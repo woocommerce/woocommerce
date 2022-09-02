@@ -21,13 +21,11 @@ import { ProductSectionLayout } from '../layout/product-section-layout';
 import { getInputControlProps } from './utils';
 import { ADMIN_URL } from '../../utils/admin-settings';
 import { CurrencyContext } from '../../lib/currency-context';
-import {
-	NUMBERS_AND_DECIMAL_SEPARATOR,
-	ONLY_ONE_DECIMAL_SEPARATOR,
-} from '../constants';
+import { useProductHelper } from '../use-product-helper';
 
 export const PricingSection: React.FC = () => {
 	const { getInputProps, setValue } = useFormContext< Product >();
+	const { sanitizePrice } = useProductHelper();
 	const { isResolving: isTaxSettingsResolving, taxSettings } = useSelect(
 		( select ) => {
 			const { getSettings, hasFinishedResolution } =
@@ -43,25 +41,6 @@ export const PricingSection: React.FC = () => {
 	const pricesIncludeTax =
 		taxSettings.woocommerce_prices_include_tax === 'yes';
 	const context = useContext( CurrencyContext );
-	const { getCurrencyConfig } = context;
-	const { decimalSeparator } = getCurrencyConfig();
-	const sanitizeAndSetPrice = ( name: string, value: string ) => {
-		// Build regex to strip out everything except digits, decimal point and minus sign.
-		const regex = new RegExp(
-			NUMBERS_AND_DECIMAL_SEPARATOR.replace( '%s', decimalSeparator ),
-			'g'
-		);
-		const decimalRegex = new RegExp(
-			ONLY_ONE_DECIMAL_SEPARATOR.replaceAll( '%s', decimalSeparator ),
-			'g'
-		);
-		const cleanValue = value
-			.replace( regex, '' )
-			.replace( decimalRegex, '' )
-			.replace( decimalSeparator, '.' );
-		setValue( name, cleanValue );
-		return cleanValue;
-	};
 
 	const taxIncludedInPriceText = __(
 		'Per your {{link}}store settings{{/link}}, tax is {{strong}}included{{/strong}} in the price.',
@@ -138,9 +117,10 @@ export const PricingSection: React.FC = () => {
 						...getInputProps( 'regular_price' ),
 						context,
 					} ) }
-					onChange={ ( value: string ) =>
-						sanitizeAndSetPrice( 'regular_price', value )
-					}
+					onChange={ ( value: string ) => {
+						const sanitizedValue = sanitizePrice( value );
+						setValue( 'regular_price', sanitizedValue );
+					} }
 				/>
 				{ ! isTaxSettingsResolving && (
 					<span className="woocommerce-product-form__secondary-text">
@@ -158,9 +138,10 @@ export const PricingSection: React.FC = () => {
 						...getInputProps( 'sale_price' ),
 						context,
 					} ) }
-					onChange={ ( value: string ) =>
-						sanitizeAndSetPrice( 'sale_price', value )
-					}
+					onChange={ ( value: string ) => {
+						const sanitizedValue = sanitizePrice( value );
+						setValue( 'sale_price', sanitizedValue );
+					} }
 				/>
 			</div>
 		</ProductSectionLayout>
