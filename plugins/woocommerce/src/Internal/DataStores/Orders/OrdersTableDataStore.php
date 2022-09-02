@@ -837,7 +837,7 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 
 			if ( $data_sync_enabled && ! in_array( $order->get_status(), array( 'draft', 'auto-draft' ) ) ) {
 				$order_post = $posts[ $order_id ][0];
-				$this->maybe_sync_order( $order, $order_post );
+				$this->maybe_log_discrepancies( $order, $order_post );
 			}
 		}
 	}
@@ -861,7 +861,7 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	}
 
 	/**
-	 * Sync order to/from posts tables if we are able to detect difference between order and posts but the sync is enabled.
+	 * Log discrepencies order to/from posts tables if we are able to detect difference between order and posts but the sync is enabled.
 	 *
 	 * @param \WC_Order $order Order object.
 	 * @param \WP_Post  $post Post object.
@@ -869,7 +869,7 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	 * @return void
 	 * @throws \Exception If passed an invalid order.
 	 */
-	private function maybe_sync_order( \WC_Order &$order, \WP_Post $post ) {
+	private function maybe_log_discrepancies( \WC_Order &$order, \WP_Post $post ) {
 		$post_order     = new \WC_Order();
 		$cpt_data_store = $this->get_cpt_data_store_instance();
 		$post_order->set_id( $post->ID );
@@ -879,18 +879,22 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 		}
 
 		// Modified dates can be empty when the order is created but never updated again. Fallback to created date in those cases.
-		try {
-			$order_modified_date = $order->get_date_modified() ?? $order->get_date_created();
-			$order_modified_date = $order_modified_date->getTimestamp();
-			$post_modified_date  = get_post_modified_time( 'U', true, $post ) ?? get_post_datetime( $post, 'date', 'gmt' )->getTimestamp();
-		} catch ( \Exception $e ) {
-			echo 'break here.';
-		}
+		$order_modified_date = $order->get_date_modified() ?? $order->get_date_created();
+		$order_modified_date = $order_modified_date->getTimestamp();
+		$post_modified_date  = get_post_modified_time( 'U', true, $post ) ?? get_post_datetime( $post, 'date', 'gmt' )->getTimestamp();
 
-		// If we are here, it means that the order and post are different. We need to sync them.
+		/**
+		 * We are here because there was difference in posts and order data, although the sync is enabled.
+		 * When order modified date is more recent than post modified date, it can only mean that COT definitely has more updated version of the order.
+		 *
+		 * In a case where post meta was updated (without updating post_modified date), post_modified would be equal to order_modified date.
+		 *
+		 * So we write back to the order table when order modified date is more recent than post modified date. Otherwise, we write to the post table.
+		 */
 		if ( $order_modified_date > $post_modified_date ) {
-			$this->backfill_post_record( $order );
+			return;
 		} else {
+			echo 'migrating post record.';
 			$this->migrate_post_record( $order, $post_order );
 		}
 	}
@@ -924,13 +928,13 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	 * @return bool True if post is different than order.
 	 */
 	private function is_post_different_from_order( $order, $post_order ): bool {
-		$diff = ArrayUtil::deep_compare_array_diff( $order->get_base_data(), $post_order->get_base_data(), false );
-		if ( ! empty( $diff ) ) {
+		if ( ArrayUtil::deep_compare_array_diff( $order->get_base_data(), $post_order->get_base_data(), false ) ) {
 			return true;
 		}
 
 		$meta_diff = $this->get_diff_meta_data_between_orders( $order, $post_order );
 		if ( ! empty( $meta_diff ) ) {
+			print_r( $meta_diff );
 			return true;
 		}
 

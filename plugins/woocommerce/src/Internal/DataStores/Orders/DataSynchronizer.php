@@ -289,6 +289,10 @@ WHERE
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			foreach ( $batch as $id ) {
 				$order      = wc_get_order( $id );
+				if ( ! $order ) {
+					echo "Unable to find order $id";
+					continue;
+				}
 				$data_store = $order->get_data_store();
 				$data_store->backfill_post_record( $order );
 			}

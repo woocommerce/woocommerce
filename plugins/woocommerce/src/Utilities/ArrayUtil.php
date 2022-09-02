@@ -211,7 +211,7 @@ class ArrayUtil {
 	 * @param array $array2 Second array to compare.
 	 * @param bool  $strict Whether to use strict comparison.
 	 *
-	 * @return bool Whether the arrays are same.
+	 * @return bool Whether the arrays are different.
 	 */
 	public static function deep_compare_array_diff( array $array1, array $array2, bool $strict = true ) {
 		return self::deep_compute_or_compare_array_diff( $array1, $array2, true, $strict );
@@ -274,7 +274,7 @@ class ArrayUtil {
 				}
 			}
 		}
-		return $diff;
+		return $compare ? false : $diff;
 	}
 }
 

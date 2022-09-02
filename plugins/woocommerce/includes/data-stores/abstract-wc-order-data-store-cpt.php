@@ -471,19 +471,41 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @return bool Whether the order was updated.
 	 */
 	public function update_order_from_object( $order ) {
+		global $wpdb;
 		if ( ! $order->get_id() ) {
 			return false;
 		}
 		$this->update_order_meta_from_object( $order );
-		return wp_update_post(
+		// We update directly instead of going via wp_insert_posts since we also want to modify the updated date and don't want to fire any of the actions/filters.
+		return $wpdb->update(
+			$wpdb->posts,
 			array(
-				'ID'            => $order->get_id(),
-				'post_date'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
-				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
-				'post_status'   => $this->get_post_status( $order ),
-				'post_parent'   => $order->get_parent_id(),
-				'post_excerpt'  => method_exists( $order, 'get_customer_note' ) ? $order->get_customer_note() : '',
-				'post_type'     => $order->get_type(),
+				'ID'                 => $order->get_id(),
+				'post_date'          => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
+				'post_date_gmt'      => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+				'post_status'        => $this->get_post_status( $order ),
+				'post_parent'        => $order->get_parent_id(),
+				'post_excerpt'       => method_exists( $order, 'get_customer_note' ) ? $order->get_customer_note() : '',
+				'post_type'          => $order->get_type(),
+				'post_modified_date' => gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getOffsetTimestamp() ),
+				'post_modified_gmt'  => gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ),
+			),
+			array(
+				'ID' => $order->get_id(),
+			),
+			array(
+				'%d',
+				'%s',
+				'%s',
+				'%s',
+				'%d',
+				'%s',
+				'%s',
+				'%s',
+				'%s',
+			),
+			array(
+				'%d',
 			)
 		);
 	}

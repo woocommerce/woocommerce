@@ -160,9 +160,9 @@ class CLIRunner {
 			return;
 		}
 
-		if ( $this->synchronizer->custom_orders_table_is_authoritative() ) {
-			return WP_CLI::error( __( 'Migration is not yet supported when custom tables are authoritative. Switch to post tables as authoritative source if you are testing.', 'woocommerce' ) );
-		}
+//		if ( $this->synchronizer->custom_orders_table_is_authoritative() ) {
+//			return WP_CLI::error( __( 'Custom order tables are already authoritative. Did you meant to run backfill?' ) );
+//		}
 
 		$order_count = $this->count_unmigrated();
 
@@ -194,9 +194,9 @@ class CLIRunner {
 				)
 			);
 			$batch_start_time = microtime( true );
-			$order_ids        = $this->synchronizer->get_ids_of_orders_pending_sync( $this->synchronizer::ID_TYPE_MISSING_IN_ORDERS_TABLE, $batch_size );
+			$order_ids        = $this->synchronizer->get_next_batch_to_process( $batch_size );
 			if ( count( $order_ids ) ) {
-				$this->post_to_cot_migrator->migrate_orders( $order_ids );
+				$this->synchronizer->process_batch( $order_ids );
 			}
 			$processed       += count( $order_ids );
 			$batch_total_time = microtime( true ) - $batch_start_time;
