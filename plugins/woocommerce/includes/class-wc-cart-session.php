@@ -128,18 +128,31 @@ final class WC_Cart_Session {
 				continue;
 			}
 
+			$update_cart_session = false;
+
 			/**
 			 * Allow 3rd parties to validate this item before it's added to cart and add their own notices.
 			 *
 			 * @since 3.6.0
 			 *
 			 * @param bool $remove_cart_item_from_session If true, the item will not be added to the cart. Default: false.
-			 * @param string $key Cart item key.
-			 * @param array $values Cart item values e.g. quantity and product_id.
+			 * @param string     $key Cart item key.
+			 * @param array      $values Cart item values e.g. quantity and product_id.
+			 * @param WC_Product $product The product being added to the cart.
 			 */
-			if ( apply_filters( 'woocommerce_pre_remove_cart_item_from_session', false, $key, $values ) ) {
+			if ( apply_filters( 'woocommerce_pre_remove_cart_item_from_session', false, $key, $values, $product ) ) {
 				$update_cart_session = true;
-				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
+				/**
+				 * Fires when cart item is removed from the session.
+				 *
+				 * @since 3.6.0
+				 *
+				 * @param bool       $remove_cart_item_from_session If true, the item will not be added to the cart. Default: false.
+				 * @param string     $key Cart item key.
+				 * @param array      $values Cart item values e.g. quantity and product_id.
+				 * @param WC_Product $product The product being added to the cart.
+				 */
+				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values, $product );
 
 			/**
 			 * Allow 3rd parties to override this item's is_puchasable() result with cart item data.
