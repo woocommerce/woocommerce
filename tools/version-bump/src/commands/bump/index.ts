@@ -3,8 +3,7 @@
  */
 import { CliUx, Command, Flags } from '@oclif/core';
 import { valid, lt as versionLessThan, prerelease } from 'semver';
-import { readFileSync, writeFileSync } from 'fs';
-import { ArgBase } from '@oclif/core/lib/interfaces/parser';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { OutputFlags, OutputArgs } from '@oclif/core/lib/interfaces';
 
 /**
@@ -158,6 +157,11 @@ export default class VersionBump extends Command {
 	 */
 	private updateClassPluginFile( plugin: string, nextVersion: string ): void {
 		const filePath = `plugins/${ plugin }/includes/class-${ plugin }.php`;
+
+		if ( ! existsSync( filePath ) ) {
+			return;
+		}
+
 		try {
 			const classPluginFileContents = readFileSync( filePath, 'utf8' );
 
