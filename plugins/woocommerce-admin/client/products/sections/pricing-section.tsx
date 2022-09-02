@@ -45,7 +45,7 @@ export const PricingSection: React.FC = () => {
 	const context = useContext( CurrencyContext );
 	const { getCurrencyConfig } = context;
 	const { decimalSeparator } = getCurrencyConfig();
-	const priceValidation = ( value: string, name: string ) => {
+	const sanitizeAndSetPrice = ( value: string, name: string ) => {
 		// Build regex to strip out everything except digits, decimal point and minus sign.
 		const regex = new RegExp(
 			NUMBERS_AND_DECIMAL_SEPARATOR.replace( '%s', decimalSeparator ),
@@ -134,7 +134,7 @@ export const PricingSection: React.FC = () => {
 						context,
 					} ) }
 					onChange={ ( value: string ) =>
-						priceValidation( value, 'regular_price' )
+						sanitizeAndSetPrice( value, 'regular_price' )
 					}
 				/>
 				{ ! isTaxSettingsResolving && (
@@ -154,7 +154,7 @@ export const PricingSection: React.FC = () => {
 						context,
 					} ) }
 					onChange={ ( value: string ) =>
-						priceValidation( value, 'sale_price' )
+						sanitizeAndSetPrice( value, 'sale_price' )
 					}
 				/>
 			</div>
