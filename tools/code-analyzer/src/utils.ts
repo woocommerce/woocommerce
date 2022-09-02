@@ -2,9 +2,12 @@
  * External dependencies
  */
 import { createServer, Server } from 'net';
-import { execSync } from 'child_process';
 import { join } from 'path';
 import { writeFile } from 'fs/promises';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+export const execAsync = promisify( exec );
 
 /**
  * Format version string for regex.
@@ -128,7 +131,7 @@ export const startWPEnv = async (
 ) => {
 	try {
 		// Stop wp-env if its already running.
-		execSync( 'wp-env stop', {
+		await execAsync( 'wp-env stop', {
 			cwd: join( tmpRepoPath, 'plugins/woocommerce' ),
 			encoding: 'utf-8',
 		} );
@@ -143,7 +146,7 @@ export const startWPEnv = async (
 			);
 		}
 
-		execSync( 'wp-env start', {
+		await execAsync( 'wp-env start', {
 			cwd: join( tmpRepoPath, 'plugins/woocommerce' ),
 			encoding: 'utf-8',
 		} );
@@ -165,12 +168,12 @@ export const startWPEnv = async (
  * @param {Function} error       - error print method.
  * @return {boolean} if stopping the container succeeded.
  */
-export const stopWPEnv = (
+export const stopWPEnv = async (
 	tmpRepoPath: string,
 	error: ( s: string ) => void
-): boolean => {
+): Promise< boolean > => {
 	try {
-		execSync( 'wp-env stop', {
+		await execAsync( 'wp-env stop', {
 			cwd: join( tmpRepoPath, 'plugins/woocommerce' ),
 			encoding: 'utf-8',
 		} );
@@ -229,11 +232,11 @@ export const getHookDescription = (
  * @param {string} diff raw diff.
  * @return {'Updated' | 'New'} change type.
  */
-export const getHookChangeType = ( diff: string ): 'Updated' | 'New' => {
+export const getHookChangeType = ( diff: string ) => {
 	const sincesRegex = /@since/g;
 	const sinces = diff.match( sincesRegex ) || [];
 	// If there is more than one 'since' in the diff, it means that line was updated meaning the hook already exists.
-	return sinces.length > 1 ? 'Updated' : 'New';
+	return sinces.length > 1 ? 'updated' : 'new';
 };
 
 export const generateJSONFile = ( filePath: string, data: unknown ) => {

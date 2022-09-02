@@ -274,7 +274,7 @@ export const generateSchemaDiff = async (
 		method: string;
 		areEqual: boolean;
 	};
-} | void > => {
+} | null > => {
 	const git = simpleGit( { baseDir: tmpRepoPath } );
 
 	// Be sure the wp-env engine is started.
@@ -293,9 +293,9 @@ export const generateSchemaDiff = async (
 			);
 		}
 	);
-	CliUx.ux.action.stop();
+	// CliUx.ux.action.stop();
 
-	CliUx.ux.action.start( `Gathering schema from ${ compare }` );
+	// CliUx.ux.action.start( `Gathering schema from ${ compare }` );
 
 	// Force checkout because sometimes a build will generate a lockfile change.
 	await git.checkout( compare, [ '--force' ] );
@@ -308,12 +308,12 @@ export const generateSchemaDiff = async (
 			);
 		}
 	);
-	CliUx.ux.action.stop();
+	// CliUx.ux.action.stop();
 
 	stopWPEnv( tmpRepoPath, error );
 
 	if ( ! baseSchema || ! compareSchema ) {
-		return;
+		return null;
 	}
 	return {
 		schema: {
