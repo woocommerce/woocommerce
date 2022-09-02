@@ -1129,7 +1129,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		 * @param  WC_Product $product The variable product.
 		 * @return string
 		 */
-		$query = apply_filters( 'woocommerce_find_matching_product_variation_query', $query, $product );
+		$query = apply_filters( 'woocommerce_find_matching_product_variation_match_any', $query, $product );
 
 		$attributes = $wpdb->get_results( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
