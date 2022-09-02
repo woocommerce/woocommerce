@@ -50,7 +50,7 @@
 	"scripts": {
 		"turbo:build": "./bin/build.sh && pnpm run clean && pnpm run compile",
 		"prepare": "pnpm run build",
-		"build": "pnpm --filter=$npm_package_name -w exec turbo run turbo:build --",
+		"build": "pnpm --filter=$npm_package_name -w exec turbo run turbo:build",
 		"clean": "rm -rf ./build ./build-module",
 		"compile": "e2e-builds",
 		"lint": "eslint src --ext=js,ts,tsx",
