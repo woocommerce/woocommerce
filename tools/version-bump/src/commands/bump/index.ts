@@ -4,6 +4,8 @@
 import { CliUx, Command, Flags } from '@oclif/core';
 import { valid, lt as versionLessThan, prerelease } from 'semver';
 import { readFileSync, writeFileSync } from 'fs';
+import { ArgBase } from '@oclif/core/lib/interfaces/parser';
+import { OutputFlags, OutputArgs } from '@oclif/core/lib/interfaces';
 
 /**
  * Internal dependencies
@@ -26,6 +28,7 @@ export default class VersionBump extends Command {
 			name: 'plugin',
 			description: 'Plugin to bump versions.',
 			required: false,
+			default: 'woocommerce',
 		},
 	];
 
@@ -46,21 +49,9 @@ export default class VersionBump extends Command {
 	async run(): Promise< void > {
 		const { args, flags } = await this.parse( VersionBump );
 
+		this.validateArgs( args, flags );
+
 		let nextVersion = flags.version;
-
-		if ( ! valid( nextVersion ) ) {
-			this.error(
-				'Invalid version supplied, please pass in a semantically correct version.'
-			);
-		}
-
-		const currentVersion = this.getCurrentVersion();
-
-		if ( versionLessThan( nextVersion, currentVersion ) ) {
-			this.error(
-				'The version supplied is less than the current version, please supply a valid version.'
-			);
-		}
 
 		const prereleaseParameters = prerelease( nextVersion );
 		const isPrerelease = !! prereleaseParameters;
@@ -78,13 +69,33 @@ export default class VersionBump extends Command {
 			// When updating to a dev version, only the plugin file gets the '-dev'.
 			nextVersion = nextVersion.replace( '-dev', '' );
 			// Bumping the dev version means updating the readme's changelog.
-			//@todo: do we do this for minor bumps too?
 			this.updateReadmeChangelog( nextVersion );
 		}
 
 		this.updateComposerJSON( nextVersion );
 		this.updateClassPluginFile( nextVersion );
 		this.updateReadmeStableTag( nextVersion );
+	}
+
+	private validateArgs(
+		args: OutputArgs,
+		flags: OutputFlags< typeof VersionBump[ 'flags' ] >
+	): void {
+		const nextVersion = flags.version;
+
+		if ( ! valid( nextVersion ) ) {
+			this.error(
+				'Invalid version supplied, please pass in a semantically correct version.'
+			);
+		}
+
+		const currentVersion = this.getCurrentVersion();
+
+		if ( versionLessThan( nextVersion, currentVersion ) ) {
+			this.error(
+				'The version supplied is less than the current version, please supply a valid version.'
+			);
+		}
 	}
 
 	private updateReadmeStableTag( nextVersion: string ): void {
