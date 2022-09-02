@@ -32,4 +32,17 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'c&amp;c', $post_data->post_title );
 		$coupon->delete( true );
 	}
+
+	/**
+	 * Order items should be deleted before deleting order.
+	 */
+	public function test_before_delete_order() {
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$items = $order->get_items();
+		$this->assertNotEmpty( $items );
+
+		WC_Post_Data::before_delete_order( $order->get_id() );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEmpty( $order->get_items() );
+	}
 }

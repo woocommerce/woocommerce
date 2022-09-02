@@ -39,7 +39,7 @@ const openNewProductAndVerify = async () => {
 /**
  * Select a variation action from the actions menu.
  *
- * @param  action item you selected from the variation actions menu
+ * @param {string} action item you selected from the variation actions menu
  */
 const selectVariationAction = async ( action ) => {
 	await waitForSelector( page, 'select.variation_actions:not(:disabled)' );
@@ -472,6 +472,7 @@ const runAddVariableProductTest = () => {
 	} );
 };
 
+// eslint-disable-next-line jest/no-export
 module.exports = {
 	runAddSimpleProductTest,
 	runAddVariableProductTest,

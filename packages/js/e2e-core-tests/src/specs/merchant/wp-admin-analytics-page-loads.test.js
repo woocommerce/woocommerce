@@ -16,9 +16,9 @@ import deprecated from '@wordpress/deprecated';
 /**
  * Quick check for page title and no data message.
  *
- * @param  pageTitle   Page title in H1.
- * @param  element     Defaults to '.d3-chart__empty-message'
- * @param  elementText Defaults to 'No data for the selected date range'
+ * @param {string} pageTitle   Page title in H1.
+ * @param {string} element     Defaults to '.d3-chart__empty-message'
+ * @param {string} elementText Defaults to 'No data for the selected date range'
  */
 const checkHeadingAndElement = async (
 	pageTitle,

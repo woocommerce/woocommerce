@@ -345,14 +345,15 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 */
 	protected function save_paypal_meta_data( $order, $posted ) {
 		if ( ! empty( $posted['payment_type'] ) ) {
-			update_post_meta( $order->get_id(), 'Payment type', wc_clean( $posted['payment_type'] ) );
+			$order->update_meta_data( 'Payment type', wc_clean( $posted['payment_type'] ) );
 		}
 		if ( ! empty( $posted['txn_id'] ) ) {
-			update_post_meta( $order->get_id(), '_transaction_id', wc_clean( $posted['txn_id'] ) );
+			$order->set_transaction_id( wc_clean( $posted['txn_id'] ) );
 		}
 		if ( ! empty( $posted['payment_status'] ) ) {
-			update_post_meta( $order->get_id(), '_paypal_status', wc_clean( $posted['payment_status'] ) );
+			$order->update_meta_data( '_paypal_status', wc_clean( $posted['payment_status'] ) );
 		}
+		$order->save();
 	}
 
 	/**

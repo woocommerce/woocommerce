@@ -119,8 +119,7 @@ const runSingleProductPageTest = () => {
 			await page.waitForSelector( 'form.grouped_form' );
 			await shopper.addToCart();
 			await expect( page ).toMatchElement( '.woocommerce-error', {
-				text:
-					'Please choose the quantity of items you wish to add to your cart…',
+				text: 'Please choose the quantity of items you wish to add to your cart…',
 			} );
 			const quantityFields = await page.$$( 'div.quantity input.qty' );
 			await quantityFields[ 0 ].click( { clickCount: 3 } );
@@ -167,4 +166,5 @@ const runSingleProductPageTest = () => {
 	} );
 };
 
+// eslint-disable-next-line jest/no-export
 module.exports = runSingleProductPageTest;

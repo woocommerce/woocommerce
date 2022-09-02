@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Adjust names of Bulgarian sub-divisons (in accordance with current CLDR spec).

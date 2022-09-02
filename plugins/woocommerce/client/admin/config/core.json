@@ -15,6 +15,7 @@
 		"minified-js": false,
 		"mobile-app-banner": true,
 		"navigation": true,
+		"new-product-management-experience": false,
 		"onboarding": true,
 		"onboarding-tasks": true,
 		"remote-inbox-notifications": true,
@@ -26,7 +27,6 @@
 		"store-alerts": true,
 		"transient-notices": true,
 		"wc-pay-promotion": true,
-		"wc-pay-welcome-page": true,
-		"wc-pay-subscriptions-page": true
+		"wc-pay-welcome-page": true
 	}
 }

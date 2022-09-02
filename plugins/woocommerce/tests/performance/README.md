@@ -54,9 +54,12 @@ Alternatively the k6 docker image can be used to execute tests.
 
 Before using the tests a test environment is needed to run against.
 
-In the WooCommerce e2e tests there is a Docker Initialization Script [`init-sample-products.sh`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e/docker/init-sample-products.sh) that will set up a shop with sample products imported and the shop settings (payment method, permalinks, address etc) needed for the tests already set. It is recommended using this to just see the tests in action.
+We first spin up an environment using `wp-env` and configure that environment with the necessary plugins and data using the Initialization Script [`init-sample-products.sh`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/performance/bin/init-sample-products.sh) that will set up a shop with sample products imported and the shop settings (payment method, permalinks, address etc) needed for the tests already set. It is recommended using this to just see the tests in action.
 
-`npx wc-e2e docker:up ./tests/e2e/docker/init-sample-products.sh`
+```sh
+pnpm run env:dev --filter=woocommerce
+pnpm run env:performance-init --filter=woocommerce
+```
 
 If using a different environment the details can be changed in `config.js`.
 

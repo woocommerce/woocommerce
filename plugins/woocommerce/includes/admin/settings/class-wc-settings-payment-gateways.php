@@ -244,7 +244,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 							$plugin_suggestions = array_filter(
 								$plugin_suggestions,
 								function( $plugin ) use ( $country, $filter_by, $active_plugins ) {
-									if ( ! isset( $plugin->{$filter_by} ) || ! isset( $plugin->image_72x72 ) || ! isset( $plugin->plugins ) || in_array( $plugin->plugins[0], $active_plugins, true ) ) {
+									if ( ! isset( $plugin->{$filter_by} ) || ! isset( $plugin->image_72x72 ) || ! isset( $plugin->plugins[0] ) || in_array( $plugin->plugins[0], $active_plugins, true ) ) {
 										return false;
 									}
 									return in_array( $country, $plugin->{$filter_by}, true );

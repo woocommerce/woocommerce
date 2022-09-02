@@ -3,17 +3,19 @@
  */
 const { merchant, utils } = require( '@woocommerce/e2e-utils' );
 
-const { getRemotePluginZip, getLatestReleaseZipUrl, deleteDownloadedPluginFiles } = require( '@woocommerce/e2e-environment' );
+const {
+	getRemotePluginZip,
+	getLatestReleaseZipUrl,
+	deleteDownloadedPluginFiles,
+} = require( '@woocommerce/e2e-environment' );
 
 /**
  * External dependencies
  */
-const {
-	it,
-	beforeAll,
-} = require( '@jest/globals' );
+const { it, beforeAll } = require( '@jest/globals' );
 
-const { GITHUB_REPOSITORY, PLUGIN_NAME, GITHUB_TOKEN, PLUGIN_REPOSITORY } = process.env;
+const { GITHUB_REPOSITORY, PLUGIN_NAME, GITHUB_TOKEN, PLUGIN_REPOSITORY } =
+	process.env;
 
 // allows us to upload plugins from different repositories.
 const pluginName = PLUGIN_NAME ? PLUGIN_NAME : 'WooCommerce';
@@ -37,10 +39,12 @@ utils.describeIf( repository )(
 			await merchant.logout();
 		} );
 
+		/* eslint-disable jest/expect-expect */
 		it( 'can upload and activate the provided plugin', async () => {
 			await merchant.uploadAndActivatePlugin( pluginPath, PLUGIN_NAME );
 		} );
 
+		/* eslint-disable jest/expect-expect */
 		it( 'can remove downloaded plugin zip', async () => {
 			await deleteDownloadedPluginFiles();
 		} );

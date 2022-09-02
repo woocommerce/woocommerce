@@ -42,7 +42,7 @@ const customerShipping = {
 /**
  * Set the billing fields for the customer account for this test suite.
  *
- * @return {Promise<number>}
+ * @return {Promise<number>} Returns the updated customer's ID
  */
 const updateCustomerBilling = async () => {
 	const client = factories.api.withDefaultPermalinks;
@@ -130,4 +130,5 @@ const runOrderSearchingTest = () => {
 	} );
 };
 
+// eslint-disable-next-line jest/no-export
 module.exports = runOrderSearchingTest;

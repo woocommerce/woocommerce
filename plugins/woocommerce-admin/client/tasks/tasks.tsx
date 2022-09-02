@@ -35,30 +35,6 @@ export type TasksProps = {
 	context?: string;
 };
 
-function getTaskListComponent( taskListId: string ) {
-	switch ( taskListId ) {
-		case 'setup_experiment_1':
-			return TwoColumnTaskList;
-		case 'setup_experiment_2':
-			return SectionedTaskList;
-		default:
-			return TaskList;
-	}
-}
-
-function getTaskListPlaceholderComponent(
-	taskListId: string
-): React.FC< TasksPlaceholderProps > {
-	switch ( taskListId ) {
-		case 'setup_experiment_1':
-			return TwoColumnTaskListPlaceholder;
-		case 'setup_experiment_2':
-			return SectionedTaskListPlaceholder;
-		default:
-			return TasksPlaceholder;
-	}
-}
-
 export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 	const { task } = query;
 	const { hideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
@@ -123,21 +99,22 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 		return null;
 	}
 
-	const taskListIds = getAdminSetting( 'visibleTaskListIds', [] );
-	const TaskListPlaceholderComponent = getTaskListPlaceholderComponent(
-		taskListIds[ 0 ]
-	);
-
-	if ( isResolving ) {
-		return <TaskListPlaceholderComponent query={ query } />;
-	}
-
 	if ( currentTask ) {
 		return (
 			<div className="woocommerce-task-dashboard__container">
 				<Task query={ query } task={ currentTask } />
 			</div>
 		);
+	}
+
+	const taskListIds = getAdminSetting( 'visibleTaskListIds', [] );
+	const TaskListPlaceholderComponent =
+		taskListIds[ 0 ] === 'setup'
+			? TwoColumnTaskListPlaceholder
+			: TasksPlaceholder;
+
+	if ( isResolving ) {
+		return <TaskListPlaceholderComponent query={ query } />;
 	}
 
 	return (
@@ -149,8 +126,9 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 				.filter( ( { isVisible }: TaskListType ) => isVisible )
 				.map( ( taskList: TaskListType ) => {
 					const { id, isHidden, isToggleable } = taskList;
+					const TaskListComponent =
+						id === 'setup' ? TwoColumnTaskList : TaskList;
 
-					const TaskListComponent = getTaskListComponent( id );
 					return (
 						<Fragment key={ id }>
 							<TaskListComponent

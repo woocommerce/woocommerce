@@ -38,7 +38,7 @@ Again, if you don't have shell access to your test site, through WP Admin ensure
 3. You have an admin user set up (if their credentials differ from u/ `admin` and p/ `password` be sure to update `/plugins/woocommerce/tests/e2e/config/default.json`)
 4. You have a customer user set up named 'Jane Smith'. This user should be a `subscriber` and again make sure their username and password are reflected in `/plugins/woocommerce/tests/e2e/config/default.json`.
 
-You should then be able to run the e2e tests by running `pnpm -- turbo run e2e --filter=woocommerce`.
+You should then be able to run the e2e tests by running `pnpm run e2e --filter=woocommerce`.
 
 ### Test Sequencer Setup
 

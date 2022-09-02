@@ -60,7 +60,7 @@ export const validateChangelogEntries = ( name: string ) => {
 export const writeChangelog = ( name: string ) => {
 	try {
 		const cwd = getFilepathFromPackageName( name );
-		execSync( './vendor/bin/changelogger write', {
+		execSync( './vendor/bin/changelogger write --add-pr-num', {
 			cwd,
 			encoding: 'utf-8',
 		} );

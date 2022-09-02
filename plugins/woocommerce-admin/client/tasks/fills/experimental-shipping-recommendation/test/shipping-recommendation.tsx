@@ -131,6 +131,6 @@ describe( 'ShippingRecommendation', () => {
 		);
 
 		getByText( 'Set store location' ).click();
-		expect( getByText( 'Address line 1' ) ).toBeInTheDocument();
+		expect( getByText( 'Address' ) ).toBeInTheDocument();
 	} );
 } );

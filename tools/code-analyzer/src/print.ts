@@ -114,9 +114,10 @@ export const printSchemaChange = (
 	version: string,
 	output: string,
 	log: ( s: string ) => void
-): void => {
+): Record< string, string > => {
+	const diff: Record< string, string > = {};
 	if ( ! schemaDiff ) {
-		return;
+		return diff;
 	}
 	if ( output === 'github' ) {
 		let githubCommentContent = '\\n\\n### New schema changes:';
@@ -137,9 +138,11 @@ export const printSchemaChange = (
 					` NOTICE | Schema changes detected in ${ schemaDiff[ key ].method } as of ${ version }`
 				);
 				log( '---------------------------------------------------' );
+				diff[ key ] = schemaDiff[ key ].method;
 			}
 		} );
 	}
+	return diff;
 };
 
 /**

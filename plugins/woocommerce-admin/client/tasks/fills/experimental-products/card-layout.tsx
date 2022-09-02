@@ -41,7 +41,7 @@ const CardLayout: React.FC< CardProps > = ( { items } ) => {
 										method: 'manually',
 									} );
 									recordCompletionTime();
-									window.location = getAdminLink(
+									window.location.href = getAdminLink(
 										'post-new.php?post_type=product&wc_onboarding_active_task=products&tutorial=true'
 									);
 									return false;
