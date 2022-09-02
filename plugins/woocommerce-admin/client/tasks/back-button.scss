@@ -1,0 +1,12 @@
+.woocommerce-layout__header-back-button {
+	cursor: pointer;
+	margin-left: $fallback-gutter-large;
+	margin-left: $gutter-large;
+	margin-right: -$gap;
+	display: flex;
+	z-index: 2;
+
+	&:focus {
+		box-shadow: inset -1px -1px 0 #757575, inset 1px 1px 0 #757575;
+	}
+}

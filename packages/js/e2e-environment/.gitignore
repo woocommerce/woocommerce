@@ -1,0 +1,3 @@
+config/default.json
+docker/wp-cli/initialize.sh
+test-results.json

@@ -1,0 +1,120 @@
+name: "Release: Code freeze"
+on:
+  schedule:
+    - cron: '0 16 * * 4' # Run at 1600 UTC on Thursdays.
+  workflow_dispatch:
+    inputs:
+      timeOverride:
+        description: "Time Override: The time to use in checking whether the action should run (default: 'now')."
+        default: 'now'
+      skipSlackPing:
+        description: "Skip Slack Ping: If true, the Slack ping will be skipped (useful for testing)"
+        type: boolean
+      slackChannelOverride:
+        description: "Slack Channel Override: The channel ID to send the Slack ping about the freeze"
+
+env:
+    TIME_OVERRIDE: ${{ inputs.timeOverride }}
+
+jobs:
+  verify-code-freeze:
+    name: "Verify that today is the day of the code freeze"
+    runs-on: ubuntu-20.04
+    outputs:
+      freeze: ${{ steps.check-freeze.outputs.freeze }}
+    steps:
+      - name: "Install PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+
+      - name: "Check whether today is the code freeze day"
+        id: check-freeze
+        shell: php {0}
+        run: |
+          <?php
+          $now = time();
+          if ( getenv( 'TIME_OVERRIDE' ) ) {
+            $now = strtotime( getenv( 'TIME_OVERRIDE' ) );
+          }
+
+          // Code freeze comes 26 days prior to release day.
+          $release_time         = strtotime( '+26 days', $now );
+          $release_day_of_week  = date( 'l', $release_time );
+          $release_day_of_month = (int) date( 'j', $release_time );
+
+          // If 26 days from now isn't the second Tuesday, then it's not code freeze day.
+          if ( 'Tuesday' !== $release_day_of_week || $release_day_of_month < 8 || $release_day_of_month > 14 ) {
+            echo '::set-output name=freeze::1';
+          } else {
+            echo '::set-output name=freeze::0';
+          }
+
+  maybe-create-next-milestone-and-release-branch:
+    name: "Maybe create next milestone and release branch"
+    runs-on: ubuntu-20.04
+    needs: verify-code-freeze
+    if: needs.verify-code-freeze.outputs.freeze == 0
+    outputs:
+      branch: ${{ steps.freeze.outputs.branch }}
+      release_version: ${{ steps.freeze.outputs.release_version }}
+      next_version: ${{ steps.freeze.outputs.next_version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 100
+
+      - uses: ./.github/actions/cache-deps
+        with:
+          workflow_name: release-code-freeze
+          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+
+      - name: Install PNPM
+        run: npm install -g pnpm@^6.24.2
+
+      - name: "Install PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          tools: composer
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: "Run the script to enforce the code freeze"
+        id: freeze
+        run: php .github/workflows/scripts/release-code-freeze.php
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_OUTPUTS: 1
+
+  notify-slack:
+    name: "Sends code freeze notification to Slack"
+    if: ${{ inputs.skipSlackPing != true }}
+    runs-on: ubuntu-20.04
+    needs: maybe-create-next-milestone-and-release-branch
+    steps:
+      - name: Slack
+        uses: archive/github-actions-slack@v2.0.0
+        id: notify
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+          slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_CHANNEL }}
+          slack-text: |
+            :warning-8c: ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.release_version }} Code Freeze :ice_cube:
+            
+            The automation to cut the release branch for ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.release_version }} has run. Any PRs that were not already merged will be a part of ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.next_version }} by default. If you have something that needs to make ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.release_version }} that hasn't yet been merged, please see the <${{ secrets.FG_LINK }}/code-freeze-for-woocommerce-core-release/|fieldguide page for the code freeze>.
+
+  trigger-changelog-action:
+    name: "Trigger changelog action"
+    runs-on: ubuntu-20.04
+    needs: maybe-create-next-milestone-and-release-branch
+    steps:
+      - run: |
+          curl \
+            -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.WC_BOT_TRIAGE_TOKEN }}" \
+            -d '{"ref":"refs/heads/trunk","inputs":{"releaseBranch":"${{ needs.maybe-create-next-milestone-and-release-branch.outputs.branch }}","releaseVersion":"${{ needs.maybe-create-next-milestone-and-release-branch.outputs.release_version }}"}}' \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/release-changelog.yml/dispatches

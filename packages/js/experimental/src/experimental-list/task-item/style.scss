@@ -1,0 +1,154 @@
+$foreground-color: var(--wp-admin-theme-color);
+$task-alert-yellow: #f0b849;
+
+.woocommerce-task-list__item {
+	position: relative;
+	display: grid;
+	grid-template-columns: 72px auto 48px;
+
+	// IE doesn't support `align-items` on grid container
+
+	& > * {
+		align-self: center;
+	}
+
+	&::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 4px;
+		height: 100%;
+		background: transparent;
+	}
+
+	&.level-1 {
+		&::before {
+			background-color: $alert-red;
+		}
+		.gridicons-notice-outline {
+			fill: $alert-red;
+		}
+	}
+
+	&.level-2 {
+		&::before {
+			background-color: $task-alert-yellow;
+		}
+	}
+
+	.woocommerce-task-list__item-title {
+		color: $foreground-color;
+	}
+
+	.woocommerce-task__additional-info,
+	.woocommerce-task-list__item-expandable-content,
+	.woocommerce-task__estimated-time {
+		color: $gray-700;
+		font-weight: 400;
+		font-size: 12px;
+	}
+
+	.woocommerce-task__estimated-time {
+		margin-top: $gap-smallest;
+	}
+
+	.woocommerce-task-list__item-before {
+		display: flex;
+		align-items: center;
+		padding: $gap 0 $gap $gap-large;
+	}
+
+	.woocommerce-task-list__item-text {
+		padding: $gap 0;
+
+		.woocommerce-pill {
+			padding: 1px $gap-smaller;
+			margin-left: $gap-smaller;
+		}
+	}
+
+	.woocommerce-task-list__item-expandable-content {
+		margin-top: $gap-smallest;
+		overflow: hidden;
+
+		&.woocommerce-task-list__item-expandable-content-enter {
+			opacity: 0;
+		}
+
+		&.woocommerce-task-list__item-expandable-content-enter-active {
+			opacity: 1;
+		}
+
+		&.woocommerce-task-list__item-expandable-content-enter-done {
+			opacity: 1;
+		}
+
+		&.woocommerce-task-list__item-expandable-content-exit {
+			opacity: 1;
+		}
+
+		&.woocommerce-task-list__item-expandable-content-exit-active {
+			opacity: 0;
+		}
+
+		.woocommerce-task__additional-info {
+			margin-top: $gap-smaller;
+		}
+	}
+
+	.woocommerce-task-list__item-action {
+		margin-top: $gap-smaller;
+		margin-bottom: $gap-smallest;
+		display: block;
+	}
+
+	.woocommerce-task-list__item-after {
+		display: flex;
+		align-items: center;
+	}
+
+	.woocommerce-task-list__item-before .woocommerce-task__icon {
+		border-radius: 50%;
+		width: 32px;
+		height: 32px;
+	}
+
+	.woocommerce-task-list__item-before .woocommerce-task__icon svg {
+		fill: $white;
+		position: relative;
+		top: 4px;
+		left: 5px;
+	}
+
+	&.complete {
+		.woocommerce-task__icon {
+			background-color: var(--wp-admin-theme-color);
+		}
+
+		.woocommerce-task-list__item-title {
+			color: $gray-700;
+		}
+
+		.woocommerce-task-list__item-expandable-content,
+		.woocommerce-task__estimated-time {
+			display: none;
+		}
+	}
+
+	&:not(.complete) {
+		.woocommerce-task__icon {
+			border: 1px solid $gray-100;
+			background: $white;
+		}
+	}
+
+	.components-tooltip .components-popover__content {
+		width: 160px;
+		white-space: normal;
+	}
+
+	.woocommerce-task-card__section-controls {
+		text-align: left;
+	}
+}

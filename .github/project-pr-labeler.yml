@@ -1,0 +1,67 @@
+'package: @woocommerce/api':
+- packages/js/api/**/*
+
+'package: @woocommerce/e2e-utils':
+- packages/js/e2e-utils/**/*
+
+'package: @woocommerce/e2e-environment':
+- packages/js/e2e-environment/**/*
+
+'package: @woocommerce/api-core-tests':
+- packages/js/api-core-tests/**/*
+
+'package: @woocommerce/e2e-core-tests':
+- packages/js/e2e-core-tests/**/*
+
+'package: @woocommerce/admin-e2e-tests':
+- packages/js/admin-e2e-tests/**/*
+
+'package: @woocommerce/components':
+- packages/js/components/**/*
+
+'package: @woocommerce/csv-export':
+- packages/js/csv-export/**/*
+
+'package: @woocommerce/currency':
+- packages/js/currency/**/*
+
+'package: @woocommerce/customer-effort-score':
+- packages/js/customer-effort-score/**/*
+
+'package: @woocommerce/data':
+- packages/js/data/**/*
+
+'package: @woocommerce/date':
+- packages/js/date/**/*
+
+'package: dependency-extraction-webpack-plugin':
+- packages/js/dependency-extraction-webpack-plugin/**/*
+
+'package: @woocommerce/eslint-plugin':
+- packages/js/eslint-plugin/**/*
+
+'package: @woocommerce/experimental':
+- packages/js/experimental/**/*
+
+'package: @woocommerce/explat':
+- packages/js/explat/**/*
+
+'package: @woocommerce/navigation':
+- packages/js/navigation/**/*
+
+'package: @woocommerce/number':
+- packages/js/number/**/*
+
+'package: @woocommerce/onboarding':
+- packages/js/onboarding/**/*
+
+'package: @woocommerce/tracks':
+- packages/js/tracks/**/*
+
+'plugin: woocommerce':
+- plugins/woocommerce/**/*
+
+'focus: react admin':
+- plugins/woocommerce/src/Admin/**/*
+- plugins/woocommerce/src/Internal/Admin/**/*
+- plugins/woocommerce-admin/**/*

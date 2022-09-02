@@ -1,0 +1,11 @@
+{
+	"extends": "../tsconfig",
+	"compilerOptions": {
+		"rootDir": "src",
+		"outDir": "build-module",
+		"declaration": true,
+		"declarationMap": true,
+		"declarationDir": "./build-types",
+		"composite": true
+	}
+}

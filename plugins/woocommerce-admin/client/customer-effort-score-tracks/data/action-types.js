@@ -1,0 +1,6 @@
+const TYPES = {
+	SET_CES_SURVEY_QUEUE: 'SET_CES_SURVEY_QUEUE',
+	ADD_CES_SURVEY: 'ADD_CES_SURVEY',
+};
+
+export default TYPES;

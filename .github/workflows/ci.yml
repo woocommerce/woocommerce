@@ -1,0 +1,88 @@
+name: Run CI
+on: 
+  push:
+    branches:
+      - trunk
+      - 'release/**'
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    name: PHP ${{ matrix.php }} WP ${{ matrix.wp }}
+    timeout-minutes: 30
+    runs-on: ubuntu-20.04
+    continue-on-error: ${{ matrix.wp == 'nightly' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        php: [ '7.2', '7.3', '7.4', '8.0' ]
+        wp: [ 'latest' ]
+        include:
+          - wp: nightly
+            php: '7.4'
+          - wp: '5.9'
+            php: 7.2
+          - wp: '5.8'
+            php: 7.2
+    services:
+      database:
+        image: mysql:5.6
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/cache-deps
+        with:
+          workflow_name: ci
+          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer
+          extensions: mysql
+          coverage: none
+
+      - name: Tool versions
+        run: |
+          php --version
+          composer --version
+
+      - name: Install and Build
+        uses: ./.github/actions/install-build
+        with:
+          composer_no_dev: 0
+
+      - name: Build Admin feature config
+        run: pnpm build:feature-config --filter=woocommerce
+
+      - name: Add PHP8 Compatibility.
+        run: |
+          if [ "$(php -r "echo version_compare(PHP_VERSION,'8.0','>=');")" ]; then
+             cd plugins/woocommerce
+             curl -L https://github.com/woocommerce/phpunit/archive/add-compatibility-with-php8-to-phpunit-7.zip -o /tmp/phpunit-7.5-fork.zip
+             unzip -d /tmp/phpunit-7.5-fork /tmp/phpunit-7.5-fork.zip
+             composer bin phpunit config --unset platform
+             composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
+             composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs
+             rm -rf ./vendor/phpunit/
+             composer dump-autoload
+           fi
+
+      - name: Init DB and WP
+        working-directory: plugins/woocommerce
+        run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
+
+      - name: Run tests
+        run: pnpm run test --filter="woocommerce" --color

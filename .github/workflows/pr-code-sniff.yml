@@ -1,0 +1,46 @@
+name: Run code sniff on PR
+on:
+  pull_request
+defaults:
+  run:
+    shell: bash
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    name: Code sniff (PHP 7.4, WP Latest)
+    timeout-minutes: 15
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+          tools: composer
+
+      - name: Tool versions
+        run: |
+          php --version
+          composer --version
+
+      - uses: ./.github/actions/cache-deps
+        with:
+          workflow_name: pr-code-sniff
+          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+
+      - name: Install and Build
+        uses: ./.github/actions/install-build
+        with:
+          composer_no_dev: 0
+
+      - name: Run code sniffer
+        uses: thenabeel/action-phpcs@v8
+        with:
+          files: "**.php"
+          phpcs_path: plugins/woocommerce/vendor/bin/phpcs
+          standard: phpcs.xml
