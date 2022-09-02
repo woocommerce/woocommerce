@@ -24,6 +24,7 @@
 		"@types/uuid": "^8.3.4",
 		"cli-core": "workspace:*",
 		"commander": "^9.4.0",
+		"@tsconfig/node16": "^1.0.3",
 		"simple-git": "^3.10.0",
 		"uuid": "^8.3.2"
 	},
