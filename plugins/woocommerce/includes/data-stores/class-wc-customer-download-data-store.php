@@ -281,23 +281,25 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	private function delete_download_log_by_field_value( $field, $value ) {
 		global $wpdb;
 
+		$value_placeholder = '';
+		if ( is_int( $value ) ) {
+			$value_placeholder = '%d';
+		} elseif ( is_string( $value ) ) {
+			$value_placeholder = '%s';
+		} elseif ( is_float( $value ) ) {
+			$value_placeholder = '%f';
+		} else {
+			wc_doing_it_wrong( __METHOD__, __( 'Unsupported argument type provided as value.', 'woocommerce' ), '7.0' );
+			// The `prepare` further down would fail if the placeholder was missing, so skip download log removal.
+			return;
+		}
+
 		$query = "DELETE FROM {$wpdb->prefix}wc_download_log
 					WHERE permission_id IN (
 					    SELECT permission_id
 					    FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-					    WHERE {$field} = ";
-
-		if ( is_int( $value ) ) {
-			$query .= '%d';
-		} elseif ( is_string( $value ) ) {
-			$query .= '%s';
-		} elseif ( is_float( $value ) ) {
-			$query .= '%f';
-		} else {
-			wc_doing_it_wrong( __METHOD__, __( 'Unsupported argument type provided as value.', 'woocommerce' ), '7.0' );
-		}
-
-		$query .= ')';
+					    WHERE {$field} = {$value_placeholder}
+					)";
 
 		$wpdb->query(
 			$wpdb->prepare( $query, $value ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
