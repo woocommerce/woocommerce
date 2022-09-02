@@ -9,6 +9,7 @@ import {
 } from '@woocommerce/base-context/hooks';
 import { useCallback, useState, useEffect } from '@wordpress/element';
 import PriceSlider from '@woocommerce/base-components/price-slider';
+import FilterTitlePlaceholder from '@woocommerce/base-components/filter-placeholder';
 import { useDebouncedCallback } from 'use-debounce';
 import PropTypes from 'prop-types';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
@@ -164,6 +165,8 @@ const PriceFilterBlock = ( {
 		setMinPriceQuery,
 	] );
 
+	const [ isUpdating, setIsUpdating ] = useState( isLoading );
+
 	// Updates the query based on slider values.
 	const onSubmit = useCallback(
 		( newMinPrice, newMaxPrice ) => {
@@ -206,6 +209,7 @@ const PriceFilterBlock = ( {
 	// Callback when slider or input fields are changed.
 	const onChange = useCallback(
 		( prices ) => {
+			setIsUpdating( true );
 			if ( prices[ 0 ] !== minPrice ) {
 				setMinPrice( prices[ 0 ] );
 			}
@@ -303,13 +307,26 @@ const PriceFilterBlock = ( {
 	const TagName =
 		`h${ attributes.headingLevel }` as keyof JSX.IntrinsicElements;
 
+	if ( ! isLoading && isUpdating ) {
+		setIsUpdating( false );
+	}
+
+	const heading = (
+		<TagName className="wc-block-price-filter__title">
+			{ attributes.heading }
+		</TagName>
+	);
+
+	const filterHeading =
+		isLoading && isUpdating ? (
+			<FilterTitlePlaceholder>{ heading }</FilterTitlePlaceholder>
+		) : (
+			heading
+		);
+
 	return (
 		<>
-			{ ! isEditor && attributes.heading && (
-				<TagName className="wc-block-price-filter__title">
-					{ attributes.heading }
-				</TagName>
-			) }
+			{ ! isEditor && attributes.heading && filterHeading }
 			<div className="wc-block-price-slider">
 				<PriceSlider
 					minConstraint={ minConstraint }
@@ -323,6 +340,7 @@ const PriceFilterBlock = ( {
 					onChange={ onChange }
 					onSubmit={ () => onSubmit( minPrice, maxPrice ) }
 					isLoading={ isLoading }
+					isUpdating={ isUpdating }
 				/>
 			</div>
 		</>
