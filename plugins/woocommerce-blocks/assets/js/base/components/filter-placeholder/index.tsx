@@ -1,5 +1,10 @@
+/**
+ * Internal dependencies
+ */
+import './style.scss';
+
 interface FilterTitlePlaceholderProps {
-	children?: React.ReactChildren;
+	children?: React.ReactNode;
 }
 
 const FilterTitlePlaceholder = ( {
