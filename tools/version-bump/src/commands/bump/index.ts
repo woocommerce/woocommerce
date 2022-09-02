@@ -79,6 +79,12 @@ export default class VersionBump extends Command {
 		this.updateReadmeStableTag( plugin, nextVersion );
 	}
 
+	/**
+	 * Validate inputs.
+	 *
+	 * @param args CLI arguments
+	 * @param flags CLI flags
+	 */
 	private validateArgs(
 		args: OutputArgs,
 		flags: OutputFlags< typeof VersionBump[ 'flags' ] >
@@ -100,6 +106,12 @@ export default class VersionBump extends Command {
 		}
 	}
 
+	/**
+	 * Update plugin readme stable tag.
+	 *
+	 * @param plugin plugin to update
+	 * @param nextVersion version to bump to
+	 */
 	private updateReadmeStableTag( plugin: string, nextVersion: string ): void {
 		const filePath = `plugins/${ plugin }/readme.txt`;
 		try {
@@ -116,6 +128,12 @@ export default class VersionBump extends Command {
 		}
 	}
 
+	/**
+	 * Update plugin readme changelog.
+	 *
+	 * @param plugin plugin to update
+	 * @param nextVersion version to bump to
+	 */
 	private updateReadmeChangelog( plugin: string, nextVersion: string ): void {
 		const filePath = `plugins/${ plugin }/readme.txt`;
 		try {
@@ -132,6 +150,12 @@ export default class VersionBump extends Command {
 		}
 	}
 
+	/**
+	 * Update plugin class file.
+	 *
+	 * @param plugin plugin to update
+	 * @param nextVersion version to bump to
+	 */
 	private updateClassPluginFile( plugin: string, nextVersion: string ): void {
 		const filePath = `plugins/${ plugin }/includes/class-${ plugin }.php`;
 		try {
@@ -149,6 +173,12 @@ export default class VersionBump extends Command {
 		}
 	}
 
+	/**
+	 * Update plugin composer.json.
+	 *
+	 * @param plugin plugin to update
+	 * @param nextVersion version to bump to
+	 */
 	private updateComposerJSON( plugin: string, nextVersion: string ): void {
 		const filePath = `plugins/${ plugin }/composer.json`;
 		try {
@@ -163,6 +193,12 @@ export default class VersionBump extends Command {
 		}
 	}
 
+	/**
+	 * Update plugin main file.
+	 *
+	 * @param plugin plugin to update
+	 * @param nextVersion version to bump to
+	 */
 	private updatePluginFile( plugin: string, nextVersion: string ): void {
 		const filePath = `plugins/${ plugin }/${ plugin }.php`;
 		try {
@@ -178,6 +214,11 @@ export default class VersionBump extends Command {
 		}
 	}
 
+	/**
+	 * Get a plugin's current version.
+	 *
+	 * @param plugin plugin to update
+	 */
 	private getCurrentVersion( plugin: string ): string {
 		try {
 			const composerJSON = JSON.parse(
