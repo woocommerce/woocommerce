@@ -29,6 +29,7 @@ export default class VersionBump extends Command {
 			description: 'Plugin to bump versions.',
 			required: false,
 			default: 'woocommerce',
+			options: [ 'woocommerce', 'woocommerce-beta-tester' ],
 		},
 	];
 
@@ -52,13 +53,14 @@ export default class VersionBump extends Command {
 		this.validateArgs( args, flags );
 
 		let nextVersion = flags.version;
+		const { plugin } = args;
 
 		const prereleaseParameters = prerelease( nextVersion );
 		const isPrerelease = !! prereleaseParameters;
 		const isDevVersionBump =
 			prereleaseParameters && prereleaseParameters[ 0 ] === 'dev';
 
-		this.updatePluginFile( nextVersion );
+		this.updatePluginFile( plugin, nextVersion );
 
 		if ( isPrerelease && ! isDevVersionBump ) {
 			// Prereleases such as beta or rc only bump the plugin file.
@@ -69,12 +71,12 @@ export default class VersionBump extends Command {
 			// When updating to a dev version, only the plugin file gets the '-dev'.
 			nextVersion = nextVersion.replace( '-dev', '' );
 			// Bumping the dev version means updating the readme's changelog.
-			this.updateReadmeChangelog( nextVersion );
+			this.updateReadmeChangelog( plugin, nextVersion );
 		}
 
-		this.updateComposerJSON( nextVersion );
-		this.updateClassPluginFile( nextVersion );
-		this.updateReadmeStableTag( nextVersion );
+		this.updateComposerJSON( plugin, nextVersion );
+		this.updateClassPluginFile( plugin, nextVersion );
+		this.updateReadmeStableTag( plugin, nextVersion );
 	}
 
 	private validateArgs(
@@ -98,54 +100,42 @@ export default class VersionBump extends Command {
 		}
 	}
 
-	private updateReadmeStableTag( nextVersion: string ): void {
+	private updateReadmeStableTag( plugin: string, nextVersion: string ): void {
+		const filePath = `plugins/${ plugin }/readme.txt`;
 		try {
-			const readmeContents = readFileSync(
-				'plugins/woocommerce/readme.txt',
-				'utf8'
-			);
+			const readmeContents = readFileSync( filePath, 'utf8' );
 
 			const updatedReadmeContents = readmeContents.replace(
 				/Stable tag: \d.\d.\d\n/m,
 				`Stable tag: ${ nextVersion }\n`
 			);
 
-			writeFileSync(
-				'plugins/woocommerce/readme.txt',
-				updatedReadmeContents
-			);
+			writeFileSync( filePath, updatedReadmeContents );
 		} catch ( e ) {
 			this.error( 'Unable to update readme stable tag' );
 		}
 	}
 
-	private updateReadmeChangelog( nextVersion: string ): void {
+	private updateReadmeChangelog( plugin: string, nextVersion: string ): void {
+		const filePath = `plugins/${ plugin }/readme.txt`;
 		try {
-			const readmeContents = readFileSync(
-				'plugins/woocommerce/readme.txt',
-				'utf8'
-			);
+			const readmeContents = readFileSync( filePath, 'utf8' );
 
 			const updatedReadmeContents = readmeContents.replace(
 				/= \d.\d.\d \d\d\d\d-XX-XX =\n/m,
 				`= ${ nextVersion } ${ new Date().getFullYear() }-XX-XX =\n`
 			);
 
-			writeFileSync(
-				'plugins/woocommerce/readme.txt',
-				updatedReadmeContents
-			);
+			writeFileSync( filePath, updatedReadmeContents );
 		} catch ( e ) {
 			this.error( 'Unable to update readme changelog' );
 		}
 	}
 
-	private updateClassPluginFile( nextVersion: string ): void {
+	private updateClassPluginFile( plugin: string, nextVersion: string ): void {
+		const filePath = `plugins/${ plugin }/includes/class-${ plugin }.php`;
 		try {
-			const classPluginFileContents = readFileSync(
-				'plugins/woocommerce/includes/class-woocommerce.php',
-				'utf8'
-			);
+			const classPluginFileContents = readFileSync( filePath, 'utf8' );
 
 			const updatedClassPluginFileContents =
 				classPluginFileContents.replace(
@@ -153,23 +143,19 @@ export default class VersionBump extends Command {
 					`public $version = '${ nextVersion }';\n`
 				);
 
-			writeFileSync(
-				'plugins/woocommerce/includes/class-woocommerce.php',
-				updatedClassPluginFileContents
-			);
+			writeFileSync( filePath, updatedClassPluginFileContents );
 		} catch ( e ) {
 			this.error( 'Unable to update plugin file.' );
 		}
 	}
 
-	private updateComposerJSON( nextVersion: string ): void {
+	private updateComposerJSON( plugin: string, nextVersion: string ): void {
+		const filePath = `plugins/${ plugin }/composer.json`;
 		try {
-			const composerJson = JSON.parse(
-				readFileSync( 'plugins/woocommerce/composer.json', 'utf8' )
-			);
+			const composerJson = JSON.parse( readFileSync( filePath, 'utf8' ) );
 			composerJson.version = nextVersion;
 			writeFileSync(
-				'plugins/woocommerce/composer.json',
+				filePath,
 				JSON.stringify( composerJson, null, '\t' ) + '\n'
 			);
 		} catch ( e ) {
@@ -177,21 +163,16 @@ export default class VersionBump extends Command {
 		}
 	}
 
-	private updatePluginFile( nextVersion: string ): void {
+	private updatePluginFile( plugin: string, nextVersion: string ): void {
+		const filePath = `plugins/${ plugin }/${ plugin }.php`;
 		try {
-			const pluginFileContents = readFileSync(
-				'plugins/woocommerce/woocommerce.php',
-				'utf8'
-			);
+			const pluginFileContents = readFileSync( filePath, 'utf8' );
 
 			const updatedPluginFileContents = pluginFileContents.replace(
 				/Version: \d.\d.\d.*\n/m,
 				`Version: ${ nextVersion }\n`
 			);
-			writeFileSync(
-				'plugins/woocommerce/woocommerce.php',
-				updatedPluginFileContents
-			);
+			writeFileSync( filePath, updatedPluginFileContents );
 		} catch ( e ) {
 			this.error( 'Unable to update plugin file.' );
 		}
