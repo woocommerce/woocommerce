@@ -152,14 +152,14 @@ final class WC_Cart_Session {
 				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values, $product );
 
 			/**
-			 * Allow 3rd parties to override this item's is_puchasable() result with cart item data.
+			 * Allow 3rd parties to override this item's is_purchasable() result with cart item data.
+			 *
+			 * @param bool       $is_purchasable If false, the item will not be added to the cart. Default: product's is_purchasable() status.
+			 * @param string     $key Cart item key.
+			 * @param array      $values Cart item values e.g. quantity and product_id.
+			 * @param WC_Product $product The product being added to the cart.
 			 *
 			 * @since 7.0.0
-			 *
-			 * @param bool $is_purchasable If false, the item will not be added to the cart. Default: product's is_purchasable() status.
-			 * @param string $key Cart item key.
-			 * @param array $values Cart item values e.g. quantity and product_id.
-			 * @param WC_Product $product The product being added to the cart.
 			 */
 			} elseif ( ! apply_filters( 'woocommerce_cart_item_is_purchasable', $product->is_purchasable(), $key, $values, $product ) ) {
 				$update_cart_session = true;
