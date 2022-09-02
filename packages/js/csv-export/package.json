@@ -35,7 +35,7 @@
 		"changelog": "composer exec -- changelogger",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"build": "pnpm --filter=$npm_package_name -w exec turbo run turbo:build",
-		"test": "pnpm --filter=$npm_package_name -w exec turbo run turbo:test --",
+		"test": "pnpm --filter=$npm_package_name -w exec turbo run turbo:test",
 		"lint": "eslint src",
 		"start": "tsc --build --watch",
 		"prepack": "pnpm run clean && pnpm run build",
