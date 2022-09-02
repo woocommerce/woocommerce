@@ -1162,7 +1162,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				 * @param  int    $variation_id    The variation ID.
 				 * @return bool
 				 */
-				$match_any_value = apply_filters( 'woocommerce_match_any_value', '' === $attribute_value, $attribute_value, $attribute_key, $variation_id );
+				$match_any_value = apply_filters( 'woocommerce_find_matching_product_variation_match_any', '' === $attribute_value, $attribute_value, $attribute_key, $variation_id );
 
 				if ( ! $match_any_value && ! array_key_exists( $attribute_key, $match_attributes ) ) {
 					$match = false; // Requires a selection but no value was provide.
