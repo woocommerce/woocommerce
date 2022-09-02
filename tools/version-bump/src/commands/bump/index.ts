@@ -91,7 +91,7 @@ export default class VersionBump extends Command {
 			);
 		}
 
-		const currentVersion = this.getCurrentVersion();
+		const currentVersion = this.getCurrentVersion( args.plugin );
 
 		if ( versionLessThan( nextVersion, currentVersion ) ) {
 			this.error(
@@ -178,10 +178,10 @@ export default class VersionBump extends Command {
 		}
 	}
 
-	private getCurrentVersion(): string {
+	private getCurrentVersion( plugin: string ): string {
 		try {
 			const composerJSON = JSON.parse(
-				readFileSync( 'plugins/woocommerce/composer.json', 'utf8' )
+				readFileSync( `plugins/${ plugin }/composer.json`, 'utf8' )
 			);
 			return composerJSON.version;
 		} catch ( e ) {
