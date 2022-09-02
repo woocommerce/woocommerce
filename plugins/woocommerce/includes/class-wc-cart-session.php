@@ -162,8 +162,9 @@ final class WC_Cart_Session {
 			 * @param bool $is_purchasable If false, the item will not be added to the cart. Default: product's is_purchasable() status.
 			 * @param string $key Cart item key.
 			 * @param array $values Cart item values e.g. quantity and product_id.
+			 * @param WC_Product $product The product being added to the cart.
 			 */
-			} elseif ( ! apply_filters( 'woocommerce_cart_item_is_purchasable', $product->is_purchasable(), $key, $values ) ) {
+			} elseif ( ! apply_filters( 'woocommerce_cart_item_is_purchasable', $product->is_purchasable(), $key, $values, $product ) ) {
 				$update_cart_session = true;
 				/* translators: %s: product name */
 				$message = sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $product->get_name() );

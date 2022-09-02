@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Exempt auto-draft orders from backfill as datastore won't load them correctly.
