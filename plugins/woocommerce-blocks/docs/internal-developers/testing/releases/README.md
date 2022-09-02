@@ -87,6 +87,7 @@ Every release includes specific testing instructions for new features and bug fi
 -   [8.2.1](./821.md)
 -   [8.3.0](./830.md)
 -   [8.3.1](./831.md)
+-   [8.4.0](./840.md)
 
 <!-- FEEDBACK -->
 
