@@ -44,6 +44,22 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		'_payment_tokens',
 	);
 
+	/**
+	 * Custom setters for props. Add key here if it has corresponding set_ and get_ method present.
+	 *
+	 * @var string[]
+	 */
+	protected $internal_data_store_key_getters = array();
+
+	/**
+	 * Return internal key getters name.
+	 *
+	 * @return string[]
+	 */
+	public function get_internal_data_store_key_getters() {
+		return $this->internal_data_store_key_getters;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD Methods
@@ -445,5 +461,56 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 */
 	public function get_title( WC_Order $order ) {
 		return get_the_title( $order->get_id() );
+	}
+
+	/**
+	 * Given an initialized order object, update the post/postmeta records.
+	 *
+	 * @param WC_Order $order Order object.
+	 *
+	 * @return bool Whether the order was updated.
+	 */
+	public function update_order_from_object( $order ) {
+		if ( ! $order->get_id() ) {
+			return false;
+		}
+		$this->update_order_meta_from_object( $order );
+		return wp_update_post(
+			array(
+				'ID'            => $order->get_id(),
+				'post_date'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
+				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+				'post_status'   => $this->get_post_status( $order ),
+				'post_parent'   => $order->get_parent_id(),
+				'post_excerpt'  => method_exists( $order, 'get_customer_note' ) ? $order->get_customer_note() : '',
+				'post_type'     => $order->get_type(),
+			)
+		);
+	}
+
+	/**
+	 * Helper method to update order metadata from intialized order object.
+	 *
+	 * @param WC_Order $order Order object.
+	 */
+	private function update_order_meta_from_object( $order ) {
+		if ( is_null( $order->get_meta() ) ) {
+			return;
+		}
+
+		$existing_meta_data = get_post_meta( $order->get_id() );
+
+		foreach ( $order->get_meta_data() as $meta_data ) {
+			if ( isset( $existing_meta_data[ $meta_data->key ] ) ) {
+				if ( $existing_meta_data[ $meta_data->key ] === $meta_data->value ) {
+					continue;
+				}
+				delete_post_meta( $order->get_id(), $meta_data->key );
+				unset( $existing_meta_data[ $meta_data->key ] );
+			}
+			add_post_meta( $order->get_id(), $meta_data->key, $meta_data->value, false );
+		}
+
+		$this->update_post_meta( $order );
 	}
 }

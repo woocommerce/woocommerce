@@ -1,24 +1,30 @@
-.product-category-layout {
-	display: grid;
-	grid-template-columns: 32% auto;
-	gap: $gap-large;
+.woocommerce-form-section {
+	a {
+		text-decoration: none;
+	}
 
-	&__fields {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
+	&__content {
 		padding: $gap-large;
-
 		background: $white;
 		border: 1px solid $gray-400;
 		border-radius: 2px;
 
 		> * {
+			&:not(:first-of-type) {
+				padding-top: $gap-large - $gap-smaller;
+			}
 			width: 100%;
 		}
 	}
 
-	.product-field-layout:not(:first-child) {
-		margin-top: $gap;
+	&__header {
+		p > span {
+			display: block;
+			margin-bottom: $gap-smaller;
+		}
+	}
+
+	&:not(:first-child) {
+		margin-top: $gap-largest;
 	}
 }

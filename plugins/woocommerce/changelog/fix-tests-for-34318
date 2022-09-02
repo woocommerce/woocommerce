@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Added tests to account for removal of foreign key for download log.
