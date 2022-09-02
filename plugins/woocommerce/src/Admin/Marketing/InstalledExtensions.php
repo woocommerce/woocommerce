@@ -162,10 +162,12 @@ class InstalledExtensions {
 		$data         = self::get_extension_base_data( $slug );
 		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/automatewoo.svg';
 
-		if ( 'activated' === $data['status'] && function_exists( 'AW_Referrals' ) ) {
-			$data['settingsUrl'] = admin_url( 'admin.php?page=automatewoo-settings&tab=referrals' );
-			$data['docsUrl']     = 'https://automatewoo.com/docs/refer-a-friend/';
-			$data['status']      = 'configured';
+		if ( 'activated' === $data['status'] ) {
+			$data['docsUrl'] = 'https://automatewoo.com/docs/refer-a-friend/';
+			$data['status']  = 'configured';
+			if ( function_exists( 'AW_Referrals' ) ) {
+				$data['settingsUrl'] = admin_url( 'admin.php?page=automatewoo-settings&tab=referrals' );
+			}
 		}
 
 		return $data;
@@ -186,10 +188,12 @@ class InstalledExtensions {
 		$data         = self::get_extension_base_data( $slug );
 		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/automatewoo.svg';
 
-		if ( 'activated' === $data['status'] && function_exists( 'AW_Birthdays' ) ) {
-			$data['settingsUrl'] = admin_url( 'admin.php?page=automatewoo-settings&tab=birthdays' );
-			$data['docsUrl']     = 'https://automatewoo.com/docs/getting-started-with-birthdays/';
-			$data['status']      = 'configured';
+		if ( 'activated' === $data['status'] ) {
+			$data['docsUrl'] = 'https://automatewoo.com/docs/getting-started-with-birthdays/';
+			$data['status']  = 'configured';
+			if ( function_exists( 'AW_Birthdays' ) ) {
+				$data['settingsUrl'] = admin_url( 'admin.php?page=automatewoo-settings&tab=birthdays' );
+			}
 		}
 
 		return $data;
