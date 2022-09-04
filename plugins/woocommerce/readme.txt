@@ -244,6 +244,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Add Skip button on OBW steps [#34176](https://github.com/woocommerce/woocommerce/pull/34176)
 * Tweak - Tweak the marketing task flow after installing a plugin [#34241](https://github.com/woocommerce/woocommerce/pull/34241)
 * Performance - Cache plugin data in system status API endpoint [#33899](https://github.com/woocommerce/woocommerce/pull/33899)
+* Enhancement - Allow accessing WooCommerce Customizer panels directly from customizer.php in block themes [#34443](https://github.com/woocommerce/woocommerce/pull/34443)
 * Enhancement - Add i18n support for data source poller [#34247](https://github.com/woocommerce/woocommerce/pull/34247)
 * Enhancement - Adds support for date_query to the COT datastore. [#34119](https://github.com/woocommerce/woocommerce/pull/34119)
 * Enhancement - Add support for the 'customer' query var to the COT datastore. [#34059](https://github.com/woocommerce/woocommerce/pull/34059)
