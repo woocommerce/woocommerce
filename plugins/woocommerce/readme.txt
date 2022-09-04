@@ -239,6 +239,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Update package.json scripts within woocommerce/client/admin plugin. #33982 [#33982](https://github.com/woocommerce/woocommerce/pull/33982)
 * Dev - Updates based on prior feedback, fixes for tests in CI [#33965](https://github.com/woocommerce/woocommerce/pull/33965)
 * Dev - Updating e2e, api and performance tests against a wp-env environment [#34311](https://github.com/woocommerce/woocommerce/pull/34311)
+* Tweak - Update product task experiment names and add spotlight parameter to physical product template link [#34495](https://github.com/woocommerce/woocommerce/pull/34495)
 * Tweak - Add a namespace to all the classes of the Psr\Container package [#33703](https://github.com/woocommerce/woocommerce/pull/33703)
 * Tweak - Add Skip button on OBW steps [#34176](https://github.com/woocommerce/woocommerce/pull/34176)
 * Tweak - Tweak the marketing task flow after installing a plugin [#34241](https://github.com/woocommerce/woocommerce/pull/34241)
