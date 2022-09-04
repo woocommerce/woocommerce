@@ -3,7 +3,7 @@
  */
 import { getFilename, getPatches } from '../utils';
 
-type TemplateChangeDescription = {
+export type TemplateChangeDescription = {
 	filePath: string;
 	code: string;
 	// We could probably move message out into a reporter later

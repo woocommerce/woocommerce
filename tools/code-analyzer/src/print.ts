@@ -1,3 +1,6 @@
+import { HookChangeDescription } from './lib/hook-changes';
+import { TemplateChangeDescription } from './lib/template-changes';
+
 /**
  * Print template results
  *
@@ -7,32 +10,29 @@
  * @param {Function}              log    print method.
  */
 export const printTemplateResults = (
-	data: Map< string, string[] >,
+	data: TemplateChangeDescription[],
 	output: string,
 	title: string,
 	log: ( s: string ) => void
 ): void => {
+	//[code,title,message]
 	if ( output === 'github' ) {
 		let opt = '\\n\\n### Template changes:';
-		for ( const [ key, value ] of data ) {
-			opt += `\\n* **file:** ${ key }`;
-			opt += `\\n  * ${ value[ 0 ].toUpperCase() }: ${ value[ 2 ] }`;
+		for ( const { filePath, code, message } of data ) {
+			opt += `\\n* **file:** ${ filePath }`;
+			opt += `\\n  * ${ code.toUpperCase() }: ${ message }`;
 			log(
-				`::${ value[ 0 ] } file=${ key },line=1,title=${ value[ 1 ] }::${ value[ 2 ] }`
+				`::${ code } file=${ filePath },line=1,title=${ title }::${ message }`
 			);
 		}
 
 		log( `::set-output name=templates::${ opt }` );
 	} else {
 		log( `\n## ${ title }:` );
-		for ( const [ key, value ] of data ) {
-			log( 'FILE: ' + key );
+		for ( const { filePath, code, message } of data ) {
+			log( 'FILE: ' + filePath );
 			log( '---------------------------------------------------' );
-			log(
-				` ${ value[ 0 ].toUpperCase() } | ${ value[ 1 ] } | ${
-					value[ 2 ]
-				}`
-			);
+			log( ` ${ code.toUpperCase() } | ${ title } | ${ message }` );
 			log( '---------------------------------------------------' );
 		}
 	}
@@ -41,54 +41,69 @@ export const printTemplateResults = (
 /**
  * Print hook results
  *
- * @param {Map}      data   Raw data.
- * @param {string}   output Output style.
- * @param {string}   title  Section title.
- * @param {Function} log    print method.
+ * @param {Map}      data         Raw data.
+ * @param {string}   output       Output style.
+ * @param {string}   sectionTitle Section title.
+ * @param {Function} log          print method.
  */
 export const printHookResults = (
-	data: Map< string, Map< string, string[] > >,
+	data: HookChangeDescription[],
 	output: string,
-	title: string,
+	sectionTitle: string,
 	log: ( s: string ) => void
-): void => {
+) => {
+	// [
+	// 	'NOTICE',
+	// 	title,
+	// 	message,
+	// 	description,
+	// ]
 	if ( output === 'github' ) {
 		let opt = '\\n\\n### New hooks:';
-		for ( const [ key, value ] of data ) {
-			if ( value.size ) {
-				opt += `\\n* **file:** ${ key }`;
-				for ( const [ k, v ] of value ) {
-					opt += `\\n  * ${ v[ 0 ].toUpperCase() } - ${ v[ 2 ] }: ${
-						v[ 3 ]
-					}`;
-					log(
-						`::${ v[ 0 ] } file=${ key },line=1,title=${ v[ 1 ] } - ${ k }::${ v[ 2 ] }`
-					);
-				}
-			}
+		for ( const {
+			filePath,
+			name,
+			version,
+			description,
+			hookType,
+			changeType,
+		} of data ) {
+			opt += `\\n* **file:** ${ filePath }`;
+
+			const cliMessage = `**${ name }** introduced in ${ version }`;
+			const ghMessage = `\\'${ name }\\' introduced in ${ version }`;
+			const message = output === 'github' ? ghMessage : cliMessage;
+			const title = `${ changeType } ${ hookType } found`;
+
+			opt += `\\n  * NOTICE - ${ message }: ${ description }`;
+			log(
+				`::NOTICE file=${ filePath },line=1,title=${ title } - ${ name }::${ message }`
+			);
 		}
 
 		log( `::set-output name=wphooks::${ opt }` );
 	} else {
-		log( `\n## ${ title }:` );
+		log( `\n## ${ sectionTitle }:` );
 		log( '---------------------------------------------------' );
-		for ( const [ key, value ] of data ) {
-			if ( value.size ) {
-				log( 'FILE: ' + key );
-				log( '---------------------------------------------------' );
-				for ( const [ k, v ] of value ) {
-					log( `HOOK: ${ k }: ${ v[ 3 ] }` );
-					log(
-						'---------------------------------------------------'
-					);
-					log(
-						` ${ v[ 0 ].toUpperCase() } | ${ v[ 1 ] } | ${ v[ 2 ] }`
-					);
-					log(
-						'---------------------------------------------------'
-					);
-				}
-			}
+		for ( const {
+			filePath,
+			name,
+			version,
+			description,
+			hookType,
+			changeType,
+		} of data ) {
+			const cliMessage = `**${ name }** introduced in ${ version }`;
+			const ghMessage = `\\'${ name }\\' introduced in ${ version }`;
+			const message = output === 'github' ? ghMessage : cliMessage;
+			const title = `${ changeType } ${ hookType } found`;
+
+			log( 'FILE: ' + filePath );
+			log( '---------------------------------------------------' );
+			log( `HOOK: ${ name }: ${ description }` );
+			log( '---------------------------------------------------' );
+			log( `NOTICE | ${ title } | ${ message }` );
+			log( '---------------------------------------------------' );
 		}
 	}
 };

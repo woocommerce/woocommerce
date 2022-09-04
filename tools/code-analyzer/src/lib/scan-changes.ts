@@ -47,10 +47,10 @@ export const scanForChanges = async (
 	Logger.endTask();
 
 	Logger.startTask( 'Detecting DB changes...' );
-	const dbChanges = scanForDBChanges( diff ) || {};
+	const dbChanges = scanForDBChanges( diff );
 	Logger.endTask();
 
-	let schemaChanges = {};
+	let schemaChanges: Record< string, string > = {};
 
 	if ( ! skipSchemaCheck ) {
 		const build = async () => {

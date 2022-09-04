@@ -10,12 +10,13 @@ import {
 	getVersionRegex,
 } from '../utils';
 
-type HookChangeDescription = {
+export type HookChangeDescription = {
 	filePath: string;
 	name: string;
 	description: string;
 	hookType: string;
 	changeType: 'new' | 'updated';
+	version: string;
 };
 
 export const scanForHookChanges = ( content: string, version: string ) => {
@@ -80,6 +81,7 @@ export const scanForHookChanges = ( content: string, version: string ) => {
 					hookType,
 					description,
 					changeType,
+					version,
 				} );
 			}
 		}
