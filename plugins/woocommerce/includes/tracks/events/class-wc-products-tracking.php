@@ -154,7 +154,7 @@ class WC_Products_Tracking {
 						tagsText          = $( '[name=\"tax_input[product_tag]\"]' ).val();
 						if ( $( '#content' ).is( ':visible' ) ) {
 							description_value = $( '#content' ).val();	
-						} else if ( typeof tinymce === 'object' ) {
+						} else if ( typeof tinymce === 'object' && tinymce.get( 'content' ) ) {
 							description_value = tinymce.get( 'content' ).getContent();
 						}
 					} else {
