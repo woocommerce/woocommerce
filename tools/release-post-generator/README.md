@@ -11,8 +11,8 @@ don't have access to a wc.com auth token.
 1. Make sure `pnpm i` has been run in the monorepo.
 2. Make sure you have added a `.env` file with the env variables set. WCCOM_TOKEN is optional if you're using `--outputOnly`, but
 the `GITHUB_ACCESS_TOKEN` is required. If you need help generating a token see [the docs](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token). To silence all CLI output, set `LOGGER_LEVEL` to `"silent"`.
-3. Run the tool from this directory, e.g. `ts-node ./index.ts release "6.8.0" --outputOnly`
-4. For more help on individual options, run the help `ts-node ./index.ts release --help`
+3. Run the tool via the npm script, e.g. `pnpm run release "6.8.0" --outputOnly`
+4. For more help on individual options, run the help `pnpm run release --help`
 ### Publishing Draft Posts
 
 This tool will publish draft posts to `https://developer.woocommerce.com` for you if you omit the `--outputOnly` flag. There is some minimal first time setup for this though:

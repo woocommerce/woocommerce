@@ -15,6 +15,8 @@ import { processChanges } from '../lib/process-changes';
 import { createWpComDraftPost } from '../lib/draft-post';
 import { generateContributors } from '../lib/contributors';
 import { Logger } from '../lib/logger';
+import { tmpdir } from 'os';
+import { join } from 'path';
 
 const DEVELOPER_WOOCOMMERCE_SITE_ID = '96396764';
 
@@ -96,10 +98,14 @@ program
 			Logger.endTask();
 
 			if ( isOutputOnly ) {
-				await writeFile( 'changes.html', html );
-				Logger.notice(
-					`Output written to ${ process.cwd() }/changes.html`
+				const tmpFile = join(
+					tmpdir(),
+					`release-${ currentVersion }.html`
 				);
+
+				await writeFile( tmpFile, html );
+
+				Logger.notice( `Output written to ${ tmpFile }` );
 			} else {
 				Logger.startTask( 'Publishing draft release post' );
 
