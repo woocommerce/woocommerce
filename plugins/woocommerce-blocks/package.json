@@ -158,7 +158,7 @@
 		"circular-dependency-plugin": "5.2.2",
 		"commander": "9.3.0",
 		"copy-webpack-plugin": "6.4.1",
-		"core-js": "3.23.3",
+		"core-js": "3.25.0",
 		"create-file-webpack": "1.0.2",
 		"cross-env": "7.0.3",
 		"cssnano": "5.1.12",
