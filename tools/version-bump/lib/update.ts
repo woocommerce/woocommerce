@@ -15,20 +15,20 @@ import { Logger } from './logger';
  * @param  plugin      plugin to update
  * @param  nextVersion version to bump to
  */
-export const updateReadmeStableTag = (
+export const updateReadmeStableTag = async (
 	plugin: string,
 	nextVersion: string
-): void => {
+): Promise< void > => {
 	const filePath = `plugins/${ plugin }/readme.txt`;
 	try {
-		const readmeContents = readFileSync( filePath, 'utf8' );
+		const readmeContents = await readFile( filePath, 'utf8' );
 
 		const updatedReadmeContents = readmeContents.replace(
 			/Stable tag: \d.\d.\d\n/m,
 			`Stable tag: ${ nextVersion }\n`
 		);
 
-		writeFileSync( filePath, updatedReadmeContents );
+		await writeFile( filePath, updatedReadmeContents );
 	} catch ( e ) {
 		Logger.error( 'Unable to update readme stable tag' );
 	}
@@ -40,20 +40,20 @@ export const updateReadmeStableTag = (
  * @param  plugin      plugin to update
  * @param  nextVersion version to bump to
  */
-export const updateReadmeChangelog = (
+export const updateReadmeChangelog = async (
 	plugin: string,
 	nextVersion: string
-): void => {
+): Promise< void > => {
 	const filePath = `plugins/${ plugin }/readme.txt`;
 	try {
-		const readmeContents = readFileSync( filePath, 'utf8' );
+		const readmeContents = await readFile( filePath, 'utf8' );
 
 		const updatedReadmeContents = readmeContents.replace(
 			/= \d.\d.\d \d\d\d\d-XX-XX =\n/m,
 			`= ${ nextVersion } ${ new Date().getFullYear() }-XX-XX =\n`
 		);
 
-		writeFileSync( filePath, updatedReadmeContents );
+		await writeFile( filePath, updatedReadmeContents );
 	} catch ( e ) {
 		Logger.error( 'Unable to update readme changelog' );
 	}
@@ -65,10 +65,10 @@ export const updateReadmeChangelog = (
  * @param  plugin      plugin to update
  * @param  nextVersion version to bump to
  */
-export const updateClassPluginFile = (
+export const updateClassPluginFile = async (
 	plugin: string,
 	nextVersion: string
-): void => {
+): Promise< void > => {
 	const filePath = `plugins/${ plugin }/includes/class-${ plugin }.php`;
 
 	if ( ! existsSync( filePath ) ) {
@@ -76,14 +76,14 @@ export const updateClassPluginFile = (
 	}
 
 	try {
-		const classPluginFileContents = readFileSync( filePath, 'utf8' );
+		const classPluginFileContents = await readFile( filePath, 'utf8' );
 
 		const updatedClassPluginFileContents = classPluginFileContents.replace(
 			/public \$version = '\d.\d.\d';\n/m,
 			`public $version = '${ nextVersion }';\n`
 		);
 
-		writeFileSync( filePath, updatedClassPluginFileContents );
+		await writeFile( filePath, updatedClassPluginFileContents );
 	} catch ( e ) {
 		Logger.error( 'Unable to update plugin file.' );
 	}
@@ -95,15 +95,15 @@ export const updateClassPluginFile = (
  * @param  plugin      plugin to update
  * @param  nextVersion version to bump to
  */
-export const updateComposerJSON = (
+export const updateComposerJSON = async (
 	plugin: string,
 	nextVersion: string
-): void => {
+): Promise< void > => {
 	const filePath = `plugins/${ plugin }/composer.json`;
 	try {
-		const composerJson = JSON.parse( readFileSync( filePath, 'utf8' ) );
+		const composerJson = JSON.parse( await readFile( filePath, 'utf8' ) );
 		composerJson.version = nextVersion;
-		writeFileSync(
+		await writeFile(
 			filePath,
 			JSON.stringify( composerJson, null, '\t' ) + '\n'
 		);

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { valid, lt as versionLessThan, prerelease } from 'semver';
-import { readFileSync } from 'fs';
+import { readFile } from 'fs/promises';
 
 /**
  * Internal dependencies
@@ -14,10 +14,12 @@ import { Logger } from './logger';
  *
  * @param  plugin plugin to update.
  */
-export const getCurrentVersion = ( plugin: string ): string | void => {
+export const getCurrentVersion = async (
+	plugin: string
+): Promise< string | void > => {
 	try {
 		const composerJSON = JSON.parse(
-			readFileSync( `plugins/${ plugin }/composer.json`, 'utf8' )
+			await readFile( `plugins/${ plugin }/composer.json`, 'utf8' )
 		);
 		return composerJSON.version;
 	} catch ( e ) {
@@ -56,10 +58,10 @@ export const stripPrereleaseParameters = (
  * @param  options         options
  * @param  options.version version
  */
-export const validateArgs = (
+export const validateArgs = async (
 	plugin: string,
 	options: { version: string }
-): void => {
+): Promise< void > => {
 	const nextVersion = options.version;
 
 	if ( ! valid( nextVersion ) ) {
@@ -68,7 +70,7 @@ export const validateArgs = (
 		);
 	}
 
-	const currentVersion = getCurrentVersion( plugin );
+	const currentVersion = await getCurrentVersion( plugin );
 
 	if ( ! currentVersion ) {
 		Logger.error( 'Unable to determine current version' );

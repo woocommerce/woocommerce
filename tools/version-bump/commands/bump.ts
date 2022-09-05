@@ -22,7 +22,7 @@ program
 	.argument( '<plugin>', 'Monorepo plugin' )
 	.requiredOption( '-v, --version <string>', 'Version to bump to' )
 	.action( async ( plugin: string, options ) => {
-		validateArgs( plugin, options );
+		await validateArgs( plugin, options );
 
 		let nextVersion = options.version;
 
@@ -37,12 +37,12 @@ program
 
 		if ( isDevVersionBump ) {
 			// Bumping the dev version means updating the readme's changelog.
-			updateReadmeChangelog( plugin, nextVersion );
+			await updateReadmeChangelog( plugin, nextVersion );
 		} else {
 			// Only update stable tag on real releases.
-			updateReadmeStableTag( plugin, nextVersion );
+			await updateReadmeStableTag( plugin, nextVersion );
 		}
 
-		updateComposerJSON( plugin, nextVersion );
-		updateClassPluginFile( plugin, nextVersion );
+		await updateComposerJSON( plugin, nextVersion );
+		await updateClassPluginFile( plugin, nextVersion );
 	} );
