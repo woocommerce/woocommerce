@@ -82,7 +82,7 @@
 		"wp-env:config": "./bin/wp-env-pre-config.sh"
 	},
 	"devDependencies": {
-		"@actions/core": "1.9.0",
+		"@actions/core": "1.9.1",
 		"@actions/github": "5.0.3",
 		"@automattic/color-studio": "2.5.0",
 		"@babel/cli": "7.18.9",
