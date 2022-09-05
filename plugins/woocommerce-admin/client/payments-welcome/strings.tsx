@@ -378,4 +378,39 @@ export default {
 
 		getInTouch: __( 'Get in touch', 'woocommerce' ),
 	},
+	apms: {
+		addMoreWaysToPay: __(
+			'Add more ways for buyers to pay',
+			'woocommerce'
+		),
+		seeMore: __( 'See more', 'woocommerce' ),
+		paypal: {
+			title: __( 'PayPal Payments', 'woocommerce' ),
+			description: __(
+				'Enable PayPal Payments alongside WooCommerce Payments. Give your customers another way to pay safely and conveniently via PayPal, PayLater, and Venmo.',
+				'woocommerce'
+			),
+		},
+		amazonpay: {
+			title: __( 'Amazon Pay', 'woocommerce' ),
+			description: __(
+				'Enable Amazon Pay alongside WooCommerce Payments and give buyers the ability to pay via AmazonPay. Transactions take place via Amazon embedded widgets, so the buyer never leaves your site.',
+				'woocommerce'
+			),
+		},
+		klarna: {
+			title: __( 'Klarna', 'woocommerce' ),
+			description: __(
+				'Enable Klarna alongside WooCommerce Payments. With Klarna Payments buyers can choose the payment installment option they want, Pay Now, Pay Later, or Slice It. No credit card numbers, no passwords, no worries.',
+				'woocommerce'
+			),
+		},
+		affirm: {
+			title: __( 'Affirm', 'woocommerce' ),
+			description: __(
+				'Enable Affirm alongside WooCommerce Payments and give buyers the ability to pick the payment option that works for them and their budget — from 4 interest-free payments every 2 weeks to monthly installments.',
+				'woocommerce'
+			),
+		},
+	},
 };

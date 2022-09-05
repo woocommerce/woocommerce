@@ -31,6 +31,7 @@ import {
  */
 import strings from './strings';
 import Banner from './banner';
+import APMs from './apms';
 import './style.scss';
 import FrequentlyAskedQuestions from './faq';
 import ExitSurveyModal from './exit-survey-modal';
@@ -279,7 +280,7 @@ const ConnectAccountPage = () => {
 					setErrorMessage={ setErrorMessage }
 				/>
 				<Banner />
-				<FrequentlyAskedQuestions />
+				<APMs />
 			</div>
 		</div>
 	);

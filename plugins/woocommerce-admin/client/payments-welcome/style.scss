@@ -165,6 +165,47 @@
 				border-radius: 3px;
 			}
 		}
+
+		.connect-account__apms {
+			.components-card__header {
+				padding: 24px 10px 16px 24px;
+				h1 {
+					font-size: 20px;
+					line-height: 28px;
+				}
+			}
+			.components-card__body {
+				padding: 0;
+
+				.woocommerce-list__item {
+					> .woocommerce-list__item-inner {
+						padding: 24px;
+						.woocommerce-list__item-title {
+							color: #1e1e1e;
+							font-weight: 700;
+							font-size: 14px;
+							line-height: 18px;
+						}
+						.woocommerce-list__item-content {
+							color: #757575;
+							font-size: 13px;
+							line-height: 16px;
+							a {
+								text-decoration: none;
+							}
+						}
+						.woocommerce-list__item-after {
+							margin-left: 24px;
+						}
+						.woocommerce-list__item-before {
+							img {
+								width: 36px;
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	.banner-heading-copy {
