@@ -20,8 +20,8 @@ use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
  *
  * @since 2.5.0
  */
-class Package
-{
+class Package {
+
 
 	/**
 	 * For back compat this is provided. Ideally, you should register your
@@ -31,9 +31,8 @@ class Package
 	 * @since 2.5.0
 	 * @return Package  The Package instance class
 	 */
-	protected static function get_package()
-	{
-		return self::container()->get(NewPackage::class);
+	protected static function get_package() {
+		return self::container()->get( NewPackage::class );
 	}
 
 	/**
@@ -41,9 +40,8 @@ class Package
 	 *
 	 * @since 2.5.0 Handled by new NewPackage.
 	 */
-	public static function init()
-	{
-		self::container()->get(Bootstrap::class);
+	public static function init() {
+		self::container()->get( Bootstrap::class );
 	}
 
 	/**
@@ -51,8 +49,7 @@ class Package
 	 *
 	 * @return string
 	 */
-	public static function get_version()
-	{
+	public static function get_version() {
 		return self::get_package()->get_version();
 	}
 
@@ -61,8 +58,7 @@ class Package
 	 *
 	 * @return string
 	 */
-	public static function get_path()
-	{
+	public static function get_path() {
 		return self::get_package()->get_path();
 	}
 
@@ -71,8 +67,7 @@ class Package
 	 *
 	 * @return FeatureGating
 	 */
-	public static function feature()
-	{
+	public static function feature() {
 		return self::get_package()->feature();
 	}
 
@@ -81,8 +76,7 @@ class Package
 	 *
 	 * @return boolean
 	 */
-	public static function is_experimental_build()
-	{
+	public static function is_experimental_build() {
 		return self::get_package()->is_experimental_build();
 	}
 
@@ -109,23 +103,22 @@ class Package
 	 *                       Note: this means all dependencies will be
 	 *                       reconstructed.
 	 */
-	public static function container($reset = false)
-	{
+	public static function container( $reset = false ) {
 		static $container;
 		if (
-			!$container instanceof Container
+			! $container instanceof Container
 			|| $reset
 		) {
 			$container = new Container();
 			// register Package.
 			$container->register(
 				NewPackage::class,
-				function ($container) {
+				function ( $container ) {
 					// leave for automated version bumping.
 					$version = '8.5.0-dev';
 					return new NewPackage(
 						$version,
-						dirname(__DIR__),
+						dirname( __DIR__ ),
 						new FeatureGating()
 					);
 				}
@@ -133,7 +126,7 @@ class Package
 			// register Bootstrap.
 			$container->register(
 				Bootstrap::class,
-				function ($container) {
+				function ( $container ) {
 					return new Bootstrap(
 						$container
 					);
