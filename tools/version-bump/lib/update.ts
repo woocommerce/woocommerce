@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { readFile, writeFile } from 'fs/promises';
+import { existsSync } from 'fs';
+import { readFile, writeFile, stat } from 'fs/promises';
 
 /**
  * Internal dependencies
@@ -71,7 +71,10 @@ export const updateClassPluginFile = async (
 ): Promise< void > => {
 	const filePath = `plugins/${ plugin }/includes/class-${ plugin }.php`;
 
-	if ( ! existsSync( filePath ) ) {
+	try {
+		await stat( filePath );
+	} catch ( e ) {
+		// Class file does not exist, return early.
 		return;
 	}
 
