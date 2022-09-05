@@ -21,7 +21,7 @@ program
 	.description( 'CLI to automate version bumping.' )
 	.argument( '<plugin>', 'Monorepo plugin' )
 	.requiredOption( '-v, --version <string>', 'Version to bump to' )
-	.action( ( plugin: string, options ) => {
+	.action( async ( plugin: string, options ) => {
 		validateArgs( plugin, options );
 
 		let nextVersion = options.version;
@@ -30,7 +30,7 @@ program
 		const isDevVersionBump =
 			prereleaseParameters && prereleaseParameters[ 0 ] === 'dev';
 
-		updatePluginFile( plugin, nextVersion );
+		await updatePluginFile( plugin, nextVersion );
 
 		// Any updated files besides the plugin file get a version stripped of prerelease parameters.
 		nextVersion = stripPrereleaseParameters( nextVersion );

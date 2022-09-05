@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFile, writeFile } from 'fs/promises';
 
 /**
  * Internal dependencies
@@ -117,19 +118,19 @@ export const updateComposerJSON = (
  * @param  plugin      plugin to update
  * @param  nextVersion version to bump to
  */
-export const updatePluginFile = (
+export const updatePluginFile = async (
 	plugin: string,
 	nextVersion: string
-): void => {
+): Promise< void > => {
 	const filePath = `plugins/${ plugin }/${ plugin }.php`;
 	try {
-		const pluginFileContents = readFileSync( filePath, 'utf8' );
+		const pluginFileContents = await readFile( filePath, 'utf8' );
 
 		const updatedPluginFileContents = pluginFileContents.replace(
 			/Version: \d.\d.\d.*\n/m,
 			`Version: ${ nextVersion }\n`
 		);
-		writeFileSync( filePath, updatedPluginFileContents );
+		await writeFile( filePath, updatedPluginFileContents );
 	} catch ( e ) {
 		Logger.error( 'Unable to update plugin file.' );
 	}
