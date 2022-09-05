@@ -38,6 +38,12 @@ export const createWpComDraftPost = async (
 			'posts'
 		);
 
+		if ( ! authToken ) {
+			throw new Error(
+				'Error getting auth token, check your env settings are correct.'
+			);
+		}
+
 		const post = await fetch(
 			`https://public-api.wordpress.com/rest/v1.2/sites/${ siteId }/posts/new`,
 			{

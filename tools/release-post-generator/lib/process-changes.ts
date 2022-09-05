@@ -6,9 +6,7 @@ type AnalyzerChangeset = {
 };
 
 export const processChanges = ( changes: AnalyzerChangeset ) => {
-	console.log( changes.hooks );
-	const hooks = Object.entries( changes.hooks ).map( ( [ key, val ] ) => {
-		console.log( key, val );
+	const hooks = Object.entries( changes.hooks ).map( ( [ , val ] ) => {
 		return {
 			name: val[ 0 ][ 0 ],
 			description: val[ 0 ][ 1 ][ 3 ],
