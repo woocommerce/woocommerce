@@ -3,7 +3,9 @@
 	"version": "0.0.1",
 	"description": "Automate release post generation for Wordpress plugins",
 	"main": " ",
-	"scripts": {},
+	"scripts": {
+		"release": "ts-node ./index.ts release --"
+	},
 	"author": "",
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
