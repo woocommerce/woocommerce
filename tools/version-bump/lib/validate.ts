@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { valid, lt as versionLessThan } from 'semver';
+import { valid, lt as versionLessThan, prerelease } from 'semver';
 import { readFileSync } from 'fs';
 
 /**
@@ -12,7 +12,7 @@ import { Logger } from './logger';
 /**
  * Get a plugin's current version.
  *
- * @param plugin plugin to update
+ * @param  plugin plugin to update.
  */
 export const getCurrentVersion = ( plugin: string ): string | void => {
 	try {
@@ -22,15 +22,39 @@ export const getCurrentVersion = ( plugin: string ): string | void => {
 		return composerJSON.version;
 	} catch ( e ) {
 		Logger.error( 'Unable to read current version.' );
-		return;
 	}
+};
+
+/**
+ * When given a prerelease version, return just the version.
+ *
+ * @param {string} prereleaseVersion version with prerelease params
+ * @return {string} version
+ */
+export const stripPrereleaseParameters = (
+	prereleaseVersion: string
+): string => {
+	const prereleaseParameters = prerelease( prereleaseVersion );
+	if ( ! prereleaseParameters ) {
+		return prereleaseVersion;
+	}
+
+	const substr = prereleaseParameters.reduce( ( str, value, idx ) => {
+		if ( idx === 0 ) {
+			return `-${ value }`;
+		}
+		return `${ str }.${ value }`;
+	}, '' );
+
+	return prereleaseVersion.replace( substr.toString(), '' );
 };
 
 /**
  * Validate inputs.
  *
- * @param plugin CLI arguments
- * @param options CLI flags
+ * @param  plugin          plugin
+ * @param  options         options
+ * @param  options.version version
  */
 export const validateArgs = (
 	plugin: string,
