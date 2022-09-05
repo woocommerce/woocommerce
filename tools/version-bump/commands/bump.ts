@@ -43,9 +43,10 @@ program
 			nextVersion = nextVersion.replace( '-dev', '' );
 			// Bumping the dev version means updating the readme's changelog.
 			updateReadmeChangelog( plugin, nextVersion );
+		} else {
+			updateReadmeStableTag( plugin, nextVersion );
 		}
 
 		updateComposerJSON( plugin, nextVersion );
 		updateClassPluginFile( plugin, nextVersion );
-		updateReadmeStableTag( plugin, nextVersion );
 	} );
