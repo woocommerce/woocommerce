@@ -11,8 +11,8 @@ import { Logger } from './logger';
 /**
  * Update plugin readme stable tag.
  *
- * @param plugin plugin to update
- * @param nextVersion version to bump to
+ * @param  plugin      plugin to update
+ * @param  nextVersion version to bump to
  */
 export const updateReadmeStableTag = (
 	plugin: string,
@@ -36,8 +36,8 @@ export const updateReadmeStableTag = (
 /**
  * Update plugin readme changelog.
  *
- * @param plugin plugin to update
- * @param nextVersion version to bump to
+ * @param  plugin      plugin to update
+ * @param  nextVersion version to bump to
  */
 export const updateReadmeChangelog = (
 	plugin: string,
@@ -61,8 +61,8 @@ export const updateReadmeChangelog = (
 /**
  * Update plugin class file.
  *
- * @param plugin plugin to update
- * @param nextVersion version to bump to
+ * @param  plugin      plugin to update
+ * @param  nextVersion version to bump to
  */
 export const updateClassPluginFile = (
 	plugin: string,
@@ -91,8 +91,8 @@ export const updateClassPluginFile = (
 /**
  * Update plugin composer.json.
  *
- * @param plugin plugin to update
- * @param nextVersion version to bump to
+ * @param  plugin      plugin to update
+ * @param  nextVersion version to bump to
  */
 export const updateComposerJSON = (
 	plugin: string,
@@ -114,8 +114,8 @@ export const updateComposerJSON = (
 /**
  * Update plugin main file.
  *
- * @param plugin plugin to update
- * @param nextVersion version to bump to
+ * @param  plugin      plugin to update
+ * @param  nextVersion version to bump to
  */
 export const updatePluginFile = (
 	plugin: string,
