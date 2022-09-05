@@ -121,7 +121,7 @@
 		"@types/wordpress__data-controls": "2.2.0",
 		"@types/wordpress__editor": "^11.0.0",
 		"@typescript-eslint/eslint-plugin": "5.30.5",
-		"@typescript-eslint/parser": "5.31.0",
+		"@typescript-eslint/parser": "5.35.1",
 		"@woocommerce/api": "0.2.0",
 		"@woocommerce/data": "^4.1.0",
 		"@woocommerce/e2e-utils": "0.2.0",
