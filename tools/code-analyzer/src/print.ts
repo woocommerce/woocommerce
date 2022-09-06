@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { HookChangeDescription } from './lib/hook-changes';
 import { TemplateChangeDescription } from './lib/template-changes';
 

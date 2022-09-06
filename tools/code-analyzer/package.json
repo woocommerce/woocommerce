@@ -59,7 +59,8 @@
 		"lint": "eslint . --ext .ts --config .eslintrc",
 		"postpack": "shx rm -f oclif.manifest.json",
 		"posttest": "pnpm lint",
-		"prepack": "pnpm build && oclif manifest"
+		"prepack": "pnpm build && oclif manifest",
+		"analyzer": "node -r ts-node/register ./src/commands/analyzer/index.ts"
 	},
 	"engines": {
 		"node": ">=12.0.0"

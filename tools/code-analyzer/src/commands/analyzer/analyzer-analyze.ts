@@ -1,16 +1,18 @@
 /**
  * External dependencies
  */
-import { Command } from '@commander-js/extra-typings';
 import { Logger } from 'cli-core/src/logger';
 import { join } from 'path';
+import { Command } from 'commander';
 
 /**
  * Internal dependencies
  */
 import { generateJSONFile } from '../../utils';
 import { scanForChanges } from '../../lib/scan-changes';
-const program = new Command()
+
+new Command()
+	.command( 'analyze' )
 	.argument(
 		'<compare>',
 		'GitHub branch or commit hash to compare against the base branch/commit.'
@@ -52,6 +54,5 @@ const program = new Command()
 		await generateJSONFile( join( process.cwd(), fileName ), changes );
 
 		Logger.notice( `Generated changes file at ${ fileName }` );
-	} );
-
-program.parse( process.argv );
+	} )
+	.parse( process.argv );

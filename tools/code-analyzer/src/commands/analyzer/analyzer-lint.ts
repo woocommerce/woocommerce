@@ -3,12 +3,10 @@
  */
 import { Command } from '@commander-js/extra-typings';
 import { Logger } from 'cli-core/src/logger';
-import { join } from 'path';
 
 /**
  * Internal dependencies
  */
-import { generateJSONFile } from '../../utils';
 import { scanForChanges } from '../../lib/scan-changes';
 import {
 	printDatabaseUpdates,
@@ -18,6 +16,7 @@ import {
 } from '../../print';
 
 const program = new Command()
+	.command( 'lint' )
 	.argument(
 		'<compare>',
 		'GitHub branch or commit hash to compare against the base branch/commit.'
@@ -37,11 +36,16 @@ const program = new Command()
 		process.cwd()
 	)
 	.option(
+		'-o, --outputStyle <outputStyle>',
+		'Output style for the results. Options: github, cli',
+		'cli'
+	)
+	.option(
 		'-ss, --skipSchemaCheck',
 		'Skip the schema check, enable this if you are not analyzing WooCommerce'
 	)
 	.action( async ( compare, sinceVersion, options ) => {
-		const { skipSchemaCheck = false, source, base } = options;
+		const { skipSchemaCheck = false, source, base, outputStyle } = options;
 
 		const changes = await scanForChanges(
 			compare,
@@ -51,30 +55,32 @@ const program = new Command()
 			base
 		);
 
+		printTemplateResults(
+			Array.from( changes.templates.values() ),
+			outputStyle,
+			'TEMPLATES',
+			Logger.notice
+		);
+
 		printHookResults(
 			Array.from( changes.hooks.values() ),
-			'github',
+			outputStyle,
 			'HOOKS',
 			Logger.notice
 		);
 
-		printTemplateResults(
-			Array.from( changes.templates.values() ),
-			'github',
-			'TEMPLATES',
+		console.log( changes.schema );
+
+		printSchemaChange(
+			changes.schema,
+			sinceVersion,
+			outputStyle,
 			Logger.notice
 		);
 
 		if ( changes.db ) {
 			printDatabaseUpdates( changes.db, 'github', Logger.notice );
 		}
-
-		printSchemaChange(
-			changes.schema,
-			sinceVersion,
-			'github',
-			Logger.notice
-		);
 	} );
 
 program.parse( process.argv );

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { program } from 'commander';
+import { program } from '@commander-js/extra-typings';
 // program
 //   .name('pm')
 //   .version('0.1.0')
@@ -9,18 +9,20 @@ import { program } from 'commander';
 //   .command('search [query]', 'search with optional query')
 //   .command('update', 'update installed packages', { executableFile: 'myUpdateSubCommand' })
 //   .command('list', 'list packages installed', { isDefault: true });
+
+/**
+ * Internal dependencies
+ */
+// import './analyzer-lint';
+// import './analyzer-analyze';
+
 program
 	.name( 'analyzer' )
 	.version( '0.0.1' )
-	.command( 'lint', { isDefault: true } )
-	.command( 'analyze' );
+	.command( 'analyze', 'Analyze changes' )
+	.command( 'lint', 'Lint changes' );
 
-/**
- * External dependencies
- */
-import { CliUx, Command, Flags } from '@oclif/core';
-import { join } from 'path';
-import { rmSync } from 'fs';
+program.parse( process.argv );
 
 /**
  * Internal dependencies
