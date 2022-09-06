@@ -215,7 +215,7 @@
 		"npm": "^8.0.0"
 	},
 	"dependencies": {
-		"@wordpress/autop": "3.12.0",
+		"@wordpress/autop": "3.16.0",
 		"@wordpress/compose": "5.5.0",
 		"@wordpress/deprecated": "3.12.0",
 		"@wordpress/icons": "6.1.1",
