@@ -8,9 +8,11 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useContext } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import interpolateComponents from '@automattic/interpolate-components';
+import classnames from 'classnames';
 import {
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
+	BaseControl,
 } from '@wordpress/components';
 
 /**
@@ -84,6 +86,16 @@ export const PricingSection: React.FC = () => {
 		},
 	} );
 
+	const regularPriceProps = getInputControlProps( {
+		...getInputProps( 'regular_price' ),
+		context,
+	} );
+
+	const salePriceProps = getInputControlProps( {
+		...getInputProps( 'sale_price' ),
+		context,
+	} );
+
 	return (
 		<ProductSectionLayout
 			title={ __( 'Pricing', 'woocommerce' ) }
@@ -109,14 +121,18 @@ export const PricingSection: React.FC = () => {
 				</>
 			}
 		>
-			<div className="woocommerce-product-form__custom-label-input">
+			<div
+				className={ classnames(
+					'woocommerce-product-form__custom-label-input',
+					{
+						'has-error': regularPriceProps?.help !== '',
+					}
+				) }
+			>
 				<InputControl
 					label={ __( 'List price', 'woocommerce' ) }
 					placeholder={ __( '10.59', 'woocommerce' ) }
-					{ ...getInputControlProps( {
-						...getInputProps( 'regular_price' ),
-						context,
-					} ) }
+					{ ...regularPriceProps }
 					onChange={ ( value: string ) => {
 						const sanitizedValue = sanitizePrice( value );
 						setValue( 'regular_price', sanitizedValue );
@@ -129,20 +145,32 @@ export const PricingSection: React.FC = () => {
 				) }
 			</div>
 
-			<div className="woocommerce-product-form__custom-label-input">
-				<InputControl
-					label={ salePriceTitle }
+			<div
+				className={ classnames(
+					'woocommerce-product-form__custom-label-input',
+					{
+						'has-error': regularPriceProps?.help !== '',
+					}
+				) }
+			>
+				<BaseControl
 					id="sale_price"
-					placeholder={ __( '8.59', 'woocommerce' ) }
-					{ ...getInputControlProps( {
-						...getInputProps( 'sale_price' ),
-						context,
-					} ) }
-					onChange={ ( value: string ) => {
-						const sanitizedValue = sanitizePrice( value );
-						setValue( 'sale_price', sanitizedValue );
-					} }
-				/>
+					help={
+						salePriceProps && salePriceProps.help
+							? salePriceProps.help
+							: ''
+					}
+				>
+					<InputControl
+						label={ salePriceTitle }
+						placeholder={ __( '8.59', 'woocommerce' ) }
+						{ ...salePriceProps }
+						onChange={ ( value: string ) => {
+							const sanitizedValue = sanitizePrice( value );
+							setValue( 'sale_price', sanitizedValue );
+						} }
+					/>
+				</BaseControl>
 			</div>
 		</ProductSectionLayout>
 	);
