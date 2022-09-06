@@ -10,24 +10,24 @@ import { DragEventHandler } from 'react';
  */
 import { DraggableIcon } from './draggable-icon';
 
-type HandleProps = {
+type SortableHandleProps = {
 	children?: React.ReactNode;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
 };
 
-export const Handle = ( {
+export const SortableHandle = ( {
 	children,
 	onDragStart = () => null,
 	onDragEnd = () => null,
-}: HandleProps ) => (
-	<span
-		className="woocommerce-sortable-list__handle"
+}: SortableHandleProps ) => (
+	<div
+		className="woocommerce-sortable__handle"
 		draggable
 		onDragStart={ onDragStart }
 		onDragEnd={ onDragEnd }
 		aria-label={ __( 'Move this item', 'woocommerce' ) }
 	>
 		{ children ? children : <DraggableIcon /> }
-	</span>
+	</div>
 );

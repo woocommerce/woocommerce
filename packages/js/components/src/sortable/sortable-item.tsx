@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { DragEvent, DragEventHandler, LegacyRef, ReactNode } from 'react';
+import { DragEvent, DragEventHandler } from 'react';
 import classnames from 'classnames';
 import { cloneElement, createElement, Fragment } from '@wordpress/element';
 import { Draggable } from '@wordpress/components';
@@ -9,52 +9,47 @@ import { Draggable } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { Handle } from './handle';
-import { SortableListChild } from './types';
+import { SortableChild } from './types';
 
-export type ListItemProps = {
+export type SortableItemProps = {
 	id: string | number;
-	children: SortableListChild;
+	index: number;
+	children: SortableChild;
+	className: string;
 	isDragging?: boolean;
-	isDraggingOver?: boolean;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
 	onDragOver?: DragEventHandler< HTMLLIElement >;
-	shouldRenderHandle?: boolean;
-	style?: React.CSSProperties;
 };
 
-export const ListItem = ( {
+export const SortableItem = ( {
 	id,
 	children,
+	className,
 	isDragging = false,
-	isDraggingOver = false,
 	onDragStart = () => null,
 	onDragEnd = () => null,
 	onDragOver = () => null,
-	shouldRenderHandle = true,
-	style,
-}: ListItemProps ) => {
+}: SortableItemProps ) => {
 	const handleDragStart = ( event: DragEvent< HTMLDivElement > ) => {
 		onDragStart( event );
 	};
 
 	const handleDragEnd = ( event: DragEvent< HTMLDivElement > ) => {
+		event.preventDefault();
 		onDragEnd( event );
 	};
 
 	return (
 		<li
-			className={ classnames( 'woocommerce-sortable-list__item', {
+			className={ classnames( 'woocommerce-sortable__item', className, {
 				'is-dragging': isDragging,
-				'is-dragging-over': isDraggingOver,
 			} ) }
-			id={ `woocommerce-sortable-list__item-${ id }` }
+			id={ `woocommerce-sortable__item-${ id }` }
 			onDragOver={ onDragOver }
-			style={ style }
 		>
 			<Draggable
-				elementId={ `woocommerce-sortable-list__item-${ id }` }
+				elementId={ `woocommerce-sortable__item-${ id }` }
 				transferData={ {} }
 				onDragStart={ handleDragStart as () => void }
 				onDragEnd={ handleDragEnd as () => void }
@@ -62,15 +57,9 @@ export const ListItem = ( {
 				{ ( { onDraggableStart, onDraggableEnd } ) => {
 					return (
 						<>
-							{ shouldRenderHandle && (
-								<Handle
-									onDragEnd={ onDraggableEnd }
-									onDragStart={ onDraggableStart }
-								/>
-							) }
 							{ cloneElement( children, {
-								onDraggableStart,
-								onDraggableEnd,
+								onDragStart: onDraggableStart,
+								onDragEnd: onDraggableEnd,
 							} ) }
 						</>
 					);
