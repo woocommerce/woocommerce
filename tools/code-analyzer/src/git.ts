@@ -14,6 +14,7 @@ import { mkdir, rm } from 'fs/promises';
  * Internal dependencies
  */
 import { execAsync, startWPEnv, stopWPEnv } from './utils';
+import { Schema } from 'inspector';
 
 /**
  * Check if a string is a valid url.
@@ -250,15 +251,24 @@ export const getSchema = async (
 	}
 };
 
+export type SchemaDiff = {
+	name: string;
+	description: string;
+	base: string;
+	compare: string;
+	method: string;
+	areEqual: boolean;
+};
+
 /**
  * Generate a schema for each branch being compared.
  *
  * @param {string}   tmpRepoPath Path to repository used to generate schema diff.
  * @param {string}   compare     Branch/commit hash to compare against the base.
  * @param {string}   base        Base branch/commit hash.
- * @param            build       Build to perform between checkouts.
+ * @param {Function} build       Build to perform between checkouts.
  * @param {Function} error       error print method.
- * @return {Object|void}     diff object.
+ * @return {Object|null}     diff object.
  */
 export const generateSchemaDiff = async (
 	tmpRepoPath: string,
@@ -266,15 +276,7 @@ export const generateSchemaDiff = async (
 	base: string,
 	build: () => Promise< void > | void,
 	error: ( s: string ) => void
-): Promise< {
-	[ key: string ]: {
-		description: string;
-		base: string;
-		compare: string;
-		method: string;
-		areEqual: boolean;
-	};
-} | null > => {
+): Promise< SchemaDiff[] | null > => {
 	const git = simpleGit( { baseDir: tmpRepoPath } );
 
 	// Be sure the wp-env engine is started.
@@ -303,22 +305,23 @@ export const generateSchemaDiff = async (
 			);
 		}
 	);
-	// CliUx.ux.action.stop();
 
 	stopWPEnv( tmpRepoPath, error );
 
 	if ( ! baseSchema || ! compareSchema ) {
 		return null;
 	}
-	return {
-		schema: {
+	return [
+		{
+			name: 'schema',
 			description: 'WooCommerce Base Schema',
 			base: baseSchema.schema,
 			compare: compareSchema.schema,
 			method: 'WC_Install->get_schema',
 			areEqual: baseSchema.schema === compareSchema.schema,
 		},
-		OrdersTableDataStore: {
+		{
+			name: 'OrdersTableDataStore',
 			description: 'OrdersTableDataStore Schema',
 			base: baseSchema.OrdersTableDataStore,
 			compare: compareSchema.OrdersTableDataStore,
@@ -327,5 +330,5 @@ export const generateSchemaDiff = async (
 				baseSchema.OrdersTableDataStore ===
 				compareSchema.OrdersTableDataStore,
 		},
-	};
+	];
 };

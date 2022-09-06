@@ -7,11 +7,15 @@ import { join } from 'path';
 /**
  * Internal dependencies
  */
-import { cloneRepo, generateDiff, generateSchemaDiff } from '../git';
+import {
+	cloneRepo,
+	generateDiff,
+	generateSchemaDiff,
+	SchemaDiff,
+} from '../git';
 import { execAsync } from '../utils';
 import { scanForDBChanges } from './db-changes';
 import { scanForHookChanges } from './hook-changes';
-import { scanForSchemaChanges } from './schema-changes';
 import { scanForTemplateChanges } from './template-changes';
 
 export const scanForChanges = async (
@@ -50,7 +54,7 @@ export const scanForChanges = async (
 	const dbChanges = scanForDBChanges( diff );
 	Logger.endTask();
 
-	let schemaChanges: Record< string, string > = {};
+	let schemaChanges: SchemaDiff[] = [];
 
 	if ( ! skipSchemaCheck ) {
 		const build = async () => {
@@ -74,7 +78,7 @@ export const scanForChanges = async (
 			Logger.error
 		);
 
-		schemaChanges = schemaDiff ? scanForSchemaChanges( schemaDiff ) : {};
+		schemaChanges = schemaDiff || [];
 
 		Logger.endTask();
 	}

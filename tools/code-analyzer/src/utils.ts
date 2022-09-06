@@ -6,6 +6,7 @@ import { join } from 'path';
 import { writeFile } from 'fs/promises';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { SchemaDiff } from './git';
 
 export const execAsync = promisify( exec );
 
@@ -75,25 +76,11 @@ export const getHookName = ( name: string ): string => {
 /**
  * Determine if schema diff object contains schemas that are equal.
  *
- * @param {Object} schemaDiff
+ * @param {Array<SchemaDiff>} schemaDiffs
  * @return {boolean|void} If the schema diff describes schemas that are equal.
  */
-export const areSchemasEqual = (
-	schemaDiff: {
-		[ key: string ]: {
-			description: string;
-			base: string;
-			compare: string;
-			areEqual: boolean;
-		};
-	} | void
-): boolean => {
-	if ( ! schemaDiff ) {
-		return false;
-	}
-	return ! Object.keys( schemaDiff ).some(
-		( d: string ) => schemaDiff[ d ].areEqual === false
-	);
+export const areSchemasEqual = ( schemaDiffs: SchemaDiff[] ): boolean => {
+	return ! schemaDiffs.some( ( s ) => ! s.areEqual );
 };
 
 /**

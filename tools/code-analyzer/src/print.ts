@@ -1,6 +1,7 @@
 /**
  * Internal dependencies
  */
+import { SchemaDiff } from './git';
 import { HookChangeDescription } from './lib/hook-changes';
 import { TemplateChangeDescription } from './lib/template-changes';
 
@@ -114,34 +115,26 @@ export const printHookResults = (
 /**
  *  Print Schema change results.
  *
- * @param {Object}   schemaDiff Schema diff object
- * @param {string}   version    Version change was introduced.
- * @param {string}   output     Output style.
- * @param {Function} log        Print method.
+ * @param {Object}   schemaDiffs Schema diff object
+ * @param {string}   version     Version change was introduced.
+ * @param {string}   output      Output style.
+ * @param {Function} log         Print method.
  */
 export const printSchemaChange = (
-	schemaDiff: {
-		[ key: string ]: {
-			description: string;
-			base: string;
-			compare: string;
-			method: string;
-			areEqual: boolean;
-		};
-	} | void,
+	schemaDiffs: SchemaDiff[],
 	version: string,
 	output: string,
 	log: ( s: string ) => void
 ): Record< string, string > => {
 	const diff: Record< string, string > = {};
-	if ( ! schemaDiff ) {
+	if ( ! schemaDiffs ) {
 		return diff;
 	}
 	if ( output === 'github' ) {
 		let githubCommentContent = '\\n\\n### New schema changes:';
-		Object.keys( schemaDiff ).forEach( ( key ) => {
-			if ( ! schemaDiff[ key ].areEqual ) {
-				githubCommentContent += `\\n* **Schema:** ${ schemaDiff[ key ].method } introduced in ${ version }`;
+		schemaDiffs.forEach( ( schemaDiff ) => {
+			if ( ! schemaDiff.areEqual ) {
+				githubCommentContent += `\\n* **Schema:** ${ schemaDiff.method } introduced in ${ version }`;
 			}
 		} );
 
@@ -150,16 +143,17 @@ export const printSchemaChange = (
 		log( '\n## SCHEMA CHANGES' );
 		log( '---------------------------------------------------' );
 
-		Object.keys( schemaDiff ).forEach( ( key ) => {
-			if ( ! schemaDiff[ key ].areEqual ) {
+		schemaDiffs.forEach( ( schemaDiff ) => {
+			if ( ! schemaDiff.areEqual ) {
 				log(
-					` NOTICE | Schema changes detected in ${ schemaDiff[ key ].method } as of ${ version }`
+					` NOTICE | Schema changes detected in ${ schemaDiff.method } as of ${ version }`
 				);
 				log( '---------------------------------------------------' );
-				diff[ key ] = schemaDiff[ key ].method;
+				diff[ schemaDiff.name ] = schemaDiff.method;
 			}
 		} );
 	}
+
 	return diff;
 };
 
