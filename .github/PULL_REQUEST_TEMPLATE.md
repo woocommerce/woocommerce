@@ -18,11 +18,15 @@ Closes # .
 
 - [ ] This PR is a very minor change/addition and does not require testing instructions (if checked you can ignore/remove the next section).
 
+<!-- Begin testing instructions -->
+
 ### How to test the changes in this Pull Request:
 
 1.
 2.
 3.
+
+<!-- End testing instructions -->
 
 ### Other information:
 
