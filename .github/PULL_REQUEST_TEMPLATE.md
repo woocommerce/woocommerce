@@ -14,6 +14,10 @@
 
 Closes # .
 
+<!-- The next section is mandatory. If your PR doesn't require testing, please indicate that you are purposefully omitting instructions.  Otherwise, please include detailed instructions on how these changes can be tested (including pre-conditions, configuration, steps to take and expected results). It may help to write your instructions using pseudocode -- as if you're telling a computer how to execute the test.-->
+
+- [ ] This PR is a very minor change/addition and does not require testing instructions (if checked you can ignore/remove the next section).
+
 ### How to test the changes in this Pull Request:
 
 1.
@@ -24,7 +28,7 @@ Closes # .
 
 -   [ ] Have you added an explanation of what your changes do and why you'd like us to include them?
 -   [ ] Have you written new tests for your changes, as applicable?
--   [ ] Have you successfully run tests with your changes locally?
+-   [ ] Have you successfully run tests with your changes locally (including end to end tests)?
 -   [ ] Have you created a changelog file for each project being changed, ie `pnpm changelog add --filter=<project>`?
 
 <!-- Mark completed items with an [x] -->
