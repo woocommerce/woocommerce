@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Database\Migrations;
 
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+
 /**
  * Helper class to assist with migration related operations.
  */
@@ -69,13 +71,8 @@ class MigrationHelper {
 	 * @return string SQL clause for INSERT...ON DUPLICATE KEY UPDATE
 	 */
 	public static function generate_on_duplicate_statement_clause( array $columns ): string {
-		$update_value_statements = array();
-		foreach ( $columns as $column ) {
-			$update_value_statements[] = "$column = VALUES( $column )";
-		}
-		$update_value_clause = implode( ', ', $update_value_statements );
-
-		return "ON DUPLICATE KEY UPDATE $update_value_clause";
+		$db_util = wc_get_container()->get( DatabaseUtil::class );
+		return $db_util->generate_on_duplicate_statement_clause( $columns );
 	}
 
 }
