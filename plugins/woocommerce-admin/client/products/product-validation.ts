@@ -34,5 +34,17 @@ export const validate = (
 			'woocommerce'
 		);
 	}
+
+	if (
+		values.sale_price &&
+		values.regular_price &&
+		parseFloat( values.sale_price ) > parseFloat( values.regular_price )
+	) {
+		errors.sale_price = __(
+			'Please enter a price with one monetary decimal point without thousand separators and currency symbols.',
+			'woocommerce'
+		);
+	}
+
 	return errors;
 };
