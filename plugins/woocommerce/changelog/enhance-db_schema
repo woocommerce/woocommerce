@@ -1,0 +1,6 @@
+Significance: minor
+Type: enhancement
+
+Add new indexes to DB tables for better performance.
+
+Additionally, remove the auto_incr from wc_orders.id column so that as an added protection against direct inserts.
