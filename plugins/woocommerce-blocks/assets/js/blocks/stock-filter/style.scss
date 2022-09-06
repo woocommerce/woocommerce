@@ -7,11 +7,17 @@
 	h6 {
 		text-transform: inherit;
 	}
+
+	.wc-block-stock-filter__title {
+		margin-top: $gap-small;
+		margin-bottom: $gap-small;
+	}
 }
 
 .wc-block-stock-filter {
 	&.show-loading-state {
 		@include placeholder();
+		margin-top: $gap;
 		box-shadow: none;
 		border-radius: 0;
 	}

@@ -11,6 +11,11 @@
 	h6 {
 		text-transform: inherit;
 	}
+
+	.wc-block-price-filter__title {
+		margin-top: $gap-small;
+		margin-bottom: $gap-small;
+	}
 }
 
 .wc-block-price-slider {

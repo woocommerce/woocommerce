@@ -11,6 +11,11 @@
 	h6 {
 		text-transform: inherit;
 	}
+
+	.wc-block-attribute-filter__title {
+		margin-top: $gap-small;
+		margin-bottom: $gap-small;
+	}
 }
 
 .wc-block-attribute-filter {
@@ -18,12 +23,19 @@
 	border-radius: inherit;
 	border-color: inherit;
 
+	.show-loading-state {
+		@include placeholder();
+		box-shadow: none;
+		border-radius: 0;
+		margin-bottom: $gap;
+		margin-top: $gap;
+		height: 1em;
+	}
+
 	&.style-dropdown {
 		position: relative;
 		display: flex;
 		gap: $gap;
-		border: 1px solid $gray-700;
-		border-radius: 4px;
 		align-items: flex-start;
 
 		.wc-block-components-filter-submit-button {
@@ -59,6 +71,16 @@
 		flex-grow: 1;
 		max-width: unset;
 		width: 0;
+		height: max-content;
+
+		&:not(.show-loading-state) {
+			border: 1px solid $gray-700 !important;
+			border-radius: 4px;
+		}
+
+		&.show-loading-state {
+			border-radius: em(4px);
+		}
 	}
 
 	.is-single .wc-block-attribute-filter-list-count,
