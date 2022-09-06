@@ -230,6 +230,7 @@ importers:
       '@wordpress/html-entities': ^3.3.1
       '@wordpress/i18n': ^4.3.1
       '@wordpress/icons': ^8.1.0
+      '@wordpress/keyboard-shortcuts': ^3.14.0
       '@wordpress/keycodes': ^3.3.1
       '@wordpress/media-utils': ^4.6.0
       '@wordpress/scripts': ^12.6.1
@@ -291,6 +292,7 @@ importers:
       '@wordpress/html-entities': 3.4.1
       '@wordpress/i18n': 4.4.1
       '@wordpress/icons': 8.1.0
+      '@wordpress/keyboard-shortcuts': 3.14.0_react@17.0.2
       '@wordpress/keycodes': 3.4.1
       '@wordpress/media-utils': 4.6.0
       '@wordpress/url': 3.5.1
@@ -313,9 +315,14 @@ importers:
       moment: 2.29.1
       moment-timezone: 0.5.34
       prop-types: 15.8.1
+<<<<<<< HEAD
       react-dates: 21.8.0_3e2zt6dsmku6uyxszuwububhzi
       react-dom: 17.0.2_react@17.0.2
       react-transition-group: 4.4.2_sfoxds7t5ydpegc3knd667wn6m
+=======
+      react-dates: 21.8.0_895effa80be9def90ecbc38e5a9fcfe5
+      react-transition-group: 4.4.2_react-dom@16.14.0+react@17.0.2
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     devDependencies:
       '@babel/core': 7.17.8
       '@babel/runtime': 7.17.7
@@ -1148,13 +1155,14 @@ importers:
       typescript: ^4.8.3
     dependencies:
       '@wordpress/a11y': 3.5.0
+<<<<<<< HEAD
       '@wordpress/data': 6.15.0_react@17.0.2
       '@wordpress/notices': 3.4.1_react@17.0.2
       lodash: 4.17.21
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
     devDependencies:
-      '@automattic/data-stores': 2.0.1_odslbdstucfczet56s2hxt4mbe
+      '@automattic/data-stores': 2.0.1_cyzxlbsx4glw2vpbppibjtng3m
       '@babel/core': 7.17.8
       '@types/lodash': 4.14.182
       '@types/wordpress__data': 6.0.0
@@ -2089,8 +2097,13 @@ packages:
       lodash: 4.17.21
       prop-types: 15.8.1
       react: 17.0.2
+<<<<<<< HEAD
       react-dom: 17.0.2_react@17.0.2
       react-modal: 3.15.1_sfoxds7t5ydpegc3knd667wn6m
+=======
+      react-dom: 16.14.0_react@17.0.2
+      react-modal: 3.15.1_react-dom@16.14.0+react@17.0.2
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
       utility-types: 3.10.0
       wpcom-proxy-request: 6.0.0
     transitivePeerDependencies:
@@ -2126,7 +2139,36 @@ packages:
       - supports-color
     dev: true
 
+<<<<<<< HEAD
   /@automattic/data-stores/3.0.1_tvee6z3edpcht3mbvrcpowxsq4:
+=======
+  /@automattic/data-stores/2.0.1_4cd81ceb8b4e1849ae25b77372abb4cd:
+    resolution: {integrity: sha512-tUuWSb5iIzZpHpqCSeXw89+lX6Gpkz/Puh+FWrMyWe4ohgK/WrrAnMqEsA5O/UpEzHNtkuqVmo8haCJKL27mwg==}
+    peerDependencies:
+      '@wordpress/data': ^4
+      react: ^16.8
+    dependencies:
+      '@automattic/format-currency': 1.0.0-alpha.0
+      '@wordpress/api-fetch': 3.23.1_react-native@0.69.4
+      '@wordpress/data': 6.15.0_react@18.0.0
+      '@wordpress/data-controls': 1.21.3_react-native@0.69.4+react@18.0.0
+      '@wordpress/deprecated': 2.12.3
+      '@wordpress/url': 2.22.2_react-native@0.69.4
+      fast-json-stable-stringify: 2.1.0
+      i18n-calypso: 5.0.0_react@18.0.0
+      qs: 6.10.3
+      react: 18.0.0
+      redux: 4.2.0
+      tslib: 2.3.1
+      utility-types: 3.10.0
+      validator: 13.7.0
+    transitivePeerDependencies:
+      - react-native
+      - supports-color
+    dev: true
+
+  /@automattic/data-stores/3.0.1_1640310616f812473ab20d6633459585:
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     resolution: {integrity: sha512-+ZcN8x+gNf4I7nGAjbZy6ubpMPiPleOQIVPbMwkHb32v/zoJ+fL4CGa9YcgiCCjJjaEEKcPZfl5Qbuo7ddGdpA==}
     peerDependencies:
       '@wordpress/data': ^6
@@ -2280,9 +2322,15 @@ packages:
       classnames: 2.3.1
       debug: 4.3.4
       react: 17.0.2
+<<<<<<< HEAD
       react-dom: 17.0.2_react@17.0.2
       react-popper: 2.2.5_f2o5qdn5jx3hkjcnqvzjhvgfwa
       reakit-utils: 0.15.2_sfoxds7t5ydpegc3knd667wn6m
+=======
+      react-dom: 16.14.0_react@17.0.2
+      react-popper: 2.2.5_2e9dd80dbd4df675244d857293d4c5b0
+      reakit-utils: 0.15.2_react-dom@16.14.0+react@17.0.2
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
       redux: 4.2.0
     transitivePeerDependencies:
       - '@babel/core'
@@ -7971,8 +8019,13 @@ packages:
     dependencies:
       '@floating-ui/dom': 0.4.5
       react: 17.0.2
+<<<<<<< HEAD
       react-dom: 17.0.2_react@17.0.2
       use-isomorphic-layout-effect: 1.1.1_adlholpkqbiq5amp2fy4vkqcli
+=======
+      react-dom: 16.14.0_react@17.0.2
+      use-isomorphic-layout-effect: 1.1.1_00d6772dea80510e818fd171caaa025a
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     transitivePeerDependencies:
       - '@types/react'
     dev: false
@@ -10000,7 +10053,7 @@ packages:
       polished: 4.1.4
       prop-types: 15.8.1
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
       react-inspector: 5.1.1_react@17.0.2
       regenerator-runtime: 0.13.9
       telejson: 5.3.3
@@ -10113,7 +10166,7 @@ packages:
       core-js: 3.21.1
       lodash: 4.17.21
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
       ts-dedent: 2.2.0
     transitivePeerDependencies:
       - '@types/react'
@@ -10327,8 +10380,13 @@ packages:
       prettier: 2.3.0
       prop-types: 15.8.1
       react: 17.0.2
+<<<<<<< HEAD
       react-dom: 17.0.2_react@17.0.2
       react-element-to-jsx-string: 14.3.4_sfoxds7t5ydpegc3knd667wn6m
+=======
+      react-dom: 16.14.0_react@17.0.2
+      react-element-to-jsx-string: 14.3.4_react-dom@16.14.0+react@17.0.2
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
       regenerator-runtime: 0.13.9
       remark-external-links: 8.0.0
       remark-slug: 6.1.0
@@ -10382,8 +10440,13 @@ packages:
       prop-types: 15.8.1
       qs: 6.10.3
       react: 17.0.2
+<<<<<<< HEAD
       react-colorful: 5.5.1_sfoxds7t5ydpegc3knd667wn6m
       react-dom: 17.0.2_react@17.0.2
+=======
+      react-colorful: 5.5.1_react-dom@16.14.0+react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
       react-lifecycles-compat: 3.0.4
       react-select: 3.2.0_sfoxds7t5ydpegc3knd667wn6m
     dev: true
@@ -10410,7 +10473,7 @@ packages:
       prop-types: 15.8.1
       qs: 6.10.3
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
       regenerator-runtime: 0.13.9
       ts-dedent: 2.2.0
     dev: true
@@ -10491,7 +10554,7 @@ packages:
       core-js: 3.21.1
       global: 4.4.0
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
       regenerator-runtime: 0.13.9
     dev: true
 
@@ -10591,10 +10654,17 @@ packages:
       postcss-loader: 4.2.0_gzaxsinx64nntyd3vmdqwl7coe
       raw-loader: 4.0.2_webpack@4.46.0
       react: 17.0.2
+<<<<<<< HEAD
       react-dom: 17.0.2_react@17.0.2
       stable: 0.1.8
       style-loader: 1.3.0_webpack@4.46.0
       terser-webpack-plugin: 4.2.3_acorn@7.4.1+webpack@4.46.0
+=======
+      react-dom: 16.14.0_react@17.0.2
+      regenerator-runtime: 0.13.9
+      store2: 2.13.2
+      telejson: 5.3.3
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
       ts-dedent: 2.2.0
       typescript: 4.8.4
       url-loader: 4.1.1_lit45vopotvaqup7lrvlnvtxwy
@@ -10963,7 +11033,7 @@ packages:
       postcss-loader: 4.2.0_gzaxsinx64nntyd3vmdqwl7coe
       raw-loader: 4.0.2_webpack@4.46.0
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
       stable: 0.1.8
       style-loader: 1.3.0_webpack@4.46.0
       terser-webpack-plugin: 4.2.3_acorn@7.4.1+webpack@4.46.0
@@ -11112,7 +11182,41 @@ packages:
       '@storybook/client-logger': 6.4.19
       '@storybook/core-events': 6.4.19
       '@storybook/csf': 0.0.2--canary.87bc651.0
+<<<<<<< HEAD
       '@storybook/store': 6.4.19_sfoxds7t5ydpegc3knd667wn6m
+=======
+      '@storybook/store': 6.4.19_react-dom@16.14.0+react@17.0.2
+      '@types/qs': 6.9.7
+      '@types/webpack-env': 1.16.3
+      core-js: 3.21.1
+      fast-deep-equal: 3.1.3
+      global: 4.4.0
+      lodash: 4.17.21
+      memoizerific: 1.11.3
+      qs: 6.10.3
+      react: 17.0.2
+      react-dom: 16.14.0_react@17.0.2
+      regenerator-runtime: 0.13.9
+      store2: 2.13.2
+      synchronous-promise: 2.0.15
+      ts-dedent: 2.2.0
+      util-deprecate: 1.0.2
+    dev: true
+
+  /@storybook/client-api/6.4.19_react-dom@17.0.2+react@17.0.2:
+    resolution: {integrity: sha512-OCrT5Um3FDvZnimQKwWtwsaI+5agPwq2i8YiqlofrI/NPMKp0I7DEkCGwE5IRD1Q8BIKqHcMo5tTmfYi0AxyOg==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0
+      react-dom: ^16.8.0 || ^17.0.0
+    dependencies:
+      '@storybook/addons': 6.4.19_react-dom@17.0.2+react@17.0.2
+      '@storybook/channel-postmessage': 6.4.19
+      '@storybook/channels': 6.4.19
+      '@storybook/client-logger': 6.4.19
+      '@storybook/core-events': 6.4.19
+      '@storybook/csf': 0.0.2--canary.87bc651.0
+      '@storybook/store': 6.4.19_react-dom@17.0.2+react@17.0.2
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
       '@types/qs': 6.9.7
       '@types/webpack-env': 1.16.3
       core-js: 3.25.5
@@ -11161,9 +11265,15 @@ packages:
       polished: 4.1.4
       prop-types: 15.8.1
       react: 17.0.2
+<<<<<<< HEAD
       react-colorful: 5.5.1_sfoxds7t5ydpegc3knd667wn6m
       react-dom: 17.0.2_react@17.0.2
       react-popper-tooltip: 3.1.1_sfoxds7t5ydpegc3knd667wn6m
+=======
+      react-colorful: 5.5.1_react-dom@16.14.0+react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
+      react-popper-tooltip: 3.1.1_react-dom@16.14.0+react@17.0.2
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
       react-syntax-highlighter: 13.5.3_react@17.0.2
       react-textarea-autosize: 8.3.3_adlholpkqbiq5amp2fy4vkqcli
       regenerator-runtime: 0.13.9
@@ -11276,7 +11386,7 @@ packages:
       lodash: 4.17.21
       qs: 6.10.3
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
       regenerator-runtime: 0.13.9
       ts-dedent: 2.2.0
       typescript: 4.8.4
@@ -11354,7 +11464,7 @@ packages:
       lodash: 4.17.21
       qs: 6.10.3
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
       regenerator-runtime: 0.13.9
       ts-dedent: 2.2.0
       typescript: 4.8.4
@@ -11419,7 +11529,7 @@ packages:
       pkg-dir: 5.0.0
       pretty-hrtime: 1.0.3
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
       resolve-from: 5.0.0
       slash: 3.0.0
       telejson: 5.3.3
@@ -11942,9 +12052,27 @@ packages:
       '@storybook/core-client': 6.4.19_eob6ejgeaslyodpcvuvidpa46y
       '@storybook/core-server': 6.4.19_gzrzyafphqx4cm7pwoveji4hv4
       react: 17.0.2
+<<<<<<< HEAD
       react-dom: 17.0.2_react@17.0.2
+<<<<<<< HEAD
       typescript: 4.8.4
+<<<<<<< HEAD
       webpack: 4.46.0_webpack-cli@3.3.12
+=======
+      webpack: 4.46.0
+=======
+=======
+      react-dom: 16.14.0_react@17.0.2
+      regenerator-runtime: 0.13.9
+      serve-favicon: 2.5.0
+      slash: 3.0.0
+      telejson: 5.3.3
+      ts-dedent: 2.2.0
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
+      typescript: 4.6.2
+      webpack: 4.46.0_webpack-cli@3.3.12
+>>>>>>> 9b43c0d70d (Add initial rich text editor component)
+>>>>>>> a3ed86eb17 (Add initial rich text editor component)
     transitivePeerDependencies:
       - '@storybook/manager-webpack5'
       - '@types/react'
@@ -12013,8 +12141,13 @@ packages:
       '@storybook/core-client': 6.4.19_lb6j7tllhltqtas2n635xqdotu
       '@storybook/core-server': 6.4.19_b6dfd6k5wi6kl4hmm6xmva7dfu
       react: 17.0.2
+<<<<<<< HEAD
       react-dom: 17.0.2_react@17.0.2
       typescript: 4.8.4
+=======
+      react-dom: 16.14.0_react@17.0.2
+      typescript: 4.6.2
+>>>>>>> 9b43c0d70d (Add initial rich text editor component)
       webpack: 4.46.0_webpack-cli@3.3.12
     transitivePeerDependencies:
       - '@storybook/manager-webpack5'
@@ -12049,9 +12182,20 @@ packages:
       '@storybook/core-client': 6.4.19_i57eoi6p2gbobism6oxgcmupsa
       '@storybook/core-server': 6.4.19_2x3ckvxqfngstqwiutxqcrgnby
       react: 17.0.2
+<<<<<<< HEAD
       react-dom: 17.0.2_react@17.0.2
+<<<<<<< HEAD
       typescript: 4.8.4
       webpack: 5.70.0
+=======
+      typescript: 4.2.4
+      webpack: 4.46.0
+=======
+      react-dom: 16.14.0_react@17.0.2
+      typescript: 4.6.2
+      webpack: 5.70.0_webpack-cli@3.3.12
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
+>>>>>>> 9b43c0d70d (Add initial rich text editor component)
     transitivePeerDependencies:
       - '@storybook/manager-webpack5'
       - '@types/react'
@@ -12376,7 +12520,7 @@ packages:
       node-fetch: 2.6.7
       pnp-webpack-plugin: 1.6.4_typescript@4.8.4
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
       read-pkg-up: 7.0.1
       regenerator-runtime: 0.13.9
       resolve-from: 5.0.0
@@ -12478,7 +12622,37 @@ packages:
       core-js: 3.21.1
     dev: true
 
+<<<<<<< HEAD
   /@storybook/preview-web/6.4.19_sfoxds7t5ydpegc3knd667wn6m:
+=======
+  /@storybook/preview-web/6.4.19_react-dom@16.14.0+react@17.0.2:
+    resolution: {integrity: sha512-jqltoBv5j7lvnxEfV9w8dLX9ASWGuvgz97yg8Yo5FqkftEwrHJenyvMGcTgDJKJPorF+wiz/9aIqnmd3LCAcZQ==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0
+      react-dom: ^16.8.0 || ^17.0.0
+    dependencies:
+      '@storybook/addons': 6.4.19_react-dom@16.14.0+react@17.0.2
+      '@storybook/channel-postmessage': 6.4.19
+      '@storybook/client-logger': 6.4.19
+      '@storybook/core-events': 6.4.19
+      '@storybook/csf': 0.0.2--canary.87bc651.0
+      '@storybook/store': 6.4.19_react-dom@16.14.0+react@17.0.2
+      ansi-to-html: 0.6.15
+      core-js: 3.21.1
+      global: 4.4.0
+      lodash: 4.17.21
+      qs: 6.10.3
+      react: 17.0.2
+      react-dom: 16.14.0_react@17.0.2
+      regenerator-runtime: 0.13.9
+      synchronous-promise: 2.0.15
+      ts-dedent: 2.2.0
+      unfetch: 4.2.0
+      util-deprecate: 1.0.2
+    dev: true
+
+  /@storybook/preview-web/6.4.19_react-dom@17.0.2+react@17.0.2:
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     resolution: {integrity: sha512-jqltoBv5j7lvnxEfV9w8dLX9ASWGuvgz97yg8Yo5FqkftEwrHJenyvMGcTgDJKJPorF+wiz/9aIqnmd3LCAcZQ==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0
@@ -12559,7 +12733,7 @@ packages:
       lodash: 4.17.21
       prop-types: 15.8.1
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
       react-refresh: 0.11.0
       read-pkg-up: 7.0.1
       regenerator-runtime: 0.13.9
@@ -12733,7 +12907,7 @@ packages:
       memoizerific: 1.11.3
       qs: 6.10.3
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
       react-router: 6.2.2_react@17.0.2
       react-router-dom: 6.2.2_sfoxds7t5ydpegc3knd667wn6m
       ts-dedent: 2.2.0
@@ -12748,7 +12922,31 @@ packages:
       find-up: 4.1.0
     dev: true
 
+<<<<<<< HEAD
   /@storybook/source-loader/6.4.19_sfoxds7t5ydpegc3knd667wn6m:
+=======
+  /@storybook/source-loader/6.4.19_react-dom@16.14.0+react@17.0.2:
+    resolution: {integrity: sha512-XqTsqddRglvfW7mhyjwoqd/B8L6samcBehhO0OEbsFp6FPWa9eXuObCxtRYIcjcSIe+ksbW3D/54ppEs1L/g1Q==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0
+      react-dom: ^16.8.0 || ^17.0.0
+    dependencies:
+      '@storybook/addons': 6.4.19_react-dom@16.14.0+react@17.0.2
+      '@storybook/client-logger': 6.4.19
+      '@storybook/csf': 0.0.2--canary.87bc651.0
+      core-js: 3.21.1
+      estraverse: 5.3.0
+      global: 4.4.0
+      loader-utils: 2.0.2
+      lodash: 4.17.21
+      prettier: 2.3.0
+      react: 17.0.2
+      react-dom: 16.14.0_react@17.0.2
+      regenerator-runtime: 0.13.9
+    dev: true
+
+  /@storybook/source-loader/6.4.19_react-dom@17.0.2+react@17.0.2:
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     resolution: {integrity: sha512-XqTsqddRglvfW7mhyjwoqd/B8L6samcBehhO0OEbsFp6FPWa9eXuObCxtRYIcjcSIe+ksbW3D/54ppEs1L/g1Q==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0
@@ -12784,7 +12982,7 @@ packages:
       lodash: 4.17.21
       memoizerific: 1.11.3
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
       regenerator-runtime: 0.13.9
       slash: 3.0.0
       stable: 0.1.8
@@ -12810,7 +13008,7 @@ packages:
       memoizerific: 1.11.3
       polished: 4.1.4
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
       resolve-from: 5.0.0
       ts-dedent: 2.2.0
     dev: true
@@ -12844,9 +13042,15 @@ packages:
       polished: 4.1.4
       qs: 6.10.3
       react: 17.0.2
+<<<<<<< HEAD
       react-dom: 17.0.2_react@17.0.2
       react-draggable: 4.4.4_sfoxds7t5ydpegc3knd667wn6m
       react-helmet-async: 1.2.3_sfoxds7t5ydpegc3knd667wn6m
+=======
+      react-dom: 16.14.0_react@17.0.2
+      react-draggable: 4.4.4_react-dom@16.14.0+react@17.0.2
+      react-helmet-async: 1.2.3_react-dom@16.14.0+react@17.0.2
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
       react-sizeme: 3.0.2
       regenerator-runtime: 0.13.9
       resolve-from: 5.0.0
@@ -13107,7 +13311,25 @@ packages:
       react-error-boundary: 3.1.4_react@17.0.2
     dev: true
 
+<<<<<<< HEAD
   /@testing-library/react/12.1.4_sfoxds7t5ydpegc3knd667wn6m:
+=======
+  /@testing-library/react/12.1.4_react-dom@16.14.0+react@17.0.2:
+    resolution: {integrity: sha512-jiPKOm7vyUw311Hn/HlNQ9P8/lHNtArAx0PisXyFixDDvfl8DbD6EUdbshK5eqauvBSvzZd19itqQ9j3nferJA==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+    dependencies:
+      '@babel/runtime': 7.17.7
+      '@testing-library/dom': 8.11.3
+      '@types/react-dom': 17.0.13
+      react: 17.0.2
+      react-dom: 16.14.0_react@17.0.2
+    dev: true
+
+  /@testing-library/react/12.1.4_react-dom@17.0.2+react@17.0.2:
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     resolution: {integrity: sha512-jiPKOm7vyUw311Hn/HlNQ9P8/lHNtArAx0PisXyFixDDvfl8DbD6EUdbshK5eqauvBSvzZd19itqQ9j3nferJA==}
     engines: {node: '>=12'}
     peerDependencies:
@@ -15017,6 +15239,17 @@ packages:
       '@wordpress/url': 2.22.2_react-native@0.70.0
     transitivePeerDependencies:
       - react-native
+    dev: false
+
+  /@wordpress/api-fetch/4.0.0:
+    resolution: {integrity: sha512-4nWH/gEpG7/VnEJbjbOWS0AWBnX5snPc3ZaKcXNZsLQlv9YgsS8idL/BNkUl9/ylZeez/UX4lJLVkOR5clvg8A==}
+    dependencies:
+      '@babel/runtime': 7.17.7
+      '@wordpress/i18n': 3.20.0
+      '@wordpress/url': 2.22.2
+    transitivePeerDependencies:
+      - react-native
+    dev: true
 
   /@wordpress/api-fetch/4.0.0_react-native@0.70.0:
     resolution: {integrity: sha512-4nWH/gEpG7/VnEJbjbOWS0AWBnX5snPc3ZaKcXNZsLQlv9YgsS8idL/BNkUl9/ylZeez/UX4lJLVkOR5clvg8A==}
@@ -15394,16 +15627,28 @@ packages:
       '@floating-ui/react-dom': 0.6.3_6rln7q2jvtuewdvbdwpg4txtvm
       '@use-gesture/react': 10.2.10_react@17.0.2
       '@wordpress/a11y': 3.10.0
-      '@wordpress/compose': 5.8.0_react@17.0.2
+      '@wordpress/compose': 5.14.0_react@17.0.2
       '@wordpress/date': 4.10.0
       '@wordpress/deprecated': 3.16.0
       '@wordpress/dom': 3.10.0
+<<<<<<< HEAD
       '@wordpress/element': 4.17.0
+=======
+      '@wordpress/element': 4.14.0
+<<<<<<< HEAD
+>>>>>>> a3ed86eb17 (Add initial rich text editor component)
       '@wordpress/escape-html': 2.15.0
       '@wordpress/hooks': 3.16.0
       '@wordpress/i18n': 4.16.0
       '@wordpress/icons': 9.1.0
       '@wordpress/is-shallow-equal': 4.10.0
+=======
+      '@wordpress/escape-html': 2.16.0
+      '@wordpress/hooks': 3.15.0
+      '@wordpress/i18n': 4.16.0
+      '@wordpress/icons': 9.1.0
+      '@wordpress/is-shallow-equal': 4.16.0
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
       '@wordpress/keycodes': 3.16.0
       '@wordpress/primitives': 3.8.0
       '@wordpress/rich-text': 5.8.0_react@17.0.2
@@ -15420,10 +15665,17 @@ packages:
       moment: 2.29.1
       re-resizable: 6.9.5_sfoxds7t5ydpegc3knd667wn6m
       react: 17.0.2
+<<<<<<< HEAD
       react-colorful: 5.5.1_sfoxds7t5ydpegc3knd667wn6m
       react-dates: 21.8.0_ruqm5uqcpfavftrrblmrkdsf44
       react-dom: 17.0.2_react@17.0.2
       reakit: 1.3.11_sfoxds7t5ydpegc3knd667wn6m
+=======
+      react-colorful: 5.5.1_react-dom@16.14.0+react@17.0.2
+      react-dates: 21.8.0_895effa80be9def90ecbc38e5a9fcfe5
+      react-dom: 16.14.0_react@17.0.2
+      reakit: 1.3.11_react-dom@16.14.0+react@17.0.2
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
       uuid: 8.3.2
     transitivePeerDependencies:
       - '@babel/core'
@@ -15473,9 +15725,15 @@ packages:
       moment: 2.29.1
       re-resizable: 6.9.5_sfoxds7t5ydpegc3knd667wn6m
       react: 17.0.2
+<<<<<<< HEAD
       react-colorful: 5.5.1_sfoxds7t5ydpegc3knd667wn6m
       react-dates: 17.2.0_doem77jvh4k7pyuvpbnkip467u
       react-dom: 17.0.2_react@17.0.2
+=======
+      react-colorful: 5.5.1_react-dom@16.14.0+react@17.0.2
+      react-dates: 17.2.0_1c0434f8966d236e87c049995b041cae
+      react-dom: 16.14.0_react@17.0.2
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
       react-resize-aware: 3.1.1_react@17.0.2
       reakit: 1.3.11_sfoxds7t5ydpegc3knd667wn6m
       uuid: 8.3.2
@@ -15631,6 +15889,26 @@ packages:
     transitivePeerDependencies:
       - react
 
+  /@wordpress/compose/3.25.3_react@18.0.0:
+    resolution: {integrity: sha512-tCO2EnJCkCH548OqA0uU8V1k/1skz2QwBlHs8ZQSpimqUS4OWWsAlndCEFe4U4vDTqFt2ow7tzAir+05Cw8MAg==}
+    dependencies:
+      '@babel/runtime': 7.17.7
+      '@wordpress/deprecated': 2.12.3
+      '@wordpress/dom': 2.18.0
+      '@wordpress/element': 2.20.3
+      '@wordpress/is-shallow-equal': 3.1.3
+      '@wordpress/keycodes': 2.19.3
+      '@wordpress/priority-queue': 1.11.2
+      clipboard: 2.0.10
+      lodash: 4.17.21
+      memize: 1.1.0
+      mousetrap: 1.6.5
+      react-resize-aware: 3.1.1_react@18.0.0
+      use-memo-one: 1.1.2_react@18.0.0
+    transitivePeerDependencies:
+      - react
+    dev: true
+
   /@wordpress/compose/5.14.0_react@17.0.2:
     resolution: {integrity: sha512-DSERuUJtz76r+genM0mbMMhHUN57K5V028WBacLrU0bOh8CQ3frgsn5vvogTXvf/Eaib/Mx2F/mpcDX3KMId6Q==}
     engines: {node: '>=12'}
@@ -15652,6 +15930,28 @@ packages:
       mousetrap: 1.6.5
       react: 17.0.2
       use-memo-one: 1.1.2_react@17.0.2
+
+  /@wordpress/compose/5.14.0_react@18.0.0:
+    resolution: {integrity: sha512-DSERuUJtz76r+genM0mbMMhHUN57K5V028WBacLrU0bOh8CQ3frgsn5vvogTXvf/Eaib/Mx2F/mpcDX3KMId6Q==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      react: ^17.0.0
+    dependencies:
+      '@babel/runtime': 7.17.7
+      '@types/lodash': 4.14.184
+      '@types/mousetrap': 1.6.9
+      '@wordpress/deprecated': 3.16.0
+      '@wordpress/dom': 3.16.0
+      '@wordpress/element': 4.14.0
+      '@wordpress/is-shallow-equal': 4.16.0
+      '@wordpress/keycodes': 3.16.0
+      '@wordpress/priority-queue': 2.16.0
+      change-case: 4.1.2
+      clipboard: 2.0.10
+      lodash: 4.17.21
+      mousetrap: 1.6.5
+      react: 18.0.0
+      use-memo-one: 1.1.2_react@18.0.0
 
   /@wordpress/compose/5.2.1_react@17.0.2:
     resolution: {integrity: sha512-0l5UOiq5tDFeuIsdSVsWzNETHZagTnSBSTdGsxDmKIi5NC7vf1pXs4rlrEA45vUdFm/SbpIA9gp+NFzfpVKIXw==}
@@ -15676,26 +15976,41 @@ packages:
       use-memo-one: 1.1.2_react@17.0.2
     dev: false
 
-  /@wordpress/compose/5.8.0_react@17.0.2:
-    resolution: {integrity: sha512-GeXtrLvLhPfQEprcsKeDCtzj2Ew8TTtoAZ7NDAJrNZRqElBs7MAeZkXQ+64u42J8K0dhDQ6v4lCR/Z0f5cMfng==}
+  /@wordpress/compose/5.2.1_react@18.0.0:
+    resolution: {integrity: sha512-0l5UOiq5tDFeuIsdSVsWzNETHZagTnSBSTdGsxDmKIi5NC7vf1pXs4rlrEA45vUdFm/SbpIA9gp+NFzfpVKIXw==}
     engines: {node: '>=12'}
     peerDependencies:
       react: ^17.0.0
     dependencies:
+<<<<<<< HEAD
       '@babel/runtime': 7.19.0
       '@types/lodash': 4.14.184
+=======
+      '@babel/runtime': 7.17.7
+      '@types/lodash': 4.14.180
+>>>>>>> a3ed86eb17 (Add initial rich text editor component)
       '@types/mousetrap': 1.6.9
+<<<<<<< HEAD
       '@wordpress/deprecated': 3.16.0
       '@wordpress/dom': 3.16.0
       '@wordpress/element': 4.17.0
       '@wordpress/is-shallow-equal': 4.16.0
       '@wordpress/keycodes': 3.16.0
       '@wordpress/priority-queue': 2.10.0
+=======
+      '@wordpress/deprecated': 3.4.1
+      '@wordpress/dom': 3.4.1
+      '@wordpress/element': 4.8.0
+      '@wordpress/is-shallow-equal': 4.4.1
+      '@wordpress/keycodes': 3.4.1
+      '@wordpress/priority-queue': 2.4.1
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
       clipboard: 2.0.10
       lodash: 4.17.21
       mousetrap: 1.6.5
-      react: 17.0.2
-      use-memo-one: 1.1.2_react@17.0.2
+      react: 18.0.0
+      react-resize-aware: 3.1.1_react@18.0.0
+      use-memo-one: 1.1.2_react@18.0.0
     dev: false
 
   /@wordpress/core-data/4.2.1_react@17.0.2:
@@ -15744,7 +16059,7 @@ packages:
       - react-native
     dev: false
 
-  /@wordpress/data-controls/1.21.3_6mfjqmjzo7vxk4q6gjrwvpc2y4:
+  /@wordpress/data-controls/1.21.3_react@17.0.2:
     resolution: {integrity: sha512-aLpx/HvKaxCQfWSLGIz699SB9Guyq8Yoq5XLlH8eNWnf/8HkQg8hQ6yagDY8BinV/t8HScc5A7a6n6pvZNGtjg==}
     dependencies:
       '@babel/runtime': 7.19.0
@@ -15824,6 +16139,30 @@ packages:
       - react
     dev: true
 
+<<<<<<< HEAD
+  /@wordpress/data/6.15.0_react@17.0.2:
+=======
+  /@wordpress/data/4.27.3_react@18.0.0:
+    resolution: {integrity: sha512-5763NgNV9IIa1CC3Q80dAvrH6108tJtj3IrHfUCZmUk1atSNsOMBCkLdQ7tGTTi2JFejeGEMg1LJI22JD5zM6Q==}
+    dependencies:
+      '@babel/runtime': 7.17.7
+      '@wordpress/compose': 3.25.3_react@18.0.0
+      '@wordpress/deprecated': 2.12.3
+      '@wordpress/element': 2.20.3
+      '@wordpress/is-shallow-equal': 3.1.3
+      '@wordpress/priority-queue': 1.11.2
+      '@wordpress/redux-routine': 3.14.2
+      equivalent-key-map: 0.2.2
+      is-promise: 4.0.0
+      lodash: 4.17.21
+      memize: 1.1.0
+      redux: 4.2.0
+      turbo-combine-reducers: 1.0.2
+      use-memo-one: 1.1.2_react@18.0.0
+    transitivePeerDependencies:
+      - react
+    dev: true
+
   /@wordpress/data/6.15.0_react@17.0.2:
     resolution: {integrity: sha512-EReq6QQ3ASWPcB60q18GLfDBhQQrf2Ru9Vvkid/tk7tn4ttqy/axn09/ck/GQ1uwi9BoSRyydPOnQCsluPAgNA==}
     engines: {node: '>=12'}
@@ -15846,6 +16185,29 @@ packages:
       turbo-combine-reducers: 1.0.2
       use-memo-one: 1.1.2_react@17.0.2
 
+  /@wordpress/data/6.15.0_react@18.0.0:
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
+    resolution: {integrity: sha512-EReq6QQ3ASWPcB60q18GLfDBhQQrf2Ru9Vvkid/tk7tn4ttqy/axn09/ck/GQ1uwi9BoSRyydPOnQCsluPAgNA==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      react: ^17.0.0
+    dependencies:
+      '@babel/runtime': 7.17.7
+      '@wordpress/compose': 5.14.0_react@18.0.0
+      '@wordpress/deprecated': 3.16.0
+      '@wordpress/element': 4.14.0
+      '@wordpress/is-shallow-equal': 4.16.0
+      '@wordpress/priority-queue': 2.16.0
+      '@wordpress/redux-routine': 4.16.0_redux@4.2.0
+      equivalent-key-map: 0.2.2
+      is-plain-obj: 4.1.0
+      is-promise: 4.0.0
+      lodash: 4.17.21
+      react: 18.0.0
+      redux: 4.2.0
+      turbo-combine-reducers: 1.0.2
+      use-memo-one: 1.1.2_react@18.0.0
+
   /@wordpress/data/6.4.1_react@17.0.2:
     resolution: {integrity: sha512-pDTQl+cmVvwyGuGo6DtWkSGtIz6FTJw87XxtRkOeuQlEqsfHoyXSA4da7cBY5o22Ss5P5408hXjR0SAIqEBhmg==}
     engines: {node: '>=12'}
@@ -15860,6 +16222,51 @@ packages:
       '@wordpress/priority-queue': 2.4.1
       '@wordpress/redux-routine': 4.4.1_redux@4.2.0
       equivalent-key-map: 0.2.2
+      is-promise: 4.0.0
+      lodash: 4.17.21
+      react: 17.0.2
+      redux: 4.2.0
+      turbo-combine-reducers: 1.0.2
+      use-memo-one: 1.1.2_react@17.0.2
+    dev: false
+
+  /@wordpress/data/6.4.1_react@18.0.0:
+    resolution: {integrity: sha512-pDTQl+cmVvwyGuGo6DtWkSGtIz6FTJw87XxtRkOeuQlEqsfHoyXSA4da7cBY5o22Ss5P5408hXjR0SAIqEBhmg==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      react: ^17.0.0
+    dependencies:
+      '@babel/runtime': 7.17.7
+      '@wordpress/compose': 5.2.1_react@18.0.0
+      '@wordpress/deprecated': 3.4.1
+      '@wordpress/element': 4.14.0
+      '@wordpress/is-shallow-equal': 4.4.1
+      '@wordpress/priority-queue': 2.4.1
+      '@wordpress/redux-routine': 4.4.1_redux@4.2.0
+      equivalent-key-map: 0.2.2
+      is-promise: 4.0.0
+      lodash: 4.17.21
+      react: 18.0.0
+      redux: 4.2.0
+      turbo-combine-reducers: 1.0.2
+      use-memo-one: 1.1.2_react@18.0.0
+    dev: false
+
+  /@wordpress/data/7.0.0_react@17.0.2:
+    resolution: {integrity: sha512-op6ZYHHNhzkJfp+/moTPYYMIEVexwjiKxhMg8dToPkuo248rtH+7Frtb7VRiQ0K7A0F/BvdgHZqZmnwR5UB9Eg==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      react: ^17.0.0
+    dependencies:
+      '@babel/runtime': 7.17.7
+      '@wordpress/compose': 5.14.0_react@17.0.2
+      '@wordpress/deprecated': 3.16.0
+      '@wordpress/element': 4.14.0
+      '@wordpress/is-shallow-equal': 4.16.0
+      '@wordpress/priority-queue': 2.16.0
+      '@wordpress/redux-routine': 4.16.0_redux@4.2.0
+      equivalent-key-map: 0.2.2
+      is-plain-object: 5.0.0
       is-promise: 4.0.0
       lodash: 4.17.21
       react: 17.0.2
@@ -16463,6 +16870,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.19.0
 
+<<<<<<< HEAD
   /@wordpress/is-shallow-equal/4.10.0:
     resolution: {integrity: sha512-LHA0F8mo6nJpoES0WU3rS3DXNzmen2jR7MvFjiekiqUh8CEPIg1V/uDnIKlOEUnWr7NsWoCL6s48Mmv0St1Uag==}
     engines: {node: '>=12'}
@@ -16470,6 +16878,8 @@ packages:
       '@babel/runtime': 7.19.0
     dev: false
 
+=======
+>>>>>>> a3ed86eb17 (Add initial rich text editor component)
   /@wordpress/is-shallow-equal/4.16.0:
     resolution: {integrity: sha512-DPNZetyW0HeU2eCrswY0JItiWAtv9/LHnkOjK+4OwGn30wpyV47yFDhU6HoJiu1lyF7DITraPbfArxn8/L+/rw==}
     engines: {node: '>=12'}
@@ -16610,6 +17020,22 @@ packages:
       - supports-color
     dev: true
 
+  /@wordpress/keyboard-shortcuts/3.14.0_react@17.0.2:
+    resolution: {integrity: sha512-R5oSP+dmREgOKjRhbzmIHHo0j3ZtSIFuGgk31oDvupsjti0DpMQ2Doh9hyq2W75LaiwgSvz187gRwOQUKwt/tA==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      react: ^17.0.0
+    dependencies:
+      '@babel/runtime': 7.17.7
+      '@wordpress/data': 7.0.0_react@17.0.2
+      '@wordpress/element': 4.14.0
+      '@wordpress/keycodes': 3.16.0
+      react: 17.0.2
+      rememo: 4.0.0
+    dev: false
+
+<<<<<<< HEAD
+=======
   /@wordpress/keycodes/2.19.3:
     resolution: {integrity: sha512-8rNdmP5M1ifTgLIL0dt/N1uTGsq/Rx1ydCXy+gg24WdxBRhyu5sudNVCtascVXo26aIfOH9OJRdqRZZTEORhog==}
     dependencies:
@@ -16617,6 +17043,7 @@ packages:
       '@wordpress/i18n': 3.20.0
       lodash: 4.17.21
 
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
   /@wordpress/keycodes/3.16.0:
     resolution: {integrity: sha512-Vs/t3GBMaJ3dBAPZfhuZBuxdwagJdXhpSpvnkX3/MJrn6sRrLKijxkWK8x26PfkDePQ+3kiupP2pEoIwSCTUXg==}
     engines: {node: '>=12'}
@@ -16659,7 +17086,24 @@ packages:
       react: 17.0.2
     dev: false
 
+<<<<<<< HEAD
   /@wordpress/npm-package-json-lint-config/3.1.0_ngbyqqcq5j4itme2ewj5k5pf2y:
+=======
+  /@wordpress/notices/3.4.1_react@18.0.0:
+    resolution: {integrity: sha512-Y7e2GLlB5wjLOtxsXzJd3jg/p6LV2GeeUnk+reURqUbb/4rlVlXQuMPOboTxLRB/0eTMNwWFI/MIr+NKbuY7MQ==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      react: ^17.0.0
+    dependencies:
+      '@babel/runtime': 7.17.7
+      '@wordpress/a11y': 3.5.0
+      '@wordpress/data': 6.4.1_react@18.0.0
+      lodash: 4.17.21
+      react: 18.0.0
+    dev: false
+
+  /@wordpress/npm-package-json-lint-config/3.1.0_npm-package-json-lint@5.4.2:
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     resolution: {integrity: sha512-SYRWpzpQaSsBUiRO+ssqg6AHjgCF4j2npstGTGaKdVs/B720fLFzeyONuMmo1ZtMb9v6MyEWxVz5ON6dDgmVYg==}
     engines: {node: '>=8'}
     peerDependencies:
@@ -16794,6 +17238,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.19.0
 
+<<<<<<< HEAD
   /@wordpress/priority-queue/2.10.0:
     resolution: {integrity: sha512-4O0ra/5fkhEBhYyssp1xd0Rs2dtIHR7oIrm8Wvtc7fjMLEfMZccqxVgjwy7risGFr7ey4SunbGiSaZQBNt6rmw==}
     engines: {node: '>=12'}
@@ -16801,6 +17246,8 @@ packages:
       '@babel/runtime': 7.19.0
     dev: false
 
+=======
+>>>>>>> a3ed86eb17 (Add initial rich text editor component)
   /@wordpress/priority-queue/2.16.0:
     resolution: {integrity: sha512-5lw+amzJEjtur6RAsmLfmOmeu4Cvg8wB/TKM+aV6dEzlPnuDDpKH/jVn9ILsCliasjQ64Aomkgo32acT7BKrvA==}
     engines: {node: '>=12'}
@@ -16907,8 +17354,17 @@ packages:
       '@wordpress/a11y': 3.10.0
       '@wordpress/compose': 5.14.0_react@17.0.2
       '@wordpress/data': 6.15.0_react@17.0.2
+<<<<<<< HEAD
       '@wordpress/element': 4.17.0
       '@wordpress/escape-html': 2.19.0
+=======
+      '@wordpress/element': 4.14.0
+<<<<<<< HEAD
+      '@wordpress/escape-html': 2.15.0
+=======
+      '@wordpress/escape-html': 2.16.0
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
+>>>>>>> a3ed86eb17 (Add initial rich text editor component)
       '@wordpress/i18n': 4.16.0
       '@wordpress/keycodes': 3.16.0
       lodash: 4.17.21
@@ -18314,7 +18770,11 @@ packages:
       loader-utils: 1.4.0
       make-dir: 3.1.0
       schema-utils: 2.7.1
+<<<<<<< HEAD
       webpack: 5.70.0
+=======
+      webpack: 4.46.0_webpack-cli@3.3.12
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     dev: true
 
   /babel-loader/8.2.3_7kihywspc3gmje7ccze4zrmvoq:
@@ -18344,7 +18804,11 @@ packages:
       loader-utils: 1.4.0
       make-dir: 3.1.0
       schema-utils: 2.7.1
+<<<<<<< HEAD
       webpack: 4.46.0_webpack-cli@3.3.12
+=======
+      webpack: 5.70.0_webpack-cli@4.9.2
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     dev: true
 
   /babel-messages/6.23.0:
@@ -22159,7 +22623,32 @@ packages:
       enzyme-adapter-utils: 1.14.0_react@17.0.2
       enzyme-shallow-equal: 1.0.4
       has: 1.0.3
+<<<<<<< HEAD
       object.assign: 4.1.4
+=======
+      object.assign: 4.1.2
+      object.values: 1.1.5
+      prop-types: 15.8.1
+      react: 17.0.2
+      react-dom: 16.14.0_react@17.0.2
+      react-is: 16.13.1
+      react-test-renderer: 16.14.0_react@17.0.2
+      semver: 5.7.1
+    dev: true
+
+  /enzyme-adapter-react-16/1.15.6_fae758709a8810ba97b4c03852dde4d0:
+    resolution: {integrity: sha512-yFlVJCXh8T+mcQo8M6my9sPgeGzj85HSHi6Apgf1Cvq/7EL/J9+1JoJmJsRxZgyTvPMAqOEpRSu/Ii/ZpyOk0g==}
+    peerDependencies:
+      enzyme: ^3.0.0
+      react: ^16.0.0-0
+      react-dom: ^16.0.0-0
+    dependencies:
+      enzyme: 3.11.0
+      enzyme-adapter-utils: 1.14.0_react@17.0.2
+      enzyme-shallow-equal: 1.0.4
+      has: 1.0.3
+      object.assign: 4.1.2
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
       object.values: 1.1.5
       prop-types: 15.8.1
       react: 17.0.2
@@ -24426,6 +24915,13 @@ packages:
   /flow-parser/0.121.0:
     resolution: {integrity: sha512-1gIBiWJNR0tKUNv8gZuk7l9rVX06OuLzY9AoGio7y/JT4V1IZErEMEq2TJS+PFcw/y0RshZ1J/27VfK1UQzYVg==}
     engines: {node: '>=0.4.0'}
+<<<<<<< HEAD
+=======
+
+  /flow-parser/0.174.1:
+    resolution: {integrity: sha512-nDMOvlFR+4doLpB3OJpseHZ7uEr3ENptlF6qMas/kzQmNcLzMwfQeFX0gGJ/+em7UdldB/nGsk55tDTOvjbCuw==}
+    engines: {node: '>=0.4.0'}
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
 
   /flush-write-stream/1.1.1:
     resolution: {integrity: sha512-3Z4XhFZ3992uIq0XOqb9AreonueSYphE6oYbpt5+3u06JWklbsPkNv3ZKkP9Bz/r+1MWCaMoSQ28P85+1Yc77w==}
@@ -24772,7 +25268,6 @@ packages:
       hey-listen: 1.0.8
       popmotion: 11.0.3
       react: 17.0.2
-      react-dom: 16.14.0_react@17.0.2
       style-value-types: 5.0.0
       tslib: 2.3.1
     optionalDependencies:
@@ -25941,13 +26436,17 @@ packages:
       capital-case: 1.0.4
       tslib: 2.3.1
 
+<<<<<<< HEAD
   /hermes-estree/0.8.0:
     resolution: {integrity: sha512-W6JDAOLZ5pMPMjEiQGLCXSSV7pIBEgRR5zGkxgmzGSXHOxqV5dC/M1Zevqpbm9TZDE5tu358qZf8Vkzmsc+u7Q==}
+    dev: false
 
   /hermes-parser/0.8.0:
     resolution: {integrity: sha512-yZKalg1fTYG5eOiToLUaw69rQfZq/fi+/NtEXRU7N87K/XobNRhRWorh80oSge2lWUiZfTgUvRJH+XgZWrhoqA==}
     dependencies:
+<<<<<<< HEAD
       hermes-estree: 0.8.0
+    dev: false
 
   /hermes-profile-transformer/0.0.6:
     resolution: {integrity: sha512-cnN7bQUm65UWOy6cbGcCcZ3rpwW8Q/j4OP5aWRhEry4Z2t2aR1cjrbp0BS+KiBN0smvP1caBgAuxutvyvJILzQ==}
@@ -26333,7 +26832,32 @@ packages:
       - supports-color
     dev: true
 
+<<<<<<< HEAD
   /i18n-calypso/6.0.1_adlholpkqbiq5amp2fy4vkqcli:
+=======
+  /i18n-calypso/5.0.0_react@18.0.0:
+    resolution: {integrity: sha512-YgqLgshNiBOiifWxr4s33ODWQ4JIaHoBPWtgFyqcRy0+WGMX2CmTDbXaeZHkHxuIjzsGP+YrVTPNp7lfbiot4g==}
+    peerDependencies:
+      react: ^16.8
+    dependencies:
+      '@babel/runtime': 7.17.7
+      '@tannin/sprintf': 1.2.0
+      '@wordpress/compose': 3.25.3_react@18.0.0
+      debug: 4.3.4
+      events: 3.3.0
+      hash.js: 1.1.7
+      interpolate-components: 1.1.1
+      lodash: 4.17.21
+      lru: 3.1.0
+      react: 18.0.0
+      tannin: 1.2.0
+      use-subscription: 1.6.0_react@18.0.0
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /i18n-calypso/6.0.1_00d6772dea80510e818fd171caaa025a:
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     resolution: {integrity: sha512-+/mWjFd0IR7VWqTV4iVOiu2wyKLtkoiioABPISVVTy3ybe1EnW8JmTnWnpQh3t6Fq3rHhstO6lMzpi/b6Idk4A==}
     peerDependencies:
       react: ^17.0.2
@@ -29516,6 +30040,13 @@ packages:
       - ts-node
       - utf-8-validate
 
+<<<<<<< HEAD
+=======
+  /jetifier/1.6.8:
+    resolution: {integrity: sha512-3Zi16h6L5tXDRQJTb221cnRoVG9/9OvreLdLU2/ZjRv/GILL+2Cemt0IKvkowwkDpvouAU1DQPOJ7qaiHeIdrw==}
+    hasBin: true
+
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
   /jmespath/0.16.0:
     resolution: {integrity: sha512-9FzQjJ7MATs1tSpnco1K6ayiYE3figslrXA72G2HQ/n76RzvYlofyi5QM+iX4YRs/pu3yzxlVQSST23+dMDknw==}
     engines: {node: '>= 0.6.0'}
@@ -29592,8 +30123,14 @@ packages:
 
   /jsc-android/250230.2.1:
     resolution: {integrity: sha512-KmxeBlRjwoqCnBBKGsihFtvsBHyUFlBxJPK4FzeYcIuBfdjv6jFys44JITAgSTbQD+vIdwMEfyZklsuQX0yI1Q==}
+<<<<<<< HEAD
 
   /jscodeshift/0.13.1_@babel+preset-env@7.19.3:
+=======
+    dev: false
+
+  /jscodeshift/0.13.1_@babel+preset-env@7.16.11:
+>>>>>>> a3ed86eb17 (Add initial rich text editor component)
     resolution: {integrity: sha512-lGyiEbGOvmMRKgWk4vf+lUrCWO/8YR8sUR3FKF1Cq5fovjZDlIcw3Hu5ppLHAnEXshVffvaM0eyuY/AbOeYpnQ==}
     hasBin: true
     peerDependencies:
@@ -30971,8 +31508,10 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
+<<<<<<< HEAD
   /metro-cache-key/0.72.2:
     resolution: {integrity: sha512-P8p4QQzbEFMuk81xklc62qdE+CGBjP9u+ECP3iYNXIAW0+apS6Dntyvx/xCLy0a4MIryXqg2EJ2Z8XrmKmNeGQ==}
+    dev: false
 
   /metro-cache/0.72.2:
     resolution: {integrity: sha512-0Yw3J32eYTp7x7bAAg+a9ScBG/mpib6Wq4WPSYvhoNilPFHzh7knLDMil3WGVCQlI1r+5xtpw/FDhNVKuypQqg==}
@@ -30999,6 +31538,7 @@ packages:
     resolution: {integrity: sha512-OXNH8UbKIhvpyHGJrdQYnPUmyPHSuVY4OO6pQxODdTW+uiO68PPPgIIVN67vlCAirZolxRFpma70N7m0sGCZyg==}
     dependencies:
       lodash.throttle: 4.1.1
+<<<<<<< HEAD
       metro-resolver: 0.72.2
 
   /metro-file-map/0.72.2:
@@ -31023,6 +31563,7 @@ packages:
 
   /metro-hermes-compiler/0.72.2:
     resolution: {integrity: sha512-X8fjDBGNwjHxYAlMtrsr8x/JI/Gep7uzLDuHOMuRU5iAIVt+gH0Z+zjbJTsX++yLZ41i755zw5akvpQnyjVl/w==}
+    dev: false
 
   /metro-inspector-proxy/0.72.2:
     resolution: {integrity: sha512-VEJU3J+0qrU33o+5tHemVuRWMXswtSrRI1lTE9yFiU8GAxoKrSy2kfJ5cOPLfv/8Nf6M6zRayjUs/Q46kjvfow==}
@@ -31165,7 +31706,12 @@ packages:
   /metro-runtime/0.72.2:
     resolution: {integrity: sha512-jIHH6ILSWJtINHA0+KgnH1T5RO5mkf46sQahgC+GYjZjGoshs8+tBdjviYD/xy5s4olCJ1hmycV+XvauQmJdkQ==}
     dependencies:
+<<<<<<< HEAD
       '@babel/runtime': 7.19.0
+=======
+      '@babel/runtime': 7.17.7
+<<<<<<< HEAD
+>>>>>>> a3ed86eb17 (Add initial rich text editor component)
       react-refresh: 0.4.3
 
   /metro-source-map/0.72.1:
@@ -31181,6 +31727,7 @@ packages:
       vlq: 1.0.1
     transitivePeerDependencies:
       - supports-color
+    dev: false
 
   /metro-source-map/0.72.2:
     resolution: {integrity: sha512-dqYK8DZ4NzGkhik0IkKRBLuPplXqF6GoKrFQ/XMw0FYGy3+dFJ9nIDxsCyg3GcjCt6Mg8FEqGrXlpMG7MrtC9Q==}
@@ -32257,11 +32804,13 @@ packages:
   /oauth-sign/0.9.0:
     resolution: {integrity: sha512-fexhUFFPTGV8ybAtSIGbV6gOkSv8UtRbDBnAyLQw4QPKkgNlsH2ByPGtMUqdWkos6YCRmAqViwgZrJc/mRDzZQ==}
 
+<<<<<<< HEAD
   /ob1/0.72.1:
     resolution: {integrity: sha512-TyQX2gO08klGTMuzD+xm3iVrzXiIygCB7t+NWeicOR05hkzgeWOiAZ8q40uMfIDRfEAc6hd66sJdIEhU/yUZZA==}
 
   /ob1/0.72.2:
     resolution: {integrity: sha512-P4zh/5GzyXPIzz+2eq2Hjd1wTZAfpwTIBWKhYx8X/DD2wCuFVprBEZp1FerWyTMwOA6AnVxiX1h0JE1v/s+PAQ==}
+    dev: false
 
   /object-assign/4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
@@ -33176,6 +33725,7 @@ packages:
     hasBin: true
     dev: true
 
+<<<<<<< HEAD
   /playwright/1.26.1:
     resolution: {integrity: sha512-WQmEdCgYYe8jOEkhkW9QLcK0PB+w1RZztBLYIT10MEEsENYg251cU0IzebDINreQsUt+HCwwRhtdz4weH9ICcQ==}
     engines: {node: '>=14'}
@@ -34645,7 +35195,7 @@ packages:
     dependencies:
       fast-memoize: 2.5.2
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
 
   /re-resizable/6.9.5_wdcame2n4eqmtj7c7r7wzweise:
     resolution: {integrity: sha512-Q4+K8gOPbUBmbJCa0qfoVXBGnCwkAJrZ9KUca4GDn5FmxyV2HtLrBz7u43uUOb0y7xKbwcfuftweiOCIDEiCQA==}
@@ -34682,7 +35232,7 @@ packages:
       line-height: 0.3.1
       prop-types: 15.8.1
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
     dev: true
 
   /react-colorful/4.4.4_wdcame2n4eqmtj7c7r7wzweise:
@@ -34702,8 +35252,10 @@ packages:
       react-dom: '>=16.8.0'
     dependencies:
       react: 17.0.2
-      react-dom: 16.14.0_react@17.0.2
     dev: false
+=======
+      react-dom: 16.14.0_react@17.0.2
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
 
   /react-colorful/5.5.1_sfoxds7t5ydpegc3knd667wn6m:
     resolution: {integrity: sha512-M1TJH2X3RXEt12sWkpa6hLc/bbYS0H6F4rIqjQZ+RxNBstpY67d9TrFXtqdZwhpmBXcCwEi7stKqFue3ZRkiOg==}
@@ -34731,11 +35283,11 @@ packages:
       prop-types: 15.8.1
       react: 17.0.2
       react-addons-shallow-compare: 15.6.3
-      react-dom: 16.14.0_react@17.0.2
+      react-dom: 17.0.2_react@17.0.2
       react-moment-proptypes: 1.8.1_moment@2.29.1
-      react-outside-click-handler: 1.3.0_prpqlkd37azqwypxturxi7uyci
-      react-portal: 4.2.1_prpqlkd37azqwypxturxi7uyci
-      react-with-styles: 3.2.3_f6ta4w4ch5ogxra4gx65xzrqki
+      react-outside-click-handler: 1.3.0_sfoxds7t5ydpegc3knd667wn6m
+      react-portal: 4.2.1_sfoxds7t5ydpegc3knd667wn6m
+      react-with-styles: 3.2.3_react@17.0.2
       react-with-styles-interface-css: 4.0.3_react-with-styles@3.2.3
     transitivePeerDependencies:
       - react-with-direction
@@ -34816,6 +35368,7 @@ packages:
       prop-types: 15.8.1
       raf: 3.4.1
       react: 17.0.2
+<<<<<<< HEAD
       react-dom: 17.0.2_react@17.0.2
       react-moment-proptypes: 1.8.1_moment@2.29.1
       react-outside-click-handler: 1.3.0_sfoxds7t5ydpegc3knd667wn6m
@@ -34823,6 +35376,15 @@ packages:
       react-with-direction: 1.4.0_sfoxds7t5ydpegc3knd667wn6m
       react-with-styles: 4.2.0_vnnik6nzwz6bu5mwl5zhriyd4i
       react-with-styles-interface-css: 6.0.0_u5gvwsivijvqc4cln26hqg7igq
+=======
+      react-dom: 16.14.0_react@17.0.2
+      react-moment-proptypes: 1.8.1
+      react-outside-click-handler: 1.3.0_react-dom@16.14.0+react@17.0.2
+      react-portal: 4.2.1_react-dom@16.14.0+react@17.0.2
+      react-with-direction: 1.4.0_react-dom@16.14.0+react@17.0.2
+      react-with-styles: 4.2.0_fc12a0973704c75bd6b22fba3192b866
+      react-with-styles-interface-css: 6.0.0_a74d5b4915426b01704b6ebc781be834
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     dev: false
 
   /react-dates/21.8.0_ruqm5uqcpfavftrrblmrkdsf44:
@@ -34933,7 +35495,23 @@ packages:
       react: 17.0.2
       scheduler: 0.20.2
 
+<<<<<<< HEAD
   /react-draggable/4.4.4_sfoxds7t5ydpegc3knd667wn6m:
+=======
+  /react-draggable/4.4.4_react-dom@16.14.0+react@17.0.2:
+    resolution: {integrity: sha512-6e0WdcNLwpBx/YIDpoyd2Xb04PB0elrDrulKUgdrIlwuYvxh5Ok9M+F8cljm8kPXXs43PmMzek9RrB1b7mLMqA==}
+    peerDependencies:
+      react: '>= 16.3.0'
+      react-dom: '>= 16.3.0'
+    dependencies:
+      clsx: 1.1.1
+      prop-types: 15.8.1
+      react: 17.0.2
+      react-dom: 16.14.0_react@17.0.2
+    dev: true
+
+  /react-draggable/4.4.4_react-dom@17.0.2+react@17.0.2:
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     resolution: {integrity: sha512-6e0WdcNLwpBx/YIDpoyd2Xb04PB0elrDrulKUgdrIlwuYvxh5Ok9M+F8cljm8kPXXs43PmMzek9RrB1b7mLMqA==}
     peerDependencies:
       react: '>= 16.3.0'
@@ -34945,7 +35523,24 @@ packages:
       react-dom: 17.0.2_react@17.0.2
     dev: true
 
+<<<<<<< HEAD
   /react-element-to-jsx-string/14.3.4_sfoxds7t5ydpegc3knd667wn6m:
+=======
+  /react-element-to-jsx-string/14.3.4_react-dom@16.14.0+react@17.0.2:
+    resolution: {integrity: sha512-t4ZwvV6vwNxzujDQ+37bspnLwA4JlgUPWhLjBJWsNIDceAf6ZKUTCjdm08cN6WeZ5pTMKiCJkmAYnpmR4Bm+dg==}
+    peerDependencies:
+      react: ^0.14.8 || ^15.0.1 || ^16.0.0 || ^17.0.1
+      react-dom: ^0.14.8 || ^15.0.1 || ^16.0.0 || ^17.0.1
+    dependencies:
+      '@base2/pretty-print-object': 1.0.1
+      is-plain-object: 5.0.0
+      react: 17.0.2
+      react-dom: 16.14.0_react@17.0.2
+      react-is: 17.0.2
+    dev: true
+
+  /react-element-to-jsx-string/14.3.4_react-dom@17.0.2+react@17.0.2:
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     resolution: {integrity: sha512-t4ZwvV6vwNxzujDQ+37bspnLwA4JlgUPWhLjBJWsNIDceAf6ZKUTCjdm08cN6WeZ5pTMKiCJkmAYnpmR4Bm+dg==}
     peerDependencies:
       react: ^0.14.8 || ^15.0.1 || ^16.0.0 || ^17.0.1
@@ -34971,7 +35566,26 @@ packages:
   /react-fast-compare/3.2.0:
     resolution: {integrity: sha512-rtGImPZ0YyLrscKI9xTpV8psd6I8VAtjKCzQDlzyDvqJA8XOW78TXYQwNRNd8g8JZnDu8q9Fu/1v4HPAVwVdHA==}
 
+<<<<<<< HEAD
   /react-helmet-async/1.2.3_sfoxds7t5ydpegc3knd667wn6m:
+=======
+  /react-helmet-async/1.2.3_react-dom@16.14.0+react@17.0.2:
+    resolution: {integrity: sha512-mCk2silF53Tq/YaYdkl2sB+/tDoPnaxN7dFS/6ZLJb/rhUY2EWGI5Xj2b4jHppScMqY45MbgPSwTxDchKpZ5Kw==}
+    peerDependencies:
+      react: ^16.6.0 || ^17.0.0
+      react-dom: ^16.6.0 || ^17.0.0
+    dependencies:
+      '@babel/runtime': 7.17.7
+      invariant: 2.2.4
+      prop-types: 15.8.1
+      react: 17.0.2
+      react-dom: 16.14.0_react@17.0.2
+      react-fast-compare: 3.2.0
+      shallowequal: 1.1.0
+    dev: true
+
+  /react-helmet-async/1.2.3_react-dom@17.0.2+react@17.0.2:
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     resolution: {integrity: sha512-mCk2silF53Tq/YaYdkl2sB+/tDoPnaxN7dFS/6ZLJb/rhUY2EWGI5Xj2b4jHppScMqY45MbgPSwTxDchKpZ5Kw==}
     peerDependencies:
       react: ^16.6.0 || ^17.0.0
@@ -35029,7 +35643,7 @@ packages:
       exenv: 1.2.2
       prop-types: 15.8.1
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
       react-lifecycles-compat: 3.0.4
       warning: 4.0.3
     dev: false
@@ -35053,8 +35667,10 @@ packages:
       - '@babel/preset-env'
       - supports-color
 
+<<<<<<< HEAD
   /react-native-gradle-plugin/0.70.2:
     resolution: {integrity: sha512-k7d+CVh0fs/VntA2WaKD58cFB2rtiSLBHYlciH18ncaT4N/B3A4qOGv9pSCEHfQikELm6vAf98KMbE3c8KnH1A==}
+    dev: false
 
   /react-native-url-polyfill/1.3.0_react-native@0.70.0:
     resolution: {integrity: sha512-w9JfSkvpqqlix9UjDvJjm1EjSt652zVQ6iwCIj1cVVkwXf4jQhQgTNXY6EVTwuAmUjg6BC6k9RHCBynoLFo3IQ==}
@@ -35139,7 +35755,7 @@ packages:
       object.values: 1.1.5
       prop-types: 15.8.1
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
     dev: false
 
   /react-outside-click-handler/1.3.0_wdcame2n4eqmtj7c7r7wzweise:
@@ -35157,7 +35773,24 @@ packages:
       react-dom: 17.0.0-rc.3_react@16.14.0
     dev: false
 
+<<<<<<< HEAD
   /react-popper-tooltip/3.1.1_sfoxds7t5ydpegc3knd667wn6m:
+=======
+  /react-popper-tooltip/3.1.1_react-dom@16.14.0+react@17.0.2:
+    resolution: {integrity: sha512-EnERAnnKRptQBJyaee5GJScWNUKQPDD2ywvzZyUjst/wj5U64C8/CnSYLNEmP2hG0IJ3ZhtDxE8oDN+KOyavXQ==}
+    peerDependencies:
+      react: ^16.6.0 || ^17.0.0
+      react-dom: ^16.6.0 || ^17.0.0
+    dependencies:
+      '@babel/runtime': 7.17.7
+      '@popperjs/core': 2.11.4
+      react: 17.0.2
+      react-dom: 16.14.0_react@17.0.2
+      react-popper: 2.2.5_2e9dd80dbd4df675244d857293d4c5b0
+    dev: true
+
+  /react-popper-tooltip/3.1.1_react-dom@17.0.2+react@17.0.2:
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     resolution: {integrity: sha512-EnERAnnKRptQBJyaee5GJScWNUKQPDD2ywvzZyUjst/wj5U64C8/CnSYLNEmP2hG0IJ3ZhtDxE8oDN+KOyavXQ==}
     peerDependencies:
       react: ^16.6.0 || ^17.0.0
@@ -35200,7 +35833,7 @@ packages:
     dependencies:
       prop-types: 15.8.1
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
     dev: false
 
   /react-portal/4.2.1_wdcame2n4eqmtj7c7r7wzweise:
@@ -35230,7 +35863,7 @@ packages:
       broadcast-channel: 3.7.0
       match-sorter: 6.3.1
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
     dev: false
 
   /react-refresh/0.11.0:
@@ -35256,7 +35889,18 @@ packages:
     dependencies:
       react: 17.0.2
 
+<<<<<<< HEAD
   /react-router-dom/6.2.2_sfoxds7t5ydpegc3knd667wn6m:
+=======
+  /react-resize-aware/3.1.1_react@18.0.0:
+    resolution: {integrity: sha512-M8IyVLBN8D6tEUss+bxQlWte3ZYtNEGhg7rBxtCVG8yEBjUlZwUo5EFLq6tnvTZXcgAbCLjsQn+NCoTJKumRYg==}
+    peerDependencies:
+      react: ^16.8.0 || 17.x
+    dependencies:
+      react: 18.0.0
+
+  /react-router-dom/6.2.2_react-dom@16.14.0+react@17.0.2:
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     resolution: {integrity: sha512-AtYEsAST7bDD4dLSQHDnk/qxWLJdad5t1HFa1qJyUrCeGgEuCSw0VB/27ARbF9Fi/W5598ujvJOm3ujUCVzuYQ==}
     peerDependencies:
       react: '>=16.8'
@@ -35264,7 +35908,7 @@ packages:
     dependencies:
       history: 5.3.0
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
       react-router: 6.2.2_react@17.0.2
     dev: true
 
@@ -35323,7 +35967,7 @@ packages:
       memoize-one: 5.2.1
       prop-types: 15.8.1
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
       react-input-autosize: 3.0.0_react@17.0.2
       react-transition-group: 4.4.2_sfoxds7t5ydpegc3knd667wn6m
     dev: true
@@ -35467,7 +36111,24 @@ packages:
       - '@types/react'
     dev: true
 
+<<<<<<< HEAD
   /react-transition-group/4.4.2_sfoxds7t5ydpegc3knd667wn6m:
+=======
+  /react-transition-group/4.4.2_react-dom@16.14.0+react@17.0.2:
+    resolution: {integrity: sha512-/RNYfRAMlZwDSr6z4zNKV6xu53/e2BuaBbGhbyYIXTrmgu/bGHzmqOs7mJSJBHy9Ud+ApHx3QjrkKSp1pxvlFg==}
+    peerDependencies:
+      react: '>=16.6.0'
+      react-dom: '>=16.6.0'
+    dependencies:
+      '@babel/runtime': 7.17.7
+      dom-helpers: 5.2.1
+      loose-envify: 1.4.0
+      prop-types: 15.8.1
+      react: 17.0.2
+      react-dom: 16.14.0_react@17.0.2
+
+  /react-transition-group/4.4.2_react-dom@17.0.2+react@17.0.2:
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     resolution: {integrity: sha512-/RNYfRAMlZwDSr6z4zNKV6xu53/e2BuaBbGhbyYIXTrmgu/bGHzmqOs7mJSJBHy9Ud+ApHx3QjrkKSp1pxvlFg==}
     peerDependencies:
       react: '>=16.6.0'
@@ -35533,7 +36194,7 @@ packages:
       object.values: 1.1.5
       prop-types: 15.8.1
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
     dev: false
 
   /react-with-direction/1.4.0_wdcame2n4eqmtj7c7r7wzweise:
@@ -35661,9 +36322,20 @@ packages:
       loose-envify: 1.4.0
       object-assign: 4.1.1
 
+<<<<<<< HEAD
   /read-cmd-shim/3.0.1:
     resolution: {integrity: sha512-kEmDUoYf/CDy8yZbLTmhB1X9kkjf9Q80PCNsDMb7ufrGd6zZSQA1+UyjrO+pZm5K/S4OXCWJeiIt1JA8kAsa6g==}
     engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
+=======
+  /react/18.0.0:
+    resolution: {integrity: sha512-x+VL6wbT4JRVPm7EGxXhZ8w8LTROaxPXOqhlGyVSrv0sB1jkyFGgXxJ8LVoPRLvPR6/CIZGFmfzqUa2NYeMr2A==}
+    engines: {node: '>=0.10.0'}
+    dependencies:
+      loose-envify: 1.4.0
+
+  /read-cmd-shim/2.0.0:
+    resolution: {integrity: sha512-HJpV9bQpkl6KwjxlJcBoqu9Ba0PQg8TqSNIOrulGt54a0uup0HtevreFHzYzkm0lpnleRdNBzXznKrgxglEHQw==}
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     dev: true
 
   /read-package-json-fast/2.0.3:
@@ -35830,8 +36502,13 @@ packages:
       react-dom: ^16.8.0 || ^17.0.0
     dependencies:
       react: 17.0.2
+<<<<<<< HEAD
       react-dom: 17.0.2_react@17.0.2
       reakit-utils: 0.15.2_sfoxds7t5ydpegc3knd667wn6m
+=======
+      react-dom: 16.14.0_react@17.0.2
+      reakit-utils: 0.15.2_react-dom@16.14.0+react@17.0.2
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     dev: false
 
   /reakit-system/0.15.2_wdcame2n4eqmtj7c7r7wzweise:
@@ -35882,7 +36559,7 @@ packages:
       react-dom: ^16.8.0 || ^17.0.0
     dependencies:
       react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
+      react-dom: 16.14.0_react@17.0.2
     dev: false
 
   /reakit-utils/0.15.2_wdcame2n4eqmtj7c7r7wzweise:
@@ -35989,10 +36666,17 @@ packages:
       '@popperjs/core': 2.11.4
       body-scroll-lock: 3.1.5
       react: 17.0.2
+<<<<<<< HEAD
       react-dom: 17.0.2_react@17.0.2
       reakit-system: 0.15.2_sfoxds7t5ydpegc3knd667wn6m
       reakit-utils: 0.15.2_sfoxds7t5ydpegc3knd667wn6m
       reakit-warning: 0.6.2_sfoxds7t5ydpegc3knd667wn6m
+=======
+      react-dom: 16.14.0_react@17.0.2
+      reakit-system: 0.15.2_react-dom@16.14.0+react@17.0.2
+      reakit-utils: 0.15.2_react-dom@16.14.0+react@17.0.2
+      reakit-warning: 0.6.2_react-dom@16.14.0+react@17.0.2
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
     dev: false
 
   /reakit/1.3.11_wdcame2n4eqmtj7c7r7wzweise:
@@ -40060,6 +40744,13 @@ packages:
     dependencies:
       react: 17.0.2
 
+  /use-memo-one/1.1.2_react@18.0.0:
+    resolution: {integrity: sha512-u2qFKtxLsia/r8qG0ZKkbytbztzRb317XCkT7yP8wxL0tZ/CzK2G+WWie5vWvpyeP7+YoPIwbJoIHJ4Ba4k0oQ==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0
+    dependencies:
+      react: 18.0.0
+
   /use-subscription/1.6.0_react@16.14.0:
     resolution: {integrity: sha512-0Y/cTLlZfw547tJhJMoRA16OUbVqRm6DmvGpiGbmLST6BIA5KU5cKlvlz8DVMrACnWpyEjCkgmhLatthP4jUbA==}
     peerDependencies:
@@ -40074,6 +40765,14 @@ packages:
       react: ^18.0.0
     dependencies:
       react: 17.0.2
+
+  /use-subscription/1.6.0_react@18.0.0:
+    resolution: {integrity: sha512-0Y/cTLlZfw547tJhJMoRA16OUbVqRm6DmvGpiGbmLST6BIA5KU5cKlvlz8DVMrACnWpyEjCkgmhLatthP4jUbA==}
+    peerDependencies:
+      react: ^18.0.0
+    dependencies:
+      react: 18.0.0
+    dev: true
 
   /use-sync-external-store/1.2.0_react@16.14.0:
     resolution: {integrity: sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==}
@@ -41356,6 +42055,13 @@ packages:
       xmlbuilder: 9.0.7
     dev: true
 
+<<<<<<< HEAD
+=======
+  /xmlbuilder/15.1.1:
+    resolution: {integrity: sha512-yMqGBqtXyeN1e3TGYvgNgDVZ3j84W4cwkOXQswghol6APgZWaff9lnbvN7MHYJOiXsvGPXtjTYJEiC9J2wv9Eg==}
+    engines: {node: '>=8.0'}
+
+>>>>>>> 7e8411e175 (Add initial rich text editor component)
   /xmlbuilder/9.0.7:
     resolution: {integrity: sha512-7YXTQc3P2l9+0rjaUbLwMKRhtmwg1M1eDf6nag7urC7pIPYLD9W/jmzQ4ptRSUbodw5S0jfoGTflLemQibSpeQ==}
     engines: {node: '>=4.0'}
