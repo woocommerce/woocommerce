@@ -5,6 +5,8 @@ import Analyzer from 'code-analyzer/src/commands/analyzer';
 import semver from 'semver';
 import { promises } from 'fs';
 import { writeFile } from 'fs/promises';
+import { tmpdir } from 'os';
+import { join } from 'path';
 
 /**
  * Internal dependencies
@@ -15,8 +17,6 @@ import { processChanges } from '../lib/process-changes';
 import { createWpComDraftPost } from '../lib/draft-post';
 import { generateContributors } from '../lib/contributors';
 import { Logger } from '../lib/logger';
-import { tmpdir } from 'os';
-import { join } from 'path';
 
 const DEVELOPER_WOOCOMMERCE_SITE_ID = '96396764';
 
