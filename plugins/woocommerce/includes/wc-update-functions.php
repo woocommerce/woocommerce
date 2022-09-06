@@ -2441,3 +2441,26 @@ function wc_update_670_purge_comments_count_cache() {
 
 	WC_Comments::delete_comments_count_cache();
 }
+
+/**
+ * Create feature toggle options for the legacy Admin feature toggles (see the FeaturesController class).
+ */
+function wc_update_700_migrate_legacy_feature_toggles() {
+	$value = get_option( Automattic\WooCommerce\Internal\Admin\Analytics::TOGGLE_OPTION_NAME );
+	if ( false !== $value ) {
+		update_option( 'woocommerce_feature_analytics_enabled', $value );
+	}
+
+	$value = get_option( Automattic\WooCommerce\Admin\Features\Navigation\Init::TOGGLE_OPTION_NAME );
+	if ( false !== $value ) {
+		update_option( 'woocommerce_feature_new_navigation_enabled', $value );
+	}
+}
+
+/**
+ *
+ * Update DB version to 7.0.0.
+ */
+function wc_update_700_db_version() {
+	WC_Install::update_db_version( '7.0.0' );
+}
