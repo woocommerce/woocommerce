@@ -1,6 +1,6 @@
 == Changelog ==
 
-= 6.8.0 2022-08-09 =
+= 6.8.0 2022-08-09 = // test change //
 
 **WooCommerce**
 
