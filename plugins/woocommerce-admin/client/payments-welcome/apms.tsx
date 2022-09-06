@@ -16,13 +16,14 @@ import {
 import strings from './strings';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
 
-const apms = [
+export const apms = [
 	{
 		id: 'paypal',
 		title: strings.apms.paypal.title,
 		icon: `${ WC_ASSET_URL }images/payment_methods/72x72/paypal.png`,
 		description: strings.apms.paypal.description,
 		link: 'https://woocommerce.com/products/woocommerce-paypal-payments/',
+		extension: 'woocommerce-paypal-payments',
 	},
 	{
 		id: 'amazonpay',
@@ -30,6 +31,7 @@ const apms = [
 		icon: `${ WC_ASSET_URL }images/payment_methods/72x72/amazonpay.png`,
 		description: strings.apms.amazonpay.description,
 		link: 'https://woocommerce.com/products/pay-with-amazon/',
+		extension: 'woocommerce-gateway-amazon-payments-advanced',
 	},
 	{
 		id: 'klarna',
@@ -37,6 +39,7 @@ const apms = [
 		icon: `${ WC_ASSET_URL }images/payment_methods/72x72/klarna.png`,
 		description: strings.apms.klarna.description,
 		link: 'https://woocommerce.com/products/klarna-payments/',
+		extension: 'klarna-payments-for-woocommerce',
 	},
 	{
 		id: 'affirm',
@@ -44,6 +47,7 @@ const apms = [
 		icon: `${ WC_ASSET_URL }images/payment_methods/72x72/affirm.png`,
 		description: strings.apms.affirm.description,
 		link: 'https://woocommerce.com/products/woocommerce-gateway-affirm/',
+		extension: 'woocommerce-gateway-affirm', // todo-4529 support Affirm
 	},
 ];
 

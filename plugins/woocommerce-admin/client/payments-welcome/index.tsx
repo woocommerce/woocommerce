@@ -31,7 +31,7 @@ import {
  */
 import strings from './strings';
 import Banner from './banner';
-import APMs, { ToggleState } from './apms';
+import APMs, { ToggleState, apms } from './apms';
 import './style.scss';
 import ExitSurveyModal from './exit-survey-modal';
 import { getAdminSetting } from '~/utils/admin-settings';
@@ -111,6 +111,7 @@ const ConnectPageOnboarding = ( {
 	installAndActivatePlugins,
 	setErrorMessage,
 	connectUrl,
+	apmsToggleState,
 }: {
 	isJetpackConnected?: boolean;
 	installAndActivatePlugins: PluginsStoreActions[ 'installAndActivatePlugins' ];
@@ -146,13 +147,18 @@ const ConnectPageOnboarding = ( {
 			wpcom_connection: isJetpackConnected ? 'Yes' : 'No',
 		} );
 
-		// todo-4529 check the APMs toggleState and install/uninstall plugins depending on the state
-
 		// todo-4529 track info about the enabled APMs
+
+		const pluginsToInstall = [];
+		apms.forEach( ( apm ) => {
+			if ( apmsToggleState[ apm.id ] ) {
+				pluginsToInstall.push( apm.extension );
+			}
+		} );
 
 		try {
 			const installAndActivateResponse = await installAndActivatePlugins(
-				[ 'woocommerce-payments' ]
+				[ 'woocommerce-payments' ].concat( pluginsToInstall )
 			);
 			if ( installAndActivateResponse?.success ) {
 				await activatePromo();
