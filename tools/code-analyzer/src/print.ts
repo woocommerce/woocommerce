@@ -125,11 +125,7 @@ export const printSchemaChange = (
 	version: string,
 	output: string,
 	log: ( s: string ) => void
-): Record< string, string > => {
-	const diff: Record< string, string > = {};
-	if ( ! schemaDiffs ) {
-		return diff;
-	}
+) => {
 	if ( output === 'github' ) {
 		let githubCommentContent = '\\n\\n### New schema changes:';
 		schemaDiffs.forEach( ( schemaDiff ) => {
@@ -142,19 +138,15 @@ export const printSchemaChange = (
 	} else {
 		log( '\n## SCHEMA CHANGES' );
 		log( '---------------------------------------------------' );
-
 		schemaDiffs.forEach( ( schemaDiff ) => {
 			if ( ! schemaDiff.areEqual ) {
 				log(
 					` NOTICE | Schema changes detected in ${ schemaDiff.method } as of ${ version }`
 				);
 				log( '---------------------------------------------------' );
-				diff[ schemaDiff.name ] = schemaDiff.method;
 			}
 		} );
 	}
-
-	return diff;
 };
 
 /**

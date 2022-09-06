@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { CliUx } from '@oclif/core';
 import { execSync } from 'child_process';
 import { join } from 'path';
 import { tmpdir } from 'os';

@@ -6,7 +6,7 @@ import { getFilename, getPatches } from '../utils';
 export type TemplateChangeDescription = {
 	filePath: string;
 	code: string;
-	// We could probably move message out into a reporter later
+	// We could probably move message out into linter later
 	message: string;
 };
 
@@ -18,8 +18,6 @@ export const scanForTemplateChanges = ( content: string, version: string ) => {
 	}
 
 	const matchPatches = /^a\/(.+)\/templates\/(.+)/g;
-	// TODO - move to reporting
-	// const title = 'Template change detected';
 	const patches = getPatches( content, matchPatches );
 	const matchVersion = `^(\\+.+\\*.+)(@version)\\s+(${ version.replace(
 		/\./g,
@@ -33,7 +31,6 @@ export const scanForTemplateChanges = ( content: string, version: string ) => {
 		const filePath = getFilename( lines[ 0 ] );
 		let code = 'warning';
 
-		// TODO - move to reporting
 		let message = 'This template may require a version bump!';
 
 		for ( const l in lines ) {

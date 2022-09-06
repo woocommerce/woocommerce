@@ -1,10 +1,12 @@
 /**
  * External dependencies
  */
-import Analyzer from 'code-analyzer/src/commands/analyzer';
+import { scanForChanges } from 'code-analyzer/src/lib/scan-changes';
 import semver from 'semver';
-import { promises } from 'fs';
 import { writeFile } from 'fs/promises';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import { Logger } from 'cli-core/src/logger';
 
 /**
  * Internal dependencies
@@ -14,9 +16,6 @@ import { renderTemplate } from '../lib/render-template';
 import { processChanges } from '../lib/process-changes';
 import { createWpComDraftPost } from '../lib/draft-post';
 import { generateContributors } from '../lib/contributors';
-import { Logger } from '../lib/logger';
-import { tmpdir } from 'os';
-import { join } from 'path';
 
 const DEVELOPER_WOOCOMMERCE_SITE_ID = '96396764';
 
@@ -62,21 +61,23 @@ program
 			}
 
 			// generates a `changes.json` file in the current directory.
-			await Analyzer.run( [
-				currentVersion,
-				currentVersion,
-				'-s',
-				'https://github.com/woocommerce/woocommerce.git',
-				'-b',
-				previousVersion.toString(),
-			] );
 
-			const changes = JSON.parse(
-				await promises.readFile(
-					process.cwd() + '/changes.json',
-					'utf8'
-				)
+			const changes = await scanForChanges(
+				currentVersion,
+				currentVersion,
+				false,
+				'https://github.com/woocommerce/woocommerce.git',
+				previousVersion.toString()
 			);
+
+			console.log( changes );
+
+			// JSON.parse(
+			// 	await promises.readFile(
+			// 		process.cwd() + '/changes.json',
+			// 		'utf8'
+			// 	)
+			// );
 
 			const changeset = processChanges( changes );
 

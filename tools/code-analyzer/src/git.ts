@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { CliUx } from '@oclif/core';
 import { execSync } from 'child_process';
 import { join } from 'path';
 import { tmpdir } from 'os';
@@ -9,12 +8,7 @@ import { mkdirSync } from 'fs';
 import { simpleGit } from 'simple-git';
 import { v4 } from 'uuid';
 import { mkdir, rm } from 'fs/promises';
-
-/**
- * Internal dependencies
- */
-import { execAsync, startWPEnv, stopWPEnv } from './utils';
-import { Schema } from 'inspector';
+import { execAsync, startWPEnv, stopWPEnv } from 'cli-core/src/util';
 
 /**
  * Check if a string is a valid url.
@@ -311,6 +305,7 @@ export const generateSchemaDiff = async (
 	if ( ! baseSchema || ! compareSchema ) {
 		return null;
 	}
+
 	return [
 		{
 			name: 'schema',

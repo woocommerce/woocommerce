@@ -4,11 +4,11 @@
 import { Logger } from 'cli-core/src/logger';
 import { join } from 'path';
 import { Command } from 'commander';
+import { generateJSONFile } from 'cli-core/src/util';
 
 /**
  * Internal dependencies
  */
-import { generateJSONFile } from '../../utils';
 import { scanForChanges } from '../../lib/scan-changes';
 
 new Command()

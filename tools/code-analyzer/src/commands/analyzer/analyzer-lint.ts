@@ -38,7 +38,7 @@ const program = new Command()
 	.option(
 		'-o, --outputStyle <outputStyle>',
 		'Output style for the results. Options: github, cli. Github output will use ::set-output to set the results as an output variable.',
-		'cli'
+		'github'
 	)
 	.option(
 		'-ss, --skipSchemaCheck',

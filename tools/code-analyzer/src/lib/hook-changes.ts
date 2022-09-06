@@ -67,11 +67,6 @@ export const scanForHookChanges = ( content: string, version: string ) => {
 			const hookType =
 				hookName[ 2 ] === 'do_action' ? 'action' : 'filter';
 
-			//  TODO - this kind of output formatting belongs in a separate reporter
-			// const CLIMessage = `**${ name }** introduced in ${ version }`;
-			// const GithubMessage = `\\'${ name }\\' introduced in ${ version }`;
-			// const message = output === 'github' ? GithubMessage : CLIMessage;
-
 			const changeType = getHookChangeType( raw );
 
 			if ( ! hookName[ 2 ].startsWith( '-' ) ) {
