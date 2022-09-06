@@ -32,7 +32,7 @@ $label = ! empty( $args['product_name'] ) ? sprintf( esc_html__( '%s quantity', 
 	/**
 	 * Hook to output something before the quantity input field.
 	 *
-	 * @SInCE 7.0.0
+	 * @since 7.0.0
 	 */
 	do_action( 'woocommerce_before_quantity_input_field' );
 	?>
