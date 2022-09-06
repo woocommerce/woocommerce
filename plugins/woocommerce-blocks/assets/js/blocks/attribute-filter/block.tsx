@@ -14,7 +14,6 @@ import {
 	useCollectionData,
 } from '@woocommerce/base-context/hooks';
 import { useCallback, useEffect, useState, useMemo } from '@wordpress/element';
-import CheckboxList from '@woocommerce/base-components/checkbox-list';
 import Label from '@woocommerce/base-components/filter-element-label';
 import FilterResetButton from '@woocommerce/base-components/filter-reset-button';
 import FilterSubmitButton from '@woocommerce/base-components/filter-submit-button';
@@ -38,7 +37,8 @@ import {
 } from '@woocommerce/utils';
 import { difference } from 'lodash';
 import FormTokenField from '@woocommerce/base-components/form-token-field';
-import classNames from 'classnames';
+import FilterTitlePlaceholder from '@woocommerce/base-components/filter-placeholder';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -57,6 +57,7 @@ import {
 	generateUniqueId,
 } from './utils';
 import { BlockAttributes, DisplayOption } from './types';
+import CheckboxFilter from './checkbox-filter';
 
 /**
  * Formats filter values into a string for the URL parameters needed for filtering PHP templates.
@@ -237,6 +238,7 @@ const AttributeFilterBlock = ( {
 			.filter( ( option ): option is DisplayOption => !! option );
 
 		setDisplayedOptions( newOptions );
+		setRemountKey( generateUniqueId() );
 	}, [
 		attributeObject?.taxonomy,
 		attributeTerms,
@@ -500,32 +502,48 @@ const AttributeFilterBlock = ( {
 				</Notice>
 			);
 		}
-		return null;
 	}
 
 	const TagName =
 		`h${ blockAttributes.headingLevel }` as keyof JSX.IntrinsicElements;
-	const isLoading = ! blockAttributes.isPreview && attributeTermsLoading;
-	const isDisabled = ! blockAttributes.isPreview && filteredCountsLoading;
+	const termsLoading = ! blockAttributes.isPreview && attributeTermsLoading;
+	const countsLoading = ! blockAttributes.isPreview && filteredCountsLoading;
+
+	const isLoading =
+		( termsLoading || countsLoading ) && displayedOptions.length === 0;
+
+	if ( ! isLoading && displayedOptions.length === 0 ) {
+		return null;
+	}
+
+	const heading = (
+		<TagName className="wc-block-attribute-filter__title">
+			{ blockAttributes.heading }
+		</TagName>
+	);
+
+	const filterHeading = isLoading ? (
+		<FilterTitlePlaceholder>{ heading }</FilterTitlePlaceholder>
+	) : (
+		heading
+	);
 
 	return (
 		<>
-			{ ! isEditor &&
-				blockAttributes.heading &&
-				displayedOptions.length > 0 && (
-					<TagName className="wc-block-attribute-filter__title">
-						{ blockAttributes.heading }
-					</TagName>
-				) }
+			{ ! isEditor && blockAttributes.heading && filterHeading }
 			<div
-				className={ `wc-block-attribute-filter style-${ blockAttributes.displayStyle }` }
+				className={ classnames(
+					'wc-block-attribute-filter',
+					`style-${ blockAttributes.displayStyle }`
+				) }
 			>
 				{ blockAttributes.displayStyle === 'dropdown' ? (
 					<>
 						<FormTokenField
 							key={ remountKey }
-							className={ classNames( borderProps.className, {
+							className={ classnames( borderProps.className, {
 								'single-selection': ! multiple,
+								'show-loading-state': isLoading,
 							} ) }
 							style={ {
 								...borderProps.style,
@@ -537,7 +555,7 @@ const AttributeFilterBlock = ( {
 										! checked.includes( option.value )
 								)
 								.map( ( option ) => option.formattedValue ) }
-							disabled={ isDisabled }
+							disabled={ isLoading }
 							placeholder={ sprintf(
 								/* translators: %s attribute name. */
 								__(
@@ -625,18 +643,18 @@ const AttributeFilterBlock = ( {
 						) }
 					</>
 				) : (
-					<CheckboxList
-						className={ 'wc-block-attribute-filter-list' }
+					<CheckboxFilter
 						options={ displayedOptions }
 						checked={ checked }
 						onChange={ onChange }
 						isLoading={ isLoading }
-						isDisabled={ isDisabled }
+						isDisabled={ isLoading }
 					/>
 				) }
 			</div>
+
 			<div className="wc-block-attribute-filter__actions">
-				{ checked.length > 0 && (
+				{ checked.length > 0 && ! isLoading && (
 					<FilterResetButton
 						onClick={ () => {
 							setChecked( [] );
@@ -651,11 +669,13 @@ const AttributeFilterBlock = ( {
 						) }
 					/>
 				) }
-				{ blockAttributes.showFilterButton && (
+				{ blockAttributes.showFilterButton && ! isLoading && (
 					<FilterSubmitButton
 						className="wc-block-attribute-filter__button"
 						disabled={
-							isLoading || isDisabled || checked.length === 0
+							termsLoading ||
+							countsLoading ||
+							checked.length === 0
 						}
 						onClick={ () => onSubmit( checked ) }
 					/>
