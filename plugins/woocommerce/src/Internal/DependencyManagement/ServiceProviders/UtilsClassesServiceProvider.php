@@ -5,9 +5,13 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
+use Automattic\WooCommerce\Internal\Utilities\COTMigrationUtil;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Service provider for the non-static utils classes in the Automattic\WooCommerce\src namespace.
@@ -22,6 +26,8 @@ class UtilsClassesServiceProvider extends AbstractServiceProvider {
 	protected $provides = array(
 		DatabaseUtil::class,
 		HtmlSanitizer::class,
+		OrderUtil::class,
+		COTMigrationUtil::class,
 	);
 
 	/**
@@ -30,5 +36,8 @@ class UtilsClassesServiceProvider extends AbstractServiceProvider {
 	public function register() {
 		$this->share( DatabaseUtil::class );
 		$this->share( HtmlSanitizer::class );
+		$this->share( OrderUtil::class );
+		$this->share( COTMigrationUtil::class )
+			->addArguments( array( CustomOrdersTableController::class, DataSynchronizer::class ) );
 	}
 }

@@ -45,7 +45,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 */
 	public function __construct() {
 		parent::__construct();
-		$this->orders_list_table = new ListTable();
+		$this->orders_list_table = wc_get_container()->get( ListTable::class );
 		add_action( 'admin_notices', array( $this, 'bulk_admin_notices' ) );
 		add_action( 'admin_footer', array( $this, 'order_preview_template' ) );
 		add_filter( 'get_search_query', array( $this, 'search_label' ) );
@@ -591,7 +591,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		foreach ( $order_statuses as $slug => $name ) {
 			if ( 'marked_' . str_replace( 'wc-', '', $slug ) === $bulk_action ) { // WPCS: input var ok, CSRF ok.
 				/* translators: %d: orders count */
-				$message = sprintf( _n( '%d order status changed.', '%d order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) );
+				$message = sprintf( _n( '%s order status changed.', '%s order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 				echo '<div class="updated"><p>' . esc_html( $message ) . '</p></div>';
 				break;
 			}
@@ -599,7 +599,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 		if ( 'removed_personal_data' === $bulk_action ) { // WPCS: input var ok, CSRF ok.
 			/* translators: %d: orders count */
-			$message = sprintf( _n( 'Removed personal data from %d order.', 'Removed personal data from %d orders.', $number, 'woocommerce' ), number_format_i18n( $number ) );
+			$message = sprintf( _n( 'Removed personal data from %s order.', 'Removed personal data from %s orders.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 			echo '<div class="updated"><p>' . esc_html( $message ) . '</p></div>';
 		}
 	}

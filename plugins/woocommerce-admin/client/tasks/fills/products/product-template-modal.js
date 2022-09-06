@@ -88,7 +88,7 @@ export default function ProductTemplateModal( { onClose } ) {
 			product_type: selectedTemplate,
 		} );
 		if ( selectedTemplate === 'subscription' ) {
-			window.location = getAdminLink(
+			window.location.href = getAdminLink(
 				'post-new.php?post_type=product&subscription_pointers=true'
 			);
 			return;

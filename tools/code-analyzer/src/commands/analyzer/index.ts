@@ -3,7 +3,7 @@
  */
 import { CliUx, Command, Flags } from '@oclif/core';
 import { join } from 'path';
-import { readFileSync, rmSync } from 'fs';
+import { rmSync } from 'fs';
 
 /**
  * Internal dependencies
@@ -22,9 +22,11 @@ import {
 	areSchemasEqual,
 	getHookDescription,
 	getHookChangeType,
+	generateJSONFile,
 } from '../../utils';
 import { cloneRepo, generateDiff, generateSchemaDiff } from '../../git';
 import { execSync } from 'child_process';
+import { OutputFlags } from '@oclif/core/lib/interfaces';
 
 /**
  * Analyzer class
@@ -43,6 +45,12 @@ export default class Analyzer extends Command {
 			name: 'compare',
 			description:
 				'GitHub branch or commit hash to compare against the base branch/commit.',
+			required: true,
+		},
+		{
+			name: 'sinceVersion',
+			description:
+				'Specify the version used to determine which changes are included (version listed in @since code doc).',
 			required: true,
 		},
 	];
@@ -67,6 +75,11 @@ export default class Analyzer extends Command {
 			description: 'Git repo url or local path to a git repo.',
 			default: process.cwd(),
 		} ),
+		file: Flags.string( {
+			char: 'f',
+			description: 'Filename for change description JSON.',
+			default: 'changes.json',
+		} ),
 		plugin: Flags.string( {
 			char: 'p',
 			description: 'Plugin to check for',
@@ -87,6 +100,9 @@ export default class Analyzer extends Command {
 	async run(): Promise< void > {
 		const { args, flags } = await this.parse( Analyzer );
 
+		const { compare, sinceVersion } = args;
+		const { base } = flags;
+
 		CliUx.ux.action.start(
 			`Making a temporary clone of '${ flags.source }'`
 		);
@@ -99,43 +115,46 @@ export default class Analyzer extends Command {
 		const diff = await generateDiff(
 			tmpRepoPath,
 			flags.base,
-			args.compare,
+			compare,
 			this.error
 		);
 		CliUx.ux.action.stop();
 
-		const pluginData = this.getPluginData( tmpRepoPath, flags.plugin );
-		this.log( `${ pluginData[ 1 ] } Version: ${ pluginData[ 0 ] }` );
-
 		// Run schema diffs only in the monorepo.
 		if ( flags[ 'is-woocommerce' ] ) {
-			CliUx.ux.action.start( 'Building WooCommerce' );
-
 			const pluginPath = join( tmpRepoPath, 'plugins/woocommerce' );
 
-			// Note doing the minimal work to get a DB scan to work, avoiding full build for speed.
-			execSync( 'composer install', { cwd: pluginPath, stdio: [] } );
-			execSync( 'pnpm run build:feature-config --filter=woocommerce', {
-				cwd: pluginPath,
-			} );
+			const build = () => {
+				CliUx.ux.action.start( 'Building WooCommerce' );
+				// Note doing the minimal work to get a DB scan to work, avoiding full build for speed.
+				execSync( 'composer install', { cwd: pluginPath, stdio: [] } );
+				execSync(
+					'pnpm run build:feature-config --filter=woocommerce',
+					{
+						cwd: pluginPath,
+					}
+				);
 
-			CliUx.ux.action.stop();
+				CliUx.ux.action.stop();
+			};
+
 			CliUx.ux.action.start(
-				`Comparing WooCommerce DB schemas of '${ flags.base }' and '${ args.compare }'`
+				`Comparing WooCommerce DB schemas of '${ base }' and '${ compare }'`
 			);
 
 			const schemaDiff = await generateSchemaDiff(
 				tmpRepoPath,
-				args.compare,
-				flags.base,
+				compare,
+				base,
+				build,
 				( e: string ): void => this.error( e )
 			);
 
 			CliUx.ux.action.stop();
 
-			this.scanChanges( diff, pluginData[ 0 ], flags.output, schemaDiff );
+			await this.scanChanges( diff, sinceVersion, flags, schemaDiff );
 		} else {
-			this.scanChanges( diff, pluginData[ 0 ], flags.output );
+			await this.scanChanges( diff, sinceVersion, flags );
 		}
 
 		// Clean up the temporary repo.
@@ -145,74 +164,18 @@ export default class Analyzer extends Command {
 	}
 
 	/**
-	 * Get plugin data
-	 *
-	 * @param {string} plugin Plugin slug.
-	 * @return {string[]} Promise.
-	 */
-	private getPluginData( tmpRepoPath: string, plugin: string ): string[] {
-		/**
-		 * List of plugins from our monorepo.
-		 */
-		const plugins = <any>{
-			core: {
-				name: 'WooCommerce',
-				mainFile: join(
-					tmpRepoPath,
-					'plugins',
-					'woocommerce',
-					'woocommerce.php'
-				),
-			},
-			admin: {
-				name: 'WooCommerce Admin',
-				mainFile: join(
-					tmpRepoPath,
-					'plugins',
-					'woocommerce-admin',
-					'woocommerce-admin.php'
-				),
-			},
-			beta: {
-				name: 'WooCommerce Beta Tester',
-				mainFile: join(
-					tmpRepoPath,
-					'plugins',
-					'woocommerce-beta-tester',
-					'woocommerce-beta-tester.php'
-				),
-			},
-		};
-
-		const pluginData = plugins[ plugin ];
-
-		CliUx.ux.action.start( `Getting ${ pluginData.name } version` );
-
-		const content = readFileSync( pluginData.mainFile ).toString();
-		const rawVer = content.match( /^\s+\*\s+Version:\s+(.*)/m );
-
-		if ( ! rawVer ) {
-			this.error( 'Failed to find plugin version!' );
-		}
-		const version = rawVer[ 1 ].replace( /\-.*/, '' );
-
-		CliUx.ux.action.stop();
-
-		return [ version, pluginData.name, pluginData.mainFile ];
-	}
-
-	/**
 	 * Scan patches for changes in templates, hooks and database schema
 	 *
-	 * @param {string}  content        Patch content.
-	 * @param {string}  version        Current product version.
-	 * @param {string}  output         Output style.
-	 * @param {boolean} schemaEquality if schemas are equal between branches.
+	 * @param {string}  content         Patch content.
+	 * @param {string}  version         Current product version.
+	 * @param {string}  output          Output style.
+	 * @param {string}  changesFileName Name of a file to output change information to.
+	 * @param {boolean} schemaEquality  if schemas are equal between branches.
 	 */
-	private scanChanges(
+	private async scanChanges(
 		content: string,
 		version: string,
-		output: string,
+		flags: OutputFlags< typeof Analyzer[ 'flags' ] >,
 		schemaDiff: {
 			[ key: string ]: {
 				description: string;
@@ -222,11 +185,17 @@ export default class Analyzer extends Command {
 				areEqual: boolean;
 			};
 		} | void
-	): void {
-		CliUx.ux.action.start( 'Generating changes' );
+	) {
+		const { output, file } = flags;
+
 		const templates = this.scanTemplates( content, version );
 		const hooks = this.scanHooks( content, version, output );
 		const databaseUpdates = this.scanDatabases( content );
+		let schemaDiffResult = {};
+
+		CliUx.ux.action.start(
+			`Generating a list of changes since ${ version }.`
+		);
 
 		if ( templates.size ) {
 			printTemplateResults(
@@ -248,7 +217,7 @@ export default class Analyzer extends Command {
 		}
 
 		if ( ! areSchemasEqual( schemaDiff ) ) {
-			printSchemaChange(
+			schemaDiffResult = printSchemaChange(
 				schemaDiff,
 				version,
 				output,
@@ -267,6 +236,13 @@ export default class Analyzer extends Command {
 		} else {
 			this.log( 'No database updates found' );
 		}
+
+		await generateJSONFile( join( process.cwd(), file ), {
+			templates: Object.fromEntries( templates.entries() ),
+			hooks: Object.fromEntries( hooks.entries() ),
+			db: databaseUpdates || {},
+			schema: schemaDiffResult || {},
+		} );
 
 		CliUx.ux.action.stop();
 	}
@@ -318,7 +294,9 @@ export default class Analyzer extends Command {
 		content: string,
 		version: string
 	): Map< string, string[] > {
-		CliUx.ux.action.start( 'Scanning template changes' );
+		CliUx.ux.action.start(
+			`Scanning for template changes since ${ version }.`
+		);
 
 		const report: Map< string, string[] > = new Map< string, string[] >();
 
@@ -376,7 +354,7 @@ export default class Analyzer extends Command {
 		version: string,
 		output: string
 	): Map< string, Map< string, string[] > > {
-		CliUx.ux.action.start( 'Scanning for new hooks' );
+		CliUx.ux.action.start( `Scanning for new hooks since ${ version }.` );
 
 		const report: Map< string, Map< string, string[] > > = new Map<
 			string,
@@ -430,11 +408,12 @@ export default class Analyzer extends Command {
 
 				const name = getHookName( hookName[ 3 ] );
 
-				const description = getHookDescription( raw, name );
+				const description = getHookDescription( raw, name ) || '';
 
 				if ( ! description ) {
 					this.error(
-						`Hook ${ name } has no description. Please add a description.`
+						`Hook ${ name } has no description. Please add a description.`,
+						{ exit: false }
 					);
 				}
 

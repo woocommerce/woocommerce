@@ -6,9 +6,9 @@
  * @version 2.5.0
  */
 
-use Automattic\WooCommerce\Internal\Admin\Orders\ListTable as Custom_Orders_List_Table;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController as Custom_Orders_PageController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -20,10 +20,6 @@ if ( class_exists( 'WC_Admin_Menus', false ) ) {
  * WC_Admin_Menus Class.
  */
 class WC_Admin_Menus {
-	/**
-	 * @var Custom_Orders_List_Table
-	 */
-	private $orders_list_table;
 
 	/**
 	 * Hook in tabs.
@@ -32,6 +28,7 @@ class WC_Admin_Menus {
 		// Add menus.
 		add_action( 'admin_menu', array( $this, 'menu_highlight' ) );
 		add_action( 'admin_menu', array( $this, 'menu_order_count' ) );
+		add_action( 'admin_menu', array( $this, 'maybe_add_new_product_management_experience' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'orders_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'reports_menu' ), 20 );
@@ -416,6 +413,14 @@ class WC_Admin_Menus {
 		);
 	}
 
+	/**
+	 * Maybe add new management product experience.
+	 */
+	public function maybe_add_new_product_management_experience() {
+		if ( Features::is_enabled( 'new-product-management-experience' ) ) {
+			add_submenu_page( 'edit.php?post_type=product', __( 'Add New', 'woocommerce' ), __( 'Add New (MVP)', 'woocommerce' ), 'manage_woocommerce', 'admin.php?page=wc-admin&path=/add-product', '', 2 );
+		}
+	}
 }
 
 return new WC_Admin_Menus();

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e0d445e412092450d0e4660723fbfcce",
+    "content-hash": "39ffd7392014e90aedf4953c104a1af5",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -385,59 +385,6 @@
             "time": "2021-09-16T16:22:04+00:00"
         },
         {
-            "name": "psr/container",
-            "version": "1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/php-fig/container.git",
-                "reference": "b7ce3b176482dbbc1245ebf52b181af44c2cf55f"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/container/zipball/b7ce3b176482dbbc1245ebf52b181af44c2cf55f",
-                "reference": "b7ce3b176482dbbc1245ebf52b181af44c2cf55f",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.0.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Psr\\Container\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "PHP-FIG",
-                    "homepage": "http://www.php-fig.org/"
-                }
-            ],
-            "description": "Common Container Interface (PHP FIG PSR-11)",
-            "homepage": "https://github.com/php-fig/container",
-            "keywords": [
-                "PSR-11",
-                "container",
-                "container-interface",
-                "container-interop",
-                "psr"
-            ],
-            "support": {
-                "issues": "https://github.com/php-fig/container/issues",
-                "source": "https://github.com/php-fig/container/tree/master"
-            },
-            "time": "2017-02-14T16:28:37+00:00"
-        },
-        {
             "name": "sabberworm/php-css-parser",
             "version": "8.4.0",
             "source": {
@@ -681,16 +628,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v7.8.3",
+            "version": "v8.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-blocks.git",
-                "reference": "0d6113c42c7707c0bcae1892b071a9b6253612c7"
+                "reference": "8076840fb21caf29a5d39608e41a3982d4ff6663"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/0d6113c42c7707c0bcae1892b071a9b6253612c7",
-                "reference": "0d6113c42c7707c0bcae1892b071a9b6253612c7",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/8076840fb21caf29a5d39608e41a3982d4ff6663",
+                "reference": "8076840fb21caf29a5d39608e41a3982d4ff6663",
                 "shasum": ""
             },
             "require": {
@@ -698,10 +645,10 @@
                 "composer/installers": "^1.7.0"
             },
             "require-dev": {
-                "johnbillion/wp-hooks-generator": "^0.7.0",
+                "johnbillion/wp-hooks-generator": "^0.9.0",
                 "mockery/mockery": "^1.4",
                 "woocommerce/woocommerce-sniffs": "0.1.0",
-                "wp-phpunit/wp-phpunit": "^5.4",
+                "wp-phpunit/wp-phpunit": "^6.0",
                 "yoast/phpunit-polyfills": "^1.0"
             },
             "type": "wordpress-plugin",
@@ -734,9 +681,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-blocks/issues",
-                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v7.8.3"
+                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v8.3.2"
             },
-            "time": "2022-06-20T13:20:21+00:00"
+            "time": "2022-09-01T10:19:55+00:00"
         }
     ],
     "packages-dev": [

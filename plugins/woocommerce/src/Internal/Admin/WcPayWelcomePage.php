@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
+use Automattic\WooCommerce\Admin\WCAdminHelper;
 
 /**
  * Class WCPayWelcomePage
@@ -11,7 +12,14 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayme
  */
 class WcPayWelcomePage {
 
-	const EXPERIMENT_NAME_BASE = 'woocommerce_payments_menu_promo_nz_ie_:yyyy_:mm';
+	const EXPERIMENT_NAME = 'woocommerce_payments_menu_promo_us_2022';
+
+	/**
+	 * WCPayWelcomePage constructor.
+	 */
+	public function __construct() {
+		add_action( 'admin_menu', array( $this, 'register_payments_welcome_page' ) );
+	}
 
 	/**
 	 * Registers the WooCommerce Payments welcome page.
@@ -19,20 +27,49 @@ class WcPayWelcomePage {
 	public function register_payments_welcome_page() {
 		global $menu;
 
-		// WC Payment must not be active.
-		if ( is_plugin_active( 'woocommerce-payments/woocommerce-payments.php' ) ) {
+		// WC Payment must not be installed.
+		if ( WooCommercePayments::is_installed() ) {
 			return;
 		}
 
-		if ( ! WooCommercePayments::is_supported() ) {
+		// Live store for at least 90 days.
+		if ( ! WCAdminHelper::is_wc_admin_active_for( DAY_IN_SECONDS * 90 ) ) {
 			return;
 		}
 
-		if ( 'yes' === get_option( 'wc_calypso_bridge_payments_dismissed', 'no' ) ) {
+		// Must be a US based business.
+		if ( WC()->countries->get_base_country() !== 'US' ) {
 			return;
 		}
 
-		if ( ! $this->should_add_the_menu() ) {
+		// No existing WCPay account.
+		if ( $this->has_wcpay_account() ) {
+			return;
+		}
+
+		// Suggestions may be disabled via a setting.
+		if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) === 'no' ) {
+			return;
+		}
+
+		/**
+		 * Filter allow marketplace suggestions.
+		 *
+		 * User can disabled all suggestions via filter.
+		 *
+		 * @since 3.6.0
+		 */
+		if ( ! apply_filters( 'woocommerce_allow_marketplace_suggestions', true ) ) {
+			return;
+		}
+
+		// Manually dismissed.
+		if ( get_option( 'wc_calypso_bridge_payments_dismissed', 'no' ) === 'yes' ) {
+			return;
+		}
+
+		// Users must be in the experiment.
+		if ( ! $this->is_user_in_treatment_mode() ) {
 			return;
 		}
 
@@ -58,7 +95,7 @@ class WcPayWelcomePage {
 		// nav is enabled. The new nav disabled everything, except the 'WooCommerce' menu.
 		// We need to register this menu via add_menu_page so that it doesn't become a child of
 		// WooCommerce menu.
-		if ( 'yes' === get_option( 'woocommerce_navigation_enabled', 'no' ) ) {
+		if ( get_option( 'woocommerce_navigation_enabled', 'no' ) === 'yes' ) {
 			$menu_with_nav_data = array(
 				__( 'Payments', 'woocommerce' ),
 				__( 'Payments', 'woocommerce' ),
@@ -83,28 +120,30 @@ class WcPayWelcomePage {
 	}
 
 	/**
+	 * Whether a WCPay account exists. By checking account data cache.
+	 *
+	 * @return boolean
+	 */
+	private function has_wcpay_account(): bool {
+		$account_data = get_option( 'wcpay_account_data' );
+		return isset( $account_data['data'] ) && is_array( $account_data['data'] ) && ! empty( $account_data['data'] );
+	}
+
+	/**
 	 * Checks if user is in the experiment.
 	 *
 	 * @return bool Whether the user is in the treatment group.
 	 */
-	private function should_add_the_menu() {
+	private function is_user_in_treatment_mode() {
 		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
-		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
+		$allow_tracking = get_option( 'woocommerce_allow_tracking' ) === 'yes';
 		$abtest         = new \WooCommerce\Admin\Experimental_Abtest(
 			$anon_id,
 			'woocommerce',
 			$allow_tracking
 		);
 
-		$date            = new \DateTime( 'now', wp_timezone() );
-		$experiment_name = strtr(
-			self::EXPERIMENT_NAME_BASE,
-			array(
-				':yyyy' => $date->format( 'Y' ),
-				':mm'   => $date->format( 'm' ),
-			)
-		);
-
-		return $abtest->get_variation( $experiment_name ) === 'treatment';
+		return $abtest->get_variation( self::EXPERIMENT_NAME ) === 'treatment';
 	}
+
 }

@@ -4,6 +4,7 @@
 import { createServer, Server } from 'net';
 import { execSync } from 'child_process';
 import { join } from 'path';
+import { writeFile } from 'fs/promises';
 
 /**
  * Format version string for regex.
@@ -233,4 +234,18 @@ export const getHookChangeType = ( diff: string ): 'Updated' | 'New' => {
 	const sinces = diff.match( sincesRegex ) || [];
 	// If there is more than one 'since' in the diff, it means that line was updated meaning the hook already exists.
 	return sinces.length > 1 ? 'Updated' : 'New';
+};
+
+export const generateJSONFile = ( filePath: string, data: unknown ) => {
+	const json = JSON.stringify(
+		data,
+		function replacer( key, value ) {
+			if ( value instanceof Map ) {
+				return Array.from( value.entries() );
+			}
+			return value;
+		},
+		2
+	);
+	return writeFile( filePath, json );
 };
