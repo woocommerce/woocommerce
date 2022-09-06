@@ -31,9 +31,8 @@ import {
  */
 import strings from './strings';
 import Banner from './banner';
-import APMs from './apms';
+import APMs, { ToggleState } from './apms';
 import './style.scss';
-import FrequentlyAskedQuestions from './faq';
 import ExitSurveyModal from './exit-survey-modal';
 import { getAdminSetting } from '~/utils/admin-settings';
 
@@ -118,6 +117,7 @@ const ConnectPageOnboarding = ( {
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	setErrorMessage: Function;
 	connectUrl: string;
+	apmsToggleState: ToggleState;
 } ) => {
 	const [ isSubmitted, setSubmitted ] = useState( false );
 	const [ isNoThanksClicked, setNoThanksClicked ] = useState( false );
@@ -145,6 +145,10 @@ const ConnectPageOnboarding = ( {
 			// eslint-disable-next-line camelcase
 			wpcom_connection: isJetpackConnected ? 'Yes' : 'No',
 		} );
+
+		// todo-4529 check the APMs toggleState and install/uninstall plugins depending on the state
+
+		// todo-4529 track info about the enabled APMs
 
 		try {
 			const installAndActivateResponse = await installAndActivatePlugins(
@@ -223,6 +227,7 @@ const ConnectPageOnboarding = ( {
 
 const ConnectAccountPage = () => {
 	const [ errorMessage, setErrorMessage ] = useState( '' );
+	const [ apmsToggleState, setApmsToggleState ] = useState( {} );
 
 	const { isJetpackConnected, connectUrl, hasViewedWelcomePage } = useSelect(
 		( select ) => {
@@ -278,9 +283,13 @@ const ConnectAccountPage = () => {
 					installAndActivatePlugins={ installAndActivatePlugins }
 					connectUrl={ connectUrl }
 					setErrorMessage={ setErrorMessage }
+					apmsToggleState={ apmsToggleState }
 				/>
 				<Banner />
-				<APMs />
+				<APMs
+					toggleState={ apmsToggleState }
+					setToggleState={ setApmsToggleState }
+				/>
 			</div>
 		</div>
 	);

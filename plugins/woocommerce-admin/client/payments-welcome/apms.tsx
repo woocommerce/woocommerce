@@ -22,32 +22,49 @@ const apms = [
 		title: strings.apms.paypal.title,
 		icon: `${ WC_ASSET_URL }images/payment_methods/72x72/paypal.png`,
 		description: strings.apms.paypal.description,
-		link: '#', // todo add the valid link
+		link: 'https://woocommerce.com/products/woocommerce-paypal-payments/',
 	},
 	{
 		id: 'amazonpay',
 		title: strings.apms.amazonpay.title,
 		icon: `${ WC_ASSET_URL }images/payment_methods/72x72/amazonpay.png`,
 		description: strings.apms.amazonpay.description,
-		link: '#', // todo add the valid link
+		link: 'https://woocommerce.com/products/pay-with-amazon/',
 	},
 	{
 		id: 'klarna',
 		title: strings.apms.klarna.title,
 		icon: `${ WC_ASSET_URL }images/payment_methods/72x72/klarna.png`,
 		description: strings.apms.klarna.description,
-		link: '#', // todo add the valid link
+		link: 'https://woocommerce.com/products/klarna-payments/',
 	},
 	{
 		id: 'affirm',
 		title: strings.apms.affirm.title,
 		icon: `${ WC_ASSET_URL }images/payment_methods/72x72/affirm.png`,
 		description: strings.apms.affirm.description,
-		link: '#', // todo add the valid link
+		link: 'https://woocommerce.com/products/woocommerce-gateway-affirm/',
 	},
 ];
 
-const APMs = () => {
+export interface ToggleState {
+	[ key: string ]: boolean;
+}
+
+interface ApmsProps {
+	toggleState: ToggleState;
+	setToggleState: ( value: ToggleState ) => void;
+}
+
+const APMs: React.FunctionComponent< ApmsProps > = ( {
+	toggleState,
+	setToggleState,
+} ) => {
+	const handleToggleChange = ( id: string ) => {
+		const newValue = ! toggleState[ id ];
+		setToggleState( { ...toggleState, [ id ]: newValue } );
+	};
+
 	const apmsList = apms.map( ( apm ) => ( {
 		key: apm.id,
 		title: apm.title,
@@ -60,9 +77,8 @@ const APMs = () => {
 		before: <img src={ apm.icon } alt="" />,
 		after: (
 			<ToggleControl
-				onChange={ function () {
-					// todo implement it
-				} }
+				checked={ toggleState[ apm.id ] || false }
+				onChange={ () => handleToggleChange( apm.id ) }
 			/>
 		),
 	} ) );
@@ -75,7 +91,9 @@ const APMs = () => {
 				<List items={ apmsList } />
 			</CardBody>
 			<CardFooter>
-				<a href="/">{ strings.apms.seeMore }</a>
+				<a href="https://woocommerce.com/products/">
+					{ strings.apms.seeMore }
+				</a>
 			</CardFooter>
 		</Card>
 	);
