@@ -76,10 +76,10 @@ abstract class AbstractBlock {
 	 *
 	 * @param array|WP_Block $attributes Block attributes, or an instance of a WP_Block. Defaults to an empty array.
 	 * @param string         $content    Block content. Default empty string.
-	 * @param WP_Block       $block      Block instance.
+	 * @param WP_Block|null  $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
-	public function render_callback( $attributes = [], $content = '', $block ) {
+	public function render_callback( $attributes = [], $content = '', $block = null ) {
 
 		$render_callback_attributes = $this->parse_render_callback_attributes( $attributes );
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
