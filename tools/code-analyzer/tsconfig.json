@@ -3,5 +3,8 @@
   "ts-node": {
     "transpileOnly": true,
     "files": true,
-  }
+  },
+  "include": [
+		"src/**/*"
+	]
 }
