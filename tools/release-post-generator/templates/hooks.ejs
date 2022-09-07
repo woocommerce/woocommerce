@@ -11,7 +11,7 @@
           <th><strong>Filter</strong></th>
           <th><strong>Description</strong></th>
         </tr>
-        <% changes.hooks.forEach(([description, name]) => { %>
+        <% changes.hooks.forEach(({ name, description }) => { %>
           <tr>
             <td><%= name %></td>
             <td><%= description %></td>

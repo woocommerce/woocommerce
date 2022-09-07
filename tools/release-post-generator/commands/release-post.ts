@@ -67,6 +67,10 @@ program
 				previousVersion.toString()
 			);
 
+			const schemaChanges = changes.schema.filter(
+				( s ) => ! s.areEqual
+			);
+
 			Logger.startTask( 'Finding contributors' );
 			const title = `WooCommerce ${ currentVersion } Released`;
 
@@ -78,7 +82,10 @@ program
 			const html = await renderTemplate( 'release.ejs', {
 				contributors,
 				title,
-				changes,
+				changes: {
+					...changes,
+					schema: schemaChanges,
+				},
 				displayVersion: currentVersion,
 			} );
 
