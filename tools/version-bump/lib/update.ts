@@ -2,11 +2,13 @@
  * External dependencies
  */
 import { readFile, writeFile, stat } from 'fs/promises';
+import { join } from 'path';
 
 /**
  * Internal dependencies
  */
 import { Logger } from './logger';
+import { MONOREPO_ROOT } from './const';
 
 /**
  * Update plugin readme stable tag.
@@ -18,7 +20,7 @@ export const updateReadmeStableTag = async (
 	plugin: string,
 	nextVersion: string
 ): Promise< void > => {
-	const filePath = `plugins/${ plugin }/readme.txt`;
+	const filePath = join( MONOREPO_ROOT, `plugins/${ plugin }/readme.txt` );
 	try {
 		const readmeContents = await readFile( filePath, 'utf8' );
 
@@ -43,7 +45,7 @@ export const updateReadmeChangelog = async (
 	plugin: string,
 	nextVersion: string
 ): Promise< void > => {
-	const filePath = `plugins/${ plugin }/readme.txt`;
+	const filePath = join( MONOREPO_ROOT, `plugins/${ plugin }/readme.txt` );
 	try {
 		const readmeContents = await readFile( filePath, 'utf8' );
 
@@ -68,7 +70,10 @@ export const updateClassPluginFile = async (
 	plugin: string,
 	nextVersion: string
 ): Promise< void > => {
-	const filePath = `plugins/${ plugin }/includes/class-${ plugin }.php`;
+	const filePath = join(
+		MONOREPO_ROOT,
+		`plugins/${ plugin }/includes/class-${ plugin }.php`
+	);
 
 	try {
 		await stat( filePath );
@@ -103,7 +108,10 @@ export const updateJSON = async (
 	plugin: string,
 	nextVersion: string
 ): Promise< void > => {
-	const filePath = `plugins/${ plugin }/${ type }.json`;
+	const filePath = join(
+		MONOREPO_ROOT,
+		`plugins/${ plugin }/${ type }.json`
+	);
 	try {
 		const composerJson = JSON.parse( await readFile( filePath, 'utf8' ) );
 		composerJson.version = nextVersion;
@@ -126,7 +134,10 @@ export const updatePluginFile = async (
 	plugin: string,
 	nextVersion: string
 ): Promise< void > => {
-	const filePath = `plugins/${ plugin }/${ plugin }.php`;
+	const filePath = join(
+		MONOREPO_ROOT,
+		`plugins/${ plugin }/${ plugin }.php`
+	);
 	try {
 		const pluginFileContents = await readFile( filePath, 'utf8' );
 
