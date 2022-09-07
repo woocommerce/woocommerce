@@ -13,7 +13,7 @@ jobs:
               run: |
                   npm install -g pnpm@^6.24.2
                   npm -g i @wordpress/env@5.1.0
-                  pnpm install --filter tools/*
+                  pnpm install --filter "./tools/*"
             - name: Run analyzer
               id: run
               run: |
