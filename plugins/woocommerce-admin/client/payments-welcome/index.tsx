@@ -283,8 +283,6 @@ const ConnectAccountPage = () => {
 
 	const { installAndActivatePlugins } = useDispatch( 'wc/admin/plugins' );
 
-	// console.log( 'index enabled apms', enabledApms );
-
 	return (
 		<div className="connect-account-page">
 			<div className="woocommerce-payments-page is-narrow connect-account">

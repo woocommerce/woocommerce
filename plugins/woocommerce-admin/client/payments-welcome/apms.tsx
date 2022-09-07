@@ -70,8 +70,12 @@ const APMs: React.FunctionComponent< ApmsProps > = ( {
 	setEnabledApms,
 } ) => {
 	const handleToggleChange = ( apm: Apm ) => {
-		const newEnabledApms = enabledApms.add( apm );
-		setEnabledApms( newEnabledApms );
+		if ( enabledApms.has( apm ) ) {
+			enabledApms.delete( apm );
+		} else {
+			enabledApms.add( apm );
+		}
+		setEnabledApms( new Set< Apm >( enabledApms ) );
 	};
 
 	const apmsList = apms.map( ( apm ) => ( {
