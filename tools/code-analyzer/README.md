@@ -8,16 +8,15 @@
 
 Currently there are just 2 commands:
 
-1. `analyzer`. Analyzer serves 2 roles currently, as a linter for PRs to check if introduced hook/template/db changes have associated changelog entries and also to provide file output of changes between
-WooCommerce versions for the purpose of automating release processes (such as generating release posts.)
+1. `analyzer`. Analyzer is used as a linter for PRs to check if hook/template/db changes were introduced. It produces output either directly on CI or via GH actions `set-output`.
 
 Here is an example `analyzer` command:
 
-`./bin/dev analyzer release/6.8 "6.8.0" -b=release/6.7`
+`pnpm run analyzer -- release/6.8 "6.8.0" -b=release/6.7`
 
 In this command we compare the `release/6.7` and `release/6.8` branches to find differences, and we're looking for changes introduced since `6.8.0` (using the `@since` tag).
 
-To find out more about the other arguments to the command you can run `./bin/dev analyzer --help`
+To find out more about the other arguments to the command you can run `pnpm run analyzer -- --help`
 
 2. `major_minor`. This simple CLI tool gives you the latest `.0` major/minor released version of a plugin's mainfile based on Woo release conventions. 
 
