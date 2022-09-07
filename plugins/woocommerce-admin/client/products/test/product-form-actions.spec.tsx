@@ -427,7 +427,7 @@ describe( 'Validations', () => {
 		const salePriceErrorMessage =
 			'Please enter a price with one monetary decimal point without thousand separators and currency symbols.';
 		const highSalePriceErrorMessage =
-			'Sale price cannot be higher than list price.';
+			'Sale price cannot be equal to or higher than list price.';
 		const productWithoutName: Partial< Product > = {
 			name: '',
 		};
