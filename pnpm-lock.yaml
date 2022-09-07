@@ -1913,36 +1913,30 @@ importers:
       '@octokit/rest': ^19.0.4
       '@tsconfig/node16': ^1.0.3
       '@types/express': ^4.17.13
-      chalk: ^4.1.2
       cli-core: workspace:*
       code-analyzer: workspace:*
       commander: 9.4.0
-      dotenv: ^10.0.0
       ejs: ^3.1.8
       express: ^4.18.1
       form-data: ^4.0.0
       lodash.shuffle: ^4.2.0
       node-fetch: ^2.6.7
       open: ^8.4.0
-      ora: ^5.4.1
       semver: ^7.3.2
       ts-node: ^10.9.1
       typescript: ^4.7.4
     dependencies:
       '@commander-js/extra-typings': 0.1.0_commander@9.4.0
       '@octokit/rest': 19.0.4
-      chalk: 4.1.2
       cli-core: link:../cli-core
       code-analyzer: link:../code-analyzer
       commander: 9.4.0
-      dotenv: 10.0.0
       ejs: 3.1.8
       express: 4.18.1
       form-data: 4.0.0
       lodash.shuffle: 4.2.0
       node-fetch: 2.6.7
       open: 8.4.0
-      ora: 5.4.1
       semver: 7.3.7
       ts-node: 10.9.1_e6fa45c66305bf393cad9090c20eec92
     devDependencies:
@@ -16341,7 +16335,7 @@ packages:
       puppeteer: '>=1.19.0'
     dependencies:
       '@babel/runtime': 7.17.7
-      '@wordpress/keycodes': 3.10.0
+      '@wordpress/keycodes': 3.16.0
       '@wordpress/url': 3.16.0
       jest: 27.5.1
       lodash: 4.17.21
@@ -18741,7 +18735,7 @@ packages:
       loader-utils: 1.4.0
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 4.46.0
+      webpack: 4.46.0_webpack-cli@3.3.12
     dev: true
 
   /babel-loader/8.2.3_d3f6fe5812216e437b67a6bf164a056c:
@@ -18771,7 +18765,7 @@ packages:
       loader-utils: 1.4.0
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 5.70.0
+      webpack: 5.70.0_webpack-cli@4.9.2
     dev: true
 
   /babel-messages/6.23.0:
@@ -21391,7 +21385,7 @@ packages:
       postcss-value-parser: 4.2.0
       schema-utils: 2.7.1
       semver: 6.3.0
-      webpack: 4.46.0
+      webpack: 4.46.0_webpack-cli@3.3.12
     dev: true
 
   /css-loader/3.6.0_webpack@5.70.0:
@@ -21413,7 +21407,7 @@ packages:
       postcss-value-parser: 4.2.0
       schema-utils: 2.7.1
       semver: 6.3.0
-      webpack: 5.70.0_webpack-cli@3.3.12
+      webpack: 5.70.0
 
   /css-loader/5.2.7_webpack@5.70.0:
     resolution: {integrity: sha512-Q7mOvpBNBG7YrVGMxRxcBJZFL75o+cH2abNASdibkj/fffYD8qWbInZrD0S9ccI6vZclF3DsHE7njGlLtaHbhg==}
@@ -39397,7 +39391,7 @@ packages:
       serialize-javascript: 4.0.0
       source-map: 0.6.1
       terser: 4.8.0
-      webpack: 4.46.0
+      webpack: 4.46.0_webpack-cli@3.3.12
       webpack-sources: 1.4.3
       worker-farm: 1.7.0
     dev: true
@@ -39488,7 +39482,7 @@ packages:
       serialize-javascript: 6.0.0
       source-map: 0.6.1
       terser: 5.10.0
-      webpack: 5.70.0
+      webpack: 5.70.0_webpack-cli@3.3.12
 
   /terser/4.8.0:
     resolution: {integrity: sha512-EAPipTNeWsb/3wLPeup1tVPaXfIaU68xMnVdPafIL1TV05OhASArYyIfFvnvJCNrR2NIOvDVNNTFRa+Re2MWyw==}
@@ -39950,7 +39944,7 @@ packages:
       '@tsconfig/node10': 1.0.8
       '@tsconfig/node12': 1.0.9
       '@tsconfig/node14': 1.0.1
-      '@tsconfig/node16': 1.0.3
+      '@tsconfig/node16': 1.0.2
       '@types/node': 16.10.3
       acorn: 8.7.0
       acorn-walk: 8.2.0
