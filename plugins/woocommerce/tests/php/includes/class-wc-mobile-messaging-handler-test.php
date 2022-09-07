@@ -94,14 +94,8 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 	 * Sets store to location USA and currency USD making it In-Person Payments eligible
 	 */
 	private function make_store_ipp_eligible() {
-		update_option(
-			'woocommerce_get_base_location',
-			'US:CA'
-		);
-		update_option(
-			'woocommerce_currency',
-			'USD'
-		);
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_currency', 'USD' );
 	}
 
 	/**
