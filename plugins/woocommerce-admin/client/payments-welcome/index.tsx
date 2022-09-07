@@ -31,7 +31,7 @@ import {
  */
 import strings from './strings';
 import Banner from './banner';
-import APMs, { ToggleState, apms } from './apms';
+import APMs, { Apm } from './apms';
 import './style.scss';
 import ExitSurveyModal from './exit-survey-modal';
 import { getAdminSetting } from '~/utils/admin-settings';
@@ -111,14 +111,14 @@ const ConnectPageOnboarding = ( {
 	installAndActivatePlugins,
 	setErrorMessage,
 	connectUrl,
-	apmsToggleState,
+	enabledApms,
 }: {
 	isJetpackConnected?: boolean;
 	installAndActivatePlugins: PluginsStoreActions[ 'installAndActivatePlugins' ];
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	setErrorMessage: Function;
 	connectUrl: string;
-	apmsToggleState: ToggleState;
+	enabledApms: Set< Apm >;
 } ) => {
 	const [ isSubmitted, setSubmitted ] = useState( false );
 	const [ isNoThanksClicked, setNoThanksClicked ] = useState( false );
@@ -147,14 +147,16 @@ const ConnectPageOnboarding = ( {
 			wpcom_connection: isJetpackConnected ? 'Yes' : 'No',
 		} );
 
-		// todo-4529 track info about the enabled APMs
+		// todo-4529 track PROPERLY info about the enabled APMs
+		// recordEvent( 'wcpay_extension_installed', {
+		// 	extensions: [ ...enabledApms ]
+		// 		.map( ( apm ) => apm.id )
+		// 		.join( ', ' ),
+		// } );
 
-		const pluginsToInstall = [];
-		apms.forEach( ( apm ) => {
-			if ( apmsToggleState[ apm.id ] ) {
-				pluginsToInstall.push( apm.extension );
-			}
-		} );
+		const pluginsToInstall = [ ...enabledApms ].map(
+			( apm ) => apm.extension
+		);
 
 		try {
 			const installAndActivateResponse = await installAndActivatePlugins(
@@ -233,7 +235,8 @@ const ConnectPageOnboarding = ( {
 
 const ConnectAccountPage = () => {
 	const [ errorMessage, setErrorMessage ] = useState( '' );
-	const [ apmsToggleState, setApmsToggleState ] = useState( {} );
+
+	const [ enabledApms, setEnabledApms ] = useState( new Set< Apm >() );
 
 	const { isJetpackConnected, connectUrl, hasViewedWelcomePage } = useSelect(
 		( select ) => {
@@ -280,6 +283,8 @@ const ConnectAccountPage = () => {
 
 	const { installAndActivatePlugins } = useDispatch( 'wc/admin/plugins' );
 
+	// console.log( 'index enabled apms', enabledApms );
+
 	return (
 		<div className="connect-account-page">
 			<div className="woocommerce-payments-page is-narrow connect-account">
@@ -289,12 +294,12 @@ const ConnectAccountPage = () => {
 					installAndActivatePlugins={ installAndActivatePlugins }
 					connectUrl={ connectUrl }
 					setErrorMessage={ setErrorMessage }
-					apmsToggleState={ apmsToggleState }
+					enabledApms={ enabledApms }
 				/>
 				<Banner />
 				<APMs
-					toggleState={ apmsToggleState }
-					setToggleState={ setApmsToggleState }
+					enabledApms={ enabledApms }
+					setEnabledApms={ setEnabledApms }
 				/>
 			</div>
 		</div>

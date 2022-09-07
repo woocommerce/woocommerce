@@ -16,7 +16,16 @@ import {
 import strings from './strings';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
 
-export const apms = [
+export interface Apm {
+	id: string;
+	title: string;
+	icon: string;
+	description: string;
+	link: string;
+	extension: string;
+}
+
+export const apms: Apm[] = [
 	{
 		id: 'paypal',
 		title: strings.apms.paypal.title,
@@ -51,22 +60,18 @@ export const apms = [
 	},
 ];
 
-export interface ToggleState {
-	[ key: string ]: boolean;
-}
-
 interface ApmsProps {
-	toggleState: ToggleState;
-	setToggleState: ( value: ToggleState ) => void;
+	enabledApms: Set< Apm >;
+	setEnabledApms: ( value: Set< Apm > ) => void;
 }
 
 const APMs: React.FunctionComponent< ApmsProps > = ( {
-	toggleState,
-	setToggleState,
+	enabledApms,
+	setEnabledApms,
 } ) => {
-	const handleToggleChange = ( id: string ) => {
-		const newValue = ! toggleState[ id ];
-		setToggleState( { ...toggleState, [ id ]: newValue } );
+	const handleToggleChange = ( apm: Apm ) => {
+		const newEnabledApms = enabledApms.add( apm );
+		setEnabledApms( newEnabledApms );
 	};
 
 	const apmsList = apms.map( ( apm ) => ( {
@@ -81,8 +86,8 @@ const APMs: React.FunctionComponent< ApmsProps > = ( {
 		before: <img src={ apm.icon } alt="" />,
 		after: (
 			<ToggleControl
-				checked={ toggleState[ apm.id ] || false }
-				onChange={ () => handleToggleChange( apm.id ) }
+				checked={ enabledApms.has( apm ) }
+				onChange={ () => handleToggleChange( apm ) }
 			/>
 		),
 	} ) );
