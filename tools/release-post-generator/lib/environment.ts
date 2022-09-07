@@ -1,7 +1,7 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
-import { Logger } from './logger';
+import { Logger } from 'cli-core/src/logger';
 
 export const getEnvVar = ( varName: string, isRequired = false ) => {
 	const value = process.env[ varName ];

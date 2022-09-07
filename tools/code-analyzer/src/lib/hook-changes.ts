@@ -1,12 +1,15 @@
 /**
+ * External dependencies
+ */
+import { getFilename, getPatches } from 'cli-core/src/util';
+
+/**
  * Internal dependencies
  */
 import {
-	getFilename,
 	getHookChangeType,
 	getHookDescription,
 	getHookName,
-	getPatches,
 	getVersionRegex,
 } from '../utils';
 

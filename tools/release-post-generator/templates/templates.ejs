@@ -2,7 +2,7 @@
 <h2 id="template-changes">Template Changes</h2>
 <!-- /wp:heading -->
 
-<% if (changes.templates.length) { %>
+<% if (changes.templates.size) { %>
   <!-- wp:table -->
   <figure class="wp-block-table">
     <table>
@@ -14,7 +14,7 @@
       <tbody>
         
         <!-- for each template change (template / description) -->
-        <% changes.templates.forEach((change) => { %>
+        <% changes.templates.forEach(([ change ]) => { %>
           <tr>
             <td><%= change %></td>
           </tr>

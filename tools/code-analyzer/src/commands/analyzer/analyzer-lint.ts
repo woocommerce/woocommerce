@@ -3,6 +3,7 @@
  */
 import { Command } from '@commander-js/extra-typings';
 import { Logger } from 'cli-core/src/logger';
+import { join } from 'path';
 
 /**
  * Internal dependencies
@@ -33,7 +34,7 @@ const program = new Command()
 	.option(
 		'-s, --source <source>',
 		'Git repo url or local path to a git repo.',
-		process.cwd()
+		join( process.cwd(), '../../' )
 	)
 	.option(
 		'-o, --outputStyle <outputStyle>',

@@ -13,7 +13,6 @@ import { Logger } from 'cli-core/src/logger';
  */
 import { program } from '../program';
 import { renderTemplate } from '../lib/render-template';
-import { processChanges } from '../lib/process-changes';
 import { createWpComDraftPost } from '../lib/draft-post';
 import { generateContributors } from '../lib/contributors';
 
@@ -60,8 +59,6 @@ program
 				);
 			}
 
-			// generates a `changes.json` file in the current directory.
-
 			const changes = await scanForChanges(
 				currentVersion,
 				currentVersion,
@@ -69,17 +66,6 @@ program
 				'https://github.com/woocommerce/woocommerce.git',
 				previousVersion.toString()
 			);
-
-			console.log( changes );
-
-			// JSON.parse(
-			// 	await promises.readFile(
-			// 		process.cwd() + '/changes.json',
-			// 		'utf8'
-			// 	)
-			// );
-
-			const changeset = processChanges( changes );
 
 			Logger.startTask( 'Finding contributors' );
 			const title = `WooCommerce ${ currentVersion } Released`;
@@ -92,7 +78,7 @@ program
 			const html = await renderTemplate( 'release.ejs', {
 				contributors,
 				title,
-				changes: changeset,
+				changes,
 				displayVersion: currentVersion,
 			} );
 

@@ -1,7 +1,7 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
-import { getFilename, getPatches } from '../utils';
+import { getFilename, getPatches } from 'cli-core/src/git';
 
 export const scanForDBChanges = ( content: string ) => {
 	const matchPatches = /^a\/(.+).php/g;

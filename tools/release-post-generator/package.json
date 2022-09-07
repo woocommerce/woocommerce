@@ -4,7 +4,7 @@
 	"description": "Automate release post generation for Wordpress plugins",
 	"main": " ",
 	"scripts": {
-		"release": "ts-node ./index.ts release --"
+		"release": "ts-node ./index.ts release"
 	},
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",

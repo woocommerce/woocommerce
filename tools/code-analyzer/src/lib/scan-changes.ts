@@ -3,20 +3,16 @@
  */
 import { Logger } from 'cli-core/src/logger';
 import { join } from 'path';
+import { cloneRepo, generateDiff } from 'cli-core/src/git';
 
 /**
  * Internal dependencies
  */
-import {
-	cloneRepo,
-	generateDiff,
-	generateSchemaDiff,
-	SchemaDiff,
-} from '../git';
 import { execAsync } from '../utils';
 import { scanForDBChanges } from './db-changes';
 import { scanForHookChanges } from './hook-changes';
 import { scanForTemplateChanges } from './template-changes';
+import { SchemaDiff, generateSchemaDiff } from '../git';
 
 export const scanForChanges = async (
 	compareVersion: string,

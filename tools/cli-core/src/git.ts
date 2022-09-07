@@ -10,9 +10,37 @@ import { v4 } from 'uuid';
 import { mkdir, rm } from 'fs/promises';
 
 /**
- * Internal dependencies
+ * Get filename from patch
+ *
+ * @param {string} str String to extract filename from.
+ * @return {string} formatted filename.
  */
-import { startWPEnv, stopWPEnv } from './utils';
+export const getFilename = ( str: string ): string => {
+	return str.replace( /^a(.*)\s.*/, '$1' );
+};
+
+/**
+ * Get patches
+ *
+ * @param {string} content Patch content.
+ * @param {RegExp} regex   Regex to find specific patches.
+ * @return {string[]} Array of patches.
+ */
+export const getPatches = ( content: string, regex: RegExp ): string[] => {
+	const patches = content.split( 'diff --git ' );
+	const changes: string[] = [];
+
+	for ( const p in patches ) {
+		const patch = patches[ p ];
+		const id = patch.match( regex );
+
+		if ( id ) {
+			changes.push( patch );
+		}
+	}
+
+	return changes;
+};
 
 /**
  * Check if a string is a valid url.
@@ -200,130 +228,4 @@ export const generateDiff = async (
 
 		return '';
 	}
-};
-/**
- * Get all schema strings found in WooCommerce.
- *
- * @param {string}   tmpRepoPath - filepath to the repo to generate a schema from.
- * @param {Function} error       - Error logging function.
- * @return {Object}	Object of schema strings.
- */
-export const getSchema = async (
-	tmpRepoPath: string,
-	error: ( s: string ) => void
-): Promise< {
-	schema: string;
-	OrdersTableDataStore: string;
-} | void > => {
-	try {
-		const pluginPath = join( tmpRepoPath, 'plugins/woocommerce' );
-		const getSchemaPath =
-			'wp-content/plugins/woocommerce/bin/wc-get-schema.php';
-
-		// Get the WooCommerce schema from wp cli
-		const schema = execSync(
-			`wp-env run cli "wp eval-file '${ getSchemaPath }'"`,
-			{
-				cwd: pluginPath,
-				encoding: 'utf-8',
-			}
-		);
-
-		// Get the OrdersTableDataStore schema.
-		const OrdersTableDataStore = execSync(
-			'wp-env run cli "wp eval \'echo (new Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore)->get_database_schema();\'"',
-			{
-				cwd: pluginPath,
-				encoding: 'utf-8',
-			}
-		);
-
-		return {
-			schema,
-			OrdersTableDataStore,
-		};
-	} catch ( e ) {
-		if ( e instanceof Error ) {
-			error( e.message );
-		}
-	}
-};
-
-/**
- * Generate a schema for each branch being compared.
- *
- * @param {string}   tmpRepoPath Path to repository used to generate schema diff.
- * @param {string}   compare     Branch/commit hash to compare against the base.
- * @param {string}   base        Base branch/commit hash.
- * @param            build       Build to perform between checkouts.
- * @param {Function} error       error print method.
- * @return {Object|void}     diff object.
- */
-export const generateSchemaDiff = async (
-	tmpRepoPath: string,
-	compare: string,
-	base: string,
-	build: () => void,
-	error: ( s: string ) => void
-): Promise< {
-	[ key: string ]: {
-		description: string;
-		base: string;
-		compare: string;
-		method: string;
-		areEqual: boolean;
-	};
-} | void > => {
-	const git = simpleGit( { baseDir: tmpRepoPath } );
-
-	// Be sure the wp-env engine is started.
-	await startWPEnv( tmpRepoPath, error );
-
-	// Force checkout because sometimes a build will generate a lockfile change.
-	await git.checkout( base, [ '--force' ] );
-	build();
-	const baseSchema = await getSchema(
-		tmpRepoPath,
-		( errorMessage: string ) => {
-			error(
-				`Unable to get schema for branch ${ base }. \n${ errorMessage }`
-			);
-		}
-	);
-
-	// Force checkout because sometimes a build will generate a lockfile change.
-	await git.checkout( compare, [ '--force' ] );
-	build();
-	const compareSchema = await getSchema(
-		tmpRepoPath,
-		( errorMessage: string ) => {
-			error(
-				`Unable to get schema for branch ${ compare }. \n${ errorMessage }`
-			);
-		}
-	);
-
-	stopWPEnv( tmpRepoPath, error );
-
-	if ( ! baseSchema || ! compareSchema ) {
-		return;
-	}
-	return {
-		schema: {
-			description: 'WooCommerce Base Schema',
-			base: baseSchema.schema,
-			compare: compareSchema.schema,
-			method: 'WC_Install->get_schema',
-			areEqual: baseSchema.schema === compareSchema.schema,
-		},
-		OrdersTableDataStore: {
-			description: 'OrdersTableDataStore Schema',
-			base: baseSchema.OrdersTableDataStore,
-			compare: compareSchema.OrdersTableDataStore,
-			method: 'Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore->get_database_schema',
-			areEqual:
-				baseSchema.OrdersTableDataStore ===
-				compareSchema.OrdersTableDataStore,
-		},
-	};
 };

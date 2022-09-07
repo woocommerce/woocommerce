@@ -1,6 +1,6 @@
 {
 	"name": "code-analyzer",
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"description": "A tool to analyze code changes in WooCommerce Monorepo.",
 	"author": "Automattic",
 	"bin": {

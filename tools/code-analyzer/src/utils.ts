@@ -28,39 +28,6 @@ export const getVersionRegex = ( rawVersion: string ): string => {
 };
 
 /**
- * Get filename from patch
- *
- * @param {string} str String to extract filename from.
- * @return {string} formatted filename.
- */
-export const getFilename = ( str: string ): string => {
-	return str.replace( /^a(.*)\s.*/, '$1' );
-};
-
-/**
- * Get patches
- *
- * @param {string} content Patch content.
- * @param {RegExp} regex   Regex to find specific patches.
- * @return {string[]} Array of patches.
- */
-export const getPatches = ( content: string, regex: RegExp ): string[] => {
-	const patches = content.split( 'diff --git ' );
-	const changes: string[] = [];
-
-	for ( const p in patches ) {
-		const patch = patches[ p ];
-		const id = patch.match( regex );
-
-		if ( id ) {
-			changes.push( patch );
-		}
-	}
-
-	return changes;
-};
-
-/**
  * Get hook name.
  *
  * @param {string} name Raw hook name.
