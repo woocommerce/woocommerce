@@ -10,6 +10,31 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 	const BLOG_ID = 2;
 
 	/**
+	 * @var string $initial_country that is set on site which is a platform for unit tests, before running tests in this test suite.
+	 */
+	private static $initial_country = '';
+	/**
+	 * @var string $initial_currency that is set on site which is a platform for unit tests, before running tests in this test suite.
+	 */
+	private static $initial_currency = '';
+
+	/**
+	 * Saves values of initial country and currency before running test suite.
+	 */
+	public static function setUpBeforeClass(): void {
+		self::$initial_country  = WC()->countries->get_base_country();
+		self::$initial_currency = get_woocommerce_currency();
+	}
+
+	/**
+	 * Restores initial values of country and currency after running test suite.
+	 */
+	public static function tearDownAfterClass(): void {
+		update_option( 'woocommerce_default_country', self::$initial_country );
+		update_option( 'woocommerce_currency', self::$initial_currency );
+	}
+
+	/**
 	 * Tests if SUT is not throwing an exception in scenario, when user has only
 	 * one mobile platform usage recorded.
 	 */
@@ -43,32 +68,17 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests if SUT returns correct message when the user uses mobile app but store is not eligible for IPP
+	 * Tests if SUT returns correct message when the user uses mobile app but store is not eligible for IPP and order is
 	 */
 	public function test_show_manage_order_message_when_store_is_NOT_ipp_eligible() {
 		$now = $this->prepare_timeline_with_valid_last_mobile_app_usage();
+		$this->make_store_not_ipp_eligible();
+		$ipp_eligible_order = $this->generate_ipp_eligible_order();
 
-		$mobile_message = WC_Mobile_Messaging_Handler::prepare_mobile_message( new WC_Order(), self::BLOG_ID, $now );
+		$mobile_message = WC_Mobile_Messaging_Handler::prepare_mobile_message( $ipp_eligible_order, self::BLOG_ID, $now );
 
 		$this->assertEquals(
 			'<a href="https://woocommerce.com/mobile/order?blog_id=' . self::BLOG_ID . '&#038;order_id=' . 0 . '">Manage the order</a> with the app.',
-			$mobile_message
-		);
-	}
-
-	/**
-	 * Tests if SUT returns correct message when the user uses mobile app but store is not eligible for IPP
-	 */
-	public function test_show_manage_order_message_when_store_is_but_order_is_NOT_ipp_eligible() {
-		$now = $this->prepare_timeline_with_valid_last_mobile_app_usage();
-		$this->make_store_ipp_eligible();
-
-		$not_ipp_eligible_order = new WC_Order();
-
-		$mobile_message = WC_Mobile_Messaging_Handler::prepare_mobile_message( $not_ipp_eligible_order, self::BLOG_ID, $now );
-
-		$this->assertEquals(
-			'<a href="https://woocommerce.com/mobile/order?blog_id=2&#038;order_id=0">Manage the order</a> with the app.',
 			$mobile_message
 		);
 	}
@@ -96,6 +106,14 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 	private function make_store_ipp_eligible() {
 		update_option( 'woocommerce_default_country', 'US:CA' );
 		update_option( 'woocommerce_currency', 'USD' );
+	}
+
+	/**
+	 * Sets store to random location and currency making it NOT In-Person Payments eligible
+	 */
+	private function make_store_not_ipp_eligible() {
+		update_option( 'woocommerce_default_country', 'AA:BB' );
+		update_option( 'woocommerce_currency', 'CCC' );
 	}
 
 	/**
