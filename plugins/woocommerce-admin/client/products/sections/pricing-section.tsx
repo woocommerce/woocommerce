@@ -45,7 +45,7 @@ export const PricingSection: React.FC = () => {
 	const context = useContext( CurrencyContext );
 	const { getCurrencyConfig } = context;
 	const { decimalSeparator } = getCurrencyConfig();
-	const priceValidation = ( value: string, name: string ) => {
+	const sanitizeAndSetPrice = ( name: string, value: string ) => {
 		// Build regex to strip out everything except digits, decimal point and minus sign.
 		const regex = new RegExp(
 			NUMBERS_AND_DECIMAL_SEPARATOR.replace( '%s', decimalSeparator ),
@@ -134,7 +134,7 @@ export const PricingSection: React.FC = () => {
 						context,
 					} ) }
 					onChange={ ( value: string ) =>
-						priceValidation( value, 'regular_price' )
+						sanitizeAndSetPrice( 'regular_price', value )
 					}
 				/>
 				{ ! isTaxSettingsResolving && (
@@ -145,9 +145,8 @@ export const PricingSection: React.FC = () => {
 			</div>
 
 			<div className="woocommerce-product-form__custom-label-input">
-				<label htmlFor="sale_price">{ salePriceTitle }</label>
 				<InputControl
-					hideLabelFromVision={ true }
+					label={ salePriceTitle }
 					id="sale_price"
 					placeholder={ __( '8.59', 'woocommerce' ) }
 					{ ...getInputControlProps( {
@@ -155,7 +154,7 @@ export const PricingSection: React.FC = () => {
 						context,
 					} ) }
 					onChange={ ( value: string ) =>
-						priceValidation( value, 'sale_price' )
+						sanitizeAndSetPrice( 'sale_price', value )
 					}
 				/>
 			</div>

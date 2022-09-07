@@ -27,6 +27,13 @@ class ListTable extends WP_List_Table {
 	private $has_filter = false;
 
 	/**
+	 * Page controller instance for this request.
+	 *
+	 * @var PageController
+	 */
+	private $page_controller;
+
+	/**
 	 * Sets up the admin list table for orders (specifically, for orders managed by the OrdersTableDataStore).
 	 *
 	 * @see WC_Admin_List_Table_Orders for the corresponding class used in relation to the traditional WP Post store.
@@ -42,18 +49,44 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Init method, invoked by DI container.
+	 *
+	 * @internal This method is not intended to be used directly (except for testing).
+	 * @param PageController $page_controller Page controller instance for this request.
+	 */
+	final public function init( PageController $page_controller ) {
+		$this->page_controller = $page_controller;
+	}
+
+	/**
 	 * Performs setup work required before rendering the table.
 	 *
 	 * @return void
 	 */
 	public function setup(): void {
 		add_action( 'admin_notices', array( $this, 'bulk_action_notices' ) );
-		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'get_columns' ) );
+		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'get_columns' ), 0 );
 		add_filter( 'set_screen_option_edit_orders_per_page', array( $this, 'set_items_per_page' ), 10, 3 );
 		add_filter( 'default_hidden_columns', array( $this, 'default_hidden_columns' ), 10, 2 );
 
 		$this->items_per_page();
 		set_screen_options();
+	}
+
+	/**
+	 * Handles output for the default column.
+	 *
+	 * @param \WC_Order $order       Current WooCommerce order object.
+	 * @param string    $column_name Identifier for the custom column.
+	 */
+	public function column_default( $order, $column_name ) {
+		/**
+		 * Fires for each custom column in the Custom Order Table in the administrative screen.
+		 *
+		 * @param string    $column_name Identifier for the custom column.
+		 * @param \WC_Order $order       Current WooCommerce order object.
+		 */
+		do_action( "manage_{$this->screen->id}_custom_column", $column_name, $order );
 	}
 
 	/**
@@ -88,16 +121,18 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function display() {
-		$title   = esc_html__( 'Orders', 'woocommerce' );
-		$add_new = esc_html__( 'Add Order', 'woocommerce' );
+		$title         = esc_html__( 'Orders', 'woocommerce' );
+		$add_new       = esc_html__( 'Add Order', 'woocommerce' );
+		$new_page_link = $this->page_controller->get_new_page_url();
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo "
+		echo wp_kses_post(
+			"
 			<div class='wrap'>
 				<h1 class='wp-heading-inline'>{$title}</h1>
-				<a href='/to-implement' class='page-title-action'>{$add_new}</a>
-				<hr class='wp-header-end'>
-		";
+				<a href='" . esc_url( $new_page_link ) . "' class='page-title-action'>{$add_new}</a>
+				<hr class='wp-header-end'>"
+		);
 
 		if ( $this->has_items() || $this->has_filter ) {
 			$this->views();
@@ -575,12 +610,10 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @param WC_Order $order Order object.
 	 *
-	 * @return mixed|string Edit link for the order.
+	 * @return string Edit link for the order.
 	 */
-	private function get_order_edit_link( WC_Order $order ) {
-		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ?
-			admin_url( 'admin.php?page=wc-orders&id=' . absint( $order->get_id() ) ) . '&action=edit' :
-			admin_url( 'post.php?post=' . absint( $order->get_id() ) ) . '&action=edit';
+	private function get_order_edit_link( WC_Order $order ) : string {
+		return $this->page_controller->get_edit_url( $order->get_id() );
 	}
 
 	/**

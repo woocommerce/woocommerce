@@ -85,8 +85,9 @@ phpcs-report.xml
 allure-report
 allure-results
 
-# Code analyzer output
+# Code analyzer output and env
 changes.json
+.env
 
 # Playwright output & working files
 /plugins/woocommerce/tests/e2e-pw/output
