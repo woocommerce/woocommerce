@@ -86,11 +86,6 @@ export const PricingSection: React.FC = () => {
 		},
 	} );
 
-	const regularPriceProps = getInputControlProps( {
-		...getInputProps( 'regular_price' ),
-		context,
-	} );
-
 	const salePriceProps = getInputControlProps( {
 		...getInputProps( 'sale_price' ),
 		context,
@@ -121,18 +116,14 @@ export const PricingSection: React.FC = () => {
 				</>
 			}
 		>
-			<div
-				className={ classnames(
-					'woocommerce-product-form__custom-label-input',
-					{
-						'has-error': regularPriceProps?.help !== '',
-					}
-				) }
-			>
+			<div className="woocommerce-product-form__custom-label-input">
 				<InputControl
 					label={ __( 'List price', 'woocommerce' ) }
 					placeholder={ __( '10.59', 'woocommerce' ) }
-					{ ...regularPriceProps }
+					{ ...getInputControlProps( {
+						...getInputProps( 'regular_price' ),
+						context,
+					} ) }
 					onChange={ ( value: string ) => {
 						const sanitizedValue = sanitizePrice( value );
 						setValue( 'regular_price', sanitizedValue );
@@ -149,7 +140,7 @@ export const PricingSection: React.FC = () => {
 				className={ classnames(
 					'woocommerce-product-form__custom-label-input',
 					{
-						'has-error': regularPriceProps?.help !== '',
+						'has-error': salePriceProps?.help !== '',
 					}
 				) }
 			>
