@@ -8,6 +8,7 @@ import { mkdirSync } from 'fs';
 import { simpleGit } from 'simple-git';
 import { v4 } from 'uuid';
 import { mkdir, rm } from 'fs/promises';
+import { URL } from 'node:url';
 
 /**
  * Get filename from patch
