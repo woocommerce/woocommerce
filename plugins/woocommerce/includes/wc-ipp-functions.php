@@ -16,7 +16,6 @@
 function is_order_in_person_payment_eligible( WC_Order $order ): bool {
 	$has_status            = in_array( $order->get_status(), array( 'pending', 'on-hold', 'processing' ), true );
 	$has_payment_method    = in_array( $order->get_payment_method(), array( 'cod', 'woocommerce_payments', 'none' ), true );
-	$store_is_eligible     = is_store_in_person_payment_eligible();
 	$order_is_not_paid     = null === $order->get_date_paid();
 	$order_is_not_refunded = empty( $order->get_refunds() );
 
@@ -30,7 +29,7 @@ function is_order_in_person_payment_eligible( WC_Order $order ): bool {
 		}
 	}
 
-	return $has_status && $has_payment_method && $store_is_eligible && $order_is_not_paid && $order_is_not_refunded && $order_has_no_subscription_products;
+	return $has_status && $has_payment_method && $order_is_not_paid && $order_is_not_refunded && $order_has_no_subscription_products;
 }
 
 /**
