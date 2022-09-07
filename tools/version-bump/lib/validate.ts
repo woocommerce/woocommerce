@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { valid, lt as versionLessThan, prerelease } from 'semver';
+import { valid, lt as versionLessThan, prerelease, parse } from 'semver';
 import { readFile } from 'fs/promises';
 
 /**
@@ -36,19 +36,12 @@ export const getCurrentVersion = async (
 export const stripPrereleaseParameters = (
 	prereleaseVersion: string
 ): string => {
-	const prereleaseParameters = prerelease( prereleaseVersion );
-	if ( ! prereleaseParameters ) {
-		return prereleaseVersion;
+	const parsedVersion = parse( prereleaseVersion );
+	if ( parsedVersion ) {
+		const { major, minor, patch } = parsedVersion;
+		return `${ major }.${ minor }.${ patch }`;
 	}
-
-	const substr = prereleaseParameters.reduce( ( str, value, idx ) => {
-		if ( idx === 0 ) {
-			return `-${ value }`;
-		}
-		return `${ str }.${ value }`;
-	}, '' );
-
-	return prereleaseVersion.replace( substr.toString(), '' );
+	return prereleaseVersion;
 };
 
 /**
