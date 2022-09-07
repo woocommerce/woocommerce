@@ -8,6 +8,7 @@ import { tmpdir } from 'os';
 import { mkdirSync } from 'fs';
 import { simpleGit } from 'simple-git';
 import { v4 } from 'uuid';
+import { mkdir, rm } from 'fs/promises';
 
 /**
  * Internal dependencies
@@ -33,7 +34,7 @@ const isUrl = ( maybeURL: string ) => {
  * Clone a git repository.
  *
  * @param {string} repoPath - the path (either URL or file path) to the repo to clone.
- * @return {string} the path to the cloned repo.
+ * @return {Promise<string>} the path to the cloned repo.
  */
 export const cloneRepo = async ( repoPath: string ) => {
 	const folderPath = join( tmpdir(), 'code-analyzer-tmp', v4() );
@@ -54,12 +55,52 @@ export const cloneRepo = async ( repoPath: string ) => {
 };
 
 /**
+ * Do a minimal sparse checkout of a github repo.
+ *
+ * @param {string}        githubRepoUrl -     the URL to the repo to checkout.
+ * @param {string}        path          - the path to checkout to.
+ * @param {Array<string>} directories   - the files or directories to checkout.
+ * @return {Promise<string>}  the path to the cloned repo.
+ */
+export const sparseCheckoutRepo = async (
+	githubRepoUrl: string,
+	path: string,
+	directories: string[]
+) => {
+	const folderPath = join( tmpdir(), path );
+
+	// clean up if it already exists.
+	await rm( folderPath, { recursive: true, force: true } );
+	await mkdir( folderPath, { recursive: true } );
+
+	const git = simpleGit( { baseDir: folderPath } );
+
+	await git.clone( githubRepoUrl, folderPath );
+	await git.raw( 'sparse-checkout', 'init', { '--cone': null } );
+	await git.raw( 'sparse-checkout', 'set', directories.join( ' ' ) );
+
+	return folderPath;
+};
+
+/**
+ * checkoutRef - checkout a ref in a git repo.
+ *
+ * @param {string} pathToRepo - the path to the repo to checkout a ref from.
+ * @param {string} ref        - the ref to checkout.
+ * @return {Response<string>} - the simple-git response.
+ */
+export const checkoutRef = ( pathToRepo: string, ref: string ) => {
+	const git = simpleGit( { baseDir: pathToRepo } );
+	return git.checkout( ref );
+};
+
+/**
  * Do a git diff of 2 commit hashes (or branches)
  *
  * @param {string} baseDir - baseDir that the repo is in
  * @param {string} hashA   - either a git commit hash or a git branch
  * @param {string} hashB   - either a git commit hash or a git branch
- * @return {string} - diff of the changfiles between the 2 hashes
+ * @return {Promise<string>} - diff of the changes between the 2 hashes
  */
 export const diffHashes = ( baseDir: string, hashA: string, hashB: string ) => {
 	const git = simpleGit( { baseDir } );

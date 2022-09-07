@@ -11,7 +11,7 @@ import { NUMBERS_AND_ALLOWED_CHARS } from '../constants';
 
 type gettersProps = {
 	context?: {
-		formatCurrency: ( number: number | string ) => string;
+		formatAmount: ( number: number | string ) => string;
 		getCurrencyConfig: () => {
 			code: string;
 			symbol: string;
@@ -80,7 +80,7 @@ export const getInputControlProps = ( {
 	if ( ! context ) {
 		return;
 	}
-	const { formatCurrency, getCurrencyConfig } = context;
+	const { formatAmount, getCurrencyConfig } = context;
 	const { decimalSeparator, symbol, symbolPosition, thousandSeparator } =
 		getCurrencyConfig();
 	const currencyPosition = symbolPosition.includes( 'left' )
@@ -98,7 +98,7 @@ export const getInputControlProps = ( {
 	const currencyString =
 		value === undefined
 			? value
-			: formatCurrency( value ).replace( regex, '' );
+			: formatAmount( value ).replace( regex, '' );
 	return {
 		value: currencyString,
 		[ currencyPosition ]: symbol,

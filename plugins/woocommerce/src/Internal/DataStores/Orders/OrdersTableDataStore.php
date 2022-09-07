@@ -1616,7 +1616,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 
 		$sql = "
 CREATE TABLE $orders_table_name (
-	id bigint(20) unsigned auto_increment,
+	id bigint(20) unsigned,
 	status varchar(20) null,
 	currency varchar(10) null,
 	type varchar(20) null,
@@ -1635,7 +1635,11 @@ CREATE TABLE $orders_table_name (
 	PRIMARY KEY (id),
 	KEY status (status),
 	KEY date_created (date_created_gmt),
-	KEY customer_id_billing_email (customer_id, billing_email)
+	KEY customer_id_billing_email (customer_id, billing_email),
+	KEY billing_email (billing_email),
+	KEY type_status (type, status),
+	KEY parent_order_id (parent_order_id),
+	KEY date_updated (date_updated_gmt)
 ) $collate;
 CREATE TABLE $addresses_table_name (
 	id bigint(20) unsigned auto_increment primary key,
@@ -1653,7 +1657,9 @@ CREATE TABLE $addresses_table_name (
 	email varchar(320) null,
 	phone varchar(100) null,
 	KEY order_id (order_id),
-	UNIQUE KEY address_type_order_id (address_type, order_id)
+	UNIQUE KEY address_type_order_id (address_type, order_id),
+	KEY email (email),
+	KEY phone (phone)
 ) $collate;
 CREATE TABLE $operational_data_table_name (
 	id bigint(20) unsigned auto_increment primary key,
@@ -1682,7 +1688,8 @@ CREATE TABLE $meta_table (
 	order_id bigint(20) unsigned null,
 	meta_key varchar(255),
 	meta_value text null,
-	KEY meta_key_value (meta_key, meta_value(100))
+	KEY meta_key_value (meta_key, meta_value(100)),
+	KEY order_id_meta_key_meta_value (order_id, meta_key, meta_value(100))
 ) $collate;
 ";
 

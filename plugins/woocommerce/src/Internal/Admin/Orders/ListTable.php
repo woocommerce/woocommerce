@@ -65,12 +65,28 @@ class ListTable extends WP_List_Table {
 	 */
 	public function setup(): void {
 		add_action( 'admin_notices', array( $this, 'bulk_action_notices' ) );
-		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'get_columns' ) );
+		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'get_columns' ), 0 );
 		add_filter( 'set_screen_option_edit_orders_per_page', array( $this, 'set_items_per_page' ), 10, 3 );
 		add_filter( 'default_hidden_columns', array( $this, 'default_hidden_columns' ), 10, 2 );
 
 		$this->items_per_page();
 		set_screen_options();
+	}
+
+	/**
+	 * Handles output for the default column.
+	 *
+	 * @param \WC_Order $order       Current WooCommerce order object.
+	 * @param string    $column_name Identifier for the custom column.
+	 */
+	public function column_default( $order, $column_name ) {
+		/**
+		 * Fires for each custom column in the Custom Order Table in the administrative screen.
+		 *
+		 * @param string    $column_name Identifier for the custom column.
+		 * @param \WC_Order $order       Current WooCommerce order object.
+		 */
+		do_action( "manage_{$this->screen->id}_custom_column", $column_name, $order );
 	}
 
 	/**

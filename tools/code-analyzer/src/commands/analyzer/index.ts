@@ -3,7 +3,7 @@
  */
 import { CliUx, Command, Flags } from '@oclif/core';
 import { join } from 'path';
-import { readFileSync, rmSync } from 'fs';
+import { rmSync } from 'fs';
 
 /**
  * Internal dependencies
@@ -122,11 +122,10 @@ export default class Analyzer extends Command {
 
 		// Run schema diffs only in the monorepo.
 		if ( flags[ 'is-woocommerce' ] ) {
-			CliUx.ux.action.start( 'Building WooCommerce' );
-
 			const pluginPath = join( tmpRepoPath, 'plugins/woocommerce' );
 
 			const build = () => {
+				CliUx.ux.action.start( 'Building WooCommerce' );
 				// Note doing the minimal work to get a DB scan to work, avoiding full build for speed.
 				execSync( 'composer install', { cwd: pluginPath, stdio: [] } );
 				execSync(
@@ -135,9 +134,10 @@ export default class Analyzer extends Command {
 						cwd: pluginPath,
 					}
 				);
+
+				CliUx.ux.action.stop();
 			};
 
-			CliUx.ux.action.stop();
 			CliUx.ux.action.start(
 				`Comparing WooCommerce DB schemas of '${ base }' and '${ compare }'`
 			);
@@ -187,12 +187,15 @@ export default class Analyzer extends Command {
 		} | void
 	) {
 		const { output, file } = flags;
-		CliUx.ux.action.start( 'Generating changes' );
 
 		const templates = this.scanTemplates( content, version );
 		const hooks = this.scanHooks( content, version, output );
 		const databaseUpdates = this.scanDatabases( content );
 		let schemaDiffResult = {};
+
+		CliUx.ux.action.start(
+			`Generating a list of changes since ${ version }.`
+		);
 
 		if ( templates.size ) {
 			printTemplateResults(
@@ -291,7 +294,9 @@ export default class Analyzer extends Command {
 		content: string,
 		version: string
 	): Map< string, string[] > {
-		CliUx.ux.action.start( 'Scanning template changes' );
+		CliUx.ux.action.start(
+			`Scanning for template changes since ${ version }.`
+		);
 
 		const report: Map< string, string[] > = new Map< string, string[] >();
 
@@ -349,7 +354,7 @@ export default class Analyzer extends Command {
 		version: string,
 		output: string
 	): Map< string, Map< string, string[] > > {
-		CliUx.ux.action.start( 'Scanning for new hooks' );
+		CliUx.ux.action.start( `Scanning for new hooks since ${ version }.` );
 
 		const report: Map< string, Map< string, string[] > > = new Map<
 			string,
