@@ -39,6 +39,20 @@
 			"outputMode": "new-only"
 		},
 
+		"woocommerce/client/legacy#turbo:build": {
+			"dependsOn": [ "^turbo:build" ],
+			"outputs": [
+				"../../assets/js/**",
+				"../../assets/css/**"
+			],
+			"inputs": [
+				"css/**/*.scss",
+				"css/**/*.css",
+				"js/**/*.js"
+			],
+			"outputMode": "new-only"
+		},
+
 		"woocommerce/client/admin#turbo:build": {
 			"dependsOn": [ 
 				"build:feature-config", 
