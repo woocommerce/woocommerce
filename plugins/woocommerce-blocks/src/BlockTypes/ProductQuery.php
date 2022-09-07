@@ -40,7 +40,7 @@ class ProductQuery extends AbstractBlock {
 	/**
 	 * Remove the query block filter and parse the custom query
 	 *
-	 * This function is supposed to be called by the `gutenberg_build_query_vars_from_query_block`
+	 * This function is supposed to be called by the `query_loop_block_query_vars`
 	 * filter. It de-registers the filter to make sure it runs only once and doesn't end
 	 * up hi-jacking future Query Loop blocks.
 	 *
@@ -51,7 +51,7 @@ class ProductQuery extends AbstractBlock {
 	 */
 	public function get_query_by_attributes_once( $query ) {
 		remove_filter(
-			'gutenberg_build_query_vars_from_query_block',
+			'query_loop_block_query_vars',
 			array( $this, 'get_query_by_attributes_once' ),
 			10
 		);
@@ -73,7 +73,7 @@ class ProductQuery extends AbstractBlock {
 		$this->parsed_block = $parsed_block;
 
 		add_filter(
-			'gutenberg_build_query_vars_from_query_block',
+			'query_loop_block_query_vars',
 			array( $this, 'get_query_by_attributes_once' ),
 			10,
 			1
