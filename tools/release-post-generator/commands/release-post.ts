@@ -1,20 +1,36 @@
 /**
  * External dependencies
  */
+<<<<<<< HEAD
 import { scanForChanges } from 'code-analyzer/src/lib/scan-changes';
 import semver from 'semver';
 import { writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { Logger } from 'cli-core/src/logger';
+=======
+import Analyzer from 'code-analyzer/src/commands/analyzer';
+import semver from 'semver';
+import { promises } from 'fs';
+import { writeFile } from 'fs/promises';
+import { tmpdir } from 'os';
+import { join } from 'path';
+>>>>>>> origin/trunk
 
 /**
  * Internal dependencies
  */
 import { program } from '../program';
 import { renderTemplate } from '../lib/render-template';
+<<<<<<< HEAD
 import { createWpComDraftPost } from '../lib/draft-post';
 import { generateContributors } from '../lib/contributors';
+=======
+import { processChanges } from '../lib/process-changes';
+import { createWpComDraftPost } from '../lib/draft-post';
+import { generateContributors } from '../lib/contributors';
+import { Logger } from '../lib/logger';
+>>>>>>> origin/trunk
 
 const DEVELOPER_WOOCOMMERCE_SITE_ID = '96396764';
 
@@ -59,6 +75,7 @@ program
 				);
 			}
 
+<<<<<<< HEAD
 			const changes = await scanForChanges(
 				currentVersion,
 				currentVersion,
@@ -70,6 +87,26 @@ program
 			const schemaChanges = changes.schema.filter(
 				( s ) => ! s.areEqual
 			);
+=======
+			// generates a `changes.json` file in the current directory.
+			await Analyzer.run( [
+				currentVersion,
+				currentVersion,
+				'-s',
+				'https://github.com/woocommerce/woocommerce.git',
+				'-b',
+				previousVersion.toString(),
+			] );
+
+			const changes = JSON.parse(
+				await promises.readFile(
+					process.cwd() + '/changes.json',
+					'utf8'
+				)
+			);
+
+			const changeset = processChanges( changes );
+>>>>>>> origin/trunk
 
 			Logger.startTask( 'Finding contributors' );
 			const title = `WooCommerce ${ currentVersion } Released`;
@@ -82,10 +119,14 @@ program
 			const html = await renderTemplate( 'release.ejs', {
 				contributors,
 				title,
+<<<<<<< HEAD
 				changes: {
 					...changes,
 					schema: schemaChanges,
 				},
+=======
+				changes: changeset,
+>>>>>>> origin/trunk
 				displayVersion: currentVersion,
 			} );
 

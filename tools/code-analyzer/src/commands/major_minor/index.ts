@@ -5,11 +5,7 @@ import { CliUx, Command, Flags } from '@oclif/core';
 import { join } from 'path';
 import { readFileSync, rmSync } from 'fs';
 import simpleGit from 'simple-git';
-
-/**
- * Internal dependencies
- */
-import { cloneRepo } from '../../git';
+import { cloneRepo } from 'cli-core/src/git';
 
 /**
  * MajorMinor command class

@@ -4,11 +4,13 @@
 import fetch from 'node-fetch';
 import { Logger } from 'cli-core/src/logger';
 
+
 /**
  * Internal dependencies
  */
 import { getWordpressComAuthToken } from './oauth-helper';
 import { getEnvVar } from './environment';
+
 
 /**
  * Create a draft of a post on wordpress.com
