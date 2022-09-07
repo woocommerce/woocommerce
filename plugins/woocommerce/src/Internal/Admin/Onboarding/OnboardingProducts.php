@@ -84,7 +84,7 @@ class OnboardingProducts {
 				add_query_arg(
 					array(
 						'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
-						'locale' => get_user_locale()
+						'locale'     => get_user_locale(),
 					),
 					'https://woocommerce.com/wp-json/wccom-extensions/1.0/search'
 				)
