@@ -1,6 +1,5 @@
 {
 	"$schema": "https://turborepo.org/schema.json",
-	"baseBranch": "origin/trunk",
 	"pipeline": {
 		"build:feature-config": {
 			"cache": false
@@ -8,17 +7,11 @@
 		"turbo:build": {
 			"dependsOn": [ "build:feature-config", "^turbo:build", "$WC_ADMIN_PHASE" ],
 			"inputs": [
-				"src/*.js",
 				"src/**/*.js",
-				"src/*.jsx",
 				"src/**/*.jsx",
-				"src/*.ts",
 				"src/**/*.ts",
-				"src/*.tsx",
 				"src/**/*.tsx",
-				"src/*.php",
 				"src/**/*.php",
-				"includes/*.php",
 				"includes/**/*.php"
 			],
 			"outputs": [
@@ -40,46 +33,53 @@
 			],
 			"outputs": [],
 			"inputs": [
-				"src/*.php",
 				"src/**/*.php",
-				"includes/*.php",
 				"includes/**/*.php"
 			],
 			"outputMode": "new-only"
 		},
 
-		"woocommerce/client/admin#turbo:build": {
-			"dependsOn": [ "build:feature-config", "^turbo:build", "$WC_ADMIN_PHASE" ],
-			"outputs": [],
+		"woocommerce/client/legacy#turbo:build": {
+			"dependsOn": [ "^turbo:build" ],
+			"outputs": [
+				"../../assets/js/**",
+				"../../assets/css/**"
+			],
 			"inputs": [
-				"client/*.js",
+				"css/**/*.scss",
+				"css/**/*.css",
+				"js/**/*.js"
+			],
+			"outputMode": "new-only"
+		},
+
+		"woocommerce/client/admin#turbo:build": {
+			"dependsOn": [ 
+				"build:feature-config", 
+				"^turbo:build", 
+				"$WC_ADMIN_PHASE"
+			],
+			"outputs": [
+				"../woocommerce/assets/client/admin/**"
+			],
+			"inputs": [
 				"client/**/*.js",
-				"client/*.jsx",
 				"client/**/*.jsx",
-				"client/*.ts",
 				"client/**/*.ts",
-				"client/*.tsx",
 				"client/**/*.tsx",
-				"client/*.scss",
 				"client/**/*.scss"
 			],
 			"outputMode": "new-only"
 		},
 
 		"turbo:test": {
-			"dependsOn": [ "build:feature-config", "turbo:build" ],
+			"dependsOn": [ "turbo:build" ],
 			"inputs": [
-				"src/*.js",
 				"src/**/*.js",
-				"src/*.jsx",
 				"src/**/*.jsx",
-				"src/*.ts",
 				"src/**/*.ts",
-				"src/*.tsx",
 				"src/**/*.tsx",
-				"src/*.php",
 				"src/**/*.php",
-				"includes/*.php",
 				"includes/**/*.php"
 			],
 			"outputs": []
