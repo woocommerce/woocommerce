@@ -13,7 +13,7 @@ export type TemplateChangeDescription = {
 export const scanForTemplateChanges = ( content: string, version: string ) => {
 	const changes: Map< string, TemplateChangeDescription > = new Map();
 
-	if ( ! content.match( /diff --git a\/(.+)\/templates\/(.+)/g ) ) {
+	if ( ! content.match( /diff --git a\/(.+)\/templates\/(.+)\.php/g ) ) {
 		return changes;
 	}
 
