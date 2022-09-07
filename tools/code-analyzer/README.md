@@ -8,11 +8,11 @@
 
 Currently there are just 2 commands:
 
-1. `analyzer`. Analyzer is used as a linter for PRs to check if hook/template/db changes were introduced. It produces output either directly on CI or via GH actions `set-output`.
+1. `lint`. Analyzer is used as a linter for PRs to check if hook/template/db changes were introduced. It produces output either directly on CI or via GH actions `set-output`.
 
 Here is an example `analyzer` command:
 
-`pnpm run analyzer -- release/6.8 "6.8.0" -b=release/6.7`
+`pnpm run analyzer -- lint "release/6.8" "6.8.0" -b=release/6.7`
 
 In this command we compare the `release/6.7` and `release/6.8` branches to find differences, and we're looking for changes introduced since `6.8.0` (using the `@since` tag).
 
@@ -22,7 +22,7 @@ To find out more about the other arguments to the command you can run `pnpm run 
 
 Here is an example `major_minor` command:
 
-`./bin/dev major_minor release/6.8 "plugins/woocommerce/woocommerce.php"`
+`pnpm run analyzer -- major-minor "release/6.8" "plugins/woocommerce/woocommerce.php"`
 
 In this command we checkout the branch `release/6.8` and check the version of the woocommerce.php mainfile located at the path passed. Note that at the time of
 writing the main file in this particular branch reports `6.8.1` so the output of this command is `6.8.0`.
