@@ -11,7 +11,7 @@ import { validateArgs, stripPrereleaseParameters } from '../lib/validate';
 import {
 	updatePluginFile,
 	updateReadmeChangelog,
-	updateComposerJSON,
+	updateJSON,
 	updateClassPluginFile,
 	updateReadmeStableTag,
 } from '../lib/update';
@@ -43,6 +43,7 @@ program
 			await updateReadmeStableTag( plugin, nextVersion );
 		}
 
-		await updateComposerJSON( plugin, nextVersion );
+		await updateJSON( 'composer', plugin, nextVersion );
+		await updateJSON( 'package', plugin, nextVersion );
 		await updateClassPluginFile( plugin, nextVersion );
 	} );

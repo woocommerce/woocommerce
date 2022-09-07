@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { existsSync } from 'fs';
 import { readFile, writeFile, stat } from 'fs/promises';
 
 /**
@@ -93,16 +92,18 @@ export const updateClassPluginFile = async (
 };
 
 /**
- * Update plugin composer.json.
+ * Update plugin JSON files.
  *
- * @param  plugin      plugin to update
- * @param  nextVersion version to bump to
+ * @param {string} type        plugin to update
+ * @param {string} plugin      plugin to update
+ * @param {string} nextVersion version to bump to
  */
-export const updateComposerJSON = async (
+export const updateJSON = async (
+	type: 'package' | 'composer',
 	plugin: string,
 	nextVersion: string
 ): Promise< void > => {
-	const filePath = `plugins/${ plugin }/composer.json`;
+	const filePath = `plugins/${ plugin }/${ type }.json`;
 	try {
 		const composerJson = JSON.parse( await readFile( filePath, 'utf8' ) );
 		composerJson.version = nextVersion;
