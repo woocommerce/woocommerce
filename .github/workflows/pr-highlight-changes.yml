@@ -17,7 +17,7 @@ jobs:
             - name: Run analyzer
               id: run
               run: |
-                version=$(pnpm run analyzer --filter code-analyzer -- major_minor "${{ github.head_ref || github.ref_name }}" "plugins/woocommerce/woocommerce.php")
+                version=$(pnpm run analyzer --filter code-analyzer -- major-minor "${{ github.head_ref || github.ref_name }}" "plugins/woocommerce/woocommerce.php" | tail -n 1)
                 pnpm run analyzer --filter code-analyzer "$GITHUB_HEAD_REF" $version
             - name: Print results
               id: results
