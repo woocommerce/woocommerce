@@ -1,0 +1,58 @@
+name: Setup WooCommerce Monorepo
+description: Handles the installation, building, and caching of the projects within the monorepo.
+
+inputs:
+  filter:
+    description: The PNPM filter used to decide what projects to install and build.
+    default: *
+  build:
+    description: Indicates whether or not the action should build any projects.
+    default: true
+  php-version:
+    description: The version of PHP that the action should set up.
+    default: 7.2
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@e04e1d97f0c0481c6e1ba40f8a538454fe5d7709
+      with:
+        php-version: ${{ inputs.php-version }}
+    
+    - name: Setup PNPM
+      uses: pnpm/action-setup@10693b3829bf86eb2572aef5f3571dcf5ca9287d
+      with:
+        version: 6
+
+    - name: Get Composer Cache Directory
+      id: composer-cache
+      run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+    - name: Cache Composer Dependencies
+      uses: actions/cache@fd5de65bc895cf536527842281bea11763fefd77
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-php-${{ inputs.php-version }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: ${{ runner.os }}-php-${{ inputs.php-version }}-composer-
+
+    - name: Install Node and PHP Dependencies
+      run: pnpm install --filter="${{ inputs.filter }}"
+
+    - name: Cache Build Output
+      if: ${{ inputs.build }}
+      uses: actions/cache@fd5de65bc895cf536527842281bea11763fefd77
+      with:
+        path: node_modules/.cache/turbo
+        key: ${{ runner.os }}-build-output-${{ hashFiles('node_modules/.cache/turbo/*-meta.json') }}
+        restore-keys: ${{ runner.os }}-build-output-
+
+    - name: Build
+      if: ${{ inputs.build }}
+      run: pnpm -w exec turbo run turbo:build --filter="${{ inputs.filter }}"
