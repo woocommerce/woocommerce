@@ -191,6 +191,14 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/34"
 }
 ```
 
+## Product Variations
+
+By default, Store API excludes product variations. You can retrieve the variations for a product by using the `type=variation`.
+
+```sh
+curl "https://example-store.com/wp-json/wc/store/v1/products?type=variation"
+```
+
 <!-- FEEDBACK -->
 
 ---
