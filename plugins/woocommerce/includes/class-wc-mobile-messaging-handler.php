@@ -113,12 +113,11 @@ class WC_Mobile_Messaging_Handler {
 			wp_kses_data(
 			/* translators: %s: Email link */
 				__(
-					'<a href="%1$s">Accept payments</a> with a card reader in our mobile app.<br /><a href="%2$s">Learn more about In-Person Payments.</a>',
+					'<a href="%1$s">Collect payments easily</a> from your customers anywhere with our mobile app.',
 					'woocommerce'
 				)
 			),
-			esc_url( $deep_link_url ),
-			'https://woocommerce.com/in-person-payments/'
+			esc_url( $deep_link_url )
 		);
 	}
 
@@ -161,7 +160,7 @@ class WC_Mobile_Messaging_Handler {
 			wp_kses_data(
 			/* translators: %s: Email link */
 				__(
-					'Process your orders on the go. <a href="%s">Get the app</a>.',
+					'Process your orders on the go. <a href="%s">Get the app</a>. Powered by Jetpack.',
 					'woocommerce'
 				)
 			),

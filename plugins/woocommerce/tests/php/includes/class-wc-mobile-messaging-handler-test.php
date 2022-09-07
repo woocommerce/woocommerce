@@ -37,7 +37,7 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 		$mobile_message = WC_Mobile_Messaging_Handler::prepare_mobile_message( new WC_Order(), self::BLOG_ID, $now );
 
 		$this->assertEquals(
-			'Process your orders on the go. <a href="https://woocommerce.com/mobile/">Get the app</a>.',
+			'Process your orders on the go. <a href="https://woocommerce.com/mobile/">Get the app</a>. Powered by Jetpack.',
 			$mobile_message
 		);
 	}
@@ -59,7 +59,7 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 	/**
 	 * Tests if SUT returns correct message when the user uses mobile app but store is not eligible for IPP
 	 */
-	public function test_show_accept_payment_message_when_store_is_but_order_is_NOT_ipp_eligible() {
+	public function test_show_manage_order_message_when_store_is_but_order_is_NOT_ipp_eligible() {
 		$now = $this->prepare_timeline_with_valid_last_mobile_app_usage();
 		$this->make_store_ipp_eligible();
 
@@ -85,7 +85,7 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 		$mobile_message = WC_Mobile_Messaging_Handler::prepare_mobile_message( $ipp_eligible_order, self::BLOG_ID, $now );
 
 		$this->assertEquals(
-			'<a href="https://woocommerce.com/mobile/payments?blog_id=2&#038;order_id=0">Accept payments</a> with a card reader in our mobile app.<a href="https://woocommerce.com/in-person-payments/">Learn more about In-Person Payments.</a>',
+			'<a href="https://woocommerce.com/mobile/payments?blog_id=2&#038;order_id=0">Collect payments easily</a> from your customers anywhere with our mobile app.',
 			$mobile_message
 		);
 	}
