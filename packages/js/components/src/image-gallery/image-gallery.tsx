@@ -1,11 +1,17 @@
 /**
  * External dependencies
  */
-import { Children, createElement } from '@wordpress/element';
+import {
+	Children,
+	createElement,
+	cloneElement,
+	useState,
+} from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
+import { ImageGalleryToolbar } from './index';
 import { Sortable, SortableHandle } from '../sortable';
 
 export type ImageGalleryProps = {
@@ -17,6 +23,8 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 	children,
 	columns = 4,
 }: ImageGalleryProps ) => {
+	const [ toolbarItem, setToolbarItem ] = useState< number | null >( null );
+
 	return (
 		<div
 			className="woocommerce-image-gallery"
@@ -25,8 +33,16 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 			} }
 		>
 			<Sortable isHorizontal>
-				{ Children.map( children, ( child ) => (
-					<SortableHandle>{ child }</SortableHandle>
+				{ Children.map( children, ( child, index ) => (
+					<SortableHandle>
+						<div
+							className="woocommerce-image-gallery__item-wrapper"
+							onClick={ () => setToolbarItem( index ) }
+						>
+							{ toolbarItem === index && <ImageGalleryToolbar /> }
+							{ child }
+						</div>
+					</SortableHandle>
 				) ) }
 			</Sortable>
 		</div>
