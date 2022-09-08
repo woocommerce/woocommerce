@@ -88,7 +88,7 @@ class RemoteInboxNotificationsEngine {
 	 * condition and thus doesn't return any results.
 	 */
 	public static function on_admin_init() {
-		add_action( 'activated_plugin', array( __CLASS__, 'run' ) );
+		add_action( 'activated_plugin', array( __CLASS__, 'possibly_run' ) );
 		add_action( 'deactivated_plugin', array( __CLASS__, 'run_on_deactivated_plugin' ), 10, 1 );
 		StoredStateSetupForProducts::admin_init();
 
@@ -103,6 +103,15 @@ class RemoteInboxNotificationsEngine {
 	 */
 	public static function on_init() {
 		StoredStateSetupForProducts::init();
+	}
+
+	/**
+	 * Call the run function if the onboarding wizard has been completed.
+	 */
+	public static function possibly_run() {
+		if ( ! OnboardingProfile::needs_completion() ) {
+			self::run();
+		}
 	}
 
 	/**
@@ -130,7 +139,7 @@ class RemoteInboxNotificationsEngine {
 	public static function run_on_woocommerce_admin_updated() {
 		update_option( self::WCA_UPDATED_OPTION_NAME, true, false );
 
-		self::run();
+		self::possibly_run();
 
 		update_option( self::WCA_UPDATED_OPTION_NAME, false, false );
 	}

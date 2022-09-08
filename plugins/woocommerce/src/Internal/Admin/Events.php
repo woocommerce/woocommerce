@@ -158,7 +158,7 @@ class Events {
 
 		if ( $this->is_remote_inbox_notifications_enabled() ) {
 			DataSourcePoller::get_instance()->read_specs_from_data_sources();
-			RemoteInboxNotificationsEngine::run();
+			RemoteInboxNotificationsEngine::possibly_run();
 		}
 
 		if ( $this->is_merchant_email_notifications_enabled() ) {
