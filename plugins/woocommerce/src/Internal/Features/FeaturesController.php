@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\Features;
 
 use Automattic\WooCommerce\Admin\Features\Analytics;
 use Automattic\WooCommerce\Admin\Features\Navigation\Init;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -28,40 +29,70 @@ class FeaturesController {
 	private $features;
 
 	/**
-	 * The registered compatibility info for WooCommerce plugins.
+	 * The registered compatibility info for WooCommerce plugins, with plugin names as keys.
 	 *
 	 * @var array
 	 */
-	private $compatibility_info;
+	private $compatibility_info_by_plugin;
+
+	/**
+	 * The registered compatibility info for WooCommerce plugins, with feature ids as keys.
+	 *
+	 * @var array
+	 */
+	private $compatibility_info_by_feature;
+
+	/**
+	 * The LegacyProxy instance to use.
+	 *
+	 * @var LegacyProxy
+	 */
+	private $proxy;
 
 	/**
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
-		$this->features = array(
-			'analytics'            => array(
+		$features = array(
+			'analytics'           => array(
 				'name'            => __( 'Analytics', 'woocommerce' ),
 				'description'     => __( 'Enables WooCommerce Analytics', 'woocommerce' ),
 				'is_experimental' => false,
 			),
-			'new_navigation'       => array(
+			'new_navigation'      => array(
 				'name'            => __( 'Navigation', 'woocommerce' ),
 				'description'     => __( 'Adds the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
 				'is_experimental' => false,
 			),
-			'custom_orders_tables' => array(
-				'name'            => __( 'Custom orders tables', 'woocommerce' ),
+			'custom_order_tables' => array(
+				'name'            => __( 'Custom order tables', 'woocommerce' ),
 				'description'     => __( 'Enable the custom orders tables feature (still in development)', 'woocommerce' ),
 				'is_experimental' => true,
 			),
 		);
 
-		$this->compatibility_info = array();
+		$this->init_features( $features );
+
+		foreach ( array_keys( $this->features ) as $feature_id ) {
+			$this->compatibility_info_by_feature[ $feature_id ] = array(
+				'compatible'   => array(),
+				'incompatible' => array(),
+			);
+		}
 
 		add_filter(
 			'updated_option',
 			function( $option, $old_value, $value ) {
 				$this->process_updated_option( $option, $old_value, $value );
+			},
+			999,
+			3
+		);
+
+		add_filter(
+			'added_option',
+			function( $option, $value ) {
+				$this->process_updated_option( $option, false, $value );
 			},
 			999,
 			3
@@ -84,6 +115,36 @@ class FeaturesController {
 			10,
 			2
 		);
+	}
+
+	/**
+	 * Initialize the class according to the existing features.
+	 *
+	 * @param array $features Information about the existing features.
+	 */
+	private function init_features( array $features ) {
+		$this->compatibility_info_by_plugin  = array();
+		$this->compatibility_info_by_feature = array();
+
+		$this->features = $features;
+
+		foreach ( array_keys( $this->features ) as $feature_id ) {
+			$this->compatibility_info_by_feature[ $feature_id ] = array(
+				'compatible'   => array(),
+				'incompatible' => array(),
+			);
+		}
+	}
+
+	/**
+	 * Initialize the class instance.
+	 *
+	 * @internal
+	 *
+	 * @param LegacyProxy $proxy The instance of LegacyProxy to use.
+	 */
+	final public function init( LegacyProxy $proxy ) {
+		$this->proxy = $proxy;
 	}
 
 	/**
@@ -138,16 +199,11 @@ class FeaturesController {
 	 *
 	 * @param string $feature_id Unique feature id.
 	 * @param bool   $enable True to enable the feature, false to disable it.
-	 * @return bool True on success, false on error (feature doesn't exist).
+	 * @return bool True on success, false if feature doesn't exist or the new value is the same as the old value.
 	 */
 	public function change_feature_enable( string $feature_id, bool $enable ): bool {
 		if ( ! $this->feature_exists( $feature_id ) ) {
 			return false;
-		}
-
-		$currently_enabled = $this->feature_is_enabled( $feature_id );
-		if ( ! ( $enable ^ $currently_enabled ) ) {
-			return true;
 		}
 
 		return update_option( $this->feature_enable_option_name( $feature_id ), $enable ? 'yes' : 'no' );
@@ -158,17 +214,21 @@ class FeaturesController {
 	 *
 	 * This method MUST be executed from inside a handler for the 'before_woocommerce_init' hook.
 	 *
+	 * The plugin name is expected to be in the form 'directory/file.php' and be one of the keys
+	 * of the array returned by 'get_plugins', but this won't be checked. Plugins are expected to use
+	 * FeaturesUtil::declare_compatibility instead, passing the full plugin file path instead of the plugin name.
+	 *
 	 * @param string $feature_id Unique feature id.
-	 * @param string $plugin_name Plugin name, as returned by 'wp plugin list'.
+	 * @param string $plugin_name Plugin name, in the form 'directory/file.php'.
 	 * @param bool   $positive_compatibility True if the plugin declares being compatible with the feature, false if it declares being incompatible.
 	 * @return bool True on success, false on error (feature doesn't exist or not inside the required hook).
 	 * @throws \Exception A plugin attempted to declare itself as compatible and incompatible with a given feature at the same time.
 	 */
 	public function declare_compatibility( string $feature_id, string $plugin_name, bool $positive_compatibility = true ): bool {
-		if ( ! doing_action( 'before_woocommerce_init' ) ) {
+		if ( ! $this->proxy->call_function( 'doing_action', 'before_woocommerce_init' ) ) {
 			$class_and_method = ( new \ReflectionClass( $this ) )->getShortName() . '::' . __FUNCTION__;
 			/* translators: 1: class::method 2: before_woocommerce_init */
-			wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%1$s should be called inside the %2$s action.', 'woocommerce' ), $class_and_method, 'before_woocommerce_init' ), '7.0' );
+			$this->proxy->call_function( 'wc_doing_it_wrong', $class_and_method, sprintf( __( '%1$s should be called inside the %2$s action.', 'woocommerce' ), $class_and_method, 'before_woocommerce_init' ), '7.0' );
 			return false;
 		}
 
@@ -176,19 +236,29 @@ class FeaturesController {
 			return false;
 		}
 
-		ArrayUtil::ensure_key_is_array( $this->compatibility_info, $plugin_name );
+		// Register compatibility by plugin.
+
+		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin, $plugin_name );
 
 		$key          = $positive_compatibility ? 'compatible' : 'incompatible';
 		$opposite_key = $positive_compatibility ? 'incompatible' : 'compatible';
-		ArrayUtil::ensure_key_is_array( $this->compatibility_info[ $plugin_name ], $key );
-		ArrayUtil::ensure_key_is_array( $this->compatibility_info[ $plugin_name ], $opposite_key );
+		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin[ $plugin_name ], $key );
+		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin[ $plugin_name ], $opposite_key );
 
-		if ( in_array( $feature_id, $this->compatibility_info[ $plugin_name ][ $opposite_key ], true ) ) {
+		if ( in_array( $feature_id, $this->compatibility_info_by_plugin[ $plugin_name ][ $opposite_key ], true ) ) {
 			throw new \Exception( "Plugin $plugin_name is trying to declare itself as $key with the '$feature_id' feature, but it already declared itself as $opposite_key" );
 		}
 
-		if ( ! in_array( $feature_id, $this->compatibility_info[ $plugin_name ][ $key ], true ) ) {
-			$this->compatibility_info[ $plugin_name ][ $key ] = $feature_id;
+		if ( ! in_array( $feature_id, $this->compatibility_info_by_plugin[ $plugin_name ][ $key ], true ) ) {
+			$this->compatibility_info_by_plugin[ $plugin_name ][ $key ][] = $feature_id;
+		}
+
+		// Register compatibility by feature.
+
+		$key = $positive_compatibility ? 'compatible' : 'incompatible';
+
+		if ( ! in_array( $plugin_name, $this->compatibility_info_by_feature[ $feature_id ][ $key ], true ) ) {
+			$this->compatibility_info_by_feature[ $feature_id ][ $key ][] = $plugin_name;
 		}
 
 		return true;
@@ -209,24 +279,53 @@ class FeaturesController {
 	 *
 	 * This method can't be called before the 'woocommerce_init' hook is fired.
 	 *
-	 * @param string $plugin_name Plugin name, as returned by 'wp plugin list'.
-	 * @return array An array having a 'compatible' and an 'incompatible' key, each holding an array of plugin ids.
+	 * @param string $plugin_name Plugin name, in the form 'directory/file.php'.
+	 * @return array An array having a 'compatible' and an 'incompatible' key, each holding an array of feature ids.
 	 */
 	public function get_compatible_features_for_plugin( string $plugin_name ) : array {
-		if ( ! did_action( 'woocommerce_init' ) && ! doing_action( 'woocommerce_init' ) ) {
-			$class_and_method = ( new \ReflectionClass( $this ) )->getShortName() . '::' . __FUNCTION__;
-			/* translators: 1: class::method 2: plugins_loaded */
-			wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%1$s should not be called before the %2$s action.', 'woocommerce' ), $class_and_method, 'woocommerce_init' ), '7.0' );
-		}
+		$this->verify_did_woocommerce_init( __FUNCTION__ );
 
-		if ( ! isset( $this->compatibility_info[ $plugin_name ] ) ) {
+		if ( ! isset( $this->compatibility_info_by_plugin[ $plugin_name ] ) ) {
 			return array(
 				'compatible'   => array(),
 				'incompatible' => array(),
 			);
 		}
 
-		return $this->compatibility_info[ $plugin_name ];
+		return $this->compatibility_info_by_plugin[ $plugin_name ];
+	}
+
+	/**
+	 * Get the names of the plugins that have been declared compatible or incompatible with a given feature.
+	 *
+	 * @param string $feature_id Feature id.
+	 * @return array An array having a 'compatible' and an 'incompatible' key, each holding an array of plugin names.
+	 */
+	public function get_compatible_plugins_for_feature( string $feature_id ) : array {
+		$this->verify_did_woocommerce_init( __FUNCTION__ );
+
+		if ( ! $this->feature_exists( $feature_id ) ) {
+			return array(
+				'compatible'   => array(),
+				'incompatible' => array(),
+			);
+		}
+
+		return $this->compatibility_info_by_feature[ $feature_id ];
+	}
+
+	/**
+	 * Check if the 'woocommerce_init' has run or is running, do a 'wc_doing_it_wrong' if not.
+	 *
+	 * @param string $function Name of the invoking method.
+	 */
+	private function verify_did_woocommerce_init( string $function ) {
+		if ( ! $this->proxy->call_function( 'did_action', 'woocommerce_init' ) &&
+			! $this->proxy->call_function( 'doing_action', 'woocommerce_init' ) ) {
+			$class_and_method = ( new \ReflectionClass( $this ) )->getShortName() . '::' . $function;
+			/* translators: 1: class::method 2: plugins_loaded */
+			$this->proxy->call_function( 'wc_doing_it_wrong', $class_and_method, sprintf( __( '%1$s should not be called before the %2$s action.', 'woocommerce' ), $class_and_method, 'woocommerce_init' ), '7.0' );
+		}
 	}
 
 	/**

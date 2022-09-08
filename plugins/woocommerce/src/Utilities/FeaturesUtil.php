@@ -45,15 +45,22 @@ class FeaturesUtil {
 	/**
 	 * Declare (in)compatibility with a given feature for a given plugin.
 	 *
-	 * This method MUST be executed from inside a handler for the 'before_woocommerce_init' hook.
+	 * This method MUST be executed from inside a handler for the 'before_woocommerce_init' hook and
+	 * SHOULD be executed from the main plugin file passing __FILE__ for the $plugin_file argument.
 	 *
 	 * @param string $feature_id Unique feature id.
-	 * @param string $plugin_name Plugin name, as returned by 'wp plugin list'.
+	 * @param string $plugin_file The full plugin file path.
 	 * @param bool   $positive_compatibility True if the plugin declares being compatible with the feature, false if it declares being incompatible.
 	 * @return bool True on success, false on error (feature doesn't exist or not inside the required hook).
 	 * @throws \Exception A plugin attempted to declare itself as compatible and incompatible with a given feature at the same time.
 	 */
-	public static function declare_compatibility( string $feature_id, string $plugin_name, bool $positive_compatibility = true ): bool {
+	public static function declare_compatibility( string $feature_id, string $plugin_file, bool $positive_compatibility = true ): bool {
+		$plugin_name = StringUtil::plugin_name_from_plugin_file( $plugin_file );
+
+		if ( ! isset( get_plugins()[ $plugin_name ] ) ) {
+			throw new \Exception( "FeaturesUtil::declare_compatibility: ${plugin_name} is not a known WordPress plugin." );
+		}
+
 		return wc_get_container()->get( FeaturesController::class )->declare_compatibility( $feature_id, $plugin_name, $positive_compatibility );
 	}
 
@@ -62,10 +69,20 @@ class FeaturesUtil {
 	 *
 	 * This method can't be called before the 'woocommerce_init' hook is fired.
 	 *
-	 * @param string $plugin_name Plugin name, as returned by 'wp plugin list'.
+	 * @param string $plugin_name Plugin name, in the form 'directory/file.php'.
 	 * @return array An array having a 'compatible' and an 'incompatible' key, each holding an array of plugin ids.
 	 */
 	public static function get_compatible_features_for_plugin( string $plugin_name ): array {
 		return wc_get_container()->get( FeaturesController::class )->get_compatible_features_for_plugin( $plugin_name );
+	}
+
+	/**
+	 * Get the names of the plugins that have been declared compatible or incompatible with a given feature.
+	 *
+	 * @param string $feature_id Feature id.
+	 * @return array An array having a 'compatible' and an 'incompatible' key, each holding an array of plugin names.
+	 */
+	public static function get_compatible_plugins_for_feature( string $feature_id ): array {
+		return wc_get_container()->get( FeaturesController::class )->get_compatible_plugins_for_feature( $feature_id );
 	}
 }
