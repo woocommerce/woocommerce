@@ -15,9 +15,7 @@ for (const line of filterLines) {
     if (output !== '') {
         output += ' ';
     }
-    output += '--filter="';
-    output += line;
-    output += '"';
+    output += "--filter='" + line + "'";
 }
 
 console.log(output);
