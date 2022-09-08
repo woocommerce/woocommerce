@@ -2,8 +2,8 @@ name: Setup WooCommerce Monorepo
 description: Handles the installation, building, and caching of the projects within the monorepo.
 
 inputs:
-  filter:
-    description: The PNPM filter used to decide what projects to install and build.
+  filters:
+    description: The PNPM filter used to decide what projects to install and build. Supports multiline strings for multiple filters.
     default: "*"
   build:
     description: Indicates whether or not the action should build any projects.
@@ -15,6 +15,11 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Parse Action Input
+      id: parse-input
+      shell: bash
+      run: echo "::set-output name=FILTERS::$(bash ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.sh {{ input.filters }})"
+
     - name: Setup PNPM
       uses: pnpm/action-setup@10693b3829bf86eb2572aef5f3571dcf5ca9287d
       with:
@@ -40,7 +45,7 @@ runs:
 
     - name: Install Node and PHP Dependencies
       shell: bash
-      run: pnpm install --filter="${{ inputs.filter }}"
+      run: pnpm install {{ steps.parse-input.FILTERS }}"
 
     - name: Cache Build Output
       if: ${{ inputs.build }}
@@ -53,4 +58,4 @@ runs:
     - name: Build
       if: ${{ inputs.build }}
       shell: bash
-      run: pnpm -w exec turbo run turbo:build --filter="${{ inputs.filter }}"
+      run: pnpm -w exec turbo run turbo:build {{ steps.parse-input.FILTERS }}"
