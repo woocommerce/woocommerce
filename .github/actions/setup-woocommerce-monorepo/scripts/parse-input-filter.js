@@ -15,7 +15,7 @@ for (const line of filterLines) {
     if (output !== '') {
         output += ' ';
     }
-    output += '--filter"';
+    output += '--filter="';
     output += line;
     output += '"';
 }
