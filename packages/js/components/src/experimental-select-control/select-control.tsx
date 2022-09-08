@@ -44,6 +44,8 @@ type SelectControlProps< ItemType > = {
 	onSelect?: ( selected: ItemType ) => void;
 	placeholder?: string;
 	selected: ItemType | ItemType[] | null;
+	clearSearchOnSelect?: boolean;
+	keepMenuOpenOnSelect?: boolean;
 };
 
 function SelectControl< ItemType = DefaultItemType >( {
@@ -79,6 +81,8 @@ function SelectControl< ItemType = DefaultItemType >( {
 	onInputChange = () => null,
 	onRemove = () => null,
 	onSelect = () => null,
+	clearSearchOnSelect = false,
+	keepMenuOpenOnSelect = false,
 	placeholder,
 	selected,
 }: SelectControlProps< ItemType > ) {
@@ -103,12 +107,18 @@ function SelectControl< ItemType = DefaultItemType >( {
 		getItemLabel
 	);
 
+	let currentSelectedItem = null;
+	if ( ! multiple && selectedItems.length > 0 ) {
+		currentSelectedItem = selectedItems[ 0 ];
+	}
+
 	const {
 		isOpen,
 		getLabelProps,
 		getMenuProps,
 		getInputProps,
 		getComboboxProps,
+		getToggleButtonProps,
 		highlightedIndex,
 		getItemProps,
 		selectItem,
@@ -127,6 +137,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 
 					break;
 				case useCombobox.stateChangeTypes.InputKeyDownEnter:
+				case useCombobox.stateChangeTypes.FunctionSelectItem:
 				case useCombobox.stateChangeTypes.ItemClick:
 				case useCombobox.stateChangeTypes.InputBlur:
 					if ( selectedItem ) {
@@ -150,6 +161,32 @@ function SelectControl< ItemType = DefaultItemType >( {
 					break;
 			}
 		},
+		stateReducer: ( state, actionAndChanges ) => {
+			const { changes, type } = actionAndChanges;
+
+			switch ( type ) {
+				case useCombobox.stateChangeTypes.InputKeyDownEnter:
+				case useCombobox.stateChangeTypes.FunctionSelectItem:
+				case useCombobox.stateChangeTypes.ItemClick:
+					return {
+						...changes,
+						isOpen: keepMenuOpenOnSelect ? true : false,
+						highlightedIndex: state.highlightedIndex,
+						inputValue: '',
+					};
+				case useCombobox.stateChangeTypes.InputBlur:
+					return {
+						...changes,
+						inputValue: '',
+					};
+				default:
+					return changes;
+			}
+		},
+	} );
+
+	const dropdownProps = multipleSelection.getDropdownProps( {
+		preventKeyAction: isOpen,
 	} );
 
 	const onRemoveItem = ( item: ItemType ) => {
@@ -169,7 +206,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 			<label { ...getLabelProps() }>{ label }</label>
 			{ /* eslint-enable jsx-a11y/label-has-for */ }
 			<div className="woocommerce-experimental-select-control__combo-box-wrapper">
-				{ multiple && (
+				{ multiple && multipleSelection && (
 					<SelectedItems
 						items={ selectedItems }
 						getItemLabel={ getItemLabel }
@@ -181,7 +218,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 				<ComboBox
 					comboBoxProps={ getComboboxProps() }
 					inputProps={ getInputProps( {
-						...getDropdownProps( { preventKeyAction: isOpen } ),
+						...dropdownProps,
 						className:
 							'woocommerce-experimental-select-control__input',
 						onFocus: () => setIsFocused( true ),
@@ -196,6 +233,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 				highlightedIndex,
 				getItemProps,
 				getMenuProps,
+				getToggleButtonProps,
 				isOpen,
 				getItemLabel,
 				getItemValue,
