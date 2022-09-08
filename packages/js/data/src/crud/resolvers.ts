@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { apiFetch, dispatch } from '@wordpress/data-controls';
+import { apiFetch } from '@wordpress/data-controls';
+import { controls } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -71,7 +72,7 @@ export const createResolvers = ( {
 				yield request< ItemQuery, Item >( path, resourceQuery );
 
 			yield getItemsTotalCountSuccess( query, totalCount );
-			yield dispatch(
+			yield controls.dispatch(
 				storeName,
 				'finishResolution',
 				`get${ pluralResourceName }TotalCount`,
@@ -80,7 +81,7 @@ export const createResolvers = ( {
 			yield getItemsSuccess( query, items, urlParameters );
 			for ( const i of items ) {
 				if ( i.id ) {
-					yield dispatch(
+					yield controls.dispatch(
 						storeName,
 						'finishResolution',
 						`get${ resourceName }`,
@@ -98,7 +99,7 @@ export const createResolvers = ( {
 
 	const getItemsTotalCount = function* ( query?: Partial< ItemQuery > ) {
 		const totalsQuery = {
-			...( typeof query === 'string' ? {} : query || {} ),
+			...( query || {} ),
 			page: 1,
 			per_page: 1,
 		};
