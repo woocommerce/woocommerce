@@ -153,10 +153,10 @@ class FeaturesController {
 	 * Returns an associative array where keys are unique feature ids
 	 * and values are arrays with these keys:
 	 *
-	 * - name
-	 * - description
-	 * - is_experimental
-	 * - is_enabled (if $include_enabled_info is passed as true)
+	 * - name (string)
+	 * - description (string)
+	 * - is_experimental (bool)
+	 * - is_enabled (bool) (only if $include_enabled_info is passed as true)
 	 *
 	 * @param bool $include_experimental Include also experimental/work in progress features in the list.
 	 * @param bool $include_enabled_info True to include the 'is_enabled' field in the returned features info.
@@ -351,7 +351,8 @@ class FeaturesController {
 	 */
 	private function process_updated_option( string $option, $old_value, $value ) {
 		$matches = array();
-		$success = preg_match( '/^woocommerce_feature_([a-zA-Z_]+)_enabled$/', $option, $matches );
+		$success = preg_match( '/^woocommerce_feature_([a-zA-Z0-9_]+)_enabled$/', $option, $matches );
+
 		if ( ! $success ) {
 			return;
 		}
