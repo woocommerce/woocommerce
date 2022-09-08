@@ -56,26 +56,32 @@ const program = new Command()
 			base
 		);
 
-		printTemplateResults(
-			Array.from( changes.templates.values() ),
-			outputStyle,
-			'TEMPLATES',
-			Logger.notice
-		);
+		if ( changes.templates.size ) {
+			printTemplateResults(
+				Array.from( changes.templates.values() ),
+				outputStyle,
+				'TEMPLATES',
+				Logger.notice
+			);
+		}
 
-		printHookResults(
-			Array.from( changes.hooks.values() ),
-			outputStyle,
-			'HOOKS',
-			Logger.notice
-		);
+		if ( changes.hooks.size ) {
+			printHookResults(
+				Array.from( changes.hooks.values() ),
+				outputStyle,
+				'HOOKS',
+				Logger.notice
+			);
+		}
 
-		printSchemaChange(
-			changes.schema,
-			sinceVersion,
-			outputStyle,
-			Logger.notice
-		);
+		if ( changes.schema.filter( ( s ) => ! s.areEqual ).length ) {
+			printSchemaChange(
+				changes.schema,
+				sinceVersion,
+				outputStyle,
+				Logger.notice
+			);
+		}
 
 		if ( changes.db ) {
 			printDatabaseUpdates( changes.db, 'github', Logger.notice );
