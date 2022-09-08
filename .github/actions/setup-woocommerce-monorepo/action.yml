@@ -33,6 +33,7 @@ runs:
 
     - name: Get Composer Cache Directory
       id: composer-cache
+      shell: bash
       run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
     - name: Cache Composer Dependencies
@@ -43,6 +44,7 @@ runs:
         restore-keys: ${{ runner.os }}-php-${{ inputs.php-version }}-composer-
 
     - name: Install Node and PHP Dependencies
+      shell: bash
       run: pnpm install --filter="${{ inputs.filter }}"
 
     - name: Cache Build Output
@@ -55,4 +57,5 @@ runs:
 
     - name: Build
       if: ${{ inputs.build }}
+      shell: bash
       run: pnpm -w exec turbo run turbo:build --filter="${{ inputs.filter }}"
