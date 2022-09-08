@@ -8,4 +8,4 @@ packages:
     - 'tools/package-release'
     - 'tools/cherry-pick'
     - 'tools/release-post-generator'
-
+    - 'tools/version-bump'
