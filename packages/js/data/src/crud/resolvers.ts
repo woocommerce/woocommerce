@@ -12,6 +12,8 @@ import {
 	getItemSuccess,
 	getItemsError,
 	getItemsSuccess,
+	getItemsTotalCountSuccess,
+	getItemsTotalCountError,
 } from './actions';
 import { IdQuery, Item, ItemQuery } from './types';
 import { request } from '../utils';
@@ -63,14 +65,14 @@ export const createResolvers = ( {
 
 		try {
 			const path = getRestPath( namespace, {}, urlParameters );
-			const { items }: { items: Item[] } = yield request<
-				ItemQuery,
-				Item
-			>( path, resourceQuery );
+			const { items, totalCount }: { items: Item[]; totalCount: number } =
+				yield request< ItemQuery, Item >( path, resourceQuery );
 
+			yield getItemsTotalCountSuccess( query, totalCount );
 			yield getItemsSuccess( query, items, urlParameters );
 			return items;
 		} catch ( error ) {
+			yield getItemsTotalCountError( query, error );
 			yield getItemsError( query, error );
 			throw error;
 		}

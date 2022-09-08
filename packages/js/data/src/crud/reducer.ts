@@ -22,6 +22,7 @@ export type ResourceState = {
 		}
 	>;
 	data: Data;
+	itemsCount: Record< string, number >;
 	errors: Record< string, unknown >;
 };
 
@@ -30,6 +31,7 @@ export const createReducer = () => {
 		state = {
 			items: {},
 			data: {},
+			itemsCount: {},
 			errors: {},
 		},
 		payload
@@ -37,6 +39,7 @@ export const createReducer = () => {
 		if ( payload && 'type' in payload ) {
 			switch ( payload.type ) {
 				case TYPES.CREATE_ITEM_ERROR:
+				case TYPES.GET_ITEMS_TOTAL_COUNT_ERROR:
 				case TYPES.GET_ITEMS_ERROR:
 					return {
 						...state,
@@ -46,6 +49,17 @@ export const createReducer = () => {
 								payload.errorType,
 								( payload.query || {} ) as ItemQuery
 							) ]: payload.error,
+						},
+					};
+				case TYPES.GET_ITEMS_TOTAL_COUNT_SUCCESS:
+					return {
+						...state,
+						itemsCount: {
+							...state.itemsCount,
+							[ getResourceName(
+								CRUD_ACTIONS.GET_ITEMS,
+								( payload.query || {} ) as ItemQuery
+							) ]: payload.totalCount,
 						},
 					};
 

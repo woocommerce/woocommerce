@@ -113,6 +113,18 @@ export const getItems = createSelector(
 	}
 );
 
+export const getItemsTotalCount = (
+	state: ResourceState,
+	query: ItemQuery,
+	defaultValue = undefined
+) => {
+	const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEMS, query || {} );
+	const totalCount = state.itemsCount.hasOwnProperty( itemQuery )
+		? state.itemsCount[ itemQuery ]
+		: defaultValue;
+	return totalCount;
+};
+
 export const getItemsError = ( state: ResourceState, query?: ItemQuery ) => {
 	const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEMS, query || {} );
 	return state.errors[ itemQuery ];
@@ -144,6 +156,10 @@ export const createSelectors = ( {
 			namespace
 		),
 		[ `get${ pluralResourceName }` ]: applyNamespace( getItems, namespace ),
+		[ `get${ pluralResourceName }TotalCount` ]: applyNamespace(
+			getItemsTotalCount,
+			namespace
+		),
 		[ `get${ pluralResourceName }Error` ]: applyNamespace(
 			getItemsError,
 			namespace

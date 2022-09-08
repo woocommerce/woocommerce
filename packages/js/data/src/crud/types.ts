@@ -6,6 +6,7 @@ import {
 	getItem,
 	getItemError,
 	getItems,
+	getItemsTotalCount,
 	getItemsError,
 	getItemCreateError,
 	getItemDeleteError,
@@ -95,6 +96,14 @@ export type CrudSelectors<
 		PluralResourceName,
 		ItemQueryType,
 		ItemType[]
+	> &
+	MapSelectors<
+		{
+			TotalCount: WPDataSelector< typeof getItemsTotalCount >;
+		},
+		PluralResourceName,
+		ItemQueryType,
+		number
 	> &
 	MapSelectors<
 		{
