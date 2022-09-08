@@ -7,14 +7,14 @@ import { writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { Logger } from 'cli-core/src/logger';
+import { Command } from '@commander-js/extra-typings';
 
 /**
  * Internal dependencies
  */
-import { program } from '../program';
-import { renderTemplate } from '../lib/render-template';
-import { createWpComDraftPost } from '../lib/draft-post';
-import { generateContributors } from '../lib/contributors';
+import { renderTemplate } from '../../lib/render-template';
+import { createWpComDraftPost } from '../../lib/draft-post';
+import { generateContributors } from '../../lib/contributors';
 
 const DEVELOPER_WOOCOMMERCE_SITE_ID = '96396764';
 
@@ -22,7 +22,7 @@ const VERSION_VALIDATION_REGEX =
 	/^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/;
 
 // Define the release post command
-program
+const program = new Command()
 	.command( 'release' )
 	.description( 'CLI to automate generation of a release post.' )
 	.argument(
@@ -124,3 +124,5 @@ program
 			);
 		}
 	} );
+
+program.parse( process.argv );

@@ -4,7 +4,7 @@
 	"description": "Automate release post generation for Wordpress plugins",
 	"main": " ",
 	"scripts": {
-		"release": "ts-node ./index.ts release"
+		"release-post": "node -r ts-node/register ./commands/release-post/index.ts"
 	},
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -19,6 +19,7 @@
 		"cli-core": "workspace:*",
 		"code-analyzer": "workspace:*",
 		"commander": "9.4.0",
+		"dotenv": "^10.0.0",
 		"ejs": "^3.1.8",
 		"express": "^4.18.1",
 		"form-data": "^4.0.0",

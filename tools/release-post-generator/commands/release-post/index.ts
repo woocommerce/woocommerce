@@ -1,0 +1,15 @@
+/**
+ * External dependencies
+ */
+import { program } from '@commander-js/extra-typings';
+
+program
+	.name( 'release-post' )
+	.version( '0.0.1' )
+	.command( 'release', 'Generate release post', { isDefault: true } )
+	.command(
+		'contributors',
+		'Generate a list of contributors for a release post'
+	);
+
+program.parse( process.argv );
