@@ -176,25 +176,120 @@ export const CustomRender: React.FC = () => {
 		setSelected( [ ...selected, item ] );
 	};
 
+	const getFilteredItems = ( allItems: ItemType[], inputValue: string ) => {
+		const re = new RegExp( inputValue, 'gi' );
+
+		return allItems.filter( ( item ) => {
+			return re.test( item.label.toLowerCase() );
+		} );
+	};
+
 	return (
 		<>
 			<SelectControl
 				multiple
 				label="Custom render"
 				items={ sampleItems }
-				getFilteredItems={ ( allItems ) => allItems }
+				getFilteredItems={ getFilteredItems }
 				selected={ selected }
 				onSelect={ onSelect }
 				onRemove={ onRemove }
+				keepMenuOpenOnSelect={ true }
 			>
 				{ ( {
 					items,
 					highlightedIndex,
 					getItemProps,
 					getMenuProps,
+					isOpen,
 				} ) => {
 					return (
-						<Menu isOpen={ true } getMenuProps={ getMenuProps }>
+						<Menu isOpen={ isOpen } getMenuProps={ getMenuProps }>
+							{ items.map( ( item, index: number ) => {
+								const isSelected = selected.includes( item );
+
+								return (
+									<MenuItem
+										key={ `${ item.value }${ index }` }
+										index={ index }
+										isActive={ highlightedIndex === index }
+										item={ item }
+										getItemProps={ getItemProps }
+									>
+										<>
+											<CheckboxControl
+												onChange={ () => null }
+												checked={ isSelected }
+												label={
+													<span
+														style={ {
+															fontWeight:
+																isSelected
+																	? 'bold'
+																	: 'normal',
+														} }
+													>
+														{ item.label }
+													</span>
+												}
+											/>
+										</>
+									</MenuItem>
+								);
+							} ) }
+						</Menu>
+					);
+				} }
+			</SelectControl>
+		</>
+	);
+};
+
+export const CustomRenderClearOnSelect: React.FC = () => {
+	const [ selected, setSelected ] = useState< ItemType[] >( [] );
+
+	const onRemove = ( item ) => {
+		setSelected( selected.filter( ( i ) => i !== item ) );
+	};
+
+	const onSelect = ( item ) => {
+		const isSelected = selected.find( ( i ) => i === item );
+		if ( isSelected ) {
+			onRemove( item );
+			return;
+		}
+		setSelected( [ ...selected, item ] );
+	};
+
+	const getFilteredItems = ( allItems: ItemType[], inputValue: string ) => {
+		const re = new RegExp( inputValue, 'gi' );
+
+		return allItems.filter( ( item ) => {
+			return re.test( item.label.toLowerCase() );
+		} );
+	};
+
+	return (
+		<>
+			<SelectControl
+				multiple
+				label="Custom render"
+				items={ sampleItems }
+				getFilteredItems={ getFilteredItems }
+				selected={ selected }
+				onSelect={ onSelect }
+				onRemove={ onRemove }
+				clearSearchOnSelect={ true }
+			>
+				{ ( {
+					items,
+					highlightedIndex,
+					getItemProps,
+					getMenuProps,
+					isOpen,
+				} ) => {
+					return (
+						<Menu isOpen={ isOpen } getMenuProps={ getMenuProps }>
 							{ items.map( ( item, index: number ) => {
 								const isSelected = selected.includes( item );
 
