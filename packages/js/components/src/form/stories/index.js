@@ -29,7 +29,7 @@ const initialValues = {
 	lastName: '',
 	select: '3',
 	checkbox: true,
-	radio: '2',
+	radio: 'one',
 };
 
 export const Basic = () => {
@@ -47,55 +47,59 @@ export const Basic = () => {
 				onChange={ handleChange }
 				initialValues={ initialValues }
 			>
-				{ ( { getInputProps, values, errors, handleSubmit } ) => (
-					<div>
-						<TextControl
-							label={ 'First Name' }
-							{ ...getInputProps( 'firstName' ) }
-						/>
-						<TextControl
-							label={ 'Last Name' }
-							{ ...getInputProps( 'lastName' ) }
-						/>
-						<SelectControl
-							label="Select"
-							options={ [
-								{ label: 'Option 1', value: '1' },
-								{ label: 'Option 2', value: '2' },
-								{ label: 'Option 3', value: '3' },
-							] }
-							{ ...getInputProps( 'select' ) }
-						/>
-						<CheckboxControl
-							label="Checkbox"
-							{ ...getInputProps( 'checkbox' ) }
-						/>
-						<RadioControl
-							label="Radio"
-							options={ [
-								{ label: 'Option 1', value: '1' },
-								{ label: 'Option 2', value: '2' },
-								{ label: 'Option 3', value: '3' },
-							] }
-							{ ...getInputProps( 'radio' ) }
-						/>
-						<Button
-							isPrimary
-							onClick={ handleSubmit }
-							disabled={ Object.keys( errors ).length }
-						>
-							Submit
-						</Button>
-						<br />
-						<br />
-						<h3>Return data:</h3>
-						<pre>
-							Values: { JSON.stringify( values ) }
+				{ ( { getInputProps, values, errors, handleSubmit } ) => {
+					const radioInputProps = getInputProps( 'radio' );
+					return (
+						<div>
+							<TextControl
+								label={ 'First Name' }
+								{ ...getInputProps( 'firstName' ) }
+							/>
+							<TextControl
+								label={ 'Last Name' }
+								{ ...getInputProps( 'lastName' ) }
+							/>
+							<SelectControl
+								label="Select"
+								options={ [
+									{ label: 'Option 1', value: '1' },
+									{ label: 'Option 2', value: '2' },
+									{ label: 'Option 3', value: '3' },
+								] }
+								{ ...getInputProps( 'select' ) }
+							/>
+							<CheckboxControl
+								label="Checkbox"
+								{ ...getInputProps( 'checkbox' ) }
+							/>
+							<RadioControl
+								label="Radio"
+								onChange={ radioInputProps.onChange }
+								selected={ radioInputProps.value }
+								options={ [
+									{ label: 'Option 1', value: 'one' },
+									{ label: 'Option 2', value: 'two' },
+									{ label: 'Option 3', value: 'three' },
+								] }
+							/>
+							<Button
+								isPrimary
+								onClick={ handleSubmit }
+								disabled={ Object.keys( errors ).length }
+							>
+								Submit
+							</Button>
 							<br />
-							Errors: { JSON.stringify( errors ) }
-						</pre>
-					</div>
-				) }
+							<br />
+							<h3>Return data:</h3>
+							<pre>
+								Values: { JSON.stringify( values ) }
+								<br />
+								Errors: { JSON.stringify( errors ) }
+							</pre>
+						</div>
+					);
+				} }
 			</Form>
 			<div>
 				<pre>onChange values: { JSON.stringify( onChangeValues ) }</pre>
