@@ -4,12 +4,13 @@ description: Handles the installation, building, and caching of the projects wit
 inputs:
   filters:
     description: The PNPM filter used to decide what projects to install and build. Supports multiline strings for multiple filters.
+    default: *
   build:
     description: Indicates whether or not the action should build any projects.
-    default: "true"
+    default: true
   php-version:
     description: The version of PHP that the action should set up.
-    default: "7.2"
+    default: 7.2
 
 runs:
   using: composite
