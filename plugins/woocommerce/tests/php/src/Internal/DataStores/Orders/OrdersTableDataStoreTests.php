@@ -141,6 +141,19 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that modified date is backfilled correctly when syncing order.
+	 */
+	public function test_backfill_updated_date() {
+		$order                   = $this->create_complex_cot_order();
+		$hardcoded_modified_date = time() - 100;
+		$order->set_date_modified( $hardcoded_modified_date );
+		$order->save();
+
+		$this->sut->backfill_post_record( $order );
+		$this->assertEquals( $hardcoded_modified_date, get_post_modified_time( 'U', true, $order->get_id() ) );
+	}
+
+	/**
 	 * Tests update() on the COT datastore.
 	 */
 	public function test_cot_datastore_update() {
