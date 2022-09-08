@@ -171,6 +171,10 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			'type' => 'string',
 			'name' => 'customer_user_agent',
 		),
+		'customer_note'        => array(
+			'type' => 'string',
+			'name' => 'customer_note',
+		),
 	);
 
 	/**
@@ -1632,6 +1636,7 @@ CREATE TABLE $orders_table_name (
 	transaction_id varchar(100) null,
 	ip_address varchar(100) null,
 	user_agent text null,
+	customer_note text null,
 	PRIMARY KEY (id),
 	KEY status (status),
 	KEY date_created (date_created_gmt),
