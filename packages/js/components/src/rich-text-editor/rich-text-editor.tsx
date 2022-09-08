@@ -3,9 +3,7 @@
  */
 import { BlockEditorProvider } from '@wordpress/block-editor';
 import { BlockInstance } from '@wordpress/blocks';
-import { Popover, Slot, SlotFillProvider } from '@wordpress/components';
-// @ts-ignore - no types for this exist yet.
-import { ShortcutProvider } from '@wordpress/keyboard-shortcuts';
+import { SlotFillProvider } from '@wordpress/components';
 import { debounce } from 'lodash';
 import {
 	createElement,
@@ -15,25 +13,21 @@ import {
 	useRef,
 } from '@wordpress/element';
 import React from 'react';
-
-// import '@/styles/gutenberg.css';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { ShortcutProvider } from '@wordpress/keyboard-shortcuts';
 
 /**
  * Internal dependencies
  */
 import { EditorWritingFlow } from './editor-writing-flow';
-import { ContextToolbar } from './components/context-toolbar';
 import { FixedFormattingToolbar } from './components/fixed-formatting-toolbar';
-// import { registerCompleters } from './autocomplete';
-// import { LINKUI_SLOT_NAME } from './formats/link/link-ui';
-// import { registerFormatTypes } from './formats/register-format-types';
-// import { SLOT_NAME } from './utils/editor-popover-slot-name';
-// import { registerBlocks } from './utils/register-blocks';
-// import { Timetravel } from './utils/time-travel';
+import { registerFormatTypes } from './formats/register-format-types';
+import { registerBlocks } from './utils/register-blocks';
 
-// registerBlocks();
-// registerCompleters();
-// registerFormatTypes();
+registerBlocks();
+registerFormatTypes();
 
 type RichTextEditorProps = {
 	blocks: BlockInstance[];
@@ -44,7 +38,6 @@ type RichTextEditorProps = {
 export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 	blocks,
 	onChange,
-	entryId,
 } ) => {
 	const blocksRef = useRef( blocks );
 
@@ -73,15 +66,12 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 
 	return (
 		<SlotFillProvider>
-			{ /* <Slot name={ LINKUI_SLOT_NAME } /> */ }
-			{ /* @ts-ignore */ }
-			{ /* <Popover.__unstableSlotNameProvider value={ SLOT_NAME }> */ }
-			{ /* <Popover.Slot /> */ }
-			{ /* @ts-ignore */ }
-			{ /* </Popover.__unstableSlotNameProvider> */ }
 			<BlockEditorProvider
 				value={ blocksRef.current }
-				settings={ { bodyPlaceholder: '', hasFixedToolbar: true } }
+				settings={ {
+					bodyPlaceholder: '',
+					hasFixedToolbar: true,
+				} }
 				onInput={ ( updatedBlocks ) => {
 					debounceChange( updatedBlocks );
 
@@ -93,19 +83,11 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 					debouncedRefresh();
 				} }
 			>
-				{ /* <Slot name={ CONTEXT_TOOLBAR_SLOT_NAME } /> */ }
-				{ /* Provide a separate named slot for the context menu. 
-          It must be within BLockEditorProvider for useSelect hook to work */ }
 				<FixedFormattingToolbar />
-				<ContextToolbar />
 
 				{ /* Shortcut provider produces a div we need to style */ }
 				<ShortcutProvider style={ { height: '100%' } }>
 					<EditorWritingFlow />
-					{ /* <Timetravel
-						blocks={ blocksRef.current }
-						entryId={ entryId }
-					/> */ }
 				</ShortcutProvider>
 			</BlockEditorProvider>
 		</SlotFillProvider>
