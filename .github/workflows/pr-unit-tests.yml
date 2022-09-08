@@ -37,7 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: ../actions/setup-woocommerce-monorepo
+      - uses: ./.github/actions/setup-woocommerce-monorepo
         with:
           php-version: ${{ matrix.php }}
 
