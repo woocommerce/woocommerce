@@ -90,7 +90,6 @@
 
 	.wc-blocks-components-form-token-field-wrapper .components-form-token-field__input-container {
 		border: 0;
-		width: calc(100% - 50px);
 		padding: $gap-smaller;
 
 		.components-form-token-field__input::placeholder {
@@ -111,6 +110,9 @@
 				padding: $gap-small;
 			}
 		}
+	}
+	.is-single .wc-blocks-components-form-token-field-wrapper .components-form-token-field__input-container {
+		width: calc(100% - 50px);
 	}
 }
 
@@ -164,8 +166,7 @@
 		border: 1px solid;
 		border-right: 0;
 		border-radius: 25px 0 0 25px;
-		padding: em($gap-smallest);
-		padding-left: em($gap-small);
+		padding: em($gap-smallest) em($gap-smaller) em($gap-smallest) em($gap-small);
 	}
 
 	.components-button.components-form-token-field__remove-token {
@@ -173,7 +174,7 @@
 		border: 1px solid;
 		border-left: 0;
 		border-radius: 0 25px 25px 0;
-		padding: 0 em($gap-smaller) 0 0;
+		padding: 1px em($gap-smallest) 0 0;
 
 		&.has-icon svg {
 			background-color: $gray-200;
