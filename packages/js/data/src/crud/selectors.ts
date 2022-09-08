@@ -7,7 +7,7 @@ import createSelector from 'rememo';
  * Internal dependencies
  */
 import { applyNamespace, getUrlParameters, parseId } from './utils';
-import { getResourceName } from '../utils';
+import { getResourceName, getTotalOrderCountResourceName } from '../utils';
 import { IdQuery, IdType, Item, ItemQuery } from './types';
 import { ResourceState } from './reducer';
 import CRUD_ACTIONS from './crud-actions';
@@ -115,13 +115,15 @@ export const getItems = createSelector(
 
 export const getItemsTotalCount = (
 	state: ResourceState,
-	query: ItemQuery,
-	defaultValue = undefined
+	query: ItemQuery | string
 ) => {
-	const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEMS, query || {} );
+	const itemQuery = getTotalOrderCountResourceName(
+		CRUD_ACTIONS.GET_ITEMS,
+		typeof query === 'string' ? {} : query || {}
+	);
 	const totalCount = state.itemsCount.hasOwnProperty( itemQuery )
 		? state.itemsCount[ itemQuery ]
-		: defaultValue;
+		: undefined;
 	return totalCount;
 };
 
