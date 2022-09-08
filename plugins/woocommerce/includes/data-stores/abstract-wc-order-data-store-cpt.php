@@ -136,7 +136,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		/**
 		 * In older versions, discounts may have been stored differently.
 		 * Update them now so if the object is saved, the correct values are
-		 * stored. @todo When meta is flattened, handle this during migration.
+		 * stored.
 		 */
 		if ( version_compare( $order->get_version( 'edit' ), '2.3.7', '<' ) && $order->get_prices_include_tax( 'edit' ) ) {
 			$order->set_discount_total( (float) get_post_meta( $order->get_id(), '_cart_discount', true ) - (float) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
@@ -488,8 +488,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				'post_excerpt'      => method_exists( $order, 'get_customer_note' ) ? $order->get_customer_note() : '',
 				'post_type'         => $order->get_type(),
 				// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- use of date is intentional.
-				'post_modified'     => date( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ),
-				'post_modified_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ),
+				'post_modified'     => ! is_null( $order->get_date_modified() ) ? date( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ) : '',
+				'post_modified_gmt' => ! is_null( $order->get_date_modified() ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ) : '',
 			),
 			array(
 				'ID' => $order->get_id(),
