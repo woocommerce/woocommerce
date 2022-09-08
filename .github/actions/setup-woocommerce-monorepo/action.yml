@@ -2,12 +2,15 @@ name: Setup WooCommerce Monorepo
 description: Handles the installation, building, and caching of the projects within the monorepo.
 
 inputs:
-  filters:
-    description: The PNPM filter used to decide what projects to install and build. Supports multiline strings for multiple filters.
+  install-filters:
+    description: The PNPM filter used to decide what projects to install. Supports multiline strings for multiple filters.
     default: ""
   build:
     description: Indicates whether or not the action should build any projects.
     default: "true"
+  build-filters:
+    description: The PNPM filter used to decide what projects to build. Supports multiline strings for multiple filters.
+    default: ""
   php-version:
     description: The version of PHP that the action should set up.
     default: "7.2"
@@ -18,7 +21,9 @@ runs:
     - name: Parse Action Input
       id: parse-input
       shell: bash
-      run: echo "::set-output name=FILTERS::$(bash ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.sh '${{ inputs.filters }}')"
+      run: |
+        echo "::set-output name=INSTALL_FILTERS::$(bash ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.sh '${{ inputs.install-filters }}')"
+        echo "::set-output name=BUILD_FILTERS::$(bash ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.sh '${{ inputs.build-filters }}')"
 
     - name: Setup PNPM
       uses: pnpm/action-setup@10693b3829bf86eb2572aef5f3571dcf5ca9287d
@@ -45,7 +50,7 @@ runs:
 
     - name: Install Node and PHP Dependencies
       shell: bash
-      run: pnpm install ${{ steps.parse-input.outputs.FILTERS }}
+      run: pnpm install ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
 
     - name: Cache Build Output
       if: ${{ inputs.build }}
@@ -58,4 +63,4 @@ runs:
     - name: Build
       if: ${{ inputs.build }}
       shell: bash
-      run: pnpm -w exec turbo run turbo:build ${{ steps.parse-input.outputs.FILTERS }}
+      run: pnpm -w exec turbo run turbo:build ${{ steps.parse-input.outputs.BUILD_FILTERS }}
