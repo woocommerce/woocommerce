@@ -34,7 +34,14 @@ const program = new Command()
 		'--previousVersion <previousVersion>',
 		'If you would like to compare against a version other than last minor you can provide a tag version from Github.'
 	)
+	.option(
+		'--tags <tags>',
+		'Comma separated list of tags to add to the post.',
+		'Releases,WooCommerce Core'
+	)
 	.action( async ( currentVersion, options ) => {
+		const tags = options.tags.split( ',' ).map( ( tag ) => tag.trim() );
+
 		const previousVersion = options.previousVersion
 			? semver.parse( options.previousVersion )
 			: semver.parse( currentVersion );
@@ -107,7 +114,8 @@ const program = new Command()
 					const { URL } = await createWpComDraftPost(
 						DEVELOPER_WOOCOMMERCE_SITE_ID,
 						title,
-						html
+						html,
+						tags
 					);
 
 					Logger.notice( `Published draft release post at ${ URL }` );
