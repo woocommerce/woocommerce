@@ -134,7 +134,8 @@ function FormComponent< Values extends Record< string, any > >(
 	const setValue = useCallback(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		( name: string, value: any ) => {
-			setValues( { ...values, [ name ]: value } );
+			const newValues = { ...values, [ name ]: value };
+			setValues( newValues );
 			if ( initialValues[ name ] !== value && ! changedFields[ name ] ) {
 				setChangedFields( {
 					...changedFields,
@@ -149,7 +150,7 @@ function FormComponent< Values extends Record< string, any > >(
 					[ name ]: false,
 				} );
 			}
-			validate( { ...values, [ name ]: value }, () => {
+			validate( newValues, () => {
 				const { onChangeCallback } = props;
 
 				// Note that onChange is a no-op by default so this will never be null
@@ -167,7 +168,7 @@ function FormComponent< Values extends Record< string, any > >(
 				if ( callback ) {
 					callback(
 						{ name, value },
-						values,
+						newValues,
 						! Object.keys( errors || {} ).length
 					);
 				}
