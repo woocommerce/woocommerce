@@ -12,7 +12,7 @@ Currently there are just 2 commands:
 
 Here is an example `analyzer` command:
 
-`pnpm run analyzer lint -- "release/6.8" "6.8.0" -b=release/6.7`
+`pnpm run analyzer -- lint "release/6.8" "6.8.0" -b release/6.7`
 
 In this command we compare the `release/6.7` and `release/6.8` branches to find differences, and we're looking for changes introduced since `6.8.0` (using the `@since` tag).
 

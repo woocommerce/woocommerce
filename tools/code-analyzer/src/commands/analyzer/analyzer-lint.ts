@@ -20,7 +20,7 @@ const program = new Command()
 	.command( 'lint' )
 	.argument(
 		'<compare>',
-		'GitHub branch or commit hash to compare against the base branch/commit.'
+		'GitHub branch/tag/commit hash to compare against the base branch/tag/commit hash.'
 	)
 	.argument(
 		'<sinceVersion>',
@@ -28,7 +28,7 @@ const program = new Command()
 	)
 	.option(
 		'-b, --base <base>',
-		'GitHub base branch or commit hash.',
+		'GitHub base branch/tag/commit hash.',
 		'trunk'
 	)
 	.option(
@@ -39,7 +39,7 @@ const program = new Command()
 	.option(
 		'-o, --outputStyle <outputStyle>',
 		'Output style for the results. Options: github, cli. Github output will use ::set-output to set the results as an output variable.',
-		'github'
+		'cli'
 	)
 	.option(
 		'-ss, --skipSchemaCheck',
@@ -84,7 +84,7 @@ const program = new Command()
 		}
 
 		if ( changes.db ) {
-			printDatabaseUpdates( changes.db, 'github', Logger.notice );
+			printDatabaseUpdates( changes.db, outputStyle, Logger.notice );
 		}
 	} );
 

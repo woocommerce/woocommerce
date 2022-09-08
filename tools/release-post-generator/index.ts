@@ -13,4 +13,4 @@ import './commands/release-post';
 dotenv.config();
 
 // Start the program
-program.parse();
+program.parse( process.argv );
