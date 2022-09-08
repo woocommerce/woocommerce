@@ -8,7 +8,7 @@ import { select } from '@wordpress/data';
  */
 import { register as registerBold } from './bold';
 import { register as registerItalic } from './italic';
-// import { register as registerLink } from './link';
+import { register as registerLink } from './link';
 
 export const formatIsRegistered = ( formatName: string ) => {
 	const registeredFormats = select( 'core/rich-text' ).getFormatTypes();
@@ -18,5 +18,7 @@ export const formatIsRegistered = ( formatName: string ) => {
 };
 
 export const registerFormatTypes = () => {
-	[ registerBold, registerItalic ].forEach( ( register ) => register() );
+	[ registerBold, registerItalic, registerLink ].forEach( ( register ) =>
+		register()
+	);
 };
