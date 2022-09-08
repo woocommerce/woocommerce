@@ -20,7 +20,7 @@ const program = new Command()
 	.command( 'lint' )
 	.argument(
 		'<compare>',
-		'GitHub branch or commit hash to compare against the base branch/commit.'
+		'GitHub branch/tag/commit hash to compare against the base branch/tag/commit hash.'
 	)
 	.argument(
 		'<sinceVersion>',
@@ -28,7 +28,7 @@ const program = new Command()
 	)
 	.option(
 		'-b, --base <base>',
-		'GitHub base branch or commit hash.',
+		'GitHub base branch/tag/commit hash.',
 		'trunk'
 	)
 	.option(
