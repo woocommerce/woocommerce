@@ -1,34 +1,50 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { createElement } from '@wordpress/element';
+import { BlockAlignmentToolbar } from '@wordpress/block-editor';
 import { Slot, Toolbar, ToolbarGroup } from '@wordpress/components';
-// import { FormattingMenuDivider } from './components/FormattingMenuDivider';
-// import { bold } from './formats/bold';
-// import { italic } from './formats/italic';
-// import { ImageUpload } from './tools/ImageUpload';
-// import { ListTransform } from './transforms/ListTransform';
 
 /**
  * Internal dependencies
  */
 import { HeadingTransform } from '../transforms/heading-transform';
+import { ListTransform } from '../transforms/list-transform';
+import { bold } from '../formats/bold';
+import { italic } from '../formats/italic';
 
-export const FORMAT_TOOLBAR_SLOT_NAME = 'dayone/format-toolbar';
+export const FORMAT_TOOLBAR_SLOT_NAME = 'rich-text-editor/format-toolbar';
 
 export const FixedFormattingToolbar = () => {
 	// Note that the order is important, later we could improve this by having some kind of registry for these inactive buttons
 	// that we register to during the registering of format types to ensure order is maintained.
-	// const inactiveFormatters = [
-	// 	{ component: bold.inactive, title: bold.title },
-	// 	{ component: italic.inactive, title: italic.title },
-	// ];
+	const inactiveFormatters = [
+		{ component: bold.inactive, title: bold.title },
+		{ component: italic.inactive, title: italic.title },
+	];
+
 	return (
 		<div>
-			<Toolbar label="Options">
+			<Toolbar label={ __( ' Formatting options', 'woocommerce' ) }>
 				{ /* Rich text formatting options  */ }
-				<ToolbarGroup />
-				{/* <FormattingMenuDivider /> */}
+				<ToolbarGroup>
+					<Slot name={ FORMAT_TOOLBAR_SLOT_NAME }>
+						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+						{ /* @ts-ignore - Type issue here might be an issue with DT types. */ }
+						{ ( fills ) => {
+							if ( ! fills.length ) {
+								return inactiveFormatters.map(
+									( { component: Format, title } ) => (
+										<Format key={ title } />
+									)
+								);
+							}
+
+							return fills;
+						} }
+					</Slot>
+				</ToolbarGroup>
 				{ /* Heading transforms */ }
 				<ToolbarGroup>
 					<HeadingTransform
@@ -44,29 +60,19 @@ export const FixedFormattingToolbar = () => {
 						headingLevel={ 3 }
 					/>
 				</ToolbarGroup>
-				{ /* <FormattingMenuDivider /> */ }
 				{ /* List transforms */ }
-				{ /* <ToolbarGroup sx={ toolbarGroupStyle }>
+				<ToolbarGroup>
 					<ListTransform
 						isContextMenu={ false }
 						listType="unordered"
 					/>
 					<ListTransform isContextMenu={ false } listType="ordered" />
-					<ListTransform
-						isContextMenu={ false }
-						listType="checklist"
-					/>
-				</ToolbarGroup> */ }
+				</ToolbarGroup>
 
-				{ /* Other menu items */ }
-				{ /* { process.env.NODE_ENV === 'development' && (
-					<>
-						<FormattingMenuDivider />
-						<ToolbarGroup sx={ toolbarGroupStyle }>
-							<ImageUpload />
-						</ToolbarGroup>
-					</>
-				) } */ }
+				<BlockAlignmentToolbar
+					onChange={ () => null }
+					value={ undefined }
+				/>
 			</Toolbar>
 		</div>
 	);
