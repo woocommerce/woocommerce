@@ -273,7 +273,7 @@ export const CustomRenderClearOnSelect: React.FC = () => {
 		<>
 			<SelectControl
 				multiple
-				label="Custom render"
+				label="Custom render clear on select"
 				items={ sampleItems }
 				getFilteredItems={ getFilteredItems }
 				selected={ selected }
