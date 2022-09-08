@@ -3,9 +3,6 @@
 	"version": "0.0.1",
 	"description": "A tool to analyze code changes in WooCommerce Monorepo.",
 	"author": "Automattic",
-	"bin": {
-		"code-analyzer": "./bin/run"
-	},
 	"homepage": "https://github.com/woocommerce/woocommerce",
 	"license": "GPLv2",
 	"repository": "woocommerce/woocommerce",
