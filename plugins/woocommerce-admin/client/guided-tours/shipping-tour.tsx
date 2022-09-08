@@ -12,6 +12,7 @@ import {
 	createPortal,
 } from '@wordpress/element';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 const REVIEWED_DEFAULTS_OPTION =
 	'woocommerce_admin_reviewed_default_shipping_zones';
@@ -220,10 +221,20 @@ export const ShippingTour: React.FC< {
 				},
 			},
 			callbacks: {
-				onNextStep: ( currentStepIndex ) =>
-					setStepNumber( currentStepIndex + 1 ),
-				onPreviousStep: ( currentStepIndex ) =>
-					setStepNumber( currentStepIndex - 1 ),
+				onNextStep: ( currentStepIndex ) => {
+					setStepNumber( currentStepIndex + 1 );
+					recordEvent( 'walkthrough_settings_shipping_next_click', {
+						step_name:
+							tourConfig.steps[ currentStepIndex ].meta.name,
+					} );
+				},
+				onPreviousStep: ( currentStepIndex ) => {
+					setStepNumber( currentStepIndex - 1 );
+					recordEvent( 'walkthrough_settings_shipping_back_click', {
+						step_name:
+							tourConfig.steps[ currentStepIndex ].meta.name,
+					} );
+				},
 			},
 		},
 		steps: [
@@ -271,10 +282,17 @@ export const ShippingTour: React.FC< {
 				},
 			},
 		],
-		closeHandler: () => {
+		closeHandler: ( steps, stepIndex, source ) => {
 			updateOptions( {
 				[ REVIEWED_DEFAULTS_OPTION ]: 'yes',
 			} );
+			if ( source === 'close-btn' ) {
+				recordEvent( 'walkthrough_settings_shipping_dismissed', {
+					step_name: steps[ stepIndex ].meta.name,
+				} );
+			} else if ( source === 'done-btn' ) {
+				recordEvent( 'walkthrough_settings_shipping_completed' );
+			}
 		},
 	};
 
@@ -315,6 +333,12 @@ export const ShippingTour: React.FC< {
 			},
 		} );
 	}
+
+	useEffect( () => {
+		if ( showTour ) {
+			recordEvent( 'walkthrough_settings_shipping_view' );
+		}
+	}, [ showTour ] );
 
 	if ( showTour ) {
 		return (
