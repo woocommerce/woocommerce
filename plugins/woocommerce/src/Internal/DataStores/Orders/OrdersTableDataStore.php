@@ -1033,8 +1033,6 @@ LEFT JOIN {$operational_data_clauses['join']}
 	 * @since 6.8.0
 	 */
 	protected function persist_order_to_db( &$order ) {
-		global $wpdb;
-
 		$context   = ( 0 === absint( $order->get_id() ) ) ? 'create' : 'update';
 		$data_sync = wc_get_container()->get( DataSynchronizer::class );
 
@@ -1063,9 +1061,11 @@ LEFT JOIN {$operational_data_clauses['join']}
 			ksort( $update['data'] );
 			ksort( $update['format'] );
 
-			$result = empty( $update['where'] )
-					? $wpdb->insert( $update['table'], $update['data'], array_values( $update['format'] ) )
-					: $wpdb->update( $update['table'], $update['data'], $update['where'], array_values( $update['format'] ), $update['where_format'] );
+			$result = $this->database_util->insert_on_duplicate_key_update(
+				$update['table'],
+				$update['data'],
+				array_values( $update['format'] )
+			);
 
 			if ( false === $result ) {
 				// translators: %s is a table name.
@@ -1093,8 +1093,6 @@ LEFT JOIN {$operational_data_clauses['join']}
 	protected function get_db_rows_for_order( $order, $context = 'create', $only_changes = false ): array {
 		$result = array();
 
-		$existing_order_row = $order->get_id() ? $this->get_order_data_for_id( $order->get_id() ) : array();
-
 		$row = $this->get_db_row_from_order( $order, $this->order_column_mapping, $only_changes );
 		if ( 'create' === $context && ! $row ) {
 			throw new \Exception( 'No data for new record.' ); // This shouldn't occur.
@@ -1102,11 +1100,9 @@ LEFT JOIN {$operational_data_clauses['join']}
 
 		if ( $row ) {
 			$result[] = array(
-				'table'        => self::get_orders_table_name(),
-				'data'         => array_merge( $row['data'], array( 'id' => $order->get_id() ) ),
-				'format'       => array_merge( $row['format'], array( 'id' => '%d' ) ),
-				'where'        => 'update' === $context ? array( 'id' => $order->get_id() ) : null,
-				'where_format' => 'update' === $context ? '%d' : null,
+				'table'  => self::get_orders_table_name(),
+				'data'   => array_merge( $row['data'], array( 'id' => $order->get_id() ) ),
+				'format' => array_merge( $row['format'], array( 'id' => '%d' ) ),
 			);
 		}
 
@@ -1114,11 +1110,9 @@ LEFT JOIN {$operational_data_clauses['join']}
 		$row = $this->get_db_row_from_order( $order, $this->operational_data_column_mapping, $only_changes );
 		if ( $row ) {
 			$result[] = array(
-				'table'        => self::get_operational_data_table_name(),
-				'data'         => array_merge( $row['data'], array( 'order_id' => $order->get_id() ) ),
-				'format'       => array_merge( $row['format'], array( 'order_id' => '%d' ) ),
-				'where'        => isset( $existing_order_row->{"{$this->get_op_table_alias()}_id"} ) ? array( 'order_id' => $order->get_id() ) : null,
-				'where_format' => isset( $existing_order_row->{"{$this->get_op_table_alias()}_id"} ) ? '%d' : null,
+				'table'  => self::get_operational_data_table_name(),
+				'data'   => array_merge( $row['data'], array( 'order_id' => $order->get_id() ) ),
+				'format' => array_merge( $row['format'], array( 'order_id' => '%d' ) ),
 			);
 		}
 
@@ -1128,28 +1122,21 @@ LEFT JOIN {$operational_data_clauses['join']}
 
 			if ( $row ) {
 				$result[] = array(
-					'table'        => self::get_addresses_table_name(),
-					'data'         => array_merge(
+					'table'  => self::get_addresses_table_name(),
+					'data'   => array_merge(
 						$row['data'],
 						array(
 							'order_id'     => $order->get_id(),
 							'address_type' => $address_type,
 						)
 					),
-					'format'       => array_merge(
+					'format' => array_merge(
 						$row['format'],
 						array(
 							'order_id'     => '%d',
 							'address_type' => '%s',
 						)
 					),
-					'where'        => isset( $existing_order_row->{ $this->get_address_table_alias( $address_type ) . '_id' } )
-									? array(
-										'order_id'     => $order->get_id(),
-										'address_type' => $address_type,
-									)
-									: null,
-					'where_format' => isset( $existing_order_row->{ $this->get_address_table_alias( $address_type ) . '_id' } ) ? array( '%d', '%s' ) : null,
 				);
 			}
 		}
