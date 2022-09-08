@@ -15,6 +15,11 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Setup PNPM
+      uses: pnpm/action-setup@10693b3829bf86eb2572aef5f3571dcf5ca9287d
+      with:
+        version: 6
+        
     - name: Setup Node
       uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93
       with:
@@ -25,11 +30,6 @@ runs:
       uses: shivammathur/setup-php@e04e1d97f0c0481c6e1ba40f8a538454fe5d7709
       with:
         php-version: ${{ inputs.php-version }}
-    
-    - name: Setup PNPM
-      uses: pnpm/action-setup@10693b3829bf86eb2572aef5f3571dcf5ca9287d
-      with:
-        version: 6
 
     - name: Get Composer Cache Directory
       id: composer-cache
