@@ -22,8 +22,8 @@ runs:
       id: parse-input
       shell: bash
       run: |
-        echo "::set-output name=INSTALL_FILTERS::$(bash ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.sh '${{ inputs.install-filters }}')"
-        echo "::set-output name=BUILD_FILTERS::$(bash ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.sh '${{ inputs.build-filters }}')"
+        echo "::set-output name=INSTALL_FILTERS::$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.install-filters }}')"
+        echo "::set-output name=BUILD_FILTERS::$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.build-filters }}')"
 
     - name: Setup PNPM
       uses: pnpm/action-setup@10693b3829bf86eb2572aef5f3571dcf5ca9287d
