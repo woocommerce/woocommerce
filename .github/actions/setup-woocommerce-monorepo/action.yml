@@ -18,7 +18,7 @@ runs:
     - name: Parse Action Input
       id: parse-input
       shell: bash
-      run: echo "::set-output name=FILTERS::$(bash ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.sh '${{ inputs.filters }}'')"
+      run: echo "::set-output name=FILTERS::$(bash ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.sh '${{ inputs.filters }}')"
 
     - name: Setup PNPM
       uses: pnpm/action-setup@10693b3829bf86eb2572aef5f3571dcf5ca9287d
