@@ -19,6 +19,7 @@ import { startsWith, find, partialRight } from 'lodash';
  * Internal dependencies
  */
 import { FormatAtts } from '../types';
+import { link as settings } from './index';
 
 type RichTextValue = {
 	activeFormats: Format[][];
@@ -129,7 +130,7 @@ export function isValidHref( href: string ): boolean {
 
 export function createLinkFormat( { url, type, id }: FormatAtts ) {
 	const format: { type: string; attributes: FormatAtts } = {
-		type: 'core/link',
+		type: settings.name,
 		attributes: {
 			url,
 		},

@@ -68,7 +68,7 @@ function getRichTextValueFromSelection(
 	// and not the selected text.
 	if ( isActive ) {
 		const boundary = getFormatBoundary( value, {
-			type: 'core/link',
+			type: settings.name,
 		} );
 
 		if ( ! boundary.start || ! boundary.end ) {
@@ -135,7 +135,7 @@ function InlineLinkUI( {
 	};
 
 	function removeLink() {
-		const newValue = removeFormat( value, 'core/link' );
+		const newValue = removeFormat( value, settings.name );
 		onChange( newValue );
 		stopAddingLink();
 		speak( __( 'Link removed.', 'woocommerce' ), 'assertive' );

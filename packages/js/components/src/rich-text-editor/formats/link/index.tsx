@@ -8,6 +8,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
 import { link as linkIcon, linkOff } from '@wordpress/icons';
 import { isURL, isEmail } from '@wordpress/url';
+import { ToolbarButton } from '@wordpress/components';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -30,7 +31,7 @@ import { EditProps } from '../types';
 import { FormatToolbarButton } from '../../components/format-toolbar-button';
 import { formatIsRegistered } from '../register-format-types';
 
-const name = 'core/link';
+const name = 'rich-text-editor/link';
 const title = __( 'Link', 'woocommerce' );
 
 function Edit( {
@@ -159,6 +160,9 @@ export const link: ExtendedFormatConfiguration = {
 		} );
 	},
 	edit: Edit,
+	inactive: () => {
+		return <ToolbarButton icon={ linkIcon } title={ title } isDisabled />;
+	},
 };
 
 export const register = () => {
