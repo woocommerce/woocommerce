@@ -9,4 +9,4 @@ packages:
     - 'tools/cherry-pick'
     - 'tools/release-post-generator'
     - 'tools/cli-core'
-
+    - 'tools/version-bump'
