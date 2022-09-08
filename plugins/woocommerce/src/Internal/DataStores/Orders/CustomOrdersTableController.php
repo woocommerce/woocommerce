@@ -204,7 +204,7 @@ class CustomOrdersTableController {
 	 * @return bool True if the feature is visible.
 	 */
 	public function is_feature_visible(): bool {
-		return $this->features_controller->feature_is_enabled( 'custom_orders_tables' );
+		return $this->features_controller->feature_is_enabled( 'custom_order_tables' );
 	}
 
 	/**
