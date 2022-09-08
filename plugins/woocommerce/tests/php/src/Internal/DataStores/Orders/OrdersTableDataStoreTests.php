@@ -297,6 +297,70 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Even corrupted order can be inserted as expected.
+	 */
+	public function test_cot_data_store_update_corrupted_order() {
+		global $wpdb;
+		$order    = $this->create_complex_cot_order();
+		$order_id = $order->get_id();
+
+		// Corrupt the order.
+		$wpdb->delete( $this->sut::get_addresses_table_name(), array( 'order_id' => $order->get_id() ), array( '%d' ) );
+
+		// Try to update the order.
+		$order->set_status( 'completed' );
+		$order->set_billing_address_1( 'New address' );
+		$order->save();
+
+		// Re-read order and make sure changes were persisted.
+		wp_cache_flush();
+		$order = new WC_Order();
+		$order->set_id( $order_id );
+		$this->switch_data_store( $order, $this->sut );
+		$this->sut->read( $order );
+		$this->assertEquals( 'New address', $order->get_billing_address_1() );
+	}
+
+	/**
+	 * We should be able to save multiple orders without them overwriting each other.
+	 */
+	public function test_cot_data_store_multiple_saved_orders() {
+		$order1 = $this->create_complex_cot_order();
+		$order2 = $this->create_complex_cot_order();
+
+		$order1_id          = $order1->get_id();
+		$order1_billing     = $order1->get_billing_address_1();
+		$order1_created_via = $order1->get_created_via();
+		$order1_key         = $order1->get_order_key();
+
+		$order2_id          = $order2->get_id();
+		$order2_billing     = $order2->get_billing_address_1();
+		$order2_created_via = $order2->get_created_via();
+		$order2_key         = $order2->get_order_key();
+
+		wp_cache_flush();
+
+		// Read the order again (fresh).
+		$r_order1 = new WC_Order();
+		$r_order1->set_id( $order1_id );
+		$this->switch_data_store( $r_order1, $this->sut );
+		$this->sut->read( $r_order1 );
+
+		$r_order2 = new WC_Order();
+		$r_order2->set_id( $order2_id );
+		$this->switch_data_store( $r_order2, $this->sut );
+		$this->sut->read( $r_order2 );
+
+		$this->assertEquals( $order1_billing, $r_order1->get_billing_address_1() );
+		$this->assertEquals( $order1_created_via, $r_order1->get_created_via() );
+		$this->assertEquals( $order1_key, $r_order1->get_order_key() );
+
+		$this->assertEquals( $order2_billing, $r_order2->get_billing_address_1() );
+		$this->assertEquals( $order2_created_via, $r_order2->get_created_via() );
+		$this->assertEquals( $order2_key, $r_order2->get_order_key() );
+	}
+
+	/**
 	 * Tests creation of full vs placeholder records in the posts table when creating orders in the COT datastore.
 	 *
 	 * @return void
