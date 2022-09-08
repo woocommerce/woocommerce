@@ -57,6 +57,14 @@ type FormProps< Values > = {
 		isValid: boolean
 	) => void;
 	/**
+	 * Function to call when multiple values change in the form.
+	 */
+	onChanges?: (
+		changedValues: Values,
+		values: Values,
+		hasErrors: boolean
+	) => void;
+	/**
 	 * A function that is passed a list of all values and
 	 * should return an `errors` object with error response.
 	 */
@@ -81,6 +89,7 @@ function FormComponent< Values extends Record< string, any > >(
 	{
 		onSubmit = () => {},
 		onChange = () => {},
+		onChanges = () => {},
 		initialValues = {} as Values,
 		...props
 	}: PropsWithChildren< FormProps< Values > >,
@@ -163,7 +172,7 @@ function FormComponent< Values extends Record< string, any > >(
 				const { onChangeCallback } = props;
 
 				// Note that onChange is a no-op by default so this will never be null
-				const callback = onChangeCallback || onChange;
+				const singleValueChangeCallback = onChangeCallback || onChange;
 
 				if ( onChangeCallback ) {
 					deprecated( 'onChangeCallback', {
@@ -172,17 +181,25 @@ function FormComponent< Values extends Record< string, any > >(
 						plugin: '@woocommerce/components',
 					} );
 				}
-				// onChange keeps track of validity, so needs to
+				// onChange and onChanges keep track of validity, so needs to
 				// happen after setting the error state.
-				if ( callback ) {
+				if ( singleValueChangeCallback ) {
 					// we should change the callback to pass all changed fields in a single callback
 					for ( const key in valuesToSet ) {
-						callback(
+						singleValueChangeCallback(
 							{ name: key, value: valuesToSet[ key ] },
 							newValues,
 							! Object.keys( newErrors || {} ).length
 						);
 					}
+				}
+
+				if ( onChanges ) {
+					onChanges(
+						valuesToSet,
+						values,
+						! Object.keys( errors || {} ).length
+					);
 				}
 			} );
 		},
