@@ -20,6 +20,7 @@ export type DateTimePickerControlProps = {
 	disabled?: boolean;
 	is12Hour?: boolean;
 	onChange: ( date: string ) => void;
+	placeholder?: string;
 } & Omit< React.HTMLAttributes< HTMLDivElement >, 'onChange' >;
 
 export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
@@ -28,6 +29,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	dateTimeFormat = is12Hour ? 'MM/DD/YYYY h:mm a' : 'MM/DD/YYYY H:MM',
 	disabled = false,
 	onChange,
+	placeholder,
 }: DateTimePickerControlProps ) => {
 	const [ dateTime, setDateTime ] = useState(
 		moment( currentDate || new Date().toISOString() )
@@ -94,6 +96,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 					} }
 					dateFormat={ dateTimeFormat }
 					label={ __( 'Choose a date', 'woocommerce' ) }
+					placeholder={ placeholder }
 					error={ inputError }
 					describedBy={ sprintf(
 						/* translators: A datetime format */
