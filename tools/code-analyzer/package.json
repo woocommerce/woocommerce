@@ -8,6 +8,9 @@
 	"repository": "woocommerce/woocommerce",
 	"dependencies": {
 		"@commander-js/extra-typings": "^0.1.0",
+		"@oclif/core": "^1",
+		"@oclif/plugin-help": "^5",
+		"@oclif/plugin-plugins": "^2.0.1",
 		"@types/uuid": "^8.3.4",
 		"cli-core": "workspace:*",
 		"commander": "^9.4.0",
