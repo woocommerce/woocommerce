@@ -3,18 +3,16 @@
 	"version": "0.0.1",
 	"description": "A tool to analyze code changes in WooCommerce Monorepo.",
 	"author": "Automattic",
-	"bin": {
-		"code-analyzer": "./bin/run"
-	},
 	"homepage": "https://github.com/woocommerce/woocommerce",
 	"license": "GPLv2",
 	"repository": "woocommerce/woocommerce",
 	"dependencies": {
 		"@commander-js/extra-typings": "^0.1.0",
+		"@tsconfig/node16": "^1.0.3",
 		"@types/uuid": "^8.3.4",
 		"cli-core": "workspace:*",
 		"commander": "^9.4.0",
-		"@tsconfig/node16": "^1.0.3",
+		"dotenv": "^10.0.0",
 		"simple-git": "^3.10.0",
 		"uuid": "^8.3.2"
 	},
