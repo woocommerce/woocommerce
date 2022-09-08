@@ -9,7 +9,7 @@ import { Reducer } from 'redux';
 import { Actions } from './actions';
 import CRUD_ACTIONS from './crud-actions';
 import { getKey } from './utils';
-import { getResourceName, getTotalOrderCountResourceName } from '../utils';
+import { getResourceName, getTotalCountResourceName } from '../utils';
 import { IdType, Item, ItemQuery } from './types';
 import { TYPES } from './action-types';
 
@@ -56,7 +56,7 @@ export const createReducer = () => {
 						...state,
 						itemsCount: {
 							...state.itemsCount,
-							[ getTotalOrderCountResourceName(
+							[ getTotalCountResourceName(
 								CRUD_ACTIONS.GET_ITEMS,
 								( payload.query || {} ) as ItemQuery
 							) ]: payload.totalCount,

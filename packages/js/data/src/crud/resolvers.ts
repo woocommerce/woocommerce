@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { apiFetch } from '@wordpress/data-controls';
+import { apiFetch, dispatch } from '@wordpress/data-controls';
 
 /**
  * Internal dependencies
@@ -19,12 +19,14 @@ import { IdQuery, Item, ItemQuery } from './types';
 import { request } from '../utils';
 
 type ResolverOptions = {
+	storeName: string;
 	resourceName: string;
 	pluralResourceName: string;
 	namespace: string;
 };
 
 export const createResolvers = ( {
+	storeName,
 	resourceName,
 	pluralResourceName,
 	namespace,
@@ -69,7 +71,23 @@ export const createResolvers = ( {
 				yield request< ItemQuery, Item >( path, resourceQuery );
 
 			yield getItemsTotalCountSuccess( query, totalCount );
+			yield dispatch(
+				storeName,
+				'finishResolution',
+				`get${ pluralResourceName }TotalCount`,
+				[ query ]
+			);
 			yield getItemsSuccess( query, items, urlParameters );
+			for ( const i of items ) {
+				if ( i.id ) {
+					yield dispatch(
+						storeName,
+						'finishResolution',
+						`get${ resourceName }`,
+						[ i.id ]
+					);
+				}
+			}
 			return items;
 		} catch ( error ) {
 			yield getItemsTotalCountError( query, error );
@@ -78,8 +96,40 @@ export const createResolvers = ( {
 		}
 	};
 
+	const getItemsTotalCount = function* ( query?: Partial< ItemQuery > ) {
+		const totalsQuery = {
+			...( typeof query === 'string' ? {} : query || {} ),
+			page: 1,
+			per_page: 1,
+		};
+		const urlParameters = getUrlParameters( namespace, totalsQuery );
+		const resourceQuery = cleanQuery( totalsQuery, namespace );
+
+		// Require ID when requesting specific fields to later update the resource data.
+		if (
+			resourceQuery &&
+			resourceQuery._fields &&
+			! resourceQuery._fields.includes( 'id' )
+		) {
+			resourceQuery._fields = [ 'id', ...resourceQuery._fields ];
+		}
+		try {
+			const path = getRestPath( namespace, {}, urlParameters );
+			const { totalCount } = yield request< ItemQuery, Item >(
+				path,
+				totalsQuery
+			);
+			yield getItemsTotalCountSuccess( query, totalCount );
+			return totalCount;
+		} catch ( error ) {
+			yield getItemsTotalCountError( query, error );
+			return error;
+		}
+	};
+
 	return {
 		[ `get${ resourceName }` ]: getItem,
 		[ `get${ pluralResourceName }` ]: getItems,
+		[ `get${ pluralResourceName }TotalCount` ]: getItemsTotalCount,
 	};
 };

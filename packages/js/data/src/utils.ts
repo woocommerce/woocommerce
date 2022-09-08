@@ -31,7 +31,7 @@ export function getResourceName(
  * @param {Object} query  Query for order totals count.
  * @return {string} Resource name for order totals.
  */
-export function getTotalOrderCountResourceName(
+export function getTotalCountResourceName(
 	prefix: string,
 	query: Record< string, unknown >
 ) {
