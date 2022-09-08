@@ -40,8 +40,9 @@ jobs:
       - name: Setup WooCommerce Monorepo
         uses: ./.github/actions/setup-woocommerce-monorepo
         with:
-          install-filters: "@woocommerce/api..."
-          build-filters: "@woocommerce/api"
+          build-filters: |
+            woocommerce
+            !@woocommerce/api
           php-version: ${{ matrix.php }}
 
       - name: Tool versions
