@@ -45,7 +45,7 @@ runs:
 
     - name: Install Node and PHP Dependencies
       shell: bash
-      run: pnpm install {{ steps.parse-input.outputs.FILTERS }}"
+      run: pnpm install ${{ steps.parse-input.outputs.FILTERS }}"
 
     - name: Cache Build Output
       if: ${{ inputs.build }}
@@ -58,4 +58,4 @@ runs:
     - name: Build
       if: ${{ inputs.build }}
       shell: bash
-      run: pnpm -w exec turbo run turbo:build {{ steps.parse-input.outputs.FILTERS }}"
+      run: pnpm -w exec turbo run turbo:build ${{ steps.parse-input.outputs.FILTERS }}"
