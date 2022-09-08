@@ -39,7 +39,7 @@ const program = new Command()
 	.option(
 		'-o, --outputStyle <outputStyle>',
 		'Output style for the results. Options: github, cli. Github output will use ::set-output to set the results as an output variable.',
-		'github'
+		'cli'
 	)
 	.option(
 		'-ss, --skipSchemaCheck',
@@ -84,7 +84,7 @@ const program = new Command()
 		}
 
 		if ( changes.db ) {
-			printDatabaseUpdates( changes.db, 'github', Logger.notice );
+			printDatabaseUpdates( changes.db, outputStyle, Logger.notice );
 		}
 	} );
 
