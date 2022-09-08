@@ -1,4 +1,4 @@
-name: Run tests against PR in a environment with COT enabled
+name: Run tests against PR in an environment with COT enabled
 on:
   pull_request:
     branches:
