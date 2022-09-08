@@ -13,6 +13,7 @@ import { HeadingTransform } from '../transforms/heading-transform';
 import { ListTransform } from '../transforms/list-transform';
 import { bold } from '../formats/bold';
 import { italic } from '../formats/italic';
+import { link } from '../formats/link';
 
 export const FORMAT_TOOLBAR_SLOT_NAME = 'rich-text-editor/format-toolbar';
 
@@ -22,6 +23,7 @@ export const FixedFormattingToolbar = () => {
 	const inactiveFormatters = [
 		{ component: bold.inactive, title: bold.title },
 		{ component: italic.inactive, title: italic.title },
+		{ component: link.inactive, title: link.title },
 	];
 
 	return (
@@ -68,7 +70,6 @@ export const FixedFormattingToolbar = () => {
 					/>
 					<ListTransform isContextMenu={ false } listType="ordered" />
 				</ToolbarGroup>
-
 				<BlockAlignmentToolbar
 					onChange={ () => null }
 					value={ undefined }
