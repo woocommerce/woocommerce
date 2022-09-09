@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add getItemsTotalCount selector to the crud data store.
