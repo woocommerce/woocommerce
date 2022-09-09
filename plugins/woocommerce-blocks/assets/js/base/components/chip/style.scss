@@ -28,17 +28,15 @@
 	&.wc-block-components-chip--radius-large {
 		border-radius: 2em;
 		padding-left: 0.75em;
-		padding-right: 0.75em;
+		padding-right: 0.25em;
 	}
 	.wc-block-components-chip__text {
-		@include font-size(smaller);
 		flex-grow: 1;
 	}
 	&.is-removable .wc-block-components-chip__text {
-		padding-right: 0.25em;
+		padding-right: 0.5em;
 	}
 	.wc-block-components-chip__remove {
-		@include font-size(smaller);
 		background: $gray-200;
 		border: 0;
 		border-radius: 25px;
@@ -46,11 +44,11 @@
 		padding: 0;
 		height: 16px;
 		width: 16px;
+		line-height: 16px;
 		margin: 0;
 	}
 
 	.wc-block-components-chip__remove-icon {
-		vertical-align: middle;
 		fill: $gray-900;
 	}
 }
