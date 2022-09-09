@@ -108,9 +108,10 @@ If you try to register again, under the same namespace, the previously registere
 
 `ExtendSchema::register_update_callback`: Used to register a callback to be executed when the `cart/extensions` endpoint gets hit with a given namespace. It takes an array of arguments
 
-| Attribute | Type | Required | Description || ----------- | ---------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `namespace` | `string` | Yes | The namespace of your extension. This is used to determine which extension's callbacks should be executed. |
-| `callback` | `Callable` | Yes | The function/method (or Callable) that will be executed when the `cart/extensions` endpoint is hit with a `namespace` that matches the one supplied. The callable should take a single argument. The data passed into the callback via this argument will be an array containing whatever data you choose to pass to it. The callable does not need to return anything, if it does, then its return value will not be used. |
+| Attribute   | Type       | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ----------- | ---------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `namespace` | `string`   | Yes      | The namespace of your extension. This is used to determine which extension's callbacks should be executed.                                                                                                                                                                                                                                                                                                                  |
+| `callback`  | `Callable` | Yes      | The function/method (or Callable) that will be executed when the `cart/extensions` endpoint is hit with a `namespace` that matches the one supplied. The callable should take a single argument. The data passed into the callback via this argument will be an array containing whatever data you choose to pass to it. The callable does not need to return anything, if it does, then its return value will not be used. |
 
 ### JavaScript
 
@@ -191,4 +192,3 @@ Now that this is registered, when the button is pressed, the `cart/extensions` e
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md)
 
 <!-- /FEEDBACK -->
-
