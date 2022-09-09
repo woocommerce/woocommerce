@@ -608,7 +608,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @return array
 	 */
-	public function get_meta_data_for_response( $request, $meta_data ) {
+	protected function get_meta_data_for_response( $request, $meta_data ) {
 		$fields = $this->get_fields_for_response( $request );
 		if ( ! in_array( 'meta_data', $fields, true ) ) {
 			return array();
