@@ -18,11 +18,11 @@ In this command we compare the `release/6.7` and `release/6.8` branches to find 
 
 To find out more about the other arguments to the command you can run `pnpm run analyzer -- --help`
 
-2. `major_minor`. This simple CLI tool gives you the latest `.0` major/minor released version of a plugin's mainfile based on Woo release conventions. 
+2. `major-minor`. This simple CLI tool gives you the latest `.0` major/minor released version of a plugin's mainfile based on Woo release conventions. 
 
-Here is an example `major_minor` command:
+Here is an example `major-minor` command:
 
-`pnpm run analyzer -- major-minor "release/6.8" "plugins/woocommerce/woocommerce.php"`
+`pnpm run analyzer major-minor -- "release/6.8" "plugins/woocommerce/woocommerce.php"`
 
 In this command we checkout the branch `release/6.8` and check the version of the woocommerce.php mainfile located at the path passed. Note that at the time of
 writing the main file in this particular branch reports `6.8.1` so the output of this command is `6.8.0`.

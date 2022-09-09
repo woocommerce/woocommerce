@@ -7,15 +7,15 @@ import { writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { Logger } from 'cli-core/src/logger';
+import { Command } from '@commander-js/extra-typings';
 import dotenv from 'dotenv';
 
 /**
  * Internal dependencies
  */
-import { program } from '../program';
-import { renderTemplate } from '../lib/render-template';
-import { createWpComDraftPost } from '../lib/draft-post';
-import { generateContributors } from '../lib/contributors';
+import { renderTemplate } from '../../lib/render-template';
+import { createWpComDraftPost } from '../../lib/draft-post';
+import { generateContributors } from '../../lib/contributors';
 
 const DEVELOPER_WOOCOMMERCE_SITE_ID = '96396764';
 
@@ -25,7 +25,7 @@ const VERSION_VALIDATION_REGEX =
 dotenv.config();
 
 // Define the release post command
-program
+const program = new Command()
 	.command( 'release' )
 	.description( 'CLI to automate generation of a release post.' )
 	.argument(
@@ -37,7 +37,14 @@ program
 		'--previousVersion <previousVersion>',
 		'If you would like to compare against a version other than last minor you can provide a tag version from Github.'
 	)
+	.option(
+		'--tags <tags>',
+		'Comma separated list of tags to add to the post.',
+		'Releases,WooCommerce Core'
+	)
 	.action( async ( currentVersion, options ) => {
+		const tags = options.tags.split( ',' ).map( ( tag ) => tag.trim() );
+
 		const previousVersion = options.previousVersion
 			? semver.parse( options.previousVersion )
 			: semver.parse( currentVersion );
@@ -110,7 +117,8 @@ program
 					const { URL } = await createWpComDraftPost(
 						DEVELOPER_WOOCOMMERCE_SITE_ID,
 						title,
-						html
+						html,
+						tags
 					);
 
 					Logger.notice( `Published draft release post at ${ URL }` );
@@ -127,3 +135,5 @@ program
 			);
 		}
 	} );
+
+program.parse( process.argv );
