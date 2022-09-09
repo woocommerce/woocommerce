@@ -125,39 +125,44 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$order->set_props(
 			array(
-				'order_key'            => get_post_meta( $id, '_order_key', true ),
-				'customer_id'          => get_post_meta( $id, '_customer_user', true ),
-				'billing_first_name'   => get_post_meta( $id, '_billing_first_name', true ),
-				'billing_last_name'    => get_post_meta( $id, '_billing_last_name', true ),
-				'billing_company'      => get_post_meta( $id, '_billing_company', true ),
-				'billing_address_1'    => get_post_meta( $id, '_billing_address_1', true ),
-				'billing_address_2'    => get_post_meta( $id, '_billing_address_2', true ),
-				'billing_city'         => get_post_meta( $id, '_billing_city', true ),
-				'billing_state'        => get_post_meta( $id, '_billing_state', true ),
-				'billing_postcode'     => get_post_meta( $id, '_billing_postcode', true ),
-				'billing_country'      => get_post_meta( $id, '_billing_country', true ),
-				'billing_email'        => get_post_meta( $id, '_billing_email', true ),
-				'billing_phone'        => get_post_meta( $id, '_billing_phone', true ),
-				'shipping_first_name'  => get_post_meta( $id, '_shipping_first_name', true ),
-				'shipping_last_name'   => get_post_meta( $id, '_shipping_last_name', true ),
-				'shipping_company'     => get_post_meta( $id, '_shipping_company', true ),
-				'shipping_address_1'   => get_post_meta( $id, '_shipping_address_1', true ),
-				'shipping_address_2'   => get_post_meta( $id, '_shipping_address_2', true ),
-				'shipping_city'        => get_post_meta( $id, '_shipping_city', true ),
-				'shipping_state'       => get_post_meta( $id, '_shipping_state', true ),
-				'shipping_postcode'    => get_post_meta( $id, '_shipping_postcode', true ),
-				'shipping_country'     => get_post_meta( $id, '_shipping_country', true ),
-				'shipping_phone'       => get_post_meta( $id, '_shipping_phone', true ),
-				'payment_method'       => get_post_meta( $id, '_payment_method', true ),
-				'payment_method_title' => get_post_meta( $id, '_payment_method_title', true ),
-				'transaction_id'       => get_post_meta( $id, '_transaction_id', true ),
-				'customer_ip_address'  => get_post_meta( $id, '_customer_ip_address', true ),
-				'customer_user_agent'  => get_post_meta( $id, '_customer_user_agent', true ),
-				'created_via'          => get_post_meta( $id, '_created_via', true ),
-				'date_completed'       => $date_completed,
-				'date_paid'            => $date_paid,
-				'cart_hash'            => get_post_meta( $id, '_cart_hash', true ),
-				'customer_note'        => $post_object->post_excerpt,
+				'order_key'                    => get_post_meta( $id, '_order_key', true ),
+				'customer_id'                  => get_post_meta( $id, '_customer_user', true ),
+				'billing_first_name'           => get_post_meta( $id, '_billing_first_name', true ),
+				'billing_last_name'            => get_post_meta( $id, '_billing_last_name', true ),
+				'billing_company'              => get_post_meta( $id, '_billing_company', true ),
+				'billing_address_1'            => get_post_meta( $id, '_billing_address_1', true ),
+				'billing_address_2'            => get_post_meta( $id, '_billing_address_2', true ),
+				'billing_city'                 => get_post_meta( $id, '_billing_city', true ),
+				'billing_state'                => get_post_meta( $id, '_billing_state', true ),
+				'billing_postcode'             => get_post_meta( $id, '_billing_postcode', true ),
+				'billing_country'              => get_post_meta( $id, '_billing_country', true ),
+				'billing_email'                => get_post_meta( $id, '_billing_email', true ),
+				'billing_phone'                => get_post_meta( $id, '_billing_phone', true ),
+				'shipping_first_name'          => get_post_meta( $id, '_shipping_first_name', true ),
+				'shipping_last_name'           => get_post_meta( $id, '_shipping_last_name', true ),
+				'shipping_company'             => get_post_meta( $id, '_shipping_company', true ),
+				'shipping_address_1'           => get_post_meta( $id, '_shipping_address_1', true ),
+				'shipping_address_2'           => get_post_meta( $id, '_shipping_address_2', true ),
+				'shipping_city'                => get_post_meta( $id, '_shipping_city', true ),
+				'shipping_state'               => get_post_meta( $id, '_shipping_state', true ),
+				'shipping_postcode'            => get_post_meta( $id, '_shipping_postcode', true ),
+				'shipping_country'             => get_post_meta( $id, '_shipping_country', true ),
+				'shipping_phone'               => get_post_meta( $id, '_shipping_phone', true ),
+				'payment_method'               => get_post_meta( $id, '_payment_method', true ),
+				'payment_method_title'         => get_post_meta( $id, '_payment_method_title', true ),
+				'transaction_id'               => get_post_meta( $id, '_transaction_id', true ),
+				'customer_ip_address'          => get_post_meta( $id, '_customer_ip_address', true ),
+				'customer_user_agent'          => get_post_meta( $id, '_customer_user_agent', true ),
+				'created_via'                  => get_post_meta( $id, '_created_via', true ),
+				'date_completed'               => $date_completed,
+				'date_paid'                    => $date_paid,
+				'cart_hash'                    => get_post_meta( $id, '_cart_hash', true ),
+				'customer_note'                => $post_object->post_excerpt,
+				'order_stock_reduced'          => get_post_meta( $id, '_order_stock_reduced', true ),
+				'download_permissions_granted' => get_post_meta( $id, '_download_permissions_granted', true ),
+				'new_order_email_sent'         => get_post_meta( $id, '_new_order_email_sent', true ),
+				'recorded_sales'               => get_post_meta( $id, '_recorded_sales', true ),
+				'recorded_coupon_usage_counts' => get_post_meta( $id, '_recorded_coupon_usage_counts', true ),
 			)
 		);
 	}
@@ -595,6 +600,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param bool         $set True or false.
 	 */
 	public function set_download_permissions_granted( $order, $set ) {
+		$order->set_download_permissions_granted( $set );
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_download_permissions_granted', wc_bool_to_string( $set ) );
 	}
@@ -617,6 +623,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param bool         $set True or false.
 	 */
 	public function set_recorded_sales( $order, $set ) {
+		$order->set_recorded_sales( $set );
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_recorded_sales', wc_bool_to_string( $set ) );
 	}
@@ -639,6 +646,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param bool         $set True or false.
 	 */
 	public function set_recorded_coupon_usage_counts( $order, $set ) {
+		$order->set_recorded_coupon_usage_counts( $set );
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_recorded_coupon_usage_counts', wc_bool_to_string( $set ) );
 	}
@@ -662,6 +670,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param bool         $set True or false.
 	 */
 	public function set_email_sent( $order, $set ) {
+		$order->set_new_order_email_sent( $set );
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_new_order_email_sent', wc_bool_to_string( $set ) );
 	}
@@ -765,6 +774,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param bool         $set True or false.
 	 */
 	public function set_stock_reduced( $order, $set ) {
+		$order->set_order_stock_reduced( $set );
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_order_stock_reduced', wc_bool_to_string( $set ) );
 	}

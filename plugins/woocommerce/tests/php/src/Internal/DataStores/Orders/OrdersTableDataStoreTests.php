@@ -299,6 +299,10 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			'billing_phone',
 			'shipping_total',
 			'total',
+			'order_stock_reduced',
+			'download_permissions_granted',
+			'recorded_sales',
+			'recorded_coupon_usage_counts',
 		);
 
 		foreach ( $props_to_compare as $prop ) {
@@ -1025,6 +1029,26 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$this->assertEquals( 'custom_value_4', $refreshed_order->get_meta( 'custom_meta_4' ) );
 		$this->assertEquals( 'custom_value_1_updated', $refreshed_order->get_meta( 'custom_meta_1' ) );
 		$this->assertEquals( '', $refreshed_order->get_meta( 'custom_meta_2' ) );
+	}
+
+	/**
+	 * Test that after backfilling, post order is same as cot order.
+	 */
+	public function test_post_is_same_as_order_after_backfill() {
+		$order = $this->create_complex_cot_order();
+		$order->save();
+		$this->sut->backfill_post_record( $order );
+
+		$r_order = new WC_Order();
+		$r_order->set_id( $order->get_id() );
+		$this->switch_data_store( $r_order, $this->sut );
+		$this->sut->read( $r_order );
+
+		$post_order_comparison_closure = function () use ( $r_order ) {
+			return $this->is_post_different_from_order( $r_order, get_post( $r_order->get_id() ) );
+		};
+
+		$this->assertFalse( $post_order_comparison_closure->call( $this->sut ) );
 	}
 
 	/**

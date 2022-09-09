@@ -819,7 +819,7 @@ abstract class WC_Data {
 	 */
 	protected function set_date_prop( $prop, $value ) {
 		try {
-			if ( empty( $value ) ) {
+			if ( empty( $value ) || '0000-00-00 00:00:00' === $value ) {
 				$this->set_prop( $prop, null );
 				return;
 			}

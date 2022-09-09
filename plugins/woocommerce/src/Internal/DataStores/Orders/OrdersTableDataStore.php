@@ -479,7 +479,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether permissions are granted.
 	 */
 	public function get_download_permissions_granted( $order ) {
-		return wc_string_to_bool( $order->get_meta( '_download_permissions_granted', true ) );
+		return $order->get_download_permissions_granted();
 	}
 
 	/**
@@ -490,8 +490,10 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
 	public function set_download_permissions_granted( $order, $set, $save = true ) {
-		// XXX implement $save = true.
-		return $order->update_meta_data( '_download_permissions_granted', wc_bool_to_string( $set ) );
+		$order->set_download_permissions_granted( $set );
+		if ( $save ) {
+			$order->save();
+		}
 	}
 
 	/**
@@ -502,7 +504,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether sales are recorded.
 	 */
 	public function get_recorded_sales( $order ) {
-		return wc_string_to_bool( $order->get_meta( '_recorded_sales', true ) );
+		return $order->get_recorded_sales();
 	}
 
 	/**
@@ -513,8 +515,10 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
 	public function set_recorded_sales( $order, $set, $save = true ) {
-		// XXX implement $save = true.
-		return $order->update_meta_data( '_recorded_sales', wc_bool_to_string( $set ) );
+		$order->set_recorded_sales( $set );
+		if ( $save ) {
+			$order->save();
+		}
 	}
 
 	/**
@@ -525,7 +529,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether coupon counts were updated.
 	 */
 	public function get_recorded_coupon_usage_counts( $order ) {
-		return wc_string_to_bool( $order->get_meta( '_recorded_coupon_usage_counts', true ) );
+		return $order->get_recorded_coupon_usage_counts();
 	}
 
 	/**
@@ -536,7 +540,10 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
 	public function set_recorded_coupon_usage_counts( $order, $set, $save = true ) {
-		return $order->update_meta_data( '_recorded_coupon_usage_counts', wc_bool_to_string( $set ) );
+		$order->set_recorded_coupon_usage_counts( $set );
+		if ( $save ) {
+			$order->save();
+		}
 	}
 
 	/**
@@ -547,7 +554,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether email is sent.
 	 */
 	public function get_email_sent( $order ) {
-		return wc_string_to_bool( $order->get_meta( '_new_order_email_sent', true ) );
+		return $order->get_new_order_email_sent();
 	}
 
 	/**
@@ -558,8 +565,10 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
 	public function set_email_sent( $order, $set, $save = true ) {
-		// XXX implement $save = true.
-		return $order->update_meta_data( '_new_order_email_sent', wc_bool_to_string( $set ) );
+		$order->set_new_order_email_sent( $set );
+		if ( $save ) {
+			$order->save();
+		}
 	}
 
 	/**
@@ -570,7 +579,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether email was sent.
 	 */
 	private function get_new_order_email_sent( $order ) {
-		return $this->get_email_sent( $order );
+		return $order->get_new_order_email_sent();
 	}
 
 	/**
@@ -579,11 +588,12 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param \WC_Order $order Order object.
 	 * @param bool      $set True or false.
 	 * @param bool      $save Whether to persist changes to db immediately or not.
-	 * @return bool Whether email was sent.
 	 */
 	private function set_new_order_email_sent( $order, $set, $save = true ) {
-		// XXX implement $save = true.
-		return $this->set_email_sent( $order, $set );
+		$order->set_new_order_email_sent( $set );
+		if ( $save ) {
+			$order->save();
+		}
 	}
 
 	/**
@@ -594,8 +604,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether stock was reduced.
 	 */
 	public function get_stock_reduced( $order ) {
-		$order = is_numeric( $order ) ? wc_get_order( $order ) : $order;
-		return wc_string_to_bool( $order->get_meta( '_order_stock_reduced', true ) );
+		return $order->get_order_stock_reduced();
 	}
 
 	/**
@@ -606,9 +615,10 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
 	public function set_stock_reduced( $order, $set, $save = true ) {
-		// XXX implement $save = true.
-		$order = is_numeric( $order ) ? wc_get_order( $order ) : $order;
-		return $order->update_meta_data( '_order_stock_reduced', wc_bool_to_string( $set ) );
+		$order->set_order_stock_reduced( $set );
+		if ( $save ) {
+			$order->save();
+		}
 	}
 
 	/**
@@ -629,7 +639,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
 	private function set_order_stock_reduced( $order, $set, $save = true ) {
-		return $this->set_stock_reduced( $order, $set, $save );
+		$this->set_stock_reduced( $order, $set, $save );
 	}
 
 	/**
@@ -837,7 +847,7 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 
 			if ( $data_sync_enabled && ! in_array( $order->get_status(), array( 'draft', 'auto-draft' ) ) ) {
 				$order_post = $posts[ $order_id ][0];
-				$this->maybe_log_discrepancies( $order, $order_post );
+				$this->maybe_sync_order( $order, $order_post );
 			}
 		}
 	}
@@ -861,7 +871,7 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	}
 
 	/**
-	 * Log discrepencies order to/from posts tables if we are able to detect difference between order and posts but the sync is enabled.
+	 * Sync order to/from posts tables if we are able to detect difference between order and posts but the sync is enabled.
 	 *
 	 * @param \WC_Order $order Order object.
 	 * @param \WP_Post  $post Post object.
@@ -869,12 +879,8 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	 * @return void
 	 * @throws \Exception If passed an invalid order.
 	 */
-	private function maybe_log_discrepancies( \WC_Order &$order, \WP_Post $post ) {
-		$post_order     = new \WC_Order();
-		$cpt_data_store = $this->get_cpt_data_store_instance();
-		$post_order->set_id( $post->ID );
-		$cpt_data_store->read( $post_order );
-		if ( ! $this->is_post_different_from_order( $order, $post_order ) ) {
+	private function maybe_sync_order( \WC_Order &$order, \WP_Post $post ) {
+		if ( ! $this->is_post_different_from_order( $order, $post ) ) {
 			return;
 		}
 
@@ -897,6 +903,21 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 			echo 'migrating post record.';
 			$this->migrate_post_record( $order, $post_order );
 		}
+	}
+
+	/**
+	 * Get the post type order representation.
+	 *
+	 * @param \WP_Post $post Post object.
+	 *
+	 * @return \WC_Order Order object.
+	 */
+	private function get_cpt_order( $post ) {
+		$cpt_order = new \WC_Order();
+		$cpt_order->set_id( $post->ID );
+		$cpt_data_store = $this->get_cpt_data_store_instance();
+		$cpt_data_store->read( $cpt_order );
+		return $cpt_order;
 	}
 
 	/**
@@ -923,11 +944,12 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	 * Computes whether post has been updated after last order. Tries to do it as efficiently as possible.
 	 *
 	 * @param \WC_Order $order Order object.
-	 * @param \WC_Order $post_order Order object read from posts table.
+	 * @param \WP_Post  $post Order object read from posts table.
 	 *
 	 * @return bool True if post is different than order.
 	 */
-	private function is_post_different_from_order( $order, $post_order ): bool {
+	private function is_post_different_from_order( $order, $post ): bool {
+		$post_order = $this->get_cpt_order( $post );
 		if ( ArrayUtil::deep_compare_array_diff( $order->get_base_data(), $post_order->get_base_data(), false ) ) {
 			return true;
 		}
@@ -984,7 +1006,7 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 
 			$order2_values = ArrayUtil::select( $order2_meta_by_key[ $key ], 'value', ArrayUtil::SELECT_BY_ARRAY_KEY );
 			$new_diff      = ArrayUtil::deep_assoc_array_diff( $order1_values, $order2_values );
-			if ( ! empty( $new_diff ) ) {
+			if ( ! empty( $new_diff ) && $sync ) {
 				if ( count( $order2_values ) > 1 ) {
 					$sync && $order1->delete_meta_data( $key );
 					foreach ( $order2_values as $post_order_value ) {
@@ -1307,7 +1329,6 @@ FROM $order_meta_table
 		$data_sync = wc_get_container()->get( DataSynchronizer::class );
 
 		if ( $context === 'create' ) {
-			// XXX: do we want to add some backwards compat for 'woocommerce_new_order_data'?
 			$post_id = wp_insert_post(
 				array(
 					'post_type'   => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
@@ -1443,13 +1464,6 @@ FROM $order_meta_table
 	protected function get_db_row_from_order( $order, $column_mapping, $only_changes = false ) {
 		$changes = $only_changes ? $order->get_changes() : array_merge( $order->get_data(), $order->get_changes() );
 
-		// XXX: manually persist some of the properties until the datastore/property design is finalized.
-		foreach ( $this->get_internal_data_store_keys() as $key ) {
-			if ( isset( $changes[ $key ] ) ) {
-				continue;
-			}
-			$changes[ $key ] = $this->{"get_$key"}( $order );
-		}
 		$changes['type'] = $order->get_type();
 
 		// Make sure 'status' is correct.
@@ -2016,59 +2030,9 @@ CREATE TABLE $meta_table (
 	 * @return array
 	 */
 	public function get_internal_meta_keys() {
-		// XXX: This is mostly just to trick `WC_Data_Store_WP` for the time being.
 		return array(
-			'_customer_user',
-			'_order_key',
-			'_order_currency',
-			'_billing_first_name',
-			'_billing_last_name',
-			'_billing_company',
-			'_billing_address_1',
-			'_billing_address_2',
-			'_billing_city',
-			'_billing_state',
-			'_billing_postcode',
-			'_billing_country',
-			'_billing_email',
-			'_billing_phone',
-			'_shipping_first_name',
-			'_shipping_last_name',
-			'_shipping_company',
-			'_shipping_address_1',
-			'_shipping_address_2',
-			'_shipping_city',
-			'_shipping_state',
-			'_shipping_postcode',
-			'_shipping_country',
-			'_shipping_phone',
-			'_completed_date',
-			'_paid_date',
-			'_edit_lock',
-			'_edit_last',
-			'_cart_discount',
-			'_cart_discount_tax',
-			'_order_shipping',
-			'_order_shipping_tax',
-			'_order_tax',
-			'_order_total',
-			'_payment_method',
-			'_payment_method_title',
-			'_transaction_id',
-			'_customer_ip_address',
-			'_customer_user_agent',
-			'_created_via',
-			'_order_version',
-			'_prices_include_tax',
-			'_date_completed',
-			'_date_paid',
-			'_payment_tokens',
 			'_billing_address_index',
 			'_shipping_address_index',
-			'_recorded_sales',
-			'_recorded_coupon_usage_counts',
-			'_download_permissions_granted',
-			'_order_stock_reduced',
 		);
 	}
 
