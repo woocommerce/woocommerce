@@ -598,19 +598,29 @@ abstract class WC_Data {
 		$raw_meta_data = $cache_loaded ? $this->data_store->filter_raw_meta_data( $this, $cached_meta ) : $this->data_store->read_meta( $this );
 
 		if ( is_array( $raw_meta_data ) ) {
-			foreach ( $raw_meta_data as $meta ) {
-				$this->meta_data[] = new WC_Meta_Data(
-					array(
-						'id'    => (int) $meta->meta_id,
-						'key'   => $meta->meta_key,
-						'value' => maybe_unserialize( $meta->meta_value ),
-					)
-				);
-			}
+			$this->init_meta_data( $raw_meta_data );
 
 			if ( ! $cache_loaded && ! empty( $this->cache_group ) ) {
 				wp_cache_set( $cache_key, $raw_meta_data, $this->cache_group );
 			}
+		}
+	}
+
+	/**
+	 * Helper function to initialize metadata entries from filtered raw meta data.
+	 *
+	 * @param array $filtered_meta_data Filtered metadata fetched from DB.
+	 */
+	public function init_meta_data( array $filtered_meta_data = array() ) {
+		$this->meta_data = array();
+		foreach ( $filtered_meta_data as $meta ) {
+			$this->meta_data[] = new WC_Meta_Data(
+				array(
+					'id'    => (int) $meta->meta_id,
+					'key'   => $meta->meta_key,
+					'value' => maybe_unserialize( $meta->meta_value ),
+				)
+			);
 		}
 	}
 
@@ -810,7 +820,7 @@ abstract class WC_Data {
 	 */
 	protected function set_date_prop( $prop, $value ) {
 		try {
-			if ( empty( $value ) ) {
+			if ( empty( $value ) || '0000-00-00 00:00:00' === $value ) {
 				$this->set_prop( $prop, null );
 				return;
 			}
