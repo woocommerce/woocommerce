@@ -11,6 +11,7 @@ import { Slot, Toolbar, ToolbarGroup } from '@wordpress/components';
  */
 import { HeadingTransform } from '../transforms/heading-transform';
 import { ListTransform } from '../transforms/list-transform';
+import { QuoteTransform } from '../transforms/quote-transform';
 import { bold } from '../formats/bold';
 import { italic } from '../formats/italic';
 import { link } from '../formats/link';
@@ -69,6 +70,7 @@ export const FixedFormattingToolbar = () => {
 						listType="unordered"
 					/>
 					<ListTransform isContextMenu={ false } listType="ordered" />
+					<QuoteTransform />
 				</ToolbarGroup>
 				<BlockAlignmentToolbar
 					onChange={ () => null }

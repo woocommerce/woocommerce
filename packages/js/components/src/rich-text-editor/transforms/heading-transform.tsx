@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { BlockInstance } from '@wordpress/blocks';
 import { createElement } from '@wordpress/element';
 import { Path, SVG, ToolbarButton } from '@wordpress/components';
@@ -77,7 +78,7 @@ export const HeadingTransform: React.VFC< HeadingTransformProps > = ( {
 	return (
 		<ToolbarButton
 			icon={ <HeadingLevelIcon level={ headingLevel } /> }
-			title={ 'Heading' }
+			title={ __( 'Heading', 'woocommerce' ) }
 			onClick={ () => {
 				replaceSelectedBlocks(
 					allBlocksHaveHeading( headingLevel, blocks )
