@@ -62,7 +62,7 @@ export function myAccountMerchantLogin() {
 	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
 
 	group( 'My Account Login', function () {
-		let requestHeaders = Object.assign(
+		const requestHeaders = Object.assign(
 			{},
 			htmlRequestHeader,
 			commonRequestHeaders,
@@ -80,10 +80,8 @@ export function myAccountMerchantLogin() {
 				login: 'Log%20in',
 			},
 			{
-				headers: {
-					headers: requestHeaders,
-					tags: { name: 'Shopper - Login to My Account' },
-				},
+				headers: requestHeaders,
+				tags: { name: 'Shopper - Login to My Account' },
 			}
 		);
 		check( response, {
@@ -94,7 +92,7 @@ export function myAccountMerchantLogin() {
 				),
 		} );
 
-		requestHeaders = Object.assign(
+		const requestHeadersPost = Object.assign(
 			{},
 			allRequestHeader,
 			commonRequestHeaders,
@@ -105,7 +103,7 @@ export function myAccountMerchantLogin() {
 		response = http.post(
 			`${ base_url }/?wc-ajax=get_refreshed_fragments`,
 			{
-				headers: requestHeaders,
+				headers: requestHeadersPost,
 				tags: { name: 'Shopper - wc-ajax=get_refreshed_fragments' },
 			}
 		);

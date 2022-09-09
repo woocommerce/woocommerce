@@ -56,7 +56,7 @@ export function checkoutCustomerLogin() {
 	let update_order_review_nonce_customer;
 
 	group( 'Proceed to checkout', function () {
-		let requestHeaders = Object.assign(
+		const requestHeaders = Object.assign(
 			{},
 			htmlRequestHeader,
 			commonRequestHeaders,
@@ -88,7 +88,7 @@ export function checkoutCustomerLogin() {
 			'","apply_coupon_nonce'
 		);
 
-		requestHeaders = Object.assign(
+		const requestHeadersPost = Object.assign(
 			{},
 			allRequestHeader,
 			commonRequestHeaders,
@@ -116,7 +116,7 @@ export function checkoutCustomerLogin() {
 				has_full_address: 'true',
 			},
 			{
-				headers: requestHeaders,
+				headers: requestHeadersPost,
 				tags: { name: 'Shopper - wc-ajax=update_order_review' },
 			}
 		);
@@ -128,7 +128,7 @@ export function checkoutCustomerLogin() {
 	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
 
 	group( 'Login on checkout', function () {
-		let requestHeaders = Object.assign(
+		const requestHeaders = Object.assign(
 			{},
 			htmlRequestHeader,
 			commonRequestHeaders,
@@ -147,10 +147,8 @@ export function checkoutCustomerLogin() {
 				login: 'Login',
 			},
 			{
-				headers: {
-					headers: requestHeaders,
-					tags: { name: 'Shopper - Login to Checkout' },
-				},
+				headers: requestHeaders,
+				tags: { name: 'Shopper - Login to Checkout' },
 			}
 		);
 		check( response, {
@@ -169,7 +167,7 @@ export function checkoutCustomerLogin() {
 			'","apply_coupon_nonce'
 		);
 
-		requestHeaders = Object.assign(
+		const requestHeadersPost = Object.assign(
 			{},
 			allRequestHeader,
 			commonRequestHeaders,
@@ -197,7 +195,7 @@ export function checkoutCustomerLogin() {
 				has_full_address: 'true',
 			},
 			{
-				headers: requestHeaders,
+				headers: requestHeadersPost,
 				tags: { name: 'Shopper - wc-ajax=update_order_review' },
 			}
 		);
@@ -251,7 +249,7 @@ export function checkoutCustomerLogin() {
 	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
 
 	group( 'Order received', function () {
-		let requestHeaders = Object.assign(
+		const requestHeaders = Object.assign(
 			{},
 			htmlRequestHeader,
 			commonRequestHeaders,
@@ -272,7 +270,7 @@ export function checkoutCustomerLogin() {
 				),
 		} );
 
-		requestHeaders = Object.assign(
+		const requestHeadersPost = Object.assign(
 			{},
 			allRequestHeader,
 			commonRequestHeaders,
@@ -283,7 +281,7 @@ export function checkoutCustomerLogin() {
 		response = http.post(
 			`${ base_url }/?wc-ajax=get_refreshed_fragments`,
 			{
-				headers: requestHeaders,
+				headers: requestHeadersPost,
 				tags: { name: 'Shopper - wc-ajax=get_refreshed_fragments' },
 			}
 		);

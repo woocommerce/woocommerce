@@ -46,7 +46,7 @@ export function checkoutGuest() {
 	let update_order_review_nonce_guest;
 
 	group( 'Proceed to checkout', function () {
-		let requestHeaders = Object.assign(
+		const requestHeaders = Object.assign(
 			{},
 			htmlRequestHeader,
 			commonRequestHeaders,
@@ -78,7 +78,7 @@ export function checkoutGuest() {
 			'","apply_coupon_nonce'
 		);
 
-		requestHeaders = Object.assign(
+		const requestHeadersPost = Object.assign(
 			{},
 			allRequestHeader,
 			commonRequestHeaders,
@@ -106,7 +106,7 @@ export function checkoutGuest() {
 				has_full_address: 'true',
 			},
 			{
-				headers: requestHeaders,
+				headers: requestHeadersPost,
 				tags: { name: 'Shopper - wc-ajax=update_order_review' },
 			}
 		);
@@ -160,7 +160,7 @@ export function checkoutGuest() {
 	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
 
 	group( 'Order received', function () {
-		let requestHeaders = Object.assign(
+		const requestHeaders = Object.assign(
 			{},
 			htmlRequestHeader,
 			commonRequestHeaders,
@@ -181,7 +181,7 @@ export function checkoutGuest() {
 				),
 		} );
 
-		requestHeaders = Object.assign(
+		const requestHeadersPost = Object.assign(
 			{},
 			allRequestHeader,
 			commonRequestHeaders,
@@ -192,7 +192,7 @@ export function checkoutGuest() {
 		response = http.post(
 			`${ base_url }/?wc-ajax=get_refreshed_fragments`,
 			{
-				headers: requestHeaders,
+				headers: requestHeadersPost,
 				tags: { name: 'Shopper - wc-ajax=get_refreshed_fragments' },
 			}
 		);
