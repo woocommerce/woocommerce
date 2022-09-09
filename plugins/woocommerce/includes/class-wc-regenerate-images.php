@@ -11,6 +11,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\ImageProcessing;
+
 /**
  * Regenerate Images Class
  */
@@ -38,7 +40,7 @@ class WC_Regenerate_Images {
 		add_filter( 'wp_generate_attachment_metadata', array( __CLASS__, 'add_uncropped_metadata' ) );
 
 		// Not required when Jetpack Photon is in use.
-		if ( self::is_photon_active() ) {
+		if ( ImageProcessing::is_photon_active() ) {
 			return;
 		}
 
@@ -61,26 +63,12 @@ class WC_Regenerate_Images {
 	}
 
 	/**
-	 * Returns true if Photon image CDN is active on the site
-	 *
-	 * In case Photon is active, don't attempt to generate thumbnails, as those are generated on the fly
-	 * and served from the Photon CDN. Thus, they're unnecessary and just take disk space and CPU cycles to generate.
-	 * Additionally, when Photon is active, WP will accept even pretty large images and attempting to resize them
-	 * will crash the image processing library.
-	 *
-	 * https://developer.wordpress.com/docs/photon/
-	 */
-	protected static function is_photon_active() {
-		return class_exists( 'Jetpack' ) && method_exists( 'Jetpack', 'get_active_modules' ) && in_array( 'photon', Jetpack::get_active_modules(), true );
-	}
-
-	/**
 	 * If an intermediate size meta differs from the actual image size (settings were changed?) return false so the wrong size is not used.
 	 *
 	 * @param array  $data Size data.
 	 * @param int    $attachment_id Attachment ID.
 	 * @param string $size Size name.
-	 * @return array
+	 * @return array|bool
 	 */
 	public static function filter_image_get_intermediate_size( $data, $attachment_id, $size ) {
 		if ( ! is_string( $size ) || ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single' ) ), true ) ) {
@@ -95,7 +83,7 @@ class WC_Regenerate_Images {
 		// See if the image size has changed from our settings.
 		if ( ! self::image_size_matches_settings( $data, $size ) ) {
 			// If Photon is running we can just return false and let Jetpack handle regeneration.
-			if ( self::is_photon_active() ) {
+			if ( ImageProcessing::is_photon_active() ) {
 				return false;
 			} else {
 				// If we get here, Jetpack is not running and we don't have the correct image sized stored. Try to return closest match.
@@ -219,7 +207,7 @@ class WC_Regenerate_Images {
 		}
 
 		// If Photon is active, don't attempt to resize images, Photon will handle it outside WP.
-		if ( self::is_photon_active() ) {
+		if ( ImageProcessing::is_photon_active() ) {
 			return $image;
 		}
 
@@ -232,11 +220,11 @@ class WC_Regenerate_Images {
 		// Once https://core.trac.wordpress.org/ticket/23127 is merged, we can catch the error from GD instead.
 		$full_size               = self::get_full_size_image_dimensions( $attachment_id );
 		$gd_image_size_in_memory = 0;
-		$available_memory        = self::get_image_memory_limit();
 		if ( is_int( $full_size['width'] ) && is_int( $full_size['height'] ) ) {
 			$gd_image_size_in_memory = $full_size['width'] * $full_size['height'] * 5; // 5 bytes per pixel, https://stackoverflow.com/questions/18465390/php-fatal-error-out-of-memory-when-creating-an-image#comment27312125_18465539
 		}
 
+		$available_memory = ImageProcessing::get_image_memory_limit();
 		if ( $gd_image_size_in_memory >= $available_memory ) {
 			return $image;
 		}
@@ -481,7 +469,7 @@ class WC_Regenerate_Images {
 		self::$background_process->kill_process();
 
 		// In case Photon is active, don't enqueue image regeneration, thumbnails are handled by Photon.
-		if ( self::is_photon_active() ) {
+		if ( ImageProcessing::is_photon_active() ) {
 			return;
 		}
 
@@ -503,79 +491,6 @@ class WC_Regenerate_Images {
 
 		// Lets dispatch the queue to start processing.
 		self::$background_process->save()->dispatch();
-	}
-
-	/**
-	 * Return the memory limit used for image processing in WP.
-	 *
-	 * @return int Number of bytes of available memory for the PHP process.
-	 */
-	protected static function get_image_memory_limit() {
-		$mem_limit_bytes = 0;
-		$mem_limit       = self::get_wp_image_memory_limit();
-
-		if ( $mem_limit === false ) {
-			$mem_limit = ini_get( 'memory_limit' );
-		}
-
-		if ( $mem_limit ) {
-			$mem_limit_bytes = wp_convert_hr_to_bytes( $mem_limit );
-		}
-
-		return $mem_limit_bytes;
-	}
-
-	/**
-	 * Returns the memory limit that would be used after running wp_raise_memory_limit( 'image' ) function,
-	 * without changing the limit.
-	 *
-	 * This is a reduced copy of core's wp_raise_memory_limit.
-	 * It would be great if there was wp_raise_memory_limit( $context, $test_mode ) that wouldn't change the
-	 * memory limit, but there isn't one.
-	 *
-	 * @return false|int|string
-	 */
-	private static function get_wp_image_memory_limit() {
-		if ( false === wp_is_ini_value_changeable( 'memory_limit' ) ) {
-			return false;
-		}
-
-		$current_limit     = ini_get( 'memory_limit' );
-		$current_limit_int = wp_convert_hr_to_bytes( $current_limit );
-
-		if ( -1 === $current_limit_int ) {
-			return false;
-		}
-
-		$wp_max_limit     = WP_MAX_MEMORY_LIMIT;
-		$wp_max_limit_int = wp_convert_hr_to_bytes( $wp_max_limit );
-		$filtered_limit   = $wp_max_limit;
-
-		/**
-		 * This is a WP core filter from wp_raise_memory_limit().
-		 *
-		 * Filters the memory limit allocated for image manipulation.
-		 *
-		 * @since 3.5.0
-		 * @since 4.6.0 The default now takes the original `memory_limit` into account.
-		 *
-		 * @param int|string $filtered_limit Maximum memory limit to allocate for images.
-		 *                                   Default `WP_MAX_MEMORY_LIMIT` or the original
-		 *                                   php.ini `memory_limit`, whichever is higher.
-		 *                                   Accepts an integer (bytes), or a shorthand string
-		 *                                   notation, such as '256M'.
-		 */
-		$filtered_limit = apply_filters( 'image_memory_limit', $filtered_limit );
-
-		$filtered_limit_int = wp_convert_hr_to_bytes( $filtered_limit );
-
-		if ( -1 === $filtered_limit_int || ( $filtered_limit_int > $wp_max_limit_int && $filtered_limit_int > $current_limit_int ) ) {
-			return $filtered_limit;
-		} elseif ( -1 === $wp_max_limit_int || $wp_max_limit_int > $current_limit_int ) {
-			return $wp_max_limit;
-		}
-
-		return false;
 	}
 }
 
