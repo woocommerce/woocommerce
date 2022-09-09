@@ -2,11 +2,15 @@
  * External dependencies
  */
 import { List } from '@woocommerce/components';
+import { download, Icon } from '@wordpress/icons';
+
 import {
 	Card,
 	CardBody,
 	CardFooter,
 	CardHeader,
+	ExternalLink,
+	Notice,
 	ToggleControl,
 } from '@wordpress/components';
 
@@ -65,6 +69,23 @@ interface ApmsProps {
 	setEnabledApms: ( value: Set< Apm > ) => void;
 }
 
+export const ApmNotice = () => {
+	return (
+		<Card className="connect-account__apms-notice">
+			<CardBody>
+				<Notice status={ 'info' } isDismissible={ false }>
+					<Icon icon={ download } />
+					<div>
+						Installing <strong>WooCommerce Payments</strong> will
+						automatically activate <strong>PayPal Payments</strong>{ ' ' }
+						extension in your store.
+					</div>
+				</Notice>
+			</CardBody>
+		</Card>
+	);
+};
+
 const APMs: React.FunctionComponent< ApmsProps > = ( {
 	enabledApms,
 	setEnabledApms,
@@ -84,7 +105,10 @@ const APMs: React.FunctionComponent< ApmsProps > = ( {
 		content: (
 			<>
 				{ apm.description }
-				<a href={ apm.link }> { strings.learnMore }</a>
+				<a href={ apm.link } target="_blank" rel="noreferrer">
+					{ ' ' }
+					{ strings.learnMore }
+				</a>
 			</>
 		),
 		before: <img src={ apm.icon } alt="" />,
@@ -104,9 +128,9 @@ const APMs: React.FunctionComponent< ApmsProps > = ( {
 				<List items={ apmsList } />
 			</CardBody>
 			<CardFooter>
-				<a href="https://woocommerce.com/products/">
+				<ExternalLink href="https://woocommerce.com/products/">
 					{ strings.apms.seeMore }
-				</a>
+				</ExternalLink>
 			</CardFooter>
 		</Card>
 	);

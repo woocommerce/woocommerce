@@ -109,6 +109,20 @@
 					margin-left: 10px;
 				}
 			}
+
+			.help-section-simple {
+				font-size: 16px;
+				padding: 18px 26px;
+				span {
+					vertical-align: 6px;
+					margin-left: 10px;
+				}
+				a {
+					text-decoration: none;
+					vertical-align: 6px;
+					margin-left: 10px;
+				}
+			}
 		}
 
 		.connect-account__card {
@@ -202,6 +216,31 @@
 								width: 36px;
 							}
 						}
+					}
+				}
+			}
+			.components-card__footer {
+				padding: 18px 24px;
+				> a {
+					text-decoration: none;
+				}
+			}
+		}
+		.connect-account__apms-notice {
+			.components-card__body {
+				padding: 0;
+			}
+			.components-notice {
+				margin: 0;
+				padding: 0;
+				background-color: #f0f6fc;
+				.components-notice__content {
+					margin: 0;
+					padding: 16px 20px;
+					display: flex;
+					align-items: center;
+					svg {
+						margin-right: 16px;
 					}
 				}
 			}

@@ -31,10 +31,11 @@ import {
  */
 import strings from './strings';
 import Banner from './banner';
-import APMs, { Apm } from './apms';
+import APMs, { Apm, ApmNotice } from './apms';
 import './style.scss';
 import ExitSurveyModal from './exit-survey-modal';
 import { getAdminSetting } from '~/utils/admin-settings';
+import FrequentlyAskedQuestionsSimple from '~/payments-welcome/faq-simple';
 
 declare global {
 	interface Window {
@@ -295,10 +296,12 @@ const ConnectAccountPage = () => {
 					enabledApms={ enabledApms }
 				/>
 				<Banner />
+				<ApmNotice />
 				<APMs
 					enabledApms={ enabledApms }
 					setEnabledApms={ setEnabledApms }
 				/>
+				<FrequentlyAskedQuestionsSimple />
 			</div>
 		</div>
 	);
