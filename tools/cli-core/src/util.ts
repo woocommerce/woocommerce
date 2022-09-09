@@ -150,6 +150,13 @@ export const stopWPEnv = async (
 	}
 };
 
+/**
+ * Generate a JSON file with the data passed.
+ *
+ * @param  filePath - path to the file to be created.
+ * @param  data     - data to be written to the file.
+ * @return {Promise<void>} - promise that resolves when the file is written.
+ */
 export const generateJSONFile = ( filePath: string, data: unknown ) => {
 	const json = JSON.stringify(
 		data,
