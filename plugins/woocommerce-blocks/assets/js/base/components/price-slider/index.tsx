@@ -471,24 +471,29 @@ const PriceSlider = ( {
 						/>
 					</div>
 				) }
-			{ ! isUpdating && (
+			{
 				<div className="wc-block-components-price-slider__actions">
-					{ ( minPrice !== minConstraint ||
-						maxPrice !== maxConstraint ) && (
-						<FilterResetButton
-							onClick={ () => {
-								onChange( [ minConstraint, maxConstraint ] );
-								debouncedUpdateQuery();
-							} }
-							screenReaderLabel={ __(
-								'Reset price filter',
-								'woo-gutenberg-products-block'
-							) }
-						/>
-					) }
+					{ ! isUpdating &&
+						( minPrice !== minConstraint ||
+							maxPrice !== maxConstraint ) && (
+							<FilterResetButton
+								onClick={ () => {
+									onChange( [
+										minConstraint,
+										maxConstraint,
+									] );
+									debouncedUpdateQuery();
+								} }
+								screenReaderLabel={ __(
+									'Reset price filter',
+									'woo-gutenberg-products-block'
+								) }
+							/>
+						) }
 					{ showFilterButton && (
 						<FilterSubmitButton
 							className="wc-block-price-filter__button wc-block-components-price-slider__button"
+							isLoading={ isUpdating }
 							disabled={ isLoading || ! hasValidConstraints }
 							onClick={ onSubmit }
 							screenReaderLabel={ __(
@@ -498,7 +503,7 @@ const PriceSlider = ( {
 						/>
 					) }
 				</div>
-			) }
+			}
 		</div>
 	);
 };

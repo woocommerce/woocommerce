@@ -26,8 +26,8 @@ const CheckboxFilter = ( {
 	if ( isLoading ) {
 		return (
 			<>
-				<span className="show-loading-state"></span>
-				<span className="show-loading-state"></span>
+				<span className="is-loading"></span>
+				<span className="is-loading"></span>
 			</>
 		);
 	}

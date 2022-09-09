@@ -379,7 +379,7 @@ const StockStatusFilterBlock = ( {
 			{ ! isEditor && blockAttributes.heading && filterHeading }
 			<div
 				className={ classnames( 'wc-block-stock-filter', {
-					'show-loading-state': isLoading,
+					'is-loading': isLoading,
 				} ) }
 			>
 				<CheckboxList
@@ -390,30 +390,31 @@ const StockStatusFilterBlock = ( {
 					isLoading={ isLoading }
 					isDisabled={ isDisabled }
 				/>
-				{ ! isLoading && (
-					<div className="wc-block-stock-filter__actions">
-						{ checked.length > 0 && (
-							<FilterResetButton
-								onClick={ () => {
-									setChecked( [] );
-									onSubmit( [] );
-								} }
-								screenReaderLabel={ __(
-									'Reset stock filter',
-									'woo-gutenberg-products-block'
-								) }
-							/>
-						) }
-						{ blockAttributes.showFilterButton && (
-							<FilterSubmitButton
-								className="wc-block-stock-filter__button"
-								disabled={ isLoading || isDisabled }
-								onClick={ () => onSubmit( checked ) }
-							/>
-						) }
-					</div>
-				) }
 			</div>
+			{
+				<div className="wc-block-stock-filter__actions">
+					{ checked.length > 0 && ! isLoading && (
+						<FilterResetButton
+							onClick={ () => {
+								setChecked( [] );
+								onSubmit( [] );
+							} }
+							screenReaderLabel={ __(
+								'Reset stock filter',
+								'woo-gutenberg-products-block'
+							) }
+						/>
+					) }
+					{ blockAttributes.showFilterButton && (
+						<FilterSubmitButton
+							className="wc-block-stock-filter__button"
+							isLoading={ isLoading }
+							disabled={ isLoading || isDisabled }
+							onClick={ () => onSubmit( checked ) }
+						/>
+					) }
+				</div>
+			}
 		</>
 	);
 };
