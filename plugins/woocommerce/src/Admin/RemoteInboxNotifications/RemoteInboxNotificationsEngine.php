@@ -32,6 +32,14 @@ class RemoteInboxNotificationsEngine {
 
 		// Trigger when the profile data option is updated (during onboarding).
 		add_action(
+			'add_option_' . OnboardingProfile::DATA_OPTION,
+			array( __CLASS__, 'add_profile_option' ),
+			10,
+			2
+		);
+
+		// Trigger when the profile data option is updated (during onboarding).
+		add_action(
 			'update_option_' . OnboardingProfile::DATA_OPTION,
 			array( __CLASS__, 'update_profile_option' ),
 			10,
@@ -71,15 +79,28 @@ class RemoteInboxNotificationsEngine {
 	 */
 	public static function update_profile_option( $old_value, $new_value ) {
 		// Return early if we're not completing the profiler.
+		$is_completed = isset( $new_value['completed'] ) && true === $new_value['completed'];
+		$is_skipped   = isset( $new_value['skipped'] ) && true === $new_value['skipped'];
 		if (
 			( isset( $old_value['completed'] ) && $old_value['completed'] ) ||
-			! isset( $new_value['completed'] ) ||
-			! $new_value['completed']
+			( isset( $old_value['skipped'] ) && $old_value['skipped'] ) ||
+			! ( $is_completed || $is_skipped )
 		) {
 			return;
 		}
 
 		self::run();
+	}
+
+	/**
+	 * This is triggered when the profile option is added, it runs the update_profile_option function
+	 * with the old_value as an empty array.
+	 *
+	 * @param string $option option name.
+	 * @param mixed  $value New value.
+	 */
+	public static function add_profile_option( $option, $value ) {
+		self::update_profile_option( array(), $value );
 	}
 
 	/**
