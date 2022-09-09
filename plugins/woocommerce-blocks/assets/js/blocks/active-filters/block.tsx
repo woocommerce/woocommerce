@@ -4,7 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { useQueryStateByKey } from '@woocommerce/base-context/hooks';
 import { getSetting, getSettingWithCoercion } from '@woocommerce/settings';
-import { useMemo, useEffect } from '@wordpress/element';
+import { useMemo, useEffect, useState } from '@wordpress/element';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import Label from '@woocommerce/base-components/label';
@@ -16,6 +16,8 @@ import {
 	isStockStatusOptions,
 } from '@woocommerce/types';
 import { getUrlParameter } from '@woocommerce/utils';
+import FilterTitlePlaceholder from '@woocommerce/base-components/filter-placeholder';
+import { useIsMounted } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -27,8 +29,11 @@ import {
 	renderRemovableListItem,
 	removeArgsFromFilterUrl,
 	cleanFilterUrl,
+	maybeUrlContainsFilters,
+	urlContainsAttributeFilter,
 } from './utils';
 import ActiveAttributeFilters from './active-attribute-filters';
+import FilterPlaceholders from './filter-placeholders';
 import { Attributes } from './types';
 
 /**
@@ -45,11 +50,20 @@ const ActiveFiltersBlock = ( {
 	attributes: Attributes;
 	isEditor?: boolean;
 } ) => {
+	const isMounted = useIsMounted();
+	const componentHasMounted = isMounted();
 	const filteringForPhpTemplate = getSettingWithCoercion(
 		'is_rendering_php_template',
 		false,
 		isBoolean
 	);
+	const [ isLoading, setIsLoading ] = useState( true );
+	/*
+		activeAttributeFilters is the only async query in this block. Because of this the rest of the filters will render null
+		when in a loading state and activeAttributeFilters renders the placeholders.
+	 */
+	const shouldShowLoadingPlaceholders =
+		maybeUrlContainsFilters() && ! isEditor && isLoading;
 	const [ productAttributes, setProductAttributes ] = useQueryStateByKey(
 		'attributes',
 		[]
@@ -62,8 +76,10 @@ const ActiveFiltersBlock = ( {
 	const [ maxPrice, setMaxPrice ] = useQueryStateByKey( 'max_price' );
 
 	const STOCK_STATUS_OPTIONS = getSetting( 'stockStatusOptions', [] );
+	const STORE_ATTRIBUTES = getSetting( 'attributes', [] );
 	const activeStockStatusFilters = useMemo( () => {
 		if (
+			shouldShowLoadingPlaceholders ||
 			productStockStatus.length === 0 ||
 			! isStockStatusQueryCollection( productStockStatus ) ||
 			! isStockStatusOptions( STOCK_STATUS_OPTIONS )
@@ -92,6 +108,7 @@ const ActiveFiltersBlock = ( {
 			} );
 		} );
 	}, [
+		shouldShowLoadingPlaceholders,
 		STOCK_STATUS_OPTIONS,
 		productStockStatus,
 		setProductStockStatus,
@@ -100,7 +117,10 @@ const ActiveFiltersBlock = ( {
 	] );
 
 	const activePriceFilters = useMemo( () => {
-		if ( ! Number.isFinite( minPrice ) && ! Number.isFinite( maxPrice ) ) {
+		if (
+			shouldShowLoadingPlaceholders ||
+			( ! Number.isFinite( minPrice ) && ! Number.isFinite( maxPrice ) )
+		) {
 			return null;
 		}
 		return renderRemovableListItem( {
@@ -116,6 +136,7 @@ const ActiveFiltersBlock = ( {
 			displayStyle: blockAttributes.displayStyle,
 		} );
 	}, [
+		shouldShowLoadingPlaceholders,
 		minPrice,
 		maxPrice,
 		blockAttributes.displayStyle,
@@ -125,7 +146,13 @@ const ActiveFiltersBlock = ( {
 	] );
 
 	const activeAttributeFilters = useMemo( () => {
-		if ( ! isAttributeQueryCollection( productAttributes ) ) {
+		if (
+			( ! isAttributeQueryCollection( productAttributes ) &&
+				componentHasMounted ) ||
+			( ! productAttributes.length &&
+				! urlContainsAttributeFilter( STORE_ATTRIBUTES ) )
+		) {
+			setIsLoading( false );
 			return null;
 		}
 
@@ -135,6 +162,7 @@ const ActiveFiltersBlock = ( {
 			);
 
 			if ( ! attributeObject ) {
+				setIsLoading( false );
 				return null;
 			}
 
@@ -145,10 +173,16 @@ const ActiveFiltersBlock = ( {
 					slugs={ attribute.slug }
 					key={ attribute.attribute }
 					operator={ attribute.operator }
+					isLoadingCallback={ setIsLoading }
 				/>
 			);
 		} );
-	}, [ productAttributes, blockAttributes.displayStyle ] );
+	}, [
+		componentHasMounted,
+		setIsLoading,
+		productAttributes,
+		blockAttributes.displayStyle,
+	] );
 
 	const [ productRatings, setProductRatings ] =
 		useQueryStateByKey( 'ratings' );
@@ -177,6 +211,7 @@ const ActiveFiltersBlock = ( {
 
 	const activeRatingFilters = useMemo( () => {
 		if (
+			shouldShowLoadingPlaceholders ||
 			productRatings.length === 0 ||
 			! isRatingQueryCollection( productRatings )
 		) {
@@ -206,6 +241,7 @@ const ActiveFiltersBlock = ( {
 			} );
 		} );
 	}, [
+		shouldShowLoadingPlaceholders,
 		productRatings,
 		setProductRatings,
 		blockAttributes.displayStyle,
@@ -222,12 +258,25 @@ const ActiveFiltersBlock = ( {
 		);
 	};
 
-	if ( ! hasFilters() && ! isEditor ) {
+	if ( ! shouldShowLoadingPlaceholders && ! hasFilters() && ! isEditor ) {
 		return null;
 	}
 
 	const TagName =
 		`h${ blockAttributes.headingLevel }` as keyof JSX.IntrinsicElements;
+
+	const heading = (
+		<TagName className="wc-block-active-filters__title">
+			{ blockAttributes.heading }
+		</TagName>
+	);
+
+	const filterHeading = shouldShowLoadingPlaceholders ? (
+		<FilterTitlePlaceholder>{ heading }</FilterTitlePlaceholder>
+	) : (
+		heading
+	);
+
 	const hasFilterableProducts = getSettingWithCoercion(
 		'has_filterable_products',
 		false,
@@ -241,15 +290,12 @@ const ActiveFiltersBlock = ( {
 	const listClasses = classnames( 'wc-block-active-filters__list', {
 		'wc-block-active-filters__list--chips':
 			blockAttributes.displayStyle === 'chips',
+		'wc-block-active-filters--loading': shouldShowLoadingPlaceholders,
 	} );
 
 	return (
 		<>
-			{ ! isEditor && blockAttributes.heading && (
-				<TagName className="wc-block-active-filters__title">
-					{ blockAttributes.heading }
-				</TagName>
-			) }
+			{ ! isEditor && blockAttributes.heading && filterHeading }
 			<div className="wc-block-active-filters">
 				<ul className={ listClasses }>
 					{ isEditor ? (
@@ -279,6 +325,10 @@ const ActiveFiltersBlock = ( {
 						</>
 					) : (
 						<>
+							<FilterPlaceholders
+								isLoading={ shouldShowLoadingPlaceholders }
+								displayStyle={ blockAttributes.displayStyle }
+							/>
 							{ activePriceFilters }
 							{ activeStockStatusFilters }
 							{ activeAttributeFilters }
@@ -286,29 +336,33 @@ const ActiveFiltersBlock = ( {
 						</>
 					) }
 				</ul>
-				<button
-					className="wc-block-active-filters__clear-all"
-					onClick={ () => {
-						cleanFilterUrl();
-						if ( ! filteringForPhpTemplate ) {
-							setMinPrice( undefined );
-							setMaxPrice( undefined );
-							setProductAttributes( [] );
-							setProductStockStatus( [] );
-						}
-					} }
-				>
-					<Label
-						label={ __(
-							'Clear All',
-							'woo-gutenberg-products-block'
-						) }
-						screenReaderLabel={ __(
-							'Clear All Filters',
-							'woo-gutenberg-products-block'
-						) }
-					/>
-				</button>
+				{ shouldShowLoadingPlaceholders ? (
+					<span className="wc-block-active-filters__clear-all-placeholder" />
+				) : (
+					<button
+						className="wc-block-active-filters__clear-all"
+						onClick={ () => {
+							cleanFilterUrl();
+							if ( ! filteringForPhpTemplate ) {
+								setMinPrice( undefined );
+								setMaxPrice( undefined );
+								setProductAttributes( [] );
+								setProductStockStatus( [] );
+							}
+						} }
+					>
+						<Label
+							label={ __(
+								'Clear All',
+								'woo-gutenberg-products-block'
+							) }
+							screenReaderLabel={ __(
+								'Clear All Filters',
+								'woo-gutenberg-products-block'
+							) }
+						/>
+					</button>
+				) }
 			</div>
 		</>
 	);
