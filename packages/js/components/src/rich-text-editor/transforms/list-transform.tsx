@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import {
 	BlockInstance,
 	createBlock,
@@ -8,7 +9,7 @@ import {
 } from '@wordpress/blocks';
 import { createElement } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
-import { formatListNumbered, check, formatListBullets } from '@wordpress/icons';
+import { formatListNumbered, formatListBullets } from '@wordpress/icons';
 import { ToolbarButton } from '@wordpress/components';
 
 /**
@@ -22,10 +23,9 @@ import { useCursor } from '../utils/replace-selected-blocks';
 // but if we import them, we get SyntaxError: Cannot use import statement outside a module
 // in jest tests, so we are defining these constants here instead
 const PARAGRAPH_BLOCK_ID = 'core/paragraph';
-const CHECKLIST_BLOCK_ID = 'dayone/checklist-item';
 const LIST_BLOCK_ID = 'core/list';
 
-type ListType = 'ordered' | 'unordered' | 'checklist';
+type ListType = 'ordered' | 'unordered';
 
 type ListTransformProps = {
 	listType: ListType;
@@ -52,19 +52,6 @@ function switchToParagraphBlocks(
 	selectConvertedBlocks: SelectConvertedBlocksType
 ) {
 	const newBlocks = switchToBlockType( sourceBlocks, PARAGRAPH_BLOCK_ID );
-	if ( newBlocks ) {
-		replaceBlocks( replaceClientIds, newBlocks );
-		selectConvertedBlocks( newBlocks );
-	}
-}
-
-function switchToChecklistBlock(
-	sourceBlocks: BlockInstance | BlockInstance[],
-	replaceBlocks: ReplaceBlocksType,
-	replaceClientIds: string[],
-	selectConvertedBlocks: SelectConvertedBlocksType
-) {
-	const newBlocks = switchToBlockType( sourceBlocks, CHECKLIST_BLOCK_ID );
 	if ( newBlocks ) {
 		replaceBlocks( replaceClientIds, newBlocks );
 		selectConvertedBlocks( newBlocks );
@@ -118,8 +105,7 @@ const convertBlocksToList = (
 	replaceBlocks: ReplaceBlocksType,
 	selectConvertedBlocks: SelectConvertedBlocksType
 ) => {
-	const newBlockType =
-		listType === 'checklist' ? CHECKLIST_BLOCK_ID : LIST_BLOCK_ID;
+	const newBlockType = LIST_BLOCK_ID;
 	const newListOrdered = listType === 'ordered';
 	const firstBlock = blocks[ 0 ];
 	const blocksAreSameType = blocks.every(
@@ -130,10 +116,7 @@ const convertBlocksToList = (
 	const NOT_LIST = 'not-list-type';
 	if ( blocksAreSameType ) {
 		const sourceBlockKey = `${
-			firstBlock.name === LIST_BLOCK_ID ||
-			firstBlock.name === CHECKLIST_BLOCK_ID
-				? firstBlock.name
-				: NOT_LIST
+			firstBlock.name === LIST_BLOCK_ID ? firstBlock.name : NOT_LIST
 		}-${ firstBlock.attributes.ordered }`;
 		const NON_LIST_TYPE = `${ NOT_LIST }-undefined`;
 		const clickedBlockKey = `${ newBlockType }-${ newListOrdered }`;
@@ -148,14 +131,6 @@ const convertBlocksToList = (
 							newListOrdered,
 							replaceBlocks,
 							blockClientIds
-						);
-						break;
-					case `${ CHECKLIST_BLOCK_ID }-false`:
-						switchToChecklistBlock(
-							blocks,
-							replaceBlocks,
-							blockClientIds,
-							selectConvertedBlocks
 						);
 						break;
 				}
@@ -178,13 +153,6 @@ const convertBlocksToList = (
 							blockClientIds
 						);
 						break;
-					case `${ CHECKLIST_BLOCK_ID }-false`:
-						switchToChecklistBlock(
-							firstBlock,
-							replaceBlocks,
-							blockClientIds,
-							selectConvertedBlocks
-						);
 				}
 				break;
 			case `${ LIST_BLOCK_ID }-false`:
@@ -205,57 +173,33 @@ const convertBlocksToList = (
 							selectConvertedBlocks
 						);
 						break;
-					case `${ CHECKLIST_BLOCK_ID }-false`:
-						switchToChecklistBlock(
-							firstBlock,
-							replaceBlocks,
-							blockClientIds,
-							selectConvertedBlocks
-						);
 				}
 				break;
-
-			case `${ CHECKLIST_BLOCK_ID }-undefined`:
-				switch ( clickedBlockKey ) {
-					case `${ LIST_BLOCK_ID }-true`:
-					case `${ LIST_BLOCK_ID }-false`:
-						switchToListBlock(
-							blocks,
-							newListOrdered,
-							replaceBlocks,
-							blockClientIds
-						);
-						break;
-					case `${ CHECKLIST_BLOCK_ID }-false`:
-						switchToParagraphBlocks(
-							blocks,
-							replaceBlocks,
-							blockClientIds,
-							selectConvertedBlocks
-						);
-				}
 		}
 	}
 };
 
 export const ListTransform: React.VFC< ListTransformProps > = ( {
 	listType,
-	isContextMenu,
 } ) => {
 	const { blocks, blockClientIds } = useBlockSelection();
 	const { selectConvertedBlocks } = useCursor();
 	const { replaceBlocks } = useDispatch( 'core/block-editor' );
 
 	const icon = {
-		checklist: check,
 		unordered: formatListBullets,
 		ordered: formatListNumbered,
 	}[ listType ];
 
+	const titles = {
+		unordered: __( 'Unordered list', 'woocommerce' ),
+		ordered: __( 'Ordered list', 'woocommerce' ),
+	};
+
 	return (
 		<ToolbarButton
 			icon={ icon }
-			title={ listType }
+			title={ titles[ listType ] }
 			onClick={ () => {
 				convertBlocksToList(
 					blocks,
