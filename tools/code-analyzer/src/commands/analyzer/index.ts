@@ -2,6 +2,9 @@
  * External dependencies
  */
 import { program } from '@commander-js/extra-typings';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 program
 	.name( 'analyzer' )

@@ -7,6 +7,7 @@ import { writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { Logger } from 'cli-core/src/logger';
+import dotenv from 'dotenv';
 
 /**
  * Internal dependencies
@@ -20,6 +21,8 @@ const DEVELOPER_WOOCOMMERCE_SITE_ID = '96396764';
 
 const VERSION_VALIDATION_REGEX =
 	/^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/;
+
+dotenv.config();
 
 // Define the release post command
 program

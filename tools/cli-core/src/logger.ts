@@ -27,7 +27,6 @@ export class Logger {
 
 	static error( message: string ) {
 		if ( Logger.loggingLevel >= LOGGING_LEVELS.error ) {
-			// eslint-disable-next-line no-console
 			error( chalk.red( message ) );
 			process.exit( 1 );
 		}
@@ -35,14 +34,12 @@ export class Logger {
 
 	static warn( message: string ) {
 		if ( Logger.loggingLevel >= LOGGING_LEVELS.warn ) {
-			// eslint-disable-next-line no-console
 			warn( chalk.yellow( message ) );
 		}
 	}
 
 	static notice( message: string ) {
 		if ( Logger.loggingLevel > LOGGING_LEVELS.silent ) {
-			// eslint-disable-next-line no-console
 			log( chalk.green( message ) );
 		}
 	}
