@@ -44,6 +44,7 @@ interface RemovableListItemProps {
 	name: string;
 	prefix?: string | JSX.Element;
 	showLabel?: boolean;
+	isLoading?: boolean;
 	displayStyle: string;
 	removeCallback?: () => void;
 }
@@ -191,6 +192,35 @@ export const removeArgsFromFilterUrl = (
 };
 
 /**
+ * Prefixes typically expected before filters in the URL.
+ */
+const FILTER_QUERY_VALUES = [
+	'min_price',
+	'max_price',
+	'rating_filter',
+	'filter_',
+	'query_type_',
+];
+
+/**
+ * Check if the URL contains arguments that could be Woo filter keys.
+ */
+const keyIsAFilter = ( key: string ): boolean => {
+	let keyIsFilter = false;
+
+	for ( let i = 0; FILTER_QUERY_VALUES.length > i; i++ ) {
+		const keyToMatch = FILTER_QUERY_VALUES[ i ];
+		const trimmedKey = key.substring( 0, keyToMatch.length );
+		if ( keyToMatch === trimmedKey ) {
+			keyIsFilter = true;
+			break;
+		}
+	}
+
+	return keyIsFilter;
+};
+
+/**
  * Clean the filter URL.
  */
 export const cleanFilterUrl = () => {
@@ -204,13 +234,7 @@ export const cleanFilterUrl = () => {
 	const remainingArgs = Object.fromEntries(
 		Object.keys( args )
 			.filter( ( arg ) => {
-				if (
-					arg.includes( 'min_price' ) ||
-					arg.includes( 'max_price' ) ||
-					arg.includes( 'rating_filter' ) ||
-					arg.includes( 'filter_' ) ||
-					arg.includes( 'query_type_' )
-				) {
+				if ( keyIsAFilter( arg ) ) {
 					return false;
 				}
 
@@ -222,4 +246,61 @@ export const cleanFilterUrl = () => {
 	const newUrl = addQueryArgs( cleanUrl, remainingArgs );
 
 	changeUrl( newUrl );
+};
+
+export const maybeUrlContainsFilters = (): boolean => {
+	if ( ! window ) {
+		return false;
+	}
+
+	const url = window.location.href;
+	const args = getQueryArgs( url );
+	const filterKeys = Object.keys( args );
+	let maybeHasFilter = false;
+
+	for ( let i = 0; filterKeys.length > i; i++ ) {
+		const key = filterKeys[ i ];
+		if ( keyIsAFilter( key ) ) {
+			maybeHasFilter = true;
+			break;
+		}
+	}
+
+	return maybeHasFilter;
+};
+
+interface StoreAttributes {
+	attribute_id: string;
+	attribute_label: string;
+	attribute_name: string;
+	attribute_orderby: string;
+	attribute_public: number;
+	attribute_type: string;
+}
+
+export const urlContainsAttributeFilter = (
+	attributes: StoreAttributes[]
+): boolean => {
+	if ( ! window ) {
+		return false;
+	}
+
+	const storeAttributeKeys = attributes.map(
+		( attr ) => `filter_${ attr.attribute_name }`
+	);
+
+	const url = window.location.href;
+	const args = getQueryArgs( url );
+	const urlFilterKeys = Object.keys( args );
+	let filterIsInUrl = false;
+
+	for ( let i = 0; urlFilterKeys.length > i; i++ ) {
+		const urlKey = urlFilterKeys[ i ];
+		if ( storeAttributeKeys.includes( urlKey ) ) {
+			filterIsInUrl = true;
+			break;
+		}
+	}
+
+	return filterIsInUrl;
 };

@@ -7,6 +7,17 @@
 	h6 {
 		text-transform: inherit;
 	}
+
+	.wc-block-filter-title-placeholder {
+		.wc-block-active-filters__title {
+			height: 1em;
+		}
+	}
+
+	.wc-block-active-filters__title {
+		margin-top: $gap-small;
+		margin-bottom: $gap-small;
+	}
 }
 
 .wc-block-active-filters {
@@ -20,6 +31,7 @@
 		padding: 0;
 		text-decoration: underline;
 		cursor: pointer;
+		float: right;
 
 		&,
 		&:hover,
@@ -30,11 +42,34 @@
 		}
 	}
 
+	.wc-block-active-filters__clear-all-placeholder {
+		@include placeholder();
+		display: inline-block;
+		width: 80px;
+		height: 1em;
+		float: right;
+		border-radius: 0;
+	}
+
 	.wc-block-active-filters__list {
 		margin: 0 0 $gap-smallest;
 		padding: 0;
 		list-style: none outside;
 		clear: both;
+
+		&.wc-block-active-filters--loading {
+			margin-top: $gap-small;
+			display: flex;
+			flex-direction: column;
+			flex-wrap: nowrap;
+
+			&.wc-block-active-filters__list--chips {
+				flex-direction: row;
+				flex-wrap: wrap;
+				align-items: flex-end;
+				gap: 0 10px;
+			}
+		}
 
 		li {
 			margin: 9px 0 0;
@@ -55,6 +90,42 @@
 		}
 		> li:first-child {
 			margin: 0;
+		}
+		li.show-loading-state-list {
+			display: inline-block;
+
+			> span {
+				@include placeholder();
+				display: inline-block;
+				box-shadow: none;
+				border-radius: 0;
+				height: 1em;
+				width: 100%;
+			}
+		}
+
+		li.show-loading-state-chips {
+			display: inline-block;
+
+			> span {
+				@include placeholder();
+				display: inline-block;
+				box-shadow: none;
+				border-radius: 13px;
+				height: 1em;
+				width: 100%;
+				min-width: 70px;
+				margin-right: 15px !important;
+			}
+
+			&:last-of-type > span {
+				margin-right: 0 !important;
+			}
+
+			&:nth-child(3) {
+				flex-grow: 1;
+				max-width: 200px;
+			}
 		}
 	}
 
