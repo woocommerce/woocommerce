@@ -15,6 +15,7 @@ import { QuoteTransform } from '../transforms/quote-transform';
 import { bold } from '../formats/bold';
 import { italic } from '../formats/italic';
 import { link } from '../formats/link';
+import { TextAlignmentToolbar } from './text-alignment-toolbar';
 
 export const FORMAT_TOOLBAR_SLOT_NAME = 'rich-text-editor/format-toolbar';
 
@@ -72,10 +73,7 @@ export const FixedFormattingToolbar = () => {
 					<ListTransform isContextMenu={ false } listType="ordered" />
 					<QuoteTransform />
 				</ToolbarGroup>
-				<BlockAlignmentToolbar
-					onChange={ () => null }
-					value={ undefined }
-				/>
+				<TextAlignmentToolbar />
 			</Toolbar>
 		</div>
 	);
