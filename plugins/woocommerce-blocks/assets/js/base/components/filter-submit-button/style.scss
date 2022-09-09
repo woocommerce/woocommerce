@@ -3,4 +3,13 @@
 	display: block;
 	margin-left: auto;
 	white-space: nowrap;
+
+	&.is-loading {
+		@include placeholder();
+		margin-top: $gap;
+		width: max-content;
+		box-shadow: none;
+		border-radius: 0;
+		line-height: initial;
+	}
 }

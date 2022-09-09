@@ -12,6 +12,7 @@ import './style.scss';
 
 interface FilterSubmitButtonProps {
 	className?: string;
+	isLoading?: boolean;
 	disabled?: boolean;
 	label?: string;
 	onClick: () => void;
@@ -20,6 +21,7 @@ interface FilterSubmitButtonProps {
 
 const FilterSubmitButton = ( {
 	className,
+	isLoading,
 	disabled,
 	/* translators: Submit button text for filters. */
 	label = __( 'Apply', 'woo-gutenberg-products-block' ),
@@ -33,6 +35,7 @@ const FilterSubmitButton = ( {
 				'wp-block-button__link',
 				'wc-block-filter-submit-button',
 				'wc-block-components-filter-submit-button',
+				{ 'is-loading': isLoading },
 				className
 			) }
 			disabled={ disabled }
