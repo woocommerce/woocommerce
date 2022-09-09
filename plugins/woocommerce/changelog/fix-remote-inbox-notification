@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Update remote inbox notification run function to only run once onboarding has been completed.
