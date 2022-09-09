@@ -8,3 +8,4 @@ export * from './use-spacing-props';
 export * from './use-typography-props';
 export * from './use-color-props';
 export * from './use-border-props';
+export * from './use-is-mounted';
