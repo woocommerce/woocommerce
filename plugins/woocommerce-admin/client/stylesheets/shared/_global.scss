@@ -46,6 +46,15 @@
 			background: $gray-0;
 		}
 	}
+	/**
+	* JITM specific styles
+	*/
+	&__jitm {
+		.jitm-card {
+			margin-left: 1.25rem !important;
+			margin-bottom: 2.5rem;
+		}
+	}
 }
 
 body.woocommerce-page {
