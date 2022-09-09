@@ -130,7 +130,7 @@ class RemoteInboxNotificationsEngine {
 	 * Call the run function if the onboarding wizard has been completed.
 	 */
 	public static function possibly_run() {
-		if ( ! OnboardingProfile::needs_completion() ) {
+		if ( ! OnboardingProfile::needs_completion() || get_option( 'woocommerce_default_country', 'US:CA' ) !== 'US:CA' || ! empty( get_option( 'woocommerce_store_address', '' ) ) ) {
 			self::run();
 		}
 	}
