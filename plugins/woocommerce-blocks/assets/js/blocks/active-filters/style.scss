@@ -14,7 +14,7 @@
 	overflow: hidden;
 
 	.wc-block-active-filters__clear-all {
-		@include font-size(smaller);
+		@include font-size(small);
 		border: none;
 		margin-top: 15px;
 		padding: 0;
@@ -73,7 +73,6 @@
 	}
 
 	.wc-block-active-filters__list-item-name {
-		@include font-size(smaller);
 		display: flex;
 		align-items: center;
 		position: relative;
@@ -86,8 +85,9 @@
 		appearance: none;
 		height: 16px;
 		width: 16px;
+		line-height: 16px;
 		padding: 0;
-		margin: 0 16px 0 0;
+		margin: 0 0.5em 0 0;
 		color: currentColor;
 
 		&:hover {
@@ -111,7 +111,6 @@
 		}
 
 		.wc-block-components-chip {
-			@include font-size(small);
 			margin-top: em($gap-small * 0.25);
 			margin-bottom: em($gap-small * 0.25);
 		}
