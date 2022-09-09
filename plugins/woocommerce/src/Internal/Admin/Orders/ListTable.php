@@ -112,7 +112,7 @@ class ListTable extends WP_List_Table {
 	 * @return mixed
 	 */
 	public function set_items_per_page( $default, string $option, int $value ) {
-		return $option === 'edit_orders_per_page' ? absint( $value ) : $default;
+		return 'edit_orders_per_page' === $option ? absint( $value ) : $default;
 	}
 
 	/**
@@ -414,7 +414,7 @@ class ListTable extends WP_List_Table {
 	protected function extra_tablenav( $which ) {
 		echo '<div class="alignleft actions">';
 
-		if ( $which === 'top' ) {
+		if ( 'top' === $which ) {
 			$this->months_filter();
 			$this->customers_filter();
 
@@ -682,7 +682,7 @@ class ListTable extends WP_List_Table {
 
 			$latest_note = current( $latest_notes );
 
-			if ( isset( $latest_note->content ) && $approved_comments_count === 1 ) {
+			if ( isset( $latest_note->content ) && 1 === $approved_comments_count ) {
 				$tooltip = wc_sanitize_tooltip( $latest_note->content );
 			} elseif ( isset( $latest_note->content ) ) {
 				/* translators: %d: notes count */
