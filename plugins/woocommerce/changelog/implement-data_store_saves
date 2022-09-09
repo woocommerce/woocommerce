@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Change order data store internal key to props for better representation.
