@@ -102,10 +102,10 @@ exports[`Testing stock filter renders the stock filter block 1`] = `
         </div>
       </li>
     </ul>
-    <div
-      class="wc-block-stock-filter__actions"
-    />
   </div>
+  <div
+    class="wc-block-stock-filter__actions"
+  />
 </div>
 `;
 
@@ -211,25 +211,25 @@ exports[`Testing stock filter renders the stock filter block with the filter but
         </div>
       </li>
     </ul>
-    <div
-      class="wc-block-stock-filter__actions"
+  </div>
+  <div
+    class="wc-block-stock-filter__actions"
+  >
+    <button
+      class="wp-block-button__link wc-block-filter-submit-button wc-block-components-filter-submit-button wc-block-stock-filter__button"
+      type="submit"
     >
-      <button
-        class="wp-block-button__link wc-block-filter-submit-button wc-block-components-filter-submit-button wc-block-stock-filter__button"
-        type="submit"
+      <span
+        aria-hidden="true"
       >
-        <span
-          aria-hidden="true"
-        >
-          Apply
-        </span>
-        <span
-          class="screen-reader-text"
-        >
-          Apply filter
-        </span>
-      </button>
-    </div>
+        Apply
+      </span>
+      <span
+        class="screen-reader-text"
+      >
+        Apply filter
+      </span>
+    </button>
   </div>
 </div>
 `;
@@ -378,9 +378,9 @@ exports[`Testing stock filter renders the stock filter block with the product co
         </div>
       </li>
     </ul>
-    <div
-      class="wc-block-stock-filter__actions"
-    />
   </div>
+  <div
+    class="wc-block-stock-filter__actions"
+  />
 </div>
 `;

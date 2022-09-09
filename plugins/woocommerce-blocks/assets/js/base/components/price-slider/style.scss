@@ -23,9 +23,11 @@
 		@include thumbFocus;
 	}
 }
+
 @mixin thumbFocus {
 	background: $gray-900;
 }
+
 /* stylelint-enable */
 @mixin track {
 	cursor: default;
@@ -35,6 +37,7 @@
 	-moz-appearance: none;
 	appearance: none;
 }
+
 @mixin reset {
 	margin: 0;
 	/* Use !important to prevent theme input styles from breaking the component.
@@ -166,10 +169,12 @@
 	&::-webkit-slider-runnable-track {
 		@include track;
 	}
+
 	&::-webkit-slider-thumb {
 		@include thumb;
 		margin: -5px 0 0 0;
 	}
+
 	&::-webkit-slider-progress {
 		@include reset;
 	}
@@ -177,12 +182,15 @@
 	&::-moz-focus-outer {
 		border: 0;
 	}
+
 	&::-moz-range-track {
 		@include track;
 	}
+
 	&::-moz-range-progress {
 		@include reset;
 	}
+
 	&::-moz-range-thumb {
 		@include thumb;
 	}
@@ -195,9 +203,11 @@
 		&::-webkit-slider-thumb {
 			@include thumbFocus;
 		}
+
 		&::-moz-range-thumb {
 			@include thumbFocus;
 		}
+
 		&::-ms-thumb {
 			@include thumbFocus;
 		}
@@ -210,10 +220,12 @@
 			margin-left: -2px;
 			background-position-x: left;
 		}
+
 		&::-moz-range-thumb {
 			background-position-x: left;
 			transform: translate(-2px, 2px);
 		}
+
 		&::-ms-thumb {
 			background-position-x: left;
 		}
@@ -226,10 +238,12 @@
 			background-position-x: right;
 			margin-left: 2px;
 		}
+
 		&::-moz-range-thumb {
 			background-position-x: right;
 			transform: translate(2px, 2px);
 		}
+
 		&::-ms-thumb {
 			background-position-x: right;
 		}
@@ -270,16 +284,20 @@
 			/*remove default tick marks*/
 			color: transparent;
 		}
+
 		&::-ms-fill-lower {
 			background: #e1e1e1;
 			box-shadow: 0 0 0 1px inset #b8b8b8;
 		}
+
 		&::-ms-fill-upper {
 			background: transparent;
 		}
+
 		&::-ms-tooltip {
 			display: none;
 		}
+
 		&::-ms-thumb {
 			transform: translate(1px, 0);
 			pointer-events: auto;
@@ -290,6 +308,7 @@
 			background: #e1e1e1;
 			box-shadow: 0 0 0 1px inset #b8b8b8;
 		}
+
 		&::-ms-fill-lower {
 			background: transparent;
 		}
@@ -345,9 +364,11 @@
 			&::-webkit-slider-thumb {
 				filter: none;
 			}
+
 			&::-moz-range-thumb {
 				filter: none;
 			}
+
 			&::-ms-thumb {
 				filter: none;
 			}

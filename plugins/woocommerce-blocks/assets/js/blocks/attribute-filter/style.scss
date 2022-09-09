@@ -12,7 +12,7 @@
 		text-transform: inherit;
 	}
 
-	.wc-block-attribute-filter__title {
+	> .wc-block-attribute-filter__title {
 		margin-top: $gap-small;
 		margin-bottom: $gap-small;
 	}
@@ -23,13 +23,12 @@
 	border-radius: inherit;
 	border-color: inherit;
 
-	.show-loading-state {
+	.is-loading {
 		@include placeholder();
 		box-shadow: none;
 		border-radius: 0;
-		margin-bottom: $gap;
-		margin-top: $gap;
 		height: 1em;
+		margin-top: $gap;
 	}
 
 	&.style-dropdown {
@@ -73,12 +72,12 @@
 		width: 0;
 		height: max-content;
 
-		&:not(.show-loading-state) {
+		&:not(.is-loading) {
 			border: 1px solid $gray-700 !important;
 			border-radius: 4px;
 		}
 
-		&.show-loading-state {
+		&.is-loading {
 			border-radius: em(4px);
 		}
 	}
@@ -187,4 +186,7 @@
 .wc-block-attribute-filter__button.wc-block-attribute-filter__button {
 	padding: em($gap-smaller) em($gap);
 	@include font-size(small);
+	height: max-content;
+	line-height: normal;
+	width: max-content;
 }
