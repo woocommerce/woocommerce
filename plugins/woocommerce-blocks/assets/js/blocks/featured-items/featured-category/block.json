@@ -99,14 +99,6 @@
 		"showDesc": {
 			"type": "boolean",
 			"default": true
-		},
-		"style": {
-			"type": "object",
-			"default": {
-				"color": {
-					"text": "#ffffff"
-				}
-			}
 		}
 	},
 	"textdomain": "woo-gutenberg-products-block",
