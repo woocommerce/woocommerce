@@ -70,6 +70,8 @@ interface ApmsProps {
 }
 
 export const ApmNotice = () => {
+	// todo-4529 generate dynamic text depending on the enabledApms
+	// todo-4529 show/hide the component depending on the enabledApms
 	return (
 		<Card className="connect-account__apms-notice">
 			<CardBody>
