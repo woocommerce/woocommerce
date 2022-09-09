@@ -127,6 +127,10 @@
 				max-width: 200px;
 			}
 		}
+
+		> .wc-block-active-filters__list-item .wc-block-active-filters__list-item-name {
+			margin: 9px 0 0;
+		}
 	}
 
 	.wc-block-active-filters__list-item-type {
@@ -151,9 +155,12 @@
 	}
 
 	.wc-block-active-filters__list-item-remove {
-		background: transparent;
+		@include font-size(smaller);
+		background: $gray-200;
 		border: 0;
+		border-radius: 25px;
 		appearance: none;
+		padding: 0;
 		height: 16px;
 		width: 16px;
 		line-height: 16px;
@@ -161,8 +168,13 @@
 		margin: 0 0.5em 0 0;
 		color: currentColor;
 
-		&:hover {
-			color: $gray-600;
+		&:hover,
+		&:focus {
+			background: $gray-600;
+
+			.wc-block-components-chip__remove-icon {
+				fill: #fff;
+			}
 		}
 
 		&:disabled {

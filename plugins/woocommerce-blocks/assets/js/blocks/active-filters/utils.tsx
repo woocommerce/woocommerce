@@ -7,6 +7,7 @@ import { RemovableChip } from '@woocommerce/base-components/chip';
 import Label from '@woocommerce/base-components/label';
 import { getQueryArgs, addQueryArgs, removeQueryArgs } from '@wordpress/url';
 import { changeUrl } from '@woocommerce/utils';
+import { Icon, closeSmall } from '@wordpress/icons';
 
 /**
  * Format a min/max price range to display.
@@ -108,39 +109,11 @@ export const renderRemovableListItem = ( {
 						className="wc-block-active-filters__list-item-remove"
 						onClick={ removeCallback }
 					>
-						<svg
-							width="16"
-							height="16"
-							viewBox="0 0 16 16"
-							fill="none"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<ellipse
-								cx="8"
-								cy="8"
-								rx="8"
-								ry="8"
-								transform="rotate(-180 8 8)"
-								fill="currentColor"
-								fillOpacity="0.7"
-							/>
-							<rect
-								x="10.636"
-								y="3.94983"
-								width="2"
-								height="9.9466"
-								transform="rotate(45 10.636 3.94983)"
-								fill="white"
-							/>
-							<rect
-								x="12.0503"
-								y="11.0209"
-								width="2"
-								height="9.9466"
-								transform="rotate(135 12.0503 11.0209)"
-								fill="white"
-							/>
-						</svg>
+						<Icon
+							className="wc-block-components-chip__remove-icon"
+							icon={ closeSmall }
+							size={ 16 }
+						/>
 						<Label screenReaderLabel={ removeText } />
 					</button>
 					{ prefixedName }
