@@ -5,6 +5,90 @@
  * Orders Controller tests for V3 REST API.
  */
 class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
+	/**
+	 * A customer user ID.
+	 *
+	 * @var int|null
+	 */
+	protected static $customer = null;
+
+	/**
+	 * An array of test orders.
+	 *
+	 * @var WC_Order[]
+	 */
+	protected static $orders = array();
+
+	/**
+	 * An array of test products.
+	 *
+	 * @var WC_Product_Simple[]
+	 */
+	protected static $products = array();
+
+	/**
+	 * Timestamp before test orders are created.
+	 *
+	 * @var int
+	 */
+	protected static $time_before_orders = 0;
+
+	/**
+	 * Timestamp after test orders are created.
+	 *
+	 * @var int
+	 */
+	protected static $time_after_orders = 0;
+
+	/**
+	 * Create orders for tests.
+	 *
+	 * @param WP_UnitTest_Factory $factory Factory class for creating WP objects.
+	 *
+	 * @return void
+	 */
+	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ) {
+		self::$customer = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+
+		self::$time_before_orders = time();
+
+		$order1 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( self::$customer );
+		$order1->add_meta_data( 'test1', 'test1', true );
+		$order1->add_meta_data( 'test2', 'test2', true );
+		$order1->save();
+
+		$order2 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( self::$customer );
+		$order2->add_meta_data( 'test1', 'test1', true );
+		$order2->add_meta_data( 'test2', 'test2', true );
+		$order2->save();
+
+		self::$orders = array( $order1, $order2 );
+
+		self::$time_after_orders = time() + HOUR_IN_SECONDS;
+
+		self::$products[] = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+	}
+
+	/**
+	 * Clean up orders after tests.
+	 *
+	 * @return void
+	 */
+	public static function wpTearDownAfterClass() {
+		foreach ( self::$orders as $order ) {
+			$order->delete( true );
+		}
+
+		foreach ( self::$products as $product ) {
+			$product->delete( true );
+		}
+
+		wp_delete_user( self::$customer );
+	}
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -12,11 +96,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Orders_Controller();
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		wp_set_current_user( self::$customer );
 	}
 
 	/**
@@ -78,10 +158,9 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Note: This has fields hardcoded intentionally instead of fetching from schema to test for any bugs in schema result. Add new fields manually when added to schema.
 	 */
 	public function test_orders_api_get_all_fields() {
-		wp_set_current_user( $this->user );
 		$expected_response_fields = $this->get_expected_response_fields();
 
-		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
+		$order    = reset( self::$orders );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() ) );
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -97,9 +176,8 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test that all fields are returned when requested one by one.
 	 */
 	public function test_orders_get_each_field_one_by_one() {
-		wp_set_current_user( $this->user );
 		$expected_response_fields = $this->get_expected_response_fields();
-		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
+		$order                    = reset( self::$orders );
 
 		foreach ( $expected_response_fields as $field ) {
 			$request = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() );
@@ -118,18 +196,10 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_orders_get_all(): void {
-		wp_set_current_user( $this->user );
-
-		// Create a few orders.
-		foreach ( range( 1, 5 ) as $i ) {
-			$order = new \WC_Order();
-			$order->save();
-		}
-
 		$request  = new \WP_REST_Request( 'GET', '/wc/v3/orders' );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 5, $response->get_data() );
+		$this->assertCount( 2, $response->get_data() );
 	}
 
 	/**
@@ -138,49 +208,32 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_orders_date_filtering(): void {
-		wp_set_current_user( $this->user );
-
-		$time_before_orders = time();
-
-		// Create a few orders for testing.
-		$order_ids = array();
-		foreach ( range( 1, 5 ) as $i ) {
-			$order = new \WC_Order();
-			$order->save();
-
-			$order_ids[] = $order->get_id();
-		}
-
-		$time_after_orders = time() + HOUR_IN_SECONDS;
-
-		$request  = new \WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request = new \WP_REST_Request( 'GET', '/wc/v3/orders' );
 		$request->set_param( 'dates_are_gmt', 1 );
 
 		// No date params should return all orders.
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 5, $response->get_data() );
+		$this->assertCount( 2, $response->get_data() );
 
 		// There are no orders before `$time_before_orders`.
-		$request->set_param( 'before', gmdate( DateTime::ATOM, $time_before_orders ) );
+		$request->set_param( 'before', gmdate( DateTime::ATOM, self::$time_before_orders ) );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 0, $response->get_data() );
 
 		// All orders are before `$time_after_orders`.
-		$request->set_param( 'before', gmdate( DateTime::ATOM, $time_after_orders ) );
-		$response = $this->server-> dispatch( $request );
+		$request->set_param( 'before', gmdate( DateTime::ATOM, self::$time_after_orders ) );
+		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 5, $response->get_data() );
+		$this->assertCount( 2, $response->get_data() );
 	}
 
 	/**
 	 * Tests creating an order.
 	 */
 	public function test_orders_create(): void {
-		wp_set_current_user( $this->user );
-
-		$product                  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$product                  = reset( self::$products );
 		$order_params             = array(
 			'payment_method'       => 'bacs',
 			'payment_method_title' => 'Direct Bank Transfer',
@@ -228,14 +281,14 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		foreach ( array_keys( $order_params['billing'] ) as $address_key ) {
 			$this->assertEquals( $order_params['billing'][ $address_key ], $order->{"get_billing_{$address_key}"}( 'edit' ) );
 		}
+
+		$order->delete( true ); // Clean up.
 	}
 
 	/**
 	 * Tests deleting an order.
 	 */
 	public function test_orders_delete(): void {
-		wp_set_current_user( $this->user );
-
 		$order = new \WC_Order();
 		$order->set_status( 'completed' );
 		$order->save();
@@ -256,6 +309,105 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// Check the order was actually deleted.
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 'trash', $order->get_status( 'edit' ) );
+
+		$order->delete( true ); // Clean up.
 	}
 
+	/**
+	 * Test that the `include_meta` param filters the `meta_data` prop correctly.
+	 */
+	public function test_collection_param_include_meta() {
+		$expected_meta_key = 'test1';
+
+		$request = new WP_REST_Request( 'GET', '/wc/v2/orders' );
+		$request->set_param( 'include_meta', 'test1' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data = $response->get_data();
+
+		foreach ( $response_data as $order ) {
+			$this->assertArrayHasKey( 'meta_data', $order );
+			$this->assertEquals( 1, count( $order['meta_data'] ) );
+			$meta = reset( $order['meta_data'] );
+			$this->assertEquals( $expected_meta_key, $meta->get_data()['key'] );
+		}
+	}
+
+	/**
+	 * Test that the `include_meta` param is skipped when empty.
+	 */
+	public function test_collection_param_include_meta_empty() {
+		$request = new WP_REST_Request( 'GET', '/wc/v2/orders' );
+		$request->set_param( 'include_meta', '' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data = $response->get_data();
+
+		foreach ( $response_data as $order ) {
+			$this->assertArrayHasKey( 'meta_data', $order );
+			$this->assertEquals( 2, count( $order['meta_data'] ) );
+		}
+	}
+
+	/**
+	 * Test that the `exclude_meta` param filters the `meta_data` prop correctly.
+	 */
+	public function test_collection_param_exclude_meta() {
+		$expected_meta_key = 'test2';
+
+		$request = new WP_REST_Request( 'GET', '/wc/v2/orders' );
+		$request->set_param( 'exclude_meta', 'test1' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data = $response->get_data();
+
+		foreach ( $response_data as $order ) {
+			$this->assertArrayHasKey( 'meta_data', $order );
+			$this->assertEquals( 1, count( $order['meta_data'] ) );
+			$meta = reset( $order['meta_data'] );
+			$this->assertEquals( $expected_meta_key, $meta->get_data()['key'] );
+		}
+	}
+
+	/**
+	 * Test that the `exclude_meta` param is skipped when empty.
+	 */
+	public function test_collection_param_exclude_meta_empty() {
+		$request = new WP_REST_Request( 'GET', '/wc/v2/orders' );
+		$request->set_param( 'exclude_meta', '' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data = $response->get_data();
+
+		foreach ( $response_data as $order ) {
+			$this->assertArrayHasKey( 'meta_data', $order );
+			$this->assertEquals( 2, count( $order['meta_data'] ) );
+		}
+	}
+
+	/**
+	 * Test that the `include_meta` param overrides the `exclude_meta` param.
+	 */
+	public function test_collection_param_include_meta_override() {
+		$expected_meta_key = 'test1';
+
+		$request = new WP_REST_Request( 'GET', '/wc/v2/orders' );
+		$request->set_param( 'include_meta', 'test1' );
+		$request->set_param( 'exclude_meta', 'test1' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data = $response->get_data();
+
+		foreach ( $response_data as $order ) {
+			$this->assertArrayHasKey( 'meta_data', $order );
+			$this->assertEquals( 1, count( $order['meta_data'] ) );
+			$meta = reset( $order['meta_data'] );
+			$this->assertEquals( $expected_meta_key, $meta->get_data()['key'] );
+		}
+	}
 }
