@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { Fragment } from 'react';
 import { createElement, useState, useEffect } from '@wordpress/element';
 import { Icon, calendar } from '@wordpress/icons';
 import moment from 'moment';
@@ -59,61 +60,64 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			position="bottom center"
 			focusOnMount={ false }
 			renderToggle={ ( { isOpen, onToggle } ) => (
-				<InputControl
-					disabled={ disabled }
-					value={ inputString }
-					onChange={ ( value: string ) => setInputString( value ) }
-					onBlur={ (
-						event: React.FocusEvent< HTMLInputElement >
-					) => {
-						if ( ! isOpen ) {
-							return;
+				<>
+					<InputControl
+						disabled={ disabled }
+						value={ inputString }
+						onChange={ ( value: string ) =>
+							setInputString( value )
 						}
+						onBlur={ (
+							event: React.FocusEvent< HTMLInputElement >
+						) => {
+							if ( ! isOpen ) {
+								return;
+							}
 
-						setDateTime(
-							moment( event.target.value, dateTimeFormat )
-						);
-
-						const relatedTargetParent =
-							event.relatedTarget?.closest(
-								'.components-dropdown'
-							);
-						const currentTargetParent =
-							event.currentTarget?.closest(
-								'.components-dropdown'
+							setDateTime(
+								moment( event.target.value, dateTimeFormat )
 							);
 
-						if (
-							! relatedTargetParent ||
-							relatedTargetParent !== currentTargetParent
-						) {
+							const relatedTargetParent =
+								event.relatedTarget?.closest(
+									'.components-dropdown'
+								);
+							const currentTargetParent =
+								event.currentTarget?.closest(
+									'.components-dropdown'
+								);
+
+							if (
+								! relatedTargetParent ||
+								relatedTargetParent !== currentTargetParent
+							) {
+								onToggle();
+							}
+						} }
+						label={ label }
+						suffix={
+							<Icon icon={ calendar } className="calendar-icon" />
+						}
+						placeholder={ placeholder }
+						describedBy={ sprintf(
+							/* translators: A datetime format */
+							__(
+								'Date input describing a selected date in format %s',
+								'woocommerce'
+							),
+							dateTimeFormat
+						) }
+						onFocus={ () => {
+							if ( isOpen ) {
+								return;
+							}
+
 							onToggle();
-						}
-					} }
-					label={ label }
-					suffix={
-						<Icon icon={ calendar } className="calendar-icon" />
-					}
-					placeholder={ placeholder }
-					error={ inputError }
-					describedBy={ sprintf(
-						/* translators: A datetime format */
-						__(
-							'Date input describing a selected date in format %s',
-							'woocommerce'
-						),
-						dateTimeFormat
-					) }
-					onFocus={ () => {
-						if ( isOpen ) {
-							return;
-						}
-
-						onToggle();
-					} }
-					aria-expanded={ isOpen }
-					errorPosition="top center"
-				/>
+						} }
+						aria-expanded={ isOpen }
+					/>
+					{ inputError && <p>{ inputError }</p> }
+				</>
 			) }
 			renderContent={ () => (
 				<WpDateTimePicker
