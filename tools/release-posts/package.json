@@ -4,9 +4,9 @@
 	"description": "Automate release post generation for Wordpress plugins",
 	"main": " ",
 	"scripts": {
-		"release": "ts-node ./index.ts release --"
+		"release-post": "node -r ts-node/register ./commands/release-post/index.ts"
 	},
-	"author": "",
+	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
 		"@tsconfig/node16": "^1.0.3",
@@ -16,7 +16,7 @@
 	"dependencies": {
 		"@commander-js/extra-typings": "^0.1.0",
 		"@octokit/rest": "^19.0.4",
-		"chalk": "^4.1.2",
+		"cli-core": "workspace:*",
 		"code-analyzer": "workspace:*",
 		"commander": "9.4.0",
 		"dotenv": "^10.0.0",
@@ -26,7 +26,6 @@
 		"lodash.shuffle": "^4.2.0",
 		"node-fetch": "^2.6.7",
 		"open": "^8.4.0",
-		"ora": "^5.4.1",
 		"semver": "^7.3.2",
 		"ts-node": "^10.9.1"
 	}

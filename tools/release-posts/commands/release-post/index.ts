@@ -7,9 +7,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 program
-	.name( 'analyzer' )
+	.name( 'release-post' )
 	.version( '0.0.1' )
-	.command( 'lint', 'Lint changes', { isDefault: true } )
-	.command( 'major-minor', 'Determine major/minor version of a plugin' );
+	.command( 'release', 'Generate release post', { isDefault: true } )
+	.command(
+		'contributors',
+		'Generate a list of contributors for a release post'
+	);
 
 program.parse( process.argv );
