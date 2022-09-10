@@ -2,17 +2,15 @@
  * External dependencies
  */
 import { createElement, useState, useEffect } from '@wordpress/element';
+import { Icon, calendar } from '@wordpress/icons';
+import moment from 'moment';
+import { sprintf, __ } from '@wordpress/i18n';
 import {
 	Dropdown,
 	DateTimePicker as WpDateTimePicker,
+	// @ts-expect-error `__experimentalInputControl` does exist.
+	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
-import moment from 'moment';
-import { sprintf, __ } from '@wordpress/i18n';
-
-/**
- * Internal dependencies
- */
-import { default as DateInput } from '../calendar/input';
 
 export type DateTimePickerControlProps = {
 	currentDate?: string | null;
@@ -20,6 +18,7 @@ export type DateTimePickerControlProps = {
 	disabled?: boolean;
 	is12Hour?: boolean;
 	onChange: ( date: string ) => void;
+	label?: string;
 	placeholder?: string;
 } & Omit< React.HTMLAttributes< HTMLDivElement >, 'onChange' >;
 
@@ -29,6 +28,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	dateTimeFormat = is12Hour ? 'MM/DD/YYYY h:mm a' : 'MM/DD/YYYY H:MM',
 	disabled = false,
 	onChange,
+	label,
 	placeholder,
 }: DateTimePickerControlProps ) => {
 	const [ dateTime, setDateTime ] = useState(
@@ -59,14 +59,10 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			position="bottom center"
 			focusOnMount={ false }
 			renderToggle={ ( { isOpen, onToggle } ) => (
-				<DateInput
+				<InputControl
 					disabled={ disabled }
 					value={ inputString }
-					onChange={ ( {
-						target,
-					}: React.ChangeEvent< HTMLInputElement > ) =>
-						setInputString( target.value )
-					}
+					onChange={ ( value: string ) => setInputString( value ) }
 					onBlur={ (
 						event: React.FocusEvent< HTMLInputElement >
 					) => {
@@ -94,8 +90,10 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 							onToggle();
 						}
 					} }
-					dateFormat={ dateTimeFormat }
-					label={ __( 'Choose a date', 'woocommerce' ) }
+					label={ label }
+					suffix={
+						<Icon icon={ calendar } className="calendar-icon" />
+					}
 					placeholder={ placeholder }
 					error={ inputError }
 					describedBy={ sprintf(
