@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Corrects the plurality of an "Orders" string to fix the `.pot` file

@@ -7,7 +7,7 @@ import createSelector from 'rememo';
  * Internal dependencies
  */
 import { applyNamespace, getUrlParameters, parseId } from './utils';
-import { getResourceName } from '../utils';
+import { getResourceName, getTotalCountResourceName } from '../utils';
 import { IdQuery, IdType, Item, ItemQuery } from './types';
 import { ResourceState } from './reducer';
 import CRUD_ACTIONS from './crud-actions';
@@ -113,6 +113,21 @@ export const getItems = createSelector(
 	}
 );
 
+export const getItemsTotalCount = (
+	state: ResourceState,
+	query: ItemQuery,
+	defaultValue = undefined
+) => {
+	const itemQuery = getTotalCountResourceName(
+		CRUD_ACTIONS.GET_ITEMS,
+		query || {}
+	);
+	const totalCount = state.itemsCount.hasOwnProperty( itemQuery )
+		? state.itemsCount[ itemQuery ]
+		: defaultValue;
+	return totalCount;
+};
+
 export const getItemsError = ( state: ResourceState, query?: ItemQuery ) => {
 	const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEMS, query || {} );
 	return state.errors[ itemQuery ];
@@ -132,6 +147,8 @@ export const getItemUpdateError = (
 	return state.errors[ itemQuery ];
 };
 
+const EMPTY_OBJECT = {};
+
 export const createSelectors = ( {
 	resourceName,
 	pluralResourceName,
@@ -143,7 +160,14 @@ export const createSelectors = ( {
 			getItemError,
 			namespace
 		),
-		[ `get${ pluralResourceName }` ]: applyNamespace( getItems, namespace ),
+		[ `get${ pluralResourceName }` ]: applyNamespace( getItems, namespace, [
+			EMPTY_OBJECT,
+		] ),
+		[ `get${ pluralResourceName }TotalCount` ]: applyNamespace(
+			getItemsTotalCount,
+			namespace,
+			[ EMPTY_OBJECT, undefined ]
+		),
 		[ `get${ pluralResourceName }Error` ]: applyNamespace(
 			getItemsError,
 			namespace

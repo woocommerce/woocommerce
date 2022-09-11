@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Utilities;
 
+use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\Utilities\COTMigrationUtil;
 use WC_Order;
@@ -101,5 +102,25 @@ final class OrderUtil {
 	 */
 	public static function get_order_type( $order_id ) {
 		return wc_get_container()->get( COTMigrationUtil::class )->get_order_type( $order_id );
+	}
+
+	/**
+	 * Helper method to generate admin url for an order.
+	 *
+	 * @param int $order_id Order ID.
+	 *
+	 * @return string Admin url for an order.
+	 */
+	public static function get_order_admin_edit_url( int $order_id ) : string {
+		return wc_get_container()->get( PageController::class )->get_edit_url( $order_id );
+	}
+
+	/**
+	 * Helper method to generate admin URL for new order.
+	 *
+	 * @return string Link for new order.
+	 */
+	public static function get_order_admin_new_url() : string {
+		return wc_get_container()->get( PageController::class )->get_new_page_url();
 	}
 }

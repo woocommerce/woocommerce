@@ -36,9 +36,12 @@ export const useCreateProductByType = () => {
 				{ _fields: [ 'id' ] }
 			);
 			if ( data && data.id ) {
-				const link = getAdminLink(
+				let link = getAdminLink(
 					`post.php?post=${ data.id }&action=edit&wc_onboarding_active_task=products&tutorial=true`
 				);
+				if ( type === 'physical' ) {
+					link += '&spotlight=true';
+				}
 				window.location.href = link;
 			} else {
 				throw new Error( 'Unexpected empty data response from server' );

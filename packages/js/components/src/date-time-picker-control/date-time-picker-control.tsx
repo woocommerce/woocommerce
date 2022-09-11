@@ -20,7 +20,7 @@ export type DateTimePickerControlProps = {
 	disabled?: boolean;
 	is12Hour?: boolean;
 	onChange: ( date: string ) => void;
-} & React.HTMLAttributes< HTMLDivElement >;
+} & Omit< React.HTMLAttributes< HTMLDivElement >, 'onChange' >;
 
 export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	currentDate,
@@ -60,10 +60,14 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 				<DateInput
 					disabled={ disabled }
 					value={ inputString }
-					onChange={ ( { target } ) =>
+					onChange={ ( {
+						target,
+					}: React.ChangeEvent< HTMLInputElement > ) =>
 						setInputString( target.value )
 					}
-					onBlur={ ( event ) => {
+					onBlur={ (
+						event: React.FocusEvent< HTMLInputElement >
+					) => {
 						if ( ! isOpen ) {
 							return;
 						}

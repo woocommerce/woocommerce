@@ -1104,6 +1104,7 @@ return array(
 		'XS' => __( 'Xaisomboun', 'woocommerce' ),
 	),
 	'LB' => array(),
+	'LI' => array(),
 	'LR' => array( // Liberian provinces.
 		'BM' => __( 'Bomi', 'woocommerce' ),
 		'BN' => __( 'Bong', 'woocommerce' ),
@@ -1159,6 +1160,7 @@ return array(
 		'TL' => __( 'Telenești', 'woocommerce' ),
 		'UN' => __( 'Ungheni', 'woocommerce' ),
 	),
+	'MF' => array(),
 	'MQ' => array(),
 	'MT' => array(),
 	'MX' => array( // Mexican states.

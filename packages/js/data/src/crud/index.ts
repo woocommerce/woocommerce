@@ -32,6 +32,7 @@ export const createCrudDataStore = ( {
 		namespace,
 	} );
 	const resolvers = createResolvers( {
+		storeName,
 		resourceName,
 		pluralResourceName,
 		namespace,

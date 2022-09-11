@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent fatal error when throwing exceptions in relation to coupon usage.

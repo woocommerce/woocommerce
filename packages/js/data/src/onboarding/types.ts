@@ -142,6 +142,7 @@ export type ProfileItems = {
 	wccom_connected?: boolean | null;
 	is_agree_marketing?: boolean | null;
 	store_email?: string | null;
+	is_store_country_set?: boolean | null;
 };
 
 export type FieldLocale = {
