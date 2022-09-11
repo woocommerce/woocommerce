@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { TabPanel, Button } from '@wordpress/components';
 import { Icon, trendingUp } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
-import { Pill, EmptyContent, Spinner } from '@woocommerce/components';
+import { Pill, Spinner } from '@woocommerce/components';
 import { flatMapDeep, uniqBy } from 'lodash';
 
 /**
