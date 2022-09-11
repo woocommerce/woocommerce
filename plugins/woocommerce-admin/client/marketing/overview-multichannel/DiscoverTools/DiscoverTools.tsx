@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Fragment } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { TabPanel, Button } from '@wordpress/components';
 import { Icon, trendingUp } from '@wordpress/icons';
@@ -19,38 +18,10 @@ import {
 	CardBody,
 	PluginCardBody,
 } from '~/marketing/components';
-import { STORE_KEY } from '~/marketing/data/constants';
 import { getInAppPurchaseUrl } from '~/lib/in-app-purchase';
+import { Plugin } from './types';
+import { useRecommendedPlugins } from './useRecommendedPlugins';
 import './DiscoverTools.scss';
-
-const category = 'marketing';
-
-type SubcategoryType = {
-	slug: string;
-	name: string;
-};
-
-type TagType = {
-	slug: string;
-	name: string;
-};
-
-type Plugin = {
-	title: string;
-	description: string;
-	url: string;
-	icon: string;
-	product: string;
-	plugin: string;
-	categories: Array< string >;
-	subcategories: Array< SubcategoryType >;
-	tags: Array< TagType >;
-};
-
-type SelectResult = {
-	isLoading: boolean;
-	plugins: Plugin[];
-};
 
 /**
  * Return tabs (`{ name, title }`) for the TabPanel.
@@ -107,17 +78,7 @@ const renderPluginCardBodies = ( plugins: Plugin[] ) => {
 };
 
 export const DiscoverTools = () => {
-	const { isLoading, plugins } = useSelect< SelectResult >(
-		( select ) => {
-			const { getRecommendedPlugins, isResolving } = select( STORE_KEY );
-
-			return {
-				isLoading: isResolving( 'getRecommendedPlugins', [ category ] ),
-				plugins: getRecommendedPlugins( category ),
-			};
-		},
-		[ category ]
-	);
+	const { isLoading, plugins } = useRecommendedPlugins();
 
 	/**
 	 * Renders card body.
