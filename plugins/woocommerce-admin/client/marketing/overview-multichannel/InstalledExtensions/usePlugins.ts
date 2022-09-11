@@ -6,7 +6,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { STORE_KEY } from '../data/constants';
+import { STORE_KEY } from '~/marketing/data/constants';
 import { Plugin } from './types';
 
 export type UsePluginsType = {
