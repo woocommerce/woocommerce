@@ -77,8 +77,6 @@ export const InstalledExtensions = () => {
 				</Button>
 			);
 		}
-
-		return null;
 	};
 
 	return (

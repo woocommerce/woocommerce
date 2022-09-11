@@ -14,7 +14,7 @@ type PluginCardBodyProps = {
 	pills?: Array< JSX.Element >;
 
 	description: string;
-	button: JSX.Element | null;
+	button?: JSX.Element;
 };
 
 /**
