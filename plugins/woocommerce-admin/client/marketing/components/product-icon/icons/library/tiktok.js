@@ -1,7 +1,17 @@
+/**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
+import { WC_ASSET_URL } from '~/utils/admin-settings';
+
 const tiktok = (
 	<img
-		src={ `${ window.wcSettings.wcAssetUrl }images/marketing/tiktok.jpg` }
-		alt="lala"
+		src={ `${ WC_ASSET_URL }images/marketing/tiktok.jpg` }
+		alt={ __( 'Tiktok', 'woocommerce' ) }
 	/>
 );
 
