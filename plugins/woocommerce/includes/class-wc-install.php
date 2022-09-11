@@ -839,6 +839,7 @@ class WC_Install {
 			'wc-admin-navigation-feedback-follow-up',
 			'wc-admin-set-up-additional-payment-types',
 			'wc-admin-deactivate-plugin',
+			'wc-admin-complete-store-details',
 		);
 
 		/**

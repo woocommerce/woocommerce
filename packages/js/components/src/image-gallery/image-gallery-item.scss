@@ -1,0 +1,22 @@
+.woocommerce-image-gallery__item {
+    height: 146px;
+    width: 146px;
+    border: 1px solid $gray-200;
+    border-radius: 2px;
+    overflow: hidden;
+
+    img {
+        max-width: 100%;
+    }
+
+    .woocommerce-pill {
+        background: var(--wp-admin-theme-color);
+        border: 0;
+        color: $white;
+        padding-top: 2px;
+        padding-bottom: 2px;
+        position: absolute;
+        top: 10px;
+        left: 10px;
+    }
+}

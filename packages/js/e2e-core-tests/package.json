@@ -19,7 +19,7 @@
 		"CHANGELOG.md"
 	],
 	"dependencies": {
-		"@jest/globals": "^26.4.2",
+		"@jest/globals": "^27.5.1",
 		"@wordpress/deprecated": "^3.2.3",
 		"config": "3.3.3"
 	},
