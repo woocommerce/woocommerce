@@ -1,16 +1,19 @@
+$image-size: 36px;
+$gap-vertical: 2px;
+
 .woocommerce_marketing_plugin_card_body {
 	display: flex;
 	align-items: center;
-	gap: 16px;
+	gap: $gap;
 
 	&__icon {
 		flex-shrink: 0;
 
 		img {
 			display: block;
-			width: 36px;
-			height: 36px;
-			border-radius: 4px;
+			width: $image-size;
+			height: $image-size;
+			border-radius: $gap-smallest;
 		}
 	}
 
@@ -19,16 +22,16 @@
 
 		&-name {
 			display: flex;
-			gap: 2px 8px;
+			gap: $gap-vertical $gap-smaller;
 			flex-wrap: wrap;
 			align-items: center;
 			font-size: 14px;
 			font-weight: 600;
 			line-height: 20px;
-			margin-bottom: 4px;
+			margin-bottom: $gap-smallest;
 
 			.woocommerce-pill {
-				padding: 2px 8px;
+				padding: $gap-vertical $gap-smaller;
 				color: $gray-700;
 			}
 		}
