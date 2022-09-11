@@ -44,7 +44,7 @@ type Plugin = {
 	plugin: string;
 	categories: Array< string >;
 	subcategories: Array< SubcategoryType >;
-	tags?: Array< TagType >;
+	tags: Array< TagType >;
 };
 
 type SelectResult = {
@@ -81,7 +81,7 @@ const renderPluginCardBodies = ( plugins: Plugin[] ) => {
 				<PluginCardBody
 					icon={ <img src={ el.icon } alt={ el.title } /> }
 					name={ el.title }
-					pills={ el.tags?.map( ( tag ) => (
+					pills={ el.tags.map( ( tag ) => (
 						<Pill key={ tag.slug }>{ tag.name }</Pill>
 					) ) }
 					description={ el.description }
@@ -124,10 +124,7 @@ export const DiscoverTools = () => {
 	 *
 	 * - If loading is in progress, it renders a loading indicator.
 	 * - If there are zero plugins, it renders an empty content.
-	 * - If the plugins do not have subcategories field, it renders the list of plugins without TabPanel.
-	 *     - This is a temporary safety measure to make sure the list of plugins are displayed,
-	 * 	     in case the subcategories changes in the woocommerce.com API are not shipped yet.
-	 * - Otherwise, it renders a TabPanel with all the plugins.
+	 * - Otherwise, it renders a TabPanel. Each tab is a subcategory displaying the plugins.
 	 */
 	const renderCardContent = () => {
 		if ( isLoading ) {
@@ -167,8 +164,8 @@ export const DiscoverTools = () => {
 		return (
 			<TabPanel tabs={ getTabs( plugins ) }>
 				{ ( tab ) => {
-					const filteredPlugins = plugins.filter( ( el ) =>
-						el.subcategories?.some(
+					const subcategoryPlugins = plugins.filter( ( el ) =>
+						el.subcategories.some(
 							( subcategory ) => subcategory.slug === tab.name
 						)
 					);
@@ -176,7 +173,7 @@ export const DiscoverTools = () => {
 					return (
 						<>
 							<CardDivider />
-							{ renderPluginCardBodies( filteredPlugins ) }
+							{ renderPluginCardBodies( subcategoryPlugins ) }
 						</>
 					);
 				} }
