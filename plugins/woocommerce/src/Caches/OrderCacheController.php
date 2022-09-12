@@ -9,14 +9,19 @@ class OrderCacheController {
 
 	public const ORDERS_CACHE_USAGE_ENABLED_OPTION = 'woocommerce_orders_cache_enabled';
 
-	public const ORDERS_CACHE_USAGE_ENABLED_BACKUP_OPTION = 'woocommerce_orders_cache_enabled_backup';
-
 	/**
 	 * The orders cache to use.
 	 *
 	 * @var OrderCache
 	 */
 	private $order_cache;
+
+	/**
+	 * The backup value of the cache usage option, stored while the cache is temporarily disabled.
+	 *
+	 * @var null|string
+	 */
+	private $orders_cache_usage_backup = null;
 
 	/**
 	 * Class initialization, invoked by the DI container.
@@ -65,7 +70,7 @@ class OrderCacheController {
 			return;
 		}
 
-		update_option( self::ORDERS_CACHE_USAGE_ENABLED_BACKUP_OPTION, get_option( self::ORDERS_CACHE_USAGE_ENABLED_OPTION ) );
+		$this->orders_cache_usage_backup = get_option( self::ORDERS_CACHE_USAGE_ENABLED_OPTION );
 
 		$this->set_orders_cache_usage( false );
 	}
@@ -76,7 +81,7 @@ class OrderCacheController {
 	 * @return bool True if the order cache is currently temporarily disabled.
 	 */
 	public function orders_cache_usage_is_temporarly_disabled(): bool {
-		return false !== get_option( self::ORDERS_CACHE_USAGE_ENABLED_BACKUP_OPTION );
+		return null !== $this->orders_cache_usage_backup;
 	}
 
 	/**
@@ -85,12 +90,7 @@ class OrderCacheController {
 	 * @return bool|null True if the option has value 'yes', false if it has value 'no', null if the option doesn't exist.
 	 */
 	public function orders_cache_usage_backup_value(): ?bool {
-		$backup_option_value = get_option( self::ORDERS_CACHE_USAGE_ENABLED_BACKUP_OPTION );
-		if ( false === $backup_option_value ) {
-			return null;
-		} else {
-			return 'yes' === $backup_option_value;
-		}
+		return $this->orders_cache_usage_backup;
 	}
 
 	/**
@@ -103,10 +103,9 @@ class OrderCacheController {
 	 */
 	public function maybe_restore_orders_cache_usage(): void {
 		$this->order_cache->flush();
-		$backup_option_value = get_option( self::ORDERS_CACHE_USAGE_ENABLED_BACKUP_OPTION );
-		if ( false !== $backup_option_value ) {
-			update_option( self::ORDERS_CACHE_USAGE_ENABLED_OPTION, $backup_option_value );
-			delete_option( self::ORDERS_CACHE_USAGE_ENABLED_BACKUP_OPTION );
+		if ( null !== $this->orders_cache_usage_backup ) {
+			update_option( self::ORDERS_CACHE_USAGE_ENABLED_OPTION, $this->orders_cache_usage_backup );
+			$this->orders_cache_usage_backup = null;
 		}
 	}
 }
