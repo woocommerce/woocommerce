@@ -317,6 +317,7 @@ class WC_Products_Tracking {
 
 		if (
 			'post-new.php' === $hook &&
+			isset( $_GET['post_type'] ) &&
 			'product' === wp_unslash( $_GET['post_type'] )
 		) {
 			return 'new';
