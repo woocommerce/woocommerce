@@ -152,7 +152,11 @@ class WC_Products_Tracking {
 
 					if ( ! isBlockEditor ) {
 						tagsText          = $( '[name=\"tax_input[product_tag]\"]' ).val();
-						description_value  = $( '#content' ).is( ':visible' ) ? $( '#content' ).val() : tinymce.get( 'content' ).getContent();
+						if ( $( '#content' ).is( ':visible' ) ) {
+							description_value = $( '#content' ).val();	
+						} else if ( typeof tinymce === 'object' && tinymce.get( 'content' ) ) {
+							description_value = tinymce.get( 'content' ).getContent();
+						}
 					} else {
 						description_value  = $( '.block-editor-rich-text__editable' ).text();
 					}
