@@ -4,7 +4,7 @@
 import { Fragment } from 'react';
 import { createElement, useState, useEffect } from '@wordpress/element';
 import { Icon, calendar } from '@wordpress/icons';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { sprintf, __ } from '@wordpress/i18n';
 import {
 	Dropdown,
@@ -21,6 +21,7 @@ export type DateTimePickerControlProps = {
 	onChange: ( date: string ) => void;
 	label?: string;
 	placeholder?: string;
+	help?: string | null;
 } & Omit< React.HTMLAttributes< HTMLDivElement >, 'onChange' >;
 
 export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
@@ -31,29 +32,30 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	onChange,
 	label,
 	placeholder,
+	help,
 }: DateTimePickerControlProps ) => {
-	const [ dateTime, setDateTime ] = useState(
-		moment( currentDate || new Date().toISOString() )
+	const [ inputString, setInputString ] = useState( '' );
+	const [ lastValidDate, setLastValidDate ] = useState< Moment | null >(
+		null
 	);
-	const [ inputString, setInputString ] = useState(
-		dateTime.format( dateTimeFormat )
-	);
-	const [ inputError, setInputError ] = useState( '' );
 
 	useEffect( () => {
-		setDateTime( moment( currentDate ) );
-	}, [ currentDate ] );
+		const newDate = moment( currentDate, moment.ISO_8601, true );
 
-	useEffect( () => {
-		if ( ! moment( dateTime ).isValid() ) {
-			setInputError( __( 'Invalid date', 'woocommerce' ) );
-			return;
+		if ( newDate.isValid() ) {
+			setInputString( newDate.format( dateTimeFormat ) );
+		} else {
+			setInputString( currentDate || '' );
 		}
+	}, [ currentDate, dateTimeFormat ] );
 
-		setInputString( dateTime.format( dateTimeFormat ) );
-		setInputError( '' );
-		onChange( dateTime.toISOString() );
-	}, [ dateTime ] );
+	useEffect( () => {
+		const newDate = moment( inputString, dateTimeFormat );
+
+		if ( newDate.isValid() ) {
+			setLastValidDate( newDate );
+		}
+	}, [ inputString ] );
 
 	return (
 		<Dropdown
@@ -64,9 +66,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 					<InputControl
 						disabled={ disabled }
 						value={ inputString }
-						onChange={ ( value: string ) =>
-							setInputString( value )
-						}
+						onChange={ setInputString }
 						onBlur={ (
 							event: React.FocusEvent< HTMLInputElement >
 						) => {
@@ -74,8 +74,14 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 								return;
 							}
 
-							setDateTime(
-								moment( event.target.value, dateTimeFormat )
+							const newDate = moment(
+								event.target.value,
+								dateTimeFormat
+							);
+							onChange(
+								newDate.isValid()
+									? newDate.toISOString()
+									: event.target.value
 							);
 
 							const relatedTargetParent =
@@ -116,14 +122,16 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 						} }
 						aria-expanded={ isOpen }
 					/>
-					{ inputError && <p>{ inputError }</p> }
+					{ help && <p>{ help }</p> }
 				</>
 			) }
 			renderContent={ () => (
 				<WpDateTimePicker
-					currentDate={ dateTime.toISOString() }
-					onChange={ ( newDate ) => {
-						setDateTime( moment( newDate ) );
+					currentDate={ lastValidDate?.toISOString() }
+					onChange={ ( date: string ) => {
+						const formattedDate =
+							moment( date ).format( dateTimeFormat );
+						setInputString( formattedDate );
 					} }
 					is12Hour={ is12Hour }
 				/>
