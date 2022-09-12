@@ -69,7 +69,7 @@ do_action( 'woocommerce_add_to_cart', string $cart_id, integer $product_id, inte
 ### Source
 
 
- - [StoreApi/Utilities/CartController.php](../../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../../../../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -94,8 +94,8 @@ do_action( 'woocommerce_after_main_content' )
 ### Source
 
 
- - [BlockTypes/ClassicTemplate.php](../../src/BlockTypes/ClassicTemplate.php)
- - [BlockTypes/ClassicTemplate.php](../../src/BlockTypes/ClassicTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../../../../src/BlockTypes/ClassicTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../../../../src/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -116,7 +116,7 @@ do_action( 'woocommerce_after_shop_loop' )
 ### Source
 
 
- - [BlockTypes/ClassicTemplate.php](../../src/BlockTypes/ClassicTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../../../../src/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -141,7 +141,7 @@ do_action( 'woocommerce_applied_coupon', string $coupon_code )
 ### Source
 
 
- - [StoreApi/Utilities/CartController.php](../../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../../../../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -163,7 +163,7 @@ do_action( 'woocommerce_archive_description' )
 ### Source
 
 
- - [BlockTypes/ClassicTemplate.php](../../src/BlockTypes/ClassicTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../../../../src/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -190,8 +190,8 @@ do_action( 'woocommerce_before_main_content' )
 ### Source
 
 
- - [BlockTypes/ClassicTemplate.php](../../src/BlockTypes/ClassicTemplate.php)
- - [BlockTypes/ClassicTemplate.php](../../src/BlockTypes/ClassicTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../../../../src/BlockTypes/ClassicTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../../../../src/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -214,7 +214,7 @@ do_action( 'woocommerce_before_shop_loop' )
 ### Source
 
 
- - [BlockTypes/ClassicTemplate.php](../../src/BlockTypes/ClassicTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../../../../src/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -230,8 +230,8 @@ do_action( 'woocommerce_blocks_cart_enqueue_data' )
 ### Source
 
 
- - [BlockTypes/Cart.php](../../src/BlockTypes/Cart.php)
- - [BlockTypes/MiniCart.php](../../src/BlockTypes/MiniCart.php)
+ - [BlockTypes/Cart.php](../../../../src/BlockTypes/Cart.php)
+ - [BlockTypes/MiniCart.php](../../../../src/BlockTypes/MiniCart.php)
 
 ---
 
@@ -247,7 +247,7 @@ do_action( 'woocommerce_blocks_checkout_enqueue_data' )
 ### Source
 
 
- - [BlockTypes/Checkout.php](../../src/BlockTypes/Checkout.php)
+ - [BlockTypes/Checkout.php](../../../../src/BlockTypes/Checkout.php)
 
 ---
 
@@ -263,7 +263,7 @@ do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_after' )
 ### Source
 
 
- - [BlockTypes/Cart.php](../../src/BlockTypes/Cart.php)
+ - [BlockTypes/Cart.php](../../../../src/BlockTypes/Cart.php)
 
 ---
 
@@ -279,7 +279,7 @@ do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_before' )
 ### Source
 
 
- - [BlockTypes/Cart.php](../../src/BlockTypes/Cart.php)
+ - [BlockTypes/Cart.php](../../../../src/BlockTypes/Cart.php)
 
 ---
 
@@ -295,7 +295,7 @@ do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_after' )
 ### Source
 
 
- - [BlockTypes/Checkout.php](../../src/BlockTypes/Checkout.php)
+ - [BlockTypes/Checkout.php](../../../../src/BlockTypes/Checkout.php)
 
 ---
 
@@ -311,7 +311,7 @@ do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_before' )
 ### Source
 
 
- - [BlockTypes/Checkout.php](../../src/BlockTypes/Checkout.php)
+ - [BlockTypes/Checkout.php](../../../../src/BlockTypes/Checkout.php)
 
 ---
 
@@ -337,7 +337,7 @@ do_action( 'woocommerce_blocks_{$this->registry_identifier}_registration', \Auto
 ### Source
 
 
- - [Integrations/IntegrationRegistry.php](../../src/Integrations/IntegrationRegistry.php)
+ - [Integrations/IntegrationRegistry.php](../../../../src/Integrations/IntegrationRegistry.php)
 
 ---
 
@@ -363,7 +363,7 @@ do_action( 'woocommerce_check_cart_items' )
 ### Source
 
 
- - [StoreApi/Utilities/CartController.php](../../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../../../../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -394,7 +394,7 @@ do_action( 'woocommerce_created_customer', integer $customer_id, array $new_cust
 ### Source
 
 
- - [StoreApi/Routes/V1/Checkout.php](../../src/StoreApi/Routes/V1/Checkout.php)
+ - [StoreApi/Routes/V1/Checkout.php](../../../../src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
@@ -415,7 +415,7 @@ do_action( 'woocommerce_no_products_found' )
 ### Source
 
 
- - [BlockTypes/ClassicTemplate.php](../../src/BlockTypes/ClassicTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../../../../src/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -446,7 +446,7 @@ do_action( 'woocommerce_register_post', string $username, string $user_email, \W
 ### Source
 
 
- - [StoreApi/Routes/V1/Checkout.php](../../src/StoreApi/Routes/V1/Checkout.php)
+ - [StoreApi/Routes/V1/Checkout.php](../../../../src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
@@ -474,7 +474,7 @@ do_action_ref_array( 'woocommerce_rest_checkout_process_payment_with_context', [
 ### Source
 
 
- - [StoreApi/Routes/V1/Checkout.php](../../src/StoreApi/Routes/V1/Checkout.php)
+ - [StoreApi/Routes/V1/Checkout.php](../../../../src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
@@ -490,7 +490,7 @@ do_action( 'woocommerce_shop_loop' )
 ### Source
 
 
- - [BlockTypes/ClassicTemplate.php](../../src/BlockTypes/ClassicTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../../../../src/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -535,7 +535,7 @@ add_action( 'woocommerce_store_api_cart_errors', 'my_function_callback', 10 );
 ### Source
 
 
- - [StoreApi/Utilities/CartController.php](../../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../../../../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -558,7 +558,7 @@ do_action( 'woocommerce_store_api_cart_update_customer_from_request', \WC_Custom
 ### Source
 
 
- - [StoreApi/Routes/V1/CartUpdateCustomer.php](../../src/StoreApi/Routes/V1/CartUpdateCustomer.php)
+ - [StoreApi/Routes/V1/CartUpdateCustomer.php](../../../../src/StoreApi/Routes/V1/CartUpdateCustomer.php)
 
 ---
 
@@ -582,7 +582,7 @@ do_action( 'woocommerce_store_api_cart_update_order_from_request', \WC_Order $dr
 ### Source
 
 
- - [StoreApi/Routes/V1/AbstractCartRoute.php](../../src/StoreApi/Routes/V1/AbstractCartRoute.php)
+ - [StoreApi/Routes/V1/AbstractCartRoute.php](../../../../src/StoreApi/Routes/V1/AbstractCartRoute.php)
 
 ---
 
@@ -628,7 +628,7 @@ add_action( 'woocommerce_blocks_checkout_order_processed', 'my_function_callback
 ### Source
 
 
- - [StoreApi/Routes/V1/Checkout.php](../../src/StoreApi/Routes/V1/Checkout.php)
+ - [StoreApi/Routes/V1/Checkout.php](../../../../src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
@@ -651,7 +651,7 @@ do_action( 'woocommerce_store_api_checkout_update_customer_from_request', \WC_Cu
 ### Source
 
 
- - [StoreApi/Routes/V1/Checkout.php](../../src/StoreApi/Routes/V1/Checkout.php)
+ - [StoreApi/Routes/V1/Checkout.php](../../../../src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
@@ -678,7 +678,7 @@ do_action( 'woocommerce_store_api_checkout_update_order_from_request', \WC_Order
 ### Source
 
 
- - [StoreApi/Routes/V1/Checkout.php](../../src/StoreApi/Routes/V1/Checkout.php)
+ - [StoreApi/Routes/V1/Checkout.php](../../../../src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
@@ -709,7 +709,7 @@ do_action( 'woocommerce_store_api_checkout_update_order_meta', \WC_Order $order 
 ### Source
 
 
- - [StoreApi/Routes/V1/Checkout.php](../../src/StoreApi/Routes/V1/Checkout.php)
+ - [StoreApi/Routes/V1/Checkout.php](../../../../src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
@@ -736,7 +736,7 @@ do_action( 'woocommerce_store_api_validate_add_to_cart', \WC_Product $product, a
 ### Source
 
 
- - [StoreApi/Utilities/CartController.php](../../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../../../../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -759,7 +759,7 @@ do_action( 'woocommerce_store_api_validate_cart_item', \WC_Product $product, arr
 ### Source
 
 
- - [StoreApi/Utilities/CartController.php](../../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../../../../src/StoreApi/Utilities/CartController.php)
 
 ---
 <!-- FEEDBACK -->

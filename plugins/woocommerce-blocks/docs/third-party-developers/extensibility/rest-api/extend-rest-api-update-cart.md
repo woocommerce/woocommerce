@@ -126,9 +126,9 @@ If you try to register again, under the same namespace, the previously registere
 
 You are the author of an extension that lets the shopper redeem points that they earn on your website for a discount on their order. There is a text field where the shopper can enter how many points they want to redeem, and a submit button that will apply the redemption.
 
-Your extension adds these UI elements to the sidebar in the Cart and Checkout blocks using the [`DiscountsMeta`](./available-slot-fills.md) Slot.
+Your extension adds these UI elements to the sidebar in the Cart and Checkout blocks using the [`DiscountsMeta`](../checkout-block/available-slot-fills.md) Slot.
 
-More information on how to use Slots is available in our [Slots and Fills documentation](./slot-fills.md).
+More information on how to use Slots is available in our [Slots and Fills documentation](../checkout-block/slot-fills.md).
 
 Once implemented, the sidebar has a control added to it like this:
 
@@ -192,3 +192,4 @@ Now that this is registered, when the button is pressed, the `cart/extensions` e
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md)
 
 <!-- /FEEDBACK -->
+

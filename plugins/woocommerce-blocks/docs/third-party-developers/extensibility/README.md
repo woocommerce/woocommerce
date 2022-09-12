@@ -2,24 +2,24 @@
 
 ## Table of Contents <!-- omit in toc -->
 
-- [Hooks (actions and filters)](#hooks-actions-and-filters)
-- [REST API](#rest-api)
-- [Checkout Payment Methods](#checkout-payment-methods)
-- [Checkout Block](#checkout-block)
+-   [Hooks (actions and filters)](#hooks-actions-and-filters)
+-   [REST API](#rest-api)
+-   [Checkout Payment Methods](#checkout-payment-methods)
+-   [Checkout Block](#checkout-block)
 
 These documents are all dealing with extensibility in the various WooCommerce Blocks.
 
 ## Hooks (actions and filters)
 
-| Document                | Description                                             |
-| ----------------------- | ------------------------------------------------------- |
+| Document                      | Description                                             |
+| ----------------------------- | ------------------------------------------------------- |
 | [Actions](./hooks/actions.md) | Documentation covering action hooks on the server side. |
 | [Filters](./hooks/filters.md) | Documentation covering filter hooks on the server side. |
 
 ## REST API
 
-| Document                                                                              | Description                                                                        |
-| ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Document                                                                                       | Description                                                                        |
+| ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | [Exposing your data in the Store API.](./rest-api/extend-rest-api-add-data.md)                 | Explains how you can add additional data to Store API endpoints.                   |
 | [Available endpoints to extend with ExtendSchema](./rest-api/available-endpoints-to-extend.md) | A list of all available endpoints to extend.                                       |
 | [Adding an endpoint to ExtendSchema.](./rest-api/extend-rest-api-new-endpoint.md)              | A step by step process for contributors to expose a new endpoint via ExtendSchema. |
@@ -27,23 +27,23 @@ These documents are all dealing with extensibility in the various WooCommerce Bl
 
 ## Checkout Payment Methods
 
-| Document                                                      | Description                                                                                                 |
-| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Document                                                                               | Description                                                                                                 |
+| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | [Checkout Flow and Events](./checkout-payment-methods/checkout-flow-and-events.md)     | All about the checkout flow in the checkout block and the various emitted events that can be subscribed to. |
 | [Payment Method Integration](./checkout-payment-methods/payment-method-integration.md) | Information about implementing payment methods.                                                             |
 | [Filtering Payment Methods](./checkout-payment-methods/filtering-payment-methods.md)   | Information about filtering the payment methods available in the Checkout Block.                            |
 
 ## Checkout Block
 
-In addition to the reference material below, [please see the `block-checkout` package documentation](../../packages/checkout/README.md) which is used to extend checkout with Filters, Slot Fills, and Inner Blocks.
+In addition to the reference material below, [please see the `block-checkout` package documentation](../../../packages/checkout/README.md) which is used to extend checkout with Filters, Slot Fills, and Inner Blocks.
 
 | Document                                                                | Description                                                                                                       |
 | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| [IntegrationInterface](./checkout-block/integration-interface.md)                      | The `IntegrationInterface` class and how to use it to register scripts, styles, and data with WooCommerce Blocks. |
-| [Available Filters](./checkout-block/available-filters.md)                             | All about the filters that you may use to change values of certain elements of WooCommerce Blocks.                |
-| [Slots and Fills](./checkout-block/slot-fills.md)                                     | Explains Slot Fills and how to use them to render your own components in Cart and Checkout.                       |
-| [Available Slot Fills](./checkout-block/available-slot-fills.md)                      | Available Slots that you can use and their positions in Cart and Checkout.                                        |
-| [DOM Events](./checkout-block/dom-events.md)                                           | A list of DOM Events used by some blocks to communicate between them and with other parts of WooCommerce.         |
+| [IntegrationInterface](./checkout-block/integration-interface.md)       | The `IntegrationInterface` class and how to use it to register scripts, styles, and data with WooCommerce Blocks. |
+| [Available Filters](./checkout-block/available-filters.md)              | All about the filters that you may use to change values of certain elements of WooCommerce Blocks.                |
+| [Slots and Fills](./checkout-block/slot-fills.md)                       | Explains Slot Fills and how to use them to render your own components in Cart and Checkout.                       |
+| [Available Slot Fills](./checkout-block/available-slot-fills.md)        | Available Slots that you can use and their positions in Cart and Checkout.                                        |
+| [DOM Events](./checkout-block/dom-events.md)                            | A list of DOM Events used by some blocks to communicate between them and with other parts of WooCommerce.         |
 | [Filter Registry](../../../packages/checkout/filter-registry/README.md) | The filter registry allows callbacks to be registered to manipulate certain values.                               |
 
 <!-- FEEDBACK -->

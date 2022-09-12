@@ -6,7 +6,7 @@ This page includes all documentation regarding WooCommerce Blocks and themes.
 
 ### Block and component class names
 
-WooCommerce Blocks follows BEM for class names, as [stated in our coding guidelines](../contributors/coding-guidelines.md). All classes start with one of these two prefixes:
+WooCommerce Blocks follows BEM for class names, as [stated in our coding guidelines](../../contributors/contributing/coding-guidelines.md). All classes start with one of these two prefixes:
 
 -   `.wc-block-`: class names specific to a single block.
 -   `.wc-block-components-`: class names specific to a component. The component might be reused by different blocks.

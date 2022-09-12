@@ -2,15 +2,15 @@
 
 ## Table of Contents <!-- omit in toc -->
 
-- [The problem](#the-problem)
-- [Solution](#solution)
-- [Basic Usage](#basic-usage)
-- [registerPlugin](#registerplugin)
-- [Requirements](#requirements)
+-   [The problem](#the-problem)
+-   [Solution](#solution)
+-   [Basic Usage](#basic-usage)
+-   [registerPlugin](#registerplugin)
+-   [Requirements](#requirements)
 
 ## The problem
 
-You added custom data to the [Store API](./extend-rest-api-add-data.md). You changed several strings using [Checkout filters](./available-filters.md). Now you want to render your own components in specific places in the Cart and Checkout.
+You added custom data to the [Store API](../rest-api/extend-rest-api-add-data.md). You changed several strings using [Checkout filters](./available-filters.md). Now you want to render your own components in specific places in the Cart and Checkout.
 
 ## Solution
 
