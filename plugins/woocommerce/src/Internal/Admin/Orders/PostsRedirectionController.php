@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+
 /**
  * When {@see OrdersTableDataStore} is in use, this class takes care of redirecting admins from CPT-based URLs
  * to the new ones.
@@ -21,6 +23,10 @@ class PostsRedirectionController {
 	 */
 	public function __construct( PageController $page_controller ) {
 		$this->page_controller = $page_controller;
+
+		if ( ! wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ) {
+			return;
+		}
 
 		add_action(
 			'load-edit.php',
