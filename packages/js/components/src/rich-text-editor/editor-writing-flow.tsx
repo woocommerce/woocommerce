@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
+import { useInstanceId } from '@wordpress/compose';
 import { createElement, useCallback } from '@wordpress/element';
 import {
 	BlockList,
@@ -13,9 +14,8 @@ import {
 	WritingFlow,
 } from '@wordpress/block-editor';
 
-export const ID = 'entry-editor';
-
 export const EditorWritingFlow: React.VFC = () => {
+	const instanceId = useInstanceId( EditorWritingFlow );
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore This action is available in the block editor data store.
 	const { resetSelection } = useDispatch( blockEditorStore );
@@ -57,7 +57,8 @@ export const EditorWritingFlow: React.VFC = () => {
 		/* Gutenberg handles the keyboard events when focusing the content editable area. */
 		/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
 		<div
-			id={ ID }
+			className="rich-text-editor__writing-flow"
+			id={ `rich-text-editor__writing-flow-${ instanceId }` }
 			style={ {
 				display: 'flex',
 				height: '100%',
