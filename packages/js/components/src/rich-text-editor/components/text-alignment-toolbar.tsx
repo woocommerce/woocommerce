@@ -45,7 +45,7 @@ const ALIGNMENT_PROPERTIES = {
 } as { [ key: string ]: string };
 
 export const TextAlignmentToolbar = () => {
-	const { blocks, blockClientIds } = useBlockSelection();
+	const { blocks } = useBlockSelection();
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore Types do not exist on this data store yet.
 	const { updateBlockAttributes } = useDispatch( blockEditorStore );

@@ -29,7 +29,6 @@ type ListType = 'ordered' | 'unordered';
 
 type ListTransformProps = {
 	listType: ListType;
-	isContextMenu: boolean;
 };
 
 type ReplaceBlocksType = (

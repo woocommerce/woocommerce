@@ -11,11 +11,10 @@ import { Path, SVG, ToolbarButton } from '@wordpress/components';
  */
 import { useReplaceSelectedBlocks } from '../utils/replace-selected-blocks';
 
-type HeadingLevel = 1 | 2 | 3;
+export type HeadingLevel = 1 | 2 | 3;
 
 type HeadingTransformProps = {
 	headingLevel: HeadingLevel;
-	isContextMenu: boolean;
 };
 
 type HeadingLevelIconProps = {
@@ -69,9 +68,7 @@ const allBlocksHaveHeading = (
 	} );
 };
 
-export const HeadingTransform: React.VFC< HeadingTransformProps > = ( {
-	headingLevel,
-} ) => {
+export const HeadingTransform = ( { headingLevel }: HeadingTransformProps ) => {
 	const { replaceSelectedBlocks, blocks, swapBlocksFn } =
 		useReplaceSelectedBlocks();
 
@@ -88,7 +85,6 @@ export const HeadingTransform: React.VFC< HeadingTransformProps > = ( {
 						  } )
 				);
 			} }
-			isActive={ false }
 		/>
 	);
 };
