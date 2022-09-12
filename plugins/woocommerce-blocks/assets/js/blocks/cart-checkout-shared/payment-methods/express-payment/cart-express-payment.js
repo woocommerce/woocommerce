@@ -66,7 +66,7 @@ const CartExpressPayment = () => {
 			</LoadingMask>
 			<div className="wc-block-components-express-payment-continue-rule wc-block-components-express-payment-continue-rule--cart">
 				{ /* translators: Shown in the Cart block between the express payment methods and the Proceed to Checkout button */ }
-				{ __( 'Or', 'woo-gutenberg-products-block' ) }
+				{ __( 'Any', 'woo-gutenberg-products-block' ) }
 			</div>
 		</>
 	);

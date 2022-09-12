@@ -2,7 +2,7 @@
 	"name": "woocommerce/mini-cart-shopping-button-block",
 	"version": "1.0.0",
 	"title": "Mini Cart Shopping Button",
-	"description": "Block that displays the shopping button for the Mini Cart block.",
+	"description": "Block that displays the shopping button when the Mini Cart is empty.",
 	"category": "woocommerce",
 	"supports": {
 		"align": false,

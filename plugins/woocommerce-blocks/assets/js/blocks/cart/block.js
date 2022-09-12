@@ -74,7 +74,10 @@ const ScrollOnError = ( { scrollToTop } ) => {
 };
 const Block = ( { attributes, children, scrollToTop } ) => (
 	<BlockErrorBoundary
-		header={ __( 'Something went wrong…', 'woo-gutenberg-products-block' ) }
+		header={ __(
+			'Something went wrong. Please contact us for assistance.',
+			'woo-gutenberg-products-block'
+		) }
 		text={ __(
 			'The cart has encountered an unexpected error. If the error persists, please get in touch with us for help.',
 			'woo-gutenberg-products-block'

@@ -98,7 +98,7 @@ const ActiveAttributeFilters = ( {
 					if ( index > 0 && operator === 'and' ) {
 						prefix = (
 							<span className="wc-block-active-filters__list-item-operator">
-								{ __( 'and', 'woo-gutenberg-products-block' ) }
+								{ __( 'All', 'woo-gutenberg-products-block' ) }
 							</span>
 						);
 					}

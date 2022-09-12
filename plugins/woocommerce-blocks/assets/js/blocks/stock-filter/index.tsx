@@ -18,7 +18,7 @@ import type { Attributes } from './types';
 registerBlockType( metadata, {
 	title: __( 'Filter Products by Stock', 'woo-gutenberg-products-block' ),
 	description: __(
-		'Allow customers to filter the grid by products stock status. Works in combination with the All Products block.',
+		'Enable customers to filter the product grid by stock status.',
 		'woo-gutenberg-products-block'
 	),
 	icon: {

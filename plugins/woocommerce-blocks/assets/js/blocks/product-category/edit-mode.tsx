@@ -47,7 +47,7 @@ export const ProductsByCategoryEditMode = (
 		save();
 		debouncedSpeak(
 			__(
-				'Showing Products by Category block preview.',
+				'Now displaying a preview of the reviews for the products in the selected categories.',
 				'woo-gutenberg-products-block'
 			)
 		);
@@ -57,7 +57,7 @@ export const ProductsByCategoryEditMode = (
 		stopEditing();
 		debouncedSpeak(
 			__(
-				'Showing Products by Category block preview.',
+				'Now displaying a preview of the reviews for the products in the selected categories.',
 				'woo-gutenberg-products-block'
 			)
 		);

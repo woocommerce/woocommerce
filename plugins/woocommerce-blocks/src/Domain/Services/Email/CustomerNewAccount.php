@@ -55,7 +55,7 @@ class CustomerNewAccount extends \WC_Email {
 		$this->id                    = 'customer_new_account';
 		$this->customer_email        = true;
 		$this->title                 = __( 'New account', 'woo-gutenberg-products-block' );
-		$this->description           = __( 'Customer "new account" emails are sent to the customer when a customer signs up via checkout or account blocks.', 'woo-gutenberg-products-block' );
+		$this->description           = __( '“New Account” emails are sent when a customer signs up via the checkout flow.', 'woo-gutenberg-products-block' );
 		$this->template_html         = 'emails/customer-new-account-blocks.php';
 		$this->template_plain        = 'emails/plain/customer-new-account-blocks.php';
 		$this->default_template_path = $package->get_path( '/templates/' );

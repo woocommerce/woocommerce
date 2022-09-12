@@ -41,7 +41,7 @@ const CONTENT_CONFIG = {
 const EDIT_MODE_CONFIG = {
 	...GENERIC_CONFIG,
 	description: __(
-		'Visually highlight a product or variation and encourage prompt action',
+		'Highlight a product or variation.',
 		'woo-gutenberg-products-block'
 	),
 	editLabel: __(
