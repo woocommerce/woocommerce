@@ -2,19 +2,19 @@
 
 ## Table of contents <!-- omit in toc -->
 
-- [Cloning the Git Repository](#cloning-the-git-repository)
-- [Configuring your WordPress site](#configuring-your-wordpress-site)
-- [Installing dependencies](#installing-dependencies)
-- [Building the plugin files](#building-the-plugin-files)
-    - [Legacy builds](#legacy-builds)
-- [Create a plugin package in ZIP format](#create-a-plugin-package-in-zip-format)
-- [Linting](#linting)
-- [Running the Blocks plugin](#running-the-blocks-plugin)
-- [Developer Tools (Visual Studio Code)](#developer-tools-visual-studio-code)
-    - [EditorConfig](#editorconfig)
-    - [ESLint](#eslint)
-    - [Prettier](#prettier)
-- [Testing](#testing)
+-   [Cloning the Git Repository](#cloning-the-git-repository)
+-   [Configuring your WordPress site](#configuring-your-wordpress-site)
+-   [Installing dependencies](#installing-dependencies)
+-   [Building the plugin files](#building-the-plugin-files)
+    -   [Legacy builds](#legacy-builds)
+-   [Create a plugin package in ZIP format](#create-a-plugin-package-in-zip-format)
+-   [Linting](#linting)
+-   [Running the Blocks plugin](#running-the-blocks-plugin)
+-   [Developer Tools (Visual Studio Code)](#developer-tools-visual-studio-code)
+    -   [EditorConfig](#editorconfig)
+    -   [ESLint](#eslint)
+    -   [Prettier](#prettier)
+-   [Testing](#testing)
 
 Before you can begin contributing to the Blocks plugin there are several steps and tools required to setup your local development environment.
 
@@ -52,7 +52,7 @@ To install dependencies, you will need the following tools installed on your mac
 -   [`npm` and `node.js`](https://nodejs.org)
 -   [`composer`](https://getcomposer.org)
 
-See [`package.json` `engines`](../../package.json) for details of required versions.
+See [`package.json` `engines`](../../../package.json) for details of required versions.
 
 Once you have `node` and `composer` setup, install the dependencies from the command line:
 
@@ -79,7 +79,7 @@ This plugin supports two type of builds:
 
 The legacy builds are loaded in a site environment where the WordPress version doesn't meet minimum requirements for a component used in a set build.
 
-You can read more about legacy builds in the [this doc](./assets/js/legacy/README.md).
+You can read more about legacy builds in the [this doc](../../../assets/js/legacy/README.md).
 
 ## Create a plugin package in ZIP format
 
@@ -96,9 +96,9 @@ Run `$ npm run lint` to check code against our linting rules.
 
 This script runs 3 sub-commands: `lint:php`, `lint:css`, `lint:js`. Use these to run linters across the codebase (linters check for valid syntax).
 
--   `lint:php` runs phpcs via composer, which uses the [phpcs.xml](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/phpcs.xml) rule set.
--   `lint:css` runs stylelint over all the scss code in `assets/css`, using the rules in [.stylelintrc.json.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/.stylelintrc.json)
--   `lint:js` runs eslint over all the JavaScript, using the rules in [.eslintrc.js.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/.eslintrc.js)
+-   `lint:php` runs phpcs via composer, which uses the [phpcs.xml](../../../phpcs.xml) rule set.
+-   `lint:css` runs stylelint over all the scss code in `assets/css`, using the rules in [.stylelintrc.json.](../../../.stylelintrc.json)
+-   `lint:js` runs eslint over all the JavaScript, using the rules in [.eslintrc.js.](../../../.eslintrc.js)
 
 Note; linters are also ran before commits via Git. If there are any violations, you will not be able to commit your changes until they are fixed, unless you add the `--no-verify` flag to your commit command.
 
@@ -148,7 +148,7 @@ You’ll find a handful of scripts in `package.json` that performs the automated
 -   JS tests: `npm run test`
 -   Run `npm run wp-env` command to setup the development environment in Docker.
 
-To find out more about how to run automated JavaScript tests, check out the documentation on [JavaScript Testing](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/contributors/javascript-testing.md).
+To find out more about how to run automated JavaScript tests, check out the documentation on [JavaScript Testing](../../contributors/contributing/javascript-testing.md).
 
 <!-- FEEDBACK -->
 

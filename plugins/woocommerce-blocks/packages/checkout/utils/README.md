@@ -2,15 +2,15 @@
 
 ## Table of Contents <!-- omit in toc -->
 
-- [`extensionCartUpdate`](#extensioncartupdate)
-    - [Usage](#usage)
-    - [Options](#options)
-        - [`args (object, required)`](#args-object-required)
-- [`mustContain`](#mustcontain)
-    - [Usage](#usage-1)
-    - [Options](#options-1)
-        - [`value (string, required)`](#value-string-required)
-        - [`requiredValue (string, required)`](#requiredvalue-string-required)
+-   [`extensionCartUpdate`](#extensioncartupdate)
+    -   [Usage](#usage)
+    -   [Options](#options)
+        -   [`args (object, required)`](#args-object-required)
+-   [`mustContain`](#mustcontain)
+    -   [Usage](#usage-1)
+    -   [Options](#options-1)
+        -   [`value (string, required)`](#value-string-required)
+        -   [`requiredValue (string, required)`](#requiredvalue-string-required)
 
 Miscellaneous utility functions for dealing with checkout functionality.
 
@@ -41,7 +41,7 @@ The following options are available:
 
 #### `args (object, required)`
 
-Args to pass to the Rest API endpoint. This can contain data and a namespace to trigger extension specific functionality on the server-side. [You can read more about this, and the server-side implementation, in this doc.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/extensibility/extend-rest-api-update-cart.md)
+Args to pass to the Rest API endpoint. This can contain data and a namespace to trigger extension specific functionality on the server-side. [You can read more about this, and the server-side implementation, in this doc.](../../../docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md)
 
 ## `mustContain`
 
