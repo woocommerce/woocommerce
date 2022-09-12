@@ -38,6 +38,7 @@ export const MultipleEditors: React.FC = () => {
 	return (
 		<RegistryProvider value={ registry }>
 			<RichTextEditor blocks={ [] } onChange={ () => null } />
+			<br />
 			<RichTextEditor blocks={ [] } onChange={ () => null } />
 		</RegistryProvider>
 	);
