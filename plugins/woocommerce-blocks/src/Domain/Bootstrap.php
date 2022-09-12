@@ -149,7 +149,7 @@ class Bootstrap {
 						if ( should_display_compatibility_notices() ) {
 							?>
 							<div class="notice notice-error">
-								<p><?php esc_html_e( 'The WooCommerce Blocks feature plugin requires a more recent version of WooCommerce and has been paused. Please update WooCommerce to the latest version to continue enjoying WooCommerce Blocks.', 'woo-gutenberg-products-block' ); ?></p>
+								<p><?php esc_html_e( 'The WooCommerce Blocks plugin requires a more recent version of WooCommerce and has been deactivated. Please update to the latest version of WooCommerce.', 'woo-gutenberg-products-block' ); ?></p>
 							</div>
 							<?php
 						}

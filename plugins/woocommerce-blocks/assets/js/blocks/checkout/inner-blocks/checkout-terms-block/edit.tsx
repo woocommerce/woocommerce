@@ -134,7 +134,7 @@ export const Edit = ( {
 				>
 					<p>
 						{ __(
-							"You don't seem to have a Terms and Conditions and/or a Privacy Policy pages setup.",
+							"You don't have any Terms and Conditions and/or Privacy Policy pages set up.",
 							'woo-gutenberg-products-block'
 						) }
 					</p>

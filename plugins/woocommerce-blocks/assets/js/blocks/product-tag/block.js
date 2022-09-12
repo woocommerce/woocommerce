@@ -311,7 +311,7 @@ class ProductsByTagBlock extends Component {
 				className="wc-block-products-grid wc-block-product-tag"
 			>
 				{ __(
-					"This block displays products from selected tags. In order to preview this you'll first need to create a product and assign it some tags.",
+					'This block displays products from selected tags. To use it you first need to create products and assign tags to them.',
 					'woo-gutenberg-products-block'
 				) }
 			</Placeholder>

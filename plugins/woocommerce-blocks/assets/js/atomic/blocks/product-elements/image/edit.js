@@ -74,7 +74,7 @@ const Edit = ( { attributes, setAttributes, context } ) => {
 							'woo-gutenberg-products-block'
 						) }
 						help={ __(
-							'Overlay a "sale" badge if the product is on-sale.',
+							'Display a “sale” badge if the product is on-sale.',
 							'woo-gutenberg-products-block'
 						) }
 						checked={ showSaleBadge }

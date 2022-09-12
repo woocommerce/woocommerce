@@ -2,16 +2,11 @@
 	"name": "woocommerce/featured-product",
 	"version": "1.0.0",
 	"title": "Featured Product",
-	"description": "Visually highlight a product or variation and encourage prompt action.",
+	"description": "Highlight a product or variation.",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [ "WooCommerce" ],
 	"supports": {
-		"align": [
-			"wide",
-			"full"
-		],
+		"align": [ "wide", "full" ],
 		"html": false,
 		"color": {
 			"background": true,

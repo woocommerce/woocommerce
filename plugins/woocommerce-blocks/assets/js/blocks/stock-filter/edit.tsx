@@ -40,20 +40,9 @@ const Edit = ( {
 				>
 					<ToggleControl
 						label={ __(
-							'Product count',
+							'Display product count',
 							'woo-gutenberg-products-block'
 						) }
-						help={
-							showCounts
-								? __(
-										'Product count is visible.',
-										'woo-gutenberg-products-block'
-								  )
-								: __(
-										'Product count is hidden.',
-										'woo-gutenberg-products-block'
-								  )
-						}
 						checked={ showCounts }
 						onChange={ () =>
 							setAttributes( {
@@ -73,11 +62,11 @@ const Edit = ( {
 						help={
 							showFilterButton
 								? __(
-										'Products will only update when the button is pressed.',
+										'Products will only update when the button is clicked.',
 										'woo-gutenberg-products-block'
 								  )
 								: __(
-										'Products will update as options are selected.',
+										'Products will update as soon as attributes are selected.',
 										'woo-gutenberg-products-block'
 								  )
 						}

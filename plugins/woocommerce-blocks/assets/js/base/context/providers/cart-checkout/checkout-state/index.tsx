@@ -265,7 +265,7 @@ export const CheckoutStateProvider = ( {
 							const message =
 								data.processingResponse?.message ||
 								__(
-									'Something went wrong. Please contact us to get assistance.',
+									'Something went wrong. Please contact us for assistance.',
 									'woo-gutenberg-products-block'
 								);
 							createErrorNotice( message, {

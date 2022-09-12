@@ -30,7 +30,7 @@ registerBlockType( 'woocommerce/reviews-by-product', {
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
-		'Show reviews of your products to build trust.',
+		'Display reviews for your products.',
 		'woo-gutenberg-products-block'
 	),
 	supports: {
