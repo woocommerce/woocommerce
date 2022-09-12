@@ -47,7 +47,7 @@ class WC_Order_Factory {
 
 		try {
 			$order = new $classname( $order_id );
-			if ( $use_orders_cache && order instanceof \WC_Abstract_Legacy_Order ) {
+			if ( $use_orders_cache && $order instanceof \WC_Abstract_Legacy_Order ) {
 				$order_cache->set( $order, $order_id );
 			}
 			return $order;
