@@ -9,6 +9,13 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 class PageController {
 
 	/**
+	 * Instance of the posts redirection controller.
+	 *
+	 * @var PostsRedirectionController
+	 */
+	private $redirection_controller;
+
+	/**
 	 * Instance of the orders list table.
 	 *
 	 * @var ListTable
@@ -70,6 +77,8 @@ class PageController {
 	 * @return void
 	 */
 	public function setup(): void {
+		$this->redirection_controller = new PostsRedirectionController( $this );
+
 		// Register menu.
 		if ( 'admin_menu' === current_action() ) {
 			$this->register_menu();
