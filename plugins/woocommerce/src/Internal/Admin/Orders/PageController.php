@@ -215,6 +215,17 @@ class PageController {
 	}
 
 	/**
+	 * Helper method to generate a link to the main orders screen.
+	 *
+	 * @return string Orders screen URL.
+	 */
+	public function get_orders_url(): string {
+		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ?
+			admin_url( 'admin.php?page=wc-orders' ) :
+			admin_url( 'edit.php?post_type=shop_order' );
+	}
+
+	/**
 	 * Helper method to generate edit link for an order.
 	 *
 	 * @param int $order_id Order ID.
