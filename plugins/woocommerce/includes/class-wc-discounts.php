@@ -576,13 +576,16 @@ class WC_Discounts {
 	/**
 	 * Ensure coupon exists or throw exception.
 	 *
+	 * A coupon is also considered to no longer exist if it has been placed in the trash, even if the trash has not yet
+	 * been emptied.
+	 *
 	 * @since  3.2.0
 	 * @throws Exception Error message.
 	 * @param  WC_Coupon $coupon Coupon data.
 	 * @return bool
 	 */
 	protected function validate_coupon_exists( $coupon ) {
-		if ( ! $coupon->get_id() && ! $coupon->get_virtual() ) {
+		if ( ( ! $coupon->get_id() && ! $coupon->get_virtual() ) || 'trash' === $coupon->get_status() ) {
 			/* translators: %s: coupon code */
 			throw new Exception( sprintf( __( 'Coupon "%s" does not exist!', 'woocommerce' ), esc_html( $coupon->get_code() ) ), 105 );
 		}

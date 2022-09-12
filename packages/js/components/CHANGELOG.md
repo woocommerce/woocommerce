@@ -2,6 +2,15 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [10.3.0](https://www.npmjs.com/package/@woocommerce/components/v/10.3.0) - 2022-08-12 
+
+-   Patch - Added in missing TS definitions in package.json [#34279]
+-   Patch - fixed button rendering for 1 step tour which was not showing completion button due to bug in logic [#34279]
+-   Minor - Adding basic CollapsibleContent component. [#34279]
+-   Minor - Add the use of a context provider for the Form component. #34082 [#34279]
+-   Minor - Update types for Form component and allow Form state to be reset. [#34279]
+-   Minor - Removed Step 1 of 1 step description for 1 step tours [#34279]
+
 ## [10.2.1](https://www.npmjs.com/package/@woocommerce/components/v/10.2.1) - 2022-07-19 
 
 -   Patch - Fix missing text domain

@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+
 /**
  * Controls the different pages/screens associated to the "Orders" menu page.
  */
@@ -63,8 +65,6 @@ class PageController {
 	}
 
 	/**
-=======
->>>>>>> trunk
 	 * Sets up the page controller, including registering the menu item.
 	 *
 	 * @return void
@@ -163,10 +163,27 @@ class PageController {
 	 * @return void
 	 */
 	private function setup_action_list_orders(): void {
-		$this->orders_table = new ListTable();
+		$this->orders_table = wc_get_container()->get( ListTable::class );
 		$this->orders_table->setup();
 		if ( $this->orders_table->current_action() ) {
 			$this->orders_table->handle_bulk_actions();
+		}
+
+		$this->strip_http_referer();
+	}
+
+	/**
+	 * Perform a redirect to remove the `_wp_http_referer` and `_wpnonce` strings if present in the URL (see also
+	 * wp-admin/edit.php where a similar process takes place), otherwise the size of this field builds to an
+	 * unmanageable length over time.
+	 */
+	private function strip_http_referer(): void {
+		$current_url  = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
+		$stripped_url = remove_query_arg( array( '_wp_http_referer', '_wpnonce' ), $current_url );
+
+		if ( $stripped_url !== $current_url ) {
+			wp_safe_redirect( $stripped_url );
+			exit;
 		}
 	}
 
@@ -195,6 +212,30 @@ class PageController {
 		$this->order->set_status( 'auto-draft' );
 		$this->order->save();
 		$theorder = $this->order;
+	}
+
+	/**
+	 * Helper method to generate edit link for an order.
+	 *
+	 * @param int $order_id Order ID.
+	 *
+	 * @return string Edit link.
+	 */
+	public function get_edit_url( int $order_id ) : string {
+		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ?
+			admin_url( 'admin.php?page=wc-orders&id=' . absint( $order_id ) ) . '&action=edit' :
+			admin_url( 'post.php?post=' . absint( $order_id ) ) . '&action=edit';
+	}
+
+	/**
+	 * Helper method to generate a link for creating order.
+	 *
+	 * @return string
+	 */
+	public function get_new_page_url() : string {
+		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ?
+			admin_url( 'admin.php?page=wc-orders&action=new' ) :
+			admin_url( 'post-new.php?post_type=shop_order' );
 	}
 
 }

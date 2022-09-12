@@ -16,7 +16,7 @@ import {
 	Spinner,
 } from '@wordpress/components';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { SelectControl, Form, TextControl } from '@woocommerce/components';
+import { Form, TextControl, SelectControl } from '@woocommerce/components';
 import {
 	ONBOARDING_STORE_NAME,
 	PLUGINS_STORE_NAME,
@@ -401,6 +401,7 @@ class BusinessDetails extends Component {
 			used_platform: otherPlatform,
 			used_platform_name: otherPlatformName,
 			setup_client: isSetupClient,
+			wp_version: getSetting( 'wpVersion' ),
 		} );
 		recordEvent( 'storeprofiler_step_complete', {
 			step: BUSINESS_DETAILS_TAB_NAME,

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure customer notes can be set, retrieved and edited when using COT.

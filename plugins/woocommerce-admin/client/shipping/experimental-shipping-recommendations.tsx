@@ -16,6 +16,7 @@ import { getCountryCode } from '~/dashboard/utils';
 import WooCommerceServicesItem from './experimental-woocommerce-services-item';
 import { ShippingRecommendationsList } from './shipping-recommendations';
 import './shipping-recommendations.scss';
+import { ShippingTour } from '../guided-tours/shipping-tour';
 
 const ShippingRecommendations: React.FC = () => {
 	const {
@@ -25,11 +26,7 @@ const ShippingRecommendations: React.FC = () => {
 		isJetpackConnected,
 		isSellingDigitalProductsOnly,
 	} = useSelect( ( select ) => {
-		const settings = select( SETTINGS_STORE_NAME ).getSettings< {
-			general?: {
-				woocommerce_default_country: string;
-			};
-		} >( 'general' );
+		const settings = select( SETTINGS_STORE_NAME ).getSettings( 'general' );
 
 		const {
 			getActivePlugins,
@@ -56,21 +53,24 @@ const ShippingRecommendations: React.FC = () => {
 		activePlugins.includes( 'woocommerce-services' ) &&
 		isJetpackConnected
 	) {
-		return null;
+		return <ShippingTour showShippingRecommendationsStep={ false } />;
 	}
 
 	if ( countryCode !== 'US' || isSellingDigitalProductsOnly ) {
-		return null;
+		return <ShippingTour showShippingRecommendationsStep={ false } />;
 	}
 
 	return (
-		<ShippingRecommendationsList>
-			<WooCommerceServicesItem
-				isWCSInstalled={ installedPlugins.includes(
-					'woocommerce-services'
-				) }
-			/>
-		</ShippingRecommendationsList>
+		<>
+			<ShippingTour showShippingRecommendationsStep={ true } />
+			<ShippingRecommendationsList>
+				<WooCommerceServicesItem
+					isWCSInstalled={ installedPlugins.includes(
+						'woocommerce-services'
+					) }
+				/>
+			</ShippingRecommendationsList>
+		</>
 	);
 };
 

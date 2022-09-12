@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+[COT] Fix error during apply coupon when COT enabled.

@@ -53,6 +53,13 @@ class CustomOrdersTableController {
 	private $data_store;
 
 	/**
+	 * Refunds data store object to use.
+	 *
+	 * @var OrdersTableRefundDataStore
+	 */
+	private $refund_data_store;
+
+	/**
 	 * The data synchronizer object to use.
 	 *
 	 * @var DataSynchronizer
@@ -86,29 +93,32 @@ class CustomOrdersTableController {
 	 * Initialize the hooks used by the class.
 	 */
 	private function init_hooks() {
-		self::add_filter( 'woocommerce_order_data_store', array( $this, 'get_data_store_instance' ), 999, 1 );
+		self::add_filter( 'woocommerce_order_data_store', array( $this, 'get_orders_data_store' ), 999, 1 );
+		self::add_filter( 'woocommerce_order-refund_data_store', array( $this, 'get_refunds_data_store' ), 999, 1 );
 		self::add_filter( 'woocommerce_debug_tools', array( $this, 'add_initiate_regeneration_entry_to_tools_array' ), 999, 1 );
 		self::add_filter( 'woocommerce_get_sections_advanced', array( $this, 'get_settings_sections' ), 999, 1 );
 		self::add_filter( 'woocommerce_get_settings_advanced', array( $this, 'get_settings' ), 999, 2 );
 		self::add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
 		self::add_filter( 'pre_update_option', array( $this, 'process_pre_update_option' ), 999, 3 );
-		self::add_filter( DataSynchronizer::PENDING_SYNCHRONIZATION_FINISHED_ACTION, array( $this, 'process_sync_finished' ) );
-		self::add_action( 'woocommerce_update_options_advanced_custom_data_stores', array( $this, 'process_options_updated' ) );
-		self::add_action( 'woocommerce_after_register_post_type', array( $this, 'register_post_type_for_order_placeholders' ) );
+		self::add_filter( DataSynchronizer::PENDING_SYNCHRONIZATION_FINISHED_ACTION, array( $this, 'process_sync_finished' ), 10, 0 );
+		self::add_action( 'woocommerce_update_options_advanced_custom_data_stores', array( $this, 'process_options_updated' ), 10, 0 );
+		self::add_action( 'woocommerce_after_register_post_type', array( $this, 'register_post_type_for_order_placeholders' ), 10, 0 );
 	}
 
 	/**
 	 * Class initialization, invoked by the DI container.
 	 *
 	 * @internal
-	 * @param OrdersTableDataStore      $data_store The data store to use.
-	 * @param DataSynchronizer          $data_synchronizer The data synchronizer to use.
-	 * @param BatchProcessingController $batch_processing_controller The batch processing controller to use.
+	 * @param OrdersTableDataStore       $data_store The data store to use.
+	 * @param DataSynchronizer           $data_synchronizer The data synchronizer to use.
+	 * @param OrdersTableRefundDataStore $refund_data_store The refund data store to use.
+	 * @param BatchProcessingController  $batch_processing_controller The batch processing controller to use.
 	 */
-	final public function init( OrdersTableDataStore $data_store, DataSynchronizer $data_synchronizer, BatchProcessingController $batch_processing_controller ) {
+	final public function init( OrdersTableDataStore $data_store, DataSynchronizer $data_synchronizer, OrdersTableRefundDataStore $refund_data_store, BatchProcessingController $batch_processing_controller ) {
 		$this->data_store                  = $data_store;
 		$this->data_synchronizer           = $data_synchronizer;
 		$this->batch_processing_controller = $batch_processing_controller;
+		$this->refund_data_store           = $refund_data_store;
 	}
 
 	/**
@@ -147,12 +157,41 @@ class CustomOrdersTableController {
 	/**
 	 * Gets the instance of the orders data store to use.
 	 *
-	 * @param WC_Object_Data_Store_Interface|string $default_data_store The default data store (as received via the woocommerce_order_data_store hooks).
-	 * @return WC_Object_Data_Store_Interface|string The actual data store to use.
+	 * @param \WC_Object_Data_Store_Interface|string $default_data_store The default data store (as received via the woocommerce_order_data_store hook).
+	 *
+	 * @return \WC_Object_Data_Store_Interface|string The actual data store to use.
 	 */
-	private function get_data_store_instance( $default_data_store ) {
+	private function get_orders_data_store( $default_data_store ) {
+		return $this->get_data_store_instance( $default_data_store, 'order' );
+	}
+
+	/**
+	 * Gets the instance of the refunds data store to use.
+	 *
+	 * @param \WC_Object_Data_Store_Interface|string $default_data_store The default data store (as received via the woocommerce_order-refund_data_store hook).
+	 *
+	 * @return \WC_Object_Data_Store_Interface|string The actual data store to use.
+	 */
+	private function get_refunds_data_store( $default_data_store ) {
+		return $this->get_data_store_instance( $default_data_store, 'order_refund' );
+	}
+
+	/**
+	 * Gets the instance of a given data store.
+	 *
+	 * @param \WC_Object_Data_Store_Interface|string $default_data_store The default data store (as received via the appropriate hooks).
+	 * @param string                                 $type               The type of the data store to get.
+	 *
+	 * @return \WC_Object_Data_Store_Interface|string The actual data store to use.
+	 */
+	private function get_data_store_instance( $default_data_store, string $type ) {
 		if ( $this->is_feature_visible() && $this->custom_orders_table_usage_is_enabled() ) {
-			return $this->data_store;
+			switch ( $type ) {
+				case 'order_refund':
+					return $this->refund_data_store;
+				default:
+					return $this->data_store;
+			}
 		} else {
 			return $default_data_store;
 		}
@@ -417,14 +456,13 @@ class CustomOrdersTableController {
 			return $value;
 		}
 
-		// TODO: Re-enable the following code once the COT to posts table sync is implemented (it's currently disabled to ease testing).
-
-		/*
+		/**
+		 * Commenting out for better testability.
 		$sync_is_pending = 0 !== $this->data_synchronizer->get_current_orders_pending_sync_count();
 		if ( $sync_is_pending ) {
 			throw new \Exception( "The authoritative table for orders storage can't be changed while there are orders out of sync" );
 		}
-		*/
+		 */
 
 		return $value;
 	}

@@ -86,11 +86,17 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$post_order_id = OrderHelper::create_complex_wp_post_order();
 		$this->migrator->migrate_orders( array( $post_order_id ) );
 
-		$post_data      = get_post( $post_order_id, ARRAY_A );
-		$post_meta_data = get_post_meta( $post_order_id );
-		// TODO: Remove `_recorded_sales` from exempted keys after https://github.com/woocommerce/woocommerce/issues/32843.
-		$exempted_keys         = array( 'post_modified', 'post_modified_gmt', '_recorded_sales' );
-		$convert_to_float_keys = array( '_cart_discount_tax', '_order_shipping', '_order_shipping_tax', '_order_tax', '_cart_discount', 'cart_tax' );
+		$post_data             = get_post( $post_order_id, ARRAY_A );
+		$post_meta_data        = get_post_meta( $post_order_id );
+		$exempted_keys         = array( 'post_modified', 'post_modified_gmt' );
+		$convert_to_float_keys = array(
+			'_cart_discount_tax',
+			'_order_shipping',
+			'_order_shipping_tax',
+			'_order_tax',
+			'_cart_discount',
+			'cart_tax',
+		);
 		$exempted_keys         = array_flip( array_merge( $exempted_keys, $convert_to_float_keys ) );
 
 		$post_data_float      = array_intersect_key( $post_data, array_flip( $convert_to_float_keys ) );
@@ -132,6 +138,19 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		foreach ( $post_meta_data_float as $float_key => $value ) {
 			$this->assertEquals( (float) get_post_meta( $post_order_id )[ $float_key ], (float) $value, "Value for $float_key does not match." );
 		}
+	}
+
+	/**
+	 * Test that modified date is backfilled correctly when syncing order.
+	 */
+	public function test_backfill_updated_date() {
+		$order                   = $this->create_complex_cot_order();
+		$hardcoded_modified_date = time() - 100;
+		$order->set_date_modified( $hardcoded_modified_date );
+		$order->save();
+
+		$this->sut->backfill_post_record( $order );
+		$this->assertEquals( $hardcoded_modified_date, get_post_modified_time( 'U', true, $order->get_id() ) );
 	}
 
 	/**
@@ -288,6 +307,70 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $order->get_meta( 'my_meta', true, 'edit' ), $r_order->get_meta( 'my_meta', true, 'edit' ) );
 		$this->assertEquals( $this->sut->get_stock_reduced( $order ), $this->sut->get_stock_reduced( $r_order ) );
+	}
+
+	/**
+	 * Even corrupted order can be inserted as expected.
+	 */
+	public function test_cot_data_store_update_corrupted_order() {
+		global $wpdb;
+		$order    = $this->create_complex_cot_order();
+		$order_id = $order->get_id();
+
+		// Corrupt the order.
+		$wpdb->delete( $this->sut::get_addresses_table_name(), array( 'order_id' => $order->get_id() ), array( '%d' ) );
+
+		// Try to update the order.
+		$order->set_status( 'completed' );
+		$order->set_billing_address_1( 'New address' );
+		$order->save();
+
+		// Re-read order and make sure changes were persisted.
+		wp_cache_flush();
+		$order = new WC_Order();
+		$order->set_id( $order_id );
+		$this->switch_data_store( $order, $this->sut );
+		$this->sut->read( $order );
+		$this->assertEquals( 'New address', $order->get_billing_address_1() );
+	}
+
+	/**
+	 * We should be able to save multiple orders without them overwriting each other.
+	 */
+	public function test_cot_data_store_multiple_saved_orders() {
+		$order1 = $this->create_complex_cot_order();
+		$order2 = $this->create_complex_cot_order();
+
+		$order1_id          = $order1->get_id();
+		$order1_billing     = $order1->get_billing_address_1();
+		$order1_created_via = $order1->get_created_via();
+		$order1_key         = $order1->get_order_key();
+
+		$order2_id          = $order2->get_id();
+		$order2_billing     = $order2->get_billing_address_1();
+		$order2_created_via = $order2->get_created_via();
+		$order2_key         = $order2->get_order_key();
+
+		wp_cache_flush();
+
+		// Read the order again (fresh).
+		$r_order1 = new WC_Order();
+		$r_order1->set_id( $order1_id );
+		$this->switch_data_store( $r_order1, $this->sut );
+		$this->sut->read( $r_order1 );
+
+		$r_order2 = new WC_Order();
+		$r_order2->set_id( $order2_id );
+		$this->switch_data_store( $r_order2, $this->sut );
+		$this->sut->read( $r_order2 );
+
+		$this->assertEquals( $order1_billing, $r_order1->get_billing_address_1() );
+		$this->assertEquals( $order1_created_via, $r_order1->get_created_via() );
+		$this->assertEquals( $order1_key, $r_order1->get_order_key() );
+
+		$this->assertEquals( $order2_billing, $r_order2->get_billing_address_1() );
+		$this->assertEquals( $order2_created_via, $r_order2->get_created_via() );
+		$this->assertEquals( $order2_key, $r_order2->get_order_key() );
 	}
 
 	/**
@@ -791,6 +874,134 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test pagination works for COT queries.
+	 *
+	 * @return void
+	 */
+	public function test_cot_query_pagination(): void {
+		$test_orders = array();
+		$this->assertEquals( 0, ( new OrdersTableQuery() )->found_orders, 'We initially have zero orders within our custom order tables.' );
+
+		for ( $i = 0; $i < 30; $i++ ) {
+			$order = new WC_Order();
+			$this->switch_data_store( $order, $this->sut );
+			$order->save();
+			$test_orders[] = $order->get_id();
+		}
+
+		$query = new OrdersTableQuery();
+		$this->assertCount( 30, $query->orders, 'If no limits are specified, we fetch all available orders.' );
+
+		$query = new OrdersTableQuery( array( 'limit' => -1 ) );
+		$this->assertCount( 30, $query->orders, 'A limit of -1 is equivalent to requesting all available orders.' );
+
+		$query = new OrdersTableQuery( array( 'limit' => -10 ) );
+		$this->assertCount( 30, $query->orders, 'An invalid limit is treated as a request for all available orders.' );
+
+		$query = new OrdersTableQuery(
+			array(
+				'limit'  => -1,
+				'offset' => 18,
+			)
+		);
+		$this->assertCount( 12, $query->orders, 'A limit of -1 can successfully be combined with an offset.' );
+		$this->assertEquals( array_slice( $test_orders, 18 ), $query->orders, 'The expected dataset is supplied when an offset is combined with a limit of -1.' );
+
+		$query = new OrdersTableQuery( array( 'limit' => 5 ) );
+		$this->assertCount( 5, $query->orders, 'Limits are respected when applied.' );
+
+		$query = new OrdersTableQuery(
+			array(
+				'limit'  => 5,
+				'paged'  => 2,
+				'return' => 'ids',
+			)
+		);
+		$this->assertCount( 5, $query->orders, 'Pagination works with specified limit.' );
+		$this->assertEquals( array_slice( $test_orders, 5, 5 ), $query->orders, 'The expected dataset is supplied when paginating through orders.' );
+	}
+
+	/**
+	 * Test the `get_order_count()` method.
+	 */
+	public function test_get_order_count(): void {
+		$number_of_orders_by_status = array(
+			'wc-completed'  => 4,
+			'wc-processing' => 2,
+			'wc-pending'    => 4,
+		);
+
+		foreach ( $number_of_orders_by_status as $order_status => $number_of_orders ) {
+			foreach ( range( 1, $number_of_orders ) as $_ ) {
+				$o = new \WC_Order();
+				$this->switch_data_store( $o, $this->sut );
+				$o->set_status( $order_status );
+				$o->save();
+			}
+		}
+
+		// Count all orders.
+		$expected_count = array_sum( array_values( $number_of_orders_by_status ) );
+		$actual_count   = ( new OrdersTableQuery( array( 'limit' => '-1' ) ) )->found_orders;
+		$this->assertEquals( $expected_count, $actual_count );
+
+		// Count orders by status.
+		foreach ( $number_of_orders_by_status as $order_status => $number_of_orders ) {
+			$this->assertEquals( $number_of_orders, $this->sut->get_order_count( $order_status ) );
+		}
+	}
+
+	/**
+	 * Test `get_unpaid_orders()`.
+	 */
+	public function test_get_unpaid_orders(): void {
+		$now = current_time( 'timestamp' );
+
+		// Create a few orders.
+		$orders_by_status = array( 'wc-completed' => 3, 'wc-pending' => 2 );
+		$unpaid_ids       = array();
+		foreach ( $orders_by_status as $order_status => $order_count ) {
+			foreach ( range( 1, $order_count ) as $_ ) {
+				$order = new \WC_Order();
+				$this->switch_data_store( $order, $this->sut );
+				$order->set_status( $order_status );
+				$order->set_date_modified( $now - DAY_IN_SECONDS );
+				$order->save();
+
+				if ( ! $order->is_paid() ) {
+					$unpaid_ids[] = $order->get_id();
+				}
+			}
+		}
+
+		// Confirm not all orders are unpaid.
+		$this->assertEquals( $orders_by_status['wc-completed'], $this->sut->get_order_count('wc-completed') );
+
+		// Find unpaid orders.
+		$this->assertEqualsCanonicalizing( $unpaid_ids, $this->sut->get_unpaid_orders( $now ) );
+		$this->assertEqualsCanonicalizing( $unpaid_ids, $this->sut->get_unpaid_orders( $now - HOUR_IN_SECONDS ) );
+
+		// No unpaid orders from before yesterday.
+		$this->assertCount( 0, $this->sut->get_unpaid_orders( $now - WEEK_IN_SECONDS ) );
+
+	}
+
+	/**
+	 * Test `get_order_id_by_order_key()`.
+	 *
+	 * @return void
+	 */
+	public function test_get_order_id_by_order_key() {
+		$order = new \WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->set_order_key( 'an_order_key' );
+		$order->save();
+
+		$this->assertEquals( $order->get_id(), $this->sut->get_order_id_by_order_key( 'an_order_key' ) );
+		$this->assertEquals( 0, $this->sut->get_order_id_by_order_key( 'other_order_key' ) );
+	}
+
+	/**
 	 * Helper function to delete all meta for post.
 	 *
 	 * @param int $post_id Post ID to delete data for.
@@ -807,10 +1018,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * @param WC_Data_Store $data_store Data store object to switch order to.
 	 */
 	private function switch_data_store( $order, $data_store ) {
-		$update_data_store_func = function ( $data_store ) {
-			$this->data_store = $data_store;
-		};
-		$update_data_store_func->call( $order, $data_store );
+		OrderHelper::switch_data_store( $order, $data_store );
 	}
 
 	/**
@@ -818,58 +1026,50 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * @return \WC_Order
 	 */
 	private function create_complex_cot_order() {
-		$order = new WC_Order();
-		$this->switch_data_store( $order, $this->sut );
-
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
-
-		$order->set_status( 'pending' );
-		$order->set_created_via( 'unit-tests' );
-		$order->set_currency( 'COP' );
-		$order->set_customer_ip_address( '127.0.0.1' );
-
-		$item = new WC_Order_Item_Product();
-		$item->set_props(
-			array(
-				'product'  => $product,
-				'quantity' => 2,
-				'subtotal' => wc_get_price_excluding_tax( $product, array( 'qty' => 2 ) ),
-				'total'    => wc_get_price_excluding_tax( $product, array( 'qty' => 2 ) ),
-			)
-		);
-
-		$order->add_item( $item );
-
-		$order->set_billing_first_name( 'Jeroen' );
-		$order->set_billing_last_name( 'Sormani' );
-		$order->set_billing_company( 'WooCompany' );
-		$order->set_billing_address_1( 'WooAddress' );
-		$order->set_billing_address_2( '' );
-		$order->set_billing_city( 'WooCity' );
-		$order->set_billing_state( 'NY' );
-		$order->set_billing_postcode( '123456' );
-		$order->set_billing_country( 'US' );
-		$order->set_billing_email( 'admin@example.org' );
-		$order->set_billing_phone( '555-32123' );
-
-		$payment_gateways = WC()->payment_gateways->payment_gateways();
-		$order->set_payment_method( $payment_gateways['bacs'] );
-
-		$order->set_shipping_total( 5.0 );
-		$order->set_discount_total( 0.0 );
-		$order->set_discount_tax( 0.0 );
-		$order->set_cart_tax( 0.0 );
-		$order->set_shipping_tax( 0.0 );
-		$order->set_total( 25.0 );
-		$order->save();
-
-		$order->get_data_store()->set_stock_reduced( $order, true, false );
-
-		$order->update_meta_data( 'my_meta', rand( 0, 255 ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.rand_rand
-
-		$order->save();
-
-		return $order;
+		return OrderHelper::create_complex_data_store_order( $this->sut );
 	}
 
+	/**
+	 * Ensure search works as expected.
+	 */
+	public function test_cot_query_search(): void {
+		$order_1 = new WC_Order();
+		$order_1->set_billing_city( 'Fort Quality' );
+		$this->switch_data_store( $order_1, $this->sut );
+		$order_1->save();
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Quality Chocolates' );
+		$product->save();
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $product );
+		$item->save();
+
+		$order_2 = new WC_Order();
+		$order_2->add_item( $item );
+		$this->switch_data_store( $order_2, $this->sut );
+		$order_2->save();
+
+		$order_3 = new WC_Order();
+		$order_3->set_billing_address_1( $order_1->get_id() . ' Functional Street' );
+		$this->switch_data_store( $order_3, $this->sut );
+		$order_3->save();
+
+		// Order 1's ID happens to be the same number used in Order 3's billing street address.
+		$query = new OrdersTableQuery( array( 's' => $order_1->get_id() ) );
+		$this->assertEquals(
+			array( $order_1->get_id(), $order_3->get_id() ),
+			$query->orders,
+			'Search terms match against IDs as well as address data.'
+		);
+
+		// Order 1's billing address references "Quality" and so does one of Order 2's order items.
+		$query = new OrdersTableQuery( array( 's' => 'Quality' ) );
+		$this->assertEquals(
+			array( $order_1->get_id(), $order_2->get_id() ),
+			$query->orders,
+			'Search terms match against address data as well as order item names.'
+		);
+	}
 }

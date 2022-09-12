@@ -24,15 +24,11 @@ class DataSynchronizer implements BatchProcessorInterface {
 	public const PENDING_SYNCHRONIZATION_FINISHED_ACTION   = 'woocommerce_orders_sync_finished';
 	public const PLACEHOLDER_ORDER_POST_TYPE               = 'shop_order_placehold';
 
-	private const ORDERS_SYNC_BATCH_SIZE      = 250;
-
+	private const ORDERS_SYNC_BATCH_SIZE = 250;
 	// Allowed values for $type in get_ids_of_orders_pending_sync method.
 	public const ID_TYPE_MISSING_IN_ORDERS_TABLE = 0;
 	public const ID_TYPE_MISSING_IN_POSTS_TABLE  = 1;
 	public const ID_TYPE_DIFFERENT_UPDATE_DATE   = 2;
-
-	// TODO: Remove the usage of the fake pending orders count once development of the feature is complete.
-	const FAKE_ORDERS_PENDING_SYNC_COUNT_OPTION = 'woocommerce_fake_orders_pending_sync_count';
 
 	/**
 	 * The data store object to use.
@@ -139,12 +135,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 
 	/**
 	 * Calculate how many orders need to be synchronized currently.
-	 *
-	 * If an option whose name is given by self::FAKE_ORDERS_PENDING_SYNC_COUNT_OPTION exists,
-	 * then the value of that option is returned. This is temporary, to ease testing the feature
-	 * while it is in development.
-	 *
-	 * Otherwise a database query is performed to get how many orders match one of the following:
+	 * A database query is performed to get how many orders match one of the following:
 	 *
 	 * - Existing in the authoritative table but not in the backup table.
 	 * - Existing in both tables, but they have a different update date.
@@ -152,30 +143,37 @@ class DataSynchronizer implements BatchProcessorInterface {
 	public function get_current_orders_pending_sync_count(): int {
 		global $wpdb;
 
-		// TODO: Remove the usage of the fake pending orders count once development of the feature is complete.
-		$count = get_option( self::FAKE_ORDERS_PENDING_SYNC_COUNT_OPTION );
-		if ( false !== $count ) {
-			return (int) $count;
-		}
-
-		$orders_table = $wpdb->prefix . 'wc_orders';
+		$orders_table                = $this->data_store::get_orders_table_name();
+		$order_post_types            = wc_get_order_types( 'cot-migration' );
+		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
 
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			$missing_orders_count_sql = "
 SELECT COUNT(1) FROM $wpdb->posts posts
 INNER JOIN $orders_table orders ON posts.id=orders.id
-WHERE posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "'";
+WHERE posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "'
+ AND orders.status not in ( 'auto-draft' )
+";
+			$operator                 = '>';
 		} else {
-			$missing_orders_count_sql = "
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $order_post_type_placeholder is prepared.
+			$missing_orders_count_sql = $wpdb->prepare(
+				"
 SELECT COUNT(1) FROM $wpdb->posts posts
 LEFT JOIN $orders_table orders ON posts.id=orders.id
 WHERE
-  posts.post_type = 'shop_order'
+  posts.post_type in ($order_post_type_placeholder)
   AND posts.post_status != 'auto-draft'
-  AND orders.id IS NULL";
+  AND orders.id IS NULL",
+				$order_post_types
+			);
+			// phpcs:enable
+			$operator = '<';
 		}
 
-		$sql = "
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $missing_orders_count_sql is prepared.
+		$sql = $wpdb->prepare(
+			"
 SELECT(
 	($missing_orders_count_sql)
 	+
@@ -183,10 +181,13 @@ SELECT(
 		SELECT orders.id FROM $orders_table orders
 		JOIN $wpdb->posts posts on posts.ID = orders.id
 		WHERE
-		  posts.post_type = 'shop_order'
-		  AND orders.date_updated_gmt != posts.post_modified_gmt
+		  posts.post_type IN ($order_post_type_placeholder)
+		  AND orders.date_updated_gmt $operator posts.post_modified_gmt
 	) x)
-) count";
+) count",
+			$order_post_types
+		);
+		// phpcs:enable
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		return (int) $wpdb->get_var( $sql );
@@ -198,7 +199,7 @@ SELECT(
 	 * @return bool Whether the custom orders table the authoritative data source for orders currently.
 	 */
 	public function custom_orders_table_is_authoritative(): bool {
-		return 'yes' === get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
+		return wc_string_to_bool( get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) );
 	}
 
 	/**
@@ -222,31 +223,45 @@ SELECT(
 			throw new \Exception( '$limit must be at least 1' );
 		}
 
-		$orders_table = $wpdb->prefix . 'wc_orders';
+		$orders_table                 = $this->data_store::get_orders_table_name();
+		$order_post_types             = wc_get_order_types( 'cot-migration' );
+		$order_post_type_placeholders = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
 
 		switch ( $type ) {
 			case self::ID_TYPE_MISSING_IN_ORDERS_TABLE:
-				$sql = "
+				$sql = $wpdb->prepare(
+					"
 SELECT posts.ID FROM $wpdb->posts posts
 LEFT JOIN $orders_table orders ON posts.ID = orders.id
 WHERE
-  posts.post_type='shop_order'
+  posts.post_type IN ($order_post_type_placeholders)
   AND posts.post_status != 'auto-draft'
-  AND orders.id IS NULL";
+  AND orders.id IS NULL",
+					$order_post_types
+				);
 				break;
 			case self::ID_TYPE_MISSING_IN_POSTS_TABLE:
 				$sql = "
 SELECT posts.ID FROM $wpdb->posts posts
 INNER JOIN $orders_table orders ON posts.id=orders.id
-WHERE posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "'";
+WHERE posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "'
+AND orders.status not in ( 'auto-draft' )
+";
 				break;
 			case self::ID_TYPE_DIFFERENT_UPDATE_DATE:
-				$sql = "
+				$operator = $this->custom_orders_table_is_authoritative() ? '>' : '<';
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $order_post_type_placeholders is prepared.
+				$sql = $wpdb->prepare(
+					"
 SELECT orders.id FROM $orders_table orders
 JOIN $wpdb->posts posts on posts.ID = orders.id
 WHERE
-  posts.post_type = 'shop_order'
-  AND orders.date_updated_gmt != posts.post_modified_gmt";
+  posts.post_type IN ($order_post_type_placeholders)
+  AND orders.date_updated_gmt $operator posts.post_modified_gmt
+",
+					$order_post_types
+				);
+				// phpcs:enable
 				break;
 			default:
 				throw new \Exception( 'Invalid $type, must be one of the ID_TYPE_... constants.' );
@@ -271,7 +286,15 @@ WHERE
 	 * @param array $batch Batch details.
 	 */
 	public function process_batch( array $batch ) : void {
-		$this->posts_to_cot_migrator->migrate_orders( $batch );
+		if ( $this->custom_orders_table_is_authoritative() ) {
+			foreach ( $batch as $id ) {
+				$order      = wc_get_order( $id );
+				$data_store = $order->get_data_store();
+				$data_store->backfill_post_record( $order );
+			}
+		} else {
+			$this->posts_to_cot_migrator->migrate_orders( $batch );
+		}
 		if ( 0 === $this->get_total_pending_count() ) {
 			$this->cleanup_synchronization_state();
 		}
@@ -313,6 +336,12 @@ WHERE
 	 * @return int Default batch size.
 	 */
 	public function get_default_batch_size(): int {
+		$batch_size = self::ORDERS_SYNC_BATCH_SIZE;
+
+		if ( $this->custom_orders_table_is_authoritative() ) {
+			// Back-filling is slower than migration.
+			$batch_size = absint( self::ORDERS_SYNC_BATCH_SIZE / 10 ) + 1;
+		}
 		/**
 		 * Filter to customize the count of orders that will be synchronized in each step of the custom orders table to/from posts table synchronization process.
 		 *
@@ -320,7 +349,7 @@ WHERE
 		 *
 		 * @param int Default value for the count.
 		 */
-		return apply_filters( 'woocommerce_orders_cot_and_posts_sync_step_size', self::ORDERS_SYNC_BATCH_SIZE );
+		return apply_filters( 'woocommerce_orders_cot_and_posts_sync_step_size', $batch_size );
 	}
 
 	/**

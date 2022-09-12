@@ -11,7 +11,6 @@ defined( 'ABSPATH' ) || exit;
 
 use \Automattic\WooCommerce\Admin\Notes\Note;
 use \Automattic\WooCommerce\Admin\Notes\Notes;
-
 /**
  * Order_Milestones
  */
@@ -96,7 +95,7 @@ class OrderMilestones {
 
 		add_action( 'wc_admin_installed', array( $this, 'backfill_last_milestone' ) );
 
-		add_action( self::PROCESS_ORDERS_MILESTONE_HOOK, array( $this, 'other_milestones' ) );
+		add_action( self::PROCESS_ORDERS_MILESTONE_HOOK, array( $this, 'possibly_add_note' ) );
 	}
 
 	/**
@@ -179,7 +178,7 @@ class OrderMilestones {
 	 * @param int $milestone Order milestone.
 	 * @return string Note title for the milestone.
 	 */
-	public function get_note_title_for_milestone( $milestone ) {
+	public static function get_note_title_for_milestone( $milestone ) {
 		switch ( $milestone ) {
 			case 1:
 				return __( 'First order received', 'woocommerce' );
@@ -208,7 +207,7 @@ class OrderMilestones {
 	 * @param int $milestone Order milestone.
 	 * @return string Note content for the milestone.
 	 */
-	public function get_note_content_for_milestone( $milestone ) {
+	public static function get_note_content_for_milestone( $milestone ) {
 		switch ( $milestone ) {
 			case 1:
 				return __( 'Congratulations on getting your first order! Now is a great time to learn how to manage your orders.', 'woocommerce' );
@@ -234,7 +233,7 @@ class OrderMilestones {
 	 * @param int $milestone Order milestone.
 	 * @return array Note actoion (name, label, query) for the milestone.
 	 */
-	public function get_note_action_for_milestone( $milestone ) {
+	public static function get_note_action_for_milestone( $milestone ) {
 		switch ( $milestone ) {
 			case 1:
 				return array(
@@ -289,35 +288,82 @@ class OrderMilestones {
 	}
 
 	/**
-	 * Add milestone notes for other significant thresholds.
+	 * Get the note. This is used for localizing the note.
+	 *
+	 * @return Note
 	 */
-	public function other_milestones() {
+	public static function get_note() {
+		$note = Notes::get_note_by_name( self::NOTE_NAME );
+		if ( ! $note ) {
+			return false;
+		}
+		$content_data = $note->get_content_data();
+		if ( ! isset( $content_data->current_milestone ) ) {
+			return false;
+		}
+		return self::get_note_by_milestone(
+			$content_data->current_milestone
+		);
+	}
+
+	/**
+	 * Get the note by milestones.
+	 *
+	 * @param int $current_milestone Current milestone.
+	 *
+	 * @return Note
+	 */
+	public static function get_note_by_milestone( $current_milestone ) {
+		$content_data = (object) array(
+			'current_milestone' => $current_milestone,
+		);
+
+		$note = new Note();
+		$note->set_title( self::get_note_title_for_milestone( $current_milestone ) );
+		$note->set_content( self::get_note_content_for_milestone( $current_milestone ) );
+		$note->set_content_data( $content_data );
+		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+		$note->set_name( self::NOTE_NAME );
+		$note->set_source( 'woocommerce-admin' );
+		$note_action = self::get_note_action_for_milestone( $current_milestone );
+		$note->add_action( $note_action['name'], $note_action['label'], $note_action['query'] );
+		return $note;
+	}
+
+	/**
+	 * Checks if a note can and should be added.
+	 *
+	 * @return bool
+	 */
+	public function can_be_added() {
 		// If the milestone notes have been disabled via filter, bail.
 		if ( ! $this->are_milestones_enabled() ) {
-			return;
+			return false;
 		}
 
 		$last_milestone    = $this->get_last_milestone();
 		$current_milestone = $this->get_current_milestone();
 
 		if ( $current_milestone <= $last_milestone ) {
-			return;
+			return false;
 		}
 
+		return true;
+	}
+
+	/**
+	 * Add milestone notes for other significant thresholds.
+	 */
+	public function possibly_add_note() {
+		if ( ! self::can_be_added() ) {
+			return;
+		}
+		$current_milestone = $this->get_current_milestone();
 		$this->set_last_milestone( $current_milestone );
 
 		// We only want one milestone note at any time.
 		Notes::delete_notes_with_name( self::NOTE_NAME );
-
-		// Add the milestone note.
-		$note = new Note();
-		$note->set_title( $this->get_note_title_for_milestone( $current_milestone ) );
-		$note->set_content( $this->get_note_content_for_milestone( $current_milestone ) );
-		$note_action = $this->get_note_action_for_milestone( $current_milestone );
-		$note->add_action( $note_action['name'], $note_action['label'], $note_action['query'] );
-		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
-		$note->set_name( self::NOTE_NAME );
-		$note->set_source( 'woocommerce-admin' );
+		$note = $this->get_note_by_milestone( $current_milestone );
 		$note->save();
 	}
 }

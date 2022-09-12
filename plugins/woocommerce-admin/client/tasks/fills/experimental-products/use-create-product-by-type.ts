@@ -18,7 +18,7 @@ export const useCreateProductByType = () => {
 
 	const createProductByType = async ( type: ProductTypeKey ) => {
 		if ( type === 'subscription' ) {
-			window.location = getAdminLink(
+			window.location.href = getAdminLink(
 				'post-new.php?post_type=product&subscription_pointers=true'
 			);
 			return;
@@ -36,10 +36,13 @@ export const useCreateProductByType = () => {
 				{ _fields: [ 'id' ] }
 			);
 			if ( data && data.id ) {
-				const link = getAdminLink(
+				let link = getAdminLink(
 					`post.php?post=${ data.id }&action=edit&wc_onboarding_active_task=products&tutorial=true`
 				);
-				window.location = link;
+				if ( type === 'physical' ) {
+					link += '&spotlight=true';
+				}
+				window.location.href = link;
 			} else {
 				throw new Error( 'Unexpected empty data response from server' );
 			}
