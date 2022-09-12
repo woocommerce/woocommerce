@@ -109,11 +109,6 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 - Add steps to retrieve products variations in Store API documentation. ([7076](https://github.com/woocommerce/woocommerce-blocks/pull/7076))
 
-#### Dependencies
-
-- Bump commander from 9.3.0 to 9.4.0. ([6831](https://github.com/woocommerce/woocommerce-blocks/pull/6831))
-- Bump automattic/jetpack-autoloader from 2.11.6 to 2.11.7. ([6810](https://github.com/woocommerce/woocommerce-blocks/pull/6810))
-
 = 8.4.0 - 2022-08-29 =
 
 #### Enhancements
