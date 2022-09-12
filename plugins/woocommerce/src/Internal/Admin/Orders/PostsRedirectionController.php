@@ -1,0 +1,142 @@
+<?php
+namespace Automattic\WooCommerce\Internal\Admin\Orders;
+
+/**
+ * When {@see OrdersTableDataStore} is in use, this class takes care of redirecting admins from CPT-based URLs
+ * to the new ones.
+ */
+class PostsRedirectionController {
+
+	/**
+	 * Instance of the PageController class.
+	 *
+	 * @var PageController
+	 */
+	private $page_controller;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param PageController $page_controller Page controller instance. Used to generate links/URLs.
+	 */
+	public function __construct( PageController $page_controller ) {
+		$this->page_controller = $page_controller;
+
+		add_action(
+			'load-edit.php',
+			function() {
+				$this->maybe_redirect_to_orders_page();
+			}
+		);
+
+		add_action(
+			'load-post-new.php',
+			function() {
+				$this->maybe_redirect_to_new_order_page();
+			}
+		);
+
+		add_action(
+			'load-post.php',
+			function() {
+				$this->maybe_redirect_to_edit_order_page();
+			}
+		);
+	}
+
+	/**
+	 * If needed, performs a redirection to the main orders page.
+	 *
+	 * @return void
+	 */
+	private function maybe_redirect_to_orders_page(): void {
+		if ( ! isset( $_GET['post_type'] ) || 'shop_order' !== $_GET['post_type'] ) {
+			return;
+		}
+
+		// Respect query args, except for 'post_type'.
+		$query_args = wp_unslash( $_GET );
+		unset( $query_args['post_type'] );
+
+		// Remap 'post_status' arg.
+		if ( isset( $query_args['post_status'] ) ) {
+			$query_args['status'] = $query_args['post_status'];
+			unset( $query_args['post_status'] );
+		}
+
+		$new_url = $this->page_controller->get_orders_url();
+		$new_url = add_query_arg( $query_args, $new_url );
+
+		wp_safe_redirect( $new_url, 301 );
+		exit;
+	}
+
+	/**
+	 * If needed, performs a redirection to the new order page.
+	 *
+	 * @return void
+	 */
+	private function maybe_redirect_to_new_order_page(): void {
+		if ( ! isset( $_GET['post_type'] ) || 'shop_order' !== $_GET['post_type'] ) {
+			return;
+		}
+
+		// Respect query args, except for 'post_type'.
+		$query_args = wp_unslash( $_GET );
+		unset( $query_args['post_type'] );
+
+		$new_url = $this->page_controller->get_new_page_url();
+		$new_url = add_query_arg( $query_args, $new_url );
+
+		wp_safe_redirect( $new_url );
+		exit;
+	}
+
+	/**
+	 * If needed, performs a redirection to the edit order page.
+	 *
+	 * @return void
+	 */
+	private function maybe_redirect_to_edit_order_page(): void {
+		$post_id = absint( $_GET['post'] ?? 0 );
+
+		if ( ! $post_id || 'shop_order' !== get_post_type( $post_id ) || ! isset( $_GET['action'] ) ) {
+			return;
+		}
+
+		// Respect query args, except for 'post'.
+		$query_args = wp_unslash( $_GET );
+		unset( $query_args['post'] );
+
+		$new_url = '';
+
+		switch ( $query_args['action'] ) {
+			case 'edit':
+				$new_url = $this->page_controller->get_edit_url( $post_id );
+				break;
+
+			case 'trash':
+			case 'untrash':
+			case 'delete':
+				// Re-generate nonce if validation passes.
+				check_admin_referer( $query_args['action'] . '-post_' . $post_id );
+
+				// $new_url TBD
+				break;
+
+			default:
+				break;
+		}
+
+		if ( ! $new_url ) {
+			return;
+		}
+
+		$new_url = add_query_arg( $query_args, $new_url );
+
+		wp_safe_redirect( $new_url );
+		exit;
+	}
+
+}
+
