@@ -22,6 +22,6 @@
 	},
 	"scripts": {
 		"lint": "eslint . --ext .ts --config .eslintrc",
-		"version-bump": "node -r ts-node/register ./index.ts"
+		"version": "node -r ts-node/register ./index.ts"
 	}
 }
