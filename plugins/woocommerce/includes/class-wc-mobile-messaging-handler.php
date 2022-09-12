@@ -113,7 +113,7 @@ class WC_Mobile_Messaging_Handler {
 			wp_kses_data(
 			/* translators: %s: Email link */
 				__(
-					'<a href="%1$s">Collect payments easily</a> from your customers anywhere with our mobile app.',
+					'<a href="%s">Collect payments easily</a> from your customers anywhere with our mobile app.',
 					'woocommerce'
 				)
 			),
