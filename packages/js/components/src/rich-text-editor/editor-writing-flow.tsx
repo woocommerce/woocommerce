@@ -60,10 +60,7 @@ export const EditorWritingFlow: React.VFC = () => {
 			className="rich-text-editor__writing-flow"
 			id={ `rich-text-editor__writing-flow-${ instanceId }` }
 			style={ {
-				display: 'flex',
-				height: '100%',
 				cursor: isEmpty ? 'text' : 'initial',
-				padding: 6,
 			} }
 			onClick={ setSelectionOnClick }
 		>

@@ -65,31 +65,33 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 	}, 200 );
 
 	return (
-		<SlotFillProvider>
-			<BlockEditorProvider
-				value={ blocksRef.current }
-				settings={ {
-					bodyPlaceholder: '',
-					hasFixedToolbar: true,
-				} }
-				onInput={ ( updatedBlocks ) => {
-					debounceChange( updatedBlocks );
+		<div className="woocommerce-rich-text-editor">
+			<SlotFillProvider>
+				<BlockEditorProvider
+					value={ blocksRef.current }
+					settings={ {
+						bodyPlaceholder: '',
+						hasFixedToolbar: true,
+					} }
+					onInput={ ( updatedBlocks ) => {
+						debounceChange( updatedBlocks );
 
-					debouncedRefresh();
-				} }
-				onChange={ ( updatedBlocks ) => {
-					debounceChange( updatedBlocks );
+						debouncedRefresh();
+					} }
+					onChange={ ( updatedBlocks ) => {
+						debounceChange( updatedBlocks );
 
-					debouncedRefresh();
-				} }
-			>
-				<FixedFormattingToolbar />
+						debouncedRefresh();
+					} }
+				>
+					<FixedFormattingToolbar />
 
-				{ /* Shortcut provider produces a div we need to style */ }
-				<ShortcutProvider style={ { height: '100%' } }>
-					<EditorWritingFlow />
-				</ShortcutProvider>
-			</BlockEditorProvider>
-		</SlotFillProvider>
+					{ /* Shortcut provider produces a div we need to style */ }
+					<ShortcutProvider>
+						<EditorWritingFlow />
+					</ShortcutProvider>
+				</BlockEditorProvider>
+			</SlotFillProvider>
+		</div>
 	);
 };
