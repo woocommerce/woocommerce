@@ -171,27 +171,15 @@ jQuery( function ( $ ) {
 	function get_product_tip_content( product_type ) {
 		switch ( product_type ) {
 			case 'simple':
-				return (
-					'<b>Simple –</b> covers the vast majority of any products you may sell. Simple products are ' +
-					'shipped and have no options. For example, a book.'
-				);
+				return woocommerce_admin_meta_boxes.i18n_product_simple_tip;
 			case 'grouped':
-				return (
-					'<b>Grouped –</b> a collection of related products that can be purchased individually and ' +
-					'only consist of simple products. For example, a set of six drinking glasses.'
-				);
+				return woocommerce_admin_meta_boxes.i18n_product_grouped_tip;
 			case 'external':
-				return '<b>External or Affiliate –</b> one that you list and describe on your website but is sold elsewhere.';
+				return woocommerce_admin_meta_boxes.i18n_product_external_tip;
 			case 'variable':
-				return (
-					'<b>Variable –</b> a product with variations, each of which may have a different SKU, price, ' +
-					'stock option, etc. For example, a t-shirt available in different colors and/or sizes.'
-				);
+				return woocommerce_admin_meta_boxes.i18n_product_variable_tip;
 			default:
-				return (
-					'Product types define available product details and attributes, such as downloadable ' +
-					"files and variations. They're also used for analytics and inventory management."
-				);
+				return woocommerce_admin_meta_boxes.i18n_product_other_tip;
 		}
 	}
 
@@ -907,16 +895,17 @@ jQuery( function ( $ ) {
 	} );
 
 	// Add a descriptive tooltip to the product description editor
-	var product_description_tip =
-		'Describe this product. What makes it unique? What are its most important features?';
 	$( '#wp-content-media-buttons' )
 		.append( '<span class="woocommerce-help-tip" tabindex="-1"></span>' )
 		.find( '.woocommerce-help-tip' )
 		.attr( 'for', 'content' )
-		.attr( 'aria-label', product_description_tip )
+		.attr(
+			'aria-label',
+			woocommerce_admin_meta_boxes.i18n_product_description_tip
+		)
 		.tipTip( {
 			attribute: 'data-tip',
-			content: product_description_tip,
+			content: woocommerce_admin_meta_boxes.i18n_product_description_tip,
 			fadeIn: 50,
 			fadeOut: 50,
 			delay: 200,
@@ -924,15 +913,17 @@ jQuery( function ( $ ) {
 		} );
 
 	// Add a descriptive tooltip to the product short description meta box title
-	var product_short_description_tip =
-		'Summarize this product in 1-2 short sentences. We’ll show it at the top of the page.';
 	$( '#postexcerpt > .postbox-header > .hndle' )
 		.append( '<span class="woocommerce-help-tip"></span>' )
 		.find( '.woocommerce-help-tip' )
-		.attr( 'aria-label', product_short_description_tip )
+		.attr(
+			'aria-label',
+			woocommerce_admin_meta_boxes.i18n_product_short_description_tip
+		)
 		.tipTip( {
 			attribute: 'data-tip',
-			content: product_short_description_tip,
+			content:
+				woocommerce_admin_meta_boxes.i18n_product_short_description_tip,
 			fadeIn: 50,
 			fadeOut: 50,
 			delay: 200,
