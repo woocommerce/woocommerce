@@ -2,24 +2,24 @@
 
 ## Table of Contents <!-- omit in toc -->
 
-- [General Concepts](#general-concepts)
-    - [Tracking flow through status](#tracking-flow-through-status)
-    - [`CheckoutProvider` Exposed Statuses](#checkoutprovider-exposed-statuses)
-        - [Special States:](#special-states)
-    - [`ShippingProvider` Exposed Statuses](#shippingprovider-exposed-statuses)
-    - [`PaymentMethodDataProvider` Exposed Statuses](#paymentmethoddataprovider-exposed-statuses)
-    - [Emitting Events](#emitting-events)
-    - [`onCheckoutValidationBeforeProcessing`](#oncheckoutvalidationbeforeprocessing)
-    - [`onPaymentProcessing`](#onpaymentprocessing)
-        - [Success](#success)
-        - [Fail](#fail)
-        - [Error](#error)
-    - [`onCheckoutAfterProcessingWithSuccess`](#oncheckoutafterprocessingwithsuccess)
-    - [`onCheckoutAfterProcessingWithError`](#oncheckoutafterprocessingwitherror)
-    - [`onShippingRateSuccess`](#onshippingratesuccess)
-    - [`onShippingRateFail`](#onshippingratefail)
-    - [`onShippingRateSelectSuccess`](#onshippingrateselectsuccess)
-    - [`onShippingRateSelectFail`](#onshippingrateselectfail)
+-   [General Concepts](#general-concepts)
+    -   [Tracking flow through status](#tracking-flow-through-status)
+    -   [`CheckoutProvider` Exposed Statuses](#checkoutprovider-exposed-statuses)
+        -   [Special States:](#special-states)
+    -   [`ShippingProvider` Exposed Statuses](#shippingprovider-exposed-statuses)
+    -   [`PaymentMethodDataProvider` Exposed Statuses](#paymentmethoddataprovider-exposed-statuses)
+    -   [Emitting Events](#emitting-events)
+    -   [`onCheckoutValidationBeforeProcessing`](#oncheckoutvalidationbeforeprocessing)
+    -   [`onPaymentProcessing`](#onpaymentprocessing)
+        -   [Success](#success)
+        -   [Fail](#fail)
+        -   [Error](#error)
+    -   [`onCheckoutAfterProcessingWithSuccess`](#oncheckoutafterprocessingwithsuccess)
+    -   [`onCheckoutAfterProcessingWithError`](#oncheckoutafterprocessingwitherror)
+    -   [`onShippingRateSuccess`](#onshippingratesuccess)
+    -   [`onShippingRateFail`](#onshippingratefail)
+    -   [`onShippingRateSelectSuccess`](#onshippingrateselectsuccess)
+    -   [`onShippingRateSelectFail`](#onshippingrateselectfail)
 
 This document gives an overview of the flow for the checkout in the WooCommerce checkout block, and some general architectural overviews.
 
@@ -99,7 +99,7 @@ The status is exposed on the `currentErrorStatus` object provided by the `useShi
 
 ### `PaymentMethodDataProvider` Exposed Statuses
 
-This context provider exposes everything related to payment method data and registered payment methods. The statuses exposed via this provider help inform the current state of _client side_ processing for payment methods and are updated via the payment method data event emitters. _Client side_ means the state of processing any payments by registered and active payment methods when the checkout form is submitted via those payment methods registered client side components. It's still possible that payment methods might have additional server side processing when the order is being processed but that is not reflected by these statuses (more in the [payment method integration doc](./payment-method-integration.md)).
+This context provider exposes everything related to payment method data and registered payment methods. The statuses exposed via this provider help inform the current state of _client side_ processing for payment methods and are updated via the payment method data event emitters. _Client side_ means the state of processing any payments by registered and active payment methods when the checkout form is submitted via those payment methods registered client side components. It's still possible that payment methods might have additional server side processing when the order is being processed but that is not reflected by these statuses (more in the [payment method integration doc](../../../third-party-developers/extensibility/checkout-payment-methods/payment-method-integration.md)).
 
 The possible _internal_ statuses that may be set are:
 
@@ -266,7 +266,7 @@ const successResponse = { type: 'success' };
 When a success response is returned, the payment method context status will be changed to `SUCCESS`. In addition, including any of the additional properties will result in extra actions:
 
 -   `paymentMethodData`: The contents of this object will be included as the value for `payment_data` when checkout sends a request to the checkout endpoint for processing the order. This is useful if a payment method does additional server side processing.
--   `billingData`: This allows payment methods to update any billing data information in the checkout (typically used by Express payment methods) so it's included in the checkout processing request to the server. This data should be in the [shape outlined here](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/assets/js/type-defs/billing.js).
+-   `billingData`: This allows payment methods to update any billing data information in the checkout (typically used by Express payment methods) so it's included in the checkout processing request to the server. This data should be in the [shape outlined here](../../../../assets/js/types/type-defs/billing.js).
 -   `shippingData`: This allows payment methods to update any shipping data information for the order (typically used by Express payment methods) so it's included in the checkout processing request to the server. This data should be in the [shape outlined here](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/34e17c3622637dbe8b02fac47b5c9b9ebf9e3596/assets/js/type-defs/cart.js#L20-L32).
 
 If `billingData` or `shippingData` properties aren't in the response object, then the state for the data is left alone.

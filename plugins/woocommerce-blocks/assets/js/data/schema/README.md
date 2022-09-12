@@ -2,7 +2,6 @@
 
 ## Table of contents <!-- omit in toc -->
 
--   [Table of contents](#table-of-contents)
 -   [Actions](#actions)
     -   [`receiveRoutes( routes, namespace = '/wc/blocks' )`](#receiveroutes-routes-namespace--wcblocks-)
 -   [Selectors](#selectors)

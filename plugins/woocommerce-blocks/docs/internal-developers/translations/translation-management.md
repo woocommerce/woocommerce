@@ -1,6 +1,6 @@
 # Translation management
 
-As mentioned in [Translation basics](docs/translations/translation-basics.md), all translations are managed using [GlotPress](https://wordpress.org/plugins/glotpress/). The translations of the WooCommerce Blocks plugin can be found on <https://translate.wordpress.org/projects/wp-plugins/woo-gutenberg-products-block/>.
+As mentioned in [Translation basics](../../internal-developers/translations/translation-basics.md), all translations are managed using [GlotPress](https://wordpress.org/plugins/glotpress/). The translations of the WooCommerce Blocks plugin can be found on <https://translate.wordpress.org/projects/wp-plugins/woo-gutenberg-products-block/>.
 
 ## Roles
 

@@ -1,5 +1,5 @@
 {
-    "$schema": "https://raw.githubusercontent.com/johnbillion/wp-hooks-generator/0.7.0/schema.json",
+    "$schema": "https://raw.githubusercontent.com/wp-hooks/generator/0.9.0/schema.json",
     "hooks": [
         {
             "name": "__experimental_woocommerce_blocks_add_data_attributes_to_block",
@@ -336,18 +336,6 @@
                     }
                 ],
                 "long_description_html": "<p>The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations. e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.</p>"
-            },
-            "args": 1
-        },
-        {
-            "name": "woocommerce_admin_disabled",
-            "file": "InboxNotifications.php",
-            "type": "filter",
-            "doc": {
-                "description": "",
-                "long_description": "",
-                "tags": [],
-                "long_description_html": ""
             },
             "args": 1
         },
