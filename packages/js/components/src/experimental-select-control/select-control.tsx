@@ -39,9 +39,9 @@ type SelectControlProps< ItemType > = {
 		getItemLabel: getItemLabelType< ItemType >
 	) => ItemType[];
 	multiple?: boolean;
-	onInputChange?: ( value: string | undefined ) => void;
-	onRemove?: ( item: ItemType ) => void;
-	onSelect?: ( selected: ItemType ) => void;
+	onInputChange?: (value: string | undefined) => void;
+	onRemove?: (item: ItemType) => void;
+	onSelect?: (selected: ItemType) => void;
 	placeholder?: string;
 	selected: ItemType | ItemType[] | null;
 };
@@ -55,7 +55,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 		getItemProps,
 		getMenuProps,
 		isOpen,
-	} ) => {
+	}) => {
 		return (
 			<Menu getMenuProps={ getMenuProps } isOpen={ isOpen }>
 				{ renderItems.map( ( item, index: number ) => (
@@ -68,7 +68,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 					>
 						{ getItemLabel( item ) }
 					</MenuItem>
-				) ) }
+				))}
 			</Menu>
 		);
 	},
@@ -89,9 +89,9 @@ function SelectControl< ItemType = DefaultItemType >( {
 		getSelectedItemProps,
 		getDropdownProps,
 		removeSelectedItem,
-	} = useMultipleSelection( { itemToString } );
+	} = useMultipleSelection({ itemToString });
 	let selectedItems = selected === null ? [] : selected;
-	selectedItems = Array.isArray( selectedItems )
+	selectedItems = Array.isArray(selectedItems)
 		? selectedItems
 		: [ selectedItems ].filter( Boolean );
 	const filteredItems = getFilteredItems(
@@ -111,25 +111,25 @@ function SelectControl< ItemType = DefaultItemType >( {
 		getItemProps,
 		selectItem,
 		selectedItem: singleSelectedItem,
-	} = useCombobox( {
+	} = useCombobox<ItemType | null>({
 		inputValue,
 		items: filteredItems,
 		itemToString: getItemLabel,
 		onStateChange: ( { inputValue: value, type, selectedItem } ) => {
 			switch ( type ) {
 				case useCombobox.stateChangeTypes.InputChange:
-					onInputChange( value );
-					setInputValue( value || '' );
+					onInputChange(value);
+					setInputValue(value || '');
 
 					break;
 				case useCombobox.stateChangeTypes.InputKeyDownEnter:
 				case useCombobox.stateChangeTypes.ItemClick:
 				case useCombobox.stateChangeTypes.InputBlur:
-					if ( selectedItem ) {
-						onSelect( selectedItem );
-						if ( multiple ) {
-							addSelectedItem( selectedItem );
-							setInputValue( '' );
+					if (selectedItem) {
+						onSelect(selectedItem);
+						if (multiple) {
+							addSelectedItem(selectedItem);
+							setInputValue('');
 							break;
 						}
 
@@ -146,25 +146,26 @@ function SelectControl< ItemType = DefaultItemType >( {
 					break;
 			}
 		},
-	} );
+	});
 
-	const onRemoveItem = ( item: ItemType ) => {
-		removeSelectedItem( item );
-		onRemove( item );
+	const onRemoveItem = (item: ItemType) => {
+		selectItem(null);
+		removeSelectedItem(item);
+		onRemove(item);
 	};
 
 	return (
 		<div
-			className={ classnames( 'woocommerce-experimental-select-control', {
+			className={classnames('woocommerce-experimental-select-control', {
 				'is-focused': isFocused,
-			} ) }
+			})}
 		>
-			{ /* Downshift's getLabelProps handles the necessary label attributes. */ }
-			{ /* eslint-disable jsx-a11y/label-has-for */ }
-			<label { ...getLabelProps() }>{ label }</label>
-			{ /* eslint-enable jsx-a11y/label-has-for */ }
+			{/* Downshift's getLabelProps handles the necessary label attributes. */}
+			{/* eslint-disable jsx-a11y/label-has-for */}
+			<label {...getLabelProps()}>{label}</label>
+			{/* eslint-enable jsx-a11y/label-has-for */}
 			<div className="woocommerce-experimental-select-control__combo-box-wrapper">
-				{ multiple && (
+				{multiple && (
 					<SelectedItems
 						items={ selectedItems }
 						getItemLabel={ getItemLabel }
@@ -172,21 +173,21 @@ function SelectControl< ItemType = DefaultItemType >( {
 						getSelectedItemProps={ getSelectedItemProps }
 						onRemove={ onRemoveItem }
 					/>
-				) }
+				)}
 				<ComboBox
-					comboBoxProps={ getComboboxProps() }
-					inputProps={ getInputProps( {
-						...getDropdownProps( { preventKeyAction: isOpen } ),
+					comboBoxProps={getComboboxProps()}
+					inputProps={getInputProps({
+						...getDropdownProps({ preventKeyAction: isOpen }),
 						className:
 							'woocommerce-experimental-select-control__input',
-						onFocus: () => setIsFocused( true ),
-						onBlur: () => setIsFocused( false ),
+						onFocus: () => setIsFocused(true),
+						onBlur: () => setIsFocused(false),
 						placeholder,
-					} ) }
+					})}
 				/>
 			</div>
 
-			{ children( {
+			{children({
 				items: filteredItems,
 				highlightedIndex,
 				getItemProps,
