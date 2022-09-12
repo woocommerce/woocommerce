@@ -111,7 +111,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 					>
 						<p>
 							{ __(
-								'Edit the appearance of your empty and filled mini cart contents.',
+								'Edit the appearance of the Mini Cart.',
 								'woo-gutenberg-products-block'
 							) }
 						</p>

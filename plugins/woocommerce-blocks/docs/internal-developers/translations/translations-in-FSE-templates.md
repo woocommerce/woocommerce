@@ -83,7 +83,7 @@ public function register_empty_cart_message_block_pattern() {
     register_block_pattern(
         'woocommerce/mini-cart-empty-cart-message',
         array(
-            'title'    => __( 'Mini Cart Empty Cart Message', 'woo-gutenberg-products-block' ),
+            'title'    => __( 'Empty Mini Cart Message', 'woo-gutenberg-products-block' ),
             'inserter' => false,
             'content'  => '<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><strong>' . __( 'Your cart is currently empty!', 'woo-gutenberg-products-block' ) . '</strong></p><!-- /wp:paragraph -->',
         )
@@ -117,4 +117,3 @@ The PR for the implementation above can be found on <https://github.com/woocomme
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/translations/translations-in-FSE-templates.md)
 
 <!-- /FEEDBACK -->
-

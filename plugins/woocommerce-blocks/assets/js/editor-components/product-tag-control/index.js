@@ -103,7 +103,7 @@ class ProductTagControl extends Component {
 			),
 			list: __( 'Product Tags', 'woo-gutenberg-products-block' ),
 			noItems: __(
-				"Your store doesn't have any product tags.",
+				'You have not set up any product tags on your store.',
 				'woo-gutenberg-products-block'
 			),
 			search: __(

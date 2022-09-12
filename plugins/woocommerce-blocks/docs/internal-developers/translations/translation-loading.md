@@ -76,7 +76,7 @@ msgstr ""
 #: assets/js/blocks/featured-product/block.json
 #: build/featured-product/block.json
 msgctxt "block description"
-msgid "Visually highlight a product or variation and encourage prompt action."
+msgid "Highlight a product or variation."
 msgstr "Ein Produkt oder eine Variante visuell hervorheben und zum sofortigen Handeln auffordern."
 
 #: assets/js/blocks/featured-product/block.json
@@ -306,4 +306,3 @@ add_filter( 'load_script_translation_file', 'load_woocommerce_core_json_translat
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/translations/translation-loading.md)
 
 <!-- /FEEDBACK -->
-

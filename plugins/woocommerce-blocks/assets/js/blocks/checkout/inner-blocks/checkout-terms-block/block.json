@@ -2,7 +2,7 @@
 	"name": "woocommerce/checkout-terms-block",
 	"version": "1.0.0",
 	"title": "Terms and Conditions",
-	"description": "Ensure customers agree to your terms and conditions and privacy policy.",
+	"description": "Ensure that customers agree to your Terms & Conditions and Privacy Policy.",
 	"category": "woocommerce",
 	"supports": {
 		"align": false,

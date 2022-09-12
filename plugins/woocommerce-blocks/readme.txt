@@ -192,7 +192,7 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 #### Bug Fixes
 
 - Fix images hidden by default in Product grid blocks after WC 6.6 update. ([6599](https://github.com/woocommerce/woocommerce-blocks/pull/6599))
-- Fix: Scrolling issue of the Filled Mini Cart Contents block. ([6565](https://github.com/woocommerce/woocommerce-blocks/pull/6565))
+- Fix: Scrolling issue of the Filled Mini Cart view block. ([6565](https://github.com/woocommerce/woocommerce-blocks/pull/6565))
 - Fix an endless loop when using product grid blocks inside product descriptions. ([6471](https://github.com/woocommerce/woocommerce-blocks/pull/6471))
 
 #### Various
@@ -276,7 +276,7 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 #### Bug Fixes
 
-- Fix: Align Empty Mini Cart Contents block center in the Site Editor. ([6379](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6379))
+- Fix: Align Empty Mini Cart view. block center in the Site Editor. ([6379](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6379))
 - Remove the Template panel from the Setting Sidebar for Shop page. ([6366](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6366))
 - Parse categories coming from the back-end as a json array. ([6358](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6358))
 - Update the default width of Classic Template to Wide width. ([6356](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6356))

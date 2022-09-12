@@ -24,7 +24,7 @@ class PaymentMethodErrorBoundary extends Component {
 
 		if ( hasError ) {
 			let errorText = __(
-				'This site is experiencing difficulties with this payment method. Please contact the owner of the site for assistance.',
+				'We are experiencing difficulties with this payment method. Please contact us for assistance.',
 				'woo-gutenberg-products-block'
 			);
 			if ( isEditor || CURRENT_USER_IS_ADMIN ) {

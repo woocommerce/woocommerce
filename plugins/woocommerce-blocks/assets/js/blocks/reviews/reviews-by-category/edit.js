@@ -94,7 +94,7 @@ const ReviewsByCategoryEditor = ( {
 			setAttributes( { editMode: false } );
 			debouncedSpeak(
 				__(
-					'Showing Reviews by Category block preview.',
+					'Now displaying a preview of the reviews for the products in the selected categories.',
 					'woo-gutenberg-products-block'
 				)
 			);

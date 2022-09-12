@@ -27,7 +27,7 @@ const NoExpressPaymentMethodsPlaceholder = () => {
 		>
 			<span className="wp-block-woocommerce-checkout-express-payment-block-placeholder__description">
 				{ __(
-					"Your store doesn't have any Payment Methods that support the Express Checkout Block. If they are added, they will be shown here.",
+					'Your store does not have any payment methods that support the Express Checkout block. Once you have configured a compatible payment method, it will be displayed here.',
 					'woo-gutenberg-products-block'
 				) }
 			</span>

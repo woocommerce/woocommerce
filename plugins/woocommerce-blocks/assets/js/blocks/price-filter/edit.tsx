@@ -102,7 +102,7 @@ export default function ( {
 						help={
 							showFilterButton
 								? __(
-										'Products will only update when the button is pressed.',
+										'Products will only update when the button is clicked.',
 										'woo-gutenberg-products-block'
 								  )
 								: __(
@@ -149,7 +149,7 @@ export default function ( {
 		>
 			<p>
 				{ __(
-					"Products with prices are needed for filtering by price. You haven't created any products yet.",
+					'To filter your products by price you first need to assign prices to your products.',
 					'woo-gutenberg-products-block'
 				) }
 			</p>
