@@ -112,11 +112,12 @@ class PostsRedirectionController {
 
 		// Respect query args, except for 'post'.
 		$query_args = wp_unslash( $_GET );
-		unset( $query_args['post'] );
+		$action     = $query_args['action'];
+		unset( $query_args['post'], $query_args['_wpnonce'], $query_args['_wp_http_referer'], $query_args['action'] );
 
 		$new_url = '';
 
-		switch ( $query_args['action'] ) {
+		switch ( $action ) {
 			case 'edit':
 				$new_url = $this->page_controller->get_edit_url( $post_id );
 				break;
@@ -125,9 +126,20 @@ class PostsRedirectionController {
 			case 'untrash':
 			case 'delete':
 				// Re-generate nonce if validation passes.
-				check_admin_referer( $query_args['action'] . '-post_' . $post_id );
+				check_admin_referer( $action . '-post_' . $post_id );
 
-				// $new_url TBD
+				$new_url = wp_nonce_url(
+					add_query_arg(
+						array(
+							'action'           => $action,
+							'order'            => array( $post_id ),
+							'_wp_http_referer' => $this->page_controller->get_orders_url(),
+						),
+						$this->page_controller->get_orders_url()
+					),
+					'bulk-orders'
+				);
+
 				break;
 
 			default:
