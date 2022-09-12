@@ -63,16 +63,19 @@ export const PricingSection: React.FC = () => {
 		return cleanValue;
 	};
 
-	const taxSettingsText =
-		'Per your {{link}}store settings{{/link}}, tax is {{strong}}%sincluded{{/strong}} in the price.';
-	const addNot = pricesIncludeTax ? '' : 'not ';
-	taxSettingsText.replace( taxSettingsText, addNot );
+	const taxIncludedInPriceText = __(
+		'Per your {{link}}store settings{{/link}}, tax is {{strong}}included{{/strong}} in the price.',
+		'woocommerce'
+	);
+	const taxNotIncludedInPriceText = __(
+		'Per your {{link}}store settings{{/link}}, tax is {{strong}}not included{{/strong}} in the price.',
+		'woocommerce'
+	);
 
 	const taxSettingsElement = interpolateComponents( {
-		mixedString: __(
-			'Per your {{link}}store settings{{/link}}, tax is {{strong}}not included{{/strong}} in the price.',
-			'woocommerce'
-		),
+		mixedString: pricesIncludeTax
+			? taxIncludedInPriceText
+			: taxNotIncludedInPriceText,
 		components: {
 			link: (
 				<Link
@@ -80,7 +83,9 @@ export const PricingSection: React.FC = () => {
 					target="_blank"
 					type="external"
 					onClick={ () => {
-						recordEvent( 'product_pricing_list_price_help' );
+						recordEvent(
+							'product_pricing_list_price_help_tax_settings_click'
+						);
 					} }
 				>
 					<></>

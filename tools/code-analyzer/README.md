@@ -8,22 +8,21 @@
 
 Currently there are just 2 commands:
 
-1. `analyzer`. Analyzer serves 2 roles currently, as a linter for PRs to check if introduced hook/template/db changes have associated changelog entries and also to provide file output of changes between
-WooCommerce versions for the purpose of automating release processes (such as generating release posts.)
+1. `lint`. Analyzer is used as a linter for PRs to check if hook/template/db changes were introduced. It produces output either directly on CI or via GH actions `set-output`.
 
 Here is an example `analyzer` command:
 
-`./bin/dev analyzer release/6.8 "6.8.0" -b=release/6.7`
+`pnpm run analyzer -- lint "release/6.8" "6.8.0" -b release/6.7`
 
 In this command we compare the `release/6.7` and `release/6.8` branches to find differences, and we're looking for changes introduced since `6.8.0` (using the `@since` tag).
 
-To find out more about the other arguments to the command you can run `./bin/dev analyzer --help`
+To find out more about the other arguments to the command you can run `pnpm run analyzer -- --help`
 
-2. `major_minor`. This simple CLI tool gives you the latest `.0` major/minor released version of a plugin's mainfile based on Woo release conventions. 
+2. `major-minor`. This simple CLI tool gives you the latest `.0` major/minor released version of a plugin's mainfile based on Woo release conventions. 
 
-Here is an example `major_minor` command:
+Here is an example `major-minor` command:
 
-`./bin/dev major_minor release/6.8 "plugins/woocommerce/woocommerce.php"`
+`pnpm run analyzer major-minor -- "release/6.8" "plugins/woocommerce/woocommerce.php"`
 
 In this command we checkout the branch `release/6.8` and check the version of the woocommerce.php mainfile located at the path passed. Note that at the time of
 writing the main file in this particular branch reports `6.8.1` so the output of this command is `6.8.0`.
