@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { saveAs } from 'browser-filesaver'; // TODO: Replace this with https://www.npmjs.com/package/file-saver since browser-filesaver is not maintained anymore.
+import { saveAs } from 'file-saver';
 
 export type Header = {
 	label: string;
