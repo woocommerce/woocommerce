@@ -111,7 +111,7 @@ abstract class ObjectCache {
 	 * @return CacheEngine
 	 */
 	private function get_cache_engine(): CacheEngine {
-		if ( $this->cache_engine === null ) {
+		if ( null === $this->cache_engine ) {
 			$engine = $this->get_cache_engine_instance();
 
 			/**
@@ -171,7 +171,7 @@ abstract class ObjectCache {
 	 * @throws CacheException Invalid parameter, or null id was passed and get_object_id returns null too.
 	 */
 	public function set( $object, $id = null, int $expiration = self::DEFAULT_EXPIRATION ): bool {
-		if ( $object === null ) {
+		if ( null === $object ) {
 			throw new CacheException( "Can't cache a null value", $this, $id );
 		}
 
@@ -215,7 +215,11 @@ abstract class ObjectCache {
 		$data = apply_filters( "woocommerce_after_serializing_{$this->object_type}_for_caching", $data, $object, $id );
 
 		$this->last_cached_data = $data;
-		return $this->get_cache_engine()->cache_object( $this->get_cache_key_prefix() . $id, $data, $expiration === self::DEFAULT_EXPIRATION ? $this->default_expiration : $expiration );
+		return $this->get_cache_engine()->cache_object(
+			$this->get_cache_key_prefix() . $id,
+			$data,
+			self::DEFAULT_EXPIRATION === $expiration ? $this->default_expiration : $expiration
+		);
 	}
 
 	/**
@@ -246,9 +250,9 @@ abstract class ObjectCache {
 	 * @throws CacheException Passed $id is null and get_object_id returned null too.
 	 */
 	private function get_id_from_object_if_null( $object, $id ) {
-		if ( $id === null ) {
+		if ( null === $id ) {
 			$id = $this->get_object_id( $object );
-			if ( $id === null ) {
+			if ( null === $id ) {
 				throw new CacheException( "Null id supplied and the cache class doesn't implement get_object_id", $this );
 			}
 		}
@@ -264,7 +268,7 @@ abstract class ObjectCache {
 	 * @throws CacheException Expiration time is negative or higher than MAX_EXPIRATION.
 	 */
 	private function verify_expiration_value( int $expiration ): void {
-		if ( $expiration !== self::DEFAULT_EXPIRATION && ( ( $expiration < 1 ) || ( $expiration > self::MAX_EXPIRATION ) ) ) {
+		if ( self::DEFAULT_EXPIRATION !== $expiration && ( ( $expiration < 1 ) || ( $expiration > self::MAX_EXPIRATION ) ) ) {
 			throw new CacheException( 'Invalid expiration value, must be ObjectCache::DEFAULT_EXPIRATION or a value between 1 and ObjectCache::MAX_EXPIRATION', $this );
 		}
 	}
@@ -290,14 +294,14 @@ abstract class ObjectCache {
 		$this->verify_expiration_value( $expiration );
 
 		$data = $this->get_cache_engine()->get_cached_object( $this->get_cache_key_prefix() . $id );
-		if ( $data === null ) {
+		if ( null === $data ) {
 			if ( $get_from_datastore_callback ) {
 				$object = $get_from_datastore_callback( $id );
 			} else {
 				$object = $this->get_from_datastore( $id );
 			}
 
-			if ( $object === null ) {
+			if ( null === $object ) {
 				return null;
 			}
 
