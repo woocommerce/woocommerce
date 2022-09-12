@@ -3,7 +3,7 @@
  * WooCommerce In-Person Payments functions
  *
  * @package WooCommerce\Functions
- * @version x.x.x
+ * @version 7.0
  */
 
 /**

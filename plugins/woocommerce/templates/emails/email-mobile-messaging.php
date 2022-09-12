@@ -12,7 +12,7 @@
  *
  * @see https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version x.x.x
+ * @version 7.0
  */
 
 echo wp_kses_post( WC_Mobile_Messaging_Handler::prepare_mobile_message( $order, $blog_id, $now ) );
