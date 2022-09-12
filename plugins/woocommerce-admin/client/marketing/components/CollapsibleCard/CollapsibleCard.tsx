@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import {
 	Card,
 	CardBody,
@@ -51,6 +52,11 @@ const CollapsibleCard: React.FC< CollapsibleCardProps > = ( {
 				<Button
 					isSmall
 					icon={ collapsed ? chevronDown : chevronUp }
+					label={
+						collapsed
+							? __( 'Expand', 'woocommerce' )
+							: __( 'Collapse', 'woocommerce' )
+					}
 					onClick={ handleClick }
 				/>
 			</CardHeader>

@@ -8,12 +8,11 @@ import { __ } from '@wordpress/i18n';
  */
 import { WC_ASSET_URL } from '~/utils/admin-settings';
 
-const google = (
+const zapier = (
 	<img
-		src={ `${ WC_ASSET_URL }images/marketing/google.svg` }
-		alt={ __( 'Google', 'woocommerce' ) }
-		style={ { padding: '4px' } }
+		src={ `${ WC_ASSET_URL }images/marketing/zapier.png` }
+		alt={ __( 'Zapier', 'woocommerce' ) }
 	/>
 );
 
-export default google;
+export default zapier;

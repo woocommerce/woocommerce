@@ -11,15 +11,14 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import {
 	CollapsibleCard,
-	CardBody,
 	CardDivider,
 	ProductIcon,
-} from '../components';
+	PluginCardBody,
+} from '~/marketing/components';
 import { Plugin } from './types';
 import { usePlugins } from './usePlugins';
-import './InstalledExtensions.scss';
 
-const InstalledExtensions = () => {
+export const InstalledExtensions = () => {
 	const { installedPlugins, activatingPlugins, activateInstalledPlugin } =
 		usePlugins();
 
@@ -78,30 +77,19 @@ const InstalledExtensions = () => {
 				</Button>
 			);
 		}
-
-		return null;
 	};
 
 	return (
-		<CollapsibleCard
-			className="woocommerce-marketing-installed-extensions-card"
-			header={ __( 'Installed extensions', 'woocommerce' ) }
-		>
+		<CollapsibleCard header={ __( 'Installed extensions', 'woocommerce' ) }>
 			{ installedPlugins.map( ( el, idx ) => {
 				return (
 					<Fragment key={ el.slug }>
-						<CardBody>
-							<ProductIcon product={ el.slug } />
-							<div className="woocommerce-marketing-installed-extensions-card__details">
-								<div className="woocommerce-marketing-installed-extensions-card__details-name">
-									{ el.name }
-								</div>
-								<div className="woocommerce-marketing-installed-extensions-card__details-description">
-									{ el.description }
-								</div>
-							</div>
-							{ getButton( el ) }
-						</CardBody>
+						<PluginCardBody
+							icon={ <ProductIcon product={ el.slug } /> }
+							name={ el.name }
+							description={ el.description }
+							button={ getButton( el ) }
+						/>
 						{ idx !== installedPlugins.length - 1 && (
 							<CardDivider />
 						) }
@@ -111,5 +99,3 @@ const InstalledExtensions = () => {
 		</CollapsibleCard>
 	);
 };
-
-export default InstalledExtensions;
