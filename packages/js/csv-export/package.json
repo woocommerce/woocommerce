@@ -22,7 +22,7 @@
 	"types": "build-types",
 	"react-native": "src/index",
 	"dependencies": {
-		"browser-filesaver": "^1.1.1",
+		"file-saver": "^2.0.5",
 		"moment": "^2.29.1"
 	},
 	"publishConfig": {
@@ -44,6 +44,7 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
+		"@types/file-saver": "^2.0.5",
 		"@types/jest": "^27.4.1",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^8.12.0",
