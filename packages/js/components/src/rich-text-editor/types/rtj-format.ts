@@ -93,17 +93,7 @@ export type PlainTextNode = {
 };
 
 export type EmbeddableNodeAttributes = {
-	type:
-		| 'photo'
-		| 'video'
-		| 'audio'
-		| 'pdfAttachment'
-		| 'externalVideo'
-		| 'externalAudio'
-		| 'renderableCodeBlock'
-		| 'horizontalRuleLine'
-		| 'dayOneEntry'
-		| 'preview';
+	type: 'photo' | 'video' | 'audio' | 'pdfAttachment';
 };
 
 export type MomentThumbnail = {
@@ -152,37 +142,13 @@ export type ExternalVideoNode = EmbeddableNodeDefinition< {
 	type: 'pdfAttachment';
 	url: string;
 } >;
-export type ExternalAudioNode = EmbeddableNodeDefinition< {
-	type: 'externalAudio';
-	url: string;
-} >;
-export type EmbeddableCodeBlockNode = EmbeddableNodeDefinition< {
-	type: 'renderableCodeBlock';
-	contents: string;
-} >;
-export type DayOneEntryNode = EmbeddableNodeDefinition< {
-	type: 'dayOneEntry';
-	entryID: string;
-} >;
-export type PreviewNode = EmbeddableNodeDefinition< {
-	type: 'preview';
-	url: string;
-} >;
-export type HorizontalRuleLineNode = EmbeddableNodeDefinition< {
-	type: 'horizontalRuleLine';
-} >;
 
 export type EmbeddableNode =
 	| PhotoNode
 	| AudioNode
 	| VideoNode
 	| PdfNode
-	| ExternalAudioNode
-	| ExternalVideoNode
-	| EmbeddableCodeBlockNode
-	| DayOneEntryNode
-	| PreviewNode
-	| HorizontalRuleLineNode;
+	| ExternalVideoNode;
 
 export type EmbeddableContentNode = {
 	embeddedObjects: EmbeddableNode[];
