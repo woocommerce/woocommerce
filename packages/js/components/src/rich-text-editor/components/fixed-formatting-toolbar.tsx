@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { createElement } from '@wordpress/element';
-import { BlockAlignmentToolbar } from '@wordpress/block-editor';
 import { Slot, Toolbar, ToolbarGroup } from '@wordpress/components';
 
 /**
@@ -31,8 +30,12 @@ export const FixedFormattingToolbar = () => {
 	return (
 		<div>
 			<Toolbar label={ __( ' Formatting options', 'woocommerce' ) }>
-				{ /* Rich text formatting options  */ }
 				<ToolbarGroup>
+					{ /* Heading transforms */ }
+					<HeadingTransform headingLevel={ 1 } />
+					<HeadingTransform headingLevel={ 2 } />
+					<HeadingTransform headingLevel={ 3 } />
+					{ /* Rich text formatting options  */ }
 					<Slot name={ FORMAT_TOOLBAR_SLOT_NAME }>
 						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 						{ /* @ts-ignore - Type issue here might be an issue with DT types. */ }
@@ -48,32 +51,12 @@ export const FixedFormattingToolbar = () => {
 							return fills;
 						} }
 					</Slot>
-				</ToolbarGroup>
-				{ /* Heading transforms */ }
-				<ToolbarGroup>
-					<HeadingTransform
-						isContextMenu={ false }
-						headingLevel={ 1 }
-					/>
-					<HeadingTransform
-						isContextMenu={ false }
-						headingLevel={ 2 }
-					/>
-					<HeadingTransform
-						isContextMenu={ false }
-						headingLevel={ 3 }
-					/>
-				</ToolbarGroup>
-				{ /* List transforms */ }
-				<ToolbarGroup>
-					<ListTransform
-						isContextMenu={ false }
-						listType="unordered"
-					/>
-					<ListTransform isContextMenu={ false } listType="ordered" />
+					{ /* List transforms */ }
+					<ListTransform listType="unordered" />
+					<ListTransform listType="ordered" />
 					<QuoteTransform />
+					<TextAlignmentToolbar />
 				</ToolbarGroup>
-				<TextAlignmentToolbar />
 			</Toolbar>
 		</div>
 	);
