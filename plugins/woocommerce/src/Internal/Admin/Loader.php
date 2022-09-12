@@ -232,11 +232,13 @@ class Loader {
 
 		// The JITMs won't be shown in the Onboarding Wizard.
 		$is_onboarding   = isset( $_GET['path'] ) && '/setup-wizard' === wc_clean( wp_unslash( $_GET['path'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		$maybe_hide_jitm = $is_onboarding ? 'woocommerce-layout__notice-list-hide' : '';
+		$maybe_hide_jitm = $is_onboarding ? '-hide' : '';
+
+		echo '<div class="woocommerce-layout__jitm' . sanitize_html_class( $maybe_hide_jitm ) . '" id="jp-admin-notices"></div>';
 
 		// Wrap the notices in a hidden div to prevent flickering before
 		// they are moved elsewhere in the page by WordPress Core.
-		echo '<div class="woocommerce-layout__jitm ' . sanitize_html_class( $maybe_hide_jitm ) . '" id="jp-admin-notices">';
+		echo '<div class="woocommerce-layout__notice-list-hide" id="wp__notice-list">';
 
 		if ( PageController::is_admin_page() ) {
 			// Capture all notices and hide them. WordPress Core looks for
