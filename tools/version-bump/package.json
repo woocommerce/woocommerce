@@ -3,7 +3,6 @@
 	"version": "0.1.0",
 	"description": "Automate version bumping for WooCommerce plugins",
 	"main": " ",
-	"scripts": {},
 	"author": "",
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
@@ -20,5 +19,9 @@
 		"ora": "^5.4.1",
 		"semver": "^7.3.2",
 		"ts-node": "^10.9.1"
+	},
+	"scripts": {
+		"lint": "eslint . --ext .ts --config .eslintrc",
+		"version-bump": "node -r ts-node/register ./index.ts"
 	}
 }
