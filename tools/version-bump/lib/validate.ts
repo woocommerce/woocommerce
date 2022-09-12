@@ -1,13 +1,9 @@
 /**
  * External dependencies
  */
-import { valid, lt as versionLessThan, prerelease, parse } from 'semver';
+import { valid, lt as versionLessThan, parse } from 'semver';
 import { readFile } from 'fs/promises';
-
-/**
- * Internal dependencies
- */
-import { Logger } from './logger';
+import { Logger } from 'cli-core/src/logger';
 
 /**
  * Get a plugin's current version.

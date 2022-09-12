@@ -3,11 +3,11 @@
  */
 import { readFile, writeFile, stat } from 'fs/promises';
 import { join } from 'path';
+import { Logger } from 'cli-core/src/logger';
 
 /**
  * Internal dependencies
  */
-import { Logger } from './logger';
 import { MONOREPO_ROOT } from './const';
 
 /**
