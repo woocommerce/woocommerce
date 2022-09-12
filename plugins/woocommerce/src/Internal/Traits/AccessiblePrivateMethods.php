@@ -106,7 +106,7 @@ trait AccessiblePrivateMethods {
 		}
 
 		$first_item = $callback[0];
-		if ( $first_item === __CLASS__ ) {
+		if ( __CLASS__ === $first_item ) {
 			static::mark_static_method_as_accessible( $callback[1] );
 		} elseif ( is_object( $first_item ) && get_class( $first_item ) === __CLASS__ ) {
 			$first_item->mark_method_as_accessible( $callback[1] );
@@ -178,7 +178,7 @@ trait AccessiblePrivateMethods {
 			return call_user_func_array( array( __CLASS__, $name ), $arguments );
 		} elseif ( is_callable( array( 'parent', '__callStatic' ) ) ) {
 			return parent::__callStatic( $name, $arguments );
-		} elseif ( $name === 'add_action' || $name === 'add_filter' ) {
+		} elseif ( 'add_action' === $name || 'add_filter' === $name ) {
 			$proper_method_name = 'add_static_' . substr( $name, 4 );
 			throw new \Error( __CLASS__ . '::' . $name . " can't be called statically, did you mean '$proper_method_name'?" );
 		} elseif ( method_exists( __CLASS__, $name ) ) {
