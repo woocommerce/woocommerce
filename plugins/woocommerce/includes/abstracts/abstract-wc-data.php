@@ -108,6 +108,16 @@ abstract class WC_Data {
 	protected $meta_data = null;
 
 	/**
+	 * List of properties that were earlier managed by data store. However, since DataStore is a not a stored entity in itself, they used to store data in metadata of the data object.
+	 * With custom tables, some of these are moved from metadata to their own columns, but existing code will still try to add them to metadata. This array is used to keep track of such properties.
+	 *
+	 * Only reason to add a property here is that you are moving properties from DataStore instance to data object. If you are adding a new property, consider adding it to to $data array instead.
+	 *
+	 * @var array
+	 */
+	protected $legacy_datastore_props = array();
+
+	/**
 	 * Default constructor.
 	 *
 	 * @param int|object|array $read ID to load from the DB (optional) or already queried data.
@@ -310,6 +320,11 @@ abstract class WC_Data {
 		if ( ! $has_setter_or_getter ) {
 			return false;
 		}
+
+		if ( in_array( $key, $this->legacy_datastore_props, true ) ) {
+			return true; // return without warning because we don't want to break legacy code which was calling add/get/update/delete meta.
+		}
+
 		/* translators: %s: $key Key to check */
 		wc_doing_it_wrong( __FUNCTION__, sprintf( __( 'Generic add/update/get meta methods should not be used for internal meta data, including "%s". Use getters and setters.', 'woocommerce' ), $key ), '3.2.0' );
 

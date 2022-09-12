@@ -74,6 +74,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		'_recorded_coupon_usage_counts',
 		'_download_permissions_granted',
 		'_order_stock_reduced',
+		'_new_order_email_sent',
 	);
 
 	/**
@@ -602,7 +603,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param bool         $set True or false.
 	 */
 	public function set_download_permissions_granted( $order, $set ) {
-		$order->set_download_permissions_granted( $set );
+		if ( $order instanceof WC_Order ) {
+			$order->set_download_permissions_granted( $set );
+		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_download_permissions_granted', wc_bool_to_string( $set ) );
 	}
@@ -625,7 +628,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param bool         $set True or false.
 	 */
 	public function set_recorded_sales( $order, $set ) {
-		$order->set_recorded_sales( $set );
+		if ( $order instanceof WC_Order ) {
+			$order->set_recorded_sales( $set );
+		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_recorded_sales', wc_bool_to_string( $set ) );
 	}
@@ -648,7 +653,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param bool         $set True or false.
 	 */
 	public function set_recorded_coupon_usage_counts( $order, $set ) {
-		$order->set_recorded_coupon_usage_counts( $set );
+		if ( $order instanceof WC_Order ) {
+			$order->set_recorded_coupon_usage_counts( $set );
+		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_recorded_coupon_usage_counts', wc_bool_to_string( $set ) );
 	}
@@ -672,7 +679,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param bool         $set True or false.
 	 */
 	public function set_email_sent( $order, $set ) {
-		$order->set_new_order_email_sent( $set );
+		if ( $order instanceof WC_Order ) {
+			$order->set_new_order_email_sent( $set );
+		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_new_order_email_sent', wc_bool_to_string( $set ) );
 	}
@@ -776,7 +785,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param bool         $set True or false.
 	 */
 	public function set_stock_reduced( $order, $set ) {
-		$order->set_order_stock_reduced( $set );
+		if ( $order instanceof WC_Order ) {
+			$order->set_order_stock_reduced( $set );
+		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_order_stock_reduced', wc_bool_to_string( $set ) );
 	}

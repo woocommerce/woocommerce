@@ -464,6 +464,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
 	public function set_download_permissions_granted( $order, $set, $save = true ) {
+		if ( is_int( $order ) ) {
+			if ( ! $save ) {
+				_doing_it_wrong( __METHOD__, esc_html__( 'Passing an order_id but not saving is a no-op.', 'woocommerce' ), '7.0' );
+				return;
+			}
+			$order = wc_get_order( $order );
+		}
 		$order->set_download_permissions_granted( $set );
 		if ( $save ) {
 			$order->save();
@@ -489,6 +496,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
 	public function set_recorded_sales( $order, $set, $save = true ) {
+		if ( is_int( $order ) ) {
+			if ( ! $save ) {
+				_doing_it_wrong( __METHOD__, esc_html__( 'Passing an order_id but not saving is a no-op.', 'woocommerce' ), '7.0' );
+				return;
+			}
+			$order = wc_get_order( $order );
+		}
 		$order->set_recorded_sales( $set );
 		if ( $save ) {
 			$order->save();
@@ -514,6 +528,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
 	public function set_recorded_coupon_usage_counts( $order, $set, $save = true ) {
+		if ( is_int( $order ) ) {
+			if ( ! $save ) {
+				_doing_it_wrong( __METHOD__, esc_html__( 'Passing an order_id but not saving is a no-op.', 'woocommerce' ), '7.0' );
+				return;
+			}
+			$order = wc_get_order( $order );
+		}
 		$order->set_recorded_coupon_usage_counts( $set );
 		if ( $save ) {
 			$order->save();
@@ -539,6 +560,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
 	public function set_email_sent( $order, $set, $save = true ) {
+		if ( is_int( $order ) ) {
+			if ( ! $save ) {
+				_doing_it_wrong( __METHOD__, esc_html__( 'Passing an order_id but not saving is a no-op.', 'woocommerce' ), '7.0' );
+				return;
+			}
+			$order = wc_get_order( $order );
+		}
 		$order->set_new_order_email_sent( $set );
 		if ( $save ) {
 			$order->save();
@@ -589,6 +617,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
 	public function set_stock_reduced( $order, $set, $save = true ) {
+		if ( is_int( $order ) ) {
+			if ( ! $save ) {
+				_doing_it_wrong( __METHOD__, esc_html__( 'Passing an order_id but not saving is a no-op.', 'woocommerce' ), '7.0' );
+				return;
+			}
+			$order = wc_get_order( $order );
+		}
 		$order->set_order_stock_reduced( $set );
 		if ( $save ) {
 			$order->save();
