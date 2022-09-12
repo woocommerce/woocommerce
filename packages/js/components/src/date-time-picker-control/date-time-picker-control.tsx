@@ -18,7 +18,8 @@ export type DateTimePickerControlProps = {
 	dateTimeFormat?: string;
 	disabled?: boolean;
 	is12Hour?: boolean;
-	onChange: ( date: string ) => void;
+	onChange?: ( date: string ) => void;
+	onBlur?: () => void;
 	label?: string;
 	placeholder?: string;
 	help?: string | null;
@@ -30,6 +31,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	dateTimeFormat = is12Hour ? 'MM/DD/YYYY h:mm a' : 'MM/DD/YYYY H:MM',
 	disabled = false,
 	onChange,
+	onBlur,
 	label,
 	placeholder,
 	help,
@@ -38,29 +40,89 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	const [ lastValidDate, setLastValidDate ] = useState< Moment | null >(
 		null
 	);
+	const [ lastSentChange, setLastSentChange ] = useState( '' );
+
+	function parseMomentIso( dateString?: string | null ): Moment {
+		return moment( dateString, moment.ISO_8601, true );
+	}
+
+	function parseMoment( dateString?: string | null ): Moment {
+		return moment( dateString, dateTimeFormat );
+	}
+
+	function formatMomentIso( momentDate: Moment ): string {
+		return momentDate.toISOString();
+	}
+
+	function formatMoment( momentDate: Moment ): string {
+		return momentDate.format( dateTimeFormat );
+	}
+
+	function hasFocusLeftComponent(
+		event: React.FocusEvent< HTMLInputElement >
+	): boolean {
+		const dropdownParentOfTargetReceivingFocus =
+			event.relatedTarget?.closest( '.components-dropdown' );
+		const dropdownParentOfTargetLosingFocus = event.currentTarget?.closest(
+			'.components-dropdown'
+		);
+
+		return (
+			! dropdownParentOfTargetReceivingFocus ||
+			dropdownParentOfTargetReceivingFocus !==
+				dropdownParentOfTargetLosingFocus
+		);
+	}
+
+	function change() {
+		const newDate = parseMoment( inputString );
+		setLastSentChange(
+			newDate.isValid() ? formatMomentIso( newDate ) : inputString
+		);
+	}
+
+	function blur() {
+		change();
+
+		if ( onBlur ) {
+			onBlur();
+		}
+	}
 
 	useEffect( () => {
-		const newDate = moment( currentDate, moment.ISO_8601, true );
+		const newDate = parseMomentIso( currentDate );
 
 		if ( newDate.isValid() ) {
-			setInputString( newDate.format( dateTimeFormat ) );
+			setInputString( formatMoment( newDate ) );
 		} else {
 			setInputString( currentDate || '' );
 		}
 	}, [ currentDate, dateTimeFormat ] );
 
 	useEffect( () => {
-		const newDate = moment( inputString, dateTimeFormat );
+		const newDate = parseMoment( inputString );
 
 		if ( newDate.isValid() ) {
 			setLastValidDate( newDate );
 		}
 	}, [ inputString ] );
 
+	useEffect( () => {
+		if ( onChange ) {
+			onChange( lastSentChange );
+		}
+	}, [ lastSentChange ] );
+
 	return (
 		<Dropdown
 			position="bottom center"
 			focusOnMount={ false }
+			// @ts-expect-error `onToggle` does exist.
+			onToggle={ ( willOpen ) => {
+				if ( ! willOpen ) {
+					blur();
+				}
+			} }
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<>
 					<InputControl
@@ -70,34 +132,8 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 						onBlur={ (
 							event: React.FocusEvent< HTMLInputElement >
 						) => {
-							if ( ! isOpen ) {
-								return;
-							}
-
-							const newDate = moment(
-								event.target.value,
-								dateTimeFormat
-							);
-							onChange(
-								newDate.isValid()
-									? newDate.toISOString()
-									: event.target.value
-							);
-
-							const relatedTargetParent =
-								event.relatedTarget?.closest(
-									'.components-dropdown'
-								);
-							const currentTargetParent =
-								event.currentTarget?.closest(
-									'.components-dropdown'
-								);
-
-							if (
-								! relatedTargetParent ||
-								relatedTargetParent !== currentTargetParent
-							) {
-								onToggle();
+							if ( hasFocusLeftComponent( event ) ) {
+								onToggle(); // hide the dropdown
 							}
 						} }
 						label={ label }
@@ -115,10 +151,10 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 						) }
 						onFocus={ () => {
 							if ( isOpen ) {
-								return;
+								return; // the dropdown is already open, do we don't need to do anything
 							}
 
-							onToggle();
+							onToggle(); // show the dropdown
 						} }
 						aria-expanded={ isOpen }
 					/>
@@ -127,10 +163,15 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			) }
 			renderContent={ () => (
 				<WpDateTimePicker
-					currentDate={ lastValidDate?.toISOString() }
+					currentDate={
+						lastValidDate
+							? formatMomentIso( lastValidDate )
+							: undefined
+					}
 					onChange={ ( date: string ) => {
-						const formattedDate =
-							moment( date ).format( dateTimeFormat );
+						const formattedDate = formatMoment(
+							parseMomentIso( date )
+						);
 						setInputString( formattedDate );
 					} }
 					is12Hour={ is12Hour }
