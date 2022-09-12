@@ -2,7 +2,7 @@
 <h2 id="actions-and-filters">Actions and Filters</h2>
 <!-- /wp:heading -->
 
-<% if (changes.hooks.length) { %>
+<% if (changes.hooks.size) { %>
   <!-- wp:table -->
   <figure class="wp-block-table">
     <table>
@@ -11,7 +11,7 @@
           <th><strong>Filter</strong></th>
           <th><strong>Description</strong></th>
         </tr>
-        <% changes.hooks.forEach(({name, description}) => { %>
+        <% changes.hooks.forEach(({ name, description }) => { %>
           <tr>
             <td><%= name %></td>
             <td><%= description %></td>

@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Update post directly to update correct post_modified value.

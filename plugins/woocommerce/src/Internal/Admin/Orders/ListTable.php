@@ -112,7 +112,7 @@ class ListTable extends WP_List_Table {
 	 * @return mixed
 	 */
 	public function set_items_per_page( $default, string $option, int $value ) {
-		return $option === 'edit_orders_per_page' ? absint( $value ) : $default;
+		return 'edit_orders_per_page' === $option ? absint( $value ) : $default;
 	}
 
 	/**
@@ -184,12 +184,22 @@ class ListTable extends WP_List_Table {
 	 * @return array
 	 */
 	protected function get_bulk_actions() {
-		$actions = array(
-			'mark_processing' => __( 'Change status to processing', 'woocommerce' ),
-			'mark_on-hold'    => __( 'Change status to on-hold', 'woocommerce' ),
-			'mark_completed'  => __( 'Change status to completed', 'woocommerce' ),
-			'mark_cancelled'  => __( 'Change status to cancelled', 'woocommerce' ),
-		);
+		$selected_status = $this->order_query_args['status'] ?? false;
+
+		if ( array( 'trash' ) === $selected_status ) {
+			$actions = array(
+				'untrash' => __( 'Restore', 'woocommerce' ),
+				'delete'  => __( 'Delete permanently', 'woocommerce' ),
+			);
+		} else {
+			$actions = array(
+				'mark_processing' => __( 'Change status to processing', 'woocommerce' ),
+				'mark_on-hold'    => __( 'Change status to on-hold', 'woocommerce' ),
+				'mark_completed'  => __( 'Change status to completed', 'woocommerce' ),
+				'mark_cancelled'  => __( 'Change status to cancelled', 'woocommerce' ),
+				'trash'           => __( 'Move to Trash', 'woocommerce' ),
+			);
+		}
 
 		if ( wc_string_to_bool( get_option( 'woocommerce_allow_bulk_remove_personal_data', 'no' ) ) ) {
 			$actions['remove_personal_data'] = __( 'Remove personal data', 'woocommerce' );
@@ -404,7 +414,7 @@ class ListTable extends WP_List_Table {
 	protected function extra_tablenav( $which ) {
 		echo '<div class="alignleft actions">';
 
-		if ( $which === 'top' ) {
+		if ( 'top' === $which ) {
 			$this->months_filter();
 			$this->customers_filter();
 
@@ -672,7 +682,7 @@ class ListTable extends WP_List_Table {
 
 			$latest_note = current( $latest_notes );
 
-			if ( isset( $latest_note->content ) && $approved_comments_count === 1 ) {
+			if ( isset( $latest_note->content ) && 1 === $approved_comments_count ) {
 				$tooltip = wc_sanitize_tooltip( $latest_note->content );
 			} elseif ( isset( $latest_note->content ) ) {
 				/* translators: %d: notes count */
@@ -877,6 +887,15 @@ class ListTable extends WP_List_Table {
 		if ( 'remove_personal_data' === $action ) {
 			$report_action = 'removed_personal_data';
 			$changed       = $this->do_bulk_action_remove_personal_data( $ids );
+		} elseif ( 'trash' === $action ) {
+			$changed       = $this->do_delete( $ids );
+			$report_action = 'trashed';
+		} elseif ( 'delete' === $action ) {
+			$changed       = $this->do_delete( $ids, true );
+			$report_action = 'deleted';
+		} elseif ( 'untrash' === $action ) {
+			$changed       = $this->do_untrash( $ids );
+			$report_action = 'untrashed';
 		} elseif ( false !== strpos( $action, 'mark_' ) ) {
 			$order_statuses = wc_get_order_statuses();
 			$new_status     = substr( $action, 5 );
@@ -954,6 +973,52 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Handles bulk trashing of orders.
+	 *
+	 * @param int[] $ids Order IDs to be trashed.
+	 * @param bool  $force_delete When set, the order will be completed deleted. Otherwise, it will be trashed.
+	 *
+	 * @return int Number of orders that were trashed.
+	 */
+	private function do_delete( array $ids, bool $force_delete = false ): int {
+		$orders_store = wc_get_container()->get( OrdersTableDataStore::class );
+		$delete_args  = $force_delete ? array( 'force_delete' => true ) : array();
+		$changed      = 0;
+
+		foreach ( $ids as $id ) {
+			$order = wc_get_order( $id );
+			$orders_store->delete( $order, $delete_args );
+			$updated_order = wc_get_order( $id );
+
+			if ( ( $force_delete && false === $updated_order ) || ( ! $force_delete && $updated_order->get_status() === 'trash' ) ) {
+				$changed++;
+			}
+		}
+
+		return $changed;
+	}
+
+	/**
+	 * Handles bulk restoration of trashed orders.
+	 *
+	 * @param array $ids Order IDs to be restored to their previous status.
+	 *
+	 * @return int Number of orders that were restored from the trash.
+	 */
+	private function do_untrash( array $ids ): int {
+		$orders_store = wc_get_container()->get( OrdersTableDataStore::class );
+		$changed      = 0;
+
+		foreach ( $ids as $id ) {
+			if ( $orders_store->untrash_order( wc_get_order( $id ) ) ) {
+				$changed++;
+			}
+		}
+
+		return $changed;
+	}
+
+	/**
 	 * Show confirmation message that order status changed for number of orders.
 	 */
 	public function bulk_action_notices() {
@@ -964,20 +1029,41 @@ class ListTable extends WP_List_Table {
 		$order_statuses = wc_get_order_statuses();
 		$number         = absint( $_REQUEST['changed'] ?? 0 );
 		$bulk_action    = wc_clean( wp_unslash( $_REQUEST['bulk_action'] ) );
+		$message        = '';
 
 		// Check if any status changes happened.
 		foreach ( $order_statuses as $slug => $name ) {
 			if ( 'marked_' . str_replace( 'wc-', '', $slug ) === $bulk_action ) { // WPCS: input var ok, CSRF ok.
 				/* translators: %s: orders count */
 				$message = sprintf( _n( '%s order status changed.', '%s order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) );
-				echo '<div class="updated"><p>' . esc_html( $message ) . '</p></div>';
 				break;
 			}
 		}
 
-		if ( 'removed_personal_data' === $bulk_action ) { // WPCS: input var ok, CSRF ok.
-			/* translators: %s: orders count */
-			$message = sprintf( _n( 'Removed personal data from %s order.', 'Removed personal data from %s orders.', $number, 'woocommerce' ), number_format_i18n( $number ) );
+		switch ( $bulk_action ) {
+			case 'removed_personal_data':
+				/* translators: %s: orders count */
+				$message = sprintf( _n( 'Removed personal data from %s order.', 'Removed personal data from %s orders.', $number, 'woocommerce' ), number_format_i18n( $number ) );
+				echo '<div class="updated"><p>' . esc_html( $message ) . '</p></div>';
+				break;
+
+			case 'trashed':
+				/* translators: %s: orders count */
+				$message = sprintf( _n( '%s order moved to the Trash.', '%s orders moved to the Trash.', $number, 'woocommerce' ), number_format_i18n( $number ) );
+				break;
+
+			case 'untrashed':
+				/* translators: %s: orders count */
+				$message = sprintf( _n( '%s order restored from the Trash.', '%s orders restored from the Trash.', $number, 'woocommerce' ), number_format_i18n( $number ) );
+				break;
+
+			case 'deleted':
+				/* translators: %s: orders count */
+				$message = sprintf( _n( '%s order permanently deleted.', '%s orders permanently deleted.', $number, 'woocommerce' ), number_format_i18n( $number ) );
+				break;
+		}
+
+		if ( ! empty( $message ) ) {
 			echo '<div class="updated"><p>' . esc_html( $message ) . '</p></div>';
 		}
 	}

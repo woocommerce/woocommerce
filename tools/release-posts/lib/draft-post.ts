@@ -2,13 +2,13 @@
  * External dependencies
  */
 import fetch from 'node-fetch';
+import { Logger } from 'cli-core/src/logger';
 
 /**
  * Internal dependencies
  */
 import { getWordpressComAuthToken } from './oauth-helper';
 import { getEnvVar } from './environment';
-import { Logger } from './logger';
 
 /**
  * Create a draft of a post on wordpress.com
@@ -21,7 +21,8 @@ import { Logger } from './logger';
 export const createWpComDraftPost = async (
 	siteId: string,
 	postTitle: string,
-	postContent: string
+	postContent: string,
+	tags: string[]
 ) => {
 	const clientId = getEnvVar( 'WPCOM_OAUTH_CLIENT_ID', true );
 	const clientSecret = getEnvVar( 'WPCOM_OAUTH_CLIENT_SECRET', true );
@@ -56,6 +57,7 @@ export const createWpComDraftPost = async (
 					title: postTitle,
 					content: postContent,
 					status: 'draft',
+					tags,
 				} ),
 			}
 		);

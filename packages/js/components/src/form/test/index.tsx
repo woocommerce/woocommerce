@@ -172,14 +172,14 @@ describe( 'Form', () => {
 			expect( mockOnChange ).toHaveBeenCalledWith(
 				{ name: 'firstName', value: 'F' },
 				{ firstName: 'F' },
-				false
+				true
 			);
 
 			fireEvent.change( firstNameInput, { target: { value: 'Fi' } } );
 			expect( mockOnChange ).toHaveBeenCalledWith(
 				{ name: 'firstName', value: 'Fi' },
 				{ firstName: 'Fi' },
-				false
+				true
 			);
 		}
 	} );
@@ -222,14 +222,14 @@ describe( 'Form', () => {
 			expect( mockOnChange ).toHaveBeenCalledWith(
 				{ name: 'firstName', value: 'F' },
 				{ firstName: 'F' },
-				true
+				false
 			);
 
 			fireEvent.change( firstNameInput, { target: { value: 'Fi' } } );
 			expect( mockOnChange ).toHaveBeenCalledWith(
 				{ name: 'firstName', value: 'Fi' },
 				{ firstName: 'Fi' },
-				false
+				true
 			);
 		}
 	} );

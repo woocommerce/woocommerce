@@ -1,30 +1,31 @@
 /**
  * External dependencies
  */
-import Analyzer from 'code-analyzer/src/commands/analyzer';
+import { scanForChanges } from 'code-analyzer/src/lib/scan-changes';
 import semver from 'semver';
-import { promises } from 'fs';
 import { writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import { Logger } from 'cli-core/src/logger';
+import { Command } from '@commander-js/extra-typings';
+import dotenv from 'dotenv';
 
 /**
  * Internal dependencies
  */
-import { program } from '../program';
-import { renderTemplate } from '../lib/render-template';
-import { processChanges } from '../lib/process-changes';
-import { createWpComDraftPost } from '../lib/draft-post';
-import { generateContributors } from '../lib/contributors';
-import { Logger } from '../lib/logger';
+import { renderTemplate } from '../../lib/render-template';
+import { createWpComDraftPost } from '../../lib/draft-post';
+import { generateContributors } from '../../lib/contributors';
 
 const DEVELOPER_WOOCOMMERCE_SITE_ID = '96396764';
 
 const VERSION_VALIDATION_REGEX =
 	/^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/;
 
+dotenv.config();
+
 // Define the release post command
-program
+const program = new Command()
 	.command( 'release' )
 	.description( 'CLI to automate generation of a release post.' )
 	.argument(
@@ -36,7 +37,14 @@ program
 		'--previousVersion <previousVersion>',
 		'If you would like to compare against a version other than last minor you can provide a tag version from Github.'
 	)
+	.option(
+		'--tags <tags>',
+		'Comma separated list of tags to add to the post.',
+		'Releases,WooCommerce Core'
+	)
 	.action( async ( currentVersion, options ) => {
+		const tags = options.tags.split( ',' ).map( ( tag ) => tag.trim() );
+
 		const previousVersion = options.previousVersion
 			? semver.parse( options.previousVersion )
 			: semver.parse( currentVersion );
@@ -61,24 +69,17 @@ program
 				);
 			}
 
-			// generates a `changes.json` file in the current directory.
-			await Analyzer.run( [
+			const changes = await scanForChanges(
 				currentVersion,
 				currentVersion,
-				'-s',
+				false,
 				'https://github.com/woocommerce/woocommerce.git',
-				'-b',
-				previousVersion.toString(),
-			] );
-
-			const changes = JSON.parse(
-				await promises.readFile(
-					process.cwd() + '/changes.json',
-					'utf8'
-				)
+				previousVersion.toString()
 			);
 
-			const changeset = processChanges( changes );
+			const schemaChanges = changes.schema.filter(
+				( s ) => ! s.areEqual
+			);
 
 			Logger.startTask( 'Finding contributors' );
 			const title = `WooCommerce ${ currentVersion } Released`;
@@ -91,7 +92,10 @@ program
 			const html = await renderTemplate( 'release.ejs', {
 				contributors,
 				title,
-				changes: changeset,
+				changes: {
+					...changes,
+					schema: schemaChanges,
+				},
 				displayVersion: currentVersion,
 			} );
 
@@ -113,7 +117,8 @@ program
 					const { URL } = await createWpComDraftPost(
 						DEVELOPER_WOOCOMMERCE_SITE_ID,
 						title,
-						html
+						html,
+						tags
 					);
 
 					Logger.notice( `Published draft release post at ${ URL }` );
@@ -130,3 +135,5 @@ program
 			);
 		}
 	} );
+
+program.parse( process.argv );

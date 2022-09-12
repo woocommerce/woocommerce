@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { checkoutRef, sparseCheckoutRepo } from 'code-analyzer/src/git';
+import { checkoutRef, sparseCheckoutRepo } from 'cli-core/src/git';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import semver from 'semver';

@@ -54,7 +54,7 @@ type FormProps< Values > = {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		value: { name: string; value: any },
 		values: Values,
-		hasErrors: boolean
+		isValid: boolean
 	) => void;
 	/**
 	 * A function that is passed a list of all values and
@@ -174,7 +174,7 @@ function FormComponent< Values extends Record< string, any > >(
 					callback(
 						{ name, value },
 						newValues,
-						!! Object.keys( newErrors || {} ).length
+						! Object.keys( newErrors || {} ).length
 					);
 				}
 			} );
