@@ -110,8 +110,12 @@
 			}
 		}
 	}
-	.is-single .wc-blocks-components-form-token-field-wrapper .components-form-token-field__input-container {
+	.wc-blocks-components-form-token-field-wrapper:not(.single-selection) .components-form-token-field__input-container {
 		width: calc(100% - 50px);
+
+		.components-form-token-field__suggestions-list {
+			width: calc(100% + 50px);
+		}
 	}
 }
 
