@@ -7,7 +7,8 @@
  */
 class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 
-	const BLOG_ID = 2;
+	const BLOG_ID  = 2;
+	const ORDER_ID = 5;
 
 	/**
 	 * @var string $initial_country that is set on site which is a platform for unit tests, before running tests in this test suite.
@@ -43,10 +44,7 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 
 		$mobile_message = WC_Mobile_Messaging_Handler::prepare_mobile_message( new WC_Order(), self::BLOG_ID, $now );
 
-		$this->assertEquals(
-			'<a href="https://woocommerce.com/mobile/order?blog_id=' . self::BLOG_ID . '&#038;order_id=' . 0 . '">Manage the order</a> with the app.',
-			$mobile_message
-		);
+		$this->assertNotNull( $mobile_message );
 	}
 
 	/**
@@ -61,14 +59,14 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 
 		$mobile_message = WC_Mobile_Messaging_Handler::prepare_mobile_message( new WC_Order(), self::BLOG_ID, $now );
 
-		$this->assertEquals(
-			'Process your orders on the go. <a href="https://woocommerce.com/mobile/">Get the app</a>. Powered by Jetpack.',
+		$this->assertContains(
+			'href="https://woocommerce.com/mobile/">',
 			$mobile_message
 		);
 	}
 
 	/**
-	 * Tests if SUT returns correct message when the user uses mobile app but store is not eligible for IPP and order is
+	 * Tests if SUT returns message with expected deep link when the user uses mobile app but store is not eligible for IPP and order is
 	 */
 	public function test_show_manage_order_message_when_store_is_NOT_ipp_eligible() {
 		$now = $this->prepare_timeline_with_valid_last_mobile_app_usage();
@@ -77,8 +75,8 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 
 		$mobile_message = WC_Mobile_Messaging_Handler::prepare_mobile_message( $ipp_eligible_order, self::BLOG_ID, $now );
 
-		$this->assertEquals(
-			'<a href="https://woocommerce.com/mobile/order?blog_id=' . self::BLOG_ID . '&#038;order_id=' . 0 . '">Manage the order</a> with the app.',
+		$this->assertContains(
+			'href="https://woocommerce.com/mobile/orders/details?blog_id=' . self::BLOG_ID . '&#038;order_id=' . self::ORDER_ID,
 			$mobile_message
 		);
 	}
@@ -94,8 +92,8 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 
 		$mobile_message = WC_Mobile_Messaging_Handler::prepare_mobile_message( $ipp_eligible_order, self::BLOG_ID, $now );
 
-		$this->assertEquals(
-			'<a href="https://woocommerce.com/mobile/payments?blog_id=2&#038;order_id=0">Collect payments easily</a> from your customers anywhere with our mobile app.',
+		$this->assertContains(
+			'href="https://woocommerce.com/mobile/payments/">',
 			$mobile_message
 		);
 	}
@@ -139,6 +137,7 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 	 */
 	public static function generate_ipp_eligible_order(): WC_Order {
 		$ipp_eligible_order = new WC_Order();
+		$ipp_eligible_order->set_id( self::ORDER_ID );
 		$ipp_eligible_order->set_status( 'pending' );
 		try {
 			$ipp_eligible_order->set_payment_method( 'cod' );
