@@ -21,7 +21,7 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 	/**
 	 * Saves values of initial country and currency before running test suite.
 	 */
-	public static function setUpBeforeClass(): void {
+	public static function wpSetUpBeforeClass(): void {
 		self::$initial_country  = WC()->countries->get_base_country();
 		self::$initial_currency = get_woocommerce_currency();
 	}
@@ -29,7 +29,7 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 	/**
 	 * Restores initial values of country and currency after running test suite.
 	 */
-	public static function tearDownAfterClass(): void {
+	public static function wpTearDownAfterClass(): void {
 		update_option( 'woocommerce_default_country', self::$initial_country );
 		update_option( 'woocommerce_currency', self::$initial_currency );
 	}
