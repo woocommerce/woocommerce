@@ -41,4 +41,89 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( false, $cached_refunds );
 	}
 
+	/**
+	 * Test that props set by datastores can be set and get by using any of metadata, object props or from data store setters.
+	 * Ideally, this should be possible only from getters and setters for objects, but for backward compatibility, earlier ways are also supported.
+	 */
+	public function test_internal_ds_getters_and_setters() {
+		$props_to_test = array(
+			'_download_permissions_granted',
+			'_recorded_sales',
+			'_recorded_coupon_usage_counts',
+			'_new_order_email_sent',
+			'_order_stock_reduced',
+		);
+
+		$ds_getter_setter_names = array(
+			'_order_stock_reduced'  => 'stock_reduced',
+			'_new_order_email_sent' => 'email_sent',
+		);
+
+		$order = WC_Helper_Order::create_order();
+
+		// set everything to true via props.
+		foreach ( $props_to_test as $prop ) {
+			$order->{"set$prop"}( true );
+			$order->save();
+		}
+		$this->assert_get_prop_via_ds_object_and_metadata( $props_to_test, $order, true, $ds_getter_setter_names );
+
+		// set everything to false, via metadata.
+		foreach ( $props_to_test as $prop ) {
+			$order->update_meta_data( $prop, false );
+			$order->save();
+		}
+		$this->assert_get_prop_via_ds_object_and_metadata( $props_to_test, $order, false, $ds_getter_setter_names );
+
+		// set everything to true again, via datastore setter.
+		foreach ( $props_to_test as $prop ) {
+			if ( in_array( $prop, array_keys( $ds_getter_setter_names ), true ) ) {
+				$setter = $ds_getter_setter_names[ $prop ];
+				$order->get_data_store()->{"set_$setter"}( $order, true );
+				continue;
+			}
+			$order->get_data_store()->{"set$prop"}( $order, true );
+		}
+		$this->assert_get_prop_via_ds_object_and_metadata( $props_to_test, $order, true, $ds_getter_setter_names );
+
+		// set everything to false again, via props.
+		foreach ( $props_to_test as $prop ) {
+			$order->{"set$prop"}( false );
+			$order->save();
+		}
+		$this->assert_get_prop_via_ds_object_and_metadata( $props_to_test, $order, false, $ds_getter_setter_names );
+	}
+
+	/**
+	 * Helper method to assert props are set.
+	 *
+	 * @param array    $props List of props to test.
+	 * @param WC_Order $order Order object.
+	 * @param mixed    $value Value to assert.
+	 * @param array    $ds_getter_setter_names List of props with custom getter/setter names.
+	 */
+	private function assert_get_prop_via_ds_object_and_metadata( array $props, WC_Order $order, $value, array $ds_getter_setter_names ) {
+		wp_cache_flush();
+		$refreshed_order = wc_get_order( $order->get_id() );
+		// assert via metadata.
+		foreach ( $props as $prop ) {
+			$this->assertEquals( $value, $refreshed_order->get_meta( $prop ), "Failed getting $prop from metadata" );
+		}
+
+		// assert via datastore object.
+		foreach ( $props as $prop ) {
+			if ( in_array( $prop, array_keys( $ds_getter_setter_names ), true ) ) {
+				$getter = $ds_getter_setter_names[ $prop ];
+				$this->assertEquals( $value, $refreshed_order->get_data_store()->{"get_$getter"}( $refreshed_order ), "Failed getting $prop from datastore" );
+				continue;
+			}
+			$this->assertEquals( $value, $refreshed_order->get_data_store()->{"get$prop"}( $order ), "Failed getting $prop from datastore" );
+		}
+
+		// assert via order object.
+		foreach ( $props as $prop ) {
+			$this->assertEquals( $value, $refreshed_order->{"get$prop"}(), "Failed getting $prop from object" );
+		}
+	}
+
 }

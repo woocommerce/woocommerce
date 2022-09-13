@@ -207,17 +207,22 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$updated_props     = array();
 		$id                = $order->get_id();
 		$meta_key_to_props = array(
-			'_order_key'            => 'order_key',
-			'_customer_user'        => 'customer_id',
-			'_payment_method'       => 'payment_method',
-			'_payment_method_title' => 'payment_method_title',
-			'_transaction_id'       => 'transaction_id',
-			'_customer_ip_address'  => 'customer_ip_address',
-			'_customer_user_agent'  => 'customer_user_agent',
-			'_created_via'          => 'created_via',
-			'_date_completed'       => 'date_completed',
-			'_date_paid'            => 'date_paid',
-			'_cart_hash'            => 'cart_hash',
+			'_order_key'                    => 'order_key',
+			'_customer_user'                => 'customer_id',
+			'_payment_method'               => 'payment_method',
+			'_payment_method_title'         => 'payment_method_title',
+			'_transaction_id'               => 'transaction_id',
+			'_customer_ip_address'          => 'customer_ip_address',
+			'_customer_user_agent'          => 'customer_user_agent',
+			'_created_via'                  => 'created_via',
+			'_date_completed'               => 'date_completed',
+			'_date_paid'                    => 'date_paid',
+			'_cart_hash'                    => 'cart_hash',
+			'_download_permissions_granted' => 'download_permissions_granted',
+			'_recorded_sales'               => 'recorded_sales',
+			'_recorded_coupon_usage_counts' => 'recorded_coupon_usage_counts',
+			'_new_order_email_sent'         => 'new_order_email_sent',
+			'_order_stock_reduced'          => 'order_stock_reduced',
 		);
 
 		$props_to_update = $this->get_props_to_update( $order, $meta_key_to_props );
