@@ -42,7 +42,7 @@
 	},
 	"scripts": {
 		"turbo:build": "pnpm run clean && pnpm run compile",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- --",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"clean": "rm -rf ./build ./build-module",
 		"compile": "e2e-builds",
 		"prepare": "pnpm run build",
