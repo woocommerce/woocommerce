@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Auto resolve peer deps to support pnpm 7
