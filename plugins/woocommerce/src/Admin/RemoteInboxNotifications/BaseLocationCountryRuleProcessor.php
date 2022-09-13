@@ -29,6 +29,7 @@ class BaseLocationCountryRuleProcessor implements RuleProcessorInterface {
 			return false;
 		}
 
+		// Return false if the location is the default country and if onboarding hasn't been finished or the store address not been updated.
 		if ( 'US' === $base_location['country'] && 'CA' === $base_location['state'] && empty( get_option( 'woocommerce_store_address', '' ) ) && OnboardingProfile::needs_completion() ) {
 			return false;
 		}
