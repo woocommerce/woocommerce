@@ -41,19 +41,6 @@ class MobileAppMagicLink extends \WC_REST_Data_Controller {
 	public function register_routes() {
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/jetpack_status',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'jetpack_status' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
-
-		register_rest_route(
-			$this->namespace,
 			'/' . $this->rest_base . '/send-magic-link',
 			array(
 				array(
@@ -66,22 +53,6 @@ class MobileAppMagicLink extends \WC_REST_Data_Controller {
 		);
 
 		parent::register_routes();
-	}
-
-	/**
-	 * Get Jetpack status.
-	 *
-	 * @return array
-	 */
-	public function jetpack_status() {
-		return rest_ensure_response(
-			[
-				'installed'      => true,
-				'activated'      => true,
-				'connected'      => true,
-				'user_connected' => false,
-			]
-		);
 	}
 
 	/**
