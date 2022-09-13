@@ -1,8 +1,6 @@
 name: Run tests against PR in an environment with COT enabled
 on:
   pull_request:
-    branches:
-      - cot-main
   workflow_dispatch:
 
 concurrency:
