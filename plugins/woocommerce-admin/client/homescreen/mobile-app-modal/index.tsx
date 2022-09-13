@@ -5,6 +5,8 @@ import { useState, useEffect, useCallback } from '@wordpress/element';
 import { Guide } from '@wordpress/components';
 import { useSearchParams } from 'react-router-dom';
 import { updateQueryString } from '@woocommerce/navigation';
+import { useDispatch } from '@wordpress/data';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -26,6 +28,7 @@ export const MobileAppModal = () => {
 	const [ guideIsOpen, setGuideIsOpen ] = useState( true );
 
 	const { state, jetpackConnectionData } = useJetpackPluginState();
+	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
 	const [ pageContent, setPageContent ] = useState< React.ReactNode >();
 	const [ searchParams ] = useSearchParams();
@@ -99,6 +102,9 @@ export const MobileAppModal = () => {
 			{ guideIsOpen && (
 				<Guide
 					onFinish={ () => {
+						updateOptions( {
+							woocommerce_admin_dismissed_mobile_app_modal: 'yes',
+						} );
 						// clear the search params that we use so that the URL is clean
 						updateQueryString(
 							{
