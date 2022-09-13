@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+change webpack config to use asset modules instead of custom loaders

@@ -1,4 +1,11 @@
 /**
+ * Internal dependencies
+ */
+import { SchemaDiff } from './git';
+import { HookChangeDescription } from './lib/hook-changes';
+import { TemplateChangeDescription } from './lib/template-changes';
+
+/**
  * Print template results
  *
  * @param {Map<string, string[]>} data   Raw data.
@@ -7,32 +14,29 @@
  * @param {Function}              log    print method.
  */
 export const printTemplateResults = (
-	data: Map< string, string[] >,
+	data: TemplateChangeDescription[],
 	output: string,
 	title: string,
 	log: ( s: string ) => void
 ): void => {
+	//[code,title,message]
 	if ( output === 'github' ) {
 		let opt = '\\n\\n### Template changes:';
-		for ( const [ key, value ] of data ) {
-			opt += `\\n* **file:** ${ key }`;
-			opt += `\\n  * ${ value[ 0 ].toUpperCase() }: ${ value[ 2 ] }`;
+		for ( const { filePath, code, message } of data ) {
+			opt += `\\n* **file:** ${ filePath }`;
+			opt += `\\n  * ${ code.toUpperCase() }: ${ message }`;
 			log(
-				`::${ value[ 0 ] } file=${ key },line=1,title=${ value[ 1 ] }::${ value[ 2 ] }`
+				`::${ code } file=${ filePath },line=1,title=${ title }::${ message }`
 			);
 		}
 
 		log( `::set-output name=templates::${ opt }` );
 	} else {
 		log( `\n## ${ title }:` );
-		for ( const [ key, value ] of data ) {
-			log( 'FILE: ' + key );
+		for ( const { filePath, code, message } of data ) {
+			log( 'FILE: ' + filePath );
 			log( '---------------------------------------------------' );
-			log(
-				` ${ value[ 0 ].toUpperCase() } | ${ value[ 1 ] } | ${
-					value[ 2 ]
-				}`
-			);
+			log( ` ${ code.toUpperCase() } | ${ title } | ${ message }` );
 			log( '---------------------------------------------------' );
 		}
 	}
@@ -41,54 +45,69 @@ export const printTemplateResults = (
 /**
  * Print hook results
  *
- * @param {Map}      data   Raw data.
- * @param {string}   output Output style.
- * @param {string}   title  Section title.
- * @param {Function} log    print method.
+ * @param {Map}      data         Raw data.
+ * @param {string}   output       Output style.
+ * @param {string}   sectionTitle Section title.
+ * @param {Function} log          print method.
  */
 export const printHookResults = (
-	data: Map< string, Map< string, string[] > >,
+	data: HookChangeDescription[],
 	output: string,
-	title: string,
+	sectionTitle: string,
 	log: ( s: string ) => void
-): void => {
+) => {
+	// [
+	// 	'NOTICE',
+	// 	title,
+	// 	message,
+	// 	description,
+	// ]
 	if ( output === 'github' ) {
 		let opt = '\\n\\n### New hooks:';
-		for ( const [ key, value ] of data ) {
-			if ( value.size ) {
-				opt += `\\n* **file:** ${ key }`;
-				for ( const [ k, v ] of value ) {
-					opt += `\\n  * ${ v[ 0 ].toUpperCase() } - ${ v[ 2 ] }: ${
-						v[ 3 ]
-					}`;
-					log(
-						`::${ v[ 0 ] } file=${ key },line=1,title=${ v[ 1 ] } - ${ k }::${ v[ 2 ] }`
-					);
-				}
-			}
+		for ( const {
+			filePath,
+			name,
+			version,
+			description,
+			hookType,
+			changeType,
+		} of data ) {
+			opt += `\\n* **file:** ${ filePath }`;
+
+			const cliMessage = `**${ name }** introduced in ${ version }`;
+			const ghMessage = `\\'${ name }\\' introduced in ${ version }`;
+			const message = output === 'github' ? ghMessage : cliMessage;
+			const title = `${ changeType } ${ hookType } found`;
+
+			opt += `\\n  * NOTICE - ${ message }: ${ description }`;
+			log(
+				`::NOTICE file=${ filePath },line=1,title=${ title } - ${ name }::${ message }`
+			);
 		}
 
 		log( `::set-output name=wphooks::${ opt }` );
 	} else {
-		log( `\n## ${ title }:` );
+		log( `\n## ${ sectionTitle }:` );
 		log( '---------------------------------------------------' );
-		for ( const [ key, value ] of data ) {
-			if ( value.size ) {
-				log( 'FILE: ' + key );
-				log( '---------------------------------------------------' );
-				for ( const [ k, v ] of value ) {
-					log( `HOOK: ${ k }: ${ v[ 3 ] }` );
-					log(
-						'---------------------------------------------------'
-					);
-					log(
-						` ${ v[ 0 ].toUpperCase() } | ${ v[ 1 ] } | ${ v[ 2 ] }`
-					);
-					log(
-						'---------------------------------------------------'
-					);
-				}
-			}
+		for ( const {
+			filePath,
+			name,
+			version,
+			description,
+			hookType,
+			changeType,
+		} of data ) {
+			const cliMessage = `**${ name }** introduced in ${ version }`;
+			const ghMessage = `\\'${ name }\\' introduced in ${ version }`;
+			const message = output === 'github' ? ghMessage : cliMessage;
+			const title = `${ changeType } ${ hookType } found`;
+
+			log( 'FILE: ' + filePath );
+			log( '---------------------------------------------------' );
+			log( `HOOK: ${ name }: ${ description }` );
+			log( '---------------------------------------------------' );
+			log( `NOTICE | ${ title } | ${ message }` );
+			log( '---------------------------------------------------' );
 		}
 	}
 };
@@ -96,34 +115,22 @@ export const printHookResults = (
 /**
  *  Print Schema change results.
  *
- * @param {Object}   schemaDiff Schema diff object
- * @param {string}   version    Version change was introduced.
- * @param {string}   output     Output style.
- * @param {Function} log        Print method.
+ * @param {Object}   schemaDiffs Schema diff object
+ * @param {string}   version     Version change was introduced.
+ * @param {string}   output      Output style.
+ * @param {Function} log         Print method.
  */
 export const printSchemaChange = (
-	schemaDiff: {
-		[ key: string ]: {
-			description: string;
-			base: string;
-			compare: string;
-			method: string;
-			areEqual: boolean;
-		};
-	} | void,
+	schemaDiffs: SchemaDiff[],
 	version: string,
 	output: string,
 	log: ( s: string ) => void
-): Record< string, string > => {
-	const diff: Record< string, string > = {};
-	if ( ! schemaDiff ) {
-		return diff;
-	}
+) => {
 	if ( output === 'github' ) {
 		let githubCommentContent = '\\n\\n### New schema changes:';
-		Object.keys( schemaDiff ).forEach( ( key ) => {
-			if ( ! schemaDiff[ key ].areEqual ) {
-				githubCommentContent += `\\n* **Schema:** ${ schemaDiff[ key ].method } introduced in ${ version }`;
+		schemaDiffs.forEach( ( schemaDiff ) => {
+			if ( ! schemaDiff.areEqual ) {
+				githubCommentContent += `\\n* **Schema:** ${ schemaDiff.method } introduced in ${ version }`;
 			}
 		} );
 
@@ -131,18 +138,15 @@ export const printSchemaChange = (
 	} else {
 		log( '\n## SCHEMA CHANGES' );
 		log( '---------------------------------------------------' );
-
-		Object.keys( schemaDiff ).forEach( ( key ) => {
-			if ( ! schemaDiff[ key ].areEqual ) {
+		schemaDiffs.forEach( ( schemaDiff ) => {
+			if ( ! schemaDiff.areEqual ) {
 				log(
-					` NOTICE | Schema changes detected in ${ schemaDiff[ key ].method } as of ${ version }`
+					` NOTICE | Schema changes detected in ${ schemaDiff.method } as of ${ version }`
 				);
 				log( '---------------------------------------------------' );
-				diff[ key ] = schemaDiff[ key ].method;
 			}
 		} );
 	}
-	return diff;
 };
 
 /**

@@ -17,26 +17,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Setup WooCommerce Monorepo
+        uses: ./.github/actions/setup-woocommerce-monorepo
         with:
-          php-version: 7.4
-          tools: composer
+          build: false
 
       - name: Tool versions
         run: |
           php --version
           composer --version
-
-      - uses: ./.github/actions/cache-deps
-        with:
-          workflow_name: pr-code-sniff
-          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
-
-      - name: Install and Build
-        uses: ./.github/actions/install-build
-        with:
-          composer_no_dev: 0
 
       - name: Run code sniffer
         uses: thenabeel/action-phpcs@v8
