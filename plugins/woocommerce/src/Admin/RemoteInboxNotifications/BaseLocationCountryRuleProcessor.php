@@ -29,7 +29,7 @@ class BaseLocationCountryRuleProcessor implements RuleProcessorInterface {
 			return false;
 		}
 
-		if ( 'US' === $base_location['country'] && 'CA' === $base_location['state'] && ( empty( get_option( 'woocommerce_store_address', '' ) ) || OnboardingProfile::needs_completion() ) ) {
+		if ( 'US' === $base_location['country'] && 'CA' === $base_location['state'] && empty( get_option( 'woocommerce_store_address', '' ) ) && OnboardingProfile::needs_completion() ) {
 			return false;
 		}
 
