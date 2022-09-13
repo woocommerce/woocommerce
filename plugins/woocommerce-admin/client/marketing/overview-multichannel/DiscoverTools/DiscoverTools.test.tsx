@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -31,8 +31,6 @@ describe( 'DiscoverTools component', () => {
 		} );
 		render( <DiscoverTools /> );
 
-		fireEvent.click( screen.getByLabelText( 'Expand' ) );
-
 		expect( screen.getByTestId( 'spinner' ) ).toBeInTheDocument();
 	} );
 
@@ -42,8 +40,6 @@ describe( 'DiscoverTools component', () => {
 			plugins: [],
 		} );
 		render( <DiscoverTools /> );
-
-		fireEvent.click( screen.getByLabelText( 'Expand' ) );
 
 		expect(
 			screen.getByText(
@@ -85,17 +81,11 @@ describe( 'DiscoverTools component', () => {
 		} );
 		render( <DiscoverTools /> );
 
-		fireEvent.click( screen.getByLabelText( 'Expand' ) );
-
-		// Assert that we have the "Sales channels" tab.
+		// Assert that we have the "Sales channels" tab, with the corresponding plugin displayed, and with the "Built by WooCommerce" pill.
 		expect( screen.getByText( 'Sales channels' ) ).toBeInTheDocument();
-
-		// Assert that we have the plugin displayed.
 		expect(
 			screen.getByText( 'Google Listings and Ads' )
 		).toBeInTheDocument();
-
-		// Assert that we can see the "Built by WooCommerce" pill.
 		expect(
 			screen.getByText( 'Built by WooCommerce' )
 		).toBeInTheDocument();

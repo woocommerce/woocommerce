@@ -144,7 +144,6 @@ export const DiscoverTools = () => {
 
 	return (
 		<CollapsibleCard
-			initialCollapsed
 			className="woocommerce-marketing-discover-tools-card"
 			header={ __( 'Discover more marketing tools', 'woocommerce' ) }
 		>
