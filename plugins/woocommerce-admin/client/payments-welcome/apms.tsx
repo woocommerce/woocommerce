@@ -69,19 +69,20 @@ interface ApmsProps {
 	setEnabledApms: ( value: Set< Apm > ) => void;
 }
 
-export const ApmNotice = () => {
-	// todo-4529 generate dynamic text depending on the enabledApms
-	// todo-4529 show/hide the component depending on the enabledApms
+const ApmNotice = ( { enabledApms }: { enabledApms: Set< Apm > } ) => {
+	if ( ! enabledApms.size ) {
+		return null;
+	}
+
+	const extensions = [ ...enabledApms ]
+		.map( ( apm ) => apm.title )
+		.join( ', ' );
 	return (
 		<Card className="connect-account__apms-notice">
 			<CardBody>
 				<Notice status={ 'info' } isDismissible={ false }>
 					<Icon icon={ download } />
-					<div>
-						Installing <strong>WooCommerce Payments</strong> will
-						automatically activate <strong>PayPal Payments</strong>{ ' ' }
-						extension in your store.
-					</div>
+					<div>{ strings.apms.installText( extensions ) }</div>
 				</Notice>
 			</CardBody>
 		</Card>
@@ -122,19 +123,22 @@ const APMs: React.FunctionComponent< ApmsProps > = ( {
 		),
 	} ) );
 	return (
-		<Card size="large" className="connect-account__apms">
-			<CardHeader>
-				<h1>{ strings.apms.addMoreWaysToPay }</h1>
-			</CardHeader>
-			<CardBody>
-				<List items={ apmsList } />
-			</CardBody>
-			<CardFooter>
-				<ExternalLink href="https://woocommerce.com/products/">
-					{ strings.apms.seeMore }
-				</ExternalLink>
-			</CardFooter>
-		</Card>
+		<>
+			<ApmNotice enabledApms={ enabledApms } />
+			<Card size="large" className="connect-account__apms">
+				<CardHeader>
+					<h1>{ strings.apms.addMoreWaysToPay }</h1>
+				</CardHeader>
+				<CardBody>
+					<List items={ apmsList } />
+				</CardBody>
+				<CardFooter>
+					<ExternalLink href="https://woocommerce.com/products/">
+						{ strings.apms.seeMore }
+					</ExternalLink>
+				</CardFooter>
+			</Card>
+		</>
 	);
 };
 

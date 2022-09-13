@@ -31,11 +31,11 @@ import {
  */
 import strings from './strings';
 import Banner from './banner';
-import APMs, { Apm, ApmNotice } from './apms';
+import APMs, { Apm } from './apms';
 import './style.scss';
 import ExitSurveyModal from './exit-survey-modal';
 import { getAdminSetting } from '~/utils/admin-settings';
-import FrequentlyAskedQuestionsSimple from '~/payments-welcome/faq-simple';
+import FrequentlyAskedQuestionsSimple from './faq-simple';
 
 declare global {
 	interface Window {
@@ -148,12 +148,11 @@ const ConnectPageOnboarding = ( {
 			wpcom_connection: isJetpackConnected ? 'Yes' : 'No',
 		} );
 
-		// todo-4529 track PROPERLY info about the enabled APMs
-		// recordEvent( 'wcpay_extension_installed', {
-		// 	extensions: [ ...enabledApms ]
-		// 		.map( ( apm ) => apm.id )
-		// 		.join( ', ' ),
-		// } );
+		recordEvent( 'wcpay_extension_installed', {
+			extensions: [ ...enabledApms ]
+				.map( ( apm ) => apm.id )
+				.join( ', ' ),
+		} );
 
 		const pluginsToInstall = [ ...enabledApms ].map(
 			( apm ) => apm.extension
@@ -296,7 +295,6 @@ const ConnectAccountPage = () => {
 					enabledApms={ enabledApms }
 				/>
 				<Banner />
-				<ApmNotice />
 				<APMs
 					enabledApms={ enabledApms }
 					setEnabledApms={ setEnabledApms }

@@ -118,7 +118,6 @@
 					margin-left: 10px;
 				}
 				a {
-					text-decoration: none;
 					vertical-align: 6px;
 					margin-left: 10px;
 				}
@@ -182,7 +181,7 @@
 
 		.connect-account__apms {
 			.components-card__header {
-				padding: 24px 10px 16px 24px;
+				padding: $gap-large 10px $gap $gap-large;
 				h1 {
 					font-size: 20px;
 					line-height: 28px;
@@ -193,15 +192,15 @@
 
 				.woocommerce-list__item {
 					> .woocommerce-list__item-inner {
-						padding: 24px;
+						padding: $gap-large;
 						.woocommerce-list__item-title {
-							color: #1e1e1e;
+							color: $gray-900;
 							font-weight: 700;
 							font-size: 14px;
 							line-height: 18px;
 						}
 						.woocommerce-list__item-content {
-							color: #757575;
+							color: $gray-700;
 							font-size: 13px;
 							line-height: 16px;
 							a {
@@ -209,7 +208,7 @@
 							}
 						}
 						.woocommerce-list__item-after {
-							margin-left: 24px;
+							margin-left: $gap-large;
 						}
 						.woocommerce-list__item-before {
 							img {
@@ -220,7 +219,7 @@
 				}
 			}
 			.components-card__footer {
-				padding: 18px 24px;
+				padding: $gap $gap-large;
 				> a {
 					text-decoration: none;
 				}
@@ -236,11 +235,11 @@
 				background-color: #f0f6fc;
 				.components-notice__content {
 					margin: 0;
-					padding: 16px 20px;
+					padding: $gap 20px;
 					display: flex;
 					align-items: center;
 					svg {
-						margin-right: 16px;
+						margin-right: $gap;
 					}
 				}
 			}
