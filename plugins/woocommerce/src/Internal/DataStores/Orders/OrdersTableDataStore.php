@@ -606,6 +606,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether stock was reduced.
 	 */
 	public function get_stock_reduced( $order ) {
+		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
 		return $order->get_order_stock_reduced();
 	}
 
