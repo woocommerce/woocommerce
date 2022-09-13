@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type React from 'react';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -19,7 +19,10 @@ export const ModalIllustrationLayout = ( {
 			<div className="mobile-app-modal-illustration">
 				<img
 					src={ Illustration }
-					alt="Screen captures of the WooCommerce mobile app"
+					alt={ __(
+						'Screen captures of the WooCommerce mobile app',
+						'woocommerce'
+					) }
 				/>
 			</div>
 		</div>

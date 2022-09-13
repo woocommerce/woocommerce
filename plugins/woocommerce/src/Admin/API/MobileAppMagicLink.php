@@ -2,7 +2,7 @@
 /**
  * REST API Data countries controller.
  *
- * Handles requests to the /data/countries endpoint.
+ * Handles requests to the /mobile-app endpoint.
  */
 
 namespace Automattic\WooCommerce\Admin\API;
@@ -31,12 +31,12 @@ class MobileAppMagicLink extends \WC_REST_Data_Controller {
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'login-qr';
+	protected $rest_base = 'mobile-app';
 
 	/**
 	 * Register routes.
 	 *
-	 * @since 3.5.0
+	 * @since 7.0.0
 	 */
 	public function register_routes() {
 		register_rest_route(

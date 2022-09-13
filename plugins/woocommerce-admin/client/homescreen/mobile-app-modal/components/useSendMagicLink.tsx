@@ -24,7 +24,7 @@ export type MagicLinkResponse = {
 
 export const sendMagicLink = () => {
 	return apiFetch< MagicLinkResponse >( {
-		path: `${ WC_ADMIN_NAMESPACE }/login-qr/send-magic-link`,
+		path: `${ WC_ADMIN_NAMESPACE }/mobile-app/send-magic-link`,
 	} );
 };
 

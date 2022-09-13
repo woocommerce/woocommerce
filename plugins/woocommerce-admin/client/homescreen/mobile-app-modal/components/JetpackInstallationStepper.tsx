@@ -3,7 +3,7 @@
  */
 import React, { useState, useEffect } from '@wordpress/element';
 import { Button } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { sprintf, __ } from '@wordpress/i18n';
 import { Spinner, Stepper, StepperProps } from '@woocommerce/components';
 
 /**
@@ -78,9 +78,9 @@ export const JetpackInstallationStepper = ( {
 				},
 				{
 					key: 'second',
-					label: 'Sign into the app',
+					label: __( 'Sign into the app', 'woocommerce' ),
 					description: '',
-					content: <div>Second step content.</div>,
+					content: <></>,
 				},
 			] );
 		} else if ( step === 'second' ) {
@@ -90,14 +90,25 @@ export const JetpackInstallationStepper = ( {
 			setStepsToDisplay( [
 				{
 					key: 'first',
-					label: `Connected as ${ wordpressAccountEmailAddress }`,
+					label: sprintf(
+						/* translators: Reflecting to the user what their WordPress account email address is */
+						__( 'Connected as %s', 'woocommerce' ),
+						wordpressAccountEmailAddress
+					),
 					description: '',
 					content: <></>,
 				},
 				{
 					key: 'second',
 					label: 'Sign into the app',
-					description: `We’ll send a magic link to ${ wordpressAccountEmailAddress }. Open it on your smartphone or tablet to sign into your store instantly.`,
+					description: sprintf(
+						/* translators: Reflecting to the user that the magic link has been sent to their WordPress account email address */
+						__(
+							'We’ll send a magic link to %s. Open it on your smartphone or tablet to sign into your store instantly.',
+							'woocommerce'
+						),
+						wordpressAccountEmailAddress
+					),
 					content: (
 						<SendMagicLinkButton
 							onClickHandler={ sendMagicLinkHandler }

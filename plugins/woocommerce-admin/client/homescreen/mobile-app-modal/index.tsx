@@ -50,8 +50,6 @@ export const MobileAppModal = () => {
 		setHasSentEmail( true );
 	}, [ fetchMagicLinkApiCall ] );
 
-	[ 'one' ].includes( 'three' );
-
 	useEffect( () => {
 		if ( hasSentEmail ) {
 			setPageContent(
