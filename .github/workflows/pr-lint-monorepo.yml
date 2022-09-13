@@ -17,23 +17,16 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Setup WooCommerce Monorepo
+        uses: ./.github/actions/setup-woocommerce-monorepo
         with:
-          php-version: '7.4'
-          tools: composer
+          build: false
 
       - name: Check change files are touched for touched projects
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.event.pull_request.head.sha }}
         run: php tools/monorepo/check-changelogger-use.php --debug "$BASE" "$HEAD"
-
-      - name: Install PNPM
-        run: npm install -g pnpm@^6.24.2
-
-      - name: Install dependencies
-        run: pnpm install
 
       - name: Run changelog validation
         run: pnpm changelog --filter=* -- validate

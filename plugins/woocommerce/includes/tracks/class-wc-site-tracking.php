@@ -81,7 +81,7 @@ class WC_Site_Tracking {
 		<script type="text/javascript">
 			window.wcTracks = window.wcTracks || {};
 			window.wcTracks.isEnabled = <?php echo self::is_tracking_enabled() ? 'true' : 'false'; ?>;
-			window.wcTracks.validateEvent = function( eventName, props ) {
+			window.wcTracks.validateEvent = function( eventName, props = {} ) {
 				let isValid = true;
 				if ( ! <?php echo esc_js( WC_Tracks_Event::EVENT_NAME_REGEX ); ?>.test( eventName ) ) {
 					if ( <?php echo $environment_type !== 'production' ? 'true' : 'false'; ?> ) {

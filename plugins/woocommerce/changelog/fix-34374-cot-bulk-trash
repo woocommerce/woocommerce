@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Adds bulk action support to the COT admin list table for deletion, trashing, and restoration.

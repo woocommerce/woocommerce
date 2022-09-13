@@ -12,27 +12,9 @@ jobs:
         runs-on: ubuntu-20.04
         steps:
             - uses: actions/checkout@v3
-            - uses: ./.github/actions/cache-deps
-              with:
-                  workflow_name: package-release
-                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
-
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: '7.4'
-
-            - name: Setup Node
-              uses: actions/setup-node@v2
-              with:
-                  node-version: '16'
-                  registry-url: 'https://registry.npmjs.org'
-
-            - name: Install PNPM
-              run: npm install -g pnpm@^6.24.2
-
-            - name: Install dependencies
-              run: pnpm install
+            
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
 
             - name: Execute script
               run: ./tools/package-release/bin/dev publish ${{ github.event.inputs.packages }} --branch=${{ github.ref_name }} --skip-install

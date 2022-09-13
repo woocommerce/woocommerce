@@ -26,28 +26,15 @@ jobs:
         with:
           fetch-depth: 100
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Setup WooCommerce Monorepo
+        uses: ./.github/actions/setup-woocommerce-monorepo
         with:
           php-version: 7.4
-          tools: composer
-          extensions: mysql
-          coverage: none
 
       - name: Tool versions
         run: |
           php --version
           composer --version
-
-      - uses: ./.github/actions/cache-deps
-        with:
-          workflow_name: pr-code-coverage
-          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
-
-      - name: Install and Build
-        uses: ./.github/actions/install-build
-        with:
-          composer_no_dev: 0
 
       - name: Build Admin feature config
         run: |

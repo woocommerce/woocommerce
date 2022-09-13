@@ -206,6 +206,7 @@ class OrderHelper {
 
 		$order->set_customer_ip_address( '1.1.1.1' );
 		$order->set_customer_user_agent( 'wc_unit_tests' );
+		$order->set_customer_note( 'Please be careful' );
 
 		$order->save();
 
