@@ -134,7 +134,7 @@ class WC_REST_Order_V2_Controller_Test extends WC_REST_Unit_Test_case {
 			$order->save();
 		}
 
-		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request = new WP_REST_Request( 'GET', '/wc/v2/orders' );
 		$request->set_param( 'include_meta', 'test1' );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
@@ -167,7 +167,7 @@ class WC_REST_Order_V2_Controller_Test extends WC_REST_Unit_Test_case {
 			$order->save();
 		}
 
-		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request = new WP_REST_Request( 'GET', '/wc/v2/orders' );
 		$request->set_param( 'include_meta', '' );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
@@ -200,7 +200,7 @@ class WC_REST_Order_V2_Controller_Test extends WC_REST_Unit_Test_case {
 			$order->save();
 		}
 
-		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request = new WP_REST_Request( 'GET', '/wc/v2/orders' );
 		$request->set_param( 'exclude_meta', 'test1' );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
@@ -233,7 +233,7 @@ class WC_REST_Order_V2_Controller_Test extends WC_REST_Unit_Test_case {
 			$order->save();
 		}
 
-		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request = new WP_REST_Request( 'GET', '/wc/v2/orders' );
 		$request->set_param( 'include_meta', 'test1' );
 		$request->set_param( 'exclude_meta', 'test1' );
 		$response = $this->server->dispatch( $request );
