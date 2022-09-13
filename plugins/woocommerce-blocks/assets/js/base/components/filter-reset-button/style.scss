@@ -1,8 +1,6 @@
 .wc-block-components-filter-reset-button {
-	background: transparent;
-	border: none;
+	@include text-button();
 	cursor: pointer;
-	font-size: inherit;
 
 	&:not([disabled]):hover {
 		text-decoration: underline;
