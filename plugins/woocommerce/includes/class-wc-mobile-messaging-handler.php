@@ -37,7 +37,7 @@ class WC_Mobile_Messaging_Handler {
 			if ( $used_app_in_last_month && $has_jetpack ) {
 				if ( is_store_in_person_payment_eligible() ) {
 					if ( is_order_in_person_payment_eligible( $order ) ) {
-						return self::accept_payment_message( $blog_id, $order->get_id() );
+						return self::accept_payment_message();
 					} else {
 						return self::manage_order_message( $blog_id, $order->get_id() );
 					}
@@ -95,20 +95,9 @@ class WC_Mobile_Messaging_Handler {
 	/**
 	 * Prepares message with a deep link to mobile payment.
 	 *
-	 * @param int $blog_id blog id to deep link to.
-	 * @param int $order_id order id to deep link to.
-	 *
 	 * @return string formatted message
 	 */
-	public static function accept_payment_message( int $blog_id, int $order_id ): string {
-		$deep_link_url = add_query_arg(
-			array(
-				'blog_id'  => absint( $blog_id ),
-				'order_id' => absint( $order_id ),
-			),
-			'https://woocommerce.com/mobile/payments'
-		);
-
+	public static function accept_payment_message(): string {
 		return sprintf(
 			wp_kses_data(
 			/* translators: %s: Email link */
@@ -117,7 +106,7 @@ class WC_Mobile_Messaging_Handler {
 					'woocommerce'
 				)
 			),
-			esc_url( $deep_link_url )
+			'https://woocommerce.com/mobile/payments/'
 		);
 	}
 
@@ -135,7 +124,7 @@ class WC_Mobile_Messaging_Handler {
 				'blog_id'  => absint( $blog_id ),
 				'order_id' => absint( $order_id ),
 			),
-			'https://woocommerce.com/mobile/order'
+			'https://woocommerce.com/mobile/orders/details'
 		);
 
 		return sprintf(
