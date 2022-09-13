@@ -106,7 +106,7 @@ class PostsRedirectionController {
 	private function maybe_redirect_to_edit_order_page(): void {
 		$post_id = absint( $_GET['post'] ?? 0 );
 
-		if ( ! $post_id || 'shop_order' !== get_post_type( $post_id ) || ! isset( $_GET['action'] ) ) {
+		if ( ! $post_id || ! in_array( get_post_type( $post_id ), array( 'shop_order_placehold', 'shop_order' ), true )  || ! isset( $_GET['action'] ) ) {
 			return;
 		}
 
