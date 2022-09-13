@@ -23,7 +23,7 @@ class GetMobileApp extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Get the free WooCommmerce mobile app', 'woocommerce' );
+		return __( 'Get the free WooCommerce mobile app', 'woocommerce' );
 	}
 
 	/**
