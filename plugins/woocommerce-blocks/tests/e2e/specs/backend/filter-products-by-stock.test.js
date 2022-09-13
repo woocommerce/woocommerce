@@ -43,7 +43,9 @@ describe( `${ block.name } Block`, () => {
 		} );
 
 		it( 'product count can be toggled', async () => {
-			const toggleLabel = await findLabelWithText( 'Product count' );
+			const toggleLabel = await findLabelWithText(
+				'Display product count'
+			);
 			await expect( toggleLabel ).toToggleElement(
 				`${ block.class } .wc-filter-element-label-list-count`
 			);
