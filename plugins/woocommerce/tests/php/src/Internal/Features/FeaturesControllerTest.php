@@ -502,25 +502,6 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Updating the enable option for a feature that is linked to a legacy Admin feature also updates the legacy setting option.
-	 */
-	public function test_update_legacy_options_enable() {
-		$this->reset_container_resolutions();
-		$sut = $this->get_instance_of( FeaturesController::class );
-
-		delete_option( 'woocommerce_feature_analytics_enabled' );
-		delete_option( 'woocommerce_feature_new_navigation_enabled' );
-		delete_option( Analytics::TOGGLE_OPTION_NAME );
-		delete_option( Init::TOGGLE_OPTION_NAME );
-
-		$sut->change_feature_enable( 'analytics', true );
-		$sut->change_feature_enable( 'new_navigation', false );
-
-		$this->assertEquals( 'yes', get_option( Analytics::TOGGLE_OPTION_NAME ) );
-		$this->assertEquals( 'no', get_option( Init::TOGGLE_OPTION_NAME ) );
-	}
-
-	/**
 	 * @testdox The action defined by FEATURE_ENABLED_CHANGED_ACTION is fired when the enable status of a feature changes.
 	 *
 	 * @testWith [true]

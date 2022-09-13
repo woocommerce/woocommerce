@@ -336,6 +336,12 @@ class FeaturesController {
 	 * @return string The option that enables or disables the feature.
 	 */
 	public function feature_enable_option_name( string $feature_id ): string {
+		if ( 'analytics' === $feature_id ) {
+			return Analytics::TOGGLE_OPTION_NAME;
+		} elseif ( 'new_navigation' === $feature_id ) {
+			return Init::TOGGLE_OPTION_NAME;
+		}
+
 		return "woocommerce_feature_${feature_id}_enabled";
 	}
 
@@ -362,13 +368,6 @@ class FeaturesController {
 		}
 
 		$feature_id = $matches[1];
-
-		// Handle legacy Admin feature settings.
-		if ( 'analytics' === $feature_id ) {
-			update_option( Analytics::TOGGLE_OPTION_NAME, $value );
-		} elseif ( 'new_navigation' === $feature_id ) {
-			update_option( Init::TOGGLE_OPTION_NAME, $value );
-		}
 
 		/**
 		 * Action triggered when a feature is enabled or disabled (the value of the corresponding setting option is changed).
