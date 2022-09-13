@@ -13,9 +13,11 @@ jobs:
               with:
                   repo-token: ${{ secrets.GITHUB_TOKEN }}
                   days-before-stale: 60
-                  days-before-close: 10
+                  days-before-pr-stale: 7
+                  days-before-close: -1
                   remove-stale-when-updated: true
-                  exempt-issue-labels: 'priority: critical,priority: high,Epic'
+                  exempt-issue-labels: 'priority: critical,priority: high,Epic,type: technical debt,category: refactor,type: documentation,plugin incompatibility'
+                  exempt-pr-labels: 'priority: critical,priority: high,Epic,type: technical debt,category: refactor,type: documentation,plugin incompatibility'
                   stale-issue-message: "This issue has been marked as `stale` because it has not seen any activity within the past 60 days. Our team uses this tool to help surface issues for review. If you are the author of the issue there's no need to comment as it will be looked at. \n\n###### Internal: After 10 days with no activity this issue will be automatically be closed."
                   stale-pr-message: "This PR has been marked as `stale` because it has not seen any activity within the past 60 days. Our team uses this tool to help surface pull requests that have slipped through review. \n\n###### If deemed still relevant, the pr can be kept active by ensuring it's up to date with the main branch and removing the stale label - otherwise it will automatically be closed after 10 days."
                   stale-issue-label: 'stale'
