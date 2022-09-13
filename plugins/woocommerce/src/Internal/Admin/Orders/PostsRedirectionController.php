@@ -62,7 +62,9 @@ class PostsRedirectionController {
 
 		// Respect query args, except for 'post_type'.
 		$query_args = wp_unslash( $_GET );
-		unset( $query_args['post_type'] );
+		$action     = $query_args['action'] ?? '';
+		$posts      = $query_args['post'] ?? array();
+		unset( $query_args['post_type'], $query_args['post'], $query_args['_wpnonce'], $query_args['_wp_http_referer'], $query_args['action'] );
 
 		// Remap 'post_status' arg.
 		if ( isset( $query_args['post_status'] ) ) {
@@ -71,7 +73,21 @@ class PostsRedirectionController {
 		}
 
 		$new_url = $this->page_controller->get_orders_url();
-		$new_url = add_query_arg( $query_args, $new_url );
+
+		// Handle bulk actions.
+		if ( $action && in_array( $action, array( 'trash', 'untrash', 'delete', 'mark_processing', 'mark_on-hold', 'mark_completed', 'mark_cancelled' ), true ) ) {
+			check_admin_referer( 'bulk-posts' );
+
+			$new_url = add_query_arg(
+				array(
+					'action'           => $action,
+					'order'            => $posts,
+					'_wp_http_referer' => $this->page_controller->get_orders_url(),
+					'_wpnonce'         => wp_create_nonce( 'bulk-orders' ),
+				),
+				$new_url
+			);
+		}
 
 		wp_safe_redirect( $new_url, 301 );
 		exit;
@@ -94,7 +110,7 @@ class PostsRedirectionController {
 		$new_url = $this->page_controller->get_new_page_url();
 		$new_url = add_query_arg( $query_args, $new_url );
 
-		wp_safe_redirect( $new_url );
+		wp_safe_redirect( $new_url, 301 );
 		exit;
 	}
 
@@ -106,7 +122,7 @@ class PostsRedirectionController {
 	private function maybe_redirect_to_edit_order_page(): void {
 		$post_id = absint( $_GET['post'] ?? 0 );
 
-		if ( ! $post_id || ! in_array( get_post_type( $post_id ), array( 'shop_order_placehold', 'shop_order' ), true )  || ! isset( $_GET['action'] ) ) {
+		if ( ! $post_id || ! in_array( get_post_type( $post_id ), array( 'shop_order_placehold', 'shop_order' ), true ) || ! isset( $_GET['action'] ) ) {
 			return;
 		}
 
@@ -128,16 +144,14 @@ class PostsRedirectionController {
 				// Re-generate nonce if validation passes.
 				check_admin_referer( $action . '-post_' . $post_id );
 
-				$new_url = wp_nonce_url(
-					add_query_arg(
-						array(
-							'action'           => $action,
-							'order'            => array( $post_id ),
-							'_wp_http_referer' => $this->page_controller->get_orders_url(),
-						),
-						$this->page_controller->get_orders_url()
+				$new_url = add_query_arg(
+					array(
+						'action'           => $action,
+						'order'            => array( $post_id ),
+						'_wp_http_referer' => $this->page_controller->get_orders_url(),
+						'_wpnonce'         => wp_create_nonce( 'bulk-orders' ),
 					),
-					'bulk-orders'
+					$this->page_controller->get_orders_url()
 				);
 
 				break;
@@ -152,7 +166,7 @@ class PostsRedirectionController {
 
 		$new_url = add_query_arg( $query_args, $new_url );
 
-		wp_safe_redirect( $new_url );
+		wp_safe_redirect( $new_url, 301 );
 		exit;
 	}
 
