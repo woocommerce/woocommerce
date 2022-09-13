@@ -598,7 +598,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	public function get_download_permissions_granted( $order ) {
 		$order_id = WC_Order_Factory::get_order_id( $order );
-		return wc_string_to_bool( get_post_meta( $order_id, '_download_permissions_granted', true ) );
+		return wc_bool_to_string( get_post_meta( $order_id, '_download_permissions_granted', true ) );
 	}
 
 	/**
@@ -623,7 +623,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	public function get_recorded_sales( $order ) {
 		$order_id = WC_Order_Factory::get_order_id( $order );
-		return wc_string_to_bool( get_post_meta( $order_id, '_recorded_sales', true ) );
+		return wc_bool_to_string( get_post_meta( $order_id, '_recorded_sales', true ) );
 	}
 
 	/**
@@ -648,7 +648,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	public function get_recorded_coupon_usage_counts( $order ) {
 		$order_id = WC_Order_Factory::get_order_id( $order );
-		return wc_string_to_bool( get_post_meta( $order_id, '_recorded_coupon_usage_counts', true ) );
+		return wc_bool_to_string( get_post_meta( $order_id, '_recorded_coupon_usage_counts', true ) );
 	}
 
 	/**
@@ -674,7 +674,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	public function get_email_sent( $order ) {
 		$order_id = WC_Order_Factory::get_order_id( $order );
-		return wc_string_to_bool( get_post_meta( $order_id, '_new_order_email_sent', true ) );
+		return wc_bool_to_string( get_post_meta( $order_id, '_new_order_email_sent', true ) );
 	}
 
 	/**
@@ -780,7 +780,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	public function get_stock_reduced( $order ) {
 		$order_id = WC_Order_Factory::get_order_id( $order );
-		return wc_string_to_bool( get_post_meta( $order_id, '_order_stock_reduced', true ) );
+		return wc_bool_to_string( get_post_meta( $order_id, '_order_stock_reduced', true ) );
 	}
 
 	/**

@@ -453,7 +453,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether permissions are granted.
 	 */
 	public function get_download_permissions_granted( $order ) {
-		return wc_string_to_bool( $order->get_meta( '_download_permissions_granted', true ) );
+		return wc_bool_to_string( $order->get_meta( '_download_permissions_granted', true ) );
 	}
 
 	/**
