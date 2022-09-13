@@ -32,14 +32,6 @@ class RemoteInboxNotificationsEngine {
 
 		// Trigger when the profile data option is updated (during onboarding).
 		add_action(
-			'add_option_' . OnboardingProfile::DATA_OPTION,
-			array( __CLASS__, 'add_profile_option' ),
-			10,
-			2
-		);
-
-		// Trigger when the profile data option is updated (during onboarding).
-		add_action(
 			'update_option_' . OnboardingProfile::DATA_OPTION,
 			array( __CLASS__, 'update_profile_option' ),
 			10,
@@ -79,12 +71,10 @@ class RemoteInboxNotificationsEngine {
 	 */
 	public static function update_profile_option( $old_value, $new_value ) {
 		// Return early if we're not completing the profiler.
-		$is_completed = isset( $new_value['completed'] ) && true === $new_value['completed'];
-		$is_skipped   = isset( $new_value['skipped'] ) && true === $new_value['skipped'];
 		if (
 			( isset( $old_value['completed'] ) && $old_value['completed'] ) ||
-			( isset( $old_value['skipped'] ) && $old_value['skipped'] ) ||
-			! ( $is_completed || $is_skipped )
+			! isset( $new_value['completed'] ) ||
+			! $new_value['completed']
 		) {
 			return;
 		}
@@ -93,23 +83,12 @@ class RemoteInboxNotificationsEngine {
 	}
 
 	/**
-	 * This is triggered when the profile option is added, it runs the update_profile_option function
-	 * with the old_value as an empty array.
-	 *
-	 * @param string $option option name.
-	 * @param mixed  $value New value.
-	 */
-	public static function add_profile_option( $option, $value ) {
-		self::update_profile_option( array(), $value );
-	}
-
-	/**
 	 * Init is continued via admin_init so that WC is loaded when the product
 	 * query is used, otherwise the query generates a "0 = 1" in the WHERE
 	 * condition and thus doesn't return any results.
 	 */
 	public static function on_admin_init() {
-		add_action( 'activated_plugin', array( __CLASS__, 'possibly_run' ) );
+		add_action( 'activated_plugin', array( __CLASS__, 'run' ) );
 		add_action( 'deactivated_plugin', array( __CLASS__, 'run_on_deactivated_plugin' ), 10, 1 );
 		StoredStateSetupForProducts::admin_init();
 
@@ -124,15 +103,6 @@ class RemoteInboxNotificationsEngine {
 	 */
 	public static function on_init() {
 		StoredStateSetupForProducts::init();
-	}
-
-	/**
-	 * Call the run function if the onboarding wizard has been completed.
-	 */
-	public static function possibly_run() {
-		if ( ! OnboardingProfile::needs_completion() || get_option( 'woocommerce_default_country', 'US:CA' ) !== 'US:CA' || ! empty( get_option( 'woocommerce_store_address', '' ) ) ) {
-			self::run();
-		}
 	}
 
 	/**
@@ -160,7 +130,7 @@ class RemoteInboxNotificationsEngine {
 	public static function run_on_woocommerce_admin_updated() {
 		update_option( self::WCA_UPDATED_OPTION_NAME, true, false );
 
-		self::possibly_run();
+		self::run();
 
 		update_option( self::WCA_UPDATED_OPTION_NAME, false, false );
 	}
