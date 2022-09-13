@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { prerelease } from 'semver';
+import { Logger } from 'cli-core/src/logger';
 
 /**
  * Internal dependencies
@@ -22,6 +23,8 @@ program
 	.argument( '<plugin>', 'Monorepo plugin' )
 	.requiredOption( '-v, --version <string>', 'Version to bump to' )
 	.action( async ( plugin: string, options ) => {
+		Logger.startTask( `Bumping versions to ${ options.version }` );
+
 		await validateArgs( plugin, options );
 
 		let nextVersion = options.version;
@@ -46,4 +49,6 @@ program
 		await updateJSON( 'composer', plugin, nextVersion );
 		await updateJSON( 'package', plugin, nextVersion );
 		await updateClassPluginFile( plugin, nextVersion );
+
+		Logger.endTask();
 	} );
