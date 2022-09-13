@@ -11,7 +11,7 @@
  *
  * @param WC_Order $order order that the conditions are checked for.
  *
- * @return true if order is eligible, false otherwise
+ * @return bool true if order is eligible, false otherwise
  */
 function is_order_in_person_payment_eligible( WC_Order $order ): bool {
 	$has_status            = in_array( $order->get_status(), array( 'pending', 'on-hold', 'processing' ), true );
@@ -35,7 +35,7 @@ function is_order_in_person_payment_eligible( WC_Order $order ): bool {
 /**
  * Returns if store is eligible to accept In-Person Payments
  *
- * @return true if store is eligible, false otherwise
+ * @return bool true if store is eligible, false otherwise
  */
 function is_store_in_person_payment_eligible(): bool {
 	$is_store_usa_based    = has_store_specified_country_currency( 'US', 'USD' );
@@ -50,7 +50,7 @@ function is_store_in_person_payment_eligible(): bool {
  * @param string $country country to compare store's country with.
  * @param string $currency currency to compare store's currency with.
  *
- * @return true if specified country and currency match the store's ones. false otherwise
+ * @return bool true if specified country and currency match the store's ones. false otherwise
  */
 function has_store_specified_country_currency( string $country, string $currency ): bool {
 	return ( WC()->countries->get_base_country() === $country && get_woocommerce_currency() === $currency );
