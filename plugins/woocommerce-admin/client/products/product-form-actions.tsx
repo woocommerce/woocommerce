@@ -30,7 +30,8 @@ export const ProductFormActions: React.FC = () => {
 		isUpdatingPublished,
 		isDeleting,
 	} = useProductHelper();
-	const { isDirty, values, resetForm } = useFormContext< Product >();
+	const { isDirty, isValidForm, values, resetForm } =
+		useFormContext< Product >();
 
 	const getProductDataForTracks = () => {
 		return {
@@ -125,6 +126,7 @@ export const ProductFormActions: React.FC = () => {
 			<Button
 				onClick={ onSaveDraft }
 				disabled={
+					! isValidForm ||
 					( ! isDirty &&
 						!! values.id &&
 						values.status !== 'publish' ) ||
@@ -160,7 +162,7 @@ export const ProductFormActions: React.FC = () => {
 					} )
 				}
 				href={ values.permalink + '?preview=true' }
-				disabled={ ! values.permalink }
+				disabled={ ! isValidForm || ! values.permalink }
 				target="_blank"
 			>
 				{ __( 'Preview', 'woocommerce' ) }
@@ -171,6 +173,7 @@ export const ProductFormActions: React.FC = () => {
 					variant="primary"
 					isBusy={ isUpdatingPublished }
 					disabled={
+						! isValidForm ||
 						( ! isDirty && !! isPublished ) ||
 						isUpdatingDraft ||
 						isUpdatingPublished ||
@@ -197,7 +200,10 @@ export const ProductFormActions: React.FC = () => {
 					{ () => (
 						<>
 							<MenuGroup>
-								<MenuItem onClick={ onPublishAndDuplicate }>
+								<MenuItem
+									onClick={ onPublishAndDuplicate }
+									disabled={ ! isValidForm }
+								>
 									{ isPublished
 										? __(
 												'Update & duplicate',
@@ -208,7 +214,10 @@ export const ProductFormActions: React.FC = () => {
 												'woocommerce'
 										  ) }
 								</MenuItem>
-								<MenuItem onClick={ onCopyToNewDraft }>
+								<MenuItem
+									onClick={ onCopyToNewDraft }
+									disabled={ ! isValidForm }
+								>
 									{ __(
 										'Copy to a new draft',
 										'woocommerce'
@@ -217,7 +226,7 @@ export const ProductFormActions: React.FC = () => {
 								<MenuItem
 									onClick={ onTrash }
 									isDestructive
-									disabled={ ! values.id }
+									disabled={ ! isValidForm || ! values.id }
 								>
 									{ __( 'Move to trash', 'woocommerce' ) }
 								</MenuItem>

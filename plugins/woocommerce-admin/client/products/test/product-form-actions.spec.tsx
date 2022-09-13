@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, screen, within } from '@testing-library/react';
 import { Form, FormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -415,6 +415,36 @@ describe( 'ProductFormActions', () => {
 			await waitFor( () =>
 				expect( copyProductWithStatus ).toHaveBeenCalledWith( product )
 			);
+		} );
+	} );
+
+	describe( 'when the form is invalid', () => {
+		beforeEach( () => {
+			render(
+				<Form initialValues={ {} } validate={ validate }>
+					<ProductFormActions />
+				</Form>
+			);
+		} );
+
+		[ 'Save draft', 'Preview', 'Publish' ].forEach( ( buttonText ) => {
+			it( `should have the ${ buttonText } button disabled`, () => {
+				const actionButton = screen.getByText( buttonText );
+				expect( actionButton ).toBeDisabled();
+			} );
+		} );
+
+		it( 'should have the Publish options menu items disabled', () => {
+			const publishOptionsButton =
+				screen.getByLabelText( 'Publish options' );
+			userEvent.click( publishOptionsButton );
+
+			const optionsMenu = screen.getByRole( 'menu' );
+			const menuItems = within( optionsMenu ).getAllByRole( 'menuitem' );
+
+			menuItems.forEach( ( menuItem ) => {
+				expect( menuItem ).toBeDisabled();
+			} );
 		} );
 	} );
 } );
