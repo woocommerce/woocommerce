@@ -1444,7 +1444,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return void
 	 */
 	public function set_download_permissions_granted( $value ) {
-		$this->set_prop( 'download_permissions_granted', wc_string_to_bool( $value ) );
+		$this->set_prop( 'download_permissions_granted', wc_bool_to_string( $value ) );
 	}
 
 	/**

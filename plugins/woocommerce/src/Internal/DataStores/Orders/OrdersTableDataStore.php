@@ -1851,18 +1851,6 @@ CREATE TABLE $meta_table (
 	}
 
 	/**
-	 * Returns list of metadata that is considered "internal".
-	 *
-	 * @return array
-	 */
-	public function get_internal_meta_keys() {
-		return array(
-			'_billing_address_index',
-			'_shipping_address_index',
-		);
-	}
-
-	/**
 	 * Returns keys currently handled by this datastore manually (not available through order properties).
 	 *
 	 * @return array List of keys.
