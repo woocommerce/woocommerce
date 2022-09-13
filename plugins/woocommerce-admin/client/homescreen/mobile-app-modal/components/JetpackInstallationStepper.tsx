@@ -86,7 +86,7 @@ export const JetpackInstallationStepper = ( {
 		} else if ( step === 'second' ) {
 			// this step is shown on the return callback from the WordPress.com user connection
 			const wordpressAccountEmailAddress =
-				jetpackConnectionData?.currentUser.wpcomUser.email;
+				jetpackConnectionData?.currentUser?.wpcomUser?.email;
 			setStepsToDisplay( [
 				{
 					key: 'first',
@@ -122,7 +122,7 @@ export const JetpackInstallationStepper = ( {
 		installHandler,
 		state,
 		isWaitingForRedirect,
-		jetpackConnectionData?.currentUser.wpcomUser.email,
+		jetpackConnectionData?.currentUser?.wpcomUser?.email,
 		sendMagicLinkHandler,
 	] );
 

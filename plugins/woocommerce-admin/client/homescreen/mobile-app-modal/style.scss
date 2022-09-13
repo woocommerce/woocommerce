@@ -224,3 +224,29 @@ button.components-button.send-magic-link-button {
 		}
 	}
 }
+.wrong-user-connected-modal-body {
+	padding-block: 40px;
+	padding-inline: 56px;
+	margin: auto; // center the content both vertically and horizontally
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	height: 495px;
+	animation: fadeIn 0.7s ease-in-out; // fade in the modal content for consistency because the previous content fades in
+
+	.wrong-user-connected-title {
+		padding-top: 111px;
+	}
+	.wrong-user-connected-subheader-spacer {
+		flex-grow: 1;
+		padding-inline: 32px;
+		margin-top: 16px;
+		.wrong-user-connected-subheader {
+			font-weight: 400;
+			font-size: 16px;
+			line-height: 1.5rem;
+			color: #757575;
+			text-align: center;
+		}
+	}
+}

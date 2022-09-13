@@ -5,6 +5,10 @@ import { useState, useEffect, useCallback } from '@wordpress/element';
 import { Guide } from '@wordpress/components';
 import { useSearchParams } from 'react-router-dom';
 import { updateQueryString } from '@woocommerce/navigation';
+import { registerPlugin } from '@wordpress/plugins';
+import { addFilter, removeFilter } from '@wordpress/hooks';
+import { getAdminLink } from '@woocommerce/settings';
+import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
@@ -23,6 +27,8 @@ import {
 	JetpackAlreadyInstalledPage,
 } from './pages';
 import './style.scss';
+import { WrongUserConnectedPage } from './pages/WrongUserConnectedPage';
+import { SETUP_TASK_HELP_ITEMS_FILTER } from '../../activity-panel/panels/help';
 
 export const MobileAppModal = () => {
 	const [ guideIsOpen, setGuideIsOpen ] = useState( true );
@@ -60,11 +66,14 @@ export const MobileAppModal = () => {
 					hasSentEmailHandler={ () => setHasSentEmail( false ) }
 				/>
 			);
+		} else if ( state === JetpackPluginStates.NOT_OWNER_OF_CONNECTION ) {
+			setPageContent( <WrongUserConnectedPage /> );
 		} else if (
 			state === JetpackPluginStates.NOT_INSTALLED ||
 			state === JetpackPluginStates.NOT_ACTIVATED ||
 			state === JetpackPluginStates.USERLESS_CONNECTION ||
-			isReturningFromWordpressConnection
+			( state === JetpackPluginStates.FULL_CONNECTION &&
+				isReturningFromWordpressConnection )
 		) {
 			setPageContent(
 				<JetpackInstallStepperPage
@@ -76,6 +85,7 @@ export const MobileAppModal = () => {
 			);
 		} else if (
 			state === JetpackPluginStates.FULL_CONNECTION &&
+			jetpackConnectionData?.currentUser?.wpcomUser?.email &&
 			! hasSentEmail
 		) {
 			const wordpressAccountEmailAddress =
@@ -93,7 +103,7 @@ export const MobileAppModal = () => {
 		sendMagicLink,
 		hasSentEmail,
 		isReturningFromWordpressConnection,
-		jetpackConnectionData?.currentUser.wpcomUser.email,
+		jetpackConnectionData?.currentUser?.wpcomUser?.email,
 		state,
 	] );
 
@@ -128,3 +138,59 @@ export const MobileAppModal = () => {
 		</>
 	);
 };
+
+export const MOBILE_APP_MODAL_HELP_ENTRY_FILTER_CALLBACK =
+	'wc/admin/mobile-app-help-entry-callback';
+
+/**
+ * This component exists to add the mobile app entry to the help panel.
+ * If the user has no pathway to achieve the required Jetpack connection,
+ * then we don't want to show the help panel entry.
+ */
+export const MobileAppHelpMenuEntryLoader = () => {
+	const { state } = useJetpackPluginState();
+
+	const filterHelpMenuEntries = useCallback(
+		( helpMenuEntries ) => {
+			if (
+				state === JetpackPluginStates.INITIALIZING ||
+				state === JetpackPluginStates.USER_CANNOT_INSTALL ||
+				state === JetpackPluginStates.NOT_OWNER_OF_CONNECTION
+			) {
+				return helpMenuEntries;
+			}
+			return [
+				...helpMenuEntries,
+				{
+					title: __( 'Get the WooCommerce app', 'woocommerce' ),
+					link: getAdminLink(
+						'./admin.php?page=wc-admin&mobileAppModal=true'
+					),
+					linkType: 'wc-admin',
+				},
+			];
+		},
+		[ state ]
+	);
+
+	useEffect( () => {
+		removeFilter(
+			SETUP_TASK_HELP_ITEMS_FILTER,
+			MOBILE_APP_MODAL_HELP_ENTRY_FILTER_CALLBACK
+		);
+		addFilter(
+			SETUP_TASK_HELP_ITEMS_FILTER,
+			MOBILE_APP_MODAL_HELP_ENTRY_FILTER_CALLBACK,
+			filterHelpMenuEntries,
+			10
+		);
+	}, [ filterHelpMenuEntries ] );
+
+	return null;
+};
+
+registerPlugin( 'woocommerce-mobile-app-modal', {
+	render: MobileAppHelpMenuEntryLoader,
+	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
+	scope: 'woocommerce-admin',
+} );
