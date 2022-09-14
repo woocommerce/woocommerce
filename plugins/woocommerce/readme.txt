@@ -167,7 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
-* Fix - Fix error when 'woocommerce_enqueue_styles' returns non-array.
+* Fix - Fix error when 'woocommerce_enqueue_styles' returns non-array. [#34671](https://github.com/woocommerce/woocommerce/pull/34671)
 
 = 6.9.0 2022-09-13 =
 
