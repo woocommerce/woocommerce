@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Update Remote Inbox Notification Country rule to return false when default country is used and onboarding not yet completed.
