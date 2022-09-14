@@ -288,6 +288,14 @@ test.describe( 'Store owner can go through setup Task List', () => {
 		await page.check( '#inspector-checkbox-control-0' );
 		await page.click( 'button >> text=Continue' );
 		await page.click( 'button >> text=No thanks' );
+		await page.click( 'button >> text=Continue' );
+		await page.click( 'button >> text=Continue' );
+		await page.click( 'button >> text=Continue' );
+		// Uncheck all business features
+		if ( page.isChecked( '.components-checkbox-control__input' ) ) {
+			await page.click( '.components-checkbox-control__input' );
+		}
+		await page.click( 'button >> text=Continue' );
 		await page.waitForLoadState( 'networkidle' ); // not autowaiting for form submission
 	} );
 
