@@ -58,8 +58,6 @@ export function useProductHelper() {
 		publish: false,
 	} );
 	const context = useContext( CurrencyContext );
-	const { getCurrencyConfig } = context;
-	const { decimalSeparator } = getCurrencyConfig();
 
 	/**
 	 * Create product with status.
@@ -268,6 +266,8 @@ export function useProductHelper() {
 	 */
 	const sanitizePrice = useCallback(
 		( price: string ) => {
+			const { getCurrencyConfig } = context;
+			const { decimalSeparator } = getCurrencyConfig();
 			// Build regex to strip out everything except digits, decimal point and minus sign.
 			const regex = new RegExp(
 				NUMBERS_AND_DECIMAL_SEPARATOR.replace( '%s', decimalSeparator ),
@@ -283,7 +283,7 @@ export function useProductHelper() {
 				.replace( decimalSeparator, '.' );
 			return cleanValue;
 		},
-		[ decimalSeparator ]
+		[ context ]
 	);
 
 	return {
