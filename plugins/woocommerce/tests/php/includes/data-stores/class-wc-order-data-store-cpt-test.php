@@ -105,24 +105,25 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	private function assert_get_prop_via_ds_object_and_metadata( array $props, WC_Order $order, $value, array $ds_getter_setter_names ) {
 		wp_cache_flush();
 		$refreshed_order = wc_get_order( $order->get_id() );
+		$value           = wc_bool_to_string( $value );
 		// assert via metadata.
 		foreach ( $props as $prop ) {
-			$this->assertEquals( $value, $refreshed_order->get_meta( $prop ), "Failed getting $prop from metadata" );
+			$this->assertEquals( $value, wc_bool_to_string( $refreshed_order->get_meta( $prop ) ), "Failed getting $prop from metadata" );
 		}
 
 		// assert via datastore object.
 		foreach ( $props as $prop ) {
 			if ( in_array( $prop, array_keys( $ds_getter_setter_names ), true ) ) {
 				$getter = $ds_getter_setter_names[ $prop ];
-				$this->assertEquals( $value, $refreshed_order->get_data_store()->{"get_$getter"}( $refreshed_order ), "Failed getting $prop from datastore" );
+				$this->assertEquals( $value, wc_bool_to_string( $refreshed_order->get_data_store()->{"get_$getter"}( $refreshed_order ) ), "Failed getting $prop from datastore" );
 				continue;
 			}
-			$this->assertEquals( $value, $refreshed_order->get_data_store()->{"get$prop"}( $order ), "Failed getting $prop from datastore" );
+			$this->assertEquals( $value, wc_bool_to_string( $refreshed_order->get_data_store()->{"get$prop"}( $order ) ), "Failed getting $prop from datastore" );
 		}
 
 		// assert via order object.
 		foreach ( $props as $prop ) {
-			$this->assertEquals( $value, $refreshed_order->{"get$prop"}(), "Failed getting $prop from object" );
+			$this->assertEquals( $value, wc_bool_to_string( $refreshed_order->{"get$prop"}() ), "Failed getting $prop from object" );
 		}
 	}
 
