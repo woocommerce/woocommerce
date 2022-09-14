@@ -84,6 +84,10 @@ class PostToOrderTableMigrator extends MetaToCustomTableMigrator {
 				'type'        => 'string',
 				'destination' => 'type',
 			),
+			'post_excerpt'      => array(
+				'type'        => 'string',
+				'destination' => 'customer_note',
+			),
 		);
 	}
 

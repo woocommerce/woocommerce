@@ -51,6 +51,22 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	);
 
 	/**
+	 * List of properties that were earlier managed by data store. However, since DataStore is a not a stored entity in itself, they used to store data in metadata of the data object.
+	 * With custom tables, some of these are moved from metadata to their own columns, but existing code will still try to add them to metadata. This array is used to keep track of such properties.
+	 *
+	 * Only reason to add a property here is that you are moving properties from DataStore instance to data object. If you are adding a new property, consider adding it to to $data array instead.
+	 *
+	 * @var array
+	 */
+	protected $legacy_datastore_props = array(
+		'_recorded_sales',
+		'_recorded_coupon_usage_counts',
+		'_download_permissions_granted',
+		'_order_stock_reduced',
+		'_new_order_email_sent',
+	);
+
+	/**
 	 * Order items will be stored here, sometimes before they persist in the DB.
 	 *
 	 * @since 3.0.0

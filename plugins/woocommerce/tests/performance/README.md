@@ -76,8 +76,12 @@ base_url | base URL of the test environment | yes `__ENV.URL`
 base_host | base host of the test environment (for use in headers) | yes `__ENV.HOST`
 admin_username | username for admin user | yes `__ENV.A_USER`
 admin_password | password for admin user | yes `__ENV.A_PW`
+admin_acc_login | set to true if site needs to use my account for admin login | yes `__ENV.A_PW`
 customer_username | username for customer user | yes `__ENV.C_USER`
 customer_password | password for customer user | yes `__ENV.C_PW`
+cot_status | set to true if site is using order tables | yes `__ENV.C_PW`
+admin_orders_base_url | url part for order urls when posts table is used | no
+cot_admin_orders_base_url | url part for order urls when orders table is used | no
 addresses_customer_billing_* | billing address details for existing customer user | no
 addresses_guest_billing_* | billing address details for guest customer user | no
 payment_method | payment method (currently only `cod` supported) | no
@@ -115,7 +119,7 @@ This will run the individual test for 1 iteration.
 
 Included in the `tests` folder are some sample scenarios that can be ran or used as a starting point to be modified to suit the context in which tests are being ran.
 
-`simple-all-shopper-requests.js` and `simple-all-merchant-requests.js` are included scenarios that use the `per-vu-iterations` scenario executor type to run each request sequentially for 1 iteration to make sure they are working.
+`simple-all-requests.js` is an included scenario that uses the `per-vu-iterations` scenario executor type to run each request sequentially for 1 iteration to make sure they are working.
 
 `example-all-requests-ramping-vus.js` and `example-all-requests-arrival-rate.js` are included example scenarios for load testing that use the `ramping-vus` and `ramping-arrival-rate` scenario executor types to run all the requests under load of multiple virtual users. These scenarios can be modified to suit the load profile for the context that the tests will be ran.
 
@@ -126,11 +130,11 @@ The amount of think time can be controlled from `config.js`.
 
 >**_Note: It’s important to note to be very careful when adding load to a scenario. By accident a dangerous amount of load could be ran aginst the test environment that could effectively be like a denial-of-service attack on the test environment. Also important to consider any other consequences of running large load such as triggering of emails._**
 
-To execute a test scenario (for example `tests/simple-all-shopper-requests.js`).
+To execute a test scenario (for example `tests/simple-all-requests.js`).
 
-CLI `k6 run tests/simple-all-shopper-requests.js`
+CLI `k6 run tests/simple-all-requests.js`
 
-Docker `docker run --network="host" -v /[YOUR LOCAL WC DIRECTORY FULL PATH]/tests:/tests -it loadimpact/k6 run /tests/simple-all-shopper-requests.js`
+Docker `docker run --network="host" -v /[YOUR LOCAL WC DIRECTORY FULL PATH]/tests:/tests -it loadimpact/k6 run /tests/simple-all-requests.js`
 
 ---
 ### Debugging Tests
@@ -243,14 +247,6 @@ Checks are like asserts but they don’t stop the tests if they record a failure
 
 All requests have had checks for at least a `200` http status repsonse added and most also have an additional check for a string contained in the response body.
 
----
-### Custom Metrics
-
-By default the built-in metrics group the HTTP requests timings so it isn't possible drill down into individual HTTP request timings. To enable seeing these individual timing in the aggregated summary report it is possible to create a custom metric for each request.
-
-The tests name them after the requests which the metric represents.
-
----
 ---
 ## Other Resources
 

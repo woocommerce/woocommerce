@@ -74,6 +74,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		'_recorded_coupon_usage_counts',
 		'_download_permissions_granted',
 		'_order_stock_reduced',
+		'_new_order_email_sent',
 	);
 
 	/**
@@ -158,6 +159,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				'date_paid'                    => $date_paid,
 				'cart_hash'                    => get_post_meta( $id, '_cart_hash', true ),
 				'customer_note'                => $post_object->post_excerpt,
+
+				// Operational data props.
 				'order_stock_reduced'          => get_post_meta( $id, '_order_stock_reduced', true ),
 				'download_permissions_granted' => get_post_meta( $id, '_download_permissions_granted', true ),
 				'new_order_email_sent'         => get_post_meta( $id, '_new_order_email_sent', true ),
@@ -204,17 +207,22 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$updated_props     = array();
 		$id                = $order->get_id();
 		$meta_key_to_props = array(
-			'_order_key'            => 'order_key',
-			'_customer_user'        => 'customer_id',
-			'_payment_method'       => 'payment_method',
-			'_payment_method_title' => 'payment_method_title',
-			'_transaction_id'       => 'transaction_id',
-			'_customer_ip_address'  => 'customer_ip_address',
-			'_customer_user_agent'  => 'customer_user_agent',
-			'_created_via'          => 'created_via',
-			'_date_completed'       => 'date_completed',
-			'_date_paid'            => 'date_paid',
-			'_cart_hash'            => 'cart_hash',
+			'_order_key'                    => 'order_key',
+			'_customer_user'                => 'customer_id',
+			'_payment_method'               => 'payment_method',
+			'_payment_method_title'         => 'payment_method_title',
+			'_transaction_id'               => 'transaction_id',
+			'_customer_ip_address'          => 'customer_ip_address',
+			'_customer_user_agent'          => 'customer_user_agent',
+			'_created_via'                  => 'created_via',
+			'_date_completed'               => 'date_completed',
+			'_date_paid'                    => 'date_paid',
+			'_cart_hash'                    => 'cart_hash',
+			'_download_permissions_granted' => 'download_permissions_granted',
+			'_recorded_sales'               => 'recorded_sales',
+			'_recorded_coupon_usage_counts' => 'recorded_coupon_usage_counts',
+			'_new_order_email_sent'         => 'new_order_email_sent',
+			'_order_stock_reduced'          => 'order_stock_reduced',
 		);
 
 		$props_to_update = $this->get_props_to_update( $order, $meta_key_to_props );
@@ -600,7 +608,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param bool         $set True or false.
 	 */
 	public function set_download_permissions_granted( $order, $set ) {
-		$order->set_download_permissions_granted( $set );
+		if ( $order instanceof WC_Order ) {
+			$order->set_download_permissions_granted( $set );
+		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_download_permissions_granted', wc_bool_to_string( $set ) );
 	}
@@ -623,7 +633,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param bool         $set True or false.
 	 */
 	public function set_recorded_sales( $order, $set ) {
-		$order->set_recorded_sales( $set );
+		if ( $order instanceof WC_Order ) {
+			$order->set_recorded_sales( $set );
+		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_recorded_sales', wc_bool_to_string( $set ) );
 	}
@@ -646,7 +658,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param bool         $set True or false.
 	 */
 	public function set_recorded_coupon_usage_counts( $order, $set ) {
-		$order->set_recorded_coupon_usage_counts( $set );
+		if ( $order instanceof WC_Order ) {
+			$order->set_recorded_coupon_usage_counts( $set );
+		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_recorded_coupon_usage_counts', wc_bool_to_string( $set ) );
 	}
@@ -670,7 +684,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param bool         $set True or false.
 	 */
 	public function set_email_sent( $order, $set ) {
-		$order->set_new_order_email_sent( $set );
+		if ( $order instanceof WC_Order ) {
+			$order->set_new_order_email_sent( $set );
+		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_new_order_email_sent', wc_bool_to_string( $set ) );
 	}
@@ -774,7 +790,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param bool         $set True or false.
 	 */
 	public function set_stock_reduced( $order, $set ) {
-		$order->set_order_stock_reduced( $set );
+		if ( $order instanceof WC_Order ) {
+			$order->set_order_stock_reduced( $set );
+		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_order_stock_reduced', wc_bool_to_string( $set ) );
 	}

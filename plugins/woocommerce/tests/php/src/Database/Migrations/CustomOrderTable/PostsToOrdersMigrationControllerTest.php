@@ -244,6 +244,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$this->assertEquals( $order->get_customer_ip_address(), $db_order->ip_address );
 		$this->assertEquals( $order->get_customer_user_agent(), $db_order->user_agent );
 		$this->assertEquals( $order->get_type(), $db_order->type );
+		$this->assertEquals( $order->get_customer_note(), $db_order->customer_note );
 	}
 
 	/**

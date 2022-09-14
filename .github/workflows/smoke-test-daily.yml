@@ -17,18 +17,8 @@ jobs:
               with:
                   ref: trunk
 
-            - uses: ./.github/actions/cache-deps
-              with:
-                workflow_name: smoke-test-daily
-                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
-
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                php-version: '7.4'
-
-            - name: Install and Build
-              uses: ./.github/actions/install-build
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
 
             - name: Install Jest
               run: npm install -g jest
@@ -130,18 +120,10 @@ jobs:
         steps:
           - uses: actions/checkout@v3
 
-          - uses: ./.github/actions/cache-deps
+          - name: Setup WooCommerce Monorepo
+            uses: ./.github/actions/setup-woocommerce-monorepo
             with:
-              workflow_name: smoke-test-daily
-              workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
-
-          - name: Install PNPM
-            run: npm install -g pnpm@^6.24.2
-
-          - name: Setup PHP
-            uses: shivammathur/setup-php@v2
-            with:
-              php-version: '7.4'
+              build: false
 
           - name: Build zip
             working-directory: plugins/woocommerce
@@ -186,21 +168,6 @@ jobs:
             - uses: actions/checkout@v3
               with:
                   path: package/woocommerce
-
-            - uses: ./package/woocommerce/.github/actions/cache-deps
-              with:
-                workflow_name: smoke-test-daily
-                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
-
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                php-version: '7.4'
-
-            - name: Install and Build
-              uses: ./package/woocommerce/.github/actions/install-build
-              with:
-                working_directory: package/woocommerce
 
             - name: Download WooCommerce ZIP.
               uses: actions/download-artifact@v3
