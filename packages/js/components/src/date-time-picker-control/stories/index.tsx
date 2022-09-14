@@ -28,6 +28,13 @@ Basic.args = {
 	help: 'Type a date and time or use the picker',
 };
 
+export const CustomDateTimeFormat = Template.bind( {} );
+CustomDateTimeFormat.args = {
+	...Basic.args,
+	help: 'Format: YYYY-MM-DD HH:mm',
+	dateTimeFormat: 'YYYY-MM-DD HH:mm',
+};
+
 function ControlledContainer( { children, ...props } ) {
 	const [ controlledDate, setControlledDate ] = useState(
 		new Date().toISOString()
@@ -48,6 +55,12 @@ function ControlledContainer( { children, ...props } ) {
 		</div>
 	);
 }
+
+export const ReallyLongHelp = Template.bind( {} );
+ReallyLongHelp.args = {
+	...Basic.args,
+	help: 'The help for this date time field is extremely long. Longer than the control itself should probably be.',
+};
 
 export const Controlled = Template.bind( {} );
 Controlled.args = {
