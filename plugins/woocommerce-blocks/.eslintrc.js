@@ -1,4 +1,5 @@
 module.exports = {
+	root: true,
 	extends: [
 		'plugin:@woocommerce/eslint-plugin/recommended',
 		'plugin:you-dont-need-lodash-underscore/compatible',
