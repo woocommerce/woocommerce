@@ -68,38 +68,42 @@ export const useJetpackPluginState = () => {
 	}, [ installJetpackAndConnect ] );
 
 	useEffect( () => {
-		if ( jetpackInstallState === 'activated' ) {
-			if (
-				// Jetpack can be installed and activated but not connected to a WordPress.com user account, this handles that
-				jetpackConnectionData &&
-				! jetpackConnectionData?.connectionOwner
-			) {
-				setPluginState( JetpackPluginStates.USERLESS_CONNECTION );
-			} else if (
-				jetpackConnectionData &&
-				jetpackConnectionData?.currentUser?.username !==
-					jetpackConnectionData?.connectionOwner
-			) {
-				setPluginState( JetpackPluginStates.NOT_OWNER_OF_CONNECTION );
-			} else if (
-				jetpackConnectionData &&
-				jetpackConnectionData?.currentUser?.isConnected &&
-				jetpackConnectionData?.currentUser?.isMaster
-			) {
-				setPluginState( JetpackPluginStates.FULL_CONNECTION );
-			}
-		}
-
 		if ( ! canUserInstallPlugins ) {
 			setPluginState( JetpackPluginStates.USER_CANNOT_INSTALL );
-		}
-
-		if ( jetpackInstallState === 'installed' ) {
-			setPluginState( JetpackPluginStates.NOT_ACTIVATED );
-		}
-
-		if ( jetpackInstallState === 'unavailable' ) {
-			setPluginState( JetpackPluginStates.NOT_INSTALLED );
+		} else {
+			switch ( jetpackInstallState ) {
+				case 'installed':
+					setPluginState( JetpackPluginStates.NOT_ACTIVATED );
+					break;
+				case 'unavailable':
+					setPluginState( JetpackPluginStates.NOT_INSTALLED );
+					break;
+				case 'activated':
+					if (
+						// Jetpack can be installed and activated but not connected to a WordPress.com user account, this handles that
+						jetpackConnectionData &&
+						! jetpackConnectionData?.connectionOwner
+					) {
+						setPluginState(
+							JetpackPluginStates.USERLESS_CONNECTION
+						);
+					} else if (
+						jetpackConnectionData &&
+						jetpackConnectionData?.currentUser?.username !==
+							jetpackConnectionData?.connectionOwner
+					) {
+						setPluginState(
+							JetpackPluginStates.NOT_OWNER_OF_CONNECTION
+						);
+					} else if (
+						jetpackConnectionData &&
+						jetpackConnectionData?.currentUser?.isConnected &&
+						jetpackConnectionData?.currentUser?.isMaster
+					) {
+						setPluginState( JetpackPluginStates.FULL_CONNECTION );
+					}
+					break;
+			}
 		}
 	}, [ canUserInstallPlugins, jetpackInstallState, jetpackConnectionData ] );
 
