@@ -37,7 +37,7 @@ class MobileMessagingHandler {
 			if ( $used_app_in_last_month && $has_jetpack ) {
 				if ( IppFunctions::is_store_in_person_payment_eligible() ) {
 					if ( IppFunctions::is_order_in_person_payment_eligible( $order ) ) {
-						return self::accept_payment_message();
+						return self::accept_payment_message( $blog_id );
 					} else {
 						return self::manage_order_message( $blog_id, $order->get_id() );
 					}
@@ -95,16 +95,25 @@ class MobileMessagingHandler {
 	/**
 	 * Prepares message with a deep link to mobile payment.
 	 *
+	 * @param int $blog_id blog id to deep link to.
+	 *
 	 * @return string formatted message
 	 */
-	public static function accept_payment_message(): string {
+	public static function accept_payment_message( int $blog_id ): string {
+		$deep_link_url = add_query_arg(
+			array(
+				'blog_id' => absint( $blog_id ),
+			),
+			'https://woocommerce.com/mobile/payments'
+		);
+
 		return sprintf(
 			/* translators: 1: opening link tag 2: closing link tag. */
 			esc_html__(
 				'%1$sCollect payments easily%2$s from your customers anywhere with our mobile app.',
 				'woocommerce'
 			),
-			'<a href="https://woocommerce.com/mobile/payments/">',
+			'<a href="' . esc_url( $deep_link_url ) . '">',
 			'</a>'
 		);
 	}

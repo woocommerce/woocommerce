@@ -93,7 +93,7 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 		$mobile_message = MobileMessagingHandler::prepare_mobile_message( $ipp_eligible_order, self::BLOG_ID, $now );
 
 		$this->assertContains(
-			'href="https://woocommerce.com/mobile/payments/">',
+			'href="https://woocommerce.com/mobile/payments?blog_id=' . self::BLOG_ID,
 			$mobile_message
 		);
 	}
