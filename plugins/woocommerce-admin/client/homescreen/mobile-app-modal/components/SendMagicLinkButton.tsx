@@ -9,7 +9,12 @@ export const SendMagicLinkButton = ( {
 }: {
 	onClickHandler: () => void;
 } ) => (
-	<Button className="send-magic-link-button" onClick={ onClickHandler }>
+	<Button
+		className="send-magic-link-button"
+		onClick={ () => {
+			onClickHandler();
+		} }
+	>
 		{ __( '✨️ Send the sign-in link', 'woocommerce' ) }
 	</Button>
 );

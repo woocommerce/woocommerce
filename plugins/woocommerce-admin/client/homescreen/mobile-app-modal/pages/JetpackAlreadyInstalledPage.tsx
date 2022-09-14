@@ -2,6 +2,10 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import { useEffect } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
+import { useSelect } from '@wordpress/data';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -17,6 +21,32 @@ interface JetpackAlreadyInstalledPageProps {
 export const JetpackAlreadyInstalledPage: React.FC<
 	JetpackAlreadyInstalledPageProps
 > = ( { wordpressAccountEmailAddress, sendMagicLinkHandler } ) => {
+	const DISMISSED_MOBILE_APP_MODAL_OPTION =
+		'woocommerce_admin_dismissed_mobile_app_modal';
+
+	const { repeatUser, isLoading } = useSelect( ( select ) => {
+		const { hasFinishedResolution, getOption } =
+			select( OPTIONS_STORE_NAME );
+
+		return {
+			isLoading: ! hasFinishedResolution( 'getOption', [
+				DISMISSED_MOBILE_APP_MODAL_OPTION,
+			] ),
+			repeatUser:
+				getOption( DISMISSED_MOBILE_APP_MODAL_OPTION ) === 'yes',
+		};
+	} );
+
+	useEffect( () => {
+		if ( ! isLoading ) {
+			recordEvent( 'wcadmin_magic_prompt_view', {
+				// jetpack_state value is implied by the precondition of rendering this screen
+				jetpack_state: 'full-connection',
+				repeat_user: repeatUser,
+			} );
+		}
+	}, [ repeatUser, isLoading ] );
+
 	return (
 		<ModalContentLayoutWithTitle>
 			<>

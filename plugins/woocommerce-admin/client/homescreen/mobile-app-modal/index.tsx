@@ -11,6 +11,7 @@ import { getAdminLink } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -31,7 +32,9 @@ import { WrongUserConnectedPage } from './pages/WrongUserConnectedPage';
 import { SETUP_TASK_HELP_ITEMS_FILTER } from '../../activity-panel/panels/help';
 
 export const MobileAppModal = () => {
-	const [ guideIsOpen, setGuideIsOpen ] = useState( true );
+	const [ guideIsOpen, setGuideIsOpen ] = useState( false );
+	const [ isReturningFromWordpressConnection, setIsReturning ] =
+		useState( false );
 
 	const { state, jetpackConnectionData } = useJetpackPluginState();
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
@@ -45,10 +48,11 @@ export const MobileAppModal = () => {
 		} else {
 			setGuideIsOpen( false );
 		}
-	}, [ searchParams ] );
 
-	const isReturningFromWordpressConnection =
-		searchParams.get( 'jetpackState' ) === 'returning';
+		if ( searchParams.get( 'jetpackState' ) === 'returning' ) {
+			setIsReturning( true );
+		}
+	}, [ searchParams ] );
 
 	const [ hasSentEmail, setHasSentEmail ] = useState( false );
 
@@ -57,6 +61,7 @@ export const MobileAppModal = () => {
 	const sendMagicLink = useCallback( () => {
 		fetchMagicLinkApiCall();
 		setHasSentEmail( true );
+		recordEvent( 'wcadmin_magic_prompt_send_signin_link_click' );
 	}, [ fetchMagicLinkApiCall ] );
 
 	useEffect( () => {

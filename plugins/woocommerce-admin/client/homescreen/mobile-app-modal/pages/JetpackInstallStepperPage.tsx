@@ -2,12 +2,18 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useEffect, useRef } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { JetpackInstallationStepper } from '../components/JetpackInstallationStepper';
 import { ModalContentLayoutWithTitle } from '../layouts/ModalContentLayoutWithTitle';
+import {
+	useJetpackPluginState,
+	JetpackPluginStates,
+} from '../components/useJetpackPluginState';
 
 interface JetpackInstallStepperPageProps {
 	isReturningFromWordpressConnection: boolean;
@@ -17,6 +23,28 @@ interface JetpackInstallStepperPageProps {
 export const JetpackInstallStepperPage: React.FC<
 	JetpackInstallStepperPageProps
 > = ( { isReturningFromWordpressConnection, sendMagicLinkHandler } ) => {
+	const { state: jetpackPluginState } = useJetpackPluginState();
+	const jetpackPluginStateRef =
+		useRef< JetpackPluginStates >( jetpackPluginState );
+
+	useEffect( () => {
+		if (
+			// capture the jp state at the moment it has finished initializing, and not on subsequent changes
+			jetpackPluginStateRef.current ===
+				JetpackPluginStates.INITIALIZING &&
+			jetpackPluginState !== JetpackPluginStates.INITIALIZING
+		) {
+			jetpackPluginStateRef.current = jetpackPluginState;
+			if ( isReturningFromWordpressConnection ) {
+				recordEvent( 'wcadmin_magic_prompt_return_from_wp_connection' );
+			} else {
+				recordEvent( 'wcadmin_magic_prompt_view', {
+					jetpack_state: jetpackPluginStateRef.current,
+				} );
+			}
+		}
+	}, [ isReturningFromWordpressConnection, jetpackPluginState ] );
+
 	return (
 		<ModalContentLayoutWithTitle>
 			<div className="modal-subheader">
