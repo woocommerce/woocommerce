@@ -227,8 +227,8 @@ test.describe(
 				page.locator( 'a:has-text("WooCommerce Payments")' )
 			).toHaveCount( 0 );
 			// Uncheck all business features
-			if ( page.isChecked( '#inspector-checkbox-control-1' ) ) {
-				await page.click( '#inspector-checkbox-control-1' );
+			if ( page.isChecked( '.components-checkbox-control__input' ) ) {
+				await page.click( '.components-checkbox-control__input' );
 			}
 			await page.click( 'button >> text=Continue' );
 		} );
