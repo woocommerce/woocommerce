@@ -32,8 +32,9 @@ export const Plugins: React.FC< Props > = ( {
 } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { isResolving, tosAccepted } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
+		const { getOption, hasFinishedResolution } = select(
+			OPTIONS_STORE_NAME
+		);
 		const wcConnectOptions = getOption( 'wc_connect_options' );
 
 		return {
@@ -75,7 +76,6 @@ export const Plugins: React.FC< Props > = ( {
 	return (
 		<>
 			<PluginInstaller
-				// @ts-expect-error PluginInstaller has onComplete props but it is a pure js component and doesn't export the right types.
 				onComplete={ (
 					activatedPlugins: string[],
 					response: InstallPluginsResponse
