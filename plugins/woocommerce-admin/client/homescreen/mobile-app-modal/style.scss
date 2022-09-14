@@ -178,8 +178,14 @@ button.components-button.send-magic-link-button {
 	height: 495px;
 	animation: fadeIn 0.7s ease-in-out; // fade in the modal content for consistency because the previous content fades in
 
+	.email-sent-title {
+		h1 {
+			font-weight: 400;
+		}
+	}
+
 	.email-sent-illustration {
-		margin-top: 151px;
+		margin-top: 95px;
 		margin-bottom: 40px;
 		background-image: url("data:image/svg+xml,%3Csvg width='84' height='80' viewBox='0 0 84 80' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M14.3876 45.6191L0.525879 29.8193L42 0L83.4741 29.8193L69.3907 45.6191H14.3876Z' fill='%23BBBBBB'/%3E%3Cpath d='M81.4781 31.8226H0.525879V67.3165H81.4781V31.8226Z' fill='%23757575'/%3E%3Cpath d='M81.4781 31.8226H0.525879V67.3165H81.4781V31.8226Z' fill='url(%23paint0_linear_5_40)'/%3E%3Cpath d='M83.4741 80H0.525879V29.8193L42 54.9651L83.4741 29.8193V80Z' fill='%23949494'/%3E%3Cpath d='M0.87554 18.5686L0.545743 18.7302L0.583669 18.6625L0.554725 18.6719L0.595312 18.6417L5.03405 10.716L7.30304 12.6571L9.24955 14.4653L8.69065 14.7392L9.31897 15.8512L0.87554 18.5686Z' fill='%23BBBBBB'/%3E%3Cpath d='M7.0782 12.8635L8.85737 14.5187L0.793213 18.5413L5.08467 13.0225L7.0782 12.8635Z' fill='%23BBBBBB'/%3E%3Cpath d='M7.0782 12.8635L8.85737 14.5187L0.793213 18.5413L5.08467 13.0225L7.0782 12.8635Z' fill='%23BBBBBB'/%3E%3Cpath d='M5.00295 11.0889L0.793213 18.5413L7.0782 12.8635L5.00295 11.0889Z' fill='%23949494'/%3E%3Cpath d='M8.9094 15.8008L0.80198 18.4878L7.57923 13.4118L8.9094 15.8008Z' fill='%23949494'/%3E%3Cpath d='M68.3945 4.30889L66.6183 7.39864L79.6416 9.52639L71.2536 3.66566L68.3945 4.30889Z' fill='%23BBBBBB'/%3E%3Cpath d='M68.3945 4.30889L66.6183 7.39864L79.6416 9.52639L71.2536 3.66566L68.3945 4.30889Z' fill='%23BBBBBB'/%3E%3Cpath d='M70.5334 0.922852L79.6416 9.52639L68.3945 4.30889L70.5334 0.922852Z' fill='%23949494'/%3E%3Cpath d='M67.0988 9.21499L79.6063 9.45477L67.93 5.29341L67.0988 9.21499Z' fill='%23949494'/%3E%3Cdefs%3E%3ClinearGradient id='paint0_linear_5_40' x1='42' y1='80' x2='42' y2='0' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-opacity='0.12'/%3E%3Cstop offset='0.55135' stop-opacity='0.09'/%3E%3Cstop offset='1' stop-opacity='0.02'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E%0A");
 		background-repeat: no-repeat;
@@ -190,7 +196,7 @@ button.components-button.send-magic-link-button {
 	.email-sent-subheader-spacer {
 		flex-grow: 1;
 		padding-inline: 32px;
-		margin-top: 16px;
+		margin-top: $gap-smallest;
 		.email-sent-subheader {
 			font-weight: 400;
 			font-size: 16px;
@@ -203,9 +209,9 @@ button.components-button.send-magic-link-button {
 	.email-sent-footer {
 		text-align: center;
 		.email-sent-footer-prompt {
-			font-weight: 600;
+			font-size: 11px;
+			font-weight: 500;
 			color: #757575;
-			margin-bottom: 8px;
 		}
 		.email-sent-footer-text {
 			.email-sent-send-another-link {
