@@ -9,6 +9,13 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 class PageController {
 
 	/**
+	 * Instance of the posts redirection controller.
+	 *
+	 * @var PostsRedirectionController
+	 */
+	private $redirection_controller;
+
+	/**
 	 * Instance of the orders list table.
 	 *
 	 * @var ListTable
@@ -70,6 +77,8 @@ class PageController {
 	 * @return void
 	 */
 	public function setup(): void {
+		$this->redirection_controller = new PostsRedirectionController( $this );
+
 		// Register menu.
 		if ( 'admin_menu' === current_action() ) {
 			$this->register_menu();
@@ -212,6 +221,17 @@ class PageController {
 		$this->order->set_status( 'auto-draft' );
 		$this->order->save();
 		$theorder = $this->order;
+	}
+
+	/**
+	 * Helper method to generate a link to the main orders screen.
+	 *
+	 * @return string Orders screen URL.
+	 */
+	public function get_orders_url(): string {
+		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ?
+			admin_url( 'admin.php?page=wc-orders' ) :
+			admin_url( 'edit.php?post_type=shop_order' );
 	}
 
 	/**
