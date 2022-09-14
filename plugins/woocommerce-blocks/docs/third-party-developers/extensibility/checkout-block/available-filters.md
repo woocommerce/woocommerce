@@ -151,10 +151,7 @@ __experimentalRegisterCheckoutFilters( 'my-hypothetical-deposit-plugin', {
 
 | Before | After |
 | ------ | ----- |
-
-
-| ![Snackbar notices before](https://user-images.githubusercontent.com/5656702/117032889-cc56b200-acf9-11eb-9bf7-ae5f6a0b1538.png)
-| ![Snackbar notices after](https://user-images.githubusercontent.com/5656702/117033039-ec867100-acf9-11eb-95d5-50c06bf2923c.png) |
+| ![Snackbar notices before](https://user-images.githubusercontent.com/5656702/117032889-cc56b200-acf9-11eb-9bf7-ae5f6a0b1538.png) | ![Snackbar notices after](https://user-images.githubusercontent.com/5656702/117033039-ec867100-acf9-11eb-95d5-50c06bf2923c.png) |
 
 ## Changing the format of the item's single price
 
@@ -189,8 +186,6 @@ __experimentalRegisterCheckoutFilters( 'my-hypothetical-price-plugin', {
 
 | Before | After |
 | ------ | ----- |
-
-
 | ![Changing the format of the item's single price before](https://user-images.githubusercontent.com/5656702/117035086-d5488300-acfb-11eb-9954-feb326916168.png) | ![Changing the format of the item's single price after](https://user-images.githubusercontent.com/5656702/117035616-70415d00-acfc-11eb-98d3-6c8096817e5b.png) |
 
 ## Change the name of a coupon
