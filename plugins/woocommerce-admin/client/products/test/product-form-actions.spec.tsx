@@ -441,8 +441,11 @@ describe( 'ProductFormActions', () => {
 
 			const optionsMenu = screen.getByRole( 'menu' );
 			const menuItems = within( optionsMenu ).getAllByRole( 'menuitem' );
+			// Verify only the first two items (Publish & duplicate|Update & duplicate
+			// and Copy to a new draft) from the action menu.
+			const firstTwoItems = menuItems.slice( 0, 2 );
 
-			menuItems.forEach( ( menuItem ) => {
+			firstTwoItems.forEach( ( menuItem ) => {
 				expect( menuItem ).toBeDisabled();
 			} );
 		} );
