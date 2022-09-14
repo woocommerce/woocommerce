@@ -9,9 +9,9 @@ when:
         - rubik
   - author:
       teamIs:
-        - kirigami
+        - woo-fse
       ignore:
         nameIs:
     assign:
       teams:
-        - kirigami
+        - woo-fse
