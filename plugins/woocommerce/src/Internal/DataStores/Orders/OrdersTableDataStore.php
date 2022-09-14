@@ -940,7 +940,7 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 
 		$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
 		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled();
-		$posts             = $data_sync_enabled ? $this->get_post_data_for_ids( $order_ids ) : array();
+		$post_orders       = $data_sync_enabled ? $this->get_post_orders_for_ids( $order_ids ) : array();
 
 		foreach ( $data as $order_data ) {
 			$order_id = absint( $order_data->id );
@@ -949,8 +949,7 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 			$this->init_order_record( $order, $order_id, $order_data );
 
 			if ( $data_sync_enabled && ! in_array( $order->get_status(), array( 'draft', 'auto-draft' ) ) ) {
-				$order_post = $posts[ $order_id ][0];
-				$this->maybe_sync_order( $order, $order_post );
+				$this->maybe_sync_order( $order, $post_orders[ $order->get_id() ][0] );
 			}
 		}
 	}
@@ -977,21 +976,21 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	 * Sync order to/from posts tables if we are able to detect difference between order and posts but the sync is enabled.
 	 *
 	 * @param \WC_Order $order Order object.
-	 * @param \WP_Post  $post Post object.
+	 * @param \WC_Order $post_order Order object initialized from post.
 	 *
 	 * @return void
 	 * @throws \Exception If passed an invalid order.
 	 */
-	private function maybe_sync_order( \WC_Order &$order, \WP_Post $post ) {
-		$post_order = $this->get_cpt_order( $post );
+	private function maybe_sync_order( \WC_Order &$order, \WC_Order $post_order ) {
 		if ( ! $this->is_post_different_from_order( $order, $post_order ) ) {
 			return;
 		}
 
 		// Modified dates can be empty when the order is created but never updated again. Fallback to created date in those cases.
-		$order_modified_date = $order->get_date_modified() ?? $order->get_date_created();
-		$order_modified_date = $order_modified_date->getTimestamp();
-		$post_modified_date  = get_post_modified_time( 'U', true, $post ) ?? get_post_datetime( $post, 'date', 'gmt' )->getTimestamp();
+		$order_modified_date      = $order->get_date_modified() ?? $order->get_date_created();
+		$order_modified_date      = $order_modified_date->getTimestamp();
+		$post_order_modified_date = $post_order->get_date_modified() ?? $post_order->get_date_created();
+		$post_order_modified_date = $post_order_modified_date->getTimestamp();
 
 		/**
 		 * We are here because there was difference in posts and order data, although the sync is enabled.
@@ -1001,7 +1000,7 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 		 *
 		 * So we write back to the order table when order modified date is more recent than post modified date. Otherwise, we write to the post table.
 		 */
-		if ( $order_modified_date > $post_modified_date ) {
+		if ( $order_modified_date > $post_order_modified_date ) {
 			return;
 		} else {
 			$this->migrate_post_record( $order, $post_order );
@@ -1030,17 +1029,21 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	 *
 	 * @return array List of posts.
 	 */
-	private function get_post_data_for_ids( array $order_ids ): array {
-		// This is mostly done to set caches, as we might be doing bunch of get_posts call eventually.
-		$posts = get_posts(
+	private function get_post_orders_for_ids( array $order_ids ): array {
+		$cpt_data_store = $this->get_cpt_data_store_instance();
+		// We have to bust meta cache, otherwise we will just get the meta cached by OrderTableDataStore.
+		foreach ( $order_ids as $order_id ) {
+			wp_cache_delete( WC_Order::generate_meta_cache_key( $order_id, 'orders' ), 'orders' );
+		}
+		$posts = $cpt_data_store->query(
 			array(
-				'post__in'       => $order_ids,
-				'post_type'      => wc_get_order_types(),
-				'post_status'    => 'any',
-				'posts_per_page' => count( $order_ids ),
+				'include' => $order_ids,
+				'type'    => wc_get_order_types(),
+				'status'  => 'any',
+				'limit'   => count( $order_ids ),
 			)
 		);
-		return ArrayUtil::select_array_to_assoc( $posts, 'ID', ArrayUtil::SELECT_BY_OBJECT_PROPERTY );
+		return ArrayUtil::select_array_to_assoc( $posts, 'get_id', ArrayUtil::SELECT_BY_OBJECT_METHOD );
 	}
 
 	/**
@@ -1058,7 +1061,6 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 
 		$meta_diff = $this->get_diff_meta_data_between_orders( $order, $post_order );
 		if ( ! empty( $meta_diff ) ) {
-			print_r( $meta_diff );
 			return true;
 		}
 
@@ -1098,6 +1100,10 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 
 		$diff = array();
 		foreach ( $order1_meta_by_key as $key => $value ) {
+			if ( in_array( $key, $this->internal_meta_keys, true ) ) {
+				// These should have already been verified in the base data comparison.
+				continue;
+			}
 			$order1_values = ArrayUtil::select( $value, 'value', ArrayUtil::SELECT_BY_ARRAY_KEY );
 			if ( ! array_key_exists( $key, $order2_meta_by_key ) ) {
 				$sync && $order1->delete_meta_data( $key );
@@ -1123,7 +1129,7 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 		}
 
 		foreach ( $order2_meta_by_key as $key => $value ) {
-			if ( array_key_exists( $key, $order1_meta_by_key ) ) {
+			if ( array_key_exists( $key, $order1_meta_by_key ) || in_array( $key, $this->internal_meta_keys, true ) ) {
 				continue;
 			}
 			$order2_values = ArrayUtil::select( $value, 'value', ArrayUtil::SELECT_BY_ARRAY_KEY );
@@ -1916,11 +1922,6 @@ FROM $order_meta_table
 				$order->update_meta_data( "_{$address_type}_address_index", implode( ' ', $order->get_address( $address_type ) ) );
 			}
 		}
-
-		// Sync some COT fields to meta keys for backwards compatibility.
-		foreach ( $this->get_internal_data_store_keys() as $key ) {
-			$this->{"set_$key"}( $order, $this->{"get_$key"}( $order ), false );
-		}
 	}
 
 	/**
@@ -2201,14 +2202,4 @@ CREATE TABLE $meta_table (
 	public function update_meta( &$object, $meta ) {
 		return $this->data_store_meta->update_meta( $object, $meta );
 	}
-
-	/**
-	 * Returns keys currently handled by this datastore manually (not available through order properties).
-	 *
-	 * @return array List of keys.
-	 */
-	protected function get_internal_data_store_keys() {
-		return array();
-	}
-
 }

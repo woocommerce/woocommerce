@@ -564,7 +564,7 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Prime caches for raw meta data. This includes meta_id column as well, which is not included by default in WP meta data.
+	 * Prime caches fo raw meta data. This includes meta_id column as well, which is not included by default in WP meta data.
 	 *
 	 * @since 4.7.0
 	 *

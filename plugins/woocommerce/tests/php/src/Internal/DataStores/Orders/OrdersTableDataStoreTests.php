@@ -1056,6 +1056,34 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that we are able to correctly detect when order and post are out of sync.
+	 */
+	public function test_is_post_different_from_order() {
+		$this->enable_cot_sync();
+		$order                         = $this->create_complex_cot_order();
+		$post_order_comparison_closure = function ( $order ) {
+			$post_order = $this->get_post_orders_for_ids( array( $order->get_id() ) )[ $order->get_id() ][0];
+
+			return $this->is_post_different_from_order( $order, $post_order );
+		};
+		// No changes, post and order should be same.
+		$this->assertFalse( $post_order_comparison_closure->call( $this->sut, $order ) );
+
+		// Simulate direct write.
+		update_post_meta( $order->get_id(), 'my_custom_meta', array( 'key' => 'value' ) );
+
+		// Order and post are different now.
+		$this->assertTrue( $post_order_comparison_closure->call( $this->sut, $order ) );
+
+		$r_order = new WC_Order();
+		$r_order->set_id( $order->get_id() );
+		// Reading again will make a call to migrate_post_record.
+		$this->sut->read( $r_order );
+		$this->assertFalse( $post_order_comparison_closure->call( $this->sut, $r_order ) );
+		$this->assertEquals( array( 'key' => 'value' ), $r_order->get_meta( 'my_custom_meta' ) );
+	}
+
+	/**
 	 * Test that after backfilling, post order is same as cot order.
 	 */
 	public function test_post_is_same_as_order_after_backfill() {
