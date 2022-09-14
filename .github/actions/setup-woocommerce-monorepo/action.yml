@@ -52,7 +52,6 @@ runs:
     - name: Install Node and PHP Dependencies
       shell: bash
       run: |
-        # If we filter install, we'll still need turbo installed for turbo:build scripts to work
         pnpm -w install turbo
         pnpm install ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
 

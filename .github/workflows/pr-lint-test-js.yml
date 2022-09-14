@@ -19,7 +19,7 @@ jobs:
                 build-filters: 'woocommerce/client/admin...'
 
             - name: Lint
-              run: pnpm run -r lint --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color
+              run: pnpm run -r --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color lint 
 
             - name: Test
-              run: pnpm run -r test --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color
+              run: pnpm run -r --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color test 
