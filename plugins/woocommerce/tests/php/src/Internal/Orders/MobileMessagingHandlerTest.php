@@ -98,7 +98,7 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests if SUT returns correct message when the user is IPP eligible but does not use mobile app
+	 * Tests if SUT returns correct message when the user is IPP eligible but does not use mobile app and site has no Jetpack
 	 */
 	public function test_show_accept_payment_message_when_store_and_order_are_ipp_eligible_but_no_mobile_app_usage() {
 		$now = new DateTime( '2022-08-05T00:00:00+00:00' );
@@ -109,10 +109,10 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 		$this->make_store_ipp_eligible();
 		$ipp_eligible_order = $this->generate_ipp_eligible_order();
 
-		$mobile_message = MobileMessagingHandler::prepare_mobile_message( $ipp_eligible_order, self::BLOG_ID, $now );
+		$mobile_message = MobileMessagingHandler::prepare_mobile_message( $ipp_eligible_order, null, $now );
 
 		$this->assertContains(
-			'href="https://woocommerce.com/mobile/payments?blog_id=' . self::BLOG_ID . '&#038;utm_source=mobile_deeplink_payments&#038;utm_content=' . self::BLOG_ID,
+			'href="https://woocommerce.com/mobile/payments?blog_id=0&#038;utm_source=mobile_deeplink_payments&#038;utm_content=0',
 			$mobile_message
 		);
 	}

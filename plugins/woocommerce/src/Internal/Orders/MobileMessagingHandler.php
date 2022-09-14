@@ -91,16 +91,16 @@ class MobileMessagingHandler {
 	/**
 	 * Prepares message with a deep link to mobile payment.
 	 *
-	 * @param int $blog_id blog id to deep link to.
+	 * @param ?int $blog_id blog id to deep link to.
 	 *
 	 * @return string formatted message
 	 */
-	public static function accept_payment_message( int $blog_id ): string {
+	private static function accept_payment_message( ?int $blog_id ): string {
 		$deep_link_url = add_query_arg(
 			array(
 				'blog_id'     => absint( $blog_id ),
 				'utm_source'  => 'mobile_deeplink_payments',
-				'utm_content' => ( $blog_id ),
+				'utm_content' => absint( $blog_id ),
 			),
 			'https://woocommerce.com/mobile/payments'
 		);
@@ -124,13 +124,13 @@ class MobileMessagingHandler {
 	 *
 	 * @return string formatted message
 	 */
-	public static function manage_order_message( int $blog_id, int $order_id ): string {
+	private static function manage_order_message( int $blog_id, int $order_id ): string {
 		$deep_link_url = add_query_arg(
 			array(
 				'blog_id'     => absint( $blog_id ),
 				'order_id'    => absint( $order_id ),
 				'utm_source'  => 'mobile_deeplink_orders_details',
-				'utm_content' => ( $blog_id ),
+				'utm_content' => absint( $blog_id ),
 			),
 			'https://woocommerce.com/mobile/orders/details'
 		);
@@ -149,16 +149,16 @@ class MobileMessagingHandler {
 	/**
 	 * Prepares message with a deep link to learn more about mobile app.
 	 *
-	 * @param int $blog_id blog id used for tracking.
+	 * @param ?int $blog_id blog id used for tracking.
 	 *
 	 * @return string formatted message
 	 */
-	public static function no_app_message( int $blog_id ): string {
+	private static function no_app_message( ?int $blog_id ): string {
 		$deep_link_url = add_query_arg(
 			array(
 				'blog_id'     => absint( $blog_id ),
 				'utm_source'  => 'mobile_deeplink_no_app',
-				'utm_content' => ( $blog_id ),
+				'utm_content' => absint( $blog_id ),
 			),
 			'https://woocommerce.com/mobile'
 		);
