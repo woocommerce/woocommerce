@@ -216,10 +216,10 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Add SKU, PRICE, and IMAGE to products.
 		if ( is_callable( array( $item, 'get_product' ) ) ) {
-			$data['sku']       = $item->get_product() ? $item->get_product()->get_sku() : null;
-			$data['price']     = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
+			$data['sku']   = $item->get_product() ? $item->get_product()->get_sku() : null;
+			$data['price'] = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
 
-			$image_id = $item->get_product() ? $item->get_product()->get_image_id() : 0;
+			$image_id      = $item->get_product() ? $item->get_product()->get_image_id() : 0;
 			$data['image'] = array(
 				'id'  => $image_id,
 				'src' => $image_id ? wp_get_attachment_image_url( $image_id, 'full' ) : '',
@@ -330,9 +330,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return array
 	 */
 	protected function get_formatted_item_data( $order ) {
-		$extra_fields      = array( 'meta_data', 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines', 'refunds', 'payment_url', 'is_editable', 'needs_payment', 'needs_processing' );
-		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
-		$format_date       = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
+		$extra_fields   = array( 'meta_data', 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines', 'refunds', 'payment_url', 'is_editable', 'needs_payment', 'needs_processing' );
+		$format_decimal = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
+		$format_date    = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
 		// These fields are dependent on other fields.
 		$dependent_fields = array(
 			'date_created_gmt'   => 'date_created',
@@ -1514,12 +1514,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'properties'  => array(
 									'type'       => 'object',
 									'properties' => array(
-										'id'                => array(
+										'id'  => array(
 											'description' => __( 'Image ID.', 'woocommerce' ),
 											'type'        => 'integer',
 											'context'     => array( 'view', 'edit' ),
 										),
-										'src'               => array(
+										'src' => array(
 											'description' => __( 'Image URL.', 'woocommerce' ),
 											'type'        => 'string',
 											'format'      => 'uri',
