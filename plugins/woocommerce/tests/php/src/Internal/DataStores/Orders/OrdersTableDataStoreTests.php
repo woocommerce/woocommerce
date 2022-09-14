@@ -165,7 +165,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			'cart_hash'          => 'YET-ANOTHER-CART-HASH',
 		);
 		static $datastore_updates = array(
-			'email_sent' => 'yes',
+			'email_sent' => true,
 		);
 		static $meta_to_update    = array(
 			'my_meta_key' => array( 'my', 'custom', 'meta' ),

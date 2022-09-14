@@ -103,7 +103,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @param array    $ds_getter_setter_names List of props with custom getter/setter names.
 	 */
 	private function assert_get_prop_via_ds_object_and_metadata( array $props, WC_Order $order, $value, array $ds_getter_setter_names ) {
-		$value = wc_bool_to_string( $value );
 		wp_cache_flush();
 		$refreshed_order = wc_get_order( $order->get_id() );
 		// assert via metadata.
