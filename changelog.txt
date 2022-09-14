@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 6.9.1 2022-09-14 =
+
+**WooCommerce**
+
+* Fix - Fix error when 'woocommerce_enqueue_styles' returns non-array. [#34671](https://github.com/woocommerce/woocommerce/pull/34671)
+
 = 6.9.0 2022-09-13 =
 
 **WooCommerce**
