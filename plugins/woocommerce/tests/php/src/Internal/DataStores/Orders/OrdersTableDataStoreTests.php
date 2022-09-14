@@ -999,6 +999,27 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Direct write to metadata should propagate to the orders table when reading.
+	 */
+	public function test_read_with_direct_meta_write() {
+		$this->enable_cot_sync();
+		$order = $this->create_complex_cot_order();
+
+		$post_object = get_post( $order->get_id() );
+		assert( get_post_type( $post_object->ID ) === 'shop_order' );
+
+		// simulate direct write.
+		update_post_meta( $post_object->ID, 'my_custom_meta', array( 'key' => 'value' ) );
+
+		$refreshed_order = new WC_Order();
+		$refreshed_order->set_id( $order->get_id() );
+		$this->switch_data_store( $refreshed_order, $this->sut );
+		$this->sut->read( $refreshed_order );
+
+		$this->assertEquals( array( 'key' => 'value' ), $refreshed_order->get_meta( 'my_custom_meta' ) );
+	}
+
+	/**
 	 * When there are direct writes to posts data, order should synced upon reading.
 	 */
 	public function test_read_multiple_with_direct_write() {

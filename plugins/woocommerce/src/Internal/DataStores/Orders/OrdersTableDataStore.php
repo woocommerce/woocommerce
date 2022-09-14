@@ -1004,7 +1004,6 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 		if ( $order_modified_date > $post_modified_date ) {
 			return;
 		} else {
-			echo 'migrating post record.';
 			$this->migrate_post_record( $order, $post_order );
 		}
 	}
