@@ -45,7 +45,7 @@ class MobileMessagingHandler {
 					return self::manage_order_message( $blog_id, $order->get_id() );
 				}
 			} else {
-				return self::no_app_message();
+				return self::no_app_message( $blog_id );
 			}
 		} catch ( Exception $e ) {
 			return null;
@@ -102,7 +102,9 @@ class MobileMessagingHandler {
 	public static function accept_payment_message( int $blog_id ): string {
 		$deep_link_url = add_query_arg(
 			array(
-				'blog_id' => absint( $blog_id ),
+				'blog_id'     => absint( $blog_id ),
+				'utm_source'  => 'mobile_deeplink_payments',
+				'utm_content' => ( $blog_id ),
 			),
 			'https://woocommerce.com/mobile/payments'
 		);
@@ -129,8 +131,10 @@ class MobileMessagingHandler {
 	public static function manage_order_message( int $blog_id, int $order_id ): string {
 		$deep_link_url = add_query_arg(
 			array(
-				'blog_id'  => absint( $blog_id ),
-				'order_id' => absint( $order_id ),
+				'blog_id'     => absint( $blog_id ),
+				'order_id'    => absint( $order_id ),
+				'utm_source'  => 'mobile_deeplink_orders_details',
+				'utm_content' => ( $blog_id ),
 			),
 			'https://woocommerce.com/mobile/orders/details'
 		);
@@ -149,18 +153,27 @@ class MobileMessagingHandler {
 	/**
 	 * Prepares message with a deep link to learn more about mobile app.
 	 *
+	 * @param int $blog_id blog id used for tracking.
+	 *
 	 * @return string formatted message
 	 */
-	public static function no_app_message(): string {
+	public static function no_app_message( int $blog_id ): string {
+		$deep_link_url = add_query_arg(
+			array(
+				'blog_id'     => absint( $blog_id ),
+				'utm_source'  => 'mobile_deeplink_no_app',
+				'utm_content' => ( $blog_id ),
+			),
+			'https://woocommerce.com/mobile'
+		);
 		return sprintf(
 			/* translators: 1: opening link tag 2: closing link tag. */
 			esc_html__(
-				'Process your orders on the go. %1$sGet the app%2$s. Powered by Jetpack.',
+				'Process your orders on the go. %1$sGet the app%2$s.',
 				'woocommerce'
 			),
-			'<a href="https://woocommerce.com/mobile/">',
+			'<a href="' . esc_url( $deep_link_url ) . '">',
 			'</a>'
 		);
 	}
 }
-

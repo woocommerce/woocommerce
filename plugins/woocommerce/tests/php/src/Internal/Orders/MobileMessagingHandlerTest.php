@@ -60,7 +60,7 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 		$mobile_message = MobileMessagingHandler::prepare_mobile_message( new WC_Order(), self::BLOG_ID, $now );
 
 		$this->assertContains(
-			'href="https://woocommerce.com/mobile/">',
+			'href="https://woocommerce.com/mobile?blog_id=' . self::BLOG_ID . '&#038;utm_source=mobile_deeplink_no_app&#038;utm_content=' . self::BLOG_ID,
 			$mobile_message
 		);
 	}
@@ -76,7 +76,7 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 		$mobile_message = MobileMessagingHandler::prepare_mobile_message( $ipp_eligible_order, self::BLOG_ID, $now );
 
 		$this->assertContains(
-			'href="https://woocommerce.com/mobile/orders/details?blog_id=' . self::BLOG_ID . '&#038;order_id=' . self::ORDER_ID,
+			'href="https://woocommerce.com/mobile/orders/details?blog_id=' . self::BLOG_ID . '&#038;order_id=' . self::ORDER_ID . '&#038;utm_source=mobile_deeplink_orders_details&#038;utm_content=' . self::BLOG_ID,
 			$mobile_message
 		);
 	}
@@ -93,7 +93,7 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 		$mobile_message = MobileMessagingHandler::prepare_mobile_message( $ipp_eligible_order, self::BLOG_ID, $now );
 
 		$this->assertContains(
-			'href="https://woocommerce.com/mobile/payments?blog_id=' . self::BLOG_ID,
+			'href="https://woocommerce.com/mobile/payments?blog_id=' . self::BLOG_ID . '&#038;utm_source=mobile_deeplink_payments&#038;utm_content=' . self::BLOG_ID,
 			$mobile_message
 		);
 	}
