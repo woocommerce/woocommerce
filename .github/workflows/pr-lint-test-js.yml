@@ -16,6 +16,7 @@ jobs:
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
                 install-filters: 'woocommerce/client/admin...'
+                build-filters: 'woocommerce/client/admin...'
 
             - name: Lint
               run: pnpm run lint --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color
