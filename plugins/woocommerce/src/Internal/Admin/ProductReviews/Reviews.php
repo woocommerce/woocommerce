@@ -90,12 +90,7 @@ class Reviews {
 			[ $this, 'render_reviews_list_table' ]
 		);
 
-		add_action(
-			"load-{$this->reviews_page_hook}",
-			function() {
-				$this->load_reviews_screen();
-			}
-		);
+		self::add_action( "load-{$this->reviews_page_hook}", array( $this, 'load_reviews_screen' ) );
 	}
 
 	/**
@@ -623,5 +618,4 @@ class Reviews {
 		 */
 		echo apply_filters( 'woocommerce_product_reviews_list_table', ob_get_clean(), $this->reviews_list_table ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
-
 }
