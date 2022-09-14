@@ -147,7 +147,7 @@ export default {
 		),
 
 		question3: __(
-			'Why should I choose WCPay over other payment gateways?',
+			'Why should I choose WooCommerce Payments over other payment gateways?',
 			'woocommerce'
 		),
 
