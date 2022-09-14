@@ -8,20 +8,20 @@ use WC_Order;
 use WC_Tracker;
 
 /**
- * Prepares formatted mobile deep link navigation link for order mails
+ * Prepares formatted mobile deep link navigation link for order mails.
  */
 class MobileMessagingHandler {
 
 	const OPEN_ORDER_INTERVAL_DAYS = 30;
 
 	/**
-	 * Prepares mobile messaging with a deep link
+	 * Prepares mobile messaging with a deep link.
 	 *
 	 * @param WC_Order $order order that mobile message is created for.
-	 * @param ?int     $blog_id  of blog to make a deep link for.
+	 * @param ?int     $blog_id  of blog to make a deep link for (will be null if Jetpack is not enabled).
 	 * @param DateTime $now      current DateTime.
 	 *
-	 * @return string|null
+	 * @return ?string
 	 */
 	public static function prepare_mobile_message(
 		WC_Order $order,
@@ -55,7 +55,7 @@ class MobileMessagingHandler {
 	/**
 	 * Returns the closest date of last usage of any mobile app platform.
 	 *
-	 * @return DateTime|null
+	 * @return ?DateTime
 	 */
 	private static function get_closer_mobile_usage_date(): ?DateTime {
 		$mobile_usage = WC_Tracker::get_woocommerce_mobile_usage();
@@ -76,7 +76,7 @@ class MobileMessagingHandler {
 	 * @param string $platform     mobile platform to check.
 	 * @param array  $mobile_usage mobile apps usage data.
 	 *
-	 * @return DateTime|null last used date of specified mobile app
+	 * @return ?DateTime last used date of specified mobile app
 	 */
 	private static function get_last_used_or_null(
 		string $platform, array $mobile_usage

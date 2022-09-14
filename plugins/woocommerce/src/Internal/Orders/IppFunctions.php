@@ -11,7 +11,7 @@ use WC_Order;
 class IppFunctions {
 
 	/**
-	 * Returns if order is eligible to accept In-Person Payments
+	 * Returns if order is eligible to accept In-Person Payments.
 	 *
 	 * @param WC_Order $order order that the conditions are checked for.
 	 *
@@ -37,7 +37,7 @@ class IppFunctions {
 	}
 
 	/**
-	 * Returns if store is eligible to accept In-Person Payments
+	 * Returns if store is eligible to accept In-Person Payments.
 	 *
 	 * @return bool true if store is eligible, false otherwise
 	 */
