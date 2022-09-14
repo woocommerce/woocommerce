@@ -12,6 +12,7 @@
 		"shipping-setting-tour": true,
 		"homescreen": true,
 		"marketing": true,
+		"multichannel-marketing": false,
 		"minified-js": false,
 		"mobile-app-banner": true,
 		"navigation": true,
