@@ -22,6 +22,11 @@ export default {
 const Template = ( args ) => <DateTimePickerControl { ...args } />;
 
 export const Basic = Template.bind( {} );
+Basic.args = {
+	label: 'Start date and time',
+	placeholder: 'Enter the start date and time',
+	help: 'Type a date and time or use the picker',
+};
 
 function ControlledContainer( { children, ...props } ) {
 	const [ controlledDate, setControlledDate ] = useState(
@@ -40,7 +45,11 @@ function ControlledContainer( { children, ...props } ) {
 	);
 }
 
-export const Controlled = ( args ) => <DateTimePickerControl { ...args } />;
+export const Controlled = Template.bind( {} );
+Controlled.args = {
+	...Basic.args,
+	help: "I'm controlled by a container that uses React state",
+};
 Controlled.decorators = [
 	( story, props ) => {
 		return (
