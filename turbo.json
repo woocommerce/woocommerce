@@ -73,15 +73,8 @@
 		},
 
 		"turbo:test": {
+			"cache": false,
 			"dependsOn": [ "turbo:build" ],
-			"inputs": [
-				"src/**/*.js",
-				"src/**/*.jsx",
-				"src/**/*.ts",
-				"src/**/*.tsx",
-				"src/**/*.php",
-				"includes/**/*.php"
-			],
 			"outputs": []
 		}
 	}

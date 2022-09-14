@@ -24,14 +24,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install PNPM
-        run: npm install -g pnpm@^6.24.2
-
-      - name: "Install PHP"
-        uses: shivammathur/setup-php@v2
+      - name: Setup WooCommerce Monorepo
+        uses: ./.github/actions/setup-woocommerce-monorepo
         with:
-          php-version: '7.4'
-          tools: composer
+          build: false
 
       - name: "Git fetch the release branch"
         run: git fetch origin ${{ inputs.releaseBranch }}
@@ -41,9 +37,6 @@ jobs:
       
       - name: "Create a new branch for the changelog update PR"
         run: git checkout -b ${{ format( 'update/{0}-changelog', inputs.releaseVersion ) }}
-
-      - name: Install dependencies
-        run: pnpm install
 
       - name: "Generate the changelog file"
         run: pnpm changelog --filter=woocommerce -- write --add-pr-num -n -vvv --use-version ${{ inputs.releaseVersion }}

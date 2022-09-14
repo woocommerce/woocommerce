@@ -1,13 +1,15 @@
 /**
  * External dependencies
  */
-import { valid, lt as versionLessThan, prerelease, parse } from 'semver';
+import { valid, lt as versionLessThan, parse } from 'semver';
+import { join } from 'path';
 import { readFile } from 'fs/promises';
+import { Logger } from 'cli-core/src/logger';
 
 /**
  * Internal dependencies
  */
-import { Logger } from './logger';
+import { MONOREPO_ROOT } from './const';
 
 /**
  * Get a plugin's current version.
@@ -17,10 +19,9 @@ import { Logger } from './logger';
 export const getCurrentVersion = async (
 	plugin: string
 ): Promise< string | void > => {
+	const filePath = join( MONOREPO_ROOT, `plugins/${ plugin }/composer.json` );
 	try {
-		const composerJSON = JSON.parse(
-			await readFile( `plugins/${ plugin }/composer.json`, 'utf8' )
-		);
+		const composerJSON = JSON.parse( await readFile( filePath, 'utf8' ) );
 		return composerJSON.version;
 	} catch ( e ) {
 		Logger.error( 'Unable to read current version.' );
