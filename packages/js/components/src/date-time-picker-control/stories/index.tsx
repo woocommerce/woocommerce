@@ -35,12 +35,16 @@ function ControlledContainer( { children, ...props } ) {
 
 	return (
 		<div { ...props }>
-			{ children( controlledDate, setControlledDate ) }
-			<Button
-				onClick={ () => setControlledDate( new Date().toISOString() ) }
-			>
-				Reset to now
-			</Button>
+			<div>{ children( controlledDate, setControlledDate ) }</div>
+			<div>
+				<Button
+					onClick={ () =>
+						setControlledDate( new Date().toISOString() )
+					}
+				>
+					Reset to now
+				</Button>
+			</div>
 		</div>
 	);
 }
