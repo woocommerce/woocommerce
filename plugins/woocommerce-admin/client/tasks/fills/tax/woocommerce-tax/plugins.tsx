@@ -30,9 +30,8 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { isResolving, tosAccepted } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } = select(
-			OPTIONS_STORE_NAME
-		);
+		const { getOption, hasFinishedResolution } =
+			select( OPTIONS_STORE_NAME );
 		const wcConnectOptions = getOption( 'wc_connect_options' );
 
 		return {
