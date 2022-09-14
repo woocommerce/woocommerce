@@ -27,7 +27,7 @@ class IppFunctions {
 		foreach ( $order->get_items() as $item ) {
 			$product = $item->get_product();
 
-			if ( $product->is_type( 'subscription' ) ) {
+			if ( is_object( $product ) && $product->is_type( 'subscription' ) ) {
 				$order_has_no_subscription_products = false;
 				break;
 			}
