@@ -25,8 +25,10 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 		// eslint-enable-next-line no-console
 	}
 
-	const { invalidateResolutionForStoreSelector, optimisticallyCompleteTask } =
-		useDispatch( ONBOARDING_STORE_NAME );
+	const {
+		invalidateResolutionForStoreSelector,
+		optimisticallyCompleteTask,
+	} = useDispatch( ONBOARDING_STORE_NAME );
 
 	const updateBadge = useCallback( () => {
 		const badgeElement: HTMLElement | null = document.querySelector(
