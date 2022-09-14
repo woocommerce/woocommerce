@@ -138,7 +138,7 @@ class CLIRunner {
 	}
 
 	/**
-	 * Migrate order data to the custom orders table.
+	 * Sync order data between the custom orders table and wp_posts table.
 	 *
 	 * ## OPTIONS
 	 *
@@ -150,7 +150,7 @@ class CLIRunner {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp wc cot migrate --batch-size=500
+	 *     wp wc cot sync --batch-size=500
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
