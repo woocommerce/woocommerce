@@ -2,8 +2,9 @@
 /**
  * External dependencies
  */
+import path from 'path';
 import { setup as setupPuppeteer } from 'jest-environment-puppeteer';
-const { truncateSync, existsSync } = require( 'fs' );
+const { truncateSync, existsSync, unlinkSync } = require( 'fs' );
 /**
  * Internal dependencies
  */
@@ -23,8 +24,22 @@ import {
 	disableAttributeLookup,
 } from '../fixtures/fixture-loaders';
 import { PERFORMANCE_REPORT_FILENAME } from '../../utils/constants';
+import { GUTENBERG_EDITOR_CONTEXT } from '../utils';
 
 module.exports = async ( globalConfig ) => {
+	/**
+	 * We have to remove snapshots to avoid "obsolete snapshot" errors.
+	 *
+	 * @todo Remove this logic when WordPress 6.1 is released.
+	 */
+	if ( GUTENBERG_EDITOR_CONTEXT !== 'core' ) {
+		unlinkSync(
+			path.join(
+				__dirname,
+				'../specs/backend/__snapshots__/site-editing-templates.test.js.snap'
+			)
+		);
+	}
 	// we need to load puppeteer global setup here.
 	await setupPuppeteer( globalConfig );
 
