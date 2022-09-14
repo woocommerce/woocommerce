@@ -99,14 +99,13 @@ class MobileMessagingHandler {
 	 */
 	public static function accept_payment_message(): string {
 		return sprintf(
-			wp_kses_data(
-			/* translators: %s: Email link */
-				__(
-					'<a href="%s">Collect payments easily</a> from your customers anywhere with our mobile app.',
-					'woocommerce'
-				)
+			/* translators: 1: opening link tag 2: closing link tag. */
+			esc_html__(
+				'%1$sCollect payments easily%2$s from your customers anywhere with our mobile app.',
+				'woocommerce'
 			),
-			'https://woocommerce.com/mobile/payments/'
+			'<a href="https://woocommerce.com/mobile/payments/">',
+			'</a>'
 		);
 	}
 
@@ -128,14 +127,13 @@ class MobileMessagingHandler {
 		);
 
 		return sprintf(
-			wp_kses_data(
-			/* translators: %s: Email link */
-				__(
-					'<a href="%s">Manage the order</a> with the app.',
-					'woocommerce'
-				)
+			/* translators: 1: opening link tag 2: closing link tag. */
+			esc_html__(
+				'%1$sManage the order%2$s with the app.',
+				'woocommerce'
 			),
-			esc_url( $deep_link_url )
+			'<a href="' . esc_url( $deep_link_url ) . '">',
+			'</a>'
 		);
 	}
 
@@ -146,14 +144,13 @@ class MobileMessagingHandler {
 	 */
 	public static function no_app_message(): string {
 		return sprintf(
-			wp_kses_data(
-			/* translators: %s: Email link */
-				__(
-					'Process your orders on the go. <a href="%s">Get the app</a>. Powered by Jetpack.',
-					'woocommerce'
-				)
+			/* translators: 1: opening link tag 2: closing link tag. */
+			esc_html__(
+				'Process your orders on the go. %1$sGet the app%2$s. Powered by Jetpack.',
+				'woocommerce'
 			),
-			'https://woocommerce.com/mobile/'
+			'<a href="https://woocommerce.com/mobile/">',
+			'</a>'
 		);
 	}
 }
