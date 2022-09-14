@@ -10,53 +10,51 @@ import { createElement, useState } from '@wordpress/element';
  */
 import { DateTimePickerControl } from '../';
 
-export const Basic: React.FC = () => {
-	return (
-		<DateTimePickerControl
-			// eslint-disable-next-line no-console
-			onChange={ ( date ) => console.log( 'selected date: ' + date ) }
-		/>
-	);
+export default {
+	title: 'WooCommerce Admin/components/DateTimePickerControl',
+	component: DateTimePickerControl,
+	argTypes: {
+		onChange: { action: 'onChange' },
+		onBlur: { action: 'onBlur' },
+	},
 };
 
-export const Disabled: React.FC = () => {
-	return <DateTimePickerControl disabled onChange={ () => null } />;
-};
+const Template = ( args ) => <DateTimePickerControl { ...args } />;
 
-export const DateFormat: React.FC = () => {
-	return (
-		<DateTimePickerControl
-			onChange={ () => null }
-			dateTimeFormat="DD.MM.YYYY"
-		/>
-	);
-};
+export const Basic = Template.bind( {} );
 
-export const ControlledDate: React.FC = () => {
-	const [ currentDate, setCurrentDate ] = useState(
+function ControlledContainer( { children, ...props } ) {
+	const [ controlledDate, setControlledDate ] = useState(
 		new Date().toISOString()
 	);
 
 	return (
-		<>
+		<div { ...props }>
+			{ children( controlledDate, setControlledDate ) }
 			<Button
-				onClick={ () => setCurrentDate( new Date().toISOString() ) }
+				onClick={ () => setControlledDate( new Date().toISOString() ) }
 			>
-				Reset to today
+				Reset to now
 			</Button>
-			<DateTimePickerControl
-				onChange={ () => null }
-				currentDate={ currentDate }
-			/>
-		</>
+		</div>
 	);
-};
+}
 
-export const TwentyFourHour: React.FC = () => {
-	return <DateTimePickerControl is12Hour={ false } onChange={ () => null } />;
-};
-
-export default {
-	title: 'WooCommerce Admin/components/DateTimePickerControl',
-	component: DateTimePickerControl,
-};
+export const Controlled = ( args ) => <DateTimePickerControl { ...args } />;
+Controlled.decorators = [
+	( story, props ) => {
+		return (
+			<ControlledContainer>
+				{ ( controlledDate, setControlledDate ) =>
+					story( {
+						args: {
+							currentDate: controlledDate,
+							onChange: setControlledDate,
+							...props.args,
+						},
+					} )
+				}
+			</ControlledContainer>
+		);
+	},
+];
