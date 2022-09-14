@@ -34,18 +34,14 @@ class MobileMessagingHandler {
 			$used_app_in_last_month = null !== $last_mobile_used && $last_mobile_used->diff( $now )->days <= self::OPEN_ORDER_INTERVAL_DAYS;
 			$has_jetpack            = null !== $blog_id;
 
-			if ( $used_app_in_last_month && $has_jetpack ) {
-				if ( IppFunctions::is_store_in_person_payment_eligible() ) {
-					if ( IppFunctions::is_order_in_person_payment_eligible( $order ) ) {
-						return self::accept_payment_message( $blog_id );
-					} else {
-						return self::manage_order_message( $blog_id, $order->get_id() );
-					}
-				} else {
-					return self::manage_order_message( $blog_id, $order->get_id() );
-				}
+			if ( IppFunctions::is_store_in_person_payment_eligible() && IppFunctions::is_order_in_person_payment_eligible( $order ) ) {
+				return self::accept_payment_message( $blog_id );
 			} else {
-				return self::no_app_message( $blog_id );
+				if ( $used_app_in_last_month && $has_jetpack ) {
+					return self::manage_order_message( $blog_id, $order->get_id() );
+				} else {
+					return self::no_app_message( $blog_id );
+				}
 			}
 		} catch ( Exception $e ) {
 			return null;
