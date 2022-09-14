@@ -12,7 +12,7 @@ use WC_Tracker;
  */
 class MobileMessagingHandler {
 
-	const OPEN_ORDER_INTERVAL_DAYS = 30;
+	private const OPEN_ORDER_INTERVAL_DAYS = 30;
 
 	/**
 	 * Prepares mobile messaging with a deep link.
