@@ -42,24 +42,12 @@ export const ProductFormActions: React.FC = () => {
 		};
 	};
 
-	const maybeSetRegularPrice = ( product: Product ) => {
-		if (
-			( product.regular_price === undefined ||
-				product.regular_price === '' ) &&
-			product.sale_price !== ''
-		) {
-			product.regular_price = product.sale_price;
-		}
-		return product;
-	};
-
 	const onSaveDraft = async () => {
 		recordEvent( 'product_edit', {
 			new_product_page: true,
 			...getProductDataForTracks(),
 		} );
 		if ( ! values.id ) {
-			maybeSetRegularPrice( values );
 			createProductWithStatus( values, 'draft' );
 		} else {
 			const product = await updateProductWithStatus(
@@ -79,7 +67,6 @@ export const ProductFormActions: React.FC = () => {
 			...getProductDataForTracks(),
 		} );
 		if ( ! values.id ) {
-			maybeSetRegularPrice( values );
 			createProductWithStatus( values, 'publish' );
 		} else {
 			const product = await updateProductWithStatus(
@@ -101,7 +88,6 @@ export const ProductFormActions: React.FC = () => {
 		if ( values.id ) {
 			await updateProductWithStatus( values.id, values, 'publish' );
 		} else {
-			maybeSetRegularPrice( values );
 			await createProductWithStatus( values, 'publish', false, true );
 		}
 		await copyProductWithStatus( values );
@@ -119,7 +105,6 @@ export const ProductFormActions: React.FC = () => {
 				values.status || 'draft'
 			);
 		}
-		maybeSetRegularPrice( values );
 		await copyProductWithStatus( values );
 	};
 
