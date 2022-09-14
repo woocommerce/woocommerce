@@ -1,11 +1,11 @@
 <?php
 
+use Automattic\WooCommerce\Internal\Orders\MobileMessagingHandler;
+
 /**
- * Class WC_Mobile_Messaging_Handler_Test file.
- *
- * @package WooCommerce\Tests
+ * Tests for MobileMessagingHandler.
  */
-class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
+class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 
 	const BLOG_ID  = 2;
 	const ORDER_ID = 5;
@@ -42,7 +42,7 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 	public function test_tracker_reports_only_android_usage() {
 		$now = $this->prepare_timeline_with_valid_last_mobile_app_usage();
 
-		$mobile_message = WC_Mobile_Messaging_Handler::prepare_mobile_message( new WC_Order(), self::BLOG_ID, $now );
+		$mobile_message = MobileMessagingHandler::prepare_mobile_message( new WC_Order(), self::BLOG_ID, $now );
 
 		$this->assertNotNull( $mobile_message );
 	}
@@ -57,7 +57,7 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 			array()
 		);
 
-		$mobile_message = WC_Mobile_Messaging_Handler::prepare_mobile_message( new WC_Order(), self::BLOG_ID, $now );
+		$mobile_message = MobileMessagingHandler::prepare_mobile_message( new WC_Order(), self::BLOG_ID, $now );
 
 		$this->assertContains(
 			'href="https://woocommerce.com/mobile/">',
@@ -73,7 +73,7 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 		$this->make_store_not_ipp_eligible();
 		$ipp_eligible_order = $this->generate_ipp_eligible_order();
 
-		$mobile_message = WC_Mobile_Messaging_Handler::prepare_mobile_message( $ipp_eligible_order, self::BLOG_ID, $now );
+		$mobile_message = MobileMessagingHandler::prepare_mobile_message( $ipp_eligible_order, self::BLOG_ID, $now );
 
 		$this->assertContains(
 			'href="https://woocommerce.com/mobile/orders/details?blog_id=' . self::BLOG_ID . '&#038;order_id=' . self::ORDER_ID,
@@ -90,7 +90,7 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 
 		$ipp_eligible_order = $this->generate_ipp_eligible_order();
 
-		$mobile_message = WC_Mobile_Messaging_Handler::prepare_mobile_message( $ipp_eligible_order, self::BLOG_ID, $now );
+		$mobile_message = MobileMessagingHandler::prepare_mobile_message( $ipp_eligible_order, self::BLOG_ID, $now );
 
 		$this->assertContains(
 			'href="https://woocommerce.com/mobile/payments/">',

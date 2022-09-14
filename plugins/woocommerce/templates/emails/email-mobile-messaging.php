@@ -15,4 +15,6 @@
  * @version 7.0
  */
 
-echo wp_kses_post( WC_Mobile_Messaging_Handler::prepare_mobile_message( $order, $blog_id, $now ) );
+use Automattic\WooCommerce\Internal\Orders\MobileMessagingHandler;
+
+echo wp_kses_post( MobileMessagingHandler::prepare_mobile_message( $order, $blog_id, $now ) );

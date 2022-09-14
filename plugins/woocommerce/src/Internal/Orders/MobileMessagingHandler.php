@@ -1,16 +1,16 @@
 <?php
+
+namespace Automattic\WooCommerce\Internal\Orders;
+
+use DateTime;
+use Exception;
+use WC_Order;
+use WC_Tracker;
+
 /**
  * Prepares formatted mobile deep link navigation link for order mails
- *
- * @package WooCommerce\Emails
  */
-
-defined( 'ABSPATH' ) || exit;
-
-/**
- * WC_Mobile_Messaging_Handler
- */
-class WC_Mobile_Messaging_Handler {
+class MobileMessagingHandler {
 
 	const OPEN_ORDER_INTERVAL_DAYS = 30;
 
@@ -35,8 +35,8 @@ class WC_Mobile_Messaging_Handler {
 			$has_jetpack            = null !== $blog_id;
 
 			if ( $used_app_in_last_month && $has_jetpack ) {
-				if ( is_store_in_person_payment_eligible() ) {
-					if ( is_order_in_person_payment_eligible( $order ) ) {
+				if ( IppFunctions::is_store_in_person_payment_eligible() ) {
+					if ( IppFunctions::is_order_in_person_payment_eligible( $order ) ) {
 						return self::accept_payment_message();
 					} else {
 						return self::manage_order_message( $blog_id, $order->get_id() );

@@ -1,19 +1,23 @@
 <?php
 
+namespace Automattic\WooCommerce\Tests\Internal\Orders;
+
+use Automattic\WooCommerce\Internal\Orders\IppFunctions;
+use MobileMessagingHandlerTest;
+
+
 /**
- * Class WC_Mobile_Messaging_Handler_Test file.
- *
- * @package WooCommerce\Tests
+ * Tests for IppFunctions.
  */
-class WC_Ipp_Functions_Test extends WC_Unit_Test_Case {
+class IppFunctionsTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Tests that order is eligible for IPP if it meets all required conditions
 	 */
 	public function test_returns_true_if_order_is_ipp_eligible() {
-		$order = WC_Mobile_Messaging_Handler_Test::generate_ipp_eligible_order();
+		$order = MobileMessagingHandlerTest::generate_ipp_eligible_order();
 
-		$result = is_order_in_person_payment_eligible( $order );
+		$result = IppFunctions::is_order_in_person_payment_eligible( $order );
 
 		$this->assertTrue( $result );
 	}
@@ -25,10 +29,10 @@ class WC_Ipp_Functions_Test extends WC_Unit_Test_Case {
 		$invalid_statuses = array( 'completed', 'cancelled', 'refunded', 'failed', 'trash' );
 
 		foreach ( $invalid_statuses as $invalid_status ) {
-			$order = WC_Mobile_Messaging_Handler_Test::generate_ipp_eligible_order();
+			$order = MobileMessagingHandlerTest::generate_ipp_eligible_order();
 			$order->set_status( $invalid_status );
 
-			$result = is_order_in_person_payment_eligible( $order );
+			$result = IppFunctions::is_order_in_person_payment_eligible( $order );
 
 			$this->assertFalse( $result );
 		}
@@ -41,10 +45,10 @@ class WC_Ipp_Functions_Test extends WC_Unit_Test_Case {
 		$valid_statuses = array( 'pending', 'on-hold', 'processing' );
 
 		foreach ( $valid_statuses as $valid_status ) {
-			$order = WC_Mobile_Messaging_Handler_Test::generate_ipp_eligible_order();
+			$order = MobileMessagingHandlerTest::generate_ipp_eligible_order();
 			$order->set_status( $valid_status );
 
-			$result = is_order_in_person_payment_eligible( $order );
+			$result = IppFunctions::is_order_in_person_payment_eligible( $order );
 
 			$this->assertTrue( $result );
 		}
@@ -57,10 +61,10 @@ class WC_Ipp_Functions_Test extends WC_Unit_Test_Case {
 		$invalid_methods = array( 'bacs', 'cheque', 'paypal' );
 
 		foreach ( $invalid_methods as $invalid_status ) {
-			$order = WC_Mobile_Messaging_Handler_Test::generate_ipp_eligible_order();
+			$order = MobileMessagingHandlerTest::generate_ipp_eligible_order();
 			$order->set_payment_method( $invalid_status );
 
-			$result = is_order_in_person_payment_eligible( $order );
+			$result = IppFunctions::is_order_in_person_payment_eligible( $order );
 
 			$this->assertFalse( $result );
 		}
@@ -73,10 +77,10 @@ class WC_Ipp_Functions_Test extends WC_Unit_Test_Case {
 		$valid_method = array( 'cod', 'woocommerce_payments', 'none' );
 
 		foreach ( $valid_method as $valid_status ) {
-			$order = WC_Mobile_Messaging_Handler_Test::generate_ipp_eligible_order();
+			$order = MobileMessagingHandlerTest::generate_ipp_eligible_order();
 			$order->set_payment_method( $valid_status );
 
-			$result = is_order_in_person_payment_eligible( $order );
+			$result = IppFunctions::is_order_in_person_payment_eligible( $order );
 
 			$this->assertTrue( $result );
 		}
@@ -86,10 +90,10 @@ class WC_Ipp_Functions_Test extends WC_Unit_Test_Case {
 	 * Tests that order is not eligible for IPP when it's paid
 	 */
 	public function test_returns_false_if_order_is_paid() {
-		$order = WC_Mobile_Messaging_Handler_Test::generate_ipp_eligible_order();
+		$order = MobileMessagingHandlerTest::generate_ipp_eligible_order();
 
 		$order->set_date_paid( '2022-08-05T00:00:00+00:00' );
-		$result = is_order_in_person_payment_eligible( $order );
+		$result = IppFunctions::is_order_in_person_payment_eligible( $order );
 
 		$this->assertFalse( $result );
 	}
