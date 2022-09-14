@@ -1048,7 +1048,8 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$this->sut->read( $r_order );
 
 		$post_order_comparison_closure = function () use ( $r_order ) {
-			return $this->is_post_different_from_order( $r_order, get_post( $r_order->get_id() ) );
+			$post_order = $this->get_cpt_order( get_post( $r_order->get_id() ) );
+			return $this->is_post_different_from_order( $r_order, $post_order );
 		};
 
 		$this->assertFalse( $post_order_comparison_closure->call( $this->sut ) );

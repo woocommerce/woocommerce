@@ -983,7 +983,8 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	 * @throws \Exception If passed an invalid order.
 	 */
 	private function maybe_sync_order( \WC_Order &$order, \WP_Post $post ) {
-		if ( ! $this->is_post_different_from_order( $order, $post ) ) {
+		$post_order = $this->get_cpt_order( $post );
+		if ( ! $this->is_post_different_from_order( $order, $post_order ) ) {
 			return;
 		}
 
@@ -1047,12 +1048,11 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	 * Computes whether post has been updated after last order. Tries to do it as efficiently as possible.
 	 *
 	 * @param \WC_Order $order Order object.
-	 * @param \WP_Post  $post Order object read from posts table.
+	 * @param \WC_Order $post_order Order object read from posts table.
 	 *
 	 * @return bool True if post is different than order.
 	 */
-	private function is_post_different_from_order( $order, $post ): bool {
-		$post_order = $this->get_cpt_order( $post );
+	private function is_post_different_from_order( $order, $post_order ): bool {
 		if ( ArrayUtil::deep_compare_array_diff( $order->get_base_data(), $post_order->get_base_data(), false ) ) {
 			return true;
 		}
