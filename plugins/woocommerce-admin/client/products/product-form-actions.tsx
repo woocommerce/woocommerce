@@ -44,7 +44,8 @@ export const ProductFormActions: React.FC = () => {
 
 	const maybeSetRegularPrice = ( product: Product ) => {
 		if (
-			product.regular_price === undefined &&
+			( product.regular_price === undefined ||
+				product.regular_price === '' ) &&
 			product.sale_price !== ''
 		) {
 			product.regular_price = product.sale_price;
