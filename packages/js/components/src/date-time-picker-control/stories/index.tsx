@@ -62,6 +62,12 @@ ReallyLongHelp.args = {
 	help: 'The help for this date time field is extremely long. Longer than the control itself should probably be.',
 };
 
+export const CustomClassName = Template.bind( {} );
+CustomClassName.args = {
+	...Basic.args,
+	className: 'custom-class-name',
+};
+
 export const Controlled = Template.bind( {} );
 Controlled.args = {
 	...Basic.args,
