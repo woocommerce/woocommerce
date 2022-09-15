@@ -81,7 +81,6 @@ function SelectControl< ItemType = DefaultItemType >( {
 	onInputChange = () => null,
 	onRemove = () => null,
 	onSelect = () => null,
-	clearSearchOnSelect = false,
 	keepMenuOpenOnSelect = false,
 	placeholder,
 	selected,
@@ -144,12 +143,16 @@ function SelectControl< ItemType = DefaultItemType >( {
 						onSelect( selectedItem );
 						if ( multiple ) {
 							addSelectedItem( selectedItem );
-							setInputValue( '' );
+							if ( ! keepMenuOpenOnSelect ) {
+								setInputValue( '' );
+							}
 							break;
 						}
 
 						selectItem( selectedItem );
-						setInputValue( getItemLabel( selectedItem ) );
+						if ( ! keepMenuOpenOnSelect ) {
+							setInputValue( getItemLabel( selectedItem ) );
+						}
 					}
 
 					if ( ! selectedItem && ! multiple ) {
@@ -185,7 +188,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 		},
 	} );
 
-	const dropdownProps = multipleSelection.getDropdownProps( {
+	const dropdownProps = getDropdownProps( {
 		preventKeyAction: isOpen,
 	} );
 
@@ -206,7 +209,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 			<label { ...getLabelProps() }>{ label }</label>
 			{ /* eslint-enable jsx-a11y/label-has-for */ }
 			<div className="woocommerce-experimental-select-control__combo-box-wrapper">
-				{ multiple && multipleSelection && (
+				{ multiple && (
 					<SelectedItems
 						items={ selectedItems }
 						getItemLabel={ getItemLabel }
