@@ -296,6 +296,7 @@ test.describe( 'Store owner can go through setup Task List', () => {
 			await page.click( '.components-checkbox-control__input' );
 		}
 		await page.click( 'button >> text=Continue' );
+		await page.click( 'button >> text=Continue with my active theme' );
 		await page.waitForLoadState( 'networkidle' ); // not autowaiting for form submission
 	} );
 
