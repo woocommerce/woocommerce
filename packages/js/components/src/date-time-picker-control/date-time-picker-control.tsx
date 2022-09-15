@@ -5,6 +5,7 @@ import { Fragment } from 'react';
 import { createElement, useState, useEffect } from '@wordpress/element';
 import { Icon, calendar } from '@wordpress/icons';
 import moment, { Moment } from 'moment';
+import classNames from 'classnames';
 import { sprintf, __ } from '@wordpress/i18n';
 import {
 	Dropdown,
@@ -35,6 +36,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	label,
 	placeholder,
 	help,
+	className = '',
 }: DateTimePickerControlProps ) => {
 	const [ inputString, setInputString ] = useState( '' );
 	const [ lastValidDate, setLastValidDate ] = useState< Moment | null >(
@@ -115,6 +117,10 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 
 	return (
 		<Dropdown
+			className={ classNames(
+				'woocommerce-date-time-picker-control',
+				className
+			) }
 			position="bottom center"
 			focusOnMount={ false }
 			// @ts-expect-error `onToggle` does exist.
