@@ -22,7 +22,7 @@
 	],
 	"sideEffects": false,
 	"dependencies": {
-		"@jest/globals": "^26.6.2",
+		"@jest/globals": "^27.5.1",
 		"@types/jest": "^27.4.1",
 		"@woocommerce/e2e-utils": "workspace:*",
 		"config": "^3.3.7"

@@ -28,6 +28,5 @@ jobs:
       - name: 'Explain Remedy'
         if: failure()
         run: |
-          echo "Dependency version mismatch detected. This can usually be fixed automatically by updating the pinned version in \`.syncpackrc` and then running: \`pnpm run 
-sync-dependencies\`"
+          echo "Dependency version mismatch detected. This can usually be fixed automatically by updating the pinned version in \`.syncpackrc\` and then running: \`pnpm run sync-dependencies\`"
           exit 1

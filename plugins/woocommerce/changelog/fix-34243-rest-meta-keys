@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add include_meta and exclude_meta collection params to the orders and products WC REST API endpoints. These allow for limiting which meta keys are included in the meta_data response.

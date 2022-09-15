@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce",
 	"title": "WooCommerce",
-	"version": "6.7.0",
+	"version": "7.0.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -79,7 +79,7 @@
 		"eslint-config-wpcalypso": "5.0.0",
 		"eslint-plugin-jest": "23.20.0",
 		"istanbul": "1.0.0-alpha.2",
-		"jest": "^25.1.0",
+		"jest": "^27.5.1",
 		"mocha": "7.2.0",
 		"prettier": "npm:wp-prettier@2.0.5",
 		"stylelint": "^13.8.0",

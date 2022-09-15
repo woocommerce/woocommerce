@@ -81,16 +81,25 @@ jobs:
 
               console.log( "::set-output name=version::" + version )
               console.log( "::set-output name=release::${{ inputs.release_branch }}" )
-            } else {
-              const version = '${{ github.event.pull_request.milestone.title }}'
+            } else if ( event.action === 'milestoned' ) {
+              const version = '${{ github.event.issue.milestone.title }}'
+              const release = version.substring( 0, 3 )
 
               console.log( "::set-output name=version::" + version )
-              console.log( "::set-output name=release::release/${{ github.event.pull_request.milestone.title }}" )
+              console.log( "::set-output name=release::release/" + release )
+            } else {
+              const version = '${{ github.event.pull_request.milestone.title }}'
+              const release = version.substring( 0, 3 )
+
+              console.log( "::set-output name=version::" + version )
+              console.log( "::set-output name=release::release/" + release )
             }
 
             // Means this workflow was triggered manually.
             if ( event.inputs && event.inputs.pull_requests ) {
               console.log( "::set-output name=pr::${{ inputs.pull_requests }}" )
+            } else if ( event.action === 'milestoned' ) {
+              console.log( "::set-output name=pr::${{ github.event.issue.number }}" )
             } else {
               console.log( "::set-output name=pr::${{ github.event.pull_request.number }}" )
             }

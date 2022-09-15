@@ -168,5 +168,21 @@ class ArrayUtil {
 
 		return array_map( $callback, $items );
 	}
+
+	/**
+	 * Push a value to an array, but only if the value isn't in the array already.
+	 *
+	 * @param array $array The array.
+	 * @param mixed $value The value to maybe push.
+	 * @return bool True if the value has been added to the array, false if the value was already in the array.
+	 */
+	public static function push_once( array &$array, $value ) : bool {
+		if ( in_array( $value, $array, true ) ) {
+			return false;
+		}
+
+		$array[] = $value;
+		return true;
+	}
 }
 

@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Fix DateTimePickerControl's onChange date arg to only be a string (TypeScript).
