@@ -18,6 +18,8 @@ import {
 	think_time_min,
 	think_time_max,
 	product_search_term,
+	addresses_customer_billing_email,
+	addresses_customer_billing_postcode,
 } from '../../config.js';
 import {
 	htmlRequestHeader,
@@ -31,7 +33,7 @@ let admin_orders_base;
 if ( cot_status === true ) {
 	admin_orders_base = cot_admin_orders_base_url;
 } else {
-	admin_orders_base = admin_orders_base_url;
+	admin_orders_base = `${ admin_orders_base_url }&post_status=all`;
 }
 
 export function ordersSearch() {
@@ -53,6 +55,36 @@ export function ordersSearch() {
 			{
 				headers: requestHeaders,
 				tags: { name: 'Merchant - Search Orders By Product' },
+			}
+		);
+		check( response, {
+			'is status 200': ( r ) => r.status === 200,
+			"body contains: 'Search results' subtitle": ( response ) =>
+				response.body.includes( 'Search results for:' ),
+		} );
+
+		response = http.get(
+			`${ base_url }/wp-admin/${ admin_orders_base }` +
+				`&s=${ addresses_customer_billing_email }&action=-1&m=0&_customer_user&` +
+				`paged=1&action2=-1`,
+			{
+				headers: requestHeaders,
+				tags: { name: 'Merchant - Search Orders By Customer Email' },
+			}
+		);
+		check( response, {
+			'is status 200': ( r ) => r.status === 200,
+			"body contains: 'Search results' subtitle": ( response ) =>
+				response.body.includes( 'Search results for:' ),
+		} );
+
+		response = http.get(
+			`${ base_url }/wp-admin/${ admin_orders_base }` +
+				`&s=${ addresses_customer_billing_postcode }&action=-1&m=0&_customer_user&` +
+				`paged=1&action2=-1`,
+			{
+				headers: requestHeaders,
+				tags: { name: 'Merchant - Search Orders By Customer Address' },
 			}
 		);
 		check( response, {
