@@ -31,4 +31,8 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
+# Ensure both branches are tracked or check-changelogger-use will fail.
+git checkout $PROTECTED_BRANCH
+git checkout $CURRENT_BRANCH
+
 php tools/monorepo/check-changelogger-use.php $PROTECTED_BRANCH $CURRENT_BRANCH
