@@ -5,6 +5,7 @@ import { FunctionComponent } from 'react';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { useState } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -13,8 +14,9 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { EmbeddedBodyProps } from '../embedded-body-layout/embedded-body-props';
 
-const REVIEWED_STORE_LOCATION_SETTINGS_OPTION =
-	'woocommerce_admin_reviewed_store_location_settings';
+const STORE_ADDRESS_SETTINGS_OPTION = 'woocommerce_store_address';
+const STORE_CITY_SETTINGS_OPTION = 'woocommerce_store_city';
+const STORE_POSTCODE_SETTINGS_OPTION = 'woocommerce_store_postcode';
 
 const useShowStoreLocationTour = () => {
 	const { hasReviewedStoreLocationSettings, isLoading } = useSelect(
@@ -23,12 +25,20 @@ const useShowStoreLocationTour = () => {
 				select( OPTIONS_STORE_NAME );
 
 			return {
-				isLoading: ! hasFinishedResolution( 'getOption', [
-					REVIEWED_STORE_LOCATION_SETTINGS_OPTION,
-				] ),
+				isLoading:
+					! hasFinishedResolution( 'getOption', [
+						STORE_ADDRESS_SETTINGS_OPTION,
+					] ) ||
+					! hasFinishedResolution( 'getOption', [
+						STORE_CITY_SETTINGS_OPTION,
+					] ) ||
+					! hasFinishedResolution( 'getOption', [
+						STORE_POSTCODE_SETTINGS_OPTION,
+					] ),
 				hasReviewedStoreLocationSettings:
-					getOption( REVIEWED_STORE_LOCATION_SETTINGS_OPTION ) ===
-					'yes',
+					getOption( STORE_ADDRESS_SETTINGS_OPTION ) !== '' &&
+					getOption( STORE_CITY_SETTINGS_OPTION ) !== '' &&
+					getOption( STORE_POSTCODE_SETTINGS_OPTION ) !== '',
 			};
 		}
 	);
@@ -46,7 +56,8 @@ const isFieldFilled = ( fieldSelector: string ) => {
 
 const StoreAddressTourOverlay = () => {
 	const { isLoading, show } = useShowStoreLocationTour();
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const [ isDismissed, setIsDismissed ] = useState( false );
+
 	const config: TourKitTypes.WooConfig = {
 		steps: [
 			{
@@ -96,13 +107,11 @@ const StoreAddressTourOverlay = () => {
 				fields_filled,
 			} );
 
-			updateOptions( {
-				[ REVIEWED_STORE_LOCATION_SETTINGS_OPTION ]: 'yes',
-			} );
+			setIsDismissed( true );
 		},
 	};
 
-	if ( isLoading || ! show ) {
+	if ( isDismissed || isLoading || ! show ) {
 		return null;
 	}
 	return <TourKit config={ config }></TourKit>;
