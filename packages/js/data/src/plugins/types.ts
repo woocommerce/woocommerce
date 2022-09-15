@@ -84,23 +84,26 @@ export type ActivatePluginsResponse = PluginsResponse< {
 } >;
 
 export type JetpackConnectionDataResponse = {
+	/** The user on this site who is connected to Jetpack with their WordPress.com account */
+	connectionOwner: string | null;
+	/** Details about the currently logged in user on this site */
 	currentUser: {
 		isConnected: boolean;
 		isMaster: boolean;
 		username: string;
 		id: number;
-		wpcomUser: {
-			ID: number;
-			login: string;
-			email: string;
-			display_name: string;
-			text_direction: string;
-			site_count: number;
-			jetpack_connect: string;
-			color_scheme: string;
-			sidebar_collapsed: boolean;
-			user_locale: string;
-			avatar: string;
+		wpcomUser?: {
+			ID?: number;
+			login?: string;
+			email?: string;
+			display_name?: string;
+			text_direction?: string;
+			site_count?: number;
+			jetpack_connect?: string;
+			color_scheme?: string;
+			sidebar_collapsed?: boolean;
+			user_locale?: string;
+			avatar?: string;
 		};
 		gravatar: string;
 		permissions: {
