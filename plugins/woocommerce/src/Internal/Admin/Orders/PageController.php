@@ -2,11 +2,14 @@
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 
 /**
  * Controls the different pages/screens associated to the "Orders" menu page.
  */
 class PageController {
+
+	use AccessiblePrivateMethods;
 
 	/**
 	 * Instance of the posts redirection controller.
@@ -88,15 +91,16 @@ class PageController {
 
 		$this->set_action();
 
-		// Perform initialization for the current action.
-		add_action(
-			'load-woocommerce_page_wc-orders',
-			function() {
-				if ( method_exists( $this, 'setup_action_' . $this->current_action ) ) {
-					$this->{"setup_action_{$this->current_action}"}();
-				}
-			}
-		);
+		self::add_action( 'load-woocommerce_page_wc-orders', array( $this, 'handle_load_page_action' ) );
+	}
+
+	/**
+	 * Perform initialization for the current action.
+	 */
+	private function handle_load_page_action() {
+		if ( method_exists( $this, 'setup_action_' . $this->current_action ) ) {
+			$this->{"setup_action_{$this->current_action}"}();
+		}
 	}
 
 	/**
