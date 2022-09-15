@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Add filter `woocommerce_cart_item_is_purchasable` to allow purchasing non-purchasable items.
