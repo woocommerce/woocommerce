@@ -44,9 +44,10 @@
 
 		> svg {
 			position: absolute;
-			right: 20px;
+			right: 8px;
 			top: 50%;
 			transform: translateY(-50%);
+			pointer-events: none;
 		}
 	}
 
@@ -105,13 +106,6 @@
 			}
 		}
 	}
-	.wc-blocks-components-form-token-field-wrapper:not(.single-selection) .components-form-token-field__input-container {
-		width: calc(100% - 50px);
-
-		.components-form-token-field__suggestions-list {
-			width: calc(100% + 50px);
-		}
-	}
 }
 
 .wc-block-attribute-filter__multiple-toggle,
@@ -159,12 +153,19 @@
 }
 
 .wc-blocks-components-form-token-field-wrapper:not(.single-selection) .components-form-token-field__input-container {
+	padding: $gap-smallest 30px $gap-smallest  $gap-smaller;
+
 	.components-form-token-field__token-text {
 		background-color: $white;
 		border: 1px solid;
 		border-right: 0;
 		border-radius: 25px 0 0 25px;
 		padding: em($gap-smallest) em($gap-smaller) em($gap-smallest) em($gap-small);
+		line-height: 22px;
+	}
+
+	> .components-form-token-field__input {
+		margin: em($gap-smallest) 0;
 	}
 
 	.components-button.components-form-token-field__remove-token {
