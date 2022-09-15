@@ -91,10 +91,7 @@ export const Sortable = ( {
 		onDragStart( event );
 	};
 
-	const handleDragEnd = (
-		event: DragEvent< HTMLDivElement >,
-		index: number
-	) => {
+	const handleDragEnd = ( event: DragEvent< HTMLDivElement > ) => {
 		persistItemOrder();
 		onDragEnd( event );
 	};
@@ -123,14 +120,12 @@ export const Sortable = ( {
 		[ dragIndex ]
 	);
 
-	const handleKeyDown = (
-		event: KeyboardEvent< HTMLLIElement >,
-		index: number
-	) => {
+	const handleKeyDown = ( event: KeyboardEvent< HTMLLIElement > ) => {
 		const { key } = event;
 		const isSelecting = dragIndex === null || dropIndex === null;
 		const selectedLabel = getItemName( ref.current, selectedIndex );
 
+		// Select or drop on spacebar press.
 		if ( key === ' ' ) {
 			if ( isSelecting ) {
 				speak(
@@ -164,6 +159,7 @@ export const Sortable = ( {
 				'assertive'
 			);
 			persistItemOrder();
+			return;
 		}
 
 		if ( key === 'ArrowUp' ) {
@@ -188,6 +184,7 @@ export const Sortable = ( {
 				),
 				'assertive'
 			);
+			return;
 		}
 
 		if ( key === 'ArrowDown' ) {
@@ -207,6 +204,7 @@ export const Sortable = ( {
 				),
 				'assertive'
 			);
+			return;
 		}
 
 		if ( key === 'Escape' ) {
@@ -257,7 +255,7 @@ export const Sortable = ( {
 						index={ index }
 						isDragging={ isDragging }
 						isSelected={ selectedIndex === index }
-						onDragEnd={ ( event ) => handleDragEnd( event, index ) }
+						onDragEnd={ ( event ) => handleDragEnd( event ) }
 						onDragStart={ ( event ) =>
 							handleDragStart( event, index )
 						}
@@ -265,7 +263,7 @@ export const Sortable = ( {
 							event.preventDefault();
 							throttledHandleDragOver( event, index );
 						} }
-						onKeyDown={ ( event ) => handleKeyDown( event, index ) }
+						onKeyDown={ ( event ) => handleKeyDown( event ) }
 					>
 						{ child }
 					</SortableItem>
