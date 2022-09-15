@@ -28,7 +28,7 @@ runs:
     - name: Setup PNPM
       uses: pnpm/action-setup@10693b3829bf86eb2572aef5f3571dcf5ca9287d
       with:
-        version: 6
+        version: 7
 
     - name: Setup Node
       uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93
@@ -51,7 +51,9 @@ runs:
 
     - name: Install Node and PHP Dependencies
       shell: bash
-      run: pnpm install ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
+      run: |
+        pnpm -w install turbo
+        pnpm install ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
 
     - name: Cache Build Output
       uses: actions/cache@fd5de65bc895cf536527842281bea11763fefd77

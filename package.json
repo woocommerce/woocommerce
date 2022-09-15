@@ -14,8 +14,8 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"scripts": {
-		"build": "pnpm exec turbo run turbo:build -- -- ",
-		"test": "pnpm exec turbo run turbo:test -- --",
+		"build": "pnpm exec turbo run turbo:build",
+		"test": "pnpm exec turbo run turbo:test",
 		"build-storybook": "build-storybook  -c ./tools/storybook/.storybook",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "pnpm git:update-hooks",

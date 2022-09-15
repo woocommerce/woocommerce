@@ -11,14 +11,15 @@ jobs:
               uses: actions/checkout@v3
             - name: Install prerequisites
               run: |
-                  npm install -g pnpm@^6.24.2
+                  npm install -g pnpm
                   npm -g i @wordpress/env@5.1.0
                   pnpm install --filter code-analyzer --filter cli-core
             - name: Run analyzer
               id: run
+              working-directory: tools/code-analyzer
               run: |
-                  version=$(pnpm run analyzer --filter code-analyzer -- major-minor "${{ github.head_ref || github.ref_name }}" "plugins/woocommerce/woocommerce.php" | tail -n 1)
-                  pnpm run analyzer --filter code-analyzer -- "$GITHUB_HEAD_REF" $version -o "github"
+                  version=$(pnpm run analyzer major-minor "${{ github.head_ref || github.ref_name }}" "plugins/woocommerce/woocommerce.php" | tail -n 1)
+                  pnpm run analyzer "$GITHUB_HEAD_REF" $version -o "github"
             - name: Print results
               id: results
               run: echo "::set-output name=results::${{ steps.run.outputs.templates }}${{ steps.run.outputs.wphooks }}${{ steps.run.outputs.schema }}${{ steps.run.outputs.database }}"

@@ -37,8 +37,9 @@ jobs:
           composer --version
 
       - name: Build Admin feature config
-        run: |
-          pnpm build:feature-config --filter=woocommerce
+        working-directory: plugins/woocommerce
+        run:
+          pnpm run build:feature-config
 
       - name: Init DB and WP
         working-directory: plugins/woocommerce
