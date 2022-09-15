@@ -2,9 +2,15 @@
  * External dependencies
  */
 import { Fragment } from 'react';
-import { createElement, useState, useEffect } from '@wordpress/element';
+import {
+	createElement,
+	useState,
+	useEffect,
+	useCallback,
+} from '@wordpress/element';
 import { Icon, calendar } from '@wordpress/icons';
 import moment, { Moment } from 'moment';
+import { debounce } from 'lodash';
 import classNames from 'classnames';
 import { sprintf, __ } from '@wordpress/i18n';
 import {
@@ -42,7 +48,6 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	const [ lastValidDate, setLastValidDate ] = useState< Moment | null >(
 		null
 	);
-	const [ lastSentChange, setLastSentChange ] = useState( '' );
 
 	function parseMomentIso( dateString?: string | null ): Moment {
 		return moment( dateString, moment.ISO_8601, true );
@@ -76,21 +81,26 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		);
 	}
 
-	function change() {
-		const newDateTime = parseMoment( inputString );
+	const change = useCallback(
+		debounce( ( newInputString: string ) => {
+			setInputString( newInputString );
 
-		if ( newDateTime.isValid() ) {
-			setLastValidDate( newDateTime );
-		}
+			const newDateTime = parseMoment( newInputString );
 
-		if ( onChange ) {
-			onChange(
-				newDateTime.isValid()
-					? formatMomentIso( newDateTime )
-					: inputString
-			);
-		}
-	}
+			if ( newDateTime.isValid() ) {
+				setLastValidDate( newDateTime );
+			}
+
+			if ( onChange ) {
+				onChange(
+					newDateTime.isValid()
+						? formatMomentIso( newDateTime )
+						: newInputString
+				);
+			}
+		}, 500 ),
+		[]
+	);
 
 	function blur() {
 		if ( onBlur ) {
@@ -102,15 +112,11 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		const newDate = parseMomentIso( currentDate );
 
 		if ( newDate.isValid() ) {
-			setInputString( formatMoment( newDate ) );
+			change( formatMoment( newDate ) );
 		} else {
-			setInputString( currentDate || '' );
+			change( currentDate || '' );
 		}
 	}, [ currentDate, dateTimeFormat ] );
-
-	useEffect( () => {
-		change();
-	}, [ inputString ] );
 
 	return (
 		<Dropdown
@@ -131,7 +137,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 					<InputControl
 						disabled={ disabled }
 						value={ inputString }
-						onChange={ setInputString }
+						onChange={ change }
 						onBlur={ (
 							event: React.FocusEvent< HTMLInputElement >
 						) => {
