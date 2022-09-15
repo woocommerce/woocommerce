@@ -77,15 +77,22 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	}
 
 	function change() {
-		const newDate = parseMoment( inputString );
-		setLastSentChange(
-			newDate.isValid() ? formatMomentIso( newDate ) : inputString
-		);
+		const newDateTime = parseMoment( inputString );
+
+		if ( newDateTime.isValid() ) {
+			setLastValidDate( newDateTime );
+		}
+
+		if ( onChange ) {
+			onChange(
+				newDateTime.isValid()
+					? formatMomentIso( newDateTime )
+					: inputString
+			);
+		}
 	}
 
 	function blur() {
-		change();
-
 		if ( onBlur ) {
 			onBlur();
 		}
@@ -102,18 +109,8 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	}, [ currentDate, dateTimeFormat ] );
 
 	useEffect( () => {
-		const newDate = parseMoment( inputString );
-
-		if ( newDate.isValid() ) {
-			setLastValidDate( newDate );
-		}
+		change();
 	}, [ inputString ] );
-
-	useEffect( () => {
-		if ( onChange ) {
-			onChange( lastSentChange );
-		}
-	}, [ lastSentChange ] );
 
 	return (
 		<Dropdown
