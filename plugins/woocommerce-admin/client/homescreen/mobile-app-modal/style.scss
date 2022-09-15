@@ -10,8 +10,9 @@
 	}
 }
 // The welcome modal is presented outside the homescreen class namespace
-.components-guide.woocommerce__welcome-modal {
-	min-width: 964px;
+.components-guide.woocommerce__mobile-app-welcome-modal {
+	max-width: 964px;
+	min-width: 534px;
 	height: 600px;
 
 	.components-modal__header {

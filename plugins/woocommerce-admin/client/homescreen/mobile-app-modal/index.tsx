@@ -109,7 +109,7 @@ export const MobileAppModal = () => {
 							Object.fromEntries( searchParams.entries() )
 						);
 					} }
-					className={ 'woocommerce__welcome-modal' }
+					className={ 'woocommerce__mobile-app-welcome-modal' }
 					pages={ [
 						{
 							content: (
