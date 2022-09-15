@@ -7,6 +7,7 @@ function isDefaultItemType< ItemType >(
 	item: ItemType | DefaultItemType | null
 ): item is DefaultItemType {
 	return (
+		Boolean( item ) &&
 		( item as DefaultItemType ).label !== undefined &&
 		( item as DefaultItemType ).value !== undefined
 	);
