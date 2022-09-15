@@ -37,27 +37,6 @@ class ProductQuery extends AbstractBlock {
 
 	}
 
-	/**
-	 * Remove the query block filter and parse the custom query
-	 *
-	 * This function is supposed to be called by the `query_loop_block_query_vars`
-	 * filter. It de-registers the filter to make sure it runs only once and doesn't end
-	 * up hi-jacking future Query Loop blocks.
-	 *
-	 * It needs unfortunately to be `public` or otherwise the filter can't call it.
-	 *
-	 * @param WP_Query $query The WordPress Query.
-	 * @return array
-	 */
-	public function get_query_by_attributes_once( $query ) {
-		remove_filter(
-			'query_loop_block_query_vars',
-			array( $this, 'get_query_by_attributes_once' ),
-			10
-		);
-
-		return $this->get_query_by_attributes( $query, $this->parsed_block );
-	}
 
 	/**
 	 * Update the query for the product query block.
@@ -66,28 +45,30 @@ class ProductQuery extends AbstractBlock {
 	 * @param array       $parsed_block The block being rendered.
 	 */
 	public function update_query( $pre_render, $parsed_block ) {
-		if ( 'core/query' !== $parsed_block['blockName'] || ! isset( $parsed_block['attrs']['__woocommerceVariationProps'] ) ) {
+		if ( 'core/query' !== $parsed_block['blockName'] ) {
 			return;
 		}
 
 		$this->parsed_block = $parsed_block;
 
-		add_filter(
-			'query_loop_block_query_vars',
-			array( $this, 'get_query_by_attributes_once' ),
-			10,
-			1
-		);
+		if ( isset( $parsed_block['attrs']['__woocommerceVariationProps'] ) ) {
+			add_filter(
+				'query_loop_block_query_vars',
+				array( $this, 'get_query_by_attributes' ),
+				10,
+				1
+			);
+		}
 	}
 
 	/**
 	 * Return a custom query based on the attributes.
 	 *
-	 * @param WP_Query $query         The WordPress Query.
-	 * @param WP_Block $parsed_block  The block being rendered.
+	 * @param WP_Query $query The WordPress Query.
 	 * @return array
 	 */
-	public function get_query_by_attributes( $query, $parsed_block ) {
+	public function get_query_by_attributes( $query ) {
+		$parsed_block = $this->parsed_block;
 		if ( ! isset( $parsed_block['attrs']['__woocommerceVariationProps'] ) ) {
 			return $query;
 		}
