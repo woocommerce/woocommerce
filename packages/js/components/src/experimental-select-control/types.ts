@@ -10,7 +10,7 @@ import {
 
 export type DefaultItemType = {
 	label: string;
-	value: string;
+	value: string | number;
 };
 
 export type SelectedType< ItemType > = ItemType | null;
@@ -50,4 +50,6 @@ export type ChildrenType< ItemType > = ( {
 
 export type getItemLabelType< ItemType > = ( item: ItemType | null ) => string;
 
-export type getItemValueType< ItemType > = ( item: ItemType | null ) => string;
+export type getItemValueType< ItemType > = (
+	item: ItemType | null
+) => string | number;
