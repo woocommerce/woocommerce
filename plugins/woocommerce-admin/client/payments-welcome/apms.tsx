@@ -89,7 +89,7 @@ const ApmNotice = ( { enabledApms }: { enabledApms: Set< Apm > } ) => {
 	);
 };
 
-const APMs: React.FunctionComponent< ApmsProps > = ( {
+const ApmList: React.FunctionComponent< ApmsProps > = ( {
 	enabledApms,
 	setEnabledApms,
 } ) => {
@@ -142,4 +142,4 @@ const APMs: React.FunctionComponent< ApmsProps > = ( {
 	);
 };
 
-export default APMs;
+export default ApmList;

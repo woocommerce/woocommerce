@@ -394,7 +394,7 @@ export default {
 		amazonpay: {
 			title: __( 'Amazon Pay', 'woocommerce' ),
 			description: __(
-				'Enable Amazon Pay alongside WooCommerce Payments and give buyers the ability to pay via AmazonPay. Transactions take place via Amazon embedded widgets, so the buyer never leaves your site.',
+				'Enable Amazon Pay alongside WooCommerce Payments and give buyers the ability to pay via Amazon Pay. Transactions take place via Amazon embedded widgets, so the buyer never leaves your site.',
 				'woocommerce'
 			),
 		},

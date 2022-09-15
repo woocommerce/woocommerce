@@ -31,7 +31,7 @@ import {
  */
 import strings from './strings';
 import Banner from './banner';
-import APMs, { Apm } from './apms';
+import ApmList, { Apm } from './apms';
 import './style.scss';
 import ExitSurveyModal from './exit-survey-modal';
 import { getAdminSetting } from '~/utils/admin-settings';
@@ -148,12 +148,6 @@ const ConnectPageOnboarding = ( {
 			wpcom_connection: isJetpackConnected ? 'Yes' : 'No',
 		} );
 
-		recordEvent( 'wcpay_extension_installed', {
-			extensions: [ ...enabledApms ]
-				.map( ( apm ) => apm.id )
-				.join( ', ' ),
-		} );
-
 		const pluginsToInstall = [ ...enabledApms ].map(
 			( apm ) => apm.extension
 		);
@@ -163,6 +157,11 @@ const ConnectPageOnboarding = ( {
 				[ 'woocommerce-payments' ].concat( pluginsToInstall )
 			);
 			if ( installAndActivateResponse?.success ) {
+				recordEvent( 'wcpay_extension_installed', {
+					extensions: [ ...enabledApms ]
+						.map( ( apm ) => apm.id )
+						.join( ', ' ),
+				} );
 				await activatePromo();
 			} else {
 				throw new Error( installAndActivateResponse.message );
@@ -295,7 +294,7 @@ const ConnectAccountPage = () => {
 					enabledApms={ enabledApms }
 				/>
 				<Banner />
-				<APMs
+				<ApmList
 					enabledApms={ enabledApms }
 					setEnabledApms={ setEnabledApms }
 				/>
