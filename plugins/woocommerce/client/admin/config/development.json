@@ -27,6 +27,7 @@
 		"subscriptions": true,
 		"store-alerts": true,
 		"transient-notices": true,
+		"woo-mobile-welcome": true,
 		"wc-pay-promotion": true,
 		"wc-pay-welcome-page": true
 	}
