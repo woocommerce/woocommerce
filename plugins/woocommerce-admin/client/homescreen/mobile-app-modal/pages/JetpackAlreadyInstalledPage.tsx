@@ -15,12 +15,17 @@ import { SendMagicLinkButton } from '../components';
 
 interface JetpackAlreadyInstalledPageProps {
 	wordpressAccountEmailAddress: string | undefined;
+	isRetryingMagicLinkSend: boolean;
 	sendMagicLinkHandler: () => void;
 }
 
 export const JetpackAlreadyInstalledPage: React.FC<
 	JetpackAlreadyInstalledPageProps
-> = ( { wordpressAccountEmailAddress, sendMagicLinkHandler } ) => {
+> = ( {
+	wordpressAccountEmailAddress,
+	sendMagicLinkHandler,
+	isRetryingMagicLinkSend,
+} ) => {
 	const DISMISSED_MOBILE_APP_MODAL_OPTION =
 		'woocommerce_admin_dismissed_mobile_app_modal';
 
@@ -38,14 +43,14 @@ export const JetpackAlreadyInstalledPage: React.FC<
 	} );
 
 	useEffect( () => {
-		if ( ! isLoading ) {
+		if ( ! isLoading && ! isRetryingMagicLinkSend ) {
 			recordEvent( 'magic_prompt_view', {
 				// jetpack_state value is implied by the precondition of rendering this screen
 				jetpack_state: 'full-connection',
 				repeat_user: repeatUser,
 			} );
 		}
-	}, [ repeatUser, isLoading ] );
+	}, [ repeatUser, isLoading, isRetryingMagicLinkSend ] );
 
 	return (
 		<ModalContentLayoutWithTitle>

@@ -55,6 +55,8 @@ export const MobileAppModal = () => {
 	}, [ searchParams ] );
 
 	const [ hasSentEmail, setHasSentEmail ] = useState( false );
+	const [ isRetryingMagicLinkSend, setIsRetryingMagicLinkSend ] =
+		useState( false );
 
 	const { fetchMagicLinkApiCall } = useSendMagicLink();
 
@@ -68,7 +70,11 @@ export const MobileAppModal = () => {
 		if ( hasSentEmail ) {
 			setPageContent(
 				<EmailSentPage
-					hasSentEmailHandler={ () => setHasSentEmail( false ) }
+					returnToSendLinkPage={ () => {
+						setHasSentEmail( false );
+						setIsRetryingMagicLinkSend( true );
+						recordEvent( 'magic_prompt_retry_send_signin_link' );
+					} }
 				/>
 			);
 		} else if ( state === JetpackPluginStates.NOT_OWNER_OF_CONNECTION ) {
@@ -85,6 +91,7 @@ export const MobileAppModal = () => {
 					isReturningFromWordpressConnection={
 						isReturningFromWordpressConnection
 					}
+					isRetryingMagicLinkSend={ isRetryingMagicLinkSend }
 					sendMagicLinkHandler={ sendMagicLink }
 				/>
 			);
@@ -100,6 +107,7 @@ export const MobileAppModal = () => {
 					wordpressAccountEmailAddress={
 						wordpressAccountEmailAddress
 					}
+					isRetryingMagicLinkSend={ isRetryingMagicLinkSend }
 					sendMagicLinkHandler={ sendMagicLink }
 				/>
 			);
@@ -110,6 +118,7 @@ export const MobileAppModal = () => {
 		isReturningFromWordpressConnection,
 		jetpackConnectionData?.currentUser?.wpcomUser?.email,
 		state,
+		isRetryingMagicLinkSend,
 	] );
 
 	return (

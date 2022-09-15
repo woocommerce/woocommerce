@@ -17,12 +17,17 @@ import {
 
 interface JetpackInstallStepperPageProps {
 	isReturningFromWordpressConnection: boolean;
+	isRetryingMagicLinkSend: boolean;
 	sendMagicLinkHandler: () => void;
 }
 
 export const JetpackInstallStepperPage: React.FC<
 	JetpackInstallStepperPageProps
-> = ( { isReturningFromWordpressConnection, sendMagicLinkHandler } ) => {
+> = ( {
+	isReturningFromWordpressConnection,
+	sendMagicLinkHandler,
+	isRetryingMagicLinkSend,
+} ) => {
 	const { state: jetpackPluginState } = useJetpackPluginState();
 	const jetpackPluginStateRef =
 		useRef< JetpackPluginStates >( jetpackPluginState );
@@ -37,13 +42,17 @@ export const JetpackInstallStepperPage: React.FC<
 			jetpackPluginStateRef.current = jetpackPluginState;
 			if ( isReturningFromWordpressConnection ) {
 				recordEvent( 'magic_prompt_return_from_wp_connection' );
-			} else {
+			} else if ( ! isRetryingMagicLinkSend ) {
 				recordEvent( 'magic_prompt_view', {
 					jetpack_state: jetpackPluginStateRef.current,
 				} );
 			}
 		}
-	}, [ isReturningFromWordpressConnection, jetpackPluginState ] );
+	}, [
+		isReturningFromWordpressConnection,
+		jetpackPluginState,
+		isRetryingMagicLinkSend,
+	] );
 
 	return (
 		<ModalContentLayoutWithTitle>
