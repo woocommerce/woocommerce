@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Move-to-trash link (within the order editor) should also work with Custom Order Tables.

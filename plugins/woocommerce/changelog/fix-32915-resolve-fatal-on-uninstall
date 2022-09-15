@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent fatal errors during uninstall when `WC_REMOVE_ALL_DATA` is true.

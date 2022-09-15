@@ -253,6 +253,30 @@ class ArrayUtilTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox push_once doesn't alter the array and returns false if the item is already in the array.
+	 */
+	public function test_push_once_existing_value() {
+		$array = array( 1, 2, 3 );
+
+		$result = ArrayUtil::push_once( $array, 2 );
+
+		$this->assertFalse( $result );
+		$this->assertEquals( array( 1, 2, 3 ), $array );
+	}
+
+	/**
+	 * @testdox push_once pushes the value in the array and returns true if the value isn't yet in the array.
+	 */
+	public function test_push_once_new_value() {
+		$array = array( 1, 2, 3 );
+
+		$result = ArrayUtil::push_once( $array, 4 );
+
+		$this->assertTrue( $result );
+		$this->assertEquals( array( 1, 2, 3, 4 ), $array );
+	}
+
+	/**
 	 * @testdox `ensure_key_is_array` adds an empty array under the given key if they key doesn't exist already in the array.
 	 */
 	public function test_ensure_key_is_array_when_key_does_not_exist() {
