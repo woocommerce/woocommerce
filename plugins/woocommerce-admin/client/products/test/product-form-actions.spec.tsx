@@ -426,6 +426,8 @@ describe( 'Validations', () => {
 			'Please enter a price with one monetary decimal point without thousand separators and currency symbols.';
 		const salePriceErrorMessage =
 			'Please enter a price with one monetary decimal point without thousand separators and currency symbols.';
+		const highSalePriceErrorMessage =
+			'Sale price cannot be equal to or higher than list price.';
 		const productWithoutName: Partial< Product > = {
 			name: '',
 		};
@@ -443,15 +445,23 @@ describe( 'Validations', () => {
 		};
 		const productSalePriceWithText: Partial< Product > = {
 			name: 'My Product',
+			regular_price: '201',
 			sale_price: 'text',
 		};
 		const productSalePriceWithNotAllowedCharacters: Partial< Product > = {
 			name: 'My Product',
+			regular_price: '201',
 			sale_price: '%&@#¢∞¬÷200',
 		};
 		const productSalePriceWithSpaces: Partial< Product > = {
 			name: 'My Product',
+			regular_price: '201',
 			sale_price: '2 0 0',
+		};
+		const productSalePriceHigherThanRegular: Partial< Product > = {
+			name: 'My Product',
+			regular_price: '201',
+			sale_price: '202',
 		};
 		const validProduct: Partial< Product > = {
 			name: 'My Product',
@@ -481,6 +491,9 @@ describe( 'Validations', () => {
 		);
 		expect( validate( productSalePriceWithSpaces ) ).toEqual( {
 			sale_price: salePriceErrorMessage,
+		} );
+		expect( validate( productSalePriceHigherThanRegular ) ).toEqual( {
+			sale_price: highSalePriceErrorMessage,
 		} );
 		expect( validate( validProduct ) ).toEqual( {} );
 	} );
