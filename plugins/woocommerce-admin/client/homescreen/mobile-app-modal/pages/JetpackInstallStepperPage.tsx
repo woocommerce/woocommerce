@@ -36,9 +36,9 @@ export const JetpackInstallStepperPage: React.FC<
 		) {
 			jetpackPluginStateRef.current = jetpackPluginState;
 			if ( isReturningFromWordpressConnection ) {
-				recordEvent( 'wcadmin_magic_prompt_return_from_wp_connection' );
+				recordEvent( 'magic_prompt_return_from_wp_connection' );
 			} else {
-				recordEvent( 'wcadmin_magic_prompt_view', {
+				recordEvent( 'magic_prompt_view', {
 					jetpack_state: jetpackPluginStateRef.current,
 				} );
 			}

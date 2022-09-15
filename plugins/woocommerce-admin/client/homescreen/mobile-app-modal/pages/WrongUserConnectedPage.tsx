@@ -13,7 +13,7 @@ export const WrongUserConnectedPage: React.FC<
 	WrongUserConnectedPageProps
 > = () => {
 	useEffect( () => {
-		recordEvent( 'wcadmin_magic_prompt_mismatched_wpcom_user_view' );
+		recordEvent( 'magic_prompt_mismatched_wpcom_user_view' );
 	}, [] );
 
 	// The user may see this screen if he clicks on the additional task and there is already another wpcom user connected to this site.

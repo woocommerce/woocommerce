@@ -39,7 +39,7 @@ export const JetpackAlreadyInstalledPage: React.FC<
 
 	useEffect( () => {
 		if ( ! isLoading ) {
-			recordEvent( 'wcadmin_magic_prompt_view', {
+			recordEvent( 'magic_prompt_view', {
 				// jetpack_state value is implied by the precondition of rendering this screen
 				jetpack_state: 'full-connection',
 				repeat_user: repeatUser,

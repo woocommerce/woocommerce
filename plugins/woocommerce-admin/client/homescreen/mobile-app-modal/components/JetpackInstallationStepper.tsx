@@ -52,7 +52,7 @@ export const JetpackInstallationStepper = ( {
 								onClick={ () => {
 									setIsWaitingForRedirect( true );
 									recordEvent(
-										'wcadmin_magic_prompt_install_connect_click'
+										'magic_prompt_install_connect_click'
 									);
 									installHandler();
 								} }

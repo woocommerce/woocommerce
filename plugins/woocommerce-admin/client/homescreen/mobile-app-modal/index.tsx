@@ -61,7 +61,7 @@ export const MobileAppModal = () => {
 	const sendMagicLink = useCallback( () => {
 		fetchMagicLinkApiCall();
 		setHasSentEmail( true );
-		recordEvent( 'wcadmin_magic_prompt_send_signin_link_click' );
+		recordEvent( 'magic_prompt_send_signin_link_click' );
 	}, [ fetchMagicLinkApiCall ] );
 
 	useEffect( () => {
