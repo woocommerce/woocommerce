@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, storefront, checkout, downlo
 Requires at least: 5.8
 Tested up to: 6.0
 Requires PHP: 7.2
-Stable tag: 6.9.1
+Stable tag: 6.9.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -162,6 +162,12 @@ If you encounter issues with the shop/category pages after an update, flush the 
 WooCommerce comes with some sample data you can use to see how products look; import sample_products.xml via the [WordPress importer](https://wordpress.org/plugins/wordpress-importer/). You can also use the core [CSV importer](https://docs.woocommerce.com/document/product-csv-importer-exporter/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) or our [CSV Import Suite extension](https://woocommerce.com/products/product-csv-import-suite/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) to import sample_products.csv
 
 == Changelog ==
+
+= 6.9.2 2022-09-15 =
+
+**WooCommerce**
+
+* Fix - Use offsetted datetime when displaying order created date. [#34687](https://github.com/woocommerce/woocommerce/pull/34687)
 
 = 6.9.1 2022-09-14 =
 
