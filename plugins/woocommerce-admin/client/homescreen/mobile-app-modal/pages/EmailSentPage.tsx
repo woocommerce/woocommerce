@@ -6,11 +6,11 @@ import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 interface EmailSentProps {
-	hasSentEmailHandler: () => void;
+	returnToSendLinkPage: () => void;
 }
 
 export const EmailSentPage: React.FC< EmailSentProps > = ( {
-	hasSentEmailHandler,
+	returnToSendLinkPage: returnToSendLinkPage,
 } ) => {
 	return (
 		<div className="email-sent-modal-body">
@@ -41,7 +41,7 @@ export const EmailSentPage: React.FC< EmailSentProps > = ( {
 								<Button
 									className="email-sent-send-another-link"
 									onClick={ () => {
-										hasSentEmailHandler();
+										returnToSendLinkPage();
 									} }
 								>
 									{ __( 'send another link', 'woocommerce' ) }

@@ -5,6 +5,7 @@ import React, { useState, useEffect } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { sprintf, __ } from '@wordpress/i18n';
 import { Spinner, Stepper, StepperProps } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -50,6 +51,9 @@ export const JetpackInstallationStepper = ( {
 								className="install-jetpack-button"
 								onClick={ () => {
 									setIsWaitingForRedirect( true );
+									recordEvent(
+										'magic_prompt_install_connect_click'
+									);
 									installHandler();
 								} }
 							>

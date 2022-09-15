@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { recordEvent } from '@woocommerce/tracks';
+import { useEffect } from '@wordpress/element';
 
 interface WrongUserConnectedPageProps {
 	wordpressAccountEmailAddress?: string | undefined;
@@ -10,7 +12,11 @@ interface WrongUserConnectedPageProps {
 export const WrongUserConnectedPage: React.FC<
 	WrongUserConnectedPageProps
 > = () => {
-	// The user shouldn't see this screen at all unless he's messing with the page URL manually to get here when he's not allowed to
+	useEffect( () => {
+		recordEvent( 'magic_prompt_mismatched_wpcom_user_view' );
+	}, [] );
+
+	// The user may see this screen if he clicks on the additional task and there is already another wpcom user connected to this site.
 	return (
 		<div className="wrong-user-connected-modal-body">
 			<div className="wrong-user-connected-title">

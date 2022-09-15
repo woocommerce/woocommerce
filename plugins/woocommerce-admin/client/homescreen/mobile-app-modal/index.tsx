@@ -11,6 +11,7 @@ import { getAdminLink } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -31,7 +32,9 @@ import { WrongUserConnectedPage } from './pages/WrongUserConnectedPage';
 import { SETUP_TASK_HELP_ITEMS_FILTER } from '../../activity-panel/panels/help';
 
 export const MobileAppModal = () => {
-	const [ guideIsOpen, setGuideIsOpen ] = useState( true );
+	const [ guideIsOpen, setGuideIsOpen ] = useState( false );
+	const [ isReturningFromWordpressConnection, setIsReturning ] =
+		useState( false );
 
 	const { state, jetpackConnectionData } = useJetpackPluginState();
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
@@ -45,25 +48,33 @@ export const MobileAppModal = () => {
 		} else {
 			setGuideIsOpen( false );
 		}
+
+		if ( searchParams.get( 'jetpackState' ) === 'returning' ) {
+			setIsReturning( true );
+		}
 	}, [ searchParams ] );
 
-	const isReturningFromWordpressConnection =
-		searchParams.get( 'jetpackState' ) === 'returning';
-
 	const [ hasSentEmail, setHasSentEmail ] = useState( false );
+	const [ isRetryingMagicLinkSend, setIsRetryingMagicLinkSend ] =
+		useState( false );
 
 	const { fetchMagicLinkApiCall } = useSendMagicLink();
 
 	const sendMagicLink = useCallback( () => {
 		fetchMagicLinkApiCall();
 		setHasSentEmail( true );
+		recordEvent( 'magic_prompt_send_signin_link_click' );
 	}, [ fetchMagicLinkApiCall ] );
 
 	useEffect( () => {
 		if ( hasSentEmail ) {
 			setPageContent(
 				<EmailSentPage
-					hasSentEmailHandler={ () => setHasSentEmail( false ) }
+					returnToSendLinkPage={ () => {
+						setHasSentEmail( false );
+						setIsRetryingMagicLinkSend( true );
+						recordEvent( 'magic_prompt_retry_send_signin_link' );
+					} }
 				/>
 			);
 		} else if ( state === JetpackPluginStates.NOT_OWNER_OF_CONNECTION ) {
@@ -80,6 +91,7 @@ export const MobileAppModal = () => {
 					isReturningFromWordpressConnection={
 						isReturningFromWordpressConnection
 					}
+					isRetryingMagicLinkSend={ isRetryingMagicLinkSend }
 					sendMagicLinkHandler={ sendMagicLink }
 				/>
 			);
@@ -95,6 +107,7 @@ export const MobileAppModal = () => {
 					wordpressAccountEmailAddress={
 						wordpressAccountEmailAddress
 					}
+					isRetryingMagicLinkSend={ isRetryingMagicLinkSend }
 					sendMagicLinkHandler={ sendMagicLink }
 				/>
 			);
@@ -105,6 +118,7 @@ export const MobileAppModal = () => {
 		isReturningFromWordpressConnection,
 		jetpackConnectionData?.currentUser?.wpcomUser?.email,
 		state,
+		isRetryingMagicLinkSend,
 	] );
 
 	return (
