@@ -46,19 +46,35 @@ describe( 'ProductFormActions', () => {
 		expect( queryByText( 'Publish' ) ).toBeInTheDocument();
 	} );
 
-	it( 'should have a publish dropdown button with three other actions', () => {
-		const { queryByText, queryByLabelText, debug } = render(
+	it( 'should have a publish dropdown button with two other actions', () => {
+		render(
 			<Form initialValues={ {} }>
 				<ProductFormActions />
 			</Form>
 		);
-		queryByLabelText( 'Publish options' )?.click();
-		expect( queryByText( 'Publish & duplicate' ) ).toBeInTheDocument();
-		expect( queryByText( 'Copy to a new draft' ) ).toBeInTheDocument();
-		expect( queryByText( 'Move to trash' ) ).toBeInTheDocument();
+		screen.getByLabelText( 'Publish options' ).click();
+		expect(
+			screen.queryByText( 'Publish & duplicate' )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText( 'Copy to a new draft' )
+		).toBeInTheDocument();
 	} );
 
 	describe( 'with new product', () => {
+		it( 'should not have the Move to trash button present', () => {
+			render(
+				<Form initialValues={ {} }>
+					<ProductFormActions />
+				</Form>
+			);
+
+			screen.getByLabelText( 'Publish options' ).click();
+			expect(
+				screen.queryByText( 'Move to trash' )
+			).not.toBeInTheDocument();
+		} );
+
 		it( 'should trigger createProductWithStatus and the product_edit track when Save draft is clicked', () => {
 			const product = { name: 'Name' };
 			const { queryByText } = render(
@@ -115,24 +131,24 @@ describe( 'ProductFormActions', () => {
 				true
 			);
 		} );
+	} );
 
-		it( 'should have the Move to trash button disabled', () => {
-			const product = { name: 'Name' };
-			const { queryByText, queryByLabelText } = render(
+	describe( 'with existing product', () => {
+		it( 'should have the Move to trash button present', () => {
+			const product: Partial< Product > = {
+				id: 5,
+				name: 'Name',
+			};
+			render(
 				<Form initialValues={ product }>
 					<ProductFormActions />
 				</Form>
 			);
-			queryByLabelText( 'Publish options' )?.click();
-			const moveToTrashButton = queryByText( 'Move to trash' );
-			expect(
-				( moveToTrashButton?.parentElement as HTMLButtonElement )
-					.disabled
-			).toEqual( true );
-		} );
-	} );
 
-	describe( 'with existing product', () => {
+			screen.getByLabelText( 'Publish options' ).click();
+			expect( screen.queryByText( 'Move to trash' ) ).toBeInTheDocument();
+		} );
+
 		it( 'The publish button should be renamed to Update when product is published', () => {
 			const { queryByText } = render(
 				<Form< Partial< Product > >
