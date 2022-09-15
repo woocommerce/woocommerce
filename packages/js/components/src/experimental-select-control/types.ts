@@ -9,8 +9,8 @@ import {
 } from 'downshift';
 
 export type DefaultItemType = {
-	value: string;
 	label: string;
+	value: string;
 };
 
 export type SelectedType< ItemType > = ItemType | null;
