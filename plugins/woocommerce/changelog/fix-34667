@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix error when 'woocommerce_enqueue_styles' returns non-array.
