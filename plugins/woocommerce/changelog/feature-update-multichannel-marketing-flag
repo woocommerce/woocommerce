@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Set multichannel-marketing to true in core.json to display new Marketing option in WooCommerce Settings.
