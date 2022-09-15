@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\Features;
 
 use Automattic\WooCommerce\Admin\Features\Analytics;
 use Automattic\WooCommerce\Admin\Features\Navigation\Init;
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
@@ -18,6 +19,8 @@ defined( 'ABSPATH' ) || exit;
  * (or incompatible) with a given feature.
  */
 class FeaturesController {
+
+	use AccessiblePrivateMethods;
 
 	public const FEATURE_ENABLED_CHANGED_ACTION = 'woocommerce_feature_enabled_changed';
 
@@ -80,41 +83,10 @@ class FeaturesController {
 			);
 		}
 
-		add_filter(
-			'updated_option',
-			function( $option, $old_value, $value ) {
-				$this->process_updated_option( $option, $old_value, $value );
-			},
-			999,
-			3
-		);
-
-		add_filter(
-			'added_option',
-			function( $option, $value ) {
-				$this->process_updated_option( $option, false, $value );
-			},
-			999,
-			3
-		);
-
-		add_filter(
-			'woocommerce_get_sections_advanced',
-			function( $sections ) {
-				return $this->add_features_section( $sections );
-			},
-			10,
-			1
-		);
-
-		add_filter(
-			'woocommerce_get_settings_advanced',
-			function( $section, $settings ) {
-				return $this->add_feature_settings( $section, $settings );
-			},
-			10,
-			2
-		);
+		self::add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
+		self::add_filter( 'added_option', array( $this, 'process_added_option' ), 999, 3 );
+		self::add_filter( 'woocommerce_get_sections_advanced', array( $this, 'add_features_section' ), 10, 1 );
+		self::add_filter( 'woocommerce_get_settings_advanced', array( $this, 'add_feature_settings' ), 10, 2 );
 	}
 
 	/**
@@ -346,10 +318,21 @@ class FeaturesController {
 	}
 
 	/**
+	 * Handler for the 'added_option' hook.
+	 *
+	 * It fires FEATURE_ENABLED_CHANGED_ACTION when a feature is enabled or disabled.
+	 *
+	 * @param string $option The option that has been created.
+	 * @param mixed  $value The value of the option.
+	 */
+	private function process_added_option( string $option, $value ) {
+		$this->process_updated_option( $option, false, $value );
+	}
+
+	/**
 	 * Handler for the 'updated_option' hook.
 	 *
-	 * It fires FEATURE_ENABLED_CHANGED_ACTION when a feature is enabled or disabled,
-	 * also it handles the compatibility with the legacy Admin features.
+	 * It fires FEATURE_ENABLED_CHANGED_ACTION when a feature is enabled or disabled.
 	 *
 	 * @param string $option The option that has been modified.
 	 * @param mixed  $old_value The old value of the option.

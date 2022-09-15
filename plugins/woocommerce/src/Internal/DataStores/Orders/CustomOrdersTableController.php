@@ -5,9 +5,9 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
-use Automattic\VIP\Feature;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 
 defined( 'ABSPATH' ) || exit;
 
