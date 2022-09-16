@@ -17,7 +17,6 @@ import { addProduct } from '../requests/merchant/add-product.js';
 import { coupons } from '../requests/merchant/coupons.js';
 import { orders } from '../requests/merchant/orders.js';
 import { ordersSearch } from '../requests/merchant/orders-search.js';
-import { ordersFilter } from '../requests/merchant/orders-filter.js';
 import { addOrder } from '../requests/merchant/add-order.js';
 import { ordersAPI } from '../requests/api/orders.js';
 import { homeWCAdmin } from '../requests/merchant/home-wc-admin.js';
@@ -261,7 +260,6 @@ export function allMerchantFlow() {
 	addOrder();
 	orders();
 	ordersSearch();
-	ordersFilter();
 	addProduct();
 	products();
 	coupons();
