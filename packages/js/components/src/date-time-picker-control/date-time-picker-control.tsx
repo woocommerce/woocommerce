@@ -7,6 +7,7 @@ import {
 	useState,
 	useEffect,
 	useCallback,
+	useRef,
 } from '@wordpress/element';
 import { Icon, calendar } from '@wordpress/icons';
 import moment, { Moment } from 'moment';
@@ -30,6 +31,7 @@ export type DateTimePickerControlProps = {
 	label?: string;
 	placeholder?: string;
 	help?: string | null;
+	onChangeDebounceWait?: number;
 } & Omit< React.HTMLAttributes< HTMLDivElement >, 'onChange' >;
 
 export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
@@ -43,6 +45,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	placeholder,
 	help,
 	className = '',
+	onChangeDebounceWait = 500,
 }: DateTimePickerControlProps ) => {
 	const [ inputString, setInputString ] = useState( '' );
 	const [ lastValidDate, setLastValidDate ] = useState< Moment | null >(
@@ -86,8 +89,8 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			if ( onChange ) {
 				onChange( dateTime, isValid );
 			}
-		}, 500 ),
-		[]
+		}, onChangeDebounceWait ),
+		[ onChangeDebounceWait ]
 	);
 
 	function change( newInputString: string ) {
@@ -111,7 +114,14 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		}
 	}
 
+	const isInitialUpdate = useRef( true );
 	useEffect( () => {
+		// Don't trigger the change handling on the initial update of the component
+		if ( isInitialUpdate.current ) {
+			isInitialUpdate.current = false;
+			return;
+		}
+
 		const newDate = parseMomentIso( currentDate );
 
 		if ( newDate.isValid() ) {
