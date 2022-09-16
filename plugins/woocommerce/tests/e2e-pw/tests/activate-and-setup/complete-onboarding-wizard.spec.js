@@ -268,7 +268,8 @@ test.describe(
 	}
 );
 
-test.describe( 'Store owner can go through setup Task List', () => {
+// Skipping this test because it's very flaky.
+test.describe.skip( 'Store owner can go through setup Task List', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async ( { page } ) => {
