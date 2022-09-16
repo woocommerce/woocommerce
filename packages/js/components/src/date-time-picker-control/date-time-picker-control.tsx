@@ -47,6 +47,8 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	className = '',
 	onChangeDebounceWait = 500,
 }: DateTimePickerControlProps ) => {
+	const inputControl = useRef< InputControl >();
+
 	const [ inputString, setInputString ] = useState( '' );
 	const [ lastValidDate, setLastValidDate ] = useState< Moment | null >(
 		null
@@ -114,6 +116,12 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		}
 	}
 
+	function focusInputControl() {
+		if ( inputControl.current ) {
+			inputControl.current.focus();
+		}
+	}
+
 	const isInitialUpdate = useRef( true );
 	useEffect( () => {
 		// Don't trigger the change handling on the initial update of the component
@@ -148,6 +156,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<>
 					<InputControl
+						ref={ inputControl }
 						disabled={ disabled }
 						value={ inputString }
 						onChange={ change }
@@ -160,7 +169,11 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 						} }
 						label={ label }
 						suffix={
-							<Icon icon={ calendar } className="calendar-icon" />
+							<Icon
+								icon={ calendar }
+								className="calendar-icon"
+								onClick={ focusInputControl }
+							/>
 						}
 						placeholder={ placeholder }
 						describedBy={ sprintf(
