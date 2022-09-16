@@ -15,7 +15,6 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStoreMeta;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 /**
@@ -52,7 +51,6 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 				DataSynchronizer::class,
 				OrdersTableRefundDataStore::class,
 				BatchProcessingController::class,
-				FeaturesController::class,
 			)
 		);
 		if ( Constants::is_defined( 'WP_CLI' ) && WP_CLI ) {
