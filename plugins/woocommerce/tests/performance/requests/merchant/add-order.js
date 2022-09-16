@@ -45,7 +45,9 @@ import {
 
 // Change URL if COT is enabled and being used
 let admin_new_order_base;
+let admin_open_order_base;
 let admin_update_order_base;
+let admin_update_order_id;
 let admin_update_order_params;
 
 if ( cot_status === true ) {
@@ -399,13 +401,13 @@ export function addOrder() {
 		);
 
 		if ( cot_status === true ) {
-			admin_update_order_base = `${ admin_update_order_base }&id=${ post_id }`;
+			admin_open_order_base = `${ admin_update_order_base }&id=${ post_id }`;
 		} else {
-			admin_update_order_base = `${ admin_update_order_base }?post=${ post_id }`;
+			admin_open_order_base = `${ admin_update_order_base }?post=${ post_id }`;
 		}
 
 		response = http.get(
-			`${ base_url }/wp-admin/${ admin_update_order_base }&action=edit`,
+			`${ base_url }/wp-admin/${ admin_open_order_base }&action=edit`,
 			{
 				headers: requestHeaders,
 				tags: { name: 'Merchant - Open Order' },
@@ -558,14 +560,15 @@ export function addOrder() {
 		] );
 
 		if ( cot_status === true ) {
-			admin_update_order_base = `${ admin_update_order_base }&id=${ post_id }`;
+			admin_update_order_id = `${ admin_update_order_base }&id=${ post_id }`;
 			admin_update_order_params = cotOrderParams.toString();
 		} else {
 			admin_update_order_params = orderParams.toString();
+			admin_update_order_id = `${ admin_open_order_base }`;
 		}
 
 		response = http.post(
-			`${ base_url }/wp-admin/${ admin_update_order_base }`,
+			`${ base_url }/wp-admin/${ admin_update_order_id }`,
 			admin_update_order_params.toString(),
 			{
 				headers: requestHeaders,

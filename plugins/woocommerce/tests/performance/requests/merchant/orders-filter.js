@@ -17,7 +17,6 @@ import {
 	cot_admin_orders_base_url,
 	think_time_min,
 	think_time_max,
-	customer_username,
 	customer_user_id,
 } from '../../config.js';
 import {
@@ -80,7 +79,7 @@ export function ordersFilter() {
 			'is status 200': ( r ) => r.status === 200,
 			'body contains: filter set to selected customer': ( response ) =>
 				response.body.includes(
-					`selected="selected">${ customer_username }`
+					`<option value="${ customer_user_id }" selected="selected">`
 				),
 		} );
 	} );
