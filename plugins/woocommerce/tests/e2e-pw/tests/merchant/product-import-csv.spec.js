@@ -250,7 +250,7 @@ test.describe( 'Import Products from a CSV file', () => {
 			elements.map( ( item ) => item.innerText )
 		);
 
-		await expect( productPrices.sort() ).toEqual(
+		await expect( productPrices.sort() ).toStrictEqual(
 			productPricesOverride.sort()
 		);
 	} );
