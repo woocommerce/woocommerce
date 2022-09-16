@@ -13,7 +13,6 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use WC_Mock_Payment_Gateway;
 use WC_Order;
 use WC_Product;
@@ -141,9 +140,9 @@ class OrderHelper {
 	 * Helper method to drop custom tables if present.
 	 */
 	public static function delete_order_custom_tables() {
-		$features_controller = wc_get_container()->get( Featurescontroller::class );
-		$features_controller->change_feature_enable( 'custom_order_tables', true );
-
+		$order_table_controller = wc_get_container()
+			->get( CustomOrdersTableController::class );
+		$order_table_controller->show_feature();
 		$synchronizer = wc_get_container()
 			->get( DataSynchronizer::class );
 		if ( $synchronizer->check_orders_table_exists() ) {
@@ -155,10 +154,11 @@ class OrderHelper {
 	 * Helper method to create custom tables if not present.
 	 */
 	public static function create_order_custom_table_if_not_exist() {
-		$features_controller = wc_get_container()->get( Featurescontroller::class );
-		$features_controller->change_feature_enable( 'custom_order_tables', true );
-
-		$synchronizer = wc_get_container()->get( DataSynchronizer::class );
+		$order_table_controller = wc_get_container()
+			->get( CustomOrdersTableController::class );
+		$order_table_controller->show_feature();
+		$synchronizer = wc_get_container()
+			->get( DataSynchronizer::class );
 		if ( ! $synchronizer->check_orders_table_exists() ) {
 			$synchronizer->create_database_tables();
 		}
