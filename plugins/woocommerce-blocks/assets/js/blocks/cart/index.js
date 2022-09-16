@@ -35,7 +35,6 @@ const settings = {
 		align: [ 'wide' ],
 		html: false,
 		multiple: false,
-		__experimentalExposeControlsToChildren: true,
 	},
 	example: {
 		attributes: {
