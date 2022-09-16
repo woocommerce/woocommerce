@@ -9,6 +9,7 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 
 	const BLOG_ID  = 2;
 	const ORDER_ID = 5;
+	const DOMAIN   = 'sample-domain.com';
 
 	/**
 	 * @var string $initial_country that is set on site which is a platform for unit tests, before running tests in this test suite.
@@ -42,7 +43,7 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 	public function test_tracker_reports_only_android_usage() {
 		$now = $this->prepare_timeline_with_valid_last_mobile_app_usage();
 
-		$mobile_message = MobileMessagingHandler::prepare_mobile_message( new WC_Order(), self::BLOG_ID, $now );
+		$mobile_message = MobileMessagingHandler::prepare_mobile_message( new WC_Order(), self::BLOG_ID, $now, self::DOMAIN );
 
 		$this->assertNotNull( $mobile_message );
 	}
@@ -57,10 +58,10 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 			array()
 		);
 
-		$mobile_message = MobileMessagingHandler::prepare_mobile_message( new WC_Order(), self::BLOG_ID, $now );
+		$mobile_message = MobileMessagingHandler::prepare_mobile_message( new WC_Order(), self::BLOG_ID, $now, self::DOMAIN );
 
 		$this->assertContains(
-			'href="https://woocommerce.com/mobile?blog_id=' . self::BLOG_ID . '&#038;utm_source=mobile_deeplink_no_app&#038;utm_content=' . self::BLOG_ID,
+			'href="https://woocommerce.com/mobile?blog_id=' . self::BLOG_ID . '&#038;utm_campaign=deeplinks_promote_app&#038;utm_medium=email&#038;utm_source=' . self::DOMAIN . '&#038;utm_term=' . self::BLOG_ID,
 			$mobile_message
 		);
 	}
@@ -73,10 +74,10 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 		$this->make_store_not_ipp_eligible();
 		$ipp_eligible_order = $this->generate_ipp_eligible_order();
 
-		$mobile_message = MobileMessagingHandler::prepare_mobile_message( $ipp_eligible_order, self::BLOG_ID, $now );
+		$mobile_message = MobileMessagingHandler::prepare_mobile_message( $ipp_eligible_order, self::BLOG_ID, $now, self::DOMAIN );
 
 		$this->assertContains(
-			'href="https://woocommerce.com/mobile/orders/details?blog_id=' . self::BLOG_ID . '&#038;order_id=' . self::ORDER_ID . '&#038;utm_source=mobile_deeplink_orders_details&#038;utm_content=' . self::BLOG_ID,
+			'href="https://woocommerce.com/mobile/orders/details?blog_id=' . self::BLOG_ID . '&#038;order_id=' . self::ORDER_ID . '&#038;utm_campaign=deeplinks_orders_details&#038;utm_medium=email&#038;utm_source=' . self::DOMAIN . '&#038;utm_term=' . self::BLOG_ID,
 			$mobile_message
 		);
 	}
@@ -89,10 +90,10 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 		$this->make_store_ipp_eligible();
 		$ipp_eligible_order = $this->generate_ipp_eligible_order();
 
-		$mobile_message = MobileMessagingHandler::prepare_mobile_message( $ipp_eligible_order, self::BLOG_ID, $now );
+		$mobile_message = MobileMessagingHandler::prepare_mobile_message( $ipp_eligible_order, self::BLOG_ID, $now, self::DOMAIN );
 
 		$this->assertContains(
-			'href="https://woocommerce.com/mobile/payments?blog_id=' . self::BLOG_ID . '&#038;utm_source=mobile_deeplink_payments&#038;utm_content=' . self::BLOG_ID,
+			'href="https://woocommerce.com/mobile/payments?blog_id=' . self::BLOG_ID . '&#038;utm_campaign=deeplinks_payments&#038;utm_medium=email&#038;utm_source=' . self::DOMAIN . '&#038;utm_term=' . self::BLOG_ID,
 			$mobile_message
 		);
 	}
@@ -109,10 +110,10 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 		$this->make_store_ipp_eligible();
 		$ipp_eligible_order = $this->generate_ipp_eligible_order();
 
-		$mobile_message = MobileMessagingHandler::prepare_mobile_message( $ipp_eligible_order, null, $now );
+		$mobile_message = MobileMessagingHandler::prepare_mobile_message( $ipp_eligible_order, null, $now, self::DOMAIN );
 
 		$this->assertContains(
-			'href="https://woocommerce.com/mobile/payments?blog_id=0&#038;utm_source=mobile_deeplink_payments&#038;utm_content=0',
+			'href="https://woocommerce.com/mobile/payments?blog_id=0&#038;utm_campaign=deeplinks_payments&#038;utm_medium=email&#038;utm_source=' . self::DOMAIN . '&#038;utm_term=0',
 			$mobile_message
 		);
 	}
@@ -148,6 +149,7 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 				),
 			)
 		);
+
 		return $now;
 	}
 

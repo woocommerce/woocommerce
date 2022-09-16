@@ -17,4 +17,4 @@
 
 use Automattic\WooCommerce\Internal\Orders\MobileMessagingHandler;
 
-echo wp_kses_post( MobileMessagingHandler::prepare_mobile_message( $order, $blog_id, $now ) );
+echo wp_kses_post( MobileMessagingHandler::prepare_mobile_message( $order, $blog_id, $now, $domain ) );

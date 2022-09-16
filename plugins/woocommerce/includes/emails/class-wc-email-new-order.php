@@ -230,12 +230,14 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		 */
 		public function mobile_messaging() {
 			if ( null !== $this->object ) {
+				$domain = wp_parse_url( home_url(), PHP_URL_HOST );
 				wc_get_template(
 					'emails/email-mobile-messaging.php',
 					array(
 						'order'   => $this->object,
 						'blog_id' => class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
 						'now'     => new DateTime(),
+						'domain'  => is_string( $domain ) ? $domain : '',
 					)
 				);
 			}
