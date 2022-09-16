@@ -222,12 +222,6 @@ export function addOrder() {
 
 	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
 
-	//woocommerce_json_search_customers
-
-	//woocommerce_get_customer_details
-
-	//woocommerce_add_order_item
-
 	group( 'Create New Order', function () {
 		const requestHeaders = Object.assign(
 			{},

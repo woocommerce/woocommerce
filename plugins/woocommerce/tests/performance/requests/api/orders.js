@@ -5,110 +5,208 @@
  */
 import encoding from 'k6/encoding';
 import http from 'k6/http';
-import { check } from 'k6';
-import { findBetween } from 'https://jslib.k6.io/k6-utils/1.1.0/index.js';
+import { check, group } from 'k6';
+import { findBetween } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 
 /**
  * Internal dependencies
  */
-import { base_url, admin_username, admin_password } from '../../config.js';
+import {
+	base_url,
+	admin_username,
+	admin_password,
+	addresses_guest_billing_first_name,
+	addresses_guest_billing_last_name,
+	addresses_guest_billing_country,
+	addresses_guest_billing_address_1,
+	addresses_guest_billing_address_2,
+	addresses_guest_billing_city,
+	addresses_guest_billing_state,
+	addresses_guest_billing_postcode,
+	addresses_guest_billing_phone,
+	addresses_guest_billing_email,
+} from '../../config.js';
 
 export function ordersAPI() {
 	const credentials = `${ admin_username }:${ admin_password }`;
 	const encodedCredentials = encoding.b64encode( credentials );
-	const options = {
-		headers: {
-			Authorization: `Basic ${ encodedCredentials }`,
-		},
+	const requestHeaders = {
+		Authorization: `Basic ${ encodedCredentials }`,
+		'Content-Type': 'application/json',
 	};
-	let response;
 
-	let data = JSON.stringify( {
+	const createData = {
 		billing: {
-			first_name: 'John',
-			last_name: 'Doe',
-			address_1: '969 Market',
-			address_2: '',
-			city: 'San Francisco',
-			state: 'CA',
-			postcode: '94103',
-			country: 'US',
-			email: 'john.doe@example.com',
-			phone: '(555) 555-5555',
+			first_name: `${ addresses_guest_billing_first_name }`,
+			last_name: `${ addresses_guest_billing_last_name }`,
+			address_1: `${ addresses_guest_billing_address_1 }`,
+			address_2: `${ addresses_guest_billing_address_2 }`,
+			city: `${ addresses_guest_billing_city }`,
+			state: `${ addresses_guest_billing_state }`,
+			postcode: `${ addresses_guest_billing_postcode }`,
+			country: `${ addresses_guest_billing_country }`,
+			email: `${ addresses_guest_billing_email }`,
+			phone: `${ addresses_guest_billing_phone }`,
 		},
 		shipping: {
-			first_name: 'John',
-			last_name: 'Doe',
-			address_1: '969 Market',
-			address_2: '',
-			city: 'San Francisco',
-			state: 'CA',
-			postcode: '94103',
-			country: 'US',
+			first_name: `${ addresses_guest_billing_first_name }`,
+			last_name: `${ addresses_guest_billing_last_name }`,
+			address_1: `${ addresses_guest_billing_address_1 }`,
+			address_2: `${ addresses_guest_billing_address_2 }`,
+			city: `${ addresses_guest_billing_city }`,
+			state: `${ addresses_guest_billing_state }`,
+			postcode: `${ addresses_guest_billing_postcode }`,
+			country: `${ addresses_guest_billing_country }`,
 		},
-	} );
+	};
 
-	console.log( data );
+	let batchData;
+	const createBatchData = [];
+	const updateBatchData = [];
 
-	response = http.post( `${ base_url }/wp-json/wc/v3/orders`, data, options );
-	check( response, {
-		'status is 201': ( r ) => r.status === 201,
-	} );
+	const batchSize = 10;
 
-	const post_id = findBetween( response.body, '{"id":', ',' );
-
-	response = http.get(
-		`${ base_url }/wp-json/wc/v3/orders/${ post_id }`,
-		options
-	);
-	check( response, {
-		'status is 200': ( r ) => r.status === 200,
-	} );
-
-	response = http.get( `${ base_url }/wp-json/wc/v3/orders`, options );
-	check( response, {
-		'status is 200': ( r ) => r.status === 200,
-	} );
-
-	data = JSON.stringify( {
+	const updateData = {
 		status: 'completed',
+	};
+	let post_id;
+	let post_ids;
+	let response;
+
+	group( 'Create Order', function () {
+		response = http.post(
+			`${ base_url }/wp-json/wc/v3/orders`,
+			JSON.stringify( createData ),
+			{
+				headers: requestHeaders,
+				tags: { name: 'API - Create Order' },
+			}
+		);
+		check( response, {
+			'status is 201': ( r ) => r.status === 201,
+			"body contains: 'Pending' Status": ( response ) =>
+				response.body.includes( '"status":"pending"' ),
+		} );
+
+		post_id = findBetween( response.body, '{"id":', ',' );
 	} );
 
-	response = http.put(
-		`${ base_url }/wp-json/wc/v3/orders/${ post_id }`,
-		data,
-		options
-	);
-	check( response, {
-		'status is 201': ( r ) => r.status === 201,
+	group( 'Retrieve Order', function () {
+		response = http.get(
+			`${ base_url }/wp-json/wc/v3/orders/${ post_id }`,
+			{
+				headers: requestHeaders,
+				tags: { name: 'API - Retrieve Order' },
+			}
+		);
+		check( response, {
+			'status is 200': ( r ) => r.status === 200,
+			'body contains: Order ID': ( response ) =>
+				response.body.includes( `"id":${ post_id }` ),
+		} );
 	} );
-	/*
-	response = http.delete(
-		`${ base_url }/wp-json/wc/v3/orders/${ post_id }`,
-		{ force: true },
-		options
-	);
-	check( response, {
-		'status is 201': ( r ) => r.status === 201,
-	} );*/
+
+	group( 'List Orders', function () {
+		response = http.get( `${ base_url }/wp-json/wc/v3/orders`, {
+			headers: requestHeaders,
+			tags: { name: 'API - List Orders' },
+		} );
+		check( response, {
+			'status is 200': ( r ) => r.status === 200,
+			'body contains: Order ID': ( response ) =>
+				response.body.includes( `[{"id":${ post_id }` ),
+		} );
+	} );
+
+	group( 'Update Order', function () {
+		response = http.put(
+			`${ base_url }/wp-json/wc/v3/orders/${ post_id }`,
+			JSON.stringify( updateData ),
+			{
+				headers: requestHeaders,
+				tags: { name: 'API - Update Order (Status)' },
+			}
+		);
+		check( response, {
+			'status is 200': ( r ) => r.status === 200,
+			"body contains: 'Completed' Status": ( response ) =>
+				response.body.includes( '"status":"completed"' ),
+		} );
+	} );
+
+	group( 'Delete Order', function () {
+		response = http.del(
+			`${ base_url }/wp-json/wc/v3/orders/${ post_id }`,
+			JSON.stringify( { force: true } ),
+			{
+				headers: requestHeaders,
+				tags: { name: 'API - Delete Order' },
+			}
+		);
+		check( response, {
+			'status is 200': ( r ) => r.status === 200,
+			'body contains: Order ID': ( response ) =>
+				response.body.includes( `"id":${ post_id }` ),
+		} );
+	} );
+
+	group( 'Batch Create Orders', function () {
+		for ( let index = 0; index < batchSize; index++ ) {
+			createBatchData.push( createData );
+		}
+		batchData = {
+			create: createBatchData,
+		};
+
+		response = http.post(
+			`${ base_url }/wp-json/wc/v3/orders/batch`,
+			JSON.stringify( batchData ),
+			{
+				headers: requestHeaders,
+				tags: { name: 'API - Batch Create Orders' },
+			}
+		);
+		check( response, {
+			'status is 200': ( r ) => r.status === 200,
+			'body contains: Create batch prefix': ( response ) =>
+				response.body.includes( 'create":[{"id"' ),
+		} );
+
+		post_ids = findBetween( response.body, '{"id":', ',"parent_id', true );
+	} );
+
+	group( 'Batch Update Orders', function () {
+		let updateBatchItem;
+
+		for ( let index = 0; index < batchSize; index++ ) {
+			updateBatchItem = {
+				id: `${ post_ids[ index ] }`,
+				status: 'completed',
+			};
+			updateBatchData.push( updateBatchItem );
+		}
+		batchData = {
+			update: updateBatchData,
+		};
+
+		response = http.post(
+			`${ base_url }/wp-json/wc/v3/orders/batch`,
+			JSON.stringify( batchData ),
+			{
+				headers: requestHeaders,
+				tags: {
+					name: 'API - Batch Update (Status) Orders',
+				},
+			}
+		);
+		check( response, {
+			'status is 200': ( r ) => r.status === 200,
+			'body contains: Update batch prefix': ( response ) =>
+				response.body.includes( 'update":[{"id"' ),
+		} );
+	} );
 }
 
 export default function () {
 	ordersAPI();
 }
-
-/*{"id":417164,"parent_id":0,"status":"pending","currency":"USD","version":"6.9.1",
-"prices_include_tax":false,"date_created":"2022-09-15T08:09:36","date_modified":"2022-09-15T08:09:36",
-"discount_total":"0.00","discount_tax":"0.00","shipping_total":"0.00","shipping_tax":"0.00",
-"cart_tax":"0.00","total":"0.00","total_tax":"0.00","customer_id":0,
-"order_key":"wc_order_TgDExzPpPIWmh",
-"billing":{"first_name":"","last_name":"","company":"","address_1":"","address_2":"","city":"","state":"","postcode":"","country":"","email":"","phone":""},
-"shipping":{"first_name":"","last_name":"","company":"","address_1":"","address_2":"","city":"","state":"","postcode":"","country":"","phone":""},
-"payment_method":"","payment_method_title":"","transaction_id":"","customer_ip_address":"","customer_user_agent":"",
-"created_via":"rest-api","customer_note":"","date_completed":null,"date_paid":null,"cart_hash":"","number":"417164",
-"meta_data":[],"line_items":[],"tax_lines":[],"shipping_lines":[],"fee_lines":[],"coupon_lines":[],"refunds":[],
-"payment_url":"https:\/\/wcperftesting.wpcomstaging.com\/checkout\/order-pay\/417164\/?pay_for_order=true&key=wc_order_TgDExzPpPIWmh","is_editable":true,
-"needs_payment":false,"needs_processing":false,"date_created_gmt":"2022-09-15T02:39:36","date_modified_gmt":"2022-09-15T02:39:36",
-"date_completed_gmt":null,"date_paid_gmt":null,"currency_symbol":"$",
-"_links":{"self":[{"href":"https:\/\/wcperftesting.wpcomstaging.com\/wp-json\/wc\/v3\/orders\/417164"}],"collection":[{"href":"https:\/\/wcperftesting.wpcomstaging.com\/wp-json\/wc\/v3\/orders"}]}}
-*/
