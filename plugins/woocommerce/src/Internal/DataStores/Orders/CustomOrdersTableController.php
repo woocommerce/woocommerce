@@ -441,27 +441,6 @@ class CustomOrdersTableController {
 				'options' => array_combine( $isolation_level_names, $isolation_level_names ),
 				'default' => self::DEFAULT_DB_TRANSACTIONS_ISOLATION_LEVEL,
 			);
-
-			if ( $this->custom_orders_table_usage_is_enabled() ) {
-				$order_cache_usage_backup_value = $this->order_cache_controller->orders_cache_usage_backup_value();
-
-				// Beware! Don't use 'switch' here: we need strict comparisons and 'switch' does loose comparions.
-				if ( true === $order_cache_usage_backup_value ) {
-					$desc_tip = __( 'The orders cache is temporarily disabled while synchronization is in progress and will be automatically re-enabled once it finishes', 'woocommerce' );
-				} elseif ( false === $order_cache_usage_backup_value ) {
-					$desc_tip = __( "The orders cache can't be enabled while synchronization is in progress", 'woocommerce' );
-				} else {
-						$desc_tip = '';
-				}
-
-				$settings[] = array(
-					'desc'     => __( 'Enable the orders cache', 'woocommerce' ),
-					'desc_tip' => $desc_tip,
-					'id'       => OrderCacheController::ORDERS_CACHE_USAGE_ENABLED_OPTION,
-					'type'     => 'checkbox',
-					'disabled' => $this->order_cache_controller->orders_cache_usage_is_temporarly_disabled(),
-				);
-			}
 		} else {
 			$settings[] = array(
 				'title' => __( 'Custom orders tables', 'woocommerce' ),
@@ -495,17 +474,6 @@ class CustomOrdersTableController {
 	}
 
 	/**
-	 * Helper function to get whether the orders cache should be used or not.
-	 *
-	 * @return bool True if the orders cache should be used, false otherwise.
-	 */
-	public function should_use_orders_cache(): bool {
-		return $this->custom_orders_table_usage_is_enabled() &&
-			! $this->order_cache_controller->orders_cache_usage_is_temporarly_disabled() &&
-			$this->order_cache_controller->orders_cache_usage_is_enabled();
-	}
-
-	/**
 	 * Handler for the individual setting updated hook.
 	 *
 	 * @param string $option Setting name.
@@ -528,7 +496,7 @@ class CustomOrdersTableController {
 	 *
 	 * @throws \Exception Attempt to change the authoritative orders table while orders sync is pending.
 	 */
-	private function process_pre_update_option( $option, $old_value, $value ) {
+	private function process_pre_update_option( $value, $option, $old_value ) {
 		if ( $option === DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION && $value !== $old_value ) {
 			$this->order_cache->flush();
 			return $value;
@@ -638,7 +606,7 @@ class CustomOrdersTableController {
 	 * @param int $order_id The id of the order deleted or trashed.
 	 */
 	private function after_order_deleted_or_trashed( int $order_id ): void {
-		if ( $this->should_use_orders_cache() ) {
+		if ( $this->features_controller->feature_is_enabled( OrderCacheController::FEATURE_NAME ) ) {
 			$this->order_cache->remove( $order_id );
 		}
 	}

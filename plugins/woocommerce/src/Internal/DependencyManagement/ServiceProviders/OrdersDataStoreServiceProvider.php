@@ -60,7 +60,7 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 		);
 		$this->share( OrdersTableRefundDataStore::class )->addArguments( array( OrdersTableDataStoreMeta::class, DatabaseUtil::class ) );
 		$this->share( OrderCache::class )->addArgument( TransientsEngine::class );
-		$this->share( OrderCacheController::class )->addArgument( OrderCache::class );
+		$this->share( OrderCacheController::class )->addArguments( array( OrderCache::class, FeaturesController::class ) );
 		$this->share( CustomOrdersTableController::class )->addArguments(
 			array(
 				OrdersTableDataStore::class,

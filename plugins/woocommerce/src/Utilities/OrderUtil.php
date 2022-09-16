@@ -5,8 +5,10 @@
 
 namespace Automattic\WooCommerce\Utilities;
 
+use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Utilities\COTMigrationUtil;
 use WC_Order;
 use WP_Post;
@@ -40,8 +42,8 @@ final class OrderUtil {
 	 *
 	 * @return bool True if the orders cache should be used, false otherwise.
 	 */
-	public static function should_use_orders_cache() : bool {
-		return wc_get_container()->get( CustomOrdersTableController::class )->should_use_orders_cache();
+	public static function orders_cache_usage_is_enabled() : bool {
+		return wc_get_container()->get( OrderCacheController::class )->orders_cache_usage_is_enabled();
 	}
 
 	/**

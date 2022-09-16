@@ -193,7 +193,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			$this->save_items();
 
-			if ( OrderUtil::should_use_orders_cache() ) {
+			if ( OrderUtil::orders_cache_usage_is_enabled() ) {
 				$order_cache = wc_get_container()->get( OrderCache::class );
 				$order_cache->update_if_cached( $this );
 			}

@@ -31,7 +31,7 @@ class WC_Order_Factory {
 			return false;
 		}
 
-		$use_orders_cache = OrderUtil::should_use_orders_cache();
+		$use_orders_cache = OrderUtil::orders_cache_usage_is_enabled();
 		if ( $use_orders_cache ) {
 			$order_cache = wc_get_container()->get( OrderCache::class );
 			$order       = $order_cache->get( $order_id );
@@ -71,7 +71,7 @@ class WC_Order_Factory {
 		$order_ids = array_filter( array_map( array( __CLASS__, 'get_order_id' ), $order_ids ) );
 
 		$already_cached_orders = array();
-		$use_orders_cache      = OrderUtil::should_use_orders_cache();
+		$use_orders_cache      = OrderUtil::orders_cache_usage_is_enabled();
 		if ( $use_orders_cache ) {
 			$uncached_order_ids = array();
 			$order_cache        = wc_get_container()->get( OrderCache::class );
