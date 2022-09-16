@@ -4,13 +4,19 @@
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createElement } from '@wordpress/element';
-import { isRTL } from '@wordpress/i18n/build-types';
 import moment from 'moment';
 
 /**
  * Internal dependencies
  */
 import { DateTimePickerControl } from '../';
+
+async function pause( milliseconds: number ) {
+	await waitFor(
+		() => new Promise( ( res ) => setTimeout( res, milliseconds ) ),
+		{ timeout: milliseconds + 1 }
+	);
+}
 
 describe( 'DateTimePickerControl', () => {
 	it.skip( 'should render the expected DOM elements', () => {
@@ -137,9 +143,7 @@ describe( 'DateTimePickerControl', () => {
 	it( 'should hide the date time picker popup when no longer focused', async () => {
 		const { container } = render( <DateTimePickerControl /> );
 
-		const input = container.querySelector(
-			'.woocommerce-date-time-picker-control input'
-		);
+		const input = container.querySelector( 'input' );
 		userEvent.click( input! );
 		fireEvent.blur( input! );
 
@@ -172,18 +176,12 @@ describe( 'DateTimePickerControl', () => {
 		const onBlurHandler = jest.fn();
 
 		const { container } = render(
-			<div>
-				<input />
-				<DateTimePickerControl onBlur={ onBlurHandler } />
-			</div>
+			<DateTimePickerControl onBlur={ onBlurHandler } />
 		);
 
-		userEvent.click(
-			container.querySelector(
-				'.woocommerce-date-time-picker-control input'
-			)!
-		);
-		userEvent.click( container.querySelector( ':scope > input' )! );
+		const input = container.querySelector( 'input' );
+		userEvent.click( input! );
+		fireEvent.blur( input! );
 
 		await waitFor( () =>
 			expect( onBlurHandler ).toHaveBeenCalledTimes( 1 )
@@ -198,28 +196,102 @@ describe( 'DateTimePickerControl', () => {
 		const onChangeHandler = jest.fn();
 
 		const { container } = render(
-			<div>
-				<input />
-				<DateTimePickerControl
-					dateTimeFormat={ dateTimeFormat }
-					currentDate={ originalDateTime.toISOString() }
-					onChange={ onChangeHandler }
-				/>
-			</div>
+			<DateTimePickerControl
+				dateTimeFormat={ dateTimeFormat }
+				currentDate={ originalDateTime.toISOString() }
+				onChange={ onChangeHandler }
+			/>
+		);
+
+		const input = container.querySelector( 'input' );
+		userEvent.clear( input! );
+		userEvent.type( input!, newDateTimeInputString );
+
+		await waitFor( () =>
+			expect( onChangeHandler ).toHaveBeenLastCalledWith(
+				newDateTime.toISOString(),
+				true
+			)
+		);
+	} );
+
+	it( 'should call onChange with isValid false when the input is invalid', async () => {
+		const originalDateTime = moment( '2022-09-15 02:30:40' );
+		const onChangeHandler = jest.fn();
+		const invalidDateTime = 'I am not a valid date time';
+
+		const { container } = render(
+			<DateTimePickerControl
+				currentDate={ originalDateTime.toISOString() }
+				onChange={ onChangeHandler }
+			/>
 		);
 
 		const input = container.querySelector(
 			'.woocommerce-date-time-picker-control input'
 		);
-		userEvent.click( input! );
-		fireEvent.change( input!, {
-			target: { value: newDateTimeInputString },
-		} );
+		userEvent.clear( input! );
+		userEvent.type( input!, invalidDateTime );
 
 		await waitFor( () =>
 			expect( onChangeHandler ).toHaveBeenLastCalledWith(
-				newDateTime.toISOString()
+				invalidDateTime,
+				false
 			)
+		);
+	} );
+
+	it( 'should call onChange once when multiple changes are made rapidly', async () => {
+		const originalDateTime = moment( '2022-09-15 02:30:40' );
+		const onChangeHandler = jest.fn();
+
+		const { container } = render(
+			<DateTimePickerControl
+				currentDate={ originalDateTime.toISOString() }
+				onChange={ onChangeHandler }
+			/>
+		);
+
+		const input = container.querySelector(
+			'.woocommerce-date-time-picker-control input'
+		);
+		userEvent.clear( input! );
+		await pause( 200 );
+		userEvent.type( input!, 'a' );
+		await pause( 200 );
+		userEvent.type( input!, 'b' );
+		await pause( 200 );
+		userEvent.type( input!, 'c' );
+
+		await waitFor( () =>
+			expect( onChangeHandler ).toHaveBeenCalledTimes( 1 )
+		);
+	} );
+
+	it( 'should call onChange multiple times when multiple changes are made slowly', async () => {
+		const originalDateTime = moment( '2022-09-15 02:30:40' );
+		const onChangeHandler = jest.fn();
+
+		const { container } = render(
+			<DateTimePickerControl
+				currentDate={ originalDateTime.toISOString() }
+				onChange={ onChangeHandler }
+			/>
+		);
+
+		const input = container.querySelector(
+			'.woocommerce-date-time-picker-control input'
+		);
+		userEvent.clear( input! );
+		await pause( 750 );
+		userEvent.type( input!, 'a' );
+		await pause( 750 );
+		userEvent.type( input!, 'b' );
+		await pause( 750 );
+		userEvent.type( input!, 'c' );
+
+		await waitFor( () =>
+			expect( onChangeHandler ).toHaveBeenCalledTimes( 4 )
 		);
 	} );
 } );
