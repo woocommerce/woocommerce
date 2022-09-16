@@ -171,8 +171,9 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 						suffix={
 							<Icon
 								icon={ calendar }
-								className="calendar-icon"
+								className="calendar-icon woocommerce-date-time-picker-control__input-control__suffix"
 								onClick={ focusInputControl }
+								size={ 16 }
 							/>
 						}
 						placeholder={ placeholder }
