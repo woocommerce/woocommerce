@@ -34,5 +34,18 @@ export const validate = (
 			'woocommerce'
 		);
 	}
+
+	if (
+		values.sale_price &&
+		( ! values.regular_price ||
+			parseFloat( values.sale_price ) >=
+				parseFloat( values?.regular_price ) )
+	) {
+		errors.sale_price = __(
+			'Sale price cannot be equal to or higher than list price.',
+			'woocommerce'
+		);
+	}
+
 	return errors;
 };

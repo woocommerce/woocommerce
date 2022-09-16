@@ -26,7 +26,8 @@
 		"@wordpress/data": "^4.26.7",
 		"@wordpress/data-controls": "^1.20.7",
 		"@wordpress/element": "^2.19.1",
-		"@wordpress/hooks": "^2.11.1"
+		"@wordpress/hooks": "^2.11.1",
+		"prop-types": "^15.8.1"
 	},
 	"assets": {
 		"js": {
@@ -37,7 +38,7 @@
 	"scripts": {
 		"postinstall": "composer install",
 		"changelog": "composer exec -- changelogger",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- --",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"turbo:build": "pnpm run build:admin && pnpm run uglify",
 		"build:admin": "wp-scripts build",
 		"build:zip": "./bin/build-zip.sh",

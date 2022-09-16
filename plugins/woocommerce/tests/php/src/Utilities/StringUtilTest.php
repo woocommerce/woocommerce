@@ -50,7 +50,7 @@ class StringUtilTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @return void 'contains' should check whether one string contains another.
+	 * @testdox 'contains' should check whether one string contains another.
 	 */
 	public function test_contains() {
 		$this->assertFalse( StringUtil::contains( 'foobar', 'fizzbuzz' ) );
@@ -63,5 +63,15 @@ class StringUtilTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( StringUtil::contains( 'foobar', 'ba', true ) );
 
 		$this->assertTrue( StringUtil::contains( 'foobar', 'BA', false ) );
+	}
+
+	/**
+	 * @testdox 'plugin_name_from_plugin_file' returns the plugin name in the form 'directory/file.php' from the plugin file.
+	 */
+	public function test_plugin_name_from_plugin_file() {
+		$file_path = '/home/someone/wordpress/wp-content/plugins/foobar/fizzbuzz.php';
+		$result    = StringUtil::plugin_name_from_plugin_file( $file_path );
+		$expected  = 'foobar/fizzbuzz.php';
+		$this->assertEquals( $expected, $result );
 	}
 }

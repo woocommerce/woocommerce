@@ -10,7 +10,7 @@ Currently there are just 2 commands:
 
 1. `lint`. Analyzer is used as a linter for PRs to check if hook/template/db changes were introduced. It produces output either directly on CI or via GH actions `set-output`.
 
-Here is an example `analyzer` command:
+Here is an example `analyzer` command, run from this directory:
 
 `pnpm run analyzer -- lint "release/6.8" "6.8.0" -b release/6.7`
 
@@ -20,7 +20,7 @@ To find out more about the other arguments to the command you can run `pnpm run 
 
 2. `major-minor`. This simple CLI tool gives you the latest `.0` major/minor released version of a plugin's mainfile based on Woo release conventions. 
 
-Here is an example `major-minor` command:
+Here is an example `major-minor` command, run from this directory:
 
 `pnpm run analyzer major-minor -- "release/6.8" "plugins/woocommerce/woocommerce.php"`
 

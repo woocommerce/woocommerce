@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 6.9.2 2022-09-15 =
+
+**WooCommerce**
+
+* Fix - Use offsetted datetime when displaying order created date. [#34687](https://github.com/woocommerce/woocommerce/pull/34687)
+
 = 6.9.1 2022-09-14 =
 
 **WooCommerce**
