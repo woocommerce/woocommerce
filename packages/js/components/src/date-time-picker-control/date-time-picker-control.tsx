@@ -81,26 +81,29 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		);
 	}
 
-	const change = useCallback(
-		debounce( ( newInputString: string ) => {
-			setInputString( newInputString );
-
-			const newDateTime = parseMoment( newInputString );
-			const isValid = newDateTime.isValid();
-
-			if ( isValid ) {
-				setLastValidDate( newDateTime );
-			}
-
+	const debouncedOnChange = useCallback(
+		debounce( ( dateTime: string, isValid: boolean ) => {
 			if ( onChange ) {
-				onChange(
-					isValid ? formatMomentIso( newDateTime ) : newInputString,
-					isValid
-				);
+				onChange( dateTime, isValid );
 			}
 		}, 500 ),
 		[]
 	);
+
+	function change( newInputString: string ) {
+		setInputString( newInputString );
+		const newDateTime = parseMoment( newInputString );
+		const isValid = newDateTime.isValid();
+
+		if ( isValid ) {
+			setLastValidDate( newDateTime );
+		}
+
+		debouncedOnChange(
+			isValid ? formatMomentIso( newDateTime ) : newInputString,
+			isValid
+		);
+	}
 
 	function blur() {
 		if ( onBlur ) {
