@@ -25,7 +25,7 @@ export type DateTimePickerControlProps = {
 	dateTimeFormat?: string;
 	disabled?: boolean;
 	is12Hour?: boolean;
-	onChange?: ( date: string ) => void;
+	onChange?: ( date: string, isValid: boolean ) => void;
 	onBlur?: () => void;
 	label?: string;
 	placeholder?: string;
@@ -86,16 +86,16 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			setInputString( newInputString );
 
 			const newDateTime = parseMoment( newInputString );
+			const isValid = newDateTime.isValid();
 
-			if ( newDateTime.isValid() ) {
+			if ( isValid ) {
 				setLastValidDate( newDateTime );
 			}
 
 			if ( onChange ) {
 				onChange(
-					newDateTime.isValid()
-						? formatMomentIso( newDateTime )
-						: newInputString
+					isValid ? formatMomentIso( newDateTime ) : newInputString,
+					isValid
 				);
 			}
 		}, 500 ),
