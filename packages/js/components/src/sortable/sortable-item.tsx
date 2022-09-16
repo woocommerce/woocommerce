@@ -69,6 +69,7 @@ export const SortableItem = ( {
 			onDragOver={ onDragOver }
 			role="option"
 			onKeyDown={ onKeyDown }
+			onDrop={ ( event ) => event.preventDefault() }
 			ref={ ref }
 			tabIndex={ isSelected ? 0 : -1 }
 			// eslint-disable-next-line jsx-a11y/aria-props
