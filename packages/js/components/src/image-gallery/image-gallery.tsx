@@ -23,7 +23,10 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 	children,
 	columns = 4,
 }: ImageGalleryProps ) => {
-	const [ toolbarItem, setToolbarItem ] = useState< number | null >( null );
+	const [ toolBarItem, setToolBarItem ] = useState<
+		JSX.Element | null | undefined
+	>( null );
+	const [ orderedChildren, setOrderedChildren ] = useState( children );
 
 	return (
 		<div
@@ -32,14 +35,38 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 				gridTemplateColumns: 'min-content '.repeat( columns ),
 			} }
 		>
-			<Sortable isHorizontal>
-				{ Children.map( children, ( child, index ) => (
+			<Sortable
+				isHorizontal
+				onOrderChange={ ( items ) => {
+					setOrderedChildren( items );
+				} }
+				onDragStart={ () => setToolBarItem( null ) }
+			>
+				{ Children.map( orderedChildren, ( child ) => (
 					<SortableHandle>
 						<div
 							className="woocommerce-image-gallery__item-wrapper"
-							onClick={ () => setToolbarItem( index ) }
+							//TODO: add correct keyboard handler
+							onKeyPress={ () => {} }
+							tabIndex={ 0 }
+							role="button"
+							onClick={ ( event ) => {
+								console.debug( event.target );
+								if (
+									( event.target as Element ).closest(
+										'.woocommerce-image-gallery__toolbar'
+									) !== null
+								) {
+									return;
+								}
+								setToolBarItem(
+									Boolean( child ) && toolBarItem === child
+										? null
+										: child
+								);
+							} }
 						>
-							{ toolbarItem === index && <ImageGalleryToolbar /> }
+							{ toolBarItem === child && <ImageGalleryToolbar /> }
 							{ child }
 						</div>
 					</SortableHandle>
