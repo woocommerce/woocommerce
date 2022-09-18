@@ -24,6 +24,14 @@ class WC_Emails {
 	 */
 	public $emails = array();
 
+
+	/**
+	 * Array of email notification classes and paths
+	 *
+	 * @var WC_Email[]
+	 */
+	public $default_emails_paths = array();
+
 	/**
 	 * The single instance of the class
 	 *
@@ -217,20 +225,36 @@ class WC_Emails {
 	public function init() {
 		// Include email classes.
 		include_once dirname( __FILE__ ) . '/emails/class-wc-email.php';
+		$this->default_emails_paths = $this->default_emails_paths();
+       	$emails_data = apply_filters( 'woocommerce_before_email_classes', $this->default_emails_paths );
+    	foreach ( $emails_data as $class_name => $email_file_path ) {
 
-		$this->emails['WC_Email_New_Order']                 = include __DIR__ . '/emails/class-wc-email-new-order.php';
-		$this->emails['WC_Email_Cancelled_Order']           = include __DIR__ . '/emails/class-wc-email-cancelled-order.php';
-		$this->emails['WC_Email_Failed_Order']              = include __DIR__ . '/emails/class-wc-email-failed-order.php';
-		$this->emails['WC_Email_Customer_On_Hold_Order']    = include __DIR__ . '/emails/class-wc-email-customer-on-hold-order.php';
-		$this->emails['WC_Email_Customer_Processing_Order'] = include __DIR__ . '/emails/class-wc-email-customer-processing-order.php';
-		$this->emails['WC_Email_Customer_Completed_Order']  = include __DIR__ . '/emails/class-wc-email-customer-completed-order.php';
-		$this->emails['WC_Email_Customer_Refunded_Order']   = include __DIR__ . '/emails/class-wc-email-customer-refunded-order.php';
-		$this->emails['WC_Email_Customer_Invoice']          = include __DIR__ . '/emails/class-wc-email-customer-invoice.php';
-		$this->emails['WC_Email_Customer_Note']             = include __DIR__ . '/emails/class-wc-email-customer-note.php';
-		$this->emails['WC_Email_Customer_Reset_Password']   = include __DIR__ . '/emails/class-wc-email-customer-reset-password.php';
-		$this->emails['WC_Email_Customer_New_Account']      = include __DIR__ . '/emails/class-wc-email-customer-new-account.php';
+        		if ( ! empty( $email_file_path ) && ! empty( $class_name ) && file_exists( dirname( __FILE__ ) . $email_file_path ) ) {
+            		$this->emails[ $class_name ] = include dirname( __FILE__ ) . $email_file_path;
+       		}
+    	}
+		$this->emails = apply_filters( 'woocommerce_email_classes', $this->emails );	
+	}
 
-		$this->emails = apply_filters( 'woocommerce_email_classes', $this->emails );
+	/**
+	 * Get the default email classes.
+	 *
+	 * @return Array of default email classes and their paths.
+	 */
+	public function default_emails_paths() {
+		return array(
+			'WC_Email_New_Order' => '/emails/class-wc-email-new-order.php',
+			'WC_Email_Cancelled_Order' => '/emails/class-wc-email-cancelled-order.php',
+			'WC_Email_Failed_Order' => '/emails/class-wc-email-failed-order.php',
+			'WC_Email_Customer_On_Hold_Order' => '/emails/class-wc-email-customer-on-hold-order.php',
+			'WC_Email_Customer_Processing_Order' => '/emails/class-wc-email-customer-processing-order.php',
+			'WC_Email_Customer_Completed_Order' => '/emails/class-wc-email-customer-completed-order.php',
+			'WC_Email_Customer_Refunded_Order' => '/emails/class-wc-email-customer-refunded-order.php',
+			'WC_Email_Customer_Invoice' => '/emails/class-wc-email-customer-invoice.php',
+			'WC_Email_Customer_Note' => '/emails/class-wc-email-customer-note.php',
+			'WC_Email_Customer_Reset_Password' => '/emails/class-wc-email-customer-reset-password.php',
+			'WC_Email_Customer_New_Account' => '/emails/class-wc-email-customer-new-account.php',
+		);
 	}
 
 	/**
