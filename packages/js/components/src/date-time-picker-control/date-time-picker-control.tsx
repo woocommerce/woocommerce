@@ -14,7 +14,9 @@ import moment, { Moment } from 'moment';
 import { debounce } from 'lodash';
 import classNames from 'classnames';
 import { sprintf, __ } from '@wordpress/i18n';
+import { useInstanceId } from '@wordpress/compose';
 import {
+	BaseControl,
 	Dropdown,
 	DateTimePicker as WpDateTimePicker,
 	// @ts-expect-error `__experimentalInputControl` does exist.
@@ -47,6 +49,8 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	className = '',
 	onChangeDebounceWait = 500,
 }: DateTimePickerControlProps ) => {
+	const instanceId = useInstanceId( DateTimePickerControl );
+	const id = `inspector-date-time-picker-control-${ instanceId }`;
 	const inputControl = useRef< InputControl >();
 
 	const [ inputString, setInputString ] = useState( '' );
@@ -154,8 +158,9 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 				}
 			} }
 			renderToggle={ ( { isOpen, onToggle } ) => (
-				<>
+				<BaseControl id={ id } label={ label } help={ help }>
 					<InputControl
+						id={ id }
 						ref={ inputControl }
 						disabled={ disabled }
 						value={ inputString }
@@ -167,7 +172,6 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 								onToggle(); // hide the dropdown
 							}
 						} }
-						label={ label }
 						suffix={
 							<Icon
 								icon={ calendar }
@@ -194,8 +198,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 						} }
 						aria-expanded={ isOpen }
 					/>
-					{ help && <p>{ help }</p> }
-				</>
+				</BaseControl>
 			) }
 			renderContent={ () => (
 				<WpDateTimePicker
