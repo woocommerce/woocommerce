@@ -290,7 +290,7 @@ jQuery( function( $ ) {
 									$.each( data, function( id, term ) {
 										terms.push({
 											id:   'id' === return_format ? term.term_id : term.slug,
-											text: term.name
+											text: term.formatted_name
 										});
 									});
 								}
