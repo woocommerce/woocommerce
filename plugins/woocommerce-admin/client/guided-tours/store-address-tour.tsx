@@ -19,33 +19,31 @@ const STORE_CITY_SETTINGS_OPTION = 'woocommerce_store_city';
 const STORE_POSTCODE_SETTINGS_OPTION = 'woocommerce_store_postcode';
 
 const useShowStoreLocationTour = () => {
-	const { hasReviewedStoreLocationSettings, isLoading } = useSelect(
-		( select ) => {
-			const { hasFinishedResolution, getOption } =
-				select( OPTIONS_STORE_NAME );
+	const { hasFilledStoreAddress, isLoading } = useSelect( ( select ) => {
+		const { hasFinishedResolution, getOption } =
+			select( OPTIONS_STORE_NAME );
 
-			return {
-				isLoading:
-					! hasFinishedResolution( 'getOption', [
-						STORE_ADDRESS_SETTINGS_OPTION,
-					] ) ||
-					! hasFinishedResolution( 'getOption', [
-						STORE_CITY_SETTINGS_OPTION,
-					] ) ||
-					! hasFinishedResolution( 'getOption', [
-						STORE_POSTCODE_SETTINGS_OPTION,
-					] ),
-				hasReviewedStoreLocationSettings:
-					getOption( STORE_ADDRESS_SETTINGS_OPTION ) !== '' &&
-					getOption( STORE_CITY_SETTINGS_OPTION ) !== '' &&
-					getOption( STORE_POSTCODE_SETTINGS_OPTION ) !== '',
-			};
-		}
-	);
+		return {
+			isLoading:
+				! hasFinishedResolution( 'getOption', [
+					STORE_ADDRESS_SETTINGS_OPTION,
+				] ) ||
+				! hasFinishedResolution( 'getOption', [
+					STORE_CITY_SETTINGS_OPTION,
+				] ) ||
+				! hasFinishedResolution( 'getOption', [
+					STORE_POSTCODE_SETTINGS_OPTION,
+				] ),
+			hasFilledStoreAddress:
+				getOption( STORE_ADDRESS_SETTINGS_OPTION ) !== '' &&
+				getOption( STORE_CITY_SETTINGS_OPTION ) !== '' &&
+				getOption( STORE_POSTCODE_SETTINGS_OPTION ) !== '',
+		};
+	} );
 
 	return {
 		isLoading,
-		show: ! isLoading && ! hasReviewedStoreLocationSettings,
+		show: ! isLoading && ! hasFilledStoreAddress,
 	};
 };
 
