@@ -67,7 +67,7 @@ const StoreAddressTourOverlay = () => {
 					heading: 'Add your store location',
 					descriptions: {
 						desktop: __(
-							'Add your store location details such as address and Country to help us configure shipping, taxes, currency and more in a fully automated way.',
+							'Add your store location details to help us configure shipping, taxes, currency and more in a fully automated way. Once done, click on the "Save" button at the end of the form.',
 							'woocommerce'
 						),
 					},
