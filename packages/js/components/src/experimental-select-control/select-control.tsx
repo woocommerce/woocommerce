@@ -240,6 +240,8 @@ function SelectControl< ItemType = DefaultItemType >( {
 				isOpen,
 				getItemLabel,
 				getItemValue,
+				selectItem,
+				setInputValue,
 			} ) }
 		</div>
 	);
