@@ -220,7 +220,7 @@ class WC_Shipping {
 		if ( is_null( $this->shipping_methods ) ) {
 			$this->load_shipping_methods();
 		}
-		return $this->shipping_methods;
+		return apply_filters( 'woocommerce_get_shipping_methods', $this->shipping_methods ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 	}
 
 	/**
