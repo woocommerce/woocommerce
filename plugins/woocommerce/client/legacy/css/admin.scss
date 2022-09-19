@@ -969,9 +969,19 @@
 
 #product_attributes {
 	.toolbar-top {
-		.button {
+		.button, .select2-container {
 			margin: 1px;
 		}
+	}
+	.select2-container {
+		min-width: 190px;
+	}
+}
+#select2-attribute_taxonomy-results {
+	.select2-results__option,
+	.select2-results__group {
+		margin: 0;
+		padding: 8px 4px;
 	}
 }
 

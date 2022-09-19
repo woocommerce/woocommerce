@@ -8,22 +8,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<span class="expand-close">
 			<a href="#" class="expand_all"><?php esc_html_e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php esc_html_e( 'Close', 'woocommerce' ); ?></a>
 		</span>
-		<select name="attribute_taxonomy" class="attribute_taxonomy">
-			<option value=""><?php esc_html_e( 'Custom product attribute', 'woocommerce' ); ?></option>
-			<?php
-			global $wc_product_attributes;
+		<button type="button" class="button add_custom_attribute"><?php esc_html_e( 'Add custom attribute', 'woocommerce' ); ?></button>
 
-			// Array of defined attribute taxonomies.
-			$attribute_taxonomies = wc_get_attribute_taxonomies();
-
-			if ( ! empty( $attribute_taxonomies ) ) {
-				foreach ( $attribute_taxonomies as $tax ) {
-					$attribute_taxonomy_name = wc_attribute_taxonomy_name( $tax->attribute_name );
-					$label                   = $tax->attribute_label ? $tax->attribute_label : $tax->attribute_name;
-					echo '<option value="' . esc_attr( $attribute_taxonomy_name ) . '">' . esc_html( $label ) . '</option>';
-				}
-			}
-			?>
+		<select class="wc-attribute-search attribute_taxonomy" id="attribute_taxonomy" name="attribute_taxonomy" data-placeholder="<?php esc_attr_e( 'Add existing attribute', 'woocommerce' ); ?>" data-minimum-input-length="0">
 		</select>
 		<button type="button" class="button add_attribute"><?php esc_html_e( 'Add', 'woocommerce' ); ?></button>
 	</div>

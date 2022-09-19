@@ -422,11 +422,9 @@ jQuery( function ( $ ) {
 		}
 	} );
 
-	// Add rows.
-	$( 'button.add_attribute' ).on( 'click', function () {
+	function add_attribute( element,  attribute ) {
 		var size = $( '.product_attributes .woocommerce_attribute' ).length;
-		var attribute = $( 'select.attribute_taxonomy' ).val();
-		var $wrapper = $( this ).closest( '#product_attributes' );
+		var $wrapper = $( element ).closest( '#product_attributes' );
 		var $attributes = $wrapper.find( '.product_attributes' );
 		var product_type = $( 'select#product-type' ).val();
 		var data = {
@@ -474,6 +472,23 @@ jQuery( function ( $ ) {
 				.attr( 'disabled', 'disabled' );
 			$( 'select.attribute_taxonomy' ).val( '' );
 		}
+	}
+
+	// Add rows.
+	$( 'button.add_attribute' ).on( 'click', function () {
+		var attribute = $( 'select.attribute_taxonomy' ).val();
+		if ( ! attribute ) {
+			return;
+		}
+		add_attribute( this, attribute );
+		$( 'select.attribute_taxonomy' ).val( null );
+		$( 'select.attribute_taxonomy' ).trigger( 'change' );
+
+		return false;
+	} );
+
+	$( 'button.add_custom_attribute' ).on( 'click', function () {
+		add_attribute( this, '' );
 
 		return false;
 	} );
