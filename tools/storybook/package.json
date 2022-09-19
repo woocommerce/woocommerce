@@ -1,5 +1,5 @@
 {
-	"name": "woocommerce-storybook",
+	"name": "@woocommerce/storybook",
 	"title": "WooCommerce Storybook",
 	"description": "Storybook implementation for WooCommerce",
 	"homepage": "https://woocommerce.github.io/woocommerce-admin/#/components/",
