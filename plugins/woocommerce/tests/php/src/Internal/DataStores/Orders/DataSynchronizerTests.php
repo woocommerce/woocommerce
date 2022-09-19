@@ -2,6 +2,7 @@
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 
 /**
@@ -15,11 +16,6 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * @var CustomOrdersTableController
-	 */
-	private $cot_controller;
-
-	/**
 	 * Initializes system under test.
 	 */
 	public function setUp(): void {
@@ -29,9 +25,9 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 		OrderHelper::delete_order_custom_tables(); // We need this since non-temporary tables won't drop automatically.
 		OrderHelper::create_order_custom_table_if_not_exist();
-		$this->sut            = wc_get_container()->get( DataSynchronizer::class );
-		$this->cot_controller = wc_get_container()->get( CustomOrdersTableController::class );
-		$this->cot_controller->show_feature();
+		$this->sut           = wc_get_container()->get( DataSynchronizer::class );
+		$features_controller = wc_get_container()->get( Featurescontroller::class );
+		$features_controller->change_feature_enable( 'custom_order_tables', true );
 	}
 
 	/**
