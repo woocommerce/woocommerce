@@ -1157,7 +1157,7 @@ importers:
       '@wordpress/data': 6.15.0_react@18.1.0
       '@wordpress/notices': 3.4.1_react@18.1.0
     devDependencies:
-      '@automattic/data-stores': 2.0.1_50b9f23b7fd12448a7ea178017bda703
+      '@automattic/data-stores': 2.0.1_62299b505fd74cef61b6a8e56f6d6b6a
       '@babel/core': 7.17.8
       '@types/lodash': 4.14.182
       '@types/wordpress__data': 6.0.0
@@ -1277,10 +1277,14 @@ importers:
       '@babel/core': 7.17.8
       '@types/debug': 4.1.7
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@wordpress/eslint-plugin': 11.0.1_nxdi2qub4ra46tpyph3fb3wi2e
 =======
       '@wordpress/eslint-plugin': 11.0.1_5db9b2fd1f8449bec1ecdb36b46d5f98
 >>>>>>> ead36c3266 (Update lock file)
+=======
+      '@wordpress/eslint-plugin': 11.0.1_1a9285f35926adfb8da741dfac03e720
+>>>>>>> 70c183e8ba (Update lock file again)
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
@@ -1730,11 +1734,11 @@ importers:
     dependencies:
       '@types/prop-types': 15.7.4
       '@woocommerce/data': link:../../packages/js/data
-      '@wordpress/api-fetch': 3.23.1_react-native@0.70.0
-      '@wordpress/components': 12.0.9_f2798d1de432edce33f3b1e25560a0a1
+      '@wordpress/api-fetch': 3.23.1_react-native@0.70.1
+      '@wordpress/components': 12.0.9_8ef5126acb83354da8c5c100387ca834
       '@wordpress/compose': 3.25.3_react@16.14.0
       '@wordpress/data': 4.27.3_react@16.14.0
-      '@wordpress/data-controls': 1.21.3_dacb185d81a591ef89dd2296afeb8eaf
+      '@wordpress/data-controls': 1.21.3_fb51d768a92e15fc00d015a80ce81cc7
       '@wordpress/element': 2.20.3
       '@wordpress/hooks': 2.12.3
       prop-types: 15.8.1
@@ -2123,18 +2127,18 @@ packages:
       - supports-color
     dev: true
 
-  /@automattic/data-stores/2.0.1_50b9f23b7fd12448a7ea178017bda703:
+  /@automattic/data-stores/2.0.1_62299b505fd74cef61b6a8e56f6d6b6a:
     resolution: {integrity: sha512-tUuWSb5iIzZpHpqCSeXw89+lX6Gpkz/Puh+FWrMyWe4ohgK/WrrAnMqEsA5O/UpEzHNtkuqVmo8haCJKL27mwg==}
     peerDependencies:
       '@wordpress/data': ^4
       react: ^16.8
     dependencies:
       '@automattic/format-currency': 1.0.0-alpha.0
-      '@wordpress/api-fetch': 3.23.1_react-native@0.70.0
+      '@wordpress/api-fetch': 3.23.1_react-native@0.70.1
       '@wordpress/data': 6.15.0_react@18.1.0
-      '@wordpress/data-controls': 1.21.3_react-native@0.70.0+react@18.1.0
+      '@wordpress/data-controls': 1.21.3_react-native@0.70.1+react@18.1.0
       '@wordpress/deprecated': 2.12.3
-      '@wordpress/url': 2.22.2_react-native@0.70.0
+      '@wordpress/url': 2.22.2_react-native@0.70.1
       fast-json-stable-stringify: 2.1.0
       i18n-calypso: 5.0.0_react@18.1.0
       qs: 6.10.3
@@ -7671,7 +7675,7 @@ packages:
     resolution: {integrity: sha512-igX9a37DR2ZPGYtV6suZ6whr8pTFtyHL3K/oLUotxpSVO2ASaprmAe2Dkq7tBo7CRY7MMDrAa9nuQP9/YG8FxQ==}
     dev: false
 
-  /@emotion/native/10.0.27_7908f5bc4e8ffde157437478839e9452:
+  /@emotion/native/10.0.27_1f98770c85cb2ce2211ab5a854718562:
     resolution: {integrity: sha512-3qxR2XFizGfABKKbX9kAYc0PHhKuCEuyxshoq3TaMEbi9asWHdQVChg32ULpblm4XAf9oxaitAU7J9SfdwFxtw==}
     peerDependencies:
       react-native: '>=0.14.0 <1'
@@ -7702,8 +7706,12 @@ packages:
 >>>>>>> 143013f5ec (Fix up lock file after rebase)
 =======
       '@emotion/primitives-core': 10.0.27_864809d686fef2043b51d8d752270dc1
+<<<<<<< HEAD
       react-native: 0.70.0_a19cca988bed9f49dd76674cd1829b53
 >>>>>>> ead36c3266 (Update lock file)
+=======
+      react-native: 0.70.1_a19cca988bed9f49dd76674cd1829b53
+>>>>>>> 70c183e8ba (Update lock file again)
     transitivePeerDependencies:
       - '@emotion/core'
       - react
@@ -9705,12 +9713,12 @@ packages:
       '@react-native-community/cli-server-api': 9.1.0
       '@react-native-community/cli-tools': 9.1.0
       chalk: 4.1.2
-      metro: 0.72.2
-      metro-config: 0.72.2
-      metro-core: 0.72.2
+      metro: 0.72.3
+      metro-config: 0.72.3
+      metro-core: 0.72.3
       metro-react-native-babel-transformer: 0.72.1
-      metro-resolver: 0.72.2
-      metro-runtime: 0.72.2
+      metro-resolver: 0.72.3
+      metro-runtime: 0.72.3
       readline: 1.3.0
     transitivePeerDependencies:
       - bufferutil
@@ -15306,6 +15314,7 @@ packages:
       typescript: 4.2.4
     transitivePeerDependencies:
       - supports-color
+    dev: true
 
   /@typescript-eslint/parser/5.15.0_eslint@8.12.0+typescript@4.6.2:
     resolution: {integrity: sha512-NGAYP/+RDM2sVfmKiKOCgJYPstAO40vPAgACoWPO/+yoYKSgAXIFaBKsV8P0Cc7fwKgvj27SjRNX4L7f4/jCKQ==}
@@ -15579,6 +15588,7 @@ packages:
       typescript: 4.2.4
     transitivePeerDependencies:
       - supports-color
+    dev: true
 
   /@typescript-eslint/typescript-estree/5.15.0_typescript@4.6.2:
     resolution: {integrity: sha512-Hb0e3dGc35b75xLzixM3cSbG1sSbrTBQDfIScqdyvrfJZVEi4XWAT+UL/HMxEdrJNB8Yk28SKxPLtAhfCbBInA==}
@@ -16159,12 +16169,12 @@ packages:
       - react-native
     dev: true
 
-  /@wordpress/api-fetch/3.23.1_react-native@0.70.0:
+  /@wordpress/api-fetch/3.23.1_react-native@0.70.1:
     resolution: {integrity: sha512-dmeigLuvqYAzpQ2hWUQT1P5VQAjkj9hS1z7PgNi1CcULFPbY8BWW+KiBETUu6Wm+rlSbUL2dC8qrA4JDv9ja5A==}
     dependencies:
       '@babel/runtime': 7.17.7
       '@wordpress/i18n': 3.20.0
-      '@wordpress/url': 2.22.2_react-native@0.70.0
+      '@wordpress/url': 2.22.2_react-native@0.70.1
     transitivePeerDependencies:
       - react-native
 
@@ -16178,12 +16188,12 @@ packages:
       - react-native
     dev: true
 
-  /@wordpress/api-fetch/4.0.0_react-native@0.70.0:
+  /@wordpress/api-fetch/4.0.0_react-native@0.70.1:
     resolution: {integrity: sha512-4nWH/gEpG7/VnEJbjbOWS0AWBnX5snPc3ZaKcXNZsLQlv9YgsS8idL/BNkUl9/ylZeez/UX4lJLVkOR5clvg8A==}
     dependencies:
       '@babel/runtime': 7.17.7
       '@wordpress/i18n': 3.20.0
-      '@wordpress/url': 2.22.2_react-native@0.70.0
+      '@wordpress/url': 2.22.2_react-native@0.70.1
     transitivePeerDependencies:
       - react-native
 
@@ -16428,13 +16438,13 @@ packages:
     resolution: {integrity: sha512-UH0Ifmm4tEjVPOtiqH6yxDvk2EKtqSAhnyhyfSIb0wUnEoGsWTjREZjzuhgjt/I2nTqfg+0gUSzL5D0yQH6wDQ==}
     engines: {node: '>=12'}
 
-  /@wordpress/components/12.0.9_f2798d1de432edce33f3b1e25560a0a1:
+  /@wordpress/components/12.0.9_8ef5126acb83354da8c5c100387ca834:
     resolution: {integrity: sha512-J6uM20Jpchr/NywQmAeVqx/LohwKizi2F8HylqN1Xt2mYzuOrDirlEhQT1wmfqiEqEt0l+mefZEBlxeknMfBag==}
     dependencies:
       '@babel/runtime': 7.17.7
       '@emotion/core': 10.3.1_react@16.14.0
       '@emotion/css': 10.0.27
-      '@emotion/native': 10.0.27_7908f5bc4e8ffde157437478839e9452
+      '@emotion/native': 10.0.27_1f98770c85cb2ce2211ab5a854718562
       '@emotion/styled': 10.3.0_864809d686fef2043b51d8d752270dc1
       '@wordpress/a11y': 2.15.3
       '@wordpress/compose': 3.25.3_react@16.14.0
@@ -16896,11 +16906,11 @@ packages:
       webpack: 5.70.0_webpack-cli@4.9.2
     dev: true
 
-  /@wordpress/data-controls/1.21.3_dacb185d81a591ef89dd2296afeb8eaf:
+  /@wordpress/data-controls/1.21.3_fb51d768a92e15fc00d015a80ce81cc7:
     resolution: {integrity: sha512-aLpx/HvKaxCQfWSLGIz699SB9Guyq8Yoq5XLlH8eNWnf/8HkQg8hQ6yagDY8BinV/t8HScc5A7a6n6pvZNGtjg==}
     dependencies:
       '@babel/runtime': 7.17.7
-      '@wordpress/api-fetch': 4.0.0_react-native@0.70.0
+      '@wordpress/api-fetch': 4.0.0_react-native@0.70.1
       '@wordpress/data': 4.27.3_react@16.14.0
       '@wordpress/deprecated': 2.12.3
     transitivePeerDependencies:
@@ -16908,11 +16918,11 @@ packages:
       - react-native
     dev: false
 
-  /@wordpress/data-controls/1.21.3_react-native@0.70.0+react@18.1.0:
+  /@wordpress/data-controls/1.21.3_react-native@0.70.1+react@18.1.0:
     resolution: {integrity: sha512-aLpx/HvKaxCQfWSLGIz699SB9Guyq8Yoq5XLlH8eNWnf/8HkQg8hQ6yagDY8BinV/t8HScc5A7a6n6pvZNGtjg==}
     dependencies:
       '@babel/runtime': 7.17.7
-      '@wordpress/api-fetch': 4.0.0_react-native@0.70.0
+      '@wordpress/api-fetch': 4.0.0_react-native@0.70.1
       '@wordpress/data': 4.27.3_react@18.1.0
       '@wordpress/deprecated': 2.12.3
     transitivePeerDependencies:
@@ -17411,6 +17421,47 @@ packages:
       '@babel/runtime': 7.17.7
     dev: false
 
+  /@wordpress/eslint-plugin/11.0.1_1a9285f35926adfb8da741dfac03e720:
+    resolution: {integrity: sha512-HDKwKjOmCaWdyJEtWKRAd0xK/NAXL/ykUP/I8l+zCvzvCXbS1UuixWN09RRzl09tv17JUtPiEqehDilkWRCBZg==}
+    engines: {node: '>=12', npm: '>=6.9'}
+    peerDependencies:
+      '@babel/core': '>=7'
+      eslint: '>=8'
+      prettier: '>=2'
+      typescript: '>=4'
+    peerDependenciesMeta:
+      prettier:
+        optional: true
+      typescript:
+        optional: true
+    dependencies:
+      '@babel/core': 7.17.8
+      '@babel/eslint-parser': 7.17.0_@babel+core@7.17.8+eslint@8.12.0
+      '@typescript-eslint/eslint-plugin': 5.15.0_c8b324c35d270b9e6d84e3592e846620
+      '@typescript-eslint/parser': 5.15.0_eslint@8.12.0+typescript@4.6.2
+      '@wordpress/babel-preset-default': 6.6.1
+      '@wordpress/prettier-config': 1.1.3
+      cosmiconfig: 7.0.1
+      eslint: 8.12.0
+      eslint-config-prettier: 8.5.0_eslint@8.12.0
+      eslint-plugin-import: 2.25.4_cc71e8efbf6abc1a029e1884c9c4d82b
+      eslint-plugin-jest: 25.7.0_6bef967891becc1ab6057e2949a5834f
+      eslint-plugin-jsdoc: 37.9.7_eslint@8.12.0
+      eslint-plugin-jsx-a11y: 6.5.1_eslint@8.12.0
+      eslint-plugin-prettier: 3.4.1_a8fac51164e8ef412b2cafe159deea6c
+      eslint-plugin-react: 7.29.4_eslint@8.12.0
+      eslint-plugin-react-hooks: 4.3.0_eslint@8.12.0
+      globals: 13.12.0
+      prettier: 2.3.0
+      requireindex: 1.2.0
+      typescript: 4.6.2
+    transitivePeerDependencies:
+      - eslint-import-resolver-typescript
+      - eslint-import-resolver-webpack
+      - jest
+      - supports-color
+    dev: true
+
   /@wordpress/eslint-plugin/11.0.1_1f52f45e7bfacc80707c778589e25ef6:
     resolution: {integrity: sha512-HDKwKjOmCaWdyJEtWKRAd0xK/NAXL/ykUP/I8l+zCvzvCXbS1UuixWN09RRzl09tv17JUtPiEqehDilkWRCBZg==}
     engines: {node: '>=12', npm: '>=6.9'}
@@ -17543,6 +17594,7 @@ packages:
       - eslint-import-resolver-webpack
       - jest
       - supports-color
+    dev: false
 
   /@wordpress/eslint-plugin/7.4.0_eslint@7.32.0+typescript@4.6.2:
     resolution: {integrity: sha512-HJpDYz2drtC9rY8MiYtYJ3cimioEIweGyb3P2DQTjUZ3sC4AGg+97PhXLHUdKfsFQ31JRxyLS9kKuGdDVBwWww==}
@@ -18511,12 +18563,12 @@ packages:
     transitivePeerDependencies:
       - react-native
 
-  /@wordpress/url/2.22.2_react-native@0.70.0:
+  /@wordpress/url/2.22.2_react-native@0.70.1:
     resolution: {integrity: sha512-aqpYKQXzyzkCOm+GzZRYlLb+wh58g0cwR1PaKAl0UXaBS4mdS+X6biMriylb4P8CVC/RR7CSw5XI20JC24KDwQ==}
     dependencies:
       '@babel/runtime': 7.17.7
       lodash: 4.17.21
-      react-native-url-polyfill: 1.3.0_react-native@0.70.0
+      react-native-url-polyfill: 1.3.0_react-native@0.70.1
     transitivePeerDependencies:
       - react-native
 
@@ -23947,7 +23999,7 @@ packages:
       eslint-import-resolver-webpack:
         optional: true
     dependencies:
-      '@typescript-eslint/parser': 5.15.0_eslint@8.12.0+typescript@4.2.4
+      '@typescript-eslint/parser': 5.15.0_eslint@8.12.0+typescript@4.6.2
       debug: 3.2.7
       eslint-import-resolver-node: 0.3.6
       find-up: 2.1.0
@@ -24028,6 +24080,7 @@ packages:
     dependencies:
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@typescript-eslint/parser': 5.15.0_7bdza2waopngrtr4qhziihsire
 =======
 <<<<<<< HEAD
@@ -24039,6 +24092,9 @@ packages:
 =======
       '@typescript-eslint/parser': 5.15.0_eslint@8.12.0+typescript@4.2.4
 >>>>>>> ead36c3266 (Update lock file)
+=======
+      '@typescript-eslint/parser': 5.15.0_eslint@8.12.0+typescript@4.6.2
+>>>>>>> 70c183e8ba (Update lock file again)
       array-includes: 3.1.4
       array.prototype.flat: 1.2.5
       debug: 2.6.9
@@ -24320,9 +24376,13 @@ packages:
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
   /eslint-plugin-prettier/3.4.1_vd5mkele5dxuckzmv7qvtxxknq:
+=======
+  /eslint-plugin-prettier/3.4.1_a8fac51164e8ef412b2cafe159deea6c:
+>>>>>>> 70c183e8ba (Update lock file again)
     resolution: {integrity: sha512-htg25EUYUeIhKHXjOinK4BgCcDwtLHjqaxCDsMy5nbnUMkKFvIhMVCp+5GFUXQ4Nr8lBsPqtGAqBenbpFqAA2g==}
     engines: {node: '>=6.0.0'}
     peerDependencies:
@@ -24339,11 +24399,14 @@ packages:
       prettier-linter-helpers: 1.0.0
     dev: true
 
+<<<<<<< HEAD
 >>>>>>> 143013f5ec (Fix up lock file after rebase)
   /eslint-plugin-prettier/3.4.1_y56j6i6hor3dgpuevglq6yd6ay:
 =======
 =======
 >>>>>>> ead36c3266 (Update lock file)
+=======
+>>>>>>> 70c183e8ba (Update lock file again)
   /eslint-plugin-prettier/3.4.1_c77c9f23c77476333e84a9970f607e06:
     resolution: {integrity: sha512-htg25EUYUeIhKHXjOinK4BgCcDwtLHjqaxCDsMy5nbnUMkKFvIhMVCp+5GFUXQ4Nr8lBsPqtGAqBenbpFqAA2g==}
     engines: {node: '>=6.0.0'}
@@ -32522,48 +32585,48 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /metro-babel-transformer/0.72.2:
-    resolution: {integrity: sha512-3Bxk/MoXHn/ysmsH7ov6inDHrSWz5eowYRGzilOSSXe9y3DJ/ceTHfT+DWsPr9IgTJLQfKVN/F0pZ+1Ndqh52A==}
+  /metro-babel-transformer/0.72.3:
+    resolution: {integrity: sha512-PTOR2zww0vJbWeeM3qN90WKENxCLzv9xrwWaNtwVlhcV8/diNdNe82sE1xIxLFI6OQuAVwNMv1Y7VsO2I7Ejrw==}
     dependencies:
       '@babel/core': 7.17.8
       hermes-parser: 0.8.0
-      metro-source-map: 0.72.2
+      metro-source-map: 0.72.3
       nullthrows: 1.1.1
     transitivePeerDependencies:
       - supports-color
 
-  /metro-cache-key/0.72.2:
-    resolution: {integrity: sha512-P8p4QQzbEFMuk81xklc62qdE+CGBjP9u+ECP3iYNXIAW0+apS6Dntyvx/xCLy0a4MIryXqg2EJ2Z8XrmKmNeGQ==}
+  /metro-cache-key/0.72.3:
+    resolution: {integrity: sha512-kQzmF5s3qMlzqkQcDwDxrOaVxJ2Bh6WRXWdzPnnhsq9LcD3B3cYqQbRBS+3tSuXmathb4gsOdhWslOuIsYS8Rg==}
 
-  /metro-cache/0.72.2:
-    resolution: {integrity: sha512-0Yw3J32eYTp7x7bAAg+a9ScBG/mpib6Wq4WPSYvhoNilPFHzh7knLDMil3WGVCQlI1r+5xtpw/FDhNVKuypQqg==}
+  /metro-cache/0.72.3:
+    resolution: {integrity: sha512-++eyZzwkXvijWRV3CkDbueaXXGlVzH9GA52QWqTgAOgSHYp5jWaDwLQ8qpsMkQzpwSyIF4LLK9aI3eA7Xa132A==}
     dependencies:
-      metro-core: 0.72.2
+      metro-core: 0.72.3
       rimraf: 2.7.1
 
-  /metro-config/0.72.2:
-    resolution: {integrity: sha512-rvX4fBctPYEIPtTEcgun7Q+3IwuR5+gMPQrwDhE8hHDHPmFkfrW9UsEqD7VArJFRr0AwXSd7GD+eapFPjXr43Q==}
+  /metro-config/0.72.3:
+    resolution: {integrity: sha512-VEsAIVDkrIhgCByq8HKTWMBjJG6RlYwWSu1Gnv3PpHa0IyTjKJtB7wC02rbTjSaemcr82scldf2R+h6ygMEvsw==}
     dependencies:
       cosmiconfig: 5.2.1
       jest-validate: 26.6.2
-      metro: 0.72.2
-      metro-cache: 0.72.2
-      metro-core: 0.72.2
-      metro-runtime: 0.72.2
+      metro: 0.72.3
+      metro-cache: 0.72.3
+      metro-core: 0.72.3
+      metro-runtime: 0.72.3
     transitivePeerDependencies:
       - bufferutil
       - encoding
       - supports-color
       - utf-8-validate
 
-  /metro-core/0.72.2:
-    resolution: {integrity: sha512-OXNH8UbKIhvpyHGJrdQYnPUmyPHSuVY4OO6pQxODdTW+uiO68PPPgIIVN67vlCAirZolxRFpma70N7m0sGCZyg==}
+  /metro-core/0.72.3:
+    resolution: {integrity: sha512-KuYWBMmLB4+LxSMcZ1dmWabVExNCjZe3KysgoECAIV+wyIc2r4xANq15GhS94xYvX1+RqZrxU1pa0jQ5OK+/6A==}
     dependencies:
       lodash.throttle: 4.1.1
-      metro-resolver: 0.72.2
+      metro-resolver: 0.72.3
 
-  /metro-file-map/0.72.2:
-    resolution: {integrity: sha512-6LMgsVT2/Ik6sKtzG1T13pwxJYrSX/JtbF5HwOU7Q/L79Mopy9NQnw9hQoXPcnVXA12gbWfp6Va/NnycaTxX+w==}
+  /metro-file-map/0.72.3:
+    resolution: {integrity: sha512-LhuRnuZ2i2uxkpFsz1XCDIQSixxBkBG7oICAFyLyEMDGbcfeY6/NexphfLdJLTghkaoJR5ARFMiIxUg9fIY/pA==}
     dependencies:
       abort-controller: 3.0.0
       anymatch: 3.1.2
@@ -32582,11 +32645,11 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /metro-hermes-compiler/0.72.2:
-    resolution: {integrity: sha512-X8fjDBGNwjHxYAlMtrsr8x/JI/Gep7uzLDuHOMuRU5iAIVt+gH0Z+zjbJTsX++yLZ41i755zw5akvpQnyjVl/w==}
+  /metro-hermes-compiler/0.72.3:
+    resolution: {integrity: sha512-QWDQASMiXNW3j8uIQbzIzCdGYv5PpAX/ZiF4/lTWqKRWuhlkP4auhVY4eqdAKj5syPx45ggpjkVE0p8hAPDZYg==}
 
-  /metro-inspector-proxy/0.72.2:
-    resolution: {integrity: sha512-VEJU3J+0qrU33o+5tHemVuRWMXswtSrRI1lTE9yFiU8GAxoKrSy2kfJ5cOPLfv/8Nf6M6zRayjUs/Q46kjvfow==}
+  /metro-inspector-proxy/0.72.3:
+    resolution: {integrity: sha512-UPFkaq2k93RaOi+eqqt7UUmqy2ywCkuxJLasQ55+xavTUS+TQSyeTnTczaYn+YKw+izLTLllGcvqnQcZiWYhGw==}
     hasBin: true
     dependencies:
       connect: 3.7.0
@@ -32598,8 +32661,8 @@ packages:
       - supports-color
       - utf-8-validate
 
-  /metro-minify-uglify/0.72.2:
-    resolution: {integrity: sha512-b9KH4vMd1yvBYfcA3xvc1HZmPWIpOhiNyiEjh7pw7il1TONAR0+Rj8TS0yG57eSYM8IB86UIwB7Y5PVCNfUNXQ==}
+  /metro-minify-uglify/0.72.3:
+    resolution: {integrity: sha512-dPXqtMI8TQcj0g7ZrdhC8X3mx3m3rtjtMuHKGIiEXH9CMBvrET8IwrgujQw2rkPcXiSiX8vFDbGMIlfxefDsKA==}
     dependencies:
       uglify-es: 3.3.9
 
@@ -32648,8 +32711,8 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /metro-react-native-babel-preset/0.72.2:
-    resolution: {integrity: sha512-OMp77TUUZAoiuUv5uKNc08AnJNQxD28k92eQvo8tPcA8Wx6OZlEUvL7M7SFkef2mEYJ0vnrRjOamSnbBuq/+1w==}
+  /metro-react-native-babel-preset/0.72.3:
+    resolution: {integrity: sha512-uJx9y/1NIqoYTp6ZW1osJ7U5ZrXGAJbOQ/Qzl05BdGYvN1S7Qmbzid6xOirgK0EIT0pJKEEh1s8qbassYZe4cw==}
     dependencies:
       '@babel/core': 7.17.8
       '@babel/plugin-proposal-async-generator-functions': 7.16.8_@babel+core@7.17.8
@@ -32706,8 +32769,8 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /metro-resolver/0.72.2:
-    resolution: {integrity: sha512-5KTWolUgA6ivLkg3DmFS2WltphBPQW7GT7An+6Izk/NU+y/6crmsoaLmNxjpZo4Fv+i/FxDSXqpbpQ6KrRWvlQ==}
+  /metro-resolver/0.72.3:
+    resolution: {integrity: sha512-wu9zSMGdxpKmfECE7FtCdpfC+vrWGTdVr57lDA0piKhZV6VN6acZIvqQ1yZKtS2WfKsngncv5VbB8Y5eHRQP3w==}
     dependencies:
       absolute-path: 0.0.0
 
@@ -32717,8 +32780,8 @@ packages:
       '@babel/runtime': 7.17.7
       react-refresh: 0.4.3
 
-  /metro-runtime/0.72.2:
-    resolution: {integrity: sha512-jIHH6ILSWJtINHA0+KgnH1T5RO5mkf46sQahgC+GYjZjGoshs8+tBdjviYD/xy5s4olCJ1hmycV+XvauQmJdkQ==}
+  /metro-runtime/0.72.3:
+    resolution: {integrity: sha512-3MhvDKfxMg2u7dmTdpFOfdR71NgNNo4tzAyJumDVQKwnHYHN44f2QFZQqpPBEmqhWlojNeOxsqFsjYgeyMx6VA==}
     dependencies:
       '@babel/runtime': 7.17.7
       react-refresh: 0.4.3
@@ -32737,15 +32800,15 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /metro-source-map/0.72.2:
-    resolution: {integrity: sha512-dqYK8DZ4NzGkhik0IkKRBLuPplXqF6GoKrFQ/XMw0FYGy3+dFJ9nIDxsCyg3GcjCt6Mg8FEqGrXlpMG7MrtC9Q==}
+  /metro-source-map/0.72.3:
+    resolution: {integrity: sha512-eNtpjbjxSheXu/jYCIDrbNEKzMGOvYW6/ePYpRM7gDdEagUOqKOCsi3St8NJIQJzZCsxD2JZ2pYOiomUSkT1yQ==}
     dependencies:
       '@babel/traverse': 7.17.3
       '@babel/types': 7.17.0
       invariant: 2.2.4
-      metro-symbolicate: 0.72.2
+      metro-symbolicate: 0.72.3
       nullthrows: 1.1.1
-      ob1: 0.72.2
+      ob1: 0.72.3
       source-map: 0.5.7
       vlq: 1.0.1
     transitivePeerDependencies:
@@ -32765,13 +32828,13 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /metro-symbolicate/0.72.2:
-    resolution: {integrity: sha512-Rn47dSggFU9jf+fpUE6/gkNQU7PQPTIbh2iUu7jI8cJFBODs0PWlI5h0W9XlQ56lcBtjLQz6fvZSloKdDcI2fQ==}
+  /metro-symbolicate/0.72.3:
+    resolution: {integrity: sha512-eXG0NX2PJzJ/jTG4q5yyYeN2dr1cUqUaY7worBB0SP5bRWRc3besfb+rXwfh49wTFiL5qR0oOawkU4ZiD4eHXw==}
     engines: {node: '>=8.3'}
     hasBin: true
     dependencies:
       invariant: 2.2.4
-      metro-source-map: 0.72.2
+      metro-source-map: 0.72.3
       nullthrows: 1.1.1
       source-map: 0.5.7
       through2: 2.0.5
@@ -32779,8 +32842,8 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /metro-transform-plugins/0.72.2:
-    resolution: {integrity: sha512-f2Zt6ti156TWFrnCRg7vxBIHBJcERBX8nwKmRKGFCbU+rk4YOxwONY4Y0Gn9Kocfu313P1xNqWYH5rCqvEWMaQ==}
+  /metro-transform-plugins/0.72.3:
+    resolution: {integrity: sha512-D+TcUvCKZbRua1+qujE0wV1onZvslW6cVTs7dLCyC2pv20lNHjFr1GtW01jN2fyKR2PcRyMjDCppFd9VwDKnSg==}
     dependencies:
       '@babel/core': 7.17.8
       '@babel/generator': 7.17.7
@@ -32790,21 +32853,21 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /metro-transform-worker/0.72.2:
-    resolution: {integrity: sha512-z5OOnEO3NV6PgI8ORIBvJ5m+u9THFpy+6WIg/MUjP9k1oqasWaP1Rfhv7K/a+MD6uho1rgXj6nwWDqybsqHY/w==}
+  /metro-transform-worker/0.72.3:
+    resolution: {integrity: sha512-WsuWj9H7i6cHuJuy+BgbWht9DK5FOgJxHLGAyULD5FJdTG9rSMFaHDO5WfC0OwQU5h4w6cPT40iDuEGksM7+YQ==}
     dependencies:
       '@babel/core': 7.17.8
       '@babel/generator': 7.17.7
       '@babel/parser': 7.17.8
       '@babel/types': 7.17.0
       babel-preset-fbjs: 3.4.0_@babel+core@7.17.8
-      metro: 0.72.2
-      metro-babel-transformer: 0.72.2
-      metro-cache: 0.72.2
-      metro-cache-key: 0.72.2
-      metro-hermes-compiler: 0.72.2
-      metro-source-map: 0.72.2
-      metro-transform-plugins: 0.72.2
+      metro: 0.72.3
+      metro-babel-transformer: 0.72.3
+      metro-cache: 0.72.3
+      metro-cache-key: 0.72.3
+      metro-hermes-compiler: 0.72.3
+      metro-source-map: 0.72.3
+      metro-transform-plugins: 0.72.3
       nullthrows: 1.1.1
     transitivePeerDependencies:
       - bufferutil
@@ -32812,8 +32875,8 @@ packages:
       - supports-color
       - utf-8-validate
 
-  /metro/0.72.2:
-    resolution: {integrity: sha512-TWqKnPMu4OX7ew7HJwsD4LBzhtn7Iqeu2OAqjlMCJtqMKqi/YWoxFf1VGZxH/mJVLhbe/5SWU5St/tqsST8swg==}
+  /metro/0.72.3:
+    resolution: {integrity: sha512-Hb3xTvPqex8kJ1hutQNZhQadUKUwmns/Du9GikmWKBFrkiG3k3xstGAyO5t5rN9JSUEzQT6y9SWzSSOGogUKIg==}
     hasBin: true
     dependencies:
       '@babel/code-frame': 7.16.7
@@ -32839,22 +32902,22 @@ packages:
       invariant: 2.2.4
       jest-worker: 27.5.1
       lodash.throttle: 4.1.1
-      metro-babel-transformer: 0.72.2
-      metro-cache: 0.72.2
-      metro-cache-key: 0.72.2
-      metro-config: 0.72.2
-      metro-core: 0.72.2
-      metro-file-map: 0.72.2
-      metro-hermes-compiler: 0.72.2
-      metro-inspector-proxy: 0.72.2
-      metro-minify-uglify: 0.72.2
-      metro-react-native-babel-preset: 0.72.2
-      metro-resolver: 0.72.2
-      metro-runtime: 0.72.2
-      metro-source-map: 0.72.2
-      metro-symbolicate: 0.72.2
-      metro-transform-plugins: 0.72.2
-      metro-transform-worker: 0.72.2
+      metro-babel-transformer: 0.72.3
+      metro-cache: 0.72.3
+      metro-cache-key: 0.72.3
+      metro-config: 0.72.3
+      metro-core: 0.72.3
+      metro-file-map: 0.72.3
+      metro-hermes-compiler: 0.72.3
+      metro-inspector-proxy: 0.72.3
+      metro-minify-uglify: 0.72.3
+      metro-react-native-babel-preset: 0.72.3
+      metro-resolver: 0.72.3
+      metro-runtime: 0.72.3
+      metro-source-map: 0.72.3
+      metro-symbolicate: 0.72.3
+      metro-transform-plugins: 0.72.3
+      metro-transform-worker: 0.72.3
       mime-types: 2.1.35
       node-fetch: 2.6.7
       nullthrows: 1.1.1
@@ -33834,8 +33897,8 @@ packages:
   /ob1/0.72.1:
     resolution: {integrity: sha512-TyQX2gO08klGTMuzD+xm3iVrzXiIygCB7t+NWeicOR05hkzgeWOiAZ8q40uMfIDRfEAc6hd66sJdIEhU/yUZZA==}
 
-  /ob1/0.72.2:
-    resolution: {integrity: sha512-P4zh/5GzyXPIzz+2eq2Hjd1wTZAfpwTIBWKhYx8X/DD2wCuFVprBEZp1FerWyTMwOA6AnVxiX1h0JE1v/s+PAQ==}
+  /ob1/0.72.3:
+    resolution: {integrity: sha512-OnVto25Sj7Ghp0vVm2THsngdze3tVq0LOg9LUHsAVXMecpqOP0Y8zaATW8M9gEgs2lNEAcCqV0P/hlmOPhVRvg==}
 
   /object-assign/4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
@@ -36643,6 +36706,7 @@ packages:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   /react-native-codegen/0.70.4:
 =======
 =======
@@ -36653,6 +36717,10 @@ packages:
   /react-native-codegen/0.70.4_@babel+preset-env@7.16.11:
 >>>>>>> 35af637ea3 (Update lock file)
     resolution: {integrity: sha512-bPyd5jm840omfx24VRyMP+KPzAefpRDwE18w5ywMWHCWZBSqLn1qI9WgBPnavlIrjTEuzxznWQNcaA26lw8AMQ==}
+=======
+  /react-native-codegen/0.70.5_@babel+preset-env@7.16.11:
+    resolution: {integrity: sha512-vXqgCWWIWlzsCtwD6hbmwmCleGNJYm+n4xO9VMfzzlF3xt9gjC7/USSMTf/YZlCK/hDwQU412QrNS6A9OH+mag==}
+>>>>>>> 70c183e8ba (Update lock file again)
     dependencies:
       '@babel/parser': 7.17.8
       flow-parser: 0.121.0
@@ -36662,8 +36730,8 @@ packages:
       - '@babel/preset-env'
       - supports-color
 
-  /react-native-gradle-plugin/0.70.2:
-    resolution: {integrity: sha512-k7d+CVh0fs/VntA2WaKD58cFB2rtiSLBHYlciH18ncaT4N/B3A4qOGv9pSCEHfQikELm6vAf98KMbE3c8KnH1A==}
+  /react-native-gradle-plugin/0.70.3:
+    resolution: {integrity: sha512-oOanj84fJEXUg9FoEAQomA8ISG+DVIrTZ3qF7m69VQUJyOGYyDZmPqKcjvRku4KXlEH6hWO9i4ACLzNBh8gC0A==}
 
   /react-native-url-polyfill/1.3.0:
     resolution: {integrity: sha512-w9JfSkvpqqlix9UjDvJjm1EjSt652zVQ6iwCIj1cVVkwXf4jQhQgTNXY6EVTwuAmUjg6BC6k9RHCBynoLFo3IQ==}
@@ -36672,11 +36740,12 @@ packages:
     dependencies:
       whatwg-url-without-unicode: 8.0.0-3
 
-  /react-native-url-polyfill/1.3.0_react-native@0.70.0:
+  /react-native-url-polyfill/1.3.0_react-native@0.70.1:
     resolution: {integrity: sha512-w9JfSkvpqqlix9UjDvJjm1EjSt652zVQ6iwCIj1cVVkwXf4jQhQgTNXY6EVTwuAmUjg6BC6k9RHCBynoLFo3IQ==}
     peerDependencies:
       react-native: '*'
     dependencies:
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -36698,6 +36767,13 @@ packages:
   /react-native/0.70.0_a19cca988bed9f49dd76674cd1829b53:
 >>>>>>> ead36c3266 (Update lock file)
     resolution: {integrity: sha512-QjXLbrK9f+/B2eCzn6kAvglLV/8nwPuFGaFv7ggPpAzFRyx5bVN1dwQLHL3MrP7iXR/M7Jc6Nnid7tmRSic6vA==}
+=======
+      react-native: 0.70.1_a19cca988bed9f49dd76674cd1829b53
+      whatwg-url-without-unicode: 8.0.0-3
+
+  /react-native/0.70.1_a19cca988bed9f49dd76674cd1829b53:
+    resolution: {integrity: sha512-AUh4NZLFdvyjSiYWCtTROCrC7loxeeZ/TzBnkZwp3kb9XmMu7/kzvWn2c5sEMnzW7X/0JSul8jXexGVdpnCoSA==}
+>>>>>>> 70c183e8ba (Update lock file again)
     engines: {node: '>=14'}
     hasBin: true
     peerDependencies:
@@ -36729,6 +36805,7 @@ packages:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       react-native-codegen: 0.70.4
 =======
 =======
@@ -36739,6 +36816,10 @@ packages:
       react-native-codegen: 0.70.4_@babel+preset-env@7.16.11
 >>>>>>> 35af637ea3 (Update lock file)
       react-native-gradle-plugin: 0.70.2
+=======
+      react-native-codegen: 0.70.5_@babel+preset-env@7.16.11
+      react-native-gradle-plugin: 0.70.3
+>>>>>>> 70c183e8ba (Update lock file again)
       react-refresh: 0.4.3
       react-shallow-renderer: 16.15.0_react@16.14.0
       regenerator-runtime: 0.13.9
@@ -40930,6 +41011,7 @@ packages:
     dependencies:
       tslib: 1.14.1
       typescript: 4.2.4
+    dev: true
 
   /tsutils/3.21.0_typescript@4.4.4:
     resolution: {integrity: sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==}
@@ -41190,6 +41272,7 @@ packages:
     resolution: {integrity: sha512-V+evlYHZnQkaz8TRBuxTA92yZBPotr5H+WhQ7bD3hZUndx5tGOa1fuCgeSjxAzM1RiN5IzvadIXTVefuuwZCRg==}
     engines: {node: '>=4.2.0'}
     hasBin: true
+    dev: true
 
   /typescript/4.4.4:
     resolution: {integrity: sha512-DqGhF5IKoBl8WNf8C1gu8q0xZSInh9j1kJJMqT3a94w1JzVaBU4EXOSMrz9yDqMT0xt3selp83fuFMQ0uzv6qA==}
