@@ -43,33 +43,30 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 				onDragStart={ () => setToolBarItem( null ) }
 			>
 				{ Children.map( orderedChildren, ( child ) => (
-					<SortableHandle>
-						<div
-							className="woocommerce-image-gallery__item-wrapper"
-							//TODO: add correct keyboard handler
-							onKeyPress={ () => {} }
-							tabIndex={ 0 }
-							role="button"
-							onClick={ ( event ) => {
-								console.debug( event.target );
-								if (
-									( event.target as Element ).closest(
-										'.woocommerce-image-gallery__toolbar'
-									) !== null
-								) {
-									return;
-								}
-								setToolBarItem(
-									Boolean( child ) && toolBarItem === child
-										? null
-										: child
-								);
-							} }
-						>
-							{ toolBarItem === child && <ImageGalleryToolbar /> }
-							{ child }
-						</div>
-					</SortableHandle>
+					<div
+						className="woocommerce-image-gallery__item-wrapper"
+						//TODO: add correct keyboard handler
+						onKeyPress={ () => {} }
+						tabIndex={ 0 }
+						role="button"
+						onClick={ ( event ) => {
+							if (
+								( event.target as Element ).closest(
+									'.woocommerce-image-gallery__toolbar'
+								) !== null
+							) {
+								return;
+							}
+							// setToolBarItem(
+							// 	Boolean( child ) && toolBarItem === child
+							// 		? null
+							// 		: child
+							// );
+						} }
+					>
+						{ toolBarItem === child && <ImageGalleryToolbar /> }
+						<SortableHandle>{ child }</SortableHandle>
+					</div>
 				) ) }
 			</Sortable>
 		</div>
