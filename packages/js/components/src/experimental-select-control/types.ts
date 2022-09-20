@@ -8,18 +8,18 @@ import {
 	GetPropsCommonOptions,
 } from 'downshift';
 
-export type ItemType = {
-	value: string;
+export type DefaultItemType = {
 	label: string;
+	value: string | number;
 };
 
-export type SelectedType = ItemType | null;
+export type SelectedType< ItemType > = ItemType | null;
 
 export type Props = {
 	[ key: string ]: string;
 };
 
-export type getItemPropsType = (
+export type getItemPropsType< ItemType > = (
 	options: UseComboboxGetItemPropsOptions< ItemType >
 	// These are the types provided by Downshift.
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,16 +32,24 @@ export type getMenuPropsType = (
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => any;
 
-export type ChildrenProps = {
+export type ChildrenProps< ItemType > = {
 	items: ItemType[];
 	isOpen: boolean;
 	highlightedIndex: number;
-	getItemProps: getItemPropsType;
+	getItemProps: getItemPropsType< ItemType >;
 	getMenuProps: getMenuPropsType;
+	getItemLabel: getItemLabelType< ItemType >;
+	getItemValue: getItemValueType< ItemType >;
 };
 
-export type ChildrenType = ( {
+export type ChildrenType< ItemType > = ( {
 	items,
 	isOpen,
 	highlightedIndex,
-}: ChildrenProps ) => ReactElement | Component;
+}: ChildrenProps< ItemType > ) => ReactElement | Component;
+
+export type getItemLabelType< ItemType > = ( item: ItemType | null ) => string;
+
+export type getItemValueType< ItemType > = (
+	item: ItemType | null
+) => string | number;

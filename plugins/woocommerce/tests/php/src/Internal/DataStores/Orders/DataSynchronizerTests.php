@@ -46,7 +46,7 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, false );
 		$post_data_store = WC_Data_Store::load( 'order' );
 
-		$cot_enabled = $authoritative_source === 'cot' ? 'yes' : 'no';
+		$cot_enabled = 'cot' === $authoritative_source ? 'yes' : 'no';
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, $cot_enabled );
 		update_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
 
@@ -104,4 +104,23 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, $this->sut->get_current_orders_pending_sync_count() );
 	}
 
+	/**
+	 * Test that orders that are backfilled later on don't need to be synced again.
+	 */
+	public function test_get_ids_orders_pending_async_backfill() {
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		$order = OrderHelper::create_complex_data_store_order();
+		$this->assertEquals( 1, $this->sut->get_current_orders_pending_sync_count() );
+		// Simulate that order was updated some time ago, and we are backfilling just now.
+		$order->set_date_modified( time() - 1000 );
+		$order->save();
+
+		$this->sut->process_batch( array( $order->get_id() ) );
+		$this->assertEquals( 0, $this->sut->get_current_orders_pending_sync_count() );
+
+		// So far so good, now if we change the authoritative source to posts, we should still have 0 order pending sync.
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+		$this->assertEquals( 0, $this->sut->get_current_orders_pending_sync_count() );
+	}
 }

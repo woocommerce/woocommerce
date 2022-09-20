@@ -94,6 +94,12 @@ const reducer: Reducer< PluginsState, Actions > = (
 					jetpackConnection: payload.jetpackConnection,
 				};
 				break;
+			case TYPES.UPDATE_JETPACK_CONNECTION_DATA:
+				state = {
+					...state,
+					jetpackConnectionData: payload.results,
+				};
+				break;
 			case TYPES.UPDATE_JETPACK_CONNECT_URL:
 				state = {
 					...state,

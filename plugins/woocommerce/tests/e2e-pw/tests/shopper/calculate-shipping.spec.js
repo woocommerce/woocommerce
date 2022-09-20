@@ -26,6 +26,10 @@ test.describe( 'Cart Calculate Shipping', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
+		// make sure the currency is USD
+		await api.put( 'settings/general/woocommerce_currency', {
+			value: 'USD',
+		} );
 		// add products
 		await api
 			.post( 'products', {

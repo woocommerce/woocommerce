@@ -75,7 +75,6 @@ export const Plugins: React.FC< Props > = ( {
 	return (
 		<>
 			<PluginInstaller
-				// @ts-expect-error PluginInstaller has onComplete props but it is a pure js component and doesn't export the right types.
 				onComplete={ (
 					activatedPlugins: string[],
 					response: InstallPluginsResponse

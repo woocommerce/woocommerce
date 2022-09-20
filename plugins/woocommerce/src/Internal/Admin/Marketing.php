@@ -194,7 +194,12 @@ class Marketing {
 		$plugins = get_transient( self::RECOMMENDED_PLUGINS_TRANSIENT );
 
 		if ( false === $plugins ) {
-			$request = wp_remote_get( 'https://woocommerce.com/wp-json/wccom/marketing-tab/1.1/recommendations.json' );
+			$request = wp_remote_get(
+				'https://woocommerce.com/wp-json/wccom/marketing-tab/1.2/recommendations.json',
+				array(
+					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
+				)
+			);
 			$plugins = [];
 
 			if ( ! is_wp_error( $request ) && 200 === $request['response']['code'] ) {
@@ -249,7 +254,12 @@ class Marketing {
 				'https://woocommerce.com/wp-json/wp/v2/posts?utm_medium=product'
 			);
 
-			$request = wp_remote_get( $request_url );
+			$request = wp_remote_get(
+				$request_url,
+				array(
+					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
+				)
+			);
 			$posts   = [];
 
 			if ( ! is_wp_error( $request ) && 200 === $request['response']['code'] ) {

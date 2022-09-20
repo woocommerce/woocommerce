@@ -37,6 +37,14 @@ export const platformOptions = [
 		label: __( 'Squarespace', 'woocommerce' ),
 	},
 	{
+		key: 'wish',
+		label: __( 'Wish', 'woocommerce' ),
+	},
+	{
+		key: 'walmart',
+		label: __( 'Walmart', 'woocommerce' ),
+	},
+	{
 		key: 'other',
 		label: __( 'Other', 'woocommerce' ),
 	},

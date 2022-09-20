@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Only show the product image upload tip once, and on all product edit pages.

@@ -251,4 +251,28 @@ class ArrayUtilTest extends \WC_Unit_Test_Case {
 		$actual = ArrayUtil::select( $items, 'the_id', ArrayUtil::SELECT_BY_AUTO );
 		$this->assertEquals( array( 1, 2, 3 ), $actual );
 	}
+
+	/**
+	 * @testdox push_once doesn't alter the array and returns false if the item is already in the array.
+	 */
+	public function test_push_once_existing_value() {
+		$array = array( 1, 2, 3 );
+
+		$result = ArrayUtil::push_once( $array, 2 );
+
+		$this->assertFalse( $result );
+		$this->assertEquals( array( 1, 2, 3 ), $array );
+	}
+
+	/**
+	 * @testdox push_once pushes the value in the array and returns true if the value isn't yet in the array.
+	 */
+	public function test_push_once_new_value() {
+		$array = array( 1, 2, 3 );
+
+		$result = ArrayUtil::push_once( $array, 4 );
+
+		$this->assertTrue( $result );
+		$this->assertEquals( array( 1, 2, 3, 4 ), $array );
+	}
 }

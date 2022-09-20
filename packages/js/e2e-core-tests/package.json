@@ -19,7 +19,7 @@
 		"CHANGELOG.md"
 	],
 	"dependencies": {
-		"@jest/globals": "^26.4.2",
+		"@jest/globals": "^27.5.1",
 		"@wordpress/deprecated": "^3.2.3",
 		"config": "3.3.3"
 	},
@@ -49,7 +49,7 @@
 	"scripts": {
 		"turbo:build": "./bin/build.sh && pnpm run clean && pnpm run compile",
 		"prepare": "pnpm run build",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- --",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"clean": "rm -rf ./build ./build-module",
 		"compile": "e2e-builds",
 		"lint": "eslint src --ext=js,ts,tsx",

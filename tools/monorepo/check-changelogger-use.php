@@ -128,6 +128,11 @@ foreach ( $composer_projects as $project_path ) {
 	$changelogger_projects[ $project_path ] = $data;
 }
 
+// Support centralizing the changelogs for multiple components and validating them together.
+$project_component_map = array(
+	'plugins/woocommerce-admin' => 'plugins/woocommerce',
+);
+
 // Process the diff.
 debug( 'Checking diff from %s...%s.', $base, $head );
 $pipes = null;
@@ -152,6 +157,17 @@ while ( ( $line = fgets( $pipes[1] ) ) ) {
 		if ( substr( $line, 0, strlen( $path ) + 1 ) === $path . '/' ) {
 			$project_match = $path;
 			break;
+		}
+	}
+
+	// Also try to match to project components.
+	if ( false === $project_match ) {
+		foreach ( $project_component_map as $path => $project ) {
+			if ( substr( $line, 0, strlen( $path ) + 1 ) === $path . '/' ) {
+				debug( 'Mapping %s to project %s.', $line, $project );
+				$project_match = $project;
+				break;
+			}
 		}
 	}
 

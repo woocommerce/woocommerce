@@ -55,6 +55,11 @@ const MarketingOverview = lazy( () =>
 		/* webpackChunkName: "marketing-overview" */ '../marketing/overview'
 	)
 );
+const MarketingOverviewMultichannel = lazy( () =>
+	import(
+		/* webpackChunkName: "multichannel-marketing" */ '../marketing/overview-multichannel'
+	)
+);
 const ProfileWizard = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ '../profile-wizard' )
 );
@@ -152,7 +157,9 @@ export const getPages = () => {
 
 	if ( window.wcAdminFeatures.marketing ) {
 		pages.push( {
-			container: MarketingOverview,
+			container: window.wcAdminFeatures[ 'multichannel-marketing' ]
+				? MarketingOverviewMultichannel
+				: MarketingOverview,
 			path: '/marketing',
 			breadcrumbs: [
 				...initialBreadcrumbs,

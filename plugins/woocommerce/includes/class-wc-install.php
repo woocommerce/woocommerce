@@ -213,6 +213,10 @@ class WC_Install {
 			'wc_update_670_purge_comments_count_cache',
 			'wc_update_670_delete_deprecated_remote_inbox_notifications_option',
 		),
+		'7.0.0' => array(
+			'wc_update_700_remove_download_log_fk',
+			'wc_update_700_remove_recommended_marketing_plugins_transient',
+		),
 	);
 
 	/**
@@ -839,6 +843,7 @@ class WC_Install {
 			'wc-admin-navigation-feedback-follow-up',
 			'wc-admin-set-up-additional-payment-types',
 			'wc-admin-deactivate-plugin',
+			'wc-admin-complete-store-details',
 		);
 
 		/**
@@ -1019,32 +1024,6 @@ class WC_Install {
 			// Add an index to the field comment_type to improve the response time of the query
 			// used by WC_Comments::wp_count_comments() to get the number of comments by type.
 			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
-		}
-
-		// Get tables data types and check it matches before adding constraint.
-		$download_log_columns     = $wpdb->get_results( "SHOW COLUMNS FROM {$wpdb->prefix}wc_download_log WHERE Field = 'permission_id'", ARRAY_A );
-		$download_log_column_type = '';
-		if ( isset( $download_log_columns[0]['Type'] ) ) {
-			$download_log_column_type = $download_log_columns[0]['Type'];
-		}
-
-		$download_permissions_columns     = $wpdb->get_results( "SHOW COLUMNS FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE Field = 'permission_id'", ARRAY_A );
-		$download_permissions_column_type = '';
-		if ( isset( $download_permissions_columns[0]['Type'] ) ) {
-			$download_permissions_column_type = $download_permissions_columns[0]['Type'];
-		}
-
-		// Add constraint to download logs if the columns matches.
-		if ( ! empty( $download_permissions_column_type ) && ! empty( $download_log_column_type ) && $download_permissions_column_type === $download_log_column_type ) {
-			$fk_result = $wpdb->get_row( "SHOW CREATE TABLE {$wpdb->prefix}wc_download_log" );
-			if ( false === strpos( $fk_result->{'Create Table'}, "fk_{$wpdb->prefix}wc_download_log_permission_id" ) ) {
-				$wpdb->query(
-					"ALTER TABLE `{$wpdb->prefix}wc_download_log`
-					ADD CONSTRAINT `fk_{$wpdb->prefix}wc_download_log_permission_id`
-					FOREIGN KEY (`permission_id`)
-					REFERENCES `{$wpdb->prefix}woocommerce_downloadable_product_permissions` (`permission_id`) ON DELETE CASCADE;"
-				);
-			}
 		}
 
 		// Clear table caches.

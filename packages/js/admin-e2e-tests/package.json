@@ -22,7 +22,7 @@
 	],
 	"sideEffects": false,
 	"dependencies": {
-		"@jest/globals": "^26.6.2",
+		"@jest/globals": "^27.5.1",
 		"@types/jest": "^27.4.1",
 		"@woocommerce/e2e-utils": "workspace:*",
 		"config": "^3.3.7"
@@ -55,7 +55,7 @@
 		"turbo:build": "tsc --build",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- --",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"lint": "eslint src",
 		"start": "tsc --build --watch",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
