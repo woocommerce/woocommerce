@@ -13,7 +13,12 @@ import { ProductSectionLayout } from '../layout/product-section-layout';
 import { AttributeField } from '../fields/attribute-field';
 
 export const AttributesSection: React.FC = () => {
-	const { getInputProps, setValue } = useFormContext< Product >();
+	const { getInputProps, values } = useFormContext< Product >();
+
+	// TODO: remove https://github.com/woocommerce/woocommerce/issues/34333 is done.
+	if ( values.attributes && values.attributes.length > 0 ) {
+		return null;
+	}
 
 	return (
 		<ProductSectionLayout
