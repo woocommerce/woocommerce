@@ -355,6 +355,7 @@ jQuery( function( $ ) {
 				});
 
 				$( ':input.wc-attribute-search' ).filter( ':not(.enhanced)' ).each( function() {
+					var select2Element = this;
 					var select2_args = $.extend( {
 						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
 						placeholder       : $( this ).data( 'placeholder' ),
@@ -374,12 +375,14 @@ jQuery( function( $ ) {
 								};
 							},
 							processResults: function( data ) {
+								var disabledItems = $( select2Element ).data('disabled-items') || [];
 								var terms = [];
 								if ( data ) {
 									$.each( data, function( id, term ) {
 										terms.push({
 											id:   term.slug,
-											text: term.name
+											text: term.name,
+											disabled: disabledItems.includes( term.slug )
 										});
 									});
 								}
