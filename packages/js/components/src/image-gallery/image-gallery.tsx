@@ -57,11 +57,13 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 							) {
 								return;
 							}
-							// setToolBarItem(
-							// 	Boolean( child ) && toolBarItem === child
-							// 		? null
-							// 		: child
-							// );
+							setToolBarItem(
+								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+								// @ts-ignore
+								Boolean( child ) && toolBarItem === child
+									? null
+									: child
+							);
 						} }
 					>
 						{ toolBarItem === child && <ImageGalleryToolbar /> }

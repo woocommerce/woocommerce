@@ -20,11 +20,17 @@
         left: 10px;
     }
 
-	.components-toolbar-group svg {
-		width: 24px;
-	}
 }
 
 .woocommerce-image-gallery__item-wrapper {
 	position: relative;
+
+	.components-toolbar-group {
+		flex-wrap: inherit;
+
+		svg {
+			width: 24px;
+		}
+	}
+
 }
