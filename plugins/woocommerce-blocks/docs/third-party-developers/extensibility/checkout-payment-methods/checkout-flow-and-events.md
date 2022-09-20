@@ -2,7 +2,7 @@
 
 To see the Checkout Flow and Events please consult the following document:
 
-[./docs/internal-developers/block-client-apis/checkout/checkout-flow-and-events.md](../../../../docs/internal-developers/block-client-apis/checkout/checkout-flow-and-events.md)
+[Checkout Flow and Events](../../../../docs/internal-developers/block-client-apis/checkout/checkout-flow-and-events.md)
 
 ---
 
