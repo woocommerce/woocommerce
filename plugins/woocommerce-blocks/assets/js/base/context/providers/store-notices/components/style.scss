@@ -17,6 +17,14 @@
 				vertical-align: text-top;
 			}
 		}
+		.components-notice__content > div:not(.components-notice__actions) {
+			*:first-child {
+				margin-top: 0;
+			}
+			*:last-child {
+				margin-bottom: 0;
+			}
+		}
 	}
 	.wc-block-components-notices__notice + .wc-block-components-notices__notice {
 		margin-top: 1em;
