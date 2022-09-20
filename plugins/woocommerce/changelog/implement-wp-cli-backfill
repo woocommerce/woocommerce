@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Support sync instead of migrate for orders COT.
+Deprecate existing `wp wc cot migrate` command and replace with `wp wc cot sync`.
