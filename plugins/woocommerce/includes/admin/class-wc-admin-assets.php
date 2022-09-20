@@ -305,7 +305,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					)
 				);
 			}
-			if ( in_array( str_replace( 'edit-', '', $screen_id ), array( 'shop_coupon', 'product' ) ) || $this->is_order_meta_box_screen( $screen_id ) ) {
+			if ( in_array( str_replace( 'edit-', '', $screen_id ), array( 'shop_coupon', 'product' ), true ) || $this->is_order_meta_box_screen( $screen_id ) ) {
 				$post_id                = isset( $post->ID ) ? $post->ID : '';
 				$currency               = '';
 				$remove_item_notice     = __( 'Are you sure you want to remove the selected items?', 'woocommerce' );
@@ -500,8 +500,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		 *
 		 * @return bool Whether the current screen is an order edit screen.
 		 */
-		private function is_order_meta_box_screen( string $screen_id ) {
-			return in_array( str_replace( 'edit-', '', $screen_id ), wc_get_order_types( 'order-meta-boxes' ) ) ||
+		private function is_order_meta_box_screen( $screen_id ) {
+			return in_array( str_replace( 'edit-', '', $screen_id ), wc_get_order_types( 'order-meta-boxes' ), true ) ||
 						wc_get_page_screen_id( 'shop-order' ) === $screen_id;
 		}
 
