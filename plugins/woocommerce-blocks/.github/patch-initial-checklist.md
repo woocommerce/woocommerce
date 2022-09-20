@@ -90,7 +90,7 @@ This only needs done if the patch release needs to be included in WooCommerce Co
   - Run through the testing checklist to ensure everything works in that branch for that package bump. **Note:** Testing should ensure any features/new blocks that are supposed to be behind feature gating for the core merge of this package update are working as expected.
   - Testing should include completing the [Smoke testing checklist](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/internal-developers/testing/smoke-testing.md). It's up to you to verify that those tests have been done.
   - Verify and make any additional edits to the pull request description for things like: Changelog to be included with WooCommerce core, additional communication that might be needed elsewhere, additional marketing communication notes that may be needed etc.
-  - After the checklist is complete and the testing is done, it will be up to the WooCommerce core team to approve and merge the pull request.
+  - After the checklist is complete and the testing is done, select the porter of your team to review the PR. Once approved, make sure you merge the PR.
 * [ ] Make sure you join the `#woo-core-releases` Slack channel to represent Woo Blocks for the release of WooCommerce core this version is included in.
 
 ## Publish Posts
