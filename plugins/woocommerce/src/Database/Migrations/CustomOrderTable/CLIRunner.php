@@ -138,7 +138,7 @@ class CLIRunner {
 	}
 
 	/**
-	 * Sync order data between the custom orders table and wp_posts table.
+	 * Sync order data between the custom order tables and the core WordPress post tables.
 	 *
 	 * ## OPTIONS
 	 *
