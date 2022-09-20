@@ -46,11 +46,11 @@ describe( 'Shopper → Checkout', () => {
 
 	it( 'User can view empty cart message', async () => {
 		await shopper.block.goToCheckout();
-		// Verify cart is empty'
+		// Verify cart is empty
 		await expect( page ).toMatchElement(
 			'strong.wc-block-checkout-empty__title',
 			{
-				text: 'Your cart is empty!',
+				text: 'Your cart is currently empty!',
 			}
 		);
 	} );

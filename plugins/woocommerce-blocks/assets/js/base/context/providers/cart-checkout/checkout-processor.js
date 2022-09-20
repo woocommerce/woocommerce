@@ -235,13 +235,18 @@ const CheckoutProcessor = () => {
 						}
 						createErrorNotice(
 							formatStoreApiErrorMessage( response ),
-							{ id: 'checkout', context: 'wc/checkout' }
+							{
+								id: 'checkout',
+								context: 'wc/checkout',
+								__unstableHTML: true,
+							}
 						);
 						response?.additional_errors?.forEach?.(
 							( additionalError ) => {
 								createErrorNotice( additionalError.message, {
 									id: additionalError.error_code,
 									context: 'wc/checkout',
+									__unstableHTML: true,
 								} );
 							}
 						);
@@ -261,7 +266,11 @@ const CheckoutProcessor = () => {
 									'woo-gutenberg-products-block'
 								)
 						),
-						{ id: 'checkout', context: 'wc/checkout' }
+						{
+							id: 'checkout',
+							context: 'wc/checkout',
+							__unstableHTML: true,
+						}
 					);
 				}
 				dispatchActions.setHasError( true );
