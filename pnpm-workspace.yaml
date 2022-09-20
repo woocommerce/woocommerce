@@ -10,3 +10,4 @@ packages:
     - 'tools/release-posts'
     - 'tools/cli-core'
     - 'tools/version-bump'
+    - 'tools/storybook'

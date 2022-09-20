@@ -18,6 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Admin\Marketing;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
@@ -2462,4 +2463,11 @@ function wc_update_700_remove_download_log_fk() {
 			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY {$fk->CONSTRAINT_NAME}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 	}
+}
+
+/**
+ * Remove the transient data for recommended marketing extensions.
+ */
+function wc_update_700_remove_recommended_marketing_plugins_transient() {
+	delete_transient( Marketing::RECOMMENDED_PLUGINS_TRANSIENT );
 }

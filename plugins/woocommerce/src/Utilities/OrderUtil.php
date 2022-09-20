@@ -64,9 +64,9 @@ final class OrderUtil {
 	 *
 	 * @param WC_Order|WP_Post $post_or_order_object Post or order object.
 	 *
-	 * @return WC_Order WC_Order object.
+	 * @return bool|WC_Order|WC_Order_Refund WC_Order object.
 	 */
-	public static function init_theorder_object( $post_or_order_object ) : WC_Order {
+	public static function init_theorder_object( $post_or_order_object ) {
 		return wc_get_container()->get( COTMigrationUtil::class )->init_theorder_object( $post_or_order_object );
 	}
 

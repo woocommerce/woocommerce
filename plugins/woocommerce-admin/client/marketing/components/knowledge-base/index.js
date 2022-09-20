@@ -14,10 +14,8 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import './style.scss';
-import { Slider } from '../../components';
+import { Card, Slider, ReadBlogMessage } from '../../components';
 import { STORE_KEY } from '../../data/constants';
-import Card from '../card';
-import ReadBlogMessage from './ReadBlogMessage';
 import KnowledgebaseCardPostPlaceholder from './placeholder';
 
 const KnowledgeBase = ( {

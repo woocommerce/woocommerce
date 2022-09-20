@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix country field is empty when navigating back to "Store Details" tab

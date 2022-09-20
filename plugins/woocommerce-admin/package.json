@@ -9,12 +9,12 @@
 		"url": "https://github.com:woocommerce/woocommerce.git"
 	},
 	"scripts": {
-		"changelog": "pnpm run changelog --filter=woocommerce --",
+		"changelog": "pnpm --filter=woocommerce -r run changelog ",
 		"turbo:build": "pnpm run clean && cross-env NODE_ENV=production WC_ADMIN_PHASE=core webpack",
 		"turbo:test": "pnpm run test:client",
 		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- --",
-		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name -- --",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
 		"lint": "pnpm run lint:js && pnpm run lint:css",
 		"build:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
 		"clean": "rimraf ../woocommerce/assets/client/admin/*",
@@ -226,7 +226,6 @@
 		]
 	},
 	"engines": {
-		"node": "^16.13.1",
-		"pnpm": "^6.24.2"
+		"node": "^16.13.1"
 	}
 }

@@ -21,14 +21,16 @@ If you would like to read more about the syntax, please check out [the Turborepo
 Here are some examples of the ways you can use Turborepo / pnpm commands:
 
 ```bash
-# Lint and build all plugins, packages, and tools
-pnpm run lint && pnpm run build 
+# Lint and build all plugins, packages, and tools. Note the use of `-r` for lint,
+# turbo does not run the lint at this time.
+pnpm run -r lint && pnpm run build 
 
 # Build WooCommerce Core and all of its dependencies
 pnpm run build --filter='woocommerce'
 
-# Lint the @woocommerce/components package
-pnpm run lint --filter='@woocommerce/components'
+# Lint the @woocommerce/components package - note the different argument order, turbo scripts
+# are not running lints at this point in time.
+pnpm run -r --filter='@woocommerce/components' lint 
 
 # Test all of the @woocommerce scoped packages
 pnpm run test --filter='@woocommerce/*'
