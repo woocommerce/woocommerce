@@ -89,6 +89,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 		getSelectedItemProps,
 		getDropdownProps,
 		removeSelectedItem,
+		// @ts-ignore
 	} = useMultipleSelection( { itemToString } );
 	let selectedItems = selected === null ? [] : selected;
 	selectedItems = Array.isArray( selectedItems )
@@ -115,6 +116,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 		inputValue,
 		items: filteredItems,
 		itemToString: getItemLabel,
+		// @ts-ignore
 		onStateChange: ( { inputValue: value, type, selectedItem } ) => {
 			switch ( type ) {
 				case useCombobox.stateChangeTypes.InputChange:
