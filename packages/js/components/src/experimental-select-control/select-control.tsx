@@ -89,6 +89,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 		getSelectedItemProps,
 		getDropdownProps,
 		removeSelectedItem,
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 	} = useMultipleSelection( { itemToString } );
 	let selectedItems = selected === null ? [] : selected;
@@ -116,6 +117,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 		inputValue,
 		items: filteredItems,
 		itemToString: getItemLabel,
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		onStateChange: ( { inputValue: value, type, selectedItem } ) => {
 			switch ( type ) {
