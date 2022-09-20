@@ -54,14 +54,6 @@ export const apms: Apm[] = [
 		link: 'https://woocommerce.com/products/klarna-payments/',
 		extension: 'klarna-payments-for-woocommerce',
 	},
-	{
-		id: 'affirm',
-		title: strings.apms.affirm.title,
-		icon: `${ WC_ASSET_URL }images/payment_methods/72x72/affirm.png`,
-		description: strings.apms.affirm.description,
-		link: 'https://woocommerce.com/products/woocommerce-gateway-affirm/',
-		extension: 'woocommerce-gateway-affirm', // todo-4529 support Affirm
-	},
 ];
 
 interface ApmsProps {
