@@ -284,12 +284,10 @@ add_filter( 'post_type_link', 'wc_product_post_type_link', 10, 2 );
 /**
  * Filter to add upload tips under the product image thumbnail.
  *
- * @param  string  $content The HTML markup for the admin post thumbnail.
+ * @param  string $content The HTML markup for the admin post thumbnail.
  * @return string
  */
 function wc_product_post_thumbnail_html( $content ) {
-
-
 	$suggestion  = '<div class="image-added-detail">';
 	$suggestion .= '<p>';
 	$suggestion .= '<span class="dashicons-info-outline dashicons"></span>';
