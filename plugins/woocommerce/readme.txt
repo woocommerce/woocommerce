@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Only show the product image upload tip once, and on all product edit pages. [#34739](https://github.com/woocommerce/woocommerce/pull/34739)
 * Fix - Use offsetted datetime when displaying order created date. [#34687](https://github.com/woocommerce/woocommerce/pull/34687)
 
 = 6.9.1 2022-09-14 =
