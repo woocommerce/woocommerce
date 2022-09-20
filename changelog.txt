@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 6.9.3 2022-09-20 =
+
+**WooCommerce**
+
+* Fix - Remove typecasting to prevent fatal when $screen_id is null. [#34734](https://github.com/woocommerce/woocommerce/pull/34734)
+* Fix - Only show the product image upload tip once, and on all product edit pages. [#34739](https://github.com/woocommerce/woocommerce/pull/34739)
+
 = 6.9.2 2022-09-15 =
 
 **WooCommerce**
