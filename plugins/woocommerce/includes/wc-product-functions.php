@@ -291,7 +291,8 @@ function wc_product_post_thumbnail_html( $content ) {
 	$suggestion  = '<div class="image-added-detail">';
 	$suggestion .= '<p>';
 	$suggestion .= '<span class="dashicons-info-outline dashicons"></span>';
-	$suggestion .= esc_html__( 'Upload JPEG files that are 1000 x 1000 pixels or larger (max. 2 GB).', 'woocommerce' );
+	/* translators: 1: formatted file size */
+	$suggestion .= esc_html( sprintf( __( 'Upload JPEG files that are 1000 x 1000 pixels or larger (max. %1$s).', 'woocommerce' ), size_format( wp_max_upload_size() ) ) );
 	$suggestion .= ' <a href="https://woocommerce.com/posts/fast-high-quality-product-photos/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to prepare images?', 'woocommerce' ) . '<span class="dashicons-external dashicons"></span></a>';
 	$suggestion .= '</p>';
 	$suggestion .= '</div>';
