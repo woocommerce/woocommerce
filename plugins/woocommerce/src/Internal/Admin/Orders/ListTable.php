@@ -85,6 +85,8 @@ class ListTable extends WP_List_Table {
 		 *
 		 * @param string    $column_name Identifier for the custom column.
 		 * @param \WC_Order $order       Current WooCommerce order object.
+		 *
+		 * @since 7.0.0
 		 */
 		do_action( "manage_{$this->screen->id}_custom_column", $column_name, $order );
 	}
