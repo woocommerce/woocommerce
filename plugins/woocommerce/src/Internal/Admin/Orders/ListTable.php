@@ -68,6 +68,7 @@ class ListTable extends WP_List_Table {
 		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'get_columns' ), 0 );
 		add_filter( 'set_screen_option_edit_orders_per_page', array( $this, 'set_items_per_page' ), 10, 3 );
 		add_filter( 'default_hidden_columns', array( $this, 'default_hidden_columns' ), 10, 2 );
+		add_action( 'admin_footer', array( $this, 'enqueue_scripts' ) );
 
 		$this->items_per_page();
 		set_screen_options();
@@ -1070,4 +1071,12 @@ class ListTable extends WP_List_Table {
 		}
 	}
 
+	/**
+	 * Enqueue list table scripts.
+	 *
+	 * @return void
+	 */
+	public function enqueue_scripts(): void {
+		wp_enqueue_script( 'wc-orders' );
+	}
 }
