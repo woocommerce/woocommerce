@@ -19,6 +19,10 @@
             position: absolute;
         }
 
+		&:first-child .woocommerce-image-gallery__toolbar-previous svg {
+			fill: #ccc;
+		}
+
         &.is-dragging-over-before:before {
             left: calc( $gap / -2 - 1px );
         }
@@ -27,4 +31,8 @@
             right: calc( $gap / -2 - 1px );
         }
     }
+
+	.is-last-droppable .woocommerce-image-gallery__toolbar-next svg {
+		fill: #ccc;
+	}
 }

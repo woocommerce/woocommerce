@@ -12,16 +12,23 @@ import { DraggableIcon } from '../sortable/draggable-icon';
 import { CoverImage } from './icons';
 import { SortableHandle } from '../sortable';
 
+// TODO: - Dragging by toolbar handle bug
+// - Drag current item to current index immediately bug (goes to next index)
+// - hover state for cover button
+// - Image outline when toolbar visible
+
 export type ImageGalleryToolbarProps = {
 	childIndex: number;
 	moveItem: ( fromIndex: number, toIndex: number ) => void;
 	removeItem: ( removeIndex: number ) => void;
+	setAsCoverImage: ( coverIndex: number ) => void;
 } & React.HTMLAttributes< HTMLDivElement >;
 
 export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 	childIndex,
 	moveItem,
 	removeItem,
+	setAsCoverImage,
 }: ImageGalleryToolbarProps ) => {
 	const moveNext = () => {
 		moveItem( childIndex, childIndex + 1 );
@@ -60,6 +67,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 				</ToolbarGroup>
 				<ToolbarGroup>
 					<ToolbarButton
+						onClick={ () => setAsCoverImage( childIndex ) }
 						icon={ CoverImage }
 						label="Set as cover image"
 					/>

@@ -42,6 +42,11 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 		);
 	};
 
+	const setAsCoverImage = ( coverIndex: number ) => {
+		moveItem( coverIndex, 0 );
+		setToolBarItem( null );
+	};
+
 	return (
 		<div
 			className="woocommerce-image-gallery"
@@ -83,9 +88,14 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 								childIndex={ childIndex }
 								moveItem={ moveItem }
 								removeItem={ removeItem }
+								setAsCoverImage={ setAsCoverImage }
 							/>
 						) }
-						<SortableHandle>{ child }</SortableHandle>
+						<SortableHandle>
+							{ cloneElement( child, {
+								isCover: childIndex === 0 ? true : false,
+							} ) }
+						</SortableHandle>
 					</div>
 				) ) }
 			</Sortable>
