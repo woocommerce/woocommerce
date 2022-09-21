@@ -24,7 +24,8 @@ import {
 	CheckoutExpressPayment,
 	SavedPaymentMethodOptions,
 } from '../../../blocks/cart-checkout-shared/payment-methods';
-import { defaultCartState } from '../../../data/cart/default-state';
+import { checkPaymentMethodsCanPay } from '../../payment-methods/check-payment-methods';
+import { defaultCartState } from '../../cart/default-state';
 
 const originalSelect = jest.requireActual( '@wordpress/data' ).select;
 jest.spyOn( wpDataFunctions, 'select' ).mockImplementation( ( storeName ) => {
@@ -131,6 +132,8 @@ const registerMockPaymentMethods = ( savedCards = true ) => {
 			},
 		} );
 	} );
+	checkPaymentMethodsCanPay();
+	checkPaymentMethodsCanPay( true );
 };
 
 const resetMockPaymentMethods = () => {
