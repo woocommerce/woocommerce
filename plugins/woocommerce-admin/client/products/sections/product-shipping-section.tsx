@@ -21,14 +21,13 @@ import { ADMIN_URL } from '../../utils/admin-settings';
 
 const DEFAULT_SHIPPING_CLASS_OPTIONS: SelectControl.Option[] = [
 	{ value: '', label: __( 'No shipping class', 'woocommerce' ) },
-	{ value: '-1', label: __( 'Standard shipping', 'woocommerce' ) },
 ];
 
 function mapShippingClassToSelectOption(
 	shippingClasses: ProductShippingClass[]
 ): SelectControl.Option[] {
-	return shippingClasses.map( ( { id, name } ) => ( {
-		value: `${ id }`,
+	return shippingClasses.map( ( { slug, name } ) => ( {
+		value: slug,
 		label: name,
 	} ) );
 }
@@ -36,19 +35,14 @@ function mapShippingClassToSelectOption(
 export const ProductShippingSection: React.FC = () => {
 	const { getInputProps } = useFormContext< Product >();
 
-	const shippingClassOptions = useSelect( ( select ) => {
+	const { shippingClasses } = useSelect( ( select ) => {
 		const { getProductShippingClasses } = select(
 			EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
 		);
-		const shippingClasses =
-			getProductShippingClasses< ProductShippingClass[] >();
-		if ( Array.isArray( shippingClasses ) ) {
-			return [
-				...DEFAULT_SHIPPING_CLASS_OPTIONS,
-				...mapShippingClassToSelectOption( shippingClasses ),
-			];
-		}
-		return DEFAULT_SHIPPING_CLASS_OPTIONS;
+		return {
+			shippingClasses:
+				getProductShippingClasses< ProductShippingClass[] >(),
+		};
 	}, [] );
 
 	return (
@@ -61,10 +55,11 @@ export const ProductShippingSection: React.FC = () => {
 		>
 			<SelectControl
 				label={ __( 'Shipping class', 'woocommerce' ) }
-				{ ...getTextControlProps(
-					getInputProps( 'shipping_class_id' )
-				) }
-				options={ shippingClassOptions }
+				{ ...getTextControlProps( getInputProps( 'shipping_class' ) ) }
+				options={ [
+					...DEFAULT_SHIPPING_CLASS_OPTIONS,
+					...mapShippingClassToSelectOption( shippingClasses ?? [] ),
+				] }
 			/>
 			<span className="woocommerce-product-form__secondary-text">
 				{ interpolateComponents( {
