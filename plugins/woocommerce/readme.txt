@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, storefront, checkout, downlo
 Requires at least: 5.8
 Tested up to: 6.0
 Requires PHP: 7.2
-Stable tag: 6.9.2
+Stable tag: 6.9.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
