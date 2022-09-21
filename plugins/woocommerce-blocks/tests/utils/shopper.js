@@ -311,6 +311,15 @@ export const shopper = {
 			] );
 		},
 
+		addCrossSellsProductToCart: async () => {
+			await page.waitForSelector(
+				'.wc-block-components-product-add-to-cart-button'
+			);
+			expect( page ).toClick(
+				'.wc-block-components-product-add-to-cart-button'
+			);
+		},
+
 		selectAndVerifyShippingOption: async (
 			shippingName,
 			shippingPrice

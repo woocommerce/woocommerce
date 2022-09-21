@@ -28,7 +28,7 @@ function woocommerce_setup_terms_and_privacy_page() {
 		exit( 'Terms & Privacy pages set up.' );
 	}
 
-  // phpcs:disable WordPress.Security.NonceVerification.Recommended
+  	// phpcs:disable WordPress.Security.NonceVerification.Recommended
 	if ( isset( $_GET['teardown_terms_and_privacy'] ) ) {
 		unpublish_privacy_page();
 		delete_terms_page();
@@ -93,4 +93,33 @@ function delete_terms_page() {
 	$table = $wpdb->prefix . 'posts';
 	$data  = array( 'post_title' => 'Terms & Conditions' );
 	$wpdb->delete( $table, $data );
+}
+
+/**
+ * Define URL endpoint for setting up cross-sells products.
+ */
+function woocommerce_setup_cross_sells_products() {
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended
+	if ( isset( $_GET['setup_cross_sells'] ) ) {
+		setup_cross_sells();
+		exit( 'Cross-Sells products set up.' );
+	}
+}
+add_action( 'init', 'woocommerce_setup_cross_sells_products' );
+
+/**
+ * Set up Cross-Sells products.
+ */
+function setup_cross_sells() {
+	global $wpdb;
+
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+	$select     = "SELECT * FROM {$wpdb->prefix}posts WHERE post_title = '128GB USB Stick' AND post_status = 'publish' AND post_type = 'product'";
+	$id_product = $wpdb->get_row( $select );
+
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+	$select        = "SELECT * FROM {$wpdb->prefix}posts WHERE post_title = '32GB USB Stick' AND post_status = 'publish' AND post_type = 'product'";
+	$id_cross_sell = $wpdb->get_row( $select );
+
+	add_post_meta( $id_product->ID, '_crosssell_ids', $id_cross_sell->ID );
 }
