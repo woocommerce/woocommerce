@@ -99,9 +99,8 @@ const ApmList: React.FunctionComponent< ApmListProps > = ( {
 		title: apm.title,
 		content: (
 			<>
-				{ apm.description }
+				{ apm.description }{ ' ' }
 				<a href={ apm.link } target="_blank" rel="noreferrer">
-					{ ' ' }
 					{ strings.learnMore }
 				</a>
 			</>
