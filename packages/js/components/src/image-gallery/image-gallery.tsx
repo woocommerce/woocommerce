@@ -7,6 +7,7 @@ import {
 	useState,
 	useEffect,
 } from '@wordpress/element';
+import { DragEventHandler } from 'react';
 import classnames from 'classnames';
 import { MediaUpload } from '@wordpress/media-utils';
 
@@ -31,6 +32,9 @@ export type ImageGalleryProps = {
 	} ) => void;
 	onOrderChange?: ( items: ImageGalleryChild[] ) => void;
 	MediaUploadComponent?: MediaUploadComponentType;
+	keepSpaceWhenDragging?: boolean;
+	onDragStart?: DragEventHandler< HTMLDivElement >;
+	onDragEnd?: DragEventHandler< HTMLDivElement >;
 } & React.HTMLAttributes< HTMLDivElement >;
 
 export const ImageGallery: React.FC< ImageGalleryProps > = ( {
@@ -40,6 +44,9 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 	onRemove = () => null,
 	onReplace = () => null,
 	MediaUploadComponent = MediaUpload,
+	keepSpaceWhenDragging = false,
+	onDragStart = () => null,
+	onDragEnd = () => null,
 }: ImageGalleryProps ) => {
 	const [ activeToolbarKey, setActiveToolbarKey ] = useState< string | null >(
 		null
@@ -77,6 +84,9 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 				onOrderChange={ ( items ) => {
 					updateOrderedChildren( items );
 				} }
+				keepSpaceWhenDragging={ keepSpaceWhenDragging }
+				onDragStart={ onDragStart }
+				onDragEnd={ onDragEnd }
 			>
 				{ orderedChildren.map( ( child, childIndex ) => {
 					const isToolbarVisible = child.key === activeToolbarKey;
