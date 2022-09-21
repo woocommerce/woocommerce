@@ -12,7 +12,7 @@ import {
  * Internal dependencies
  */
 import { ImageGalleryToolbar } from './index';
-import { Sortable, SortableHandle } from '../sortable';
+import { Sortable, SortableHandle, moveIndex } from '../sortable';
 
 export type ImageGalleryProps = {
 	children: JSX.Element | JSX.Element[];
@@ -26,7 +26,15 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 	const [ toolBarItem, setToolBarItem ] = useState<
 		JSX.Element | null | undefined
 	>( null );
-	const [ orderedChildren, setOrderedChildren ] = useState( children );
+	const [ orderedChildren, setOrderedChildren ] = useState< JSX.Element[] >(
+		Array.isArray( children ) ? children : [ children ]
+	);
+
+	const moveItem = ( fromIndex: number, toIndex: number ) => {
+		setOrderedChildren(
+			moveIndex< JSX.Element >( fromIndex, toIndex, orderedChildren )
+		);
+	};
 
 	return (
 		<div
@@ -42,7 +50,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 				} }
 				onDragStart={ () => setToolBarItem( null ) }
 			>
-				{ Children.map( orderedChildren, ( child ) => (
+				{ Children.map( orderedChildren, ( child, childIndex ) => (
 					<div
 						className="woocommerce-image-gallery__item-wrapper"
 						//TODO: add correct keyboard handler
@@ -58,15 +66,18 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 								return;
 							}
 							setToolBarItem(
-								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-								// @ts-ignore
 								Boolean( child ) && toolBarItem === child
 									? null
 									: child
 							);
 						} }
 					>
-						{ toolBarItem === child && <ImageGalleryToolbar /> }
+						{ toolBarItem === child && (
+							<ImageGalleryToolbar
+								childIndex={ childIndex }
+								moveItem={ moveItem }
+							/>
+						) }
 						<SortableHandle>{ child }</SortableHandle>
 					</div>
 				) ) }

@@ -12,12 +12,25 @@ import { DraggableIcon } from '../sortable/draggable-icon';
 import { CoverImage } from './icons';
 import { SortableHandle } from '../sortable';
 
-export type ImageGalleryToolbarProps =
-	{} & React.HTMLAttributes< HTMLDivElement >;
+export type ImageGalleryToolbarProps = {
+	childIndex: number;
+	moveItem: ( fromIndex: number, toIndex: number ) => void;
+} & React.HTMLAttributes< HTMLDivElement >;
 
-export const ImageGalleryToolbar: React.FC<
-	ImageGalleryToolbarProps
-> = ( {}: ImageGalleryToolbarProps ) => {
+export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
+	childIndex,
+	moveItem,
+}: ImageGalleryToolbarProps ) => {
+	const moveNext = () => {
+		moveItem( childIndex, childIndex + 1 );
+	};
+	const movePrevious = () => {
+		if ( childIndex < 1 ) {
+			return;
+		}
+		moveItem( childIndex, childIndex - 1 );
+	};
+
 	return (
 		<div className="woocommerce-image-gallery__toolbar">
 			<Toolbar label="Options" id="options-toolbar">
@@ -30,8 +43,16 @@ export const ImageGalleryToolbar: React.FC<
 						) }
 						label="Drag"
 					/>
-					<ToolbarButton icon={ chevronLeft } label="Move Left" />
-					<ToolbarButton icon={ chevronRight } label="Move Right" />
+					<ToolbarButton
+						onClick={ () => movePrevious() }
+						icon={ chevronLeft }
+						label="Move previous"
+					/>
+					<ToolbarButton
+						onClick={ () => moveNext() }
+						icon={ chevronRight }
+						label="Move next"
+					/>
 				</ToolbarGroup>
 				<ToolbarGroup>
 					<ToolbarButton
