@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { lazy } from '@wordpress/element';
-import { WC_BLOCKS_BUILD_URL } from '@woocommerce/block-settings';
+import {
+	WC_BLOCKS_BUILD_URL,
+	isExperimentalBuild,
+} from '@woocommerce/block-settings';
 import { registerCheckoutBlock } from '@woocommerce/blocks-checkout';
 
 /**
@@ -57,6 +60,30 @@ registerCheckoutBlock( {
 			)
 	),
 } );
+
+if ( isExperimentalBuild() ) {
+	registerCheckoutBlock( {
+		metadata: metadata.CART_CROSS_SELLS,
+		component: lazy(
+			() =>
+				import(
+					/* webpackChunkName: "cart-blocks/cart-cross-sells" */
+					'./cart-cross-sells-block/frontend'
+				)
+		),
+	} );
+
+	registerCheckoutBlock( {
+		metadata: metadata.CART_CROSS_SELLS_PRODUCTS,
+		component: lazy(
+			() =>
+				import(
+					/* webpackChunkName: "cart-blocks/cart-cross-sells-products" */
+					'./cart-cross-sells-products/frontend'
+				)
+		),
+	} );
+}
 
 registerCheckoutBlock( {
 	metadata: metadata.CART_TOTALS,

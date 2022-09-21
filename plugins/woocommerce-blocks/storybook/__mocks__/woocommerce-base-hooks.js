@@ -19,6 +19,7 @@ export const useStoreCart = () => ( {
 	cartIsLoading: false,
 	cartErrors: [],
 	cartFees: [],
+	crossSellsProducts: previewCart.cross_sells,
 	billingAddress: {},
 	shippingAddress: {},
 	shippingRates: previewShippingRates,

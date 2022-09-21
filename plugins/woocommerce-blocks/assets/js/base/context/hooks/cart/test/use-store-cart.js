@@ -30,6 +30,7 @@ describe( 'useStoreCart', () => {
 	const previewCartData = {
 		cartCoupons: previewCart.coupons,
 		cartItems: previewCart.items,
+		crossSellsProducts: previewCart.cross_sells,
 		cartFees: previewCart.fees,
 		cartItemsCount: previewCart.items_count,
 		cartItemsWeight: previewCart.items_weight,

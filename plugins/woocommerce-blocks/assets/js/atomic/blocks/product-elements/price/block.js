@@ -25,7 +25,7 @@ import { withProductDataContext } from '@woocommerce/shared-hocs';
  *                                   context will be used if this is not provided.
  * @return {*} The component.
  */
-const Block = ( props ) => {
+export const Block = ( props ) => {
 	const { className, textAlign } = props;
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
