@@ -18,7 +18,7 @@ export { FormSection } from './form-section';
 export type { FormContext, FormRef, FormErrors } from './form';
 export { default as FilterPicker } from './filter-picker';
 export { H, Section } from './section';
-export { ImageGallery } from './image-gallery';
+export { ImageGallery, ImageGalleryItem } from './image-gallery';
 export { default as ImageUpload } from './image-upload';
 export { default as Link } from './link';
 export { default as List } from './list';
