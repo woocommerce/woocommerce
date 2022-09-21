@@ -7,6 +7,7 @@ export const API_BLOCK_NAMESPACE = 'wc/blocks';
 
 export const EMPTY_CART_COUPONS: [] = [];
 export const EMPTY_CART_ITEMS: [] = [];
+export const EMPTY_CART_CROSS_SELLS: [] = [];
 export const EMPTY_CART_FEES: [] = [];
 export const EMPTY_CART_ITEM_ERRORS: [] = [];
 export const EMPTY_CART_ERRORS: [] = [];

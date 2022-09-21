@@ -35,6 +35,16 @@ The majority of our feature flagging is blocks, this is a list of them:
 
 ### Experimental flag
 
+-   Cart block ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/8516e87bddee6c07a080c934f3d8cc0683adef06/assets/js/blocks/cart-checkout/cart-i2/index.js#L44) | [PHP flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/961c0c476d4228a218859c658c42f9b6eebfdec4/src/BlockTypesController.php#L182)).
+-   Cart Express Checkout block ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/8516e87bddee6c07a080c934f3d8cc0683adef06/assets/js/blocks/cart-checkout/cart-i2/inner-blocks/cart-express-payment-block/index.tsx#L13)).
+-   Cart Items block ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/8516e87bddee6c07a080c934f3d8cc0683adef06/assets/js/blocks/cart-checkout/cart-i2/inner-blocks/cart-items-block/index.tsx#L13)).
+-   Cart Line Items block ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/8516e87bddee6c07a080c934f3d8cc0683adef06/assets/js/blocks/cart-checkout/cart-i2/inner-blocks/cart-line-items-block/index.tsx#L13)).
+-   Cart Order Summary block ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/8516e87bddee6c07a080c934f3d8cc0683adef06/assets/js/blocks/cart-checkout/cart-i2/inner-blocks/cart-order-summary-block/index.tsx#L14)).
+-   Cart Totals block ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/8516e87bddee6c07a080c934f3d8cc0683adef06/assets/js/blocks/cart-checkout/cart-i2/inner-blocks/cart-totals-block/index.tsx#L13)).
+-   Cross-Sells block ([JS flag](https://github.com/woocommerce/woocommerce-blocks/blob/84950e6188c451d522a7ce614f77272362575d37/assets/js/blocks/cart/inner-blocks/cart-cross-sells-block/index.tsx#L13) | [JS flag](https://github.com/woocommerce/woocommerce-blocks/blob/84950e6188c451d522a7ce614f77272362575d37/assets/js/blocks/cart/inner-blocks/cart-items-block/edit.tsx#L26-L28))
+-   Empty Cart block ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/8516e87bddee6c07a080c934f3d8cc0683adef06/assets/js/blocks/cart-checkout/cart-i2/inner-blocks/empty-cart-block/index.tsx#L13)).
+-   Filled Cart block ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/8516e87bddee6c07a080c934f3d8cc0683adef06/assets/js/blocks/cart-checkout/cart-i2/inner-blocks/filled-cart-block/index.tsx#L13)).
+-   Cart Proceed to checkout block ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/8516e87bddee6c07a080c934f3d8cc0683adef06/assets/js/blocks/cart-checkout/cart-i2/inner-blocks/proceed-to-checkout-block/index.tsx#L14)).
 -   Single Product block ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/9b76ea7a1680e68cc20bfee01078e43ccfc996bd/assets/js/blocks/single-product/index.js#L43) | [PHP flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/4a1ee97eb97011458174e93e44a9b7ad2f10ca36/src/BlockTypesController.php#L181) | [webpack flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/341be1f56071fbd4b5ff975e8788d65a09512df2/bin/webpack-entries.js#L57-L59)).
 -   ⚛️ Add to cart ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/assets/js/atomic/blocks/product-elements/add-to-cart/index.js#L29-L32)).
 -   ⚛️ Product category list ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/assets/js/atomic/blocks/product-elements/category-list/index.js#L29-L32)).
@@ -126,4 +136,3 @@ Current list of events:
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md)
 
 <!-- /FEEDBACK -->
-
