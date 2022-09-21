@@ -44,7 +44,6 @@ type SelectControlProps< ItemType > = {
 	onSelect?: ( selected: ItemType ) => void;
 	placeholder?: string;
 	selected: ItemType | ItemType[] | null;
-	clearSearchOnSelect?: boolean;
 	keepMenuOpenOnSelect?: boolean;
 };
 
@@ -105,11 +104,6 @@ function SelectControl< ItemType = DefaultItemType >( {
 		selectedItems,
 		getItemLabel
 	);
-
-	let currentSelectedItem = null;
-	if ( ! multiple && selectedItems.length > 0 ) {
-		currentSelectedItem = selectedItems[ 0 ];
-	}
 
 	const {
 		isOpen,
