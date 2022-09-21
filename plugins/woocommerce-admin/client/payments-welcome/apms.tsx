@@ -125,7 +125,7 @@ const ApmList: React.FunctionComponent< ApmsProps > = ( {
 					<List items={ apmsList } />
 				</CardBody>
 				<CardFooter>
-					<ExternalLink href="https://woocommerce.com/products/">
+					<ExternalLink href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/wallets/?categoryIds=28682&collections=product&page=1">
 						{ strings.apms.seeMore }
 					</ExternalLink>
 				</CardFooter>

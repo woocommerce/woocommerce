@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { createInterpolateElement } from '@wordpress/element';
 
 export default {
@@ -413,18 +413,16 @@ export default {
 			),
 		},
 		installText: ( extensionsString: string ) => {
-			const extensionsPlural =
-				extensionsString.indexOf( ',' ) > -1
-					? 'extensions'
-					: 'extension';
+			const extensionsNumber = extensionsString.split( ', ' ).length;
 			return createInterpolateElement(
 				sprintf(
-					__(
-						'Installing <strong>WooCommerce Payments</strong> will automatically activate <strong>%s</strong> %s in your store.',
+					_n(
+						'Installing <strong>WooCommerce Payments</strong> will automatically activate <strong>%s</strong> extension in your store.',
+						'Installing <strong>WooCommerce Payments</strong> will automatically activate <strong>%s</strong> extensions in your store.',
+						extensionsNumber,
 						'woocommerce'
 					),
-					extensionsString,
-					extensionsPlural
+					extensionsString
 				),
 				{
 					strong: <strong />,
