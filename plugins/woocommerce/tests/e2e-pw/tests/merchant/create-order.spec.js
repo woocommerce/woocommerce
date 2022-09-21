@@ -199,7 +199,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 
 	test( 'can create new order', async ( { page } ) => {
 		await page.goto( 'wp-admin/post-new.php?post_type=shop_order' );
-		await expect( page.locator( 'title' ) ).toContainText(
+		await expect( page.locator( 'h1.wp-heading-inline' ) ).toContainText(
 			'Add new order'
 		);
 
