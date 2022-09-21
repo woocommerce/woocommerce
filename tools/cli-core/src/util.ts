@@ -3,9 +3,16 @@
  */
 import { createServer, Server } from 'net';
 import { join } from 'path';
-import { writeFile } from 'fs/promises';
+import { writeFile, readFile } from 'fs/promises';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import simpleGit from 'simple-git';
+import { camelCase } from 'camel-case';
+
+/**
+ * Internal dependencies
+ */
+import { Logger } from './logger';
 
 export const execAsync = promisify( exec );
 
@@ -169,4 +176,45 @@ export const generateJSONFile = ( filePath: string, data: unknown ) => {
 		2
 	);
 	return writeFile( filePath, json );
+};
+
+/**
+ * Get plugin data
+ *
+ * @param {string} tmpRepoPath    - Path to repo.
+ * @param {string} pathToMainFile - Path to plugin's main PHP file.
+ * @param {string} hashOrBranch   - Hash or branch to checkout.
+ * @return {Object} - plugin data
+ */
+export const getPluginData = async (
+	tmpRepoPath: string,
+	pathToMainFile: string,
+	hashOrBranch: string
+) => {
+	const git = simpleGit( { baseDir: tmpRepoPath } );
+	await git.checkout( [ hashOrBranch ] );
+
+	const mainFile = join( tmpRepoPath, pathToMainFile );
+
+	const content = await readFile( mainFile, 'utf-8' );
+	const regex = /<\?php\n\/\*\*\n([\S\s]+?) \*\//;
+	const match = content.match( regex );
+
+	if ( ! match || match.length < 2 ) {
+		Logger.error( 'Failed to find plugin data!' );
+		return;
+	}
+
+	return match[ 1 ]
+		.replace( /@package .+\n/, '' )
+		.split( '*' )
+		.reduce( ( result: { [ key: string ]: string }, line: string ) => {
+			if ( line.includes( ':' ) ) {
+				const cleanLine = line.replace( '\n', '' ).trim();
+				const [ prop, value ] = cleanLine.split( ':' );
+				const camelCaseProp = camelCase( prop );
+				result[ camelCaseProp ] = value.trim();
+			}
+			return result;
+		}, {} );
 };

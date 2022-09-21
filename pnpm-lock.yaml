@@ -1824,14 +1824,16 @@ importers:
   tools/cli-core:
     specifiers:
       '@tsconfig/node16': ^1.0.3
+      camel-case: ^4.1.2
       chalk: ^4.1.2
       dotenv: ^10.0.0
       ora: ^5.4.1
-      simple-git: ^3.10.0
+      simple-git: ^3.14.0
       ts-node: ^10.9.1
       typescript: ^4.8.3
       uuid: ^8.3.2
     dependencies:
+      camel-case: 4.1.2
       chalk: 4.1.2
       dotenv: 10.0.0
       ora: 5.4.1
