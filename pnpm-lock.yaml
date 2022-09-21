@@ -213,6 +213,7 @@ importers:
       '@woocommerce/eslint-plugin': workspace:*
       '@woocommerce/internal-style-build': workspace:*
       '@woocommerce/navigation': workspace:*
+      '@wordpress/a11y': ^3.5.0
       '@wordpress/api-fetch': ^6.0.1
       '@wordpress/browserslist-config': ^4.1.1
       '@wordpress/components': ^19.5.0
@@ -274,6 +275,7 @@ importers:
       '@woocommerce/data': link:../data
       '@woocommerce/date': link:../date
       '@woocommerce/navigation': link:../navigation
+      '@wordpress/a11y': 3.10.0
       '@wordpress/api-fetch': 6.1.1
       '@wordpress/components': 19.6.1_lxraipvdfcmyzw3sdzk3k7kygu
       '@wordpress/compose': 5.2.1_react@17.0.2
@@ -786,7 +788,7 @@ importers:
       eslint: ^8.1.0
       fishery: ^1.2.0
     dependencies:
-      '@automattic/puppeteer-utils': github.com/Automattic/puppeteer-utils/0f3ec50_react-native@0.70.0
+      '@automattic/puppeteer-utils': github.com/Automattic/puppeteer-utils/0f3ec50
       '@woocommerce/api': link:../api
       '@wordpress/deprecated': 3.2.3
       '@wordpress/e2e-test-utils': 5.3.2_ujr7gcpwq6xmoiv7mmimozpxs4
@@ -6598,7 +6600,7 @@ packages:
       react-native: '>=0.14.0 <1'
     dependencies:
       '@emotion/primitives-core': 10.0.27_qzeatvug73zaio2r3dlvejynye
-      react-native: 0.70.0_z264xedublairnjtgpe7xwxvmm
+      react-native: 0.70.0_wahjskecmqaqgpksn6xwa65wrm
     transitivePeerDependencies:
       - '@emotion/core'
       - react
@@ -14029,7 +14031,7 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.17.7
-      '@wordpress/dom-ready': 3.4.1
+      '@wordpress/dom-ready': 3.10.0
       '@wordpress/i18n': 4.16.0
     dev: false
 
@@ -15044,24 +15046,6 @@ packages:
       lodash: 4.17.21
     dev: false
 
-  /@wordpress/e2e-test-utils/3.0.0_ddjhsfu4aotkh3cuzmpsln6ywq:
-    resolution: {integrity: sha512-XMdR8DeKyDQRF5jKeUlOzP4pTRtoJuOLsNZRLUFUvnrs9y/7/hH17VmPbWp3TJGvV/eGKzO4+D+wJTsP9nJmIw==}
-    engines: {node: '>=8'}
-    peerDependencies:
-      jest: '>=24'
-      puppeteer: '>=1.19.0'
-    dependencies:
-      '@babel/runtime': 7.17.7
-      '@wordpress/keycodes': 2.19.3
-      '@wordpress/url': 2.22.2_react-native@0.70.0
-      jest: 24.9.0
-      lodash: 4.17.21
-      node-fetch: 1.7.3
-      puppeteer: 2.1.1
-    transitivePeerDependencies:
-      - react-native
-    dev: false
-
   /@wordpress/e2e-test-utils/3.0.0_lawbsmxtcxar2rt6ez6hclrarm:
     resolution: {integrity: sha512-XMdR8DeKyDQRF5jKeUlOzP4pTRtoJuOLsNZRLUFUvnrs9y/7/hH17VmPbWp3TJGvV/eGKzO4+D+wJTsP9nJmIw==}
     engines: {node: '>=8'}
@@ -15928,7 +15912,7 @@ packages:
       react: ^17.0.0
     dependencies:
       '@babel/runtime': 7.17.7
-      '@wordpress/a11y': 3.4.1
+      '@wordpress/a11y': 3.10.0
       '@wordpress/compose': 5.2.1_react@17.0.2
       '@wordpress/data': 6.15.0_react@17.0.2
       '@wordpress/element': 4.14.0
@@ -28578,35 +28562,6 @@ packages:
     resolution: {integrity: sha512-KmxeBlRjwoqCnBBKGsihFtvsBHyUFlBxJPK4FzeYcIuBfdjv6jFys44JITAgSTbQD+vIdwMEfyZklsuQX0yI1Q==}
     dev: false
 
-  /jscodeshift/0.13.1:
-    resolution: {integrity: sha512-lGyiEbGOvmMRKgWk4vf+lUrCWO/8YR8sUR3FKF1Cq5fovjZDlIcw3Hu5ppLHAnEXshVffvaM0eyuY/AbOeYpnQ==}
-    hasBin: true
-    peerDependencies:
-      '@babel/preset-env': ^7.1.6
-    dependencies:
-      '@babel/core': 7.17.8
-      '@babel/parser': 7.17.8
-      '@babel/plugin-proposal-class-properties': 7.16.7_@babel+core@7.17.8
-      '@babel/plugin-proposal-nullish-coalescing-operator': 7.16.7_@babel+core@7.17.8
-      '@babel/plugin-proposal-optional-chaining': 7.16.7_@babel+core@7.17.8
-      '@babel/plugin-transform-modules-commonjs': 7.17.7_@babel+core@7.17.8
-      '@babel/preset-flow': 7.16.7_@babel+core@7.17.8
-      '@babel/preset-typescript': 7.16.7_@babel+core@7.17.8
-      '@babel/register': 7.18.9_@babel+core@7.17.8
-      babel-core: 7.0.0-bridge.0_@babel+core@7.17.8
-      chalk: 4.1.2
-      flow-parser: 0.121.0
-      graceful-fs: 4.2.9
-      micromatch: 3.1.10
-      neo-async: 2.6.2
-      node-dir: 0.1.17
-      recast: 0.20.5
-      temp: 0.8.4
-      write-file-atomic: 2.4.1
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
   /jscodeshift/0.13.1_@babel+preset-env@7.16.11:
     resolution: {integrity: sha512-lGyiEbGOvmMRKgWk4vf+lUrCWO/8YR8sUR3FKF1Cq5fovjZDlIcw3Hu5ppLHAnEXshVffvaM0eyuY/AbOeYpnQ==}
     hasBin: true
@@ -28635,7 +28590,6 @@ packages:
       write-file-atomic: 2.4.1
     transitivePeerDependencies:
       - supports-color
-    dev: true
 
   /jsdoc-type-pratt-parser/1.1.1:
     resolution: {integrity: sha512-uelRmpghNwPBuZScwgBG/OzodaFk5RbO5xaivBdsAY70icWfShwZ7PCMO0x1zSkOa8T1FzHThmrdoyg/0AwV5g==}
@@ -34158,12 +34112,12 @@ packages:
       moment: 2.29.1
     dev: false
 
-  /react-native-codegen/0.70.4:
+  /react-native-codegen/0.70.4_@babel+preset-env@7.16.11:
     resolution: {integrity: sha512-bPyd5jm840omfx24VRyMP+KPzAefpRDwE18w5ywMWHCWZBSqLn1qI9WgBPnavlIrjTEuzxznWQNcaA26lw8AMQ==}
     dependencies:
       '@babel/parser': 7.17.8
       flow-parser: 0.121.0
-      jscodeshift: 0.13.1
+      jscodeshift: 0.13.1_@babel+preset-env@7.16.11
       nullthrows: 1.1.1
     transitivePeerDependencies:
       - '@babel/preset-env'
@@ -34186,11 +34140,11 @@ packages:
     peerDependencies:
       react-native: '*'
     dependencies:
-      react-native: 0.70.0_z264xedublairnjtgpe7xwxvmm
+      react-native: 0.70.0_wahjskecmqaqgpksn6xwa65wrm
       whatwg-url-without-unicode: 8.0.0-3
     dev: false
 
-  /react-native/0.70.0_z264xedublairnjtgpe7xwxvmm:
+  /react-native/0.70.0_wahjskecmqaqgpksn6xwa65wrm:
     resolution: {integrity: sha512-QjXLbrK9f+/B2eCzn6kAvglLV/8nwPuFGaFv7ggPpAzFRyx5bVN1dwQLHL3MrP7iXR/M7Jc6Nnid7tmRSic6vA==}
     engines: {node: '>=14'}
     hasBin: true
@@ -34220,7 +34174,7 @@ packages:
       promise: 8.2.0
       react: 16.14.0
       react-devtools-core: 4.24.0
-      react-native-codegen: 0.70.4
+      react-native-codegen: 0.70.4_@babel+preset-env@7.16.11
       react-native-gradle-plugin: 0.70.2
       react-refresh: 0.4.3
       react-shallow-renderer: 16.15.0_react@16.14.0
@@ -40954,31 +40908,6 @@ packages:
       '@babel/preset-env': 7.16.11_@babel+core@7.17.8
       '@slack/web-api': 5.15.0
       '@wordpress/e2e-test-utils': 3.0.0_lawbsmxtcxar2rt6ez6hclrarm
-      config: 3.3.7
-      eslint: 6.7.2
-      jest: 24.9.0
-      prettier: /wp-prettier/1.19.1
-      puppeteer: 2.1.1
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - react-native
-      - supports-color
-      - utf-8-validate
-    dev: false
-
-  github.com/Automattic/puppeteer-utils/0f3ec50_react-native@0.70.0:
-    resolution: {tarball: https://codeload.github.com/Automattic/puppeteer-utils/tar.gz/0f3ec50}
-    id: github.com/Automattic/puppeteer-utils/0f3ec50
-    name: '@automattic/puppeteer-utils'
-    version: 0.0.1
-    requiresBuild: true
-    dependencies:
-      '@babel/cli': 7.17.6_@babel+core@7.17.8
-      '@babel/core': 7.17.8
-      '@babel/preset-env': 7.16.11_@babel+core@7.17.8
-      '@slack/web-api': 5.15.0
-      '@wordpress/e2e-test-utils': 3.0.0_ddjhsfu4aotkh3cuzmpsln6ywq
       config: 3.3.7
       eslint: 6.7.2
       jest: 24.9.0
