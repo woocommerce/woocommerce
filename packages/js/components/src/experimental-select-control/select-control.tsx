@@ -44,7 +44,8 @@ type SelectControlProps< ItemType > = {
 	onSelect?: ( selected: ItemType ) => void;
 	placeholder?: string;
 	selected: ItemType | ItemType[] | null;
-	keepMenuOpenOnSelect?: boolean;
+	onBlur?: () => void;
+	onFocus?: () => void;
 };
 
 function SelectControl< ItemType = DefaultItemType >( {
@@ -80,7 +81,8 @@ function SelectControl< ItemType = DefaultItemType >( {
 	onInputChange = () => null,
 	onRemove = () => null,
 	onSelect = () => null,
-	keepMenuOpenOnSelect = false,
+	onBlur = () => null,
+	onFocus = () => null,
 	placeholder,
 	selected,
 }: SelectControlProps< ItemType > ) {
@@ -137,16 +139,10 @@ function SelectControl< ItemType = DefaultItemType >( {
 						onSelect( selectedItem );
 						if ( multiple ) {
 							addSelectedItem( selectedItem );
-							if ( ! keepMenuOpenOnSelect ) {
-								setInputValue( '' );
-							}
 							break;
 						}
 
 						selectItem( selectedItem );
-						if ( ! keepMenuOpenOnSelect ) {
-							setInputValue( getItemLabel( selectedItem ) );
-						}
 					}
 
 					if ( ! selectedItem && ! multiple ) {
@@ -154,30 +150,10 @@ function SelectControl< ItemType = DefaultItemType >( {
 					}
 
 					break;
+				case useCombobox.stateChangeTypes.InputBlur:
+					onBlur();
 				default:
 					break;
-			}
-		},
-		stateReducer: ( state, actionAndChanges ) => {
-			const { changes, type } = actionAndChanges;
-
-			switch ( type ) {
-				case useCombobox.stateChangeTypes.InputKeyDownEnter:
-				case useCombobox.stateChangeTypes.FunctionSelectItem:
-				case useCombobox.stateChangeTypes.ItemClick:
-					return {
-						...changes,
-						isOpen: keepMenuOpenOnSelect ? true : false,
-						highlightedIndex: state.highlightedIndex,
-						inputValue: '',
-					};
-				case useCombobox.stateChangeTypes.InputBlur:
-					return {
-						...changes,
-						inputValue: '',
-					};
-				default:
-					return changes;
 			}
 		},
 	} );
@@ -218,7 +194,10 @@ function SelectControl< ItemType = DefaultItemType >( {
 						...dropdownProps,
 						className:
 							'woocommerce-experimental-select-control__input',
-						onFocus: () => setIsFocused( true ),
+						onFocus: () => {
+							setIsFocused( true );
+							onFocus();
+						},
 						onBlur: () => setIsFocused( false ),
 						placeholder,
 					} ) }

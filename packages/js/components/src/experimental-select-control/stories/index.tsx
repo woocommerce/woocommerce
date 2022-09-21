@@ -162,6 +162,7 @@ export const Async: React.FC = () => {
 
 export const CustomRender: React.FC = () => {
 	const [ selected, setSelected ] = useState< DefaultItemType[] >( [] );
+	const [ isOpen, setIsOpen ] = useState( false );
 
 	const onRemove = ( item ) => {
 		setSelected( selected.filter( ( i ) => i !== item ) );
@@ -194,14 +195,14 @@ export const CustomRender: React.FC = () => {
 				selected={ selected }
 				onSelect={ onSelect }
 				onRemove={ onRemove }
-				keepMenuOpenOnSelect={ true }
+				onBlur={ () => setIsOpen( false ) }
+				onFocus={ () => setIsOpen( true ) }
 			>
 				{ ( {
 					items,
 					highlightedIndex,
 					getItemProps,
 					getMenuProps,
-					isOpen,
 				} ) => {
 					return (
 						<Menu isOpen={ isOpen } getMenuProps={ getMenuProps }>
