@@ -15,11 +15,13 @@ import { SortableHandle } from '../sortable';
 export type ImageGalleryToolbarProps = {
 	childIndex: number;
 	moveItem: ( fromIndex: number, toIndex: number ) => void;
+	removeItem: ( removeIndex: number ) => void;
 } & React.HTMLAttributes< HTMLDivElement >;
 
 export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 	childIndex,
 	moveItem,
+	removeItem,
 }: ImageGalleryToolbarProps ) => {
 	const moveNext = () => {
 		moveItem( childIndex, childIndex + 1 );
@@ -64,7 +66,11 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 					<ToolbarButton>Replace</ToolbarButton>
 				</ToolbarGroup>
 				<ToolbarGroup>
-					<ToolbarButton icon={ trash } label="Delete" />
+					<ToolbarButton
+						onClick={ () => removeItem( childIndex ) }
+						icon={ trash }
+						label="Delete"
+					/>
 				</ToolbarGroup>
 			</Toolbar>
 		</div>

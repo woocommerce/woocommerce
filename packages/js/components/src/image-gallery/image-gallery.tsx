@@ -36,6 +36,12 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 		);
 	};
 
+	const removeItem = ( removeIndex: number ) => {
+		setOrderedChildren(
+			orderedChildren.filter( ( _, index ) => index !== removeIndex )
+		);
+	};
+
 	return (
 		<div
 			className="woocommerce-image-gallery"
@@ -76,6 +82,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 							<ImageGalleryToolbar
 								childIndex={ childIndex }
 								moveItem={ moveItem }
+								removeItem={ removeItem }
 							/>
 						) }
 						<SortableHandle>{ child }</SortableHandle>
