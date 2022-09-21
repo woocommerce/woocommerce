@@ -114,14 +114,14 @@
 
 			.help-section-simple {
 				font-size: 16px;
-				padding: 18px 16px;
+				padding: $gap $gap;
 				span {
 					vertical-align: 6px;
-					margin-left: 10px;
+					margin-left: $gap-small;
 				}
 				a {
 					vertical-align: 6px;
-					margin-left: 10px;
+					margin-left: $gap-small;
 				}
 			}
 		}
@@ -183,7 +183,7 @@
 
 		.connect-account__apms {
 			.components-card__header {
-				padding: $gap-large 10px $gap $gap-large;
+				padding: $gap-large $gap-small $gap $gap-large;
 				h1 {
 					font-size: 20px;
 					line-height: 28px;
@@ -205,9 +205,6 @@
 							color: $gray-700;
 							font-size: 13px;
 							line-height: 16px;
-							a {
-								text-decoration: none;
-							}
 						}
 						.woocommerce-list__item-after {
 							margin-left: $gap-large;
@@ -237,7 +234,7 @@
 				background-color: #f0f6fc;
 				.components-notice__content {
 					margin: 0;
-					padding: $gap 20px;
+					padding: $gap $gap-large;
 					display: flex;
 					align-items: center;
 					svg {

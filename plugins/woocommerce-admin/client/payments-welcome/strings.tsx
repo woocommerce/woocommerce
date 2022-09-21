@@ -416,6 +416,7 @@ export default {
 			const extensionsNumber = extensionsString.split( ', ' ).length;
 			return createInterpolateElement(
 				sprintf(
+					/* translators: %s = names of the installed extensions */
 					_n(
 						'Installing <strong>WooCommerce Payments</strong> will automatically activate <strong>%s</strong> extension in your store.',
 						'Installing <strong>WooCommerce Payments</strong> will automatically activate <strong>%s</strong> extensions in your store.',

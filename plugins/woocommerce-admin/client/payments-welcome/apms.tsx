@@ -56,7 +56,7 @@ export const apms: Apm[] = [
 	},
 ];
 
-interface ApmsProps {
+interface ApmListProps {
 	enabledApms: Set< Apm >;
 	setEnabledApms: ( value: Set< Apm > ) => void;
 }
@@ -81,7 +81,7 @@ const ApmNotice = ( { enabledApms }: { enabledApms: Set< Apm > } ) => {
 	);
 };
 
-const ApmList: React.FunctionComponent< ApmsProps > = ( {
+const ApmList: React.FunctionComponent< ApmListProps > = ( {
 	enabledApms,
 	setEnabledApms,
 } ) => {
