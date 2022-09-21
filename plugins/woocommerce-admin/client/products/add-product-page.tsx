@@ -14,6 +14,7 @@ import { ProductFormActions } from './product-form-actions';
 import { ProductDetailsSection } from './sections/product-details-section';
 import { PricingSection } from './sections/pricing-section';
 import { ProductShippingSection } from './sections/product-shipping-section';
+import { ImagesSection } from './sections/images-section';
 import './product-page.scss';
 import { validate } from './product-validation';
 import { AttributesSection } from './sections/attributes-section';
@@ -33,6 +34,7 @@ const AddProductPage: React.FC = () => {
 				<ProductFormLayout>
 					<ProductDetailsSection />
 					<PricingSection />
+					<ImagesSection />
 					<ProductShippingSection />
 					<AttributesSection />
 					<ProductFormActions />
