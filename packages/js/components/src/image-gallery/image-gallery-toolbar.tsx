@@ -46,11 +46,13 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 						label="Drag"
 					/>
 					<ToolbarButton
+						className="woocommerce-image-gallery__toolbar-previous"
 						onClick={ () => movePrevious() }
 						icon={ chevronLeft }
 						label="Move previous"
 					/>
 					<ToolbarButton
+						className="woocommerce-image-gallery__toolbar-next"
 						onClick={ () => moveNext() }
 						icon={ chevronRight }
 						label="Move next"

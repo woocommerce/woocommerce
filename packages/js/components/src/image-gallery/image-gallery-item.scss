@@ -1,3 +1,13 @@
+.woocommerce-image-gallery {
+	.is-last-droppable .woocommerce-image-gallery__toolbar-next svg {
+		fill: #ccc;
+	}
+
+	.woocommerce-sortable__item:first-child .woocommerce-image-gallery__toolbar-previous svg {
+		fill: #ccc;
+	}
+}
+
 .woocommerce-image-gallery__item {
     height: 146px;
     width: 146px;
