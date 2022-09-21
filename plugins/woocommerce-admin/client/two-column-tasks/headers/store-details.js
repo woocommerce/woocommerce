@@ -17,15 +17,17 @@ const StoreDetailsHeader = ( { task, goToTask } ) => {
 				alt={ __( 'Store location illustration', 'woocommerce' ) }
 				src={
 					WC_ASSET_URL +
-					'images/task_list/sales-section-illustration.png'
+					'images/task_list/store-details-illustration.png'
 				}
 				className="svg-background"
 			/>
 			<div className="woocommerce-task-header__contents">
-				<h1>{ __( 'Add your store location', 'woocommerce' ) }</h1>
+				<h1>
+					{ __( 'First, tell us about your store', 'woocommerce' ) }
+				</h1>
 				<p>
 					{ __(
-						'Add your store location details such as address and Country to help us configure shipping, taxes, currency and more in a fully automated way.',
+						"Get your store up and running in no time. Add your store's address to set up shipping, tax and payments faster.",
 						'woocommerce'
 					) }
 				</p>
@@ -34,7 +36,7 @@ const StoreDetailsHeader = ( { task, goToTask } ) => {
 					isPrimary={ ! task.isComplete }
 					onClick={ goToTask }
 				>
-					{ __( 'Add store details', 'woocommerce' ) }
+					{ __( 'Add details', 'woocommerce' ) }
 				</Button>
 				<p className="woocommerce-task-header__timer">
 					<img src={ TimerImage } alt="Timer" />{ ' ' }
