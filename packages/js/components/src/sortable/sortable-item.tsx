@@ -25,6 +25,7 @@ export type SortableItemProps = {
 	className: string;
 	onKeyDown?: ( event: KeyboardEvent< HTMLLIElement > ) => void;
 	isDragging?: boolean;
+	keepSpace?: boolean;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
 	onDragOver?: DragEventHandler< HTMLLIElement >;
@@ -38,6 +39,7 @@ export const SortableItem = ( {
 	onKeyDown,
 	isDragging = false,
 	isSelected = false,
+	keepSpace = false,
 	onDragStart = () => null,
 	onDragEnd = () => null,
 	onDragOver = () => null,
@@ -59,12 +61,15 @@ export const SortableItem = ( {
 			ref.current.focus();
 		}
 	}, [ isSelected ] );
+	const keepSpaceWhenDragging = keepSpace
+		? 'is-dragging-keep-space'
+		: 'is-dragging';
 
 	return (
 		<li
 			aria-selected={ isSelected }
 			className={ classnames( 'woocommerce-sortable__item', className, {
-				'is-dragging': isDragging,
+				[ keepSpaceWhenDragging ]: isDragging,
 				'is-selected': isSelected,
 			} ) }
 			id={ `woocommerce-sortable__item-${ id }` }
