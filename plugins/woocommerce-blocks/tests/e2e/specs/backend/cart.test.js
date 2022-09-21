@@ -43,6 +43,12 @@ const emptyCartBlock = {
 	class: '.wp-block-woocommerce-empty-cart-block',
 };
 
+const crossSellsBlock = {
+	name: 'Cart Cross-Sells block',
+	slug: 'woocommerce/cart-cross-sells-products-block',
+	class: '.wp-block-woocommerce-cart-cross-sells-products-block',
+};
+
 if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 ) {
 	// eslint-disable-next-line jest/no-focused-tests, jest/expect-expect
 	test.only( `skipping ${ block.name } tests`, () => {} );
@@ -63,6 +69,7 @@ describe( `${ block.name } Block`, () => {
 		it( 'renders without crashing', async () => {
 			await expect( page ).toRenderBlock( block );
 			await expect( page ).toRenderBlock( filledCartBlock );
+			await expect( page ).toRenderBlock( crossSellsBlock );
 			await expect( page ).toRenderBlock( emptyCartBlock );
 		} );
 
