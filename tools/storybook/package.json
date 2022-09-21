@@ -14,10 +14,12 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"scripts": {
-		"build-storybook": "build-storybook  -c ./.storybook",
+		"turbo:build": "./import-wp-css-storybook.sh",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"build:static": "build-storybook -c ./.storybook",
 		"preinstall": "npx only-allow pnpm",
-		"storybook": "./import-wp-css-storybook.sh && BABEL_ENV=storybook STORYBOOK=true start-storybook -c ./.storybook -p 6007 --ci",
-		"storybook-rtl": "USE_RTL_STYLE=true pnpm run storybook"
+		"start": "BABEL_ENV=storybook STORYBOOK=true start-storybook -c ./.storybook -p 6007",
+		"start-rtl": "USE_RTL_STYLE=true BABEL_ENV=storybook STORYBOOK=true start-storybook -c ./.storybook -p 6007"
 	},
 	"devDependencies": {
 		"@babel/preset-env": "^7.16.11",

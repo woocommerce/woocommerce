@@ -4,8 +4,31 @@
 		"build:feature-config": {
 			"cache": false
 		},
+
+		"@woocommerce/storybook#start": {
+			"dependsOn": [ "turbo:build" ],
+			"cache": false
+		},
+
+		"@woocommerce/components#start": {
+			"dependsOn": [ "turbo:build" ],
+			"cache": false
+		},
+
+		"dev:components": {
+			"dependsOn": [
+				"@woocommerce/storybook#start",
+				"@woocommerce/components#start"
+			],
+			"inputs": [ "**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx" ]
+		},
+
 		"turbo:build": {
-			"dependsOn": [ "build:feature-config", "^turbo:build", "$WC_ADMIN_PHASE" ],
+			"dependsOn": [
+				"build:feature-config",
+				"^turbo:build",
+				"$WC_ADMIN_PHASE"
+			],
 			"inputs": [
 				"src/**/*.js",
 				"src/**/*.jsx",
@@ -32,36 +55,24 @@
 				"woocommerce/client/legacy#turbo:build"
 			],
 			"outputs": [],
-			"inputs": [
-				"src/**/*.php",
-				"includes/**/*.php"
-			],
+			"inputs": [ "src/**/*.php", "includes/**/*.php" ],
 			"outputMode": "new-only"
 		},
 
 		"woocommerce/client/legacy#turbo:build": {
 			"dependsOn": [ "^turbo:build" ],
-			"outputs": [
-				"../../assets/js/**",
-				"../../assets/css/**"
-			],
-			"inputs": [
-				"css/**/*.scss",
-				"css/**/*.css",
-				"js/**/*.js"
-			],
+			"outputs": [ "../../assets/js/**", "../../assets/css/**" ],
+			"inputs": [ "css/**/*.scss", "css/**/*.css", "js/**/*.js" ],
 			"outputMode": "new-only"
 		},
 
 		"woocommerce/client/admin#turbo:build": {
-			"dependsOn": [ 
-				"build:feature-config", 
-				"^turbo:build", 
+			"dependsOn": [
+				"build:feature-config",
+				"^turbo:build",
 				"$WC_ADMIN_PHASE"
 			],
-			"outputs": [
-				"../woocommerce/assets/client/admin/**"
-			],
+			"outputs": [ "../woocommerce/assets/client/admin/**" ],
 			"inputs": [
 				"client/**/*.js",
 				"client/**/*.jsx",
