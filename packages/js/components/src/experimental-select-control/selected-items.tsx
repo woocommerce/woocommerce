@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement } from 'react';
+import { createElement, Fragment } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -29,9 +29,9 @@ export const SelectedItems = < ItemType, >( {
 	onRemove,
 }: SelectedItemsProps< ItemType > ) => {
 	return (
-		<div className="woocommerce-experimental-select-control__selected-items">
+		<>
 			{ items.map( ( item, index ) => (
-				<span
+				<div
 					key={ `selected-item-${ index }` }
 					className="woocommerce-experimental-select-control__selected-item"
 					{ ...getSelectedItemProps( {
@@ -46,8 +46,8 @@ export const SelectedItems = < ItemType, >( {
 						remove={ () => () => onRemove( item ) }
 						label={ getItemLabel( item ) }
 					/>
-				</span>
+				</div>
 			) ) }
-		</div>
+		</>
 	);
 };

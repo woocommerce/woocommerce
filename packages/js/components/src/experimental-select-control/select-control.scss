@@ -1,6 +1,7 @@
 @import './combo-box.scss';
 @import './menu.scss';
 @import './menu-item.scss';
+@import './selected-items.scss';
 
 .woocommerce-experimental-select-control {
     position: relative;
@@ -11,9 +12,13 @@
         background: $studio-white;
         position: relative;
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
-        padding-left: $gap-small;
-        padding-right: $gap-small;
+        padding: $gap-smallest $gap-smaller;
+
+        > * {
+            display: inline-flex;
+        }
     }
 
     &.is-focused .woocommerce-experimental-select-control__combo-box-wrapper {
