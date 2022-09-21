@@ -74,11 +74,11 @@ test.describe( 'Cart page', () => {
 		await page.goto( '/shop/' );
 		await page.click( `a:below(:text("${ productName }"))` );
 		// Once the view cart link is visible, item has been added
-		await page.waitForLoadState( 'networkidle' );
+		await page.waitForSelector( 'a.added_to_cart' );
 		// Click add to cart a second time (load the shop in case redirection enabled)
 		await page.goto( '/shop/' );
 		await page.click( `a:below(:text("${ productName }"))` );
-		await page.waitForLoadState( 'networkidle' );
+		await page.waitForSelector( 'a.added_to_cart' );
 
 		await page.goto( '/cart/' );
 		await expect( page.locator( 'input.qty' ) ).toHaveValue( '2' );
