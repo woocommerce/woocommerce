@@ -128,7 +128,7 @@ jobs:
       - name: Checkout release branch
         uses: actions/checkout@v3
         with:
-          fetch-depth: 100
+          fetch-depth: 0
 
       - name: Git fetch the release branch
         run: git fetch origin ${{ needs.prep.outputs.release }}
