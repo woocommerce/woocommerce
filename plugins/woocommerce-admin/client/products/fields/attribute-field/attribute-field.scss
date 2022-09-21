@@ -14,4 +14,47 @@
 	&__add-new {
 		margin: $gap-large 0 $gap-larger;
 	}
+	&__attribute-option-chip {
+		padding: 4px 8px;
+		gap: 2px;
+
+		background: $gray-100;
+		border-radius: 2px;
+	}
+
+	&__attribute-options {
+		display: flex;
+		flex-direction: row;
+		gap: 4px;
+	}
+
+	&__attribute-actions {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: end;
+		gap: 8px;
+	}
+
+	.woocommerce-list-item {
+		height: 82px;
+		padding: 0px $gap-large;
+
+		&:last-child {
+			margin: -1px;
+		}
+	}
+
+	.woocommerce-sortable {
+		margin: 0;
+
+		.woocommerce-list-item {
+			display: grid;
+			grid-template-columns: 24px 26% auto 90px;
+		}
+	}
+
+	.woocommerce-sortable__item:not( :first-child ) {
+		margin-top: -1px;
+	}
 }
