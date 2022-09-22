@@ -24,6 +24,9 @@
 				margin-top: 0;
 			}
 		}
+		.woocommerce-sortable {
+			min-height: 146px;
+		}
 	}
 	&__remove-image-drop-zone {
 		color: $error-red;
