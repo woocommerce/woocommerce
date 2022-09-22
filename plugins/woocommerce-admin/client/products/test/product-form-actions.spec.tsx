@@ -458,7 +458,11 @@ describe( 'ProductFormActions', () => {
 
 		it( 'should have the Publish options menu items disabled', () => {
 			render(
-				<Form initialValues={ { id: 1 } } validate={ validate }>
+				// This consider a product created and published
+				<Form
+					initialValues={ { id: 1, status: 'publish' } }
+					validate={ validate }
+				>
 					<ProductFormActions />
 				</Form>
 			);
@@ -469,14 +473,14 @@ describe( 'ProductFormActions', () => {
 			userEvent.click( publishOptionsButton );
 
 			const optionsMenu = screen.getByRole( 'menu' );
-			const menuItems = within( optionsMenu ).getAllByRole( 'menuitem' );
-			// Verify only the first two items (Publish & duplicate|Update & duplicate
-			// and Copy to a new draft) from the action menu.
-			const firstTwoItems = menuItems.slice( 0, 2 );
-
-			firstTwoItems.forEach( ( menuItem ) => {
-				expect( menuItem ).toBeDisabled();
-			} );
+			[ 'Update & duplicate', 'Copy to a new draft' ].forEach(
+				( itemText ) => {
+					const menuItem = within( optionsMenu )
+						.getByText( itemText )
+						.closest( 'button' );
+					expect( menuItem ).toBeDisabled();
+				}
+			);
 		} );
 	} );
 } );
