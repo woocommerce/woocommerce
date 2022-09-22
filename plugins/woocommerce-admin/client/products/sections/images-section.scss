@@ -20,24 +20,45 @@
 			img {
 				display: none;
 			}
-			h4 {
+			span {
 				margin-top: 0;
 			}
 		}
 		.woocommerce-sortable {
-			min-height: 146px;
+			min-height: 144px;
+			margin-top: 0;
+			@media ( max-width: 1034px ) {
+				grid-template-columns: auto auto;
+			}
+			@media ( min-width: 1035px ) and ( max-width: 1280px ) {
+				grid-template-columns: auto auto auto;
+			}
+		}
+	}
+	&__image-drop-zone {
+		font-weight: 600;
+		font-size: 14px;
+		line-height: 20px;
+
+		> div {
+			height: 146px;
 		}
 	}
 	&__remove-image-drop-zone {
 		color: $error-red;
 		border: 1px dashed $error-red;
 		border-radius: 2px;
-		padding: 32px 0;
-		text-align: center;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 600;
+		font-size: 14px;
+		line-height: 20px;
 		.components-drop-zone__content {
 			background-color: $error-red;
 		}
-		h4 {
+		span {
 			display: flex;
 			align-items: center;
 			justify-content: center;

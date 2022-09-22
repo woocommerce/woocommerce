@@ -125,58 +125,63 @@ export const ImagesSection: React.FC = () => {
 							/>
 						) ) }
 					</ImageGallery>
-					{ showRemoveZone ? (
-						<CardBody>
-							<div className="woocommerce-product-form__remove-image-drop-zone">
-								<h4>
-									<Icon
-										icon={ trash }
-										size={ 20 }
-										className="icon-control"
-									/>
-									{ __(
-										'Drop here to remove',
-										'woocommerce'
-									) }
-								</h4>
-								<DropZone
-									onHTMLDrop={ setImageToRemove }
-									label={ __(
-										'Drop here to remove',
-										'woocommerce'
-									) }
-								/>
-							</div>
-						</CardBody>
-					) : (
-						<MediaUploader
-							onError={ () => null }
-							onSelect={ ( file: File ) =>
-								setValue(
-									'images',
-									getUniqueImages( [ file ] )
-								)
-							}
-							onUpload={ ( files ) =>
-								setValue( 'images', getUniqueImages( files ) )
-							}
-							label={
-								<>
-									<img
-										src={ DragAndDrop }
-										alt="Completed"
-										className="woocommerce-product-form__drag-and-drop-image"
-									/>
-									<h4>
+					<div className="woocommerce-product-form__image-drop-zone">
+						{ showRemoveZone ? (
+							<CardBody>
+								<div className="woocommerce-product-form__remove-image-drop-zone">
+									<span>
+										<Icon
+											icon={ trash }
+											size={ 20 }
+											className="icon-control"
+										/>
 										{ __(
-											'Drag images here or click to upload',
+											'Drop here to remove',
 											'woocommerce'
 										) }
-									</h4>
-								</>
-							}
-						/>
-					) }
+									</span>
+									<DropZone
+										onHTMLDrop={ setImageToRemove }
+										label={ __(
+											'Drop here to remove',
+											'woocommerce'
+										) }
+									/>
+								</div>
+							</CardBody>
+						) : (
+							<MediaUploader
+								onError={ () => null }
+								onSelect={ ( file: File ) =>
+									setValue(
+										'images',
+										getUniqueImages( [ file ] )
+									)
+								}
+								onUpload={ ( files ) =>
+									setValue(
+										'images',
+										getUniqueImages( files )
+									)
+								}
+								label={
+									<>
+										<img
+											src={ DragAndDrop }
+											alt="Completed"
+											className="woocommerce-product-form__drag-and-drop-image"
+										/>
+										<span>
+											{ __(
+												'Drag images here or click to upload',
+												'woocommerce'
+											) }
+										</span>
+									</>
+								}
+							/>
+						) }
+					</div>
 				</CardBody>
 			</Card>
 		</ProductSectionLayout>
