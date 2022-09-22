@@ -1855,6 +1855,7 @@ importers:
       '@oclif/plugin-help': ^5
       '@oclif/plugin-plugins': ^2.0.1
       '@octokit/graphql': 4.8.0
+      '@octokit/request-error': ^3.0.1
       '@types/node': ^16.9.4
       eslint: ^7.32.0
       globby: ^11
@@ -1870,6 +1871,7 @@ importers:
       '@oclif/plugin-plugins': 2.1.0
       '@octokit/graphql': 4.8.0
     devDependencies:
+      '@octokit/request-error': 3.0.1
       '@types/node': 16.10.3
       eslint: 7.32.0
       globby: 11.0.4
@@ -8317,7 +8319,6 @@ packages:
 
   /@octokit/openapi-types/13.10.0:
     resolution: {integrity: sha512-wPQDpTyy35D6VS/lekXDaKcxy6LI2hzcbmXBnP180Pdgz3dXRzoHdav0w09yZzzWX8HHLGuqwAeyMqEPtWY2XA==}
-    dev: false
 
   /@octokit/plugin-paginate-rest/2.21.3_@octokit+core@3.5.1:
     resolution: {integrity: sha512-aCZTEf0y2h3OLbrgKkrfFdjRL6eSOo8komneVQJnYecAxIej7Bafor2xhuDJOIFau4pk0i/P28/XgtbyPF0ZHw==}
@@ -8389,7 +8390,6 @@ packages:
       '@octokit/types': 7.4.0
       deprecation: 2.3.1
       once: 1.4.0
-    dev: false
 
   /@octokit/request/5.6.3:
     resolution: {integrity: sha512-bFJl0I1KVc9jYTe9tdGGpAMPy32dLBXXo1dS/YwSCTL/2nd9XeHsY616RE3HPXDVk+a+dBuzyz5YdlXwcDTr2A==}
@@ -8455,7 +8455,6 @@ packages:
     resolution: {integrity: sha512-ln1GW0p72+P8qeRjHGj0wyR5ePy6slqvczveOqonMk1w1UWua6UgrkwFzv6S0vKWjSqt/ijYXF1ehNVRRRSvLA==}
     dependencies:
       '@octokit/openapi-types': 13.10.0
-    dev: false
 
   /@playwright/test/1.25.2:
     resolution: {integrity: sha512-6qPznIR4Fw02OMbqXUPMG6bFFg1hDVNEdihKy0t9K0dmRbus1DyP5Q5XFQhGwEHQkLG5hrSfBuu9CW/foqhQHQ==}
@@ -26195,7 +26194,7 @@ packages:
     engines: {node: '>=10'}
 
   /is-utf8/0.2.1:
-    resolution: {integrity: sha1-Sw2hRCEE0bM2NA6AeX6GXPOffXI=}
+    resolution: {integrity: sha512-rMYPYvCzsXywIsldgLaSoPlw5PfoB/ssr7hY4pLfcodrA5M/eArza1a9VmTiNIBNMjOGr1Ow9mTyU2o69U6U9Q==}
     dev: true
 
   /is-weakref/1.0.2:
@@ -35495,7 +35494,7 @@ packages:
     dev: true
 
   /replace-ext/1.0.0:
-    resolution: {integrity: sha1-3mMSg3P8v3w8z6TeWkgMRaZ5WOs=}
+    resolution: {integrity: sha512-vuNYXC7gG7IeVNBC1xUllqCcZKRbJoSPOBhnTEcAIiKCsbuef6zO3F0Rve3isPMMoNoQRWjQwbAgAjHUHniyEA==}
     engines: {node: '>= 0.10'}
     dev: true
 

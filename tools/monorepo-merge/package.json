@@ -23,6 +23,7 @@
 		"@octokit/graphql": "4.8.0"
 	},
 	"devDependencies": {
+		"@octokit/request-error": "^3.0.1",
 		"@types/node": "^16.9.4",
 		"eslint": "^7.32.0",
 		"globby": "^11",
