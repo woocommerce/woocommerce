@@ -124,8 +124,9 @@ class WCAdminAssets {
 		} elseif ( is_readable( $script_asset_path . $script_nonmin_filename ) ) {
 			return $script_nonmin_filename;
 		} else {
+			return false;
 			// could not find an asset file, throw an error.
-			throw new \Exception( 'Could not find asset registry for ' . $script_path_name );
+			//throw new \Exception( 'Could not find asset registry for ' . $script_path_name );
 		}
 	}
 
@@ -284,6 +285,9 @@ class WCAdminAssets {
 
 			try {
 				$script_assets_filename = self::get_script_asset_filename( $script_path_name, 'index' );
+				if ( ! $script_assets_filename ) {
+					continue;
+				}
 				$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . $script_path_name . '/' . $script_assets_filename;
 
 				wp_register_script(
@@ -389,6 +393,9 @@ class WCAdminAssets {
 	 */
 	public static function register_script( $script_path_name, $script_name, $need_translation = false ) {
 		$script_assets_filename = self::get_script_asset_filename( $script_path_name, $script_name );
+		if ( ! $script_assets_filename ) {
+			return;
+		}
 		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . $script_path_name . '/' . $script_assets_filename;
 
 		wp_enqueue_script(
