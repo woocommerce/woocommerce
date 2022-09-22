@@ -34,7 +34,6 @@ import { SortableChild } from './types';
 export type SortableProps = {
 	children: SortableChild | SortableChild[] | null | undefined;
 	isHorizontal?: boolean;
-	keepSpaceWhenDragging?: boolean;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
 	onDragOver?: DragEventHandler< HTMLLIElement >;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
@@ -48,7 +47,6 @@ export const SortableContext = createContext( {} );
 export const Sortable = ( {
 	children,
 	isHorizontal = false,
-	keepSpaceWhenDragging = false,
 	onDragEnd = () => null,
 	onDragOver = () => null,
 	onDragStart = () => null,
@@ -271,7 +269,6 @@ export const Sortable = ( {
 							index={ index }
 							isDragging={ isDragging }
 							isSelected={ selectedIndex === index }
-							keepSpace={ keepSpaceWhenDragging }
 							onDragEnd={ ( event ) => handleDragEnd( event ) }
 							onDragStart={ ( event ) =>
 								handleDragStart( event, index )

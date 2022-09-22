@@ -14,10 +14,6 @@ $place-holder-size: 3px;
         width: 0;
     }
 
-    &.is-dragging-keep-space {
-        visibility: hidden;
-    }
-
     &:before,
     &:after {
         content: '';

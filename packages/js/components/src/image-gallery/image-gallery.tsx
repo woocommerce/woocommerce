@@ -32,7 +32,6 @@ export type ImageGalleryProps = {
 	} ) => void;
 	onOrderChange?: ( items: ImageGalleryChild[] ) => void;
 	MediaUploadComponent?: MediaUploadComponentType;
-	keepSpaceWhenDragging?: boolean;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
 } & React.HTMLAttributes< HTMLDivElement >;
@@ -44,7 +43,6 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 	onRemove = () => null,
 	onReplace = () => null,
 	MediaUploadComponent = MediaUpload,
-	keepSpaceWhenDragging = false,
 	onDragStart = () => null,
 	onDragEnd = () => null,
 }: ImageGalleryProps ) => {
@@ -84,7 +82,6 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 				onOrderChange={ ( items ) => {
 					updateOrderedChildren( items );
 				} }
-				keepSpaceWhenDragging={ keepSpaceWhenDragging }
 				onDragStart={ onDragStart }
 				onDragEnd={ onDragEnd }
 			>
