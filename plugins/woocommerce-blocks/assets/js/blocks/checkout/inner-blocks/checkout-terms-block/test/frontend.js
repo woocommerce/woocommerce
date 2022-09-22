@@ -12,31 +12,26 @@ import userEvent from '@testing-library/user-event';
  * Internal dependencies
  */
 import FrontendBlock from '../frontend';
+import * as actionCreators from '../../../../../data/validation/actions';
+
+jest.mock( '../../../../../data/validation/actions', () => {
+	const actions = jest.requireActual(
+		'../../../../../data/validation/actions'
+	);
+	return {
+		...actions,
+		clearValidationError: jest.fn().mockImplementation( ( errorId ) => {
+			return actions.clearValidationError( errorId );
+		} ),
+	};
+} );
 
 describe( 'FrontendBlock', () => {
-	let validationData = {
-		hasValidationErrors: false,
-		getValidationError: jest.fn(),
-		clearValidationError: jest.fn(),
-		hideValidationError: jest.fn(),
-		setValidationErrors: jest.fn(),
-	};
-	beforeEach( () => {
-		validationData = {
-			hasValidationErrors: false,
-			getValidationError: jest.fn(),
-			clearValidationError: jest.fn(),
-			hideValidationError: jest.fn(),
-			setValidationErrors: jest.fn(),
-		};
-	} );
-
 	it( 'Renders a checkbox if the checkbox prop is true', async () => {
 		const { container } = render(
 			<FrontendBlock
 				checkbox={ true }
 				text={ 'I agree to the terms and conditions' }
-				validation={ validationData }
 			/>
 		);
 
@@ -53,7 +48,6 @@ describe( 'FrontendBlock', () => {
 			<FrontendBlock
 				checkbox={ false }
 				text={ 'I agree to the terms and conditions' }
-				validation={ validationData }
 			/>
 		);
 
@@ -66,17 +60,10 @@ describe( 'FrontendBlock', () => {
 	} );
 
 	it( 'Clears any validation errors when the checkbox is checked', async () => {
-		validationData.getValidationError.mockImplementation( () => {
-			return {
-				message: 'Please read and accept the terms and conditions.',
-				hidden: false,
-			};
-		} );
 		const { container } = render(
 			<FrontendBlock
 				checkbox={ true }
 				text={ 'I agree to the terms and conditions' }
-				validation={ validationData }
 			/>
 		);
 		const checkbox = await findByLabelText(
@@ -84,7 +71,7 @@ describe( 'FrontendBlock', () => {
 			'I agree to the terms and conditions'
 		);
 		userEvent.click( checkbox );
-		expect( validationData.clearValidationError ).toHaveBeenLastCalledWith(
+		expect( actionCreators.clearValidationError ).toHaveBeenLastCalledWith(
 			expect.stringMatching( /terms-and-conditions-\d/ )
 		);
 	} );

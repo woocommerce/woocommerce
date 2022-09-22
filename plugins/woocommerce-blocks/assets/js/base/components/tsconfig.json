@@ -13,7 +13,8 @@
 		"../../atomic/utils",
 		"../../atomic/blocks/component-init.js",
 		"../../data",
-		"../../shared/context"
+		"../../shared/context",
+		"../hooks/index.js"
 	],
 	"exclude": [ "**/test/**" ]
 }
