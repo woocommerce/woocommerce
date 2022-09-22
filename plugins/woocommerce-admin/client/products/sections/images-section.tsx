@@ -120,7 +120,7 @@ export const ImagesSection: React.FC = () => {
 							<ImageGalleryItem
 								key={ image.id }
 								alt={ image.name }
-								src={ image.url }
+								src={ image.url || image.src }
 								id={ `${ image.id }` }
 							/>
 						) ) }
