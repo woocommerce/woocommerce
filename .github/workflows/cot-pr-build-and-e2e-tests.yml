@@ -25,7 +25,7 @@ jobs:
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
-              run: pnpx playwright install chromium
+              run: pnpm exec playwright install chromium
 
             - name: Run Playwright E2E tests.
               timeout-minutes: 60
@@ -33,7 +33,7 @@ jobs:
               env:
                 USE_WP_ENV: 1
               working-directory: plugins/woocommerce
-              run: pnpx playwright test --config=tests/e2e-pw/playwright.config.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
             - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
@@ -44,7 +44,7 @@ jobs:
                     steps.run_playwright_e2e_tests.conclusion != 'skipped' 
                   )
               working-directory: plugins/woocommerce
-              run: pnpx allure generate --clean e2e/allure-results --output e2e/allure-report
+              run: pnpm exec allure generate --clean e2e/allure-results --output e2e/allure-report
 
             - name: Archive Playwright E2E test report
               if: |
