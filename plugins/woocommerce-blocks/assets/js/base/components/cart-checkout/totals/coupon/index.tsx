@@ -45,17 +45,17 @@ export const TotalsCoupon = ( {
 }: TotalsCouponProps ): JSX.Element => {
 	const [ couponValue, setCouponValue ] = useState( '' );
 	const currentIsLoading = useRef( false );
-	const { getValidationError, getValidationErrorId } = useSelect(
-		( select ) => {
-			const store = select( VALIDATION_STORE_KEY );
-			return {
-				getValidationError: store.getValidationError(),
-				getValidationErrorId: store.getValidationErrorId(),
-			};
-		}
-	);
 
-	const validationError = getValidationError( 'coupon' );
+	const validationErrorKey = 'coupon';
+	const textInputId = `wc-block-components-totals-coupon__input-${ instanceId }`;
+
+	const { validationError, validationErrorId } = useSelect( ( select ) => {
+		const store = select( VALIDATION_STORE_KEY );
+		return {
+			validationError: store.getValidationError( validationErrorKey ),
+			validationErrorId: store.getValidationErrorId( textInputId ),
+		};
+	} );
 
 	useEffect( () => {
 		if ( currentIsLoading.current !== isLoading ) {
@@ -65,8 +65,6 @@ export const TotalsCoupon = ( {
 			currentIsLoading.current = isLoading;
 		}
 	}, [ isLoading, couponValue, validationError ] );
-
-	const textInputId = `wc-block-components-totals-coupon__input-${ instanceId }`;
 
 	return (
 		<Panel
@@ -106,9 +104,7 @@ export const TotalsCoupon = ( {
 								'woo-gutenberg-products-block'
 							) }
 							value={ couponValue }
-							ariaDescribedBy={ getValidationErrorId(
-								textInputId
-							) }
+							ariaDescribedBy={ validationErrorId }
 							onChange={ ( newCouponValue ) => {
 								setCouponValue( newCouponValue );
 							} }
@@ -120,7 +116,10 @@ export const TotalsCoupon = ( {
 							disabled={ isLoading || ! couponValue }
 							showSpinner={ isLoading }
 							onClick={ (
-								e: React.MouseEvent< HTMLElement, 'click' >
+								e: React.MouseEvent<
+									HTMLButtonElement,
+									MouseEvent
+								>
 							) => {
 								e.preventDefault();
 								onSubmit( couponValue );

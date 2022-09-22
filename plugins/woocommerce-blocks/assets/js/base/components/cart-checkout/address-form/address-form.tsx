@@ -42,13 +42,14 @@ const validateShippingCountry = (
 	clearValidationError: ( error: string ) => void,
 	hasValidationError: boolean
 ): void => {
+	const validationErrorId = 'shipping-missing-country';
 	if (
 		! hasValidationError &&
 		! values.country &&
 		( values.city || values.state || values.postcode )
 	) {
 		setValidationErrors( {
-			'shipping-missing-country': {
+			[ validationErrorId ]: {
 				message: __(
 					'Please select a country to calculate rates.',
 					'woo-gutenberg-products-block'
@@ -58,7 +59,7 @@ const validateShippingCountry = (
 		} );
 	}
 	if ( hasValidationError && values.country ) {
-		clearValidationError( 'shipping-missing-country' );
+		clearValidationError( validationErrorId );
 	}
 };
 
@@ -93,22 +94,16 @@ const AddressForm = ( {
 	type = 'shipping',
 	values,
 }: AddressFormProps ): JSX.Element => {
+	const validationErrorId = 'shipping-missing-country';
 	const { setValidationErrors, clearValidationError } =
 		useDispatch( VALIDATION_STORE_KEY );
 
-	const getValidationError = useSelect( ( select ) => {
+	const countryValidationError = useSelect( ( select ) => {
 		const store = select( VALIDATION_STORE_KEY );
-		return store.getValidationError();
+		return store.getValidationError( validationErrorId );
 	} );
 
 	const currentFields = useShallowEqual( fields );
-
-	const countryValidationError = ( getValidationError(
-		'shipping-missing-country'
-	) || {} ) as {
-		message: string;
-		hidden: boolean;
-	};
 
 	const addressFormFields = useMemo( () => {
 		return prepareAddressFields(
@@ -136,14 +131,14 @@ const AddressForm = ( {
 				values,
 				setValidationErrors,
 				clearValidationError,
-				!! countryValidationError.message &&
-					! countryValidationError.hidden
+				!! countryValidationError?.message &&
+					! countryValidationError?.hidden
 			);
 		}
 	}, [
 		values,
-		countryValidationError.message,
-		countryValidationError.hidden,
+		countryValidationError?.message,
+		countryValidationError?.hidden,
 		setValidationErrors,
 		clearValidationError,
 		type,

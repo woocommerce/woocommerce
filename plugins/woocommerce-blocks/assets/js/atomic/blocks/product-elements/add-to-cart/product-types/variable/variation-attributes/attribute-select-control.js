@@ -31,17 +31,17 @@ const AttributeSelectControl = ( {
 		'woo-gutenberg-products-block'
 	),
 } ) => {
+	const errorId = attributeName;
+
 	const { setValidationErrors, clearValidationError } =
 		useDispatch( VALIDATION_STORE_KEY );
 
-	const { getValidationError } = useSelect( ( select ) => {
+	const { error } = useSelect( ( select ) => {
 		const store = select( VALIDATION_STORE_KEY );
 		return {
-			getValidationError: store.getValidationError(),
+			error: store.getValidationError( errorId ) || {},
 		};
 	} );
-	const errorId = attributeName;
-	const error = getValidationError( errorId ) || {};
 
 	useEffect( () => {
 		if ( value ) {
@@ -79,7 +79,7 @@ const AttributeSelectControl = ( {
 				className={ classnames(
 					'wc-block-components-product-add-to-cart-attribute-picker__select',
 					{
-						'has-error': error.message && ! error.hidden,
+						'has-error': error?.message && ! error?.hidden,
 					}
 				) }
 			/>

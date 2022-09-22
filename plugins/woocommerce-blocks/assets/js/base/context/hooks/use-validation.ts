@@ -15,24 +15,25 @@ import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 export const useValidation = (): ValidationData => {
 	const { clearValidationError, hideValidationError, setValidationErrors } =
 		useDispatch( VALIDATION_STORE_KEY );
+
+	const prefix = 'extensions-errors';
+
 	const { hasValidationErrors, getValidationError } = useSelect(
-		( select ) => {
-			const store = select( VALIDATION_STORE_KEY );
+		( mapSelect ) => {
+			const store = mapSelect( VALIDATION_STORE_KEY );
 			return {
-				hasValidationErrors: store.hasValidationErrors,
-				getValidationError: store.getValidationError(),
+				hasValidationErrors: store.hasValidationErrors(),
+				getValidationError: ( validationErrorId: string ) =>
+					store.getValidationError(
+						`${ prefix }-${ validationErrorId }`
+					),
 			};
 		}
 	);
-	const prefix = 'extensions-errors';
 
 	return {
-		hasValidationErrors: hasValidationErrors(),
-		getValidationError: useCallback(
-			( validationErrorId: string ) =>
-				getValidationError( `${ prefix }-${ validationErrorId }` ),
-			[ getValidationError ]
-		),
+		hasValidationErrors,
+		getValidationError,
 		clearValidationError: useCallback(
 			( validationErrorId: string ) =>
 				clearValidationError( `${ prefix }-${ validationErrorId }` ),
