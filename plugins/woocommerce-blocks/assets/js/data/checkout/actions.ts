@@ -92,22 +92,24 @@ export const setExtensionData = (
 	extensionData,
 } );
 
-export type CheckoutAction = ReturnOrGeneratorYieldUnion<
-	| typeof setPristine
-	| typeof setIdle
-	| typeof setComplete
-	| typeof setProcessing
-	| typeof setProcessingResponse
-	| typeof setBeforeProcessing
-	| typeof setAfterProcessing
-	| typeof setRedirectUrl
-	| typeof setHasError
-	| typeof incrementCalculating
-	| typeof decrementCalculating
-	| typeof setCustomerId
-	| typeof setOrderId
-	| typeof setUseShippingAsBilling
-	| typeof setShouldCreateAccount
-	| typeof setOrderNotes
-	| typeof setExtensionData
->;
+export type CheckoutAction =
+	| ReturnOrGeneratorYieldUnion<
+			| typeof setPristine
+			| typeof setIdle
+			| typeof setComplete
+			| typeof setProcessing
+			| typeof setProcessingResponse
+			| typeof setBeforeProcessing
+			| typeof setAfterProcessing
+			| typeof setRedirectUrl
+			| typeof setHasError
+			| typeof incrementCalculating
+			| typeof decrementCalculating
+			| typeof setCustomerId
+			| typeof setOrderId
+			| typeof setUseShippingAsBilling
+			| typeof setShouldCreateAccount
+			| typeof setOrderNotes
+			| typeof setExtensionData
+	  >
+	| Record< string, never >;

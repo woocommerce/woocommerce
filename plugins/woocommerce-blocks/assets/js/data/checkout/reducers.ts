@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import type { Reducer } from 'redux';
 import { PaymentResult } from '@woocommerce/types';
 
 /**
@@ -12,7 +11,7 @@ import { STATUS } from './constants';
 import { defaultState } from './default-state';
 import { CheckoutAction } from './actions';
 
-const reducer: Reducer = ( state = defaultState, action: CheckoutAction ) => {
+const reducer = ( state = defaultState, action: CheckoutAction ) => {
 	let newState = state;
 	switch ( action.type ) {
 		case types.SET_PRISTINE:
