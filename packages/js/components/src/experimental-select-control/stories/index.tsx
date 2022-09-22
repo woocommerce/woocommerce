@@ -106,6 +106,7 @@ export const Async: React.FC = () => {
 
 	const fetchItems = ( value: string | undefined ) => {
 		setIsFetching( true );
+		setFetchedItems( [] );
 		setTimeout( () => {
 			const results = sampleItems.sort( () => 0.5 - Math.random() );
 			setFetchedItems( results );
@@ -117,6 +118,9 @@ export const Async: React.FC = () => {
 		<>
 			<SelectControl
 				label="Async"
+				getFilteredItems={ ( allItems ) => {
+					return allItems;
+				} }
 				items={ fetchedItems }
 				onInputChange={ fetchItems }
 				selected={ selectedItem }
