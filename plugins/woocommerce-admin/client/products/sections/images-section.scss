@@ -4,8 +4,14 @@
 		box-shadow: unset;
 		.woocommerce-media-uploader {
 			text-align: center;
+			&__label {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+			}
 			img {
 				margin-bottom: $gap-small;
+				width: $gap-larger + $gap-larger;
 			}
 		}
 		.components-card__body {
@@ -36,9 +42,11 @@
 		}
 	}
 	&__image-drop-zone {
-		font-weight: 600;
-		font-size: 14px;
-		line-height: 20px;
+		span {
+			font-weight: 600;
+			font-size: 14px;
+			line-height: 20px;
+		}
 
 		> div {
 			height: 146px;
