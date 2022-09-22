@@ -45,6 +45,6 @@ export const MultipleEditors: React.FC = () => {
 };
 
 export default {
-	title: 'WooCommerce Admin/components/RichTextEditor',
+	title: 'WooCommerce Admin/experimental/RichTextEditor',
 	component: RichTextEditor,
 };
