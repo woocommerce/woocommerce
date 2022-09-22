@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove typecasting to prevent fatal when $screen_id is null.
