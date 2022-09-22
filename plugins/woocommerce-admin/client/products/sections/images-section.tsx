@@ -59,6 +59,16 @@ export const ImagesSection: React.FC = () => {
 		setImageIdToRemove( parseInt( imageId, 10 ) );
 	};
 
+	const orderImages = ( newOrder: JSX.Element[] ) => {
+		const orderedImages = newOrder.map( ( image ) => {
+			return images.find(
+				( file ) =>
+					file.id === parseInt( image?.props?.children?.key, 10 )
+			);
+		} );
+		setValue( 'images', orderedImages );
+	};
+
 	return (
 		<ProductSectionLayout
 			title={ __( 'Images', 'woocommerce' ) }
@@ -91,9 +101,8 @@ export const ImagesSection: React.FC = () => {
 			>
 				<CardBody>
 					<ImageGallery
-						keepSpaceWhenDragging={ true }
 						onDragStart={ toggleRemoveZone }
-						onDragEnd={ ( e ) => {
+						onDragEnd={ () => {
 							if ( imageIdToRemove ) {
 								setValue(
 									'images',
@@ -105,6 +114,7 @@ export const ImagesSection: React.FC = () => {
 							}
 							toggleRemoveZone();
 						} }
+						onOrderChange={ orderImages }
 					>
 						{ images.map( ( image ) => (
 							<ImageGalleryItem
