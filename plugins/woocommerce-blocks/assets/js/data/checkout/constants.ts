@@ -8,7 +8,7 @@ import { CheckoutResponseSuccess } from '@woocommerce/types';
 export const STORE_KEY = 'wc/store/checkout';
 
 export enum STATUS {
-	// Checkout is in it's initialized state.
+	// Checkout is in its initialized state.
 	PRISTINE = 'pristine',
 	// When checkout state has changed but there is no activity happening.
 	IDLE = 'idle',

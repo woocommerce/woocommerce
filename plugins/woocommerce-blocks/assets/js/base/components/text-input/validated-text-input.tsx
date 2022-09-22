@@ -51,15 +51,13 @@ const ValidatedTextInput = ( {
 		typeof id !== 'undefined' ? id : 'textinput-' + instanceId;
 	const errorIdString = errorId !== undefined ? errorId : textInputId;
 
-	const { getValidationError, getValidationErrorId } = useSelect(
-		( select ) => {
-			const store = select( VALIDATION_STORE_KEY );
-			return {
-				getValidationError: store.getValidationError(),
-				getValidationErrorId: store.getValidationErrorId(),
-			};
-		}
-	);
+	const { validationError, validationErrorId } = useSelect( ( select ) => {
+		const store = select( VALIDATION_STORE_KEY );
+		return {
+			validationError: store.getValidationError( errorIdString ),
+			validationErrorId: store.getValidationErrorId( errorIdString ),
+		};
+	} );
 
 	const validateInput = useCallback(
 		( errorsHidden = true ) => {
@@ -124,16 +122,14 @@ const ValidatedTextInput = ( {
 		};
 	}, [ clearValidationError, errorIdString ] );
 
-	const errorMessage = getValidationError( errorIdString );
-
 	if ( isString( passedErrorMessage ) && passedErrorMessage !== '' ) {
-		errorMessage.message = passedErrorMessage;
+		validationError.message = passedErrorMessage;
 	}
 
-	const hasError = errorMessage?.message && ! errorMessage?.hidden;
+	const hasError = validationError?.message && ! validationError?.hidden;
 	const describedBy =
-		showError && hasError && getValidationErrorId( errorIdString )
-			? getValidationErrorId( errorIdString )
+		showError && hasError && validationErrorId
+			? validationErrorId
 			: ariaDescribedBy;
 
 	return (

@@ -2,8 +2,8 @@
  * External dependencies
  */
 import type { Reducer } from 'redux';
-
 import { PaymentResult } from '@woocommerce/types';
+
 /**
  * Internal dependencies
  */
