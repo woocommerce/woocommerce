@@ -76,6 +76,7 @@ export type InstallPluginsResponse = PluginsResponse< {
 	installed: string[];
 	results: Record< string, boolean >;
 	install_time?: Record< string, number >;
+	activated: string[];
 } >;
 
 export type ActivatePluginsResponse = PluginsResponse< {
