@@ -59,7 +59,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 						label="Move next"
 					/>
 				</ToolbarGroup>
-				<ToolbarGroup>
+				<ToolbarGroup className="woocommerce-image-gallery__toolbargroup-cover">
 					<ToolbarButton
 						onClick={ () => setAsCoverImage( childIndex ) }
 						icon={ CoverImage }
