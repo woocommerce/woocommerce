@@ -435,24 +435,37 @@ describe( 'ProductFormActions', () => {
 	} );
 
 	describe( 'when the form is invalid', () => {
-		beforeEach( () => {
-			render(
-				<Form initialValues={ {} } validate={ validate }>
-					<ProductFormActions />
-				</Form>
-			);
-		} );
-
 		[ 'Save draft', 'Preview', 'Publish' ].forEach( ( buttonText ) => {
 			it( `should have the ${ buttonText } button disabled`, () => {
+				render(
+					<Form initialValues={ {} } validate={ validate }>
+						<ProductFormActions />
+					</Form>
+				);
 				const actionButton = screen.getByText( buttonText );
 				expect( actionButton ).toBeDisabled();
 			} );
 		} );
 
+		it( 'should have the Publish options menu button disabled', () => {
+			render(
+				<Form initialValues={ {} } validate={ validate }>
+					<ProductFormActions />
+				</Form>
+			);
+			expect( screen.getByLabelText( 'Publish options' ) ).toBeDisabled();
+		} );
+
 		it( 'should have the Publish options menu items disabled', () => {
+			render(
+				<Form initialValues={ { id: 1 } } validate={ validate }>
+					<ProductFormActions />
+				</Form>
+			);
+
 			const publishOptionsButton =
 				screen.getByLabelText( 'Publish options' );
+
 			userEvent.click( publishOptionsButton );
 
 			const optionsMenu = screen.getByRole( 'menu' );

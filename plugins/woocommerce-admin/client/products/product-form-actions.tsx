@@ -195,7 +195,10 @@ export const ProductFormActions: React.FC = () => {
 					label={ __( 'Publish options', 'woocommerce' ) }
 					icon={ chevronDown }
 					popoverProps={ { position: 'bottom left' } }
-					toggleProps={ { variant: 'primary' } }
+					toggleProps={ {
+						variant: 'primary',
+						disabled: ! values.id && ! isValidForm,
+					} }
 				>
 					{ () => (
 						<>
