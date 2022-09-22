@@ -248,6 +248,11 @@ export const Sortable = ( {
 						items.length
 					),
 				} );
+
+				if ( child.props.className.indexOf( 'not-sortable' ) !== -1 ) {
+					return <li>{ child }</li>;
+				}
+
 				return (
 					<SortableItem
 						key={ index }

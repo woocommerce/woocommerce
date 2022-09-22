@@ -6,6 +6,7 @@ import {
 	createElement,
 	cloneElement,
 	useState,
+	useEffect,
 } from '@wordpress/element';
 
 /**
@@ -27,8 +28,17 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 		JSX.Element | null | undefined
 	>( null );
 	const [ orderedChildren, setOrderedChildren ] = useState< JSX.Element[] >(
-		Array.isArray( children ) ? children : [ children ]
+		[]
 	);
+
+	useEffect( () => {
+		if ( ! children ) {
+			return;
+		}
+		setOrderedChildren(
+			Array.isArray( children ) ? children : [ children ]
+		);
+	}, [ children ] );
 
 	const moveItem = ( fromIndex: number, toIndex: number ) => {
 		setOrderedChildren(
@@ -63,7 +73,9 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 			>
 				{ Children.map( orderedChildren, ( child, childIndex ) => (
 					<div
-						className="woocommerce-image-gallery__item-wrapper"
+						className={ `woocommerce-image-gallery__item-wrapper ${
+							childIndex === 0 ? 'not-sortable' : ''
+						}` }
 						//TODO: add correct keyboard handler
 						onKeyPress={ () => {} }
 						tabIndex={ 0 }
@@ -91,11 +103,14 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 								setAsCoverImage={ setAsCoverImage }
 							/>
 						) }
-						<SortableHandle>
-							{ cloneElement( child, {
-								isCover: childIndex === 0 ? true : false,
+						{ childIndex === 0 &&
+							cloneElement( child, {
+								isCover: true,
 							} ) }
-						</SortableHandle>
+
+						{ childIndex !== 0 && (
+							<SortableHandle>{ child }</SortableHandle>
+						) }
 					</div>
 				) ) }
 			</Sortable>

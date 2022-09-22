@@ -8,14 +8,12 @@ import { chevronRight, chevronLeft, trash } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import { DraggableIcon } from '../sortable/draggable-icon';
 import { CoverImage } from './icons';
 import { SortableHandle } from '../sortable';
 
-// TODO: - Dragging by toolbar handle bug
-// - Drag current item to current index immediately bug (goes to next index)
-// - hover state for cover button
-// - Image outline when toolbar visible
+// TODO: Dragging by toolbar handle bug
+// TODO: hover state for cover button
+// TODO: Image outline when toolbar visible
 
 export type ImageGalleryToolbarProps = {
 	childIndex: number;
@@ -43,13 +41,9 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 	return (
 		<div className="woocommerce-image-gallery__toolbar">
 			<Toolbar label="Options" id="options-toolbar">
-				<ToolbarGroup>
+				<ToolbarGroup className="woocommerce-image-gallery__toolbargroup-movement">
 					<ToolbarButton
-						icon={ () => (
-							<SortableHandle>
-								<DraggableIcon />
-							</SortableHandle>
-						) }
+						icon={ () => <SortableHandle /> }
 						label="Drag"
 					/>
 					<ToolbarButton

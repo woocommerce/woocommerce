@@ -14,14 +14,14 @@
         margin: 0;
     }
 
+	li:first-child .woocommerce-image-gallery__toolbargroup-movement {
+		display: none;
+	}
+
     .woocommerce-sortable__item {
         &.is-dragging {
             position: absolute;
         }
-
-		&:first-child .woocommerce-image-gallery__toolbar-previous svg {
-			fill: #ccc;
-		}
 
         &.is-dragging-over-before:before {
             left: calc( $gap / -2 - 1px );
