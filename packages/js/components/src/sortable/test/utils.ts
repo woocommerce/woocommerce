@@ -7,23 +7,25 @@ import { DragEvent } from 'react';
  * Internal dependencies
  */
 import {
-	moveIndex,
+	getNextIndex,
+	getPreviousIndex,
 	isBefore,
 	isDraggingOverAfter,
 	isDraggingOverBefore,
 	isLastDroppable,
+	moveIndex,
 } from '../utils';
 
 describe( 'moveIndex', () => {
 	it( 'should move the from index to a higher index', () => {
 		const arr = [ 'apple', 'orange', 'banana' ];
-		const newArr = moveIndex( 0, 2, arr );
+		const newArr = moveIndex( 0, 1, arr );
 		expect( newArr ).toEqual( [ 'orange', 'apple', 'banana' ] );
 	} );
 
 	it( 'should move the from index to the last index', () => {
 		const arr = [ 'apple', 'orange', 'banana' ];
-		const newArr = moveIndex( 0, 3, arr );
+		const newArr = moveIndex( 0, 2, arr );
 		expect( newArr ).toEqual( [ 'orange', 'banana', 'apple' ] );
 	} );
 
@@ -142,30 +144,22 @@ describe( 'isDraggingOverAfter', () => {
 		expect( isDraggingOverAfter( 0, 5, 2 ) ).toBeFalsy();
 	} );
 
-	it( 'should return false when the item is being dragged', () => {
-		expect( isDraggingOverAfter( 2, 2, 3 ) ).toBeFalsy();
-	} );
-
-	it( 'should return true when the item after is being dragged and the drop index is immediately after', () => {
-		expect( isDraggingOverAfter( 3, 4, 5 ) ).toBeTruthy();
+	it( 'should return true when the an item before is dragged to the current index position', () => {
+		expect( isDraggingOverAfter( 3, 2, 3 ) ).toBeTruthy();
 	} );
 } );
 
 describe( 'isDraggingOverBefore', () => {
-	it( 'should return true when the item is the same as the drop index', () => {
-		expect( isDraggingOverBefore( 0, 1, 0 ) ).toBeTruthy();
-	} );
-
-	it( 'should return false when the item is being dragged', () => {
-		expect( isDraggingOverBefore( 1, 1, 1 ) ).toBeFalsy();
+	it( 'should return true when the item is being dropped immediately before this index', () => {
+		expect( isDraggingOverBefore( 1, 0, 0 ) ).toBeTruthy();
 	} );
 
 	it( 'should return false when the drop index is different', () => {
 		expect( isDraggingOverBefore( 2, 1, 5 ) ).toBeFalsy();
 	} );
 
-	it( 'should return true when the item before is being dragged and is also the drop index', () => {
-		expect( isDraggingOverBefore( 3, 2, 2 ) ).toBeTruthy();
+	it( 'should return true when the item being dragged is a greater index and is dragged to this index', () => {
+		expect( isDraggingOverBefore( 3, 4, 3 ) ).toBeTruthy();
 	} );
 } );
 
@@ -180,5 +174,25 @@ describe( 'isLastDroppable', () => {
 
 	it( 'should return true on the second to last item when the last item is being dragged', () => {
 		expect( isLastDroppable( 3, 4, 5 ) ).toBeTruthy();
+	} );
+} );
+
+describe( 'getNextIndex', () => {
+	it( 'should return the next index when one exists', () => {
+		expect( getNextIndex( 1, 5 ) ).toBe( 2 );
+	} );
+
+	it( 'should return 0 when the end of the list has been reached', () => {
+		expect( getNextIndex( 4, 5 ) ).toBe( 0 );
+	} );
+} );
+
+describe( 'getPreviousIndex', () => {
+	it( 'should return the previous index when one exists', () => {
+		expect( getPreviousIndex( 3, 5 ) ).toBe( 2 );
+	} );
+
+	it( 'should return the last index when the beginning of the list has been reached', () => {
+		expect( getPreviousIndex( 0, 5 ) ).toBe( 4 );
 	} );
 } );

@@ -1,9 +1,15 @@
 /**
  * External dependencies
  */
-import { DragEvent, DragEventHandler } from 'react';
+import { __ } from '@wordpress/i18n';
+import { DragEvent, DragEventHandler, KeyboardEvent, useEffect } from 'react';
 import classnames from 'classnames';
-import { cloneElement, createElement, Fragment } from '@wordpress/element';
+import {
+	cloneElement,
+	createElement,
+	Fragment,
+	useRef,
+} from '@wordpress/element';
 import { Draggable } from '@wordpress/components';
 
 /**
@@ -16,21 +22,27 @@ export type SortableItemProps = {
 	index: number;
 	children: SortableChild;
 	className: string;
+	onKeyDown?: ( event: KeyboardEvent< HTMLLIElement > ) => void;
 	isDragging?: boolean;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
 	onDragOver?: DragEventHandler< HTMLLIElement >;
+	isSelected?: boolean;
 };
 
 export const SortableItem = ( {
 	id,
 	children,
 	className,
+	onKeyDown,
 	isDragging = false,
+	isSelected = false,
 	onDragStart = () => null,
 	onDragEnd = () => null,
 	onDragOver = () => null,
 }: SortableItemProps ) => {
+	const ref = useRef< HTMLLIElement >( null );
+
 	const handleDragStart = ( event: DragEvent< HTMLDivElement > ) => {
 		onDragStart( event );
 	};
@@ -40,13 +52,30 @@ export const SortableItem = ( {
 		onDragEnd( event );
 	};
 
+	useEffect( () => {
+		if ( isSelected && ref.current ) {
+			ref.current.focus();
+		}
+	}, [ isSelected ] );
+
 	return (
 		<li
+			aria-selected={ isSelected }
 			className={ classnames( 'woocommerce-sortable__item', className, {
 				'is-dragging': isDragging,
+				'is-selected': isSelected,
 			} ) }
 			id={ `woocommerce-sortable__item-${ id }` }
 			onDragOver={ onDragOver }
+			role="option"
+			onKeyDown={ onKeyDown }
+			ref={ ref }
+			tabIndex={ isSelected ? 0 : -1 }
+			// eslint-disable-next-line jsx-a11y/aria-props
+			aria-description={ __(
+				'Press spacebar to reorder',
+				'woocommerce'
+			) }
 		>
 			<Draggable
 				elementId={ `woocommerce-sortable__item-${ id }` }
