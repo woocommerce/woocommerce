@@ -30,6 +30,9 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 	const [ orderedChildren, setOrderedChildren ] = useState< JSX.Element[] >(
 		[]
 	);
+	const [ coverImage, setCoverImage ] = useState< JSX.Element | undefined >(
+		orderedChildren[ 0 ]
+	);
 
 	useEffect( () => {
 		if ( ! children ) {
@@ -39,6 +42,10 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 			Array.isArray( children ) ? children : [ children ]
 		);
 	}, [ children ] );
+
+	useEffect( () => {
+		setCoverImage( orderedChildren[ 0 ] );
+	}, [ orderedChildren ] );
 
 	const moveItem = ( fromIndex: number, toIndex: number ) => {
 		setOrderedChildren(
@@ -71,48 +78,52 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 				} }
 				onDragStart={ () => setToolBarItem( null ) }
 			>
-				{ Children.map( orderedChildren, ( child, childIndex ) => (
-					<div
-						className={ `woocommerce-image-gallery__item-wrapper ${
-							childIndex === 0 ? 'not-sortable' : ''
-						}` }
-						//TODO: add correct keyboard handler
-						onKeyPress={ () => {} }
-						tabIndex={ 0 }
-						role="button"
-						onClick={ ( event ) => {
-							if (
-								( event.target as Element ).closest(
-									'.woocommerce-image-gallery__toolbar'
-								) !== null
-							) {
-								return;
-							}
-							setToolBarItem(
-								Boolean( child ) && toolBarItem === child
-									? null
-									: child
-							);
-						} }
-					>
-						{ toolBarItem === child && (
-							<ImageGalleryToolbar
-								childIndex={ childIndex }
-								moveItem={ moveItem }
-								removeItem={ removeItem }
-								setAsCoverImage={ setAsCoverImage }
-							/>
-						) }
-						{ childIndex === 0 &&
-							cloneElement( child, {
-								isCover: true,
-							} ) }
+				{ Children.map( orderedChildren, ( child, childIndex ) => {
+					const isCoverImage = coverImage === child;
 
-						{ childIndex !== 0 && (
-							<SortableHandle>{ child }</SortableHandle>
-						) }
-					</div>
-				) ) }
+					return (
+						<div
+							className={ `woocommerce-image-gallery__item-wrapper ${
+								isCoverImage ? 'not-sortable ' : ''
+							}` }
+							//TODO: add correct keyboard handler
+							onKeyPress={ () => {} }
+							tabIndex={ 0 }
+							role="button"
+							onClick={ ( event ) => {
+								if (
+									( event.target as Element ).closest(
+										'.woocommerce-image-gallery__toolbar'
+									) !== null
+								) {
+									return;
+								}
+								setToolBarItem(
+									Boolean( child ) && toolBarItem === child
+										? null
+										: child
+								);
+							} }
+						>
+							{ toolBarItem === child && (
+								<ImageGalleryToolbar
+									childIndex={ childIndex }
+									moveItem={ moveItem }
+									removeItem={ removeItem }
+									setAsCoverImage={ setAsCoverImage }
+								/>
+							) }
+							{ isCoverImage &&
+								cloneElement( child, {
+									isCover: true,
+								} ) }
+
+							{ ! isCoverImage && (
+								<SortableHandle>{ child }</SortableHandle>
+							) }
+						</div>
+					);
+				} ) }
 			</Sortable>
 		</div>
 	);
