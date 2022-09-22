@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Icon, column } from '@wordpress/icons';
-import { registerExperimentalBlockType } from '@woocommerce/block-settings';
+import { registerBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -10,7 +10,7 @@ import { registerExperimentalBlockType } from '@woocommerce/block-settings';
 import { Edit, Save } from './edit';
 import metadata from './block.json';
 
-registerExperimentalBlockType( metadata, {
+registerBlockType( metadata, {
 	icon: {
 		src: (
 			<Icon
