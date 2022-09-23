@@ -5,6 +5,9 @@
 		margin: 0;
 		display: flex;
 		flex-wrap: nowrap;
+		a {
+			text-decoration: underline;
+		}
 		.components-notice__dismiss {
 			background: transparent none;
 			padding: 0;
