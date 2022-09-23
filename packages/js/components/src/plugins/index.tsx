@@ -18,7 +18,7 @@ type PluginsProps = {
 		activePlugins: string[],
 		response: InstallPluginsResponse
 	) => void;
-	onError?: ( errors: unknown, response: InstallPluginsResponse ) => void;
+	onError: ( errors: unknown, response: InstallPluginsResponse ) => void;
 	onSkip?: () => void;
 	skipText?: string;
 	autoInstall?: boolean;
@@ -33,7 +33,7 @@ export const Plugins = ( {
 	onComplete,
 	onError = () => null,
 	pluginSlugs = [ 'jetpack', 'woocommerce-services' ],
-	onSkip = () => null,
+	onSkip,
 	skipText = __( 'No thanks', 'woocommerce' ),
 	abortText = __( 'Abort', 'woocommerce' ),
 }: PluginsProps ) => {
@@ -57,7 +57,10 @@ export const Plugins = ( {
 		response: InstallPluginsResponse
 	) => {
 		setHasErrors( true );
-		onError( errors, response );
+
+		if ( onError ) {
+			onError( errors, response );
+		}
 	};
 
 	const handleSuccess = (
