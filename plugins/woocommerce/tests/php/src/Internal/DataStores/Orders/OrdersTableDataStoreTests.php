@@ -224,9 +224,6 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		}
 
 		foreach ( $datastore_updates as $prop => $value ) {
-			if ( is_bool( $value ) ) {
-				$value = wc_bool_to_string( $value );
-			}
 			$this->assertEquals( $this->sut->{"get_$prop"}( $order ), $value );
 		}
 	}
