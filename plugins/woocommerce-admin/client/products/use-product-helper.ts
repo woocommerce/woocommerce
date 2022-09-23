@@ -260,13 +260,13 @@ export function useProductHelper() {
 	);
 
 	/**
-	 * Sanitizes a price.
+	 * Sanitizes a value using the Woo General Currency Settings.
 	 *
-	 * @param {string} price the price that will be sanitized.
-	 * @return {string} sanitized price.
+	 * @param {string} value the value that will be sanitized.
+	 * @return {string} sanitized value.
 	 */
 	const sanitizePrice = useCallback(
-		( price: string ) => {
+		( value: string ) => {
 			const { getCurrencyConfig } = context;
 			const { decimalSeparator } = getCurrencyConfig();
 			// Build regex to strip out everything except digits, decimal point and minus sign.
@@ -278,7 +278,7 @@ export function useProductHelper() {
 				ONLY_ONE_DECIMAL_SEPARATOR.replaceAll( '%s', decimalSeparator ),
 				'g'
 			);
-			const cleanValue = price
+			const cleanValue = value
 				.replace( regex, '' )
 				.replace( decimalRegex, '' )
 				.replace( decimalSeparator, '.' );
