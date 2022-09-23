@@ -990,7 +990,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function get_order_stock_reduced( string $context = 'view' ) {
-		return wc_bool_to_string( $this->get_prop( 'order_stock_reduced', $context ) );
+		return wc_string_to_bool( $this->get_prop( 'order_stock_reduced', $context ) );
 	}
 
 	/**
@@ -1001,7 +1001,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool True if permissions were generated, false otherwise.
 	 */
 	public function get_download_permissions_granted( string $context = 'view' ) {
-		return wc_bool_to_string( $this->get_prop( 'download_permissions_granted', $context ) );
+		return wc_string_to_bool( $this->get_prop( 'download_permissions_granted', $context ) );
 	}
 
 	/**
@@ -1012,7 +1012,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function get_new_order_email_sent( string $context = 'view' ) {
-		return wc_bool_to_string( $this->get_prop( 'new_order_email_sent', $context ) );
+		return wc_string_to_bool( $this->get_prop( 'new_order_email_sent', $context ) );
 	}
 
 	/**
@@ -1023,7 +1023,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool True if sales were recorded, false otherwise.
 	 */
 	public function get_recorded_sales( string $context = 'view' ) {
-		return wc_bool_to_string( $this->get_prop( 'recorded_sales', $context ) );
+		return wc_string_to_bool( $this->get_prop( 'recorded_sales', $context ) );
 	}
 
 	/**
@@ -1034,7 +1034,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool True if coupon counts were updated, false otherwise.
 	 */
 	public function get_recorded_coupon_usage_counts( $context = 'view' ) {
-		return wc_bool_to_string( $this->get_prop( 'recorded_coupon_usage_counts', $context ) );
+		return wc_string_to_bool( $this->get_prop( 'recorded_coupon_usage_counts', $context ) );
 	}
 
 	/*
