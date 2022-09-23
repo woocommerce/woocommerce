@@ -1,4 +1,10 @@
 /**
+ * External dependencies
+ */
+import { useSelect } from '@wordpress/data';
+import { store as WP_BLOCKS_STORE } from '@wordpress/blocks';
+
+/**
  * Internal dependencies
  */
 import {
@@ -6,6 +12,13 @@ import {
 	ProductQueryBlock,
 	QueryVariation,
 } from './types';
+
+/**
+ * Creates an array that is the symmetric difference of the given arrays
+ */
+export function ArrayXOR< T extends Array< unknown > >( a: T, b: T ) {
+	return a.filter( ( el ) => ! b.includes( el ) );
+}
 
 /**
  * Identifies if a block is a Query block variation from our conventions
@@ -17,10 +30,8 @@ import {
 export function isWooQueryBlockVariation( block: ProductQueryBlock ) {
 	return (
 		block.name === 'core/query' &&
-		block.attributes.__woocommerceVariationProps &&
 		Object.values( QueryVariation ).includes(
-			block.attributes.__woocommerceVariationProps
-				.name as unknown as QueryVariation
+			block.attributes.namespace as QueryVariation
 		)
 	);
 }
@@ -35,20 +46,35 @@ export function isWooQueryBlockVariation( block: ProductQueryBlock ) {
  */
 export function setCustomQueryAttribute(
 	block: ProductQueryBlock,
-	attributes: Partial< ProductQueryArguments >
+	queryParams: Partial< ProductQueryArguments >
 ) {
-	const { __woocommerceVariationProps } = block.attributes;
+	const { query } = block.attributes;
 
 	block.setAttributes( {
-		__woocommerceVariationProps: {
-			...__woocommerceVariationProps,
-			attributes: {
-				...__woocommerceVariationProps.attributes,
-				query: {
-					...__woocommerceVariationProps.attributes?.query,
-					...attributes,
-				},
-			},
+		query: {
+			...query,
+			...queryParams,
 		},
 	} );
+}
+
+/**
+ * Hook that returns the query properties' names defined by the active
+ * block variation, to determine which block inspector controls to show.
+ *
+ * @param {Object} attributes Block attributes.
+ * @return {string[]} An array of the controls keys.
+ */
+export function useAllowedControls(
+	attributes: ProductQueryBlock[ 'attributes' ]
+) {
+	return useSelect(
+		( select ) =>
+			select( WP_BLOCKS_STORE ).getActiveBlockVariation(
+				'core/query',
+				attributes
+			)?.allowControls,
+
+		[ attributes ]
+	);
 }
