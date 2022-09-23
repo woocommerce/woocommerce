@@ -15,6 +15,7 @@ import { useState } from '@wordpress/element';
 import { Product } from '@woocommerce/data';
 import classnames from 'classnames';
 import { Icon, trash } from '@wordpress/icons';
+import { MediaItem } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
@@ -23,20 +24,21 @@ import { ProductSectionLayout } from '../layout/product-section-layout';
 import DragAndDrop from '../images/drag-and-drop.svg';
 import './images-section.scss';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type File = { id: number } & { [ k: string ]: any };
+type Image = MediaItem & {
+	src: string;
+};
 
 export const ImagesSection: React.FC = () => {
 	const { getInputProps, setValue } = useFormContext< Product >();
-	const images = ( getInputProps( 'images' ).value as File[] ) || [];
+	const images = ( getInputProps( 'images' ).value as Image[] ) || [];
 	const [ showRemoveZone, setShowRemoveZone ] = useState( false );
 	const [ imageIdToRemove, setImageIdToRemove ] = useState< number >( 0 );
 
-	const getUniqueImages = ( files: File[] ) => {
+	const getUniqueImages = ( files: Image[] ) => {
 		if ( ! files ) {
 			return [];
 		}
-		files.forEach( ( image ) => {
+		files.forEach( ( image: Image ) => {
 			if (
 				image.id &&
 				images.find( ( file ) => file.id === image.id ) === undefined
@@ -152,16 +154,16 @@ export const ImagesSection: React.FC = () => {
 						) : (
 							<MediaUploader
 								onError={ () => null }
-								onSelect={ ( file: File ) =>
+								onSelect={ ( file ) =>
 									setValue(
 										'images',
-										getUniqueImages( [ file ] )
+										getUniqueImages( [ file as Image ] )
 									)
 								}
 								onUpload={ ( files ) =>
 									setValue(
 										'images',
-										getUniqueImages( files )
+										getUniqueImages( files as Image[] )
 									)
 								}
 								label={
