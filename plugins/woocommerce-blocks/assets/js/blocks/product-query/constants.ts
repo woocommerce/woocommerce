@@ -1,20 +1,24 @@
 /**
  * External dependencies
  */
-import { InnerBlockTemplate } from '@wordpress/blocks';
+import type { InnerBlockTemplate } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import { QueryBlockQuery } from './types';
+import { QueryBlockAttributes } from './types';
 
-export const QUERY_DEFAULT_ATTRIBUTES: {
-	query: QueryBlockQuery;
-	displayLayout: {
-		type: 'flex' | 'list';
-		columns?: number;
-	};
-} = {
+export const DEFAULT_CORE_ALLOWED_CONTROLS = [ 'order', 'taxQuery', 'search' ];
+
+export const ALL_PRODUCT_QUERY_CONTROLS = [ 'onSale' ];
+
+export const DEFAULT_ALLOWED_CONTROLS = [
+	...DEFAULT_CORE_ALLOWED_CONTROLS,
+	...ALL_PRODUCT_QUERY_CONTROLS,
+];
+
+export const QUERY_DEFAULT_ATTRIBUTES: QueryBlockAttributes = {
+	allowControls: DEFAULT_ALLOWED_CONTROLS,
 	displayLayout: {
 		type: 'flex',
 		columns: 3,
@@ -39,7 +43,7 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 		'core/post-template',
 		{},
 		[
-			[ 'woocommerce/product-image', undefined, [] ],
+			[ 'woocommerce/product-image' ],
 			[
 				'core/post-title',
 				{
@@ -50,6 +54,6 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 			],
 		],
 	],
-	[ 'core/query-pagination', undefined, [] ],
-	[ 'core/query-no-results', undefined, [] ],
+	[ 'core/query-pagination' ],
+	[ 'core/query-no-results' ],
 ];

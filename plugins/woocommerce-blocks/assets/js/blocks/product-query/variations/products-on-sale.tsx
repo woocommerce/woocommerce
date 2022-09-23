@@ -9,17 +9,23 @@ import { Icon, percent } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import { INNER_BLOCKS_TEMPLATE, QUERY_DEFAULT_ATTRIBUTES } from '../constants';
+import {
+	DEFAULT_CORE_ALLOWED_CONTROLS,
+	INNER_BLOCKS_TEMPLATE,
+	QUERY_DEFAULT_ATTRIBUTES,
+} from '../constants';
+import { ArrayXOR } from '../utils';
+
+const VARIATION_NAME = 'woocommerce/query-products-on-sale';
+const DISABLED_INSPECTOR_CONTROLS = [ 'onSale' ];
 
 if ( isExperimentalBuild() ) {
 	registerBlockVariation( 'core/query', {
-		name: 'woocommerce/query-products-on-sale',
+		name: VARIATION_NAME,
 		title: __( 'Products on Sale', 'woo-gutenberg-products-block' ),
 		isActive: ( blockAttributes ) =>
-			blockAttributes?.__woocommerceVariationProps?.name ===
-				'query-products-on-sale' ||
-			blockAttributes?.__woocommerceVariationProps?.query?.onSale ===
-				true,
+			blockAttributes.namespace === VARIATION_NAME ||
+			blockAttributes.query?.__woocommerceOnSale === true,
 		icon: {
 			src: (
 				<Icon
@@ -30,15 +36,20 @@ if ( isExperimentalBuild() ) {
 		},
 		attributes: {
 			...QUERY_DEFAULT_ATTRIBUTES,
-			__woocommerceVariationProps: {
-				name: 'query-products-on-sale',
-				attributes: {
-					query: {
-						onSale: true,
-					},
-				},
+			namespace: VARIATION_NAME,
+			query: {
+				...QUERY_DEFAULT_ATTRIBUTES.query,
+				__woocommerceOnSale: true,
 			},
 		},
+		// Gutenberg doesn't support this type yet, discussion here:
+		// https://github.com/WordPress/gutenberg/pull/43632
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		allowControls: ArrayXOR(
+			DEFAULT_CORE_ALLOWED_CONTROLS,
+			DISABLED_INSPECTOR_CONTROLS
+		),
 		innerBlocks: INNER_BLOCKS_TEMPLATE,
 		scope: [ 'block', 'inserter' ],
 	} );

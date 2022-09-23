@@ -12,7 +12,11 @@ import { ElementType } from 'react';
  * Internal dependencies
  */
 import { ProductQueryBlock } from './types';
-import { isWooQueryBlockVariation, setCustomQueryAttribute } from './utils';
+import {
+	isWooQueryBlockVariation,
+	setCustomQueryAttribute,
+	useAllowedControls,
+} from './utils';
 
 export const INSPECTOR_CONTROLS = {
 	onSale: ( props: ProductQueryBlock ) => (
@@ -21,12 +25,9 @@ export const INSPECTOR_CONTROLS = {
 				'Show only products on sale',
 				'woo-gutenberg-products-block'
 			) }
-			checked={
-				props.attributes.__woocommerceVariationProps?.attributes?.query
-					?.onSale || false
-			}
-			onChange={ ( onSale ) => {
-				setCustomQueryAttribute( props, { onSale } );
+			checked={ props.attributes.query.__woocommerceOnSale || false }
+			onChange={ ( __woocommerceOnSale ) => {
+				setCustomQueryAttribute( props, { __woocommerceOnSale } );
 			} }
 		/>
 	),
@@ -35,17 +36,16 @@ export const INSPECTOR_CONTROLS = {
 export const withProductQueryControls =
 	< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
 	( props: ProductQueryBlock ) => {
+		const allowedControls = useAllowedControls( props.attributes );
 		return isWooQueryBlockVariation( props ) ? (
 			<>
 				<BlockEdit { ...props } />
 				<InspectorControls>
 					{ Object.entries( INSPECTOR_CONTROLS ).map(
 						( [ key, Control ] ) =>
-							props.attributes.__woocommerceVariationProps.attributes?.disabledInspectorControls?.includes(
-								key
-							) ? null : (
+							allowedControls?.includes( key ) ? (
 								<Control { ...props } />
-							)
+							) : null
 					) }
 				</InspectorControls>
 			</>
