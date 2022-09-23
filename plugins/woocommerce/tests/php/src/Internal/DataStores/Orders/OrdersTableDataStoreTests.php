@@ -97,10 +97,19 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			'_cart_discount',
 			'cart_tax',
 		);
-		$exempted_keys         = array_flip( array_merge( $exempted_keys, $convert_to_float_keys ) );
 
+		$convert_to_bool_keys = array(
+			'_order_stock_reduced',
+			'_download_permissions_granted',
+			'_new_order_email_sent',
+			'_recorded_sales',
+			'_recorded_coupon_usage_counts',
+		);
+
+		$exempted_keys        = array_flip( array_merge( $exempted_keys, $convert_to_float_keys, $convert_to_bool_keys ) );
 		$post_data_float      = array_intersect_key( $post_data, array_flip( $convert_to_float_keys ) );
 		$post_meta_data_float = array_intersect_key( $post_meta_data, array_flip( $convert_to_float_keys ) );
+		$post_meta_data_bool  = array_intersect_key( $post_meta_data, array_flip( $convert_to_bool_keys ) );
 		$post_data            = array_diff_key( $post_data, $exempted_keys );
 		$post_meta_data       = array_diff_key( $post_meta_data, $exempted_keys );
 
@@ -137,6 +146,10 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		foreach ( $post_meta_data_float as $float_key => $value ) {
 			$this->assertEquals( (float) get_post_meta( $post_order_id )[ $float_key ], (float) $value, "Value for $float_key does not match." );
+		}
+
+		foreach ( $post_meta_data_bool as $bool_key => $value ) {
+			$this->assertEquals( wc_string_to_bool( get_post_meta( $post_order_id, $bool_key, true ) ), wc_string_to_bool( current( $value ) ), "Value for $bool_key does not match." );
 		}
 	}
 

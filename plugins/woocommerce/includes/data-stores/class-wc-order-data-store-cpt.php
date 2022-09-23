@@ -164,7 +164,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				'order_stock_reduced'          => get_post_meta( $id, '_order_stock_reduced', true ),
 				'download_permissions_granted' => get_post_meta( $id, '_download_permissions_granted', true ),
 				'new_order_email_sent'         => get_post_meta( $id, '_new_order_email_sent', true ),
-				'recorded_sales'               => get_post_meta( $id, '_recorded_sales', true ),
+				'recorded_sales'               => wc_string_to_bool( get_post_meta( $id, '_recorded_sales', true ) ),
 				'recorded_coupon_usage_counts' => get_post_meta( $id, '_recorded_coupon_usage_counts', true ),
 			)
 		);
