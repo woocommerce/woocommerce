@@ -1433,7 +1433,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return void
 	 */
 	public function set_order_stock_reduced( $value ) {
-		$this->set_prop( 'order_stock_reduced', wc_bool_to_string( $value ) );
+		$this->set_prop( 'order_stock_reduced', wc_string_to_bool( $value ) );
 	}
 
 	/**
@@ -1444,7 +1444,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return void
 	 */
 	public function set_download_permissions_granted( $value ) {
-		$this->set_prop( 'download_permissions_granted', wc_bool_to_string( $value ) );
+		$this->set_prop( 'download_permissions_granted', wc_string_to_bool( $value ) );
 	}
 
 	/**
@@ -1455,7 +1455,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return void
 	 */
 	public function set_new_order_email_sent( $value ) {
-		$this->set_prop( 'new_order_email_sent', wc_bool_to_string( $value ) );
+		$this->set_prop( 'new_order_email_sent', wc_string_to_bool( $value ) );
 	}
 
 	/**
@@ -1466,7 +1466,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return void
 	 */
 	public function set_recorded_sales( $value ) {
-		$this->set_prop( 'recorded_sales', wc_bool_to_string( $value ) );
+		$this->set_prop( 'recorded_sales', wc_string_to_bool( $value ) );
 	}
 
 	/**
@@ -1477,7 +1477,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return void
 	 */
 	public function set_recorded_coupon_usage_counts( $value ) {
-		$this->set_prop( 'recorded_coupon_usage_counts', wc_bool_to_string( $value ) );
+		$this->set_prop( 'recorded_coupon_usage_counts', wc_string_to_bool( $value ) );
 	}
 
 	/*
