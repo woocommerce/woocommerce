@@ -127,6 +127,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	protected function write_csv_data( $data ) {
 
 		if ( ! file_exists( $this->get_file_path() ) || ! is_writeable( $this->get_file_path() ) ) {
+			 error_log(__("ERROR : Cannot create temporary CSV export file : please check permissions on upload directory.", 'woocommerce'));
 			return false;
 		}
 
