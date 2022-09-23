@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { SelectControl } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { Link, Spinner, useFormContext } from '@woocommerce/components';
@@ -11,6 +10,11 @@ import {
 	ProductShippingClass,
 } from '@woocommerce/data';
 import interpolateComponents from '@automattic/interpolate-components';
+import {
+	SelectControl,
+	// @ts-expect-error `__experimentalInputControl` does exist.
+	__experimentalInputControl as InputControl,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -33,6 +37,15 @@ function mapShippingClassToSelectOption(
 	} ) );
 }
 
+function getInterpolatedSizeLabel( mixedString: string ) {
+	return interpolateComponents( {
+		mixedString,
+		components: {
+			span: <span className="woocommerce-product-form__secondary-text" />,
+		},
+	} );
+}
+
 export const ProductShippingSection: React.FC = () => {
 	const { getInputProps } = useFormContext< Product >();
 
@@ -53,52 +66,137 @@ export const ProductShippingSection: React.FC = () => {
 	);
 
 	return (
-		<ProductSectionLayout
-			title={ __( 'Shipping', 'woocommerce' ) }
-			description={ __(
-				'Set up shipping costs and enter dimensions used for accurate rate calculations.',
-				'woocommerce'
-			) }
-		>
-			{ hasResolvedShippingClasses ? (
-				<div>
-					<SelectControl
-						label={ __( 'Shipping class', 'woocommerce' ) }
-						{ ...getTextControlProps(
-							getInputProps( 'shipping_class' )
-						) }
-						options={ [
-							...DEFAULT_SHIPPING_CLASS_OPTIONS,
-							...mapShippingClassToSelectOption(
-								shippingClasses ?? []
-							),
-						] }
-					/>
-					<span className="woocommerce-product-form__secondary-text">
-						{ interpolateComponents( {
-							mixedString: __(
-								'Manage shipping classes and rates in {{link}}global settings{{/link}}.',
-								'woocommerce'
-							),
-							components: {
-								link: (
-									<Link
-										href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=classes` }
-										target="_blank"
-										type="external"
-									>
-										<></>
-									</Link>
+		<>
+			<ProductSectionLayout
+				title={ __( 'Shipping', 'woocommerce' ) }
+				description={ __(
+					'Set up shipping costs and enter dimensions used for accurate rate calculations.',
+					'woocommerce'
+				) }
+			>
+				{ hasResolvedShippingClasses ? (
+					<div>
+						<SelectControl
+							label={ __( 'Shipping class', 'woocommerce' ) }
+							{ ...getTextControlProps(
+								getInputProps( 'shipping_class' )
+							) }
+							options={ [
+								...DEFAULT_SHIPPING_CLASS_OPTIONS,
+								...mapShippingClassToSelectOption(
+									shippingClasses ?? []
 								),
-							},
-						} ) }
-					</span>
+							] }
+						/>
+						<span className="woocommerce-product-form__secondary-text">
+							{ interpolateComponents( {
+								mixedString: __(
+									'Manage shipping classes and rates in {{link}}global settings{{/link}}.',
+									'woocommerce'
+								),
+								components: {
+									link: (
+										<Link
+											href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=classes` }
+											target="_blank"
+											type="external"
+										>
+											<></>
+										</Link>
+									),
+								},
+							} ) }
+						</span>
+					</div>
+				) : (
+					<div className="product-shipping-section__spinner-wrapper">
+						<Spinner />
+					</div>
+				) }
+			</ProductSectionLayout>
+
+			<ProductSectionLayout title={ '' } description={ '' }>
+				<h4 className="product-shipping-section__subtitle">
+					{ __( 'Dimensions', 'woocommerce' ) }
+				</h4>
+				<p className="woocommerce-product-form__secondary-text">
+					{ __(
+						'Enter the size of the product as you’d put it in a shipping box, including packaging like bubble wrap.',
+						'woocommerce'
+					) }
+				</p>
+				<div className="product-shipping-section__container">
+					<div>
+						<div className="components-base-control">
+							<div className="components-base-control__field">
+								<InputControl
+									label={ getInterpolatedSizeLabel(
+										__(
+											'Width {{span}}A{{/span}}',
+											'woocommerce'
+										)
+									) }
+									type="number"
+									{ ...getTextControlProps(
+										getInputProps( 'dimensions.width' )
+									) }
+									suffix="cm"
+								/>
+							</div>
+						</div>
+
+						<div className="components-base-control">
+							<div className="components-base-control__field">
+								<InputControl
+									label={ getInterpolatedSizeLabel(
+										__(
+											'Length {{span}}B{{/span}}',
+											'woocommerce'
+										)
+									) }
+									type="number"
+									{ ...getTextControlProps(
+										getInputProps( 'dimensions.length' )
+									) }
+									suffix="cm"
+								/>
+							</div>
+						</div>
+
+						<div className="components-base-control">
+							<div className="components-base-control__field">
+								<InputControl
+									label={ getInterpolatedSizeLabel(
+										__(
+											'Height {{span}}C{{/span}}',
+											'woocommerce'
+										)
+									) }
+									type="number"
+									{ ...getTextControlProps(
+										getInputProps( 'dimensions.height' )
+									) }
+									suffix="cm"
+								/>
+							</div>
+						</div>
+
+						<div className="components-base-control">
+							<div className="components-base-control__field">
+								<InputControl
+									label={ __( 'Weight', 'woocommerce' ) }
+									type="number"
+									{ ...getTextControlProps(
+										getInputProps( 'weight' )
+									) }
+									suffix="kg"
+								/>
+							</div>
+						</div>
+					</div>
+					<div></div>
 				</div>
-			) : (
-				<div className="product-shipping-section__spinner-wrapper">
-					<Spinner />
-				</div>
-			) }
-		</ProductSectionLayout>
+			</ProductSectionLayout>
+		</>
 	);
 };

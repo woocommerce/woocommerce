@@ -5,4 +5,14 @@
 		justify-content: center;
 		height: 100%;
 	}
+	&__subtitle {
+		margin: 0;
+	}
+	&__container {
+		.components-base-control {
+			&__field {
+				margin-bottom: 8px;
+			}
+		}
+	}
 }

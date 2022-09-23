@@ -7,11 +7,16 @@ import {
 	createElement,
 	useCallback,
 	useEffect,
+	useMemo,
 	forwardRef,
 	useImperativeHandle,
 } from '@wordpress/element';
 import deprecated from '@wordpress/deprecated';
-import { ChangeEvent, PropsWithChildren } from 'react';
+import { ChangeEvent, PropsWithChildren, useRef } from 'react';
+import _setWith from 'lodash/setWith';
+import _get from 'lodash/get';
+import _clone from 'lodash/clone';
+import _isEqual from 'lodash/isEqual';
 
 /**
  * Internal dependencies
@@ -88,21 +93,21 @@ export type FormRef< Values > = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function FormComponent< Values extends Record< string, any > >(
 	{
+		children,
 		onSubmit = () => {},
 		onChange = () => {},
 		onChanges = () => {},
-		initialValues = {} as Values,
 		...props
 	}: PropsWithChildren< FormProps< Values > >,
 	ref: React.Ref< FormRef< Values > >
 ): React.ReactElement | null {
-	const [ values, setValuesInternal ] = useState< Values >( initialValues );
+	const initialValues = useRef( props.initialValues ?? ( {} as Values ) );
+	const [ values, setValuesInternal ] = useState< Values >(
+		props.initialValues ?? ( {} as Values )
+	);
 	const [ errors, setErrors ] = useState< {
 		[ P in keyof Values ]?: string;
 	} >( props.errors || {} );
-	const [ changedFields, setChangedFields ] = useState< {
-		[ P in keyof Values ]?: boolean;
-	} >( {} );
 	const [ touched, setTouched ] = useState< {
 		[ P in keyof Values ]?: boolean;
 	} >( props.touched || {} );
@@ -126,13 +131,11 @@ function FormComponent< Values extends Record< string, any > >(
 	}, [] );
 
 	const resetForm = (
-		newInitialValues: Values,
-		newChangedFields = {},
+		newInitialValues = {} as Values,
 		newTouchedFields = {},
 		newErrors = {}
 	) => {
-		setValuesInternal( newInitialValues || {} );
-		setChangedFields( newChangedFields );
+		setValuesInternal( newInitialValues ?? initialValues.current ?? {} );
 		setTouched( newTouchedFields );
 		setErrors( newErrors );
 	};
@@ -150,24 +153,6 @@ function FormComponent< Values extends Record< string, any > >(
 		( valuesToSet: Values ) => {
 			const newValues = { ...values, ...valuesToSet };
 			setValuesInternal( newValues );
-
-			const changedFieldsToSet: { [ P in keyof Values ]?: boolean } = {};
-
-			for ( const key in valuesToSet ) {
-				if (
-					initialValues[ key ] !== valuesToSet[ key ] &&
-					! changedFields[ key ]
-				) {
-					changedFieldsToSet[ key ] = true;
-				} else if (
-					initialValues[ key ] === valuesToSet[ key ] &&
-					changedFields[ key ]
-				) {
-					changedFieldsToSet[ key ] = false;
-				}
-			}
-
-			setChangedFields( { ...changedFields, ...changedFieldsToSet } );
 
 			validate( newValues, ( newErrors ) => {
 				const { onChangeCallback } = props;
@@ -220,9 +205,7 @@ function FormComponent< Values extends Record< string, any > >(
 	const setValue = useCallback(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		( name: string, value: any ) => {
-			const valuesToSet: Values = {} as Values;
-			valuesToSet[ name as keyof Values ] = value;
-			setValues( valuesToSet );
+			setValues( _setWith( { ...values }, name, value, _clone ) );
 		},
 		[ values, validate, onChange, props.onChangeCallback ]
 	);
@@ -235,7 +218,7 @@ function FormComponent< Values extends Record< string, any > >(
 			// Handle native events.
 			if ( isChangeEvent( value ) && value.target ) {
 				if ( value.target.type === 'checkbox' ) {
-					setValue( name, ! values[ name ] );
+					setValue( name, ! _get( values, name ) );
 				} else {
 					setValue( name, value.target.value );
 				}
@@ -295,77 +278,55 @@ function FormComponent< Values extends Record< string, any > >(
 		className: string | undefined;
 		help: string | null | undefined;
 	} {
+		const inputValue = _get( values, name );
+		const isTouched = touched[ name ];
+		const inputError = _get( errors, name );
+
 		return {
-			value: values[ name ],
-			checked: Boolean( values[ name ] ),
-			selected: values[ name ],
+			value: inputValue,
+			checked: Boolean( inputValue ),
+			selected: inputValue,
 			onChange: (
 				value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
 			) => handleChange( name, value ),
 			onBlur: () => handleBlur( name ),
-			className:
-				touched[ name ] && errors[ name ] ? 'has-error' : undefined,
-			help: touched[ name ] ? errors[ name ] : null,
+			className: isTouched && inputError ? 'has-error' : undefined,
+			help: isTouched ? inputError : null,
 		};
 	}
+
+	const isDirty = useMemo(
+		() => ! _isEqual( initialValues.current, values ),
+		[ initialValues.current, values ]
+	);
 
 	const getStateAndHelpers = () => {
 		return {
 			values,
 			errors,
 			touched,
+			isDirty,
 			setTouched,
 			setValue,
 			setValues,
 			handleSubmit,
 			getInputProps,
 			isValidForm: ! Object.keys( errors ).length,
+			resetForm,
 		};
 	};
 
-	const isDirty = Object.values( changedFields ).some( Boolean );
-
-	if ( props.children && typeof props.children === 'function' ) {
-		const element = props.children( getStateAndHelpers() );
-		return (
-			<FormContext.Provider
-				value={ {
-					values,
-					errors,
-					touched,
-					isDirty,
-					changedFields,
-					setTouched,
-					setValue,
-					setValues,
-					handleSubmit,
-					getInputProps,
-					isValidForm: ! Object.keys( errors ).length,
-					resetForm,
-				} }
-			>
-				{ cloneElement( element ) }
-			</FormContext.Provider>
-		);
+	function getChildren() {
+		if ( typeof children === 'function' ) {
+			const element = children( getStateAndHelpers() );
+			return cloneElement( element );
+		}
+		return children;
 	}
+
 	return (
-		<FormContext.Provider
-			value={ {
-				values,
-				errors,
-				touched,
-				isDirty,
-				changedFields,
-				setTouched,
-				setValue,
-				setValues,
-				handleSubmit,
-				getInputProps,
-				isValidForm: ! Object.keys( errors ).length,
-				resetForm,
-			} }
-		>
-			{ props.children }
+		<FormContext.Provider value={ getStateAndHelpers() }>
+			{ getChildren() }
 		</FormContext.Provider>
 	);
 }

@@ -12,7 +12,6 @@ export type FormContext< Values extends Record< string, any > > = {
 	};
 	isDirty: boolean;
 	touched: { [ P in keyof Values ]?: boolean | undefined };
-	changedFields: { [ P in keyof Values ]?: boolean | undefined };
 	setTouched: React.Dispatch<
 		React.SetStateAction< { [ P in keyof Values ]?: boolean | undefined } >
 	>;
@@ -34,7 +33,6 @@ export type FormContext< Values extends Record< string, any > > = {
 	isValidForm: boolean;
 	resetForm: (
 		initialValues: Values,
-		changedFields?: { [ P in keyof Values ]?: boolean | undefined },
 		touchedFields?: { [ P in keyof Values ]?: boolean | undefined },
 		errors?: { [ P in keyof Values ]?: string }
 	) => void;
