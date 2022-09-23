@@ -21,13 +21,13 @@ import _isEqual from 'lodash/isEqual';
 /**
  * Internal dependencies
  */
-import { FormContext } from './form-context';
+import { FormContext, FormErrors } from './form-context';
 
 type FormProps< Values > = {
 	/**
 	 * Object of all initial errors to store in state.
 	 */
-	errors?: { [ P in keyof Values ]?: string };
+	errors?: FormErrors< Values >;
 	/**
 	 * Object key:value pair list of all initial field values.
 	 */
@@ -74,7 +74,7 @@ type FormProps< Values > = {
 	 * A function that is passed a list of all values and
 	 * should return an `errors` object with error response.
 	 */
-	validate?: ( values: Values ) => Record< string, string >;
+	validate?: ( values: Values ) => FormErrors< Values >;
 };
 
 function isChangeEvent< T >(
@@ -105,9 +105,9 @@ function FormComponent< Values extends Record< string, any > >(
 	const [ values, setValuesInternal ] = useState< Values >(
 		props.initialValues ?? ( {} as Values )
 	);
-	const [ errors, setErrors ] = useState< {
-		[ P in keyof Values ]?: string;
-	} >( props.errors || {} );
+	const [ errors, setErrors ] = useState< FormErrors< Values > >(
+		props.errors || {}
+	);
 	const [ touched, setTouched ] = useState< {
 		[ P in keyof Values ]?: boolean;
 	} >( props.touched || {} );
@@ -291,7 +291,7 @@ function FormComponent< Values extends Record< string, any > >(
 			) => handleChange( name, value ),
 			onBlur: () => handleBlur( name ),
 			className: isTouched && inputError ? 'has-error' : undefined,
-			help: isTouched ? inputError : null,
+			help: isTouched ? ( inputError as string ) : null,
 		};
 	}
 

@@ -2,14 +2,18 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { ProductStatus, ProductType, Product } from '@woocommerce/data';
+import {
+	ProductStatus,
+	ProductType,
+	Product,
+	ProductDimensions,
+} from '@woocommerce/data';
+import type { FormErrors } from '@woocommerce/components';
 
 export const validate = (
 	values: Partial< Product< ProductStatus, ProductType > >
 ) => {
-	const errors: {
-		[ key: string ]: string;
-	} = {};
+	const errors: FormErrors< typeof values > = {};
 	if ( ! values.name?.length ) {
 		errors.name = __( 'This field is required.', 'woocommerce' );
 	}

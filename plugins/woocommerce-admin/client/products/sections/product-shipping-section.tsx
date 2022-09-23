@@ -11,6 +11,9 @@ import {
 } from '@woocommerce/data';
 import interpolateComponents from '@automattic/interpolate-components';
 import {
+	BaseControl,
+	Card,
+	CardBody,
 	SelectControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
@@ -19,9 +22,10 @@ import {
 /**
  * Internal dependencies
  */
-import { ProductSectionLayout } from '../layout/product-section-layout';
-import { getTextControlProps } from './utils';
 import { ADMIN_URL } from '../../utils/admin-settings';
+import { ProductSectionLayout } from '../layout/product-section-layout';
+import { useProductHelper } from '../use-product-helper';
+import { getTextControlProps } from './utils';
 import './product-shipping-section.scss';
 
 const DEFAULT_SHIPPING_CLASS_OPTIONS: SelectControl.Option[] = [
@@ -48,6 +52,7 @@ function getInterpolatedSizeLabel( mixedString: string ) {
 
 export const ProductShippingSection: React.FC = () => {
 	const { getInputProps } = useFormContext< Product >();
+	const { sanitizeNumber } = useProductHelper();
 
 	const { shippingClasses, hasResolvedShippingClasses } = useSelect(
 		( select ) => {
@@ -65,6 +70,17 @@ export const ProductShippingSection: React.FC = () => {
 		[]
 	);
 
+	const inputWidthProps = getTextControlProps(
+		getInputProps( 'dimensions.width' )
+	);
+	const inputLengthProps = getTextControlProps(
+		getInputProps( 'dimensions.length' )
+	);
+	const inputHeightProps = getTextControlProps(
+		getInputProps( 'dimensions.height' )
+	);
+	const inputWeightProps = getTextControlProps( getInputProps( 'weight' ) );
+
 	return (
 		<>
 			<ProductSectionLayout
@@ -74,128 +90,149 @@ export const ProductShippingSection: React.FC = () => {
 					'woocommerce'
 				) }
 			>
-				{ hasResolvedShippingClasses ? (
-					<div>
-						<SelectControl
-							label={ __( 'Shipping class', 'woocommerce' ) }
-							{ ...getTextControlProps(
-								getInputProps( 'shipping_class' )
+				<Card>
+					<CardBody>
+						{ hasResolvedShippingClasses ? (
+							<>
+								<SelectControl
+									label={ __(
+										'Shipping class',
+										'woocommerce'
+									) }
+									{ ...getTextControlProps(
+										getInputProps( 'shipping_class' )
+									) }
+									options={ [
+										...DEFAULT_SHIPPING_CLASS_OPTIONS,
+										...mapShippingClassToSelectOption(
+											shippingClasses ?? []
+										),
+									] }
+								/>
+								<span className="woocommerce-product-form__secondary-text">
+									{ interpolateComponents( {
+										mixedString: __(
+											'Manage shipping classes and rates in {{link}}global settings{{/link}}.',
+											'woocommerce'
+										),
+										components: {
+											link: (
+												<Link
+													href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=classes` }
+													target="_blank"
+													type="external"
+												>
+													<></>
+												</Link>
+											),
+										},
+									} ) }
+								</span>
+							</>
+						) : (
+							<div className="product-shipping-section__spinner-wrapper">
+								<Spinner />
+							</div>
+						) }
+					</CardBody>
+				</Card>
+
+				<Card>
+					<CardBody>
+						<h4 className="product-shipping-section__subtitle">
+							{ __( 'Dimensions', 'woocommerce' ) }
+						</h4>
+						<p className="woocommerce-product-form__secondary-text">
+							{ __(
+								'Enter the size of the product as you’d put it in a shipping box, including packaging like bubble wrap.',
+								'woocommerce'
 							) }
-							options={ [
-								...DEFAULT_SHIPPING_CLASS_OPTIONS,
-								...mapShippingClassToSelectOption(
-									shippingClasses ?? []
-								),
-							] }
-						/>
-						<span className="woocommerce-product-form__secondary-text">
-							{ interpolateComponents( {
-								mixedString: __(
-									'Manage shipping classes and rates in {{link}}global settings{{/link}}.',
-									'woocommerce'
-								),
-								components: {
-									link: (
-										<Link
-											href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=classes` }
-											target="_blank"
-											type="external"
-										>
-											<></>
-										</Link>
-									),
-								},
-							} ) }
-						</span>
-					</div>
-				) : (
-					<div className="product-shipping-section__spinner-wrapper">
-						<Spinner />
-					</div>
-				) }
-			</ProductSectionLayout>
+						</p>
+						<div className="product-shipping-section__container">
+							<div>
+								<BaseControl
+									{ ...inputWidthProps }
+									id="product_shipping_dimensions_width"
+								>
+									<InputControl
+										{ ...inputWidthProps }
+										label={ getInterpolatedSizeLabel(
+											__(
+												'Width {{span}}A{{/span}}',
+												'woocommerce'
+											)
+										) }
+										onChange={ ( value: string ) =>
+											inputWidthProps?.onChange(
+												sanitizeNumber( value )
+											)
+										}
+										suffix="cm"
+									/>
+								</BaseControl>
 
-			<ProductSectionLayout title={ '' } description={ '' }>
-				<h4 className="product-shipping-section__subtitle">
-					{ __( 'Dimensions', 'woocommerce' ) }
-				</h4>
-				<p className="woocommerce-product-form__secondary-text">
-					{ __(
-						'Enter the size of the product as you’d put it in a shipping box, including packaging like bubble wrap.',
-						'woocommerce'
-					) }
-				</p>
-				<div className="product-shipping-section__container">
-					<div>
-						<div className="components-base-control">
-							<div className="components-base-control__field">
-								<InputControl
-									label={ getInterpolatedSizeLabel(
-										__(
-											'Width {{span}}A{{/span}}',
-											'woocommerce'
-										)
-									) }
-									type="number"
-									{ ...getTextControlProps(
-										getInputProps( 'dimensions.width' )
-									) }
-									suffix="cm"
-								/>
-							</div>
-						</div>
+								<BaseControl
+									{ ...inputLengthProps }
+									id="product_shipping_dimensions_length"
+								>
+									<InputControl
+										{ ...inputLengthProps }
+										label={ getInterpolatedSizeLabel(
+											__(
+												'Length {{span}}B{{/span}}',
+												'woocommerce'
+											)
+										) }
+										onChange={ ( value: string ) =>
+											inputLengthProps?.onChange(
+												sanitizeNumber( value )
+											)
+										}
+										suffix="cm"
+									/>
+								</BaseControl>
 
-						<div className="components-base-control">
-							<div className="components-base-control__field">
-								<InputControl
-									label={ getInterpolatedSizeLabel(
-										__(
-											'Length {{span}}B{{/span}}',
-											'woocommerce'
-										)
-									) }
-									type="number"
-									{ ...getTextControlProps(
-										getInputProps( 'dimensions.length' )
-									) }
-									suffix="cm"
-								/>
-							</div>
-						</div>
+								<BaseControl
+									{ ...inputHeightProps }
+									id="product_shipping_dimensions_height"
+								>
+									<InputControl
+										{ ...inputHeightProps }
+										label={ getInterpolatedSizeLabel(
+											__(
+												'Height {{span}}C{{/span}}',
+												'woocommerce'
+											)
+										) }
+										onChange={ ( value: string ) =>
+											inputHeightProps?.onChange(
+												sanitizeNumber( value )
+											)
+										}
+										suffix="cm"
+									/>
+								</BaseControl>
 
-						<div className="components-base-control">
-							<div className="components-base-control__field">
-								<InputControl
-									label={ getInterpolatedSizeLabel(
-										__(
-											'Height {{span}}C{{/span}}',
-											'woocommerce'
-										)
-									) }
-									type="number"
-									{ ...getTextControlProps(
-										getInputProps( 'dimensions.height' )
-									) }
-									suffix="cm"
-								/>
+								<BaseControl
+									{ ...inputWeightProps }
+									id="product_shipping_weight"
+								>
+									<InputControl
+										{ ...inputWeightProps }
+										label={ __( 'Weight', 'woocommerce' ) }
+										onChange={ ( value: string ) =>
+											inputWeightProps?.onChange(
+												sanitizeNumber( value )
+											)
+										}
+										suffix="kg"
+									/>
+								</BaseControl>
 							</div>
+							<div></div>
 						</div>
-
-						<div className="components-base-control">
-							<div className="components-base-control__field">
-								<InputControl
-									label={ __( 'Weight', 'woocommerce' ) }
-									type="number"
-									{ ...getTextControlProps(
-										getInputProps( 'weight' )
-									) }
-									suffix="kg"
-								/>
-							</div>
-						</div>
-					</div>
-					<div></div>
-				</div>
+					</CardBody>
+				</Card>
 			</ProductSectionLayout>
 		</>
 	);

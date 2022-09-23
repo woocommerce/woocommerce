@@ -8,11 +8,12 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useContext } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import interpolateComponents from '@automattic/interpolate-components';
-import classnames from 'classnames';
 import {
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 	BaseControl,
+	Card,
+	CardBody,
 } from '@wordpress/components';
 
 /**
@@ -26,8 +27,8 @@ import { CurrencyContext } from '../../lib/currency-context';
 import { useProductHelper } from '../use-product-helper';
 
 export const PricingSection: React.FC = () => {
-	const { getInputProps, setValue } = useFormContext< Product >();
-	const { sanitizePrice } = useProductHelper();
+	const { getInputProps } = useFormContext< Product >();
+	const { sanitizeNumber } = useProductHelper();
 	const { isResolving: isTaxSettingsResolving, taxSettings } = useSelect(
 		( select ) => {
 			const { getSettings, hasFinishedResolution } =
@@ -86,6 +87,10 @@ export const PricingSection: React.FC = () => {
 		},
 	} );
 
+	const regularPriceProps = getInputControlProps( {
+		...getInputProps( 'regular_price' ),
+		context,
+	} );
 	const salePriceProps = getInputControlProps( {
 		...getInputProps( 'sale_price' ),
 		context,
@@ -119,53 +124,44 @@ export const PricingSection: React.FC = () => {
 				</>
 			}
 		>
-			<div className="woocommerce-product-form__custom-label-input">
-				<InputControl
-					label={ __( 'List price', 'woocommerce' ) }
-					placeholder={ __( '10.59', 'woocommerce' ) }
-					{ ...getInputControlProps( {
-						...getInputProps( 'regular_price' ),
-						context,
-					} ) }
-					onChange={ ( value: string ) => {
-						const sanitizedValue = sanitizePrice( value );
-						setValue( 'regular_price', sanitizedValue );
-					} }
-				/>
-				{ ! isTaxSettingsResolving && (
-					<span className="woocommerce-product-form__secondary-text">
-						{ taxSettingsElement }
-					</span>
-				) }
-			</div>
+			<Card>
+				<CardBody>
+					<BaseControl
+						{ ...regularPriceProps }
+						id="product_pricing_regular_price"
+					>
+						<InputControl
+							{ ...regularPriceProps }
+							label={ __( 'List price', 'woocommerce' ) }
+							placeholder={ __( '10.59', 'woocommerce' ) }
+							onChange={ ( value: string ) => {
+								const sanitizedValue = sanitizeNumber( value );
+								regularPriceProps?.onChange( sanitizedValue );
+							} }
+						/>
+					</BaseControl>
+					{ ! isTaxSettingsResolving && (
+						<span className="woocommerce-product-form__secondary-text">
+							{ taxSettingsElement }
+						</span>
+					) }
 
-			<div
-				className={ classnames(
-					'woocommerce-product-form__custom-label-input',
-					{
-						'has-error': salePriceProps?.help !== '',
-					}
-				) }
-			>
-				<BaseControl
-					id="sale_price"
-					help={
-						salePriceProps && salePriceProps.help
-							? salePriceProps.help
-							: ''
-					}
-				>
-					<InputControl
-						label={ salePriceTitle }
-						placeholder={ __( '8.59', 'woocommerce' ) }
+					<BaseControl
 						{ ...salePriceProps }
-						onChange={ ( value: string ) => {
-							const sanitizedValue = sanitizePrice( value );
-							setValue( 'sale_price', sanitizedValue );
-						} }
-					/>
-				</BaseControl>
-			</div>
+						id="product_pricing_sale_price"
+					>
+						<InputControl
+							{ ...salePriceProps }
+							label={ salePriceTitle }
+							placeholder={ __( '8.59', 'woocommerce' ) }
+							onChange={ ( value: string ) => {
+								const sanitizedValue = sanitizeNumber( value );
+								salePriceProps?.onChange( sanitizedValue );
+							} }
+						/>
+					</BaseControl>
+				</CardBody>
+			</Card>
 		</ProductSectionLayout>
 	);
 };
