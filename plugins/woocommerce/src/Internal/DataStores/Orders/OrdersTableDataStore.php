@@ -1589,11 +1589,6 @@ LEFT JOIN {$operational_data_clauses['join']}
 				$order->update_meta_data( "_{$address_type}_address_index", implode( ' ', $order->get_address( $address_type ) ) );
 			}
 		}
-
-		// Sync some COT fields to meta keys for backwards compatibility.
-		foreach ( $this->get_internal_data_store_keys() as $key ) {
-			$this->{"set_$key"}( $order, $this->{"get_$key"}( $order ), false );
-		}
 	}
 
 	/**
@@ -1873,15 +1868,6 @@ CREATE TABLE $meta_table (
 	 */
 	public function update_meta( &$object, $meta ) {
 		return $this->data_store_meta->update_meta( $object, $meta );
-	}
-
-	/**
-	 * Returns keys currently handled by this datastore manually (not available through order properties).
-	 *
-	 * @return array List of keys.
-	 */
-	protected function get_internal_data_store_keys() {
-		return array();
 	}
 
 }
