@@ -1138,7 +1138,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$refund->save();
 		$this->migrator->migrate_order( $refund->get_id() );
 
-		$this->assertEquals( 5, $order->get_total_tax_refunded() );
-		$this->assertEquals( 10, $order->get_total_shipping_refunded() );
+		$this->assertEquals( 5, $order->get_data_store()->get_total_tax_refunded( $order ) );
+		$this->assertEquals( 10, $order->get_data_store()->get_total_shipping_refunded( $order ) );
 	}
 }
