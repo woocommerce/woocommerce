@@ -21,6 +21,7 @@ import { ProductFormLayout } from './layout/product-form-layout';
 import { ProductFormActions } from './product-form-actions';
 import { ProductDetailsSection } from './sections/product-details-section';
 import { PricingSection } from './sections/pricing-section';
+import { ProductShippingSection } from './sections/product-shipping-section';
 import './product-page.scss';
 import { validate } from './product-validation';
 
@@ -125,7 +126,7 @@ const EditProductPage: React.FC = () => {
 						<ProductFormLayout>
 							<ProductDetailsSection />
 							<PricingSection />
-
+							<ProductShippingSection />
 							<ProductFormActions />
 						</ProductFormLayout>
 					</Form>
