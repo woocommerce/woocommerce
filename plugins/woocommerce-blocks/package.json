@@ -230,6 +230,7 @@
 		"config": "3.3.7",
 		"dataloader": "2.1.0",
 		"dinero.js": "1.9.1",
+		"dompurify": "^2.4.0",
 		"downshift": "6.1.7",
 		"html-react-parser": "0.14.3",
 		"react-number-format": "4.9.3",
