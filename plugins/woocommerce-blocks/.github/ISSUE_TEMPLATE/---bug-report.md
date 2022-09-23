@@ -29,7 +29,7 @@ If applicable, add screenshots to help explain your problem.
 
 ### WordPress (please complete the following information):
 
--   Core version: [e.g. 5.9]
+-   WordPress version: [e.g. 5.9]
 -   Gutenberg version (if installed): [e.g. 12.0.0]
 -   WooCommerce version: [e.g. 6.1]
 -   WooCommerce Blocks version: [e.g. 7.0.0]
