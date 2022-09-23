@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { CheckboxControl, Spinner } from '@wordpress/components';
-import React, { createElement } from 'react';
-import { useState } from '@wordpress/element';
+import React from 'react';
+import { createElement, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -52,6 +52,29 @@ export const Multiple: React.FC = () => {
 				multiple
 				items={ sampleItems }
 				label="Multiple values"
+				selected={ selected }
+				onSelect={ ( item ) =>
+					Array.isArray( selected ) &&
+					setSelected( [ ...selected, item ] )
+				}
+				onRemove={ ( item ) =>
+					setSelected( selected.filter( ( i ) => i !== item ) )
+				}
+			/>
+		</>
+	);
+};
+
+export const ExternalTags: React.FC = () => {
+	const [ selected, setSelected ] = useState< DefaultItemType[] >( [] );
+
+	return (
+		<>
+			<SelectControl
+				multiple
+				hasExternalTags
+				items={ sampleItems }
+				label="External tags"
 				selected={ selected }
 				onSelect={ ( item ) =>
 					Array.isArray( selected ) &&
@@ -292,10 +315,8 @@ export const CustomItemType: React.FC = () => {
 							: [ item ]
 					)
 				}
-				onRemove={ ( item ) =>
-					setSelected( selected.filter( ( i ) => i !== item ) )
-				}
-				getItemLabel={ ( item ) => item?.user.name }
+				onRemove={ () => setSelected( null ) }
+				getItemLabel={ ( item ) => item?.user.name || '' }
 				getItemValue={ ( item ) => String( item?.itemId ) }
 			/>
 		</>

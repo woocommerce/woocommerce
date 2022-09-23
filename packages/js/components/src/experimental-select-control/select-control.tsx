@@ -2,8 +2,8 @@
  * External dependencies
  */
 import classnames from 'classnames';
+import { createElement, Fragment, useState } from '@wordpress/element';
 import { useCombobox, useMultipleSelection } from 'downshift';
-import { createElement, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -36,6 +36,7 @@ type SelectControlProps< ItemType > = {
 		selectedItems: ItemType[],
 		getItemLabel: getItemLabelType< ItemType >
 	) => ItemType[];
+	hasExternalTags?: boolean;
 	multiple?: boolean;
 	onInputChange?: ( value: string | undefined ) => void;
 	onRemove?: ( item: ItemType ) => void;
@@ -47,6 +48,7 @@ type SelectControlProps< ItemType > = {
 function SelectControl< ItemType = DefaultItemType >( {
 	getItemLabel = defaultGetItemLabel,
 	getItemValue = defaultGetItemValue,
+	hasExternalTags = false,
 	children = ( {
 		items: renderItems,
 		highlightedIndex,
@@ -170,6 +172,16 @@ function SelectControl< ItemType = DefaultItemType >( {
 		onRemove( item );
 	};
 
+	const selectedItemTags = multiple ? (
+		<SelectedItems
+			items={ selectedItems }
+			getItemLabel={ getItemLabel }
+			getItemValue={ getItemValue }
+			getSelectedItemProps={ getSelectedItemProps }
+			onRemove={ onRemoveItem }
+		/>
+	) : null;
+
 	return (
 		<div
 			className={ classnames( 'woocommerce-experimental-select-control', {
@@ -192,26 +204,21 @@ function SelectControl< ItemType = DefaultItemType >( {
 					placeholder,
 				} ) }
 			>
-				{ multiple ? (
-					<SelectedItems
-						items={ selectedItems }
-						getItemLabel={ getItemLabel }
-						getItemValue={ getItemValue }
-						getSelectedItemProps={ getSelectedItemProps }
-						onRemove={ onRemoveItem }
-					/>
-				) : null }
+				<>
+					{ children( {
+						items: filteredItems,
+						highlightedIndex,
+						getItemProps,
+						getMenuProps,
+						isOpen,
+						getItemLabel,
+						getItemValue,
+					} ) }
+					{ ! hasExternalTags && selectedItemTags }
+				</>
 			</ComboBox>
 
-			{ children( {
-				items: filteredItems,
-				highlightedIndex,
-				getItemProps,
-				getMenuProps,
-				isOpen,
-				getItemLabel,
-				getItemValue,
-			} ) }
+			{ hasExternalTags && selectedItemTags }
 		</div>
 	);
 }
