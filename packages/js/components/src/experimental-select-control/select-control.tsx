@@ -91,7 +91,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 		removeSelectedItem,
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
-	} = useMultipleSelection( { itemToString } );
+	} = useMultipleSelection( { itemToString: getItemLabel } );
 	let selectedItems = selected === null ? [] : selected;
 	selectedItems = Array.isArray( selectedItems )
 		? selectedItems
