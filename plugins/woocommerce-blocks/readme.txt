@@ -86,6 +86,12 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 8.5.1 - 2022-09-23 =
+
+#### Bug Fixes
+
+- Ensure that scripts are loaded using absolute URLs to prevent loading issues with subfolder installs. ([7211](https://github.com/woocommerce/woocommerce-blocks/pull/7211))
+
 = 8.5.0 - 2022-09-12 =
 
 #### Enhancements
