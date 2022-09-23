@@ -212,6 +212,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Support order searches as an integral part of how (COT) order queries work. [#34405](https://github.com/woocommerce/woocommerce/pull/34405)
 * Add - UI Revamp on Marketing Page with feature toggle. [#34642](https://github.com/woocommerce/woocommerce/pull/34642)
 * Add - Woo Mobile Welcome Page with Magic Link feature [#34637](https://github.com/woocommerce/woocommerce/pull/34637)
+* Update - Update WooCommerce Blocks to 8.5.1 [#34807](https://github.com/woocommerce/woocommerce/pull/34807)
 * Update - Updates tracking parameters for marketing messages of mobile apps in New order mail. [#34717](https://github.com/woocommerce/woocommerce/pull/34717)
 * Update - Add an empty list of states for Saint Martin (French part) [#34521](https://github.com/woocommerce/woocommerce/pull/34521)
 * Update - Add Wish and Walmart to the platform options [#34541](https://github.com/woocommerce/woocommerce/pull/34541)
