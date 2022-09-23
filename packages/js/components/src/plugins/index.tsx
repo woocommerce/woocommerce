@@ -58,9 +58,7 @@ export const Plugins = ( {
 	) => {
 		setHasErrors( true );
 
-		if ( onError ) {
-			onError( errors, response );
-		}
+		onError( errors, response );
 	};
 
 	const handleSuccess = (
