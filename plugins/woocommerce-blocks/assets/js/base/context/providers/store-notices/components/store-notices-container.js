@@ -2,15 +2,24 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { useDispatch, useSelect } from '@wordpress/data';
 import classnames from 'classnames';
 import { Notice } from 'wordpress-components';
-import { useDispatch, useSelect } from '@wordpress/data';
-
+import { sanitize } from 'dompurify';
 /**
  * Internal dependencies
  */
 import './style.scss';
 import { useStoreNoticesContext } from '../context';
+
+const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br' ];
+const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download' ];
+
+const sanitizeHTML = ( html ) => {
+	return {
+		__html: sanitize( html, { ALLOWED_TAGS, ALLOWED_ATTR } ),
+	};
+};
 
 const getWooClassName = ( { status = 'default' } ) => {
 	switch ( status ) {
@@ -53,7 +62,7 @@ export const StoreNoticesContainer = ( {
 		<div className={ wrapperClass }>
 			{ regularNotices.map( ( props ) => (
 				<Notice
-					key={ 'store-notice-' + props.id }
+					key={ `store-notice-${ props.id }` }
 					{ ...props }
 					className={ classnames(
 						'wc-block-components-notices__notice',
@@ -65,7 +74,11 @@ export const StoreNoticesContainer = ( {
 						}
 					} }
 				>
-					{ props.content }
+					<span
+						dangerouslySetInnerHTML={ sanitizeHTML(
+							props.content
+						) }
+					/>
 				</Notice>
 			) ) }
 		</div>
@@ -84,3 +97,5 @@ StoreNoticesContainer.propTypes = {
 		} )
 	),
 };
+
+export default StoreNoticesContainer;
