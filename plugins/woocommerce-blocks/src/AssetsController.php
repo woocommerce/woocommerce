@@ -163,13 +163,27 @@ final class AssetsController {
 			$dependencies,
 			function( $src, $handle ) use ( $wp_scripts ) {
 				if ( isset( $wp_scripts->registered[ $handle ] ) ) {
-					$src[] = add_query_arg( 'ver', $wp_scripts->registered[ $handle ]->ver, $wp_scripts->registered[ $handle ]->src );
+					$src[] = add_query_arg( 'ver', $wp_scripts->registered[ $handle ]->ver, $this->get_absolute_url( $wp_scripts->registered[ $handle ]->src ) );
 					$src   = array_merge( $src, $this->get_script_dependency_src_array( $wp_scripts->registered[ $handle ]->deps ) );
 				}
 				return $src;
 			},
 			[]
 		);
+	}
+
+	/**
+	 * Returns an absolute url to relative links for WordPress core scripts.
+	 *
+	 * @param string $src Original src that can be relative.
+	 * @return string Correct full path string.
+	 */
+	private function get_absolute_url( $src ) {
+		$wp_scripts = wp_scripts();
+		if ( ! preg_match( '|^(https?:)?//|', $src ) && ! ( $wp_scripts->content_url && 0 === strpos( $src, $wp_scripts->content_url ) ) ) {
+			$src = $wp_scripts->base_url . $src;
+		}
+		return $src;
 	}
 
 	/**
