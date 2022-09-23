@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, storefront, checkout, downlo
 Requires at least: 5.8
 Tested up to: 6.0
 Requires PHP: 7.2
-Stable tag: 6.9.3
+Stable tag: 6.9.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -163,6 +163,16 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
+= 6.9.4 2022-09-26 =
+
+**WooCommerce**
+
+* Dev - Update WooCommerce Blocks to 8.3.3. [#34814](https://github.com/woocommerce/woocommerce/pull/34814)
+
+**WooCommerce Blocks 8.3.3**
+
+* Fix - Ensure that scripts are loaded using absolute URLs to prevent loading issues with subfolder installs. ([7211](https://github.com/woocommerce/woocommerce-blocks/pull/7211))
+
 = 6.9.3 2022-09-20 =
 
 **WooCommerce**
@@ -278,8 +288,9 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Reduce the amount of terms shown in attributes page [#33962](https://github.com/woocommerce/woocommerce/pull/33962)
 * Enhancement - Use method_exists instead of throwing in AbstractServiceProvider::reflect_class_or_callable [#33960](https://github.com/woocommerce/woocommerce/pull/33960)
 
-**WooCommerce Blocks 8.1.0 & 8.2.0 & 8.2.1**
+**WooCommerce Blocks 8.1.0 & 8.2.0 & 8.2.1 & 8.3.0 & 8.3.1 & 8.3.2**
 
+* Enhancement - Add feedback box to the Cart & Checkout Inner Blocks in the inspector. ([6881](https://github.com/woocommerce/woocommerce-blocks/pull/6881))
 * Enhancement - Enable the Cart and Checkout blocks when WooCommerce Blocks is bundled in WooCommerce Core.([6805](https://github.com/woocommerce/woocommerce-blocks/pull/6805))
 * Enhancement - Refactor style-attributes hooks to add as global custom imports and remove relative import paths.([6870](https://github.com/woocommerce/woocommerce-blocks/pull/6870))
 * Enhancement - Add the ability to register patterns by adding them under the "patterns" folder and add the new "WooCommerce Filters" pattern.([6861](https://github.com/woocommerce/woocommerce-blocks/pull/6861))
@@ -288,6 +299,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Add filter URL support to filter blocks when filtering for All Products block.([6642](https://github.com/woocommerce/woocommerce-blocks/pull/6642))
 * Enhancement - Add: Allow choosing between single and multiple sections.([6620](https://github.com/woocommerce/woocommerce-blocks/pull/6620))
 * Enhancement - Cart endpoint for Store API (/wc/store/cart) now features cross-sell items based on cart contents.([6635](https://github.com/woocommerce/woocommerce-blocks/pull/6635))
+* Fix - Fix Best Selling Products block ordering ([7025](https://github.com/woocommerce/woocommerce-blocks/pull/7025))
+* Fix - Prevent unnecessarily showing the item names in a shipping package if it's the only package. ([6899](https://github.com/woocommerce/woocommerce-blocks/pull/6899))
 * Fix - Refactor Product Categories block to use block.json.([6875](https://github.com/woocommerce/woocommerce-blocks/pull/6875))
 * Fix - Add font-weight controls to the Mini Cart block text.([6760](https://github.com/woocommerce/woocommerce-blocks/pull/6760))
 * Fix - Fix proceed to checkout button not working for custom links.([6804](https://github.com/woocommerce/woocommerce-blocks/pull/6804))
