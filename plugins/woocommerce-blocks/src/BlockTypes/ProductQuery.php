@@ -37,6 +37,17 @@ class ProductQuery extends AbstractBlock {
 
 	}
 
+	/**
+	 * Check if a given block
+	 *
+	 * @param array $parsed_block The block being rendered.
+	 * @return boolean
+	 */
+	private function is_woocommerce_variation( $parsed_block ) {
+		return isset( $parsed_block['attrs']['namespace'] )
+		&& substr( $parsed_block['attrs']['namespace'], 0, 11 ) === 'woocommerce';
+	}
+
 
 	/**
 	 * Update the query for the product query block.
@@ -51,7 +62,7 @@ class ProductQuery extends AbstractBlock {
 
 		$this->parsed_block = $parsed_block;
 
-		if ( isset( $parsed_block['attrs']['__woocommerceVariationProps'] ) ) {
+		if ( $this->is_woocommerce_variation( $parsed_block ) ) {
 			add_filter(
 				'query_loop_block_query_vars',
 				array( $this, 'get_query_by_attributes' ),
@@ -69,11 +80,10 @@ class ProductQuery extends AbstractBlock {
 	 */
 	public function get_query_by_attributes( $query ) {
 		$parsed_block = $this->parsed_block;
-		if ( ! isset( $parsed_block['attrs']['__woocommerceVariationProps'] ) ) {
+		if ( ! $this->is_woocommerce_variation( $parsed_block ) ) {
 			return $query;
 		}
 
-		$variation_props     = $parsed_block['attrs']['__woocommerceVariationProps'];
 		$common_query_values = array(
 			'post_type'      => 'product',
 			'post_status'    => 'publish',
@@ -81,7 +91,7 @@ class ProductQuery extends AbstractBlock {
 			'orderby'        => $query['orderby'],
 			'order'          => $query['order'],
 		);
-		$on_sale_query       = $this->get_on_sale_products_query( $variation_props );
+		$on_sale_query       = $this->get_on_sale_products_query( $parsed_block['attrs']['query'] );
 
 		return array_merge( $query, $common_query_values, $on_sale_query );
 	}
@@ -89,11 +99,11 @@ class ProductQuery extends AbstractBlock {
 	/**
 	 * Return a query for on sale products.
 	 *
-	 * @param array $variation_props Dedicated attributes for the variation.
+	 * @param array $query_params Block query parameters.
 	 * @return array
 	 */
-	private function get_on_sale_products_query( $variation_props ) {
-		if ( ! isset( $variation_props['attributes']['query']['onSale'] ) || true !== $variation_props['attributes']['query']['onSale'] ) {
+	private function get_on_sale_products_query( $query_params ) {
+		if ( ! isset( $query_params['__woocommerceOnSale'] ) || true !== $query_params['__woocommerceOnSale'] ) {
 			return array();
 		}
 

@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { BlockInstance } from '@wordpress/blocks';
 import type { EditorBlock } from '@woocommerce/types';
 
 export interface ProductQueryArguments {
@@ -28,11 +27,14 @@ export interface ProductQueryArguments {
 	 * )
 	 * ```
 	 */
-	onSale?: boolean;
+	// Disabling naming convention because we are namespacing our
+	// custom attributes inside a core block. Prefixing with underscores
+	// will help signify our intentions.
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	__woocommerceOnSale?: boolean;
 }
 
-export type ProductQueryBlock =
-	WooCommerceBlockVariation< ProductQueryAttributes >;
+export type ProductQueryBlock = EditorBlock< QueryBlockAttributes >;
 
 export interface ProductQueryAttributes {
 	/**
@@ -45,6 +47,16 @@ export interface ProductQueryAttributes {
 	 * Query attributes that define which products will be fetched.
 	 */
 	query?: ProductQueryArguments;
+}
+
+export interface QueryBlockAttributes {
+	allowControls?: string[];
+	displayLayout?: {
+		type: 'flex' | 'list';
+		columns?: number;
+	};
+	namespace?: string;
+	query: QueryBlockQuery & ProductQueryArguments;
 }
 
 export interface QueryBlockQuery {
@@ -65,15 +77,7 @@ export interface QueryBlockQuery {
 
 export enum QueryVariation {
 	/** The main, fully customizable, Product Query block */
-	PRODUCT_QUERY = 'product-query',
+	PRODUCT_QUERY = 'woocommerce/product-query',
 	/** Only shows products on sale */
-	PRODUCTS_ON_SALE = 'query-products-on-sale',
+	PRODUCTS_ON_SALE = 'woocommerce/query-products-on-sale',
 }
-
-export type WooCommerceBlockVariation< T > = EditorBlock< {
-	// Disabling naming convention because we are namespacing our
-	// custom attributes inside a core block. Prefixing with underscores
-	// will help signify our intentions.
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	__woocommerceVariationProps: Partial< BlockInstance< T > >;
-} >;
