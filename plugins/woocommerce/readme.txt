@@ -253,7 +253,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Collapse the short description module by default. Add tooltips clarifying product description and short description editors. [#34619](https://github.com/woocommerce/woocommerce/pull/34619)
 * Enhancement - Redirect CPT-based admin order URLs to the corresponding Custom Order Table URLs. [#34644](https://github.com/woocommerce/woocommerce/pull/34644)
 
-**WooCommerce Blocks 8.4.0 & 8.5.0**
+**WooCommerce Blocks 8.4.0 & 8.5.0 & 8.5.1**
 
 * Enhancement - Update the filter `Apply` buttons to match the new designs. ([6958](https://github.com/woocommerce/woocommerce-blocks/pull/6958))
 * Enhancement - Update the design of the Filter Products by Attribute block. ([6920](https://github.com/woocommerce/woocommerce-blocks/pull/6920))
@@ -272,6 +272,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Update "remove filter" icon on the Active Filters block to use Icon component in both layouts. ([7035](https://github.com/woocommerce/woocommerce-blocks/pull/7035))
 * Enhancement - Update `filter by price` skeleton design. ([6997](https://github.com/woocommerce/woocommerce-blocks/pull/6997))
 * Enhancement - Update `filter by attribute` skeleton design. ([6990](https://github.com/woocommerce/woocommerce-blocks/pull/6990))
+* Fix - Ensure that scripts are loaded using absolute URLs to prevent loading issues with subfolder installs. ([7211](https://github.com/woocommerce/woocommerce-blocks/pull/7211))
 * Fix - Fixed a bug with a class name deriving from a translatable string. ([6914](https://github.com/woocommerce/woocommerce-blocks/pull/6914))
 * Fix - Fix checkbox label when count is zero. ([7073](https://github.com/woocommerce/woocommerce-blocks/pull/7073))
 * Fix - Fix incompatible Classic Template block notice in the Editor for Woo specific templates. ([7033](https://github.com/woocommerce/woocommerce-blocks/pull/7033))
