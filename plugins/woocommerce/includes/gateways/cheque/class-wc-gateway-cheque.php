@@ -45,7 +45,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 		add_action( 'woocommerce_thankyou_cheque', array( $this, 'thankyou_page' ) );
 
 		// Customer Emails.
-		add_action( 'woocommerce_email_payment_instructions', array( $this, 'email_instructions' ), 10, 3 );
+		add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 );
 	}
 
 	/**

@@ -26,10 +26,6 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 <p><?php printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ); ?></p>
 <p><?php esc_html_e( 'Thanks for your order. It’s on-hold until we confirm that payment has been received.', 'woocommerce' ); ?></p>
 
-<?php do_action( 'woocommerce_email_payment_instructions', $order, $sent_to_admin, $plain_text, $email ); ?>
-
-<p><?php esc_html_e( 'In the meantime, here’s a reminder of what you ordered:', 'woocommerce' ); ?></p>
-
 <?php
 
 /*
