@@ -14,6 +14,7 @@
 	},
 	"scripts": {
 		"e2e": "pnpm exec wc-e2e test:e2e",
+		"e2e-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js",
 		"turbo:test": "pnpm test:unit",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "composer install",
