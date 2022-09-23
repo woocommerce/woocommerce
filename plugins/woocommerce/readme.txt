@@ -212,6 +212,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Support order searches as an integral part of how (COT) order queries work. [#34405](https://github.com/woocommerce/woocommerce/pull/34405)
 * Add - UI Revamp on Marketing Page with feature toggle. [#34642](https://github.com/woocommerce/woocommerce/pull/34642)
 * Add - Woo Mobile Welcome Page with Magic Link feature [#34637](https://github.com/woocommerce/woocommerce/pull/34637)
+* Update - Update WooCommerce Blocks to 8.5.1 [#34807](https://github.com/woocommerce/woocommerce/pull/34807)
 * Update - Updates tracking parameters for marketing messages of mobile apps in New order mail. [#34717](https://github.com/woocommerce/woocommerce/pull/34717)
 * Update - Add an empty list of states for Saint Martin (French part) [#34521](https://github.com/woocommerce/woocommerce/pull/34521)
 * Update - Add Wish and Walmart to the platform options [#34541](https://github.com/woocommerce/woocommerce/pull/34541)
@@ -252,7 +253,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Collapse the short description module by default. Add tooltips clarifying product description and short description editors. [#34619](https://github.com/woocommerce/woocommerce/pull/34619)
 * Enhancement - Redirect CPT-based admin order URLs to the corresponding Custom Order Table URLs. [#34644](https://github.com/woocommerce/woocommerce/pull/34644)
 
-**WooCommerce Blocks 8.4.0 & 8.5.0**
+**WooCommerce Blocks 8.4.0 & 8.5.0 & 8.5.1**
 
 * Enhancement - Update the filter `Apply` buttons to match the new designs. ([6958](https://github.com/woocommerce/woocommerce-blocks/pull/6958))
 * Enhancement - Update the design of the Filter Products by Attribute block. ([6920](https://github.com/woocommerce/woocommerce-blocks/pull/6920))
@@ -271,6 +272,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Update "remove filter" icon on the Active Filters block to use Icon component in both layouts. ([7035](https://github.com/woocommerce/woocommerce-blocks/pull/7035))
 * Enhancement - Update `filter by price` skeleton design. ([6997](https://github.com/woocommerce/woocommerce-blocks/pull/6997))
 * Enhancement - Update `filter by attribute` skeleton design. ([6990](https://github.com/woocommerce/woocommerce-blocks/pull/6990))
+* Fix - Ensure that scripts are loaded using absolute URLs to prevent loading issues with subfolder installs. ([7211](https://github.com/woocommerce/woocommerce-blocks/pull/7211))
 * Fix - Fixed a bug with a class name deriving from a translatable string. ([6914](https://github.com/woocommerce/woocommerce-blocks/pull/6914))
 * Fix - Fix checkbox label when count is zero. ([7073](https://github.com/woocommerce/woocommerce-blocks/pull/7073))
 * Fix - Fix incompatible Classic Template block notice in the Editor for Woo specific templates. ([7033](https://github.com/woocommerce/woocommerce-blocks/pull/7033))
