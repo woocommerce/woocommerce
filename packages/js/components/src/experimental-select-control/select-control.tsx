@@ -4,31 +4,39 @@
 import classnames from 'classnames';
 import { createElement } from 'react';
 import { useCombobox, useMultipleSelection } from 'downshift';
-import { useState, Fragment } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { ChildrenType, ItemType } from './types';
+import {
+	ChildrenType,
+	DefaultItemType,
+	getItemLabelType,
+	getItemValueType,
+} from './types';
 import { SelectedItems } from './selected-items';
 import { ComboBox } from './combo-box';
 import { Menu } from './menu';
 import { MenuItem } from './menu-item';
 import {
-	itemToString as defaultItemToString,
-	getFilteredItems as defaultGetFilteredItems,
+	defaultGetItemLabel,
+	defaultGetItemValue,
+	defaultGetFilteredItems,
 } from './utils';
 
-type SelectControlProps = {
-	children?: ChildrenType;
+type SelectControlProps< ItemType > = {
+	children?: ChildrenType< ItemType >;
 	items: ItemType[];
 	label: string;
 	initialSelectedItems?: ItemType[];
-	itemToString?: ( item: ItemType | null ) => string;
+	getItemLabel?: getItemLabelType< ItemType >;
+	getItemValue?: getItemValueType< ItemType >;
 	getFilteredItems?: (
 		allItems: ItemType[],
 		inputValue: string,
-		selectedItems: ItemType[]
+		selectedItems: ItemType[],
+		getItemLabel: getItemLabelType< ItemType >
 	) => ItemType[];
 	multiple?: boolean;
 	onInputChange?: ( value: string | undefined ) => void;
@@ -38,9 +46,11 @@ type SelectControlProps = {
 	selected: ItemType | ItemType[] | null;
 };
 
-export const SelectControl = ( {
+function SelectControl< ItemType = DefaultItemType >( {
+	getItemLabel = defaultGetItemLabel,
+	getItemValue = defaultGetItemValue,
 	children = ( {
-		items,
+		items: renderItems,
 		highlightedIndex,
 		getItemProps,
 		getMenuProps,
@@ -48,15 +58,15 @@ export const SelectControl = ( {
 	} ) => {
 		return (
 			<Menu getMenuProps={ getMenuProps } isOpen={ isOpen }>
-				{ items.map( ( item, index: number ) => (
+				{ renderItems.map( ( item, index: number ) => (
 					<MenuItem
-						key={ `${ item.value }${ index }` }
+						key={ `${ getItemValue( item ) }${ index }` }
 						index={ index }
 						isActive={ highlightedIndex === index }
 						item={ item }
 						getItemProps={ getItemProps }
 					>
-						{ item.label }
+						{ getItemLabel( item ) }
 					</MenuItem>
 				) ) }
 			</Menu>
@@ -65,22 +75,33 @@ export const SelectControl = ( {
 	multiple = false,
 	items,
 	label,
-	itemToString = defaultItemToString,
 	getFilteredItems = defaultGetFilteredItems,
 	onInputChange = () => null,
 	onRemove = () => null,
 	onSelect = () => null,
 	placeholder,
 	selected,
-}: SelectControlProps ) => {
+}: SelectControlProps< ItemType > ) {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
-	const { getSelectedItemProps, getDropdownProps } = useMultipleSelection();
+	const {
+		addSelectedItem,
+		getSelectedItemProps,
+		getDropdownProps,
+		removeSelectedItem,
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+	} = useMultipleSelection( { itemToString: getItemLabel } );
 	let selectedItems = selected === null ? [] : selected;
 	selectedItems = Array.isArray( selectedItems )
 		? selectedItems
 		: [ selectedItems ].filter( Boolean );
-	const filteredItems = getFilteredItems( items, inputValue, selectedItems );
+	const filteredItems = getFilteredItems(
+		items,
+		inputValue,
+		selectedItems,
+		getItemLabel
+	);
 
 	const {
 		isOpen,
@@ -90,11 +111,14 @@ export const SelectControl = ( {
 		getComboboxProps,
 		highlightedIndex,
 		getItemProps,
-	} = useCombobox( {
+		selectItem,
+		selectedItem: singleSelectedItem,
+	} = useCombobox< ItemType | null >( {
 		inputValue,
 		items: filteredItems,
-		itemToString,
-		selectedItem: null,
+		itemToString: getItemLabel,
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		onStateChange: ( { inputValue: value, type, selectedItem } ) => {
 			switch ( type ) {
 				case useCombobox.stateChangeTypes.InputChange:
@@ -107,9 +131,18 @@ export const SelectControl = ( {
 				case useCombobox.stateChangeTypes.InputBlur:
 					if ( selectedItem ) {
 						onSelect( selectedItem );
-						setInputValue(
-							multiple ? '' : itemToString( selectedItem )
-						);
+						if ( multiple ) {
+							addSelectedItem( selectedItem );
+							setInputValue( '' );
+							break;
+						}
+
+						selectItem( selectedItem );
+						setInputValue( getItemLabel( selectedItem ) );
+					}
+
+					if ( ! selectedItem && ! multiple ) {
+						setInputValue( getItemLabel( singleSelectedItem ) );
 					}
 
 					break;
@@ -118,6 +151,12 @@ export const SelectControl = ( {
 			}
 		},
 	} );
+
+	const onRemoveItem = ( item: ItemType ) => {
+		selectItem( null );
+		removeSelectedItem( item );
+		onRemove( item );
+	};
 
 	return (
 		<div
@@ -133,9 +172,10 @@ export const SelectControl = ( {
 				{ multiple && (
 					<SelectedItems
 						items={ selectedItems }
-						itemToString={ itemToString }
+						getItemLabel={ getItemLabel }
+						getItemValue={ getItemValue }
 						getSelectedItemProps={ getSelectedItemProps }
-						onRemove={ onRemove }
+						onRemove={ onRemoveItem }
 					/>
 				) }
 				<ComboBox
@@ -157,7 +197,11 @@ export const SelectControl = ( {
 				getItemProps,
 				getMenuProps,
 				isOpen,
+				getItemLabel,
+				getItemValue,
 			} ) }
 		</div>
 	);
-};
+}
+
+export { SelectControl };

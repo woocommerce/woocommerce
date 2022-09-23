@@ -1,4 +1,0 @@
-Significance: minor 
-Type: fix
-
-Shipping defaults is now set when the user completes onboarding profiler, even if they did not set their address details

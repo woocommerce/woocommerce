@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Implement `get_order_count()`, `get_unpaid_orders()` and `get_order_id_by_order_key()` in the COT datastore.

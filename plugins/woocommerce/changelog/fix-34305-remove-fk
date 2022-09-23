@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Remove foreign key requirement from download_log table.

@@ -5,9 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\ProductAttributesLookup;
 
-use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
-use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -30,6 +29,8 @@ defined( 'ABSPATH' ) || exit;
  * and another one for enabling or disabling the actual lookup table usage.
  */
 class DataRegenerator {
+
+	use AccessiblePrivateMethods;
 
 	public const PRODUCTS_PER_GENERATION_STEP = 10;
 
@@ -55,28 +56,9 @@ class DataRegenerator {
 
 		$this->lookup_table_name = $wpdb->prefix . 'wc_product_attributes_lookup';
 
-		add_filter(
-			'woocommerce_debug_tools',
-			function( $tools ) {
-				return $this->add_initiate_regeneration_entry_to_tools_array( $tools );
-			},
-			1,
-			999
-		);
-
-		add_action(
-			'woocommerce_run_product_attribute_lookup_regeneration_callback',
-			function () {
-				$this->run_regeneration_step_callback();
-			}
-		);
-
-		add_action(
-			'woocommerce_installed',
-			function() {
-				$this->run_woocommerce_installed_callback();
-			}
-		);
+		self::add_filter( 'woocommerce_debug_tools', array( $this, 'add_initiate_regeneration_entry_to_tools_array' ), 1, 999 );
+		self::add_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback', array( $this, 'run_regeneration_step_callback' ) );
+		self::add_action( 'woocommerce_installed', array( $this, 'run_woocommerce_installed_callback' ) );
 	}
 
 	/**
@@ -446,7 +428,7 @@ class DataRegenerator {
 	 */
 	private function verify_tool_execution_nonce() {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		if ( ! isset( $_REQUEST['_wpnonce'] ) || false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
+		if ( ! isset( $_REQUEST['_wpnonce'] ) || wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) === false ) {
 			throw new \Exception( 'Invalid nonce' );
 		}
 	}
@@ -519,7 +501,7 @@ class DataRegenerator {
 		// If the lookup table has data, or if it's empty because there are no products yet, we're good.
 		// Otherwise (lookup table is empty but products exist) we need to initiate a regeneration if one isn't already in progress.
 		if ( $this->data_store->lookup_table_has_data() || ! $this->get_last_existing_product_id() ) {
-			$must_enable = 'no' !== get_option( 'woocommerce_attribute_lookup_enabled' );
+			$must_enable = get_option( 'woocommerce_attribute_lookup_enabled' ) !== 'no';
 			$this->finalize_regeneration( $must_enable );
 		} else {
 			$this->initiate_regeneration();

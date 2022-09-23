@@ -8,9 +8,11 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useContext } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import interpolateComponents from '@automattic/interpolate-components';
+import classnames from 'classnames';
 import {
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
+	BaseControl,
 } from '@wordpress/components';
 
 /**
@@ -21,13 +23,11 @@ import { ProductSectionLayout } from '../layout/product-section-layout';
 import { getInputControlProps } from './utils';
 import { ADMIN_URL } from '../../utils/admin-settings';
 import { CurrencyContext } from '../../lib/currency-context';
-import {
-	NUMBERS_AND_DECIMAL_SEPARATOR,
-	ONLY_ONE_DECIMAL_SEPARATOR,
-} from '../constants';
+import { useProductHelper } from '../use-product-helper';
 
 export const PricingSection: React.FC = () => {
 	const { getInputProps, setValue } = useFormContext< Product >();
+	const { sanitizePrice } = useProductHelper();
 	const { isResolving: isTaxSettingsResolving, taxSettings } = useSelect(
 		( select ) => {
 			const { getSettings, hasFinishedResolution } =
@@ -43,25 +43,6 @@ export const PricingSection: React.FC = () => {
 	const pricesIncludeTax =
 		taxSettings.woocommerce_prices_include_tax === 'yes';
 	const context = useContext( CurrencyContext );
-	const { getCurrencyConfig } = context;
-	const { decimalSeparator } = getCurrencyConfig();
-	const sanitizeAndSetPrice = ( name: string, value: string ) => {
-		// Build regex to strip out everything except digits, decimal point and minus sign.
-		const regex = new RegExp(
-			NUMBERS_AND_DECIMAL_SEPARATOR.replace( '%s', decimalSeparator ),
-			'g'
-		);
-		const decimalRegex = new RegExp(
-			ONLY_ONE_DECIMAL_SEPARATOR.replaceAll( '%s', decimalSeparator ),
-			'g'
-		);
-		const cleanValue = value
-			.replace( regex, '' )
-			.replace( decimalRegex, '' )
-			.replace( decimalSeparator, '.' );
-		setValue( name, cleanValue );
-		return cleanValue;
-	};
 
 	const taxIncludedInPriceText = __(
 		'Per your {{link}}store settings{{/link}}, tax is {{strong}}included{{/strong}} in the price.',
@@ -105,6 +86,11 @@ export const PricingSection: React.FC = () => {
 		},
 	} );
 
+	const salePriceProps = getInputControlProps( {
+		...getInputProps( 'sale_price' ),
+		context,
+	} );
+
 	return (
 		<ProductSectionLayout
 			title={ __( 'Pricing', 'woocommerce' ) }
@@ -138,9 +124,10 @@ export const PricingSection: React.FC = () => {
 						...getInputProps( 'regular_price' ),
 						context,
 					} ) }
-					onChange={ ( value: string ) =>
-						sanitizeAndSetPrice( 'regular_price', value )
-					}
+					onChange={ ( value: string ) => {
+						const sanitizedValue = sanitizePrice( value );
+						setValue( 'regular_price', sanitizedValue );
+					} }
 				/>
 				{ ! isTaxSettingsResolving && (
 					<span className="woocommerce-product-form__secondary-text">
@@ -149,19 +136,32 @@ export const PricingSection: React.FC = () => {
 				) }
 			</div>
 
-			<div className="woocommerce-product-form__custom-label-input">
-				<InputControl
-					label={ salePriceTitle }
-					id="sale_price"
-					placeholder={ __( '8.59', 'woocommerce' ) }
-					{ ...getInputControlProps( {
-						...getInputProps( 'sale_price' ),
-						context,
-					} ) }
-					onChange={ ( value: string ) =>
-						sanitizeAndSetPrice( 'sale_price', value )
+			<div
+				className={ classnames(
+					'woocommerce-product-form__custom-label-input',
+					{
+						'has-error': salePriceProps?.help !== '',
 					}
-				/>
+				) }
+			>
+				<BaseControl
+					id="sale_price"
+					help={
+						salePriceProps && salePriceProps.help
+							? salePriceProps.help
+							: ''
+					}
+				>
+					<InputControl
+						label={ salePriceTitle }
+						placeholder={ __( '8.59', 'woocommerce' ) }
+						{ ...salePriceProps }
+						onChange={ ( value: string ) => {
+							const sanitizedValue = sanitizePrice( value );
+							setValue( 'sale_price', sanitizedValue );
+						} }
+					/>
+				</BaseControl>
 			</div>
 		</ProductSectionLayout>
 	);

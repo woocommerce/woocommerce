@@ -13,12 +13,10 @@ jobs:
             - uses: actions/checkout@v3
 
             - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                install-filters: 'woocommerce/client/admin...'
+              uses: ./.github/actions/setup-woocommerce-monorepo              
 
             - name: Lint
-              run: pnpm run lint --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color
+              run: pnpm run -r --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color lint 
 
             - name: Test
-              run: pnpm run test --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color
+              run: pnpm run test --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color  

@@ -18,10 +18,15 @@ import {
 	updateInstalledPlugins,
 	updateIsJetpackConnected,
 	updateJetpackConnectUrl,
+	updateJetpackConnectionData,
 	setPaypalOnboardingStatus,
 	setRecommendedPlugins,
 } from './actions';
-import { PaypalOnboardingStatus, RecommendedTypes } from './types';
+import {
+	PaypalOnboardingStatus,
+	RecommendedTypes,
+	JetpackConnectionDataResponse,
+} from './types';
 
 // Can be removed in WP 5.9, wp.data is supported in >5.7.
 const resolveSelect =
@@ -87,6 +92,25 @@ export function* isJetpackConnected() {
 	}
 
 	yield setIsRequesting( 'isJetpackConnected', false );
+}
+
+export function* getJetpackConnectionData() {
+	yield setIsRequesting( 'getJetpackConnectionData', true );
+
+	try {
+		const url = JETPACK_NAMESPACE + '/connection/data';
+
+		const results: JetpackConnectionDataResponse = yield apiFetch( {
+			path: url,
+			method: 'GET',
+		} );
+
+		yield updateJetpackConnectionData( results );
+	} catch ( error ) {
+		yield setError( 'getJetpackConnectionData', error );
+	}
+
+	yield setIsRequesting( 'getJetpackConnectionData', false );
 }
 
 export function* getJetpackConnectUrl( query: { redirect_url: string } ) {

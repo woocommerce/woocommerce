@@ -68,6 +68,7 @@ class ListTable extends WP_List_Table {
 		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'get_columns' ), 0 );
 		add_filter( 'set_screen_option_edit_orders_per_page', array( $this, 'set_items_per_page' ), 10, 3 );
 		add_filter( 'default_hidden_columns', array( $this, 'default_hidden_columns' ), 10, 2 );
+		add_action( 'admin_footer', array( $this, 'enqueue_scripts' ) );
 
 		$this->items_per_page();
 		set_screen_options();
@@ -85,6 +86,8 @@ class ListTable extends WP_List_Table {
 		 *
 		 * @param string    $column_name Identifier for the custom column.
 		 * @param \WC_Order $order       Current WooCommerce order object.
+		 *
+		 * @since 7.0.0
 		 */
 		do_action( "manage_{$this->screen->id}_custom_column", $column_name, $order );
 	}
@@ -1066,6 +1069,111 @@ class ListTable extends WP_List_Table {
 		if ( ! empty( $message ) ) {
 			echo '<div class="updated"><p>' . esc_html( $message ) . '</p></div>';
 		}
+	}
+
+	/**
+	 * Enqueue list table scripts.
+	 *
+	 * @return void
+	 */
+	public function enqueue_scripts(): void {
+		echo $this->get_order_preview_template(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		wp_enqueue_script( 'wc-orders' );
+	}
+
+	/**
+	 * Returns the HTML for the order preview template.
+	 *
+	 * @return string HTML template.
+	 */
+	public function get_order_preview_template(): string {
+		$order_edit_url_placeholder =
+			wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled()
+			? esc_url( admin_url( 'admin.php?page=wc-orders&action=edit' ) ) . '&id={{ data.data.id }}'
+			: esc_url( admin_url( 'post.php?action=edit' ) ) . '&post={{ data.data.id }}';
+
+		ob_start();
+		?>
+		<script type="text/template" id="tmpl-wc-modal-view-order">
+			<div class="wc-backbone-modal wc-order-preview">
+				<div class="wc-backbone-modal-content">
+					<section class="wc-backbone-modal-main" role="main">
+						<header class="wc-backbone-modal-header">
+							<mark class="order-status status-{{ data.status }}"><span>{{ data.status_name }}</span></mark>
+							<?php /* translators: %s: order ID */ ?>
+							<h1><?php echo esc_html( sprintf( __( 'Order #%s', 'woocommerce' ), '{{ data.order_number }}' ) ); ?></h1>
+							<button class="modal-close modal-close-link dashicons dashicons-no-alt">
+								<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce' ); ?></span>
+							</button>
+						</header>
+						<article>
+							<?php do_action( 'woocommerce_admin_order_preview_start' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
+
+							<div class="wc-order-preview-addresses">
+								<div class="wc-order-preview-address">
+									<h2><?php esc_html_e( 'Billing details', 'woocommerce' ); ?></h2>
+									{{{ data.formatted_billing_address }}}
+
+									<# if ( data.data.billing.email ) { #>
+										<strong><?php esc_html_e( 'Email', 'woocommerce' ); ?></strong>
+										<a href="mailto:{{ data.data.billing.email }}">{{ data.data.billing.email }}</a>
+									<# } #>
+
+									<# if ( data.data.billing.phone ) { #>
+										<strong><?php esc_html_e( 'Phone', 'woocommerce' ); ?></strong>
+										<a href="tel:{{ data.data.billing.phone }}">{{ data.data.billing.phone }}</a>
+									<# } #>
+
+									<# if ( data.payment_via ) { #>
+										<strong><?php esc_html_e( 'Payment via', 'woocommerce' ); ?></strong>
+										{{{ data.payment_via }}}
+									<# } #>
+								</div>
+								<# if ( data.needs_shipping ) { #>
+									<div class="wc-order-preview-address">
+										<h2><?php esc_html_e( 'Shipping details', 'woocommerce' ); ?></h2>
+										<# if ( data.ship_to_billing ) { #>
+											{{{ data.formatted_billing_address }}}
+										<# } else { #>
+											<a href="{{ data.shipping_address_map_url }}" target="_blank">{{{ data.formatted_shipping_address }}}</a>
+										<# } #>
+
+										<# if ( data.shipping_via ) { #>
+											<strong><?php esc_html_e( 'Shipping method', 'woocommerce' ); ?></strong>
+											{{ data.shipping_via }}
+										<# } #>
+									</div>
+								<# } #>
+
+								<# if ( data.data.customer_note ) { #>
+									<div class="wc-order-preview-note">
+										<strong><?php esc_html_e( 'Note', 'woocommerce' ); ?></strong>
+										{{ data.data.customer_note }}
+									</div>
+								<# } #>
+							</div>
+
+							{{{ data.item_html }}}
+
+							<?php do_action( 'woocommerce_admin_order_preview_end' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
+						</article>
+						<footer>
+							<div class="inner">
+								{{{ data.actions_html }}}
+
+								<a class="button button-primary button-large" aria-label="<?php esc_attr_e( 'Edit this order', 'woocommerce' ); ?>" href="<?php echo $order_edit_url_placeholder; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
+							</div>
+						</footer>
+					</section>
+				</div>
+			</div>
+			<div class="wc-backbone-modal-backdrop modal-close"></div>
+		</script>
+		<?php
+
+		$html = ob_get_clean();
+
+		return $html;
 	}
 
 }

@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Add and use ON_DUPLICATE_KEY update function to perform update/insert without additional query.

@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
-import { useCallback, useState } from '@wordpress/element';
+import { useCallback, useContext, useState } from '@wordpress/element';
 import {
 	Product,
 	ProductsStoreActions,
@@ -14,6 +14,15 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { navigateTo } from '@woocommerce/navigation';
+
+/**
+ * Internal dependencies
+ */
+import { CurrencyContext } from '../lib/currency-context';
+import {
+	NUMBERS_AND_DECIMAL_SEPARATOR,
+	ONLY_ONE_DECIMAL_SEPARATOR,
+} from './constants';
 
 function removeReadonlyProperties(
 	product: Product
@@ -48,6 +57,7 @@ export function useProductHelper() {
 		draft: false,
 		publish: false,
 	} );
+	const context = useContext( CurrencyContext );
 
 	/**
 	 * Create product with status.
@@ -248,11 +258,40 @@ export function useProductHelper() {
 		[]
 	);
 
+	/**
+	 * Sanitizes a price.
+	 *
+	 * @param {string} price the price that will be sanitized.
+	 * @return {string} sanitized price.
+	 */
+	const sanitizePrice = useCallback(
+		( price: string ) => {
+			const { getCurrencyConfig } = context;
+			const { decimalSeparator } = getCurrencyConfig();
+			// Build regex to strip out everything except digits, decimal point and minus sign.
+			const regex = new RegExp(
+				NUMBERS_AND_DECIMAL_SEPARATOR.replace( '%s', decimalSeparator ),
+				'g'
+			);
+			const decimalRegex = new RegExp(
+				ONLY_ONE_DECIMAL_SEPARATOR.replaceAll( '%s', decimalSeparator ),
+				'g'
+			);
+			const cleanValue = price
+				.replace( regex, '' )
+				.replace( decimalRegex, '' )
+				.replace( decimalSeparator, '.' );
+			return cleanValue;
+		},
+		[ context ]
+	);
+
 	return {
 		createProductWithStatus,
 		updateProductWithStatus,
 		copyProductWithStatus,
 		deleteProductAndRedirect,
+		sanitizePrice,
 		isUpdatingDraft: updating.draft,
 		isUpdatingPublished: updating.publish,
 		isDeleting,
