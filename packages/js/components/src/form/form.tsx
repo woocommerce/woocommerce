@@ -11,7 +11,7 @@ import {
 	useImperativeHandle,
 } from '@wordpress/element';
 import deprecated from '@wordpress/deprecated';
-import { ChangeEvent, PropsWithChildren, useRef } from 'react';
+import { ChangeEvent, PropsWithChildren } from 'react';
 
 /**
  * Internal dependencies
@@ -60,9 +60,10 @@ type FormProps< Values > = {
 	 * Function to call when multiple values change in the form.
 	 */
 	onChanges?: (
-		changedValues: Values,
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		changedValues: { name: string; value: any }[],
 		values: Values,
-		hasErrors: boolean
+		isValid: boolean
 	) => void;
 	/**
 	 * A function that is passed a list of all values and
@@ -181,25 +182,35 @@ function FormComponent< Values extends Record< string, any > >(
 						plugin: '@woocommerce/components',
 					} );
 				}
+
+				if ( ! singleValueChangeCallback && ! onChanges ) {
+					return;
+				}
+
 				// onChange and onChanges keep track of validity, so needs to
 				// happen after setting the error state.
-				if ( singleValueChangeCallback ) {
-					// we should change the callback to pass all changed fields in a single callback
-					for ( const key in valuesToSet ) {
+
+				const isValid = ! Object.keys( newErrors || {} ).length;
+				const nameValuePairs = [];
+				for ( const key in valuesToSet ) {
+					const nameValuePair = {
+						name: key,
+						value: valuesToSet[ key ],
+					};
+
+					nameValuePairs.push( nameValuePair );
+
+					if ( singleValueChangeCallback ) {
 						singleValueChangeCallback(
-							{ name: key, value: valuesToSet[ key ] },
+							nameValuePair,
 							newValues,
-							! Object.keys( newErrors || {} ).length
+							isValid
 						);
 					}
 				}
 
 				if ( onChanges ) {
-					onChanges(
-						valuesToSet,
-						values,
-						! Object.keys( errors || {} ).length
-					);
+					onChanges( nameValuePairs, newValues, isValid );
 				}
 			} );
 		},
