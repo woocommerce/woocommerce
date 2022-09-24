@@ -149,7 +149,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 				'woocommerce-date-time-picker-control',
 				className
 			) }
-			position="bottom center"
+			position="bottom left"
 			focusOnMount={ false }
 			// @ts-expect-error `onToggle` does exist.
 			onToggle={ ( willOpen ) => {
