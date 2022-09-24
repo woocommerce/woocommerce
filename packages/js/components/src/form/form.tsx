@@ -57,7 +57,7 @@ type FormProps< Values > = {
 		isValid: boolean
 	) => void;
 	/**
-	 * Function to call when multiple values change in the form.
+	 * Function to call when one or more values change in the form.
 	 */
 	onChanges?: (
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
