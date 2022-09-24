@@ -96,7 +96,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 				onChange( dateTime, isValid );
 			}
 		}, onChangeDebounceWait ),
-		[ onChangeDebounceWait ]
+		[ onChange, onChangeDebounceWait ]
 	);
 
 	function change( newInputString: string ) {
