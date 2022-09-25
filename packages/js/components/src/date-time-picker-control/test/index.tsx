@@ -120,7 +120,7 @@ describe( 'DateTimePickerControl', () => {
 		expect( input?.value === '02:30, 09-15-2022' );
 	} );
 
-	it.skip( 'should show the date time picker popup when focused', async () => {
+	it( 'should show the date time picker popup when focused', async () => {
 		const { container, queryByText } = render( <DateTimePickerControl /> );
 
 		const input = container.querySelector( 'input' );
