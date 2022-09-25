@@ -134,7 +134,7 @@ describe( 'DateTimePickerControl', () => {
 		);
 	} );
 
-	it.skip( 'should hide the date time picker popup when no longer focused', async () => {
+	it( 'should hide the date time picker popup when no longer focused', async () => {
 		const { container } = render( <DateTimePickerControl /> );
 
 		const input = container.querySelector( 'input' );
