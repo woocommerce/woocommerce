@@ -148,7 +148,7 @@ describe( 'DateTimePickerControl', () => {
 		);
 	} );
 
-	it.skip( 'should set the date time picker popup to 12 hour mode', async () => {
+	it( 'should set the date time picker popup to 12 hour mode', async () => {
 		const { container, queryByText } = render(
 			<DateTimePickerControl is12Hour={ true } />
 		);
@@ -166,7 +166,7 @@ describe( 'DateTimePickerControl', () => {
 		);
 	} );
 
-	it.skip( 'should call onBlur when losing focus', async () => {
+	it( 'should call onBlur when losing focus', async () => {
 		const onBlurHandler = jest.fn();
 
 		const { container } = render(
