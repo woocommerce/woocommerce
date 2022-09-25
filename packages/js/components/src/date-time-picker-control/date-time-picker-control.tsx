@@ -128,6 +128,11 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		debouncedOnChange( newInputString );
 	}
 
+	function changeImmediate( newInputString: string ) {
+		setInputString( newInputString );
+		onChangeCallback( newInputString );
+	}
+
 	function blur() {
 		if ( onBlur ) {
 			onBlur();
@@ -225,7 +230,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 						const formattedDate = formatMoment(
 							parseMomentIso( date )
 						);
-						setInputString( formattedDate );
+						changeImmediate( formattedDate );
 					} }
 					is12Hour={ is12Hour }
 				/>
