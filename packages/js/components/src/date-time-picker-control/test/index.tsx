@@ -182,7 +182,7 @@ describe( 'DateTimePickerControl', () => {
 		);
 	} );
 
-	it.skip( 'should call onChange when the input is changed', async () => {
+	it( 'should call onChange when the input is changed', async () => {
 		const originalDateTime = moment( '2022-09-15 02:30:40' );
 		const dateTimeFormat = 'HH:mm, MM-DD-YYYY';
 		const newDateTimeInputString = '02:04, 06-08-2010';
