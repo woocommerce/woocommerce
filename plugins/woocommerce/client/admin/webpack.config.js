@@ -5,19 +5,19 @@ const { get } = require( 'lodash' );
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
-const BundleAnalyzerPlugin = require( 'webpack-bundle-analyzer' )
-	.BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin =
+	require( 'webpack-bundle-analyzer' ).BundleAnalyzerPlugin;
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
+const {
+	webpackConfig: styleConfig,
+} = require( '@woocommerce/internal-style-build' );
+const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
 
 /**
  * Internal dependencies
  */
 const UnminifyWebpackPlugin = require( './unminify' );
-const {
-	webpackConfig: styleConfig,
-} = require( '@woocommerce/internal-style-build' );
-const WooCommerceDependencyExtractionWebpackPlugin = require( '../../packages/js/dependency-extraction-webpack-plugin/src/index' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
@@ -62,7 +62,7 @@ const getEntryPoints = () => {
 		app: './client/index.js',
 	};
 	wcAdminPackages.forEach( ( name ) => {
-		entryPoints[ name ] = `../../packages/js/${ name }`;
+		entryPoints[ name ] = `../../../../packages/js/${ name }`;
 	} );
 	wpAdminScripts.forEach( ( name ) => {
 		entryPoints[ name ] = `./client/wp-admin-scripts/${ name }`;
@@ -85,7 +85,10 @@ const webpackConfig = {
 				: `[name]/index${ outputSuffix }.js`;
 		},
 		chunkFilename: `chunks/[name]${ outputSuffix }.js`,
-		path: path.join( __dirname, '/../woocommerce/assets/client/admin' ),
+		path: path.join(
+			__dirname,
+			'/../../../woocommerce/assets/client/admin'
+		),
 		library: {
 			// Expose the exports of entry points so we can consume the libraries in window.wc.[modulename] with WooCommerceDependencyExtractionWebpackPlugin.
 			name: [ 'wc', '[modulename]' ],
