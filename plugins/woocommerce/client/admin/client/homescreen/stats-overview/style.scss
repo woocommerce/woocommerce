@@ -1,0 +1,105 @@
+// Set up some local color variables to make the CSS more clear
+$outer-border: $gray-200;
+$promo-actions-border-top: $gray-100;
+$promo-actions-border-bottom: $gray-100;
+
+.woocommerce-stats-overview {
+	.woocommerce-card__body {
+		padding: 0;
+	}
+	.woocommerce-summary {
+		margin: 0;
+	}
+}
+
+.woocommerce-stats-overview__more-btn {
+	display: inline-block;
+	padding: $gap;
+}
+
+.woocommerce-stats-overview__tabs {
+	.components-tab-panel__tabs {
+		display: flex;
+		justify-content: space-between;
+		border-bottom: 1px solid $outer-border;
+
+		.components-button {
+			width: 33.33%;
+			padding-right: $gap-large;
+			padding-left: $gap-large;
+		}
+	}
+}
+
+.woocommerce-stats-overview__stats {
+	margin: 0;
+
+	.woocommerce-summary__item-container {
+		width: 50%;
+		display: inline-block;
+	}
+
+	.woocommerce-summary__item-container:nth-last-of-type(1)
+	.woocommerce-summary__item {
+		border-bottom: none;
+	}
+
+	&.is-even
+	.woocommerce-summary__item-container:nth-last-of-type(2)
+	.woocommerce-summary__item {
+		border-bottom: none;
+	}
+
+	.woocommerce-summary__item-container:nth-of-type(even)
+	.woocommerce-summary__item {
+		border-right: none;
+	}
+
+	.woocommerce-summary__item {
+		background-color: $studio-white;
+
+		&:hover {
+			background-color: $gray-100;
+		}
+
+		&:active {
+			background-color: $gray-100;
+		}
+	}
+}
+
+article.woocommerce-stats-overview__install-jetpack-promo {
+	.woocommerce-stats-overview__install-jetpack-promo__content {
+		padding: $gap $gap-large;
+	}
+
+	h2 {
+		color: $gray-900;
+		@include font-size( 16 );
+		font-style: normal;
+		line-height: 1.5;
+		font-weight: normal;
+		margin: $gap-smaller 0;
+	}
+	p {
+		color: $gray-700;
+		font-style: normal;
+		font-weight: normal;
+		@include font-size( 14 );
+		line-height: 20px;
+		margin: $gap-smaller 0;
+	}
+	footer {
+		padding: $gap $gap-large;
+		border-top: 1px solid $promo-actions-border-top;
+		border-bottom: 1px solid $promo-actions-border-bottom;
+
+		button {
+			margin-left: $gap-smaller;
+
+			&:first-child {
+				margin-left: 0;
+			}
+		}
+	}
+}

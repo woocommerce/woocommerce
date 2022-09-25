@@ -1,0 +1,90 @@
+.woocommerce-task-payments {
+	.components-card + .components-card {
+		margin-top: $gap-large;
+	}
+
+	.woocommerce-task-payment__setup_required {
+		display: flex;
+		align-items: center;
+		font-size: 14px;
+		margin-left: $gap-small;
+		font-weight: 400;
+		gap: 3px;
+		> svg {
+			fill: #efb854;
+		}
+	}
+
+	.components-card__header {
+		font-size: 20px;
+		font-weight: 400;
+		line-height: 28px;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.woocommerce-task-payment-header__description {
+		margin: 0;
+		color: $gray-700;
+		font-weight: 400;
+		font-size: 14px;
+	}
+
+	.components-card__footer {
+		a.components-button {
+			.gridicon {
+				margin-left: 4px;
+			}
+		}
+	}
+
+	.woocommerce-task-payment__recommended-pill {
+		border: 1px solid $studio-gray-5;
+		border-radius: 28px;
+		display: inline-block;
+		font-size: 13px;
+		margin-left: 12px;
+		padding: 1px 10px;
+
+		span {
+			max-width: 70px;
+		}
+	}
+
+	.components-card__divider:last-child {
+		display: none;
+	}
+
+	.woocommerce-task-payment-wcpay {
+		margin-bottom: 0;
+	}
+}
+
+// @todo This can be migrated into the PaymentMethod component once the payment-gateway-suggestions feature is enabled.
+.woocommerce-task-payment-method {
+	> h3 {
+		margin: 0;
+		color: $studio-gray-90;
+	}
+
+	p {
+		font-size: 14px;
+		color: $studio-gray-50;
+		font-weight: 400;
+		margin-top: $gap;
+		margin-bottom: $gap;
+	}
+}
+
+.woocommerce-task-payment-method__fields {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-gap: 0 $gap;
+	margin-bottom: $gap-smaller;
+
+	.components-base-control {
+		margin-bottom: 0;
+	}
+}

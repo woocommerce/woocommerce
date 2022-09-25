@@ -1,0 +1,50 @@
+.woocommerce-recommended-shipping-extensions {
+	&__more_options_cta {
+		// adding some breathing room between the "external" icon and the text
+		.gridicon {
+			margin-left: $gap-smallest;
+		}
+	}
+
+	// overwriting the list's default colors/behavior
+	.woocommerce-list__item {
+		> .woocommerce-list__item-inner {
+			align-items: flex-start;
+		}
+
+		&:hover {
+			background-color: $white;
+
+			.woocommerce-list__item-title {
+				color: $gray-900;
+			}
+		}
+	}
+
+	.woocommerce-list__item-title {
+		font-size: 14px;
+		color: $gray-900;
+		font-weight: 600;
+	}
+
+	.woocommerce-pill {
+		margin-left: $gap-smallest;
+		margin-top: $gap-smallest;
+		margin-bottom: $gap-smallest;
+		padding: 2px 8px;
+
+		@media (min-width: #{ ($break-mobile) }) {
+			margin-top: 0;
+			margin-bottom: 0;
+		}
+	}
+
+	.woocommerce-list__item-after .components-button {
+		margin-left: $gap-small;
+	}
+
+	.woocommerce-list__item-text,
+	.woocommerce-recommended-shipping__header-heading {
+		max-width: 749px;
+	}
+}

@@ -1,0 +1,25 @@
+# Line-ending normalization
+* text=auto
+
+/.* export-ignore
+/*.md export-ignore
+/node_modules* export-ignore
+/tests export-ignore
+/bin export-ignore
+/phpcs.* export-ignore
+/phpunit.* export-ignore
+/composer.lock export-ignore
+/composer.json export-ignore
+/renovate.json export-ignore
+/webpack.config.js export-ignore
+/postcss.config.js export-ignore
+/package.json export-ignore
+/package-lock.json export-ignore
+/babel.config.js export-ignore
+/Gruntfile.js export-ignore
+/packages* export-ignore
+/docs* export-ignore
+/config* export-ignore
+/client* export-ignore
+/docker* export-ignore
+/storybook* export-ignore
