@@ -11,10 +11,9 @@ import {
 } from '@wordpress/element';
 import { Icon, calendar } from '@wordpress/icons';
 import moment, { Moment } from 'moment';
-import { debounce } from 'lodash';
 import classNames from 'classnames';
 import { sprintf, __ } from '@wordpress/i18n';
-import { useInstanceId } from '@wordpress/compose';
+import { useDebounce, useInstanceId } from '@wordpress/compose';
 import {
 	BaseControl,
 	Dropdown,
@@ -53,6 +52,14 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	const id = `inspector-date-time-picker-control-${ instanceId }`;
 	const inputControl = useRef< InputControl >();
 
+	const isMounted = useRef( false );
+	useEffect( () => {
+		isMounted.current = true;
+		return () => {
+			isMounted.current = false;
+		};
+	} );
+
 	const [ inputString, setInputString ] = useState( '' );
 	const [ lastValidDate, setLastValidDate ] = useState< Moment | null >(
 		null
@@ -90,28 +97,35 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		);
 	}
 
-	const debouncedOnChange = useCallback(
-		debounce( ( dateTime: string, isValid: boolean ) => {
-			if ( onChange ) {
-				onChange( dateTime, isValid );
+	const onChangeCallback = useCallback(
+		( newInputString: string ) => {
+			if ( ! isMounted.current ) return;
+
+			const newDateTime = parseMoment( newInputString );
+			const isValid = newDateTime.isValid();
+
+			if ( isValid ) {
+				setLastValidDate( newDateTime );
 			}
-		}, onChangeDebounceWait ),
-		[ onChange, onChangeDebounceWait ]
+
+			if ( onChange ) {
+				onChange(
+					isValid ? formatMomentIso( newDateTime ) : newInputString,
+					isValid
+				);
+			}
+		},
+		[ onChange ]
+	);
+
+	const debouncedOnChange = useDebounce(
+		onChangeCallback,
+		onChangeDebounceWait
 	);
 
 	function change( newInputString: string ) {
 		setInputString( newInputString );
-		const newDateTime = parseMoment( newInputString );
-		const isValid = newDateTime.isValid();
-
-		if ( isValid ) {
-			setLastValidDate( newDateTime );
-		}
-
-		debouncedOnChange(
-			isValid ? formatMomentIso( newDateTime ) : newInputString,
-			isValid
-		);
+		debouncedOnChange( newInputString );
 	}
 
 	function blur() {
