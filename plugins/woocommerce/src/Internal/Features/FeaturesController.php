@@ -474,8 +474,6 @@ class FeaturesController {
 	 * @return array The parameters to add to the settings array.
 	 */
 	private function get_setting_for_feature( string $feature_id, array $feature, bool $admin_features_disabled ): array {
-		return array();
-		
 		$description = $feature['description'];
 		$disabled    = false;
 		$desc_tip    = '';
@@ -504,7 +502,7 @@ class FeaturesController {
 			'title'    => $feature['name'],
 			'desc'     => $description,
 			'type'     => 'checkbox',
-			'id'       => $this->feature_enable_option_name( $feature_id ),
+			'id'       => 'some_random_id',// $this->feature_enable_option_name( $feature_id ),
 			'class'    => $disabled ? 'disabled' : '',
 			'desc_tip' => $desc_tip,
 		);
