@@ -62,16 +62,6 @@ class FeaturesController {
 				'description'     => __( 'Enables WooCommerce Analytics', 'woocommerce' ),
 				'is_experimental' => false,
 			),
-			'new_navigation'      => array(
-				'name'            => __( 'Navigation', 'woocommerce' ),
-				'description'     => __( 'Adds the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
-				'is_experimental' => false,
-			),
-			'custom_order_tables' => array(
-				'name'            => __( 'Custom order tables', 'woocommerce' ),
-				'description'     => __( 'Enable the custom orders tables feature (still in development)', 'woocommerce' ),
-				'is_experimental' => true,
-			),
 		);
 
 		$this->init_features( $features );
@@ -411,13 +401,6 @@ class FeaturesController {
 					'id'    => 'features_options',
 				),
 			);
-
-		$feature_settings[] = array(
-			'type' => 'sectionend',
-			'id'   => 'features_options',
-		);
-
-		return $feature_settings;
 
 		$features = $this->get_features( true );
 
