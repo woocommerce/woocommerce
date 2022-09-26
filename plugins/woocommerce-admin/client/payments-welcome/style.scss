@@ -37,6 +37,8 @@
 
 		.connect-account__card,
 		.woocommerce-payments-banner,
+		.connect-account__apms,
+		.connect-account__apms-notice,
 		.faq__card {
 			box-shadow: none;
 			border: 1px solid #e2e4e7;
@@ -109,6 +111,19 @@
 					margin-left: 10px;
 				}
 			}
+
+			.help-section-simple {
+				font-size: 16px;
+				padding: $gap;
+				span {
+					vertical-align: 6px;
+					margin-left: $gap-small;
+				}
+				a {
+					vertical-align: 6px;
+					margin-left: $gap-small;
+				}
+			}
 		}
 
 		.connect-account__card {
@@ -163,6 +178,67 @@
 			button.btn-install {
 				padding: 0 30px 0 30px;
 				border-radius: 3px;
+			}
+		}
+
+		.connect-account__apms {
+			.components-card__header {
+				padding: $gap-small $gap-large;
+				h1 {
+					font-size: 20px;
+					line-height: 28px;
+				}
+			}
+			.components-card__body {
+				padding: 0;
+
+				.woocommerce-list__item {
+					> .woocommerce-list__item-inner {
+						padding: $gap-large;
+						.woocommerce-list__item-title {
+							color: $gray-900;
+							font-weight: 700;
+							font-size: 14px;
+							line-height: 18px;
+						}
+						.woocommerce-list__item-content {
+							color: $gray-700;
+							font-size: 13px;
+							line-height: 16px;
+						}
+						.woocommerce-list__item-after {
+							margin-left: $gap-large;
+						}
+						.woocommerce-list__item-before {
+							img {
+								width: 36px;
+							}
+						}
+					}
+				}
+			}
+			.components-card__footer {
+				padding: $gap $gap-large;
+			}
+		}
+		.connect-account__apms-notice {
+			.components-card__body {
+				padding: 0;
+			}
+			.components-notice {
+				margin: 0;
+				padding: 0;
+				background-color: #f0f6fc;
+				.components-notice__content {
+					margin: 0;
+					padding: $gap $gap-large;
+					display: flex;
+					align-items: center;
+					svg {
+						margin-right: $gap;
+						height: 16px;
+					}
+				}
 			}
 		}
 	}

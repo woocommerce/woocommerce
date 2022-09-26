@@ -31,10 +31,11 @@ import {
  */
 import strings from './strings';
 import Banner from './banner';
+import ApmList, { Apm } from './apms';
 import './style.scss';
-import FrequentlyAskedQuestions from './faq';
 import ExitSurveyModal from './exit-survey-modal';
 import { getAdminSetting } from '~/utils/admin-settings';
+import FrequentlyAskedQuestionsSimple from './faq-simple';
 
 declare global {
 	interface Window {
@@ -111,12 +112,14 @@ const ConnectPageOnboarding = ( {
 	installAndActivatePlugins,
 	setErrorMessage,
 	connectUrl,
+	enabledApms,
 }: {
 	isJetpackConnected?: boolean;
 	installAndActivatePlugins: PluginsStoreActions[ 'installAndActivatePlugins' ];
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	setErrorMessage: Function;
 	connectUrl: string;
+	enabledApms: Set< Apm >;
 } ) => {
 	const [ isSubmitted, setSubmitted ] = useState( false );
 	const [ isNoThanksClicked, setNoThanksClicked ] = useState( false );
@@ -145,11 +148,20 @@ const ConnectPageOnboarding = ( {
 			wpcom_connection: isJetpackConnected ? 'Yes' : 'No',
 		} );
 
+		const pluginsToInstall = [ ...enabledApms ].map(
+			( apm ) => apm.extension
+		);
+
 		try {
 			const installAndActivateResponse = await installAndActivatePlugins(
-				[ 'woocommerce-payments' ]
+				[ 'woocommerce-payments' ].concat( pluginsToInstall )
 			);
 			if ( installAndActivateResponse?.success ) {
+				recordEvent( 'wcpay_extension_installed', {
+					extensions: [ ...enabledApms ]
+						.map( ( apm ) => apm.id )
+						.join( ', ' ),
+				} );
 				await activatePromo();
 			} else {
 				throw new Error( installAndActivateResponse.message );
@@ -223,6 +235,8 @@ const ConnectPageOnboarding = ( {
 const ConnectAccountPage = () => {
 	const [ errorMessage, setErrorMessage ] = useState( '' );
 
+	const [ enabledApms, setEnabledApms ] = useState( new Set< Apm >() );
+
 	const { isJetpackConnected, connectUrl, hasViewedWelcomePage } = useSelect(
 		( select ) => {
 			const { getOption } = select( OPTIONS_STORE_NAME );
@@ -277,9 +291,14 @@ const ConnectAccountPage = () => {
 					installAndActivatePlugins={ installAndActivatePlugins }
 					connectUrl={ connectUrl }
 					setErrorMessage={ setErrorMessage }
+					enabledApms={ enabledApms }
 				/>
 				<Banner />
-				<FrequentlyAskedQuestions />
+				<ApmList
+					enabledApms={ enabledApms }
+					setEnabledApms={ setEnabledApms }
+				/>
+				<FrequentlyAskedQuestionsSimple />
 			</div>
 		</div>
 	);
