@@ -6,3 +6,4 @@ export * from './notices';
 export * from './products';
 export * from './shared-attributes';
 export * from './useThrottle';
+export * from './sanitize-html';
