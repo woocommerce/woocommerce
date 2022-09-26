@@ -25,7 +25,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 } ) => {
 	const onRemove = ( attribute: ProductAttribute ) => {
 		// eslint-disable-next-line no-alert
-		if ( window.confirm( __( 'Remove this attribute', 'woocommerce' ) ) ) {
+		if ( window.confirm( __( 'Remove this attribute?', 'woocommerce' ) ) ) {
 			onChange( value.filter( ( attr ) => attr.id !== attribute.id ) );
 		}
 	};
