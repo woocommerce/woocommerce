@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\Features;
 
-use Automattic\WooCommerce\Admin\Features\Analytics;
+use Automattic\WooCommerce\Internal\Admin;
 use Automattic\WooCommerce\Admin\Features\Navigation\Init;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -309,9 +309,9 @@ class FeaturesController {
 	 */
 	public function feature_enable_option_name( string $feature_id ): string {
 		if ( 'analytics' === $feature_id ) {
-			return 'woocommerce_analytics_enabled';
+			return Analytics::TOGGLE_OPTION_NAME;
 		} elseif ( 'new_navigation' === $feature_id ) {
-			return 'woocommerce_navigation_enabled';
+			return Init::TOGGLE_OPTION_NAME;
 		}
 
 		return "woocommerce_feature_${feature_id}_enabled";
