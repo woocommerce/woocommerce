@@ -14,7 +14,7 @@ describe( 'AttributeField', () => {
 	} );
 
 	describe( 'empty state', () => {
-		it( 'should show subittle and "Add first attribute" button', () => {
+		it( 'should show subtitle and "Add first attribute" button', () => {
 			const { queryByText } = render(
 				<AttributeField value={ [] } onChange={ () => {} } />
 			);
