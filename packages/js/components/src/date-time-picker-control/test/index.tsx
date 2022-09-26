@@ -212,7 +212,7 @@ describe( 'DateTimePickerControl', () => {
 				),
 			{ timeout: 100 }
 		);
-	} );
+	}, 10000 );
 
 	it.skip( 'should call onChange with isValid false when the input is invalid', async () => {
 		const originalDateTime = moment( '2022-09-15 02:30:40' );
