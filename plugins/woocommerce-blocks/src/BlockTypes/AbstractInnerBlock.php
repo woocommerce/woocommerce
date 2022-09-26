@@ -30,7 +30,7 @@ abstract class AbstractInnerBlock extends AbstractBlock {
 			$block_settings['api_version'] = 2;
 		}
 
-		$metadata_path = $this->asset_api->get_block_metadata_path( $this->block_name );
+		$metadata_path = $this->asset_api->get_block_metadata_path( $this->block_name, 'inner-blocks/' );
 		// Prefer to register with metadata if the path is set in the block's class.
 		register_block_type_from_metadata(
 			$metadata_path,
