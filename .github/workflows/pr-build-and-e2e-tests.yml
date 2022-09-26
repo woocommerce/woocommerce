@@ -29,7 +29,6 @@ jobs:
 
             - name: Get total number of Playwright E2E tests to be run.
               id: count_e2e_total
-              if: fromJSON(env.E2E_PLAYWRIGHT)
               working-directory: plugins/woocommerce
               run: |
                   TOTAL_STR=$(pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --list | grep "Total:")
