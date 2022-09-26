@@ -7,4 +7,7 @@ packages:
     - 'tools/create-extension'
     - 'tools/package-release'
     - 'tools/cherry-pick'
-    - 'tools/require-turbo'
+    - 'tools/release-posts'
+    - 'tools/cli-core'
+    - 'tools/version-bump'
+    - 'tools/storybook'

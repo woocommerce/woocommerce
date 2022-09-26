@@ -13,9 +13,6 @@ project.properties
 *.sublime-workspace
 .sublimelinterrc
 
-# Excluded IDE Files for developer experience tooling within workspace
-!.vscode/tasks.json
-
 # Grunt
 none
 
@@ -88,10 +85,18 @@ phpcs-report.xml
 allure-report
 allure-results
 
+# Code analyzer output and env
+changes.json
+.env
+
 # Playwright output & working files
-/plugins/woocommerce/e2e/output
-/plugins/woocommerce/e2e/report
-/plugins/woocommerce/e2e/storage
+/plugins/woocommerce/tests/e2e-pw/output
+/plugins/woocommerce/tests/e2e-pw/report
+/plugins/woocommerce/tests/e2e-pw/storage
+/plugins/woocommerce/tests/e2e-pw/test-results.json
 
 # Turborepo
 .turbo
+
+# Support .gitkeep Files
+!.gitkeep

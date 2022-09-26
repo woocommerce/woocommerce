@@ -6,6 +6,8 @@
  * @version 2.3.0
  */
 
+ // phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+
 use Automattic\Jetpack\Constants;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -55,7 +57,14 @@ class WC_Frontend_Scripts {
 	public static function get_styles() {
 		$version = Constants::get_constant( 'WC_VERSION' );
 
-		return apply_filters(
+		/**
+		 * Filter list of WooCommerce styles to enqueue.
+		 *
+		 * @since 2.1.0
+		 * @param array List of default WooCommerce styles.
+		 * @retrun array List of styles to enqueue.
+		 */
+		$styles = apply_filters(
 			'woocommerce_enqueue_styles',
 			array(
 				'woocommerce-layout'      => array(
@@ -79,8 +88,16 @@ class WC_Frontend_Scripts {
 					'media'   => 'all',
 					'has_rtl' => true,
 				),
+				'woocommerce-blocktheme'  => wc_current_theme_is_fse_theme() ? array(
+					'src'     => self::get_asset_url( 'assets/css/woocommerce-blocktheme.css' ),
+					'deps'    => '',
+					'version' => $version,
+					'media'   => 'all',
+					'has_rtl' => true,
+				) : false,
 			)
 		);
+		return is_array( $styles ) ? array_filter( $styles ) : array();
 	}
 
 	/**
@@ -476,8 +493,8 @@ class WC_Frontend_Scripts {
 				break;
 			case 'wc-geolocation':
 				$params = array(
-					'wc_ajax_url'  => WC_AJAX::get_endpoint( '%%endpoint%%' ),
-					'home_url'     => remove_query_arg( 'lang', home_url() ), // FIX for WPML compatibility.
+					'wc_ajax_url' => WC_AJAX::get_endpoint( '%%endpoint%%' ),
+					'home_url'    => remove_query_arg( 'lang', home_url() ), // FIX for WPML compatibility.
 				);
 				break;
 			case 'wc-single-product':

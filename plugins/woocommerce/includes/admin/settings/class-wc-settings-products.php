@@ -422,6 +422,16 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
+					'title'    => __( 'Open in browser', 'woocommerce' ),
+					'desc'     => __( 'Open downloadable files in the browser, instead of saving them to the device.', 'woocommerce' ),
+					'id'       => 'woocommerce_downloads_deliver_inline',
+					'type'     => 'checkbox',
+					'default'  => false,
+					'desc_tip' => __( 'Customers can still save the file to their device, but by default file will be opened instead of being downloaded (does not work with redirects).', 'woocommerce' ),
+					'autoload' => false,
+				),
+
+				array(
 					'title'    => __( 'Filename', 'woocommerce' ),
 					'desc'     => __( 'Append a unique string to filename for security', 'woocommerce' ),
 					'id'       => 'woocommerce_downloads_add_hash_to_filename',

@@ -2,10 +2,8 @@
  * Script to generate the test results summary to be posted as a GitHub Job Summary and as a PR comment.
  */
 const {
-	E2E_PLAYWRIGHT,
 	API_SUMMARY_PATH,
 	E2E_PW_SUMMARY_PATH,
-	E2E_PPTR_SUMMARY_PATH,
 	SHA,
 	PR_NUMBER,
 	E2E_GRAND_TOTAL,

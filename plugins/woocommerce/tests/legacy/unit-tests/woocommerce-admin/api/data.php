@@ -53,7 +53,7 @@ class WC_Admin_Tests_API_Data extends WC_REST_Unit_Test_Case {
 		WC_Helper_Reports::reset_stats_dbs();
 
 		$prod_download = new WC_Product_Download();
-		$prod_download->set_file( plugin_dir_url( $this->wc_core_dir ) . 'woocommerce/assets/images/help.png' );
+		$prod_download->set_file( plugin_dir_url( WC_ABSPATH ) . 'woocommerce/assets/images/help.png' );
 		$prod_download->set_id( '1' );
 
 		$product = new WC_Product_Simple();

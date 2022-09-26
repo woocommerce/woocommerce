@@ -8,7 +8,8 @@ import { Reducer } from 'redux';
  */
 import { Actions } from './actions';
 import CRUD_ACTIONS from './crud-actions';
-import { getResourceName } from '../utils';
+import { getKey } from './utils';
+import { getResourceName, getTotalCountResourceName } from '../utils';
 import { IdType, Item, ItemQuery } from './types';
 import { TYPES } from './action-types';
 
@@ -21,6 +22,7 @@ export type ResourceState = {
 		}
 	>;
 	data: Data;
+	itemsCount: Record< string, number >;
 	errors: Record< string, unknown >;
 };
 
@@ -29,6 +31,7 @@ export const createReducer = () => {
 		state = {
 			items: {},
 			data: {},
+			itemsCount: {},
 			errors: {},
 		},
 		payload
@@ -36,6 +39,7 @@ export const createReducer = () => {
 		if ( payload && 'type' in payload ) {
 			switch ( payload.type ) {
 				case TYPES.CREATE_ITEM_ERROR:
+				case TYPES.GET_ITEMS_TOTAL_COUNT_ERROR:
 				case TYPES.GET_ITEMS_ERROR:
 					return {
 						...state,
@@ -47,6 +51,17 @@ export const createReducer = () => {
 							) ]: payload.error,
 						},
 					};
+				case TYPES.GET_ITEMS_TOTAL_COUNT_SUCCESS:
+					return {
+						...state,
+						itemsCount: {
+							...state.itemsCount,
+							[ getTotalCountResourceName(
+								CRUD_ACTIONS.GET_ITEMS,
+								( payload.query || {} ) as ItemQuery
+							) ]: payload.totalCount,
+						},
+					};
 
 				case TYPES.CREATE_ITEM_SUCCESS:
 				case TYPES.GET_ITEM_SUCCESS:
@@ -56,25 +71,25 @@ export const createReducer = () => {
 						...state,
 						data: {
 							...itemData,
-							[ payload.id ]: {
-								...( itemData[ payload.id ] || {} ),
+							[ payload.key ]: {
+								...( itemData[ payload.key ] || {} ),
 								...payload.item,
 							},
 						},
 					};
 
 				case TYPES.DELETE_ITEM_SUCCESS:
-					const itemIds = Object.keys( state.data );
-					const nextData = itemIds.reduce< Data >(
-						( items: Data, id: string ) => {
-							if ( id !== payload.id.toString() ) {
-								items[ id ] = state.data[ id ];
+					const itemKeys = Object.keys( state.data );
+					const nextData = itemKeys.reduce< Data >(
+						( items: Data, key: string ) => {
+							if ( key !== payload.key.toString() ) {
+								items[ key ] = state.data[ key ];
 								return items;
 							}
 							if ( payload.force ) {
 								return items;
 							}
-							items[ id ] = payload.item;
+							items[ key ] = payload.item;
 							return items;
 						},
 						{} as Data
@@ -93,7 +108,7 @@ export const createReducer = () => {
 						errors: {
 							...state.errors,
 							[ getResourceName( payload.errorType, {
-								id: payload.id,
+								key: payload.key,
 							} ) ]: payload.error,
 						},
 					};
@@ -104,9 +119,10 @@ export const createReducer = () => {
 					const nextResources = payload.items.reduce<
 						Record< string, Item >
 					>( ( result, item ) => {
-						ids.push( item.id );
-						result[ item.id ] = {
-							...( state.data[ item.id ] || {} ),
+						const key = getKey( item.id, payload.urlParameters );
+						ids.push( key );
+						result[ key ] = {
+							...( state.data[ key ] || {} ),
 							...item,
 						};
 						return result;

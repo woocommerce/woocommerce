@@ -38,6 +38,7 @@ import {
 } from './constants';
 import { WelcomeFromCalypsoModal } from './welcome-from-calypso-modal';
 import { WelcomeModal } from './welcome-modal';
+import { MobileAppModal } from './mobile-app-modal';
 import './style.scss';
 import '../dashboard/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
@@ -67,7 +68,7 @@ export const Layout = ( {
 	const hasTwoColumnContent =
 		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
 	const [ showInbox, setShowInbox ] = useState( true );
-	const isDashboardShown = ! query.task;
+	const isDashboardShown = ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
 	const activeSetupTaskList = useActiveSetupTasklist();
 
 	const twoColumns =
@@ -93,6 +94,7 @@ export const Layout = ( {
 	}, [ maybeToggleColumns ] );
 
 	const shouldStickColumns = isWideViewport.current && twoColumns;
+	const shouldShowMobileAppModal = query.mobileAppModal ?? false;
 
 	const renderColumns = () => {
 		return (
@@ -123,11 +125,9 @@ export const Layout = ( {
 	const renderTaskList = () => {
 		return (
 			<Suspense fallback={ <TasksPlaceholder query={ query } /> }>
-				{ activeSetupTaskList &&
-					isDashboardShown &&
-					[ 'setup_experiment_1', 'setup_experiment_2' ].includes(
-						activeSetupTaskList
-					) && <ProgressTitle taskListId={ activeSetupTaskList } /> }
+				{ activeSetupTaskList && isDashboardShown && (
+					<ProgressTitle taskListId={ activeSetupTaskList } />
+				) }
 				<Tasks query={ query } />
 			</Suspense>
 		);
@@ -160,6 +160,7 @@ export const Layout = ( {
 						} }
 					/>
 				) }
+				{ shouldShowMobileAppModal && <MobileAppModal /> }
 				{ window.wcAdminFeatures.navigation && (
 					<NavigationIntroModal />
 				) }

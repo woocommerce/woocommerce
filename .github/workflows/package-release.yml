@@ -7,9 +7,16 @@ on:
                 required: false
                 default: '-a'
 jobs:
-    prepare:
-        name: Run the prepare script
+    release:
+        name: Run packages release script
         runs-on: ubuntu-20.04
         steps:
-            - name: Run
-              run: echo "hello world"
+            - uses: actions/checkout@v3
+            
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+
+            - name: Execute script
+              run: ./tools/package-release/bin/dev publish ${{ github.event.inputs.packages }} --branch=${{ github.ref_name }} --skip-install
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

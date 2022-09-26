@@ -1,0 +1,30 @@
+.woocommerce-form-section {
+	a {
+		text-decoration: none;
+	}
+
+	&__content {
+		padding: $gap-large;
+		background: $white;
+		border: 1px solid $gray-400;
+		border-radius: 2px;
+
+		> * {
+			&:not(:first-of-type) {
+				padding-top: $gap-large - $gap-smaller;
+			}
+			width: 100%;
+		}
+	}
+
+	&__header {
+		p > span {
+			display: block;
+			margin-bottom: $gap-smaller;
+		}
+	}
+
+	&:not(:first-child) {
+		margin-top: $gap-largest;
+	}
+}

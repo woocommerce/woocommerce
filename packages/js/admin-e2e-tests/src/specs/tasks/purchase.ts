@@ -1,4 +1,8 @@
 /**
+ * External dependencies
+ */
+import { afterAll, beforeAll, describe, it } from '@jest/globals';
+/**
  * Internal dependencies
  */
 import { resetWooCommerceState } from '../../fixtures';
@@ -7,11 +11,7 @@ import { OnboardingWizard } from '../../pages/OnboardingWizard';
 import { WcHomescreen } from '../../pages/WcHomescreen';
 import { getElementByText, waitForElementByText } from '../../utils/actions';
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
-/* eslint-enable @typescript-eslint/no-var-requires */
-
-const testAdminPurchaseSetupTask = () => {
+export const testAdminPurchaseSetupTask = () => {
 	describe( 'Purchase setup task', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const homeScreen = new WcHomescreen( page );
@@ -96,5 +96,3 @@ const testAdminPurchaseSetupTask = () => {
 		} );
 	} );
 };
-
-module.exports = { testAdminPurchaseSetupTask };

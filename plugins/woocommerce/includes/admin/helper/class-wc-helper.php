@@ -71,7 +71,7 @@ class WC_Helper {
 		$notices = self::_get_return_notices();
 
 		// No active connection.
-		if ( empty( $auth['access_token'] ) ) {
+		if ( ! self::is_site_connected() ) {
 			$connect_url = add_query_arg(
 				array(
 					'page'              => 'wc-addons',
@@ -809,26 +809,7 @@ class WC_Helper {
 			wp_die( 'Something went wrong' );
 		}
 
-		WC_Helper_Options::update(
-			'auth',
-			array(
-				'access_token'        => $access_token['access_token'],
-				'access_token_secret' => $access_token['access_token_secret'],
-				'site_id'             => $access_token['site_id'],
-				'user_id'             => get_current_user_id(),
-				'updated'             => time(),
-			)
-		);
-
-		// Obtain the connected user info.
-		if ( ! self::_flush_authentication_cache() ) {
-			self::log( 'Could not obtain connected user info in _helper_auth_return' );
-			WC_Helper_Options::update( 'auth', array() );
-			wp_die( 'Something went wrong.' );
-		}
-
-		self::_flush_subscriptions_cache();
-		self::_flush_updates_cache();
+		self::update_auth_option( $access_token['access_token'], $access_token['access_token_secret'], $access_token['site_id'] );
 
 		/**
 		 * Fires when the Helper connection process has completed successfully.
@@ -884,18 +865,7 @@ class WC_Helper {
 			admin_url( 'admin.php' )
 		);
 
-		WC_Helper_API::post(
-			'oauth/invalidate_token',
-			array(
-				'authenticated' => true,
-			)
-		);
-
-		WC_Helper_Options::update( 'auth', array() );
-		WC_Helper_Options::update( 'auth_user_data', array() );
-
-		self::_flush_subscriptions_cache();
-		self::_flush_updates_cache();
+		self::disconnect();
 
 		wp_safe_redirect( $redirect_uri );
 		die();
@@ -1675,6 +1645,115 @@ class WC_Helper {
 		}
 
 		self::$log->log( $level, $message, array( 'source' => 'helper' ) );
+	}
+
+	/**
+	 * Handles WC Helper disconnect tasks.
+	 *
+	 * @return void
+	 */
+	public static function disconnect() {
+		WC_Helper_API::post(
+			'oauth/invalidate_token',
+			array(
+				'authenticated' => true,
+			)
+		);
+
+		WC_Helper_Options::update( 'auth', array() );
+		WC_Helper_Options::update( 'auth_user_data', array() );
+
+		self::_flush_subscriptions_cache();
+		self::_flush_updates_cache();
+	}
+
+	/**
+	 * Checks if `access_token` exists in `auth` option.
+	 *
+	 * @return bool
+	 */
+	public static function is_site_connected(): bool {
+		$auth = WC_Helper_Options::get( 'auth' );
+
+		// If `access_token` is empty, there's no active connection.
+		return ! empty( $auth['access_token'] );
+	}
+
+	/**
+	 * Allows to connect with WCCOM using application password. used it to connect via CLI
+	 *
+	 * @param string $password The application password.
+	 *
+	 * @return void|WP_Error
+	 */
+	public static function connect_with_password( string $password ) {
+		$request = WC_Helper_API::post(
+			'connect',
+			array(
+				'headers'       => array(
+					'X-API-Key'    => $password,
+					'Content-Type' => 'application/json',
+				),
+				'body'          => wp_json_encode( array( 'home_url' => home_url() ) ),
+				'authenticated' => false,
+			)
+		);
+
+		$code = wp_remote_retrieve_response_code( $request );
+
+		if ( $code === 403 ) {
+			$message = 'Invalid password';
+			self::log( $message );
+
+			return new WP_Error( 'connect-with-password-invalid-password', $message );
+		} elseif ( $code !== 200 ) {
+			$message = sprintf( 'Call to /connect returned a non-200 response code (%d)', $code );
+			self::log( $message );
+
+			return new WP_Error( 'connect-with-password-' . $code, $message );
+		}
+
+		$access_data = json_decode( wp_remote_retrieve_body( $request ), true );
+		if ( empty( $access_data['access_token'] ) || empty( $access_data['access_token_secret'] ) ) {
+			$message = sprintf( 'Call to /connect returned an invalid body: %s', wp_remote_retrieve_body( $request ) );
+			self::log( $message );
+
+			return new WP_Error( 'connect-with-password-invalid-response', $message );
+		}
+
+		self::update_auth_option( $access_data['access_token'], $access_data['access_token_secret'], $access_data['site_id'] );
+	}
+
+	/**
+	 * Updates auth options and flushes cache
+	 *
+	 * @param string $access_token The access token.
+	 * @param string $access_token_secret The secret access token.
+	 * @param int    $site_id The site id returned by the API.
+	 *
+	 * @return void
+	 */
+	public static function update_auth_option( string $access_token, string $access_token_secret, int $site_id ): void {
+		WC_Helper_Options::update(
+			'auth',
+			array(
+				'access_token'        => $access_token,
+				'access_token_secret' => $access_token_secret,
+				'site_id'             => $site_id,
+				'user_id'             => get_current_user_id(),
+				'updated'             => time(),
+			)
+		);
+
+		// Obtain the connected user info.
+		if ( ! self::_flush_authentication_cache() ) {
+			self::log( 'Could not obtain connected user info in _helper_auth_return.' );
+			WC_Helper_Options::update( 'auth', array() );
+			wp_die( 'Something went wrong. Could not obtain connected user info in _helper_auth_return.' );
+		}
+
+		self::_flush_subscriptions_cache();
+		self::_flush_updates_cache();
 	}
 }
 

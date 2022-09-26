@@ -24,6 +24,17 @@ import getReports from '../analytics/report/get-reports';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { NoMatch } from './NoMatch';
 
+const EditProductPage = lazy( () =>
+	import(
+		/* webpackChunkName: "edit-product-page" */ '../products/edit-product-page'
+	)
+);
+
+const AddProductPage = lazy( () =>
+	import(
+		/* webpackChunkName: "add-product-page" */ '../products/add-product-page'
+	)
+);
 const AnalyticsReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report" */ '../analytics/report' )
 );
@@ -44,6 +55,11 @@ const MarketingOverview = lazy( () =>
 		/* webpackChunkName: "marketing-overview" */ '../marketing/overview'
 	)
 );
+const MarketingOverviewMultichannel = lazy( () =>
+	import(
+		/* webpackChunkName: "multichannel-marketing" */ '../marketing/overview-multichannel'
+	)
+);
 const ProfileWizard = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ '../profile-wizard' )
 );
@@ -54,12 +70,6 @@ const SettingsGroup = lazy( () =>
 const WCPaymentsWelcomePage = lazy( () =>
 	import(
 		/* webpackChunkName: "wcpay-payment-welcome-page" */ '../payments-welcome'
-	)
-);
-
-const WCPaymentsSubscriptionsPage = lazy( () =>
-	import(
-		/* webpackChunkName: "wc-pay-subscriptions-page" */ '../subscriptions'
 	)
 );
 
@@ -147,7 +157,9 @@ export const getPages = () => {
 
 	if ( window.wcAdminFeatures.marketing ) {
 		pages.push( {
-			container: MarketingOverview,
+			container: window.wcAdminFeatures[ 'multichannel-marketing' ]
+				? MarketingOverviewMultichannel
+				: MarketingOverview,
 			path: '/marketing',
 			breadcrumbs: [
 				...initialBreadcrumbs,
@@ -159,6 +171,36 @@ export const getPages = () => {
 				id: 'woocommerce-marketing-overview',
 			},
 			capability: 'view_woocommerce_reports',
+		} );
+	}
+
+	if ( window.wcAdminFeatures[ 'new-product-management-experience' ] ) {
+		pages.push( {
+			container: AddProductPage,
+			path: '/add-product',
+			breadcrumbs: [
+				[ '/add-product', __( 'Product', 'woocommerce' ) ],
+				__( 'Add New Product', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-add-product',
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'manage_woocommerce',
+		} );
+
+		pages.push( {
+			container: EditProductPage,
+			path: '/product/:productId',
+			breadcrumbs: [
+				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
+				__( 'Edit Product', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-edit-product',
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'manage_woocommerce',
 		} );
 	}
 
@@ -218,22 +260,6 @@ export const getPages = () => {
 				id: 'woocommerce-wc-pay-welcome-page',
 			},
 			wpOpenMenu: 'toplevel_page_woocommerce-wc-pay-welcome-page',
-			capability: 'manage_woocommerce',
-		} );
-	}
-
-	if ( window.wcAdminFeatures[ 'wc-pay-subscriptions-page' ] ) {
-		pages.push( {
-			container: WCPaymentsSubscriptionsPage,
-			path: '/subscriptions',
-			breadcrumbs: [
-				...initialBreadcrumbs,
-				__( 'Subscriptions', 'woocommerce' ),
-			],
-			wpOpenMenu: 'toplevel_page_woocommerce',
-			navArgs: {
-				id: 'woocommerce-wcpay-subscriptions',
-			},
 			capability: 'manage_woocommerce',
 		} );
 	}

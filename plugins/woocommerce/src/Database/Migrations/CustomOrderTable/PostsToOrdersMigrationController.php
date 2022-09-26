@@ -19,7 +19,7 @@ class PostsToOrdersMigrationController {
 	/**
 	 * Error logger for migration errors.
 	 *
-	 * @var WC_Logger
+	 * @var \WC_Logger
 	 */
 	private $error_logger;
 
