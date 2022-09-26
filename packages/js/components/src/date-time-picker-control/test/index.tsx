@@ -13,7 +13,11 @@ import moment from 'moment';
 import { DateTimePickerControl } from '../';
 
 describe( 'DateTimePickerControl', () => {
-	it.skip( 'should render the expected DOM elements', () => {
+	// The end user of the component doesn't care about how it is rendered in the DOM.
+	// The consumer of the component might, however, if they are applying any custom styles to it.
+	// By having this test, we will know right away if the resulting DOM changes at some point, so that we
+	// can address that in documentation.
+	it( 'should render the expected DOM elements', () => {
 		const { container } = render(
 			<DateTimePickerControl
 				label="This is the label"
@@ -22,19 +26,20 @@ describe( 'DateTimePickerControl', () => {
 			/>
 		);
 
+		// Make sure the default classname is set on the component.
 		const control = container.querySelector(
 			'.woocommerce-date-time-picker-control'
 		);
 		expect( control ).toBeInTheDocument();
 
+		// Make sure the default classname is set on the label.
 		const label = control?.querySelector(
-			'.components-input-control__label'
+			'.components-base-control__label'
 		);
 		expect( label ).toBeInTheDocument();
 
-		const help = control?.querySelector(
-			'.woocommerce-date-time-picker-control__help'
-		);
+		// Make sure the default classname is set on the help.
+		const help = control?.querySelector( '.components-base-control__help' );
 		expect( help ).toBeInTheDocument();
 	} );
 
