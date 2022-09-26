@@ -372,7 +372,7 @@ class FeaturesController {
 	 */
 	private function add_features_section( $sections ) {
 		if ( ! isset( $sections['features'] ) ) {
-			$sections['features2'] = __( 'Features', 'woocommerce' );
+			$sections['features'] = __( 'Features', 'woocommerce' );
 		}
 		return $sections;
 	}
@@ -392,6 +392,8 @@ class FeaturesController {
 		if ( 'features' !== $current_section ) {
 			return $settings;
 		}
+
+		return $settings;
 
 		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		/**
