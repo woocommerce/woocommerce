@@ -134,15 +134,32 @@ class DataSynchronizer implements BatchProcessorInterface {
 	}
 
 	/**
+	 * Get the total number of orders pending synchronization.
+	 *
+	 * @return int
+	 */
+	public function get_current_orders_pending_sync_count_cached() : int {
+		return $this->get_current_orders_pending_sync_count( true );
+	}
+
+	/**
 	 * Calculate how many orders need to be synchronized currently.
 	 * A database query is performed to get how many orders match one of the following:
 	 *
 	 * - Existing in the authoritative table but not in the backup table.
 	 * - Existing in both tables, but they have a different update date.
+	 *
+	 * @param bool $use_cache Whether to use the cached value instead of fetching from database.
 	 */
-	public function get_current_orders_pending_sync_count(): int {
+	public function get_current_orders_pending_sync_count( $use_cache = false ): int {
 		global $wpdb;
 
+		if ( $use_cache ) {
+			$pending_count = wp_cache_get( 'woocommerce_hpos_pending_sync_count' );
+			if ( false !== $pending_count ) {
+				return (int) $pending_count;
+			}
+		}
 		$orders_table                = $this->data_store::get_orders_table_name();
 		$order_post_types            = wc_get_order_types( 'cot-migration' );
 		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
@@ -190,7 +207,9 @@ SELECT(
 		// phpcs:enable
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		return (int) $wpdb->get_var( $sql );
+		$pending_count = (int) $wpdb->get_var( $sql );
+		wp_cache_set( 'woocommerce_hpos_pending_sync_count', $pending_count );
+		return $pending_count;
 	}
 
 	/**

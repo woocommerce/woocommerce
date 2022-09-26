@@ -939,7 +939,10 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 		}
 
 		$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
-		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled();
+		if ( ! $data_synchronizer instanceof DataSynchronizer ) {
+			return;
+		}
+		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled() && 0 === $data_synchronizer->get_current_orders_pending_sync_count_cached();
 		$post_orders       = $data_sync_enabled ? $this->get_post_orders_for_ids( $order_ids ) : array();
 
 		foreach ( $data as $order_data ) {
@@ -949,7 +952,7 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 			$this->init_order_record( $order, $order_id, $order_data );
 
 			if ( $data_sync_enabled && ! in_array( $order->get_status(), array( 'draft', 'auto-draft' ) ) ) {
-				$this->maybe_sync_order( $order, $post_orders[ $order->get_id() ][0] );
+				$this->maybe_sync_order( $order, $post_orders[ $order->get_id() ] );
 			}
 		}
 	}
@@ -988,9 +991,9 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 
 		// Modified dates can be empty when the order is created but never updated again. Fallback to created date in those cases.
 		$order_modified_date      = $order->get_date_modified() ?? $order->get_date_created();
-		$order_modified_date      = $order_modified_date->getTimestamp();
+		$order_modified_date      = is_null( $order_modified_date ) ? 0 : $order_modified_date->getTimestamp();
 		$post_order_modified_date = $post_order->get_date_modified() ?? $post_order->get_date_created();
-		$post_order_modified_date = $post_order_modified_date->getTimestamp();
+		$post_order_modified_date = is_null( $post_order_modified_date ) ? 0 : $post_order_modified_date->getTimestamp();
 
 		/**
 		 * We are here because there was difference in posts and order data, although the sync is enabled.
@@ -1035,15 +1038,21 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 		foreach ( $order_ids as $order_id ) {
 			wp_cache_delete( WC_Order::generate_meta_cache_key( $order_id, 'orders' ), 'orders' );
 		}
-		$posts = $cpt_data_store->query(
-			array(
-				'include' => $order_ids,
-				'type'    => wc_get_order_types(),
-				'status'  => 'any',
-				'limit'   => count( $order_ids ),
-			)
+		$query_vars = array(
+			'include' => $order_ids,
+			'type'    => wc_get_order_types(),
+			'status'  => 'any',
+			'limit'   => count( $order_ids ),
 		);
-		return ArrayUtil::select_array_to_assoc( $posts, 'get_id', ArrayUtil::SELECT_BY_OBJECT_METHOD );
+		$cpt_data_store->prime_caches_for_orders( $order_ids, $query_vars );
+		$orders = array();
+		foreach ( $order_ids as $order_id ) {
+			$order = new WC_Order();
+			$order->set_id( $order_id );
+			$cpt_data_store->read( $order );
+			$orders[ $order_id ] = $order;
+		}
+		return $orders;
 	}
 
 	/**
