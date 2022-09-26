@@ -16,7 +16,7 @@ const config = {
 			'html',
 			{
 				outputFolder: 'output',
-				open: process.env.CI ? 'never' : 'always',
+				open: CI ? 'never' : 'always',
 			},
 		],
 		[ 'allure-playwright', { outputFolder: 'e2e/allure-results' } ],
