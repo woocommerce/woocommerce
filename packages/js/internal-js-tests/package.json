@@ -4,6 +4,10 @@
 	"description": "JavaScript test tooling.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "7.11.0"
+	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/internal-js-tests/README.md",
 	"repository": {
 		"type": "git",
