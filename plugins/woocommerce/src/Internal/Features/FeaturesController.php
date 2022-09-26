@@ -453,6 +453,7 @@ class FeaturesController {
 				continue;
 			}
 
+			$this->get_setting_for_feature( $id, $features[ $id ], $admin_features_disabled );
 			//$feature_settings[] = $this->get_setting_for_feature( $id, $features[ $id ], $admin_features_disabled );
 		}
 
