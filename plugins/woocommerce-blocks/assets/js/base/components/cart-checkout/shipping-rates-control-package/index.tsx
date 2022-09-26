@@ -10,6 +10,7 @@ import { Panel } from '@woocommerce/blocks-checkout';
 import Label from '@woocommerce/base-components/label';
 import { useSelectShippingRate } from '@woocommerce/base-context/hooks';
 import type { CartShippingPackageShippingRate } from '@woocommerce/type-defs/cart';
+import { sanitizeHTML } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
@@ -70,9 +71,10 @@ export const ShippingRatesControlPackage = ( {
 	const header = (
 		<>
 			{ ( showItems || collapsible ) && (
-				<div className="wc-block-components-shipping-rates-control__package-title">
-					{ packageData.name }
-				</div>
+				<div
+					className="wc-block-components-shipping-rates-control__package-title"
+					dangerouslySetInnerHTML={ sanitizeHTML( packageData.name ) }
+				/>
 			) }
 			{ showItems && (
 				<ul className="wc-block-components-shipping-rates-control__package-items">
