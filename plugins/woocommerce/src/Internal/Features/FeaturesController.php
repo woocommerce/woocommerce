@@ -372,7 +372,7 @@ class FeaturesController {
 	 */
 	private function add_features_section( $sections ) {
 		if ( ! isset( $sections['features'] ) ) {
-			$sections['features'] = __( 'Features', 'woocommerce' );
+			$sections['features2'] = __( 'Features', 'woocommerce' );
 		}
 		return $sections;
 	}

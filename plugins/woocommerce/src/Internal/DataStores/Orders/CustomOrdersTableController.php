@@ -305,9 +305,7 @@ class CustomOrdersTableController {
 			return $sections;
 		}
 
-		if( !isset( $sections['custom_data_stores'] ) ) {
-			$sections['custom_data_stores'] = __( 'Custom data stores', 'woocommerce' );
-		}
+		$sections['custom_data_stores'] = __( 'Custom data stores', 'woocommerce' );
 
 		return $sections;
 	}
