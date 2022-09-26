@@ -274,6 +274,10 @@ const getMainConfig = ( options = {} ) => {
 							const blockName = metadata.name
 								.split( '/' )
 								.at( 1 );
+
+							if ( metadata.parent )
+								return `./inner-blocks/${ blockName }/block.json`;
+
 							return `./${ blockName }/block.json`;
 						},
 					},
