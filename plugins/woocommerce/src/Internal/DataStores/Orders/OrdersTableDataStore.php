@@ -836,6 +836,9 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 				}
 
 				$prop_value = $order_data->{$prop_details['name']};
+				if ( is_null( $prop_value ) ) {
+					continue;
+				}
 
 				if ( 'date' === $prop_details['type'] ) {
 					$prop_value = $this->string_to_timestamp( $prop_value );
