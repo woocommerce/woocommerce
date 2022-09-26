@@ -453,8 +453,7 @@ class FeaturesController {
 				continue;
 			}
 
-			$this->get_setting_for_feature( $id, $features[ $id ], $admin_features_disabled );
-			//$feature_settings[] = $this->get_setting_for_feature( $id, $features[ $id ], $admin_features_disabled );
+			$feature_settings[] = $this->get_setting_for_feature( $id, $features[ $id ], $admin_features_disabled );
 		}
 
 		$feature_settings[] = array(
@@ -478,7 +477,6 @@ class FeaturesController {
 		$disabled    = false;
 		$desc_tip    = '';
 
-		/*
 		if ( ( 'analytics' === $feature_id || 'new_navigation' === $feature_id ) && $admin_features_disabled ) {
 			$disabled = true;
 			$desc_tip = __( 'WooCommerce Admin has been disabled', 'woocommerce' );
@@ -496,7 +494,6 @@ class FeaturesController {
 				$disabled     = true;
 			}
 		}
-		*/
 
 		return array(
 			'title'    => $feature['name'],
