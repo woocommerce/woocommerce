@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Remove version fixing to pnpm 6 now we use pnpm 7.

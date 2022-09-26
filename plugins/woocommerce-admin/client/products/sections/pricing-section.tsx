@@ -111,7 +111,10 @@ export const PricingSection: React.FC = () => {
 							recordEvent( 'add_product_pricing_help' );
 						} }
 					>
-						How to price your product: expert tips
+						{ __(
+							'How to price your product: expert tips',
+							'woocommerce'
+						) }
 					</Link>
 				</>
 			}

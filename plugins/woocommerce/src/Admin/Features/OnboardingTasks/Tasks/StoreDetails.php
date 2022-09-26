@@ -60,7 +60,7 @@ class StoreDetails extends Task {
 	 * @return string
 	 */
 	public function get_action_url() {
-		return admin_url( 'admin.php?page=wc-settings&tab=general&tutorial=true' );
+		return ! $this->is_complete() ? admin_url( 'admin.php?page=wc-settings&tab=general&tutorial=true' ) : admin_url( 'admin.php?page=wc-settings&tab=general' );
 	}
 
 	/**

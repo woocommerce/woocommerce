@@ -1,20 +1,26 @@
 /**
  * External dependencies
  */
+import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
 import {
 	createElement,
 	useCallback,
 	useEffect,
+	useRef,
 	useState,
 } from '@wordpress/element';
-import { DragEvent, DragEventHandler } from 'react';
+import { DragEvent, DragEventHandler, KeyboardEvent } from 'react';
+import { speak } from '@wordpress/a11y';
 import { throttle } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import {
+	getItemName,
+	getNextIndex,
+	getPreviousIndex,
 	isBefore,
 	isDraggingOverAfter,
 	isDraggingOverBefore,
@@ -43,7 +49,9 @@ export const Sortable = ( {
 	onDragStart = () => null,
 	onOrderChange = () => null,
 }: SortableProps ) => {
+	const ref = useRef< HTMLOListElement >( null );
 	const [ items, setItems ] = useState< SortableChild[] >( [] );
+	const [ selectedIndex, setSelectedIndex ] = useState< number >( 0 );
 	const [ dragIndex, setDragIndex ] = useState< number | null >( null );
 	const [ dropIndex, setDropIndex ] = useState< number | null >( null );
 
@@ -54,19 +62,14 @@ export const Sortable = ( {
 		setItems( Array.isArray( children ) ? children : [ children ] );
 	}, [ children ] );
 
-	const handleDragStart = (
-		event: DragEvent< HTMLDivElement >,
-		index: number
-	) => {
-		setDropIndex( index );
-		setDragIndex( index );
-		onDragStart( event );
+	const resetIndexes = () => {
+		setTimeout( () => {
+			setDragIndex( null );
+			setDropIndex( null );
+		}, THROTTLE_TIME );
 	};
 
-	const handleDragEnd = (
-		event: DragEvent< HTMLDivElement >,
-		index: number
-	) => {
+	const persistItemOrder = () => {
 		if (
 			dropIndex !== null &&
 			dragIndex !== null &&
@@ -76,34 +79,154 @@ export const Sortable = ( {
 			setItems( nextItems as JSX.Element[] );
 			onOrderChange( nextItems );
 		}
+		resetIndexes();
+	};
 
-		setTimeout( () => {
-			setDragIndex( null );
-			setDropIndex( null );
-			onDragEnd( event );
-		}, THROTTLE_TIME );
+	const handleDragStart = (
+		event: DragEvent< HTMLDivElement >,
+		index: number
+	) => {
+		setDropIndex( index );
+		setDragIndex( index );
+		onDragStart( event );
+	};
+
+	const handleDragEnd = ( event: DragEvent< HTMLDivElement > ) => {
+		persistItemOrder();
+		onDragEnd( event );
 	};
 
 	const handleDragOver = (
 		event: DragEvent< HTMLLIElement >,
 		index: number
 	) => {
-		const targetIndex = isBefore( event, isHorizontal ) ? index : index + 1;
+		if ( dragIndex === null ) {
+			return;
+		}
+
+		// Items before the current item cause a one off error when
+		// removed from the old array and spliced into the new array.
+		let targetIndex = dragIndex < index ? index : index + 1;
+		if ( isBefore( event, isHorizontal ) ) {
+			targetIndex--;
+		}
+
 		setDropIndex( targetIndex );
 		onDragOver( event );
 	};
 
 	const throttledHandleDragOver = useCallback(
 		throttle( handleDragOver, THROTTLE_TIME ),
-		[]
+		[ dragIndex ]
 	);
 
+	const handleKeyDown = ( event: KeyboardEvent< HTMLLIElement > ) => {
+		const { key } = event;
+		const isSelecting = dragIndex === null || dropIndex === null;
+		const selectedLabel = getItemName( ref.current, selectedIndex );
+
+		// Select or drop on spacebar press.
+		if ( key === ' ' ) {
+			if ( isSelecting ) {
+				speak(
+					sprintf(
+						/** Translators: Selected item label */
+						__(
+							'%s selected, use up and down arrow keys to reorder',
+							'woocommerce'
+						),
+						selectedLabel
+					),
+					'assertive'
+				);
+				setDragIndex( selectedIndex );
+				setDropIndex( selectedIndex );
+				return;
+			}
+
+			setSelectedIndex( dropIndex );
+			speak(
+				sprintf(
+					/* translators: %1$s: Selected item label, %2$d: Current position in list, %3$d: List total length */
+					__(
+						'%1$s dropped, position in list: %2$d of %3$d',
+						'woocommerce'
+					),
+					selectedLabel,
+					dropIndex + 1,
+					items.length
+				),
+				'assertive'
+			);
+			persistItemOrder();
+			return;
+		}
+
+		if ( key === 'ArrowUp' ) {
+			if ( isSelecting ) {
+				setSelectedIndex(
+					getPreviousIndex( selectedIndex, items.length )
+				);
+				return;
+			}
+			const previousDropIndex = getPreviousIndex(
+				dropIndex,
+				items.length
+			);
+			setDropIndex( previousDropIndex );
+			speak(
+				sprintf(
+					/* translators: %1$s: Selected item label, %2$d: Current position in list, %3$d: List total length */
+					__( '%1$s, position in list: %2$d of %3$d', 'woocommerce' ),
+					selectedLabel,
+					previousDropIndex + 1,
+					items.length
+				),
+				'assertive'
+			);
+			return;
+		}
+
+		if ( key === 'ArrowDown' ) {
+			if ( isSelecting ) {
+				setSelectedIndex( getNextIndex( selectedIndex, items.length ) );
+				return;
+			}
+			const nextDropIndex = getNextIndex( dropIndex, items.length );
+			setDropIndex( nextDropIndex );
+			speak(
+				sprintf(
+					/* translators: %1$s: Selected item label, %2$d: Current position in list, %3$d: List total length */
+					__( '%1$s, position in list: %2$d of %3$d', 'woocommerce' ),
+					selectedLabel,
+					nextDropIndex + 1,
+					items.length
+				),
+				'assertive'
+			);
+			return;
+		}
+
+		if ( key === 'Escape' ) {
+			resetIndexes();
+			speak(
+				__(
+					'Reordering cancelled. Restoring the original list order',
+					'woocommerce'
+				),
+				'assertive'
+			);
+		}
+	};
+
 	return (
-		<ul
+		<ol
 			className={ classnames( 'woocommerce-sortable', {
 				'is-dragging': dragIndex !== null,
 				'is-horizontal': isHorizontal,
 			} ) }
+			ref={ ref }
+			role="listbox"
 		>
 			{ items.map( ( child, index ) => {
 				const isDragging = index === dragIndex;
@@ -131,7 +254,8 @@ export const Sortable = ( {
 						id={ index }
 						index={ index }
 						isDragging={ isDragging }
-						onDragEnd={ ( event ) => handleDragEnd( event, index ) }
+						isSelected={ selectedIndex === index }
+						onDragEnd={ ( event ) => handleDragEnd( event ) }
 						onDragStart={ ( event ) =>
 							handleDragStart( event, index )
 						}
@@ -139,11 +263,12 @@ export const Sortable = ( {
 							event.preventDefault();
 							throttledHandleDragOver( event, index );
 						} }
+						onKeyDown={ ( event ) => handleKeyDown( event ) }
 					>
 						{ child }
 					</SortableItem>
 				);
 			} ) }
-		</ul>
+		</ol>
 	);
 };
