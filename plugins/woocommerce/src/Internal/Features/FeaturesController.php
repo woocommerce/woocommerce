@@ -412,6 +412,13 @@ class FeaturesController {
 				),
 			);
 
+		$feature_settings[] = array(
+			'type' => 'sectionend',
+			'id'   => 'features_options',
+		);
+
+		return $feature_settings;
+
 		$features = $this->get_features( true );
 
 		$feature_ids              = array_keys( $features );
@@ -461,7 +468,7 @@ class FeaturesController {
 			'id'   => empty( $experimental_feature_ids ) ? 'features_options' : 'experimental_features_options',
 		);
 
-		return array_merge($settings, $feature_settings);
+		return $feature_settings;
 	}
 
 	/**
