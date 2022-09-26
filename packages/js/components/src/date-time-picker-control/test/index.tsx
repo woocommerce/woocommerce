@@ -182,6 +182,9 @@ describe( 'DateTimePickerControl', () => {
 		);
 	} );
 
+	// we need to bump up the timeout for this test because:
+	// 1. userEvent.type() is slow (see https://github.com/testing-library/user-event/issues/577)
+	// 2. moment.js is slow
 	it( 'should call onChange when the input is changed', async () => {
 		const originalDateTime = moment( '2022-09-15 02:30:40' );
 		const dateTimeFormat = 'HH:mm, MM-DD-YYYY';
@@ -214,7 +217,10 @@ describe( 'DateTimePickerControl', () => {
 		);
 	}, 10000 );
 
-	it.skip( 'should call onChange with isValid false when the input is invalid', async () => {
+	// we need to bump up the timeout for this test because:
+	// 1. userEvent.type() is slow (see https://github.com/testing-library/user-event/issues/577)
+	// 2. moment.js is slow
+	it( 'should call onChange with isValid false when the input is invalid', async () => {
 		const originalDateTime = moment( '2022-09-15 02:30:40' );
 		const onChangeHandler = jest.fn();
 		const invalidDateTime = 'I am not a valid date time';
@@ -238,7 +244,7 @@ describe( 'DateTimePickerControl', () => {
 				false
 			)
 		);
-	} );
+	}, 10000 );
 
 	// Skipping this test for now because it does not work with Jest's fake timers
 	it.skip( 'should call onChange once when multiple changes are made rapidly', async () => {
