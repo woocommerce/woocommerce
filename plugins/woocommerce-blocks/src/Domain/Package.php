@@ -134,13 +134,7 @@ class Package {
 	 *
 	 * @return boolean
 	 */
-	// phpcs:disable Squiz.PHP.CommentedOutCode
-	// phpcs:disable Squiz.Commenting.InlineComment.InvalidEndChar
-	// phpcs:disable Squiz.Commenting.InlineComment.SpacingBefore
-	//	public function is_feature_plugin_build() {
-	//		return $this->feature()->is_feature_plugin_build();
-	//	}
-	// phpcs:enable Squiz.PHP.CommentedOutCode
-	// phpcs:enable Squiz.Commenting.InlineComment.InvalidEndChar
-	// phpcs:enable Squiz.Commenting.InlineComment.SpacingBefore
+	public function is_feature_plugin_build() {
+		return $this->feature()->is_feature_plugin_build();
+	}
 }
