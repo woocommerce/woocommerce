@@ -32,7 +32,7 @@ jobs:
               if: fromJSON(env.E2E_PLAYWRIGHT)
               working-directory: plugins/woocommerce
               run: |
-                  TOTAL_STR=$(pnpx playwright test --config=e2e/playwright.config.js --list | grep "Total:")
+                  TOTAL_STR=$(pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --list | grep "Total:")
                   NO_PREFIX=${TOTAL_STR#*"Total: "}
                   COUNT=${NO_PREFIX%" tests in"*}
                   echo "::set-output name=E2E_GRAND_TOTAL::$COUNT"
