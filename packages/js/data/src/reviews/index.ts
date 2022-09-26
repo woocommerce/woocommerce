@@ -3,6 +3,8 @@
  */
 
 import { registerStore } from '@wordpress/data';
+import { Reducer, AnyAction } from 'redux';
+import { SelectFromMap } from '@automattic/data-stores';
 
 /**
  * Internal dependencies
@@ -12,10 +14,13 @@ import * as selectors from './selectors';
 import * as actions from './actions';
 import * as resolvers from './resolvers';
 import controls from '../controls';
-import reducer from './reducer';
+import reducer, { State } from './reducer';
 
-registerStore( STORE_NAME, {
-	reducer,
+export * from './types';
+export type { State };
+
+registerStore< State >( STORE_NAME, {
+	reducer: reducer as Reducer< State, AnyAction >,
 	actions,
 	controls,
 	selectors,
@@ -23,3 +28,5 @@ registerStore( STORE_NAME, {
 } );
 
 export const REVIEWS_STORE_NAME = STORE_NAME;
+
+export type ReviewSelector = SelectFromMap< typeof selectors >;
