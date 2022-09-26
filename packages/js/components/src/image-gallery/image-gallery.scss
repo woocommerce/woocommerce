@@ -15,6 +15,10 @@
     }
 
     .woocommerce-sortable__item {
+        &.is-dragging {
+            position: absolute;
+        }
+
         &.is-dragging-over-before:before {
             left: calc( $gap / -2 - 1px );
         }
