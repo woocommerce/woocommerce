@@ -474,6 +474,8 @@ class FeaturesController {
 	 * @return array The parameters to add to the settings array.
 	 */
 	private function get_setting_for_feature( string $feature_id, array $feature, bool $admin_features_disabled ): array {
+		return array();
+		
 		$description = $feature['description'];
 		$disabled    = false;
 		$desc_tip    = '';
