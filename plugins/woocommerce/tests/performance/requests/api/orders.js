@@ -73,7 +73,7 @@ export function ordersAPI() {
 	let post_ids;
 	let response;
 
-	group( 'Create Order', function () {
+	group( 'API Create Order', function () {
 		response = http.post(
 			`${ base_url }/wp-json/wc/v3/orders`,
 			JSON.stringify( createData ),
@@ -91,7 +91,7 @@ export function ordersAPI() {
 		post_id = findBetween( response.body, '{"id":', ',' );
 	} );
 
-	group( 'Retrieve Order', function () {
+	group( 'API Retrieve Order', function () {
 		response = http.get(
 			`${ base_url }/wp-json/wc/v3/orders/${ post_id }`,
 			{
@@ -106,7 +106,7 @@ export function ordersAPI() {
 		} );
 	} );
 
-	group( 'List Orders', function () {
+	group( 'API List Orders', function () {
 		response = http.get( `${ base_url }/wp-json/wc/v3/orders`, {
 			headers: requestHeaders,
 			tags: { name: 'API - List Orders' },
@@ -114,11 +114,11 @@ export function ordersAPI() {
 		check( response, {
 			'status is 200': ( r ) => r.status === 200,
 			'body contains: Order ID': ( response ) =>
-				response.body.includes( `[{"id":${ post_id }` ),
+				response.body.includes( '[{"id":' ),
 		} );
 	} );
 
-	group( 'Update Order', function () {
+	group( 'API Update Order', function () {
 		response = http.put(
 			`${ base_url }/wp-json/wc/v3/orders/${ post_id }`,
 			JSON.stringify( updateData ),
@@ -134,7 +134,7 @@ export function ordersAPI() {
 		} );
 	} );
 
-	group( 'Delete Order', function () {
+	group( 'API Delete Order', function () {
 		response = http.del(
 			`${ base_url }/wp-json/wc/v3/orders/${ post_id }`,
 			JSON.stringify( { force: true } ),
@@ -150,7 +150,7 @@ export function ordersAPI() {
 		} );
 	} );
 
-	group( 'Batch Create Orders', function () {
+	group( 'API Batch Create Orders', function () {
 		for ( let index = 0; index < batchSize; index++ ) {
 			createBatchData.push( createData );
 		}
@@ -175,7 +175,7 @@ export function ordersAPI() {
 		post_ids = findBetween( response.body, '{"id":', ',"parent_id', true );
 	} );
 
-	group( 'Batch Update Orders', function () {
+	group( 'API Batch Update Orders', function () {
 		let updateBatchItem;
 
 		for ( let index = 0; index < batchSize; index++ ) {

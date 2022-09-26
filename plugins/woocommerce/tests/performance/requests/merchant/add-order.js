@@ -45,17 +45,29 @@ import {
 
 // Change URL if COT is enabled and being used
 let admin_new_order_base;
+let admin_new_order_assert;
+let admin_created_order_assert;
 let admin_open_order_base;
+let admin_open_order_assert;
 let admin_update_order_base;
 let admin_update_order_id;
 let admin_update_order_params;
+let admin_update_order_assert;
 
 if ( cot_status === true ) {
 	admin_new_order_base = 'admin.php?page=wc-orders&action=new';
 	admin_update_order_base = 'admin.php?page=wc-orders&action=edit';
+	admin_new_order_assert = 'Edit order		</h1>';
+	admin_open_order_assert = 'Edit order		</h1>';
+	admin_created_order_assert = 'changed from auto-draft to';
+	admin_update_order_assert = 'changed from auto-draft to';
 } else {
 	admin_new_order_base = 'post-new.php?post_type=shop_order';
 	admin_update_order_base = 'post.php';
+	admin_new_order_assert = 'Add new order</h1>';
+	admin_open_order_assert = 'Edit order</h1>';
+	admin_created_order_assert = 'Order updated.';
+	admin_update_order_assert = 'Order updated.';
 }
 
 const date = new Date();
@@ -64,13 +76,13 @@ const order_date = date.toJSON().slice( 0, 10 );
 export function addOrder() {
 	let response;
 	let ajax_nonce_add_meta;
-	let ajax_nonce_add_product_cat;
 	let wpnonce;
 	let closed_postboxes_nonce;
 	let sample_permalink_nonce;
 	let woocommerce_meta_nonce;
 	let meta_box_order_nonce;
 	let post_id;
+	let hpos_post_id;
 	let api_x_wp_nonce;
 	let apiNonceHeader;
 	let heartbeat_nonce;
@@ -94,7 +106,7 @@ export function addOrder() {
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
 			"body contains: 'Add new order' header": ( response ) =>
-				response.body.includes( 'Add new order</h1>' ),
+				response.body.includes( `${ admin_new_order_assert }` ),
 		} );
 
 		// Correlate nonce values for use in subsequent requests.
@@ -133,6 +145,7 @@ export function addOrder() {
 			.find( 'input[id=post_ID]' )
 			.first()
 			.attr( 'value' );
+		hpos_post_id = findBetween( response.body, 'post_id":"', '",' );
 		heartbeat_nonce = findBetween(
 			response.body,
 			'heartbeatSettings = {"nonce":"',
@@ -239,10 +252,6 @@ export function addOrder() {
 
 		const orderParams = new URLSearchParams( [
 			[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
-			[
-				'_ajax_nonce-add-product_cat',
-				`${ ajax_nonce_add_product_cat }`,
-			],
 			[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
 			[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
 			[ '_billing_city', `${ addresses_guest_billing_city }` ],
@@ -309,10 +318,6 @@ export function addOrder() {
 
 		const cotOrderParams = new URLSearchParams( [
 			[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
-			[
-				'_ajax_nonce-add-product_cat',
-				`${ ajax_nonce_add_product_cat }`,
-			],
 			[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
 			[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
 			[ '_billing_city', `${ addresses_guest_billing_city }` ],
@@ -344,7 +349,7 @@ export function addOrder() {
 			[ '_transaction_id', '' ],
 			[ '_wp_http_referer', '' ],
 			[ '_wpnonce', `${ wpnonce }` ],
-			[ 'action', 'editpost' ],
+			[ 'action', 'edit_order' ],
 			[ 'customer_user', '' ],
 			[ 'excerpt', '' ],
 			[ 'metakeyinput', '' ],
@@ -366,7 +371,7 @@ export function addOrder() {
 		] );
 
 		if ( cot_status === true ) {
-			admin_update_order_base = `${ admin_update_order_base }&id=${ post_id }`;
+			admin_update_order_base = `${ admin_update_order_base }&id=${ hpos_post_id }`;
 			admin_update_order_params = cotOrderParams.toString();
 		} else {
 			admin_update_order_params = orderParams.toString();
@@ -377,15 +382,15 @@ export function addOrder() {
 			admin_update_order_params.toString(),
 			{
 				headers: requestHeaders,
-				tags: { name: 'Merchant - Update New Order' },
+				tags: { name: 'Merchant - Create New Order' },
 			}
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
 			"body contains: 'Edit order' header": ( response ) =>
-				response.body.includes( 'Edit order</h1>' ),
+				response.body.includes( `${ admin_open_order_assert }` ),
 			"body contains: 'Order updated' confirmation": ( response ) =>
-				response.body.includes( 'Order updated.' ),
+				response.body.includes( `${ admin_created_order_assert }` ),
 		} );
 	} );
 
@@ -401,7 +406,7 @@ export function addOrder() {
 		);
 
 		if ( cot_status === true ) {
-			admin_open_order_base = `${ admin_update_order_base }&id=${ post_id }`;
+			admin_open_order_base = `${ admin_update_order_base }&id=${ hpos_post_id }`;
 		} else {
 			admin_open_order_base = `${ admin_update_order_base }?post=${ post_id }`;
 		}
@@ -416,7 +421,7 @@ export function addOrder() {
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
 			"body contains: 'Edit order' header": ( response ) =>
-				response.body.includes( 'Edit order</h1>' ),
+				response.body.includes( `${ admin_open_order_assert }` ),
 		} );
 	} );
 
@@ -434,10 +439,6 @@ export function addOrder() {
 
 		const orderParams = new URLSearchParams( [
 			[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
-			[
-				'_ajax_nonce-add-product_cat',
-				`${ ajax_nonce_add_product_cat }`,
-			],
 			[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
 			[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
 			[ '_billing_city', `${ addresses_guest_billing_city }` ],
@@ -503,10 +504,6 @@ export function addOrder() {
 
 		const cotOrderParams = new URLSearchParams( [
 			[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
-			[
-				'_ajax_nonce-add-product_cat',
-				`${ ajax_nonce_add_product_cat }`,
-			],
 			[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
 			[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
 			[ '_billing_city', `${ addresses_guest_billing_city }` ],
@@ -538,7 +535,7 @@ export function addOrder() {
 			[ '_transaction_id', '' ],
 			[ '_wp_http_referer', '' ],
 			[ '_wpnonce', `${ wpnonce }` ],
-			[ 'action', 'editpost' ],
+			[ 'action', 'edit_order' ],
 			[ 'customer_user', '' ],
 			[ 'excerpt', '' ],
 			[ 'metakeyinput', '' ],
@@ -560,7 +557,7 @@ export function addOrder() {
 		] );
 
 		if ( cot_status === true ) {
-			admin_update_order_id = `${ admin_update_order_base }&id=${ post_id }`;
+			admin_update_order_id = `${ admin_update_order_base }&id=${ hpos_post_id }`;
 			admin_update_order_params = cotOrderParams.toString();
 		} else {
 			admin_update_order_params = orderParams.toString();
@@ -572,15 +569,15 @@ export function addOrder() {
 			admin_update_order_params.toString(),
 			{
 				headers: requestHeaders,
-				tags: { name: 'Merchant - Update Existing Order' },
+				tags: { name: 'Merchant - Update Existing Order Status' },
 			}
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
 			"body contains: 'Edit order' header": ( response ) =>
-				response.body.includes( 'Edit order</h1>' ),
+				response.body.includes( `${ admin_open_order_assert }` ),
 			"body contains: 'Order updated' confirmation": ( response ) =>
-				response.body.includes( 'Order updated.' ),
+				response.body.includes( `${ admin_update_order_assert }` ),
 		} );
 	} );
 }

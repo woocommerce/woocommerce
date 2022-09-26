@@ -30,10 +30,13 @@ import {
 
 // Change URL if COT is enabled and being used
 let admin_orders_base;
+let admin_search_assert;
 if ( cot_status === true ) {
 	admin_orders_base = cot_admin_orders_base_url;
+	admin_search_assert = 'tbody id="the-list"';
 } else {
 	admin_orders_base = `${ admin_orders_base_url }&post_status=all`;
+	admin_search_assert = 'Search results for:';
 }
 
 export function ordersSearch() {
@@ -60,7 +63,7 @@ export function ordersSearch() {
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
 			"body contains: 'Search results' subtitle": ( response ) =>
-				response.body.includes( 'Search results for:' ),
+				response.body.includes( `${ admin_search_assert }` ),
 		} );
 
 		response = http.get(
@@ -75,7 +78,7 @@ export function ordersSearch() {
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
 			"body contains: 'Search results' subtitle": ( response ) =>
-				response.body.includes( 'Search results for:' ),
+				response.body.includes( `${ admin_search_assert }` ),
 		} );
 
 		response = http.get(
@@ -90,7 +93,7 @@ export function ordersSearch() {
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
 			"body contains: 'Search results' subtitle": ( response ) =>
-				response.body.includes( 'Search results for:' ),
+				response.body.includes( `${ admin_search_assert }` ),
 		} );
 	} );
 

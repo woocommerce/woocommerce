@@ -26,21 +26,24 @@ import {
 	commonNonStandardHeaders,
 } from '../../headers.js';
 
+const date = new Date();
+const month = date.toJSON().slice( 5, 7 );
+const year = date.toJSON().slice( 0, 4 );
+const currentDate = `${ year }${ month }`;
+
 // Change URL if COT is enabled and being used
 let admin_orders_base;
+let admin_filter_month_assert;
 if ( cot_status === true ) {
 	admin_orders_base = cot_admin_orders_base_url;
+	admin_filter_month_assert = `selected='selected' value="${ currentDate }">`;
 } else {
 	admin_orders_base = `${ admin_orders_base_url }&post_status=all`;
+	admin_filter_month_assert = `selected='selected' value='${ currentDate }'>`;
 }
 
 export function ordersFilter() {
 	let response;
-
-	const date = new Date();
-	const month = date.toJSON().slice( 5, 7 );
-	const year = date.toJSON().slice( 0, 4 );
-	const currentDate = `${ year }${ month }`;
 
 	group( 'Orders Filter', function () {
 		const requestHeaders = Object.assign(
@@ -53,7 +56,7 @@ export function ordersFilter() {
 
 		response = http.get(
 			`${ base_url }/wp-admin/${ admin_orders_base }` +
-				`s&action=-1&m=${ currentDate }&_customer_user&filter_action=Filter&paged=1&action2=-1`,
+				`&s&action=-1&m=${ currentDate }&_customer_user&filter_action=Filter&paged=1&action2=-1`,
 			{
 				headers: requestHeaders,
 				tags: { name: 'Merchant - Filter Orders By Month' },
@@ -62,14 +65,12 @@ export function ordersFilter() {
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
 			'body contains: filter set to selected month': ( response ) =>
-				response.body.includes(
-					`selected='selected' value='${ currentDate }'>`
-				),
+				response.body.includes( `${ admin_filter_month_assert }` ),
 		} );
 
 		response = http.get(
 			`${ base_url }/wp-admin/${ admin_orders_base }` +
-				`s&action=-1&m=0&_customer_user=${ customer_user_id }&filter_action=Filter&paged=1&action2=-1`,
+				`&s&action=-1&m=0&_customer_user=${ customer_user_id }&filter_action=Filter&paged=1&action2=-1`,
 			{
 				headers: requestHeaders,
 				tags: { name: 'Merchant - Filter Orders By Customer' },
