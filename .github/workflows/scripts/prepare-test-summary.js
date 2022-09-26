@@ -105,9 +105,7 @@ const createAPITableRow = () => {
  */
 const createE2ETableRow = () => {
 	const { passed, failed, skipped, broken, unknown, total, duration } =
-		E2E_PLAYWRIGHT
-			? getAllureSummaryStats( E2E_PW_SUMMARY_PATH )
-			: getPuppeteerStats();
+		getAllureSummaryStats( E2E_PW_SUMMARY_PATH );
 	const durationFormatted = getFormattedDuration( duration );
 
 	return [
@@ -126,10 +124,6 @@ const createE2ETableRow = () => {
  * Add a warning when the number of executed Playwright E2E tests were fewer than the total.
  */
 const addWarningE2EIncomplete = ( warnings ) => {
-	if ( ! E2E_PLAYWRIGHT ) {
-		return;
-	}
-
 	const { statistic } = require( E2E_PW_SUMMARY_PATH );
 	const { total } = statistic;
 	const expectedTotal = Number( E2E_GRAND_TOTAL );
@@ -148,9 +142,8 @@ const addWarningE2EIncomplete = ( warnings ) => {
 const addWarningFailuresBrokenTests = ( warnings ) => {
 	const { failed: apiFailed, broken: apiBroken } =
 		getAllureSummaryStats( API_SUMMARY_PATH );
-	const { failed: e2eFailed, broken: e2eBroken } = E2E_PLAYWRIGHT
-		? getAllureSummaryStats( E2E_PW_SUMMARY_PATH )
-		: getPuppeteerStats();
+	const { failed: e2eFailed, broken: e2eBroken } =
+		getAllureSummaryStats( E2E_PW_SUMMARY_PATH );
 
 	if ( apiFailed || apiBroken || e2eFailed || e2eBroken ) {
 		warnings.push(
