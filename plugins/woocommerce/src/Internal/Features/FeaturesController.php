@@ -502,7 +502,7 @@ class FeaturesController {
 			'title'    => $feature['name'],
 			'desc'     => $description,
 			'type'     => 'checkbox',
-			'id'       => 'some_random_id',// $this->feature_enable_option_name( $feature_id ),
+			'id'       => $this->feature_enable_option_name( $feature_id ),
 			'class'    => $disabled ? 'disabled' : '',
 			'desc_tip' => $desc_tip,
 		);
