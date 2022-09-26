@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import { useCallback, useContext, useState } from '@wordpress/element';
+import * as WooNumber from '@woocommerce/number';
 import {
 	Product,
 	ProductsStoreActions,
@@ -259,13 +260,13 @@ export function useProductHelper() {
 	);
 
 	/**
-	 * Sanitizes a value using the Woo General Currency Settings.
+	 * Sanitizes a price.
 	 *
-	 * @param {string} value the value that will be sanitized.
-	 * @return {string} sanitized value.
+	 * @param {string} price the price that will be sanitized.
+	 * @return {string} sanitized price.
 	 */
-	const sanitizeNumber = useCallback(
-		( value: string ) => {
+	const sanitizePrice = useCallback(
+		( price: string ) => {
 			const { getCurrencyConfig } = context;
 			const { decimalSeparator } = getCurrencyConfig();
 			// Build regex to strip out everything except digits, decimal point and minus sign.
@@ -277,11 +278,49 @@ export function useProductHelper() {
 				ONLY_ONE_DECIMAL_SEPARATOR.replaceAll( '%s', decimalSeparator ),
 				'g'
 			);
-			const cleanValue = value
+			const cleanValue = price
 				.replace( regex, '' )
 				.replace( decimalRegex, '' )
 				.replace( decimalSeparator, '.' );
 			return cleanValue;
+		},
+		[ context ]
+	);
+
+	/**
+	 * Format a value using the Woo General Currency Settings.
+	 *
+	 * @param {string} value the value that will be formatted.
+	 * @return {string} the formatted number.
+	 */
+	const formatNumber = useCallback(
+		( value: string ): string => {
+			const { getCurrencyConfig } = context;
+			const { decimalSeparator, thousandSeparator } = getCurrencyConfig();
+
+			return WooNumber.numberFormat(
+				{ decimalSeparator, thousandSeparator },
+				value
+			);
+		},
+		[ context ]
+	);
+
+	/**
+	 * Parse a value using the Woo General Currency Settings.
+	 *
+	 * @param {string} value the value that will be parsed.
+	 * @return {string} the parsed number.
+	 */
+	const parseNumber = useCallback(
+		( value: string ): string => {
+			const { getCurrencyConfig } = context;
+			const { decimalSeparator, thousandSeparator } = getCurrencyConfig();
+
+			return WooNumber.parseNumber(
+				{ decimalSeparator, thousandSeparator },
+				value
+			);
 		},
 		[ context ]
 	);
@@ -291,7 +330,9 @@ export function useProductHelper() {
 		updateProductWithStatus,
 		copyProductWithStatus,
 		deleteProductAndRedirect,
-		sanitizeNumber,
+		sanitizePrice,
+		formatNumber,
+		parseNumber,
 		isUpdatingDraft: updating.draft,
 		isUpdatingPublished: updating.publish,
 		isDeleting,

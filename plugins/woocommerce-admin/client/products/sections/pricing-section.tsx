@@ -28,7 +28,7 @@ import { useProductHelper } from '../use-product-helper';
 
 export const PricingSection: React.FC = () => {
 	const { getInputProps } = useFormContext< Product >();
-	const { sanitizeNumber } = useProductHelper();
+	const { sanitizePrice } = useProductHelper();
 	const { isResolving: isTaxSettingsResolving, taxSettings } = useSelect(
 		( select ) => {
 			const { getSettings, hasFinishedResolution } =
@@ -135,7 +135,7 @@ export const PricingSection: React.FC = () => {
 							label={ __( 'List price', 'woocommerce' ) }
 							placeholder={ __( '10.59', 'woocommerce' ) }
 							onChange={ ( value: string ) => {
-								const sanitizedValue = sanitizeNumber( value );
+								const sanitizedValue = sanitizePrice( value );
 								regularPriceProps?.onChange( sanitizedValue );
 							} }
 						/>
@@ -155,7 +155,7 @@ export const PricingSection: React.FC = () => {
 							label={ salePriceTitle }
 							placeholder={ __( '8.59', 'woocommerce' ) }
 							onChange={ ( value: string ) => {
-								const sanitizedValue = sanitizeNumber( value );
+								const sanitizedValue = sanitizePrice( value );
 								salePriceProps?.onChange( sanitizedValue );
 							} }
 						/>

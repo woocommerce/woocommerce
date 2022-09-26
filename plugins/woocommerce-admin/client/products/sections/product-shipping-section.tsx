@@ -52,7 +52,7 @@ function getInterpolatedSizeLabel( mixedString: string ) {
 
 export const ProductShippingSection: React.FC = () => {
 	const { getInputProps } = useFormContext< Product >();
-	const { sanitizeNumber } = useProductHelper();
+	const { formatNumber, parseNumber } = useProductHelper();
 
 	const { shippingClasses, hasResolvedShippingClasses } = useSelect(
 		( select ) => {
@@ -156,6 +156,9 @@ export const ProductShippingSection: React.FC = () => {
 								>
 									<InputControl
 										{ ...inputWidthProps }
+										value={ formatNumber(
+											inputWidthProps.value
+										) }
 										label={ getInterpolatedSizeLabel(
 											__(
 												'Width {{span}}A{{/span}}',
@@ -164,7 +167,7 @@ export const ProductShippingSection: React.FC = () => {
 										) }
 										onChange={ ( value: string ) =>
 											inputWidthProps?.onChange(
-												sanitizeNumber( value )
+												parseNumber( value )
 											)
 										}
 										suffix="cm"
@@ -177,6 +180,9 @@ export const ProductShippingSection: React.FC = () => {
 								>
 									<InputControl
 										{ ...inputLengthProps }
+										value={ formatNumber(
+											inputLengthProps.value
+										) }
 										label={ getInterpolatedSizeLabel(
 											__(
 												'Length {{span}}B{{/span}}',
@@ -185,7 +191,7 @@ export const ProductShippingSection: React.FC = () => {
 										) }
 										onChange={ ( value: string ) =>
 											inputLengthProps?.onChange(
-												sanitizeNumber( value )
+												parseNumber( value )
 											)
 										}
 										suffix="cm"
@@ -198,6 +204,9 @@ export const ProductShippingSection: React.FC = () => {
 								>
 									<InputControl
 										{ ...inputHeightProps }
+										value={ formatNumber(
+											inputHeightProps.value
+										) }
 										label={ getInterpolatedSizeLabel(
 											__(
 												'Height {{span}}C{{/span}}',
@@ -206,7 +215,7 @@ export const ProductShippingSection: React.FC = () => {
 										) }
 										onChange={ ( value: string ) =>
 											inputHeightProps?.onChange(
-												sanitizeNumber( value )
+												parseNumber( value )
 											)
 										}
 										suffix="cm"
@@ -219,10 +228,13 @@ export const ProductShippingSection: React.FC = () => {
 								>
 									<InputControl
 										{ ...inputWeightProps }
+										value={ formatNumber(
+											inputWeightProps.value
+										) }
 										label={ __( 'Weight', 'woocommerce' ) }
 										onChange={ ( value: string ) =>
 											inputWeightProps?.onChange(
-												sanitizeNumber( value )
+												parseNumber( value )
 											)
 										}
 										suffix="kg"
