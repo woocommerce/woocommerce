@@ -105,6 +105,7 @@
 		"@testing-library/user-event": "13.5.0",
 		"@types/classnames": "2.3.0",
 		"@types/dinero.js": "1.9.0",
+		"@types/dompurify": "2.3.4",
 		"@types/gtag.js": "0.0.10",
 		"@types/jest": "27.5.2",
 		"@types/jest-environment-puppeteer": "5.0.2",
