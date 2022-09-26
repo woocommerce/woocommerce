@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix failing to update industries after clicking "Continue" on "Industry" tab
+Fix failing to update onboarding profile data for PHP 8
