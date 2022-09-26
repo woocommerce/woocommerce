@@ -46,37 +46,6 @@ const getAllureSummaryStats = ( summaryJSONPath ) => {
 };
 
 /**
- * Extract the test report statistics (the number of tests that passed, failed, skipped, etc.) from the `test-results.json` file.
- *
- * @returns An object containing relevant statistics from the `test-results.json` file.
- */
-const getPuppeteerStats = () => {
-	const summary = require( E2E_PPTR_SUMMARY_PATH );
-	const {
-		numPassedTests: passed,
-		numFailedTests: failed,
-		numTotalTests: total,
-		numPendingTests: skipped,
-		numRuntimeErrorTestSuites: broken,
-		numTodoTests: unknown,
-		startTime,
-		testResults,
-	} = summary;
-	const endTime = testResults[ testResults.length - 1 ].endTime;
-	const duration = endTime - startTime;
-
-	return {
-		passed,
-		failed,
-		skipped,
-		broken,
-		unknown,
-		total,
-		duration,
-	};
-};
-
-/**
  * Construct the array to be used for the API table row.
  *
  * @returns Array of API test result stats.
