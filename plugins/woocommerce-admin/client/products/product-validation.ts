@@ -51,5 +51,31 @@ export const validate = (
 		);
 	}
 
+	if ( values.dimensions?.width && +values.dimensions.width <= 0 ) {
+		errors.dimensions = {
+			width: __( 'Width must be higher than zero.', 'woocommerce' ),
+		};
+	}
+
+	if ( values.dimensions?.length && +values.dimensions.length <= 0 ) {
+		errors.dimensions = {
+			...( ( errors.dimensions as FormErrors< ProductDimensions > ) ??
+				{} ),
+			length: __( 'Length must be higher than zero.', 'woocommerce' ),
+		};
+	}
+
+	if ( values.dimensions?.height && +values.dimensions.height <= 0 ) {
+		errors.dimensions = {
+			...( ( errors.dimensions as FormErrors< ProductDimensions > ) ??
+				{} ),
+			height: __( 'Height must be higher than zero.', 'woocommerce' ),
+		};
+	}
+
+	if ( values.weight && +values.weight <= 0 ) {
+		errors.weight = __( 'Weight must be higher than zero.', 'woocommerce' );
+	}
+
 	return errors;
 };
