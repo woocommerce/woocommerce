@@ -64,11 +64,12 @@ class Api {
 	 * Get the path to a block's metadata
 	 *
 	 * @param string $block_name The block to get metadata for.
+	 * @param string $path Optional. The path to the metadata file inside the 'build' folder.
 	 *
 	 * @return string|boolean False if metadata file is not found for the block.
 	 */
-	public function get_block_metadata_path( $block_name ) {
-		$path_to_metadata_from_plugin_root = $this->package->get_path( 'build/' . $block_name . '/block.json' );
+	public function get_block_metadata_path( $block_name, $path = '' ) {
+		$path_to_metadata_from_plugin_root = $this->package->get_path( 'build/' . $path . $block_name . '/block.json' );
 		if ( ! file_exists( $path_to_metadata_from_plugin_root ) ) {
 			return false;
 		}
