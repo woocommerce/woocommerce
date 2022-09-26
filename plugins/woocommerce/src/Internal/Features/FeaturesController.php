@@ -393,8 +393,6 @@ class FeaturesController {
 			return $settings;
 		}
 
-		return $settings;
-
 		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		/**
 		 * Filter allowing WooCommerce Admin to be disabled.
@@ -463,7 +461,7 @@ class FeaturesController {
 			'id'   => empty( $experimental_feature_ids ) ? 'features_options' : 'experimental_features_options',
 		);
 
-		return $feature_settings;
+		return array_merge($settings, $feature_settings);
 	}
 
 	/**
