@@ -1,0 +1,40 @@
+.woocommerce-add-attribute-modal {
+	.components-notice.is-info {
+		margin-left: 0;
+		margin-right: 0;
+		background-color: #f0f6fc;
+	}
+
+	&__buttons {
+		margin-top: $gap-larger;
+		display: flex;
+		flex-direction: row;
+		gap: 8px;
+		justify-content: flex-end;
+	}
+
+	&__table {
+		width: 100%;
+		margin-top: $gap-large;
+
+		th {
+			text-align: left;
+			color: $gray-700;
+			font-weight: normal;
+			text-transform: uppercase;
+		}
+	}
+	&__table-header {
+		padding: 0 0 $gap;
+	}
+	&__table-header,
+	&__table-row {
+		display: grid;
+		grid-template-columns: 40% 60%;
+		gap: $gap;
+		border-bottom: 1px solid $gray-300;
+	}
+	&__table-row {
+		padding: $gap-large 0;
+	}
+}

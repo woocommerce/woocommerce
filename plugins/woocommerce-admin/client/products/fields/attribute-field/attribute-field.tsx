@@ -3,6 +3,7 @@
  */
 import { sprintf, __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
+import { useState } from '@wordpress/element';
 import { ProductAttribute } from '@woocommerce/data';
 import { Text } from '@woocommerce/experimental';
 import { Sortable, ListItem } from '@woocommerce/components';
@@ -13,6 +14,7 @@ import { closeSmall } from '@wordpress/icons';
  */
 import './attribute-field.scss';
 import AttributeEmptyStateLogo from './attribute-empty-state-logo.svg';
+import { AddAttributeModal } from './add-attribute-modal';
 import { reorderSortableProductAttributePositions } from './utils';
 
 type AttributeFieldProps = {
@@ -24,6 +26,8 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 	value,
 	onChange,
 } ) => {
+	const [ showAddAttributeModal, setShowAddAttributeModal ] =
+		useState( false );
 	const onRemove = ( attribute: ProductAttribute ) => {
 		// eslint-disable-next-line no-alert
 		if ( window.confirm( __( 'Remove this attribute?', 'woocommerce' ) ) ) {
@@ -52,7 +56,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					<Button
 						variant="secondary"
 						className="woocommerce-attribute-field__add-new"
-						disabled={ true }
+						onClick={ () => setShowAddAttributeModal( true ) }
 					>
 						{ __( 'Add first attribute', 'woocommerce' ) }
 					</Button>
@@ -127,11 +131,17 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 				<Button
 					variant="secondary"
 					className="woocommerce-attribute-field__add-attribute"
-					disabled={ true }
+					onClick={ () => setShowAddAttributeModal( true ) }
 				>
 					{ __( 'Add attribute', 'woocommerce' ) }
 				</Button>
 			</ListItem>
+			{ showAddAttributeModal && (
+				<AddAttributeModal
+					onCancel={ () => setShowAddAttributeModal( false ) }
+					onCreated={ () => {} }
+				/>
+			) }
 		</div>
 	);
 };
