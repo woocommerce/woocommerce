@@ -93,6 +93,22 @@ class WC_Order extends WC_Abstract_Order {
 	);
 
 	/**
+	 * List of properties that were earlier managed by data store. However, since DataStore is a not a stored entity in itself, they used to store data in metadata of the data object.
+	 * With custom tables, some of these are moved from metadata to their own columns, but existing code will still try to add them to metadata. This array is used to keep track of such properties.
+	 *
+	 * Only reason to add a property here is that you are moving properties from DataStore instance to data object. Otherwise, if you are adding a new property, consider adding it to $data array instead.
+	 *
+	 * @var array
+	 */
+	protected $legacy_datastore_props = array(
+		'_recorded_sales',
+		'_recorded_coupon_usage_counts',
+		'_download_permissions_granted',
+		'_order_stock_reduced',
+		'_new_order_email_sent',
+	);
+
+	/**
 	 * When a payment is complete this function is called.
 	 *
 	 * Most of the time this should mark an order as 'processing' so that admin can process/post the items.
@@ -1026,17 +1042,6 @@ class WC_Order extends WC_Abstract_Order {
 		return wc_string_to_bool( $this->get_prop( 'recorded_sales', $context ) );
 	}
 
-	/**
-	 * Gets information about whether coupon counts were updated.
-	 *
-	 * @param string $context What the value is for. Valid values are view and edit.
-	 *
-	 * @return bool True if coupon counts were updated, false otherwise.
-	 */
-	public function get_recorded_coupon_usage_counts( $context = 'view' ) {
-		return wc_string_to_bool( $this->get_prop( 'recorded_coupon_usage_counts', $context ) );
-	}
-
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -1467,17 +1472,6 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function set_recorded_sales( $value ) {
 		$this->set_prop( 'recorded_sales', wc_string_to_bool( $value ) );
-	}
-
-	/**
-	 * Stores information about whether the coupon usage were counted.
-	 *
-	 * @param bool|string $value True if counted, false if not.
-	 *
-	 * @return void
-	 */
-	public function set_recorded_coupon_usage_counts( $value ) {
-		$this->set_prop( 'recorded_coupon_usage_counts', wc_string_to_bool( $value ) );
 	}
 
 	/*

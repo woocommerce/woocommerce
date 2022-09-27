@@ -59,11 +59,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @var array
 	 */
 	protected $legacy_datastore_props = array(
-		'_recorded_sales',
 		'_recorded_coupon_usage_counts',
-		'_download_permissions_granted',
-		'_order_stock_reduced',
-		'_new_order_email_sent',
 	);
 
 	/**
@@ -532,6 +528,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		return false;
 	}
 
+	/**
+	 * Gets information about whether coupon counts were updated.
+	 *
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 *
+	 * @return bool True if coupon counts were updated, false otherwise.
+	 */
+	public function get_recorded_coupon_usage_counts( $context = 'view' ) {
+		return wc_string_to_bool( $this->get_prop( 'recorded_coupon_usage_counts', $context ) );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -722,6 +729,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return $this->legacy_set_total( $value, $deprecated );
 		}
 		$this->set_prop( 'total', wc_format_decimal( $value, wc_get_price_decimals() ) );
+	}
+
+	/**
+	 * Stores information about whether the coupon usage were counted.
+	 *
+	 * @param bool|string $value True if counted, false if not.
+	 *
+	 * @return void
+	 */
+	public function set_recorded_coupon_usage_counts( $value ) {
+		$this->set_prop( 'recorded_coupon_usage_counts', wc_string_to_bool( $value ) );
 	}
 
 	/*
