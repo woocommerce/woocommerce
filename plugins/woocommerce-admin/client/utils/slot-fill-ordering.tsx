@@ -21,6 +21,8 @@ export const createOrderedChildren = (
 	if ( typeof children === 'function' ) {
 		return cloneElement( children( props ), { order } );
 	} else if ( isValidElement( children ) ) {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		return cloneElement( children, { ...props, order } );
 	}
 	throw Error( 'Invalid children type' );
