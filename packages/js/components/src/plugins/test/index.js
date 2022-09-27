@@ -21,6 +21,10 @@ jest.mock( '@wordpress/data', () => ( {
 } ) );
 
 describe( 'Rendering', () => {
+	afterAll( () => {
+		jest.restoreAllMocks();
+	} );
+
 	it( 'should render nothing when autoInstalling', async () => {
 		const { installAndActivatePlugins } = useDispatch();
 
