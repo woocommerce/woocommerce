@@ -6,8 +6,10 @@ import { __ } from '@wordpress/i18n';
 import { Link, Spinner, useFormContext } from '@woocommerce/components';
 import {
 	EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME,
+	OPTIONS_STORE_NAME,
 	Product,
 	ProductShippingClass,
+	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
 import interpolateComponents from '@automattic/interpolate-components';
 import {
@@ -70,6 +72,25 @@ export const ProductShippingSection: React.FC = () => {
 		[]
 	);
 
+	const { dimensionUnit, weightUnit, hasResolvedUnits } = useSelect(
+		( select ) => {
+			const { getOption, hasFinishedResolution } =
+				select( OPTIONS_STORE_NAME );
+			return {
+				dimensionUnit: getOption( 'woocommerce_dimension_unit' ),
+				weightUnit: getOption( 'woocommerce_weight_unit' ),
+				hasResolvedUnits:
+					hasFinishedResolution( 'getOption', [
+						'woocommerce_dimension_unit',
+					] ) &&
+					hasFinishedResolution( 'getOption', [
+						'woocommerce_weight_unit',
+					] ),
+			};
+		},
+		[]
+	);
+
 	const inputWidthProps = getTextControlProps(
 		getInputProps( 'dimensions.width' )
 	);
@@ -91,7 +112,7 @@ export const ProductShippingSection: React.FC = () => {
 				) }
 			>
 				<Card>
-					<CardBody>
+					<CardBody className="product-shipping-section__classes">
 						{ hasResolvedShippingClasses ? (
 							<>
 								<SelectControl
@@ -138,111 +159,122 @@ export const ProductShippingSection: React.FC = () => {
 				</Card>
 
 				<Card>
-					<CardBody>
-						<h4 className="product-shipping-section__subtitle">
-							{ __( 'Dimensions', 'woocommerce' ) }
-						</h4>
-						<p className="woocommerce-product-form__secondary-text">
-							{ __(
-								'Enter the size of the product as you’d put it in a shipping box, including packaging like bubble wrap.',
-								'woocommerce'
-							) }
-						</p>
-						<div className="product-shipping-section__container">
-							<div>
-								<BaseControl
-									{ ...inputWidthProps }
-									id="product_shipping_dimensions_width"
-								>
-									<InputControl
-										{ ...inputWidthProps }
-										value={ formatNumber(
-											inputWidthProps.value
-										) }
-										label={ getInterpolatedSizeLabel(
-											__(
-												'Width {{span}}A{{/span}}',
-												'woocommerce'
-											)
-										) }
-										onChange={ ( value: string ) =>
-											inputWidthProps?.onChange(
-												parseNumber( value )
-											)
-										}
-										suffix="cm"
-									/>
-								</BaseControl>
+					<CardBody className="product-shipping-section__dimensions">
+						{ hasResolvedUnits ? (
+							<>
+								<h4 className="product-shipping-section__subtitle">
+									{ __( 'Dimensions', 'woocommerce' ) }
+								</h4>
+								<p className="woocommerce-product-form__secondary-text">
+									{ __(
+										'Enter the size of the product as you’d put it in a shipping box, including packaging like bubble wrap.',
+										'woocommerce'
+									) }
+								</p>
+								<div className="product-shipping-section__container">
+									<div>
+										<BaseControl
+											{ ...inputWidthProps }
+											id="product_shipping_dimensions_width"
+										>
+											<InputControl
+												{ ...inputWidthProps }
+												value={ formatNumber(
+													inputWidthProps.value
+												) }
+												label={ getInterpolatedSizeLabel(
+													__(
+														'Width {{span}}A{{/span}}',
+														'woocommerce'
+													)
+												) }
+												onChange={ ( value: string ) =>
+													inputWidthProps?.onChange(
+														parseNumber( value )
+													)
+												}
+												suffix={ dimensionUnit }
+											/>
+										</BaseControl>
 
-								<BaseControl
-									{ ...inputLengthProps }
-									id="product_shipping_dimensions_length"
-								>
-									<InputControl
-										{ ...inputLengthProps }
-										value={ formatNumber(
-											inputLengthProps.value
-										) }
-										label={ getInterpolatedSizeLabel(
-											__(
-												'Length {{span}}B{{/span}}',
-												'woocommerce'
-											)
-										) }
-										onChange={ ( value: string ) =>
-											inputLengthProps?.onChange(
-												parseNumber( value )
-											)
-										}
-										suffix="cm"
-									/>
-								</BaseControl>
+										<BaseControl
+											{ ...inputLengthProps }
+											id="product_shipping_dimensions_length"
+										>
+											<InputControl
+												{ ...inputLengthProps }
+												value={ formatNumber(
+													inputLengthProps.value
+												) }
+												label={ getInterpolatedSizeLabel(
+													__(
+														'Length {{span}}B{{/span}}',
+														'woocommerce'
+													)
+												) }
+												onChange={ ( value: string ) =>
+													inputLengthProps?.onChange(
+														parseNumber( value )
+													)
+												}
+												suffix={ dimensionUnit }
+											/>
+										</BaseControl>
 
-								<BaseControl
-									{ ...inputHeightProps }
-									id="product_shipping_dimensions_height"
-								>
-									<InputControl
-										{ ...inputHeightProps }
-										value={ formatNumber(
-											inputHeightProps.value
-										) }
-										label={ getInterpolatedSizeLabel(
-											__(
-												'Height {{span}}C{{/span}}',
-												'woocommerce'
-											)
-										) }
-										onChange={ ( value: string ) =>
-											inputHeightProps?.onChange(
-												parseNumber( value )
-											)
-										}
-										suffix="cm"
-									/>
-								</BaseControl>
+										<BaseControl
+											{ ...inputHeightProps }
+											id="product_shipping_dimensions_height"
+										>
+											<InputControl
+												{ ...inputHeightProps }
+												value={ formatNumber(
+													inputHeightProps.value
+												) }
+												label={ getInterpolatedSizeLabel(
+													__(
+														'Height {{span}}C{{/span}}',
+														'woocommerce'
+													)
+												) }
+												onChange={ ( value: string ) =>
+													inputHeightProps?.onChange(
+														parseNumber( value )
+													)
+												}
+												suffix={ dimensionUnit }
+											/>
+										</BaseControl>
 
-								<BaseControl
-									{ ...inputWeightProps }
-									id="product_shipping_weight"
-								>
-									<InputControl
-										{ ...inputWeightProps }
-										value={ formatNumber(
-											inputWeightProps.value
-										) }
-										label={ __( 'Weight', 'woocommerce' ) }
-										onChange={ ( value: string ) =>
-											inputWeightProps?.onChange(
-												parseNumber( value )
-											)
-										}
-										suffix="kg"
-									/>
-								</BaseControl>
+										<BaseControl
+											{ ...inputWeightProps }
+											id="product_shipping_weight"
+										>
+											<InputControl
+												{ ...inputWeightProps }
+												value={ formatNumber(
+													inputWeightProps.value
+												) }
+												label={ __(
+													'Weight',
+													'woocommerce'
+												) }
+												onChange={ ( value: string ) =>
+													inputWeightProps?.onChange(
+														parseNumber( value )
+													)
+												}
+												suffix={ weightUnit }
+											/>
+										</BaseControl>
+									</div>
+									<div></div>
+								</div>
+							</>
+						) : (
+							<div className="product-shipping-section__spinner-wrapper">
+								<Spinner />
 							</div>
-							<div></div>
-						</div>
+						) }
 					</CardBody>
 				</Card>
 			</ProductSectionLayout>
