@@ -67,7 +67,31 @@ class WC_Admin_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 				'slug' => 'health-beauty',
 			),
 		);
-		$request->set_body( wp_json_encode( array( 'industry' => $industry ) ) );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'completed'            => true,
+					'skipped'              => false,
+					'industry'             => $industry,
+					'product_types'        => 'physical',
+					'product_count'        => '1-10',
+					'selling_venues'       => 'brick-mortar',
+					'number_employees'     => '<10',
+					'revenue'              => 'none',
+					'other_platform'       => 'shopify',
+					'other_platform_name'  => '',
+					'business_extensions'  => array(
+						'jetpack',
+					),
+					'theme'                => 'Test',
+					'wccom_connected'      => false,
+					'setup_client'         => false,
+					'is_agree_marketing'   => true,
+					'store_email'          => 'user@example.com',
+					'is_store_country_set' => true,
+				)
+			)
+		);
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
