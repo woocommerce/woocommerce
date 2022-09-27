@@ -1512,7 +1512,6 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 								'properties'  => array(
-									'type'       => 'object',
 									'properties' => array(
 										'id'  => array(
 											'description' => __( 'Image ID.', 'woocommerce' ),
