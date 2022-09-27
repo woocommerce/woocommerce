@@ -34,6 +34,7 @@ export type ImageGalleryProps = {
 	MediaUploadComponent?: MediaUploadComponentType;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
+	onDragOver?: DragEventHandler< HTMLLIElement >;
 } & React.HTMLAttributes< HTMLDivElement >;
 
 export const ImageGallery: React.FC< ImageGalleryProps > = ( {
@@ -45,6 +46,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 	MediaUploadComponent = MediaUpload,
 	onDragStart = () => null,
 	onDragEnd = () => null,
+	onDragOver = () => null,
 }: ImageGalleryProps ) => {
 	const [ activeToolbarKey, setActiveToolbarKey ] = useState< string | null >(
 		null
@@ -84,6 +86,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 				} }
 				onDragStart={ onDragStart }
 				onDragEnd={ onDragEnd }
+				onDragOver={ onDragOver }
 			>
 				{ orderedChildren.map( ( child, childIndex ) => {
 					const isToolbarVisible = child.key === activeToolbarKey;
