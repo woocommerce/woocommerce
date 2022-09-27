@@ -46,6 +46,7 @@ class Industry extends Component {
 	constructor( props ) {
 		const profileItems = get( props, 'profileItems', {} );
 		let selected = profileItems.industry || [];
+
 		/**
 		 * @todo Remove block on `updateProfileItems` refactor to wp.data dataStores.
 		 *
