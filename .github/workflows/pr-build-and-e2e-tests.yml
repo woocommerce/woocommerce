@@ -78,7 +78,7 @@ jobs:
                   BASE_URL: http://localhost:8086
                   USER_KEY: admin
                   USER_SECRET: password
-              run: pnpm exec wc-api-tests test api
+              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js
 
             - name: Archive API test report
               if: always()

@@ -21,7 +21,10 @@ const config = {
 				open: process.env.CI ? 'never' : 'always',
 			},
 		],
-		[ 'allure-playwright', { outputFolder: 'e2e/allure-results' } ],
+		[
+			'allure-playwright',
+			{ outputFolder: 'api-test-report/allure-results' },
+		],
 		[ 'json', { outputFile: 'e2e/test-results.json' } ],
 	],
 	use: {
