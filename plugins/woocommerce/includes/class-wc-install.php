@@ -215,6 +215,7 @@ class WC_Install {
 		),
 		'7.0.0' => array(
 			'wc_update_700_remove_download_log_fk',
+			'wc_update_700_remove_recommended_marketing_plugins_transient',
 		),
 	);
 

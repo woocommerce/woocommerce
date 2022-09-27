@@ -95,6 +95,19 @@ const errorMessage =
 test.describe( 'Import Products from a CSV file', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
+	test.beforeAll( async ( { baseURL } ) => {
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		// make sure the currency is USD
+		await api.put( 'settings/general/woocommerce_currency', {
+			value: 'USD',
+		} );
+	} );
+
 	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
@@ -250,7 +263,7 @@ test.describe( 'Import Products from a CSV file', () => {
 			elements.map( ( item ) => item.innerText )
 		);
 
-		await expect( productPrices.sort() ).toEqual(
+		await expect( productPrices.sort() ).toStrictEqual(
 			productPricesOverride.sort()
 		);
 	} );

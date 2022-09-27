@@ -50,7 +50,7 @@ class StringUtilTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'contains' should check whether one string contains another.
+	 * @@testdox 'contains' should check whether one string contains another.
 	 */
 	public function test_contains() {
 		$this->assertFalse( StringUtil::contains( 'foobar', 'fizzbuzz' ) );

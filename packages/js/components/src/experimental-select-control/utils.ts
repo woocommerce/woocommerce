@@ -1,20 +1,43 @@
 /**
  * Internal dependencies
  */
-import { ItemType, SelectedType } from './types';
+import { getItemLabelType, DefaultItemType } from './types';
 
-export const itemToString = ( item: ItemType | null ) => {
-	return item ? item.label : '';
+function isDefaultItemType< ItemType >(
+	item: ItemType | DefaultItemType | null
+): item is DefaultItemType {
+	return (
+		Boolean( item ) &&
+		( item as DefaultItemType ).label !== undefined &&
+		( item as DefaultItemType ).value !== undefined
+	);
+}
+
+export const defaultGetItemLabel = < ItemType >( item: ItemType | null ) => {
+	if ( isDefaultItemType< ItemType >( item ) ) {
+		return item.label;
+	}
+	return '';
 };
 
-export const getFilteredItems = (
+export const defaultGetItemValue = < ItemType >( item: ItemType | null ) => {
+	if ( isDefaultItemType< ItemType >( item ) ) {
+		return item.value;
+	}
+	return '';
+};
+
+export const defaultGetFilteredItems = < ItemType >(
 	allItems: ItemType[],
 	inputValue: string,
-	selectedItems: ItemType[]
+	selectedItems: ItemType[],
+	getItemLabel: getItemLabelType< ItemType >
 ) => {
 	return allItems.filter(
 		( item ) =>
 			selectedItems.indexOf( item ) < 0 &&
-			item.label.toLowerCase().startsWith( inputValue.toLowerCase() )
+			getItemLabel( item )
+				.toLowerCase()
+				.startsWith( inputValue.toLowerCase() )
 	);
 };

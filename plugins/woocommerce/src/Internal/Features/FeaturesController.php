@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\Features;
 
-use Automattic\WooCommerce\Admin\Features\Analytics;
+use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Admin\Features\Navigation\Init;
 use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
@@ -490,7 +490,7 @@ class FeaturesController {
 			$needs_update = version_compare( get_bloginfo( 'version' ), '5.6', '<' );
 			if ( $needs_update && current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
 				$update_text = sprintf(
-					// translators: 1: line break tag, 2: open link to WordPress update link, 3: close link tag.
+				// translators: 1: line break tag, 2: open link to WordPress update link, 3: close link tag.
 					__( '%1$s %2$sUpdate WordPress to enable the new navigation%3$s', 'woocommerce' ),
 					'<br/>',
 					'<a href="' . self_admin_url( 'update-core.php' ) . '" target="_blank">',

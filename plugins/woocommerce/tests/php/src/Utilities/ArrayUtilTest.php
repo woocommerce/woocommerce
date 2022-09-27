@@ -276,6 +276,7 @@ class ArrayUtilTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( array( 1, 2, 3, 4 ), $array );
 	}
 
+
 	/**
 	 * @testdox `ensure_key_is_array` adds an empty array under the given key if they key doesn't exist already in the array.
 	 */

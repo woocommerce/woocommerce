@@ -54,7 +54,6 @@ class Init {
 	 * @return array
 	 */
 	public static function add_feature_toggle( $features ) {
-
 		return $features;
 	}
 
