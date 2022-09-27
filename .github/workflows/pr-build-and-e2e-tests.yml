@@ -90,7 +90,7 @@ jobs:
                       ${{ env.API_TEST_REPORT_DIR }}/allure-report
                   retention-days: 5
 
-    k6-tests-run:
+    k6-tests-run: 
         name: Runs k6 Performance tests
         runs-on: ubuntu-20.04
         steps:
