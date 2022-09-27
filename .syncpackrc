@@ -18,6 +18,15 @@
 				"**"
 			],
 			"pinVersion": "^17.0.2"
+		},
+		{
+			"dependencies": [
+				"typescript"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^4.8.3"
 		}
 	]
 }
