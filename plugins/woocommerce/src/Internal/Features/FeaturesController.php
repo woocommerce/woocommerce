@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\Features;
 
-use Automattic\WooCommerce\Admin\Features\Analytics;
+use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Admin\Features\Navigation\Init;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
