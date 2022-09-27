@@ -161,6 +161,9 @@ export const options = {
 		'http_req_duration{name:Merchant - All Orders}': [
 			`${ merchant_request_threshold }`,
 		],
+		'http_req_duration{name:Merchant - Completed Orders}': [
+			`${ merchant_request_threshold }`,
+		],
 		'http_req_duration{name:Merchant - New Order Page}': [
 			`${ merchant_request_threshold }`,
 		],
