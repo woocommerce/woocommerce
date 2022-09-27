@@ -237,6 +237,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					break;
 			}
 
+			// We want to persist internal data store keys as 'yes' or 'no' if they are boolean to maintain compatibility.
+			if ( is_bool( $value ) && in_array( $prop, array_values( $this->internal_data_store_key_getters ), true ) ) {
+				$value = wc_bool_to_string( $value );
+			}
+
 			$updated = $this->update_or_delete_post_meta( $order, $meta_key, $value );
 
 			if ( $updated ) {
