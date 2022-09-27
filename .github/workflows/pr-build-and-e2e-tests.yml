@@ -78,7 +78,7 @@ jobs:
                   BASE_URL: http://localhost:8086
                   USER_KEY: admin
                   USER_SECRET: password
-              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js
+              run: pnpm exec wc-api-tests test api
 
             - name: Archive API test report
               if: always()
@@ -155,8 +155,8 @@ jobs:
               uses: actions/github-script@v6
               env:
                   API_SUMMARY_PATH: ${{ github.workspace }}/artifacts/api/allure-report/widgets/summary.json
-                  E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/widgets/summary.json
-                  E2E_PPTR_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/test-results.json
+                  # E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/widgets/summary.json
+                  # E2E_PPTR_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/test-results.json
                   PR_NUMBER: ${{ github.event.number }}
                   SHA: ${{ github.event.pull_request.head.sha }}
               with:
@@ -202,12 +202,11 @@ jobs:
             - name: Publish test reports
               env:
                   API_ARTIFACT: api-test-report---pr-${{ github.event.number }}
-                  E2E_ARTIFACT: e2e-test-report---pr-${{ github.event.number }}
+                  # E2E_ARTIFACT: e2e-test-report---pr-${{ github.event.number }}
               run: |
                   gh workflow run publish-test-reports-pr.yml \
                     -f run_id=$RUN_ID \
                     -f api_artifact=$API_ARTIFACT \
-                    -f e2e_artifact=$E2E_ARTIFACT \
                     -f pr_number=$PR_NUMBER \
                     -f commit_sha=$COMMIT_SHA \
                     -f s3_root=public \
