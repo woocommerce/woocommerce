@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { Link, Spinner, useFormContext } from '@woocommerce/components';
@@ -25,6 +26,10 @@ import {
  */
 import { ADMIN_URL } from '../../utils/admin-settings';
 import { ProductSectionLayout } from '../layout/product-section-layout';
+import {
+	ShippingDimensionsImage,
+	ShippingDimensionsImageProps,
+} from '../fields/shipping-dimensions-image';
 import { useProductHelper } from '../use-product-helper';
 import { getTextControlProps } from './utils';
 import './product-shipping-section.scss';
@@ -54,6 +59,8 @@ function getInterpolatedSizeLabel( mixedString: string ) {
 export const ProductShippingSection: React.FC = () => {
 	const { getInputProps } = useFormContext< Product >();
 	const { formatNumber, parseNumber } = useProductHelper();
+	const [ highlightSide, setHighLightSide ] =
+		useState< ShippingDimensionsImageProps[ 'highlight' ] >();
 
 	const { shippingClasses, hasResolvedShippingClasses } = useSelect(
 		( select ) => {
@@ -166,8 +173,8 @@ export const ProductShippingSection: React.FC = () => {
 									'woocommerce'
 								) }
 							</p>
-							<div className="product-shipping-section__container">
-								<div>
+							<div className="product-shipping-section__dimensions__body">
+								<div className="product-shipping-section__dimensions__body__col">
 									<BaseControl
 										id="product_shipping_dimensions_width"
 										className={ inputWidthProps.className }
@@ -189,6 +196,13 @@ export const ProductShippingSection: React.FC = () => {
 													parseNumber( value )
 												)
 											}
+											onFocus={ () => {
+												setHighLightSide( 'A' );
+											} }
+											onBlur={ () => {
+												setHighLightSide( undefined );
+												inputWidthProps?.onBlur();
+											} }
 											suffix={ dimensionUnit }
 										/>
 									</BaseControl>
@@ -214,6 +228,13 @@ export const ProductShippingSection: React.FC = () => {
 													parseNumber( value )
 												)
 											}
+											onFocus={ () => {
+												setHighLightSide( 'B' );
+											} }
+											onBlur={ () => {
+												setHighLightSide( undefined );
+												inputLengthProps?.onBlur();
+											} }
 											suffix={ dimensionUnit }
 										/>
 									</BaseControl>
@@ -239,6 +260,13 @@ export const ProductShippingSection: React.FC = () => {
 													parseNumber( value )
 												)
 											}
+											onFocus={ () => {
+												setHighLightSide( 'C' );
+											} }
+											onBlur={ () => {
+												setHighLightSide( undefined );
+												inputHeightProps?.onBlur();
+											} }
 											suffix={ dimensionUnit }
 										/>
 									</BaseControl>
@@ -266,7 +294,12 @@ export const ProductShippingSection: React.FC = () => {
 										/>
 									</BaseControl>
 								</div>
-								<div></div>
+								<div className="product-shipping-section__dimensions__body__col">
+									<ShippingDimensionsImage
+										highlight={ highlightSide }
+										className="product-shipping-section__dimensions__image"
+									/>
+								</div>
 							</div>
 						</>
 					) : (
