@@ -8,6 +8,10 @@
 		"wordpress",
 		"woocommerce"
 	],
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "7.11.0"
+	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/dependency-extraction-webpack-plugin/README.md",
 	"repository": {
 		"type": "git",
