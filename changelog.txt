@@ -33,6 +33,7 @@
 * Fix - When a coupon has been trashed, it should become unusable. [#33791](https://github.com/woocommerce/woocommerce/pull/33791)
 * Fix - [COT](https://github.com/woocommerce/woocommerce/pull/) Fix error during apply coupon when COT enabled. [#34498](https://github.com/woocommerce/woocommerce/pull/34498)
 * Fix - Fix Enriched-label styles. [#34382](https://github.com/woocommerce/woocommerce/pull/34382)
+* Fix - Fix failing to update onboarding profile data for PHP 8. [#34832](https://github.com/woocommerce/woocommerce/pull/34832)
 * Add - Added the get mobile app task to the additional tasklist [#34651](https://github.com/woocommerce/woocommerce/pull/34651)
 * Add - Added tracks for woocommerce mobile app modal [#34670](https://github.com/woocommerce/woocommerce/pull/34670)
 * Add - Add include_meta and exclude_meta collection params to the orders and products WC REST API endpoints. These allow for limiting which meta keys are included in the meta_data response. [#34478](https://github.com/woocommerce/woocommerce/pull/34478)
