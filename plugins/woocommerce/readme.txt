@@ -167,7 +167,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
-* Fix - Fix failing to update onboarding profile data for PHP 8 [#34832](https://github.com/woocommerce/woocommerce/pull/34832)
 * Fix - Added in the missing tracks events for the shipping default settings tour [#34601](https://github.com/woocommerce/woocommerce/pull/34601)
 * Fix - Add missing styles for the progress bar component [#34521](https://github.com/woocommerce/woocommerce/pull/34521)
 * Fix - Allow customer to save a product when tinymce is not the default text editor [#34551](https://github.com/woocommerce/woocommerce/pull/34551)
