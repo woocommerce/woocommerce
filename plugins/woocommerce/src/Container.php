@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\COTMigrationServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\DownloadPermissionsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\AssignDefaultCategoryServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\FeaturesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrdersControllersServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrderAdminServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrderMetaBoxServiceProvider;
@@ -63,6 +64,7 @@ final class Container {
 		BatchProcessingServiceProvider::class,
 		OrderMetaBoxServiceProvider::class,
 		OrderAdminServiceProvider::class,
+		FeaturesServiceProvider::class,
 	);
 
 	/**
