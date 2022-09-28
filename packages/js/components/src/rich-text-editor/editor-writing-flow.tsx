@@ -57,8 +57,8 @@ export const EditorWritingFlow: React.VFC = () => {
 		/* Gutenberg handles the keyboard events when focusing the content editable area. */
 		/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
 		<div
-			className="rich-text-editor__writing-flow"
-			id={ `rich-text-editor__writing-flow-${ instanceId }` }
+			className="woocommerce-rich-text-editor__writing-flow"
+			id={ `woocommerce-rich-text-editor__writing-flow-${ instanceId }` }
 			style={ {
 				cursor: isEmpty ? 'text' : 'initial',
 			} }
