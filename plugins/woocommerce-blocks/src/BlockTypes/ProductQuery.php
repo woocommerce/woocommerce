@@ -100,8 +100,6 @@ class ProductQuery extends AbstractBlock {
 			'meta_query'     => array(),
 		);
 
-		do_action( 'qm/debug', $parsed_block );
-
 		$queries_attributes = $this->get_queries_by_attributes( $parsed_block );
 		$queries_filters    = $this->get_queries_by_applied_filters();
 
