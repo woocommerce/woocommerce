@@ -82,7 +82,6 @@ function SelectControl< ItemType = DefaultItemType >( {
 }: SelectControlProps< ItemType > ) {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
-	const inputRef = useRef< HTMLInputElement >( null );
 
 	let selectedItems = selected === null ? [] : selected;
 	selectedItems = Array.isArray( selectedItems )
@@ -186,14 +185,12 @@ function SelectControl< ItemType = DefaultItemType >( {
 				inputProps={ getInputProps( {
 					...getDropdownProps( {
 						preventKeyAction: isOpen,
-						ref: inputRef,
 					} ),
 					className: 'woocommerce-experimental-select-control__input',
 					onFocus: () => setIsFocused( true ),
 					onBlur: () => setIsFocused( false ),
 					placeholder,
 				} ) }
-				inputRef={ inputRef }
 			>
 				{ multiple ? (
 					<SelectedItems

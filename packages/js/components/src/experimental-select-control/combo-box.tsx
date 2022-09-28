@@ -3,7 +3,6 @@
  */
 import { createElement, MouseEvent, useRef } from 'react';
 import { Icon, search } from '@wordpress/icons';
-// import { MouseEvent } from 'react';
 
 /**
  * Internal dependencies
@@ -21,8 +20,9 @@ export const ComboBox = ( {
 	children,
 	comboBoxProps,
 	inputProps,
-	inputRef = null,
 }: ComboBoxProps ) => {
+	const inputRef = useRef< HTMLInputElement | null >( null );
+
 	const maybeFocusInput = ( event: MouseEvent< HTMLDivElement > ) => {
 		if ( ! inputRef || ! inputRef.current ) {
 			return;
@@ -49,7 +49,17 @@ export const ComboBox = ( {
 				{ ...comboBoxProps }
 				className="woocommerce-experimental-select-control__combox-box"
 			>
-				<input { ...inputProps } />
+				<input
+					{ ...inputProps }
+					ref={ ( node ) => {
+						inputRef.current = node;
+						(
+							inputProps.ref as unknown as (
+								node: HTMLInputElement | null
+							) => void
+						 )( node );
+					} }
+				/>
 				<Icon
 					className="woocommerce-experimental-select-control__combox-box-icon"
 					icon={ search }
