@@ -57,10 +57,11 @@ class FeaturesController {
 	 */
 	public function __construct() {
 		$features = array(
-			'analytics'           => array(
-				'name'            => __( 'Analytics', 'woocommerce' ),
-				'description'     => __( 'Enables WooCommerce Analytics', 'woocommerce' ),
-				'is_experimental' => false,
+			'analytics'              => array(
+				'name'               => __( 'Analytics', 'woocommerce' ),
+				'description'        => __( 'Enables WooCommerce Analytics', 'woocommerce' ),
+				'is_experimental'    => false,
+				'enabled_by_default' => true,
 			),
 			'new_navigation'      => array(
 				'name'            => __( 'Navigation', 'woocommerce' ),
@@ -163,7 +164,22 @@ class FeaturesController {
 	 * @return bool True if the feature is enabled, false if not or if the feature doesn't exist.
 	 */
 	public function feature_is_enabled( string $feature_id ): bool {
-		return $this->feature_exists( $feature_id ) && 'yes' === get_option( $this->feature_enable_option_name( $feature_id ) );
+		if ( ! $this->feature_exists( $feature_id ) ) {
+			return false;
+		}
+
+		$default_value = $this->feature_is_enabled_by_default( $feature_id ) ? 'yes' : 'no';
+		return 'yes' === get_option( $this->feature_enable_option_name( $feature_id ), $default_value );
+	}
+
+	/**
+	 * Check if a given feature is enabled by default.
+	 *
+	 * @param string $feature_id Unique feature id.
+	 * @return boolean TRUE if the feature is enabled by default, FALSE otherwise.
+	 */
+	private function feature_is_enabled_by_default( string $feature_id ): bool {
+		return ! empty( $this->features[ $feature_id ]['enabled_by_default'] );
 	}
 
 	/**
@@ -502,6 +518,7 @@ class FeaturesController {
 			'id'       => $this->feature_enable_option_name( $feature_id ),
 			'class'    => $disabled ? 'disabled' : '',
 			'desc_tip' => $desc_tip,
+			'default'  => $this->feature_is_enabled_by_default( $feature_id ) ? 'yes' : 'no',
 		);
 	}
 }
