@@ -80,19 +80,11 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		return momentDate.format( dateTimeFormat );
 	}
 
-	function hasFocusLeftComponent(
+	function hasFocusLeftInputAndDropdownContent(
 		event: React.FocusEvent< HTMLInputElement >
 	): boolean {
-		const dropdownParentOfTargetReceivingFocus =
-			event.relatedTarget?.closest( '.components-dropdown' );
-		const dropdownParentOfTargetLosingFocus = event.currentTarget?.closest(
-			'.components-dropdown'
-		);
-
-		return (
-			! dropdownParentOfTargetReceivingFocus ||
-			dropdownParentOfTargetReceivingFocus !==
-				dropdownParentOfTargetLosingFocus
+		return ! event.relatedTarget?.closest(
+			'.components-dropdown__content'
 		);
 	}
 
@@ -186,7 +178,9 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 						onBlur={ (
 							event: React.FocusEvent< HTMLInputElement >
 						) => {
-							if ( hasFocusLeftComponent( event ) ) {
+							if (
+								hasFocusLeftInputAndDropdownContent( event )
+							) {
 								onToggle(); // hide the dropdown
 							}
 						} }
