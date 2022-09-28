@@ -69,6 +69,9 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 					settings={ {
 						bodyPlaceholder: '',
 						hasFixedToolbar: true,
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore This property was recently added in the block editor data store.
+						__experimentalClearBlockSelection: false,
 					} }
 					onInput={ ( updatedBlocks ) => {
 						debounceChange( updatedBlocks );

@@ -62,7 +62,7 @@ export const EditorWritingFlow: React.VFC = () => {
 					<ObserveTyping>
 						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 						{ /* @ts-ignore This action is available in the block editor data store. */ }
-						<BlockList disableBlockSelectionClearer />
+						<BlockList />
 					</ObserveTyping>
 				</WritingFlow>
 			</BlockTools>
