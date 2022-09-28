@@ -1028,7 +1028,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function get_new_order_email_sent( string $context = 'view' ) {
-		return wc_bool_to_string( $this->get_prop( 'new_order_email_sent', $context ) );
+		return wc_string_to_bool( $this->get_prop( 'new_order_email_sent', $context ) );
 	}
 
 	/**
