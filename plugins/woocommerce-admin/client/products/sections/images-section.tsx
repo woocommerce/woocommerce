@@ -91,7 +91,7 @@ export const ImagesSection: React.FC = () => {
 							recordEvent( 'prepare_images_help' );
 						} }
 					>
-						{ __( 'How to prepare images?', 'woocommerce' ) }
+						{ __( 'How should I prepare images?', 'woocommerce' ) }
 					</Link>
 				</>
 			}
