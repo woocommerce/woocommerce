@@ -1,24 +1,21 @@
 .woocommerce-product-form {
 	&__images {
-		margin-bottom: 0;
 		box-shadow: unset;
 		.woocommerce-media-uploader {
-			text-align: center;
-			&__label {
-				display: flex;
-				flex-direction: column;
-				align-items: center;
-			}
 			img {
 				margin-bottom: $gap-small;
 				width: $gap-larger + $gap-larger;
 			}
 		}
 		.components-card__body {
-			padding: 0;
+			padding: 0 0 $gap-smallest;
 		}
 	}
 	&__images.has-images {
+		margin-bottom: 0;
+		.components-card__body {
+			padding-bottom: 0;
+		}
 		.woocommerce-media-uploader {
 			border: 1px dashed $gray-400;
 			border-radius: 2px;
@@ -47,16 +44,12 @@
 			font-size: 14px;
 			line-height: 20px;
 		}
-
-		> div {
-			height: 146px;
-		}
 	}
 	&__remove-image-drop-zone {
 		color: $error-red;
 		border: 1px dashed $error-red;
 		border-radius: 2px;
-		height: 100%;
+		height: 146px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
