@@ -93,6 +93,22 @@ class WC_Order extends WC_Abstract_Order {
 	);
 
 	/**
+	 * List of properties that were earlier managed by data store. However, since DataStore is a not a stored entity in itself, they used to store data in metadata of the data object.
+	 * With custom tables, some of these are moved from metadata to their own columns, but existing code will still try to add them to metadata. This array is used to keep track of such properties.
+	 *
+	 * Only reason to add a property here is that you are moving properties from DataStore instance to data object. Otherwise, if you are adding a new property, consider adding it to $data array instead.
+	 *
+	 * @var array
+	 */
+	protected $legacy_datastore_props = array(
+		'_recorded_sales',
+		'_recorded_coupon_usage_counts',
+		'_download_permissions_granted',
+		'_order_stock_reduced',
+		'_new_order_email_sent',
+	);
+
+	/**
 	 * When a payment is complete this function is called.
 	 *
 	 * Most of the time this should mark an order as 'processing' so that admin can process/post the items.
@@ -990,7 +1006,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function get_order_stock_reduced( string $context = 'view' ) {
-		return wc_bool_to_string( $this->get_prop( 'order_stock_reduced', $context ) );
+		return wc_string_to_bool( $this->get_prop( 'order_stock_reduced', $context ) );
 	}
 
 	/**
@@ -1001,7 +1017,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool True if permissions were generated, false otherwise.
 	 */
 	public function get_download_permissions_granted( string $context = 'view' ) {
-		return wc_bool_to_string( $this->get_prop( 'download_permissions_granted', $context ) );
+		return wc_string_to_bool( $this->get_prop( 'download_permissions_granted', $context ) );
 	}
 
 	/**
@@ -1012,7 +1028,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function get_new_order_email_sent( string $context = 'view' ) {
-		return wc_bool_to_string( $this->get_prop( 'new_order_email_sent', $context ) );
+		return wc_string_to_bool( $this->get_prop( 'new_order_email_sent', $context ) );
 	}
 
 	/**
@@ -1023,18 +1039,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool True if sales were recorded, false otherwise.
 	 */
 	public function get_recorded_sales( string $context = 'view' ) {
-		return wc_bool_to_string( $this->get_prop( 'recorded_sales', $context ) );
-	}
-
-	/**
-	 * Gets information about whether coupon counts were updated.
-	 *
-	 * @param string $context What the value is for. Valid values are view and edit.
-	 *
-	 * @return bool True if coupon counts were updated, false otherwise.
-	 */
-	public function get_recorded_coupon_usage_counts( $context = 'view' ) {
-		return wc_bool_to_string( $this->get_prop( 'recorded_coupon_usage_counts', $context ) );
+		return wc_string_to_bool( $this->get_prop( 'recorded_sales', $context ) );
 	}
 
 	/*
@@ -1483,7 +1488,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return void
 	 */
 	public function set_order_stock_reduced( $value ) {
-		$this->set_prop( 'order_stock_reduced', wc_bool_to_string( $value ) );
+		$this->set_prop( 'order_stock_reduced', wc_string_to_bool( $value ) );
 	}
 
 	/**
@@ -1494,7 +1499,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return void
 	 */
 	public function set_download_permissions_granted( $value ) {
-		$this->set_prop( 'download_permissions_granted', wc_bool_to_string( $value ) );
+		$this->set_prop( 'download_permissions_granted', wc_string_to_bool( $value ) );
 	}
 
 	/**
@@ -1505,7 +1510,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return void
 	 */
 	public function set_new_order_email_sent( $value ) {
-		$this->set_prop( 'new_order_email_sent', wc_bool_to_string( $value ) );
+		$this->set_prop( 'new_order_email_sent', wc_string_to_bool( $value ) );
 	}
 
 	/**
@@ -1516,18 +1521,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return void
 	 */
 	public function set_recorded_sales( $value ) {
-		$this->set_prop( 'recorded_sales', wc_bool_to_string( $value ) );
-	}
-
-	/**
-	 * Stores information about whether the coupon usage were counted.
-	 *
-	 * @param bool|string $value True if counted, false if not.
-	 *
-	 * @return void
-	 */
-	public function set_recorded_coupon_usage_counts( $value ) {
-		$this->set_prop( 'recorded_coupon_usage_counts', wc_bool_to_string( $value ) );
+		$this->set_prop( 'recorded_sales', wc_string_to_bool( $value ) );
 	}
 
 	/*

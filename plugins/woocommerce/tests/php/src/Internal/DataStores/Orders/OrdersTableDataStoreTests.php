@@ -97,10 +97,19 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			'_cart_discount',
 			'cart_tax',
 		);
-		$exempted_keys         = array_flip( array_merge( $exempted_keys, $convert_to_float_keys ) );
 
+		$convert_to_bool_keys = array(
+			'_order_stock_reduced',
+			'_download_permissions_granted',
+			'_new_order_email_sent',
+			'_recorded_sales',
+			'_recorded_coupon_usage_counts',
+		);
+
+		$exempted_keys        = array_flip( array_merge( $exempted_keys, $convert_to_float_keys, $convert_to_bool_keys ) );
 		$post_data_float      = array_intersect_key( $post_data, array_flip( $convert_to_float_keys ) );
 		$post_meta_data_float = array_intersect_key( $post_meta_data, array_flip( $convert_to_float_keys ) );
+		$post_meta_data_bool  = array_intersect_key( $post_meta_data, array_flip( $convert_to_bool_keys ) );
 		$post_data            = array_diff_key( $post_data, $exempted_keys );
 		$post_meta_data       = array_diff_key( $post_meta_data, $exempted_keys );
 
@@ -138,6 +147,10 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		foreach ( $post_meta_data_float as $float_key => $value ) {
 			$this->assertEquals( (float) get_post_meta( $post_order_id )[ $float_key ], (float) $value, "Value for $float_key does not match." );
 		}
+
+		foreach ( $post_meta_data_bool as $bool_key => $value ) {
+			$this->assertEquals( wc_string_to_bool( get_post_meta( $post_order_id, $bool_key, true ) ), wc_string_to_bool( current( $value ) ), "Value for $bool_key does not match." );
+		}
 	}
 
 	/**
@@ -165,7 +178,8 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			'cart_hash'          => 'YET-ANOTHER-CART-HASH',
 		);
 		static $datastore_updates = array(
-			'email_sent' => true,
+			'email_sent'          => true,
+			'order_stock_reduced' => true,
 		);
 		static $meta_to_update    = array(
 			'my_meta_key' => array( 'my', 'custom', 'meta' ),
@@ -211,10 +225,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		}
 
 		foreach ( $datastore_updates as $prop => $value ) {
-			if ( is_bool( $value ) ) {
-				$value = wc_bool_to_string( $value );
-			}
-			$this->assertEquals( $this->sut->{"get_$prop"}( $order ), $value );
+			$this->assertEquals( $value, $this->sut->{"get_$prop"}( $order ), "Unable to match prop $prop" );
 		}
 	}
 
@@ -1322,6 +1333,98 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		// assert via order object.
 		foreach ( $props as $prop ) {
 			$this->assertEquals( $value, wc_bool_to_string( $refreshed_order->{"get$prop"}() ), "Failed getting $prop from object" );
+		}
+	}
+
+	/**
+	 * Legacy getters and setters for props migrated from data stores should be set/reset properly.
+	 */
+	public function test_legacy_getters_setters() {
+		$order_id = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_complex_wp_post_order();
+		$order    = wc_get_order( $order_id );
+		$this->switch_data_store( $order, $this->sut );
+		$bool_props = array(
+			'_download_permissions_granted' => 'download_permissions_granted',
+			'_recorded_sales'               => 'recorded_sales',
+			'_recorded_coupon_usage_counts' => 'recorded_coupon_usage_counts',
+			'_order_stock_reduced'          => 'order_stock_reduced',
+			'_new_order_email_sent'         => 'new_order_email_sent',
+		);
+
+		$this->set_props_via_data_store( $order, $bool_props, true );
+
+		$this->assert_props_value_via_data_store( $order, $bool_props, true );
+
+		$this->assert_props_value_via_order_object( $order, $bool_props, true );
+
+		// Let's repeat for false value.
+
+		$this->set_props_via_data_store( $order, $bool_props, false );
+
+		$this->assert_props_value_via_data_store( $order, $bool_props, false );
+
+		$this->assert_props_value_via_order_object( $order, $bool_props, false );
+
+		// Let's repeat for true value but setting via order object.
+
+		$this->set_props_via_order_object( $order, $bool_props, true );
+
+		$this->assert_props_value_via_data_store( $order, $bool_props, true );
+
+		$this->assert_props_value_via_order_object( $order, $bool_props, true );
+
+	}
+
+	/**
+	 * Helper function to set prop via data store.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param array    $props List of props and their setter names.
+	 * @param mixed    $value value to set.
+	 */
+	private function set_props_via_data_store( $order, $props, $value ) {
+		foreach ( $props as $meta_key_name => $prop_name ) {
+			$order->get_data_store()->{"set_$prop_name"}( $order, $value );
+		}
+	}
+
+	/**
+	 * Helper function to set prop value via object.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param array    $props List of props and their setter names.
+	 * @param mixed    $value value to set.
+	 */
+	private function set_props_via_order_object( $order, $props, $value ) {
+		foreach ( $props as $meta_key_name => $prop_name ) {
+			$order->{"set_$prop_name"}( $value );
+		}
+		$order->save();
+	}
+
+	/**
+	 * Helper function to assert prop value via data store.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param array    $props List of props and their getter names.
+	 * @param mixed    $value value to assert.
+	 */
+	private function assert_props_value_via_data_store( $order, $props, $value ) {
+		foreach ( $props as $meta_key_name => $prop_name ) {
+			$this->assertEquals( $value, $order->get_data_store()->{"get_$prop_name"}( $order ), "Prop $prop_name was not set correctly." );
+		}
+	}
+
+	/**
+	 * Helper function to assert prop value via order object.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param array    $props List of props and their getter names.
+	 * @param mixed    $value value to assert.
+	 */
+	private function assert_props_value_via_order_object( $order, $props, $value ) {
+		foreach ( $props as $meta_key_name => $prop_name ) {
+			$this->assertEquals( $value, $order->{"get_$prop_name"}(), "Prop $prop_name was not set correctly." );
 		}
 	}
 }

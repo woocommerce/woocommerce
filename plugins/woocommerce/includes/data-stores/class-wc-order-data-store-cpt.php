@@ -86,8 +86,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		'_download_permissions_granted' => 'download_permissions_granted',
 		'_recorded_sales'               => 'recorded_sales',
 		'_recorded_coupon_usage_counts' => 'recorded_coupon_usage_counts',
-		'_order_stock_reduced'          => 'stock_reduced',
-		'_new_order_email_sent'         => 'email_sent',
+		'_order_stock_reduced'          => 'order_stock_reduced',
+		'_new_order_email_sent'         => 'new_order_email_sent',
 	);
 
 	/**
@@ -164,7 +164,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				'order_stock_reduced'          => get_post_meta( $id, '_order_stock_reduced', true ),
 				'download_permissions_granted' => get_post_meta( $id, '_download_permissions_granted', true ),
 				'new_order_email_sent'         => get_post_meta( $id, '_new_order_email_sent', true ),
-				'recorded_sales'               => get_post_meta( $id, '_recorded_sales', true ),
+				'recorded_sales'               => wc_string_to_bool( get_post_meta( $id, '_recorded_sales', true ) ),
 				'recorded_coupon_usage_counts' => get_post_meta( $id, '_recorded_coupon_usage_counts', true ),
 			)
 		);
@@ -235,6 +235,27 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				case 'date_completed':
 					$value = ! is_null( $value ) ? $value->getTimestamp() : '';
 					break;
+				case 'download_permissions_granted':
+				case 'recorded_sales':
+				case 'recorded_coupon_usage_counts':
+				case 'order_stock_reduced':
+					if ( is_null( $value ) || '' === $value ) {
+						break;
+					}
+					$value = is_bool( $value ) ? wc_bool_to_string( $value ) : $value;
+					break;
+				case 'new_order_email_sent':
+					if ( is_null( $value ) || '' === $value ) {
+						break;
+					}
+					$value = is_bool( $value ) ? wc_bool_to_string( $value ) : $value;
+					$value = 'yes' === $value ? 'true' : 'false'; // For backward compatibility, we store as true/false in DB.
+					break;
+			}
+
+			// We want to persist internal data store keys as 'yes' or 'no' if they are boolean to maintain compatibility.
+			if ( is_bool( $value ) && in_array( $prop, array_values( $this->internal_data_store_key_getters ), true ) ) {
+				$value = wc_bool_to_string( $value );
 			}
 
 			$updated = $this->update_or_delete_post_meta( $order, $meta_key, $value );
@@ -678,6 +699,17 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
+	 * Whether email have been sent for this order.
+	 *
+	 * @param WC_Order|int $order Order ID or order object.
+	 *
+	 * @return bool               Whether email is sent.
+	 */
+	public function get_new_order_email_sent( $order ) {
+		return $this->get_email_sent( $order );
+	}
+
+	/**
 	 * Stores information about whether email was sent.
 	 *
 	 * @param WC_Order|int $order Order ID or order object.
@@ -688,7 +720,19 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$order->set_new_order_email_sent( $set );
 		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
-		update_post_meta( $order_id, '_new_order_email_sent', wc_bool_to_string( $set ) );
+		$value    = wc_bool_to_string( $set );
+		$value    = 'yes' === $value ? 'true' : 'false'; // For backward compat, we store this as true|false string.
+		update_post_meta( $order_id, '_new_order_email_sent', $value );
+	}
+
+	/**
+	 * Stores information about whether email was sent.
+	 *
+	 * @param WC_Order|int $order Order ID or order object.
+	 * @param bool         $set True or false.
+	 */
+	public function set_new_order_email_sent( $order, $set ) {
+		$this->set_email_sent( $order, $set );
 	}
 
 	/**
@@ -787,6 +831,16 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Stores information about whether stock was reduced.
 	 *
 	 * @param WC_Order|int $order Order ID or order object.
+	 * @return bool
+	 */
+	public function get_order_stock_reduced( $order ) {
+		return $this->get_stock_reduced( $order );
+	}
+
+	/**
+	 * Stores information about whether stock was reduced.
+	 *
+	 * @param WC_Order|int $order Order ID or order object.
 	 * @param bool         $set True or false.
 	 */
 	public function set_stock_reduced( $order, $set ) {
@@ -795,6 +849,16 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_order_stock_reduced', wc_bool_to_string( $set ) );
+	}
+
+	/**
+	 * Gets information about whether stock was reduced.
+	 *
+	 * @param WC_Order|int $order Order ID or order object.
+	 * @param bool         $set True or false.
+	 */
+	public function set_order_stock_reduced( $order, $set ) {
+		$this->set_stock_reduced( $order, $set );
 	}
 
 	/**
