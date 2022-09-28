@@ -182,6 +182,7 @@ final class BlockTypesController {
 			'PriceFilter',
 			'AttributeFilter',
 			'StockFilter',
+			'RatingFilter',
 			'ActiveFilters',
 			'ClassicTemplate',
 			'ProductAddToCart',

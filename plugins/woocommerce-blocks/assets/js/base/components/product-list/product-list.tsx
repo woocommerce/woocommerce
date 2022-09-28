@@ -132,6 +132,11 @@ const ProductList = ( {
 		'stock_status',
 		[]
 	);
+	const [ productRating, setProductRating ] = useQueryStateByKey(
+		'rating',
+		[]
+	);
+
 	const [ minPrice, setMinPrice ] = useQueryStateByKey( 'min_price' );
 	const [ maxPrice, setMaxPrice ] = useQueryStateByKey( 'max_price' );
 
@@ -215,6 +220,7 @@ const ProductList = ( {
 	const hasFilters =
 		productAttributes.length > 0 ||
 		productStockStatus.length > 0 ||
+		productRating.length > 0 ||
 		Number.isFinite( minPrice ) ||
 		Number.isFinite( maxPrice );
 
@@ -231,6 +237,7 @@ const ProductList = ( {
 					resetCallback={ () => {
 						setProductAttributes( [] );
 						setProductStockStatus( [] );
+						setProductRating( [] );
 						setMinPrice( null );
 						setMaxPrice( null );
 					} }

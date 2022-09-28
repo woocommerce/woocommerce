@@ -44,6 +44,7 @@ const blocks = {
 	'attribute-filter': {},
 	'stock-filter': {},
 	'active-filters': {},
+	'rating-filter': {},
 	cart: {},
 	checkout: {},
 	'mini-cart': {},
