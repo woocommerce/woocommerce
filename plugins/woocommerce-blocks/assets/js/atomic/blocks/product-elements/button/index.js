@@ -15,17 +15,22 @@ import {
 	BLOCK_DESCRIPTION as description,
 } from './constants';
 import { supports } from './supports';
-import { Save } from '../title/save';
 
 const blockConfig = {
 	apiVersion: 2,
 	title,
 	description,
+	parent: [ 'core/group' ],
+	ancestor: [
+		'@woocommerce/all-products',
+		'@woocommerce/single-product',
+		'core/post-template',
+	],
+	usesContext: [ 'query', 'queryId', 'postId' ],
 	icon: { src: icon },
 	attributes,
 	supports,
 	edit,
-	save: Save,
 };
 
 registerBlockType( 'woocommerce/product-button', {
