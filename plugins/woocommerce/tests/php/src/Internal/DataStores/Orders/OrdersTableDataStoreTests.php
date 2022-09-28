@@ -178,7 +178,8 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			'cart_hash'          => 'YET-ANOTHER-CART-HASH',
 		);
 		static $datastore_updates = array(
-			'email_sent' => 'yes',
+			'email_sent'          => true,
+			'order_stock_reduced' => true,
 		);
 		static $meta_to_update    = array(
 			'my_meta_key' => array( 'my', 'custom', 'meta' ),
@@ -224,7 +225,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		}
 
 		foreach ( $datastore_updates as $prop => $value ) {
-			$this->assertEquals( $this->sut->{"get_$prop"}( $order ), $value );
+			$this->assertEquals( $value, $this->sut->{"get_$prop"}( $order ), "Unable to match prop $prop" );
 		}
 	}
 
