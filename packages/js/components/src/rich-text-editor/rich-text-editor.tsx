@@ -22,12 +22,9 @@ import { ShortcutProvider } from '@wordpress/keyboard-shortcuts';
  * Internal dependencies
  */
 import { EditorWritingFlow } from './editor-writing-flow';
-import { FixedFormattingToolbar } from './components/fixed-formatting-toolbar';
-import { registerFormatTypes } from './formats/register-format-types';
 import { registerBlocks } from './utils/register-blocks';
 
 registerBlocks();
-registerFormatTypes();
 
 type RichTextEditorProps = {
 	blocks: BlockInstance[];
@@ -84,9 +81,6 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 						debouncedRefresh();
 					} }
 				>
-					<FixedFormattingToolbar />
-
-					{ /* Shortcut provider produces a div we need to style */ }
 					<ShortcutProvider>
 						<EditorWritingFlow />
 					</ShortcutProvider>

@@ -1,11 +1,20 @@
 .woocommerce-rich-text-editor {
+	border: 1px solid $gray-600;
+	border-radius: 2px;
+	background: $white;
+
 	* {
 		box-sizing: border-box;
 	}
 
-	.block-editor-block-contextual-toolbar.is-fixed,
 	.block-editor-inserter {
 		display: none;
+	}
+
+	.block-editor-block-contextual-toolbar.is-fixed,
+	.block-editor-block-contextual-toolbar.is-fixed .block-editor-block-toolbar .components-toolbar-group,
+	.block-editor-block-contextual-toolbar.is-fixed .block-editor-block-toolbar .components-toolbar {
+		border-color: $gray-600;
 	}
 
 	/* Hide rich text placeholder text */
@@ -33,6 +42,10 @@
 		display: none !important;
 	}
 
+	.block-editor-writing-flow {
+		padding: $gap-small;
+	}
+
 	/* Within the writing flow reset some of the css resets used elsewhere */
 	.block-editor-writing-flow ul,
 	.block-editor-writing-flow ol {
@@ -57,23 +70,4 @@
 			font-size: 11px;
 		}
 	}
-
-	.has-text-align-left {
-		text-align: left;
-	}
-	.has-text-align-center {
-		text-align: center;
-	}
-	.has-text-align-right {
-		text-align: right;
-	}
-}
-
-.rich-text-editor__writing-flow {
-	background: $white;
-	padding: $gap-small;
-	border: 1px solid $gray-700;
-	border-top: none;
-	border-bottom-left-radius: 2px;
-	border-bottom-right-radius: 2px;
 }

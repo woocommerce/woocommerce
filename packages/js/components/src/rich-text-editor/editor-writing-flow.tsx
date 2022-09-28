@@ -3,7 +3,7 @@
  */
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useInstanceId } from '@wordpress/compose';
-import { createElement, useCallback } from '@wordpress/element';
+import { createElement, useCallback, useEffect } from '@wordpress/element';
 import {
 	BlockList,
 	ObserveTyping,
@@ -41,7 +41,7 @@ export const EditorWritingFlow: React.VFC = () => {
 
 	// A combination of cursor on hover with CSS and this click handler ensures that clicking on
 	// an empty editor starts you in the first paragraph and ready to type.
-	const setSelectionOnClick = useCallback( () => {
+	const handleClick = useCallback( () => {
 		if ( isEmpty || ! selectedBlockClientIds.length ) {
 			const position = {
 				offset: 0,
@@ -62,12 +62,14 @@ export const EditorWritingFlow: React.VFC = () => {
 			style={ {
 				cursor: isEmpty ? 'text' : 'initial',
 			} }
-			onClick={ setSelectionOnClick }
+			onClick={ handleClick }
 		>
 			<BlockTools>
 				<WritingFlow>
 					<ObserveTyping>
-						<BlockList />
+						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+						{ /* @ts-ignore This action is available in the block editor data store. */ }
+						<BlockList disableBlockSelectionClearer />
 					</ObserveTyping>
 				</WritingFlow>
 			</BlockTools>
