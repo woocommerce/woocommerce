@@ -4,6 +4,10 @@
 	"author": "Automattic",
 	"description": "E2E tests for the new WooCommerce interface.",
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/admin-e2e-tests/README.md",
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "7.11.0"
+	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerce.git"
@@ -55,7 +59,7 @@
 		"turbo:build": "tsc --build",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- --",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"lint": "eslint src",
 		"start": "tsc --build --watch",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",

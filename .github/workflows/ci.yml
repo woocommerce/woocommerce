@@ -52,7 +52,8 @@ jobs:
           composer --version
 
       - name: Build Admin feature config
-        run: pnpm build:feature-config --filter=woocommerce
+        working-directory: plugins/woocommerce
+        run: pnpm run build:feature-config
 
       - name: Add PHP8 Compatibility.
         run: |
@@ -72,4 +73,5 @@ jobs:
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
 
       - name: Run tests
-        run: pnpm run test --filter="woocommerce" --color
+        working-directory: plugins/woocommerce
+        run: pnpm run test --color

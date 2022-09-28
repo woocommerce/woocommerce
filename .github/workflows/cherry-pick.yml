@@ -128,7 +128,7 @@ jobs:
       - name: Checkout release branch
         uses: actions/checkout@v3
         with:
-          fetch-depth: 100
+          fetch-depth: 0
 
       - name: Git fetch the release branch
         run: git fetch origin ${{ needs.prep.outputs.release }}
@@ -258,9 +258,11 @@ jobs:
             console.log( `::set-output name=changelogsToBeDeleted::${ changelogsToBeDeleted }` )
 
       - name: Delete changelog files from cherry pick branch
+        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
         run: git rm ${{ steps.changelog.outputs.changelogsToBeDeleted }}
 
       - name: Commit changes for cherry pick
+        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
         run: git commit --no-verify -am "Prep for cherry pick ${{ needs.prep.outputs.pr }}"
 
       - name: Push cherry pick branch up
@@ -286,22 +288,28 @@ jobs:
 
             console.log( `::set-output name=cherry-pick-pr::${ pr.data.html_url }` )
       - name: Checkout trunk branch
+        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
         run: git checkout trunk
 
       - name: Create a branch based on trunk branch
+        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
         run: git checkout -b delete-changelogs/${{ needs.prep.outputs.pr }}
 
       - name: Delete changelogs from trunk
+        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
         run: git rm ${{ steps.changelog.outputs.changelogsToBeDeleted }}
 
       - name: Commit changes for deletion
+        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
         run: git commit --no-verify -am "Delete changelog files for ${{ needs.prep.outputs.pr }}"
 
       - name: Push deletion branch up
+        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
         run: git push origin delete-changelogs/${{ needs.prep.outputs.pr }}
 
       - name: Create the PR for deletion branch
         id: deletion-pr
+        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
         uses: actions/github-script@v6
         with:
           script: |

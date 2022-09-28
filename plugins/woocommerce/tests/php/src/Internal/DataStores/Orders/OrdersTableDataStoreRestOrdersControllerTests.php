@@ -2,6 +2,7 @@
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Utilities\ArrayUtil as ArrayUtilAlias;
 
@@ -91,12 +92,14 @@ class OrdersTableDataStoreRestOrdersControllerTests extends \WC_REST_Orders_Cont
 	 * @return void
 	 */
 	private function toggle_cot( bool $enabled ): void {
-		$controller = wc_get_container()->get( CustomOrdersTableController::class )->show_feature();
+		$features_controller = wc_get_container()->get( Featurescontroller::class );
+		$features_controller->change_feature_enable( 'custom_order_tables', true );
+
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, wc_bool_to_string( $enabled ) );
 
 		// Confirm things are really correct.
 		$wc_data_store = WC_Data_Store::load( 'order' );
-		assert( $enabled === is_a( $wc_data_store->get_current_class_name(), OrdersTableDataStore::class, true ) );
+		assert( is_a( $wc_data_store->get_current_class_name(), OrdersTableDataStore::class, true ) === $enabled );
 	}
 
 }

@@ -9,7 +9,7 @@ import { DispatchFromMap } from '@automattic/data-stores';
 import { CrudActions, CrudSelectors } from '../crud/types';
 import { BaseQueryParams } from '../types';
 
-type ProductShippingClass = {
+export type ProductShippingClass = {
 	id: number;
 	slug: string;
 	name: string;

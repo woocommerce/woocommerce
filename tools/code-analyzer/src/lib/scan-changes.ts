@@ -13,6 +13,7 @@ import { scanForDBChanges } from './db-changes';
 import { scanForHookChanges } from './hook-changes';
 import { scanForTemplateChanges } from './template-changes';
 import { SchemaDiff, generateSchemaDiff } from '../git';
+import { readFile } from 'fs/promises';
 
 export const scanForChanges = async (
 	compareVersion: string,
@@ -54,6 +55,19 @@ export const scanForChanges = async (
 
 	if ( ! skipSchemaCheck ) {
 		const build = async () => {
+			const fileStr = await readFile(
+				join( pluginPath, 'package.json' ),
+				'utf-8'
+			);
+			const packageJSON = JSON.parse( fileStr );
+
+			if ( packageJSON.engines && packageJSON.engines.pnpm ) {
+				await execAsync(
+					`npm i -g pnpm@${ packageJSON.engines.pnpm }`,
+					{ cwd: pluginPath }
+				);
+			}
+
 			// Note doing the minimal work to get a DB scan to work, avoiding full build for speed.
 			await execAsync( 'composer install', { cwd: pluginPath } );
 			await execAsync(

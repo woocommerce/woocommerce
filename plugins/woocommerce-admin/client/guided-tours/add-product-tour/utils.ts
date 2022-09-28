@@ -23,13 +23,9 @@ export const waitUntilElementTopNotChange = (
 export const bindEnableGuideModeClickEvent = (
 	onClick: EventListenerOrEventListenerObject
 ) => {
-	const enableGuideModeBtn = Array.from(
-		window.document.querySelectorAll( '.page-title-action' )
-	).find( ( el ) => el.textContent === 'Enable guided mode' );
-
-	if ( enableGuideModeBtn ) {
-		enableGuideModeBtn.addEventListener( 'click', onClick );
-	}
+	window.document
+		.querySelector( '.wp-heading-inline + .page-title-action' )
+		?.addEventListener( 'click', onClick );
 };
 
 // Add listener to product "Publish" button.

@@ -4,6 +4,10 @@
 	"description": "Utility build files for e2e packages",
 	"private": true,
 	"main": "build.js",
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "7.11.0"
+	},
 	"bin": {
 		"e2e-builds": "./build.js"
 	},

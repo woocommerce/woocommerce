@@ -25,6 +25,7 @@ import {
 	ActivatePluginsResponse,
 	PluginsResponse,
 	PluginNames,
+	JetpackConnectionDataResponse,
 } from './types';
 
 // Can be removed in WP 5.9, wp.data is supported in >5.7.
@@ -113,6 +114,15 @@ export function updateIsJetpackConnected( jetpackConnection: boolean ) {
 	return {
 		type: TYPES.UPDATE_JETPACK_CONNECTION as const,
 		jetpackConnection,
+	};
+}
+
+export function updateJetpackConnectionData(
+	results: JetpackConnectionDataResponse
+) {
+	return {
+		type: TYPES.UPDATE_JETPACK_CONNECTION_DATA as const,
+		results,
 	};
 }
 
@@ -374,6 +384,7 @@ export type Actions = ReturnType<
 	| typeof setError
 	| typeof updateIsJetpackConnected
 	| typeof updateJetpackConnectUrl
+	| typeof updateJetpackConnectionData
 	| typeof setPaypalOnboardingStatus
 	| typeof setRecommendedPlugins
 	| typeof createErrorNotice

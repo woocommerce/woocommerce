@@ -274,7 +274,47 @@ class ArrayUtil {
 				}
 			}
 		}
+
 		return $compare ? false : $diff;
+	}
+
+	/**
+	 * Push a value to an array, but only if the value isn't in the array already.
+	 *
+	 * @param array $array The array.
+	 * @param mixed $value The value to maybe push.
+	 * @return bool True if the value has been added to the array, false if the value was already in the array.
+	 */
+	public static function push_once( array &$array, $value ) : bool {
+		if ( in_array( $value, $array, true ) ) {
+			return false;
+		}
+
+		$array[] = $value;
+		return true;
+	}
+
+	/**
+	 * Ensure that an associative array has a given key, and if not, set the key to an empty array.
+	 *
+	 * @param array  $array The array to check.
+	 * @param string $key The key to check.
+	 * @param bool   $throw_if_existing_is_not_array If true, an exception will be thrown if the key already exists in the array but the value is not an array.
+	 * @return bool True if the key has been added to the array, false if not (the key already existed).
+	 * @throws \Exception The key already exists in the array but the value is not an array.
+	 */
+	public static function ensure_key_is_array( array &$array, string $key, bool $throw_if_existing_is_not_array = false ): bool {
+		if ( ! isset( $array[ $key ] ) ) {
+			$array[ $key ] = array();
+			return true;
+		}
+
+		if ( $throw_if_existing_is_not_array && ! is_array( $array[ $key ] ) ) {
+			$type = is_object( $array[ $key ] ) ? get_class( $array[ $key ] ) : gettype( $array[ $key ] );
+			throw new \Exception( "Array key exists but it's not an array, it's a {$type}" );
+		}
+
+		return false;
 	}
 }
 

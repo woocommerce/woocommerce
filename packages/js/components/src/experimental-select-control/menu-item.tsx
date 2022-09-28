@@ -6,23 +6,23 @@ import { createElement, ReactElement } from 'react';
 /**
  * Internal dependencies
  */
-import { ItemType, getItemPropsType } from './types';
+import { getItemPropsType } from './types';
 
-type MenuItemProps = {
+type MenuItemProps< ItemType > = {
 	index: number;
 	isActive: boolean;
 	item: ItemType;
 	children: ReactElement | string;
-	getItemProps: getItemPropsType;
+	getItemProps: getItemPropsType< ItemType >;
 };
 
-export const MenuItem = ( {
+export const MenuItem = < ItemType, >( {
 	children,
 	getItemProps,
 	index,
 	isActive,
 	item,
-}: MenuItemProps ) => {
+}: MenuItemProps< ItemType > ) => {
 	return (
 		<li
 			style={ isActive ? { backgroundColor: '#bde4ff' } : {} }

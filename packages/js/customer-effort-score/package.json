@@ -8,6 +8,10 @@
 		"wordpress",
 		"woocommerce"
 	],
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "7.11.0"
+	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/customer-effort-score/README.md",
 	"repository": {
 		"type": "git",
@@ -69,8 +73,8 @@
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- --",
-		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name -- --",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
 		"lint": "eslint src",
 		"build:js": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"build:css": "webpack",

@@ -18,6 +18,7 @@ export type FormContext< Values extends Record< string, any > > = {
 	>;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	setValue: ( name: string, value: any ) => void;
+	setValues: ( valuesToSet: Values ) => void;
 	handleSubmit: () => Promise< Values >;
 	getInputProps< Value extends Values[ keyof Values ] >(
 		name: string

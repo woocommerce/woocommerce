@@ -28,6 +28,8 @@ jobs:
         uses: ./.github/actions/setup-woocommerce-monorepo
         with:
           build: false
+          php-version: '7.4'
+          
 
       - name: "Git fetch the release branch"
         run: git fetch origin ${{ inputs.releaseBranch }}
