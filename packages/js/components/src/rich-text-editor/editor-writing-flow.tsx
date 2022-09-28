@@ -4,6 +4,7 @@
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useInstanceId } from '@wordpress/compose';
 import { createElement, useCallback, useEffect } from '@wordpress/element';
+import { createBlock } from '@wordpress/blocks';
 import {
 	BlockList,
 	ObserveTyping,
@@ -18,7 +19,7 @@ export const EditorWritingFlow: React.VFC = () => {
 	const instanceId = useInstanceId( EditorWritingFlow );
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore This action is available in the block editor data store.
-	const { resetSelection } = useDispatch( blockEditorStore );
+	const { insertBlock, selectBlock } = useDispatch( blockEditorStore );
 
 	const { firstBlock, isEmpty, selectedBlockClientIds } = useSelect(
 		( select ) => {
@@ -39,19 +40,20 @@ export const EditorWritingFlow: React.VFC = () => {
 		}
 	);
 
-	// A combination of cursor on hover with CSS and this click handler ensures that clicking on
-	// an empty editor starts you in the first paragraph and ready to type.
-	const handleClick = useCallback( () => {
-		if ( isEmpty || ! selectedBlockClientIds.length ) {
-			const position = {
-				offset: 0,
-				clientId: firstBlock?.clientId,
-				attributeKey: 'content',
-			};
-
-			resetSelection( position, position, 0 );
+	useEffect( () => {
+		if ( isEmpty ) {
+			const initialBlock = createBlock( 'core/paragraph', {
+				content: '',
+			} );
+			insertBlock( initialBlock );
 		}
-	}, [ isEmpty, firstBlock, selectedBlockClientIds ] );
+	}, [] );
+
+	useEffect( () => {
+		if ( ! selectedBlockClientIds.length ) {
+			selectBlock( firstBlock?.clientId );
+		}
+	}, [ firstBlock ] );
 
 	return (
 		/* Gutenberg handles the keyboard events when focusing the content editable area. */
@@ -62,7 +64,6 @@ export const EditorWritingFlow: React.VFC = () => {
 			style={ {
 				cursor: isEmpty ? 'text' : 'initial',
 			} }
-			onClick={ handleClick }
 		>
 			<BlockTools>
 				<WritingFlow>
