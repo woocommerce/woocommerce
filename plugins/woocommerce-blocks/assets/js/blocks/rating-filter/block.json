@@ -1,0 +1,34 @@
+{
+	"name": "woocommerce/rating-filter",
+	"version": "1.0.0",
+	"title": "Filter by Rating",
+	"description": "Enable customers to filter the product grid by rating.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"supports": {
+		"html": false,
+		"multiple": false
+	},
+	"example": {
+		"attributes": {
+			"isPreview": true
+		}
+	},
+	"attributes": {
+		"className": {
+			"type": "string",
+			"default": ""
+		},
+		"headingLevel": {
+			"type": "number",
+			"default": 3
+		},
+		"isPreview": {
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"textdomain": "woo-gutenberg-products-block",
+	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}
