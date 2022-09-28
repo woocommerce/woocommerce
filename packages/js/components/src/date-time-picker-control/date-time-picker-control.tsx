@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { Fragment } from 'react';
 import {
 	createElement,
 	useState,
