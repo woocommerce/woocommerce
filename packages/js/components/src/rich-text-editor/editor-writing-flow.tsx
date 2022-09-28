@@ -3,7 +3,7 @@
  */
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useInstanceId } from '@wordpress/compose';
-import { createElement, useCallback, useEffect } from '@wordpress/element';
+import { createElement, useEffect } from '@wordpress/element';
 import { createBlock } from '@wordpress/blocks';
 import {
 	BlockList,
@@ -19,26 +19,24 @@ export const EditorWritingFlow: React.VFC = () => {
 	const instanceId = useInstanceId( EditorWritingFlow );
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore This action is available in the block editor data store.
-	const { insertBlock, selectBlock } = useDispatch( blockEditorStore );
+	const { insertBlock } = useDispatch( blockEditorStore );
 
-	const { firstBlock, isEmpty, selectedBlockClientIds } = useSelect(
-		( select ) => {
-			const blocks = select( 'core/block-editor' ).getBlocks();
+	const { isEmpty } = useSelect( ( select ) => {
+		const blocks = select( 'core/block-editor' ).getBlocks();
 
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore This selector is available in the block editor data store.
-			const { getSelectedBlockClientIds } = select( blockEditorStore );
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore This selector is available in the block editor data store.
+		const { getSelectedBlockClientIds } = select( blockEditorStore );
 
-			return {
-				isEmpty: blocks.length
-					? blocks.length <= 1 &&
-					  blocks[ 0 ].attributes?.content?.trim() === ''
-					: true,
-				firstBlock: blocks[ 0 ],
-				selectedBlockClientIds: getSelectedBlockClientIds(),
-			};
-		}
-	);
+		return {
+			isEmpty: blocks.length
+				? blocks.length <= 1 &&
+				  blocks[ 0 ].attributes?.content?.trim() === ''
+				: true,
+			firstBlock: blocks[ 0 ],
+			selectedBlockClientIds: getSelectedBlockClientIds(),
+		};
+	} );
 
 	useEffect( () => {
 		if ( isEmpty ) {
@@ -48,12 +46,6 @@ export const EditorWritingFlow: React.VFC = () => {
 			insertBlock( initialBlock );
 		}
 	}, [] );
-
-	useEffect( () => {
-		if ( ! selectedBlockClientIds.length ) {
-			selectBlock( firstBlock?.clientId );
-		}
-	}, [ firstBlock ] );
 
 	return (
 		/* Gutenberg handles the keyboard events when focusing the content editable area. */
