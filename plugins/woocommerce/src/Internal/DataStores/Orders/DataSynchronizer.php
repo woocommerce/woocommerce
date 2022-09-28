@@ -66,6 +66,17 @@ class DataSynchronizer implements BatchProcessorInterface {
 			10,
 			2
 		);
+
+		// When posts is authoritative and sync is enabled, updating a post triggers a corresponding change in the COT table.
+		add_action(
+			'woocommerce_update_order',
+			function ( $order_id ) {
+				if ( ! $this->custom_orders_table_is_authoritative() && $this->data_sync_is_enabled() ) {
+					$this->posts_to_cot_migrator->migrate_orders( array( $order_id ) );
+				}
+			},
+			100
+		);
 	}
 
 	/**

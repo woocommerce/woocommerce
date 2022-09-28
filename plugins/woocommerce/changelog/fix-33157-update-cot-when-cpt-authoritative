@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+When the primary order store is the posts table, and sync is enabled, propagate changes outside of dedicated migrations.
