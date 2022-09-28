@@ -1073,7 +1073,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$this->enable_cot_sync();
 		$order                         = $this->create_complex_cot_order();
 		$post_order_comparison_closure = function ( $order ) {
-			$post_order = $this->get_post_orders_for_ids( array( $order->get_id() ) )[ $order->get_id() ][0];
+			$post_order = $this->get_post_orders_for_ids( array( $order->get_id() ) )[ $order->get_id() ];
 
 			return $this->is_post_different_from_order( $order, $post_order );
 		};
