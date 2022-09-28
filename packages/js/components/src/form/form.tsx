@@ -135,7 +135,9 @@ function FormComponent< Values extends Record< string, any > >(
 		newTouchedFields = {},
 		newErrors = {}
 	) => {
-		setValuesInternal( newInitialValues ?? initialValues.current ?? {} );
+		const newValues = newInitialValues ?? initialValues.current ?? {};
+		initialValues.current = newValues;
+		setValuesInternal( newValues );
 		setTouched( newTouchedFields );
 		setErrors( newErrors );
 	};
