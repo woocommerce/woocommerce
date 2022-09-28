@@ -120,7 +120,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 		highlightedIndex,
 		getItemProps,
 		selectItem,
-		selectedItem: selectedItemSingle,
+		selectedItem: comboboxSingleSelectedItem,
 	} = useCombobox< ItemType | null >( {
 		initialSelectedItem: singleSelectedItem,
 		inputValue,
@@ -151,7 +151,9 @@ function SelectControl< ItemType = DefaultItemType >( {
 					}
 
 					if ( ! selectedItem && ! multiple ) {
-						setInputValue( getItemLabel( selectedItemSingle ) );
+						setInputValue(
+							getItemLabel( comboboxSingleSelectedItem )
+						);
 					}
 
 					break;
