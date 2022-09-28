@@ -30,9 +30,6 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 	const [ orderedChildren, setOrderedChildren ] = useState< JSX.Element[] >(
 		[]
 	);
-	const [ coverImage, setCoverImage ] = useState< JSX.Element | undefined >(
-		orderedChildren[ 0 ]
-	);
 
 	useEffect( () => {
 		if ( ! children ) {
@@ -42,10 +39,6 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 			Array.isArray( children ) ? children : [ children ]
 		);
 	}, [ children ] );
-
-	useEffect( () => {
-		setCoverImage( orderedChildren[ 0 ] );
-	}, [ orderedChildren ] );
 
 	const moveItem = ( fromIndex: number, toIndex: number ) => {
 		setOrderedChildren(
@@ -79,7 +72,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 				onDragStart={ () => setToolBarItem( null ) }
 			>
 				{ Children.map( orderedChildren, ( child, childIndex ) => {
-					const isCoverImage = coverImage === child;
+					const isCoverImage = childIndex === 0;
 
 					return (
 						<div
@@ -108,6 +101,10 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 							{ toolBarItem === child && (
 								<ImageGalleryToolbar
 									childIndex={ childIndex }
+									lastChild={ Boolean(
+										childIndex ===
+											orderedChildren.length - 1
+									) }
 									moveItem={ moveItem }
 									removeItem={ removeItem }
 									setAsCoverImage={ setAsCoverImage }

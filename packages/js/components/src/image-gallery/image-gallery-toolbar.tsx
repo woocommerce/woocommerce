@@ -14,12 +14,14 @@ import { SortableHandle } from '../sortable';
 // TODO: Dragging by toolbar handle bug
 // TODO: hover state for cover button
 // TODO: Image outline when toolbar visible
+// TODO: Strange behavior with cover image after dragging has happened
 
 export type ImageGalleryToolbarProps = {
 	childIndex: number;
 	moveItem: ( fromIndex: number, toIndex: number ) => void;
 	removeItem: ( removeIndex: number ) => void;
 	setAsCoverImage: ( coverIndex: number ) => void;
+	lastChild: boolean;
 } & React.HTMLAttributes< HTMLDivElement >;
 
 export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
@@ -27,14 +29,12 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 	moveItem,
 	removeItem,
 	setAsCoverImage,
+	lastChild,
 }: ImageGalleryToolbarProps ) => {
 	const moveNext = () => {
 		moveItem( childIndex, childIndex + 1 );
 	};
 	const movePrevious = () => {
-		if ( childIndex < 1 ) {
-			return;
-		}
 		moveItem( childIndex, childIndex - 1 );
 	};
 
@@ -48,6 +48,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 					/>
 					<ToolbarButton
 						className="woocommerce-image-gallery__toolbar-previous"
+						disabled={ childIndex < 2 }
 						onClick={ () => movePrevious() }
 						icon={ chevronLeft }
 						label="Move previous"
@@ -57,6 +58,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 						onClick={ () => moveNext() }
 						icon={ chevronRight }
 						label="Move next"
+						disabled={ lastChild }
 					/>
 				</ToolbarGroup>
 				<ToolbarGroup className="woocommerce-image-gallery__toolbargroup-cover">

@@ -249,7 +249,10 @@ export const Sortable = ( {
 					),
 				} );
 
-				if ( child.props.className.indexOf( 'not-sortable' ) !== -1 ) {
+				if (
+					child.props.className &&
+					child.props.className.indexOf( 'not-sortable' ) !== -1
+				) {
 					return <li>{ child }</li>;
 				}
 
