@@ -101,21 +101,21 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 							{ toolBarItem === child && (
 								<ImageGalleryToolbar
 									childIndex={ childIndex }
-									lastChild={ Boolean(
+									lastChild={
 										childIndex ===
-											orderedChildren.length - 1
-									) }
+										orderedChildren.length - 1
+									}
 									moveItem={ moveItem }
 									removeItem={ removeItem }
 									setAsCoverImage={ setAsCoverImage }
 								/>
 							) }
-							{ isCoverImage &&
+
+							{ isCoverImage ? (
 								cloneElement( child, {
 									isCover: true,
-								} ) }
-
-							{ ! isCoverImage && (
+								} )
+							) : (
 								<SortableHandle>{ child }</SortableHandle>
 							) }
 						</div>

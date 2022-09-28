@@ -41,33 +41,37 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 	return (
 		<div className="woocommerce-image-gallery__toolbar">
 			<Toolbar label="Options" id="options-toolbar">
-				<ToolbarGroup className="woocommerce-image-gallery__toolbargroup-movement">
-					<ToolbarButton
-						icon={ () => <SortableHandle /> }
-						label="Drag"
-					/>
-					<ToolbarButton
-						className="woocommerce-image-gallery__toolbar-previous"
-						disabled={ childIndex < 2 }
-						onClick={ () => movePrevious() }
-						icon={ chevronLeft }
-						label="Move previous"
-					/>
-					<ToolbarButton
-						className="woocommerce-image-gallery__toolbar-next"
-						onClick={ () => moveNext() }
-						icon={ chevronRight }
-						label="Move next"
-						disabled={ lastChild }
-					/>
-				</ToolbarGroup>
-				<ToolbarGroup className="woocommerce-image-gallery__toolbargroup-cover">
-					<ToolbarButton
-						onClick={ () => setAsCoverImage( childIndex ) }
-						icon={ CoverImage }
-						label="Set as cover image"
-					/>
-				</ToolbarGroup>
+				{ childIndex !== 0 && (
+					<ToolbarGroup>
+						<ToolbarButton
+							icon={ () => <SortableHandle /> }
+							label="Drag"
+						/>
+						<ToolbarButton
+							className="woocommerce-image-gallery__toolbar-previous"
+							disabled={ childIndex < 2 }
+							onClick={ () => movePrevious() }
+							icon={ chevronLeft }
+							label="Move previous"
+						/>
+						<ToolbarButton
+							className="woocommerce-image-gallery__toolbar-next"
+							onClick={ () => moveNext() }
+							icon={ chevronRight }
+							label="Move next"
+							disabled={ lastChild }
+						/>
+					</ToolbarGroup>
+				) }
+				{ childIndex !== 0 && (
+					<ToolbarGroup>
+						<ToolbarButton
+							onClick={ () => setAsCoverImage( childIndex ) }
+							icon={ CoverImage }
+							label="Set as cover image"
+						/>
+					</ToolbarGroup>
+				) }
 				<ToolbarGroup>
 					<ToolbarButton>Replace</ToolbarButton>
 				</ToolbarGroup>

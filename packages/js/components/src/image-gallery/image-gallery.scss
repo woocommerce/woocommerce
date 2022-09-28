@@ -14,11 +14,6 @@
         margin: 0;
     }
 
-	li:first-child .woocommerce-image-gallery__toolbargroup-movement,
-	li:first-child .woocommerce-image-gallery__toolbargroup-cover {
-		display: none;
-	}
-
     .woocommerce-sortable__item {
         &.is-dragging {
             position: absolute;
