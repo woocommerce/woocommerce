@@ -1174,4 +1174,96 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			$this->assertEquals( $value, wc_bool_to_string( $refreshed_order->{"get$prop"}() ), "Failed getting $prop from object" );
 		}
 	}
+
+	/**
+	 * Legacy getters and setters for props migrated from data stores should be set/reset properly.
+	 */
+	public function test_legacy_getters_setters() {
+		$order_id = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_complex_wp_post_order();
+		$order    = wc_get_order( $order_id );
+		$this->switch_data_store( $order, $this->sut );
+		$bool_props = array(
+			'_download_permissions_granted' => 'download_permissions_granted',
+			'_recorded_sales'               => 'recorded_sales',
+			'_recorded_coupon_usage_counts' => 'recorded_coupon_usage_counts',
+			'_order_stock_reduced'          => 'order_stock_reduced',
+			'_new_order_email_sent'         => 'new_order_email_sent',
+		);
+
+		$this->set_props_via_data_store( $order, $bool_props, true );
+
+		$this->assert_props_value_via_data_store( $order, $bool_props, true );
+
+		$this->assert_props_value_via_order_object( $order, $bool_props, true );
+
+		// Let's repeat for false value.
+
+		$this->set_props_via_data_store( $order, $bool_props, false );
+
+		$this->assert_props_value_via_data_store( $order, $bool_props, false );
+
+		$this->assert_props_value_via_order_object( $order, $bool_props, false );
+
+		// Let's repeat for true value but setting via order object.
+
+		$this->set_props_via_order_object( $order, $bool_props, true );
+
+		$this->assert_props_value_via_data_store( $order, $bool_props, true );
+
+		$this->assert_props_value_via_order_object( $order, $bool_props, true );
+
+	}
+
+	/**
+	 * Helper function to set prop via data store.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param array    $props List of props and their setter names.
+	 * @param mixed    $value value to set.
+	 */
+	private function set_props_via_data_store( $order, $props, $value ) {
+		foreach ( $props as $meta_key_name => $prop_name ) {
+			$order->get_data_store()->{"set_$prop_name"}( $order, $value );
+		}
+	}
+
+	/**
+	 * Helper function to set prop value via object.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param array    $props List of props and their setter names.
+	 * @param mixed    $value value to set.
+	 */
+	private function set_props_via_order_object( $order, $props, $value ) {
+		foreach ( $props as $meta_key_name => $prop_name ) {
+			$order->{"set_$prop_name"}( $value );
+		}
+		$order->save();
+	}
+
+	/**
+	 * Helper function to assert prop value via data store.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param array    $props List of props and their getter names.
+	 * @param mixed    $value value to assert.
+	 */
+	private function assert_props_value_via_data_store( $order, $props, $value ) {
+		foreach ( $props as $meta_key_name => $prop_name ) {
+			$this->assertEquals( $value, $order->get_data_store()->{"get_$prop_name"}( $order ), "Prop $prop_name was not set correctly." );
+		}
+	}
+
+	/**
+	 * Helper function to assert prop value via order object.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param array    $props List of props and their getter names.
+	 * @param mixed    $value value to assert.
+	 */
+	private function assert_props_value_via_order_object( $order, $props, $value ) {
+		foreach ( $props as $meta_key_name => $prop_name ) {
+			$this->assertEquals( $value, $order->{"get_$prop_name"}(), "Prop $prop_name was not set correctly." );
+		}
+	}
 }

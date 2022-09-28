@@ -613,7 +613,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @return bool Whether email was sent.
 	 */
-	private function get_new_order_email_sent( $order ) {
+	public function get_new_order_email_sent( $order ) {
 		return $order->get_new_order_email_sent();
 	}
 
@@ -623,7 +623,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param \WC_Order $order Order object.
 	 * @param bool      $set True or false.
 	 */
-	private function set_new_order_email_sent( $order, $set ) {
+	public function set_new_order_email_sent( $order, $set ) {
 		if ( is_int( $order ) ) {
 			$order = wc_get_order( $order );
 		}
@@ -663,7 +663,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param \WC_Order $order Order object.
 	 * @return bool Whether stock was reduced.
 	 */
-	private function get_order_stock_reduced( $order ) {
+	public function get_order_stock_reduced( $order ) {
 		return $this->get_stock_reduced( $order );
 	}
 
@@ -673,7 +673,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param \WC_Order $order Order ID or order object.
 	 * @param bool      $set Whether stock was reduced.
 	 */
-	private function set_order_stock_reduced( $order, $set ) {
+	public function set_order_stock_reduced( $order, $set ) {
 		$this->set_stock_reduced( $order, $set );
 	}
 
