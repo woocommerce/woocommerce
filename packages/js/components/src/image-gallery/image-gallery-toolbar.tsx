@@ -8,7 +8,7 @@ import { chevronRight, chevronLeft, trash } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import { CoverImage } from './icons';
+import { CoverImageIcon } from './icons';
 import { SortableHandle } from '../sortable';
 
 // TODO: Dragging by toolbar handle bug
@@ -78,7 +78,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 					<ToolbarGroup>
 						<ToolbarButton
 							onClick={ () => setAsCoverImage( childIndex ) }
-							icon={ CoverImage }
+							icon={ CoverImageIcon }
 							label="Set as cover image"
 						/>
 					</ToolbarGroup>

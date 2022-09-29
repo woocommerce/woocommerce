@@ -1,1 +1,1 @@
-export * from './cover-image.js';
+export * from './cover-image-icon';

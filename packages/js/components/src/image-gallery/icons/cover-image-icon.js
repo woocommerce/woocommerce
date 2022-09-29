@@ -3,7 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 
-export const CoverImage = () => (
+export const CoverImageIcon = () => (
 	<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 		<mask id="path-1-inside-1_7913_41727" fill="white">
 			<rect x="4" y="3" width="16" height="9" rx="1.11111" />
