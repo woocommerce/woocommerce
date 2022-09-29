@@ -9,7 +9,6 @@ import {
 	OPTIONS_STORE_NAME,
 	Product,
 	ProductShippingClass,
-	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
 import interpolateComponents from '@automattic/interpolate-components';
 import {
