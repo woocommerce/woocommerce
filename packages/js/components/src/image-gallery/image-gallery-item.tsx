@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createElement, cloneElement } from '@wordpress/element';
+import { createElement, cloneElement, Fragment } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -14,11 +14,11 @@ export type ImageGalleryItemProps = {
 	alt: string;
 	isCover?: boolean;
 	src: string;
-	displayToolbar: boolean;
+	displayToolbar?: boolean;
 	className?: string;
-	onClick: () => void;
-	onDragStart: () => void;
-	onDragEnd: () => void;
+	onClick?: () => void;
+	onDragStart?: () => void;
+	onDragEnd?: () => void;
 	children?: JSX.Element;
 } & React.HTMLAttributes< HTMLDivElement >;
 
@@ -43,10 +43,19 @@ export const ImageGalleryItem: React.FC< ImageGalleryItemProps > = ( {
 		>
 			{ children && cloneElement( children, { onDragStart, onDragEnd } ) }
 
-			<SortableHandle onDragStart={ onDragStart } onDragEnd={ onDragEnd }>
-				{ isCover && <Pill>{ __( 'Cover', 'woocommerce' ) }</Pill> }
-				<img alt={ alt } src={ src } />
-			</SortableHandle>
+			{ isCover ? (
+				<>
+					<Pill>{ __( 'Cover', 'woocommerce' ) }</Pill>
+					<img alt={ alt } src={ src } />
+				</>
+			) : (
+				<SortableHandle
+					onDragStart={ onDragStart }
+					onDragEnd={ onDragEnd }
+				>
+					<img alt={ alt } src={ src } />
+				</SortableHandle>
+			) }
 		</div>
 	);
 };

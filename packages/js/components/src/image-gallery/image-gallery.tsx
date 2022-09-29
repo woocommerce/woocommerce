@@ -76,6 +76,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 						child,
 						{
 							isCover: childIndex === 0,
+							className: childIndex === 0 ? 'not-sortable' : '',
 							onClick: () => {
 								setToolBarItem(
 									Boolean( child ) && toolBarItem === child

@@ -45,7 +45,11 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 
 	return (
 		<div className="woocommerce-image-gallery__toolbar">
-			<Toolbar label="Options" id="options-toolbar">
+			<Toolbar
+				onClick={ ( e ) => e.stopPropagation() }
+				label="Options"
+				id="options-toolbar"
+			>
 				{ childIndex !== 0 && (
 					<ToolbarGroup>
 						<ToolbarButton
