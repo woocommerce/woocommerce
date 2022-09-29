@@ -233,7 +233,7 @@ export default compose(
 			fromCalypsoUrlArgIsPresent;
 
 		const welcomeModalDismissed =
-			getOption( WELCOME_MODAL_DISMISSED_OPTION_NAME ) !== 'no';
+			getOption( WELCOME_MODAL_DISMISSED_OPTION_NAME ) === 'yes';
 
 		const welcomeModalDismissedHasResolved = hasFinishedResolution(
 			'getOption',
