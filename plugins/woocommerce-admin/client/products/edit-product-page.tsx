@@ -127,7 +127,7 @@ const EditProductPage: React.FC = () => {
 						<ProductFormLayout>
 							<ProductDetailsSection />
 							<PricingSection />
-							<ProductShippingSection />
+							<ProductShippingSection product={ product } />
 							<AttributesSection />
 							<ProductFormActions />
 						</ProductFormLayout>
