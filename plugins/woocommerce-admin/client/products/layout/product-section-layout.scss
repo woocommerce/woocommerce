@@ -4,6 +4,15 @@
 	}
 
 	&__content {
+		.components-card {
+			border: 1px solid $gray-400;
+			border-radius: 2px;
+			box-shadow: none;
+			&__body {
+				padding: $gap-large;
+			}
+		}
+
 		.components-base-control {
 			&:not(:first-child) {
 				margin-top: $gap-large - $gap-smaller;

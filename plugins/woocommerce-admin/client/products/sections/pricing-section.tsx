@@ -127,8 +127,9 @@ export const PricingSection: React.FC = () => {
 			<Card>
 				<CardBody>
 					<BaseControl
-						{ ...regularPriceProps }
 						id="product_pricing_regular_price"
+						className={ regularPriceProps?.className ?? '' }
+						help={ regularPriceProps?.help ?? '' }
 					>
 						<InputControl
 							{ ...regularPriceProps }
@@ -147,8 +148,9 @@ export const PricingSection: React.FC = () => {
 					) }
 
 					<BaseControl
-						{ ...salePriceProps }
 						id="product_pricing_sale_price"
+						className={ salePriceProps?.className ?? '' }
+						help={ salePriceProps?.help ?? '' }
 					>
 						<InputControl
 							{ ...salePriceProps }
