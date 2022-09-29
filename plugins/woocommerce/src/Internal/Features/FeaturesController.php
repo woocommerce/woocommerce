@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Admin\Features\Navigation\Init;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\PluginUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -53,6 +54,20 @@ class FeaturesController {
 	private $proxy;
 
 	/**
+	 * The PluginUtil instance to use.
+	 *
+	 * @var PluginUtil
+	 */
+	private $plugin_util;
+
+	/**
+	 * The cached list of WooCommerce aware plugin names.
+	 *
+	 * @var null|array
+	 */
+	private $woocommerce_aware_plugins = null;
+
+	/**
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
@@ -76,17 +91,12 @@ class FeaturesController {
 
 		$this->init_features( $features );
 
-		foreach ( array_keys( $this->features ) as $feature_id ) {
-			$this->compatibility_info_by_feature[ $feature_id ] = array(
-				'compatible'   => array(),
-				'incompatible' => array(),
-			);
-		}
-
 		self::add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
 		self::add_filter( 'added_option', array( $this, 'process_added_option' ), 999, 3 );
 		self::add_filter( 'woocommerce_get_sections_advanced', array( $this, 'add_features_section' ), 10, 1 );
 		self::add_filter( 'woocommerce_get_settings_advanced', array( $this, 'add_feature_settings' ), 10, 2 );
+		self::add_filter( 'activated_plugin', array( $this, 'handle_plugin_activation' ), 10, 0 );
+		self::add_filter( 'deactivated_plugin', array( $this, 'handle_plugin_deactivation' ), 10, 1 );
 	}
 
 	/**
@@ -114,9 +124,11 @@ class FeaturesController {
 	 * @internal
 	 *
 	 * @param LegacyProxy $proxy The instance of LegacyProxy to use.
+	 * @param PluginUtil  $plugin_util The instance of PluginUtil to use.
 	 */
-	final public function init( LegacyProxy $proxy ) {
-		$this->proxy = $proxy;
+	final public function init( LegacyProxy $proxy, PluginUtil $plugin_util ) {
+		$this->proxy       = $proxy;
+		$this->plugin_util = $plugin_util;
 	}
 
 	/**
@@ -261,10 +273,14 @@ class FeaturesController {
 			return array(
 				'compatible'   => array(),
 				'incompatible' => array(),
+				'uncertain'    => array_keys( $this->features ),
 			);
 		}
 
-		return $this->compatibility_info_by_plugin[ $plugin_name ];
+		$info              = $this->compatibility_info_by_plugin[ $plugin_name ];
+		$info['uncertain'] = array_values( array_diff( array_keys( $this->features ), $info['compatible'], $info['incompatible'] ) );
+
+		return $info;
 	}
 
 	/**
@@ -280,10 +296,16 @@ class FeaturesController {
 			return array(
 				'compatible'   => array(),
 				'incompatible' => array(),
+				'uncertain'    => $this->get_active_woocommerce_aware_plugins(),
 			);
 		}
 
-		return $this->compatibility_info_by_feature[ $feature_id ];
+		$info              = $this->compatibility_info_by_feature[ $feature_id ];
+		$woo_aware_plugins = $this->get_active_woocommerce_aware_plugins();
+		$info['uncertain'] = array_values( array_diff( $woo_aware_plugins, $info['compatible'], $info['incompatible'] ) );
+
+		return $info;
+
 	}
 
 	/**
@@ -503,5 +525,45 @@ class FeaturesController {
 			'class'    => $disabled ? 'disabled' : '',
 			'desc_tip' => $desc_tip,
 		);
+	}
+
+	/**
+	 * Get (and cache if needed) the names of the plugins that are WooCommerce aware.
+	 *
+	 * @return array Names of the plugins that are WooCommerce aware.
+	 */
+	private function get_active_woocommerce_aware_plugins(): array {
+		if ( is_null( $this->woocommerce_aware_plugins ) ) {
+			$this->woocommerce_aware_plugins = $this->plugin_util->get_woocommerce_aware_plugins( true );
+		}
+
+		return $this->woocommerce_aware_plugins;
+	}
+
+	/**
+	 * Handle the plugin activation hook.
+	 */
+	private function handle_plugin_activation(): void {
+		$this->woocommerce_aware_plugins = null;
+	}
+
+	/**
+	 * Handle the plugin deactivation hook.
+	 *
+	 * @param string $plugin_name Name of the plugin that has been deactivated.
+	 */
+	private function handle_plugin_deactivation( $plugin_name ): void {
+		$this->woocommerce_aware_plugins = null;
+
+		unset( $this->compatibility_info_by_plugin[ $plugin_name ] );
+
+		foreach ( array_keys( $this->compatibility_info_by_feature ) as $feature ) {
+			$compatibles = $this->compatibility_info_by_feature[ $feature ]['compatible'];
+			$this->compatibility_info_by_feature[ $feature ]['compatible'] = array_diff( $compatibles, array( $plugin_name ) );
+
+			$incompatibles = $this->compatibility_info_by_feature[ $feature ]['incompatible'];
+			$this->compatibility_info_by_feature[ $feature ]['incompatible'] = array_diff( $incompatibles, array( $plugin_name ) );
+
+		}
 	}
 }

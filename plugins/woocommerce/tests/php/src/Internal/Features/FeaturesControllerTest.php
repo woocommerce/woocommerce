@@ -6,8 +6,7 @@
 namespace Automattic\WooCommerce\Tests\Internal\Features;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Admin\Features\Analytics;
-use Automattic\WooCommerce\Admin\Features\Navigation\Init;
+use Automattic\WooCommerce\Utilities\PluginUtil;
 
 /**
  * Tests for the FeaturesController class.
@@ -21,11 +20,39 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * The fake PluginUtil instance to use.
+	 *
+	 * @var PluginUtil
+	 */
+	private $fake_plugin_util;
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
 		$this->reset_container_resolutions();
 		$this->reset_legacy_proxy_mocks();
+
+		// phpcs:disable Squiz.Commenting
+		$this->fake_plugin_util = new class() extends PluginUtil {
+			private $active_plugins;
+
+			public function set_active_plugins( $plugins ) {
+				$this->active_plugins = $plugins;
+			}
+
+			public function get_woocommerce_aware_plugins( bool $active_only = false ) {
+				$plugins = $this->active_plugins;
+				if ( ! $active_only ) {
+					$plugins[] = 'the_plugin_inactive';
+				}
+				return $plugins;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$this->fake_plugin_util->set_active_plugins( array( 'the_plugin', 'the_plugin_2', 'the_plugin_3', 'the_plugin_4' ) );
+		wc_get_container()->replace( PluginUtil::class, $this->fake_plugin_util );
 
 		$features = array(
 			'mature1'       => array(
@@ -391,12 +418,13 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$expected = array(
 			'compatible'   => array(),
 			'incompatible' => array(),
+			'uncertain'    => array( 'mature1', 'mature2', 'experimental1', 'experimental2' ),
 		);
 		$this->assertEquals( $expected, $result );
 	}
 
 	/**
-	 * @testdox 'get_compatible_features_for_plugin' returns proper information for a plugin that has declared compatibility with the passed feature.
+	 * @testdox 'get_compatible_features_for_plugin' returns proper information for a plugin that has declared compatibility with the passed feature, and reacts to plugin deactivation accordingly.
 	 */
 	public function test_get_compatible_features_for_registered_plugin() {
 		$this->simulate_inside_before_woocommerce_init_hook();
@@ -404,17 +432,26 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin', true );
 		$this->sut->declare_compatibility( 'mature2', 'the_plugin', true );
 		$this->sut->declare_compatibility( 'experimental1', 'the_plugin', false );
-		$this->sut->declare_compatibility( 'experimental2', 'the_plugin', false );
-
 		$this->reset_legacy_proxy_mocks();
-
 		$this->simulate_after_woocommerce_init_hook();
 
-		$result = $this->sut->get_compatible_features_for_plugin( 'the_plugin' );
-
+		$result   = $this->sut->get_compatible_features_for_plugin( 'the_plugin' );
 		$expected = array(
 			'compatible'   => array( 'mature1', 'mature2' ),
-			'incompatible' => array( 'experimental1', 'experimental2' ),
+			'incompatible' => array( 'experimental1' ),
+			'uncertain'    => array( 'experimental2' ),
+		);
+		$this->assertEquals( $expected, $result );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'deactivated_plugin', 'the_plugin' );
+		$this->fake_plugin_util->set_active_plugins( array( 'the_plugin_2', 'the_plugin_3', 'the_plugin_4' ) );
+
+		$result   = $this->sut->get_compatible_features_for_plugin( 'the_plugin' );
+		$expected = array(
+			'compatible'   => array(),
+			'incompatible' => array(),
+			'uncertain'    => array( 'mature1', 'mature2', 'experimental1', 'experimental2' ),
 		);
 		$this->assertEquals( $expected, $result );
 	}
@@ -458,6 +495,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$expected = array(
 			'compatible'   => array(),
 			'incompatible' => array(),
+			'uncertain'    => array( 'the_plugin', 'the_plugin_2', 'the_plugin_3', 'the_plugin_4' ),
 		);
 		$this->assertEquals( $expected, $result );
 	}
@@ -473,31 +511,46 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$expected = array(
 			'compatible'   => array(),
 			'incompatible' => array(),
+			'uncertain'    => array( 'the_plugin', 'the_plugin_2', 'the_plugin_3', 'the_plugin_4' ),
 		);
 		$this->assertEquals( $expected, $result );
 	}
 
 	/**
-	 * @testdox 'get_compatible_plugins_for_feature' returns proper information for a feature for which compatibility has been declared.
+	 * @testdox 'get_compatible_plugins_for_feature' returns proper information for a feature for which compatibility has been declared, and reacts to plugin deactivation accordingly.
 	 */
 	public function test_get_compatible_plugins_for_feature() {
 		$this->simulate_inside_before_woocommerce_init_hook();
 
-		$this->sut->declare_compatibility( 'mature1', 'the_plugin_1', true );
+		$this->fake_plugin_util->set_active_plugins( array( 'the_plugin', 'the_plugin_2', 'the_plugin_3', 'the_plugin_4', 'the_plugin_5', 'the_plugin_6' ) );
+
+		$this->sut->declare_compatibility( 'mature1', 'the_plugin', true );
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin_2', true );
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin_3', false );
-
-		$this->reset_legacy_proxy_mocks();
+		$this->sut->declare_compatibility( 'mature1', 'the_plugin_4', false );
 
 		$this->simulate_after_woocommerce_init_hook();
-
-		$result = $this->sut->get_compatible_plugins_for_feature( 'mature1' );
-
+		$result   = $this->sut->get_compatible_plugins_for_feature( 'mature1' );
 		$expected = array(
-			'compatible'   => array( 'the_plugin_1', 'the_plugin_2' ),
-			'incompatible' => array( 'the_plugin_3' ),
+			'compatible'   => array( 'the_plugin', 'the_plugin_2' ),
+			'incompatible' => array( 'the_plugin_3', 'the_plugin_4' ),
+			'uncertain'    => array( 'the_plugin_5', 'the_plugin_6' ),
 		);
+		$this->assertEquals( $expected, $result );
 
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'deactivated_plugin', 'the_plugin_2' );
+		do_action( 'deactivated_plugin', 'the_plugin_4' );
+		do_action( 'deactivated_plugin', 'the_plugin_6' );
+		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment
+
+		$this->fake_plugin_util->set_active_plugins( array( 'the_plugin', 'the_plugin_3', 'the_plugin_5' ) );
+		$result   = $this->sut->get_compatible_plugins_for_feature( 'mature1' );
+		$expected = array(
+			'compatible'   => array( 'the_plugin' ),
+			'incompatible' => array( 'the_plugin_3' ),
+			'uncertain'    => array( 'the_plugin_5' ),
+		);
 		$this->assertEquals( $expected, $result );
 	}
 
