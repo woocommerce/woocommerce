@@ -85,10 +85,6 @@ test.describe( 'Cart page', () => {
 			`a[data-product_id='${ productId }'][href*=add-to-cart]`
 		);
 		await page.waitForSelector( 'a.added_to_cart' );
-		await page.click(
-			`a[data-product_id='${ productId }'][href*=add-to-cart]`
-		);
-		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/cart/' );
 		await expect( page.locator( 'input.qty' ) ).toHaveValue( '2' );
