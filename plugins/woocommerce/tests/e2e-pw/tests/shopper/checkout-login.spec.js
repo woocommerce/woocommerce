@@ -55,19 +55,36 @@ test.describe( 'Shopper Checkout Login Account', () => {
 			method_id: 'free_shipping',
 		} );
 		// update customer billing details.
-		await api.put( 'customers/2', {
-			billing: {
-				first_name,
-				last_name,
-				address_1,
-				address_2,
-				city,
-				state,
-				postcode,
-				country,
-				phone,
-			},
+		console.log( 'update customer billing details' );
+		await api.get( 'customers' ).then( ( response ) => {
+			console.log(
+				`"list all customers" response status: ${ response.status } }`
+			);
+			console.log(
+				`"list all customers" response data: ${ response.data } }`
+			);
+			console.log(
+				`"list all customers" response header x-wp-total: ${ response.headers[ 'x-wp-total' ] } }`
+			);
 		} );
+		await api
+			.put( 'customers/2', {
+				billing: {
+					first_name,
+					last_name,
+					address_1,
+					address_2,
+					city,
+					state,
+					postcode,
+					country,
+					phone,
+				},
+			} )
+			.then( ( response ) => {
+				console.log( `status: ${ response.status }` );
+				console.log( `data: ${ response.data }` );
+			} );
 		// enable a payment method
 		await api.put( 'payment_gateways/cod', {
 			enabled: true,
