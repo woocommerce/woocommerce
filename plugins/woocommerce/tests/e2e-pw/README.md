@@ -142,4 +142,4 @@ test.describe( 'Merchant can create virtual product', () => {
 
 ## Debugging tests
 
-For Playwright debugging, follow [Playwright's documentation](https://playwright.dev/docs/debug).
+For Playwright debugging, follow [Playwright's documentation](https://playwright.dev/docs/debug)..
