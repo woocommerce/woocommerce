@@ -25,7 +25,8 @@ import { getCheckboxProps, getTextControlProps } from './utils';
 const PRODUCT_DETAILS_SLUG = 'product-details';
 
 export const ProductDetailsSection: React.FC = () => {
-	const { getInputProps, values } = useFormContext< Product >();
+	const { getInputProps, values, touched, errors } =
+		useFormContext< Product >();
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
 		useState( false );
 	const { permalinkPrefix, permalinkSuffix } = useSelect(
@@ -42,6 +43,10 @@ export const ProductDetailsSection: React.FC = () => {
 		}
 	);
 
+	function doesNameHaveError(): boolean {
+		return Boolean( touched.name ) && Boolean( errors.name );
+	}
+
 	return (
 		<ProductSectionLayout
 			title={ __( 'Product info', 'woocommerce' ) }
@@ -57,7 +62,7 @@ export const ProductDetailsSection: React.FC = () => {
 					placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
 					{ ...getTextControlProps( getInputProps( 'name' ) ) }
 				/>
-				{ values.id && permalinkPrefix && (
+				{ values.id && ! doesNameHaveError() && permalinkPrefix && (
 					<div className="product-details-section__product-link">
 						{ __( 'Product link', 'woocommerce' ) }:&nbsp;
 						<a

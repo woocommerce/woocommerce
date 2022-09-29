@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 
 defined( 'ABSPATH' ) || exit;
@@ -74,18 +75,16 @@ class CustomOrdersTableController {
 	private $batch_processing_controller;
 
 	/**
-	 * Is the feature visible?
+	 * The features controller to use.
 	 *
-	 * @var bool
+	 * @var FeaturesController
 	 */
-	private $is_feature_visible;
+	private $features_controller;
 
 	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
-		$this->is_feature_visible = false;
-
 		$this->init_hooks();
 	}
 
@@ -113,12 +112,19 @@ class CustomOrdersTableController {
 	 * @param DataSynchronizer           $data_synchronizer The data synchronizer to use.
 	 * @param OrdersTableRefundDataStore $refund_data_store The refund data store to use.
 	 * @param BatchProcessingController  $batch_processing_controller The batch processing controller to use.
+	 * @param FeaturesController         $features_controller The features controller instance to use.
 	 */
-	final public function init( OrdersTableDataStore $data_store, DataSynchronizer $data_synchronizer, OrdersTableRefundDataStore $refund_data_store, BatchProcessingController $batch_processing_controller ) {
+	final public function init(
+		OrdersTableDataStore $data_store,
+		DataSynchronizer $data_synchronizer,
+		OrdersTableRefundDataStore $refund_data_store,
+		BatchProcessingController $batch_processing_controller,
+		FeaturesController $features_controller ) {
 		$this->data_store                  = $data_store;
 		$this->data_synchronizer           = $data_synchronizer;
 		$this->batch_processing_controller = $batch_processing_controller;
 		$this->refund_data_store           = $refund_data_store;
+		$this->features_controller         = $features_controller;
 	}
 
 	/**
@@ -127,21 +133,35 @@ class CustomOrdersTableController {
 	 * @return bool True if the feature is visible.
 	 */
 	public function is_feature_visible(): bool {
-		return $this->is_feature_visible;
+		return $this->features_controller->feature_is_enabled( 'custom_order_tables' );
 	}
 
 	/**
 	 * Makes the feature visible, so that dedicated entries will be added to the debug tools page.
+	 *
+	 * This method shouldn't be used anymore, see the FeaturesController class.
 	 */
 	public function show_feature() {
-		$this->is_feature_visible = true;
+		$class_and_method = ( new \ReflectionClass( $this ) )->getShortName() . '::' . __FUNCTION__;
+		wc_doing_it_wrong(
+			$class_and_method,
+			__( "${class_and_method}: The visibility of the custom orders table feature is now handled by the WooCommerce features engine. See the FeaturesController class, or go to WooCommerce - Settings - Advanced - Features.", 'woocommerce' ),
+			'7.0'
+		);
 	}
 
 	/**
 	 * Hides the feature, so that no entries will be added to the debug tools page.
+	 *
+	 * This method shouldn't be used anymore, see the FeaturesController class.
 	 */
 	public function hide_feature() {
-		$this->is_feature_visible = false;
+		$class_and_method = ( new \ReflectionClass( $this ) )->getShortName() . '::' . __FUNCTION__;
+		wc_doing_it_wrong(
+			$class_and_method,
+			__( "${class_and_method}: The visibility of the custom orders table feature is now handled by the WooCommerce features engine. See the FeaturesController class, or go to WooCommerce - Settings - Advanced - Features.", 'woocommerce' ),
+			'7.0'
+		);
 	}
 
 	/**

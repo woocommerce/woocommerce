@@ -21,6 +21,11 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		$this->user = $this->factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
 		delete_option( 'woocommerce_show_marketplace_suggestions' );
 		add_filter(
 			'transient_woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs',

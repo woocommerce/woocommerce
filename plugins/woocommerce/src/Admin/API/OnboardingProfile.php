@@ -443,7 +443,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 				'description'       => __( 'Whether or not this store country is set via onboarding profiler.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
-				'validate_callback' => array( __CLASS__, 'rest_validate_request_arg' ),
+				'validate_callback' => 'rest_validate_request_arg',
 			),
 		);
 

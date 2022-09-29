@@ -10,53 +10,83 @@ import { createElement, useState } from '@wordpress/element';
  */
 import { DateTimePickerControl } from '../';
 
-export const Basic: React.FC = () => {
-	return (
-		<DateTimePickerControl
-			// eslint-disable-next-line no-console
-			onChange={ ( date ) => console.log( 'selected date: ' + date ) }
-		/>
-	);
+export default {
+	title: 'WooCommerce Admin/components/DateTimePickerControl',
+	component: DateTimePickerControl,
+	argTypes: {
+		onChange: { action: 'onChange' },
+		onBlur: { action: 'onBlur' },
+	},
 };
 
-export const Disabled: React.FC = () => {
-	return <DateTimePickerControl disabled onChange={ () => null } />;
+const Template = ( args ) => <DateTimePickerControl { ...args } />;
+
+export const Basic = Template.bind( {} );
+Basic.args = {
+	label: 'Start date and time',
+	placeholder: 'Enter the start date and time',
+	help: 'Type a date and time or use the picker',
 };
 
-export const DateFormat: React.FC = () => {
-	return (
-		<DateTimePickerControl
-			onChange={ () => null }
-			dateTimeFormat="DD.MM.YYYY"
-		/>
-	);
+export const CustomDateTimeFormat = Template.bind( {} );
+CustomDateTimeFormat.args = {
+	...Basic.args,
+	help: 'Format: YYYY-MM-DD HH:mm',
+	dateTimeFormat: 'YYYY-MM-DD HH:mm',
 };
 
-export const ControlledDate: React.FC = () => {
-	const [ currentDate, setCurrentDate ] = useState(
+function ControlledContainer( { children, ...props } ) {
+	const [ controlledDate, setControlledDate ] = useState(
 		new Date().toISOString()
 	);
 
 	return (
-		<>
-			<Button
-				onClick={ () => setCurrentDate( new Date().toISOString() ) }
-			>
-				Reset to today
-			</Button>
-			<DateTimePickerControl
-				onChange={ () => null }
-				currentDate={ currentDate }
-			/>
-		</>
+		<div { ...props }>
+			<div>{ children( controlledDate, setControlledDate ) }</div>
+			<div>
+				<Button
+					onClick={ () =>
+						setControlledDate( new Date().toISOString() )
+					}
+				>
+					Reset to now
+				</Button>
+			</div>
+		</div>
 	);
+}
+
+export const ReallyLongHelp = Template.bind( {} );
+ReallyLongHelp.args = {
+	...Basic.args,
+	help: 'The help for this date time field is extremely long. Longer than the control itself should probably be.',
 };
 
-export const TwentyFourHour: React.FC = () => {
-	return <DateTimePickerControl is12Hour={ false } onChange={ () => null } />;
+export const CustomClassName = Template.bind( {} );
+CustomClassName.args = {
+	...Basic.args,
+	className: 'custom-class-name',
 };
 
-export default {
-	title: 'WooCommerce Admin/components/DateTimePickerControl',
-	component: DateTimePickerControl,
+export const Controlled = Template.bind( {} );
+Controlled.args = {
+	...Basic.args,
+	help: "I'm controlled by a container that uses React state",
 };
+Controlled.decorators = [
+	( story, props ) => {
+		return (
+			<ControlledContainer>
+				{ ( controlledDate, setControlledDate ) =>
+					story( {
+						args: {
+							currentDate: controlledDate,
+							onChange: setControlledDate,
+							...props.args,
+						},
+					} )
+				}
+			</ControlledContainer>
+		);
+	},
+];
