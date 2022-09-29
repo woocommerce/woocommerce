@@ -3,17 +3,15 @@
  */
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
 import { Pagination, EmptyContent } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
 import { CollapsibleCard, ReadBlogMessage } from '~/marketing/components';
-import { STORE_KEY } from '~/marketing/data/constants';
 import { PlaceholderPostTile } from './PlaceholderPostTile';
 import { PostTile } from './PostTile';
-import { Post } from './types';
+import { useBlogPosts } from './useBlogPosts';
 import './LearnMarketing.scss';
 
 const BLOG_POST_CATEGORY = 'marketing';
@@ -21,21 +19,7 @@ const PER_PAGE = 2;
 
 export const LearnMarketing = () => {
 	const [ page, setPage ] = useState( 1 );
-	const { isLoading, error, posts } = useSelect(
-		( select ) => {
-			const { getBlogPosts, getBlogPostsError, isResolving } =
-				select( STORE_KEY );
-
-			return {
-				posts: getBlogPosts( BLOG_POST_CATEGORY ),
-				isLoading: isResolving( 'getBlogPosts', [
-					BLOG_POST_CATEGORY,
-				] ),
-				error: getBlogPostsError( BLOG_POST_CATEGORY ),
-			};
-		},
-		[ BLOG_POST_CATEGORY ]
-	);
+	const { isLoading, error, posts } = useBlogPosts( BLOG_POST_CATEGORY );
 
 	/**
 	 * Renders card footer.
@@ -47,7 +31,10 @@ export const LearnMarketing = () => {
 	const renderFooter = () => {
 		if ( isLoading ) {
 			return (
-				<div className="woocommerce-marketing-learn-marketing-card__footer--placeholder" />
+				<div
+					role="progressbar"
+					className="woocommerce-marketing-learn-marketing-card__footer--placeholder"
+				/>
 			);
 		}
 
@@ -111,7 +98,7 @@ export const LearnMarketing = () => {
 
 		return posts
 			.slice( ( page - 1 ) * PER_PAGE, page * PER_PAGE )
-			.map( ( post: Post, index: number ) => {
+			.map( ( post, index ) => {
 				return <PostTile key={ index } post={ post } />;
 			} );
 	};

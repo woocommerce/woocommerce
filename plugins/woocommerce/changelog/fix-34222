@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix order refund removal when the HPOS datastore is in use.

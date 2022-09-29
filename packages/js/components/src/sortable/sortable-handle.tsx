@@ -26,7 +26,6 @@ export const SortableHandle = ( {
 		draggable
 		onDragStart={ onDragStart }
 		onDragEnd={ onDragEnd }
-		aria-label={ __( 'Move this item', 'woocommerce' ) }
 	>
 		{ children ? children : <DraggableIcon /> }
 	</div>

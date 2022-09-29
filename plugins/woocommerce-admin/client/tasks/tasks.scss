@@ -15,6 +15,10 @@
 
 		.wooocommerce-task-card__header {
 			display: flex;
+
+			.components-text + .woocommerce-badge {
+				margin-left: 16px;
+			}
 		}
 
 		.woocommerce-list__item-text {

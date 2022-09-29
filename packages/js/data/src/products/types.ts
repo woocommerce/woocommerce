@@ -25,6 +25,15 @@ export type ProductDownload = {
 	file: string;
 };
 
+export type ProductAttribute = {
+	id: number;
+	name: string;
+	position: number;
+	visible: boolean;
+	variation: boolean;
+	options: string[];
+};
+
 export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	Schema.Post,
 	'status'
@@ -76,6 +85,7 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	rating_count: number;
 	related_ids: number[];
 	variations: number[];
+	attributes: ProductAttribute[];
 };
 
 export const productReadOnlyProperties = [

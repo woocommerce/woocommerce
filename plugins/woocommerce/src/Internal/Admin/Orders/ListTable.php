@@ -238,13 +238,30 @@ class ListTable extends WP_List_Table {
 		 *
 		 * @param array $query_args Arguments to be passed to `wc_get_orders()`.
 		 */
-		$orders      = wc_get_orders( (array) apply_filters( 'woocommerce_order_list_table_prepare_items_query_args', $this->order_query_args ) );
+		$order_query_args = (array) apply_filters( 'woocommerce_order_list_table_prepare_items_query_args', $this->order_query_args );
+
+		// We must ensure the 'paginate' argument is set.
+		$order_query_args['paginate'] = true;
+
+		$orders      = wc_get_orders( $order_query_args );
 		$this->items = $orders->orders;
+
+		$max_num_pages = $orders->max_num_pages;
+
+		// Check in case the user has attempted to page beyond the available range of orders.
+		if ( 0 === $max_num_pages && $this->order_query_args['page'] > 1 ) {
+			$count_query_args          = $order_query_args;
+			$count_query_args['page']  = 1;
+			$count_query_args['limit'] = 1;
+			$order_count               = wc_get_orders( $count_query_args );
+			$max_num_pages             = (int) ceil( $order_count->total / $order_query_args['limit'] );
+		}
 
 		$this->set_pagination_args(
 			array(
 				'total_items' => $orders->total ?? 0,
 				'per_page'    => $limit,
+				'total_pages' => $max_num_pages,
 			)
 		);
 	}

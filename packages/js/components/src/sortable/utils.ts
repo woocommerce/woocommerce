@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { DragEvent } from 'react';
 
 /**
@@ -19,10 +20,7 @@ export const moveIndex = < T >(
 	const newArr = [ ...arr ];
 	const item = arr[ fromIndex ];
 	newArr.splice( fromIndex, 1 );
-
-	// Splicing the array reduces the array size by 1 after removal.
-	// Lower index items affect the position of where the item should be inserted.
-	newArr.splice( fromIndex < toIndex ? toIndex - 1 : toIndex, 0, item );
+	newArr.splice( toIndex, 0, item );
 	return newArr;
 };
 
@@ -52,44 +50,36 @@ export const isBefore = (
 	return relativeY < middle;
 };
 
-export const isDraggingOverBefore = (
-	index: number,
-	dragIndex: number | null,
-	dropIndex: number | null
-) => {
-	if ( index === dragIndex ) {
-		return false;
-	}
-
-	if ( dropIndex === index ) {
-		return true;
-	}
-
-	if ( dragIndex === index - 1 && index - 1 === dropIndex ) {
-		return true;
-	}
-
-	return false;
-};
-
 export const isDraggingOverAfter = (
 	index: number,
 	dragIndex: number | null,
 	dropIndex: number | null
 ) => {
-	if ( index === dragIndex ) {
+	if ( dragIndex === null ) {
 		return false;
 	}
 
-	if ( dropIndex === index + 1 ) {
-		return true;
+	if ( dragIndex < index ) {
+		return dropIndex === index;
 	}
 
-	if ( dragIndex === index + 1 && index + 2 === dropIndex ) {
-		return true;
+	return dropIndex === index + 1;
+};
+
+export const isDraggingOverBefore = (
+	index: number,
+	dragIndex: number | null,
+	dropIndex: number | null
+) => {
+	if ( dragIndex === null ) {
+		return false;
 	}
 
-	return false;
+	if ( dragIndex < index ) {
+		return dropIndex === index - 1;
+	}
+
+	return dropIndex === index;
 };
 
 export const isLastDroppable = (
@@ -110,4 +100,50 @@ export const isLastDroppable = (
 	}
 
 	return false;
+};
+
+export const getNextIndex = ( currentIndex: number, itemCount: number ) => {
+	let index = currentIndex + 1;
+
+	if ( index > itemCount - 1 ) {
+		index = 0;
+	}
+
+	return index;
+};
+
+export const getPreviousIndex = ( currentIndex: number, itemCount: number ) => {
+	let index = currentIndex - 1;
+
+	if ( index < 0 ) {
+		index = itemCount - 1;
+	}
+
+	return index;
+};
+
+export const getItemName = (
+	parentNode: HTMLOListElement | null,
+	index: number
+) => {
+	const listItemNode = parentNode?.childNodes[ index ] as HTMLLIElement;
+
+	if ( index === null || ! listItemNode ) {
+		return null;
+	}
+
+	if ( listItemNode.querySelector( '[aria-label]' ) ) {
+		return listItemNode.querySelector( '[aria-label]' )?.ariaLabel;
+	}
+
+	if ( listItemNode.textContent ) {
+		return listItemNode.textContent;
+	}
+
+	if ( listItemNode.querySelector( '[alt]' ) ) {
+		return ( listItemNode.querySelector( '[alt]' ) as HTMLImageElement )
+			.alt;
+	}
+
+	return __( 'Item', 'woocommerce' );
 };
