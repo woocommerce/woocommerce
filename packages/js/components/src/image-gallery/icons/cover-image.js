@@ -15,13 +15,13 @@ export const CoverImage = () => (
 			width="16"
 			height="9"
 			rx="1.11111"
-			stroke="#000"
+			stroke="currentColor"
 			strokeWidth="3"
 			mask="url(#path-1-inside-1_7913_41727)"
 		/>
 		<path
 			d="M5 9.5L7.28571 7.83333L9 8.94444L11 7L15.25 11.25"
-			stroke="#000"
+			stroke="currentColor"
 			fill="none"
 			strokeWidth="1.5"
 			strokeLinejoin="round"
@@ -31,7 +31,7 @@ export const CoverImage = () => (
 			y1="19.25"
 			x2="13"
 			y2="19.25"
-			stroke="#000"
+			stroke="currentColor"
 			strokeWidth="1.5"
 		/>
 		<line
@@ -39,7 +39,7 @@ export const CoverImage = () => (
 			y1="15.25"
 			x2="20"
 			y2="15.25"
-			stroke="#000"
+			stroke="currentColor"
 			strokeWidth="1.5"
 		/>
 	</svg>

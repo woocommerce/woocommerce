@@ -12,9 +12,6 @@ import { CoverImage } from './icons';
 import { SortableHandle } from '../sortable';
 
 // TODO: Dragging by toolbar handle bug
-// TODO: hover state for cover button
-// TODO: Image outline when toolbar visible
-// TODO: Strange behavior with cover image after dragging has happened
 
 export type ImageGalleryToolbarProps = {
 	childIndex: number;

@@ -8,6 +8,7 @@ import {
 	useState,
 	useEffect,
 } from '@wordpress/element';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -72,20 +73,25 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 				onDragStart={ () => setToolBarItem( null ) }
 			>
 				{ Children.map( orderedChildren, ( child, childIndex ) => {
+					const isToolbarItem = child === toolBarItem;
+
 					return cloneElement(
 						child,
 						{
 							isCover: childIndex === 0,
-							className: childIndex === 0 ? 'not-sortable' : '',
+							className: classnames( {
+								'not-sortable': childIndex === 0,
+								'is-showing-toolbar': isToolbarItem,
+							} ),
 							onClick: () => {
 								setToolBarItem(
-									Boolean( child ) && toolBarItem === child
+									Boolean( child ) && isToolbarItem
 										? null
 										: child
 								);
 							},
 						},
-						child === toolBarItem ? (
+						isToolbarItem ? (
 							<ImageGalleryToolbar
 								childIndex={ childIndex }
 								lastChild={
