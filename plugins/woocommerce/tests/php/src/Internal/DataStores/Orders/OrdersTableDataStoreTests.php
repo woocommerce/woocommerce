@@ -1,10 +1,12 @@
 <?php
 
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use DateTime;
 
 /**
  * Class OrdersTableDataStoreTests.
@@ -321,6 +323,23 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $order->get_meta( 'my_meta', true, 'edit' ), $r_order->get_meta( 'my_meta', true, 'edit' ) );
 		$this->assertEquals( $this->sut->get_stock_reduced( $order ), $this->sut->get_stock_reduced( $r_order ) );
+	}
+
+	/**
+	 * Confirm we store the order creation date in GMT.
+	 */
+	public function test_order_dates_are_gmt(): void {
+		// Switch to the COT datastore, set WordPress to use a non-UTC timezone, and create a new order.
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		update_option( 'timezone_string', 'America/Los_Angeles' );
+		$order = OrderHelper::create_order();
+
+		// We tolerate a 20 second difference to account for pauses during test execution.
+		$this->assertLessThan(
+			20,
+			$order->get_date_created()->getTimestamp() - $order->get_date_created()->getOffsetTimestamp(),
+			'Date created field is set to GMT, therefore the timestamp and offset timestamp are identical.'
+		);
 	}
 
 	/**
