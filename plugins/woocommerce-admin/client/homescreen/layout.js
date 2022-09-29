@@ -32,11 +32,7 @@ import { IntroModal as NavigationIntroModal } from '../navigation/components/int
 import StatsOverview from './stats-overview';
 import { StoreManagementLinks } from '../store-management-links';
 import { TasksPlaceholder, useActiveSetupTasklist } from '../tasks';
-import {
-	WELCOME_MODAL_DISMISSED_OPTION_NAME,
-	WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME,
-} from './constants';
-import { WelcomeFromCalypsoModal } from './welcome-from-calypso-modal';
+import { WELCOME_MODAL_DISMISSED_OPTION_NAME } from './constants';
 import { WelcomeModal } from './welcome-modal';
 import { MobileAppModal } from './mobile-app-modal';
 import './style.scss';
@@ -59,7 +55,6 @@ export const Layout = ( {
 	showingProgressHeader,
 	isLoadingTaskLists,
 	shouldShowWelcomeModal,
-	shouldShowWelcomeFromCalypsoModal,
 	isTaskListHidden,
 	updateOptions,
 } ) => {
@@ -150,16 +145,6 @@ export const Layout = ( {
 						} }
 					/>
 				) }
-				{ shouldShowWelcomeFromCalypsoModal && (
-					<WelcomeFromCalypsoModal
-						onClose={ () => {
-							updateOptions( {
-								[ WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ]:
-									'yes',
-							} );
-						} }
-					/>
-				) }
 				{ shouldShowMobileAppModal && <MobileAppModal /> }
 				{ window.wcAdminFeatures.navigation && (
 					<NavigationIntroModal />
@@ -187,10 +172,6 @@ Layout.propTypes = {
 	 */
 	shouldShowWelcomeModal: PropTypes.bool,
 	/**
-	 * If the welcome from Calypso modal should display.
-	 */
-	shouldShowWelcomeFromCalypsoModal: PropTypes.bool,
-	/**
 	 * Timestamp of WooCommerce Admin installation.
 	 */
 	installTimestamp: PropTypes.string,
@@ -217,21 +198,6 @@ export default compose(
 		const taskLists = getTaskLists();
 		const isLoadingTaskLists = ! taskListFinishResolution( 'getTaskLists' );
 
-		const welcomeFromCalypsoModalDismissed =
-			getOption( WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ) !==
-			'no';
-		const welcomeFromCalypsoModalDismissedResolved = hasFinishedResolution(
-			'getOption',
-			[ WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ]
-		);
-		const fromCalypsoUrlArgIsPresent =
-			!! window.location.search.match( 'from-calypso' );
-
-		const shouldShowWelcomeFromCalypsoModal =
-			welcomeFromCalypsoModalDismissedResolved &&
-			! welcomeFromCalypsoModalDismissed &&
-			fromCalypsoUrlArgIsPresent;
-
 		const welcomeModalDismissed =
 			getOption( WELCOME_MODAL_DISMISSED_OPTION_NAME ) === 'yes';
 
@@ -241,10 +207,7 @@ export default compose(
 		);
 
 		const shouldShowWelcomeModal =
-			welcomeModalDismissedHasResolved &&
-			! welcomeModalDismissed &&
-			welcomeFromCalypsoModalDismissedResolved &&
-			! welcomeFromCalypsoModalDismissed;
+			welcomeModalDismissedHasResolved && ! welcomeModalDismissed;
 
 		const defaultHomescreenLayout =
 			getOption( 'woocommerce_default_homepage_layout' ) ||
@@ -254,7 +217,6 @@ export default compose(
 			defaultHomescreenLayout,
 			isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
 			shouldShowWelcomeModal,
-			shouldShowWelcomeFromCalypsoModal,
 			isLoadingTaskLists,
 			isTaskListHidden: getTaskList( 'setup' )?.isHidden,
 			hasTaskList: getAdminSetting( 'visibleTaskListIds', [] ).length > 0,
