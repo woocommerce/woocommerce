@@ -81,7 +81,9 @@ test.describe( 'Cart page', () => {
 		await page.waitForSelector( 'a.added_to_cart' );
 		// Click add to cart a second time (load the shop in case redirection enabled)
 		await page.goto( '/shop/' );
-		await page.click( `a:below(:text("${ productName }"))` );
+		await page.click(
+			`a[data-product_id='${ productId }'][href*=add-to-cart]`
+		);
 		await page.waitForSelector( 'a.added_to_cart' );
 		await page.click(
 			`a[data-product_id='${ productId }'][href*=add-to-cart]`
