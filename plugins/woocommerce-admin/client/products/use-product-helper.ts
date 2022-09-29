@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import { useCallback, useContext, useState } from '@wordpress/element';
+import * as WooNumber from '@woocommerce/number';
 import {
 	Product,
 	ProductsStoreActions,
@@ -286,12 +287,52 @@ export function useProductHelper() {
 		[ context ]
 	);
 
+	/**
+	 * Format a value using the Woo General Currency Settings.
+	 *
+	 * @param {string} value the value that will be formatted.
+	 * @return {string} the formatted number.
+	 */
+	const formatNumber = useCallback(
+		( value: string ): string => {
+			const { getCurrencyConfig } = context;
+			const { decimalSeparator, thousandSeparator } = getCurrencyConfig();
+
+			return WooNumber.numberFormat(
+				{ decimalSeparator, thousandSeparator },
+				value
+			);
+		},
+		[ context ]
+	);
+
+	/**
+	 * Parse a value using the Woo General Currency Settings.
+	 *
+	 * @param {string} value the value that will be parsed.
+	 * @return {string} the parsed number.
+	 */
+	const parseNumber = useCallback(
+		( value: string ): string => {
+			const { getCurrencyConfig } = context;
+			const { decimalSeparator, thousandSeparator } = getCurrencyConfig();
+
+			return WooNumber.parseNumber(
+				{ decimalSeparator, thousandSeparator },
+				value
+			);
+		},
+		[ context ]
+	);
+
 	return {
 		createProductWithStatus,
 		updateProductWithStatus,
 		copyProductWithStatus,
 		deleteProductAndRedirect,
 		sanitizePrice,
+		formatNumber,
+		parseNumber,
 		isUpdatingDraft: updating.draft,
 		isUpdatingPublished: updating.publish,
 		isDeleting,

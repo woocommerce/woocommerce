@@ -5,4 +5,17 @@
 		justify-content: center;
 		height: 100%;
 	}
+	&__subtitle {
+		margin: 0;
+	}
+	&__classes {
+		.product-shipping-section__spinner-wrapper {
+			min-height: 80px;
+		}
+	}
+	&__dimensions {
+		.product-shipping-section__spinner-wrapper {
+			min-height: 326px;
+		}
+	}
 }
