@@ -237,6 +237,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - This change only impacts the validation of changelog files. [#34520](https://github.com/woocommerce/woocommerce/pull/34520)
 * Dev - Update wp data version and jest config to fix admin tests for pnpm 7 [#34428](https://github.com/woocommerce/woocommerce/pull/34428)
 * Dev - Update `jest@^26.5.1` from `^25`. [#34322](https://github.com/woocommerce/woocommerce/pull/34322)
+* Dev - Implement "Discover more marketing tools" card. [#34415](https://github.com/woocommerce/woocommerce/pull/34415)
 * Tweak - Add additional class to no-products-found info banner for easier contextual targeting. [#34362](https://github.com/woocommerce/woocommerce/pull/34362)
 * Tweak - Add back FB to Installed marketing extensions list. [#34259](https://github.com/woocommerce/woocommerce/pull/34259)
 * Tweak - Add filter hooks to the Product Reviews admin list table. [#34393](https://github.com/woocommerce/woocommerce/pull/34393)
