@@ -11,6 +11,7 @@
 		{ "path": "./assets/js/data" },
 		{ "path": "./assets/js/icons" },
 		{ "path": "./assets/js/base/components" },
+		{ "path": "./assets/js/base/context/hooks" },
 		{ "path": "./packages" },
 		{ "path": "./assets/js/extensions/google-analytics" },
 		{ "path": "./assets/js/base/context" }
