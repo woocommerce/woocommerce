@@ -59,7 +59,9 @@ test.describe( 'Cart page', () => {
 		page,
 	} ) => {
 		await page.goto( '/shop/' );
-		await page.click( `a:below(:text("${ productName }"))` );
+		await page.click(
+			`a[data-product_id='${ productId }'][href*=add-to-cart]`
+		);
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/cart/' );
@@ -72,13 +74,19 @@ test.describe( 'Cart page', () => {
 		page,
 	} ) => {
 		await page.goto( '/shop/' );
-		await page.click( `a:below(:text("${ productName }"))` );
+		await page.click(
+			`a[data-product_id='${ productId }'][href*=add-to-cart]`
+		);
 		// Once the view cart link is visible, item has been added
 		await page.waitForSelector( 'a.added_to_cart' );
 		// Click add to cart a second time (load the shop in case redirection enabled)
 		await page.goto( '/shop/' );
 		await page.click( `a:below(:text("${ productName }"))` );
 		await page.waitForSelector( 'a.added_to_cart' );
+		await page.click(
+			`a[data-product_id='${ productId }'][href*=add-to-cart]`
+		);
+		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/cart/' );
 		await expect( page.locator( 'input.qty' ) ).toHaveValue( '2' );
@@ -88,7 +96,9 @@ test.describe( 'Cart page', () => {
 		page,
 	} ) => {
 		await page.goto( '/shop/' );
-		await page.click( `a:below(:text("${ productName }"))` );
+		await page.click(
+			`a[data-product_id='${ productId }'][href*=add-to-cart]`
+		);
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/cart/' );
@@ -104,7 +114,9 @@ test.describe( 'Cart page', () => {
 		page,
 	} ) => {
 		await page.goto( '/shop/' );
-		await page.click( `a:below(:text("${ productName }"))` );
+		await page.click(
+			`a[data-product_id='${ productId }'][href*=add-to-cart]`
+		);
 		await page.waitForLoadState( 'networkidle' );
 		await page.goto( '/cart/' );
 
@@ -124,7 +136,9 @@ test.describe( 'Cart page', () => {
 		page,
 	} ) => {
 		await page.goto( '/shop/' );
-		await page.click( `a:below(:text("${ productName }"))` );
+		await page.click(
+			`a[data-product_id='${ productId }'][href*=add-to-cart]`
+		);
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/cart/' );
@@ -144,7 +158,9 @@ test.describe( 'Cart page', () => {
 		page,
 	} ) => {
 		await page.goto( '/shop/' );
-		await page.click( `a:below(:text("${ productName }"))` );
+		await page.click(
+			`a[data-product_id='${ productId }'][href*=add-to-cart]`
+		);
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/cart/' );

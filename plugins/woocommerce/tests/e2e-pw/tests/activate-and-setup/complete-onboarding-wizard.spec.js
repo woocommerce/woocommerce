@@ -133,7 +133,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		);
 		// Check to see if WC Payments is present
 		const wcPay = await page.locator(
-			'a:has-text("WooCommerce Payments")'
+			'.woocommerce-admin__business-details__selective-extensions-bundle__description a[href*=woocommerce-payments]'
 		);
 		expect( wcPay ).toBeVisible();
 		// Uncheck all business features
@@ -224,7 +224,9 @@ test.describe(
 			);
 			// Make sure WC Payments is NOT present
 			await expect(
-				page.locator( 'a:has-text("WooCommerce Payments")' )
+				page.locator(
+					'.woocommerce-admin__business-details__selective-extensions-bundle__description a[href*=woocommerce-payments]'
+				)
 			).toHaveCount( 0 );
 			// Uncheck all business features
 			if ( page.isChecked( '.components-checkbox-control__input' ) ) {
