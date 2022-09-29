@@ -8,7 +8,7 @@
 	"license": "GPL-2.0-or-later",
 	"engines": {
 		"node": "^16.13.1",
-		"pnpm": "7.11.0"
+		"pnpm": "^7.12.2"
 	},
 	"devDependencies": {
 		"@tsconfig/node16": "^1.0.3",
