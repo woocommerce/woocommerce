@@ -1,10 +1,8 @@
-
 .woocommerce-image-gallery__item {
     height: 146px;
     width: 146px;
     border: 1px solid $gray-200;
     border-radius: 2px;
-    overflow: hidden;
 
     img {
         max-width: 100%;
@@ -20,11 +18,6 @@
         top: 10px;
         left: 10px;
     }
-
-}
-
-.woocommerce-image-gallery__item-wrapper {
-	position: relative;
 
 	.components-toolbar-group {
 		flex-wrap: inherit;

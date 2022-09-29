@@ -12,8 +12,8 @@ import {
 /**
  * Internal dependencies
  */
+import { Sortable, moveIndex } from '../sortable';
 import { ImageGalleryToolbar } from './index';
-import { Sortable, SortableHandle, moveIndex } from '../sortable';
 
 export type ImageGalleryProps = {
 	children: JSX.Element | JSX.Element[];
@@ -72,53 +72,29 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 				onDragStart={ () => setToolBarItem( null ) }
 			>
 				{ Children.map( orderedChildren, ( child, childIndex ) => {
-					const isCoverImage = childIndex === 0;
-
-					return (
-						<div
-							className={ `woocommerce-image-gallery__item-wrapper ${
-								isCoverImage ? 'not-sortable ' : ''
-							}` }
-							//TODO: add correct keyboard handler
-							onKeyPress={ () => {} }
-							tabIndex={ 0 }
-							role="button"
-							onClick={ ( event ) => {
-								if (
-									( event.target as Element ).closest(
-										'.woocommerce-image-gallery__toolbar'
-									) !== null
-								) {
-									return;
-								}
+					return cloneElement(
+						child,
+						{
+							isCover: childIndex === 0,
+							onItemClick: () => {
 								setToolBarItem(
 									Boolean( child ) && toolBarItem === child
 										? null
 										: child
 								);
-							} }
-						>
-							{ toolBarItem === child && (
-								<ImageGalleryToolbar
-									childIndex={ childIndex }
-									lastChild={
-										childIndex ===
-										orderedChildren.length - 1
-									}
-									moveItem={ moveItem }
-									removeItem={ removeItem }
-									setAsCoverImage={ setAsCoverImage }
-								/>
-							) }
-
-							{ isCoverImage ? (
-								cloneElement( child, {
-									isCover: true,
-								} )
-							) : (
-								<SortableHandle>{ child }</SortableHandle>
-							) }
-						</div>
+							},
+						},
+						child === toolBarItem ? (
+							<ImageGalleryToolbar
+								childIndex={ childIndex }
+								lastChild={
+									childIndex === orderedChildren.length - 1
+								}
+								moveItem={ moveItem }
+								removeItem={ removeItem }
+								setAsCoverImage={ setAsCoverImage }
+							/>
+						) : null
 					);
 				} ) }
 			</Sortable>

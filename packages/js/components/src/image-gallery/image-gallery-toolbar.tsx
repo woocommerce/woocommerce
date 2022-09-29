@@ -34,6 +34,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 	const moveNext = () => {
 		moveItem( childIndex, childIndex + 1 );
 	};
+
 	const movePrevious = () => {
 		moveItem( childIndex, childIndex - 1 );
 	};
