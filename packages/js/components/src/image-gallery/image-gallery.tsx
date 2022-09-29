@@ -76,7 +76,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 						child,
 						{
 							isCover: childIndex === 0,
-							onItemClick: () => {
+							onClick: () => {
 								setToolBarItem(
 									Boolean( child ) && toolBarItem === child
 										? null

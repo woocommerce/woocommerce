@@ -22,6 +22,8 @@ export type ImageGalleryToolbarProps = {
 	removeItem: ( removeIndex: number ) => void;
 	setAsCoverImage: ( coverIndex: number ) => void;
 	lastChild: boolean;
+	onDragStart?: () => void;
+	onDragEnd?: () => void;
 } & React.HTMLAttributes< HTMLDivElement >;
 
 export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
@@ -30,6 +32,8 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 	removeItem,
 	setAsCoverImage,
 	lastChild,
+	onDragStart,
+	onDragEnd,
 }: ImageGalleryToolbarProps ) => {
 	const moveNext = () => {
 		moveItem( childIndex, childIndex + 1 );
@@ -45,7 +49,12 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 				{ childIndex !== 0 && (
 					<ToolbarGroup>
 						<ToolbarButton
-							icon={ () => <SortableHandle /> }
+							icon={ () => (
+								<SortableHandle
+									onDragStart={ onDragStart }
+									onDragEnd={ onDragEnd }
+								/>
+							) }
 							label="Drag"
 						/>
 						<ToolbarButton

@@ -16,7 +16,7 @@ export type ImageGalleryItemProps = {
 	src: string;
 	displayToolbar: boolean;
 	className?: string;
-	onItemClick: () => void;
+	onClick: () => void;
 	onDragStart: () => void;
 	onDragEnd: () => void;
 	children?: JSX.Element;
@@ -27,7 +27,7 @@ export const ImageGalleryItem: React.FC< ImageGalleryItemProps > = ( {
 	isCover = false,
 	src,
 	className = '',
-	onItemClick = () => null,
+	onClick = () => null,
 	onDragStart,
 	onDragEnd,
 	children,
@@ -39,12 +39,11 @@ export const ImageGalleryItem: React.FC< ImageGalleryItemProps > = ( {
 			onKeyPress={ () => {} }
 			tabIndex={ 0 }
 			role="button"
-			onClick={ () => onItemClick() }
+			onClick={ () => onClick() }
 		>
-			<SortableHandle onDragStart={ onDragStart } onDragEnd={ onDragEnd }>
-				{ children &&
-					cloneElement( children, { onDragStart, onDragEnd } ) }
+			{ children && cloneElement( children, { onDragStart, onDragEnd } ) }
 
+			<SortableHandle onDragStart={ onDragStart } onDragEnd={ onDragEnd }>
 				{ isCover && <Pill>{ __( 'Cover', 'woocommerce' ) }</Pill> }
 				<img alt={ alt } src={ src } />
 			</SortableHandle>
