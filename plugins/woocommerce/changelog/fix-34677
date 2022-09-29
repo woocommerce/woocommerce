@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Do no override order defaults with NULL values (HPOS)

@@ -107,8 +107,8 @@ const webpackConfig = {
 					amd: false,
 				},
 				exclude: [
-					// Exclude node_modules/.pnpm but not node_modules/.pnpm/debug*
-					/node_modules(\/|\\)\.pnpm(\/|\\)(?!(debug))/,
+					// Exclude node_modules/.pnpm
+					/node_modules(\/|\\)\.pnpm(\/|\\)/,
 				],
 				use: {
 					loader: 'babel-loader',

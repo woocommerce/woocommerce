@@ -11,7 +11,8 @@
 	"license": "GPLv3",
 	"repository": "woocommerce/woocommerce",
 	"engines": {
-		"node": "^16.13.1"
+		"node": "^16.13.1",
+		"pnpm": "7.11.0"
 	},
 	"dependencies": {
 		"node-fetch": "^3.2.6",

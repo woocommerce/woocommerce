@@ -8,6 +8,10 @@
 		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
 	"license": "GPL-3.0+",
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "7.11.0"
+	},
 	"main": "build/index.js",
 	"module": "build-module/index.js",
 	"dependencies": {
