@@ -1,0 +1,10 @@
+.product-form-layout {
+	max-width: 1032px;
+	margin: 0 auto;
+
+	&__category {
+		&:not(:first-child) {
+			margin-top: $gap-largest + $gap-smaller;
+		}
+	}
+}
