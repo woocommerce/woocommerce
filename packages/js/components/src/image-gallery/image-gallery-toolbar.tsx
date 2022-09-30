@@ -43,6 +43,8 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 		setToolBarItem( null );
 	};
 
+	const isCoverItem = childIndex === 0;
+
 	return (
 		<div className="woocommerce-image-gallery__toolbar">
 			<Toolbar
@@ -50,7 +52,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 				label="Options"
 				id="options-toolbar"
 			>
-				{ childIndex !== 0 && (
+				{ ! isCoverItem && (
 					<ToolbarGroup>
 						<ToolbarButton
 							icon={ () => (
@@ -77,7 +79,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 						/>
 					</ToolbarGroup>
 				) }
-				{ childIndex !== 0 && (
+				{ ! isCoverItem && (
 					<ToolbarGroup>
 						<ToolbarButton
 							onClick={ () => setAsCoverImage( childIndex ) }

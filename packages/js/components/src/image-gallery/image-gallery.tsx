@@ -15,20 +15,25 @@ import classnames from 'classnames';
  */
 import { Sortable, moveIndex } from '../sortable';
 import { ImageGalleryToolbar } from './index';
+import { ImageGalleryChild } from './types';
 
 export type ImageGalleryProps = {
-	children: JSX.Element | JSX.Element[];
+	children: ImageGalleryChild | ImageGalleryChild[];
 	columns?: number;
+	onRemove?: ( removeIndex: number, removedItem: ImageGalleryChild ) => void;
+	onOrderChange?: ( items: ImageGalleryChild[] ) => void;
 } & React.HTMLAttributes< HTMLDivElement >;
 
 export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 	children,
 	columns = 4,
+	onOrderChange = () => null,
+	onRemove = () => null,
 }: ImageGalleryProps ) => {
 	const [ toolBarItem, setToolBarItem ] = useState< string | null >( null );
-	const [ orderedChildren, setOrderedChildren ] = useState< JSX.Element[] >(
-		[]
-	);
+	const [ orderedChildren, setOrderedChildren ] = useState<
+		ImageGalleryChild[]
+	>( [] );
 
 	useEffect( () => {
 		if ( ! children ) {
@@ -42,10 +47,19 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 		);
 	}, [ children ] );
 
+	const updateOrderedChildren = ( items: ImageGalleryChild[] ) => {
+		setOrderedChildren( items );
+		onOrderChange( orderedChildren );
+	};
+
 	const moveItem = useCallback(
 		( fromIndex: number, toIndex: number ) => {
-			setOrderedChildren(
-				moveIndex< JSX.Element >( fromIndex, toIndex, orderedChildren )
+			updateOrderedChildren(
+				moveIndex< ImageGalleryChild >(
+					fromIndex,
+					toIndex,
+					orderedChildren
+				)
 			);
 		},
 		[ orderedChildren ]
@@ -53,9 +67,10 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 
 	const removeItem = useCallback(
 		( removeIndex: number ) => {
-			setOrderedChildren(
+			updateOrderedChildren(
 				orderedChildren.filter( ( _, index ) => index !== removeIndex )
 			);
+			onRemove( removeIndex, orderedChildren[ removeIndex ] );
 		},
 		[ orderedChildren ]
 	);
@@ -70,7 +85,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 			<Sortable
 				isHorizontal
 				onOrderChange={ ( items ) => {
-					setOrderedChildren( items );
+					updateOrderedChildren( items );
 				} }
 				notSortableIndexes={ [ 0 ] }
 			>
