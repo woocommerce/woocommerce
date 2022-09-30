@@ -72,6 +72,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 				onOrderChange={ ( items ) => {
 					setOrderedChildren( items );
 				} }
+				notSortableIndexes={ [ 0 ] }
 			>
 				{ orderedChildren.map( ( child, childIndex ) => {
 					const isToolbarItem = child.key === toolBarItem;
@@ -82,7 +83,6 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 						{
 							isCover: isCoverItem,
 							className: classnames( {
-								'not-sortable': isCoverItem,
 								'is-showing-toolbar': isToolbarItem,
 							} ),
 							onClick: () => {
