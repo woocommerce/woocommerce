@@ -376,6 +376,7 @@ export class StoreDetails extends Component {
 									onClick={ handleSubmit }
 									isBusy={ isBusy }
 									disabled={ ! isValidForm || isBusy }
+									aria-disabled={ ! isValidForm || isBusy }
 								>
 									{ __( 'Continue', 'woocommerce' ) }
 								</Button>
