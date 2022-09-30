@@ -6,6 +6,7 @@ import {
 	cloneElement,
 	useState,
 	useEffect,
+	useCallback,
 } from '@wordpress/element';
 import classnames from 'classnames';
 
@@ -41,22 +42,23 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 		);
 	}, [ children ] );
 
-	const moveItem = ( fromIndex: number, toIndex: number ) => {
-		setOrderedChildren(
-			moveIndex< JSX.Element >( fromIndex, toIndex, orderedChildren )
-		);
-	};
+	const moveItem = useCallback(
+		( fromIndex: number, toIndex: number ) => {
+			setOrderedChildren(
+				moveIndex< JSX.Element >( fromIndex, toIndex, orderedChildren )
+			);
+		},
+		[ orderedChildren ]
+	);
 
-	const removeItem = ( removeIndex: number ) => {
-		setOrderedChildren(
-			orderedChildren.filter( ( _, index ) => index !== removeIndex )
-		);
-	};
-
-	const setAsCoverImage = ( coverIndex: number ) => {
-		moveItem( coverIndex, 0 );
-		setToolBarItem( null );
-	};
+	const removeItem = useCallback(
+		( removeIndex: number ) => {
+			setOrderedChildren(
+				orderedChildren.filter( ( _, index ) => index !== removeIndex )
+			);
+		},
+		[ orderedChildren ]
+	);
 
 	return (
 		<div
@@ -73,13 +75,14 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 			>
 				{ orderedChildren.map( ( child, childIndex ) => {
 					const isToolbarItem = child.key === toolBarItem;
+					const isCoverItem = childIndex === 0;
 
 					return cloneElement(
 						child,
 						{
-							isCover: childIndex === 0,
+							isCover: isCoverItem,
 							className: classnames( {
-								'not-sortable': childIndex === 0,
+								'not-sortable': isCoverItem,
 								'is-showing-toolbar': isToolbarItem,
 							} ),
 							onClick: () => {
@@ -98,7 +101,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 								}
 								moveItem={ moveItem }
 								removeItem={ removeItem }
-								setAsCoverImage={ setAsCoverImage }
+								setToolBarItem={ setToolBarItem }
 							/>
 						) : null
 					);

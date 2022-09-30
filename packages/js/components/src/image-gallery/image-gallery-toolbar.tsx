@@ -11,13 +11,11 @@ import { chevronRight, chevronLeft, trash } from '@wordpress/icons';
 import { CoverImageIcon } from './icons';
 import { SortableHandle } from '../sortable';
 
-// TODO: Dragging by toolbar handle bug
-
 export type ImageGalleryToolbarProps = {
 	childIndex: number;
 	moveItem: ( fromIndex: number, toIndex: number ) => void;
 	removeItem: ( removeIndex: number ) => void;
-	setAsCoverImage: ( coverIndex: number ) => void;
+	setToolBarItem: ( key: string | null ) => void;
 	lastChild: boolean;
 	onDragStart?: () => void;
 	onDragEnd?: () => void;
@@ -27,7 +25,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 	childIndex,
 	moveItem,
 	removeItem,
-	setAsCoverImage,
+	setToolBarItem,
 	lastChild,
 	onDragStart,
 	onDragEnd,
@@ -38,6 +36,11 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 
 	const movePrevious = () => {
 		moveItem( childIndex, childIndex - 1 );
+	};
+
+	const setAsCoverImage = ( coverIndex: number ) => {
+		moveItem( coverIndex, 0 );
+		setToolBarItem( null );
 	};
 
 	return (
