@@ -84,6 +84,7 @@
 * Tweak - Implement default columns in COT table [#34445](https://github.com/woocommerce/woocommerce/pull/34445)
 * Tweak - Remove CompleteStoreDetails note [#34515](https://github.com/woocommerce/woocommerce/pull/34515)
 * Tweak - Remove foreign key requirement from download_log table. [#34318](https://github.com/woocommerce/woocommerce/pull/34318)
+* Enhancement - Add a header for the store details task item [#34712](https://github.com/woocommerce/woocommerce/pull/34712)
 * Enhancement - Add and use ON_DUPLICATE_KEY update function to perform update/insert without additional query. [#34590](https://github.com/woocommerce/woocommerce/pull/34590)
 * Enhancement - Add new indexes to DB tables for better performance. Additionally, remove the auto_incr from wc_orders.id column so that as an added protection against direct inserts. [#34588](https://github.com/woocommerce/woocommerce/pull/34588)
 * Enhancement - Add option to serve downloadable files inline. [#31145](https://github.com/woocommerce/woocommerce/pull/31145)
