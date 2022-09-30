@@ -4,28 +4,28 @@
 
 In general, perform smoke tests, ensure you can check out with carts containing:
 
-- Only physical products,
-- Only virtual products,
-- A mix of physical and virtual products,
-- Products on sale,
-- Products with different tax rates.
-- Check out using coupons, and the amount charged to the payment method is correct.
+-   Only physical products,
+-   Only virtual products,
+-   A mix of physical and virtual products,
+-   Products on sale,
+-   Products with different tax rates.
+-   Check out using coupons, and the amount charged to the payment method is correct.
 
 Ensure the amount charged is correct.
 
 ### Subscriptions
 
-- Check out using WooCommerce Subscriptions products, ensure the checkout works and the stripe key is saved to the order.
-- Go to the Subscription in the dashboard, process a renewal for it, ensure the payment goes through and is collected in your stripe account. (This check is to ensure the tokens are saved correctly)
+-   Check out using WooCommerce Subscriptions products, ensure the checkout works and the stripe key is saved to the order.
+-   Go to the Subscription in the dashboard, process a renewal for it, ensure the payment goes through and is collected in your stripe account. (This check is to ensure the tokens are saved correctly)
 
 ### Stripe failures
 
 Check out using the following cards to ensure following scenarios happen: (use any CVV and expiration date in the future)
 
-- `4242 4242 4242 4242` - Checkout succeeds
-- `4000 0025 0000 3155` - SCA prompt appears, if you choose to fail, then checkout fails, if you choose to succeed then the checkout succeeds
-- `4000 0082 6000 3178` - Choose to succeed, but the payment should still fail because of insufficient funds
-- `4000 0000 0000 9979`- Checkout fails with generic card error. (This card is marked stolen).
+-   `4242 4242 4242 4242` - Checkout succeeds
+-   `4000 0025 0000 3155` - SCA prompt appears, if you choose to fail, then checkout fails, if you choose to succeed then the checkout succeeds
+-   `4000 0082 6000 3178` - Choose to succeed, but the payment should still fail because of insufficient funds
+-   `4000 0000 0000 9979`- Checkout fails with generic card error. (This card is marked stolen).
 
 ### Express Payment methods
 
@@ -40,30 +40,30 @@ If using GPay, then ensure your account is linked in Chrome. You may need to dis
 Prerequisite: Install [`woocommerce-gateway-stripe`](https://github.com/woocommerce/woocommerce-gateway-stripe) from GitHub, we will need to edit code here. Set it up and get it running in dev mode.
 Go to: [https://github.com/woocommerce/woocommerce-gateway-stripe/blob/8ffd22aff3b06eda02a1ae2fd8368b71450b36a9/client/blocks/credit-card/use-payment-processing.js#L66](https://github.com/woocommerce/woocommerce-gateway-stripe/blob/8ffd22aff3b06eda02a1ae2fd8368b71450b36a9/client/blocks/credit-card/use-payment-processing.js#L66)
 
-- Add a `console.log` to the `onSubmit` at the very top of the function.
-- In your browser, open dev tools and view the console. Ensure `preserve log` is enabled!
-- Check out (both successfully and unsuccessfully) and ensure the console log you added to `onSubmit` is called **both** times.
+-   Add a `console.log` to the `onSubmit` at the very top of the function.
+-   In your browser, open dev tools and view the console. Ensure `preserve log` is enabled!
+-   Check out (both successfully and unsuccessfully) and ensure the console log you added to `onSubmit` is called **both** times.
 
 ### Interaction with unusable payment methods
 
-- Install and activate [WooCommerce Bookings](https://github.com/woocommerce/woocommerce-bookings). Add a bookable product, ensure to add a cost to it on the edit product page, then:
-- Add a _normal_ (i.e. Beanie, Hoodie etc.) product to the cart and ensure you can check out successfully.
-- Then add a bookable product, ensure you can check out successfully.
+-   Install and activate [WooCommerce Bookings](https://github.com/woocommerce/woocommerce-bookings). Add a bookable product, ensure to add a cost to it on the edit product page, then:
+-   Add a _normal_ (i.e. Beanie, Hoodie etc.) product to the cart and ensure you can check out successfully.
+-   Then add a bookable product, ensure you can check out successfully.
 
 ### Interaction with another payment method added by extension
 
-- Edit the bookable product and set the `Check this box if the booking requires admin approval/confirmation. Payment will not be taken during checkout.` option to true.
-- Add this product to the cart and ensure you can check out.
+-   Edit the bookable product and set the `Check this box if the booking requires admin approval/confirmation. Payment will not be taken during checkout.` option to true.
+-   Add this product to the cart and ensure you can check out.
 
 ### Payment filtering by extensions
 
-- Enable the Cash on Delivery payment method.
-- Install the `@woocommerce/extend-cart-checkout-block` template by using the following command. Run this from your `wp-content/plugins` directory: `npx @wordpress/create-block -t @woocommerce/extend-cart-checkout-block payment-test-plugin`.
-- This will install a plugin called `Payment Test Plugin`. Find this and activate it.
-- By default, this example template has the following code [https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/extend-cart-checkout-block/src/js/filters.js.mustache#L17](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/extend-cart-checkout-block/src/js/filters.js.mustache#L17) which will disable COD if the billing city is Denver.
-- Go to the front-end and enter Denver in the billing city.
-- Ensure COD is removed as an option.
-- Change Denver to something else and ensure COD reappears as an option.
+-   Enable the Cash on Delivery payment method.
+-   Install the `@woocommerce/extend-cart-checkout-block` template by using the following command. Run this from your `wp-content/plugins` directory: `npx @wordpress/create-block -t @woocommerce/extend-cart-checkout-block payment-test-plugin`.
+-   This will install a plugin called `Payment Test Plugin`. Find this and activate it.
+-   By default, this example template has the following code [https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/extend-cart-checkout-block/src/js/filters.js.mustache#L17](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/extend-cart-checkout-block/src/js/filters.js.mustache#L17) which will disable COD if the billing city is Denver.
+-   Go to the front-end and enter Denver in the billing city.
+-   Ensure COD is removed as an option.
+-   Change Denver to something else and ensure COD reappears as an option.
 
 ## Checkout
 
@@ -79,15 +79,15 @@ In the position linked in point 1, add `eventRegistration` as a new argument to 
 
 ```js
 usePaymentProcessing(
-  onStripeError,
-  error,
-  stripe,
-  billing,
-  emitResponse,
-  sourceId,
-  setSourceId,
-  onPaymentProcessing,
-  eventRegistration
+	onStripeError,
+	error,
+	stripe,
+	billing,
+	emitResponse,
+	sourceId,
+	setSourceId,
+	onPaymentProcessing,
+	eventRegistration
 );
 ```
 
@@ -114,37 +114,37 @@ In the location linked in point 3, add the following:
 
 ```js
 const unsubscribeValidationBeforeProcessing =
-  eventRegistration.onCheckoutValidationBeforeProcessing( ( a ) => {
-  console.log( 'onCheckoutValidationBeforeProcessing', a );
-  } );
+	eventRegistration.onCheckoutValidationBeforeProcessing( ( a ) => {
+		console.log( 'onCheckoutValidationBeforeProcessing', a );
+	} );
 ```
 
 #### `onCheckoutAfterProcessingWithError`
 
 ```js
 const unsubscribeOnCheckoutAfterProcessingWithError =
-  eventRegistration.onCheckoutAfterProcessingWithError( ( a ) => {
-  console.log( 'onCheckoutAfterProcessingWithError', a );
-  } );
+	eventRegistration.onCheckoutAfterProcessingWithError( ( a ) => {
+		console.log( 'onCheckoutAfterProcessingWithError', a );
+	} );
 ```
 
 #### `onCheckoutAfterProcessingWithSuccess`
 
 ```js
 const unsubscribeOnCheckoutAfterProcessingWithSuccess =
-  eventRegistration.onCheckoutAfterProcessingWithSuccess( ( a ) => {
-  console.log( 'onCheckoutAfterProcessingWithSuccess', a );
-  } );
+	eventRegistration.onCheckoutAfterProcessingWithSuccess( ( a ) => {
+		console.log( 'onCheckoutAfterProcessingWithSuccess', a );
+	} );
 ```
 
 #### `onCheckoutBeforeProcessing` (deprecated)
 
 ```js
 const unsubscribeOnCheckoutBeforeProcessing =
-  eventRegistration.onCheckoutBeforeProcessing( ( a ) => {
-  // Expect a deprecated message here.
-  console.log( 'onCheckoutBeforeProcessing', a );
-  } );
+	eventRegistration.onCheckoutBeforeProcessing( ( a ) => {
+		// Expect a deprecated message here.
+		console.log( 'onCheckoutBeforeProcessing', a );
+	} );
 ```
 
 Then, in the returned function, [https://github.com/woocommerce/woocommerce-gateway-stripe/blob/8ffd22aff3b06eda02a1ae2fd8368b71450b36a9/client/blocks/credit-card/use-payment-processing.js#L147-L149](https://github.com/woocommerce/woocommerce-gateway-stripe/blob/8ffd22aff3b06eda02a1ae2fd8368b71450b36a9/client/blocks/credit-card/use-payment-processing.js#L147-L149) below, add:
@@ -163,24 +163,26 @@ After these changes have been made, your file should look like this: [https://gi
 1. Ensure you can check out correctly.
 2. Press the `Place Order` button and ensure all checkout controls are disabled while processing is taking place.
 3. After making the code changes above, you need to use the Stripe payment method (entering new card details in this component each time!)
-<img width="647" alt="image" src="https://user-images.githubusercontent.com/5656702/175654613-4f94853a-f96c-4cb8-9f07-d759d049db8a.png">
+   <img width="647" alt="image" src="https://user-images.githubusercontent.com/5656702/175654613-4f94853a-f96c-4cb8-9f07-d759d049db8a.png">
 
 4. In the console section of dev tools, enable the `Preserve log` option.
 5. Then do the following:
 
-- Check out using a valid card. You should see a message telling you `onCheckoutBeforeProcessing` is deprecated then when you check out you should see, in the same order, the following logs:
-    - `onCheckoutValidationBeforeProcessing` `{}`
-    - `onCheckoutBeforeProcessing` `{}`
-    - `onCheckoutAfterProcessingWithSuccess` `{redirectUrl, orderId, customerId, orderNotes, processingResponse }
+-   Check out using a valid card. You should see a message telling you `onCheckoutBeforeProcessing` is deprecated then when you check out you should see, in the same order, the following logs:
 
-- Check out using an invalid card, you should only see:
-    - `onCheckoutValidationBeforeProcessing` `{}`
-    - `onCheckoutBeforeProcessing` `{}`
+    -   `onCheckoutValidationBeforeProcessing` `{}`
+    -   `onCheckoutBeforeProcessing` `{}`
+    -   `onCheckoutAfterProcessingWithSuccess` `{redirectUrl, orderId, customerId, orderNotes, paymentResult }
 
-- Reload the checkout page and then go to [https://github.com/woocommerce/woocommerce-blocks/blob/029b379138906872dec3ed920fcb23d24404a3f2/src/StoreApi/Schemas/V1/CheckoutSchema.php#L26-L25](https://github.com/woocommerce/woocommerce-blocks/blob/029b379138906872dec3ed920fcb23d24404a3f2/src/StoreApi/Schemas/V1/CheckoutSchema.php#L26-L25) and introduce a syntax error. Try to check out using a valid card, then an invalid card you should see:
-    - `onCheckoutValidationBeforeProcessing` `{}`
-    - `onCheckoutBeforeProcessing` `{}`
-    - `onCheckoutAfterProcessingWithError` `{redirectUrl, orderId, customerId, orderNotes, processingResponse }`
+-   Check out using an invalid card, you should only see:
+
+    -   `onCheckoutValidationBeforeProcessing` `{}`
+    -   `onCheckoutBeforeProcessing` `{}`
+
+-   Reload the checkout page and then go to [https://github.com/woocommerce/woocommerce-blocks/blob/029b379138906872dec3ed920fcb23d24404a3f2/src/StoreApi/Schemas/V1/CheckoutSchema.php#L26-L25](https://github.com/woocommerce/woocommerce-blocks/blob/029b379138906872dec3ed920fcb23d24404a3f2/src/StoreApi/Schemas/V1/CheckoutSchema.php#L26-L25) and introduce a syntax error. Try to check out using a valid card, then an invalid card you should see:
+    -   `onCheckoutValidationBeforeProcessing` `{}`
+    -   `onCheckoutBeforeProcessing` `{}`
+    -   `onCheckoutAfterProcessingWithError` `{redirectUrl, orderId, customerId, orderNotes, paymentResult }`
 
 ## WordPress.com
 

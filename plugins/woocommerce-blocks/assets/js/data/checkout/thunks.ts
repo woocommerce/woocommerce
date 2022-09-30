@@ -38,7 +38,7 @@ export const processCheckoutResponse = ( response: CheckoutResponse ) => {
 	} ) => {
 		const paymentResult = getPaymentResultFromCheckoutResponse( response );
 		dispatch.setRedirectUrl( paymentResult?.redirectUrl || '' );
-		dispatch.setProcessingResponse( paymentResult );
+		dispatch.setPaymentResult( paymentResult );
 		dispatch.setAfterProcessing();
 	};
 };
@@ -96,7 +96,7 @@ export const emitAfterProcessingEvents: emitAfterProcessingEventsType = ( {
 			orderId: state.orderId,
 			customerId: state.customerId,
 			orderNotes: state.orderNotes,
-			processingResponse: state.processingResponse,
+			processingResponse: state.paymentResult,
 		};
 		if ( state.hasError ) {
 			// allow payment methods or other things to customize the error

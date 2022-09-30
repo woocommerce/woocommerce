@@ -19,7 +19,7 @@ export type CheckoutAfterProcessingWithErrorEventData = {
 	orderId: CheckoutState[ 'orderId' ];
 	customerId: CheckoutState[ 'customerId' ];
 	orderNotes: CheckoutState[ 'orderNotes' ];
-	processingResponse: CheckoutState[ 'processingResponse' ];
+	processingResponse: CheckoutState[ 'paymentResult' ];
 };
 export type CheckoutAndPaymentNotices = {
 	checkoutNotices: Notice[];
