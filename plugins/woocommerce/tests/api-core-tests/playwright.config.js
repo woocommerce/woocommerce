@@ -10,7 +10,7 @@ const config = {
 	expect: { timeout: 20 * 1000 },
 	outputDir: './report',
 	testDir: 'tests',
-	retries: process.env.CI ? 4 : 1,
+	retries: process.env.CI ? 4 : 2,
 	workers: 4,
 	reporter: [
 		[ 'list' ],
@@ -25,7 +25,7 @@ const config = {
 			'allure-playwright',
 			{ outputFolder: 'api-test-report/allure-results' },
 		],
-		[ 'json', { outputFile: 'e2e/test-results.json' } ],
+		[ 'json', { outputFile: 'api-test-report/test-results.json' } ],
 	],
 	use: {
 		screenshot: 'only-on-failure',
@@ -37,7 +37,6 @@ const config = {
 			// Add authorization token to all requests.
 			Authorization: `Basic ${ base64auth }`,
 		},
-		stateDir: 'e2e/storage/',
 	},
 	projects: [
 		{
