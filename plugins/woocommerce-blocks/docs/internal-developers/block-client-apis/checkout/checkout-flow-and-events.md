@@ -4,10 +4,10 @@
 
 -   [General Concepts](#general-concepts)
     -   [Tracking flow through status](#tracking-flow-through-status)
-    -   [`CheckoutProvider` Exposed Statuses](#checkoutprovider-exposed-statuses)
+    -   [Checkout Data Store Status](#checkout-data-store-status)
         -   [Special States:](#special-states)
     -   [`ShippingProvider` Exposed Statuses](#shippingprovider-exposed-statuses)
-    -   [`PaymentMethodDataProvider` Exposed Statuses](#paymentmethoddataprovider-exposed-statuses)
+    -   [Payment Method Data Store Status](#payment-method-data-store-status)
     -   [Emitting Events](#emitting-events)
     -   [`onCheckoutValidationBeforeProcessing`](#oncheckoutvalidationbeforeprocessing)
     -   [`onPaymentProcessing`](#onpaymentprocessing)
@@ -50,7 +50,7 @@ To surface the flow state, the block uses statuses that are tracked in the vario
 
 The following statuses exist in the Checkout.
 
-#### Checkout Data Store Exposed Statuses
+#### Checkout Data Store Status
 
 There are various statuses that are exposed on the Checkout data store via selectors. All the selectors are detailed below and in the [Checkout API docs](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/block-client-apis/checkout/checkout-api.md).
 
@@ -100,9 +100,23 @@ The status is exposed on the `currentErrorStatus` object provided by the `useShi
 -   `hasInvalidAddress`: When the address provided for shipping is invalid, this will be true.
 -   `hasError`: This is `true` when the error status for shipping is either `UNKNOWN` or `hasInvalidAddress`.
 
-### `PaymentMethodDataProvider` Exposed Statuses
+### Payment Method Data Store Status
 
-This context provider exposes everything related to payment method data and registered payment methods. The statuses exposed via this provider help inform the current state of _client side_ processing for payment methods and are updated via the payment method data event emitters. _Client side_ means the state of processing any payments by registered and active payment methods when the checkout form is submitted via those payment methods registered client side components. It's still possible that payment methods might have additional server side processing when the order is being processed but that is not reflected by these statuses (more in the [payment method integration doc](../../../third-party-developers/extensibility/checkout-payment-methods/payment-method-integration.md)).
+The status of the payment lives in the payment data store. It can be retrieved with the `getCurrentStatus` selector, liek so:
+
+```jsx
+import { useSelect } from '@wordpress/data';
+import { PAYMENT_METHOD_DATA_STORE_KEY } from '@woocommerce/blocks-data';
+
+const MyComponent = ( props ) => {
+	const currentStatus = useSelect( ( select ) =>
+		select( PAYMENT_METHOD_DATA_STORE_KEY ).getCurrentStatus()
+	);
+	// do something with status
+};
+```
+
+The status here will help inform the current state of _client side_ processing for the payment and are updated via the store actions at different points throughout the checkout processing cycle. _Client side_ means the state of processing any payments by registered and active payment methods when the checkout form is submitted via those payment methods registered client side components. It's still possible that payment methods might have additional server side processing when the order is being processed but that is not reflected by these statuses (more in the [payment method integration doc](../../../third-party-developers/extensibility/checkout-payment-methods/payment-method-integration.md)).
 
 The possible _internal_ statuses that may be set are:
 
@@ -112,8 +126,6 @@ The possible _internal_ statuses that may be set are:
 -   `SUCCESS`: This status is set after all the observers hooked into the payment processing event have completed successfully. The `CheckoutProcessor` component uses this along with the checkout `PROCESSING` status to signal things are ready to send the order to the server with data for processing.
 -   `FAILED`: This status is set after an observer hooked into the payment processing event returns a fail response. This in turn will end up causing the checkout `hasError` flag to be set to true.
 -   `ERROR`: This status is set after an observer hooked into the payment processing event returns an error response. This in turn will end up causing the checkout `hasError` flag to be set to true.
-
-The provider exposes the current status of the payment method data context via the `currentStatus` object. You can retrieve this via the `usePaymentMethodEventsContext` hook.
 
 The `currentStatus` object has the following properties:
 
@@ -348,7 +360,7 @@ const onCheckoutProcessingData = {
 	orderId,
 	customerId,
 	orderNotes,
-	processingResponse,
+	paymentResult,
 };
 ```
 
@@ -358,7 +370,7 @@ The properties are:
 -   `orderId`: Is the id of the current order being processed.
 -   `customerId`: Is the id for the customer making the purchase (that is attached to the order).
 -   `orderNotes`: This will be any custom note the customer left on the order.
--   `processingResponse`: This is the value of [`payment_result` from the checkout response](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/34e17c3622637dbe8b02fac47b5c9b9ebf9e3596/src/RestApi/StoreApi/Schemas/CheckoutSchema.php#L103-L138). The data exposed on this object is (via the object properties):
+-   `paymentResult`: This is the value of [`payment_result` from the /checkout StoreApi response](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/34e17c3622637dbe8b02fac47b5c9b9ebf9e3596/src/RestApi/StoreApi/Schemas/CheckoutSchema.php#L103-L138). The data exposed on this object is (via the object properties):
     -   `paymentStatus`: Whatever the status is for the payment after it was processed server side. Will be one of `success`, `failure`, `pending`, `error`.
     -   `paymentDetails`: This will be an arbitrary object that contains any data the payment method processing server side sends back to the client in the checkout processing response. Payment methods are able to hook in on the processing server side and set this data for returning.
 
@@ -484,4 +496,3 @@ This event emitter doesn't care about any registered observer response and will 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/block-client-apis/checkout/checkout-flow-and-events.md)
 
 <!-- /FEEDBACK -->
-

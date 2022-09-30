@@ -14,10 +14,6 @@ import { CheckoutAction } from './actions';
 const reducer = ( state = defaultState, action: CheckoutAction ) => {
 	let newState = state;
 	switch ( action.type ) {
-		case types.SET_PRISTINE:
-			newState = defaultState;
-			break;
-
 		case types.SET_IDLE:
 			newState =
 				state.status !== STATUS.IDLE
@@ -39,10 +35,10 @@ const reducer = ( state = defaultState, action: CheckoutAction ) => {
 					: state;
 			break;
 
-		case types.SET_PROCESSING_RESPONSE:
+		case types.SET_PAYMENT_RESULT:
 			newState = {
 				...state,
-				processingResponse: action.data as PaymentResult,
+				paymentResult: action.data as PaymentResult,
 			};
 			break;
 
@@ -110,15 +106,6 @@ const reducer = ( state = defaultState, action: CheckoutAction ) => {
 				newState = {
 					...state,
 					customerId: action.customerId,
-				};
-			}
-			break;
-
-		case types.SET_ORDER_ID:
-			if ( action.orderId !== undefined ) {
-				newState = {
-					...state,
-					orderId: action.orderId,
 				};
 			}
 			break;

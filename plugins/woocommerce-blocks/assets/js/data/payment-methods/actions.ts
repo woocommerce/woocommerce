@@ -17,6 +17,12 @@ import { PaymentStatus } from './types';
 // `Thunks are functions that can be dispatched, similar to actions creators
 export * from './thunks';
 
+/**
+ * Set the status of the payment
+ *
+ * @param  status            An object that holds properties representing different status values
+ * @param  paymentMethodData A config object for the payment method being used
+ */
 export const setPaymentStatus = (
 	status: PaymentStatus,
 	paymentMethodData?: Record< string, unknown >
@@ -26,6 +32,11 @@ export const setPaymentStatus = (
 	paymentMethodData,
 } );
 
+/**
+ * Set whether the payment methods have been initialised or not
+ *
+ * @param  initialized True if the `checkCanPay` methods have been run on all available payment methods
+ */
 export const setPaymentMethodsInitialized = ( initialized: boolean ) => {
 	return async ( { select, dispatch } ) => {
 		// If the currently selected method is not in this new list, then we need to select a new one, or select a default.
@@ -40,6 +51,11 @@ export const setPaymentMethodsInitialized = ( initialized: boolean ) => {
 	};
 };
 
+/**
+ * Set whether the express payment methods have been initialised or not
+ *
+ * @param  initialized True if the `checkCanPay` methods have been run on all express available payment methods
+ */
 export const setExpressPaymentMethodsInitialized = (
 	initialized: boolean
 ) => ( {
@@ -47,6 +63,11 @@ export const setExpressPaymentMethodsInitialized = (
 	initialized,
 } );
 
+/**
+ * Set a flag for whether to save the current payment method for next time
+ *
+ * @param  shouldSavePaymentMethod Whether to save the current payment method for next time
+ */
 export const setShouldSavePaymentMethod = (
 	shouldSavePaymentMethod: boolean
 ) => ( {
@@ -54,6 +75,12 @@ export const setShouldSavePaymentMethod = (
 	shouldSavePaymentMethod,
 } );
 
+/**
+ * Set the payment method the user has chosen. This should change every time the user selects a new payment method
+ *
+ * @param  activePaymentMethod The name of the payment method selected by the user
+ * @param  paymentMethodData   The extra data associated with a payment
+ */
 export const setActivePaymentMethod = (
 	activePaymentMethod: string,
 	paymentMethodData: Record< string, unknown > = {}
@@ -63,6 +90,11 @@ export const setActivePaymentMethod = (
 	paymentMethodData,
 } );
 
+/**
+ * Set the extra data for the chosen payment method
+ *
+ * @param  paymentMethodData The extra data associated with a payment
+ */
 export const setPaymentMethodData = (
 	paymentMethodData: Record< string, unknown > = {}
 ) => ( {
@@ -118,6 +150,9 @@ export const removeRegisteredExpressPaymentMethod = ( name: string ) => ( {
 	name,
 } );
 
+/**
+ * The store is initialised once we have checked whether the payment methods registered can pay or not
+ */
 export function initializePaymentMethodDataStore() {
 	return async ( { dispatch } ) => {
 		const expressRegistered = await checkPaymentMethodsCanPay( true );
