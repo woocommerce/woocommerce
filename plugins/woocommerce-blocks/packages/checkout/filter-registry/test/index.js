@@ -66,15 +66,17 @@ describe( 'Checkout registry', () => {
 			.mockImplementation( () => {} );
 
 		const error = new Error( 'test error' );
+		// We use this new filter name here to avoid return the cached value for the filter
+		const filterNameThatThrows = 'throw';
 		const value = 'Hello World';
-		__experimentalRegisterCheckoutFilters( filterName, {
-			[ filterName ]: () => {
+		__experimentalRegisterCheckoutFilters( filterNameThatThrows, {
+			[ filterNameThatThrows ]: () => {
 				throw error;
 			},
 		} );
 		const { result: newValue } = renderHook( () =>
 			__experimentalApplyCheckoutFilter( {
-				filterName,
+				filterName: filterNameThatThrows,
 				defaultValue: value,
 			} )
 		);
