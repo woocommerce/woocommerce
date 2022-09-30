@@ -12,7 +12,21 @@ import { MockMediaUpload } from '../../media-uploader/stories/index.tsx';
 
 export const Basic: React.FC = () => {
 	return (
-		<ImageGallery MediaUploadComponent={ MockMediaUpload }>
+		<ImageGallery
+			MediaUploadComponent={ MockMediaUpload }
+			onReplace={ ( { newItem, replaceIndex } ) =>
+				// eslint-disable-next-line no-console
+				console.info( `Item ${ replaceIndex } replaced with`, newItem )
+			}
+			onRemove={ ( { removeIndex } ) => {
+				// eslint-disable-next-line no-console
+				console.info( `Item ${ removeIndex } removed` );
+			} }
+			onOrderChange={ () => {
+				// eslint-disable-next-line no-console
+				console.info( `Order changed for image gallery items` );
+			} }
+		>
 			<ImageGalleryItem
 				alt="Random image 1"
 				src="https://picsum.photos/id/137/200/200"

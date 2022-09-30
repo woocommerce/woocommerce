@@ -21,7 +21,15 @@ import { ImageGalleryChild, MediaUploadComponentType } from './types';
 export type ImageGalleryProps = {
 	children: ImageGalleryChild | ImageGalleryChild[];
 	columns?: number;
-	onRemove?: ( removeIndex: number, removedItem: ImageGalleryChild ) => void;
+	onRemove?: ( props: {
+		removeIndex: number;
+		removedItem: ImageGalleryChild;
+	} ) => void;
+	onReplace?: ( props: {
+		replaceIndex: number;
+		previousItem: ImageGalleryChild;
+		newItem: ImageGalleryChild;
+	} ) => void;
 	onOrderChange?: ( items: ImageGalleryChild[] ) => void;
 	MediaUploadComponent?: MediaUploadComponentType;
 } & React.HTMLAttributes< HTMLDivElement >;
@@ -31,6 +39,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 	columns = 4,
 	onOrderChange = () => null,
 	onRemove = () => null,
+	onReplace = () => null,
 	MediaUploadComponent = MediaUpload,
 }: ImageGalleryProps ) => {
 	const [ toolBarItem, setToolBarItem ] = useState< string | null >( null );
@@ -73,7 +82,10 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 			updateOrderedChildren(
 				orderedChildren.filter( ( _, index ) => index !== removeIndex )
 			);
-			onRemove( removeIndex, orderedChildren[ removeIndex ] );
+			onRemove( {
+				removeIndex,
+				removedItem: orderedChildren[ removeIndex ],
+			} );
 		},
 		[ orderedChildren ]
 	);
@@ -89,6 +101,11 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 					alt: newAlt,
 				} )
 			);
+			onReplace( {
+				replaceIndex,
+				previousItem: orderedChildren[ replaceIndex ],
+				newItem: newChildren[ replaceIndex ],
+			} );
 			updateOrderedChildren( newChildren );
 		},
 		[ orderedChildren ]
