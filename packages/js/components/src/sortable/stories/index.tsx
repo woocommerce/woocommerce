@@ -36,17 +36,10 @@ export const CustomHandle = () => {
 		onDragEnd?: DragEventHandler< Element >;
 		onDragStart?: DragEventHandler< Element >;
 	};
-	const CustomListItem = ( {
-		children,
-		onDragStart,
-		onDragEnd,
-	}: CustomListItemProps ) => {
+	const CustomListItem = ( { children }: CustomListItemProps ) => {
 		return (
 			<>
-				<SortableHandle
-					onDragEnd={ onDragEnd }
-					onDragStart={ onDragStart }
-				>
+				<SortableHandle>
 					<Icon icon={ wordpress } size={ 16 } />
 				</SortableHandle>
 				{ children }

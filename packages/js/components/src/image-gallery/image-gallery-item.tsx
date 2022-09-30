@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createElement, cloneElement, Fragment } from '@wordpress/element';
+import { createElement, Fragment } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -17,8 +17,6 @@ export type ImageGalleryItemProps = {
 	displayToolbar?: boolean;
 	className?: string;
 	onClick?: () => void;
-	onDragStart?: () => void;
-	onDragEnd?: () => void;
 	children?: JSX.Element;
 } & React.HTMLAttributes< HTMLDivElement >;
 
@@ -28,8 +26,6 @@ export const ImageGalleryItem: React.FC< ImageGalleryItemProps > = ( {
 	src,
 	className = '',
 	onClick = () => null,
-	onDragStart,
-	onDragEnd,
 	children,
 }: ImageGalleryItemProps ) => {
 	return (
@@ -41,7 +37,7 @@ export const ImageGalleryItem: React.FC< ImageGalleryItemProps > = ( {
 			role="button"
 			onClick={ () => onClick() }
 		>
-			{ children && cloneElement( children, { onDragStart, onDragEnd } ) }
+			{ children }
 
 			{ isCover ? (
 				<>
@@ -49,10 +45,7 @@ export const ImageGalleryItem: React.FC< ImageGalleryItemProps > = ( {
 					<img alt={ alt } src={ src } />
 				</>
 			) : (
-				<SortableHandle
-					onDragStart={ onDragStart }
-					onDragEnd={ onDragEnd }
-				>
+				<SortableHandle>
 					<img alt={ alt } src={ src } />
 				</SortableHandle>
 			) }

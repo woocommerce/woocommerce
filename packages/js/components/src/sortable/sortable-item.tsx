@@ -7,8 +7,8 @@ import classnames from 'classnames';
 import {
 	cloneElement,
 	createElement,
-	Fragment,
 	useRef,
+	useContext,
 } from '@wordpress/element';
 import { Draggable } from '@wordpress/components';
 
@@ -16,6 +16,7 @@ import { Draggable } from '@wordpress/components';
  * Internal dependencies
  */
 import { SortableChild } from './types';
+import { SortableContext } from './sortable';
 
 export type SortableItemProps = {
 	id: string | number;
@@ -42,6 +43,7 @@ export const SortableItem = ( {
 	onDragOver = () => null,
 }: SortableItemProps ) => {
 	const ref = useRef< HTMLLIElement >( null );
+	const sortableContext = useContext( SortableContext );
 
 	const handleDragStart = ( event: DragEvent< HTMLDivElement > ) => {
 		onDragStart( event );
@@ -86,12 +88,18 @@ export const SortableItem = ( {
 			>
 				{ ( { onDraggableStart, onDraggableEnd } ) => {
 					return (
-						<>
+						<SortableContext.Provider
+							value={ {
+								...sortableContext,
+								onDragStart: onDraggableStart,
+								onDragEnd: onDraggableEnd,
+							} }
+						>
 							{ cloneElement( children, {
 								onDragStart: onDraggableStart,
 								onDragEnd: onDraggableEnd,
 							} ) }
-						</>
+						</SortableContext.Provider>
 					);
 				} }
 			</Draggable>
