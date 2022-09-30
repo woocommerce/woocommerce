@@ -1,17 +1,67 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import { createElement, useState, Fragment } from '@wordpress/element';
 import React from 'react';
+import { Modal } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import { ImageGallery, ImageGalleryItem } from '../';
 
+const MockMediaUpload = ( { onSelect, render } ) => {
+	const [ isOpen, setOpen ] = useState( false );
+
+	return (
+		<>
+			{ render( {
+				open: () => setOpen( true ),
+			} ) }
+			{ isOpen && (
+				<Modal
+					title="Media Modal"
+					onRequestClose={ () => setOpen( false ) }
+				>
+					<p>
+						Use the default built-in{ ' ' }
+						<code>MediaUploadComponent</code> prop to render the WP
+						Media Modal.
+					</p>
+					{ Array( ...Array( 3 ) ).map( ( n, i ) => {
+						return (
+							<button
+								key={ i }
+								onClick={ () => {
+									onSelect( {
+										alt: 'Random',
+										url: `https://picsum.photos/200?i=${ i }`,
+									} );
+									setOpen( false );
+								} }
+								style={ {
+									marginRight: '16px',
+								} }
+							>
+								<img
+									src={ `https://picsum.photos/200?i=${ i }` }
+									alt="Random"
+									style={ {
+										maxWidth: '100px',
+									} }
+								/>
+							</button>
+						);
+					} ) }
+				</Modal>
+			) }
+		</>
+	);
+};
+
 export const Basic: React.FC = () => {
 	return (
-		<ImageGallery>
+		<ImageGallery MediaUploadComponent={ MockMediaUpload }>
 			<ImageGalleryItem
 				alt="Random image 1"
 				src="https://picsum.photos/id/137/200/200"
@@ -50,7 +100,7 @@ export const Basic: React.FC = () => {
 
 export const Cover: React.FC = () => {
 	return (
-		<ImageGallery>
+		<ImageGallery MediaUploadComponent={ MockMediaUpload }>
 			<ImageGalleryItem
 				alt="Random image 1"
 				src="https://picsum.photos/id/137/200/200"
@@ -66,7 +116,7 @@ export const Cover: React.FC = () => {
 
 export const Columns: React.FC = () => {
 	return (
-		<ImageGallery columns={ 3 }>
+		<ImageGallery columns={ 3 } MediaUploadComponent={ MockMediaUpload }>
 			<ImageGalleryItem
 				alt="Random image 1"
 				src="https://picsum.photos/id/137/200/200"

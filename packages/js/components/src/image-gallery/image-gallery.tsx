@@ -9,19 +9,21 @@ import {
 	useCallback,
 } from '@wordpress/element';
 import classnames from 'classnames';
+import { MediaUpload } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
  */
 import { Sortable, moveIndex } from '../sortable';
 import { ImageGalleryToolbar } from './index';
-import { ImageGalleryChild } from './types';
+import { ImageGalleryChild, MediaUploadComponentType } from './types';
 
 export type ImageGalleryProps = {
 	children: ImageGalleryChild | ImageGalleryChild[];
 	columns?: number;
 	onRemove?: ( removeIndex: number, removedItem: ImageGalleryChild ) => void;
 	onOrderChange?: ( items: ImageGalleryChild[] ) => void;
+	MediaUploadComponent?: MediaUploadComponentType;
 } & React.HTMLAttributes< HTMLDivElement >;
 
 export const ImageGallery: React.FC< ImageGalleryProps > = ( {
@@ -29,6 +31,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 	columns = 4,
 	onOrderChange = () => null,
 	onRemove = () => null,
+	MediaUploadComponent = MediaUpload,
 }: ImageGalleryProps ) => {
 	const [ toolBarItem, setToolBarItem ] = useState< string | null >( null );
 	const [ orderedChildren, setOrderedChildren ] = useState<
@@ -75,6 +78,22 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 		[ orderedChildren ]
 	);
 
+	const replaceItem = useCallback(
+		( replaceIndex: number, newSrc: string, newAlt: string ) => {
+			const newChildren = [ ...orderedChildren ];
+			newChildren.splice(
+				replaceIndex,
+				1,
+				cloneElement( orderedChildren[ replaceIndex ], {
+					src: newSrc,
+					alt: newAlt,
+				} )
+			);
+			updateOrderedChildren( newChildren );
+		},
+		[ orderedChildren ]
+	);
+
 	return (
 		<div
 			className="woocommerce-image-gallery"
@@ -116,7 +135,9 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 								}
 								moveItem={ moveItem }
 								removeItem={ removeItem }
+								replaceItem={ replaceItem }
 								setToolBarItem={ setToolBarItem }
+								MediaUploadComponent={ MediaUploadComponent }
 							/>
 						) : null
 					);
