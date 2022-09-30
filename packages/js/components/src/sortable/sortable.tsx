@@ -258,7 +258,7 @@ export const Sortable = ( {
 
 				return (
 					<SortableItem
-						key={ index }
+						key={ child.key || index }
 						className={ itemClasses }
 						id={ index }
 						index={ index }

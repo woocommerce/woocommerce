@@ -2,7 +2,6 @@
  * External dependencies
  */
 import {
-	Children,
 	createElement,
 	cloneElement,
 	useState,
@@ -25,9 +24,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 	children,
 	columns = 4,
 }: ImageGalleryProps ) => {
-	const [ toolBarItem, setToolBarItem ] = useState<
-		JSX.Element | null | undefined
-	>( null );
+	const [ toolBarItem, setToolBarItem ] = useState< string | null >( null );
 	const [ orderedChildren, setOrderedChildren ] = useState< JSX.Element[] >(
 		[]
 	);
@@ -37,7 +34,10 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 			return;
 		}
 		setOrderedChildren(
-			Array.isArray( children ) ? children : [ children ]
+			( Array.isArray( children ) ? children : [ children ] ).map(
+				( child, index ) =>
+					cloneElement( child, { key: child.key || String( index ) } )
+			)
 		);
 	}, [ children ] );
 
@@ -70,10 +70,9 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 				onOrderChange={ ( items ) => {
 					setOrderedChildren( items );
 				} }
-				onDragStart={ () => setToolBarItem( null ) }
 			>
-				{ Children.map( orderedChildren, ( child, childIndex ) => {
-					const isToolbarItem = child === toolBarItem;
+				{ orderedChildren.map( ( child, childIndex ) => {
+					const isToolbarItem = child.key === toolBarItem;
 
 					return cloneElement(
 						child,
@@ -85,9 +84,9 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 							} ),
 							onClick: () => {
 								setToolBarItem(
-									Boolean( child ) && isToolbarItem
+									isToolbarItem
 										? null
-										: child
+										: ( child.key as string )
 								);
 							},
 						},
