@@ -72,6 +72,23 @@ class ListTable extends WP_List_Table {
 
 		$this->items_per_page();
 		set_screen_options();
+		add_action( 'manage_' . wc_get_page_screen_id( 'shop-order' ) . '_custom_column', array( $this, 'render_column' ), 10, 2 );
+	}
+
+	/**
+	 * Render individual column.
+	 *
+	 * @param string   $column_id Column ID to render.
+	 * @param WC_Order $order Order object.
+	 */
+	public function render_column( $column_id, $order ) {
+		if ( ! $order ) {
+			return;
+		}
+
+		if ( is_callable( array( $this, 'render_' . $column_id . '_column' ) ) ) {
+			call_user_func( array( $this, 'render_' . $column_id . '_column' ), $order );
+		}
 	}
 
 	/**
@@ -604,7 +621,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_order_number( WC_Order $order ): void {
+	public function render_order_number_column( WC_Order $order ): void {
 		$buyer = '';
 
 		if ( $order->get_billing_first_name() || $order->get_billing_last_name() ) {
@@ -653,7 +670,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_order_date( WC_Order $order ): void {
+	public function render_order_date_column( WC_Order $order ): void {
 		$order_timestamp = $order->get_date_created() ? $order->get_date_created()->getTimestamp() : '';
 
 		if ( ! $order_timestamp ) {
@@ -686,7 +703,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_order_status( WC_Order $order ): void {
+	public function render_order_status_column( WC_Order $order ): void {
 		$tooltip                 = '';
 		$comment_count           = get_comment_count( $order->get_id() );
 		$approved_comments_count = absint( $comment_count['approved'] );
@@ -734,7 +751,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_billing_address( WC_Order $order ): void {
+	public function render_billing_address_column( WC_Order $order ): void {
 		$address = $order->get_formatted_billing_address();
 
 		if ( $address ) {
@@ -756,7 +773,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_shipping_address( WC_Order $order ): void {
+	public function render_shipping_address_column( WC_Order $order ): void {
 		$address = $order->get_formatted_shipping_address();
 
 		if ( $address ) {
@@ -777,7 +794,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_order_total( WC_Order $order ): void {
+	public function render_order_total_column( WC_Order $order ): void {
 		if ( $order->get_payment_method_title() ) {
 			/* translators: %s: method */
 			echo '<span class="tips" data-tip="' . esc_attr( sprintf( __( 'via %s', 'woocommerce' ), $order->get_payment_method_title() ) ) . '">' . wp_kses_post( $order->get_formatted_order_total() ) . '</span>';
@@ -793,7 +810,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_wc_actions( WC_Order $order ): void {
+	public function render_wc_actions_column( WC_Order $order ): void {
 		echo '<p>';
 
 		/**
