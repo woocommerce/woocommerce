@@ -39,10 +39,12 @@ export const useOptionsHydration = ( data: Options ) => {
 };
 
 export const withOptionsHydration = ( data: Options ) =>
-	createHigherOrderComponent< Record< string, unknown > >(
+	createHigherOrderComponent(
 		( OriginalComponent ) => ( props ) => {
 			useOptionsHydration( data );
 
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore TODO - fix these for new type defs
 			return <OriginalComponent { ...props } />;
 		},
 		'withOptionsHydration'

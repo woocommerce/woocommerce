@@ -17,7 +17,7 @@ export const withOnboardingHydration = ( data: {
 } ) => {
 	let hydratedProfileItems = false;
 
-	return createHigherOrderComponent< Record< string, unknown > >(
+	return createHigherOrderComponent(
 		( OriginalComponent ) => ( props ) => {
 			const onboardingRef = useRef( data );
 
@@ -54,6 +54,8 @@ export const withOnboardingHydration = ( data: {
 				[]
 			);
 
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore TODO - fix these for new type defs
 			return <OriginalComponent { ...props } />;
 		},
 		'withOnboardingHydration'

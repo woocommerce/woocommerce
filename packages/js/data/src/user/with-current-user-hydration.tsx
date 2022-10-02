@@ -17,7 +17,7 @@ import { WCUser } from './types';
  * @param {Object} currentUser Current user object in the same format as the WP REST API returns.
  */
 export const withCurrentUserHydration = ( currentUser: WCUser ) =>
-	createHigherOrderComponent< Record< string, unknown > >(
+	createHigherOrderComponent(
 		( OriginalComponent ) => ( props ) => {
 			const userRef = useRef( currentUser );
 
@@ -46,6 +46,8 @@ export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 				}
 			} );
 
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore TODO - fix these for new type defs
 			return <OriginalComponent { ...props } />;
 		},
 		'withCurrentUserHydration'

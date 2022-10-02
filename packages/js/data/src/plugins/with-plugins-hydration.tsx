@@ -22,7 +22,7 @@ type PluginHydrationData = {
 	jetpackStatus?: { isActive: boolean };
 };
 export const withPluginsHydration = ( data: PluginHydrationData ) =>
-	createHigherOrderComponent< Record< string, unknown > >(
+	createHigherOrderComponent(
 		( OriginalComponent ) => ( props ) => {
 			const dataRef = useRef( data );
 
@@ -81,6 +81,8 @@ export const withPluginsHydration = ( data: PluginHydrationData ) =>
 				[]
 			);
 
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore TODO - fix these for new type defs
 			return <OriginalComponent { ...props } />;
 		},
 		'withPluginsHydration'
