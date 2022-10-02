@@ -4,16 +4,19 @@
 	}
 
 	&__content {
-		padding: $gap-large;
-		background: $white;
-		border: 1px solid $gray-400;
-		border-radius: 2px;
-
-		> * {
-			&:not(:first-of-type) {
-				padding-top: $gap-large - $gap-smaller;
+		.components-card {
+			border: 1px solid $gray-400;
+			border-radius: 2px;
+			box-shadow: none;
+			&__body {
+				padding: $gap-large;
 			}
-			width: 100%;
+		}
+
+		.components-base-control {
+			&:not(:first-child) {
+				margin-top: $gap-large - $gap-smaller;
+			}
 		}
 	}
 

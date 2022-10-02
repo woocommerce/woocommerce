@@ -7,6 +7,8 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use WC_Data;
+use WC_Order;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -14,6 +16,67 @@ defined( 'ABSPATH' ) || exit;
  * This class is the standard data store to be used when the custom orders table is in use.
  */
 class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements \WC_Object_Data_Store_Interface, \WC_Order_Data_Store_Interface {
+
+	/**
+	 * Data stored in meta keys, but not considered "meta" for an order.
+	 *
+	 * @since 7.0.0
+	 * @var array
+	 */
+	protected $internal_meta_keys = array(
+		'_customer_user',
+		'_order_key',
+		'_order_currency',
+		'_billing_first_name',
+		'_billing_last_name',
+		'_billing_company',
+		'_billing_address_1',
+		'_billing_address_2',
+		'_billing_city',
+		'_billing_state',
+		'_billing_postcode',
+		'_billing_country',
+		'_billing_email',
+		'_billing_phone',
+		'_shipping_first_name',
+		'_shipping_last_name',
+		'_shipping_company',
+		'_shipping_address_1',
+		'_shipping_address_2',
+		'_shipping_city',
+		'_shipping_state',
+		'_shipping_postcode',
+		'_shipping_country',
+		'_shipping_phone',
+		'_completed_date',
+		'_paid_date',
+		'_edit_lock',
+		'_edit_last',
+		'_cart_discount',
+		'_cart_discount_tax',
+		'_order_shipping',
+		'_order_shipping_tax',
+		'_order_tax',
+		'_order_total',
+		'_payment_method',
+		'_payment_method_title',
+		'_transaction_id',
+		'_customer_ip_address',
+		'_customer_user_agent',
+		'_created_via',
+		'_order_version',
+		'_prices_include_tax',
+		'_date_completed',
+		'_date_paid',
+		'_payment_tokens',
+		'_billing_address_index',
+		'_shipping_address_index',
+		'_recorded_sales',
+		'_recorded_coupon_usage_counts',
+		'_download_permissions_granted',
+		'_order_stock_reduced',
+		'_new_order_email_sent',
+	);
 
 	/**
 	 * Handles custom metadata in the wc_orders_meta table.
@@ -170,6 +233,10 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		'user_agent'           => array(
 			'type' => 'string',
 			'name' => 'customer_user_agent',
+		),
+		'customer_note'        => array(
+			'type' => 'string',
+			'name' => 'customer_note',
 		),
 	);
 
@@ -447,7 +514,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether permissions are granted.
 	 */
 	public function get_download_permissions_granted( $order ) {
-		return wc_string_to_bool( $order->get_meta( '_download_permissions_granted', true ) );
+		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
+		return $order->get_download_permissions_granted();
 	}
 
 	/**
@@ -455,11 +523,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @param \WC_Order $order Order ID or order object.
 	 * @param bool      $set True or false.
-	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
-	public function set_download_permissions_granted( $order, $set, $save = true ) {
-		// XXX implement $save = true.
-		return $order->update_meta_data( '_download_permissions_granted', wc_bool_to_string( $set ) );
+	public function set_download_permissions_granted( $order, $set ) {
+		if ( is_int( $order ) ) {
+			$order = wc_get_order( $order );
+		}
+		$order->set_download_permissions_granted( $set );
+		$order->save();
 	}
 
 	/**
@@ -470,7 +540,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether sales are recorded.
 	 */
 	public function get_recorded_sales( $order ) {
-		return wc_string_to_bool( $order->get_meta( '_recorded_sales', true ) );
+		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
+		return $order->get_recorded_sales();
 	}
 
 	/**
@@ -478,11 +549,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @param \WC_Order $order Order object.
 	 * @param bool      $set True or false.
-	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
-	public function set_recorded_sales( $order, $set, $save = true ) {
-		// XXX implement $save = true.
-		return $order->update_meta_data( '_recorded_sales', wc_bool_to_string( $set ) );
+	public function set_recorded_sales( $order, $set ) {
+		if ( is_int( $order ) ) {
+			$order = wc_get_order( $order );
+		}
+		$order->set_recorded_sales( $set );
+		$order->save();
 	}
 
 	/**
@@ -493,7 +566,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether coupon counts were updated.
 	 */
 	public function get_recorded_coupon_usage_counts( $order ) {
-		return wc_string_to_bool( $order->get_meta( '_recorded_coupon_usage_counts', true ) );
+		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
+		return $order->get_recorded_coupon_usage_counts();
 	}
 
 	/**
@@ -501,10 +575,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @param \WC_Order $order Order object.
 	 * @param bool      $set True or false.
-	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
-	public function set_recorded_coupon_usage_counts( $order, $set, $save = true ) {
-		return $order->update_meta_data( '_recorded_coupon_usage_counts', wc_bool_to_string( $set ) );
+	public function set_recorded_coupon_usage_counts( $order, $set ) {
+		if ( is_int( $order ) ) {
+			$order = wc_get_order( $order );
+		}
+		$order->set_recorded_coupon_usage_counts( $set );
+		$order->save();
 	}
 
 	/**
@@ -515,7 +592,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether email is sent.
 	 */
 	public function get_email_sent( $order ) {
-		return wc_string_to_bool( $order->get_meta( '_new_order_email_sent', true ) );
+		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
+		return $order->get_new_order_email_sent();
 	}
 
 	/**
@@ -523,11 +601,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @param \WC_Order $order Order object.
 	 * @param bool      $set True or false.
-	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
-	public function set_email_sent( $order, $set, $save = true ) {
-		// XXX implement $save = true.
-		return $order->update_meta_data( '_new_order_email_sent', wc_bool_to_string( $set ) );
+	public function set_email_sent( $order, $set ) {
+		if ( is_int( $order ) ) {
+			$order = wc_get_order( $order );
+		}
+		$order->set_new_order_email_sent( $set );
+		$order->save();
 	}
 
 	/**
@@ -537,8 +617,9 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @return bool Whether email was sent.
 	 */
-	private function get_new_order_email_sent( $order ) {
-		return $this->get_email_sent( $order );
+	public function get_new_order_email_sent( $order ) {
+		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
+		return $order->get_new_order_email_sent();
 	}
 
 	/**
@@ -546,12 +627,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @param \WC_Order $order Order object.
 	 * @param bool      $set True or false.
-	 * @param bool      $save Whether to persist changes to db immediately or not.
-	 * @return bool Whether email was sent.
 	 */
-	private function set_new_order_email_sent( $order, $set, $save = true ) {
-		// XXX implement $save = true.
-		return $this->set_email_sent( $order, $set );
+	public function set_new_order_email_sent( $order, $set ) {
+		if ( is_int( $order ) ) {
+			$order = wc_get_order( $order );
+		}
+		$order->set_new_order_email_sent( $set );
+		$order->save();
 	}
 
 	/**
@@ -562,8 +644,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether stock was reduced.
 	 */
 	public function get_stock_reduced( $order ) {
-		$order = is_numeric( $order ) ? wc_get_order( $order ) : $order;
-		return wc_string_to_bool( $order->get_meta( '_order_stock_reduced', true ) );
+		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
+		return $order->get_order_stock_reduced();
 	}
 
 	/**
@@ -571,12 +653,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @param \WC_Order $order Order ID or order object.
 	 * @param bool      $set True or false.
-	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
-	public function set_stock_reduced( $order, $set, $save = true ) {
-		// XXX implement $save = true.
-		$order = is_numeric( $order ) ? wc_get_order( $order ) : $order;
-		return $order->update_meta_data( '_order_stock_reduced', wc_bool_to_string( $set ) );
+	public function set_stock_reduced( $order, $set ) {
+		if ( is_int( $order ) ) {
+			$order = wc_get_order( $order );
+		}
+		$order->set_order_stock_reduced( $set );
+		$order->save();
 	}
 
 	/**
@@ -585,7 +668,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param \WC_Order $order Order object.
 	 * @return bool Whether stock was reduced.
 	 */
-	private function get_order_stock_reduced( $order ) {
+	public function get_order_stock_reduced( $order ) {
 		return $this->get_stock_reduced( $order );
 	}
 
@@ -594,10 +677,9 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @param \WC_Order $order Order ID or order object.
 	 * @param bool      $set Whether stock was reduced.
-	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
-	private function set_order_stock_reduced( $order, $set, $save = true ) {
-		return $this->set_stock_reduced( $order, $set, $save );
+	public function set_order_stock_reduced( $order, $set ) {
+		$this->set_stock_reduced( $order, $set );
 	}
 
 	/**
@@ -830,6 +912,9 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 				}
 
 				$prop_value = $order_data->{$prop_details['name']};
+				if ( is_null( $prop_value ) ) {
+					continue;
+				}
 
 				if ( 'date' === $prop_details['type'] ) {
 					$prop_value = $this->string_to_timestamp( $prop_value );
@@ -1029,13 +1114,10 @@ LEFT JOIN {$operational_data_clauses['join']}
 	 * @since 6.8.0
 	 */
 	protected function persist_order_to_db( &$order ) {
-		global $wpdb;
-
 		$context   = ( 0 === absint( $order->get_id() ) ) ? 'create' : 'update';
 		$data_sync = wc_get_container()->get( DataSynchronizer::class );
 
 		if ( 'create' === $context ) {
-			// XXX: do we want to add some backwards compat for 'woocommerce_new_order_data'?
 			$post_id = wp_insert_post(
 				array(
 					'post_type'   => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
@@ -1059,9 +1141,11 @@ LEFT JOIN {$operational_data_clauses['join']}
 			ksort( $update['data'] );
 			ksort( $update['format'] );
 
-			$result = empty( $update['where'] )
-					? $wpdb->insert( $update['table'], $update['data'], array_values( $update['format'] ) )
-					: $wpdb->update( $update['table'], $update['data'], $update['where'], array_values( $update['format'] ), $update['where_format'] );
+			$result = $this->database_util->insert_on_duplicate_key_update(
+				$update['table'],
+				$update['data'],
+				array_values( $update['format'] )
+			);
 
 			if ( false === $result ) {
 				// translators: %s is a table name.
@@ -1089,8 +1173,6 @@ LEFT JOIN {$operational_data_clauses['join']}
 	protected function get_db_rows_for_order( $order, $context = 'create', $only_changes = false ): array {
 		$result = array();
 
-		$existing_order_row = $order->get_id() ? $this->get_order_data_for_id( $order->get_id() ) : array();
-
 		$row = $this->get_db_row_from_order( $order, $this->order_column_mapping, $only_changes );
 		if ( 'create' === $context && ! $row ) {
 			throw new \Exception( 'No data for new record.' ); // This shouldn't occur.
@@ -1098,11 +1180,9 @@ LEFT JOIN {$operational_data_clauses['join']}
 
 		if ( $row ) {
 			$result[] = array(
-				'table'        => self::get_orders_table_name(),
-				'data'         => array_merge( $row['data'], array( 'id' => $order->get_id() ) ),
-				'format'       => array_merge( $row['format'], array( 'id' => '%d' ) ),
-				'where'        => 'update' === $context ? array( 'id' => $order->get_id() ) : null,
-				'where_format' => 'update' === $context ? '%d' : null,
+				'table'  => self::get_orders_table_name(),
+				'data'   => array_merge( $row['data'], array( 'id' => $order->get_id() ) ),
+				'format' => array_merge( $row['format'], array( 'id' => '%d' ) ),
 			);
 		}
 
@@ -1110,11 +1190,9 @@ LEFT JOIN {$operational_data_clauses['join']}
 		$row = $this->get_db_row_from_order( $order, $this->operational_data_column_mapping, $only_changes );
 		if ( $row ) {
 			$result[] = array(
-				'table'        => self::get_operational_data_table_name(),
-				'data'         => array_merge( $row['data'], array( 'order_id' => $order->get_id() ) ),
-				'format'       => array_merge( $row['format'], array( 'order_id' => '%d' ) ),
-				'where'        => isset( $existing_order_row->{"{$this->get_op_table_alias()}_id"} ) ? array( 'order_id' => $order->get_id() ) : null,
-				'where_format' => isset( $existing_order_row->{"{$this->get_op_table_alias()}_id"} ) ? '%d' : null,
+				'table'  => self::get_operational_data_table_name(),
+				'data'   => array_merge( $row['data'], array( 'order_id' => $order->get_id() ) ),
+				'format' => array_merge( $row['format'], array( 'order_id' => '%d' ) ),
 			);
 		}
 
@@ -1124,28 +1202,21 @@ LEFT JOIN {$operational_data_clauses['join']}
 
 			if ( $row ) {
 				$result[] = array(
-					'table'        => self::get_addresses_table_name(),
-					'data'         => array_merge(
+					'table'  => self::get_addresses_table_name(),
+					'data'   => array_merge(
 						$row['data'],
 						array(
 							'order_id'     => $order->get_id(),
 							'address_type' => $address_type,
 						)
 					),
-					'format'       => array_merge(
+					'format' => array_merge(
 						$row['format'],
 						array(
 							'order_id'     => '%d',
 							'address_type' => '%s',
 						)
 					),
-					'where'        => isset( $existing_order_row->{ $this->get_address_table_alias( $address_type ) . '_id' } )
-									? array(
-										'order_id'     => $order->get_id(),
-										'address_type' => $address_type,
-									)
-									: null,
-					'where_format' => isset( $existing_order_row->{ $this->get_address_table_alias( $address_type ) . '_id' } ) ? array( '%d', '%s' ) : null,
 				);
 			}
 		}
@@ -1180,10 +1251,6 @@ LEFT JOIN {$operational_data_clauses['join']}
 	protected function get_db_row_from_order( $order, $column_mapping, $only_changes = false ) {
 		$changes = $only_changes ? $order->get_changes() : array_merge( $order->get_data(), $order->get_changes() );
 
-		// XXX: manually persist some of the properties until the datastore/property design is finalized.
-		foreach ( $this->get_internal_data_store_keys() as $key ) {
-			$changes[ $key ] = $this->{"get_$key"}( $order );
-		}
 		$changes['type'] = $order->get_type();
 
 		// Make sure 'status' is correct.
@@ -1240,12 +1307,32 @@ LEFT JOIN {$operational_data_clauses['join']}
 				return;
 			}
 
+			/**
+			 * Fires immediately before an order is deleted from the database.
+			 *
+			 * @since 7.1.0
+			 *
+			 * @param int      $order_id ID of the order about to be deleted.
+			 * @param WC_Order $order    Instance of the order that is about to be deleted.
+			 */
+			do_action( 'woocommerce_before_delete_order', $order_id, $order );
+
 			// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
 			// Once we stop creating posts for orders, we should do the cleanup here instead.
 			wp_delete_post( $order_id );
 
 			do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		} else {
+			/**
+			 * Fires immediately before an order is trashed.
+			 *
+			 * @since 7.1.0
+			 *
+			 * @param int      $order_id ID of the order about to be deleted.
+			 * @param WC_Order $order    Instance of the order that is about to be deleted.
+			 */
+			do_action( 'woocommerce_before_trash_order', $order_id, $order );
+
 			$this->trash_order( $order );
 
 			do_action( 'woocommerce_trash_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
@@ -1255,10 +1342,10 @@ LEFT JOIN {$operational_data_clauses['join']}
 	/**
 	 * Trashes an order.
 	 *
-	 * @param \WC_Order $order The order object
+	 * @param WC_Order $order The order object
 	 * @return void
 	 */
-	public function trash_order( &$order ) {
+	public function trash_order( $order ) {
 		global $wpdb;
 
 		if ( 'trash' === $order->get_status( 'edit' ) ) {
@@ -1290,6 +1377,83 @@ LEFT JOIN {$operational_data_clauses['join']}
 
 		$order->set_status( 'trash' );
 	}
+
+	/**
+	 * Attempts to restore the specified order back to its original status (after having been trashed).
+	 *
+	 * @param WC_Order $order The order to be untrashed.
+	 *
+	 * @return bool If the operation was successful.
+	 */
+	public function untrash_order( WC_Order $order ): bool {
+		$id     = $order->get_id();
+		$status = $order->get_status();
+
+		if ( 'trash' !== $status ) {
+			wc_get_logger()->warning(
+				sprintf(
+					/* translators: 1: order ID, 2: order status */
+					__( 'Order %1$d cannot be restored from the trash: it has already been restored to status "%2$s".', 'woocommerce' ),
+					$id,
+					$status
+				)
+			);
+			return false;
+		}
+
+		$previous_status           = $order->get_meta( '_wp_trash_meta_status' );
+		$valid_statuses            = wc_get_order_statuses();
+		$previous_state_is_invalid = ! array_key_exists( 'wc-' . $previous_status, $valid_statuses );
+		$pending_is_valid_status   = array_key_exists( 'wc-pending', $valid_statuses );
+
+		if ( $previous_state_is_invalid && $pending_is_valid_status ) {
+			// If the previous status is no longer valid, let's try to restore it to "pending" instead.
+			wc_get_logger()->warning(
+				sprintf(
+					/* translators: 1: order ID, 2: order status */
+					__( 'The previous status of order %1$d ("%2$s") is invalid. It has been restored to "pending" status instead.', 'woocommerce' ),
+					$id,
+					$previous_status
+				)
+			);
+
+			$previous_status = 'pending';
+		} elseif ( $previous_state_is_invalid ) {
+			// If we cannot restore to pending, we should probably stand back and let the merchant intervene some other way.
+			wc_get_logger()->warning(
+				sprintf(
+					/* translators: 1: order ID, 2: order status */
+					__( 'The previous status of order %1$d ("%2$s") is invalid. It could not be restored.', 'woocommerce' ),
+					$id,
+					$previous_status
+				)
+			);
+
+			return false;
+		}
+
+		$order->set_status( $previous_status );
+		$order->save();
+
+		// Was the status successfully restored? Let's clean up the meta and indicate success...
+		if ( $previous_status === $order->get_status() ) {
+			$order->delete_meta_data( '_wp_trash_meta_status' );
+			$order->delete_meta_data( '_wp_trash_meta_time' );
+			return true;
+		}
+
+		// ...Or log a warning and bail.
+		wc_get_logger()->warning(
+			sprintf(
+				/* translators: 1: order ID, 2: order status */
+				__( 'Something went wrong when trying to restore order %d from the trash. It could not be restored.', 'woocommerce' ),
+				$id
+			)
+		);
+
+		return false;
+	}
+
 
 	/**
 	 * Deletes order data from custom order tables.
@@ -1452,11 +1616,6 @@ LEFT JOIN {$operational_data_clauses['join']}
 			if ( isset( $changes[ $address_type ] ) ) {
 				$order->update_meta_data( "_{$address_type}_address_index", implode( ' ', $order->get_address( $address_type ) ) );
 			}
-		}
-
-		// Sync some COT fields to meta keys for backwards compatibility.
-		foreach ( $this->get_internal_data_store_keys() as $key ) {
-			$this->{"set_$key"}( $order, $this->{"get_$key"}( $order ), false );
 		}
 	}
 
@@ -1632,6 +1791,7 @@ CREATE TABLE $orders_table_name (
 	transaction_id varchar(100) null,
 	ip_address varchar(100) null,
 	user_agent text null,
+	customer_note text null,
 	PRIMARY KEY (id),
 	KEY status (status),
 	KEY date_created (date_created_gmt),
@@ -1703,7 +1863,8 @@ CREATE TABLE $meta_table (
 	 * @return array
 	 */
 	public function read_meta( &$object ) {
-		return $this->data_store_meta->read_meta( $object );
+		$raw_meta_data = $this->data_store_meta->read_meta( $object );
+		return $this->filter_raw_meta_data( $object, $raw_meta_data );
 	}
 
 	/**
@@ -1735,84 +1896,6 @@ CREATE TABLE $meta_table (
 	 */
 	public function update_meta( &$object, $meta ) {
 		return $this->data_store_meta->update_meta( $object, $meta );
-	}
-
-	/**
-	 * Returns list of metadata that is considered "internal".
-	 *
-	 * @return array
-	 */
-	public function get_internal_meta_keys() {
-		// XXX: This is mostly just to trick `WC_Data_Store_WP` for the time being.
-		return array(
-			'_customer_user',
-			'_order_key',
-			'_order_currency',
-			'_billing_first_name',
-			'_billing_last_name',
-			'_billing_company',
-			'_billing_address_1',
-			'_billing_address_2',
-			'_billing_city',
-			'_billing_state',
-			'_billing_postcode',
-			'_billing_country',
-			'_billing_email',
-			'_billing_phone',
-			'_shipping_first_name',
-			'_shipping_last_name',
-			'_shipping_company',
-			'_shipping_address_1',
-			'_shipping_address_2',
-			'_shipping_city',
-			'_shipping_state',
-			'_shipping_postcode',
-			'_shipping_country',
-			'_shipping_phone',
-			'_completed_date',
-			'_paid_date',
-			'_edit_lock',
-			'_edit_last',
-			'_cart_discount',
-			'_cart_discount_tax',
-			'_order_shipping',
-			'_order_shipping_tax',
-			'_order_tax',
-			'_order_total',
-			'_payment_method',
-			'_payment_method_title',
-			'_transaction_id',
-			'_customer_ip_address',
-			'_customer_user_agent',
-			'_created_via',
-			'_order_version',
-			'_prices_include_tax',
-			'_date_completed',
-			'_date_paid',
-			'_payment_tokens',
-			'_billing_address_index',
-			'_shipping_address_index',
-			'_recorded_sales',
-			'_recorded_coupon_usage_counts',
-			'_download_permissions_granted',
-			'_order_stock_reduced',
-		);
-	}
-
-	/**
-	 * Returns keys currently handled by this datastore manually (not available through order properties).
-	 *
-	 * @return array List of keys.
-	 */
-	protected function get_internal_data_store_keys() {
-		// XXX: Finalize design -- will these be turned into props?
-		return array(
-			'order_stock_reduced',
-			'download_permissions_granted',
-			'new_order_email_sent',
-			'recorded_sales',
-			'recorded_coupon_usage_counts',
-		);
 	}
 
 }

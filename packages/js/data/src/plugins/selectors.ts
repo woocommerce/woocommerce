@@ -33,6 +33,9 @@ export const getPluginsError = (
 export const isJetpackConnected = ( state: PluginsState ) =>
 	state.jetpackConnection;
 
+export const getJetpackConnectionData = ( state: PluginsState ) =>
+	state.jetpackConnectionData;
+
 export const getJetpackConnectUrl = (
 	state: PluginsState,
 	query: { redirect_url: string }
@@ -68,6 +71,7 @@ export type PluginSelectors = {
 	getActivePlugins: WPDataSelector< typeof getActivePlugins >;
 	getInstalledPlugins: WPDataSelector< typeof getInstalledPlugins >;
 	getRecommendedPlugins: WPDataSelector< typeof getRecommendedPlugins >;
+	getJetpackConnectionData: WPDataSelector< typeof getJetpackConnectionData >;
 	isJetpackConnected: WPDataSelector< typeof isJetpackConnected >;
 	isPluginsRequesting: WPDataSelector< typeof isPluginsRequesting >;
 } & WPDataSelectors;

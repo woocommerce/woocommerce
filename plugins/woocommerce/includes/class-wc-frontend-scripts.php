@@ -57,41 +57,47 @@ class WC_Frontend_Scripts {
 	public static function get_styles() {
 		$version = Constants::get_constant( 'WC_VERSION' );
 
-		return array_filter(
-			apply_filters(
-				'woocommerce_enqueue_styles',
-				array(
-					'woocommerce-layout'      => array(
-						'src'     => self::get_asset_url( 'assets/css/woocommerce-layout.css' ),
-						'deps'    => '',
-						'version' => $version,
-						'media'   => 'all',
-						'has_rtl' => true,
-					),
-					'woocommerce-smallscreen' => array(
-						'src'     => self::get_asset_url( 'assets/css/woocommerce-smallscreen.css' ),
-						'deps'    => 'woocommerce-layout',
-						'version' => $version,
-						'media'   => 'only screen and (max-width: ' . apply_filters( 'woocommerce_style_smallscreen_breakpoint', '768px' ) . ')',
-						'has_rtl' => true,
-					),
-					'woocommerce-general'     => array(
-						'src'     => self::get_asset_url( 'assets/css/woocommerce.css' ),
-						'deps'    => '',
-						'version' => $version,
-						'media'   => 'all',
-						'has_rtl' => true,
-					),
-					'woocommerce-blocktheme'  => wc_current_theme_is_fse_theme() ? array(
-						'src'     => self::get_asset_url( 'assets/css/woocommerce-blocktheme.css' ),
-						'deps'    => '',
-						'version' => $version,
-						'media'   => 'all',
-						'has_rtl' => true,
-					) : false,
-				)
+		/**
+		 * Filter list of WooCommerce styles to enqueue.
+		 *
+		 * @since 2.1.0
+		 * @param array List of default WooCommerce styles.
+		 * @retrun array List of styles to enqueue.
+		 */
+		$styles = apply_filters(
+			'woocommerce_enqueue_styles',
+			array(
+				'woocommerce-layout'      => array(
+					'src'     => self::get_asset_url( 'assets/css/woocommerce-layout.css' ),
+					'deps'    => '',
+					'version' => $version,
+					'media'   => 'all',
+					'has_rtl' => true,
+				),
+				'woocommerce-smallscreen' => array(
+					'src'     => self::get_asset_url( 'assets/css/woocommerce-smallscreen.css' ),
+					'deps'    => 'woocommerce-layout',
+					'version' => $version,
+					'media'   => 'only screen and (max-width: ' . apply_filters( 'woocommerce_style_smallscreen_breakpoint', '768px' ) . ')',
+					'has_rtl' => true,
+				),
+				'woocommerce-general'     => array(
+					'src'     => self::get_asset_url( 'assets/css/woocommerce.css' ),
+					'deps'    => '',
+					'version' => $version,
+					'media'   => 'all',
+					'has_rtl' => true,
+				),
+				'woocommerce-blocktheme'  => wc_current_theme_is_fse_theme() ? array(
+					'src'     => self::get_asset_url( 'assets/css/woocommerce-blocktheme.css' ),
+					'deps'    => '',
+					'version' => $version,
+					'media'   => 'all',
+					'has_rtl' => true,
+				) : false,
 			)
 		);
+		return is_array( $styles ) ? array_filter( $styles ) : array();
 	}
 
 	/**

@@ -12,10 +12,11 @@
 		"shipping-setting-tour": true,
 		"homescreen": true,
 		"marketing": true,
+		"multichannel-marketing": true,
 		"minified-js": true,
 		"mobile-app-banner": true,
 		"navigation": true,
-		"new-product-management-experience": true,
+		"new-product-management-experience": false,
 		"onboarding": true,
 		"onboarding-tasks": true,
 		"payment-gateway-suggestions": true,
@@ -26,6 +27,7 @@
 		"subscriptions": true,
 		"store-alerts": true,
 		"transient-notices": true,
+		"woo-mobile-welcome": true,
 		"wc-pay-promotion": true,
 		"wc-pay-welcome-page": true
 	}

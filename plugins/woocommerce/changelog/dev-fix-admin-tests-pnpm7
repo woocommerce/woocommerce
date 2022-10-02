@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update wp data version and jest config to fix admin tests for pnpm 7

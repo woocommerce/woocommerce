@@ -251,4 +251,104 @@ class ArrayUtilTest extends \WC_Unit_Test_Case {
 		$actual = ArrayUtil::select( $items, 'the_id', ArrayUtil::SELECT_BY_AUTO );
 		$this->assertEquals( array( 1, 2, 3 ), $actual );
 	}
+
+	/**
+	 * @testdox push_once doesn't alter the array and returns false if the item is already in the array.
+	 */
+	public function test_push_once_existing_value() {
+		$array = array( 1, 2, 3 );
+
+		$result = ArrayUtil::push_once( $array, 2 );
+
+		$this->assertFalse( $result );
+		$this->assertEquals( array( 1, 2, 3 ), $array );
+	}
+
+	/**
+	 * @testdox push_once pushes the value in the array and returns true if the value isn't yet in the array.
+	 */
+	public function test_push_once_new_value() {
+		$array = array( 1, 2, 3 );
+
+		$result = ArrayUtil::push_once( $array, 4 );
+
+		$this->assertTrue( $result );
+		$this->assertEquals( array( 1, 2, 3, 4 ), $array );
+	}
+
+
+	/**
+	 * @testdox `ensure_key_is_array` adds an empty array under the given key if they key doesn't exist already in the array.
+	 */
+	public function test_ensure_key_is_array_when_key_does_not_exist() {
+		$array  = array( 'foo' => 1 );
+		$result = ArrayUtil::ensure_key_is_array( $array, 'bar' );
+		$this->assertTrue( $result );
+		$this->assertEquals(
+			array(
+				'foo' => 1,
+				'bar' => array(),
+			),
+			$array
+		);
+	}
+
+	/**
+	 * @testdox `ensure_key_is_array` does nothing if the key already exists in the array and $throw_if_existing_is_not_array is false.
+	 *
+	 * @testWith [[]]
+	 *           [1]
+	 *           [true]
+	 *           ["Foo"]
+	 *
+	 * @param mixed $value The already existing value.
+	 */
+	public function test_ensure_key_is_array_when_key_exist_and_not_throwing( $value ) {
+		$array  = array(
+			'foo' => 1,
+			'bar' => $value,
+		);
+		$result = ArrayUtil::ensure_key_is_array( $array, 'bar' );
+		$this->assertFalse( $result );
+		$this->assertEquals(
+			array(
+				'foo' => 1,
+				'bar' => $value,
+			),
+			$array
+		);
+	}
+
+	/**
+	 * @testdox `ensure_key_is_array` does nothing if the key already exists in the array, the value is itself an array, and $throw_if_existing_is_not_array is true.
+	 */
+	public function test_ensure_key_is_array_when_key_is_array_and_throwing() {
+		$array  = array(
+			'foo' => 1,
+			'bar' => array(),
+		);
+		$result = ArrayUtil::ensure_key_is_array( $array, 'bar', true );
+		$this->assertFalse( $result );
+		$this->assertEquals(
+			array(
+				'foo' => 1,
+				'bar' => array(),
+			),
+			$array
+		);
+	}
+
+	/**
+	 * @testdox `ensure_key_is_array` throws if the key already exists in the array, the value is not an array, and $throw_if_existing_is_not_array is true.
+	 */
+	public function test_ensure_key_is_array_when_key_is_not_array_and_throwing() {
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( "Array key exists but it's not an array, it's a integer" );
+
+		$array = array(
+			'foo' => 1,
+			'bar' => 2,
+		);
+		ArrayUtil::ensure_key_is_array( $array, 'bar', true );
+	}
 }

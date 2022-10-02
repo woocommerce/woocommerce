@@ -13,18 +13,9 @@ jobs:
         runs-on: ubuntu-20.04
         steps:
             - uses: actions/checkout@v3
-            - uses: ./.github/actions/cache-deps
-              with:
-                  workflow_name: pr-build-and-e2e-tests
-                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
-
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: '7.4'
-
-            - name: Install and Build
-              uses: ./.github/actions/install-build
+            
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
@@ -32,7 +23,7 @@ jobs:
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
-              run: pnpx playwright install chromium
+              run: pnpm exec playwright install chromium
 
             - name: Run Playwright E2E tests.
               timeout-minutes: 60
@@ -40,7 +31,7 @@ jobs:
               env:
                 USE_WP_ENV: 1
               working-directory: plugins/woocommerce
-              run: pnpx playwright test --config=tests/e2e-pw/playwright.config.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
             - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
@@ -51,7 +42,7 @@ jobs:
                     steps.run_playwright_e2e_tests.conclusion != 'skipped' 
                   )
               working-directory: plugins/woocommerce
-              run: pnpx allure generate --clean e2e/allure-results --output e2e/allure-report
+              run: pnpm exec allure generate --clean e2e/allure-results --output e2e/allure-report
 
             - name: Archive Playwright E2E test report
               if: |
@@ -73,18 +64,9 @@ jobs:
             API_TEST_REPORT_DIR: ${{ github.workspace }}/api-test-report
         steps:
             - uses: actions/checkout@v3
-            - uses: ./.github/actions/cache-deps
-              with:
-                  workflow_name: pr-build-and-e2e-tests
-                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
-
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: '7.4'
-
-            - name: Install and Build
-              uses: ./.github/actions/install-build
+            
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
@@ -113,18 +95,9 @@ jobs:
         runs-on: ubuntu-20.04
         steps:
             - uses: actions/checkout@v3
-            - uses: ./.github/actions/cache-deps
-              with:
-                  workflow_name: pr-build-and-e2e-tests
-                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
-
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: '7.4'
-
-            - name: Install and Build
-              uses: ./.github/actions/install-build
+            
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce

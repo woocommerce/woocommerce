@@ -3,6 +3,10 @@
 	"version": "0.1.0",
 	"description": "API tests for WooCommerce",
 	"main": "index.js",
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "7.11.0"
+	},
 	"scripts": {
 		"e2e": "jest",
 		"e2e:api": "jest --group=api",

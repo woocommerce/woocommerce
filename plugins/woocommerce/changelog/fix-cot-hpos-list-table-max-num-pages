@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Admin list table for orders (in HPOS mode) should check in case the user pages beyond the available range.

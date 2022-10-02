@@ -195,7 +195,7 @@ class Marketing {
 
 		if ( false === $plugins ) {
 			$request = wp_remote_get(
-				'https://woocommerce.com/wp-json/wccom/marketing-tab/1.1/recommendations.json',
+				'https://woocommerce.com/wp-json/wccom/marketing-tab/1.2/recommendations.json',
 				array(
 					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 				)

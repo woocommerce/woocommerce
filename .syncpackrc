@@ -1,6 +1,6 @@
 {
 	"dev": true,
-	"filter": "^(?:react|react-dom|jest|jest-circus|jest-each|@jest/test-sequencer|@jest/globals|ts-jest)$",
+	"filter": "^(?:react|react-dom|typescript|jest|jest-circus|jest-each|@jest/test-sequencer|@jest/globals|ts-jest)$",
 	"indent": "\t",
 	"overrides": true,
 	"peer": true,
@@ -10,16 +10,44 @@
 	"workspace": true,
 	"versionGroups": [
 		{
-			"dependencies": [ "react", "react-dom" ],
-			"packages": [ "**" ],
+			"dependencies": [
+				"react",
+				"react-dom"
+			],
+			"packages": [
+				"**"
+			],
 			"pinVersion": "^17.0.2"
-		},{
-			"dependencies": [ "jest", "jest-circus", "jest-each", "@jest/test-sequencer", "@jest/globals" ],
-			"packages": [ "**" ],
+		},
+		{
+			"dependencies": [
+				"typescript"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^4.8.3"
+		},
+		{
+			"dependencies": [
+				"jest",
+				"jest-circus",
+				"jest-each",
+				"@jest/test-sequencer",
+				"@jest/globals"
+			],
+			"packages": [
+				"**"
+			],
 			"pinVersion": "^27.5.1"
-		},{
-			"dependencies": [ "ts-jest" ],
-			"packages": [ "**" ],
+		},
+		{
+			"dependencies": [
+				"ts-jest"
+			],
+			"packages": [
+				"**"
+			],
 			"pinVersion": "^27.1.3"
 		}
 	]

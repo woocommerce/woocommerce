@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { createInterpolateElement } from '@wordpress/element';
 
 export default {
@@ -377,5 +377,59 @@ export default {
 		haveMoreQuestions: __( 'Have more questions?', 'woocommerce' ),
 
 		getInTouch: __( 'Get in touch', 'woocommerce' ),
+	},
+	apms: {
+		addMoreWaysToPay: __(
+			'Add more ways for buyers to pay',
+			'woocommerce'
+		),
+		seeMore: __( 'See more', 'woocommerce' ),
+		paypal: {
+			title: __( 'PayPal Payments', 'woocommerce' ),
+			description: __(
+				'Enable PayPal Payments alongside WooCommerce Payments. Give your customers another way to pay safely and conveniently via PayPal, PayLater, and Venmo.',
+				'woocommerce'
+			),
+		},
+		amazonpay: {
+			title: __( 'Amazon Pay', 'woocommerce' ),
+			description: __(
+				'Enable Amazon Pay alongside WooCommerce Payments and give buyers the ability to pay via Amazon Pay. Transactions take place via Amazon embedded widgets, so the buyer never leaves your site.',
+				'woocommerce'
+			),
+		},
+		klarna: {
+			title: __( 'Klarna', 'woocommerce' ),
+			description: __(
+				'Enable Klarna alongside WooCommerce Payments. With Klarna Payments buyers can choose the payment installment option they want, Pay Now, Pay Later, or Slice It. No credit card numbers, no passwords, no worries.',
+				'woocommerce'
+			),
+		},
+		affirm: {
+			title: __( 'Affirm', 'woocommerce' ),
+			description: __(
+				'Enable Affirm alongside WooCommerce Payments and give buyers the ability to pick the payment option that works for them and their budget — from 4 interest-free payments every 2 weeks to monthly installments.',
+				'woocommerce'
+			),
+		},
+		installText: ( extensionsString: string ) => {
+			const extensionsNumber = extensionsString.split( ', ' ).length;
+			return createInterpolateElement(
+				sprintf(
+					/* translators: %s = names of the installed extensions */
+					_n(
+						'Installing <strong>WooCommerce Payments</strong> will automatically activate <strong>%s</strong> extension in your store.',
+						'Installing <strong>WooCommerce Payments</strong> will automatically activate <strong>%s</strong> extensions in your store.',
+						extensionsNumber,
+						'woocommerce'
+					),
+					extensionsString
+				),
+				{
+					strong: <strong />,
+				}
+			);
+		},
+		installTextPost: __( 'extension in your store.', 'woocommerce' ),
 	},
 };

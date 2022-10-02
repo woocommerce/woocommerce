@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Update get_product_data to send request with a locale query param for translation

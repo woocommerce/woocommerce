@@ -1,4 +1,4 @@
-name: Syncronize Dependencies with syncpack
+name: Synchronize Dependencies with syncpack
 on:
   # Run whenever a pull request is updated
   pull_request:

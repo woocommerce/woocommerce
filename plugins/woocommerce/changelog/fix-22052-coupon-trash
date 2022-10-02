@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-When a coupon has been trashed, it should become unusable.

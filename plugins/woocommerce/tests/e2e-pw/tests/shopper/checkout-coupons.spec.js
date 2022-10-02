@@ -33,6 +33,10 @@ test.describe( 'Checkout coupons', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
+		// make sure the currency is USD
+		await api.put( 'settings/general/woocommerce_currency', {
+			value: 'USD',
+		} );
 		// add product
 		await api
 			.post( 'products', {

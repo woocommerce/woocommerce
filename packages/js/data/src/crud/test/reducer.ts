@@ -11,6 +11,7 @@ import TYPES from '../action-types';
 const defaultState: ResourceState = {
 	items: {},
 	errors: {},
+	itemsCount: {},
 	data: {},
 };
 
@@ -31,6 +32,7 @@ describe( 'crud reducer', () => {
 					data: [ 1, 2 ],
 				},
 			},
+			itemsCount: {},
 			errors: {},
 			data: {
 				1: { id: 1, name: 'Donkey', status: 'draft' },
@@ -78,6 +80,19 @@ describe( 'crud reducer', () => {
 
 		expect( state.data[ 1 ] ).toEqual( items[ 0 ] );
 		expect( state.data[ 2 ] ).toEqual( items[ 1 ] );
+	} );
+
+	it( 'should handle GET_ITEMS_TOTAL_COUNT_SUCCESS', () => {
+		const query: Partial< ItemQuery > = { status: 'draft' };
+		const state = reducer( defaultState, {
+			type: TYPES.GET_ITEMS_TOTAL_COUNT_SUCCESS,
+			query,
+			totalCount: 10,
+		} );
+
+		const resourceName = getResourceName( CRUD_ACTIONS.GET_ITEMS, query );
+
+		expect( state.itemsCount[ resourceName ] ).toEqual( 10 );
 	} );
 
 	it( 'should handle GET_ITEMS_SUCCESS with urlParameters', () => {
@@ -154,6 +169,23 @@ describe( 'crud reducer', () => {
 		expect( state.errors[ resourceName ] ).toBe( error );
 	} );
 
+	it( 'should handle GET_ITEMS_TOTAL_COUNT_ERROR', () => {
+		const query: Partial< ItemQuery > = { status: 'draft' };
+		const resourceName = getResourceName(
+			CRUD_ACTIONS.GET_ITEMS_TOTAL_COUNT,
+			query
+		);
+		const error = 'Baaam!';
+		const state = reducer( defaultState, {
+			type: TYPES.GET_ITEMS_TOTAL_COUNT_ERROR,
+			query,
+			error,
+			errorType: CRUD_ACTIONS.GET_ITEMS_TOTAL_COUNT,
+		} );
+
+		expect( state.errors[ resourceName ] ).toBe( error );
+	} );
+
 	it( 'should handle GET_ITEM_ERROR', () => {
 		const key = 3;
 		const resourceName = getResourceName( CRUD_ACTIONS.GET_ITEM, { key } );
@@ -220,6 +252,7 @@ describe( 'crud reducer', () => {
 					data: [ 1, 2 ],
 				},
 			},
+			itemsCount: {},
 			errors: {},
 			data: {
 				1: { id: 1, name: 'Donkey', status: 'draft' },
@@ -272,6 +305,7 @@ describe( 'crud reducer', () => {
 					data: [ 1, 2 ],
 				},
 			},
+			itemsCount: {},
 			errors: {},
 			data: {
 				1: { id: 1, name: 'Donkey', status: 'draft' },
