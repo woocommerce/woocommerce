@@ -1307,12 +1307,32 @@ LEFT JOIN {$operational_data_clauses['join']}
 				return;
 			}
 
+			/**
+			 * Fires immediately before an order is deleted from the database.
+			 *
+			 * @since 7.1.0
+			 *
+			 * @param int      $order_id ID of the order about to be deleted.
+			 * @param WC_Order $order    Instance of the order that is about to be deleted.
+			 */
+			do_action( 'woocommerce_before_delete_order', $order_id, $order );
+
 			// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
 			// Once we stop creating posts for orders, we should do the cleanup here instead.
 			wp_delete_post( $order_id );
 
 			do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		} else {
+			/**
+			 * Fires immediately before an order is trashed.
+			 *
+			 * @since 7.1.0
+			 *
+			 * @param int      $order_id ID of the order about to be deleted.
+			 * @param WC_Order $order    Instance of the order that is about to be deleted.
+			 */
+			do_action( 'woocommerce_before_trash_order', $order_id, $order );
+
 			$this->trash_order( $order );
 
 			do_action( 'woocommerce_trash_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment

@@ -28,7 +28,7 @@ runs:
     - name: Setup PNPM
       uses: pnpm/action-setup@10693b3829bf86eb2572aef5f3571dcf5ca9287d
       with:
-        version: "7.11.0"
+        version: "^7.12.2"
 
     - name: Setup Node
       uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93
