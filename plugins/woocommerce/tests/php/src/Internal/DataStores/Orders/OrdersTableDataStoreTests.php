@@ -9,7 +9,7 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 /**
  * Class OrdersTableDataStoreTests.
  *
- * Test or OrdersTableDataStore class.
+ * Test for OrdersTableDataStore class.
  */
 class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 

@@ -79,7 +79,7 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 	/**
 	 * Read a refund object from custom tables.
 	 *
-	 * @param \WC_Order $refund Refund object.
+	 * @param \WC_Abstract_Order $refund Refund object.
 	 *
 	 * @return void
 	 */
@@ -119,7 +119,7 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 	/**
 	 * Method to create a refund in the database.
 	 *
-	 * @param \WC_Order $refund Refund object.
+	 * @param \WC_Abstract_Order $refund Refund object.
 	 */
 	public function create( &$refund ) {
 		$refund->set_status( 'completed' ); // Refund are always marked completed.
