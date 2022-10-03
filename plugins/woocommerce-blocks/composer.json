@@ -12,6 +12,8 @@
 	"prefer-stable": true,
 	"minimum-stability": "dev",
 	"require": {
+		"ext-hash": "*",
+		"ext-json": "*",
 		"composer/installers": "^1.7.0",
 		"automattic/jetpack-autoloader": "^2.9.1"
 	},
