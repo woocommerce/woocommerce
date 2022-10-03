@@ -1,14 +1,18 @@
 <?php
+
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
-use Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CartItemSchema;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema;
+use Automattic\WooCommerce\StoreApi\SessionHandler;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
+use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
+
 /**
  * Abstract Cart Route
  */
@@ -16,7 +20,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	use DraftOrderTrait;
 
 	/**
-	 * The routes schema.
+	 * The route's schema.
 	 *
 	 * @var string
 	 */
@@ -28,6 +32,13 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @var CartSchema
 	 */
 	protected $cart_schema;
+
+	/**
+	 * Schema class for the cart item.
+	 *
+	 * @var CartItemSchema
+	 */
+	protected $cart_item_schema;
 
 	/**
 	 * Cart controller class instance.
@@ -50,29 +61,30 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @param AbstractSchema   $schema Schema class for this route.
 	 */
 	public function __construct( SchemaController $schema_controller, AbstractSchema $schema ) {
-		$this->schema_controller = $schema_controller;
-		$this->schema            = $schema;
-		$this->cart_schema       = $this->schema_controller->get( CartSchema::IDENTIFIER );
-		$this->cart_item_schema  = $this->schema_controller->get( CartItemSchema::IDENTIFIER );
-		$this->cart_controller   = new CartController();
-		$this->order_controller  = new OrderController();
+		parent::__construct( $schema_controller, $schema );
+
+		$this->cart_schema      = $this->schema_controller->get( CartSchema::IDENTIFIER );
+		$this->cart_item_schema = $this->schema_controller->get( CartItemSchema::IDENTIFIER );
+		$this->cart_controller  = new CartController();
+		$this->order_controller = new OrderController();
 	}
 
 	/**
 	 * Get the route response based on the type of request.
 	 *
 	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_Error|\WP_REST_Response
+	 *
+	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
-		$this->cart_controller->load_cart();
+		$this->load_cart_session( $request );
 		$this->calculate_totals();
 
 		if ( $this->requires_nonce( $request ) ) {
 			$nonce_check = $this->check_nonce( $request );
 
 			if ( is_wp_error( $nonce_check ) ) {
-				return $this->add_nonce_headers( $this->error_to_response( $nonce_check ) );
+				return $this->add_response_headers( $this->error_to_response( $nonce_check ) );
 			}
 		}
 
@@ -81,7 +93,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		} catch ( RouteException $error ) {
 			$response = $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode(), $error->getAdditionalData() );
 		} catch ( \Exception $error ) {
-			$response = $this->get_route_error_response( 'woocommerce_rest_unknown_server_error', $error->getMessage(), 500 );
+			$response = $this->get_route_error_response( 'woocommerce_rest_unknown_server_error', $error->getMessage() );
 		}
 
 		if ( is_wp_error( $response ) ) {
@@ -90,21 +102,23 @@ abstract class AbstractCartRoute extends AbstractRoute {
 			$this->cart_updated( $request );
 		}
 
-		return $this->add_nonce_headers( $response );
+		return $this->add_response_headers( $response );
 	}
 
 	/**
 	 * Add nonce headers to a response object.
 	 *
 	 * @param \WP_REST_Response $response The response object.
+	 *
 	 * @return \WP_REST_Response
 	 */
-	protected function add_nonce_headers( \WP_REST_Response $response ) {
+	protected function add_response_headers( \WP_REST_Response $response ) {
 		$nonce = wp_create_nonce( 'wc_store_api' );
 
 		$response->header( 'Nonce', $nonce );
 		$response->header( 'Nonce-Timestamp', time() );
 		$response->header( 'User-ID', get_current_user_id() );
+		$response->header( 'Cart-Token', $this->get_cart_token() );
 
 		// The following headers are deprecated and should be removed in a future version.
 		$response->header( 'X-WC-Store-API-Nonce', $nonce );
@@ -113,9 +127,68 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	}
 
 	/**
+	 * Load the cart session before handling responses.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 */
+	protected function load_cart_session( \WP_REST_Request $request ) {
+		$cart_token = $request->get_header( 'Cart-Token' );
+
+		if ( $cart_token && JsonWebToken::validate( $cart_token, $this->get_cart_token_secret() ) ) {
+			// Overrides the core session class.
+			add_filter(
+				'woocommerce_session_handler',
+				function () {
+					return SessionHandler::class;
+				}
+			);
+		}
+
+		$this->cart_controller->load_cart();
+	}
+
+	/**
+	 * Generates a cart token for the response headers.
+	 *
+	 * Current namespace is used as the token Issuer.
+	 * *
+	 *
+	 * @return string
+	 */
+	protected function get_cart_token() {
+		return JsonWebToken::create(
+			[
+				'user_id' => wc()->session->get_customer_id(),
+				'exp'     => $this->get_cart_token_expiration(),
+				'iss'     => $this->namespace,
+			],
+			$this->get_cart_token_secret()
+		);
+	}
+
+	/**
+	 * Gets the secret for the cart token using wp_salt.
+	 *
+	 * @return string
+	 */
+	protected function get_cart_token_secret() {
+		return '@' . wp_salt();
+	}
+
+	/**
+	 * Gets the expiration of the cart token. Defaults to 48h.
+	 *
+	 * @return int
+	 */
+	protected function get_cart_token_expiration() {
+		return time() + intval( apply_filters( 'wc_session_expiration', 60 * 60 * 48 ) );
+	}
+
+	/**
 	 * Checks if a nonce is required for the route.
 	 *
 	 * @param \WP_REST_Request $request Request.
+	 *
 	 * @return bool
 	 */
 	protected function requires_nonce( \WP_REST_Request $request ) {
@@ -173,6 +246,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * to match the logged in cookie in your browser.
 	 *
 	 * @param \WP_REST_Request $request Request object.
+	 *
 	 * @return \WP_Error|boolean
 	 */
 	protected function check_nonce( \WP_REST_Request $request ) {
@@ -194,6 +268,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		 * This can be used to disable the nonce check when testing API endpoints via a REST API client.
 		 *
 		 * @param boolean $disable_nonce_check If true, nonce checks will be disabled.
+		 *
 		 * @return boolean
 		 */
 		if ( apply_filters( 'woocommerce_store_api_disable_nonce_check', false ) ) {
@@ -217,7 +292,8 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @param string $error_code String based error code.
 	 * @param string $error_message User facing error message.
 	 * @param int    $http_status_code HTTP status. Defaults to 500.
-	 * @param array  $additional_data  Extra data (key value pairs) to expose in the error response.
+	 * @param array  $additional_data Extra data (key value pairs) to expose in the error response.
+	 *
 	 * @return \WP_Error WP Error object.
 	 */
 	protected function get_route_error_response( $error_code, $error_message, $http_status_code = 500, $additional_data = [] ) {
@@ -238,6 +314,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 					)
 				);
 		}
+
 		return new \WP_Error( $error_code, $error_message, [ 'status' => $http_status_code ] );
 	}
 }
