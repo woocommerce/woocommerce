@@ -110,3 +110,35 @@ export function calculateDelta( primaryValue: number, secondaryValue: number ) {
 		( ( primaryValue - secondaryValue ) / secondaryValue ) * 100
 	);
 }
+
+/**
+ * Parse a string into a number using site's current config
+ *
+ * @param {NumberConfig} numberConfig Number formatting configuration object.
+ * @param {string}       value        value to parse
+ * @return {string} A parsed number.
+ */
+export function parseNumber(
+	{
+		precision = null,
+		decimalSeparator = '.',
+		thousandSeparator = ',',
+	}: Partial< NumberConfig >,
+	value: string
+): string {
+	if ( typeof value !== 'string' || value === '' ) {
+		return '';
+	}
+
+	let parsedPrecision = precision === null ? NaN : Number( precision );
+	if ( isNaN( parsedPrecision ) ) {
+		const [ , decimals ] = value.split( decimalSeparator );
+		parsedPrecision = decimals ? decimals.length : 0;
+	}
+
+	return Number.parseFloat(
+		value
+			.replace( new RegExp( `\\${ thousandSeparator }`, 'g' ), '' )
+			.replace( new RegExp( `\\${ decimalSeparator }`, 'g' ), '.' )
+	).toFixed( parsedPrecision );
+}

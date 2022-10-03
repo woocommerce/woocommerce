@@ -3,9 +3,12 @@ $place-holder-size: 3px;
 .woocommerce-sortable__item {
     margin: 0;
     position: relative;
+    list-style: none;
 
     &.is-dragging {
-        display: none;
+        opacity: 0;
+        height: 0;
+        width: 0;
     }
 
     &:before,

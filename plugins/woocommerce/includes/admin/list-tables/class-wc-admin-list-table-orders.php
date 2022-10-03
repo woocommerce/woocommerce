@@ -173,49 +173,49 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * Render column: order_number.
 	 */
 	protected function render_order_number_column() {
-		$this->orders_list_table->column_order_number( $this->object );
+		$this->orders_list_table->render_order_number_column( $this->object );
 	}
 
 	/**
 	 * Render column: order_status.
 	 */
 	protected function render_order_status_column() {
-		$this->orders_list_table->column_order_status( $this->object );
+		$this->orders_list_table->render_order_status_column( $this->object );
 	}
 
 	/**
 	 * Render column: order_date.
 	 */
 	protected function render_order_date_column() {
-		$this->orders_list_table->column_order_date( $this->object );
+		$this->orders_list_table->render_order_date_column( $this->object );
 	}
 
 	/**
 	 * Render column: order_total.
 	 */
 	protected function render_order_total_column() {
-		$this->orders_list_table->column_order_total( $this->object );
+		$this->orders_list_table->render_order_total_column( $this->object );
 	}
 
 	/**
 	 * Render column: wc_actions.
 	 */
 	protected function render_wc_actions_column() {
-		$this->orders_list_table->column_wc_actions( $this->object );
+		$this->orders_list_table->render_wc_actions_column( $this->object );
 	}
 
 	/**
 	 * Render column: billing_address.
 	 */
 	protected function render_billing_address_column() {
-		$this->orders_list_table->column_billing_address( $this->object );
+		$this->orders_list_table->render_billing_address_column( $this->object );
 	}
 
 	/**
 	 * Render column: shipping_address.
 	 */
 	protected function render_shipping_address_column() {
-		$this->orders_list_table->column_shipping_address( $this->object );
+		$this->orders_list_table->render_shipping_address_column( $this->object );
 	}
 
 	/**
@@ -224,83 +224,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * @since 3.3.0
 	 */
 	public function order_preview_template() {
-		?>
-		<script type="text/template" id="tmpl-wc-modal-view-order">
-			<div class="wc-backbone-modal wc-order-preview">
-				<div class="wc-backbone-modal-content">
-					<section class="wc-backbone-modal-main" role="main">
-						<header class="wc-backbone-modal-header">
-							<mark class="order-status status-{{ data.status }}"><span>{{ data.status_name }}</span></mark>
-							<?php /* translators: %s: order ID */ ?>
-							<h1><?php echo esc_html( sprintf( __( 'Order #%s', 'woocommerce' ), '{{ data.order_number }}' ) ); ?></h1>
-							<button class="modal-close modal-close-link dashicons dashicons-no-alt">
-								<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce' ); ?></span>
-							</button>
-						</header>
-						<article>
-							<?php do_action( 'woocommerce_admin_order_preview_start' ); ?>
-
-							<div class="wc-order-preview-addresses">
-								<div class="wc-order-preview-address">
-									<h2><?php esc_html_e( 'Billing details', 'woocommerce' ); ?></h2>
-									{{{ data.formatted_billing_address }}}
-
-									<# if ( data.data.billing.email ) { #>
-										<strong><?php esc_html_e( 'Email', 'woocommerce' ); ?></strong>
-										<a href="mailto:{{ data.data.billing.email }}">{{ data.data.billing.email }}</a>
-									<# } #>
-
-									<# if ( data.data.billing.phone ) { #>
-										<strong><?php esc_html_e( 'Phone', 'woocommerce' ); ?></strong>
-										<a href="tel:{{ data.data.billing.phone }}">{{ data.data.billing.phone }}</a>
-									<# } #>
-
-									<# if ( data.payment_via ) { #>
-										<strong><?php esc_html_e( 'Payment via', 'woocommerce' ); ?></strong>
-										{{{ data.payment_via }}}
-									<# } #>
-								</div>
-								<# if ( data.needs_shipping ) { #>
-									<div class="wc-order-preview-address">
-										<h2><?php esc_html_e( 'Shipping details', 'woocommerce' ); ?></h2>
-										<# if ( data.ship_to_billing ) { #>
-											{{{ data.formatted_billing_address }}}
-										<# } else { #>
-											<a href="{{ data.shipping_address_map_url }}" target="_blank">{{{ data.formatted_shipping_address }}}</a>
-										<# } #>
-
-										<# if ( data.shipping_via ) { #>
-											<strong><?php esc_html_e( 'Shipping method', 'woocommerce' ); ?></strong>
-											{{ data.shipping_via }}
-										<# } #>
-									</div>
-								<# } #>
-
-								<# if ( data.data.customer_note ) { #>
-									<div class="wc-order-preview-note">
-										<strong><?php esc_html_e( 'Note', 'woocommerce' ); ?></strong>
-										{{ data.data.customer_note }}
-									</div>
-								<# } #>
-							</div>
-
-							{{{ data.item_html }}}
-
-							<?php do_action( 'woocommerce_admin_order_preview_end' ); ?>
-						</article>
-						<footer>
-							<div class="inner">
-								{{{ data.actions_html }}}
-
-								<a class="button button-primary button-large" aria-label="<?php esc_attr_e( 'Edit this order', 'woocommerce' ); ?>" href="<?php echo esc_url( admin_url( 'post.php?action=edit' ) ); ?>&post={{ data.data.id }}"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
-							</div>
-						</footer>
-					</section>
-				</div>
-			</div>
-			<div class="wc-backbone-modal-backdrop modal-close"></div>
-		</script>
-		<?php
+		echo $this->orders_list_table->get_order_preview_template();
 	}
 
 	/**

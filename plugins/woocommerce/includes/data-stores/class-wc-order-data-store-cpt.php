@@ -74,6 +74,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		'_recorded_coupon_usage_counts',
 		'_download_permissions_granted',
 		'_order_stock_reduced',
+		'_new_order_email_sent',
 	);
 
 	/**
@@ -85,8 +86,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		'_download_permissions_granted' => 'download_permissions_granted',
 		'_recorded_sales'               => 'recorded_sales',
 		'_recorded_coupon_usage_counts' => 'recorded_coupon_usage_counts',
-		'_order_stock_reduced'          => 'stock_reduced',
-		'_new_order_email_sent'         => 'email_sent',
+		'_order_stock_reduced'          => 'order_stock_reduced',
+		'_new_order_email_sent'         => 'new_order_email_sent',
 	);
 
 	/**
@@ -125,39 +126,46 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$order->set_props(
 			array(
-				'order_key'            => get_post_meta( $id, '_order_key', true ),
-				'customer_id'          => get_post_meta( $id, '_customer_user', true ),
-				'billing_first_name'   => get_post_meta( $id, '_billing_first_name', true ),
-				'billing_last_name'    => get_post_meta( $id, '_billing_last_name', true ),
-				'billing_company'      => get_post_meta( $id, '_billing_company', true ),
-				'billing_address_1'    => get_post_meta( $id, '_billing_address_1', true ),
-				'billing_address_2'    => get_post_meta( $id, '_billing_address_2', true ),
-				'billing_city'         => get_post_meta( $id, '_billing_city', true ),
-				'billing_state'        => get_post_meta( $id, '_billing_state', true ),
-				'billing_postcode'     => get_post_meta( $id, '_billing_postcode', true ),
-				'billing_country'      => get_post_meta( $id, '_billing_country', true ),
-				'billing_email'        => get_post_meta( $id, '_billing_email', true ),
-				'billing_phone'        => get_post_meta( $id, '_billing_phone', true ),
-				'shipping_first_name'  => get_post_meta( $id, '_shipping_first_name', true ),
-				'shipping_last_name'   => get_post_meta( $id, '_shipping_last_name', true ),
-				'shipping_company'     => get_post_meta( $id, '_shipping_company', true ),
-				'shipping_address_1'   => get_post_meta( $id, '_shipping_address_1', true ),
-				'shipping_address_2'   => get_post_meta( $id, '_shipping_address_2', true ),
-				'shipping_city'        => get_post_meta( $id, '_shipping_city', true ),
-				'shipping_state'       => get_post_meta( $id, '_shipping_state', true ),
-				'shipping_postcode'    => get_post_meta( $id, '_shipping_postcode', true ),
-				'shipping_country'     => get_post_meta( $id, '_shipping_country', true ),
-				'shipping_phone'       => get_post_meta( $id, '_shipping_phone', true ),
-				'payment_method'       => get_post_meta( $id, '_payment_method', true ),
-				'payment_method_title' => get_post_meta( $id, '_payment_method_title', true ),
-				'transaction_id'       => get_post_meta( $id, '_transaction_id', true ),
-				'customer_ip_address'  => get_post_meta( $id, '_customer_ip_address', true ),
-				'customer_user_agent'  => get_post_meta( $id, '_customer_user_agent', true ),
-				'created_via'          => get_post_meta( $id, '_created_via', true ),
-				'date_completed'       => $date_completed,
-				'date_paid'            => $date_paid,
-				'cart_hash'            => get_post_meta( $id, '_cart_hash', true ),
-				'customer_note'        => $post_object->post_excerpt,
+				'order_key'                    => get_post_meta( $id, '_order_key', true ),
+				'customer_id'                  => get_post_meta( $id, '_customer_user', true ),
+				'billing_first_name'           => get_post_meta( $id, '_billing_first_name', true ),
+				'billing_last_name'            => get_post_meta( $id, '_billing_last_name', true ),
+				'billing_company'              => get_post_meta( $id, '_billing_company', true ),
+				'billing_address_1'            => get_post_meta( $id, '_billing_address_1', true ),
+				'billing_address_2'            => get_post_meta( $id, '_billing_address_2', true ),
+				'billing_city'                 => get_post_meta( $id, '_billing_city', true ),
+				'billing_state'                => get_post_meta( $id, '_billing_state', true ),
+				'billing_postcode'             => get_post_meta( $id, '_billing_postcode', true ),
+				'billing_country'              => get_post_meta( $id, '_billing_country', true ),
+				'billing_email'                => get_post_meta( $id, '_billing_email', true ),
+				'billing_phone'                => get_post_meta( $id, '_billing_phone', true ),
+				'shipping_first_name'          => get_post_meta( $id, '_shipping_first_name', true ),
+				'shipping_last_name'           => get_post_meta( $id, '_shipping_last_name', true ),
+				'shipping_company'             => get_post_meta( $id, '_shipping_company', true ),
+				'shipping_address_1'           => get_post_meta( $id, '_shipping_address_1', true ),
+				'shipping_address_2'           => get_post_meta( $id, '_shipping_address_2', true ),
+				'shipping_city'                => get_post_meta( $id, '_shipping_city', true ),
+				'shipping_state'               => get_post_meta( $id, '_shipping_state', true ),
+				'shipping_postcode'            => get_post_meta( $id, '_shipping_postcode', true ),
+				'shipping_country'             => get_post_meta( $id, '_shipping_country', true ),
+				'shipping_phone'               => get_post_meta( $id, '_shipping_phone', true ),
+				'payment_method'               => get_post_meta( $id, '_payment_method', true ),
+				'payment_method_title'         => get_post_meta( $id, '_payment_method_title', true ),
+				'transaction_id'               => get_post_meta( $id, '_transaction_id', true ),
+				'customer_ip_address'          => get_post_meta( $id, '_customer_ip_address', true ),
+				'customer_user_agent'          => get_post_meta( $id, '_customer_user_agent', true ),
+				'created_via'                  => get_post_meta( $id, '_created_via', true ),
+				'date_completed'               => $date_completed,
+				'date_paid'                    => $date_paid,
+				'cart_hash'                    => get_post_meta( $id, '_cart_hash', true ),
+				'customer_note'                => $post_object->post_excerpt,
+
+				// Operational data props.
+				'order_stock_reduced'          => get_post_meta( $id, '_order_stock_reduced', true ),
+				'download_permissions_granted' => get_post_meta( $id, '_download_permissions_granted', true ),
+				'new_order_email_sent'         => get_post_meta( $id, '_new_order_email_sent', true ),
+				'recorded_sales'               => wc_string_to_bool( get_post_meta( $id, '_recorded_sales', true ) ),
+				'recorded_coupon_usage_counts' => get_post_meta( $id, '_recorded_coupon_usage_counts', true ),
 			)
 		);
 	}
@@ -199,17 +207,22 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$updated_props     = array();
 		$id                = $order->get_id();
 		$meta_key_to_props = array(
-			'_order_key'            => 'order_key',
-			'_customer_user'        => 'customer_id',
-			'_payment_method'       => 'payment_method',
-			'_payment_method_title' => 'payment_method_title',
-			'_transaction_id'       => 'transaction_id',
-			'_customer_ip_address'  => 'customer_ip_address',
-			'_customer_user_agent'  => 'customer_user_agent',
-			'_created_via'          => 'created_via',
-			'_date_completed'       => 'date_completed',
-			'_date_paid'            => 'date_paid',
-			'_cart_hash'            => 'cart_hash',
+			'_order_key'                    => 'order_key',
+			'_customer_user'                => 'customer_id',
+			'_payment_method'               => 'payment_method',
+			'_payment_method_title'         => 'payment_method_title',
+			'_transaction_id'               => 'transaction_id',
+			'_customer_ip_address'          => 'customer_ip_address',
+			'_customer_user_agent'          => 'customer_user_agent',
+			'_created_via'                  => 'created_via',
+			'_date_completed'               => 'date_completed',
+			'_date_paid'                    => 'date_paid',
+			'_cart_hash'                    => 'cart_hash',
+			'_download_permissions_granted' => 'download_permissions_granted',
+			'_recorded_sales'               => 'recorded_sales',
+			'_recorded_coupon_usage_counts' => 'recorded_coupon_usage_counts',
+			'_new_order_email_sent'         => 'new_order_email_sent',
+			'_order_stock_reduced'          => 'order_stock_reduced',
 		);
 
 		$props_to_update = $this->get_props_to_update( $order, $meta_key_to_props );
@@ -222,6 +235,27 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				case 'date_completed':
 					$value = ! is_null( $value ) ? $value->getTimestamp() : '';
 					break;
+				case 'download_permissions_granted':
+				case 'recorded_sales':
+				case 'recorded_coupon_usage_counts':
+				case 'order_stock_reduced':
+					if ( is_null( $value ) || '' === $value ) {
+						break;
+					}
+					$value = is_bool( $value ) ? wc_bool_to_string( $value ) : $value;
+					break;
+				case 'new_order_email_sent':
+					if ( is_null( $value ) || '' === $value ) {
+						break;
+					}
+					$value = is_bool( $value ) ? wc_bool_to_string( $value ) : $value;
+					$value = 'yes' === $value ? 'true' : 'false'; // For backward compatibility, we store as true/false in DB.
+					break;
+			}
+
+			// We want to persist internal data store keys as 'yes' or 'no' if they are boolean to maintain compatibility.
+			if ( is_bool( $value ) && in_array( $prop, array_values( $this->internal_data_store_key_getters ), true ) ) {
+				$value = wc_bool_to_string( $value );
 			}
 
 			$updated = $this->update_or_delete_post_meta( $order, $meta_key, $value );
@@ -595,6 +629,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param bool         $set True or false.
 	 */
 	public function set_download_permissions_granted( $order, $set ) {
+		if ( $order instanceof WC_Order ) {
+			$order->set_download_permissions_granted( $set );
+		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_download_permissions_granted', wc_bool_to_string( $set ) );
 	}
@@ -617,6 +654,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param bool         $set True or false.
 	 */
 	public function set_recorded_sales( $order, $set ) {
+		if ( $order instanceof WC_Order ) {
+			$order->set_recorded_sales( $set );
+		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_recorded_sales', wc_bool_to_string( $set ) );
 	}
@@ -639,6 +679,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param bool         $set True or false.
 	 */
 	public function set_recorded_coupon_usage_counts( $order, $set ) {
+		if ( $order instanceof WC_Order ) {
+			$order->set_recorded_coupon_usage_counts( $set );
+		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_recorded_coupon_usage_counts', wc_bool_to_string( $set ) );
 	}
@@ -656,14 +699,40 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
+	 * Whether email have been sent for this order.
+	 *
+	 * @param WC_Order|int $order Order ID or order object.
+	 *
+	 * @return bool               Whether email is sent.
+	 */
+	public function get_new_order_email_sent( $order ) {
+		return $this->get_email_sent( $order );
+	}
+
+	/**
 	 * Stores information about whether email was sent.
 	 *
 	 * @param WC_Order|int $order Order ID or order object.
 	 * @param bool         $set True or false.
 	 */
 	public function set_email_sent( $order, $set ) {
+		if ( $order instanceof WC_Order ) {
+			$order->set_new_order_email_sent( $set );
+		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
-		update_post_meta( $order_id, '_new_order_email_sent', wc_bool_to_string( $set ) );
+		$value    = wc_bool_to_string( $set );
+		$value    = 'yes' === $value ? 'true' : 'false'; // For backward compat, we store this as true|false string.
+		update_post_meta( $order_id, '_new_order_email_sent', $value );
+	}
+
+	/**
+	 * Stores information about whether email was sent.
+	 *
+	 * @param WC_Order|int $order Order ID or order object.
+	 * @param bool         $set True or false.
+	 */
+	public function set_new_order_email_sent( $order, $set ) {
+		$this->set_email_sent( $order, $set );
 	}
 
 	/**
@@ -762,11 +831,34 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Stores information about whether stock was reduced.
 	 *
 	 * @param WC_Order|int $order Order ID or order object.
+	 * @return bool
+	 */
+	public function get_order_stock_reduced( $order ) {
+		return $this->get_stock_reduced( $order );
+	}
+
+	/**
+	 * Stores information about whether stock was reduced.
+	 *
+	 * @param WC_Order|int $order Order ID or order object.
 	 * @param bool         $set True or false.
 	 */
 	public function set_stock_reduced( $order, $set ) {
+		if ( $order instanceof WC_Order ) {
+			$order->set_order_stock_reduced( $set );
+		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_order_stock_reduced', wc_bool_to_string( $set ) );
+	}
+
+	/**
+	 * Gets information about whether stock was reduced.
+	 *
+	 * @param WC_Order|int $order Order ID or order object.
+	 * @param bool         $set True or false.
+	 */
+	public function set_order_stock_reduced( $order, $set ) {
+		$this->set_stock_reduced( $order, $set );
 	}
 
 	/**

@@ -2,6 +2,8 @@
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 
 /**
@@ -15,11 +17,6 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * @var CustomOrdersTableController
-	 */
-	private $cot_controller;
-
-	/**
 	 * Initializes system under test.
 	 */
 	public function setUp(): void {
@@ -29,9 +26,9 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 		OrderHelper::delete_order_custom_tables(); // We need this since non-temporary tables won't drop automatically.
 		OrderHelper::create_order_custom_table_if_not_exist();
-		$this->sut            = wc_get_container()->get( DataSynchronizer::class );
-		$this->cot_controller = wc_get_container()->get( CustomOrdersTableController::class );
-		$this->cot_controller->show_feature();
+		$this->sut           = wc_get_container()->get( DataSynchronizer::class );
+		$features_controller = wc_get_container()->get( Featurescontroller::class );
+		$features_controller->change_feature_enable( 'custom_order_tables', true );
 	}
 
 	/**
@@ -122,5 +119,31 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 		// So far so good, now if we change the authoritative source to posts, we should still have 0 order pending sync.
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 		$this->assertEquals( 0, $this->sut->get_current_orders_pending_sync_count() );
+	}
+
+	/**
+	 * When the CPT data store is authoritative, and an order is updated, we should propagate those changes to
+	 * the COT store immediately (rather than wait for sync to catch up). This guards against a situation where
+	 * the corresponding COT record is temporarily inaccurate.
+	 */
+	public function test_updates_to_cpt_orders_should_propagate_while_sync_is_in_progress() {
+		// Enable sync, make the posts table authoritative.
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+
+		$post_order = OrderHelper::create_order();
+		$this->assertInstanceOf(
+			WP_Post::class,
+			get_post( $post_order->get_id() ),
+			'The order was initially created as a post.'
+		);
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		$cot_order = wc_get_order( $post_order->get_id() );
+		$this->assertEquals(
+			OrdersTableDataStore::class,
+			$cot_order->get_data_store()->get_current_class_name(),
+			'The order was successfully copied to the COT table, outside of a dedicated synchronization batch.'
+		);
 	}
 }

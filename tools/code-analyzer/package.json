@@ -21,7 +21,7 @@
 		"eslint": "^7.32.0",
 		"ts-node": "^10.2.1",
 		"tslib": "^2.3.1",
-		"typescript": "^4.4.3"
+		"typescript": "^4.8.3"
 	},
 	"scripts": {
 		"lint": "eslint . --ext .ts --config .eslintrc",
@@ -29,7 +29,8 @@
 		"analyzer": "node -r ts-node/register ./src/commands/analyzer/index.ts"
 	},
 	"engines": {
-		"node": ">=12.0.0"
+		"node": "^16.13.1",
+		"pnpm": "^7.12.2"
 	},
 	"types": "dist/index.d.ts"
 }

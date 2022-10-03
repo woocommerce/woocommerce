@@ -30,25 +30,25 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	protected $data = array(
 		// Abstract order props.
-		'parent_id'            => 0,
-		'status'               => '',
-		'currency'             => '',
-		'version'              => '',
-		'prices_include_tax'   => false,
-		'date_created'         => null,
-		'date_modified'        => null,
-		'discount_total'       => 0,
-		'discount_tax'         => 0,
-		'shipping_total'       => 0,
-		'shipping_tax'         => 0,
-		'cart_tax'             => 0,
-		'total'                => 0,
-		'total_tax'            => 0,
+		'parent_id'                    => 0,
+		'status'                       => '',
+		'currency'                     => '',
+		'version'                      => '',
+		'prices_include_tax'           => false,
+		'date_created'                 => null,
+		'date_modified'                => null,
+		'discount_total'               => 0,
+		'discount_tax'                 => 0,
+		'shipping_total'               => 0,
+		'shipping_tax'                 => 0,
+		'cart_tax'                     => 0,
+		'total'                        => 0,
+		'total_tax'                    => 0,
 
 		// Order props.
-		'customer_id'          => 0,
-		'order_key'            => '',
-		'billing'              => array(
+		'customer_id'                  => 0,
+		'order_key'                    => '',
+		'billing'                      => array(
 			'first_name' => '',
 			'last_name'  => '',
 			'company'    => '',
@@ -61,7 +61,7 @@ class WC_Order extends WC_Abstract_Order {
 			'email'      => '',
 			'phone'      => '',
 		),
-		'shipping'             => array(
+		'shipping'                     => array(
 			'first_name' => '',
 			'last_name'  => '',
 			'company'    => '',
@@ -73,16 +73,39 @@ class WC_Order extends WC_Abstract_Order {
 			'country'    => '',
 			'phone'      => '',
 		),
-		'payment_method'       => '',
-		'payment_method_title' => '',
-		'transaction_id'       => '',
-		'customer_ip_address'  => '',
-		'customer_user_agent'  => '',
-		'created_via'          => '',
-		'customer_note'        => '',
-		'date_completed'       => null,
-		'date_paid'            => null,
-		'cart_hash'            => '',
+		'payment_method'               => '',
+		'payment_method_title'         => '',
+		'transaction_id'               => '',
+		'customer_ip_address'          => '',
+		'customer_user_agent'          => '',
+		'created_via'                  => '',
+		'customer_note'                => '',
+		'date_completed'               => null,
+		'date_paid'                    => null,
+		'cart_hash'                    => '',
+
+		// Operational data.
+		'order_stock_reduced'          => false,
+		'download_permissions_granted' => false,
+		'new_order_email_sent'         => false,
+		'recorded_sales'               => false,
+		'recorded_coupon_usage_counts' => false,
+	);
+
+	/**
+	 * List of properties that were earlier managed by data store. However, since DataStore is a not a stored entity in itself, they used to store data in metadata of the data object.
+	 * With custom tables, some of these are moved from metadata to their own columns, but existing code will still try to add them to metadata. This array is used to keep track of such properties.
+	 *
+	 * Only reason to add a property here is that you are moving properties from DataStore instance to data object. Otherwise, if you are adding a new property, consider adding it to $data array instead.
+	 *
+	 * @var array
+	 */
+	protected $legacy_datastore_props = array(
+		'_recorded_sales',
+		'_recorded_coupon_usage_counts',
+		'_download_permissions_granted',
+		'_order_stock_reduced',
+		'_new_order_email_sent',
 	);
 
 	/**
@@ -975,6 +998,50 @@ class WC_Order extends WC_Abstract_Order {
 		return $this->get_shipping_address_1() || $this->get_shipping_address_2();
 	}
 
+	/**
+	 * Gets information about whether stock was reduced.
+	 *
+	 * @since 7.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 * @return bool
+	 */
+	public function get_order_stock_reduced( string $context = 'view' ) {
+		return wc_string_to_bool( $this->get_prop( 'order_stock_reduced', $context ) );
+	}
+
+	/**
+	 * Gets information about whether permissions were generated yet.
+	 *
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 *
+	 * @return bool True if permissions were generated, false otherwise.
+	 */
+	public function get_download_permissions_granted( string $context = 'view' ) {
+		return wc_string_to_bool( $this->get_prop( 'download_permissions_granted', $context ) );
+	}
+
+	/**
+	 * Whether email have been sent for this order.
+	 *
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 *
+	 * @return bool
+	 */
+	public function get_new_order_email_sent( string $context = 'view' ) {
+		return wc_string_to_bool( $this->get_prop( 'new_order_email_sent', $context ) );
+	}
+
+	/**
+	 * Gets information about whether sales were recorded.
+	 *
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 *
+	 * @return bool True if sales were recorded, false otherwise.
+	 */
+	public function get_recorded_sales( string $context = 'view' ) {
+		return wc_string_to_bool( $this->get_prop( 'recorded_sales', $context ) );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -1361,6 +1428,50 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function set_cart_hash( $value ) {
 		$this->set_prop( 'cart_hash', $value );
+	}
+
+	/**
+	 * Stores information about whether stock was reduced.
+	 *
+	 * @param bool|string $value True if stock was reduced, false if not.
+	 *
+	 * @return void
+	 */
+	public function set_order_stock_reduced( $value ) {
+		$this->set_prop( 'order_stock_reduced', wc_string_to_bool( $value ) );
+	}
+
+	/**
+	 * Stores information about whether permissions were generated yet.
+	 *
+	 * @param bool|string $value True if permissions were generated, false if not.
+	 *
+	 * @return void
+	 */
+	public function set_download_permissions_granted( $value ) {
+		$this->set_prop( 'download_permissions_granted', wc_string_to_bool( $value ) );
+	}
+
+	/**
+	 * Stores information about whether email was sent.
+	 *
+	 * @param bool|string $value True if email was sent, false if not.
+	 *
+	 * @return void
+	 */
+	public function set_new_order_email_sent( $value ) {
+		$this->set_prop( 'new_order_email_sent', wc_string_to_bool( $value ) );
+	}
+
+	/**
+	 * Stores information about whether sales were recorded.
+	 *
+	 * @param bool|string $value True if sales were recorded, false if not.
+	 *
+	 * @return void
+	 */
+	public function set_recorded_sales( $value ) {
+		$this->set_prop( 'recorded_sales', wc_string_to_bool( $value ) );
 	}
 
 	/*

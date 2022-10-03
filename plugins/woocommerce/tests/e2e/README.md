@@ -1,6 +1,6 @@
 # WooCommerce Puppeteer End to End Tests
 
-**Please check the new E2E setup based on [Playwright + wp-env](./../../e2e).**
+**Please check the new E2E setup based on [Playwright + wp-env](./../e2e-pw).**
 
 This package uses `Puppeteer` as test runner and `e2e-environment` to spin up a test site. [Please check the new setup](./../../e2e), using `Playwright` as test runner and `wp-env` to spin up a test site.
 
