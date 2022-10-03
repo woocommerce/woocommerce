@@ -924,13 +924,13 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	/**
 	 * Helper method to initialize order object from DB data.
 	 *
-	 * @param \WC_Order $order Order object.
+	 * @param \WC_Abstract_Order $order Order object.
 	 * @param int       $order_id Order ID.
 	 * @param \stdClass $order_data Order data fetched from DB.
 	 *
 	 * @return void
 	 */
-	private function init_order_record( \WC_Order &$order, int $order_id, \stdClass $order_data ) {
+	private function init_order_record( \WC_Abstract_Order &$order, int $order_id, \stdClass $order_data ) {
 		$order->set_defaults();
 		$order->set_id( $order_id );
 		$filtered_meta_data = $this->filter_raw_meta_data( $order, $order_data->meta_data );
@@ -1146,8 +1146,8 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	/**
 	 * Sets order properties based on a row from the database.
 	 *
-	 * @param \WC_Order $order      The order object.
-	 * @param object    $order_data A row of order data from the database.
+	 * @param \WC_Abstract_Order $order      The order object.
+	 * @param object             $order_data A row of order data from the database.
 	 */
 	private function set_order_props_from_data( &$order, $order_data ) {
 		foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mapping ) {
@@ -1172,13 +1172,13 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	/**
 	 * Set order prop if a setter exists in either the order object or in the data store.
 	 *
-	 * @param \WC_Order $order Order object.
-	 * @param string    $prop_name Property name.
-	 * @param mixed     $prop_value Property value.
+	 * @param \WC_Abstract_Order $order Order object.
+	 * @param string             $prop_name Property name.
+	 * @param mixed              $prop_value Property value.
 	 *
 	 * @return bool True if the property was set, false otherwise.
 	 */
-	private function set_order_prop( \WC_Order $order, string $prop_name, $prop_value ) {
+	private function set_order_prop( \WC_Abstract_Order $order, string $prop_name, $prop_value ) {
 		$prop_setter_function_name = "set_{$prop_name}";
 		if ( is_callable( array( $order, $prop_setter_function_name ) ) ) {
 			return $order->{$prop_setter_function_name}( $prop_value );
@@ -1405,14 +1405,14 @@ FROM $order_meta_table
 	/**
 	 * Persists order changes to the database.
 	 *
-	 * @param \WC_Order $order        The order.
-	 * @param bool      $force_all_fields Force saving all fields to DB and just changed.
+	 * @param \WC_Abstract_Order $order            The order.
+	 * @param bool               $force_all_fields Force saving all fields to DB and just changed.
 	 *
 	 * @throws \Exception If order data is not valid.
 	 *
 	 * @since 6.8.0
 	 */
-	protected function persist_order_to_db( \WC_Order &$order, bool $force_all_fields = false ) {
+	protected function persist_order_to_db( &$order, bool $force_all_fields = false ) {
 		$context   = ( 0 === absint( $order->get_id() ) ) ? 'create' : 'update';
 		$data_sync = wc_get_container()->get( DataSynchronizer::class );
 
@@ -1462,16 +1462,16 @@ FROM $order_meta_table
 	/**
 	 * Generates an array of rows with all the details required to insert or update an order in the database.
 	 *
-	 * @param \WC_Order $order        The order.
-	 * @param string    $context      The context: 'create' or 'update'.
-	 * @param boolean   $only_changes Whether to consider only changes in the order for generating the rows.
+	 * @param \WC_Abstract_Order $order The order.
+	 * @param string             $context The context: 'create' or 'update'.
+	 * @param boolean            $only_changes Whether to consider only changes in the order for generating the rows.
 	 *
 	 * @return array
 	 * @throws \Exception When invalid data is found for the given context.
 	 *
 	 * @since 6.8.0
 	 */
-	protected function get_db_rows_for_order( \WC_Order $order, string $context = 'create', bool $only_changes = false ): array {
+	protected function get_db_rows_for_order( \WC_Abstract_Order $order, string $context = 'create', bool $only_changes = false ): array {
 		$result = array();
 
 		$row = $this->get_db_row_from_order( $order, $this->order_column_mapping, $only_changes );
@@ -1542,9 +1542,9 @@ FROM $order_meta_table
 	 * `$format` parameters. Values are taken from the order changes array and properly formatted for inclusion in the
 	 * database.
 	 *
-	 * @param \WC_Order $order          Order.
-	 * @param array     $column_mapping Table column mapping.
-	 * @param bool      $only_changes   Whether to consider only changes in the order object or all fields.
+	 * @param \WC_Abstract_Order $order          Order.
+	 * @param array              $column_mapping Table column mapping.
+	 * @param bool               $only_changes   Whether to consider only changes in the order object or all fields.
 	 * @return array
 	 *
 	 * @since 6.8.0
@@ -1587,8 +1587,8 @@ FROM $order_meta_table
 	/**
 	 * Method to delete an order from the database.
 	 *
-	 * @param \WC_Order $order Order object.
-	 * @param array     $args Array of args to pass to the delete method.
+	 * @param \WC_Abstract_Order $order Order object.
+	 * @param array              $args Array of args to pass to the delete method.
 	 *
 	 * @return void
 	 */
