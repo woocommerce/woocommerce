@@ -10,12 +10,36 @@
 	}
 	&__classes {
 		.product-shipping-section__spinner-wrapper {
-			min-height: 80px;
+			@media ( min-width: #{ ($break-medium) } ) {
+				min-height: 80px;
+			}
 		}
 	}
 	&__dimensions {
+		&-body {
+			display: grid;
+			gap: $gap-large;
+			grid-template-columns: 1fr;
+			@media ( min-width: #{ ($break-medium) } ) {
+				grid-template-columns: 1fr 1fr;
+			}
+			&-col {
+				&:last-child {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+				}
+			}
+		}
 		.product-shipping-section__spinner-wrapper {
-			min-height: 326px;
+			@media ( min-width: #{ ($break-medium) } ) {
+				min-height: 326px;
+			}
+		}
+	}
+	&-image {
+		@media ( min-width: #{ ($break-medium) } ) {
+			width: 100%;
 		}
 	}
 }

@@ -288,6 +288,7 @@ Object {
               data-wp-component="CardFooter"
             >
               <button
+                aria-disabled="true"
                 class="components-button is-primary"
                 disabled=""
                 type="button"
@@ -601,6 +602,7 @@ Object {
             data-wp-component="CardFooter"
           >
             <button
+              aria-disabled="true"
               class="components-button is-primary"
               disabled=""
               type="button"
