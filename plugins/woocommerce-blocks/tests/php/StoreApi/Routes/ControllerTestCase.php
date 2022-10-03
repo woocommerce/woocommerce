@@ -95,9 +95,9 @@ abstract class ControllerTestCase extends \WP_Test_REST_TestCase {
 	/**
 	 * Custom assertion of an API response to confirm data and response code is expected.
 	 *
-	 * @param string $endpoint_or_request Route endpoint to get.
-	 * @param int    $expected_response_code Expected response code.
-	 * @param array  $expected_response_data Expected response data.
+	 * @param string|\WP_Rest_Request $endpoint_or_request Route endpoint to get.
+	 * @param int                     $expected_response_code Expected response code.
+	 * @param array                   $expected_response_data Expected response data.
 	 */
 	public function assertApiResponse( $endpoint_or_request, $expected_response_code, $expected_response_data = null ) {
 		$response      = is_a( $endpoint_or_request, '\WP_Rest_Request' ) ? rest_get_server()->dispatch( $endpoint_or_request ) : $this->getApiResponse( $endpoint_or_request );
