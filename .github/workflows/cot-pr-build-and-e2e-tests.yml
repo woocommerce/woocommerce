@@ -75,22 +75,37 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm env:test:cot --filter=woocommerce
 
-            - name: Run tests command.
+            - name: Run Playwright API tests.
+              id: run_playwright_api_tests
               working-directory: plugins/woocommerce
               env:
                   BASE_URL: http://localhost:8086
                   USER_KEY: admin
                   USER_SECRET: password
-              run: pnpm exec wc-api-tests test api
+              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js
 
-            - name: Archive API test report
-              if: always()
+            - name: Generate Playwright API Test report.
+              id: generate_api_report
+              if: |
+                  always() &&
+                  (
+                    steps.run_playwright_api_tests.conclusion != 'cancelled' ||
+                    steps.run_playwright_api_tests.conclusion != 'skipped' 
+                  )
+              working-directory: plugins/woocommerce
+              run: pnpm exec allure generate --clean api-test-report/allure-results --output api-test-report/allure-report
+              
+            - name: Archive Playwright API test report
+              if: |
+                  always() &&
+                  steps.generate_api_report.conclusion == 'success'
               uses: actions/upload-artifact@v3
               with:
                   name: api-test-report---pr-${{ github.event.number }}
                   path: |
-                      ${{ env.API_TEST_REPORT_DIR }}/allure-results
-                      ${{ env.API_TEST_REPORT_DIR }}/allure-report
+                      plugins/woocommerce/api-test-report/allure-results
+                      plugins/woocommerce/api-test-report/allure-report
+                  if-no-files-found: ignore
                   retention-days: 5
 
     test-summary:
