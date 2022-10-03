@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the wc pay view logic so that we don't display it even when payment task is completed
