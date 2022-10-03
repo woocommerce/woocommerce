@@ -22,10 +22,14 @@ export function* getReviews( query: ReviewsQueryParams ) {
 			method: 'GET',
 		} );
 
-		const totalCount = parseInt(
-			response.headers.get( 'x-wp-total' ) ?? '0',
-			10
-		);
+		const totalCountFromHeader = response.headers.get( 'x-wp-total' );
+
+		if ( totalCountFromHeader === undefined ) {
+			throw new Error(
+				"Malformed response from server. 'x-wp-total' header is missing when retriving ./products/reviews."
+			);
+		}
+		const totalCount = parseInt( totalCountFromHeader, 10 );
 		yield updateReviews( query, response.data, totalCount );
 	} catch ( error ) {
 		yield setError( JSON.stringify( query ), error );
