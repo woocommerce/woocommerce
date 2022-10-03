@@ -59,7 +59,7 @@ function getInterpolatedSizeLabel( mixedString: string ) {
 export const ProductShippingSection: React.FC = () => {
 	const { getInputProps } = useFormContext< Product >();
 	const { formatNumber, parseNumber } = useProductHelper();
-	const [ highlightSide, setHighLightSide ] =
+	const [ highlightSide, setHighlightSide ] =
 		useState< ShippingDimensionsImageProps[ 'highlight' ] >();
 
 	const { shippingClasses, hasResolvedShippingClasses } = useSelect(
@@ -173,8 +173,8 @@ export const ProductShippingSection: React.FC = () => {
 									'woocommerce'
 								) }
 							</p>
-							<div className="product-shipping-section__dimensions__body">
-								<div className="product-shipping-section__dimensions__body__col">
+							<div className="product-shipping-section__dimensions-body">
+								<div className="product-shipping-section__dimensions-body-col">
 									<BaseControl
 										id="product_shipping_dimensions_width"
 										className={ inputWidthProps.className }
@@ -197,10 +197,10 @@ export const ProductShippingSection: React.FC = () => {
 												)
 											}
 											onFocus={ () => {
-												setHighLightSide( 'A' );
+												setHighlightSide( 'A' );
 											} }
 											onBlur={ () => {
-												setHighLightSide( undefined );
+												setHighlightSide( undefined );
 												inputWidthProps?.onBlur();
 											} }
 											suffix={ dimensionUnit }
@@ -229,10 +229,10 @@ export const ProductShippingSection: React.FC = () => {
 												)
 											}
 											onFocus={ () => {
-												setHighLightSide( 'B' );
+												setHighlightSide( 'B' );
 											} }
 											onBlur={ () => {
-												setHighLightSide( undefined );
+												setHighlightSide( undefined );
 												inputLengthProps?.onBlur();
 											} }
 											suffix={ dimensionUnit }
@@ -261,10 +261,10 @@ export const ProductShippingSection: React.FC = () => {
 												)
 											}
 											onFocus={ () => {
-												setHighLightSide( 'C' );
+												setHighlightSide( 'C' );
 											} }
 											onBlur={ () => {
-												setHighLightSide( undefined );
+												setHighlightSide( undefined );
 												inputHeightProps?.onBlur();
 											} }
 											suffix={ dimensionUnit }
@@ -294,10 +294,10 @@ export const ProductShippingSection: React.FC = () => {
 										/>
 									</BaseControl>
 								</div>
-								<div className="product-shipping-section__dimensions__body__col">
+								<div className="product-shipping-section__dimensions-body-col">
 									<ShippingDimensionsImage
 										highlight={ highlightSide }
-										className="product-shipping-section__dimensions__image"
+										className="product-shipping-section__dimensions-image"
 									/>
 								</div>
 							</div>

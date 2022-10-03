@@ -16,14 +16,14 @@
 		}
 	}
 	&__dimensions {
-		&__body {
+		&-body {
 			display: grid;
 			gap: $gap-large;
 			grid-template-columns: 1fr;
 			@media ( min-width: #{ ($break-medium) } ) {
 				grid-template-columns: 1fr 1fr;
 			}
-			&__col {
+			&-col {
 				&:last-child {
 					display: flex;
 					align-items: center;
@@ -37,7 +37,7 @@
 			}
 		}
 	}
-	&__image {
+	&-image {
 		@media ( min-width: #{ ($break-medium) } ) {
 			width: 100%;
 		}
