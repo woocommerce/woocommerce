@@ -77,6 +77,10 @@ export * from './onboarding/types';
 export * from './plugins/types';
 export * from './products/types';
 export * from './product-shipping-classes/types';
+export {
+	ProductAttributeTerm,
+	ProductAttributeTermsSelectors,
+} from './product-attribute-terms/types';
 export * from './orders/types';
 export {
 	ProductCategory,

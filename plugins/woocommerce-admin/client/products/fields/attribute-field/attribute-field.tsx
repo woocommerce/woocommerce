@@ -35,6 +35,22 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		}
 	};
 
+	const onAddNewAttributes = ( newAttributes: ProductAttribute[] ) => {
+		onChange( [
+			...value,
+			...newAttributes
+				.filter(
+					( newAttr ) =>
+						! value.find( ( attr ) => attr.id === newAttr.id )
+				)
+				.map( ( newAttr, index ) => {
+					newAttr.position = value.length + index;
+					return newAttr;
+				} ),
+		] );
+		setShowAddAttributeModal( false );
+	};
+
 	if ( ! value || value.length === 0 ) {
 		return (
 			<div className="woocommerce-attribute-field">
@@ -61,6 +77,15 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 						{ __( 'Add first attribute', 'woocommerce' ) }
 					</Button>
 				</div>
+				{ showAddAttributeModal && (
+					<AddAttributeModal
+						onCancel={ () => setShowAddAttributeModal( false ) }
+						onCreated={ onAddNewAttributes }
+						selectedAttributeIds={ ( value || [] ).map(
+							( attr ) => attr.id
+						) }
+					/>
+				) }
 			</div>
 		);
 	}
@@ -139,7 +164,8 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 			{ showAddAttributeModal && (
 				<AddAttributeModal
 					onCancel={ () => setShowAddAttributeModal( false ) }
-					onCreated={ () => {} }
+					onCreated={ onAddNewAttributes }
+					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
 				/>
 			) }
 		</div>

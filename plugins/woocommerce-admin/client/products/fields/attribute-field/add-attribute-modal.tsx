@@ -3,16 +3,16 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button, Modal, Notice, Spinner } from '@wordpress/components';
-import { useState } from '@wordpress/element';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { resolveSelect, useSelect } from '@wordpress/data';
+import { trash } from '@wordpress/icons';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
+	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
 	ProductAttribute,
+	ProductAttributeTerm,
 } from '@woocommerce/data';
 import {
 	__experimentalSelectControl as SelectControl,
-	__experimentalSelectControlMenuItem as MenuItem,
-	__experimentalSelectControlMenu as Menu,
 	Form,
 } from '@woocommerce/components';
 
@@ -20,17 +20,24 @@ import {
  * Internal dependencies
  */
 import './add-attribute-modal.scss';
+import { AsyncSelectControl } from '~/products/shared/async-select-control';
 
 type CreateCategoryModalProps = {
 	onCancel: () => void;
-	onCreated: ( newCategory: ProductAttribute ) => void;
+	onCreated: ( newCategories: ProductAttribute[] ) => void;
+	selectedAttributeIds?: number[];
+};
+
+type AttributeForm = {
+	attributes: Partial< ProductAttribute >[];
+	attributeTerms: Record< number, ProductAttributeTerm[] >;
 };
 
 export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 	onCancel,
 	onCreated,
+	selectedAttributeIds = [],
 } ) => {
-	const { createNotice } = useDispatch( 'core/notices' );
 	const { productAttributes, hasResolvedProductAttributes } = useSelect(
 		( select ) => {
 			const { getProductAttributes, hasFinishedResolution } = select(
@@ -46,6 +53,51 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 		[]
 	);
 
+	const addAnother = (
+		values: AttributeForm,
+		setValue: (
+			name: string,
+			value: AttributeForm[ keyof AttributeForm ]
+		) => void
+	) => {
+		setValue( 'attributes', [ ...values.attributes, {} ] );
+	};
+
+	const onAdd = ( values: AttributeForm ) => {
+		const newAttributesToAdd: ProductAttribute[] = [];
+		values.attributes.forEach( ( attr, index ) => {
+			if (
+				attr &&
+				attr.name &&
+				values.attributeTerms[ index ] &&
+				values.attributeTerms[ index ].length > 0
+			) {
+				newAttributesToAdd.push( {
+					...( attr as ProductAttribute ),
+					options: values.attributeTerms[ index ].map(
+						( term ) => term.name
+					),
+				} );
+			}
+		} );
+		onCreated( newAttributesToAdd );
+	};
+
+	const getFilteredItems = (
+		allItems: Partial< ProductAttribute >[],
+		inputValue: string,
+		selectedItems: Partial< ProductAttribute >[]
+	) => {
+		return allItems.filter(
+			( item ) =>
+				selectedItems.indexOf( item ) < 0 &&
+				selectedAttributeIds.indexOf( item.id || -1 ) < 0 &&
+				( item.name || '' )
+					.toLowerCase()
+					.startsWith( inputValue.toLowerCase() )
+		);
+	};
+
 	return (
 		<Modal
 			title={ __( 'Add attributes', 'woocommerce' ) }
@@ -60,8 +112,19 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 					) }
 				</p>
 			</Notice>
-			<Form< Partial< ProductAttribute >[] > initialValues={ [ {} ] }>
-				{ ( { values }: { values: Partial< ProductAttribute >[] } ) => {
+			<Form< AttributeForm >
+				initialValues={ { attributes: [ {} ], attributeTerms: {} } }
+			>
+				{ ( {
+					values,
+					setValue,
+				}: {
+					values: AttributeForm;
+					setValue: (
+						name: string,
+						value: AttributeForm[ keyof AttributeForm ]
+					) => void;
+				} ) => {
 					return (
 						<>
 							<table className="woocommerce-add-attribute-modal__table">
@@ -69,18 +132,84 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 									<th>Attribute</th>
 									<th>Values</th>
 								</tr>
-								{ values.map( ( attribute, index ) => (
-									<tr
-										key={ index }
-										className="woocommerce-add-attribute-modal__table-row"
-									>
-										<td>
-											{ hasResolvedProductAttributes ? (
-												<SelectControl<
-													Partial< ProductAttribute >
-												>
-													items={ productAttributes }
+								{ values.attributes.map(
+									( attribute, index ) => (
+										<tr
+											key={ index }
+											className="woocommerce-add-attribute-modal__table-row"
+										>
+											<td>
+												{ hasResolvedProductAttributes ? (
+													<SelectControl<
+														Partial< ProductAttribute >
+													>
+														items={
+															productAttributes
+														}
+														label=""
+														placeholder={ __(
+															'Search or create attribute',
+															'woocommerce'
+														) }
+														getItemLabel={ (
+															item
+														) => item?.name || '' }
+														getItemValue={ (
+															item
+														) => item?.id || '' }
+														getFilteredItems={
+															getFilteredItems
+														}
+														selected={ attribute }
+														onSelect={ ( item ) =>
+															setValue(
+																'attributes[' +
+																	index +
+																	']',
+																item
+															)
+														}
+														onRemove={ () =>
+															setValue(
+																'attributes[' +
+																	index +
+																	']',
+																{}
+															)
+														}
+													/>
+												) : (
+													<Spinner />
+												) }
+											</td>
+											<td>
+												<AsyncSelectControl< ProductAttributeTerm >
+													items={ [] }
+													multiple
+													disabled={
+														! values.attributes[
+															index
+														]?.id
+													}
 													label=""
+													onSearch={ (
+														searchString:
+															| string
+															| undefined
+													) => {
+														return resolveSelect(
+															EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
+														).getProductAttributeTerms<
+															ProductAttributeTerm[]
+														>( {
+															search: searchString,
+															attribute_id:
+																values
+																	.attributes[
+																	index
+																]?.id,
+														} );
+													} }
 													placeholder={ __(
 														'Search or create attribute',
 														'woocommerce'
@@ -89,23 +218,61 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 														item?.name || ''
 													}
 													getItemValue={ ( item ) =>
-														item?.id || ''
+														item?.slug || ''
 													}
-													selected={ attribute }
+													selected={
+														values.attributeTerms[
+															index
+														] || []
+													}
 													onSelect={ ( item ) =>
-														item
+														setValue(
+															'attributeTerms[' +
+																index +
+																']',
+															[
+																...( values
+																	.attributeTerms[
+																	index
+																] || [] ),
+																item,
+															]
+														)
 													}
-													onRemove={ () => {} }
+													onRemove={ ( item ) =>
+														setValue(
+															'attributes[' +
+																index +
+																'].options',
+															values.attributeTerms[
+																index
+															]?.filter(
+																( opt ) =>
+																	opt.slug !==
+																	item.slug
+															)
+														)
+													}
 												/>
-											) : (
-												<Spinner />
-											) }
-										</td>
-										<td></td>
-									</tr>
-								) ) }
+											</td>
+											<td>
+												<Button
+													icon={ trash }
+													label={ __(
+														'Remove attribute',
+														'woocommerce'
+													) }
+													onClick={ () => {} }
+												></Button>
+											</td>
+										</tr>
+									)
+								) }
 							</table>
-							<Button variant="tertiary">
+							<Button
+								variant="tertiary"
+								onClick={ () => addAnother( values, setValue ) }
+							>
 								+&nbsp;{ __( 'Add another', 'woocommerce' ) }
 							</Button>
 							<div className="woocommerce-add-attribute-modal__wrapper">
@@ -116,7 +283,10 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 									>
 										{ __( 'Cancel', 'woocommerce' ) }
 									</Button>
-									<Button isPrimary onClick={ () => {} }>
+									<Button
+										isPrimary
+										onClick={ () => onAdd( values ) }
+									>
 										{ __( 'Add', 'woocommerce' ) }
 									</Button>
 								</div>
