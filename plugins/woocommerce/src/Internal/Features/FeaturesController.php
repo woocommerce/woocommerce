@@ -97,6 +97,8 @@ class FeaturesController {
 		self::add_filter( 'woocommerce_get_settings_advanced', array( $this, 'add_feature_settings' ), 10, 2 );
 		self::add_filter( 'activated_plugin', array( $this, 'handle_plugin_activation' ), 10, 0 );
 		self::add_filter( 'deactivated_plugin', array( $this, 'handle_plugin_deactivation' ), 10, 1 );
+		self::add_filter( 'all_plugins', array( $this, 'filter_plugins_list' ), 10, 1 );
+		self::add_action( 'admin_notices', array( $this, 'display_notice_in_plugins_page' ), 10, 0 );
 	}
 
 	/**
@@ -305,21 +307,26 @@ class FeaturesController {
 		$info['uncertain'] = array_values( array_diff( $woo_aware_plugins, $info['compatible'], $info['incompatible'] ) );
 
 		return $info;
-
 	}
 
 	/**
 	 * Check if the 'woocommerce_init' has run or is running, do a 'wc_doing_it_wrong' if not.
 	 *
-	 * @param string $function Name of the invoking method.
+	 * @param string|null $function Name of the invoking method, if not null, 'wc_doing_it_wrong' will be invoked if 'woocommerce_init' has not run and is not running.
+	 * @return bool True if 'woocommerce_init' has run or is running, false otherwise.
 	 */
-	private function verify_did_woocommerce_init( string $function ) {
+	private function verify_did_woocommerce_init( string $function = null ): bool {
 		if ( ! $this->proxy->call_function( 'did_action', 'woocommerce_init' ) &&
 			! $this->proxy->call_function( 'doing_action', 'woocommerce_init' ) ) {
-			$class_and_method = ( new \ReflectionClass( $this ) )->getShortName() . '::' . $function;
-			/* translators: 1: class::method 2: plugins_loaded */
-			$this->proxy->call_function( 'wc_doing_it_wrong', $class_and_method, sprintf( __( '%1$s should not be called before the %2$s action.', 'woocommerce' ), $class_and_method, 'woocommerce_init' ), '7.0' );
+			if ( ! is_null( $function ) ) {
+				$class_and_method = ( new \ReflectionClass( $this ) )->getShortName() . '::' . $function;
+				/* translators: 1: class::method 2: plugins_loaded */
+				$this->proxy->call_function( 'wc_doing_it_wrong', $class_and_method, sprintf( __( '%1$s should not be called before the %2$s action.', 'woocommerce' ), $class_and_method, 'woocommerce_init' ), '7.0' );
+			}
+			return false;
 		}
+
+		return true;
 	}
 
 	/**
@@ -517,6 +524,46 @@ class FeaturesController {
 			}
 		}
 
+		if ( ! $disabled && $this->verify_did_woocommerce_init() ) {
+			$plugin_info_for_feature = $this->get_compatible_plugins_for_feature( $feature_id );
+			$incompatibles           = array_merge( $plugin_info_for_feature['incompatible'], $plugin_info_for_feature['uncertain'] );
+			$incompatible_count      = count( $incompatibles );
+			if ( $incompatible_count > 0 ) {
+				$disabled = true;
+				if ( 1 === $incompatible_count ) {
+					/* translators: %s = printable plugin name */
+					$desc_tip = sprintf( __( "⚠ This feature can't be enabled, the %s plugin isn't compatible with it.", 'woocommerce' ), $this->plugin_util->get_plugin_name( $incompatibles[0] ) );
+				} elseif ( 2 === $incompatible_count ) {
+					/* translators: %1\$s, %2\$s = printable plugin names */
+					$desc_tip = sprintf(
+						__( "⚠ This feature can't be enabled: the %1\$s and %2\$s plugins aren't compatible with it.", 'woocommerce' ),
+						$this->plugin_util->get_plugin_name( $incompatibles[0] ),
+						$this->plugin_util->get_plugin_name( $incompatibles[1] )
+					);
+				} else {
+					/* translators: %1\$s, %2\$s = printable plugin names, %3\$d = plugins count */
+					$desc_tip = sprintf(
+						__( "⚠ This feature can't be enabled: %1\$s, %2\$s and %3\$d more plugins aren't compatible with it.", 'woocommerce' ),
+						$this->plugin_util->get_plugin_name( $incompatibles[0] ),
+						$this->plugin_util->get_plugin_name( $incompatibles[1] ),
+						$incompatible_count - 2
+					);
+				}
+
+				$incompatible_plugins_url = add_query_arg(
+					array(
+						'plugin_status' => 'incompatible_with_feature',
+						'feature_id'    => $feature_id,
+					),
+					admin_url( 'plugins.php' )
+				);
+				/* translators: %s = URL of the plugins page */
+				$extra_desc_tip = sprintf( __( " <a href='%s'>Manage incompatible plugins</a>", 'woocommerce' ), $incompatible_plugins_url );
+
+				$desc_tip .= $extra_desc_tip;
+			}
+		}
+
 		return array(
 			'title'    => $feature['name'],
 			'desc'     => $description,
@@ -565,5 +612,81 @@ class FeaturesController {
 			$this->compatibility_info_by_feature[ $feature ]['incompatible'] = array_diff( $incompatibles, array( $plugin_name ) );
 
 		}
+	}
+
+	/**
+	 * Handler for the all_plugins filter.
+	 *
+	 * Returns the list of plugins incompatible with a given plugin
+	 * if we are in the plugins page and the query string of the current request
+	 * looks like '?plugin_status=incompatible_with_feature&feature_id=<feature id>'.
+	 *
+	 * @param array $list The original list of plugins.
+	 */
+	private function filter_plugins_list( $list ): array {
+		if ( ! $this->verify_did_woocommerce_init() ) {
+			return $list;
+		}
+
+		// phpcs:disable WordPress.Security.NonceVerification
+		if ( 'plugins' !== get_current_screen()->id || 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) {
+			return $list;
+		}
+
+		$feature_id = ArrayUtil::get_value_or_default( $_GET, 'feature_id' );
+		if ( is_null( $feature_id ) || ! $this->feature_exists( $feature_id ) ) {
+			return $list;
+		}
+		// phpcs:enable WordPress.Security.NonceVerification
+
+		$plugin_info_for_feature = $this->get_compatible_plugins_for_feature( $feature_id );
+		$incompatibles           = array_merge( $plugin_info_for_feature['incompatible'], $plugin_info_for_feature['uncertain'] );
+		if ( 0 === count( $incompatibles ) ) {
+			return $list;
+		}
+
+		return array_intersect_key( $list, array_flip( $incompatibles ) );
+	}
+
+	/**
+	 * Handler for the admin_notices action.
+	 *
+	 * Shows a "You are viewing the plugins that are incompatible with the X feature"
+	 * if we are in the plugins page and the query string of the current request
+	 * looks like '?plugin_status=incompatible_with_feature&feature_id=<feature id>'.
+	 */
+	private function display_notice_in_plugins_page(): void {
+		if ( ! $this->verify_did_woocommerce_init() ) {
+			return;
+		}
+
+		// phpcs:disable WordPress.Security.NonceVerification
+		if ( 'plugins' !== get_current_screen()->id || 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) {
+			return;
+		}
+
+		$feature_id = ArrayUtil::get_value_or_default( $_GET, 'feature_id' );
+		if ( is_null( $feature_id ) || ! $this->feature_exists( $feature_id ) ) {
+			return;
+		}
+		// phpcs:enable WordPress.Security.NonceVerification
+
+		$plugins_page_url  = admin_url( 'plugins.php' );
+		$plugin_name       = $this->features[ $feature_id ]['name'];
+		$features_page_url = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' );
+		$message           = sprintf(
+			__( "You are viewing the plugins that are incompatible with the '%1\$s' feature. <a href='%2\$s'>View all plugins</a> - <a href='%3\$s'>Manage wooCommerce features</a>", 'woocommerce' ),
+			$plugin_name,
+			$plugins_page_url,
+			$features_page_url
+		);
+
+		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+		?>
+		<div class="notice notice-info">
+			<p><?php echo $message; ?></p>
+		</div>
+		<?php
+		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 }

@@ -37,7 +37,7 @@ class PluginUtil {
 	 * @param bool $active_only True to return only active plugins, false to return all the active plugins.
 	 * @return string[] A list of plugin names (path/file.php).
 	 */
-	public function get_woocommerce_aware_plugins( bool $active_only = false ) {
+	public function get_woocommerce_aware_plugins( bool $active_only = false ): array {
 		$all_plugins = $this->proxy->call_function( 'get_plugins' );
 
 		return array_keys(
@@ -50,5 +50,16 @@ class PluginUtil {
 				ARRAY_FILTER_USE_BOTH
 			)
 		);
+	}
+
+	/**
+	 * Get the printable name of a plugin.
+	 *
+	 * @param string $plugin_id Plugin id (path/file.php).
+	 * @return string Printable plugin name, or the plugin id itself if printable name is not available.
+	 */
+	public function get_plugin_name( string $plugin_id ): string {
+		$plugin_data = $this->proxy->call_function( 'get_plugin_data', WP_PLUGIN_DIR . DIRECTORY_SEPARATOR . $plugin_id );
+		return ArrayUtil::get_value_or_default( $plugin_data, 'Name', $plugin_id );
 	}
 }

@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Tests\Utilities;
 
 use Automattic\WooCommerce\Utilities\PluginUtil;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 /**
  * A collection of tests for the PluginUtil class.
@@ -57,6 +58,22 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * 'test_get_plugin_name' returns the printable plugin name when available.
+	 */
+	public function test_get_plugin_name_with_name() {
+		$result = $this->sut->get_plugin_name( 'woo_aware_1' );
+		$this->assertEquals( 'The WooCommerce aware plugin #1', $result );
+	}
+
+	/**
+	 * 'test_get_plugin_name' returns back the plugin id when printable plugin name is not available.
+	 */
+	public function test_get_plugin_name_with_no_name() {
+		$result = $this->sut->get_plugin_name( 'woo_aware_2' );
+		$this->assertEquals( 'woo_aware_2', $result );
+	}
+
+	/**
 	 * Forces a fake list of plugins to be used by the tests.
 	 */
 	private function mock_plugin_functions() {
@@ -73,6 +90,14 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 				},
 				'is_plugin_active' => function( $plugin_name ) {
 					return 'woo_aware_3' !== $plugin_name;
+				},
+				'get_plugin_data'  => function( $plugin_name ) {
+					return StringUtil::ends_with( $plugin_name, 'woo_aware_1' ) ?
+						array(
+							'WC tested up to' => '1.0',
+							'Name'            => 'The WooCommerce aware plugin #1',
+						) :
+						array( 'WC tested up to' => '1.0' );
 				},
 			)
 		);
