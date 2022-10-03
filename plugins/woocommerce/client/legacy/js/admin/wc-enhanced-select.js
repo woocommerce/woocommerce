@@ -269,7 +269,7 @@ jQuery( function( $ ) {
 					var select2_args = $.extend( {
 						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
 						placeholder       : $( this ).data( 'placeholder' ),
-						minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : 3,
+						minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : '3',
 						escapeMarkup      : function( m ) {
 							return m;
 						},
@@ -308,12 +308,11 @@ jQuery( function( $ ) {
 				// Ajax category search boxes
 				$( ':input.wc-taxonomy-term-search' ).filter( ':not(.enhanced)' ).each( function() {
 					var return_format = $( this ).data( 'return_id' ) ? 'id' : 'slug';
-					var minimumInputLength = $( this ).data( 'minimum_input_length' ) ?? 3;
 
 					var select2_args = $.extend( {
 						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
 						placeholder       : $( this ).data( 'placeholder' ),
-						minimumInputLength: minimumInputLength,
+						minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : '3',
 						escapeMarkup      : function( m ) {
 							return m;
 						},
@@ -356,7 +355,7 @@ jQuery( function( $ ) {
 					var select2_args = $.extend( {
 						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
 						placeholder       : $( this ).data( 'placeholder' ),
-						minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : 3,
+						minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : '3',
 						escapeMarkup      : function( m ) {
 							return m;
 						},
