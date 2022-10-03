@@ -103,12 +103,8 @@ export default function ProductTemplateModal( { onClose } ) {
 			).then(
 				( data ) => {
 					if ( data && data.id ) {
-						const additionalParams =
-							selectedTemplate === 'physical'
-								? '&spotlight=true'
-								: '';
 						const link = getAdminLink(
-							`post.php?post=${ data.id }&action=edit&wc_onboarding_active_task=products&tutorial=true${ additionalParams }`
+							`post.php?post=${ data.id }&action=edit&wc_onboarding_active_task=products&tutorial=true`
 						);
 						window.location = link;
 					}
