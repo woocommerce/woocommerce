@@ -308,11 +308,8 @@ jQuery( function( $ ) {
 				// Ajax category search boxes
 				$( ':input.wc-taxonomy-term-search' ).filter( ':not(.enhanced)' ).each( function() {
 					var return_format = $( this ).data( 'return_id' ) ? 'id' : 'slug';
-					var minimumInputLength = 3;
+					var minimumInputLength = $( this ).data( 'minimum_input_length' ) ?? 3;
 
-					if ( $( this ).data( 'minimum_input_length' ) !== undefined ) {
-						minimumInputLength = $( this ).data( 'minimum_input_length' );
-					}
 					var select2_args = $.extend( {
 						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
 						placeholder       : $( this ).data( 'placeholder' ),
