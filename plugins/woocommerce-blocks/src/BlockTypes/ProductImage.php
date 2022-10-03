@@ -115,19 +115,26 @@ class ProductImage extends AbstractBlock {
 	/**
 	 * Render anchor.
 	 *
-	 * @param \WC_Product $product Product object.
-	 * @param array       $attributes Attributes.
+	 * @param \WC_Product $product       Product object.
+	 * @param string      $on_sale_badge Return value from $render_image.
+	 * @param string      $product_image Return value from $render_on_sale_badge.
+	 * @param array       $attributes    Attributes.
 	 * @return string
 	 */
-	private function render_anchor( $product, $attributes ) {
+	private function render_anchor( $product, $on_sale_badge, $product_image, $attributes ) {
 		$product_permalink = $product->get_permalink();
-
-		$border_radius = StyleAttributesUtils::get_border_radius_class_and_style( $attributes );
 
 		$pointer_events = false === $attributes['showProductLink'] ? 'pointer-events: none;' : '';
 
-		return sprintf( '<a href="%s" style="%s">', $product_permalink, $pointer_events, isset( $border_radius['style'] ) ? $border_radius['style'] : '' );
+		return sprintf(
+			'<a href="%1$s" style="%2$s">%3$s %4$s</a>',
+			$product_permalink,
+			$pointer_events,
+			$on_sale_badge,
+			$product_image
+		);
 	}
+
 
 
 	/**
@@ -140,7 +147,7 @@ class ProductImage extends AbstractBlock {
 		$image_info = wp_get_attachment_image_src( get_post_thumbnail_id( $product->get_id() ), 'woocommerce_thumbnail' );
 
 		if ( ! isset( $image_info[0] ) ) {
-			return sprintf( '<img src="%s" alt="" width="500 height="500" />', woocommerce_placeholder_img_src( 'woocommerce_thumbnail' ) );
+			return sprintf( '<img src="%s" alt="" width="500 height="500" />', wc_placeholder_img_src( 'woocommerce_thumbnail' ) );
 		}
 
 		return sprintf(
@@ -186,18 +193,17 @@ class ProductImage extends AbstractBlock {
 
 		if ( $product ) {
 			return sprintf(
-				'
-			<div class="wc-block-components-product-image wc-block-grid__product-image" style="%s %s">
-				 	%s
-				 	%s
-					%s
-				</a>
-			</div>',
+				'<div class="wc-block-components-product-image wc-block-grid__product-image" style="%1$s %2$s">
+					%3$s
+				</div>',
 				isset( $border_radius['style'] ) ? $border_radius['style'] : '',
 				isset( $margin['style'] ) ? $margin['style'] : '',
-				$this->render_anchor( $product, $parsed_attributes ),
-				$this->render_on_sale_badge( $product, $parsed_attributes ),
-				$this->render_image( $product )
+				$this->render_anchor(
+					$product,
+					$this->render_on_sale_badge( $product, $parsed_attributes ),
+					$this->render_image( $product ),
+					$parsed_attributes
+				)
 			);
 
 		}
