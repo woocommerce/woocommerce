@@ -2,6 +2,7 @@ packages:
     - 'packages/js/*'
     - 'plugins/*'
     - 'plugins/woocommerce/client/legacy'
+    - 'plugins/woocommerce/client/admin'
     - 'tools/monorepo-merge'
     - 'tools/code-analyzer'
     - 'tools/create-extension'
