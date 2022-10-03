@@ -1,9 +1,23 @@
 const { devices } = require( '@playwright/test' );
 require( 'dotenv' ).config();
 
-const base64auth = btoa(
-	`${ process.env.USER_KEY }:${ process.env.USER_SECRET }`
-);
+let baseURL = 'http://localhost:8086';
+let userKey = 'admin';
+let userSecret = 'password';
+
+if ( process.env.BASE_URL ) {
+	baseURL = process.env.BASE_URL;
+}
+
+if ( process.env.USER_KEY ) {
+	userKey = process.env.USER_KEY;
+}
+
+if ( process.env.USER_SECRET ) {
+	userSecret = process.env.USER_SECRET;
+}
+
+const base64auth = btoa( `${ userKey }:${ userSecret }` );
 
 const config = {
 	timeout: 90 * 1000,
@@ -32,7 +46,7 @@ const config = {
 		video: 'on-first-retry',
 		trace: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
-		baseURL: 'http://localhost:8086',
+		baseURL,
 		extraHTTPHeaders: {
 			// Add authorization token to all requests.
 			Authorization: `Basic ${ base64auth }`,

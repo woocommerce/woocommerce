@@ -30,25 +30,51 @@ If you are using Windows, we recommend using [Windows Subsystem for Linux (WSL)]
 api-core-tests are powered by Playwright. The test site is spinned up using `wp-env` (recommended), but we will continue to support `e2e-environment` in the meantime.
 
 **Running tests for the first time:**
+Note: the commands may need to be executed in `plugins/woocommerce` (or a subdirectory thereof)
 
 - `nvm use`
 - `pnpm install`
 - `pnpm run build --filter=woocommerce`
 - `pnpm env:test --filter=woocommerce`
 
-To run the test again, re-create the environment to start with a fresh state:
+Then execute the tests with the following command:
+
+- `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js` (headless)
+
+To run the test again, re-create the environment to start with a fresh state 
 
 - `pnpm env:destroy --filter=woocommerce`
 - `pnpm env:test --filter=woocommerce`
 
 Other ways of running tests:
 
-- `cd plugin/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js`(headless)
-- `cd plugin/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js --headed` (headed)
+- `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js --headed` (headed)
 - `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js --debug` (debug)
 - `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js ./tests/api-core-tests/tests/hello/hello.test.js` (running a single test)
 
 To see all options, run `cd plugins/woocommerce && pnpm playwright test --help`
+
+## Environment variables
+
+The following environment variables can be configured as shown in `.env.example`:
+
+```
+# Your site's base URL, not including a trailing slash
+BASE_URL="https://mysite.com"
+
+# The admin user's username or generated consumer key
+USER_KEY=""
+
+# The admin user's password or generated consumer secret
+USER_SECRET=""
+```
+
+For local setup, create a `.env` file in this folder with the three required values described above.
+If any of these variables are configured they will override the values automatically set in the `playwright.config.js`
+
+When using a username and password combination instead of a consumer secret and consumer key, make sure to have the [JSON Basic Authentication plugin](https://github.com/WP-API/Basic-Auth) installed and activated on the test site.
+
+For more information about authentication with the WooCommerce API, please see the [Authentication](https://woocommerce.github.io/woocommerce-rest-api-docs/?javascript#authentication) section in the WooCommerce REST API documentation.
 
 ### About the environment
 
