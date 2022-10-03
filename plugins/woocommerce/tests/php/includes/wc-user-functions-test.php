@@ -8,17 +8,26 @@ use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
+	/**
+	 * Setup COT.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->setup_cot();
 		$this->toggle_cot( false );
 	}
 
+	/**
+	 * Clean COT specific things.
+	 */
 	public function tearDown(): void {
 		parent::tearDown();
 		$this->clean_up_cot_setup();
 	}
 
+	/**
+	 * Test wc_get_customer_order_count. Borrowed from `WC_Tests_Customer_Functions` class for COT.
+	 */
 	public function test_hpos_wc_customer_bought_product() {
 		$this->toggle_cot( true );
 		$customer_id_1 = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
