@@ -1238,6 +1238,12 @@ class WC_Countries {
 							'hidden'   => true,
 						),
 					),
+					'MF' => array(
+						'state' => array(
+							'required' => false,
+							'hidden'   => true,
+						),
+					),
 					'MQ' => array(
 						'state' => array(
 							'required' => false,
