@@ -521,11 +521,56 @@ jQuery( function ( $ ) {
 		'click',
 		'button.select_all_attributes',
 		function () {
-			$( this )
-				.closest( 'td' )
-				.find( 'select option' )
-				.prop( 'selected', 'selected' );
-			$( this ).closest( 'td' ).find( 'select' ).trigger( 'change' );
+			$( '.product_attributes' ).block( {
+				message: null,
+				overlayCSS: {
+					background: '#fff',
+					opacity: 0.6,
+				},
+			} );
+
+			var $wrapper = $( this ).closest( '.woocommerce_attribute' );
+			var attribute = $wrapper.data( 'taxonomy' );
+
+			var data = {
+				action: 'woocommerce_json_search_taxonomy_terms',
+				taxonomy: attribute,
+				security: wc_enhanced_select_params.search_taxonomy_terms_nonce
+			};
+
+			$.get( woocommerce_admin_meta_boxes.ajax_url, data, function (
+				response
+			) {
+				if ( response.errors ) {
+					// Error.
+					window.alert( response.errors );
+				} else if ( response && response.length > 0 ) {
+					// Success.
+					response.forEach( function( term ) {
+						const currentItem = $wrapper
+							.find( 'select.attribute_values option[value="' + term.term_id + '"]' );
+						console.log( currentItem );
+						if ( currentItem && currentItem.length > 0 ) {
+							currentItem.prop( 'selected', 'selected' );
+						} else {
+							$wrapper
+								.find('select.attribute_values')
+								.append(
+									'<option value="' +
+									term.term_id +
+									'" selected="selected">' +
+									term.name +
+									'</option>'
+								);
+						}
+					});
+					$wrapper
+						.find( 'select.attribute_values' )
+						.trigger( 'change' );
+				}
+
+				$( '.product_attributes' ).unblock();
+			} );
 			return false;
 		}
 	);
