@@ -38,6 +38,7 @@ import {
 } from './constants';
 import { WelcomeFromCalypsoModal } from './welcome-from-calypso-modal';
 import { WelcomeModal } from './welcome-modal';
+import { MobileAppModal } from './mobile-app-modal';
 import './style.scss';
 import '../dashboard/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
@@ -93,6 +94,7 @@ export const Layout = ( {
 	}, [ maybeToggleColumns ] );
 
 	const shouldStickColumns = isWideViewport.current && twoColumns;
+	const shouldShowMobileAppModal = query.mobileAppModal ?? false;
 
 	const renderColumns = () => {
 		return (
@@ -158,6 +160,7 @@ export const Layout = ( {
 						} }
 					/>
 				) }
+				{ shouldShowMobileAppModal && <MobileAppModal /> }
 				{ window.wcAdminFeatures.navigation && (
 					<NavigationIntroModal />
 				) }

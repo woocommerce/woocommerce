@@ -41,6 +41,20 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	);
 
 	/**
+	 * List of properties that were earlier managed by data store. However, since DataStore is a not a stored entity in itself, they used to store data in metadata of the data object.
+	 * With custom tables, some of these are moved from metadata to their own columns, but existing code will still try to add them to metadata. This array is used to keep track of such properties.
+	 *
+	 * Only reason to add a property here is that you are moving properties from DataStore instance to data object. Otherwise, if you are adding a new property, consider adding it to $data array instead.
+	 *
+	 * @var array
+	 */
+	protected $legacy_datastore_props = array(
+		'_refunded_by',
+		'_refunded_payment',
+	);
+
+
+	/**
 	 * Get internal type (post type.)
 	 *
 	 * @return string

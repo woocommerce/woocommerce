@@ -2,8 +2,9 @@
  * External dependencies
  */
 import { createElement, Fragment } from '@wordpress/element';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { TextControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -143,6 +144,266 @@ describe( 'Form', () => {
 
 		await waitFor( () =>
 			expect( mockOnChange ).toHaveBeenCalledTimes( 1 )
+		);
+	} );
+
+	it( 'should call onChange with latest changed values', () => {
+		const mockOnChange = jest.fn();
+
+		const { queryByLabelText } = render(
+			<Form onChange={ mockOnChange } validate={ () => ( {} ) }>
+				{ ( {
+					setValue,
+					getInputProps,
+				}: FormContext< Record< string, string > > ) => {
+					return (
+						<TextControl
+							label={ 'First Name' }
+							{ ...getInputProps( 'firstName' ) }
+						/>
+					);
+				} }
+			</Form>
+		);
+
+		const firstNameInput = queryByLabelText( 'First Name' );
+		if ( firstNameInput ) {
+			fireEvent.change( firstNameInput, { target: { value: 'F' } } );
+			expect( mockOnChange ).toHaveBeenCalledWith(
+				{ name: 'firstName', value: 'F' },
+				{ firstName: 'F' },
+				true
+			);
+
+			fireEvent.change( firstNameInput, { target: { value: 'Fi' } } );
+			expect( mockOnChange ).toHaveBeenCalledWith(
+				{ name: 'firstName', value: 'Fi' },
+				{ firstName: 'Fi' },
+				true
+			);
+		}
+	} );
+
+	it( 'should call onChange with latest hasErrors', () => {
+		const mockOnChange = jest.fn();
+
+		type TestData = {
+			firstName: string;
+		};
+
+		const validate = ( data: TestData ): Record< string, string > => {
+			if ( data.firstName && data.firstName.length < 2 ) {
+				return {
+					firstName: 'Must be greater then 1',
+				};
+			}
+			return {};
+		};
+
+		const { queryByLabelText } = render(
+			<Form< TestData > onChange={ mockOnChange } validate={ validate }>
+				{ ( {
+					setValue,
+					getInputProps,
+				}: FormContext< Record< string, string > > ) => {
+					return (
+						<TextControl
+							label={ 'First Name' }
+							{ ...getInputProps( 'firstName' ) }
+						/>
+					);
+				} }
+			</Form>
+		);
+
+		const firstNameInput = queryByLabelText( 'First Name' );
+		if ( firstNameInput ) {
+			fireEvent.change( firstNameInput, { target: { value: 'F' } } );
+			expect( mockOnChange ).toHaveBeenCalledWith(
+				{ name: 'firstName', value: 'F' },
+				{ firstName: 'F' },
+				false
+			);
+
+			fireEvent.change( firstNameInput, { target: { value: 'Fi' } } );
+			expect( mockOnChange ).toHaveBeenCalledWith(
+				{ name: 'firstName', value: 'Fi' },
+				{ firstName: 'Fi' },
+				true
+			);
+		}
+	} );
+
+	it( 'should call onChanges with latest changed values with one change', () => {
+		const mockOnChanges = jest.fn();
+
+		const { queryByLabelText } = render(
+			<Form onChanges={ mockOnChanges } validate={ () => ( {} ) }>
+				{ ( {
+					setValue,
+					getInputProps,
+				}: FormContext< Record< string, string > > ) => {
+					return (
+						<TextControl
+							label={ 'First Name' }
+							{ ...getInputProps( 'firstName' ) }
+						/>
+					);
+				} }
+			</Form>
+		);
+
+		const firstNameInput = queryByLabelText( 'First Name' );
+		if ( firstNameInput ) {
+			fireEvent.change( firstNameInput, { target: { value: 'F' } } );
+			expect( mockOnChanges ).toHaveBeenCalledWith(
+				[ { name: 'firstName', value: 'F' } ],
+				{ firstName: 'F' },
+				true
+			);
+
+			fireEvent.change( firstNameInput, { target: { value: 'Fi' } } );
+			expect( mockOnChanges ).toHaveBeenCalledWith(
+				[ { name: 'firstName', value: 'Fi' } ],
+				{ firstName: 'Fi' },
+				true
+			);
+		}
+	} );
+
+	it( 'should call onChanges with latest hasErrors with one change', () => {
+		const mockOnChanges = jest.fn();
+
+		type TestData = {
+			firstName: string;
+		};
+
+		const validate = ( data: TestData ): Record< string, string > => {
+			if ( data.firstName && data.firstName.length < 2 ) {
+				return {
+					firstName: 'Must be greater then 1',
+				};
+			}
+			return {};
+		};
+
+		const { queryByLabelText } = render(
+			<Form< TestData > onChanges={ mockOnChanges } validate={ validate }>
+				{ ( {
+					setValue,
+					getInputProps,
+				}: FormContext< Record< string, string > > ) => {
+					return (
+						<TextControl
+							label={ 'First Name' }
+							{ ...getInputProps( 'firstName' ) }
+						/>
+					);
+				} }
+			</Form>
+		);
+
+		const firstNameInput = queryByLabelText( 'First Name' );
+		if ( firstNameInput ) {
+			fireEvent.change( firstNameInput, { target: { value: 'F' } } );
+			expect( mockOnChanges ).toHaveBeenCalledWith(
+				[ { name: 'firstName', value: 'F' } ],
+				{ firstName: 'F' },
+				false
+			);
+
+			fireEvent.change( firstNameInput, { target: { value: 'Fi' } } );
+			expect( mockOnChanges ).toHaveBeenCalledWith(
+				[ { name: 'firstName', value: 'Fi' } ],
+				{ firstName: 'Fi' },
+				true
+			);
+		}
+	} );
+
+	it( 'should call onChanges with latest changed values with multiple changes', () => {
+		const mockOnChanges = jest.fn();
+
+		const { queryByText } = render(
+			<Form onChanges={ mockOnChanges } validate={ () => ( {} ) }>
+				{ ( {
+					setValues,
+				}: FormContext< Record< string, string > > ) => {
+					return (
+						<button
+							onClick={ () => {
+								setValues( { foo: 'bar', foo2: 'bar2' } );
+							} }
+						>
+							Submit
+						</button>
+					);
+				} }
+			</Form>
+		);
+
+		const submitButton = queryByText( 'Submit' );
+		if ( submitButton ) {
+			userEvent.click( submitButton );
+		}
+
+		expect( mockOnChanges ).toHaveBeenCalledWith(
+			[
+				{ name: 'foo', value: 'bar' },
+				{ name: 'foo2', value: 'bar2' },
+			],
+			{ foo: 'bar', foo2: 'bar2' },
+			true
+		);
+	} );
+
+	it( 'should call onChanges with latest hasErrors with multiple changes', () => {
+		const mockOnChanges = jest.fn();
+
+		type TestData = {
+			foo: string;
+			foo2: string;
+		};
+
+		const validate = ( data: TestData ): Record< string, string > => {
+			if ( data.foo && data.foo.length < 2 ) {
+				return {
+					foo: 'Must be greater then 1',
+				};
+			}
+			return {};
+		};
+
+		const { queryByText } = render(
+			<Form onChanges={ mockOnChanges } validate={ validate }>
+				{ ( {
+					setValues,
+				}: FormContext< Record< string, string > > ) => {
+					return (
+						<button
+							onClick={ () => {
+								setValues( { foo: 'b', foo2: 'bar2' } );
+							} }
+						>
+							Submit
+						</button>
+					);
+				} }
+			</Form>
+		);
+
+		const submitButton = queryByText( 'Submit' );
+		if ( submitButton ) {
+			userEvent.click( submitButton );
+		}
+
+		expect( mockOnChanges ).toHaveBeenCalledWith(
+			[
+				{ name: 'foo', value: 'b' },
+				{ name: 'foo2', value: 'bar2' },
+			],
+			{ foo: 'b', foo2: 'bar2' },
+			false
 		);
 	} );
 

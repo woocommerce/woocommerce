@@ -47,6 +47,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 			add_action( 'woocommerce_order_status_cancelled_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_status_cancelled_to_completed_notification', array( $this, 'trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_status_cancelled_to_on-hold_notification', array( $this, 'trigger' ), 10, 2 );
+			add_action( 'woocommerce_email_footer', array( $this, 'mobile_messaging' ), 9 ); // Run before the default email footer.
 
 			// Call parent constructor.
 			parent::__construct();
@@ -93,7 +94,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 				$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
 				$this->placeholders['{order_number}'] = $this->object->get_order_number();
 
-				$email_already_sent = $order->get_meta( '_new_order_email_sent' );
+				$email_already_sent = $order->get_new_order_email_sent();
 			}
 
 			/**
@@ -102,7 +103,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 			 * @since 5.0.0
 			 * @param bool $allows Defaults to false.
 			 */
-			if ( 'true' === $email_already_sent && ! apply_filters( 'woocommerce_new_order_email_allows_resend', false ) ) {
+			if ( $email_already_sent && ! apply_filters( 'woocommerce_new_order_email_allows_resend', false ) ) {
 				return;
 			}
 
@@ -221,6 +222,25 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 					'desc_tip'    => true,
 				),
 			);
+		}
+
+
+		/**
+		 * Add mobile messaging.
+		 */
+		public function mobile_messaging() {
+			if ( null !== $this->object ) {
+				$domain = wp_parse_url( home_url(), PHP_URL_HOST );
+				wc_get_template(
+					'emails/email-mobile-messaging.php',
+					array(
+						'order'   => $this->object,
+						'blog_id' => class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
+						'now'     => new DateTime(),
+						'domain'  => is_string( $domain ) ? $domain : '',
+					)
+				);
+			}
 		}
 	}
 

@@ -21,6 +21,25 @@ export function getResourceName(
 	return `${ prefix }:${ identifierString }`;
 }
 
+/**
+ * Generate a resource name for order totals count.
+ *
+ * It omits query parameters from the identifier that don't affect
+ * totals values like pagination and response field filtering.
+ *
+ * @param {string} prefix Resource name prefix.
+ * @param {Object} query  Query for order totals count.
+ * @return {string} Resource name for order totals.
+ */
+export function getTotalCountResourceName(
+	prefix: string,
+	query: Record< string, unknown >
+) {
+	const { _fields, page, per_page, ...totalsQuery } = query;
+
+	return getResourceName( prefix, totalsQuery );
+}
+
 export function getResourcePrefix( resourceName: string ) {
 	const hasPrefixIndex = resourceName.indexOf( ':' );
 	return hasPrefixIndex < 0

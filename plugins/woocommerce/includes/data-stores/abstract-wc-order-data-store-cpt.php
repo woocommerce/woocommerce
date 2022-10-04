@@ -136,7 +136,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		/**
 		 * In older versions, discounts may have been stored differently.
 		 * Update them now so if the object is saved, the correct values are
-		 * stored. @todo When meta is flattened, handle this during migration.
+		 * stored.
 		 */
 		if ( version_compare( $order->get_version( 'edit' ), '2.3.7', '<' ) && $order->get_prices_include_tax( 'edit' ) ) {
 			$order->set_discount_total( (float) get_post_meta( $order->get_id(), '_cart_discount', true ) - (float) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
@@ -471,21 +471,50 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @return bool Whether the order was updated.
 	 */
 	public function update_order_from_object( $order ) {
+		global $wpdb;
 		if ( ! $order->get_id() ) {
 			return false;
 		}
 		$this->update_order_meta_from_object( $order );
-		return wp_update_post(
+		// Add hook to update post_modified date so that it's the same as order. Without this hook, WP will set the modified date to current date, and we will think that posts and orders are out of sync again.
+		add_filter( 'wp_insert_post_data', array( $this, 'update_post_modified_data' ), 10, 2 );
+		$updated = wp_update_post(
 			array(
-				'ID'            => $order->get_id(),
-				'post_date'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
-				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
-				'post_status'   => $this->get_post_status( $order ),
-				'post_parent'   => $order->get_parent_id(),
-				'post_excerpt'  => method_exists( $order, 'get_customer_note' ) ? $order->get_customer_note() : '',
-				'post_type'     => $order->get_type(),
+				'ID'                 => $order->get_id(),
+				// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- use of date is intentional.
+				'post_date'          => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
+				'post_date_gmt'      => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+				'post_status'        => $this->get_post_status( $order ),
+				'post_parent'        => $order->get_parent_id(),
+				'post_excerpt'       => method_exists( $order, 'get_customer_note' ) ? $order->get_customer_note() : '',
+				'post_type'          => $order->get_type(),
+				// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- use of date is intentional.
+				'order_modified'     => ! is_null( $order->get_date_modified() ) ? date( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ) : '',
+				'order_modified_gmt' => ! is_null( $order->get_date_modified() ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ) : '',
 			)
 		);
+		remove_filter( 'wp_insert_post_data', array( $this, 'update_post_modified_data' ) );
+		return $updated;
+	}
+
+	/**
+	 * Change the modified date of the post to match the order's modified date if passed.
+	 *
+	 * @hooked wp_insert_post_data See function update_order_from_object.
+	 *
+	 * @param array $data An array of slashed, sanitized, and processed post data.
+	 * @param array $postarr An array of sanitized (and slashed) but otherwise unmodified post data.
+	 *
+	 * @return array Data with updated modified date.
+	 */
+	public function update_post_modified_data( $data, $postarr ) {
+		if ( ! isset( $postarr['order_modified'] ) || ! isset( $postarr['order_modified_gmt'] ) ) {
+			return $data;
+		}
+
+		$data['post_modified']     = $postarr['order_modified'];
+		$data['post_modified_gmt'] = $postarr['order_modified_gmt'];
+		return $data;
 	}
 
 	/**

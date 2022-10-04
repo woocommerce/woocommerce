@@ -265,12 +265,19 @@ class WC_Email extends WC_Settings_API {
 	 * @return PHPMailer
 	 */
 	public function handle_multipart( $mailer ) {
-		if ( $this->sending && 'multipart' === $this->get_email_type() ) {
+		if ( ! $this->sending ) {
+			return $mailer;
+		}
+
+		if ( 'multipart' === $this->get_email_type() ) {
 			$mailer->AltBody = wordwrap( // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 				preg_replace( $this->plain_search, $this->plain_replace, wp_strip_all_tags( $this->get_content_plain() ) )
 			);
-			$this->sending   = false;
+		} else {
+			$mailer->AltBody = ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		}
+
+		$this->sending = false;
 		return $mailer;
 	}
 
@@ -685,6 +692,9 @@ class WC_Email extends WC_Settings_API {
 		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
 		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 		remove_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
+
+		// Clear the AltBody (if set) so that it does not leak across to different emails.
+		$this->clear_alt_body_field();
 
 		/**
 		 * Action hook fired when an email is sent.
@@ -1115,6 +1125,17 @@ class WC_Email extends WC_Settings_API {
 					}
 				});"
 			);
+		}
+	}
+
+	/**
+	 * Clears the PhpMailer AltBody field, to prevent that content from leaking across emails.
+	 */
+	private function clear_alt_body_field(): void {
+		global $phpmailer;
+
+		if ( $phpmailer instanceof PHPMailer\PHPMailer\PHPMailer ) {
+			$phpmailer->AltBody = ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		}
 	}
 }

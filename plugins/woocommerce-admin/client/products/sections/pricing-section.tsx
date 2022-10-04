@@ -11,6 +11,9 @@ import interpolateComponents from '@automattic/interpolate-components';
 import {
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
+	BaseControl,
+	Card,
+	CardBody,
 } from '@wordpress/components';
 
 /**
@@ -21,13 +24,11 @@ import { ProductSectionLayout } from '../layout/product-section-layout';
 import { getInputControlProps } from './utils';
 import { ADMIN_URL } from '../../utils/admin-settings';
 import { CurrencyContext } from '../../lib/currency-context';
-import {
-	NUMBERS_AND_DECIMAL_SEPARATOR,
-	ONLY_ONE_DECIMAL_SEPARATOR,
-} from '../constants';
+import { useProductHelper } from '../use-product-helper';
 
 export const PricingSection: React.FC = () => {
-	const { getInputProps, setValue } = useFormContext< Product >();
+	const { getInputProps } = useFormContext< Product >();
+	const { sanitizePrice } = useProductHelper();
 	const { isResolving: isTaxSettingsResolving, taxSettings } = useSelect(
 		( select ) => {
 			const { getSettings, hasFinishedResolution } =
@@ -43,36 +44,20 @@ export const PricingSection: React.FC = () => {
 	const pricesIncludeTax =
 		taxSettings.woocommerce_prices_include_tax === 'yes';
 	const context = useContext( CurrencyContext );
-	const { getCurrencyConfig } = context;
-	const { decimalSeparator } = getCurrencyConfig();
-	const sanitizeAndSetPrice = ( name: string, value: string ) => {
-		// Build regex to strip out everything except digits, decimal point and minus sign.
-		const regex = new RegExp(
-			NUMBERS_AND_DECIMAL_SEPARATOR.replace( '%s', decimalSeparator ),
-			'g'
-		);
-		const decimalRegex = new RegExp(
-			ONLY_ONE_DECIMAL_SEPARATOR.replaceAll( '%s', decimalSeparator ),
-			'g'
-		);
-		const cleanValue = value
-			.replace( regex, '' )
-			.replace( decimalRegex, '' )
-			.replace( decimalSeparator, '.' );
-		setValue( name, cleanValue );
-		return cleanValue;
-	};
 
-	const taxSettingsText =
-		'Per your {{link}}store settings{{/link}}, tax is {{strong}}%sincluded{{/strong}} in the price.';
-	const addNot = pricesIncludeTax ? '' : 'not ';
-	taxSettingsText.replace( taxSettingsText, addNot );
+	const taxIncludedInPriceText = __(
+		'Per your {{link}}store settings{{/link}}, tax is {{strong}}included{{/strong}} in the price.',
+		'woocommerce'
+	);
+	const taxNotIncludedInPriceText = __(
+		'Per your {{link}}store settings{{/link}}, tax is {{strong}}not included{{/strong}} in the price.',
+		'woocommerce'
+	);
 
 	const taxSettingsElement = interpolateComponents( {
-		mixedString: __(
-			'Per your {{link}}store settings{{/link}}, tax is {{strong}}not included{{/strong}} in the price.',
-			'woocommerce'
-		),
+		mixedString: pricesIncludeTax
+			? taxIncludedInPriceText
+			: taxNotIncludedInPriceText,
 		components: {
 			link: (
 				<Link
@@ -80,7 +65,9 @@ export const PricingSection: React.FC = () => {
 					target="_blank"
 					type="external"
 					onClick={ () => {
-						recordEvent( 'product_pricing_list_price_help' );
+						recordEvent(
+							'product_pricing_list_price_help_tax_settings_click'
+						);
 					} }
 				>
 					<></>
@@ -98,6 +85,15 @@ export const PricingSection: React.FC = () => {
 		components: {
 			span: <span className="woocommerce-product-form__optional-input" />,
 		},
+	} );
+
+	const regularPriceProps = getInputControlProps( {
+		...getInputProps( 'regular_price' ),
+		context,
+	} );
+	const salePriceProps = getInputControlProps( {
+		...getInputProps( 'sale_price' ),
+		context,
 	} );
 
 	return (
@@ -120,44 +116,54 @@ export const PricingSection: React.FC = () => {
 							recordEvent( 'add_product_pricing_help' );
 						} }
 					>
-						How to price your product: expert tips
+						{ __(
+							'How to price your product: expert tips',
+							'woocommerce'
+						) }
 					</Link>
 				</>
 			}
 		>
-			<div className="woocommerce-product-form__custom-label-input">
-				<InputControl
-					label={ __( 'List price', 'woocommerce' ) }
-					placeholder={ __( '10.59', 'woocommerce' ) }
-					{ ...getInputControlProps( {
-						...getInputProps( 'regular_price' ),
-						context,
-					} ) }
-					onChange={ ( value: string ) =>
-						sanitizeAndSetPrice( 'regular_price', value )
-					}
-				/>
-				{ ! isTaxSettingsResolving && (
-					<span className="woocommerce-product-form__secondary-text">
-						{ taxSettingsElement }
-					</span>
-				) }
-			</div>
+			<Card>
+				<CardBody>
+					<BaseControl
+						id="product_pricing_regular_price"
+						className={ regularPriceProps?.className ?? '' }
+						help={ regularPriceProps?.help ?? '' }
+					>
+						<InputControl
+							{ ...regularPriceProps }
+							label={ __( 'List price', 'woocommerce' ) }
+							placeholder={ __( '10.59', 'woocommerce' ) }
+							onChange={ ( value: string ) => {
+								const sanitizedValue = sanitizePrice( value );
+								regularPriceProps?.onChange( sanitizedValue );
+							} }
+						/>
+					</BaseControl>
+					{ ! isTaxSettingsResolving && (
+						<span className="woocommerce-product-form__secondary-text">
+							{ taxSettingsElement }
+						</span>
+					) }
 
-			<div className="woocommerce-product-form__custom-label-input">
-				<InputControl
-					label={ salePriceTitle }
-					id="sale_price"
-					placeholder={ __( '8.59', 'woocommerce' ) }
-					{ ...getInputControlProps( {
-						...getInputProps( 'sale_price' ),
-						context,
-					} ) }
-					onChange={ ( value: string ) =>
-						sanitizeAndSetPrice( 'sale_price', value )
-					}
-				/>
-			</div>
+					<BaseControl
+						id="product_pricing_sale_price"
+						className={ salePriceProps?.className ?? '' }
+						help={ salePriceProps?.help ?? '' }
+					>
+						<InputControl
+							{ ...salePriceProps }
+							label={ salePriceTitle }
+							placeholder={ __( '8.59', 'woocommerce' ) }
+							onChange={ ( value: string ) => {
+								const sanitizedValue = sanitizePrice( value );
+								salePriceProps?.onChange( sanitizedValue );
+							} }
+						/>
+					</BaseControl>
+				</CardBody>
+			</Card>
 		</ProductSectionLayout>
 	);
 };

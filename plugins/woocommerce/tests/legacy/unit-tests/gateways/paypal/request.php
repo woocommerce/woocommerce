@@ -106,7 +106,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 		// Create products.
 		$this->create_products( $product_count );
 
-		$this->order = WC_Helper_Order::create_order( $this->user );
+		$this->order = WC_Helper_Order::create_order();
 		$this->add_products_to_order( $this->order, $product_prices );
 
 		// Set payment method to Paypal.

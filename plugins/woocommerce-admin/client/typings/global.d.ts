@@ -28,6 +28,7 @@ declare global {
 			'transient-notices': boolean;
 			'wc-pay-promotion': boolean;
 			'wc-pay-welcome-page': boolean;
+			'woo-mobile-welcome': boolean;
 			'shipping-smart-defaults': boolean;
 			'shipping-setting-tour': boolean;
 		};

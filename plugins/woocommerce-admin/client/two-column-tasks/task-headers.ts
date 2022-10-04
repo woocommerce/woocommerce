@@ -1,6 +1,7 @@
 /**
  * Internal dependencies
  */
+import StoreDetailsHeader from './headers/store-details';
 import TaxHeader from './headers/tax';
 import MarketingHeader from './headers/marketing';
 import AppearanceHeader from './headers/appearance';
@@ -11,6 +12,7 @@ import PaymentsHeader from './headers/payments';
 import WoocommercePaymentsHeader from './headers/woocommerce-payments';
 
 const taskHeaders: Record< string, React.ElementType > = {
+	store_details: StoreDetailsHeader,
 	tax: TaxHeader,
 	shipping: ShippingHeader,
 	marketing: MarketingHeader,

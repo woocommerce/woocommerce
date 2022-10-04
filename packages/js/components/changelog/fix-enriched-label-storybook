@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix EnrichedLabel Storybook story styles so they don't affect other stories.

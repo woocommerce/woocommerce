@@ -1,0 +1,3 @@
+{
+	"extends": [ "plugin:@woocommerce/eslint-plugin/recommended" ]
+}
