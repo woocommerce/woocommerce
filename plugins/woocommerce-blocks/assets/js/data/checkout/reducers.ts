@@ -122,6 +122,18 @@ const reducer = ( state = defaultState, action: CheckoutAction ) => {
 			}
 			break;
 
+		case types.SET_PREFERS_COLLECTION:
+			if (
+				action.prefersCollection !== undefined &&
+				action.prefersCollection !== state.prefersCollection
+			) {
+				newState = {
+					...state,
+					prefersCollection: action.prefersCollection,
+				};
+			}
+			break;
+
 		case types.SET_ORDER_NOTES:
 			if (
 				action.orderNotes !== undefined &&

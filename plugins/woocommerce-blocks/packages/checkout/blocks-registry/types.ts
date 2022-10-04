@@ -13,6 +13,7 @@ export enum innerBlockAreas {
 	SHIPPING_ADDRESS = 'woocommerce/checkout-shipping-address-block',
 	BILLING_ADDRESS = 'woocommerce/checkout-billing-address-block',
 	SHIPPING_METHODS = 'woocommerce/checkout-shipping-methods-block',
+	COLLECTION_METHOD = 'woocommerce/checkout-collection-method',
 	PAYMENT_METHODS = 'woocommerce/checkout-payment-methods-block',
 	CART = 'woocommerce/cart',
 	EMPTY_CART = 'woocommerce/empty-cart-block',

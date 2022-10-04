@@ -13,6 +13,7 @@ import './checkout-order-summary-block';
 import './checkout-payment-block';
 import './checkout-express-payment-block';
 import './checkout-shipping-methods-block';
+import './checkout-collection-method';
 import './checkout-order-summary-subtotal';
 import './checkout-order-summary-fee';
 import './checkout-order-summary-discount';
