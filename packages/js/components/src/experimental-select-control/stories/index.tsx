@@ -11,6 +11,7 @@ import { createElement, useState } from '@wordpress/element';
 import { SelectedType, DefaultItemType, getItemLabelType } from '../types';
 import { MenuItem } from '../menu-item';
 import { SelectControl, selectControlStateChangeTypes } from '../';
+import { AsyncSelectControl } from '../async-select-control';
 import { Menu } from '../menu';
 
 const sampleItems = [
@@ -126,63 +127,71 @@ export const FuzzyMatching: React.FC = () => {
 export const Async: React.FC = () => {
 	const [ selectedItem, setSelectedItem ] =
 		useState< SelectedType< DefaultItemType > >( null );
-	const [ fetchedItems, setFetchedItems ] = useState< DefaultItemType[] >(
-		[]
-	);
-	const [ isFetching, setIsFetching ] = useState( false );
 
 	const fetchItems = ( value: string | undefined ) => {
-		setIsFetching( true );
-		setFetchedItems( [] );
-		setTimeout( () => {
-			const results = sampleItems.sort( () => 0.5 - Math.random() );
-			setFetchedItems( results );
-			setIsFetching( false );
-		}, 1500 );
+		return new Promise< DefaultItemType[] >( ( resolve ) => {
+			setTimeout( () => {
+				const results = sampleItems
+					.filter( ( item ) =>
+						item.label
+							.toLowerCase()
+							.includes( value?.toLowerCase() || '' )
+					)
+					.sort( () => 0.5 - Math.random() );
+				resolve( results );
+			}, 1500 );
+		} );
 	};
 
 	return (
 		<>
-			<SelectControl
+			<AsyncSelectControl
 				label="Async"
-				getFilteredItems={ ( allItems ) => {
-					return allItems;
-				} }
-				items={ fetchedItems }
-				onInputChange={ fetchItems }
+				onSearch={ fetchItems }
 				selected={ selectedItem }
 				onSelect={ ( item ) => setSelectedItem( item ) }
 				onRemove={ () => setSelectedItem( null ) }
 				placeholder="Start typing..."
-			>
-				{ ( {
-					items,
-					isOpen,
-					highlightedIndex,
-					getItemProps,
-					getMenuProps,
-				} ) => {
-					return (
-						<Menu isOpen={ isOpen } getMenuProps={ getMenuProps }>
-							{ isFetching ? (
-								<Spinner />
-							) : (
-								items.map( ( item, index: number ) => (
-									<MenuItem
-										key={ `${ item.value }${ index }` }
-										index={ index }
-										isActive={ highlightedIndex === index }
-										item={ item }
-										getItemProps={ getItemProps }
-									>
-										{ item.label }
-									</MenuItem>
-								) )
-							) }
-						</Menu>
-					);
-				} }
-			</SelectControl>
+			></AsyncSelectControl>
+		</>
+	);
+};
+
+export const AsyncWithClientSideFiltering: React.FC = () => {
+	const [ selectedItem, setSelectedItem ] =
+		useState< SelectedType< DefaultItemType > >( null );
+	const [ total, setTotal ] = useState< number | undefined >( undefined );
+
+	const fetchItems = ( value: string | undefined ) => {
+		return new Promise< DefaultItemType[] >( ( resolve ) => {
+			setTimeout( () => {
+				const results = sampleItems
+					.filter( ( item ) =>
+						item.label
+							.toLowerCase()
+							.includes( value?.toLowerCase() || '' )
+					)
+					.sort( () => 0.5 - Math.random() );
+				if ( ! value ) {
+					setTotal( results.length );
+				}
+				resolve( results );
+			}, 1500 );
+		} );
+	};
+
+	return (
+		<>
+			<AsyncSelectControl
+				label="Async"
+				pageSize={ 50 }
+				total={ total }
+				onSearch={ fetchItems }
+				selected={ selectedItem }
+				onSelect={ ( item ) => setSelectedItem( item ) }
+				onRemove={ () => setSelectedItem( null ) }
+				placeholder="Start typing..."
+			></AsyncSelectControl>
 		</>
 	);
 };

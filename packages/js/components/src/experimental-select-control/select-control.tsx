@@ -34,7 +34,7 @@ import {
 	defaultGetFilteredItems,
 } from './utils';
 
-type SelectControlProps< ItemType > = {
+export type SelectControlProps< ItemType > = {
 	children?: ChildrenType< ItemType >;
 	items: ItemType[];
 	label: string;
@@ -58,6 +58,7 @@ type SelectControlProps< ItemType > = {
 	) => Partial< UseComboboxState< ItemType | null > >;
 	placeholder?: string;
 	selected: ItemType | ItemType[] | null;
+	disabled?: boolean;
 };
 
 export const selectControlStateChangeTypes = useCombobox.stateChangeTypes;
@@ -100,6 +101,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 	stateReducer = ( state, actionAndChanges ) => actionAndChanges.changes,
 	placeholder,
 	selected,
+	disabled,
 }: SelectControlProps< ItemType > ) {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
@@ -234,6 +236,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 					},
 					onBlur: () => setIsFocused( false ),
 					placeholder,
+					disabled,
 				} ) }
 			>
 				<>
