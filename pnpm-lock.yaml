@@ -1977,6 +1977,8 @@ importers:
       '@storybook/react': ^6.4.19
       '@storybook/theming': ^6.4.19
       '@woocommerce/eslint-plugin': workspace:*
+      react: ^17.0.2
+      react-dom: ^17.0.2
       typescript: ^4.8.3
       webpack: ^5.70.0
     dependencies:
@@ -2002,6 +2004,8 @@ importers:
       '@storybook/react': 6.4.19_kfrjrhhwebekgpsugbnvvjaihu
       '@storybook/theming': 6.4.19_sfoxds7t5ydpegc3knd667wn6m
       '@woocommerce/eslint-plugin': link:../../packages/js/eslint-plugin
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
       typescript: 4.8.4
       webpack: 5.70.0
 
@@ -17104,7 +17108,7 @@ packages:
       loader-utils: 1.4.0
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 5.70.0_webpack-cli@4.9.2
+      webpack: 5.70.0
     dev: true
 
   /babel-loader/8.2.3_w4x3pzrj2omidyjy5w3nzug7xy:
@@ -17119,7 +17123,7 @@ packages:
       loader-utils: 1.4.0
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0
     dev: true
 
   /babel-messages/6.23.0:
@@ -19612,7 +19616,7 @@ packages:
       postcss-value-parser: 4.2.0
       schema-utils: 2.7.1
       semver: 6.3.0
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0
     dev: true
 
   /css-loader/3.6.0_webpack@5.70.0:
@@ -37313,7 +37317,7 @@ packages:
       serialize-javascript: 4.0.0
       source-map: 0.6.1
       terser: 4.8.0
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0
       webpack-sources: 1.4.3
       worker-farm: 1.7.0
     dev: true
