@@ -27,6 +27,7 @@ export const ImageGalleryItem: React.FC< ImageGalleryItemProps > = ( {
 	src,
 	className = '',
 	onClick = () => null,
+	onBlur = () => null,
 	children,
 }: ImageGalleryItemProps ) => (
 	<ConditionalWrapper
@@ -40,7 +41,8 @@ export const ImageGalleryItem: React.FC< ImageGalleryItemProps > = ( {
 			onKeyPress={ () => {} }
 			tabIndex={ 0 }
 			role="button"
-			onClick={ () => onClick() }
+			onClick={ ( event ) => onClick( event ) }
+			onBlur={ ( event ) => onBlur( event ) }
 		>
 			{ children }
 

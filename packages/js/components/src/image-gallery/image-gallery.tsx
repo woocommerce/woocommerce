@@ -143,6 +143,24 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 										: ( child.key as string )
 								);
 							},
+							onBlur: (
+								event: React.FocusEvent< HTMLDivElement >
+							) => {
+								if (
+									event.currentTarget.contains(
+										event.relatedTarget
+									) ||
+									( event.relatedTarget &&
+										(
+											event.relatedTarget as Element
+										 ).closest(
+											'.components-modal__frame'
+										) )
+								) {
+									return;
+								}
+								setToolBarItem( null );
+							},
 						},
 						isToolbarItem ? (
 							<ImageGalleryToolbar

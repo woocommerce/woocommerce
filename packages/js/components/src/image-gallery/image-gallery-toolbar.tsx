@@ -65,14 +65,12 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 							label="Drag"
 						/>
 						<ToolbarButton
-							className="woocommerce-image-gallery__toolbar-previous"
 							disabled={ childIndex < 2 }
 							onClick={ () => movePrevious() }
 							icon={ chevronLeft }
 							label="Move previous"
 						/>
 						<ToolbarButton
-							className="woocommerce-image-gallery__toolbar-next"
 							onClick={ () => moveNext() }
 							icon={ chevronRight }
 							label="Move next"
@@ -89,7 +87,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 						/>
 					</ToolbarGroup>
 				) }
-				<ToolbarGroup>
+				<ToolbarGroup className="woocommerce-image-gallery__toolbar-media">
 					<MediaUploadComponent
 						onSelect={ ( media ) =>
 							replaceItem( childIndex, media.url, media.alt )
