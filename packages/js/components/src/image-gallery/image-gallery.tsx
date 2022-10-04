@@ -6,7 +6,6 @@ import {
 	cloneElement,
 	useState,
 	useEffect,
-	useCallback,
 } from '@wordpress/element';
 import classnames from 'classnames';
 import { MediaUpload } from '@wordpress/media-utils';
@@ -17,6 +16,7 @@ import { MediaUpload } from '@wordpress/media-utils';
 import { Sortable, moveIndex } from '../sortable';
 import { ImageGalleryToolbar } from './index';
 import { ImageGalleryChild, MediaUploadComponentType } from './types';
+import { removeItem, replaceItem } from './utils';
 
 export type ImageGalleryProps = {
 	children: ImageGalleryChild | ImageGalleryChild[];
@@ -28,7 +28,6 @@ export type ImageGalleryProps = {
 	onReplace?: ( props: {
 		replaceIndex: number;
 		previousItem: ImageGalleryChild;
-		newItem: ImageGalleryChild;
 	} ) => void;
 	onOrderChange?: ( items: ImageGalleryChild[] ) => void;
 	MediaUploadComponent?: MediaUploadComponentType;
@@ -63,53 +62,6 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 		setOrderedChildren( items );
 		onOrderChange( orderedChildren );
 	};
-
-	const moveItem = useCallback(
-		( fromIndex: number, toIndex: number ) => {
-			updateOrderedChildren(
-				moveIndex< ImageGalleryChild >(
-					fromIndex,
-					toIndex,
-					orderedChildren
-				)
-			);
-		},
-		[ orderedChildren ]
-	);
-
-	const removeItem = useCallback(
-		( removeIndex: number ) => {
-			updateOrderedChildren(
-				orderedChildren.filter( ( _, index ) => index !== removeIndex )
-			);
-			onRemove( {
-				removeIndex,
-				removedItem: orderedChildren[ removeIndex ],
-			} );
-		},
-		[ orderedChildren ]
-	);
-
-	const replaceItem = useCallback(
-		( replaceIndex: number, newSrc: string, newAlt: string ) => {
-			const newChildren = [ ...orderedChildren ];
-			newChildren.splice(
-				replaceIndex,
-				1,
-				cloneElement( orderedChildren[ replaceIndex ], {
-					src: newSrc,
-					alt: newAlt,
-				} )
-			);
-			onReplace( {
-				replaceIndex,
-				previousItem: orderedChildren[ replaceIndex ],
-				newItem: newChildren[ replaceIndex ],
-			} );
-			updateOrderedChildren( newChildren );
-		},
-		[ orderedChildren ]
-	);
 
 	return (
 		<div
@@ -168,9 +120,51 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 								lastChild={
 									childIndex === orderedChildren.length - 1
 								}
-								moveItem={ moveItem }
-								removeItem={ removeItem }
-								replaceItem={ replaceItem }
+								moveItem={ (
+									fromIndex: number,
+									toIndex: number
+								) => {
+									updateOrderedChildren(
+										moveIndex< ImageGalleryChild >(
+											fromIndex,
+											toIndex,
+											orderedChildren
+										)
+									);
+								} }
+								removeItem={ ( removeIndex: number ) => {
+									onRemove( {
+										removeIndex,
+										removedItem:
+											orderedChildren[ removeIndex ],
+									} );
+									updateOrderedChildren(
+										removeItem(
+											orderedChildren,
+											removeIndex
+										)
+									);
+								} }
+								replaceItem={ (
+									replaceIndex: number,
+									newSrc: string,
+									newAlt: string
+								) => {
+									onReplace( {
+										replaceIndex,
+										previousItem:
+											orderedChildren[ replaceIndex ],
+									} );
+									updateOrderedChildren(
+										replaceItem< {
+											src: string;
+											alt: string;
+										} >( orderedChildren, replaceIndex, {
+											src: newSrc,
+											alt: newAlt,
+										} )
+									);
+								} }
 								setToolBarItem={ setToolBarItem }
 								MediaUploadComponent={ MediaUploadComponent }
 							/>

@@ -14,9 +14,9 @@ export const Basic: React.FC = () => {
 	return (
 		<ImageGallery
 			MediaUploadComponent={ MockMediaUpload }
-			onReplace={ ( { newItem, replaceIndex } ) =>
+			onReplace={ ( { replaceIndex } ) =>
 				// eslint-disable-next-line no-console
-				console.info( `Item ${ replaceIndex } replaced with`, newItem )
+				console.info( `Item ${ replaceIndex } replaced` )
 			}
 			onRemove={ ( { removeIndex } ) => {
 				// eslint-disable-next-line no-console
@@ -24,7 +24,7 @@ export const Basic: React.FC = () => {
 			} }
 			onOrderChange={ () => {
 				// eslint-disable-next-line no-console
-				console.info( `Order changed for image gallery items` );
+				console.info( `Order changed` );
 			} }
 		>
 			<ImageGalleryItem
