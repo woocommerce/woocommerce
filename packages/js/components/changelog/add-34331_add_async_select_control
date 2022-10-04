@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add AsyncSelectControl component for async dropdowns, this is a wrapper around the experimental AsyncControl.
