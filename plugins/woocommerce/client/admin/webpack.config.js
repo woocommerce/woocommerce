@@ -59,13 +59,13 @@ const wpAdminScripts = [
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
-		app: './client/index.js',
+		app: './index.js',
 	};
 	wcAdminPackages.forEach( ( name ) => {
 		entryPoints[ name ] = `../../../../packages/js/${ name }`;
 	} );
 	wpAdminScripts.forEach( ( name ) => {
-		entryPoints[ name ] = `./client/wp-admin-scripts/${ name }`;
+		entryPoints[ name ] = `./wp-admin-scripts/${ name }`;
 	} );
 	return entryPoints;
 };
@@ -148,7 +148,7 @@ const webpackConfig = {
 		},
 		extensions: [ '.json', '.js', '.jsx', '.ts', '.tsx' ],
 		alias: {
-			'~': path.resolve( __dirname + '/client' ),
+			'~': path.resolve( __dirname ),
 		},
 	},
 	plugins: [
