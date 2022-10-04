@@ -5,6 +5,7 @@ import { createElement } from '@wordpress/element';
 import { Toolbar, ToolbarButton, ToolbarGroup } from '@wordpress/components';
 import { chevronRight, chevronLeft, trash } from '@wordpress/icons';
 import { MediaUpload } from '@wordpress/media-utils';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -55,25 +56,25 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 		<div className="woocommerce-image-gallery__toolbar">
 			<Toolbar
 				onClick={ ( e ) => e.stopPropagation() }
-				label="Options"
+				label={ __( 'Options', 'woocommerce' ) }
 				id="options-toolbar"
 			>
 				{ ! isCoverItem && (
 					<ToolbarGroup>
 						<ToolbarButton
 							icon={ () => <SortableHandle /> }
-							label="Drag"
+							label={ __( 'Drag', 'woocommerce' ) }
 						/>
 						<ToolbarButton
 							disabled={ childIndex < 2 }
 							onClick={ () => movePrevious() }
 							icon={ chevronLeft }
-							label="Move previous"
+							label={ __( 'Move previous', 'woocommerce' ) }
 						/>
 						<ToolbarButton
 							onClick={ () => moveNext() }
 							icon={ chevronRight }
-							label="Move next"
+							label={ __( 'Move next', 'woocommerce' ) }
 							disabled={ lastChild }
 						/>
 					</ToolbarGroup>
@@ -83,7 +84,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 						<ToolbarButton
 							onClick={ () => setAsCoverImage( childIndex ) }
 							icon={ CoverImageIcon }
-							label="Set as cover image"
+							label={ __( 'Set as cover image', 'woocommerce' ) }
 						/>
 					</ToolbarGroup>
 				) }
@@ -104,7 +105,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 					<ToolbarButton
 						onClick={ () => removeItem( childIndex ) }
 						icon={ trash }
-						label="Delete"
+						label={ __( 'Delete', 'woocommerce' ) }
 					/>
 				</ToolbarGroup>
 			</Toolbar>
