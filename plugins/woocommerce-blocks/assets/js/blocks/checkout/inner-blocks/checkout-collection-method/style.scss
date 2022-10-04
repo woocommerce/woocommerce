@@ -1,0 +1,39 @@
+.wc-block-checkout__collection-method-container {
+	width: 100%;
+	display: flex;
+	gap: $gap;
+	justify-content: space-between;
+}
+
+.wc-block-checkout__collection-item {
+	flex-grow: 1;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+	min-height: 80px;
+	flex-basis: 0;
+	gap: 4px;
+	padding: 16px 12px;
+	color: inherit;
+	background-color: transparent;
+	border: none;
+	outline: 1px solid currentColor;
+	&.wc-block-checkout__collection-item--selected {
+		outline-width: 2px;
+	}
+}
+
+.wc-block-checkout__collection-item-icon {
+	fill: currentColor;
+}
+
+.wc-block-checkout__collection-item-title {
+	@include font-size(regular, 1rem);
+	font-weight: bold;
+}
+
+.wc-block-checkout__collection-item-price {
+	@include font-size(small, 1rem);
+}

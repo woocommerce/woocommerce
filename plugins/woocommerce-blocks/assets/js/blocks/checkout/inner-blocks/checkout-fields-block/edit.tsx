@@ -5,6 +5,7 @@ import classnames from 'classnames';
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { Main } from '@woocommerce/base-components/sidebar-layout';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
+import { isExperimentalBuild } from '@woocommerce/block-settings';
 import type { TemplateArray } from '@wordpress/blocks';
 
 /**
@@ -40,6 +41,11 @@ export const Edit = ( {
 	const defaultTemplate = [
 		[ 'woocommerce/checkout-express-payment-block', {}, [] ],
 		[ 'woocommerce/checkout-contact-information-block', {}, [] ],
+		...[
+			isExperimentalBuild()
+				? [ 'woocommerce/checkout-collection-method', {}, [] ]
+				: null,
+		],
 		[ 'woocommerce/checkout-shipping-address-block', {}, [] ],
 		[ 'woocommerce/checkout-billing-address-block', {}, [] ],
 		[ 'woocommerce/checkout-shipping-methods-block', {}, [] ],

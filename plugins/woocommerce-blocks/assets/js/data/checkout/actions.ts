@@ -125,6 +125,11 @@ export const __internalSetOrderNotes = ( orderNotes: string ) => ( {
 	orderNotes,
 } );
 
+export const setPrefersCollection = ( prefersCollection: boolean ) => ( {
+	type: types.SET_PREFERS_COLLECTION,
+	prefersCollection,
+} );
+
 /**
  * Register some extra data for an extension. This works with the
  *
@@ -152,6 +157,7 @@ export type CheckoutAction =
 			| typeof __internalSetUseShippingAsBilling
 			| typeof __internalSetShouldCreateAccount
 			| typeof __internalSetOrderNotes
+			| typeof setPrefersCollection
 			| typeof __internalSetExtensionData
 	  >
 	| Record< string, never >;
