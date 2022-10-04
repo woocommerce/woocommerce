@@ -125,7 +125,14 @@ class MarketingOverview extends \WC_REST_Data_Controller {
 	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_installed_plugins( $request ) {
-		return rest_ensure_response( InstalledExtensions::get_data() );
+		/**
+		 * InstalledExtensions
+		 *
+		 * @var InstalledExtensions $installed_extensions
+		 */
+		$installed_extensions = wc_get_container()->get( InstalledExtensions::class );
+
+		return rest_ensure_response( $installed_extensions->get_data() );
 	}
 
 }

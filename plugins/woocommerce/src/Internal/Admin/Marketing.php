@@ -180,7 +180,14 @@ class Marketing {
 			return $settings;
 		}
 
-		$settings['marketing']['installedExtensions'] = InstalledExtensions::get_data();
+		/**
+		 * InstalledExtensions helper class.
+		 *
+		 * @var InstalledExtensions $installed_extensions
+		 */
+		$installed_extensions = wc_get_container()->get( InstalledExtensions::class );
+
+		$settings['marketing']['installedExtensions'] = $installed_extensions->get_data();
 
 		return $settings;
 	}
