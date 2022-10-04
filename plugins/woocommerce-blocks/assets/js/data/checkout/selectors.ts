@@ -67,3 +67,7 @@ export const isProcessing = ( state: CheckoutState ) => {
 export const isCalculating = ( state: CheckoutState ) => {
 	return state.calculatingCount > 0;
 };
+
+export const prefersCollection = ( state: CheckoutState ) => {
+	return state.prefersCollection;
+};
