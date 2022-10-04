@@ -41,7 +41,9 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 	onReplace = () => null,
 	MediaUploadComponent = MediaUpload,
 }: ImageGalleryProps ) => {
-	const [ toolBarItem, setToolBarItem ] = useState< string | null >( null );
+	const [ activeToolbarKey, setActiveToolbarKey ] = useState< string | null >(
+		null
+	);
 	const [ orderedChildren, setOrderedChildren ] = useState<
 		ImageGalleryChild[]
 	>( [] );
@@ -78,7 +80,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 				notSortableIndexes={ [ 0 ] }
 			>
 				{ orderedChildren.map( ( child, childIndex ) => {
-					const isToolbarItem = child.key === toolBarItem;
+					const isToolbarVisible = child.key === activeToolbarKey;
 					const isCoverItem = childIndex === 0;
 
 					return cloneElement(
@@ -86,11 +88,11 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 						{
 							isCover: isCoverItem,
 							className: classnames( {
-								'is-showing-toolbar': isToolbarItem,
+								'is-showing-toolbar': isToolbarVisible,
 							} ),
 							onClick: () => {
-								setToolBarItem(
-									isToolbarItem
+								setActiveToolbarKey(
+									isToolbarVisible
 										? null
 										: ( child.key as string )
 								);
@@ -111,10 +113,10 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 								) {
 									return;
 								}
-								setToolBarItem( null );
+								setActiveToolbarKey( null );
 							},
 						},
-						isToolbarItem ? (
+						isToolbarVisible ? (
 							<ImageGalleryToolbar
 								childIndex={ childIndex }
 								lastChild={
@@ -165,7 +167,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 										} )
 									);
 								} }
-								setToolBarItem={ setToolBarItem }
+								setToolBarItem={ setActiveToolbarKey }
 								MediaUploadComponent={ MediaUploadComponent }
 							/>
 						) : null
