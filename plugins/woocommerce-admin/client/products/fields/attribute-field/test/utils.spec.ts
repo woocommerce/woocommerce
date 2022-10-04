@@ -53,4 +53,19 @@ describe( 'reorderSortableProductAttributePositions', () => {
 		expect( newList[ 2 ].position ).toEqual( 2 );
 		expect( newList[ 2 ].id ).toEqual( 1 );
 	} );
+
+	it( 'should filter out elements that do not contain a key', () => {
+		const elements = [
+			{ key: '3' },
+			{},
+			{ key: '15' },
+			{},
+			{ key: '1' },
+		] as JSX.Element[];
+		const newList = reorderSortableProductAttributePositions(
+			elements,
+			attributeList
+		);
+		expect( newList.length ).toEqual( 3 );
+	} );
 } );
