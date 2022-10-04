@@ -195,6 +195,13 @@ const CartLineItemRow = forwardRef< HTMLTableRowElement, CartLineItemRowProps >(
 			validation: productPriceValidation,
 		} );
 
+		const showRemoveItemLink = __experimentalApplyCheckoutFilter( {
+			filterName: 'showRemoveItemLink',
+			defaultValue: true,
+			extensions,
+			arg,
+		} );
+
 		return (
 			<tr
 				className={ classnames(
@@ -301,33 +308,38 @@ const CartLineItemRow = forwardRef< HTMLTableRowElement, CartLineItemRowProps >(
 										itemName={ name }
 									/>
 								) }
-							<button
-								className="wc-block-cart-item__remove-link"
-								onClick={ () => {
-									onRemove();
-									removeItem();
-									dispatchStoreEvent( 'cart-remove-item', {
-										product: lineItem,
-										quantity,
-									} );
-									speak(
-										sprintf(
-											/* translators: %s refers to the item name in the cart. */
-											__(
-												'%s has been removed from your cart.',
-												'woo-gutenberg-products-block'
-											),
-											name
-										)
-									);
-								} }
-								disabled={ isPendingDelete }
-							>
-								{ __(
-									'Remove item',
-									'woo-gutenberg-products-block'
-								) }
-							</button>
+							{ showRemoveItemLink && (
+								<button
+									className="wc-block-cart-item__remove-link"
+									onClick={ () => {
+										onRemove();
+										removeItem();
+										dispatchStoreEvent(
+											'cart-remove-item',
+											{
+												product: lineItem,
+												quantity,
+											}
+										);
+										speak(
+											sprintf(
+												/* translators: %s refers to the item name in the cart. */
+												__(
+													'%s has been removed from your cart.',
+													'woo-gutenberg-products-block'
+												),
+												name
+											)
+										);
+									} }
+									disabled={ isPendingDelete }
+								>
+									{ __(
+										'Remove item',
+										'woo-gutenberg-products-block'
+									) }
+								</button>
+							) }
 						</div>
 					</div>
 				</td>
