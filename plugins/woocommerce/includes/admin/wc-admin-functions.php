@@ -499,7 +499,7 @@ function wc_render_invalid_variation_notice( $product_object ) {
 
 	if ( 0 < ( $variation_count - $invalid_variation_count ) ) {
 		?>
-		<div id="message" class="inline notice woocommerce-message woocommerce-notice-invalid-variation">
+		<div id="message" class="inline notice notice-warning woocommerce-message woocommerce-notice-invalid-variation">
 			<p>
 			<?php
 			echo wp_kses_post(
@@ -512,6 +512,9 @@ function wc_render_invalid_variation_notice( $product_object ) {
 			);
 			?>
 			</p>
+			<div class="woocommerce-add-variation-price-container">
+				<button type="button" class="button add_price_for_variations"><?php esc_html_e( 'Add price', 'woocommerce' ); ?></button>
+			</div>
 		</div>
 		<?php
 	}
