@@ -60,11 +60,11 @@ export const ComboBox = ( {
 						 )( node );
 					} }
 				/>
-				<Icon
-					className="woocommerce-experimental-select-control__combox-box-icon"
-					icon={ search }
-				/>
 			</div>
+			<Icon
+				className="woocommerce-experimental-select-control__combox-box-icon"
+				icon={ search }
+			/>
 		</div>
 	);
 };

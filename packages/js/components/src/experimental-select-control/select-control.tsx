@@ -3,7 +3,7 @@
  */
 import classnames from 'classnames';
 import { useCombobox, useMultipleSelection } from 'downshift';
-import { createElement, useEffect, useRef, useState } from '@wordpress/element';
+import { createElement, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
