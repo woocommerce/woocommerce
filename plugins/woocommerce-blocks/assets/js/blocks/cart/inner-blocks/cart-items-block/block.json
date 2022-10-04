@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/cart-items-block",
 	"version": "1.0.0",
-	"title": "Cart Items block",
+	"title": "Cart Items",
 	"description": "Column containing cart items.",
 	"category": "woocommerce",
 	"supports": {
