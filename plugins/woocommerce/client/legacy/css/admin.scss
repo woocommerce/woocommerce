@@ -952,7 +952,43 @@
 
 #variable_product_options #message,
 #variable_product_options .notice {
+	display: flex;
 	margin: 10px;
+	background-color: #FCFAE8;
+	> p {
+		width: 85%;
+	}
+	.woocommerce-add-variation-price-container {
+		width: 15%;
+		display: flex;
+		justify-content: center;
+		> button {
+			align-self: center;
+		}
+	}
+}
+
+.woocommerce-set-price-variations {
+	.woocommerce-usage-modal__wrapper{
+		.woocommerce-usage-modal__message {
+			height: 60px;
+			flex-wrap: wrap;
+			display: flex;
+			> span {
+				padding-bottom: 16px;
+			}
+		}
+		.woocommerce-usage-modal__actions {
+			display: flex;
+			justify-content: flex-end;
+			margin-top: 20px;
+			> button{
+				margin-left: 16px;
+				width: 88px;
+				display: unset;
+			}
+		}
+	}
 }
 
 #variable_product_options {
