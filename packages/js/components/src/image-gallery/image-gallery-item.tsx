@@ -31,8 +31,8 @@ export const ImageGalleryItem: React.FC< ImageGalleryItemProps > = ( {
 }: ImageGalleryItemProps ) => (
 	<ConditionalWrapper
 		condition={ isCover }
-		wrapper={ ( conditionalChildren ) => (
-			<NonSortableItem>{ conditionalChildren }</NonSortableItem>
+		wrapper={ ( wrappedChildren ) => (
+			<NonSortableItem>{ wrappedChildren }</NonSortableItem>
 		) }
 	>
 		<div
