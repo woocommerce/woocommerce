@@ -176,6 +176,7 @@ class WC_Meta_Box_Product_Data {
 		$variations_count       = absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_count', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(ID) FROM $wpdb->posts WHERE post_parent = %d AND post_type = 'product_variation' AND post_status IN ('publish', 'private')", $post->ID ) ), $post->ID ) );
 		$variations_per_page    = absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) );
 		$variations_total_pages = ceil( $variations_count / $variations_per_page );
+		$modal_title            = get_bloginfo( 'name' ) . __( ' says', 'woocommerce' );
 
 		include __DIR__ . '/views/html-product-data-variations.php';
 	}

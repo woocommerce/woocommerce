@@ -150,3 +150,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php endif; ?>
 	</div>
 </div>
+<script type="text/template" id="tmpl-wc-modal-set-price-variations">
+	<div class="wc-backbone-modal">
+		<div class="wc-backbone-modal-content">
+			<div class="components-modal__content woocommerce-set-price-variations" role="document">
+				<div class="components-modal__header">
+					<h2><?php echo esc_attr( $modal_title ); ?></h2>
+				</div>
+				<div class="woocommerce-usage-modal__wrapper">
+					<div class="woocommerce-usage-modal__message">
+						<span>Add price to all variations (<?php echo esc_attr( get_woocommerce_currency_symbol() ); ?> <?php echo esc_textarea( get_woocommerce_currency() ); ?>)</span>
+						<input type="text" class="components-text-control__input wc_input_variations_price"/>
+					</div>
+					<div class="woocommerce-usage-modal__actions">
+						<button id="btn-cancel" class="modal-close components-button is-secondary"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
+						<button id="btn-ok" class="button components-button is-primary"><?php esc_html_e( 'OK', 'woocommerce' ); ?></button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="wc-backbone-modal-backdrop modal-close"></div>
+</script>
