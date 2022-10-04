@@ -32,6 +32,15 @@ export type FormContext< Values extends Record< string, any > > = {
 		className: string | undefined;
 		help: string | null | undefined;
 	};
+	getDateTimePickerControlProps< Value extends Values[ keyof Values ] >(
+		name: string
+	): {
+		currentDate: Value;
+		className?: string;
+		onChange: ( date: Values[ keyof Values ] ) => void;
+		onBlur: () => void;
+		help?: string | null;
+	};
 	isValidForm: boolean;
 	resetForm: (
 		initialValues: Values,
