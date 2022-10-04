@@ -96,7 +96,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 						allowedTypes={ [ 'image' ] }
 						render={ ( { open } ) => (
 							<ToolbarButton onClick={ open }>
-								Replace
+								{ __( 'Replace', 'woocommerce' ) }
 							</ToolbarButton>
 						) }
 					/>
