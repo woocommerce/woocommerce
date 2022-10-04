@@ -15,7 +15,7 @@
 		margin: $gap-large 0 $gap-larger;
 	}
 	&__attribute-option-chip {
-		padding: 4px 8px;
+		padding: $gap-smallest $gap-smaller;
 		gap: 2px;
 
 		background: $gray-100;
@@ -25,7 +25,7 @@
 	&__attribute-options {
 		display: flex;
 		flex-direction: row;
-		gap: 4px;
+		gap: $gap-smallest;
 	}
 
 	&__attribute-actions {
@@ -33,11 +33,11 @@
 		flex-direction: row;
 		align-items: center;
 		justify-content: end;
-		gap: 8px;
+		gap: $gap-smaller;
 	}
 
 	.woocommerce-list-item {
-		height: 82px;
+		min-height: 82px;
 		padding: 0 $gap-large;
 
 		&:last-child {
@@ -54,11 +54,12 @@
 		}
 	}
 
-	.woocommerce-sortable__item:not(:first-child) {
+	.woocommerce-sortable__item:not( :first-child ) {
 		margin-top: -1px;
 	}
-	.woocommerce-sortable__item:focus-visible:not(:active) + .woocommerce-sortable__item
-	.woocommerce-list-item {
+	.woocommerce-sortable__item:focus-visible:not( :active )
+		+ .woocommerce-sortable__item
+		.woocommerce-list-item {
 		background: none;
 		border-top: 0;
 	}

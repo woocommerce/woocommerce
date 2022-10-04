@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { sprintf, __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { ProductAttribute } from '@woocommerce/data';
 import { Text } from '@woocommerce/experimental';
@@ -13,6 +13,7 @@ import { trash } from '@wordpress/icons';
  */
 import './attribute-field.scss';
 import AttributeEmptyStateLogo from './attribute-empty-state-logo.svg';
+import { reorderSortableProductAttributePositions } from './utils';
 
 type AttributeFieldProps = {
 	value: ProductAttribute[];
@@ -75,24 +76,12 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		<div className="woocommerce-attribute-field">
 			<Sortable
 				onOrderChange={ ( items ) => {
-					const newAttributes: ProductAttribute[] = items
-						.map( ( item, index ): ProductAttribute | undefined => {
-							const key = item.key
-								? parseInt( item.key as string, 10 )
-								: NaN;
-							if ( key !== NaN ) {
-								return {
-									...attributeKeyValues[ key ],
-									position: index,
-								};
-							}
-							return undefined;
-						} )
-						.filter(
-							( attr ): attr is ProductAttribute =>
-								attr !== undefined
-						);
-					onChange( newAttributes );
+					onChange(
+						reorderSortableProductAttributePositions(
+							items,
+							attributeKeyValues
+						)
+					);
 				} }
 			>
 				{ sortedAttributes.map( ( attribute ) => (
@@ -111,8 +100,10 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 								) ) }
 							{ attribute.options.length > 2 && (
 								<div className="woocommerce-attribute-field__attribute-option-chip">
-									+ { attribute.options.length - 2 }&nbsp;
-									{ __( 'more', 'woocommerce' ) }
+									{ sprintf(
+										__( '+ %i more', 'woocommerce' ),
+										attribute.options.length - 2
+									) }
 								</div>
 							) }
 						</div>
@@ -135,7 +126,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 			<ListItem>
 				<Button
 					variant="secondary"
-					className="woocommerce-attribute-field__add"
+					className="woocommerce-attribute-field__add-attribute"
 					disabled={ true }
 				>
 					{ __( 'Add attribute', 'woocommerce' ) }
