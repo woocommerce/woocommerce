@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/cart-cross-sells-products-block",
 	"version": "1.0.0",
-	"title": "Cart Cross-Sells products",
+	"title": "Cart Cross-Sells Products",
 	"description": "Shows the Cross-Sells products.",
 	"category": "woocommerce",
 	"supports": {
