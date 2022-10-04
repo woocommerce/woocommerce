@@ -2,11 +2,21 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Link, useFormContext } from '@woocommerce/components';
-import { Product, SETTINGS_STORE_NAME } from '@woocommerce/data';
+import {
+	DateTimePickerControl,
+	Link,
+	Spinner,
+	useFormContext,
+} from '@woocommerce/components';
+import {
+	Product,
+	OPTIONS_STORE_NAME,
+	SETTINGS_STORE_NAME,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { useContext } from '@wordpress/element';
+import { useContext, useEffect, useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
+import moment from 'moment';
 import interpolateComponents from '@automattic/interpolate-components';
 import {
 	// @ts-expect-error `__experimentalInputControl` does exist.
@@ -14,6 +24,7 @@ import {
 	BaseControl,
 	Card,
 	CardBody,
+	ToggleControl,
 } from '@wordpress/components';
 
 /**
@@ -27,8 +38,13 @@ import { CurrencyContext } from '../../lib/currency-context';
 import { useProductHelper } from '../use-product-helper';
 
 export const PricingSection: React.FC = () => {
-	const { getInputProps } = useFormContext< Product >();
 	const { sanitizePrice } = useProductHelper();
+	const { getInputProps, setValues, values } = useFormContext< Product >();
+	const [ showSaleSchedule, setShowSaleSchedule ] = useState( false );
+	const [ userToggledSaleSchedule, setUserToggledSaleSchedule ] =
+		useState( false );
+	const [ autoToggledSaleSchedule, setAutoToggledSaleSchedule ] =
+		useState( false );
 	const { isResolving: isTaxSettingsResolving, taxSettings } = useSelect(
 		( select ) => {
 			const { getSettings, hasFinishedResolution } =
@@ -55,6 +71,54 @@ export const PricingSection: React.FC = () => {
 		'Per your {{link}}store settings{{/link}}, tax is {{strong}}not included{{/strong}} in the price.',
 		'woocommerce'
 	);
+
+	const { dateFormat, hasResolvedDateFormat } = useSelect( ( select ) => {
+		const { getOption, hasFinishedResolution } =
+			select( OPTIONS_STORE_NAME );
+		return {
+			dateFormat: getOption( 'date_format' ) as string,
+			hasResolvedDateFormat: hasFinishedResolution( 'getOption', [
+				'date_format',
+			] ),
+		};
+	} );
+
+	const onSaleScheduleToggleChange = ( value: boolean ) => {
+		setUserToggledSaleSchedule( true );
+		setShowSaleSchedule( value );
+
+		if ( value ) {
+			setValues( {
+				date_on_sale_from_gmt: moment().add( 1, 'hours' ).toISOString(),
+				date_on_sale_to_gmt: null,
+			} as Product );
+		} else {
+			setValues( {
+				date_on_sale_from_gmt: null,
+				date_on_sale_to_gmt: null,
+			} as Product );
+		}
+	};
+
+	useEffect( () => {
+		if ( userToggledSaleSchedule || autoToggledSaleSchedule ) {
+			return;
+		}
+
+		const hasDateOnSaleFrom =
+			typeof values.date_on_sale_from_gmt === 'string' &&
+			values.date_on_sale_from_gmt.length > 0;
+		const hasDateOnSaleTo =
+			typeof values.date_on_sale_to_gmt === 'string' &&
+			values.date_on_sale_to_gmt.length > 0;
+
+		const hasSaleSchedule = hasDateOnSaleFrom || hasDateOnSaleTo;
+
+		if ( hasSaleSchedule ) {
+			setAutoToggledSaleSchedule( true );
+			setShowSaleSchedule( true );
+		}
+	}, [ userToggledSaleSchedule, autoToggledSaleSchedule, values ] );
 
 	const taxSettingsElement = interpolateComponents( {
 		mixedString: pricesIncludeTax
@@ -90,6 +154,11 @@ export const PricingSection: React.FC = () => {
 		currencyInputProps
 	);
 	const salePriceProps = getInputProps( 'sale_price', currencyInputProps );
+
+	const dateTimePickerProps = {
+		className: 'woocommerce-product__date-time-picker',
+		isDateOnlyPicker: true,
+	};
 
 	return (
 		<ProductSectionLayout
@@ -157,6 +226,52 @@ export const PricingSection: React.FC = () => {
 							) }
 						/>
 					</BaseControl>
+
+					<ToggleControl
+						label={ __( 'Schedule sale', 'woocommerce' ) }
+						checked={ showSaleSchedule }
+						onChange={ onSaleScheduleToggleChange }
+						// @ts-ignore disabled prop exists
+						disabled={
+							! (
+								values.sale_price &&
+								values.sale_price.length > 0
+							)
+						}
+					/>
+
+					{ showSaleSchedule &&
+						( hasResolvedDateFormat ? (
+							<>
+								<DateTimePickerControl
+									label={ __( 'From', 'woocommerce' ) }
+									placeholder={ __( 'Now', 'woocommerce' ) }
+									currentDate={ values.date_on_sale_from_gmt }
+									{ ...getInputProps(
+										'date_on_sale_from_gmt',
+										{
+											...dateTimePickerProps,
+										}
+									) }
+								/>
+
+								<DateTimePickerControl
+									label={ __( 'To', 'woocommerce' ) }
+									placeholder={ __(
+										'No end date',
+										'woocommerce'
+									) }
+									currentDate={ values.date_on_sale_to_gmt }
+									{ ...getInputProps( 'date_on_sale_to_gmt', {
+										...dateTimePickerProps,
+									} ) }
+								/>
+							</>
+						) : (
+							<div className="product-pricing-section__scheduled-sale__spinner-wrapper">
+								<Spinner />
+							</div>
+						) ) }
 				</CardBody>
 			</Card>
 		</ProductSectionLayout>
