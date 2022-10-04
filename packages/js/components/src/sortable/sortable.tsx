@@ -255,7 +255,11 @@ export const Sortable = ( {
 						),
 					} );
 
-					if ( notSortableIndexes.includes( index ) ) {
+					if (
+						child.props.className &&
+						child.props.className.indexOf( 'non-sortable-item' ) !==
+							-1
+					) {
 						return <li>{ child }</li>;
 					}
 

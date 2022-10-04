@@ -8,7 +8,8 @@ import { createElement, Fragment } from '@wordpress/element';
  * Internal dependencies
  */
 import Pill from '../pill';
-import { SortableHandle } from '../sortable';
+import { SortableHandle, NonSortableItem } from '../sortable';
+import { ConditionalWrapper } from '../conditional-wrapper';
 
 export type ImageGalleryItemProps = {
 	alt: string;
@@ -27,11 +28,15 @@ export const ImageGalleryItem: React.FC< ImageGalleryItemProps > = ( {
 	className = '',
 	onClick = () => null,
 	children,
-}: ImageGalleryItemProps ) => {
-	return (
+}: ImageGalleryItemProps ) => (
+	<ConditionalWrapper
+		condition={ isCover }
+		wrapper={ ( conditionalChildren ) => (
+			<NonSortableItem>{ conditionalChildren }</NonSortableItem>
+		) }
+	>
 		<div
 			className={ `woocommerce-image-gallery__item ${ className }` }
-			//TODO: add correct keyboard handler
 			onKeyPress={ () => {} }
 			tabIndex={ 0 }
 			role="button"
@@ -50,5 +55,5 @@ export const ImageGalleryItem: React.FC< ImageGalleryItemProps > = ( {
 				</SortableHandle>
 			) }
 		</div>
-	);
-};
+	</ConditionalWrapper>
+);
