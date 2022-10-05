@@ -39,6 +39,7 @@ class DefaultFreeExtensions {
 					self::get_plugin( 'mailpoet' ),
 					self::get_plugin( 'google-listings-and-ads' ),
 					self::get_plugin( 'facebook-for-woocommerce' ),
+					self::get_plugin( 'tiktok-for-business:alt' ),
 				],
 			],
 			[
@@ -669,6 +670,221 @@ class DefaultFreeExtensions {
 				],
 				'is_built_by_wc' => false,
 			],
+			'tiktok-for-business:alt'               => [
+				'name'           => __( 'TikTok for WooCommerce', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/tiktok.svg', WC_PLUGIN_FILE ),
+				'description'    =>
+					__( 'Create ad campaigns and reach one billion global users with TikTok for WooCommerce.', 'woocommerce' ),
+				'manage_url'     => 'admin.php?page=tiktok',
+				'is_visible'     => [
+					[
+						'type'     => 'or',
+						'operands' => [
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'US',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'CA',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'MX',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'AT',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'BE',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'CZ',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'DK',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'FI',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'FR',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'DE',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'GR',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'HU',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'IE',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'IT',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'NL',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'PL',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'PT',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'RO',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'ES',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'SE',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'GB',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'CH',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'NO',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'AU',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'NZ',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'SG',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'MY',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'PH',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'ID',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'VN',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'TH',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'KR',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'IL',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'AE',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'RU',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'UA',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'TR',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'SA',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'BR',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'JP',
+								'operation' => '=',
+							],
+						],
+					],
+				],
+				'is_built_by_wc' => false,
+			]
 		);
 
 		$plugin        = $plugins[ $slug ];
