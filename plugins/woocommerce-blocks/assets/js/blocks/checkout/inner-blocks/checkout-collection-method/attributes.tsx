@@ -28,6 +28,14 @@ export default {
 		type: 'boolean',
 		default: true,
 	},
+	localPickupText: {
+		type: 'string',
+		default: __( 'Local Pickup', 'woo-gutenberg-products-block' ),
+	},
+	shippingText: {
+		type: 'string',
+		default: __( 'Delivery', 'woo-gutenberg-products-block' ),
+	},
 	lock: {
 		type: 'object',
 		default: {
