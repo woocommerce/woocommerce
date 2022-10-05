@@ -297,8 +297,9 @@ const customItems: CustomItemType[] = [
 ];
 
 export const CustomItemType: React.FC = () => {
-	const [ selected, setSelected ] =
-		useState< SelectedType< Array< CustomItemType > > >( null );
+	const [ selected, setSelected ] = useState<
+		SelectedType< Array< CustomItemType > >
+	>( [] );
 
 	return (
 		<>
@@ -315,7 +316,9 @@ export const CustomItemType: React.FC = () => {
 							: [ item ]
 					)
 				}
-				onRemove={ () => setSelected( null ) }
+				onRemove={ ( item ) =>
+					setSelected( selected?.filter( ( i ) => i !== item ) || [] )
+				}
 				getItemLabel={ ( item ) => item?.user.name || '' }
 				getItemValue={ ( item ) => String( item?.itemId ) }
 			/>
