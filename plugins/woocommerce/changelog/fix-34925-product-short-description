@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: This was broken in the 7.0.0 betas, but the bug had not entered production. For that reason, a changelog entry is not required.
+
+
