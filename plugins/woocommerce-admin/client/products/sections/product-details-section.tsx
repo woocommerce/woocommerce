@@ -12,13 +12,18 @@ import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { cleanForSlug } from '@wordpress/url';
-import { EnrichedLabel, useFormContext } from '@woocommerce/components';
+import {
+	EnrichedLabel,
+	useFormContext,
+	__experimentalRichTextEditor as RichTextEditor,
+} from '@woocommerce/components';
 import {
 	Product,
 	PRODUCTS_STORE_NAME,
 	WCDataSelector,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { BlockInstance, serialize, parse } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -31,10 +36,13 @@ import { EditProductLinkModal } from '../shared/edit-product-link-modal';
 const PRODUCT_DETAILS_SLUG = 'product-details';
 
 export const ProductDetailsSection: React.FC = () => {
-	const { getInputProps, values, touched, errors, setValue } =
+	const { getInputProps, values, setValue, touched, errors } =
 		useFormContext< Product >();
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
 		useState( false );
+	const [ descriptionBlocks, setDescriptionBlocks ] = useState<
+		BlockInstance[]
+	>( parse( values.description ) );
 	const { permalinkPrefix, permalinkSuffix } = useSelect(
 		( select: WCDataSelector ) => {
 			const { getPermalinkParts } = select( PRODUCTS_STORE_NAME );
@@ -150,6 +158,14 @@ export const ProductDetailsSection: React.FC = () => {
 							}
 						/>
 					) }
+					<RichTextEditor
+						label={ __( 'Description', 'woocommerce' ) }
+						blocks={ descriptionBlocks }
+						onChange={ ( blocks ) => {
+							setDescriptionBlocks( blocks );
+							setValue( 'description', serialize( blocks ) );
+						} }
+					/>
 				</CardBody>
 			</Card>
 		</ProductSectionLayout>
