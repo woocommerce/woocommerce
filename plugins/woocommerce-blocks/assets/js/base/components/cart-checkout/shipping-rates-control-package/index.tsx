@@ -73,7 +73,9 @@ export const ShippingRatesControlPackage = ( {
 			{ ( showItems || collapsible ) && (
 				<div
 					className="wc-block-components-shipping-rates-control__package-title"
-					dangerouslySetInnerHTML={ sanitizeHTML( packageData.name ) }
+					dangerouslySetInnerHTML={ {
+						__html: sanitizeHTML( packageData.name ),
+					} }
 				/>
 			) }
 			{ showItems && (

@@ -4,7 +4,7 @@
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { Notice } from 'wordpress-components';
-import { sanitize } from 'dompurify';
+import { sanitizeHTML } from '@woocommerce/utils';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { PAYMENT_METHOD_DATA_STORE_KEY } from '@woocommerce/block-data';
 
@@ -12,15 +12,6 @@ import { PAYMENT_METHOD_DATA_STORE_KEY } from '@woocommerce/block-data';
  * Internal dependencies
  */
 import './style.scss';
-
-const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br' ];
-const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download' ];
-
-const sanitizeHTML = ( html ) => {
-	return {
-		__html: sanitize( html, { ALLOWED_TAGS, ALLOWED_ATTR } ),
-	};
-};
 
 const getWooClassName = ( { status = 'default' } ) => {
 	switch ( status ) {
@@ -78,11 +69,7 @@ export const StoreNoticesContainer = ( {
 						}
 					} }
 				>
-					<span
-						dangerouslySetInnerHTML={ sanitizeHTML(
-							props.content
-						) }
-					/>
+					{ sanitizeHTML( props.content ) }
 				</Notice>
 			) ) }
 		</div>
