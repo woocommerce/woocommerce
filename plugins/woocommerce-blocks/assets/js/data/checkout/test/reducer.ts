@@ -17,7 +17,7 @@ describe.only( 'Checkout Store Reducer', () => {
 			status: STATUS.IDLE,
 		};
 
-		expect( reducer( defaultState, actions.setIdle() ) ).toEqual(
+		expect( reducer( defaultState, actions.__internalSetIdle() ) ).toEqual(
 			expectedState
 		);
 	} );
@@ -32,7 +32,7 @@ describe.only( 'Checkout Store Reducer', () => {
 		expect(
 			reducer(
 				defaultState,
-				actions.setRedirectUrl( 'https://example.com' )
+				actions.__internalSetRedirectUrl( 'https://example.com' )
 			)
 		).toEqual( expectedState );
 	} );
@@ -52,7 +52,10 @@ describe.only( 'Checkout Store Reducer', () => {
 		};
 
 		expect(
-			reducer( defaultState, actions.setPaymentResult( mockResponse ) )
+			reducer(
+				defaultState,
+				actions.__internalSetPaymentResult( mockResponse )
+			)
 		).toEqual( expectedState );
 	} );
 
@@ -66,7 +69,7 @@ describe.only( 'Checkout Store Reducer', () => {
 		expect(
 			reducer(
 				defaultState,
-				actions.setComplete( {
+				actions.__internalSetComplete( {
 					redirectUrl: 'https://example.com',
 				} )
 			)
@@ -79,9 +82,9 @@ describe.only( 'Checkout Store Reducer', () => {
 			status: STATUS.PROCESSING,
 		};
 
-		expect( reducer( defaultState, actions.setProcessing() ) ).toEqual(
-			expectedState
-		);
+		expect(
+			reducer( defaultState, actions.__internalSetProcessing() )
+		).toEqual( expectedState );
 	} );
 
 	it( 'should handle SET_HAS_ERROR when status is PROCESSING', () => {
@@ -93,9 +96,9 @@ describe.only( 'Checkout Store Reducer', () => {
 			status: STATUS.IDLE,
 		};
 
-		expect( reducer( initialState, actions.setHasError( true ) ) ).toEqual(
-			expectedState
-		);
+		expect(
+			reducer( initialState, actions.__internalSetHasError( true ) )
+		).toEqual( expectedState );
 	} );
 
 	it( 'should handle SET_HAS_ERROR when status is BEFORE_PROCESSING', () => {
@@ -110,9 +113,9 @@ describe.only( 'Checkout Store Reducer', () => {
 			status: STATUS.IDLE,
 		};
 
-		expect( reducer( initialState, actions.setHasError( true ) ) ).toEqual(
-			expectedState
-		);
+		expect(
+			reducer( initialState, actions.__internalSetHasError( true ) )
+		).toEqual( expectedState );
 	} );
 
 	it( 'should handle SET_HAS_ERROR when status is anything else', () => {
@@ -124,9 +127,9 @@ describe.only( 'Checkout Store Reducer', () => {
 			status: STATUS.IDLE,
 		};
 
-		expect( reducer( initialState, actions.setHasError( false ) ) ).toEqual(
-			expectedState
-		);
+		expect(
+			reducer( initialState, actions.__internalSetHasError( false ) )
+		).toEqual( expectedState );
 	} );
 
 	it( 'should handle SET_BEFORE_PROCESSING', () => {
@@ -136,7 +139,7 @@ describe.only( 'Checkout Store Reducer', () => {
 		};
 
 		expect(
-			reducer( defaultState, actions.setBeforeProcessing() )
+			reducer( defaultState, actions.__internalSetBeforeProcessing() )
 		).toEqual( expectedState );
 	} );
 
@@ -146,9 +149,9 @@ describe.only( 'Checkout Store Reducer', () => {
 			status: STATUS.AFTER_PROCESSING,
 		};
 
-		expect( reducer( defaultState, actions.setAfterProcessing() ) ).toEqual(
-			expectedState
-		);
+		expect(
+			reducer( defaultState, actions.__internalSetAfterProcessing() )
+		).toEqual( expectedState );
 	} );
 
 	it( 'should handle INCREMENT_CALCULATING', () => {
@@ -159,7 +162,7 @@ describe.only( 'Checkout Store Reducer', () => {
 		};
 
 		expect(
-			reducer( defaultState, actions.incrementCalculating() )
+			reducer( defaultState, actions.__internalIncrementCalculating() )
 		).toEqual( expectedState );
 	} );
 
@@ -176,7 +179,7 @@ describe.only( 'Checkout Store Reducer', () => {
 		};
 
 		expect(
-			reducer( initialState, actions.decrementCalculating() )
+			reducer( initialState, actions.__internalDecrementCalculating() )
 		).toEqual( expectedState );
 	} );
 
@@ -187,9 +190,9 @@ describe.only( 'Checkout Store Reducer', () => {
 			customerId: 1,
 		};
 
-		expect( reducer( defaultState, actions.setCustomerId( 1 ) ) ).toEqual(
-			expectedState
-		);
+		expect(
+			reducer( defaultState, actions.__internalSetCustomerId( 1 ) )
+		).toEqual( expectedState );
 	} );
 
 	it( 'should handle SET_SHIPPING_ADDRESS_AS_BILLING_ADDRESS', () => {
@@ -200,7 +203,10 @@ describe.only( 'Checkout Store Reducer', () => {
 		};
 
 		expect(
-			reducer( defaultState, actions.setUseShippingAsBilling( false ) )
+			reducer(
+				defaultState,
+				actions.__internalSetUseShippingAsBilling( false )
+			)
 		).toEqual( expectedState );
 	} );
 
@@ -212,7 +218,10 @@ describe.only( 'Checkout Store Reducer', () => {
 		};
 
 		expect(
-			reducer( defaultState, actions.setShouldCreateAccount( true ) )
+			reducer(
+				defaultState,
+				actions.__internalSetShouldCreateAccount( true )
+			)
 		).toEqual( expectedState );
 	} );
 
@@ -224,7 +233,7 @@ describe.only( 'Checkout Store Reducer', () => {
 		};
 
 		expect(
-			reducer( defaultState, actions.setOrderNotes( 'test' ) )
+			reducer( defaultState, actions.__internalSetOrderNotes( 'test' ) )
 		).toEqual( expectedState );
 	} );
 
@@ -241,7 +250,7 @@ describe.only( 'Checkout Store Reducer', () => {
 		expect(
 			reducer(
 				defaultState,
-				actions.setExtensionData( mockExtensionData )
+				actions.__internalSetExtensionData( mockExtensionData )
 			)
 		).toEqual( expectedState );
 	} );

@@ -115,20 +115,20 @@ export const __experimentalDeRegisterPaymentMethod = (
 	paymentMethodName: string
 ): void => {
 	delete paymentMethods[ paymentMethodName ];
-	const { removeAvailablePaymentMethod } = dispatch(
+	const { __internalRemoveAvailablePaymentMethod } = dispatch(
 		PAYMENT_METHOD_DATA_STORE_KEY
 	);
-	removeAvailablePaymentMethod( paymentMethodName );
+	__internalRemoveAvailablePaymentMethod( paymentMethodName );
 };
 
 export const __experimentalDeRegisterExpressPaymentMethod = (
 	paymentMethodName: string
 ): void => {
 	delete expressPaymentMethods[ paymentMethodName ];
-	const { removeRegisteredExpressPaymentMethod } = dispatch(
+	const { __internalRemoveAvailableExpressPaymentMethod } = dispatch(
 		PAYMENT_METHOD_DATA_STORE_KEY
 	);
-	removeRegisteredExpressPaymentMethod( paymentMethodName );
+	__internalRemoveAvailableExpressPaymentMethod( paymentMethodName );
 };
 
 export const getPaymentMethods = (): PaymentMethods => {

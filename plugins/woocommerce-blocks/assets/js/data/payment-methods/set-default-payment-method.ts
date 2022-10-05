@@ -40,15 +40,14 @@ export const setDefaultPaymentMethod = async (
 
 		const savedTokenKey = `wc-${ paymentMethodSlug }-payment-token`;
 
-		dispatch( PAYMENT_METHOD_DATA_STORE_KEY ).setActivePaymentMethod(
-			paymentMethodSlug,
-			{
-				token,
-				payment_method: paymentMethodSlug,
-				[ savedTokenKey ]: token,
-				isSavedToken: true,
-			}
-		);
+		dispatch(
+			PAYMENT_METHOD_DATA_STORE_KEY
+		).__internalSetActivePaymentMethod( paymentMethodSlug, {
+			token,
+			payment_method: paymentMethodSlug,
+			[ savedTokenKey ]: token,
+			isSavedToken: true,
+		} );
 		return;
 	}
 
@@ -64,11 +63,11 @@ export const setDefaultPaymentMethod = async (
 		return;
 	}
 
-	dispatch( PAYMENT_METHOD_DATA_STORE_KEY ).setPaymentStatus( {
+	dispatch( PAYMENT_METHOD_DATA_STORE_KEY ).__internalSetPaymentStatus( {
 		isPristine: true,
 	} );
 
-	dispatch( PAYMENT_METHOD_DATA_STORE_KEY ).setActivePaymentMethod(
+	dispatch( PAYMENT_METHOD_DATA_STORE_KEY ).__internalSetActivePaymentMethod(
 		paymentMethodKeys[ 0 ]
 	);
 };

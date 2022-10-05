@@ -18,7 +18,7 @@ import { EMIT_TYPES } from '../../base/context/providers/cart-checkout/payment-m
 import type { emitProcessingEventType } from './types';
 import { CART_STORE_KEY } from '../cart';
 
-export const setExpressPaymentError = ( message?: string ) => {
+export const __internalSetExpressPaymentError = ( message?: string ) => {
 	return ( { registry } ) => {
 		const { createErrorNotice, removeNotice } =
 			registry.dispatch( noticesStore );
@@ -39,7 +39,7 @@ export const setExpressPaymentError = ( message?: string ) => {
 /**
  * Emit the payment_processing event
  */
-export const emitProcessingEvent: emitProcessingEventType = (
+export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 	currentObserver,
 	setValidationErrors
 ) => {
@@ -84,8 +84,8 @@ export const emitProcessingEvent: emitProcessingEventType = (
 						shippingData.address as Record< string, unknown >
 					);
 				}
-				dispatch.setPaymentMethodData( paymentMethodData );
-				dispatch.setPaymentStatus( {
+				dispatch.__internalSetPaymentMethodData( paymentMethodData );
+				dispatch.__internalSetPaymentStatus( {
 					isSuccessful: true,
 				} );
 			} else if ( errorResponse && isFailResponse( errorResponse ) ) {
@@ -105,7 +105,7 @@ export const emitProcessingEvent: emitProcessingEventType = (
 				if ( billingAddress ) {
 					setBillingAddress( billingAddress );
 				}
-				dispatch.setPaymentStatus(
+				dispatch.__internalSetPaymentStatus(
 					{ hasFailed: true },
 					paymentMethodData
 				);
@@ -120,12 +120,12 @@ export const emitProcessingEvent: emitProcessingEventType = (
 					} );
 				}
 
-				dispatch.setPaymentStatus( { hasError: true } );
+				dispatch.__internalSetPaymentStatus( { hasError: true } );
 				setValidationErrors( errorResponse?.validationErrors );
 			} else {
 				// otherwise there are no payment methods doing anything so
 				// just consider success
-				dispatch.setPaymentStatus( {
+				dispatch.__internalSetPaymentStatus( {
 					isSuccessful: true,
 				} );
 			}

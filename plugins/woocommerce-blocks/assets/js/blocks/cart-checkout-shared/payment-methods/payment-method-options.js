@@ -41,7 +41,7 @@ const PaymentMethodOptions = () => {
 			availablePaymentMethods: store.getAvailablePaymentMethods(),
 		};
 	} );
-	const { setActivePaymentMethod } = useDispatch(
+	const { __internalSetActivePaymentMethod } = useDispatch(
 		PAYMENT_METHOD_DATA_STORE_KEY
 	);
 	const paymentMethods = getPaymentMethods();
@@ -65,7 +65,7 @@ const PaymentMethodOptions = () => {
 			content: (
 				<PaymentMethodCard showSaveOption={ supports.showSaveOption }>
 					{ cloneElement( component, {
-						activePaymentMethod,
+						__internalSetActivePaymentMethod,
 						...paymentMethodInterface,
 					} ) }
 				</PaymentMethodCard>
@@ -75,13 +75,17 @@ const PaymentMethodOptions = () => {
 
 	const onChange = useCallback(
 		( value ) => {
-			setActivePaymentMethod( value );
+			__internalSetActivePaymentMethod( value );
 			removeNotice( 'wc-payment-error', noticeContexts.PAYMENTS );
 			dispatchCheckoutEvent( 'set-active-payment-method', {
 				value,
 			} );
 		},
-		[ dispatchCheckoutEvent, removeNotice, setActivePaymentMethod ]
+		[
+			dispatchCheckoutEvent,
+			removeNotice,
+			__internalSetActivePaymentMethod,
+		]
 	);
 
 	const isSinglePaymentMethod =

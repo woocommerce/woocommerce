@@ -32,7 +32,7 @@ export const preparePaymentData = (
  * Process headers from an API response an dispatch updates.
  */
 export const processCheckoutResponseHeaders = ( headers: Headers ): void => {
-	const { setCustomerId } = dispatch( CHECKOUT_STORE_KEY );
+	const { __internalSetCustomerId } = dispatch( CHECKOUT_STORE_KEY );
 	if (
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore -- this does exist because it's monkey patched in
@@ -51,6 +51,8 @@ export const processCheckoutResponseHeaders = ( headers: Headers ): void => {
 
 	// Update user using headers.
 	if ( headers?.get( 'User-ID' ) ) {
-		setCustomerId( parseInt( headers.get( 'User-ID' ) || '0', 10 ) );
+		__internalSetCustomerId(
+			parseInt( headers.get( 'User-ID' ) || '0', 10 )
+		);
 	}
 };
