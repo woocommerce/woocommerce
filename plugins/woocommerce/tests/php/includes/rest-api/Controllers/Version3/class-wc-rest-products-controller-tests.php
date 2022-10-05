@@ -408,4 +408,20 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertContains( 'test1', $meta_keys );
 		}
 	}
+
+	/**
+	 * Test that the meta_data property contains an array, and not an object, after being filtered.
+	 */
+	public function test_collection_param_include_meta_returns_array() {
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_param( 'include_meta', 'test2' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data       = $this->server->response_to_data( $response, false );
+		$encoded_data_string = wp_json_encode( $response_data );
+		$decoded_data_object = json_decode( $encoded_data_string, false ); // Ensure object instead of associative array.
+
+		$this->assertIsArray( $decoded_data_object[0]->meta_data );
+	}
 }
