@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Moved onboarding methods into utils method for the sake of reusability
