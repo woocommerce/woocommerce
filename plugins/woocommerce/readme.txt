@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - false [#34966](https://github.com/woocommerce/woocommerce/pull/34966)
 * Fix - Fix: can't place orders for Saint Martin (French part) [#34920](https://github.com/woocommerce/woocommerce/pull/34920)
 * Fix - Fix the wc pay view logic so that we don't display it even when payment task is completed [#34892](https://github.com/woocommerce/woocommerce/pull/34892)
 * Fix - Added in the missing tracks events for the shipping default settings tour [#34601](https://github.com/woocommerce/woocommerce/pull/34601)
