@@ -1312,6 +1312,7 @@ importers:
       istanbul: 1.0.0-alpha.2
       jest: ^27.5.1
       mocha: 7.2.0
+      playwright: ^1.26.1
       prettier: npm:wp-prettier@2.0.5
       stylelint: ^13.8.0
       typescript: ^4.8.3
@@ -1355,6 +1356,7 @@ importers:
       istanbul: 1.0.0-alpha.2
       jest: 27.5.1
       mocha: 7.2.0
+      playwright: 1.26.1
       prettier: /wp-prettier/2.0.5
       stylelint: 13.13.1
       typescript: 4.8.4
@@ -32216,6 +32218,15 @@ packages:
     hasBin: true
     dev: true
 
+  /playwright/1.26.1:
+    resolution: {integrity: sha512-WQmEdCgYYe8jOEkhkW9QLcK0PB+w1RZztBLYIT10MEEsENYg251cU0IzebDINreQsUt+HCwwRhtdz4weH9ICcQ==}
+    engines: {node: '>=14'}
+    hasBin: true
+    requiresBuild: true
+    dependencies:
+      playwright-core: 1.26.1
+    dev: true
+
   /plur/4.0.0:
     resolution: {integrity: sha512-4UGewrYgqDFw9vV6zNV+ADmPAUAfJPKtGvb/VdpQAx25X5f3xXdGdyOEVFwkl8Hl/tl7+xbeHqSEM+D5/TirUg==}
     engines: {node: '>=10'}
@@ -37110,7 +37121,7 @@ packages:
       postcss-sass: 0.4.4
       postcss-scss: 2.1.1
       postcss-selector-parser: 6.0.6
-      postcss-syntax: 0.36.2_kei4jy7wdgbhc236h4oijypxom
+      postcss-syntax: 0.36.2_postcss@7.0.39
       postcss-value-parser: 4.1.0
       resolve-from: 5.0.0
       slash: 3.0.0
@@ -37702,7 +37713,7 @@ packages:
       serialize-javascript: 6.0.0
       source-map: 0.6.1
       terser: 5.10.0_acorn@8.7.0
-      webpack: 5.70.0
+      webpack: 5.70.0_webpack-cli@3.3.12
     transitivePeerDependencies:
       - acorn
 
