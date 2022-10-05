@@ -20,6 +20,8 @@ const FrontendBlock = ( {
 	className,
 	showPrice,
 	showIcon,
+	shippingText,
+	localPickupText,
 }: {
 	title: string;
 	description: string;
@@ -28,6 +30,8 @@ const FrontendBlock = ( {
 	className?: string;
 	showPrice: boolean;
 	showIcon: boolean;
+	shippingText: string;
+	localPickupText: string;
 } ) => {
 	const { checkoutIsProcessing, prefersCollection } = useSelect(
 		( select ) => {
@@ -64,6 +68,8 @@ const FrontendBlock = ( {
 				onChange={ onChange }
 				showPrice={ showPrice }
 				showIcon={ showIcon }
+				localPickupText={ localPickupText }
+				shippingText={ shippingText }
 			/>
 			{ children }
 		</FormStep>

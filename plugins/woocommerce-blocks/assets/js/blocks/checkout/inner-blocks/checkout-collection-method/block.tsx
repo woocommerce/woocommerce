@@ -3,121 +3,36 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useShippingData } from '@woocommerce/base-context/hooks';
-import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
-import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import {
 	__experimentalRadio as Radio,
 	__experimentalRadioGroup as RadioGroup,
 } from 'wordpress-components';
 import classnames from 'classnames';
 import { Icon, store, shipping } from '@wordpress/icons';
-import { getSetting } from '@woocommerce/settings';
-import { createInterpolateElement } from '@wordpress/element';
 import type { CartShippingPackageShippingRate } from '@woocommerce/type-defs/cart';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+import {
+	RatePrice,
+	getLocalPickupStartingPrice,
+	getShippingStartingPrice,
+} from './shared';
 
-/**
- * Returns the cheapest rate that isn't a local pickup.
- *
- * @param {Array|undefined} shippingRates Array of shipping Rate.
- *
- * @return {Object|undefined} cheapest rate.
- */
-function getShippingStartingPrice(
-	shippingRates: CartShippingPackageShippingRate[]
-): CartShippingPackageShippingRate | undefined {
-	if ( shippingRates ) {
-		return shippingRates.reduce(
-			(
-				lowestRate: CartShippingPackageShippingRate | undefined,
-				currentRate: CartShippingPackageShippingRate
-			) => {
-				if ( currentRate.method_id === 'local_pickup' ) {
-					return lowestRate;
-				}
-				if (
-					lowestRate === undefined ||
-					currentRate.price < lowestRate.price
-				) {
-					return currentRate;
-				}
-				return lowestRate;
-			},
-			undefined
-		);
-	}
-}
-
-/**
- * Returns the cheapest rate that is a local pickup.
- *
- * @param {Array|undefined} shippingRates Array of shipping Rate.
- *
- * @return {Object|undefined} cheapest rate.
- */
-function getLocalPickupStartingPrice(
-	shippingRates: CartShippingPackageShippingRate[]
-): CartShippingPackageShippingRate | undefined {
-	if ( shippingRates ) {
-		return shippingRates.reduce(
-			(
-				lowestRate: CartShippingPackageShippingRate | undefined,
-				currentRate: CartShippingPackageShippingRate
-			) => {
-				if ( currentRate.method_id !== 'local_pickup' ) {
-					return lowestRate;
-				}
-				if (
-					lowestRate === undefined ||
-					currentRate.price < lowestRate.price
-				) {
-					return currentRate;
-				}
-				return lowestRate;
-			},
-			undefined
-		);
-	}
-}
-
-const RatePrice = ( { rate }: { rate: CartShippingPackageShippingRate } ) => {
-	const ratePrice = getSetting( 'displayCartPricesIncludingTax', false )
-		? parseInt( rate.price, 10 ) + parseInt( rate.taxes, 10 )
-		: parseInt( rate.price, 10 );
-	return (
-		<span className="wc-block-checkout__collection-item-price">
-			{ ratePrice === 0
-				? __( 'free', 'woo-gutenberg-products-block' )
-				: createInterpolateElement(
-						__( 'from <price />', 'woo-gutenberg-products-block' ),
-						{
-							price: (
-								<FormattedMonetaryAmount
-									currency={ getCurrencyFromPriceResponse(
-										rate
-									) }
-									value={ ratePrice }
-								/>
-							),
-						}
-				  ) }
-		</span>
-	);
-};
 const LocalPickupSelector = ( {
 	checked,
 	rate,
 	showPrice,
 	showIcon,
+	toggleText,
 }: {
 	checked: string;
 	rate: CartShippingPackageShippingRate;
 	showPrice: boolean;
 	showIcon: boolean;
+	toggleText: string;
 } ) => {
 	return (
 		<Radio
@@ -135,7 +50,7 @@ const LocalPickupSelector = ( {
 				/>
 			) }
 			<span className="wc-block-checkout__collection-item-title">
-				{ __( 'Local Pickup', 'woo-gutenberg-products-block' ) }
+				{ toggleText }
 			</span>
 			{ showPrice === true && <RatePrice rate={ rate } /> }
 		</Radio>
@@ -147,11 +62,13 @@ const ShippingSelector = ( {
 	rate,
 	showPrice,
 	showIcon,
+	toggleText,
 }: {
 	checked: string;
 	rate: CartShippingPackageShippingRate;
 	showPrice: boolean;
 	showIcon: boolean;
+	toggleText: string;
 } ) => {
 	const Price =
 		rate === undefined ? (
@@ -181,7 +98,7 @@ const ShippingSelector = ( {
 				/>
 			) }
 			<span className="wc-block-checkout__collection-item-title">
-				{ __( 'Delivery', 'woo-gutenberg-products-block' ) }
+				{ toggleText }
 			</span>
 			{ showPrice === true && Price }
 		</Radio>
@@ -192,11 +109,15 @@ const Block = ( {
 	onChange,
 	showPrice,
 	showIcon,
+	localPickupText,
+	shippingText,
 }: {
 	checked: string;
 	onChange: ( value: string ) => void;
 	showPrice: boolean;
 	showIcon: boolean;
+	localPickupText: string;
+	shippingText: string;
 } ): JSX.Element | null => {
 	const { shippingRates, needsShipping, hasCalculatedShipping } =
 		useShippingData();
@@ -228,12 +149,14 @@ const Block = ( {
 				rate={ shippingStartingPrice }
 				showPrice={ showPrice }
 				showIcon={ showIcon }
+				toggleText={ shippingText }
 			/>
 			<LocalPickupSelector
 				checked={ checked }
 				rate={ localPickupStartingPrice }
 				showPrice={ showPrice }
 				showIcon={ showIcon }
+				toggleText={ localPickupText }
 			/>
 		</RadioGroup>
 	);
