@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { onboarding } = require( '../utils' );
+const { onboarding } = require( '../../utils' );
 const { storeDetails } = require( '../../test-data/data' );
 
 test.describe( 'Store owner can complete onboarding wizard', () => {
