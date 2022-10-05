@@ -22,6 +22,7 @@ class MarketingServiceProvider extends AbstractServiceProvider {
 	 */
 	protected $provides = array(
 		MarketingChannels::class,
+		InstalledExtensions::class,
 	);
 
 	/**
