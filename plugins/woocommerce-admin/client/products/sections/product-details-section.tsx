@@ -42,7 +42,7 @@ export const ProductDetailsSection: React.FC = () => {
 		useState( false );
 	const [ descriptionBlocks, setDescriptionBlocks ] = useState<
 		BlockInstance[]
-	>( parse( values.description ) );
+	>( parse( values.description || '' ) );
 	const { permalinkPrefix, permalinkSuffix } = useSelect(
 		( select: WCDataSelector ) => {
 			const { getPermalinkParts } = select( PRODUCTS_STORE_NAME );
