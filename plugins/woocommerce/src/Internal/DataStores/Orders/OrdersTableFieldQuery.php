@@ -284,9 +284,9 @@ class OrdersTableFieldQuery {
 
 		if ( $where ) {
 			if ( 'CHAR' === $clause['cast'] ) {
-				return "{$clause['alias']}.{$clause['column']} {$clause_compare} {$where}";
+				return "`{$clause['alias']}`.`{$clause['column']}` {$clause_compare} {$where}";
 			} else {
-				return "CAST({$clause['alias']}.{$clause['column']} AS {$clause['cast']}) {$clause_compare} {$where}";
+				return "CAST(`{$clause['alias']}`.`{$clause['column']}` AS {$clause['cast']}) {$clause_compare} {$where}";
 			}
 		}
 

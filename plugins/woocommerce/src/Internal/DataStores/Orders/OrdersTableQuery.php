@@ -655,14 +655,14 @@ class OrdersTableQuery {
 		$join    = '';
 		$join_on = '';
 
-		$join .= "INNER JOIN {$table}" . ( $alias !== $table ? " AS {$alias}" : '' );
+		$join .= "INNER JOIN `{$table}`" . ( $alias !== $table ? " AS `{$alias}`" : '' );
 
 		if ( isset( $this->mappings[ $mapping_id ]['order_id'] ) ) {
-			$join_on .= "{$this->tables['orders']}.id = {$alias}.order_id";
+			$join_on .= "`{$this->tables['orders']}`.id = `{$alias}`.order_id";
 		}
 
 		if ( $is_address_mapping ) {
-			$join_on .= $wpdb->prepare( " AND {$alias}.address_type = %s", substr( $mapping_id, 0, -8 ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$join_on .= $wpdb->prepare( " AND `{$alias}`.address_type = %s", substr( $mapping_id, 0, -8 ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 
 		return $join . ( $join_on ? " ON ( {$join_on} )" : '' );
