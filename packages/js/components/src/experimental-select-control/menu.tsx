@@ -29,6 +29,8 @@ export const Menu = ( {
 
 	let childrenMarkup = children;
 	if ( dropdownPlacement === 'body' ) {
+		const selectControlParentElement =
+			selectControlMenuRef.current?.parentElement;
 		childrenMarkup = (
 			<Popover
 				focusOnMount={ false }
@@ -38,7 +40,7 @@ export const Menu = ( {
 				<div
 					className="woocommerce-experimental-select-control__popover-menu-container"
 					style={ {
-						width: selectControlMenuRef.current?.getBoundingClientRect()
+						width: selectControlParentElement?.getBoundingClientRect()
 							.width,
 					} }
 					onMouseUp={ ( e ) =>
