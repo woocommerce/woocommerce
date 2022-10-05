@@ -3,7 +3,7 @@
  */
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createElement } from '@wordpress/element';
+import { createElement, Fragment } from '@wordpress/element';
 import moment from 'moment';
 
 /**
@@ -11,6 +11,7 @@ import moment from 'moment';
  */
 import {
 	DateTimePickerControl,
+	DateTimePickerControlOnChangeHandler,
 	default12HourDateTimeFormat,
 	default24HourDateTimeFormat,
 } from '../';
@@ -161,7 +162,7 @@ describe( 'DateTimePickerControl', () => {
 	} );
 
 	it( 'should show the date time picker popup when focused', async () => {
-		const { container, queryByText } = render( <DateTimePickerControl /> );
+		const { container } = render( <DateTimePickerControl /> );
 
 		const input = container.querySelector( 'input' );
 
@@ -189,7 +190,7 @@ describe( 'DateTimePickerControl', () => {
 	} );
 
 	it( 'should set the date time picker popup to 12 hour mode', async () => {
-		const { container, queryByText } = render(
+		const { container } = render(
 			<DateTimePickerControl is12Hour={ true } />
 		);
 
@@ -291,6 +292,99 @@ describe( 'DateTimePickerControl', () => {
 				invalidDateTime,
 				false
 			)
+		);
+	}, 10000 );
+
+	// We need to bump up the timeout for this test because:
+	//     1. userEvent.type() is slow (see https://github.com/testing-library/user-event/issues/577)
+	//     2. moment.js is slow
+	// Otherwise, the following error can occur on slow machines (such as our CI), because Jest times out and starts
+	// tearing down the component while test microtasks are still being executed
+	// (see https://github.com/facebook/jest/issues/12670)
+	//       TypeError: Cannot read properties of null (reading 'createEvent')
+	it( 'should call the current onChange when the input is changed', async () => {
+		const originalDateTime = moment( '2022-09-15 02:30:40' );
+		const dateTimeFormat = 'HH:mm, MM-DD-YYYY';
+		const newDateTimeInputString = '02:04, 06-08-2010';
+		const newDateTime = moment( newDateTimeInputString, dateTimeFormat );
+		const originalOnChangeHandler = jest.fn();
+		const newOnChangeHandler = jest.fn();
+
+		let count = 0;
+
+		const Container: React.FC< { children?: React.ReactNode } > = ( {
+			children,
+		} ) => {
+			function getChildren() {
+				if ( typeof children === 'function' ) {
+					return children( {
+						// change the onChange handler after the initial render
+						onChange:
+							count++ === 0
+								? originalOnChangeHandler
+								: newOnChangeHandler,
+						className: 'foo',
+					} );
+				}
+
+				return children;
+			}
+
+			return <>{ getChildren() }</>;
+		};
+
+		const { container, rerender } = render(
+			<Container>
+				{ ( {
+					onChange,
+				}: {
+					onChange: DateTimePickerControlOnChangeHandler;
+				} ) => {
+					return (
+						<DateTimePickerControl
+							dateTimeFormat={ dateTimeFormat }
+							currentDate={ originalDateTime.toISOString() }
+							onChange={ onChange }
+							onChangeDebounceWait={ 500 }
+						/>
+					);
+				} }
+			</Container>
+		);
+
+		const input = container.querySelector( 'input' );
+		userEvent.type(
+			input!,
+			'{selectall}{backspace}' + newDateTimeInputString
+		);
+
+		// re-render the component; we do this to then test whether our onChange still gets called
+		rerender(
+			<Container>
+				{ ( {
+					onChange,
+				}: {
+					onChange: DateTimePickerControlOnChangeHandler;
+				} ) => {
+					return (
+						<DateTimePickerControl
+							dateTimeFormat={ dateTimeFormat }
+							currentDate={ originalDateTime.toISOString() }
+							onChange={ onChange }
+							onChangeDebounceWait={ 500 }
+						/>
+					);
+				} }
+			</Container>
+		);
+
+		await waitFor(
+			() =>
+				expect( newOnChangeHandler ).toHaveBeenLastCalledWith(
+					newDateTime.toISOString(),
+					true
+				),
+			{ timeout: 5000 }
 		);
 	}, 10000 );
 
