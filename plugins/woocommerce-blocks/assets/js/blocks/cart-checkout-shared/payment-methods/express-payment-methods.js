@@ -20,7 +20,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import PaymentMethodErrorBoundary from './payment-method-error-boundary';
-import { STORE_KEY as PAYMENT_METHOD_DATA_STORE_KEY } from '../../../data/payment-methods/constants';
+import { STORE_KEY as PAYMENT_METHOD_DATA_STORE_KEY } from '../../../data/payment/constants';
 
 const ExpressPaymentMethods = () => {
 	const { isEditor } = useEditorContext();
