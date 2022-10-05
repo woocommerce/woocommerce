@@ -106,7 +106,7 @@ export const ImagesSection: React.FC = () => {
 					>
 						{ images.map( ( image ) => (
 							<ImageGalleryItem
-								key={ image.id }
+								key={ image.id || image.url }
 								alt={ image.alt }
 								src={ image.url || image.src }
 								id={ `${ image.id }` }
