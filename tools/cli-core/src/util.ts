@@ -179,12 +179,12 @@ export const generateJSONFile = ( filePath: string, data: unknown ) => {
 };
 
 /**
- * Get plugin data
+ * Get plugin data from main PHP file in JSON format.
  *
  * @param {string} tmpRepoPath    - Path to repo.
  * @param {string} pathToMainFile - Path to plugin's main PHP file.
  * @param {string} hashOrBranch   - Hash or branch to checkout.
- * @return {Object} - plugin data
+ * @return {Object} - plugin data in JSON format.
  */
 export const getPluginData = async (
 	tmpRepoPath: string,
