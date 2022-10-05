@@ -242,7 +242,7 @@ test.describe('Customers API tests: CRUD', () => {
 		test('retrieve after update customer', async ({
 			request
 		}) => {
-			// call API to retrieve all customers
+			// call API to retrieve the updated customer we created above
 			const response = await request.get(`/wp-json/wc/v3/customers/${ customerId }`);
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
