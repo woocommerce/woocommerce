@@ -291,6 +291,9 @@ class Industry extends Component {
 							disabled={
 								! selected.length || isProfileItemsRequesting
 							}
+							aria-disabled={
+								! selected.length || isProfileItemsRequesting
+							}
 						>
 							{ __( 'Continue', 'woocommerce' ) }
 						</Button>

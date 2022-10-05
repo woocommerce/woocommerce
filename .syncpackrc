@@ -1,6 +1,6 @@
 {
 	"dev": true,
-	"filter": "^(?:react|react-dom)$",
+	"filter": "^(?:react|react-dom|typescript)$",
 	"indent": "\t",
 	"overrides": true,
 	"peer": true,
@@ -10,9 +10,23 @@
 	"workspace": true,
 	"versionGroups": [
 		{
-			"dependencies": [ "react", "react-dom" ],
-			"packages": [ "**" ],
+			"dependencies": [
+				"react",
+				"react-dom"
+			],
+			"packages": [
+				"**"
+			],
 			"pinVersion": "^17.0.2"
+		},
+		{
+			"dependencies": [
+				"typescript"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^4.8.3"
 		}
 	]
 }

@@ -38,8 +38,7 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 	const [ slug, setSlug ] = useState(
 		product.slug || cleanForSlug( product.name )
 	);
-	const { resetForm, changedFields, touched, errors } =
-		useFormContext< Product >();
+	const { resetForm, touched, errors } = useFormContext< Product >();
 
 	const onSave = async () => {
 		recordEvent( 'product_update_slug', {
@@ -63,7 +62,6 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 					slug: updatedProduct.slug,
 					permalink: updatedProduct.permalink,
 				},
-				changedFields,
 				touched,
 				errors
 			);
