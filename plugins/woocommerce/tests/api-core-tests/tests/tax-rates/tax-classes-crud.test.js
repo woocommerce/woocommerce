@@ -14,11 +14,33 @@ const {
  * @group taxRates
  *
  */
-test.describe('Tax Rates API tests: CRUD', () => {
+test.describe('Tax Classes API tests: CRUD', () => {
 	let taxRateId;
 
-	test.describe('Create a tax rate', () => {
-		test('can create a tax rate', async ({
+	test.describe('Create a tax class', () => {
+
+		test('can enable tax calculations', async ({
+			request,
+		}) => {
+			// call API to enable tax rates and calculations
+			const response = await request.put(
+				'/wp-json/wc/v3/settings/general/woocommerce_calc_taxes', {
+					data: {
+						value: 'yes',
+					},
+				}
+			);
+			const responseJSON = await response.json();
+			expect(response.status()).toEqual(200);
+			expect(typeof responseJSON.id).toEqual('string');
+			expect(responseJSON.id).toEqual('woocommerce_calc_taxes');
+			expect(responseJSON.label).toEqual("Enable taxes");
+			expect(responseJSON.type).toEqual("checkbox");
+			expect(responseJSON.value).toEqual("yes");
+			expect(responseJSON.group_id).toEqual("general");
+		});
+
+		test('can create a tax class', async ({
 			request,
 		}) => {
 			// call API to create a customer
