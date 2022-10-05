@@ -518,7 +518,7 @@ class Checkout extends AbstractCartRoute {
 				throw new RouteException( 'woocommerce_rest_checkout_invalid_payment_result', __( 'Invalid payment result received from payment method.', 'woo-gutenberg-products-block' ), 500 );
 			}
 		} catch ( \Exception $e ) {
-			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', $e->getMessage(), 400 );
+			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', $e->getMessage(), 402 );
 		}
 	}
 
