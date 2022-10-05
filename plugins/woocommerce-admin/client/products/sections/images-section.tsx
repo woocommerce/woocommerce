@@ -31,7 +31,8 @@ type Image = MediaItem & {
 export const ImagesSection: React.FC = () => {
 	const { getInputProps, setValue } = useFormContext< Product >();
 	const images = ( getInputProps( 'images' ).value as Image[] ) || [];
-	const [ showRemoveZone, setShowRemoveZone ] = useState< boolean >( false );
+	const [ isRemoveZoneVisible, setIsRemoveZoneVisible ] =
+		useState< boolean >( false );
 	const [ isRemove, setIsRemove ] = useState< boolean >( false );
 	const [ draggedImageId, setDraggedImageId ] = useState< number | null >(
 		0
@@ -54,7 +55,7 @@ export const ImagesSection: React.FC = () => {
 	};
 
 	const toggleRemoveZone = () => {
-		setShowRemoveZone( ! showRemoveZone );
+		setIsRemoveZoneVisible( ! isRemoveZoneVisible );
 	};
 
 	const orderImages = ( newOrder: JSX.Element[] ) => {
@@ -129,7 +130,7 @@ export const ImagesSection: React.FC = () => {
 						) ) }
 					</ImageGallery>
 					<div className="woocommerce-product-form__image-drop-zone">
-						{ showRemoveZone ? (
+						{ isRemoveZoneVisible ? (
 							<CardBody>
 								<div className="woocommerce-product-form__remove-image-drop-zone">
 									<span>
