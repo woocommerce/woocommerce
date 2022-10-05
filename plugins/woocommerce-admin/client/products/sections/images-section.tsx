@@ -31,8 +31,9 @@ type Image = MediaItem & {
 export const ImagesSection: React.FC = () => {
 	const { getInputProps, setValue } = useFormContext< Product >();
 	const images = ( getInputProps( 'images' ).value as Image[] ) || [];
-	const [ showRemoveZone, setShowRemoveZone ] = useState( false );
-	const [ imageIdToRemove, setImageIdToRemove ] = useState< number >( 0 );
+	const [ showRemoveZone, setShowRemoveZone ] = useState< boolean >( false );
+	const [ isRemove, setIsRemove ] = useState< boolean >( false );
+	const [ draggedImageId, setDraggedImageId ] = useState< number >( 0 );
 
 	const getUniqueImages = ( files: Image[] ) => {
 		if ( ! files ) {
@@ -52,13 +53,6 @@ export const ImagesSection: React.FC = () => {
 
 	const toggleRemoveZone = () => {
 		setShowRemoveZone( ! showRemoveZone );
-	};
-
-	const setImageToRemove = ( image: string ) => {
-		const tempNode = document.createElement( 'div' );
-		tempNode.innerHTML = image;
-		const imageId = tempNode.getElementsByTagName( 'img' )[ 0 ].id;
-		setImageIdToRemove( parseInt( imageId, 10 ) );
 	};
 
 	const orderImages = ( newOrder: JSX.Element[] ) => {
@@ -103,16 +97,20 @@ export const ImagesSection: React.FC = () => {
 			>
 				<CardBody>
 					<ImageGallery
-						onDragStart={ toggleRemoveZone }
+						onDragStart={ ( event ) => {
+							const { id: imageId } = event.target as HTMLElement;
+							setDraggedImageId( parseInt( imageId, 10 ) );
+							toggleRemoveZone();
+						} }
 						onDragEnd={ () => {
-							if ( imageIdToRemove ) {
+							if ( isRemove && draggedImageId ) {
 								setValue(
 									'images',
 									images.filter(
-										( img ) => img.id !== imageIdToRemove
+										( img ) => img.id !== draggedImageId
 									)
 								);
-								setImageIdToRemove( 0 );
+								setIsRemove( false );
 							}
 							toggleRemoveZone();
 						} }
@@ -143,7 +141,7 @@ export const ImagesSection: React.FC = () => {
 										) }
 									</span>
 									<DropZone
-										onHTMLDrop={ setImageToRemove }
+										onHTMLDrop={ () => setIsRemove( true ) }
 										label={ __(
 											'Drop here to remove',
 											'woocommerce'
