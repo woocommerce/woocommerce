@@ -8,6 +8,7 @@
     flex-wrap: wrap;
     align-items: center;
     padding: $gap-smallest 36px $gap-smallest $gap-smaller;
+    margin-bottom: 4px;
 
     > * {
         display: inline-flex;
@@ -18,6 +19,7 @@
     flex-grow: 1;
     align-items: center;
     flex-basis: 120px;
+    display: inline-flex;
 
     input {
         width: 100%;
