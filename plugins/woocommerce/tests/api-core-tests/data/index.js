@@ -6,7 +6,7 @@ const {
 const { coupon } = require( './coupon' );
 const { customer } = require( './customer' );
 const { refund } = require( './refund' );
-const { getTaxRateExamples } = require( './tax-rate' );
+const { getTaxRateExamples, allUSTaxesExample } = require( './tax-rate' );
 const { getVariationExample } = require( './variation' );
 const {
 	simpleProduct,
@@ -28,6 +28,7 @@ module.exports = {
 	coupon,
 	shared,
 	refund,
+	allUSTaxesExample,
 	getTaxRateExamples,
 	getVariationExample,
 	simpleProduct,
