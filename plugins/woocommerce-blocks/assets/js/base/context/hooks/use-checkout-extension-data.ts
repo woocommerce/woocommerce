@@ -22,7 +22,7 @@ export const useCheckoutExtensionData = (): {
 		value: unknown
 	) => void;
 } => {
-	const { setExtensionData } = useDispatch( CHECKOUT_STORE_KEY );
+	const { __internalSetExtensionData } = useDispatch( CHECKOUT_STORE_KEY );
 	const { extensionData } = useSelect( ( select ) =>
 		select( CHECKOUT_STORE_KEY ).getCheckoutState()
 	);
@@ -37,7 +37,7 @@ export const useCheckoutExtensionData = (): {
 	const setExtensionDataWithNamespace = useCallback(
 		( namespace, key, value ) => {
 			const currentData = extensionDataRef.current[ namespace ] || {};
-			setExtensionData( {
+			__internalSetExtensionData( {
 				...extensionDataRef.current,
 				[ namespace ]: {
 					...currentData,
@@ -45,7 +45,7 @@ export const useCheckoutExtensionData = (): {
 				},
 			} );
 		},
-		[ setExtensionData ]
+		[ __internalSetExtensionData ]
 	);
 
 	return {

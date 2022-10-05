@@ -22,7 +22,8 @@ const Block = ( {
 		select( CHECKOUT_STORE_KEY ).getCheckoutState()
 	);
 
-	const { setShouldCreateAccount } = useDispatch( CHECKOUT_STORE_KEY );
+	const { __internalSetShouldCreateAccount } =
+		useDispatch( CHECKOUT_STORE_KEY );
 	const { billingAddress, setEmail } = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
 
@@ -42,7 +43,9 @@ const Block = ( {
 					'woo-gutenberg-products-block'
 				) }
 				checked={ shouldCreateAccount }
-				onChange={ ( value ) => setShouldCreateAccount( value ) }
+				onChange={ ( value ) =>
+					__internalSetShouldCreateAccount( value )
+				}
 			/>
 		);
 

@@ -80,9 +80,9 @@ export const runCheckoutAfterProcessingWithErrorObservers = ( {
 	if ( errorResponse !== null ) {
 		// irrecoverable error so set complete
 		if ( ! shouldRetry( errorResponse ) ) {
-			dispatch.setComplete( errorResponse );
+			dispatch.__internalSetComplete( errorResponse );
 		} else {
-			dispatch.setIdle();
+			dispatch.__internalSetIdle();
 		}
 	} else {
 		const hasErrorNotices =
@@ -110,7 +110,7 @@ export const runCheckoutAfterProcessingWithErrorObservers = ( {
 			} );
 		}
 
-		dispatch.setIdle();
+		dispatch.__internalSetIdle();
 	}
 };
 
@@ -143,7 +143,7 @@ export const runCheckoutAfterProcessingWithSuccessObservers = ( {
 	} );
 
 	if ( successResponse && ! errorResponse ) {
-		dispatch.setComplete( successResponse );
+		dispatch.__internalSetComplete( successResponse );
 	} else if ( isObject( errorResponse ) ) {
 		if ( errorResponse.message && isString( errorResponse.message ) ) {
 			const errorOptions =
@@ -156,16 +156,16 @@ export const runCheckoutAfterProcessingWithSuccessObservers = ( {
 			createErrorNotice( errorResponse.message, errorOptions );
 		}
 		if ( ! shouldRetry( errorResponse ) ) {
-			dispatch.setComplete( errorResponse );
+			dispatch.__internalSetComplete( errorResponse );
 		} else {
 			// this will set an error which will end up
 			// triggering the onCheckoutAfterProcessingWithError emitter.
 			// and then setting checkout to IDLE state.
-			dispatch.setHasError( true );
+			dispatch.__internalSetHasError( true );
 		}
 	} else {
 		// nothing hooked in had any response type so let's just consider successful.
-		dispatch.setComplete();
+		dispatch.__internalSetComplete();
 	}
 };
 
