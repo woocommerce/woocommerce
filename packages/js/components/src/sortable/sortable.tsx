@@ -38,7 +38,6 @@ export type SortableProps = {
 	onDragOver?: DragEventHandler< HTMLLIElement >;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onOrderChange?: ( items: SortableChild[] ) => void;
-	notSortableIndexes?: number[];
 };
 
 const THROTTLE_TIME = 16;
@@ -52,7 +51,6 @@ export const Sortable = ( {
 	onDragOver = () => null,
 	onDragStart = () => null,
 	onOrderChange = () => null,
-	notSortableIndexes = [],
 }: SortableProps ) => {
 	const ref = useRef< HTMLOListElement >( null );
 	const [ items, setItems ] = useState< SortableChild[] >( [] );

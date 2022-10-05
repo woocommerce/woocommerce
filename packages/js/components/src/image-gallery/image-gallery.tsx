@@ -77,7 +77,6 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 				onOrderChange={ ( items ) => {
 					updateOrderedChildren( items );
 				} }
-				notSortableIndexes={ [ 0 ] }
 			>
 				{ orderedChildren.map( ( child, childIndex ) => {
 					const isToolbarVisible = child.key === activeToolbarKey;
