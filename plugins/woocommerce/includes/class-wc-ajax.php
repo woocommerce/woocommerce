@@ -1747,13 +1747,14 @@ class WC_AJAX {
 		$taxonomy    = isset( $_GET['taxonomy'] ) ? wc_clean( wp_unslash( $_GET['taxonomy'] ) ) : '';
 
 		$args = array(
-			'taxonomy'   => $taxonomy,
-			'orderby'    => 'id',
-			'order'      => 'ASC',
-			'hide_empty' => true,
-			'fields'     => 'all',
-			'number'     => $limit,
-			'name__like' => $search_text,
+			'taxonomy'        => $taxonomy,
+			'orderby'         => 'id',
+			'order'           => 'ASC',
+			'hide_empty'      => false,
+			'fields'          => 'all',
+			'number'          => $limit,
+			'name__like'      => $search_text,
+			'suppress_filter' => true
 		);
 
 		/**
