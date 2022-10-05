@@ -82,6 +82,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 }: SelectControlProps< ItemType > ) {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
+
 	let selectedItems = selected === null ? [] : selected;
 	selectedItems = Array.isArray( selectedItems )
 		? selectedItems
@@ -179,8 +180,19 @@ function SelectControl< ItemType = DefaultItemType >( {
 			{ /* eslint-disable jsx-a11y/label-has-for */ }
 			<label { ...getLabelProps() }>{ label }</label>
 			{ /* eslint-enable jsx-a11y/label-has-for */ }
-			<div className="woocommerce-experimental-select-control__combo-box-wrapper">
-				{ multiple && (
+			<ComboBox
+				comboBoxProps={ getComboboxProps() }
+				inputProps={ getInputProps( {
+					...getDropdownProps( {
+						preventKeyAction: isOpen,
+					} ),
+					className: 'woocommerce-experimental-select-control__input',
+					onFocus: () => setIsFocused( true ),
+					onBlur: () => setIsFocused( false ),
+					placeholder,
+				} ) }
+			>
+				{ multiple ? (
 					<SelectedItems
 						items={ selectedItems }
 						getItemLabel={ getItemLabel }
@@ -188,19 +200,8 @@ function SelectControl< ItemType = DefaultItemType >( {
 						getSelectedItemProps={ getSelectedItemProps }
 						onRemove={ onRemoveItem }
 					/>
-				) }
-				<ComboBox
-					comboBoxProps={ getComboboxProps() }
-					inputProps={ getInputProps( {
-						...getDropdownProps( { preventKeyAction: isOpen } ),
-						className:
-							'woocommerce-experimental-select-control__input',
-						onFocus: () => setIsFocused( true ),
-						onBlur: () => setIsFocused( false ),
-						placeholder,
-					} ) }
-				/>
-			</div>
+				) : null }
+			</ComboBox>
 
 			{ children( {
 				items: filteredItems,
