@@ -12,11 +12,43 @@ defined( 'ABSPATH' ) || exit;
 class OrdersTableFieldQuery {
 
 	/**
+	 * List of valid SQL operators to use as field_query 'compare' values.
+	 *
+	 * @var array
+	 */
+	private const VALID_COMPARISON_OPERATORS = array(
+		'=',
+		'!=',
+		'LIKE',
+		'NOT LIKE',
+		'IN',
+		'NOT IN',
+		'EXISTS',
+		'NOT EXISTS',
+		'RLIKE',
+		'REGEXP',
+		'NOT REGEXP',
+		'>',
+		'>=',
+		'<',
+		'<=',
+		'BETWEEN',
+		'NOT BETWEEN',
+	);
+
+	/**
 	 * The original query object.
 	 *
 	 * @var OrdersTableQuery
 	 */
 	private $query = null;
+
+	/**
+	 * Determines whether the field query should produce no results due to an invalid argument.
+	 *
+	 * @var boolean
+	 */
+	private $force_no_results = false;
 
 	/**
 	 * Holds a sanitized version of the `field_query`.
@@ -61,7 +93,7 @@ class OrdersTableFieldQuery {
 
 		$this->query   = $q;
 		$this->queries = $this->sanitize_query( $field_query );
-		$this->where   = $this->process( $this->queries );
+		$this->where   = ( ! $this->force_no_results ) ? $this->process( $this->queries ) : '1=0';
 	}
 
 	/**
@@ -84,11 +116,20 @@ class OrdersTableFieldQuery {
 					continue;
 				}
 
-				$arg['compare'] = isset( $arg['compare'] ) ? strtoupper( $arg['compare'] ) : ( isset( $arg['value'] ) && is_array( $arg['value'] ) ? 'IN' : '=' );
-				$arg['cast']    = $this->sanitize_cast_type( $arg['type'] ?? '' );
+				// Sanitize 'compare'.
+				$arg['compare'] = strtoupper( $arg['compare'] ?? '=' );
+				$arg['compare'] = in_array( $arg['compare'], self::VALID_COMPARISON_OPERATORS, true ) ? $arg['compare'] : '=';
+
+				if ( '=' === $arg['compare'] && isset( $arg['value'] ) && is_array( $arg['value'] ) ) {
+					$arg['compare'] = 'IN';
+				}
+
+				// Sanitize 'cast'.
+				$arg['cast'] = $this->sanitize_cast_type( $arg['type'] ?? '' );
 
 				$field_info = $this->query->get_field_mapping_info( $arg['field'] );
 				if ( ! $field_info ) {
+					$this->force_no_results = true;
 					continue;
 				}
 
@@ -133,6 +174,10 @@ class OrdersTableFieldQuery {
 	 */
 	private function process( array $q ) {
 		$where = '';
+
+		if ( empty( $q ) ) {
+			return $where;
+		}
 
 		if ( $this->is_atomic( $q ) ) {
 			$q['alias'] = $this->find_or_create_table_alias_for_clause( $q );
@@ -255,7 +300,7 @@ class OrdersTableFieldQuery {
 				break;
 			case 'BETWEEN':
 			case 'NOT BETWEEN':
-				$where = $wpdb->prepare( '%s AND %s', $clause_value[0], $clause_value[1] );
+				$where = $wpdb->prepare( '%s AND %s', $clause_value[0], $clause_value[1] ?? $clause_value[0] );
 				break;
 			case 'LIKE':
 			case 'NOT LIKE':
@@ -304,7 +349,7 @@ class OrdersTableFieldQuery {
 	public function get_sql_clauses() {
 		return array(
 			'join'  => $this->join,
-			'where' => array( $this->where ),
+			'where' => $this->where ? array( $this->where ) : array(),
 		);
 	}
 
