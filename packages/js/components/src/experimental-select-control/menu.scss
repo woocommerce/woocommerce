@@ -15,3 +15,17 @@
 		display: block;
 	}
 }
+
+.components-popover.woocommerce-experimental-select-control__popover-menu {
+	margin-top: -$gap-small;
+}
+.woocommerce-experimental-select-control__popover-menu-container {
+	max-height: 300px;
+	overflow-y: scroll;
+
+	> .category-field-dropdown__item:not( :first-child ) {
+		.category-field-dropdown__item-content {
+			border-top: 1px solid $gray-200;
+		}
+	}
+}

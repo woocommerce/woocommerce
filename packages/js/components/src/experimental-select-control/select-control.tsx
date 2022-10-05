@@ -58,6 +58,7 @@ type SelectControlProps< ItemType > = {
 	) => Partial< UseComboboxState< ItemType | null > >;
 	placeholder?: string;
 	selected: ItemType | ItemType[] | null;
+	dropdownPlacement?: 'inline' | 'body';
 	className?: string;
 };
 
@@ -75,7 +76,11 @@ function SelectControl< ItemType = DefaultItemType >( {
 		isOpen,
 	} ) => {
 		return (
-			<Menu getMenuProps={ getMenuProps } isOpen={ isOpen }>
+			<Menu
+				getMenuProps={ getMenuProps }
+				isOpen={ isOpen }
+				dropdownPlacement={ dropdownPlacement }
+			>
 				{ renderItems.map( ( item, index: number ) => (
 					<MenuItem
 						key={ `${ getItemValue( item ) }${ index }` }
@@ -101,6 +106,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 	stateReducer = ( state, actionAndChanges ) => actionAndChanges.changes,
 	placeholder,
 	selected,
+	dropdownPlacement = 'inline',
 	className,
 }: SelectControlProps< ItemType > ) {
 	const [ isFocused, setIsFocused ] = useState( false );
