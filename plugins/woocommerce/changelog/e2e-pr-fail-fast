@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add fail-fast configuration to Playwright E2E tests.
