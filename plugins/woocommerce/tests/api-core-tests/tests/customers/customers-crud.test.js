@@ -320,7 +320,7 @@ test.describe('Customers API tests: CRUD', () => {
 					state: "RJ",
 					postcode: "12345-000",
 					country: "BR",
-					email: "joao.silva@example.com",
+					email: "joao.silva2@example.com",
 					phone: "(55) 5555-5555"
 				},
 				shipping: {
