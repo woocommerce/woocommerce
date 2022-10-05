@@ -188,7 +188,9 @@ export const Async: React.FC = () => {
 };
 
 export const CustomRender: React.FC = () => {
-	const [ selected, setSelected ] = useState< DefaultItemType[] >( [] );
+	const [ selected, setSelected ] = useState< DefaultItemType[] >( [
+		sampleItems[ 0 ],
+	] );
 
 	const onRemove = ( item ) => {
 		setSelected( selected.filter( ( i ) => i !== item ) );
@@ -233,8 +235,12 @@ export const CustomRender: React.FC = () => {
 				stateReducer={ ( state, actionAndChanges ) => {
 					const { changes, type } = actionAndChanges;
 					switch ( type ) {
-						case selectControlStateChangeTypes.ItemClick:
 						case selectControlStateChangeTypes.ControlledPropUpdatedSelectedItem:
+							return {
+								...changes,
+								inputValue: state.inputValue,
+							};
+						case selectControlStateChangeTypes.ItemClick:
 							return {
 								...changes,
 								isOpen: true,

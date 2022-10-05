@@ -117,7 +117,6 @@ function SelectControl< ItemType = DefaultItemType >( {
 		getItemLabel
 	);
 	const {
-		addSelectedItem,
 		getSelectedItemProps,
 		getDropdownProps,
 		removeSelectedItem,
