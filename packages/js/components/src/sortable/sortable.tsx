@@ -9,6 +9,7 @@ import {
 	useEffect,
 	useRef,
 	useState,
+	createContext,
 } from '@wordpress/element';
 import { DragEvent, DragEventHandler, KeyboardEvent } from 'react';
 import { speak } from '@wordpress/a11y';
@@ -40,6 +41,8 @@ export type SortableProps = {
 };
 
 const THROTTLE_TIME = 16;
+
+export const SortableContext = createContext( {} );
 
 export const Sortable = ( {
 	children,
@@ -106,6 +109,7 @@ export const Sortable = ( {
 
 		// Items before the current item cause a one off error when
 		// removed from the old array and spliced into the new array.
+		// TODO: Issue with dragging into same position having to do with isBefore returning true intially.
 		let targetIndex = dragIndex < index ? index : index + 1;
 		if ( isBefore( event, isHorizontal ) ) {
 			targetIndex--;
@@ -220,55 +224,66 @@ export const Sortable = ( {
 	};
 
 	return (
-		<ol
-			className={ classnames( 'woocommerce-sortable', {
-				'is-dragging': dragIndex !== null,
-				'is-horizontal': isHorizontal,
-			} ) }
-			ref={ ref }
-			role="listbox"
-		>
-			{ items.map( ( child, index ) => {
-				const isDragging = index === dragIndex;
-				const itemClasses = classnames( {
-					'is-dragging-over-after': isDraggingOverAfter(
-						index,
-						dragIndex,
-						dropIndex
-					),
-					'is-dragging-over-before': isDraggingOverBefore(
-						index,
-						dragIndex,
-						dropIndex
-					),
-					'is-last-droppable': isLastDroppable(
-						index,
-						dragIndex,
-						items.length
-					),
-				} );
-				return (
-					<SortableItem
-						key={ index }
-						className={ itemClasses }
-						id={ index }
-						index={ index }
-						isDragging={ isDragging }
-						isSelected={ selectedIndex === index }
-						onDragEnd={ ( event ) => handleDragEnd( event ) }
-						onDragStart={ ( event ) =>
-							handleDragStart( event, index )
-						}
-						onDragOver={ ( event ) => {
-							event.preventDefault();
-							throttledHandleDragOver( event, index );
-						} }
-						onKeyDown={ ( event ) => handleKeyDown( event ) }
-					>
-						{ child }
-					</SortableItem>
-				);
-			} ) }
-		</ol>
+		<SortableContext.Provider value={ {} }>
+			<ol
+				className={ classnames( 'woocommerce-sortable', {
+					'is-dragging': dragIndex !== null,
+					'is-horizontal': isHorizontal,
+				} ) }
+				ref={ ref }
+				role="listbox"
+			>
+				{ items.map( ( child, index ) => {
+					const isDragging = index === dragIndex;
+					const itemClasses = classnames( {
+						'is-dragging-over-after': isDraggingOverAfter(
+							index,
+							dragIndex,
+							dropIndex
+						),
+						'is-dragging-over-before': isDraggingOverBefore(
+							index,
+							dragIndex,
+							dropIndex
+						),
+						'is-last-droppable': isLastDroppable(
+							index,
+							dragIndex,
+							items.length
+						),
+					} );
+
+					if (
+						child.props.className &&
+						child.props.className.indexOf( 'non-sortable-item' ) !==
+							-1
+					) {
+						return <li>{ child }</li>;
+					}
+
+					return (
+						<SortableItem
+							key={ child.key || index }
+							className={ itemClasses }
+							id={ index }
+							index={ index }
+							isDragging={ isDragging }
+							isSelected={ selectedIndex === index }
+							onDragEnd={ ( event ) => handleDragEnd( event ) }
+							onDragStart={ ( event ) =>
+								handleDragStart( event, index )
+							}
+							onDragOver={ ( event ) => {
+								event.preventDefault();
+								throttledHandleDragOver( event, index );
+							} }
+							onKeyDown={ ( event ) => handleKeyDown( event ) }
+						>
+							{ child }
+						</SortableItem>
+					);
+				} ) }
+			</ol>
+		</SortableContext.Provider>
 	);
 };
