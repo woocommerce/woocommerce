@@ -76,7 +76,6 @@ test.describe('Payment setup task', () => {
 		page.locator('.components-button.is-small.has-icon')
 			.click()
 			.catch(() => {});
-
 		await page.waitForLoadState('networkidle');
 
 		// purposely no await again
