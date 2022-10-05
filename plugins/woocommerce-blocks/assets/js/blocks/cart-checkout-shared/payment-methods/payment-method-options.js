@@ -17,7 +17,7 @@ import { getPaymentMethods } from '@woocommerce/blocks-registry';
  */
 import PaymentMethodCard from './payment-method-card';
 import { noticeContexts } from '../../../base/context/event-emit';
-import { STORE_KEY as PAYMENT_METHOD_DATA_STORE_KEY } from '../../../data/payment-methods/constants';
+import { STORE_KEY as PAYMENT_METHOD_DATA_STORE_KEY } from '../../../data/payment/constants';
 
 /**
  * Component used to render all non-saved payment method options.

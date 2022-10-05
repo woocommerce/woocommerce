@@ -20,7 +20,7 @@ import { controls as sharedControls } from '../shared-controls';
 import { controls } from './controls';
 import type { SelectFromMap, DispatchFromMap } from '../mapped-types';
 import { pushChanges } from './push-changes';
-import { checkPaymentMethodsCanPay } from '../payment-methods/check-payment-methods';
+import { checkPaymentMethodsCanPay } from '../payment/check-payment-methods';
 
 const registeredStore = registerStore< State >( STORE_KEY, {
 	reducer,
@@ -49,7 +49,7 @@ const unsubscribeInitializePaymentMethodDataStore = registeredStore.subscribe(
 			wpDataSelect( STORE_KEY ).hasFinishedResolution( 'getCartTotals' );
 		if ( cartLoaded ) {
 			wpDataDispatch(
-				'wc/store/payment-methods'
+				'wc/store/payment'
 			).__internalInitializePaymentMethodDataStore();
 			unsubscribeInitializePaymentMethodDataStore();
 		}

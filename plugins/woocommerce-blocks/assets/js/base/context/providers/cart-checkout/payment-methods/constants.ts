@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import type { PaymentMethodDataContextType } from '../../../../../data/payment-methods/types';
+import type { PaymentMethodDataContextType } from '../../../../../data/payment/types';
 
 export enum STATUS {
 	PRISTINE = 'pristine',
