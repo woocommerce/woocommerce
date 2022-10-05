@@ -170,7 +170,7 @@ test.describe('Customers API tests: CRUD', () => {
 		test('retrieve after update admin', async ({
 			request
 		}) => {
-			// call API to retrieve all customers
+			// call API to retrieve the admin customer we updated above
 			const response = await request.get('/wp-json/wc/v3/customers/1');
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
@@ -206,7 +206,7 @@ test.describe('Customers API tests: CRUD', () => {
 		test('retrieve after update subscriber', async ({
 			request
 		}) => {
-			// call API to retrieve all customers
+			// call API to retrieve the subscriber customer we updated above
 			const response = await request.get('/wp-json/wc/v3/customers/2');
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
