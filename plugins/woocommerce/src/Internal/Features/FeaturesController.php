@@ -61,13 +61,6 @@ class FeaturesController {
 	private $plugin_util;
 
 	/**
-	 * The cached list of WooCommerce aware plugin names.
-	 *
-	 * @var null|array
-	 */
-	private $woocommerce_aware_plugins = null;
-
-	/**
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
@@ -95,10 +88,12 @@ class FeaturesController {
 		self::add_filter( 'added_option', array( $this, 'process_added_option' ), 999, 3 );
 		self::add_filter( 'woocommerce_get_sections_advanced', array( $this, 'add_features_section' ), 10, 1 );
 		self::add_filter( 'woocommerce_get_settings_advanced', array( $this, 'add_feature_settings' ), 10, 2 );
-		self::add_filter( 'activated_plugin', array( $this, 'handle_plugin_activation' ), 10, 0 );
 		self::add_filter( 'deactivated_plugin', array( $this, 'handle_plugin_deactivation' ), 10, 1 );
 		self::add_filter( 'all_plugins', array( $this, 'filter_plugins_list' ), 10, 1 );
 		self::add_action( 'admin_notices', array( $this, 'display_notice_in_plugins_page' ), 10, 0 );
+		self::add_action( 'plugin_action_links', array( $this, 'handle_action_links' ), 10, 2 );
+		self::add_action( 'after_plugin_row', array( $this, 'handle_plugin_list_rows' ), 10, 2 );
+		self::add_action( 'current_screen', array( $this, 'enqueue_script_to_fix_plugin_list_html' ), 10, 1 );
 	}
 
 	/**
@@ -266,21 +261,33 @@ class FeaturesController {
 	 * This method can't be called before the 'woocommerce_init' hook is fired.
 	 *
 	 * @param string $plugin_name Plugin name, in the form 'directory/file.php'.
+	 * @param bool   $enabled_features_only True to return only names of enabled plugins.
 	 * @return array An array having a 'compatible' and an 'incompatible' key, each holding an array of feature ids.
 	 */
-	public function get_compatible_features_for_plugin( string $plugin_name ) : array {
+	public function get_compatible_features_for_plugin( string $plugin_name, bool $enabled_features_only = false ) : array {
 		$this->verify_did_woocommerce_init( __FUNCTION__ );
+
+		$features = $this->features;
+		if ( $enabled_features_only ) {
+			$features = array_filter(
+				$features,
+				array( $this, 'feature_is_enabled' ),
+				ARRAY_FILTER_USE_KEY
+			);
+		}
 
 		if ( ! isset( $this->compatibility_info_by_plugin[ $plugin_name ] ) ) {
 			return array(
 				'compatible'   => array(),
 				'incompatible' => array(),
-				'uncertain'    => array_keys( $this->features ),
+				'uncertain'    => array_keys( $features ),
 			);
 		}
 
-		$info              = $this->compatibility_info_by_plugin[ $plugin_name ];
-		$info['uncertain'] = array_values( array_diff( array_keys( $this->features ), $info['compatible'], $info['incompatible'] ) );
+		$info                 = $this->compatibility_info_by_plugin[ $plugin_name ];
+		$info['compatible']   = array_values( array_intersect( array_keys( $features ), $info['compatible'] ) );
+		$info['incompatible'] = array_values( array_intersect( array_keys( $features ), $info['incompatible'] ) );
+		$info['uncertain']    = array_values( array_diff( array_keys( $features ), $info['compatible'], $info['incompatible'] ) );
 
 		return $info;
 	}
@@ -294,16 +301,16 @@ class FeaturesController {
 	public function get_compatible_plugins_for_feature( string $feature_id ) : array {
 		$this->verify_did_woocommerce_init( __FUNCTION__ );
 
+		$woo_aware_plugins = $this->plugin_util->get_woocommerce_aware_plugins( true );
 		if ( ! $this->feature_exists( $feature_id ) ) {
 			return array(
 				'compatible'   => array(),
 				'incompatible' => array(),
-				'uncertain'    => $this->get_active_woocommerce_aware_plugins(),
+				'uncertain'    => $woo_aware_plugins,
 			);
 		}
 
 		$info              = $this->compatibility_info_by_feature[ $feature_id ];
-		$woo_aware_plugins = $this->get_active_woocommerce_aware_plugins();
 		$info['uncertain'] = array_values( array_diff( $woo_aware_plugins, $info['compatible'], $info['incompatible'] ) );
 
 		return $info;
@@ -371,7 +378,7 @@ class FeaturesController {
 		$matches = array();
 		$success = preg_match( '/^woocommerce_feature_([a-zA-Z0-9_]+)_enabled$/', $option, $matches );
 
-		if ( ! $success ) {
+		if ( ! $success && Analytics::TOGGLE_OPTION_NAME !== $option && Init::TOGGLE_OPTION_NAME !== $option ) {
 			return;
 		}
 
@@ -379,7 +386,13 @@ class FeaturesController {
 			return;
 		}
 
-		$feature_id = $matches[1];
+		if ( Analytics::TOGGLE_OPTION_NAME === $option ) {
+			$feature_id = 'analytics';
+		} elseif ( Init::TOGGLE_OPTION_NAME === $option ) {
+			$feature_id = 'new_navigation';
+		} else {
+			$feature_id = $matches[1];
+		}
 
 		/**
 		 * Action triggered when a feature is enabled or disabled (the value of the corresponding setting option is changed).
@@ -575,33 +588,11 @@ class FeaturesController {
 	}
 
 	/**
-	 * Get (and cache if needed) the names of the plugins that are WooCommerce aware.
-	 *
-	 * @return array Names of the plugins that are WooCommerce aware.
-	 */
-	private function get_active_woocommerce_aware_plugins(): array {
-		if ( is_null( $this->woocommerce_aware_plugins ) ) {
-			$this->woocommerce_aware_plugins = $this->plugin_util->get_woocommerce_aware_plugins( true );
-		}
-
-		return $this->woocommerce_aware_plugins;
-	}
-
-	/**
-	 * Handle the plugin activation hook.
-	 */
-	private function handle_plugin_activation(): void {
-		$this->woocommerce_aware_plugins = null;
-	}
-
-	/**
 	 * Handle the plugin deactivation hook.
 	 *
 	 * @param string $plugin_name Name of the plugin that has been deactivated.
 	 */
 	private function handle_plugin_deactivation( $plugin_name ): void {
-		$this->woocommerce_aware_plugins = null;
-
 		unset( $this->compatibility_info_by_plugin[ $plugin_name ] );
 
 		foreach ( array_keys( $this->compatibility_info_by_feature ) as $feature ) {
@@ -673,7 +664,7 @@ class FeaturesController {
 
 		$plugins_page_url  = admin_url( 'plugins.php' );
 		$plugin_name       = $this->features[ $feature_id ]['name'];
-		$features_page_url = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' );
+		$features_page_url = $this->get_features_page_url();
 		$message           = sprintf(
 			__( "You are viewing the plugins that are incompatible with the '%1\$s' feature. <a href='%2\$s'>View all plugins</a> - <a href='%3\$s'>Manage wooCommerce features</a>", 'woocommerce' ),
 			$plugin_name,
@@ -688,5 +679,155 @@ class FeaturesController {
 		</div>
 		<?php
 		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
+	 * Handler for the 'plugin_action_links' filter.
+	 * Disables the 'Activate' link if the plugins has icnompatibilities with enabled features.
+	 *
+	 * @param array  $actions The action links to render.
+	 * @param string $plugin_file The plugin file.
+	 * @return array The actual action links to render.
+	 */
+	private function handle_action_links( $actions, $plugin_file ): array {
+		if ( ! $this->verify_did_woocommerce_init() ) {
+			return $actions;
+		}
+
+		$is_woocommerce_aware = in_array( $plugin_file, $this->plugin_util->get_woocommerce_aware_plugins(), true );
+		if ( ! $is_woocommerce_aware ) {
+			return $actions;
+		}
+
+		$feature_info          = $this->get_compatible_features_for_plugin( $plugin_file, true );
+		$incompatible_features = array_merge( $feature_info['incompatible'], $feature_info['uncertain'] );
+		if ( count( $incompatible_features ) > 0 ) {
+			if ( isset( $actions['activate'] ) ) {
+				$actions['activate'] = '<span disabled>' . __( 'Activate', 'woocommerce' ) . '</span>';
+			}
+		}
+
+		return $actions;
+	}
+
+	/**
+	 * Handler for the 'after_plugin_row' action.
+	 * Displays a "This plugin is incompatible with X features" notice if necessary.
+	 *
+	 * @param string $plugin_file The id of the plugin for which a row has been rendered in the plugins page.
+	 * @param array  $plugin_data Plugin data, as returned by 'get_plugins'.
+	 */
+	private function handle_plugin_list_rows( $plugin_file, $plugin_data ) {
+		global $wp_list_table;
+
+		if ( ! $this->plugin_util->is_woocommerce_aware_plugin( $plugin_data ) ) {
+			return;
+		}
+
+		$feature_compatibility_info = $this->get_compatible_features_for_plugin( $plugin_file, true );
+		$incompatible_features      = array_merge( $feature_compatibility_info['incompatible'], $feature_compatibility_info['uncertain'] );
+
+		$incompatible_features_count = count( $incompatible_features );
+		if ( $incompatible_features_count > 0 ) {
+			$columns_count      = $wp_list_table->get_column_count();
+			$is_active          = $this->proxy->call_function( 'is_plugin_active', $plugin_file );
+			$is_active_class    = $is_active ? 'active' : 'inactive';
+			$is_active_td_style = $is_active ? " style='border-left: 4px solid #72aee6;'" : '';
+
+			if ( 1 === $incompatible_features_count ) {
+				$message = sprintf(
+					/* translators: %s = printable plugin name */
+					__( "⚠ This plugin is incompatible with the active WooCommerce feature '%s', it shouldn't be activated.", 'woocommerce' ),
+					$this->features[ $incompatible_features[0] ]['name']
+				);
+			} elseif ( 2 === $incompatible_features_count ) {
+				/* translators: %1\$s, %2\$s = printable plugin names */
+				$message = sprintf(
+					__( "⚠ This plugin is incompatible with the active WooCommerce features '%1\$s' and '%2\$s', it shouldn't be activated.", 'woocommerce' ),
+					$this->features[ $incompatible_features[0] ]['name'],
+					$this->features[ $incompatible_features[1] ]['name']
+				);
+			} else {
+				/* translators: %1\$s, %2\$s = printable plugin names, %3\$d = plugins count */
+				$message = sprintf(
+					__( "⚠ This plugin is incompatible with the active WooCommerce features '%1\$s', '%2\$s' and %3\$d more, it shouldn't be activated.", 'woocommerce' ),
+					$this->features[ $incompatible_features[0] ]['name'],
+					$this->features[ $incompatible_features[1] ]['name'],
+					$incompatible_features_count - 2
+				);
+			}
+
+			$features_page_url       = $this->get_features_page_url();
+			$manage_features_message = __( 'Manage wooCommerce features', 'woocommerce' );
+
+			// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+			?>
+			<tr class='plugin-update-tr update <?php echo $is_active_class; ?>' data-plugin='<?php echo $plugin_file; ?>' data-plugin-row-type='feature-incomp-warn'>
+				<td colspan='<?php echo $columns_count; ?>' class='plugin-update'<?php echo $is_active_td_style; ?>>
+					<div class='notice inline notice-warning notice-alt'>
+						<p>
+							<?php echo $message; ?>
+							<a href="<?php echo $features_page_url; ?>"><?php echo $manage_features_message; ?></a>
+						</p>
+					</div>
+				</td>
+			</tr>
+			<?php
+			// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
+	}
+
+	/**
+	 * Get the URL of the features settings page.
+	 *
+	 * @return string
+	 */
+	private function get_features_page_url(): string {
+		return admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' );
+	}
+
+	/**
+	 * Fix for the HTML of the plugins list when there are feature-plugin incompatibility warnings.
+	 *
+	 * WordPress renders the plugin information rows in the plugins page in <tr> elements as follows:
+	 *
+	 * - If the plugin needs update, the <tr> will have an "update" class. This will prevent the lower
+	 *   border line to be drawn. Later an additional <tr> with an "update available" warning will be rendered,
+	 *   it will have a "plugin-update-tr" class which will draw the missing lower border line.
+	 * - Otherwise, the <tr> will be already drawn with the lower border line.
+	 *
+	 * This is a problem for our rendering of the "plugin is incompatible with X features" warning:
+	 *
+	 * - If the plugin info <tr> has "update", our <tr> will render nicely right after it; but then
+	 *   our own "plugin-update-tr" class will draw an additional line before the "needs update" warning.
+	 * - If not, the plugin info <tr> will render its lower border line right before our compatibility info <tr>.
+	 *
+	 * This small script fixes this by adding the "update" class to the plugin info <tr> if it doesn't have it
+	 * (so no extra line before our <tr>), or removing 'plugin-update-tr' from our <tr> otherwise
+	 * (and then some extra manual tweaking of margins is needed).
+	 *
+	 * @param string $current_screen The current screen object.
+	 */
+	private function enqueue_script_to_fix_plugin_list_html( $current_screen ): void {
+		if ( 'plugins' !== $current_screen->id ) {
+			return;
+		}
+
+		wc_enqueue_js(
+			"
+	    const warningRows = document.querySelectorAll('tr[data-plugin-row-type=\"feature-incomp-warn\"]');
+	    for(const warningRow of warningRows) {
+	    	const pluginName = warningRow.getAttribute('data-plugin');
+			const pluginInfoRow = document.querySelector('tr.active[data-plugin=\"' + pluginName + '\"]:not(.plugin-update-tr), tr.inactive[data-plugin=\"' + pluginName + '\"]:not(.plugin-update-tr)');
+			if(pluginInfoRow.classList.contains('update')) {
+				warningRow.classList.remove('plugin-update-tr');
+				warningRow.querySelector('.notice').style.margin = '5px 10px 15px 30px';
+			}
+			else {
+				pluginInfoRow.classList.add('update');
+			}
+	    }
+		"
+		);
 	}
 }

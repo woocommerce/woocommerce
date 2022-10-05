@@ -74,6 +74,47 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox 'is_woocommerce_aware_plugin' works as expected when a plugin id (path/file.php) is passed.
+	 *
+	 * @testWith ["woo_aware_1", true]
+	 *           ["not_woo_aware_2", false]
+	 *           ["NOT_EXISTS", false]
+	 *
+	 * @param string $plugin_file The plugin file name to test.
+	 * @param bool   $expected_result The expected result from the method.
+	 */
+	public function test_is_woocommerce_aware_plugin_by_plugin_file( string $plugin_file, bool $expected_result ) {
+		$result = $this->sut->is_woocommerce_aware_plugin( $plugin_file );
+		$this->assertEquals( $expected_result, $result );
+	}
+
+	/**
+	 * Data provider for test_is_woocommerce_aware_plugin_by_plugin_data.
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_for_test_is_woocommerce_aware_plugin_by_plugin_data() {
+		return array(
+			array( array( 'WC tested up to' => '1.0' ), true ),
+			array( array( 'WC tested up to' => '' ), false ),
+			array( array(), false ),
+		);
+	}
+
+	/**
+	 * @testDox 'is_woocommerce_aware_plugin' works as expected when a an array of plugin data is passed.
+	 *
+	 * @dataProvider data_provider_for_test_is_woocommerce_aware_plugin_by_plugin_data
+	 *
+	 * @param array $plugin_data The plugin data to test.
+	 * @param bool  $expected_result The expected result from the method.
+	 */
+	public function test_get_is_woocommerce_aware_plugin_by_plugin_data( array $plugin_data, bool $expected_result ) {
+		$result = $this->sut->is_woocommerce_aware_plugin( $plugin_data );
+		$this->assertEquals( $expected_result, $result );
+	}
+
+	/**
 	 * Forces a fake list of plugins to be used by the tests.
 	 */
 	private function mock_plugin_functions() {
