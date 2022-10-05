@@ -2,14 +2,14 @@
  * External dependencies
  */
 import { __, _n } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import {
 	EmptyContent,
 	Section,
 	Badge,
 	EllipsisMenu,
 } from '@woocommerce/components';
-import { Card, CardHeader, Button } from '@wordpress/components';
+import { Card, CardHeader, Button, CardFooter } from '@wordpress/components';
 import { NOTES_STORE_NAME, QUERY_DEFAULTS } from '@woocommerce/data';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -29,6 +29,32 @@ import { hasValidNotes, truncateRenderableHTML } from './utils';
 import { getScreenName } from '../utils';
 import DismissAllModal from './dismiss-all-modal';
 import './index.scss';
+
+const ADD_NOTES_AMOUNT = 10;
+const DEFAULT_INBOX_QUERY = {
+	page: 1,
+	per_page: 5,
+	status: 'unactioned',
+	type: QUERY_DEFAULTS.noteTypes,
+	orderby: 'date',
+	order: 'desc',
+	_fields: [
+		'id',
+		'name',
+		'title',
+		'content',
+		'type',
+		'status',
+		'actions',
+		'date_created',
+		'date_created_gmt',
+		'layout',
+		'image',
+		'is_deleted',
+		'is_read',
+		'locale',
+	],
+};
 
 const renderEmptyCard = () => (
 	<ActivityCard
@@ -62,6 +88,7 @@ const renderNotes = ( {
 	onNoteActionClick,
 	setShowDismissAllModal: onDismissAll,
 	showHeader = true,
+	loadMoreNotes,
 } ) => {
 	if ( isBatchUpdating ) {
 		return;
@@ -89,6 +116,7 @@ const renderNotes = ( {
 		} );
 	};
 
+	// TODO: What does this line do?
 	const notesArray = Object.keys( notes ).map( ( key ) => notes[ key ] );
 
 	return (
@@ -142,44 +170,34 @@ const renderNotes = ( {
 					);
 				} ) }
 			</TransitionGroup>
+			<CardFooter size="medium">
+				<Button
+					onClick={ () => {
+						loadMoreNotes();
+					} }
+				>
+					{ __( 'Show older', 'woocommerce' ) }
+				</Button>
+			</CardFooter>
 		</Card>
 	);
 };
 
-const INBOX_QUERY = {
-	page: 1,
-	per_page: QUERY_DEFAULTS.pageSize,
-	status: 'unactioned',
-	type: QUERY_DEFAULTS.noteTypes,
-	orderby: 'date',
-	order: 'desc',
-	_fields: [
-		'id',
-		'name',
-		'title',
-		'content',
-		'type',
-		'status',
-		'actions',
-		'date_created',
-		'date_created_gmt',
-		'layout',
-		'image',
-		'is_deleted',
-		'is_read',
-		'locale',
-	],
-};
-
 const InboxPanel = ( { showHeader = true } ) => {
+	const [ pageSize, setPageSize ] = useState( DEFAULT_INBOX_QUERY.per_page );
+	const [ allNotesFetched, setAllNotesFetched ] = useState( false );
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { removeNote, updateNote, triggerNoteAction } =
 		useDispatch( NOTES_STORE_NAME );
 
-	const { isError, isResolvingNotes, isBatchUpdating, notes } = useSelect(
+	const { isError, notes, notesHaveResolved, isBatchUpdating } = useSelect(
 		( select ) => {
-			const { getNotes, getNotesError, isResolving, isNotesRequesting } =
-				select( NOTES_STORE_NAME );
+			const {
+				getNotes,
+				getNotesError,
+				isNotesRequesting,
+				hasFinishedResolution,
+			} = select( NOTES_STORE_NAME );
 			const WC_VERSION_61_RELEASE_DATE = moment(
 				'2022-01-11',
 				'YYYY-MM-DD'
@@ -193,8 +211,10 @@ const InboxPanel = ( { showHeader = true } ) => {
 				'en_ZA',
 			];
 
+			const inboxQuery = { ...DEFAULT_INBOX_QUERY, per_page: pageSize };
+
 			return {
-				notes: getNotes( INBOX_QUERY ).map( ( note ) => {
+				notes: getNotes( inboxQuery ).map( ( note ) => {
 					const noteDate = moment(
 						note.date_created_gmt,
 						'YYYY-MM-DD'
@@ -214,14 +234,20 @@ const InboxPanel = ( { showHeader = true } ) => {
 					}
 					return note;
 				} ),
-				isError: Boolean(
-					getNotesError( 'getNotes', [ INBOX_QUERY ] )
-				),
-				isResolvingNotes: isResolving( 'getNotes', [ INBOX_QUERY ] ),
+				isError: Boolean( getNotesError( 'getNotes', [ inboxQuery ] ) ),
 				isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
+				notesHaveResolved:
+					! isNotesRequesting( 'batchUpdateNotes' ) &&
+					hasFinishedResolution( 'getNotes', [ inboxQuery ] ),
 			};
 		}
 	);
+
+	useEffect( () => {
+		if ( notesHaveResolved && notes.length < pageSize ) {
+			setAllNotesFetched( true );
+		}
+	}, [ notes ] );
 
 	const [ showDismissAllModal, setShowDismissAllModal ] = useState( false );
 
@@ -287,8 +313,6 @@ const InboxPanel = ( { showHeader = true } ) => {
 
 	const hasNotes = hasValidNotes( notes );
 
-	// @todo After having a pagination implemented we should call the method "getNotes" with a different query since
-	// the current one is only getting 25 notes and the count of unread notes only will refer to this 25 and not all the existing ones.
 	return (
 		<>
 			{ showDismissAllModal && (
@@ -299,15 +323,17 @@ const InboxPanel = ( { showHeader = true } ) => {
 				/>
 			) }
 			<div className="woocommerce-homepage-notes-wrapper">
-				{ ( isResolvingNotes || isBatchUpdating ) && (
+				{ ! notesHaveResolved && (
 					<Section>
 						<InboxNotePlaceholder className="banner message-is-unread" />
 					</Section>
 				) }
 				<Section>
-					{ ! isResolvingNotes &&
-						! isBatchUpdating &&
+					{ notesHaveResolved &&
 						renderNotes( {
+							loadMoreNotes: () => {
+								setPageSize( pageSize + ADD_NOTES_AMOUNT );
+							},
 							hasNotes,
 							isBatchUpdating,
 							notes,
@@ -317,6 +343,7 @@ const InboxPanel = ( { showHeader = true } ) => {
 							},
 							setShowDismissAllModal,
 							showHeader,
+							allNotesFetched,
 						} ) }
 				</Section>
 			</div>
