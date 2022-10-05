@@ -87,7 +87,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 						{
 							isCover: isCoverItem,
 							className: classnames( {
-								'is-showing-toolbar': isToolbarVisible,
+								'is-toolbar-visible': isToolbarVisible,
 							} ),
 							onClick: () => {
 								setActiveToolbarKey(
