@@ -51,7 +51,7 @@ export const Sortable = ( {
 }: SortableProps ) => {
 	const ref = useRef< HTMLOListElement >( null );
 	const [ items, setItems ] = useState< SortableChild[] >( [] );
-	const [ selectedIndex, setSelectedIndex ] = useState< number >( 0 );
+	const [ selectedIndex, setSelectedIndex ] = useState< number >( -1 );
 	const [ dragIndex, setDragIndex ] = useState< number | null >( null );
 	const [ dropIndex, setDropIndex ] = useState< number | null >( null );
 
