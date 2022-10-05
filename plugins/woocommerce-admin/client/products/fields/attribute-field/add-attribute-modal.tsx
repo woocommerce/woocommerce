@@ -38,21 +38,6 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 	onCreated,
 	selectedAttributeIds = [],
 } ) => {
-	const { productAttributes, hasResolvedProductAttributes } = useSelect(
-		( select ) => {
-			const { getProductAttributes, hasFinishedResolution } = select(
-				EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
-			);
-			return {
-				hasResolvedProductAttributes: hasFinishedResolution(
-					'getProductAttributes'
-				),
-				productAttributes: getProductAttributes< ProductAttribute[] >(),
-			};
-		},
-		[]
-	);
-
 	const addAnother = (
 		values: AttributeForm,
 		setValue: (
@@ -139,48 +124,63 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 											className="woocommerce-add-attribute-modal__table-row"
 										>
 											<td>
-												{ hasResolvedProductAttributes ? (
-													<SelectControl<
-														Partial< ProductAttribute >
-													>
-														items={
-															productAttributes
-														}
-														label=""
-														placeholder={ __(
-															'Search or create attribute',
-															'woocommerce'
-														) }
-														getItemLabel={ (
+												<AsyncSelectControl<
+													Partial< ProductAttribute >
+												>
+													items={ [] }
+													label=""
+													onSearch={ (
+														searchString:
+															| string
+															| undefined
+													) => {
+														return resolveSelect(
+															EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
+														)
+															.getProductAttributes<
+																ProductAttribute[]
+															>()
+															.then(
+																(
+																	categories
+																) => {
+																	return getFilteredItems(
+																		categories,
+																		searchString ||
+																			'',
+																		values.attributes
+																	);
+																}
+															);
+													} }
+													placeholder={ __(
+														'Search or create attribute',
+														'woocommerce'
+													) }
+													getItemLabel={ ( item ) =>
+														item?.name || ''
+													}
+													getItemValue={ ( item ) =>
+														item?.id || ''
+													}
+													selected={ attribute }
+													onSelect={ ( item ) =>
+														setValue(
+															'attributes[' +
+																index +
+																']',
 															item
-														) => item?.name || '' }
-														getItemValue={ (
-															item
-														) => item?.id || '' }
-														getFilteredItems={
-															getFilteredItems
-														}
-														selected={ attribute }
-														onSelect={ ( item ) =>
-															setValue(
-																'attributes[' +
-																	index +
-																	']',
-																item
-															)
-														}
-														onRemove={ () =>
-															setValue(
-																'attributes[' +
-																	index +
-																	']',
-																{}
-															)
-														}
-													/>
-												) : (
-													<Spinner />
-												) }
+														)
+													}
+													onRemove={ () =>
+														setValue(
+															'attributes[' +
+																index +
+																']',
+															{}
+														)
+													}
+												/>
 											</td>
 											<td>
 												<AsyncSelectControl< ProductAttributeTerm >

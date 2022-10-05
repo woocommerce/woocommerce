@@ -1,13 +1,14 @@
 /**
  * External dependencies
  */
-import { useState } from '@wordpress/element';
+import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import {
 	__experimentalSelectControl as SelectControl,
 	__experimentalSelectControlMenuItem as MenuItem,
 	__experimentalSelectControlMenu as Menu,
 	Spinner,
 } from '@woocommerce/components';
+import { debounce } from 'lodash';
 
 type AsyncSelectControlProps< ItemType > = {
 	label: string;
@@ -21,6 +22,9 @@ type AsyncSelectControlProps< ItemType > = {
 	disabled?: boolean;
 	getItemLabel: ( item: ItemType | null ) => string;
 	getItemValue: ( item: ItemType | null ) => string | number;
+	triggerInitialFetch?: boolean;
+	pageSize?: number;
+	total?: number;
 };
 
 export function AsyncSelectControl< ItemType >( {
@@ -35,31 +39,66 @@ export function AsyncSelectControl< ItemType >( {
 	multiple,
 	getItemLabel,
 	getItemValue,
+	triggerInitialFetch = true,
+	pageSize,
+	total,
 }: AsyncSelectControlProps< ItemType > ) {
 	const [ fetchedItems, setFetchedItems ] = useState< ItemType[] >( items );
 	const [ isFetching, setIsFetching ] = useState( false );
 
-	const fetchItems = ( value: string | undefined ) => {
-		setIsFetching( true );
-		onSearch( value ).then(
-			( results ) => {
-				setFetchedItems( results );
-				setIsFetching( false );
-			},
-			() => {
-				setIsFetching( false );
+	const fetchItems = useCallback(
+		( value: string | undefined ) => {
+			setIsFetching( true );
+			onSearch( value ).then(
+				( results ) => {
+					setFetchedItems( results );
+					setIsFetching( false );
+				},
+				() => {
+					setIsFetching( false );
+				}
+			);
+		},
+		[ setFetchedItems, setIsFetching ]
+	);
+
+	useEffect( () => {
+		if ( triggerInitialFetch && items.length === 0 ) {
+			fetchItems( '' );
+		}
+	}, [] );
+
+	const searchDebounced = useMemo(
+		() => debounce( fetchItems, 150 ),
+		[ fetchItems ]
+	);
+
+	const filterClientSide =
+		pageSize && total && pageSize > 0 && total < pageSize;
+
+	const onInputChange = useCallback(
+		( value?: string ) => {
+			if ( filterClientSide ) {
+				return;
 			}
-		);
-	};
+			searchDebounced( value );
+		},
+		[ filterClientSide ]
+	);
+
+	const getFilteredItems = useCallback(
+		( allItems: ItemType[] ) => {
+			return allItems;
+		},
+		[ filterClientSide ]
+	);
 
 	return (
 		<>
 			<SelectControl< ItemType >
 				label={ label }
 				multiple={ multiple }
-				getFilteredItems={ ( allItems ) => {
-					return allItems;
-				} }
+				getFilteredItems={ getFilteredItems }
 				disabled={ disabled }
 				items={ fetchedItems }
 				onInputChange={ fetchItems }
