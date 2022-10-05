@@ -22,8 +22,9 @@ const sampleItems = [
 ];
 
 export const Single: React.FC = () => {
-	const [ selected, setSelected ] =
-		useState< SelectedType< DefaultItemType > >( null );
+	const [ selected, setSelected ] = useState<
+		SelectedType< DefaultItemType >
+	>( sampleItems[ 1 ] );
 
 	return (
 		<>
@@ -40,7 +41,10 @@ export const Single: React.FC = () => {
 };
 
 export const Multiple: React.FC = () => {
-	const [ selected, setSelected ] = useState< DefaultItemType[] >( [] );
+	const [ selected, setSelected ] = useState< DefaultItemType[] >( [
+		sampleItems[ 0 ],
+		sampleItems[ 2 ],
+	] );
 
 	return (
 		<>
