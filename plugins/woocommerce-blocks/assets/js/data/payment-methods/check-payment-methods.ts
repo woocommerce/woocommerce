@@ -130,12 +130,14 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 		return true;
 	}
 
-	const { setAvailablePaymentMethods, setAvailableExpressPaymentMethods } =
-		dispatch( PAYMENT_METHOD_DATA_STORE_KEY );
+	const {
+		__internalSetAvailablePaymentMethods,
+		__internalSetAvailableExpressPaymentMethods,
+	} = dispatch( PAYMENT_METHOD_DATA_STORE_KEY );
 	if ( express ) {
-		setAvailableExpressPaymentMethods( availablePaymentMethods );
+		__internalSetAvailableExpressPaymentMethods( availablePaymentMethods );
 		return true;
 	}
-	setAvailablePaymentMethods( availablePaymentMethods );
+	__internalSetAvailablePaymentMethods( availablePaymentMethods );
 	return true;
 };

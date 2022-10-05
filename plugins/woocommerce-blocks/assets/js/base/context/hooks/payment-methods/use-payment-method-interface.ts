@@ -65,7 +65,7 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 		}
 	);
 
-	const { setExpressPaymentError } = useDispatch(
+	const { __internalSetExpressPaymentError } = useDispatch(
 		PAYMENT_METHOD_DATA_STORE_KEY
 	);
 
@@ -119,9 +119,9 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 					link: 'https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4228',
 				}
 			);
-			setExpressPaymentError( errorMessage );
+			__internalSetExpressPaymentError( errorMessage );
 		},
-		[ setExpressPaymentError ]
+		[ __internalSetExpressPaymentError ]
 	);
 
 	return {

@@ -34,8 +34,11 @@ const ExpressPaymentMethods = () => {
 			};
 		}
 	);
-	const { setActivePaymentMethod, setPaymentStatus, setExpressPaymentError } =
-		useDispatch( PAYMENT_METHOD_DATA_STORE_KEY );
+	const {
+		__internalSetActivePaymentMethod,
+		__internalSetPaymentStatus,
+		__internalSetExpressPaymentError,
+	} = useDispatch( PAYMENT_METHOD_DATA_STORE_KEY );
 	const { paymentMethods } = useExpressPaymentMethods();
 
 	const paymentMethodInterface = usePaymentMethodInterface();
@@ -52,14 +55,14 @@ const ExpressPaymentMethods = () => {
 		( paymentMethodId ) => () => {
 			previousActivePaymentMethod.current = activePaymentMethod;
 			previousPaymentMethodData.current = paymentMethodData;
-			setPaymentStatus( { isStarted: true } );
-			setActivePaymentMethod( paymentMethodId );
+			__internalSetPaymentStatus( { isStarted: true } );
+			__internalSetActivePaymentMethod( paymentMethodId );
 		},
 		[
 			activePaymentMethod,
 			paymentMethodData,
-			setActivePaymentMethod,
-			setPaymentStatus,
+			__internalSetActivePaymentMethod,
+			__internalSetPaymentStatus,
 		]
 	);
 
@@ -69,12 +72,12 @@ const ExpressPaymentMethods = () => {
 	 * This restores the active method and returns the state to pristine.
 	 */
 	const onExpressPaymentClose = useCallback( () => {
-		setPaymentStatus( { isPristine: true } );
-		setActivePaymentMethod(
+		__internalSetPaymentStatus( { isPristine: true } );
+		__internalSetActivePaymentMethod(
 			previousActivePaymentMethod.current,
 			previousPaymentMethodData.current
 		);
-	}, [ setActivePaymentMethod, setPaymentStatus ] );
+	}, [ __internalSetActivePaymentMethod, __internalSetPaymentStatus ] );
 
 	/**
 	 * onExpressPaymentError should be triggered when the express payment process errors.
@@ -83,14 +86,18 @@ const ExpressPaymentMethods = () => {
 	 */
 	const onExpressPaymentError = useCallback(
 		( errorMessage ) => {
-			setPaymentStatus( { hasError: true }, errorMessage );
-			setExpressPaymentError( errorMessage );
-			setActivePaymentMethod(
+			__internalSetPaymentStatus( { hasError: true }, errorMessage );
+			__internalSetExpressPaymentError( errorMessage );
+			__internalSetActivePaymentMethod(
 				previousActivePaymentMethod.current,
 				previousPaymentMethodData.current
 			);
 		},
-		[ setActivePaymentMethod, setPaymentStatus, setExpressPaymentError ]
+		[
+			__internalSetActivePaymentMethod,
+			__internalSetPaymentStatus,
+			__internalSetExpressPaymentError,
+		]
 	);
 
 	/**
@@ -109,10 +116,10 @@ const ExpressPaymentMethods = () => {
 			if ( errorMessage ) {
 				onExpressPaymentError( errorMessage );
 			} else {
-				setExpressPaymentError( '' );
+				__internalSetExpressPaymentError( '' );
 			}
 		},
-		[ setExpressPaymentError, onExpressPaymentError ]
+		[ __internalSetExpressPaymentError, onExpressPaymentError ]
 	);
 
 	/**

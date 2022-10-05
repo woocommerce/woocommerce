@@ -24,7 +24,7 @@ const Block = ( { className }: { className?: string } ): JSX.Element => {
 			};
 		}
 	);
-	const { setOrderNotes } = useDispatch( CHECKOUT_STORE_KEY );
+	const { __internalSetOrderNotes } = useDispatch( CHECKOUT_STORE_KEY );
 
 	return (
 		<FormStep
@@ -38,7 +38,7 @@ const Block = ( { className }: { className?: string } ): JSX.Element => {
 		>
 			<CheckoutOrderNotes
 				disabled={ checkoutIsProcessing }
-				onChange={ setOrderNotes }
+				onChange={ __internalSetOrderNotes }
 				placeholder={
 					needsShipping
 						? __(

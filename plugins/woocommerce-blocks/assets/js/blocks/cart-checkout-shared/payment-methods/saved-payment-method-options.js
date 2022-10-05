@@ -67,7 +67,7 @@ const SavedPaymentMethodOptions = () => {
 		useSelect( ( select ) =>
 			select( PAYMENT_METHOD_DATA_STORE_KEY ).getState()
 		);
-	const { setActivePaymentMethod } = useDispatch(
+	const { __internalSetActivePaymentMethod } = useDispatch(
 		PAYMENT_METHOD_DATA_STORE_KEY
 	);
 	const paymentMethods = getPaymentMethods();
@@ -91,12 +91,15 @@ const SavedPaymentMethodOptions = () => {
 						value: paymentMethod.tokenId.toString(),
 						onChange: ( token ) => {
 							const savedTokenKey = `wc-${ paymentMethodSlug }-payment-token`;
-							setActivePaymentMethod( paymentMethodSlug, {
-								token,
-								payment_method: paymentMethodSlug,
-								[ savedTokenKey ]: token.toString(),
-								isSavedToken: true,
-							} );
+							__internalSetActivePaymentMethod(
+								paymentMethodSlug,
+								{
+									token,
+									payment_method: paymentMethodSlug,
+									[ savedTokenKey ]: token.toString(),
+									isSavedToken: true,
+								}
+							);
 							removeNotice(
 								'wc-payment-error',
 								noticeContexts.PAYMENTS
@@ -114,7 +117,7 @@ const SavedPaymentMethodOptions = () => {
 			.filter( Boolean );
 	}, [
 		savedPaymentMethods,
-		setActivePaymentMethod,
+		__internalSetActivePaymentMethod,
 		removeNotice,
 		dispatchCheckoutEvent,
 	] );

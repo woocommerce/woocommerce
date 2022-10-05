@@ -15,35 +15,37 @@ export * from './thunks';
 /**
  * Set the checkout status to `idle`
  */
-export const setIdle = () => ( {
+export const __internalSetIdle = () => ( {
 	type: types.SET_IDLE,
 } );
 
 /**
  * Set the checkout status to `before_processing`
  */
-export const setBeforeProcessing = () => ( {
+export const __internalSetBeforeProcessing = () => ( {
 	type: types.SET_BEFORE_PROCESSING,
 } );
 
 /**
  * Set the checkout status to `processing`
  */
-export const setProcessing = () => ( {
+export const __internalSetProcessing = () => ( {
 	type: types.SET_PROCESSING,
 } );
 
 /**
  * Set the checkout status to `after_processing`
  */
-export const setAfterProcessing = () => ( {
+export const __internalSetAfterProcessing = () => ( {
 	type: types.SET_AFTER_PROCESSING,
 } );
 
 /**
  * Set the checkout status to `complete`
  */
-export const setComplete = ( data: Record< string, unknown > = {} ) => ( {
+export const __internalSetComplete = (
+	data: Record< string, unknown > = {}
+) => ( {
 	type: types.SET_COMPLETE,
 	data,
 } );
@@ -53,7 +55,7 @@ export const setComplete = ( data: Record< string, unknown > = {} ) => ( {
  *
  * @param  redirectUrl the url to redirect to
  */
-export const setRedirectUrl = ( redirectUrl: string ) => ( {
+export const __internalSetRedirectUrl = ( redirectUrl: string ) => ( {
 	type: types.SET_REDIRECT_URL,
 	redirectUrl,
 } );
@@ -63,7 +65,7 @@ export const setRedirectUrl = ( redirectUrl: string ) => ( {
  *
  * @param  data The result of the payment attempt through the StoreApi /checkout endpoints
  */
-export const setPaymentResult = ( data: PaymentResult ) => ( {
+export const __internalSetPaymentResult = ( data: PaymentResult ) => ( {
 	type: types.SET_PAYMENT_RESULT,
 	data,
 } );
@@ -73,7 +75,7 @@ export const setPaymentResult = ( data: PaymentResult ) => ( {
  *
  * @param  hasError Wether the checkout has an error or not
  */
-export const setHasError = ( hasError = true ) => ( {
+export const __internalSetHasError = ( hasError = true ) => ( {
 	type: types.SET_HAS_ERROR,
 	hasError,
 } );
@@ -82,7 +84,7 @@ export const setHasError = ( hasError = true ) => ( {
  * Used when any of the totals, taxes, shipping, etc need to be calculated, the `calculatingCount` will be increased
  * A `calculatingCount` of 0 means nothing is being updated.
  */
-export const incrementCalculating = () => ( {
+export const __internalIncrementCalculating = () => ( {
 	type: types.INCREMENT_CALCULATING,
 } );
 
@@ -90,7 +92,7 @@ export const incrementCalculating = () => ( {
  * When any of the totals, taxes, shipping, etc are done beign calculated, the `calculatingCount` will be decreased
  * A `calculatingCount` of 0 means nothing is being updated.
  */
-export const decrementCalculating = () => ( {
+export const __internalDecrementCalculating = () => ( {
 	type: types.DECREMENT_CALCULATING,
 } );
 
@@ -99,7 +101,7 @@ export const decrementCalculating = () => ( {
  *
  * @param  customerId ID of the customer who is checking out.
  */
-export const setCustomerId = ( customerId: number ) => ( {
+export const __internalSetCustomerId = ( customerId: number ) => ( {
 	type: types.SET_CUSTOMER_ID,
 	customerId,
 } );
@@ -109,7 +111,9 @@ export const setCustomerId = ( customerId: number ) => ( {
  *
  * @param  useShippingAsBilling True if shipping address should be the same as billing, false otherwise
  */
-export const setUseShippingAsBilling = ( useShippingAsBilling: boolean ) => ( {
+export const __internalSetUseShippingAsBilling = (
+	useShippingAsBilling: boolean
+) => ( {
 	type: types.SET_SHIPPING_ADDRESS_AS_BILLING_ADDRESS,
 	useShippingAsBilling,
 } );
@@ -119,7 +123,9 @@ export const setUseShippingAsBilling = ( useShippingAsBilling: boolean ) => ( {
  *
  * @param  shouldCreateAccount True if an account should be created, false otherwise
  */
-export const setShouldCreateAccount = ( shouldCreateAccount: boolean ) => ( {
+export const __internalSetShouldCreateAccount = (
+	shouldCreateAccount: boolean
+) => ( {
 	type: types.SET_SHOULD_CREATE_ACCOUNT,
 	shouldCreateAccount,
 } );
@@ -129,17 +135,17 @@ export const setShouldCreateAccount = ( shouldCreateAccount: boolean ) => ( {
  *
  * @param  orderNotes String that represents a note for the order
  */
-export const setOrderNotes = ( orderNotes: string ) => ( {
+export const __internalSetOrderNotes = ( orderNotes: string ) => ( {
 	type: types.SET_ORDER_NOTES,
 	orderNotes,
 } );
 
 /**
- * Register some extra data for an extension.
+ * Register some extra data for an extension. This works with the
  *
  * @param  extensionData An object containing the data to register for an extension
  */
-export const setExtensionData = (
+export const __internalSetExtensionData = (
 	extensionData: Record< string, Record< string, unknown > >
 ) => ( {
 	type: types.SET_EXTENSION_DATA,
@@ -148,20 +154,20 @@ export const setExtensionData = (
 
 export type CheckoutAction =
 	| ReturnOrGeneratorYieldUnion<
-			| typeof setIdle
-			| typeof setComplete
-			| typeof setProcessing
-			| typeof setPaymentResult
-			| typeof setBeforeProcessing
-			| typeof setAfterProcessing
-			| typeof setRedirectUrl
-			| typeof setHasError
-			| typeof incrementCalculating
-			| typeof decrementCalculating
-			| typeof setCustomerId
-			| typeof setUseShippingAsBilling
-			| typeof setShouldCreateAccount
-			| typeof setOrderNotes
-			| typeof setExtensionData
+			| typeof __internalSetIdle
+			| typeof __internalSetComplete
+			| typeof __internalSetProcessing
+			| typeof __internalSetPaymentResult
+			| typeof __internalSetBeforeProcessing
+			| typeof __internalSetAfterProcessing
+			| typeof __internalSetRedirectUrl
+			| typeof __internalSetHasError
+			| typeof __internalIncrementCalculating
+			| typeof __internalDecrementCalculating
+			| typeof __internalSetCustomerId
+			| typeof __internalSetUseShippingAsBilling
+			| typeof __internalSetShouldCreateAccount
+			| typeof __internalSetOrderNotes
+			| typeof __internalSetExtensionData
 	  >
 	| Record< string, never >;

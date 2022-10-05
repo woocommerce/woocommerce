@@ -77,9 +77,9 @@ export const PaymentMethodDataProvider = ( {
 	}, [ observers ] );
 
 	const {
-		setPaymentStatus,
-		setPaymentMethodData,
-		emitProcessingEvent: emitPaymentProcessingEvent,
+		__internalSetPaymentStatus,
+		__internalSetPaymentMethodData,
+		__internalEmitPaymentProcessingEvent,
 	} = useDispatch( PAYMENT_METHOD_DATA_STORE_KEY );
 	const { setBillingAddress, setShippingAddress } = useCustomerData();
 
@@ -91,29 +91,37 @@ export const PaymentMethodDataProvider = ( {
 			! checkoutIsCalculating &&
 			! currentStatus.isFinished
 		) {
-			setPaymentStatus( { isProcessing: true } );
+			__internalSetPaymentStatus( { isProcessing: true } );
 		}
 	}, [
 		checkoutIsProcessing,
 		checkoutHasError,
 		checkoutIsCalculating,
 		currentStatus.isFinished,
-		setPaymentStatus,
+		__internalSetPaymentStatus,
 	] );
 
 	// When checkout is returned to idle, set payment status to pristine but only if payment status is already not finished.
 	useEffect( () => {
 		if ( checkoutIsIdle && ! currentStatus.isSuccessful ) {
-			setPaymentStatus( { isPristine: true } );
+			__internalSetPaymentStatus( { isPristine: true } );
 		}
-	}, [ checkoutIsIdle, currentStatus.isSuccessful, setPaymentStatus ] );
+	}, [
+		checkoutIsIdle,
+		currentStatus.isSuccessful,
+		__internalSetPaymentStatus,
+	] );
 
 	// if checkout has an error sync payment status back to pristine.
 	useEffect( () => {
 		if ( checkoutHasError && currentStatus.isSuccessful ) {
-			setPaymentStatus( { isPristine: true } );
+			__internalSetPaymentStatus( { isPristine: true } );
 		}
-	}, [ checkoutHasError, currentStatus.isSuccessful, setPaymentStatus ] );
+	}, [
+		checkoutHasError,
+		currentStatus.isSuccessful,
+		__internalSetPaymentStatus,
+	] );
 
 	// Emit the payment processing event
 	useEffect( () => {
@@ -122,7 +130,7 @@ export const PaymentMethodDataProvider = ( {
 		// allows for other observers that return true for continuing through
 		// to the next observer (or bailing if there's a problem).
 		if ( currentStatus.isProcessing ) {
-			emitPaymentProcessingEvent(
+			__internalEmitPaymentProcessingEvent(
 				currentObservers.current,
 				setValidationErrors
 			);
@@ -130,13 +138,13 @@ export const PaymentMethodDataProvider = ( {
 	}, [
 		currentStatus.isProcessing,
 		setValidationErrors,
-		setPaymentStatus,
+		__internalSetPaymentStatus,
 		removeNotice,
 		createErrorNotice,
 		setBillingAddress,
-		setPaymentMethodData,
+		__internalSetPaymentMethodData,
 		setShippingAddress,
-		emitPaymentProcessingEvent,
+		__internalEmitPaymentProcessingEvent,
 	] );
 
 	const paymentContextData: PaymentMethodEventsContextType = {

@@ -60,7 +60,8 @@ describe( 'setDefaultPaymentMethod', () => {
 				if ( storeName === PAYMENT_METHOD_DATA_STORE_KEY ) {
 					return {
 						...originalStore,
-						setActivePaymentMethod: setActivePaymentMethodMock,
+						__internalSetActivePaymentMethod:
+							setActivePaymentMethodMock,
 					};
 				}
 				return originalStore;
@@ -122,8 +123,9 @@ describe( 'setDefaultPaymentMethod', () => {
 				if ( storeName === PAYMENT_METHOD_DATA_STORE_KEY ) {
 					return {
 						...originalStore,
-						setActivePaymentMethod: setActivePaymentMethodMock,
-						setPaymentStatus: () => void 0,
+						__internalSetActivePaymentMethod:
+							setActivePaymentMethodMock,
+						__internalSetPaymentStatus: () => void 0,
 					};
 				}
 				return originalStore;

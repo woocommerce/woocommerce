@@ -86,7 +86,7 @@ const registerMockPaymentMethods = () => {
 	} );
 	dispatch(
 		PAYMENT_METHOD_DATA_STORE_KEY
-	).initializePaymentMethodDataStore();
+	).__internalInitializePaymentMethodDataStore();
 };
 
 const resetMockPaymentMethods = () => {

@@ -37,7 +37,7 @@ const PaymentMethodCard = ( { children, showSaveOption } ) => {
 			customerId: checkoutStore.getCustomerId(),
 		};
 	} );
-	const { setShouldSavePaymentMethod } = useDispatch(
+	const { __internalSetShouldSavePaymentMethod } = useDispatch(
 		PAYMENT_METHOD_DATA_STORE_KEY
 	);
 	return (
@@ -52,7 +52,9 @@ const PaymentMethodCard = ( { children, showSaveOption } ) => {
 					) }
 					checked={ shouldSavePaymentMethod }
 					onChange={ () =>
-						setShouldSavePaymentMethod( ! shouldSavePaymentMethod )
+						__internalSetShouldSavePaymentMethod(
+							! shouldSavePaymentMethod
+						)
 					}
 				/>
 			) }

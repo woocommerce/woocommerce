@@ -44,7 +44,7 @@ if ( isEditor ) {
 	const unsubscribeInitializePaymentMethodDataStore = subscribe( async () => {
 		wpDataDispatch(
 			'wc/store/payment-methods'
-		).initializePaymentMethodDataStore();
+		).__internalInitializePaymentMethodDataStore();
 		unsubscribeInitializePaymentMethodDataStore();
 	} );
 }

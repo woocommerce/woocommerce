@@ -62,22 +62,22 @@ Data can be accessed through the following selectors:
 
 The following actions can be dispatched from the Checkout data store:
 
--   `setIdle()`: Set `state.status` to `idle`
--   `setComplete()`: Set `state.status` to `complete`
--   `setProcessing()`: Set `state.status` to `processing`
--   `setPaymentResult( response: PaymentResult )`: Set `state.paymentResult` to `response`
--   `setBeforeProcessing()`: Set `state.status` to `before_processing`
--   `setAfterProcessing()`: Set `state.status` to `after_processing`
--   `processCheckoutResponse( response: CheckoutResponse )`: This is a thunk that will extract the paymentResult from the CheckoutResponse, and dispatch 3 actions: `setRedirectUrl`, `setPaymentResult` and `setAfterProcessing`.
--   `setRedirectUrl( url: string )`: Set `state.redirectUrl` to `url`
--   `setHasError( trueOrFalse: bool )`: Set `state.hasError` to `trueOrFalse`
--   `incrementCalculating()`: Increment `state.calculatingCount`
--   `decrementCalculating()`: Decrement `state.calculatingCount`
--   `setCustomerId( id: number )`: Set `state.customerId` to `id`
--   `setUseShippingAsBilling( useShippingAsBilling: boolean )`: Set `state.useShippingAsBilling` to `useShippingAsBilling`
--   `setShouldCreateAccount( shouldCreateAccount: boolean )`: Set `state.shouldCreateAccount` to `shouldCreateAccount`
--   `setOrderNotes( orderNotes: string )`: Set `state.orderNotes` to `orderNotes`
--   `setExtensionData( extensionData: Record< string, Record< string, unknown > > )`: Set `state.extensionData` to `extensionData`
+-   `__internalSetIdle()`: Set `state.status` to `idle`
+-   `__internalSetComplete()`: Set `state.status` to `complete`
+-   `__internalSetProcessing()`: Set `state.status` to `processing`
+-   `__internalSetPaymentResult( response: PaymentResult )`: Set `state.paymentResult` to `response`
+-   `__internalSetBeforeProcessing()`: Set `state.status` to `before_processing`
+-   `__internalSetAfterProcessing()`: Set `state.status` to `after_processing`
+-   `__internalSrocessCheckoutResponse( response: CheckoutResponse )`: This is a thunk that will extract the paymentResult from the CheckoutResponse, and dispatch 3 actions: `__internalSetRedirectUrl`, `__internalSetPaymentResult` and `__internalSetAfterProcessing`.
+-   `__internalSetRedirectUrl( url: string )`: Set `state.redirectUrl` to `url`
+-   `__internalSetHasError( trueOrFalse: bool )`: Set `state.hasError` to `trueOrFalse`
+-   `__internalIncrementCalculating()`: Increment `state.calculatingCount`
+-   `__internalDecrementCalculating()`: Decrement `state.calculatingCount`
+-   `__internalSetCustomerId( id: number )`: Set `state.customerId` to `id`
+-   `__internalSetUseShippingAsBilling( useShippingAsBilling: boolean )`: Set `state.useShippingAsBilling` to `useShippingAsBilling`
+-   `__internalSetShouldCreateAccount( shouldCreateAccount: boolean )`: Set `state.shouldCreateAccount` to `shouldCreateAccount`
+-   `__internalSetOrderNotes( orderNotes: string )`: Set `state.orderNotes` to `orderNotes`
+-   `__internalSetExtensionData( extensionData: Record< string, Record< string, unknown > > )`: Set `state.extensionData` to `extensionData`
 
 ### Contexts
 

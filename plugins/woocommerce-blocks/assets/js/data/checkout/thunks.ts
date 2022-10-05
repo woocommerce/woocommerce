@@ -30,16 +30,18 @@ import * as actions from './actions';
  * set the payment processing response in the checkout data store
  * and change the status to AFTER_PROCESSING
  */
-export const processCheckoutResponse = ( response: CheckoutResponse ) => {
+export const __internalProcessCheckoutResponse = (
+	response: CheckoutResponse
+) => {
 	return ( {
 		dispatch,
 	}: {
 		dispatch: DispatchFromMap< typeof actions >;
 	} ) => {
 		const paymentResult = getPaymentResultFromCheckoutResponse( response );
-		dispatch.setRedirectUrl( paymentResult?.redirectUrl || '' );
-		dispatch.setPaymentResult( paymentResult );
-		dispatch.setAfterProcessing();
+		dispatch.__internalSetRedirectUrl( paymentResult?.redirectUrl || '' );
+		dispatch.__internalSetPaymentResult( paymentResult );
+		dispatch.__internalSetAfterProcessing();
 	};
 };
 
@@ -47,7 +49,7 @@ export const processCheckoutResponse = ( response: CheckoutResponse ) => {
  * Emit the CHECKOUT_VALIDATION_BEFORE_PROCESSING event and process all
  * registered observers
  */
-export const emitValidateEvent: emitValidateEventType = ( {
+export const __internalEmitValidateEvent: emitValidateEventType = ( {
 	observers,
 	setValidationErrors, // TODO: Fix this type after we move to validation store
 } ) => {
@@ -70,10 +72,10 @@ export const emitValidateEvent: emitValidateEventType = ( {
 						}
 					);
 				}
-				dispatch.setIdle();
-				dispatch.setHasError();
+				dispatch.__internalSetIdle();
+				dispatch.__internalSetHasError();
 			} else {
-				dispatch.setProcessing();
+				dispatch.__internalSetProcessing();
 			}
 		} );
 	};
@@ -84,48 +86,46 @@ export const emitValidateEvent: emitValidateEventType = ( {
  * or the CHECKOUT_AFTER_PROCESSING_WITH_SUCCESS if not. Set checkout errors according
  * to the observer responses
  */
-export const emitAfterProcessingEvents: emitAfterProcessingEventsType = ( {
-	observers,
-	notices,
-} ) => {
-	return ( { select, dispatch, registry } ) => {
-		const { createErrorNotice } = registry.dispatch( noticesStore );
-		const state = select.getCheckoutState();
-		const data = {
-			redirectUrl: state.redirectUrl,
-			orderId: state.orderId,
-			customerId: state.customerId,
-			orderNotes: state.orderNotes,
-			processingResponse: state.paymentResult,
+export const __internalEmitAfterProcessingEvents: emitAfterProcessingEventsType =
+	( { observers, notices } ) => {
+		return ( { select, dispatch, registry } ) => {
+			const { createErrorNotice } = registry.dispatch( noticesStore );
+			const state = select.getCheckoutState();
+			const data = {
+				redirectUrl: state.redirectUrl,
+				orderId: state.orderId,
+				customerId: state.customerId,
+				orderNotes: state.orderNotes,
+				processingResponse: state.paymentResult,
+			};
+			if ( state.hasError ) {
+				// allow payment methods or other things to customize the error
+				// with a fallback if nothing customizes it.
+				emitEventWithAbort(
+					observers,
+					EVENTS.CHECKOUT_AFTER_PROCESSING_WITH_ERROR,
+					data
+				).then( ( observerResponses ) => {
+					runCheckoutAfterProcessingWithErrorObservers( {
+						observerResponses,
+						notices,
+						dispatch,
+						createErrorNotice,
+						data,
+					} );
+				} );
+			} else {
+				emitEventWithAbort(
+					observers,
+					EVENTS.CHECKOUT_AFTER_PROCESSING_WITH_SUCCESS,
+					data
+				).then( ( observerResponses: unknown[] ) => {
+					runCheckoutAfterProcessingWithSuccessObservers( {
+						observerResponses,
+						dispatch,
+						createErrorNotice,
+					} );
+				} );
+			}
 		};
-		if ( state.hasError ) {
-			// allow payment methods or other things to customize the error
-			// with a fallback if nothing customizes it.
-			emitEventWithAbort(
-				observers,
-				EVENTS.CHECKOUT_AFTER_PROCESSING_WITH_ERROR,
-				data
-			).then( ( observerResponses ) => {
-				runCheckoutAfterProcessingWithErrorObservers( {
-					observerResponses,
-					notices,
-					dispatch,
-					createErrorNotice,
-					data,
-				} );
-			} );
-		} else {
-			emitEventWithAbort(
-				observers,
-				EVENTS.CHECKOUT_AFTER_PROCESSING_WITH_SUCCESS,
-				data
-			).then( ( observerResponses: unknown[] ) => {
-				runCheckoutAfterProcessingWithSuccessObservers( {
-					observerResponses,
-					dispatch,
-					createErrorNotice,
-				} );
-			} );
-		}
 	};
-};
