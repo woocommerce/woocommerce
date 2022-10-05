@@ -15,7 +15,7 @@ import {
 import {
 	PAYMENT_METHOD_DATA_STORE_KEY,
 	config as paymentDataStoreConfig,
-} from '../../../../data/payment-methods';
+} from '../../../../data/payment';
 
 jest.mock( '../../providers/cart-checkout/checkout-events', () => {
 	const original = jest.requireActual(

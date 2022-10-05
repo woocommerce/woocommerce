@@ -20,7 +20,7 @@ import {
  * Internal dependencies
  */
 import { STORE_KEY as CART_STORE_KEY } from '../cart/constants';
-import { STORE_KEY as PAYMENT_METHOD_DATA_STORE_KEY } from '../payment-methods/constants';
+import { STORE_KEY as PAYMENT_METHOD_DATA_STORE_KEY } from './constants';
 import { noticeContexts } from '../../base/context/event-emit';
 
 export const checkPaymentMethodsCanPay = async ( express = false ) => {

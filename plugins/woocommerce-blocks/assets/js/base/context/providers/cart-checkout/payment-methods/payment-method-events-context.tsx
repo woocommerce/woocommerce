@@ -18,7 +18,7 @@ import {
 /**
  * Internal dependencies
  */
-import type { PaymentMethodEventsContextType } from '../../../../../data/payment-methods/types';
+import type { PaymentMethodEventsContextType } from '../../../../../data/payment/types';
 import { DEFAULT_PAYMENT_METHOD_DATA } from './constants';
 import { useEventEmitters, reducer as emitReducer } from './event-emit';
 import { useCustomerData } from '../../../hooks/use-customer-data';
