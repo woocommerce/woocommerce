@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Support `wc_customer_bought_product` function in HPOS.

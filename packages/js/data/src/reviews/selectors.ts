@@ -1,4 +1,12 @@
-export const getReviews = ( state, query ) => {
+/**
+ * Internal dependencies
+ */
+import { ReviewsQueryParams, ReviewsState } from './types';
+
+export const getReviews = (
+	state: ReviewsState,
+	query: ReviewsQueryParams
+) => {
 	const stringifiedQuery = JSON.stringify( query );
 	const ids =
 		( state.reviews[ stringifiedQuery ] &&
@@ -7,7 +15,10 @@ export const getReviews = ( state, query ) => {
 	return ids.map( ( id ) => state.data[ id ] );
 };
 
-export const getReviewsTotalCount = ( state, query ) => {
+export const getReviewsTotalCount = (
+	state: ReviewsState,
+	query: ReviewsQueryParams
+) => {
 	const stringifiedQuery = JSON.stringify( query );
 	return (
 		state.reviews[ stringifiedQuery ] &&
@@ -15,7 +26,10 @@ export const getReviewsTotalCount = ( state, query ) => {
 	);
 };
 
-export const getReviewsError = ( state, query ) => {
+export const getReviewsError = (
+	state: ReviewsState,
+	query: ReviewsQueryParams
+) => {
 	const stringifiedQuery = JSON.stringify( query );
 	return state.errors[ stringifiedQuery ];
 };

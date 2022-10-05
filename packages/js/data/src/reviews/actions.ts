@@ -9,8 +9,37 @@ import { addQueryArgs } from '@wordpress/url';
  */
 import TYPES from './action-types';
 import { NAMESPACE } from '../constants';
+import { ReviewObject, ReviewObjectUpdate, ReviewsQueryParams } from './types';
 
-export function updateReviews( query, reviews, totalCount ) {
+export function setReviewIsUpdating( reviewId: number, isUpdating: boolean ) {
+	return {
+		type: TYPES.SET_REVIEW_IS_UPDATING,
+		reviewId,
+		isUpdating,
+	};
+}
+
+export function setReview( reviewId: number, reviewData: ReviewObject ) {
+	return {
+		type: TYPES.SET_REVIEW,
+		reviewId,
+		reviewData,
+	};
+}
+
+export function setError( query: ReviewsQueryParams | string, error: unknown ) {
+	return {
+		type: TYPES.SET_ERROR,
+		query,
+		error,
+	};
+}
+
+export function updateReviews(
+	query: ReviewsQueryParams,
+	reviews: Array< ReviewObjectUpdate >,
+	totalCount: number
+) {
 	return {
 		type: TYPES.UPDATE_REVIEWS,
 		reviews,
@@ -19,7 +48,11 @@ export function updateReviews( query, reviews, totalCount ) {
 	};
 }
 
-export function* updateReview( reviewId, reviewFields, query ) {
+export function* updateReview(
+	reviewId: number,
+	reviewFields: ReviewObjectUpdate,
+	query: ReviewsQueryParams
+) {
 	yield setReviewIsUpdating( reviewId, true );
 
 	try {
@@ -27,7 +60,7 @@ export function* updateReview( reviewId, reviewFields, query ) {
 			`${ NAMESPACE }/products/reviews/${ reviewId }`,
 			query || {}
 		);
-		const review = yield apiFetch( {
+		const review: ReviewObject = yield apiFetch( {
 			path: url,
 			method: 'PUT',
 			data: reviewFields,
@@ -41,12 +74,15 @@ export function* updateReview( reviewId, reviewFields, query ) {
 	}
 }
 
-export function* deleteReview( reviewId ) {
+export function* deleteReview( reviewId: number ) {
 	yield setReviewIsUpdating( reviewId, true );
 
 	try {
 		const url = `${ NAMESPACE }/products/reviews/${ reviewId }`;
-		const response = yield apiFetch( { path: url, method: 'DELETE' } );
+		const response: ReviewObject = yield apiFetch( {
+			path: url,
+			method: 'DELETE',
+		} );
 		yield setReview( reviewId, response );
 		yield setReviewIsUpdating( reviewId, false );
 		return response;
@@ -57,26 +93,9 @@ export function* deleteReview( reviewId ) {
 	}
 }
 
-export function setReviewIsUpdating( reviewId, isUpdating ) {
-	return {
-		type: TYPES.SET_REVIEW_IS_UPDATING,
-		reviewId,
-		isUpdating,
-	};
-}
-
-export function setReview( reviewId, reviewData ) {
-	return {
-		type: TYPES.SET_REVIEW,
-		reviewId,
-		reviewData,
-	};
-}
-
-export function setError( query, error ) {
-	return {
-		type: TYPES.SET_ERROR,
-		query,
-		error,
-	};
-}
+export type Action = ReturnType<
+	| typeof updateReviews
+	| typeof setReviewIsUpdating
+	| typeof setReview
+	| typeof setError
+>;
