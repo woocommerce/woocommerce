@@ -93,8 +93,7 @@ export function AsyncSelectControl< ItemType >( {
 		(
 			allItems: ItemType[],
 			inputValue: string,
-			selectedItems: ItemType[],
-			getItemLabel: getItemLabelType< ItemType >
+			selectedItems: ItemType[]
 		) => {
 			if ( filterClientSide ) {
 				const getFilteredItemsFunc =
