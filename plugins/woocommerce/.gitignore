@@ -20,9 +20,6 @@ tests/cli/vendor
 /tests/e2e/plugins
 .phpunit.result.cache
 
-# API Test Output
-/tests/api-core-tests/output/*
-
 # Packages
 /packages/*
 !/packages/README.md

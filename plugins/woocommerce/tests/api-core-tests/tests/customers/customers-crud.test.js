@@ -17,13 +17,15 @@ test.describe('Customers API tests: CRUD', () => {
 	let customerId;
 
 	test.describe('Retrieve after env setup', () => {
-
-		// when the environment is created, we have an admin user and 
-		// an subscriber user that can both be accessed through their ids
-		// admin user will have id 1 and subscriber user will have id 2
-		// neither of these are returned as part of the get all customers call
-		// unless the role 'all' is passed as a search param 
-        // but can be accessed by specific id reference
+		/** when the environment is created,
+		 * (https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw#woocommerce-playwright-end-to-end-tests),
+		 * we have an admin user and  a subscriber user that can both be 
+         * accessed through their ids
+		 * admin user will have id 1 and subscriber user will have id 2
+		 * neither of these are returned as part of the get all customers call
+		 * unless the role 'all' is passed as a search param 
+		 * but they can be accessed by specific id reference
+		 */
 		test('can retrieve admin user', async ({
 			request
 		}) => {
@@ -74,8 +76,8 @@ test.describe('Customers API tests: CRUD', () => {
 			request
 		}) => {
 			// call API to retrieve all customers should initially return empty array
-            // unless the role 'all' is passed as a search string, in which case the admin
-            // and subscriber users will be returned
+			// unless the role 'all' is passed as a search string, in which case the admin
+			// and subscriber users will be returned
 			const response = await request.get('/wp-json/wc/v3/customers', {
 				params: {
 					role: 'all'
@@ -140,8 +142,11 @@ test.describe('Customers API tests: CRUD', () => {
 		test(`can update the admin user/customer`, async ({
 			request,
 		}) => {
-			// update customer names (regular, billing and shipping) to admin
-			// (these were initialised blank)
+			/**
+             * update customer names (regular, billing and shipping) to admin
+             * (these were initialised blank when the environment is created,
+             * (https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw#woocommerce-playwright-end-to-end-tests
+             */ 
 			const response = await request.put(
 				`/wp-json/wc/v3/customers/1`, {
 					data: {
@@ -274,8 +279,7 @@ test.describe('Customers API tests: CRUD', () => {
 		/**
 		 * 2 Customers to be created in one batch.
 		 */
-		const expectedCustomers = [
-            {
+		const expectedCustomers = [{
 				email: "john.doe2@example.com",
 				first_name: "John",
 				last_name: "Doe",
@@ -290,7 +294,7 @@ test.describe('Customers API tests: CRUD', () => {
 					state: "CA",
 					postcode: "94103",
 					country: "US",
-					email: "john.doe@example.com",
+					email: "john.doe2@example.com",
 					phone: "(555) 555-5555"
 				},
 				shipping: {
@@ -320,7 +324,7 @@ test.describe('Customers API tests: CRUD', () => {
 					state: "RJ",
 					postcode: "12345-000",
 					country: "BR",
-					email: "joao.silva@example.com",
+					email: "joao.silva2@example.com",
 					phone: "(55) 5555-5555"
 				},
 				shipping: {
@@ -337,7 +341,7 @@ test.describe('Customers API tests: CRUD', () => {
 			}
 		];
 
-        // set payload to use batch create: action
+		// set payload to use batch create: action
 		const batchCreate2CustomersPayload = {
 			create: expectedCustomers
 		};
@@ -374,7 +378,7 @@ test.describe('Customers API tests: CRUD', () => {
 
 		test('can batch update customers', async ({
 			request
-		}) => {			
+		}) => {
 			// set payload to use batch update: action
 			const batchUpdatePayload = {
 				update: [{
@@ -383,9 +387,9 @@ test.describe('Customers API tests: CRUD', () => {
 					},
 					{
 						id: expectedCustomers[1].id,
-						billing:{
-                            address_1: "123 Addressupdate Street"
-                        }
+						billing: {
+							address_1: "123 Addressupdate Street"
+						}
 					},
 				],
 			};
@@ -433,7 +437,9 @@ test.describe('Customers API tests: CRUD', () => {
 
 			// Verify that the response shows the 2 customers.
 			const deletedCustomerIds = responseJSON.delete.map(
-				({id}) => id);
+				({
+					id
+				}) => id);
 			expect(response.status()).toEqual(200);
 			expect(deletedCustomerIds).toEqual(customerIdsToDelete);
 
