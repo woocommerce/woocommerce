@@ -8,10 +8,10 @@ const {
 } = require('../../data');
 
 /**
- * Tests for the WooCommerce Customers API.
+ * Tests for the WooCommerce API.
  *
  * @group api
- * @group taxRates
+ * @group taxes
  *
  */
 test.describe('Tax Rates API tests: CRUD', () => {
@@ -21,7 +21,7 @@ test.describe('Tax Rates API tests: CRUD', () => {
 		test('can create a tax rate', async ({
 			request,
 		}) => {
-			// call API to create a customer
+			// call API to create a tax rate
 			const response = await request.post('/wp-json/wc/v3/taxes', {
 				data: {
 					country: "US",
@@ -37,11 +37,11 @@ test.describe('Tax Rates API tests: CRUD', () => {
 
 			// Save the tax rate ID. It will be used by the retrieve, update, and delete tests.
 			taxRateId = responseJSON.id;
-			console.log('taxRateId=', taxRateId);
 
 			expect(response.status()).toEqual(201);
 			expect(typeof responseJSON.id).toEqual('number');
 			// Verify that the tax rate class is 'standard'
+			expect(responseJSON.class).toEqual('standard');
 			expect(responseJSON.country).toEqual("US");
 			expect(responseJSON.state).toEqual("AL");
 			expect(responseJSON.city).toEqual(expect.stringMatching(/ALPINE|BROOKSIDE|CARDIFF/));
@@ -52,8 +52,6 @@ test.describe('Tax Rates API tests: CRUD', () => {
 			expect(responseJSON.shipping).toEqual(false);
 			expect(responseJSON.order).toEqual(0);
 			expect(responseJSON.rate).toEqual('4.0000');
-
-
 		});
 	});
 
@@ -61,7 +59,7 @@ test.describe('Tax Rates API tests: CRUD', () => {
 		test('can retrieve a tax rate', async ({
 			request
 		}) => {
-			// call API to retrieve the previously saved customer
+			// call API to retrieve the previously saved tax rates
 			const response = await request.get(
 				`/wp-json/wc/v3/taxes/${taxRateId}`
 			);
@@ -70,6 +68,7 @@ test.describe('Tax Rates API tests: CRUD', () => {
 			expect(responseJSON.id).toEqual(taxRateId);
 			expect(typeof responseJSON.id).toEqual('number');
 			// Verify that the tax rate class is 'standard'
+			expect(responseJSON.class).toEqual('standard');
 			expect(responseJSON.country).toEqual("US");
 			expect(responseJSON.state).toEqual("AL");
 			expect(responseJSON.city).toEqual(expect.stringMatching(/ALPINE|BROOKSIDE|CARDIFF/));
@@ -86,10 +85,9 @@ test.describe('Tax Rates API tests: CRUD', () => {
 		test('can retrieve all tax rates', async ({
 			request
 		}) => {
-			// call API to retrieve all customers
+			// call API to retrieve all tax rates
 			const response = await request.get('/wp-json/wc/v3/taxes');
 			const responseJSON = await response.json();
-			console.log('response=', responseJSON);
 			expect(response.status()).toEqual(200);
 			expect(Array.isArray(responseJSON));
 			expect(responseJSON.length).toBeGreaterThan(0);
@@ -97,11 +95,10 @@ test.describe('Tax Rates API tests: CRUD', () => {
 	});
 
 	test.describe('Update a tax rate', () => {
-
 		test(`can update a tax rate`, async ({
 			request,
 		}) => {
-			// update customer names (regular, billing and shipping) from John to Jack
+			// update tax rate name
 			const response = await request.put(
 				`/wp-json/wc/v3/taxes/${ taxRateId }`, {
 					data: {
@@ -121,10 +118,10 @@ test.describe('Tax Rates API tests: CRUD', () => {
 
 		});
 
-		test('retrieve after update customer', async ({
+		test('retrieve after update tax rate', async ({
 			request
 		}) => {
-			// call API to retrieve all customers
+			// call API to retrieve all tax rates
 			const response = await request.get(`/wp-json/wc/v3/taxes/${ taxRateId }`);
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
@@ -138,7 +135,7 @@ test.describe('Tax Rates API tests: CRUD', () => {
 		test('can permanently delete a tax rate', async ({
 			request
 		}) => {
-			// Delete the customer.
+			// Delete the tax rate.
 			const response = await request.delete(
 				`/wp-json/wc/v3/taxes/${ taxRateId }`, {
 					data: {
@@ -148,7 +145,7 @@ test.describe('Tax Rates API tests: CRUD', () => {
 			);
 			expect(response.status()).toEqual(200);
 
-			// Verify that the customer can no longer be retrieved.
+			// Verify that the tax rate can no longer be retrieved.
 			const getDeletedTaxRateResponse = await request.get(
 				`/wp-json/wc/v3/taxes/${ taxRateId }`
 			);
@@ -157,18 +154,15 @@ test.describe('Tax Rates API tests: CRUD', () => {
 	});
 
 
+	/**
+	 * 48 tax rates to be created in one batch.
+	 */
 	test.describe('Batch tax rate operations', () => {
-		/**
-		 * 48 tax rates to be created in one batch.
-		 */
 
 		// set payload to use batch create: action
 		const batchCreate48TaxRatesPayload = {
 			create: allUSTaxesExample
 		};
-
-		console.log('before test allUSTaxesExample=', allUSTaxesExample);
-		console.log('batchCreate48TaxRatesPayload=', batchCreate48TaxRatesPayload);
 
 		test('can batch create tax rates', async ({
 			request
@@ -183,7 +177,6 @@ test.describe('Tax Rates API tests: CRUD', () => {
 
 			// Verify that the 48 new tax rates were created
 			const actualTaxRates = responseJSON.create;
-			console.log('actualTaxRates=', actualTaxRates);
 			expect(actualTaxRates).toHaveLength(allUSTaxesExample.length);
 
 			for (let i = 0; i < actualTaxRates.length; i++) {
@@ -198,8 +191,6 @@ test.describe('Tax Rates API tests: CRUD', () => {
 				// Save the tax rate id
 				allUSTaxesExample[i].id = id;
 			}
-
-			console.log('after test allUSTaxesExample=', allUSTaxesExample);
 		});
 
 		test('can batch update tax rates', async ({
@@ -219,7 +210,7 @@ test.describe('Tax Rates API tests: CRUD', () => {
 				],
 			};
 
-			// Call API to update the customers
+			// Call API to batch update the tax rates
 			const response = await request.post(
 				'wp-json/wc/v3/taxes/batch', {
 					data: batchUpdatePayload,
@@ -227,28 +218,22 @@ test.describe('Tax Rates API tests: CRUD', () => {
 			);
 			const responseJSON = await response.json();
 
-			// Verify the response code and the number of customers that were updated.
+			// Verify the response code and the number of tax ratess that were updated.
 			const updatedTaxRates = responseJSON.update;
-			console.log('updatedTaxRates=', updatedTaxRates);
 			expect(response.status()).toEqual(200);
 			expect(updatedTaxRates).toHaveLength(2);
 
-			// Verify that the 1st customer was updated to have a new email address.
+			// Verify that the 1st tax rate was updated to have a new rate.
 			expect(updatedTaxRates[0].id).toEqual(allUSTaxesExample[0].id);
 			expect(updatedTaxRates[0].rate).toEqual('4.1111');
 
-			// Verify that the amount of the 2nd customer was updated to have a new billing address.
+			// Verify that the 2nd tax rate has had the order and the rate updated
 			expect(updatedTaxRates[1].id).toEqual(allUSTaxesExample[1].id);
 			expect(updatedTaxRates[1].order).toEqual(49);
 			expect(updatedTaxRates[1].rate).toEqual('5.6111');
-
-			console.log('after batch update allUSTaxesExample=', allUSTaxesExample);
-			console.log('allUSTaxesExample[0].id=', allUSTaxesExample[0].id);
-			console.log('allUSTaxesExample[1].id=', allUSTaxesExample[1].id);
-
 		});
 
-		test('can batch delete customers', async ({
+		test('can batch delete tax rates', async ({
 			request
 		}) => {
 			// Batch delete the 48 tax rates
@@ -259,7 +244,7 @@ test.describe('Tax Rates API tests: CRUD', () => {
 				delete: taxRateIdsToDelete,
 			};
 
-			//Call API to batch delete the customers
+			//Call API to batch delete the tax rates
 			const response = await request.post(
 				'wp-json/wc/v3/taxes/batch', {
 					data: batchDeletePayload,
@@ -268,18 +253,18 @@ test.describe('Tax Rates API tests: CRUD', () => {
 			const responseJSON = await response.json();
 
 			// Verify that the response shows the 48 tax rates.
-			const deletedCustomerIds = responseJSON.delete.map(
+			const deletedTaxRateIds = responseJSON.delete.map(
 				({
 					id
 				}) => id);
 			expect(response.status()).toEqual(200);
-			expect(deletedCustomerIds).toEqual(taxRateIdsToDelete);
+			expect(deletedTaxRateIds).toEqual(taxRateIdsToDelete);
 
 			// Verify that the deleted tax rates cannot be retrieved.
 			for (const taxRateId of taxRateIdsToDelete) {
 				//Call the API to attempte to retrieve the tax rates
 				const response = await request.get(
-					`wp-json/wc/v3/customers/${ taxRateId }`
+					`wp-json/wc/v3/taxes/${ taxRateId }`
 				);
 				expect(response.status()).toEqual(404);
 			}
