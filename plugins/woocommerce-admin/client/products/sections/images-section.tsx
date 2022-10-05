@@ -38,21 +38,6 @@ export const ImagesSection: React.FC = () => {
 		0
 	);
 
-	const getUniqueImages = ( files: Image[] ) => {
-		if ( ! files ) {
-			return [];
-		}
-		files.forEach( ( image: Image ) => {
-			if (
-				image.id &&
-				images.find( ( file ) => file.id === image.id ) === undefined
-			) {
-				images.push( image );
-			}
-		} );
-		return images;
-	};
-
 	const toggleRemoveZone = () => {
 		setIsRemoveZoneVisible( ! isRemoveZoneVisible );
 	};
@@ -156,18 +141,26 @@ export const ImagesSection: React.FC = () => {
 							<CardBody>
 								<MediaUploader
 									onError={ () => null }
-									onSelect={ ( file ) =>
-										setValue(
-											'images',
-											getUniqueImages( [ file as Image ] )
-										)
-									}
-									onUpload={ ( files ) =>
-										setValue(
-											'images',
-											getUniqueImages( files as Image[] )
-										)
-									}
+									onSelect={ ( file ) => {
+										if (
+											images.find(
+												( img ) => file.id === img.id
+											) === undefined
+										) {
+											setValue( 'images', [
+												...images,
+												file,
+											] );
+										}
+									} }
+									onUpload={ ( files ) => {
+										if ( files[ 0 ].id ) {
+											setValue( 'images', [
+												...images,
+												...files,
+											] );
+										}
+									} }
 									label={
 										<>
 											<img
