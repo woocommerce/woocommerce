@@ -5,7 +5,6 @@ import classnames from 'classnames';
 import {
 	useCombobox,
 	UseComboboxState,
-	UseComboboxStateChange,
 	UseComboboxStateChangeOptions,
 	useMultipleSelection,
 } from 'downshift';
