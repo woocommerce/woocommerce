@@ -33,7 +33,9 @@ export const ImagesSection: React.FC = () => {
 	const images = ( getInputProps( 'images' ).value as Image[] ) || [];
 	const [ showRemoveZone, setShowRemoveZone ] = useState< boolean >( false );
 	const [ isRemove, setIsRemove ] = useState< boolean >( false );
-	const [ draggedImageId, setDraggedImageId ] = useState< number >( 0 );
+	const [ draggedImageId, setDraggedImageId ] = useState< number | null >(
+		0
+	);
 
 	const getUniqueImages = ( files: Image[] ) => {
 		if ( ! files ) {
@@ -111,6 +113,7 @@ export const ImagesSection: React.FC = () => {
 									)
 								);
 								setIsRemove( false );
+								setDraggedImageId( null );
 							}
 							toggleRemoveZone();
 						} }
