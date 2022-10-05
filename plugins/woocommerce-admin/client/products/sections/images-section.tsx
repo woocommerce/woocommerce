@@ -50,7 +50,6 @@ export const ImagesSection: React.FC = () => {
 				images.push( image );
 			}
 		} );
-		setValue( 'images', images );
 		return images;
 	};
 
@@ -154,36 +153,38 @@ export const ImagesSection: React.FC = () => {
 								</div>
 							</CardBody>
 						) : (
-							<MediaUploader
-								onError={ () => null }
-								onSelect={ ( file ) =>
-									setValue(
-										'images',
-										getUniqueImages( [ file as Image ] )
-									)
-								}
-								onUpload={ ( files ) =>
-									setValue(
-										'images',
-										getUniqueImages( files as Image[] )
-									)
-								}
-								label={
-									<>
-										<img
-											src={ DragAndDrop }
-											alt="Completed"
-											className="woocommerce-product-form__drag-and-drop-image"
-										/>
-										<span>
-											{ __(
-												'Drag images here or click to upload',
-												'woocommerce'
-											) }
-										</span>
-									</>
-								}
-							/>
+							<CardBody>
+								<MediaUploader
+									onError={ () => null }
+									onSelect={ ( file ) =>
+										setValue(
+											'images',
+											getUniqueImages( [ file as Image ] )
+										)
+									}
+									onUpload={ ( files ) =>
+										setValue(
+											'images',
+											getUniqueImages( files as Image[] )
+										)
+									}
+									label={
+										<>
+											<img
+												src={ DragAndDrop }
+												alt="Completed"
+												className="woocommerce-product-form__drag-and-drop-image"
+											/>
+											<span>
+												{ __(
+													'Drag images here or click to upload',
+													'woocommerce'
+												) }
+											</span>
+										</>
+									}
+								/>
+							</CardBody>
 						) }
 					</div>
 				</CardBody>
