@@ -13,7 +13,6 @@ type ComboBoxProps = {
 	children?: JSX.Element | JSX.Element[] | null;
 	comboBoxProps: Props;
 	inputProps: Props;
-	inputRef?: React.RefObject< HTMLInputElement > | null;
 };
 
 export const ComboBox = ( {

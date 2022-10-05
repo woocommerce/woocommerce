@@ -2,7 +2,12 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { createElement, Fragment, useState } from '@wordpress/element';
+import {
+	createElement,
+	Fragment,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 import { useCombobox, useMultipleSelection } from 'downshift';
 
 /**
