@@ -15,7 +15,6 @@ if ( process.env.CONSUMER_KEY && process.env.CONSUMER_SECRET ) {
 
 const update = {
 	storeDetails: async ( store ) => {
-		console.log( store );
 		// ensure store address is US
 		const res = await api.post( 'settings/general/batch', {
 			update: [
@@ -58,16 +57,9 @@ const get = {
 			'settings/general/woocommerce_default_country'
 		);
 
-		const code = response.data.value;
+		const code = response.data.default;
 
-		if ( code.includes( 'US' ) ) {
-			return 'us';
-		} else if ( code.includes( 'MT' ) ) {
-			return 'malta';
-		}
-
-		// Throw error is country is not US or Malta
-		throw new Error( 'Unexpected Country Address. Expected US/Malta' );
+		return code;
 	},
 };
 

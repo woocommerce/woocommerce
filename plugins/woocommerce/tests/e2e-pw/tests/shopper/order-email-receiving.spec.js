@@ -46,6 +46,7 @@ test.describe( 'Shopper Order Email Receiving', () => {
 	test( 'should receive order email after purchasing an item', async ( {
 		page,
 	} ) => {
+		// ensure that the store's address is in the US
 		await api.update.storeDetails( storeDetails.us.store );
 
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
