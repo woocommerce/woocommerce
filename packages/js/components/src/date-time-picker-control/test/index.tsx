@@ -125,6 +125,28 @@ describe( 'DateTimePickerControl', () => {
 		expect( input?.value ).toBe( '02:30, 09-15-2022' );
 	} );
 
+	it( 'should update the input when currentDate is changed', () => {
+		const originalDateTime = moment( '2022-09-15 02:30:40' );
+		const updatedDateTime = moment( '2022-10-06 10:25:00' );
+
+		const { container, rerender } = render(
+			<DateTimePickerControl
+				currentDate={ originalDateTime.toISOString() }
+				is12Hour={ false }
+			/>
+		);
+
+		rerender(
+			<DateTimePickerControl
+				currentDate={ updatedDateTime.toISOString() }
+				is12Hour={ false }
+			/>
+		);
+
+		const input = container.querySelector( 'input' );
+		expect( input?.value ).toBe( '10/06/2022 10:25' );
+	} );
+
 	it( 'should show the date time picker popup when focused', async () => {
 		const { container, queryByText } = render( <DateTimePickerControl /> );
 
