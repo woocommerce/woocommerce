@@ -40,7 +40,7 @@ const applyLabelToCommunityContributor = async () => {
 	
 	const isCommunityUser = await isCommunityContributor(owner, repo, username);
 
-	if (isCommunityUser) {
+	if (!isCommunityUser) {
 		console.log('Adding community contributor label');
 		await addLabel('type: community contribution', owner, repo, number);
 	}
