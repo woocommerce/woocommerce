@@ -68,6 +68,22 @@ class FeaturesController {
 	private $plugin_util;
 
 	/**
+	 * Flag indicating that features will be enableable from the settings page
+	 * even when they are incompatible with active plugins.
+	 *
+	 * @var bool
+	 */
+	private $force_allow_enabling_features = false;
+
+	/**
+	 * Flag indicating that plugins will be activable from the plugins page
+	 * even when they are incompatible with enabled features.
+	 *
+	 * @var bool
+	 */
+	private $force_allow_enabling_plugins = false;
+
+	/**
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
@@ -377,6 +393,22 @@ class FeaturesController {
 	}
 
 	/**
+	 * Sets a flag indicating that it's allowed to enable features for which incompatible plugins are active
+	 * from the WooCommerce feature settings page.
+	 */
+	public function allow_enabling_features_with_incompatible_plugins(): void {
+		$this->force_allow_enabling_features = true;
+	}
+
+	/**
+	 * Sets a flag indicating that it's allowed to activate plugins for which incompatible features are enabled
+	 * from the WordPress plugins page.
+	 */
+	public function allow_activating_plugins_with_incompatible_features(): void {
+		$this->force_allow_enabling_plugins = true;
+	}
+
+	/**
 	 * Handler for the 'added_option' hook.
 	 *
 	 * It fires FEATURE_ENABLED_CHANGED_ACTION when a feature is enabled or disabled.
@@ -563,23 +595,23 @@ class FeaturesController {
 		if ( ! $this->is_legacy_feature( $feature_id ) && ! $disabled && $this->verify_did_woocommerce_init() ) {
 			$plugin_info_for_feature = $this->get_compatible_plugins_for_feature( $feature_id );
 			$incompatibles           = array_merge( $plugin_info_for_feature['incompatible'], $plugin_info_for_feature['uncertain'] );
+			$incompatibles           = array_filter( $incompatibles, 'is_plugin_active' );
 			$incompatible_count      = count( $incompatibles );
 			if ( $incompatible_count > 0 ) {
-				$disabled = true;
 				if ( 1 === $incompatible_count ) {
 					/* translators: %s = printable plugin name */
-					$desc_tip = sprintf( __( "⚠ This feature shouldn't be enabled, the %s plugin isn't compatible with it.", 'woocommerce' ), $this->plugin_util->get_plugin_name( $incompatibles[0] ) );
+					$desc_tip = sprintf( __( "⚠ This feature shouldn't be enabled, the %s plugin is active and isn't compatible with it.", 'woocommerce' ), $this->plugin_util->get_plugin_name( $incompatibles[0] ) );
 				} elseif ( 2 === $incompatible_count ) {
 					/* translators: %1\$s, %2\$s = printable plugin names */
 					$desc_tip = sprintf(
-						__( "⚠ This feature shouldn't be enabled: the %1\$s and %2\$s plugins aren't compatible with it.", 'woocommerce' ),
+						__( "⚠ This feature shouldn't be enabled: the %1\$s and %2\$s plugins are active and aren't compatible with it.", 'woocommerce' ),
 						$this->plugin_util->get_plugin_name( $incompatibles[0] ),
 						$this->plugin_util->get_plugin_name( $incompatibles[1] )
 					);
 				} else {
 					/* translators: %1\$s, %2\$s = printable plugin names, %3\$d = plugins count */
 					$desc_tip = sprintf(
-						__( "⚠ This feature shouldn't be enabled: %1\$s, %2\$s and %3\$d more plugins aren't compatible with it.", 'woocommerce' ),
+						__( "⚠ This feature shouldn't be enabled: %1\$s, %2\$s and %3\$d more active plugins aren't compatible with it.", 'woocommerce' ),
 						$this->plugin_util->get_plugin_name( $incompatibles[0] ),
 						$this->plugin_util->get_plugin_name( $incompatibles[1] ),
 						$incompatible_count - 2
@@ -607,7 +639,7 @@ class FeaturesController {
 			'desc'     => $description,
 			'type'     => 'checkbox',
 			'id'       => $this->feature_enable_option_name( $feature_id ),
-			'class'    => $disabled ? 'disabled' : '',
+			'disabled' => $disabled && ! $this->force_allow_enabling_features,
 			'desc_tip' => $desc_tip,
 		);
 	}
@@ -716,6 +748,10 @@ class FeaturesController {
 	 */
 	private function handle_action_links( $actions, $plugin_file ): array {
 		if ( ! $this->verify_did_woocommerce_init() ) {
+			return $actions;
+		}
+
+		if ( $this->force_allow_enabling_plugins ) {
 			return $actions;
 		}
 
