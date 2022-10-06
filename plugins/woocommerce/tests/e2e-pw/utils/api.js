@@ -36,8 +36,6 @@ const update = {
 				},
 			],
 		} );
-
-		console.log( res.data );
 	},
 	enableCashOnDelivery: async () => {
 		await api.put( 'payment_gateways/cod', {
