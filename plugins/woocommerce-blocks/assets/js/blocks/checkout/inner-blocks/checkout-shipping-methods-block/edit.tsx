@@ -8,6 +8,7 @@ import { PanelBody, ExternalLink } from '@wordpress/components';
 import { ADMIN_URL, getSetting } from '@woocommerce/settings';
 import ExternalLinkCard from '@woocommerce/editor-components/external-link-card';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
+import { useCheckoutAddress } from '@woocommerce/base-context/hooks';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 
 /**
@@ -37,13 +38,19 @@ export const Edit = ( {
 		className: string;
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element => {
+} ): JSX.Element | null => {
 	const globalShippingMethods = getSetting(
 		'globalShippingMethods'
 	) as shippingAdminLink[];
 	const activeShippingZones = getSetting(
 		'activeShippingZones'
 	) as shippingAdminLink[];
+
+	const { showShippingFields } = useCheckoutAddress();
+
+	if ( ! showShippingFields ) {
+		return null;
+	}
 
 	return (
 		<FormStepBlock
