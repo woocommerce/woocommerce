@@ -37,7 +37,7 @@ export type DateTimePickerControlProps = {
 export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	currentDate,
 	is12Hour = true,
-	dateTimeFormat = is12Hour ? 'MM/DD/YYYY h:mm a' : 'MM/DD/YYYY H:MM',
+	dateTimeFormat = is12Hour ? 'MM/DD/YYYY h:mm a' : 'MM/DD/YYYY H:mm',
 	disabled = false,
 	onChange,
 	onBlur,
