@@ -1,9 +1,10 @@
 name: Add Community Label
 
 on:
+  pull_request:
   issues:
     types: [opened]
-  pull_request
+  
 
 concurrency: 
   group: ${{ github.workflow }}-${{ github.ref }}
