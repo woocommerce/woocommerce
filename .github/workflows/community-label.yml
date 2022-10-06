@@ -25,7 +25,7 @@ jobs:
         uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93
 
       - name: Install Octokit 
-        run: npm install @octokit/action
+        run: npm install -g @octokit/action
 
       - name: Check if user is a community contributor
         run: node .github/workflows/scripts/is-community-contributor.js
