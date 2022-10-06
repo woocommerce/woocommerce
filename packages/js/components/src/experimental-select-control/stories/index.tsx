@@ -2,15 +2,15 @@
  * External dependencies
  */
 import { CheckboxControl, Spinner } from '@wordpress/components';
-import React, { createElement } from 'react';
-import { useState } from '@wordpress/element';
+import React from 'react';
+import { createElement, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { SelectedType, DefaultItemType } from '../types';
+import { SelectedType, DefaultItemType, getItemLabelType } from '../types';
 import { MenuItem } from '../menu-item';
-import { SelectControl } from '../';
+import { SelectControl, selectControlStateChangeTypes } from '../';
 import { Menu } from '../menu';
 
 const sampleItems = [
@@ -52,6 +52,29 @@ export const Multiple: React.FC = () => {
 				multiple
 				items={ sampleItems }
 				label="Multiple values"
+				selected={ selected }
+				onSelect={ ( item ) =>
+					Array.isArray( selected ) &&
+					setSelected( [ ...selected, item ] )
+				}
+				onRemove={ ( item ) =>
+					setSelected( selected.filter( ( i ) => i !== item ) )
+				}
+			/>
+		</>
+	);
+};
+
+export const ExternalTags: React.FC = () => {
+	const [ selected, setSelected ] = useState< DefaultItemType[] >( [] );
+
+	return (
+		<>
+			<SelectControl
+				multiple
+				hasExternalTags
+				items={ sampleItems }
+				label="External tags"
 				selected={ selected }
 				onSelect={ ( item ) =>
 					Array.isArray( selected ) &&
@@ -165,19 +188,38 @@ export const Async: React.FC = () => {
 };
 
 export const CustomRender: React.FC = () => {
-	const [ selected, setSelected ] = useState< DefaultItemType[] >( [] );
+	const [ selected, setSelected ] = useState< DefaultItemType[] >( [
+		sampleItems[ 0 ],
+	] );
 
 	const onRemove = ( item ) => {
 		setSelected( selected.filter( ( i ) => i !== item ) );
 	};
 
 	const onSelect = ( item ) => {
-		const isSelected = selected.find( ( i ) => i === item );
+		const isSelected = selected.find( ( i ) => i.value === item.value );
 		if ( isSelected ) {
 			onRemove( item );
 			return;
 		}
 		setSelected( [ ...selected, item ] );
+	};
+
+	const getFilteredItems = (
+		allItems: DefaultItemType[],
+		inputValue: string,
+		selectedItems: DefaultItemType[],
+		getItemLabel: getItemLabelType< DefaultItemType >
+	) => {
+		const escapedInputValue = inputValue.replace(
+			/[.*+?^${}()|[\]\\]/g,
+			'\\$&'
+		);
+		const re = new RegExp( escapedInputValue, 'gi' );
+
+		return allItems.filter( ( item ) => {
+			return re.test( getItemLabel( item ).toLowerCase() );
+		} );
 	};
 
 	return (
@@ -186,25 +228,45 @@ export const CustomRender: React.FC = () => {
 				multiple
 				label="Custom render"
 				items={ sampleItems }
-				getFilteredItems={ ( allItems ) => allItems }
 				selected={ selected }
 				onSelect={ onSelect }
 				onRemove={ onRemove }
+				getFilteredItems={ getFilteredItems }
+				stateReducer={ ( state, actionAndChanges ) => {
+					const { changes, type } = actionAndChanges;
+					switch ( type ) {
+						case selectControlStateChangeTypes.ControlledPropUpdatedSelectedItem:
+							return {
+								...changes,
+								inputValue: state.inputValue,
+							};
+						case selectControlStateChangeTypes.ItemClick:
+							return {
+								...changes,
+								isOpen: true,
+								inputValue: state.inputValue,
+								highlightedIndex: state.highlightedIndex,
+							};
+						default:
+							return changes;
+					}
+				} }
 			>
 				{ ( {
 					items,
 					highlightedIndex,
 					getItemProps,
 					getMenuProps,
+					isOpen,
 				} ) => {
 					return (
-						<Menu isOpen={ true } getMenuProps={ getMenuProps }>
+						<Menu isOpen={ isOpen } getMenuProps={ getMenuProps }>
 							{ items.map( ( item, index: number ) => {
 								const isSelected = selected.includes( item );
 
 								return (
 									<MenuItem
-										key={ `${ item.value }${ index }` }
+										key={ `${ item.value }` }
 										index={ index }
 										isActive={ highlightedIndex === index }
 										item={ item }
@@ -274,8 +336,9 @@ const customItems: CustomItemType[] = [
 ];
 
 export const CustomItemType: React.FC = () => {
-	const [ selected, setSelected ] =
-		useState< SelectedType< Array< CustomItemType > > >( null );
+	const [ selected, setSelected ] = useState<
+		SelectedType< Array< CustomItemType > >
+	>( [] );
 
 	return (
 		<>
@@ -293,9 +356,9 @@ export const CustomItemType: React.FC = () => {
 					)
 				}
 				onRemove={ ( item ) =>
-					setSelected( selected.filter( ( i ) => i !== item ) )
+					setSelected( selected?.filter( ( i ) => i !== item ) || [] )
 				}
-				getItemLabel={ ( item ) => item?.user.name }
+				getItemLabel={ ( item ) => item?.user.name || '' }
 				getItemValue={ ( item ) => String( item?.itemId ) }
 			/>
 		</>
