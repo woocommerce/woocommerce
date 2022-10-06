@@ -74,7 +74,7 @@ describe( 'DateTimePickerControl', () => {
 		);
 
 		const input = container.querySelector( 'input' );
-		expect( input?.placeholder === 'This is the placeholder' );
+		expect( input?.placeholder ).toBe( 'This is the placeholder' );
 	} );
 
 	it( 'should disable the input if set', () => {
@@ -94,7 +94,7 @@ describe( 'DateTimePickerControl', () => {
 		);
 
 		const input = container.querySelector( 'input' );
-		expect( input?.value === '09/15/2022 02:30' );
+		expect( input?.value ).toBe( '09/15/2022 02:30' );
 	} );
 
 	it( 'should use the default 12 hour date time format', () => {
@@ -108,7 +108,7 @@ describe( 'DateTimePickerControl', () => {
 		);
 
 		const input = container.querySelector( 'input' );
-		expect( input?.value === '09/15/2022 02:30 AM' );
+		expect( input?.value ).toBe( '09/15/2022 02:30 AM' );
 	} );
 
 	it( 'should use the date time format if set', () => {
@@ -122,7 +122,7 @@ describe( 'DateTimePickerControl', () => {
 		);
 
 		const input = container.querySelector( 'input' );
-		expect( input?.value === '02:30, 09-15-2022' );
+		expect( input?.value ).toBe( '02:30, 09-15-2022' );
 	} );
 
 	it( 'should show the date time picker popup when focused', async () => {
