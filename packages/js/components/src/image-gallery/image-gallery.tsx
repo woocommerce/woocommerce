@@ -30,6 +30,7 @@ export type ImageGalleryProps = {
 		replaceIndex: number;
 		previousItem: ImageGalleryChild;
 	} ) => void;
+	onSelectAsCover?: ( itemId: string | null ) => void;
 	onOrderChange?: ( items: ImageGalleryChild[] ) => void;
 	MediaUploadComponent?: MediaUploadComponentType;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
@@ -40,6 +41,7 @@ export type ImageGalleryProps = {
 export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 	children,
 	columns = 4,
+	onSelectAsCover = () => null,
 	onOrderChange = () => null,
 	onRemove = () => null,
 	onReplace = () => null,
@@ -69,7 +71,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 
 	const updateOrderedChildren = ( items: ImageGalleryChild[] ) => {
 		setOrderedChildren( items );
-		onOrderChange( orderedChildren );
+		onOrderChange( items );
 	};
 
 	return (
@@ -176,7 +178,10 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 										} )
 									);
 								} }
-								setToolBarItem={ setActiveToolbarKey }
+								setToolBarItem={ ( toolBarItem )=> {
+									onSelectAsCover( activeToolbarKey );
+									setActiveToolbarKey( toolBarItem );
+								} }
 								MediaUploadComponent={ MediaUploadComponent }
 							/>
 						) : null
