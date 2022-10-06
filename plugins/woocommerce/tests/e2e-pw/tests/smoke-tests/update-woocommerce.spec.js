@@ -1,51 +1,28 @@
-const { UPDATE_WC, ADMINSTATE, PLUGIN_PATH } = process.env;
+const { ADMINSTATE, UPDATE_WC, ADMIN_USER, ADMIN_PASSWORD } = process.env;
 const { test, expect } = require( '@playwright/test' );
+const { deletePlugin } = require( '../../utils/plugin-utils' );
 
 test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
-	// Skip this test group when the UPDATE_WC environment variable wasn't set, for example in PR smoke tests.
+	// Skip test if UPDATE_WC is falsy.
 	test.skip(
 		! Boolean( UPDATE_WC ),
-		'Skipping the WooCommerce plugin upload test.'
+		`Skipping this test because UPDATE_WC is falsy: ${ UPDATE_WC }`
 	);
 
 	test.use( { storageState: ADMINSTATE } );
 
-	test.beforeAll( async ( { browser } ) => {
-		// Create a browser context
-		const context = await browser.newContext();
-		const page = await context.newPage();
-
-		// Navigate to 'Installed Plugins' page
-		await page.goto( 'wp-admin/plugins.php', {
-			waitUntil: 'networkidle',
+	test.beforeAll( async ( { playwright, baseURL } ) => {
+		await deletePlugin( {
+			request: playwright.request,
+			baseURL,
+			slug: 'woocommerce/woocommerce',
+			username: ADMIN_USER,
+			password: ADMIN_PASSWORD,
 		} );
-
-		// Deactivate WooCommerce
-		await page
-			.locator( '[data-slug="woocommerce"] #deactivate-woocommerce' )
-			.click();
-		await expect(
-			page.locator( '#message', { hasText: 'Plugin deactivated.' } )
-		).toBeVisible();
-
-		// Delete WooCommerce
-		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page
-			.locator( '[data-slug="woocommerce"] #delete-woocommerce' )
-			.click();
-
-		// Assert that a confirmation message was displayed.
-		await expect(
-			page.locator( '#woocommerce-deleted', {
-				hasText: 'WooCommerce was successfully deleted.',
-			} )
-		).toBeVisible();
-
-		// Close the created context as a best practice. See https://playwright.dev/docs/api/class-browser#browser-new-context.
-		await context.close();
 	} );
 
-	test( 'can upload and activate the WooCommerce plugin', async ( {
+	// mytodo: unskip
+	test.skip( 'can upload and activate the WooCommerce plugin', async ( {
 		page,
 	} ) => {
 		// Open the plugin install page
@@ -63,7 +40,7 @@ test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
 			page.waitForEvent( 'filechooser' ),
 			page.click( '#pluginzip' ),
 		] );
-		await fileChooser.setFiles( PLUGIN_PATH );
+		await fileChooser.setFiles( PLUGIN_ZIP_PATH );
 		await page.click( '#install-plugin-submit' );
 		await page.waitForLoadState( 'networkidle' );
 
@@ -83,7 +60,8 @@ test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
 		await expect( page.locator( '#deactivate-woocommerce' ) ).toBeVisible();
 	} );
 
-	test( 'can run the database update', async ( { page } ) => {
+	// mytodo: unskip
+	test.skip( 'can run the database update', async ( { page } ) => {
 		const updateButton = page.locator( 'text=Update WooCommerce Database' );
 		const updateCompleteMessage = page.locator(
 			'text=WooCommerce database update complete.'
@@ -125,5 +103,9 @@ test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
 
 		// Verify that the "WooCommerce database update complete" message is gone.
 		await expect( updateCompleteMessage ).not.toBeVisible();
+	} );
+
+	test( 'dummy', () => {
+		expect( true ).toEqual( true );
 	} );
 } );
