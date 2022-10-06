@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Features;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 
 /**
@@ -88,9 +89,9 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		// phpcs:enable Squiz.Commenting
 
 		$this->fake_plugin_util->set_active_plugins( array( 'the_plugin', 'the_plugin_2', 'the_plugin_3', 'the_plugin_4' ) );
-		wc_get_container()->replace( PluginUtil::class, $this->fake_plugin_util );
 
-		$this->sut            = $this->get_instance_of( FeaturesController::class );
+		$this->sut = new FeaturesController();
+		$this->sut->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
 		$init_features_method = new \ReflectionMethod( $this->sut, 'init_features' );
 		$init_features_method->setAccessible( true );
 		$init_features_method->invoke( $this->sut, $features );

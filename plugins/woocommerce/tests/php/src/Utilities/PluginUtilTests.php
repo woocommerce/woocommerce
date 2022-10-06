@@ -24,6 +24,8 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 		parent::setUp();
 
 		$this->reset_container_resolutions();
+		$this->reset_legacy_proxy_mocks();
+
 		$this->mock_plugin_functions();
 		$this->sut = $this->get_instance_of( PluginUtil::class );
 	}
