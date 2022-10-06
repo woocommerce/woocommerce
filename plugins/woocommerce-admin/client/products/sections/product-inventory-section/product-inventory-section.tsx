@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Card, CardBody, TextControl } from '@wordpress/components';
+import {
+	Card,
+	CardBody,
+	ToggleControl,
+	TextControl,
+} from '@wordpress/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { Link, useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
@@ -11,11 +16,12 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { getTextControlProps } from './utils';
-import { ProductSectionLayout } from '../layout/product-section-layout';
+import { getCheckboxProps, getTextControlProps } from '../utils';
+import { ProductSectionLayout } from '../../layout/product-section-layout';
+import { ManageStockSection } from './manage-stock-section';
 
 export const ProductInventorySection: React.FC = () => {
-	const { getInputProps } = useFormContext< Product >();
+	const { getInputProps, values } = useFormContext< Product >();
 
 	return (
 		<ProductSectionLayout
@@ -60,6 +66,16 @@ export const ProductInventorySection: React.FC = () => {
 						) }
 						{ ...getTextControlProps( getInputProps( 'sku' ) ) }
 					/>
+					<ToggleControl
+						label={ __(
+							'Track quantity for this product',
+							'woocommerce'
+						) }
+						{ ...getCheckboxProps(
+							getInputProps( 'manage_stock' )
+						) }
+					/>
+					{ values.manage_stock && <ManageStockSection /> }
 				</CardBody>
 			</Card>
 		</ProductSectionLayout>
