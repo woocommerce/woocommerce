@@ -37,7 +37,7 @@ export interface AddressFields {
 }
 
 export type AddressType = 'billing' | 'shipping';
-export interface EnteredAddress {
+export interface ShippingAddress {
 	first_name: string;
 	last_name: string;
 	company: string;
@@ -54,8 +54,7 @@ export type KeyedAddressField = AddressField & {
 	key: keyof AddressFields;
 	errorMessage?: string;
 };
-export type ShippingAddress = EnteredAddress;
-export interface BillingAddress extends EnteredAddress {
+export interface BillingAddress extends ShippingAddress {
 	email: string;
 }
 export type CountryAddressFields = Record< string, AddressFields >;

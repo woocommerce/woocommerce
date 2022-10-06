@@ -19,7 +19,7 @@ import {
 	AddressFields,
 	AddressType,
 	defaultAddressFields,
-	EnteredAddress,
+	ShippingAddress,
 } from '@woocommerce/settings';
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
@@ -35,7 +35,7 @@ import prepareAddressFields from './prepare-address-fields';
 // If it's the shipping address form and the user starts entering address
 // values without having set the country first, show an error.
 const validateShippingCountry = (
-	values: EnteredAddress,
+	values: ShippingAddress,
 	setValidationErrors: (
 		errors: Record< string, FieldValidationStatus >
 	) => void,
@@ -73,11 +73,11 @@ interface AddressFormProps {
 	// Field configuration for fields in form.
 	fieldConfig?: Record< keyof AddressFields, Partial< AddressField > >;
 	// Function to all for an form onChange event.
-	onChange: ( newValue: EnteredAddress ) => void;
+	onChange: ( newValue: ShippingAddress ) => void;
 	// Type of form.
 	type?: AddressType;
 	// Values for fields.
-	values: EnteredAddress;
+	values: ShippingAddress;
 }
 
 /**

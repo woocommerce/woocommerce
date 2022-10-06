@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import Button from '@woocommerce/base-components/button';
 import { useState } from '@wordpress/element';
 import isShallowEqual from '@wordpress/is-shallow-equal';
-import type { EnteredAddress, AddressFields } from '@woocommerce/settings';
+import type { ShippingAddress, AddressFields } from '@woocommerce/settings';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 
@@ -16,8 +16,8 @@ import './style.scss';
 import { AddressForm } from '../address-form';
 
 interface ShippingCalculatorAddressProps {
-	address: EnteredAddress;
-	onUpdate: ( address: EnteredAddress ) => void;
+	address: ShippingAddress;
+	onUpdate: ( address: ShippingAddress ) => void;
 	addressFields: Partial< keyof AddressFields >[];
 }
 const ShippingCalculatorAddress = ( {

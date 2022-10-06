@@ -8,7 +8,10 @@ import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { TotalsItem } from '@woocommerce/blocks-checkout';
 import type { Currency } from '@woocommerce/price-format';
 import type { ReactElement } from 'react';
-import { getSetting, EnteredAddress } from '@woocommerce/settings';
+import {
+	getSetting,
+	ShippingAddress as ShippingAddressType,
+} from '@woocommerce/settings';
 import { ShippingVia } from '@woocommerce/base-components/cart-checkout/totals/shipping/shipping-via';
 
 /**
@@ -48,7 +51,7 @@ interface ShippingAddressProps {
 	showCalculator: boolean;
 	isShippingCalculatorOpen: boolean;
 	setIsShippingCalculatorOpen: CalculatorButtonProps[ 'setIsShippingCalculatorOpen' ];
-	shippingAddress: EnteredAddress;
+	shippingAddress: ShippingAddressType;
 }
 
 const ShippingAddress = ( {
