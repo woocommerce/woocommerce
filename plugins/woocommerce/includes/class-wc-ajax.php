@@ -1754,7 +1754,7 @@ class WC_AJAX {
 			'fields'          => 'all',
 			'number'          => $limit,
 			'name__like'      => $search_text,
-			'suppress_filter' => true
+			'suppress_filter' => true,
 		);
 
 		/**
