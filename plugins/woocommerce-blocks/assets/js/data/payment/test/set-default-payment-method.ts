@@ -9,7 +9,7 @@ import * as wpDataFunctions from '@wordpress/data';
  */
 import { setDefaultPaymentMethod } from '../set-default-payment-method';
 import { PaymentMethods } from '../../../types';
-import { PAYMENT_METHOD_DATA_STORE_KEY } from '..';
+import { PAYMENT_STORE_KEY } from '..';
 
 const originalSelect = jest.requireActual( '@wordpress/data' ).select;
 
@@ -32,7 +32,7 @@ describe( 'setDefaultPaymentMethod', () => {
 		jest.spyOn( wpDataFunctions, 'select' ).mockImplementation(
 			( storeName ) => {
 				const originalStore = originalSelect( storeName );
-				if ( storeName === PAYMENT_METHOD_DATA_STORE_KEY ) {
+				if ( storeName === PAYMENT_STORE_KEY ) {
 					return {
 						...originalStore,
 						getAvailableExpressPaymentMethods: () => {
@@ -57,7 +57,7 @@ describe( 'setDefaultPaymentMethod', () => {
 		jest.spyOn( wpDataFunctions, 'dispatch' ).mockImplementation(
 			( storeName ) => {
 				const originalStore = originalDispatch( storeName );
-				if ( storeName === PAYMENT_METHOD_DATA_STORE_KEY ) {
+				if ( storeName === PAYMENT_STORE_KEY ) {
 					return {
 						...originalStore,
 						__internalSetActivePaymentMethod:
@@ -76,7 +76,7 @@ describe( 'setDefaultPaymentMethod', () => {
 		jest.spyOn( wpDataFunctions, 'select' ).mockImplementation(
 			( storeName ) => {
 				const originalStore = originalSelect( storeName );
-				if ( storeName === PAYMENT_METHOD_DATA_STORE_KEY ) {
+				if ( storeName === PAYMENT_STORE_KEY ) {
 					return {
 						...originalStore,
 						getAvailableExpressPaymentMethods: () => {
@@ -120,7 +120,7 @@ describe( 'setDefaultPaymentMethod', () => {
 		jest.spyOn( wpDataFunctions, 'dispatch' ).mockImplementation(
 			( storeName ) => {
 				const originalStore = originalDispatch( storeName );
-				if ( storeName === PAYMENT_METHOD_DATA_STORE_KEY ) {
+				if ( storeName === PAYMENT_STORE_KEY ) {
 					return {
 						...originalStore,
 						__internalSetActivePaymentMethod:

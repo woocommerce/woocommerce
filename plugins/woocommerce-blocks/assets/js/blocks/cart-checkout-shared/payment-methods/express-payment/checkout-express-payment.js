@@ -10,10 +10,7 @@ import {
 import Title from '@woocommerce/base-components/title';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
-import {
-	CHECKOUT_STORE_KEY,
-	PAYMENT_METHOD_DATA_STORE_KEY,
-} from '@woocommerce/block-data';
+import { CHECKOUT_STORE_KEY, PAYMENT_STORE_KEY } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -46,7 +43,7 @@ const CheckoutExpressPayment = () => {
 		expressPaymentMethodsInitialized,
 		paymentStatus,
 	} = useSelect( ( select ) => {
-		const store = select( PAYMENT_METHOD_DATA_STORE_KEY );
+		const store = select( PAYMENT_STORE_KEY );
 		return {
 			availableExpressPaymentMethods:
 				store.getAvailableExpressPaymentMethods(),

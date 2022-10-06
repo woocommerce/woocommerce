@@ -106,11 +106,11 @@ The status of the payment lives in the payment data store. It can be retrieved w
 
 ```jsx
 import { useSelect } from '@wordpress/data';
-import { PAYMENT_METHOD_DATA_STORE_KEY } from '@woocommerce/blocks-data';
+import { PAYMENT_STORE_KEY } from '@woocommerce/blocks-data';
 
 const MyComponent = ( props ) => {
 	const currentStatus = useSelect( ( select ) =>
-		select( PAYMENT_METHOD_DATA_STORE_KEY ).getCurrentStatus()
+		select( PAYMENT_STORE_KEY ).getCurrentStatus()
 	);
 	// do something with status
 };
@@ -316,16 +316,16 @@ If the response object doesn't match any of the above conditions, then the fallb
 
 When the payment status is set to `SUCCESS` and the checkout status is `PROCESSING`, the `CheckoutProcessor` component will trigger the request to the server for processing the order.
 
-This event emitter subscriber can be obtained via the checkout context using the `usePaymentMethodEventsContext` hook or to payment method extensions as a prop on their registered component:
+This event emitter subscriber can be obtained via the checkout context using the `usePaymentEventsContext` hook or to payment method extensions as a prop on their registered component:
 
 _For internal development:_
 
 ```jsx
-import { usePaymentMethodEventsContext } from '@woocommerce/base-contexts';
+import { usePaymentEventsContext } from '@woocommerce/base-contexts';
 import { useEffect } from '@wordpress/element';
 
 const Component = () => {
-	const { onPaymentProcessing } = usePaymentMethodEventsContext();
+	const { onPaymentProcessing } = usePaymentEventsContext();
 	useEffect( () => {
 		const unsubscribe = onPaymentProcessing( () => true );
 		return unsubscribe;

@@ -1,10 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	CHECKOUT_STORE_KEY,
-	PAYMENT_METHOD_DATA_STORE_KEY,
-} from '@woocommerce/block-data';
+import { CHECKOUT_STORE_KEY, PAYMENT_STORE_KEY } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { __experimentalApplyCheckoutFilter } from '@woocommerce/blocks-checkout';
@@ -40,7 +37,7 @@ export const useCheckoutSubmit = () => {
 	} );
 	const { currentStatus: paymentStatus, activePaymentMethod } = useSelect(
 		( select ) => {
-			const store = select( PAYMENT_METHOD_DATA_STORE_KEY );
+			const store = select( PAYMENT_STORE_KEY );
 
 			return {
 				currentStatus: store.getCurrentStatus(),
