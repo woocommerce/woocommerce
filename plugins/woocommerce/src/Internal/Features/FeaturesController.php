@@ -40,6 +40,13 @@ class FeaturesController {
 	private $compatibility_info_by_plugin;
 
 	/**
+	 * Ids of the legacy features (they existed before the features engine was implemented).
+	 *
+	 * @var array
+	 */
+	private $legacy_feature_ids;
+
+	/**
 	 * The registered compatibility info for WooCommerce plugins, with feature ids as keys.
 	 *
 	 * @var array
@@ -82,6 +89,8 @@ class FeaturesController {
 			),
 		);
 
+		$this->legacy_feature_ids = array( 'analytics', 'new_navigation' );
+
 		$this->init_features( $features );
 
 		self::add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
@@ -94,6 +103,7 @@ class FeaturesController {
 		self::add_action( 'plugin_action_links', array( $this, 'handle_action_links' ), 10, 2 );
 		self::add_action( 'after_plugin_row', array( $this, 'handle_plugin_list_rows' ), 10, 2 );
 		self::add_action( 'current_screen', array( $this, 'enqueue_script_to_fix_plugin_list_html' ), 10, 1 );
+		self::add_filter( 'views_plugins', array( $this, 'handle_plugins_page_views_list' ), 10, 1 );
 	}
 
 	/**
@@ -354,6 +364,17 @@ class FeaturesController {
 	}
 
 	/**
+	 * Checks whether a feature id corresponds to a legacy feature
+	 * (a feature that existed prior to the implementation of the features engine).
+	 *
+	 * @param string $feature_id The feature id to check.
+	 * @return bool True if the id corresponds to a legacy feature.
+	 */
+	public function is_legacy_feature( string $feature_id ): bool {
+		return in_array( $feature_id, $this->legacy_feature_ids, true );
+	}
+
+	/**
 	 * Handler for the 'added_option' hook.
 	 *
 	 * It fires FEATURE_ENABLED_CHANGED_ACTION when a feature is enabled or disabled.
@@ -537,7 +558,7 @@ class FeaturesController {
 			}
 		}
 
-		if ( ! $disabled && $this->verify_did_woocommerce_init() ) {
+		if ( ! $this->is_legacy_feature( $feature_id ) && ! $disabled && $this->verify_did_woocommerce_init() ) {
 			$plugin_info_for_feature = $this->get_compatible_plugins_for_feature( $feature_id );
 			$incompatibles           = array_merge( $plugin_info_for_feature['incompatible'], $plugin_info_for_feature['uncertain'] );
 			$incompatible_count      = count( $incompatibles );
@@ -545,18 +566,18 @@ class FeaturesController {
 				$disabled = true;
 				if ( 1 === $incompatible_count ) {
 					/* translators: %s = printable plugin name */
-					$desc_tip = sprintf( __( "⚠ This feature can't be enabled, the %s plugin isn't compatible with it.", 'woocommerce' ), $this->plugin_util->get_plugin_name( $incompatibles[0] ) );
+					$desc_tip = sprintf( __( "⚠ This feature shouldn't be enabled, the %s plugin isn't compatible with it.", 'woocommerce' ), $this->plugin_util->get_plugin_name( $incompatibles[0] ) );
 				} elseif ( 2 === $incompatible_count ) {
 					/* translators: %1\$s, %2\$s = printable plugin names */
 					$desc_tip = sprintf(
-						__( "⚠ This feature can't be enabled: the %1\$s and %2\$s plugins aren't compatible with it.", 'woocommerce' ),
+						__( "⚠ This feature shouldn't be enabled: the %1\$s and %2\$s plugins aren't compatible with it.", 'woocommerce' ),
 						$this->plugin_util->get_plugin_name( $incompatibles[0] ),
 						$this->plugin_util->get_plugin_name( $incompatibles[1] )
 					);
 				} else {
 					/* translators: %1\$s, %2\$s = printable plugin names, %3\$d = plugins count */
 					$desc_tip = sprintf(
-						__( "⚠ This feature can't be enabled: %1\$s, %2\$s and %3\$d more plugins aren't compatible with it.", 'woocommerce' ),
+						__( "⚠ This feature shouldn't be enabled: %1\$s, %2\$s and %3\$d more plugins aren't compatible with it.", 'woocommerce' ),
 						$this->plugin_util->get_plugin_name( $incompatibles[0] ),
 						$this->plugin_util->get_plugin_name( $incompatibles[1] ),
 						$incompatible_count - 2
@@ -574,6 +595,8 @@ class FeaturesController {
 				$extra_desc_tip = sprintf( __( " <a href='%s'>Manage incompatible plugins</a>", 'woocommerce' ), $incompatible_plugins_url );
 
 				$desc_tip .= $extra_desc_tip;
+
+				$disabled = ! $this->feature_is_enabled( $feature_id );
 			}
 		}
 
@@ -720,12 +743,20 @@ class FeaturesController {
 	private function handle_plugin_list_rows( $plugin_file, $plugin_data ) {
 		global $wp_list_table;
 
-		if ( ! $this->plugin_util->is_woocommerce_aware_plugin( $plugin_data ) ) {
+		if ( is_null( $wp_list_table ) || ! $this->plugin_util->is_woocommerce_aware_plugin( $plugin_data ) ) {
 			return;
 		}
 
 		$feature_compatibility_info = $this->get_compatible_features_for_plugin( $plugin_file, true );
 		$incompatible_features      = array_merge( $feature_compatibility_info['incompatible'], $feature_compatibility_info['uncertain'] );
+		$incompatible_features      = array_values(
+			array_filter(
+				$incompatible_features,
+				function( $feature_id ) {
+					return ! $this->is_legacy_feature( $feature_id );
+				}
+			)
+		);
 
 		$incompatible_features_count = count( $incompatible_features );
 		if ( $incompatible_features_count > 0 ) {
@@ -828,6 +859,46 @@ class FeaturesController {
 			}
 	    }
 		"
+		);
+	}
+
+	/**
+	 * Handler for the 'views_plugins' hook that shows the links to the different views in the plugins page.
+	 * If we come from a "Manage incompatible plugins" in the features page we'll show just two views:
+	 * "All" (so that it's easy to go back to a known state) and "Incompatible with X".
+	 * We'll skip the rest of the views since the counts are wrong anyway, as we are modifying
+	 * the plugins list via the 'all_plugins' filter.
+	 *
+	 * @param array $views An array of view ids => view links.
+	 * @return string[] The actual views array to use.
+	 */
+	private function handle_plugins_page_views_list( $views ): array {
+		// phpcs:disable WordPress.Security.NonceVerification
+		if ( 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) {
+			return $views;
+		}
+
+		$feature_id = ArrayUtil::get_value_or_default( $_GET, 'feature_id' );
+		if ( is_null( $feature_id ) || ! $this->feature_exists( $feature_id ) ) {
+			return $views;
+		}
+		// phpcs:enable WordPress.Security.NonceVerification
+
+		$feature_compatibility_info = $this->get_compatible_plugins_for_feature( $feature_id );
+		$incompatible_plugins_count = count( $feature_compatibility_info['incompatible'] ) + count( $feature_compatibility_info['uncertain'] );
+
+		$feature_name = $this->features[ $feature_id ]['name'];
+		/* translators: %s = name of a WooCommerce feature */
+		$incompatible_text = sprintf( __( "Incompatible with '%s'", 'woocommerce' ), $feature_name );
+		$incompatible_link = "<a href='plugins.php?plugin_status=incompatible_with_feature&feature_id={$feature_id}' class='current' aria-current='page'>{$incompatible_text} <span class='count'>({$incompatible_plugins_count})</span></a>";
+
+		$all_plugins_count = count( get_plugins() );
+		$all_text          = __( 'All', 'woocommerce' );
+		$all_link          = "<a href='plugins.php?plugin_status=all'>{$all_text} <span class='count'>({$all_plugins_count})</span></a>";
+
+		return array(
+			'all'                       => $all_link,
+			'incompatible_with_feature' => $incompatible_link,
 		);
 	}
 }
