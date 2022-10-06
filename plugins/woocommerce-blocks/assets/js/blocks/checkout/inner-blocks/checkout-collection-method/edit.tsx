@@ -20,6 +20,8 @@ import {
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 import type { CartShippingPackageShippingRate } from '@woocommerce/type-defs/cart';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -155,7 +157,13 @@ export const Edit = ( {
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
-	const [ currentView, changeView ] = useState( 'shipping' );
+	const { setPrefersCollection } = useDispatch( CHECKOUT_STORE_KEY );
+	const { prefersCollection } = useSelect( ( select ) => {
+		const checkoutStore = select( CHECKOUT_STORE_KEY );
+		return {
+			prefersCollection: checkoutStore.prefersCollection(),
+		};
+	} );
 	const { showPrice, showIcon, className, localPickupText, shippingText } =
 		attributes;
 	const { shippingRates } = useShippingData();
@@ -165,6 +173,15 @@ export const Edit = ( {
 	const shippingStartingPrice = getShippingStartingPrice(
 		shippingRates[ 0 ]?.shipping_rates
 	);
+
+	const changeView = ( method: string ) => {
+		if ( method === 'pickup' ) {
+			setPrefersCollection( true );
+		} else {
+			setPrefersCollection( false );
+		}
+	};
+
 	return (
 		<FormStepBlock
 			attributes={ attributes }
@@ -215,10 +232,10 @@ export const Edit = ( {
 				className="wc-block-checkout__collection-method-container"
 				label="options"
 				onChange={ changeView }
-				checked={ currentView }
+				checked={ prefersCollection ? 'pickup' : 'shipping' }
 			>
 				<ShippingSelector
-					checked={ currentView }
+					checked={ prefersCollection ? 'pickup' : 'shipping' }
 					rate={ shippingStartingPrice }
 					showPrice={ showPrice }
 					showIcon={ showIcon }
@@ -226,7 +243,7 @@ export const Edit = ( {
 					toggleText={ shippingText }
 				/>
 				<LocalPickupSelector
-					checked={ currentView }
+					checked={ prefersCollection ? 'pickup' : 'shipping' }
 					rate={ localPickupStartingPrice }
 					showPrice={ showPrice }
 					showIcon={ showIcon }

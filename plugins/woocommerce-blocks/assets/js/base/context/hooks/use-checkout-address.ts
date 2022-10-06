@@ -39,8 +39,12 @@ interface CheckoutAddress {
  */
 export const useCheckoutAddress = (): CheckoutAddress => {
 	const { needsShipping } = useShippingData();
-	const useShippingAsBilling = useSelect( ( select ) =>
-		select( CHECKOUT_STORE_KEY ).getUseShippingAsBilling()
+	const { useShippingAsBilling, prefersCollection } = useSelect(
+		( select ) => ( {
+			useShippingAsBilling:
+				select( CHECKOUT_STORE_KEY ).getUseShippingAsBilling(),
+			prefersCollection: select( CHECKOUT_STORE_KEY ).prefersCollection(),
+		} )
 	);
 	const { __internalSetUseShippingAsBilling } =
 		useDispatch( CHECKOUT_STORE_KEY );
@@ -89,8 +93,10 @@ export const useCheckoutAddress = (): CheckoutAddress => {
 		defaultAddressFields,
 		useShippingAsBilling,
 		setUseShippingAsBilling: __internalSetUseShippingAsBilling,
-		showShippingFields: ! forcedBillingAddress && needsShipping,
-		showBillingFields: ! needsShipping || ! useShippingAsBilling,
+		showShippingFields:
+			! forcedBillingAddress && needsShipping && ! prefersCollection,
+		showBillingFields:
+			! needsShipping || ! useShippingAsBilling || prefersCollection,
 		forcedBillingAddress,
 	};
 };
