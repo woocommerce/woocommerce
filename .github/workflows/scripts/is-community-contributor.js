@@ -1,3 +1,4 @@
+// Note you'll need to install this dependency as part of your workflow.
 const { Octokit } = require('@octokit/action');
 
 // Note that this script assumes you set GITHUB_TOKEN in env, if you don't
@@ -34,9 +35,9 @@ const addLabel = async(label, owner, repo, issueNumber) => {
 
 const applyLabelToCommunityContributor = async () => {
 	const context = require(process.env.GITHUB_EVENT_PATH);
-	const username = getPRAuthor(context);
+	const username = getPRAuthor(context.event);
 	const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-	const { number } = context.issue;
+	const { number } = context?.event?.issue || context?.event?.pull_request;
 	
 	const isCommunityUser = await isCommunityContributor(owner, repo, username);
 
