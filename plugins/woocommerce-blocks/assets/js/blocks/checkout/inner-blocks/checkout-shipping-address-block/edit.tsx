@@ -3,6 +3,7 @@
  */
 import classnames from 'classnames';
 import { useBlockProps } from '@wordpress/block-editor';
+import { useCheckoutAddress } from '@woocommerce/base-context/hooks';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 import { useCheckoutAddress } from '@woocommerce/base-context/hooks';
 /**
@@ -41,9 +42,11 @@ export const Edit = ( {
 	const { addressFieldControls: Controls } =
 		useCheckoutBlockControlsContext();
 	const { showShippingFields } = useCheckoutAddress();
+
 	if ( ! showShippingFields ) {
 		return null;
 	}
+
 	return (
 		<FormStepBlock
 			setAttributes={ setAttributes }
