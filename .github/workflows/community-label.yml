@@ -3,8 +3,7 @@ name: Add Community Label
 on:
   issues:
     types: [opened]
-  pull_request_target:
-    types: [opened]
+  pull_request
 
 concurrency: 
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,8 +17,7 @@ jobs:
       issueId: ${{ steps.check.outputs.issueId }}
       run: ${{ steps.check.outputs.run }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Setup Node.js
         id: check
