@@ -154,6 +154,8 @@ class WC_AJAX {
 			'json_search_downloadable_products_and_variations',
 			'json_search_customers',
 			'json_search_categories',
+			'json_search_taxonomy_terms',
+			'json_search_product_attributes',
 			'json_search_pages',
 			'term_ordering',
 			'product_ordering',
@@ -1726,6 +1728,96 @@ class WC_AJAX {
 		}
 
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_categories', $found_categories ) );
+	}
+
+	/**
+	 * Search for taxonomy terms and return json.
+	 */
+	public static function json_search_taxonomy_terms() {
+		ob_start();
+
+		check_ajax_referer( 'search-taxonomy-terms', 'security' );
+
+		if ( ! current_user_can( 'edit_products' ) ) {
+			wp_die( -1 );
+		}
+
+		$search_text = isset( $_GET['term'] ) ? wc_clean( wp_unslash( $_GET['term'] ) ) : '';
+		$limit       = isset( $_GET['limit'] ) ? absint( wp_unslash( $_GET['limit'] ) ) : null;
+		$taxonomy    = isset( $_GET['taxonomy'] ) ? wc_clean( wp_unslash( $_GET['taxonomy'] ) ) : '';
+
+		$args = array(
+			'taxonomy'        => $taxonomy,
+			'orderby'         => 'id',
+			'order'           => 'ASC',
+			'hide_empty'      => false,
+			'fields'          => 'all',
+			'number'          => $limit,
+			'name__like'      => $search_text,
+			'suppress_filter' => true,
+		);
+
+		/**
+		 * Filter the product attribute term arguments used for search.
+		 *
+		 * @since 3.4.0
+		 * @param array $args The search arguments.
+		 */
+		$terms = get_terms( apply_filters( 'woocommerce_product_attribute_terms', $args ) );
+
+		/**
+		 * Filter the product attribute terms search results.
+		 *
+		 * @since 7.0.0
+		 * @param array  $terms    The list of matched terms.
+		 * @param string $taxonomy The terms taxonomy.
+		 */
+		wp_send_json( apply_filters( 'woocommerce_json_search_found_product_attribute_terms', $terms, $taxonomy ) );
+	}
+
+	/**
+	 * Search for product attributes and return json.
+	 */
+	public static function json_search_product_attributes() {
+		ob_start();
+
+		check_ajax_referer( 'search-product-attributes', 'security' );
+
+		if ( ! current_user_can( 'edit_products' ) ) {
+			wp_die( -1 );
+		}
+
+		$limit       = isset( $_GET['limit'] ) ? absint( wp_unslash( $_GET['limit'] ) ) : 100;
+		$search_text = isset( $_GET['term'] ) ? wc_clean( wp_unslash( $_GET['term'] ) ) : '';
+
+		$attributes = wc_get_attribute_taxonomies();
+
+		$found_product_categories = array();
+
+		foreach ( $attributes as $attribute_obj ) {
+			if ( ! $search_text || false !== stripos( $attribute_obj->attribute_label, $search_text ) ) {
+				$found_product_categories[] = array(
+					'id'           => (int) $attribute_obj->attribute_id,
+					'name'         => $attribute_obj->attribute_label,
+					'slug'         => wc_attribute_taxonomy_name( $attribute_obj->attribute_name ),
+					'type'         => $attribute_obj->attribute_type,
+					'order_by'     => $attribute_obj->attribute_orderby,
+					'has_archives' => (bool) $attribute_obj->attribute_public,
+				);
+			}
+			if ( count( $found_product_categories ) >= $limit ) {
+				break;
+			}
+		}
+
+		/**
+		 * Filter the product category search results.
+		 *
+		 * @since 7.0.0
+		 * @param array   $found_product_categories Array of matched product categories.
+		 * @param string  $search_text              Search text.
+		 */
+		wp_send_json( apply_filters( 'woocommerce_json_search_found_product_categories', $found_product_categories, $search_text ) );
 	}
 
 	/**
