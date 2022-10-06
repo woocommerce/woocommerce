@@ -12,7 +12,7 @@ const encodeCredentials = ( username, password ) => {
 };
 
 /**
- * Deactivate and delete a plugin specified by the given `slug`. This function uses Playwright's built-in capability for sending requests to the WordPress API.
+ * Deactivate and delete a plugin specified by the given `slug` using the WordPress API.
  *
  * @param {object} params
  * @param {APIRequest} params.request

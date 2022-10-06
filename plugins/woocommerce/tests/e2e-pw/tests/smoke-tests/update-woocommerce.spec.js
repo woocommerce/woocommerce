@@ -12,6 +12,7 @@ test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
 	test.use( { storageState: ADMINSTATE } );
 
 	test.beforeAll( async ( { playwright, baseURL } ) => {
+		// Delete WooCommerce if it's installed.
 		await deletePlugin( {
 			request: playwright.request,
 			baseURL,
@@ -19,6 +20,8 @@ test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
 			username: ADMIN_USER,
 			password: ADMIN_PASSWORD,
 		} );
+
+		// mytodo: Download the nightly build
 	} );
 
 	// mytodo: unskip
