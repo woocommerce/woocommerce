@@ -947,13 +947,13 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	/**
 	 * Sync order to/from posts tables if we are able to detect difference between order and posts but the sync is enabled.
 	 *
-	 * @param \WC_Order $order Order object.
-	 * @param \WC_Order $post_order Order object initialized from post.
+	 * @param \WC_Abstract_Order $order Order object.
+	 * @param \WC_Abstract_Order $post_order Order object initialized from post.
 	 *
 	 * @return void
 	 * @throws \Exception If passed an invalid order.
 	 */
-	private function maybe_sync_order( \WC_Order &$order, \WC_Order $post_order ) {
+	private function maybe_sync_order( \WC_Abstract_Order &$order, \WC_Abstract_Order $post_order ) {
 		if ( ! $this->is_post_different_from_order( $order, $post_order ) ) {
 			return;
 		}
@@ -1027,8 +1027,8 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	/**
 	 * Computes whether post has been updated after last order. Tries to do it as efficiently as possible.
 	 *
-	 * @param \WC_Order $order Order object.
-	 * @param \WC_Order $post_order Order object read from posts table.
+	 * @param \WC_Abstract_Order $order Order object.
+	 * @param \WC_Abstract_Order $post_order Order object read from posts table.
 	 *
 	 * @return bool True if post is different than order.
 	 */
@@ -1053,7 +1053,7 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	 *
 	 * @return array List of meta data that was migrated.
 	 */
-	private function migrate_meta_data_from_post_order( \WC_Order &$order, \WC_Order $post_order ) {
+	private function migrate_meta_data_from_post_order( \WC_Abstract_Order &$order, \WC_Abstract_Order $post_order ) {
 		$diff = $this->get_diff_meta_data_between_orders( $order, $post_order, true );
 		$order->save_meta_data();
 		return $diff;
@@ -1064,13 +1064,13 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	 *
 	 * Also provides an option to sync the metadata as well, since we are already computing the diff.
 	 *
-	 * @param \WC_Order $order1 Order object read from posts.
-	 * @param \WC_Order $order2 Order object read from COT.
+	 * @param \WC_Abstract_Order $order1 Order object read from posts.
+	 * @param \WC_Abstract_Order $order2 Order object read from COT.
 	 * @param bool      $sync   Whether to also sync the meta data.
 	 *
 	 * @return array Difference between post and COT meta data.
 	 */
-	private function get_diff_meta_data_between_orders( \WC_Order &$order1, \WC_Order $order2, $sync = false ): array {
+	private function get_diff_meta_data_between_orders( \WC_Abstract_Order &$order1, \WC_Abstract_Order $order2, $sync = false ): array {
 		$order1_meta        = ArrayUtil::select( $order1->get_meta_data(), 'get_data', ArrayUtil::SELECT_BY_OBJECT_METHOD );
 		$order2_meta        = ArrayUtil::select( $order2->get_meta_data(), 'get_data', ArrayUtil::SELECT_BY_OBJECT_METHOD );
 		$order1_meta_by_key = ArrayUtil::select_array_to_assoc( $order1_meta, 'key', ArrayUtil::SELECT_BY_ARRAY_KEY );
