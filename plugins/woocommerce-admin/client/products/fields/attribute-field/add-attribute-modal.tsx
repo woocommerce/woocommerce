@@ -338,6 +338,13 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 									</Button>
 									<Button
 										isPrimary
+										disabled={
+											values.attributes.length === 1 &&
+											! values.attributes[ 0 ].attribute
+												.id &&
+											values.attributes[ 0 ].terms
+												.length === 0
+										}
 										onClick={ () => onAdd( values ) }
 									>
 										{ __( 'Add', 'woocommerce' ) }
