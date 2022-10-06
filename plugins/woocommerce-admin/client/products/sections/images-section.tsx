@@ -46,7 +46,7 @@ export const ImagesSection: React.FC = () => {
 		const orderedImages = newOrder.map( ( image ) => {
 			return images.find(
 				( file ) =>
-					file.id === parseInt( image?.props?.children?.key, 10 )
+					file.id === parseInt( image?.props?.id, 10 )
 			);
 		} );
 		setValue( 'images', orderedImages );
