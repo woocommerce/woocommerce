@@ -48,7 +48,10 @@ export type SelectControlProps< ItemType > = {
 	) => ItemType[];
 	hasExternalTags?: boolean;
 	multiple?: boolean;
-	onInputChange?: ( value: string | undefined ) => void;
+	onInputChange?: (
+		value: string | undefined,
+		changes: Partial< Omit< UseComboboxState< ItemType >, 'inputValue' > >
+	) => void;
 	onRemove?: ( item: ItemType ) => void;
 	onSelect?: ( selected: ItemType ) => void;
 	onFocus?: ( data: { inputValue: string } ) => void;
@@ -154,12 +157,10 @@ function SelectControl< ItemType = DefaultItemType >( {
 		itemToString: getItemLabel,
 		onSelectedItemChange: ( { selectedItem } ) =>
 			selectedItem && onSelect( selectedItem ),
-		onInputValueChange: ( changes ) => {
-			if ( changes.inputValue !== undefined ) {
-				setInputValue( changes.inputValue );
-				if ( changes.isOpen ) {
-					onInputChange( changes.inputValue );
-				}
+		onInputValueChange: ( { inputValue: value, ...changes } ) => {
+			if ( value !== undefined ) {
+				setInputValue( value );
+				onInputChange( value, changes );
 			}
 		},
 		stateReducer: ( state, actionAndChanges ) => {
