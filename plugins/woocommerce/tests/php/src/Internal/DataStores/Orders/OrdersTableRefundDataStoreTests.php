@@ -53,7 +53,7 @@ class OrdersTableRefundDataStoreTests extends WC_Unit_Test_Case {
 	 * Test that we are able to create refund.
 	 */
 	public function test_create_refund() {
-		$order = OrderHelper::create_complex_data_store_order( $this->order_data_store );
+		$order  = OrderHelper::create_complex_data_store_order( $this->order_data_store );
 		$refund = new WC_Order_Refund();
 		OrderHelper::switch_data_store( $refund, $this->sut );
 		$refund->set_amount( 10 );
