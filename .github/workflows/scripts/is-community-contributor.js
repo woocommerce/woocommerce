@@ -10,7 +10,7 @@ const getPRAuthor = (payload) => {
 }
 
 const isCommunityContributor = async (owner, repo, username)  => {
-	if (user) {
+	if (username) {
 		const permission = await octokit.rest.repos.getCollaboratorPermissionLevel({
 			owner,
 			repo,
@@ -34,10 +34,10 @@ const addLabel = async(label, owner, repo, issueNumber) => {
 }
 
 const applyLabelToCommunityContributor = async () => {
-	const context = require(process.env.GITHUB_EVENT_PATH);
-	const username = getPRAuthor(context.event);
+	const eventPayload = require(process.env.GITHUB_EVENT_PATH);
+	const username = getPRAuthor(eventPayload);
 	const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-	const { number } = context?.issue || context?.pull_request;
+	const { number } = eventPayload?.issue || eventPayload?.pull_request;
 	
 	const isCommunityUser = await isCommunityContributor(owner, repo, username);
 
