@@ -1918,9 +1918,9 @@ FROM $order_meta_table
 	 *
 	 * @param \WC_Order $order Order object.
 	 *
-	 * @since 3.0.0
+	 * @since 7.0.0
 	 */
-	protected function update_order_meta( &$order ) {
+	public function update_order_meta( &$order ) {
 		$changes = $order->get_changes();
 
 		// If address changed, store concatenated version to make searches faster.

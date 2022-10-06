@@ -141,8 +141,8 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 	 *
 	 * @param \WC_Order $refund Refund object.
 	 */
-	public function update_post_meta( &$refund ) {
-		parent::update_post_meta( $refund );
+	public function update_order_meta( &$refund ) {
+		parent::update_order_meta( $refund );
 
 		// Update additional props.
 		$updated_props     = array();
