@@ -11,13 +11,11 @@ const getPRAuthor = (payload) => {
 
 const isCommunityContributor = async (owner, repo, username)  => {
 	if (username) {
-		const permission = await octokit.rest.repos.getCollaboratorPermissionLevel({
+		const {data: permission} = await octokit.rest.repos.getCollaboratorPermissionLevel({
 			owner,
 			repo,
 			username,
 		});
-		
-		console.log("User permission level: ", permission);
 	
 		return permission === 'read' || permission === 'none';
 	}
