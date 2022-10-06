@@ -37,7 +37,7 @@ const applyLabelToCommunityContributor = async () => {
 	const context = require(process.env.GITHUB_EVENT_PATH);
 	const username = getPRAuthor(context.event);
 	const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-	const { number } = context?.event?.issue || context?.event?.pull_request;
+	const { number } = context?.issue || context?.pull_request;
 	
 	const isCommunityUser = await isCommunityContributor(owner, repo, username);
 
