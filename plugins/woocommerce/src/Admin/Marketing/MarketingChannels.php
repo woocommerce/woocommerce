@@ -18,7 +18,7 @@ class MarketingChannels {
 	 *
 	 * @var MarketingChannelInterface[]
 	 */
-	private $registered_channels;
+	private $registered_channels = [];
 
 	/**
 	 * Array of plugin slugs for allowed marketing channels.
