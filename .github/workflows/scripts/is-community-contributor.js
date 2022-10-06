@@ -16,7 +16,8 @@ const isCommunityContributor = async (owner, repo, username)  => {
 			repo,
 			username,
 		});
-	
+		
+		console.log("User permission level: ", permission);
 	
 		return permission === 'read' || permission === 'none';
 	}
@@ -43,6 +44,8 @@ const applyLabelToCommunityContributor = async () => {
 
 	if (isCommunityUser) {
 		await addLabel('type: community contribution', owner, repo, number);
+	} else {
+		console.log('User is not a community contributor');
 	}
 }
 
