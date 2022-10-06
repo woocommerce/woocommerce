@@ -12,10 +12,10 @@ import {
  * Internal dependencies
  */
 import { SavedPaymentMethod } from './types';
-import { STATUS as PAYMENT_METHOD_STATUS } from '../../base/context/providers/cart-checkout/payment-methods/constants';
+import { STATUS as PAYMENT_STATUS } from './constants';
 
 export interface PaymentMethodDataState {
-	paymentStatuses: typeof PAYMENT_METHOD_STATUS;
+	paymentStatuses: typeof PAYMENT_STATUS;
 	currentStatus: {
 		isPristine: boolean;
 		isStarted: boolean;
@@ -41,7 +41,7 @@ export interface PaymentMethodDataState {
 	isExpressPaymentMethodActive: boolean;
 }
 export const defaultPaymentMethodDataState: PaymentMethodDataState = {
-	paymentStatuses: PAYMENT_METHOD_STATUS,
+	paymentStatuses: PAYMENT_STATUS,
 	currentStatus: {
 		isPristine: true,
 		isStarted: false,

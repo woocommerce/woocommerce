@@ -22,14 +22,27 @@ import {
 /**
  * Internal dependencies
  */
-import type { CheckoutEventsContextType } from './types';
 import { useEventEmitters, reducer as emitReducer } from './event-emit';
+import type { emitterCallback } from '../../../event-emit';
 import { STATUS } from '../../../../../data/checkout/constants';
 import { useStoreEvents } from '../../../hooks/use-store-events';
 import { useCheckoutNotices } from '../../../hooks/use-checkout-notices';
 import { CheckoutState } from '../../../../../data/checkout/default-state';
 
-const CheckoutEventsContext = createContext( {
+type CheckoutEventsContextType = {
+	// Submits the checkout and begins processing.
+	onSubmit: () => void;
+	// Used to register a callback that will fire after checkout has been processed and there are no errors.
+	onCheckoutAfterProcessingWithSuccess: ReturnType< typeof emitterCallback >;
+	// Used to register a callback that will fire when the checkout has been processed and has an error.
+	onCheckoutAfterProcessingWithError: ReturnType< typeof emitterCallback >;
+	// Deprecated in favour of onCheckoutValidationBeforeProcessing.
+	onCheckoutBeforeProcessing: ReturnType< typeof emitterCallback >;
+	// Used to register a callback that will fire when the checkout has been submitted before being sent off to the server.
+	onCheckoutValidationBeforeProcessing: ReturnType< typeof emitterCallback >;
+};
+
+const CheckoutEventsContext = createContext< CheckoutEventsContextType >( {
 	onSubmit: () => void null,
 	onCheckoutAfterProcessingWithSuccess: () => () => void null,
 	onCheckoutAfterProcessingWithError: () => () => void null,
@@ -167,7 +180,7 @@ export const CheckoutEventsProvider = ( {
 		checkoutActions.__internalSetBeforeProcessing();
 	}, [ dispatchCheckoutEvent, checkoutActions ] );
 
-	const checkoutEventHandlers: CheckoutEventsContextType = {
+	const checkoutEventHandlers = {
 		onSubmit,
 		onCheckoutBeforeProcessing,
 		onCheckoutValidationBeforeProcessing,

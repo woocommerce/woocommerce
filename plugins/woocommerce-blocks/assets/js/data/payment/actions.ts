@@ -157,7 +157,7 @@ export const __internalRemoveAvailableExpressPaymentMethod = (
 /**
  * The store is initialised once we have checked whether the payment methods registered can pay or not
  */
-export function __internalInitializePaymentMethodDataStore() {
+export function __internalInitializePaymentStore() {
 	return async ( { dispatch } ) => {
 		const expressRegistered = await checkPaymentMethodsCanPay( true );
 		const registered = await checkPaymentMethodsCanPay( false );

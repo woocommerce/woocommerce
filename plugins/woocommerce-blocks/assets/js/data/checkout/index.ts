@@ -41,12 +41,10 @@ if ( isEditor ) {
 		await checkPaymentMethodsCanPay( true );
 	} );
 
-	const unsubscribeInitializePaymentMethodDataStore = subscribe( async () => {
-		wpDataDispatch(
-			'wc/store/payment'
-		).__internalInitializePaymentMethodDataStore();
+	const unsubscribeInitializePaymentStore = subscribe( async () => {
+		wpDataDispatch( 'wc/store/payment' ).__internalInitializePaymentStore();
 
-		unsubscribeInitializePaymentMethodDataStore();
+		unsubscribeInitializePaymentStore();
 	} );
 }
 
