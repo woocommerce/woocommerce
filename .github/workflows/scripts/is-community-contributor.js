@@ -5,8 +5,8 @@ const { Octokit } = require('@octokit/action');
 // this won't work.
 const octokit = new Octokit();
 
-const getPRAuthor = (payload) => {
-	return payload?.pull_request?.user?.login || null;
+const getIssueAuthor = (payload) => {
+	return payload?.issue?.user?.login || payload?.pull_request?.user?.login || null;
 }
 
 const isCommunityContributor = async (owner, repo, username)  => {
