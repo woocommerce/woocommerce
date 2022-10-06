@@ -227,6 +227,8 @@ class FeaturesController {
 			return false;
 		}
 
+		$plugin_name = str_replace( '\\', '/', $plugin_name );
+
 		// Register compatibility by plugin.
 
 		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin, $plugin_name );
