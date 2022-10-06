@@ -34,7 +34,7 @@ const addLabel = async(label, owner, repo, issueNumber) => {
 
 const applyLabelToCommunityContributor = async () => {
 	const eventPayload = require(process.env.GITHUB_EVENT_PATH);
-	const username = getPRAuthor(eventPayload);
+	const username = getIssueAuthor(eventPayload);
 	const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
 	const { number } = eventPayload?.issue || eventPayload?.pull_request;
 	
