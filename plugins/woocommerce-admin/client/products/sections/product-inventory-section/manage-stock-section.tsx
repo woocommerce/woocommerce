@@ -17,7 +17,7 @@ import { getTextControlProps } from '../utils';
 
 export const ManageStockSection: React.FC = () => {
 	const { getInputProps } = useFormContext< Product >();
-	const notifyLowStockAmount = getAdminSetting( 'notifyLowStockAmount', 0 );
+	const notifyLowStockAmount = getAdminSetting( 'notifyLowStockAmount', 2 );
 
 	return (
 		<>
