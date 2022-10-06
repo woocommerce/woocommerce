@@ -89,6 +89,8 @@ const renderNotes = ( {
 	setShowDismissAllModal: onDismissAll,
 	showHeader = true,
 	loadMoreNotes,
+	allNotesFetched,
+	notesHaveResolved,
 } ) => {
 	if ( isBatchUpdating ) {
 		return;
@@ -170,15 +172,25 @@ const renderNotes = ( {
 					);
 				} ) }
 			</TransitionGroup>
-			<CardFooter size="medium">
-				<Button
-					onClick={ () => {
-						loadMoreNotes();
-					} }
+			{ allNotesFetched ? null : notesHaveResolved ? (
+				<CardFooter
+					className="wooocommerce-inbox-card__footer"
+					size="medium"
 				>
-					{ __( 'Show older', 'woocommerce' ) }
-				</Button>
-			</CardFooter>
+					<Button
+						isPrimary={ true }
+						onClick={ () => {
+							loadMoreNotes();
+						} }
+					>
+						{ notesArray.length > DEFAULT_INBOX_QUERY.per_page
+							? __( 'Show more', 'woocommerce' )
+							: __( 'Show older', 'woocommerce' ) }
+					</Button>
+				</CardFooter>
+			) : (
+				<InboxNotePlaceholder className="banner message-is-unread" />
+			) }
 		</Card>
 	);
 };
@@ -186,9 +198,14 @@ const renderNotes = ( {
 const InboxPanel = ( { showHeader = true } ) => {
 	const [ pageSize, setPageSize ] = useState( DEFAULT_INBOX_QUERY.per_page );
 	const [ allNotesFetched, setAllNotesFetched ] = useState( false );
+	const [ allNotes, setAllNotes ] = useState( [] );
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { removeNote, updateNote, triggerNoteAction } =
-		useDispatch( NOTES_STORE_NAME );
+	const {
+		removeNote,
+		updateNote,
+		triggerNoteAction,
+		invalidateResolutionForStoreSelector,
+	} = useDispatch( NOTES_STORE_NAME );
 
 	const { isError, notes, notesHaveResolved, isBatchUpdating } = useSelect(
 		( select ) => {
@@ -247,11 +264,15 @@ const InboxPanel = ( { showHeader = true } ) => {
 		if ( notesHaveResolved && notes.length < pageSize ) {
 			setAllNotesFetched( true );
 		}
+
+		if ( notes && notes.length && notes.length !== allNotes.length ) {
+			setAllNotes( notes );
+		}
 	}, [ notes ] );
 
 	const [ showDismissAllModal, setShowDismissAllModal ] = useState( false );
 
-	const onDismiss = ( note ) => {
+	const onDismiss = async ( note ) => {
 		const screen = getScreenName();
 
 		recordEvent( 'inbox_action_dismiss', {
@@ -264,7 +285,8 @@ const InboxPanel = ( { showHeader = true } ) => {
 
 		const noteId = note.id;
 		try {
-			removeNote( noteId );
+			await removeNote( noteId );
+			invalidateResolutionForStoreSelector( 'getNotes' );
 			createNotice( 'success', __( 'Message dismissed', 'woocommerce' ), {
 				actions: [
 					{
@@ -311,7 +333,7 @@ const InboxPanel = ( { showHeader = true } ) => {
 		);
 	}
 
-	const hasNotes = hasValidNotes( notes );
+	const hasNotes = hasValidNotes( allNotes );
 
 	return (
 		<>
@@ -323,20 +345,20 @@ const InboxPanel = ( { showHeader = true } ) => {
 				/>
 			) }
 			<div className="woocommerce-homepage-notes-wrapper">
-				{ ! notesHaveResolved && (
+				{ ! allNotes.length && (
 					<Section>
 						<InboxNotePlaceholder className="banner message-is-unread" />
 					</Section>
 				) }
 				<Section>
-					{ notesHaveResolved &&
+					{ allNotes.length &&
 						renderNotes( {
 							loadMoreNotes: () => {
 								setPageSize( pageSize + ADD_NOTES_AMOUNT );
 							},
 							hasNotes,
 							isBatchUpdating,
-							notes,
+							notes: allNotes,
 							onDismiss,
 							onNoteActionClick: ( note, action ) => {
 								triggerNoteAction( note.id, action.id );
@@ -344,6 +366,7 @@ const InboxPanel = ( { showHeader = true } ) => {
 							setShowDismissAllModal,
 							showHeader,
 							allNotesFetched,
+							notesHaveResolved,
 						} ) }
 				</Section>
 			</div>
