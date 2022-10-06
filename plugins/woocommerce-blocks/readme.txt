@@ -18,29 +18,31 @@ For more information on what blocks are available, and how to use them, check ou
 
 Use this plugin if you want access to the bleeding edge of available blocks for WooCommerce. However, stable blocks are bundled into WooCommerce, and can be added from the "WooCommerce" section in the block inserter.
 
-- **Featured Product Block**
-- **Featured Category Block**
-- **Hand-picked Products Block**
-- **Best Selling Products Block**
-- **Top Rated Products Block**
-- **Newest Products Block**
-- **On Sale Products Block**
-- **Products by Category Block**
-- **Products by Tag Block**
-- **Products by Attribute Block**
-- **Product Categories List Block**
-- **Reviews by Product**
-- **Reviews by Category**
-- **All Reviews**
-- **Product Search**
-- **All Products**
-- **Filter by Price**
-- **Filter Products by Attribute**
-- **Filter Products by Stock**
 - **Active Product Filters**
-- **Cart**
+- **All Products**
+- **All Reviews**
+- **Best Selling Products**
+- **Cart including Cross-Sells**
 - **Checkout**
+- **Featured Category**
+- **Featured Product**
+- **Filter by Attribute**
+- **Filter by Price**
+- **Filter by Rating**
+- **Filter Products by Stock**
+- **Hand-picked Products**
 - **Mini Cart**
+- **Newest Products**
+- **On Sale Products**
+- **Product Categories List**
+- **Product Search**
+- **Products by Attribute**
+- **Products by Category**
+- **Products by Tag**
+- **Reviews by Category**
+- **Reviews by Product**
+- **Single Product**
+- **Top Rated Products**
 
 == Getting Started ==
 
@@ -75,14 +77,6 @@ Bugs should be reported in the [WooCommerce Blocks GitHub repository](https://gi
 Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/woocommerce-gutenberg-products-block/) :)
 
 Release and roadmap notes available on the [WooCommerce Developers Blog](https://woocommerce.wordpress.com/2019/01/15/woocommerce-blocks-1-3-0-release-notes/)
-
-== Screenshots ==
-
-1. The Featured Product Block
-2. Selecting a product for the Featured Product Block
-3. Selecting Products for the Hand-picked Products Block
-4. Selecting categories in the Products By Category block
-5. WooCommerce Product Blocks in the block inserter menu
 
 == Changelog ==
 
