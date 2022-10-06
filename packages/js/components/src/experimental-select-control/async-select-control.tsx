@@ -8,9 +8,9 @@ import {
 	useMemo,
 	useCallback,
 	useEffect,
-	useRef,
 } from '@wordpress/element';
 import { debounce } from 'lodash';
+import { ReactElement, Component } from 'react';
 
 /**
  * Internal dependencies
@@ -23,17 +23,22 @@ import {
 	defaultGetItemLabel,
 	defaultGetItemValue,
 } from './utils';
-import { getItemLabelType } from './types';
+import { ChildrenProps } from './types';
 
 type AsyncSelectControlProps< ItemType > = Omit<
 	SelectControlProps< ItemType >,
-	'onInputChange' | 'items'
+	'onInputChange' | 'items' | 'children'
 > & {
 	onSearch: ( value: string | undefined ) => Promise< ItemType[] >;
 	items?: ItemType[];
 	triggerInitialFetch?: boolean;
 	pageSize?: number;
 	total?: number;
+	children: (
+		props: ChildrenProps< ItemType > & {
+			isFetching: boolean;
+		}
+	) => ReactElement | Component;
 };
 
 export function AsyncSelectControl< ItemType >( {
@@ -44,6 +49,34 @@ export function AsyncSelectControl< ItemType >( {
 	triggerInitialFetch = true,
 	pageSize,
 	total,
+	children = ( {
+		items: renderItems,
+		highlightedIndex,
+		getItemProps,
+		getMenuProps,
+		isOpen,
+		isFetching,
+	} ) => {
+		return (
+			<Menu isOpen={ isOpen } getMenuProps={ getMenuProps }>
+				{ isFetching ? (
+					<Spinner />
+				) : (
+					renderItems.map( ( item, index: number ) => (
+						<MenuItem
+							key={ `${ getItemValue( item ) }` }
+							index={ index }
+							isActive={ highlightedIndex === index }
+							item={ item }
+							getItemProps={ getItemProps }
+						>
+							{ getItemLabel( item ) }
+						</MenuItem>
+					) )
+				) }
+			</Menu>
+		);
+	},
 	...remainingSelectControlProps
 }: AsyncSelectControlProps< ItemType > ) {
 	const [ fetchedItems, setFetchedItems ] = useState< ItemType[] >( items );
@@ -62,14 +95,18 @@ export function AsyncSelectControl< ItemType >( {
 				}
 			);
 		},
-		[ setFetchedItems, setIsFetching ]
+		[ setFetchedItems, setIsFetching, onSearch ]
 	);
 
 	useEffect( () => {
-		if ( triggerInitialFetch && items.length === 0 ) {
+		if (
+			triggerInitialFetch &&
+			! remainingSelectControlProps.disabled &&
+			items.length === 0
+		) {
 			fetchItems( '' );
 		}
-	}, [] );
+	}, [ remainingSelectControlProps.disabled ] );
 
 	const searchDebounced = useMemo(
 		() => debounce( fetchItems, 150 ),
@@ -120,32 +157,11 @@ export function AsyncSelectControl< ItemType >( {
 			getItemLabel={ getItemLabel }
 			getItemValue={ getItemValue }
 		>
-			{ ( {
-				items: selectControlItems,
-				isOpen,
-				highlightedIndex,
-				getItemProps,
-				getMenuProps,
-			} ) => {
-				return (
-					<Menu isOpen={ isOpen } getMenuProps={ getMenuProps }>
-						{ isFetching ? (
-							<Spinner />
-						) : (
-							selectControlItems.map( ( item, index: number ) => (
-								<MenuItem
-									key={ `${ getItemValue( item ) }` }
-									index={ index }
-									isActive={ highlightedIndex === index }
-									item={ item }
-									getItemProps={ getItemProps }
-								>
-									{ getItemLabel( item ) }
-								</MenuItem>
-							) )
-						) }
-					</Menu>
-				);
+			{ ( { ...childProps } ) => {
+				return children( {
+					...childProps,
+					isFetching,
+				} );
 			} }
 		</SelectControl>
 	);
