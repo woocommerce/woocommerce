@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { afterAll, beforeAll, describe, it } from '@jest/globals';
 import { createSimpleProduct, withRestApi } from '@woocommerce/e2e-utils';
 
 /**
@@ -20,12 +21,8 @@ import {
 import { OrdersActivityPanel } from '../../elements/OrdersActivityPanel';
 import { addReviewToProduct, waitForElementByText } from '../../utils/actions';
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
-/* eslint-enable @typescript-eslint/no-var-requires */
-
 const simpleProductName = 'Simple order';
-const testAdminHomescreenActivityPanel = () => {
+export const testAdminHomescreenActivityPanel = () => {
 	describe( 'Homescreen activity panel', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const homeScreen = new WcHomescreen( page );
@@ -131,5 +128,3 @@ const testAdminHomescreenActivityPanel = () => {
 		} );
 	} );
 };
-
-module.exports = { testAdminHomescreenActivityPanel };

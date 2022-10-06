@@ -130,5 +130,7 @@ class WC_Tests_Customer_Download extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertEquals( $expected_result, $downloads );
+
+		$download_2->delete();
 	}
 }

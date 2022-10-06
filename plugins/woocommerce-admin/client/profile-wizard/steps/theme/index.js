@@ -81,6 +81,12 @@ class Theme extends Component {
 		}
 	}
 
+	skipStep() {
+		const { activeTheme = '' } = getAdminSetting( 'onboarding', {} );
+		recordEvent( 'storeprofiler_store_theme_skip_step', { activeTheme } );
+		this.props.goToNextStep();
+	}
+
 	onChoose( theme, location = '' ) {
 		const { updateProfileItems } = this.props;
 		const { is_installed: isInstalled, price, slug } = theme;
@@ -163,12 +169,6 @@ class Theme extends Component {
 		} );
 		document.body.classList.add( 'woocommerce-theme-preview-active' );
 		this.setState( { demo: theme } );
-	}
-
-	skipStep() {
-		const { activeTheme = '' } = getAdminSetting( 'onboarding', {} );
-		recordEvent( 'storeprofiler_store_theme_skip_step', { activeTheme } );
-		this.props.goToNextStep();
 	}
 
 	renderTheme( theme ) {

@@ -742,7 +742,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					'https://www.paypal.com/cgi-bin/webscr',
 					array(
 						'timeout'     => 10,
-						'user-agent'  => 'WooCommerce/' . WC()->version,
+						'user-agent'  => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 						'httpversion' => '1.1',
 						'body'        => array(
 							'cmd' => '_notify-validate',
@@ -765,7 +765,12 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$get_response_code = get_transient( 'woocommerce_test_remote_get' );
 
 			if ( false === $get_response_code || is_wp_error( $get_response_code ) ) {
-				$response = wp_safe_remote_get( 'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
+				$response = wp_safe_remote_get(
+					'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ),
+					array(
+						'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
+					)
+				);
 				if ( ! is_wp_error( $response ) ) {
 					$get_response_code = $response['response']['code'];
 				}

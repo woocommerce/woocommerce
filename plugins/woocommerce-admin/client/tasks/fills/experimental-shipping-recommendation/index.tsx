@@ -14,15 +14,12 @@ import { compose } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { SettingsSelector } from '../tax/utils';
 import { ShippingRecommendation } from './shipping-recommendation';
 import { TaskProps } from './types';
 
 const ShippingRecommendationWrapper = compose(
 	withSelect( ( select ) => {
-		const { getSettings } = select(
-			SETTINGS_STORE_NAME
-		) as SettingsSelector;
+		const { getSettings } = select( SETTINGS_STORE_NAME );
 		const { hasFinishedResolution } = select( OPTIONS_STORE_NAME );
 		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
 

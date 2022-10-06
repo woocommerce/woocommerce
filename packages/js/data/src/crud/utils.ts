@@ -90,9 +90,17 @@ export const parseId = ( query: IdQuery, urlParameters: IdType[] = [] ) => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const applyNamespace = < T extends ( ...args: any[] ) => unknown >(
 	fn: T,
-	namespace: string
+	namespace: string,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	defaultArgs: any[] = []
 ) => {
 	return ( ...args: Parameters< T > ) => {
+		defaultArgs.forEach( ( defaultArg, index ) => {
+			// skip first item, as that is the state.
+			if ( args[ index + 1 ] === undefined ) {
+				args[ index + 1 ] = defaultArg;
+			}
+		} );
 		return fn( ...args, namespace );
 	};
 };

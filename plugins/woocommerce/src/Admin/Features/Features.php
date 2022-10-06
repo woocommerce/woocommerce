@@ -26,6 +26,7 @@ class Features {
 	 * @var array
 	 */
 	protected static $optional_features = array(
+		'multichannel-marketing'     => array( 'default' => 'no' ),
 		'navigation'                 => array( 'default' => 'no' ),
 		'settings'                   => array( 'default' => 'no' ),
 		'analytics'                  => array( 'default' => 'yes' ),
@@ -38,6 +39,7 @@ class Features {
 	 * @var array
 	 */
 	protected static $beta_features = array(
+		'multichannel-marketing',
 		'navigation',
 		'settings',
 	);
@@ -59,8 +61,6 @@ class Features {
 		$this->register_internal_class_aliases();
 		// Load feature before WooCommerce update hooks.
 		add_action( 'init', array( __CLASS__, 'load_features' ), 4 );
-		add_filter( 'woocommerce_get_sections_advanced', array( __CLASS__, 'add_features_section' ) );
-		add_filter( 'woocommerce_get_settings_advanced', array( __CLASS__, 'add_features_settings' ), 10, 2 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_load_beta_features_modal' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'load_scripts' ), 15 );
 		add_filter( 'admin_body_class', array( __CLASS__, 'add_admin_body_classes' ) );
@@ -248,70 +248,26 @@ class Features {
 	/**
 	 * Adds the Features section to the advanced tab of WooCommerce Settings
 	 *
+	 * @deprecated 7.0 The WooCommerce Admin features are now handled by the WooCommerce features engine (see the FeaturesController class).
+	 *
 	 * @param array $sections Sections.
 	 * @return array
 	 */
 	public static function add_features_section( $sections ) {
-		$features = apply_filters(
-			'woocommerce_settings_features',
-			array()
-		);
-
-		if ( empty( $features ) ) {
-			return $sections;
-		}
-
-		$sections['features'] = __( 'Features', 'woocommerce' );
 		return $sections;
 	}
 
 	/**
 	 * Adds the Features settings.
 	 *
+	 * @deprecated 7.0 The WooCommerce Admin features are now handled by the WooCommerce features engine (see the FeaturesController class).
+	 *
 	 * @param array  $settings Settings.
 	 * @param string $current_section Current section slug.
 	 * @return array
 	 */
 	public static function add_features_settings( $settings, $current_section ) {
-		if ( 'features' !== $current_section ) {
-			return $settings;
-		}
-
-		$features = apply_filters(
-			'woocommerce_settings_features',
-			array()
-		);
-
-		$features_disabled = apply_filters( 'woocommerce_admin_disabled', false );
-
-		if ( ! $features_disabled && empty( $features ) ) {
-			return $settings;
-		}
-
-		$desc          = __( 'Start using new features that are being progressively rolled out to improve the store management experience.', 'woocommerce' );
-		$disabled_desc = __( 'WooCommerce features have been disabled.', 'woocommerce' );
-
-		if ( $features_disabled ) {
-			$GLOBALS['hide_save_button'] = true;
-		}
-
-		return array_merge(
-			array(
-				array(
-					'title' => __( 'Features', 'woocommerce' ),
-					'type'  => 'title',
-					'desc'  => $features_disabled ? $disabled_desc : $desc,
-					'id'    => 'features_options',
-				),
-			),
-			$features_disabled ? array() : $features,
-			array(
-				array(
-					'type' => 'sectionend',
-					'id'   => 'features_options',
-				),
-			)
-		);
+		return $settings;
 	}
 
 	/**
@@ -417,7 +373,6 @@ class Features {
 			'Automattic\WooCommerce\Internal\Admin\ShippingLabelBanner' => 'Automattic\WooCommerce\Admin\Features\ShippingLabelBanner',
 			'Automattic\WooCommerce\Internal\Admin\ShippingLabelBannerDisplayRules' => 'Automattic\WooCommerce\Admin\Features\ShippingLabelBannerDisplayRules',
 			'Automattic\WooCommerce\Internal\Admin\WcPayWelcomePage' => 'Automattic\WooCommerce\Admin\Features\WcPayWelcomePage',
-			'Automattic\WooCommerce\Internal\Admin\WcPaySubscriptionsPage' => 'Automattic\WooCommerce\Admin\Features\WcPaySubscriptionsPage',
 		);
 		foreach ( $aliases as $new_class => $orig_class ) {
 			class_alias( $new_class, $orig_class );

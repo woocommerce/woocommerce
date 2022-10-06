@@ -64,9 +64,7 @@ export const Products = () => {
 
 	const { isStoreInUS } = useSelect( ( select ) => {
 		const { getSettings } = select( SETTINGS_STORE_NAME );
-		const { general: settings = {} } = getSettings< {
-			general?: { [ key: string ]: unknown };
-		} >( 'general' );
+		const { general: settings = {} } = getSettings( 'general' );
 
 		const country =
 			typeof settings.woocommerce_default_country === 'string'

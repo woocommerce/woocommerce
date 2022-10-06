@@ -7,6 +7,7 @@
 
 namespace Automattic\WooCommerce\Admin\API;
 
+use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as Suggestions;
 
 defined( 'ABSPATH' ) || exit;
@@ -45,6 +46,12 @@ class PaymentGatewaySuggestions extends \WC_REST_Data_Controller {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_suggestions' ),
 					'permission_callback' => array( $this, 'get_permission_check' ),
+					'args'                => array(
+						'force_default_suggestions' => array(
+							'type'        => 'boolean',
+							'description' => __( 'Return the default payment suggestions when woocommerce_show_marketplace_suggestions and woocommerce_setting_payments_recommendations_hidden options are set to no', 'woocommerce' ),
+						),
+					),
 				),
 				'schema' => array( $this, 'get_item_schema' ),
 			)
@@ -85,8 +92,14 @@ class PaymentGatewaySuggestions extends \WC_REST_Data_Controller {
 	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
 	 */
 	public function get_suggestions( $request ) {
-		if ( Suggestions::should_display() ) {
+
+		$should_display = Suggestions::should_display();
+		$force_default  = $request->get_param( 'force_default_suggestions' );
+
+		if ( $should_display ) {
 			return Suggestions::get_suggestions();
+		} elseif ( false === $should_display && true === $force_default ) {
+			return rest_ensure_response( Suggestions::get_suggestions( DefaultPaymentGateways::get_all() ) );
 		}
 
 		return rest_ensure_response( array() );

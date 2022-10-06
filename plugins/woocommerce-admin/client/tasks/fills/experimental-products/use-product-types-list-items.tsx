@@ -27,6 +27,9 @@ const useProductTypeListItems = (
 				...productType,
 				onClick: () => {
 					createProductByType( productType.key );
+					recordEvent( 'tasklist_add_product', {
+						method: 'product_template',
+					} );
 					recordEvent( 'tasklist_product_template_selection', {
 						product_type: productType.key,
 						is_suggested: suggestedProductTypes.includes(

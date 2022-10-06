@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import {
+	createElement,
+	useState,
+	useEffect,
+	useLayoutEffect,
+} from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
 import { parse } from 'qs';
 import { pick } from 'lodash';
@@ -177,6 +182,30 @@ export function getQuery() {
 	}
 	return {};
 }
+
+/**
+ * Like getQuery but in useHook format for easy usage in React functional components
+ *
+ * @return {Record<string, string>} Current query object, defaults to empty object.
+ */
+export const useQuery = () => {
+	const [ queryState, setQueryState ] = useState( {} );
+	const [ locationChanged, setLocationChanged ] = useState( true );
+	useLayoutEffect( () => {
+		return addHistoryListener( () => {
+			setLocationChanged( true );
+		} );
+	}, [] );
+
+	useEffect( () => {
+		if ( locationChanged ) {
+			const query = getQuery();
+			setQueryState( query );
+			setLocationChanged( false );
+		}
+	}, [ locationChanged ] );
+	return queryState;
+};
 
 /**
  * This function returns an event handler for the given `param`

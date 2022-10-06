@@ -32,10 +32,11 @@ function wc_admin_get_core_pages_to_connect() {
 		),
 		'wc-settings' => array(
 			'title' => __( 'Settings', 'woocommerce' ),
-			'tabs'  => apply_filters( 'woocommerce_settings_tabs_array', array() ),
+			'tabs'  => apply_filters( 'woocommerce_settings_tabs_array', array() ), // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		),
 		'wc-status'   => array(
 			'title' => __( 'Status', 'woocommerce' ),
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			'tabs'  => apply_filters(
 				'woocommerce_admin_status_tabs',
 				array(
@@ -134,11 +135,11 @@ wc_admin_connect_page(
 	)
 );
 
-// WooCommerce > Orders (COT)
+// WooCommerce > Orders (COT).
 wc_admin_connect_page(
 	array(
 		'id'        => 'woocommerce-custom-orders',
-		'screen_id' => 'woocommerce_page_wc-orders',
+		'screen_id' => wc_get_page_screen_id( 'shop-order' ),
 		'title'     => __( 'Orders', 'woocommerce' ),
 		'path'      => 'admin.php?page=wc-orders',
 	)

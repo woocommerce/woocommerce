@@ -93,6 +93,29 @@ export function getItemsSuccess(
 	};
 }
 
+export function getItemsTotalCountSuccess(
+	query: Partial< ItemQuery > | undefined,
+	totalCount: number
+) {
+	return {
+		type: TYPES.GET_ITEMS_TOTAL_COUNT_SUCCESS as const,
+		query,
+		totalCount,
+	};
+}
+
+export function getItemsTotalCountError(
+	query: Partial< ItemQuery > | undefined,
+	error: unknown
+) {
+	return {
+		type: TYPES.GET_ITEMS_TOTAL_COUNT_ERROR as const,
+		query,
+		error,
+		errorType: CRUD_ACTIONS.GET_ITEMS_TOTAL_COUNT,
+	};
+}
+
 export function updateItemError( key: IdType, error: unknown ) {
 	return {
 		type: TYPES.UPDATE_ITEM_ERROR as const,
@@ -199,6 +222,8 @@ export type Actions = ReturnType<
 	| typeof getItemSuccess
 	| typeof getItemsError
 	| typeof getItemsSuccess
+	| typeof getItemsTotalCountSuccess
+	| typeof getItemsTotalCountError
 	| typeof updateItemError
 	| typeof updateItemSuccess
 >;

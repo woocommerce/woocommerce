@@ -2512,20 +2512,15 @@ function wc_selected( $value, $options ) {
 function wc_get_server_database_version() {
 	global $wpdb;
 
-	if ( empty( $wpdb->is_mysql ) ) {
+	if ( empty( $wpdb->is_mysql ) || ! $wpdb->use_mysqli ) {
 		return array(
 			'string' => '',
 			'number' => '',
 		);
 	}
 
-	// phpcs:disable WordPress.DB.RestrictedFunctions, PHPCompatibility.Extensions.RemovedExtensions.mysql_DeprecatedRemoved
-	if ( $wpdb->use_mysqli ) {
-		$server_info = mysqli_get_server_info( $wpdb->dbh );
-	} else {
-		$server_info = mysql_get_server_info( $wpdb->dbh );
-	}
-	// phpcs:enable WordPress.DB.RestrictedFunctions, PHPCompatibility.Extensions.RemovedExtensions.mysql_DeprecatedRemoved
+	// phpcs:ignore WordPress.DB.RestrictedFunctions
+	$server_info = mysqli_get_server_info( $wpdb->dbh );
 
 	return array(
 		'string' => $server_info,

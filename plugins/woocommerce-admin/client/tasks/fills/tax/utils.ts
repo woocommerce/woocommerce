@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { getAdminLink } from '@woocommerce/settings';
-import { WPDataSelectors, TaskType } from '@woocommerce/data';
+import { TaskType } from '@woocommerce/data';
 
 /**
  * Plugins required to automate taxes.
@@ -17,11 +17,9 @@ export const AUTOMATION_PLUGINS = [ 'jetpack', 'woocommerce-services' ];
  * @param {Object} generalSettings.woocommerce_default_country Store default country.
  * @param {Object} generalSettings.woocommerce_store_postcode  Store postal code.
  */
-export const hasCompleteAddress = ( generalSettings: {
-	woocommerce_store_address?: string;
-	woocommerce_default_country?: string;
-	woocommerce_store_postcode?: string;
-} ): boolean => {
+export const hasCompleteAddress = (
+	generalSettings: Record< string, string >
+): boolean => {
 	const {
 		woocommerce_store_address: storeAddress,
 		woocommerce_default_country: defaultCountry,
@@ -37,22 +35,6 @@ export const redirectToTaxSettings = (): void => {
 	window.location.href = getAdminLink(
 		'admin.php?page=wc-settings&tab=tax&section=standard&wc_onboarding_active_task=tax'
 	);
-};
-
-/**
- * Types for settings selectors.
- */
-export type SettingsSelector = WPDataSelectors & {
-	getSettings: ( type: string ) => {
-		general: {
-			woocommerce_default_country?: string;
-			woocommerce_calc_taxes?: string;
-		};
-		tax: { [ key: string ]: string };
-	};
-	getOption: ( type: string ) => {
-		tos_accepted?: boolean;
-	};
 };
 
 /**

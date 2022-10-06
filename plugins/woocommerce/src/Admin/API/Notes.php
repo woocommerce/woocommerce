@@ -40,7 +40,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 	 * @var array
 	 */
 	protected $allowed_promo_notes = array(
-		'wcpay-promo-2022-3-incentive-100-off',
+		'wcpay-promo-2022-us-incentive-20-off',
 	);
 
 	/**
@@ -812,6 +812,12 @@ class Notes extends \WC_REST_CRUD_Controller {
 				),
 				'is_deleted'        => array(
 					'description' => __( 'Registers whether the note is deleted or not', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'is_read'           => array(
+					'description' => __( 'Registers whether the note is read or not', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

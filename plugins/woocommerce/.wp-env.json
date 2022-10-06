@@ -1,6 +1,5 @@
 {
 	"phpVersion": "7.4",
-	"core": null,
 	"plugins": [ "." ],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
@@ -11,7 +10,10 @@
 	"env": {
 		"development": {},
 		"tests": {
-		  	"port": 8086
+			"port": 8086,
+			"config": {
+				"ALTERNATE_WP_CRON": false
+			}
 		}
 	}
 }

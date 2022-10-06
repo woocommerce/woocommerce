@@ -127,8 +127,7 @@ const LayoutSwitchWrapper = ( props ) => {
 class _Layout extends Component {
 	memoizedLayoutContext = memoize( ( page ) =>
 		LayoutContextPrototype.getExtendedContext(
-			page?.breadcrumbs[ page.breadcrumbs.length - 1 ]?.toLowerCase() ||
-				'page'
+			page?.navArgs?.id?.toLowerCase() || 'page'
 		)
 	);
 

@@ -376,7 +376,7 @@
             methods.setToClearWatchedEvent();
           });
         },
-        update: function() {console.log('updating...');
+        update: function() {
           var disabledClass = namespace + 'disabled';
           if (slider.pagingCount === 1) {
             slider.directionNav.addClass(disabledClass).attr('tabindex', '-1');
@@ -623,10 +623,10 @@
             slider.viewport.height(slider.h);
             slider.setProps(slider.h, "setTotal");
           } else {
+			  slider.setProps(slider.computedW, "setTotal");
+			  slider.newSlides.width(slider.computedW);
             // SMOOTH HEIGHT:
             if (slider.vars.smoothHeight) { methods.smoothHeight(); }
-            slider.newSlides.width(slider.computedW);
-            slider.setProps(slider.computedW, "setTotal");
           }
         }
       },

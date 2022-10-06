@@ -12,11 +12,11 @@ mkdir -p "$DEST_PATH"
 echo "Installing PHP and JS dependencies..."
 pnpm install
 echo "Running JS Build..."
-pnpm -w exec turbo run build --filter=woocommerce || exit "$?"
+pnpm -w run build --filter=woocommerce || exit "$?"
 echo "Cleaning up PHP dependencies..."
 composer install --no-dev || exit "$?"
 echo "Run makepot..."
-pnpm makepot --filter=woocommerce || exit "$?"
+pnpm -r --filter=woocommerce run makepot || exit "$?"
 echo "Syncing files..."
 rsync -rc --exclude-from="$PROJECT_PATH/.distignore" "$PROJECT_PATH/" "$DEST_PATH/" --delete --delete-excluded
 

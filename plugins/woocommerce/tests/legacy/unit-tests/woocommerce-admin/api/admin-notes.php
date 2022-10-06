@@ -476,7 +476,7 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 18, count( $properties ) );
+		$this->assertEquals( 19, count( $properties ) );
 
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'name', $properties );
@@ -498,6 +498,7 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'layout', $properties );
 		$this->assertArrayHasKey( 'image', $properties );
 		$this->assertArrayHasKey( 'is_deleted', $properties );
+		$this->assertArrayHasKey( 'is_read', $properties );
 	}
 
 	/**

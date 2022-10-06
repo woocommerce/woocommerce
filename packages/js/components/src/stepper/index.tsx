@@ -3,7 +3,7 @@
  */
 import classnames from 'classnames';
 import { createElement, Fragment } from '@wordpress/element';
-import React from 'react';
+import type React from 'react';
 
 /**
  * Internal dependencies
@@ -11,7 +11,7 @@ import React from 'react';
 import Spinner from '../spinner';
 import CheckIcon from './check-icon';
 
-interface StepperProps {
+export interface StepperProps {
 	/** Additional class name to style the component. */
 	className?: string;
 	/** The current step's key. */

@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+The updates will mean that the github workflows use the playwright versions of the api-core-tests rather than the supertest versions of the tests.

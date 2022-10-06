@@ -8,6 +8,8 @@
  * @version 3.4.0
  */
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -231,6 +233,13 @@ function wc_get_order_types( $for = '' ) {
 		case 'order-webhooks':
 			foreach ( $wc_order_types as $type => $args ) {
 				if ( ! $args['exclude_from_order_webhooks'] ) {
+					$order_types[] = $type;
+				}
+			}
+			break;
+		case 'cot-migration':
+			foreach ( $wc_order_types as $type => $args ) {
+				if ( DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE !== $type ) {
 					$order_types[] = $type;
 				}
 			}
@@ -638,7 +647,7 @@ function wc_create_refund( $args = array() ) {
 
 	} catch ( Exception $e ) {
 		if ( isset( $refund ) && is_a( $refund, 'WC_Order_Refund' ) ) {
-			wp_delete_post( $refund->get_id(), true );
+			$refund->delete( true );
 		}
 		return new WP_Error( 'error', $e->getMessage() );
 	}

@@ -22,7 +22,6 @@ class PostToOrderTableMigrator extends MetaToCustomTableMigrator {
 	protected function get_schema_config(): array {
 		global $wpdb;
 
-		// TODO: Remove hardcoding.
 		$this->table_names = array(
 			'orders'    => $wpdb->prefix . 'wc_orders',
 			'addresses' => $wpdb->prefix . 'wc_order_addresses',
@@ -80,6 +79,14 @@ class PostToOrderTableMigrator extends MetaToCustomTableMigrator {
 			'post_parent'       => array(
 				'type'        => 'int',
 				'destination' => 'parent_order_id',
+			),
+			'post_type'         => array(
+				'type'        => 'string',
+				'destination' => 'type',
+			),
+			'post_excerpt'      => array(
+				'type'        => 'string',
+				'destination' => 'customer_note',
 			),
 		);
 	}

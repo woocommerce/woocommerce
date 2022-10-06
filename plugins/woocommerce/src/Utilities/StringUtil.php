@@ -73,4 +73,14 @@ final class StringUtil {
 			return false !== stripos( $string, $contained );
 		}
 	}
+
+	/**
+	 * Get the name of a plugin in the form 'directory/file.php', as in the keys of the array returned by 'get_plugins'.
+	 *
+	 * @param string $plugin_file_path The path of the main plugin file (can be passed as __FILE__ from the plugin itself).
+	 * @return string The name of the plugin in the form 'directory/file.php'.
+	 */
+	public static function plugin_name_from_plugin_file( string $plugin_file_path ): string {
+		return basename( dirname( $plugin_file_path ) ) . DIRECTORY_SEPARATOR . basename( $plugin_file_path );
+	}
 }

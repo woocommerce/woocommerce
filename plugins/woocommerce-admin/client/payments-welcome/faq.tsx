@@ -33,12 +33,12 @@ const FrequentlyAskedQuestions: React.FC = () => {
 						<li>{ strings.faq.question3Answer2 }</li>
 						<li>{ strings.faq.question3Answer3 }</li>
 						<li>{ strings.faq.question3Answer4 }</li>
+						<li>{ strings.faq.question3Answer5 }</li>
 					</ul>
 				</PanelBody>
 
 				<PanelBody title={ strings.faq.question4 }>
 					<p>{ strings.faq.question4Answer1 }</p>
-					<p>{ strings.faq.question4Answer2 }</p>
 				</PanelBody>
 
 				<PanelBody title={ strings.faq.question5 }>
@@ -51,7 +51,6 @@ const FrequentlyAskedQuestions: React.FC = () => {
 					<p>{ strings.faq.question6Answer2 }</p>
 					<p>{ strings.faq.question6Answer3 }</p>
 					<p>{ strings.faq.question6Answer4 }</p>
-					<p>{ strings.faq.question6Answer5 }</p>
 				</PanelBody>
 
 				<PanelBody title={ strings.faq.question7 }>
@@ -75,16 +74,6 @@ const FrequentlyAskedQuestions: React.FC = () => {
 				<PanelBody title={ strings.faq.question8 }>
 					<p>{ strings.faq.question8Answer1 }</p>
 					<p>{ strings.faq.question8Answer2 }</p>
-					<ul>
-						<li>{ strings.faq.question8Answer3 }</li>
-						<li>{ strings.faq.question8Answer4 }</li>
-						<li>{ strings.faq.question8Answer5 }</li>
-						<li>{ strings.faq.question8Answer6 }</li>
-						<li>{ strings.faq.question8Answer7 }</li>
-						<li>{ strings.faq.question8Answer8 }</li>
-						<li>{ strings.faq.question8Answer9 }</li>
-					</ul>
-					<p>{ strings.faq.question8Answer10 }</p>
 				</PanelBody>
 			</Panel>
 			<div className="help-section">

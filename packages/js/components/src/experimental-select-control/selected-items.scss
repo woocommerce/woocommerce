@@ -1,0 +1,11 @@
+.woocommerce-experimental-select-control__selected-item {
+    margin-right: $gap-smallest;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    cursor: default;
+    display: inline-flex;
+
+    .woocommerce-tag {
+        margin: 0;
+    }
+}

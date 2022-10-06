@@ -1,11 +1,11 @@
 /**
+ * External dependencies
+ */
+import { clearAndFillInput } from '@woocommerce/e2e-utils';
+/**
  * Internal dependencies
  */
 import { BasePage } from '../../pages/BasePage';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { clearAndFillInput } = require( '@woocommerce/e2e-utils' );
-/* eslint-enable @typescript-eslint/no-var-requires */
 
 type AccountDetails = {
 	accountName: string;

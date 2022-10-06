@@ -193,4 +193,56 @@ AND index_name='$index_name'"
 		return $wpdb_placeholder_for_type[ $type ];
 	}
 
+	/**
+	 * Generates ON DUPLICATE KEY UPDATE clause to be used in migration.
+	 *
+	 * @param array $columns List of column names.
+	 *
+	 * @return string SQL clause for INSERT...ON DUPLICATE KEY UPDATE
+	 */
+	public function generate_on_duplicate_statement_clause( array $columns ): string {
+		$update_value_statements = array();
+		foreach ( $columns as $column ) {
+			$update_value_statements[] = "`$column` = VALUES( `$column` )";
+		}
+		$update_value_clause = implode( ', ', $update_value_statements );
+
+		return "ON DUPLICATE KEY UPDATE $update_value_clause";
+	}
+
+	/**
+	 * Hybrid of $wpdb->update and $wpdb->insert. It will try to update a row, and if it doesn't exist, it will insert it. This needs unique constraints to be set on the table on all ID columns.
+	 *
+	 * You can use this function only when:
+	 * 1. There is only one unique constraint on the table. The constraint can contain multiple columns, but it must be the only one unique constraint.
+	 * 2. The complete unique constraint must be part of the $data array.
+	 * 3. You do not need the LAST_INSERT_ID() value.
+	 *
+	 * @param string $table_name Table name.
+	 * @param array  $data Unescaped data to update (in column => value pairs).
+	 * @param array  $format An array of formats to be mapped to each of the values in $data.
+	 *
+	 * @return int Returns the value of DB's  ON DUPLICATE KEY UPDATE clause.
+	 */
+	public function insert_on_duplicate_key_update( $table_name, $data, $format ) : int {
+		global $wpdb;
+
+		$columns             = array_keys( $data );
+		$column_clause       = '`' . implode( '`, `', $columns ) . '`';
+		$value_placeholders  = implode( ', ', array_values( $format ) );
+		$on_duplicate_clause = $this->generate_on_duplicate_statement_clause( $columns );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Values are escaped in $wpdb->prepare.
+		$sql = $wpdb->prepare(
+			"
+INSERT INTO $table_name ( $column_clause )
+VALUES ( $value_placeholders )
+$on_duplicate_clause
+",
+			array_values( $data )
+		);
+		// phpcs:enable
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is prepared.
+		return $wpdb->query( $sql );
+	}
+
 }

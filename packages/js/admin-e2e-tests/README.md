@@ -15,7 +15,7 @@ pnpm install @woocommerce/admin-e2e-tests --save
 Create a E2E test specification file under `/tests/e2e/specs/example.test.js`:
 
 ```js
-const { testAdminBasicSetup } = require( '@woocommerce/admin-e2e-tests' );
+import { testAdminBasicSetup } from '@woocommerce/admin-e2e-tests';
 
 testAdminBasicSetup();
 ```

@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Implements `query()` for the orders table datastore.

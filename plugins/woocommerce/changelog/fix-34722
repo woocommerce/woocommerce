@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a fatal error thrown by init_theorder_object due to the return type declaration

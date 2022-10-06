@@ -19,6 +19,21 @@ export type ProductStatus =
 	| 'trash'
 	| 'future';
 
+export type ProductDownload = {
+	id: string;
+	name: string;
+	file: string;
+};
+
+export type ProductAttribute = {
+	id: number;
+	name: string;
+	position: number;
+	visible: boolean;
+	variation: boolean;
+	options: string[];
+};
+
 export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	Schema.Post,
 	'status'
@@ -37,32 +52,68 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	description: string;
 	short_description: string;
 	sku: string;
+	date_on_sale_from: string | null;
+	date_on_sale_from_gmt: string | null;
+	date_on_sale_to: string | null;
+	date_on_sale_to_gmt: string | null;
+	virtual: boolean;
+	downloadable: boolean;
+	downloads: ProductDownload[];
+	download_limit: number;
+	download_expiry: number;
+	external_url: string;
+	button_text: string;
+	tax_status: 'taxable' | 'shipping' | 'none';
+	tax_class: 'standard' | 'reduced-rate' | 'zero-rate' | undefined;
+	manage_stock: boolean;
+	stock_quantity: number;
+	stock_status: 'instock' | 'outofstock' | 'onbackorder';
+	backorders: 'no' | 'notify' | 'yes';
 	price: string;
+	price_html: string;
 	regular_price: string;
 	sale_price: string;
+	on_sale: boolean;
+	purchasable: boolean;
+	total_sales: number;
+	backorders_allowed: boolean;
+	backordered: boolean;
+	shipping_required: boolean;
+	shipping_taxable: boolean;
+	shipping_class_id: number;
+	average_rating: string;
+	rating_count: number;
+	related_ids: number[];
+	variations: number[];
+	attributes: ProductAttribute[];
+	dimensions: ProductDimensions;
+	weight: string;
 };
 
-export type ReadOnlyProperties =
-	| 'id'
-	| 'permalink'
-	| 'date_created'
-	| 'date_created_gmt'
-	| 'date_modified'
-	| 'date_modified_gmt'
-	| 'price'
-	| 'price_html'
-	| 'on_sale'
-	| 'purchasable'
-	| 'total_sales'
-	| 'backorders_allowed'
-	| 'backordered'
-	| 'shipping_required'
-	| 'shipping_taxable'
-	| 'shipping_class_id'
-	| 'average_rating'
-	| 'rating_count'
-	| 'related_ids'
-	| 'variations';
+export const productReadOnlyProperties = [
+	'id',
+	'permalink',
+	'date_created',
+	'date_created_gmt',
+	'date_modified',
+	'date_modified_gmt',
+	'price',
+	'price_html',
+	'on_sale',
+	'purchasable',
+	'total_sales',
+	'backorders_allowed',
+	'backordered',
+	'shipping_required',
+	'shipping_taxable',
+	'shipping_class_id',
+	'average_rating',
+	'rating_count',
+	'related_ids',
+	'variations',
+] as const;
+
+export type ReadOnlyProperties = typeof productReadOnlyProperties[ number ];
 
 export type PartialProduct = Partial< Product > & Pick< Product, 'id' >;
 
@@ -93,5 +144,11 @@ export type ProductQuery<
 	on_sale: boolean;
 	min_price: string;
 	max_price: string;
-	stock_status: 'instock' | 'outofstock';
+	stock_status: 'instock' | 'outofstock' | 'onbackorder';
+};
+
+export type ProductDimensions = {
+	width: string;
+	height: string;
+	length: string;
 };

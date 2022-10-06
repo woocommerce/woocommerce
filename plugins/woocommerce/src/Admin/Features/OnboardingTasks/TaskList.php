@@ -207,7 +207,19 @@ class TaskList {
 
 		$hidden   = get_option( self::HIDDEN_OPTION, array() );
 		$hidden[] = $this->hidden_id ? $this->hidden_id : $this->id;
+		$this->maybe_set_default_layout( $hidden );
 		return update_option( self::HIDDEN_OPTION, array_unique( $hidden ) );
+	}
+
+	/**
+	 * Sets the default homepage layout to two_columns if "setup" tasklist is completed or hidden.
+	 *
+	 * @param array $completed_or_hidden_tasklist_ids Array of tasklist ids.
+	 */
+	public function maybe_set_default_layout( $completed_or_hidden_tasklist_ids ) {
+		if ( in_array( 'setup', $completed_or_hidden_tasklist_ids, true ) ) {
+			update_option( 'woocommerce_default_homepage_layout', 'two_columns' );
+		}
 	}
 
 	/**
@@ -326,6 +338,7 @@ class TaskList {
 		$completed_lists   = get_option( self::COMPLETED_OPTION, array() );
 		$completed_lists[] = $this->get_list_id();
 		update_option( self::COMPLETED_OPTION, $completed_lists );
+		$this->maybe_set_default_layout( $completed_lists );
 		$this->record_tracks_event( 'tasks_completed' );
 	}
 

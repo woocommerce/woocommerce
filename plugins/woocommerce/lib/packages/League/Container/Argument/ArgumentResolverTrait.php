@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Vendor\League\Container\Argument;
 use Automattic\WooCommerce\Vendor\League\Container\Container;
 use Automattic\WooCommerce\Vendor\League\Container\Exception\{ContainerException, NotFoundException};
 use Automattic\WooCommerce\Vendor\League\Container\ReflectionContainer;
-use Psr\Container\ContainerInterface;
+use Automattic\WooCommerce\Vendor\Psr\Container\ContainerInterface;
 use ReflectionFunctionAbstract;
 use ReflectionParameter;
 
@@ -79,7 +79,7 @@ trait ArgumentResolverTrait
             }
 
             if ($type) {
-                if (PHP_VERSION_ID >= 70200) {
+                if (PHP_VERSION_ID >= 70100) {
                     $typeName = $type->getName();
                 } else {
                     $typeName = (string) $type;

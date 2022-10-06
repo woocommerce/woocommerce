@@ -1,17 +1,13 @@
 /**
  * External dependencies
  */
+import config from 'config';
 import { ElementHandle } from 'puppeteer';
 
 /**
  * Internal dependencies
  */
 import { Login } from '../pages/Login';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { expect } = require( '@jest/globals' );
-const config = require( 'config' );
-/* eslint-enable @typescript-eslint/no-var-requires */
 
 /**
  * Wait for UI blocking to end.

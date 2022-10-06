@@ -19,38 +19,17 @@ import { orders } from '../requests/merchant/orders.js';
 import { ordersSearch } from '../requests/merchant/orders-search.js';
 import { homeWCAdmin } from '../requests/merchant/home-wc-admin.js';
 
+const shopper_request_threshold = 'p(95)<10000';
+const merchant_request_threshold = 'p(95)<10000';
+
 export const options = {
 	scenarios: {
-		homePageSmoke: {
+		shopperBrowseSmoke: {
 			executor: 'per-vu-iterations',
 			vus: 1,
 			iterations: 3,
-			maxDuration: '60s',
-			exec: 'homePageFlow',
-		},
-		shopPageSmoke: {
-			executor: 'per-vu-iterations',
-			vus: 1,
-			iterations: 3,
-			maxDuration: '60s',
-			startTime: '5s',
-			exec: 'shopPageFlow',
-		},
-		searchProductSmoke: {
-			executor: 'per-vu-iterations',
-			vus: 1,
-			iterations: 3,
-			maxDuration: '60s',
-			startTime: '10s',
-			exec: 'searchProductFlow',
-		},
-		singleProductSmoke: {
-			executor: 'per-vu-iterations',
-			vus: 1,
-			iterations: 3,
-			maxDuration: '60s',
-			startTime: '15s',
-			exec: 'singleProductFlow',
+			maxDuration: '180s',
+			exec: 'shopperBrowseFlow',
 		},
 		myAccountSmoke: {
 			executor: 'per-vu-iterations',
@@ -94,21 +73,121 @@ export const options = {
 	},
 	thresholds: {
 		checks: [ 'rate==1' ],
+		'http_req_duration{name:Shopper - Site Root}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - Shop Page}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - Search Products}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - Category Page}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - Product Page}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - wc-ajax=add_to_cart}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - View Cart}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - Remove Item From Cart}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - wc-ajax=apply_coupon}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - Update Cart}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - View Checkout}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - wc-ajax=update_order_review}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - wc-ajax=checkout}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - Order Received}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - wc-ajax=get_refreshed_fragments}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - Login to Checkout}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - My Account Login Page}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - Login to My Account}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - WP Login Page}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - Login to WP Admin}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - WC-Admin}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - wc-analytics/orders?}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - wc-analytics/products/reviews?}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - wc-analytics/products/low-in-stock?}':
+			[ `${ merchant_request_threshold }` ],
+		'http_req_duration{name:Merchant - All Orders}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - Search Orders By Product}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - All Products}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - Add New Product}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - action=sample-permalink}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - action=heartbeat autosave}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - Update New Product}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - Coupons}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - wc-admin/onboarding/tasks?}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - wc-analytics/admin/notes?}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - wc-admin/options?options=woocommerce_ces_tracks_queue}':
+			[ `${ merchant_request_threshold }` ],
+		'http_req_duration{name:Merchant - action=heartbeat}': [
+			`${ merchant_request_threshold }`,
+		],
 	},
 };
 
-export function homePageFlow() {
+export function shopperBrowseFlow() {
 	homePage();
-}
-export function shopPageFlow() {
 	shopPage();
-}
-export function searchProductFlow() {
-	searchProduct();
-}
-export function singleProductFlow() {
-	singleProduct();
 	categoryPage();
+	searchProduct();
+	singleProduct();
 }
 export function checkoutGuestFlow() {
 	cart();

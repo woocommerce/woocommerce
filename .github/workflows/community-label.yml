@@ -1,0 +1,60 @@
+name: Add Community Label
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-20.04
+    outputs:
+      issueId: ${{ steps.check.outputs.issueId }}
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check if user is a community contributor
+        id: check
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const isCommunityContributor = require( './.github/workflows/scripts/is-community-contributor.js' );
+            const config = {
+              types: [ 'pull_request', 'issue' ],
+              orgs: [ 'woocommerce', 'automattic' ],
+            };
+            
+            ( async ( { github, context, config } ) => {
+              try {
+                const isCommunity = await isCommunityContributor( { github, context, config } );
+                console.log( '::set-output name=run::%s', isCommunity ? 'true' : 'false' );
+              } catch ( e ) {
+                console.log( '::set-output name=run::false' );
+              }
+            } )( { github, context, config } );
+            
+
+  label_community:
+    name: Label Community Issues and PRs
+    runs-on: ubuntu-20.04
+    needs: verify
+    if: needs.verify.outputs.run == 'true'
+    steps:
+      - name: label
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.addLabels( {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: [ 'type: community contribution' ]
+            } );
