@@ -1,7 +1,8 @@
 name: Add Community Label
 
 on:
-  pull_request:
+  pull_request_target:
+    types: [opened]
   issues:
     types: [opened]
   
