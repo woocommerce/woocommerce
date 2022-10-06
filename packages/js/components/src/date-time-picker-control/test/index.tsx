@@ -110,7 +110,7 @@ describe( 'DateTimePickerControl', () => {
 		);
 
 		const input = container.querySelector( 'input' );
-		expect( input?.value ).toBe( '09/15/2022 02:30 am' );
+		expect( input?.value ).toBe( '09/15/2022 2:30 am' );
 	} );
 
 	it( 'should use the date time format if set', () => {
@@ -124,7 +124,7 @@ describe( 'DateTimePickerControl', () => {
 		);
 
 		const input = container.querySelector( 'input' );
-		expect( input?.value ).toBe( '02:30, 09-15-2022' );
+		expect( input?.value ).toBe( '2:30, 09-15-2022' );
 	} );
 
 	it( 'should update the input when currentDate is changed', () => {
