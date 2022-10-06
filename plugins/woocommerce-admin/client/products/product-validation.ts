@@ -10,10 +10,17 @@ import {
 } from '@woocommerce/data';
 import type { FormErrors } from '@woocommerce/components';
 
+/**
+ * Internal dependencies
+ */
+import { validate as validateInventory } from './sections/product-inventory-section';
+
 export const validate = (
 	values: Partial< Product< ProductStatus, ProductType > >
 ) => {
-	const errors: FormErrors< typeof values > = {};
+	let errors: FormErrors< typeof values > = {};
+	errors = validateInventory( values, errors );
+
 	if ( ! values.name?.length ) {
 		errors.name = __( 'This field is required.', 'woocommerce' );
 	}
