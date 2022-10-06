@@ -4,7 +4,6 @@
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createElement } from '@wordpress/element';
-import { isRTL } from '@wordpress/i18n/build-types';
 import moment from 'moment';
 
 /**
@@ -87,14 +86,17 @@ describe( 'DateTimePickerControl', () => {
 	} );
 
 	it( 'should use the default 24 hour date time format', () => {
-		const dateTime = moment( '2022-09-15 02:30:40' );
+		const dateTime = moment( '2022-09-15 22:30:40' );
 
 		const { container } = render(
-			<DateTimePickerControl currentDate={ dateTime.toISOString() } />
+			<DateTimePickerControl
+				currentDate={ dateTime.toISOString() }
+				is12Hour={ false }
+			/>
 		);
 
 		const input = container.querySelector( 'input' );
-		expect( input?.value ).toBe( '09/15/2022 02:30' );
+		expect( input?.value ).toBe( '09/15/2022 22:30' );
 	} );
 
 	it( 'should use the default 12 hour date time format', () => {
@@ -108,7 +110,7 @@ describe( 'DateTimePickerControl', () => {
 		);
 
 		const input = container.querySelector( 'input' );
-		expect( input?.value ).toBe( '09/15/2022 02:30 AM' );
+		expect( input?.value ).toBe( '09/15/2022 02:30 am' );
 	} );
 
 	it( 'should use the date time format if set', () => {
