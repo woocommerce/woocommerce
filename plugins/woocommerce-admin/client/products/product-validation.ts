@@ -9,6 +9,10 @@ import {
 	ProductDimensions,
 } from '@woocommerce/data';
 import type { FormErrors } from '@woocommerce/components';
+
+/**
+ * Internal dependencies
+ */
 import { isValidSlug } from './sections/utils';
 
 export const validate = (
