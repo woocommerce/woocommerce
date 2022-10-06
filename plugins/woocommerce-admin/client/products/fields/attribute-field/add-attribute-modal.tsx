@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, Modal, Notice, Spinner } from '@wordpress/components';
-import { resolveSelect, useSelect } from '@wordpress/data';
+import { Button, Modal, Notice } from '@wordpress/components';
+import { resolveSelect } from '@wordpress/data';
 import { trash } from '@wordpress/icons';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
@@ -11,10 +11,7 @@ import {
 	ProductAttribute,
 	ProductAttributeTerm,
 } from '@woocommerce/data';
-import {
-	__experimentalSelectControl as SelectControl,
-	Form,
-} from '@woocommerce/components';
+import { Form } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -29,8 +26,10 @@ type CreateCategoryModalProps = {
 };
 
 type AttributeForm = {
-	attributes: Partial< ProductAttribute >[];
-	attributeTerms: Record< number, ProductAttributeTerm[] >;
+	attributes: {
+		attribute: Partial< ProductAttribute >;
+		terms: ProductAttributeTerm[];
+	}[];
 };
 
 export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
@@ -45,42 +44,76 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 			value: AttributeForm[ keyof AttributeForm ]
 		) => void
 	) => {
-		setValue( 'attributes', [ ...values.attributes, {} ] );
+		setValue( 'attributes', [
+			...values.attributes,
+			{
+				attribute: {},
+				terms: [],
+			},
+		] );
 	};
 
 	const onAdd = ( values: AttributeForm ) => {
 		const newAttributesToAdd: ProductAttribute[] = [];
 		values.attributes.forEach( ( attr, index ) => {
 			if (
-				attr &&
-				attr.name &&
-				values.attributeTerms[ index ] &&
-				values.attributeTerms[ index ].length > 0
+				attr.attribute &&
+				attr.attribute.name &&
+				attr.terms.length > 0
 			) {
 				newAttributesToAdd.push( {
-					...( attr as ProductAttribute ),
-					options: values.attributeTerms[ index ].map(
-						( term ) => term.name
-					),
+					...( attr.attribute as ProductAttribute ),
+					options: attr.terms.map( ( term ) => term.name ),
 				} );
 			}
 		} );
 		onCreated( newAttributesToAdd );
 	};
 
+	const onRemove = (
+		index: number,
+		values: AttributeForm,
+		setValue: (
+			name: string,
+			value: AttributeForm[ keyof AttributeForm ]
+		) => void
+	) => {
+		if ( values.attributes.length > 1 ) {
+			setValue(
+				'attributes',
+				values.attributes.filter( ( val, i ) => i !== index )
+			);
+		} else {
+			setValue( 'attributes', [ { attribute: {}, terms: [] } ] );
+		}
+	};
+
 	const getFilteredItems = (
 		allItems: Partial< ProductAttribute >[],
 		inputValue: string,
-		selectedItems: Partial< ProductAttribute >[]
+		selectedItems: AttributeForm
 	) => {
 		return allItems.filter(
 			( item ) =>
-				selectedItems.indexOf( item ) < 0 &&
+				selectedItems.attributes.findIndex(
+					( attr ) => attr.attribute.id === item.id
+				) < 0 &&
 				selectedAttributeIds.indexOf( item.id || -1 ) < 0 &&
 				( item.name || '' )
 					.toLowerCase()
 					.startsWith( inputValue.toLowerCase() )
 		);
+	};
+
+	const focusValueField = ( index: number ) => {
+		const valueInputField: HTMLInputElement | null = document.querySelector(
+			'.woocommerce-add-attribute-modal__table-row-' +
+				index +
+				' .woocommerce-add-attribute-modal__table-attribute-value-column .woocommerce-experimental-select-control__input'
+		);
+		if ( valueInputField ) {
+			valueInputField.focus();
+		}
 	};
 
 	return (
@@ -98,176 +131,196 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 				</p>
 			</Notice>
 			<Form< AttributeForm >
-				initialValues={ { attributes: [ {} ], attributeTerms: {} } }
+				initialValues={ {
+					attributes: [ { attribute: {}, terms: [] } ],
+				} }
 			>
 				{ ( {
 					values,
 					setValue,
 				}: {
 					values: AttributeForm;
-					setValue: (
-						name: string,
-						value: AttributeForm[ keyof AttributeForm ]
-					) => void;
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					setValue: ( name: string, value: any ) => void;
 				} ) => {
 					return (
 						<>
 							<table className="woocommerce-add-attribute-modal__table">
-								<tr className="woocommerce-add-attribute-modal__table-header">
-									<th>Attribute</th>
-									<th>Values</th>
-								</tr>
-								{ values.attributes.map(
-									( attribute, index ) => (
-										<tr
-											key={ index }
-											className="woocommerce-add-attribute-modal__table-row"
-										>
-											<td>
-												<AsyncSelectControl<
-													Partial< ProductAttribute >
-												>
-													items={ [] }
-													label=""
-													onSearch={ (
-														searchString:
-															| string
-															| undefined
-													) => {
-														return resolveSelect(
-															EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
-														)
-															.getProductAttributes<
-																ProductAttribute[]
-															>()
-															.then(
-																(
-																	categories
-																) => {
-																	return getFilteredItems(
-																		categories,
-																		searchString ||
-																			'',
-																		values.attributes
-																	);
+								<thead>
+									<tr className="woocommerce-add-attribute-modal__table-header">
+										<th>Attribute</th>
+										<th>Values</th>
+									</tr>
+								</thead>
+								<tbody>
+									{ values.attributes.map(
+										( { attribute, terms }, index ) => (
+											<tr
+												key={ index }
+												className={ `woocommerce-add-attribute-modal__table-row woocommerce-add-attribute-modal__table-row-${ index }` }
+											>
+												<td className="woocommerce-add-attribute-modal__table-attribute-column">
+													<AsyncSelectControl<
+														Partial< ProductAttribute >
+													>
+														items={ [] }
+														label=""
+														onSearch={ (
+															searchString:
+																| string
+																| undefined
+														) => {
+															return resolveSelect(
+																EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
+															)
+																.getProductAttributes<
+																	ProductAttribute[]
+																>()
+																.then(
+																	(
+																		categories
+																	) => {
+																		return getFilteredItems(
+																			categories,
+																			searchString ||
+																				'',
+																			values
+																		);
+																	}
+																);
+														} }
+														placeholder={ __(
+															'Search or create attribute',
+															'woocommerce'
+														) }
+														getItemLabel={ (
+															item
+														) => item?.name || '' }
+														getItemValue={ (
+															item
+														) => item?.id || '' }
+														selected={ attribute }
+														onSelect={ ( item ) => {
+															setValue(
+																'attributes[' +
+																	index +
+																	']',
+																{
+																	attribute:
+																		item,
+																	terms: [],
 																}
 															);
-													} }
-													placeholder={ __(
-														'Search or create attribute',
-														'woocommerce'
-													) }
-													getItemLabel={ ( item ) =>
-														item?.name || ''
-													}
-													getItemValue={ ( item ) =>
-														item?.id || ''
-													}
-													selected={ attribute }
-													onSelect={ ( item ) =>
-														setValue(
-															'attributes[' +
-																index +
-																']',
-															item
-														)
-													}
-													onRemove={ () =>
-														setValue(
-															'attributes[' +
-																index +
-																']',
-															{}
-														)
-													}
-												/>
-											</td>
-											<td>
-												<AsyncSelectControl< ProductAttributeTerm >
-													items={ [] }
-													multiple
-													disabled={
-														! values.attributes[
-															index
-														]?.id
-													}
-													label=""
-													onSearch={ (
-														searchString:
-															| string
-															| undefined
-													) => {
-														return resolveSelect(
-															EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
-														).getProductAttributeTerms<
-															ProductAttributeTerm[]
-														>( {
-															search: searchString,
-															attribute_id:
-																values
-																	.attributes[
-																	index
-																]?.id,
-														} );
-													} }
-													placeholder={ __(
-														'Search or create attribute',
-														'woocommerce'
-													) }
-													getItemLabel={ ( item ) =>
-														item?.name || ''
-													}
-													getItemValue={ ( item ) =>
-														item?.slug || ''
-													}
-													selected={
-														values.attributeTerms[
-															index
-														] || []
-													}
-													onSelect={ ( item ) =>
-														setValue(
-															'attributeTerms[' +
-																index +
-																']',
-															[
-																...( values
-																	.attributeTerms[
-																	index
-																] || [] ),
-																item,
-															]
-														)
-													}
-													onRemove={ ( item ) =>
-														setValue(
-															'attributes[' +
-																index +
-																'].options',
-															values.attributeTerms[
+															focusValueField(
 																index
-															]?.filter(
-																( opt ) =>
-																	opt.slug !==
-																	item.slug
+															);
+														} }
+														onRemove={ () =>
+															setValue(
+																'attributes[' +
+																	index +
+																	']',
+																{
+																	attribute:
+																		{},
+																	terms: [],
+																}
 															)
-														)
-													}
-												/>
-											</td>
-											<td>
-												<Button
-													icon={ trash }
-													label={ __(
-														'Remove attribute',
-														'woocommerce'
-													) }
-													onClick={ () => {} }
-												></Button>
-											</td>
-										</tr>
-									)
-								) }
+														}
+													/>
+												</td>
+												<td className="woocommerce-add-attribute-modal__table-attribute-value-column">
+													<AsyncSelectControl< ProductAttributeTerm >
+														items={ [] }
+														multiple
+														disabled={
+															! attribute?.id
+														}
+														label=""
+														triggerInitialFetch={
+															false
+														}
+														onSearch={ (
+															searchString:
+																| string
+																| undefined
+														) => {
+															return resolveSelect(
+																EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
+															).getProductAttributeTerms<
+																ProductAttributeTerm[]
+															>( {
+																search: searchString,
+																attribute_id:
+																	attribute.id,
+															} );
+														} }
+														placeholder={ __(
+															'Search or create value',
+															'woocommerce'
+														) }
+														getItemLabel={ (
+															item
+														) => item?.name || '' }
+														getItemValue={ (
+															item
+														) => item?.slug || '' }
+														selected={ terms || [] }
+														onSelect={ ( item ) => {
+															setValue(
+																'attributes[' +
+																	index +
+																	'].terms',
+																[
+																	...( terms ||
+																		[] ),
+																	item,
+																]
+															);
+														} }
+														onRemove={ ( item ) =>
+															setValue(
+																'attributes[' +
+																	index +
+																	'].terms',
+																values.attributes[
+																	index
+																].terms.filter(
+																	( opt ) =>
+																		opt.slug !==
+																		item.slug
+																)
+															)
+														}
+													/>
+												</td>
+												<td>
+													<Button
+														icon={ trash }
+														disabled={
+															values.attributes
+																.length === 1 &&
+															! values
+																.attributes[ 0 ]
+																.attribute.id
+														}
+														label={ __(
+															'Remove attribute',
+															'woocommerce'
+														) }
+														onClick={ () =>
+															onRemove(
+																index,
+																values,
+																setValue
+															)
+														}
+													></Button>
+												</td>
+											</tr>
+										)
+									) }
+								</tbody>
 							</table>
 							<Button
 								variant="tertiary"

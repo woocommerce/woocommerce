@@ -37,14 +37,16 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 
 	const onAddNewAttributes = ( newAttributes: ProductAttribute[] ) => {
 		onChange( [
-			...value,
+			...( value || [] ),
 			...newAttributes
 				.filter(
 					( newAttr ) =>
-						! value.find( ( attr ) => attr.id === newAttr.id )
+						! ( value || [] ).find(
+							( attr ) => attr.id === newAttr.id
+						)
 				)
 				.map( ( newAttr, index ) => {
-					newAttr.position = value.length + index;
+					newAttr.position = ( value || [] ).length + index;
 					return newAttr;
 				} ),
 		] );

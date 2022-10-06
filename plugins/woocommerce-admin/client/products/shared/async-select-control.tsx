@@ -59,7 +59,7 @@ export function AsyncSelectControl< ItemType >( {
 				}
 			);
 		},
-		[ setFetchedItems, setIsFetching ]
+		[ setFetchedItems, setIsFetching, onSearch ]
 	);
 
 	useEffect( () => {
@@ -101,7 +101,7 @@ export function AsyncSelectControl< ItemType >( {
 				getFilteredItems={ getFilteredItems }
 				disabled={ disabled }
 				items={ fetchedItems }
-				onInputChange={ fetchItems }
+				onInputChange={ onInputChange }
 				selected={ selected }
 				onSelect={ onSelect }
 				onRemove={ onRemove }
