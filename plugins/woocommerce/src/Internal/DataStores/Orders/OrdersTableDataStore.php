@@ -546,6 +546,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether permissions are granted.
 	 */
 	public function get_download_permissions_granted( $order ) {
+		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
 		return $order->get_download_permissions_granted();
 	}
 
@@ -571,6 +572,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether sales are recorded.
 	 */
 	public function get_recorded_sales( $order ) {
+		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
 		return $order->get_recorded_sales();
 	}
 
@@ -596,6 +598,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether coupon counts were updated.
 	 */
 	public function get_recorded_coupon_usage_counts( $order ) {
+		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
 		return $order->get_recorded_coupon_usage_counts();
 	}
 
@@ -621,6 +624,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether email is sent.
 	 */
 	public function get_email_sent( $order ) {
+		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
 		return $order->get_new_order_email_sent();
 	}
 
@@ -646,6 +650,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether email was sent.
 	 */
 	public function get_new_order_email_sent( $order ) {
+		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
 		return $order->get_new_order_email_sent();
 	}
 
@@ -1608,12 +1613,32 @@ FROM $order_meta_table
 				return;
 			}
 
+			/**
+			 * Fires immediately before an order is deleted from the database.
+			 *
+			 * @since 7.1.0
+			 *
+			 * @param int      $order_id ID of the order about to be deleted.
+			 * @param WC_Order $order    Instance of the order that is about to be deleted.
+			 */
+			do_action( 'woocommerce_before_delete_order', $order_id, $order );
+
 			// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
 			// Once we stop creating posts for orders, we should do the cleanup here instead.
 			wp_delete_post( $order_id );
 
 			do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		} else {
+			/**
+			 * Fires immediately before an order is trashed.
+			 *
+			 * @since 7.1.0
+			 *
+			 * @param int      $order_id ID of the order about to be deleted.
+			 * @param WC_Order $order    Instance of the order that is about to be deleted.
+			 */
+			do_action( 'woocommerce_before_trash_order', $order_id, $order );
+
 			$this->trash_order( $order );
 
 			do_action( 'woocommerce_trash_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment

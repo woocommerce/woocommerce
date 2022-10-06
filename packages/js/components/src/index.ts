@@ -15,7 +15,7 @@ export { default as EmptyContent } from './empty-content';
 export { default as Flag } from './flag';
 export { Form, useFormContext } from './form';
 export { FormSection } from './form-section';
-export type { FormContext, FormRef } from './form';
+export type { FormContext, FormRef, FormErrors } from './form';
 export { default as FilterPicker } from './filter-picker';
 export { H, Section } from './section';
 export { ImageGallery } from './image-gallery';
@@ -44,6 +44,7 @@ export { SelectControl as __experimentalSelectControl } from './experimental-sel
 export { MenuItem as __experimentalSelectControlMenuItem } from './experimental-select-control/menu-item';
 export { default as ScrollTo } from './scroll-to';
 export { Sortable } from './sortable';
+export { ListItem } from './list-item';
 export { default as Spinner } from './spinner';
 export { default as Stepper, StepperProps } from './stepper';
 export { default as SummaryList } from './summary';

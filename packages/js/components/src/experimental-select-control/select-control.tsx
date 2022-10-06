@@ -2,9 +2,13 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { createElement } from 'react';
+import {
+	createElement,
+	Fragment,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 import { useCombobox, useMultipleSelection } from 'downshift';
-import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -29,7 +33,6 @@ type SelectControlProps< ItemType > = {
 	children?: ChildrenType< ItemType >;
 	items: ItemType[];
 	label: string;
-	initialSelectedItems?: ItemType[];
 	getItemLabel?: getItemLabelType< ItemType >;
 	getItemValue?: getItemValueType< ItemType >;
 	getFilteredItems?: (
@@ -38,6 +41,7 @@ type SelectControlProps< ItemType > = {
 		selectedItems: ItemType[],
 		getItemLabel: getItemLabelType< ItemType >
 	) => ItemType[];
+	hasExternalTags?: boolean;
 	multiple?: boolean;
 	onInputChange?: ( value: string | undefined ) => void;
 	onRemove?: ( item: ItemType ) => void;
@@ -49,6 +53,7 @@ type SelectControlProps< ItemType > = {
 function SelectControl< ItemType = DefaultItemType >( {
 	getItemLabel = defaultGetItemLabel,
 	getItemValue = defaultGetItemValue,
+	hasExternalTags = false,
 	children = ( {
 		items: renderItems,
 		highlightedIndex,
@@ -84,6 +89,19 @@ function SelectControl< ItemType = DefaultItemType >( {
 }: SelectControlProps< ItemType > ) {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
+
+	let selectedItems = selected === null ? [] : selected;
+	selectedItems = Array.isArray( selectedItems )
+		? selectedItems
+		: [ selectedItems ].filter( Boolean );
+	const singleSelectedItem =
+		! multiple && selectedItems.length ? selectedItems[ 0 ] : null;
+	const filteredItems = getFilteredItems(
+		items,
+		inputValue,
+		selectedItems,
+		getItemLabel
+	);
 	const {
 		addSelectedItem,
 		getSelectedItemProps,
@@ -91,17 +109,15 @@ function SelectControl< ItemType = DefaultItemType >( {
 		removeSelectedItem,
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
-	} = useMultipleSelection( { itemToString: getItemLabel } );
-	let selectedItems = selected === null ? [] : selected;
-	selectedItems = Array.isArray( selectedItems )
-		? selectedItems
-		: [ selectedItems ].filter( Boolean );
-	const filteredItems = getFilteredItems(
-		items,
-		inputValue,
-		selectedItems,
-		getItemLabel
-	);
+	} = useMultipleSelection( { itemToString: getItemLabel, selectedItems } );
+
+	useEffect( () => {
+		if ( multiple ) {
+			return;
+		}
+
+		setInputValue( getItemLabel( singleSelectedItem ) );
+	}, [ singleSelectedItem ] );
 
 	const {
 		isOpen,
@@ -112,8 +128,9 @@ function SelectControl< ItemType = DefaultItemType >( {
 		highlightedIndex,
 		getItemProps,
 		selectItem,
-		selectedItem: singleSelectedItem,
+		selectedItem: comboboxSingleSelectedItem,
 	} = useCombobox< ItemType | null >( {
+		initialSelectedItem: singleSelectedItem,
 		inputValue,
 		items: filteredItems,
 		itemToString: getItemLabel,
@@ -142,7 +159,9 @@ function SelectControl< ItemType = DefaultItemType >( {
 					}
 
 					if ( ! selectedItem && ! multiple ) {
-						setInputValue( getItemLabel( singleSelectedItem ) );
+						setInputValue(
+							getItemLabel( comboboxSingleSelectedItem )
+						);
 					}
 
 					break;
@@ -158,6 +177,16 @@ function SelectControl< ItemType = DefaultItemType >( {
 		onRemove( item );
 	};
 
+	const selectedItemTags = multiple ? (
+		<SelectedItems
+			items={ selectedItems }
+			getItemLabel={ getItemLabel }
+			getItemValue={ getItemValue }
+			getSelectedItemProps={ getSelectedItemProps }
+			onRemove={ onRemoveItem }
+		/>
+	) : null;
+
 	return (
 		<div
 			className={ classnames( 'woocommerce-experimental-select-control', {
@@ -168,38 +197,33 @@ function SelectControl< ItemType = DefaultItemType >( {
 			{ /* eslint-disable jsx-a11y/label-has-for */ }
 			<label { ...getLabelProps() }>{ label }</label>
 			{ /* eslint-enable jsx-a11y/label-has-for */ }
-			<div className="woocommerce-experimental-select-control__combo-box-wrapper">
-				{ multiple && (
-					<SelectedItems
-						items={ selectedItems }
-						getItemLabel={ getItemLabel }
-						getItemValue={ getItemValue }
-						getSelectedItemProps={ getSelectedItemProps }
-						onRemove={ onRemoveItem }
-					/>
-				) }
-				<ComboBox
-					comboBoxProps={ getComboboxProps() }
-					inputProps={ getInputProps( {
-						...getDropdownProps( { preventKeyAction: isOpen } ),
-						className:
-							'woocommerce-experimental-select-control__input',
-						onFocus: () => setIsFocused( true ),
-						onBlur: () => setIsFocused( false ),
-						placeholder,
+			<ComboBox
+				comboBoxProps={ getComboboxProps() }
+				inputProps={ getInputProps( {
+					...getDropdownProps( {
+						preventKeyAction: isOpen,
+					} ),
+					className: 'woocommerce-experimental-select-control__input',
+					onFocus: () => setIsFocused( true ),
+					onBlur: () => setIsFocused( false ),
+					placeholder,
+				} ) }
+			>
+				<>
+					{ children( {
+						items: filteredItems,
+						highlightedIndex,
+						getItemProps,
+						getMenuProps,
+						isOpen,
+						getItemLabel,
+						getItemValue,
 					} ) }
-				/>
-			</div>
+					{ ! hasExternalTags && selectedItemTags }
+				</>
+			</ComboBox>
 
-			{ children( {
-				items: filteredItems,
-				highlightedIndex,
-				getItemProps,
-				getMenuProps,
-				isOpen,
-				getItemLabel,
-				getItemValue,
-			} ) }
+			{ hasExternalTags && selectedItemTags }
 		</div>
 	);
 }

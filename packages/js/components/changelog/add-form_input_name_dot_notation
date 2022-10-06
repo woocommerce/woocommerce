@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add form input name dot notation name="product.dimensions.width"

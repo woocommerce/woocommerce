@@ -2,6 +2,8 @@
     position: absolute;
     width: 100%;
     top: 100%;
+    left: 0;
+    margin-top: $gap-smaller;
     box-sizing: border-box;
     display: none;
     background: $studio-white;

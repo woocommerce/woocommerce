@@ -618,7 +618,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		$exclude = (array) $request['exclude_meta'];
 
 		if ( ! empty( $include ) ) {
-			return array_filter(
+			$meta_data = array_filter(
 				$meta_data,
 				function( WC_Meta_Data $item ) use ( $include ) {
 					$data = $item->get_data();
@@ -626,7 +626,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 				}
 			);
 		} elseif ( ! empty( $exclude ) ) {
-			return array_filter(
+			$meta_data = array_filter(
 				$meta_data,
 				function( WC_Meta_Data $item ) use ( $exclude ) {
 					$data = $item->get_data();
@@ -635,6 +635,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 			);
 		}
 
-		return $meta_data;
+		// Ensure the array indexes are reset so it doesn't get converted to an object in JSON.
+		return array_values( $meta_data );
 	}
 }

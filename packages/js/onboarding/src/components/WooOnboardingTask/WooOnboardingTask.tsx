@@ -20,9 +20,8 @@ export const trackView = async ( taskId: string, variant?: string ) => {
 		.select( 'wc/admin/plugins' )
 		.getInstalledPlugins();
 
-	const isJetpackConnected: boolean = wp.data
-		.select( 'wc/admin/plugins' )
-		.isJetpackConnected();
+	const isJetpackConnected: boolean =
+		wp.data.select( 'wc/admin/plugins' ).isJetpackConnected() || false;
 
 	recordEvent( 'task_view', {
 		task_name: taskId,
