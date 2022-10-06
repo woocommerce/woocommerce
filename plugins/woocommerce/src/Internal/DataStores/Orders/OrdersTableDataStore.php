@@ -824,6 +824,27 @@ WHERE
 
 	//phpcs:enable Squiz.Commenting, Generic.Commenting
 
+	public function get_orders_type( $order_ids ) {
+		global $wpdb;
+
+		$orders_table = self::get_orders_table_name();
+		$order_ids_placeholder = implode( ', ', array_fill( 0, count( $order_ids ), '%d' ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id, type FROM {$orders_table} WHERE id IN ( $order_ids_placeholder )",
+				$order_ids
+			)
+		);
+		// phpcs:enable
+		$order_types = array();
+		foreach ( $results as $row ) {
+			$order_types[$row->id ] = $row->type;
+		}
+		return $order_types;
+	}
+
 	/**
 	 * Get order type from DB.
 	 *
