@@ -17,7 +17,7 @@ import type {
 	responseTypes,
 	noticeContexts,
 } from '../../base/context/event-emit';
-import type { PaymentMethodCurrentStatusType } from '../../base/context/providers/cart-checkout/payment-methods/types';
+import type { PaymentMethodCurrentStatusType } from '../../base/context/providers/cart-checkout/payment-events/types';
 import type {
 	CartResponseShippingAddress,
 	CartResponseCouponItem,

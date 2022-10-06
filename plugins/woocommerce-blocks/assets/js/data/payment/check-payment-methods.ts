@@ -20,7 +20,7 @@ import {
  * Internal dependencies
  */
 import { STORE_KEY as CART_STORE_KEY } from '../cart/constants';
-import { STORE_KEY as PAYMENT_METHOD_DATA_STORE_KEY } from './constants';
+import { STORE_KEY as PAYMENT_STORE_KEY } from './constants';
 import { noticeContexts } from '../../base/context/event-emit';
 
 export const checkPaymentMethodsCanPay = async ( express = false ) => {
@@ -113,10 +113,8 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 		}
 	}
 	const currentlyAvailablePaymentMethods = express
-		? select(
-				PAYMENT_METHOD_DATA_STORE_KEY
-		  ).getAvailableExpressPaymentMethods()
-		: select( PAYMENT_METHOD_DATA_STORE_KEY ).getAvailablePaymentMethods();
+		? select( PAYMENT_STORE_KEY ).getAvailableExpressPaymentMethods()
+		: select( PAYMENT_STORE_KEY ).getAvailablePaymentMethods();
 
 	const availablePaymentMethodNames = Object.keys( availablePaymentMethods );
 	if (
@@ -133,7 +131,7 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 	const {
 		__internalSetAvailablePaymentMethods,
 		__internalSetAvailableExpressPaymentMethods,
-	} = dispatch( PAYMENT_METHOD_DATA_STORE_KEY );
+	} = dispatch( PAYMENT_STORE_KEY );
 	if ( express ) {
 		__internalSetAvailableExpressPaymentMethods( availablePaymentMethods );
 		return true;

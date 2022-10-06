@@ -11,10 +11,7 @@ import { DataRegistry } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import type {
-	emitterCallback,
-	EventObserversType,
-} from '../../base/context/event-emit';
+import type { EventObserversType } from '../../base/context/event-emit';
 import type { DispatchFromMap } from '../mapped-types';
 import * as actions from './actions';
 import { FieldValidationStatus } from '../types';
@@ -69,11 +66,6 @@ export type PaymentMethodCurrentStatusType = {
 	isSuccessful: boolean;
 	// If true, an express payment is in progress.
 	isDoingExpressPayment: boolean;
-};
-
-export type PaymentMethodEventsContextType = {
-	// Event registration callback for registering observers for the payment processing event.
-	onPaymentProcessing: ReturnType< typeof emitterCallback >;
 };
 
 export type PaymentMethodsDispatcherType = (

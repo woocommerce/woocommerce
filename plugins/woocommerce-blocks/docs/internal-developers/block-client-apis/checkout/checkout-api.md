@@ -122,7 +122,7 @@ The shipping method data context exposes the api interfaces for the following th
 
 ### Payment Method Events Context
 
-The payment method events context exposes any event handlers related to payments (typedef `PaymentMethodEventsContext`) via the `usePaymentMethodEventsContext` hook.
+The payment method events context exposes any event handlers related to payments (typedef `PaymentEventsContext`) via the `usePaymentEventsContext` hook.
 
 -   `onPaymentProcessing`: This is an event subscriber that can be used to subscribe observers to be called when the status for the context is `PROCESSING`.
 

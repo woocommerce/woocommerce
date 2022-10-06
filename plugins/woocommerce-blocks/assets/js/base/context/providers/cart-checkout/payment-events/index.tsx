@@ -11,34 +11,39 @@ import {
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	CHECKOUT_STORE_KEY,
-	PAYMENT_METHOD_DATA_STORE_KEY,
+	PAYMENT_STORE_KEY,
 	VALIDATION_STORE_KEY,
 } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
  */
-import type { PaymentMethodEventsContextType } from '../../../../../data/payment/types';
-import { DEFAULT_PAYMENT_METHOD_DATA } from './constants';
 import { useEventEmitters, reducer as emitReducer } from './event-emit';
 import { useCustomerData } from '../../../hooks/use-customer-data';
+import { emitterCallback } from '../../../event-emit';
 
-const PaymentMethodEventsContext = createContext( DEFAULT_PAYMENT_METHOD_DATA );
+type PaymentEventsContextType = {
+	// Event registration callback for registering observers for the payment processing event.
+	onPaymentProcessing: ReturnType< typeof emitterCallback >;
+};
 
-export const usePaymentMethodEventsContext =
-	(): PaymentMethodEventsContextType => {
-		return useContext( PaymentMethodEventsContext );
-	};
+const PaymentEventsContext = createContext< PaymentEventsContextType >( {
+	onPaymentProcessing: () => () => () => void null,
+} );
+
+export const usePaymentEventsContext = () => {
+	return useContext( PaymentEventsContext );
+};
 
 /**
- * PaymentMethodDataProvider is automatically included in the CheckoutDataProvider.
+ * PaymentEventsProvider is automatically included in the CheckoutProvider.
  *
- * This provides the api interface (via the context hook) for payment method status and data.
+ * This provides the api interface (via the context hook) for payment status and data.
  *
  * @param {Object} props          Incoming props for provider
  * @param {Object} props.children The wrapped components in this provider.
  */
-export const PaymentMethodDataProvider = ( {
+export const PaymentEventsProvider = ( {
 	children,
 }: {
 	children: React.ReactNode;
@@ -58,7 +63,7 @@ export const PaymentMethodDataProvider = ( {
 		};
 	} );
 	const { currentStatus } = useSelect( ( select ) => {
-		const store = select( PAYMENT_METHOD_DATA_STORE_KEY );
+		const store = select( PAYMENT_STORE_KEY );
 
 		return {
 			currentStatus: store.getCurrentStatus(),
@@ -80,7 +85,7 @@ export const PaymentMethodDataProvider = ( {
 		__internalSetPaymentStatus,
 		__internalSetPaymentMethodData,
 		__internalEmitPaymentProcessingEvent,
-	} = useDispatch( PAYMENT_METHOD_DATA_STORE_KEY );
+	} = useDispatch( PAYMENT_STORE_KEY );
 	const { setBillingAddress, setShippingAddress } = useCustomerData();
 
 	// flip payment to processing if checkout processing is complete, there are no errors, and payment status is started.
@@ -147,13 +152,13 @@ export const PaymentMethodDataProvider = ( {
 		__internalEmitPaymentProcessingEvent,
 	] );
 
-	const paymentContextData: PaymentMethodEventsContextType = {
+	const paymentContextData = {
 		onPaymentProcessing,
 	};
 
 	return (
-		<PaymentMethodEventsContext.Provider value={ paymentContextData }>
+		<PaymentEventsContext.Provider value={ paymentContextData }>
 			{ children }
-		</PaymentMethodEventsContext.Provider>
+		</PaymentEventsContext.Provider>
 	);
 };

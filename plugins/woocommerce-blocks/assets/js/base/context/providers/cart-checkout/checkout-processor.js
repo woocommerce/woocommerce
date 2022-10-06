@@ -17,7 +17,7 @@ import {
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	CHECKOUT_STORE_KEY,
-	PAYMENT_METHOD_DATA_STORE_KEY,
+	PAYMENT_STORE_KEY,
 	VALIDATION_STORE_KEY,
 } from '@woocommerce/block-data';
 import {
@@ -79,7 +79,7 @@ const CheckoutProcessor = () => {
 		currentPaymentStatus,
 		shouldSavePayment,
 	} = useSelect( ( select ) => {
-		const store = select( PAYMENT_METHOD_DATA_STORE_KEY );
+		const store = select( PAYMENT_STORE_KEY );
 
 		return {
 			activePaymentMethod: store.getActivePaymentMethod(),

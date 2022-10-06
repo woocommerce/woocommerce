@@ -1,4 +1,4 @@
-export * from './payment-methods';
+export * from './payment-events';
 export * from './shipping';
 export * from './customer';
 export * from './checkout-events';

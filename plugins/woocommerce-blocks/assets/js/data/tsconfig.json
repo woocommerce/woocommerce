@@ -7,7 +7,7 @@
 		"../mapped-types.ts",
 		"../settings/shared/index.js",
 		"../settings/blocks/index.js",
-		"../base/context/providers/cart-checkout/payment-methods/**.ts",
+		"../base/context/providers/cart-checkout/payment-events/**.ts",
 		"../utils/notices.ts",
 		"../base/context/providers/cart-checkout/checkout-events/**.ts",
 		"../base/context/event-emit",

@@ -6,7 +6,7 @@ import classnames from 'classnames';
 import { Notice } from 'wordpress-components';
 import { sanitizeHTML } from '@woocommerce/utils';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { PAYMENT_METHOD_DATA_STORE_KEY } from '@woocommerce/block-data';
+import { PAYMENT_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -32,7 +32,7 @@ export const StoreNoticesContainer = ( {
 	additionalNotices = [],
 } ) => {
 	const isExpressPaymentMethodActive = useSelect( ( select ) =>
-		select( PAYMENT_METHOD_DATA_STORE_KEY ).isExpressPaymentMethodActive()
+		select( PAYMENT_STORE_KEY ).isExpressPaymentMethodActive()
 	);
 
 	const { notices } = useSelect( ( select ) => {

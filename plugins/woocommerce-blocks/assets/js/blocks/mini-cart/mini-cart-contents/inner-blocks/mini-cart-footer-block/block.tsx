@@ -13,7 +13,7 @@ import { getIconsFromPaymentMethods } from '@woocommerce/base-utils';
 import { getSetting } from '@woocommerce/settings';
 import { CART_URL, CHECKOUT_URL } from '@woocommerce/block-settings';
 import Button from '@woocommerce/base-components/button';
-import { PaymentMethodDataProvider } from '@woocommerce/base-context';
+import { PaymentEventsProvider } from '@woocommerce/base-context';
 import classNames from 'classnames';
 
 const PaymentMethodIconsElement = (): JSX.Element => {
@@ -71,9 +71,9 @@ const Block = ( { className }: Props ): JSX.Element => {
 					</Button>
 				) }
 			</div>
-			<PaymentMethodDataProvider>
+			<PaymentEventsProvider>
 				<PaymentMethodIconsElement />
-			</PaymentMethodDataProvider>
+			</PaymentEventsProvider>
 		</div>
 	);
 };

@@ -7,7 +7,7 @@ import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundar
 /**
  * Internal dependencies
  */
-import { PaymentMethodDataProvider } from './payment-methods';
+import { PaymentEventsProvider } from './payment-events';
 import { ShippingDataProvider } from './shipping';
 import { CustomerDataProvider } from './customer';
 import { CheckoutEventsProvider } from './checkout-events';
@@ -30,7 +30,7 @@ export const CheckoutProvider = ( { children, redirectUrl } ) => {
 		<CheckoutEventsProvider redirectUrl={ redirectUrl }>
 			<CustomerDataProvider>
 				<ShippingDataProvider>
-					<PaymentMethodDataProvider>
+					<PaymentEventsProvider>
 						{ children }
 						{ /* If the current user is an admin, we let BlockErrorBoundary render
 								the error, or we simply die silently. */ }
@@ -42,7 +42,7 @@ export const CheckoutProvider = ( { children, redirectUrl } ) => {
 							<PluginArea scope="woocommerce-checkout" />
 						</BlockErrorBoundary>
 						<CheckoutProcessor />
-					</PaymentMethodDataProvider>
+					</PaymentEventsProvider>
 				</ShippingDataProvider>
 			</CustomerDataProvider>
 		</CheckoutEventsProvider>

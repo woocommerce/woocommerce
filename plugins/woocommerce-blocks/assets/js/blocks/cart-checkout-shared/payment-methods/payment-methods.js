@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import Label from '@woocommerce/base-components/label';
 import { select } from '@wordpress/data';
-import { PAYMENT_METHOD_DATA_STORE_KEY } from '@woocommerce/block-data';
+import { PAYMENT_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -23,7 +23,7 @@ const PaymentMethods = () => {
 		paymentMethodsInitialized,
 		availablePaymentMethods,
 		savedPaymentMethods,
-	} = select( PAYMENT_METHOD_DATA_STORE_KEY ).getState();
+	} = select( PAYMENT_STORE_KEY ).getState();
 
 	if (
 		paymentMethodsInitialized &&

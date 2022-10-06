@@ -4,10 +4,7 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { previewCart } from '@woocommerce/resource-previews';
 import * as wpDataFunctions from '@wordpress/data';
-import {
-	CART_STORE_KEY,
-	PAYMENT_METHOD_DATA_STORE_KEY,
-} from '@woocommerce/block-data';
+import { CART_STORE_KEY, PAYMENT_STORE_KEY } from '@woocommerce/block-data';
 import { default as fetchMock } from 'jest-fetch-mock';
 import {
 	registerPaymentMethod,
@@ -50,7 +47,7 @@ const selectMock = jest
 	.spyOn( wpDataFunctions, 'select' )
 	.mockImplementation( ( storeName ) => {
 		const originalStore = originalSelect( storeName );
-		if ( storeName === PAYMENT_METHOD_DATA_STORE_KEY ) {
+		if ( storeName === PAYMENT_STORE_KEY ) {
 			return {
 				...originalStore,
 				getState: () => {
@@ -84,9 +81,7 @@ const registerMockPaymentMethods = () => {
 			ariaLabel: name,
 		} );
 	} );
-	dispatch(
-		PAYMENT_METHOD_DATA_STORE_KEY
-	).__internalInitializePaymentMethodDataStore();
+	dispatch( PAYMENT_STORE_KEY ).__internalInitializePaymentStore();
 };
 
 const resetMockPaymentMethods = () => {
@@ -136,7 +131,7 @@ describe( 'PaymentMethods', () => {
 		const ShowActivePaymentMethod = () => {
 			const { activePaymentMethod, activeSavedToken } =
 				wpDataFunctions.useSelect( ( select ) => {
-					const store = select( PAYMENT_METHOD_DATA_STORE_KEY );
+					const store = select( PAYMENT_STORE_KEY );
 					return {
 						activePaymentMethod: store.getActivePaymentMethod(),
 						activeSavedToken: store.getActiveSavedToken(),
@@ -159,7 +154,7 @@ describe( 'PaymentMethods', () => {
 		await waitFor( () => {
 			expect(
 				wpDataFunctions
-					.select( PAYMENT_METHOD_DATA_STORE_KEY )
+					.select( PAYMENT_STORE_KEY )
 					.getActivePaymentMethod()
 			).toBe( 'cod' );
 		} );

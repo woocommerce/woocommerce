@@ -40,4 +40,4 @@ declare module '@wordpress/data' {
 	};
 }
 
-export const PAYMENT_METHOD_DATA_STORE_KEY = STORE_KEY;
+export const PAYMENT_STORE_KEY = STORE_KEY;

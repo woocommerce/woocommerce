@@ -20,14 +20,14 @@ import { useDispatch, useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import PaymentMethodErrorBoundary from './payment-method-error-boundary';
-import { STORE_KEY as PAYMENT_METHOD_DATA_STORE_KEY } from '../../../data/payment/constants';
+import { STORE_KEY as PAYMENT_STORE_KEY } from '../../../data/payment/constants';
 
 const ExpressPaymentMethods = () => {
 	const { isEditor } = useEditorContext();
 
 	const { activePaymentMethod, paymentMethodData } = useSelect(
 		( select ) => {
-			const store = select( PAYMENT_METHOD_DATA_STORE_KEY );
+			const store = select( PAYMENT_STORE_KEY );
 			return {
 				activePaymentMethod: store.getActivePaymentMethod(),
 				paymentMethodData: store.getPaymentMethodData(),
@@ -38,7 +38,7 @@ const ExpressPaymentMethods = () => {
 		__internalSetActivePaymentMethod,
 		__internalSetPaymentStatus,
 		__internalSetExpressPaymentError,
-	} = useDispatch( PAYMENT_METHOD_DATA_STORE_KEY );
+	} = useDispatch( PAYMENT_STORE_KEY );
 	const { paymentMethods } = useExpressPaymentMethods();
 
 	const paymentMethodInterface = usePaymentMethodInterface();

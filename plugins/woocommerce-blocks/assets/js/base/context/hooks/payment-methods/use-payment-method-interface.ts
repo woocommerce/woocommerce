@@ -11,10 +11,7 @@ import deprecated from '@wordpress/deprecated';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import type { PaymentMethodInterface } from '@woocommerce/types';
 import { useSelect, useDispatch } from '@wordpress/data';
-import {
-	CHECKOUT_STORE_KEY,
-	PAYMENT_METHOD_DATA_STORE_KEY,
-} from '@woocommerce/block-data';
+import { CHECKOUT_STORE_KEY, PAYMENT_STORE_KEY } from '@woocommerce/block-data';
 import { ValidationInputError } from '@woocommerce/base-components/validation-input-error';
 
 /**
@@ -24,7 +21,7 @@ import { useStoreCart } from '../cart/use-store-cart';
 import { useStoreCartCoupons } from '../cart/use-store-cart-coupons';
 import { noticeContexts, responseTypes } from '../../event-emit';
 import { useCheckoutEventsContext } from '../../providers/cart-checkout/checkout-events';
-import { usePaymentMethodEventsContext } from '../../providers/cart-checkout/payment-methods';
+import { usePaymentEventsContext } from '../../providers/cart-checkout/payment-events';
 import { useShippingDataContext } from '../../providers/cart-checkout/shipping';
 import { useCustomerDataContext } from '../../providers/cart-checkout/customer';
 import { prepareTotalItems } from './utils';
@@ -55,7 +52,7 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 		} );
 	const { currentStatus, activePaymentMethod, shouldSavePayment } = useSelect(
 		( select ) => {
-			const store = select( PAYMENT_METHOD_DATA_STORE_KEY );
+			const store = select( PAYMENT_STORE_KEY );
 
 			return {
 				currentStatus: store.getCurrentStatus(),
@@ -65,11 +62,10 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 		}
 	);
 
-	const { __internalSetExpressPaymentError } = useDispatch(
-		PAYMENT_METHOD_DATA_STORE_KEY
-	);
+	const { __internalSetExpressPaymentError } =
+		useDispatch( PAYMENT_STORE_KEY );
 
-	const { onPaymentProcessing } = usePaymentMethodEventsContext();
+	const { onPaymentProcessing } = usePaymentEventsContext();
 	const {
 		shippingErrorStatus,
 		shippingErrorTypes,
