@@ -36,15 +36,20 @@ export const deletePlugin = async ( {
 		},
 	} );
 
-	const response = await apiContext.get( `/wp-json/wp/v2/plugins/${ slug }` );
+	const response = await apiContext.get( `/wp-json/wp/v2/plugins/${ slug }`, {
+		failOnStatusCode: true,
+	} );
 
 	// If installed, deactivate and delete it.
 	if ( response.ok() ) {
 		await apiContext.put( `/wp-json/wp/v2/plugins/${ slug }`, {
 			data: { status: 'inactive' },
+			failOnStatusCode: true,
 		} );
 
-		await apiContext.delete( `/wp-json/wp/v2/plugins/${ slug }` );
+		await apiContext.delete( `/wp-json/wp/v2/plugins/${ slug }`, {
+			failOnStatusCode: true,
+		} );
 	}
 
 	// Dispose all responses.
