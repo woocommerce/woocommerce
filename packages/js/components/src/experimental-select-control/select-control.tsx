@@ -59,6 +59,7 @@ type SelectControlProps< ItemType > = {
 	placeholder?: string;
 	selected: ItemType | ItemType[] | null;
 	className?: string;
+	disabled?: boolean;
 };
 
 export const selectControlStateChangeTypes = useCombobox.stateChangeTypes;
@@ -102,6 +103,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 	placeholder,
 	selected,
 	className,
+	disabled,
 }: SelectControlProps< ItemType > ) {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
@@ -245,6 +247,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 					},
 					onBlur: () => setIsFocused( false ),
 					placeholder,
+					disabled,
 				} ) }
 			>
 				<>
