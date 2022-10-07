@@ -3,6 +3,7 @@
 ## Table of Contents
 
 -   [wc/store/checkout](checkout.md)
+-   [wc/store/validation](validation.md)
 
 <!-- FEEDBACK -->
 
