@@ -269,7 +269,7 @@ jQuery( function( $ ) {
 					var select2_args = $.extend( {
 						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
 						placeholder       : $( this ).data( 'placeholder' ),
-						minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : 3,
+						minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : '3',
 						escapeMarkup      : function( m ) {
 							return m;
 						},
@@ -291,6 +291,94 @@ jQuery( function( $ ) {
 										terms.push({
 											id:   'id' === return_format ? term.term_id : term.slug,
 											text: term.formatted_name
+										});
+									});
+								}
+								return {
+									results: terms
+								};
+							},
+							cache: true
+						}
+					}, getEnhancedSelectFormatString() );
+
+					$( this ).selectWoo( select2_args ).addClass( 'enhanced' );
+				});
+
+				// Ajax category search boxes
+				$( ':input.wc-taxonomy-term-search' ).filter( ':not(.enhanced)' ).each( function() {
+					var return_format = $( this ).data( 'return_id' ) ? 'id' : 'slug';
+
+					var select2_args = $.extend( {
+						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
+						placeholder       : $( this ).data( 'placeholder' ),
+						minimumInputLength: $( this ).data( 'minimum_input_length' ) ?? '3',
+						escapeMarkup      : function( m ) {
+							return m;
+						},
+						ajax: {
+							url:         wc_enhanced_select_params.ajax_url,
+							dataType:    'json',
+							delay:       250,
+							data:        function( params ) {
+								return {
+									taxonomy: $( this ).data( 'taxonomy' ),
+									limit:    $( this ).data( 'limit' ),
+									term:     params.term,
+									action:   'woocommerce_json_search_taxonomy_terms',
+									security: wc_enhanced_select_params.search_taxonomy_terms_nonce
+								};
+							},
+							processResults: function( data ) {
+								var terms = [];
+								if ( data ) {
+									$.each( data, function( id, term ) {
+										terms.push({
+											id:   'id' === return_format ? term.term_id : term.slug,
+											text: term.name
+										});
+									});
+								}
+								return {
+									results: terms
+								};
+							},
+							cache: true
+						}
+					}, getEnhancedSelectFormatString() );
+
+					$( this ).selectWoo( select2_args ).addClass( 'enhanced' );
+				});
+
+				$( ':input.wc-attribute-search' ).filter( ':not(.enhanced)' ).each( function() {
+					var select2Element = this;
+					var select2_args = $.extend( {
+						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
+						placeholder       : $( this ).data( 'placeholder' ),
+						minimumInputLength: $( this ).data( 'minimum_input_length' ) ?? '3',
+						escapeMarkup      : function( m ) {
+							return m;
+						},
+						ajax: {
+							url:         wc_enhanced_select_params.ajax_url,
+							dataType:    'json',
+							delay:       250,
+							data:        function( params ) {
+								return {
+									term:     params.term,
+									action:   'woocommerce_json_search_product_attributes',
+									security: wc_enhanced_select_params.search_product_attributes_nonce
+								};
+							},
+							processResults: function( data ) {
+								var disabledItems = $( select2Element ).data('disabled-items') || [];
+								var terms = [];
+								if ( data ) {
+									$.each( data, function( id, term ) {
+										terms.push({
+											id:   term.slug,
+											text: term.name,
+											disabled: disabledItems.includes( term.slug )
 										});
 									});
 								}

@@ -1,16 +1,17 @@
 .woocommerce-experimental-select-control__menu {
-    position: absolute;
-    width: 100%;
-    top: 100%;
-    left: 0;
-    margin-top: $gap-smaller;
-    box-sizing: border-box;
-    display: none;
-    background: $studio-white;
-    border: 1px solid $studio-gray-5;
-    border-radius: 3px;
+	position: absolute;
+	width: 100%;
+	top: 100%;
+	left: 0;
+	margin-top: $gap-smaller;
+	box-sizing: border-box;
+	display: none;
+	background: $studio-white;
+	border: 1px solid $studio-gray-5;
+	border-radius: 3px;
+	z-index: 10;
 
-    &.is-open.has-results {
-        display: block;
-    }
+	&.is-open.has-results {
+		display: block;
+	}
 }

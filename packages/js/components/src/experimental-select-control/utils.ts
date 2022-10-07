@@ -33,11 +33,16 @@ export const defaultGetFilteredItems = < ItemType >(
 	selectedItems: ItemType[],
 	getItemLabel: getItemLabelType< ItemType >
 ) => {
-	return allItems.filter(
-		( item ) =>
-			selectedItems.indexOf( item ) < 0 &&
-			getItemLabel( item )
-				.toLowerCase()
-				.startsWith( inputValue.toLowerCase() )
+	const escapedInputValue = inputValue.replace(
+		/[.*+?^${}()|[\]\\]/g,
+		'\\$&'
 	);
+	const re = new RegExp( escapedInputValue, 'gi' );
+
+	return allItems.filter( ( item ) => {
+		return (
+			selectedItems.indexOf( item ) < 0 &&
+			re.test( getItemLabel( item ).toLowerCase() )
+		);
+	} );
 };
