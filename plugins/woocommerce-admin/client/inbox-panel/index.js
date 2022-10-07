@@ -373,6 +373,9 @@ const InboxPanel = ( { showHeader = true } ) => {
 					{ Boolean( allNotes.length ) &&
 						renderNotes( {
 							loadMoreNotes: () => {
+								recordEvent( 'inbox_action_load_more', {
+									quantity_shown: allNotes.length,
+								} );
 								setNoteDisplayQty(
 									noteDisplayQty + ADD_NOTES_AMOUNT
 								);
