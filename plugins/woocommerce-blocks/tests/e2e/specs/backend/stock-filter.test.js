@@ -3,7 +3,6 @@
  */
 import {
 	switchUserToAdmin,
-	getAllBlocks,
 	openDocumentSettingsSidebar,
 } from '@wordpress/e2e-test-utils';
 import { visitBlockPage } from '@woocommerce/blocks-test-utils';
@@ -11,7 +10,6 @@ import { visitBlockPage } from '@woocommerce/blocks-test-utils';
 /**
  * Internal dependencies
  */
-import { closeInserter, insertBlockDontWaitForInsertClose } from '../../utils';
 import { findLabelWithText } from '../../../utils';
 
 const block = {
@@ -28,12 +26,6 @@ describe( `${ block.name } Block`, () => {
 
 	it( 'renders without crashing', async () => {
 		await expect( page ).toRenderBlock( block );
-	} );
-
-	it( 'can only be inserted once', async () => {
-		await insertBlockDontWaitForInsertClose( block.name );
-		await closeInserter();
-		expect( await getAllBlocks() ).toHaveLength( 1 );
 	} );
 
 	describe( 'attributes', () => {

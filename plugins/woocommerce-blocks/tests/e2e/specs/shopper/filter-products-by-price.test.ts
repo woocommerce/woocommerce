@@ -89,15 +89,16 @@ describe( `${ block.name } Block`, () => {
 
 		it( 'should show only products that match the filter', async () => {
 			const isRefreshed = jest.fn( () => void 0 );
+
 			page.on( 'load', isRefreshed );
+
 			await setMaxPrice();
-			await expect( page ).toMatchElement(
-				'.wc-block-active-filters__title',
-				{
-					text: 'Active filters',
-				}
-			);
+
 			await waitForAllProductsBlockLoaded();
+
+			await expect( page ).toMatchElement( '.wc-blocks-filter-wrapper', {
+				text: 'Active filters',
+			} );
 
 			const products = await page.$$( selectors.frontend.productsList );
 

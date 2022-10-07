@@ -8,6 +8,12 @@ import Label from '@woocommerce/base-components/label';
 import { getQueryArgs, addQueryArgs, removeQueryArgs } from '@wordpress/url';
 import { changeUrl } from '@woocommerce/utils';
 import { Icon, closeSmall } from '@wordpress/icons';
+import { isString } from '@woocommerce/types';
+
+/**
+ * Internal dependencies
+ */
+import metadata from './block.json';
 
 /**
  * Format a min/max price range to display.
@@ -276,4 +282,17 @@ export const urlContainsAttributeFilter = (
 	}
 
 	return filterIsInUrl;
+};
+
+export const parseAttributes = ( data: Record< string, unknown > ) => {
+	return {
+		heading: isString( data?.heading ) ? data.heading : '',
+		headingLevel:
+			( isString( data?.headingLevel ) &&
+				parseInt( data.headingLevel, 10 ) ) ||
+			metadata.attributes.headingLevel.default,
+		displayStyle:
+			( isString( data?.displayStyle ) && data.displayStyle ) ||
+			metadata.attributes.displayStyle.default,
+	};
 };

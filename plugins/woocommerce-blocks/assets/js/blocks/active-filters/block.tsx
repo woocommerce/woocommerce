@@ -35,6 +35,7 @@ import {
 import ActiveAttributeFilters from './active-attribute-filters';
 import FilterPlaceholders from './filter-placeholders';
 import { Attributes } from './types';
+import { useSetWraperVisibility } from '../filter-wrapper/context';
 
 /**
  * Component displaying active filters.
@@ -50,6 +51,7 @@ const ActiveFiltersBlock = ( {
 	attributes: Attributes;
 	isEditor?: boolean;
 } ) => {
+	const setWrapperVisibility = useSetWraperVisibility();
 	const isMounted = useIsMounted();
 	const componentHasMounted = isMounted();
 	const filteringForPhpTemplate = getSettingWithCoercion(
@@ -178,9 +180,9 @@ const ActiveFiltersBlock = ( {
 			);
 		} );
 	}, [
-		componentHasMounted,
-		setIsLoading,
 		productAttributes,
+		componentHasMounted,
+		STORE_ATTRIBUTES,
 		blockAttributes.displayStyle,
 	] );
 
@@ -259,6 +261,7 @@ const ActiveFiltersBlock = ( {
 	};
 
 	if ( ! shouldShowLoadingPlaceholders && ! hasFilters() && ! isEditor ) {
+		setWrapperVisibility( false );
 		return null;
 	}
 
@@ -284,8 +287,11 @@ const ActiveFiltersBlock = ( {
 	);
 
 	if ( ! hasFilterableProducts ) {
+		setWrapperVisibility( false );
 		return null;
 	}
+
+	setWrapperVisibility( true );
 
 	const listClasses = classnames( 'wc-block-active-filters__list', {
 		'wc-block-active-filters__list--chips':
