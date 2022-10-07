@@ -200,8 +200,7 @@ export const getPluginData = async (
 	const match = content.match( regex );
 
 	if ( ! match || match.length < 2 ) {
-		Logger.error( 'Failed to find plugin data!' );
-		return;
+		throw new Error( 'Failed to find plugin data!' );
 	}
 
 	return match[ 1 ]

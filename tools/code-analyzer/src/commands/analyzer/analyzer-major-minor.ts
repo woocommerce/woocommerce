@@ -20,24 +20,29 @@ const program = new Command()
 	)
 	.action( async ( branch, pathToMainFile, options ) => {
 		const { source } = options;
+		try {
+			Logger.startTask( `Making a temporary clone of '${ branch }'` );
+			const tmpRepoPath = await cloneRepo( source );
+			Logger.endTask();
 
-		Logger.startTask( `Making a temporary clone of '${ branch }'` );
-		const tmpRepoPath = await cloneRepo( source );
-		Logger.endTask();
+			Logger.startTask( `Getting version from ${ pathToMainFile }` );
+			const pluginData = await getPluginData(
+				tmpRepoPath,
+				pathToMainFile,
+				branch
+			);
+			Logger.endTask();
 
-		Logger.startTask( `Getting version from ${ pathToMainFile }` );
-		const pluginData = await getPluginData(
-			tmpRepoPath,
-			pathToMainFile,
-			branch
-		);
-		Logger.endTask();
-
-		if ( pluginData && pluginData.version ) {
-			const [ major, minor ] = pluginData.version.split( '.' );
-			Logger.notice( `${ major }.${ minor }.0` );
-		} else {
-			Logger.error( 'Failed to get version' );
+			if ( pluginData && pluginData.version ) {
+				const [ major, minor ] = pluginData.version.split( '.' );
+				Logger.notice( `${ major }.${ minor }.0` );
+			} else {
+				Logger.error( 'Failed to get version' );
+			}
+		} catch ( e ) {
+			if ( e instanceof Error ) {
+				Logger.error( e.message );
+			}
 		}
 	} );
 
