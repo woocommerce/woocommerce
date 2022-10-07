@@ -21,6 +21,9 @@ import {
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
+export const default12HourDateTimeFormat = 'MM/DD/YYYY h:mm a';
+export const default24HourDateTimeFormat = 'MM/DD/YYYY H:mm';
+
 export type DateTimePickerControlProps = {
 	currentDate?: string | null;
 	dateTimeFormat?: string;
@@ -37,7 +40,9 @@ export type DateTimePickerControlProps = {
 export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	currentDate,
 	is12Hour = true,
-	dateTimeFormat = is12Hour ? 'MM/DD/YYYY h:mm a' : 'MM/DD/YYYY H:mm',
+	dateTimeFormat = is12Hour
+		? default12HourDateTimeFormat
+		: default24HourDateTimeFormat,
 	disabled = false,
 	onChange,
 	onBlur,
