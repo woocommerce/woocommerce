@@ -2,13 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	Button,
-	CardBody,
-	CardFooter,
-	Modal,
-	Notice,
-} from '@wordpress/components';
+import { Button, Modal, Notice } from '@wordpress/components';
 import { trash } from '@wordpress/icons';
 import { ProductAttribute, ProductAttributeTerm } from '@woocommerce/data';
 import { Form } from '@woocommerce/components';
@@ -22,7 +16,7 @@ import { AttributeTermInputField } from '../attribute-term-input-field';
 
 type CreateCategoryModalProps = {
 	onCancel: () => void;
-	onCreated: ( newCategories: ProductAttribute[] ) => void;
+	onAdd: ( newCategories: ProductAttribute[] ) => void;
 	selectedAttributeIds?: number[];
 };
 
@@ -35,7 +29,7 @@ type AttributeForm = {
 
 export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 	onCancel,
-	onCreated,
+	onAdd,
 	selectedAttributeIds = [],
 } ) => {
 	const addAnother = (
@@ -54,7 +48,7 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 		] );
 	};
 
-	const onAdd = ( values: AttributeForm ) => {
+	const onAddingAttributes = ( values: AttributeForm ) => {
 		const newAttributesToAdd: ProductAttribute[] = [];
 		values.attributes.forEach( ( attr ) => {
 			if (
@@ -68,7 +62,7 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 				} );
 			}
 		} );
-		onCreated( newAttributesToAdd );
+		onAdd( newAttributesToAdd );
 	};
 
 	const onRemove = (
@@ -250,6 +244,10 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 								<Button
 									className="woocommerce-add-attribute-modal__add-attribute"
 									variant="tertiary"
+									label={ __(
+										'Add another attribute',
+										'woocommerce'
+									) }
 									onClick={ () =>
 										addAnother( values, setValue )
 									}
@@ -261,12 +259,17 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 							<div className="woocommerce-add-attribute-modal__buttons">
 								<Button
 									isSecondary
+									label={ __( 'Cancel', 'woocommerce' ) }
 									onClick={ () => onCancel() }
 								>
 									{ __( 'Cancel', 'woocommerce' ) }
 								</Button>
 								<Button
 									isPrimary
+									label={ __(
+										'Add attributes',
+										'woocommerce'
+									) }
 									disabled={
 										values.attributes.length === 1 &&
 										! values.attributes[ 0 ]?.attribute
@@ -274,7 +277,9 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 										values.attributes[ 0 ].terms.length ===
 											0
 									}
-									onClick={ () => onAdd( values ) }
+									onClick={ () =>
+										onAddingAttributes( values )
+									}
 								>
 									{ __( 'Add', 'woocommerce' ) }
 								</Button>

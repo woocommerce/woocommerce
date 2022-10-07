@@ -82,7 +82,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 				{ showAddAttributeModal && (
 					<AddAttributeModal
 						onCancel={ () => setShowAddAttributeModal( false ) }
-						onCreated={ onAddNewAttributes }
+						onAdd={ onAddNewAttributes }
 						selectedAttributeIds={ ( value || [] ).map(
 							( attr ) => attr.id
 						) }
@@ -166,7 +166,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 			{ showAddAttributeModal && (
 				<AddAttributeModal
 					onCancel={ () => setShowAddAttributeModal( false ) }
-					onCreated={ onAddNewAttributes }
+					onAdd={ onAddNewAttributes }
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
 				/>
 			) }
