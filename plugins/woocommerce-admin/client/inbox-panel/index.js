@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n } from '@wordpress/i18n';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useState, useMemo } from '@wordpress/element';
 import {
 	EmptyContent,
 	Section,
@@ -25,7 +25,11 @@ import moment from 'moment';
  * Internal dependencies
  */
 import { ActivityCard } from '~/activity-panel/activity-card';
-import { hasValidNotes, truncateRenderableHTML } from './utils';
+import {
+	hasValidNotes,
+	truncateRenderableHTML,
+	generateNotesHash,
+} from './utils';
 import { getScreenName } from '../utils';
 import DismissAllModal from './dismiss-all-modal';
 import './index.scss';
@@ -207,8 +211,8 @@ const InboxPanel = ( { showHeader = true } ) => {
 		invalidateResolutionForStoreSelector,
 	} = useDispatch( NOTES_STORE_NAME );
 
-	const { isError, notes, notesHaveResolved, isBatchUpdating } = useSelect(
-		( select ) => {
+	const { isError, notes, notesHaveResolved, isBatchUpdating, notesHash } =
+		useSelect( ( select ) => {
 			const {
 				getNotes,
 				getNotesError,
@@ -229,9 +233,11 @@ const InboxPanel = ( { showHeader = true } ) => {
 			];
 
 			const inboxQuery = { ...DEFAULT_INBOX_QUERY, per_page: pageSize };
+			const notes = getNotes( inboxQuery );
 
 			return {
-				notes: getNotes( inboxQuery ).map( ( note ) => {
+				notesHash: generateNotesHash( notes ),
+				notes: notes.map( ( note ) => {
 					const noteDate = moment(
 						note.date_created_gmt,
 						'YYYY-MM-DD'
@@ -257,7 +263,11 @@ const InboxPanel = ( { showHeader = true } ) => {
 					! isNotesRequesting( 'batchUpdateNotes' ) &&
 					hasFinishedResolution( 'getNotes', [ inboxQuery ] ),
 			};
-		}
+		} );
+
+	const allNotesHash = useMemo(
+		() => generateNotesHash( allNotes ),
+		[ allNotes ]
 	);
 
 	useEffect( () => {
@@ -265,7 +275,7 @@ const InboxPanel = ( { showHeader = true } ) => {
 			setAllNotesFetched( true );
 		}
 
-		if ( notes && notes.length && notes.length !== allNotes.length ) {
+		if ( notes.length && notesHash !== allNotesHash ) {
 			setAllNotes( notes );
 		}
 	}, [ notes ] );
@@ -291,10 +301,11 @@ const InboxPanel = ( { showHeader = true } ) => {
 				actions: [
 					{
 						label: __( 'Undo', 'woocommerce' ),
-						onClick: () => {
-							updateNote( noteId, {
+						onClick: async () => {
+							await updateNote( noteId, {
 								is_deleted: 0,
 							} );
+							invalidateResolutionForStoreSelector( 'getNotes' );
 						},
 					},
 				],
