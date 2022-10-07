@@ -146,7 +146,6 @@ jobs:
               env:
                   API_SUMMARY_PATH: ${{ github.workspace }}/artifacts/api/allure-report/widgets/summary.json
                   E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/widgets/summary.json
-                  E2E_PPTR_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/test-results.json
                   PR_NUMBER: ${{ github.event.number }}
                   SHA: ${{ github.event.pull_request.head.sha }}
               with:

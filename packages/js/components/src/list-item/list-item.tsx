@@ -25,12 +25,7 @@ export const ListItem = ( {
 
 	return (
 		<div className={ classnames( 'woocommerce-list-item' ) }>
-			{ isDraggable && (
-				<SortableHandle
-					onDragEnd={ onDragEnd }
-					onDragStart={ onDragStart }
-				/>
-			) }
+			{ isDraggable && <SortableHandle /> }
 			{ children }
 		</div>
 	);

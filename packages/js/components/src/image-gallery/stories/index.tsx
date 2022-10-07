@@ -8,10 +8,25 @@ import React from 'react';
  * Internal dependencies
  */
 import { ImageGallery, ImageGalleryItem } from '../';
+import { MockMediaUpload } from '../../media-uploader/stories/index.tsx';
 
 export const Basic: React.FC = () => {
 	return (
-		<ImageGallery>
+		<ImageGallery
+			MediaUploadComponent={ MockMediaUpload }
+			onReplace={ ( { replaceIndex } ) =>
+				// eslint-disable-next-line no-console
+				console.info( `Item ${ replaceIndex } replaced` )
+			}
+			onRemove={ ( { removeIndex } ) => {
+				// eslint-disable-next-line no-console
+				console.info( `Item ${ removeIndex } removed` );
+			} }
+			onOrderChange={ () => {
+				// eslint-disable-next-line no-console
+				console.info( `Order changed` );
+			} }
+		>
 			<ImageGalleryItem
 				alt="Random image 1"
 				src="https://picsum.photos/id/137/200/200"
@@ -50,7 +65,7 @@ export const Basic: React.FC = () => {
 
 export const Cover: React.FC = () => {
 	return (
-		<ImageGallery>
+		<ImageGallery MediaUploadComponent={ MockMediaUpload }>
 			<ImageGalleryItem
 				alt="Random image 1"
 				src="https://picsum.photos/id/137/200/200"
@@ -66,7 +81,7 @@ export const Cover: React.FC = () => {
 
 export const Columns: React.FC = () => {
 	return (
-		<ImageGallery columns={ 3 }>
+		<ImageGallery columns={ 3 } MediaUploadComponent={ MockMediaUpload }>
 			<ImageGalleryItem
 				alt="Random image 1"
 				src="https://picsum.photos/id/137/200/200"

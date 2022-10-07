@@ -6,6 +6,7 @@ const {
 	E2E_PW_SUMMARY_PATH,
 	SHA,
 	PR_NUMBER,
+	E2E_GRAND_TOTAL,
 } = process.env;
 
 /**
@@ -25,18 +26,37 @@ const getFormattedDuration = ( duration ) => {
  * Extract the test report statistics (the number of tests that passed, failed, skipped, etc.) from Allure report's `summary.json` file.
  *
  * @param {string} summaryJSONPath Path to the Allure report's `summary.json` file.
- * @param {string} testHeader The kind of test that generated the Allure report. For example, "E2E Tests".
- * @returns Array containing stringified values of test stats.
+ * @returns An object containing relevant statistics from the Allure report.
  */
-const getAllureSummaryStats = ( summaryJSONPath, testHeader ) => {
+const getAllureSummaryStats = ( summaryJSONPath ) => {
 	const summary = require( summaryJSONPath );
-	const { passed, failed, skipped, broken, unknown, total } =
-		summary.statistic;
-	const { duration } = summary.time;
+	const { statistic, time } = summary;
+	const { passed, failed, skipped, broken, unknown, total } = statistic;
+	const { duration } = time;
+
+	return {
+		passed,
+		failed,
+		skipped,
+		broken,
+		unknown,
+		total,
+		duration,
+	};
+};
+
+/**
+ * Construct the array to be used for the API table row.
+ *
+ * @returns Array of API test result stats.
+ */
+const createAPITableRow = () => {
+	const { passed, failed, skipped, broken, unknown, total, duration } =
+		getAllureSummaryStats( API_SUMMARY_PATH );
 	const durationFormatted = getFormattedDuration( duration );
 
 	return [
-		testHeader,
+		'API Tests',
 		passed.toString(),
 		failed.toString(),
 		broken.toString(),
@@ -48,34 +68,89 @@ const getAllureSummaryStats = ( summaryJSONPath, testHeader ) => {
 };
 
 /**
- * Get API test result stats.
- *
- * @returns Array of API test result stats.
- */
-const getAPIStatsArr = () => {
-	return getAllureSummaryStats( API_SUMMARY_PATH, 'API Tests' );
-};
-
-/**
- * Get E2E test result stats.
+ * Construct the array to be used for the E2E table row.
  *
  * @returns Array of E2E test result stats.
  */
-const getE2EStatsArr = () => {
-	return getAllureSummaryStats( E2E_PW_SUMMARY_PATH, 'E2E Tests' );
+const createE2ETableRow = () => {
+	const { passed, failed, skipped, broken, unknown, total, duration } =
+		getAllureSummaryStats( E2E_PW_SUMMARY_PATH );
+	const durationFormatted = getFormattedDuration( duration );
+
+	return [
+		'E2E Tests',
+		passed.toString(),
+		failed.toString(),
+		broken.toString(),
+		skipped.toString(),
+		unknown.toString(),
+		total.toString(),
+		durationFormatted,
+	];
 };
 
 /**
- * Generate the contents of the test results summary and post it on the workflow run.
- *
- * @param {*} params Objects passed from the calling GitHub Action workflow.
- * @returns Stringified content of the test results summary.
+ * Add a warning when the number of executed Playwright E2E tests were fewer than the total.
  */
-module.exports = async ( { core } ) => {
-	const apiStats = getAPIStatsArr();
-	const e2eStats = getE2EStatsArr();
+const addWarningE2EIncomplete = ( warnings ) => {
+	const { statistic } = require( E2E_PW_SUMMARY_PATH );
+	const { total } = statistic;
+	const expectedTotal = Number( E2E_GRAND_TOTAL );
 
-	const contents = core.summary
+	if ( total < expectedTotal ) {
+		warnings.push(
+			`INCOMPLETE E2E TEST RUN. We have a total of ${ expectedTotal } E2E tests, but only ${ total } were executed. Note that in CI, E2E tests automatically end when they encounter too many failures.`
+		);
+	}
+};
+
+/**
+ *
+ * Add a warning when there are failures and broken tests.
+ */
+const addWarningFailuresBrokenTests = ( warnings ) => {
+	const { failed: apiFailed, broken: apiBroken } =
+		getAllureSummaryStats( API_SUMMARY_PATH );
+	const { failed: e2eFailed, broken: e2eBroken } =
+		getAllureSummaryStats( E2E_PW_SUMMARY_PATH );
+
+	if ( apiFailed || apiBroken || e2eFailed || e2eBroken ) {
+		warnings.push(
+			'FAILED/BROKEN TESTS. There were failed and/or broken API and E2E tests.'
+		);
+	}
+};
+
+/**
+ * Add warnings to the test summary.
+ *
+ * @param core The GitHub Actions toolkit core object
+ */
+const addSummaryWarnings = ( core ) => {
+	const warnings = [];
+
+	addWarningFailuresBrokenTests( warnings );
+	addWarningE2EIncomplete( warnings );
+	if ( warnings.length > 0 ) {
+		core.summary
+			.addHeading( ':warning: Warning', 3 )
+			.addRaw(
+				'Please address the following issues prior to merging this pull request:'
+			)
+			.addList( warnings );
+	}
+};
+
+/**
+ * Create the heading, commit SHA, and test results table.
+ *
+ * @param core The GitHub Actions toolkit core object
+ */
+const addSummaryHeadingAndTable = ( core ) => {
+	const apiTableRow = createAPITableRow();
+	const e2eTableRow = createE2ETableRow();
+
+	core.summary
 		.addHeading( 'Test Results Summary' )
 		.addRaw( `Commit SHA: ${ SHA }` )
 		.addBreak()
@@ -91,9 +166,19 @@ module.exports = async ( { core } ) => {
 				{ data: 'Total :bar_chart:', header: true },
 				{ data: 'Duration :stopwatch:', header: true },
 			],
-			apiStats,
-			e2eStats,
-		] )
+			apiTableRow,
+			e2eTableRow,
+		] );
+};
+
+/**
+ * Add the summary footer.
+ *
+ * @param core The GitHub Actions toolkit core object
+ */
+const addSummaryFooter = ( core ) => {
+	core.summary
+		.addSeparator()
 		.addRaw( 'To view the full API test report, click ' )
 		.addLink(
 			'here.',
@@ -110,10 +195,25 @@ module.exports = async ( { core } ) => {
 		.addLink(
 			'WooCommerce Test Reports Dashboard.',
 			'https://woocommerce.github.io/woocommerce-test-reports/'
-		)
-		.stringify();
+		);
+};
+
+/**
+ * Generate the contents of the test results summary and post it on the workflow run.
+ *
+ * @param {*} params Objects passed from the calling GitHub Action workflow.
+ * @returns Stringified content of the test results summary.
+ */
+module.exports = async ( { core } ) => {
+	addSummaryHeadingAndTable( core );
+
+	addSummaryWarnings( core );
+
+	addSummaryFooter( core );
+
+	const summary = core.summary.stringify();
 
 	await core.summary.write();
 
-	return contents;
+	return summary;
 };

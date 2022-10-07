@@ -11,6 +11,8 @@ jobs:
     e2e-tests-run:
         name: Runs E2E tests.
         runs-on: ubuntu-20.04
+        outputs:
+            E2E_GRAND_TOTAL: ${{ steps.count_e2e_total.outputs.E2E_GRAND_TOTAL }}
         steps:
             - uses: actions/checkout@v3
             
@@ -25,11 +27,21 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
 
+            - name: Get total number of Playwright E2E tests to be run.
+              id: count_e2e_total
+              working-directory: plugins/woocommerce
+              run: |
+                  TOTAL_STR=$(pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --list | grep "Total:")
+                  NO_PREFIX=${TOTAL_STR#*"Total: "}
+                  COUNT=${NO_PREFIX%" tests in"*}
+                  echo "::set-output name=E2E_GRAND_TOTAL::$COUNT"
+
             - name: Run Playwright E2E tests.
               timeout-minutes: 60
               id: run_playwright_e2e_tests
               env:
                 USE_WP_ENV: 1
+                E2E_MAX_FAILURES: 15
               working-directory: plugins/woocommerce
               run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
@@ -138,6 +150,8 @@ jobs:
             )
         runs-on: ubuntu-20.04
         needs: [api-tests-run, e2e-tests-run]
+        env:
+            E2E_GRAND_TOTAL: ${{needs.e2e-tests-run.outputs.E2E_GRAND_TOTAL}}
         steps:
             - name: Create dirs
               run: |
@@ -169,7 +183,6 @@ jobs:
               env:
                   API_SUMMARY_PATH: ${{ github.workspace }}/artifacts/api/allure-report/widgets/summary.json
                   E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/widgets/summary.json
-                  E2E_PPTR_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/test-results.json
                   PR_NUMBER: ${{ github.event.number }}
                   SHA: ${{ github.event.pull_request.head.sha }}
               with:

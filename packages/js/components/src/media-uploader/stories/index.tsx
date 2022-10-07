@@ -17,7 +17,7 @@ declare let Blob: {
 	new (): Blob;
 };
 
-const MockMediaUpload = ( { onSelect, render } ) => {
+export const MockMediaUpload = ( { onSelect, render } ) => {
 	const [ isOpen, setOpen ] = useState( false );
 
 	return (
