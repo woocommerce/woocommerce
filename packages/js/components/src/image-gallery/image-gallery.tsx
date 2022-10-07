@@ -118,7 +118,9 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 									( event.relatedTarget &&
 										(
 											event.relatedTarget as Element
-										 ).closest( '.media-modal' ) )
+										 ).closest(
+											'.media-modal, .components-modal__frame'
+										) )
 								) {
 									return;
 								}
