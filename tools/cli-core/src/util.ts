@@ -6,13 +6,13 @@ import { join } from 'path';
 import { writeFile, readFile } from 'fs/promises';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import simpleGit from 'simple-git';
 import { camelCase } from 'camel-case';
 
 /**
  * Internal dependencies
  */
 import { Logger } from './logger';
+import { checkoutRef } from './git';
 
 export const execAsync = promisify( exec );
 
@@ -191,8 +191,7 @@ export const getPluginData = async (
 	pathToMainFile: string,
 	hashOrBranch: string
 ) => {
-	const git = simpleGit( { baseDir: tmpRepoPath } );
-	await git.checkout( [ hashOrBranch ] );
+	await checkoutRef( tmpRepoPath, hashOrBranch );
 
 	const mainFile = join( tmpRepoPath, pathToMainFile );
 
