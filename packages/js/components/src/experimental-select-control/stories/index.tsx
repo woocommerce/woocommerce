@@ -392,7 +392,6 @@ export const SingleWithinModalUsingBodyDropdownPlacement: React.FC = () => {
 						items={ sampleItems }
 						label="Single value"
 						selected={ selected }
-						dropdownPlacement="body"
 						onSelect={ ( item ) => item && setSelected( item ) }
 						onRemove={ () => setSelected( null ) }
 					/>

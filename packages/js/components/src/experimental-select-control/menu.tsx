@@ -23,7 +23,7 @@ export const Menu = ( {
 	isOpen,
 	className,
 }: MenuProps ) => {
-	const selectControlMenuRef = useRef< HTMLElement >( null );
+	const selectControlMenuRef = useRef< HTMLDivElement >( null );
 
 	useEffect( () => {
 		if (
@@ -36,9 +36,7 @@ export const Menu = ( {
 		}
 	}, [ selectControlMenuRef.current ] );
 
-	const selectControlParentElement =
-		selectControlMenuRef.current?.parentElement;
-	/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
+	/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
 	const childrenPopoverMarkup = (
 		<Popover
 			focusOnMount={ false }
@@ -46,7 +44,8 @@ export const Menu = ( {
 			position="bottom center"
 			animate={ false }
 		>
-			<div
+			<ul
+				{ ...getMenuProps() }
 				className="woocommerce-experimental-select-control__popover-menu-container"
 				style={ {
 					width: boundingRect?.width,
@@ -57,14 +56,14 @@ export const Menu = ( {
 				}
 			>
 				{ children }
-			</div>
+			</ul>
 		</Popover>
 	);
-	/* eslint-enable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
+	/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
 
 	return (
-		<ul
-			{ ...getMenuProps( { ref: selectControlMenuRef } ) }
+		<div
+			ref={ selectControlMenuRef }
 			className={ classnames(
 				'woocommerce-experimental-select-control__menu',
 				className,
@@ -77,6 +76,6 @@ export const Menu = ( {
 			) }
 		>
 			{ isOpen && childrenPopoverMarkup }
-		</ul>
+		</div>
 	);
 };
