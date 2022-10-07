@@ -4,8 +4,8 @@
 import type { EmptyObjectType } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
 import {
-	PaymentMethods,
-	ExpressPaymentMethods,
+	PlainPaymentMethods,
+	PlainExpressPaymentMethods,
 } from '@woocommerce/type-defs/payments';
 
 /**
@@ -29,8 +29,8 @@ export interface PaymentMethodDataState {
 	activePaymentMethod: string;
 	activeSavedToken: string;
 	// Avilable payment methods are payment methods which have been validated and can make payment
-	availablePaymentMethods: PaymentMethods;
-	availableExpressPaymentMethods: ExpressPaymentMethods;
+	availablePaymentMethods: PlainPaymentMethods;
+	availableExpressPaymentMethods: PlainExpressPaymentMethods;
 	savedPaymentMethods:
 		| Record< string, SavedPaymentMethod[] >
 		| EmptyObjectType;
