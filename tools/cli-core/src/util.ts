@@ -206,7 +206,7 @@ export const getPluginData = async (
 	return match[ 1 ]
 		.replace( /@package .+\n/, '' )
 		.split( '*' )
-		.reduce( ( result: { [ key: string ]: string }, line: string ) => {
+		.reduce( ( result: Record< string, string >, line: string ) => {
 			if ( line.includes( ':' ) ) {
 				const cleanLine = line.replace( '\n', '' ).trim();
 				const [ prop, value ] = cleanLine.split( ':' );
