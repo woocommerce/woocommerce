@@ -46,13 +46,13 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 		// Note: Because this component is memoized and because we don't re-render
 		// when this component initiates a change, a prop change won't force the re-render
 		// you'd expect. A change to the blocks must come from outside the editor.
-		setRefresh( ( r ) => r + 1 );
+		setRefresh( ( refresh ) => refresh + 1 );
 	}, [ blocks ] );
 
 	// Use a combo of memoization and debounce to refresh every 200 milliseconds,
 	// ensuring that history is kept up to date for undo.
 	const debouncedRefresh = useCallback(
-		debounce( () => setRefresh( ( refresh ) => ( refresh += 1 ) ), 200 ),
+		debounce( () => setRefresh( ( refresh ) => refresh + 1 ), 200 ),
 		[]
 	);
 
@@ -75,12 +75,10 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 					} }
 					onInput={ ( updatedBlocks ) => {
 						debounceChange( updatedBlocks );
-
 						debouncedRefresh();
 					} }
 					onChange={ ( updatedBlocks ) => {
 						debounceChange( updatedBlocks );
-
 						debouncedRefresh();
 					} }
 				>
