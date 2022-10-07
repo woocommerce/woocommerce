@@ -163,6 +163,13 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 									media: { id: number } & { [ k: string ]: any }
 								) => {
 									onReplace( { replaceIndex, media } );
+									setOrderedChildren( replaceItem< {
+										src: string;
+										alt: string;
+									} >( orderedChildren, replaceIndex, {
+										src: media.url,
+										alt: media.alt,
+									} ) );
 								} }
 								setToolBarItem={ ( toolBarItem )=> {
 									onSelectAsCover( activeToolbarKey );
