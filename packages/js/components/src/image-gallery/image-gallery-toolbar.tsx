@@ -20,8 +20,7 @@ export type ImageGalleryToolbarProps = {
 	removeItem: ( removeIndex: number ) => void;
 	replaceItem: (
 		replaceIndex: number,
-		newSrc: string,
-		newAlt: string
+		media: { id: number } & { [ k: string ]: any }
 	) => void;
 	setToolBarItem: ( key: string | null ) => void;
 	lastChild: boolean;
@@ -91,7 +90,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 				<ToolbarGroup className="woocommerce-image-gallery__toolbar-media">
 					<MediaUploadComponent
 						onSelect={ ( media ) =>
-							replaceItem( childIndex, media.url, media.alt )
+							replaceItem( childIndex, media )
 						}
 						allowedTypes={ [ 'image' ] }
 						render={ ( { open } ) => (

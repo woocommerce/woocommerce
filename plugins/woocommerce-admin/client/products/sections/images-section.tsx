@@ -110,6 +110,16 @@ export const ImagesSection: React.FC = () => {
 							toggleRemoveZone();
 						} }
 						onOrderChange={ orderImages }
+						onReplace={ ( { replaceIndex, media } ) => {
+							if (
+								images.find(
+									( img ) => media.id === img.id
+								) === undefined
+							) {
+								images[ replaceIndex ] = media as Image;
+								setValue( 'images', images );
+							}
+						} }
 					>
 						{ images.map( ( image ) => (
 							<ImageGalleryItem

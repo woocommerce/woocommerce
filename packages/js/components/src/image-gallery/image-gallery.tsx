@@ -28,7 +28,7 @@ export type ImageGalleryProps = {
 	} ) => void;
 	onReplace?: ( props: {
 		replaceIndex: number;
-		previousItem: ImageGalleryChild;
+		media: { id: number } & { [ k: string ]: any };
 	} ) => void;
 	onSelectAsCover?: ( itemId: string | null ) => void;
 	onOrderChange?: ( items: ImageGalleryChild[] ) => void;
@@ -158,23 +158,9 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 								} }
 								replaceItem={ (
 									replaceIndex: number,
-									newSrc: string,
-									newAlt: string
+									media: { id: number } & { [ k: string ]: any }
 								) => {
-									onReplace( {
-										replaceIndex,
-										previousItem:
-											orderedChildren[ replaceIndex ],
-									} );
-									updateOrderedChildren(
-										replaceItem< {
-											src: string;
-											alt: string;
-										} >( orderedChildren, replaceIndex, {
-											src: newSrc,
-											alt: newAlt,
-										} )
-									);
+									onReplace( { replaceIndex, media } );
 								} }
 								setToolBarItem={ ( toolBarItem )=> {
 									onSelectAsCover( activeToolbarKey );
