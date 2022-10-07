@@ -94,7 +94,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 		$this->expectException( CacheException::class );
 		$this->expectExceptionMessage( "Can't cache a null value" );
 
-		$this->sut->set( 'the_id', null );
+		$this->sut->set( null );
 	}
 
 	/**
@@ -104,7 +104,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 		$this->expectException( CacheException::class );
 		$this->expectExceptionMessage( "Can't cache a non-object, non-array value" );
 
-		$this->sut->set( 'the_id', 1234 );
+		$this->sut->set( 1234 );
 	}
 
 	/**
@@ -114,7 +114,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 		$this->expectException( CacheException::class );
 		$this->expectExceptionMessage( "Object id must be an int, a string, or null for 'set'" );
 
-		$this->sut->set( array( 1, 2 ), array( 'foo' ) );
+		$this->sut->set( array( 'foo' ), array( 1, 2 ) );
 	}
 
 	/**
@@ -130,7 +130,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 		$this->expectException( CacheException::class );
 		$this->expectExceptionMessage( 'Invalid expiration value, must be ObjectCache::DEFAULT_EXPIRATION or a value between 1 and ObjectCache::MAX_EXPIRATION' );
 
-		$this->sut->set( 'the_id', array( 'foo' ), $expiration );
+		$this->sut->set( array( 'foo' ), 'the_id', $expiration );
 	}
 
 	/**
@@ -139,7 +139,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	public function try_set_when_cache_engine_fails() {
 		$this->cache_engine->caching_succeeds = false;
 
-		$result = $this->sut->set( 'the_id', array( 'foo' ) );
+		$result = $this->sut->set( array( 'foo' ), 'the_id' );
 		$this->assertFalse( $result );
 	}
 
@@ -148,7 +148,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_set_new_object_with_id_caches_with_expected_key() {
 		$object = array( 'foo' );
-		$result = $this->sut->set( 'the_id', $object );
+		$result = $this->sut->set( $object, 'the_id' );
 
 		$this->assertTrue( $result );
 
@@ -165,9 +165,9 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_setting_two_objects_result_in_same_prefix() {
 		$object_1 = array( 'foo' );
-		$this->sut->set( 'the_id_1', $object_1 );
+		$this->sut->set( $object_1, 'the_id_1' );
 		$object_2 = array( 1, 2, 3, 4 );
-		$this->sut->set( 9999, $object_2 );
+		$this->sut->set( $object_2, 9999 );
 
 		$prefix = 'woocommerce_object_cache|the_type|random_1|';
 
@@ -183,7 +183,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	 * @testdox 'set' uses the default expiration value if no explicit value is passed.
 	 */
 	public function test_set_with_default_expiration() {
-		$this->sut->set( 'the_id', array( 'foo' ) );
+		$this->sut->set( array( 'foo' ), 'the_id' );
 		$this->assertEquals( $this->sut->get_default_expiration_value(), $this->cache_engine->last_expiration );
 	}
 
@@ -191,7 +191,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	 * @testdox 'set' uses the explicitly passed expiration value.
 	 */
 	public function test_set_with_explicit_expiration() {
-		$this->sut->set( 'the_id', array( 'foo' ), 1234 );
+		$this->sut->set( array( 'foo' ), 'the_id', 1234 );
 		$this->assertEquals( 1234, $this->cache_engine->last_expiration );
 	}
 
@@ -202,7 +202,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 		$this->expectException( CacheException::class );
 		$this->expectExceptionMessage( "Null id supplied and the cache class doesn't implement get_object_id" );
 
-		$this->sut->set( null, array( 'foo' ) );
+		$this->sut->set( array( 'foo' ) );
 	}
 
 	/**
@@ -227,9 +227,86 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 
 		// phpcs:enable Squiz.Commenting
 
-		$sut->set( null, array( 'id' => 1234 ) );
+		$sut->set( array( 'id' => 1234 ) );
 
 		$this->assertEquals( 'woocommerce_object_cache|the_type|random|1235', array_keys( $this->cache_engine->cache )[0] );
+	}
+
+	/**
+	 * @testdox 'update_if_cached' does nothing if no object is cached with the passed (or obtained) id.
+	 *
+	 * @testWith [1234]
+	 *           [null]
+	 *
+	 * @param ?int $id Id to pass to update_if_cached.
+	 */
+	public function test_update_if_cached_does_nothing_for_not_cached_id( ?int $id ) {
+		// phpcs:disable Squiz.Commenting
+
+		$sut = new class() extends ObjectCache {
+			public function get_object_type(): string {
+				return 'the_type';
+			}
+
+			protected function get_object_id( $object ) {
+				return $object['id'];
+			}
+		};
+
+		// phpcs:enable Squiz.Commenting
+
+		$result = $sut->update_if_cached( array( 'id' => 1234 ), $id );
+		$this->assertFalse( $result );
+		$this->assertEmpty( $this->cache_engine->cache );
+	}
+
+	/**
+	 * @testdox 'update_if_cached' updates an already cached object the same way as 'set'.
+	 *
+	 * @testWith [1234]
+	 *           [null]
+	 *
+	 * @param ?int $id Id to pass to update_if_cached.
+	 */
+	public function test_update_if_cached_updates_already_cached_object( ?int $id ) {
+		// phpcs:disable Squiz.Commenting
+
+		$sut = new class() extends ObjectCache {
+			public function get_object_type(): string {
+				return 'the_type';
+			}
+
+			protected function get_object_id( $object ) {
+				return $object['id'];
+			}
+
+			protected function get_random_string(): string {
+				return 'random';
+			}
+		};
+
+		// phpcs:enable Squiz.Commenting
+
+		$sut->set( array( 'id' => 1234 ), $id );
+		$this->assertEquals( 'woocommerce_object_cache|the_type|random|1234', array_keys( $this->cache_engine->cache )[0] );
+
+		$new_value = array(
+			'id'  => 1234,
+			'foo' => 'bar',
+		);
+		$result    = $sut->update_if_cached( $new_value, $id );
+		$this->assertTrue( $result );
+		$this->assertEquals( $this->cache_engine->cache['woocommerce_object_cache|the_type|random|1234'], array( 'data' => $new_value ) );
+	}
+
+	/**
+	 * @testdox 'update_if_cached' throws an exception if no object id is passed and the class doesn't implement 'get_object_id'.
+	 */
+	public function test_update_if_cached_null_id_without_id_retrieval_implementation() {
+		$this->expectException( CacheException::class );
+		$this->expectExceptionMessage( "Null id supplied and the cache class doesn't implement get_object_id" );
+
+		$this->sut->update_if_cached( array( 'foo' ) );
 	}
 
 	/**
@@ -252,7 +329,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 
 		// phpcs:enable Squiz.Commenting
 
-		$sut->set( 1234, $object );
+		$sut->set( $object, 1234 );
 
 		$cached   = array_values( $this->cache_engine->cache )[0];
 		$expected = array( 'the_data' => $object );
@@ -269,7 +346,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_set_with_custom_serialization_that_returns_errors( int $errors_count ) {
 		$exception = null;
-		$errors    = 1 === $errors_count ? array( 'Foo failed' ) : array( 'Foo failed', 'Bar failed' );
+		$errors    = $errors_count === 1 ? array( 'Foo failed' ) : array( 'Foo failed', 'Bar failed' );
 		$object    = array( 'foo' );
 
 		// phpcs:disable Squiz.Commenting
@@ -293,13 +370,13 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 		// phpcs:enable Squiz.Commenting
 
 		try {
-			$sut->set( 1234, $object );
+			$sut->set( $object, 1234 );
 		} catch ( CacheException $thrown ) {
 			$exception = $thrown;
 		}
 
 		$expected_message = 'Object validation/serialization failed';
-		if ( 1 === $errors_count ) {
+		if ( $errors_count === 1 ) {
 			$expected_message .= ': Foo failed';
 		}
 		$this->assertEquals( $expected_message, $exception->getMessage() );
@@ -343,7 +420,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_try_getting_previously_cached_object() {
 		$object = array( 'foo' );
-		$this->sut->set( 'the_id', $object );
+		$this->sut->set( $object, 'the_id' );
 
 		$result = $this->sut->get( 'the_id' );
 		$this->assertEquals( $object, $result );
@@ -465,7 +542,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 
 		// phpcs:enable Squiz.Commenting
 
-		$sut->set( 'the_id', array( 1, 2 ) );
+		$sut->set( array( 1, 2 ), 'the_id' );
 
 		$result   = $sut->get( 'the_id' );
 		$expected = array( 1, 2, 3 );
@@ -476,8 +553,8 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	 * @testdox 'remove' removes a cached object and returns true, or returns false if there's no cached object under the passed id.
 	 */
 	public function test_remove() {
-		$this->sut->set( 'the_id_1', array( 'foo' ) );
-		$this->sut->set( 'the_id_2', array( 'bar' ) );
+		$this->sut->set( array( 'foo' ), 'the_id_1' );
+		$this->sut->set( array( 'bar' ), 'the_id_2' );
 
 		$result_1 = $this->sut->remove( 'the_id_1' );
 		$result_2 = $this->sut->remove( 'the_id_X' );
@@ -493,12 +570,12 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	 * @testdox 'flush' deletes the stored cache key prefix, effectively rendering the cached objects inaccessible.
 	 */
 	public function test_flush() {
-		$this->sut->set( 'the_id', array( 'foo' ) );
+		$this->sut->set( array( 'foo' ), 'the_id' );
 
 		$this->sut->flush();
 		$this->assertFalse( get_option( 'wp_object_cache_key_prefix_the_type' ) );
 
-		$this->sut->set( 'the_id_2', array( 'bar' ) );
+		$this->sut->set( array( 'bar' ), 'the_id_2' );
 
 		$expected_new_prefix = 'woocommerce_object_cache|the_type|random_2|';
 		$this->assertEquals( $expected_new_prefix, get_option( 'wp_object_cache_key_prefix_the_type' ) );
@@ -534,7 +611,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 		// phpcs:enable Squiz.Commenting
 
 		$object = array( 'foo' );
-		$sut->set( 'the_id', $object );
+		$sut->set( $object, 'the_id' );
 
 		$expected_cached = array( 'data' => $object );
 		$this->assertEquals( $expected_cached, array_values( $engine->cache )[0] );
@@ -560,7 +637,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 		);
 
 		$object = array( 'foo' );
-		$this->sut->set( 'the_id', $object );
+		$this->sut->set( $object, 'the_id' );
 
 		$expected_cached = array( 'data' => $object );
 		$this->assertEquals( $expected_cached, array_values( $engine->cache )[0] );
@@ -590,7 +667,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 		);
 
 		$object = array( 'fizz' );
-		$this->sut->set( 'the_id', $object );
+		$this->sut->set( $object, 'the_id' );
 
 		$expected_cached = array(
 			'data' => $object,
@@ -626,7 +703,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$this->sut->set( 'the_id', $original_object );
+		$this->sut->set( $original_object, 'the_id' );
 		$retrieved_object = $this->sut->get( 'the_id' );
 
 		$this->assertEquals( $replacement_object, $retrieved_object );
@@ -658,7 +735,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 			2
 		);
 
-		$this->sut->set( 'the_id', array( 'foo' ) );
+		$this->sut->set( array( 'foo' ), 'the_id' );
 		$this->sut->remove( $operation_succeeds ? 'the_id' : 'INVALID_ID' );
 
 		$this->assertEquals( $operation_succeeds ? 'the_id' : 'INVALID_ID', $id_passed_to_action );
