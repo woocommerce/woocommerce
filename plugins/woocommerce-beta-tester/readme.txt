@@ -55,7 +55,7 @@ See our [contributing guidelines here](https://github.com/woocommerce/woocommerc
 
 == Changelog ==
 
-= 2.1.0 2022-xx-xx =
+= 2.1.0 2022-10-11 =
 
 * Dev - Add WooCommerce Admin Helper Tester functionality to Beta Tester
 

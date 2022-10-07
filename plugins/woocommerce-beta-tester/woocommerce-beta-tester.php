@@ -23,7 +23,7 @@ if ( ! defined( 'WC_BETA_TESTER_FILE' ) ) {
 }
 
 if ( ! defined( 'WC_BETA_TESTER_VERSION' ) ) {
-	define( 'WC_BETA_TESTER_VERSION', '2.0.2' );
+	define( 'WC_BETA_TESTER_VERSION', '2.1.0' ); // WRCS: DEFINED_VERSION.
 }
 
 /**
