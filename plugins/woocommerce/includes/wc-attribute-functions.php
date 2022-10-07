@@ -569,7 +569,7 @@ function wc_create_attribute( $args ) {
 			// Update taxonomy ordering term meta.
 			$wpdb->update(
 				$wpdb->termmeta,
-				array( 'meta_key' => 'order', // WPCS: slow query ok.
+				array( 'meta_key' => 'order' ), // WPCS: slow query ok.
 				array( 'meta_key' => 'order_pa_' . sanitize_title( $old_slug ) ) // WPCS: slow query ok.
 			);
 
