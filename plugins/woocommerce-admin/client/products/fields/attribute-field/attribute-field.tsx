@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { sprintf, __ } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
+import { Button, Popover } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { ProductAttribute } from '@woocommerce/data';
 import { Text } from '@woocommerce/experimental';
@@ -88,6 +88,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 						) }
 					/>
 				) }
+				<Popover.Slot />
 			</div>
 		);
 	}
@@ -170,6 +171,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
 				/>
 			) }
+			<Popover.Slot />
 		</div>
 	);
 };
