@@ -37,11 +37,12 @@ const Block = ( {
 		defaultAddressFields,
 		billingAddress,
 		setBillingAddress,
+		setShippingAddress,
 		setBillingPhone,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
 	const { isEditor } = useEditorContext();
-
+	const { forcedBillingAddress } = useCheckoutAddress();
 	// Clears data if fields are hidden.
 	useEffect( () => {
 		if ( ! showPhoneField ) {
@@ -74,6 +75,9 @@ const Block = ( {
 				type="billing"
 				onChange={ ( values: Partial< BillingAddress > ) => {
 					setBillingAddress( values );
+					if ( forcedBillingAddress ) {
+						setShippingAddress( values );
+					}
 					dispatchCheckoutEvent( 'set-billing-address' );
 				} }
 				values={ billingAddress }

@@ -236,6 +236,7 @@ class Checkout extends AbstractBlock {
 		$this->asset_data_registry->add( 'checkoutShowLoginReminder', filter_var( get_option( 'woocommerce_enable_checkout_login_reminder' ), FILTER_VALIDATE_BOOLEAN ), true );
 		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', 'incl' === get_option( 'woocommerce_tax_display_cart' ), true );
 		$this->asset_data_registry->add( 'displayItemizedTaxes', 'itemized' === get_option( 'woocommerce_tax_total_display' ), true );
+		$this->asset_data_registry->add( 'forcedBillingAddress', 'billing_only' === get_option( 'woocommerce_ship_to_destination' ), true );
 		$this->asset_data_registry->add( 'taxesEnabled', wc_tax_enabled(), true );
 		$this->asset_data_registry->add( 'couponsEnabled', wc_coupons_enabled(), true );
 		$this->asset_data_registry->add( 'shippingEnabled', wc_shipping_enabled(), true );
