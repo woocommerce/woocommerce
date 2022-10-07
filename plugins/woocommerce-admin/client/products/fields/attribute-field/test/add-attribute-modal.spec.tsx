@@ -9,8 +9,6 @@ import { ProductAttribute, ProductAttributeTerm } from '@woocommerce/data';
  */
 import { AddAttributeModal } from '../add-attribute-modal';
 
-let triggerDrag: ( items: Array< { key: string } > ) => void;
-
 jest.mock( '@wordpress/components', () => {
 	const actual = jest.requireActual( '@wordpress/components' );
 	return {
