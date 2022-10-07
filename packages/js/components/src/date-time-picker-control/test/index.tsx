@@ -9,7 +9,11 @@ import moment from 'moment';
 /**
  * Internal dependencies
  */
-import { DateTimePickerControl } from '../';
+import {
+	DateTimePickerControl,
+	default12HourDateTimeFormat,
+	default24HourDateTimeFormat,
+} from '../';
 
 describe( 'DateTimePickerControl', () => {
 	// The end user of the component doesn't care about how it is rendered in the DOM.
@@ -96,7 +100,9 @@ describe( 'DateTimePickerControl', () => {
 		);
 
 		const input = container.querySelector( 'input' );
-		expect( input?.value ).toBe( '09/15/2022 22:30' );
+		expect( input?.value ).toBe(
+			dateTime.format( default24HourDateTimeFormat )
+		);
 	} );
 
 	it( 'should use the default 12 hour date time format', () => {
@@ -110,21 +116,24 @@ describe( 'DateTimePickerControl', () => {
 		);
 
 		const input = container.querySelector( 'input' );
-		expect( input?.value ).toBe( '09/15/2022 2:30 am' );
+		expect( input?.value ).toBe(
+			dateTime.format( default12HourDateTimeFormat )
+		);
 	} );
 
 	it( 'should use the date time format if set', () => {
 		const dateTime = moment( '2022-09-15 02:30:40' );
+		const dateTimeFormat = 'H:mm, MM-DD-YYYY';
 
 		const { container } = render(
 			<DateTimePickerControl
 				currentDate={ dateTime.toISOString() }
-				dateTimeFormat="H:mm, MM-DD-YYYY"
+				dateTimeFormat={ dateTimeFormat }
 			/>
 		);
 
 		const input = container.querySelector( 'input' );
-		expect( input?.value ).toBe( '2:30, 09-15-2022' );
+		expect( input?.value ).toBe( dateTime.format( dateTimeFormat ) );
 	} );
 
 	it( 'should update the input when currentDate is changed', () => {
@@ -146,7 +155,9 @@ describe( 'DateTimePickerControl', () => {
 		);
 
 		const input = container.querySelector( 'input' );
-		expect( input?.value ).toBe( '10/06/2022 10:25' );
+		expect( input?.value ).toBe(
+			updatedDateTime.format( default24HourDateTimeFormat )
+		);
 	} );
 
 	it( 'should show the date time picker popup when focused', async () => {
