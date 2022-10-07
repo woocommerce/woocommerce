@@ -122,7 +122,6 @@ const renderNotes = ( {
 		} );
 	};
 
-	// TODO: What does this line do?
 	const notesArray = Object.keys( notes ).map( ( key ) => notes[ key ] );
 
 	return (
@@ -275,7 +274,7 @@ const InboxPanel = ( { showHeader = true } ) => {
 			setAllNotesFetched( true );
 		}
 
-		if ( notes.length && notesHash !== allNotesHash ) {
+		if ( notesHaveResolved && notesHash !== allNotesHash ) {
 			setAllNotes( notes );
 		}
 	}, [ notes ] );
@@ -346,6 +345,10 @@ const InboxPanel = ( { showHeader = true } ) => {
 
 	const hasNotes = hasValidNotes( allNotes );
 
+	if ( notesHaveResolved && ! allNotes.length ) {
+		return null;
+	}
+
 	return (
 		<>
 			{ showDismissAllModal && (
@@ -356,13 +359,13 @@ const InboxPanel = ( { showHeader = true } ) => {
 				/>
 			) }
 			<div className="woocommerce-homepage-notes-wrapper">
-				{ ! allNotes.length && (
+				{ ! notesHaveResolved && ! allNotes.length && (
 					<Section>
 						<InboxNotePlaceholder className="banner message-is-unread" />
 					</Section>
 				) }
 				<Section>
-					{ allNotes.length &&
+					{ Boolean( allNotes.length ) &&
 						renderNotes( {
 							loadMoreNotes: () => {
 								setPageSize( pageSize + ADD_NOTES_AMOUNT );
