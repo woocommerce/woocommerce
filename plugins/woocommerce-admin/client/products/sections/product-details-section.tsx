@@ -83,6 +83,7 @@ export const ProductDetailsSection: React.FC = () => {
 							) }
 							onBlur={ () => {
 								setSkuIfEmpty();
+								getInputProps( 'name' ).onBlur();
 							} }
 						/>
 						{ values.id && ! hasNameError() && permalinkPrefix && (
