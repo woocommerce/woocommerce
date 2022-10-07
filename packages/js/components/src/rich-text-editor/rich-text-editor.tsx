@@ -40,25 +40,23 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 
 	const [ , setRefresh ] = useState( 0 );
 
+	// If there is a props change we need to update the ref and force re-render.
+	// Note: Because this component is memoized and because we don't re-render
+	// when this component initiates a change, a prop change won't force the re-render
+	// you'd expect. A change to the blocks must come from outside the editor.
+	const forceRerender = () => {
+		setRefresh( ( refresh ) => refresh + 1 );
+	}
+
 	useEffect( () => {
 		blocksRef.current = blocks;
-		// If there is a props change we need to update the ref and force re-render.
-		// Note: Because this component is memoized and because we don't re-render
-		// when this component initiates a change, a prop change won't force the re-render
-		// you'd expect. A change to the blocks must come from outside the editor.
-		setRefresh( ( refresh ) => refresh + 1 );
+		forceRerender();
 	}, [ blocks ] );
-
-	// Use a combo of memoization and debounce to refresh every 200 milliseconds,
-	// ensuring that history is kept up to date for undo.
-	const debouncedRefresh = useCallback(
-		debounce( () => setRefresh( ( refresh ) => refresh + 1 ), 200 ),
-		[]
-	);
 
 	const debounceChange = debounce( ( updatedBlocks ) => {
 		onChange( updatedBlocks );
 		blocksRef.current = updatedBlocks;
+		forceRerender();
 	}, 200 );
 
 	return (
@@ -73,14 +71,8 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 						// @ts-ignore This property was recently added in the block editor data store.
 						__experimentalClearBlockSelection: false,
 					} }
-					onInput={ ( updatedBlocks ) => {
-						debounceChange( updatedBlocks );
-						debouncedRefresh();
-					} }
-					onChange={ ( updatedBlocks ) => {
-						debounceChange( updatedBlocks );
-						debouncedRefresh();
-					} }
+					onInput={ debounceChange }
+					onChange={ debounceChange }
 				>
 					<ShortcutProvider>
 						<EditorWritingFlow />
