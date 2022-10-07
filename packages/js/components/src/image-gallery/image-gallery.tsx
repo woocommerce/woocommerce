@@ -53,6 +53,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 	const [ activeToolbarKey, setActiveToolbarKey ] = useState< string | null >(
 		null
 	);
+	const [ isDragging, setIsDragging ] = useState< boolean >( false );
 	const [ orderedChildren, setOrderedChildren ] = useState<
 		ImageGalleryChild[]
 	>( [] );
@@ -86,8 +87,14 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 				onOrderChange={ ( items ) => {
 					updateOrderedChildren( items );
 				} }
-				onDragStart={ onDragStart }
-				onDragEnd={ onDragEnd }
+				onDragStart={ () => {
+					setIsDragging( true );
+					onDragStart();
+				} }
+				onDragEnd={ () => {
+					setIsDragging( false );
+					onDragEnd();
+				} }
 				onDragOver={ onDragOver }
 			>
 				{ orderedChildren.map( ( child, childIndex ) => {
@@ -112,6 +119,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 								event: React.FocusEvent< HTMLDivElement >
 							) => {
 								if (
+									isDragging ||
 									event.currentTarget.contains(
 										event.relatedTarget
 									) ||
