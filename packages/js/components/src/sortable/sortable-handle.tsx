@@ -13,9 +13,10 @@ import { SortableContextType } from './types';
 
 type SortableHandleProps = {
 	children?: React.ReactNode;
+	itemIndex?: number;
 };
 
-export const SortableHandle = ( { children }: SortableHandleProps ) => {
+export const SortableHandle = ( { children, itemIndex }: SortableHandleProps ) => {
 	const { onDragStart, onDragEnd }: SortableContextType =
 		useContext( SortableContext );
 
@@ -25,6 +26,7 @@ export const SortableHandle = ( { children }: SortableHandleProps ) => {
 			draggable
 			onDragStart={ onDragStart }
 			onDragEnd={ onDragEnd }
+			data-index={ itemIndex }
 		>
 			{ children ? children : <DraggableIcon /> }
 		</div>

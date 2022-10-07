@@ -85,8 +85,15 @@ export const ImagesSection: React.FC = () => {
 				<CardBody>
 					<ImageGallery
 						onDragStart={ ( event ) => {
-							const { id: imageId } = event.target as HTMLElement;
-							setDraggedImageId( parseInt( imageId, 10 ) );
+							const { id: imageId, dataset } = event.target as HTMLElement;
+							if ( imageId ) {
+								setDraggedImageId( parseInt( imageId, 10 ) );
+							} else {
+								const index = dataset?.index;
+								if ( index ) {
+									setDraggedImageId( images[ parseInt( index, 10 ) ]?.id );
+								}
+							}
 							toggleRemoveZone();
 						} }
 						onDragEnd={ () => {
@@ -130,6 +137,7 @@ export const ImagesSection: React.FC = () => {
 									</span>
 									<DropZone
 										onHTMLDrop={ () => setIsRemove( true ) }
+										onDrop={ () => setIsRemove( true ) }
 										label={ __(
 											'Drop here to remove',
 											'woocommerce'

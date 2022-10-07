@@ -62,7 +62,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 				{ ! isCoverItem && (
 					<ToolbarGroup>
 						<ToolbarButton
-							icon={ () => <SortableHandle /> }
+							icon={ () => <SortableHandle itemIndex={ childIndex } /> }
 							label={ __( 'Drag', 'woocommerce' ) }
 						/>
 						<ToolbarButton
