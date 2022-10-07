@@ -88,19 +88,19 @@ class FeaturesController {
 	 */
 	public function __construct() {
 		$features = array(
-			'analytics'           => array(
+			'analytics'                      => array(
 				'name'            => __( 'Analytics', 'woocommerce' ),
 				'description'     => __( 'Enables WooCommerce Analytics', 'woocommerce' ),
 				'is_experimental' => false,
 			),
-			'new_navigation'      => array(
+			'new_navigation'                 => array(
 				'name'            => __( 'Navigation', 'woocommerce' ),
 				'description'     => __( 'Adds the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
 				'is_experimental' => false,
 			),
-			'custom_order_tables' => array(
-				'name'            => __( 'Custom order tables', 'woocommerce' ),
-				'description'     => __( 'Enable the custom orders tables feature (still in development)', 'woocommerce' ),
+			'high_performance_order_storage' => array(
+				'name'            => __( 'High performance order storage', 'woocommerce' ),
+				'description'     => __( 'Enable the high performance order storage feature (still in development)', 'woocommerce' ),
 				'is_experimental' => true,
 			),
 		);
@@ -324,12 +324,13 @@ class FeaturesController {
 	 * Get the names of the plugins that have been declared compatible or incompatible with a given feature.
 	 *
 	 * @param string $feature_id Feature id.
+	 * @param bool   $active_only True to return only active plugins.
 	 * @return array An array having a 'compatible' and an 'incompatible' key, each holding an array of plugin names.
 	 */
-	public function get_compatible_plugins_for_feature( string $feature_id ) : array {
+	public function get_compatible_plugins_for_feature( string $feature_id, bool $active_only = false ) : array {
 		$this->verify_did_woocommerce_init( __FUNCTION__ );
 
-		$woo_aware_plugins = $this->plugin_util->get_woocommerce_aware_plugins( true );
+		$woo_aware_plugins = $this->plugin_util->get_woocommerce_aware_plugins( $active_only );
 		if ( ! $this->feature_exists( $feature_id ) ) {
 			return array(
 				'compatible'   => array(),
@@ -593,7 +594,7 @@ class FeaturesController {
 		}
 
 		if ( ! $this->is_legacy_feature( $feature_id ) && ! $disabled && $this->verify_did_woocommerce_init() ) {
-			$plugin_info_for_feature = $this->get_compatible_plugins_for_feature( $feature_id );
+			$plugin_info_for_feature = $this->get_compatible_plugins_for_feature( $feature_id, true );
 			$incompatibles           = array_merge( $plugin_info_for_feature['incompatible'], $plugin_info_for_feature['uncertain'] );
 			$incompatibles           = array_filter( $incompatibles, 'is_plugin_active' );
 			$incompatible_count      = count( $incompatibles );
@@ -922,7 +923,7 @@ class FeaturesController {
 		}
 		// phpcs:enable WordPress.Security.NonceVerification
 
-		$feature_compatibility_info = $this->get_compatible_plugins_for_feature( $feature_id );
+		$feature_compatibility_info = $this->get_compatible_plugins_for_feature( $feature_id, false );
 		$incompatible_plugins_count = count( $feature_compatibility_info['incompatible'] ) + count( $feature_compatibility_info['uncertain'] );
 
 		$feature_name = $this->features[ $feature_id ]['name'];

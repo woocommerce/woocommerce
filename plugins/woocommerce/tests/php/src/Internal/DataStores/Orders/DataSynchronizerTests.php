@@ -27,7 +27,7 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 		OrderHelper::create_order_custom_table_if_not_exist();
 		$this->sut           = wc_get_container()->get( DataSynchronizer::class );
 		$features_controller = wc_get_container()->get( Featurescontroller::class );
-		$features_controller->change_feature_enable( 'custom_order_tables', true );
+		$features_controller->change_feature_enable( 'high_performance_order_storage', true );
 	}
 
 	/**

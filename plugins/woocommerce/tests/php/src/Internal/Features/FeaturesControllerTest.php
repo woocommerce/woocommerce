@@ -563,12 +563,12 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'get_compatible_plugins_for_feature' returns empty information for invalid feature ids.
+	 * @testdox 'get_compatible_plugins_for_feature' returns empty information for invalid feature ids when only active plugins are requested.
 	 */
-	public function test_get_compatible_plugins_for_non_existing_feature() {
+	public function test_get_compatible_active_plugins_for_non_existing_feature() {
 		$this->simulate_after_woocommerce_init_hook();
 
-		$result = $this->sut->get_compatible_plugins_for_feature( 'NON_EXISTING' );
+		$result = $this->sut->get_compatible_plugins_for_feature( 'NON_EXISTING', true );
 
 		$expected = array(
 			'compatible'   => array(),
@@ -579,25 +579,62 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'get_compatible_plugins_for_feature' returns empty information for features for which no compatibility has been declared.
+	 * @testdox 'get_compatible_plugins_for_feature' returns empty information for invalid feature ids when all plugins are requested.
 	 */
-	public function test_get_compatible_plugins_for_existing_feature_without_compatibility_declarations() {
+	public function test_get_all_compatible_plugins_for_non_existing_feature() {
 		$this->simulate_after_woocommerce_init_hook();
 
-		$result = $this->sut->get_compatible_plugins_for_feature( 'mature1' );
+		$result = $this->sut->get_compatible_plugins_for_feature( 'NON_EXISTING', false );
+
+		$expected = array(
+			'compatible'   => array(),
+			'incompatible' => array(),
+			'uncertain'    => array( 'the_plugin', 'the_plugin_2', 'the_plugin_3', 'the_plugin_4', 'the_plugin_inactive' ),
+		);
+		$this->assertEquals( $expected, $result );
+	}
+
+	/**
+	 * @testdox 'get_compatible_plugins_for_feature' returns empty information for features for which no compatibility has been declared when only active plugins are requested.
+	 */
+	public function test_get_active_compatible_plugins_for_existing_feature_without_compatibility_declarations() {
+		$this->simulate_after_woocommerce_init_hook();
+
+		$result = $this->sut->get_compatible_plugins_for_feature( 'mature1', true );
 
 		$expected = array(
 			'compatible'   => array(),
 			'incompatible' => array(),
 			'uncertain'    => array( 'the_plugin', 'the_plugin_2', 'the_plugin_3', 'the_plugin_4' ),
+		);
+		$this->assertEquals( $expected, $result );
+	}
+
+	/**
+	 * @testdox 'get_compatible_plugins_for_feature' returns empty information for features for which no compatibility has been declared when all plugins are requested.
+	 */
+	public function test_get_all_compatible_plugins_for_existing_feature_without_compatibility_declarations() {
+		$this->simulate_after_woocommerce_init_hook();
+
+		$result = $this->sut->get_compatible_plugins_for_feature( 'mature1', false );
+
+		$expected = array(
+			'compatible'   => array(),
+			'incompatible' => array(),
+			'uncertain'    => array( 'the_plugin', 'the_plugin_2', 'the_plugin_3', 'the_plugin_4', 'the_plugin_inactive' ),
 		);
 		$this->assertEquals( $expected, $result );
 	}
 
 	/**
 	 * @testdox 'get_compatible_plugins_for_feature' returns proper information for a feature for which compatibility has been declared, and reacts to plugin deactivation accordingly.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $active_only True to test retrieving only active plugins.
 	 */
-	public function test_get_compatible_plugins_for_feature() {
+	public function test_get_compatible_plugins_for_feature( bool $active_only ) {
 		$this->simulate_inside_before_woocommerce_init_hook();
 
 		$this->fake_plugin_util->set_active_plugins( array( 'the_plugin', 'the_plugin_2', 'the_plugin_3', 'the_plugin_4', 'the_plugin_5', 'the_plugin_6' ) );
@@ -608,11 +645,12 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin_4', false );
 
 		$this->simulate_after_woocommerce_init_hook();
-		$result   = $this->sut->get_compatible_plugins_for_feature( 'mature1' );
-		$expected = array(
+		$result             = $this->sut->get_compatible_plugins_for_feature( 'mature1', $active_only );
+		$expected_uncertain = $active_only ? array( 'the_plugin_5', 'the_plugin_6' ) : array( 'the_plugin_5', 'the_plugin_6', 'the_plugin_inactive' );
+		$expected           = array(
 			'compatible'   => array( 'the_plugin', 'the_plugin_2' ),
 			'incompatible' => array( 'the_plugin_3', 'the_plugin_4' ),
-			'uncertain'    => array( 'the_plugin_5', 'the_plugin_6' ),
+			'uncertain'    => $expected_uncertain,
 		);
 		$this->assertEquals( $expected, $result );
 
@@ -623,11 +661,12 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 		$this->fake_plugin_util->set_active_plugins( array( 'the_plugin', 'the_plugin_3', 'the_plugin_5' ) );
-		$result   = $this->sut->get_compatible_plugins_for_feature( 'mature1' );
-		$expected = array(
+		$result             = $this->sut->get_compatible_plugins_for_feature( 'mature1', $active_only );
+		$expected_uncertain = $active_only ? array( 'the_plugin_5' ) : array( 'the_plugin_5', 'the_plugin_inactive' );
+		$expected           = array(
 			'compatible'   => array( 'the_plugin' ),
 			'incompatible' => array( 'the_plugin_3' ),
-			'uncertain'    => array( 'the_plugin_5' ),
+			'uncertain'    => $expected_uncertain,
 		);
 		$this->assertEquals( $expected, $result );
 	}

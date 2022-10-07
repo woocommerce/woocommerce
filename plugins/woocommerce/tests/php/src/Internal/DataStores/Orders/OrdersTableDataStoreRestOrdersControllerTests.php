@@ -81,7 +81,7 @@ class OrdersTableDataStoreRestOrdersControllerTests extends \WC_REST_Orders_Cont
 	 */
 	private function toggle_cot( bool $enabled ): void {
 		$features_controller = wc_get_container()->get( Featurescontroller::class );
-		$features_controller->change_feature_enable( 'custom_order_tables', true );
+		$features_controller->change_feature_enable( 'high_performance_order_storage', true );
 
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, wc_bool_to_string( $enabled ) );
 
