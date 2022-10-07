@@ -13,11 +13,12 @@ import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { cleanForSlug } from '@wordpress/url';
 import {
-	EnrichedLabel,
 	Link,
 	useFormContext,
 	__experimentalRichTextEditor as RichTextEditor,
+	__experimentalTooltip as Tooltip,
 } from '@woocommerce/components';
+import interpolateComponents from '@automattic/interpolate-components';
 import {
 	Product,
 	ProductCategory,
@@ -134,39 +135,40 @@ export const ProductDetailsSection: React.FC = () => {
 					/>
 					<CheckboxControl
 						label={
-							<EnrichedLabel
-								label={ __(
-									'Feature this product',
-									'woocommerce'
-								) }
-								helpDescription={
-									<>
-										{ __(
-											'Include this product in a featured section on your website with a widget or shortcode.',
+							<>
+								{ __( 'Feature this product', 'woocommerce' ) }
+								<Tooltip
+									text={ interpolateComponents( {
+										mixedString: __(
+											'Include this product in a featured section on your website with a widget or shortcode. {{moreLink/}}',
 											'woocommerce'
-										) }
-										<Link
-											href="https://woocommerce.com/document/woocommerce-shortcodes/#products"
-											target="_blank"
-											type="external"
-											onClick={ () =>
-												recordEvent(
-													'add_product_learn_more',
-													{
-														category:
-															PRODUCT_DETAILS_SLUG,
+										),
+										components: {
+											moreLink: (
+												<Link
+													href="https://woocommerce.com/document/woocommerce-shortcodes/#products"
+													target="_blank"
+													type="external"
+													onClick={ () =>
+														recordEvent(
+															'add_product_learn_more',
+															{
+																category:
+																	PRODUCT_DETAILS_SLUG,
+															}
+														)
 													}
-												)
-											}
-										>
-											{ __(
-												'Learn more',
-												'woocommerce'
-											) }
-										</Link>
-									</>
-								}
-							/>
+												>
+													{ __(
+														'Learn more',
+														'woocommerce'
+													) }
+												</Link>
+											),
+										},
+									} ) }
+								/>
+							</>
 						}
 						{ ...getCheckboxProps( {
 							...getInputProps( 'featured' ),
