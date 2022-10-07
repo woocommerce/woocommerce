@@ -5,12 +5,27 @@
 		background-color: #f0f6fc;
 	}
 
+	&__add-attribute {
+		margin-top: $gap-small;
+	}
+
 	&__buttons {
 		margin-top: $gap-larger;
 		display: flex;
 		flex-direction: row;
 		gap: 8px;
 		justify-content: flex-end;
+	}
+
+	.components-modal__content {
+		display: flex;
+		flex-direction: column;
+	}
+
+	&__body {
+		min-height: 200px;
+		flex: 1 1 auto;
+		overflow: auto;
 	}
 
 	&__table {
@@ -35,7 +50,7 @@
 	}
 	&__table-row {
 		padding: $gap-large 0;
-		td:not(:last-child) {
+		td:not( :last-child ) {
 			margin-right: $gap;
 		}
 	}
