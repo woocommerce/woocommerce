@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, storefront, checkout, downlo
 Requires at least: 5.8
 Tested up to: 6.0
 Requires PHP: 7.2
-Stable tag: 6.9.4
+Stable tag: 7.0.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -167,7 +167,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
-* Fix - false [#34966](https://github.com/woocommerce/woocommerce/pull/34966)
 * Fix - Fix: can't place orders for Saint Martin (French part) [#34920](https://github.com/woocommerce/woocommerce/pull/34920)
 * Fix - Fix the wc pay view logic so that we don't display it even when payment task is completed [#34892](https://github.com/woocommerce/woocommerce/pull/34892)
 * Fix - Added in the missing tracks events for the shipping default settings tour [#34601](https://github.com/woocommerce/woocommerce/pull/34601)
