@@ -87,13 +87,13 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 				onOrderChange={ ( items ) => {
 					updateOrderedChildren( items );
 				} }
-				onDragStart={ () => {
+				onDragStart={ ( event ) => {
 					setIsDragging( true );
-					onDragStart();
+					onDragStart( event );
 				} }
-				onDragEnd={ () => {
+				onDragEnd={ ( event ) => {
 					setIsDragging( false );
-					onDragEnd();
+					onDragEnd( event );
 				} }
 				onDragOver={ onDragOver }
 			>
@@ -168,18 +168,22 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 								} }
 								replaceItem={ (
 									replaceIndex: number,
-									media: { id: number } & { [ k: string ]: any }
+									media: { id: number } & {
+										[ k: string ]: any;
+									}
 								) => {
 									onReplace( { replaceIndex, media } );
-									setOrderedChildren( replaceItem< {
-										src: string;
-										alt: string;
-									} >( orderedChildren, replaceIndex, {
-										src: media.url,
-										alt: media.alt,
-									} ) );
+									setOrderedChildren(
+										replaceItem< {
+											src: string;
+											alt: string;
+										} >( orderedChildren, replaceIndex, {
+											src: media.url,
+											alt: media.alt,
+										} )
+									);
 								} }
-								setToolBarItem={ ( toolBarItem )=> {
+								setToolBarItem={ ( toolBarItem ) => {
 									onSelectAsCover( activeToolbarKey );
 									setActiveToolbarKey( toolBarItem );
 								} }
