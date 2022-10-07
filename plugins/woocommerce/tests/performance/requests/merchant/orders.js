@@ -35,10 +35,13 @@ import {
 
 // Change URL if COT is enabled and being used
 let admin_orders_base;
+let admin_orders_completed;
 if ( cot_status === true ) {
 	admin_orders_base = cot_admin_orders_base_url;
+	admin_orders_completed = 'status=wc-completed';
 } else {
 	admin_orders_base = admin_orders_base_url;
+	admin_orders_completed = 'post_status=wc-completed';
 }
 
 export function orders() {
@@ -153,6 +156,31 @@ export function orders() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
+		} );
+	} );
+
+	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+
+	group( 'Completed Orders', function () {
+		const requestHeaders = Object.assign(
+			{},
+			htmlRequestHeader,
+			commonRequestHeaders,
+			commonGetRequestHeaders,
+			commonNonStandardHeaders
+		);
+
+		response = http.get(
+			`${ base_url }/wp-admin/${ admin_orders_base }&${ admin_orders_completed }`,
+			{
+				headers: requestHeaders,
+				tags: { name: 'Merchant - Completed Orders' },
+			}
+		);
+		check( response, {
+			'is status 200': ( r ) => r.status === 200,
+			"body contains: 'Orders' header": ( response ) =>
+				response.body.includes( 'Orders</h1>' ),
 		} );
 	} );
 

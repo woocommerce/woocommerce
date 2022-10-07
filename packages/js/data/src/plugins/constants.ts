@@ -59,4 +59,5 @@ export const pluginNames = {
 		'Pinterest for WooCommerce',
 		'woocommerce'
 	),
+	'tiktok-for-business:alt': __( 'TikTok for WooCommerce', 'woocommerce' ),
 };
