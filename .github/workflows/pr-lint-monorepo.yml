@@ -21,6 +21,7 @@ jobs:
         uses: ./.github/actions/setup-woocommerce-monorepo
         with:
           build: false
+          php-version: '7.4'
 
       - name: Check change files are touched for touched projects
         env:

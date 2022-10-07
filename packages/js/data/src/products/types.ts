@@ -86,6 +86,8 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	related_ids: number[];
 	variations: number[];
 	attributes: ProductAttribute[];
+	dimensions: ProductDimensions;
+	weight: string;
 };
 
 export const productReadOnlyProperties = [
@@ -143,4 +145,10 @@ export type ProductQuery<
 	min_price: string;
 	max_price: string;
 	stock_status: 'instock' | 'outofstock' | 'onbackorder';
+};
+
+export type ProductDimensions = {
+	width: string;
+	height: string;
+	length: string;
 };

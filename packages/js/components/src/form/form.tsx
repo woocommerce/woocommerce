@@ -7,22 +7,27 @@ import {
 	createElement,
 	useCallback,
 	useEffect,
+	useMemo,
 	forwardRef,
 	useImperativeHandle,
 } from '@wordpress/element';
 import deprecated from '@wordpress/deprecated';
 import { ChangeEvent, PropsWithChildren, useRef } from 'react';
+import _setWith from 'lodash/setWith';
+import _get from 'lodash/get';
+import _clone from 'lodash/clone';
+import _isEqual from 'lodash/isEqual';
 
 /**
  * Internal dependencies
  */
-import { FormContext } from './form-context';
+import { FormContext, FormErrors } from './form-context';
 
 type FormProps< Values > = {
 	/**
 	 * Object of all initial errors to store in state.
 	 */
-	errors?: { [ P in keyof Values ]?: string };
+	errors?: FormErrors< Values >;
 	/**
 	 * Object key:value pair list of all initial field values.
 	 */
@@ -57,10 +62,19 @@ type FormProps< Values > = {
 		isValid: boolean
 	) => void;
 	/**
+	 * Function to call when one or more values change in the form.
+	 */
+	onChanges?: (
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		changedValues: { name: string; value: any }[],
+		values: Values,
+		isValid: boolean
+	) => void;
+	/**
 	 * A function that is passed a list of all values and
 	 * should return an `errors` object with error response.
 	 */
-	validate?: ( values: Values ) => Record< string, string >;
+	validate?: ( values: Values ) => FormErrors< Values >;
 };
 
 function isChangeEvent< T >(
@@ -79,20 +93,21 @@ export type FormRef< Values > = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function FormComponent< Values extends Record< string, any > >(
 	{
+		children,
 		onSubmit = () => {},
 		onChange = () => {},
-		initialValues = {} as Values,
+		onChanges = () => {},
 		...props
 	}: PropsWithChildren< FormProps< Values > >,
 	ref: React.Ref< FormRef< Values > >
 ): React.ReactElement | null {
-	const [ values, setValues ] = useState< Values >( initialValues );
-	const [ errors, setErrors ] = useState< {
-		[ P in keyof Values ]?: string;
-	} >( props.errors || {} );
-	const [ changedFields, setChangedFields ] = useState< {
-		[ P in keyof Values ]?: boolean;
-	} >( {} );
+	const initialValues = useRef( props.initialValues ?? ( {} as Values ) );
+	const [ values, setValuesInternal ] = useState< Values >(
+		props.initialValues ?? ( {} as Values )
+	);
+	const [ errors, setErrors ] = useState< FormErrors< Values > >(
+		props.errors || {}
+	);
 	const [ touched, setTouched ] = useState< {
 		[ P in keyof Values ]?: boolean;
 	} >( props.touched || {} );
@@ -116,13 +131,13 @@ function FormComponent< Values extends Record< string, any > >(
 	}, [] );
 
 	const resetForm = (
-		newInitialValues: Values,
-		newChangedFields = {},
+		newInitialValues = {} as Values,
 		newTouchedFields = {},
 		newErrors = {}
 	) => {
-		setValues( newInitialValues || {} );
-		setChangedFields( newChangedFields );
+		const newValues = newInitialValues ?? initialValues.current ?? {};
+		initialValues.current = newValues;
+		setValuesInternal( newValues );
 		setTouched( newTouchedFields );
 		setErrors( newErrors );
 	};
@@ -136,30 +151,16 @@ function FormComponent< Values extends Record< string, any > >(
 		return ! Object.keys( errors ).length;
 	};
 
-	const setValue = useCallback(
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		( name: string, value: any ) => {
-			const newValues = { ...values, [ name ]: value };
-			setValues( newValues );
-			if ( initialValues[ name ] !== value && ! changedFields[ name ] ) {
-				setChangedFields( {
-					...changedFields,
-					[ name ]: true,
-				} );
-			} else if (
-				initialValues[ name ] === value &&
-				changedFields[ name ]
-			) {
-				setChangedFields( {
-					...changedFields,
-					[ name ]: false,
-				} );
-			}
+	const setValues = useCallback(
+		( valuesToSet: Values ) => {
+			const newValues = { ...values, ...valuesToSet };
+			setValuesInternal( newValues );
+
 			validate( newValues, ( newErrors ) => {
 				const { onChangeCallback } = props;
 
 				// Note that onChange is a no-op by default so this will never be null
-				const callback = onChangeCallback || onChange;
+				const singleValueChangeCallback = onChangeCallback || onChange;
 
 				if ( onChangeCallback ) {
 					deprecated( 'onChangeCallback', {
@@ -168,16 +169,45 @@ function FormComponent< Values extends Record< string, any > >(
 						plugin: '@woocommerce/components',
 					} );
 				}
-				// onChange keeps track of validity, so needs to
+
+				if ( ! singleValueChangeCallback && ! onChanges ) {
+					return;
+				}
+
+				// onChange and onChanges keep track of validity, so needs to
 				// happen after setting the error state.
-				if ( callback ) {
-					callback(
-						{ name, value },
-						newValues,
-						! Object.keys( newErrors || {} ).length
-					);
+
+				const isValid = ! Object.keys( newErrors || {} ).length;
+				const nameValuePairs = [];
+				for ( const key in valuesToSet ) {
+					const nameValuePair = {
+						name: key,
+						value: valuesToSet[ key ],
+					};
+
+					nameValuePairs.push( nameValuePair );
+
+					if ( singleValueChangeCallback ) {
+						singleValueChangeCallback(
+							nameValuePair,
+							newValues,
+							isValid
+						);
+					}
+				}
+
+				if ( onChanges ) {
+					onChanges( nameValuePairs, newValues, isValid );
 				}
 			} );
+		},
+		[ values, validate, onChange, props.onChangeCallback ]
+	);
+
+	const setValue = useCallback(
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		( name: string, value: any ) => {
+			setValues( _setWith( { ...values }, name, value, _clone ) );
 		},
 		[ values, validate, onChange, props.onChangeCallback ]
 	);
@@ -190,7 +220,7 @@ function FormComponent< Values extends Record< string, any > >(
 			// Handle native events.
 			if ( isChangeEvent( value ) && value.target ) {
 				if ( value.target.type === 'checkbox' ) {
-					setValue( name, ! values[ name ] );
+					setValue( name, ! _get( values, name ) );
 				} else {
 					setValue( name, value.target.value );
 				}
@@ -250,74 +280,55 @@ function FormComponent< Values extends Record< string, any > >(
 		className: string | undefined;
 		help: string | null | undefined;
 	} {
+		const inputValue = _get( values, name );
+		const isTouched = touched[ name ];
+		const inputError = _get( errors, name );
+
 		return {
-			value: values[ name ],
-			checked: Boolean( values[ name ] ),
-			selected: values[ name ],
+			value: inputValue,
+			checked: Boolean( inputValue ),
+			selected: inputValue,
 			onChange: (
 				value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
 			) => handleChange( name, value ),
 			onBlur: () => handleBlur( name ),
-			className:
-				touched[ name ] && errors[ name ] ? 'has-error' : undefined,
-			help: touched[ name ] ? errors[ name ] : null,
+			className: isTouched && inputError ? 'has-error' : undefined,
+			help: isTouched ? ( inputError as string ) : null,
 		};
 	}
+
+	const isDirty = useMemo(
+		() => ! _isEqual( initialValues.current, values ),
+		[ initialValues.current, values ]
+	);
 
 	const getStateAndHelpers = () => {
 		return {
 			values,
 			errors,
 			touched,
+			isDirty,
 			setTouched,
 			setValue,
+			setValues,
 			handleSubmit,
 			getInputProps,
 			isValidForm: ! Object.keys( errors ).length,
+			resetForm,
 		};
 	};
 
-	const isDirty = Object.values( changedFields ).some( Boolean );
-
-	if ( props.children && typeof props.children === 'function' ) {
-		const element = props.children( getStateAndHelpers() );
-		return (
-			<FormContext.Provider
-				value={ {
-					values,
-					errors,
-					touched,
-					isDirty,
-					changedFields,
-					setTouched,
-					setValue,
-					handleSubmit,
-					getInputProps,
-					isValidForm: ! Object.keys( errors ).length,
-					resetForm,
-				} }
-			>
-				{ cloneElement( element ) }
-			</FormContext.Provider>
-		);
+	function getChildren() {
+		if ( typeof children === 'function' ) {
+			const element = children( getStateAndHelpers() );
+			return cloneElement( element );
+		}
+		return children;
 	}
+
 	return (
-		<FormContext.Provider
-			value={ {
-				values,
-				errors,
-				touched,
-				isDirty,
-				changedFields,
-				setTouched,
-				setValue,
-				handleSubmit,
-				getInputProps,
-				isValidForm: ! Object.keys( errors ).length,
-				resetForm,
-			} }
-		>
-			{ props.children }
+		<FormContext.Provider value={ getStateAndHelpers() }>
+			{ getChildren() }
 		</FormContext.Provider>
 	);
 }

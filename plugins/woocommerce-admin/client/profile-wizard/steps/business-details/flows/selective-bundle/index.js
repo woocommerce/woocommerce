@@ -627,6 +627,7 @@ class BusinessDetails extends Component {
 											this.persistProfileItems();
 										} }
 										disabled={ ! isValidForm }
+										aria-disabled={ ! isValidForm }
 										isBusy={ isInstallingActivating }
 									>
 										{ ! hasInstallActivateError

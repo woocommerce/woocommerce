@@ -61,7 +61,7 @@
 	},
 	"engines": {
 		"node": "^16.13.1",
-		"pnpm": "7.11.0"
+		"pnpm": "^7.12.2"
 	},
 	"woorelease": {
 		"svn_reauth": "true",

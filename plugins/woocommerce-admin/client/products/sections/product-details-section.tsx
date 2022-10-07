@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { CheckboxControl, Button, TextControl } from '@wordpress/components';
+import {
+	CheckboxControl,
+	Button,
+	TextControl,
+	Card,
+	CardBody,
+} from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
@@ -55,67 +61,88 @@ export const ProductDetailsSection: React.FC = () => {
 				'woocommerce'
 			) }
 		>
-			<div>
-				<TextControl
-					label={ __( 'Name', 'woocommerce' ) }
-					name={ `${ PRODUCT_DETAILS_SLUG }-name` }
-					placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
-					{ ...getTextControlProps( getInputProps( 'name' ) ) }
-				/>
-				{ values.id && ! doesNameHaveError() && permalinkPrefix && (
-					<div className="product-details-section__product-link">
-						{ __( 'Product link', 'woocommerce' ) }:&nbsp;
-						<a
-							href={ values.permalink }
-							target="_blank"
-							rel="noreferrer"
-						>
-							{ permalinkPrefix }
-							{ values.slug || cleanForSlug( values.name ) }
-							{ permalinkSuffix }
-						</a>
-						<Button
-							variant="link"
-							onClick={ () =>
-								setShowProductLinkEditModal( true )
-							}
-						>
-							{ __( 'Edit', 'woocommerce' ) }
-						</Button>
+			<Card>
+				<CardBody>
+					<div>
+						<TextControl
+							label={ __( 'Name', 'woocommerce' ) }
+							name={ `${ PRODUCT_DETAILS_SLUG }-name` }
+							placeholder={ __(
+								'e.g. 12 oz Coffee Mug',
+								'woocommerce'
+							) }
+							{ ...getTextControlProps(
+								getInputProps( 'name' )
+							) }
+						/>
+						{ values.id &&
+							! doesNameHaveError() &&
+							permalinkPrefix && (
+								<span className="woocommerce-product-form__secondary-text product-details-section__product-link">
+									{ __( 'Product link', 'woocommerce' ) }
+									:&nbsp;
+									<a
+										href={ values.permalink }
+										target="_blank"
+										rel="noreferrer"
+									>
+										{ permalinkPrefix }
+										{ values.slug ||
+											cleanForSlug( values.name ) }
+										{ permalinkSuffix }
+									</a>
+									<Button
+										variant="link"
+										onClick={ () =>
+											setShowProductLinkEditModal( true )
+										}
+									>
+										{ __( 'Edit', 'woocommerce' ) }
+									</Button>
+								</span>
+							) }
 					</div>
-				) }
-			</div>
-			<CheckboxControl
-				label={
-					<EnrichedLabel
-						label={ __( 'Feature this product', 'woocommerce' ) }
-						helpDescription={ __(
-							'Include this product in a featured section on your website with a widget or shortcode.',
-							'woocommerce'
-						) }
-						moreUrl="https://woocommerce.com/document/woocommerce-shortcodes/#products"
-						tooltipLinkCallback={ () =>
-							recordEvent( 'add_product_learn_more', {
-								category: PRODUCT_DETAILS_SLUG,
-							} )
+					<CheckboxControl
+						label={
+							<EnrichedLabel
+								label={ __(
+									'Feature this product',
+									'woocommerce'
+								) }
+								helpDescription={ __(
+									'Include this product in a featured section on your website with a widget or shortcode.',
+									'woocommerce'
+								) }
+								moreUrl="https://woocommerce.com/document/woocommerce-shortcodes/#products"
+								tooltipLinkCallback={ () =>
+									recordEvent( 'add_product_learn_more', {
+										category: PRODUCT_DETAILS_SLUG,
+									} )
+								}
+							/>
 						}
+						{ ...getCheckboxProps( {
+							...getInputProps( 'featured' ),
+							name: 'featured',
+							className:
+								'product-details-section__feature-checkbox',
+						} ) }
 					/>
-				}
-				{ ...getCheckboxProps( {
-					...getInputProps( 'featured' ),
-					name: 'featured',
-					className: 'product-details-section__feature-checkbox',
-				} ) }
-			/>
-			{ showProductLinkEditModal && (
-				<EditProductLinkModal
-					permalinkPrefix={ permalinkPrefix || '' }
-					permalinkSuffix={ permalinkSuffix || '' }
-					product={ values }
-					onCancel={ () => setShowProductLinkEditModal( false ) }
-					onSaved={ () => setShowProductLinkEditModal( false ) }
-				/>
-			) }
+					{ showProductLinkEditModal && (
+						<EditProductLinkModal
+							permalinkPrefix={ permalinkPrefix || '' }
+							permalinkSuffix={ permalinkSuffix || '' }
+							product={ values }
+							onCancel={ () =>
+								setShowProductLinkEditModal( false )
+							}
+							onSaved={ () =>
+								setShowProductLinkEditModal( false )
+							}
+						/>
+					) }
+				</CardBody>
+			</Card>
 		</ProductSectionLayout>
 	);
 };

@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Enable async typeahead fields for the attribute and term fields within products.
