@@ -11,13 +11,14 @@ import {
 	ProductAttributeTerm,
 } from '@woocommerce/data';
 import {
+	selectControlStateChangeTypes,
 	__experimentalSelectControl as SelectControl,
 	__experimentalSelectControlMenu as Menu,
 	__experimentalSelectControlMenuItem as MenuItem,
 } from '@woocommerce/components';
 
 type AttributeTermInputFieldProps = {
-	value: ProductAttributeTerm[];
+	value?: ProductAttributeTerm[];
 	onChange: ( value: ProductAttributeTerm[] ) => void;
 	attributeId?: number;
 	placeholder?: string;
@@ -26,7 +27,7 @@ type AttributeTermInputFieldProps = {
 
 export const AttributeTermInputField: React.FC<
 	AttributeTermInputFieldProps
-> = ( { value, onChange, placeholder, disabled, attributeId } ) => {
+> = ( { value = [], onChange, placeholder, disabled, attributeId } ) => {
 	const [ fetchedItems, setFetchedItems ] = useState<
 		ProductAttributeTerm[]
 	>( [] );
@@ -60,23 +61,54 @@ export const AttributeTermInputField: React.FC<
 		}
 	}, [ disabled, attributeId ] );
 
+	const onRemove = ( item: ProductAttributeTerm ) => {
+		onChange( value.filter( ( opt ) => opt.slug !== item.slug ) );
+	};
+
+	const onSelect = ( item: ProductAttributeTerm ) => {
+		const isSelected = value.find( ( i ) => i.slug === item.slug );
+		if ( isSelected ) {
+			onRemove( item );
+			return;
+		}
+		onChange( [ ...value, item ] );
+	};
+
+	const selectedTermSlugs = ( value || [] ).map( ( term ) => term.slug );
+
 	return (
 		<SelectControl< ProductAttributeTerm >
 			items={ fetchedItems }
 			multiple
 			disabled={ disabled || ! attributeId }
 			label=""
+			getFilteredItems={ ( allItems ) => allItems }
 			onInputChange={ debouncedSearch }
 			placeholder={ placeholder || '' }
 			getItemLabel={ ( item ) => item?.name || '' }
 			getItemValue={ ( item ) => item?.slug || '' }
-			selected={ value }
-			onSelect={ ( item ) => {
-				onChange( [ ...value, item ] );
+			stateReducer={ ( state, actionAndChanges ) => {
+				const { changes, type } = actionAndChanges;
+				switch ( type ) {
+					case selectControlStateChangeTypes.ControlledPropUpdatedSelectedItem:
+						return {
+							...changes,
+							inputValue: state.inputValue,
+						};
+					case selectControlStateChangeTypes.ItemClick:
+						return {
+							...changes,
+							isOpen: true,
+							inputValue: state.inputValue,
+							highlightedIndex: state.highlightedIndex,
+						};
+					default:
+						return changes;
+				}
 			} }
-			onRemove={ ( item ) =>
-				onChange( value.filter( ( opt ) => opt.slug !== item.slug ) )
-			}
+			selected={ value }
+			onSelect={ onSelect }
+			onRemove={ onRemove }
 		>
 			{ ( {
 				items,
@@ -91,7 +123,9 @@ export const AttributeTermInputField: React.FC<
 							<Spinner />
 						) : (
 							items.map( ( item, menuIndex ) => {
-								const isSelected = value.includes( item );
+								const isSelected = selectedTermSlugs.includes(
+									item.slug
+								);
 
 								return (
 									<MenuItem
