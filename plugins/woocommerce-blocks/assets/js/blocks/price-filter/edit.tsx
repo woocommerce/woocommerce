@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { getAdminLink } from '@woocommerce/settings';
 import { blocksConfig } from '@woocommerce/block-settings';
-import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
 import BlockTitle from '@woocommerce/editor-components/block-title';
 import { Icon, currencyDollar, external } from '@wordpress/icons';
 import type { BlockEditProps } from '@wordpress/blocks';
@@ -27,10 +26,12 @@ import {
 import Block from './block';
 import './editor.scss';
 import type { Attributes } from './types';
+import { UpgradeNotice } from '../filter-wrapper/upgrade';
 
 export default function ( {
 	attributes,
 	setAttributes,
+	clientId,
 }: BlockEditProps< Attributes > ) {
 	const {
 		heading,
@@ -117,21 +118,6 @@ export default function ( {
 							} )
 						}
 					/>
-					<p>
-						{ __(
-							'Heading Level',
-							'woo-gutenberg-products-block'
-						) }
-					</p>
-					<HeadingToolbar
-						isCollapsed={ false }
-						minLevel={ 2 }
-						maxLevel={ 7 }
-						selectedLevel={ headingLevel }
-						onChange={ ( newLevel: number ) =>
-							setAttributes( { headingLevel: newLevel } )
-						}
-					/>
 				</PanelBody>
 			</InspectorControls>
 		);
@@ -179,14 +165,22 @@ export default function ( {
 			) : (
 				<>
 					{ getInspectorControls() }
-					<BlockTitle
-						className="wc-block-price-filter__title"
-						headingLevel={ headingLevel }
-						heading={ heading }
-						onChange={ ( value: string ) =>
-							setAttributes( { heading: value } )
-						}
+					<UpgradeNotice
+						attributes={ attributes }
+						clientId={ clientId }
+						setAttributes={ setAttributes }
+						filterType="price-filter"
 					/>
+					{ heading && (
+						<BlockTitle
+							className="wc-block-price-filter__title"
+							headingLevel={ headingLevel }
+							heading={ heading }
+							onChange={ ( value: string ) =>
+								setAttributes( { heading: value } )
+							}
+						/>
+					) }
 					<Disabled>
 						<Block attributes={ attributes } isEditor={ true } />
 					</Disabled>

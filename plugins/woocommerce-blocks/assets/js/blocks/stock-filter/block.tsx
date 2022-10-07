@@ -36,6 +36,7 @@ import { previewOptions } from './preview';
 import './style.scss';
 import { getActiveFilters } from './utils';
 import { Attributes, DisplayOption } from './types';
+import { useSetWraperVisibility } from '../filter-wrapper/context';
 
 export const QUERY_PARAM_KEY = PREFIX_QUERY_ARG_FILTER_TYPE + 'stock_status';
 
@@ -53,6 +54,8 @@ const StockStatusFilterBlock = ( {
 	attributes: Attributes;
 	isEditor?: boolean;
 } ) => {
+	const setWrapperVisibility = useSetWraperVisibility();
+
 	const filteringForPhpTemplate = getSettingWithCoercion(
 		'is_rendering_php_template',
 		false,
@@ -342,6 +345,7 @@ const StockStatusFilterBlock = ( {
 	);
 
 	if ( ! filteredCountsLoading && displayedOptions.length === 0 ) {
+		setWrapperVisibility( false );
 		return null;
 	}
 
@@ -359,6 +363,7 @@ const StockStatusFilterBlock = ( {
 	);
 
 	if ( ! hasFilterableProducts ) {
+		setWrapperVisibility( false );
 		return null;
 	}
 
@@ -373,6 +378,8 @@ const StockStatusFilterBlock = ( {
 	) : (
 		heading
 	);
+
+	setWrapperVisibility( true );
 
 	return (
 		<>

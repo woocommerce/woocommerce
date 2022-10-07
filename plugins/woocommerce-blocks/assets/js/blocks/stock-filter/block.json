@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/stock-filter",
 	"version": "1.0.0",
-	"title": "Filter by Stock",
+	"title": "Filter by Stock Controls",
 	"description": "Allow customers to filter the grid by products stock status.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
@@ -13,7 +13,9 @@
 		  "__experimentalDefaultControls": {
 			"text": true
 		  }
-		}
+		},
+		"inserter": false,
+		"lock": false
 	},
 	"example": {
 		"attributes": {
