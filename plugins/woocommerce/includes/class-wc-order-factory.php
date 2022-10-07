@@ -212,6 +212,8 @@ class WC_Order_Factory {
 			 * @param string $classname  Order classname.
 			 * @param string $order_type Order type.
 			 * @param int    $order_id   Order ID.
+			 *
+			 * @since 3.0.0
 			 */
 			$order_class_names[ $order_id ] = apply_filters( 'woocommerce_order_class', $order_class_names[ $order_id ], $order_type, $order_id );
 
