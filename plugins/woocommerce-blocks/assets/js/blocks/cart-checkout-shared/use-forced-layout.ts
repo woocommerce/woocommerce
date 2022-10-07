@@ -6,6 +6,7 @@ import {
 	useRef,
 	useCallback,
 	useMemo,
+	useState,
 } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
@@ -41,6 +42,8 @@ export const useForcedLayout = ( {
 } ): void => {
 	const currentRegisteredBlocks = useRef( registeredBlocks );
 	const currentDefaultTemplate = useRef( defaultTemplate );
+	const [ forcedBlocksInserted, setForcedBlocksInserted ] =
+		useState< number >( 0 );
 
 	const { insertBlock, replaceInnerBlocks } =
 		useDispatch( 'core/block-editor' );
@@ -55,15 +58,16 @@ export const useForcedLayout = ( {
 				),
 			};
 		},
-		[ clientId, currentRegisteredBlocks.current ]
+		[ clientId, currentRegisteredBlocks.current, forcedBlocksInserted ]
 	);
 
 	const appendBlock = useCallback(
 		( block, position ) => {
 			const newBlock = createBlock( block.name );
 			insertBlock( newBlock, position, clientId, false );
+			setForcedBlocksInserted( forcedBlocksInserted + 1 );
 		},
-		[ clientId, insertBlock ]
+		[ clientId, insertBlock, forcedBlocksInserted ]
 	);
 
 	const lockedBlockTypes = useMemo(
