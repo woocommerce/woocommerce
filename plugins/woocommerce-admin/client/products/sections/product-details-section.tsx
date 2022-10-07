@@ -14,6 +14,7 @@ import { useState } from '@wordpress/element';
 import { cleanForSlug } from '@wordpress/url';
 import {
 	EnrichedLabel,
+	Link,
 	useFormContext,
 	__experimentalRichTextEditor as RichTextEditor,
 } from '@woocommerce/components';
@@ -30,10 +31,10 @@ import { BlockInstance, serialize, parse } from '@wordpress/blocks';
  * Internal dependencies
  */
 import './product-details-section.scss';
+import { CategoryField } from '../fields/category-field';
+import { EditProductLinkModal } from '../shared/edit-product-link-modal';
 import { getCheckboxProps, getTextControlProps } from './utils';
 import { ProductSectionLayout } from '../layout/product-section-layout';
-import { EditProductLinkModal } from '../shared/edit-product-link-modal';
-import { CategoryField } from '../fields/category-field';
 
 const PRODUCT_DETAILS_SLUG = 'product-details';
 
@@ -138,15 +139,32 @@ export const ProductDetailsSection: React.FC = () => {
 									'Feature this product',
 									'woocommerce'
 								) }
-								helpDescription={ __(
-									'Include this product in a featured section on your website with a widget or shortcode.',
-									'woocommerce'
-								) }
-								moreUrl="https://woocommerce.com/document/woocommerce-shortcodes/#products"
-								tooltipLinkCallback={ () =>
-									recordEvent( 'add_product_learn_more', {
-										category: PRODUCT_DETAILS_SLUG,
-									} )
+								helpDescription={
+									<>
+										{ __(
+											'Include this product in a featured section on your website with a widget or shortcode.',
+											'woocommerce'
+										) }
+										<Link
+											href="https://woocommerce.com/document/woocommerce-shortcodes/#products"
+											target="_blank"
+											type="external"
+											onClick={ () =>
+												recordEvent(
+													'add_product_learn_more',
+													{
+														category:
+															PRODUCT_DETAILS_SLUG,
+													}
+												)
+											}
+										>
+											{ __(
+												'Learn more',
+												'woocommerce'
+											) }
+										</Link>
+									</>
 								}
 							/>
 						}

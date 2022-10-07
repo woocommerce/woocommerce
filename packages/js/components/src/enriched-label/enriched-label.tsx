@@ -2,74 +2,26 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, Popover } from '@wordpress/components';
-import { createElement, Fragment, useState } from '@wordpress/element';
-import interpolateComponents from '@automattic/interpolate-components';
-import { Icon, help } from '@wordpress/icons';
+import { createElement, Fragment } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import Link from '../link';
+import { Tooltip } from '../tooltip';
 
 type EnrichedLabelProps = {
-	helpDescription: string;
+	helpDescription: JSX.Element | string;
 	label: string;
-	moreUrl: string;
-	tooltipLinkCallback: () => void;
 };
 
 export const EnrichedLabel: React.FC< EnrichedLabelProps > = ( {
 	helpDescription,
-	label,
-	moreUrl,
-	tooltipLinkCallback,
+	label
 } ) => {
-	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
-
 	return (
 		<>
 			<span className="woocommerce-enriched-label__text">{ label }</span>
-			{ helpDescription && (
-				<div
-					className="woocommerce-enriched-label__help-wrapper"
-					onMouseLeave={ () => setIsPopoverVisible( false ) }
-				>
-					<Button
-						label={ __( 'Help button', 'woocommerce' ) }
-						onMouseEnter={ () => setIsPopoverVisible( true ) }
-					>
-						<Icon icon={ help } />
-					</Button>
-
-					{ isPopoverVisible && (
-						<Popover focusOnMount="container" position="top center">
-							{ interpolateComponents( {
-								mixedString:
-									helpDescription +
-									( moreUrl ? ' {{moreLink/}}' : '' ),
-								components: {
-									moreLink: moreUrl ? (
-										<Link
-											href={ moreUrl }
-											target="_blank"
-											type="external"
-											onClick={ tooltipLinkCallback }
-										>
-											{ __(
-												'Learn more',
-												'woocommerce'
-											) }
-										</Link>
-									) : (
-										<div />
-									),
-								},
-							} ) }
-						</Popover>
-					) }
-				</div>
-			) }
+			{ helpDescription && <Tooltip text={ helpDescription } /> }
 		</>
 	);
 };
