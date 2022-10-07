@@ -1,8 +1,5 @@
 .product-details-section {
 	&__product-link {
-		color: $gray-700;
-		font-size: 12px;
-
 		> a {
 			color: inherit;
 			text-decoration: none;
@@ -27,7 +24,6 @@
 				&__input-container {
 					align-self: center;
 				}
-
 			}
 			.woocommerce-enriched-label__text {
 				align-self: center;

@@ -230,8 +230,9 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$order = new \WC_Order();
 		$order->set_status( 'completed' );
 		$order->save();
+		$order_id = $order->get_id();
 
-		$request  = new \WP_REST_Request( 'DELETE', '/wc/v3/orders/' . $order->get_id() );
+		$request  = new \WP_REST_Request( 'DELETE', '/wc/v3/orders/' . $order_id );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -239,13 +240,13 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// Check that the response includes order data from the order (before deletion).
 		$data = $response->get_data();
 		$this->assertArrayHasKey( 'id', $data );
-		$this->assertEquals( $data['id'], $order->get_id() );
+		$this->assertEquals( $data['id'], $order_id );
 		$this->assertEquals( 'completed', $data['status'] );
 
 		wp_cache_flush();
 
 		// Check the order was actually deleted.
-		$order = wc_get_order( $order->get_id() );
+		$order = wc_get_order( $order_id );
 		$this->assertEquals( 'trash', $order->get_status( 'edit' ) );
 	}
 
@@ -380,5 +381,26 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 			);
 			$this->assertContains( 'test1', $meta_keys );
 		}
+	}
+
+	/**
+	 * Test that the meta_data property contains an array, and not an object, after being filtered.
+	 */
+	public function test_collection_param_include_meta_returns_array() {
+		$order = new \WC_Order();
+		$order->add_meta_data( 'test1', 'test1', true );
+		$order->add_meta_data( 'test2', 'test2', true );
+		$order->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request->set_param( 'include_meta', 'test2' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data       = $this->server->response_to_data( $response, false );
+		$encoded_data_string = wp_json_encode( $response_data );
+		$decoded_data_object = json_decode( $encoded_data_string, false ); // Ensure object instead of associative array.
+
+		$this->assertIsArray( $decoded_data_object[0]->meta_data );
 	}
 }

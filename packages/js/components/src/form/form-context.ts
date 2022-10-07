@@ -4,15 +4,16 @@
 import { ChangeEvent } from 'react';
 import { createContext, useContext } from '@wordpress/element';
 
+export type FormErrors< Values > = {
+	[ P in keyof Values ]?: FormErrors< Values[ P ] > | string;
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type FormContext< Values extends Record< string, any > > = {
 	values: Values;
-	errors: {
-		[ P in keyof Values ]?: string;
-	};
+	errors: FormErrors< Values >;
 	isDirty: boolean;
 	touched: { [ P in keyof Values ]?: boolean | undefined };
-	changedFields: { [ P in keyof Values ]?: boolean | undefined };
 	setTouched: React.Dispatch<
 		React.SetStateAction< { [ P in keyof Values ]?: boolean | undefined } >
 	>;
@@ -34,9 +35,8 @@ export type FormContext< Values extends Record< string, any > > = {
 	isValidForm: boolean;
 	resetForm: (
 		initialValues: Values,
-		changedFields?: { [ P in keyof Values ]?: boolean | undefined },
 		touchedFields?: { [ P in keyof Values ]?: boolean | undefined },
-		errors?: { [ P in keyof Values ]?: string }
+		errors?: FormErrors< Values >
 	) => void;
 };
 

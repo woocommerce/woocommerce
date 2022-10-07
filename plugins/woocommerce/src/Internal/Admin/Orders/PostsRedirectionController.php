@@ -73,6 +73,7 @@ class PostsRedirectionController {
 		}
 
 		$new_url = $this->page_controller->get_orders_url();
+		$new_url = add_query_arg( $query_args, $new_url );
 
 		// Handle bulk actions.
 		if ( $action && in_array( $action, array( 'trash', 'untrash', 'delete', 'mark_processing', 'mark_on-hold', 'mark_completed', 'mark_cancelled' ), true ) ) {

@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\Features;
 
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Admin\Features\Navigation\Init;
+use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -88,12 +89,13 @@ class FeaturesController {
 	 */
 	public function __construct() {
 		$features = array(
-			'analytics'                      => array(
-				'name'            => __( 'Analytics', 'woocommerce' ),
-				'description'     => __( 'Enables WooCommerce Analytics', 'woocommerce' ),
-				'is_experimental' => false,
+			'analytics'              => array(
+				'name'               => __( 'Analytics', 'woocommerce' ),
+				'description'        => __( 'Enables WooCommerce Analytics', 'woocommerce' ),
+				'is_experimental'    => false,
+				'enabled_by_default' => true,
 			),
-			'new_navigation'                 => array(
+			'new_navigation'                   => array(
 				'name'            => __( 'Navigation', 'woocommerce' ),
 				'description'     => __( 'Adds the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
 				'is_experimental' => false,
@@ -101,6 +103,11 @@ class FeaturesController {
 			'high_performance_order_storage' => array(
 				'name'            => __( 'High performance order storage', 'woocommerce' ),
 				'description'     => __( 'Enable the high performance order storage feature (still in development)', 'woocommerce' ),
+				'is_experimental' => true,
+			),
+			OrderCacheController::FEATURE_NAME => array(
+				'name'            => __( 'Orders cache', 'woocommerce' ),
+				'description'     => __( 'Enable the usage of a cache for shop orders', 'woocommerce' ),
 				'is_experimental' => true,
 			),
 		);
@@ -198,7 +205,22 @@ class FeaturesController {
 	 * @return bool True if the feature is enabled, false if not or if the feature doesn't exist.
 	 */
 	public function feature_is_enabled( string $feature_id ): bool {
-		return $this->feature_exists( $feature_id ) && 'yes' === get_option( $this->feature_enable_option_name( $feature_id ) );
+		if ( ! $this->feature_exists( $feature_id ) ) {
+			return false;
+		}
+
+		$default_value = $this->feature_is_enabled_by_default( $feature_id ) ? 'yes' : 'no';
+		return 'yes' === get_option( $this->feature_enable_option_name( $feature_id ), $default_value );
+	}
+
+	/**
+	 * Check if a given feature is enabled by default.
+	 *
+	 * @param string $feature_id Unique feature id.
+	 * @return boolean TRUE if the feature is enabled by default, FALSE otherwise.
+	 */
+	private function feature_is_enabled_by_default( string $feature_id ): bool {
+		return ! empty( $this->features[ $feature_id ]['enabled_by_default'] );
 	}
 
 	/**
@@ -642,6 +664,7 @@ class FeaturesController {
 			'id'       => $this->feature_enable_option_name( $feature_id ),
 			'disabled' => $disabled && ! $this->force_allow_enabling_features,
 			'desc_tip' => $desc_tip,
+			'default'  => $this->feature_is_enabled_by_default( $feature_id ) ? 'yes' : 'no',
 		);
 	}
 

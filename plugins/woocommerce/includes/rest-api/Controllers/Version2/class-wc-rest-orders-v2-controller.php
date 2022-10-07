@@ -1512,19 +1512,16 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 								'properties'  => array(
-									'type'       => 'object',
-									'properties' => array(
-										'id'  => array(
-											'description' => __( 'Image ID.', 'woocommerce' ),
-											'type'        => 'integer',
-											'context'     => array( 'view', 'edit' ),
-										),
-										'src' => array(
-											'description' => __( 'Image URL.', 'woocommerce' ),
-											'type'        => 'string',
-											'format'      => 'uri',
-											'context'     => array( 'view', 'edit' ),
-										),
+									'id'  => array(
+										'description' => __( 'Image ID.', 'woocommerce' ),
+										'type'        => 'integer',
+										'context'     => array( 'view', 'edit' ),
+									),
+									'src' => array(
+										'description' => __( 'Image URL.', 'woocommerce' ),
+										'type'        => 'string',
+										'format'      => 'uri',
+										'context'     => array( 'view', 'edit' ),
 									),
 								),
 							),
