@@ -38,11 +38,9 @@ const Block = ( { children, checkoutExtensionData } ) => {
 	const { validationError } = useSelect( ( select ) => {
 		const store = select( 'wc/store/validation' );
 		return {
-			getValidationError: store.getValidationError( '{{slug}}' ),
+			validationError: store.getValidationError( '{{slug}}' ),
 		};
 	} );
-
-	const errorMessage = validationError?.message;
 
 	return (
 		<>
@@ -54,12 +52,12 @@ const Block = ( { children, checkoutExtensionData } ) => {
 				{ children || optInDefaultText }
 			</CheckboxControl>
 
-			{ ! errorMessage?.hidden && (
+			{ validationError?.hidden === false && (
 				<div>
 					<span role="img" aria-label="Warning emoji">
 						⚠️
 					</span>
-					{ errorMessage?.message }
+					{ validationError?.message }
 				</div>
 			) }
 		</>
