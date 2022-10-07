@@ -2,8 +2,8 @@
  * External dependencies
  */
 import {
-	PaymentMethods,
-	ExpressPaymentMethods,
+	PlainPaymentMethods,
+	PlainExpressPaymentMethods,
 } from '@woocommerce/type-defs/payments';
 
 /**
@@ -109,13 +109,14 @@ export const __internalSetPaymentMethodData = (
  * An available payment method is one that has been validated and can make a payment.
  */
 export const __internalSetAvailablePaymentMethods = (
-	paymentMethods: PaymentMethods
+	paymentMethods: PlainPaymentMethods
 ) => {
-	return async ( { dispatch } ) => {
+	return async ( { dispatch, select } ) => {
 		// If the currently selected method is not in this new list, then we need to select a new one, or select a default.
-
-		// TODO See if we can stop this being dispatched if the currently selected method is still available.
-		await setDefaultPaymentMethod( paymentMethods );
+		const activePaymentMethod = select.getActivePaymentMethod();
+		if ( ! ( activePaymentMethod in paymentMethods ) ) {
+			await setDefaultPaymentMethod( paymentMethods );
+		}
 		dispatch( {
 			type: ACTION_TYPES.SET_AVAILABLE_PAYMENT_METHODS,
 			paymentMethods,
@@ -128,7 +129,7 @@ export const __internalSetAvailablePaymentMethods = (
  * An available payment method is one that has been validated and can make a payment.
  */
 export const __internalSetAvailableExpressPaymentMethods = (
-	paymentMethods: ExpressPaymentMethods
+	paymentMethods: PlainExpressPaymentMethods
 ) => ( {
 	type: ACTION_TYPES.SET_AVAILABLE_EXPRESS_PAYMENT_METHODS,
 	paymentMethods,
