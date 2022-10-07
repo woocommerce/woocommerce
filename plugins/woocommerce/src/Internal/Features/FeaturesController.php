@@ -830,20 +830,20 @@ class FeaturesController {
 			if ( 1 === $incompatible_features_count ) {
 				$message = sprintf(
 					/* translators: %s = printable plugin name */
-					__( "⚠ This plugin is incompatible with the active WooCommerce feature '%s', it shouldn't be activated.", 'woocommerce' ),
+					__( "⚠ This plugin is incompatible with the enabled WooCommerce feature '%s', it shouldn't be activated.", 'woocommerce' ),
 					$this->features[ $incompatible_features[0] ]['name']
 				);
 			} elseif ( 2 === $incompatible_features_count ) {
 				/* translators: %1\$s, %2\$s = printable plugin names */
 				$message = sprintf(
-					__( "⚠ This plugin is incompatible with the active WooCommerce features '%1\$s' and '%2\$s', it shouldn't be activated.", 'woocommerce' ),
+					__( "⚠ This plugin is incompatible with the enabled WooCommerce features '%1\$s' and '%2\$s', it shouldn't be activated.", 'woocommerce' ),
 					$this->features[ $incompatible_features[0] ]['name'],
 					$this->features[ $incompatible_features[1] ]['name']
 				);
 			} else {
 				/* translators: %1\$s, %2\$s = printable plugin names, %3\$d = plugins count */
 				$message = sprintf(
-					__( "⚠ This plugin is incompatible with the active WooCommerce features '%1\$s', '%2\$s' and %3\$d more, it shouldn't be activated.", 'woocommerce' ),
+					__( "⚠ This plugin is incompatible with the enabled WooCommerce features '%1\$s', '%2\$s' and %3\$d more, it shouldn't be activated.", 'woocommerce' ),
 					$this->features[ $incompatible_features[0] ]['name'],
 					$this->features[ $incompatible_features[1] ]['name'],
 					$incompatible_features_count - 2
@@ -851,7 +851,7 @@ class FeaturesController {
 			}
 
 			$features_page_url       = $this->get_features_page_url();
-			$manage_features_message = __( 'Manage wooCommerce features', 'woocommerce' );
+			$manage_features_message = __( 'Manage WooCommerce features', 'woocommerce' );
 
 			// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 			?>
