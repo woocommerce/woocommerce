@@ -35,9 +35,9 @@ const FrontendBlock = ( {
 	const checkoutIsProcessing = useSelect( ( select ) =>
 		select( CHECKOUT_STORE_KEY ).isProcessing()
 	);
-	const { showShippingFields } = useCheckoutAddress();
+	const { showShippingFields, forcedBillingAddress } = useCheckoutAddress();
 
-	if ( ! showShippingFields ) {
+	if ( ! showShippingFields && ! forcedBillingAddress ) {
 		return null;
 	}
 
