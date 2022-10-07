@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { PaymentMethods } from '@woocommerce/type-defs/payments';
+import {
+	PlainPaymentMethods,
+	PlainExpressPaymentMethods,
+} from '@woocommerce/type-defs/payments';
 import type {
 	EmptyObjectType,
 	ObjectType,
@@ -31,6 +34,19 @@ export interface SavedPaymentMethod {
 export type SavedPaymentMethods =
 	| Record< string, SavedPaymentMethod[] >
 	| EmptyObjectType;
+
+export interface PaymentMethodDispatchers {
+	setRegisteredPaymentMethods: (
+		paymentMethods: PlainPaymentMethods
+	) => void;
+	setRegisteredExpressPaymentMethods: (
+		paymentMethods: PlainExpressPaymentMethods
+	) => void;
+	setActivePaymentMethod: (
+		paymentMethod: string,
+		paymentMethodData?: ObjectType | EmptyObjectType
+	) => void;
+}
 
 export interface PaymentStatusDispatchers {
 	pristine: () => void;
@@ -69,7 +85,7 @@ export type PaymentMethodCurrentStatusType = {
 };
 
 export type PaymentMethodsDispatcherType = (
-	paymentMethods: PaymentMethods
+	paymentMethods: PlainPaymentMethods
 ) => undefined | void;
 
 /**

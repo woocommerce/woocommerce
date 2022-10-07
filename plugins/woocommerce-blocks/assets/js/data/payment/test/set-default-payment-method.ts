@@ -8,7 +8,7 @@ import * as wpDataFunctions from '@wordpress/data';
  * Internal dependencies
  */
 import { setDefaultPaymentMethod } from '../set-default-payment-method';
-import { PaymentMethods } from '../../../types';
+import { PlainPaymentMethods } from '../../../types';
 import { PAYMENT_STORE_KEY } from '..';
 
 const originalSelect = jest.requireActual( '@wordpress/data' ).select;
@@ -19,7 +19,7 @@ describe( 'setDefaultPaymentMethod', () => {
 		jest.resetModules();
 	} );
 
-	const paymentMethods: PaymentMethods = {
+	const paymentMethods: PlainPaymentMethods = {
 		'wc-payment-gateway-1': {
 			name: 'wc-payment-gateway-1',
 		},

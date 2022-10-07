@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { select, dispatch } from '@wordpress/data';
-import { PaymentMethods } from '@woocommerce/type-defs/payments';
+import { PlainPaymentMethods } from '@woocommerce/type-defs/payments';
 
 /**
  * Internal dependencies
@@ -10,7 +10,7 @@ import { PaymentMethods } from '@woocommerce/type-defs/payments';
 import { STORE_KEY as PAYMENT_STORE_KEY } from './constants';
 
 export const setDefaultPaymentMethod = async (
-	paymentMethods: PaymentMethods
+	paymentMethods: PlainPaymentMethods
 ) => {
 	const paymentMethodKeys = Object.keys( paymentMethods );
 
