@@ -8,6 +8,10 @@ let blockAttributes = {
 		type: 'number',
 		default: 0,
 	},
+	isDescendentOfQueryLoop: {
+		type: 'boolean',
+		default: false,
+	},
 };
 
 if ( isFeaturePluginBuild() ) {
