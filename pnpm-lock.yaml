@@ -1281,7 +1281,7 @@ importers:
       '@babel/core': 7.12.9
       '@babel/preset-env': 7.12.7
       '@babel/register': 7.12.1
-      '@playwright/test': ^1.22.1
+      '@playwright/test': ^1.26.1
       '@typescript-eslint/eslint-plugin': 3.10.1
       '@typescript-eslint/experimental-utils': 3.10.1
       '@typescript-eslint/parser': 3.10.1
@@ -1312,6 +1312,7 @@ importers:
       istanbul: 1.0.0-alpha.2
       jest: ^27.5.1
       mocha: 7.2.0
+      playwright: ^1.26.1
       prettier: npm:wp-prettier@2.0.5
       stylelint: ^13.8.0
       typescript: ^4.8.3
@@ -1324,7 +1325,7 @@ importers:
       '@babel/core': 7.12.9
       '@babel/preset-env': 7.12.7_@babel+core@7.12.9
       '@babel/register': 7.12.1_@babel+core@7.12.9
-      '@playwright/test': 1.25.2
+      '@playwright/test': 1.26.1
       '@typescript-eslint/eslint-plugin': 3.10.1_emvgcsyrrniq64kkwdpw54irvu
       '@typescript-eslint/experimental-utils': 3.10.1_gjkzpvg3kr4mru3ob5fvm4vice
       '@typescript-eslint/parser': 3.10.1_gjkzpvg3kr4mru3ob5fvm4vice
@@ -1355,6 +1356,7 @@ importers:
       istanbul: 1.0.0-alpha.2
       jest: 27.5.1
       mocha: 7.2.0
+      playwright: 1.26.1
       prettier: /wp-prettier/2.0.5
       stylelint: 13.13.1
       typescript: 4.8.4
@@ -8451,13 +8453,13 @@ packages:
     dependencies:
       '@octokit/openapi-types': 13.10.0
 
-  /@playwright/test/1.25.2:
-    resolution: {integrity: sha512-6qPznIR4Fw02OMbqXUPMG6bFFg1hDVNEdihKy0t9K0dmRbus1DyP5Q5XFQhGwEHQkLG5hrSfBuu9CW/foqhQHQ==}
+  /@playwright/test/1.26.1:
+    resolution: {integrity: sha512-bNxyZASVt2adSZ9gbD7NCydzcb5JaI0OR9hc7s+nmPeH604gwp0zp17NNpwXY4c8nvuBGQQ9oGDx72LE+cUWvw==}
     engines: {node: '>=14'}
     hasBin: true
     dependencies:
       '@types/node': 17.0.21
-      playwright-core: 1.25.2
+      playwright-core: 1.26.1
     dev: true
 
   /@pmmmwh/react-refresh-webpack-plugin/0.5.1_a3gyllrqvxpec3fpybsrposvju:
@@ -31757,10 +31759,19 @@ packages:
       find-up: 5.0.0
     dev: true
 
-  /playwright-core/1.25.2:
-    resolution: {integrity: sha512-0yTbUE9lIddkEpLHL3u8PoCL+pWiZtj5A/j3U7YoNjcmKKDGBnCrgHJMzwd2J5vy6l28q4ki3JIuz7McLHhl1A==}
+  /playwright-core/1.26.1:
+    resolution: {integrity: sha512-hzFchhhxnEiPc4qVPs9q2ZR+5eKNifY2hQDHtg1HnTTUuphYCBP8ZRb2si+B1TR7BHirgXaPi48LIye5SgrLAA==}
     engines: {node: '>=14'}
     hasBin: true
+    dev: true
+
+  /playwright/1.26.1:
+    resolution: {integrity: sha512-WQmEdCgYYe8jOEkhkW9QLcK0PB+w1RZztBLYIT10MEEsENYg251cU0IzebDINreQsUt+HCwwRhtdz4weH9ICcQ==}
+    engines: {node: '>=14'}
+    hasBin: true
+    requiresBuild: true
+    dependencies:
+      playwright-core: 1.26.1
     dev: true
 
   /plur/4.0.0:
@@ -32533,33 +32544,6 @@ packages:
       postcss: 8.4.12
       postcss-value-parser: 4.2.0
       svgo: 2.8.0
-    dev: true
-
-  /postcss-syntax/0.36.2_kei4jy7wdgbhc236h4oijypxom:
-    resolution: {integrity: sha512-nBRg/i7E3SOHWxF3PpF5WnJM/jQ1YpY9000OaVXlAQj6Zp/kIqJxEDWIZ67tAd7NLuk7zqN4yqe9nc0oNAOs1w==}
-    peerDependencies:
-      postcss: '>=5.0.0'
-      postcss-html: '*'
-      postcss-jsx: '*'
-      postcss-less: '*'
-      postcss-markdown: '*'
-      postcss-scss: '*'
-    peerDependenciesMeta:
-      postcss-html:
-        optional: true
-      postcss-jsx:
-        optional: true
-      postcss-less:
-        optional: true
-      postcss-markdown:
-        optional: true
-      postcss-scss:
-        optional: true
-    dependencies:
-      postcss: 7.0.39
-      postcss-html: 0.36.0_j55xdkkcxc32kvnyvx3y7casfm
-      postcss-less: 3.1.4
-      postcss-scss: 2.1.1
     dev: true
 
   /postcss-syntax/0.36.2_postcss@7.0.39:
@@ -36644,7 +36628,7 @@ packages:
       postcss-sass: 0.4.4
       postcss-scss: 2.1.1
       postcss-selector-parser: 6.0.6
-      postcss-syntax: 0.36.2_kei4jy7wdgbhc236h4oijypxom
+      postcss-syntax: 0.36.2_postcss@7.0.39
       postcss-value-parser: 4.1.0
       resolve-from: 5.0.0
       slash: 3.0.0
@@ -37236,7 +37220,7 @@ packages:
       serialize-javascript: 6.0.0
       source-map: 0.6.1
       terser: 5.10.0_acorn@8.7.0
-      webpack: 5.70.0
+      webpack: 5.70.0_webpack-cli@3.3.12
     transitivePeerDependencies:
       - acorn
 
