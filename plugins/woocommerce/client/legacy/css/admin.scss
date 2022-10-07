@@ -7824,10 +7824,33 @@ table.bar_chart {
   * Product Reviews
   */
 .wp-list-table.product-reviews {
+
+	tbody#the-comment-list {
+		tr.review {
+			td.column-author {
+				strong {
+					display:block;
+				}
+			}
+		}
+	}
+	tbody#the-comment-list {
+		tr.review {
+			td.column-author {
+				strong {
+					display:block;
+					img{
+						margin-right:5px;
+					}
+				}
+			}
+		}
+	}
+
 	th.column-type {
 		width: 10%;
 	}
-
+	
 	@media screen and ( max-width: 782px ) {
 		th.column-type,
 		td.column-type,
