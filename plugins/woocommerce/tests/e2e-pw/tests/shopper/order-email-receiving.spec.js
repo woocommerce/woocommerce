@@ -1,56 +1,24 @@
 const { test, expect } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { customerDetails, storeDetails } = require( '../../test-data/data' );
+const { api } = require( '../../utils' );
 
 let productId, orderId;
-const productName = 'Order email product';
+
+const product = {
+	name: 'Order email product',
+	type: 'simple',
+	price: '42.77',
+};
+
 const customerEmail = 'order-email-test@example.com';
 const storeName = 'WooCommerce Core E2E Test Suite';
 
 test.describe( 'Shopper Order Email Receiving', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-		// ensure store address is US
-		await api.post( 'settings/general/batch', {
-			update: [
-				{
-					id: 'woocommerce_store_address',
-					value: 'addr 1',
-				},
-				{
-					id: 'woocommerce_store_city',
-					value: 'San Francisco',
-				},
-				{
-					id: 'woocommerce_default_country',
-					value: 'US:CA',
-				},
-				{
-					id: 'woocommerce_store_postcode',
-					value: '94107',
-				},
-			],
-		} );
-		// add product
-		await api
-			.post( 'products', {
-				name: productName,
-				type: 'simple',
-				regular_price: '42.77',
-			} )
-			.then( ( response ) => {
-				productId = response.data.id;
-			} );
-		// enable COD payment
-		await api.put( 'payment_gateways/cod', {
-			enabled: true,
-		} );
+	test.beforeAll( async () => {
+		productId = await api.create.product( product );
+		await api.update.enableCashOnDelivery();
 	} );
 
 	test.beforeEach( async ( { page } ) => {
@@ -67,42 +35,38 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		}
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-		await api.delete( `products/${ productId }`, {
-			force: true,
-		} );
+	test.afterAll( async () => {
+		await api.deletePost.product( productId );
 		if ( orderId ) {
-			await api.delete( `orders/${ orderId }`, {
-				force: true,
-			} );
+			await api.deletePost.order( orderId );
 		}
-		await api.put( 'payment_gateways/cod', {
-			enabled: false,
-		} );
+		await api.update.disableCashOnDelivery();
 	} );
 
 	test( 'should receive order email after purchasing an item', async ( {
 		page,
 	} ) => {
+		// ensure that the store's address is in the US
+		await api.update.storeDetails( storeDetails.us.store );
+
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/checkout/' );
 
-		await page.fill( '#billing_first_name', 'Maggie' );
-		await page.fill( '#billing_last_name', 'Simpson' );
-		await page.fill( '#billing_address_1', '123 Evergreen Terrace' );
-		await page.fill( '#billing_city', 'Springfield' );
-		await page.selectOption( '#billing_country', 'US' );
-		await page.selectOption( '#billing_state', 'OR' );
-		await page.fill( '#billing_postcode', '97403' );
-		await page.fill( '#billing_phone', '555 555-5555' );
+		await page.fill( '#billing_first_name', customerDetails.us.first_name );
+		await page.fill( '#billing_last_name', customerDetails.us.last_name );
+		await page.fill( '#billing_address_1', customerDetails.us.address );
+		await page.fill( '#billing_city', customerDetails.us.city );
+		await page.selectOption(
+			'#billing_country',
+			customerDetails.us.country
+		);
+
+		await page.selectOption( '#billing_state', customerDetails.us.state );
+
+		await page.fill( '#billing_postcode', customerDetails.us.zip );
+		await page.fill( '#billing_phone', customerDetails.us.phone );
 		await page.fill( '#billing_email', customerEmail );
 
 		await page.click( 'text=Place order' );
