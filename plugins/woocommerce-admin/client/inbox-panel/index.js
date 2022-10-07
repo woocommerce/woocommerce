@@ -199,7 +199,9 @@ const renderNotes = ( {
 };
 
 const InboxPanel = ( { showHeader = true } ) => {
-	const [ pageSize, setPageSize ] = useState( DEFAULT_INBOX_QUERY.per_page );
+	const [ noteDisplayQty, setNoteDisplayQty ] = useState(
+		DEFAULT_INBOX_QUERY.per_page
+	);
 	const [ allNotesFetched, setAllNotesFetched ] = useState( false );
 	const [ allNotes, setAllNotes ] = useState( [] );
 	const { createNotice } = useDispatch( 'core/notices' );
@@ -231,7 +233,10 @@ const InboxPanel = ( { showHeader = true } ) => {
 				'en_ZA',
 			];
 
-			const inboxQuery = { ...DEFAULT_INBOX_QUERY, per_page: pageSize };
+			const inboxQuery = {
+				...DEFAULT_INBOX_QUERY,
+				per_page: noteDisplayQty,
+			};
 			const notes = getNotes( inboxQuery );
 
 			return {
@@ -270,7 +275,7 @@ const InboxPanel = ( { showHeader = true } ) => {
 	);
 
 	useEffect( () => {
-		if ( notesHaveResolved && notes.length < pageSize ) {
+		if ( notesHaveResolved && notes.length < noteDisplayQty ) {
 			setAllNotesFetched( true );
 		}
 
@@ -368,7 +373,9 @@ const InboxPanel = ( { showHeader = true } ) => {
 					{ Boolean( allNotes.length ) &&
 						renderNotes( {
 							loadMoreNotes: () => {
-								setPageSize( pageSize + ADD_NOTES_AMOUNT );
+								setNoteDisplayQty(
+									noteDisplayQty + ADD_NOTES_AMOUNT
+								);
 							},
 							hasNotes,
 							isBatchUpdating,
