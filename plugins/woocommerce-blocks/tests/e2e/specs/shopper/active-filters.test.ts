@@ -60,7 +60,7 @@ const { selectors } = block;
 
 const insertBlocks = async () => {
 	await insertBlock( 'Filter by Price' );
-	await insertBlock( 'Filter Products by Stock' );
+	await insertBlock( 'Filter by Stock' );
 	await insertBlock( 'Filter by Attribute' );
 	await insertBlock( block.name );
 };
@@ -97,8 +97,8 @@ describe( 'Shopper → Active Filters Block', () => {
 			} );
 
 			await insertBlocks();
-			await configurateFilterProductsByAttributeBlock( page );
 			await insertBlock( 'All Products' );
+			await configurateFilterProductsByAttributeBlock( page );
 			await publishPost();
 
 			const link = await page.evaluate( () =>

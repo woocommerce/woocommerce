@@ -63,9 +63,6 @@ const SELECTORS = {
 		saveButton: '.edit-site-save-button__button',
 		savePrompt: '.entities-saved-states__text-prompt',
 	},
-	allProductsBlock: {
-		productsList: '.wc-block-grid__products:not(.is-loading-products)',
-	},
 };
 
 /**
@@ -436,7 +433,12 @@ export const openBlockEditorSettings = async ( { isFSEEditor = false } ) => {
  *  Wait for all Products Block is loaded completely: when the skeleton disappears, and the products are visible
  */
 export const waitForAllProductsBlockLoaded = async () => {
-	await page.waitForSelector( SELECTORS.allProductsBlock.productsList );
+	await page.waitForSelector(
+		'.wc-block-grid__products.is-loading-products'
+	);
+	await page.waitForSelector(
+		'.wc-block-grid__products:not(.is-loading-products)'
+	);
 };
 
 /**

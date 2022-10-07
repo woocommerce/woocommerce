@@ -12,7 +12,6 @@ import { Icon, category, external } from '@wordpress/icons';
 import { SearchListControl } from '@woocommerce/editor-components/search-list-control';
 import { sortBy } from 'lodash';
 import { getAdminLink, getSetting } from '@woocommerce/settings';
-import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
 import BlockTitle from '@woocommerce/editor-components/block-title';
 import classnames from 'classnames';
 import { SearchListItemsType } from '@woocommerce/editor-components/search-list-control/types';
@@ -37,10 +36,16 @@ import {
 import Block from './block';
 import './editor.scss';
 import type { EditProps } from './types';
+import { UpgradeNotice } from '../filter-wrapper/upgrade';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
-const Edit = ( { attributes, setAttributes, debouncedSpeak }: EditProps ) => {
+const Edit = ( {
+	attributes,
+	setAttributes,
+	debouncedSpeak,
+	clientId,
+}: EditProps ) => {
 	const {
 		attributeId,
 		className,
@@ -91,15 +96,8 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak }: EditProps ) => {
 			return;
 		}
 
-		const attributeName = productAttribute.attribute_label;
-
 		setAttributes( {
 			attributeId: selectedId as number,
-			heading: sprintf(
-				/* translators: %s attribute name. */
-				__( 'Filter by %s', 'woo-gutenberg-products-block' ),
-				attributeName
-			),
 		} );
 	};
 
@@ -181,21 +179,6 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak }: EditProps ) => {
 							setAttributes( {
 								showCounts: ! showCounts,
 							} )
-						}
-					/>
-					<p>
-						{ __(
-							'Heading Level',
-							'woo-gutenberg-products-block'
-						) }
-					</p>
-					<HeadingToolbar
-						isCollapsed={ false }
-						minLevel={ 2 }
-						maxLevel={ 7 }
-						selectedLevel={ headingLevel }
-						onChange={ ( newLevel: number ) =>
-							setAttributes( { headingLevel: newLevel } )
 						}
 					/>
 					<ToggleGroupControl
@@ -412,6 +395,12 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak }: EditProps ) => {
 		<div { ...blockProps }>
 			{ getBlockControls() }
 			{ getInspectorControls() }
+			<UpgradeNotice
+				clientId={ clientId }
+				attributes={ attributes }
+				setAttributes={ setAttributes }
+				filterType="attribute-filter"
+			/>
 			{ isEditing ? (
 				renderEditMode()
 			) : (
@@ -421,14 +410,16 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak }: EditProps ) => {
 						'wc-block-attribute-filter'
 					) }
 				>
-					<BlockTitle
-						className="wc-block-attribute-filter__title"
-						headingLevel={ headingLevel }
-						heading={ heading }
-						onChange={ ( value: string ) =>
-							setAttributes( { heading: value } )
-						}
-					/>
+					{ heading && (
+						<BlockTitle
+							className="wc-block-attribute-filter__title"
+							headingLevel={ headingLevel }
+							heading={ heading }
+							onChange={ ( value: string ) =>
+								setAttributes( { heading: value } )
+							}
+						/>
+					) }
 					<Disabled>
 						<Block attributes={ attributes } isEditor />
 					</Disabled>

@@ -29,6 +29,7 @@ import {
 import usePriceConstraints from './use-price-constraints';
 import './style.scss';
 import { Attributes } from './types';
+import { useSetWraperVisibility } from '../filter-wrapper/context';
 
 /**
  * Formats filter values into a string for the URL parameters needed for filtering PHP templates.
@@ -85,6 +86,7 @@ const PriceFilterBlock = ( {
 	attributes: Attributes;
 	isEditor: boolean;
 } ) => {
+	const setWrapperVisibility = useSetWraperVisibility();
 	const hasFilterableProducts = getSettingWithCoercion(
 		'has_filterable_products',
 		false,
@@ -292,6 +294,7 @@ const PriceFilterBlock = ( {
 	] );
 
 	if ( ! hasFilterableProducts ) {
+		setWrapperVisibility( false );
 		return null;
 	}
 
@@ -301,11 +304,14 @@ const PriceFilterBlock = ( {
 			maxConstraint === null ||
 			minConstraint === maxConstraint )
 	) {
+		setWrapperVisibility( false );
 		return null;
 	}
 
 	const TagName =
 		`h${ attributes.headingLevel }` as keyof JSX.IntrinsicElements;
+
+	setWrapperVisibility( true );
 
 	if ( ! isLoading && isUpdating ) {
 		setIsUpdating( false );

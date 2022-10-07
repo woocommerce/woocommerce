@@ -17,11 +17,6 @@ import { blockAttributes } from './attributes';
 import metadata from './block.json';
 
 registerBlockType( metadata, {
-	title: __( 'Filter by Attribute', 'woo-gutenberg-products-block' ),
-	description: __(
-		'Enable customers to filter the product grid by selecting one or more attributes, such as color.',
-		'woo-gutenberg-products-block'
-	),
 	icon: {
 		src: (
 			<Icon

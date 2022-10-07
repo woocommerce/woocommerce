@@ -65,10 +65,10 @@ describe( `${ block.name } Block`, () => {
 				title: block.name,
 			} );
 
+			await insertBlock( 'All Products' );
 			await insertBlock( block.name );
 			await page.click( selectors.editor.firstAttributeInTheList );
 			await page.click( selectors.editor.doneButton );
-			await insertBlock( 'All Products' );
 			await publishPost();
 
 			const link = await page.evaluate( () =>

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import {
-	getAllBlocks,
 	switchUserToAdmin,
 	openDocumentSettingsSidebar,
 } from '@wordpress/e2e-test-utils';
@@ -12,26 +11,17 @@ import {
 	selectBlockByName,
 } from '@woocommerce/blocks-test-utils';
 
-/**
- * Internal dependencies
- */
-import { insertBlockDontWaitForInsertClose } from '../../utils';
-
 const block = {
 	name: 'Active Product Filters',
 	slug: 'woocommerce/active-filters',
 	class: '.wc-block-active-filters',
+	title: 'Active filters',
 };
 
 describe( `${ block.name } Block`, () => {
 	beforeAll( async () => {
 		await switchUserToAdmin();
 		await visitBlockPage( `${ block.name } Block` );
-	} );
-
-	it( 'can only be inserted once', async () => {
-		await insertBlockDontWaitForInsertClose( block.name );
-		expect( await getAllBlocks() ).toHaveLength( 1 );
 	} );
 
 	it( 'renders without crashing', async () => {
@@ -45,20 +35,15 @@ describe( `${ block.name } Block`, () => {
 		} );
 
 		it( "allows changing the block's title", async () => {
-			const textareaSelector = `.wp-block[data-type="${ block.slug }"] textarea.wc-block-editor-components-title`;
+			const textareaSelector =
+				'.wp-block-woocommerce-filter-wrapper .wp-block-heading';
 			await expect( page ).toFill( textareaSelector, 'New Title' );
-			await page.click(
-				'.components-toolbar button[aria-label="Heading 6"]'
-			);
 			await expect( page ).toMatchElement(
-				`.wp-block[data-type="${ block.slug }"] h6 textarea`,
+				'.wp-block-woocommerce-filter-wrapper .wp-block-heading',
 				{ text: 'New Title' }
 			);
 			// reset
-			await expect( page ).toFill( textareaSelector, block.name );
-			await page.click(
-				'.components-toolbar button[aria-label="Heading 3"]'
-			);
+			await expect( page ).toFill( textareaSelector, block.title );
 		} );
 
 		it( 'allows changing the Display Style', async () => {
