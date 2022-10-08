@@ -24,6 +24,10 @@ test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
 		// mytodo: Download the nightly build
 	} );
 
+	test.afterAll(async()=>{
+		// mytodo: clean up downloaded nightly build zip
+	})
+
 	// mytodo: unskip
 	test.skip( 'can upload and activate the WooCommerce plugin', async ( {
 		page,
