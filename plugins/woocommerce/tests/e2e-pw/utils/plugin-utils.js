@@ -1,4 +1,7 @@
 const { APIRequest } = require( '@playwright/test' );
+const axios = require( 'axios' ).default;
+const fs = require( 'fs' );
+const path = require( 'path' );
 
 /**
  * Encode basic auth username and password to be used in HTTP Authorization header.
@@ -36,9 +39,7 @@ export const deletePlugin = async ( {
 		},
 	} );
 
-	const response = await apiContext.get( `/wp-json/wp/v2/plugins/${ slug }`, {
-		failOnStatusCode: true,
-	} );
+	const response = await apiContext.get( `/wp-json/wp/v2/plugins/${ slug }` );
 
 	// If installed, deactivate and delete it.
 	if ( response.ok() ) {
@@ -54,4 +55,32 @@ export const deletePlugin = async ( {
 
 	// Dispose all responses.
 	await apiContext.dispose();
+};
+
+/**
+ * Download the zip file from a remote location.
+ *
+ * @param {object} param
+ * @param {string} param.url The URL where the zip file is located.
+ * @param {string} param.downloadPath The location where to download the zip to.
+ * @param {string} param.authToken Authorization token used to authenticate with the GitHub API if required.
+ */
+export const downloadZip = async ( { url, downloadPath, authToken } ) => {
+	// Create destination folder.
+	const dir = path.dirname( downloadPath );
+	fs.mkdirSync( dir, { recursive: true } );
+
+	// Download the zip.
+	const options = {
+		url,
+		responseType: 'stream',
+	};
+
+	// If provided with a token, use it for authorization
+	if ( authToken ) {
+		options.headers.Authorization = `token ${ authToken }`;
+	}
+
+	const response = await axios( options );
+	response.data.pipe( fs.createWriteStream( downloadPath ) );
 };

@@ -1,6 +1,10 @@
 const { ADMINSTATE, UPDATE_WC, ADMIN_USER, ADMIN_PASSWORD } = process.env;
 const { test, expect } = require( '@playwright/test' );
-const { deletePlugin } = require( '../../utils/plugin-utils' );
+const path = require( 'path' );
+const { deletePlugin, downloadZip } = require( '../../utils/plugin-utils' );
+
+// Absolute path to WooCommerce ZIP
+const pluginZipPath = path.resolve( __dirname, '../../tmp/woocommerce.zip' );
 
 test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
 	// Skip test if UPDATE_WC is falsy.
@@ -21,15 +25,18 @@ test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
 			password: ADMIN_PASSWORD,
 		} );
 
-		// mytodo: Download the nightly build
+		// Download WooCommerce ZIP
+		await downloadZip( {
+			url:
+				'https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip',
+			downloadPath: pluginZipPath,
+		} );
 	} );
 
-	test.afterAll(async()=>{
-		// mytodo: clean up downloaded nightly build zip
-	})
+	// mytodo: clean up downloaded nightly build zip
+	// test.afterAll( async () => {} );
 
-	// mytodo: unskip
-	test.skip( 'can upload and activate the WooCommerce plugin', async ( {
+	test( 'can upload and activate the WooCommerce plugin', async ( {
 		page,
 	} ) => {
 		// Open the plugin install page
@@ -47,7 +54,7 @@ test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
 			page.waitForEvent( 'filechooser' ),
 			page.click( '#pluginzip' ),
 		] );
-		await fileChooser.setFiles( PLUGIN_ZIP_PATH );
+		await fileChooser.setFiles( pluginZipPath );
 		await page.click( '#install-plugin-submit' );
 		await page.waitForLoadState( 'networkidle' );
 
@@ -67,8 +74,7 @@ test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
 		await expect( page.locator( '#deactivate-woocommerce' ) ).toBeVisible();
 	} );
 
-	// mytodo: unskip
-	test.skip( 'can run the database update', async ( { page } ) => {
+	test( 'can run the database update', async ( { page } ) => {
 		const updateButton = page.locator( 'text=Update WooCommerce Database' );
 		const updateCompleteMessage = page.locator(
 			'text=WooCommerce database update complete.'
@@ -110,9 +116,5 @@ test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
 
 		// Verify that the "WooCommerce database update complete" message is gone.
 		await expect( updateCompleteMessage ).not.toBeVisible();
-	} );
-
-	test( 'dummy', () => {
-		expect( true ).toEqual( true );
 	} );
 } );
