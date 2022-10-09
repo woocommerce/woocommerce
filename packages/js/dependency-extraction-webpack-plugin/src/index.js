@@ -1,5 +1,5 @@
-const WPDependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
-const packages = require( '../assets/packages' );
+const WPDependencyExtractionWebpackPlugin = require('@wordpress/dependency-extraction-webpack-plugin');
+const packages = require('../assets/packages');
 
 const WOOCOMMERCE_NAMESPACE = '@woocommerce/';
 
@@ -13,42 +13,42 @@ const WOOCOMMERCE_NAMESPACE = '@woocommerce/';
  *
  * @return {string} Camel-cased string.
  */
-function camelCaseDash( string ) {
-	return string.replace( /-([a-z])/g, ( _, letter ) => letter.toUpperCase() );
+function camelCaseDash(string) {
+	return string.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
 }
 
-const wooRequestToExternal = ( request, excludedExternals ) => {
-	if ( packages.includes( request ) ) {
-		const handle = request.substring( WOOCOMMERCE_NAMESPACE.length );
+const wooRequestToExternal = (request, excludedExternals) => {
+	if (packages.includes(request)) {
+		const handle = request.substring(WOOCOMMERCE_NAMESPACE.length);
 		const irregularExternalMap = {
-			'block-data': [ 'wc', 'wcBlocksData' ],
-			'blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
-			settings: [ 'wc', 'wcSettings' ],
+			'block-data': ['wc', 'wcBlocksData'],
+			'blocks-registry': ['wc', 'wcBlocksRegistry'],
+			settings: ['wc', 'wcSettings'],
 		};
 
-		if ( ( excludedExternals || [] ).includes( request ) ) {
+		if ((excludedExternals || []).includes(request)) {
 			return;
 		}
 
-		if ( irregularExternalMap[ handle ] ) {
-			return irregularExternalMap[ handle ];
+		if (irregularExternalMap[handle]) {
+			return irregularExternalMap[handle];
 		}
 
-		return [ 'wc', camelCaseDash( handle ) ];
+		return ['wc', camelCaseDash(handle)];
 	}
 };
 
-const wooRequestToHandle = ( request ) => {
-	if ( packages.includes( request ) ) {
-		const handle = request.substring( WOOCOMMERCE_NAMESPACE.length );
+const wooRequestToHandle = (request) => {
+	if (packages.includes(request)) {
+		const handle = request.substring(WOOCOMMERCE_NAMESPACE.length);
 		const irregularHandleMap = {
 			data: 'wc-store-data',
 			'block-data': 'wc-blocks-data-store',
 			'csv-export': 'wc-csv',
 		};
 
-		if ( irregularHandleMap[ handle ] ) {
-			return irregularHandleMap[ handle ];
+		if (irregularHandleMap[handle]) {
+			return irregularHandleMap[handle];
 		}
 
 		return 'wc-' + handle;
@@ -56,12 +56,12 @@ const wooRequestToHandle = ( request ) => {
 };
 
 class DependencyExtractionWebpackPlugin extends WPDependencyExtractionWebpackPlugin {
-	externalizeWpDeps( _context, request, callback ) {
+	externalizeWpDeps(_context, request, callback) {
 		let externalRequest;
 
 		// Handle via options.requestToExternal first
-		if ( typeof this.options.requestToExternal === 'function' ) {
-			externalRequest = this.options.requestToExternal( request );
+		if (typeof this.options.requestToExternal === 'function') {
+			externalRequest = this.options.requestToExternal(request);
 		}
 
 		// Cascade to default if unhandled and enabled
@@ -75,35 +75,35 @@ class DependencyExtractionWebpackPlugin extends WPDependencyExtractionWebpackPlu
 			);
 		}
 
-		if ( externalRequest ) {
-			this.externalizedDeps.add( request );
+		if (externalRequest) {
+			this.externalizedDeps.add(request);
 
-			return callback( null, externalRequest );
+			return callback(null, externalRequest);
 		}
 
 		// Fall back to the WP method
-		return super.externalizeWpDeps( _context, request, callback );
+		return super.externalizeWpDeps(_context, request, callback);
 	}
 
-	mapRequestToDependency( request ) {
+	mapRequestToDependency(request) {
 		// Handle via options.requestToHandle first
-		if ( typeof this.options.requestToHandle === 'function' ) {
-			const scriptDependency = this.options.requestToHandle( request );
-			if ( scriptDependency ) {
+		if (typeof this.options.requestToHandle === 'function') {
+			const scriptDependency = this.options.requestToHandle(request);
+			if (scriptDependency) {
 				return scriptDependency;
 			}
 		}
 
 		// Cascade to default if enabled
-		if ( this.options.useDefaults ) {
-			const scriptDependency = wooRequestToHandle( request );
-			if ( scriptDependency ) {
+		if (this.options.useDefaults) {
+			const scriptDependency = wooRequestToHandle(request);
+			if (scriptDependency) {
 				return scriptDependency;
 			}
 		}
 
 		// Fall back to the WP method
-		return super.mapRequestToDependency( request );
+		return super.mapRequestToDependency(request);
 	}
 }
 
