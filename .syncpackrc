@@ -1,6 +1,6 @@
 {
 	"dev": true,
-	"filter": "^(?:react|react-dom|typescript)$",
+	"filter": "^(?:react|react-dom|typescript|@typescript-eslint.*)$",
 	"indent": "\t",
 	"overrides": true,
 	"peer": true,
@@ -9,6 +9,15 @@
 	"semverRange": "^",
 	"workspace": true,
 	"versionGroups": [
+		{
+			"dependencies": [
+				"@typescript-eslint/**"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^5.39.0"
+		},
 		{
 			"dependencies": [
 				"react",
