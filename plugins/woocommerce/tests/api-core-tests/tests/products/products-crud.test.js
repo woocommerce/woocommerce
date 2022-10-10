@@ -286,7 +286,7 @@ test.describe('Products API tests: CRUD', () => {
 
 			// Verify that the product attribute can no longer be retrieved.
 			const getDeletedProductAttributeResponse = await request.get(
-				`wp-json/wc/v3/products/tags/${productAttributeId}`
+				`wp-json/wc/v3/products/attributes/${productAttributeId}`
 			);
 			expect(getDeletedProductAttributeResponse.status()).toEqual(404);
 		});
@@ -309,11 +309,13 @@ test.describe('Products API tests: CRUD', () => {
 				}
 			);
 			const responseJSON = await response.json();
+			console.log('batch responseJSON=',responseJSON);
 			expect(response.status()).toEqual(200);
 			expect(responseJSON.create[0].name).toEqual('Smell');
 			expect(responseJSON.create[1].name).toEqual('Weight');
 			const attributeId1 = responseJSON.create[0].id;
 			const attributeId2 = responseJSON.create[1].id;
+			console.log('attributeId1 attributeId1=',attributeId1,attributeId2);
 
 			// Batch create a new attribute, update an attribute and delete another.
 			const responseBatchUpdate = await request.post(
@@ -333,6 +335,8 @@ test.describe('Products API tests: CRUD', () => {
 				}
 			);
 			const responseBatchUpdateJSON = await responseBatchUpdate.json();
+			console.log('responseBatchUpdateJSON=',responseBatchUpdateJSON);
+
 			const attributeId3 = responseBatchUpdateJSON.create[0].id;
 			expect(responseBatchUpdate.status()).toEqual(200);
 
@@ -348,7 +352,7 @@ test.describe('Products API tests: CRUD', () => {
 
 			// Batch delete the created attribute
 			await request.post(
-				`wp-json/wc/v3/products/tags/batch`, {
+				`wp-json/wc/v3/products/attributes/batch`, {
 					data: {
 						delete: [attributeId1, attributeId3]
 					}
@@ -357,490 +361,326 @@ test.describe('Products API tests: CRUD', () => {
 		});
 	});
 
-	// test.describe('Product **variations** tests: CRUD', () => {
-	// 	let productTagId;
+	test.describe('Product categories tests: CRUD', () => {
+		let productCategoryId;
 
-	// 	test('can add a product tag', async ({
-	// 		request
-	// 	}) => {
-	// 		const response = await request.post('wp-json/wc/v3/products/tags', {
-	// 			data: {
-	// 				name: 'Leather Shoes'
-	// 			},
-	// 		});
-	// 		const responseJSON = await response.json();
-	// 		productTagId = responseJSON.id;
+		test('can add a product category', async ({
+			request
+		}) => {
+			const response = await request.post('wp-json/wc/v3/products/categories', {
+				data: {
+					name: 'Video Games'
+				},
+			});
+			const responseJSON = await response.json();
+			productCategoryId = responseJSON.id;
 
-	// 		expect(response.status()).toEqual(201);
-	// 		expect(typeof productId).toEqual('number');
-	// 		expect(responseJSON.name).toEqual('Leather Shoes');
-	// 		expect(responseJSON.slug).toEqual('leather-shoes');
-	// 	});
+			expect(response.status()).toEqual(201);
+			expect(typeof productCategoryId).toEqual('number');
+			expect(responseJSON.name).toEqual('Video Games');
+			expect(responseJSON.slug).toEqual('video-games');
+			expect(responseJSON.parent).toEqual(0);
+			expect(responseJSON.description).toEqual('');
+			expect(responseJSON.display).toEqual('default');
+			expect(responseJSON.image).toEqual(null);
+			expect(responseJSON.menu_order).toEqual(0);
+			expect(responseJSON.count).toEqual(0);
+		});
 
-	// 	test('can retrieve a product tag', async ({
-	// 		request
-	// 	}) => {
-	// 		const response = await request.get(`wp-json/wc/v3/products/tags/${productTagId}`);
-	// 		const responseJSON = await response.json();
-	// 		expect(response.status()).toEqual(200);
-	// 		expect(responseJSON.id).toEqual(productTagId);
-	// 		expect(responseJSON.name).toEqual('Leather Shoes');
-	// 		expect(responseJSON.slug).toEqual('leather-shoes');
-	// 	});
+		test('can retrieve a product category', async ({
+			request
+		}) => {
+			const response = await request.get(`wp-json/wc/v3/products/categories/${productCategoryId}`);
+			const responseJSON = await response.json();
+			expect(response.status()).toEqual(200);
+			expect(responseJSON.id).toEqual(productCategoryId);
+			expect(responseJSON.name).toEqual('Video Games');
+			expect(responseJSON.slug).toEqual('video-games');
+			expect(responseJSON.parent).toEqual(0);
+			expect(responseJSON.description).toEqual('');
+			expect(responseJSON.display).toEqual('default');
+			expect(responseJSON.image).toEqual(null);
+			expect(responseJSON.menu_order).toEqual(0);
+			expect(responseJSON.count).toEqual(0);
+			
+		});
 
-	// 	test('can retrieve all product tags', async ({
-	// 		request
-	// 	}) => {
-	// 		// call API to retrieve all product tags
-	// 		const response = await request.get('/wp-json/wc/v3/products/tags');
-	// 		const responseJSON = await response.json();
-	// 		expect(response.status()).toEqual(200);
-	// 		expect(Array.isArray(responseJSON)).toBe(true);
-	// 		expect(responseJSON.length).toBeGreaterThan(0);
-	// 	});
+		
+		test('can retrieve all product categories', async ({
+			request
+		}) => {
+			// call API to retrieve all product tags
+			const response = await request.get('/wp-json/wc/v3/products/categories');
+			const responseJSON = await response.json();
+			expect(response.status()).toEqual(200);
+			expect(Array.isArray(responseJSON)).toBe(true);
+			// There will initially be a product category of 'Uncategorized'
+			expect(responseJSON.length).toBeGreaterThan(1);
+		});
 
-	// 	test('can update a product tag', async ({
-	// 		request
-	// 	}) => {
-	// 		// call API to retrieve all product tags
-	// 		const response = await request.put(`wp-json/wc/v3/products/tags/${productTagId}`, {
-	// 			data: {
-	// 				description: 'Genuine leather.'
-	// 			}
-	// 		});
-	// 		const responseJSON = await response.json();
-	// 		expect(response.status()).toEqual(200);
-	// 		expect(responseJSON.id).toEqual(productTagId);
-	// 		expect(responseJSON.name).toEqual('Leather Shoes');
-	// 		expect(responseJSON.description).toEqual('Genuine leather.');
-	// 		expect(responseJSON.slug).toEqual('leather-shoes');
-	// 		expect(responseJSON.count).toEqual(0);
-	// 	});
+		test('can update a product category', async ({
+			request
+		}) => {
+			// call API to retrieve all product tags
+			const response = await request.put(`wp-json/wc/v3/products/categories/${productCategoryId}`, {
+				data: {
+					description: 'Games played on a video games console or computer.'
+				}
+			});
+			const responseJSON = await response.json();
+			expect(response.status()).toEqual(200);
+			expect(responseJSON.id).toEqual(productCategoryId);
+			expect(responseJSON.name).toEqual('Video Games');
+			expect(responseJSON.slug).toEqual('video-games');
+			expect(responseJSON.parent).toEqual(0);
+			expect(responseJSON.description).toEqual('Games played on a video games console or computer.');
+			expect(responseJSON.display).toEqual('default');
+			expect(responseJSON.image).toEqual(null);
+			expect(responseJSON.menu_order).toEqual(0);
+			expect(responseJSON.count).toEqual(0);
+		});
 
-	// 	test('can permanently delete a product tag', async ({
-	// 		request
-	// 	}) => {
-	// 		// Delete the product tag.
-	// 		const response = await request.delete(
-	// 			`wp-json/wc/v3/products/tags/${productTagId}`, {
-	// 				data: {
-	// 					force: true,
-	// 				},
-	// 			}
-	// 		);
-	// 		expect(response.status()).toEqual(200);
+		test('can permanently delete a product tag', async ({
+			request
+		}) => {
+			// Delete the product category.
+			const response = await request.delete(
+				`wp-json/wc/v3/products/categories/${productCategoryId}`, {
+					data: {
+						force: true,
+					},
+				}
+			);
+			expect(response.status()).toEqual(200);
 
-	// 		// Verify that the product tag can no longer be retrieved.
-	// 		const getDeletedProductTagResponse = await request.get(
-	// 			`wp-json/wc/v3/products/tags/${productTagId}`
-	// 		);
-	// 		expect(getDeletedProductTagResponse.status()).toEqual(404);
-	// 	});
+			// Verify that the product category can no longer be retrieved.
+			const getDeletedProductCategoryResponse = await request.get(
+				`wp-json/wc/v3/products/categories/${productCategoryId}`
+			);
+			expect(getDeletedProductCategoryResponse.status()).toEqual(404);
+		});
 
-	// 	test('can batch update product tags', async ({
-	// 		request
-	// 	}) => {
-	// 		// Batch create 3 product tags.
-	// 		const response = await request.post(
-	// 			`wp-json/wc/v3/products/tags/batch`, {
-	// 				data: {
-	// 					create: [{
-	// 							name: "Round toe"
-	// 						},
-	// 						{
-	// 							name: "Flat"
-	// 						},
-	// 						{
-	// 							name: "High heel"
-	// 						}
-	// 					]
-	// 				}
-	// 			}
-	// 		);
-	// 		const responseJSON = await response.json();
-	// 		expect(response.status()).toEqual(200);
-	// 		expect(responseJSON.create[0].name).toEqual('Round toe');
-	// 		expect(responseJSON.create[1].name).toEqual('Flat');
-	// 		expect(responseJSON.create[2].name).toEqual('High heel');
-	// 		const tag1Id = responseJSON.create[0].id;
-	// 		const tag2Id = responseJSON.create[1].id;
-	// 		const tag3Id = responseJSON.create[2].id;
+		test('can batch update product categories', async ({
+			request
+		}) => {
+			// Batch create product categories.
+			const response = await request.post(
+				`wp-json/wc/v3/products/categories/batch`, {
+					data: {
+						create: [{
+								name: "Hats"
+							},
+							{
+								name: "Sweets"
+							}
+						]
+					}
+				}
+			);
+			const responseJSON = await response.json();
+			expect(response.status()).toEqual(200);
+			expect(responseJSON.create[0].name).toEqual('Hats');
+			expect(responseJSON.create[1].name).toEqual('Sweets');
+			const category1Id = responseJSON.create[0].id;
+			const category2Id = responseJSON.create[1].id;
 
-	// 		// Batch create a new tag, update 2 tags and delete another.
-	// 		const responseBatchUpdate = await request.post(
-	// 			`wp-json/wc/v3/products/tags/batch`, {
-	// 				data: {
-	// 					create: [{
-	// 						name: "Football boot"
-	// 					}, ],
-	// 					update: [{
-	// 							id: tag1Id,
-	// 							description: "Genuine leather."
-	// 						},
-	// 						{
-	// 							id: tag2Id,
-	// 							description: "Like a pancake."
-	// 						}
-	// 					],
-	// 					delete: [
-	// 						tag3Id
-	// 					]
-	// 				}
-	// 			}
-	// 		);
-	// 		const responseBatchUpdateJSON = await responseBatchUpdate.json();
-	// 		const tag4Id = responseBatchUpdateJSON.create[0].id;
-	// 		expect(response.status()).toEqual(200);
+			// Batch create a new category, update a category and delete another.
+			const responseBatchUpdate = await request.post(
+				`wp-json/wc/v3/products/categories/batch`, {
+					data: {
+						create: [{
+							name: ""
+						}, ],
+						update: [{
+								id: category1Id,
+								description: "Put them on your head."
+							}
+						],
+						delete: [
+							category2Id
+						]
+					}
+				}
+			);
+			const responseBatchUpdateJSON = await responseBatchUpdate.json();
+			const category3Id = responseBatchUpdateJSON.create[0].id;
+			expect(response.status()).toEqual(200);
 
-	// 		const responseUpdatedTag1 = await request.get(`wp-json/wc/v3/products/tags/${tag1Id}`);
-	// 		const responseUpdatedTag1JSON = await responseUpdatedTag1.json();
-	// 		expect(responseUpdatedTag1JSON.description).toEqual('Genuine leather.');
+			const responseUpdatedCategory = await request.get(`wp-json/wc/v3/products/categories/${category1Id}`);
+			const responseUpdatedCategoryJSON = await responseUpdatedCategory.json();
+			expect(responseUpdatedCategoryJSON.description).toEqual('Put them on your head.');
 
-	// 		const responseUpdatedTag2 = await request.get(`wp-json/wc/v3/products/tags/${tag2Id}`);
-	// 		const responseUpdatedTag2JSON = await responseUpdatedTag2.json();
-	// 		expect(responseUpdatedTag2JSON.description).toEqual('Like a pancake.');
+			// Verify that the product tag can no longer be retrieved.
+			const getDeletedProductCategoryResponse = await request.get(
+				`wp-json/wc/v3/products/categories/${category2Id}`
+			);
+			expect(getDeletedProductCategoryResponse.status()).toEqual(404);
 
-	// 		// Verify that the product tag can no longer be retrieved.
-	// 		const getDeletedProductTagResponse = await request.get(
-	// 			`wp-json/wc/v3/products/tags/${tag3Id}`
-	// 		);
-	// 		expect(getDeletedProductTagResponse.status()).toEqual(404);
+			// Batch delete the created tags
+			await request.post(
+				`wp-json/wc/v3/products/categories/batch`, {
+					data: {
+						delete: [category1Id, category3Id]
+					}
+				}
+			);
+		});
+	});
 
-	// 		// Batch delete the created tags
-	// 		await request.post(
-	// 			`wp-json/wc/v3/products/tags/batch`, {
-	// 				data: {
-	// 					delete: [tag1Id, tag2Id, tag4Id]
-	// 				}
-	// 			}
-	// 		);
-	// 	});
-	// });
+	test.describe('Product shipping classes tests: CRUD', () => {
+		let productShippingClassId;
 
+		test('can add a product shipping class', async ({
+			request
+		}) => {
+			const response = await request.post('wp-json/wc/v3/products/shipping_classes', {
+				data: {
+					name: 'Priority'
+				},
+			});
+			const responseJSON = await response.json();
+			productShippingClassId = responseJSON.id;
 
+			expect(response.status()).toEqual(201);
+			expect(typeof productShippingClassId).toEqual('number');
+			expect(responseJSON.name).toEqual('Priority');
+			expect(responseJSON.slug).toEqual('priority');
+			expect(responseJSON.description).toEqual('');
+			expect(responseJSON.count).toEqual(0);
+		});
 
+		test('can retrieve a product shipping class', async ({
+			request
+		}) => {
+			const response = await request.get(`wp-json/wc/v3/products/shipping_classes/${productShippingClassId}`);
+			const responseJSON = await response.json();
+			expect(response.status()).toEqual(200);
+			expect(responseJSON.id).toEqual(productShippingClassId);
+			expect(responseJSON.name).toEqual('Priority');
+			expect(responseJSON.slug).toEqual('priority');
+			expect(responseJSON.description).toEqual('');
+			expect(responseJSON.count).toEqual(0);
+			
+		});
 
+		
+		test('can retrieve all product shipping classes', async ({
+			request
+		}) => {
+			// call API to retrieve all product tags
+			const response = await request.get('/wp-json/wc/v3/products/shipping_classes');
+			const responseJSON = await response.json();
+			expect(response.status()).toEqual(200);
+			expect(Array.isArray(responseJSON)).toBe(true);
+			expect(responseJSON.length).toBeGreaterThan(0);
+		});
 
-	// test.describe('Product **categories** tests: CRUD', () => {
-	// 	let productTagId;
+		test('can update a product shipping class', async ({
+			request
+		}) => {
+			// call API to retrieve all product tags
+			const response = await request.put(`wp-json/wc/v3/products/shipping_classes/${productShippingClassId}`, {
+				data: {
+					description: 'This is a description for the Priority shipping class.'
+				}
+			});
+			const responseJSON = await response.json();
+			expect(response.status()).toEqual(200);
+			expect(responseJSON.id).toEqual(productShippingClassId);
+			expect(responseJSON.name).toEqual('Priority');
+			expect(responseJSON.slug).toEqual('priority');
+			expect(responseJSON.description).toEqual('This is a description for the Priority shipping class.');
+			expect(responseJSON.count).toEqual(0);
+		});
 
-	// 	test('can add a product tag', async ({
-	// 		request
-	// 	}) => {
-	// 		const response = await request.post('wp-json/wc/v3/products/tags', {
-	// 			data: {
-	// 				name: 'Leather Shoes'
-	// 			},
-	// 		});
-	// 		const responseJSON = await response.json();
-	// 		productTagId = responseJSON.id;
+		test('can permanently delete a product shipping class', async ({
+			request
+		}) => {
+			// Delete the product shipping class.
+			const response = await request.delete(
+				`wp-json/wc/v3/products/shipping_classes/${productShippingClassId}`, {
+					data: {
+						force: true,
+					},
+				}
+			);
+			expect(response.status()).toEqual(200);
 
-	// 		expect(response.status()).toEqual(201);
-	// 		expect(typeof productId).toEqual('number');
-	// 		expect(responseJSON.name).toEqual('Leather Shoes');
-	// 		expect(responseJSON.slug).toEqual('leather-shoes');
-	// 	});
+			// Verify that the product shipping class can no longer be retrieved.
+			const getDeletedProductShippingClassResponse = await request.get(
+				`wp-json/wc/v3/products/shipping_classes/${productShippingClassId}`
+			);
+			expect(getDeletedProductShippingClassResponse.status()).toEqual(404);
+		});
 
-	// 	test('can retrieve a product tag', async ({
-	// 		request
-	// 	}) => {
-	// 		const response = await request.get(`wp-json/wc/v3/products/tags/${productTagId}`);
-	// 		const responseJSON = await response.json();
-	// 		expect(response.status()).toEqual(200);
-	// 		expect(responseJSON.id).toEqual(productTagId);
-	// 		expect(responseJSON.name).toEqual('Leather Shoes');
-	// 		expect(responseJSON.slug).toEqual('leather-shoes');
-	// 	});
+		test('can batch update product shipping classes', async ({
+			request
+		}) => {
+			// Batch create product shipping classes.
+			const response = await request.post(
+				`wp-json/wc/v3/products/shipping_classes/batch`, {
+					data: {
+						create: [{
+								name: "Small Items"
+							},
+							{
+								name: "Large Items"
+							}
+						]
+					}
+				}
+			);
+			const responseJSON = await response.json();
+			expect(response.status()).toEqual(200);
+			expect(responseJSON.create[0].name).toEqual('Small Items');
+			expect(responseJSON.create[1].name).toEqual('Large Items');
+			const shippingClass1Id = responseJSON.create[0].id;
+			const shippingClass2Id = responseJSON.create[1].id;
 
-	// 	test('can retrieve all product tags', async ({
-	// 		request
-	// 	}) => {
-	// 		// call API to retrieve all product tags
-	// 		const response = await request.get('/wp-json/wc/v3/products/tags');
-	// 		const responseJSON = await response.json();
-	// 		expect(response.status()).toEqual(200);
-	// 		expect(Array.isArray(responseJSON)).toBe(true);
-	// 		expect(responseJSON.length).toBeGreaterThan(0);
-	// 	});
+			// Batch create a new shipping class, update a shipping class and delete another.
+			const responseBatchUpdate = await request.post(
+				`wp-json/wc/v3/products/shipping_classes/batch`, {
+					data: {
+						create: [{
+							name: "Express"
+						}, ],
+						update: [{
+								id: shippingClass1Id,
+								description: "Priority shipping."
+							}
+						],
+						delete: [
+							shippingClass2Id
+						]
+					}
+				}
+			);
+			const responseBatchUpdateJSON = await responseBatchUpdate.json();
+			const shippingClass3Id = responseBatchUpdateJSON.create[0].id;
+			expect(response.status()).toEqual(200);
 
-	// 	test('can update a product tag', async ({
-	// 		request
-	// 	}) => {
-	// 		// call API to retrieve all product tags
-	// 		const response = await request.put(`wp-json/wc/v3/products/tags/${productTagId}`, {
-	// 			data: {
-	// 				description: 'Genuine leather.'
-	// 			}
-	// 		});
-	// 		const responseJSON = await response.json();
-	// 		expect(response.status()).toEqual(200);
-	// 		expect(responseJSON.id).toEqual(productTagId);
-	// 		expect(responseJSON.name).toEqual('Leather Shoes');
-	// 		expect(responseJSON.description).toEqual('Genuine leather.');
-	// 		expect(responseJSON.slug).toEqual('leather-shoes');
-	// 		expect(responseJSON.count).toEqual(0);
-	// 	});
+			const responseUpdatedShippingClass = await request.get(`wp-json/wc/v3/products/shipping_classes/${shippingClass1Id}`);
+			const responseUpdatedShippingClassJSON = await responseUpdatedShippingClass.json();
+			expect(responseUpdatedShippingClassJSON.description).toEqual('Priority shipping.');
 
-	// 	test('can permanently delete a product tag', async ({
-	// 		request
-	// 	}) => {
-	// 		// Delete the product tag.
-	// 		const response = await request.delete(
-	// 			`wp-json/wc/v3/products/tags/${productTagId}`, {
-	// 				data: {
-	// 					force: true,
-	// 				},
-	// 			}
-	// 		);
-	// 		expect(response.status()).toEqual(200);
+			// Verify that the product tag can no longer be retrieved.
+			const getDeletedProductShippingClassResponse = await request.get(
+				`wp-json/wc/v3/products/shipping_classes/${shippingClass2Id}`
+			);
+			expect(getDeletedProductShippingClassResponse.status()).toEqual(404);
 
-	// 		// Verify that the product tag can no longer be retrieved.
-	// 		const getDeletedProductTagResponse = await request.get(
-	// 			`wp-json/wc/v3/products/tags/${productTagId}`
-	// 		);
-	// 		expect(getDeletedProductTagResponse.status()).toEqual(404);
-	// 	});
+			// Batch delete the created tags
+			await request.post(
+				`wp-json/wc/v3/products/shipping_classes/batch`, {
+					data: {
+						delete: [shippingClass1Id, shippingClass3Id]
+					}
+				}
+			);
+		});
+	});
 
-	// 	test('can batch update product tags', async ({
-	// 		request
-	// 	}) => {
-	// 		// Batch create 3 product tags.
-	// 		const response = await request.post(
-	// 			`wp-json/wc/v3/products/tags/batch`, {
-	// 				data: {
-	// 					create: [{
-	// 							name: "Round toe"
-	// 						},
-	// 						{
-	// 							name: "Flat"
-	// 						},
-	// 						{
-	// 							name: "High heel"
-	// 						}
-	// 					]
-	// 				}
-	// 			}
-	// 		);
-	// 		const responseJSON = await response.json();
-	// 		expect(response.status()).toEqual(200);
-	// 		expect(responseJSON.create[0].name).toEqual('Round toe');
-	// 		expect(responseJSON.create[1].name).toEqual('Flat');
-	// 		expect(responseJSON.create[2].name).toEqual('High heel');
-	// 		const tag1Id = responseJSON.create[0].id;
-	// 		const tag2Id = responseJSON.create[1].id;
-	// 		const tag3Id = responseJSON.create[2].id;
-
-	// 		// Batch create a new tag, update 2 tags and delete another.
-	// 		const responseBatchUpdate = await request.post(
-	// 			`wp-json/wc/v3/products/tags/batch`, {
-	// 				data: {
-	// 					create: [{
-	// 						name: "Football boot"
-	// 					}, ],
-	// 					update: [{
-	// 							id: tag1Id,
-	// 							description: "Genuine leather."
-	// 						},
-	// 						{
-	// 							id: tag2Id,
-	// 							description: "Like a pancake."
-	// 						}
-	// 					],
-	// 					delete: [
-	// 						tag3Id
-	// 					]
-	// 				}
-	// 			}
-	// 		);
-	// 		const responseBatchUpdateJSON = await responseBatchUpdate.json();
-	// 		const tag4Id = responseBatchUpdateJSON.create[0].id;
-	// 		expect(response.status()).toEqual(200);
-
-	// 		const responseUpdatedTag1 = await request.get(`wp-json/wc/v3/products/tags/${tag1Id}`);
-	// 		const responseUpdatedTag1JSON = await responseUpdatedTag1.json();
-	// 		expect(responseUpdatedTag1JSON.description).toEqual('Genuine leather.');
-
-	// 		const responseUpdatedTag2 = await request.get(`wp-json/wc/v3/products/tags/${tag2Id}`);
-	// 		const responseUpdatedTag2JSON = await responseUpdatedTag2.json();
-	// 		expect(responseUpdatedTag2JSON.description).toEqual('Like a pancake.');
-
-	// 		// Verify that the product tag can no longer be retrieved.
-	// 		const getDeletedProductTagResponse = await request.get(
-	// 			`wp-json/wc/v3/products/tags/${tag3Id}`
-	// 		);
-	// 		expect(getDeletedProductTagResponse.status()).toEqual(404);
-
-	// 		// Batch delete the created tags
-	// 		await request.post(
-	// 			`wp-json/wc/v3/products/tags/batch`, {
-	// 				data: {
-	// 					delete: [tag1Id, tag2Id, tag4Id]
-	// 				}
-	// 			}
-	// 		);
-	// 	});
-	// });
-
-	// test.describe('Product **shipping classes** tests: CRUD', () => {
-	// 	let productTagId;
-
-	// 	test('can add a product tag', async ({
-	// 		request
-	// 	}) => {
-	// 		const response = await request.post('wp-json/wc/v3/products/tags', {
-	// 			data: {
-	// 				name: 'Leather Shoes'
-	// 			},
-	// 		});
-	// 		const responseJSON = await response.json();
-	// 		productTagId = responseJSON.id;
-
-	// 		expect(response.status()).toEqual(201);
-	// 		expect(typeof productId).toEqual('number');
-	// 		expect(responseJSON.name).toEqual('Leather Shoes');
-	// 		expect(responseJSON.slug).toEqual('leather-shoes');
-	// 	});
-
-	// 	test('can retrieve a product tag', async ({
-	// 		request
-	// 	}) => {
-	// 		const response = await request.get(`wp-json/wc/v3/products/tags/${productTagId}`);
-	// 		const responseJSON = await response.json();
-	// 		expect(response.status()).toEqual(200);
-	// 		expect(responseJSON.id).toEqual(productTagId);
-	// 		expect(responseJSON.name).toEqual('Leather Shoes');
-	// 		expect(responseJSON.slug).toEqual('leather-shoes');
-	// 	});
-
-	// 	test('can retrieve all product tags', async ({
-	// 		request
-	// 	}) => {
-	// 		// call API to retrieve all product tags
-	// 		const response = await request.get('/wp-json/wc/v3/products/tags');
-	// 		const responseJSON = await response.json();
-	// 		expect(response.status()).toEqual(200);
-	// 		expect(Array.isArray(responseJSON)).toBe(true);
-	// 		expect(responseJSON.length).toBeGreaterThan(0);
-	// 	});
-
-	// 	test('can update a product tag', async ({
-	// 		request
-	// 	}) => {
-	// 		// call API to retrieve all product tags
-	// 		const response = await request.put(`wp-json/wc/v3/products/tags/${productTagId}`, {
-	// 			data: {
-	// 				description: 'Genuine leather.'
-	// 			}
-	// 		});
-	// 		const responseJSON = await response.json();
-	// 		expect(response.status()).toEqual(200);
-	// 		expect(responseJSON.id).toEqual(productTagId);
-	// 		expect(responseJSON.name).toEqual('Leather Shoes');
-	// 		expect(responseJSON.description).toEqual('Genuine leather.');
-	// 		expect(responseJSON.slug).toEqual('leather-shoes');
-	// 		expect(responseJSON.count).toEqual(0);
-	// 	});
-
-	// 	test('can permanently delete a product tag', async ({
-	// 		request
-	// 	}) => {
-	// 		// Delete the product tag.
-	// 		const response = await request.delete(
-	// 			`wp-json/wc/v3/products/tags/${productTagId}`, {
-	// 				data: {
-	// 					force: true,
-	// 				},
-	// 			}
-	// 		);
-	// 		expect(response.status()).toEqual(200);
-
-	// 		// Verify that the product tag can no longer be retrieved.
-	// 		const getDeletedProductTagResponse = await request.get(
-	// 			`wp-json/wc/v3/products/tags/${productTagId}`
-	// 		);
-	// 		expect(getDeletedProductTagResponse.status()).toEqual(404);
-	// 	});
-
-	// 	test('can batch update product tags', async ({
-	// 		request
-	// 	}) => {
-	// 		// Batch create 3 product tags.
-	// 		const response = await request.post(
-	// 			`wp-json/wc/v3/products/tags/batch`, {
-	// 				data: {
-	// 					create: [{
-	// 							name: "Round toe"
-	// 						},
-	// 						{
-	// 							name: "Flat"
-	// 						},
-	// 						{
-	// 							name: "High heel"
-	// 						}
-	// 					]
-	// 				}
-	// 			}
-	// 		);
-	// 		const responseJSON = await response.json();
-	// 		expect(response.status()).toEqual(200);
-	// 		expect(responseJSON.create[0].name).toEqual('Round toe');
-	// 		expect(responseJSON.create[1].name).toEqual('Flat');
-	// 		expect(responseJSON.create[2].name).toEqual('High heel');
-	// 		const tag1Id = responseJSON.create[0].id;
-	// 		const tag2Id = responseJSON.create[1].id;
-	// 		const tag3Id = responseJSON.create[2].id;
-
-	// 		// Batch create a new tag, update 2 tags and delete another.
-	// 		const responseBatchUpdate = await request.post(
-	// 			`wp-json/wc/v3/products/tags/batch`, {
-	// 				data: {
-	// 					create: [{
-	// 						name: "Football boot"
-	// 					}, ],
-	// 					update: [{
-	// 							id: tag1Id,
-	// 							description: "Genuine leather."
-	// 						},
-	// 						{
-	// 							id: tag2Id,
-	// 							description: "Like a pancake."
-	// 						}
-	// 					],
-	// 					delete: [
-	// 						tag3Id
-	// 					]
-	// 				}
-	// 			}
-	// 		);
-	// 		const responseBatchUpdateJSON = await responseBatchUpdate.json();
-	// 		const tag4Id = responseBatchUpdateJSON.create[0].id;
-	// 		expect(response.status()).toEqual(200);
-
-	// 		const responseUpdatedTag1 = await request.get(`wp-json/wc/v3/products/tags/${tag1Id}`);
-	// 		const responseUpdatedTag1JSON = await responseUpdatedTag1.json();
-	// 		expect(responseUpdatedTag1JSON.description).toEqual('Genuine leather.');
-
-	// 		const responseUpdatedTag2 = await request.get(`wp-json/wc/v3/products/tags/${tag2Id}`);
-	// 		const responseUpdatedTag2JSON = await responseUpdatedTag2.json();
-	// 		expect(responseUpdatedTag2JSON.description).toEqual('Like a pancake.');
-
-	// 		// Verify that the product tag can no longer be retrieved.
-	// 		const getDeletedProductTagResponse = await request.get(
-	// 			`wp-json/wc/v3/products/tags/${tag3Id}`
-	// 		);
-	// 		expect(getDeletedProductTagResponse.status()).toEqual(404);
-
-	// 		// Batch delete the created tags
-	// 		await request.post(
-	// 			`wp-json/wc/v3/products/tags/batch`, {
-	// 				data: {
-	// 					delete: [tag1Id, tag2Id, tag4Id]
-	// 				}
-	// 			}
-	// 		);
-	// 	});
-	// });
-
+	
 	test.describe('Product tags tests: CRUD', () => {
 		let productTagId;
 
