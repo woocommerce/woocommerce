@@ -148,7 +148,8 @@ final class BlockTypesController {
 			'woocommerce_product_tag_cloud',
 			'woocommerce_price_filter',
 			'woocommerce_layered_nav',
-			'woocommerce_layered_nav_filters'
+			'woocommerce_layered_nav_filters',
+			'woocommerce_rating_filter'
 		);
 
 		return $widget_types;
