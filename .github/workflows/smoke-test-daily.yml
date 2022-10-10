@@ -58,7 +58,7 @@ jobs:
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
               run: |
                   pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-woocommerce.spec.js
-                  UPDATE_WC=false
+                  unset UPDATE_WC
                   pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
             - name: Generate Playwright E2E Test report.
