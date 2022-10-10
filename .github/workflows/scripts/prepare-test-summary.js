@@ -135,7 +135,7 @@ const addSummaryWarnings = ( core ) => {
 		core.summary
 			.addHeading( ':warning: Warning', 3 )
 			.addRaw(
-				'Please address the following issues prior to merging this pull request:'
+				'The following issues were found. If this is a pull request, please address them prior to merging:'
 			)
 			.addList( warnings );
 	}
