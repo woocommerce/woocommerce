@@ -40,6 +40,7 @@ export const client = HTTPClientFactory.build( BASE_URL )
 export const GUTENBERG_EDITOR_CONTEXT =
 	process.env.GUTENBERG_EDITOR_CONTEXT || 'core';
 export const DEFAULT_TIMEOUT = 30000;
+export const SHOP_CHECKOUT_BLOCK_PAGE = BASE_URL + 'checkout-block/';
 
 const SELECTORS = {
 	canvas: 'iframe[name="editor-canvas"]',

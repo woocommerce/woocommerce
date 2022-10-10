@@ -49,7 +49,7 @@ const setupSettings = ( fixture = fixtures.Settings() ) =>
 	} );
 
 const setupPageSettings = () => {
-	axios.get( WPAPI ).then( ( response ) => {
+	axios.get( `${ WPAPI }?per_page=100` ).then( ( response ) => {
 		const fixture = fixtures.PageSettings( response.data );
 		WooCommerce.post( 'settings/advanced/batch', {
 			update: fixture,
