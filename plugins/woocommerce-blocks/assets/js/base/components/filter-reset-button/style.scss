@@ -1,10 +1,6 @@
 .wc-block-components-filter-reset-button {
-	@include text-button();
+	@include link-button();
 	cursor: pointer;
-
-	&:not([disabled]):hover {
-		text-decoration: underline;
-	}
 
 	&[disabled] {
 		cursor: not-allowed;

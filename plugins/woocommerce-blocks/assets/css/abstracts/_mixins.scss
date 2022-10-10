@@ -163,7 +163,15 @@ $fontSizes: (
 // Reset <button> style so we can use link style for action buttons.
 @mixin link-button() {
 	@include text-button();
+	@include font-size(small);
 	text-decoration: underline;
+	font-weight: normal;
+	color: inherit;
+
+	&:hover {
+		text-decoration: none;
+		color: inherit;
+	}
 }
 
 // Makes sure long words are broken if they overflow the container.
