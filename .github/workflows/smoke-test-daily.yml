@@ -111,7 +111,7 @@ jobs:
                   steps.generate_api_report.conclusion == 'success'
               uses: actions/upload-artifact@v3
               with:
-                  name: api-test-report---pr-${{ github.event.number }}
+                  name: api-test-report---daily
                   path: |
                       plugins/woocommerce/api-test-report/allure-results
                       plugins/woocommerce/api-test-report/allure-report
