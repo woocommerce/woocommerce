@@ -39,7 +39,9 @@ export const deletePlugin = async ( {
 		},
 	} );
 
-	const response = await apiContext.get( `/wp-json/wp/v2/plugins/${ slug }` );
+	const response = await apiContext.get( `/wp-json/wp/v2/plugins/${ slug }`, {
+		failOnStatusCode: true,
+	} );
 
 	// If installed, deactivate and delete it.
 	if ( response.ok() ) {
@@ -52,9 +54,6 @@ export const deletePlugin = async ( {
 			failOnStatusCode: true,
 		} );
 	}
-
-	// Dispose all responses.
-	await apiContext.dispose();
 };
 
 /**
@@ -83,4 +82,16 @@ export const downloadZip = async ( { url, downloadPath, authToken } ) => {
 
 	const response = await axios( options );
 	response.data.pipe( fs.createWriteStream( downloadPath ) );
+};
+
+/**
+ * Delete a zip file. Useful when cleaning up downloaded plugin zips.
+ *
+ * @param {string} path Local file path to the ZIP.
+ */
+export const deleteZip = async ( path ) => {
+	await fs.unlink( path, ( err ) => {
+		if ( err ) throw err;
+		console.log( `Successfully deleted: ${ path }` );
+	} );
 };
