@@ -130,41 +130,41 @@ jobs:
             #       curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
 
             # - name: Run k6 smoke tests
-              if: always()
-              env:
-                  URL: ${{ secrets.SMOKE_TEST_PERF_URL }}
-                  HOST: ${{ secrets.SMOKE_TEST_PERF_HOST }}
-                  A_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
-                  A_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
-                  C_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
-                  C_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
-                  P_ID: 274
-              run: |
-                  ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
+              # if: always()
+              # env:
+              #     URL: ${{ secrets.SMOKE_TEST_PERF_URL }}
+              #     HOST: ${{ secrets.SMOKE_TEST_PERF_HOST }}
+              #     A_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
+              #     A_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
+              #     C_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
+              #     C_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
+              #     P_ID: 274
+              # run: |
+              #     ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
 
     # build:
-        name: Build zip for PR
-        runs-on: ubuntu-20.04
-        steps:
-          - uses: actions/checkout@v3
+        # name: Build zip for PR
+        # runs-on: ubuntu-20.04
+        # steps:
+        #   - uses: actions/checkout@v3
 
-          - name: Setup WooCommerce Monorepo
-            uses: ./.github/actions/setup-woocommerce-monorepo
-            with:
-              build: false
+        #   - name: Setup WooCommerce Monorepo
+        #     uses: ./.github/actions/setup-woocommerce-monorepo
+        #     with:
+        #       build: false
 
-          - name: Build zip
-            working-directory: plugins/woocommerce
-            run: bash bin/build-zip.sh
+        #   - name: Build zip
+        #     working-directory: plugins/woocommerce
+        #     run: bash bin/build-zip.sh
 
-          - name: Upload the zip file as an artifact
-            uses: actions/upload-artifact@v3
-            env:
-              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            with:
-              name: woocommerce
-              path: plugins/woocommerce/woocommerce.zip
-              retention-days: 7
+        #   - name: Upload the zip file as an artifact
+        #     uses: actions/upload-artifact@v3
+        #     env:
+        #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #     with:
+        #       name: woocommerce
+        #       path: plugins/woocommerce/woocommerce.zip
+        #       retention-days: 7
 
     # test-plugins:
     #     name: Smoke tests with ${{ matrix.plugin }} plugin installed
