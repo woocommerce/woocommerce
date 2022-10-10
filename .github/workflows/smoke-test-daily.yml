@@ -13,10 +13,18 @@ jobs:
     login-run:
         name: Daily smoke test on trunk.
         runs-on: ubuntu-20.04
+        outputs:
+            commit_message: ${{ steps.get_commit_message.outputs.commit_message }}
         steps:
             - uses: actions/checkout@v3
               with:
                   ref: e2e/rep-s3-daily
+
+            - name: Get latest commit message
+              id: get_commit_message
+              run: |
+                  COMMIT_MESSAGE=$(git log --pretty=format:%s -1)
+                  echo "::set-output name=commit_message::$COMMIT_MESSAGE"
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -245,6 +253,7 @@ jobs:
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             RUN_ID: ${{ github.run_id }}
+            COMMIT_MESSAGE: ${{ needs.login-run.outputs.commit_message }}
         steps:
             - name: Publish API test report
               run: |
@@ -252,4 +261,5 @@ jobs:
                     -f run_id=$RUN_ID \
                     -f api_artifact=$API_ARTIFACT \
                     -f e2e_artifact=$E2E_ARTIFACT \
+                    -f commit_message="$COMMIT_MESSAGE" \
                     --repo woocommerce/woocommerce-test-reports
