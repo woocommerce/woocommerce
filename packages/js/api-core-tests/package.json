@@ -12,9 +12,7 @@
 		"e2e:api": "jest --group=api",
 		"e2e:hello": "jest --group=hello",
 		"make:collection": "node utils/api-collection/build-collection.js",
-		"report": "allure generate --clean && allure serve",
-		"lint": "eslint data endpoints tests utils --ext=js,ts,tsx",
-		"lint:fix": "eslint data endpoints tests utils --ext=js,ts,tsx --fix"
+		"report": "allure generate --clean && allure serve"
 	},
 	"repository": {
 		"type": "git",

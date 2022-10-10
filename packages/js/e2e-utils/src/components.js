@@ -1,8 +1,4 @@
 /**
- * @format
- */
-
-/**
  * Internal dependencies
  */
 import { merchant, IS_RETEST_MODE } from './flows';
@@ -34,7 +30,7 @@ const uuid = require( 'uuid' );
 /**
  * Verify and publish
  *
- * @param  noticeText The text that appears in the notice after publishing.
+ * @param {string} noticeText The text that appears in the notice after publishing.
  */
 const verifyAndPublish = async ( noticeText ) => {
 	// Wait for auto save
@@ -53,7 +49,7 @@ const verifyAndPublish = async ( noticeText ) => {
 /**
  * Wait for primary button to be enabled and click.
  *
- * @param  waitForNetworkIdle - Wait for network idle after click
+ * @param {boolean} waitForNetworkIdle - Wait for network idle after click
  * @return {Promise<void>}
  */
 const waitAndClickPrimary = async ( waitForNetworkIdle = true ) => {
@@ -258,9 +254,9 @@ const createSimpleProduct = async (
 /**
  * Create simple product with categories
  *
- * @param  productName  Product's name which can be changed when writing a test
- * @param  productPrice Product's price which can be changed when writing a test
- * @param  categoryName Product's category which can be changed when writing a test
+ * @param {string} productName  Product's name which can be changed when writing a test
+ * @param {string} productPrice Product's price which can be changed when writing a test
+ * @param {string} categoryName Product's category which can be changed when writing a test
  */
 const createSimpleProductWithCategory = async (
 	productName,
@@ -452,7 +448,7 @@ const createOrder = async ( orderOptions = {} ) => {
 /**
  * Create a basic order with the provided order status.
  *
- * @param  orderStatus Status of the new order. Defaults to `Pending payment`.
+ * @param {string} orderStatus Status of the new order. Defaults to `Pending payment`.
  */
 const createSimpleOrder = async ( orderStatus = 'Pending payment' ) => {
 	// Go to 'Add new order' page
