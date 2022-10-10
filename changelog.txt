@@ -30,7 +30,6 @@
 * Fix - Update Guernsey state field to non-required. [#34500](https://github.com/woocommerce/woocommerce/pull/34500)
 * Fix - Update post directly to update correct post_modified value. [#34611](https://github.com/woocommerce/woocommerce/pull/34611)
 * Fix - Update Remote Inbox Notification Country rule to return false when default country is used and onboarding not yet completed. [#34632](https://github.com/woocommerce/woocommerce/pull/34632)
-* Fix - Use offsetted datetime when displaying order created date. [#34687](https://github.com/woocommerce/woocommerce/pull/34687)
 * Fix - Use the term slug instead of name in order-again flow. [#34472](https://github.com/woocommerce/woocommerce/pull/34472)
 * Fix - When a coupon has been trashed, it should become unusable. [#33791](https://github.com/woocommerce/woocommerce/pull/33791)
 * Fix - [COT](https://github.com/woocommerce/woocommerce/pull/) Fix error during apply coupon when COT enabled. [#34498](https://github.com/woocommerce/woocommerce/pull/34498)
