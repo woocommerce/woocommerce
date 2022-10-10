@@ -19,6 +19,27 @@ test.describe( 'Checkout page', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
+		// ensure store address is US
+		await api.post( 'settings/general/batch', {
+			update: [
+				{
+					id: 'woocommerce_store_address',
+					value: 'addr 1',
+				},
+				{
+					id: 'woocommerce_store_city',
+					value: 'San Francisco',
+				},
+				{
+					id: 'woocommerce_default_country',
+					value: 'US:CA',
+				},
+				{
+					id: 'woocommerce_store_postcode',
+					value: '94107',
+				},
+			],
+		} );
 		// add product
 		await api
 			.post( 'products', {
@@ -276,6 +297,7 @@ test.describe( 'Checkout page', () => {
 		await page.fill( '#billing_last_name', 'Simpson' );
 		await page.fill( '#billing_address_1', '123 Evergreen Terrace' );
 		await page.fill( '#billing_city', 'Springfield' );
+		await page.selectOption( '#billing_country', 'US' );
 		await page.selectOption( '#billing_state', 'OR' );
 		await page.fill( '#billing_postcode', '97403' );
 		await page.fill( '#billing_phone', '555 555-5555' );
