@@ -309,13 +309,11 @@ test.describe('Products API tests: CRUD', () => {
 				}
 			);
 			const responseJSON = await response.json();
-			console.log('batch responseJSON=',responseJSON);
 			expect(response.status()).toEqual(200);
 			expect(responseJSON.create[0].name).toEqual('Smell');
 			expect(responseJSON.create[1].name).toEqual('Weight');
 			const attributeId1 = responseJSON.create[0].id;
 			const attributeId2 = responseJSON.create[1].id;
-			console.log('attributeId1 attributeId1=',attributeId1,attributeId2);
 
 			// Batch create a new attribute, update an attribute and delete another.
 			const responseBatchUpdate = await request.post(
@@ -335,8 +333,6 @@ test.describe('Products API tests: CRUD', () => {
 				}
 			);
 			const responseBatchUpdateJSON = await responseBatchUpdate.json();
-			console.log('responseBatchUpdateJSON=',responseBatchUpdateJSON);
-
 			const attributeId3 = responseBatchUpdateJSON.create[0].id;
 			expect(responseBatchUpdate.status()).toEqual(200);
 
