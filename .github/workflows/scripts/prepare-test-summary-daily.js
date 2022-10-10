@@ -1,5 +1,5 @@
 /**
- * Script to generate the test results summary to be posted as a GitHub Job Summary and as a PR comment.
+ * Script to generate the test results summary.
  */
 const { API_SUMMARY_PATH, E2E_PW_SUMMARY_PATH } = process.env;
 
@@ -84,7 +84,7 @@ const createE2ETableRow = () => {
 };
 
 /**
- * Create the heading, commit SHA, and test results table.
+ * Create the heading and test results table.
  *
  * @param core The GitHub Actions toolkit core object
  */
@@ -94,7 +94,6 @@ const addSummaryHeadingAndTable = ( core ) => {
 
 	core.summary
 		.addHeading( 'Test Results Summary' )
-		.addRaw( `Commit SHA: ${ SHA }` )
 		.addBreak()
 		.addBreak()
 		.addTable( [
