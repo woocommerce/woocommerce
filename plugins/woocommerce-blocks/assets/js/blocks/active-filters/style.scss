@@ -20,7 +20,7 @@
 	overflow: hidden;
 
 	.wc-block-active-filters__clear-all {
-		@include link-button();
+		@include filter-link-button();
 		border: none;
 		margin-top: 15px;
 		padding: 0;
