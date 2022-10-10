@@ -108,13 +108,3 @@ export const getInputControlProps = ( {
 		help,
 	};
 };
-
-/**
- * Test if a string is a valid slug.
- *
- * @param  string String to test
- * @return boolean
- */
-export const isValidSlug = ( string: string ) => {
-	return ! /[^\p{L}\p{N}_-]+/gu.test( string );
-};

@@ -10,11 +10,6 @@ import {
 } from '@woocommerce/data';
 import type { FormErrors } from '@woocommerce/components';
 
-/**
- * Internal dependencies
- */
-import { isValidSlug } from './sections/utils';
-
 export const validate = (
 	values: Partial< Product< ProductStatus, ProductType > >
 ) => {
@@ -52,20 +47,6 @@ export const validate = (
 	) {
 		errors.sale_price = __(
 			'Sale price cannot be equal to or higher than list price.',
-			'woocommerce'
-		);
-	}
-
-	if ( values.sku && values.sku.length > 0 && ! isValidSlug( values.sku ) ) {
-		errors.sku = __(
-			'SKU can only contain alphanumeric characters, hyphens, and underscores.',
-			'woocommerce'
-		);
-	}
-
-	if ( values.sku && values.sku.length > 160 ) {
-		errors.sku = __(
-			'SKU must be a maximum of 160 characters.',
 			'woocommerce'
 		);
 	}
