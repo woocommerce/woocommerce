@@ -228,8 +228,8 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		/**
 		 * Add mobile messaging.
 		 */
-		public function mobile_messaging() {
-			if ( null !== $this->object ) {
+		public function mobile_messaging( $email ) {
+			if ( $email instanceof WC_Email_New_Order && null !== $this->object ) {
 				$domain = wp_parse_url( home_url(), PHP_URL_HOST );
 				wc_get_template(
 					'emails/email-mobile-messaging.php',
