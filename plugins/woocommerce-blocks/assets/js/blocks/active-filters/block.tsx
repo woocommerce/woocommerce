@@ -77,6 +77,9 @@ const ActiveFiltersBlock = ( {
 	const [ minPrice, setMinPrice ] = useQueryStateByKey( 'min_price' );
 	const [ maxPrice, setMaxPrice ] = useQueryStateByKey( 'max_price' );
 
+	const [ productRatings, setProductRatings ] =
+		useQueryStateByKey( 'rating' );
+
 	const STOCK_STATUS_OPTIONS = getSetting( 'stockStatusOptions', [] );
 	const STORE_ATTRIBUTES = getSetting( 'attributes', [] );
 	const activeStockStatusFilters = useMemo( () => {
@@ -154,7 +157,9 @@ const ActiveFiltersBlock = ( {
 			( ! productAttributes.length &&
 				! urlContainsAttributeFilter( STORE_ATTRIBUTES ) )
 		) {
-			setIsLoading( false );
+			if ( isLoading ) {
+				setIsLoading( false );
+			}
 			return null;
 		}
 
@@ -164,7 +169,9 @@ const ActiveFiltersBlock = ( {
 			);
 
 			if ( ! attributeObject ) {
-				setIsLoading( false );
+				if ( isLoading ) {
+					setIsLoading( false );
+				}
 				return null;
 			}
 
@@ -183,11 +190,9 @@ const ActiveFiltersBlock = ( {
 		productAttributes,
 		componentHasMounted,
 		STORE_ATTRIBUTES,
+		isLoading,
 		blockAttributes.displayStyle,
 	] );
-
-	const [ productRatings, setProductRatings ] =
-		useQueryStateByKey( 'rating' );
 
 	/**
 	 * Parse the filter URL to set the active rating fitlers.
