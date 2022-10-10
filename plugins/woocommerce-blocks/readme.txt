@@ -103,6 +103,7 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Fixed an error where adding new pages would cause an infinite loop and large amounts of memory use in redux. ([7256](https://github.com/woocommerce/woocommerce-blocks/pull/7256))
 - Ensure error messages containing HTML are shown correctly in the Cart and Checkout blocks. ([7231](https://github.com/woocommerce/woocommerce-blocks/pull/7231))
 - Prevent locked inner blocks from sometimes displaying twice. ([6676](https://github.com/woocommerce/woocommerce-blocks/pull/6676))
+- Improve visual consistency between block links. ([7357](https://github.com/woocommerce/woocommerce-blocks/pull/7357))
 
 = 8.6.0 - 2022-09-26 =
 
