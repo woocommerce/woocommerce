@@ -163,6 +163,12 @@ $fontSizes: (
 // Reset <button> style so we can use link style for action buttons.
 @mixin link-button() {
 	@include text-button();
+	text-decoration: underline;
+}
+
+// Reset <button> style so we can use link style for action buttons in filter blocks
+@mixin filter-link-button() {
+	@include link-button();
 	@include font-size(small);
 	text-decoration: underline;
 	font-weight: normal;
