@@ -15,7 +15,7 @@ concurrency:
     cancel-in-progress: true
 
 jobs:
-    test-core:
+    login-run:
         name: Daily smoke test on trunk.
         runs-on: ubuntu-20.04
         outputs:
@@ -254,12 +254,12 @@ jobs:
             )
         runs-on: ubuntu-20.04
         # mytodo re-add other job needs
-        # needs: [test-core, build, test-plugins]
-        needs: [test-core]
+        # needs: [login-run, build, test-plugins]
+        needs: [login-run]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             RUN_ID: ${{ github.run_id }}
-            COMMIT_MESSAGE: ${{ needs.test-core.outputs.commit_message }}
+            COMMIT_MESSAGE: ${{ needs.login-run.outputs.commit_message }}
         steps:
             - name: Publish API test report
               run: |
@@ -282,8 +282,8 @@ jobs:
             )
         runs-on: ubuntu-20.04
         # mytodo: re-add other needs
-        # needs: [test-core, test-plugins]
-        needs: [test-core]
+        # needs: [login-run, test-plugins]
+        needs: [login-run]
         steps:
             - name: Create dirs
               run: |
