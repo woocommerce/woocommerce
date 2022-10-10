@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: This fixes bug described in https://github.com/woocommerce/woocommerce/issues/35016
