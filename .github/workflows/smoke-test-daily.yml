@@ -1,5 +1,6 @@
 name: Smoke test daily
 on:
+    # mytodo remove pull_request, uncomment cron
     # schedule:
     #     - cron: '25 3 * * *'
     workflow_dispatch:
@@ -42,7 +43,9 @@ jobs:
               run: pnpm exec playwright install chromium
 
             - name: Run E2E smoke test.
+              timeout-minutes: 120
               working-directory: plugins/woocommerce
+              id: run_playwright_e2e_tests
               env:
                   BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
                   ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
@@ -55,7 +58,32 @@ jobs:
               run: |
                   pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-woocommerce.spec.js
                   UPDATE_WC=false
-                  pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
+                  # mytodo remove basic.spec.js
+                  pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js basic.spec.js
+
+            - name: Generate Playwright E2E Test report.
+              id: generate_e2e_report
+              if: |
+                  always() &&
+                  (
+                    steps.run_playwright_e2e_tests.conclusion != 'cancelled' ||
+                    steps.run_playwright_e2e_tests.conclusion != 'skipped' 
+                  )
+              working-directory: plugins/woocommerce
+              run: pnpm exec allure generate --clean e2e/allure-results --output e2e/allure-report
+
+            - name: Archive E2E test report
+              if: |
+                  always() &&
+                  steps.generate_e2e_report.conclusion == 'success'
+              uses: actions/upload-artifact@v3
+              with:
+                  name: e2e-test-report---daily
+                  path: |
+                      plugins/woocommerce/e2e/allure-results
+                      plugins/woocommerce/e2e/allure-report
+                  if-no-files-found: ignore
+                  retention-days: 5
 
             # - name: Run API smoke tests
             #   if: always()
