@@ -15,7 +15,7 @@
  * @package WooCommerce\Blocks
  * @internal This file is only used when running as a feature plugin.
  */
-
+ 
 defined( 'ABSPATH' ) || exit;
 
 $minimum_wp_version = '6.0';
@@ -23,6 +23,14 @@ $minimum_wp_version = '6.0';
 if ( ! defined( 'WC_BLOCKS_IS_FEATURE_PLUGIN' ) ) {
 	define( 'WC_BLOCKS_IS_FEATURE_PLUGIN', true );
 }
+
+// Declare comaptibility with custom order tables for WooCommerce
+if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+    add_action('before_woocommerce_init', function() {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
+    });
+}
+
 /**
  * Whether notices must be displayed in the current page (plugins and WooCommerce pages).
  *
