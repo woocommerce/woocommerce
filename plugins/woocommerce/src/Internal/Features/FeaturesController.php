@@ -111,6 +111,11 @@ class FeaturesController {
 				'description'     => __( 'Enable the high performance order storage feature.', 'woocommerce' ),
 				'is_experimental' => true,
 			),
+			OrderCacheController::FEATURE_NAME => array(
+				'name'            => __( 'Orders cache', 'woocommerce' ),
+				'description'     => __( 'Enable the usage of a cache for shop orders', 'woocommerce' ),
+				'is_experimental' => true,
+			),
 		);
 
 		$this->legacy_feature_ids = array( 'analytics', 'new_navigation', 'new_product_management' );

@@ -164,13 +164,13 @@ abstract class ObjectCache {
 	/**
 	 * Add an object to the cache, or update an already cached object.
 	 *
-	 * @param int|string|null $id Id of the object to be cached, if null, get_object_id will be used to get it.
 	 * @param object|array    $object The object to be cached.
+	 * @param int|string|null $id Id of the object to be cached, if null, get_object_id will be used to get it.
 	 * @param int             $expiration Expiration of the cached data in seconds from the current time, or DEFAULT_EXPIRATION to use the default value.
 	 * @return bool True on success, false on error.
 	 * @throws CacheException Invalid parameter, or null id was passed and get_object_id returns null too.
 	 */
-	public function set( $id = null, $object, int $expiration = self::DEFAULT_EXPIRATION ): bool {
+	public function set( $object, $id = null, int $expiration = self::DEFAULT_EXPIRATION ): bool {
 		if ( null === $object ) {
 			throw new CacheException( "Can't cache a null value", $this, $id );
 		}
@@ -185,20 +185,22 @@ abstract class ObjectCache {
 
 		$this->verify_expiration_value( $expiration );
 
-		if ( null === $id ) {
-			$id = $this->get_object_id( $object );
-			if ( null === $id ) {
-				throw new CacheException( "Null id supplied and the cache class doesn't implement get_object_id", $this );
+		$errors = $this->validate( $object );
+		if ( ! is_null( $errors ) ) {
+			try {
+				$id = $this->get_id_from_object_if_null( $object, $id );
+			} catch ( \Throwable $ex ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+				// Nothing else to do, we won't be able to add any significant object id to the CacheException and that's it.
+			}
+
+			if ( count( $errors ) === 1 ) {
+				throw new CacheException( 'Object validation/serialization failed: ' . $errors[0], $this, $id, $errors );
+			} elseif ( ! empty( $errors ) ) {
+				throw new CacheException( 'Object validation/serialization failed', $this, $id, $errors );
 			}
 		}
 
-		$errors = $this->validate( $object );
-		if ( null !== $errors && 1 === count( $errors ) ) {
-			throw new CacheException( 'Object validation/serialization failed: ' . $errors[0], $this, $id, $errors );
-		} elseif ( ! empty( $errors ) ) {
-			throw new CacheException( 'Object validation/serialization failed', $this, $id, $errors );
-		}
-
+		$id   = $this->get_id_from_object_if_null( $object, $id );
 		$data = $this->serialize( $object );
 
 		/**
@@ -213,7 +215,49 @@ abstract class ObjectCache {
 		$data = apply_filters( "woocommerce_after_serializing_{$this->object_type}_for_caching", $data, $object, $id );
 
 		$this->last_cached_data = $data;
-		return $this->get_cache_engine()->cache_object( $this->get_cache_key_prefix() . $id, $data, self::DEFAULT_EXPIRATION === $expiration ? $this->default_expiration : $expiration );
+		return $this->get_cache_engine()->cache_object(
+			$this->get_cache_key_prefix() . $id,
+			$data,
+			self::DEFAULT_EXPIRATION === $expiration ? $this->default_expiration : $expiration
+		);
+	}
+
+	/**
+	 * Update an object in the cache, but only if an object is already cached with the same id.
+	 *
+	 * @param object|array    $object The new object that will replace the already cached one.
+	 * @param int|string|null $id Id of the object to be cached, if null, get_object_id will be used to get it.
+	 * @param int             $expiration Expiration of the cached data in seconds from the current time, or DEFAULT_EXPIRATION to use the default value.
+	 * @return bool True on success, false on error or if no object wiith the supplied id was cached.
+	 * @throws CacheException Invalid parameter, or null id was passed and get_object_id returns null too.
+	 */
+	public function update_if_cached( $object, $id = null, int $expiration = self::DEFAULT_EXPIRATION ): bool {
+		$id = $this->get_id_from_object_if_null( $object, $id );
+
+		if ( ! $this->is_cached( $id ) ) {
+			return false;
+		}
+
+		return $this->set( $object, $id, $expiration );
+	}
+
+	/**
+	 * Get the id from an object if the id itself is null.
+	 *
+	 * @param object|array    $object The object to get the id from.
+	 * @param int|string|null $id An object id or null.
+	 * @return int|string|null Passed $id if it wasn't null, otherwise id obtained from $object using get_object_id.
+	 * @throws CacheException Passed $id is null and get_object_id returned null too.
+	 */
+	private function get_id_from_object_if_null( $object, $id ) {
+		if ( null === $id ) {
+			$id = $this->get_object_id( $object );
+			if ( null === $id ) {
+				throw new CacheException( "Null id supplied and the cache class doesn't implement get_object_id", $this );
+			}
+		}
+
+		return $id;
 	}
 
 	/**
@@ -261,7 +305,7 @@ abstract class ObjectCache {
 				return null;
 			}
 
-			$this->set( $id, $object, $expiration );
+			$this->set( $object, $id, $expiration );
 			$data = $this->last_cached_data;
 		}
 
