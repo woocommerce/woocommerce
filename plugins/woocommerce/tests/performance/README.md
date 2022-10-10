@@ -79,6 +79,7 @@ admin_password | password for admin user | yes `__ENV.A_PW`
 admin_acc_login | set to true if site needs to use my account for admin login | yes `__ENV.A_PW`
 customer_username | username for customer user | yes `__ENV.C_USER`
 customer_password | password for customer user | yes `__ENV.C_PW`
+customer_user_id | user id for customer user | yes `__ENV.C_UID`
 cot_status | set to true if site is using order tables | yes `__ENV.C_PW`
 admin_orders_base_url | url part for order urls when posts table is used | no
 cot_admin_orders_base_url | url part for order urls when orders table is used | no

@@ -17,13 +17,17 @@ import { addProduct } from '../requests/merchant/add-product.js';
 import { coupons } from '../requests/merchant/coupons.js';
 import { orders } from '../requests/merchant/orders.js';
 import { ordersSearch } from '../requests/merchant/orders-search.js';
+import { ordersFilter } from '../requests/merchant/orders-filter.js';
+import { addOrder } from '../requests/merchant/add-order.js';
 import { homeWCAdmin } from '../requests/merchant/home-wc-admin.js';
 import { wpLogin } from '../requests/merchant/wp-login.js';
 import { myAccountMerchantLogin } from '../requests/merchant/my-account-merchant.js';
+import { ordersAPI } from '../requests/api/orders.js';
 import { admin_acc_login } from '../config.js';
 
 const shopper_request_threshold = 'p(95)<10000';
 const merchant_request_threshold = 'p(95)<10000';
+const api_request_threshold = 'p(95)<10000';
 
 export const options = {
 	scenarios: {
@@ -72,6 +76,13 @@ export const options = {
 			iterations: 1,
 			maxDuration: '360s',
 			exec: 'allMerchantFlow',
+		},
+		allAPISmoke: {
+			executor: 'per-vu-iterations',
+			vus: 1,
+			iterations: 1,
+			maxDuration: '120s',
+			exec: 'allAPIFlow',
 		},
 	},
 	thresholds: {
@@ -150,7 +161,33 @@ export const options = {
 		'http_req_duration{name:Merchant - All Orders}': [
 			`${ merchant_request_threshold }`,
 		],
+		'http_req_duration{name:Merchant - Completed Orders}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - New Order Page}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - Create New Order}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - Open Order}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - Update Existing Order Status}': [
+			`${ merchant_request_threshold }`,
+		],
 		'http_req_duration{name:Merchant - Search Orders By Product}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - Search Orders By Customer Email}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - Search Orders By Customer Address}':
+			[ `${ merchant_request_threshold }` ],
+		'http_req_duration{name:Merchant - Filter Orders By Month}': [
+			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:Merchant - Filter Orders By Customer}': [
 			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - All Products}': [
@@ -181,6 +218,24 @@ export const options = {
 			[ `${ merchant_request_threshold }` ],
 		'http_req_duration{name:Merchant - action=heartbeat}': [
 			`${ merchant_request_threshold }`,
+		],
+		'http_req_duration{name:API - Create Order}': [
+			`${ api_request_threshold }`,
+		],
+		'http_req_duration{name:API - Retrieve Order}': [
+			`${ api_request_threshold }`,
+		],
+		'http_req_duration{name:API - Update Order (Status)}': [
+			`${ api_request_threshold }`,
+		],
+		'http_req_duration{name:API - Delete Order}': [
+			`${ api_request_threshold }`,
+		],
+		'http_req_duration{name:API - Batch Create Orders}': [
+			`${ api_request_threshold }`,
+		],
+		'http_req_duration{name:API - Batch Update (Status) Orders}': [
+			`${ api_request_threshold }`,
 		],
 	},
 };
@@ -215,9 +270,15 @@ export function allMerchantFlow() {
 		wpLogin();
 	}
 	homeWCAdmin();
+	addOrder();
 	orders();
 	ordersSearch();
-	products();
+	ordersFilter();
 	addProduct();
+	products();
 	coupons();
+}
+
+export function allAPIFlow() {
+	ordersAPI();
 }
