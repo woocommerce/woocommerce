@@ -119,6 +119,16 @@
 * Fix - Update - remove __experimentalDuotone from Featured Product and Featured Category blocks. ([7000](https://github.com/woocommerce/woocommerce-blocks/pull/7000))
 * Dev - Add steps to retrieve products variations in Store API documentation. ([7076](https://github.com/woocommerce/woocommerce-blocks/pull/7076))
 
+= 6.9.4 2022-09-26 =
+
+**WooCommerce**
+
+* Dev - Update WooCommerce Blocks to 8.3.3. [#34814](https://github.com/woocommerce/woocommerce/pull/34814)
+
+**WooCommerce Blocks 8.3.3**
+
+* Fix - Ensure that scripts are loaded using absolute URLs to prevent loading issues with subfolder installs. ([7211](https://github.com/woocommerce/woocommerce-blocks/pull/7211))
+
 = 6.9.3 2022-09-20 =
 
 **WooCommerce**
