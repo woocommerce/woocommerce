@@ -15,7 +15,7 @@ concurrency:
     cancel-in-progress: true
 
 jobs:
-    login-run:
+    test-core:
         name: Daily smoke test on trunk.
         runs-on: ubuntu-20.04
         outputs:
@@ -23,6 +23,7 @@ jobs:
         steps:
             - uses: actions/checkout@v3
               with:
+                  # mytodo revert to trunk
                   ref: e2e/rep-s3-daily
 
             - name: Get latest commit message
@@ -253,12 +254,12 @@ jobs:
             )
         runs-on: ubuntu-20.04
         # mytodo re-add other job needs
-        # needs: [login-run, build, test-plugins]
-        needs: [login-run]
+        # needs: [test-core, build, test-plugins]
+        needs: [test-core]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             RUN_ID: ${{ github.run_id }}
-            COMMIT_MESSAGE: ${{ needs.login-run.outputs.commit_message }}
+            COMMIT_MESSAGE: ${{ needs.test-core.outputs.commit_message }}
         steps:
             - name: Publish API test report
               run: |
@@ -269,3 +270,54 @@ jobs:
                     -f commit_message="$COMMIT_MESSAGE" \
                     -f s3_root=public \
                     --repo woocommerce/woocommerce-test-reports
+
+    test-summary:
+        name: Post test results
+        if: |
+            always() && 
+            ! github.event.pull_request.head.repo.fork &&
+            (
+              contains( needs.*.result, 'success' ) ||
+              contains( needs.*.result, 'failure' )
+            )
+        runs-on: ubuntu-20.04
+        # mytodo: re-add other needs
+        # needs: [test-core, test-plugins]
+        needs: [test-core]
+        steps:
+            - name: Create dirs
+              run: |
+                  mkdir -p repo
+                  mkdir -p artifacts/api 
+                  mkdir -p artifacts/e2e
+                  mkdir -p output
+
+            - name: Checkout code
+              uses: actions/checkout@v3
+              with:
+                  path: repo
+                  # mytodo revert to trunk
+                  ref: e2e/rep-s3-daily
+
+            - name: Download API test report artifact
+              uses: actions/download-artifact@v3
+              with:
+                  name: ${{ env.API_ARTIFACT }}
+                  path: artifacts/api
+
+            - name: Download E2E test report artifact
+              uses: actions/download-artifact@v3
+              with:
+                  name: ${{ env.E2E_ARTIFACT }}
+                  path: artifacts/e2e
+
+            - name: Post test summary
+              uses: actions/github-script@v6
+              env:
+                  API_SUMMARY_PATH: ${{ github.workspace }}/artifacts/api/allure-report/widgets/summary.json
+                  E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/widgets/summary.json
+              with:
+                  result-encoding: string
+                  script: |
+                      const script = require( './repo/.github/workflows/scripts/prepare-test-summary-daily.js' )
+                      return await script( { core } )
