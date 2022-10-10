@@ -1,4 +1,1 @@
-{
-	"title": "Product Search Block",
-	"pageContent": "<!-- wp:search {\"label\":\"Search\",\"placeholder\":\"Search products…\",\"buttonText\":\"Search\",\"query\":{\"post_type\":\"product\"}} /-->"
-}
+{"title": "Product Search Block","pageContent": "<!-- wp:search {\"label\":\"Search\",\"placeholder\":\"Search products…\",\"buttonText\":\"Search\",\"query\":{\"post_type\":\"product\"}} /-->"}
