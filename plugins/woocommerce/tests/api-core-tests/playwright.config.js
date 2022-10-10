@@ -9,8 +9,8 @@ const {
 require( 'dotenv' ).config();
 
 const baseURL = BASE_URL ?? 'http://localhost:8086';
-let userKey = USER_KEY ?? 'admin';
-let userSecret = USER_SECRET ?? 'password';
+const userKey = USER_KEY ?? 'admin';
+const userSecret = USER_SECRET ?? 'password';
 
 const base64auth = btoa( `${ userKey }:${ userSecret }` );
 
