@@ -5,25 +5,20 @@ on:
     #     - cron: '25 3 * * *'
     workflow_dispatch:
     pull_request:
+env:
+    API_ARTIFACT: api-test-report---daily---run-${{ env.GITHUB_RUN_NUMBER }}
+    E2E_ARTIFACT: e2e-test-report---daily---run-${{ env.GITHUB_RUN_NUMBER }}
 
 jobs:
     login-run:
         name: Daily smoke test on trunk.
         runs-on: ubuntu-20.04
-        env:
-            API_TEST_REPORT_DIR: ${{ github.workspace }}/api-test-report
         outputs:
             commit_message: ${{ steps.get_commit_message.outputs.commit_message }}
         steps:
             - uses: actions/checkout@v3
               with:
                   ref: e2e/rep-s3-daily
-
-            # - name: Setup WooCommerce Monorepo
-            #   uses: ./.github/actions/setup-woocommerce-monorepo
-
-            # - name: Install Jest
-            #   run: npm install -g jest
 
             - name: Get latest commit message
               id: get_commit_message
@@ -78,7 +73,7 @@ jobs:
                   steps.generate_e2e_report.conclusion == 'success'
               uses: actions/upload-artifact@v3
               with:
-                  name: e2e-test-report---daily
+                  name: ${{ env.E2E_ARTIFACT }}
                   path: |
                       plugins/woocommerce/e2e/allure-results
                       plugins/woocommerce/e2e/allure-report
@@ -112,38 +107,12 @@ jobs:
                   steps.generate_api_report.conclusion == 'success'
               uses: actions/upload-artifact@v3
               with:
-                  name: api-test-report---daily
+                  name: ${{ env.API_ARTIFACT }}
                   path: |
                       plugins/woocommerce/api-test-report/allure-results
                       plugins/woocommerce/api-test-report/allure-report
                   if-no-files-found: ignore
                   retention-days: 5
-
-            # - name: Run API smoke tests
-            #   if: always()
-            #   id: run_api_tests
-            #   working-directory: plugins/woocommerce
-            #   env:
-            #       BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
-            #       USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
-            #       USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
-            #       DEFAULT_TIMEOUT_OVERRIDE: 120000
-            #   run: pnpm exec wc-api-tests test api
-
-            # - name: Archive API test report
-            #   if: |
-            #       always() &&
-            #       (
-            #         steps.run_api_tests.conclusion != 'cancelled' ||
-            #         steps.run_api_tests.conclusion != 'skipped'
-            #       )
-            #   uses: actions/upload-artifact@v3
-            #   with:
-            #       name: api-test-report---daily
-            #       path: |
-            #           ${{ env.API_TEST_REPORT_DIR }}/allure-results
-            #           ${{ env.API_TEST_REPORT_DIR }}/allure-report
-            #       retention-days: 5
 
             # - name: Update performance test site with E2E test
             #   if: always()
@@ -268,21 +237,29 @@ jobs:
     #               pnpm exec wc-e2e test:e2e tests/e2e/specs/smoke-tests/upload-plugin.js
     #               pnpm exec wc-e2e test:e2e
 
-    # publish-test-reports:
-    #     name: Publish test reports
-    #     if: always()
-    #     runs-on: ubuntu-20.04
-    #     needs: [login-run, build, test-plugins]
-    #     env:
-    #         GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-    #         RUN_ID: ${{ github.run_id }}
-    #         API_ARTIFACT: api-test-report---daily
-    #         COMMIT_MESSAGE: ${{ needs.login-run.outputs.commit_message }}
-    #     steps:
-    #         - name: Publish API test report
-    #           run: |
-    #               gh workflow run publish-test-reports-daily.yml \
-    #                 -f run_id=$RUN_ID \
-    #                 -f api_artifact=$API_ARTIFACT \
-    #                 -f commit_message="$COMMIT_MESSAGE" \
-    #                 --repo woocommerce/woocommerce-test-reports
+    publish-test-reports:
+        name: Publish test reports
+        if: |
+            always() &&
+            ! github.event.pull_requestE2E_ARTIFACT.head.repo.fork &&
+            (
+              contains( needs.*.result, 'success' ) ||
+              contains( needs.*.result, 'failure' )
+            )
+        runs-on: ubuntu-20.04
+        # mytodo re-add other job needs
+        # needs: [login-run, build, test-plugins]
+        needs: [login-run]
+        env:
+            GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+            RUN_ID: ${{ github.run_id }}
+            COMMIT_MESSAGE: ${{ needs.login-run.outputs.commit_message }}
+        steps:
+            - name: Publish API test report
+              run: |
+                  gh workflow run publish-test-reports-daily.yml \
+                    -f run_id=$RUN_ID \
+                    -f api_artifact=$API_ARTIFACT \
+                    -f e2e_artifact=$E2E_ARTIFACT \
+                    -f commit_message="$COMMIT_MESSAGE" \
+                    --repo woocommerce/woocommerce-test-reports
