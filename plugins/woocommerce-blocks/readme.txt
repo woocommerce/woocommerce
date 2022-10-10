@@ -104,6 +104,7 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Ensure error messages containing HTML are shown correctly in the Cart and Checkout blocks. ([7231](https://github.com/woocommerce/woocommerce-blocks/pull/7231))
 - Prevent locked inner blocks from sometimes displaying twice. ([6676](https://github.com/woocommerce/woocommerce-blocks/pull/6676))
 - Improve visual consistency between block links. ([7357](https://github.com/woocommerce/woocommerce-blocks/pull/7357))
+- StoreApi `/checkout` endpoint now returns HTTP 402 instead of HTTP 400 when payment fails. ([7273](https://github.com/woocommerce/woocommerce-blocks/pull/7273))
 
 = 8.6.0 - 2022-09-26 =
 
