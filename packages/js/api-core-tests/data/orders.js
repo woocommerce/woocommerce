@@ -6,30 +6,28 @@ const {
 	deleteRequest,
 	getRequest,
 	putRequest,
-} = require( '../utils/request' );
-const productsTestSetup = require( './product-list' );
-const { ordersApi } = require( '../endpoints/orders' );
+} = require('../utils/request');
+const productsTestSetup = require('./product-list');
+const { ordersApi } = require('../endpoints/orders');
 
-const createCustomer = ( data ) => postRequest( 'customers', data );
-const deleteCustomer = ( id ) => deleteRequest( `customers/${ id }`, true );
+const createCustomer = (data) => postRequest('customers', data);
+const deleteCustomer = (id) => deleteRequest(`customers/${id}`, true);
 
 const createSampleData = async () => {
 	const testProductData = await productsTestSetup.createSampleData();
 
 	const orderedProducts = {
 		pocketHoodie: testProductData.simpleProducts.find(
-			( p ) => p.name === 'Hoodie with Pocket'
+			(p) => p.name === 'Hoodie with Pocket'
 		),
 		sunglasses: testProductData.simpleProducts.find(
-			( p ) => p.name === 'Sunglasses'
+			(p) => p.name === 'Sunglasses'
 		),
-		beanie: testProductData.simpleProducts.find(
-			( p ) => p.name === 'Beanie'
-		),
+		beanie: testProductData.simpleProducts.find((p) => p.name === 'Beanie'),
 		blueVneck: testProductData.variableProducts.vneckVariations.find(
-			( p ) => p.sku === 'woo-vneck-tee-blue'
+			(p) => p.sku === 'woo-vneck-tee-blue'
 		),
-		pennant: testProductData.externalProducts[ 0 ],
+		pennant: testProductData.externalProducts[0],
 	};
 
 	const johnAddress = {
@@ -82,7 +80,7 @@ const createSampleData = async () => {
 		email: 'ben.efactor@email.net',
 	};
 
-	const { body: john } = await createCustomer( {
+	const { body: john } = await createCustomer({
 		first_name: 'John',
 		last_name: 'Doe',
 		username: 'john.doe',
@@ -92,9 +90,9 @@ const createSampleData = async () => {
 			email: 'john.doe@example.com',
 		},
 		shipping: johnAddress,
-	} );
+	});
 
-	const { body: tina } = await createCustomer( {
+	const { body: tina } = await createCustomer({
 		first_name: 'Tina',
 		last_name: 'Clark',
 		username: 'tina.clark',
@@ -104,7 +102,7 @@ const createSampleData = async () => {
 			email: 'tina.clark@example.com',
 		},
 		shipping: tinaAddress,
-	} );
+	});
 
 	const orderBaseData = {
 		payment_method: 'cod',
@@ -118,8 +116,8 @@ const createSampleData = async () => {
 	const orders = [];
 
 	// Have "John" order all products.
-	Object.values( orderedProducts ).forEach( async ( product ) => {
-		const { body: order } = await ordersApi.create.order( {
+	Object.values(orderedProducts).forEach(async (product) => {
+		const { body: order } = await ordersApi.create.order({
 			...orderBaseData,
 			customer_id: john.id,
 			billing: {
@@ -133,14 +131,14 @@ const createSampleData = async () => {
 					quantity: 1,
 				},
 			],
-		} );
+		});
 
-		orders.push( order );
-	} );
+		orders.push(order);
+	});
 
 	// Have "Tina" order some sunglasses and make a child order.
 	// This somewhat resembles a subscription renewal, but we're just testing the `parent` field.
-	const { body: order2 } = await ordersApi.create.order( {
+	const { body: order2 } = await ordersApi.create.order({
 		...orderBaseData,
 		status: 'completed',
 		set_paid: true,
@@ -156,10 +154,10 @@ const createSampleData = async () => {
 				quantity: 1,
 			},
 		],
-	} );
-	orders.push( order2 );
+	});
+	orders.push(order2);
 
-	const { body: order3 } = await ordersApi.create.order( {
+	const { body: order3 } = await ordersApi.create.order({
 		...orderBaseData,
 		parent_id: order2.id,
 		customer_id: tina.id,
@@ -174,11 +172,11 @@ const createSampleData = async () => {
 				quantity: 1,
 			},
 		],
-	} );
-	orders.push( order3 );
+	});
+	orders.push(order3);
 
 	// Guest order.
-	const { body: guestOrder } = await ordersApi.create.order( {
+	const { body: guestOrder } = await ordersApi.create.order({
 		...orderBaseData,
 		billing: guestBillingAddress,
 		shipping: guestShippingAddress,
@@ -192,17 +190,17 @@ const createSampleData = async () => {
 				quantity: 1,
 			},
 		],
-	} );
+	});
 
 	// Create an order with all possible numerical fields (taxes, fees, refunds, etc).
 	const { body: taxSetting } = await getRequest(
 		'settings/general/woocommerce_calc_taxes'
 	);
-	await putRequest( 'settings/general/woocommerce_calc_taxes', {
+	await putRequest('settings/general/woocommerce_calc_taxes', {
 		value: 'yes',
-	} );
+	});
 
-	const { body: taxRate } = await postRequest( 'taxes', {
+	const { body: taxRate } = await postRequest('taxes', {
 		country: '*',
 		state: '*',
 		postcode: '*',
@@ -211,14 +209,14 @@ const createSampleData = async () => {
 		name: 'Tax',
 		rate: '5.5',
 		shipping: true,
-	} );
+	});
 
-	const { body: coupon } = await postRequest( 'coupons', {
+	const { body: coupon } = await postRequest('coupons', {
 		code: 'save5',
 		amount: '5',
-	} );
+	});
 
-	const { body: order4 } = await ordersApi.create.order( {
+	const { body: order4 } = await ordersApi.create.order({
 		...orderBaseData,
 		line_items: [
 			{
@@ -226,7 +224,7 @@ const createSampleData = async () => {
 				quantity: 1,
 			},
 		],
-		coupon_lines: [ { code: 'save5' } ],
+		coupon_lines: [{ code: 'save5' }],
 		shipping_lines: [
 			{
 				method_id: 'flat_rate',
@@ -239,25 +237,25 @@ const createSampleData = async () => {
 				name: 'Test Fee',
 			},
 		],
-	} );
+	});
 
-	await postRequest( `orders/${ order4.id }/refunds`, {
+	await postRequest(`orders/${order4.id}/refunds`, {
 		api_refund: false, // Prevent an actual refund request (fails with CoD),
 		line_items: [
 			{
-				id: order4.line_items[ 0 ].id,
+				id: order4.line_items[0].id,
 				quantity: 1,
-				refund_total: order4.line_items[ 0 ].total,
+				refund_total: order4.line_items[0].total,
 				refund_tax: [
 					{
-						id: order4.line_items[ 0 ].taxes[ 0 ].id,
-						refund_total: order4.line_items[ 0 ].total_tax,
+						id: order4.line_items[0].taxes[0].id,
+						refund_total: order4.line_items[0].total_tax,
 					},
 				],
 			},
 		],
-	} );
-	orders.push( order4 );
+	});
+	orders.push(order4);
 
 	return {
 		customers: { john, tina },
@@ -272,18 +270,18 @@ const createSampleData = async () => {
 	};
 };
 
-const deleteSampleData = async ( sampleData ) => {
-	await productsTestSetup.deleteSampleData( sampleData.testProductData );
+const deleteSampleData = async (sampleData) => {
+	await productsTestSetup.deleteSampleData(sampleData.testProductData);
 
 	sampleData.orders
-		.concat( [ sampleData.guestOrder ] )
-		.forEach( async ( { id } ) => {
-			await ordersApi.delete.order( id, true );
-		} );
+		.concat([sampleData.guestOrder])
+		.forEach(async ({ id }) => {
+			await ordersApi.delete.order(id, true);
+		});
 
-	Object.values( sampleData.customers ).forEach( async ( { id } ) => {
-		await deleteCustomer( id );
-	} );
+	Object.values(sampleData.customers).forEach(async ({ id }) => {
+		await deleteCustomer(id);
+	});
 };
 
 module.exports = {
