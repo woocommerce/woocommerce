@@ -1300,6 +1300,7 @@ importers:
       allure-commandline: ^2.17.2
       allure-playwright: ^2.0.0-beta.16
       autoprefixer: 9.8.6
+      axios: ^0.24.0
       babel-eslint: 10.1.0
       chai: 4.2.0
       chai-as-promised: 7.1.1
@@ -1344,6 +1345,7 @@ importers:
       allure-commandline: 2.18.1
       allure-playwright: 2.0.0-beta.19
       autoprefixer: 9.8.6
+      axios: 0.24.0
       babel-eslint: 10.1.0_eslint@6.8.0
       chai: 4.2.0
       chai-as-promised: 7.1.1_chai@4.2.0
@@ -16822,7 +16824,7 @@ packages:
   /axios/0.24.0:
     resolution: {integrity: sha512-Q6cWsys88HoPgAaFAVUb0WpPk0O8iTeisR9IMqy9G8AbO4NlpVknrnQS03zzF9PGAWgO3cgletO3VjV/P7VztA==}
     dependencies:
-      follow-redirects: 1.14.5
+      follow-redirects: 1.14.7
     transitivePeerDependencies:
       - debug
 
@@ -23014,15 +23016,6 @@ packages:
       inherits: 2.0.4
       readable-stream: 2.3.7
     dev: true
-
-  /follow-redirects/1.14.5:
-    resolution: {integrity: sha512-wtphSXy7d4/OR+MvIFbCVBDzZ5520qV8XfPklSN5QtxuMUJZ+b0Wnst1e1lCDocfzuCkHqj8k0FpZqO+UIaKNA==}
-    engines: {node: '>=4.0'}
-    peerDependencies:
-      debug: '*'
-    peerDependenciesMeta:
-      debug:
-        optional: true
 
   /follow-redirects/1.14.7:
     resolution: {integrity: sha512-+hbxoLbFMbRKDwohX8GkTataGqO6Jb7jGwpAlwgy2bIz25XtRm7KEzJM76R1WiNT5SwZkX4Y75SwBolkpmE7iQ==}
