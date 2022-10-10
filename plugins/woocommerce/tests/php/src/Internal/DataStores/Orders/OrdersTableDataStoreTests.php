@@ -1088,6 +1088,220 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Ensure field_query works as expected.
+	 */
+	public function test_cot_query_field_query(): void {
+		$orders_test_data = array(
+			array( 'Werner', 'Heisenberg', 'Unknown', 'werner_heisenberg_1', '15.0', '1901-12-05', '1976-02-01' ),
+			array( 'Max', 'Planck', 'Quanta', 'planck_1', '16.0', '1858-04-23', '1947-10-04' ),
+			array( 'Édouard', 'Roche', 'Tidal', 'roche_3', '9.99', '1820-10-17', '1883-04-27' ),
+		);
+		$order_ids       = array();
+
+		// Create some test orders.
+		foreach ( $orders_test_data as $i => $order_data ) {
+			$order = new \WC_Order();
+			$this->switch_data_store( $order, $this->sut );
+			$order->set_status( 'wc-completed' );
+			$order->set_shipping_city( 'The Universe' );
+			$order->set_billing_first_name( $order_data[0] );
+			$order->set_billing_last_name( $order_data[1] );
+			$order->set_billing_city( $order_data[2] );
+			$order->set_order_key( $order_data[3] );
+			$order->set_total( $order_data[4] );
+
+			$order->add_meta_data( 'customer_birthdate', $order_data[5] );
+			$order->add_meta_data( 'customer_last_seen', $order_data[6] );
+			$order->add_meta_data( 'customer_age', absint( ( strtotime( $order_data[6] ) - strtotime( $order_data[5] ) ) / YEAR_IN_SECONDS ) );
+
+			$order_ids[] = $order->save();
+		}
+
+		// Relatively simple field_query.
+		$field_query = array(
+			'relation' => 'OR',
+			array(
+				'field' => 'order_key',
+				'value' => 'werner_heisenberg_1',
+			),
+			array(
+				'field' => 'order_key',
+				'value' => 'planck_1',
+			)
+		);
+		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$this->assertEqualsCanonicalizing( array( $order_ids[0], $order_ids[1] ), $query->orders );
+
+		// A more complex field_query.
+		$field_query = array(
+			array(
+				'field'   => 'billing_first_name',
+				'value'   => array( 'Werner', 'Max', 'Édouard' ),
+				'compare' => 'IN',
+			),
+			array(
+				'relation' => 'OR',
+				array(
+					'field'   => 'billing_last_name',
+					'value'   => 'Heisen',
+					'compare' => 'LIKE',
+				),
+				array(
+					'field'   => 'billing_city',
+					'value'   => 'Tid',
+					'compare' => 'LIKE',
+				),
+			),
+		);
+		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$this->assertEqualsCanonicalizing( array( $order_ids[0], $order_ids[2] ), $query->orders );
+
+		// Find orders with order_key ending in a number (i.e. all).
+		$field_query = array(
+			array(
+				'field'   => 'order_key',
+				'value'   => '[0-9]$',
+				'compare' => 'RLIKE'
+			)
+		);
+		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$this->assertEqualsCanonicalizing( $order_ids, $query->orders );
+
+		// Find orders with order_key not ending in a number (i.e. none).
+		$field_query = array(
+			array(
+				'field'   => 'order_key',
+				'value'   => '[^0-9]$',
+				'compare' => 'NOT RLIKE'
+			)
+		);
+		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$this->assertCount( 0, $query->posts );
+
+		// Use full column name in a query.
+		$field_query = array(
+			array(
+				'field'   => $GLOBALS['wpdb']->prefix . 'wc_orders.total_amount',
+				'value'   => '10.0',
+				'compare' => '<=',
+				'type'    => 'NUMERIC',
+			)
+		);
+		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$this->assertEqualsCanonicalizing( array( $order_ids[2] ), $query->orders );
+
+		// Pass an invalid column name.
+		$field_query = array(
+			array(
+				'field'   => 'non_existing_field',
+				'value'   => 'any-value',
+			)
+		);
+		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$this->assertCount( 0, $query->posts );
+
+		// Pass an apparently incorrect value to an 'IN' compare.
+		$field_query = array(
+			array(
+				'field'   => 'wc_orders.total_amount',
+				'value'   => 5.5,
+				'compare' => 'IN',
+			)
+		);
+		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$this->assertCount( 0, $query->posts );
+
+		// Pass an invalid 'compare'.
+		$field_query = array(
+			array(
+				'field'   => 'wc_orders.total_amount',
+				'value'   => 10.0,
+				'compare' => 'EXOSTS',
+			)
+		);
+		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$this->assertCount( 0, $query->posts );
+
+		// Pass an incomplete array for BETWEEN (treated as =).
+		$field_query = array(
+			array(
+				'field'   => 'total',
+				'compare' => 'BETWEEN',
+				'value'   => 10.0,
+			)
+		);
+		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$this->assertCount( 0, $query->posts );
+
+		// Pass an incomplete array for NOT BETWEEN (treated as !=).
+		$field_query = array(
+			array(
+				'field'   => 'total',
+				'compare' => 'NOT BETWEEN',
+				'value'   => array( 1.0 ),
+			)
+		);
+		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$this->assertCount( 0, $query->posts );
+
+		// Test combinations of field_query with regular query args:
+		$args = array(
+			'id' => array( $order_ids[0], $order_ids[1] ),
+		);
+		$query = new OrdersTableQuery( $args );
+
+		// At this point 2 orders would be returned...
+		$this->assertEqualsCanonicalizing( array( $order_ids[0], $order_ids[1] ), $query->orders );
+
+		// ... and now just one
+		$args['field_query'] = array(
+			'relation' => 'AND',
+			array(
+				'field' => 'id',
+				'value' => $order_ids[1],
+			)
+		);
+		$query = new OrdersTableQuery( $args );
+		$this->assertEqualsCanonicalizing( array( $order_ids[1] ), $query->orders );
+
+		// ... and now none (no orders below < 5.0)
+		$args['field_query'][] = array(
+			'field'   => 'total',
+			'value'   => '5.0',
+			'compare' => '<',
+		);
+		$query = new OrdersTableQuery( $args );
+		$this->assertCount( 0, $query->orders );
+
+		// Now a more complex query with meta_query and date_query:
+		$args = array(
+			'shipping_address' => 'The Universe',
+			'field_query' => array(
+				array(
+					'field'   => 'total',
+					'value'   => array( 1.0, 11.0 ),
+					'compare' => 'NOT BETWEEN',
+				),
+			),
+		);
+
+		// this should fetch the orders from Heisenberg and Planck...
+		$query = new OrdersTableQuery( $args );
+		$this->assertEqualsCanonicalizing( array( $order_ids[0], $order_ids[1] ), $query->orders );
+
+		// ... but only Planck is more than 80 years old.
+		$args['meta_query'] = array(
+				array(
+					'key'     => 'customer_age',
+					'value'   => 80,
+					'compare' => '>='
+				)
+		);
+		$query = new OrdersTableQuery( $args );
+		$this->assertEqualsCanonicalizing( array( $order_ids[1] ), $query->orders );
+	}
+
+	/**
 	 * Test that props set by datastores can be set and get by using any of metadata, object props or from data store setters.
 	 * Ideally, this should be possible only from getters and setters for objects, but for backward compatibility, earlier ways are also supported.
 	 */
@@ -1267,4 +1481,5 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			$this->assertEquals( $value, $order->{"get_$prop_name"}(), "Prop $prop_name was not set correctly." );
 		}
 	}
+
 }
