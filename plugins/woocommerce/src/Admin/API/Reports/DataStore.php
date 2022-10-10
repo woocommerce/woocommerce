@@ -139,7 +139,7 @@ class DataStore extends SqlQuery {
 		}
 
 		// Utilize enveloped responses to include debugging info.
-		// See https://querymonitor.com/blog/2021/05/debugging-wordpress-rest-api-requests/
+		// See https://querymonitor.com/blog/2021/05/debugging-wordpress-rest-api-requests/ .
 		if ( isset( $_GET['_envelope'] ) ) {
 			$this->debug_cache = true;
 			add_filter( 'rest_envelope_response', array( $this, 'add_debug_cache_to_envelope' ), 999, 2 );
@@ -260,8 +260,8 @@ class DataStore extends SqlQuery {
 	/**
 	 * Add cache debugging information to an enveloped API response.
 	 *
-	 * @param array             $envelope
-	 * @param \WP_REST_Response $response
+	 * @param array             $envelope Envelope containing the API response.
+	 * @param \WP_REST_Response $response The original API response object.
 	 *
 	 * @return array
 	 */
