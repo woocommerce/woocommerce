@@ -55,7 +55,9 @@ test.describe( 'Cart > Redirect to cart from shop', () => {
 
 	test( 'can redirect user to cart from shop page', async ( { page } ) => {
 		await page.goto( '/shop/' );
-		await page.click( `a:below(:text("${ productName }"))` );
+		await page.click(
+			`a[data-product_id='${ productId }'][href*=add-to-cart]`
+		);
 		await page.waitForLoadState( 'networkidle' );
 
 		await expect( page.url() ).toContain( '/cart/' );

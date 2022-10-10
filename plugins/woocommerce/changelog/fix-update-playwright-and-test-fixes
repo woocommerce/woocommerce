@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update Playwright to 1.26.0 and fix a few flaky tests

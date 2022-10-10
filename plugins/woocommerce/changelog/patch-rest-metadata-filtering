@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: This fixes a bug introduced in https://github.com/woocommerce/woocommerce/pull/34478, which is also included in the 7.0 release
-
-
