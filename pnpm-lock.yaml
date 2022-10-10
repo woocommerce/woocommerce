@@ -1307,6 +1307,7 @@ importers:
       config: 3.3.3
       cross-env: 6.0.3
       deasync: 0.1.26
+      dotenv: ^10.0.0
       eslint: 6.8.0
       eslint-config-wpcalypso: 5.0.0
       eslint-plugin-jest: 23.20.0
@@ -1352,6 +1353,7 @@ importers:
       config: 3.3.3
       cross-env: 6.0.3
       deasync: 0.1.26
+      dotenv: 10.0.0
       eslint: 6.8.0
       eslint-config-wpcalypso: 5.0.0_3y2sdwkhlqz3xfbanqi75dzl7y
       eslint-plugin-jest: 23.20.0_gjkzpvg3kr4mru3ob5fvm4vice
@@ -20500,7 +20502,6 @@ packages:
   /dotenv/10.0.0:
     resolution: {integrity: sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==}
     engines: {node: '>=10'}
-    dev: false
 
   /dotenv/8.6.0:
     resolution: {integrity: sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g==}
