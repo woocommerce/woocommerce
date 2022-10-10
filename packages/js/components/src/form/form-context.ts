@@ -32,8 +32,24 @@ export type FormContext< Values extends Record< string, any > > = {
 	setValues: ( valuesToSet: Values ) => void;
 	handleSubmit: () => Promise< Values >;
 	getInputProps< Value extends Values[ keyof Values ] >(
-		name: string
-	): InputProps< Value >;
+		name: string,
+		inputProps?: {
+			className?: string;
+			onChange?: (
+				value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
+			) => void;
+			onBlur?: () => void;
+			[ key: string ]: unknown;
+		}
+	): {
+		value: Value;
+		checked: boolean;
+		selected?: boolean;
+		onChange: ( value: ChangeEvent< HTMLInputElement > | Value ) => void;
+		onBlur: () => void;
+		className: string | undefined;
+		help: string | null | undefined;
+	};
 	isValidForm: boolean;
 	resetForm: (
 		initialValues: Values,

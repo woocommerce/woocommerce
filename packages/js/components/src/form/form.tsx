@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
 import {
 	cloneElement,
 	useState,
@@ -268,21 +269,59 @@ function FormComponent< Values extends Record< string, any > >(
 	};
 
 	function getInputProps< Value = Values[ keyof Values ] >(
-		name: string
-	): InputProps< Value > {
+		name: string,
+		inputProps: {
+			className?: string;
+			onChange?: (
+				value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
+			) => void;
+			onBlur?: () => void;
+			[ key: string ]: unknown;
+		} = {}
+	): {
+		value: Value;
+		checked: boolean;
+		selected?: boolean;
+		onChange: (
+			value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
+		) => void;
+		onBlur: () => void;
+		className: string | undefined;
+		help: string | null | undefined;
+	} {
 		const inputValue = _get( values, name );
 		const isTouched = touched[ name ];
 		const inputError = _get( errors, name );
+		const {
+			className: classNameProp,
+			onBlur: onBlurProp,
+			onChange: onChangeProp,
+			...additionalProps
+		} = inputProps;
 
 		return {
 			value: inputValue,
 			checked: Boolean( inputValue ),
 			selected: inputValue,
-			onChange: ( value: ChangeEvent< HTMLInputElement > | Value ) =>
-				handleChange( name, value as Values[ keyof Values ] ),
-			onBlur: () => handleBlur( name ),
-			className: isTouched && inputError ? 'has-error' : undefined,
+			onChange: (
+				value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
+			) => {
+				handleChange( name, value );
+				if ( onChangeProp ) {
+					onChangeProp( value );
+				}
+			},
+			onBlur: () => {
+				handleBlur( name );
+				if ( onBlurProp ) {
+					onBlurProp();
+				}
+			},
+			className: classnames( classNameProp, {
+				'has-error': isTouched && inputError,
+			} ),
 			help: isTouched ? ( inputError as string ) : null,
+			...additionalProps,
 		};
 	}
 
