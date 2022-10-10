@@ -92,6 +92,7 @@ jobs:
                   BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
                   USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
                   USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
+                  DEFAULT_TIMEOUT_OVERRIDE: 120000
               run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js
 
             - name: Generate Playwright API Test report.
