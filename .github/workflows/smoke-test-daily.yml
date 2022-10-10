@@ -39,7 +39,7 @@ jobs:
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium                  
+              run: pnpm exec playwright install chromium
 
             - name: Run E2E smoke test.
               working-directory: plugins/woocommerce
@@ -88,20 +88,20 @@ jobs:
             #       DEFAULT_TIMEOUT_OVERRIDE: 120000
             #   run: pnpm exec wc-api-tests test api
 
-            # - name: Archive API test report
-            #   if: |
-            #       always() &&
-            #       (
-            #         steps.run_api_tests.conclusion != 'cancelled' ||
-            #         steps.run_api_tests.conclusion != 'skipped'
-            #       )
-            #   uses: actions/upload-artifact@v3
-            #   with:
-            #       name: api-test-report---daily
-            #       path: |
-            #           ${{ env.API_TEST_REPORT_DIR }}/allure-results
-            #           ${{ env.API_TEST_REPORT_DIR }}/allure-report
-            #       retention-days: 5
+            - name: Archive API test report
+              if: |
+                  always() &&
+                  (
+                    steps.run_api_tests.conclusion != 'cancelled' ||
+                    steps.run_api_tests.conclusion != 'skipped'
+                  )
+              uses: actions/upload-artifact@v3
+              with:
+                  name: api-test-report---daily
+                  path: |
+                      ${{ env.API_TEST_REPORT_DIR }}/allure-results
+                      ${{ env.API_TEST_REPORT_DIR }}/allure-report
+                  retention-days: 5
 
             # - name: Update performance test site with E2E test
             #   if: always()
@@ -130,41 +130,41 @@ jobs:
             #       curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
 
             # - name: Run k6 smoke tests
-              # if: always()
-              # env:
-              #     URL: ${{ secrets.SMOKE_TEST_PERF_URL }}
-              #     HOST: ${{ secrets.SMOKE_TEST_PERF_HOST }}
-              #     A_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
-              #     A_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
-              #     C_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
-              #     C_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
-              #     P_ID: 274
-              # run: |
-              #     ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
+            # if: always()
+            # env:
+            #     URL: ${{ secrets.SMOKE_TEST_PERF_URL }}
+            #     HOST: ${{ secrets.SMOKE_TEST_PERF_HOST }}
+            #     A_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
+            #     A_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
+            #     C_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
+            #     C_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
+            #     P_ID: 274
+            # run: |
+            #     ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
 
     # build:
-        # name: Build zip for PR
-        # runs-on: ubuntu-20.04
-        # steps:
-        #   - uses: actions/checkout@v3
+    # name: Build zip for PR
+    # runs-on: ubuntu-20.04
+    # steps:
+    #   - uses: actions/checkout@v3
 
-        #   - name: Setup WooCommerce Monorepo
-        #     uses: ./.github/actions/setup-woocommerce-monorepo
-        #     with:
-        #       build: false
+    #   - name: Setup WooCommerce Monorepo
+    #     uses: ./.github/actions/setup-woocommerce-monorepo
+    #     with:
+    #       build: false
 
-        #   - name: Build zip
-        #     working-directory: plugins/woocommerce
-        #     run: bash bin/build-zip.sh
+    #   - name: Build zip
+    #     working-directory: plugins/woocommerce
+    #     run: bash bin/build-zip.sh
 
-        #   - name: Upload the zip file as an artifact
-        #     uses: actions/upload-artifact@v3
-        #     env:
-        #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        #     with:
-        #       name: woocommerce
-        #       path: plugins/woocommerce/woocommerce.zip
-        #       retention-days: 7
+    #   - name: Upload the zip file as an artifact
+    #     uses: actions/upload-artifact@v3
+    #     env:
+    #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #     with:
+    #       name: woocommerce
+    #       path: plugins/woocommerce/woocommerce.zip
+    #       retention-days: 7
 
     # test-plugins:
     #     name: Smoke tests with ${{ matrix.plugin }} plugin installed
@@ -226,21 +226,22 @@ jobs:
     #               pnpm exec wc-e2e test:e2e tests/e2e/specs/smoke-tests/upload-plugin.js
     #               pnpm exec wc-e2e test:e2e
 
-    # publish-test-reports:
-    #     name: Publish test reports
-    #     if: always()
-    #     runs-on: ubuntu-20.04
-    #     needs: [login-run, build, test-plugins]
-    #     env:
-    #         GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-    #         RUN_ID: ${{ github.run_id }}
-    #         API_ARTIFACT: api-test-report---daily
-    #         COMMIT_MESSAGE: ${{ needs.login-run.outputs.commit_message }}
-    #     steps:
-    #         - name: Publish API test report
-    #           run: |
-    #               gh workflow run publish-test-reports-daily.yml \
-    #                 -f run_id=$RUN_ID \
-    #                 -f api_artifact=$API_ARTIFACT \
-    #                 -f commit_message="$COMMIT_MESSAGE" \
-    #                 --repo woocommerce/woocommerce-test-reports
+    publish-test-reports:
+        name: Publish test reports
+        if: always()
+        runs-on: ubuntu-20.04
+        # needs: [login-run, build, test-plugins]
+        needs: [login-run]
+        env:
+            GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+            RUN_ID: ${{ github.run_id }}
+            API_ARTIFACT: api-test-report---daily
+            COMMIT_MESSAGE: ${{ needs.login-run.outputs.commit_message }}
+        steps:
+            - name: Publish API test report
+              run: |
+                  gh workflow run publish-test-reports-daily.yml \
+                    -f run_id=$RUN_ID \
+                    -f api_artifact=$API_ARTIFACT \
+                    -f commit_message="$COMMIT_MESSAGE" \
+                    --repo woocommerce/woocommerce-test-reports
