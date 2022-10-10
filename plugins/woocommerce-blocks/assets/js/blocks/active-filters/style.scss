@@ -20,11 +20,10 @@
 	overflow: hidden;
 
 	.wc-block-active-filters__clear-all {
-		@include font-size(small);
+		@include link-button();
 		border: none;
 		margin-top: 15px;
 		padding: 0;
-		text-decoration: underline;
 		cursor: pointer;
 		float: right;
 
