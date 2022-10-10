@@ -32,5 +32,6 @@ module.exports = {
 	],
 	globals: {
 		page: true,
+		browser: true,
 	},
 };

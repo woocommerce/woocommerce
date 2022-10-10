@@ -283,10 +283,10 @@ const createSimpleProductWithCategory = async (
 /**
  * Create simple downloadable product
  *
- * @param  name          Product's name. Defaults to 'Simple Product' (see createSimpleProduct definition).
- * @param  downloadLimit Product's download limit. Defaults to '-1' (unlimited).
- * @param  downloadName  Product's download name. Defaults to 'Single'.
- * @param  price         Product's price. Defaults to '$9.99' (see createSimpleProduct definition).
+ * @param {string} name          Product's name. Defaults to 'Simple Product' (see createSimpleProduct definition).
+ * @param {number} downloadLimit Product's download limit. Defaults to '-1' (unlimited).
+ * @param {string} downloadName  Product's download name. Defaults to 'Single'.
+ * @param {string} price         Product's price. Defaults to '$9.99' (see createSimpleProduct definition).
  */
 const createSimpleDownloadableProduct = async (
 	name,
@@ -314,8 +314,8 @@ const createSimpleDownloadableProduct = async (
  * Create variable product.
  * Also, create variations for all attributes.
  *
- * @param  varProduct Defaults to the variable product object in `default.json`
- * @return the ID of the created variable product
+ * @param {Object} varProduct Defaults to the variable product object in `default.json`
+ * @return {number} the ID of the created variable product
  */
 const createVariableProduct = async ( varProduct = defaultVariableProduct ) => {
 	const { attributes } = varProduct;
@@ -325,6 +325,7 @@ const createVariableProduct = async ( varProduct = defaultVariableProduct ) => {
 	const aIdx = 0; // attributes[] index
 
 	// Create variation for all attributes
+	// eslint-disable-next-line no-shadow
 	const createVariation = ( aIdx ) => {
 		const { name, options } = attributes[ aIdx ];
 		const isLastAttribute = aIdx === attributes.length - 1;
@@ -385,8 +386,8 @@ const createVariableProduct = async ( varProduct = defaultVariableProduct ) => {
 /**
  * Create grouped product.
  *
- * @param  groupedProduct Defaults to the grouped product object in `default.json`
- * @return ID of the grouped product
+ * @param {Object} groupedProduct Defaults to the grouped product object in `default.json`
+ * @return {number} ID of the grouped product
  */
 const createGroupedProduct = async (
 	groupedProduct = defaultGroupedProduct
@@ -402,6 +403,7 @@ const createGroupedProduct = async (
 	}
 
 	// Using the api, create the grouped product
+	// eslint-disable-next-line prefer-const
 	groupedProductRequest = {
 		name,
 		groupedProducts: simpleProductIds,
@@ -475,7 +477,7 @@ const createSimpleOrder = async ( orderStatus = 'Pending payment' ) => {
 	const variablePostId = await page.$( '#post_ID' );
 	const variablePostIdValue = await (
 		await variablePostId.getProperty( 'value' )
-	 ).jsonValue();
+	).jsonValue();
 	return variablePostIdValue;
 };
 
@@ -483,7 +485,7 @@ const createSimpleOrder = async ( orderStatus = 'Pending payment' ) => {
  * Creates a batch of orders from the given `statuses`
  * using the "Batch Create Order" API.
  *
- * @param  statuses Array of order statuses
+ * @param {Array} statuses Array of order statuses
  */
 const batchCreateOrders = async ( statuses ) => {
 	const defaultOrder = config.get( 'orders.basicPaidOrder' );
@@ -507,8 +509,8 @@ const batchCreateOrders = async ( statuses ) => {
 /**
  * Adds a product to an order in the merchant.
  *
- * @param  orderId     ID of the order to add the product to.
- * @param  productName Name of the product being added to the order.
+ * @param {number} orderId     ID of the order to add the product to.
+ * @param {string} productName Name of the product being added to the order.
  */
 const addProductToOrder = async ( orderId, productName ) => {
 	await merchant.goToOrder( orderId );
@@ -541,8 +543,8 @@ const addProductToOrder = async ( orderId, productName ) => {
 /**
  * Creates a basic coupon with the provided coupon amount. Returns the coupon code.
  *
- * @param  couponAmount Amount to be applied. Defaults to 5.
- * @param  discountType Type of a coupon. Defaults to Fixed cart discount.
+ * @param {string} couponAmount Amount to be applied. Defaults to 5.
+ * @param {string} discountType Type of a coupon. Defaults to Fixed cart discount.
  */
 const createCoupon = async (
 	couponAmount = '5',
@@ -578,10 +580,10 @@ const createCoupon = async (
 /**
  * Adds a shipping zone along with a shipping method.
  *
- * @param  zoneName     Shipping zone name.
- * @param  zoneLocation Shiping zone location. Defaults to country:US. For states use: state:US:CA
- * @param  zipCode      Shipping zone zip code. Defaults to empty one space.
- * @param  zoneMethod   Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup)
+ * @param {string} zoneName     Shipping zone name.
+ * @param {string} zoneLocation Shiping zone location. Defaults to country:US. For states use: state:US:CA
+ * @param {string} zipCode      Shipping zone zip code. Defaults to empty one space.
+ * @param {string} zoneMethod   Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup)
  */
 const addShippingZoneAndMethod = async (
 	zoneName,
@@ -628,8 +630,8 @@ const addShippingZoneAndMethod = async (
 /**
  * Click the Update button on the order details page.
  *
- * @param  noticeText  The text that appears in the notice after updating the order.
- * @param  waitForSave Optionally wait for auto save.
+ * @param {string}  noticeText  The text that appears in the notice after updating the order.
+ * @param {boolean} waitForSave Optionally wait for auto save.
  */
 const clickUpdateOrder = async ( noticeText, waitForSave = false ) => {
 	if ( waitForSave ) {
