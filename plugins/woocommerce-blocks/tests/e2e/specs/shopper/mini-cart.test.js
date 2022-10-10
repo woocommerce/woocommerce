@@ -3,11 +3,7 @@
  */
 import { setDefaultOptions, getDefaultOptions } from 'expect-puppeteer';
 import { default as WooCommerceRestApi } from '@woocommerce/woocommerce-rest-api';
-import {
-	SHOP_PAGE,
-	SHOP_CART_PAGE,
-	SHOP_CHECKOUT_PAGE,
-} from '@woocommerce/e2e-utils';
+import { SHOP_PAGE, SHOP_CART_PAGE } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -15,7 +11,7 @@ import {
 import { shopper } from '../../../utils';
 import { merchant } from '../../../utils/merchant';
 import { getTextContent } from '../../page-utils';
-import { useTheme } from '../../utils';
+import { SHOP_CHECKOUT_BLOCK_PAGE, useTheme } from '../../utils';
 
 const block = {
 	name: 'Mini Cart',
@@ -552,7 +548,7 @@ describe( 'Shopper → Mini Cart', () => {
 				( el ) => el.href
 			);
 
-			expect( checkoutUrl ).toMatch( SHOP_CHECKOUT_PAGE );
+			expect( checkoutUrl ).toMatch( SHOP_CHECKOUT_BLOCK_PAGE );
 
 			await page.goto( checkoutUrl, { waitUntil: 'networkidle0' } );
 
@@ -566,6 +562,10 @@ describe( 'Shopper → Mini Cart', () => {
 		beforeAll( async () => {
 			await merchant.changeLanguage( 'nl_NL' );
 			await shopper.block.emptyCart();
+		} );
+
+		beforeEach( async () => {
+			await shopper.block.goToBlockPage( block.name );
 		} );
 
 		afterAll( async () => {

@@ -1,4 +1,1 @@
-{
-	"title": "Product Categories List Block",
-	"pageContent": "<!-- wp:woocommerce/product-categories /-->"
-}
+{"title":"Product Categories List Block","pageContent":"<!-- wp:woocommerce/product-categories /-->"}
