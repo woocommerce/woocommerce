@@ -1,9 +1,12 @@
 const { ADMINSTATE, UPDATE_WC, ADMIN_USER, ADMIN_PASSWORD } = process.env;
 const { test, expect } = require( '@playwright/test' );
 const path = require( 'path' );
-const { deletePlugin, downloadZip } = require( '../../utils/plugin-utils' );
+const {
+	deletePlugin,
+	downloadZip,
+	deleteZip,
+} = require( '../../utils/plugin-utils' );
 
-// Absolute path to WooCommerce ZIP
 const pluginZipPath = path.resolve( __dirname, '../../tmp/woocommerce.zip' );
 
 test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
@@ -15,7 +18,25 @@ test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
 
 	test.use( { storageState: ADMINSTATE } );
 
-	test.beforeAll( async ( { playwright, baseURL } ) => {
+	test.beforeAll( async () => {
+		// Download WooCommerce ZIP
+		await downloadZip( {
+			url:
+				'https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip',
+			downloadPath: pluginZipPath,
+		} );
+	} );
+
+	test.afterAll( async () => {
+		// Clean up downloaded zip
+		await deleteZip( pluginZipPath );
+	} );
+
+	test( 'can upload and activate the WooCommerce plugin', async ( {
+		page,
+		playwright,
+		baseURL,
+	} ) => {
 		// Delete WooCommerce if it's installed.
 		await deletePlugin( {
 			request: playwright.request,
@@ -25,20 +46,6 @@ test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
 			password: ADMIN_PASSWORD,
 		} );
 
-		// Download WooCommerce ZIP
-		await downloadZip( {
-			url:
-				'https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip',
-			downloadPath: pluginZipPath,
-		} );
-	} );
-
-	// mytodo: clean up downloaded nightly build zip
-	// test.afterAll( async () => {} );
-
-	test( 'can upload and activate the WooCommerce plugin', async ( {
-		page,
-	} ) => {
 		// Open the plugin install page
 		await page.goto( 'wp-admin/plugin-install.php', {
 			waitUntil: 'networkidle',
@@ -95,26 +102,20 @@ test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
 		await updateButton.click();
 		await page.waitForLoadState( 'networkidle' );
 
-		// For 1.5 minutes, repeatedly reload the page every 5 seconds until the "WooCommerce database update complete." message appears.
+		// Repeatedly reload the Plugins page up to 10 times until the message "WooCommerce database update complete." appears.
 		for (
 			let reloads = 0;
-			reloads < 18 && ! ( await updateCompleteMessage.isVisible() );
+			reloads < 10 && ! ( await updateCompleteMessage.isVisible() );
 			reloads++
 		) {
-			await page.reload( { waitUntil: 'networkidle' } );
-			await page.waitForTimeout( 5000 );
+			await page.goto( 'wp-admin/plugins.php', {
+				waitUntil: 'networkidle',
+			} );
+
+			// Wait 10s before the next reload.
+			await page.waitForTimeout( 10000 );
 		}
 
-		// Fail the test if the message didn't appear.
-		test.fail(
-			! ( await updateCompleteMessage.isVisible() ),
-			'The expected message "WooCommerce database update complete." did not appear after waiting for a long while.'
-		);
-
-		// If the message appeared, click on the "Thanks!" button.
-		await page.locator( 'a', { hasText: 'Thanks!' } ).click();
-
-		// Verify that the "WooCommerce database update complete" message is gone.
-		await expect( updateCompleteMessage ).not.toBeVisible();
+		await expect( updateCompleteMessage ).toBeVisible();
 	} );
 } );
