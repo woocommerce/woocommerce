@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: This disables feature introduced in https://github.com/woocommerce/woocommerce/pull/34467 because of bug described in https://github.com/woocommerce/woocommerce/issues/35016
+
