@@ -8,10 +8,12 @@ import { useRef, useEffect } from 'react';
  * @param value Value to track.
  * @returns unknown
  */
-export const usePrevious = ( value: unknown ) => {
-	const ref = useRef();
+export const usePrevious = <T>( value: T ): T | undefined => {
+	const ref = useRef<T>();
+
 	useEffect( () => {
 		ref.current = value;
 	}, [ value ] );
+
 	return ref.current;
 };
