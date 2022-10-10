@@ -33,7 +33,7 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                 install-filters: woocommerce
+                  install-filters: woocommerce
                   build: false
                   php-version: null
 
