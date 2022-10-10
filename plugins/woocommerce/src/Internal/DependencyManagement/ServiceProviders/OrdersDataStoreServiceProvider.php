@@ -6,6 +6,9 @@
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Caches\OrderCacheController;
+use Automattic\WooCommerce\Caching\TransientsEngine;
 use Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable\CLIRunner;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
@@ -36,6 +39,8 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 		CLIRunner::class,
 		OrdersTableDataStoreMeta::class,
 		OrdersTableRefundDataStore::class,
+		OrderCache::class,
+		OrderCacheController::class,
 	);
 
 	/**
@@ -54,6 +59,8 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 				OrdersTableRefundDataStore::class,
 				BatchProcessingController::class,
 				FeaturesController::class,
+				OrderCache::class,
+				OrderCacheController::class,
 			)
 		);
 

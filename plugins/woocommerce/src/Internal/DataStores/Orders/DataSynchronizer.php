@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -111,6 +113,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * Delete the custom orders database tables.
 	 */
 	public function delete_database_tables() {
+		$this->cache->flush();
 		$table_names = $this->data_store->get_all_table_names();
 
 		foreach ( $table_names as $table_name ) {
@@ -329,6 +332,8 @@ WHERE
 	 * @param array $batch Batch details.
 	 */
 	public function process_batch( array $batch ) : void {
+		$this->cache_controller->temporarily_disable_orders_cache_usage();
+
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			foreach ( $batch as $id ) {
 				$order = wc_get_order( $id );
@@ -344,6 +349,7 @@ WHERE
 		}
 		if ( 0 === $this->get_total_pending_count() ) {
 			$this->cleanup_synchronization_state();
+			$this->cache_controller->maybe_restore_orders_cache_usage();
 		}
 	}
 
