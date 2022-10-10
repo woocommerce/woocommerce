@@ -228,7 +228,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		/**
 		 * Add mobile messaging.
 		 *
-		 * @param $email WC_Email that called for mobile messaging.
+		 * @param WC_Email $email that called for mobile messaging.
 		 */
 		public function mobile_messaging( WC_Email $email ) {
 			if ( $email instanceof WC_Email_New_Order && null !== $this->object ) {
