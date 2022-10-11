@@ -466,12 +466,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Given an initialized order object, update the post/postmeta records.
 	 *
-	 * @param WC_Order $order Order object.
+	 * @param WC_Abstract_Order $order Order object.
 	 *
 	 * @return bool Whether the order was updated.
 	 */
 	public function update_order_from_object( $order ) {
-		global $wpdb;
 		if ( ! $order->get_id() ) {
 			return false;
 		}
@@ -521,7 +520,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Helper method to update order metadata from intialized order object.
 	 *
-	 * @param WC_Order $order Order object.
+	 * @param WC_Abstract_Order $order Order object.
 	 */
 	private function update_order_meta_from_object( $order ) {
 		if ( is_null( $order->get_meta() ) ) {

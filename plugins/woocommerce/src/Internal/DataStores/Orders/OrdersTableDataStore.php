@@ -517,7 +517,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	/**
 	 * Backfills order details in to WP_Post DB. Uses WC_Order_Data_store_CPT.
 	 *
-	 * @param \WC_Order $order Order object to backfill.
+	 * @param \WC_Abstract_Order $order Order object to backfill.
 	 */
 	public function backfill_post_record( $order ) {
 		$cpt_data_store = $this->get_post_data_store_for_backfill();
@@ -908,7 +908,7 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	 */
 	public function read_multiple( &$orders ) {
 		$order_ids = array_keys( $orders );
-		$data      = $this->get_order_data_for_ids( $order_ids, true );
+		$data      = $this->get_order_data_for_ids( $order_ids );
 
 		if ( count( $data ) !== count( $order_ids ) ) {
 			throw new \Exception( __( 'Invalid order IDs in call to read_multiple()', 'woocommerce' ) );
@@ -921,7 +921,6 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 
 		$data_sync_enabled       = $data_synchronizer->data_sync_is_enabled() && 0 === $data_synchronizer->get_current_orders_pending_sync_count_cached();
 		$load_posts_for          = array_diff( $order_ids, self::$reading_order_ids );
-		self::$reading_order_ids = array_merge( self::$reading_order_ids, $load_posts_for );
 		$post_orders             = $data_sync_enabled ? $this->get_post_orders_for_ids( $load_posts_for ) : array();
 
 		foreach ( $data as $order_data ) {
@@ -930,10 +929,24 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 
 			$this->init_order_record( $order, $order_id, $order_data );
 
-			if ( $data_sync_enabled && ! in_array( $order->get_status(), array( 'draft', 'auto-draft' ) ) && isset( $post_orders[ $order_id ] ) ) {
+			if ( $data_sync_enabled && $this->should_sync_order( $order ) && isset( $post_orders[ $order_id ] ) ) {
+				self::$reading_order_ids[] = $order_id;
 				$this->maybe_sync_order( $order, $post_orders[ $order->get_id() ] );
 			}
 		}
+	}
+
+	/**
+	 * Helper method to check whether to sync the order.
+	 *
+	 * @param \WC_Abstract_Order $order Order object.
+	 *
+	 * @return bool Whether the order should be synced.
+	 */
+	private function should_sync_order( \WC_Abstract_Order $order ) : bool {
+		$draft_order = in_array( $order->get_status(), array( 'draft', 'auto-draft' ) );
+		$already_synced = in_array( $order->get_id(), self::$reading_order_ids );
+		return ! $draft_order && ! $already_synced;
 	}
 
 	/**
@@ -1155,7 +1168,7 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 		foreach ( $post_order_base_data as $key => $value ) {
 			$this->set_order_prop( $order, $key, $value );
 		}
-		$this->persist_save( $order, true );
+		$this->persist_updates( $order, false );
 	}
 
 	/**
@@ -1466,11 +1479,6 @@ FROM $order_meta_table
 				// translators: %s is a table name.
 				throw new \Exception( sprintf( __( 'Could not persist order to database table "%s".', 'woocommerce' ), $update['table'] ) );
 			}
-		}
-
-		// Backfill post record.
-		if ( $data_sync->data_sync_is_enabled() ) {
-			$this->backfill_post_record( $order );
 		}
 	}
 
@@ -1826,7 +1834,7 @@ FROM $order_meta_table
 	 *
 	 * @throws \Exception When unable to save data.
 	 */
-	protected function persist_save( &$order, bool $force_all_fields = false ) {
+	protected function persist_save( &$order, bool $force_all_fields = false, $backfill = true ) {
 		$order->set_version( Constants::get_constant( 'WC_VERSION' ) );
 		$order->set_currency( $order->get_currency() ? $order->get_currency() : get_woocommerce_currency() );
 
@@ -1841,6 +1849,9 @@ FROM $order_meta_table
 		$order->save_meta_data();
 		$order->apply_changes();
 
+		if ( $backfill ) {
+			$this->maybe_backfill_post_record( $order );
+		}
 		$this->clear_caches( $order );
 	}
 
@@ -1908,7 +1919,7 @@ FROM $order_meta_table
 	 *
 	 * @throws \Exception When unable to persist order.
 	 */
-	protected function persist_updates( &$order ) {
+	protected function persist_updates( &$order, $backfill = true ) {
 		// Fetch changes.
 		$changes = $order->get_changes();
 
@@ -1916,10 +1927,28 @@ FROM $order_meta_table
 			$order->set_date_modified( time() );
 		}
 
+		if ( $backfill ) {
+			$this->maybe_backfill_post_record( $order );
+		}
+
 		$this->persist_order_to_db( $order );
 		$order->save_meta_data();
 
 		return $changes;
+	}
+
+	/**
+	 * Helper function to decide whether to backfill post record.
+	 *
+	 * @param \WC_Abstract_Order $order Order object.
+	 *
+	 * @return void
+	 */
+	private function maybe_backfill_post_record( $order ) {
+		$data_sync = wc_get_container()->get( DataSynchronizer::class );
+		if ( $data_sync->data_sync_is_enabled() ) {
+			$this->backfill_post_record( $order );
+		}
 	}
 
 	/**
