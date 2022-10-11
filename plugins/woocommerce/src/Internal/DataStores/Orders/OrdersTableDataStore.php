@@ -20,6 +20,13 @@ defined( 'ABSPATH' ) || exit;
 class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements \WC_Object_Data_Store_Interface, \WC_Order_Data_Store_Interface {
 
 	/**
+	 * Order IDs for which we are checking read on sync in the current request.
+	 *
+	 * @var array.
+	 */
+	private static $reading_order_ids = array();
+
+	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
 	 *
 	 * @since 7.0.0
@@ -911,8 +918,11 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 		if ( ! $data_synchronizer instanceof DataSynchronizer ) {
 			return;
 		}
-		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled() && 0 === $data_synchronizer->get_current_orders_pending_sync_count_cached();
-		$post_orders       = $data_sync_enabled ? $this->get_post_orders_for_ids( $order_ids ) : array();
+
+		$data_sync_enabled       = $data_synchronizer->data_sync_is_enabled() && 0 === $data_synchronizer->get_current_orders_pending_sync_count_cached();
+		$load_posts_for          = array_diff( $order_ids, self::$reading_order_ids );
+		self::$reading_order_ids = array_merge( self::$reading_order_ids, $load_posts_for );
+		$post_orders             = $data_sync_enabled ? $this->get_post_orders_for_ids( $load_posts_for ) : array();
 
 		foreach ( $data as $order_data ) {
 			$order_id = absint( $order_data->id );
@@ -920,7 +930,7 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 
 			$this->init_order_record( $order, $order_id, $order_data );
 
-			if ( $data_sync_enabled && ! in_array( $order->get_status(), array( 'draft', 'auto-draft' ) ) ) {
+			if ( $data_sync_enabled && ! in_array( $order->get_status(), array( 'draft', 'auto-draft' ) ) && isset( $post_orders[ $order_id ] ) ) {
 				$this->maybe_sync_order( $order, $post_orders[ $order->get_id() ] );
 			}
 		}
