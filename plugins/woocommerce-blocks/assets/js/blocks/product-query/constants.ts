@@ -18,7 +18,7 @@ export const DEFAULT_ALLOWED_CONTROLS = [
 ];
 
 export const QUERY_DEFAULT_ATTRIBUTES: QueryBlockAttributes = {
-	allowControls: DEFAULT_ALLOWED_CONTROLS,
+	allowedControls: DEFAULT_ALLOWED_CONTROLS,
 	displayLayout: {
 		type: 'flex',
 		columns: 3,
