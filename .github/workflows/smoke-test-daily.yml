@@ -19,6 +19,7 @@ jobs:
     e2e-test:
         name: E2E test on trunk
         runs-on: ubuntu-20.04
+        # mytodo remove commit_message
         outputs:
             commit_message: ${{ steps.get_commit_message.outputs.commit_message }}
         steps:
@@ -266,7 +267,7 @@ jobs:
               contains( needs.*.result, 'failure' )
             )
         runs-on: ubuntu-20.04
-        needs: [e2e-test, api-test]
+        needs: [test-plugins]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             RUN_ID: ${{ github.run_id }}
