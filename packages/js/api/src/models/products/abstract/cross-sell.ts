@@ -12,4 +12,4 @@ abstract class AbstractProductCrossSells extends Model {
 	public readonly crossSellIds: Array< number > = [];
 }
 
-export interface IProductCrossSells extends AbstractProductCrossSells {}
+export type IProductCrossSells = AbstractProductCrossSells;

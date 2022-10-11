@@ -97,7 +97,7 @@ export class ModelTransformer< T extends Model > {
 	 * Takes the input data and runs all of the transformations on it before returning the created model.
 	 *
 	 * @param {Function.<T>} modelClass The model class we're trying to create.
-	 * @param {*} data The data we're transforming.
+	 * @param {*}            data       The data we're transforming.
 	 * @return {T} The transformed model.
 	 * @template T
 	 */

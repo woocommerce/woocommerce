@@ -126,7 +126,7 @@ export class Coupon extends Model {
 	 *
 	 * @type {number}
 	 */
-	public readonly usageCount: Number = 0;
+	public readonly usageCount: number = 0;
 
 	/**
 	 * Flags if the coupon can only be used on its own and not combined with other coupons.
@@ -154,21 +154,21 @@ export class Coupon extends Model {
 	 *
 	 * @type {number}
 	 */
-	public readonly usageLimit: Number = -1;
+	public readonly usageLimit: number = -1;
 
 	/**
 	 * How many times the coupon can be used per customer.
 	 *
 	 * @type {number}
 	 */
-	public readonly usageLimitPerUser: Number = -1;
+	public readonly usageLimitPerUser: number = -1;
 
 	/**
 	 * Max number of items in the cart the coupon can be applied to.
 	 *
 	 * @type {number}
 	 */
-	public readonly limitUsageToXItems: Number = -1;
+	public readonly limitUsageToXItems: number = -1;
 
 	/**
 	 * Flags if the free shipping option requires a coupon. This coupon will enable free shipping.

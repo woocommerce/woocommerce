@@ -38,7 +38,9 @@
 		"clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
 		"compile": "tsc -b",
 		"prepack": "pnpm run build",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name"
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"lint": "eslint src",
+		"lint:fix": "eslint src --fix"
 	},
 	"dependencies": {
 		"axios": "^0.24.0",

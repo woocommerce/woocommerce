@@ -55,7 +55,7 @@ export class HTTPClientFactory {
 	/**
 	 * Configures the client to utilize OAuth.
 	 *
-	 * @param {string} key The OAuth consumer key to use.
+	 * @param {string} key    The OAuth consumer key to use.
 	 * @param {string} secret The OAuth consumer secret to use.
 	 * @return {HTTPClientFactory} This factory.
 	 */

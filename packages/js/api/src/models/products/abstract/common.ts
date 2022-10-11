@@ -153,4 +153,4 @@ export abstract class AbstractProduct extends AbstractProductData {
 	};
 }
 
-export interface IProductCommon extends AbstractProduct {}
+export type IProductCommon = AbstractProduct;

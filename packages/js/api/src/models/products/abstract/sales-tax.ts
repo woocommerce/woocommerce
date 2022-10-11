@@ -20,4 +20,4 @@ abstract class AbstractProductSalesTax extends Model {
 	public readonly taxClass: string = '';
 }
 
-export interface IProductSalesTax extends AbstractProductSalesTax {}
+export type IProductSalesTax = AbstractProductSalesTax;

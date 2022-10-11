@@ -51,7 +51,8 @@ export type ExternalProductRepositoryParams = ModelRepositoryParams<
  * @typedef ListsExternalProducts
  * @alias ListsModels.<ExternalProduct>
  */
-export type ListsExternalProducts = ListsModels< ExternalProductRepositoryParams >;
+export type ListsExternalProducts =
+	ListsModels< ExternalProductRepositoryParams >;
 
 /**
  * An interface for external simple products using the repository.
@@ -59,7 +60,8 @@ export type ListsExternalProducts = ListsModels< ExternalProductRepositoryParams
  * @typedef CreatesExternalProducts
  * @alias CreatesModels.<ExternalProduct>
  */
-export type CreatesExternalProducts = CreatesModels< ExternalProductRepositoryParams >;
+export type CreatesExternalProducts =
+	CreatesModels< ExternalProductRepositoryParams >;
 
 /**
  * An interface for reading external products using the repository.
@@ -67,7 +69,8 @@ export type CreatesExternalProducts = CreatesModels< ExternalProductRepositoryPa
  * @typedef ReadsExternalProducts
  * @alias ReadsModels.<ExternalProduct>
  */
-export type ReadsExternalProducts = ReadsModels< ExternalProductRepositoryParams >;
+export type ReadsExternalProducts =
+	ReadsModels< ExternalProductRepositoryParams >;
 
 /**
  * An interface for updating external products using the repository.
@@ -75,7 +78,8 @@ export type ReadsExternalProducts = ReadsModels< ExternalProductRepositoryParams
  * @typedef UpdatesExternalProducts
  * @alias UpdatesModels.<ExternalProduct>
  */
-export type UpdatesExternalProducts = UpdatesModels< ExternalProductRepositoryParams >;
+export type UpdatesExternalProducts =
+	UpdatesModels< ExternalProductRepositoryParams >;
 
 /**
  * An interface for deleting external products using the repository.
@@ -83,7 +87,8 @@ export type UpdatesExternalProducts = UpdatesModels< ExternalProductRepositoryPa
  * @typedef DeletesExternalProducts
  * @alias DeletesModels.<ExternalProduct>
  */
-export type DeletesExternalProducts = DeletesModels< ExternalProductRepositoryParams >;
+export type DeletesExternalProducts =
+	DeletesModels< ExternalProductRepositoryParams >;
 
 /**
  * The base for the external product object.
@@ -95,7 +100,8 @@ export class ExternalProduct
 		IProductExternal,
 		IProductPrice,
 		IProductSalesTax,
-		IProductUpSells {
+		IProductUpSells
+{
 	/**
 	 * @see ./abstracts/external.ts
 	 */
