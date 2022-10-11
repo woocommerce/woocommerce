@@ -41,10 +41,15 @@ export const AttributeTermInputField: React.FC<
 					search: value || '',
 					attribute_id: attributeId,
 				} )
-				.then( ( attributeTerms ) => {
-					setFetchedItems( attributeTerms );
-					setIsFetching( false );
-				} );
+				.then(
+					( attributeTerms ) => {
+						setFetchedItems( attributeTerms );
+						setIsFetching( false );
+					},
+					() => {
+						setIsFetching( false );
+					}
+				);
 		},
 		[ attributeId ]
 	);

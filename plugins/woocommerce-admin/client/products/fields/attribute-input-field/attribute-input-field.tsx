@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
+import { Spinner } from '@wordpress/components';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
 	QueryProductAttribute,
@@ -10,7 +11,6 @@ import {
 	WCDataSelector,
 } from '@woocommerce/data';
 import {
-	Spinner,
 	__experimentalSelectControl as SelectControl,
 	__experimentalSelectControlMenu as Menu,
 	__experimentalSelectControlMenuItem as MenuItem,

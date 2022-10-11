@@ -9,18 +9,6 @@ import { ProductAttribute, ProductAttributeTerm } from '@woocommerce/data';
  */
 import { AddAttributeModal } from '../add-attribute-modal';
 
-jest.mock( '@wordpress/components', () => {
-	const actual = jest.requireActual( '@wordpress/components' );
-	return {
-		__esModule: true,
-		Button: actual.Button,
-		Notice: () => {
-			return <div>notice</div>;
-		},
-		Modal: ( { children }: { children: JSX.Element } ) => children,
-	};
-} );
-
 let attributeOnChange: ( val: ProductAttribute ) => void;
 jest.mock( '../../attribute-input-field', () => ( {
 	AttributeInputField: ( {
@@ -130,7 +118,7 @@ const attributeTermList: ProductAttributeTerm[] = [
 	},
 ];
 
-describe( 'AttributeField', () => {
+describe( 'AddAttributeModal', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 	} );
@@ -166,23 +154,19 @@ describe( 'AttributeField', () => {
 	} );
 
 	it( 'should allow us to add multiple new rows with the attribute fields', () => {
-		const { queryAllByText, container } = render(
+		const { queryAllByText, queryByRole } = render(
 			<AddAttributeModal
 				onCancel={ () => {} }
 				onAdd={ () => {} }
 				selectedAttributeIds={ [] }
 			/>
 		);
-		const addAnotherButton = container.getElementsByClassName(
-			'woocommerce-add-attribute-modal__add-attribute'
-		);
-		expect( addAnotherButton[ 0 ] ).toBeInTheDocument();
-		( addAnotherButton[ 0 ] as HTMLElement ).click();
+		queryByRole( 'button', { name: 'Add another attribute' } )?.click();
 		expect( queryAllByText( 'attribute_input_field' ).length ).toEqual( 2 );
 		expect(
 			queryAllByText( 'attribute_term_input_field: disabled:true' ).length
 		).toEqual( 2 );
-		( addAnotherButton[ 0 ] as HTMLElement ).click();
+		queryByRole( 'button', { name: 'Add another attribute' } )?.click();
 		expect( queryAllByText( 'attribute_input_field' ).length ).toEqual( 3 );
 		expect(
 			queryAllByText( 'attribute_term_input_field: disabled:true' ).length
@@ -190,19 +174,16 @@ describe( 'AttributeField', () => {
 	} );
 
 	it( 'should allow us to remove the added fields', () => {
-		const { queryAllByText, container, queryAllByLabelText } = render(
+		const { queryAllByText, queryByRole, queryAllByLabelText } = render(
 			<AddAttributeModal
 				onCancel={ () => {} }
 				onAdd={ () => {} }
 				selectedAttributeIds={ [] }
 			/>
 		);
-		const addAnotherButton = container.getElementsByClassName(
-			'woocommerce-add-attribute-modal__add-attribute'
-		);
-		expect( addAnotherButton[ 0 ] ).toBeInTheDocument();
-		( addAnotherButton[ 0 ] as HTMLElement ).click();
-		( addAnotherButton[ 0 ] as HTMLElement ).click();
+
+		queryByRole( 'button', { name: 'Add another attribute' } )?.click();
+		queryByRole( 'button', { name: 'Add another attribute' } )?.click();
 		expect( queryAllByText( 'attribute_input_field' ).length ).toEqual( 3 );
 		expect(
 			queryAllByText( 'attribute_term_input_field: disabled:true' ).length
@@ -239,7 +220,7 @@ describe( 'AttributeField', () => {
 	describe( 'onAdd', () => {
 		it( 'should not return empty attribute rows', () => {
 			const onAddMock = jest.fn();
-			const { queryAllByText, queryByLabelText } = render(
+			const { queryAllByText, queryByLabelText, queryByRole } = render(
 				<AddAttributeModal
 					onCancel={ () => {} }
 					onAdd={ onAddMock }
@@ -259,13 +240,13 @@ describe( 'AttributeField', () => {
 				queryAllByText( 'attribute_term_input_field: disabled:true' )
 					.length
 			).toEqual( 3 );
-			queryByLabelText( 'Add attributes' )?.click();
+			queryByRole( 'button', { name: 'Add attributes' } )?.click();
 			expect( onAddMock ).toHaveBeenCalledWith( [] );
 		} );
 
 		it( 'should not add attribute if no terms were selected', () => {
 			const onAddMock = jest.fn();
-			const { queryByLabelText } = render(
+			const { queryByRole } = render(
 				<AddAttributeModal
 					onCancel={ () => {} }
 					onAdd={ onAddMock }
@@ -274,13 +255,13 @@ describe( 'AttributeField', () => {
 			);
 
 			attributeOnChange( attributeList[ 0 ] );
-			queryByLabelText( 'Add attributes' )?.click();
+			queryByRole( 'button', { name: 'Add attributes' } )?.click();
 			expect( onAddMock ).toHaveBeenCalledWith( [] );
 		} );
 
 		it( 'should add attribute with terms as string of options', () => {
 			const onAddMock = jest.fn();
-			const { queryByLabelText } = render(
+			const { queryByRole } = render(
 				<AddAttributeModal
 					onCancel={ () => {} }
 					onAdd={ onAddMock }
@@ -293,7 +274,7 @@ describe( 'AttributeField', () => {
 				attributeTermList[ 0 ],
 				attributeTermList[ 1 ],
 			] );
-			queryByLabelText( 'Add attributes' )?.click();
+			queryByRole( 'button', { name: 'Add attributes' } )?.click();
 			expect( onAddMock ).toHaveBeenCalledWith( [
 				{
 					...attributeList[ 0 ],
