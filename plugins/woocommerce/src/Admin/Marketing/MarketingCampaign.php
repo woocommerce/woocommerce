@@ -39,19 +39,19 @@ class MarketingCampaign implements JsonSerializable {
 	/**
 	 * The cost of the marketing campaign with the currency.
 	 *
-	 * @var string
+	 * @var Price
 	 */
 	protected $cost;
 
 	/**
 	 * MarketingCampaign constructor.
 	 *
-	 * @param string      $id         The marketing campaign's unique identifier.
-	 * @param string      $title      The title of the marketing campaign.
-	 * @param string      $manage_url The URL to the channel's campaign management page.
-	 * @param string|null $cost       The cost of the marketing campaign with the currency.
+	 * @param string     $id         The marketing campaign's unique identifier.
+	 * @param string     $title      The title of the marketing campaign.
+	 * @param string     $manage_url The URL to the channel's campaign management page.
+	 * @param Price|null $cost       The cost of the marketing campaign with the currency.
 	 */
-	public function __construct( string $id, string $title, string $manage_url, ?string $cost = null ) {
+	public function __construct( string $id, string $title, string $manage_url, Price $cost = null ) {
 		$this->id         = $id;
 		$this->title      = $title;
 		$this->manage_url = $manage_url;
@@ -88,16 +88,16 @@ class MarketingCampaign implements JsonSerializable {
 	/**
 	 * Returns the cost of the marketing campaign with the currency.
 	 *
-	 * @return string|null
+	 * @return Price|null
 	 */
-	public function get_cost(): ?string {
+	public function get_cost(): ?Price {
 		return $this->cost;
 	}
 
 	/**
 	 * Serialize the marketing campaign data.
 	 *
-	 * @return mixed
+	 * @return array
 	 */
 	public function jsonSerialize() {
 		return [
