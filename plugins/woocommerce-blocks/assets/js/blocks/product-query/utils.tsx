@@ -73,7 +73,7 @@ export function useAllowedControls(
 			select( WP_BLOCKS_STORE ).getActiveBlockVariation(
 				'core/query',
 				attributes
-			)?.allowControls,
+			)?.allowedControls,
 
 		[ attributes ]
 	);

@@ -40,7 +40,7 @@ if ( isExperimentalBuild() ) {
 		// https://github.com/WordPress/gutenberg/pull/43632
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
-		allowControls: DEFAULT_ALLOWED_CONTROLS,
+		allowedControls: DEFAULT_ALLOWED_CONTROLS,
 		innerBlocks: INNER_BLOCKS_TEMPLATE,
 		scope: [ 'block', 'inserter' ],
 	} );

@@ -50,7 +50,7 @@ export interface ProductQueryAttributes {
 }
 
 export interface QueryBlockAttributes {
-	allowControls?: string[];
+	allowedControls?: string[];
 	displayLayout?: {
 		type: 'flex' | 'list';
 		columns?: number;
