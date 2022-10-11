@@ -39,7 +39,7 @@ export const Menu = ( {
 	/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
 	return (
 		<div
-			ref={ selectControlMenuRef }
+			{ ...getMenuProps( { ref: selectControlMenuRef } ) }
 			className={ classnames(
 				'woocommerce-experimental-select-control__menu',
 				className,
@@ -59,7 +59,6 @@ export const Menu = ( {
 					animate={ false }
 				>
 					<ul
-						{ ...getMenuProps() }
 						className="woocommerce-experimental-select-control__popover-menu-container"
 						style={ {
 							width: boundingRect?.width,
