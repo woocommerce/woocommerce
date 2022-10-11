@@ -15,7 +15,8 @@ wp-env run tests-cli "wp user create customer customer@woocommercecoree2etestsui
 	--role=subscriber \
 	--first_name='Jane' \
 	--last_name='Smith' \
-	--path=/var/www/html
+	--path=/var/www/html \
+	--user_registered='2022-01-01 12:23:45'
 "
 
 echo -e 'Update Blog Name \n'

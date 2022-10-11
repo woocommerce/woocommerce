@@ -5,8 +5,8 @@ const { get } = require( 'lodash' );
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
-const BundleAnalyzerPlugin = require( 'webpack-bundle-analyzer' )
-	.BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin =
+	require( 'webpack-bundle-analyzer' ).BundleAnalyzerPlugin;
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 
@@ -104,8 +104,8 @@ const webpackConfig = {
 					amd: false,
 				},
 				exclude: [
-					// Exclude node_modules/.pnpm but not node_modules/.pnpm/debug*
-					/node_modules(\/|\\)\.pnpm(\/|\\)(?!(debug))/,
+					// Exclude node_modules/.pnpm
+					/node_modules(\/|\\)\.pnpm(\/|\\)/,
 				],
 				use: {
 					loader: 'babel-loader',

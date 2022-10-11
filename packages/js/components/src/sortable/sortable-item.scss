@@ -1,9 +1,12 @@
 $place-holder-size: 3px;
 
+.woocommerce-sortable li {
+	list-style: none;
+}
+
 .woocommerce-sortable__item {
     margin: 0;
     position: relative;
-    list-style: none;
 
     &.is-dragging {
         opacity: 0;

@@ -3,6 +3,10 @@
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "^7.13.3"
+	},
 	"scripts": {
 		"postinstall": "composer install",
 		"changelog": "composer exec -- changelogger"

@@ -94,7 +94,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 				$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
 				$this->placeholders['{order_number}'] = $this->object->get_order_number();
 
-				$email_already_sent = $order->get_meta( '_new_order_email_sent' );
+				$email_already_sent = $order->get_new_order_email_sent();
 			}
 
 			/**
@@ -103,7 +103,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 			 * @since 5.0.0
 			 * @param bool $allows Defaults to false.
 			 */
-			if ( 'true' === $email_already_sent && ! apply_filters( 'woocommerce_new_order_email_allows_resend', false ) ) {
+			if ( $email_already_sent && ! apply_filters( 'woocommerce_new_order_email_allows_resend', false ) ) {
 				return;
 			}
 
@@ -227,9 +227,11 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 
 		/**
 		 * Add mobile messaging.
+		 *
+		 * @param WC_Email $email that called for mobile messaging. May not contain a WC_Email for legacy reasons.
 		 */
-		public function mobile_messaging() {
-			if ( null !== $this->object ) {
+		public function mobile_messaging( $email ) {
+			if ( $email instanceof WC_Email_New_Order && null !== $this->object ) {
 				$domain = wp_parse_url( home_url(), PHP_URL_HOST );
 				wc_get_template(
 					'emails/email-mobile-messaging.php',

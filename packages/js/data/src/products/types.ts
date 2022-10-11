@@ -25,9 +25,18 @@ export type ProductDownload = {
 	file: string;
 };
 
+export type ProductAttribute = {
+	id: number;
+	name: string;
+	position: number;
+	visible: boolean;
+	variation: boolean;
+	options: string[];
+};
+
 export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	Schema.Post,
-	'status'
+	'status' | 'categories'
 > & {
 	id: number;
 	name: string;
@@ -76,6 +85,10 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	rating_count: number;
 	related_ids: number[];
 	variations: number[];
+	attributes: ProductAttribute[];
+	dimensions: ProductDimensions;
+	weight: string;
+	categories: ProductCategory[];
 };
 
 export const productReadOnlyProperties = [
@@ -133,4 +146,16 @@ export type ProductQuery<
 	min_price: string;
 	max_price: string;
 	stock_status: 'instock' | 'outofstock' | 'onbackorder';
+};
+
+export type ProductDimensions = {
+	width: string;
+	height: string;
+	length: string;
+};
+
+export type ProductCategory = {
+	id: number;
+	name: string;
+	slug: string;
 };

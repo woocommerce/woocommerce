@@ -6,6 +6,7 @@ import {
 	UseComboboxGetItemPropsOptions,
 	UseComboboxGetMenuPropsOptions,
 	GetPropsCommonOptions,
+	UseComboboxGetToggleButtonPropsOptions,
 } from 'downshift';
 
 export type DefaultItemType = {
@@ -25,6 +26,12 @@ export type getItemPropsType< ItemType > = (
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => any;
 
+export type getToggleButtonPropsType = (
+	options?: UseComboboxGetToggleButtonPropsOptions
+	// These are the types provided by Downshift.
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+) => any;
+
 export type getMenuPropsType = (
 	options?: UseComboboxGetMenuPropsOptions,
 	otherOptions?: GetPropsCommonOptions
@@ -40,6 +47,10 @@ export type ChildrenProps< ItemType > = {
 	getMenuProps: getMenuPropsType;
 	getItemLabel: getItemLabelType< ItemType >;
 	getItemValue: getItemValueType< ItemType >;
+	selectItem: ( item: ItemType ) => void;
+	setInputValue: ( value: string ) => void;
+	openMenu: () => void;
+	closeMenu: () => void;
 };
 
 export type ChildrenType< ItemType > = ( {

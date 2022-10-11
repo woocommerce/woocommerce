@@ -1,20 +1,10 @@
 @import './combo-box.scss';
 @import './menu.scss';
 @import './menu-item.scss';
+@import './selected-items.scss';
 
 .woocommerce-experimental-select-control {
     position: relative;
-
-    .woocommerce-experimental-select-control__combo-box-wrapper {
-        border: 1px solid $studio-gray-20;
-        border-radius: 3px;
-        background: $studio-white;
-        position: relative;
-        display: flex;
-        align-items: center;
-        padding-left: $gap-small;
-        padding-right: $gap-small;
-    }
 
     &.is-focused .woocommerce-experimental-select-control__combo-box-wrapper {
         box-shadow: 0 0 0 1px var(--wp-admin-theme-color);

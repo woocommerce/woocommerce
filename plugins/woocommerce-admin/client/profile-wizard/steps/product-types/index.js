@@ -286,6 +286,11 @@ export class ProductTypes extends Component {
 								isProfileItemsRequesting ||
 								isInstallingActivating
 							}
+							aria-disabled={
+								! selected.length ||
+								isProfileItemsRequesting ||
+								isInstallingActivating
+							}
 						>
 							{ __( 'Continue', 'woocommerce' ) }
 						</Button>
