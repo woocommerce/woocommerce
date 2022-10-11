@@ -104,6 +104,7 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Prevent locked inner blocks from sometimes displaying twice. ([6676](https://github.com/woocommerce/woocommerce-blocks/pull/6676))
 - Improve visual consistency between block links. ([7357](https://github.com/woocommerce/woocommerce-blocks/pull/7357))
 - StoreApi `/checkout` endpoint now returns HTTP 402 instead of HTTP 400 when payment fails. ([7273](https://github.com/woocommerce/woocommerce-blocks/pull/7273))
+- Fix a problem that causes an infinite loop when inserting Cart block in wordpress.com. ([7367](https://github.com/woocommerce/woocommerce-blocks/pull/7367))
 
 = 8.6.0 - 2022-09-26 =
 
