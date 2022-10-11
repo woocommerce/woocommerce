@@ -55,10 +55,11 @@ if ( isExperimentalBuild() ) {
 		edit,
 		// Save the props to post content.
 		save( { attributes }: { attributes: Attributes } ) {
-			const { className, heading, headingLevel } = attributes;
+			const { className, heading, headingLevel, showCounts } = attributes;
 			const data: Record< string, unknown > = {
 				'data-heading': heading,
 				'data-heading-level': headingLevel,
+				'data-show-counts': showCounts,
 			};
 			return (
 				<div
