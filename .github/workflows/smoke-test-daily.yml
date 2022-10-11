@@ -44,7 +44,7 @@ jobs:
               run: pnpm exec playwright install chromium
 
             - name: Run E2E smoke test.
-              timeout-minutes: 120
+              timeout-minutes: 60
               working-directory: plugins/woocommerce
               id: run_playwright_e2e_tests
               env:
