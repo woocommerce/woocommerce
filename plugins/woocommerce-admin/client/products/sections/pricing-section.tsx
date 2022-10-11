@@ -20,8 +20,8 @@ import {
  * Internal dependencies
  */
 import './pricing-section.scss';
+import { formatCurrencyDisplayValue, getCurrencyInputProps } from './utils';
 import { ProductSectionLayout } from '../layout/product-section-layout';
-import { getInputControlProps } from './utils';
 import { ADMIN_URL } from '../../utils/admin-settings';
 import { CurrencyContext } from '../../lib/currency-context';
 import { useProductHelper } from '../use-product-helper';
@@ -44,6 +44,8 @@ export const PricingSection: React.FC = () => {
 	const pricesIncludeTax =
 		taxSettings.woocommerce_prices_include_tax === 'yes';
 	const context = useContext( CurrencyContext );
+	const { getCurrencyConfig, formatAmount } = context;
+	const currencyConfig = getCurrencyConfig();
 
 	const taxIncludedInPriceText = __(
 		'Per your {{link}}store settings{{/link}}, tax is {{strong}}included{{/strong}} in the price.',
@@ -87,14 +89,9 @@ export const PricingSection: React.FC = () => {
 		},
 	} );
 
-	const regularPriceProps = getInputControlProps( {
-		...getInputProps( 'regular_price' ),
-		context,
-	} );
-	const salePriceProps = getInputControlProps( {
-		...getInputProps( 'sale_price' ),
-		context,
-	} );
+	const currencyInputProps = getCurrencyInputProps( currencyConfig );
+	const regularPriceProps = getInputProps( 'regular_price', currencyInputProps );
+	const salePriceProps = getInputProps( 'sale_price', currencyInputProps );
 
 	return (
 		<ProductSectionLayout
@@ -135,6 +132,7 @@ export const PricingSection: React.FC = () => {
 							{ ...regularPriceProps }
 							label={ __( 'List price', 'woocommerce' ) }
 							placeholder={ __( '10.59', 'woocommerce' ) }
+							value={ formatCurrencyDisplayValue( regularPriceProps?.value, currencyConfig, formatAmount ) }
 							onChange={ ( value: string ) => {
 								const sanitizedValue = sanitizePrice( value );
 								regularPriceProps?.onChange( sanitizedValue );
@@ -156,6 +154,7 @@ export const PricingSection: React.FC = () => {
 							{ ...salePriceProps }
 							label={ salePriceTitle }
 							placeholder={ __( '8.59', 'woocommerce' ) }
+							value={ formatCurrencyDisplayValue( salePriceProps?.value, currencyConfig, formatAmount ) }
 							onChange={ ( value: string ) => {
 								const sanitizedValue = sanitizePrice( value );
 								salePriceProps?.onChange( sanitizedValue );

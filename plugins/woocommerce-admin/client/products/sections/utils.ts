@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -9,34 +8,21 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { NUMBERS_AND_ALLOWED_CHARS } from '../constants';
 
-type gettersProps = {
-	context?: {
-		formatAmount: ( number: number | string ) => string;
-		getCurrencyConfig: () => {
-			code: string;
-			symbol: string;
-			symbolPosition: string;
-			decimalSeparator: string;
-			priceFormat: string;
-			thousandSeparator: string;
-			precision: number;
-		};
-	};
-	value: string;
-	name?: string;
-	checked: boolean;
-	selected?: boolean;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	onChange: ( value: any ) => void;
-	onBlur: () => void;
-	className: string | undefined;
-	help: string | null | undefined;
+type CurrencyConfig = {
+	code: string;
+	symbol: string;
+	symbolPosition: string;
+	decimalSeparator: string;
+	priceFormat: string;
+	thousandSeparator: string;
+	precision: number;
 };
 
 /**
  * Get additional props to be passed to all checkbox inputs.
- * @param name Name of the checkbox
- * @returns object Props.
+ *
+ * @param {string} name Name of the checkbox
+ * @return {object} Props.
  */
 export const getCheckboxProps = ( name: string ) => {
 	return {
@@ -48,25 +34,37 @@ export const getCheckboxProps = ( name: string ) => {
 	};
 };
 
-export const getInputControlProps = ( {
-	className,
-	context,
-	onBlur,
-	onChange,
-	value = '',
-	help,
-}: gettersProps ) => {
-	if ( ! context ) {
-		return;
-	}
-	const { formatAmount, getCurrencyConfig } = context;
-	const { decimalSeparator, symbol, symbolPosition, thousandSeparator } =
-		getCurrencyConfig();
+/**
+ * Get input props for currency related values and symbol positions.
+ *
+ * @param {object}  context - Currency context
+ * @return {object} Props.
+ */
+export const getCurrencyInputProps = ( currencyConfig: CurrencyConfig ) => {
+	const { symbol, symbolPosition } = currencyConfig;
 	const currencyPosition = symbolPosition.includes( 'left' )
 		? 'prefix'
 		: 'suffix';
 
-	// Cleans the value to show.
+	return {
+		[ currencyPosition ]: symbol,
+	};
+};
+
+/**
+ * Cleans and formats the currency value shown to the user.
+ *
+ * @param {string} value Form value.
+ * @param {object} context Currency context.
+ * @return {string} Display value.
+ */
+export const formatCurrencyDisplayValue = (
+	value: string,
+	currencyConfig: CurrencyConfig,
+	format: ( number: number | string ) => string
+) => {
+	const { decimalSeparator, thousandSeparator } = currencyConfig;
+
 	const regex = new RegExp(
 		NUMBERS_AND_ALLOWED_CHARS.replace( '%s1', decimalSeparator ).replace(
 			'%s2',
@@ -74,16 +72,8 @@ export const getInputControlProps = ( {
 		),
 		'g'
 	);
-	const currencyString =
-		value === undefined
-			? value
-			: formatAmount( value ).replace( regex, '' );
-	return {
-		value: currencyString,
-		[ currencyPosition ]: symbol,
-		className: classnames( 'woocommerce-product__input', className ),
-		onChange,
-		onBlur,
-		help,
-	};
-};
+
+	return value === undefined
+		? value
+		: format( value ).replace( regex, '' );
+}
