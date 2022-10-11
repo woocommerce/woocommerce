@@ -7,7 +7,12 @@
 	"keywords": [ "WooCommerce" ],
 	"supports": {
 		"html": false,
-		"multiple": false
+		"multiple": false,
+		"color": {
+			"__experimentalDefaultControls": {
+			  "text": true
+			}
+		  }
 	},
 	"example": {
 		"attributes": {
@@ -22,6 +27,14 @@
 		"headingLevel": {
 			"type": "number",
 			"default": 3
+		},
+		"showCounts": {
+			"type": "boolean",
+			"default": true
+		},
+		"showFilterButton": {
+			"type": "boolean",
+			"default": false
 		},
 		"isPreview": {
 			"type": "boolean",

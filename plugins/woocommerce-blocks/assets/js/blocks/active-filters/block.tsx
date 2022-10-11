@@ -234,15 +234,17 @@ const ActiveFiltersBlock = ( {
 					slug
 				),
 				removeCallback: () => {
-					if ( filteringForPhpTemplate ) {
-						return removeArgsFromFilterUrl( {
-							rating_filter: slug,
-						} );
-					}
-					const newRatings = productRatings.filter( ( rating ) => {
-						return rating !== slug;
+					removeArgsFromFilterUrl( {
+						rating_filter: slug,
 					} );
-					setProductRatings( newRatings );
+					if ( ! filteringForPhpTemplate ) {
+						const newRatings = productRatings.filter(
+							( rating ) => {
+								return rating !== slug;
+							}
+						);
+						setProductRatings( newRatings );
+					}
 				},
 				displayStyle: blockAttributes.displayStyle,
 			} );

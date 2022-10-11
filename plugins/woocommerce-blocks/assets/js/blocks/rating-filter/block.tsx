@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import Rating from '@woocommerce/base-components/product-rating';
 import { usePrevious, useShallowEqual } from '@woocommerce/base-hooks';
 import {
@@ -14,6 +15,8 @@ import FilterTitlePlaceholder from '@woocommerce/base-components/filter-placehol
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import { useState, useCallback, useMemo, useEffect } from '@wordpress/element';
 import CheckboxList from '@woocommerce/base-components/checkbox-list';
+import FilterSubmitButton from '@woocommerce/base-components/filter-submit-button';
+import FilterResetButton from '@woocommerce/base-components/filter-reset-button';
 import { addQueryArgs, removeQueryArgs } from '@wordpress/url';
 import { changeUrl } from '@woocommerce/utils';
 import classnames from 'classnames';
@@ -21,6 +24,7 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
+import { previewOptions } from './preview';
 import './style.scss';
 import { Attributes } from './types';
 import { getActiveFilters } from './utils';
@@ -28,7 +32,7 @@ import { getActiveFilters } from './utils';
 export const QUERY_PARAM_KEY = 'rating_filter';
 
 /**
- * Component displaying an stock status filter.
+ * Component displaying a rating filter.
  *
  * @param {Object}  props            Incoming props for the component.
  * @param {Object}  props.attributes Incoming block attributes.
@@ -57,17 +61,25 @@ const RatingFilterBlock = ( {
 			queryState,
 		} );
 
+	const [ displayedOptions, setDisplayedOptions ] = useState(
+		blockAttributes.isPreview ? previewOptions : []
+	);
+
 	const TagName =
 		`h${ blockAttributes.headingLevel }` as keyof JSX.IntrinsicElements;
-	const isLoading = ! blockAttributes.isPreview && filteredCountsLoading;
-	const isDisabled = ! blockAttributes.isPreview && ! filteredCountsLoading;
+	const isLoading =
+		! blockAttributes.isPreview &&
+		filteredCountsLoading &&
+		displayedOptions.length === 0;
+
+	const isDisabled = ! blockAttributes.isPreview && filteredCountsLoading;
 
 	const initialFilters = useMemo(
 		() => getActiveFilters( 'rating_filter' ),
 		[]
 	);
 
-	const [ clicked, setClicked ] = useState( initialFilters );
+	const [ checked, setChecked ] = useState( initialFilters );
 
 	const [ productRatings, setProductRatings ] =
 		useQueryStateByKey( 'rating' );
@@ -82,14 +94,14 @@ const RatingFilterBlock = ( {
 	/**
 	 * Used to redirect the page when filters are changed so templates using the Classic Template block can filter.
 	 *
-	 * @param {Array} clickedRatings Array of clicked ratings.
+	 * @param {Array} checkedRatings Array of checked ratings.
 	 */
-	const updateFilterUrl = ( clickedRatings: string[] ) => {
+	const updateFilterUrl = ( checkedRatings: string[] ) => {
 		if ( ! window ) {
 			return;
 		}
 
-		if ( clickedRatings.length === 0 ) {
+		if ( checkedRatings.length === 0 ) {
 			const url = removeQueryArgs(
 				window.location.href,
 				QUERY_PARAM_KEY
@@ -103,7 +115,7 @@ const RatingFilterBlock = ( {
 		}
 
 		const newUrl = addQueryArgs( window.location.href, {
-			[ QUERY_PARAM_KEY ]: clickedRatings.join( ',' ),
+			[ QUERY_PARAM_KEY ]: checkedRatings.join( ',' ),
 		} );
 
 		if ( newUrl === window.location.href ) {
@@ -114,39 +126,41 @@ const RatingFilterBlock = ( {
 	};
 
 	const onSubmit = useCallback(
-		( isClicked ) => {
+		( checkedOptions ) => {
 			if ( isEditor ) {
 				return;
 			}
-			if ( isClicked && ! filteringForPhpTemplate ) {
-				setProductRatingsQuery( clicked );
+			if ( checkedOptions && ! filteringForPhpTemplate ) {
+				setProductRatingsQuery( checkedOptions );
 			}
 
-			updateFilterUrl( clicked );
+			updateFilterUrl( checkedOptions );
 		},
-		[ isEditor, setProductRatingsQuery, clicked, filteringForPhpTemplate ]
+		[ isEditor, setProductRatingsQuery, filteringForPhpTemplate ]
 	);
 
-	// Track clicked STATE changes - if state changes, update the query.
+	// Track checked STATE changes - if state changes, update the query.
 	useEffect( () => {
-		onSubmit( clicked );
-	}, [ clicked, onSubmit ] );
+		if ( ! blockAttributes.showFilterButton ) {
+			onSubmit( checked );
+		}
+	}, [ blockAttributes.showFilterButton, checked, onSubmit ] );
 
-	const clickedQuery = useMemo( () => {
+	const checkedQuery = useMemo( () => {
 		return productRatingsQuery;
 	}, [ productRatingsQuery ] );
 
-	const currentClickedQuery = useShallowEqual( clickedQuery );
-	const previousClickedQuery = usePrevious( currentClickedQuery );
+	const currentCheckedQuery = useShallowEqual( checkedQuery );
+	const previousCheckedQuery = usePrevious( currentCheckedQuery );
 	// Track Rating query changes so the block reflects current filters.
 	useEffect( () => {
 		if (
-			! isShallowEqual( previousClickedQuery, currentClickedQuery ) && // Clicked query changed.
-			! isShallowEqual( clicked, currentClickedQuery ) // Clicked query doesn't match the UI.
+			! isShallowEqual( previousCheckedQuery, currentCheckedQuery ) && // Checked query changed.
+			! isShallowEqual( checked, currentCheckedQuery ) // Checked query doesn't match the UI.
 		) {
-			setClicked( currentClickedQuery );
+			setChecked( currentCheckedQuery );
 		}
-	}, [ clicked, currentClickedQuery, previousClickedQuery ] );
+	}, [ checked, currentCheckedQuery, previousCheckedQuery ] );
 
 	/**
 	 * Try get the rating filter from the URL.
@@ -164,27 +178,87 @@ const RatingFilterBlock = ( {
 	] );
 
 	/**
+	 * Compare intersection of all ratings and filtered counts to get a list of options to display.
+	 */
+	useEffect( () => {
+		/**
+		 * Checks if a status slug is in the query state.
+		 *
+		 * @param {string} queryStatus The status slug to check.
+		 */
+
+		if ( filteredCountsLoading || blockAttributes.isPreview ) {
+			return;
+		}
+		const orderedRatings =
+			! filteredCountsLoading &&
+			objectHasProp( filteredCounts, 'rating_counts' ) &&
+			Array.isArray( filteredCounts.rating_counts )
+				? [ ...filteredCounts.rating_counts ].reverse()
+				: [];
+
+		const newOptions = orderedRatings
+			.filter(
+				( item ) => isObject( item ) && Object.keys( item ).length > 0
+			)
+			.map(
+				( item ) => {
+					return {
+						label: (
+							<Rating
+								className={
+									productRatingsArray.includes(
+										item?.rating?.toString()
+									)
+										? 'is-active'
+										: ''
+								}
+								key={ item?.rating }
+								rating={ item?.rating }
+								ratedProductsCount={
+									blockAttributes.showCounts
+										? item?.count
+										: null
+								}
+							/>
+						),
+						value: item?.rating?.toString(),
+					};
+				},
+				[ blockAttributes.showCounts ]
+			);
+
+		setDisplayedOptions( newOptions );
+	}, [
+		blockAttributes.showCounts,
+		blockAttributes.isPreview,
+		filteredCounts,
+		filteredCountsLoading,
+	] );
+
+	/**
 	 * When a checkbox in the list changes, update state.
 	 */
 	const onClick = useCallback(
-		( clickedValue: string ) => {
-			if ( ! productRatingsArray.length ) {
-				setProductRatings( [ clickedValue ] );
-			} else {
-				const previouslyClicked =
-					productRatingsArray.includes( clickedValue );
-				const newClicked = productRatingsArray.filter(
-					( value ) => value !== clickedValue
-				);
-				if ( ! previouslyClicked ) {
-					newClicked.push( clickedValue );
-					newClicked.sort();
-				}
-				setProductRatings( newClicked );
+		( checkedValue: string ) => {
+			const previouslyChecked = checked.includes( checkedValue );
+
+			const newChecked = checked.filter(
+				( value ) => value !== checkedValue
+			);
+
+			if ( ! previouslyChecked ) {
+				newChecked.push( checkedValue );
+				newChecked.sort();
 			}
+			setChecked( newChecked );
 		},
-		[ productRatingsArray, setProductRatings ]
+		[ checked, displayedOptions ]
 	);
+
+	if ( ! filteredCountsLoading && displayedOptions.length === 0 ) {
+		return null;
+	}
 
 	const heading = (
 		<TagName className="wc-block-rating-filter__title">
@@ -198,37 +272,6 @@ const RatingFilterBlock = ( {
 		heading
 	);
 
-	const orderedRatings =
-		! filteredCountsLoading &&
-		objectHasProp( filteredCounts, 'rating_counts' ) &&
-		Array.isArray( filteredCounts.rating_counts )
-			? [ ...filteredCounts.rating_counts ].reverse()
-			: [];
-
-	const displayedOptions = orderedRatings
-		.filter(
-			( item ) => isObject( item ) && Object.keys( item ).length > 0
-		)
-		.map( ( item ) => {
-			return {
-				label: (
-					<Rating
-						className={
-							productRatingsArray.includes(
-								item?.rating?.toString()
-							)
-								? 'is-active'
-								: ''
-						}
-						key={ item?.rating }
-						rating={ item?.rating }
-						ratedProductsCount={ item?.count }
-					/>
-				),
-				value: item?.rating?.toString(),
-			};
-		} );
-
 	return (
 		<>
 			{ ! isEditor && blockAttributes.heading && filterHeading }
@@ -240,14 +283,39 @@ const RatingFilterBlock = ( {
 				<CheckboxList
 					className={ 'wc-block-rating-filter-list' }
 					options={ displayedOptions }
-					checked={ productRatingsArray }
-					onChange={ ( checked ) => {
-						onClick( checked.toString() );
+					checked={ checked }
+					onChange={ ( item ) => {
+						onClick( item.toString() );
 					} }
 					isLoading={ isLoading }
 					isDisabled={ isDisabled }
 				/>
 			</div>
+			{
+				<div className="wc-block-rating-filter__actions">
+					{ checked.length > 0 && ! isLoading && (
+						<FilterResetButton
+							onClick={ () => {
+								setChecked( [] );
+								setProductRatings( [] );
+								onSubmit( [] );
+							} }
+							screenReaderLabel={ __(
+								'Reset rating filter',
+								'woo-gutenberg-products-block'
+							) }
+						/>
+					) }
+					{ blockAttributes.showFilterButton && (
+						<FilterSubmitButton
+							className="wc-block-rating-filter__button"
+							isLoading={ isLoading }
+							disabled={ isLoading || isDisabled }
+							onClick={ () => onSubmit( checked ) }
+						/>
+					) }
+				</div>
+			}
 		</>
 	);
 };

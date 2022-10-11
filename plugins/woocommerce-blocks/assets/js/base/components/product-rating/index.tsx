@@ -50,7 +50,7 @@ const Rating = ( {
 					dangerouslySetInnerHTML={ ratingHTML }
 				/>
 			</div>
-			{ ratedProductsCount ? `(${ ratedProductsCount })` : null }
+			{ ratedProductsCount !== null ? `(${ ratedProductsCount })` : null }
 		</div>
 	);
 };
@@ -58,7 +58,7 @@ interface RatingProps {
 	className: string;
 	key: 0 | 1 | 2 | 3 | 4 | 5;
 	rating: 0 | 1 | 2 | 3 | 4 | 5;
-	ratedProductsCount: number;
+	ratedProductsCount?: number | null;
 }
 
 export default Rating;
