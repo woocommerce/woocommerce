@@ -24,3 +24,38 @@
 		cursor: pointer;
 	}
 }
+
+.wc-block-rating-filter__actions {
+	align-items: center;
+	display: flex;
+	gap: $gap;
+	justify-content: flex-end;
+	margin-top: $gap;
+
+	.wc-block-components-filter-submit-button {
+		margin-left: 0;
+
+		&:disabled {
+			opacity: 0.6;
+			cursor: auto;
+		}
+	}
+
+	// The specificity here is needed to overwrite the margin-top that is inherited on WC block template pages such as Shop.
+	button[type="submit"]:not(.wp-block-search__button).wc-block-components-filter-submit-button {
+		margin-left: 0;
+		margin-top: 0;
+	}
+
+	.wc-block-rating-filter__button {
+		margin-top: em($gap-smaller);
+		padding: em($gap-smaller) em($gap);
+		@include font-size(small);
+	}
+}
+
+.editor-styles-wrapper .wc-block-rating-filter .wc-block-rating-filter__button {
+	margin-top: em($gap-smaller);
+	padding: em($gap-smaller) em($gap);
+	@include font-size(small);
+}

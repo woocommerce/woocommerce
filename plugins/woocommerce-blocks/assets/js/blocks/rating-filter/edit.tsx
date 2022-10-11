@@ -1,9 +1,16 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
-import { useBlockProps } from '@wordpress/block-editor';
-import { Disabled, withSpokenMessages } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import {
+	Disabled,
+	PanelBody,
+	ToggleControl,
+	withSpokenMessages,
+} from '@wordpress/components';
+import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
 import BlockTitle from '@woocommerce/editor-components/block-title';
 import type { BlockEditProps } from '@wordpress/blocks';
 
@@ -17,14 +24,80 @@ const Edit = ( {
 	attributes,
 	setAttributes,
 }: BlockEditProps< Attributes > ) => {
-	const { className, heading, headingLevel } = attributes;
+	const { className, heading, headingLevel, showCounts, showFilterButton } =
+		attributes;
 
 	const blockProps = useBlockProps( {
 		className: classnames( 'wc-block-rating-filter', className ),
 	} );
 
+	const getInspectorControls = () => {
+		return (
+			<InspectorControls key="inspector">
+				<PanelBody
+					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
+				>
+					<ToggleControl
+						label={ __(
+							'Display product count',
+							'woo-gutenberg-products-block'
+						) }
+						checked={ showCounts }
+						onChange={ () =>
+							setAttributes( {
+								showCounts: ! showCounts,
+							} )
+						}
+					/>
+				</PanelBody>
+				<PanelBody
+					title={ __( 'Settings', 'woo-gutenberg-products-block' ) }
+				>
+					<ToggleControl
+						label={ __(
+							"Show 'Apply filters' button",
+							'woo-gutenberg-products-block'
+						) }
+						help={
+							showFilterButton
+								? __(
+										'Products will only update when the button is clicked.',
+										'woo-gutenberg-products-block'
+								  )
+								: __(
+										'Products will update as soon as attributes are selected.',
+										'woo-gutenberg-products-block'
+								  )
+						}
+						checked={ showFilterButton }
+						onChange={ ( value ) =>
+							setAttributes( {
+								showFilterButton: value,
+							} )
+						}
+					/>
+				</PanelBody>
+				<PanelBody
+					title={ __( 'Typography', 'woo-gutenberg-products-block' ) }
+				>
+					<p> { __( 'Size', 'woo-gutenberg-products-block' ) } </p>
+					<HeadingToolbar
+						isCollapsed={ false }
+						minLevel={ 2 }
+						maxLevel={ 7 }
+						selectedLevel={ headingLevel }
+						onChange={ ( newLevel: number ) =>
+							setAttributes( { headingLevel: newLevel } )
+						}
+					/>
+				</PanelBody>
+			</InspectorControls>
+		);
+	};
+
 	return (
 		<>
+			{ getInspectorControls() }
 			{
 				<div { ...blockProps }>
 					<BlockTitle
