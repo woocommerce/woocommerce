@@ -309,7 +309,7 @@ class CartShippingRateSchema extends AbstractSchema {
 				'description'   => $this->prepare_html_response( $this->get_rate_prop( $rate, 'description' ) ),
 				'delivery_time' => $this->prepare_html_response( $this->get_rate_prop( $rate, 'delivery_time' ) ),
 				'price'         => $this->prepare_money_response( $this->get_rate_prop( $rate, 'cost' ), wc_get_price_decimals() ),
-				'taxes'         => $this->prepare_money_response( array_sum( $this->get_rate_prop( $rate, 'taxes' ) ), wc_get_price_decimals() ),
+				'taxes'         => $this->prepare_money_response( array_sum( (array) $this->get_rate_prop( $rate, 'taxes' ) ), wc_get_price_decimals() ),
 				'instance_id'   => $this->get_rate_prop( $rate, 'instance_id' ),
 				'method_id'     => $this->get_rate_prop( $rate, 'method_id' ),
 				'meta_data'     => $this->get_rate_meta_data( $rate ),
