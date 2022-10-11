@@ -55,21 +55,18 @@ export default {
 		'Give your buyers more ways to pay',
 		'woocommerce'
 	),
-	surveyTitle: __( 'Remove WooCommerce Payments', 'woocommerce' ),
+	surveyTitle: __(
+		'No thanks, I don’t want WooCommerce Payments',
+		'woocommerce'
+	),
 
-	surveyIntro: createInterpolateElement(
-		// Note: \xa0 is used to create a non-breaking space.
-		__(
-			'Please take a moment to tell us why you’d like to remove WooCommerce Payments. This will remove WooCommerce\xa0Payments from the navigation. You can enable it again in <strong>WooCommerce\xa0Settings\xa0>\xa0Payments</strong>, however the promotion will not apply.',
-			'woocommerce'
-		),
-		{
-			strong: <strong />,
-		}
+	surveyIntro: __(
+		'Note that the extension hasn’t been installed, this will simply remove WooCommerce Payments from the navigation. Please take a moment to tell us why you’d like to dismiss WooCommerce Payments.',
+		'woocommerce'
 	),
 
 	surveyQuestion: __(
-		'What made you disable the new payments experience?',
+		'Why would you like to dismiss the new payments experience?',
 		'woocommerce'
 	),
 
@@ -100,9 +97,12 @@ export default {
 
 	surveyCommentsLabel: __( 'Comments (Optional)', 'woocommerce' ),
 
-	surveyCancelButton: __( 'Just remove WooCommerce Payments', 'woocommerce' ),
+	surveyCancelButton: __(
+		'Just dismiss WooCommerce Payments',
+		'woocommerce'
+	),
 
-	surveySubmitButton: __( 'Remove and send feedback', 'woocommerce' ),
+	surveySubmitButton: __( 'Dismiss and send feedback', 'woocommerce' ),
 
 	terms: createInterpolateElement(
 		__(
