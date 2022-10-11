@@ -10,7 +10,8 @@ import CHECKOUT_ORDER_NOTE from './checkout-order-note-block/block.json';
 import CHECKOUT_PAYMENT from './checkout-payment-block/block.json';
 import CHECKOUT_SHIPPING_ADDRESS from './checkout-shipping-address-block/block.json';
 import CHECKOUT_SHIPPING_METHODS from './checkout-shipping-methods-block/block.json';
-import CHECKOUT_COLLECTION_METHOD from './checkout-collection-method/block.json';
+import CHECKOUT_COLLECTION_METHOD from './checkout-collection-method-block/block.json';
+import CHECKOUT_PICKUP_LOCATION from './checkout-pickup-options-block/block.json';
 import CHECKOUT_TERMS from './checkout-terms-block/block.json';
 import CHECKOUT_TOTALS from './checkout-totals-block/block.json';
 import CHECKOUT_ORDER_SUMMARY from './checkout-order-summary-block/block.json';
@@ -43,4 +44,5 @@ export default {
 	CHECKOUT_ORDER_SUMMARY_TAXES,
 	CHECKOUT_ORDER_SUMMARY_CART_ITEMS,
 	CHECKOUT_COLLECTION_METHOD,
+	CHECKOUT_PICKUP_LOCATION,
 };
