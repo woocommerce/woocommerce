@@ -88,7 +88,6 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Update the titles of some inner blocks of the Cart block and remove the lock of the Cross-Sells parent block. ([7232](https://github.com/woocommerce/woocommerce-blocks/pull/7232))
 - Add filter for place order button label. ([7154](https://github.com/woocommerce/woocommerce-blocks/pull/7154))
 - Exposed data related to the checkout through wordpress/data stores. ([6612](https://github.com/woocommerce/woocommerce-blocks/pull/6612))
-- Filter by rating: Provide a block transform for the legacy rating widget. ([7338](https://github.com/woocommerce/woocommerce-blocks/pull/7338))
 - Add simple, large & two menus footer patterns. ([7306](https://github.com/woocommerce/woocommerce-blocks/pull/7306))
 - Add minimal, large, and essential header patterns. ([7292](https://github.com/woocommerce/woocommerce-blocks/pull/7292))
 - Add `showRemoveItemLink` as a new checkout filter to allow extensions to toggle the visibility of the `Remove item` button under each cart line item. ([7242](https://github.com/woocommerce/woocommerce-blocks/pull/7242))
