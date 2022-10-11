@@ -33,23 +33,18 @@ type gettersProps = {
 	help: string | null | undefined;
 };
 
-export const getCheckboxProps = ( {
-	checked = false,
-	className,
-	name,
-	onBlur,
-	onChange,
-}: gettersProps ) => {
+/**
+ * Get additional props to be passed to all checkbox inputs.
+ * @param name Name of the checkbox
+ * @returns object Props.
+ */
+export const getCheckboxProps = ( name: string ) => {
 	return {
-		checked,
-		className: classnames( 'woocommerce-product__checkbox', className ),
 		onChange: ( isChecked: boolean ) => {
 			recordEvent( `product_checkbox_${ name }`, {
 				checked: isChecked,
 			} );
-			return onChange( isChecked );
 		},
-		onBlur,
 	};
 };
 

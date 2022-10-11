@@ -168,12 +168,7 @@ export const ProductDetailsSection: React.FC = () => {
 								/>
 							</>
 						}
-						{ ...getCheckboxProps( {
-							...getInputProps( 'featured' ),
-							name: 'featured',
-							className:
-								'product-details-section__feature-checkbox',
-						} ) }
+						{ ...getInputProps( 'featured', getCheckboxProps( 'featured' ) ) }
 					/>
 					{ showProductLinkEditModal && (
 						<EditProductLinkModal
