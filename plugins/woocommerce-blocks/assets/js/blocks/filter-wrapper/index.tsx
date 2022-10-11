@@ -29,7 +29,7 @@ registerBlockType( metadata, {
 				'woo-gutenberg-products-block'
 			),
 			description: __(
-				'Show the currently active product filters. Works in combination with other filters blocks.',
+				'Display the currently active product filters.',
 				'woo-gutenberg-products-block'
 			),
 			/**
@@ -58,7 +58,7 @@ registerBlockType( metadata, {
 			name: 'price-filter',
 			title: __( 'Filter by Price', 'woo-gutenberg-products-block' ),
 			description: __(
-				'Allow customers to filter products by price range.',
+				'Enable customers to filter the product grid by choosing a price range.',
 				'woo-gutenberg-products-block'
 			),
 			isActive: ( attributes ) =>
@@ -83,7 +83,7 @@ registerBlockType( metadata, {
 			name: 'stock-filter',
 			title: __( 'Filter by Stock', 'woo-gutenberg-products-block' ),
 			description: __(
-				'Allow customers to filter the grid by products stock status.',
+				'Enable customers to filter the product grid by stock status.',
 				'woo-gutenberg-products-block'
 			),
 			isActive: ( attributes ) =>
@@ -108,7 +108,7 @@ registerBlockType( metadata, {
 			name: 'attribute-filter',
 			title: __( 'Filter by Attribute', 'woo-gutenberg-products-block' ),
 			description: __(
-				'Allow customers to filter the grid by product attribute, such as color.',
+				'Enable customers to filter the product grid by selecting one or more attributes, such as color.',
 				'woo-gutenberg-products-block'
 			),
 			isActive: ( attributes ) =>
