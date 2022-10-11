@@ -21,6 +21,9 @@ import {
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
+export const default12HourDateTimeFormat = 'MM/DD/YYYY h:mm a';
+export const default24HourDateTimeFormat = 'MM/DD/YYYY H:mm';
+
 export type DateTimePickerControlProps = {
 	currentDate?: string | null;
 	dateTimeFormat?: string;
@@ -37,7 +40,9 @@ export type DateTimePickerControlProps = {
 export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	currentDate,
 	is12Hour = true,
-	dateTimeFormat = is12Hour ? 'MM/DD/YYYY h:mm a' : 'MM/DD/YYYY H:MM',
+	dateTimeFormat = is12Hour
+		? default12HourDateTimeFormat
+		: default24HourDateTimeFormat,
 	disabled = false,
 	onChange,
 	onBlur,
@@ -89,7 +94,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	}
 
 	const onChangeCallback = useCallback(
-		( newInputString: string ) => {
+		( newInputString: string, fireOnChange: boolean ) => {
 			if ( ! isMounted.current ) return;
 
 			const newDateTime = parseMoment( newInputString );
@@ -99,7 +104,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 				setLastValidDate( newDateTime );
 			}
 
-			if ( onChange ) {
+			if ( fireOnChange && typeof onChange === 'function' ) {
 				onChange(
 					isValid ? formatMomentIso( newDateTime ) : newInputString,
 					isValid
@@ -116,12 +121,12 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 
 	function change( newInputString: string ) {
 		setInputString( newInputString );
-		debouncedOnChange( newInputString );
+		debouncedOnChange( newInputString, true );
 	}
 
-	function changeImmediate( newInputString: string ) {
+	function changeImmediate( newInputString: string, fireOnChange: boolean ) {
 		setInputString( newInputString );
-		onChangeCallback( newInputString );
+		onChangeCallback( newInputString, fireOnChange );
 	}
 
 	function blur() {
@@ -138,18 +143,17 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 
 	const isInitialUpdate = useRef( true );
 	useEffect( () => {
-		// Don't trigger the change handling on the initial update of the component
+		const fireOnChange = ! isInitialUpdate.current;
 		if ( isInitialUpdate.current ) {
 			isInitialUpdate.current = false;
-			return;
 		}
 
 		const newDate = parseMomentIso( currentDate );
 
 		if ( newDate.isValid() ) {
-			change( formatMoment( newDate ) );
+			changeImmediate( formatMoment( newDate ), fireOnChange );
 		} else {
-			change( currentDate || '' );
+			changeImmediate( currentDate || '', fireOnChange );
 		}
 	}, [ currentDate, dateTimeFormat ] );
 
@@ -223,7 +227,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 						const formattedDate = formatMoment(
 							parseMomentIso( date )
 						);
-						changeImmediate( formattedDate );
+						changeImmediate( formattedDate, true );
 					} }
 					is12Hour={ is12Hour }
 				/>
