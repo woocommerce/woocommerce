@@ -1,6 +1,13 @@
+/**
+ * External dependencies
+ */
+import { AxiosRequestConfig } from 'axios';
+
+/**
+ * Internal dependencies
+ */
 import { HTTPClient } from './http-client';
 import { AxiosClient, AxiosOAuthInterceptor } from './axios';
-import { AxiosRequestConfig } from 'axios';
 import { AxiosInterceptor } from './axios/axios-interceptor';
 import { AxiosURLToQueryInterceptor } from './axios/axios-url-to-query-interceptor';
 

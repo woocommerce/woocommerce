@@ -1,6 +1,13 @@
+/**
+ * External dependencies
+ */
 import type { AxiosRequestConfig } from 'axios';
 import * as createHmac from 'create-hmac';
 import * as OAuth from 'oauth-1.0a';
+
+/**
+ * Internal dependencies
+ */
 import { AxiosInterceptor } from './axios-interceptor';
 import { buildURLWithParams } from './utils';
 
@@ -56,6 +63,7 @@ export class AxiosOAuthInterceptor extends AxiosInterceptor {
 			request.headers.Authorization = this.oauth.toHeader(
 				this.oauth.authorize( {
 					url,
+					// eslint-disable-next-line
 					method: request.method!,
 				} )
 			).Authorization;

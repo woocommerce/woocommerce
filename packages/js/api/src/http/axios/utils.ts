@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { AxiosRequestConfig } from 'axios';
 
 // @ts-ignore

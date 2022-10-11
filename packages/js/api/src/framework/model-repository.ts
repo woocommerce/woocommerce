@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { Model, ModelID } from '../models';
 
 /**

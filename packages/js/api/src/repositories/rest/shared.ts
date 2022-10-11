@@ -1,4 +1,8 @@
+/**
+ * Internal dependencies
+ */
 import { HTTPClient } from '../../http';
+import { ModelID, MetaData, ModelConstructor } from '../../models';
 import {
 	ListFn,
 	ModelRepositoryParams,
@@ -20,7 +24,6 @@ import {
 	// @ts-ignore
 	ModelParentID,
 } from '../../framework';
-import { ModelID, MetaData, ModelConstructor } from '../../models';
 
 /**
  * Creates a new transformer for metadata models.

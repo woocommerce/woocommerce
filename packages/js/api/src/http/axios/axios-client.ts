@@ -1,5 +1,12 @@
-import { HTTPClient, HTTPResponse } from '../http-client';
+/**
+ * External dependencies
+ */
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+
+/**
+ * Internal dependencies
+ */
+import { HTTPClient, HTTPResponse } from '../http-client';
 import { AxiosInterceptor } from './axios-interceptor';
 import { AxiosResponseInterceptor } from './axios-response-interceptor';
 

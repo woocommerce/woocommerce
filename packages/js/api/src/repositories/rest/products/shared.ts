@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import {
 	AddPropertyTransformation,
 	CustomTransformation,

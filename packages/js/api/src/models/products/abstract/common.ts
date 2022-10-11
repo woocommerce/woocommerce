@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { AbstractProductData } from './data';
 import { ModelID } from '../../model';
 import { CatalogVisibility, ProductTerm, ProductAttribute } from '../shared';

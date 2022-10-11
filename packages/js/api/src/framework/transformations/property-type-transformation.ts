@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { ModelTransformation, TransformationOrder } from '../model-transformer';
 
 /**
@@ -134,6 +137,7 @@ export class PropertyTypeTransformation implements ModelTransformation {
 			case PropertyType.String:
 				return String( value );
 			case PropertyType.Integer:
+				// eslint-disable-next-line
 				return parseInt( value );
 			case PropertyType.Float:
 				return parseFloat( value );

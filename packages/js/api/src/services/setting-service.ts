@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { Setting, UpdatesSettings } from '../models';
 
 /**

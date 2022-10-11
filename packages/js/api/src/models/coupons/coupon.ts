@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { Model } from '../model';
 import { HTTPClient } from '../../http';
 import { couponRESTRepository } from '../../repositories';

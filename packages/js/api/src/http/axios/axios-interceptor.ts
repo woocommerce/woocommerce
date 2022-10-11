@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 /**

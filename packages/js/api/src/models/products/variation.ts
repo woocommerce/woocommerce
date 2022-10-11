@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { ModelID } from '../model';
 import {
 	AbstractProductData,
