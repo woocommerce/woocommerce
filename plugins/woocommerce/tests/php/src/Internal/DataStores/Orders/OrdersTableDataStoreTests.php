@@ -14,6 +14,11 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 	/**
+	 * Original timezone before this test started.
+	 */
+	private $original_time_zone;
+
+	/**
 	 * @var PostsToOrdersMigrationController
 	 */
 	private $migrator;
@@ -32,6 +37,8 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * Initializes system under test.
 	 */
 	public function setUp(): void {
+		$this->original_time_zone = date_default_timezone_get();
+		date_default_timezone_set( 'Asia/Kolkata' );
 		parent::setUp();
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
 		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
@@ -50,6 +57,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		// Add back removed filter.
 		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		date_default_timezone_set( $this->original_time_zone );
 		parent::tearDown();
 	}
 
@@ -834,7 +842,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 				'date_query' => array(
 					array(
 						'column'  => 'date_completed_gmt',
-						'hour'    => 11,
+						'hour'    => 5,
 						'compare' => '>',
 					),
 				),

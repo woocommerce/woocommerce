@@ -482,15 +482,15 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			array(
 				'ID'                 => $order->get_id(),
 				// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- use of date is intentional.
-				'post_date'          => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
+				'post_date'          => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
 				'post_date_gmt'      => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 				'post_status'        => $this->get_post_status( $order ),
 				'post_parent'        => $order->get_parent_id(),
 				'post_excerpt'       => method_exists( $order, 'get_customer_note' ) ? $order->get_customer_note() : '',
 				'post_type'          => $order->get_type(),
 				// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- use of date is intentional.
-				'order_modified'     => ! is_null( $order->get_date_modified() ) ? date( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ) : '',
-				'order_modified_gmt' => ! is_null( $order->get_date_modified() ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ) : '',
+				'order_modified'     => ! is_null( $order->get_date_modified() ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getOffsetTimestamp() ) : '',
+				'order_modified_gmt' => ! is_null( $order->get_date_modified() ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getOffsetTimestamp() ) : '',
 			)
 		);
 		remove_filter( 'wp_insert_post_data', array( $this, 'update_post_modified_data' ) );
