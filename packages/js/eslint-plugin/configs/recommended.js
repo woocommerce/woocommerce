@@ -1,7 +1,7 @@
 module.exports = {
 	extends: [
 		'plugin:react-hooks/recommended',
-		require.resolve('./custom.js'),
+		require.resolve( './custom.js' ),
 		'plugin:@wordpress/eslint-plugin/recommended',
 	],
 	parser: '@typescript-eslint/parser',
@@ -10,10 +10,10 @@ module.exports = {
 		'jest/globals': true,
 		jest: true,
 	},
-	plugins: ['@wordpress'],
+	plugins: [ '@wordpress' ],
 	rules: {
 		radix: 'error',
-		yoda: ['error', 'never'],
+		yoda: [ 'error', 'never' ],
 		// temporary conversion to warnings until the below are all handled.
 		'@wordpress/i18n-translator-comments': 'warn',
 		'@wordpress/i18n-text-domain': [
@@ -53,19 +53,19 @@ module.exports = {
 	settings: {
 		'import/resolver': 'typescript',
 		// List of modules that are externals in our webpack config.
-		'import/core-modules': ['@woocommerce/settings', 'lodash', 'react'],
+		'import/core-modules': [ '@woocommerce/settings', 'lodash', 'react' ],
 		react: {
 			pragma: 'createElement',
 		},
 	},
 	overrides: [
 		{
-			files: ['*.ts', '*.tsx'],
-			extends: ['plugin:@typescript-eslint/recommended'],
+			files: [ '*.ts', '*.tsx' ],
+			extends: [ 'plugin:@typescript-eslint/recommended' ],
 			rules: {
 				'@typescript-eslint/no-explicit-any': 'error',
-				'@typescript-eslint/no-use-before-define': ['error'],
-				'@typescript-eslint/no-shadow': ['error'],
+				'@typescript-eslint/no-use-before-define': [ 'error' ],
+				'@typescript-eslint/no-shadow': [ 'error' ],
 				'@typescript-eslint/no-empty-function': 'off',
 				camelcase: 'off',
 				'no-use-before-define': 'off',
