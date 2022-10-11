@@ -168,7 +168,7 @@ class WcPayWelcomePage {
 		);
 
 		foreach ( $gateway_specs as $spec ) {
-			if ( ! empty( $spec->plugins ) && in_array( $spec->plugins[0], $plugin_slugs ) ) {
+			if ( ! empty( $spec->plugins ) && in_array( $spec->plugins[0], $plugin_slugs, true ) ) {
 				return true;
 			}
 		}
