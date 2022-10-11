@@ -34,7 +34,7 @@ import { BlockInstance, serialize, parse } from '@wordpress/blocks';
 import './product-details-section.scss';
 import { CategoryField } from '../fields/category-field';
 import { EditProductLinkModal } from '../shared/edit-product-link-modal';
-import { getCheckboxProps, getTextControlProps } from './utils';
+import { getCheckboxProps } from './utils';
 import { ProductSectionLayout } from '../layout/product-section-layout';
 
 const PRODUCT_DETAILS_SLUG = 'product-details';
@@ -90,9 +90,7 @@ export const ProductDetailsSection: React.FC = () => {
 								'e.g. 12 oz Coffee Mug',
 								'woocommerce'
 							) }
-							{ ...getTextControlProps(
-								getInputProps( 'name' )
-							) }
+							{ ...getInputProps( 'name' ) }
 							onBlur={ () => {
 								setSkuIfEmpty();
 								getInputProps( 'name' ).onBlur();

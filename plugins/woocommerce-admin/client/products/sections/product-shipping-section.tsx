@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { Link, Spinner, useFormContext } from '@woocommerce/components';
 import {
@@ -17,6 +17,7 @@ import {
 	Card,
 	CardBody,
 	SelectControl,
+	TextControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
@@ -31,8 +32,6 @@ import {
 	ShippingDimensionsImageProps,
 } from '../fields/shipping-dimensions-image';
 import { useProductHelper } from '../use-product-helper';
-import { AddNewShippingClassModal } from '../shared/add-new-shipping-class-modal';
-import { getTextControlProps } from './utils';
 import './product-shipping-section.scss';
 import {
 	ADD_NEW_SHIPPING_CLASS_OPTION_VALUE,
@@ -74,7 +73,7 @@ function getInterpolatedSizeLabel( mixedString: string ) {
  * the first category different to `Uncategorized`.
  *
  * @see https://github.com/woocommerce/woocommerce/issues/34657
- * @param product The product
+ * @param  product The product
  * @return The default shipping class
  */
 function extractDefaultShippingClassFromProduct(
@@ -136,23 +135,10 @@ export function ProductShippingSection( {
 		[]
 	);
 
-	const { createProductShippingClass, invalidateResolution } = useDispatch(
-		EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
-	);
-
-	const selectShippingClassProps = getTextControlProps(
-		getInputProps( 'shipping_class' )
-	);
-	const inputWidthProps = getTextControlProps(
-		getInputProps( 'dimensions.width' )
-	);
-	const inputLengthProps = getTextControlProps(
-		getInputProps( 'dimensions.length' )
-	);
-	const inputHeightProps = getTextControlProps(
-		getInputProps( 'dimensions.height' )
-	);
-	const inputWeightProps = getTextControlProps( getInputProps( 'weight' ) );
+	const inputWidthProps = getInputProps( 'dimensions.width' );
+	const inputLengthProps = getInputProps( 'dimensions.length' );
+	const inputHeightProps = getInputProps( 'dimensions.height' );
+	const inputWeightProps = getInputProps( 'weight' );
 
 	return (
 		<ProductSectionLayout
@@ -167,24 +153,24 @@ export function ProductShippingSection( {
 					{ hasResolvedShippingClasses ? (
 						<>
 							<SelectControl
-								{ ...selectShippingClassProps }
 								label={ __( 'Shipping class', 'woocommerce' ) }
+								{ ...( getInputProps( 'shipping_class' ),
+								{
+									onChange: ( value: string ) => {
+										if (
+											value ===
+											ADD_NEW_SHIPPING_CLASS_OPTION_VALUE
+										) {
+											setShowShippingClassModal( true );
+										}
+									},
+								} ) }
 								options={ [
 									...DEFAULT_SHIPPING_CLASS_OPTIONS,
 									...mapShippingClassToSelectOption(
 										shippingClasses ?? []
 									),
 								] }
-								onChange={ ( value: string ) => {
-									if (
-										value ===
-										ADD_NEW_SHIPPING_CLASS_OPTION_VALUE
-									) {
-										setShowShippingClassModal( true );
-										return;
-									}
-									selectShippingClassProps?.onChange( value );
-								} }
 							/>
 							<span className="woocommerce-product-form__secondary-text">
 								{ interpolateComponents( {

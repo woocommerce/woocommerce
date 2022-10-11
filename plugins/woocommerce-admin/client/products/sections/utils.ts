@@ -53,22 +53,6 @@ export const getCheckboxProps = ( {
 	};
 };
 
-export const getTextControlProps = ( {
-	className,
-	onBlur,
-	onChange,
-	value = '',
-	help,
-}: gettersProps ) => {
-	return {
-		value,
-		className: classnames( 'woocommerce-product__text', className ),
-		onChange,
-		onBlur,
-		help,
-	};
-};
-
 export const getInputControlProps = ( {
 	className,
 	context,
