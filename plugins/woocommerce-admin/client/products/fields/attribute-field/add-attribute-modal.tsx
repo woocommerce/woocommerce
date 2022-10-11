@@ -79,7 +79,9 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 				values.attributes.filter( ( val, i ) => i !== index )
 			);
 		} else {
-			setValue( 'attributes', [ { attribute: undefined, terms: [] } ] );
+			setValue( `attributes[${ index }]`, [
+				{ attribute: undefined, terms: [] },
+			] );
 		}
 	};
 

@@ -155,7 +155,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 		initialSelectedItem: singleSelectedItem,
 		inputValue,
 		items: filteredItems,
-		selectedItem: multiple ? null : undefined,
+		selectedItem: multiple ? null : singleSelectedItem,
 		itemToString: getItemLabel,
 		onSelectedItemChange: ( { selectedItem } ) =>
 			selectedItem && onSelect( selectedItem ),

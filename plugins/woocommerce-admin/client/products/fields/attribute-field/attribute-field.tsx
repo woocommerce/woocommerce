@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { sprintf, __ } from '@wordpress/i18n';
-import { Button, Popover } from '@wordpress/components';
+import { Button, Card, CardBody, Popover } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { ProductAttribute } from '@woocommerce/data';
 import { Text } from '@woocommerce/experimental';
@@ -55,41 +55,49 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 
 	if ( ! value || value.length === 0 ) {
 		return (
-			<div className="woocommerce-attribute-field">
-				<div className="woocommerce-attribute-field__empty-container">
-					<img
-						src={ AttributeEmptyStateLogo }
-						alt="Completed"
-						className="woocommerce-attribute-field__empty-logo"
-					/>
-					<Text
-						variant="subtitle.small"
-						weight="600"
-						size="14"
-						lineHeight="20px"
-						className="woocommerce-attribute-field__empty-subtitle"
-					>
-						{ __( 'No attributes yet', 'woocommerce' ) }
-					</Text>
-					<Button
-						variant="secondary"
-						className="woocommerce-attribute-field__add-new"
-						onClick={ () => setShowAddAttributeModal( true ) }
-					>
-						{ __( 'Add first attribute', 'woocommerce' ) }
-					</Button>
-				</div>
-				{ showAddAttributeModal && (
-					<AddAttributeModal
-						onCancel={ () => setShowAddAttributeModal( false ) }
-						onAdd={ onAddNewAttributes }
-						selectedAttributeIds={ ( value || [] ).map(
-							( attr ) => attr.id
+			<Card>
+				<CardBody>
+					<div className="woocommerce-attribute-field">
+						<div className="woocommerce-attribute-field__empty-container">
+							<img
+								src={ AttributeEmptyStateLogo }
+								alt="Completed"
+								className="woocommerce-attribute-field__empty-logo"
+							/>
+							<Text
+								variant="subtitle.small"
+								weight="600"
+								size="14"
+								lineHeight="20px"
+								className="woocommerce-attribute-field__empty-subtitle"
+							>
+								{ __( 'No attributes yet', 'woocommerce' ) }
+							</Text>
+							<Button
+								variant="secondary"
+								className="woocommerce-attribute-field__add-new"
+								onClick={ () =>
+									setShowAddAttributeModal( true )
+								}
+							>
+								{ __( 'Add first attribute', 'woocommerce' ) }
+							</Button>
+						</div>
+						{ showAddAttributeModal && (
+							<AddAttributeModal
+								onCancel={ () =>
+									setShowAddAttributeModal( false )
+								}
+								onAdd={ onAddNewAttributes }
+								selectedAttributeIds={ ( value || [] ).map(
+									( attr ) => attr.id
+								) }
+							/>
 						) }
-					/>
-				) }
-				<Popover.Slot />
-			</div>
+						<Popover.Slot />
+					</div>
+				</CardBody>
+			</Card>
 		);
 	}
 

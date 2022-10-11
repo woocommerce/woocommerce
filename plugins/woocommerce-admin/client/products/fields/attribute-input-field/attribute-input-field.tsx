@@ -63,6 +63,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 				name: value.name,
 		  }
 		: null;
+
 	return (
 		<SelectControl< Pick< QueryProductAttribute, 'id' | 'name' > >
 			items={ attributes || [] }
