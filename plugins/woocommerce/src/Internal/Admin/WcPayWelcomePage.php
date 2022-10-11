@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
+use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as PaymentGatewaySuggestions;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 
 /**
@@ -39,6 +40,11 @@ class WcPayWelcomePage {
 
 		// Must be a US based business.
 		if ( WC()->countries->get_base_country() !== 'US' ) {
+			return;
+		}
+
+		// Has another payment gateway installed.
+		if ( ! $this->is_another_payment_gateway_installed() ) {
 			return;
 		}
 
@@ -144,6 +150,30 @@ class WcPayWelcomePage {
 		);
 
 		return $abtest->get_variation( self::EXPERIMENT_NAME ) === 'treatment';
+	}
+
+	/**
+	 * Checks if there is another payment gateway installed using PaymentGatewaySuggestions.
+	 *
+	 * @return bool Whether there is another payment gateway installed.
+	 */
+	private function is_another_payment_gateway_installed() {
+		$gateway_specs     = PaymentGatewaySuggestions::get_specs();
+		$installed_plugins = array_keys( get_plugins() );
+		$plugin_slugs      = array_map(
+			function( $plugin ) {
+				return explode( '/', $plugin )[0] ?? null;
+			},
+			$installed_plugins
+		);
+
+		foreach ( $gateway_specs as $spec ) {
+			if ( ! empty( $spec->plugins ) && in_array( $spec->plugins[0], $plugin_slugs ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 }
