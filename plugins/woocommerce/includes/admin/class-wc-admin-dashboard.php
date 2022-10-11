@@ -183,7 +183,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			}
 
 			$this->status_widget_order_rows();
-			if ( get_option( ''woocommerce_manage_stock ) === 'yes' )
+			if ( get_option( 'woocommerce_manage_stock' ) === 'yes' )
 			{
 				$this->status_widget_stock_rows( $is_wc_admin_disabled );
 			}
