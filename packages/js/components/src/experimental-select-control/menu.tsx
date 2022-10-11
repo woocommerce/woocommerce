@@ -37,30 +37,6 @@ export const Menu = ( {
 	}, [ selectControlMenuRef.current ] );
 
 	/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
-	const childrenPopoverMarkup = (
-		<Popover
-			focusOnMount={ false }
-			className="woocommerce-experimental-select-control__popover-menu"
-			position="bottom center"
-			animate={ false }
-		>
-			<ul
-				{ ...getMenuProps() }
-				className="woocommerce-experimental-select-control__popover-menu-container"
-				style={ {
-					width: boundingRect?.width,
-				} }
-				onMouseUp={ ( e ) =>
-					// Fix to prevent select control dropdown from closing when selecting within the Popover.
-					e.stopPropagation()
-				}
-			>
-				{ children }
-			</ul>
-		</Popover>
-	);
-	/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
-
 	return (
 		<div
 			ref={ selectControlMenuRef }
@@ -75,7 +51,29 @@ export const Menu = ( {
 				}
 			) }
 		>
-			{ isOpen && childrenPopoverMarkup }
+			{ isOpen && (
+				<Popover
+					focusOnMount={ false }
+					className="woocommerce-experimental-select-control__popover-menu"
+					position="bottom center"
+					animate={ false }
+				>
+					<ul
+						{ ...getMenuProps() }
+						className="woocommerce-experimental-select-control__popover-menu-container"
+						style={ {
+							width: boundingRect?.width,
+						} }
+						onMouseUp={ ( e ) =>
+							// Fix to prevent select control dropdown from closing when selecting within the Popover.
+							e.stopPropagation()
+						}
+					>
+						{ children }
+					</ul>
+				</Popover>
+			) }
 		</div>
 	);
+	/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
 };
