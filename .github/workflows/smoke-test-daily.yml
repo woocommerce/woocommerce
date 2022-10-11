@@ -56,6 +56,7 @@ jobs:
                   CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
                   UPDATE_WC: true
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
+                  E2E_MAX_FAILURES: 40
               run: |
                   pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-woocommerce.spec.js
                   unset UPDATE_WC
