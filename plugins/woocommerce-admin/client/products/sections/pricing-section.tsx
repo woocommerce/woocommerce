@@ -27,7 +27,7 @@ import { CurrencyContext } from '../../lib/currency-context';
 import { useProductHelper } from '../use-product-helper';
 
 export const PricingSection: React.FC = () => {
-	const { getInputProps } = useFormContext< Product >();
+	const { getInputProps, setValue } = useFormContext< Product >();
 	const { sanitizePrice } = useProductHelper();
 	const { isResolving: isTaxSettingsResolving, taxSettings } = useSelect(
 		( select ) => {
@@ -133,10 +133,7 @@ export const PricingSection: React.FC = () => {
 							label={ __( 'List price', 'woocommerce' ) }
 							placeholder={ __( '10.59', 'woocommerce' ) }
 							value={ formatCurrencyDisplayValue( regularPriceProps?.value, currencyConfig, formatAmount ) }
-							onChange={ ( value: string ) => {
-								const sanitizedValue = sanitizePrice( value );
-								regularPriceProps?.onChange( sanitizedValue );
-							} }
+							onBlur={ () => setValue( 'regular_price', sanitizePrice( regularPriceProps.value ) ) }
 						/>
 					</BaseControl>
 					{ ! isTaxSettingsResolving && (
@@ -155,10 +152,7 @@ export const PricingSection: React.FC = () => {
 							label={ salePriceTitle }
 							placeholder={ __( '8.59', 'woocommerce' ) }
 							value={ formatCurrencyDisplayValue( salePriceProps?.value, currencyConfig, formatAmount ) }
-							onChange={ ( value: string ) => {
-								const sanitizedValue = sanitizePrice( value );
-								salePriceProps?.onChange( sanitizedValue );
-							} }
+							onBlur={ () => setValue( 'sales_price', sanitizePrice( salePriceProps.value ) ) }
 						/>
 					</BaseControl>
 				</CardBody>
