@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Serialize meta value before rendering so that it's rendered properly.
