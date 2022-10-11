@@ -135,10 +135,11 @@ export function ProductShippingSection( {
 		[]
 	);
 
-	const inputWidthProps = getInputProps( 'dimensions.width' );
-	const inputLengthProps = getInputProps( 'dimensions.length' );
-	const inputHeightProps = getInputProps( 'dimensions.height' );
-	const inputWeightProps = getInputProps( 'weight' );
+	const dimensionProps = { onBlur: () => setHighlightSide( undefined ), suffix: dimensionUnit };
+	const inputWidthProps = getInputProps( 'dimensions.width', dimensionProps );
+	const inputLengthProps = getInputProps( 'dimensions.length', dimensionProps );
+	const inputHeightProps = getInputProps( 'dimensions.height', dimensionProps );
+	const inputWeightProps = getInputProps( 'weight', dimensionProps );
 
 	return (
 		<ProductSectionLayout
@@ -237,11 +238,6 @@ export function ProductShippingSection( {
 											onFocus={ () => {
 												setHighlightSide( 'A' );
 											} }
-											onBlur={ () => {
-												setHighlightSide( undefined );
-												inputWidthProps?.onBlur();
-											} }
-											suffix={ dimensionUnit }
 										/>
 									</BaseControl>
 
@@ -269,11 +265,6 @@ export function ProductShippingSection( {
 											onFocus={ () => {
 												setHighlightSide( 'B' );
 											} }
-											onBlur={ () => {
-												setHighlightSide( undefined );
-												inputLengthProps?.onBlur();
-											} }
-											suffix={ dimensionUnit }
 										/>
 									</BaseControl>
 
@@ -301,11 +292,6 @@ export function ProductShippingSection( {
 											onFocus={ () => {
 												setHighlightSide( 'C' );
 											} }
-											onBlur={ () => {
-												setHighlightSide( undefined );
-												inputHeightProps?.onBlur();
-											} }
-											suffix={ dimensionUnit }
 										/>
 									</BaseControl>
 
