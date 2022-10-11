@@ -19,7 +19,6 @@ import {
 } from '@wordpress/block-editor';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
-import type { CartShippingPackageShippingRate } from '@woocommerce/type-defs/cart';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 
@@ -31,11 +30,8 @@ import {
 	AdditionalFields,
 	AdditionalFieldsContent,
 } from '../../form-step';
-import {
-	RatePrice,
-	getLocalPickupStartingPrice,
-	getShippingStartingPrice,
-} from './shared';
+import { RatePrice, getLocalPickupPrices, getShippingPrices } from './shared';
+import type { minMaxPrices } from './shared';
 import './style.scss';
 
 const LocalPickupSelector = ( {
@@ -47,7 +43,7 @@ const LocalPickupSelector = ( {
 	setAttributes,
 }: {
 	checked: string;
-	rate: CartShippingPackageShippingRate;
+	rate: minMaxPrices;
 	showPrice: boolean;
 	showIcon: boolean;
 	toggleText: string;
@@ -78,7 +74,9 @@ const LocalPickupSelector = ( {
 				__unstableDisableFormats
 				preserveWhiteSpace
 			/>
-			{ showPrice === true && <RatePrice rate={ rate } /> }
+			{ showPrice === true && (
+				<RatePrice minRate={ rate.min } maxRate={ rate.max } />
+			) }
 		</Radio>
 	);
 };
@@ -92,14 +90,14 @@ const ShippingSelector = ( {
 	setAttributes,
 }: {
 	checked: string;
-	rate: CartShippingPackageShippingRate;
+	rate: minMaxPrices;
 	showPrice: boolean;
 	showIcon: boolean;
 	toggleText: string;
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ) => {
 	const Price =
-		rate === undefined ? (
+		rate.min === undefined ? (
 			<span className="wc-block-checkout__collection-item-price">
 				{ __(
 					'calculated with an address',
@@ -107,7 +105,7 @@ const ShippingSelector = ( {
 				) }
 			</span>
 		) : (
-			<RatePrice rate={ rate } />
+			<RatePrice minRate={ rate.min } maxRate={ rate.max } />
 		);
 
 	return (
@@ -167,12 +165,6 @@ export const Edit = ( {
 	const { showPrice, showIcon, className, localPickupText, shippingText } =
 		attributes;
 	const { shippingRates } = useShippingData();
-	const localPickupStartingPrice = getLocalPickupStartingPrice(
-		shippingRates[ 0 ]?.shipping_rates
-	);
-	const shippingStartingPrice = getShippingStartingPrice(
-		shippingRates[ 0 ]?.shipping_rates
-	);
 
 	const changeView = ( method: string ) => {
 		if ( method === 'pickup' ) {
@@ -236,7 +228,9 @@ export const Edit = ( {
 			>
 				<ShippingSelector
 					checked={ prefersCollection ? 'pickup' : 'shipping' }
-					rate={ shippingStartingPrice }
+					rate={ getShippingPrices(
+						shippingRates[ 0 ]?.shipping_rates
+					) }
 					showPrice={ showPrice }
 					showIcon={ showIcon }
 					setAttributes={ setAttributes }
@@ -244,7 +238,9 @@ export const Edit = ( {
 				/>
 				<LocalPickupSelector
 					checked={ prefersCollection ? 'pickup' : 'shipping' }
-					rate={ localPickupStartingPrice }
+					rate={ getLocalPickupPrices(
+						shippingRates[ 0 ]?.shipping_rates
+					) }
 					showPrice={ showPrice }
 					showIcon={ showIcon }
 					setAttributes={ setAttributes }

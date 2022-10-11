@@ -54,7 +54,16 @@ if ( isExperimentalBuild() ) {
 		component: lazy(
 			() =>
 				import(
-					/* webpackChunkName: "checkout-blocks/collection-method" */ './checkout-collection-method/frontend'
+					/* webpackChunkName: "checkout-blocks/collection-method" */ './checkout-collection-method-block/frontend'
+				)
+		),
+	} );
+	registerCheckoutBlock( {
+		metadata: metadata.CHECKOUT_PICKUP_LOCATION,
+		component: lazy(
+			() =>
+				import(
+					/* webpackChunkName: "checkout-blocks/pickup-options" */ './checkout-pickup-options-block/frontend'
 				)
 		),
 	} );

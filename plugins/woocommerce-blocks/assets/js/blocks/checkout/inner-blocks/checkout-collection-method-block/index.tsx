@@ -10,7 +10,7 @@ import { registerExperimentalBlockType } from '@woocommerce/block-settings';
 import { Edit, Save } from './edit';
 import attributes from './attributes';
 
-registerExperimentalBlockType( 'woocommerce/checkout-collection-method', {
+registerExperimentalBlockType( 'woocommerce/checkout-collection-method-block', {
 	icon: {
 		src: (
 			<Icon

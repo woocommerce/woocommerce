@@ -30,24 +30,26 @@ const OptionLayout = ( {
 					</span>
 				) }
 			</div>
-			<div className="wc-block-components-radio-control__description-group">
-				{ description && (
-					<span
-						id={ id && `${ id }__description` }
-						className="wc-block-components-radio-control__description"
-					>
-						{ description }
-					</span>
-				) }
-				{ secondaryDescription && (
-					<span
-						id={ id && `${ id }__secondary-description` }
-						className="wc-block-components-radio-control__secondary-description"
-					>
-						{ secondaryDescription }
-					</span>
-				) }
-			</div>
+			{ ( description || secondaryDescription ) && (
+				<div className="wc-block-components-radio-control__description-group">
+					{ description && (
+						<span
+							id={ id && `${ id }__description` }
+							className="wc-block-components-radio-control__description"
+						>
+							{ description }
+						</span>
+					) }
+					{ secondaryDescription && (
+						<span
+							id={ id && `${ id }__secondary-description` }
+							className="wc-block-components-radio-control__secondary-description"
+						>
+							{ secondaryDescription }
+						</span>
+					) }
+				</div>
+			) }
 		</div>
 	);
 };

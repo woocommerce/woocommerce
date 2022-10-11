@@ -36,4 +36,9 @@
 
 .wc-block-checkout__collection-item-price {
 	@include font-size(small, 1rem);
+
+	em {
+		text-transform: uppercase;
+		font-style: inherit;
+	}
 }

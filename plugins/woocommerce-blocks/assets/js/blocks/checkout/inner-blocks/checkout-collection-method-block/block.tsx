@@ -9,17 +9,13 @@ import {
 } from 'wordpress-components';
 import classnames from 'classnames';
 import { Icon, store, shipping } from '@wordpress/icons';
-import type { CartShippingPackageShippingRate } from '@woocommerce/type-defs/cart';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import {
-	RatePrice,
-	getLocalPickupStartingPrice,
-	getShippingStartingPrice,
-} from './shared';
+import { RatePrice, getLocalPickupPrices, getShippingPrices } from './shared';
+import type { minMaxPrices } from './shared';
 
 const LocalPickupSelector = ( {
 	checked,
@@ -29,7 +25,7 @@ const LocalPickupSelector = ( {
 	toggleText,
 }: {
 	checked: string;
-	rate: CartShippingPackageShippingRate;
+	rate: minMaxPrices;
 	showPrice: boolean;
 	showIcon: boolean;
 	toggleText: string;
@@ -52,7 +48,9 @@ const LocalPickupSelector = ( {
 			<span className="wc-block-checkout__collection-item-title">
 				{ toggleText }
 			</span>
-			{ showPrice === true && <RatePrice rate={ rate } /> }
+			{ showPrice === true && (
+				<RatePrice minRate={ rate.min } maxRate={ rate.max } />
+			) }
 		</Radio>
 	);
 };
@@ -65,13 +63,13 @@ const ShippingSelector = ( {
 	toggleText,
 }: {
 	checked: string;
-	rate: CartShippingPackageShippingRate;
+	rate: minMaxPrices;
 	showPrice: boolean;
 	showIcon: boolean;
 	toggleText: string;
 } ) => {
 	const Price =
-		rate === undefined ? (
+		rate.min === undefined ? (
 			<span className="wc-block-checkout__collection-item-price">
 				{ __(
 					'calculated with an address',
@@ -79,7 +77,7 @@ const ShippingSelector = ( {
 				) }
 			</span>
 		) : (
-			<RatePrice rate={ rate } />
+			<RatePrice minRate={ rate.min } maxRate={ rate.max } />
 		);
 
 	return (
@@ -122,20 +120,10 @@ const Block = ( {
 	const { shippingRates, needsShipping, hasCalculatedShipping } =
 		useShippingData();
 
-	if ( ! needsShipping || ! hasCalculatedShipping ) {
+	if ( ! needsShipping || ! hasCalculatedShipping || ! shippingRates ) {
 		return null;
 	}
 
-	const localPickupStartingPrice = getLocalPickupStartingPrice(
-		shippingRates[ 0 ]?.shipping_rates
-	);
-	const shippingStartingPrice = getShippingStartingPrice(
-		shippingRates[ 0 ]?.shipping_rates
-	);
-
-	if ( ! localPickupStartingPrice && ! shippingStartingPrice ) {
-		return null;
-	}
 	return (
 		<RadioGroup
 			id="collection-method"
@@ -146,14 +134,16 @@ const Block = ( {
 		>
 			<ShippingSelector
 				checked={ checked }
-				rate={ shippingStartingPrice }
+				rate={ getShippingPrices( shippingRates[ 0 ]?.shipping_rates ) }
 				showPrice={ showPrice }
 				showIcon={ showIcon }
 				toggleText={ shippingText }
 			/>
 			<LocalPickupSelector
 				checked={ checked }
-				rate={ localPickupStartingPrice }
+				rate={ getLocalPickupPrices(
+					shippingRates[ 0 ]?.shipping_rates
+				) }
 				showPrice={ showPrice }
 				showIcon={ showIcon }
 				toggleText={ localPickupText }
