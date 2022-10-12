@@ -9,6 +9,12 @@ use Automattic\WooCommerce\Admin\Marketing\InstalledExtensions;
 use Automattic\WooCommerce\Admin\Marketing\MarketingChannels;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 
+// Indicates that the multichannel marketing classes exist.
+// This constant will be checked by third-party extensions before utilizing any of the classes defined for this feature.
+if ( ! defined( 'WC_MCM_EXISTS' ) ) {
+	define( 'WC_MCM_EXISTS', true );
+}
+
 /**
  * Service provider for the non-static utils classes in the Automattic\WooCommerce\src namespace.
  *
