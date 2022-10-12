@@ -20,7 +20,7 @@ export type ImageGalleryToolbarProps = {
 	removeItem: ( removeIndex: number ) => void;
 	replaceItem: (
 		replaceIndex: number,
-		media: { id: number } & { [ k: string ]: any }
+		media: { id: number } & { [ k: string ]: unknown }
 	) => void;
 	setToolBarItem: ( key: string | null ) => void;
 	lastChild: boolean;
@@ -61,7 +61,9 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 				{ ! isCoverItem && (
 					<ToolbarGroup>
 						<ToolbarButton
-							icon={ () => <SortableHandle itemIndex={ childIndex } /> }
+							icon={ () => (
+								<SortableHandle itemIndex={ childIndex } />
+							) }
 							label={ __( 'Drag', 'woocommerce' ) }
 						/>
 						<ToolbarButton

@@ -28,7 +28,7 @@ export type ImageGalleryProps = {
 	} ) => void;
 	onReplace?: ( props: {
 		replaceIndex: number;
-		media: { id: number } & { [ k: string ]: any };
+		media: { id: number } & { [ k: string ]: unknown };
 	} ) => void;
 	onSelectAsCover?: ( itemId: string | null ) => void;
 	onOrderChange?: ( items: ImageGalleryChild[] ) => void;
@@ -99,7 +99,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 			>
 				{ orderedChildren.map( ( child, childIndex ) => {
 					const isToolbarVisible = child.key === activeToolbarKey;
-					const isCoverItem = childIndex === 0;
+					const isCoverItem = ( childIndex === 0 ) as boolean;
 
 					return cloneElement(
 						child,
@@ -169,7 +169,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 								replaceItem={ (
 									replaceIndex: number,
 									media: { id: number } & {
-										[ k: string ]: any;
+										[ k: string ]: unknown;
 									}
 								) => {
 									onReplace( { replaceIndex, media } );
@@ -178,8 +178,8 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 											src: string;
 											alt: string;
 										} >( orderedChildren, replaceIndex, {
-											src: media.url,
-											alt: media.alt,
+											src: media.url as string,
+											alt: media.alt as string,
 										} )
 									);
 								} }

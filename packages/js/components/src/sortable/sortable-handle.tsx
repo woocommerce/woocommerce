@@ -16,7 +16,10 @@ type SortableHandleProps = {
 	itemIndex?: number;
 };
 
-export const SortableHandle = ( { children, itemIndex }: SortableHandleProps ) => {
+export const SortableHandle = ( {
+	children,
+	itemIndex,
+}: SortableHandleProps ) => {
 	const { onDragStart, onDragEnd }: SortableContextType =
 		useContext( SortableContext );
 
