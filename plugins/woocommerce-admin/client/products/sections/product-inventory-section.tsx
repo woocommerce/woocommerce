@@ -3,33 +3,19 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Card, CardBody, TextControl } from '@wordpress/components';
-import { cleanForSlug } from '@wordpress/url';
 import { getAdminLink } from '@woocommerce/settings';
 import { Link, useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { getTextControlProps } from './utils';
 import { ProductSectionLayout } from '../layout/product-section-layout';
-import { usePrevious } from '~/hooks/usePrevious';
 
 export const ProductInventorySection: React.FC = () => {
-	const { getInputProps, setValue, touched, values } = useFormContext< Product >();
-	const prevTouchedName = usePrevious( touched.name );
-
-	const setSkuIfEmpty = () => {
-		if ( values.sku || ! values.name?.length ) {
-			return;
-		}
-		setValue( 'sku', cleanForSlug( values.name ) );
-	};
-
-	const isNameBlurred = ! prevTouchedName && touched.name;
-	useEffect( setSkuIfEmpty, [ isNameBlurred ] );
+	const { getInputProps } = useFormContext< Product >();
 
 	return (
 		<ProductSectionLayout

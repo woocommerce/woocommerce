@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Suspense, lazy } from '@wordpress/element';
-import { useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { parse, stringify } from 'qs';
 import { find, isEqual, last, omit } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
@@ -23,7 +23,6 @@ import { Spinner } from '@woocommerce/components';
 import getReports from '../analytics/report/get-reports';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { NoMatch } from './NoMatch';
-import { usePrevious } from '~/hooks/usePrevious';
 
 const EditProductPage = lazy( () =>
 	import(
@@ -285,6 +284,14 @@ export const getPages = () => {
 
 	return filteredPages;
 };
+
+function usePrevious( value ) {
+	const ref = useRef();
+	useEffect( () => {
+		ref.current = value;
+	}, [ value ] );
+	return ref.current;
+}
 
 export const Controller = ( { ...props } ) => {
 	const prevProps = usePrevious( props );

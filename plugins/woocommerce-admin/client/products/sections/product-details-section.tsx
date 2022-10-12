@@ -31,7 +31,7 @@ import { EditProductLinkModal } from '../shared/edit-product-link-modal';
 const PRODUCT_DETAILS_SLUG = 'product-details';
 
 export const ProductDetailsSection: React.FC = () => {
-	const { getInputProps, values, touched, errors } =
+	const { getInputProps, values, touched, errors, setValue } =
 		useFormContext< Product >();
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
 		useState( false );
@@ -51,6 +51,13 @@ export const ProductDetailsSection: React.FC = () => {
 
 	const hasNameError = () => {
 		return Boolean( touched.name ) && Boolean( errors.name );
+	};
+
+	const setSkuIfEmpty = () => {
+		if ( values.sku || ! values.name.length ) {
+			return;
+		}
+		setValue( 'sku', cleanForSlug( values.name ) );
 	};
 
 	return (
@@ -74,6 +81,10 @@ export const ProductDetailsSection: React.FC = () => {
 							{ ...getTextControlProps(
 								getInputProps( 'name' )
 							) }
+							onBlur={ () => {
+								setSkuIfEmpty();
+								getInputProps( 'name' ).onBlur();
+							} }
 						/>
 						{ values.id && ! hasNameError() && permalinkPrefix && (
 							<span className="woocommerce-product-form__secondary-text product-details-section__product-link">
