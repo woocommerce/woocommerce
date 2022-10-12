@@ -41,7 +41,7 @@ test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
 		await deletePlugin( {
 			request: playwright.request,
 			baseURL,
-			slug: 'woocommerce/woocommerce',
+			slug: 'woocommerce',
 			username: ADMIN_USER,
 			password: ADMIN_PASSWORD,
 		} );
