@@ -704,14 +704,30 @@ class FeaturesController {
 			return $list;
 		}
 
-		$feature_id = ArrayUtil::get_value_or_default( $_GET, 'feature_id' );
-		if ( is_null( $feature_id ) || ! $this->feature_exists( $feature_id ) ) {
+		$feature_id = ArrayUtil::get_value_or_default( $_GET, 'feature_id', 'all' );
+		if ( 'all' !== $feature_id && ! $this->feature_exists( $feature_id ) ) {
 			return $list;
 		}
-		// phpcs:enable WordPress.Security.NonceVerification
 
-		$plugin_info_for_feature = $this->get_compatible_plugins_for_feature( $feature_id );
-		$incompatibles           = array_merge( $plugin_info_for_feature['incompatible'], $plugin_info_for_feature['uncertain'] );
+		$incompatibles = array();
+
+		// phpcs:enable WordPress.Security.NonceVerification
+		foreach ( array_keys( $list ) as $plugin_name ) {
+			if ( ! $this->plugin_util->is_woocommerce_aware_plugin( $plugin_name ) ) {
+				continue;
+			}
+
+			$compatibility     = $this->get_compatible_features_for_plugin( $plugin_name );
+			$incompatible_with = array_diff(
+				array_merge( $compatibility['incompatible'], $compatibility['uncertain'] ),
+				$this->legacy_feature_ids
+			);
+
+			if ( ( 'all' === $feature_id && ! empty( $incompatible_with ) ) || in_array( $feature_id, $incompatible_with, true ) ) {
+				$incompatibles[] = $plugin_name;
+			}
+		}
+
 		if ( 0 === count( $incompatibles ) ) {
 			return $list;
 		}
@@ -909,21 +925,23 @@ class FeaturesController {
 			return $views;
 		}
 
-		$feature_id = ArrayUtil::get_value_or_default( $_GET, 'feature_id' );
-		if ( is_null( $feature_id ) || ! $this->feature_exists( $feature_id ) ) {
+		$feature_id = ArrayUtil::get_value_or_default( $_GET, 'feature_id', 'all' );
+		if ( 'all' !== $feature_id && ! $this->feature_exists( $feature_id ) ) {
 			return $views;
 		}
 		// phpcs:enable WordPress.Security.NonceVerification
 
-		$feature_compatibility_info = $this->get_compatible_plugins_for_feature( $feature_id, false );
-		$incompatible_plugins_count = count( $feature_compatibility_info['incompatible'] ) + count( $feature_compatibility_info['uncertain'] );
+		$all_items = get_plugins();
 
-		$feature_name = $this->features[ $feature_id ]['name'];
-		/* translators: %s = name of a WooCommerce feature */
-		$incompatible_text = sprintf( __( "Incompatible with '%s'", 'woocommerce' ), $feature_name );
+		$incompatible_plugins_count = count( $this->filter_plugins_list( $all_items ) );
+		$incompatible_text          =
+			'all' === $feature_id
+			? __( 'Incompatible with WooCommerce features', 'woocommerce' )
+			/* translators: %s = name of a WooCommerce feature */
+			: sprintf( __( "Incompatible with '%s'", 'woocommerce' ), $this->features[ $feature_id ]['name'] );
 		$incompatible_link = "<a href='plugins.php?plugin_status=incompatible_with_feature&feature_id={$feature_id}' class='current' aria-current='page'>{$incompatible_text} <span class='count'>({$incompatible_plugins_count})</span></a>";
 
-		$all_plugins_count = count( get_plugins() );
+		$all_plugins_count = count( $all_items );
 		$all_text          = __( 'All', 'woocommerce' );
 		$all_link          = "<a href='plugins.php?plugin_status=all'>{$all_text} <span class='count'>({$all_plugins_count})</span></a>";
 
