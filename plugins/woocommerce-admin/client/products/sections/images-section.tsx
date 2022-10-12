@@ -33,7 +33,7 @@ export const ImagesSection: React.FC = () => {
 	const images = ( getInputProps( 'images' ).value as Image[] ) || [];
 	const [ isRemoveZoneVisible, setIsRemoveZoneVisible ] =
 		useState< boolean >( false );
-	const [ isRemove, setIsRemove ] = useState< boolean >( false );
+	const [ isRemoving, setIsRemoving ] = useState< boolean >( false );
 	const [ draggedImageId, setDraggedImageId ] = useState< number | null >(
 		0
 	);
