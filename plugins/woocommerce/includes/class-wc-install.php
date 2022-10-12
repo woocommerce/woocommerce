@@ -494,9 +494,10 @@ class WC_Install {
 	 * @return boolean
 	 */
 	public static function is_new_install() {
-		$product_count = array_sum( (array) wp_count_posts( 'product' ) );
-
-		return is_null( get_option( 'woocommerce_version', null ) ) || ( 0 === $product_count && -1 === wc_get_page_id( 'shop' ) );
+		global $wpdb;
+		// this query will give you either 0 or 1 depending on whether a product exists or not
+		$product_exists = $wpdb->get_var("select CASE WHEN EXISTS (SELECT * from $wpdb->posts where post_type = 'product') THEN 1 ELSE 0 END as product_exists;");
+		return is_null( get_option( 'woocommerce_version', null ) ) || ( !$product_exists && -1 === wc_get_page_id( 'shop' ) );
 	}
 
 	/**
