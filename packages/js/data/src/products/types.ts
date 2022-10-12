@@ -35,6 +35,12 @@ export type ProductAttribute = {
 	options: string[];
 };
 
+export type ProductDimensions = {
+	width: string;
+	height: string;
+	length: string;
+};
+
 export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	Schema.Post,
 	'status' | 'categories'
@@ -148,16 +154,4 @@ export type ProductQuery<
 	min_price: string;
 	max_price: string;
 	stock_status: 'instock' | 'outofstock' | 'onbackorder';
-};
-
-export type ProductDimensions = {
-	width: string;
-	height: string;
-	length: string;
-};
-
-export type ProductCategory = {
-	id: number;
-	name: string;
-	slug: string;
 };
