@@ -1270,11 +1270,24 @@ class WC_Helper {
 			return $data;
 		}
 
+		$source = $_SERVER['REQUEST_URI'];
+		if ( preg_match( '/\S+wc-addons?\S+/', $source ) ):
+			$source = 'my-subscriptions';
+		elseif ( preg_match( '/\S+plugins.php?\S+/', $source ) ):
+			$source = 'plugins';
+		elseif ( preg_match( '/\S+wc-admin?\S+/', $source ) ):
+			$source = 'inbox-notes';
+		elseif ( preg_match( '/\Sadmin-ajax.php/', $source ) ):
+			$source = 'heartbeat-api';
+		endif;
+
 		// Obtain the connected user info.
 		$request = WC_Helper_API::get(
 			'subscriptions',
 			array(
 				'authenticated' => true,
+				'source'        => '?source=' . $source,
+
 			)
 		);
 

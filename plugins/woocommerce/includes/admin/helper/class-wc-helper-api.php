@@ -42,7 +42,10 @@ class WC_Helper_API {
 	 * @return array|WP_Error The response from wp_safe_remote_request()
 	 */
 	public static function request( $endpoint, $args = array() ) {
-		$url = self::url( $endpoint );
+		if ( ! isset( $args[ 'source' ] ) ) {
+			$args[ 'source' ] = '';
+		}
+		$url = self::url( $endpoint, $args['source'] );
 
 		if ( ! empty( $args['authenticated'] ) ) {
 			if ( ! self::_authenticate( $url, $args ) ) {
@@ -163,9 +166,9 @@ class WC_Helper_API {
 	 *
 	 * @return string The absolute endpoint URL.
 	 */
-	public static function url( $endpoint ) {
+	public static function url( $endpoint, $source = '' ) {
 		$endpoint = ltrim( $endpoint, '/' );
-		$endpoint = sprintf( '%s/%s', self::$api_base, $endpoint );
+		$endpoint = sprintf( '%s/%s/%s', self::$api_base, $endpoint, $source );
 		$endpoint = esc_url_raw( $endpoint );
 		return $endpoint;
 	}
