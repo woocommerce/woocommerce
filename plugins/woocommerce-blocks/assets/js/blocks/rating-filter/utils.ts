@@ -17,3 +17,11 @@ export const getActiveFilters = ( queryParamKey = 'filter_rating' ) => {
 
 	return parsedParams;
 };
+
+export const parseAttributes = ( data: Record< string, unknown > ) => {
+	return {
+		showFilterButton: data?.showFilterButton === 'true',
+		showCounts: data?.showCounts !== 'false',
+		isPreview: false,
+	};
+};

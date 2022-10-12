@@ -11,7 +11,6 @@ import {
 } from '@woocommerce/base-context/hooks';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean, isObject, objectHasProp } from '@woocommerce/types';
-import FilterTitlePlaceholder from '@woocommerce/base-components/filter-placeholder';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import { useState, useCallback, useMemo, useEffect } from '@wordpress/element';
 import CheckboxList from '@woocommerce/base-components/checkbox-list';
@@ -28,6 +27,7 @@ import { previewOptions } from './preview';
 import './style.scss';
 import { Attributes } from './types';
 import { getActiveFilters } from './utils';
+import { useSetWraperVisibility } from '../filter-wrapper/context';
 
 export const QUERY_PARAM_KEY = 'rating_filter';
 
@@ -45,6 +45,8 @@ const RatingFilterBlock = ( {
 	attributes: Attributes;
 	isEditor?: boolean;
 } ) => {
+	const setWrapperVisibility = useSetWraperVisibility();
+
 	const filteringForPhpTemplate = getSettingWithCoercion(
 		'is_rendering_php_template',
 		false,
@@ -65,8 +67,6 @@ const RatingFilterBlock = ( {
 		blockAttributes.isPreview ? previewOptions : []
 	);
 
-	const TagName =
-		`h${ blockAttributes.headingLevel }` as keyof JSX.IntrinsicElements;
 	const isLoading =
 		! blockAttributes.isPreview &&
 		filteredCountsLoading &&
@@ -232,6 +232,7 @@ const RatingFilterBlock = ( {
 	}, [
 		blockAttributes.showCounts,
 		blockAttributes.isPreview,
+		productRatingsArray,
 		filteredCounts,
 		filteredCountsLoading,
 	] );
@@ -253,28 +254,29 @@ const RatingFilterBlock = ( {
 			}
 			setChecked( newChecked );
 		},
-		[ checked, displayedOptions ]
+		[ checked ]
 	);
 
 	if ( ! filteredCountsLoading && displayedOptions.length === 0 ) {
+		setWrapperVisibility( false );
 		return null;
 	}
 
-	const heading = (
-		<TagName className="wc-block-rating-filter__title">
-			{ blockAttributes.heading }
-		</TagName>
+	const hasFilterableProducts = getSettingWithCoercion(
+		'has_filterable_products',
+		false,
+		isBoolean
 	);
 
-	const filterHeading = isLoading ? (
-		<FilterTitlePlaceholder>{ heading }</FilterTitlePlaceholder>
-	) : (
-		heading
-	);
+	if ( ! hasFilterableProducts ) {
+		setWrapperVisibility( false );
+		return null;
+	}
+
+	setWrapperVisibility( true );
 
 	return (
 		<>
-			{ ! isEditor && blockAttributes.heading && filterHeading }
 			<div
 				className={ classnames( 'wc-block-rating-filter', {
 					'is-loading': isLoading,
