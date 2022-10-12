@@ -118,7 +118,6 @@ class FeaturesController {
 		self::add_filter( 'deactivated_plugin', array( $this, 'handle_plugin_deactivation' ), 10, 1 );
 		self::add_filter( 'all_plugins', array( $this, 'filter_plugins_list' ), 10, 1 );
 		self::add_action( 'admin_notices', array( $this, 'display_notice_in_plugins_page' ), 10, 0 );
-		self::add_action( 'plugin_action_links', array( $this, 'handle_action_links' ), 10, 2 );
 		self::add_action( 'after_plugin_row', array( $this, 'handle_plugin_list_rows' ), 10, 2 );
 		self::add_action( 'current_screen', array( $this, 'enqueue_script_to_fix_plugin_list_html' ), 10, 1 );
 		self::add_filter( 'views_plugins', array( $this, 'handle_plugins_page_views_list' ), 10, 1 );
@@ -763,39 +762,6 @@ class FeaturesController {
 	}
 
 	/**
-	 * Handler for the 'plugin_action_links' filter.
-	 * Disables the 'Activate' link if the plugins has icnompatibilities with enabled features.
-	 *
-	 * @param array  $actions The action links to render.
-	 * @param string $plugin_file The plugin file.
-	 * @return array The actual action links to render.
-	 */
-	private function handle_action_links( $actions, $plugin_file ): array {
-		if ( ! $this->verify_did_woocommerce_init() ) {
-			return $actions;
-		}
-
-		if ( $this->force_allow_enabling_plugins ) {
-			return $actions;
-		}
-
-		$is_woocommerce_aware = in_array( $plugin_file, $this->plugin_util->get_woocommerce_aware_plugins(), true );
-		if ( ! $is_woocommerce_aware ) {
-			return $actions;
-		}
-
-		$feature_info          = $this->get_compatible_features_for_plugin( $plugin_file, true );
-		$incompatible_features = array_merge( $feature_info['incompatible'], $feature_info['uncertain'] );
-		if ( count( $incompatible_features ) > 0 ) {
-			if ( ! Constants::is_true( 'WP_DEBUG' ) && isset( $actions['activate'] ) ) {
-				$actions['activate'] = '<span disabled>' . __( 'Activate', 'woocommerce' ) . '</span>';
-			}
-		}
-
-		return $actions;
-	}
-
-	/**
 	 * Handler for the 'after_plugin_row' action.
 	 * Displays a "This plugin is incompatible with X features" notice if necessary.
 	 *
@@ -853,8 +819,6 @@ class FeaturesController {
 					$incompatible_features_count - 2
 				);
 			}
-			$debug_message           = Constants::is_true( 'WP_DEBUG' ) ? __( ' You can still activate it as WP_DEBUG is true.', 'woocommerce' ) : '';
-			$message                 .= $debug_message;
 			$features_page_url       = $this->get_features_page_url();
 			$manage_features_message = __( 'Manage WooCommerce features', 'woocommerce' );
 
