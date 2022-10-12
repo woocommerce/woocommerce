@@ -8,6 +8,23 @@ export type FormErrors< Values > = {
 	[ P in keyof Values ]?: FormErrors< Values[ P ] > | string;
 };
 
+export type InputProps< Value > = {
+	value: Value;
+	checked: boolean;
+	selected?: boolean;
+	onChange: ( value: ChangeEvent< HTMLInputElement > | Value ) => void;
+	onBlur: () => void;
+	className?: string;
+	help?: string | null;
+};
+
+export type DateTimePickerControlProps< Value > = Omit<
+	InputProps< Value >,
+	'value' | 'checked'
+> & {
+	currentDate: Value;
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type FormContext< Values extends Record< string, any > > = {
 	values: Values;
@@ -23,24 +40,10 @@ export type FormContext< Values extends Record< string, any > > = {
 	handleSubmit: () => Promise< Values >;
 	getInputProps< Value extends Values[ keyof Values ] >(
 		name: string
-	): {
-		value: Value;
-		checked: boolean;
-		selected?: boolean;
-		onChange: ( value: ChangeEvent< HTMLInputElement > | Value ) => void;
-		onBlur: () => void;
-		className: string | undefined;
-		help: string | null | undefined;
-	};
+	): InputProps< Value >;
 	getDateTimePickerControlProps< Value extends Values[ keyof Values ] >(
 		name: string
-	): {
-		currentDate: Value;
-		className?: string;
-		onChange: ( date: Values[ keyof Values ] ) => void;
-		onBlur: () => void;
-		help?: string | null;
-	};
+	): DateTimePickerControlProps< Value >;
 	isValidForm: boolean;
 	resetForm: (
 		initialValues: Values,
