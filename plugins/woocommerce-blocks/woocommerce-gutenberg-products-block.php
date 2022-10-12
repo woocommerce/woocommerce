@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce Blocks
  * Plugin URI: https://github.com/woocommerce/woocommerce-gutenberg-products-block
  * Description: WooCommerce blocks for the Gutenberg editor.
- * Version: 8.7.0-dev
+ * Version: 8.7.0
  * Author: Automattic
  * Author URI: https://woocommerce.com
  * Text Domain:  woo-gutenberg-products-block
@@ -15,7 +15,7 @@
  * @package WooCommerce\Blocks
  * @internal This file is only used when running as a feature plugin.
  */
- 
+
 defined( 'ABSPATH' ) || exit;
 
 $minimum_wp_version = '6.0';
@@ -24,11 +24,14 @@ if ( ! defined( 'WC_BLOCKS_IS_FEATURE_PLUGIN' ) ) {
 	define( 'WC_BLOCKS_IS_FEATURE_PLUGIN', true );
 }
 
-// Declare comaptibility with custom order tables for WooCommerce
+// Declare compatibility with custom order tables for WooCommerce.
 if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
-    add_action('before_woocommerce_init', function() {
-        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
-    });
+	add_action(
+		'before_woocommerce_init',
+		function () {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+		}
+	);
 }
 
 /**
