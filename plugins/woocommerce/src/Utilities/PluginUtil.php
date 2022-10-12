@@ -53,6 +53,7 @@ class PluginUtil {
 	 */
 	final public function init( LegacyProxy $proxy ) {
 		$this->proxy = $proxy;
+		require_once ABSPATH . WPINC . '/plugin.php';
 	}
 
 	/**

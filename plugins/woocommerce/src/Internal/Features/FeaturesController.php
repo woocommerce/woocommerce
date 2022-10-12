@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\Features;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Admin\Features\Navigation\Init;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
@@ -786,7 +787,7 @@ class FeaturesController {
 		$feature_info          = $this->get_compatible_features_for_plugin( $plugin_file, true );
 		$incompatible_features = array_merge( $feature_info['incompatible'], $feature_info['uncertain'] );
 		if ( count( $incompatible_features ) > 0 ) {
-			if ( isset( $actions['activate'] ) ) {
+			if ( ! Constants::is_true( 'WP_DEBUG' ) && isset( $actions['activate'] ) ) {
 				$actions['activate'] = '<span disabled>' . __( 'Activate', 'woocommerce' ) . '</span>';
 			}
 		}
@@ -848,7 +849,8 @@ class FeaturesController {
 					$incompatible_features_count - 2
 				);
 			}
-
+			$debug_message           = Constants::is_true( 'WP_DEBUG' ) ? __( ' You can still activate it as WP_DEBUG is true.', 'woocommerce' ) : '';
+			$message                 .= $debug_message;
 			$features_page_url       = $this->get_features_page_url();
 			$manage_features_message = __( 'Manage WooCommerce features', 'woocommerce' );
 
