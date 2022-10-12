@@ -81,6 +81,7 @@ export const downloadZip = async ( { url, downloadPath, authToken } ) => {
 	const options = {
 		url,
 		responseType: 'stream',
+		headers: { 'user-agent': 'node.js' },
 	};
 
 	// If provided with a token, use it for authorization
