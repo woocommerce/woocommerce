@@ -63,7 +63,7 @@ class Package {
 	}
 
 	/**
-	 * Returns an instance of the the FeatureGating class.
+	 * Returns an instance of the FeatureGating class.
 	 *
 	 * @return FeatureGating
 	 */
@@ -109,7 +109,7 @@ class Package {
 				NewPackage::class,
 				function ( $container ) {
 					// leave for automated version bumping.
-					$version = '8.7.0';
+					$version = '8.8.0-dev';
 					return new NewPackage(
 						$version,
 						dirname( __DIR__ ),
