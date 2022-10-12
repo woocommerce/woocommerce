@@ -31,7 +31,7 @@ type Image = MediaItem & {
 export const ImagesSection: React.FC = () => {
 	const { getInputProps, setValue } = useFormContext< Product >();
 	const images = ( getInputProps( 'images' ).value as Image[] ) || [];
-	const [ isRemoveZoneVisible, setIsRemoveZoneVisible ] =
+	const [ isRemovingZoneVisible, setIsRemovingZoneVisible ] =
 		useState< boolean >( false );
 	const [ isRemoving, setIsRemoving ] = useState< boolean >( false );
 	const [ draggedImageId, setDraggedImageId ] = useState< number | null >(
@@ -39,7 +39,7 @@ export const ImagesSection: React.FC = () => {
 	);
 
 	const toggleRemoveZone = () => {
-		setIsRemoveZoneVisible( ! isRemoveZoneVisible );
+		setIsRemovingZoneVisible( ! isRemovingZoneVisible );
 	};
 
 	const orderImages = ( newOrder: JSX.Element[] ) => {
@@ -99,14 +99,14 @@ export const ImagesSection: React.FC = () => {
 							toggleRemoveZone();
 						} }
 						onDragEnd={ () => {
-							if ( isRemove && draggedImageId ) {
+							if ( isRemoving && draggedImageId ) {
 								setValue(
 									'images',
 									images.filter(
 										( img ) => img.id !== draggedImageId
 									)
 								);
-								setIsRemove( false );
+								setIsRemoving( false );
 								setDraggedImageId( null );
 							}
 							toggleRemoveZone();
@@ -133,7 +133,7 @@ export const ImagesSection: React.FC = () => {
 						) ) }
 					</ImageGallery>
 					<div className="woocommerce-product-form__image-drop-zone">
-						{ isRemoveZoneVisible ? (
+						{ isRemovingZoneVisible ? (
 							<CardBody>
 								<div className="woocommerce-product-form__remove-image-drop-zone">
 									<span>
@@ -148,8 +148,10 @@ export const ImagesSection: React.FC = () => {
 										) }
 									</span>
 									<DropZone
-										onHTMLDrop={ () => setIsRemove( true ) }
-										onDrop={ () => setIsRemove( true ) }
+										onHTMLDrop={ () =>
+											setIsRemoving( true )
+										}
+										onDrop={ () => setIsRemoving( true ) }
 										label={ __(
 											'Drop here to remove',
 											'woocommerce'
