@@ -15,10 +15,10 @@ const {
 	getLatestReleaseZipUrl,
 } = require( '../../utils/plugin-utils' );
 
-const pluginZipPath = path.resolve( __dirname, '../../tmp/woocommerce.zip' );
+let pluginZipPath;
 let pluginSlug;
 
-test.describe( 'Plugin can be uploaded and activated', () => {
+test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 	// Skip test if PLUGIN_REPOSITORY is falsy.
 	test.skip(
 		! PLUGIN_REPOSITORY,
@@ -30,12 +30,15 @@ test.describe( 'Plugin can be uploaded and activated', () => {
 	test.beforeAll( async () => {
 		pluginSlug = PLUGIN_REPOSITORY.split( '/' ).pop();
 
-		// Download the needed plugin.
+		// Get the download URL and filename of the plugin
 		const pluginDownloadURL = await getLatestReleaseZipUrl( {
 			repository: PLUGIN_REPOSITORY,
 			authorizationToken: GITHUB_TOKEN,
 		} );
+		const zipFilename = pluginDownloadURL.split( '/' ).pop();
+		pluginZipPath = path.resolve( __dirname, `../../tmp/${ zipFilename }` );
 
+		// Download the needed plugin.
 		await downloadZip( {
 			url: pluginDownloadURL,
 			downloadPath: pluginZipPath,
@@ -43,8 +46,18 @@ test.describe( 'Plugin can be uploaded and activated', () => {
 		} );
 	} );
 
-	test.afterAll( async () => {
+	test.afterAll( async ( { baseURL, playwright } ) => {
+		// Delete the downloaded zip.
 		await deleteZip( pluginZipPath );
+
+		// Delete the plugin from the test site.
+		await deletePlugin( {
+			request: playwright.request,
+			baseURL,
+			slug: pluginSlug,
+			username: ADMIN_USER,
+			password: ADMIN_PASSWORD,
+		} );
 	} );
 
 	test( `can upload and activate ${ PLUGIN_NAME }`, async ( {
@@ -90,11 +103,6 @@ test.describe( 'Plugin can be uploaded and activated', () => {
 		} );
 
 		// Assert that the plugin is listed and active
-		await expect(
-			page.locator( '.plugin-title strong', {
-				hasText: PLUGIN_NAME,
-			} )
-		).toBeVisible();
 		await expect(
 			page.locator( `#deactivate-${ pluginSlug }` )
 		).toBeVisible();
