@@ -28,8 +28,6 @@ jobs:
 
       - name: Setup WooCommerce Monorepo
         uses: ./.github/actions/setup-woocommerce-monorepo
-        with:
-          php-version: 7.4
 
       - name: Tool versions
         run: |

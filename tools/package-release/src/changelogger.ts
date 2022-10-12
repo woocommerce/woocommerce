@@ -25,6 +25,7 @@ export const getNextVersion = ( name: string ) => {
 		} ).trim();
 	} catch ( e ) {
 		if ( e instanceof Error ) {
+			// eslint-disable-next-line no-console
 			console.log( e );
 			throw e;
 		}
@@ -46,6 +47,7 @@ export const validateChangelogEntries = ( name: string ) => {
 		} );
 	} catch ( e ) {
 		if ( e instanceof Error ) {
+			// eslint-disable-next-line no-console
 			console.log( e );
 			throw e;
 		}
@@ -66,6 +68,7 @@ export const writeChangelog = ( name: string ) => {
 		} );
 	} catch ( e ) {
 		if ( e instanceof Error ) {
+			// eslint-disable-next-line no-console
 			console.log( e );
 			throw e;
 		}
@@ -122,6 +125,7 @@ export const hasValidChangelogs = ( name: string ): boolean | void => {
 		} );
 	} catch ( e ) {
 		if ( e instanceof Error ) {
+			// eslint-disable-next-line no-console
 			console.log( e );
 			throw e;
 		}

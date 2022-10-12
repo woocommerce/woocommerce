@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Support fetching order types in bulk to improve performance.
