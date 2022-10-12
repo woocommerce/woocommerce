@@ -199,6 +199,7 @@ describe( 'Orders API test', () => {
 			expectedLineTaxTotal,
 		] of expectedTaxTotalsPerLineItem ) {
 			const { total_tax: actualLineTaxTotal } = body.line_items.find(
+				// eslint-disable-next-line
 				( { product_id } ) => product_id === product.id
 			);
 

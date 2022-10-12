@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Update subdivision codes for New Zealand, to match current CLDR specification.
