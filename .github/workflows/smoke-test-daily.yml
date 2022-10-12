@@ -269,7 +269,7 @@ jobs:
                   steps.generate_e2e_report.conclusion == 'success'
               uses: actions/upload-artifact@v3
               with:
-                  name: e2e-test-report---pr-${{ github.event.number }}
+                  name: e2e-test-report---daily-${{ matrix.plugin }}---run-${{ github.run_number }}
                   path: |
                       package/woocommerce/plugins/woocommerce/e2e/allure-results
                       package/woocommerce/plugins/woocommerce/e2e/allure-report
