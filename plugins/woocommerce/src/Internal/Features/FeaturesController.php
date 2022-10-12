@@ -117,7 +117,7 @@ class FeaturesController {
 		self::add_filter( 'woocommerce_get_settings_advanced', array( $this, 'add_feature_settings' ), 10, 2 );
 		self::add_filter( 'deactivated_plugin', array( $this, 'handle_plugin_deactivation' ), 10, 1 );
 		self::add_filter( 'all_plugins', array( $this, 'filter_plugins_list' ), 10, 1 );
-		self::add_action( 'admin_notices', array( $this, 'display_notice_in_plugins_page' ), 10, 0 );
+		self::add_action( 'admin_notices', array( $this, 'display_notices_in_plugins_page' ), 10, 0 );
 		self::add_action( 'after_plugin_row', array( $this, 'handle_plugin_list_rows' ), 10, 2 );
 		self::add_action( 'current_screen', array( $this, 'enqueue_script_to_fix_plugin_list_html' ), 10, 1 );
 		self::add_filter( 'views_plugins', array( $this, 'handle_plugins_page_views_list' ), 10, 1 );
@@ -737,33 +737,54 @@ class FeaturesController {
 
 	/**
 	 * Handler for the admin_notices action.
-	 *
-	 * Shows a "You are viewing the plugins that are incompatible with the X feature"
-	 * if we are in the plugins page and the query string of the current request
-	 * looks like '?plugin_status=incompatible_with_feature&feature_id=<feature id>'.
 	 */
-	private function display_notice_in_plugins_page(): void {
+	private function display_notices_in_plugins_page(): void {
 		if ( ! $this->verify_did_woocommerce_init() ) {
 			return;
 		}
 
-		// phpcs:disable WordPress.Security.NonceVerification
-		if ( 'plugins' !== get_current_screen()->id || 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) {
+		if ( 'plugins' !== get_current_screen()->id ) {
 			return;
 		}
 
-		$feature_id = ArrayUtil::get_value_or_default( $_GET, 'feature_id' );
-		if ( is_null( $feature_id ) || ! $this->feature_exists( $feature_id ) ) {
+		$this->maybe_display_current_feature_filter_description();
+	/**
+	 * Shows a "You are viewing the plugins that are incompatible with the X feature"
+	 * if we are in the plugins page and the query string of the current request
+	 * looks like '?plugin_status=incompatible_with_feature&feature_id=<feature id>'.
+	 */
+	private function maybe_display_current_feature_filter_description(): void {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput
+		$plugin_status = $_GET['plugin_status'] ?? '';
+		$feature_id    = $_GET['feature_id'] ?? '';
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput
+
+		if ( 'incompatible_with_feature' !== $plugin_status ) {
 			return;
 		}
+
+		$feature_id = ( '' === $feature_id ) ? 'all' : $feature_id;
+
+		if ( 'all' !== $feature_id && ! $this->feature_exists( $feature_id ) ) {
+			return;
+		}
+
 		// phpcs:enable WordPress.Security.NonceVerification
-
 		$plugins_page_url  = admin_url( 'plugins.php' );
-		$plugin_name       = $this->features[ $feature_id ]['name'];
 		$features_page_url = $this->get_features_page_url();
-		$message           = sprintf(
-			__( "You are viewing the plugins that are incompatible with the '%1\$s' feature. <a href='%2\$s'>View all plugins</a> - <a href='%3\$s'>Manage wooCommerce features</a>", 'woocommerce' ),
-			$plugin_name,
+
+		$message =
+			'all' === $feature_id
+			? __( 'You are viewing plugins that are incompatible with currently-enabled WooCommerce features.', 'woocommerce' )
+			: sprintf(
+				/* translators: %s is a feature name. */
+				__( "You are viewing the plugins that are incompatible with the '%s' feature.", 'woocommerce' ),
+				$this->features[ $feature_id ]['name']
+			);
+
+		$message .= '<br />';
+		$message .= sprintf(
+			__( "<a href='%1\$s'>View all plugins</a> - <a href='%2\$s'>Manage WooCommerce features</a>", 'woocommerce' ),
 			$plugins_page_url,
 			$features_page_url
 		);
