@@ -99,9 +99,9 @@ class FeaturesController {
 				'description'     => __( 'Adds the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
 				'is_experimental' => false,
 			),
-			'high_performance_order_storage' => array(
-				'name'            => __( 'High performance order storage', 'woocommerce' ),
-				'description'     => __( 'Enable the high performance order storage feature (still in development)', 'woocommerce' ),
+			'custom_order_tables' => array(
+				'name'            => __( 'High-Performance order storage (COT)', 'woocommerce' ),
+				'description'     => __( 'Enable the high performance order storage feature.', 'woocommerce' ),
 				'is_experimental' => true,
 			),
 		);
@@ -628,7 +628,12 @@ class FeaturesController {
 				} else {
 					/* translators: %1\$s, %2\$s = printable plugin names, %3\$d = plugins count */
 					$desc_tip = sprintf(
-						__( "⚠ This feature shouldn't be enabled: %1\$s, %2\$s and %3\$d more active plugins aren't compatible with it.", 'woocommerce' ),
+						_n(
+							"⚠ This feature shouldn't be enabled: %1\$s, %2\$s and %3\$d more active plugin isn't compatible with it",
+							"⚠ This feature shouldn't be enabled: the %1\$s and %2\$s plugins are active and aren't compatible with it. There are %3\$d other incompatible plugins.",
+							$incompatible_count - 2,
+							'woocommerce'
+						),
 						$this->plugin_util->get_plugin_name( $incompatibles[0] ),
 						$this->plugin_util->get_plugin_name( $incompatibles[1] ),
 						$incompatible_count - 2
@@ -695,7 +700,7 @@ class FeaturesController {
 		}
 
 		// phpcs:disable WordPress.Security.NonceVerification
-		if ( 'plugins' !== get_current_screen()->id || 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) {
+		if ( get_current_screen() && 'plugins' !== get_current_screen()->id || 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) {
 			return $list;
 		}
 

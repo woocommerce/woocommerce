@@ -142,7 +142,7 @@ class OrderHelper {
 	 */
 	public static function delete_order_custom_tables() {
 		$features_controller = wc_get_container()->get( Featurescontroller::class );
-		$features_controller->change_feature_enable( 'high_performance_order_storage', true );
+		$features_controller->change_feature_enable( 'custom_order_tables', true );
 		$synchronizer = wc_get_container()
 			->get( DataSynchronizer::class );
 		if ( $synchronizer->check_orders_table_exists() ) {
@@ -155,7 +155,7 @@ class OrderHelper {
 	 */
 	public static function create_order_custom_table_if_not_exist() {
 		$features_controller = wc_get_container()->get( Featurescontroller::class );
-		$features_controller->change_feature_enable( 'high_performance_order_storage', true );
+		$features_controller->change_feature_enable( 'custom_order_tables', true );
 
 		$synchronizer = wc_get_container()->get( DataSynchronizer::class );
 		if ( ! $synchronizer->check_orders_table_exists() ) {
