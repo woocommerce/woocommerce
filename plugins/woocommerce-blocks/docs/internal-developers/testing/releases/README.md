@@ -84,12 +84,14 @@ Every release includes specific testing instructions for new features and bug fi
 -   [8.0.0](./800.md)
 -   [8.1.0](./810.md)
 -   [8.2.0](./820.md)
--   [8.2.1](./821.md)
+    -   [8.2.1](./821.md)
 -   [8.3.0](./830.md)
--   [8.3.1](./831.md)
+    -   [8.3.1](./831.md)
 -   [8.4.0](./840.md)
 -   [8.5.0](./850.md)
     -   [8.5.1](./851.md)
+-   [8.6.0](./860.md)
+-   [8.7.0](./870.md)
 
 <!-- FEEDBACK -->
 
