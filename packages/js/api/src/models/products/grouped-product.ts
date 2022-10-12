@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import {
 	AbstractProduct,
 	IProductCommon,
@@ -44,7 +47,8 @@ export type GroupedProductRepositoryParams = ModelRepositoryParams<
  * @typedef ListsGroupedProducts
  * @alias ListsModels.<GroupedProduct>
  */
-export type ListsGroupedProducts = ListsModels< GroupedProductRepositoryParams >;
+export type ListsGroupedProducts =
+	ListsModels< GroupedProductRepositoryParams >;
 
 /**
  * An interface for creating Grouped products using the repository.
@@ -52,7 +56,8 @@ export type ListsGroupedProducts = ListsModels< GroupedProductRepositoryParams >
  * @typedef CreatesGroupedProducts
  * @alias CreatesModels.<GroupedProduct>
  */
-export type CreatesGroupedProducts = CreatesModels< GroupedProductRepositoryParams >;
+export type CreatesGroupedProducts =
+	CreatesModels< GroupedProductRepositoryParams >;
 
 /**
  * An interface for reading Grouped products using the repository.
@@ -60,7 +65,8 @@ export type CreatesGroupedProducts = CreatesModels< GroupedProductRepositoryPara
  * @typedef ReadsGroupedProducts
  * @alias ReadsModels.<GroupedProduct>
  */
-export type ReadsGroupedProducts = ReadsModels< GroupedProductRepositoryParams >;
+export type ReadsGroupedProducts =
+	ReadsModels< GroupedProductRepositoryParams >;
 
 /**
  * An interface for updating Grouped products using the repository.
@@ -68,7 +74,8 @@ export type ReadsGroupedProducts = ReadsModels< GroupedProductRepositoryParams >
  * @typedef UpdatesGroupedProducts
  * @alias UpdatesModels.<GroupedProduct>
  */
-export type UpdatesGroupedProducts = UpdatesModels< GroupedProductRepositoryParams >;
+export type UpdatesGroupedProducts =
+	UpdatesModels< GroupedProductRepositoryParams >;
 
 /**
  * An interface for deleting Grouped products using the repository.
@@ -76,14 +83,16 @@ export type UpdatesGroupedProducts = UpdatesModels< GroupedProductRepositoryPara
  * @typedef DeletesGroupedProducts
  * @alias DeletesModels.<GroupedProduct>
  */
-export type DeletesGroupedProducts = DeletesModels< GroupedProductRepositoryParams >;
+export type DeletesGroupedProducts =
+	DeletesModels< GroupedProductRepositoryParams >;
 
 /**
  * The base for the Grouped product object.
  */
 export class GroupedProduct
 	extends AbstractProduct
-	implements IProductCommon, IProductGrouped, IProductUpSells {
+	implements IProductCommon, IProductGrouped, IProductUpSells
+{
 	/**
 	 * @see ./abstracts/grouped.ts
 	 */

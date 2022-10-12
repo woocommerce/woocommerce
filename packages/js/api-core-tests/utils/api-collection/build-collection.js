@@ -12,9 +12,11 @@ const { BASE_URL, USER_KEY, USER_SECRET, USE_INDEX_PERMALINKS } = process.env;
 
 // Set up our empty collection
 if ( typeof USER_KEY === 'undefined' ) {
+	// eslint-disable-next-line
 	console.log( 'No USER_KEY was defined.' );
 }
 if ( typeof USER_SECRET === 'undefined' ) {
+	// eslint-disable-next-line
 	console.log( 'No USER_SECRET was defined.' );
 }
 
@@ -41,6 +43,7 @@ const postmanCollection = new Collection( {
 
 // Get the API url
 if ( typeof BASE_URL === 'undefined' ) {
+	// eslint-disable-next-line
 	console.log( 'No BASE_URL was defined.' );
 }
 
@@ -62,6 +65,7 @@ postmanCollection.variables.add( {
 
 // Get the API request data
 const resources = require( '../../endpoints' );
+// eslint-disable-next-line
 resourceKeys = Object.keys( resources );
 
 // Add the requests to folders in the collection
@@ -108,8 +112,10 @@ fs.writeFile(
 	JSON.stringify( collectionJSON ),
 	( err ) => {
 		if ( err ) {
+			// eslint-disable-next-line
 			console.log( err );
 		}
+		// eslint-disable-next-line
 		console.log( 'File saved!' );
 	}
 );

@@ -13,7 +13,7 @@ inputs:
     default: ""
   php-version:
     description: The version of PHP that the action should set up.
-    default: "7.2"
+    default: "7.4"
 
 runs:
   using: composite

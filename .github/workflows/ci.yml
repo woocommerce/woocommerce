@@ -21,15 +21,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: [ '7.2', '7.3', '7.4', '8.0' ]
+        php: [ '7.4', '8.0' ]
         wp: [ 'latest' ]
         include:
           - wp: nightly
             php: '7.4'
           - wp: '5.9'
-            php: 7.2
+            php: 7.4
           - wp: '5.8'
-            php: 7.2
+            php: 7.4
     services:
       database:
         image: mysql:5.6
