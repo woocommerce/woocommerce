@@ -44,7 +44,7 @@ export const deletePlugin = async ( {
 			failOnStatusCode: true,
 		}
 	);
-	const pluginsList = await listPluginsResponse.body();
+	const pluginsList = await listPluginsResponse.json();
 	const pluginToDelete = pluginsList.find(
 		( { textdomain } ) => textdomain === slug
 	);
