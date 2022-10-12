@@ -89,7 +89,7 @@ class FeaturesController {
 	 */
 	public function __construct() {
 		$features = array(
-			'analytics'              => array(
+			'analytics'           => array(
 				'name'               => __( 'Analytics', 'woocommerce' ),
 				'description'        => __( 'Enables WooCommerce Analytics', 'woocommerce' ),
 				'is_experimental'    => false,
