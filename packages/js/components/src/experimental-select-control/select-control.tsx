@@ -188,7 +188,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 					}
 					break;
 				default:
-					return changes;
+					break;
 			}
 			return stateReducer( state, {
 				...actionAndChanges,
