@@ -2,13 +2,13 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { Link, Spinner, useFormContext } from '@woocommerce/components';
 import {
 	EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME,
 	OPTIONS_STORE_NAME,
-	Product,
+	PartialProduct,
 	ProductShippingClass,
 } from '@woocommerce/data';
 import interpolateComponents from '@automattic/interpolate-components';
@@ -31,12 +31,26 @@ import {
 	ShippingDimensionsImageProps,
 } from '../fields/shipping-dimensions-image';
 import { useProductHelper } from '../use-product-helper';
+import { AddNewShippingClassModal } from '../shared/add-new-shipping-class-modal';
 import { getTextControlProps } from './utils';
 import './product-shipping-section.scss';
 
+export type ProductShippingSectionProps = {
+	product?: PartialProduct;
+};
+
+// This should never be a real slug value of any existing shipping class
+const ADD_NEW_SHIPPING_CLASS_OPTION_VALUE = '__ADD_NEW_SHIPPING_CLASS_OPTION__';
+
 const DEFAULT_SHIPPING_CLASS_OPTIONS: SelectControl.Option[] = [
 	{ value: '', label: __( 'No shipping class', 'woocommerce' ) },
+	{
+		value: ADD_NEW_SHIPPING_CLASS_OPTION_VALUE,
+		label: __( 'Add new shipping class', 'woocommerce' ),
+	},
 ];
+
+const UNCATEGORIZED_CATEGORY_SLUG = 'uncategorized';
 
 function mapShippingClassToSelectOption(
 	shippingClasses: ProductShippingClass[]
@@ -56,11 +70,37 @@ function getInterpolatedSizeLabel( mixedString: string ) {
 	} );
 }
 
-export const ProductShippingSection: React.FC = () => {
-	const { getInputProps } = useFormContext< Product >();
+/**
+ * This extracts a shipping class from the product categories. Using
+ * the first category different to `Uncategorized`.
+ *
+ * @see https://github.com/woocommerce/woocommerce/issues/34657
+ * @param product The product
+ * @return The default shipping class
+ */
+function extractDefaultShippingClassFromProduct(
+	product: PartialProduct
+): Partial< ProductShippingClass > | undefined {
+	const category = product?.categories?.find(
+		( { slug } ) => slug !== UNCATEGORIZED_CATEGORY_SLUG
+	);
+	if ( category ) {
+		return {
+			name: category.name,
+			slug: category.slug,
+		};
+	}
+}
+
+export function ProductShippingSection( {
+	product,
+}: ProductShippingSectionProps ) {
+	const { getInputProps } = useFormContext< PartialProduct >();
 	const { formatNumber, parseNumber } = useProductHelper();
 	const [ highlightSide, setHighlightSide ] =
 		useState< ShippingDimensionsImageProps[ 'highlight' ] >();
+	const [ showShippingClassModal, setShowShippingClassModal ] =
+		useState( false );
 
 	const { shippingClasses, hasResolvedShippingClasses } = useSelect(
 		( select ) => {
@@ -97,6 +137,13 @@ export const ProductShippingSection: React.FC = () => {
 		[]
 	);
 
+	const { createProductShippingClass, invalidateResolution } = useDispatch(
+		EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
+	);
+
+	const selectShippingClassProps = getTextControlProps(
+		getInputProps( 'shipping_class' )
+	);
 	const inputWidthProps = getTextControlProps(
 		getInputProps( 'dimensions.width' )
 	);
@@ -121,16 +168,24 @@ export const ProductShippingSection: React.FC = () => {
 					{ hasResolvedShippingClasses ? (
 						<>
 							<SelectControl
+								{ ...selectShippingClassProps }
 								label={ __( 'Shipping class', 'woocommerce' ) }
-								{ ...getTextControlProps(
-									getInputProps( 'shipping_class' )
-								) }
 								options={ [
 									...DEFAULT_SHIPPING_CLASS_OPTIONS,
 									...mapShippingClassToSelectOption(
 										shippingClasses ?? []
 									),
 								] }
+								onChange={ ( value: string ) => {
+									if (
+										value ===
+										ADD_NEW_SHIPPING_CLASS_OPTION_VALUE
+									) {
+										setShowShippingClassModal( true );
+										return;
+									}
+									selectShippingClassProps?.onChange( value );
+								} }
 							/>
 							<span className="woocommerce-product-form__secondary-text">
 								{ interpolateComponents( {
@@ -309,6 +364,24 @@ export const ProductShippingSection: React.FC = () => {
 					) }
 				</CardBody>
 			</Card>
+
+			{ showShippingClassModal && (
+				<AddNewShippingClassModal
+					shippingClass={
+						product &&
+						extractDefaultShippingClassFromProduct( product )
+					}
+					onAdd={ ( values ) =>
+						createProductShippingClass<
+							Promise< ProductShippingClass >
+						>( values ).then( ( value ) => {
+							invalidateResolution( 'getProductShippingClasses' );
+							return value;
+						} )
+					}
+					onCancel={ () => setShowShippingClassModal( false ) }
+				/>
+			) }
 		</ProductSectionLayout>
 	);
-};
+}

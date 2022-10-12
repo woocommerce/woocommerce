@@ -825,6 +825,38 @@ WHERE
 	//phpcs:enable Squiz.Commenting, Generic.Commenting
 
 	/**
+	 * Fetch order type for orders in bulk.
+	 *
+	 * @param array $order_ids Order IDs.
+	 *
+	 * @return array array( $order_id1 => $type1, ... ) Array for all orders.
+	 */
+	public function get_orders_type( $order_ids ) {
+		global $wpdb;
+
+		if ( empty( $order_ids ) ) {
+			return array();
+		}
+
+		$orders_table          = self::get_orders_table_name();
+		$order_ids_placeholder = implode( ', ', array_fill( 0, count( $order_ids ), '%d' ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id, type FROM {$orders_table} WHERE id IN ( $order_ids_placeholder )",
+				$order_ids
+			)
+		);
+		// phpcs:enable
+		$order_types = array();
+		foreach ( $results as $row ) {
+			$order_types[ $row->id ] = $row->type;
+		}
+		return $order_types;
+	}
+
+	/**
 	 * Get order type from DB.
 	 *
 	 * @param int $order_id Order ID.
@@ -832,20 +864,8 @@ WHERE
 	 * @return string Order type.
 	 */
 	public function get_order_type( $order_id ) {
-		global $wpdb;
-		if ( $order_id instanceof \WC_Order ) {
-			return $order_id->get_type();
-		}
-		return $wpdb->get_var(
-			$wpdb->prepare(
-				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $this->get_orders_table_name() is hardcoded.
-				"
-SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
-				",
-				// phpcs:enable
-				$order_id
-			)
-		);
+		$type = $this->get_orders_type( array( $order_id ) );
+		return $type[ $order_id ];
 	}
 
 	/**

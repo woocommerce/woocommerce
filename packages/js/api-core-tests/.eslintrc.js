@@ -3,4 +3,5 @@ module.exports = {
 	rules: {
 		'jsdoc/check-tag-names': 'off',
 	},
+	root: true,
 };
