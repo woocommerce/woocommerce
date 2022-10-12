@@ -25,11 +25,7 @@ import moment from 'moment';
  * Internal dependencies
  */
 import { ActivityCard } from '~/activity-panel/activity-card';
-import {
-	hasValidNotes,
-	truncateRenderableHTML,
-	generateNotesHash,
-} from './utils';
+import { hasValidNotes, truncateRenderableHTML } from './utils';
 import { getScreenName } from '../utils';
 import DismissAllModal from './dismiss-all-modal';
 import './index.scss';
@@ -59,6 +55,13 @@ const DEFAULT_INBOX_QUERY = {
 		'locale',
 	],
 };
+
+const supportedLocales = [ 'en_US', 'en_AU', 'en_CA', 'en_GB', 'en_ZA' ];
+
+const WC_VERSION_61_RELEASE_DATE = moment(
+	'2022-01-11',
+	'YYYY-MM-DD'
+).valueOf();
 
 const renderEmptyCard = () => (
 	<ActivityCard
@@ -212,36 +215,41 @@ const InboxPanel = ( { showHeader = true } ) => {
 		invalidateResolutionForStoreSelector,
 	} = useDispatch( NOTES_STORE_NAME );
 
-	const { isError, notes, notesHaveResolved, isBatchUpdating, notesHash } =
-		useSelect( ( select ) => {
+	const inboxQuery = useMemo( () => {
+		return {
+			...DEFAULT_INBOX_QUERY,
+			per_page: noteDisplayQty,
+		};
+	}, [ noteDisplayQty ] );
+
+	const { isError, notes, notesHaveResolved, isBatchUpdating } = useSelect(
+		( select ) => {
 			const {
 				getNotes,
 				getNotesError,
 				isNotesRequesting,
 				hasFinishedResolution,
 			} = select( NOTES_STORE_NAME );
-			const WC_VERSION_61_RELEASE_DATE = moment(
-				'2022-01-11',
-				'YYYY-MM-DD'
-			).valueOf();
-
-			const supportedLocales = [
-				'en_US',
-				'en_AU',
-				'en_CA',
-				'en_GB',
-				'en_ZA',
-			];
-
-			const inboxQuery = {
-				...DEFAULT_INBOX_QUERY,
-				per_page: noteDisplayQty,
-			};
-			const notes = getNotes( inboxQuery );
 
 			return {
-				notesHash: generateNotesHash( notes ),
-				notes: notes.map( ( note ) => {
+				notes: getNotes( inboxQuery ),
+				isError: Boolean( getNotesError( 'getNotes', [ inboxQuery ] ) ),
+				isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
+				notesHaveResolved:
+					! isNotesRequesting( 'batchUpdateNotes' ) &&
+					hasFinishedResolution( 'getNotes', [ inboxQuery ] ),
+			};
+		}
+	);
+
+	useEffect( () => {
+		if ( notesHaveResolved && notes.length < noteDisplayQty ) {
+			setAllNotesFetched( true );
+		}
+
+		if ( notesHaveResolved && notes.length ) {
+			setAllNotes(
+				notes.map( ( note ) => {
 					const noteDate = moment(
 						note.date_created_gmt,
 						'YYYY-MM-DD'
@@ -260,29 +268,10 @@ const InboxPanel = ( { showHeader = true } ) => {
 						};
 					}
 					return note;
-				} ),
-				isError: Boolean( getNotesError( 'getNotes', [ inboxQuery ] ) ),
-				isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
-				notesHaveResolved:
-					! isNotesRequesting( 'batchUpdateNotes' ) &&
-					hasFinishedResolution( 'getNotes', [ inboxQuery ] ),
-			};
-		} );
-
-	const allNotesHash = useMemo(
-		() => generateNotesHash( allNotes ),
-		[ allNotes ]
-	);
-
-	useEffect( () => {
-		if ( notesHaveResolved && notes.length < noteDisplayQty ) {
-			setAllNotesFetched( true );
+				} )
+			);
 		}
-
-		if ( notesHaveResolved && notesHash !== allNotesHash ) {
-			setAllNotes( notes );
-		}
-	}, [ notes ] );
+	}, [ notes, notesHaveResolved ] );
 
 	const [ showDismissAllModal, setShowDismissAllModal ] = useState( false );
 
@@ -348,8 +337,6 @@ const InboxPanel = ( { showHeader = true } ) => {
 		);
 	}
 
-	const hasNotes = hasValidNotes( allNotes );
-
 	if ( notesHaveResolved && ! allNotes.length ) {
 		return null;
 	}
@@ -380,7 +367,7 @@ const InboxPanel = ( { showHeader = true } ) => {
 									noteDisplayQty + ADD_NOTES_AMOUNT
 								);
 							},
-							hasNotes,
+							hasNotes: hasValidNotes( allNotes ),
 							isBatchUpdating,
 							notes: allNotes,
 							onDismiss,

@@ -120,14 +120,3 @@ export const truncateRenderableHTML = ( originalHTML, limit ) => {
 	}
 	return originalHTML;
 };
-
-/**
- * Generates string form IDs in current set to represent content.
- *
- * @param {array} notes Array of note objects.
- */
-export const generateNotesHash = ( notes ) =>
-	notes.reduce( ( acc, note ) => {
-		acc += String( note.id );
-		return acc;
-	}, '' );
