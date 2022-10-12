@@ -11,6 +11,15 @@
 	"versionGroups": [
 		{
 			"dependencies": [
+				"@typescript-eslint/**"
+			],
+			"pinVersion": "latest",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"dependencies": [
 				"react",
 				"react-dom"
 			],

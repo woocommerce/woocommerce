@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { AbstractProductData } from './data';
 import { ModelID } from '../../model';
 import { CatalogVisibility, ProductTerm, ProductAttribute } from '../shared';
@@ -153,4 +156,4 @@ export abstract class AbstractProduct extends AbstractProductData {
 	};
 }
 
-export interface IProductCommon extends AbstractProduct {}
+export type IProductCommon = AbstractProduct;

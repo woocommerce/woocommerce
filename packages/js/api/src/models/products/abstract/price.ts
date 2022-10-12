@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { Model } from '../../model';
 
 /**
@@ -54,4 +57,4 @@ abstract class AbstractProductPrice extends Model {
 	public readonly saleEnd: Date | null = null;
 }
 
-export interface IProductPrice extends AbstractProductPrice {}
+export type IProductPrice = AbstractProductPrice;
