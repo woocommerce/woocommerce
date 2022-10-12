@@ -190,12 +190,38 @@ jobs:
               run: |
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
 
+    build:
+        name: Build zip
+        runs-on: ubuntu-20.04
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                  ref: ${{ env.BRANCH_NAME }}
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  build: false
+
+            - name: Build zip
+              working-directory: plugins/woocommerce
+              run: bash bin/build-zip.sh
+
+            - name: Upload the zip file as an artifact
+              uses: actions/upload-artifact@v3
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  name: woocommerce
+                  path: plugins/woocommerce/woocommerce.zip
+                  retention-days: 7
+
     # Disable for this job for the meantime. It will be migrated to Playwright later.
     test-plugins:
         name: Smoke tests with ${{ matrix.plugin }} plugin installed
         if: always()
         runs-on: ubuntu-20.04
-        needs: [k6-test]
+        needs: [build]
         strategy:
             fail-fast: false
             matrix:
@@ -228,47 +254,65 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  install-filters: woocommerce
                   build: false
-                  php-version: null
+
+            - name: Download WooCommerce ZIP.
+              uses: actions/download-artifact@v3
+              with:
+                  name: woocommerce
+                  path: tmp
+
+            - name: Extract and replace WooCommerce zip.
+              working-directory: tmp
+              run: |
+                  unzip woocommerce.zip -d .
+                  rsync -a woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
 
-            # - name: Download WooCommerce ZIP.
-            #   uses: actions/download-artifact@v3
-            #   with:
-            #       name: woocommerce
-            #       path: tmp
-
-            # - name: Extract and replace WooCommerce zip.
-            #   working-directory: tmp
-            #   run: |
-            #       unzip woocommerce.zip -d .
-            #       rsync -a woocommerce/* ../package/woocommerce/plugins/woocommerce/
-
-            # - name: Load docker images and start containers.
-            #   working-directory: package/woocommerce
-            #   run: pnpm docker:up --filter=woocommerce
+            - name: Launch wp-env e2e environment
+              working-directory: package/woocommerce/plugins/woocommerce
+              run: pnpm env:test --filter=woocommerce
 
             - name: Run E2E tests
+              id: run_playwright_e2e_tests
               working-directory: package/woocommerce/plugins/woocommerce
               env:
-                  BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
-                  ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
-                  ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
-                  ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
-                  CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
-                  CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
-                  DEFAULT_TIMEOUT_OVERRIDE: 120000
-                  E2E_MAX_FAILURES: 20
+                  USE_WP_ENV: 1
+                  E2E_MAX_FAILURES: 15
+                  FORCE_COLOR: 1
                   PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
                   PLUGIN_NAME: ${{ matrix.plugin }}
                   GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
               run: |
                   pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-plugin.spec.js
                   pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js basic.spec.js
+
+            - name: Generate Playwright E2E Test report.
+              id: generate_e2e_report
+              if: |
+                  always() &&
+                  (
+                    steps.run_playwright_e2e_tests.conclusion != 'cancelled' ||
+                    steps.run_playwright_e2e_tests.conclusion != 'skipped' 
+                  )
+              working-directory: package/woocommerce/plugins/woocommerce
+              run: pnpm exec allure generate --clean e2e/allure-results --output e2e/allure-report
+
+            - name: Archive Playwright E2E test report
+              if: |
+                  always() &&
+                  steps.generate_e2e_report.conclusion == 'success'
+              uses: actions/upload-artifact@v3
+              with:
+                  name: e2e-test-report---pr-${{ github.event.number }}
+                  path: |
+                      package/woocommerce/plugins/woocommerce/e2e/allure-results
+                      package/woocommerce/plugins/woocommerce/e2e/allure-report
+                  if-no-files-found: ignore
+                  retention-days: 5
 
     publish-reports:
         name: Publish test reports
@@ -282,7 +326,7 @@ jobs:
         #     )
         if: false
         runs-on: ubuntu-20.04
-        needs: [test-plugins]
+        needs: [k6-test, test-plugins]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             RUN_ID: ${{ github.run_id }}
