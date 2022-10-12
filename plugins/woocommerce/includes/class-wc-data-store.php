@@ -224,4 +224,15 @@ class WC_Data_Store {
 			return $this->instance->$method( ...$parameters );
 		}
 	}
+
+	/**
+	 * Check if the data store we are working with has a callable method.
+	 *
+	 * @param string $method Method name.
+	 *
+	 * @return bool Whether the passed method is callable.
+	 */
+	public function has_callable( string $method ) : bool {
+		return is_callable( array( $this->instance, $method ) );
+	}
 }

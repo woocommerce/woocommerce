@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { ModelTransformation, TransformationOrder } from '../model-transformer';
 
 /**
@@ -32,7 +35,7 @@ export class AddPropertyTransformation implements ModelTransformation {
 	/**
 	 * Creates a new transformation.
 	 *
-	 * @param {AdditionalProperties} toProperties The properties to add when executing toModel.
+	 * @param {AdditionalProperties} toProperties   The properties to add when executing toModel.
 	 * @param {AdditionalProperties} fromProperties The properties to add when executing fromModel.
 	 */
 	public constructor(

@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { ModelTransformation, TransformationOrder } from '../model-transformer';
 
 /**
@@ -111,8 +114,8 @@ export class PropertyTypeTransformation implements ModelTransformation {
 	/**
 	 * Converts the given value into the requested type.
 	 *
-	 * @param {*} value The value to transform.
-	 * @param {PropertyType} type The type to transform it into.
+	 * @param {*}            value The value to transform.
+	 * @param {PropertyType} type  The type to transform it into.
 	 * @return {*} The converted type.
 	 * @private
 	 */
@@ -134,6 +137,7 @@ export class PropertyTypeTransformation implements ModelTransformation {
 			case PropertyType.String:
 				return String( value );
 			case PropertyType.Integer:
+				// eslint-disable-next-line
 				return parseInt( value );
 			case PropertyType.Float:
 				return parseFloat( value );
@@ -147,8 +151,8 @@ export class PropertyTypeTransformation implements ModelTransformation {
 	/**
 	 * Converts the given type into a string.
 	 *
-	 * @param {*} value The value to transform.
-	 * @param {PropertyType} type The type to transform it into.
+	 * @param {*}            value The value to transform.
+	 * @param {PropertyType} type  The type to transform it into.
 	 * @return {*} The converted type.
 	 * @private
 	 */

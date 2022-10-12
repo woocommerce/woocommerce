@@ -36,7 +36,7 @@ export type ProductAttribute = {
 
 export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	Schema.Post,
-	'status'
+	'status' | 'categories'
 > & {
 	id: number;
 	name: string;
@@ -88,6 +88,7 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	attributes: ProductAttribute[];
 	dimensions: ProductDimensions;
 	weight: string;
+	categories: ProductCategory[];
 };
 
 export const productReadOnlyProperties = [
@@ -151,4 +152,10 @@ export type ProductDimensions = {
 	width: string;
 	height: string;
 	length: string;
+};
+
+export type ProductCategory = {
+	id: number;
+	name: string;
+	slug: string;
 };
