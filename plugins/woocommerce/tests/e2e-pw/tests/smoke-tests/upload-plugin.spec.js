@@ -9,6 +9,7 @@ const {
 const { test, expect } = require( '@playwright/test' );
 const path = require( 'path' );
 const {
+	createPlugin,
 	deletePlugin,
 	downloadZip,
 	deleteZip,
@@ -74,28 +75,14 @@ test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 			password: ADMIN_PASSWORD,
 		} );
 
-		// Open the plugin install page
-		await page.goto( 'wp-admin/plugin-install.php', {
-			waitUntil: 'networkidle',
+		// Install and activate plugin
+		await createPlugin( {
+			request: playwright.request,
+			baseURL,
+			slug: pluginSlug.split( '/' ).pop(),
+			username: ADMIN_USER,
+			password: ADMIN_PASSWORD,
 		} );
-
-		// Upload the plugin zip
-		await page.click( 'a.upload-view-toggle' );
-		await expect( page.locator( 'p.install-help' ) ).toBeVisible();
-		await expect( page.locator( 'p.install-help' ) ).toContainText(
-			'If you have a plugin in a .zip format, you may install or update it by uploading it here.'
-		);
-		const [ fileChooser ] = await Promise.all( [
-			page.waitForEvent( 'filechooser' ),
-			page.click( '#pluginzip' ),
-		] );
-		await fileChooser.setFiles( pluginZipPath );
-		await page.click( '#install-plugin-submit' );
-		await page.waitForLoadState( 'networkidle' );
-
-		// Activate the plugin
-		await page.click( '.button-primary' );
-		await page.waitForLoadState( 'networkidle' );
 
 		// Go to 'Installed plugins' page
 		await page.goto( 'wp-admin/plugins.php', {

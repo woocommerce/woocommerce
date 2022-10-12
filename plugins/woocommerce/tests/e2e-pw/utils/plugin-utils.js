@@ -162,3 +162,27 @@ export const getLatestReleaseZipUrl = async ( {
 		return body.assets[ 0 ].browser_download_url;
 	}
 };
+
+/**
+ * mytodo
+ *
+ */
+export const createPlugin = async ( {
+	request,
+	baseURL,
+	slug,
+	username,
+	password,
+} ) => {
+	const apiContext = await request.newContext( {
+		baseURL,
+		extraHTTPHeaders: {
+			Authorization: `Basic ${ encodeCredentials( username, password ) }`,
+		},
+	} );
+
+	await apiContext.post( `/wp-json/wp/v2/plugins/${ slug }`, {
+		data: { slug, status: 'active' },
+		failOnStatusCode: true,
+	} );
+};
