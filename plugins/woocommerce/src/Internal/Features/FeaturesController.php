@@ -747,7 +747,55 @@ class FeaturesController {
 			return;
 		}
 
+		$this->maybe_display_feature_incompatibility_warning();
 		$this->maybe_display_current_feature_filter_description();
+	}
+
+	/**
+	 * Shows a warning (on the plugins screen) when there are any incompatibility between active plugins and enabled
+	 * features.
+	 */
+	private function maybe_display_feature_incompatibility_warning(): void {
+		$plugin_status = $_GET['plugin_status'] ?? ''; // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
+
+		if ( ! in_array( $plugin_status, array( '', 'all', 'active' ), true ) ) {
+			return;
+		}
+
+		$incompatible_plugins = false;
+
+		foreach ( $this->plugin_util->get_woocommerce_aware_plugins( true ) as $plugin ) {
+			$compatibility     = $this->get_compatible_features_for_plugin( $plugin, true );
+			$incompatible_with = array_diff(
+				array_merge( $compatibility['incompatible'], $compatibility['uncertain'] ),
+				$this->legacy_feature_ids
+			);
+
+			if ( $incompatible_with ) {
+				$incompatible_plugins = true;
+				break;
+			}
+		}
+
+		if ( ! $incompatible_plugins ) {
+			return;
+		}
+
+		$message = str_replace(
+			'<a>',
+			'<a href="' . esc_url( add_query_arg( array( 'plugin_status' => 'incompatible_with_feature' ), admin_url( 'plugins.php' ) ) ) . '">',
+			__( 'WooCommerce has detected that some of your active plugins are incompatible with currently-enabled WooCommerce features. Please <a>review the details</a>.', 'woocommerce' )
+		);
+
+		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+		?>
+		<div class="notice notice-warning">
+		<p><?php echo $message; ?></p>
+		</div>
+		<?php
+		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
 	/**
 	 * Shows a "You are viewing the plugins that are incompatible with the X feature"
 	 * if we are in the plugins page and the query string of the current request
