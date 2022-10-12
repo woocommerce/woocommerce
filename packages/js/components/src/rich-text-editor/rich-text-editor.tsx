@@ -46,7 +46,7 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 	// you'd expect. A change to the blocks must come from outside the editor.
 	const forceRerender = () => {
 		setRefresh( ( refresh ) => refresh + 1 );
-	}
+	};
 
 	useEffect( () => {
 		blocksRef.current = blocks;
