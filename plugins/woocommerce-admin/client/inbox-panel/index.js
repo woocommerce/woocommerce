@@ -87,6 +87,8 @@ const onBodyLinkClick = ( note, innerLink ) => {
 
 let hasFiredPanelViewTrack = false;
 
+console.debug( 'updated' );
+
 const renderNotes = ( {
 	hasNotes,
 	isBatchUpdating,
@@ -113,6 +115,8 @@ const renderNotes = ( {
 		} );
 		hasFiredPanelViewTrack = true;
 	}
+
+	console.debug( 'allNotesFetched', allNotesFetched );
 
 	const screen = getScreenName();
 	const onNoteVisible = ( note ) => {
@@ -178,25 +182,34 @@ const renderNotes = ( {
 					);
 				} ) }
 			</TransitionGroup>
-			{ allNotesFetched ? null : notesHaveResolved ? (
-				<CardFooter
-					className="wooocommerce-inbox-card__footer"
-					size="medium"
-				>
-					<Button
-						isPrimary={ true }
-						onClick={ () => {
-							loadMoreNotes();
-						} }
-					>
-						{ notesArray.length > DEFAULT_INBOX_QUERY.per_page
-							? __( 'Show more', 'woocommerce' )
-							: __( 'Show older', 'woocommerce' ) }
-					</Button>
-				</CardFooter>
-			) : (
-				<InboxNotePlaceholder className="banner message-is-unread" />
-			) }
+			{ allNotesFetched
+				? null
+				: ( () => {
+						if ( ! notesHaveResolved ) {
+							return (
+								<InboxNotePlaceholder className="banner message-is-unread" />
+							);
+						}
+
+						return (
+							<CardFooter
+								className="wooocommerce-inbox-card__footer"
+								size="medium"
+							>
+								<Button
+									isPrimary={ true }
+									onClick={ () => {
+										loadMoreNotes();
+									} }
+								>
+									{ notesArray.length >
+									DEFAULT_INBOX_QUERY.per_page
+										? __( 'Show more', 'woocommerce' )
+										: __( 'Show older', 'woocommerce' ) }
+								</Button>
+							</CardFooter>
+						);
+				  } )() }
 		</Card>
 	);
 };
