@@ -14,13 +14,13 @@ export type InputProps< Value > = {
 	selected?: boolean;
 	onChange: ( value: ChangeEvent< HTMLInputElement > | Value ) => void;
 	onBlur: () => void;
-	className?: string;
-	help?: string | null;
+	className: string | undefined;
+	help: string | null | undefined;
 };
 
-export type DateTimePickerControlProps< Value > = Omit<
+export type DateTimePickerControlProps< Value > = Pick<
 	InputProps< Value >,
-	'value' | 'checked'
+	'onChange' | 'onBlur' | 'className' | 'help'
 > & {
 	currentDate: Value;
 };
