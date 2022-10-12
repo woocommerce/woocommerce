@@ -95,11 +95,11 @@ export const downloadZip = async ( { url, downloadPath, authToken } ) => {
 /**
  * Delete a zip file. Useful when cleaning up downloaded plugin zips.
  *
- * @param {string} path Local file path to the ZIP.
+ * @param {string} zipFilePath Local file path to the ZIP.
  */
-export const deleteZip = async ( path ) => {
-	console.log( `Deleting file located in ${ path }...` );
-	await fs.unlink( path, ( err ) => {
+export const deleteZip = async ( zipFilePath ) => {
+	console.log( `Deleting file located in ${ zipFilePath }...` );
+	await fs.unlink(  zipFilePath ), ( err ) => {
 		if ( err ) throw err;
 		console.log( `Successfully deleted!` );
 	} );
