@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import settingRESTRepository from './setting';
 import settingGroupRESTRepository from './setting-group';
 
