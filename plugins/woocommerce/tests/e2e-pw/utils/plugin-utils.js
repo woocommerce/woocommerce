@@ -31,26 +31,34 @@ export const deletePlugin = async ( {
 	username,
 	password,
 } ) => {
-	// Check if plugin is installed.
+	// Check if plugin is installed by getting the list of installed plugins, and then finding the one whose `textdomain` property equals `slug`.
 	const apiContext = await request.newContext( {
 		baseURL,
 		extraHTTPHeaders: {
 			Authorization: `Basic ${ encodeCredentials( username, password ) }`,
 		},
 	} );
+	const listPluginsResponse = await apiContext.get(
+		`/wp-json/wp/v2/plugins`,
+		{
+			failOnStatusCode: true,
+		}
+	);
+	const pluginsList = await listPluginsResponse.body();
+	const pluginToDelete = pluginsList.find(
+		( { textdomain } ) => textdomain === slug
+	);
 
-	const response = await apiContext.get( `/wp-json/wp/v2/plugins/${ slug }`, {
-		failOnStatusCode: true,
-	} );
+	// If installed, get its `plugin` value and use it to deactivate and delete it.
+	if ( pluginToDelete ) {
+		const { plugin } = pluginToDelete;
 
-	// If installed, deactivate and delete it.
-	if ( response.ok() ) {
-		await apiContext.put( `/wp-json/wp/v2/plugins/${ slug }`, {
+		await apiContext.put( `/wp-json/wp/v2/plugins/${ plugin }`, {
 			data: { status: 'inactive' },
 			failOnStatusCode: true,
 		} );
 
-		await apiContext.delete( `/wp-json/wp/v2/plugins/${ slug }`, {
+		await apiContext.delete( `/wp-json/wp/v2/plugins/${ plugin }`, {
 			failOnStatusCode: true,
 		} );
 	}
@@ -90,8 +98,66 @@ export const downloadZip = async ( { url, downloadPath, authToken } ) => {
  * @param {string} path Local file path to the ZIP.
  */
 export const deleteZip = async ( path ) => {
+	console.log( `Deleting file located in ${ path }...` );
 	await fs.unlink( path, ( err ) => {
 		if ( err ) throw err;
-		console.log( `Successfully deleted: ${ path }` );
+		console.log( `Successfully deleted!` );
 	} );
+};
+
+/**
+ * Get the download URL of the latest release zip for a plugin using GitHub's {@link https://docs.github.com/en/rest/releases/releases Releases API}.
+ *
+ * @param {{repository: string, authorizationToken: string, prerelease: boolean, perPage: number}} param
+ * @param {string} repository The repository owner and name. For example: `woocommerce/woocommerce`.
+ * @param {string} authorizationToken Authorization token used to authenticate with the GitHub API if required.
+ * @param {boolean} prerelease Flag on whether to get a prelease or not.
+ * @param {number} perPage Limit of entries returned from the latest releases list, defaults to 3.
+ * @return {string} Download URL for the release zip file.
+ */
+export const getLatestReleaseZipUrl = async ( {
+	repository,
+	authorizationToken,
+	prerelease = false,
+	perPage = 3,
+} ) => {
+	const requesturl = prerelease
+		? `https://api.github.com/repos/${ repository }/releases?per_page=${ perPage }`
+		: `https://api.github.com/repos/${ repository }/releases/latest`;
+
+	const options = {
+		url: requesturl,
+		headers: { 'user-agent': 'node.js' },
+	};
+
+	// If provided with a token, use it for authorization
+	if ( authorizationToken ) {
+		options.headers.Authorization = `token ${ authorizationToken }`;
+	}
+
+	// Call the List releases API endpoint in GitHub
+	const response = await axios( options );
+	const body = response.data;
+
+	// If it's a prerelease, find the first one and return its download URL.
+	if ( prerelease ) {
+		const latestPrerelease = body.find( ( { prerelease } ) => prerelease );
+
+		return latestPrerelease.assets[ 0 ].browser_download_url;
+	} else if ( authorizationToken ) {
+		// If it's a private repo, we need to download the archive this way.
+		// Use uploaded assets over downloading the zip archive.
+		if (
+			body.assets &&
+			body.assets.length > 0 &&
+			body.assets[ 0 ].browser_download_url
+		) {
+			return body.assets[ 0 ].browser_download_url;
+		} else {
+			const tagName = body.tag_name;
+			return `https://github.com/${ repository }/archive/${ tagName }.zip`;
+		}
+	} else {
+		return body.assets[ 0 ].browser_download_url;
+	}
 };
