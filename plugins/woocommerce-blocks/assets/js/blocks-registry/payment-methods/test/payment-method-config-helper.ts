@@ -88,6 +88,9 @@ describe( 'payment-method-config-helper', () => {
 				woopay: trueCallback,
 				// testpay: one callback errors, one returns true
 				testpay: throwsCallback,
+				// Used to check that only valid callbacks run in each namespace. It is not present in
+				// 'other-woocommerce-marketplace-extension'.
+				blocks_pay: trueCallback,
 			}
 		);
 		registerPaymentMethodExtensionCallbacks(
@@ -201,6 +204,15 @@ describe( 'payment-method-config-helper', () => {
 			expect( console ).toHaveErrored();
 			expect( throwsCallback ).toHaveBeenCalledTimes( 1 );
 			expect( trueCallback ).toHaveBeenCalledTimes( 1 );
+		} );
+
+		it( 'Does not error when a callback for a payment method is in one namespace but not another', () => {
+			helpers.canMakePaymentWithExtensions(
+				() => true,
+				canMakePaymentExtensionsCallbacks,
+				'blocks_pay'
+			)( canMakePaymentArgument );
+			expect( console ).not.toHaveErrored();
 		} );
 	} );
 } );
