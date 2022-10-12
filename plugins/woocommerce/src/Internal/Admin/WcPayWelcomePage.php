@@ -3,7 +3,6 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
-use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as PaymentGatewaySuggestions;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 
 /**
@@ -14,6 +13,39 @@ use Automattic\WooCommerce\Admin\WCAdminHelper;
 class WcPayWelcomePage {
 
 	const EXPERIMENT_NAME = 'woocommerce_payments_menu_promo_us_2022';
+	const OTHER_GATEWAYS  = [
+		'affirm',
+		'afterpay',
+		'amazon_payments_advanced_express',
+		'amazon_payments_advanced',
+		'authorize_net_cim_credit_card',
+		'authorize_net_cim_echeck',
+		'bacs',
+		'bambora_credit_card',
+		'braintree_credit_card',
+		'braintree_paypal',
+		'chase_paymentech',
+		'cybersource_credit_card',
+		'elavon_converge_credit_card',
+		'elavon_converge_echeck',
+		'gocardless',
+		'intuit_payments_credit_card',
+		'intuit_payments_echeck',
+		'kco',
+		'klarna_payments',
+		'payfast',
+		'paypal',
+		'paytrace',
+		'ppcp-gateway',
+		'psigate',
+		'sagepaymentsusaapi',
+		'square_credit_card',
+		'stripe_alipay',
+		'stripe_multibanco',
+		'stripe',
+		'trustcommerce',
+		'usa_epay_credit_card',
+	];
 
 	/**
 	 * WCPayWelcomePage constructor.
@@ -153,22 +185,15 @@ class WcPayWelcomePage {
 	}
 
 	/**
-	 * Checks if there is another payment gateway installed using PaymentGatewaySuggestions.
+	 * Checks if there is another payment gateway installed using a static list of US gateways from WC Store.
 	 *
 	 * @return bool Whether there is another payment gateway installed.
 	 */
 	private function is_another_payment_gateway_installed() {
-		$gateway_specs     = PaymentGatewaySuggestions::get_specs();
-		$installed_plugins = array_keys( get_plugins() );
-		$plugin_slugs      = array_map(
-			function( $plugin ) {
-				return explode( '/', $plugin )[0] ?? null;
-			},
-			$installed_plugins
-		);
+		$available_gateways = wp_list_pluck( WC()->payment_gateways()->get_available_payment_gateways(), 'id' );
 
-		foreach ( $gateway_specs as $spec ) {
-			if ( ! empty( $spec->plugins ) && in_array( $spec->plugins[0], $plugin_slugs, true ) ) {
+		foreach ( $available_gateways as $gateway ) {
+			if ( in_array( $gateway, self::OTHER_GATEWAYS, true ) ) {
 				return true;
 			}
 		}
