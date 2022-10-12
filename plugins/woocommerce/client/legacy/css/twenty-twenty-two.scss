@@ -164,6 +164,7 @@ $tt2-gray: #f7f7f7;
 	}
 
 	a.button,
+	button.button,
 	button[name="add-to-cart"],
 	input[name="submit"],
 	button.single_add_to_cart_button,
@@ -189,14 +190,14 @@ $tt2-gray: #f7f7f7;
 
 	#respond input#submit.alt,
 	a.button.alt,
-	button.button.alt,
+	button.button.alt:not(.single_add_to_cart_button),
 	input.button.alt {
-		background-color: var(--wp--preset--color--primary);
-		color: #fff;
+		background-color: var(--wp--preset--color--foreground,#a46497);
+		color: var(--wp--preset--color--background,#fff);
 
 		&:hover {
-			background-color: var(--wp--preset--color--primary);
-			color: #fff;
+			background-color: var(--wp--preset--color--foreground,#a46497);
+			color: var(--wp--preset--color--background,#fff);
 			opacity: 1;
 		}
 
