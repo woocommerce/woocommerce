@@ -87,8 +87,6 @@ const onBodyLinkClick = ( note, innerLink ) => {
 
 let hasFiredPanelViewTrack = false;
 
-console.debug( 'updated' );
-
 const renderNotes = ( {
 	hasNotes,
 	isBatchUpdating,
@@ -115,8 +113,6 @@ const renderNotes = ( {
 		} );
 		hasFiredPanelViewTrack = true;
 	}
-
-	console.debug( 'allNotesFetched', allNotesFetched );
 
 	const screen = getScreenName();
 	const onNoteVisible = ( note ) => {
