@@ -812,7 +812,7 @@ class FeaturesController {
 			return;
 		}
 
-		if ( 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) {
+		if ( 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			return;
 		}
 
