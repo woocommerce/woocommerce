@@ -1409,6 +1409,7 @@ importers:
       '@types/wordpress__compose': ^4.0.1
       '@types/wordpress__data': ^6.0.0
       '@types/wordpress__data-controls': ^2.2.0
+      '@types/wordpress__media-utils': ^3.0.0
       '@types/wordpress__notices': ^3.3.0
       '@types/wordpress__plugins': ^3.0.0
       '@typescript-eslint/eslint-plugin': ^5.14.0
@@ -1455,6 +1456,7 @@ importers:
       '@wordpress/icons': ^8.1.0
       '@wordpress/jest-preset-default': ^8.0.1
       '@wordpress/keycodes': ^3.3.1
+      '@wordpress/media-utils': ^4.6.0
       '@wordpress/notices': ^3.3.2
       '@wordpress/plugins': ^4.1.3
       '@wordpress/postcss-plugins-preset': ^1.6.0
@@ -1563,6 +1565,7 @@ importers:
       '@wordpress/i18n': 4.4.1
       '@wordpress/icons': 8.1.0
       '@wordpress/keycodes': 3.4.1
+      '@wordpress/media-utils': 4.6.0
       '@wordpress/notices': 3.4.1_react@17.0.2
       '@wordpress/plugins': 4.2.1_react@17.0.2
       '@wordpress/primitives': 3.2.1
@@ -1619,6 +1622,7 @@ importers:
       '@types/wordpress__compose': 4.0.1
       '@types/wordpress__data': 6.0.0
       '@types/wordpress__data-controls': 2.2.0
+      '@types/wordpress__media-utils': 3.0.0_sfoxds7t5ydpegc3knd667wn6m
       '@types/wordpress__notices': 3.3.0
       '@types/wordpress__plugins': 3.0.0_sfoxds7t5ydpegc3knd667wn6m
       '@typescript-eslint/eslint-plugin': 5.15.0_kjpgj5mwuhqsafyl367g3mx6ni
@@ -2353,7 +2357,7 @@ packages:
   /@babel/code-frame/7.12.11:
     resolution: {integrity: sha512-Zt1yodBx1UcyiePMSkWnU4hPqhwq7hGi2nFL1LeA3EUl+q2LQx16MISgJ0+z7dnmgvP9QtIleuETGOiOH1RcIw==}
     dependencies:
-      '@babel/highlight': 7.16.10
+      '@babel/highlight': 7.18.6
     dev: true
 
   /@babel/code-frame/7.16.7:
@@ -2838,42 +2842,6 @@ packages:
     dependencies:
       '@babel/core': 7.12.9
       '@babel/helper-compilation-targets': 7.19.3_@babel+core@7.12.9
-      '@babel/helper-module-imports': 7.18.6
-      '@babel/helper-plugin-utils': 7.19.0
-      '@babel/traverse': 7.19.3
-      debug: 4.3.4
-      lodash.debounce: 4.0.8
-      resolve: 1.22.1
-      semver: 6.3.0
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
-  /@babel/helper-define-polyfill-provider/0.3.0_@babel+core@7.16.12:
-    resolution: {integrity: sha512-7hfT8lUljl/tM3h+izTX/pO3W3frz2ok6Pk+gzys8iJqDfZrZy2pXjRTZAvG2YmfHun1X4q8/UZRLatMfqc5Tg==}
-    peerDependencies:
-      '@babel/core': ^7.4.0-0
-    dependencies:
-      '@babel/core': 7.16.12
-      '@babel/helper-compilation-targets': 7.19.3_@babel+core@7.16.12
-      '@babel/helper-module-imports': 7.18.6
-      '@babel/helper-plugin-utils': 7.19.0
-      '@babel/traverse': 7.19.3
-      debug: 4.3.4
-      lodash.debounce: 4.0.8
-      resolve: 1.22.1
-      semver: 6.3.0
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
-  /@babel/helper-define-polyfill-provider/0.3.0_@babel+core@7.17.8:
-    resolution: {integrity: sha512-7hfT8lUljl/tM3h+izTX/pO3W3frz2ok6Pk+gzys8iJqDfZrZy2pXjRTZAvG2YmfHun1X4q8/UZRLatMfqc5Tg==}
-    peerDependencies:
-      '@babel/core': ^7.4.0-0
-    dependencies:
-      '@babel/core': 7.17.8
-      '@babel/helper-compilation-targets': 7.19.3_@babel+core@7.17.8
       '@babel/helper-module-imports': 7.18.6
       '@babel/helper-plugin-utils': 7.19.0
       '@babel/traverse': 7.19.3
@@ -3529,8 +3497,8 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.12.9
-      '@babel/helper-create-class-features-plugin': 7.19.0_@babel+core@7.12.9
-      '@babel/helper-plugin-utils': 7.19.0
+      '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.12.9
+      '@babel/helper-plugin-utils': 7.18.9
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -3542,8 +3510,8 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.16.12
-      '@babel/helper-create-class-features-plugin': 7.19.0_@babel+core@7.16.12
-      '@babel/helper-plugin-utils': 7.19.0
+      '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.16.12
+      '@babel/helper-plugin-utils': 7.18.9
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -7378,8 +7346,8 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.16.12
-      '@babel/helper-plugin-utils': 7.19.0
-      '@babel/helper-validator-option': 7.18.6
+      '@babel/helper-plugin-utils': 7.18.9
+      '@babel/helper-validator-option': 7.16.7
       '@babel/plugin-transform-typescript': 7.16.8_@babel+core@7.16.12
     transitivePeerDependencies:
       - supports-color
@@ -13573,7 +13541,7 @@ packages:
     resolution: {integrity: sha512-YYknwy0D0iOwKQgz9v8nOzt2J6l4gouBmDnWqUUznltOTaon+r8US8ky8HvN0tXvc38U9m6z/t2RsVsnd1zM0g==}
     dependencies:
       '@types/history': 4.7.11
-      '@types/react': 17.0.40
+      '@types/react': 17.0.50
     dev: true
 
   /@types/react-syntax-highlighter/11.0.5:
@@ -13716,12 +13684,12 @@ packages:
   /@types/wordpress__block-editor/7.0.0_sfoxds7t5ydpegc3knd667wn6m:
     resolution: {integrity: sha512-JERpxKAQ7J07C2wtKxr+5ZE9NETIcpu0EiXuXka6Qmrq74oOypdy9jYdhMIYBDMOx4ptR3ne7edaFb2+1SBcqA==}
     dependencies:
-      '@types/react': 17.0.40
+      '@types/react': 17.0.50
       '@types/wordpress__blocks': 11.0.6_sfoxds7t5ydpegc3knd667wn6m
       '@types/wordpress__components': 19.10.1_sfoxds7t5ydpegc3knd667wn6m
       '@types/wordpress__data': 6.0.0
       '@types/wordpress__keycodes': 2.3.1
-      '@wordpress/element': 4.14.0
+      '@wordpress/element': 4.17.0
       react-autosize-textarea: 7.1.0_sfoxds7t5ydpegc3knd667wn6m
     transitivePeerDependencies:
       - react
@@ -13836,7 +13804,7 @@ packages:
   /@types/wordpress__rich-text/3.4.6:
     resolution: {integrity: sha512-MeLSATBHrcN3fp8cVylbpx+BKRJ1aootPNtbTblcUAHcuRo6avKu1kaDLxIZb/8YbsD+/3Wm8d1uldeNz9/lhw==}
     dependencies:
-      '@types/react': 17.0.40
+      '@types/react': 17.0.50
       '@types/wordpress__data': 6.0.0
     dev: true
 
@@ -15295,13 +15263,6 @@ packages:
       '@babel/runtime': 7.19.0
     dev: false
 
-  /@wordpress/blob/3.4.1:
-    resolution: {integrity: sha512-rGm7nXaxnsXStIu9v9IjbUOKtE9UzkvgYiJMX5SyVyzAGLOo2Aq759+JNRDLRR0RDkS6igH/G7qBXS6xSgLFgA==}
-    engines: {node: '>=12'}
-    dependencies:
-      '@babel/runtime': 7.19.0
-    dev: false
-
   /@wordpress/block-serialization-default-parser/4.4.1:
     resolution: {integrity: sha512-0KGj9pG6rmZlOWtu0wbPNvCesGD9vj4k8+HiKbkYFu/GHSg10mfinTLZ638tByPLM6Q5OY3G3fNXGairGNpnSw==}
     engines: {node: '>=12'}
@@ -15317,13 +15278,13 @@ packages:
     dependencies:
       '@babel/runtime': 7.19.0
       '@wordpress/autop': 3.4.1
-      '@wordpress/blob': 3.4.1
+      '@wordpress/blob': 3.15.0
       '@wordpress/block-serialization-default-parser': 4.4.1
       '@wordpress/compose': 5.2.1_react@17.0.2
       '@wordpress/data': 6.15.0_react@17.0.2
       '@wordpress/deprecated': 3.16.0
       '@wordpress/dom': 3.4.1
-      '@wordpress/element': 4.14.0
+      '@wordpress/element': 4.17.0
       '@wordpress/hooks': 3.16.0
       '@wordpress/html-entities': 3.4.1
       '@wordpress/i18n': 4.16.0
@@ -15681,7 +15642,7 @@ packages:
       '@types/mousetrap': 1.6.9
       '@wordpress/deprecated': 3.16.0
       '@wordpress/dom': 3.16.0
-      '@wordpress/element': 4.14.0
+      '@wordpress/element': 4.17.0
       '@wordpress/is-shallow-equal': 4.16.0
       '@wordpress/keycodes': 3.16.0
       '@wordpress/priority-queue': 2.16.0
@@ -15703,7 +15664,7 @@ packages:
       '@types/mousetrap': 1.6.9
       '@wordpress/deprecated': 3.4.1
       '@wordpress/dom': 3.4.1
-      '@wordpress/element': 4.8.0
+      '@wordpress/element': 4.17.0
       '@wordpress/is-shallow-equal': 4.4.1
       '@wordpress/keycodes': 3.16.0
       '@wordpress/priority-queue': 2.4.1
@@ -15894,7 +15855,7 @@ packages:
       '@babel/runtime': 7.19.0
       '@wordpress/compose': 5.2.1_react@17.0.2
       '@wordpress/deprecated': 3.4.1
-      '@wordpress/element': 4.14.0
+      '@wordpress/element': 4.17.0
       '@wordpress/is-shallow-equal': 4.4.1
       '@wordpress/priority-queue': 2.4.1
       '@wordpress/redux-routine': 4.4.1_redux@4.2.0
@@ -16475,7 +16436,7 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.19.0
-      '@wordpress/element': 4.14.0
+      '@wordpress/element': 4.17.0
       '@wordpress/primitives': 3.2.1
     dev: false
 
@@ -16815,7 +16776,7 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.19.0
-      '@wordpress/element': 4.14.0
+      '@wordpress/element': 4.17.0
       classnames: 2.3.1
     dev: false
 
@@ -16926,7 +16887,7 @@ packages:
       '@wordpress/a11y': 3.10.0
       '@wordpress/compose': 5.2.1_react@17.0.2
       '@wordpress/data': 6.15.0_react@17.0.2
-      '@wordpress/element': 4.14.0
+      '@wordpress/element': 4.17.0
       '@wordpress/escape-html': 2.15.0
       '@wordpress/i18n': 4.16.0
       '@wordpress/keycodes': 3.16.0
@@ -18607,7 +18568,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.16.12
-      '@babel/helper-define-polyfill-provider': 0.3.0_@babel+core@7.16.12
+      '@babel/helper-define-polyfill-provider': 0.3.3_@babel+core@7.16.12
       core-js-compat: 3.25.5
     transitivePeerDependencies:
       - supports-color
@@ -18619,7 +18580,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.17.8
-      '@babel/helper-define-polyfill-provider': 0.3.0_@babel+core@7.17.8
+      '@babel/helper-define-polyfill-provider': 0.3.3_@babel+core@7.17.8
       core-js-compat: 3.25.5
     transitivePeerDependencies:
       - supports-color
@@ -22612,11 +22573,11 @@ packages:
       eslint-import-resolver-node: 0.3.6
       eslint-module-utils: 2.7.3_lkzaig2qiyp6elizstfbgvzhie
       has: 1.0.3
-      is-core-module: 2.8.0
+      is-core-module: 2.10.0
       is-glob: 4.0.3
-      minimatch: 3.0.4
+      minimatch: 3.1.2
       object.values: 1.1.5
-      resolve: 1.20.0
+      resolve: 1.22.1
       tsconfig-paths: 3.14.0
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
@@ -22674,11 +22635,11 @@ packages:
       eslint-import-resolver-node: 0.3.6
       eslint-module-utils: 2.7.3_54d5qjwnmqnp5634aqlesxatge
       has: 1.0.3
-      is-core-module: 2.8.0
+      is-core-module: 2.10.0
       is-glob: 4.0.3
-      minimatch: 3.0.4
+      minimatch: 3.1.2
       object.values: 1.1.5
-      resolve: 1.20.0
+      resolve: 1.22.1
       tsconfig-paths: 3.14.0
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
@@ -31531,6 +31492,7 @@ packages:
     resolution: {integrity: sha512-yJHVQEhyqPLUTgt9B83PXu6W3rx4MvvHvSUvToogpwoGDOUQ+yDrR0HRot+yOCdCO7u4hX3pWft6kWBBcqh0UA==}
     dependencies:
       brace-expansion: 1.1.11
+    dev: true
 
   /minimatch/3.1.2:
     resolution: {integrity: sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==}
