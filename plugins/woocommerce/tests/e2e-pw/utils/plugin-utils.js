@@ -99,7 +99,7 @@ export const downloadZip = async ( { url, downloadPath, authToken } ) => {
  */
 export const deleteZip = async ( zipFilePath ) => {
 	console.log( `Deleting file located in ${ zipFilePath }...` );
-	await fs.unlink(  zipFilePath ), ( err ) => {
+	await fs.unlink( zipFilePath, ( err ) => {
 		if ( err ) throw err;
 		console.log( `Successfully deleted!` );
 	} );
