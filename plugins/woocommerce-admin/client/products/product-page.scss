@@ -58,6 +58,19 @@
 			margin-bottom: 0;
 		}
 	}
+
+	.components-tooltip__overlay {
+		position: relative;
+		&:after {
+			content: '';
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			background: transparent;
+			left: 0;
+			cursor: pointer;
+		}
+	}
 }
 
 .woocommerce-edit-product {

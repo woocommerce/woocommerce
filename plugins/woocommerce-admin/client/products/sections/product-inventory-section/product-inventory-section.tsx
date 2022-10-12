@@ -2,16 +2,24 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	Card,
-	CardBody,
-	ToggleControl,
-	TextControl,
-} from '@wordpress/components';
+import type { ChangeEvent } from 'react';
 import { getAdminLink } from '@woocommerce/settings';
 import { Link, useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { useInstanceId } from '@wordpress/compose';
+import {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore This component does exist.
+	__experimentalHStack as HStack,
+	BaseControl,
+	Card,
+	CardBody,
+	FormToggle,
+	ToggleControl,
+	TextControl,
+	Tooltip,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -26,6 +34,11 @@ export const ProductInventorySection: React.FC = () => {
 	const { getCheckboxControlProps, getInputProps, values } =
 		useFormContext< Product >();
 	const canManageStock = getAdminSetting( 'manageStock', 'yes' ) === 'yes';
+	const toggleInstanceId = useInstanceId( ToggleControl );
+	const toggleId = `inspector-toggle-control-${ toggleInstanceId }`;
+	const toggleInputProps = getCheckboxProps(
+		getInputProps( 'manage_stock' )
+	);
 
 	return (
 		<ProductSectionLayout
@@ -68,24 +81,53 @@ export const ProductInventorySection: React.FC = () => {
 							'washed-oxford-button-down-shirt',
 							'woocommerce'
 						) }
-						{ ...getInputProps( 'sku' ) }
+						{ ...getTextControlProps( getInputProps( 'sku' ) ) }
 					/>
-					{ canManageStock && (
-						<>
-							<ToggleControl
-								label={ __(
-									'Track quantity for this product',
+					<BaseControl
+						id={ toggleId }
+						className={ 'components-toggle-control' }
+					>
+						<HStack justify="flex-start" spacing={ 3 }>
+							<Tooltip
+								text={ __(
+									'Quantity tracking is disabled for all products. Go to global store settings to change it.',
 									'woocommerce'
 								) }
-								{ ...getCheckboxControlProps(
-									'manage_stock',
-									getCheckboxTracks( 'manage_stock' )
+								position="top center"
+							>
+								<div className="components-tooltip__overlay">
+									<FormToggle
+										id={ toggleId }
+										disabled={ ! canManageStock }
+										{ ...toggleInputProps }
+										onChange={ (
+											event: ChangeEvent< HTMLInputElement >
+										) => {
+											toggleInputProps.onChange(
+												event.target.checked
+											);
+										} }
+									/>
+								</div>
+							</Tooltip>
+							<label
+								htmlFor={ toggleId }
+								className="components-toggle-control__label"
+							>
+								{ __(
+									'Track quantity for this product',
+									'woocommerce'
+>>>>>>> 028df8e9f6 (Disable product inventory toggle when inventory management is disabled)
 								) }
-							/>
-							{ values.manage_stock && <ManageStockSection /> }
-						</>
+							</label>
+						</HStack>
+					</BaseControl>
+
+					{ values.manage_stock ? (
+						<ManageStockSection />
+					) : (
+						<ManualStockSection />
 					) }
-					{ ! values.manage_stock && <ManualStockSection /> }
 				</CardBody>
 			</Card>
 		</ProductSectionLayout>
