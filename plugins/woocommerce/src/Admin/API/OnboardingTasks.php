@@ -532,8 +532,9 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @return string Template contents.
 	 */
 	private static function get_homepage_template( $post_id ) {
-		$products = wp_count_posts( 'product' );
-		if ( $products->publish >= 4 ) {
+		global $wpdb;
+		$first_5_products = $wpdb->get_results("SELECT ID from $wpdb->posts where post_type = 'product' and post_status = 'publish' LIMIT 5;");
+		if ($wpdb->num_rows >= 4) {
 			$images   = self::sideload_homepage_images( $post_id, 1 );
 			$image_1  = ! empty( $images[0] ) ? $images[0] : '';
 			$template = self::get_homepage_cover_block( $image_1 ) . '
