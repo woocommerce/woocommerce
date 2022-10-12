@@ -52,3 +52,14 @@ registerBlockComponent( {
 			)
 	),
 } );
+
+registerBlockComponent( {
+	blockName: 'woocommerce/rating-filter',
+	component: lazy(
+		() =>
+			import(
+				/* webpackChunkName: "rating-filter-wrapper" */
+				'../rating-filter/block-wrapper'
+			)
+	),
+} );

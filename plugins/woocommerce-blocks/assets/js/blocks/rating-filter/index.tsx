@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { isExperimentalBuild } from '@woocommerce/block-settings';
 import { createBlock, registerBlockType } from '@wordpress/blocks';
 import { Icon, starEmpty } from '@wordpress/icons';
@@ -13,7 +12,6 @@ import { useBlockProps } from '@wordpress/block-editor';
  */
 import edit from './edit';
 import metadata from './block.json';
-import { blockAttributes } from './attributes';
 import type { Attributes } from './types';
 
 if ( isExperimentalBuild() ) {
@@ -28,7 +26,6 @@ if ( isExperimentalBuild() ) {
 		},
 		attributes: {
 			...metadata.attributes,
-			...blockAttributes,
 		},
 		transforms: {
 			from: [
@@ -39,26 +36,15 @@ if ( isExperimentalBuild() ) {
 					isMatch: ( { idBase, instance } ) =>
 						idBase === 'woocommerce_rating_filter' &&
 						!! instance?.raw,
-					transform: ( { instance } ) =>
-						createBlock( 'woocommerce/rating-filter', {
-							heading:
-								instance?.raw?.title ||
-								__(
-									'Filter by rating',
-									'woo-gutenberg-products-block'
-								),
-							headingLevel: 3,
-						} ),
+					transform: () => createBlock( 'woocommerce/rating-filter' ),
 				},
 			],
 		},
 		edit,
 		// Save the props to post content.
 		save( { attributes }: { attributes: Attributes } ) {
-			const { className, heading, headingLevel, showCounts } = attributes;
+			const { className, showCounts } = attributes;
 			const data: Record< string, unknown > = {
-				'data-heading': heading,
-				'data-heading-level': headingLevel,
 				'data-show-counts': showCounts,
 			};
 			return (

@@ -10,8 +10,6 @@ import {
 	ToggleControl,
 	withSpokenMessages,
 } from '@wordpress/components';
-import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
-import BlockTitle from '@woocommerce/editor-components/block-title';
 import type { BlockEditProps } from '@wordpress/blocks';
 
 /**
@@ -24,8 +22,7 @@ const Edit = ( {
 	attributes,
 	setAttributes,
 }: BlockEditProps< Attributes > ) => {
-	const { className, heading, headingLevel, showCounts, showFilterButton } =
-		attributes;
+	const { className, showCounts, showFilterButton } = attributes;
 
 	const blockProps = useBlockProps( {
 		className: classnames( 'wc-block-rating-filter', className ),
@@ -77,20 +74,6 @@ const Edit = ( {
 						}
 					/>
 				</PanelBody>
-				<PanelBody
-					title={ __( 'Typography', 'woo-gutenberg-products-block' ) }
-				>
-					<p> { __( 'Size', 'woo-gutenberg-products-block' ) } </p>
-					<HeadingToolbar
-						isCollapsed={ false }
-						minLevel={ 2 }
-						maxLevel={ 7 }
-						selectedLevel={ headingLevel }
-						onChange={ ( newLevel: number ) =>
-							setAttributes( { headingLevel: newLevel } )
-						}
-					/>
-				</PanelBody>
 			</InspectorControls>
 		);
 	};
@@ -100,14 +83,6 @@ const Edit = ( {
 			{ getInspectorControls() }
 			{
 				<div { ...blockProps }>
-					<BlockTitle
-						className="wc-block-rating-filter__title"
-						headingLevel={ headingLevel }
-						heading={ heading }
-						onChange={ ( value: string ) =>
-							setAttributes( { heading: value } )
-						}
-					/>
 					<Disabled>
 						<Block attributes={ attributes } isEditor={ true } />
 					</Disabled>
