@@ -31,7 +31,7 @@ test.describe( 'Plugin can be uploaded and activated', () => {
 		pluginSlug = PLUGIN_REPOSITORY.split( '/' ).pop();
 
 		// Download the needed plugin.
-		const pluginDownloadURL = getLatestReleaseZipUrl( {
+		const pluginDownloadURL = await getLatestReleaseZipUrl( {
 			repository: PLUGIN_REPOSITORY,
 			authorizationToken: GITHUB_TOKEN,
 		} );
@@ -44,7 +44,6 @@ test.describe( 'Plugin can be uploaded and activated', () => {
 	} );
 
 	test.afterAll( async () => {
-		// mytodo uncomment
 		await deleteZip( pluginZipPath );
 	} );
 
