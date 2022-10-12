@@ -3,8 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import type { ChangeEvent } from 'react';
+import {
+	__experimentalConditionalWrapper as ConditionalWrapper,
+	Link,
+	useFormContext,
+} from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
-import { Link, useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useInstanceId } from '@wordpress/compose';
@@ -88,12 +92,19 @@ export const ProductInventorySection: React.FC = () => {
 						className={ 'components-toggle-control' }
 					>
 						<HStack justify="flex-start" spacing={ 3 }>
-							<Tooltip
-								text={ __(
-									'Quantity tracking is disabled for all products. Go to global store settings to change it.',
-									'woocommerce'
+							<ConditionalWrapper
+								condition={ ! canManageStock }
+								wrapper={ ( children: JSX.Element ) => (
+									<Tooltip
+										text={ __(
+											'Quantity tracking is disabled for all products. Go to global store settings to change it.',
+											'woocommerce'
+										) }
+										position="top center"
+									>
+										{ children }
+									</Tooltip>
 								) }
-								position="top center"
 							>
 								<div className="components-tooltip__overlay">
 									<FormToggle
@@ -109,7 +120,7 @@ export const ProductInventorySection: React.FC = () => {
 										} }
 									/>
 								</div>
-							</Tooltip>
+							</ConditionalWrapper>
 							<label
 								htmlFor={ toggleId }
 								className="components-toggle-control__label"
