@@ -809,6 +809,10 @@ class FeaturesController {
 			return;
 		}
 
+		if ( 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) {
+			return;
+		}
+
 		$feature_compatibility_info = $this->get_compatible_features_for_plugin( $plugin_file, true );
 		$incompatible_features      = array_merge( $feature_compatibility_info['incompatible'], $feature_compatibility_info['uncertain'] );
 		$incompatible_features      = array_values(
