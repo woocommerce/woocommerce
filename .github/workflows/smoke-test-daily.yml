@@ -52,7 +52,7 @@ jobs:
               run: |
                   pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-woocommerce.spec.js
                   unset UPDATE_WC
-                  pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
+                  pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js basic.spec.js
 
             - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
@@ -82,7 +82,9 @@ jobs:
         name: API test on trunk
         runs-on: ubuntu-20.04
         needs: [e2e-test]
-        if: always()
+        # mytodo skip for the meantime
+        # if: always()
+        if: false
         steps:
             - uses: actions/checkout@v3
               with:
@@ -134,7 +136,9 @@ jobs:
         name: k6 test on trunk
         runs-on: ubuntu-20.04
         needs: [api-test]
-        if: always()
+        # mytodo skip for the meantime
+        # if: always()
+        if: false
         steps:
             - uses: actions/checkout@v3
               with:
@@ -189,7 +193,7 @@ jobs:
     # Disable for this job for the meantime. It will be migrated to Playwright later.
     test-plugins:
         name: Smoke tests with ${{ matrix.plugin }} plugin installed
-        if: false
+        if: always()
         runs-on: ubuntu-20.04
         needs: [k6-test]
         strategy:
@@ -198,17 +202,18 @@ jobs:
                 include:
                     - plugin: 'WooCommerce Payments'
                       repo: 'automattic/woocommerce-payments'
-                    - plugin: 'WooCommerce PayPal Payments'
-                      repo: 'woocommerce/woocommerce-paypal-payments'
-                    - plugin: 'WooCommerce Shipping & Tax'
-                      repo: 'automattic/woocommerce-services'
-                    - plugin: 'WooCommerce Subscriptions'
-                      repo: WC_SUBSCRIPTIONS_REPO
-                      private: true
-                    - plugin: 'WordPress SEO' # Yoast SEO in the UI, but the slug is wordpress-seo
-                      repo: 'Yoast/wordpress-seo'
-                    - plugin: 'Contact Form 7'
-                      repo: 'takayukister/contact-form-7'
+                    # mytodo comment out for now
+                    # - plugin: 'WooCommerce PayPal Payments'
+                    #   repo: 'woocommerce/woocommerce-paypal-payments'
+                    # - plugin: 'WooCommerce Shipping & Tax'
+                    #   repo: 'automattic/woocommerce-services'
+                    # - plugin: 'WooCommerce Subscriptions'
+                    #   repo: WC_SUBSCRIPTIONS_REPO
+                    #   private: true
+                    # - plugin: 'WordPress SEO' # Yoast SEO in the UI, but the slug is wordpress-seo
+                    #   repo: 'Yoast/wordpress-seo'
+                    # - plugin: 'Contact Form 7'
+                    #   repo: 'takayukister/contact-form-7'
         steps:
             - name: Create dirs.
               run: |
@@ -218,45 +223,64 @@ jobs:
             - uses: actions/checkout@v3
               with:
                   path: package/woocommerce
+                  ref: ${{ env.BRANCH_NAME }}
 
-            - name: Download WooCommerce ZIP.
-              uses: actions/download-artifact@v3
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  name: woocommerce
-                  path: tmp
+                  install-filters: woocommerce
+                  build: false
+                  php-version: null
 
-            - name: Extract and replace WooCommerce zip.
-              working-directory: tmp
-              run: |
-                  unzip woocommerce.zip -d .
-                  rsync -a woocommerce/* ../package/woocommerce/plugins/woocommerce/
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
 
-            - name: Load docker images and start containers.
-              working-directory: package/woocommerce
-              run: pnpm docker:up --filter=woocommerce
+            # - name: Download WooCommerce ZIP.
+            #   uses: actions/download-artifact@v3
+            #   with:
+            #       name: woocommerce
+            #       path: tmp
 
-            - name: Run tests command.
+            # - name: Extract and replace WooCommerce zip.
+            #   working-directory: tmp
+            #   run: |
+            #       unzip woocommerce.zip -d .
+            #       rsync -a woocommerce/* ../package/woocommerce/plugins/woocommerce/
+
+            # - name: Load docker images and start containers.
+            #   working-directory: package/woocommerce
+            #   run: pnpm docker:up --filter=woocommerce
+
+            - name: Run E2E tests
               working-directory: package/woocommerce/plugins/woocommerce
               env:
-                  WC_E2E_SCREENSHOTS: 1
-                  E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
-                  E2E_SLACK_CHANNEL: ${{ secrets.SMOKE_TEST_SLACK_CHANNEL }}
+                  BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
+                  ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
+                  ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
+                  ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
+                  CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
+                  CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
+                  DEFAULT_TIMEOUT_OVERRIDE: 120000
+                  E2E_MAX_FAILURES: 20
                   PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
                   PLUGIN_NAME: ${{ matrix.plugin }}
                   GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
               run: |
-                  pnpm exec wc-e2e test:e2e tests/e2e/specs/smoke-tests/upload-plugin.js
-                  pnpm exec wc-e2e test:e2e
+                  pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-plugin.spec.js
+                  pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js basic.spec.js
 
     publish-reports:
         name: Publish test reports
-        if: |
-            always() &&
-            ! github.event.pull_request.head.repo.fork &&
-            (
-              contains( needs.*.result, 'success' ) ||
-              contains( needs.*.result, 'failure' )
-            )
+        # mytodo skip for the meantime
+        # if: |
+        #     always() &&
+        #     ! github.event.pull_request.head.repo.fork &&
+        #     (
+        #       contains( needs.*.result, 'success' ) ||
+        #       contains( needs.*.result, 'failure' )
+        #     )
+        if: false
         runs-on: ubuntu-20.04
         needs: [test-plugins]
         env:
@@ -274,13 +298,15 @@ jobs:
 
     post-summary:
         name: Post test results
-        if: |
-            always() && 
-            ! github.event.pull_request.head.repo.fork &&
-            (
-              contains( needs.*.result, 'success' ) ||
-              contains( needs.*.result, 'failure' )
-            )
+        # mytodo skip for the meantime
+        # if: |
+        #     always() &&
+        #     ! github.event.pull_request.head.repo.fork &&
+        #     (
+        #       contains( needs.*.result, 'success' ) ||
+        #       contains( needs.*.result, 'failure' )
+        #     )
+        if: false
         runs-on: ubuntu-20.04
         needs: [e2e-test, api-test]
         steps:
