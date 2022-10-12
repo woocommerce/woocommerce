@@ -1,6 +1,7 @@
 <?php
 
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
@@ -321,6 +322,35 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $order->get_meta( 'my_meta', true, 'edit' ), $r_order->get_meta( 'my_meta', true, 'edit' ) );
 		$this->assertEquals( $this->sut->get_stock_reduced( $order ), $this->sut->get_stock_reduced( $r_order ) );
+	}
+
+	/**
+	 * Confirm we store the order creation date in GMT.
+	 */
+	public function test_order_dates_are_gmt(): void {
+		global $wpdb;
+
+		// Switch to the COT datastore, set WordPress to use a non-UTC timezone, and create a new order.
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		update_option( 'timezone_string', 'America/Los_Angeles' );
+
+		$order            = OrderHelper::create_order();
+		$date_created_gmt = $wpdb->get_var(
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			'SELECT date_created_gmt FROM ' . OrdersTableDataStore::get_orders_table_name() . ' WHERE id = ' . $order->get_id()
+		);
+
+		$this->assertNotEquals(
+			$date_created_gmt,
+			$order->get_date_created()->format( 'Y-m-d H:i:s' ),
+			'The creation date in the database should be in GMT, but the retrieved datetime should be in the local WP timezone.'
+		);
+
+		$this->assertEquals(
+			$date_created_gmt,
+			$order->get_date_created()->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' ),
+			'The order creation datetime, when cast to UTC/GMT, should match the same value stored in the database.'
+		);
 	}
 
 	/**
