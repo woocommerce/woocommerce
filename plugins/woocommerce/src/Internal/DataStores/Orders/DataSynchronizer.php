@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -52,6 +53,13 @@ class DataSynchronizer implements BatchProcessorInterface {
 	private $posts_to_cot_migrator;
 
 	/**
+	 * Logger object to be used to log events.
+	 *
+	 * @var \WC_Logger
+	 */
+	private $error_logger;
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
@@ -87,10 +95,11 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * @param PostsToOrdersMigrationController $posts_to_cot_migrator The posts to COT migration class to use.
 	 *@internal
 	 */
-	final public function init( OrdersTableDataStore $data_store, DatabaseUtil $database_util, PostsToOrdersMigrationController $posts_to_cot_migrator ) {
+	final public function init( OrdersTableDataStore $data_store, DatabaseUtil $database_util, PostsToOrdersMigrationController $posts_to_cot_migrator, LegacyProxy $legacy_proxy ) {
 		$this->data_store            = $data_store;
 		$this->database_util         = $database_util;
 		$this->posts_to_cot_migrator = $posts_to_cot_migrator;
+		$this->error_logger          = $legacy_proxy->call_function( 'wc_get_logger' );
 	}
 
 	/**
@@ -318,9 +327,9 @@ WHERE
 	public function process_batch( array $batch ) : void {
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			foreach ( $batch as $id ) {
-				$order      = wc_get_order( $id );
+				$order = wc_get_order( $id );
 				if ( ! $order ) {
-					echo "Unable to find order $id";
+					$this->error_logger->error( "Order $id not found during batch process, skipping." );
 					continue;
 				}
 				$data_store = $order->get_data_store();

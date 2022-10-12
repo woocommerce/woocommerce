@@ -190,16 +190,13 @@ class ArrayUtil {
 	 *
 	 * @return array The converted assoc array.
 	 */
-	public static function select_array_to_assoc( array $items, string $selector_name, int $selector_type = self::SELECT_BY_AUTO ): array {
+	public static function select_as_assoc( array $items, string $selector_name, int $selector_type = self::SELECT_BY_AUTO ): array {
 		$selector_callback = self::get_selector_callback( $selector_name, $selector_type );
 		$result            = array();
 		foreach ( $items as $item ) {
 			$key = $selector_callback( $item );
-			if ( isset( $result[ $key ] ) ) {
-				$result[ $key ][] = $item;
-			} else {
-				$result[ $key ] = array( $item );
-			}
+			self::ensure_key_is_array( $result, $key );
+			$result[ $key ][] = $item;
 		}
 		return $result;
 	}

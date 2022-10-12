@@ -1116,8 +1116,8 @@ WHERE
 	private function get_diff_meta_data_between_orders( \WC_Abstract_Order &$order1, \WC_Abstract_Order $order2, $sync = false ): array {
 		$order1_meta        = ArrayUtil::select( $order1->get_meta_data(), 'get_data', ArrayUtil::SELECT_BY_OBJECT_METHOD );
 		$order2_meta        = ArrayUtil::select( $order2->get_meta_data(), 'get_data', ArrayUtil::SELECT_BY_OBJECT_METHOD );
-		$order1_meta_by_key = ArrayUtil::select_array_to_assoc( $order1_meta, 'key', ArrayUtil::SELECT_BY_ARRAY_KEY );
-		$order2_meta_by_key = ArrayUtil::select_array_to_assoc( $order2_meta, 'key', ArrayUtil::SELECT_BY_ARRAY_KEY );
+		$order1_meta_by_key = ArrayUtil::select_as_assoc( $order1_meta, 'key', ArrayUtil::SELECT_BY_ARRAY_KEY );
+		$order2_meta_by_key = ArrayUtil::select_as_assoc( $order2_meta, 'key', ArrayUtil::SELECT_BY_ARRAY_KEY );
 
 		$diff = array();
 		foreach ( $order1_meta_by_key as $key => $value ) {

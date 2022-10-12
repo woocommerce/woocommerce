@@ -52,7 +52,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test reading from migrated post order.
+	 * @testDox Test reading from migrated post order.
 	 */
 	public function test_read_from_migrated_order() {
 		$post_order_id = OrderHelper::create_complex_wp_post_order();
@@ -78,7 +78,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test whether backfill_post_record works as expected.
+	 * @testDox Test whether backfill_post_record works as expected.
 	 */
 	public function test_backfill_post_record() {
 		$post_order_id = OrderHelper::create_complex_wp_post_order();
@@ -152,7 +152,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that modified date is backfilled correctly when syncing order.
+	 * @testDox Test that modified date is backfilled correctly when syncing order.
 	 */
 	public function test_backfill_updated_date() {
 		$order                   = $this->create_complex_cot_order();
@@ -165,7 +165,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests update() on the COT datastore.
+	 * @testDox Tests update() on the COT datastore.
 	 */
 	public function test_cot_datastore_update() {
 		static $props_to_update = array(
@@ -276,7 +276,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests create() on the COT datastore.
+	 * @testDox Tests create() on the COT datastore.
 	 */
 	public function test_cot_datastore_create() {
 		$order    = $this->create_complex_cot_order();
@@ -326,7 +326,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Even corrupted order can be inserted as expected.
+	 * @testDox Even corrupted order can be inserted as expected.
 	 */
 	public function test_cot_data_store_update_corrupted_order() {
 		global $wpdb;
@@ -351,7 +351,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * We should be able to save multiple orders without them overwriting each other.
+	 * @testDox We should be able to save multiple orders without them overwriting each other.
 	 */
 	public function test_cot_data_store_multiple_saved_orders() {
 		$order1 = $this->create_complex_cot_order();
@@ -390,7 +390,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests creation of full vs placeholder records in the posts table when creating orders in the COT datastore.
+	 * @testDox Tests creation of full vs placeholder records in the posts table when creating orders in the COT datastore.
 	 *
 	 * @return void
 	 */
@@ -409,7 +409,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests the `delete()` method on the COT datastore -- trashing.
+	 * @testDox Tests the `delete()` method on the COT datastore -- trashing.
 	 *
 	 * @return void
 	 */
@@ -437,7 +437,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests the `delete()` method on the COT datastore -- full deletes.
+	 * @testDox Tests the `delete()` method on the COT datastore -- full deletes.
 	 *
 	 * @return void
 	 */
@@ -459,7 +459,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests the `OrdersTableQuery` class on the COT datastore.
+	 * @testDox Tests the `OrdersTableQuery` class on the COT datastore.
 	 */
 	public function test_cot_query_basic() {
 		// We bypass the `query()` method as it's mainly just a thin wrapper around
@@ -528,7 +528,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests meta queries in the `OrdersTableQuery` class.
+	 * @testDox Tests meta queries in the `OrdersTableQuery` class.
 	 *
 	 * @return void
 	 */
@@ -647,7 +647,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests queries involving the 'customer' query var.
+	 * @testDox Tests queries involving the 'customer' query var.
 	 *
 	 * @return void
 	 */
@@ -720,7 +720,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests queries involving 'date_query'.
+	 * @testDox Tests queries involving 'date_query'.
 	 *
 	 * @return void
 	 */
@@ -928,7 +928,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the `get_order_count()` method.
+	 * @testDox Test the `get_order_count()` method.
 	 */
 	public function test_get_order_count(): void {
 		$number_of_orders_by_status = array(
@@ -958,7 +958,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test `get_unpaid_orders()`.
+	 * @testDox Test `get_unpaid_orders()`.
 	 */
 	public function test_get_unpaid_orders(): void {
 		$now = current_time( 'timestamp' );
@@ -993,7 +993,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test `get_order_id_by_order_key()`.
+	 * @testDox Test `get_order_id_by_order_key()`.
 	 *
 	 * @return void
 	 */
@@ -1008,7 +1008,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Direct write to metadata should propagate to the orders table when reading.
+	 * @testDox Direct write to metadata should propagate to the orders table when reading.
 	 */
 	public function test_read_with_direct_meta_write() {
 		$this->enable_cot_sync();
@@ -1029,7 +1029,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * When there are direct writes to posts data, order should synced upon reading.
+	 * @testDox When there are direct writes to posts data, order should synced upon reading.
 	 */
 	public function test_read_multiple_with_direct_write() {
 		$this->enable_cot_sync();
@@ -1065,7 +1065,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that we are able to correctly detect when order and post are out of sync.
+	 * @testDox Test that we are able to correctly detect when order and post are out of sync.
 	 */
 	public function test_is_post_different_from_order() {
 		$this->enable_cot_sync();
@@ -1093,7 +1093,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that after backfilling, post order is same as cot order.
+	 * @testDox Test that after backfilling, post order is same as cot order.
 	 */
 	public function test_post_is_same_as_order_after_backfill() {
 		$order = $this->create_complex_cot_order();
@@ -1119,7 +1119,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Meta data should be migrated from post order to cot order.
+	 * @testDox Meta data should be migrated from post order to cot order.
 	 *
 	 * @return void
 	 */
@@ -1179,7 +1179,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Ensure search works as expected.
+	 * @testDox Ensure search works as expected.
 	 */
 	public function test_cot_query_search(): void {
 		$order_1 = new WC_Order();
@@ -1223,7 +1223,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Ensure field_query works as expected.
+	 * @testDox Ensure field_query works as expected.
 	 */
 	public function test_cot_query_field_query(): void {
 		$orders_test_data = array(
@@ -1437,7 +1437,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that props set by datastores can be set and get by using any of metadata, object props or from data store setters.
+	 * @testDox Test that props set by datastores can be set and get by using any of metadata, object props or from data store setters.
 	 * Ideally, this should be possible only from getters and setters for objects, but for backward compatibility, earlier ways are also supported.
 	 */
 	public function test_internal_ds_getters_and_setters() {
@@ -1526,7 +1526,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Legacy getters and setters for props migrated from data stores should be set/reset properly.
+	 * @testDox Legacy getters and setters for props migrated from data stores should be set/reset properly.
 	 */
 	public function test_legacy_getters_setters() {
 		$order_id = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_complex_wp_post_order();
@@ -1618,7 +1618,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that multiple calls to read don't try to sync again.
+	 * @testDox Test that multiple calls to read don't try to sync again.
 	 */
 	public function test_read_multiple_dont_sync_again_for_same_order() {
 		$order = $this->create_complex_cot_order();
