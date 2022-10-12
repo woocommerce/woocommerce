@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Add source parameter for calls to the subscriptions endpoint on WooCommerce.com
