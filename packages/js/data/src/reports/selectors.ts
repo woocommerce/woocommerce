@@ -4,43 +4,52 @@
 import { getResourceName } from '../utils';
 import {
 	ReportState,
-	Endpoint,
+	ReportItemsEndpoint,
+	ReportStatEndpoint,
 	ReportQueryParams,
 	ReportStatQueryParams,
+	ReportItemObjectInfer,
+	ReportStatObjectInfer,
 } from './types';
 
-const EMPTY_OBJECT = {};
+const EMPTY_OBJECT = {} as const;
 
 export const getReportItemsError = (
 	state: ReportState,
-	endpoint: Endpoint,
+	endpoint: ReportItemsEndpoint,
 	query: ReportQueryParams
 ) => {
 	const resourceName = getResourceName( endpoint, query );
 	return state.itemErrors[ resourceName ] || false;
 };
 
-export const getReportItems = (
+export const getReportItems = < T >(
 	state: ReportState,
-	endpoint: Endpoint,
+	endpoint: ReportItemsEndpoint,
 	query: ReportQueryParams
-) => {
+): ReportItemObjectInfer< T > => {
 	const resourceName = getResourceName( endpoint, query );
-	return state.items[ resourceName ] || EMPTY_OBJECT;
+	return (
+		( state.items[ resourceName ] as ReportItemObjectInfer< T > ) ||
+		EMPTY_OBJECT
+	);
 };
 
-export const getReportStats = (
+export const getReportStats = < T >(
 	state: ReportState,
-	endpoint: Endpoint,
+	endpoint: ReportStatEndpoint,
 	query: ReportStatQueryParams
-) => {
+): ReportStatObjectInfer< T > => {
 	const resourceName = getResourceName( endpoint, query );
-	return state.stats[ resourceName ] || EMPTY_OBJECT;
+	return (
+		( state.stats[ resourceName ] as ReportStatObjectInfer< T > ) ||
+		EMPTY_OBJECT
+	);
 };
 
 export const getReportStatsError = (
 	state: ReportState,
-	endpoint: Endpoint,
+	endpoint: ReportStatEndpoint,
 	query: ReportStatQueryParams
 ) => {
 	const resourceName = getResourceName( endpoint, query );

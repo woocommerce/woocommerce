@@ -4,15 +4,16 @@
 import { getResourceName } from '../utils';
 import TYPES from './action-types';
 import {
-	Endpoint,
+	ReportItemsEndpoint,
+	ReportStatEndpoint,
 	ReportQueryParams,
 	ReportStatQueryParams,
-	ReportObject,
+	ReportItemObject,
 	ReportStatObject,
 } from './types';
 
 export function setReportItemsError(
-	endpoint: Endpoint,
+	endpoint: ReportItemsEndpoint,
 	query: ReportQueryParams,
 	error: unknown
 ) {
@@ -26,9 +27,9 @@ export function setReportItemsError(
 }
 
 export function setReportItems(
-	endpoint: Endpoint,
+	endpoint: ReportItemsEndpoint,
 	query: ReportQueryParams,
-	items: ReportObject
+	items: ReportItemObject
 ) {
 	const resourceName = getResourceName( endpoint, query );
 
@@ -40,7 +41,7 @@ export function setReportItems(
 }
 
 export function setReportStats(
-	endpoint: Endpoint,
+	endpoint: ReportStatEndpoint,
 	query: ReportStatQueryParams,
 	stats: ReportStatObject
 ) {
@@ -54,7 +55,7 @@ export function setReportStats(
 }
 
 export function setReportStatsError(
-	endpoint: Endpoint,
+	endpoint: ReportStatEndpoint,
 	query: ReportStatQueryParams,
 	error: unknown
 ) {

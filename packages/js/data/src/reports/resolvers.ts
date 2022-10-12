@@ -15,15 +15,16 @@ import {
 	setReportStats,
 } from './actions';
 import {
-	Endpoint,
+	ReportItemsEndpoint,
+	ReportStatEndpoint,
 	ReportQueryParams,
 	ReportStatQueryParams,
-	ReportObject,
+	ReportItemObject,
 	ReportStatObject,
 } from './types';
 
 const getIntHeaderValues = (
-	endpoint: Endpoint,
+	endpoint: string,
 	response: {
 		headers: Map< string, string >;
 		data: unknown;
@@ -42,7 +43,7 @@ const getIntHeaderValues = (
 };
 
 export function* getReportItems(
-	endpoint: Endpoint,
+	endpoint: ReportItemsEndpoint,
 	query: ReportQueryParams
 ) {
 	const fetchArgs = {
@@ -53,7 +54,7 @@ export function* getReportItems(
 	try {
 		const response: {
 			headers: Map< string, string >;
-			data: ReportObject[ 'data' ];
+			data: ReportItemObject[ 'data' ];
 		} = yield fetchWithHeaders( fetchArgs );
 		const data = response.data;
 
@@ -74,7 +75,7 @@ export function* getReportItems(
 }
 
 export function* getReportStats(
-	endpoint: Endpoint,
+	endpoint: ReportStatEndpoint,
 	query: ReportStatQueryParams
 ) {
 	const fetchArgs = {

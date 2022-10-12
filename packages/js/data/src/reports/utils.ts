@@ -23,7 +23,11 @@ import * as reportsUtils from './utils';
 import { MAX_PER_PAGE, QUERY_DEFAULTS } from '../constants';
 import { STORE_NAME } from './constants';
 import { getResourceName } from '../utils';
-import { Endpoint, ReportStatObject } from './types';
+import {
+	ReportItemsEndpoint,
+	ReportStatEndpoint,
+	ReportStatObject,
+} from './types';
 import type { ReportsSelect } from './';
 
 type Filter = {
@@ -44,7 +48,7 @@ type AdvancedFilters =
 	| Record< string, never >;
 
 type QueryOptions = {
-	endpoint: Endpoint;
+	endpoint: ReportStatEndpoint;
 	dataType: 'primary' | 'secondary';
 	query: Record< string, string >;
 	limitBy: string[];
@@ -167,7 +171,11 @@ export function getQueryFromConfig(
  * @param {Object} [options.advancedFilters] config advanced filters
  * @return {Object} A query object with the values from filters and advanced fitlters applied.
  */
-export function getFilterQuery( options: QueryOptions ) {
+export function getFilterQuery(
+	options: Omit< QueryOptions, 'endpoint' > & {
+		endpoint: ReportItemsEndpoint | ReportStatEndpoint;
+	}
+) {
 	const {
 		endpoint,
 		query,
@@ -214,7 +222,7 @@ type ActiveFilter = {
  */
 export function isReportDataEmpty(
 	report: ReportStatObject,
-	endpoint: Endpoint
+	endpoint: ReportStatEndpoint
 ) {
 	if ( ! report ) {
 		return true;
@@ -287,7 +295,9 @@ export function getRequestQuery( options: QueryOptions ) {
  * @param {string} options.defaultDateRange  User specified default date range.
  * @return {Object} Object containing summary number responses.
  */
-export function getSummaryNumbers( options: QueryOptions ) {
+export function getSummaryNumbers< T extends ReportStatEndpoint >(
+	options: QueryOptions
+) {
 	const { endpoint, select } = options;
 	const { getReportStats, getReportStatsError, isResolving } =
 		select( STORE_NAME );
@@ -305,7 +315,7 @@ export function getSummaryNumbers( options: QueryOptions ) {
 	// Disable eslint rule requiring `getReportStats` to be defined below because the next two statements
 	// depend on `getReportStats` to have been called.
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-	const primary = getReportStats( endpoint, primaryQuery );
+	const primary = getReportStats< T >( endpoint, primaryQuery );
 
 	if ( isResolving( 'getReportStats', [ endpoint, primaryQuery ] ) ) {
 		return { ...response, isRequesting: true };
@@ -324,7 +334,7 @@ export function getSummaryNumbers( options: QueryOptions ) {
 	// Disable eslint rule requiring `getReportStats` to be defined below because the next two statements
 	// depend on `getReportStats` to have been called.
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-	const secondary = getReportStats( endpoint, secondaryQuery );
+	const secondary = getReportStats< T >( endpoint, secondaryQuery );
 
 	if ( isResolving( 'getReportStats', [ endpoint, secondaryQuery ] ) ) {
 		return { ...response, isRequesting: true };
@@ -405,7 +415,9 @@ const getReportChartDataResponse = memoize(
  * @param {string} options.defaultDateRange User specified default date range.
  * @return {Object}  Object containing API request information (response, fetching, and error details)
  */
-export function getReportChartData( options: QueryOptions ) {
+export function getReportChartData< T extends ReportStatEndpoint >(
+	options: QueryOptions
+) {
 	const { endpoint } = options;
 	let reportSelectors = options.selector;
 	if ( options.select && ! options.selector ) {
@@ -422,7 +434,7 @@ export function getReportChartData( options: QueryOptions ) {
 	// Disable eslint rule requiring `stats` to be defined below because the next two if statements
 	// depend on `getReportStats` to have been called.
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-	const stats = getReportStats( endpoint, requestQuery );
+	const stats = getReportStats< T >( endpoint, requestQuery );
 
 	if ( isResolving( 'getReportStats', [ endpoint, requestQuery ] ) ) {
 		return reportChartDataResponses.requesting;
@@ -451,7 +463,7 @@ export function getReportChartData( options: QueryOptions ) {
 
 		for ( let i = 2; i <= totalPages; i++ ) {
 			const nextQuery = { ...requestQuery, page: i };
-			const _data = getReportStats( endpoint, nextQuery );
+			const _data = getReportStats< T >( endpoint, nextQuery );
 			if ( isResolving( 'getReportStats', [ endpoint, nextQuery ] ) ) {
 				continue;
 			}
@@ -529,7 +541,11 @@ export function getTooltipValueFormat(
  * @param {string} options.defaultDateRange User specified default date range.
  * @return {Object} Object    Table data response
  */
-export function getReportTableQuery( options: QueryOptions ) {
+export function getReportTableQuery(
+	options: Omit< QueryOptions, 'endpoint' > & {
+		endpoint: ReportItemsEndpoint;
+	}
+) {
 	const { query, tableQuery = {} } = options;
 	const filterQuery = getFilterQuery( options );
 	const datesFromQuery = getCurrentDates( query, options.defaultDateRange );
@@ -564,7 +580,11 @@ export function getReportTableQuery( options: QueryOptions ) {
  * @param {string} options.defaultDateRange User specified default date range.
  * @return {Object} Object    Table data response
  */
-export function getReportTableData( options: QueryOptions ) {
+export function getReportTableData< T extends ReportItemsEndpoint >(
+	options: Omit< QueryOptions, 'endpoint' > & {
+		endpoint: ReportItemsEndpoint;
+	}
+) {
 	const { endpoint } = options;
 	let reportSelectors = options.selector;
 	if ( options.select && ! options.selector ) {
@@ -591,7 +611,7 @@ export function getReportTableData( options: QueryOptions ) {
 	// Disable eslint rule requiring `items` to be defined below because the next two if statements
 	// depend on `getReportItems` to have been called.
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-	const items = getReportItems( endpoint, tableQuery );
+	const items = getReportItems< T >( endpoint, tableQuery );
 
 	const queryResolved = hasFinishedResolution( 'getReportItems', [
 		endpoint,

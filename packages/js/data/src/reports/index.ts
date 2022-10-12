@@ -16,6 +16,14 @@ import * as resolvers from './resolvers';
 import controls from '../controls';
 import reducer, { State } from './reducer';
 import { WPDataActions, WPDataSelectors } from '../types';
+import {
+	ReportItemObjectInfer,
+	ReportItemsEndpoint,
+	ReportQueryParams,
+	ReportStatEndpoint,
+	ReportStatObjectInfer,
+	ReportStatQueryParams,
+} from './types';
 export * from './types';
 export type { State };
 
@@ -29,7 +37,20 @@ registerStore( STORE_NAME, {
 
 export const REPORTS_STORE_NAME = STORE_NAME;
 
-export type ReportsSelect = SelectFromMap< typeof selectors > & WPDataSelectors;
+export type ReportsSelect = WPDataSelectors &
+	Omit<
+		SelectFromMap< typeof selectors >,
+		'getReportItems' | 'getReportStats'
+	> & {
+		getReportItems: < T >(
+			endpoint: ReportItemsEndpoint,
+			query: ReportQueryParams
+		) => ReportItemObjectInfer< T >;
+		getReportStats: < T >(
+			endpoint: ReportStatEndpoint,
+			query: ReportStatQueryParams
+		) => ReportStatObjectInfer< T >;
+	};
 
 declare module '@wordpress/data' {
 	function dispatch(
