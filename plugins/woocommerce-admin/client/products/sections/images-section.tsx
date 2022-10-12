@@ -45,8 +45,7 @@ export const ImagesSection: React.FC = () => {
 	const orderImages = ( newOrder: JSX.Element[] ) => {
 		const orderedImages = newOrder.map( ( image ) => {
 			return images.find(
-				( file ) =>
-					file.id === parseInt( image?.props?.id, 10 )
+				( file ) => file.id === parseInt( image?.props?.id, 10 )
 			);
 		} );
 		setValue( 'images', orderedImages );
@@ -85,13 +84,16 @@ export const ImagesSection: React.FC = () => {
 				<CardBody>
 					<ImageGallery
 						onDragStart={ ( event ) => {
-							const { id: imageId, dataset } = event.target as HTMLElement;
+							const { id: imageId, dataset } =
+								event.target as HTMLElement;
 							if ( imageId ) {
 								setDraggedImageId( parseInt( imageId, 10 ) );
 							} else {
 								const index = dataset?.index;
 								if ( index ) {
-									setDraggedImageId( images[ parseInt( index, 10 ) ]?.id );
+									setDraggedImageId(
+										images[ parseInt( index, 10 ) ]?.id
+									);
 								}
 							}
 							toggleRemoveZone();

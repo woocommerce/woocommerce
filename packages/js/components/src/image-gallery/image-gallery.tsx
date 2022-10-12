@@ -9,7 +9,7 @@ import {
 } from '@wordpress/element';
 import { DragEventHandler } from 'react';
 import classnames from 'classnames';
-import { MediaUpload } from '@wordpress/media-utils';
+import { MediaItem, MediaUpload } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
@@ -28,7 +28,7 @@ export type ImageGalleryProps = {
 	} ) => void;
 	onReplace?: ( props: {
 		replaceIndex: number;
-		media: { id: number } & { [ k: string ]: unknown };
+		media: { id: number } & MediaItem;
 	} ) => void;
 	onSelectAsCover?: ( itemId: string | null ) => void;
 	onOrderChange?: ( items: ImageGalleryChild[] ) => void;
@@ -168,9 +168,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 								} }
 								replaceItem={ (
 									replaceIndex: number,
-									media: { id: number } & {
-										[ k: string ]: unknown;
-									}
+									media: { id: number } & MediaItem
 								) => {
 									onReplace( { replaceIndex, media } );
 									setOrderedChildren(
