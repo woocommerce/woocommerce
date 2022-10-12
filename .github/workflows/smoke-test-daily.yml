@@ -190,38 +190,12 @@ jobs:
               run: |
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
 
-    build:
-        name: Build zip
-        runs-on: ubuntu-20.04
-        steps:
-            - uses: actions/checkout@v3
-              with:
-                  ref: ${{ env.BRANCH_NAME }}
-
-            - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                  build: false
-
-            - name: Build zip
-              working-directory: plugins/woocommerce
-              run: bash bin/build-zip.sh
-
-            - name: Upload the zip file as an artifact
-              uses: actions/upload-artifact@v3
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              with:
-                  name: woocommerce
-                  path: plugins/woocommerce/woocommerce.zip
-                  retention-days: 7
-
     # Disable for this job for the meantime. It will be migrated to Playwright later.
     test-plugins:
         name: Smoke tests with ${{ matrix.plugin }} plugin installed
         if: always()
         runs-on: ubuntu-20.04
-        needs: [build]
+        needs: [k6-test]
         strategy:
             fail-fast: false
             matrix:
@@ -255,18 +229,6 @@ jobs:
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
                   build: false
-
-            - name: Download WooCommerce ZIP.
-              uses: actions/download-artifact@v3
-              with:
-                  name: woocommerce
-                  path: tmp
-
-            - name: Extract and replace WooCommerce zip.
-              working-directory: tmp
-              run: |
-                  unzip woocommerce.zip -d .
-                  rsync -a woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
@@ -326,7 +288,7 @@ jobs:
         #     )
         if: false
         runs-on: ubuntu-20.04
-        needs: [k6-test, test-plugins]
+        needs: [test-plugins]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             RUN_ID: ${{ github.run_id }}
