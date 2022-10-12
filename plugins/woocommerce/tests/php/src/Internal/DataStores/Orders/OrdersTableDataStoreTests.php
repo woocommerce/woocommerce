@@ -15,6 +15,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 	/**
 	 * Original timezone before this test started.
+	 * @var string
 	 */
 	private $original_time_zone;
 
@@ -38,6 +39,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		$this->original_time_zone = date_default_timezone_get();
+		//phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- We need to change the timezone to test the date sync fields.
 		date_default_timezone_set( 'Asia/Kolkata' );
 		parent::setUp();
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
@@ -57,6 +59,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		// Add back removed filter.
 		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		//phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- We need to change the timezone to test the date sync fields.
 		date_default_timezone_set( $this->original_time_zone );
 		parent::tearDown();
 	}
