@@ -10,20 +10,17 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
+import './attributes-section.scss';
 import { ProductSectionLayout } from '../layout/product-section-layout';
 import { AttributeField } from '../fields/attribute-field';
 
 export const AttributesSection: React.FC = () => {
-	const { getInputProps, values } = useFormContext< Product >();
-
-	// TODO: remove https://github.com/woocommerce/woocommerce/issues/34333 is done.
-	if ( values.attributes && values.attributes.length > 0 ) {
-		return null;
-	}
+	const { getInputProps } = useFormContext< Product >();
 
 	return (
 		<ProductSectionLayout
 			title={ __( 'Attributes', 'woocommerce' ) }
+			className="woocommerce-product-attributes-section"
 			description={
 				<>
 					<span>

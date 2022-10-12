@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Update tracks debugging to only log after events are validated

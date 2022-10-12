@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { Model } from '../../model';
 
 /**
@@ -12,4 +15,4 @@ abstract class AbstractProductGrouped extends Model {
 	public readonly groupedProducts: Array< number > = [];
 }
 
-export interface IProductGrouped extends AbstractProductGrouped {}
+export type IProductGrouped = AbstractProductGrouped;

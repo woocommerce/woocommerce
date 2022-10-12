@@ -4,8 +4,9 @@ const {
 	getOrderExampleSearchTest,
 } = require( './order' );
 const { coupon } = require( './coupon' );
+const { customer } = require( './customer' );
 const { refund } = require( './refund' );
-const { getTaxRateExamples } = require( './tax-rate' );
+const { getTaxRateExamples, allUSTaxesExample } = require( './tax-rate' );
 const { getVariationExample } = require( './variation' );
 const {
 	simpleProduct,
@@ -20,12 +21,14 @@ const { getShippingMethodExample } = require( './shipping-method' );
 const shared = require( './shared' );
 
 module.exports = {
+	customer,
 	order,
 	getOrderExample,
 	getOrderExampleSearchTest,
 	coupon,
 	shared,
 	refund,
+	allUSTaxesExample,
 	getTaxRateExamples,
 	getVariationExample,
 	simpleProduct,

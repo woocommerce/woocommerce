@@ -2,8 +2,18 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { useCombobox, useMultipleSelection } from 'downshift';
-import { createElement, useEffect, useState } from '@wordpress/element';
+import {
+	useCombobox,
+	UseComboboxState,
+	UseComboboxStateChangeOptions,
+	useMultipleSelection,
+} from 'downshift';
+import {
+	useState,
+	useEffect,
+	createElement,
+	Fragment,
+} from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -36,17 +46,26 @@ type SelectControlProps< ItemType > = {
 		selectedItems: ItemType[],
 		getItemLabel: getItemLabelType< ItemType >
 	) => ItemType[];
+	hasExternalTags?: boolean;
 	multiple?: boolean;
 	onInputChange?: ( value: string | undefined ) => void;
 	onRemove?: ( item: ItemType ) => void;
 	onSelect?: ( selected: ItemType ) => void;
+	onFocus?: ( data: { inputValue: string } ) => void;
+	stateReducer?: (
+		state: UseComboboxState< ItemType | null >,
+		actionAndChanges: UseComboboxStateChangeOptions< ItemType | null >
+	) => Partial< UseComboboxState< ItemType | null > >;
 	placeholder?: string;
 	selected: ItemType | ItemType[] | null;
 };
 
+export const selectControlStateChangeTypes = useCombobox.stateChangeTypes;
+
 function SelectControl< ItemType = DefaultItemType >( {
 	getItemLabel = defaultGetItemLabel,
 	getItemValue = defaultGetItemValue,
+	hasExternalTags = false,
 	children = ( {
 		items: renderItems,
 		highlightedIndex,
@@ -77,11 +96,14 @@ function SelectControl< ItemType = DefaultItemType >( {
 	onInputChange = () => null,
 	onRemove = () => null,
 	onSelect = () => null,
+	onFocus = () => null,
+	stateReducer = ( state, actionAndChanges ) => actionAndChanges.changes,
 	placeholder,
 	selected,
 }: SelectControlProps< ItemType > ) {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
+
 	let selectedItems = selected === null ? [] : selected;
 	selectedItems = Array.isArray( selectedItems )
 		? selectedItems
@@ -95,7 +117,6 @@ function SelectControl< ItemType = DefaultItemType >( {
 		getItemLabel
 	);
 	const {
-		addSelectedItem,
 		getSelectedItemProps,
 		getDropdownProps,
 		removeSelectedItem,
@@ -121,45 +142,56 @@ function SelectControl< ItemType = DefaultItemType >( {
 		getItemProps,
 		selectItem,
 		selectedItem: comboboxSingleSelectedItem,
+		openMenu,
+		closeMenu,
 	} = useCombobox< ItemType | null >( {
 		initialSelectedItem: singleSelectedItem,
 		inputValue,
 		items: filteredItems,
+		selectedItem: multiple ? null : undefined,
 		itemToString: getItemLabel,
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		onStateChange: ( { inputValue: value, type, selectedItem } ) => {
+		onSelectedItemChange: ( { selectedItem } ) =>
+			selectedItem && onSelect( selectedItem ),
+		onInputValueChange: ( changes ) => {
+			if ( changes.inputValue !== undefined ) {
+				setInputValue( changes.inputValue );
+				if ( changes.isOpen ) {
+					onInputChange( changes.inputValue );
+				}
+			}
+		},
+		stateReducer: ( state, actionAndChanges ) => {
+			const { changes, type } = actionAndChanges;
+			let newChanges;
 			switch ( type ) {
-				case useCombobox.stateChangeTypes.InputChange:
-					onInputChange( value );
-					setInputValue( value || '' );
-
+				case selectControlStateChangeTypes.InputBlur:
+					// Set input back to selected item if there is a selected item, blank otherwise.
+					newChanges = {
+						...changes,
+						inputValue:
+							changes.selectedItem === state.selectedItem &&
+							! multiple
+								? getItemLabel( comboboxSingleSelectedItem )
+								: '',
+					};
 					break;
-				case useCombobox.stateChangeTypes.InputKeyDownEnter:
-				case useCombobox.stateChangeTypes.ItemClick:
-				case useCombobox.stateChangeTypes.InputBlur:
-					if ( selectedItem ) {
-						onSelect( selectedItem );
-						if ( multiple ) {
-							addSelectedItem( selectedItem );
-							setInputValue( '' );
-							break;
-						}
-
-						selectItem( selectedItem );
-						setInputValue( getItemLabel( selectedItem ) );
+				case selectControlStateChangeTypes.InputKeyDownEnter:
+				case selectControlStateChangeTypes.FunctionSelectItem:
+				case selectControlStateChangeTypes.ItemClick:
+					if ( changes.selectedItem && multiple ) {
+						newChanges = {
+							...changes,
+							inputValue: '',
+						};
 					}
-
-					if ( ! selectedItem && ! multiple ) {
-						setInputValue(
-							getItemLabel( comboboxSingleSelectedItem )
-						);
-					}
-
 					break;
 				default:
 					break;
 			}
+			return stateReducer( state, {
+				...actionAndChanges,
+				changes: newChanges ?? changes,
+			} );
 		},
 	} );
 
@@ -168,6 +200,16 @@ function SelectControl< ItemType = DefaultItemType >( {
 		removeSelectedItem( item );
 		onRemove( item );
 	};
+
+	const selectedItemTags = multiple ? (
+		<SelectedItems
+			items={ selectedItems }
+			getItemLabel={ getItemLabel }
+			getItemValue={ getItemValue }
+			getSelectedItemProps={ getSelectedItemProps }
+			onRemove={ onRemoveItem }
+		/>
+	) : null;
 
 	return (
 		<div
@@ -179,38 +221,40 @@ function SelectControl< ItemType = DefaultItemType >( {
 			{ /* eslint-disable jsx-a11y/label-has-for */ }
 			<label { ...getLabelProps() }>{ label }</label>
 			{ /* eslint-enable jsx-a11y/label-has-for */ }
-			<div className="woocommerce-experimental-select-control__combo-box-wrapper">
-				{ multiple && (
-					<SelectedItems
-						items={ selectedItems }
-						getItemLabel={ getItemLabel }
-						getItemValue={ getItemValue }
-						getSelectedItemProps={ getSelectedItemProps }
-						onRemove={ onRemoveItem }
-					/>
-				) }
-				<ComboBox
-					comboBoxProps={ getComboboxProps() }
-					inputProps={ getInputProps( {
-						...getDropdownProps( { preventKeyAction: isOpen } ),
-						className:
-							'woocommerce-experimental-select-control__input',
-						onFocus: () => setIsFocused( true ),
-						onBlur: () => setIsFocused( false ),
-						placeholder,
+			<ComboBox
+				comboBoxProps={ getComboboxProps() }
+				inputProps={ getInputProps( {
+					...getDropdownProps( {
+						preventKeyAction: isOpen,
+					} ),
+					className: 'woocommerce-experimental-select-control__input',
+					onFocus: () => {
+						setIsFocused( true );
+						onFocus( { inputValue } );
+					},
+					onBlur: () => setIsFocused( false ),
+					placeholder,
+				} ) }
+			>
+				<>
+					{ children( {
+						items: filteredItems,
+						highlightedIndex,
+						getItemProps,
+						getMenuProps,
+						isOpen,
+						getItemLabel,
+						getItemValue,
+						selectItem,
+						setInputValue,
+						openMenu,
+						closeMenu,
 					} ) }
-				/>
-			</div>
+					{ ! hasExternalTags && selectedItemTags }
+				</>
+			</ComboBox>
 
-			{ children( {
-				items: filteredItems,
-				highlightedIndex,
-				getItemProps,
-				getMenuProps,
-				isOpen,
-				getItemLabel,
-				getItemValue,
-			} ) }
+			{ hasExternalTags && selectedItemTags }
 		</div>
 	);
 }

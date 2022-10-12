@@ -1,11 +1,18 @@
 .woocommerce-image-gallery__item {
     height: 146px;
     width: 146px;
-    border: 1px solid $gray-200;
-    border-radius: 2px;
-    overflow: hidden;
+	position: relative;
+
+	&.is-toolbar-visible{
+		img {
+			border: 2px solid #007cba;
+		}
+	}
 
     img {
+		border: 1px solid $gray-200;
+		border-radius: 3px;
+		box-sizing: border-box;
         max-width: 100%;
     }
 
@@ -19,4 +26,14 @@
         top: 10px;
         left: 10px;
     }
+
+	.components-toolbar-group {
+		flex-wrap: inherit;
+		border-right: 1px solid #ccc;
+
+		svg {
+			width: 24px;
+		}
+	}
+
 }

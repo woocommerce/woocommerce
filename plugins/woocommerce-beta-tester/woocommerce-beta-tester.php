@@ -8,8 +8,8 @@
  * Author URI: http://woocommerce.com/
  * Requires at least: 5.8
  * Tested up to: 6.0
- * WC requires at least: 3.6.0
- * WC tested up to: 5.7.0
+ * WC requires at least: 6.7
+ * WC tested up to: 7.0
  * Text Domain: woocommerce-beta-tester
  *
  * @package WC_Beta_Tester
@@ -23,7 +23,7 @@ if ( ! defined( 'WC_BETA_TESTER_FILE' ) ) {
 }
 
 if ( ! defined( 'WC_BETA_TESTER_VERSION' ) ) {
-	define( 'WC_BETA_TESTER_VERSION', '2.0.2' );
+	define( 'WC_BETA_TESTER_VERSION', '2.1.0' ); // WRCS: DEFINED_VERSION.
 }
 
 /**
