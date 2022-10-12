@@ -29,6 +29,7 @@ jest.mock( '@woocommerce/components', () => {
 		isOpen: boolean;
 		highlightedIndex: number;
 		getMenuProps: () => Record< string, string >;
+		getItemProps: () => Record< string, string >;
 		selectItem: ( item: ProductCategory ) => void;
 		setInputValue: ( value: string ) => void;
 	};
@@ -53,6 +54,11 @@ jest.mock( '@woocommerce/components', () => {
 
 	return {
 		...originalModule,
+		__experimentalSelectControlMenu: ( {
+			children,
+		}: {
+			children: JSX.Element;
+		} ) => children,
 		__experimentalSelectControl: ( {
 			children,
 			items,
@@ -74,6 +80,7 @@ jest.mock( '@woocommerce/components', () => {
 							selectItem: () => {},
 							highlightedIndex: -1,
 							setInputValue: () => {},
+							getItemProps: () => ( {} ),
 						} ) }
 					</div>
 				</div>
@@ -184,11 +191,11 @@ describe( 'CategoryField', () => {
 			const childParent = queryByText(
 				mockCategoryList[ 1 ].name
 			)?.parentElement?.closest(
-				'.category-field-dropdown__item-children'
+				'.woocommerce-category-field-dropdown__item-children'
 			);
 			expect( childParent ).toBeInTheDocument();
 			expect( childParent?.className ).not.toMatch(
-				'category-field-dropdown__item-open'
+				'woocommerce-category-field-dropdown__item-open'
 			);
 			expect(
 				queryByText( mockCategoryList[ 2 ].name )
@@ -272,7 +279,7 @@ describe( 'CategoryField', () => {
 			const rainGearCheckboxParent = getByLabelText(
 				mockCategoryList[ 0 ].name
 			).parentElement?.closest(
-				'.category-field-dropdown__item-content'
+				'.woocommerce-category-field-dropdown__item-content'
 			);
 
 			expect(
@@ -301,7 +308,7 @@ describe( 'CategoryField', () => {
 			const rainGearCheckboxParent = getByLabelText(
 				mockCategoryList[ 0 ].name
 			).parentElement?.closest(
-				'.category-field-dropdown__item-content'
+				'.woocommerce-category-field-dropdown__item-content'
 			);
 
 			const toggle = rainGearCheckboxParent?.querySelector( 'svg' );
@@ -311,11 +318,11 @@ describe( 'CategoryField', () => {
 			const childParent = queryByText(
 				mockCategoryList[ 1 ].name
 			)?.parentElement?.closest(
-				'.category-field-dropdown__item-children'
+				'.woocommerce-category-field-dropdown__item-children'
 			);
 			expect( childParent ).toBeInTheDocument();
 			expect( childParent?.className ).toMatch(
-				'category-field-dropdown__item-open'
+				'woocommerce-category-field-dropdown__item-open'
 			);
 		} );
 	} );
