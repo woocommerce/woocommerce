@@ -35,7 +35,7 @@ export const ImagesSection: React.FC = () => {
 		useState< boolean >( false );
 	const [ isRemoving, setIsRemoving ] = useState< boolean >( false );
 	const [ draggedImageId, setDraggedImageId ] = useState< number | null >(
-		0
+		null
 	);
 
 	const toggleRemoveZone = () => {
