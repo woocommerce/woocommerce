@@ -1270,14 +1270,15 @@ class WC_Helper {
 			return $data;
 		}
 
-		$source = $_SERVER['REQUEST_URI'];
-		if ( preg_match( '/\S+wc-addons?\S+/', $source ) ):
+		$request_uri = $_SERVER['REQUEST_URI'];
+		$source = '';
+		if ( stripos( $request_uri, 'wc-addons' ) ):
 			$source = 'my-subscriptions';
-		elseif ( preg_match( '/\S+plugins.php?\S+/', $source ) ):
+		elseif ( stripos( $request_uri, 'plugins.php' ) ):
 			$source = 'plugins';
-		elseif ( preg_match( '/\S+wc-admin?\S+/', $source ) ):
+		elseif ( stripos( $request_uri, 'wc-admin' ) ):
 			$source = 'inbox-notes';
-		elseif ( preg_match( '/\Sadmin-ajax.php/', $source ) ):
+		elseif ( stripos( $request_uri, 'admin-ajax.php' ) ):
 			$source = 'heartbeat-api';
 		endif;
 
@@ -1286,7 +1287,7 @@ class WC_Helper {
 			'subscriptions',
 			array(
 				'authenticated' => true,
-				'source'        => '?source=' . $source,
+				'query_string'  => esc_url( '?source=' . $source ),
 
 			)
 		);
