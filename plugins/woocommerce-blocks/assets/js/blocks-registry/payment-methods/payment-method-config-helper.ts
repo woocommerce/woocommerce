@@ -50,6 +50,12 @@ export const canMakePaymentWithExtensions =
 
 			Object.entries( extensionsCallbacks ).forEach(
 				( [ namespace, callbacks ] ) => {
+					if (
+						! ( paymentMethodName in callbacks ) ||
+						typeof callbacks[ paymentMethodName ] !== 'function'
+					) {
+						return;
+					}
 					namespacedCallbacks[ namespace ] =
 						callbacks[ paymentMethodName ];
 				}
