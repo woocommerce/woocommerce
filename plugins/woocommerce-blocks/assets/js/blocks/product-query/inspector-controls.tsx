@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
-import { ToggleControl } from '@wordpress/components';
+import { PanelBody, ToggleControl } from '@wordpress/components';
 import { addFilter } from '@wordpress/hooks';
 import { EditorBlock } from '@woocommerce/types';
 import { ElementType } from 'react';
@@ -41,12 +41,14 @@ export const withProductQueryControls =
 			<>
 				<BlockEdit { ...props } />
 				<InspectorControls>
-					{ Object.entries( INSPECTOR_CONTROLS ).map(
-						( [ key, Control ] ) =>
-							allowedControls?.includes( key ) ? (
-								<Control { ...props } />
-							) : null
-					) }
+					<PanelBody>
+						{ Object.entries( INSPECTOR_CONTROLS ).map(
+							( [ key, Control ] ) =>
+								allowedControls?.includes( key ) ? (
+									<Control { ...props } />
+								) : null
+						) }
+					</PanelBody>
 				</InspectorControls>
 			</>
 		) : (
