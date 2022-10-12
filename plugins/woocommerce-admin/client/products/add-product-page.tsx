@@ -28,7 +28,7 @@ const AddProductPage: React.FC = () => {
 	return (
 		<div className="woocommerce-add-product">
 			<Form< Partial< Product > >
-				initialValues={ {} }
+				initialValues={ { stock_quantity: 0 } }
 				errors={ {} }
 				validate={ validate }
 			>
