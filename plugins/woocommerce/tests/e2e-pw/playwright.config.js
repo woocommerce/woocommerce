@@ -10,7 +10,7 @@ const config = {
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
-	retries: CI ? 4 : 2,
+	retries: 0,
 	workers: 4,
 	reporter: [
 		[ 'list' ],

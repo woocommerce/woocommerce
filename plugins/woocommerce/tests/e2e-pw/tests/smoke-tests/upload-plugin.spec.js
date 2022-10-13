@@ -16,6 +16,9 @@ const {
 	getLatestReleaseZipUrl,
 } = require( '../../utils/plugin-utils' );
 
+const adminUsername = ADMIN_USER ?? 'admin';
+const adminPassword = ADMIN_PASSWORD ?? 'password';
+
 let pluginZipPath;
 let pluginSlug;
 
@@ -56,8 +59,8 @@ test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 			request: playwright.request,
 			baseURL,
 			slug: pluginSlug,
-			username: ADMIN_USER,
-			password: ADMIN_PASSWORD,
+			username: adminUsername,
+			password: adminPassword,
 		} );
 	} );
 
@@ -71,8 +74,8 @@ test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 			request: playwright.request,
 			baseURL,
 			slug: pluginSlug,
-			username: ADMIN_USER,
-			password: ADMIN_PASSWORD,
+			username: adminUsername,
+			password: adminPassword,
 		} );
 
 		// Install and activate plugin
@@ -80,14 +83,18 @@ test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 			request: playwright.request,
 			baseURL,
 			slug: pluginSlug.split( '/' ).pop(),
-			username: ADMIN_USER,
-			password: ADMIN_PASSWORD,
+			username: adminUsername,
+			password: adminPassword,
 		} );
 
-		// Go to 'Installed plugins' page
-		await page.goto( 'wp-admin/plugins.php', {
-			waitUntil: 'networkidle',
-		} );
+		// Go to 'Installed plugins' page.
+		// Repeat in case the newly installed plugin redirects to their own onboarding screen upon first install, like what Yoast SEO does.
+		let reload = 2;
+		do {
+			await page.goto( 'wp-admin/plugins.php', {
+				waitUntil: 'networkidle',
+			} );
+		} while ( ! page.url().includes( '/plugins.php' ) && --reload );
 
 		// Assert that the plugin is listed and active
 		await expect(
