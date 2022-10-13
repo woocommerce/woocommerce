@@ -118,6 +118,39 @@ class PluginUtil {
 	}
 
 	/**
+	 * Match plugin identifier passed as a parameter with the output from `get_plugins()`.
+	 *
+	 * @param string $plugin_file Plugin identifier, either 'my-plugin/my-plugin.php', or output from __FILE__.
+	 *
+	 * @return string|false
+	 */
+	public function get_wp_plugin_id( $plugin_file ) {
+		$wp_plugins = array_keys( $this->proxy->call_function( 'get_plugins' ) );
+
+		// Try to match plugin_basename().
+		$plugin_basename = $this->proxy->call_function( 'plugin_basename', $plugin_file );
+		if ( array_key_exists( $plugin_basename, $wp_plugins ) ){
+			return $plugin_basename;
+		}
+
+		// Try to match by the my-file.php (file name only)
+		$file_name_parts = explode( DIRECTORY_SEPARATOR, $plugin_file );
+		$file_name = array_pop( $file_name_parts );
+		$matches = array();
+		foreach ( $wp_plugins as $wp_plugin ){
+			if ( false !== strpos( $wp_plugin, $file_name ) ){
+				$matches[] = $wp_plugin;
+			}
+		}
+
+		if ( 1 === count( $matches ) ){
+			return $matches[0];
+		}
+
+		return false;
+	}
+
+	/**
 	 * Handle plugin activation and deactivation by clearing the WooCommerce aware plugin ids cache.
 	 */
 	private function handle_plugin_de_activation(): void {
