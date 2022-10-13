@@ -6,14 +6,15 @@ import { __ } from '@wordpress/i18n';
 import { WC_ADMIN_NAMESPACE } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
+import { recordEvent } from '@woocommerce/tracks';
 
-const SendMagicLinkStates = {
+export const SendMagicLinkStates = {
 	INIT: 'initializing',
 	FETCHING: 'fetching',
 	SUCCESS: 'success',
 	ERROR: 'error',
 } as const;
-type SendMagicLinkStates =
+export type SendMagicLinkStates =
 	typeof SendMagicLinkStates[ keyof typeof SendMagicLinkStates ];
 
 export type MagicLinkResponse = {
@@ -52,11 +53,15 @@ export const useSendMagicLink = () => {
 			} )
 			.catch( ( response ) => {
 				setRequestState( SendMagicLinkStates.ERROR );
+				recordEvent( 'magic_prompt_send_magic_link_error', {
+					error: response.message,
+					code: response.code,
+				} );
 				if ( response.code === 'error_sending_mobile_magic_link' ) {
 					createNotice(
 						'error',
 						__(
-							'Sorry, there was an error trying to request for a magic link',
+							"We couldn't send the link. Try again in a few seconds.",
 							'woocommerce'
 						)
 					);
@@ -73,7 +78,10 @@ export const useSendMagicLink = () => {
 				} else if ( response.code === 'jetpack_not_connected' ) {
 					createNotice( 'error', response.message );
 				} else {
-					createNotice( 'error', response.message );
+					createNotice(
+						'error',
+						"We couldn't send the link. Try again in a few seconds."
+					);
 				}
 			} );
 	}, [ createNotice ] );
