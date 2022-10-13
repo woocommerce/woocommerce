@@ -129,32 +129,32 @@ class PluginUtil {
 
 		// Try to match plugin_basename().
 		$plugin_basename = $this->proxy->call_function( 'plugin_basename', $plugin_file );
-		if ( array_key_exists( $plugin_basename, $wp_plugins ) ){
+		if ( array_key_exists( $plugin_basename, $wp_plugins ) ) {
 			return $plugin_basename;
 		}
 
 		// Try to match by the my-file/my-file.php (dir + file name), then by my-file.php (file name only).
-		$plugin_file     = str_replace( [ '\\', '/' ], DIRECTORY_SEPARATOR, $plugin_file );
+		$plugin_file     = str_replace( array( '\\', '/' ), DIRECTORY_SEPARATOR, $plugin_file );
 		$file_name_parts = explode( DIRECTORY_SEPARATOR, $plugin_file );
 		$file_name       = array_pop( $file_name_parts );
 		$directory_name  = array_pop( $file_name_parts );
 		$full_matches    = array();
 		$partial_matches = array();
 		foreach ( $wp_plugins as $wp_plugin ){
-			if ( false !== strpos( $wp_plugin, $directory_name . DIRECTORY_SEPARATOR . $file_name ) ){
+			if ( false !== strpos( $wp_plugin, $directory_name . DIRECTORY_SEPARATOR . $file_name ) ) {
 				$full_matches[] = $wp_plugin;
 			}
 
-			if ( false !== strpos( $wp_plugin, $file_name ) ){
+			if ( false !== strpos( $wp_plugin, $file_name ) ) {
 				$partial_matches[] = $wp_plugin;
 			}
 		}
 
-		if ( 1 === count( $full_matches ) ){
+		if ( 1 === count( $full_matches ) ) {
 			return $full_matches[0];
 		}
 
-		if ( 1 === count( $partial_matches ) ){
+		if ( 1 === count( $partial_matches ) ) {
 			return $partial_matches[0];
 		}
 
