@@ -939,9 +939,9 @@ WHERE
 			return;
 		}
 
-		$data_sync_enabled       = $data_synchronizer->data_sync_is_enabled() && 0 === $data_synchronizer->get_current_orders_pending_sync_count_cached();
-		$load_posts_for          = array_diff( $order_ids, self::$reading_order_ids );
-		$post_orders             = $data_sync_enabled ? $this->get_post_orders_for_ids( $load_posts_for ) : array();
+		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled() && 0 === $data_synchronizer->get_current_orders_pending_sync_count_cached();
+		$load_posts_for    = array_diff( $order_ids, self::$reading_order_ids );
+		$post_orders       = $data_sync_enabled ? $this->get_post_orders_for_ids( $load_posts_for ) : array();
 
 		foreach ( $data as $order_data ) {
 			$order_id = absint( $order_data->id );
