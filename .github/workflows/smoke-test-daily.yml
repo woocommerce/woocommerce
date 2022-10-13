@@ -167,7 +167,7 @@ jobs:
                   ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
                   ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
                   CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
-                  CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
+                  CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_PERF_CUSTOMER_PASSWORD }}
                   UPDATE_WC: true
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
               run: |
