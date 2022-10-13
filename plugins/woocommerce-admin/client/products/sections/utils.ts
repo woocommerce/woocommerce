@@ -1,6 +1,8 @@
 /**
  * External dependencies
  */
+import { ChangeEvent } from 'react';
+import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -22,11 +24,15 @@ type CurrencyConfig = {
  * Get additional props to be passed to all checkbox inputs.
  *
  * @param {string} name Name of the checkbox
- * @return {object} Props.
+ * @return {Object} Props.
  */
-export const getCheckboxProps = ( name: string ) => {
+export const getCheckboxTracks = ( name: string ) => {
 	return {
-		onChange: ( isChecked: boolean ) => {
+		onChange: (
+			isChecked:
+				| ChangeEvent< HTMLInputElement >
+				| Product[ keyof Product ]
+		) => {
 			recordEvent( `product_checkbox_${ name }`, {
 				checked: isChecked,
 			} );
@@ -37,8 +43,8 @@ export const getCheckboxProps = ( name: string ) => {
 /**
  * Get input props for currency related values and symbol positions.
  *
- * @param {object}  context - Currency context
- * @return {object} Props.
+ * @param {Object} currencyConfig - Currency context
+ * @return {Object} Props.
  */
 export const getCurrencyInputProps = ( currencyConfig: CurrencyConfig ) => {
 	const { symbol, symbolPosition } = currencyConfig;
@@ -54,8 +60,8 @@ export const getCurrencyInputProps = ( currencyConfig: CurrencyConfig ) => {
 /**
  * Cleans and formats the currency value shown to the user.
  *
- * @param {string} value Form value.
- * @param {object} context Currency context.
+ * @param {string} value          Form value.
+ * @param {Object} currencyConfig Currency context.
  * @return {string} Display value.
  */
 export const formatCurrencyDisplayValue = (
@@ -73,7 +79,5 @@ export const formatCurrencyDisplayValue = (
 		'g'
 	);
 
-	return value === undefined
-		? value
-		: format( value ).replace( regex, '' );
-}
+	return value === undefined ? value : format( value ).replace( regex, '' );
+};
