@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\RestApi\UnitTests;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
@@ -56,5 +57,33 @@ trait HPOSToggleTrait {
 		// Confirm things are really correct.
 		$wc_data_store = WC_Data_Store::load( 'order' );
 		assert( is_a( $wc_data_store->get_current_class_name(), OrdersTableDataStore::class, true ) === $enabled );
+	}
+
+	/**
+	 * Helper function to enable COT <> Posts sync.
+	 */
+	private function enable_cot_sync() {
+		$hook_name = 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION;
+		remove_all_actions( $hook_name );
+		add_filter(
+			$hook_name,
+			function () {
+				return 'yes';
+			}
+		);
+	}
+
+	/**
+	 * Helper function to disable COT <> Posts sync.
+	 */
+	private function disable_cot_sync() {
+		$hook_name = 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION;
+		remove_all_actions( $hook_name );
+		add_filter(
+			$hook_name,
+			function () {
+				return 'no';
+			}
+		);
 	}
 }

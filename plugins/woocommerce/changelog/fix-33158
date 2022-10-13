@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Also read from posts when reading from orders as a mittigation to direct write.
