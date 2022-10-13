@@ -1617,7 +1617,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$this->sut->backfill_post_record( $order );
 
 		// 10s is to account for any flakiness.
-		$this->assertTrue( 10 > absint( $order->get_date_modified()->getTimestamp() - time() ), 'Order date created date is about the same as now.' );
+		$this->assertTrue( 10 > absint( $order->get_date_modified()->getTimestamp() - time() ), 'Order date modified date is about the same as now.' );
 
 		$this->sut->backfill_post_record( $order );
 		$post = get_post( $order->get_id() );
