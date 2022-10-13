@@ -1,0 +1,15 @@
+on:
+  workflow_dispatch:
+jobs:
+  try:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            github.pulls.createReviewRequest({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: 35084,
+              team_reviewers: ['atlas'],
+            });
