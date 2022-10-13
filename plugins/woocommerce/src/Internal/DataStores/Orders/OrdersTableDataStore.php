@@ -1479,7 +1479,7 @@ FROM $order_meta_table
 			$order->set_id( $post_id );
 		}
 
-		$only_changes = ! $force_all_fields && $context === 'update';
+		$only_changes = ! $force_all_fields && 'update' === $context;
 		// Figure out what needs to be updated in the database.
 		$db_updates = $this->get_db_rows_for_order( $order, $context, $only_changes );
 
