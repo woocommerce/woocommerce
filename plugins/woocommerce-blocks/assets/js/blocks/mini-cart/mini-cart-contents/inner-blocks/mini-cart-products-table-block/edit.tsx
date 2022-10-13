@@ -15,7 +15,7 @@ export const Edit = (): JSX.Element => {
 	return (
 		<div { ...blockProps }>
 			<Noninteractive>
-				<Block />
+				<Block className="is-mobile" />
 			</Noninteractive>
 		</div>
 	);
