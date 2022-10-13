@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Only unit tests are slightly modified to accommodate undefined props for $user and $wc_core_dir.
-
-

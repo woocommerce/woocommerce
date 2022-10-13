@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-(HPOS) Ensure we use GMT when populating the `date_created_gmt` column for orders.
