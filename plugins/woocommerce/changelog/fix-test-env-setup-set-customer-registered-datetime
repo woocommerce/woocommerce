@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixes test environment setup setting datetime for customer user creation
