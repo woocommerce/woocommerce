@@ -25,14 +25,14 @@ if ( ! defined( 'WC_BLOCKS_IS_FEATURE_PLUGIN' ) ) {
 }
 
 // Declare compatibility with custom order tables for WooCommerce.
-if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
-	add_action(
-		'before_woocommerce_init',
-		function () {
+add_action(
+	'before_woocommerce_init',
+	function () {
+		if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
 			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
 		}
-	);
-}
+	}
+);
 
 /**
  * Whether notices must be displayed in the current page (plugins and WooCommerce pages).
