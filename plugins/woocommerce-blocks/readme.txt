@@ -41,7 +41,6 @@ Use this plugin if you want access to the bleeding edge of available blocks for 
 - **Products by Tag**
 - **Reviews by Category**
 - **Reviews by Product**
-- **Single Product**
 - **Top Rated Products**
 
 == Getting Started ==
