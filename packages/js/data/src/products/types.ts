@@ -67,6 +67,7 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	tax_class: 'standard' | 'reduced-rate' | 'zero-rate' | undefined;
 	manage_stock: boolean;
 	stock_quantity: number;
+	low_stock_amount: number;
 	stock_status: 'instock' | 'outofstock' | 'onbackorder';
 	backorders: 'no' | 'notify' | 'yes';
 	price: string;

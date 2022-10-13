@@ -5,6 +5,9 @@
 
 namespace Automattic\WooCommerce\Internal\Utilities;
 
+use DateTime;
+use DateTimeZone;
+
 /**
  * A class of utilities for dealing with the database.
  */
@@ -157,10 +160,12 @@ AND index_name='$index_name'"
 				$value = strval( $value );
 				break;
 			case 'date':
-				$value = $value ? ( new \DateTime( $value ) )->format( 'Y-m-d H:i:s' ) : null;
+				// Date properties are converted to the WP timezone (see WC_Data::set_date_prop() method), however
+				// for our own tables we persist dates in GMT.
+				$value = $value ? ( new DateTime( $value ) )->setTimezone( new DateTimeZone( '+00:00' ) )->format( 'Y-m-d H:i:s' ) : null;
 				break;
 			case 'date_epoch':
-				$value = $value ? ( new \DateTime( "@{$value}" ) )->format( 'Y-m-d H:i:s' ) : null;
+				$value = $value ? ( new DateTime( "@{$value}" ) )->format( 'Y-m-d H:i:s' ) : null;
 				break;
 			default:
 				throw new \Exception( 'Invalid type received: ' . $type );

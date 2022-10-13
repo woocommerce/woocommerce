@@ -85,4 +85,20 @@ class FeaturesUtil {
 	public static function get_compatible_plugins_for_feature( string $feature_id ): array {
 		return wc_get_container()->get( FeaturesController::class )->get_compatible_plugins_for_feature( $feature_id );
 	}
+
+	/**
+	 * Sets a flag indicating that it's allowed to enable features for which incompatible plugins are active
+	 * from the WooCommerce feature settings page.
+	 */
+	public static function allow_enabling_features_with_incompatible_plugins(): void {
+		wc_get_container()->get( FeaturesController::class )->allow_enabling_features_with_incompatible_plugins();
+	}
+
+	/**
+	 * Sets a flag indicating that it's allowed to activate plugins for which incompatible features are enabled
+	 * from the WordPress plugins page.
+	 */
+	public static function allow_activating_plugins_with_incompatible_features(): void {
+		wc_get_container()->get( FeaturesController::class )->allow_activating_plugins_with_incompatible_features();
+	}
 }
