@@ -9,7 +9,7 @@ jobs:
       - uses: actions/github-script@v6
         with:
           script: |
-            github.pulls.createReviewRequest({
+            github.rest.pulls.requestReviewers({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: 35084,
