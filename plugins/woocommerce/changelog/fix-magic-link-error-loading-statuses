@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Handle loading and error states for magic link button
