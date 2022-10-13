@@ -1,7 +1,11 @@
 const { chromium, expect } = require( '@playwright/test' );
 const fs = require( 'fs' );
-const { ADMIN_USER, ADMIN_PASSWORD, CUSTOMER_USER, CUSTOMER_PASSWORD } =
-	process.env;
+const {
+	ADMIN_USER,
+	ADMIN_PASSWORD,
+	CUSTOMER_USER,
+	CUSTOMER_PASSWORD,
+} = process.env;
 const adminUsername = ADMIN_USER ?? 'admin';
 const adminPassword = ADMIN_PASSWORD ?? 'password';
 const customerUsername = CUSTOMER_USER ?? 'customer';
@@ -135,15 +139,17 @@ module.exports = async ( config ) => {
 			await customerPage.fill( 'input[name="pwd"]', customerPassword );
 			await customerPage.click( 'text=Log In' );
 
-			await customerPage.goto( `/my-account/` );
+			await customerPage.goto( `/my-account` );
 			await expect(
-				customerPage.locator( 'h1.entry-title' )
-			).toContainText( 'My account' );
+				customerPage.locator(
+					'.woocommerce-MyAccount-navigation-link--customer-logout'
+				)
+			).toBeVisible();
 			await expect(
 				customerPage.locator(
 					'div.woocommerce-MyAccount-content > p >> nth=0'
 				)
-			).toContainText( 'Jane Smith' );
+			).toContainText( 'Hello' );
 
 			await customerPage
 				.context()
