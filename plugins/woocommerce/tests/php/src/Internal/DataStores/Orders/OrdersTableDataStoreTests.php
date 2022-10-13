@@ -336,9 +336,10 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
 		update_option( 'timezone_string', 'America/Los_Angeles' );
 
-		$order            = OrderHelper::create_order();
+		$order = new WC_Order();
+		$this->sut->create( $order );
 		$date_created_gmt = $wpdb->get_var(
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			'SELECT date_created_gmt FROM ' . OrdersTableDataStore::get_orders_table_name() . ' WHERE id = ' . $order->get_id()
 		);
 
@@ -1045,7 +1046,8 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$order = $this->create_complex_cot_order();
 
 		$post_object = get_post( $order->get_id() );
-		assert( get_post_type( $post_object->ID ) === 'shop_order' );
+		// Make sure that COT sync is enabled, by checking that this is not placeholder post.
+		$this->assertTrue( get_post_type( $post_object->ID ) === 'shop_order' );
 
 		// simulate direct write.
 		update_post_meta( $post_object->ID, 'my_custom_meta', array( 'key' => 'value' ) );
