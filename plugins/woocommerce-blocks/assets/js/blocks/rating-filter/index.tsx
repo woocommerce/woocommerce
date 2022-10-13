@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { isExperimentalBuild } from '@woocommerce/block-settings';
+import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 import { createBlock, registerBlockType } from '@wordpress/blocks';
 import { Icon, starEmpty } from '@wordpress/icons';
 import classNames from 'classnames';
@@ -14,7 +14,7 @@ import edit from './edit';
 import metadata from './block.json';
 import type { Attributes } from './types';
 
-if ( isExperimentalBuild() ) {
+if ( isFeaturePluginBuild() ) {
 	registerBlockType( metadata, {
 		icon: {
 			src: (
