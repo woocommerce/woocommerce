@@ -229,7 +229,21 @@ describe( 'DateTimePickerControl', () => {
 		);
 	} );
 
-	it( 'should set the date time picker popup to 12 hour mode', async () => {
+	it( 'should set the picker popup to date and time by default', async () => {
+		const { container } = render( <DateTimePickerControl /> );
+
+		const input = container.querySelector( 'input' );
+
+		userEvent.click( input! );
+
+		await waitFor( () =>
+			expect(
+				container.querySelector( '.components-datetime' )
+			).toBeInTheDocument()
+		);
+	} );
+
+	it( 'should set the picker to 12 hour mode', async () => {
 		const { container } = render(
 			<DateTimePickerControl is12HourPicker={ true } />
 		);
@@ -245,6 +259,25 @@ describe( 'DateTimePickerControl', () => {
 				)
 			).toBeInTheDocument()
 		);
+	} );
+
+	it( 'should set the picker popup to date only', async () => {
+		const { container } = render(
+			<DateTimePickerControl isDateOnlyPicker={ true } />
+		);
+
+		const input = container.querySelector( 'input' );
+
+		userEvent.click( input! );
+
+		await waitFor( () => {
+			expect(
+				container.querySelector( '.components-datetime' )
+			).not.toBeInTheDocument();
+			expect(
+				container.querySelector( '.components-datetime__date' )
+			).toBeInTheDocument();
+		} );
 	} );
 
 	it( 'should call onBlur when losing focus', async () => {
