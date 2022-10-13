@@ -118,8 +118,6 @@ describe( 'DateTimePickerControl', () => {
 
 		const input = container.querySelector( 'input' );
 
-		console.log( '*** AMBIGUOUS input?.value: ' + input?.value );
-
 		expect( input?.value ).toBe(
 			moment
 				.utc( ambiguousISODateTimeString )
@@ -139,8 +137,6 @@ describe( 'DateTimePickerControl', () => {
 		);
 
 		const input = container.querySelector( 'input' );
-
-		console.log( '*** UNAMBIGUOUS input?.value: ' + input?.value );
 
 		expect( input?.value ).toBe(
 			moment
