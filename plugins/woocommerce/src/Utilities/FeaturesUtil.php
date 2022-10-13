@@ -60,6 +60,7 @@ class FeaturesUtil {
 		if ( ! $plugin_id ) {
 			$logger = wc_get_logger();
 			$logger->error( "FeaturesUtil::declare_compatibility: ${plugin_file} is not a known WordPress plugin." );
+			return false;
 		}
 
 		return wc_get_container()->get( FeaturesController::class )->declare_compatibility( $feature_id, $plugin_id, $positive_compatibility );
