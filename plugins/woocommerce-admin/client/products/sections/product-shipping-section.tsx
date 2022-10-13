@@ -342,10 +342,10 @@ export function ProductShippingSection( {
 						product &&
 						extractDefaultShippingClassFromProduct( product )
 					}
-					onAdd={ ( shippClassValues ) =>
+					onAdd={ ( shippingClassValues ) =>
 						createProductShippingClass<
 							Promise< ProductShippingClass >
-						>( shippClassValues ).then( ( value ) => {
+						>( shippingClassValues ).then( ( value ) => {
 							invalidateResolution( 'getProductShippingClasses' );
 							setValue( 'shipping_class', value.slug );
 							return value;
