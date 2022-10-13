@@ -571,9 +571,7 @@ class WC_Tracker {
 			$orders_by_origin[$origin->origin] = (int) $origin->count;
 		}
 
-		return array(
-			'created_via' => $orders_by_origin
-		);
+		return array( 'created_via' => $orders_by_origin );
 	}
 
 	/**
