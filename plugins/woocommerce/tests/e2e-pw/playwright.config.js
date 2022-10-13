@@ -1,5 +1,10 @@
 const { devices } = require( '@playwright/test' );
-const { CI, E2E_MAX_FAILURES, BASE_URL, DEFAULT_TIMEOUT_OVERRIDE } = process.env;
+const {
+	CI,
+	E2E_MAX_FAILURES,
+	BASE_URL,
+	DEFAULT_TIMEOUT_OVERRIDE,
+} = process.env;
 
 const config = {
 	timeout: DEFAULT_TIMEOUT_OVERRIDE
@@ -10,7 +15,7 @@ const config = {
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
-	retries: 0,
+	retries: CI ? 4 : 2,
 	workers: 4,
 	reporter: [
 		[ 'list' ],
