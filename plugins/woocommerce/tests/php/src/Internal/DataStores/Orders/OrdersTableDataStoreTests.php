@@ -875,7 +875,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 				'date_query' => array(
 					array(
 						'column'  => 'date_completed_gmt',
-						'hour'    => 5,
+						'hour'    => 11,
 						'compare' => '>',
 					),
 				),
