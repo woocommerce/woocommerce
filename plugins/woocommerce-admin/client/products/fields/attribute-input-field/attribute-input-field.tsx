@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { sprintf, __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { Spinner } from '@wordpress/components';
+import { useState } from '@wordpress/element';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
 	QueryProductAttribute,
@@ -63,6 +64,21 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 					.toLowerCase()
 					.startsWith( inputValue.toLowerCase() )
 		);
+		if (
+			inputValue.length > 0 &&
+			! filteredItems.find(
+				( item ) => item.name.toLowerCase() === inputValue.toLowerCase()
+			)
+		) {
+			return [
+				...filteredItems,
+				{
+					id: -99,
+					name: inputValue,
+				},
+			];
+		}
+		return filteredItems;
 	};
 
 	return (
@@ -75,7 +91,10 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			getItemLabel={ ( item ) => item?.name || '' }
 			getItemValue={ ( item ) => item?.id || '' }
 			selected={ value }
-			onSelect={ ( attribute ) => {
+			onSelect={ ( attribute ) => { {
+				if ( attribute.id === -99 ) {
+					return;
+				}
 				onChange( {
 					id: attribute.id,
 					name: attribute.name,
@@ -104,7 +123,15 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 									item={ item }
 									getItemProps={ getItemProps }
 								>
-									{ item.name }
+									{ index === -99
+										? sprintf(
+												__(
+													'Create "%s"',
+													'woocommerce'
+												),
+												item.name
+										  )
+										: item.name }
 								</MenuItem>
 							) )
 						) }
