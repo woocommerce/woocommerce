@@ -34,11 +34,11 @@ export const AttributeTermInputField: React.FC<
 	const [ isFetching, setIsFetching ] = useState( false );
 
 	const fetchItems = useCallback(
-		( value: string | undefined ) => {
+		( searchString: string | undefined ) => {
 			setIsFetching( true );
 			resolveSelect( EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME )
 				.getProductAttributeTerms< ProductAttributeTerm[] >( {
-					search: value || '',
+					search: searchString || '',
 					attribute_id: attributeId,
 				} )
 				.then(
