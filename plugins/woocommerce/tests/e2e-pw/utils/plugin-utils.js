@@ -81,7 +81,9 @@ export const downloadZip = async ( { url, downloadPath, authToken } ) => {
 	const options = {
 		url,
 		responseType: 'stream',
-		headers: { 'user-agent': 'node.js' },
+		headers: {
+			'user-agent': 'node.js',
+		},
 	};
 
 	// If provided with a token, use it for authorization
@@ -89,8 +91,14 @@ export const downloadZip = async ( { url, downloadPath, authToken } ) => {
 		options.headers.Authorization = `token ${ authToken }`;
 	}
 
-	const response = await axios( options );
+	// mytodo remove
+	console.log(
+		`Calling axios() with options: ${ JSON.stringify( options, 4 ) }`
+	);
+	response = await axios( options );
 	response.data.pipe( fs.createWriteStream( downloadPath ) );
+	// mytodo remove
+	console.log( `Returned body: ${ JSON.stringify( body, 4 ) }` );
 };
 
 /**
@@ -181,7 +189,7 @@ export const createPlugin = async ( {
 		},
 	} );
 
-	await apiContext.post( `/wp-json/wp/v2/plugins/${ slug }`, {
+	await apiContext.post( '/wp-json/wp/v2/plugins', {
 		data: { slug, status: 'active' },
 		failOnStatusCode: true,
 	} );
