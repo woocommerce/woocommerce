@@ -556,9 +556,9 @@ class WC_Tracker {
 			SELECT
 				meta_value as origin, COUNT( DISTINCT ( orders.id ) ) as count
 			FROM
-				wp_posts orders
+				$wpdb->posts orders
 			LEFT JOIN
-				wp_postmeta order_meta ON order_meta.post_id = orders.id
+				$wpdb->postmeta order_meta ON order_meta.post_id = orders.id
 			WHERE
 				meta_key = '_created_via'
 			GROUP BY
