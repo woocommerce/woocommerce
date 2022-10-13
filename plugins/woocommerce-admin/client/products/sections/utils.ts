@@ -46,7 +46,7 @@ export const getCheckboxTracks = ( name: string ) => {
  * @param {Object} currencyConfig - Currency context
  * @return {Object} Props.
  */
-export const getCurrencyInputProps = ( currencyConfig: CurrencyConfig ) => {
+export const getCurrencySymbolProps = ( currencyConfig: CurrencyConfig ) => {
 	const { symbol, symbolPosition } = currencyConfig;
 	const currencyPosition = symbolPosition.includes( 'left' )
 		? 'prefix'

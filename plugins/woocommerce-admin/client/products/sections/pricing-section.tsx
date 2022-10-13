@@ -20,14 +20,14 @@ import {
  * Internal dependencies
  */
 import './pricing-section.scss';
-import { formatCurrencyDisplayValue, getCurrencyInputProps } from './utils';
+import { formatCurrencyDisplayValue, getCurrencySymbolProps } from './utils';
 import { ProductSectionLayout } from '../layout/product-section-layout';
 import { ADMIN_URL } from '../../utils/admin-settings';
 import { CurrencyContext } from '../../lib/currency-context';
 import { useProductHelper } from '../use-product-helper';
 
 export const PricingSection: React.FC = () => {
-	const { getInputProps, setValue } = useFormContext< Product >();
+	const { getInputProps } = useFormContext< Product >();
 	const { sanitizePrice } = useProductHelper();
 	const { isResolving: isTaxSettingsResolving, taxSettings } = useSelect(
 		( select ) => {
@@ -89,7 +89,12 @@ export const PricingSection: React.FC = () => {
 		},
 	} );
 
-	const currencyInputProps = getCurrencyInputProps( currencyConfig );
+	const currencyInputProps = {
+		...getCurrencySymbolProps( currencyConfig ),
+		sanitize: ( value: Product[ keyof Product ] ) => {
+			return sanitizePrice( String( value ) );
+		},
+	};
 	const regularPriceProps = getInputProps(
 		'regular_price',
 		currencyInputProps
@@ -140,14 +145,6 @@ export const PricingSection: React.FC = () => {
 								currencyConfig,
 								formatAmount
 							) }
-							onBlur={ () =>
-								setValue(
-									'regular_price',
-									sanitizePrice(
-										String( regularPriceProps.value )
-									)
-								)
-							}
 						/>
 					</BaseControl>
 					{ ! isTaxSettingsResolving && (
@@ -170,14 +167,6 @@ export const PricingSection: React.FC = () => {
 								currencyConfig,
 								formatAmount
 							) }
-							onBlur={ () =>
-								setValue(
-									'sales_price',
-									sanitizePrice(
-										String( salePriceProps.value )
-									)
-								)
-							}
 						/>
 					</BaseControl>
 				</CardBody>

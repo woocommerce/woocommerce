@@ -96,11 +96,9 @@ export const ProductDetailsSection: React.FC = () => {
 								'e.g. 12 oz Coffee Mug',
 								'woocommerce'
 							) }
-							{ ...getInputProps( 'name' ) }
-							onBlur={ () => {
-								setSkuIfEmpty();
-								getInputProps( 'name' ).onBlur();
-							} }
+							{ ...getInputProps( 'name', {
+								onBlur: setSkuIfEmpty,
+							} ) }
 						/>
 						{ values.id && ! hasNameError() && permalinkPrefix && (
 							<span className="woocommerce-product-form__secondary-text product-details-section__product-link">

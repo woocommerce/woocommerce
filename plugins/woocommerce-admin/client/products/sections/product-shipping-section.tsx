@@ -140,26 +140,28 @@ export function ProductShippingSection( {
 		EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
 	);
 
-	const getDimensionProps = ( name: string ) => {
-		const dimensionProps = {
-			onBlur: () => {
-				setHighlightSide( undefined );
-				setValue(
-					name,
-					parseNumber(
-						String( values[ name as keyof PartialProduct ] )
-					)
-				);
-			},
-			suffix: dimensionUnit,
-		};
-		return getInputProps( 'dimensions.width', dimensionProps );
+	const dimensionProps = {
+		onBlur: () => {
+			setHighlightSide( undefined );
+		},
+		sanitize: ( value: PartialProduct[ keyof PartialProduct ] ) =>
+			parseNumber( String( value ) ),
+		suffix: dimensionUnit,
 	};
 
-	const inputWidthProps = getDimensionProps( 'dimensions.width' );
-	const inputLengthProps = getDimensionProps( 'dimensions.length' );
-	const inputHeightProps = getDimensionProps( 'dimensions.height' );
-	const inputWeightProps = getInputProps( 'weight' );
+	const inputWidthProps = getInputProps( 'dimensions.width', dimensionProps );
+	const inputLengthProps = getInputProps(
+		'dimensions.length',
+		dimensionProps
+	);
+	const inputHeightProps = getInputProps(
+		'dimensions.height',
+		dimensionProps
+	);
+	const inputWeightProps = getInputProps( 'weight', {
+		sanitize: ( value: PartialProduct[ keyof PartialProduct ] ) =>
+			parseNumber( String( value ) ),
+	} );
 
 	return (
 		<ProductSectionLayout
@@ -272,16 +274,6 @@ export function ProductShippingSection( {
 													'woocommerce'
 												)
 											) }
-											onBlur={ () =>
-												setValue(
-													'dimensions.length',
-													parseNumber(
-														String(
-															inputLengthProps?.value
-														)
-													)
-												)
-											}
 											onFocus={ () => {
 												setHighlightSide( 'B' );
 											} }
@@ -325,14 +317,6 @@ export function ProductShippingSection( {
 												'woocommerce'
 											) }
 											suffix={ weightUnit }
-											onBlur={ () => {
-												setValue(
-													'weight',
-													parseNumber(
-														values.weight || ''
-													)
-												);
-											} }
 										/>
 									</BaseControl>
 								</div>
