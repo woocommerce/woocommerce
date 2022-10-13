@@ -928,10 +928,10 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$query = new OrdersTableQuery();
 		$this->assertCount( 30, $query->orders, 'If no limits are specified, we fetch all available orders.' );
 
-		$query = new OrdersTableQuery( array( 'limit' => - 1 ) );
+		$query = new OrdersTableQuery( array( 'limit' => -1 ) );
 		$this->assertCount( 30, $query->orders, 'A limit of -1 is equivalent to requesting all available orders.' );
 
-		$query = new OrdersTableQuery( array( 'limit' => - 10 ) );
+		$query = new OrdersTableQuery( array( 'limit' => -10 ) );
 		$this->assertCount( 30, $query->orders, 'An invalid limit is treated as a request for all available orders.' );
 
 		$query = new OrdersTableQuery(
