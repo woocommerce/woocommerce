@@ -1118,6 +1118,75 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test methods get_total_tax_refunded and get_total_shipping_refunded.
+	 */
+	public function test_get_total_tax_refunded_and_get_total_shipping_refunded() {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate'          => '20',
+			'tax_rate_name'     => 'tax',
+			'tax_rate_order'    => '1',
+			'tax_rate_shipping' => '1',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$rate = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' );
+		$item = new WC_Order_Item_Shipping();
+		$item->set_props(
+			array(
+				'method_title' => $rate->label,
+				'method_id'    => $rate->id,
+				'total'        => wc_format_decimal( $rate->cost ),
+				'taxes'        => $rate->taxes,
+			)
+		);
+		foreach ( $rate->get_meta_data() as $key => $value ) {
+			$item->add_meta_data( $key, $value, true );
+		}
+
+		$order = new WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->save();
+		$order->add_product( WC_Helper_Product::create_simple_product(), 10 );
+		$order->add_item( $item );
+		$order->calculate_totals();
+		$order->save();
+		$this->sut->backfill_post_record( $order );
+
+		assert( $order->get_total_tax() > 0 );
+		assert( $order->get_total() > 0 );
+		$product_item_id  = current( $order->get_items() )->get_id();
+		$shipping_item_id = current( $order->get_items( 'shipping' ) )->get_id();
+		$refund           = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$product_item_id  => array(
+						'id'           => $product_item_id,
+						'qty'          => 1,
+						'refund_total' => 10,
+						'refund_tax'   => array( 1 => 2 ),
+					),
+					$shipping_item_id => array(
+						'id'           => $shipping_item_id,
+						'qty'          => 1,
+						'refund_total' => 10,
+						'refund_tax'   => array( 1 => 3 ),
+					),
+				),
+			)
+		);
+		$refund->save();
+		$this->migrator->migrate_order( $refund->get_id() );
+
+		$this->assertEquals( 5, $order->get_data_store()->get_total_tax_refunded( $order ) );
+		$this->assertEquals( 10, $order->get_data_store()->get_total_shipping_refunded( $order ) );
+	}
+
+	/*
 	 * Ensure field_query works as expected.
 	 */
 	public function test_cot_query_field_query(): void {
@@ -1511,5 +1580,4 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			$this->assertEquals( $value, $order->{"get_$prop_name"}(), "Prop $prop_name was not set correctly." );
 		}
 	}
-
 }
