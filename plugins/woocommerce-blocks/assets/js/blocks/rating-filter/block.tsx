@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
+import { speak } from '@wordpress/a11y';
 import Rating from '@woocommerce/base-components/product-rating';
 import { usePrevious, useShallowEqual } from '@woocommerce/base-hooks';
 import {
@@ -88,8 +89,6 @@ const RatingFilterBlock = ( {
 		'rating',
 		initialFilters
 	);
-
-	const productRatingsArray: string[] = Array.from( productRatings );
 
 	/**
 	 * Used to redirect the page when filters are changed so templates using the Classic Template block can filter.
@@ -201,40 +200,35 @@ const RatingFilterBlock = ( {
 			.filter(
 				( item ) => isObject( item ) && Object.keys( item ).length > 0
 			)
-			.map(
-				( item ) => {
-					return {
-						label: (
-							<Rating
-								className={
-									productRatingsArray.includes(
-										item?.rating?.toString()
-									)
-										? 'is-active'
-										: ''
-								}
-								key={ item?.rating }
-								rating={ item?.rating }
-								ratedProductsCount={
-									blockAttributes.showCounts
-										? item?.count
-										: null
-								}
-							/>
-						),
-						value: item?.rating?.toString(),
-					};
-				},
-				[ blockAttributes.showCounts ]
-			);
+			.map( ( item ) => {
+				return {
+					label: (
+						<Rating
+							className={
+								Array.from( productRatings ).includes(
+									item?.rating?.toString()
+								)
+									? 'is-active'
+									: ''
+							}
+							key={ item?.rating }
+							rating={ item?.rating }
+							ratedProductsCount={
+								blockAttributes.showCounts ? item?.count : null
+							}
+						/>
+					),
+					value: item?.rating?.toString(),
+				};
+			} );
 
 		setDisplayedOptions( newOptions );
 	}, [
 		blockAttributes.showCounts,
 		blockAttributes.isPreview,
-		productRatingsArray,
 		filteredCounts,
 		filteredCountsLoading,
+		productRatings,
 	] );
 
 	/**
@@ -251,6 +245,27 @@ const RatingFilterBlock = ( {
 			if ( ! previouslyChecked ) {
 				newChecked.push( checkedValue );
 				newChecked.sort();
+				speak(
+					sprintf(
+						/* translators: %s is referring to the average rating value */
+						__(
+							'Rated %s out of 5 filter added.',
+							'woo-gutenberg-products-block'
+						),
+						checkedValue
+					)
+				);
+			} else {
+				speak(
+					sprintf(
+						/* translators: %s is referring to the average rating value */
+						__(
+							'Rated %s out of 5 filter removed.',
+							'woo-gutenberg-products-block'
+						),
+						checkedValue
+					)
+				);
 			}
 			setChecked( newChecked );
 		},
