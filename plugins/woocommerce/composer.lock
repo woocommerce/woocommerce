@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a5b89843fb6a65d3db7cfdafaccd2c16",
+    "content-hash": "9e0e2721da4db7a3c7474c3e2f14c236",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -628,21 +628,23 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v8.5.1",
+            "version": "v8.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-blocks.git",
-                "reference": "b14d64b63cf1edb5871f638e6250dd633504fb38"
+                "reference": "5530ea25a060cb0eaf9e930f9097057fb820f22e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/b14d64b63cf1edb5871f638e6250dd633504fb38",
-                "reference": "b14d64b63cf1edb5871f638e6250dd633504fb38",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/5530ea25a060cb0eaf9e930f9097057fb820f22e",
+                "reference": "5530ea25a060cb0eaf9e930f9097057fb820f22e",
                 "shasum": ""
             },
             "require": {
                 "automattic/jetpack-autoloader": "^2.9.1",
-                "composer/installers": "^1.7.0"
+                "composer/installers": "^1.7.0",
+                "ext-hash": "*",
+                "ext-json": "*"
             },
             "require-dev": {
                 "johnbillion/wp-hooks-generator": "^0.9.0",
@@ -681,9 +683,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-blocks/issues",
-                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v8.5.1"
+                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v8.7.1"
             },
-            "time": "2022-09-23T12:24:34+00:00"
+            "time": "2022-10-12T15:27:50+00:00"
         }
     ],
     "packages-dev": [

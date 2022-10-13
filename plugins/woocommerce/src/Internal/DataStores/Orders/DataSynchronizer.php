@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -52,6 +53,13 @@ class DataSynchronizer implements BatchProcessorInterface {
 	private $posts_to_cot_migrator;
 
 	/**
+	 * Logger object to be used to log events.
+	 *
+	 * @var \WC_Logger
+	 */
+	private $error_logger;
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
@@ -87,10 +95,11 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * @param PostsToOrdersMigrationController $posts_to_cot_migrator The posts to COT migration class to use.
 	 *@internal
 	 */
-	final public function init( OrdersTableDataStore $data_store, DatabaseUtil $database_util, PostsToOrdersMigrationController $posts_to_cot_migrator ) {
+	final public function init( OrdersTableDataStore $data_store, DatabaseUtil $database_util, PostsToOrdersMigrationController $posts_to_cot_migrator, LegacyProxy $legacy_proxy ) {
 		$this->data_store            = $data_store;
 		$this->database_util         = $database_util;
 		$this->posts_to_cot_migrator = $posts_to_cot_migrator;
+		$this->error_logger          = $legacy_proxy->call_function( 'wc_get_logger' );
 	}
 
 	/**
@@ -145,15 +154,32 @@ class DataSynchronizer implements BatchProcessorInterface {
 	}
 
 	/**
+	 * Get the total number of orders pending synchronization.
+	 *
+	 * @return int
+	 */
+	public function get_current_orders_pending_sync_count_cached() : int {
+		return $this->get_current_orders_pending_sync_count( true );
+	}
+
+	/**
 	 * Calculate how many orders need to be synchronized currently.
 	 * A database query is performed to get how many orders match one of the following:
 	 *
 	 * - Existing in the authoritative table but not in the backup table.
 	 * - Existing in both tables, but they have a different update date.
+	 *
+	 * @param bool $use_cache Whether to use the cached value instead of fetching from database.
 	 */
-	public function get_current_orders_pending_sync_count(): int {
+	public function get_current_orders_pending_sync_count( $use_cache = false ): int {
 		global $wpdb;
 
+		if ( $use_cache ) {
+			$pending_count = wp_cache_get( 'woocommerce_hpos_pending_sync_count' );
+			if ( false !== $pending_count ) {
+				return (int) $pending_count;
+			}
+		}
 		$orders_table                = $this->data_store::get_orders_table_name();
 		$order_post_types            = wc_get_order_types( 'cot-migration' );
 		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
@@ -201,7 +227,9 @@ SELECT(
 		// phpcs:enable
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		return (int) $wpdb->get_var( $sql );
+		$pending_count = (int) $wpdb->get_var( $sql );
+		wp_cache_set( 'woocommerce_hpos_pending_sync_count', $pending_count );
+		return $pending_count;
 	}
 
 	/**
@@ -299,7 +327,11 @@ WHERE
 	public function process_batch( array $batch ) : void {
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			foreach ( $batch as $id ) {
-				$order      = wc_get_order( $id );
+				$order = wc_get_order( $id );
+				if ( ! $order ) {
+					$this->error_logger->error( "Order $id not found during batch process, skipping." );
+					continue;
+				}
 				$data_store = $order->get_data_store();
 				$data_store->backfill_post_record( $order );
 			}
