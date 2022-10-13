@@ -131,12 +131,6 @@ jobs:
               body: body
             })
 
-            const prCreated = await github.rest.pulls.requestReviewers({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: pr.data.number
-            })
-
   notify-slack:
     name: "Sends code freeze notification to Slack"
     if: ${{ inputs.skipSlackPing != true }}
