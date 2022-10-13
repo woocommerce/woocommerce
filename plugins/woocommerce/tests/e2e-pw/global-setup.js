@@ -5,6 +5,7 @@ const {
 	ADMIN_PASSWORD,
 	CUSTOMER_USER,
 	CUSTOMER_PASSWORD,
+	SKIP_CUSTOMER_SAVE_STATE,
 } = process.env;
 const adminUsername = ADMIN_USER ?? 'admin';
 const adminPassword = ADMIN_PASSWORD ?? 'password';
@@ -51,12 +52,10 @@ module.exports = async ( config ) => {
 	// Specify user agent when running against an external test site to avoid getting HTTP 406 NOT ACCEPTABLE errors.
 	const contextOptions = { baseURL, userAgent };
 
-	// Create browser, browserContext, and page for customer and admin users
+	// Create browser, browserContext, and page for admin user
 	const browser = await chromium.launch();
 	const adminContext = await browser.newContext( contextOptions );
-	const customerContext = await browser.newContext( contextOptions );
 	const adminPage = await adminContext.newPage();
-	const customerPage = await customerContext.newPage();
 
 	// Sign in as admin user and save state
 	const adminRetries = 5;
@@ -130,49 +129,62 @@ module.exports = async ( config ) => {
 	}
 
 	// Sign in as customer user and save state
-	const customerRetries = 5;
-	for ( let i = 0; i < customerRetries; i++ ) {
-		try {
-			console.log( 'Trying to log-in as customer...' );
-			await customerPage.goto( `/wp-admin` );
-			await customerPage.fill( 'input[name="log"]', customerUsername );
-			await customerPage.fill( 'input[name="pwd"]', customerPassword );
-			await customerPage.click( 'text=Log In' );
+	if ( ! SKIP_CUSTOMER_SAVE_STATE ) {
+		// Create browser, browserContext, and page for customer user
+		const customerContext = await browser.newContext( contextOptions );
+		const customerPage = await customerContext.newPage();
+		const customerRetries = 5;
 
-			await customerPage.goto( `/my-account` );
-			await expect(
-				customerPage.locator(
-					'.woocommerce-MyAccount-navigation-link--customer-logout'
-				)
-			).toBeVisible();
-			await expect(
-				customerPage.locator(
-					'div.woocommerce-MyAccount-content > p >> nth=0'
-				)
-			).toContainText( 'Hello' );
+		for ( let i = 0; i < customerRetries; i++ ) {
+			try {
+				console.log( 'Trying to log-in as customer...' );
+				await customerPage.goto( `/wp-admin` );
+				await customerPage.fill(
+					'input[name="log"]',
+					customerUsername
+				);
+				await customerPage.fill(
+					'input[name="pwd"]',
+					customerPassword
+				);
+				await customerPage.click( 'text=Log In' );
 
-			await customerPage
-				.context()
-				.storageState( { path: process.env.CUSTOMERSTATE } );
-			console.log( 'Logged-in as customer successfully.' );
-			customerLoggedIn = true;
-			break;
-		} catch ( e ) {
-			console.log(
-				`Customer log-in failed. Retrying... ${ i }/${ customerRetries }`
-			);
-			console.log( e );
+				await customerPage.goto( `/my-account` );
+				await expect(
+					customerPage.locator(
+						'.woocommerce-MyAccount-navigation-link--customer-logout'
+					)
+				).toBeVisible();
+				await expect(
+					customerPage.locator(
+						'div.woocommerce-MyAccount-content > p >> nth=0'
+					)
+				).toContainText( 'Hello' );
+
+				await customerPage
+					.context()
+					.storageState( { path: process.env.CUSTOMERSTATE } );
+				console.log( 'Logged-in as customer successfully.' );
+				customerLoggedIn = true;
+				break;
+			} catch ( e ) {
+				console.log(
+					`Customer log-in failed. Retrying... ${ i }/${ customerRetries }`
+				);
+				console.log( e );
+			}
 		}
-	}
 
-	if ( ! customerLoggedIn ) {
-		console.error(
-			'Cannot proceed e2e test, as customer login failed. Please check if the test site has been setup correctly.'
-		);
-		process.exit( 1 );
+		if ( ! customerLoggedIn ) {
+			console.error(
+				'Cannot proceed e2e test, as customer login failed. Please check if the test site has been setup correctly.'
+			);
+			process.exit( 1 );
+		}
+
+		await customerContext.close();
 	}
 
 	await adminContext.close();
-	await customerContext.close();
 	await browser.close();
 };
