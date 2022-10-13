@@ -18,7 +18,6 @@ concurrency:
 jobs:
     e2e-tests:
         name: E2E tests on trunk
-        if: false # mytodo re-enable
         runs-on: ubuntu-20.04
         env:
             BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
@@ -89,7 +88,7 @@ jobs:
         name: API tests on trunk
         runs-on: ubuntu-20.04
         needs: [e2e-tests]
-        if: false # mytodo re-enable
+        if: always()
         steps:
             - uses: actions/checkout@v3
               with:
@@ -194,7 +193,7 @@ jobs:
     # Disable for this job for the meantime. It will be migrated to Playwright later.
     test-plugins:
         name: Smoke tests with ${{ matrix.plugin }} plugin installed
-        if: false # mytodo re-enable
+        if: always()
         runs-on: ubuntu-20.04
         needs: [k6-tests]
         env:
@@ -277,15 +276,13 @@ jobs:
 
     publish-reports:
         name: Publish test reports
-        # mytodo skip for the meantime
-        # if: |
-        #     always() &&
-        #     ! github.event.pull_request.head.repo.fork &&
-        #     (
-        #       contains( needs.*.result, 'success' ) ||
-        #       contains( needs.*.result, 'failure' )
-        #     )
-        if: false
+        if: |
+            always() &&
+            ! github.event.pull_request.head.repo.fork &&
+            (
+              contains( needs.*.result, 'success' ) ||
+              contains( needs.*.result, 'failure' )
+            )
         runs-on: ubuntu-20.04
         needs: [test-plugins]
         env:
@@ -303,15 +300,7 @@ jobs:
 
     post-summary:
         name: Post test results
-        # mytodo skip for the meantime
-        # if: |
-        #     always() &&
-        #     ! github.event.pull_request.head.repo.fork &&
-        #     (
-        #       contains( needs.*.result, 'success' ) ||
-        #       contains( needs.*.result, 'failure' )
-        #     )
-        if: false
+        if: always()
         runs-on: ubuntu-20.04
         needs: [e2e-tests, api-tests]
         steps:
