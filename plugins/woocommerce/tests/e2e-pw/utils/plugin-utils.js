@@ -91,7 +91,7 @@ export const downloadZip = async ( { url, downloadPath, authToken } ) => {
 		options.headers.Authorization = `token ${ authToken }`;
 	}
 
-	response = await axios( options );
+	const response = await axios( options );
 	response.data.pipe( fs.createWriteStream( downloadPath ) );
 };
 
