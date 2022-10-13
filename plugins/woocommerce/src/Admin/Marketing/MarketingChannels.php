@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Admin\Marketing;
 
-use Automattic\WooCommerce\Internal\Admin\Marketing as MarketingFeature;
+use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 
 /**
  * MarketingChannels repository class
@@ -28,12 +28,23 @@ class MarketingChannels {
 	private $allowed_channels;
 
 	/**
-	 * MarketingChannels constructor.
+	 * MarketingSpecs repository
+	 *
+	 * @var MarketingSpecs
 	 */
-	public function __construct() {
+	protected $marketing_specs;
+
+	/**
+	 * Class initialization, invoked by the DI container.
+	 *
+	 * @param MarketingSpecs $marketing_specs The MarketingSpecs class.
+	 *
+	 * @internal
+	 */
+	final public function init( MarketingSpecs $marketing_specs ) {
+		$this->marketing_specs  = $marketing_specs;
 		$this->allowed_channels = $this->get_allowed_channels();
 	}
-
 
 	/**
 	 * Registers a marketing channel.
@@ -99,7 +110,7 @@ class MarketingChannels {
 	 * @return array
 	 */
 	protected function get_allowed_channels(): array {
-		$recommended_channels = MarketingFeature::get_instance()->get_recommended_plugins();
+		$recommended_channels = $this->marketing_specs->get_recommended_plugins();
 		if ( empty( $recommended_channels ) ) {
 			return [];
 		}

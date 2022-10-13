@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
 use Automattic\WooCommerce\Admin\Marketing\InstalledExtensions;
 use Automattic\WooCommerce\Admin\Marketing\MarketingChannels;
+use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 
 // Indicates that the multichannel marketing classes exist.
@@ -27,6 +28,7 @@ class MarketingServiceProvider extends AbstractServiceProvider {
 	 * @var array
 	 */
 	protected $provides = array(
+		MarketingSpecs::class,
 		MarketingChannels::class,
 		InstalledExtensions::class,
 	);
@@ -35,7 +37,8 @@ class MarketingServiceProvider extends AbstractServiceProvider {
 	 * Register the classes.
 	 */
 	public function register() {
-		$this->share( MarketingChannels::class );
+		$this->share( MarketingSpecs::class );
+		$this->share( MarketingChannels::class )->addArgument( MarketingSpecs::class );
 		$this->share( InstalledExtensions::class )->addArgument( MarketingChannels::class );
 	}
 }
