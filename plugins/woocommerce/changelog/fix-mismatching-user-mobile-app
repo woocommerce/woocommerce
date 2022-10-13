@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+fixed mismatching jetpack user should not see mobile app task list item

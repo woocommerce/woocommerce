@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { Model, ModelID } from '../model';
 import { HTTPClient } from '../../http';
 import { settingRESTRepository } from '../../repositories';

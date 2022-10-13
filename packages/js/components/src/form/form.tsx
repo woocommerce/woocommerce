@@ -262,7 +262,7 @@ function FormComponent< Values extends Record< string, any > >(
 			}
 
 			if ( callback ) {
-				callback( values );
+				return callback( values );
 			}
 		}
 	};

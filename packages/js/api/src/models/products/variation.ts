@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { ModelID } from '../model';
 import {
 	AbstractProductData,
@@ -59,7 +62,8 @@ export type ProductVariationRepositoryParams = ModelRepositoryParams<
  * @typedef ListsProductVariations
  * @alias ListsModels.<ProductVariation>
  */
-export type ListsProductVariations = ListsChildModels< ProductVariationRepositoryParams >;
+export type ListsProductVariations =
+	ListsChildModels< ProductVariationRepositoryParams >;
 
 /**
  * An interface for creating variable products using the repository.
@@ -67,7 +71,8 @@ export type ListsProductVariations = ListsChildModels< ProductVariationRepositor
  * @typedef CreatesProductVariations
  * @alias CreatesModels.<ProductVariation>
  */
-export type CreatesProductVariations = CreatesChildModels< ProductVariationRepositoryParams >;
+export type CreatesProductVariations =
+	CreatesChildModels< ProductVariationRepositoryParams >;
 
 /**
  * An interface for reading variable products using the repository.
@@ -75,7 +80,8 @@ export type CreatesProductVariations = CreatesChildModels< ProductVariationRepos
  * @typedef ReadsProductVariations
  * @alias ReadsModels.<ProductVariation>
  */
-export type ReadsProductVariations = ReadsChildModels< ProductVariationRepositoryParams >;
+export type ReadsProductVariations =
+	ReadsChildModels< ProductVariationRepositoryParams >;
 
 /**
  * An interface for updating variable products using the repository.
@@ -83,7 +89,8 @@ export type ReadsProductVariations = ReadsChildModels< ProductVariationRepositor
  * @typedef UpdatesProductVariations
  * @alias UpdatesModels.<ProductVariation>
  */
-export type UpdatesProductVariations = UpdatesChildModels< ProductVariationRepositoryParams >;
+export type UpdatesProductVariations =
+	UpdatesChildModels< ProductVariationRepositoryParams >;
 
 /**
  * An interface for deleting variable products using the repository.
@@ -91,7 +98,8 @@ export type UpdatesProductVariations = UpdatesChildModels< ProductVariationRepos
  * @typedef DeletesProductVariations
  * @alias DeletesModels.<ProductVariation>
  */
-export type DeletesProductVariations = DeletesChildModels< ProductVariationRepositoryParams >;
+export type DeletesProductVariations =
+	DeletesChildModels< ProductVariationRepositoryParams >;
 
 /**
  * The base for the product variation object.
@@ -103,7 +111,8 @@ export class ProductVariation
 		IProductInventory,
 		IProductPrice,
 		IProductSalesTax,
-		IProductShipping {
+		IProductShipping
+{
 	/**
 	 * @see ./abstracts/delivery.ts
 	 */

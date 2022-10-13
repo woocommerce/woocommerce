@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { Setting, UpdatesSettings } from '../models';
 
 /**
@@ -26,8 +29,8 @@ export class SettingService {
 	 *
 	 * @param {string} address1 The first address line.
 	 * @param {string} address2 The second address line.
-	 * @param {string} city The city.
-	 * @param {string} country The country or country/state.
+	 * @param {string} city     The city.
+	 * @param {string} country  The country or country/state.
 	 * @param {string} postCode The postal code.
 	 * @return {Promise.<boolean>} Resolves to true if all of the settings are updated.
 	 */
