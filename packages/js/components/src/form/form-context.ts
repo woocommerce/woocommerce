@@ -1,8 +1,12 @@
 /**
  * External dependencies
  */
-import { ChangeEvent } from 'react';
 import { createContext, useContext } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
+import { CheckboxProps, ConsumerInputProps, InputProps } from './form';
 
 export type FormErrors< Values > = {
 	[ P in keyof Values ]?: FormErrors< Values[ P ] > | string;
@@ -31,25 +35,14 @@ export type FormContext< Values extends Record< string, any > > = {
 	setValue: ( name: string, value: any ) => void;
 	setValues: ( valuesToSet: Values ) => void;
 	handleSubmit: () => Promise< Values >;
+	getCheckboxProps< Value extends Values[ keyof Values ] >(
+		name: string,
+		inputProps?: ConsumerInputProps< Values >
+	): CheckboxProps< Values, Value >;
 	getInputProps< Value extends Values[ keyof Values ] >(
 		name: string,
-		inputProps?: {
-			className?: string;
-			onChange?: (
-				value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
-			) => void;
-			onBlur?: () => void;
-			[ key: string ]: unknown;
-		}
-	): {
-		value: Value;
-		checked: boolean;
-		selected?: boolean;
-		onChange: ( value: ChangeEvent< HTMLInputElement > | Value ) => void;
-		onBlur: () => void;
-		className: string | undefined;
-		help: string | null | undefined;
-	};
+		inputProps?: ConsumerInputProps< Values >
+	): InputProps< Values, Value >;
 	isValidForm: boolean;
 	resetForm: (
 		initialValues: Values,

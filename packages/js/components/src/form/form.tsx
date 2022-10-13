@@ -18,6 +18,7 @@ import _setWith from 'lodash/setWith';
 import _get from 'lodash/get';
 import _clone from 'lodash/clone';
 import _isEqual from 'lodash/isEqual';
+import _omit from 'lodash/omit';
 
 /**
  * Internal dependencies
@@ -86,6 +87,32 @@ function isChangeEvent< T >(
 
 export type FormRef< Values > = {
 	resetForm: ( initialValues: Values ) => void;
+};
+
+export type InputProps< Values, Value > = {
+	value: Value;
+	checked: boolean;
+	selected?: boolean;
+	onChange: (
+		value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
+	) => void;
+	onBlur: () => void;
+	className: string | undefined;
+	help: string | null | undefined;
+};
+
+export type CheckboxProps< Values, Value > = Omit<
+	InputProps< Values, Value >,
+	'value' | 'selected'
+>;
+
+export type ConsumerInputProps< Values > = {
+	className?: string;
+	onChange?: (
+		value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
+	) => void;
+	onBlur?: ( value: Values[ keyof Values ] ) => void;
+	[ key: string ]: unknown;
 };
 
 /**
@@ -270,25 +297,8 @@ function FormComponent< Values extends Record< string, any > >(
 
 	function getInputProps< Value = Values[ keyof Values ] >(
 		name: string,
-		inputProps: {
-			className?: string;
-			onChange?: (
-				value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
-			) => void;
-			onBlur?: () => void;
-			[ key: string ]: unknown;
-		} = {}
-	): {
-		value: Value;
-		checked: boolean;
-		selected?: boolean;
-		onChange: (
-			value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
-		) => void;
-		onBlur: () => void;
-		className: string | undefined;
-		help: string | null | undefined;
-	} {
+		inputProps: ConsumerInputProps< Values > = {}
+	): InputProps< Values, Value > {
 		const inputValue = _get( values, name );
 		const isTouched = touched[ name ];
 		const inputError = _get( errors, name );
@@ -314,7 +324,7 @@ function FormComponent< Values extends Record< string, any > >(
 			onBlur: () => {
 				handleBlur( name );
 				if ( onBlurProp ) {
-					onBlurProp();
+					onBlurProp( inputValue );
 				}
 			},
 			className: classnames( classNameProp, {
@@ -323,6 +333,16 @@ function FormComponent< Values extends Record< string, any > >(
 			help: isTouched ? ( inputError as string ) : null,
 			...additionalProps,
 		};
+	}
+
+	function getCheckboxProps< Value = Values[ keyof Values ] >(
+		name: string,
+		inputProps: ConsumerInputProps< Values > = {}
+	): CheckboxProps< Values, Value > {
+		return _omit( getInputProps( name, inputProps ), [
+			'selected',
+			'value',
+		] );
 	}
 
 	const isDirty = useMemo(
@@ -340,6 +360,7 @@ function FormComponent< Values extends Record< string, any > >(
 			setValue,
 			setValues,
 			handleSubmit,
+			getCheckboxProps,
 			getInputProps,
 			isValidForm: ! Object.keys( errors ).length,
 			resetForm,
