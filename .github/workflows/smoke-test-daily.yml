@@ -227,7 +227,7 @@ jobs:
                   ref: ${{ env.BRANCH_NAME }}
 
             - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
+              uses: package/woocommerce/.github/actions/setup-woocommerce-monorepo
               with:
                   build: false
 
