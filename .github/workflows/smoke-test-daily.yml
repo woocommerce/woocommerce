@@ -7,8 +7,8 @@ on:
     pull_request:
 
 env:
-    API_ARTIFACT: api-daily--run-${{ github.run_number }}
-    E2E_ARTIFACT: e2e-daily--run-${{ github.run_number }}
+    API_ARTIFACT: api-test-report---daily---run-${{ github.run_number }}
+    E2E_ARTIFACT: e2e-test-report---daily---run-${{ github.run_number }}
     BRANCH_NAME: e2e/rep-s3-daily # mytodo revert to trunk
 
 concurrency:
@@ -19,8 +19,6 @@ jobs:
     e2e-test:
         name: E2E test on trunk
         runs-on: ubuntu-20.04
-        # mytodo skip for now
-        if: false
         steps:
             - uses: actions/checkout@v3
               with:
@@ -204,17 +202,18 @@ jobs:
                 include:
                     - plugin: 'WooCommerce Payments'
                       repo: 'automattic/woocommerce-payments'
-                    - plugin: 'WooCommerce PayPal Payments'
-                      repo: 'woocommerce/woocommerce-paypal-payments'
-                    - plugin: 'WooCommerce Shipping & Tax'
-                      repo: 'automattic/woocommerce-services'
-                    - plugin: 'WooCommerce Subscriptions'
-                      repo: WC_SUBSCRIPTIONS_REPO
-                      private: true
-                    - plugin: 'WordPress SEO' # Yoast SEO in the UI, but the slug is wordpress-seo
-                      repo: 'Yoast/wordpress-seo'
-                    - plugin: 'Contact Form 7'
-                      repo: 'takayukister/contact-form-7'
+                    # mytodo comment out for now
+                    # - plugin: 'WooCommerce PayPal Payments'
+                    #   repo: 'woocommerce/woocommerce-paypal-payments'
+                    # - plugin: 'WooCommerce Shipping & Tax'
+                    #   repo: 'automattic/woocommerce-services'
+                    # - plugin: 'WooCommerce Subscriptions'
+                    #   repo: WC_SUBSCRIPTIONS_REPO
+                    #   private: true
+                    # - plugin: 'WordPress SEO' # Yoast SEO in the UI, but the slug is wordpress-seo
+                    #   repo: 'Yoast/wordpress-seo'
+                    # - plugin: 'Contact Form 7'
+                    #   repo: 'takayukister/contact-form-7'
         steps:
             - name: Create dirs.
               run: |
@@ -270,7 +269,7 @@ jobs:
                   steps.generate_e2e_report.conclusion == 'success'
               uses: actions/upload-artifact@v3
               with:
-                  name: e2e-daily-${{ matrix.plugin }}--run-${{ github.run_number }}
+                  name: e2e-test-report---daily-${{ matrix.plugin }}---run-${{ github.run_number }}
                   path: |
                       package/woocommerce/plugins/woocommerce/e2e/allure-results
                       package/woocommerce/plugins/woocommerce/e2e/allure-report
