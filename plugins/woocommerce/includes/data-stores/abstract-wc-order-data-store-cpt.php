@@ -491,7 +491,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			'order_modified'     => ! is_null( $order->get_date_modified() ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getOffsetTimestamp() ) : '',
 			'order_modified_gmt' => ! is_null( $order->get_date_modified() ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ) : '',
 		);
-		$updated = wp_update_post( $post_data );
+		$updated   = wp_update_post( $post_data );
 		remove_filter( 'wp_insert_post_data', array( $this, 'update_post_modified_data' ) );
 		return $updated;
 	}
