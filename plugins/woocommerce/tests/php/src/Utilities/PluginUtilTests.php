@@ -123,10 +123,10 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 		$this->reset_legacy_proxy_mocks();
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'get_plugins'      => function() {
+				'get_plugins' => function() {
 					return array(
-						'woocommerce/woocommerce.php'       => array( 'WC tested up to' => '1.0' ),
-						'jetpack/jetpack.php'               => array( 'foo' => 'bar' ),
+						'woocommerce/woocommerce.php' => array( 'WC tested up to' => '1.0' ),
+						'jetpack/jetpack.php' => array( 'foo' => 'bar' ),
 						'classic-editor/classic-editor.php' => array( 'foo' => 'bar' ),
 					);
 				},

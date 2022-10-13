@@ -140,7 +140,7 @@ class PluginUtil {
 		$directory_name  = array_pop( $file_name_parts );
 		$full_matches    = array();
 		$partial_matches = array();
-		foreach ( $wp_plugins as $wp_plugin ){
+		foreach ( $wp_plugins as $wp_plugin ) {
 			if ( false !== strpos( $wp_plugin, $directory_name . DIRECTORY_SEPARATOR . $file_name ) ) {
 				$full_matches[] = $wp_plugin;
 			}
