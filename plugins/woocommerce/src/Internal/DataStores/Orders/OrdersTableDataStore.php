@@ -1820,6 +1820,16 @@ FROM $order_meta_table
 			return false;
 		}
 
+		/**
+		 * Fires before an order is restored from the trash.
+		 *
+		 * @since 7.2.0
+		 *
+		 * @param int    $order_id        Order ID.
+		 * @param string $previous_status The status of the order before it was trashed.
+		 */
+		do_action( 'woocommerce_untrash_order', $order->get_id(), $previous_status );
+
 		$order->set_status( $previous_status );
 		$order->save();
 
@@ -1827,6 +1837,7 @@ FROM $order_meta_table
 		if ( $previous_status === $order->get_status() ) {
 			$order->delete_meta_data( '_wp_trash_meta_status' );
 			$order->delete_meta_data( '_wp_trash_meta_time' );
+
 			return true;
 		}
 
