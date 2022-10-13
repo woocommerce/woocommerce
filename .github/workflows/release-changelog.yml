@@ -39,7 +39,7 @@ jobs:
         run: git checkout -b ${{ format( 'update/{0}-changelog', inputs.releaseVersion ) }}
 
       - name: "Generate the changelog file"
-        run: pnpm changelog --filter=woocommerce -- write --add-pr-num -n -vvv --use-version ${{ inputs.releaseVersion }}
+        run: pnpm --filter=woocommerce run changelog write --add-pr-num -n -vvv --use-version ${{ inputs.releaseVersion }}
         
       - name: "git rm deleted files"
         run: git rm $(git ls-files --deleted)
