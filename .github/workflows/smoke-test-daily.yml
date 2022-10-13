@@ -16,8 +16,8 @@ concurrency:
     cancel-in-progress: true
 
 jobs:
-    e2e-test:
-        name: E2E test on trunk
+    e2e-tests:
+        name: E2E tests on trunk
         runs-on: ubuntu-20.04
         # mytodo skip for now
         if: false
@@ -80,10 +80,10 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
-    api-test:
-        name: API test on trunk
+    api-tests:
+        name: API tests on trunk
         runs-on: ubuntu-20.04
-        needs: [e2e-test]
+        needs: [e2e-tests]
         # mytodo skip for the meantime
         # if: always()
         if: false
@@ -134,10 +134,10 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
-    k6-test:
-        name: k6 test on trunk
+    k6-tests:
+        name: k6 tests on trunk
         runs-on: ubuntu-20.04
-        needs: [api-test]
+        needs: [api-tests]
         # mytodo skip for the meantime
         # if: always()
         if: false
@@ -197,7 +197,7 @@ jobs:
         name: Smoke tests with ${{ matrix.plugin }} plugin installed
         if: always()
         runs-on: ubuntu-20.04
-        needs: [k6-test]
+        needs: [k6-tests]
         strategy:
             fail-fast: false
             matrix:
@@ -308,7 +308,7 @@ jobs:
         #     )
         if: false
         runs-on: ubuntu-20.04
-        needs: [e2e-test, api-test]
+        needs: [e2e-tests, api-tests]
         steps:
             - name: Create dirs
               run: |
