@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { Link, Spinner, useFormContext } from '@woocommerce/components';
 import {
@@ -17,7 +17,6 @@ import {
 	Card,
 	CardBody,
 	SelectControl,
-	TextControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
@@ -32,6 +31,7 @@ import {
 	ShippingDimensionsImageProps,
 } from '../fields/shipping-dimensions-image';
 import { useProductHelper } from '../use-product-helper';
+import { AddNewShippingClassModal } from '../shared/add-new-shipping-class-modal';
 import './product-shipping-section.scss';
 import {
 	ADD_NEW_SHIPPING_CLASS_OPTION_VALUE,
@@ -93,7 +93,8 @@ function extractDefaultShippingClassFromProduct(
 export function ProductShippingSection( {
 	product,
 }: ProductShippingSectionProps ) {
-	const { getInputProps, setValue } = useFormContext< PartialProduct >();
+	const { getInputProps, setValue, values } =
+		useFormContext< PartialProduct >();
 	const { formatNumber, parseNumber } = useProductHelper();
 	const [ highlightSide, setHighlightSide ] =
 		useState< ShippingDimensionsImageProps[ 'highlight' ] >();
@@ -135,11 +136,30 @@ export function ProductShippingSection( {
 		[]
 	);
 
-	const dimensionProps = { onBlur: () => setHighlightSide( undefined ), suffix: dimensionUnit };
-	const inputWidthProps = getInputProps( 'dimensions.width', dimensionProps );
-	const inputLengthProps = getInputProps( 'dimensions.length', dimensionProps );
-	const inputHeightProps = getInputProps( 'dimensions.height', dimensionProps );
-	const inputWeightProps = getInputProps( 'weight', dimensionProps );
+	const { createProductShippingClass, invalidateResolution } = useDispatch(
+		EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
+	);
+
+	const getDimensionProps = ( name: string ) => {
+		const dimensionProps = {
+			onBlur: () => {
+				setHighlightSide( undefined );
+				setValue(
+					name,
+					parseNumber(
+						String( values[ name as keyof PartialProduct ] )
+					)
+				);
+			},
+			suffix: dimensionUnit,
+		};
+		return getInputProps( 'dimensions.width', dimensionProps );
+	};
+
+	const inputWidthProps = getDimensionProps( 'dimensions.width' );
+	const inputLengthProps = getDimensionProps( 'dimensions.length' );
+	const inputHeightProps = getDimensionProps( 'dimensions.height' );
+	const inputWeightProps = getInputProps( 'weight' );
 
 	return (
 		<ProductSectionLayout
@@ -222,7 +242,7 @@ export function ProductShippingSection( {
 										<InputControl
 											{ ...inputWidthProps }
 											value={ formatNumber(
-												inputWidthProps.value
+												String( inputWidthProps.value )
 											) }
 											label={ getInterpolatedSizeLabel(
 												__(
@@ -230,11 +250,6 @@ export function ProductShippingSection( {
 													'woocommerce'
 												)
 											) }
-											onChange={ ( value: string ) =>
-												inputWidthProps?.onChange(
-													parseNumber( value )
-												)
-											}
 											onFocus={ () => {
 												setHighlightSide( 'A' );
 											} }
@@ -249,7 +264,7 @@ export function ProductShippingSection( {
 										<InputControl
 											{ ...inputLengthProps }
 											value={ formatNumber(
-												inputLengthProps.value
+												String( inputLengthProps.value )
 											) }
 											label={ getInterpolatedSizeLabel(
 												__(
@@ -257,9 +272,14 @@ export function ProductShippingSection( {
 													'woocommerce'
 												)
 											) }
-											onChange={ ( value: string ) =>
-												inputLengthProps?.onChange(
-													parseNumber( value )
+											onBlur={ () =>
+												setValue(
+													'dimensions.length',
+													parseNumber(
+														String(
+															inputLengthProps?.value
+														)
+													)
 												)
 											}
 											onFocus={ () => {
@@ -276,7 +296,7 @@ export function ProductShippingSection( {
 										<InputControl
 											{ ...inputHeightProps }
 											value={ formatNumber(
-												inputHeightProps.value
+												String( inputHeightProps.value )
 											) }
 											label={ getInterpolatedSizeLabel(
 												__(
@@ -284,11 +304,6 @@ export function ProductShippingSection( {
 													'woocommerce'
 												)
 											) }
-											onChange={ ( value: string ) =>
-												inputHeightProps?.onChange(
-													parseNumber( value )
-												)
-											}
 											onFocus={ () => {
 												setHighlightSide( 'C' );
 											} }
@@ -303,18 +318,21 @@ export function ProductShippingSection( {
 										<InputControl
 											{ ...inputWeightProps }
 											value={ formatNumber(
-												inputWeightProps.value
+												String( inputWeightProps.value )
 											) }
 											label={ __(
 												'Weight',
 												'woocommerce'
 											) }
-											onChange={ ( value: string ) =>
-												inputWeightProps?.onChange(
-													parseNumber( value )
-												)
-											}
 											suffix={ weightUnit }
+											onBlur={ () => {
+												setValue(
+													'weight',
+													parseNumber(
+														values.weight || ''
+													)
+												);
+											} }
 										/>
 									</BaseControl>
 								</div>
@@ -340,10 +358,10 @@ export function ProductShippingSection( {
 						product &&
 						extractDefaultShippingClassFromProduct( product )
 					}
-					onAdd={ ( values ) =>
+					onAdd={ ( shippClassValues ) =>
 						createProductShippingClass<
 							Promise< ProductShippingClass >
-						>( values ).then( ( value ) => {
+						>( shippClassValues ).then( ( value ) => {
 							invalidateResolution( 'getProductShippingClasses' );
 							setValue( 'shipping_class', value.slug );
 							return value;

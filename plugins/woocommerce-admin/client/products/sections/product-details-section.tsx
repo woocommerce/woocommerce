@@ -34,14 +34,20 @@ import { BlockInstance, serialize, parse } from '@wordpress/blocks';
 import './product-details-section.scss';
 import { CategoryField } from '../fields/category-field';
 import { EditProductLinkModal } from '../shared/edit-product-link-modal';
-import { getCheckboxProps } from './utils';
+import { getCheckboxTracks } from './utils';
 import { ProductSectionLayout } from '../layout/product-section-layout';
 
 const PRODUCT_DETAILS_SLUG = 'product-details';
 
 export const ProductDetailsSection: React.FC = () => {
-	const { getInputProps, values, setValue, touched, errors } =
-		useFormContext< Product >();
+	const {
+		getCheckboxProps,
+		getInputProps,
+		values,
+		touched,
+		errors,
+		setValue,
+	} = useFormContext< Product >();
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
 		useState( false );
 	const [ descriptionBlocks, setDescriptionBlocks ] = useState<
@@ -168,7 +174,10 @@ export const ProductDetailsSection: React.FC = () => {
 								/>
 							</>
 						}
-						{ ...getInputProps( 'featured', getCheckboxProps( 'featured' ) ) }
+						{ ...getCheckboxProps(
+							'featured',
+							getCheckboxTracks( 'featured' )
+						) }
 					/>
 					{ showProductLinkEditModal && (
 						<EditProductLinkModal

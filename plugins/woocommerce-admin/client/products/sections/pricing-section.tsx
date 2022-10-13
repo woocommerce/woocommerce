@@ -90,7 +90,10 @@ export const PricingSection: React.FC = () => {
 	} );
 
 	const currencyInputProps = getCurrencyInputProps( currencyConfig );
-	const regularPriceProps = getInputProps( 'regular_price', currencyInputProps );
+	const regularPriceProps = getInputProps(
+		'regular_price',
+		currencyInputProps
+	);
 	const salePriceProps = getInputProps( 'sale_price', currencyInputProps );
 
 	return (
@@ -132,8 +135,19 @@ export const PricingSection: React.FC = () => {
 							{ ...regularPriceProps }
 							label={ __( 'List price', 'woocommerce' ) }
 							placeholder={ __( '10.59', 'woocommerce' ) }
-							value={ formatCurrencyDisplayValue( regularPriceProps?.value, currencyConfig, formatAmount ) }
-							onBlur={ () => setValue( 'regular_price', sanitizePrice( regularPriceProps.value ) ) }
+							value={ formatCurrencyDisplayValue(
+								String( regularPriceProps?.value ),
+								currencyConfig,
+								formatAmount
+							) }
+							onBlur={ () =>
+								setValue(
+									'regular_price',
+									sanitizePrice(
+										String( regularPriceProps.value )
+									)
+								)
+							}
 						/>
 					</BaseControl>
 					{ ! isTaxSettingsResolving && (
@@ -151,8 +165,19 @@ export const PricingSection: React.FC = () => {
 							{ ...salePriceProps }
 							label={ salePriceTitle }
 							placeholder={ __( '8.59', 'woocommerce' ) }
-							value={ formatCurrencyDisplayValue( salePriceProps?.value, currencyConfig, formatAmount ) }
-							onBlur={ () => setValue( 'sales_price', sanitizePrice( salePriceProps.value ) ) }
+							value={ formatCurrencyDisplayValue(
+								String( salePriceProps?.value ),
+								currencyConfig,
+								formatAmount
+							) }
+							onBlur={ () =>
+								setValue(
+									'sales_price',
+									sanitizePrice(
+										String( salePriceProps.value )
+									)
+								)
+							}
 						/>
 					</BaseControl>
 				</CardBody>
