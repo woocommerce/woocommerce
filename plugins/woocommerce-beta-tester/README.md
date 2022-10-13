@@ -1,6 +1,6 @@
 # WooCommerce Beta Tester
 
-A plugin that makes it easy to test out pre-releases such as betas release canadidates and even final releases. It also comes with WooCommerce Admin Test Helper that helps test WooCommerce Admin functionalities.
+A plugin that makes it easy to test out pre-releases such as betas release candidates and even final releases. It also comes with WooCommerce Admin Test Helper that helps test WooCommerce Admin functionalities.
 
 ## Installation
 
