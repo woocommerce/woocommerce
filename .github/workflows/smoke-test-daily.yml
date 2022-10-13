@@ -193,9 +193,7 @@ jobs:
     # Disable for this job for the meantime. It will be migrated to Playwright later.
     test-plugins:
         name: Smoke tests with ${{ matrix.plugin }} plugin installed
-        if: always()
         runs-on: ubuntu-20.04
-        needs: [k6-tests]
         env:
             USE_WP_ENV: 1
             FORCE_COLOR: 1
@@ -274,30 +272,6 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
-    publish-reports:
-        name: Publish test reports
-        if: |
-            always() &&
-            ! github.event.pull_request.head.repo.fork &&
-            (
-              contains( needs.*.result, 'success' ) ||
-              contains( needs.*.result, 'failure' )
-            )
-        runs-on: ubuntu-20.04
-        needs: [test-plugins]
-        env:
-            GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-            RUN_ID: ${{ github.run_id }}
-        steps:
-            - name: Publish API & E2E test reports
-              run: |
-                  gh workflow run publish-test-reports-daily.yml \
-                    -f run_id=$RUN_ID \
-                    -f api_artifact=$API_ARTIFACT \
-                    -f e2e_artifact=$E2E_ARTIFACT \
-                    -f s3_root=public \
-                    --repo woocommerce/woocommerce-test-reports
-
     post-summary:
         name: Post test results
         if: always()
@@ -339,3 +313,27 @@ jobs:
                   script: |
                       const script = require( './repo/.github/workflows/scripts/prepare-test-summary-daily.js' )
                       return await script( { core } )
+
+    publish-reports:
+        name: Publish test reports
+        if: |
+            always() &&
+            ! github.event.pull_request.head.repo.fork &&
+            (
+              contains( needs.*.result, 'success' ) ||
+              contains( needs.*.result, 'failure' )
+            )
+        runs-on: ubuntu-20.04
+        needs: [k6-tests, test-plugins, post-summary]
+        env:
+            GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+            RUN_ID: ${{ github.run_id }}
+        steps:
+            - name: Publish API & E2E test reports
+              run: |
+                  gh workflow run publish-test-reports-daily.yml \
+                    -f run_id=$RUN_ID \
+                    -f api_artifact=$API_ARTIFACT \
+                    -f e2e_artifact=$E2E_ARTIFACT \
+                    -f s3_root=public \
+                    --repo woocommerce/woocommerce-test-reports
