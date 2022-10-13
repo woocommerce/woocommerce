@@ -166,8 +166,14 @@ export const getLatestReleaseZipUrl = async ( {
 };
 
 /**
- * mytodo
+ * Use the {@link https://developer.wordpress.org/rest-api/reference/plugins/#create-a-plugin Create plugin endpoint} to install and activate a plugin.
  *
+ * @param {object} params
+ * @param {APIRequest} params.request
+ * @param {string} params.baseURL
+ * @param {string} params.slug
+ * @param {string} params.username
+ * @param {string} params.password
  */
 export const createPlugin = async ( {
 	request,
