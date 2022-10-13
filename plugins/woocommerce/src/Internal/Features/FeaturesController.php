@@ -784,7 +784,7 @@ class FeaturesController {
 		$message = str_replace(
 			'<a>',
 			'<a href="' . esc_url( add_query_arg( array( 'plugin_status' => 'incompatible_with_feature' ), admin_url( 'plugins.php' ) ) ) . '">',
-			__( 'WooCommerce has detected that some of your active plugins are incompatible with currently-enabled WooCommerce features. Please <a>review the details</a>.', 'woocommerce' )
+			__( 'WooCommerce has detected that some of your active plugins are incompatible with currently enabled WooCommerce features. Please <a>review the details</a>.', 'woocommerce' )
 		);
 
 		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -823,7 +823,7 @@ class FeaturesController {
 
 		$message =
 			'all' === $feature_id
-			? __( 'You are viewing plugins that are incompatible with currently-enabled WooCommerce features.', 'woocommerce' )
+			? __( 'You are viewing plugins that are incompatible with currently enabled WooCommerce features.', 'woocommerce' )
 			: sprintf(
 				/* translators: %s is a feature name. */
 				__( "You are viewing the plugins that are incompatible with the '%s' feature.", 'woocommerce' ),
