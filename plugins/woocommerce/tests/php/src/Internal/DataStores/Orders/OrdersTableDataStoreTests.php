@@ -17,6 +17,12 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**
+	 * Original timezone before this test started.
+	 * @var string
+	 */
+	private $original_time_zone;
+
+	/**
 	 * @var PostsToOrdersMigrationController
 	 */
 	private $migrator;
@@ -35,6 +41,9 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * Initializes system under test.
 	 */
 	public function setUp(): void {
+		$this->original_time_zone = wp_timezone_string();
+		//phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- We need to change the timezone to test the date sync fields.
+		update_option( 'timezone_string', 'Asia/Kolkata' );
 		parent::setUp();
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
 		$this->setup_cot();
@@ -48,6 +57,8 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * Destroys system under test.
 	 */
 	public function tearDown(): void {
+		//phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- We need to change the timezone to test the date sync fields.
+		update_option( 'timezone_string', $this->original_time_zone );
 		$this->clean_up_cot_setup();
 		parent::tearDown();
 	}
@@ -1716,6 +1727,42 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		foreach ( $props as $meta_key_name => $prop_name ) {
 			$this->assertEquals( $value, $order->{"get_$prop_name"}(), "Prop $prop_name was not set correctly." );
 		}
+	}
+
+	/**
+	 * @testDox Test that created and updated dates are backfilled correctly.
+	 */
+	public function test_create_update_date_gmt() {
+		$order = new WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->set_created_via( 'checkout' );
+		$order->save();
+
+		// 10s is to account for any flakiness.
+		$this->assertTrue( 10 > absint( $order->get_date_created()->getTimestamp() - time() ), 'Order date created date is about the same as now.' );
+
+		$this->sut->backfill_post_record( $order );
+
+		$post = get_post( $order->get_id() );
+		$this->assertEquals( $order->get_date_created()->format( 'Y-m-d H:i:s' ), $post->post_date );
+		$created_date = $order->get_date_created();
+		$created_date->setTimezone( new DateTimeZone( 'GMT' ) );
+		$this->assertEquals( $created_date->format( 'Y-m-d H:i:s' ), $post->post_date_gmt );
+
+		$order->set_status( 'completed' );
+		$order->save();
+		$this->sut->backfill_post_record( $order );
+
+		// 10s is to account for any flakiness.
+		$this->assertTrue( 10 > absint( $order->get_date_modified()->getTimestamp() - time() ), 'Order date modified date is about the same as now.' );
+
+		$this->sut->backfill_post_record( $order );
+		$post = get_post( $order->get_id() );
+
+		$this->assertEquals( $order->get_date_modified()->format( 'Y-m-d H:i:s' ), $post->post_modified );
+		$modified_date = $order->get_date_modified();
+		$modified_date->setTimezone( new DateTimeZone( 'GMT' ) );
+		$this->assertEquals( $modified_date->format( 'Y-m-d H:i:s' ), $post->post_modified_gmt );
 	}
 
 	/**
