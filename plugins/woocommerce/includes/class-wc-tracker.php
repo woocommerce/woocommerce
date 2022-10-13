@@ -545,7 +545,7 @@ class WC_Tracker {
 
 	/**
 	 * Get orders origin details.
-	 * 
+	 *
 	 * @return array
 	 */
 	private static function get_orders_origins() {
