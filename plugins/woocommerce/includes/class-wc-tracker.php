@@ -561,7 +561,8 @@ class WC_Tracker {
 				wp_postmeta order_meta ON order_meta.post_id = orders.id
 			WHERE
 				meta_key = '_created_via'
-			GROUP BY meta_value;
+			GROUP BY
+				meta_value;
 			"
 		);
 
