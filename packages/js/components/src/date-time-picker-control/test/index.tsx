@@ -96,7 +96,7 @@ describe( 'DateTimePickerControl', () => {
 		const { container } = render(
 			<DateTimePickerControl
 				currentDate={ dateTime.toISOString() }
-				is12Hour={ false }
+				is12HourPicker={ false }
 			/>
 		);
 
@@ -152,7 +152,7 @@ describe( 'DateTimePickerControl', () => {
 		const { container } = render(
 			<DateTimePickerControl
 				currentDate={ dateTime.toISOString() }
-				is12Hour={ true }
+				is12HourPicker={ true }
 			/>
 		);
 
@@ -184,14 +184,14 @@ describe( 'DateTimePickerControl', () => {
 		const { container, rerender } = render(
 			<DateTimePickerControl
 				currentDate={ originalDateTime.toISOString() }
-				is12Hour={ false }
+				is12HourPicker={ false }
 			/>
 		);
 
 		rerender(
 			<DateTimePickerControl
 				currentDate={ updatedDateTime.toISOString() }
-				is12Hour={ false }
+				is12HourPicker={ false }
 			/>
 		);
 
@@ -231,7 +231,7 @@ describe( 'DateTimePickerControl', () => {
 
 	it( 'should set the date time picker popup to 12 hour mode', async () => {
 		const { container } = render(
-			<DateTimePickerControl is12Hour={ true } />
+			<DateTimePickerControl is12HourPicker={ true } />
 		);
 
 		const input = container.querySelector( 'input' );
