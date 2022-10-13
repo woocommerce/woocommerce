@@ -91,14 +91,8 @@ export const downloadZip = async ( { url, downloadPath, authToken } ) => {
 		options.headers.Authorization = `token ${ authToken }`;
 	}
 
-	// mytodo remove
-	console.log(
-		`Calling axios() with options: ${ JSON.stringify( options, 4 ) }`
-	);
 	response = await axios( options );
 	response.data.pipe( fs.createWriteStream( downloadPath ) );
-	// mytodo remove
-	console.log( `Returned body: ${ JSON.stringify( body, 4 ) }` );
 };
 
 /**
