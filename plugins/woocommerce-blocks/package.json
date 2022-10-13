@@ -235,7 +235,7 @@
 		"dinero.js": "1.9.1",
 		"dompurify": "^2.4.0",
 		"downshift": "6.1.7",
-		"html-react-parser": "0.14.3",
+		"html-react-parser": "3.0.4",
 		"react-number-format": "4.9.3",
 		"reakit": "1.3.11",
 		"snakecase-keys": "5.4.2",
