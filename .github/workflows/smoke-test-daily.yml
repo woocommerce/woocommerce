@@ -19,8 +19,14 @@ jobs:
     e2e-tests:
         name: E2E tests on trunk
         runs-on: ubuntu-20.04
-        # mytodo skip for now
-        if: false
+        env:
+            BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
+            ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
+            ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
+            ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
+            CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
+            CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
+            DEFAULT_TIMEOUT_OVERRIDE: 120000
         steps:
             - uses: actions/checkout@v3
               with:
@@ -37,32 +43,30 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
 
-            - name: Run E2E smoke test.
+            - name: Run 'Update WooCommerce' test.
+              working-directory: plugins/woocommerce
+              id: e2e-update
+              env:
+                  UPDATE_WC: true
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-woocommerce.spec.js
+
+            - name: Run the rest of E2E tests.
               timeout-minutes: 60
               working-directory: plugins/woocommerce
-              id: run_playwright_e2e_tests
+              id: e2e
               env:
-                  BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
-                  ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
-                  ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
-                  ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
-                  CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
-                  CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
-                  UPDATE_WC: true
-                  DEFAULT_TIMEOUT_OVERRIDE: 120000
-                  E2E_MAX_FAILURES: 20
-              run: |
-                  pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-woocommerce.spec.js
-                  unset UPDATE_WC
-                  pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js basic.spec.js
+                  E2E_MAX_FAILURES: 15
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js basic.spec.js
 
             - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
               if: |
                   always() &&
                   (
-                    steps.run_playwright_e2e_tests.conclusion != 'cancelled' ||
-                    steps.run_playwright_e2e_tests.conclusion != 'skipped' 
+                    steps.e2e-update.conclusion != 'cancelled' ||
+                    steps.e2e-update.conclusion != 'skipped' ||
+                    steps.e2e.conclusion != 'cancelled' ||
+                    steps.e2e.conclusion != 'skipped' 
                   )
               working-directory: plugins/woocommerce
               run: pnpm exec allure generate --clean e2e/allure-results --output e2e/allure-report
@@ -84,9 +88,7 @@ jobs:
         name: API tests on trunk
         runs-on: ubuntu-20.04
         needs: [e2e-tests]
-        # mytodo skip for the meantime
-        # if: always()
-        if: false
+        if: always()
         steps:
             - uses: actions/checkout@v3
               with:
@@ -198,6 +200,9 @@ jobs:
         if: always()
         runs-on: ubuntu-20.04
         needs: [k6-tests]
+        env:
+            USE_WP_ENV: 1
+            FORCE_COLOR: 1
         strategy:
             fail-fast: false
             matrix:
@@ -231,28 +236,31 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
 
-            - name: Run E2E tests
-              id: run_playwright_e2e_tests
+            - name: Run 'Upload plugin' test
+              id: e2e-upload
               working-directory: plugins/woocommerce
               env:
-                  USE_WP_ENV: 1
-                  E2E_MAX_FAILURES: 15
-                  FORCE_COLOR: 1
                   PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
                   PLUGIN_NAME: ${{ matrix.plugin }}
                   GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
-              run: |
-                  pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js upload-plugin.spec.js
-                  unset PLUGIN_REPOSITORY
-                  pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js basic.spec.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js upload-plugin.spec.js
+
+            - name: Run the rest of E2E tests
+              id: e2e
+              working-directory: plugins/woocommerce
+              env:
+                  E2E_MAX_FAILURES: 15
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js basic.spec.js
 
             - name: Generate E2E Test report.
-              id: generate_e2e_report
+              id: report
               if: |
                   always() &&
                   (
-                    steps.run_playwright_e2e_tests.conclusion != 'cancelled' ||
-                    steps.run_playwright_e2e_tests.conclusion != 'skipped' 
+                    steps.e2e-upload.conclusion != 'cancelled' ||
+                    steps.e2e-upload.conclusion != 'skipped' ||
+                    steps.e2e.conclusion != 'cancelled' ||
+                    steps.e2e.conclusion != 'skipped' 
                   )
               working-directory: plugins/woocommerce
               run: pnpm exec allure generate --clean e2e/allure-results --output e2e/allure-report
@@ -260,7 +268,7 @@ jobs:
             - name: Archive E2E test report
               if: |
                   always() &&
-                  steps.generate_e2e_report.conclusion == 'success'
+                  steps.report.conclusion == 'success'
               uses: actions/upload-artifact@v3
               with:
                   name: e2e-daily-${{ matrix.plugin }}--run-${{ github.run_number }}
