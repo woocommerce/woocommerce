@@ -111,8 +111,9 @@ export type ConsumerInputProps< Values > = {
 	onChange?: (
 		value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
 	) => void;
-	onBlur?: ( value: Values[ keyof Values ] ) => void;
+	onBlur?: () => void;
 	[ key: string ]: unknown;
+	sanitize?: ( value: Values[ keyof Values ] ) => Values[ keyof Values ];
 };
 
 /**
@@ -306,6 +307,7 @@ function FormComponent< Values extends Record< string, any > >(
 			className: classNameProp,
 			onBlur: onBlurProp,
 			onChange: onChangeProp,
+			sanitize,
 			...additionalProps
 		} = inputProps;
 
@@ -322,9 +324,12 @@ function FormComponent< Values extends Record< string, any > >(
 				}
 			},
 			onBlur: () => {
+				if ( sanitize ) {
+					handleChange( name, sanitize( inputValue ) );
+				}
 				handleBlur( name );
 				if ( onBlurProp ) {
-					onBlurProp( inputValue );
+					onBlurProp();
 				}
 			},
 			className: classnames( classNameProp, {
