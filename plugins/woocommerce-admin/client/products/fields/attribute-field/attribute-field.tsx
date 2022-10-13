@@ -15,6 +15,7 @@ import { closeSmall } from '@wordpress/icons';
 import './attribute-field.scss';
 import AttributeEmptyStateLogo from './attribute-empty-state-logo.svg';
 import { AddAttributeModal } from './add-attribute-modal';
+import { EditAttributeModal } from './edit-attribute-modal';
 import { reorderSortableProductAttributePositions } from './utils';
 
 type AttributeFieldProps = {
@@ -28,6 +29,9 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 } ) => {
 	const [ showAddAttributeModal, setShowAddAttributeModal ] =
 		useState( false );
+	const [ editingAttributeId, setEditingAttributeId ] = useState<
+		null | number
+	>( null );
 	const onRemove = ( attribute: ProductAttribute ) => {
 		// eslint-disable-next-line no-alert
 		if ( window.confirm( __( 'Remove this attribute?', 'woocommerce' ) ) ) {
@@ -147,7 +151,12 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 							) }
 						</div>
 						<div className="woocommerce-attribute-field__attribute-actions">
-							<Button variant="tertiary" disabled>
+							<Button
+								variant="tertiary"
+								onClick={ () =>
+									setEditingAttributeId( attribute.id )
+								}
+							>
 								{ __( 'edit', 'woocommerce' ) }
 							</Button>
 							<Button
@@ -178,6 +187,17 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
 				/>
 			) }
+
+			{ editingAttributeId && (
+				<EditAttributeModal
+					onCancel={ () => setEditingAttributeId( null ) }
+					onEdit={ () => {} }
+					attribute={ value.find(
+						( attr ) => attr.id === editingAttributeId
+					) }
+				/>
+			) }
+			<Popover.Slot />
 		</div>
 	);
 };

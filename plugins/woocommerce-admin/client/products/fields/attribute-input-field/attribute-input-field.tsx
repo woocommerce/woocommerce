@@ -17,7 +17,7 @@ import {
 } from '@woocommerce/components';
 
 type AttributeInputFieldProps = {
-	value?: ProductAttribute;
+	value?: Pick< QueryProductAttribute, 'id' | 'name' > | null;
 	onChange: (
 		value?: Omit< ProductAttribute, 'position' | 'visible' | 'variation' >
 	) => void;
@@ -28,7 +28,7 @@ type AttributeInputFieldProps = {
 };
 
 export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
-	value,
+	value = null,
 	onChange,
 	placeholder,
 	label,
@@ -57,12 +57,6 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 					.startsWith( inputValue.toLowerCase() )
 		);
 	};
-	const selected: Pick< QueryProductAttribute, 'id' | 'name' > | null = value
-		? {
-				id: value.id,
-				name: value.name,
-		  }
-		: null;
 
 	return (
 		<SelectControl< Pick< QueryProductAttribute, 'id' | 'name' > >
@@ -73,14 +67,14 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			placeholder={ placeholder }
 			getItemLabel={ ( item ) => item?.name || '' }
 			getItemValue={ ( item ) => item?.id || '' }
-			selected={ selected }
-			onSelect={ ( attribute ) =>
+			selected={ value }
+			onSelect={ ( attribute ) => {
 				onChange( {
 					id: attribute.id,
 					name: attribute.name,
 					options: [],
-				} )
-			}
+				} );
+			} }
 			onRemove={ () => onChange() }
 		>
 			{ ( {
