@@ -12,7 +12,7 @@
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 7.1.0
+ * @version 7.2.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -33,7 +33,7 @@ if ( $max_value && $min_value === $max_value ) {
 	/**
 	 * Hook to output something before the quantity input field.
 	 *
-	 * @since 7.1.0
+	 * @since 7.2.0
 	 */
 	do_action( 'woocommerce_before_quantity_input_field' );
 	?>
