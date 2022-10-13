@@ -13,5 +13,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: 35084,
-              team_reviewers: ['atlas'],
+              team_reviewers: ['woocommerce/atlas'],
             });
