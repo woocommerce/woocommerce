@@ -12,8 +12,10 @@ import { Product } from '@woocommerce/data';
 import { ProductFormLayout } from './layout/product-form-layout';
 import { ProductFormActions } from './product-form-actions';
 import { ProductDetailsSection } from './sections/product-details-section';
+import { ProductInventorySection } from './sections/product-inventory-section';
 import { PricingSection } from './sections/pricing-section';
 import { ProductShippingSection } from './sections/product-shipping-section';
+import { ImagesSection } from './sections/images-section';
 import './product-page.scss';
 import { validate } from './product-validation';
 import { AttributesSection } from './sections/attributes-section';
@@ -26,13 +28,15 @@ const AddProductPage: React.FC = () => {
 	return (
 		<div className="woocommerce-add-product">
 			<Form< Partial< Product > >
-				initialValues={ {} }
+				initialValues={ { stock_quantity: 0 } }
 				errors={ {} }
 				validate={ validate }
 			>
 				<ProductFormLayout>
 					<ProductDetailsSection />
 					<PricingSection />
+					<ImagesSection />
+					<ProductInventorySection />
 					<ProductShippingSection />
 					<AttributesSection />
 					<ProductFormActions />
