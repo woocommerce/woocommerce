@@ -28,7 +28,6 @@ import './product-details-section.scss';
 import { getCheckboxProps, getTextControlProps } from './utils';
 import { ProductSectionLayout } from '../layout/product-section-layout';
 import { EditProductLinkModal } from '../shared/edit-product-link-modal';
-import { getCheckboxProps, getTextControlProps } from './utils';
 import { CategoryField } from '../fields/category-field';
 
 const PRODUCT_DETAILS_SLUG = 'product-details';
