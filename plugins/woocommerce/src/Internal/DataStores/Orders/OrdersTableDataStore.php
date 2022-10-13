@@ -1091,8 +1091,8 @@ WHERE
 	/**
 	 * Migrate meta data from post to order.
 	 *
-	 * @param \WC_Order $order Order object.
-	 * @param \WC_Order $post_order Order object read from posts table.
+	 * @param \WC_Abstract_Order $order Order object.
+	 * @param \WC_Abstract_Order $post_order Order object read from posts table.
 	 *
 	 * @return array List of meta data that was migrated.
 	 */
