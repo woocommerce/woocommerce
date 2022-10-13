@@ -75,20 +75,28 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		null
 	);
 
-	function parseMomentIso( dateString?: string | null ): Moment {
-		return moment( dateString, moment.ISO_8601, true );
+	function parseMomentIso(
+		dateString?: string | null,
+		assumeLocalTime = false
+	): Moment {
+		if ( assumeLocalTime ) {
+			return moment( dateString, moment.ISO_8601, true ).utc();
+		}
+
+		return moment.utc( dateString, moment.ISO_8601, true );
 	}
 
 	function parseMoment( dateString?: string | null ): Moment {
+		// parse input date string as local time
 		return moment( dateString, dateTimeFormat );
 	}
 
 	function formatMomentIso( momentDate: Moment ): string {
-		return momentDate.toISOString();
+		return momentDate.utc().toISOString();
 	}
 
 	function formatMoment( momentDate: Moment ): string {
-		return momentDate.format( dateTimeFormat );
+		return momentDate.local().format( dateTimeFormat );
 	}
 
 	function hasFocusLeftInputAndDropdownContent(
@@ -272,8 +280,9 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 							: undefined
 					}
 					onChange={ ( date: string ) => {
+						// the picker returns the date in local time
 						const formattedDate = formatMoment(
-							parseMomentIso( date )
+							parseMomentIso( date, true )
 						);
 						changeImmediate( formattedDate, true );
 					} }
