@@ -567,7 +567,7 @@ class WC_Tracker {
 		);
 
 		$orders_by_origin = array();
-		foreach( $orders_origin as $origin ) {
+		foreach ( $orders_origin as $origin ) {
 			$orders_by_origin[ $origin->origin ] = (int) $origin->count;
 		}
 
