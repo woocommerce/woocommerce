@@ -251,6 +251,7 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
               run: |
                   pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-plugin.spec.js
+                  unset PLUGIN_REPOSITORY
                   pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js basic.spec.js
 
             - name: Generate Playwright E2E Test report.
