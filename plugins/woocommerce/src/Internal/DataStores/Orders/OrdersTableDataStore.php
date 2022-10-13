@@ -964,7 +964,7 @@ WHERE
 	 * @return bool Whether the order should be synced.
 	 */
 	private function should_sync_order( \WC_Abstract_Order $order ) : bool {
-		$draft_order = in_array( $order->get_status(), array( 'draft', 'auto-draft' ) );
+		$draft_order    = in_array( $order->get_status(), array( 'draft', 'auto-draft' ) );
 		$already_synced = in_array( $order->get_id(), self::$reading_order_ids );
 		return ! $draft_order && ! $already_synced;
 	}
