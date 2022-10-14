@@ -106,6 +106,46 @@ describe( 'DateTimePickerControl', () => {
 		);
 	} );
 
+	it( 'should assume ambiguous dates are UTC', () => {
+		const ambiguousISODateTimeString = '2202-09-15T22:30:40';
+
+		const { container } = render(
+			<DateTimePickerControl
+				currentDate={ ambiguousISODateTimeString }
+				is12Hour={ false }
+			/>
+		);
+
+		const input = container.querySelector( 'input' );
+
+		expect( input?.value ).toBe(
+			moment
+				.utc( ambiguousISODateTimeString )
+				.local()
+				.format( default24HourDateTimeFormat )
+		);
+	} );
+
+	it( 'should handle unambiguous UTC dates', () => {
+		const unambiguousISODateTimeString = '2202-09-15T22:30:40Z';
+
+		const { container } = render(
+			<DateTimePickerControl
+				currentDate={ unambiguousISODateTimeString }
+				is12Hour={ false }
+			/>
+		);
+
+		const input = container.querySelector( 'input' );
+
+		expect( input?.value ).toBe(
+			moment
+				.utc( unambiguousISODateTimeString )
+				.local()
+				.format( default24HourDateTimeFormat )
+		);
+	} );
+
 	it( 'should use the default 12 hour date time format', () => {
 		const dateTime = moment( '2022-09-15 02:30:40' );
 
