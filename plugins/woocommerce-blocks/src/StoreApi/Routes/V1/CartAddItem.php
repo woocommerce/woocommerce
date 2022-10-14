@@ -89,14 +89,33 @@ class CartAddItem extends AbstractCartRoute {
 			throw new RouteException( 'woocommerce_rest_cart_item_exists', __( 'Cannot create an existing cart item.', 'woo-gutenberg-products-block' ), 400 );
 		}
 
-		$cart   = $this->cart_controller->get_cart_instance();
-		$result = $this->cart_controller->add_to_cart(
-			[
-				'id'        => $request['id'],
-				'quantity'  => $request['quantity'],
-				'variation' => $request['variation'],
-			]
+		$cart = $this->cart_controller->get_cart_instance();
+
+		/**
+		 * Filters cart item data sent via the API before it is passed to the cart controller.
+		 *
+		 * This hook filters cart items. It allows the request data to be changed, for example, quantity, or
+		 * supplemental cart item data, before it is passed into CartController::add_to_cart and stored to session.
+		 *
+		 * CartController::add_to_cart only expects the keys id, quantity, variation, and cart_item_data, so other values
+		 * may be ignored. CartController::add_to_cart (and core) do already have a filter hook called
+		 * woocommerce_add_cart_item, but this does not have access to the original Store API request like this hook does.
+		 *
+		 * @param array $customer_data An array of customer (user) data.
+		 * @return array
+		 */
+		$add_to_cart_data = apply_filters(
+			'woocommerce_store_api_add_to_cart_data',
+			array(
+				'id'             => $request['id'],
+				'quantity'       => $request['quantity'],
+				'variation'      => $request['variation'],
+				'cart_item_data' => [],
+			),
+			$request
 		);
+
+		$this->cart_controller->add_to_cart( $add_to_cart_data );
 
 		$response = rest_ensure_response( $this->schema->get_item_response( $cart ) );
 		$response->set_status( 201 );
