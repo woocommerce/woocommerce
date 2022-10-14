@@ -361,7 +361,7 @@ jobs:
               with:
                   result-encoding: string
                   script: |
-                      const script = require( './.github/workflows/scripts/prepare-test-summary-daily-with-plugin.js' )
+                      const script = require( './repo/.github/workflows/scripts/prepare-test-summary-daily-with-plugin.js' )
                       return await script( { core } )
 
     publish-reports:
