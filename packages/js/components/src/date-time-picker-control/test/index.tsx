@@ -112,7 +112,7 @@ describe( 'DateTimePickerControl', () => {
 		const { container } = render(
 			<DateTimePickerControl
 				currentDate={ ambiguousISODateTimeString }
-				is12Hour={ false }
+				is12HourPicker={ false }
 			/>
 		);
 
@@ -132,7 +132,7 @@ describe( 'DateTimePickerControl', () => {
 		const { container } = render(
 			<DateTimePickerControl
 				currentDate={ unambiguousISODateTimeString }
-				is12Hour={ false }
+				is12HourPicker={ false }
 			/>
 		);
 
