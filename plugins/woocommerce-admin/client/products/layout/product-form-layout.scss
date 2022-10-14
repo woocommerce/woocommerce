@@ -2,6 +2,17 @@
 	max-width: 1032px;
 	margin: 0 auto;
 
+	h4 {
+		font-size: 14px;
+		font-weight: 600;
+		margin-bottom: 18px;
+		margin-top: 26px;
+	}
+
+	.components-card__body h4:first-child {
+		margin-top: 0;
+	}
+
 	&__category {
 		&:not(:first-child) {
 			margin-top: $gap-largest + $gap-smaller;

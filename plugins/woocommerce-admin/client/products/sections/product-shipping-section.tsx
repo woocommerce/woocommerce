@@ -219,9 +219,7 @@ export function ProductShippingSection( {
 				<CardBody className="product-shipping-section__dimensions">
 					{ hasResolvedUnits ? (
 						<>
-							<h4 className="product-shipping-section__subtitle">
-								{ __( 'Dimensions', 'woocommerce' ) }
-							</h4>
+							<h4>{ __( 'Dimensions', 'woocommerce' ) }</h4>
 							<p className="woocommerce-product-form__secondary-text">
 								{ __(
 									'Enter the size of the product as you’d put it in a shipping box, including packaging like bubble wrap.',

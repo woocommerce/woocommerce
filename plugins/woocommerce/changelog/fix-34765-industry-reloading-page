@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix "Industry" options fails to save in the Industry step after reloading the page for OBW

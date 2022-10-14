@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix obw validation issue to truly disable the continue buttons

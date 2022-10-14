@@ -19,7 +19,7 @@ type MediaUploaderProps = {
 	buttonText?: string;
 	hasDropZone?: boolean;
 	icon?: JSX.Element;
-	label?: string;
+	label?: string | JSX.Element;
 	maxUploadFileSize?: number;
 	MediaUploadComponent?: < T extends boolean = false >(
 		props: MediaUpload.Props< T >

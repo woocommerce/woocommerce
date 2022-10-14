@@ -4,7 +4,7 @@
 import { createElement } from '@wordpress/element';
 import { Toolbar, ToolbarButton, ToolbarGroup } from '@wordpress/components';
 import { chevronRight, chevronLeft, trash } from '@wordpress/icons';
-import { MediaUpload } from '@wordpress/media-utils';
+import { MediaItem, MediaUpload } from '@wordpress/media-utils';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -20,8 +20,7 @@ export type ImageGalleryToolbarProps = {
 	removeItem: ( removeIndex: number ) => void;
 	replaceItem: (
 		replaceIndex: number,
-		newSrc: string,
-		newAlt: string
+		media: { id: number } & MediaItem
 	) => void;
 	setToolBarItem: ( key: string | null ) => void;
 	lastChild: boolean;
@@ -62,7 +61,9 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 				{ ! isCoverItem && (
 					<ToolbarGroup>
 						<ToolbarButton
-							icon={ () => <SortableHandle /> }
+							icon={ () => (
+								<SortableHandle itemIndex={ childIndex } />
+							) }
 							label={ __( 'Drag', 'woocommerce' ) }
 						/>
 						<ToolbarButton
@@ -91,7 +92,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 				<ToolbarGroup className="woocommerce-image-gallery__toolbar-media">
 					<MediaUploadComponent
 						onSelect={ ( media ) =>
-							replaceItem( childIndex, media.url, media.alt )
+							replaceItem( childIndex, media as MediaItem )
 						}
 						allowedTypes={ [ 'image' ] }
 						render={ ( { open } ) => (

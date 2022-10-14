@@ -1,0 +1,73 @@
+.woocommerce-rich-text-editor {
+	border: 1px solid $gray-600;
+	border-radius: 2px;
+	background: $white;
+
+	* {
+		box-sizing: border-box;
+	}
+
+	.block-editor-inserter {
+		display: none;
+	}
+
+	.block-editor-block-contextual-toolbar.is-fixed,
+	.block-editor-block-contextual-toolbar.is-fixed .block-editor-block-toolbar .components-toolbar-group,
+	.block-editor-block-contextual-toolbar.is-fixed .block-editor-block-toolbar .components-toolbar {
+		border-color: $gray-600;
+	}
+
+	/* Hide rich text placeholder text */
+	.rich-text [data-rich-text-placeholder] {
+		display: none !important;
+	}
+
+	/* hide block boundary background styling */
+	.rich-text:focus *[data-rich-text-format-boundary] {
+		background: none !important;
+	}
+	.block-editor-block-list__layout
+	.block-editor-block-list__block.is-multi-selected::after {
+		box-shadow: none;
+		outline: none;
+	}
+	.block-editor-block-list__layout
+	.block-editor-block-list__block:not([contenteditable]):focus::after {
+		box-shadow: none;
+		outline: none;
+	}
+
+	.block-editor-block-list__empty-block-inserter,
+	.block-editor-block-list__insertion-point {
+		display: none !important;
+	}
+
+	.block-editor-writing-flow {
+		padding: $gap-small;
+	}
+
+	/* Within the writing flow reset some of the css resets used elsewhere */
+	.block-editor-writing-flow ul,
+	.block-editor-writing-flow ol {
+		list-style: revert;
+		padding: revert;
+	}
+
+	.components-accessible-toolbar {
+		width: 100%;
+		background-color: $white;
+		border-color: $gray-700;
+		border-bottom-left-radius: 0;
+		border-bottom-right-radius: 0;
+	}
+
+	.wp-block-quote {
+		border-left: 0.25em solid currentColor;
+		margin: 0 0 1.75em 0;
+		padding-left: 1em;
+		
+		cite {
+			font-size: 11px;
+		}
+	}
+}
