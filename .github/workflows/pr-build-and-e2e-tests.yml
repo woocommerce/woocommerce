@@ -37,14 +37,18 @@ jobs:
                   echo "::set-output name=E2E_GRAND_TOTAL::$COUNT"
 
             - name: Run Playwright E2E tests.
-              timeout-minutes: 60
               id: run_playwright_e2e_tests
               env:
-                USE_WP_ENV: 1
-                E2E_MAX_FAILURES: 15
-                FORCE_COLOR: 1
+                  USE_WP_ENV: 1
+                  E2E_MAX_FAILURES: 15
+                  FORCE_COLOR: 1
               working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
+              uses: nick-fields/retry@v2
+              with:
+                  timeout-minutes: 60
+                  max_attempts: 2
+                  retry_on: error
+                  command: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
             - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
