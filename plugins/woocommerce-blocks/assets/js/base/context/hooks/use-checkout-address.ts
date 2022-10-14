@@ -90,8 +90,7 @@ export const useCheckoutAddress = (): CheckoutAddress => {
 		useShippingAsBilling,
 		setUseShippingAsBilling: __internalSetUseShippingAsBilling,
 		showShippingFields: ! forcedBillingAddress && needsShipping,
-		showBillingFields:
-			forcedBillingAddress || ! needsShipping || ! useShippingAsBilling,
+		showBillingFields: ! needsShipping || ! useShippingAsBilling,
 		forcedBillingAddress,
 	};
 };
