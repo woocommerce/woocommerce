@@ -6,7 +6,6 @@ import {
 	useState,
 	useEffect,
 	useLayoutEffect,
-	useCallback,
 	useRef,
 } from '@wordpress/element';
 import { Icon, calendar } from '@wordpress/icons';
@@ -16,12 +15,14 @@ import { sprintf, __ } from '@wordpress/i18n';
 import { useDebounce, useInstanceId } from '@wordpress/compose';
 import {
 	BaseControl,
-	Dropdown,
+	DatePicker,
 	DateTimePicker as WpDateTimePicker,
+	Dropdown,
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
+export const defaultDateFormat = 'MM/DD/YYYY';
 export const default12HourDateTimeFormat = 'MM/DD/YYYY h:mm a';
 export const default24HourDateTimeFormat = 'MM/DD/YYYY H:mm';
 
@@ -34,7 +35,8 @@ export type DateTimePickerControlProps = {
 	currentDate?: string | null;
 	dateTimeFormat?: string;
 	disabled?: boolean;
-	is12Hour?: boolean;
+	isDateOnlyPicker?: boolean;
+	is12HourPicker?: boolean;
 	onChange?: DateTimePickerControlOnChangeHandler;
 	onBlur?: () => void;
 	label?: string;
@@ -45,10 +47,9 @@ export type DateTimePickerControlProps = {
 
 export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	currentDate,
-	is12Hour = true,
-	dateTimeFormat = is12Hour
-		? default12HourDateTimeFormat
-		: default24HourDateTimeFormat,
+	isDateOnlyPicker = false,
+	is12HourPicker = true,
+	dateTimeFormat,
 	disabled = false,
 	onChange,
 	onBlur,
@@ -75,6 +76,22 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		null
 	);
 
+	const displayFormat = ( () => {
+		if ( dateTimeFormat ) {
+			return dateTimeFormat;
+		}
+
+		if ( isDateOnlyPicker ) {
+			return defaultDateFormat;
+		}
+
+		if ( is12HourPicker ) {
+			return default12HourDateTimeFormat;
+		}
+
+		return default24HourDateTimeFormat;
+	} )();
+
 	function parseMomentIso(
 		dateString?: string | null,
 		assumeLocalTime = false
@@ -88,7 +105,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 
 	function parseMoment( dateString?: string | null ): Moment {
 		// parse input date string as local time
-		return moment( dateString, dateTimeFormat );
+		return moment( dateString, displayFormat );
 	}
 
 	function formatMomentIso( momentDate: Moment ): string {
@@ -96,7 +113,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	}
 
 	function formatMoment( momentDate: Moment ): string {
-		return momentDate.local().format( dateTimeFormat );
+		return momentDate.local().format( displayFormat );
 	}
 
 	function hasFocusLeftInputAndDropdownContent(
@@ -211,7 +228,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		} else {
 			changeImmediate( currentDate || '', fireOnChange );
 		}
-	}, [ currentDate, dateTimeFormat ] );
+	}, [ currentDate, displayFormat ] );
 
 	return (
 		<Dropdown
@@ -272,23 +289,27 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 					/>
 				</BaseControl>
 			) }
-			renderContent={ () => (
-				<WpDateTimePicker
-					currentDate={
-						lastValidDate
-							? formatMomentIso( lastValidDate )
-							: undefined
-					}
-					onChange={ ( date: string ) => {
-						// the picker returns the date in local time
-						const formattedDate = formatMoment(
-							parseMomentIso( date, true )
-						);
-						changeImmediate( formattedDate, true );
-					} }
-					is12Hour={ is12Hour }
-				/>
-			) }
+			renderContent={ () => {
+				const Picker = isDateOnlyPicker ? DatePicker : WpDateTimePicker;
+
+				return (
+					<Picker
+						currentDate={
+							lastValidDate
+								? formatMomentIso( lastValidDate )
+								: undefined
+						}
+						onChange={ ( date: string ) => {
+							// the picker returns the date in local time
+							const formattedDate = formatMoment(
+								parseMomentIso( date, true )
+							);
+							changeImmediate( formattedDate, true );
+						} }
+						is12Hour={ is12HourPicker }
+					/>
+				);
+			} }
 		/>
 	);
 };
