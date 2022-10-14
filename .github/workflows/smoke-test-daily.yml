@@ -314,7 +314,7 @@ jobs:
                       return await script( { core } )
 
     plugins-summary:
-        name: Report summary for Smoke tests with ${{ matrix.plugin }} plugin installed
+        name: Smoke tests with ${{ matrix.plugin }} plugin installed
         if: always()
         runs-on: ubuntu-20.04
         needs: [test-plugins]
