@@ -42,7 +42,7 @@ class CartController {
 	 * @throws RouteException Exception if invalid data is detected.
 	 *
 	 * @param array $request Add to cart request params.
-	 * @return string|Error
+	 * @return string
 	 */
 	public function add_to_cart( $request ) {
 		$cart    = $this->get_cart_instance();
