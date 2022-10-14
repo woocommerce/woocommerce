@@ -58,6 +58,7 @@ type SelectControlProps< ItemType > = {
 	) => Partial< UseComboboxState< ItemType | null > >;
 	placeholder?: string;
 	selected: ItemType | ItemType[] | null;
+	className?: string;
 };
 
 export const selectControlStateChangeTypes = useCombobox.stateChangeTypes;
@@ -100,6 +101,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 	stateReducer = ( state, actionAndChanges ) => actionAndChanges.changes,
 	placeholder,
 	selected,
+	className,
 }: SelectControlProps< ItemType > ) {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
@@ -213,13 +215,22 @@ function SelectControl< ItemType = DefaultItemType >( {
 
 	return (
 		<div
-			className={ classnames( 'woocommerce-experimental-select-control', {
-				'is-focused': isFocused,
-			} ) }
+			className={ classnames(
+				'woocommerce-experimental-select-control',
+				className,
+				{
+					'is-focused': isFocused,
+				}
+			) }
 		>
 			{ /* Downshift's getLabelProps handles the necessary label attributes. */ }
 			{ /* eslint-disable jsx-a11y/label-has-for */ }
-			<label { ...getLabelProps() }>{ label }</label>
+			<label
+				{ ...getLabelProps() }
+				className="woocommerce-experimental-select-control__label"
+			>
+				{ label }
+			</label>
 			{ /* eslint-enable jsx-a11y/label-has-for */ }
 			<ComboBox
 				comboBoxProps={ getComboboxProps() }

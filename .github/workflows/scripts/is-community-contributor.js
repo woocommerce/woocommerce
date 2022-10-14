@@ -39,7 +39,8 @@ const applyLabelToCommunityContributor = async () => {
 	const { number } = eventPayload?.issue || eventPayload?.pull_request;
 	
 	const isCommunityUser = await isCommunityContributor(owner, repo, username);
-
+	console.log( '::set-output name=is-community::%s', isCommunityUser ? 'yes' : 'no' );
+	
 	if (isCommunityUser) {
 		console.log('Adding community contributor label');
 		await addLabel('type: community contribution', owner, repo, number);

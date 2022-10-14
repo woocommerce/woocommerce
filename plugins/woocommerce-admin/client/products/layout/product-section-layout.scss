@@ -16,6 +16,7 @@
 		.components-base-control {
 			&:not(:first-child) {
 				margin-top: $gap-large - $gap-smaller;
+				margin-bottom: 0;
 			}
 		}
 	}

@@ -163,9 +163,32 @@
 button.components-button.send-magic-link-button {
 	background: #007cba;
 	color: #fff;
+	position: relative;
 	:hover {
 		// the hover state makes the text invisible so we need to override it
 		color: #fff;
+	}
+
+	.send-magic-link-spinner {
+		position: absolute;
+		background-color: transparent;
+		// below rules are to center the spinner
+		margin-left: auto;
+		margin-right: auto;
+		left: 0;
+		right: 0;
+
+		.woocommerce-spinner__circle {
+			stroke: #fff;
+		}
+	}
+
+	.send-magic-link-button-contents {
+		visibility: hidden;
+		.send-magic-link-button-text {
+			display: inline-block;
+			vertical-align: top;
+		}
 	}
 }
 
