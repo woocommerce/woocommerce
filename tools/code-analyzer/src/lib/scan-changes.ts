@@ -73,7 +73,7 @@ export const scanForChanges = async (
 			// Note doing the minimal work to get a DB scan to work, avoiding full build for speed.
 			await execAsync( 'composer install', { cwd: pluginPath } );
 			await execAsync(
-				'pnpm run build:feature-config --filter=woocommerce',
+				'pnpm run --filter=woocommerce build:feature-config',
 				{
 					cwd: pluginPath,
 				}
