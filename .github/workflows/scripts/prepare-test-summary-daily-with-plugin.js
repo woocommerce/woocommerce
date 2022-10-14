@@ -66,24 +66,22 @@ const createE2ETableRow = () => {
  *
  * @param core The GitHub Actions toolkit core object
  */
-const addHeadingAndTable = ( core ) => {
+const addTable = ( core ) => {
 	const e2eTableRow = createE2ETableRow();
 
-	core.summary
-		.addHeading( `Smoke tests with ${ PLUGIN_NAME } plugin installed` )
-		.addTable( [
-			[
-				{ data: 'Test :test_tube:', header: true },
-				{ data: 'Passed :white_check_mark:', header: true },
-				{ data: 'Failed :rotating_light:', header: true },
-				{ data: 'Broken :construction:', header: true },
-				{ data: 'Skipped :next_track_button:', header: true },
-				{ data: 'Unknown :grey_question:', header: true },
-				{ data: 'Total :bar_chart:', header: true },
-				{ data: 'Duration :stopwatch:', header: true },
-			],
-			e2eTableRow,
-		] );
+	core.summary.addTable( [
+		[
+			{ data: 'Test :test_tube:', header: true },
+			{ data: 'Passed :white_check_mark:', header: true },
+			{ data: 'Failed :rotating_light:', header: true },
+			{ data: 'Broken :construction:', header: true },
+			{ data: 'Skipped :next_track_button:', header: true },
+			{ data: 'Unknown :grey_question:', header: true },
+			{ data: 'Total :bar_chart:', header: true },
+			{ data: 'Duration :stopwatch:', header: true },
+		],
+		e2eTableRow,
+	] );
 };
 
 /**
@@ -95,7 +93,6 @@ const addFooter = ( core ) => {
 	const slug = PLUGIN_REPOSITORY.split( '/' ).pop();
 
 	core.summary
-		.addSeparator()
 		.addRaw( 'To view the full smoke test report, click ' )
 		.addLink(
 			'here.',
@@ -110,7 +107,7 @@ const addFooter = ( core ) => {
  * @returns Stringified content of the test results summary.
  */
 module.exports = async ( { core } ) => {
-	addHeadingAndTable( core );
+	addTable( core );
 
 	addFooter( core );
 
