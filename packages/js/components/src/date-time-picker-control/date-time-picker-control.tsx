@@ -77,7 +77,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		null
 	);
 
-	const displayFormat = useMemo( () => {
+	const displayFormat = ( () => {
 		if ( dateTimeFormat ) {
 			return dateTimeFormat;
 		}
@@ -91,7 +91,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		}
 
 		return default24HourDateTimeFormat;
-	}, [ dateTimeFormat, isDateOnlyPicker, is12HourPicker ] );
+	} )();
 
 	function parseMomentIso(
 		dateString?: string | null,
