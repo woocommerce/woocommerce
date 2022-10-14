@@ -64,17 +64,23 @@ export const CreateAttributeModal: React.FC< CreateAttributeModalProps > = ( {
 		useDispatch( EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME );
 
 	const onAdd = async ( attribute: Partial< QueryProductAttribute > ) => {
-		recordEvent( 'product_category_add', {
+		recordEvent( 'product_attribute_add', {
 			new_product_page: true,
 		} );
 		setIsCreating( true );
 		try {
 			const newAttribute: QueryProductAttribute =
 				await createProductAttribute( attribute );
+			recordEvent( 'product_attribute_add_success', {
+				new_product_page: true,
+			} );
 			invalidateResolutionForStoreSelector( 'getProductAttributes' );
 			setIsCreating( false );
 			onCreated( newAttribute );
 		} catch ( e ) {
+			recordEvent( 'product_attribute_add_failed', {
+				new_product_page: true,
+			} );
 			createNotice(
 				'error',
 				__( 'Failed to create attribute.', 'woocommerce' )
@@ -118,44 +124,70 @@ export const CreateAttributeModal: React.FC< CreateAttributeModalProps > = ( {
 					getInputProps,
 					handleSubmit,
 					isValidForm,
-				}: FormContext< QueryProductAttribute > ) => (
-					<>
-						<TextControl
-							label={ __( 'Name', 'woocommerce' ) }
-							{ ...getInputProps( 'name' ) }
-						/>
-						<TextControl
-							label={ __( 'Slug', 'woocommerce' ) }
-							{ ...getInputProps( 'slug' ) }
-						/>
-						<CheckboxControl
-							label={ __( 'Enable Archives?', 'woocommerce' ) }
-							{ ...getCheckboxProps( {
-								...getInputProps( 'has_archives' ),
-							} ) }
-						/>
-						<SelectControl
-							{ ...getTextControlProps(
-								getInputProps( 'order_by' )
-							) }
-							label={ __( 'Default sort order', 'woocommerce' ) }
-							options={ ATTRIBUTE_SORT_ORDER_OPTIONS }
-						/>
-						<div className="woocommerce-create-attribute-modal__buttons">
-							<Button isSecondary onClick={ () => onCancel() }>
-								{ __( 'Cancel', 'woocommerce' ) }
-							</Button>
-							<Button
-								isPrimary
-								isBusy={ isCreating }
-								disabled={ ! isValidForm || isCreating }
-								onClick={ handleSubmit }
-							>
-								{ __( 'Add', 'woocommerce' ) }
-							</Button>
-						</div>
-					</>
-				) }
+					setValue,
+					values,
+				}: FormContext< QueryProductAttribute > ) => {
+					const nameInputProps = getInputProps< string >( 'name' );
+					return (
+						<>
+							<TextControl
+								label={ __( 'Name', 'woocommerce' ) }
+								{ ...nameInputProps }
+								onBlur={ () => {
+									nameInputProps.onBlur();
+									setValue(
+										'slug',
+										cleanForSlug( values.name )
+									);
+								} }
+							/>
+							<TextControl
+								label={ __( 'Slug', 'woocommerce' ) }
+								{ ...getInputProps( 'slug' ) }
+							/>
+							<CheckboxControl
+								label={ __(
+									'Enable Archives?',
+									'woocommerce'
+								) }
+								{ ...getCheckboxProps( {
+									...getInputProps( 'has_archives' ),
+								} ) }
+							/>
+							<SelectControl
+								{ ...getTextControlProps(
+									getInputProps( 'order_by' )
+								) }
+								label={ __(
+									'Default sort order',
+									'woocommerce'
+								) }
+								options={ ATTRIBUTE_SORT_ORDER_OPTIONS }
+							/>
+							<div className="woocommerce-create-attribute-modal__buttons">
+								<Button
+									isSecondary
+									label={ __( 'Cancel', 'woocommerce' ) }
+									onClick={ () => onCancel() }
+								>
+									{ __( 'Cancel', 'woocommerce' ) }
+								</Button>
+								<Button
+									isPrimary
+									isBusy={ isCreating }
+									label={ __(
+										'Add attribute',
+										'woocommerce'
+									) }
+									disabled={ ! isValidForm || isCreating }
+									onClick={ handleSubmit }
+								>
+									{ __( 'Add', 'woocommerce' ) }
+								</Button>
+							</div>
+						</>
+					);
+				} }
 			</Form>
 		</Modal>
 	);
