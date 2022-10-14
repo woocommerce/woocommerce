@@ -37,17 +37,19 @@ export const withProductQueryControls =
 	< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
 	( props: ProductQueryBlock ) => {
 		const allowedControls = useAllowedControls( props.attributes );
-		return isWooQueryBlockVariation( props ) ? (
+
+		const availableControls = Object.entries( INSPECTOR_CONTROLS ).filter(
+			( [ key ] ) => allowedControls?.includes( key )
+		);
+		return isWooQueryBlockVariation( props ) &&
+			availableControls.length > 0 ? (
 			<>
 				<BlockEdit { ...props } />
 				<InspectorControls>
 					<PanelBody>
-						{ Object.entries( INSPECTOR_CONTROLS ).map(
-							( [ key, Control ] ) =>
-								allowedControls?.includes( key ) ? (
-									<Control { ...props } />
-								) : null
-						) }
+						{ availableControls.map( ( [ key, Control ] ) => (
+							<Control key={ key } { ...props } />
+						) ) }
 					</PanelBody>
 				</InspectorControls>
 			</>

@@ -23,7 +23,10 @@
 		"./assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/**/index.tsx",
 		"./assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/register-components.ts",
 		"./assets/js/blocks/cart-checkout-shared/sidebar-notices/index.tsx",
-		"./assets/js/blocks/filter-wrapper/register-components.ts"
+		"./assets/js/blocks/filter-wrapper/register-components.ts",
+		"./assets/js/blocks/product-query/variations/**.tsx",
+		"./assets/js/blocks/product-query/index.tsx",
+		"./assets/js/blocks/product-query/inspector-controls.tsx"
 	],
 	"repository": {
 		"type": "git",
