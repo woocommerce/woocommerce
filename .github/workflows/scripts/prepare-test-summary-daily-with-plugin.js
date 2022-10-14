@@ -1,7 +1,7 @@
 /**
  * Script to generate the test results summary.
  */
-const { API_SUMMARY_PATH, E2E_PW_SUMMARY_PATH } = process.env;
+const { E2E_SUMMARY_PATH, PLUGIN_NAME, PLUGIN_REPOSITORY } = process.env;
 
 /**
  * Convert the given `duration` from milliseconds to a more user-friendly string.
@@ -40,35 +40,13 @@ const getAllureSummaryStats = ( summaryJSONPath ) => {
 };
 
 /**
- * Construct the array to be used for the API table row.
- *
- * @returns Array of API test result stats.
- */
-const createAPITableRow = () => {
-	const { passed, failed, skipped, broken, unknown, total, duration } =
-		getAllureSummaryStats( API_SUMMARY_PATH );
-	const durationFormatted = getFormattedDuration( duration );
-
-	return [
-		'API Tests',
-		passed.toString(),
-		failed.toString(),
-		broken.toString(),
-		skipped.toString(),
-		unknown.toString(),
-		total.toString(),
-		durationFormatted,
-	];
-};
-
-/**
  * Construct the array to be used for the E2E table row.
  *
  * @returns Array of E2E test result stats.
  */
 const createE2ETableRow = () => {
 	const { passed, failed, skipped, broken, unknown, total, duration } =
-		getAllureSummaryStats( E2E_PW_SUMMARY_PATH );
+		getAllureSummaryStats( E2E_SUMMARY_PATH );
 	const durationFormatted = getFormattedDuration( duration );
 
 	return [
@@ -88,24 +66,24 @@ const createE2ETableRow = () => {
  *
  * @param core The GitHub Actions toolkit core object
  */
-const addSummaryHeadingAndTable = ( core ) => {
-	const apiTableRow = createAPITableRow();
+const addHeadingAndTable = ( core ) => {
 	const e2eTableRow = createE2ETableRow();
 
-	core.summary.addHeading( 'Smoke tests on trunk' ).addTable( [
-		[
-			{ data: 'Test :test_tube:', header: true },
-			{ data: 'Passed :white_check_mark:', header: true },
-			{ data: 'Failed :rotating_light:', header: true },
-			{ data: 'Broken :construction:', header: true },
-			{ data: 'Skipped :next_track_button:', header: true },
-			{ data: 'Unknown :grey_question:', header: true },
-			{ data: 'Total :bar_chart:', header: true },
-			{ data: 'Duration :stopwatch:', header: true },
-		],
-		apiTableRow,
-		e2eTableRow,
-	] );
+	core.summary
+		.addHeading( `Smoke tests with ${ PLUGIN_NAME } plugin installed` )
+		.addTable( [
+			[
+				{ data: 'Test :test_tube:', header: true },
+				{ data: 'Passed :white_check_mark:', header: true },
+				{ data: 'Failed :rotating_light:', header: true },
+				{ data: 'Broken :construction:', header: true },
+				{ data: 'Skipped :next_track_button:', header: true },
+				{ data: 'Unknown :grey_question:', header: true },
+				{ data: 'Total :bar_chart:', header: true },
+				{ data: 'Duration :stopwatch:', header: true },
+			],
+			e2eTableRow,
+		] );
 };
 
 /**
@@ -113,25 +91,15 @@ const addSummaryHeadingAndTable = ( core ) => {
  *
  * @param core The GitHub Actions toolkit core object
  */
-const addSummaryFooter = ( core ) => {
+const addFooter = ( core ) => {
+	const slug = PLUGIN_REPOSITORY.split( '/' ).pop();
+
 	core.summary
 		.addSeparator()
-		.addRaw( 'To view the full API test report, click ' )
+		.addRaw( 'To view the full smoke test report, click ' )
 		.addLink(
 			'here.',
-			'https://woocommerce.github.io/woocommerce-test-reports/daily/api'
-		)
-		.addBreak()
-		.addRaw( 'To view the full E2E test report, click ' )
-		.addLink(
-			'here.',
-			'https://woocommerce.github.io/woocommerce-test-reports/daily/e2e'
-		)
-		.addBreak()
-		.addRaw( 'To view all test reports, visit the ' )
-		.addLink(
-			'WooCommerce Test Reports Dashboard.',
-			'https://woocommerce.github.io/woocommerce-test-reports/'
+			`https://woocommerce.github.io/woocommerce-test-reports/daily/${ slug }/e2e`
 		);
 };
 
@@ -142,9 +110,9 @@ const addSummaryFooter = ( core ) => {
  * @returns Stringified content of the test results summary.
  */
 module.exports = async ( { core } ) => {
-	addSummaryHeadingAndTable( core );
+	addHeadingAndTable( core );
 
-	addSummaryFooter( core );
+	addFooter( core );
 
 	const summary = core.summary.stringify();
 

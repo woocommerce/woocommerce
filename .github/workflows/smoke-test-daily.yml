@@ -110,7 +110,7 @@ jobs:
                   USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
                   USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
-              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js
+              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js hello.test.js
 
             - name: Generate API Test report.
               id: generate_api_report
@@ -272,6 +272,18 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
+            - name: Post test summary
+              uses: actions/github-script@v6
+              env:
+                  PLUGIN_NAME: ${{ matrix.plugin }}
+                  PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
+                  E2E_SUMMARY_PATH: ${{ github.workspace }}/plugins/woocommerce/e2e/allure-report/widgets/summary.json
+              with:
+                  result-encoding: string
+                  script: |
+                      const script = require( './repo/.github/workflows/scripts/prepare-test-summary-daily-with-plugin.js' )
+                      return await script( { core } )
+
     post-summary:
         name: Post test results
         if: always()
@@ -324,7 +336,7 @@ jobs:
               contains( needs.*.result, 'failure' )
             )
         runs-on: ubuntu-20.04
-        needs: [k6-tests, test-plugins, post-summary]
+        needs: [k6-tests, test-plugins]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             RUN_ID: ${{ github.run_id }}
