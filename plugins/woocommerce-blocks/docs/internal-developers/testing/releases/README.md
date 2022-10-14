@@ -30,7 +30,7 @@ Every release includes specific testing instructions for new features and bug fi
 -   [4.7.0](./470.md)
 -   [4.8.0](./480.md)
 -   [4.9.0](./490.md)
--   [4.9.1](./491.md)
+    -   [4.9.1](./491.md)
 -   [5.0.0](./500.md)
 -   [5.1.0](./510.md)
 -   [5.2.0](./520.md)
@@ -92,6 +92,8 @@ Every release includes specific testing instructions for new features and bug fi
     -   [8.5.1](./851.md)
 -   [8.6.0](./860.md)
 -   [8.7.0](./870.md)
+    -   [8.7.1](./871.md)
+    -   [8.7.2](./872.md)
 
 <!-- FEEDBACK -->
 
