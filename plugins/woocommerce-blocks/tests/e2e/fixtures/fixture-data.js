@@ -227,6 +227,7 @@ const Products = () => [
 		name: 'Woo Single #3 - Limited Edition',
 		type: 'simple',
 		regular_price: '100.00',
+		sale_price: '90.00',
 		virtual: true,
 		downloadable: true,
 		downloads: [
