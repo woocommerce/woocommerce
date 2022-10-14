@@ -4,7 +4,7 @@ namespace Automattic\WooCommerce\Tests\Admin\Marketing;
 
 use Automattic\WooCommerce\Admin\Marketing\MarketingChannelInterface;
 use Automattic\WooCommerce\Admin\Marketing\MarketingChannels;
-use Automattic\WooCommerce\Internal\Admin\Marketing;
+use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use WC_Unit_Test_Case;
 
 /**
@@ -16,7 +16,7 @@ class MarketingChannelsTest extends WC_Unit_Test_Case {
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
-		delete_transient( Marketing::RECOMMENDED_PLUGINS_TRANSIENT );
+		delete_transient( MarketingSpecs::RECOMMENDED_PLUGINS_TRANSIENT );
 	}
 
 	/**
@@ -27,7 +27,7 @@ class MarketingChannelsTest extends WC_Unit_Test_Case {
 		$test_channel->expects( $this->any() )->method( 'get_slug' )->willReturn( 'test-channel-1' );
 
 		set_transient(
-			Marketing::RECOMMENDED_PLUGINS_TRANSIENT,
+			MarketingSpecs::RECOMMENDED_PLUGINS_TRANSIENT,
 			[
 				[
 					'product' => 'test-channel-1',
@@ -49,7 +49,7 @@ class MarketingChannelsTest extends WC_Unit_Test_Case {
 		$test_channel = $this->createMock( MarketingChannelInterface::class );
 		$test_channel->expects( $this->any() )->method( 'get_slug' )->willReturn( 'test-channel-1' );
 
-		set_transient( Marketing::RECOMMENDED_PLUGINS_TRANSIENT, [] );
+		set_transient( MarketingSpecs::RECOMMENDED_PLUGINS_TRANSIENT, [] );
 
 		$marketing_channels = new MarketingChannels();
 		$marketing_channels->register( $test_channel );
@@ -65,7 +65,7 @@ class MarketingChannelsTest extends WC_Unit_Test_Case {
 		$test_channel->expects( $this->any() )->method( 'get_slug' )->willReturn( 'test-channel-1' );
 
 		set_transient(
-			Marketing::RECOMMENDED_PLUGINS_TRANSIENT,
+			MarketingSpecs::RECOMMENDED_PLUGINS_TRANSIENT,
 			[
 				[
 					'product' => $test_channel->get_slug(),
@@ -94,7 +94,7 @@ class MarketingChannelsTest extends WC_Unit_Test_Case {
 		$test_channel = $this->createMock( MarketingChannelInterface::class );
 		$test_channel->expects( $this->any() )->method( 'get_slug' )->willReturn( 'test-channel-1' );
 
-		set_transient( Marketing::RECOMMENDED_PLUGINS_TRANSIENT, [] );
+		set_transient( MarketingSpecs::RECOMMENDED_PLUGINS_TRANSIENT, [] );
 
 		add_filter(
 			'woocommerce_marketing_channels',
