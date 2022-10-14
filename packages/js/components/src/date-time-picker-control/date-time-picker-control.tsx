@@ -6,7 +6,6 @@ import {
 	useState,
 	useEffect,
 	useLayoutEffect,
-	useMemo,
 	useRef,
 } from '@wordpress/element';
 import { Icon, calendar } from '@wordpress/icons';
@@ -105,6 +104,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	}
 
 	function parseMoment( dateString?: string | null ): Moment {
+		// parse input date string as local time
 		return moment( dateString, displayFormat );
 	}
 
@@ -113,7 +113,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	}
 
 	function formatMoment( momentDate: Moment ): string {
-		return momentDate.format( displayFormat );
+		return momentDate.local().format( displayFormat );
 	}
 
 	function hasFocusLeftInputAndDropdownContent(
