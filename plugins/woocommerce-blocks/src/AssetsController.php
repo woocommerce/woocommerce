@@ -86,7 +86,7 @@ final class AssetsController {
 	 * @return array URLs to print for resource hints.
 	 */
 	public function add_resource_hints( $urls, $relation_type ) {
-		if ( ! in_array( $relation_type, [ 'prefetch', 'prerender' ], true ) ) {
+		if ( ! in_array( $relation_type, [ 'prefetch', 'prerender' ], true ) || is_admin() ) {
 			return $urls;
 		}
 
@@ -97,39 +97,72 @@ final class AssetsController {
 			return $urls;
 		}
 
-		$resources         = [];
-		$is_block_cart     = has_block( 'woocommerce/cart' );
-		$is_block_checkout = has_block( 'woocommerce/checkout' );
-
 		if ( 'prefetch' === $relation_type ) {
-			if ( ! $is_block_cart ) {
-				$resources = array_merge( $resources, $this->get_block_asset_resource_hints( 'cart-frontend' ) );
-			}
-
-			if ( ! $is_block_checkout ) {
-				$resources = array_merge( $resources, $this->get_block_asset_resource_hints( 'checkout-frontend' ) );
-			}
-
 			$urls = array_merge(
 				$urls,
-				array_map(
-					function( $src ) {
-						return array(
-							'href' => $src,
-							'as'   => 'script',
-						);
-					},
-					array_unique( array_filter( $resources ) )
-				)
+				$this->get_prefetch_resource_hints()
 			);
 		}
 
-		if ( 'prerender' === $relation_type && $is_block_cart ) {
-			$checkout_page_id  = wc_get_page_id( 'checkout' );
-			$checkout_page_url = $checkout_page_id ? get_permalink( $checkout_page_id ) : '';
-			if ( $checkout_page_url ) {
-				$urls[] = $checkout_page_url;
-			}
+		if ( 'prerender' === $relation_type ) {
+			$urls = array_merge(
+				$urls,
+				$this->get_prerender_resource_hints()
+			);
+		}
+
+		return $urls;
+	}
+
+	/**
+	 * Get resource hints during prefetch requests.
+	 *
+	 * @return array Array of URLs.
+	 */
+	private function get_prefetch_resource_hints() {
+		$urls = [];
+
+		// Core page IDs.
+		$cart_page_id     = wc_get_page_id( 'cart' );
+		$checkout_page_id = wc_get_page_id( 'checkout' );
+
+		// Checks a specific page (by ID) to see if it contains the named block.
+		$has_block_cart     = $cart_page_id && has_block( 'woocommerce/cart', $cart_page_id );
+		$has_block_checkout = $checkout_page_id && has_block( 'woocommerce/checkout', $checkout_page_id );
+
+		// Checks the current page to see if it contains the named block.
+		$is_block_cart     = has_block( 'woocommerce/cart' );
+		$is_block_checkout = has_block( 'woocommerce/checkout' );
+
+		if ( $has_block_cart && ! $is_block_cart ) {
+			$urls = array_merge( $urls, $this->get_block_asset_resource_hints( 'cart-frontend' ) );
+		}
+
+		if ( $has_block_checkout && ! $is_block_checkout ) {
+			$urls = array_merge( $urls, $this->get_block_asset_resource_hints( 'checkout-frontend' ) );
+		}
+
+		return $urls;
+	}
+
+	/**
+	 * Get resource hints during prerender requests.
+	 *
+	 * @return array Array of URLs.
+	 */
+	private function get_prerender_resource_hints() {
+		$urls          = [];
+		$is_block_cart = has_block( 'woocommerce/cart' );
+
+		if ( ! $is_block_cart ) {
+			return $urls;
+		}
+
+		$checkout_page_id  = wc_get_page_id( 'checkout' );
+		$checkout_page_url = $checkout_page_id ? get_permalink( $checkout_page_id ) : '';
+
+		if ( $checkout_page_url ) {
+			$urls[] = $checkout_page_url;
 		}
 
 		return $urls;
@@ -148,7 +181,19 @@ final class AssetsController {
 		$script_data = $this->api->get_script_data(
 			$this->api->get_block_asset_build_path( $filename )
 		);
-		return array_merge( [ add_query_arg( 'ver', $script_data['version'], $script_data['src'] ) ], $this->get_script_dependency_src_array( $script_data['dependencies'] ) );
+		$resources   = array_merge(
+			[ add_query_arg( 'ver', $script_data['version'], $script_data['src'] ) ],
+			$this->get_script_dependency_src_array( $script_data['dependencies'] )
+		);
+		return array_map(
+			function( $src ) {
+				return array(
+					'href' => $src,
+					'as'   => 'script',
+				);
+			},
+			array_unique( array_filter( $resources ) )
+		);
 	}
 
 	/**
