@@ -38,9 +38,9 @@ const FrontendBlock = ( {
 		showCompanyField,
 		showPhoneField,
 	} = useCheckoutBlockContext();
-	const { showBillingFields } = useCheckoutAddress();
+	const { showBillingFields, forcedBillingAddress } = useCheckoutAddress();
 
-	if ( ! showBillingFields ) {
+	if ( ! showBillingFields && ! forcedBillingAddress ) {
 		return null;
 	}
 
