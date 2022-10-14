@@ -55,22 +55,13 @@ $tt2-gray: #f7f7f7;
 .woocommerce {
 
 	// Common
-	.woocommerce-products-header {
-		h1.page-title {
-			font-family: var(--wp--preset--font-family--source-serif-pro);
-			font-size: var(--wp--custom--typography--font-size--gigantic);
-			font-weight: 300;
-			line-height: var(--wp--custom--typography--line-height--tiny);
-			margin-bottom: var(--wp--custom--spacing--medium);
-		}
-	}
 
 	span.onsale {
 		top: -1rem;
 		right: -1rem;
 		position: absolute;
-		background: var(--wp--preset--color--secondary);
-		color: inherit;
+		background: var(--wp--preset--color--vivid-red);
+		color: var(--wp--preset--color--base);
 		border-radius: 2rem;
 		line-height: 2.6rem;
 		font-size: 0.8rem;
