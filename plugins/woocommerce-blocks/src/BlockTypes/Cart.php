@@ -223,24 +223,14 @@ class Cart extends AbstractBlock {
 		}
 
 		$array_without_accents = array_map(
-			'remove_accents',
-			array_map(
-				'wc_strtolower',
-				array_map(
-					'html_entity_decode',
-					array_map(
-						function ( $element ) {
-							if ( is_array( $element ) ) {
-								return $this->deep_sort_with_accents( $element );
-							}
-						},
-						$array
-					)
-				)
-			)
+			function( $value ) {
+				return is_array( $value )
+					? $this->deep_sort_with_accents( $value )
+					: remove_accents( wc_strtolower( html_entity_decode( $value ) ) );
+			},
+			$array
 		);
 
-		$array_without_accents = array_map( 'remove_accents', array_map( 'wc_strtolower', array_map( 'html_entity_decode', $array ) ) );
 		asort( $array_without_accents );
 		return array_replace( $array_without_accents, $array );
 	}
