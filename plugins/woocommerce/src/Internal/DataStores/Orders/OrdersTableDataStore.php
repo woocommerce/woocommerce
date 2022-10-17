@@ -1544,6 +1544,9 @@ FROM $order_meta_table
 				throw new \Exception( sprintf( __( 'Could not persist order to database table "%s".', 'woocommerce' ), $update['table'] ) );
 			}
 		}
+
+		$changes = $order->get_changes();
+		$this->update_address_index_meta( $order, $changes );
 	}
 
 	/**
@@ -2025,7 +2028,17 @@ FROM $order_meta_table
 	 */
 	public function update_order_meta( &$order ) {
 		$changes = $order->get_changes();
+		$this->update_address_index_meta( $order, $changes );
+	}
 
+	/**
+	 * Helper function to update billing and shipping address metadata.
+	 * @param \WC_Abstract_Order $order Order Object
+	 * @param array              $changes Array of changes.
+	 *
+	 * @return void
+	 */
+	private function update_address_index_meta( $order, $changes ) {
 		// If address changed, store concatenated version to make searches faster.
 		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
 			if ( isset( $changes[ $address_type ] ) ) {
