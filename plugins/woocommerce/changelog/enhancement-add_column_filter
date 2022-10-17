@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Render columns via action so that they can be hooked into.

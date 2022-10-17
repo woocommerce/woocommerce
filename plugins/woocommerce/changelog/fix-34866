@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Allow features to declare their initial enabled state.

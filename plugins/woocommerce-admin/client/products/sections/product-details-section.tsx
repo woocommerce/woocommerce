@@ -15,6 +15,7 @@ import { cleanForSlug } from '@wordpress/url';
 import { EnrichedLabel, useFormContext } from '@woocommerce/components';
 import {
 	Product,
+	ProductCategory,
 	PRODUCTS_STORE_NAME,
 	WCDataSelector,
 } from '@woocommerce/data';
@@ -24,14 +25,15 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import './product-details-section.scss';
+import { getCheckboxProps, getTextControlProps } from './utils';
 import { ProductSectionLayout } from '../layout/product-section-layout';
 import { EditProductLinkModal } from '../shared/edit-product-link-modal';
-import { getCheckboxProps, getTextControlProps } from './utils';
+import { CategoryField } from '../fields/category-field';
 
 const PRODUCT_DETAILS_SLUG = 'product-details';
 
 export const ProductDetailsSection: React.FC = () => {
-	const { getInputProps, values, touched, errors } =
+	const { getInputProps, values, touched, errors, setValue } =
 		useFormContext< Product >();
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
 		useState( false );
@@ -49,9 +51,16 @@ export const ProductDetailsSection: React.FC = () => {
 		}
 	);
 
-	function doesNameHaveError(): boolean {
+	const hasNameError = () => {
 		return Boolean( touched.name ) && Boolean( errors.name );
-	}
+	};
+
+	const setSkuIfEmpty = () => {
+		if ( values.sku || ! values.name.length ) {
+			return;
+		}
+		setValue( 'sku', cleanForSlug( values.name ) );
+	};
 
 	return (
 		<ProductSectionLayout
@@ -74,34 +83,46 @@ export const ProductDetailsSection: React.FC = () => {
 							{ ...getTextControlProps(
 								getInputProps( 'name' )
 							) }
+							onBlur={ () => {
+								setSkuIfEmpty();
+								getInputProps( 'name' ).onBlur();
+							} }
 						/>
-						{ values.id &&
-							! doesNameHaveError() &&
-							permalinkPrefix && (
-								<span className="woocommerce-product-form__secondary-text product-details-section__product-link">
-									{ __( 'Product link', 'woocommerce' ) }
-									:&nbsp;
-									<a
-										href={ values.permalink }
-										target="_blank"
-										rel="noreferrer"
-									>
-										{ permalinkPrefix }
-										{ values.slug ||
-											cleanForSlug( values.name ) }
-										{ permalinkSuffix }
-									</a>
-									<Button
-										variant="link"
-										onClick={ () =>
-											setShowProductLinkEditModal( true )
-										}
-									>
-										{ __( 'Edit', 'woocommerce' ) }
-									</Button>
-								</span>
-							) }
+						{ values.id && ! hasNameError() && permalinkPrefix && (
+							<span className="woocommerce-product-form__secondary-text product-details-section__product-link">
+								{ __( 'Product link', 'woocommerce' ) }
+								:&nbsp;
+								<a
+									href={ values.permalink }
+									target="_blank"
+									rel="noreferrer"
+								>
+									{ permalinkPrefix }
+									{ values.slug ||
+										cleanForSlug( values.name ) }
+									{ permalinkSuffix }
+								</a>
+								<Button
+									variant="link"
+									onClick={ () =>
+										setShowProductLinkEditModal( true )
+									}
+								>
+									{ __( 'Edit', 'woocommerce' ) }
+								</Button>
+							</span>
+						) }
 					</div>
+					<CategoryField
+						label={ __( 'Categories', 'woocommerce' ) }
+						placeholder={ __(
+							'Search or create category…',
+							'woocommerce'
+						) }
+						{ ...getInputProps<
+							Pick< ProductCategory, 'id' | 'name' >[]
+						>( 'categories' ) }
+					/>
 					<CheckboxControl
 						label={
 							<EnrichedLabel

@@ -4,6 +4,7 @@
 import { Logger } from 'cli-core/src/logger';
 import { join } from 'path';
 import { cloneRepo, generateDiff } from 'cli-core/src/git';
+import { readFile } from 'fs/promises';
 
 /**
  * Internal dependencies
@@ -13,7 +14,6 @@ import { scanForDBChanges } from './db-changes';
 import { scanForHookChanges } from './hook-changes';
 import { scanForTemplateChanges } from './template-changes';
 import { SchemaDiff, generateSchemaDiff } from '../git';
-import { readFile } from 'fs/promises';
 
 export const scanForChanges = async (
 	compareVersion: string,
@@ -64,14 +64,16 @@ export const scanForChanges = async (
 			if ( packageJSON.engines && packageJSON.engines.pnpm ) {
 				await execAsync(
 					`npm i -g pnpm@${ packageJSON.engines.pnpm }`,
-					{ cwd: pluginPath }
+					{
+						cwd: pluginPath,
+					}
 				);
 			}
 
 			// Note doing the minimal work to get a DB scan to work, avoiding full build for speed.
 			await execAsync( 'composer install', { cwd: pluginPath } );
 			await execAsync(
-				'pnpm run build:feature-config --filter=woocommerce',
+				'pnpm run --filter=woocommerce build:feature-config',
 				{
 					cwd: pluginPath,
 				}

@@ -6,6 +6,7 @@ import { Schema } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
+import { ProductCategory } from '../product-categories/types';
 import { BaseQueryParams } from '../types';
 
 export type ProductType = 'simple' | 'grouped' | 'external' | 'variable';
@@ -34,9 +35,15 @@ export type ProductAttribute = {
 	options: string[];
 };
 
+export type ProductDimensions = {
+	width: string;
+	height: string;
+	length: string;
+};
+
 export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	Schema.Post,
-	'status'
+	'status' | 'categories'
 > & {
 	id: number;
 	name: string;
@@ -67,6 +74,7 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	tax_class: 'standard' | 'reduced-rate' | 'zero-rate' | undefined;
 	manage_stock: boolean;
 	stock_quantity: number;
+	low_stock_amount: number;
 	stock_status: 'instock' | 'outofstock' | 'onbackorder';
 	backorders: 'no' | 'notify' | 'yes';
 	price: string;
@@ -88,6 +96,7 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	attributes: ProductAttribute[];
 	dimensions: ProductDimensions;
 	weight: string;
+	categories: Pick< ProductCategory, 'id' | 'name' | 'slug' >[];
 };
 
 export const productReadOnlyProperties = [
@@ -145,10 +154,4 @@ export type ProductQuery<
 	min_price: string;
 	max_price: string;
 	stock_status: 'instock' | 'outofstock' | 'onbackorder';
-};
-
-export type ProductDimensions = {
-	width: string;
-	height: string;
-	length: string;
 };

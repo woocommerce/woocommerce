@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { Model } from '../../model';
 import { MetaData, PostStatus, ObjectLinks } from '../../shared-types';
 import { ProductImage } from '../shared';

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { createElement, ReactElement } from 'react';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -13,14 +13,21 @@ type MenuProps = {
 	children?: JSX.Element | JSX.Element[];
 	getMenuProps: getMenuPropsType;
 	isOpen: boolean;
+	className?: string;
 };
 
-export const Menu = ( { children, getMenuProps, isOpen }: MenuProps ) => {
+export const Menu = ( {
+	children,
+	getMenuProps,
+	isOpen,
+	className,
+}: MenuProps ) => {
 	return (
 		<ul
 			{ ...getMenuProps() }
 			className={ classnames(
 				'woocommerce-experimental-select-control__menu',
+				className,
 				{
 					'is-open': isOpen,
 					'has-results': Array.isArray( children )

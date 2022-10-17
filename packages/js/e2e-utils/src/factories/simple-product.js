@@ -5,8 +5,8 @@ import crypto from 'crypto';
 /**
  * Creates a new factory for creating models.
  *
- * @param {HTTPClient} httpClient The HTTP client we will give the repository.
- * @return {AsyncFactory} The factory for creating models.
+ * @param {Object} httpClient The HTTP client we will give the repository.
+ * @return {Object} The factory for creating models.
  */
 export function simpleProductFactory( httpClient ) {
 	const repository = SimpleProduct.restRepository( httpClient );

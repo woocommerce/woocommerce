@@ -90,3 +90,10 @@ Controlled.decorators = [
 		);
 	},
 ];
+
+export const ControlledDateOnly = Template.bind( {} );
+ControlledDateOnly.args = {
+	...Controlled.args,
+	isDateOnlyPicker: true,
+};
+ControlledDateOnly.decorators = Controlled.decorators;

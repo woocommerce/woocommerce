@@ -7,8 +7,9 @@ import {
 	useState,
 	useEffect,
 } from '@wordpress/element';
+import { DragEventHandler } from 'react';
 import classnames from 'classnames';
-import { MediaUpload } from '@wordpress/media-utils';
+import { MediaItem, MediaUpload } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
@@ -27,23 +28,32 @@ export type ImageGalleryProps = {
 	} ) => void;
 	onReplace?: ( props: {
 		replaceIndex: number;
-		previousItem: ImageGalleryChild;
+		media: { id: number } & MediaItem;
 	} ) => void;
+	onSelectAsCover?: ( itemId: string | null ) => void;
 	onOrderChange?: ( items: ImageGalleryChild[] ) => void;
 	MediaUploadComponent?: MediaUploadComponentType;
+	onDragStart?: DragEventHandler< HTMLDivElement >;
+	onDragEnd?: DragEventHandler< HTMLDivElement >;
+	onDragOver?: DragEventHandler< HTMLLIElement >;
 } & React.HTMLAttributes< HTMLDivElement >;
 
 export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 	children,
 	columns = 4,
+	onSelectAsCover = () => null,
 	onOrderChange = () => null,
 	onRemove = () => null,
 	onReplace = () => null,
 	MediaUploadComponent = MediaUpload,
+	onDragStart = () => null,
+	onDragEnd = () => null,
+	onDragOver = () => null,
 }: ImageGalleryProps ) => {
 	const [ activeToolbarKey, setActiveToolbarKey ] = useState< string | null >(
 		null
 	);
+	const [ isDragging, setIsDragging ] = useState< boolean >( false );
 	const [ orderedChildren, setOrderedChildren ] = useState<
 		ImageGalleryChild[]
 	>( [] );
@@ -62,7 +72,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 
 	const updateOrderedChildren = ( items: ImageGalleryChild[] ) => {
 		setOrderedChildren( items );
-		onOrderChange( orderedChildren );
+		onOrderChange( items );
 	};
 
 	return (
@@ -77,10 +87,19 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 				onOrderChange={ ( items ) => {
 					updateOrderedChildren( items );
 				} }
+				onDragStart={ ( event ) => {
+					setIsDragging( true );
+					onDragStart( event );
+				} }
+				onDragEnd={ ( event ) => {
+					setIsDragging( false );
+					onDragEnd( event );
+				} }
+				onDragOver={ onDragOver }
 			>
 				{ orderedChildren.map( ( child, childIndex ) => {
 					const isToolbarVisible = child.key === activeToolbarKey;
-					const isCoverItem = childIndex === 0;
+					const isCoverItem = ( childIndex === 0 ) as boolean;
 
 					return cloneElement(
 						child,
@@ -100,6 +119,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 								event: React.FocusEvent< HTMLDivElement >
 							) => {
 								if (
+									isDragging ||
 									event.currentTarget.contains(
 										event.relatedTarget
 									) ||
@@ -107,7 +127,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 										(
 											event.relatedTarget as Element
 										 ).closest(
-											'.components-modal__frame'
+											'.media-modal, .components-modal__frame'
 										) )
 								) {
 									return;
@@ -148,25 +168,23 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 								} }
 								replaceItem={ (
 									replaceIndex: number,
-									newSrc: string,
-									newAlt: string
+									media: { id: number } & MediaItem
 								) => {
-									onReplace( {
-										replaceIndex,
-										previousItem:
-											orderedChildren[ replaceIndex ],
-									} );
-									updateOrderedChildren(
+									onReplace( { replaceIndex, media } );
+									setOrderedChildren(
 										replaceItem< {
 											src: string;
 											alt: string;
 										} >( orderedChildren, replaceIndex, {
-											src: newSrc,
-											alt: newAlt,
+											src: media.url as string,
+											alt: media.alt as string,
 										} )
 									);
 								} }
-								setToolBarItem={ setActiveToolbarKey }
+								setToolBarItem={ ( toolBarItem ) => {
+									onSelectAsCover( activeToolbarKey );
+									setActiveToolbarKey( toolBarItem );
+								} }
 								MediaUploadComponent={ MediaUploadComponent }
 							/>
 						) : null
