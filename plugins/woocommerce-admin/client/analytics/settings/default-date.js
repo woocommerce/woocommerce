@@ -19,7 +19,7 @@ const DefaultDate = ( { value, onChange } ) => {
 		onChange( {
 			target: {
 				name: 'woocommerce_default_date_range',
-				value: ( new URLSearchParams( query ) ).toString(),
+				value: new URLSearchParams( query ).toString(),
 			},
 		} );
 	};

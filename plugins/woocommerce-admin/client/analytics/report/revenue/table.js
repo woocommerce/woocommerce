@@ -307,7 +307,7 @@ const formatProps = memoize(
 		[
 			isError,
 			isRequesting,
-			( new URLSearchParams( tableQuery ) ).toString(),
+			new URLSearchParams( tableQuery ).toString(),
 			get( revenueData, [ 'totalResults' ], 0 ),
 			get( revenueData, [ 'data', 'intervals' ], EMPTY_ARRAY ).length,
 		].join( ':' )

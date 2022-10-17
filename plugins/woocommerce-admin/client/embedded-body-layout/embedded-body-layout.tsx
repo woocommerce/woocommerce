@@ -14,9 +14,7 @@ import './style.scss';
 
 type QueryParams = EmbeddedBodyProps;
 
-function isWPPage(
-	params: URLSearchParams
-): Boolean {
+function isWPPage( params: URLSearchParams ): boolean {
 	return params.get( 'page' ) !== null;
 }
 
