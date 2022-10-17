@@ -3,7 +3,13 @@
  */
 import { Popover } from '@wordpress/components';
 import classnames from 'classnames';
-import { createElement, useEffect, useRef, useState } from '@wordpress/element';
+import {
+	createElement,
+	useEffect,
+	useRef,
+	useState,
+	createPortal,
+} from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -23,6 +29,7 @@ export const Menu = ( {
 	isOpen,
 	className,
 }: MenuProps ) => {
+	const [ boundingRect, setBoundingRect ] = useState< DOMRect >();
 	const selectControlMenuRef = useRef< HTMLDivElement >( null );
 
 	useEffect( () => {
@@ -55,7 +62,12 @@ export const Menu = ( {
 				focusOnMount={ false }
 				className={ classnames(
 					'woocommerce-experimental-select-control__popover-menu',
-					{ 'is-open': isOpen }
+					{
+						'is-open': isOpen,
+						'has-results': Array.isArray( children )
+							? children.length
+							: Boolean( children ),
+					}
 				) }
 				position="bottom center"
 				animate={ false }
@@ -78,3 +90,11 @@ export const Menu = ( {
 	);
 	/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
 };
+
+export const MenuSlot: React.FC = () =>
+	createPortal(
+		<div aria-live="off">
+			<Popover.Slot />
+		</div>,
+		document.body
+	);

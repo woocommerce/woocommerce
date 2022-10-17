@@ -18,7 +18,7 @@ import { useState, createElement } from '@wordpress/element';
 import { SelectedType, DefaultItemType, getItemLabelType } from '../types';
 import { MenuItem } from '../menu-item';
 import { SelectControl, selectControlStateChangeTypes } from '../';
-import { Menu } from '../menu';
+import { Menu, MenuSlot } from '../menu';
 
 const sampleItems = [
 	{ value: 'apple', label: 'Apple' },
@@ -397,7 +397,7 @@ export const SingleWithinModalUsingBodyDropdownPlacement: React.FC = () => {
 					/>
 				</Modal>
 			) }
-			<Popover.Slot />
+			<MenuSlot />
 		</SlotFillProvider>
 	);
 };

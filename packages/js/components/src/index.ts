@@ -49,7 +49,10 @@ export {
 	MenuItem as __experimentalSelectControlMenuItem,
 	MenuItemProps as __experimentalSelectControlMenuItemProps,
 } from './experimental-select-control/menu-item';
-export { Menu as __experimentalSelectControlMenu } from './experimental-select-control/menu';
+export {
+	Menu as __experimentalSelectControlMenu,
+	MenuSlot as __experimentalSelectControlMenuSlot,
+} from './experimental-select-control/menu';
 export { default as ScrollTo } from './scroll-to';
 export { Sortable } from './sortable';
 export { ListItem } from './list-item';
