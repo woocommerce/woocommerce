@@ -194,6 +194,8 @@ jobs:
     test-plugins:
         name: Smoke tests with ${{ matrix.plugin }} plugin installed
         runs-on: ubuntu-20.04
+        needs: [k6-tests]
+        if: always()
         env:
             USE_WP_ENV: 1
         strategy:
@@ -271,17 +273,13 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
-    trunk-summary:
+    trunk-results:
         name: Post test results
         if: |
             always()  &&
             ! github.event.pull_request.head.repo.fork &&
-            (
-              contains( needs.*.result, 'success' ) ||
-              contains( needs.*.result, 'failure' )
-            )
         runs-on: ubuntu-20.04
-        needs: [e2e-tests, api-tests]
+        needs: [test-plugins]
         steps:
             - name: Create dirs
               run: |
@@ -319,44 +317,31 @@ jobs:
                       const script = require( './repo/.github/workflows/scripts/prepare-test-summary-daily.js' )
                       return await script( { core } )
 
-    trunk-publish-reports:
-        name: Publish Smoke tests on trunk report
-        if: |
-            always() &&
-            ! github.event.pull_request.head.repo.fork &&
-            (
-              contains( needs.*.result, 'success' ) ||
-              contains( needs.*.result, 'failure' )
-            )
-        runs-on: ubuntu-20.04
-        needs: [e2e-tests, api-tests, k6-tests, test-plugins]
-        env:
-            GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-            RUN_ID: ${{ github.run_id }}
-        steps:
-            - name: Publish API & E2E test reports
-              run: |
-                  gh workflow run publish-test-reports-daily.yml \
-                    -f run_id=$RUN_ID \
-                    -f api_artifact=$API_ARTIFACT \
-                    -f e2e_artifact=$E2E_ARTIFACT \
-                    -f s3_root=public \
-                    --repo woocommerce/woocommerce-test-reports
+            - name: Publish report
+              env:
+                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+                  RUN_ID: ${{ github.run_id }}
+              steps:
+                  - name: Publish API & E2E test reports
+                    run: |
+                        gh workflow run publish-test-reports-daily.yml \
+                          -f run_id=$RUN_ID \
+                          -f api_artifact=$API_ARTIFACT \
+                          -f e2e_artifact=$E2E_ARTIFACT \
+                          -f s3_root=public \
+                          --repo woocommerce/woocommerce-test-reports
 
-    plugins-publish-reports:
+    plugins-results:
         name: Publish Smoke tests with plugins report
         if: |
             always() &&
             ! github.event.pull_request.head.repo.fork &&
-            (
-              contains( needs.*.result, 'success' ) ||
-              contains( needs.*.result, 'failure' )
-            )
         runs-on: ubuntu-20.04
-        needs: [e2e-tests, api-tests, k6-tests, test-plugins]
+        needs: [test-plugins]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             RUN_ID: ${{ github.run_id }}
+            ARTIFACT: Smoke tests with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
         strategy:
             fail-fast: false
             matrix:
@@ -372,6 +357,13 @@ jobs:
                     - plugin: 'Contact Form 7'
                       repo: 'takayukister/contact-form-7'
         steps:
+            - name: Download test report artifact
+              uses: actions/download-artifact@v3
+              with:
+                  name: ${{ env.ARTIFACT }}
+
+            # TODO: Add step to post job summary
+
             - name: Get slug
               id: get-slug
               uses: actions/github-script@v6
@@ -380,12 +372,10 @@ jobs:
                   script: return "${{ matrix.repo }}".split( '/' ).pop()
 
             - name: Publish reports
-              env:
-                  ARTIFACT: Smoke tests with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
               run: |
                   gh workflow run publish-test-reports-daily-plugins.yml \
                     -f run_id=$RUN_ID \
-                    -f artifact="$ARTIFACT" \
+                    -f artifact="${{ env.ARTIFACT }}" \
                     -f plugin="${{ matrix.plugin }}" \
                     -f slug="${{ steps.get-slug.outputs.result }}" \
                     -f s3_root=public \
