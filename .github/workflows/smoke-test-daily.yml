@@ -436,6 +436,6 @@ jobs:
                     -f run_id=$RUN_ID \
                     -f artifact="$ARTIFACT" \
                     -f plugin="${{ matrix.plugin }}" \
-                    -f slug="${{ steps.get-slug.outputs.result }}" \ # mytodo obtain this value from previous step
+                    -f slug="${{ steps.get-slug.outputs.result }}" \ 
                     -f s3_root=public \
                     --repo woocommerce/woocommerce-test-reports                    
