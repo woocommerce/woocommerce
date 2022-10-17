@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix (un)trashing of orders when using HPOS
