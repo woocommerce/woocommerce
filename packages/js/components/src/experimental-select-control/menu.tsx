@@ -44,6 +44,7 @@ export const Menu = ( {
 	}, [ selectControlMenuRef.current ] );
 
 	/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
+	/* Disabled because of the onmouseup on the ul element below. */
 	return (
 		<div
 			ref={ selectControlMenuRef }
