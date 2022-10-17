@@ -321,15 +321,13 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   RUN_ID: ${{ github.run_id }}
-              steps:
-                  - name: Publish API & E2E test reports
-                    run: |
-                        gh workflow run publish-test-reports-daily.yml \
-                          -f run_id=$RUN_ID \
-                          -f api_artifact=$API_ARTIFACT \
-                          -f e2e_artifact=$E2E_ARTIFACT \
-                          -f s3_root=public \
-                          --repo woocommerce/woocommerce-test-reports
+              run: |
+                  gh workflow run publish-test-reports-daily.yml \
+                    -f run_id=$RUN_ID \
+                    -f api_artifact="$API_ARTIFACT" \
+                    -f e2e_artifact="$E2E_ARTIFACT" \
+                    -f s3_root=public \
+                    --repo woocommerce/woocommerce-test-reports
 
     plugins-results:
         name: Publish Smoke tests with plugins report
