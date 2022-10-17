@@ -5,7 +5,6 @@ import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
-import qs from 'qs';
 
 /**
  * Internal dependencies
@@ -294,7 +293,9 @@ export const ProductTour = () => {
 			recordEvent( 'walkthrough_product_enable_button_click' );
 		} );
 
-		const query = qs.parse( window.location.search.slice( 1 ) );
+		const query = Object.fromEntries(
+			new URLSearchParams( window.location.search )
+		);
 		if ( query && query.tutorial === 'true' ) {
 			const intervalId = waitUntilElementTopNotChange(
 				tourConfig.steps[ 0 ].referenceElements?.desktop || '',
