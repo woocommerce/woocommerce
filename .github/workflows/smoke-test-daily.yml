@@ -9,6 +9,7 @@ on:
 env:
     API_ARTIFACT: api-daily--run-${{ github.run_number }}
     E2E_ARTIFACT: e2e-daily--run-${{ github.run_number }}
+    FORCE_COLOR: 1
     BRANCH_NAME: e2e/rep-s3-daily # mytodo revert to trunk
 
 concurrency:
@@ -195,7 +196,6 @@ jobs:
         runs-on: ubuntu-20.04
         env:
             USE_WP_ENV: 1
-            FORCE_COLOR: 1
         strategy:
             fail-fast: false
             matrix:
@@ -315,7 +315,9 @@ jobs:
 
     plugins-summary:
         name: Smoke tests with ${{ matrix.plugin }} plugin installed
-        if: always()
+        # mytodo re-enable if there's still time
+        # if: always()
+        if: false
         runs-on: ubuntu-20.04
         needs: [test-plugins]
         strategy:
