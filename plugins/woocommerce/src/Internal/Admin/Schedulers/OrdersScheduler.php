@@ -13,6 +13,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsData
 use \Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * OrdersScheduler Class.
@@ -129,7 +130,7 @@ class OrdersScheduler extends ImportScheduler {
 	 * @param int $post_id Post ID.
 	 */
 	public static function possibly_schedule_import( $post_id ) {
-		if ( 'shop_order' !== get_post_type( $post_id ) && 'woocommerce_refund_created' !== current_filter() ) {
+		if ( ! OrderUtil::is_order( $post_id, array( 'shop_order') ) && 'woocommerce_refund_created' !== current_filter() ) {
 			return;
 		}
 

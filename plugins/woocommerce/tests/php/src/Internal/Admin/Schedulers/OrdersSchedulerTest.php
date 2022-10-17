@@ -28,6 +28,7 @@ class OrdersSchedulerTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->clean_up_cot_setup();
+		$this->toggle_cot( false );
 		remove_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
 		parent::tearDown();
 	}
