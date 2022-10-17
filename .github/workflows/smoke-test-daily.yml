@@ -38,7 +38,6 @@ jobs:
               with:
                   install-filters: woocommerce
                   build: false
-                  php-version: null
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
@@ -100,7 +99,6 @@ jobs:
               with:
                   install-filters: woocommerce
                   build: false
-                  php-version: null
 
             - name: Run API tests.
               if: always()
@@ -152,7 +150,6 @@ jobs:
               with:
                   install-filters: woocommerce
                   build: false
-                  php-version: null
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
