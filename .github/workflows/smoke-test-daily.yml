@@ -264,7 +264,7 @@ jobs:
                   steps.report.conclusion == 'success'
               uses: actions/upload-artifact@v3
               with:
-                  name: e2e-daily-${{ matrix.plugin }}--run-${{ github.run_number }}
+                  name: Smoke tests with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
                   path: |
                       plugins/woocommerce/e2e/allure-results
                       plugins/woocommerce/e2e/allure-report
@@ -351,7 +351,7 @@ jobs:
             - name: Download E2E test report artifact
               uses: actions/download-artifact@v3
               with:
-                  name: e2e-daily-${{ matrix.plugin }}--run-${{ github.run_number }}
+                  name: Smoke tests with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
                   path: artifacts/e2e
 
             - name: Post test summary
@@ -366,8 +366,8 @@ jobs:
                       const script = require( './repo/.github/workflows/scripts/prepare-test-summary-daily-with-plugin.js' )
                       return await script( { core } )
 
-    publish-reports:
-        name: Publish test reports
+    trunk-publish-reports:
+        name: Publish Smoke tests on trunk report
         if: |
             always() &&
             ! github.event.pull_request.head.repo.fork &&
@@ -389,3 +389,53 @@ jobs:
                     -f e2e_artifact=$E2E_ARTIFACT \
                     -f s3_root=public \
                     --repo woocommerce/woocommerce-test-reports
+
+    plugins-publish-reports:
+        name: Publish Smoke tests with plugins report
+        if: |
+            always() &&
+            ! github.event.pull_request.head.repo.fork &&
+            (
+              contains( needs.*.result, 'success' ) ||
+              contains( needs.*.result, 'failure' )
+            )
+        runs-on: ubuntu-20.04
+        needs: [k6-tests, test-plugins]
+        env:
+            GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+            RUN_ID: ${{ github.run_id }}
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - plugin: 'WooCommerce Payments'
+                      repo: 'automattic/woocommerce-payments'
+                    - plugin: 'WooCommerce PayPal Payments'
+                      repo: 'woocommerce/woocommerce-paypal-payments'
+                    - plugin: 'WooCommerce Shipping & Tax'
+                      repo: 'automattic/woocommerce-services'
+                    - plugin: 'WooCommerce Subscriptions'
+                      repo: ${{ secrets['WC_SUBSCRIPTIONS_REPO'] }}
+                    - plugin: 'WordPress SEO' # Yoast SEO in the UI, but the slug is wordpress-seo
+                      repo: 'Yoast/wordpress-seo'
+                    - plugin: 'Contact Form 7'
+                      repo: 'takayukister/contact-form-7'            
+        steps:
+            - name: Get slug
+              id: get-slug
+              uses: actions/github-script@v6
+              with:
+                  result-encoding: string
+                  script: return "${{ matrix.repo }}".split( '/' ).pop()
+
+            - name: Publish reports
+              env:
+                  ARTIFACT: Smoke tests with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
+              run: |
+                  gh workflow run publish-test-reports-daily-plugins.yml \
+                    -f run_id=$RUN_ID \
+                    -f artifact="$ARTIFACT" \
+                    -f plugin="${{ matrix.plugin }}" \
+                    -f slug="${{ steps.get-slug.outputs.result }}" \ # mytodo obtain this value from previous step
+                    -f s3_root=public \
+                    --repo woocommerce/woocommerce-test-reports                    
