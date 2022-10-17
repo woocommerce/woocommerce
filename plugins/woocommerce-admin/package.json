@@ -153,6 +153,7 @@
 		"@woocommerce/onboarding": "workspace:*",
 		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/babel-preset-default": "^6.5.1",
+		"@wordpress/block-editor": "^9.8.0",
 		"@wordpress/browserslist-config": "^4.1.1",
 		"@wordpress/custom-templated-path-webpack-plugin": "^2.1.2",
 		"@wordpress/jest-preset-default": "^8.0.1",
