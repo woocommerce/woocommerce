@@ -4,13 +4,12 @@ on:
     # schedule:
     #     - cron: '25 3 * * *'
     workflow_dispatch:
-    pull_request:
 
 env:
     API_ARTIFACT: api-daily--run-${{ github.run_number }}
     E2E_ARTIFACT: e2e-daily--run-${{ github.run_number }}
     FORCE_COLOR: 1
-    BRANCH_NAME: e2e/rep-s3-daily # mytodo revert to trunk
+    BRANCH_NAME: ${{ github.ref_name }}
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -20,7 +19,7 @@ jobs:
     e2e-tests:
         name: E2E tests on trunk
         runs-on: ubuntu-20.04
-        if: false # mytodo re-enable
+        if: always()
         env:
             BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
             ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
@@ -90,7 +89,7 @@ jobs:
         name: API tests on trunk
         runs-on: ubuntu-20.04
         needs: [e2e-tests]
-        if: false # mytodo re-enable
+        if: always()
         steps:
             - uses: actions/checkout@v3
               with:
@@ -142,7 +141,7 @@ jobs:
         name: k6 tests on trunk
         runs-on: ubuntu-20.04
         needs: [api-tests]
-        if: false # mytodo re-enable
+        if: always()
         steps:
             - uses: actions/checkout@v3
               with:
@@ -274,8 +273,13 @@ jobs:
 
     trunk-summary:
         name: Post test results
-        # mytodo: re-enable: if: always()
-        if: false
+        if: |
+            always()  &&
+            ! github.event.pull_request.head.repo.fork &&
+            (
+              contains( needs.*.result, 'success' ) ||
+              contains( needs.*.result, 'failure' )
+            )
         runs-on: ubuntu-20.04
         needs: [e2e-tests, api-tests]
         steps:
@@ -315,72 +319,17 @@ jobs:
                       const script = require( './repo/.github/workflows/scripts/prepare-test-summary-daily.js' )
                       return await script( { core } )
 
-    plugins-summary:
-        name: Smoke tests with ${{ matrix.plugin }} plugin installed
-        # mytodo re-enable if there's still time
-        # if: always()
-        if: false
-        runs-on: ubuntu-20.04
-        needs: [test-plugins]
-        strategy:
-            fail-fast: false
-            matrix:
-                include:
-                    - plugin: 'WooCommerce Payments'
-                      repo: 'automattic/woocommerce-payments'
-                    - plugin: 'WooCommerce PayPal Payments'
-                      repo: 'woocommerce/woocommerce-paypal-payments'
-                    - plugin: 'WooCommerce Shipping & Tax'
-                      repo: 'automattic/woocommerce-services'
-                    - plugin: 'WooCommerce Subscriptions'
-                      repo: WC_SUBSCRIPTIONS_REPO
-                      private: true
-                    - plugin: 'WordPress SEO' # Yoast SEO in the UI, but the slug is wordpress-seo
-                      repo: 'Yoast/wordpress-seo'
-                    - plugin: 'Contact Form 7'
-                      repo: 'takayukister/contact-form-7'
-        steps:
-            - name: Create dirs
-              run: |
-                  mkdir -p repo
-                  mkdir -p artifacts/e2e
-
-            - name: Checkout code
-              uses: actions/checkout@v3
-              with:
-                  path: repo
-
-            - name: Download E2E test report artifact
-              uses: actions/download-artifact@v3
-              with:
-                  name: Smoke tests with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
-                  path: artifacts/e2e
-
-            - name: Post test summary
-              uses: actions/github-script@v6
-              env:
-                  PLUGIN_NAME: ${{ matrix.plugin }}
-                  PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
-                  E2E_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/widgets/summary.json
-              with:
-                  result-encoding: string
-                  script: |
-                      const script = require( './repo/.github/workflows/scripts/prepare-test-summary-daily-with-plugin.js' )
-                      return await script( { core } )
-
     trunk-publish-reports:
         name: Publish Smoke tests on trunk report
-        # mytodo re-enable
-        # if: |
-        #     always() &&
-        #     ! github.event.pull_request.head.repo.fork &&
-        #     (
-        #       contains( needs.*.result, 'success' ) ||
-        #       contains( needs.*.result, 'failure' )
-        #     )
-        if: false
+        if: |
+            always() &&
+            ! github.event.pull_request.head.repo.fork &&
+            (
+              contains( needs.*.result, 'success' ) ||
+              contains( needs.*.result, 'failure' )
+            )
         runs-on: ubuntu-20.04
-        needs: [k6-tests, test-plugins]
+        needs: [e2e-tests, api-tests, k6-tests, test-plugins]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             RUN_ID: ${{ github.run_id }}
@@ -404,7 +353,7 @@ jobs:
               contains( needs.*.result, 'failure' )
             )
         runs-on: ubuntu-20.04
-        needs: [k6-tests, test-plugins]
+        needs: [e2e-tests, api-tests, k6-tests, test-plugins]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             RUN_ID: ${{ github.run_id }}
