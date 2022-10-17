@@ -222,7 +222,7 @@ jobs:
 
             - name: Launch wp-env e2e environment
               working-directory: plugins/woocommerce
-              run: pnpm env:test --filter=
+              run: pnpm env:test --filter=woocommerce
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
