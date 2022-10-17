@@ -4,11 +4,11 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Icon } from '@wordpress/components';
 import { plus } from '@wordpress/icons';
-import { __experimentalSelectControlItem as SelectControlItem } from '@woocommerce/components';
 import classNames from 'classnames';
+import { ProductCategory } from '@woocommerce/data';
 
 type CategoryFieldAddNewItemProps = {
-	item: SelectControlItem;
+	item: Pick< ProductCategory, 'id' | 'name' >;
 	onClick: ( e: React.MouseEvent< HTMLButtonElement > ) => void;
 	highlighted: boolean;
 };
@@ -36,7 +36,7 @@ export const CategoryFieldAddNewItem: React.FC<
 					icon={ plus }
 					size={ 24 }
 				/>
-				{ sprintf( __( 'Create "%s"', 'woocommerce' ), item.label ) }
+				{ sprintf( __( 'Create "%s"', 'woocommerce' ), item.name ) }
 			</Button>
 		</div>
 	);

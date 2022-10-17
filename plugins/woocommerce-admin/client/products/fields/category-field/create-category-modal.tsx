@@ -11,10 +11,7 @@ import {
 } from '@wordpress/components';
 import { useMemo, useRef, useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
-import {
-	__experimentalSelectControl as SelectControl,
-	__experimentalSelectControlItem as SelectControlItem,
-} from '@woocommerce/components';
+import { __experimentalSelectControl as SelectControl } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import {
 	EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME,
@@ -55,8 +52,10 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 	const [ categoryName, setCategoryName ] = useState(
 		initialCategoryName || ''
 	);
-	const [ categoryParent, setCategoryParent ] =
-		useState< SelectControlItem | null >( null );
+	const [ categoryParent, setCategoryParent ] = useState< Pick<
+		ProductCategory,
+		'id' | 'name'
+	> | null >( null );
 	const selectControlMenuRef = useRef< HTMLElement >( null );
 
 	const onSave = async () => {
@@ -67,7 +66,7 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 		try {
 			const newCategory: ProductCategory = await createProductCategory( {
 				name: categoryName,
-				parent: categoryParent ? categoryParent.value : undefined,
+				parent: categoryParent ? categoryParent.id : undefined,
 			} );
 			invalidateResolutionForStoreSelector( 'getProductCategories' );
 			setIsCreating( false );
@@ -104,13 +103,11 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 					value={ categoryName }
 					onChange={ setCategoryName }
 				/>
-				<SelectControl
+				<SelectControl< Pick< ProductCategory, 'id' | 'name' > >
 					items={ categoriesSelectList }
 					label={ __( 'Parent category (optional)', 'woocommerce' ) }
 					selected={ categoryParent }
-					onSelect={ ( item: SelectControlItem ) =>
-						item && setCategoryParent( item )
-					}
+					onSelect={ ( item ) => item && setCategoryParent( item ) }
 					onRemove={ () => setCategoryParent( null ) }
 					onInputChange={ searchDelayed }
 					getFilteredItems={ getFilteredItems }
@@ -121,6 +118,7 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 						getMenuProps,
 						selectItem,
 						highlightedIndex,
+						getItemProps,
 					} ) => {
 						return (
 							<div
@@ -172,53 +170,38 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 													.filter(
 														( item ) =>
 															categoryTreeKeyValues[
-																parseInt(
-																	item.value,
-																	10
-																)
+																item.id
 															]?.parentID === 0
 													)
-													.map(
-														(
-															item: SelectControlItem
-														) => {
-															return (
-																<CategoryFieldItem
-																	key={ `${ item.value }` }
-																	item={
-																		categoryTreeKeyValues[
-																			parseInt(
-																				item.value,
-																				10
-																			)
-																		]
-																	}
-																	selectControlItem={
-																		item
-																	}
-																	onSelect={
-																		selectItem
-																	}
-																	selectedIds={
-																		categoryParent
-																			? [
-																					parseInt(
-																						categoryParent.value,
-																						10
-																					),
-																			  ]
-																			: []
-																	}
-																	items={
-																		items
-																	}
-																	highlightedIndex={
-																		highlightedIndex
-																	}
-																/>
-															);
-														}
-													) }
+													.map( ( item ) => {
+														return (
+															<CategoryFieldItem
+																key={ `${ item.id }` }
+																item={
+																	categoryTreeKeyValues[
+																		item.id
+																	]
+																}
+																onSelect={
+																	selectItem
+																}
+																selectedIds={
+																	categoryParent
+																		? [
+																				categoryParent.id,
+																		  ]
+																		: []
+																}
+																items={ items }
+																highlightedIndex={
+																	highlightedIndex
+																}
+																getItemProps={
+																	getItemProps
+																}
+															/>
+														);
+													} ) }
 										</div>
 									</Popover>
 								) }

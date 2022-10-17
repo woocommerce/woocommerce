@@ -102,35 +102,40 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 		}
 	};
 
-	const selectedIds = value.map( ( item ) => item.id );
-	let selectControlItems = categoriesSelectList;
-
-	// Add the add new button if search value does not exist.
-	if (
-		searchValue.length > 0 &&
-		categoriesSelectList.length > 0 &&
-		! categoriesSelectList.find(
-			( cat ) =>
-				cat.label.toLowerCase() === searchValue.toLowerCase() &&
-				cat.value !== 'add-new'
-		)
-	) {
-		if (
-			! categoriesSelectList.find( ( cat ) => cat.value === 'add-new' )
-		) {
-			selectControlItems.push( { value: 'add-new', label: searchValue } );
-		}
-	} else {
-		selectControlItems = categoriesSelectList.filter(
-			( cat ) => cat.value !== 'add-new'
+	const categoryFieldGetFilteredItems = (
+		allItems: Pick< ProductCategory, 'id' | 'name' >[],
+		inputValue: string,
+		selectedItems: Pick< ProductCategory, 'id' | 'name' >[]
+	) => {
+		const filteredItems = getFilteredItems(
+			allItems,
+			inputValue,
+			selectedItems
 		);
-	}
+		if (
+			inputValue.length > 0 &&
+			! filteredItems.find(
+				( item ) => item.name.toLowerCase() === inputValue.toLowerCase()
+			)
+		) {
+			return [
+				...filteredItems,
+				{
+					id: -99,
+					name: inputValue,
+				},
+			];
+		}
+		return filteredItems;
+	};
+
+	const selectedIds = value.map( ( item ) => item.id );
 
 	return (
 		<SelectControl< Pick< ProductCategory, 'id' | 'name' > >
 			className="woocommerce-category-field-dropdown components-base-control"
 			multiple
-			items={ selectControlItems }
+			items={ categoriesSelectList }
 			label={ label }
 			selected={ value }
 			getItemLabel={ ( item ) => item?.name || '' }
@@ -142,7 +147,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 			} }
 			onRemove={ ( item ) => item && onSelect( item.id, false ) }
 			onInputChange={ searchDelayed }
-			getFilteredItems={ getFilteredItems }
+			getFilteredItems={ categoryFieldGetFilteredItems }
 			placeholder={ value.length === 0 ? placeholder : '' }
 			stateReducer={ ( state, actionAndChanges ) => {
 				const { changes, type } = actionAndChanges;
@@ -177,7 +182,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 						? items.filter(
 								( item ) =>
 									categoryTreeKeyValues[ item.id ]
-										?.parentID === 0
+										?.parentID === 0 || item.id === -99
 						  )
 						: [];
 				return (
@@ -197,7 +202,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 								) }
 								{ isOpen &&
 									rootItems.map( ( item ) => {
-										return item.id === 'add-new' ? (
+										return item.id === -99 ? (
 											<CategoryFieldAddNewItem
 												key={ item.id }
 												highlighted={
@@ -241,8 +246,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 									setShowCreateNewModal( false )
 								}
 								onCreated={ ( newCategory ) => {
-									onSelect( newCategory, true );
-									setInputValue( '' );
+									onSelect( newCategory.id, true );
 									setShowCreateNewModal( false );
 									onInputChange( '' );
 								} }
