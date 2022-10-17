@@ -374,6 +374,7 @@ export function ProductShippingSection( {
 							Promise< ProductShippingClass >
 						>( values ).then( ( value ) => {
 							invalidateResolution( 'getProductShippingClasses' );
+							selectShippingClassProps?.onChange( value.slug );
 							return value;
 						} )
 					}
