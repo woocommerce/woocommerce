@@ -220,8 +220,7 @@ function FormComponent< Values extends Record< string, any > >(
 	const handleChange = useCallback(
 		(
 			name: string,
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			value: ChangeEvent< HTMLInputElement > | any
+			value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
 		) => {
 			// Handle native events.
 			if ( isChangeEvent( value ) && value.target ) {
@@ -286,7 +285,7 @@ function FormComponent< Values extends Record< string, any > >(
 			checked: Boolean( inputValue ),
 			selected: inputValue,
 			onChange: ( value: ChangeEvent< HTMLInputElement > | Value ) =>
-				handleChange( name, value ),
+				handleChange( name, value as Values[ keyof Values ] ),
 			onBlur: () => handleBlur( name ),
 			className: isTouched && inputError ? 'has-error' : undefined,
 			help: isTouched ? ( inputError as string ) : null,
