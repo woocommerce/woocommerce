@@ -78,6 +78,11 @@ export * from './plugins/types';
 export * from './products/types';
 export * from './product-shipping-classes/types';
 export * from './orders/types';
+export {
+	ProductCategory,
+	ProductCategoryImage,
+	ProductCategorySelectors,
+} from './product-categories/types';
 
 /**
  * Internal dependencies

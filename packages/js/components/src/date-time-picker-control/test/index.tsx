@@ -96,7 +96,7 @@ describe( 'DateTimePickerControl', () => {
 		const { container } = render(
 			<DateTimePickerControl
 				currentDate={ dateTime.toISOString() }
-				is12Hour={ false }
+				is12HourPicker={ false }
 			/>
 		);
 
@@ -106,13 +106,53 @@ describe( 'DateTimePickerControl', () => {
 		);
 	} );
 
+	it( 'should assume ambiguous dates are UTC', () => {
+		const ambiguousISODateTimeString = '2202-09-15T22:30:40';
+
+		const { container } = render(
+			<DateTimePickerControl
+				currentDate={ ambiguousISODateTimeString }
+				is12HourPicker={ false }
+			/>
+		);
+
+		const input = container.querySelector( 'input' );
+
+		expect( input?.value ).toBe(
+			moment
+				.utc( ambiguousISODateTimeString )
+				.local()
+				.format( default24HourDateTimeFormat )
+		);
+	} );
+
+	it( 'should handle unambiguous UTC dates', () => {
+		const unambiguousISODateTimeString = '2202-09-15T22:30:40Z';
+
+		const { container } = render(
+			<DateTimePickerControl
+				currentDate={ unambiguousISODateTimeString }
+				is12HourPicker={ false }
+			/>
+		);
+
+		const input = container.querySelector( 'input' );
+
+		expect( input?.value ).toBe(
+			moment
+				.utc( unambiguousISODateTimeString )
+				.local()
+				.format( default24HourDateTimeFormat )
+		);
+	} );
+
 	it( 'should use the default 12 hour date time format', () => {
 		const dateTime = moment( '2022-09-15 02:30:40' );
 
 		const { container } = render(
 			<DateTimePickerControl
 				currentDate={ dateTime.toISOString() }
-				is12Hour={ true }
+				is12HourPicker={ true }
 			/>
 		);
 
@@ -144,14 +184,14 @@ describe( 'DateTimePickerControl', () => {
 		const { container, rerender } = render(
 			<DateTimePickerControl
 				currentDate={ originalDateTime.toISOString() }
-				is12Hour={ false }
+				is12HourPicker={ false }
 			/>
 		);
 
 		rerender(
 			<DateTimePickerControl
 				currentDate={ updatedDateTime.toISOString() }
-				is12Hour={ false }
+				is12HourPicker={ false }
 			/>
 		);
 
@@ -189,9 +229,23 @@ describe( 'DateTimePickerControl', () => {
 		);
 	} );
 
-	it( 'should set the date time picker popup to 12 hour mode', async () => {
+	it( 'should set the picker popup to date and time by default', async () => {
+		const { container } = render( <DateTimePickerControl /> );
+
+		const input = container.querySelector( 'input' );
+
+		userEvent.click( input! );
+
+		await waitFor( () =>
+			expect(
+				container.querySelector( '.components-datetime' )
+			).toBeInTheDocument()
+		);
+	} );
+
+	it( 'should set the picker to 12 hour mode', async () => {
 		const { container } = render(
-			<DateTimePickerControl is12Hour={ true } />
+			<DateTimePickerControl is12HourPicker={ true } />
 		);
 
 		const input = container.querySelector( 'input' );
@@ -205,6 +259,25 @@ describe( 'DateTimePickerControl', () => {
 				)
 			).toBeInTheDocument()
 		);
+	} );
+
+	it( 'should set the picker popup to date only', async () => {
+		const { container } = render(
+			<DateTimePickerControl isDateOnlyPicker={ true } />
+		);
+
+		const input = container.querySelector( 'input' );
+
+		userEvent.click( input! );
+
+		await waitFor( () => {
+			expect(
+				container.querySelector( '.components-datetime' )
+			).not.toBeInTheDocument();
+			expect(
+				container.querySelector( '.components-datetime__date' )
+			).toBeInTheDocument();
+		} );
 	} );
 
 	it( 'should call onBlur when losing focus', async () => {

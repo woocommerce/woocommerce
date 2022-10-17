@@ -15,6 +15,7 @@ import { cleanForSlug } from '@wordpress/url';
 import { EnrichedLabel, useFormContext } from '@woocommerce/components';
 import {
 	Product,
+	ProductCategory,
 	PRODUCTS_STORE_NAME,
 	WCDataSelector,
 } from '@woocommerce/data';
@@ -27,6 +28,7 @@ import './product-details-section.scss';
 import { getCheckboxProps, getTextControlProps } from './utils';
 import { ProductSectionLayout } from '../layout/product-section-layout';
 import { EditProductLinkModal } from '../shared/edit-product-link-modal';
+import { CategoryField } from '../fields/category-field';
 
 const PRODUCT_DETAILS_SLUG = 'product-details';
 
@@ -111,6 +113,16 @@ export const ProductDetailsSection: React.FC = () => {
 							</span>
 						) }
 					</div>
+					<CategoryField
+						label={ __( 'Categories', 'woocommerce' ) }
+						placeholder={ __(
+							'Search or create category…',
+							'woocommerce'
+						) }
+						{ ...getInputProps<
+							Pick< ProductCategory, 'id' | 'name' >[]
+						>( 'categories' ) }
+					/>
 					<CheckboxControl
 						label={
 							<EnrichedLabel

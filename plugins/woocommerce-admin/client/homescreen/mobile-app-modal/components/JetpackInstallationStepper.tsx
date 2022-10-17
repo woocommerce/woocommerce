@@ -14,14 +14,17 @@ import {
 	SendMagicLinkButton,
 	useJetpackPluginState,
 	JetpackPluginStates,
+	SendMagicLinkStates,
 } from './';
 
 export const JetpackInstallationStepper = ( {
 	step,
 	sendMagicLinkHandler,
+	sendMagicLinkStatus,
 }: {
 	step: 'first' | 'second';
 	sendMagicLinkHandler: () => void;
+	sendMagicLinkStatus: SendMagicLinkStates;
 } ) => {
 	const { installHandler, jetpackConnectionData, state } =
 		useJetpackPluginState();
@@ -115,6 +118,10 @@ export const JetpackInstallationStepper = ( {
 					),
 					content: (
 						<SendMagicLinkButton
+							isFetching={
+								sendMagicLinkStatus ===
+								SendMagicLinkStates.FETCHING
+							}
 							onClickHandler={ sendMagicLinkHandler }
 						/>
 					),
@@ -128,6 +135,7 @@ export const JetpackInstallationStepper = ( {
 		isWaitingForRedirect,
 		jetpackConnectionData?.currentUser?.wpcomUser?.email,
 		sendMagicLinkHandler,
+		sendMagicLinkStatus,
 	] );
 
 	return (

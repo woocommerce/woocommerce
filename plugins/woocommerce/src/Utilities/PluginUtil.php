@@ -118,6 +118,50 @@ class PluginUtil {
 	}
 
 	/**
+	 * Match plugin identifier passed as a parameter with the output from `get_plugins()`.
+	 *
+	 * @param string $plugin_file Plugin identifier, either 'my-plugin/my-plugin.php', or output from __FILE__.
+	 *
+	 * @return string|false Key from the array returned by `get_plugins` if matched. False if no match.
+	 */
+	public function get_wp_plugin_id( $plugin_file ) {
+		$wp_plugins = array_keys( $this->proxy->call_function( 'get_plugins' ) );
+
+		// Try to match plugin_basename().
+		$plugin_basename = $this->proxy->call_function( 'plugin_basename', $plugin_file );
+		if ( array_key_exists( $plugin_basename, $wp_plugins ) ) {
+			return $plugin_basename;
+		}
+
+		// Try to match by the my-file/my-file.php (dir + file name), then by my-file.php (file name only).
+		$plugin_file     = str_replace( array( '\\', '/' ), DIRECTORY_SEPARATOR, $plugin_file );
+		$file_name_parts = explode( DIRECTORY_SEPARATOR, $plugin_file );
+		$file_name       = array_pop( $file_name_parts );
+		$directory_name  = array_pop( $file_name_parts );
+		$full_matches    = array();
+		$partial_matches = array();
+		foreach ( $wp_plugins as $wp_plugin ) {
+			if ( false !== strpos( $wp_plugin, $directory_name . DIRECTORY_SEPARATOR . $file_name ) ) {
+				$full_matches[] = $wp_plugin;
+			}
+
+			if ( false !== strpos( $wp_plugin, $file_name ) ) {
+				$partial_matches[] = $wp_plugin;
+			}
+		}
+
+		if ( 1 === count( $full_matches ) ) {
+			return $full_matches[0];
+		}
+
+		if ( 1 === count( $partial_matches ) ) {
+			return $partial_matches[0];
+		}
+
+		return false;
+	}
+
+	/**
 	 * Handle plugin activation and deactivation by clearing the WooCommerce aware plugin ids cache.
 	 */
 	private function handle_plugin_de_activation(): void {

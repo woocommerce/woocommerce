@@ -1075,6 +1075,56 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Setter for billing address, expects the $address parameter to be key value pairs for individual address props.
+	 *
+	 * @param array $address Address to set.
+	 *
+	 * @return void
+	 */
+	public function set_billing_address( array $address ) {
+		foreach ( $address as $key => $value ) {
+			$this->set_address_prop( $key, 'billing', $value );
+		}
+	}
+
+	/**
+	 * Shortcut for calling set_billing_address.
+	 *
+	 * This is useful in scenarios where set_$prop_name is invoked, and since we store the billing address as 'billing' prop in data, it can be called directly.
+	 *
+	 * @param array $address Address to set.
+	 *
+	 * @return void
+	 */
+	public function set_billing( array $address ) {
+		$this->set_billing_address( $address );
+	}
+
+	/**
+	 * Setter for shipping address, expects the $address parameter to be key value pairs for individual address props.
+	 *
+	 * @param array $address Address to set.
+	 *
+	 * @return void
+	 */
+	public function set_shipping_address( array $address ) {
+		foreach ( $address as $key => $value ) {
+			$this->set_address_prop( $key, 'shipping', $value );
+		}
+	}
+
+	/**
+	 * Shortcut for calling set_shipping_address. This is useful in scenarios where set_$prop_name is invoked, and since we store the shipping address as 'shipping' prop in data, it can be called directly.
+	 *
+	 * @param array $address Address to set.
+	 *
+	 * @return void
+	 */
+	public function set_shipping( array $address ) {
+		$this->set_shipping_address( $address );
+	}
+
+	/**
 	 * Set order key.
 	 *
 	 * @param string $value Max length 22 chars.
