@@ -39,7 +39,7 @@ jobs:
         uses: aurelien-baudet/workflow-dispatch@v2
         with:
           workflow: GitHub Pages deploy
-          repo: woocommerce/code-reference
+          repo: samueljseay/code-reference
           token: ${{ secrets.CUSTOM_GH_TOKEN }}
           ref: refs/heads/trunk
           inputs: '{ "version": "${{ github.event.release.tag_name }}" }'    
