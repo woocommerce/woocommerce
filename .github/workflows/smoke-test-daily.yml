@@ -274,7 +274,7 @@ jobs:
                   retention-days: 5
 
     trunk-results:
-        name: Post test results
+        name: Publish report on smoke tests on trunk
         if: always() &&
             ! github.event.pull_request.head.repo.fork
         runs-on: ubuntu-20.04
@@ -329,7 +329,7 @@ jobs:
                     --repo woocommerce/woocommerce-test-reports
 
     plugins-results:
-        name: Publish Smoke tests with plugins report
+        name: Publish report on smoke tests with plugins
         if: |
             always() &&
             ! github.event.pull_request.head.repo.fork
