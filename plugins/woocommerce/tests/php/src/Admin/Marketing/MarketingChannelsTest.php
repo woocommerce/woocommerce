@@ -26,16 +26,19 @@ class MarketingChannelsTest extends WC_Unit_Test_Case {
 		$test_channel = $this->createMock( MarketingChannelInterface::class );
 		$test_channel->expects( $this->any() )->method( 'get_slug' )->willReturn( 'test-channel-1' );
 
-		set_transient(
-			MarketingSpecs::RECOMMENDED_PLUGINS_TRANSIENT,
-			[
-				[
-					'product' => 'test-channel-1',
-				],
-			]
-		);
+		$marketing_specs = $this->createMock( MarketingSpecs::class );
+		$marketing_specs->expects( $this->once() )
+						->method( 'get_recommended_plugins' )
+						->willReturn(
+							[
+								[
+									'product' => 'test-channel-1',
+								],
+							]
+						);
 
 		$marketing_channels = new MarketingChannels();
+		$marketing_channels->init( $marketing_specs );
 		$marketing_channels->register( $test_channel );
 
 		$this->assertNotEmpty( $marketing_channels->get_registered_channels() );
@@ -49,9 +52,11 @@ class MarketingChannelsTest extends WC_Unit_Test_Case {
 		$test_channel = $this->createMock( MarketingChannelInterface::class );
 		$test_channel->expects( $this->any() )->method( 'get_slug' )->willReturn( 'test-channel-1' );
 
-		set_transient( MarketingSpecs::RECOMMENDED_PLUGINS_TRANSIENT, [] );
+		$marketing_specs = $this->createMock( MarketingSpecs::class );
+		$marketing_specs->expects( $this->once() )->method( 'get_recommended_plugins' )->willReturn( [] );
 
 		$marketing_channels = new MarketingChannels();
+		$marketing_channels->init( $marketing_specs );
 		$marketing_channels->register( $test_channel );
 
 		$this->assertEmpty( $marketing_channels->get_registered_channels() );
@@ -64,14 +69,19 @@ class MarketingChannelsTest extends WC_Unit_Test_Case {
 		$test_channel = $this->createMock( MarketingChannelInterface::class );
 		$test_channel->expects( $this->any() )->method( 'get_slug' )->willReturn( 'test-channel-1' );
 
-		set_transient(
-			MarketingSpecs::RECOMMENDED_PLUGINS_TRANSIENT,
-			[
-				[
-					'product' => $test_channel->get_slug(),
-				],
-			]
-		);
+		$marketing_specs = $this->createMock( MarketingSpecs::class );
+		$marketing_specs->expects( $this->once() )
+						->method( 'get_recommended_plugins' )
+						->willReturn(
+							[
+								[
+									'product' => 'test-channel-1',
+								],
+							]
+						);
+
+		$marketing_channels = new MarketingChannels();
+		$marketing_channels->init( $marketing_specs );
 
 		add_filter(
 			'woocommerce_marketing_channels',
@@ -82,7 +92,6 @@ class MarketingChannelsTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		$marketing_channels = new MarketingChannels();
 		$this->assertNotEmpty( $marketing_channels->get_registered_channels() );
 		$this->assertEquals( $test_channel, $marketing_channels->get_registered_channels()[0] );
 	}
