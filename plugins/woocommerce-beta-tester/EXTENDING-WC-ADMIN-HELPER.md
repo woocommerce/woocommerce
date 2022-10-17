@@ -1,14 +1,3 @@
-## Development
-
-To get started, run the following commands:
-
-```text
-pnpm install
-pnpm run start
-```
-
-See [wp-scripts](https://github.com/WordPress/gutenberg/tree/master/packages/scripts) for more usage information.
-
 ## Extending
 
 There are two client-side filters available if you want to extend the test
