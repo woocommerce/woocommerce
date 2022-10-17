@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove `qs` dependency from `woocommerce-admin`
