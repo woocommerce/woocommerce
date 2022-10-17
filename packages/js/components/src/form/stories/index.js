@@ -52,13 +52,7 @@ export const Basic = () => {
 				onChange={ handleChange }
 				initialValues={ initialValues }
 			>
-				{ ( {
-					getInputProps,
-					getDateTimePickerControlProps,
-					values,
-					errors,
-					handleSubmit,
-				} ) => {
+				{ ( { getInputProps, values, errors, handleSubmit } ) => {
 					const radioInputProps = getInputProps( 'radio' );
 					return (
 						<div>
@@ -83,7 +77,9 @@ export const Basic = () => {
 								label="Date"
 								dateTimeFormat="YYYY-MM-DD HH:mm"
 								placeholder="Enter a date"
-								{ ...getDateTimePickerControlProps( 'date' ) }
+								{ ...getInputProps( 'date', {
+									alias: { value: 'currentDate' },
+								} ) }
 							/>
 							<CheckboxControl
 								label="Checkbox"

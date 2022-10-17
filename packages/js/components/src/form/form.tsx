@@ -22,10 +22,10 @@ import _isEqual from 'lodash/isEqual';
  * Internal dependencies
  */
 import {
-	DateTimePickerControlProps,
 	FormContext,
 	FormErrors,
 	InputProps,
+	InputPropsOptions,
 } from './form-context';
 
 type FormProps< Values > = {
@@ -274,13 +274,14 @@ function FormComponent< Values extends Record< string, any > >(
 	};
 
 	function getInputProps< Value = Values[ keyof Values ] >(
-		name: string
+		name: string,
+		options?: InputPropsOptions< InputProps< Value > >
 	): InputProps< Value > {
 		const inputValue = _get( values, name );
 		const isTouched = touched[ name ];
 		const inputError = _get( errors, name );
 
-		return {
+		const inputProps = {
 			value: inputValue,
 			checked: Boolean( inputValue ),
 			selected: inputValue,
@@ -290,23 +291,26 @@ function FormComponent< Values extends Record< string, any > >(
 			className: isTouched && inputError ? 'has-error' : undefined,
 			help: isTouched ? ( inputError as string ) : null,
 		};
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const aliasedProps = {} as Record< string, any >;
+		if ( options?.alias ) {
+			for ( const key in options.alias ) {
+				const alias = options.alias[ key as keyof InputProps< Value > ];
+				if ( alias ) {
+					aliasedProps[ alias ] =
+						inputProps[ key as keyof InputProps< Value > ];
+				}
+			}
+		}
+
+		return { ...inputProps, ...aliasedProps };
 	}
 
 	const isDirty = useMemo(
 		() => ! _isEqual( initialValues.current, values ),
 		[ initialValues.current, values ]
 	);
-
-	function getDateTimePickerControlProps< Value = Values[ keyof Values ] >(
-		name: string
-	): DateTimePickerControlProps< Value > {
-		const inputProps = getInputProps< Value >( name );
-
-		return {
-			currentDate: inputProps.value,
-			...inputProps,
-		};
-	}
 
 	const getStateAndHelpers = () => {
 		return {
@@ -319,7 +323,6 @@ function FormComponent< Values extends Record< string, any > >(
 			setValues,
 			handleSubmit,
 			getInputProps,
-			getDateTimePickerControlProps,
 			isValidForm: ! Object.keys( errors ).length,
 			resetForm,
 		};

@@ -18,11 +18,10 @@ export type InputProps< Value > = {
 	help: string | null | undefined;
 };
 
-export type DateTimePickerControlProps< Value > = Pick<
-	InputProps< Value >,
-	'onChange' | 'onBlur' | 'className' | 'help'
-> & {
-	currentDate: Value;
+export type InputPropsOptions< Type > = {
+	alias?: {
+		[ Property in keyof Type ]?: string;
+	};
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,11 +38,9 @@ export type FormContext< Values extends Record< string, any > > = {
 	setValues: ( valuesToSet: Values ) => void;
 	handleSubmit: () => Promise< Values >;
 	getInputProps< Value extends Values[ keyof Values ] >(
-		name: string
+		name: string,
+		options?: InputPropsOptions< InputProps< Value > >
 	): InputProps< Value >;
-	getDateTimePickerControlProps< Value extends Values[ keyof Values ] >(
-		name: string
-	): DateTimePickerControlProps< Value >;
 	isValidForm: boolean;
 	resetForm: (
 		initialValues: Values,
