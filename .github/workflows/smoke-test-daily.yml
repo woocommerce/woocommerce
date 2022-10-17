@@ -20,6 +20,7 @@ jobs:
     e2e-tests:
         name: E2E tests on trunk
         runs-on: ubuntu-20.04
+        if: false # mytodo re-enable
         env:
             BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
             ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
@@ -89,7 +90,7 @@ jobs:
         name: API tests on trunk
         runs-on: ubuntu-20.04
         needs: [e2e-tests]
-        if: always()
+        if: false # mytodo re-enable
         steps:
             - uses: actions/checkout@v3
               with:
@@ -141,7 +142,7 @@ jobs:
         name: k6 tests on trunk
         runs-on: ubuntu-20.04
         needs: [api-tests]
-        if: always()
+        if: false # mytodo re-enable
         steps:
             - uses: actions/checkout@v3
               with:
@@ -273,7 +274,8 @@ jobs:
 
     trunk-summary:
         name: Post test results
-        if: always()
+        # mytodo: re-enable: if: always()
+        if: false
         runs-on: ubuntu-20.04
         needs: [e2e-tests, api-tests]
         steps:
@@ -368,13 +370,15 @@ jobs:
 
     trunk-publish-reports:
         name: Publish Smoke tests on trunk report
-        if: |
-            always() &&
-            ! github.event.pull_request.head.repo.fork &&
-            (
-              contains( needs.*.result, 'success' ) ||
-              contains( needs.*.result, 'failure' )
-            )
+        # mytodo re-enable
+        # if: |
+        #     always() &&
+        #     ! github.event.pull_request.head.repo.fork &&
+        #     (
+        #       contains( needs.*.result, 'success' ) ||
+        #       contains( needs.*.result, 'failure' )
+        #     )
+        if: false
         runs-on: ubuntu-20.04
         needs: [k6-tests, test-plugins]
         env:
