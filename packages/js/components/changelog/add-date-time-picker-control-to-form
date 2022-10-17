@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add DateTimePickerControl support to Form.
+Add support for aliasing props returned from FormContext's getInputProps.
