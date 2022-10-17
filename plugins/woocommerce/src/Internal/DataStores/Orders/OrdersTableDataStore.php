@@ -1757,13 +1757,21 @@ FROM $order_meta_table
 
 		$wpdb->update(
 			self::get_orders_table_name(),
-			array( 'status' => 'trash' ),
+			array(
+				'status'           => 'trash',
+				'date_updated_gmt' => current_time( 'Y-m-d H:i:s', true ),
+			),
 			array( 'id' => $order->get_id() ),
-			array( '%s' ),
+			array( '%s', '%s' ),
 			array( '%d' )
 		);
 
 		$order->set_status( 'trash' );
+
+		$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+		if ( $data_synchronizer->data_sync_is_enabled() ) {
+			wp_trash_post( $order->get_id() );
+		}
 	}
 
 	/**
@@ -1827,6 +1835,7 @@ FROM $order_meta_table
 		if ( $previous_status === $order->get_status() ) {
 			$order->delete_meta_data( '_wp_trash_meta_status' );
 			$order->delete_meta_data( '_wp_trash_meta_time' );
+			$order->save_meta_data();
 			return true;
 		}
 
