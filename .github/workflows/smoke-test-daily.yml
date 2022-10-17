@@ -419,7 +419,7 @@ jobs:
                     - plugin: 'WordPress SEO' # Yoast SEO in the UI, but the slug is wordpress-seo
                       repo: 'Yoast/wordpress-seo'
                     - plugin: 'Contact Form 7'
-                      repo: 'takayukister/contact-form-7'            
+                      repo: 'takayukister/contact-form-7'
         steps:
             - name: Get slug
               id: get-slug
@@ -436,6 +436,6 @@ jobs:
                     -f run_id=$RUN_ID \
                     -f artifact="$ARTIFACT" \
                     -f plugin="${{ matrix.plugin }}" \
-                    -f slug="${{ steps.get-slug.outputs.result }}" \ 
+                    -f slug="${{ steps.get-slug.outputs.result }}" \
                     -f s3_root=public \
-                    --repo woocommerce/woocommerce-test-reports                    
+                    --repo woocommerce/woocommerce-test-reports
