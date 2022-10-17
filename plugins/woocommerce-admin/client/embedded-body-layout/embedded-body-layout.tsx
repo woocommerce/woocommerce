@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { applyFilters } from '@wordpress/hooks';
-import QueryString, { parse } from 'qs';
 
 /**
  * Internal dependencies
@@ -16,9 +15,9 @@ import './style.scss';
 type QueryParams = EmbeddedBodyProps;
 
 function isWPPage(
-	params: QueryParams | QueryString.ParsedQs
-): params is QueryParams {
-	return ( params as QueryParams ).page !== undefined;
+	params: URLSearchParams
+): Boolean {
+	return params.get( 'page' ) !== null;
 }
 
 const EMBEDDED_BODY_COMPONENT_LIST: React.ElementType[] = [
@@ -34,10 +33,10 @@ const EMBEDDED_BODY_COMPONENT_LIST: React.ElementType[] = [
  * Each Fill component receives QueryParams, consisting of a page, tab, and section string.
  */
 export const EmbeddedBodyLayout = () => {
-	const query = parse( location.search.substring( 1 ) );
+	const query = new URLSearchParams( location.search );
 	let queryParams: QueryParams = { page: '', tab: '' };
 	if ( isWPPage( query ) ) {
-		queryParams = query;
+		queryParams = Object.fromEntries( query ) as QueryParams;
 	}
 	/**
 	 * Filter an array of body components for WooCommerce non-react pages.
