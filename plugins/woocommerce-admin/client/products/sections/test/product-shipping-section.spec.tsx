@@ -4,6 +4,7 @@
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useSelect, useDispatch } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
 import { Form } from '@woocommerce/components';
 
 /**
@@ -34,10 +35,9 @@ describe( 'ProductShippingSection', () => {
 				name: 'New shipping class',
 				slug: 'new-shipping-class',
 			};
-			const createProductShippingClass = jest
-				.fn()
-				.mockReturnValue( Promise.resolve( newShippingClass ) );
+			const createProductShippingClass = jest.fn();
 			const invalidateResolution = jest.fn();
+			const createErrorNotice = jest.fn();
 
 			beforeEach( () => {
 				useSelectMock.mockReturnValue( {
@@ -48,6 +48,7 @@ describe( 'ProductShippingSection', () => {
 				useDispatchMock.mockReturnValue( {
 					createProductShippingClass,
 					invalidateResolution,
+					createErrorNotice,
 				} );
 
 				render(
@@ -58,6 +59,10 @@ describe( 'ProductShippingSection', () => {
 			} );
 
 			it( 'should be selected as the current option', async () => {
+				createProductShippingClass.mockResolvedValue(
+					newShippingClass
+				);
+
 				const select = screen.getByLabelText( 'Shipping class' );
 				act( () =>
 					userEvent.selectOptions(
@@ -73,6 +78,34 @@ describe( 'ProductShippingSection', () => {
 				expect( select ).toHaveDisplayValue( [
 					newShippingClass.name,
 				] );
+			} );
+
+			it( 'should show a snackbar message when server responds an error', async () => {
+				createProductShippingClass.mockRejectedValue(
+					new Error( 'Server Error' )
+				);
+
+				const select = screen.getByLabelText( 'Shipping class' );
+				act( () =>
+					userEvent.selectOptions(
+						select,
+						ADD_NEW_SHIPPING_CLASS_OPTION_VALUE
+					)
+				);
+
+				const dialog = screen.getByRole( 'dialog' );
+				const addButton = within( dialog ).getByText( 'Add' );
+
+				await act( async () => userEvent.click( addButton ) );
+
+				expect( createErrorNotice ).toHaveBeenNthCalledWith(
+					1,
+					__(
+						'We couldn’t add this shipping class. Try again in a few seconds.',
+						'woocommerce'
+					),
+					expect.objectContaining( { explicitDismiss: true } )
+				);
 			} );
 		} );
 	} );

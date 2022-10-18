@@ -139,6 +139,7 @@ export function ProductShippingSection( {
 	const { createProductShippingClass, invalidateResolution } = useDispatch(
 		EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
 	);
+	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	const dimensionProps = {
 		onBlur: () => {
@@ -346,11 +347,26 @@ export function ProductShippingSection( {
 					onAdd={ ( shippingClassValues ) =>
 						createProductShippingClass<
 							Promise< ProductShippingClass >
-						>( shippingClassValues ).then( ( value ) => {
-							invalidateResolution( 'getProductShippingClasses' );
-							setValue( 'shipping_class', value.slug );
-							return value;
-						} )
+						>( shippingClassValues )
+							.then( ( value ) => {
+								invalidateResolution(
+									'getProductShippingClasses'
+								);
+								setValue( 'shipping_class', value.slug );
+								return value;
+							} )
+							.catch( ( error: Error ) => {
+								createErrorNotice(
+									__(
+										'We couldn’t add this shipping class. Try again in a few seconds.',
+										'woocommerce'
+									),
+									{
+										explicitDismiss: true,
+									}
+								);
+								throw error;
+							} )
 					}
 					onCancel={ () => setShowShippingClassModal( false ) }
 				/>
