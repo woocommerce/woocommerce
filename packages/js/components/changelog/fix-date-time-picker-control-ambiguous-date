@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Assume ambiguous dates passed into DateTimePickerControl are UTC.

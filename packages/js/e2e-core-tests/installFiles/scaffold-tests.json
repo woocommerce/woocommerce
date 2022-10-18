@@ -1,0 +1,136 @@
+{
+	"active": [
+		{
+			"name": "front-end",
+			"description": "Shopper tests",
+			"testFiles": [
+				{
+					"name": "cart-begin",
+					"functions": [ "runCartPageTest" ]
+				}, {
+					"name": "cart-calculate-shipping",
+					"functions": [ "runCartCalculateShippingTest" ]
+				}, {
+					"name": "cart-coupons",
+					"functions": [ "runCartApplyCouponsTest" ]
+				}, {
+					"name": "checkout-begin",
+					"functions": [ "runCheckoutPageTest" ]
+				}, {
+					"name": "checkout-coupons",
+					"functions": [ "runCheckoutApplyCouponsTest" ]
+				}, {
+					"name": "checkout-create-account",
+					"functions": [ "runCheckoutCreateAccountTest" ]
+				}, {
+					"name": "checkout-login-account",
+					"functions": [ "runCheckoutLoginAccountTest" ]
+				}, {
+					"name": "my-account-create-account",
+					"functions": [ "runMyAccountCreateAccountTest" ]
+				}, {
+					"name": "my-account-pay-order",
+					"functions": [ "runMyAccountPayOrderTest" ]
+				}, {
+					"name": "my-account",
+					"functions": [ "runMyAccountPageTest" ]
+				}, {
+					"name": "order-email-receiving",
+					"functions": [ "runOrderEmailReceivingTest" ]
+				}, {
+					"name": "product-browse-search-sort",
+					"functions": [ "runProductBrowseSearchSortTest" ]
+				}, {
+					"name": "single-product-page",
+					"functions": [ "runSingleProductPageTest" ]
+				}, {
+					"name": "variable-product-updates",
+					"functions": [ "runVariableProductUpdateTest" ]
+				}
+			]
+		}, {
+			"name": "rest-api",
+			"description": "REST API tests",
+			"testFiles": [
+				{
+					"name": "api",
+					"functions": [ "runApiTests" ]
+				}
+			]
+		}, {
+			"name": "wp-admin",
+			"description": "Merchant tests",
+			"testFiles": [
+				{
+					"name": "create-coupon",
+					"functions": [ "runCreateCouponTest" ]
+				}, {
+					"name": "create-order",
+					"functions": [ "runCreateOrderTest" ]
+				}, {
+					"name": "create-shipping-classes",
+					"functions": [ "runAddShippingClassesTest" ]
+				}, {
+					"name": "create-shipping-zones",
+					"functions": [ "runAddNewShippingZoneTest" ]
+				}, {
+					"name": "create-simple-product",
+					"functions": [ "runAddSimpleProductTest" ]
+				}, {
+					"name": "create-variable-product",
+					"functions": [ "runAddVariableProductTest" ]
+				}, {
+					"name": "order-coupon",
+					"functions": [ "runOrderApplyCouponTest" ]
+				}, {
+					"name": "order-customer-payment-page",
+					"functions": [ "runMerchantOrdersCustomerPaymentPage" ]
+				}, {
+					"name": "order-edit",
+					"functions": [ "runEditOrderTest" ]
+				}, {
+					"name": "order-emails",
+					"functions": [ "runMerchantOrderEmailsTest" ]
+				}, {
+					"name": "order-refund",
+					"functions": [ "runOrderRefundTest" ]
+				}, {
+					"name": "order-searching",
+					"functions": [ "runOrderSearchingTest" ]
+				}, {
+					"name": "order-status-filters",
+					"functions": [ "runOrderStatusFiltersTest" ]
+				}, {
+					"name": "product-edit",
+					"functions": [ "runProductEditDetailsTest" ]
+				}, {
+					"name": "product-import-csv",
+					"functions": [ "runImportProductsTest" ]
+				}, {
+					"name": "product-search",
+					"functions": [ "runProductSearchTest" ]
+				}, {
+					"name": "update-general-settings",
+					"functions": [ "runUpdateGeneralSettingsTest" ]
+				}, {
+					"name": "update-product-settings",
+					"functions": [ "runProductSettingsTest" ]
+				}, {
+					"name": "update-tax-settings",
+					"functions": [ "runTaxSettingsTest" ]
+				}, {
+					"name": "wccom-connect",
+					"functions": [ "runInitiateWccomConnectionTest" ]
+				}
+			]
+		}
+	],
+	"deprecated": [
+		{
+			"name": "example-folder",
+			"testFiles": [
+				{ "name": "any-filename-to-deprecate" }
+			]
+		}
+	]
+}

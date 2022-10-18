@@ -1,0 +1,340 @@
+.connect-account-page {
+	.woocommerce-payments-page {
+		margin: 0 auto;
+
+		&.is-narrow {
+			max-width: 680px;
+		}
+	}
+
+	.wcpay-connect-account-page-payment-methods {
+		svg {
+			display: inline-block;
+			height: 35px;
+			width: 52px;
+			margin-right: 0.5em;
+			margin-bottom: 0.5em;
+		}
+	}
+
+	.wcpay-connect-account-page-terms-of-service {
+		color: #40464d;
+		font-size: 12px;
+		margin: 0;
+	}
+
+	.connect-account {
+		h2 {
+			font-size: 24px;
+			font-weight: normal;
+		}
+
+		h3 {
+			font-size: 16px;
+			line-height: 24px;
+			padding-top: 15px;
+		}
+
+		.connect-account__card,
+		.woocommerce-payments-banner,
+		.connect-account__apms,
+		.connect-account__apms-notice,
+		.faq__card {
+			box-shadow: none;
+			border: 1px solid #e2e4e7;
+			border-radius: 2px;
+			margin-top: 24px;
+		}
+
+		.faq__card {
+			margin-bottom: var(--large-gap);
+			background-color: #fff;
+
+			h3 {
+				padding: 0 24px;
+				font-weight: normal;
+			}
+
+			.components-panel__body {
+				&.is-opened {
+					padding: 24px 24px 8px 24px;
+					> .components-panel__body-title {
+						margin: -24px;
+						margin-bottom: 13px;
+					}
+				}
+			}
+
+			.components-panel__body-toggle.components-button {
+				padding-left: 24px;
+				line-height: 20px;
+			}
+
+			.components-panel {
+				border-left: 0;
+				border-right: 0;
+			}
+
+			p {
+				font-size: 14px;
+				line-height: 20px;
+			}
+
+			ul {
+				margin-left: 34px;
+				li {
+					list-style: disc;
+					line-height: 20px;
+					font-size: 14px;
+					margin: 5px 0 0 0;
+					ul li {
+						list-style: circle;
+					}
+				}
+			}
+
+			.help-section {
+				font-size: 16px;
+				background: #f7edf7;
+				padding: 16px 24px;
+				color: #533582;
+				svg path {
+					fill: #533582;
+				}
+				span {
+					vertical-align: 6px;
+					margin-left: 10px;
+				}
+				a {
+					text-decoration: none;
+					vertical-align: 6px;
+					margin-left: 10px;
+				}
+			}
+
+			.help-section-simple {
+				font-size: 16px;
+				padding: $gap;
+				span {
+					vertical-align: 6px;
+					margin-left: $gap-small;
+				}
+				a {
+					vertical-align: 6px;
+					margin-left: $gap-small;
+				}
+			}
+		}
+
+		.connect-account__card {
+			.components-card__header {
+				align-items: baseline;
+			}
+
+			// Phone-ish sizes.
+			@media (max-width: 680px) {
+				.components-card__header {
+					flex-direction: column;
+				}
+
+				.connect-account__action {
+					margin-top: 15px;
+				}
+			}
+
+			// Applies for non-gutenberg
+			> .components-card__body {
+				padding: 0;
+
+				.content {
+					padding: 9px 24px 24px 24px;
+
+					a {
+						text-decoration: none;
+					}
+				}
+			}
+
+			.onboarding-description {
+				font-size: 16px;
+				color: $studio-gray-70;
+				margin: 0;
+			}
+
+			.accepted-payment-methods {
+				font-size: 12px;
+				font-weight: bold;
+				margin: $gap-large 0 $gap-smaller;
+			}
+		}
+
+		.connect-account__action {
+			margin: 0;
+			white-space: nowrap;
+			button.btn-nothanks {
+				margin-left: 0;
+				margin-right: 10px !important;
+			}
+			button.btn-install {
+				padding: 0 30px 0 30px;
+				border-radius: 3px;
+			}
+		}
+
+		.connect-account__apms {
+			.components-card__header {
+				padding: $gap-small $gap-large;
+				h1 {
+					font-size: 20px;
+					line-height: 28px;
+				}
+			}
+			.components-card__body {
+				padding: 0;
+
+				.woocommerce-list__item {
+					> .woocommerce-list__item-inner {
+						padding: $gap-large;
+						.woocommerce-list__item-title {
+							color: $gray-900;
+							font-weight: 700;
+							font-size: 14px;
+							line-height: 18px;
+						}
+						.woocommerce-list__item-content {
+							color: $gray-700;
+							font-size: 13px;
+							line-height: 16px;
+						}
+						.woocommerce-list__item-after {
+							margin-left: $gap-large;
+						}
+						.woocommerce-list__item-before {
+							img {
+								width: 36px;
+							}
+						}
+					}
+				}
+			}
+			.components-card__footer {
+				padding: $gap $gap-large;
+			}
+		}
+		.connect-account__apms-notice {
+			.components-card__body {
+				padding: 0;
+			}
+			.components-notice {
+				margin: 0;
+				padding: 0;
+				background-color: #f0f6fc;
+				.components-notice__content {
+					margin: 0;
+					padding: $gap $gap-large;
+					display: flex;
+					align-items: center;
+					svg {
+						margin-right: $gap;
+						height: 16px;
+					}
+				}
+			}
+		}
+	}
+
+	.banner-heading-copy {
+		font-size: 24px;
+		line-height: 32px;
+	}
+}
+
+.woocommerce-payments-banner {
+	&.account-page {
+		border: none;
+		border-bottom: 1px solid #e2e4e7;
+		border-radius: 0;
+		box-shadow: none;
+	}
+
+	.gift-icon {
+		display: inline-block;
+		width: 16px;
+		height: 16px;
+		margin-right: $gap-smaller;
+	}
+
+	.offer-header {
+		display: flex;
+		color: $studio-gray-30;
+		text-transform: uppercase;
+	}
+
+	.components-card__body {
+		padding: $gap-large;
+		display: flex;
+	}
+
+	.limited-time-offer {
+		h1 {
+			font-size: 16px;
+			line-height: 21px;
+			font-weight: 400;
+			color: $gray-900;
+		}
+
+		p {
+			font-size: 10px;
+			line-height: 12px;
+			margin: $gap-smaller 0 0;
+			color: $gray-600;
+		}
+	}
+
+	.banner-offer-icon {
+		width: 240px;
+	}
+
+	@include breakpoint('<600px') {
+		.banner-offer-icon {
+			display: none;
+		}
+	}
+}
+
+.wc-calypso-bridge-payments-welcome-survey {
+	p {
+		margin-bottom: 1em;
+	}
+}
+
+.wc-calypso-bridge-payments-welcome-survey__intro {
+	max-width: 500px;
+}
+
+.wc-calypso-bridge-payments-welcome-survey__question {
+	font-weight: bold;
+}
+
+.wc-calypso-bridge-payments-welcome-survey__selection {
+	margin: 1em 0;
+}
+.wc-calypso-bridge-payments-welcome-survey__comment {
+	margin-top: 1em;
+}
+
+.wc-calypso-bridge-payments-welcome-survey__buttons {
+	text-align: right;
+
+	button {
+		margin-left: 0.5em;
+	}
+
+	button.is-destructive {
+		background-color: #cc1818;
+		color: #fff;
+		&:hover {
+			color: #fff !important;
+		}
+	}
+}

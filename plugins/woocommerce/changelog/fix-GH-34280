@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+When the minimum and maximum quantity are identical, render the quantity input and set it to disabled.

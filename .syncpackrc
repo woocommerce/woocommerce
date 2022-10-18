@@ -1,0 +1,41 @@
+{
+	"dev": true,
+	"filter": "^(?:react|react-dom|typescript)$",
+	"indent": "\t",
+	"overrides": true,
+	"peer": true,
+	"pnpmOverrides": true,
+	"prod": true,
+	"semverRange": "^",
+	"workspace": true,
+	"versionGroups": [
+		{
+			"dependencies": [
+				"@typescript-eslint/**"
+			],
+			"pinVersion": "latest",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"dependencies": [
+				"react",
+				"react-dom"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^17.0.2"
+		},
+		{
+			"dependencies": [
+				"typescript"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^4.8.3"
+		}
+	]
+}

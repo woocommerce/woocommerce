@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add date-only mode to DateTimePickerControl.

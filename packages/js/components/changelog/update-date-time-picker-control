@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Add label, placeholder, and help props to DateTimePickerControl.

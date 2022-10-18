@@ -1,0 +1,79 @@
+
+
+.woocommerce-section-header {
+	padding: ($gap - 3);
+	border-bottom: none;
+	display: flex;
+	justify-content: space-between;
+
+	@include breakpoint( '<782px' ) {
+		margin-left: -16px;
+		margin-right: -16px;
+		margin-bottom: $gap-small;
+		border-left: none;
+		border-right: none;
+		width: auto;
+	}
+
+	hr {
+		align-self: center;
+		flex-grow: 1;
+		height: 1px;
+		margin: 0 10px;
+	}
+
+	@include breakpoint( '<782px' ) {
+		&.has-interval-select {
+			position: relative;
+			padding-bottom: 30px;
+			.woocommerce-chart__interval-select {
+				position: absolute;
+				left: 0;
+				bottom: 0;
+				padding-left: 6px;
+			}
+		}
+	}
+}
+
+.woocommerce-section-header__actions,
+.woocommerce-section-header__menu {
+	text-align: right;
+}
+.woocommerce-section-header__actions {
+	display: flex;
+	flex-grow: 1;
+	justify-content: flex-end;
+
+	.components-base-control {
+		padding-top: 0;
+		min-height: 34px;
+
+		.components-base-control__field {
+			margin-bottom: 0;
+			select {
+				background: transparent;
+			}
+		}
+	}
+}
+
+.woocommerce-ellipsis-menu__toggle {
+	padding: 0;
+}
+
+.woocommerce-section-header__menu {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.woocommerce-section-header__title {
+	margin: 0 $gap 0 0;
+	// EllipsisMenu is 24px, so to match we add 6px padding around the
+	// heading text, which we know is 18px from line-height.
+	padding: 3px 0;
+	@include font-size( 20 );
+	line-height: 2.2;
+	font-weight: 400;
+}

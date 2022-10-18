@@ -1,0 +1,65 @@
+<?php
+/**
+ * Adds and controls pointers for contextual help/tutorials
+ *
+ * @package WooCommerce\Admin\Pointers
+ * @version 2.4.0
+ */
+
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Admin\Features\Features;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * WC_Admin_Pointers Class.
+ */
+class WC_Admin_Pointers {
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		add_action( 'admin_enqueue_scripts', array( $this, 'setup_pointers_for_screen' ) );
+	}
+
+	/**
+	 * Setup pointers for screen.
+	 */
+	public function setup_pointers_for_screen() {
+		$screen = get_current_screen();
+
+		if ( ! $screen ) {
+			return;
+		}
+
+		switch ( $screen->id ) {
+			case 'product':
+				$this->create_product_tutorial();
+				break;
+		}
+	}
+
+	/**
+	 * Pointers for creating a product.
+	 */
+	public function create_product_tutorial() {
+		if ( ! isset( $_GET['tutorial'] ) || ! current_user_can( 'manage_options' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+
+		global $wp_post_types;
+
+		if ( ! isset( $wp_post_types ) ) {
+			return;
+		}
+
+		$labels          = $wp_post_types['product']->labels;
+		$labels->add_new = __( 'Enable guided mode', 'woocommerce' );
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'product-tour', true );
+	}
+}
+
+new WC_Admin_Pointers();
