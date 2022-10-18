@@ -94,7 +94,7 @@ function extractDefaultShippingClassFromProduct(
 export function ProductShippingSection( {
 	product,
 }: ProductShippingSectionProps ) {
-	const { getInputProps } = useFormContext< PartialProduct >();
+	const { getInputProps, setValue } = useFormContext< PartialProduct >();
 	const { formatNumber, parseNumber } = useProductHelper();
 	const [ highlightSide, setHighlightSide ] =
 		useState< ShippingDimensionsImageProps[ 'highlight' ] >();
@@ -373,7 +373,7 @@ export function ProductShippingSection( {
 							Promise< ProductShippingClass >
 						>( values ).then( ( value ) => {
 							invalidateResolution( 'getProductShippingClasses' );
-							selectShippingClassProps?.onChange( value.slug );
+							setValue( 'shipping_class', value.slug );
 							return value;
 						} )
 					}
