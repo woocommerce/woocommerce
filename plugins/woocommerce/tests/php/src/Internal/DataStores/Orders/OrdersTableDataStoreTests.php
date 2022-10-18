@@ -1228,6 +1228,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$order_1 = new WC_Order();
 		$order_1->set_billing_city( 'Fort Quality' );
 		$this->switch_data_store( $order_1, $this->sut );
+		$this->disable_cot_sync();
 		$order_1->save();
 
 		$product = new WC_Product_Simple();
@@ -1258,10 +1259,39 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		// Order 1's billing address references "Quality" and so does one of Order 2's order items.
 		$query = new OrdersTableQuery( array( 's' => 'Quality' ) );
+		$orders_array = $query->orders;
+		sort( $orders_array );
 		$this->assertEquals(
 			array( $order_1->get_id(), $order_2->get_id() ),
-			$query->orders,
+			$orders_array,
 			'Search terms match against address data as well as order item names.'
+		);
+	}
+
+	/**
+	 * @testDox Ensure search works as expected on updated orders.
+	 */
+	public function test_cot_query_search_update() {
+		$order_1 = new WC_Order();
+		$this->switch_data_store( $order_1, $this->sut );
+		$this->disable_cot_sync();
+		$order_1->save();
+
+		$order_1->set_billing_city( 'New Cybertron' );
+		$order_1->save();
+
+		$order_2 = new WC_Order();
+		$this->switch_data_store( $order_2, $this->sut );
+		$order_2->save();
+
+		$order_2->set_billing_city( 'Gigantian City' );
+		$order_2->save();
+
+		$query = new OrdersTableQuery( array( 's' => 'Cybertron' ) );
+		$this->assertEquals(
+			array( $order_1->get_id() ),
+			$query->orders,
+			'Search terms match against updated address data.'
 		);
 	}
 
