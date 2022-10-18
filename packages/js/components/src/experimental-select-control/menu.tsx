@@ -33,12 +33,9 @@ export const Menu = ( {
 	const selectControlMenuRef = useRef< HTMLDivElement >( null );
 
 	useEffect( () => {
-		if (
-			selectControlMenuRef.current &&
-			selectControlMenuRef.current?.parentElement
-		) {
+		if ( selectControlMenuRef.current?.parentElement ) {
 			setBoundingRect(
-				selectControlMenuRef.current?.parentElement.getBoundingClientRect()
+				selectControlMenuRef.current.parentElement.getBoundingClientRect()
 			);
 		}
 	}, [ selectControlMenuRef.current ] );
@@ -50,13 +47,7 @@ export const Menu = ( {
 			ref={ selectControlMenuRef }
 			className={ classnames(
 				'woocommerce-experimental-select-control__menu',
-				className,
-				{
-					'is-open': isOpen,
-					'has-results': Array.isArray( children )
-						? children.length
-						: Boolean( children ),
-				}
+				className
 			) }
 		>
 			<Popover
@@ -65,9 +56,8 @@ export const Menu = ( {
 					'woocommerce-experimental-select-control__popover-menu',
 					{
 						'is-open': isOpen,
-						'has-results': Array.isArray( children )
-							? children.length
-							: Boolean( children ),
+						'has-results':
+							Array.isArray( children ) && children.length > 0,
 					}
 				) }
 				position="bottom center"

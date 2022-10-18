@@ -5,12 +5,11 @@ import {
 	Button,
 	CheckboxControl,
 	Modal,
-	Popover,
 	SlotFillProvider,
 	Spinner,
 } from '@wordpress/components';
 import React from 'react';
-import { useState, createElement } from '@wordpress/element';
+import { createElement, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -376,6 +375,8 @@ export const SingleWithinModalUsingBodyDropdownPlacement: React.FC = () => {
 	const [ isOpen, setOpen ] = useState( true );
 	const [ selected, setSelected ] =
 		useState< SelectedType< DefaultItemType > >();
+	const [ selectedTwo, setSelectedTwo ] =
+		useState< SelectedType< DefaultItemType > >();
 
 	return (
 		<SlotFillProvider>
@@ -394,6 +395,13 @@ export const SingleWithinModalUsingBodyDropdownPlacement: React.FC = () => {
 						selected={ selected }
 						onSelect={ ( item ) => item && setSelected( item ) }
 						onRemove={ () => setSelected( null ) }
+					/>
+					<SelectControl
+						items={ sampleItems }
+						label="Single value"
+						selected={ selectedTwo }
+						onSelect={ ( item ) => item && setSelectedTwo( item ) }
+						onRemove={ () => setSelectedTwo( null ) }
 					/>
 				</Modal>
 			) }

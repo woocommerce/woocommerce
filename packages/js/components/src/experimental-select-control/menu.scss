@@ -5,11 +5,6 @@
 	left: 0;
 	margin-top: $gap-smaller;
 	box-sizing: border-box;
-	display: none;
-
-	&.is-open.has-results {
-		display: block;
-	}
 }
 
 .components-popover.woocommerce-experimental-select-control__popover-menu {
