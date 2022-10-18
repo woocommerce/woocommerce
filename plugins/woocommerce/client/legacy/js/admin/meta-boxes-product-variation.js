@@ -42,10 +42,13 @@ jQuery( function ( $ ) {
 				'woocommerce_variations_loaded',
 				this.variations_loaded
 			);
-			$( document.body ).on(
-				'woocommerce_variations_added',
-				this.variation_added
-			);
+			$( document.body )
+				.on( 'woocommerce_variations_added', this.variation_added )
+				.on(
+					'keyup',
+					'.wc_input_variations_price',
+					this.maybe_enable_button_to_add_price_to_variations
+				);
 		},
 
 		/**
@@ -90,6 +93,21 @@ jQuery( function ( $ ) {
 					.closest( '.woocommerce_variation' )
 					.find( '.hide_if_variation_virtual' )
 					.hide();
+			}
+		},
+
+		/**
+		 * Maybe enable the button to add a price for every variation
+		 */
+		maybe_enable_button_to_add_price_to_variations: function () {
+			var variation_price = parseInt(
+				$( '.wc_input_variations_price' ).val(),
+				10
+			);
+			if ( isNaN( variation_price ) ) {
+				$( '.add_variations_price_button' ).prop( 'disabled', true );
+			} else {
+				$( '.add_variations_price_button' ).prop( 'disabled', false );
 			}
 		},
 
@@ -250,12 +268,37 @@ jQuery( function ( $ ) {
 		},
 
 		/**
+		 * Sets a price for every variation
+		 */
+		set_variations_price: function () {
+			var variation_price = $( '.wc_input_variations_price' ).val();
+			var product_type = $( 'select#product-type' ).val();
+			var input_type =
+				'variable-subscription' === product_type
+					? 'variable_subscription_sign_up_fee'
+					: 'variable_regular_price';
+			var input = $( `.wc_input_price[name^=${ input_type }]` );
+			console.log( 'input', input );
+
+			// We don't want to override prices already set
+			input.each( function ( index, el ) {
+				if ( '0' === $( el ).val() || '' === $( el ).val() ) {
+					$( el ).val( variation_price ).trigger( 'change' );
+				}
+			} );
+		},
+
+		/**
 		 * Opens the modal to set a price for every variation
 		 */
-		open_modal_to_set_variations_price: function ( event ) {
+		open_modal_to_set_variations_price: function () {
 			$( this ).WCBackboneModal( {
 				template: 'wc-modal-set-price-variations',
 			} );
+			$( '.add_variations_price_button' ).on(
+				'click',
+				wc_meta_boxes_product_variations_actions.set_variations_price
+			);
 		},
 
 		/**
@@ -552,6 +595,7 @@ jQuery( function ( $ ) {
 		 * @return {Bool}
 		 */
 		check_for_changes: function () {
+			console.log( 'check_for_changes' );
 			var need_update = $( '#variable_product_options' ).find(
 				'.woocommerce_variations .variation-needs-update'
 			);
@@ -663,6 +707,7 @@ jQuery( function ( $ ) {
 		get_variations_fields: function ( fields ) {
 			var data = $( ':input', fields ).serializeJSON();
 
+			console.log( 'get_variations_fields', data );
 			$( '.variations-defaults select' ).each( function (
 				index,
 				element
@@ -1179,6 +1224,7 @@ jQuery( function ( $ ) {
 			}
 
 			wc_meta_boxes_product_variations_ajax.block();
+			console.log( 'data', data );
 
 			$.ajax( {
 				url: woocommerce_admin_meta_boxes_variations.ajax_url,

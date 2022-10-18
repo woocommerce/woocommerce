@@ -163,8 +163,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<input type="text" class="components-text-control__input wc_input_variations_price"/>
 					</div>
 					<div class="woocommerce-usage-modal__actions">
-						<button id="btn-cancel" class="modal-close components-button is-secondary"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
-						<button id="btn-ok" class="button components-button is-primary"><?php esc_html_e( 'OK', 'woocommerce' ); ?></button>
+						<button class="modal-close components-button is-secondary"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
+						<button class="modal-close button components-button add_variations_price_button is-primary" disabled><?php esc_html_e( 'OK', 'woocommerce' ); ?></button>
 					</div>
 				</div>
 			</div>
