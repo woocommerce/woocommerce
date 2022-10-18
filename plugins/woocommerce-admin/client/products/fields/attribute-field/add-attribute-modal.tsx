@@ -276,8 +276,8 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 										values.attributes.length === 1 &&
 										! values.attributes[ 0 ]?.attribute
 											?.id &&
-										values.attributes[ 0 ].terms.length ===
-											0
+										values.attributes[ 0 ]?.terms
+											?.length === 0
 									}
 									onClick={ () =>
 										onAddingAttributes( values )

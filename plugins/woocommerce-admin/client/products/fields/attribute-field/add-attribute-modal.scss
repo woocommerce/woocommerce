@@ -47,6 +47,7 @@
 		display: grid;
 		grid-template-columns: 40% 55% 5%;
 		border-bottom: 1px solid $gray-300;
+		align-items: center;
 	}
 	&__table-row {
 		padding: $gap-large 0;

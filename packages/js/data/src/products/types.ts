@@ -41,12 +41,6 @@ export type ProductDimensions = {
 	length: string;
 };
 
-export type ProductCategory = {
-	id: number;
-	name: string;
-	slug: string;
-};
-
 export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	Schema.Post,
 	'status' | 'categories'

@@ -228,12 +228,14 @@ function SelectControl< ItemType = DefaultItemType >( {
 		>
 			{ /* Downshift's getLabelProps handles the necessary label attributes. */ }
 			{ /* eslint-disable jsx-a11y/label-has-for */ }
-			<label
-				{ ...getLabelProps() }
-				className="woocommerce-experimental-select-control__label"
-			>
-				{ label }
-			</label>
+			{ label && (
+				<label
+					{ ...getLabelProps() }
+					className="woocommerce-experimental-select-control__label"
+				>
+					{ label }
+				</label>
+			) }
 			{ /* eslint-enable jsx-a11y/label-has-for */ }
 			<ComboBox
 				comboBoxProps={ getComboboxProps() }
