@@ -33,7 +33,6 @@
 "packages/js/customer-effort-score/**/*":
   - team: mothra
 
-#'package: @woocommerce/data':
 "packages/js/data/**/*":
   - team: mothra
 
@@ -75,3 +74,6 @@
   
 "plugins/woocommerce-admin/**/*":
   - team: mothra
+
+"plugins/woocommerce-beta-tester/**/*":
+  - team: atlas
