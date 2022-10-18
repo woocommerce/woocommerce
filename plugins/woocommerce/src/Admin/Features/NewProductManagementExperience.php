@@ -19,14 +19,19 @@ class NewProductManagementExperience {
 		add_action( 'admin_init', array( $this, 'enqueue_styles' ) );
 	}
 
-    /**
-     * Enqueue styles needed for the rich text editor.
-     */
-    public function enqueue_styles() {
+	/**
+	 * Enqueue styles needed for the rich text editor.
+	 */
+	public function enqueue_styles() {
 		wp_enqueue_style( 'wp-edit-post' );
 		wp_enqueue_style( 'wp-format-library' );
 		wp_enqueue_editor();
+		/**
+		 * Enqueue any block editor related assets.
+		 *
+		 * @since 7.1.0
+		*/
 		do_action( 'enqueue_block_editor_assets' );
-    }
+	}
 
 }
