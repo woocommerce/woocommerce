@@ -1008,8 +1008,8 @@ WHERE
 	 * @return bool Whether the order should be synced.
 	 */
 	private function should_sync_order( \WC_Abstract_Order $order ) : bool {
-		$draft_order    = in_array( $order->get_status(), array( 'draft', 'auto-draft' ) );
-		$already_synced = in_array( $order->get_id(), self::$reading_order_ids );
+		$draft_order    = in_array( $order->get_status(), array( 'draft', 'auto-draft' ), true );
+		$already_synced = in_array( $order->get_id(), self::$reading_order_ids, true );
 		return ! $draft_order && ! $already_synced;
 	}
 
@@ -1017,8 +1017,8 @@ WHERE
 	 * Helper method to initialize order object from DB data.
 	 *
 	 * @param \WC_Abstract_Order $order Order object.
-	 * @param int       $order_id Order ID.
-	 * @param \stdClass $order_data Order data fetched from DB.
+	 * @param int                $order_id Order ID.
+	 * @param \stdClass          $order_data Order data fetched from DB.
 	 *
 	 * @return void
 	 */
