@@ -6,7 +6,7 @@ import { Button } from '@wordpress/components';
 import { ProductAttribute } from '@woocommerce/data';
 import { Text } from '@woocommerce/experimental';
 import { Sortable, ListItem } from '@woocommerce/components';
-import { trash } from '@wordpress/icons';
+import { closeSmall } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -112,7 +112,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 								{ __( 'edit', 'woocommerce' ) }
 							</Button>
 							<Button
-								icon={ trash }
+								icon={ closeSmall }
 								label={ __(
 									'Remove attribute',
 									'woocommerce'
