@@ -4,16 +4,29 @@
 import { __ } from '@wordpress/i18n';
 import { Button, Popover } from '@wordpress/components';
 import { createElement, Fragment, useState } from '@wordpress/element';
+import { FocusEvent, KeyboardEvent } from 'react';
 import { Icon, help } from '@wordpress/icons';
-import { KeyboardEvent } from 'react';
+
+type Position =
+	| 'top left'
+	| 'top right'
+	| 'top center'
+	| 'middle left'
+	| 'middle right'
+	| 'middle center'
+	| 'bottom left'
+	| 'bottom right'
+	| 'bottom center';
 
 type TooltipProps = {
 	children?: JSX.Element | string;
+	position?: Position;
 	text: JSX.Element | string;
 };
 
 export const Tooltip: React.FC< TooltipProps > = ( {
 	children = <Icon icon={ help } />,
+	position = 'top center',
 	text,
 } ) => {
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
@@ -31,7 +44,7 @@ export const Tooltip: React.FC< TooltipProps > = ( {
 						}
 						setIsPopoverVisible( true );
 					} }
-					onClick={ () => setIsPopoverVisible( true ) }
+					onClick={ () => setIsPopoverVisible( ! isPopoverVisible ) }
 					label={ __( 'Help', 'woocommerce' ) }
 				>
 					{ children }
@@ -40,9 +53,18 @@ export const Tooltip: React.FC< TooltipProps > = ( {
 				{ isPopoverVisible && (
 					<Popover
 						focusOnMount="container"
-						position="top center"
+						position={ position }
 						className="woocommerce-tooltip__text"
-						onFocusOutside={ () => setIsPopoverVisible( false ) }
+						onFocusOutside={ ( event: FocusEvent ) => {
+							if (
+								event.relatedTarget?.classList.contains(
+									'woocommerce-tooltip__button'
+								)
+							) {
+								return;
+							}
+							setIsPopoverVisible( false );
+						} }
 						onKeyDown={ (
 							event: KeyboardEvent< HTMLDivElement >
 						) => {
