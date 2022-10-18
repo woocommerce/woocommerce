@@ -39,6 +39,36 @@ describe( 'ProductShippingSection', () => {
 			const invalidateResolution = jest.fn();
 			const createErrorNotice = jest.fn();
 
+			function getShippingClassSelect() {
+				return screen.getByLabelText(
+					__( 'Shipping class', 'woocommerce' )
+				);
+			}
+
+			async function addNewShippingClass(
+				name: string = 'New shipping class'
+			) {
+				const select = getShippingClassSelect();
+
+				act( () =>
+					userEvent.selectOptions(
+						select,
+						ADD_NEW_SHIPPING_CLASS_OPTION_VALUE
+					)
+				);
+
+				const dialog = screen.getByRole( 'dialog' );
+				const inputName = within( dialog ).getByLabelText(
+					__( 'Name', 'woocommerce' )
+				);
+				const buttonAdd = within( dialog ).getByText(
+					__( 'Add', 'woocommerce' )
+				);
+
+				await act( async () => userEvent.type( inputName, name ) );
+				await act( async () => userEvent.click( buttonAdd ) );
+			}
+
 			beforeEach( () => {
 				useSelectMock.mockReturnValue( {
 					shippingClasses: [ newShippingClass ],
@@ -63,17 +93,9 @@ describe( 'ProductShippingSection', () => {
 					newShippingClass
 				);
 
-				const select = screen.getByLabelText( 'Shipping class' );
-				act( () =>
-					userEvent.selectOptions(
-						select,
-						ADD_NEW_SHIPPING_CLASS_OPTION_VALUE
-					)
-				);
+				await addNewShippingClass();
 
-				const dialog = screen.getByRole( 'dialog' );
-				const addButton = within( dialog ).getByText( 'Add' );
-				await act( async () => userEvent.click( addButton ) );
+				const select = getShippingClassSelect();
 
 				expect( select ).toHaveDisplayValue( [
 					newShippingClass.name,
@@ -85,18 +107,7 @@ describe( 'ProductShippingSection', () => {
 					new Error( 'Server Error' )
 				);
 
-				const select = screen.getByLabelText( 'Shipping class' );
-				act( () =>
-					userEvent.selectOptions(
-						select,
-						ADD_NEW_SHIPPING_CLASS_OPTION_VALUE
-					)
-				);
-
-				const dialog = screen.getByRole( 'dialog' );
-				const addButton = within( dialog ).getByText( 'Add' );
-
-				await act( async () => userEvent.click( addButton ) );
+				await addNewShippingClass();
 
 				expect( createErrorNotice ).toHaveBeenNthCalledWith(
 					1,
