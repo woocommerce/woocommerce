@@ -77,9 +77,8 @@ export const Basic = () => {
 								label="Date"
 								dateTimeFormat="YYYY-MM-DD HH:mm"
 								placeholder="Enter a date"
-								{ ...getInputProps( 'date', {
-									alias: { value: 'currentDate' },
-								} ) }
+								currentDate={ values.date }
+								{ ...getInputProps( 'date' ) }
 							/>
 							<CheckboxControl
 								label="Checkbox"
