@@ -273,14 +273,13 @@ function FormComponent< Values extends Record< string, any > >(
 	};
 
 	function getInputProps< Value = Values[ keyof Values ] >(
-		name: string,
-		options?: InputPropsOptions< InputProps< Value > >
+		name: string
 	): InputProps< Value > {
 		const inputValue = _get( values, name );
 		const isTouched = touched[ name ];
 		const inputError = _get( errors, name );
 
-		const inputProps = {
+		return {
 			value: inputValue,
 			checked: Boolean( inputValue ),
 			selected: inputValue,
@@ -290,20 +289,6 @@ function FormComponent< Values extends Record< string, any > >(
 			className: isTouched && inputError ? 'has-error' : undefined,
 			help: isTouched ? ( inputError as string ) : null,
 		};
-
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const aliasedProps = {} as Record< string, any >;
-		if ( options?.alias ) {
-			for ( const key in options.alias ) {
-				const alias = options.alias[ key as keyof InputProps< Value > ];
-				if ( alias ) {
-					aliasedProps[ alias ] =
-						inputProps[ key as keyof InputProps< Value > ];
-				}
-			}
-		}
-
-		return { ...inputProps, ...aliasedProps };
 	}
 
 	const isDirty = useMemo(

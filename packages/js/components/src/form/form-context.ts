@@ -38,8 +38,7 @@ export type FormContext< Values extends Record< string, any > > = {
 	setValues: ( valuesToSet: Values ) => void;
 	handleSubmit: () => Promise< Values >;
 	getInputProps< Value extends Values[ keyof Values ] >(
-		name: string,
-		options?: InputPropsOptions< InputProps< Value > >
+		name: string
 	): InputProps< Value >;
 	isValidForm: boolean;
 	resetForm: (
