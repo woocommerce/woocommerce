@@ -70,19 +70,26 @@ function getInterpolatedSizeLabel( mixedString: string ) {
 
 /**
  * This extracts a shipping class from the product categories. Using
- * the first category different to `Uncategorized`.
+ * the first category different to `Uncategorized` and check if the
+ * category was not added to the shipping class list
  *
  * @see https://github.com/woocommerce/woocommerce/issues/34657
- * @param  product The product
+ * @see https://github.com/woocommerce/woocommerce/issues/35037
+ * @param product The product
+ * @param shippingClasses The shipping classes
  * @return The default shipping class
  */
 function extractDefaultShippingClassFromProduct(
-	product: PartialProduct
+	product?: PartialProduct,
+	shippingClasses?: ProductShippingClass[]
 ): Partial< ProductShippingClass > | undefined {
 	const category = product?.categories?.find(
 		( { slug } ) => slug !== UNCATEGORIZED_CATEGORY_SLUG
 	);
-	if ( category ) {
+	if (
+		category &&
+		! shippingClasses?.some( ( { slug } ) => slug === category.slug )
+	) {
 		return {
 			name: category.name,
 			slug: category.slug,
@@ -340,10 +347,10 @@ export function ProductShippingSection( {
 
 			{ showShippingClassModal && (
 				<AddNewShippingClassModal
-					shippingClass={
-						product &&
-						extractDefaultShippingClassFromProduct( product )
-					}
+					shippingClass={ extractDefaultShippingClassFromProduct(
+						product,
+						shippingClasses
+					) }
 					onAdd={ ( shippingClassValues ) =>
 						createProductShippingClass<
 							Promise< ProductShippingClass >
