@@ -18,12 +18,6 @@ export type InputProps< Value > = {
 	help: string | null | undefined;
 };
 
-export type InputPropsOptions< Type > = {
-	alias?: {
-		[ Property in keyof Type ]?: string;
-	};
-};
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type FormContext< Values extends Record< string, any > > = {
 	values: Values;

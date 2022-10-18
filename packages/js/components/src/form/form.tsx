@@ -21,12 +21,7 @@ import _isEqual from 'lodash/isEqual';
 /**
  * Internal dependencies
  */
-import {
-	FormContext,
-	FormErrors,
-	InputProps,
-	InputPropsOptions,
-} from './form-context';
+import { FormContext, FormErrors, InputProps } from './form-context';
 
 type FormProps< Values > = {
 	/**
