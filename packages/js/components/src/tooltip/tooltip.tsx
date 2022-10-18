@@ -12,45 +12,49 @@ type TooltipProps = {
 	text: JSX.Element | string;
 };
 
-export const Tooltip: React.FC<TooltipProps> = ({
-	children = <Icon icon={help} />,
+export const Tooltip: React.FC< TooltipProps > = ( {
+	children = <Icon icon={ help } />,
 	text,
-}) => {
-	const [isPopoverVisible, setIsPopoverVisible] = useState(false);
+} ) => {
+	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
 
 	return (
 		<>
 			<div className="woocommerce-tooltip">
 				<Button
 					className="woocommerce-tooltip__button"
-					onKeyDown={(event: KeyboardEvent<HTMLButtonElement>) => {
-						if (event.key !== 'Enter') {
+					onKeyDown={ (
+						event: KeyboardEvent< HTMLButtonElement >
+					) => {
+						if ( event.key !== 'Enter' ) {
 							return;
 						}
-						setIsPopoverVisible(true);
-					}}
-					onClick={() => setIsPopoverVisible(true)}
-					label={__('Help', 'woocommerce')}
+						setIsPopoverVisible( true );
+					} }
+					onClick={ () => setIsPopoverVisible( true ) }
+					label={ __( 'Help', 'woocommerce' ) }
 				>
-					{children}
+					{ children }
 				</Button>
 
-				{isPopoverVisible && (
+				{ isPopoverVisible && (
 					<Popover
 						focusOnMount="container"
 						position="top center"
 						className="woocommerce-tooltip__text"
-						onFocusOutside={() => setIsPopoverVisible(false)}
-						onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
-							if (event.key !== 'Escape') {
+						onFocusOutside={ () => setIsPopoverVisible( false ) }
+						onKeyDown={ (
+							event: KeyboardEvent< HTMLDivElement >
+						) => {
+							if ( event.key !== 'Escape' ) {
 								return;
 							}
-							setIsPopoverVisible(false);
-						}}
+							setIsPopoverVisible( false );
+						} }
 					>
-						{text}
+						{ text }
 					</Popover>
-				)}
+				) }
 			</div>
 		</>
 	);

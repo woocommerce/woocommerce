@@ -25,7 +25,7 @@ export const Basic = () => {
 export const CustomIcon = () => {
 	return (
 		<Tooltip text="I'm a tooltip with a custom button icon">
-			<Icon icon={warning} />
+			<Icon icon={ warning } />
 		</Tooltip>
 	);
 };
