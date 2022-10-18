@@ -2,6 +2,8 @@
 
 WooCommerce powers many online stores across the internet, and your help making it even more awesome will be greatly appreciated :)
 
+Test PR, do not merge!
+
 There are many ways to contribute to the project!
 
 - [Translating strings into your language](https://github.com/woocommerce/woocommerce/wiki/Translating-WooCommerce).
