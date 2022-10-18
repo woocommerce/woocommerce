@@ -6,6 +6,8 @@ import { withFilteredAttributes } from '@woocommerce/shared-hocs';
 import { FormStep } from '@woocommerce/base-components/cart-checkout';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
+import { useShippingData } from '@woocommerce/base-context/hooks';
+
 /**
  * Internal dependencies
  */
@@ -43,6 +45,21 @@ const FrontendBlock = ( {
 		}
 	);
 	const { setPrefersCollection } = useDispatch( CHECKOUT_STORE_KEY );
+	const {
+		shippingRates,
+		needsShipping,
+		hasCalculatedShipping,
+		isCollectable,
+	} = useShippingData();
+
+	if (
+		! needsShipping ||
+		! hasCalculatedShipping ||
+		! shippingRates ||
+		! isCollectable
+	) {
+		return null;
+	}
 
 	const onChange = ( method: string ) => {
 		if ( method === 'pickup' ) {
@@ -51,6 +68,7 @@ const FrontendBlock = ( {
 			setPrefersCollection( false );
 		}
 	};
+
 	return (
 		<FormStep
 			id="collection-method"

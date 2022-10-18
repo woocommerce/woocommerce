@@ -817,11 +817,6 @@ class CartController {
 
 		$packages = $calculate_rates ? wc()->shipping()->calculate_shipping( $packages ) : $packages;
 
-		if ( Package::feature()->is_experimental_build() ) {
-			// This is a temporary measure until we can bring such change to WooCommerce core.
-			remove_filter( 'woocommerce_get_shipping_methods', [ $this, 'enable_local_pickup_without_address' ] );
-		}
-
 		return $packages;
 	}
 
@@ -848,10 +843,10 @@ class CartController {
 			$index > 1 ?
 				sprintf(
 					/* translators: %d: shipping package number */
-					_x( 'Shipping method %d', 'shipping packages', 'woo-gutenberg-products-block' ),
+					_x( 'Shipment %d', 'shipping packages', 'woo-gutenberg-products-block' ),
 					$index
 				) :
-				_x( 'Shipping method', 'shipping packages', 'woo-gutenberg-products-block' ),
+				_x( 'Shipment 1', 'shipping packages', 'woo-gutenberg-products-block' ),
 			$package['package_id'],
 			$package
 		);

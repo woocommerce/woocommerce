@@ -20,6 +20,11 @@ interface ShippingData extends SelectShippingRateType {
 	shippingRates: Cart[ 'shippingRates' ];
 	isLoadingRates: boolean;
 	selectedRates: Record< string, string | unknown >;
+	/**
+	 * The following values are used to determine if pickup methods are shown separately from shipping methods, or if
+	 * those options should be hidden.
+	 */
+	isCollectable: boolean; // Only true when ALL packages support local pickup. If true, we can show the collection/delivery toggle
 }
 
 export const useShippingData = (): ShippingData => {
@@ -28,13 +33,15 @@ export const useShippingData = (): ShippingData => {
 		needsShipping,
 		hasCalculatedShipping,
 		isLoadingRates,
+		isCollectable,
 	} = useSelect( ( select ) => {
 		const isEditor = !! select( 'core/editor' );
 		const store = select( storeKey );
+		const rates = isEditor
+			? previewCart.shipping_rates
+			: store.getShippingRates();
 		return {
-			shippingRates: isEditor
-				? previewCart.shipping_rates
-				: store.getShippingRates(),
+			shippingRates: rates,
 			needsShipping: isEditor
 				? previewCart.needs_shipping
 				: store.getNeedsShipping(),
@@ -42,6 +49,13 @@ export const useShippingData = (): ShippingData => {
 				? previewCart.has_calculated_shipping
 				: store.getHasCalculatedShipping(),
 			isLoadingRates: isEditor ? false : store.isCustomerDataUpdating(),
+			isCollectable: rates.every(
+				( { shipping_rates: packageShippingRates } ) =>
+					packageShippingRates.find(
+						( { method_id: methodId } ) =>
+							methodId === 'pickup_location'
+					)
+			),
 		};
 	} );
 	const { isSelectingRate, selectShippingRate } = useSelectShippingRate();
@@ -67,5 +81,6 @@ export const useShippingData = (): ShippingData => {
 		needsShipping,
 		hasCalculatedShipping,
 		isLoadingRates,
+		isCollectable,
 	};
 };

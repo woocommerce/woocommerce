@@ -15,11 +15,6 @@ class Legacy {
 	 */
 	public function init() {
 		add_action( 'woocommerce_rest_checkout_process_payment_with_context', array( $this, 'process_legacy_payment' ), 999, 2 );
-
-		if ( Package::feature()->is_experimental_build() ) {
-			// This is a temporary measure until we can bring such change to WooCommerce core.
-			add_filter( 'woocommerce_get_shipping_methods', [ $this, 'enable_local_pickup_without_address' ] );
-		}
 	}
 
 	/**
@@ -71,30 +66,5 @@ class Legacy {
 		// set payment_details from result.
 		$result->set_payment_details( array_merge( $result->payment_details, $gateway_result ) );
 		$result->set_redirect_url( $gateway_result['redirect'] );
-	}
-
-	/**
-	 * We want to make local pickup always available without checking for a shipping zone or address.
-	 *
-	 * @param array $shipping_methods Package we're checking against right now.
-	 * @return array $shipping_methods Shipping methods with local pickup.
-	 */
-	public function enable_local_pickup_without_address( $shipping_methods ) {
-		$shipping_zones = \WC_Shipping_Zones::get_zones( 'admin' );
-		$worldwide_zone = new \WC_Shipping_Zone( 0 );
-		$all_methods    = array_map(
-			function( $_shipping_zone ) {
-				return $_shipping_zone['shipping_methods'];
-			},
-			$shipping_zones
-		);
-		$all_methods    = array_merge_recursive( $worldwide_zone->get_shipping_methods( false, 'admin' ), ...$all_methods );
-		$local_pickups  = array_filter(
-			$all_methods,
-			function( $method ) {
-				return 'local_pickup' === $method->id;
-			}
-		);
-		return array_merge( $shipping_methods, $local_pickups );
 	}
 }

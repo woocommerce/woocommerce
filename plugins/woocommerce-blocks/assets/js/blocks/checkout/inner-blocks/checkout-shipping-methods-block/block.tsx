@@ -57,7 +57,21 @@ const Block = (): JSX.Element | null => {
 		needsShipping,
 		isLoadingRates,
 		hasCalculatedShipping,
+		isCollectable,
 	} = useShippingData();
+
+	const filteredShippingRates = isCollectable
+		? shippingRates.map( ( shippingRatesPackage ) => {
+				return {
+					...shippingRatesPackage,
+					shipping_rates: shippingRatesPackage.shipping_rates.filter(
+						( shippingRatesPackageRate ) =>
+							shippingRatesPackageRate.method_id !==
+							'pickup_location'
+					),
+				};
+		  } )
+		: shippingRates;
 
 	if ( ! needsShipping ) {
 		return null;

@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useShippingData } from '@woocommerce/base-context/hooks';
-import { useMemo } from '@wordpress/element';
 import { ShippingRatesControl } from '@woocommerce/base-components/cart-checkout';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
@@ -12,10 +11,7 @@ import { Notice } from 'wordpress-components';
 import classnames from 'classnames';
 import { getSetting } from '@woocommerce/settings';
 import type { PackageRateOption } from '@woocommerce/type-defs/shipping';
-import type {
-	CartShippingRate,
-	CartShippingPackageShippingRate,
-} from '@woocommerce/type-defs/cart';
+import type { CartShippingPackageShippingRate } from '@woocommerce/type-defs/cart';
 import { Icon, mapMarker } from '@wordpress/icons';
 import { MetaKeyValue } from '@woocommerce/types';
 
@@ -63,9 +59,9 @@ const renderShippingRatesControlOption = (
 	const address = getPickupAddress( option );
 	return {
 		value: option.rate_id,
-		label:
-			decodeEntities( option.name ) +
-			( location ? ' (' + location + ')' : '' ),
+		label: location
+			? decodeEntities( location )
+			: decodeEntities( option.name ),
 		secondaryLabel: (
 			<FormattedMonetaryAmount
 				currency={ getCurrencyFromPriceResponse( option ) }
@@ -85,29 +81,24 @@ const renderShippingRatesControlOption = (
 	};
 };
 
-const filterLocalPickupRates = ( shippingRates: CartShippingRate[] ) => {
-	return shippingRates.map( ( shippingRatesPackage ) => {
-		return {
-			...shippingRatesPackage,
-			shipping_rates: shippingRatesPackage.shipping_rates.filter(
-				( shippingRatesPackageRate ) =>
-					shippingRatesPackageRate.method_id === 'local_pickup'
-			),
-		};
-	} );
-};
-
 const Block = (): JSX.Element | null => {
 	const { shippingRates, needsShipping, isLoadingRates } = useShippingData();
-
-	const filteredShippingRates = useMemo(
-		() => filterLocalPickupRates( shippingRates ),
-		[ shippingRates ]
-	);
 
 	if ( ! needsShipping ) {
 		return null;
 	}
+
+	const filteredShippingRates = shippingRates.map(
+		( shippingRatesPackage ) => {
+			return {
+				...shippingRatesPackage,
+				shipping_rates: shippingRatesPackage.shipping_rates.filter(
+					( shippingRatesPackageRate ) =>
+						shippingRatesPackageRate.method_id === 'pickup_location'
+				),
+			};
+		}
+	);
 
 	return (
 		<ShippingRatesControl
