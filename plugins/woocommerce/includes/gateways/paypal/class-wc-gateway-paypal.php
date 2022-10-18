@@ -70,6 +70,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$this->description  = trim( $this->description );
 		}
 
+		// Actions.
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_order_status_processing', array( $this, 'capture_payment' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'capture_payment' ) );
@@ -83,7 +84,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			if ( $this->identity_token ) {
 				include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-pdt-handler.php';
-				new WC_Gateway_Paypal_PDT_Handler( $this->testmode, $this->identity_token );
+				$pdt_handler = new WC_Gateway_Paypal_PDT_Handler( $this->testmode, $this->identity_token );
+				$pdt_handler->set_receiver_email( $this->receiver_email );
 			}
 		}
 
@@ -426,8 +428,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					case 'Completed':
 						/* translators: 1: Amount, 2: Authorization ID, 3: Transaction ID */
 						$order->add_order_note( sprintf( __( 'Payment of %1$s was captured - Auth ID: %2$s, Transaction ID: %3$s', 'woocommerce' ), $result->AMT, $result->AUTHORIZATIONID, $result->TRANSACTIONID ) );
-						update_post_meta( $order->get_id(), '_paypal_status', $result->PAYMENTSTATUS );
-						update_post_meta( $order->get_id(), '_transaction_id', $result->TRANSACTIONID );
+						$order->update_meta_data( '_paypal_status', $result->PAYMENTSTATUS );
+						$order->set_transaction_id( $result->TRANSACTIONID );
+						$order->save();
 						break;
 					default:
 						/* translators: 1: Authorization ID, 2: Payment status */

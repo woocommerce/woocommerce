@@ -35,7 +35,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					'value'         => $product_object->get_manage_stock( 'edit' ) ? 'yes' : 'no',
 					'wrapper_class' => 'show_if_simple show_if_variable',
 					'label'         => __( 'Manage stock?', 'woocommerce' ),
-					'description'   => __( 'Enable stock management at product level', 'woocommerce' ),
+					'description'   => __( 'Manage stock level (quantity)', 'woocommerce' ),
 				)
 			);
 
@@ -111,7 +111,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		?>
 	</div>
 
-	<div class="options_group show_if_simple show_if_variable">
+	<div class="inventory_sold_individually options_group show_if_simple show_if_variable">
 		<?php
 		woocommerce_wp_checkbox(
 			array(
@@ -119,9 +119,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 				'value'         => $product_object->get_sold_individually( 'edit' ) ? 'yes' : 'no',
 				'wrapper_class' => 'show_if_simple show_if_variable',
 				'label'         => __( 'Sold individually', 'woocommerce' ),
-				'description'   => __( 'Enable this to only allow one of this item to be bought in a single order', 'woocommerce' ),
+				'description'   => __( 'Limit purchases to 1 item per order', 'woocommerce' ),
 			)
 		);
+
+		echo wc_help_tip( __( 'Check to let customers to purchase only 1 item in a single order. This is particularly useful for items that have limited quantity, for example art or handmade goods.', 'woocommerce' ) );
 
 		do_action( 'woocommerce_product_options_sold_individually' );
 		?>

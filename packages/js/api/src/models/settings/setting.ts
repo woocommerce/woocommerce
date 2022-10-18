@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { Model, ModelID } from '../model';
 import { HTTPClient } from '../../http';
 import { settingRESTRepository } from '../../repositories';
@@ -12,7 +15,12 @@ import {
  * The parameters embedded in this generic can be used in the ModelRepository in order to give
  * type-safety in an incredibly granular way.
  */
-export type SettingRepositoryParams = ModelRepositoryParams< Setting, ModelID, never, 'value' >;
+export type SettingRepositoryParams = ModelRepositoryParams<
+	Setting,
+	ModelID,
+	never,
+	'value'
+>;
 
 /**
  * An interface for listing settings using the repository.
@@ -73,7 +81,7 @@ export class Setting extends Model {
 	 *
 	 * @type {Object.<string, string>|null}
 	 */
-	public readonly options: { [key: string]: string } | undefined;
+	public readonly options: { [ key: string ]: string } | undefined;
 
 	/**
 	 * The default value for the setting.
@@ -104,7 +112,9 @@ export class Setting extends Model {
 	 *
 	 * @param {HTTPClient} httpClient The client for communicating via HTTP.
 	 */
-	public static restRepository( httpClient: HTTPClient ): ReturnType< typeof settingRESTRepository > {
+	public static restRepository(
+		httpClient: HTTPClient
+	): ReturnType< typeof settingRESTRepository > {
 		return settingRESTRepository( httpClient );
 	}
 }

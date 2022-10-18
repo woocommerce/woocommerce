@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { ModelTransformation } from '../model-transformer';
 
 /**
@@ -34,14 +37,14 @@ export class CustomTransformation implements ModelTransformation {
 	/**
 	 * Creates a new transformation.
 	 *
-	 * @param {number} order The order for the transformation.
-	 * @param {TransformationCallback|null} toHook The hook to run for toModel.
+	 * @param {number}                      order    The order for the transformation.
+	 * @param {TransformationCallback|null} toHook   The hook to run for toModel.
 	 * @param {TransformationCallback|null} fromHook The hook to run for fromModel.
 	 */
 	public constructor(
 		order: number,
 		toHook: TransformationCallback | null,
-		fromHook: TransformationCallback | null,
+		fromHook: TransformationCallback | null
 	) {
 		this.fromModelOrder = order;
 		this.toHook = toHook;

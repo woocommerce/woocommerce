@@ -2,7 +2,7 @@
 /**
  * Internal dependencies
  */
- const {
+const {
 	shopper,
 	merchant,
 	createSimpleProduct,
@@ -23,38 +23,45 @@ const customerEmail = config.get( 'addresses.customer.billing.email' );
 const storeName = 'WooCommerce Core E2E Test Suite';
 
 const runOrderEmailReceivingTest = () => {
-	describe('Shopper Order Email Receiving', () => {
-		beforeAll(async () => {
+	describe( 'Shopper Order Email Receiving', () => {
+		beforeAll( async () => {
 			simplePostIdValue = await createSimpleProduct();
 
 			await merchant.login();
 			await deleteAllEmailLogs();
 			await merchant.logout();
-		});
+		} );
 
 		afterAll( async () => {
 			await shopper.logout();
 		} );
 
-		it('should receive order email after purchasing an item', async () => {
+		it( 'should receive order email after purchasing an item', async () => {
 			await shopper.login();
 
 			// Go to the shop and purchase an item
-			await shopper.goToProduct(simplePostIdValue);
-			await shopper.addToCart(simpleProductName);
+			await shopper.goToProduct( simplePostIdValue );
+			await shopper.addToCart( simpleProductName );
 			await shopper.goToCheckout();
 			await uiUnblocked();
 			await shopper.placeOrder();
 			// Get order ID from the order received html element on the page
-			orderId = await page.$$eval(".woocommerce-order-overview__order strong", elements => elements.map(item => item.textContent));
+			orderId = await page.$$eval(
+				'.woocommerce-order-overview__order strong',
+				( elements ) => elements.map( ( item ) => item.textContent )
+			);
 
 			// Verify the new order email has been received
 			await merchant.login();
 			await merchant.openEmailLog();
-			await expect( page ).toMatchElement( '.column-receiver', { text: customerEmail } );
-			await expect( page ).toMatchElement( '.column-subject', { text: `[${storeName}]: New order #${orderId}` } );
-		});
-	});
+			await expect( page ).toMatchElement( '.column-receiver', {
+				text: customerEmail,
+			} );
+			await expect( page ).toMatchElement( '.column-subject', {
+				text: `[${ storeName }]: New order #${ orderId }`,
+			} );
+		} );
+	} );
 };
 
 module.exports = runOrderEmailReceivingTest;

@@ -72,7 +72,7 @@ function wc_get_attribute_taxonomies() {
 	 */
 	$raw_attribute_taxonomies = (array) array_filter( apply_filters( 'woocommerce_attribute_taxonomies', $raw_attribute_taxonomies ) );
 
-	// Index by ID for easer lookups.
+	// Index by ID for easier lookups.
 	$attribute_taxonomies = array();
 
 	foreach ( $raw_attribute_taxonomies as $result ) {
@@ -483,7 +483,7 @@ function wc_create_attribute( $args ) {
 	}
 
 	// Validate slug.
-	if ( strlen( $slug ) >= 28 ) {
+	if ( strlen( $slug ) > 28 ) {
 		/* translators: %s: attribute slug */
 		return new WP_Error( 'invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
 	} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {

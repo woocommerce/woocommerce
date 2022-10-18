@@ -71,7 +71,7 @@ class WC_Helper {
 		$notices = self::_get_return_notices();
 
 		// No active connection.
-		if ( empty( $auth['access_token'] ) ) {
+		if ( ! self::is_site_connected() ) {
 			$connect_url = add_query_arg(
 				array(
 					'page'              => 'wc-addons',
@@ -223,7 +223,10 @@ class WC_Helper {
 
 				$action['message']     .= ' ' . __( 'To enable this update you need to <strong>purchase</strong> a new subscription.', 'woocommerce' );
 				$action['button_label'] = __( 'Purchase', 'woocommerce' );
-				$action['button_url']   = $subscription['product_url'];
+				$action['button_url']   = self::add_utm_params_to_url_for_subscription_link(
+					$subscription['product_url'],
+					'purchase'
+				);
 
 				$subscription['actions'][] = $action;
 			} elseif ( $subscription['expired'] && ! empty( $subscription['master_user_email'] ) ) {
@@ -238,7 +241,10 @@ class WC_Helper {
 				$action = array(
 					'message'      => sprintf( __( 'This subscription has expired. Please <strong>renew</strong> to receive updates and support.', 'woocommerce' ) ),
 					'button_label' => __( 'Renew', 'woocommerce' ),
-					'button_url'   => 'https://woocommerce.com/my-account/my-subscriptions/',
+					'button_url'   => self::add_utm_params_to_url_for_subscription_link(
+						'https://woocommerce.com/my-account/my-subscriptions/',
+						'renew'
+					),
 					'status'       => 'expired',
 					'icon'         => 'dashicons-info',
 				);
@@ -250,7 +256,10 @@ class WC_Helper {
 				$action = array(
 					'message'      => __( 'Subscription is <strong>expiring</strong> soon.', 'woocommerce' ),
 					'button_label' => __( 'Enable auto-renew', 'woocommerce' ),
-					'button_url'   => 'https://woocommerce.com/my-account/my-subscriptions/',
+					'button_url'   => self::add_utm_params_to_url_for_subscription_link(
+						'https://woocommerce.com/my-account/my-subscriptions/',
+						'auto-renew'
+					),
 					'status'       => 'expired',
 					'icon'         => 'dashicons-info',
 				);
@@ -261,7 +270,10 @@ class WC_Helper {
 				$action = array(
 					'message'      => sprintf( __( 'This subscription is expiring soon. Please <strong>renew</strong> to continue receiving updates and support.', 'woocommerce' ) ),
 					'button_label' => __( 'Renew', 'woocommerce' ),
-					'button_url'   => 'https://woocommerce.com/my-account/my-subscriptions/',
+					'button_url'   => self::add_utm_params_to_url_for_subscription_link(
+						'https://woocommerce.com/my-account/my-subscriptions/',
+						'renew'
+					),
 					'status'       => 'expired',
 					'icon'         => 'dashicons-info',
 				);
@@ -309,7 +321,10 @@ class WC_Helper {
 					/* translators: %s: version number */
 					'message'      => sprintf( __( 'Version %s is <strong>available</strong>. To enable this update you need to <strong>purchase</strong> a new subscription.', 'woocommerce' ), esc_html( $updates[ $data['_product_id'] ]['version'] ) ),
 					'button_label' => __( 'Purchase', 'woocommerce' ),
-					'button_url'   => $data['_product_url'],
+					'button_url'   => self::add_utm_params_to_url_for_subscription_link(
+						$data['_product_url'],
+						'purchase'
+					),
 					'status'       => 'expired',
 					'icon'         => 'dashicons-info',
 				);
@@ -320,7 +335,10 @@ class WC_Helper {
 					/* translators: 1: subscriptions docs 2: subscriptions docs */
 					'message'      => sprintf( __( 'To receive updates and support for this extension, you need to <strong>purchase</strong> a new subscription or consolidate your extensions to one connected account by <strong><a href="%1$s" title="Sharing Docs">sharing</a> or <a href="%2$s" title="Transferring Docs">transferring</a></strong> this extension to this connected account.', 'woocommerce' ), 'https://docs.woocommerce.com/document/managing-woocommerce-com-subscriptions/#section-10', 'https://docs.woocommerce.com/document/managing-woocommerce-com-subscriptions/#section-5' ),
 					'button_label' => __( 'Purchase', 'woocommerce' ),
-					'button_url'   => $data['_product_url'],
+					'button_url'   => self::add_utm_params_to_url_for_subscription_link(
+						$data['_product_url'],
+						'purchase'
+					),
 					'status'       => 'expired',
 					'icon'         => 'dashicons-info',
 				);
@@ -348,6 +366,28 @@ class WC_Helper {
 		// We have an active connection.
 		include self::get_view_filename( 'html-main.php' );
 		return;
+	}
+
+	/**
+	 * Add tracking parameters to buttons (Renew, Purchase, etc.) on subscriptions page
+	 *
+	 * @param string $url URL to product page or to https://woocommerce.com/my-account/my-subscriptions/
+	 * @param string $utm_content value of utm_content query parameter used for tracking
+	 *
+	 * @return string URL including utm parameters for tracking
+	 */
+	public static function add_utm_params_to_url_for_subscription_link( $url, $utm_content ) {
+		$utm_params = 'utm_source=subscriptionsscreen&' .
+					  'utm_medium=product&' .
+					  'utm_campaign=wcaddons&' .
+					  'utm_content=' . $utm_content;
+
+		// there are already some URL parameters
+		if ( strpos( $url, '?' ) ) {
+			return $url . '&' . $utm_params;
+		}
+
+		return $url . '?' . $utm_params;
 	}
 
 	/**
@@ -769,26 +809,7 @@ class WC_Helper {
 			wp_die( 'Something went wrong' );
 		}
 
-		WC_Helper_Options::update(
-			'auth',
-			array(
-				'access_token'        => $access_token['access_token'],
-				'access_token_secret' => $access_token['access_token_secret'],
-				'site_id'             => $access_token['site_id'],
-				'user_id'             => get_current_user_id(),
-				'updated'             => time(),
-			)
-		);
-
-		// Obtain the connected user info.
-		if ( ! self::_flush_authentication_cache() ) {
-			self::log( 'Could not obtain connected user info in _helper_auth_return' );
-			WC_Helper_Options::update( 'auth', array() );
-			wp_die( 'Something went wrong.' );
-		}
-
-		self::_flush_subscriptions_cache();
-		self::_flush_updates_cache();
+		self::update_auth_option( $access_token['access_token'], $access_token['access_token_secret'], $access_token['site_id'] );
 
 		/**
 		 * Fires when the Helper connection process has completed successfully.
@@ -844,18 +865,7 @@ class WC_Helper {
 			admin_url( 'admin.php' )
 		);
 
-		WC_Helper_API::post(
-			'oauth/invalidate_token',
-			array(
-				'authenticated' => true,
-			)
-		);
-
-		WC_Helper_Options::update( 'auth', array() );
-		WC_Helper_Options::update( 'auth_user_data', array() );
-
-		self::_flush_subscriptions_cache();
-		self::_flush_updates_cache();
+		self::disconnect();
 
 		wp_safe_redirect( $redirect_uri );
 		die();
@@ -1154,7 +1164,7 @@ class WC_Helper {
 		/**
 		 * Check if plugins have WC headers, if not then clear cache and fetch again.
 		 * WC Headers will not be present if `wc_enable_wc_plugin_headers` hook was added after a `get_plugins` call -- for example when WC is activated/updated.
-		 * Also, get_plugins call is expensive so we should clear this cache very conservatively.
+		 * Also, get_plugins call is expensive, so we should clear this cache very conservatively.
 		 */
 		if ( ! empty( $plugins ) && ! array_key_exists( 'Woo', current( $plugins ) ) ) {
 			wp_clean_plugins_cache( false );
@@ -1635,6 +1645,115 @@ class WC_Helper {
 		}
 
 		self::$log->log( $level, $message, array( 'source' => 'helper' ) );
+	}
+
+	/**
+	 * Handles WC Helper disconnect tasks.
+	 *
+	 * @return void
+	 */
+	public static function disconnect() {
+		WC_Helper_API::post(
+			'oauth/invalidate_token',
+			array(
+				'authenticated' => true,
+			)
+		);
+
+		WC_Helper_Options::update( 'auth', array() );
+		WC_Helper_Options::update( 'auth_user_data', array() );
+
+		self::_flush_subscriptions_cache();
+		self::_flush_updates_cache();
+	}
+
+	/**
+	 * Checks if `access_token` exists in `auth` option.
+	 *
+	 * @return bool
+	 */
+	public static function is_site_connected(): bool {
+		$auth = WC_Helper_Options::get( 'auth' );
+
+		// If `access_token` is empty, there's no active connection.
+		return ! empty( $auth['access_token'] );
+	}
+
+	/**
+	 * Allows to connect with WCCOM using application password. used it to connect via CLI
+	 *
+	 * @param string $password The application password.
+	 *
+	 * @return void|WP_Error
+	 */
+	public static function connect_with_password( string $password ) {
+		$request = WC_Helper_API::post(
+			'connect',
+			array(
+				'headers'       => array(
+					'X-API-Key'    => $password,
+					'Content-Type' => 'application/json',
+				),
+				'body'          => wp_json_encode( array( 'home_url' => home_url() ) ),
+				'authenticated' => false,
+			)
+		);
+
+		$code = wp_remote_retrieve_response_code( $request );
+
+		if ( $code === 403 ) {
+			$message = 'Invalid password';
+			self::log( $message );
+
+			return new WP_Error( 'connect-with-password-invalid-password', $message );
+		} elseif ( $code !== 200 ) {
+			$message = sprintf( 'Call to /connect returned a non-200 response code (%d)', $code );
+			self::log( $message );
+
+			return new WP_Error( 'connect-with-password-' . $code, $message );
+		}
+
+		$access_data = json_decode( wp_remote_retrieve_body( $request ), true );
+		if ( empty( $access_data['access_token'] ) || empty( $access_data['access_token_secret'] ) ) {
+			$message = sprintf( 'Call to /connect returned an invalid body: %s', wp_remote_retrieve_body( $request ) );
+			self::log( $message );
+
+			return new WP_Error( 'connect-with-password-invalid-response', $message );
+		}
+
+		self::update_auth_option( $access_data['access_token'], $access_data['access_token_secret'], $access_data['site_id'] );
+	}
+
+	/**
+	 * Updates auth options and flushes cache
+	 *
+	 * @param string $access_token The access token.
+	 * @param string $access_token_secret The secret access token.
+	 * @param int    $site_id The site id returned by the API.
+	 *
+	 * @return void
+	 */
+	public static function update_auth_option( string $access_token, string $access_token_secret, int $site_id ): void {
+		WC_Helper_Options::update(
+			'auth',
+			array(
+				'access_token'        => $access_token,
+				'access_token_secret' => $access_token_secret,
+				'site_id'             => $site_id,
+				'user_id'             => get_current_user_id(),
+				'updated'             => time(),
+			)
+		);
+
+		// Obtain the connected user info.
+		if ( ! self::_flush_authentication_cache() ) {
+			self::log( 'Could not obtain connected user info in _helper_auth_return.' );
+			WC_Helper_Options::update( 'auth', array() );
+			wp_die( 'Something went wrong. Could not obtain connected user info in _helper_auth_return.' );
+		}
+
+		self::_flush_subscriptions_cache();
+		self::_flush_updates_cache();
 	}
 }
 

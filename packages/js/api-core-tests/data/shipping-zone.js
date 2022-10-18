@@ -13,7 +13,7 @@ const shippingZone = {
 /**
  * Constructs a default shipping zone object.
  *
- * @returns default shipping zone
+ * @return {Object} default shipping zone
  */
 const getShippingZoneExample = () => {
 	return shippingZone;

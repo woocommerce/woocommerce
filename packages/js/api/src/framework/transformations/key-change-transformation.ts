@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { ModelTransformation, TransformationOrder } from '../model-transformer';
 import { Model } from '../../models';
 
@@ -5,14 +8,18 @@ import { Model } from '../../models';
  * @typedef KeyChanges
  * @alias Object.<string,string>
  */
-type KeyChanges< T extends Model > = { readonly [ key in keyof Partial< T > ]: string };
+type KeyChanges< T extends Model > = {
+	readonly [ key in keyof Partial< T > ]: string;
+};
 
 /**
  * A model transformation that can be used to change property keys between two formats.
  * This transformation has a very high priority so that it will be executed after all
  * other transformations to prevent the changed key from causing problems.
  */
-export class KeyChangeTransformation< T extends Model > implements ModelTransformation {
+export class KeyChangeTransformation< T extends Model >
+	implements ModelTransformation
+{
 	/**
 	 * Ensure that this transformation always happens at the very end since it changes the keys
 	 * in the transformed object.

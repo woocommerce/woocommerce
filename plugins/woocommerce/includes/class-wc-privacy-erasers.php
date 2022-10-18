@@ -95,14 +95,14 @@ class WC_Privacy_Erasers {
 		 * Allow extensions to remove data for this customer and adjust the response.
 		 *
 		 * @since 3.4.0
-		 * @param array    $response Array resonse data. Must include messages, num_items_removed, num_items_retained, done.
+		 * @param array    $response Array response data. Must include messages, num_items_removed, num_items_retained, done.
 		 * @param WC_Order $order A customer object.
 		 */
 		return apply_filters( 'woocommerce_privacy_erase_personal_data_customer', $response, $customer );
 	}
 
 	/**
-	 * Finds and erases data which could be used to identify a person from WooCommerce data assocated with an email address.
+	 * Finds and erases data which could be used to identify a person from WooCommerce data associated with an email address.
 	 *
 	 * Orders are erased in blocks of 10 to avoid timeouts.
 	 *
@@ -350,7 +350,7 @@ class WC_Privacy_Erasers {
 			wc_delete_order_note( $note->id );
 		}
 
-		// Add note that this event occured.
+		// Add note that this event occurred.
 		$order->add_order_note( __( 'Personal data removed.', 'woocommerce' ) );
 
 		/**
@@ -406,7 +406,7 @@ class WC_Privacy_Erasers {
 		 * Allow extensions to remove data for tokens and adjust the response.
 		 *
 		 * @since 3.4.0
-		 * @param array $response Array resonse data. Must include messages, num_items_removed, num_items_retained, done.
+		 * @param array $response Array response data. Must include messages, num_items_removed, num_items_retained, done.
 		 * @param array $tokens   Array of tokens.
 		 */
 		return apply_filters( 'woocommerce_privacy_erase_personal_data_tokens', $response, $tokens );

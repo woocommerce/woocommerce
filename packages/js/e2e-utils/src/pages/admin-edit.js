@@ -1,14 +1,13 @@
 import { waitForTimeout } from '../flows/utils';
 
-
 export class AdminEdit {
 	/**
 	 * Publish the object being edited and verify published status
 	 *
-	 * @param button Publish button selector
-	 * @param publishNotice Publish notice selector
-	 * @param publishVerification Expected notice on successful publish
-	 * @returns {Promise<void>}
+	 * @param {string} button              Publish button selector
+	 * @param {string} publishNotice       Publish notice selector
+	 * @param {string} publishVerification Expected notice on successful publish
+	 * @return {Promise<void>} Promise resolving when the object is published
 	 */
 	async verifyPublish( button, publishNotice, publishVerification ) {
 		// Wait for auto save
@@ -17,17 +16,22 @@ export class AdminEdit {
 		// Publish and verify
 		await expect( page ).toClick( button );
 		await page.waitForSelector( publishNotice );
-		await expect( page ).toMatchElement( publishNotice, { text: publishVerification } );
+		await expect( page ).toMatchElement( publishNotice, {
+			text: publishVerification,
+		} );
 	}
 
 	/**
 	 * Get the ID of the object being edited
 	 *
-	 * @returns {Promise<*>}
+	 * @return {Promise<*>} Promise resolving to the ID of the object being edited.
 	 */
 	async getId() {
-		let postId = await page.$( '#post_ID' );
-		let objectID = await page.evaluate( element => element.value, postId );
+		const postId = await page.$( '#post_ID' );
+		const objectID = await page.evaluate(
+			( element ) => element.value,
+			postId
+		);
 		return objectID;
 	}
 }

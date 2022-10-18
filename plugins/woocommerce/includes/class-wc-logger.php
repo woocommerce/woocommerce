@@ -143,7 +143,7 @@ class WC_Logger implements WC_Logger_Interface {
 
 			foreach ( $this->handlers as $handler ) {
 				/**
-				 * Filter the logging message. Returning null will prevent logging from occuring since 5.3.
+				 * Filter the logging message. Returning null will prevent logging from occurring since 5.3.
 				 *
 				 * @since 3.1
 				 * @param string $message Log message.

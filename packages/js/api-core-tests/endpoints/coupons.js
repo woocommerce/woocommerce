@@ -1,8 +1,13 @@
 /**
  * Internal dependencies
  */
- const { getRequest, postRequest, putRequest, deleteRequest } = require('../utils/request');
- const { coupon, shared } = require('../data');
+const {
+	getRequest,
+	postRequest,
+	putRequest,
+	deleteRequest,
+} = require( '../utils/request' );
+const { coupon, shared } = require( '../data' );
 
 /**
  * WooCommerce Coupon endpoints.
@@ -17,14 +22,15 @@ const couponsApi = {
 		path: 'coupons',
 		responseCode: 201,
 		payload: coupon,
-		coupon: async ( couponDetails ) => postRequest( 'coupons', couponDetails ),
+		coupon: async ( couponDetails ) =>
+			postRequest( 'coupons', couponDetails ),
 	},
 	retrieve: {
 		name: 'Retrieve a coupon',
 		method: 'GET',
 		path: 'coupons/<id>',
 		responseCode: 200,
-		coupon: async ( couponId ) => getRequest( `coupons/${couponId}` ),
+		coupon: async ( couponId ) => getRequest( `coupons/${ couponId }` ),
 	},
 	listAll: {
 		name: 'List all coupons',
@@ -39,7 +45,8 @@ const couponsApi = {
 		path: 'coupons/<id>',
 		responseCode: 200,
 		payload: coupon,
-		coupon: async ( couponId, couponDetails ) => putRequest( `coupons/${couponId}`, couponDetails ),
+		coupon: async ( couponId, couponDetails ) =>
+			putRequest( `coupons/${ couponId }`, couponDetails ),
 	},
 	delete: {
 		name: 'Delete a coupon',
@@ -47,9 +54,10 @@ const couponsApi = {
 		path: 'coupons/<id>',
 		responseCode: 200,
 		payload: {
-			force: false
+			force: false,
 		},
-		coupon: async ( couponId, deletePermanently ) => deleteRequest( `coupons/${couponId}`, deletePermanently ),
+		coupon: async ( couponId, deletePermanently ) =>
+			deleteRequest( `coupons/${ couponId }`, deletePermanently ),
 	},
 	batch: {
 		name: 'Batch update coupons',
@@ -57,8 +65,9 @@ const couponsApi = {
 		path: 'coupons/batch',
 		responseCode: 200,
 		payload: shared.getBatchPayloadExample( coupon ),
-		coupons: async ( batchUpdatePayload ) => postRequest( `coupons/batch`, batchUpdatePayload ),
+		coupons: async ( batchUpdatePayload ) =>
+			postRequest( `coupons/batch`, batchUpdatePayload ),
 	},
 };
 
- module.exports = { couponsApi };
+module.exports = { couponsApi };

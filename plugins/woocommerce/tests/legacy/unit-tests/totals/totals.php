@@ -27,7 +27,7 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	/**
 	 * Setup the cart for totals calculation.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		// Set a valid address for the customer so shipping rates will calculate.
@@ -115,7 +115,7 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	/**
 	 * Clean up after test.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		WC()->cart->empty_cart();
 		WC()->session->set( 'chosen_shipping_methods', array() );
 		WC_Helper_Shipping::delete_simple_flat_rate();

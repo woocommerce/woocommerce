@@ -1,7 +1,8 @@
+/**
+ * Internal dependencies
+ */
 import { HTTPClient } from '../../../http';
-import {
-	ModelRepository,
-} from '../../../framework';
+import { ModelRepository } from '../../../framework';
 import {
 	ModelID,
 	Coupon,
@@ -34,22 +35,45 @@ import { createCouponTransformer } from './transformer';
  * DeletesCoupons
  * } The created repository.
  */
-export default function couponRESTRepository( httpClient: HTTPClient ): CreatesCoupons
-	& ListsCoupons
-	& ReadsCoupons
-	& UpdatesCoupons
-	& DeletesCoupons {
+export default function couponRESTRepository(
+	httpClient: HTTPClient
+): CreatesCoupons &
+	ListsCoupons &
+	ReadsCoupons &
+	UpdatesCoupons &
+	DeletesCoupons {
 	const buildURL = ( id: ModelID ) => '/wc/v3/coupons/' + id;
 	// Using `?force=true` permanently deletes the coupon
-	const buildDeleteUrl = ( id: ModelID ) => `/wc/v3/coupons/${ id }?force=true`;
+	const buildDeleteUrl = ( id: ModelID ) =>
+		`/wc/v3/coupons/${ id }?force=true`;
 
 	const transformer = createCouponTransformer();
 
 	return new ModelRepository(
-		restList< CouponRepositoryParams >( () => '/wc/v3/coupons', Coupon, httpClient, transformer ),
-		restCreate< CouponRepositoryParams >( () => '/wc/v3/coupons', Coupon, httpClient, transformer ),
-		restRead< CouponRepositoryParams >( buildURL, Coupon, httpClient, transformer ),
-		restUpdate< CouponRepositoryParams >( buildURL, Coupon, httpClient, transformer ),
-		restDelete< CouponRepositoryParams >( buildDeleteUrl, httpClient ),
+		restList< CouponRepositoryParams >(
+			() => '/wc/v3/coupons',
+			Coupon,
+			httpClient,
+			transformer
+		),
+		restCreate< CouponRepositoryParams >(
+			() => '/wc/v3/coupons',
+			Coupon,
+			httpClient,
+			transformer
+		),
+		restRead< CouponRepositoryParams >(
+			buildURL,
+			Coupon,
+			httpClient,
+			transformer
+		),
+		restUpdate< CouponRepositoryParams >(
+			buildURL,
+			Coupon,
+			httpClient,
+			transformer
+		),
+		restDelete< CouponRepositoryParams >( buildDeleteUrl, httpClient )
 	);
 }

@@ -1,0 +1,167 @@
+/**
+ * Internal Dependencies
+ */
+@import './legend.scss';
+
+.woocommerce-chart__body-row .d3-chart__container {
+	width: calc(100% - 320px);
+}
+
+.d3-chart__container {
+	position: relative;
+	width: 100%;
+
+	svg {
+		overflow: visible;
+	}
+
+	.d3-chart__empty-message {
+		align-items: center;
+		bottom: 0;
+		color: $gray-700;
+		display: flex;
+		@include font-size( 18 );
+		font-weight: bold;
+		justify-content: center;
+		left: 0;
+		line-height: 1.5;
+		margin: 0 auto;
+		max-width: 50%;
+		padding-bottom: 48px;
+		pointer-events: none;
+		position: absolute;
+		right: 0;
+		top: 0;
+		text-align: center;
+
+		@include breakpoint( '<782px' ) {
+			@include font-size( 13 );
+		}
+	}
+
+	.d3-chart__tooltip {
+		border: 1px solid $gray-400;
+		position: absolute;
+		display: flex;
+		min-width: 324px;
+		height: auto;
+		background-color: $studio-white;
+		text-align: left;
+		padding: 17px;
+		box-shadow: 0 3px 20px 0 rgba(18, 24, 30, 0.1),
+			0 1px 3px 0 rgba(18, 24, 30, 0.1);
+		flex-direction: column;
+		flex-wrap: nowrap;
+		justify-content: flex-start;
+		pointer-events: none;
+		visibility: hidden;
+		z-index: 1;
+
+		@include breakpoint( '<600px' ) {
+			min-width: auto;
+			width: calc(100% - #{$gap-large * 2});
+		}
+
+		h4 {
+			text-align: left;
+			line-height: 18px;
+			width: 100%;
+			text-transform: uppercase;
+			font-size: 11px;
+			color: $gray-700;
+			margin-top: 0;
+		}
+
+		ul {
+			list-style: none;
+			margin-bottom: 2px;
+			margin-top: 2px;
+			font-size: 14px;
+
+			li {
+				display: flex;
+				flex-direction: row;
+				flex-wrap: nowrap;
+				justify-content: flex-start;
+				align-items: center;
+
+				&.key-row {
+					display: flex;
+					flex-direction: row;
+					justify-content: space-between;
+					width: 100%;
+
+					.key-container {
+						width: 100%;
+						min-width: 100px;
+
+						.key-color {
+							display: inline-block;
+							width: 16px;
+							height: 16px;
+							margin-right: 8px;
+						}
+						.key-key {
+							margin-right: 6px;
+						}
+					}
+					.key-value {
+						font-weight: 600;
+					}
+				}
+			}
+		}
+	}
+	.bargroup {
+		&rect {
+			shape-rendering: crispEdges;
+		}
+	}
+	.grid {
+		.tick {
+			line {
+				stroke: $gray-100;
+				stroke-width: 1;
+				shape-rendering: crispEdges;
+			}
+
+			&:first-child {
+				line {
+					stroke: $gray-700;
+				}
+			}
+		}
+	}
+	.grid.with-positive-ticks .tick:last-child line {
+		opacity: 0;
+	}
+	.tick {
+		padding-top: 10px;
+		stroke-width: 1;
+	}
+	.y-axis {
+		text-anchor: start;
+		&.tick {
+			&text {
+				fill: $gray-700;
+			}
+		}
+	}
+	.y-axis,
+	.axis-month {
+		.tick text {
+			font-size: 10px;
+		}
+	}
+
+	.focus-grid {
+		line {
+			stroke: rgba(0, 0, 0, 0.1);
+			stroke-width: 1px;
+		}
+	}
+
+	.barfocus {
+		fill: rgba(0, 0, 0, 0.1);
+	}
+}

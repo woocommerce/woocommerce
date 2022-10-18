@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update i18n-text-domain rule to only allow woocommerce text domain

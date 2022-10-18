@@ -8,6 +8,8 @@
  * @version 3.4.0
  */
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -231,6 +233,13 @@ function wc_get_order_types( $for = '' ) {
 		case 'order-webhooks':
 			foreach ( $wc_order_types as $type => $args ) {
 				if ( ! $args['exclude_from_order_webhooks'] ) {
+					$order_types[] = $type;
+				}
+			}
+			break;
+		case 'cot-migration':
+			foreach ( $wc_order_types as $type => $args ) {
+				if ( DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE !== $type ) {
 					$order_types[] = $type;
 				}
 			}
@@ -609,8 +618,18 @@ function wc_create_refund( $args = array() ) {
 				wc_restock_refunded_items( $order, $args['line_items'] );
 			}
 
-			// Trigger notification emails.
-			if ( ( $remaining_refund_amount - $args['amount'] ) > 0 || ( $order->has_free_item() && ( $remaining_refund_items - $refund_item_count ) > 0 ) ) {
+			/**
+			 * Trigger notification emails.
+			 *
+			 * Filter hook to modify the partially-refunded status conditions.
+			 *
+			 * @since 6.7.0
+			 *
+			 * @param bool $is_partially_refunded Whether the order is partially refunded.
+			 * @param int  $order_id The order id.
+			 * @param int  $refund_id The refund id.
+			 */
+			if ( (bool) apply_filters( 'woocommerce_order_is_partially_refunded', ( $remaining_refund_amount - $args['amount'] ) > 0 || ( $order->has_free_item() && ( $remaining_refund_items - $refund_item_count ) > 0 ), $order->get_id(), $refund->get_id() ) ) {
 				do_action( 'woocommerce_order_partially_refunded', $order->get_id(), $refund->get_id() );
 			} else {
 				do_action( 'woocommerce_order_fully_refunded', $order->get_id(), $refund->get_id() );
@@ -628,7 +647,7 @@ function wc_create_refund( $args = array() ) {
 
 	} catch ( Exception $e ) {
 		if ( isset( $refund ) && is_a( $refund, 'WC_Order_Refund' ) ) {
-			wp_delete_post( $refund->get_id(), true );
+			$refund->delete( true );
 		}
 		return new WP_Error( 'error', $e->getMessage() );
 	}
@@ -722,7 +741,22 @@ function wc_restock_refunded_items( $order, $refunded_line_items ) {
 		$item->update_meta_data( '_restock_refunded_items', $qty_to_refund + $restock_refunded_items );
 
 		/* translators: 1: product ID 2: old stock level 3: new stock level */
-		$order->add_order_note( sprintf( __( 'Item #%1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $product->get_id(), $old_stock, $new_stock ) );
+		$restock_note = sprintf( __( 'Item #%1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $product->get_id(), $old_stock, $new_stock );
+
+		/**
+		 * Allow the restock note to be modified.
+		 *
+		 * @since 6.4.0
+		 *
+		 * @param string $restock_note The original note.
+		 * @param int $old_stock The old stock.
+		 * @param bool|int|null $new_stock The new stock.
+		 * @param WC_Order $order The order the refund was done for.
+		 * @param bool|WC_Product $product The product the refund was done for.
+		 */
+		$restock_note = apply_filters( 'woocommerce_refund_restock_note', $restock_note, $old_stock, $new_stock, $order, $product );
+
+		$order->add_order_note( $restock_note );
 
 		$item->save();
 

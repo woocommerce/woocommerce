@@ -20,16 +20,17 @@ describe( 'AxiosURLToQueryInterceptor', () => {
 	} );
 
 	it( 'should put path in query string', async () => {
-		adapter.onGet(
-			'http://test.test/',
-			{ params: { test: '/test/route' } }
-		).reply(
-			200,
-			{ test: 'value' },
-			{ 'content-type': 'application/json' }
-		);
+		adapter
+			.onGet( 'http://test.test/', { params: { test: '/test/route' } } )
+			.reply(
+				200,
+				{ test: 'value' },
+				{ 'content-type': 'application/json' }
+			);
 
-		const response = await axiosInstance.get( 'http://test.test/test/route' );
+		const response = await axiosInstance.get(
+			'http://test.test/test/route'
+		);
 
 		expect( response.status ).toEqual( 200 );
 	} );

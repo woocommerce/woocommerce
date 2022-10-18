@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @version  3.0.0
  */
-class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_Store implements WC_Object_Data_Store_Interface, WC_Order_Item_Type_Data_Store_Interface, WC_Order_Item_Product_Data_Store_Interface {
+class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_Store implements WC_Object_Data_Store_Interface, WC_Order_Item_Product_Data_Store_Interface, WC_Order_Item_Type_Data_Store_Interface {
 
 	/**
 	 * Data stored in meta keys.

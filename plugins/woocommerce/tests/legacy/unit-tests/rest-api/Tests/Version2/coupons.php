@@ -12,7 +12,7 @@ class WC_Tests_API_Coupons_V2 extends WC_REST_Unit_Test_Case {
 	 * Setup test coupon data.
 	 * @since 3.0.0
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Coupons_Controller();
 		$this->user     = $this->factory->user->create(

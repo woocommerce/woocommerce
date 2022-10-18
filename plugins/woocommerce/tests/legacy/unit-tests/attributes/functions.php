@@ -49,7 +49,7 @@ class WC_Tests_Attributes_Functions extends WC_Unit_Test_Case {
 	public function test_wc_create_attribute() {
 		// Test success.
 		$id = wc_create_attribute( array( 'name' => 'Brand' ) );
-		$this->assertInternalType( 'int', $id );
+		$this->assertIsInt( $id );
 
 		// Test failures.
 		$err = wc_create_attribute( array() );

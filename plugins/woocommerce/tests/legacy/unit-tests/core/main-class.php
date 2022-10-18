@@ -26,7 +26,7 @@ class WC_Test_WooCommerce extends WC_Unit_Test_Case {
 	 *
 	 * @since 2.2
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->wc = WC();
 	}

@@ -81,7 +81,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 	/**
 	 * Initialize the Paypal gateway and Request objects.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$bootstrap = WC_Unit_Tests_Bootstrap::instance();
@@ -106,7 +106,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 		// Create products.
 		$this->create_products( $product_count );
 
-		$this->order = WC_Helper_Order::create_order( $this->user );
+		$this->order = WC_Helper_Order::create_order();
 		$this->add_products_to_order( $this->order, $product_prices );
 
 		// Set payment method to Paypal.

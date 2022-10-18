@@ -47,6 +47,8 @@ describe( 'AxiosInterceptor', () => {
 			interceptor.start( axiosInstance );
 		}
 
-		await expect( axiosInstance.get( 'http://test.test' ) ).rejects.toBeInstanceOf( Error );
+		await expect(
+			axiosInstance.get( 'http://test.test' )
+		).rejects.toBeInstanceOf( Error );
 	} );
 } );

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Include the woocommerce_admin_install_timestamp option value in the explat assignment query string as woo_wcadmin_install_timestamp. #33574

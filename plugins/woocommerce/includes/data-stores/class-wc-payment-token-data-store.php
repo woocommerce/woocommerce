@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @version  3.0.0
  */
-class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment_Token_Data_Store_Interface, WC_Object_Data_Store_Interface {
+class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_Data_Store_Interface, WC_Payment_Token_Data_Store_Interface {
 
 	/**
 	 * Meta type. Payment tokens are a new object type.
@@ -264,7 +264,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 		}
 
 		$page           = isset( $args['page'] ) ? absint( $args['page'] ) : 1;
-		$posts_per_page = isset( $args['limit'] ) ? absint( $args['limit'] ) : get_option( 'posts_per_page' );
+		$posts_per_page = absint( isset( $args['limit'] ) ? $args['limit'] : get_option( 'posts_per_page' ) );
 
 		$pgstrt = absint( ( $page - 1 ) * $posts_per_page ) . ', ';
 		$limits = 'LIMIT ' . $pgstrt . $posts_per_page;

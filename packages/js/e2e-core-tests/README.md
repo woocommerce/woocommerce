@@ -104,6 +104,7 @@ The functions to access the core tests are:
   - `runCartCalculateShippingTest` - Shopper can calculate shipping in the cart
   - `runCartRedirectionTest` - Shopper is redirected to the cart page after adding to cart
   - `runOrderEmailReceivingTest` - Shopper can receive an email for his order
+  - `runCartAndCheckoutConsistentShippingTest` - Shopper gets consistent shipping information on cart and checkout pages
 
 ### REST API
 

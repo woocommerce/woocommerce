@@ -936,7 +936,7 @@ return array(
 		'name'           => 'Danish krone',
 		'singular'       => 'Danish krone',
 		'plural'         => 'Danish kroner',
-		'short_symbol'   => 'kr',
+		'short_symbol'   => 'kr.',
 		'locales'        => $locales['DKK'],
 	),
 	'DM' => array(

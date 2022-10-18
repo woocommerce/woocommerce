@@ -5,6 +5,8 @@
  * @package WooCommerce\Tracks
  */
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -92,9 +94,7 @@ class WC_Orders_Tracking {
 	 * @param int $id Order id.
 	 */
 	public function track_created_date_change( $id ) {
-		$post_type = get_post_type( $id );
-
-		if ( 'shop_order' !== $post_type ) {
+		if ( ! OrderUtil::is_order( $id ) ) {
 			return;
 		}
 
@@ -168,7 +168,7 @@ class WC_Orders_Tracking {
 					isset( $referring_args['action'] ) &&
 					'edit' === $referring_args['action'] &&
 					isset( $referring_args['post'] ) &&
-					'shop_order' === get_post_type( $referring_args['post'] )
+					'shop_order' === OrderUtil::get_order_type( $referring_args['post'] )
 				) {
 					WC_Tracks::record_event( 'order_edit_add_order' );
 				}

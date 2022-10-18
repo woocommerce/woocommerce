@@ -14,7 +14,7 @@ class WC_Tests_WC_Emails extends WC_Unit_Test_Case {
 	/**
 	 * Setup tests.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		// Load email classes.

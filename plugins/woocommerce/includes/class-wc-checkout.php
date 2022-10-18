@@ -247,19 +247,21 @@ class WC_Checkout {
 
 		if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) {
 			$this->fields['account']['account_username'] = array(
-				'type'        => 'text',
-				'label'       => __( 'Account username', 'woocommerce' ),
-				'required'    => true,
-				'placeholder' => esc_attr__( 'Username', 'woocommerce' ),
+				'type'         => 'text',
+				'label'        => __( 'Account username', 'woocommerce' ),
+				'required'     => true,
+				'placeholder'  => esc_attr__( 'Username', 'woocommerce' ),
+				'autocomplete' => 'username',
 			);
 		}
 
 		if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
 			$this->fields['account']['account_password'] = array(
-				'type'        => 'password',
-				'label'       => __( 'Create account password', 'woocommerce' ),
-				'required'    => true,
-				'placeholder' => esc_attr__( 'Password', 'woocommerce' ),
+				'type'         => 'password',
+				'label'        => __( 'Create account password', 'woocommerce' ),
+				'required'     => true,
+				'placeholder'  => esc_attr__( 'Password', 'woocommerce' ),
+				'autocomplete' => 'new-password',
 			);
 		}
 		$this->fields = apply_filters( 'woocommerce_checkout_fields', $this->fields );
@@ -1132,9 +1134,19 @@ class WC_Checkout {
 	 */
 	public function process_checkout() {
 		try {
-			$nonce_value = wc_get_var( $_REQUEST['woocommerce-process-checkout-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // phpcs:ignore
+			$nonce_value    = wc_get_var( $_REQUEST['woocommerce-process-checkout-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // phpcs:ignore
+			$expiry_message = sprintf(
+				/* translators: %s: shop cart url */
+				__( 'Sorry, your session has expired. <a href="%s" class="wc-backward">Return to shop</a>', 'woocommerce' ),
+				esc_url( wc_get_page_permalink( 'shop' ) )
+			);
 
 			if ( empty( $nonce_value ) || ! wp_verify_nonce( $nonce_value, 'woocommerce-process_checkout' ) ) {
+				// If the cart is empty, the nonce check failed because of session expiry.
+				if ( WC()->cart->is_empty() ) {
+					throw new Exception( $expiry_message );
+				}
+
 				WC()->session->set( 'refresh_totals', true );
 				throw new Exception( __( 'We were unable to process your order, please try again.', 'woocommerce' ) );
 			}
@@ -1145,8 +1157,7 @@ class WC_Checkout {
 			do_action( 'woocommerce_before_checkout_process' );
 
 			if ( WC()->cart->is_empty() ) {
-				/* translators: %s: shop cart url */
-				throw new Exception( sprintf( __( 'Sorry, your session has expired. <a href="%s" class="wc-backward">Return to shop</a>', 'woocommerce' ), esc_url( wc_get_page_permalink( 'shop' ) ) ) );
+				throw new Exception( $expiry_message );
 			}
 
 			do_action( 'woocommerce_checkout_process' );

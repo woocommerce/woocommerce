@@ -13,7 +13,7 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 	/**
 	 * Setup.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->handler = new WC_Session_Handler();
@@ -131,11 +131,110 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test that session from cookie is destroyed if expired.
+	 */
+	public function test_destroy_session_cookie_expired() {
+		$customer_id        = '1';
+		$session_expiration = time() - 10000;
+		$session_expiring   = time() - 1000;
+		$cookie_hash        = '';
+		$this->session_key  = $customer_id;
+
+		$handler = $this
+			->getMockBuilder( WC_Session_Handler::class )
+			->setMethods( array( 'get_session_cookie' ) )
+			->getMock();
+
+		$handler
+			->method( 'get_session_cookie' )
+			->willReturn( array( $customer_id, $session_expiration, $session_expiring, $cookie_hash ) );
+
+		add_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		$handler->init_session_cookie();
+
+		remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		$this->assertFalse( wp_cache_get( $this->cache_prefix . $this->session_key, WC_SESSION_CACHE_GROUP ) );
+		$this->assertNull( $this->get_session_from_db( $this->session_key ) );
+	}
+
+	/**
+	 * @testdox Test that session from cookie is destroyed if user is logged out.
+	 */
+	public function test_destroy_session_user_logged_out() {
+		$customer_id        = '1';
+		$session_expiration = time() + 50000;
+		$session_expiring   = time() + 5000;
+		$cookie_hash        = '';
+		$this->session_key  = $customer_id;
+
+		// Simulate a log out.
+		wp_set_current_user( 0 );
+
+		$handler = $this
+			->getMockBuilder( WC_Session_Handler::class )
+			->setMethods( array( 'get_session_cookie' ) )
+			->getMock();
+
+		$handler
+			->method( 'get_session_cookie' )
+			->willReturn( array( $customer_id, $session_expiration, $session_expiring, $cookie_hash ) );
+
+		add_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		$handler->init_session_cookie();
+
+		remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		$this->assertFalse( wp_cache_get( $this->cache_prefix . $this->session_key, WC_SESSION_CACHE_GROUP ) );
+		$this->assertNull( $this->get_session_from_db( $this->session_key ) );
+	}
+
+	/**
+	 * @testdox Test that session from cookie is destroyed if logged in user doesn't match.
+	 */
+	public function test_destroy_session_user_mismatch() {
+		$customer           = WC_Helper_Customer::create_customer();
+		$customer_id        = (string) $customer->get_id();
+		$session_expiration = time() + 50000;
+		$session_expiring   = time() + 5000;
+		$cookie_hash        = '';
+
+		$handler = $this
+			->getMockBuilder( WC_Session_Handler::class )
+			->setMethods( array( 'get_session_cookie' ) )
+			->getMock();
+
+		wp_set_current_user( $customer->get_id() );
+
+		$handler->init();
+		$handler->set( 'cart', 'fake cart' );
+		$handler->save_data();
+
+		$handler
+			->method( 'get_session_cookie' )
+			->willReturn( array( $customer_id, $session_expiration, $session_expiring, $cookie_hash ) );
+
+		wp_set_current_user( 1 );
+
+		add_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		$handler->init_session_cookie();
+
+		remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		$this->assertFalse( wp_cache_get( $this->cache_prefix . $customer_id, WC_SESSION_CACHE_GROUP ) );
+		$this->assertNull( $this->get_session_from_db( $customer_id ) );
+		$this->assertNotNull( $this->get_session_from_db( '1' ) );
+	}
+
+	/**
 	 * Helper function to create a WC session and save it to the DB.
 	 */
 	protected function create_session() {
-		$this->handler->init();
 		wp_set_current_user( 1 );
+		$this->handler->init();
 		$this->handler->set( 'cart', 'fake cart' );
 		$this->handler->save_data();
 		$this->session_key  = $this->handler->get_customer_id();

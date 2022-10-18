@@ -59,6 +59,41 @@ class WC_Helper_Product {
 	}
 
 	/**
+	 * Create a downloadable product.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @param array $downloads An array of arrays (each containing a 'name' and 'file' key) or WC_Product_Download objects.
+	 * @param bool  $save      Save or return object.
+	 *
+	 * @return WC_Product_Simple|false
+	 */
+	public static function create_downloadable_product( array $downloads = array(), $save = true ) {
+		$product = new WC_Product_Simple();
+		$product->set_props(
+			array(
+				'name'          => 'Downloadable Product',
+				'regular_price' => 10,
+				'price'         => 10,
+				'manage_stock'  => false,
+				'tax_status'    => 'taxable',
+				'downloadable'  => true,
+				'virtual'       => false,
+				'stock_status'  => 'instock',
+			)
+		);
+
+		$product->set_downloads( $downloads );
+
+		if ( $save ) {
+			$product->save();
+			return \wc_get_product( $product->get_id() );
+		} else {
+			return $product;
+		}
+	}
+
+	/**
 	 * Create external product.
 	 *
 	 * @since 3.0.0

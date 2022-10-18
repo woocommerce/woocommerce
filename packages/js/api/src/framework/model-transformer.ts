@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { Model, ModelConstructor } from '../models';
 
 /**
@@ -45,7 +48,7 @@ export enum TransformationOrder {
 	 * A special value reserved for transformations that MUST come after all orders due to
 	 * the way that they destroy the property keys or values.
 	 */
-	VeryLast = 2000000
+	VeryLast = 2000000,
 }
 
 /**
@@ -67,7 +70,9 @@ export class ModelTransformer< T extends Model > {
 	 */
 	public constructor( transformations: ModelTransformation[] ) {
 		// Ensure that the transformations are sorted by priority.
-		transformations.sort( ( a, b ) => ( a.fromModelOrder > b.fromModelOrder ) ? 1 : -1 );
+		transformations.sort( ( a, b ) =>
+			a.fromModelOrder > b.fromModelOrder ? 1 : -1
+		);
 
 		this.transformations = transformations;
 	}
@@ -87,7 +92,7 @@ export class ModelTransformer< T extends Model > {
 			( properties: any, transformer: ModelTransformation ) => {
 				return transformer.fromModel( properties );
 			},
-			raw,
+			raw
 		);
 	}
 
@@ -95,7 +100,7 @@ export class ModelTransformer< T extends Model > {
 	 * Takes the input data and runs all of the transformations on it before returning the created model.
 	 *
 	 * @param {Function.<T>} modelClass The model class we're trying to create.
-	 * @param {*} data The data we're transforming.
+	 * @param {*}            data       The data we're transforming.
 	 * @return {T} The transformed model.
 	 * @template T
 	 */
@@ -104,7 +109,7 @@ export class ModelTransformer< T extends Model > {
 			( properties: any, transformer: ModelTransformation ) => {
 				return transformer.toModel( properties );
 			},
-			data,
+			data
 		);
 
 		return new modelClass( transformed );

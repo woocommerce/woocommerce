@@ -8,6 +8,8 @@
  * @version 2.3.0
  */
 
+use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -35,6 +37,9 @@ class WC_Comments {
 		// Secure webhook comments.
 		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_webhook_comments' ), 10, 1 );
 		add_filter( 'comment_feed_where', array( __CLASS__, 'exclude_webhook_comments_from_feed_where' ) );
+
+		// Exclude product reviews.
+		add_filter( 'comments_clauses', array( ReviewsUtil::class, 'comments_clauses_without_product_reviews' ), 10, 1 );
 
 		// Count comments.
 		add_filter( 'wp_count_comments', array( __CLASS__, 'wp_count_comments' ), 10, 2 );
@@ -221,7 +226,7 @@ class WC_Comments {
 	}
 
 	/**
-	 * Remove order notes and webhook delivery logs from wp_count_comments().
+	 * Remove order notes, webhook delivery logs, and product reviews from wp_count_comments().
 	 *
 	 * @since  2.2
 	 * @param  object $stats   Comment stats.
@@ -244,7 +249,8 @@ class WC_Comments {
 					"
 					SELECT comment_approved, COUNT(*) AS num_comments
 					FROM {$wpdb->comments}
-					WHERE comment_type NOT IN ('action_log', 'order_note', 'webhook_delivery')
+					LEFT JOIN {$wpdb->posts} ON comment_post_ID = {$wpdb->posts}.ID
+					WHERE comment_type NOT IN ('action_log', 'order_note', 'webhook_delivery') AND {$wpdb->posts}.post_type NOT IN ('product')
 					GROUP BY comment_approved
 					",
 					ARRAY_A

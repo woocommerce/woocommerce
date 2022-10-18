@@ -606,7 +606,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	/**
 	 * Parse download file urls, we should allow shortcodes here.
 	 *
-	 * Allow shortcodes if present, othersiwe esc_url the value.
+	 * Allow shortcodes if present, otherwise esc_url the value.
 	 *
 	 * @param string $value Field value.
 	 *

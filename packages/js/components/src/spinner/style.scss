@@ -1,0 +1,38 @@
+@keyframes rotate {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(270deg);
+	}
+}
+
+@keyframes growAndShrink {
+	0%,
+	100% {
+		stroke-dashoffset: 200;
+	}
+	50% {
+		stroke-dashoffset: 50;
+		transform: rotate(135deg);
+	}
+	100% {
+		transform: rotate(450deg);
+	}
+}
+
+.woocommerce-spinner {
+	animation: rotate 2s linear infinite;
+	width: 40px;
+	min-width: 40px;
+	height: 40px;
+	max-height: 40px;
+}
+
+.woocommerce-spinner__circle {
+	stroke-dasharray: 200;
+	stroke-dashoffset: 0;
+	transform-origin: center;
+	animation: growAndShrink 2s ease-in-out infinite;
+	stroke: $studio-gray-90;
+}

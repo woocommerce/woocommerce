@@ -1,7 +1,11 @@
 /*
  * Internal dependencies
  */
-const { runActivationTest, runInitialStoreSettingsTest, runSetupOnboardingTests } = require( '@woocommerce/e2e-core-tests' );
+const {
+	runActivationTest,
+	runInitialStoreSettingsTest,
+	runSetupOnboardingTests,
+} = require( '@woocommerce/e2e-core-tests' );
 
 runActivationTest();
 runInitialStoreSettingsTest();

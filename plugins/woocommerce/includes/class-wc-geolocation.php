@@ -45,10 +45,10 @@ class WC_Geolocation {
 	 * @var array
 	 */
 	private static $ip_lookup_apis = array(
-		'ipify'             => 'http://api.ipify.org/',
-		'ipecho'            => 'http://ipecho.net/plain',
-		'ident'             => 'http://ident.me',
-		'whatismyipaddress' => 'http://bot.whatismyipaddress.com',
+		'ipify'  => 'http://api.ipify.org/',
+		'ipecho' => 'http://ipecho.net/plain',
+		'ident'  => 'http://ident.me',
+		'tnedi'  => 'http://tnedi.me',
 	);
 
 	/**
@@ -113,7 +113,13 @@ class WC_Geolocation {
 
 			foreach ( $ip_lookup_services_keys as $service_name ) {
 				$service_endpoint = $ip_lookup_services[ $service_name ];
-				$response         = wp_safe_remote_get( $service_endpoint, array( 'timeout' => 2 ) );
+				$response         = wp_safe_remote_get(
+					$service_endpoint,
+					array(
+						'timeout'    => 2,
+						'user-agent' => 'WooCommerce/' . wc()->version,
+					)
+				);
 
 				if ( ! is_wp_error( $response ) && rest_is_ip_address( $response['body'] ) ) {
 					$external_ip_address = apply_filters( 'woocommerce_geolocation_ip_lookup_api_response', wc_clean( $response['body'] ), $service_name );
@@ -276,7 +282,13 @@ class WC_Geolocation {
 
 			foreach ( $geoip_services_keys as $service_name ) {
 				$service_endpoint = $geoip_services[ $service_name ];
-				$response         = wp_safe_remote_get( sprintf( $service_endpoint, $ip_address ), array( 'timeout' => 2 ) );
+				$response         = wp_safe_remote_get(
+					sprintf( $service_endpoint, $ip_address ),
+					array(
+						'timeout'    => 2,
+						'user-agent' => 'WooCommerce/' . wc()->version,
+					)
+				);
 
 				if ( ! is_wp_error( $response ) && $response['body'] ) {
 					switch ( $service_name ) {

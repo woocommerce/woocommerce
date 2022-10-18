@@ -21,6 +21,8 @@ class WC_Site_Tracking {
 		 * Don't track users if a filter has been applied to turn it off.
 		 * `woocommerce_apply_tracking` will be deprecated. Please use
 		 * `woocommerce_apply_user_tracking` instead.
+		 *
+		 * @since 3.6.0
 		 */
 		if ( ! apply_filters( 'woocommerce_apply_user_tracking', true ) || ! apply_filters( 'woocommerce_apply_tracking', true ) ) {
 			return false;
@@ -62,24 +64,65 @@ class WC_Site_Tracking {
 	 * Adds the tracking function to the admin footer.
 	 */
 	public static function add_tracking_function() {
+		$user           = wp_get_current_user();
+		$server_details = WC_Tracks::get_server_details();
+		$blog_details   = WC_Tracks::get_blog_details( $user->ID );
+
+		$client_tracking_properties = array_merge( $server_details, $blog_details );
+		/**
+		 * Add global tracks event properties.
+		 *
+		 * @since 6.5.0
+		 */
+		$filtered_properties = apply_filters( 'woocommerce_tracks_event_properties', $client_tracking_properties, false );
+		$environment_type    = function_exists( 'wp_get_environment_type' ) ? wp_get_environment_type() : 'production';
 		?>
 		<!-- WooCommerce Tracks -->
 		<script type="text/javascript">
 			window.wcTracks = window.wcTracks || {};
 			window.wcTracks.isEnabled = <?php echo self::is_tracking_enabled() ? 'true' : 'false'; ?>;
+			window.wcTracks.validateEvent = function( eventName, props = {} ) {
+				let isValid = true;
+				if ( ! <?php echo esc_js( WC_Tracks_Event::EVENT_NAME_REGEX ); ?>.test( eventName ) ) {
+					if ( <?php echo $environment_type !== 'production' ? 'true' : 'false'; ?> ) {
+						/* eslint-disable no-console */
+						console.error(
+							`A valid event name must be specified. The event name: "${ eventName }" is not valid.`
+						);
+						/* eslint-enable no-console */
+					}
+					isValid = false;
+				}
+				for ( const prop of Object.keys( props ) ) {
+					if ( ! <?php echo esc_js( WC_Tracks_Event::PROP_NAME_REGEX ); ?>.test( prop ) ) {
+						if ( <?php echo $environment_type !== 'production' ? 'true' : 'false'; ?> ) {
+							/* eslint-disable no-console */
+							console.error(
+								`A valid prop name must be specified. The property name: "${ prop }" is not valid.`
+							);
+							/* eslint-enable no-console */
+						}
+						isValid = false;
+					}
+				}
+				return isValid;
+			}
 			window.wcTracks.recordEvent = function( name, properties ) {
 				if ( ! window.wcTracks.isEnabled ) {
 					return;
 				}
 
-				var eventName = '<?php echo esc_attr( WC_Tracks::PREFIX ); ?>' + name;
-				var eventProperties = properties || {};
-				eventProperties.url = '<?php echo esc_html( home_url() ); ?>'
-				eventProperties.products_count = '<?php echo intval( WC_Tracks::get_products_count() ); ?>';
+				const eventName = '<?php echo esc_attr( WC_Tracks::PREFIX ); ?>' + name;
+				let eventProperties = properties || {};
+				eventProperties = { ...eventProperties, ...<?php echo json_encode( $filtered_properties ); ?> };
 				if ( window.wp && window.wp.hooks && window.wp.hooks.applyFilters ) {
 					eventProperties = window.wp.hooks.applyFilters( 'woocommerce_tracks_client_event_properties', eventProperties, eventName );
 					delete( eventProperties._ui );
 					delete( eventProperties._ut );
+				}
+
+				if ( ! window.wcTracks.validateEvent( eventName, eventProperties ) ) {
+					return;
 				}
 				window._tkq = window._tkq || [];
 				window._tkq.push( [ 'recordEvent', eventName, eventProperties ] );
@@ -139,7 +182,6 @@ class WC_Site_Tracking {
 	 * Init tracking.
 	 */
 	public static function init() {
-
 		// Define window.wcTracks.recordEvent in case it is enabled client-side.
 		self::register_scripts();
 		add_filter( 'admin_footer', array( __CLASS__, 'add_tracking_function' ), 24 );
@@ -161,6 +203,7 @@ class WC_Site_Tracking {
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-coupons-tracking.php';
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-order-tracking.php';
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-coupon-tracking.php';
+		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-theme-tracking.php';
 
 		$tracking_classes = array(
 			'WC_Extensions_Tracking',
@@ -172,6 +215,7 @@ class WC_Site_Tracking {
 			'WC_Coupons_Tracking',
 			'WC_Order_Tracking',
 			'WC_Coupon_Tracking',
+			'WC_Theme_Tracking',
 		);
 
 		foreach ( $tracking_classes as $tracking_class ) {
@@ -183,4 +227,6 @@ class WC_Site_Tracking {
 			}
 		}
 	}
+
+
 }

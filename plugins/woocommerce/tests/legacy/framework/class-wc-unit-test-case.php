@@ -62,7 +62,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 *
 	 * @since 2.2
 	 */
-	public function setUp() {
+	public function setUp(): void {
 
 		parent::setUp();
 
@@ -90,7 +90,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 *
 	 * @since 3.5.0
 	 */
-	public static function setUpBeforeClass() {
+	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 
 		// Terms are deleted in WP_UnitTestCase::tearDownAfterClass, then e.g. Uncategorized product_cat is missing.
@@ -255,6 +255,15 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
+	 * Register the global mocks to use in the mockable LegacyProxy.
+	 *
+	 * @param array $mocks An associative array where keys are global names and values are the replacements for each global.
+	 */
+	public function register_legacy_proxy_global_mocks( array $mocks ) {
+		wc_get_container()->get( LegacyProxy::class )->register_global_mocks( $mocks );
+	}
+
+	/**
 	 * Asserts that a certain callable output is equivalent to a given piece of HTML.
 	 *
 	 * "Equivalent" means that the string representations of the HTML pieces are equal
@@ -328,6 +337,55 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @return bool mixed True if the value is of integer type, false otherwise.
 	 */
 	public static function assertIsInteger( $actual, $message = '' ) {
-		return self::assertInternalType( 'int', $actual, $message );
+		return self::assertIsInt( $actual, $message );
+	}
+
+	/**
+	 * Skip the current test on PHP 8.1 and higher.
+	 * TODO: Remove this method and its usages once WordPress is compatible with PHP 8.1. Please note that there are multiple copies of this method.
+	 */
+	protected function skip_on_php_8_1() {
+		if ( version_compare( PHP_VERSION, '8.1', '>=' ) ) {
+			$this->markTestSkipped( 'Waiting for WordPress compatibility with PHP 8.1' );
+		}
+	}
+
+	/**
+	 * Get recorded tracks event by name.
+	 *
+	 * @param string $event_name Event name.
+	 * @return WC_Tracks_Event|null
+	 */
+	public function get_tracks_events( $event_name ) {
+		$events  = WC_Tracks_Footer_Pixel::get_events();
+		$matches = array();
+
+		foreach ( $events as $event ) {
+			if ( $event->_en === $event_name ) {
+				$matches[] = $event;
+			}
+		}
+
+		return $matches;
+	}
+
+	/**
+	 * Assert that a valid tracks event has been recorded.
+	 *
+	 * @param string $event_name Event name.
+	 */
+	public function assertRecordedTracksEvent( $event_name ): void {
+		$events = self::get_tracks_events( $event_name );
+		$this->assertNotEmpty( $events );
+	}
+
+	/**
+	 * Assert that a tracks event has not been recorded.
+	 *
+	 * @param string $event_name Event name.
+	 */
+	public function assertNotRecordedTracksEvent( $event_name ): void {
+		$events = self::get_tracks_events( $event_name );
+		$this->assertEmpty( $events );
 	}
 }

@@ -8,7 +8,7 @@ class WC_Tests_Helper_API extends WC_Unit_Test_Case {
 	/**
 	 * Set up mock responses for all API calls.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.

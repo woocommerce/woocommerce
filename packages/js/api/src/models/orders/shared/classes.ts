@@ -1,5 +1,8 @@
+/**
+ * Internal dependencies
+ */
 import { MetaData } from '../../shared-types';
-import { Model } from '../../model';
+import { Model, ModelID } from '../../model';
 import { TaxStatus } from './types';
 
 /**
@@ -36,7 +39,7 @@ export class OrderItemTax extends Model {
 /**
  * An order address.
  */
-export class OrderAddress extends Model {
+export class ShippingOrderAddress extends Model {
 	/**
 	 * The first name of the person in the address.
 	 *
@@ -56,7 +59,7 @@ export class OrderAddress extends Model {
 	 *
 	 * @type {string}
 	 */
-	public readonly companyName: string = '';
+	public readonly company: string = '';
 
 	/**
 	 * The first address line in the address.
@@ -98,21 +101,61 @@ export class OrderAddress extends Model {
 	 *
 	 * @type {string}
 	 */
-	public readonly countryCode: string = '';
+	public readonly country: string = '';
 
+	/**
+	 * Adapter to keep backward compatibility with renamed property.
+	 *
+	 * @type {string|null}
+	 */
+	get companyName() {
+		return this.company;
+	}
+
+	/**
+	 * Adapter to keep backward compatibility with renamed property.
+	 *
+	 * @type {string|null}
+	 */
+	get countryCode() {
+		return this.country;
+	}
+
+	/**
+	 * Creates a new order instance with the given properties
+	 *
+	 * @param {Object} properties The properties to set in the object.
+	 */
+	public constructor( properties?: Partial< ShippingOrderAddress > ) {
+		super();
+		Object.assign( this, properties );
+	}
+}
+
+export class BillingOrderAddress extends ShippingOrderAddress {
 	/**
 	 * The email address of the person in the address.
 	 *
-	 * @type {string}
+	 * @type {string|null}
 	 */
-	public readonly email: string = '';
+	public readonly email: undefined | string = '';
 
 	/**
 	 * The phone number of the person in the address.
 	 *
-	 * @type {string}
+	 * @type {string|null}
 	 */
-	public readonly phone: string = '';
+	public readonly phone: undefined | string = '';
+
+	/**
+	 * Creates a new order instance with the given properties
+	 *
+	 * @param {Object} properties The properties to set in the object.
+	 */
+	public constructor( properties?: Partial< BillingOrderAddress > ) {
+		super();
+		Object.assign( this, properties );
+	}
 }
 
 /**
@@ -209,6 +252,16 @@ export class OrderLineItem extends OrderItemMeta {
 	 * @type {string|null}
 	 */
 	public readonly parentName: string | null = null;
+
+	/**
+	 * Creates a new order instance with the given properties
+	 *
+	 * @param {Object} properties The properties to set in the object.
+	 */
+	public constructor( properties?: Partial< OrderLineItem > ) {
+		super();
+		Object.assign( this, properties );
+	}
 }
 
 /**
@@ -263,6 +316,16 @@ export class OrderTaxRate extends Model {
 	 * @type {number}
 	 */
 	public readonly ratePercent: number = 0;
+
+	/**
+	 * Creates a new order instance with the given properties
+	 *
+	 * @param {Object} properties The properties to set in the object.
+	 */
+	public constructor( properties?: Partial< OrderTaxRate > ) {
+		super();
+		Object.assign( this, properties );
+	}
 }
 
 /**
@@ -279,9 +342,9 @@ export class OrderShippingLine extends OrderItemMeta {
 	/**
 	 * The shipping method id.
 	 *
-	 * @type {string}
+	 * @type {string|number}
 	 */
-	public readonly methodId: string = '';
+	public readonly methodId: ModelID | undefined;
 
 	/**
 	 * The shipping method instance id.
@@ -310,6 +373,16 @@ export class OrderShippingLine extends OrderItemMeta {
 	 * @type {ReadonlyArray.<OrderItemTax>}
 	 */
 	public readonly taxes: OrderItemTax[] = [];
+
+	/**
+	 * Creates a new order instance with the given properties
+	 *
+	 * @param {Object} properties The properties to set in the object.
+	 */
+	public constructor( properties?: Partial< OrderShippingLine > ) {
+		super();
+		Object.assign( this, properties );
+	}
 }
 
 /**
@@ -364,6 +437,16 @@ export class OrderFeeLine extends OrderItemMeta {
 	 * @type {ReadonlyArray.<OrderItemTax>}
 	 */
 	public readonly taxes: OrderItemTax[] = [];
+
+	/**
+	 * Creates a new order instance with the given properties
+	 *
+	 * @param {Object} properties The properties to set in the object.
+	 */
+	public constructor( properties?: Partial< OrderFeeLine > ) {
+		super();
+		Object.assign( this, properties );
+	}
 }
 
 /**
@@ -390,6 +473,16 @@ export class OrderCouponLine extends OrderItemMeta {
 	 * @type {string}
 	 */
 	public readonly discountTax: string = '';
+
+	/**
+	 * Creates a new order instance with the given properties
+	 *
+	 * @param {Object} properties The properties to set in the object.
+	 */
+	public constructor( properties?: Partial< OrderCouponLine > ) {
+		super();
+		Object.assign( this, properties );
+	}
 }
 
 /**
@@ -409,4 +502,14 @@ export class OrderRefundLine extends Model {
 	 * @type {string}
 	 */
 	public readonly total: string = '';
+
+	/**
+	 * Creates a new order instance with the given properties
+	 *
+	 * @param {Object} properties The properties to set in the object.
+	 */
+	public constructor( properties?: Partial< OrderRefundLine > ) {
+		super();
+		Object.assign( this, properties );
+	}
 }

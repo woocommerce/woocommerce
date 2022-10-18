@@ -4,7 +4,7 @@ Thumbs.db
 
 # IDE files
 .idea
-.vscode/
+.vscode/*
 project.xml
 project.properties
 .project
@@ -40,6 +40,7 @@ npm-debug.log
 build/
 build-module/
 build-style/
+build-types/
 dist/
 
 # Project files
@@ -73,3 +74,30 @@ nbproject/private/
 
 # Test Results
 test-results.json
+
+# Admin Feature config
+plugins/woocommerce/includes/react-admin/feature-config.php
+
+# PHP lint
+phpcs-report.xml
+
+# Allure directories
+allure-report
+allure-results
+
+# Code analyzer output and env
+changes.json
+.env
+
+# Playwright output & working files
+/plugins/woocommerce/tests/e2e-pw/output
+/plugins/woocommerce/tests/e2e-pw/report
+/plugins/woocommerce/tests/e2e-pw/storage
+/plugins/woocommerce/tests/e2e-pw/test-results.json
+/plugins/woocommerce/tests/api-core-tests/output
+
+# Turborepo
+.turbo
+
+# Support .gitkeep Files
+!.gitkeep

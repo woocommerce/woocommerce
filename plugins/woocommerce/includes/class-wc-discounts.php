@@ -540,7 +540,7 @@ class WC_Discounts {
 	 * until the amount is expired, discounting 1 cent at a time.
 	 *
 	 * @since 3.2.0
-	 * @param  WC_Coupon $coupon Coupon object if appliable. Passed through filters.
+	 * @param  WC_Coupon $coupon Coupon object if applicable. Passed through filters.
 	 * @param  array     $items_to_apply Array of items to apply the coupon to.
 	 * @param  int       $amount Fixed discount amount to apply.
 	 * @return int Total discounted.
@@ -576,13 +576,16 @@ class WC_Discounts {
 	/**
 	 * Ensure coupon exists or throw exception.
 	 *
+	 * A coupon is also considered to no longer exist if it has been placed in the trash, even if the trash has not yet
+	 * been emptied.
+	 *
 	 * @since  3.2.0
 	 * @throws Exception Error message.
 	 * @param  WC_Coupon $coupon Coupon data.
 	 * @return bool
 	 */
 	protected function validate_coupon_exists( $coupon ) {
-		if ( ! $coupon->get_id() && ! $coupon->get_virtual() ) {
+		if ( ( ! $coupon->get_id() && ! $coupon->get_virtual() ) || 'trash' === $coupon->get_status() ) {
 			/* translators: %s: coupon code */
 			throw new Exception( sprintf( __( 'Coupon "%s" does not exist!', 'woocommerce' ), esc_html( $coupon->get_code() ) ), 105 );
 		}
@@ -741,7 +744,7 @@ class WC_Discounts {
 			$valid = false;
 
 			foreach ( $this->get_items_to_validate() as $item ) {
-				if ( $item->product && in_array( $item->product->get_id(), $coupon->get_product_ids(), true ) || in_array( $item->product->get_parent_id(), $coupon->get_product_ids(), true ) ) {
+				if ( $item->product && ( in_array( $item->product->get_id(), $coupon->get_product_ids(), true ) || in_array( $item->product->get_parent_id(), $coupon->get_product_ids(), true ) ) ) {
 					$valid = true;
 					break;
 				}

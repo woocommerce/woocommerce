@@ -46,15 +46,16 @@ const confirm = ( prompt, choices ) => {
  * @param {string} localE2ePath Destination path
  * @param {string} packageE2ePath Source path
  * @param {string} packageName Source package. Default @woocommerce/e2e-environment package.
+ * @param {boolean} force Whether to override files if they exist without confirmation.
  * @return {boolean}
  */
-const confirmLocalCopy = ( localE2ePath, packageE2ePath, packageName = '' ) => {
+const confirmLocalCopy = ( localE2ePath, packageE2ePath, packageName = '', force = false ) => {
 	const localPath = resolveLocalE2ePath( localE2ePath );
 	const packagePath = resolvePackagePath( packageE2ePath, packageName );
 	const confirmPrompt = `${localE2ePath} already exists. Overwrite? [Y]es/[n]o: `;
 
 	let overwriteFiles;
-	if ( fs.existsSync( localPath ) ) {
+	if ( ! force && fs.existsSync( localPath ) ) {
 		overwriteFiles = confirm( confirmPrompt, 'ny' );
 		overwriteFiles = overwriteFiles.toLowerCase();
 	} else {
@@ -102,16 +103,16 @@ const getPackageData = ( packageName ) => {
 /**
  * Install test runner and test container defaults
  */
-const installDefaults = () => {
+const installDefaults = ( force ) => {
 	createLocalE2ePath( 'docker' );
 	console.log( 'Writing tests/e2e/docker/initialize.sh' );
-	confirmLocalCopy( `docker${path.sep}initialize.sh`, `installFiles${path.sep}initialize.sh` );
+	confirmLocalCopy( `docker${path.sep}initialize.sh`, `installFiles${path.sep}initialize.sh`, '', force );
 
 	createLocalE2ePath( 'config' );
 	console.log( 'Writing tests/e2e/config/jest.config.js' );
-	confirmLocalCopy( `config${path.sep}jest.config.js`, `installFiles${path.sep}jest.config.js.default` );
+	confirmLocalCopy( `config${path.sep}jest.config.js`, `installFiles${path.sep}jest.config.js.default`, '', force );
 	console.log( 'Writing tests/e2e/config/jest.setup.js' );
-	confirmLocalCopy( `config${path.sep}jest.setup.js`, `installFiles${path.sep}jest.setup.js.default` );
+	confirmLocalCopy( `config${path.sep}jest.setup.js`, `installFiles${path.sep}jest.setup.js.default`, '', force );
 };
 
 module.exports = {

@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<div class="toolbar toolbar-variations-defaults">
 				<div class="variations-defaults">
-					<strong><?php esc_html_e( 'Default Form Values', 'woocommerce' ); ?>: <?php echo wc_help_tip( __( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ) ); ?></strong>
+					<strong><?php esc_html_e( 'Default Form Values', 'woocommerce' ); ?>: <?php echo wc_help_tip( __( 'Choose a default form value if you want a certain variation already selected when a user visits the product page.', 'woocommerce' ) ); ?></strong>
 					<?php
 					foreach ( $variation_attributes as $attribute ) {
 						$selected_value = isset( $default_attributes[ sanitize_title( $attribute->get_name() ) ] ) ? $default_attributes[ sanitize_title( $attribute->get_name() ) ] : '';

@@ -146,11 +146,11 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				array(
 					'title'    => __( 'Base color', 'woocommerce' ),
 					/* translators: %s: default color */
-					'desc'     => sprintf( __( 'The base color for WooCommerce email templates. Default %s.', 'woocommerce' ), '<code>#96588a</code>' ),
+					'desc'     => sprintf( __( 'The base color for WooCommerce email templates. Default %s.', 'woocommerce' ), '<code>#7f54b3</code>' ),
 					'id'       => 'woocommerce_email_base_color',
 					'type'     => 'color',
 					'css'      => 'width:6em;',
-					'default'  => '#96588a',
+					'default'  => '#7f54b3',
 					'autoload' => false,
 					'desc_tip' => true,
 				),

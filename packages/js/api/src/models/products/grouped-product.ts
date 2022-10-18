@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import {
 	AbstractProduct,
 	IProductCommon,
@@ -24,15 +27,19 @@ import {
 /**
  * The parameters that Grouped products can update.
  */
-type GroupedProductUpdateParams = ProductCommonUpdateParams
-	& ProductGroupedUpdateParams
-	& ProductUpSellUpdateParams;
+type GroupedProductUpdateParams = ProductCommonUpdateParams &
+	ProductGroupedUpdateParams &
+	ProductUpSellUpdateParams;
 /**
  * The parameters embedded in this generic can be used in the ModelRepository in order to give
  * type-safety in an incredibly granular way.
  */
-export type GroupedProductRepositoryParams =
-	ModelRepositoryParams< GroupedProduct, never, ProductSearchParams, GroupedProductUpdateParams >;
+export type GroupedProductRepositoryParams = ModelRepositoryParams<
+	GroupedProduct,
+	never,
+	ProductSearchParams,
+	GroupedProductUpdateParams
+>;
 
 /**
  * An interface for listing Grouped products using the repository.
@@ -40,7 +47,8 @@ export type GroupedProductRepositoryParams =
  * @typedef ListsGroupedProducts
  * @alias ListsModels.<GroupedProduct>
  */
-export type ListsGroupedProducts = ListsModels< GroupedProductRepositoryParams >;
+export type ListsGroupedProducts =
+	ListsModels< GroupedProductRepositoryParams >;
 
 /**
  * An interface for creating Grouped products using the repository.
@@ -48,7 +56,8 @@ export type ListsGroupedProducts = ListsModels< GroupedProductRepositoryParams >
  * @typedef CreatesGroupedProducts
  * @alias CreatesModels.<GroupedProduct>
  */
-export type CreatesGroupedProducts = CreatesModels< GroupedProductRepositoryParams >;
+export type CreatesGroupedProducts =
+	CreatesModels< GroupedProductRepositoryParams >;
 
 /**
  * An interface for reading Grouped products using the repository.
@@ -56,7 +65,8 @@ export type CreatesGroupedProducts = CreatesModels< GroupedProductRepositoryPara
  * @typedef ReadsGroupedProducts
  * @alias ReadsModels.<GroupedProduct>
  */
-export type ReadsGroupedProducts = ReadsModels< GroupedProductRepositoryParams >;
+export type ReadsGroupedProducts =
+	ReadsModels< GroupedProductRepositoryParams >;
 
 /**
  * An interface for updating Grouped products using the repository.
@@ -64,7 +74,8 @@ export type ReadsGroupedProducts = ReadsModels< GroupedProductRepositoryParams >
  * @typedef UpdatesGroupedProducts
  * @alias UpdatesModels.<GroupedProduct>
  */
-export type UpdatesGroupedProducts = UpdatesModels< GroupedProductRepositoryParams >;
+export type UpdatesGroupedProducts =
+	UpdatesModels< GroupedProductRepositoryParams >;
 
 /**
  * An interface for deleting Grouped products using the repository.
@@ -72,24 +83,25 @@ export type UpdatesGroupedProducts = UpdatesModels< GroupedProductRepositoryPara
  * @typedef DeletesGroupedProducts
  * @alias DeletesModels.<GroupedProduct>
  */
-export type DeletesGroupedProducts = DeletesModels< GroupedProductRepositoryParams >;
+export type DeletesGroupedProducts =
+	DeletesModels< GroupedProductRepositoryParams >;
 
 /**
  * The base for the Grouped product object.
  */
-export class GroupedProduct extends AbstractProduct implements
-	IProductCommon,
-	IProductGrouped,
-	IProductUpSells {
+export class GroupedProduct
+	extends AbstractProduct
+	implements IProductCommon, IProductGrouped, IProductUpSells
+{
 	/**
 	 * @see ./abstracts/grouped.ts
 	 */
-	public readonly groupedProducts: Array<number> = [];
+	public readonly groupedProducts: Array< number > = [];
 
 	/**
 	 * @see ./abstracts/upsell.ts
 	 */
-	public readonly upSellIds: Array<number> = [];
+	public readonly upSellIds: Array< number > = [];
 
 	/**
 	 * Creates a new Grouped product instance with the given properties
@@ -106,7 +118,9 @@ export class GroupedProduct extends AbstractProduct implements
 	 *
 	 * @param {HTTPClient} httpClient The client for communicating via HTTP.
 	 */
-	public static restRepository( httpClient: HTTPClient ): ReturnType< typeof groupedProductRESTRepository > {
+	public static restRepository(
+		httpClient: HTTPClient
+	): ReturnType< typeof groupedProductRESTRepository > {
 		return groupedProductRESTRepository( httpClient );
 	}
 }

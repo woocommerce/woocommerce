@@ -8,6 +8,10 @@ import {
 	isOfflineMode,
 	setBrowserViewport,
 } from '@wordpress/e2e-test-utils';
+
+/**
+ * Internal dependencies
+ */
 import { consoleShouldSuppress, addConsoleSuppression } from '../../utils';
 import { setupJestRetries } from '../../config/jest-object.config';
 
@@ -21,8 +25,10 @@ const pageEvents = [];
 /**
  * Set of logged messages that will only be logged once.
  */
-addConsoleSuppression('Failed to load resource: net::ERR_PROXY_CONNECTION_FAILED');
-addConsoleSuppression('the server responded with a status of 404');
+addConsoleSuppression(
+	'Failed to load resource: net::ERR_PROXY_CONNECTION_FAILED'
+);
+addConsoleSuppression( 'the server responded with a status of 404' );
 
 /**
  * Set of console logging types observed to protect against unexpected yet
@@ -42,7 +48,7 @@ async function setupBrowser() {
 	await setBrowserViewport( {
 		width: 1280,
 		height: 800,
-	});
+	} );
 }
 
 /**
@@ -66,20 +72,21 @@ function removePageEvents() {
 
 /**
  * Add an expect range matcher.
+ *
  * @see https://jestjs.io/docs/expect#expectextendmatchers
  */
-expect.extend({
-	toBeInRange: function (received, floor, ceiling) {
+expect.extend( {
+	toBeInRange( received, floor, ceiling ) {
 		const pass = received >= floor && received <= ceiling;
 		const condition = pass ? 'not to be' : 'to be';
 
 		return {
 			message: () =>
-				`expected ${received} ${condition} within range ${floor} - ${ceiling}`,
+				`expected ${ received } ${ condition } within range ${ floor } - ${ ceiling }`,
 			pass,
 		};
 	},
-});
+} );
 
 /**
  * Adds a page event handler to emit uncaught exception to process if one of

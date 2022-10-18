@@ -104,13 +104,13 @@ const runImportProductsTest = () => {
 			await merchant.openImportProducts();
 		} );
 
-		afterAll(async () => {
+		afterAll( async () => {
 			// Delete imported products
 			await withRestApi.deleteAllProducts();
 			await withRestApi.deleteAllProductAttributes( false );
 			await withRestApi.deleteAllProductCategories( false );
 			await withRestApi.deleteAllProductTags( false );
-		});
+		} );
 
 		it( 'should show error message if you go without providing CSV file', async () => {
 			// Verify the error message if you go without providing CSV file

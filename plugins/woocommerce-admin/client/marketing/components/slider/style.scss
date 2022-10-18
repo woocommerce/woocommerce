@@ -1,0 +1,65 @@
+.woocommerce-marketing-slider {
+	display: block;
+	width: 100%;
+	overflow: hidden;
+
+	// slide container
+	& > div {
+		width: 100%;
+		white-space: normal;
+		overflow: hidden;
+		display: block;
+		position: relative;
+		height: 100%;
+	}
+
+	&__slide {
+		top: 0;
+		left: 0;
+		width: 100%;
+		transition: transform 300ms ease-in;
+		position: relative;
+	}
+
+	.slide-enter,
+	.slide-exit {
+		position: absolute;
+	}
+
+	&.animate-right {
+		.slide-enter {
+			transform: translateX(-100%);
+		}
+		.slide-enter-active {
+			transform: translateX(0%);
+		}
+		.slide-exit {
+			transform: translateX(0%);
+		}
+		.slide-exit-active {
+			transform: translateX(100%);
+		}
+	}
+
+	&.animate-left {
+		.slide-enter {
+			transform: translateX(100%);
+		}
+		.slide-enter-active {
+			transform: translateX(0%);
+		}
+		.slide-exit {
+			transform: translateX(0%);
+		}
+		.slide-exit-active {
+			transform: translateX(-100%);
+		}
+	}
+
+	@media screen and (prefers-reduced-motion: reduce) {
+		.slide-enter-active,
+		.slide-exit-active {
+			transition: none !important;
+		}
+	}
+}

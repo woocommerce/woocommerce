@@ -11,7 +11,7 @@ class WC_Tests_API_Product_Reviews_V2 extends WC_REST_Unit_Test_Case {
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->user = $this->factory->user->create(
 			array(
@@ -56,6 +56,8 @@ class WC_Tests_API_Product_Reviews_V2 extends WC_REST_Unit_Test_Case {
 				'date_created'         => $product_reviews[0]['date_created'],
 				'date_created_gmt'     => $product_reviews[0]['date_created_gmt'],
 				'product_id'           => $product->get_id(),
+				'product_name'         => $product->get_name(),
+				'product_permalink'    => $product->get_permalink(),
 				'status'               => 'approved',
 				'reviewer'             => 'admin',
 				'reviewer_email'       => 'woo@woo.local',
@@ -128,6 +130,8 @@ class WC_Tests_API_Product_Reviews_V2 extends WC_REST_Unit_Test_Case {
 				'date_created'         => $data['date_created'],
 				'date_created_gmt'     => $data['date_created_gmt'],
 				'product_id'           => $product->get_id(),
+				'product_name'         => $product->get_name(),
+				'product_permalink'    => $product->get_permalink(),
 				'status'               => 'approved',
 				'reviewer'             => 'admin',
 				'reviewer_email'       => 'woo@woo.local',
@@ -193,6 +197,8 @@ class WC_Tests_API_Product_Reviews_V2 extends WC_REST_Unit_Test_Case {
 				'date_created'         => $data['date_created'],
 				'date_created_gmt'     => $data['date_created_gmt'],
 				'product_id'           => $product->get_id(),
+				'product_name'         => $product->get_name(),
+				'product_permalink'	   => $product->get_permalink(),
 				'status'               => 'approved',
 				'reviewer'             => 'Admin',
 				'reviewer_email'       => 'woo@woo.local',
@@ -449,11 +455,13 @@ class WC_Tests_API_Product_Reviews_V2 extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 11, count( $properties ) );
+		$this->assertEquals( 13, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'date_created', $properties );
 		$this->assertArrayHasKey( 'date_created_gmt', $properties );
 		$this->assertArrayHasKey( 'product_id', $properties );
+		$this->assertArrayHasKey( 'product_name', $properties );
+		$this->assertArrayHasKey( 'product_permalink', $properties );
 		$this->assertArrayHasKey( 'status', $properties );
 		$this->assertArrayHasKey( 'reviewer', $properties );
 		$this->assertArrayHasKey( 'reviewer_email', $properties );

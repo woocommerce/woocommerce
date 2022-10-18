@@ -8,6 +8,7 @@
 /changelog/
 /node_modules/
 /tests/
+/e2e/
 babel.config.js
 changelog.txt
 composer.*
@@ -27,3 +28,4 @@ README.md
 renovate.json
 tsconfig.*
 webpack.config.js
+client/legacy/

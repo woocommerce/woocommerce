@@ -9,7 +9,7 @@ class WC_REST_Terms_Controller_Tests extends WC_Unit_Test_Case {
 	/**
 	 * Runs before any test.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		// phpcs:disable Generic.CodeAnalysis, Squiz.Commenting
 		$this->sut = new class() extends WC_REST_Terms_Controller {
 			public function get_taxonomy( $request ) {

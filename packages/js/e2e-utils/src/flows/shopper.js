@@ -10,7 +10,7 @@ const config = require( 'config' );
 const {
 	getQtyInputExpression,
 	getCartItemExpression,
-	getRemoveExpression
+	getRemoveExpression,
 } = require( './expressions' );
 const {
 	MY_ACCOUNT_ADDRESSES,
@@ -21,7 +21,7 @@ const {
 	SHOP_CART_PAGE,
 	SHOP_CHECKOUT_PAGE,
 	SHOP_PAGE,
-	SHOP_PRODUCT_PAGE
+	SHOP_PRODUCT_PAGE,
 } = require( './constants' );
 
 const { uiUnblocked, clickAndWaitForSelector } = require( '../page-utils' );
@@ -46,16 +46,18 @@ const shopper = {
 			await page.click( addToCart );
 			await expect( page ).toMatchElement( addToCart + '.added' );
 		} else {
-			const addToCartXPath = `//li[contains(@class, "type-product") and a/h2[contains(text(), "${ productIdOrTitle }")]]` +
+			const addToCartXPath =
+				`//li[contains(@class, "type-product") and a/h2[contains(text(), "${ productIdOrTitle }")]]` +
 				'//a[contains(@class, "add_to_cart_button") and contains(@class, "ajax_add_to_cart")';
 
 			const [ addToCartButton ] = await page.$x( addToCartXPath + ']' );
 			await addToCartButton.click();
 
 			// @todo: Update to waitForXPath when available in Puppeteer api.
-			await page.waitFor( addToCartXPath + ' and contains(@class, "added")]' );
+			await page.waitFor(
+				addToCartXPath + ' and contains(@class, "added")]'
+			);
 		}
-
 	},
 
 	goToCheckout: async () => {
@@ -71,9 +73,9 @@ const shopper = {
 	},
 
 	goToShop: async () => {
-		await page.goto(SHOP_PAGE, {
+		await page.goto( SHOP_PAGE, {
 			waitUntil: 'networkidle0',
-		});
+		} );
 	},
 
 	placeOrder: async () => {
@@ -83,11 +85,24 @@ const shopper = {
 		] );
 	},
 
-	productIsInCheckout: async ( productTitle, quantity, total, cartSubtotal ) => {
-		await expect( page ).toMatchElement( '.product-name', { text: productTitle } );
-		await expect( page ).toMatchElement( '.product-quantity', { text: quantity } );
-		await expect( page ).toMatchElement( '.product-total .amount', { text: total } );
-		await expect( page ).toMatchElement( '.cart-subtotal .amount', { text: cartSubtotal } );
+	productIsInCheckout: async (
+		productTitle,
+		quantity,
+		total,
+		cartSubtotal
+	) => {
+		await expect( page ).toMatchElement( '.product-name', {
+			text: productTitle,
+		} );
+		await expect( page ).toMatchElement( '.product-quantity', {
+			text: quantity,
+		} );
+		await expect( page ).toMatchElement( '.product-total .amount', {
+			text: total,
+		} );
+		await expect( page ).toMatchElement( '.cart-subtotal .amount', {
+			text: cartSubtotal,
+		} );
 	},
 
 	goToCart: async () => {
@@ -98,35 +113,98 @@ const shopper = {
 
 	productIsInCart: async ( productTitle, quantity = null ) => {
 		const cartItemArgs = quantity ? { qty: quantity } : {};
-		const cartItemXPath = getCartItemExpression( productTitle, cartItemArgs );
+		const cartItemXPath = getCartItemExpression(
+			productTitle,
+			cartItemArgs
+		);
 
 		await expect( page.$x( cartItemXPath ) ).resolves.toHaveLength( 1 );
 	},
 
-	fillBillingDetails: async (	customerBillingDetails ) => {
-		await expect( page ).toFill( '#billing_first_name', customerBillingDetails.firstname );
-		await expect( page ).toFill( '#billing_last_name', customerBillingDetails.lastname );
-		await expect( page ).toFill( '#billing_company', customerBillingDetails.company );
-		await expect( page ).toSelect( '#billing_country', customerBillingDetails.country );
-		await expect( page ).toFill( '#billing_address_1', customerBillingDetails.addressfirstline );
-		await expect( page ).toFill( '#billing_address_2', customerBillingDetails.addresssecondline );
-		await expect( page ).toFill( '#billing_city', customerBillingDetails.city );
-		await expect( page ).toSelect( '#billing_state', customerBillingDetails.state );
-		await expect( page ).toFill( '#billing_postcode', customerBillingDetails.postcode );
-		await expect( page ).toFill( '#billing_phone', customerBillingDetails.phone );
-		await expect( page ).toFill( '#billing_email', customerBillingDetails.email );
+	fillBillingDetails: async ( customerBillingDetails ) => {
+		await expect( page ).toFill(
+			'#billing_first_name',
+			customerBillingDetails.firstname
+		);
+		await expect( page ).toFill(
+			'#billing_last_name',
+			customerBillingDetails.lastname
+		);
+		await expect( page ).toFill(
+			'#billing_company',
+			customerBillingDetails.company
+		);
+		await expect( page ).toSelect(
+			'#billing_country',
+			customerBillingDetails.country
+		);
+		await expect( page ).toFill(
+			'#billing_address_1',
+			customerBillingDetails.addressfirstline
+		);
+		await expect( page ).toFill(
+			'#billing_address_2',
+			customerBillingDetails.addresssecondline
+		);
+		await expect( page ).toFill(
+			'#billing_city',
+			customerBillingDetails.city
+		);
+		await expect( page ).toSelect(
+			'#billing_state',
+			customerBillingDetails.state
+		);
+		await expect( page ).toFill(
+			'#billing_postcode',
+			customerBillingDetails.postcode
+		);
+		await expect( page ).toFill(
+			'#billing_phone',
+			customerBillingDetails.phone
+		);
+		await expect( page ).toFill(
+			'#billing_email',
+			customerBillingDetails.email
+		);
 	},
 
 	fillShippingDetails: async ( customerShippingDetails ) => {
-		await expect( page ).toFill( '#shipping_first_name', customerShippingDetails.firstname );
-		await expect( page ).toFill( '#shipping_last_name', customerShippingDetails.lastname );
-		await expect( page ).toFill( '#shipping_company', customerShippingDetails.company );
-		await expect( page ).toSelect( '#shipping_country', customerShippingDetails.country );
-		await expect( page ).toFill( '#shipping_address_1', customerShippingDetails.addressfirstline );
-		await expect( page ).toFill( '#shipping_address_2', customerShippingDetails.addresssecondline );
-		await expect( page ).toFill( '#shipping_city', customerShippingDetails.city );
-		await expect( page ).toSelect( '#shipping_state', customerShippingDetails.state );
-		await expect( page ).toFill( '#shipping_postcode', customerShippingDetails.postcode );
+		await expect( page ).toFill(
+			'#shipping_first_name',
+			customerShippingDetails.firstname
+		);
+		await expect( page ).toFill(
+			'#shipping_last_name',
+			customerShippingDetails.lastname
+		);
+		await expect( page ).toFill(
+			'#shipping_company',
+			customerShippingDetails.company
+		);
+		await expect( page ).toSelect(
+			'#shipping_country',
+			customerShippingDetails.country
+		);
+		await expect( page ).toFill(
+			'#shipping_address_1',
+			customerShippingDetails.addressfirstline
+		);
+		await expect( page ).toFill(
+			'#shipping_address_2',
+			customerShippingDetails.addresssecondline
+		);
+		await expect( page ).toFill(
+			'#shipping_city',
+			customerShippingDetails.city
+		);
+		await expect( page ).toSelect(
+			'#shipping_state',
+			customerShippingDetails.state
+		);
+		await expect( page ).toFill(
+			'#shipping_postcode',
+			customerShippingDetails.postcode
+		);
 	},
 
 	removeFromCart: async ( productIdOrTitle ) => {
@@ -134,7 +212,8 @@ const shopper = {
 			await page.click( `a[data-product_id="${ productIdOrTitle }"]` );
 		} else {
 			const cartItemXPath = getCartItemExpression( productIdOrTitle );
-			const removeItemXPath = cartItemXPath + '//' + getRemoveExpression();
+			const removeItemXPath =
+				cartItemXPath + '//' + getRemoveExpression();
 
 			const [ removeButton ] = await page.$x( removeItemXPath );
 			await removeButton.click();
@@ -147,30 +226,32 @@ const shopper = {
 		} );
 
 		// Remove products if they exist
-		if ( await page.$( '.remove' ) !== null ) {
-			products = await page.$( '.remove' );
+		if ( ( await page.$( '.remove' ) ) !== null ) {
+			let products = await page.$$( '.remove' );
 			while ( products && products.length > 0 ) {
-				for (let p = 0; p < products.length; p++ ) {
-					await page.click( p );
-					await uiUnblocked();
-				}
-				products = await page.$( '.remove' );
+				await page.click( '.remove' );
+				await uiUnblocked();
+				products = await page.$$( '.remove' );
 			}
 		}
 
 		// Remove coupons if they exist
-		if ( await page.$( '.woocommerce-remove-coupon' ) !== null ) {
+		if ( ( await page.$( '.woocommerce-remove-coupon' ) ) !== null ) {
 			await page.click( '.woocommerce-remove-coupon' );
 			await uiUnblocked();
 		}
 
-		await page.waitForSelector('.woocommerce-info');
-		await expect( page ).toMatchElement( '.woocommerce-info', { text: 'Your cart is currently empty.' } );
+		await page.waitForSelector( '.woocommerce-info' );
+		// eslint-disable-next-line jest/no-standalone-expect
+		await expect( page ).toMatchElement( '.woocommerce-info', {
+			text: 'Your cart is currently empty.',
+		} );
 	},
 
 	setCartQuantity: async ( productTitle, quantityValue ) => {
 		const cartItemXPath = getCartItemExpression( productTitle );
-		const quantityInputXPath = cartItemXPath + '//' + getQtyInputExpression();
+		const quantityInputXPath =
+			cartItemXPath + '//' + getQtyInputExpression();
 
 		const [ quantityInput ] = await page.$x( quantityInputXPath );
 		await quantityInput.focus();
@@ -180,17 +261,21 @@ const shopper = {
 
 	searchForProduct: async ( prouductName ) => {
 		const searchFieldSelector = 'input.wp-block-search__input';
-		await page.waitForSelector(searchFieldSelector, { timeout: 100000 });
-		await expect(page).toFill(searchFieldSelector, prouductName);
-		await expect(page).toClick('.wp-block-search__button');
+		await page.waitForSelector( searchFieldSelector, { timeout: 100000 } );
+		await expect( page ).toFill( searchFieldSelector, prouductName );
+		await expect( page ).toClick( '.wp-block-search__button' );
 		// Single search results may go directly to product page
-		if ( await page.waitForSelector('h2.entry-title') ) {
-			await expect(page).toMatchElement('h2.entry-title', {text: prouductName});
-			await expect(page).toClick('h2.entry-title', {text: prouductName});
+		if ( await page.waitForSelector( 'h2.entry-title' ) ) {
+			await expect( page ).toMatchElement( 'h2.entry-title', {
+				text: prouductName,
+			} );
+			await expect( page ).toClick( 'h2.entry-title > a', {
+				text: prouductName,
+			} );
 		}
-		await page.waitForSelector('h1.entry-title');
-		await expect(page.title()).resolves.toMatch(prouductName);
-		await expect(page).toMatchElement('h1.entry-title', prouductName);
+		await page.waitForSelector( 'h1.entry-title' );
+		await expect( page.title() ).resolves.toMatch( prouductName );
+		await expect( page ).toMatchElement( 'h1.entry-title', prouductName );
 	},
 
 	/*
@@ -220,15 +305,15 @@ const shopper = {
 		} );
 	},
 
-	gotoMyAccount: gotoMyAccount,
+	gotoMyAccount,
 
 	login: async () => {
 		await gotoMyAccount();
 
 		await expect( page.title() ).resolves.toMatch( 'My account' );
 
-		await page.type( '#username', config.get('users.customer.username') );
-		await page.type( '#password', config.get('users.customer.password') );
+		await page.type( '#username', config.get( 'users.customer.username' ) );
+		await page.type( '#password', config.get( 'users.customer.password' ) );
 
 		await Promise.all( [
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
@@ -239,7 +324,9 @@ const shopper = {
 		await gotoMyAccount();
 
 		await expect( page.title() ).resolves.toMatch( 'My account' );
-		await page.click( '.woocommerce-MyAccount-navigation-link--customer-logout a' );
+		await page.click(
+			'.woocommerce-MyAccount-navigation-link--customer-logout a'
+		);
 	},
 };
 

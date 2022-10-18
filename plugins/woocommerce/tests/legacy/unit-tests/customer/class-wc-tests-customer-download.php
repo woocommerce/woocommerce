@@ -37,7 +37,7 @@ class WC_Tests_Customer_Download extends WC_Unit_Test_Case {
 	/**
 	 * Tests set up.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		$this->customer_id    = 1;
 		$this->customer_email = 'test@example.com';
 
@@ -130,5 +130,7 @@ class WC_Tests_Customer_Download extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertEquals( $expected_result, $downloads );
+
+		$download_2->delete();
 	}
 }

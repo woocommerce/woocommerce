@@ -5,14 +5,17 @@
 
 // Setup and onboarding tests
 const runActivationTest = require( './activate-and-setup/activate.test' );
-const { runOnboardingFlowTest, runTaskListTest } = require( './activate-and-setup/onboarding-tasklist.test' );
+const {
+	runOnboardingFlowTest,
+	runTaskListTest,
+} = require( './activate-and-setup/onboarding-tasklist.test' );
 const runInitialStoreSettingsTest = require( './activate-and-setup/setup.test' );
 
 // Shopper tests
 const runProductBrowseSearchSortTest = require( './shopper/front-end-product-browse-search-sort.test' );
-const runCartApplyCouponsTest = require( './shopper/front-end-cart-coupons.test');
+const runCartApplyCouponsTest = require( './shopper/front-end-cart-coupons.test' );
 const runCartPageTest = require( './shopper/front-end-cart.test' );
-const runCheckoutApplyCouponsTest = require( './shopper/front-end-checkout-coupons.test');
+const runCheckoutApplyCouponsTest = require( './shopper/front-end-checkout-coupons.test' );
 const runCheckoutPageTest = require( './shopper/front-end-checkout.test' );
 const runMyAccountPageTest = require( './shopper/front-end-my-account.test' );
 const runMyAccountPayOrderTest = require( './shopper/front-end-my-account-pay-order.test' );
@@ -24,14 +27,18 @@ const runCheckoutLoginAccountTest = require( './shopper/front-end-checkout-login
 const runCartCalculateShippingTest = require( './shopper/front-end-cart-calculate-shipping.test' );
 const runCartRedirectionTest = require( './shopper/front-end-cart-redirection.test' );
 const runOrderEmailReceivingTest = require( './shopper/front-end-order-email-receiving.test' );
+const runCartAndCheckoutConsistentShippingTest = require( './shopper/front-end-cart-and-checkout-consistent-shipping.test' );
 
 // Merchant tests
-const runAddNewShippingZoneTest = require ( './merchant/wp-admin-settings-shipping-zones.test' );
-const runAddShippingClassesTest = require('./merchant/wp-admin-settings-shipping-classes.test')
+const runAddNewShippingZoneTest = require( './merchant/wp-admin-settings-shipping-zones.test' );
+const runAddShippingClassesTest = require( './merchant/wp-admin-settings-shipping-classes.test' );
 const runCreateCouponTest = require( './merchant/wp-admin-coupon-new.test' );
 const runCreateOrderTest = require( './merchant/wp-admin-order-new.test' );
 const runEditOrderTest = require( './merchant/wp-admin-order-edit.test' );
-const { runAddSimpleProductTest, runAddVariableProductTest } = require( './merchant/wp-admin-product-new.test' );
+const {
+	runAddSimpleProductTest,
+	runAddVariableProductTest,
+} = require( './merchant/wp-admin-product-new.test' );
 const runUpdateGeneralSettingsTest = require( './merchant/wp-admin-settings-general.test' );
 const runProductSettingsTest = require( './merchant/wp-admin-settings-product.test' );
 const runTaxSettingsTest = require( './merchant/wp-admin-settings-tax.test' );
@@ -80,6 +87,7 @@ const runShopperTests = () => {
 	runCartCalculateShippingTest();
 	runCartRedirectionTest();
 	runOrderEmailReceivingTest();
+	runCartAndCheckoutConsistentShippingTest();
 };
 
 const runMerchantTests = () => {
@@ -105,7 +113,7 @@ const runMerchantTests = () => {
 	runAnalyticsPageLoadsTest();
 	runInitiateWccomConnectionTest();
 	runAdminPageLoadTests();
-}
+};
 
 const runApiTests = () => {
 	runExternalProductAPITest();
@@ -114,7 +122,7 @@ const runApiTests = () => {
 	runCouponApiTest();
 	runOrderApiTest();
 	runTelemetryAPITest();
-}
+};
 
 module.exports = {
 	runActivationTest,
@@ -169,4 +177,5 @@ module.exports = {
 	runInitiateWccomConnectionTest,
 	runTelemetryAPITest,
 	runAdminPageLoadTests,
+	runCartAndCheckoutConsistentShippingTest,
 };

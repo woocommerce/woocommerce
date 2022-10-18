@@ -6,7 +6,9 @@
  * - `flat_rate`
  * - `local_pickup`
  *
- * @returns shipping method object that can serve as a request payload for adding a shipping method to a shipping zone.
+ * @param {string} methodId
+ * @param {string} cost
+ * @return {Object} shipping method object that can serve as a request payload for adding a shipping method to a shipping zone.
  */
 const getShippingMethodExample = ( methodId, cost ) => {
 	const shippingMethodExample = {
@@ -15,7 +17,7 @@ const getShippingMethodExample = ( methodId, cost ) => {
 
 	if ( cost !== undefined ) {
 		shippingMethodExample.settings = {
-			cost: cost,
+			cost,
 		};
 	}
 

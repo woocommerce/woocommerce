@@ -33,6 +33,42 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	protected $rest_base = 'system_status';
 
 	/**
+	 * Register cache cleaner
+	 *
+	 * Handles all the cache cleaning for this endpoint. We need to register
+	 * these functions before the routes are registered, so this function gets
+	 * called from Server.php
+	 */
+	public static function register_cache_clean() {
+		// Clear the theme cache if we switch themes or our theme is upgraded.
+		add_action( 'switch_theme', array( __CLASS__, 'clean_theme_cache' ) );
+		add_action( 'activate_plugin', array( __CLASS__, 'clean_plugin_cache' ) );
+		add_action( 'deactivate_plugin', array( __CLASS__, 'clean_plugin_cache' ) );
+		add_action(
+			'upgrader_process_complete',
+			function( $upgrader, $extra ) {
+				if ( ! $extra || ! $extra['type'] ) {
+					return;
+				}
+
+				// Clear the cache if woocommerce is updated.
+				if ( 'plugin' === $extra['type'] ) {
+					\WC_REST_System_Status_V2_Controller::clean_theme_cache();
+					\WC_REST_System_Status_V2_Controller::clean_plugin_cache();
+					return;
+				}
+
+				if ( 'theme' === $extra['type'] ) {
+					\WC_REST_System_Status_V2_Controller::clean_theme_cache();
+					return;
+				}
+			},
+			10,
+			2
+		);
+	}
+
+	/**
 	 * Register the route for /system_status
 	 */
 	public function register_routes() {
@@ -585,18 +621,47 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_item_mappings_per_fields( $fields ) {
-		return array(
-			'environment'        => $this->get_environment_info_per_fields( $fields ),
-			'database'           => $this->get_database_info(),
-			'active_plugins'     => $this->get_active_plugins(),
-			'inactive_plugins'   => $this->get_inactive_plugins(),
-			'dropins_mu_plugins' => $this->get_dropins_mu_plugins(),
-			'theme'              => $this->get_theme_info(),
-			'settings'           => $this->get_settings(),
-			'security'           => $this->get_security_info(),
-			'pages'              => $this->get_pages(),
-			'post_type_counts'   => $this->get_post_type_counts(),
-		);
+		$items = array();
+
+		foreach ( $fields as $field ) {
+			// If we're looking for a sub-property, like environment.version we need
+			// to extract the first-level property here so we know which function to run.
+			list( $prop ) = explode( '.', $field, 2 );
+			switch ( $prop ) {
+				case 'environment':
+					$items['environment'] = $this->get_environment_info_per_fields( $fields );
+					break;
+				case 'database':
+					$items['database'] = $this->get_database_info();
+					break;
+				case 'active_plugins':
+					$items['active_plugins'] = $this->get_active_plugins();
+					break;
+				case 'inactive_plugins':
+					$items['inactive_plugins'] = $this->get_inactive_plugins();
+					break;
+				case 'dropins_mu_plugins':
+					$items['dropins_mu_plugins'] = $this->get_dropins_mu_plugins();
+					break;
+				case 'theme':
+					$items['theme'] = $this->get_theme_info();
+					break;
+				case 'settings':
+					$items['settings'] = $this->get_settings();
+					break;
+				case 'security':
+					$items['security'] = $this->get_security_info();
+					break;
+				case 'pages':
+					$items['pages'] = $this->get_pages();
+					break;
+				case 'post_type_counts':
+					$items['post_type_counts'] = $this->get_post_type_counts();
+					break;
+			}
+		}
+
+		return $items;
 	}
 
 	/**
@@ -677,7 +742,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					'https://www.paypal.com/cgi-bin/webscr',
 					array(
 						'timeout'     => 10,
-						'user-agent'  => 'WooCommerce/' . WC()->version,
+						'user-agent'  => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 						'httpversion' => '1.1',
 						'body'        => array(
 							'cmd' => '_notify-validate',
@@ -700,7 +765,12 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$get_response_code = get_transient( 'woocommerce_test_remote_get' );
 
 			if ( false === $get_response_code || is_wp_error( $get_response_code ) ) {
-				$response = wp_safe_remote_get( 'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
+				$response = wp_safe_remote_get(
+					'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ),
+					array(
+						'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
+					)
+				);
 				if ( ! is_wp_error( $response ) ) {
 					$get_response_code = $response['response']['code'];
 				}
@@ -880,23 +950,29 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_active_plugins() {
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		$active_plugins_data = get_transient( 'wc_system_status_active_plugins' );
 
-		if ( ! function_exists( 'get_plugin_data' ) ) {
-			return array();
-		}
+		if ( false === $active_plugins_data ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-		$active_plugins = (array) get_option( 'active_plugins', array() );
-		if ( is_multisite() ) {
-			$network_activated_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
-			$active_plugins            = array_merge( $active_plugins, $network_activated_plugins );
-		}
+			if ( ! function_exists( 'get_plugin_data' ) ) {
+				return array();
+			}
 
-		$active_plugins_data = array();
+			$active_plugins = (array) get_option( 'active_plugins', array() );
+			if ( is_multisite() ) {
+				$network_activated_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
+				$active_plugins            = array_merge( $active_plugins, $network_activated_plugins );
+			}
 
-		foreach ( $active_plugins as $plugin ) {
-			$data                  = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
-			$active_plugins_data[] = $this->format_plugin_data( $plugin, $data );
+			$active_plugins_data = array();
+
+			foreach ( $active_plugins as $plugin ) {
+				$data                  = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
+				$active_plugins_data[] = $this->format_plugin_data( $plugin, $data );
+			}
+
+			set_transient( 'wc_system_status_active_plugins', $active_plugins_data, HOUR_IN_SECONDS );
 		}
 
 		return $active_plugins_data;
@@ -908,27 +984,33 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_inactive_plugins() {
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		$plugins_data = get_transient( 'wc_system_status_inactive_plugins' );
 
-		if ( ! function_exists( 'get_plugins' ) ) {
-			return array();
-		}
+		if ( false === $plugins_data ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-		$plugins        = get_plugins();
-		$active_plugins = (array) get_option( 'active_plugins', array() );
-
-		if ( is_multisite() ) {
-			$network_activated_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
-			$active_plugins            = array_merge( $active_plugins, $network_activated_plugins );
-		}
-
-		$plugins_data = array();
-
-		foreach ( $plugins as $plugin => $data ) {
-			if ( in_array( $plugin, $active_plugins, true ) ) {
-				continue;
+			if ( ! function_exists( 'get_plugins' ) ) {
+				return array();
 			}
-			$plugins_data[] = $this->format_plugin_data( $plugin, $data );
+
+			$plugins        = get_plugins();
+			$active_plugins = (array) get_option( 'active_plugins', array() );
+
+			if ( is_multisite() ) {
+				$network_activated_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
+				$active_plugins            = array_merge( $active_plugins, $network_activated_plugins );
+			}
+
+			$plugins_data = array();
+
+			foreach ( $plugins as $plugin => $data ) {
+				if ( in_array( $plugin, $active_plugins, true ) ) {
+					continue;
+				}
+				$plugins_data[] = $this->format_plugin_data( $plugin, $data );
+			}
+
+			set_transient( 'wc_system_status_inactive_plugins', $plugins_data, HOUR_IN_SECONDS );
 		}
 
 		return $plugins_data;
@@ -980,29 +1062,36 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_dropins_mu_plugins() {
-		$dropins = get_dropins();
-		$plugins = array(
-			'dropins'    => array(),
-			'mu_plugins' => array(),
-		);
-		foreach ( $dropins as $key => $dropin ) {
-			$plugins['dropins'][] = array(
-				'plugin' => $key,
-				'name'   => $dropin['Name'],
+		$plugins = get_transient( 'wc_system_status_dropins_mu_plugins' );
+
+		if ( false === $plugins ) {
+			$dropins = get_dropins();
+			$plugins = array(
+				'dropins'    => array(),
+				'mu_plugins' => array(),
 			);
+			foreach ( $dropins as $key => $dropin ) {
+				$plugins['dropins'][] = array(
+					'plugin' => $key,
+					'name'   => $dropin['Name'],
+				);
+			}
+
+			$mu_plugins = get_mu_plugins();
+			foreach ( $mu_plugins as $plugin => $mu_plugin ) {
+				$plugins['mu_plugins'][] = array(
+					'plugin'      => $plugin,
+					'name'        => $mu_plugin['Name'],
+					'version'     => $mu_plugin['Version'],
+					'url'         => $mu_plugin['PluginURI'],
+					'author_name' => $mu_plugin['AuthorName'],
+					'author_url'  => esc_url_raw( $mu_plugin['AuthorURI'] ),
+				);
+			}
+
+			set_transient( 'wc_system_status_dropins_mu_plugins', $plugins, HOUR_IN_SECONDS );
 		}
 
-		$mu_plugins = get_mu_plugins();
-		foreach ( $mu_plugins as $plugin => $mu_plugin ) {
-			$plugins['mu_plugins'][] = array(
-				'plugin'      => $plugin,
-				'name'        => $mu_plugin['Name'],
-				'version'     => $mu_plugin['Version'],
-				'url'         => $mu_plugin['PluginURI'],
-				'author_name' => $mu_plugin['AuthorName'],
-				'author_url'  => esc_url_raw( $mu_plugin['AuthorURI'] ),
-			);
-		}
 		return $plugins;
 	}
 
@@ -1013,93 +1102,116 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_theme_info() {
-		$active_theme = wp_get_theme();
+		$theme_info = get_transient( 'wc_system_status_theme_info' );
 
-		// Get parent theme info if this theme is a child theme, otherwise
-		// pass empty info in the response.
-		if ( is_child_theme() ) {
-			$parent_theme      = wp_get_theme( $active_theme->template );
-			$parent_theme_info = array(
-				'parent_name'           => $parent_theme->name,
-				'parent_version'        => $parent_theme->version,
-				'parent_version_latest' => WC_Admin_Status::get_latest_theme_version( $parent_theme ),
-				'parent_author_url'     => $parent_theme->{'Author URI'},
-			);
-		} else {
-			$parent_theme_info = array(
-				'parent_name'           => '',
-				'parent_version'        => '',
-				'parent_version_latest' => '',
-				'parent_author_url'     => '',
-			);
-		}
+		if ( false === $theme_info ) {
+			$active_theme = wp_get_theme();
 
-		/**
-		 * Scan the theme directory for all WC templates to see if our theme
-		 * overrides any of them.
-		 */
-		$override_files     = array();
-		$outdated_templates = false;
-		$scan_files         = WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates/' );
-
-		// Include *-product_<cat|tag> templates for backwards compatibility.
-		$scan_files[] = 'content-product_cat.php';
-		$scan_files[] = 'taxonomy-product_cat.php';
-		$scan_files[] = 'taxonomy-product_tag.php';
-
-		foreach ( $scan_files as $file ) {
-			$located = apply_filters( 'wc_get_template', $file, $file, array(), WC()->template_path(), WC()->plugin_path() . '/templates/' );
-
-			if ( file_exists( $located ) ) {
-				$theme_file = $located;
-			} elseif ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
-				$theme_file = get_stylesheet_directory() . '/' . $file;
-			} elseif ( file_exists( get_stylesheet_directory() . '/' . WC()->template_path() . $file ) ) {
-				$theme_file = get_stylesheet_directory() . '/' . WC()->template_path() . $file;
-			} elseif ( file_exists( get_template_directory() . '/' . $file ) ) {
-				$theme_file = get_template_directory() . '/' . $file;
-			} elseif ( file_exists( get_template_directory() . '/' . WC()->template_path() . $file ) ) {
-				$theme_file = get_template_directory() . '/' . WC()->template_path() . $file;
+			// Get parent theme info if this theme is a child theme, otherwise
+			// pass empty info in the response.
+			if ( is_child_theme() ) {
+				$parent_theme      = wp_get_theme( $active_theme->template );
+				$parent_theme_info = array(
+					'parent_name'           => $parent_theme->name,
+					'parent_version'        => $parent_theme->version,
+					'parent_version_latest' => WC_Admin_Status::get_latest_theme_version( $parent_theme ),
+					'parent_author_url'     => $parent_theme->{'Author URI'},
+				);
 			} else {
-				$theme_file = false;
-			}
-
-			if ( ! empty( $theme_file ) ) {
-				$core_file = $file;
-
-				// Update *-product_<cat|tag> template name before searching in core.
-				if ( false !== strpos( $core_file, '-product_cat' ) || false !== strpos( $core_file, '-product_tag' ) ) {
-					$core_file = str_replace( '_', '-', $core_file );
-				}
-
-				$core_version  = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $core_file );
-				$theme_version = WC_Admin_Status::get_file_version( $theme_file );
-				if ( $core_version && ( empty( $theme_version ) || version_compare( $theme_version, $core_version, '<' ) ) ) {
-					if ( ! $outdated_templates ) {
-						$outdated_templates = true;
-					}
-				}
-				$override_files[] = array(
-					'file'         => str_replace( WP_CONTENT_DIR . '/themes/', '', $theme_file ),
-					'version'      => $theme_version,
-					'core_version' => $core_version,
+				$parent_theme_info = array(
+					'parent_name'           => '',
+					'parent_version'        => '',
+					'parent_version_latest' => '',
+					'parent_author_url'     => '',
 				);
 			}
+
+			/**
+			 * Scan the theme directory for all WC templates to see if our theme
+			 * overrides any of them.
+			 */
+			$override_files     = array();
+			$outdated_templates = false;
+			$scan_files         = WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates/' );
+
+			// Include *-product_<cat|tag> templates for backwards compatibility.
+			$scan_files[] = 'content-product_cat.php';
+			$scan_files[] = 'taxonomy-product_cat.php';
+			$scan_files[] = 'taxonomy-product_tag.php';
+
+			foreach ( $scan_files as $file ) {
+				$located = apply_filters( 'wc_get_template', $file, $file, array(), WC()->template_path(), WC()->plugin_path() . '/templates/' );
+
+				if ( file_exists( $located ) ) {
+					$theme_file = $located;
+				} elseif ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
+					$theme_file = get_stylesheet_directory() . '/' . $file;
+				} elseif ( file_exists( get_stylesheet_directory() . '/' . WC()->template_path() . $file ) ) {
+					$theme_file = get_stylesheet_directory() . '/' . WC()->template_path() . $file;
+				} elseif ( file_exists( get_template_directory() . '/' . $file ) ) {
+					$theme_file = get_template_directory() . '/' . $file;
+				} elseif ( file_exists( get_template_directory() . '/' . WC()->template_path() . $file ) ) {
+					$theme_file = get_template_directory() . '/' . WC()->template_path() . $file;
+				} else {
+					$theme_file = false;
+				}
+
+				if ( ! empty( $theme_file ) ) {
+					$core_file = $file;
+
+					// Update *-product_<cat|tag> template name before searching in core.
+					if ( false !== strpos( $core_file, '-product_cat' ) || false !== strpos( $core_file, '-product_tag' ) ) {
+						$core_file = str_replace( '_', '-', $core_file );
+					}
+
+					$core_version  = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $core_file );
+					$theme_version = WC_Admin_Status::get_file_version( $theme_file );
+					if ( $core_version && ( empty( $theme_version ) || version_compare( $theme_version, $core_version, '<' ) ) ) {
+						if ( ! $outdated_templates ) {
+							$outdated_templates = true;
+						}
+					}
+					$override_files[] = array(
+						'file'         => str_replace( WP_CONTENT_DIR . '/themes/', '', $theme_file ),
+						'version'      => $theme_version,
+						'core_version' => $core_version,
+					);
+				}
+			}
+
+			$active_theme_info = array(
+				'name'                    => $active_theme->name,
+				'version'                 => $active_theme->version,
+				'version_latest'          => WC_Admin_Status::get_latest_theme_version( $active_theme ),
+				'author_url'              => esc_url_raw( $active_theme->{'Author URI'} ),
+				'is_child_theme'          => is_child_theme(),
+				'has_woocommerce_support' => current_theme_supports( 'woocommerce' ),
+				'has_woocommerce_file'    => ( file_exists( get_stylesheet_directory() . '/woocommerce.php' ) || file_exists( get_template_directory() . '/woocommerce.php' ) ),
+				'has_outdated_templates'  => $outdated_templates,
+				'overrides'               => $override_files,
+			);
+
+			$theme_info = array_merge( $active_theme_info, $parent_theme_info );
+			set_transient( 'wc_system_status_theme_info', $theme_info, HOUR_IN_SECONDS );
 		}
 
-		$active_theme_info = array(
-			'name'                    => $active_theme->name,
-			'version'                 => $active_theme->version,
-			'version_latest'          => WC_Admin_Status::get_latest_theme_version( $active_theme ),
-			'author_url'              => esc_url_raw( $active_theme->{'Author URI'} ),
-			'is_child_theme'          => is_child_theme(),
-			'has_woocommerce_support' => current_theme_supports( 'woocommerce' ),
-			'has_woocommerce_file'    => ( file_exists( get_stylesheet_directory() . '/woocommerce.php' ) || file_exists( get_template_directory() . '/woocommerce.php' ) ),
-			'has_outdated_templates'  => $outdated_templates,
-			'overrides'               => $override_files,
-		);
+		return $theme_info;
+	}
 
-		return array_merge( $active_theme_info, $parent_theme_info );
+	/**
+	 * Clear the system status theme cache
+	 */
+	public static function clean_theme_cache() {
+		delete_transient( 'wc_system_status_theme_info' );
+	}
+
+	/**
+	 * Clear the system status plugin caches
+	 */
+	public static function clean_plugin_cache() {
+		delete_transient( 'wc_system_status_active_plugins' );
+		delete_transient( 'wc_system_status_inactive_plugins' );
+		delete_transient( 'wc_system_status_dropins_mu_plugins' );
 	}
 
 	/**

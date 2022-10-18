@@ -98,7 +98,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		 * Enqueue scripts.
 		 */
 		public function admin_scripts() {
-			global $wp_query, $post;
+			global $wp_query, $post, $theorder;
 
 			$screen       = get_current_screen();
 			$screen_id    = $screen ? $screen->id : '';
@@ -112,7 +112,6 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_register_script( 'jquery-tiptip', WC()->plugin_url() . '/assets/js/jquery-tiptip/jquery.tipTip' . $suffix . '.js', array( 'jquery' ), $version, true );
 			wp_register_script( 'round', WC()->plugin_url() . '/assets/js/round/round' . $suffix . '.js', array( 'jquery' ), $version );
 			wp_register_script( 'wc-admin-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'accounting', 'round', 'wc-enhanced-select', 'plupload-all', 'stupidtable', 'jquery-tiptip' ), $version );
-			wp_register_script( 'zeroclipboard', WC()->plugin_url() . '/assets/js/zeroclipboard/jquery.zeroclipboard' . $suffix . '.js', array( 'jquery' ), $version );
 			wp_register_script( 'qrcode', WC()->plugin_url() . '/assets/js/jquery-qrcode/jquery.qrcode' . $suffix . '.js', array( 'jquery' ), $version );
 			wp_register_script( 'stupidtable', WC()->plugin_url() . '/assets/js/stupidtable/stupidtable' . $suffix . '.js', array( 'jquery' ), $version );
 			wp_register_script( 'serializejson', WC()->plugin_url() . '/assets/js/jquery-serializejson/jquery.serializejson' . $suffix . '.js', array( 'jquery' ), '2.8.1' );
@@ -136,21 +135,23 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				'wc-enhanced-select',
 				'wc_enhanced_select_params',
 				array(
-					'i18n_no_matches'           => _x( 'No matches found', 'enhanced select', 'woocommerce' ),
-					'i18n_ajax_error'           => _x( 'Loading failed', 'enhanced select', 'woocommerce' ),
-					'i18n_input_too_short_1'    => _x( 'Please enter 1 or more characters', 'enhanced select', 'woocommerce' ),
-					'i18n_input_too_short_n'    => _x( 'Please enter %qty% or more characters', 'enhanced select', 'woocommerce' ),
-					'i18n_input_too_long_1'     => _x( 'Please delete 1 character', 'enhanced select', 'woocommerce' ),
-					'i18n_input_too_long_n'     => _x( 'Please delete %qty% characters', 'enhanced select', 'woocommerce' ),
-					'i18n_selection_too_long_1' => _x( 'You can only select 1 item', 'enhanced select', 'woocommerce' ),
-					'i18n_selection_too_long_n' => _x( 'You can only select %qty% items', 'enhanced select', 'woocommerce' ),
-					'i18n_load_more'            => _x( 'Loading more results&hellip;', 'enhanced select', 'woocommerce' ),
-					'i18n_searching'            => _x( 'Searching&hellip;', 'enhanced select', 'woocommerce' ),
-					'ajax_url'                  => admin_url( 'admin-ajax.php' ),
-					'search_products_nonce'     => wp_create_nonce( 'search-products' ),
-					'search_customers_nonce'    => wp_create_nonce( 'search-customers' ),
-					'search_categories_nonce'   => wp_create_nonce( 'search-categories' ),
-					'search_pages_nonce'        => wp_create_nonce( 'search-pages' ),
+					'i18n_no_matches'                 => _x( 'No matches found', 'enhanced select', 'woocommerce' ),
+					'i18n_ajax_error'                 => _x( 'Loading failed', 'enhanced select', 'woocommerce' ),
+					'i18n_input_too_short_1'          => _x( 'Please enter 1 or more characters', 'enhanced select', 'woocommerce' ),
+					'i18n_input_too_short_n'          => _x( 'Please enter %qty% or more characters', 'enhanced select', 'woocommerce' ),
+					'i18n_input_too_long_1'           => _x( 'Please delete 1 character', 'enhanced select', 'woocommerce' ),
+					'i18n_input_too_long_n'           => _x( 'Please delete %qty% characters', 'enhanced select', 'woocommerce' ),
+					'i18n_selection_too_long_1'       => _x( 'You can only select 1 item', 'enhanced select', 'woocommerce' ),
+					'i18n_selection_too_long_n'       => _x( 'You can only select %qty% items', 'enhanced select', 'woocommerce' ),
+					'i18n_load_more'                  => _x( 'Loading more results&hellip;', 'enhanced select', 'woocommerce' ),
+					'i18n_searching'                  => _x( 'Searching&hellip;', 'enhanced select', 'woocommerce' ),
+					'ajax_url'                        => admin_url( 'admin-ajax.php' ),
+					'search_products_nonce'           => wp_create_nonce( 'search-products' ),
+					'search_customers_nonce'          => wp_create_nonce( 'search-customers' ),
+					'search_categories_nonce'         => wp_create_nonce( 'search-categories' ),
+					'search_taxonomy_terms_nonce'     => wp_create_nonce( 'search-taxonomy-terms' ),
+					'search_product_attributes_nonce' => wp_create_nonce( 'search-product-attributes' ),
+					'search_pages_nonce'              => wp_create_nonce( 'search-pages' ),
 				)
 			);
 
@@ -182,7 +183,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'jquery-ui-autocomplete' );
 
 				$locale  = localeconv();
-				$decimal = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
+				$decimal_point = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
+				$decimal = ( ! empty( wc_get_price_decimal_separator() ) ) ? wc_get_price_decimal_separator() : $decimal_point;
 
 				$params = array(
 					/* translators: %s: decimal */
@@ -193,6 +195,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_sale_less_than_regular_error' => __( 'Please enter in a value less than the regular price.', 'woocommerce' ),
 					'i18n_delete_product_notice'        => __( 'This product has produced sales and may be linked to existing orders. Are you sure you want to delete it?', 'woocommerce' ),
 					'i18n_remove_personal_data_notice'  => __( 'This action cannot be reversed. Are you sure you wish to erase personal data from the selected orders?', 'woocommerce' ),
+					'i18n_confirm_delete'               => __( 'Are you sure you wish to delete this item?', 'woocommerce' ),
 					'decimal_point'                     => $decimal,
 					'mon_decimal_point'                 => wc_get_price_decimal_separator(),
 					'ajax_url'                          => admin_url( 'admin-ajax.php' ),
@@ -273,7 +276,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 				wp_localize_script( 'wc-admin-variation-meta-boxes', 'woocommerce_admin_meta_boxes_variations', $params );
 			}
-			if ( in_array( str_replace( 'edit-', '', $screen_id ), wc_get_order_types( 'order-meta-boxes' ) ) ) {
+			if ( $this->is_order_meta_box_screen( $screen_id ) ) {
 				$default_location = wc_get_customer_default_location();
 
 				wp_enqueue_script( 'wc-admin-order-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-order' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'wc-backbone-modal', 'selectWoo', 'wc-clipboard' ), $version );
@@ -304,80 +307,89 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					)
 				);
 			}
-			if ( in_array( str_replace( 'edit-', '', $screen_id ), array_merge( array( 'shop_coupon', 'product' ), wc_get_order_types( 'order-meta-boxes' ) ) ) ) {
+			if ( in_array( str_replace( 'edit-', '', $screen_id ), array( 'shop_coupon', 'product' ), true ) || $this->is_order_meta_box_screen( $screen_id ) ) {
 				$post_id                = isset( $post->ID ) ? $post->ID : '';
 				$currency               = '';
 				$remove_item_notice     = __( 'Are you sure you want to remove the selected items?', 'woocommerce' );
 				$remove_fee_notice      = __( 'Are you sure you want to remove the selected fees?', 'woocommerce' );
 				$remove_shipping_notice = __( 'Are you sure you want to remove the selected shipping?', 'woocommerce' );
 
-				if ( $post_id && in_array( get_post_type( $post_id ), wc_get_order_types( 'order-meta-boxes' ) ) ) {
-					$order = wc_get_order( $post_id );
-					if ( $order ) {
-						$currency = $order->get_currency();
+				// Eventually this will become wc_data_or_post object as we implement more custom tables.
+				$order_or_post_object = $post;
+				if ( ( $theorder instanceof WC_Order ) && $this->is_order_meta_box_screen( $screen_id ) ) {
+					$order_or_post_object = $theorder;
+					if ( $order_or_post_object ) {
+						$currency = $order_or_post_object->get_currency();
 
-						if ( ! $order->has_status( array( 'pending', 'failed', 'cancelled' ) ) ) {
+						if ( ! $order_or_post_object->has_status( array( 'pending', 'failed', 'cancelled' ) ) ) {
 							$remove_item_notice = $remove_item_notice . ' ' . __( "You may need to manually restore the item's stock.", 'woocommerce' );
 						}
 					}
 				}
 
 				$params = array(
-					'remove_item_notice'            => $remove_item_notice,
-					'remove_fee_notice'             => $remove_fee_notice,
-					'remove_shipping_notice'        => $remove_shipping_notice,
-					'i18n_select_items'             => __( 'Please select some items.', 'woocommerce' ),
-					'i18n_do_refund'                => __( 'Are you sure you wish to process this refund? This action cannot be undone.', 'woocommerce' ),
-					'i18n_delete_refund'            => __( 'Are you sure you wish to delete this refund? This action cannot be undone.', 'woocommerce' ),
-					'i18n_delete_tax'               => __( 'Are you sure you wish to delete this tax column? This action cannot be undone.', 'woocommerce' ),
-					'remove_item_meta'              => __( 'Remove this item meta?', 'woocommerce' ),
-					'remove_attribute'              => __( 'Remove this attribute?', 'woocommerce' ),
-					'name_label'                    => __( 'Name', 'woocommerce' ),
-					'remove_label'                  => __( 'Remove', 'woocommerce' ),
-					'click_to_toggle'               => __( 'Click to toggle', 'woocommerce' ),
-					'values_label'                  => __( 'Value(s)', 'woocommerce' ),
-					'text_attribute_tip'            => __( 'Enter some text, or some attributes by pipe (|) separating values.', 'woocommerce' ),
-					'visible_label'                 => __( 'Visible on the product page', 'woocommerce' ),
-					'used_for_variations_label'     => __( 'Used for variations', 'woocommerce' ),
-					'new_attribute_prompt'          => __( 'Enter a name for the new attribute term:', 'woocommerce' ),
-					'calc_totals'                   => __( 'Recalculate totals? This will calculate taxes based on the customers country (or the store base country) and update totals.', 'woocommerce' ),
-					'copy_billing'                  => __( 'Copy billing information to shipping information? This will remove any currently entered shipping information.', 'woocommerce' ),
-					'load_billing'                  => __( "Load the customer's billing information? This will remove any currently entered billing information.", 'woocommerce' ),
-					'load_shipping'                 => __( "Load the customer's shipping information? This will remove any currently entered shipping information.", 'woocommerce' ),
-					'featured_label'                => __( 'Featured', 'woocommerce' ),
-					'prices_include_tax'            => esc_attr( get_option( 'woocommerce_prices_include_tax' ) ),
-					'tax_based_on'                  => esc_attr( get_option( 'woocommerce_tax_based_on' ) ),
-					'round_at_subtotal'             => esc_attr( get_option( 'woocommerce_tax_round_at_subtotal' ) ),
-					'no_customer_selected'          => __( 'No customer selected', 'woocommerce' ),
-					'plugin_url'                    => WC()->plugin_url(),
-					'ajax_url'                      => admin_url( 'admin-ajax.php' ),
-					'order_item_nonce'              => wp_create_nonce( 'order-item' ),
-					'add_attribute_nonce'           => wp_create_nonce( 'add-attribute' ),
-					'save_attributes_nonce'         => wp_create_nonce( 'save-attributes' ),
-					'calc_totals_nonce'             => wp_create_nonce( 'calc-totals' ),
-					'get_customer_details_nonce'    => wp_create_nonce( 'get-customer-details' ),
-					'search_products_nonce'         => wp_create_nonce( 'search-products' ),
-					'grant_access_nonce'            => wp_create_nonce( 'grant-access' ),
-					'revoke_access_nonce'           => wp_create_nonce( 'revoke-access' ),
-					'add_order_note_nonce'          => wp_create_nonce( 'add-order-note' ),
-					'delete_order_note_nonce'       => wp_create_nonce( 'delete-order-note' ),
-					'calendar_image'                => WC()->plugin_url() . '/assets/images/calendar.png',
-					'post_id'                       => isset( $post->ID ) ? $post->ID : '',
-					'base_country'                  => WC()->countries->get_base_country(),
-					'currency_format_num_decimals'  => wc_get_price_decimals(),
-					'currency_format_symbol'        => get_woocommerce_currency_symbol( $currency ),
-					'currency_format_decimal_sep'   => esc_attr( wc_get_price_decimal_separator() ),
-					'currency_format_thousand_sep'  => esc_attr( wc_get_price_thousand_separator() ),
-					'currency_format'               => esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ), // For accounting JS.
-					'rounding_precision'            => wc_get_rounding_precision(),
-					'tax_rounding_mode'             => wc_get_tax_rounding_mode(),
-					'product_types'                 => array_unique( array_merge( array( 'simple', 'grouped', 'variable', 'external' ), array_keys( wc_get_product_types() ) ) ),
-					'i18n_download_permission_fail' => __( 'Could not grant access - the user may already have permission for this file or billing email is not set. Ensure the billing email is set, and the order has been saved.', 'woocommerce' ),
-					'i18n_permission_revoke'        => __( 'Are you sure you want to revoke access to this download?', 'woocommerce' ),
-					'i18n_tax_rate_already_exists'  => __( 'You cannot add the same tax rate twice!', 'woocommerce' ),
-					'i18n_delete_note'              => __( 'Are you sure you wish to delete this note? This action cannot be undone.', 'woocommerce' ),
-					'i18n_apply_coupon'             => __( 'Enter a coupon code to apply. Discounts are applied to line totals, before taxes.', 'woocommerce' ),
-					'i18n_add_fee'                  => __( 'Enter a fixed amount or percentage to apply as a fee.', 'woocommerce' ),
+					'remove_item_notice'                 => $remove_item_notice,
+					'remove_fee_notice'                  => $remove_fee_notice,
+					'remove_shipping_notice'             => $remove_shipping_notice,
+					'i18n_select_items'                  => __( 'Please select some items.', 'woocommerce' ),
+					'i18n_do_refund'                     => __( 'Are you sure you wish to process this refund? This action cannot be undone.', 'woocommerce' ),
+					'i18n_delete_refund'                 => __( 'Are you sure you wish to delete this refund? This action cannot be undone.', 'woocommerce' ),
+					'i18n_delete_tax'                    => __( 'Are you sure you wish to delete this tax column? This action cannot be undone.', 'woocommerce' ),
+					'remove_item_meta'                   => __( 'Remove this item meta?', 'woocommerce' ),
+					'remove_attribute'                   => __( 'Remove this attribute?', 'woocommerce' ),
+					'name_label'                         => __( 'Name', 'woocommerce' ),
+					'remove_label'                       => __( 'Remove', 'woocommerce' ),
+					'click_to_toggle'                    => __( 'Click to toggle', 'woocommerce' ),
+					'values_label'                       => __( 'Value(s)', 'woocommerce' ),
+					'text_attribute_tip'                 => __( 'Enter some text, or some attributes by pipe (|) separating values.', 'woocommerce' ),
+					'visible_label'                      => __( 'Visible on the product page', 'woocommerce' ),
+					'used_for_variations_label'          => __( 'Used for variations', 'woocommerce' ),
+					'new_attribute_prompt'               => __( 'Enter a name for the new attribute term:', 'woocommerce' ),
+					'calc_totals'                        => __( 'Recalculate totals? This will calculate taxes based on the customers country (or the store base country) and update totals.', 'woocommerce' ),
+					'copy_billing'                       => __( 'Copy billing information to shipping information? This will remove any currently entered shipping information.', 'woocommerce' ),
+					'load_billing'                       => __( "Load the customer's billing information? This will remove any currently entered billing information.", 'woocommerce' ),
+					'load_shipping'                      => __( "Load the customer's shipping information? This will remove any currently entered shipping information.", 'woocommerce' ),
+					'featured_label'                     => __( 'Featured', 'woocommerce' ),
+					'prices_include_tax'                 => esc_attr( get_option( 'woocommerce_prices_include_tax' ) ),
+					'tax_based_on'                       => esc_attr( get_option( 'woocommerce_tax_based_on' ) ),
+					'round_at_subtotal'                  => esc_attr( get_option( 'woocommerce_tax_round_at_subtotal' ) ),
+					'no_customer_selected'               => __( 'No customer selected', 'woocommerce' ),
+					'plugin_url'                         => WC()->plugin_url(),
+					'ajax_url'                           => admin_url( 'admin-ajax.php' ),
+					'order_item_nonce'                   => wp_create_nonce( 'order-item' ),
+					'add_attribute_nonce'                => wp_create_nonce( 'add-attribute' ),
+					'save_attributes_nonce'              => wp_create_nonce( 'save-attributes' ),
+					'calc_totals_nonce'                  => wp_create_nonce( 'calc-totals' ),
+					'get_customer_details_nonce'         => wp_create_nonce( 'get-customer-details' ),
+					'search_products_nonce'              => wp_create_nonce( 'search-products' ),
+					'grant_access_nonce'                 => wp_create_nonce( 'grant-access' ),
+					'revoke_access_nonce'                => wp_create_nonce( 'revoke-access' ),
+					'add_order_note_nonce'               => wp_create_nonce( 'add-order-note' ),
+					'delete_order_note_nonce'            => wp_create_nonce( 'delete-order-note' ),
+					'calendar_image'                     => WC()->plugin_url() . '/assets/images/calendar.png',
+					'post_id'                            => $this->is_order_meta_box_screen( $screen_id ) && isset( $order_or_post_object ) ? \Automattic\WooCommerce\Utilities\OrderUtil::get_post_or_order_id( $order_or_post_object ) : $post_id,
+					'base_country'                       => WC()->countries->get_base_country(),
+					'currency_format_num_decimals'       => wc_get_price_decimals(),
+					'currency_format_symbol'             => get_woocommerce_currency_symbol( $currency ),
+					'currency_format_decimal_sep'        => esc_attr( wc_get_price_decimal_separator() ),
+					'currency_format_thousand_sep'       => esc_attr( wc_get_price_thousand_separator() ),
+					'currency_format'                    => esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ), // For accounting JS.
+					'rounding_precision'                 => wc_get_rounding_precision(),
+					'tax_rounding_mode'                  => wc_get_tax_rounding_mode(),
+					'product_types'                      => array_unique( array_merge( array( 'simple', 'grouped', 'variable', 'external' ), array_keys( wc_get_product_types() ) ) ),
+					'i18n_download_permission_fail'      => __( 'Could not grant access - the user may already have permission for this file or billing email is not set. Ensure the billing email is set, and the order has been saved.', 'woocommerce' ),
+					'i18n_permission_revoke'             => __( 'Are you sure you want to revoke access to this download?', 'woocommerce' ),
+					'i18n_tax_rate_already_exists'       => __( 'You cannot add the same tax rate twice!', 'woocommerce' ),
+					'i18n_delete_note'                   => __( 'Are you sure you wish to delete this note? This action cannot be undone.', 'woocommerce' ),
+					'i18n_apply_coupon'                  => __( 'Enter a coupon code to apply. Discounts are applied to line totals, before taxes.', 'woocommerce' ),
+					'i18n_add_fee'                       => __( 'Enter a fixed amount or percentage to apply as a fee.', 'woocommerce' ),
+					'i18n_product_simple_tip'            => __( '<b>Simple –</b> covers the vast majority of any products you may sell. Simple products are shipped and have no options. For example, a book.', 'woocommerce' ),
+					'i18n_product_grouped_tip'           => __( '<b>Grouped –</b> a collection of related products that can be purchased individually and only consist of simple products. For example, a set of six drinking glasses.', 'woocommerce' ),
+					'i18n_product_external_tip'          => __( '<b>External or Affiliate –</b> one that you list and describe on your website but is sold elsewhere.', 'woocommerce' ),
+					'i18n_product_variable_tip'          => __( '<b>Variable –</b> a product with variations, each of which may have a different SKU, price, stock option, etc. For example, a t-shirt available in different colors and/or sizes.', 'woocommerce' ),
+					'i18n_product_other_tip'             => __( 'Product types define available product details and attributes, such as downloadable files and variations. They’re also used for analytics and inventory management.', 'woocommerce' ),
+					'i18n_product_description_tip'       => __( 'Describe this product. What makes it unique? What are its most important features?', 'woocommerce' ),
+					'i18n_product_short_description_tip' => __( 'Summarize this product in 1-2 short sentences. We’ll show it at the top of the page.', 'woocommerce' ),
 				);
 
 				wp_localize_script( 'wc-admin-meta-boxes', 'woocommerce_admin_meta_boxes', $params );
@@ -488,6 +500,18 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'marketplace-suggestions' );
 			}
 
+		}
+
+		/**
+		 * Helper function to determine whether the current screen is an order edit screen.
+		 *
+		 * @param string $screen_id Screen ID.
+		 *
+		 * @return bool Whether the current screen is an order edit screen.
+		 */
+		private function is_order_meta_box_screen( $screen_id ) {
+			return in_array( str_replace( 'edit-', '', $screen_id ), wc_get_order_types( 'order-meta-boxes' ), true ) ||
+						wc_get_page_screen_id( 'shop-order' ) === $screen_id;
 		}
 
 	}

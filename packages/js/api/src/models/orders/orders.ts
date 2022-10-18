@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { HTTPClient } from '../../http';
 import { orderRESTRepository } from '../../repositories';
 import {
@@ -9,7 +12,8 @@ import {
 	DeletesModels,
 } from '../../framework';
 import {
-	OrderAddressUpdateParams,
+	BillingOrderAddressUpdateParams,
+	ShippingOrderAddressUpdateParams,
 	OrderCouponUpdateParams,
 	OrderDataUpdateParams,
 	OrderFeeUpdateParams,
@@ -19,7 +23,8 @@ import {
 	OrderTaxUpdateParams,
 	OrderTotalUpdateParams,
 	OrderItemMeta,
-	OrderAddress,
+	BillingOrderAddress,
+	ShippingOrderAddress,
 	OrderCouponLine,
 	OrderFeeLine,
 	OrderLineItem,
@@ -33,21 +38,27 @@ import { ObjectLinks } from '../shared-types';
 /**
  * The parameters that orders can update.
  */
-type OrderUpdateParams = OrderAddressUpdateParams
-	& OrderCouponUpdateParams
-	& OrderDataUpdateParams
-	& OrderFeeUpdateParams
-	& OrderLineItemUpdateParams
-	& OrderRefundUpdateParams
-	& OrderShippingUpdateParams
-	& OrderTaxUpdateParams
-	& OrderTotalUpdateParams;
+type OrderUpdateParams = BillingOrderAddressUpdateParams &
+	ShippingOrderAddressUpdateParams &
+	OrderCouponUpdateParams &
+	OrderDataUpdateParams &
+	OrderFeeUpdateParams &
+	OrderLineItemUpdateParams &
+	OrderRefundUpdateParams &
+	OrderShippingUpdateParams &
+	OrderTaxUpdateParams &
+	OrderTotalUpdateParams;
 
 /**
  * The parameters embedded in this generic can be used in the ModelRepository in order to give
  * type-safety in an incredibly granular way.
  */
-export type OrderRepositoryParams = ModelRepositoryParams< Order, never, never, OrderUpdateParams >;
+export type OrderRepositoryParams = ModelRepositoryParams<
+	Order,
+	never,
+	never,
+	OrderUpdateParams
+>;
 
 /**
  * An interface for creating orders using the repository.
@@ -194,16 +205,16 @@ export class Order extends OrderItemMeta {
 	/**
 	 * The billing address.
 	 *
-	 * @type {OrderAddress}
+	 * @type {BillingOrderAddress}
 	 */
-	public readonly billing: OrderAddress | null = null;
+	public readonly billing: BillingOrderAddress | null = null;
 
 	/**
 	 * The shipping address.
 	 *
-	 * @type {OrderAddress}
+	 * @type {ShippingOrderAddress}
 	 */
-	public readonly shipping: OrderAddress | null = null;
+	public readonly shipping: ShippingOrderAddress | null = null;
 
 	/**
 	 * Name of the payment method.
@@ -363,7 +374,9 @@ export class Order extends OrderItemMeta {
 	 *
 	 * @param {HTTPClient} httpClient The client for communicating via HTTP.
 	 */
-	public static restRepository( httpClient: HTTPClient ): ReturnType< typeof orderRESTRepository > {
+	public static restRepository(
+		httpClient: HTTPClient
+	): ReturnType< typeof orderRESTRepository > {
 		return orderRESTRepository( httpClient );
 	}
 }

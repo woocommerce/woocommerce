@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { HTTPClient } from '../../../http';
 import { ModelRepository } from '../../../framework';
 import {
@@ -37,25 +40,50 @@ import {
  * 	DeletesGroupedProducts
  * } The created repository.
  */
-export function groupedProductRESTRepository( httpClient: HTTPClient ): ListsGroupedProducts
-	& CreatesGroupedProducts
-	& ReadsGroupedProducts
-	& UpdatesGroupedProducts
-	& DeletesGroupedProducts {
+export function groupedProductRESTRepository(
+	httpClient: HTTPClient
+): ListsGroupedProducts &
+	CreatesGroupedProducts &
+	ReadsGroupedProducts &
+	UpdatesGroupedProducts &
+	DeletesGroupedProducts {
 	const upsells = createProductUpSellsTransformation();
 	const grouped = createProductGroupedTransformation();
-	const transformations = [
-		...upsells,
-		...grouped,
-	];
+	const transformations = [ ...upsells, ...grouped ];
 
-	const transformer = createProductTransformer<GroupedProduct>( 'grouped', transformations );
+	const transformer = createProductTransformer< GroupedProduct >(
+		'grouped',
+		transformations
+	);
 
 	return new ModelRepository(
-		restList< GroupedProductRepositoryParams >( baseProductURL, GroupedProduct, httpClient, transformer ),
-		restCreate< GroupedProductRepositoryParams >( baseProductURL, GroupedProduct, httpClient, transformer ),
-		restRead< GroupedProductRepositoryParams >( buildProductURL, GroupedProduct, httpClient, transformer ),
-		restUpdate< GroupedProductRepositoryParams >( buildProductURL, GroupedProduct, httpClient, transformer ),
-		restDelete< GroupedProductRepositoryParams >( deleteProductURL, httpClient ),
+		restList< GroupedProductRepositoryParams >(
+			baseProductURL,
+			GroupedProduct,
+			httpClient,
+			transformer
+		),
+		restCreate< GroupedProductRepositoryParams >(
+			baseProductURL,
+			GroupedProduct,
+			httpClient,
+			transformer
+		),
+		restRead< GroupedProductRepositoryParams >(
+			buildProductURL,
+			GroupedProduct,
+			httpClient,
+			transformer
+		),
+		restUpdate< GroupedProductRepositoryParams >(
+			buildProductURL,
+			GroupedProduct,
+			httpClient,
+			transformer
+		),
+		restDelete< GroupedProductRepositoryParams >(
+			deleteProductURL,
+			httpClient
+		)
 	);
 }

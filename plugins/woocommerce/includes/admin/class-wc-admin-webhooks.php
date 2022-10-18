@@ -30,7 +30,8 @@ class WC_Admin_Webhooks {
 	 * @return bool
 	 */
 	public function allow_save_settings( $allow ) {
-		if ( ! isset( $_GET['edit-webhook'] ) ) { // WPCS: input var okay, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['edit-webhook'] ) ) {
 			return false;
 		}
 
@@ -43,7 +44,8 @@ class WC_Admin_Webhooks {
 	 * @return bool
 	 */
 	private function is_webhook_settings_page() {
-		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] ) && 'wc-settings' === $_GET['page'] && 'advanced' === $_GET['tab'] && 'webhooks' === $_GET['section']; // WPCS: input var okay, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] ) && 'wc-settings' === $_GET['page'] && 'advanced' === $_GET['tab'] && 'webhooks' === $_GET['section'];
 	}
 
 	/**
@@ -56,19 +58,22 @@ class WC_Admin_Webhooks {
 			wp_die( esc_html__( 'You do not have permission to update Webhooks', 'woocommerce' ) );
 		}
 
-		$errors     = array();
-		$webhook_id = isset( $_POST['webhook_id'] ) ? absint( $_POST['webhook_id'] ) : 0;  // WPCS: input var okay, CSRF ok.
+		$errors = array();
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$webhook_id = isset( $_POST['webhook_id'] ) ? absint( $_POST['webhook_id'] ) : 0;
 		$webhook    = new WC_Webhook( $webhook_id );
 
 		// Name.
-		if ( ! empty( $_POST['webhook_name'] ) ) { // WPCS: input var okay, CSRF ok.
-			$name = sanitize_text_field( wp_unslash( $_POST['webhook_name'] ) ); // WPCS: input var okay, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $_POST['webhook_name'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$name = sanitize_text_field( wp_unslash( $_POST['webhook_name'] ) );
 		} else {
 			$name = sprintf(
 				/* translators: %s: date */
 				__( 'Webhook created on %s', 'woocommerce' ),
 				// @codingStandardsIgnoreStart
-				strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) )
+				(new DateTime('now'))->format( _x( 'M d, Y @ h:i A', 'Webhook created on date parsed by DateTime::format', 'woocommerce' ) )
 				// @codingStandardsIgnoreEnd
 			);
 		}
@@ -80,32 +85,39 @@ class WC_Admin_Webhooks {
 		}
 
 		// Status.
-		$webhook->set_status( ! empty( $_POST['webhook_status'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_status'] ) ) : 'disabled' ); // WPCS: input var okay, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$webhook->set_status( ! empty( $_POST['webhook_status'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_status'] ) ) : 'disabled' );
 
 		// Delivery URL.
-		$delivery_url = ! empty( $_POST['webhook_delivery_url'] ) ? esc_url_raw( wp_unslash( $_POST['webhook_delivery_url'] ) ) : ''; // WPCS: input var okay, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$delivery_url = ! empty( $_POST['webhook_delivery_url'] ) ? esc_url_raw( wp_unslash( $_POST['webhook_delivery_url'] ) ) : '';
 
 		if ( wc_is_valid_url( $delivery_url ) ) {
 			$webhook->set_delivery_url( $delivery_url );
 		}
 
 		// Secret.
-		$secret = ! empty( $_POST['webhook_secret'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_secret'] ) ) : wp_generate_password( 50, true, true ); // WPCS: input var okay, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$secret = ! empty( $_POST['webhook_secret'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_secret'] ) ) : wp_generate_password( 50, true, true );
 		$webhook->set_secret( $secret );
 
 		// Topic.
-		if ( ! empty( $_POST['webhook_topic'] ) ) { // WPCS: input var okay, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $_POST['webhook_topic'] ) ) {
 			$resource = '';
 			$event    = '';
 
-			switch ( $_POST['webhook_topic'] ) { // WPCS: input var okay, CSRF ok.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			switch ( $_POST['webhook_topic'] ) {
 				case 'action':
 					$resource = 'action';
-					$event    = ! empty( $_POST['webhook_action_event'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_action_event'] ) ) : ''; // WPCS: input var okay, CSRF ok.
+					// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					$event = ! empty( $_POST['webhook_action_event'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_action_event'] ) ) : '';
 					break;
 
 				default:
-					list( $resource, $event ) = explode( '.', sanitize_text_field( wp_unslash( $_POST['webhook_topic'] ) ) ); // WPCS: input var okay, CSRF ok.
+					// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					list( $resource, $event ) = explode( '.', sanitize_text_field( wp_unslash( $_POST['webhook_topic'] ) ) );
 					break;
 			}
 
@@ -120,7 +132,8 @@ class WC_Admin_Webhooks {
 
 		// API version.
 		$rest_api_versions = wc_get_webhook_rest_api_versions();
-		$webhook->set_api_version( ! empty( $_POST['webhook_api_version'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_api_version'] ) ) : end( $rest_api_versions ) ); // WPCS: input var okay, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$webhook->set_api_version( ! empty( $_POST['webhook_api_version'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_api_version'] ) ) : end( $rest_api_versions ) );
 
 		$webhook->save();
 
@@ -130,7 +143,8 @@ class WC_Admin_Webhooks {
 			// Redirect to webhook edit page to avoid settings save actions.
 			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks&edit-webhook=' . $webhook->get_id() . '&error=' . rawurlencode( implode( '|', $errors ) ) ) );
 			exit();
-		} elseif ( isset( $_POST['webhook_status'] ) && 'active' === $_POST['webhook_status'] && $webhook->get_pending_delivery() ) { // WPCS: input var okay, CSRF ok.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		} elseif ( isset( $_POST['webhook_status'] ) && 'active' === $_POST['webhook_status'] && $webhook->get_pending_delivery() ) {
 			// Ping the webhook at the first time that is activated.
 			$result = $webhook->deliver_ping();
 
@@ -157,8 +171,9 @@ class WC_Admin_Webhooks {
 			$webhook->delete( true );
 		}
 
-		$qty    = count( $webhooks );
-		$status = isset( $_GET['status'] ) ? '&status=' . sanitize_text_field( wp_unslash( $_GET['status'] ) ) : ''; // WPCS: input var okay, CSRF ok.
+		$qty = count( $webhooks );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$status = isset( $_GET['status'] ) ? '&status=' . sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';
 
 		// Redirect to webhooks page.
 		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' . $status . '&deleted=' . $qty ) );
@@ -171,8 +186,10 @@ class WC_Admin_Webhooks {
 	private function delete() {
 		check_admin_referer( 'delete-webhook' );
 
-		if ( isset( $_GET['delete'] ) ) { // WPCS: input var okay, CSRF ok.
-			$webhook_id = absint( $_GET['delete'] ); // WPCS: input var okay, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['delete'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$webhook_id = absint( $_GET['delete'] );
 
 			if ( $webhook_id ) {
 				$this->bulk_delete( array( $webhook_id ) );
@@ -186,12 +203,14 @@ class WC_Admin_Webhooks {
 	public function actions() {
 		if ( $this->is_webhook_settings_page() ) {
 			// Save.
-			if ( isset( $_POST['save'] ) && isset( $_POST['webhook_id'] ) ) { // WPCS: input var okay, CSRF ok.
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing
+			if ( isset( $_POST['save'] ) && isset( $_POST['webhook_id'] ) ) {
 				$this->save();
 			}
 
 			// Delete webhook.
-			if ( isset( $_GET['delete'] ) ) { // WPCS: input var okay, CSRF ok.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( isset( $_GET['delete'] ) ) {
 				$this->delete();
 			}
 		}
@@ -204,11 +223,13 @@ class WC_Admin_Webhooks {
 		// Hide the save button.
 		$GLOBALS['hide_save_button'] = true;
 
-		if ( isset( $_GET['edit-webhook'] ) ) { // WPCS: input var okay, CSRF ok.
-			$webhook_id = absint( $_GET['edit-webhook'] ); // WPCS: input var okay, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['edit-webhook'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$webhook_id = absint( $_GET['edit-webhook'] );
 			$webhook    = new WC_Webhook( $webhook_id );
 
-			include __DIR__ .  '/settings/views/html-webhooks-edit.php';
+			include __DIR__ . '/settings/views/html-webhooks-edit.php';
 			return;
 		}
 
@@ -219,23 +240,29 @@ class WC_Admin_Webhooks {
 	 * Notices.
 	 */
 	public static function notices() {
-		if ( isset( $_GET['deleted'] ) ) { // WPCS: input var okay, CSRF ok.
-			$deleted = absint( $_GET['deleted'] ); // WPCS: input var okay, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['deleted'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$deleted = absint( $_GET['deleted'] );
 
 			/* translators: %d: count */
 			WC_Admin_Settings::add_message( sprintf( _n( '%d webhook permanently deleted.', '%d webhooks permanently deleted.', $deleted, 'woocommerce' ), $deleted ) );
 		}
 
-		if ( isset( $_GET['updated'] ) ) { // WPCS: input var okay, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['updated'] ) ) {
 			WC_Admin_Settings::add_message( __( 'Webhook updated successfully.', 'woocommerce' ) );
 		}
 
-		if ( isset( $_GET['created'] ) ) { // WPCS: input var okay, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['created'] ) ) {
 			WC_Admin_Settings::add_message( __( 'Webhook created successfully.', 'woocommerce' ) );
 		}
 
-		if ( isset( $_GET['error'] ) ) { // WPCS: input var okay, CSRF ok.
-			foreach ( explode( '|', sanitize_text_field( wp_unslash( $_GET['error'] ) ) ) as $message ) { // WPCS: input var okay, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['error'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			foreach ( explode( '|', sanitize_text_field( wp_unslash( $_GET['error'] ) ) ) as $message ) {
 				WC_Admin_Settings::add_error( trim( $message ) );
 			}
 		}
@@ -247,7 +274,8 @@ class WC_Admin_Webhooks {
 	public function screen_option() {
 		global $webhooks_table_list;
 
-		if ( ! isset( $_GET['edit-webhook'] ) && $this->is_webhook_settings_page() ) { // WPCS: input var okay, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['edit-webhook'] ) && $this->is_webhook_settings_page() ) {
 			$webhooks_table_list = new WC_Admin_Webhooks_Table_List();
 
 			// Add screen option.

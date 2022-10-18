@@ -1,6 +1,13 @@
+/**
+ * External dependencies
+ */
 import type { AxiosRequestConfig } from 'axios';
 import * as createHmac from 'create-hmac';
 import * as OAuth from 'oauth-1.0a';
+
+/**
+ * Internal dependencies
+ */
 import { AxiosInterceptor } from './axios-interceptor';
 import { buildURLWithParams } from './utils';
 
@@ -19,7 +26,7 @@ export class AxiosOAuthInterceptor extends AxiosInterceptor {
 	/**
 	 * Creates a new interceptor.
 	 *
-	 * @param {string} consumerKey The consumer key of the API key.
+	 * @param {string} consumerKey    The consumer key of the API key.
 	 * @param {string} consumerSecret The consumer secret of the API key.
 	 */
 	public constructor( consumerKey: string, consumerSecret: string ) {
@@ -32,7 +39,9 @@ export class AxiosOAuthInterceptor extends AxiosInterceptor {
 			},
 			signature_method: 'HMAC-SHA256',
 			hash_function: ( base: any, key: any ) => {
-				return createHmac( 'sha256', key ).update( base ).digest( 'base64' );
+				return createHmac( 'sha256', key )
+					.update( base )
+					.digest( 'base64' );
 			},
 		} );
 	}
@@ -54,8 +63,9 @@ export class AxiosOAuthInterceptor extends AxiosInterceptor {
 			request.headers.Authorization = this.oauth.toHeader(
 				this.oauth.authorize( {
 					url,
+					// eslint-disable-next-line
 					method: request.method!,
-				} ),
+				} )
 			).Authorization;
 		}
 

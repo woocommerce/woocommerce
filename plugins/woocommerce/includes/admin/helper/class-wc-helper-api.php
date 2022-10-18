@@ -50,6 +50,10 @@ class WC_Helper_API {
 			}
 		}
 
+		if ( ! isset( $args['user-agent'] ) ) {
+			$args['user-agent'] = 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' );
+		}
+
 		/**
 		 * Allow developers to filter the request args passed to wp_safe_remote_request().
 		 * Useful to remove sslverify when working on a local api dev environment.

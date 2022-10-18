@@ -1,12 +1,7 @@
-const fs = require('fs');
-const { Collection, ItemGroup, Item } = require('postman-collection');
-require('dotenv').config();
-const {
-	BASE_URL,
-	USER_KEY,
-	USER_SECRET,
-	USE_INDEX_PERMALINKS
-} = process.env;
+const fs = require( 'fs' );
+const { Collection, ItemGroup, Item } = require( 'postman-collection' );
+require( 'dotenv' ).config();
+const { BASE_URL, USER_KEY, USER_SECRET, USE_INDEX_PERMALINKS } = process.env;
 
 /**
  * Build a Postman collection using the API testing objects.
@@ -17,10 +12,12 @@ const {
 
 // Set up our empty collection
 if ( typeof USER_KEY === 'undefined' ) {
-	console.log('No USER_KEY was defined.');
+	// eslint-disable-next-line
+	console.log( 'No USER_KEY was defined.' );
 }
 if ( typeof USER_SECRET === 'undefined' ) {
-	console.log('No USER_SECRET was defined.');
+	// eslint-disable-next-line
+	console.log( 'No USER_SECRET was defined.' );
 }
 
 const postmanCollection = new Collection( {
@@ -30,74 +27,74 @@ const postmanCollection = new Collection( {
 			{
 				key: 'username',
 				value: USER_KEY,
-				type: 'string'
+				type: 'string',
 			},
 			{
 				key: 'password',
 				value: USER_SECRET,
-				type: 'string'
+				type: 'string',
 			},
-		]
+		],
 	},
 	info: {
-	  name: 'WooCommerce API - v3'
+		name: 'WooCommerce API - v3',
 	},
 } );
 
 // Get the API url
 if ( typeof BASE_URL === 'undefined' ) {
-	console.log('No BASE_URL was defined.');
+	// eslint-disable-next-line
+	console.log( 'No BASE_URL was defined.' );
 }
 
 // Update the API path if the `USE_INDEX_PERMALINKS` flag is set
-const useIndexPermalinks = ( USE_INDEX_PERMALINKS === 'true' );
-let apiPath = `${BASE_URL}/?rest_route=/wc/v3`;
+const useIndexPermalinks = USE_INDEX_PERMALINKS === 'true';
+let apiPath = `${ BASE_URL }/?rest_route=/wc/v3`;
 if ( useIndexPermalinks ) {
-	apiPath = `${BASE_URL}/wp-json/wc/v3`;
+	apiPath = `${ BASE_URL }/wp-json/wc/v3`;
 }
 // Set this here for use in `request.js`
-global.API_PATH = `${apiPath}/`;
+global.API_PATH = `${ apiPath }/`;
 
 // Add the API path has a collection variable
-postmanCollection.variables.add({
+postmanCollection.variables.add( {
 	id: 'apiBaseUrl',
 	value: apiPath,
 	type: 'string',
-});
+} );
 
 // Get the API request data
-const resources = require('../../endpoints');
+const resources = require( '../../endpoints' );
+// eslint-disable-next-line
 resourceKeys = Object.keys( resources );
 
 // Add the requests to folders in the collection
 for ( const key in resources ) {
-
 	const folder = new ItemGroup( {
-		name: resources[key].name,
-		items: []
+		name: resources[ key ].name,
+		items: [],
 	} );
 
-	for ( const endpoint in resources[key] ) {
-
-		let api = resources[key][endpoint];
+	for ( const endpoint in resources[ key ] ) {
+		const api = resources[ key ][ endpoint ];
 
 		// If there is no name defined, continue
-		if ( !api.name ) {
+		if ( ! api.name ) {
 			continue;
 		}
 
 		const request = new Item( {
 			name: api.name,
 			request: {
-			  url: `{{apiBaseUrl}}/${api.path}`,
-			  method: api.method,
-			  body: {
-				mode: 'raw',
-				raw: JSON.stringify( api.payload ),
-				options: {
-					raw: { language: 'json' }
-				}
-			  },
+				url: `{{apiBaseUrl}}/${ api.path }`,
+				method: api.method,
+				body: {
+					mode: 'raw',
+					raw: JSON.stringify( api.payload ),
+					options: {
+						raw: { language: 'json' },
+					},
+				},
 			},
 		} );
 		folder.items.add( request );
@@ -110,9 +107,15 @@ for ( const key in resources ) {
 const collectionJSON = postmanCollection.toJSON();
 
 // Create a colleciton.json file. It can be imported to postman
-fs.writeFile('./collection.json', JSON.stringify( collectionJSON ), ( err ) => {
-	if ( err ) {
-	  console.log( err );
+fs.writeFile(
+	'./collection.json',
+	JSON.stringify( collectionJSON ),
+	( err ) => {
+		if ( err ) {
+			// eslint-disable-next-line
+			console.log( err );
+		}
+		// eslint-disable-next-line
+		console.log( 'File saved!' );
 	}
-	console.log('File saved!');
-});
+);

@@ -368,7 +368,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$set_props['category_ids']      = $this->get_term_ids( $product, 'product_cat' );
 		$set_props['tag_ids']           = $this->get_term_ids( $product, 'product_tag' );
 		$set_props['shipping_class_id'] = current( $this->get_term_ids( $product, 'product_shipping_class' ) );
-		$set_props['gallery_image_ids'] = array_filter( explode( ',', $set_props['gallery_image_ids'] ) );
+		$set_props['gallery_image_ids'] = array_filter( explode( ',', $set_props['gallery_image_ids'] ?? '' ) );
 
 		$product->set_props( $set_props );
 	}

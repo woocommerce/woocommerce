@@ -317,7 +317,16 @@ class WC_Admin_Attributes {
 							<tbody>
 								<?php
 								$attribute_taxonomies = wc_get_attribute_taxonomies();
-								if ( $attribute_taxonomies ) :
+								if ( $attribute_taxonomies ) {
+									/**
+									 * Filters the maximum number of terms that will be displayed for each taxonomy in the Attributes page.
+									 *
+									 * @param int @default_max_terms_to_display Default value.
+									 * @returns int Actual value to use, may be zero.
+									 *
+									 * @since 6.9.0
+									 */
+									$max_terms_to_display = apply_filters( 'woocommerce_max_terms_displayed_in_attributes_page', 100 );
 									foreach ( $attribute_taxonomies as $tax ) :
 										?>
 										<tr>
@@ -353,15 +362,39 @@ class WC_Admin_Attributes {
 													$taxonomy = wc_attribute_taxonomy_name( $tax->attribute_name );
 
 													if ( taxonomy_exists( $taxonomy ) ) {
-														$terms        = get_terms( $taxonomy, 'hide_empty=0' );
-														$terms_string = implode( ', ', wp_list_pluck( $terms, 'name' ) );
-														if ( $terms_string ) {
-															echo esc_html( $terms_string );
-														} else {
+														$total_count = (int) get_terms(
+															array(
+																'taxonomy'   => $taxonomy,
+																'fields'     => 'count',
+																'hide_empty' => false,
+															)
+														);
+														if ( 0 === $total_count ) {
 															echo '<span class="na">&ndash;</span>';
+														} elseif ( $max_terms_to_display > 0 ) {
+															$terms        = get_terms(
+																array(
+																	'taxonomy'   => $taxonomy,
+																	'number'     => $max_terms_to_display,
+																	'fields'     => 'names',
+																	'hide_empty' => false,
+																)
+															);
+															$terms_string = implode( ', ', $terms );
+															if ( $total_count > $max_terms_to_display ) {
+																$remaining = $total_count - $max_terms_to_display;
+																/* translators: 1: Comma-separated terms list, 2: how many terms are hidden */
+																$terms_string = sprintf( __( '%1$s... (%2$s more)', 'woocommerce' ), $terms_string, $remaining );
+															}
+															echo esc_html( $terms_string );
+														} elseif ( 1 === $total_count ) {
+															echo esc_html( __( '1 term', 'woocommerce' ) );
+														} else {
+															/* translators: %s: Total count of terms available for the attribute */
+															echo esc_html( sprintf( __( '%s terms', 'woocommerce' ), $total_count ) );
 														}
 													} else {
-															echo '<span class="na">&ndash;</span>';
+															echo '<span class="na">&ndash;</span><br />';
 													}
 													?>
 													<br /><a href="edit-tags.php?taxonomy=<?php echo esc_attr( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product" class="configure-terms"><?php esc_html_e( 'Configure terms', 'woocommerce' ); ?></a>
@@ -369,14 +402,14 @@ class WC_Admin_Attributes {
 											</tr>
 											<?php
 										endforeach;
-									else :
-										?>
+								} else {
+									?>
 										<tr>
 											<td colspan="6"><?php esc_html_e( 'No attributes currently exist.', 'woocommerce' ); ?></td>
 										</tr>
 										<?php
-									endif;
-									?>
+								}
+								?>
 							</tbody>
 						</table>
 					</div>

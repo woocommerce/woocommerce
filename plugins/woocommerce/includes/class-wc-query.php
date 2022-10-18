@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -14,6 +15,8 @@ defined( 'ABSPATH' ) || exit;
  * WC_Query Class.
  */
 class WC_Query {
+
+	use AccessiblePrivateMethods;
 
 	/**
 	 * Query vars to add to wp.
@@ -505,14 +508,7 @@ class WC_Query {
 		self::$product_query = $q;
 
 		// Additonal hooks to change WP Query.
-		add_filter(
-			'posts_clauses',
-			function( $args, $wp_query ) {
-				return $this->product_query_post_clauses( $args, $wp_query );
-			},
-			10,
-			2
-		);
+		self::add_filter( 'posts_clauses', array( $this, 'product_query_post_clauses' ), 10, 2 );
 		add_filter( 'the_posts', array( $this, 'handle_get_posts' ), 10, 2 );
 
 		do_action( 'woocommerce_product_query', $q, $this );

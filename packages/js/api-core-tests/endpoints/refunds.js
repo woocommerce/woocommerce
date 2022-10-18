@@ -55,5 +55,5 @@ const refundsApi = {
 };
 
 module.exports = {
-	refundsApi: refundsApi,
+	refundsApi,
 };

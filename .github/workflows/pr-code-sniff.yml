@@ -4,48 +4,32 @@ on:
 defaults:
   run:
     shell: bash
-    working-directory: plugins/woocommerce
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   test:
     name: Code sniff (PHP 7.4, WP Latest)
     timeout-minutes: 15
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
-          fetch-depth: 100
+          fetch-depth: 0
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Setup WooCommerce Monorepo
+        uses: ./.github/actions/setup-woocommerce-monorepo
         with:
-          php-version: 7.4
-          tools: composer, cs2pr
+          build: false
 
       - name: Tool versions
         run: |
           php --version
           composer --version
 
-      - name: Get cached composer directories
-        uses: actions/cache@v2
+      - name: Run code sniffer
+        uses: thenabeel/action-phpcs@v8
         with:
-          path: |
-            ./packages
-            ./vendor
-          key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
-
-      - name: Install PNPM and install dependencies
-        run: |
-            npm install -g pnpm
-            pnpm install
-
-      - name: Setup and install composer
-        run: pnpm nx composer-install woocommerce
-
-      - name: Run code sniff
-        continue-on-error: true
-        run: ./tests/bin/phpcs.sh "${{ github.event.pull_request.base.sha }}" "${{ github.event.after }}"
-      
-      - name: Show PHPCS results in PR
-        run: cs2pr ./phpcs-report.xml
+          files: "**.php"
+          phpcs_path: plugins/woocommerce/vendor/bin/phpcs
+          standard: phpcs.xml

@@ -78,4 +78,5 @@ const runOrderApiTest = () => {
 	} );
 };
 
+// eslint-disable-next-line jest/no-export
 module.exports = runOrderApiTest;

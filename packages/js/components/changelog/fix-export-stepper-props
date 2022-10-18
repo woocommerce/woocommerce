@@ -1,0 +1,6 @@
+Significance: patch
+Type: fix
+
+Export StepperProps for external usage
+
+

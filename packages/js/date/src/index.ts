@@ -1,0 +1,973 @@
+/**
+ * External dependencies
+ */
+import moment from 'moment';
+import 'moment-timezone';
+import { find, memoize } from 'lodash';
+import { __ } from '@wordpress/i18n';
+import { parse } from 'qs';
+
+type Query = {
+	[ key: string ]: string | undefined;
+};
+
+export const isoDateFormat = 'YYYY-MM-DD';
+export const defaultDateTimeFormat = 'YYYY-MM-DDTHH:mm:ss';
+
+/**
+ * DateValue Object
+ *
+ * @typedef  {Object} DateValue - DateValue data about the selected period.
+ * @property {moment.Moment} primaryStart   - Primary start of the date range.
+ * @property {moment.Moment} primaryEnd     - Primary end of the date range.
+ * @property {moment.Moment} secondaryStart - Secondary start of the date range.
+ * @property {moment.Moment} secondaryEnd   - Secondary End of the date range.
+ */
+export type DateValue = {
+	primaryStart: moment.Moment;
+	primaryEnd: moment.Moment;
+	secondaryStart: moment.Moment;
+	secondaryEnd: moment.Moment;
+};
+
+/**
+ * DataPickerOptions Object
+ *
+ * @typedef  {Object}  DataPickerOptions - Describes the date range supplied by the date picker.
+ * @property {string}        label  - The translated value of the period.
+ * @property {string}        range  - The human readable value of a date range.
+ * @property {moment.Moment} after  - Start of the date range.
+ * @property {moment.Moment} before - End of the date range.
+ */
+export type DataPickerOptions = {
+	label: string;
+	range: string;
+	after: moment.Moment;
+	before: moment.Moment;
+};
+
+/**
+ * DateParams Object
+ *
+ * @typedef {Object} DateParams - date parameters derived from query parameters.
+ * @property {string}             period  - period value, ie `last_week`
+ * @property {string}             compare - compare valuer, ie previous_year
+ * @param    {moment.Moment|null} after   - If the period supplied is "custom", this is the after date
+ * @param    {moment.Moment|null} before  - If the period supplied is "custom", this is the before date
+ */
+export type DateParams = {
+	period: string;
+	compare: string;
+	after: moment.Moment | null;
+	before: moment.Moment | null;
+};
+
+export const presetValues = [
+	{ value: 'today', label: __( 'Today', 'woocommerce' ) },
+	{ value: 'yesterday', label: __( 'Yesterday', 'woocommerce' ) },
+	{ value: 'week', label: __( 'Week to date', 'woocommerce' ) },
+	{ value: 'last_week', label: __( 'Last week', 'woocommerce' ) },
+	{ value: 'month', label: __( 'Month to date', 'woocommerce' ) },
+	{ value: 'last_month', label: __( 'Last month', 'woocommerce' ) },
+	{ value: 'quarter', label: __( 'Quarter to date', 'woocommerce' ) },
+	{ value: 'last_quarter', label: __( 'Last quarter', 'woocommerce' ) },
+	{ value: 'year', label: __( 'Year to date', 'woocommerce' ) },
+	{ value: 'last_year', label: __( 'Last year', 'woocommerce' ) },
+	{ value: 'custom', label: __( 'Custom', 'woocommerce' ) },
+];
+
+export const periods = [
+	{
+		value: 'previous_period',
+		label: __( 'Previous period', 'woocommerce' ),
+	},
+	{
+		value: 'previous_year',
+		label: __( 'Previous year', 'woocommerce' ),
+	},
+];
+
+const isValidMomentInput = ( input: unknown ): input is moment.MomentInput =>
+	moment( input as moment.MomentInput ).isValid();
+
+/**
+ * Adds timestamp to a string date.
+ *
+ * @param {moment.Moment} date      - Date as a moment object.
+ * @param {string}        timeOfDay - Either `start`, `now` or `end` of the day.
+ * @return {string} - String date with timestamp attached.
+ */
+export const appendTimestamp = ( date: moment.Moment, timeOfDay: string ) => {
+	if ( timeOfDay === 'start' ) {
+		return date.startOf( 'day' ).format( defaultDateTimeFormat );
+	}
+	if ( timeOfDay === 'now' ) {
+		// Set seconds to 00 to avoid consecutives calls happening before the previous
+		// one finished.
+		return date.format( defaultDateTimeFormat );
+	}
+	if ( timeOfDay === 'end' ) {
+		return date.endOf( 'day' ).format( defaultDateTimeFormat );
+	}
+	throw new Error(
+		'appendTimestamp requires second parameter to be either `start`, `now` or `end`'
+	);
+};
+
+/**
+ * Convert a string to Moment object
+ *
+ * @param {string}  format - localized date string format
+ * @param {unknown} str    - date string or moment object
+ * @return {moment.Moment|null} - Moment object representing given string
+ */
+export function toMoment( format: string, str: unknown ) {
+	if ( moment.isMoment( str ) ) {
+		return str.isValid() ? str : null;
+	}
+	if ( typeof str === 'string' ) {
+		const date = moment( str, [ isoDateFormat, format ], true );
+		return date.isValid() ? date : null;
+	}
+	throw new Error( 'toMoment requires a string to be passed as an argument' );
+}
+
+/**
+ * Given two dates, derive a string representation
+ *
+ * @param {moment.Moment} after  - start date
+ * @param {moment.Moment} before - end date
+ * @return {string} - text value for the supplied date range
+ */
+export function getRangeLabel( after: moment.Moment, before: moment.Moment ) {
+	const isSameYear = after.year() === before.year();
+	const isSameMonth = isSameYear && after.month() === before.month();
+	const isSameDay =
+		isSameYear && isSameMonth && after.isSame( before, 'day' );
+	const fullDateFormat = __( 'MMM D, YYYY', 'woocommerce' );
+
+	if ( isSameDay ) {
+		return after.format( fullDateFormat );
+	} else if ( isSameMonth ) {
+		const afterDate = after.date();
+		return after
+			.format( fullDateFormat )
+			.replace(
+				String( afterDate ),
+				`${ afterDate } - ${ before.date() }`
+			);
+	} else if ( isSameYear ) {
+		const monthDayFormat = __( 'MMM D', 'woocommerce' );
+		return `${ after.format( monthDayFormat ) } - ${ before.format(
+			fullDateFormat
+		) }`;
+	}
+	return `${ after.format( fullDateFormat ) } - ${ before.format(
+		fullDateFormat
+	) }`;
+}
+
+/**
+ * Gets the current time in the store time zone if set.
+ *
+ * @return {string} - Datetime string.
+ */
+export function getStoreTimeZoneMoment() {
+	if ( ! window.wcSettings || ! window.wcSettings.timeZone ) {
+		return moment();
+	}
+
+	if ( [ '+', '-' ].includes( window.wcSettings.timeZone.charAt( 0 ) ) ) {
+		return moment().utcOffset( window.wcSettings.timeZone );
+	}
+
+	return moment().tz( window.wcSettings.timeZone );
+}
+
+/**
+ * Get a DateValue object for a period prior to the current period.
+ *
+ * @param {moment.DurationInputArg2} period  - the chosen period
+ * @param {string}                   compare - `previous_period` or `previous_year`
+ * @return {DateValue} -  DateValue data about the selected period
+ */
+export function getLastPeriod(
+	period: moment.DurationInputArg2,
+	compare: string
+) {
+	const primaryStart = getStoreTimeZoneMoment()
+		.startOf( period )
+		.subtract( 1, period );
+	const primaryEnd = primaryStart.clone().endOf( period );
+	let secondaryStart;
+	let secondaryEnd;
+
+	if ( compare === 'previous_period' ) {
+		if ( period === 'year' ) {
+			// Subtract two entire periods for years to take into account leap year
+			secondaryStart = moment().startOf( period ).subtract( 2, period );
+			secondaryEnd = secondaryStart.clone().endOf( period );
+		} else {
+			// Otherwise, use days in primary period to figure out how far to go back
+			// This is necessary for calculating weeks instead of using `endOf`.
+			const daysDiff = primaryEnd.diff( primaryStart, 'days' );
+			secondaryEnd = primaryStart.clone().subtract( 1, 'days' );
+			secondaryStart = secondaryEnd.clone().subtract( daysDiff, 'days' );
+		}
+	} else if ( period === 'week' ) {
+		secondaryStart = primaryStart.clone().subtract( 1, 'years' );
+		secondaryEnd = primaryEnd.clone().subtract( 1, 'years' );
+	} else {
+		secondaryStart = primaryStart.clone().subtract( 1, 'years' );
+		secondaryEnd = secondaryStart.clone().endOf( period );
+	}
+
+	// When the period is month, be sure to force end of month to take into account leap year
+	if ( period === 'month' ) {
+		secondaryEnd = secondaryEnd.clone().endOf( 'month' );
+	}
+
+	return {
+		primaryStart,
+		primaryEnd,
+		secondaryStart,
+		secondaryEnd,
+	};
+}
+
+/**
+ * Get a DateValue object for a curent period. The period begins on the first day of the period,
+ * and ends on the current day.
+ *
+ * @param {moment.DurationInputArg2} period  - the chosen period
+ * @param {string}                   compare - `previous_period` or `previous_year`
+ * @return {DateValue} -  DateValue data about the selected period
+ */
+export function getCurrentPeriod(
+	period: moment.DurationInputArg2,
+	compare: string
+) {
+	const primaryStart = getStoreTimeZoneMoment().startOf( period );
+	const primaryEnd = getStoreTimeZoneMoment();
+
+	const daysSoFar = primaryEnd.diff( primaryStart, 'days' );
+	let secondaryStart;
+	let secondaryEnd;
+
+	if ( compare === 'previous_period' ) {
+		secondaryStart = primaryStart.clone().subtract( 1, period );
+		secondaryEnd = primaryEnd.clone().subtract( 1, period );
+	} else {
+		secondaryStart = primaryStart.clone().subtract( 1, 'years' );
+		// Set the end time to 23:59:59.
+		secondaryEnd = secondaryStart
+			.clone()
+			.add( daysSoFar + 1, 'days' )
+			.subtract( 1, 'seconds' );
+	}
+	return {
+		primaryStart,
+		primaryEnd,
+		secondaryStart,
+		secondaryEnd,
+	};
+}
+
+/**
+ * Get a DateValue object for a period described by a period, compare value, and start/end
+ * dates, for custom dates.
+ *
+ * @param {string}             period   - the chosen period
+ * @param {string}             compare  - `previous_period` or `previous_year`
+ * @param {moment.Moment|null} [after]  - after date if custom period
+ * @param {moment.Moment|null} [before] - before date if custom period
+ * @return {DateValue} - DateValue data about the selected period
+ */
+const getDateValue = memoize<
+	(
+		...args: [ string, string, moment.Moment | null, moment.Moment | null ]
+	) => DateValue | undefined
+>(
+	( period, compare, after, before ) => {
+		switch ( period ) {
+			case 'today':
+				return getCurrentPeriod( 'day', compare );
+			case 'yesterday':
+				return getLastPeriod( 'day', compare );
+			case 'week':
+				return getCurrentPeriod( 'week', compare );
+			case 'last_week':
+				return getLastPeriod( 'week', compare );
+			case 'month':
+				return getCurrentPeriod( 'month', compare );
+			case 'last_month':
+				return getLastPeriod( 'month', compare );
+			case 'quarter':
+				return getCurrentPeriod( 'quarter', compare );
+			case 'last_quarter':
+				return getLastPeriod( 'quarter', compare );
+			case 'year':
+				return getCurrentPeriod( 'year', compare );
+			case 'last_year':
+				return getLastPeriod( 'year', compare );
+			case 'custom':
+				if ( ! after || ! before ) {
+					throw Error(
+						'Custom date range requires both after and before dates.'
+					);
+				}
+
+				const difference = before.diff( after, 'days' );
+				if ( compare === 'previous_period' ) {
+					const secondaryEnd = after.clone().subtract( 1, 'days' );
+					const secondaryStart = secondaryEnd
+						.clone()
+						.subtract( difference, 'days' );
+					return {
+						primaryStart: after,
+						primaryEnd: before,
+						secondaryStart,
+						secondaryEnd,
+					};
+				}
+				return {
+					primaryStart: after,
+					primaryEnd: before,
+					secondaryStart: after.clone().subtract( 1, 'years' ),
+					secondaryEnd: before.clone().subtract( 1, 'years' ),
+				};
+		}
+	},
+	( period, compare, after, before ) =>
+		[
+			period,
+			compare,
+			after && after.format(),
+			before && before.format(),
+		].join( ':' )
+);
+
+/**
+ * Memoized internal logic of getDateParamsFromQuery().
+ *
+ * @param {string|undefined} period           - period value, ie `last_week`
+ * @param {string|undefined} compare          - compare value, ie `previous_year`
+ * @param {string|undefined} after            - date in iso date format, ie `2018-07-03`
+ * @param {string|undefined} before           - date in iso date format, ie `2018-07-03`
+ * @param {string}           defaultDateRange - the store's default date range
+ * @return {DateParams} - date parameters derived from query parameters with added defaults
+ */
+const getDateParamsFromQueryMemoized = memoize<
+	(
+		...args: [
+			string | undefined,
+			string | undefined,
+			string | undefined,
+			string | undefined,
+			string
+		]
+	) => DateParams
+>(
+	(
+		period: string | undefined,
+		compare: string | undefined,
+		after: string | undefined,
+		before: string | undefined,
+		defaultDateRange: string
+	) => {
+		if ( period && compare ) {
+			return {
+				period,
+				compare,
+				after: after ? moment( after ) : null,
+				before: before ? moment( before ) : null,
+			};
+		}
+		const queryDefaults = parse(
+			defaultDateRange.replace( /&amp;/g, '&' )
+		);
+
+		if ( typeof queryDefaults.period !== 'string' ) {
+			/* eslint-disable no-console */
+			console.warn(
+				`Unexpected default period type ${ queryDefaults.period }`
+			);
+			/* eslint-enable no-console */
+			queryDefaults.period = '';
+		}
+
+		if ( typeof queryDefaults.compare !== 'string' ) {
+			/* eslint-disable no-console */
+			console.warn(
+				`Unexpected default compare type ${ queryDefaults.compare }`
+			);
+			/* eslint-enable no-console */
+			queryDefaults.compare = '';
+		}
+
+		return {
+			period: queryDefaults.period,
+			compare: queryDefaults.compare,
+			after:
+				queryDefaults.after && isValidMomentInput( queryDefaults.after )
+					? moment( queryDefaults.after )
+					: null,
+			before:
+				queryDefaults.before &&
+				isValidMomentInput( queryDefaults.before )
+					? moment( queryDefaults.before )
+					: null,
+		};
+	},
+	( period, compare, after, before, defaultDateRange ) =>
+		[ period, compare, after, before, defaultDateRange ].join( ':' )
+);
+
+/**
+ * Add default date-related parameters to a query object
+ *
+ * @param {Object} query            - query object
+ * @param {string} query.period     - period value, ie `last_week`
+ * @param {string} query.compare    - compare value, ie `previous_year`
+ * @param {string} query.after      - date in iso date format, ie `2018-07-03`
+ * @param {string} query.before     - date in iso date format, ie `2018-07-03`
+ * @param {string} defaultDateRange - the store's default date range
+ * @return {DateParams} - date parameters derived from query parameters with added defaults
+ */
+export const getDateParamsFromQuery = (
+	query: Query,
+	defaultDateRange = 'period=month&compare=previous_year'
+) => {
+	const { period, compare, after, before } = query;
+
+	return getDateParamsFromQueryMemoized(
+		period,
+		compare,
+		after,
+		before,
+		defaultDateRange
+	);
+};
+
+/**
+ * Memoized internal logic of getCurrentDates().
+ *
+ * @param {string|undefined} period         - period value, ie `last_week`
+ * @param {string|undefined} compare        - compare value, ie `previous_year`
+ * @param {Object}           primaryStart   - primary query start DateTime, in Moment instance.
+ * @param {Object}           primaryEnd     - primary query start DateTime, in Moment instance.
+ * @param {Object}           secondaryStart - secondary query start DateTime, in Moment instance.
+ * @param {Object}           secondaryEnd   - secondary query start DateTime, in Moment instance.
+ * @return {{primary: DataPickerOptions, secondary: DataPickerOptions}} - Primary and secondary DataPickerOptions objects
+ */
+const getCurrentDatesMemoized = memoize<
+	(
+		...args: [
+			string,
+			string,
+			moment.Moment,
+			moment.Moment,
+			moment.Moment,
+			moment.Moment
+		]
+	) => {
+		primary: DataPickerOptions;
+		secondary: DataPickerOptions;
+	}
+>(
+	(
+		period,
+		compare,
+		primaryStart,
+		primaryEnd,
+		secondaryStart,
+		secondaryEnd
+	) => {
+		const primaryItem = find(
+			presetValues,
+			( item ) => item.value === period
+		);
+		if ( ! primaryItem ) {
+			throw new Error( `Cannot find period: ${ period }` );
+		}
+		const secondaryItem = find(
+			periods,
+			( item ) => item.value === compare
+		);
+		if ( ! secondaryItem ) {
+			throw new Error( `Cannot find compare: ${ compare }` );
+		}
+
+		return {
+			primary: {
+				label: primaryItem.label,
+				range: getRangeLabel( primaryStart, primaryEnd ),
+				after: primaryStart,
+				before: primaryEnd,
+			},
+			secondary: {
+				label: secondaryItem.label,
+				range: getRangeLabel( secondaryStart, secondaryEnd ),
+				after: secondaryStart,
+				before: secondaryEnd,
+			},
+		};
+	},
+	(
+		period,
+		compare,
+		primaryStart,
+		primaryEnd,
+		secondaryStart,
+		secondaryEnd
+	) =>
+		[
+			period,
+			compare,
+			primaryStart && primaryStart.format(),
+			primaryEnd && primaryEnd.format(),
+			secondaryStart && secondaryStart.format(),
+			secondaryEnd && secondaryEnd.format(),
+		].join( ':' )
+);
+
+/**
+ * Get Date Value Objects for a primary and secondary date range
+ *
+ * @param {Object} query            - query object
+ * @param {string} query.period     - period value, ie `last_week`
+ * @param {string} query.compare    - compare value, ie `previous_year`
+ * @param {string} query.after      - date in iso date format, ie `2018-07-03`
+ * @param {string} query.before     - date in iso date format, ie `2018-07-03`
+ * @param {string} defaultDateRange - the store's default date range
+ * @return {{primary: DataPickerOptions, secondary: DataPickerOptions}} - Primary and secondary DataPickerOptions objects
+ */
+export const getCurrentDates = (
+	query: Query,
+	defaultDateRange = 'period=month&compare=previous_year'
+) => {
+	const { period, compare, after, before } = getDateParamsFromQuery(
+		query,
+		defaultDateRange
+	);
+
+	const dateValue = getDateValue( period, compare, after, before );
+
+	if ( ! dateValue ) {
+		throw Error( 'Invalid date range' );
+	}
+
+	const { primaryStart, primaryEnd, secondaryStart, secondaryEnd } =
+		dateValue;
+
+	return getCurrentDatesMemoized(
+		period,
+		compare,
+		primaryStart,
+		primaryEnd,
+		secondaryStart,
+		secondaryEnd
+	);
+};
+
+/**
+ * Calculates the date difference between two dates. Used in calculating a matching date for previous period.
+ *
+ * @param {string} date  - Date to compare
+ * @param {string} date2 - Secondary date to compare
+ * @return {number}  - Difference in days.
+ */
+export const getDateDifferenceInDays = (
+	date: moment.MomentInput,
+	date2: moment.MomentInput
+) => {
+	const _date = moment( date );
+	const _date2 = moment( date2 );
+	return _date.diff( _date2, 'days' );
+};
+
+/**
+ * Get the previous date for either the previous period of year.
+ *
+ * @param {string}                 date     - Base date
+ * @param {string}                 date1    - primary start
+ * @param {string}                 date2    - secondary start
+ * @param {string}                 compare  - `previous_period`  or `previous_year`
+ * @param {moment.unitOfTime.Diff} interval - interval
+ * @return {Object}  - Calculated date
+ */
+export const getPreviousDate = (
+	date: string,
+	date1: string,
+	date2: string,
+	compare: string,
+	interval: moment.unitOfTime.Diff | moment.DurationInputArg2
+) => {
+	const dateMoment = moment( date );
+
+	if ( compare === 'previous_year' ) {
+		return dateMoment.clone().subtract( 1, 'years' );
+	}
+
+	const _date1 = moment( date1 );
+	const _date2 = moment( date2 );
+	const difference = _date1.diff( _date2, interval );
+
+	return dateMoment.clone().subtract( difference, interval );
+};
+
+/**
+ * Returns the allowed selectable intervals for a specific query.
+ *
+ * @param {Query}  query            Current query
+ * @param {string} defaultDateRange - the store's default date range
+ * @return {Array} Array containing allowed intervals.
+ */
+export function getAllowedIntervalsForQuery(
+	query: Query,
+	defaultDateRange = 'period=&compare=previous_year'
+) {
+	const { period } = getDateParamsFromQuery( query, defaultDateRange );
+	let allowed = [];
+	if ( period === 'custom' ) {
+		const { primary } = getCurrentDates( query );
+		const differenceInDays = getDateDifferenceInDays(
+			primary.before,
+			primary.after
+		);
+		if ( differenceInDays >= 365 ) {
+			allowed = [ 'day', 'week', 'month', 'quarter', 'year' ];
+		} else if ( differenceInDays >= 90 ) {
+			allowed = [ 'day', 'week', 'month', 'quarter' ];
+		} else if ( differenceInDays >= 28 ) {
+			allowed = [ 'day', 'week', 'month' ];
+		} else if ( differenceInDays >= 7 ) {
+			allowed = [ 'day', 'week' ];
+		} else if ( differenceInDays > 1 && differenceInDays < 7 ) {
+			allowed = [ 'day' ];
+		} else {
+			allowed = [ 'hour', 'day' ];
+		}
+	} else {
+		switch ( period ) {
+			case 'today':
+			case 'yesterday':
+				allowed = [ 'hour', 'day' ];
+				break;
+			case 'week':
+			case 'last_week':
+				allowed = [ 'day' ];
+				break;
+			case 'month':
+			case 'last_month':
+				allowed = [ 'day', 'week' ];
+				break;
+			case 'quarter':
+			case 'last_quarter':
+				allowed = [ 'day', 'week', 'month' ];
+				break;
+			case 'year':
+			case 'last_year':
+				allowed = [ 'day', 'week', 'month', 'quarter' ];
+				break;
+			default:
+				allowed = [ 'day' ];
+				break;
+		}
+	}
+	return allowed;
+}
+
+/**
+ * Returns the current interval to use.
+ *
+ * @param {Query}  query            Current query
+ * @param {string} defaultDateRange - the store's default date range
+ * @return {string} Current interval.
+ */
+export function getIntervalForQuery(
+	query: Query,
+	defaultDateRange = 'period=&compare=previous_year'
+) {
+	const allowed = getAllowedIntervalsForQuery( query, defaultDateRange );
+	const defaultInterval = allowed[ 0 ];
+	let current = query.interval || defaultInterval;
+	if ( query.interval && ! allowed.includes( query.interval ) ) {
+		current = defaultInterval;
+	}
+
+	return current;
+}
+
+/**
+ * Returns the current chart type to use.
+ *
+ * @param {Query}  query           Current query
+ * @param {string} query.chartType
+ * @return {string} Current chart type.
+ */
+export function getChartTypeForQuery( { chartType }: Query ) {
+	if ( chartType !== undefined && [ 'line', 'bar' ].includes( chartType ) ) {
+		return chartType;
+	}
+	return 'line';
+}
+
+export const dayTicksThreshold = 63;
+export const weekTicksThreshold = 9;
+export const defaultTableDateFormat = 'm/d/Y';
+
+/**
+ * Returns d3 date formats for the current interval.
+ * See https://github.com/d3/d3-time-format for chart formats.
+ *
+ * @param {string} interval Interval to get date formats for.
+ * @param {number} [ticks]  Number of ticks the axis will have.
+ * @return {string} Current interval.
+ */
+export function getDateFormatsForIntervalD3( interval: string, ticks = 0 ) {
+	let screenReaderFormat = '%B %-d, %Y';
+	let tooltipLabelFormat = '%B %-d, %Y';
+	let xFormat = '%Y-%m-%d';
+	let x2Format = '%b %Y';
+	let tableFormat = defaultTableDateFormat;
+
+	switch ( interval ) {
+		case 'hour':
+			screenReaderFormat = '%_I%p %B %-d, %Y';
+			tooltipLabelFormat = '%_I%p %b %-d, %Y';
+			xFormat = '%_I%p';
+			x2Format = '%b %-d, %Y';
+			tableFormat = 'h A';
+			break;
+		case 'day':
+			if ( ticks < dayTicksThreshold ) {
+				xFormat = '%-d';
+			} else {
+				xFormat = '%b';
+				x2Format = '%Y';
+			}
+			break;
+		case 'week':
+			if ( ticks < weekTicksThreshold ) {
+				xFormat = '%-d';
+				x2Format = '%b %Y';
+			} else {
+				xFormat = '%b';
+				x2Format = '%Y';
+			}
+			// eslint-disable-next-line @wordpress/i18n-translator-comments
+			screenReaderFormat = __( 'Week of %B %-d, %Y', 'woocommerce' );
+			// eslint-disable-next-line @wordpress/i18n-translator-comments
+			tooltipLabelFormat = __( 'Week of %B %-d, %Y', 'woocommerce' );
+			break;
+		case 'quarter':
+		case 'month':
+			screenReaderFormat = '%B %Y';
+			tooltipLabelFormat = '%B %Y';
+			xFormat = '%b';
+			x2Format = '%Y';
+			break;
+		case 'year':
+			screenReaderFormat = '%Y';
+			tooltipLabelFormat = '%Y';
+			xFormat = '%Y';
+			break;
+	}
+
+	return {
+		screenReaderFormat,
+		tooltipLabelFormat,
+		xFormat,
+		x2Format,
+		tableFormat,
+	};
+}
+
+/**
+ * Returns php date formats for the current interval.
+ * See see https://www.php.net/manual/en/datetime.format.php.
+ *
+ * @param {string} interval Interval to get date formats for.
+ * @param {number} [ticks]  Number of ticks the axis will have.
+ * @return {string} Current interval.
+ */
+export function getDateFormatsForIntervalPhp( interval: string, ticks = 0 ) {
+	let screenReaderFormat = 'F j, Y';
+	let tooltipLabelFormat = 'F j, Y';
+	let xFormat = 'Y-m-d';
+	let x2Format = 'M Y';
+	let tableFormat = defaultTableDateFormat;
+
+	switch ( interval ) {
+		case 'hour':
+			screenReaderFormat = 'gA F j, Y';
+			tooltipLabelFormat = 'gA M j, Y';
+			xFormat = 'gA';
+			x2Format = 'M j, Y';
+			tableFormat = 'h A';
+			break;
+		case 'day':
+			if ( ticks < dayTicksThreshold ) {
+				xFormat = 'j';
+			} else {
+				xFormat = 'M';
+				x2Format = 'Y';
+			}
+			break;
+		case 'week':
+			if ( ticks < weekTicksThreshold ) {
+				xFormat = 'j';
+				x2Format = 'M Y';
+			} else {
+				xFormat = 'M';
+				x2Format = 'Y';
+			}
+
+			// Since some alphabet letters have php associated formats, we need to escape them first.
+			const escapedWeekOfStr = __( 'Week of', 'woocommerce' ).replace(
+				/(\w)/g,
+				'\\$1'
+			);
+
+			screenReaderFormat = `${ escapedWeekOfStr } F j, Y`;
+			tooltipLabelFormat = `${ escapedWeekOfStr } F j, Y`;
+			break;
+		case 'quarter':
+		case 'month':
+			screenReaderFormat = 'F Y';
+			tooltipLabelFormat = 'F Y';
+			xFormat = 'M';
+			x2Format = 'Y';
+			break;
+		case 'year':
+			screenReaderFormat = 'Y';
+			tooltipLabelFormat = 'Y';
+			xFormat = 'Y';
+			break;
+	}
+
+	return {
+		screenReaderFormat,
+		tooltipLabelFormat,
+		xFormat,
+		x2Format,
+		tableFormat,
+	};
+}
+
+/**
+ * Returns date formats for the current interval.
+ *
+ * @param {string} interval      Interval to get date formats for.
+ * @param {number} [ticks]       Number of ticks the axis will have.
+ * @param {Object} [option]      Options
+ * @param {string} [option.type] Date format type, d3 or php, defaults to d3.
+ * @return {string} Current interval.
+ */
+export function getDateFormatsForInterval(
+	interval: string,
+	ticks = 0,
+	option = { type: 'd3' }
+) {
+	switch ( option.type ) {
+		case 'php':
+			return getDateFormatsForIntervalPhp( interval, ticks );
+
+		case 'd3':
+		default:
+			return getDateFormatsForIntervalD3( interval, ticks );
+	}
+}
+
+/**
+ * Gutenberg's moment instance is loaded with i18n values, which are
+ * PHP date formats, ie 'LLL: "F j, Y g:i a"'. Override those with translations
+ * of moment style js formats.
+ *
+ * @param {Object} config               Locale config object, from store settings.
+ * @param {string} config.userLocale
+ * @param {Array}  config.weekdaysShort
+ */
+export function loadLocaleData( {
+	userLocale,
+	weekdaysShort,
+}: {
+	userLocale: string;
+	weekdaysShort?: moment.LocaleSpecification[ 'weekdaysMin' ];
+} ) {
+	// Don't update if the wp locale hasn't been set yet, like in unit tests, for instance.
+	if ( moment.locale() !== 'en' ) {
+		moment.updateLocale( userLocale, {
+			longDateFormat: {
+				L: __( 'MM/DD/YYYY', 'woocommerce' ),
+				LL: __( 'MMMM D, YYYY', 'woocommerce' ),
+				LLL: __( 'D MMMM YYYY LT', 'woocommerce' ),
+				LLLL: __( 'dddd, D MMMM YYYY LT', 'woocommerce' ),
+				LT: __( 'HH:mm', 'woocommerce' ),
+				// Set LTS to default LTS locale format because we don't have a specific format for it.
+				// Reference https://github.com/moment/moment/blob/develop/dist/moment.js
+				LTS: 'h:mm:ss A',
+			},
+			weekdaysMin: weekdaysShort,
+		} );
+	}
+}
+
+export const dateValidationMessages = {
+	invalid: __( 'Invalid date', 'woocommerce' ),
+	future: __( 'Select a date in the past', 'woocommerce' ),
+	startAfterEnd: __( 'Start date must be before end date', 'woocommerce' ),
+	endBeforeStart: __( 'Start date must be before end date', 'woocommerce' ),
+};
+
+/**
+ * @typedef {Object} validatedDate
+ * @property {Object|null} date  - A resulting Moment date object or null, if invalid
+ * @property {string}      error - An optional error message if date is invalid
+ */
+
+/**
+ * Validate text input supplied for a date range.
+ *
+ * @param {string}      type     - Designate beginning or end of range, eg `before` or `after`.
+ * @param {string}      value    - User input value
+ * @param {Object|null} [before] - If already designated, the before date parameter
+ * @param {Object|null} [after]  - If already designated, the after date parameter
+ * @param {string}      format   - The expected date format in a user's locale
+ * @return {Object} validatedDate - validated date object
+ */
+export function validateDateInputForRange(
+	type: string,
+	value: string,
+	before: moment.MomentInput | null,
+	after: moment.MomentInput | null,
+	format: string
+) {
+	const date = toMoment( format, value );
+	if ( ! date ) {
+		return {
+			date: null,
+			error: dateValidationMessages.invalid,
+		};
+	}
+	if ( moment().isBefore( date, 'day' ) ) {
+		return {
+			date: null,
+			error: dateValidationMessages.future,
+		};
+	}
+	if ( type === 'after' && before && date.isAfter( before, 'day' ) ) {
+		return {
+			date: null,
+			error: dateValidationMessages.startAfterEnd,
+		};
+	}
+	if ( type === 'before' && after && date.isBefore( after, 'day' ) ) {
+		return {
+			date: null,
+			error: dateValidationMessages.endBeforeStart,
+		};
+	}
+	return { date };
+}

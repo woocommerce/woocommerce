@@ -50,4 +50,5 @@ const runTelemetryAPITest = () => {
 	} );
 };
 
+// eslint-disable-next-line jest/no-export
 module.exports = runTelemetryAPITest;

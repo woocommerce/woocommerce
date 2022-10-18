@@ -36,7 +36,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 		// Cleanup orders daily - this is a callback on a daily cron event.
 		add_action( 'woocommerce_cleanup_personal_data', array( $this, 'queue_cleanup_personal_data' ) );
 
-		// Handles custom anonomization types not included in core.
+		// Handles custom anonymization types not included in core.
 		add_filter( 'wp_privacy_anonymize_data', array( $this, 'anonymize_custom_data_types' ), 10, 3 );
 
 		// When this is fired, data is removed in a given order. Called from bulk actions.
