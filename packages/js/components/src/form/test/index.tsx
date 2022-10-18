@@ -428,14 +428,13 @@ describe( 'Form', () => {
 
 		const { container, queryByText } = render(
 			<Form< TestData > onChange={ mockOnChange } validate={ validate }>
-				{ ( { getInputProps }: FormContext< TestData > ) => {
+				{ ( { getInputProps, values }: FormContext< TestData > ) => {
 					return (
 						<DateTimePickerControl
 							label={ 'Date' }
 							onChangeDebounceWait={ 10 }
-							{ ...getInputProps( 'date', {
-								alias: { value: 'currentDate' },
-							} ) }
+							currentDate={ values.date }
+							{ ...getInputProps( 'date' ) }
 						/>
 					);
 				} }
