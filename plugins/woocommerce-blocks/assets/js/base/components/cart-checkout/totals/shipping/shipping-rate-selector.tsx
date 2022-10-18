@@ -11,12 +11,13 @@ import type { CartResponseShippingRate } from '@woocommerce/types';
  */
 import ShippingRatesControl from '../../shipping-rates-control';
 
-interface ShippingRateSelectorProps {
+export interface ShippingRateSelectorProps {
 	hasRates: boolean;
 	shippingRates: CartResponseShippingRate[];
 	isLoadingRates: boolean;
 }
-const ShippingRateSelector = ( {
+
+export const ShippingRateSelector = ( {
 	hasRates,
 	shippingRates,
 	isLoadingRates,

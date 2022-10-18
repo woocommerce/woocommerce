@@ -37,16 +37,14 @@ export const RatePrice = ( {
 
 	return (
 		<span className="wc-block-checkout__collection-item-price">
-			{ minRatePrice === 0 && maxRatePrice === 0 ? (
-				<em>{ __( 'free', 'woo-gutenberg-products-block' ) }</em>
-			) : (
-				createInterpolateElement(
-					__( 'from <price />', 'woo-gutenberg-products-block' ),
-					{
-						price: priceElement,
-					}
-				)
-			) }
+			{ minRatePrice === maxRatePrice
+				? priceElement
+				: createInterpolateElement(
+						__( 'from <price />', 'woo-gutenberg-products-block' ),
+						{
+							price: priceElement,
+						}
+				  ) }
 		</span>
 	);
 };
