@@ -154,7 +154,7 @@ export const Edit = ( {
 		className: string;
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element => {
+} ): JSX.Element | null => {
 	const { setPrefersCollection } = useDispatch( CHECKOUT_STORE_KEY );
 	const { prefersCollection } = useSelect( ( select ) => {
 		const checkoutStore = select( CHECKOUT_STORE_KEY );
@@ -164,7 +164,21 @@ export const Edit = ( {
 	} );
 	const { showPrice, showIcon, className, localPickupText, shippingText } =
 		attributes;
-	const { shippingRates } = useShippingData();
+	const {
+		shippingRates,
+		needsShipping,
+		hasCalculatedShipping,
+		isCollectable,
+	} = useShippingData();
+
+	if (
+		! needsShipping ||
+		! hasCalculatedShipping ||
+		! shippingRates ||
+		! isCollectable
+	) {
+		return null;
+	}
 
 	const changeView = ( method: string ) => {
 		if ( method === 'pickup' ) {

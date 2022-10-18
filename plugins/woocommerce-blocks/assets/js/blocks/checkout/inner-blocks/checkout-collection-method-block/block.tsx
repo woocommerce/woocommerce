@@ -117,12 +117,7 @@ const Block = ( {
 	localPickupText: string;
 	shippingText: string;
 } ): JSX.Element | null => {
-	const { shippingRates, needsShipping, hasCalculatedShipping } =
-		useShippingData();
-
-	if ( ! needsShipping || ! hasCalculatedShipping || ! shippingRates ) {
-		return null;
-	}
+	const { shippingRates } = useShippingData();
 
 	return (
 		<RadioGroup

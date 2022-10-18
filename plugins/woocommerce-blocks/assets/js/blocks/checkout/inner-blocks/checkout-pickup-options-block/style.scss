@@ -1,4 +1,5 @@
-.wc-block-checkout__pickup-options {
+.wc-block-checkout__pickup-options,
+.wp-block-woocommerce-checkout-pickup-options-block {
 	.wc-block-components-radio-control__option {
 		@include with-translucent-border(0 0 1px);
 		margin: 0;
@@ -33,6 +34,7 @@
 	}
 	.wc-block-components-radio-control__description-group {
 		width: 100%;
+		box-sizing: border-box;
 		background-color: $gray-100;
 		border-radius: 4px;
 		padding: 1px em($gap-small);
