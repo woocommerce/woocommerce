@@ -490,8 +490,8 @@ function wc_render_invalid_variation_notice( $product_object ) {
 		"
 		SELECT count(post_id) FROM {$wpdb->postmeta}
 		WHERE post_id in (" . implode( ',', array_map( 'absint', $variation_ids ) ) . ")
-		AND meta_key='_price'
-		AND meta_value >= 0
+		AND ( meta_key='_subscription_sign_up_fee' OR meta_key='_price' )
+		AND meta_value > 0
 		AND meta_value != ''
 		"
 	);
