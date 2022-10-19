@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
@@ -19,6 +20,8 @@ defined( 'ABSPATH' ) || exit;
  * - Synchronizing changes between the custom orders tables and the posts table whenever changes in orders happen.
  */
 class DataSynchronizer implements BatchProcessorInterface {
+
+	use AccessiblePrivateMethods;
 
 	public const ORDERS_DATA_SYNC_ENABLED_OPTION           = 'woocommerce_custom_orders_table_data_sync_enabled';
 	private const INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION = 'woocommerce_initial_orders_pending_sync_count';
@@ -63,28 +66,8 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * Class constructor.
 	 */
 	public function __construct() {
-		// When posts is authoritative and sync is enabled, deleting a post also deletes COT data.
-		add_action(
-			'deleted_post',
-			function( $postid, $post ) {
-				if ( 'shop_order' === $post->post_type && ! $this->custom_orders_table_is_authoritative() && $this->data_sync_is_enabled() ) {
-					$this->data_store->delete_order_data_from_custom_order_tables( $postid );
-				}
-			},
-			10,
-			2
-		);
-
-		// When posts is authoritative and sync is enabled, updating a post triggers a corresponding change in the COT table.
-		add_action(
-			'woocommerce_update_order',
-			function ( $order_id ) {
-				if ( ! $this->custom_orders_table_is_authoritative() && $this->data_sync_is_enabled() ) {
-					$this->posts_to_cot_migrator->migrate_orders( array( $order_id ) );
-				}
-			},
-			100
-		);
+		self::add_action( 'deleted_post', array( $this, 'handle_deleted_post' ), 10, 2 );
+		self::add_action( 'woocommerce_update_order', array( $this, 'handle_updated_order' ), 100 );
 	}
 
 	/**
@@ -93,7 +76,8 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * @param OrdersTableDataStore             $data_store The data store to use.
 	 * @param DatabaseUtil                     $database_util The database util class to use.
 	 * @param PostsToOrdersMigrationController $posts_to_cot_migrator The posts to COT migration class to use.
-	 *@internal
+	 * @param LegacyProxy                      $legacy_proxy The legacy proxy instance to use.
+	 * @internal
 	 */
 	final public function init( OrdersTableDataStore $data_store, DatabaseUtil $database_util, PostsToOrdersMigrationController $posts_to_cot_migrator, LegacyProxy $legacy_proxy ) {
 		$this->data_store            = $data_store;
@@ -266,18 +250,16 @@ SELECT(
 		$order_post_types             = wc_get_order_types( 'cot-migration' );
 		$order_post_type_placeholders = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		switch ( $type ) {
 			case self::ID_TYPE_MISSING_IN_ORDERS_TABLE:
-				$sql = $wpdb->prepare(
-					"
+				$sql = "
 SELECT posts.ID FROM $wpdb->posts posts
 LEFT JOIN $orders_table orders ON posts.ID = orders.id
 WHERE
   posts.post_type IN ($order_post_type_placeholders)
   AND posts.post_status != 'auto-draft'
-  AND orders.id IS NULL",
-					$order_post_types
-				);
+  AND orders.id IS NULL";
 				break;
 			case self::ID_TYPE_MISSING_IN_POSTS_TABLE:
 				$sql = "
@@ -305,6 +287,7 @@ WHERE
 			default:
 				throw new \Exception( 'Invalid $type, must be one of the ID_TYPE_... constants.' );
 		}
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		// phpcs:ignore WordPress.DB
 		return array_map( 'intval', $wpdb->get_col( $sql . " LIMIT $limit" ) );
@@ -411,5 +394,32 @@ WHERE
 	 */
 	public function get_description(): string {
 		return 'Synchronizes orders between posts and custom order tables.';
+	}
+
+	/**
+	 * Handle the 'deleted_post' action.
+	 *
+	 * When posts is authoritative and sync is enabled, deleting a post also deletes COT data.
+	 *
+	 * @param int     $postid The post id.
+	 * @param WP_Post $post The deleted post.
+	 */
+	private function handle_deleted_post( $postid, $post ): void {
+		if ( 'shop_order' === $post->post_type && ! $this->custom_orders_table_is_authoritative() && $this->data_sync_is_enabled() ) {
+			$this->data_store->delete_order_data_from_custom_order_tables( $postid );
+		}
+	}
+
+	/**
+	 * Handle the 'woocommerce_update_order' action.
+	 *
+	 * When posts is authoritative and sync is enabled, updating a post triggers a corresponding change in the COT table.
+	 *
+	 * @param int $order_id The order id.
+	 */
+	private function handle_updated_order( $order_id ): void {
+		if ( ! $this->custom_orders_table_is_authoritative() && $this->data_sync_is_enabled() ) {
+			$this->posts_to_cot_migrator->migrate_orders( array( $order_id ) );
+		}
 	}
 }
