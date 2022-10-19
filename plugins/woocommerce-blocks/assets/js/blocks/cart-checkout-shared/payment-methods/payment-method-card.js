@@ -30,7 +30,7 @@ const PaymentMethodCard = ( { children, showSaveOption } ) => {
 		const checkoutStore = select( CHECKOUT_STORE_KEY );
 		return {
 			shouldSavePaymentMethod:
-				paymentMethodStore.shouldSavePaymentMethod(),
+				paymentMethodStore.getShouldSavePaymentMethod(),
 			customerId: checkoutStore.getCustomerId(),
 		};
 	} );

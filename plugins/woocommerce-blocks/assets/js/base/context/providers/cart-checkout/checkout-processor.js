@@ -86,7 +86,7 @@ const CheckoutProcessor = () => {
 			paymentMethodData: store.getPaymentMethodData(),
 			isExpressPaymentMethodActive: store.isExpressPaymentMethodActive(),
 			currentPaymentStatus: store.getCurrentStatus(),
-			shouldSavePayment: store.shouldSavePaymentMethod(),
+			shouldSavePayment: store.getShouldSavePaymentMethod(),
 		};
 	}, [] );
 
