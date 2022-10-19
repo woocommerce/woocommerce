@@ -985,7 +985,7 @@ WHERE
 
 		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled() && 0 === $data_synchronizer->get_current_orders_pending_sync_count_cached();
 		$load_posts_for    = array_diff( $order_ids, self::$reading_order_ids );
-		$post_orders       = $data_sync_enabled ? $this->get_post_orders_for_ids( $load_posts_for, $orders ) : array();
+		$post_orders       = $data_sync_enabled ? $this->get_post_orders_for_ids( array_intersect_key( $orders, array_flip( $load_posts_for ) ) ) : array();
 
 		foreach ( $data as $order_data ) {
 			$order_id = absint( $order_data->id );
@@ -1084,12 +1084,12 @@ WHERE
 	/**
 	 * Helper function to get posts data for an order in bullk. We use to this to compute posts object in bulk so that we can compare it with COT data.
 	 *
-	 * @param array $order_ids List of order IDs.
-	 * @param array $orders    List of orders.
+	 * @param array $orders    List of orders mapped by $order_id.
 	 *
 	 * @return array List of posts.
 	 */
-	private function get_post_orders_for_ids( array $order_ids, array $orders ): array {
+	private function get_post_orders_for_ids( array $orders ): array {
+		$order_ids = array_keys( $orders );
 		// We have to bust meta cache, otherwise we will just get the meta cached by OrderTableDataStore.
 		foreach ( $order_ids as $order_id ) {
 			wp_cache_delete( WC_Order::generate_meta_cache_key( $order_id, 'orders' ), 'orders' );
@@ -1119,7 +1119,7 @@ WHERE
 				$cpt_order_class_name = wc_get_order_type( $order->get_type() )['class_name'];
 				$cpt_order            = new $cpt_order_class_name();
 				$cpt_order->set_id( $order_id );
-				$cpt_stores[ $cpt_store_name ]->read( $cpt_order );
+				$cpt_store->read( $cpt_order );
 				$cpt_orders[ $order_id ] = $cpt_order;
 			}
 		}
