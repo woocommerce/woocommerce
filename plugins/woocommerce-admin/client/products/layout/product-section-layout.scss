@@ -14,7 +14,8 @@
 		}
 
 		.components-base-control,
-		.woocommerce-rich-text-editor {
+		.woocommerce-rich-text-editor,
+		.woocommerce-product-form__tooltip-disabled-overlay {
 			&:not(:first-child):not(.components-radio-control) {
 				margin-top: $gap-large - $gap-smaller;
 				margin-bottom: 0;
