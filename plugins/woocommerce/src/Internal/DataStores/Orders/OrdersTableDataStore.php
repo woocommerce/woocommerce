@@ -1059,7 +1059,7 @@ WHERE
 		 *
 		 * So we write back to the order table when order modified date is more recent than post modified date. Otherwise, we write to the post table.
 		 */
-		if ( $post_order_modified_date > $order_modified_date ) {
+		if ( $post_order_modified_date >= $order_modified_date ) {
 			$this->migrate_post_record( $order, $post_order );
 		}
 	}
