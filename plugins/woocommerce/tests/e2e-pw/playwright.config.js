@@ -19,8 +19,13 @@ const config = {
 				open: CI ? 'never' : 'always',
 			},
 		],
-		[ 'allure-playwright', { outputFolder: 'e2e/allure-results' } ],
-		[ 'json', { outputFile: 'e2e/test-results.json' } ],
+		[
+			'allure-playwright',
+			{
+				outputFolder: `${ __dirname }/allure-results`,
+			},
+		],
+		[ 'json', { outputFile: `${ __dirname }/test-results.json` } ],
 	],
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
 	use: {
@@ -29,7 +34,7 @@ const config = {
 		trace: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
 		baseURL: 'http://localhost:8086',
-		stateDir: 'e2e/storage/',
+		stateDir: `${ __dirname }/storage/`,
 	},
 	projects: [
 		{
