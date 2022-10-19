@@ -63,10 +63,6 @@ export const getActiveSavedPaymentMethods = (
 	);
 };
 
-export const shouldSavePaymentMethod = ( state: PaymentMethodDataState ) => {
-	return state.shouldSavePaymentMethod;
-};
-
 export const paymentMethodsInitialized = ( state: PaymentMethodDataState ) => {
 	return state.paymentMethodsInitialized;
 };
