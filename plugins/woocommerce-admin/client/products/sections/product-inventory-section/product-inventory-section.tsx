@@ -23,7 +23,7 @@ import { ManageStockSection } from './manage-stock-section';
 import { ManualStockSection } from './manual-stock-section';
 
 export const ProductInventorySection: React.FC = () => {
-	const { getCheckboxProps, getInputProps, values } =
+	const { getCheckboxControlProps, getInputProps, values } =
 		useFormContext< Product >();
 	const canManageStock = getAdminSetting( 'manageStock', 'yes' ) === 'yes';
 
@@ -77,7 +77,7 @@ export const ProductInventorySection: React.FC = () => {
 									'Track quantity for this product',
 									'woocommerce'
 								) }
-								{ ...getCheckboxProps(
+								{ ...getCheckboxControlProps(
 									'manage_stock',
 									getCheckboxTracks( 'manage_stock' )
 								) }

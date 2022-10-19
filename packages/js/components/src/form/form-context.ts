@@ -25,7 +25,7 @@ export type FormContext< Values extends Record< string, any > > = {
 	setValue: ( name: string, value: any ) => void;
 	setValues: ( valuesToSet: Values ) => void;
 	handleSubmit: () => Promise< Values >;
-	getCheckboxProps< Value extends Values[ keyof Values ] >(
+	getCheckboxControlProps< Value extends Values[ keyof Values ] >(
 		name: string,
 		inputProps?: ConsumerInputProps< Values >
 	): CheckboxProps< Values, Value >;

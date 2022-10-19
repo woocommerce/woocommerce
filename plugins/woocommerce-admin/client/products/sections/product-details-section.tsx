@@ -41,7 +41,7 @@ const PRODUCT_DETAILS_SLUG = 'product-details';
 
 export const ProductDetailsSection: React.FC = () => {
 	const {
-		getCheckboxProps,
+		getCheckboxControlProps,
 		getInputProps,
 		values,
 		touched,
@@ -172,7 +172,7 @@ export const ProductDetailsSection: React.FC = () => {
 								/>
 							</>
 						}
-						{ ...getCheckboxProps(
+						{ ...getCheckboxControlProps(
 							'featured',
 							getCheckboxTracks( 'featured' )
 						) }

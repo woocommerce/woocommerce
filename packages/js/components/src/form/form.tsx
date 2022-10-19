@@ -340,7 +340,7 @@ function FormComponent< Values extends Record< string, any > >(
 		};
 	}
 
-	function getCheckboxProps< Value = Values[ keyof Values ] >(
+	function getCheckboxControlProps< Value = Values[ keyof Values ] >(
 		name: string,
 		inputProps: ConsumerInputProps< Values > = {}
 	): CheckboxProps< Values, Value > {
@@ -365,7 +365,7 @@ function FormComponent< Values extends Record< string, any > >(
 			setValue,
 			setValues,
 			handleSubmit,
-			getCheckboxProps,
+			getCheckboxControlProps,
 			getInputProps,
 			isValidForm: ! Object.keys( errors ).length,
 			resetForm,
