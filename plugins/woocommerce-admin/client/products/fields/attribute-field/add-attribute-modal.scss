@@ -51,8 +51,13 @@
 	}
 	&__table-row {
 		padding: $gap-large 0;
-		td:not( :last-child ) {
+		td:not(:last-child) {
 			margin-right: $gap;
 		}
+	}
+
+	&__table-attribute-trash-column {
+		display: flex;
+		justify-content: center;
 	}
 }

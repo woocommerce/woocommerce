@@ -210,7 +210,7 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 															}
 														/>
 													</td>
-													<td>
+													<td className="woocommerce-add-attribute-modal__table-attribute-trash-column">
 														<Button
 															icon={ trash }
 															disabled={

@@ -17,6 +17,11 @@ import {
 	__experimentalSelectControlMenuItem as MenuItem,
 } from '@woocommerce/components';
 
+/**
+ * Internal dependencies
+ */
+import './attribute-term-input-field.scss';
+
 type AttributeTermInputFieldProps = {
 	value?: ProductAttributeTerm[];
 	onChange: ( value: ProductAttributeTerm[] ) => void;
@@ -36,7 +41,9 @@ export const AttributeTermInputField: React.FC<
 	const fetchItems = useCallback(
 		( searchString: string | undefined ) => {
 			setIsFetching( true );
-			resolveSelect( EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME )
+			return resolveSelect(
+				EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
+			)
 				.getProductAttributeTerms< ProductAttributeTerm[] >( {
 					search: searchString || '',
 					attribute_id: attributeId,
@@ -45,9 +52,11 @@ export const AttributeTermInputField: React.FC<
 					( attributeTerms ) => {
 						setFetchedItems( attributeTerms );
 						setIsFetching( false );
+						return attributeTerms;
 					},
-					() => {
+					( error ) => {
 						setIsFetching( false );
+						return error;
 					}
 				);
 		},
@@ -114,6 +123,7 @@ export const AttributeTermInputField: React.FC<
 			selected={ value }
 			onSelect={ onSelect }
 			onRemove={ onRemove }
+			className="woocommerce-attribute-term-field"
 		>
 			{ ( {
 				items,
@@ -124,10 +134,16 @@ export const AttributeTermInputField: React.FC<
 			} ) => {
 				return (
 					<Menu isOpen={ isOpen } getMenuProps={ getMenuProps }>
-						{ isFetching ? (
-							<Spinner />
-						) : (
-							items.map( ( item, menuIndex ) => {
+						{ [
+							isFetching ? (
+								<div
+									key="loading-spinner"
+									className="woocommerce-attribute-term-field__loading-spinner"
+								>
+									<Spinner />
+								</div>
+							) : null,
+							...items.map( ( item, menuIndex ) => {
 								const isSelected = selectedTermSlugs.includes(
 									item.slug
 								);
@@ -162,7 +178,9 @@ export const AttributeTermInputField: React.FC<
 										</>
 									</MenuItem>
 								);
-							} )
+							} ),
+						].filter(
+							( child ): child is JSX.Element => child !== null
 						) }
 					</Menu>
 				);

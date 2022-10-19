@@ -9,6 +9,7 @@ import {
 	useRef,
 	useState,
 	createPortal,
+	Children,
 } from '@wordpress/element';
 
 /**
@@ -56,8 +57,7 @@ export const Menu = ( {
 					'woocommerce-experimental-select-control__popover-menu',
 					{
 						'is-open': isOpen,
-						'has-results':
-							Array.isArray( children ) && children.length > 0,
+						'has-results': Children.count( children ) > 0,
 					}
 				) }
 				position="bottom center"
