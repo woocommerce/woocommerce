@@ -454,6 +454,7 @@ class OrderController {
 
 		return $location;
 	}
+
 	/**
 	 * Create order line items.
 	 *
