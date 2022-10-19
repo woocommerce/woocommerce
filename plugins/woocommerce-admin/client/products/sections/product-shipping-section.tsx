@@ -93,7 +93,7 @@ function extractDefaultShippingClassFromProduct(
 export function ProductShippingSection( {
 	product,
 }: ProductShippingSectionProps ) {
-	const { getInputProps, setValue, values } =
+	const { getInputProps, getSelectControlProps, setValue } =
 		useFormContext< PartialProduct >();
 	const { formatNumber, parseNumber } = useProductHelper();
 	const [ highlightSide, setHighlightSide ] =
@@ -162,6 +162,7 @@ export function ProductShippingSection( {
 		sanitize: ( value: PartialProduct[ keyof PartialProduct ] ) =>
 			parseNumber( String( value ) ),
 	} );
+	const shippingClassProps = getInputProps( 'shipping_class' );
 
 	return (
 		<ProductSectionLayout
@@ -177,17 +178,17 @@ export function ProductShippingSection( {
 						<>
 							<SelectControl
 								label={ __( 'Shipping class', 'woocommerce' ) }
-								{ ...( getInputProps( 'shipping_class' ),
-								{
-									onChange: ( value: string ) => {
-										if (
-											value ===
-											ADD_NEW_SHIPPING_CLASS_OPTION_VALUE
-										) {
-											setShowShippingClassModal( true );
-										}
-									},
-								} ) }
+								{ ...getSelectControlProps( 'shipping_class' ) }
+								onChange={ ( value: string ) => {
+									if (
+										value ===
+										ADD_NEW_SHIPPING_CLASS_OPTION_VALUE
+									) {
+										setShowShippingClassModal( true );
+										return;
+									}
+									shippingClassProps.onChange( value );
+								} }
 								options={ [
 									...DEFAULT_SHIPPING_CLASS_OPTIONS,
 									...mapShippingClassToSelectOption(

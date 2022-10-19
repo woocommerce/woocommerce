@@ -106,6 +106,13 @@ export type CheckboxProps< Values, Value > = Omit<
 	'value' | 'selected'
 >;
 
+export type SelectControlProps< Values, Value > = Omit<
+	InputProps< Values, Value >,
+	'value'
+> & {
+	value: string | undefined;
+};
+
 export type ConsumerInputProps< Values > = {
 	className?: string;
 	onChange?: (
@@ -350,6 +357,20 @@ function FormComponent< Values extends Record< string, any > >(
 		] );
 	}
 
+	function getSelectControlProps< Value = Values[ keyof Values ] >(
+		name: string,
+		inputProps: ConsumerInputProps< Values > = {}
+	): SelectControlProps< Values, Value > {
+		const selectControlProps = getInputProps( name, inputProps );
+		return {
+			...selectControlProps,
+			value:
+				selectControlProps.value === undefined
+					? undefined
+					: String( selectControlProps.value ),
+		};
+	}
+
 	const isDirty = useMemo(
 		() => ! _isEqual( initialValues.current, values ),
 		[ initialValues.current, values ]
@@ -367,6 +388,7 @@ function FormComponent< Values extends Record< string, any > >(
 			handleSubmit,
 			getCheckboxControlProps,
 			getInputProps,
+			getSelectControlProps,
 			isValidForm: ! Object.keys( errors ).length,
 			resetForm,
 		};

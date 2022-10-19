@@ -6,7 +6,12 @@ import { createContext, useContext } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { CheckboxProps, ConsumerInputProps, InputProps } from './form';
+import {
+	CheckboxProps,
+	ConsumerInputProps,
+	InputProps,
+	SelectControlProps,
+} from './form';
 
 export type FormErrors< Values > = {
 	[ P in keyof Values ]?: FormErrors< Values[ P ] > | string;
@@ -29,6 +34,10 @@ export type FormContext< Values extends Record< string, any > > = {
 		name: string,
 		inputProps?: ConsumerInputProps< Values >
 	): CheckboxProps< Values, Value >;
+	getSelectControlProps< Value extends Values[ keyof Values ] >(
+		name: string,
+		inputProps?: ConsumerInputProps< Values >
+	): SelectControlProps< Values, Value >;
 	getInputProps< Value extends Values[ keyof Values ] >(
 		name: string,
 		inputProps?: ConsumerInputProps< Values >
