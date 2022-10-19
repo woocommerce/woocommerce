@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add WC-specific criteria to the Site Health test for persistent object caches
