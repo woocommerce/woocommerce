@@ -656,6 +656,18 @@ class FeaturesController {
 			}
 		}
 
+		/**
+		 * Filter to customize the description tip that appears under the description of each feature in the features settings page.
+		 *
+		 * @since 7.1.0
+		 *
+		 * @param string $desc_tip The original description tip.
+		 * @param string $feature_id The id of the feature for which the description tip is being customized.
+		 * @param bool $disabled True if the UI currently prevents changing the enable/disable status of the feature.
+		 * @return string The new description tip to use.
+		 */
+		$desc_tip = apply_filters( 'woocommerce_feature_description_tip', $desc_tip, $feature_id, $disabled );
+
 		return array(
 			'title'    => $feature['name'],
 			'desc'     => $description,
