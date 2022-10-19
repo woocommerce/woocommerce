@@ -14,8 +14,8 @@ defined( 'ABSPATH' ) || exit;
 ?>
 <div class="woocommerce_variation wc-metabox closed">
 	<h3>
+		<a href="javascript:void(0)" class="edit_variation edit"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
 		<a href="#" class="remove_variation delete" rel="<?php echo esc_attr( $variation_id ); ?>"><?php esc_html_e( 'Remove', 'woocommerce' ); ?></a>
-		<div class="handlediv" aria-label="<?php esc_attr_e( 'Click to toggle', 'woocommerce' ); ?>"></div>
 		<div class="tips sort" data-tip="<?php esc_attr_e( 'Drag and drop, or click to set admin variation order', 'woocommerce' ); ?>"></div>
 		<strong>#<?php echo esc_html( $variation_id ); ?> </strong>
 		<?php
