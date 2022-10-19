@@ -5508,6 +5508,10 @@ img.help_tip {
 				position: relative;
 			}
 
+			a.remove_variation {
+				margin: 0 0.5em;
+			}
+
 			strong {
 				font-weight: normal;
 				line-height: 26px;
@@ -5541,6 +5545,13 @@ img.help_tip {
 			.handlediv,
 			.sort {
 				margin-top: 0.25em;
+			}
+		}
+		&.woocommerce_variation h3 {
+			a.delete,
+			a.edit,
+			.sort {
+				margin-top: 0.45em;
 			}
 		}
 
