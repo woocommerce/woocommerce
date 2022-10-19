@@ -2,10 +2,17 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, Modal, Notice } from '@wordpress/components';
+import { useState } from '@wordpress/element';
 import { trash } from '@wordpress/icons';
 import { ProductAttribute, ProductAttributeTerm } from '@woocommerce/data';
 import { Form } from '@woocommerce/components';
+import {
+	Button,
+	Modal,
+	Notice,
+	// @ts-expect-error ConfirmDialog is not part of the typescript definition yet.
+	__experimentalConfirmDialog as ConfirmDialog,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -32,6 +39,7 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 	onAdd,
 	selectedAttributeIds = [],
 } ) => {
+	const [ showConfirmClose, setShowConfirmClose ] = useState( false );
 	const addAnother = (
 		values: AttributeForm,
 		setValue: (
@@ -98,20 +106,19 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 		}
 	};
 
+	const onClose = ( values: AttributeForm ) => {
+		const hasValuesSet = values.attributes.some(
+			( value ) => value?.attribute?.id && value?.terms?.length > 0
+		);
+		if ( hasValuesSet ) {
+			setShowConfirmClose( true );
+		} else {
+			onCancel();
+		}
+	};
+
 	return (
-		<Modal
-			title={ __( 'Add attributes', 'woocommerce' ) }
-			onRequestClose={ () => onCancel() }
-			className="woocommerce-add-attribute-modal"
-		>
-			<Notice isDismissible={ false }>
-				<p>
-					{ __(
-						'By default, attributes are filterable and visible on the product page. You can change these settings for each attribute separately later.',
-						'woocommerce'
-					) }
-				</p>
-			</Notice>
+		<>
 			<Form< AttributeForm >
 				initialValues={ {
 					attributes: [ { attribute: undefined, terms: [] } ],
@@ -126,7 +133,20 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 					setValue: ( name: string, value: any ) => void;
 				} ) => {
 					return (
-						<>
+						<Modal
+							title={ __( 'Add attributes', 'woocommerce' ) }
+							onRequestClose={ () => onClose( values ) }
+							className="woocommerce-add-attribute-modal"
+						>
+							<Notice isDismissible={ false }>
+								<p>
+									{ __(
+										'By default, attributes are filterable and visible on the product page. You can change these settings for each attribute separately later.',
+										'woocommerce'
+									) }
+								</p>
+							</Notice>
+
 							<div className="woocommerce-add-attribute-modal__body">
 								<table className="woocommerce-add-attribute-modal__table">
 									<thead>
@@ -262,7 +282,7 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 								<Button
 									isSecondary
 									label={ __( 'Cancel', 'woocommerce' ) }
-									onClick={ () => onCancel() }
+									onClick={ () => onClose( values ) }
 								>
 									{ __( 'Cancel', 'woocommerce' ) }
 								</Button>
@@ -286,10 +306,23 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 									{ __( 'Add', 'woocommerce' ) }
 								</Button>
 							</div>
-						</>
+						</Modal>
 					);
 				} }
 			</Form>
-		</Modal>
+			{ showConfirmClose && (
+				<ConfirmDialog
+					cancelButtonText={ __( 'No thanks', 'woocommerce' ) }
+					confirmButtonText={ __( 'Yes please!', 'woocommerce' ) }
+					onCancel={ () => setShowConfirmClose( false ) }
+					onConfirm={ onCancel }
+				>
+					{ __(
+						'You have some attributes added to the list, are you sure you want to cancel?',
+						'woocommerce'
+					) }
+				</ConfirmDialog>
+			) }
+		</>
 	);
 };
