@@ -5126,7 +5126,6 @@ img.help_tip {
 		font-size: 15px;
 		font-weight: 400;
 		margin-right: 0.5em;
-		visibility: hidden;
 		text-align: center;
 		vertical-align: middle;
 
@@ -5146,11 +5145,22 @@ img.help_tip {
 			color: #777;
 		}
 	}
+	.edit_variation {
+		margin-left: 0.5em;
+	}
 
 	h3:hover,
 	&.ui-sortable-helper {
 		.sort {
 			visibility: visible;
+		}
+	}
+}
+
+.woocommerce_attribute {
+	h3 {
+		.sort, a.delete {
+			visibility: hidden;
 		}
 	}
 }
@@ -5478,7 +5488,8 @@ img.help_tip {
 			cursor: move;
 
 			button,
-			a.delete {
+			a.delete,
+			a.edit {
 				float: right;
 			}
 
@@ -5488,7 +5499,13 @@ img.help_tip {
 				line-height: 26px;
 				text-decoration: none;
 				position: relative;
-				visibility: hidden;
+			}
+
+			a.edit {
+				font-weight: normal;
+				line-height: 26px;
+				text-decoration: none;
+				position: relative;
 			}
 
 			strong {
@@ -5520,6 +5537,7 @@ img.help_tip {
 			padding: 0.5em 0.75em 0.5em 1em !important;
 
 			a.delete,
+			a.edit,
 			.handlediv,
 			.sort {
 				margin-top: 0.25em;
