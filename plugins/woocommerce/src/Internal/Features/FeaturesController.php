@@ -755,25 +755,18 @@ class FeaturesController {
 			return;
 		}
 
-		if ( 'plugins' !== get_current_screen()->id ) {
-			return;
+		$feature_filter_description_shown = $this->maybe_display_current_feature_filter_description();
+		if ( ! $feature_filter_description_shown ) {
+			$this->maybe_display_feature_incompatibility_warning();
 		}
-
-		$this->maybe_display_feature_incompatibility_warning();
-		$this->maybe_display_current_feature_filter_description();
 	}
 
 	/**
-	 * Shows a warning (on the plugins screen) when there are any incompatibility between active plugins and enabled
-	 * features.
+	 * Shows a warning when there are any incompatibility between active plugins and enabled features.
+	 * The warning is shown in on any admin screen except the plugins screen itself, since
+	 * there's already a "You are viewing
 	 */
 	private function maybe_display_feature_incompatibility_warning(): void {
-		$plugin_status = $_GET['plugin_status'] ?? ''; // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
-
-		if ( ! in_array( $plugin_status, array( '', 'all', 'active' ), true ) ) {
-			return;
-		}
-
 		$incompatible_plugins = false;
 
 		foreach ( $this->plugin_util->get_woocommerce_aware_plugins( true ) as $plugin ) {
@@ -801,7 +794,7 @@ class FeaturesController {
 
 		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 		?>
-		<div class="notice notice-warning">
+		<div class="notice notice-error">
 		<p><?php echo $message; ?></p>
 		</div>
 		<?php
@@ -813,20 +806,24 @@ class FeaturesController {
 	 * if we are in the plugins page and the query string of the current request
 	 * looks like '?plugin_status=incompatible_with_feature&feature_id=<feature id>'.
 	 */
-	private function maybe_display_current_feature_filter_description(): void {
+	private function maybe_display_current_feature_filter_description(): bool {
+		if ( 'plugins' !== get_current_screen()->id ) {
+			return false;
+		}
+
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput
 		$plugin_status = $_GET['plugin_status'] ?? '';
 		$feature_id    = $_GET['feature_id'] ?? '';
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput
 
 		if ( 'incompatible_with_feature' !== $plugin_status ) {
-			return;
+			return false;
 		}
 
 		$feature_id = ( '' === $feature_id ) ? 'all' : $feature_id;
 
 		if ( 'all' !== $feature_id && ! $this->feature_exists( $feature_id ) ) {
-			return;
+			return false;
 		}
 
 		// phpcs:enable WordPress.Security.NonceVerification
@@ -856,6 +853,8 @@ class FeaturesController {
 		</div>
 		<?php
 		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+
+		return true;
 	}
 
 	/**
