@@ -23,7 +23,7 @@ import _omit from 'lodash/omit';
 /**
  * Internal dependencies
  */
-import { FormContext, FormErrors, InputProps } from './form-context';
+import { FormContext, FormErrors } from './form-context';
 
 type FormProps< Values > = {
 	/**
