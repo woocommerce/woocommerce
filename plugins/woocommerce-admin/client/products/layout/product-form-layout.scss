@@ -2,11 +2,13 @@
 	max-width: 1032px;
 	margin: 0 auto;
 
-	h4 {
+	h4,
+	.components-radio-control .components-base-control__label {
 		font-size: 14px;
 		font-weight: 600;
 		margin-bottom: 18px;
 		margin-top: 26px;
+		text-transform: none;
 	}
 
 	.components-card__body h4:first-child {
