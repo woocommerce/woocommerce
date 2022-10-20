@@ -239,15 +239,13 @@ class TaskList {
 	 * @return bool
 	 */
 	public function is_complete() {
-		$viewable_tasks = $this->get_viewable_tasks();
+		foreach ( $this->get_viewable_tasks() as $viewable_task ) {
+			if ( $viewable_task->is_complete() === false ) {
+				return false;
+			}
+		}
 
-		return array_reduce(
-			$viewable_tasks,
-			function( $is_complete, $task ) {
-				return ! $task->is_complete() ? false : $is_complete;
-			},
-			true
-		);
+		return true;
 	}
 
 	/**
