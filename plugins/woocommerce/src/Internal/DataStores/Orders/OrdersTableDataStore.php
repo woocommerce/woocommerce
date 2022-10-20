@@ -1739,7 +1739,7 @@ FROM $order_meta_table
 		}
 
 		$trash_metadata = array(
-			'_wp_trash_meta_status' => $order->get_status( 'edit' ),
+			'_wp_trash_meta_status' => 'wc-' . $order->get_status( 'edit' ),
 			'_wp_trash_meta_time'   => time(),
 		);
 
@@ -1797,7 +1797,7 @@ FROM $order_meta_table
 
 		$previous_status           = $order->get_meta( '_wp_trash_meta_status' );
 		$valid_statuses            = wc_get_order_statuses();
-		$previous_state_is_invalid = ! array_key_exists( 'wc-' . $previous_status, $valid_statuses );
+		$previous_state_is_invalid = ! array_key_exists( $previous_status, $valid_statuses );
 		$pending_is_valid_status   = array_key_exists( 'wc-pending', $valid_statuses );
 
 		if ( $previous_state_is_invalid && $pending_is_valid_status ) {
@@ -1830,10 +1830,27 @@ FROM $order_meta_table
 		$order->save();
 
 		// Was the status successfully restored? Let's clean up the meta and indicate success...
-		if ( $previous_status === $order->get_status() ) {
+		if ( 'wc-' . $order->get_status() === $previous_status ) {
 			$order->delete_meta_data( '_wp_trash_meta_status' );
 			$order->delete_meta_data( '_wp_trash_meta_time' );
+			$order->delete_meta_data( '_wp_trash_meta_comments_status' );
 			$order->save_meta_data();
+
+			$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+			if ( $data_synchronizer->data_sync_is_enabled() ) {
+				//The previous $order->save() will have forced a sync to the posts table,
+				//this implies that the post status is not "trash" anymore, and thus
+				//wp_untrash_post would do nothing.
+				wp_update_post(
+					array(
+						'ID'          => $id,
+						'post_status' => 'trash',
+					)
+				);
+
+				wp_untrash_post( $id );
+			}
+
 			return true;
 		}
 
