@@ -233,7 +233,7 @@ class WC_Order_Factory {
 	 */
 	private static function get_class_name_for_order_id( $order_id ) {
 		$classname = self::get_class_names_for_order_ids( array( $order_id ) );
-		return $classname[ $order_id ];
+		return $classname[ $order_id ] ?? false;
 	}
 
 }
