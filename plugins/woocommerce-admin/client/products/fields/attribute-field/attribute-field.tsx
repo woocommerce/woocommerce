@@ -2,9 +2,14 @@
  * External dependencies
  */
 import { sprintf, __ } from '@wordpress/i18n';
-import { Button, Card, CardBody } from '@wordpress/components';
-import { useState } from '@wordpress/element';
-import { ProductAttribute } from '@woocommerce/data';
+import { Button, Card, CardBody, Popover } from '@wordpress/components';
+import { useState, useCallback, useEffect } from '@wordpress/element';
+import {
+	ProductAttribute,
+	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
+	ProductAttributeTerm,
+} from '@woocommerce/data';
+import { resolveSelect } from '@wordpress/data';
 import { Text } from '@woocommerce/experimental';
 import { Sortable, ListItem } from '@woocommerce/components';
 import { closeSmall } from '@wordpress/icons';
@@ -21,27 +26,101 @@ import { reorderSortableProductAttributePositions } from './utils';
 type AttributeFieldProps = {
 	value: ProductAttribute[];
 	onChange: ( value: ProductAttribute[] ) => void;
+	productId: number;
+};
+
+export type HydratedAttributeType = Omit< ProductAttribute, 'options' > & {
+	terms: ProductAttributeTerm[];
 };
 
 export const AttributeField: React.FC< AttributeFieldProps > = ( {
 	value,
 	onChange,
+	productId,
 } ) => {
 	const [ showAddAttributeModal, setShowAddAttributeModal ] =
 		useState( false );
+	const [ hydrationComplete, setHydrationComplete ] =
+		useState< boolean >( false );
+	const [ hydratedAttributes, setHydratedAttributes ] = useState<
+		HydratedAttributeType[]
+	>( [] );
 	const [ editingAttributeId, setEditingAttributeId ] = useState<
 		null | number
 	>( null );
+
+	const fetchTerms = useCallback(
+		( attributeId: number ) => {
+			return resolveSelect(
+				EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
+			)
+				.getProductAttributeTerms< ProductAttributeTerm[] >( {
+					attribute_id: attributeId,
+					product: productId,
+				} )
+				.then(
+					( attributeTerms ) => {
+						return attributeTerms;
+					},
+					( error ) => {
+						return error;
+					}
+				);
+		},
+		[ productId ]
+	);
+
+	useEffect( () => {
+		if ( ! value || hydrationComplete ) {
+			return;
+		}
+		Promise.all( value.map( ( attr ) => fetchTerms( attr.id ) ) ).then(
+			( allResults ) => {
+				setHydratedAttributes(
+					value.map( ( attr, index ) => {
+						const newAttr = {
+							...attr,
+							terms: allResults[ index ],
+							options: undefined,
+						};
+
+						return newAttr;
+					} )
+				);
+				setHydrationComplete( true );
+			}
+		);
+	}, [ productId, value, hydrationComplete ] );
+
+	useEffect( () => {
+		if ( ! hydrationComplete ) {
+			return;
+		}
+		onChange(
+			hydratedAttributes.map( ( attr ) => {
+				return {
+					...attr,
+					options: attr.terms.map( ( term ) => term.name ),
+					terms: undefined,
+				};
+			} )
+		);
+	}, [ hydratedAttributes, hydrationComplete ] );
+
 	const onRemove = ( attribute: ProductAttribute ) => {
 		// eslint-disable-next-line no-alert
 		if ( window.confirm( __( 'Remove this attribute?', 'woocommerce' ) ) ) {
-			onChange( value.filter( ( attr ) => attr.id !== attribute.id ) );
+			setHydratedAttributes(
+				hydratedAttributes.filter(
+					( attr ) => attr.id !== attribute.id
+				)
+			);
 		}
 	};
 
-	const onAddNewAttributes = ( newAttributes: ProductAttribute[] ) => {
-		onChange( [
-			...( value || [] ),
+	const onAddNewAttributes = ( newAttributes: HydratedAttributeType[] ) => {
+		setHydratedAttributes( [
+			...( hydratedAttributes || [] ),
 			...newAttributes
 				.filter(
 					( newAttr ) =>

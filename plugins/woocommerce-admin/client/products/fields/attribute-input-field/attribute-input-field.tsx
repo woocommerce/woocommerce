@@ -53,19 +53,19 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 		allItems: NarrowedQueryAttribute[],
 		inputValue: string
 	) => {
-		const filterOnlyIds = ( item: NarrowedQueryAttribute ) =>
+		const onlyIdsFilter = ( item: NarrowedQueryAttribute ) =>
 			onlyAttributeIds.length
 				? onlyAttributeIds.includes( item.id )
 				: true;
 
-		const filterIgnoreIds = ( item: NarrowedQueryAttribute ) =>
+		const ignoreIdsFilter = ( item: NarrowedQueryAttribute ) =>
 			ignoredAttributeIds.length
 				? ! ignoredAttributeIds.includes( item.id )
 				: true;
 
 		return allItems
-			.filter( filterOnlyIds )
-			.filter( filterIgnoreIds )
+			.filter( onlyIdsFilter )
+			.filter( ignoreIdsFilter )
 			.filter( ( item ) =>
 				( item.name || '' )
 					.toLowerCase()

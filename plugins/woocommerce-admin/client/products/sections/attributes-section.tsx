@@ -14,7 +14,10 @@ import { ProductSectionLayout } from '../layout/product-section-layout';
 import { AttributeField } from '../fields/attribute-field';
 
 export const AttributesSection: React.FC = () => {
-	const { getInputProps } = useFormContext< Product >();
+	const {
+		getInputProps,
+		values: { id: productId },
+	} = useFormContext< Product >();
 
 	return (
 		<ProductSectionLayout
@@ -42,7 +45,12 @@ export const AttributesSection: React.FC = () => {
 				</>
 			}
 		>
-			<AttributeField { ...getInputProps( 'attributes' ) } />
+			{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+			{ /* @ts-ignore */ }
+			<AttributeField
+				{ ...getInputProps( 'attributes' ) }
+				productId={ productId }
+			/>
 		</ProductSectionLayout>
 	);
 };
