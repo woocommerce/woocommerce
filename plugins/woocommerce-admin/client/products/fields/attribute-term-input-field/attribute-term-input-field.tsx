@@ -230,7 +230,10 @@ export const AttributeTermInputField: React.FC<
 										</MenuItem>
 									);
 								} ),
-							] }
+							].filter(
+								( child ): child is JSX.Element =>
+									child !== null
+							) }
 						</Menu>
 					);
 				} }
