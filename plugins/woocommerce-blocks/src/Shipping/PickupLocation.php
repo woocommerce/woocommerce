@@ -194,7 +194,7 @@ class PickupLocation extends WC_Shipping_Method {
 					<tfoot>
 						<tr>
 							<th colspan="5">
-								<button type="button" class="add button"><?php esc_html_e( 'Add pickup location', 'woo-gutenberg-products-block' ); ?></button>
+								<button type="button" class="button-add-location button"><?php esc_html_e( 'Add pickup location', 'woo-gutenberg-products-block' ); ?></button>
 							</th>
 						</tr>
 					</tfoot>
@@ -279,6 +279,9 @@ class PickupLocation extends WC_Shipping_Method {
 	}
 </style>
 <script type="text/javascript">
+	const states = JSON.parse( decodeURIComponent( '<?php echo rawurlencode( wp_json_encode( WC()->countries->get_states() ) ); ?>' ) );
+	const locationsTable = document.querySelectorAll("table.wc-local-pickup-locations")[0];
+
 	function insertRow() {
 		var tbodyRef = document.querySelectorAll('#pickup_locations table tbody')[0];
 		let size = tbodyRef.getElementsByTagName('tr').length;
@@ -288,18 +291,16 @@ class PickupLocation extends WC_Shipping_Method {
 		newRow.innerHTML = txt.value;
 	}
 
-	var locationsTable = document.querySelectorAll("table.wc-local-pickup-locations")[0];
-	var addButton = document.querySelectorAll("#pickup_locations button.add")[0];
-
-	addButton.addEventListener( "click", function(e) {
-		insertRow();
-		return false;
-	}, false );
-
 	locationsTable.addEventListener( "click", function(event) {
+		const addButton = event.target.closest( "button.button-add-location" );
 		const editButton = event.target.closest('button.button-link-edit');
 		const deleteButton = event.target.closest('button.button-link-delete');
 		const enabledToggleButton = event.target.closest('button.enabled-toggle-button');
+
+		if (addButton !== null) {
+			insertRow();
+			return false;
+		}
 
 		if (editButton !== null) {
 			const toggleText = editButton.dataset.toggle;
@@ -351,32 +352,14 @@ class PickupLocation extends WC_Shipping_Method {
 		return true;
 	}, false );
 
-	locationsTable.addEventListener( "focus", function(event) {
-		const input = event.target.closest('input, select');
-		if (input !== null) {
-			input.parentElement.classList.add("is-active");
-		}
-	}, true );
+	function initCountrySelect() {
+		var event = new Event('change');
+		locationsTable.querySelectorAll('select.country-select').forEach(function(countrySelect) {
+			countrySelect.dispatchEvent(event);
+		});
+	}
 
-	locationsTable.addEventListener( "blur", function(event) {
-		const input = event.target.closest('input, select');
-		if (input !== null) {
-			const nextInput = event.relatedTarget ? event.relatedTarget.closest('input, select') : null;
-			if(nextInput === null || nextInput.parentElement !== input.parentElement) {
-				input.parentElement.classList.remove("is-active");
-			}
-		}
-	}, true );
-
-	var states = JSON.parse( decodeURIComponent( '<?php echo rawurlencode( wp_json_encode( WC()->countries->get_states() ) ); ?>' ) );
-
-	locationsTable.addEventListener( "change", function(event) {
-		const countrySelect = event.target.closest('select.country-select');
-
-		if (countrySelect === null) {
-			return;
-		}
-
+	function changeCountry( countrySelect ) {
 		const stateInput = countrySelect.parentElement.querySelectorAll('input.state-input')[0];
 		const stateSelect = countrySelect.parentElement.querySelectorAll('select.state-select')[0];
 		const selectedCountry = countrySelect.value;
@@ -404,23 +387,29 @@ class PickupLocation extends WC_Shipping_Method {
 		};
 		stateSelect.hidden = false;
 		stateInput.type = 'hidden';
-	}, true );
+	}
 
-	locationsTable.addEventListener( "change", function(event) {
-		const stateSelect = event.target.closest('select.state-select');
-
-		if (stateSelect === null) {
-			return;
-		}
-
+	function changeState( stateSelect ) {
 		const stateInput = stateSelect.parentElement.querySelectorAll('input.state-input')[0];
 		stateInput.value = stateSelect.value;
+	}
+
+	locationsTable.addEventListener( "change", function(event) {
+		const countrySelect = event.target.closest('select.country-select');
+		const stateSelect = event.target.closest('select.state-select');
+
+		if (countrySelect !== null) {
+			changeCountry( countrySelect );
+		}
+
+		if (stateSelect !== null) {
+			changeState( stateSelect );
+		}
+
+
 	}, true );
 
-	var event = new Event('change');
-	locationsTable.querySelectorAll('select.country-select').forEach(function(countrySelect) {
-		countrySelect.dispatchEvent(event);
-	});
+	initCountrySelect();
 </script>
 		<?php
 	}
