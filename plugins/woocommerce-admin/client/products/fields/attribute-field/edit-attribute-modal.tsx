@@ -41,7 +41,7 @@ export const EditAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 		[]
 	);
 	const {
-		values: { id: productId },
+		values: { id: productId, attributes },
 	} = useFormContext< Product >();
 
 	const fetchTerms = useCallback( () => {
@@ -101,6 +101,7 @@ export const EditAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 					onChange={ ( val ) => {
 						setEditableAttribute( val );
 					} }
+					onlyAttributeIds={ attributes.map( ( attr ) => attr.id ) }
 				/>
 
 				<h2>Values</h2>

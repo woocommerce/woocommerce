@@ -16,6 +16,8 @@ import {
 	__experimentalSelectControlMenuItem as MenuItem,
 } from '@woocommerce/components';
 
+type NarrowedQueryAttribute = Pick< QueryProductAttribute, 'id' | 'name' >;
+
 type AttributeInputFieldProps = {
 	value?: Pick< QueryProductAttribute, 'id' | 'name' > | null;
 	onChange: (
@@ -24,7 +26,8 @@ type AttributeInputFieldProps = {
 	label?: string;
 	placeholder?: string;
 	disabled?: boolean;
-	filteredAttributeIds?: number[];
+	ignoredAttributeIds?: number[];
+	onlyAttributeIds?: number[];
 };
 
 export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
@@ -33,7 +36,8 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	placeholder,
 	label,
 	disabled,
-	filteredAttributeIds = [],
+	ignoredAttributeIds = [],
+	onlyAttributeIds = [],
 } ) => {
 	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
 		const { getProductAttributes, hasFinishedResolution } = select(
@@ -46,20 +50,31 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	} );
 
 	const getFilteredItems = (
-		allItems: Pick< QueryProductAttribute, 'id' | 'name' >[],
+		allItems: NarrowedQueryAttribute[],
 		inputValue: string
 	) => {
-		return allItems.filter(
-			( item ) =>
-				filteredAttributeIds.indexOf( item.id ) < 0 &&
+		const filterOnlyIds = ( item: NarrowedQueryAttribute ) =>
+			onlyAttributeIds.length
+				? onlyAttributeIds.includes( item.id )
+				: true;
+
+		const filterIgnoreIds = ( item: NarrowedQueryAttribute ) =>
+			ignoredAttributeIds.length
+				? ! ignoredAttributeIds.includes( item.id )
+				: true;
+
+		return allItems
+			.filter( filterOnlyIds )
+			.filter( filterIgnoreIds )
+			.filter( ( item ) =>
 				( item.name || '' )
 					.toLowerCase()
 					.startsWith( inputValue.toLowerCase() )
-		);
+			);
 	};
 
 	return (
-		<SelectControl< Pick< QueryProductAttribute, 'id' | 'name' > >
+		<SelectControl< NarrowedQueryAttribute >
 			items={ attributes || [] }
 			label={ label || '' }
 			disabled={ disabled }
