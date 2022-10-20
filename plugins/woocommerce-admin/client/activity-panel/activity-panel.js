@@ -45,6 +45,7 @@ import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-n
 import { getAdminSetting } from '~/utils/admin-settings';
 import { useActiveSetupTasklist } from '~/tasks';
 import { LayoutContext } from '~/layout';
+import { getSegmentsFromPath } from '~/utils/url-helpers';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -237,9 +238,9 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	};
 
 	const isProductPage = () => {
+		const [ firstPathSegment ] = getSegmentsFromPath( query.path );
 		return (
-			query.page === 'wc-admin' &&
-			/^(\/add-product|\/product)/gi.test( query.path )
+			firstPathSegment === 'add-product' || firstPathSegment === 'product'
 		);
 	};
 
