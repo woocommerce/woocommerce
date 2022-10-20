@@ -255,13 +255,15 @@ SELECT(
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		switch ( $type ) {
 			case self::ID_TYPE_MISSING_IN_ORDERS_TABLE:
-				$sql = "
+				$sql = $wpdb->prepare("
 SELECT posts.ID FROM $wpdb->posts posts
 LEFT JOIN $orders_table orders ON posts.ID = orders.id
 WHERE
   posts.post_type IN ($order_post_type_placeholders)
   AND posts.post_status != 'auto-draft'
-  AND orders.id IS NULL";
+  AND orders.id IS NULL",
+					$order_post_types
+				);
 				break;
 			case self::ID_TYPE_MISSING_IN_POSTS_TABLE:
 				$sql = "
