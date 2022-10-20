@@ -81,7 +81,7 @@ const registerMockPaymentMethods = () => {
 			ariaLabel: name,
 		} );
 	} );
-	dispatch( PAYMENT_STORE_KEY ).__internalInitializePaymentStore();
+	dispatch( PAYMENT_STORE_KEY ).__internalUpdateAvailablePaymentMethods();
 };
 
 const resetMockPaymentMethods = () => {
