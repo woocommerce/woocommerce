@@ -236,6 +236,13 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		return query.page === 'wc-admin' && ! query.path;
 	};
 
+	const isProductPage = () => {
+		return (
+			query.page === 'wc-admin' &&
+			/^(\/add-product|\/product)/gi.test( query.path )
+		);
+	};
+
 	const isPerformingSetupTask = () => {
 		return (
 			query.task &&
@@ -254,7 +261,9 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			icon: <IconFlag />,
 			unread: hasUnreadNotes || hasAbbreviatedNotifications,
 			visible:
-				( isEmbedded || ! isHomescreen() ) && ! isPerformingSetupTask(),
+				( isEmbedded || ! isHomescreen() ) &&
+				! isPerformingSetupTask() &&
+				! isProductPage(),
 		};
 
 		const setup = {
@@ -273,7 +282,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				! requestingTaskListOptions &&
 				! setupTaskListComplete &&
 				! setupTaskListHidden &&
-				! isHomescreen(),
+				! isHomescreen() &&
+				! isProductPage(),
 		};
 
 		const help = {

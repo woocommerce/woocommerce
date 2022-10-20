@@ -10,6 +10,7 @@ import {
 	MenuItem,
 } from '@wordpress/components';
 import { chevronDown, check, Icon } from '@wordpress/icons';
+import { registerPlugin } from '@wordpress/plugins';
 import { useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -17,8 +18,9 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import './product-form-actions.scss';
+import { WooHeaderItem } from '~/header/utils';
 import { useProductHelper } from './use-product-helper';
+import './product-form-actions.scss';
 
 export const ProductFormActions: React.FC = () => {
 	const {
@@ -122,120 +124,139 @@ export const ProductFormActions: React.FC = () => {
 	const isPublished = values.id && values.status === 'publish';
 
 	return (
-		<div className="woocommerce-product-form-actions">
-			<Button
-				onClick={ onSaveDraft }
-				disabled={
-					! isValidForm ||
-					( ! isDirty &&
-						!! values.id &&
-						values.status !== 'publish' ) ||
-					isUpdatingDraft ||
-					isUpdatingPublished ||
-					isDeleting
-				}
-			>
-				{ ! isDirty && values.id && values.status !== 'publish' && (
-					<Icon icon={ check } />
-				) }
-				{ isUpdatingDraft ? __( 'Saving', 'woocommerce' ) : null }
-				{ ( isDirty || ! values.id ) &&
-				! isUpdatingDraft &&
-				values.status !== 'publish'
-					? __( 'Save draft', 'woocommerce' )
-					: null }
-				{ values.status === 'publish' && ! isUpdatingDraft
-					? __( 'Switch to draft', 'woocommerce' )
-					: null }
-				{ ! isDirty &&
-				values.id &&
-				! isUpdatingDraft &&
-				values.status !== 'publish'
-					? __( 'Saved', 'woocommerce' )
-					: null }
-			</Button>
-			<Button
-				onClick={ () =>
-					recordEvent( 'product_preview_changes', {
-						new_product_page: true,
-						...getProductDataForTracks(),
-					} )
-				}
-				href={ values.permalink + '?preview=true' }
-				disabled={ ! isValidForm || ! values.permalink }
-				target="_blank"
-			>
-				{ __( 'Preview', 'woocommerce' ) }
-			</Button>
-			<ButtonGroup className="woocommerce-product-form-actions__publish-button-group">
-				<Button
-					onClick={ onPublish }
-					variant="primary"
-					isBusy={ isUpdatingPublished }
-					disabled={
-						! isValidForm ||
-						( ! isDirty && !! isPublished ) ||
-						isUpdatingDraft ||
-						isUpdatingPublished ||
-						isDeleting
-					}
-				>
-					{ isUpdatingPublished
-						? __( 'Updating', 'woocommerce' )
-						: null }
-					{ isPublished && ! isUpdatingPublished
-						? __( 'Update', 'woocommerce' )
-						: null }
-					{ ! isPublished && ! isUpdatingPublished
-						? __( 'Publish', 'woocommerce' )
-						: null }
-				</Button>
-				<DropdownMenu
-					className="woocommerce-product-form-actions__publish-dropdown"
-					label={ __( 'Publish options', 'woocommerce' ) }
-					icon={ chevronDown }
-					popoverProps={ { position: 'bottom left' } }
-					toggleProps={ {
-						variant: 'primary',
-						disabled: ! values.id && ! isValidForm,
-					} }
-				>
-					{ () => (
-						<>
-							<MenuGroup>
-								<MenuItem
-									onClick={ onPublishAndDuplicate }
-									disabled={ ! isValidForm }
-								>
-									{ isPublished
-										? __(
-												'Update & duplicate',
+		<WooHeaderItem>
+			{ () => (
+				<div className="woocommerce-product-form-actions">
+					<Button
+						onClick={ onSaveDraft }
+						disabled={
+							! isValidForm ||
+							( ! isDirty &&
+								!! values.id &&
+								values.status !== 'publish' ) ||
+							isUpdatingDraft ||
+							isUpdatingPublished ||
+							isDeleting
+						}
+					>
+						{ ! isDirty &&
+							values.id &&
+							values.status !== 'publish' && (
+								<Icon icon={ check } />
+							) }
+						{ isUpdatingDraft
+							? __( 'Saving', 'woocommerce' )
+							: null }
+						{ ( isDirty || ! values.id ) &&
+						! isUpdatingDraft &&
+						values.status !== 'publish'
+							? __( 'Save draft', 'woocommerce' )
+							: null }
+						{ values.status === 'publish' && ! isUpdatingDraft
+							? __( 'Switch to draft', 'woocommerce' )
+							: null }
+						{ ! isDirty &&
+						values.id &&
+						! isUpdatingDraft &&
+						values.status !== 'publish'
+							? __( 'Saved', 'woocommerce' )
+							: null }
+					</Button>
+					<Button
+						onClick={ () =>
+							recordEvent( 'product_preview_changes', {
+								new_product_page: true,
+								...getProductDataForTracks(),
+							} )
+						}
+						href={ values.permalink + '?preview=true' }
+						disabled={ ! isValidForm || ! values.permalink }
+						target="_blank"
+					>
+						{ __( 'Preview', 'woocommerce' ) }
+					</Button>
+					<ButtonGroup className="woocommerce-product-form-actions__publish-button-group">
+						<Button
+							onClick={ onPublish }
+							variant="primary"
+							isBusy={ isUpdatingPublished }
+							disabled={
+								! isValidForm ||
+								( ! isDirty && !! isPublished ) ||
+								isUpdatingDraft ||
+								isUpdatingPublished ||
+								isDeleting
+							}
+						>
+							{ isUpdatingPublished
+								? __( 'Updating', 'woocommerce' )
+								: null }
+							{ isPublished && ! isUpdatingPublished
+								? __( 'Update', 'woocommerce' )
+								: null }
+							{ ! isPublished && ! isUpdatingPublished
+								? __( 'Publish', 'woocommerce' )
+								: null }
+						</Button>
+						<DropdownMenu
+							className="woocommerce-product-form-actions__publish-dropdown"
+							label={ __( 'Publish options', 'woocommerce' ) }
+							icon={ chevronDown }
+							popoverProps={ { position: 'bottom left' } }
+							toggleProps={ {
+								variant: 'primary',
+								disabled: ! values.id && ! isValidForm,
+							} }
+						>
+							{ () => (
+								<>
+									<MenuGroup>
+										<MenuItem
+											onClick={ onPublishAndDuplicate }
+											disabled={ ! isValidForm }
+										>
+											{ isPublished
+												? __(
+														'Update & duplicate',
+														'woocommerce'
+												  )
+												: __(
+														'Publish & duplicate',
+														'woocommerce'
+												  ) }
+										</MenuItem>
+										<MenuItem
+											onClick={ onCopyToNewDraft }
+											disabled={ ! isValidForm }
+										>
+											{ __(
+												'Copy to a new draft',
 												'woocommerce'
-										  )
-										: __(
-												'Publish & duplicate',
-												'woocommerce'
-										  ) }
-								</MenuItem>
-								<MenuItem
-									onClick={ onCopyToNewDraft }
-									disabled={ ! isValidForm }
-								>
-									{ __(
-										'Copy to a new draft',
-										'woocommerce'
-									) }
-								</MenuItem>
-								{ values.id && (
-									<MenuItem onClick={ onTrash } isDestructive>
-										{ __( 'Move to trash', 'woocommerce' ) }
-									</MenuItem>
-								) }
-							</MenuGroup>
-						</>
-					) }
-				</DropdownMenu>
-			</ButtonGroup>
-		</div>
+											) }
+										</MenuItem>
+										{ values.id && (
+											<MenuItem
+												onClick={ onTrash }
+												isDestructive
+											>
+												{ __(
+													'Move to trash',
+													'woocommerce'
+												) }
+											</MenuItem>
+										) }
+									</MenuGroup>
+								</>
+							) }
+						</DropdownMenu>
+					</ButtonGroup>
+				</div>
+			) }
+		</WooHeaderItem>
 	);
 };
+
+registerPlugin( 'action-buttons-header-item', {
+	render: ProductFormActions,
+	icon: 'admin-generic',
+} );
