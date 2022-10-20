@@ -47,7 +47,7 @@ export const Edit = ( {
 			attributes={ attributes }
 			setAttributes={ setAttributes }
 			className={ classnames(
-				'wc-block-checkout__collection-method',
+				'wc-block-checkout__shipping-method',
 				className
 			) }
 		>

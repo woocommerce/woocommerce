@@ -1,11 +1,11 @@
-.wc-block-checkout__collection-method-container {
+.wc-block-checkout__shipping-method-container {
 	width: 100%;
 	display: flex;
 	gap: $gap;
 	justify-content: space-between;
 }
 
-.wc-block-checkout__collection-item {
+.wc-block-checkout__shipping-method-option {
 	flex-grow: 1;
 	display: flex;
 	flex-direction: column;
@@ -20,21 +20,21 @@
 	background-color: transparent;
 	border: none;
 	outline: 1px solid currentColor;
-	&.wc-block-checkout__collection-item--selected {
+	&.wc-block-checkout__shipping-method-option--selected {
 		outline-width: 2px;
 	}
 }
 
-.wc-block-checkout__collection-item-icon {
+.wc-block-checkout__shipping-method-option-icon {
 	fill: currentColor;
 }
 
-.wc-block-checkout__collection-item-title {
+.wc-block-checkout__shipping-method-option-title {
 	@include font-size(regular, 1rem);
 	font-weight: bold;
 }
 
-.wc-block-checkout__collection-item-price {
+.wc-block-checkout__shipping-method-option-price {
 	@include font-size(small, 1rem);
 
 	em {

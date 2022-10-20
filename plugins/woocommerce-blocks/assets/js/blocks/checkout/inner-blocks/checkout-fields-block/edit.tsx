@@ -43,7 +43,7 @@ export const Edit = ( {
 		[ 'woocommerce/checkout-contact-information-block', {}, [] ],
 		...[
 			isExperimentalBuild()
-				? [ 'woocommerce/checkout-collection-method-block', {}, [] ]
+				? [ 'woocommerce/checkout-shipping-method-block', {}, [] ]
 				: null,
 		],
 		...[

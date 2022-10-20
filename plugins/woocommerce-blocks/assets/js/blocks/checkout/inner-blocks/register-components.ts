@@ -50,11 +50,11 @@ registerCheckoutBlock( {
 
 if ( isExperimentalBuild() ) {
 	registerCheckoutBlock( {
-		metadata: metadata.CHECKOUT_COLLECTION_METHOD,
+		metadata: metadata.CHECKOUT_SHIPPING_METHOD,
 		component: lazy(
 			() =>
 				import(
-					/* webpackChunkName: "checkout-blocks/collection-method" */ './checkout-collection-method-block/frontend'
+					/* webpackChunkName: "checkout-blocks/shipping-method" */ './checkout-shipping-method-block/frontend'
 				)
 		),
 	} );

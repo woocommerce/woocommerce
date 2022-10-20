@@ -71,10 +71,10 @@ const FrontendBlock = ( {
 
 	return (
 		<FormStep
-			id="collection-method"
+			id="shipping-method"
 			disabled={ checkoutIsProcessing }
 			className={ classnames(
-				'wc-block-checkout__collection-method',
+				'wc-block-checkout__shipping-method',
 				className
 			) }
 			title={ title }
