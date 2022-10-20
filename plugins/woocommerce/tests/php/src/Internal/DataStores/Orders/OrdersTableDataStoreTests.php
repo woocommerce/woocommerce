@@ -1824,4 +1824,15 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$this->sut->read_multiple( $orders );
 		$this->assertFalse( $should_sync_callable->call( $this->sut, $order ) );
 	}
+
+	/**
+	 * @testDox Make sure get_order return false when checking an order of different order types without warning.
+	 */
+	public function test_get_order_with_id_for_different_type() {
+		$this->toggle_cot( true );
+		$this->disable_cot_sync();
+		$product = new \WC_Product();
+		$product->save();
+		$this->assertFalse( wc_get_order( $product->get_id() ) );
+	}
 }
