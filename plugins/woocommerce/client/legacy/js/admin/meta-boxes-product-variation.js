@@ -278,7 +278,6 @@ jQuery( function ( $ ) {
 					? 'variable_subscription_sign_up_fee'
 					: 'variable_regular_price';
 			var input = $( `.wc_input_price[name^=${ input_type }]` );
-			console.log( 'input', input );
 
 			// We don't want to override prices already set
 			input.each( function ( index, el ) {
@@ -595,7 +594,6 @@ jQuery( function ( $ ) {
 		 * @return {Bool}
 		 */
 		check_for_changes: function () {
-			console.log( 'check_for_changes' );
 			var need_update = $( '#variable_product_options' ).find(
 				'.woocommerce_variations .variation-needs-update'
 			);
@@ -707,7 +705,6 @@ jQuery( function ( $ ) {
 		get_variations_fields: function ( fields ) {
 			var data = $( ':input', fields ).serializeJSON();
 
-			console.log( 'get_variations_fields', data );
 			$( '.variations-defaults select' ).each( function (
 				index,
 				element
@@ -1224,7 +1221,6 @@ jQuery( function ( $ ) {
 			}
 
 			wc_meta_boxes_product_variations_ajax.block();
-			console.log( 'data', data );
 
 			$.ajax( {
 				url: woocommerce_admin_meta_boxes_variations.ajax_url,

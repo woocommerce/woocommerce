@@ -145,7 +145,6 @@
 				function () {
 					var regex, error, decimalRegex;
 					var checkDecimalNumbers = false;
-					console.log( 'entro' );
 					if (
 						$( this ).is( '.wc_input_price' ) ||
 						$( this ).is( '.wc_input_variations_price' ) ||
