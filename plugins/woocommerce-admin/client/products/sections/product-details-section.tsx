@@ -72,7 +72,7 @@ export const ProductDetailsSection: React.FC = () => {
 	};
 
 	const setSkuIfEmpty = () => {
-		if ( values.sku || ! values.name.length ) {
+		if ( values.sku || ! values.name?.length ) {
 			return;
 		}
 		setValue( 'sku', cleanForSlug( values.name ) );
