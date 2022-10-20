@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Check whether order has classname before returning. [#35207](https://github.com/woocommerce/woocommerce/pull/35207)
 * Fix - Add billing and shipping address indexes on order update. [#35121](https://github.com/woocommerce/woocommerce/pull/35121)
 * Fix - Use correct datastore when backfilling orders. [#35176](https://github.com/woocommerce/woocommerce/pull/35176)
 * Fix - (HPOS) Ensure we use GMT when populating the `date_created_gmt` column for orders. [#34875](https://github.com/woocommerce/woocommerce/pull/34875)
