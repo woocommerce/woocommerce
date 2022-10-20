@@ -8,6 +8,16 @@ export type FormErrors< Values > = {
 	[ P in keyof Values ]?: FormErrors< Values[ P ] > | string;
 };
 
+export type InputProps< Value > = {
+	value: Value;
+	checked: boolean;
+	selected?: boolean;
+	onChange: ( value: ChangeEvent< HTMLInputElement > | Value ) => void;
+	onBlur: () => void;
+	className: string | undefined;
+	help: string | null | undefined;
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type FormContext< Values extends Record< string, any > > = {
 	values: Values;
@@ -23,15 +33,7 @@ export type FormContext< Values extends Record< string, any > > = {
 	handleSubmit: () => Promise< Values >;
 	getInputProps< Value extends Values[ keyof Values ] >(
 		name: string
-	): {
-		value: Value;
-		checked: boolean;
-		selected?: boolean;
-		onChange: ( value: ChangeEvent< HTMLInputElement > | Value ) => void;
-		onBlur: () => void;
-		className: string | undefined;
-		help: string | null | undefined;
-	};
+	): InputProps< Value >;
 	isValidForm: boolean;
 	resetForm: (
 		initialValues: Values,

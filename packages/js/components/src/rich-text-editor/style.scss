@@ -1,7 +1,9 @@
 .woocommerce-rich-text-editor {
-	border: 1px solid $gray-600;
-	border-radius: 2px;
-	background: $white;
+	.woocommerce-rich-text-editor__writing-flow {
+		border: 1px solid $gray-600;
+		border-radius: 2px;
+		background: $white;
+	}
 
 	* {
 		box-sizing: border-box;
