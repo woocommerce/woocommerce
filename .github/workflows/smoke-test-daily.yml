@@ -69,7 +69,7 @@ jobs:
                     steps.e2e.conclusion != 'skipped' 
                   )
               working-directory: plugins/woocommerce
-              run: pnpm exec allure generate --clean e2e/allure-results --output e2e/allure-report
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
             - name: Archive E2E test report
               if: |
@@ -79,8 +79,8 @@ jobs:
               with:
                   name: ${{ env.E2E_ARTIFACT }}
                   path: |
-                      plugins/woocommerce/e2e/allure-results
-                      plugins/woocommerce/e2e/allure-report
+                      ${{ env.ALLURE_RESULTS_DIR }}
+                      ${{ env.ALLURE_REPORT_DIR }}
                   if-no-files-found: ignore
                   retention-days: 5
 
@@ -195,6 +195,8 @@ jobs:
         if: always()
         env:
             USE_WP_ENV: 1
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
         strategy:
             fail-fast: false
             matrix:
@@ -255,7 +257,7 @@ jobs:
                     steps.e2e.conclusion != 'skipped' 
                   )
               working-directory: plugins/woocommerce
-              run: pnpm exec allure generate --clean e2e/allure-results --output e2e/allure-report
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
             - name: Archive E2E test report
               if: |
@@ -265,8 +267,8 @@ jobs:
               with:
                   name: Smoke tests with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
                   path: |
-                      plugins/woocommerce/e2e/allure-results
-                      plugins/woocommerce/e2e/allure-report
+                      ${{ env.ALLURE_RESULTS_DIR }}
+                      ${{ env.ALLURE_REPORT_DIR }}
                   if-no-files-found: ignore
                   retention-days: 5
 

@@ -1,5 +1,5 @@
 const { devices } = require( '@playwright/test' );
-const { CI, E2E_MAX_FAILURES } = process.env;
+const { CI, E2E_MAX_FAILURES, ALLURE_RESULTS_DIR } = process.env;
 
 const config = {
 	timeout: 90 * 1000,
@@ -22,10 +22,11 @@ const config = {
 		[
 			'allure-playwright',
 			{
-				outputFolder: `${ __dirname }/allure-results`,
+				outputFolder:
+					ALLURE_RESULTS_DIR ?? 'tests/e2e-pw/allure-results',
 			},
 		],
-		[ 'json', { outputFile: `${ __dirname }/test-results.json` } ],
+		[ 'json', { outputFile: 'tests/e2e-pw/test-results.json' } ],
 	],
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
 	use: {
@@ -34,7 +35,7 @@ const config = {
 		trace: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
 		baseURL: 'http://localhost:8086',
-		stateDir: `${ __dirname }/storage/`,
+		stateDir: 'tests/e2e-pw/storage/',
 	},
 	projects: [
 		{
