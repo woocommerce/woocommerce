@@ -30,6 +30,13 @@ declare module '@wordpress/block-editor' {
 
 const withSidebarNotices = createHigherOrderComponent(
 	( BlockEdit ) => ( props ) => {
+		const { name: blockName, isSelected: isBlockSelected } = props;
+
+		// Show sidebar notices only when a WooCommerce block is selected.
+		if ( ! blockName.startsWith( 'woocommerce/' ) || ! isBlockSelected ) {
+			return <BlockEdit { ...props } />;
+		}
+
 		const addressFieldOrAccountBlocks = [
 			'woocommerce/checkout-shipping-address-block',
 			'woocommerce/checkout-billing-address-block',
