@@ -1120,7 +1120,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$this->enable_cot_sync();
 		$order                         = $this->create_complex_cot_order();
 		$post_order_comparison_closure = function ( $order ) {
-			$post_order = $this->get_post_orders_for_ids( array( $order->get_id() ) )[ $order->get_id() ];
+			$post_order = $this->get_post_orders_for_ids( array( $order->get_id() => $order ) )[ $order->get_id() ];
 
 			return $this->is_post_different_from_order( $order, $post_order );
 		};
@@ -1135,6 +1135,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		$r_order = new WC_Order();
 		$r_order->set_id( $order->get_id() );
+		$this->switch_data_store( $r_order, $this->sut );
 		// Reading again will make a call to migrate_post_record.
 		$this->sut->read( $r_order );
 		$this->assertFalse( $post_order_comparison_closure->call( $this->sut, $r_order ) );
@@ -1806,6 +1807,8 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * @testDox Test that multiple calls to read don't try to sync again.
 	 */
 	public function test_read_multiple_dont_sync_again_for_same_order() {
+		$this->toggle_cot( true );
+		$this->enable_cot_sync();
 		$order = $this->create_complex_cot_order();
 
 		$order_id = $order->get_id();
@@ -1814,7 +1817,6 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			return $this->should_sync_order( $order );
 		};
 
-		$this->enable_cot_sync();
 		$order = new WC_Order();
 		$order->set_id( $order_id );
 		$orders = array( $order_id => $order );
