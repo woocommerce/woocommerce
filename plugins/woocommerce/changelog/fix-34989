@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add billing and shipping address indexes on order update.
