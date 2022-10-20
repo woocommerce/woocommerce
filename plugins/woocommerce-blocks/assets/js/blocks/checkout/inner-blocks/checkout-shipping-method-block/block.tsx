@@ -33,19 +33,22 @@ const LocalPickupSelector = ( {
 	return (
 		<Radio
 			value="pickup"
-			className={ classnames( 'wc-block-checkout__collection-item', {
-				'wc-block-checkout__collection-item--selected':
-					checked === 'pickup',
-			} ) }
+			className={ classnames(
+				'wc-block-checkout__shipping-method-option',
+				{
+					'wc-block-checkout__shipping-method-option--selected':
+						checked === 'pickup',
+				}
+			) }
 		>
 			{ showIcon === true && (
 				<Icon
 					icon={ store }
 					size={ 28 }
-					className="wc-block-checkout__collection-item-icon"
+					className="wc-block-checkout__shipping-method-option-icon"
 				/>
 			) }
-			<span className="wc-block-checkout__collection-item-title">
+			<span className="wc-block-checkout__shipping-method-option-title">
 				{ toggleText }
 			</span>
 			{ showPrice === true && (
@@ -70,7 +73,7 @@ const ShippingSelector = ( {
 } ) => {
 	const Price =
 		rate.min === undefined ? (
-			<span className="wc-block-checkout__collection-item-price">
+			<span className="wc-block-checkout__shipping-method-option-price">
 				{ __(
 					'calculated with an address',
 					'woo-gutenberg-products-block'
@@ -83,19 +86,22 @@ const ShippingSelector = ( {
 	return (
 		<Radio
 			value="shipping"
-			className={ classnames( 'wc-block-checkout__collection-item', {
-				'wc-block-checkout__collection-item--selected':
-					checked === 'shipping',
-			} ) }
+			className={ classnames(
+				'wc-block-checkout__shipping-method-option',
+				{
+					'wc-block-checkout__shipping-method-option--selected':
+						checked === 'shipping',
+				}
+			) }
 		>
 			{ showIcon === true && (
 				<Icon
 					icon={ shipping }
 					size={ 28 }
-					className="wc-block-checkout__collection-item-icon"
+					className="wc-block-checkout__shipping-method-option-icon"
 				/>
 			) }
-			<span className="wc-block-checkout__collection-item-title">
+			<span className="wc-block-checkout__shipping-method-option-title">
 				{ toggleText }
 			</span>
 			{ showPrice === true && Price }
@@ -121,8 +127,8 @@ const Block = ( {
 
 	return (
 		<RadioGroup
-			id="collection-method"
-			className="wc-block-checkout__collection-method-container"
+			id="shipping-method"
+			className="wc-block-checkout__shipping-method-container"
 			label="options"
 			onChange={ onChange }
 			checked={ checked }

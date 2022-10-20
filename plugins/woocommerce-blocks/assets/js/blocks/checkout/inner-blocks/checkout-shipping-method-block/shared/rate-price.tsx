@@ -36,7 +36,7 @@ export const RatePrice = ( {
 		);
 
 	return (
-		<span className="wc-block-checkout__collection-item-price">
+		<span className="wc-block-checkout__shipping-method-option-price">
 			{ minRatePrice === maxRatePrice
 				? priceElement
 				: createInterpolateElement(

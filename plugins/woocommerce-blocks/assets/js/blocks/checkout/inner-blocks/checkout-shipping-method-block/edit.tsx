@@ -52,22 +52,25 @@ const LocalPickupSelector = ( {
 	return (
 		<Radio
 			value="pickup"
-			className={ classnames( 'wc-block-checkout__collection-item', {
-				'wc-block-checkout__collection-item--selected':
-					checked === 'pickup',
-			} ) }
+			className={ classnames(
+				'wc-block-checkout__shipping-method-option',
+				{
+					'wc-block-checkout__shipping-method-option--selected':
+						checked === 'pickup',
+				}
+			) }
 		>
 			{ showIcon === true && (
 				<Icon
 					icon={ store }
 					size={ 28 }
-					className="wc-block-checkout__collection-item-icon"
+					className="wc-block-checkout__shipping-method-option-icon"
 				/>
 			) }
 			<RichText
 				value={ toggleText }
 				tagName="span"
-				className="wc-block-checkout__collection-item-title"
+				className="wc-block-checkout__shipping-method-option-title"
 				onChange={ ( value ) =>
 					setAttributes( { localPickupText: value } )
 				}
@@ -98,7 +101,7 @@ const ShippingSelector = ( {
 } ) => {
 	const Price =
 		rate.min === undefined ? (
-			<span className="wc-block-checkout__collection-item-price">
+			<span className="wc-block-checkout__shipping-method-option-price">
 				{ __(
 					'calculated with an address',
 					'woo-gutenberg-products-block'
@@ -111,22 +114,25 @@ const ShippingSelector = ( {
 	return (
 		<Radio
 			value="shipping"
-			className={ classnames( 'wc-block-checkout__collection-item', {
-				'wc-block-checkout__collection-item--selected':
-					checked === 'shipping',
-			} ) }
+			className={ classnames(
+				'wc-block-checkout__shipping-method-option',
+				{
+					'wc-block-checkout__shipping-method-option--selected':
+						checked === 'shipping',
+				}
+			) }
 		>
 			{ showIcon === true && (
 				<Icon
 					icon={ shipping }
 					size={ 28 }
-					className="wc-block-checkout__collection-item-icon"
+					className="wc-block-checkout__shipping-method-option-icon"
 				/>
 			) }
 			<RichText
 				value={ toggleText }
 				tagName="span"
-				className="wc-block-checkout__collection-item-title"
+				className="wc-block-checkout__shipping-method-option-title"
 				onChange={ ( value ) =>
 					setAttributes( { shippingText: value } )
 				}
@@ -193,7 +199,7 @@ export const Edit = ( {
 			attributes={ attributes }
 			setAttributes={ setAttributes }
 			className={ classnames(
-				'wc-block-checkout__collection-method',
+				'wc-block-checkout__shipping-method',
 				className
 			) }
 		>
@@ -234,8 +240,8 @@ export const Edit = ( {
 				</PanelBody>
 			</InspectorControls>
 			<RadioGroup
-				id="collection-method"
-				className="wc-block-checkout__collection-method-container"
+				id="shipping-method"
+				className="wc-block-checkout__shipping-method-container"
 				label="options"
 				onChange={ changeView }
 				checked={ prefersCollection ? 'pickup' : 'shipping' }
@@ -261,7 +267,7 @@ export const Edit = ( {
 					toggleText={ localPickupText }
 				/>
 			</RadioGroup>
-			<AdditionalFields block={ innerBlockAreas.COLLECTION_METHOD } />
+			<AdditionalFields block={ innerBlockAreas.SHIPPING_METHOD } />
 		</FormStepBlock>
 	);
 };

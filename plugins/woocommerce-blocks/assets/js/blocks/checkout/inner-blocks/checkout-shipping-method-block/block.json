@@ -1,8 +1,8 @@
 {
-	"name": "woocommerce/checkout-collection-method-block",
+	"name": "woocommerce/checkout-shipping-method-block",
 	"version": "1.0.0",
 	"title": "Shipping Method",
-	"description": "Select between delivery or collection.",
+	"description": "Select between shipping or local pickup.",
 	"category": "woocommerce",
 	"supports": {
 		"align": false,
