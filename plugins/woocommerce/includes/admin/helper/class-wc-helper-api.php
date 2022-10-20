@@ -163,6 +163,7 @@ class WC_Helper_API {
 	 * Using the API base, form a request URL from a given endpoint.
 	 *
 	 * @param string $endpoint The endpoint to request.
+	 * @param string $query_string Optional query string to append to the URL.
 	 *
 	 * @return string The absolute endpoint URL.
 	 */

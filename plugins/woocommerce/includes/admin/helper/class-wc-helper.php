@@ -1288,7 +1288,6 @@ class WC_Helper {
 			array(
 				'authenticated' => true,
 				'query_string'  => esc_url( '?source=' . $source ),
-
 			)
 		);
 
