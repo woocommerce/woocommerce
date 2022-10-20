@@ -2,22 +2,18 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	Button,
-	Modal,
-	Spinner,
-	TextControl,
-	Popover,
-} from '@wordpress/components';
-import { useMemo, useRef, useState } from '@wordpress/element';
+import { Button, Modal, Spinner, TextControl } from '@wordpress/components';
+import { useMemo, useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
-import { __experimentalSelectControl as SelectControl } from '@woocommerce/components';
+import {
+	__experimentalSelectControl as SelectControl,
+	__experimentalSelectControlMenu as Menu,
+} from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import {
 	EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME,
 	ProductCategory,
 } from '@woocommerce/data';
-import classnames from 'classnames';
 import { debounce } from 'lodash';
 
 /**
@@ -56,7 +52,6 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 		ProductCategory,
 		'id' | 'name'
 	> | null >( null );
-	const selectControlMenuRef = useRef< HTMLElement >( null );
 
 	const onSave = async () => {
 		recordEvent( 'product_category_add', {
@@ -103,6 +98,7 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 					value={ categoryName }
 					onChange={ setCategoryName }
 				/>
+				{ JSON.stringify( categoryParent ) }
 				<SelectControl< Pick< ProductCategory, 'id' | 'name' > >
 					items={ categoriesSelectList }
 					label={ __( 'Parent category (optional)', 'woocommerce' ) }
@@ -111,101 +107,68 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 					onRemove={ () => setCategoryParent( null ) }
 					onInputChange={ searchDelayed }
 					getFilteredItems={ getFilteredItems }
+					getItemLabel={ ( item ) => item?.name || '' }
+					getItemValue={ ( item ) => item?.id || '' }
 				>
 					{ ( {
 						items,
 						isOpen,
 						getMenuProps,
-						selectItem,
 						highlightedIndex,
 						getItemProps,
 					} ) => {
 						return (
-							<div
-								{ ...getMenuProps( {
-									ref: selectControlMenuRef,
-								} ) }
-								className={ classnames(
-									'woocommerce-select-control__menu',
-									{
-										'is-open': isOpen,
-										'category-field-dropdown__menu': isOpen,
-									}
-								) }
+							<Menu
+								isOpen={ isOpen }
+								getMenuProps={ getMenuProps }
+								className="woocommerce-category-field-dropdown__menu"
 							>
-								{ isOpen && (
-									<Popover
-										focusOnMount={ false }
-										className="woocommerce-select-control__popover-menu"
-										position="bottom center"
-										anchorRect={
-											selectControlMenuRef.current
-												? selectControlMenuRef.current.getBoundingClientRect()
-												: undefined
-										}
-									>
-										{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */ }
-										<div
-											className="woocommerce-select-control__popover-menu-container"
-											style={ {
-												width: selectControlMenuRef.current?.getBoundingClientRect()
-													.width,
-											} }
-											onMouseUp={ ( e ) =>
-												// Fix to prevent select control dropdown from closing when selecting within the Popover.
-												e.stopPropagation()
-											}
-										>
-											{ isOpen &&
-												isSearching &&
-												items.length === 0 && (
-													<div className="category-field-dropdown__item">
-														<div className="category-field-dropdown__item-content">
-															<Spinner />
-														</div>
-													</div>
-												) }
-											{ isOpen &&
-												items
-													.filter(
-														( item ) =>
+								<>
+									{ isOpen &&
+										isSearching &&
+										items.length === 0 && (
+											<div className="category-field-dropdown__item">
+												<div className="category-field-dropdown__item-content">
+													<Spinner />
+												</div>
+											</div>
+										) }
+									{ isOpen &&
+										items
+											.filter(
+												( item ) =>
+													categoryTreeKeyValues[
+														item.id
+													]?.parentID === 0
+											)
+											.map( ( item ) => {
+												return (
+													<CategoryFieldItem
+														key={ `${ item.id }` }
+														item={
 															categoryTreeKeyValues[
 																item.id
-															]?.parentID === 0
-													)
-													.map( ( item ) => {
-														return (
-															<CategoryFieldItem
-																key={ `${ item.id }` }
-																item={
-																	categoryTreeKeyValues[
-																		item.id
-																	]
-																}
-																onSelect={
-																	selectItem
-																}
-																selectedIds={
-																	categoryParent
-																		? [
-																				categoryParent.id,
-																		  ]
-																		: []
-																}
-																items={ items }
-																highlightedIndex={
-																	highlightedIndex
-																}
-																getItemProps={
-																	getItemProps
-																}
-															/>
-														);
-													} ) }
-										</div>
-									</Popover>
-								) }
-							</div>
+															]
+														}
+														selectedIds={
+															categoryParent
+																? [
+																		categoryParent.id,
+																  ]
+																: []
+														}
+														items={ items }
+														highlightedIndex={
+															highlightedIndex
+														}
+														getItemProps={
+															getItemProps
+														}
+													/>
+												);
+											} ) }
+								</>
+							</Menu>
 						);
 					} }
 				</SelectControl>

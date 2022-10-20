@@ -2,22 +2,30 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Button, Icon } from '@wordpress/components';
+import { Icon } from '@wordpress/components';
 import { plus } from '@wordpress/icons';
 import classNames from 'classnames';
 import { ProductCategory } from '@woocommerce/data';
+import { __experimentalSelectControlMenuItemProps as MenuItemProps } from '@woocommerce/components';
 
 type CategoryFieldAddNewItemProps = {
 	item: Pick< ProductCategory, 'id' | 'name' >;
-	onClick: ( e: React.MouseEvent< HTMLButtonElement > ) => void;
 	highlighted: boolean;
-};
+	index: number;
+} & Pick<
+	MenuItemProps< Pick< ProductCategory, 'id' | 'name' > >,
+	'getItemProps'
+>;
 
 export const CategoryFieldAddNewItem: React.FC<
 	CategoryFieldAddNewItemProps
-> = ( { item, onClick, highlighted } ) => {
+> = ( { item, highlighted, getItemProps, index } ) => {
 	return (
 		<div
+			{ ...getItemProps( {
+				item,
+				index,
+			} ) }
 			className={ classNames(
 				'category-field-dropdown__item category-field-dropdown__new-item',
 				{
@@ -25,19 +33,12 @@ export const CategoryFieldAddNewItem: React.FC<
 				}
 			) }
 		>
-			<Button
-				className="category-field-dropdown__item-content"
-				onClick={ ( e: React.MouseEvent< HTMLButtonElement > ) => {
-					onClick( e );
-				} }
-			>
-				<Icon
-					className="category-field-dropdown__toggle"
-					icon={ plus }
-					size={ 24 }
-				/>
-				{ sprintf( __( 'Create "%s"', 'woocommerce' ), item.name ) }
-			</Button>
+			<Icon
+				className="category-field-dropdown__toggle"
+				icon={ plus }
+				size={ 24 }
+			/>
+			{ sprintf( __( 'Create "%s"', 'woocommerce' ), item.name ) }
 		</div>
 	);
 };

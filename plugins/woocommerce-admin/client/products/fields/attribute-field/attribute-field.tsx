@@ -194,6 +194,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 								) }
 							/>
 						) }
+						<MenuSlot />
 					</div>
 				</CardBody>
 			</Card>

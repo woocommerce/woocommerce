@@ -2,12 +2,16 @@
  * External dependencies
  */
 import { useMemo, useState } from '@wordpress/element';
-import { Popover } from '@wordpress/components';
+import { __, sprintf } from '@wordpress/i18n';
+import { Icon } from '@wordpress/components';
+import { plus } from '@wordpress/icons';
 import {
 	selectControlStateChangeTypes,
 	Spinner,
 	__experimentalSelectControl as SelectControl,
+	__experimentalSelectControlMenuSlot as MenuSlot,
 	__experimentalSelectControlMenu as Menu,
+	__experimentalSelectControlMenuItem as MenuItem,
 } from '@woocommerce/components';
 import { ProductCategory } from '@woocommerce/data';
 import { debounce } from 'lodash';
@@ -18,8 +22,8 @@ import { debounce } from 'lodash';
 import './category-field.scss';
 import { CategoryFieldItem, CategoryTreeItem } from './category-field-item';
 import { useCategorySearch } from './use-category-search';
-import { CategoryFieldAddNewItem } from './category-field-add-new-item';
 import { CreateCategoryModal } from './create-category-modal';
+import { CategoryFieldAddNewItem } from './category-field-add-new-item';
 
 type CategoryFieldProps = {
 	label: string;
@@ -86,6 +90,10 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 	);
 
 	const onSelect = ( itemId: number, selected: boolean ) => {
+		if ( itemId === -99 ) {
+			setShowCreateNewModal( true );
+			return;
+		}
 		if ( selected ) {
 			const item = categoryTreeKeyValues[ itemId ].data;
 			if ( item ) {
@@ -114,6 +122,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 		);
 		if (
 			inputValue.length > 0 &&
+			! isSearching &&
 			! filteredItems.find(
 				( item ) => item.name.toLowerCase() === inputValue.toLowerCase()
 			)
@@ -132,61 +141,66 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 	const selectedIds = value.map( ( item ) => item.id );
 
 	return (
-		<SelectControl< Pick< ProductCategory, 'id' | 'name' > >
-			className="woocommerce-category-field-dropdown components-base-control"
-			multiple
-			items={ categoriesSelectList }
-			label={ label }
-			selected={ value }
-			getItemLabel={ ( item ) => item?.name || '' }
-			getItemValue={ ( item ) => item?.id || '' }
-			onSelect={ ( item ) => {
-				if ( item ) {
-					onSelect( item.id, ! selectedIds.includes( item.id ) );
-				}
-			} }
-			onRemove={ ( item ) => item && onSelect( item.id, false ) }
-			onInputChange={ searchDelayed }
-			getFilteredItems={ categoryFieldGetFilteredItems }
-			placeholder={ value.length === 0 ? placeholder : '' }
-			stateReducer={ ( state, actionAndChanges ) => {
-				const { changes, type } = actionAndChanges;
-				switch ( type ) {
-					case selectControlStateChangeTypes.ControlledPropUpdatedSelectedItem:
-						return {
-							...changes,
-							inputValue: state.inputValue,
-						};
-					case selectControlStateChangeTypes.ItemClick:
-						return {
-							...changes,
-							isOpen: true,
-							inputValue: state.inputValue,
-							highlightedIndex: state.highlightedIndex,
-						};
-					default:
-						return changes;
-				}
-			} }
-		>
-			{ ( {
-				items,
-				isOpen,
-				getMenuProps,
-				getItemProps,
-				selectItem,
-				highlightedIndex,
-			} ) => {
-				const rootItems =
-					items.length > 0
-						? items.filter(
-								( item ) =>
-									categoryTreeKeyValues[ item.id ]
-										?.parentID === 0 || item.id === -99
-						  )
-						: [];
-				return (
-					<>
+		<>
+			<SelectControl< Pick< ProductCategory, 'id' | 'name' > >
+				className="woocommerce-category-field-dropdown components-base-control"
+				multiple
+				items={ categoriesSelectList }
+				label={ label }
+				selected={ value }
+				getItemLabel={ ( item ) => item?.name || '' }
+				getItemValue={ ( item ) => item?.id || '' }
+				onSelect={ ( item ) => {
+					if ( item ) {
+						onSelect( item.id, ! selectedIds.includes( item.id ) );
+					}
+				} }
+				onRemove={ ( item ) => item && onSelect( item.id, false ) }
+				onInputChange={ searchDelayed }
+				getFilteredItems={ categoryFieldGetFilteredItems }
+				placeholder={ value.length === 0 ? placeholder : '' }
+				stateReducer={ ( state, actionAndChanges ) => {
+					const { changes, type } = actionAndChanges;
+					switch ( type ) {
+						case selectControlStateChangeTypes.ControlledPropUpdatedSelectedItem:
+							return {
+								...changes,
+								inputValue: state.inputValue,
+							};
+						case selectControlStateChangeTypes.ItemClick:
+							if (
+								changes.selectedItem &&
+								changes.selectedItem.id === -99
+							) {
+								return changes;
+							}
+							return {
+								...changes,
+								isOpen: true,
+								inputValue: state.inputValue,
+								highlightedIndex: state.highlightedIndex,
+							};
+						default:
+							return changes;
+					}
+				} }
+			>
+				{ ( {
+					items,
+					isOpen,
+					getMenuProps,
+					getItemProps,
+					highlightedIndex,
+				} ) => {
+					const rootItems =
+						items.length > 0
+							? items.filter(
+									( item ) =>
+										categoryTreeKeyValues[ item.id ]
+											?.parentID === 0 || item.id === -99
+							  )
+							: [];
+					return (
 						<Menu
 							isOpen={ isOpen }
 							getMenuProps={ getMenuProps }
@@ -201,23 +215,16 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 									</li>
 								) }
 								{ isOpen &&
-									rootItems.map( ( item ) => {
+									rootItems.map( ( item, menuIndex ) => {
 										return item.id === -99 ? (
 											<CategoryFieldAddNewItem
-												key={ item.id }
-												highlighted={
-													highlightedIndex ===
-													items.indexOf( item )
-												}
 												item={ item }
-												onClick={ ( e ) => {
-													// getToggleButtonProps().onClick(
-													// 	e
-													// );
-													setShowCreateNewModal(
-														true
-													);
-												} }
+												highlighted={
+													menuIndex ===
+													highlightedIndex
+												}
+												getItemProps={ getItemProps }
+												index={ menuIndex }
 											/>
 										) : (
 											<CategoryFieldItem
@@ -231,7 +238,6 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 													highlightedIndex
 												}
 												selectedIds={ selectedIds }
-												onSelect={ selectItem }
 												items={ items }
 												getItemProps={ getItemProps }
 											/>
@@ -239,23 +245,21 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 									} ) }
 							</>
 						</Menu>
-						{ showCreateNewModal && (
-							<CreateCategoryModal
-								initialCategoryName={ searchValue }
-								onCancel={ () =>
-									setShowCreateNewModal( false )
-								}
-								onCreated={ ( newCategory ) => {
-									onSelect( newCategory.id, true );
-									setShowCreateNewModal( false );
-									onInputChange( '' );
-								} }
-							/>
-						) }
-						<Popover.Slot />
-					</>
-				);
-			} }
-		</SelectControl>
+					);
+				} }
+			</SelectControl>
+			<MenuSlot />
+			{ showCreateNewModal && (
+				<CreateCategoryModal
+					initialCategoryName={ searchValue }
+					onCancel={ () => setShowCreateNewModal( false ) }
+					onCreated={ ( newCategory ) => {
+						onSelect( newCategory.id, true );
+						setShowCreateNewModal( false );
+						onInputChange( '' );
+					} }
+				/>
+			) }
+		</>
 	);
 };
