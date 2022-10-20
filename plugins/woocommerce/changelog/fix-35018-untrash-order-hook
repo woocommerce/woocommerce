@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Introduces new hook `woocommerce_untrash_order` as a COT/HPOS analog to `untrash_post`.
