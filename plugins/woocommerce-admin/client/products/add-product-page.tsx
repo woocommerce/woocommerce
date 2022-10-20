@@ -30,6 +30,7 @@ const AddProductPage: React.FC = () => {
 			<Form< Partial< Product > >
 				initialValues={ {
 					name: '',
+					sku: '',
 					stock_quantity: 0,
 					stock_status: 'instock',
 				} }
