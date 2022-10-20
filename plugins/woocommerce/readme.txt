@@ -205,6 +205,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Render columns via action so that they can be hooked into. [#34900](https://github.com/woocommerce/woocommerce/pull/34900)
 * Add - Support `wc_customer_bought_product` function in HPOS. [#34931](https://github.com/woocommerce/woocommerce/pull/34931)
 * Add - The updates will mean that the github workflows use the playwright versions of the api-core-tests rather than the supertest versions of the tests. [#34935](https://github.com/woocommerce/woocommerce/pull/34935)
+* Update - Improve the warnings about incompatibilities between plugins and features [#35198](https://github.com/woocommerce/woocommerce/pull/35198)
 * Update - Additional payment methods on new WCPay promotion page (payment-welcome) [#34581](https://github.com/woocommerce/woocommerce/pull/34581)
 * Update - Add Tiktok to free grow extensions list [#34953](https://github.com/woocommerce/woocommerce/pull/34953)
 * Update - Allowing generic item type in new experimental SelectControl. [#34547](https://github.com/woocommerce/woocommerce/pull/34547)
