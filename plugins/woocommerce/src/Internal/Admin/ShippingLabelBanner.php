@@ -46,7 +46,7 @@ class ShippingLabelBanner {
 			}
 
 			if ( class_exists( Jetpack_Connection_Manager::class ) ) {
-				$jetpack_connected = ( new Jetpack_Connection_Manager() )->is_active();
+				$jetpack_connected = ( new Jetpack_Connection_Manager() )->has_connected_owner();
 			}
 
 			if ( class_exists( '\WC_Connect_Loader' ) ) {
