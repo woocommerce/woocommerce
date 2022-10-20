@@ -34,7 +34,7 @@ export default {
 	},
 	shippingText: {
 		type: 'string',
-		default: __( 'Delivery', 'woo-gutenberg-products-block' ),
+		default: __( 'Shipping', 'woo-gutenberg-products-block' ),
 	},
 	lock: {
 		type: 'object',
