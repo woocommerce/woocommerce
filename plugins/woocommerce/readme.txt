@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Add billing and shipping address indexes on order update. [#35121](https://github.com/woocommerce/woocommerce/pull/35121)
 * Fix - Use correct datastore when backfilling orders. [#35176](https://github.com/woocommerce/woocommerce/pull/35176)
 * Fix - (HPOS) Ensure we use GMT when populating the `date_created_gmt` column for orders. [#34875](https://github.com/woocommerce/woocommerce/pull/34875)
 * Fix - Admin list table for orders (in HPOS mode) should check in case the user pages beyond the available range. [#34793](https://github.com/woocommerce/woocommerce/pull/34793)
