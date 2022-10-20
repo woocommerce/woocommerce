@@ -21285,7 +21285,7 @@ packages:
       normalize-path: 3.0.0
       schema-utils: 4.0.0
       serialize-javascript: 6.0.0
-      webpack: 5.70.0_webpack-cli@4.9.2
+      webpack: 5.70.0
     dev: true
 
   /core-js-compat/3.19.1:
@@ -21625,7 +21625,7 @@ packages:
       postcss-modules-values: 4.0.0_postcss@8.4.12
       postcss-value-parser: 4.2.0
       semver: 7.3.5
-      webpack: 5.70.0_webpack-cli@4.9.2
+      webpack: 5.70.0
     dev: true
 
   /css-select-base-adapter/0.1.1:
@@ -37459,7 +37459,7 @@ packages:
       sass: 1.49.9
       schema-utils: 3.1.1
       semver: 7.3.5
-      webpack: 5.70.0_webpack-cli@4.9.2
+      webpack: 5.70.0
     dev: true
 
   /sass-loader/10.2.1_webpack@5.70.0:
@@ -39402,7 +39402,7 @@ packages:
       serialize-javascript: 6.0.0
       source-map: 0.6.1
       terser: 5.10.0_acorn@8.8.0
-      webpack: 5.70.0_webpack-cli@4.9.2
+      webpack: 5.70.0
     transitivePeerDependencies:
       - acorn
 
@@ -40593,7 +40593,7 @@ packages:
       loader-utils: 1.4.0
       mime: 2.5.2
       schema-utils: 1.0.0
-      webpack: 5.70.0_webpack-cli@4.9.2
+      webpack: 5.70.0
     dev: true
 
   /url-loader/3.0.0_webpack@4.46.0:
