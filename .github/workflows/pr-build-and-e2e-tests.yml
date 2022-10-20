@@ -77,7 +77,8 @@ jobs:
         name: Runs API tests.
         runs-on: ubuntu-20.04
         env:
-            API_TEST_REPORT_DIR: ${{ github.workspace }}/api-test-report
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-results
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-report
         steps:
             - uses: actions/checkout@v3
 
@@ -106,7 +107,7 @@ jobs:
                     steps.run_playwright_api_tests.conclusion != 'skipped' 
                   )
               working-directory: plugins/woocommerce
-              run: pnpm exec allure generate --clean api-test-report/allure-results --output api-test-report/allure-report
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
             - name: Archive Playwright API test report
               if: |
                   always() &&
@@ -115,8 +116,8 @@ jobs:
               with:
                   name: api-test-report---pr-${{ github.event.number }}
                   path: |
-                      plugins/woocommerce/api-test-report/allure-results
-                      plugins/woocommerce/api-test-report/allure-report
+                      ${{ env.ALLURE_RESULTS_DIR }}
+                      ${{ env.ALLURE_REPORT_DIR }}
                   if-no-files-found: ignore
                   retention-days: 5
 
