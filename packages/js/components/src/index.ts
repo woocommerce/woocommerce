@@ -49,7 +49,10 @@ export {
 	MenuItem as __experimentalSelectControlMenuItem,
 	MenuItemProps as __experimentalSelectControlMenuItemProps,
 } from './experimental-select-control/menu-item';
-export { Menu as __experimentalSelectControlMenu } from './experimental-select-control/menu';
+export {
+	Menu as __experimentalSelectControlMenu,
+	MenuSlot as __experimentalSelectControlMenuSlot,
+} from './experimental-select-control/menu';
 export { default as ScrollTo } from './scroll-to';
 export { Sortable } from './sortable';
 export { ListItem } from './list-item';
@@ -71,11 +74,11 @@ export { default as Tag } from './tag';
 export { default as TextControl } from './text-control';
 export { default as TextControlWithAffixes } from './text-control-with-affixes';
 export { default as Timeline } from './timeline';
+export { Tooltip as __experimentalTooltip } from './tooltip';
 export { default as ViewMoreList } from './view-more-list';
 export { default as WebPreview } from './web-preview';
 export { Badge } from './badge';
 export { DynamicForm } from './dynamic-form';
-export { EnrichedLabel } from './enriched-label';
 export { default as TourKit } from './tour-kit';
 export * as TourKitTypes from './tour-kit/types';
 export { CollapsibleContent } from './collapsible-content';

@@ -35,4 +35,4 @@ jobs:
         uses: shufo/auto-assign-reviewer-by-files@f5f3db9ef06bd72ab6978996988c6462cbdaabf6
         with:
           config: ".github/project-community-pr-assigner.yml"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PR_ASSIGN_TOKEN }}

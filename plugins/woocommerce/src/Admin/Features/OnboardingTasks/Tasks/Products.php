@@ -167,15 +167,7 @@ class Products extends Task {
 	 * @return bool
 	 */
 	public static function has_products() {
-		$product_query = new \WC_Product_Query(
-			array(
-				'limit'  => 1,
-				'return' => 'ids',
-				'status' => array( 'publish' ),
-			)
-		);
-		$products      = $product_query->get_products();
-
-		return count( $products ) !== 0;
+		$counts = wp_count_posts('product');
+		return isset( $counts->publish ) && $counts->publish > 0;
 	}
 }

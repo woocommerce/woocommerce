@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { addQueryArgs } from '@wordpress/url';
 import { apiFetch } from '@wordpress/data-controls';
 
 /**
@@ -48,7 +49,9 @@ export function* getProducts( query: Partial< ProductQuery > ) {
 export function* getProduct( productId: number ) {
 	try {
 		const product: Product = yield apiFetch( {
-			path: `${ WC_PRODUCT_NAMESPACE }/${ productId }`,
+			path: addQueryArgs( `${ WC_PRODUCT_NAMESPACE }/${ productId }`, {
+				context: 'edit',
+			} ),
 			method: 'GET',
 		} );
 
