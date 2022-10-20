@@ -21,7 +21,7 @@ import _isEqual from 'lodash/isEqual';
 /**
  * Internal dependencies
  */
-import { FormContext, FormErrors } from './form-context';
+import { FormContext, FormErrors, InputProps } from './form-context';
 
 type FormProps< Values > = {
 	/**
@@ -269,17 +269,7 @@ function FormComponent< Values extends Record< string, any > >(
 
 	function getInputProps< Value = Values[ keyof Values ] >(
 		name: string
-	): {
-		value: Value;
-		checked: boolean;
-		selected?: boolean;
-		onChange: (
-			value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
-		) => void;
-		onBlur: () => void;
-		className: string | undefined;
-		help: string | null | undefined;
-	} {
+	): InputProps< Value > {
 		const inputValue = _get( values, name );
 		const isTouched = touched[ name ];
 		const inputError = _get( errors, name );
@@ -288,9 +278,8 @@ function FormComponent< Values extends Record< string, any > >(
 			value: inputValue,
 			checked: Boolean( inputValue ),
 			selected: inputValue,
-			onChange: (
-				value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
-			) => handleChange( name, value ),
+			onChange: ( value: ChangeEvent< HTMLInputElement > | Value ) =>
+				handleChange( name, value as Values[ keyof Values ] ),
 			onBlur: () => handleBlur( name ),
 			className: isTouched && inputError ? 'has-error' : undefined,
 			help: isTouched ? ( inputError as string ) : null,

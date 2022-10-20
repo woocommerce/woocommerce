@@ -34,23 +34,22 @@ import { useProductHelper } from '../use-product-helper';
 import { AddNewShippingClassModal } from '../shared/add-new-shipping-class-modal';
 import { getTextControlProps } from './utils';
 import './product-shipping-section.scss';
+import {
+	ADD_NEW_SHIPPING_CLASS_OPTION_VALUE,
+	UNCATEGORIZED_CATEGORY_SLUG,
+} from '../constants';
 
 export type ProductShippingSectionProps = {
 	product?: PartialProduct;
 };
 
-// This should never be a real slug value of any existing shipping class
-const ADD_NEW_SHIPPING_CLASS_OPTION_VALUE = '__ADD_NEW_SHIPPING_CLASS_OPTION__';
-
-const DEFAULT_SHIPPING_CLASS_OPTIONS: SelectControl.Option[] = [
+export const DEFAULT_SHIPPING_CLASS_OPTIONS: SelectControl.Option[] = [
 	{ value: '', label: __( 'No shipping class', 'woocommerce' ) },
 	{
 		value: ADD_NEW_SHIPPING_CLASS_OPTION_VALUE,
 		label: __( 'Add new shipping class', 'woocommerce' ),
 	},
 ];
-
-const UNCATEGORIZED_CATEGORY_SLUG = 'uncategorized';
 
 function mapShippingClassToSelectOption(
 	shippingClasses: ProductShippingClass[]
@@ -95,7 +94,7 @@ function extractDefaultShippingClassFromProduct(
 export function ProductShippingSection( {
 	product,
 }: ProductShippingSectionProps ) {
-	const { getInputProps } = useFormContext< PartialProduct >();
+	const { getInputProps, setValue } = useFormContext< PartialProduct >();
 	const { formatNumber, parseNumber } = useProductHelper();
 	const [ highlightSide, setHighlightSide ] =
 		useState< ShippingDimensionsImageProps[ 'highlight' ] >();
@@ -374,6 +373,7 @@ export function ProductShippingSection( {
 							Promise< ProductShippingClass >
 						>( values ).then( ( value ) => {
 							invalidateResolution( 'getProductShippingClasses' );
+							setValue( 'shipping_class', value.slug );
 							return value;
 						} )
 					}

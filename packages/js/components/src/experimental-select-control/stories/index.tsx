@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { CheckboxControl, Spinner } from '@wordpress/components';
+import {
+	Button,
+	CheckboxControl,
+	Modal,
+	SlotFillProvider,
+	Spinner,
+} from '@wordpress/components';
 import React from 'react';
 import { createElement, useState } from '@wordpress/element';
 
@@ -11,7 +17,7 @@ import { createElement, useState } from '@wordpress/element';
 import { SelectedType, DefaultItemType, getItemLabelType } from '../types';
 import { MenuItem } from '../menu-item';
 import { SelectControl, selectControlStateChangeTypes } from '../';
-import { Menu } from '../menu';
+import { Menu, MenuSlot } from '../menu';
 
 const sampleItems = [
 	{ value: 'apple', label: 'Apple' },
@@ -362,6 +368,45 @@ export const CustomItemType: React.FC = () => {
 				getItemValue={ ( item ) => String( item?.itemId ) }
 			/>
 		</>
+	);
+};
+
+export const SingleWithinModalUsingBodyDropdownPlacement: React.FC = () => {
+	const [ isOpen, setOpen ] = useState( true );
+	const [ selected, setSelected ] =
+		useState< SelectedType< DefaultItemType > >();
+	const [ selectedTwo, setSelectedTwo ] =
+		useState< SelectedType< DefaultItemType > >();
+
+	return (
+		<SlotFillProvider>
+			Selected: { JSON.stringify( selected ) }
+			<Button onClick={ () => setOpen( true ) }>
+				Show Dropdown in Modal
+			</Button>
+			{ isOpen && (
+				<Modal
+					title="Dropdown Modal"
+					onRequestClose={ () => setOpen( false ) }
+				>
+					<SelectControl
+						items={ sampleItems }
+						label="Single value"
+						selected={ selected }
+						onSelect={ ( item ) => item && setSelected( item ) }
+						onRemove={ () => setSelected( null ) }
+					/>
+					<SelectControl
+						items={ sampleItems }
+						label="Single value"
+						selected={ selectedTwo }
+						onSelect={ ( item ) => item && setSelectedTwo( item ) }
+						onRemove={ () => setSelectedTwo( null ) }
+					/>
+				</Modal>
+			) }
+			<MenuSlot />
+		</SlotFillProvider>
 	);
 };
 

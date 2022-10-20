@@ -59,9 +59,7 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	description: string;
 	short_description: string;
 	sku: string;
-	date_on_sale_from: string | null;
 	date_on_sale_from_gmt: string | null;
-	date_on_sale_to: string | null;
 	date_on_sale_to_gmt: string | null;
 	virtual: boolean;
 	downloadable: boolean;

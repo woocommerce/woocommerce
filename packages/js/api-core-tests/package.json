@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/api-core-tests",
-	"version": "0.1.0",
+	"version": "1.0.0",
 	"description": "API tests for WooCommerce",
 	"main": "index.js",
 	"engines": {
