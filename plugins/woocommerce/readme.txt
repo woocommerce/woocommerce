@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Use correct datastore when backfilling orders. [#35176](https://github.com/woocommerce/woocommerce/pull/35176)
 * Fix - (HPOS) Ensure we use GMT when populating the `date_created_gmt` column for orders. [#34875](https://github.com/woocommerce/woocommerce/pull/34875)
 * Fix - Admin list table for orders (in HPOS mode) should check in case the user pages beyond the available range. [#34793](https://github.com/woocommerce/woocommerce/pull/34793)
 * Fix - Allow features to declare their initial enabled state. [#34867](https://github.com/woocommerce/woocommerce/pull/34867)
