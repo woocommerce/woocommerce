@@ -497,9 +497,9 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @return \WC_Order_Data_Store_CPT Data store instance.
 	 */
-	private function get_cpt_data_store_instance() {
+	public function get_cpt_data_store_instance() {
 		if ( ! isset( $this->cpt_data_store ) ) {
-			$this->cpt_data_store = new \WC_Order_Data_Store_CPT();
+			$this->cpt_data_store = $this->get_post_data_store_for_backfill();
 		}
 		return $this->cpt_data_store;
 	}
@@ -985,7 +985,7 @@ WHERE
 
 		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled() && 0 === $data_synchronizer->get_current_orders_pending_sync_count_cached();
 		$load_posts_for    = array_diff( $order_ids, self::$reading_order_ids );
-		$post_orders       = $data_sync_enabled ? $this->get_post_orders_for_ids( $load_posts_for ) : array();
+		$post_orders       = $data_sync_enabled ? $this->get_post_orders_for_ids( array_intersect_key( $orders, array_flip( $load_posts_for ) ) ) : array();
 
 		foreach ( $data as $order_data ) {
 			$order_id = absint( $order_data->id );
@@ -1084,31 +1084,46 @@ WHERE
 	/**
 	 * Helper function to get posts data for an order in bullk. We use to this to compute posts object in bulk so that we can compare it with COT data.
 	 *
-	 * @param array $order_ids List of order IDs.
+	 * @param array $orders    List of orders mapped by $order_id.
 	 *
 	 * @return array List of posts.
 	 */
-	private function get_post_orders_for_ids( array $order_ids ): array {
-		$cpt_data_store = $this->get_cpt_data_store_instance();
+	private function get_post_orders_for_ids( array $orders ): array {
+		$order_ids = array_keys( $orders );
 		// We have to bust meta cache, otherwise we will just get the meta cached by OrderTableDataStore.
 		foreach ( $order_ids as $order_id ) {
 			wp_cache_delete( WC_Order::generate_meta_cache_key( $order_id, 'orders' ), 'orders' );
 		}
-		$query_vars = array(
-			'include' => $order_ids,
-			'type'    => wc_get_order_types(),
-			'status'  => 'any',
-			'limit'   => count( $order_ids ),
-		);
-		$cpt_data_store->prime_caches_for_orders( $order_ids, $query_vars );
-		$orders = array();
-		foreach ( $order_ids as $order_id ) {
-			$order = new WC_Order();
-			$order->set_id( $order_id );
-			$cpt_data_store->read( $order );
-			$orders[ $order_id ] = $order;
+
+		$cpt_stores       = array();
+		$cpt_store_orders = array();
+		foreach ( $orders as $order_id => $order ) {
+			$table_data_store     = $order->get_data_store();
+			$cpt_data_store       = $table_data_store->get_cpt_data_store_instance();
+			$cpt_store_class_name = get_class( $cpt_data_store );
+			if ( ! isset( $cpt_stores[ $cpt_store_class_name ] ) ) {
+				$cpt_stores[ $cpt_store_class_name ]       = $cpt_data_store;
+				$cpt_store_orders[ $cpt_store_class_name ] = array();
+			}
+			$cpt_store_orders[ $cpt_store_class_name ][ $order_id ] = $order;
 		}
-		return $orders;
+
+		$cpt_orders = array();
+		foreach ( $cpt_stores as $cpt_store_name => $cpt_store ) {
+			// Prime caches if we can.
+			if ( method_exists( $cpt_store, 'prime_caches_for_orders' ) ) {
+				$cpt_store->prime_caches_for_orders( array_keys( $cpt_store_orders[ $cpt_store_name ] ), array() );
+			}
+
+			foreach ( $cpt_store_orders[ $cpt_store_name ] as $order_id => $order ) {
+				$cpt_order_class_name = wc_get_order_type( $order->get_type() )['class_name'];
+				$cpt_order            = new $cpt_order_class_name();
+				$cpt_order->set_id( $order_id );
+				$cpt_store->read( $cpt_order );
+				$cpt_orders[ $order_id ] = $cpt_order;
+			}
+		}
+		return $cpt_orders;
 	}
 
 	/**
@@ -1221,12 +1236,12 @@ WHERE
 	/**
 	 * Migrate post record from a given order object.
 	 *
-	 * @param \WC_Order $order Order object.
-	 * @param \WC_Order $post_order Order object read from posts.
+	 * @param \WC_Abstract_Order $order Order object.
+	 * @param \WC_Abstract_Order $post_order Order object read from posts.
 	 *
 	 * @return void
 	 */
-	private function migrate_post_record( \WC_Order &$order, \WC_Order $post_order ): void {
+	private function migrate_post_record( \WC_Abstract_Order &$order, \WC_Abstract_Order $post_order ): void {
 		$this->migrate_meta_data_from_post_order( $order, $post_order );
 		$post_order_base_data = $post_order->get_base_data();
 		foreach ( $post_order_base_data as $key => $value ) {

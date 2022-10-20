@@ -187,7 +187,7 @@ class WC_Order_Factory {
 	 *
 	 * @return array Array of order_id => class_name.
 	 */
-	private static function get_class_names_for_order_ids( $order_ids ) {
+	public static function get_class_names_for_order_ids( $order_ids ) {
 		$order_data_store = WC_Data_Store::load( 'order' );
 		if ( $order_data_store->has_callable( 'get_orders_type' ) ) {
 			$order_types = $order_data_store->get_orders_type( $order_ids );
