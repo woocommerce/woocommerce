@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Revert change that auto collapses the product short description field.
