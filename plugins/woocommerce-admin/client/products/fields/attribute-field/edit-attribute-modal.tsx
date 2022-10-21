@@ -34,8 +34,6 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 	>( undefined );
 	const [ selectedAttributeId, setSelectedAttributeId ] =
 		useState< number >( clickedAttributeId );
-	const [ visibleToCustomers, setVisibleToCustomers ] = useState( false );
-	const [ usedForFilters, setUsedForFilters ] = useState( false );
 
 	useEffect( () => {
 		const selectedAttribute = allAttributes.find(
@@ -87,10 +85,15 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 				/>
 				<div className="woocommerce-edit-attribute-modal__option-container">
 					<CheckboxControl
-						onChange={ ( val ) => setVisibleToCustomers( val ) }
-						checked={ visibleToCustomers }
+						onChange={ ( val ) =>
+							setEditableAttribute( {
+								...( editableAttribute as HydratedAttributeType ),
+								visible: val,
+							} )
+						}
+						checked={ editableAttribute?.visible }
 						label={ __( 'Visible to customers', 'woocommerce' ) }
-					/>{ ' ' }
+					/>
 					<Tooltip
 						text={ __(
 							'Show or hide this attribute on the product page',
@@ -100,8 +103,13 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 				</div>
 				<div className="woocommerce-edit-attribute-modal__option-container">
 					<CheckboxControl
-						onChange={ ( val ) => setUsedForFilters( val ) }
-						checked={ usedForFilters }
+						onChange={ ( val ) =>
+							setEditableAttribute( {
+								...( editableAttribute as HydratedAttributeType ),
+								variation: val,
+							} )
+						}
+						checked={ editableAttribute?.variation }
 						label={ __( 'Used for filters', 'woocommerce' ) }
 					/>
 					<Tooltip
