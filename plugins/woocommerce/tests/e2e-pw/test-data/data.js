@@ -2,6 +2,9 @@ const {
 	ADMIN_USER,
 	ADMIN_PASSWORD,
 	ADMIN_USER_EMAIL,
+	CUSTOMER_USER,
+	CUSTOMER_PASSWORD,
+	CUSTOMER_USER_EMAIL,
 	USE_WP_ENV,
 } = process.env;
 
@@ -13,6 +16,35 @@ const admin = {
 		( !! USE_WP_ENV
 			? 'wordpress@example.com'
 			: 'admin@woocommercecoree2etestsuite.com' ),
+};
+
+const customer = {
+	username: CUSTOMER_USER ?? 'customer',
+	password: CUSTOMER_PASSWORD ?? 'password',
+	email: CUSTOMER_USER_EMAIL ?? 'customer@woocommercecoree2etestsuite.com',
+	billing: {
+		us: {
+			first_name: 'Maggie',
+			last_name: 'Simpson',
+			address: '123 Evergreen Terrace',
+			city: 'Springfield',
+			country: 'US',
+			state: 'OR',
+			zip: '97403',
+			phone: '555 555-5555',
+			email: 'customer@example.com',
+		},
+		malta: {
+			first_name: 'Maggie',
+			last_name: 'Simpson',
+			address: '123 Evergreen Terrace',
+			city: 'Valletta',
+			country: 'MT',
+			zip: 'VT 1011',
+			phone: '555 555-5555',
+			email: 'vt-customer@example.com',
+		},
+	},
 };
 
 const storeDetails = {
@@ -55,37 +87,8 @@ const storeDetails = {
 	},
 };
 
-// mytodo replace hardcoded customer details from tests with this one
-// mytodo change name to `customer`
-const customerDetails = {
-	// mytodo add username, password, email
-
-	// mytodo put inside `billingAddress` object
-	us: {
-		first_name: 'Maggie',
-		last_name: 'Simpson',
-		address: '123 Evergreen Terrace',
-		city: 'Springfield',
-		country: 'US',
-		state: 'OR',
-		zip: '97403',
-		phone: '555 555-5555',
-		email: 'customer@example.com',
-	},
-	malta: {
-		first_name: 'Maggie',
-		last_name: 'Simpson',
-		address: '123 Evergreen Terrace',
-		city: 'Valletta',
-		country: 'MT',
-		zip: 'VT 1011',
-		phone: '555 555-5555',
-		email: 'vt-customer@example.com',
-	},
-};
-
 module.exports = {
 	storeDetails,
 	admin,
-	customerDetails,
+	customer,
 };
