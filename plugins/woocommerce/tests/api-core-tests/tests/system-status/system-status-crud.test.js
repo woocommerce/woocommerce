@@ -58,7 +58,6 @@ test.describe('System Status API tests', () => {
 					"remote_post_response": expect.any(String),
 					"remote_get_successful": expect.any(Boolean),
 					"remote_get_response": expect.any(String),
-
 				})
 			})
 		);
@@ -580,7 +579,6 @@ test.describe('System Status API tests', () => {
 			])
 		);
 
-
 	});
 
 	test('can retrieve a system status tool', async ({
@@ -592,15 +590,13 @@ test.describe('System Status API tests', () => {
 		expect(response.status()).toEqual(200);
 
 		expect(responseJSON).toEqual(
-				expect.objectContaining({
-					"id": "clear_transients",
-					"name": "WooCommerce transients",
-					"action": "Clear transients",
-					"description": "This tool will clear the product/shop transients cache.",				  
-				}),
+			expect.objectContaining({
+				"id": "clear_transients",
+				"name": "WooCommerce transients",
+				"action": "Clear transients",
+				"description": "This tool will clear the product/shop transients cache.",
+			}),
 		);
-
-
 	});
 
 	test('can run a tool from system status', async ({
@@ -612,14 +608,14 @@ test.describe('System Status API tests', () => {
 		expect(response.status()).toEqual(200);
 
 		expect(responseJSON).toEqual(
-				expect.objectContaining({
-					"id": "clear_transients",
-					"name": "WooCommerce transients",
-					"action": "Clear transients",
-					"description": "This tool will clear the product/shop transients cache.",	
-					"success": true,
-					"message": "Product transients cleared",			  
-				}),
+			expect.objectContaining({
+				"id": "clear_transients",
+				"name": "WooCommerce transients",
+				"action": "Clear transients",
+				"description": "This tool will clear the product/shop transients cache.",
+				"success": true,
+				"message": "Product transients cleared",
+			}),
 		);
 	});
 
