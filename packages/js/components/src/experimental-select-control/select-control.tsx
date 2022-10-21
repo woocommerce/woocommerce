@@ -139,6 +139,8 @@ function SelectControl< ItemType = DefaultItemType >( {
 		setInputValue( getItemLabel( singleSelectedItem ) );
 	}, [ singleSelectedItem ] );
 
+	// TODO: for some reason the value in getInputProps is not updated when singleSelectedItem changes
+
 	const {
 		isOpen,
 		getLabelProps,
@@ -205,6 +207,8 @@ function SelectControl< ItemType = DefaultItemType >( {
 		removeSelectedItem( item );
 		onRemove( item );
 	};
+
+	console.debug( 'getInputProps', getInputProps() );
 
 	const selectedItemTags = multiple ? (
 		<SelectedItems
