@@ -17,7 +17,10 @@ const deleteAllShippingClasses = async ( adminPage ) => {
 	}
 
 	while ( count-- ) {
-		await adminPage.locator( '.wc-shipping-class-delete' ).first().click();
+		await adminPage.dispatchEvent(
+			'.wc-shipping-class-delete >> nth=0',
+			'click'
+		);
 	}
 
 	await adminPage.click( '.wc-shipping-class-save' );
