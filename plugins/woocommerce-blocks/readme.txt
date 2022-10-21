@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 6.0
 Tested up to: 6.0
 Requires PHP: 7.0
-Stable tag: 8.7.2
+Stable tag: 8.7.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -79,6 +79,11 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 Release and roadmap notes available on the [WooCommerce Developers Blog](https://woocommerce.wordpress.com/2019/01/15/woocommerce-blocks-1-3-0-release-notes/)
 
 == Changelog ==
+
+= 8.7.3 - 2022-10-20 =
+
+#### Bug fixes
+- Fixed an issue where the argument passed to `canMakePayment` contained the incorrect keys. Also fixed the current user's customer data appearing in the editor when editing the Checkout block.
 
 = 8.7.2 - 2022-10-13 =
 
