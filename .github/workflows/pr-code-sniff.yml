@@ -35,5 +35,6 @@ jobs:
           composer --version
 
       - name: Run PHPCS
+        if: steps.changed-files.outputs.any_changed == 'true'
         run: ./phpcs -q --report=checkstyle ${{ steps.changed-files.outputs.all_changed_files }} | cs2pr    
         working-directory: plugins/woocommerce/vendor/bin
