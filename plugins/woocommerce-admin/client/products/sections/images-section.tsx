@@ -48,6 +48,7 @@ export const ImagesSection: React.FC = () => {
 				( file ) => file.id === parseInt( image?.props?.id, 10 )
 			);
 		} );
+		recordEvent( 'product_image_change_order' );
 		setValue( 'images', orderedImages );
 	};
 
@@ -100,6 +101,7 @@ export const ImagesSection: React.FC = () => {
 						} }
 						onDragEnd={ () => {
 							if ( isRemoving && draggedImageId ) {
+								recordEvent( 'product_image_remove' );
 								setValue(
 									'images',
 									images.filter(
@@ -119,6 +121,7 @@ export const ImagesSection: React.FC = () => {
 								) === undefined
 							) {
 								images[ replaceIndex ] = media as Image;
+								recordEvent( 'product_image_replace' );
 								setValue( 'images', images );
 							}
 						} }
@@ -169,6 +172,9 @@ export const ImagesSection: React.FC = () => {
 												( img ) => file.id === img.id
 											) === undefined
 										) {
+											recordEvent(
+												'product_choose_image_button'
+											);
 											setValue( 'images', [
 												...images,
 												file,
@@ -176,6 +182,7 @@ export const ImagesSection: React.FC = () => {
 										}
 									} }
 									onUpload={ ( files ) => {
+										recordEvent( 'product_image_upload' );
 										if ( files[ 0 ].id ) {
 											setValue( 'images', [
 												...images,

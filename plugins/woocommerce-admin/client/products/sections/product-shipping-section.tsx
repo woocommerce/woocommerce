@@ -12,6 +12,7 @@ import {
 	ProductShippingClass,
 } from '@woocommerce/data';
 import interpolateComponents from '@automattic/interpolate-components';
+import { recordEvent } from '@woocommerce/tracks';
 import {
 	BaseControl,
 	Card,
@@ -242,6 +243,11 @@ export function ProductShippingSection( {
 												href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=classes` }
 												target="_blank"
 												type="external"
+												onClick={ () => {
+													recordEvent(
+														'product_shipping_global_settings'
+													);
+												} }
 											>
 												<></>
 											</Link>
