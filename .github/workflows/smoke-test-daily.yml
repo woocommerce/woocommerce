@@ -1,6 +1,5 @@
 name: Smoke test daily
 on:
-    # mytodo remove pull_request, uncomment cron
     # schedule:
     #     - cron: '25 3 * * *'
     workflow_dispatch:
