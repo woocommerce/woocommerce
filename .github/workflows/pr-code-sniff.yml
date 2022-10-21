@@ -38,4 +38,4 @@ jobs:
 
       - name: Run PHPCS
         if: steps.changed-files.outputs.any_changed == 'true'
-        run: ./plugins/woocommerce/vendor/bin/phpcs -q --report=checkstyle ${{ steps.changed-files.outputs.all_changed_files }} | cs2pr        
+        run: ./plugins/woocommerce/vendor/bin/phpcs --standard=./phpcs.xml -q --report=checkstyle ${{ steps.changed-files.outputs.all_changed_files }} | cs2pr        
