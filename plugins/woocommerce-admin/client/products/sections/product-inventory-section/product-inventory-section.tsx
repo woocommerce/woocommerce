@@ -64,10 +64,6 @@ export const ProductInventorySection: React.FC = () => {
 							'SKU (Stock Keeping Unit)',
 							'woocommerce'
 						) }
-						placeholder={ __(
-							'washed-oxford-button-down-shirt',
-							'woocommerce'
-						) }
 						{ ...getInputProps( 'sku' ) }
 					/>
 					{ canManageStock && (
