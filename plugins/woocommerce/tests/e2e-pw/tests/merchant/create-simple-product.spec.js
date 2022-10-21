@@ -88,9 +88,7 @@ test.describe( 'Add New Simple Product Page', () => {
 	test( 'can have a shopper add the simple virtual product to the cart', async ( {
 		page,
 	} ) => {
-		await page.goto( 'shop/' );
-		await page.selectOption( '.orderby', { value: 'date' } );
-		await page.waitForLoadState( 'networkidle' );
+		await page.goto( 'shop/?orderby=date' );
 		await page.click( `h2:has-text("${ virtualProductName }")` );
 		await page.click( 'text=Add to cart' );
 		await page.click( 'text=View cart' );
@@ -128,9 +126,7 @@ test.describe( 'Add New Simple Product Page', () => {
 	test( 'can have a shopper add the simple non-virtual product to the cart', async ( {
 		page,
 	} ) => {
-		await page.goto( 'shop/' );
-		await page.selectOption( '.orderby', { value: 'date' } );
-		await page.waitForLoadState( 'networkidle' );
+		await page.goto( 'shop/?orderby=date' );
 		await page.click( `h2:has-text("${ nonVirtualProductName }")` );
 		await page.click( 'text=Add to cart' );
 		await page.click( 'text=View cart' );
