@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Moved hook `woocommerce_before_delete_order` before delete order data from custom order tables.
