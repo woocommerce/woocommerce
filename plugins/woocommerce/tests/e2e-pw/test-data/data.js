@@ -1,3 +1,11 @@
+const {
+	ADMIN_USER,
+	ADMIN_PASSWORD,
+	ADMIN_USER_EMAIL,
+	USE_WP_ENV,
+} = process.env;
+
+// mytodo delete, then fix references. Have them use adminDetails.email instead
 const adminEmail =
 	process.env.USE_WP_ENV === '1'
 		? 'wordpress@example.com'
@@ -43,7 +51,22 @@ const storeDetails = {
 	},
 };
 
+// mytodo make use of this data across tests
+const admin = {
+	username: ADMIN_USER ?? 'admin',
+	password: ADMIN_PASSWORD ?? 'password',
+	email:
+		ADMIN_USER_EMAIL ??
+		( !! USE_WP_ENV ?? 'wordpress@example.com',
+		'admin@woocommercecoree2etestsuite.com' ),
+};
+
+// mytodo replace hardcoded customer details from tests with this one
+// mytodo change name to `customer`
 const customerDetails = {
+	// mytodo add username, password, email
+
+	// mytodo put inside `billingAddress` object
 	us: {
 		first_name: 'Maggie',
 		last_name: 'Simpson',
@@ -69,5 +92,6 @@ const customerDetails = {
 
 module.exports = {
 	storeDetails,
+	admin,
 	customerDetails,
 };
