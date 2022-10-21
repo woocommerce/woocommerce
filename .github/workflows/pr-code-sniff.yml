@@ -22,14 +22,15 @@ jobs:
         with:
           build: false
 
+      - name: Get Changed Files
+        id: changed-files
+        uses: tj-actions/changed-files@v32    
+
       - name: Tool versions
         run: |
           php --version
           composer --version
 
-      - name: Run code sniffer
-        uses: thenabeel/action-phpcs@v8
-        with:
-          files: "**.php"
-          phpcs_path: plugins/woocommerce/vendor/bin/phpcs
-          standard: phpcs.xml
+      - name: Run PHPCS
+        run: ./phpcs -q --report=checkstyle ${{ steps.changed-files.outputs.all_changed_files }} | cs2pr    
+        working-directory: plugins/woocommerce/vendor/bin
