@@ -14,6 +14,12 @@ use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 class Tax extends Task {
 
 	/**
+	 * Used to cache is_complete() method result.
+	 * @var null
+	 */
+	private $is_complete_result = null;
+
+	/**
 	 * Constructor
 	 *
 	 * @param TaskList $task_list Parent task list.
@@ -114,9 +120,13 @@ class Tax extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		return get_option( 'wc_connect_taxes_enabled' ) ||
-			count( TaxDataStore::get_taxes( array() ) ) > 0 ||
-			get_option( 'woocommerce_no_sales_tax' ) !== false;
+		if ( $this->is_complete_result === null ) {
+			$this->is_complete_result = get_option( 'wc_connect_taxes_enabled' ) ||
+				count( TaxDataStore::get_taxes( array() ) ) > 0 ||
+				get_option( 'woocommerce_no_sales_tax' ) !== false;
+		}
+
+		return $this->is_complete_result;
 	}
 
 	/**

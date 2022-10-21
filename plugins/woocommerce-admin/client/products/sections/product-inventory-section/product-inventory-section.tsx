@@ -20,6 +20,7 @@ import { getCheckboxProps, getTextControlProps } from '../utils';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { ProductSectionLayout } from '../../layout/product-section-layout';
 import { ManageStockSection } from './manage-stock-section';
+import { ManualStockSection } from './manual-stock-section';
 
 export const ProductInventorySection: React.FC = () => {
 	const { getInputProps, values } = useFormContext< Product >();
@@ -82,6 +83,7 @@ export const ProductInventorySection: React.FC = () => {
 							{ values.manage_stock && <ManageStockSection /> }
 						</>
 					) }
+					{ ! values.manage_stock && <ManualStockSection /> }
 				</CardBody>
 			</Card>
 		</ProductSectionLayout>

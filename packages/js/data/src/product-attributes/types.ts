@@ -8,7 +8,7 @@ import { DispatchFromMap } from '@automattic/data-stores';
  */
 import { CrudActions, CrudSelectors } from '../crud/types';
 
-type ProductAttribute = {
+export type QueryProductAttribute = {
 	id: number;
 	slug: string;
 	name: string;
@@ -24,19 +24,19 @@ type Query = {
 type ReadOnlyProperties = 'id';
 
 type MutableProperties = Partial<
-	Omit< ProductAttribute, ReadOnlyProperties >
+	Omit< QueryProductAttribute, ReadOnlyProperties >
 >;
 
 type ProductAttributeActions = CrudActions<
 	'ProductAttribute',
-	ProductAttribute,
+	QueryProductAttribute,
 	MutableProperties
 >;
 
 export type ProductAttributeSelectors = CrudSelectors<
 	'ProductAttribute',
 	'ProductAttributes',
-	ProductAttribute,
+	QueryProductAttribute,
 	Query,
 	MutableProperties
 >;
