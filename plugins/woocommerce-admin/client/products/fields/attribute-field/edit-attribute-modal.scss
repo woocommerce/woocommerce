@@ -1,13 +1,24 @@
 .woocommerce-edit-attribute-modal__body {
 	width: 500px;
+	max-width: 100%;
 
 	.woocommerce-experimental-select-control + .woocommerce-experimental-select-control {
-		margin-top: 2em;
+		margin-top: 1.3em;
 	}
 
 	.woocommerce-experimental-select-control__label {
 		font-size: 14px;
 		color: gray;
 		font-weight: bold;
+	}
+
+	.woocommerce-edit-attribute-modal__option-container {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.woocommerce-attribute-term-field {
+		margin-bottom: 1.5em;
 	}
 }

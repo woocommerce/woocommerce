@@ -2,8 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, Modal } from '@wordpress/components';
+import { Button, Modal, CheckboxControl } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
+import { __experimentalTooltip as Tooltip } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -33,6 +34,8 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 	>( undefined );
 	const [ selectedAttributeId, setSelectedAttributeId ] =
 		useState< number >( clickedAttributeId );
+	const [ visibleToCustomers, setVisibleToCustomers ] = useState( false );
+	const [ usedForFilters, setUsedForFilters ] = useState( false );
 
 	useEffect( () => {
 		const selectedAttribute = allAttributes.find(
@@ -66,24 +69,48 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 					) }
 					label={ __( 'Attribute', 'woocommerce' ) }
 				/>
-				<>
-					<AttributeTermInputField
-						label={ __( 'Values', 'woocommerce' ) }
-						placeholder={ __(
-							'Search or create value',
+				<AttributeTermInputField
+					label={ __( 'Values', 'woocommerce' ) }
+					placeholder={ __(
+						'Search or create value',
+						'woocommerce'
+					) }
+					value={ editableAttribute?.terms }
+					disabled={ ! editableAttribute?.id }
+					attributeId={ editableAttribute?.id }
+					onChange={ ( val ) => {
+						setEditableAttribute( {
+							...( editableAttribute as HydratedAttributeType ),
+							terms: val,
+						} );
+					} }
+				/>
+				<div className="woocommerce-edit-attribute-modal__option-container">
+					<CheckboxControl
+						onChange={ ( val ) => setVisibleToCustomers( val ) }
+						checked={ visibleToCustomers }
+						label={ __( 'Visible to customers', 'woocommerce' ) }
+					/>{ ' ' }
+					<Tooltip
+						text={ __(
+							'Show or hide this attribute on the product page',
 							'woocommerce'
 						) }
-						value={ editableAttribute?.terms }
-						disabled={ ! editableAttribute?.id }
-						attributeId={ editableAttribute?.id }
-						onChange={ ( val ) => {
-							setEditableAttribute( {
-								...( editableAttribute as HydratedAttributeType ),
-								terms: val,
-							} );
-						} }
 					/>
-				</>
+				</div>
+				<div className="woocommerce-edit-attribute-modal__option-container">
+					<CheckboxControl
+						onChange={ ( val ) => setUsedForFilters( val ) }
+						checked={ usedForFilters }
+						label={ __( 'Used for filters', 'woocommerce' ) }
+					/>
+					<Tooltip
+						text={ __(
+							'Show or hide this attribute in the filters section on your store’s category and shop pages',
+							'woocommerce'
+						) }
+					/>
+				</div>
 			</div>
 			<div className="woocommerce-add-attribute-modal__buttons">
 				<Button
