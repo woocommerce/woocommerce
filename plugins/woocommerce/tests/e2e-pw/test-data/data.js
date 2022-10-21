@@ -5,19 +5,13 @@ const {
 	USE_WP_ENV,
 } = process.env;
 
-// mytodo delete, then fix references. Have them use adminDetails.email instead
-const adminEmail =
-	process.env.USE_WP_ENV === '1'
-		? 'wordpress@example.com'
-		: 'admin@woocommercecoree2etestsuite.com';
-
 const storeDetails = {
 	us: {
 		store: {
 			address: 'addr1',
 			city: 'San Francisco',
 			zip: '94107',
-			email: adminEmail,
+			email: admin.email,
 			country: 'United States (US) — California', // corresponding to the text value of the option,
 			countryCode: 'US:CA',
 		},
@@ -36,7 +30,7 @@ const storeDetails = {
 			address: 'addr1',
 			city: 'Valletta',
 			zip: 'VT 1011',
-			email: adminEmail,
+			email: admin.email,
 			country: 'Malta', // corresponding to the text value of the option,
 			countryCode: 'MT',
 		},
@@ -51,7 +45,6 @@ const storeDetails = {
 	},
 };
 
-// mytodo make use of this data across tests
 const admin = {
 	username: ADMIN_USER ?? 'admin',
 	password: ADMIN_PASSWORD ?? 'password',
