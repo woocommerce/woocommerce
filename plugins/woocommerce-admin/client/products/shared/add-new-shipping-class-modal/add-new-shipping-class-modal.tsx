@@ -117,6 +117,8 @@ export type AddNewShippingClassModalProps = {
 	onCancel: () => void;
 };
 
+const INITIAL_VALUES = { name: '', slug: '', description: '' };
+
 export function AddNewShippingClassModal( {
 	shippingClass,
 	onAdd,
@@ -129,7 +131,7 @@ export function AddNewShippingClassModal( {
 			onRequestClose={ onCancel }
 		>
 			<Form< Partial< ProductShippingClass > >
-				initialValues={ shippingClass }
+				initialValues={ shippingClass ?? INITIAL_VALUES }
 				validate={ validateForm }
 				errors={ {} }
 				onSubmit={ onAdd }
