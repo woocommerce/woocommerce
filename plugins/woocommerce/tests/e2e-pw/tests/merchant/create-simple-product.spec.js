@@ -89,6 +89,8 @@ test.describe( 'Add New Simple Product Page', () => {
 		page,
 	} ) => {
 		await page.goto( 'shop/' );
+		await page.selectOption( '.orderby', { value: 'date' } );
+		await page.waitForLoadState( 'networkidle' );
 		await page.click( `h2:has-text("${ virtualProductName }")` );
 		await page.click( 'text=Add to cart' );
 		await page.click( 'text=View cart' );
@@ -127,6 +129,8 @@ test.describe( 'Add New Simple Product Page', () => {
 		page,
 	} ) => {
 		await page.goto( 'shop/' );
+		await page.selectOption( '.orderby', { value: 'date' } );
+		await page.waitForLoadState( 'networkidle' );
 		await page.click( `h2:has-text("${ nonVirtualProductName }")` );
 		await page.click( 'text=Add to cart' );
 		await page.click( 'text=View cart' );
