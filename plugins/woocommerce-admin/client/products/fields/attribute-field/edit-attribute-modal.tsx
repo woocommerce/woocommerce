@@ -50,7 +50,6 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 			className="woocommerce-edit-attribute-modal"
 		>
 			<div className="woocommerce-edit-attribute-modal__body">
-				<h2>Attribute</h2>
 				<AttributeInputField
 					placeholder={ __(
 						'Search or create attribute',
@@ -65,10 +64,11 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 					onlyAttributeIds={ allAttributes.map(
 						( attr ) => attr.id
 					) }
+					label={ __( 'Attribute', 'woocommerce' ) }
 				/>
 				<>
-					<h2>Values</h2>
 					<AttributeTermInputField
+						label={ __( 'Values', 'woocommerce' ) }
 						placeholder={ __(
 							'Search or create value',
 							'woocommerce'

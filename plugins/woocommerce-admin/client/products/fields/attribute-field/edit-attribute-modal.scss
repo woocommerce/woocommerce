@@ -1,7 +1,13 @@
 .woocommerce-edit-attribute-modal__body {
 	width: 500px;
-	> h2 {
+
+	.woocommerce-experimental-select-control + .woocommerce-experimental-select-control {
+		margin-top: 2em;
+	}
+
+	.woocommerce-experimental-select-control__label {
 		font-size: 14px;
 		color: gray;
+		font-weight: bold;
 	}
 }
