@@ -40,8 +40,9 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 } ) => {
 	const [ showAddAttributeModal, setShowAddAttributeModal ] =
 		useState( false );
-	const [ hydrationComplete, setHydrationComplete ] =
-		useState< boolean >( false );
+	const [ hydrationComplete, setHydrationComplete ] = useState< boolean >(
+		value ? false : true
+	);
 	const [ hydratedAttributes, setHydratedAttributes ] = useState<
 		HydratedAttributeType[]
 	>( [] );
@@ -271,9 +272,8 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 				<EditAttributeModal
 					onCancel={ () => setEditingAttributeId( null ) }
 					onEdit={ () => {} }
-					attribute={ value.find(
-						( attr ) => attr.id === editingAttributeId
-					) }
+					clickedAttributeId={ editingAttributeId }
+					allAttributes={ hydratedAttributes }
 				/>
 			) }
 			<Popover.Slot />

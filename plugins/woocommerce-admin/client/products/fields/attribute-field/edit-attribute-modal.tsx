@@ -3,16 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button, Modal } from '@wordpress/components';
-import { useFormContext } from '@woocommerce/components';
-import { useState, useCallback, useEffect } from '@wordpress/element';
-import {
-	ProductAttribute,
-	ProductAttributeTerm,
-	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
-	Product,
-} from '@woocommerce/data';
-
-import { resolveSelect } from '@wordpress/data';
+import { useState, useEffect } from '@wordpress/element';
+import { ProductAttribute } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -20,52 +12,37 @@ import { resolveSelect } from '@wordpress/data';
 import './add-attribute-modal.scss';
 import { AttributeInputField } from '../attribute-input-field';
 import { AttributeTermInputField } from '../attribute-term-input-field';
+import { HydratedAttributeType } from './attribute-field';
 
 import './edit-attribute-modal.scss';
 
-type CreateCategoryModalProps = {
+type EditAttributeModalProps = {
 	onCancel: () => void;
 	onEdit: ( alteredAttribute: ProductAttribute ) => void;
-	attribute: ProductAttribute | undefined;
+	allAttributes: HydratedAttributeType[];
+	clickedAttributeId: number;
 };
 
-export const EditAttributeModal: React.FC< CreateCategoryModalProps > = ( {
+export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 	onCancel,
 	onEdit,
-	attribute,
+	allAttributes,
+	clickedAttributeId,
 } ) => {
 	const [ editableAttribute, setEditableAttribute ] = useState<
-		Pick< ProductAttribute, 'id' | 'name' > | undefined
-	>( attribute ? { id: attribute.id, name: attribute.name } : undefined );
-	const [ attrTerms, setAttrTerms ] = useState< ProductAttributeTerm[] >(
-		[]
-	);
-	const {
-		values: { id: productId, attributes },
-	} = useFormContext< Product >();
-
-	const fetchTerms = useCallback( () => {
-		return resolveSelect( EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME )
-			.getProductAttributeTerms< ProductAttributeTerm[] >( {
-				attribute_id: editableAttribute?.id,
-				product: productId,
-			} )
-			.then(
-				( attributeTerms ) => {
-					setAttrTerms( attributeTerms );
-					return attributeTerms;
-				},
-				( error ) => {
-					return error;
-				}
-			);
-	}, [ editableAttribute?.id ] );
+		HydratedAttributeType | undefined
+	>( undefined );
+	const [ selectedAttributeId, setSelectedAttributeId ] =
+		useState< number >( clickedAttributeId );
 
 	useEffect( () => {
-		if ( productId && editableAttribute?.id ) {
-			fetchTerms();
+		const selectedAttribute = allAttributes.find(
+			( attribute ) => attribute.id === selectedAttributeId
+		);
+		if ( selectedAttribute ) {
+			setEditableAttribute( { ...selectedAttribute } );
 		}
-	}, [ editableAttribute, productId ] );
+	}, [ allAttributes, selectedAttributeId ] );
 
 	const onEditingAttribute = () => {
 		// const newAttributesToAdd: ProductAttribute[] = [];
@@ -99,24 +76,34 @@ export const EditAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 					) }
 					value={ editableAttribute }
 					onChange={ ( val ) => {
-						setEditableAttribute( val );
+						if ( val?.id ) {
+							setSelectedAttributeId( val.id );
+						}
 					} }
-					onlyAttributeIds={ attributes.map( ( attr ) => attr.id ) }
-				/>
-
-				<h2>Values</h2>
-				<AttributeTermInputField
-					placeholder={ __(
-						'Search or create value',
-						'woocommerce'
+					onlyAttributeIds={ allAttributes.map(
+						( attr ) => attr.id
 					) }
-					value={ attrTerms }
-					disabled={ ! editableAttribute?.id }
-					attributeId={ editableAttribute?.id }
-					onChange={ ( val ) => {
-						setAttrTerms( val );
-					} }
 				/>
+				{ editableAttribute && (
+					<>
+						<h2>Values</h2>
+						<AttributeTermInputField
+							placeholder={ __(
+								'Search or create value',
+								'woocommerce'
+							) }
+							value={ editableAttribute.terms }
+							disabled={ ! editableAttribute.id }
+							attributeId={ editableAttribute.id }
+							onChange={ ( val ) => {
+								setEditableAttribute( {
+									...( editableAttribute || {} ),
+									terms: val,
+								} );
+							} }
+						/>
+					</>
+				) }
 			</div>
 			<div className="woocommerce-add-attribute-modal__buttons">
 				<Button
