@@ -42,6 +42,10 @@ export type ProductShippingSectionProps = {
 	product?: PartialProduct;
 };
 
+type ServerErrorResponse = {
+	code: string;
+};
+
 export const DEFAULT_SHIPPING_CLASS_OPTIONS: SelectControl.Option[] = [
 	{ value: '', label: __( 'No shipping class', 'woocommerce' ) },
 	{
@@ -171,6 +175,28 @@ export function ProductShippingSection( {
 			parseNumber( String( value ) ),
 	} );
 	const shippingClassProps = getInputProps( 'shipping_class' );
+
+	function handleShippingClassServerError(
+		error: ServerErrorResponse
+	): Promise< ProductShippingClass > {
+		let message = __(
+			'We couldn’t add this shipping class. Try again in a few seconds.',
+			'woocommerce'
+		);
+
+		if ( error.code === 'term_exists' ) {
+			message = __(
+				'A shipping class with that slug already exists.',
+				'woocommerce'
+			);
+		}
+
+		createErrorNotice( message, {
+			explicitDismiss: true,
+		} );
+
+		throw error;
+	}
 
 	return (
 		<ProductSectionLayout
@@ -362,18 +388,7 @@ export function ProductShippingSection( {
 								setValue( 'shipping_class', value.slug );
 								return value;
 							} )
-							.catch( ( error: Error ) => {
-								createErrorNotice(
-									__(
-										'We couldn’t add this shipping class. Try again in a few seconds.',
-										'woocommerce'
-									),
-									{
-										explicitDismiss: true,
-									}
-								);
-								throw error;
-							} )
+							.catch( handleShippingClassServerError )
 					}
 					onCancel={ () => setShowShippingClassModal( false ) }
 				/>
