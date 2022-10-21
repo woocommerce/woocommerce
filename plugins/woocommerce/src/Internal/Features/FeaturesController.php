@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\PluginUtil;
+use WC_Tracks;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -229,7 +230,13 @@ class FeaturesController {
 			return false;
 		}
 
-		return update_option( $this->feature_enable_option_name( $feature_id ), $enable ? 'yes' : 'no' );
+		$updated = update_option( $this->feature_enable_option_name( $feature_id ), $enable ? 'yes' : 'no' );
+
+		if ( $updated ) {
+			WC_Tracks::record_event( 'feature_' . $feature_id . '_' . ( $enable ? 'enabled' : 'disabled' ) );
+		}
+
+		return $updated;
 	}
 
 	/**
