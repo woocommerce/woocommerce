@@ -1,4 +1,5 @@
-const { ADMINSTATE, UPDATE_WC, ADMIN_USER, ADMIN_PASSWORD } = process.env;
+const { ADMINSTATE, UPDATE_WC } = process.env;
+const { admin } = require( '../../test-data/data' );
 const { test, expect } = require( '@playwright/test' );
 const path = require( 'path' );
 const {
@@ -42,8 +43,8 @@ test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
 			request: playwright.request,
 			baseURL,
 			slug: 'woocommerce',
-			username: ADMIN_USER,
-			password: ADMIN_PASSWORD,
+			username: admin.username,
+			password: admin.password,
 		} );
 
 		// Open the plugin install page

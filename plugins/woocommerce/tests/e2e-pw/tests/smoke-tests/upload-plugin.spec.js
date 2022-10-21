@@ -1,12 +1,11 @@
 const {
 	ADMINSTATE,
-	ADMIN_USER,
-	ADMIN_PASSWORD,
 	GITHUB_TOKEN,
 	PLUGIN_NAME,
 	PLUGIN_REPOSITORY,
 } = process.env;
 const { test, expect } = require( '@playwright/test' );
+const { admin } = require( '../../test-data/data' );
 const path = require( 'path' );
 const {
 	createPlugin,
@@ -15,9 +14,6 @@ const {
 	deleteZip,
 	getLatestReleaseZipUrl,
 } = require( '../../utils/plugin-utils' );
-
-const adminUsername = ADMIN_USER ?? 'admin';
-const adminPassword = ADMIN_PASSWORD ?? 'password';
 
 let pluginZipPath;
 let pluginSlug;
@@ -59,8 +55,8 @@ test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 			request: playwright.request,
 			baseURL,
 			slug: pluginSlug,
-			username: adminUsername,
-			password: adminPassword,
+			username: admin.username,
+			password: admin.password,
 		} );
 	} );
 
@@ -74,8 +70,8 @@ test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 			request: playwright.request,
 			baseURL,
 			slug: pluginSlug,
-			username: adminUsername,
-			password: adminPassword,
+			username: admin.username,
+			password: admin.password,
 		} );
 
 		// Install and activate plugin
@@ -83,8 +79,8 @@ test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 			request: playwright.request,
 			baseURL,
 			slug: pluginSlug.split( '/' ).pop(),
-			username: adminUsername,
-			password: adminPassword,
+			username: admin.username,
+			password: admin.password,
 		} );
 
 		// Go to 'Installed plugins' page.
