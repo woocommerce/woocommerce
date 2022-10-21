@@ -90,7 +90,17 @@ export const ProductDetailsSection: React.FC = () => {
 				<CardBody>
 					<div>
 						<TextControl
-							label={ __( 'Name', 'woocommerce' ) }
+							label={ interpolateComponents( {
+								mixedString: __(
+									'Name {{span}}(required){{/span}}',
+									'woocommerce'
+								),
+								components: {
+									span: (
+										<span className="woocommerce-product-form__optional-input" />
+									),
+								},
+							} ) }
 							name={ `${ PRODUCT_DETAILS_SLUG }-name` }
 							placeholder={ __(
 								'e.g. 12 oz Coffee Mug',
