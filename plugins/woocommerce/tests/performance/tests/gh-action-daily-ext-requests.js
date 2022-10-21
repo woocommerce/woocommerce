@@ -10,6 +10,7 @@ import { cartRemoveItem } from '../requests/shopper/cart-remove-item.js';
 import { checkoutGuest } from '../requests/shopper/checkout-guest.js';
 import { checkoutCustomerLogin } from '../requests/shopper/checkout-customer-login.js';
 import { myAccount } from '../requests/shopper/my-account.js';
+import { myAccountOrders } from '../requests/shopper/my-account-orders.js';
 import { categoryPage } from '../requests/shopper/category-page.js';
 import { myAccountMerchantLogin } from '../requests/merchant/my-account-merchant.js';
 import { products } from '../requests/merchant/products.js';
@@ -262,6 +263,7 @@ export function checkoutCustomerLoginFlow() {
 }
 export function myAccountFlow() {
 	myAccount();
+	myAccountOrders();
 }
 export function cartFlow() {
 	cartRemoveItem();
