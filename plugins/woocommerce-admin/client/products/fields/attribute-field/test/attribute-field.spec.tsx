@@ -73,6 +73,7 @@ jest.mock( '@wordpress/data', () => ( {
 
 jest.mock( '@woocommerce/components', () => ( {
 	__esModule: true,
+	__experimentalSelectControlMenuSlot: () => <div></div>,
 	ListItem: ( { children }: { children: JSX.Element } ) => children,
 	__experimentalSelectControlMenuSlot: () => null,
 	Sortable: ( {

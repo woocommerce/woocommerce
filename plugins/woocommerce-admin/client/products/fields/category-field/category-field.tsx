@@ -254,7 +254,13 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 					initialCategoryName={ searchValue }
 					onCancel={ () => setShowCreateNewModal( false ) }
 					onCreated={ ( newCategory ) => {
-						onSelect( newCategory.id, true );
+						onChange(
+							getSelectedWithParents(
+								[ ...value ],
+								newCategory,
+								categoryTreeKeyValues
+							)
+						);
 						setShowCreateNewModal( false );
 						onInputChange( '' );
 					} }
