@@ -310,8 +310,8 @@ test.describe('System Status API tests', () => {
 						}
 					},
 					"database_size": {
-						"data": 1.0300000000000007,
-						"index": 1.4400000000000008
+						"data": expect.any(Number),
+						"index": expect.any(Number)
 					}
 				})
 			})
@@ -540,6 +540,86 @@ test.describe('System Status API tests', () => {
 					}
 				])
 			})
+		);
+	});
+
+	test('can view all system status tools', async ({
+		request
+	}) => {
+		// call API to create a refund
+		const response = await request.get('/wp-json/wc/v3/system_status/tools');
+		const responseJSON = await response.json();
+		expect(response.status()).toEqual(200);
+
+		expect(responseJSON).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					"id": "clear_transients",
+					"name": "WooCommerce transients",
+					"action": "Clear transients",
+					"description": "This tool will clear the product/shop transients cache.",
+				}),
+				expect.objectContaining({
+					"id": "clear_expired_transients",
+					"name": "Expired transients",
+					"action": "Clear transients",
+					"description": "This tool will clear ALL expired transients from WordPress.",
+				}),
+				expect.objectContaining({
+					"id": "clear_expired_download_permissions",
+					"name": "Used-up download permissions",
+					"action": "Clean up download permissions",
+					"description": "This tool will delete expired download permissions and permissions with 0 remaining downloads.",
+				}),
+				expect.objectContaining({
+					"id": "regenerate_product_lookup_tables",
+					"name": "Product lookup tables",
+					"action": "Regenerate",
+					"description": "This tool will regenerate product lookup table data. This process may take a while.",
+				}),
+			])
+		);
+
+
+	});
+
+	test('can retrieve a system status tool', async ({
+		request
+	}) => {
+		// call API to create a refund
+		const response = await request.get('/wp-json/wc/v3/system_status/tools/clear_transients');
+		const responseJSON = await response.json();
+		expect(response.status()).toEqual(200);
+
+		expect(responseJSON).toEqual(
+				expect.objectContaining({
+					"id": "clear_transients",
+					"name": "WooCommerce transients",
+					"action": "Clear transients",
+					"description": "This tool will clear the product/shop transients cache.",				  
+				}),
+		);
+
+
+	});
+
+	test('can run a tool from system status', async ({
+		request
+	}) => {
+		// call API to create a refund
+		const response = await request.put('/wp-json/wc/v3/system_status/tools/clear_transients');
+		const responseJSON = await response.json();
+		expect(response.status()).toEqual(200);
+
+		expect(responseJSON).toEqual(
+				expect.objectContaining({
+					"id": "clear_transients",
+					"name": "WooCommerce transients",
+					"action": "Clear transients",
+					"description": "This tool will clear the product/shop transients cache.",	
+					"success": true,
+					"message": "Product transients cleared",			  
+				}),
 		);
 	});
 
