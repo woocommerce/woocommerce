@@ -304,24 +304,20 @@ class WC_Meta_Box_Order_Data {
 							$user_string = '';
 							$user_id     = '';
 							if ( $order->get_user_id() ) {
-								$user_id     = absint( $order->get_user_id() );
-								$user        = get_user_by( 'id', $user_id );
+								$user_id  = absint( $order->get_user_id() );
+								$customer = new WC_Customer( $user_id );
+								/* translators: 1: user display name 2: user ID 3: user email */
 								$user_string = sprintf(
-									/* translators: 1: user display name 2: user ID 3: user email */
+									/* translators: $1: customer name, $2 customer id, $3: customer email */
 									esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
-									$user->display_name,
-									absint( $user->ID ),
-									$user->user_email
-								);
+									$customer->get_first_name() . ' ' . $customer->get_last_name(),
+									$customer->get_id(),
+									$customer->get_email()
+								);	
 							}
 							?>
 							<select class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php esc_attr_e( 'Guest', 'woocommerce' ); ?>" data-allow_clear="true">
-								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected">
-									<?php
-									// htmlspecialchars to prevent XSS when rendered by selectWoo.
-									echo esc_html( htmlspecialchars( wp_kses_post( $user_string ) ) );
-									?>
-								</option>
+								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo esc_html( htmlspecialchars( wp_kses_post( current( apply_filters( 'woocommerce_json_search_found_customers', array( $user_string ) ) ) ) ) ); // htmlspecialchars to prevent XSS when rendered by selectWoo. ?></option>
 							</select>
 							<!--/email_off-->
 						</p>
