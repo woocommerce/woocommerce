@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { admin } = require('../../test-data/data');
+const { admin } = require( '../../test-data/data' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe( 'Merchant > Order Action emails received', () => {
