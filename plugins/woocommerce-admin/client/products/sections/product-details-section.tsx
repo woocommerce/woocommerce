@@ -12,7 +12,13 @@ import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { cleanForSlug } from '@wordpress/url';
-import { EnrichedLabel, useFormContext } from '@woocommerce/components';
+import {
+	Link,
+	useFormContext,
+	__experimentalRichTextEditor as RichTextEditor,
+	__experimentalTooltip as Tooltip,
+} from '@woocommerce/components';
+import interpolateComponents from '@automattic/interpolate-components';
 import {
 	Product,
 	ProductCategory,
@@ -20,23 +26,33 @@ import {
 	WCDataSelector,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { BlockInstance, serialize, parse } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import './product-details-section.scss';
-import { getCheckboxProps, getTextControlProps } from './utils';
-import { ProductSectionLayout } from '../layout/product-section-layout';
-import { EditProductLinkModal } from '../shared/edit-product-link-modal';
 import { CategoryField } from '../fields/category-field';
+import { EditProductLinkModal } from '../shared/edit-product-link-modal';
+import { getCheckboxTracks } from './utils';
+import { ProductSectionLayout } from '../layout/product-section-layout';
 
 const PRODUCT_DETAILS_SLUG = 'product-details';
 
 export const ProductDetailsSection: React.FC = () => {
-	const { getInputProps, values, touched, errors, setValue } =
-		useFormContext< Product >();
+	const {
+		getCheckboxControlProps,
+		getInputProps,
+		values,
+		touched,
+		errors,
+		setValue,
+	} = useFormContext< Product >();
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
 		useState( false );
+	const [ descriptionBlocks, setDescriptionBlocks ] = useState<
+		BlockInstance[]
+	>( parse( values.description || '' ) );
 	const { permalinkPrefix, permalinkSuffix } = useSelect(
 		( select: WCDataSelector ) => {
 			const { getPermalinkParts } = select( PRODUCTS_STORE_NAME );
@@ -56,7 +72,7 @@ export const ProductDetailsSection: React.FC = () => {
 	};
 
 	const setSkuIfEmpty = () => {
-		if ( values.sku || ! values.name.length ) {
+		if ( values.sku || ! values.name?.length ) {
 			return;
 		}
 		setValue( 'sku', cleanForSlug( values.name ) );
@@ -80,13 +96,9 @@ export const ProductDetailsSection: React.FC = () => {
 								'e.g. 12 oz Coffee Mug',
 								'woocommerce'
 							) }
-							{ ...getTextControlProps(
-								getInputProps( 'name' )
-							) }
-							onBlur={ () => {
-								setSkuIfEmpty();
-								getInputProps( 'name' ).onBlur();
-							} }
+							{ ...getInputProps( 'name', {
+								onBlur: setSkuIfEmpty,
+							} ) }
 						/>
 						{ values.id && ! hasNameError() && permalinkPrefix && (
 							<span className="woocommerce-product-form__secondary-text product-details-section__product-link">
@@ -125,29 +137,45 @@ export const ProductDetailsSection: React.FC = () => {
 					/>
 					<CheckboxControl
 						label={
-							<EnrichedLabel
-								label={ __(
-									'Feature this product',
-									'woocommerce'
-								) }
-								helpDescription={ __(
-									'Include this product in a featured section on your website with a widget or shortcode.',
-									'woocommerce'
-								) }
-								moreUrl="https://woocommerce.com/document/woocommerce-shortcodes/#products"
-								tooltipLinkCallback={ () =>
-									recordEvent( 'add_product_learn_more', {
-										category: PRODUCT_DETAILS_SLUG,
-									} )
-								}
-							/>
+							<>
+								{ __( 'Feature this product', 'woocommerce' ) }
+								<Tooltip
+									text={ interpolateComponents( {
+										mixedString: __(
+											'Include this product in a featured section on your website with a widget or shortcode. {{moreLink/}}',
+											'woocommerce'
+										),
+										components: {
+											moreLink: (
+												<Link
+													href="https://woocommerce.com/document/woocommerce-shortcodes/#products"
+													target="_blank"
+													type="external"
+													onClick={ () =>
+														recordEvent(
+															'add_product_learn_more',
+															{
+																category:
+																	PRODUCT_DETAILS_SLUG,
+															}
+														)
+													}
+												>
+													{ __(
+														'Learn more',
+														'woocommerce'
+													) }
+												</Link>
+											),
+										},
+									} ) }
+								/>
+							</>
 						}
-						{ ...getCheckboxProps( {
-							...getInputProps( 'featured' ),
-							name: 'featured',
-							className:
-								'product-details-section__feature-checkbox',
-						} ) }
+						{ ...getCheckboxControlProps(
+							'featured',
+							getCheckboxTracks( 'featured' )
+						) }
 					/>
 					{ showProductLinkEditModal && (
 						<EditProductLinkModal
@@ -162,6 +190,14 @@ export const ProductDetailsSection: React.FC = () => {
 							}
 						/>
 					) }
+					<RichTextEditor
+						label={ __( 'Description', 'woocommerce' ) }
+						blocks={ descriptionBlocks }
+						onChange={ ( blocks ) => {
+							setDescriptionBlocks( blocks );
+							setValue( 'description', serialize( blocks ) );
+						} }
+					/>
 				</CardBody>
 			</Card>
 		</ProductSectionLayout>

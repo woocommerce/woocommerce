@@ -13,11 +13,16 @@
 			}
 		}
 
-		.components-base-control {
-			&:not(:first-child) {
+		.components-base-control,
+		.woocommerce-rich-text-editor {
+			&:not(:first-child):not(.components-radio-control) {
 				margin-top: $gap-large - $gap-smaller;
 				margin-bottom: 0;
 			}
+		}
+
+		.components-radio-control .components-v-stack {
+			gap: $gap-small;
 		}
 	}
 

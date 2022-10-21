@@ -12,6 +12,7 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
  * Class OrdersTableRefundDataStoreTests.
  */
 class OrdersTableRefundDataStoreTests extends WC_Unit_Test_Case {
+	use \Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 
 	/**
 	 * @var PostsToOrdersMigrationController
@@ -68,6 +69,33 @@ class OrdersTableRefundDataStoreTests extends WC_Unit_Test_Case {
 		OrderHelper::switch_data_store( $refreshed_refund, $this->sut );
 		$refreshed_refund->set_id( $refund->get_id() );
 		$this->sut->read( $refreshed_refund );
+		$this->assertEquals( $refund->get_id(), $refreshed_refund->get_id() );
+		$this->assertEquals( 10, $refreshed_refund->get_amount() );
+		$this->assertEquals( 'Test', $refreshed_refund->get_reason() );
+	}
+
+	/**
+	 * @testDox Test that refunds can be backfilled correctly.
+	 */
+	public function test_refunds_backfill() {
+		$this->enable_cot_sync();
+		$this->toggle_cot( true );
+		$order  = OrderHelper::create_complex_data_store_order( $this->order_data_store );
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+				'reason'   => 'Test',
+			)
+		);
+		$refund->save();
+		$this->assertTrue( $refund->get_id() > 0 );
+
+		// Check that data was saved.
+		$refreshed_refund = new WC_Order_Refund();
+		$cpt_store        = $this->sut->get_cpt_data_store_instance();
+		$refreshed_refund->set_id( $refund->get_id() );
+		$cpt_store->read( $refreshed_refund );
 		$this->assertEquals( $refund->get_id(), $refreshed_refund->get_id() );
 		$this->assertEquals( 10, $refreshed_refund->get_amount() );
 		$this->assertEquals( 'Test', $refreshed_refund->get_reason() );

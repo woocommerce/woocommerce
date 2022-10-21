@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Use new Tooltip component instead of EnrichedLabel
