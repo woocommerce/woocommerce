@@ -348,6 +348,9 @@ $tt2-gray: #f7f7f7;
 
 				th {
 					padding-right: 1rem;
+					max-width: 100px; 
+					width: 100%; 
+					text-align: right;
 				}
 
 				td select {
