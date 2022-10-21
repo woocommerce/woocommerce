@@ -65,7 +65,7 @@
 	// See https://github.com/WordPress/gutenberg/blob/411b6eee8376e31bf9db4c15c92a80524ae38e9b/packages/components/src/tooltip/index.js#L99-L102
 	.woocommerce-product-form__tooltip-disabled-overlay {
 		position: relative;
-		&:after {
+		&::after {
 			content: '';
 			position: absolute;
 			width: 100%;
