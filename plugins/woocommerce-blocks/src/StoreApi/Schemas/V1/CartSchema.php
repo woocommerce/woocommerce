@@ -5,8 +5,6 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use WC_Tax;
-use WP_Error;
-
 
 /**
  * CartSchema class.
