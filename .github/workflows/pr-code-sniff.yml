@@ -22,7 +22,7 @@ jobs:
         uses: tj-actions/changed-files@v32  
         with:
           files: |
-            **.php
+            **/*.php
 
       - name: Setup WooCommerce Monorepo
         if: steps.changed-files.outputs.any_changed == 'true'
