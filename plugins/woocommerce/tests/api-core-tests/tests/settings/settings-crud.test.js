@@ -3,9 +3,6 @@ const {
 	expect
 } = require('@playwright/test');
 const {
-	values
-} = require('lodash');
-const {
 	countries,
 	currencies,
 	stateOptions
