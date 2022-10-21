@@ -79,6 +79,11 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 8.7.3 - 2022-10-20 =
+
+#### Bug fixes
+- Fixed an issue where the argument passed to `canMakePayment` contained the incorrect keys. Also fixed the current user's customer data appearing in the editor when editing the Checkout block.
+
 = 8.7.2 - 2022-10-13 =
 
 #### Bug Fixes
