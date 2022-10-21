@@ -28,7 +28,29 @@ const registeredStore = registerStore< State >( STORE_KEY, {
 } );
 
 registeredStore.subscribe( pushChanges );
-registeredStore.subscribe( updatePaymentMethods );
+registeredStore.subscribe( async () => {
+	const isInitialized =
+		wpDataSelect( STORE_KEY ).hasFinishedResolution( 'getCartData' );
+
+	if ( ! isInitialized ) {
+		return;
+	}
+	await checkPaymentMethodsCanPay();
+	await checkPaymentMethodsCanPay( true );
+} );
+
+const unsubscribeInitializePaymentStore = registeredStore.subscribe(
+	async () => {
+		const cartLoaded =
+			wpDataSelect( STORE_KEY ).hasFinishedResolution( 'getCartTotals' );
+		if ( cartLoaded ) {
+			wpDataDispatch(
+				'wc/store/payment'
+			).__internalUpdateAvailablePaymentMethods();
+			unsubscribeInitializePaymentStore();
+		}
+	}
+);
 
 export const CART_STORE_KEY = STORE_KEY;
 
