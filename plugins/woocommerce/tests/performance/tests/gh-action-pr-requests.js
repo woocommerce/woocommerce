@@ -10,6 +10,7 @@ import { cartRemoveItem } from '../requests/shopper/cart-remove-item.js';
 import { checkoutGuest } from '../requests/shopper/checkout-guest.js';
 import { checkoutCustomerLogin } from '../requests/shopper/checkout-customer-login.js';
 import { myAccount } from '../requests/shopper/my-account.js';
+import { myAccountOrders } from '../requests/shopper/my-account-orders.js';
 import { categoryPage } from '../requests/shopper/category-page.js';
 import { wpLogin } from '../requests/merchant/wp-login.js';
 import { products } from '../requests/merchant/products.js';
@@ -138,6 +139,15 @@ export const options = {
 		'http_req_duration{name:Shopper - Login to My Account}': [
 			`${ shopper_request_threshold }`,
 		],
+		'http_req_duration{name:Shopper - My Account}': [
+			`${shopper_request_threshold}`,
+		],
+		'http_req_duration{name:Shopper - My Account Orders}': [
+			`${shopper_request_threshold}`,
+		],
+		'http_req_duration{name:Shopper - My Account Open Order}': [
+			`${shopper_request_threshold}`,
+		],
 		'http_req_duration{name:Merchant - WP Login Page}': [
 			`${ merchant_request_threshold }`,
 		],
@@ -254,6 +264,7 @@ export function checkoutCustomerLoginFlow() {
 }
 export function myAccountFlow() {
 	myAccount();
+	myAccountOrders();
 }
 export function cartFlow() {
 	cartRemoveItem();

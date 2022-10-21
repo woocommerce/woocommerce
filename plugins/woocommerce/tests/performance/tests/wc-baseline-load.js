@@ -1,3 +1,5 @@
+/* eslint-disable eqeqeq */
+/* eslint-disable no-undef */
 /**
  * Internal dependencies
  */
@@ -7,83 +9,115 @@ import { searchProduct } from '../requests/shopper/search-product.js';
 import { singleProduct } from '../requests/shopper/single-product.js';
 import { cart } from '../requests/shopper/cart.js';
 import { cartRemoveItem } from '../requests/shopper/cart-remove-item.js';
+import { cartApplyCoupon } from '../requests/shopper/cart-apply-coupon.js';
 import { checkoutGuest } from '../requests/shopper/checkout-guest.js';
 import { checkoutCustomerLogin } from '../requests/shopper/checkout-customer-login.js';
-import { myAccount } from '../requests/shopper/my-account.js';
 import { myAccountOrders } from '../requests/shopper/my-account-orders.js';
 import { categoryPage } from '../requests/shopper/category-page.js';
-import { myAccountMerchantLogin } from '../requests/merchant/my-account-merchant.js';
 import { products } from '../requests/merchant/products.js';
 import { addProduct } from '../requests/merchant/add-product.js';
 import { coupons } from '../requests/merchant/coupons.js';
 import { orders } from '../requests/merchant/orders.js';
 import { ordersSearch } from '../requests/merchant/orders-search.js';
+import { ordersFilter } from '../requests/merchant/orders-filter.js';
 import { addOrder } from '../requests/merchant/add-order.js';
-import { ordersAPI } from '../requests/api/orders.js';
 import { homeWCAdmin } from '../requests/merchant/home-wc-admin.js';
+import { myAccountMerchantLogin } from '../requests/merchant/my-account-merchant.js';
+import { ordersAPI } from '../requests/api/orders.js';
+import { admin_acc_login } from '../config.js';
 
-const shopper_request_threshold = 'p(95)<10000';
-const merchant_request_threshold = 'p(95)<10000';
-const api_request_threshold = 'p(95)<10000';
+const shopper_request_threshold = 'p(95)<100000';
+const merchant_request_threshold = 'p(95)<100000';
+const api_request_threshold = 'p(95)<100000';
 
 export const options = {
 	scenarios: {
-		shopperBrowseSmoke: {
-			executor: 'per-vu-iterations',
-			vus: 1,
-			iterations: 3,
-			maxDuration: '180s',
-			exec: 'shopperBrowseFlow',
+		merchantOrders: {
+			executor: 'ramping-arrival-rate',
+			startRate: 2, // starting iterations per timeUnit
+			timeUnit: '10s',
+			preAllocatedVUs: 5,
+			maxVUs: 9,
+			stages: [
+				// target value is iterations per timeUnit
+				{ target: 2, duration: '60s' },
+				{ target: 5, duration: '500s' },
+				{ target: 1, duration: '60' },
+			],
+			exec: 'merchantOrderFlows',
 		},
-		myAccountSmoke: {
-			executor: 'per-vu-iterations',
-			vus: 1,
-			iterations: 3,
-			maxDuration: '60s',
-			startTime: '20s',
-			exec: 'myAccountFlow',
+		merchantOther: {
+			executor: 'ramping-arrival-rate',
+			startRate: 2, // starting iterations per timeUnit
+			timeUnit: '10s',
+			preAllocatedVUs: 5,
+			maxVUs: 9,
+			stages: [
+				// target value is iterations per timeUnit
+				{ target: 2, duration: '60s' },
+				{ target: 5, duration: '500s' },
+				{ target: 1, duration: '60' },
+			],
+			exec: 'merchantOtherFlows',
 		},
-		cartSmoke: {
-			executor: 'per-vu-iterations',
-			vus: 1,
-			iterations: 3,
-			maxDuration: '60s',
-			startTime: '25s',
-			exec: 'cartFlow',
+		shopperBrowsing: {
+			executor: 'ramping-arrival-rate',
+			startRate: 2, // starting iterations per timeUnit
+			timeUnit: '10s',
+			preAllocatedVUs: 5,
+			maxVUs: 9,
+			stages: [
+				// target value is iterations per timeUnit
+				{ target: 2, duration: '60s' },
+				{ target: 10, duration: '500s' },
+				{ target: 1, duration: '60' },
+			],
+			exec: 'shopperBrowsingFlows',
 		},
-		checkoutGuestSmoke: {
-			executor: 'per-vu-iterations',
-			vus: 1,
-			iterations: 3,
-			maxDuration: '120s',
-			startTime: '30s',
+		shopperGuestCheckouts: {
+			executor: 'ramping-arrival-rate',
+			startRate: 2, // starting iterations per timeUnit
+			timeUnit: '10s',
+			preAllocatedVUs: 5,
+			maxVUs: 9,
+			stages: [
+				// target value is iterations per timeUnit
+				{ target: 2, duration: '60s' },
+				{ target: 5, duration: '500s' },
+				{ target: 1, duration: '60' },
+			],
 			exec: 'checkoutGuestFlow',
 		},
-		checkoutCustomerLoginSmoke: {
-			executor: 'per-vu-iterations',
-			vus: 1,
-			iterations: 3,
-			maxDuration: '120s',
-			startTime: '40s',
+		shopperCustomerCheckouts: {
+			executor: 'ramping-arrival-rate',
+			startRate: 2, // starting iterations per timeUnit
+			timeUnit: '10s',
+			preAllocatedVUs: 5,
+			maxVUs: 9,
+			stages: [
+				// target value is iterations per timeUnit
+				{ target: 2, duration: '60s' },
+				{ target: 5, duration: '500s' },
+				{ target: 1, duration: '60' },
+			],
 			exec: 'checkoutCustomerLoginFlow',
 		},
-		allMerchantSmoke: {
-			executor: 'per-vu-iterations',
-			vus: 1,
-			iterations: 3,
-			maxDuration: '360s',
-			exec: 'allMerchantFlow',
-		},
-		allAPISmoke: {
-			executor: 'per-vu-iterations',
-			vus: 1,
-			iterations: 3,
-			maxDuration: '120s',
+		apiBackground: {
+			executor: 'ramping-arrival-rate',
+			startRate: 1, // starting iterations per timeUnit
+			timeUnit: '10s',
+			preAllocatedVUs: 5,
+			maxVUs: 5,
+			stages: [
+				// target value is iterations per timeUnit
+				{ target: 1, duration: '60s' },
+				{ target: 5, duration: '500s' },
+				{ target: 1, duration: '60' },
+			],
 			exec: 'allAPIFlow',
 		},
 	},
 	thresholds: {
-		checks: ['rate==1'],
 		'http_req_duration{name:Shopper - Site Root}': [
 			`${shopper_request_threshold}`,
 		],
@@ -246,12 +280,39 @@ export const options = {
 	},
 };
 
-export function shopperBrowseFlow() {
+// Use myAccountMerchantLogin() instead of wpLogin() if having issues with login.
+export function merchantOrderFlows() {
+	if (admin_acc_login === true) {
+		myAccountMerchantLogin();
+	} else {
+		wpLogin();
+	}
+	addOrder();
+	orders();
+	ordersSearch();
+	ordersFilter();
+}
+
+// Use myAccountMerchantLogin() instead of wpLogin() if having issues with login.
+export function merchantOtherFlows() {
+	if (admin_acc_login === true) {
+		myAccountMerchantLogin();
+	} else {
+		wpLogin();
+	}
+	homeWCAdmin();
+	addProduct();
+	products();
+	coupons();
+}
+export function shopperBrowsingFlows() {
 	homePage();
 	shopPage();
-	categoryPage();
 	searchProduct();
 	singleProduct();
+	cartRemoveItem();
+	cartApplyCoupon();
+	categoryPage();
 }
 export function checkoutGuestFlow() {
 	cart();
@@ -260,25 +321,8 @@ export function checkoutGuestFlow() {
 export function checkoutCustomerLoginFlow() {
 	cart();
 	checkoutCustomerLogin();
-}
-export function myAccountFlow() {
-	myAccount();
 	myAccountOrders();
 }
-export function cartFlow() {
-	cartRemoveItem();
-}
-export function allMerchantFlow() {
-	myAccountMerchantLogin();
-	homeWCAdmin();
-	addOrder();
-	orders();
-	ordersSearch();
-	addProduct();
-	products();
-	coupons();
-}
-
 export function allAPIFlow() {
 	ordersAPI();
 }
