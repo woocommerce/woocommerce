@@ -208,8 +208,6 @@ function SelectControl< ItemType = DefaultItemType >( {
 		onRemove( item );
 	};
 
-	console.debug( 'getInputProps', getInputProps() );
-
 	const selectedItemTags = multiple ? (
 		<SelectedItems
 			items={ selectedItems }
