@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { Button, Modal } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
-import { ProductAttribute } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -18,7 +17,7 @@ import './edit-attribute-modal.scss';
 
 type EditAttributeModalProps = {
 	onCancel: () => void;
-	onEdit: ( alteredAttribute: ProductAttribute ) => void;
+	onEdit: ( alteredAttribute: HydratedAttributeType ) => void;
 	allAttributes: HydratedAttributeType[];
 	clickedAttributeId: number;
 };
@@ -44,23 +43,6 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 		}
 	}, [ allAttributes, selectedAttributeId ] );
 
-	const onEditingAttribute = () => {
-		// const newAttributesToAdd: ProductAttribute[] = [];
-		// values.attributes.forEach( ( attr ) => {
-		// 	if (
-		// 		attr.attribute &&
-		// 		attr.attribute.name &&
-		// 		attr.terms.length > 0
-		// 	) {
-		// 		newAttributesToAdd.push( {
-		// 			...( attr.attribute as ProductAttribute ),
-		// 			options: attr.terms.map( ( term ) => term.name ),
-		// 		} );
-		// 	}
-		// } );
-		// onEdit( newAttributesToAdd );
-	};
-
 	return (
 		<Modal
 			title={ __( 'Edit attribute', 'woocommerce' ) }
@@ -84,26 +66,24 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 						( attr ) => attr.id
 					) }
 				/>
-				{ editableAttribute && (
-					<>
-						<h2>Values</h2>
-						<AttributeTermInputField
-							placeholder={ __(
-								'Search or create value',
-								'woocommerce'
-							) }
-							value={ editableAttribute.terms }
-							disabled={ ! editableAttribute.id }
-							attributeId={ editableAttribute.id }
-							onChange={ ( val ) => {
-								setEditableAttribute( {
-									...( editableAttribute || {} ),
-									terms: val,
-								} );
-							} }
-						/>
-					</>
-				) }
+				<>
+					<h2>Values</h2>
+					<AttributeTermInputField
+						placeholder={ __(
+							'Search or create value',
+							'woocommerce'
+						) }
+						value={ editableAttribute?.terms }
+						disabled={ ! editableAttribute?.id }
+						attributeId={ editableAttribute?.id }
+						onChange={ ( val ) => {
+							setEditableAttribute( {
+								...( editableAttribute as HydratedAttributeType ),
+								terms: val,
+							} );
+						} }
+					/>
+				</>
 			</div>
 			<div className="woocommerce-add-attribute-modal__buttons">
 				<Button
@@ -116,9 +96,8 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 				<Button
 					isPrimary
 					label={ __( 'Edit attribute', 'woocommerce' ) }
-					//disabled={ false }
 					onClick={ () => {
-						onEditingAttribute();
+						onEdit( editableAttribute as HydratedAttributeType );
 					} }
 				>
 					{ __( 'Update', 'woocommerce' ) }

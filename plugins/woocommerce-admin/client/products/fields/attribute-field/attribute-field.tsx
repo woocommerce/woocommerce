@@ -271,7 +271,22 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 			{ editingAttributeId && (
 				<EditAttributeModal
 					onCancel={ () => setEditingAttributeId( null ) }
-					onEdit={ () => {} }
+					onEdit={ ( changedAttribute ) => {
+						const newAttributesSet = [ ...hydratedAttributes ];
+						const changedAttributeIndex: number =
+							newAttributesSet.findIndex(
+								( attr ) => attr.id === changedAttribute.id
+							);
+
+						newAttributesSet.splice(
+							changedAttributeIndex,
+							1,
+							changedAttribute
+						);
+
+						setHydratedAttributes( newAttributesSet );
+						setEditingAttributeId( null );
+					} }
 					clickedAttributeId={ editingAttributeId }
 					allAttributes={ hydratedAttributes }
 				/>
