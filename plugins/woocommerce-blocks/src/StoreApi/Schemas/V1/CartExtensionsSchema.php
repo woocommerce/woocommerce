@@ -2,6 +2,9 @@
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\StoreApi\SchemaController;
+use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
+use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 
 /**
  * Class CartExtensionsSchema
@@ -20,6 +23,24 @@ class CartExtensionsSchema extends AbstractSchema {
 	 * @var string
 	 */
 	const IDENTIFIER = 'cart-extensions';
+
+	/**
+	 * Cart schema instance.
+	 *
+	 * @var CartSchema
+	 */
+	public $cart_schema;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param ExtendSchema     $extend Rest Extending instance.
+	 * @param SchemaController $controller Schema Controller instance.
+	 */
+	public function __construct( ExtendSchema $extend, SchemaController $controller ) {
+		parent::__construct( $extend, $controller );
+		$this->cart_schema = $this->controller->get( CartSchema::IDENTIFIER );
+	}
 
 	/**
 	 * Cart extensions schema properties.
@@ -51,6 +72,10 @@ class CartExtensionsSchema extends AbstractSchema {
 		if ( is_callable( $callback ) ) {
 			$callback( $request['data'] );
 		}
-		return rest_ensure_response( wc()->api->get_endpoint_data( '/wc/store/v1/cart' ) );
+
+		$controller = new CartController();
+		$cart       = $controller->get_cart_instance();
+
+		return rest_ensure_response( $this->cart_schema->get_item_response( $cart ) );
 	}
 }
