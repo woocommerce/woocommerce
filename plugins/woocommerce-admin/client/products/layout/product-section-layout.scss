@@ -14,10 +14,17 @@
 		}
 
 		.components-base-control,
-		.woocommerce-rich-text-editor,
-		.woocommerce-product-form__tooltip-disabled-overlay {
+		.woocommerce-rich-text-editor {
 			&:not(:first-child):not(.components-radio-control) {
 				margin-top: $gap-large - $gap-smaller;
+				margin-bottom: 0;
+			}
+		}
+
+		.woocommerce-product-form__field {
+			margin-top: $gap-large;
+
+			> .components-base-control {
 				margin-bottom: 0;
 			}
 		}
