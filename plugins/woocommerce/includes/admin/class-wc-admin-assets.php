@@ -241,7 +241,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'wc-admin-product-editor',
 					'woocommerce_admin_product_editor',
 					array(
-						'i18n_description' => esc_js(__('Product description', 'woocommerce')),
+						'i18n_description' => esc_js( __( 'Product description', 'woocommerce' ) ),
 					)
 				);
 			}
