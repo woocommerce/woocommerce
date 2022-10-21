@@ -74,7 +74,7 @@ export const ProductInventorySection: React.FC = () => {
 							'washed-oxford-button-down-shirt',
 							'woocommerce'
 						) }
-						{ ...getTextControlProps( getInputProps( 'sku' ) ) }
+						{ ...getInputProps( 'sku' ) }
 					/>
 					<ConditionalWrapper
 						condition={ ! canManageStock }
