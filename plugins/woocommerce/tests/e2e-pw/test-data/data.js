@@ -5,6 +5,16 @@ const {
 	USE_WP_ENV,
 } = process.env;
 
+const admin = {
+	username: ADMIN_USER ?? 'admin',
+	password: ADMIN_PASSWORD ?? 'password',
+	email:
+		ADMIN_USER_EMAIL ??
+		( !! USE_WP_ENV
+			? 'wordpress@example.com'
+			: 'admin@woocommercecoree2etestsuite.com' ),
+};
+
 const storeDetails = {
 	us: {
 		store: {
@@ -43,15 +53,6 @@ const storeDetails = {
 			downloadable: 'Downloads',
 		},
 	},
-};
-
-const admin = {
-	username: ADMIN_USER ?? 'admin',
-	password: ADMIN_PASSWORD ?? 'password',
-	email:
-		ADMIN_USER_EMAIL ??
-		( !! USE_WP_ENV ?? 'wordpress@example.com',
-		'admin@woocommercecoree2etestsuite.com' ),
 };
 
 // mytodo replace hardcoded customer details from tests with this one
