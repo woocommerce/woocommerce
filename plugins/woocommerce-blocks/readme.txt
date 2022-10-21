@@ -79,10 +79,15 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 8.7.4 - 2022-10-21 =
+
+#### Bug fixes
+- Compatibility fix for Cart and Checkout inner blocks for WordPress 6.1. ([7447](https://github.com/woocommerce/woocommerce-blocks/pull/7447))
+
 = 8.7.3 - 2022-10-20 =
 
 #### Bug fixes
-- Fixed an issue where the argument passed to `canMakePayment` contained the incorrect keys. Also fixed the current user's customer data appearing in the editor when editing the Checkout block.
+- Fixed an issue where the argument passed to `canMakePayment` contained the incorrect keys. Also fixed the current user's customer data appearing in the editor when editing the Checkout block. ([7434](https://github.com/woocommerce/woocommerce-blocks/pull/7434))
 
 = 8.7.2 - 2022-10-13 =
 
