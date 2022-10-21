@@ -13,7 +13,6 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
-import { getTextControlProps } from '../utils';
 
 export const ManageStockSection: React.FC = () => {
 	const { getInputProps } = useFormContext< Product >();
@@ -25,9 +24,7 @@ export const ManageStockSection: React.FC = () => {
 			<TextControl
 				type="number"
 				label={ __( 'Current quantity', 'woocommerce' ) }
-				{ ...getTextControlProps( {
-					...getInputProps( 'stock_quantity' ),
-				} ) }
+				{ ...getInputProps( 'stock_quantity' ) }
 				min={ 0 }
 			/>
 			<TextControl
@@ -38,9 +35,7 @@ export const ManageStockSection: React.FC = () => {
 					__( '%d (store default)', 'woocommerce' ),
 					notifyLowStockAmount
 				) }
-				{ ...getTextControlProps( {
-					...getInputProps( 'low_stock_amount' ),
-				} ) }
+				{ ...getInputProps( 'low_stock_amount' ) }
 				min={ 0 }
 			/>
 			<span className="woocommerce-product-form__secondary-text">
