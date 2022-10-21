@@ -10,7 +10,7 @@
 		max-height: 300px;
 		overflow-y: scroll;
 
-		> .woocommerce-category-field-dropdown__item:not( :first-child ) {
+		> .woocommerce-category-field-dropdown__item:not(:first-child) {
 			> .woocommerce-category-field-dropdown__item-content {
 				border-top: 1px solid $gray-200;
 			}
@@ -51,10 +51,14 @@
 	&__toggle-placeholder {
 		width: $gap + $gap-small;
 	}
+	&__new-item {
+		.category-field-dropdown__toggle {
+			margin-right: $gap-smaller;
+		}
+	}
 }
 
-.woocommerce-category-field-dropdown__item.item_highlighted
-	> .woocommerce-category-field-dropdown__item-content {
+.woocommerce-category-field-dropdown__item.item_highlighted > .woocommerce-category-field-dropdown__item-content {
 	font-weight: bold;
 }
 

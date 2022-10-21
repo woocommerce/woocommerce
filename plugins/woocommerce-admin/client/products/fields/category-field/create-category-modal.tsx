@@ -98,7 +98,6 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 					value={ categoryName }
 					onChange={ setCategoryName }
 				/>
-				{ JSON.stringify( categoryParent ) }
 				<SelectControl< Pick< ProductCategory, 'id' | 'name' > >
 					items={ categoriesSelectList }
 					label={ __( 'Parent category (optional)', 'woocommerce' ) }

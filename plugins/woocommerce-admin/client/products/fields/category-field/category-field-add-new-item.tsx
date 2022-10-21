@@ -10,8 +10,8 @@ import { __experimentalSelectControlMenuItemProps as MenuItemProps } from '@wooc
 
 type CategoryFieldAddNewItemProps = {
 	item: Pick< ProductCategory, 'id' | 'name' >;
-	highlighted: boolean;
-	index: number;
+	highlightedIndex: number;
+	items: Pick< ProductCategory, 'id' | 'name' >[];
 } & Pick<
 	MenuItemProps< Pick< ProductCategory, 'id' | 'name' > >,
 	'getItemProps'
@@ -19,26 +19,29 @@ type CategoryFieldAddNewItemProps = {
 
 export const CategoryFieldAddNewItem: React.FC<
 	CategoryFieldAddNewItemProps
-> = ( { item, highlighted, getItemProps, index } ) => {
+> = ( { item, highlightedIndex, getItemProps, items } ) => {
+	const index = items.findIndex( ( i ) => i.id === item.id );
 	return (
-		<div
+		<li
 			{ ...getItemProps( {
 				item,
 				index,
 			} ) }
 			className={ classNames(
-				'category-field-dropdown__item category-field-dropdown__new-item',
+				'woocommerce-category-field-dropdown__item woocommerce-category-field-dropdown__new-item',
 				{
-					item_highlighted: highlighted,
+					item_highlighted: highlightedIndex === index,
 				}
 			) }
 		>
-			<Icon
-				className="category-field-dropdown__toggle"
-				icon={ plus }
-				size={ 24 }
-			/>
-			{ sprintf( __( 'Create "%s"', 'woocommerce' ), item.name ) }
-		</div>
+			<div className="woocommerce-category-field-dropdown__item-content">
+				<Icon
+					className="category-field-dropdown__toggle"
+					icon={ plus }
+					size={ 20 }
+				/>
+				{ sprintf( __( 'Create "%s"', 'woocommerce' ), item.name ) }
+			</div>
+		</li>
 	);
 };

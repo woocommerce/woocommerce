@@ -215,16 +215,16 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 									</li>
 								) }
 								{ isOpen &&
-									rootItems.map( ( item, menuIndex ) => {
+									rootItems.map( ( item ) => {
 										return item.id === -99 ? (
 											<CategoryFieldAddNewItem
+												key={ `${ item.id }` }
 												item={ item }
-												highlighted={
-													menuIndex ===
+												highlightedIndex={
 													highlightedIndex
 												}
+												items={ items }
 												getItemProps={ getItemProps }
-												index={ menuIndex }
 											/>
 										) : (
 											<CategoryFieldItem
