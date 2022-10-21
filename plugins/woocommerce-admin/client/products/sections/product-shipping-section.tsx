@@ -388,6 +388,9 @@ export function ProductShippingSection( {
 							Promise< ProductShippingClass >
 						>( shippingClassValues )
 							.then( ( value ) => {
+								recordEvent(
+									'product_modal_new_shipping_class_add_button'
+								);
 								invalidateResolution(
 									'getProductShippingClasses'
 								);

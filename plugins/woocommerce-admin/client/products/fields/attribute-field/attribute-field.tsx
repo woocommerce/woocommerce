@@ -152,6 +152,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					return newAttr;
 				} ),
 		] );
+		recordEvent( 'product_modal_attribute_add_button' );
 		setShowAddAttributeModal( false );
 	};
 
@@ -178,18 +179,24 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 							<Button
 								variant="secondary"
 								className="woocommerce-attribute-field__add-new"
-								onClick={ () =>
-									setShowAddAttributeModal( true )
-								}
+								onClick={ () => {
+									recordEvent(
+										'product_add_first_attribute_button'
+									);
+									setShowAddAttributeModal( true );
+								} }
 							>
 								{ __( 'Add first attribute', 'woocommerce' ) }
 							</Button>
 						</div>
 						{ showAddAttributeModal && (
 							<AddAttributeModal
-								onCancel={ () =>
-									setShowAddAttributeModal( false )
-								}
+								onCancel={ () => {
+									recordEvent(
+										'product_modal_attribute_cancel_button'
+									);
+									setShowAddAttributeModal( false );
+								} }
 								onAdd={ onAddNewAttributes }
 								selectedAttributeIds={ ( value || [] ).map(
 									( attr ) => attr.id
@@ -286,7 +293,10 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 			</ListItem>
 			{ showAddAttributeModal && (
 				<AddAttributeModal
-					onCancel={ () => setShowAddAttributeModal( false ) }
+					onCancel={ () => {
+						recordEvent( 'product_modal_attribute_cancel_button' );
+						setShowAddAttributeModal( false );
+					} }
 					onAdd={ onAddNewAttributes }
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
 				/>
