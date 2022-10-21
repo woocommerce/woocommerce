@@ -1032,6 +1032,21 @@ WHERE
 	}
 
 	/**
+	 * For post based data stores, this was used to filter internal meta data. For custom tables, technically there is no internal meta data,
+	 * (i.e. we store all core data as properties for the order, and not in meta data). So this method is a no-op.
+	 *
+	 * However, declaring $internal_meta_keys is still required so that our backfill and other comparison checks works as expected.
+	 *
+	 * @param \WC_Data $object Object to filter meta data for.
+	 * @param array    $raw_meta_data Raw meta data.
+	 *
+	 * @return array Filtered meta data.
+	 */
+	public function filter_raw_meta_data( &$object, $raw_meta_data ) {
+		return $raw_meta_data;
+	}
+
+	/**
 	 * Sync order to/from posts tables if we are able to detect difference between order and posts but the sync is enabled.
 	 *
 	 * @param \WC_Abstract_Order $order Order object.
