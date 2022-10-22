@@ -89,7 +89,7 @@ export const PricingSection: React.FC = () => {
 
 		if ( value ) {
 			setValues( {
-				date_on_sale_from_gmt: moment().add( 1, 'hours' ).toISOString(),
+				date_on_sale_from_gmt: moment().startOf( 'day' ).toISOString(),
 				date_on_sale_to_gmt: null,
 			} as Product );
 		} else {
@@ -246,6 +246,7 @@ export const PricingSection: React.FC = () => {
 								<DateTimePickerControl
 									label={ __( 'From', 'woocommerce' ) }
 									placeholder={ __( 'Now', 'woocommerce' ) }
+									timeForDateOnly={ 'start-of-day' }
 									currentDate={ values.date_on_sale_from_gmt }
 									{ ...getInputProps(
 										'date_on_sale_from_gmt',
@@ -261,6 +262,7 @@ export const PricingSection: React.FC = () => {
 										'No end date',
 										'woocommerce'
 									) }
+									timeForDateOnly={ 'end-of-day' }
 									currentDate={ values.date_on_sale_to_gmt }
 									{ ...getInputProps( 'date_on_sale_to_gmt', {
 										...dateTimePickerProps,
