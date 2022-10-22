@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { format as formatDate } from '@wordpress/date';
 import {
 	createElement,
 	useState,
@@ -103,9 +104,10 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		return moment.utc( dateString, moment.ISO_8601, true );
 	}
 
-	function parseMoment( dateString?: string | null ): Moment {
-		// parse input date string as local time
-		return moment( dateString, displayFormat );
+	function parseMoment( dateString: string | null ): Moment {
+		// parse input date string as local time;
+		// be lenient of user input and try to match any format Moment can
+		return moment( dateString );
 	}
 
 	function formatMomentIso( momentDate: Moment ): string {
@@ -113,7 +115,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	}
 
 	function formatMoment( momentDate: Moment ): string {
-		return momentDate.local().format( displayFormat );
+		return formatDate( displayFormat, momentDate.local() );
 	}
 
 	function hasFocusLeftInputAndDropdownContent(
