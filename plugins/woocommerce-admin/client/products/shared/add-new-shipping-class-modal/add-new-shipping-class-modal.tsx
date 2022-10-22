@@ -40,6 +40,7 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 			<TextControl
 				{ ...getInputProps( 'name' ) }
 				label={ __( 'Name', 'woocommerce' ) }
+				placeholder={ __( 'e.g. Fragile products', 'woocommerce' ) }
 			/>
 			<TextControl
 				{ ...getInputProps( 'slug' ) }
@@ -116,10 +117,7 @@ export type AddNewShippingClassModalProps = {
 	onCancel: () => void;
 };
 
-const INITIAL_VALUES = {
-	name: __( 'New shipping class', 'woocommerce' ),
-	slug: __( 'new-shipping-class', 'woocommerce' ),
-};
+const INITIAL_VALUES = { name: '', slug: '', description: '' };
 
 export function AddNewShippingClassModal( {
 	shippingClass,

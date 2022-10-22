@@ -42,6 +42,10 @@ export type ProductShippingSectionProps = {
 	product?: PartialProduct;
 };
 
+type ServerErrorResponse = {
+	code: string;
+};
+
 export const DEFAULT_SHIPPING_CLASS_OPTIONS: SelectControl.Option[] = [
 	{ value: '', label: __( 'No shipping class', 'woocommerce' ) },
 	{
@@ -70,19 +74,26 @@ function getInterpolatedSizeLabel( mixedString: string ) {
 
 /**
  * This extracts a shipping class from the product categories. Using
- * the first category different to `Uncategorized`.
+ * the first category different to `Uncategorized` and check if the
+ * category was not added to the shipping class list
  *
  * @see https://github.com/woocommerce/woocommerce/issues/34657
- * @param  product The product
+ * @see https://github.com/woocommerce/woocommerce/issues/35037
+ * @param product The product
+ * @param shippingClasses The shipping classes
  * @return The default shipping class
  */
 function extractDefaultShippingClassFromProduct(
-	product: PartialProduct
+	product?: PartialProduct,
+	shippingClasses?: ProductShippingClass[]
 ): Partial< ProductShippingClass > | undefined {
 	const category = product?.categories?.find(
 		( { slug } ) => slug !== UNCATEGORIZED_CATEGORY_SLUG
 	);
-	if ( category ) {
+	if (
+		category &&
+		! shippingClasses?.some( ( { slug } ) => slug === category.slug )
+	) {
 		return {
 			name: category.name,
 			slug: category.slug,
@@ -139,6 +150,7 @@ export function ProductShippingSection( {
 	const { createProductShippingClass, invalidateResolution } = useDispatch(
 		EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
 	);
+	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	const dimensionProps = {
 		onBlur: () => {
@@ -163,6 +175,28 @@ export function ProductShippingSection( {
 			parseNumber( String( value ) ),
 	} );
 	const shippingClassProps = getInputProps( 'shipping_class' );
+
+	function handleShippingClassServerError(
+		error: ServerErrorResponse
+	): Promise< ProductShippingClass > {
+		let message = __(
+			'We couldn’t add this shipping class. Try again in a few seconds.',
+			'woocommerce'
+		);
+
+		if ( error.code === 'term_exists' ) {
+			message = __(
+				'A shipping class with that slug already exists.',
+				'woocommerce'
+			);
+		}
+
+		createErrorNotice( message, {
+			explicitDismiss: true,
+		} );
+
+		throw error;
+	}
 
 	return (
 		<ProductSectionLayout
@@ -339,18 +373,22 @@ export function ProductShippingSection( {
 
 			{ showShippingClassModal && (
 				<AddNewShippingClassModal
-					shippingClass={
-						product &&
-						extractDefaultShippingClassFromProduct( product )
-					}
+					shippingClass={ extractDefaultShippingClassFromProduct(
+						product,
+						shippingClasses
+					) }
 					onAdd={ ( shippingClassValues ) =>
 						createProductShippingClass<
 							Promise< ProductShippingClass >
-						>( shippingClassValues ).then( ( value ) => {
-							invalidateResolution( 'getProductShippingClasses' );
-							setValue( 'shipping_class', value.slug );
-							return value;
-						} )
+						>( shippingClassValues )
+							.then( ( value ) => {
+								invalidateResolution(
+									'getProductShippingClasses'
+								);
+								setValue( 'shipping_class', value.slug );
+								return value;
+							} )
+							.catch( handleShippingClassServerError )
 					}
 					onCancel={ () => setShowShippingClassModal( false ) }
 				/>
