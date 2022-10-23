@@ -16,9 +16,9 @@ class WC_Beta_Tester_Live_Branches {
 	 */
 	public function __construct() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
-		// add_action( 'admin_menu', array( $this, 'do_it' ), 10 );
+		
+		// By the time this code runs it appears too late to hook into `admin_menu`
 		$this->register_page();
-		// $this->register_scripts();
 	}
 
 	/**
