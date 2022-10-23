@@ -11,20 +11,56 @@ defined( 'ABSPATH' ) || exit;
  * WC_Beta_Tester Live Branches Feature Class.
  */
 class WC_Beta_Tester_Live_Branches {
-
-	
-
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
-		
-		// $this->includes();
-		$this->register_live_branches_page();
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
+		// add_action( 'admin_menu', array( $this, 'do_it' ), 10 );
+		$this->register_page();
+		// $this->register_scripts();
 	}
 
-  protected function register_live_branches_page() {
-    if ( ! function_exists( 'wc_admin_register_page' ) ) {
+	/**
+	 * Register live branches scripts.
+	 */
+	public function register_scripts() {
+		if ( 
+			! method_exists( 'Automattic\WooCommerce\Admin\Loader', 'is_admin_or_embed_page' ) ||
+			! \Automattic\WooCommerce\Admin\Loader::is_admin_or_embed_page()
+		) {
+			return;
+		}
+
+		$script_path       = '/build/live-branches.js';
+		$script_asset_path = dirname( __FILE__ ) . '/build/live-branches.asset.php';
+		$script_asset      = file_exists( $script_asset_path )
+			? require( $script_asset_path )
+			: array( 'dependencies' => array(), 'version' => filemtime( $script_path ) );
+		$script_url = WC_Beta_Tester::instance()->plugin_url() . $script_path;
+
+		wp_register_script(
+			'woocommerce-beta-tester-live-branches',
+			$script_url,
+			$script_asset['dependencies'],
+			$script_asset['version'],
+			true
+		);
+
+		// wp_register_style(
+		// 	'woocommerce-beta-tester',
+		// 	plugins_url( '/build/index.css', __FILE__ ),
+		// 	// Add any dependencies styles may have, such as wp-components.
+		// 	array(),
+		// 	filemtime( dirname( __FILE__ ) . '/build/index.css' )
+		// );
+
+		wp_enqueue_script( 'woocommerce-beta-tester-live-branches' );
+		// wp_enqueue_style( '{{extension_slug}}' );
+	}
+
+  public function register_page() {    
+		if ( ! function_exists( 'wc_admin_register_page' ) ) {
       return;
     }
 
@@ -34,7 +70,7 @@ class WC_Beta_Tester_Live_Branches {
 				'title'    => __( 'Live Branches', 'woocommerce-beta-tester' ),
 				'path'     => 'live-branches',
 				'parent'   => 'woocommerce',
-				'capability' => 'read',
+				'capability' => 'manage_woocommerce',
 				'nav_args' => array(
 					'order'  => 10,
 					'parent' => 'woocommerce',
