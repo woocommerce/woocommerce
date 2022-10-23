@@ -103,6 +103,7 @@ class WC_Beta_Tester {
 	public function includes() {
 		include_once dirname( __FILE__ ) . '/class-wc-beta-tester-admin-menus.php';
 		include_once dirname( __FILE__ ) . '/class-wc-beta-tester-admin-assets.php';
+		include_once dirname( __FILE__ ) . '/class-wc-beta-tester-live-branches.php';
 	}
 
 	/**
