@@ -52,6 +52,7 @@ class TaskLists {
 		'AdditionalPayments',
 		'ReviewShippingOptions',
 		'GetMobileApp',
+		'TourInAppMarketplace',
 	);
 
 	/**
@@ -147,6 +148,7 @@ class TaskLists {
 				'tasks'   => array(
 					'AdditionalPayments',
 					'GetMobileApp',
+					'TourInAppMarketplace',
 				),
 			)
 		);
@@ -185,6 +187,7 @@ class TaskLists {
 				'tasks'        => array(
 					'AdditionalPayments',
 					'GetMobileApp',
+					'TourInAppMarketplace',
 				),
 				'event_prefix' => 'extended_tasklist_',
 			)
