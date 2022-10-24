@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { useEffect, useState, createInterpolateElement } from '@wordpress/element';
+ import {
+	useEffect,
+	useState,
+	createInterpolateElement,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import qs from 'qs';
@@ -172,7 +176,7 @@ const getTourConfig = ( {
 											'Refund policy',
 											'woocommerce'
 										) }
-									/>
+									>{ __( '30-day money-back guarantee', 'woocommerce' ) }</a>
 								),
 								a2: (
 									<a
@@ -181,7 +185,7 @@ const getTourConfig = ( {
 											'Contact support',
 											'woocommerce'
 										) }
-									/>
+									>{ __( 'email and live chat support', 'woocommerce' ) }</a>
 								),
 								br: <br />,
 							}
@@ -198,7 +202,10 @@ export const WCAddonsTour = () => {
 	const [ showTour, setShowTour ] = useState< boolean >( false );
 	const [ tourConfig, setTourConfig ] = useState< TourKitTypes.WooConfig >();
 
-	const closeHandler: TourKitTypes.CloseHandler = ( steps, currentStepIndex ) => {
+	const closeHandler: TourKitTypes.CloseHandler = (
+		steps,
+		currentStepIndex
+	) => {
 		setShowTour( false );
 		if ( steps.length - 1 === currentStepIndex ) {
 			// TODO: Track Tour as completed
@@ -225,7 +232,7 @@ export const WCAddonsTour = () => {
 	};
 
 	const onNextStepHandler = ( stepIndex: number ) => {
-		const stepName = tourConfig?.steps[ stepIndex ]?.meta?.name || '';
+		// const stepName = tourConfig?.steps[ stepIndex ]?.meta?.name || '';
 
 		scrollForStep( stepIndex + 1 );
 
@@ -233,8 +240,6 @@ export const WCAddonsTour = () => {
 	};
 
 	const onPreviousStepHandler = ( stepIndex: number ) => {
-		const stepName = tourConfig?.steps[ stepIndex ]?.meta?.name || '';
-
 		scrollForStep( stepIndex - 1 );
 	};
 
