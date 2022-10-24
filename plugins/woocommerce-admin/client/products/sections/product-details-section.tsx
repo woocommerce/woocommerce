@@ -34,14 +34,20 @@ import { BlockInstance, serialize, parse } from '@wordpress/blocks';
 import './product-details-section.scss';
 import { CategoryField } from '../fields/category-field';
 import { EditProductLinkModal } from '../shared/edit-product-link-modal';
-import { getCheckboxProps, getTextControlProps } from './utils';
+import { getCheckboxTracks } from './utils';
 import { ProductSectionLayout } from '../layout/product-section-layout';
 
 const PRODUCT_DETAILS_SLUG = 'product-details';
 
 export const ProductDetailsSection: React.FC = () => {
-	const { getInputProps, values, setValue, touched, errors } =
-		useFormContext< Product >();
+	const {
+		getCheckboxControlProps,
+		getInputProps,
+		values,
+		touched,
+		errors,
+		setValue,
+	} = useFormContext< Product >();
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
 		useState( false );
 	const [ descriptionBlocks, setDescriptionBlocks ] = useState<
@@ -66,7 +72,7 @@ export const ProductDetailsSection: React.FC = () => {
 	};
 
 	const setSkuIfEmpty = () => {
-		if ( values.sku || ! values.name.length ) {
+		if ( values.sku || ! values.name?.length ) {
 			return;
 		}
 		setValue( 'sku', cleanForSlug( values.name ) );
@@ -90,13 +96,9 @@ export const ProductDetailsSection: React.FC = () => {
 								'e.g. 12 oz Coffee Mug',
 								'woocommerce'
 							) }
-							{ ...getTextControlProps(
-								getInputProps( 'name' )
-							) }
-							onBlur={ () => {
-								setSkuIfEmpty();
-								getInputProps( 'name' ).onBlur();
-							} }
+							{ ...getInputProps( 'name', {
+								onBlur: setSkuIfEmpty,
+							} ) }
 						/>
 						{ values.id && ! hasNameError() && permalinkPrefix && (
 							<span className="woocommerce-product-form__secondary-text product-details-section__product-link">
@@ -170,12 +172,10 @@ export const ProductDetailsSection: React.FC = () => {
 								/>
 							</>
 						}
-						{ ...getCheckboxProps( {
-							...getInputProps( 'featured' ),
-							name: 'featured',
-							className:
-								'product-details-section__feature-checkbox',
-						} ) }
+						{ ...getCheckboxControlProps(
+							'featured',
+							getCheckboxTracks( 'featured' )
+						) }
 					/>
 					{ showProductLinkEditModal && (
 						<EditProductLinkModal

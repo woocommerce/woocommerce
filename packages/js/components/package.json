@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/components",
-	"version": "10.3.0",
+	"version": "11.0.0",
 	"description": "UI components for WooCommerce.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",

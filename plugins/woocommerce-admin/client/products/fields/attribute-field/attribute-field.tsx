@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { sprintf, __ } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
+import { Button, Card, CardBody, Popover } from '@wordpress/components';
+import { useState } from '@wordpress/element';
 import { ProductAttribute } from '@woocommerce/data';
 import { Text } from '@woocommerce/experimental';
 import { Sortable, ListItem } from '@woocommerce/components';
@@ -13,6 +14,7 @@ import { closeSmall } from '@wordpress/icons';
  */
 import './attribute-field.scss';
 import AttributeEmptyStateLogo from './attribute-empty-state-logo.svg';
+import { AddAttributeModal } from './add-attribute-modal';
 import { reorderSortableProductAttributePositions } from './utils';
 
 type AttributeFieldProps = {
@@ -24,6 +26,8 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 	value,
 	onChange,
 } ) => {
+	const [ showAddAttributeModal, setShowAddAttributeModal ] =
+		useState( false );
 	const onRemove = ( attribute: ProductAttribute ) => {
 		// eslint-disable-next-line no-alert
 		if ( window.confirm( __( 'Remove this attribute?', 'woocommerce' ) ) ) {
@@ -31,33 +35,69 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		}
 	};
 
+	const onAddNewAttributes = ( newAttributes: ProductAttribute[] ) => {
+		onChange( [
+			...( value || [] ),
+			...newAttributes
+				.filter(
+					( newAttr ) =>
+						! ( value || [] ).find(
+							( attr ) => attr.id === newAttr.id
+						)
+				)
+				.map( ( newAttr, index ) => {
+					newAttr.position = ( value || [] ).length + index;
+					return newAttr;
+				} ),
+		] );
+		setShowAddAttributeModal( false );
+	};
+
 	if ( ! value || value.length === 0 ) {
 		return (
-			<div className="woocommerce-attribute-field">
-				<div className="woocommerce-attribute-field__empty-container">
-					<img
-						src={ AttributeEmptyStateLogo }
-						alt="Completed"
-						className="woocommerce-attribute-field__empty-logo"
-					/>
-					<Text
-						variant="subtitle.small"
-						weight="600"
-						size="14"
-						lineHeight="20px"
-						className="woocommerce-attribute-field__empty-subtitle"
-					>
-						{ __( 'No attributes yet', 'woocommerce' ) }
-					</Text>
-					<Button
-						variant="secondary"
-						className="woocommerce-attribute-field__add-new"
-						disabled={ true }
-					>
-						{ __( 'Add first attribute', 'woocommerce' ) }
-					</Button>
-				</div>
-			</div>
+			<Card>
+				<CardBody>
+					<div className="woocommerce-attribute-field">
+						<div className="woocommerce-attribute-field__empty-container">
+							<img
+								src={ AttributeEmptyStateLogo }
+								alt="Completed"
+								className="woocommerce-attribute-field__empty-logo"
+							/>
+							<Text
+								variant="subtitle.small"
+								weight="600"
+								size="14"
+								lineHeight="20px"
+								className="woocommerce-attribute-field__empty-subtitle"
+							>
+								{ __( 'No attributes yet', 'woocommerce' ) }
+							</Text>
+							<Button
+								variant="secondary"
+								className="woocommerce-attribute-field__add-new"
+								onClick={ () =>
+									setShowAddAttributeModal( true )
+								}
+							>
+								{ __( 'Add first attribute', 'woocommerce' ) }
+							</Button>
+						</div>
+						{ showAddAttributeModal && (
+							<AddAttributeModal
+								onCancel={ () =>
+									setShowAddAttributeModal( false )
+								}
+								onAdd={ onAddNewAttributes }
+								selectedAttributeIds={ ( value || [] ).map(
+									( attr ) => attr.id
+								) }
+							/>
+						) }
+						<Popover.Slot />
+					</div>
+				</CardBody>
+			</Card>
 		);
 	}
 
@@ -127,11 +167,19 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 				<Button
 					variant="secondary"
 					className="woocommerce-attribute-field__add-attribute"
-					disabled={ true }
+					onClick={ () => setShowAddAttributeModal( true ) }
 				>
 					{ __( 'Add attribute', 'woocommerce' ) }
 				</Button>
 			</ListItem>
+			{ showAddAttributeModal && (
+				<AddAttributeModal
+					onCancel={ () => setShowAddAttributeModal( false ) }
+					onAdd={ onAddNewAttributes }
+					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
+				/>
+			) }
+			<Popover.Slot />
 		</div>
 	);
 };

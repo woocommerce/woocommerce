@@ -58,6 +58,9 @@ class PageController {
 		if ( ! current_user_can( 'edit_others_shop_orders' ) && ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_die( esc_html__( 'You do not have permission to edit this order', 'woocommerce' ) );
 		}
+		if ( 'trash' === $this->order->get_status() ) {
+			wp_die( esc_html__( 'You cannot edit this item because it is in the Trash. Please restore it and try again.', 'woocommerce' ) );
+		}
 	}
 
 	/**

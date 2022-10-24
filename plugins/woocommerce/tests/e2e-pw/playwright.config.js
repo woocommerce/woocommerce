@@ -1,8 +1,16 @@
 const { devices } = require( '@playwright/test' );
-const { CI, E2E_MAX_FAILURES, ALLURE_RESULTS_DIR } = process.env;
+const {
+	ALLURE_RESULTS_DIR,
+	BASE_URL,
+	CI,
+	DEFAULT_TIMEOUT_OVERRIDE,
+	E2E_MAX_FAILURES,
+} = process.env;
 
 const config = {
-	timeout: 90 * 1000,
+	timeout: DEFAULT_TIMEOUT_OVERRIDE
+		? Number( DEFAULT_TIMEOUT_OVERRIDE )
+		: 90 * 1000,
 	expect: { timeout: 20 * 1000 },
 	outputDir: './report',
 	globalSetup: require.resolve( './global-setup' ),
@@ -30,12 +38,12 @@ const config = {
 	],
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
 	use: {
+		baseURL: BASE_URL ?? 'http://localhost:8086',
 		screenshot: 'only-on-failure',
-		video: 'on-first-retry',
-		trace: 'retain-on-failure',
-		viewport: { width: 1280, height: 720 },
-		baseURL: 'http://localhost:8086',
 		stateDir: 'tests/e2e-pw/storage/',
+		trace: 'retain-on-failure',
+		video: 'on-first-retry',
+		viewport: { width: 1280, height: 720 },
 	},
 	projects: [
 		{
