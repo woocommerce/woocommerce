@@ -31,7 +31,7 @@
 		"docker:up": "pnpm exec wc-e2e docker:up",
 		"env:dev": "pnpm wp-env start",
 		"env:test": "pnpm run env:dev && ./tests/e2e-pw/bin/test-env-setup.sh",
-		"e2e-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js",
+		"test:e2e-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js",
 		"env:test:cot": "pnpm run env:dev && ./tests/e2e-pw/bin/test-env-setup.sh --cot",
 		"env:performance-init": "./tests/performance/bin/init-sample-products.sh",
 		"env:down": "pnpm wp-env stop",
