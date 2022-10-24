@@ -1,20 +1,10 @@
 /**
  * External dependencies
  */
-import {
-	useEffect,
-	useState,
-	createInterpolateElement,
-} from '@wordpress/element';
+import { useEffect, useState, createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import qs from 'qs';
-import {
-	Step,
-	Options,
-	Config,
-	TourStepRendererProps,
-} from '@automattic/tour-kit';
 
 /**
  * Internal dependencies
@@ -208,7 +198,7 @@ export const WCAddonsTour = () => {
 	const [ showTour, setShowTour ] = useState< boolean >( false );
 	const [ tourConfig, setTourConfig ] = useState< TourKitTypes.WooConfig >();
 
-	const closeHandler = ( steps: Step[], currentStepIndex: number ) => {
+	const closeHandler: TourKitTypes.CloseHandler = ( steps, currentStepIndex ) => {
 		setShowTour( false );
 		if ( steps.length - 1 === currentStepIndex ) {
 			// TODO: Track Tour as completed
