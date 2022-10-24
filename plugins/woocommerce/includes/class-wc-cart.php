@@ -1161,7 +1161,7 @@ class WC_Cart extends WC_Legacy_Cart {
 					 */
 					$message = apply_filters( 'woocommerce_cart_product_cannot_add_another_message', $message, $product_data );
 
-					throw new Exception( sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', wc_get_cart_url(), __( 'View cart', 'woocommerce' ), $message ) );
+					throw new Exception( sprintf( '<a href="%s" class="button wc-forward wp-element-button">%s</a> %s', wc_get_cart_url(), __( 'View cart', 'woocommerce' ), $message ) );
 				}
 			}
 
@@ -1222,7 +1222,7 @@ class WC_Cart extends WC_Legacy_Cart {
 					$stock_quantity_in_cart = $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ];
 
 					$message = sprintf(
-						'<a href="%s" class="button wc-forward">%s</a> %s',
+						'<a href="%s" class="button wc-forward wp-element-button">%s</a> %s',
 						wc_get_cart_url(),
 						__( 'View cart', 'woocommerce' ),
 						/* translators: 1: quantity in stock 2: current quantity */
