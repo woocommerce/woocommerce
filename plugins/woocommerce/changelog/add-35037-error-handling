@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Show a dismissible snackbar if the server responds with an error

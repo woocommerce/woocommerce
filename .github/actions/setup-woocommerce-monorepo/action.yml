@@ -35,6 +35,7 @@ runs:
       with:
         node-version-file: .nvmrc
         cache: pnpm
+        registry-url: 'https://registry.npmjs.org'
     
     - name: Setup PHP
       uses: shivammathur/setup-php@e04e1d97f0c0481c6e1ba40f8a538454fe5d7709

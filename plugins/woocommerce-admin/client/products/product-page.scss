@@ -3,7 +3,7 @@
 	.woocommerce-product-form-actions {
 		margin-top: $gap-largest + $gap-smaller;
 	}
-	.woocommerce-product__checkbox,
+	.components-checkbox-control,
 	.components-toggle-control {
 		& > * {
 			margin-bottom: 0;
@@ -17,8 +17,19 @@
 			margin-right: $gap-smaller;
 		}
 	}
-	.components-checkbox-control__label {
-		align-items: center;
+	.components-checkbox-control {
+		&__label {
+			display: flex;
+			align-items: center;
+		}
+
+		&__input-container {
+			align-self: center;
+		}
+
+		.components-base-control__field {
+			display: flex;
+		}
 	}
 	.woocommerce-tooltip {
 		margin-left: $gap-smaller;
