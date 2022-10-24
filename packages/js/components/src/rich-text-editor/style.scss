@@ -1,3 +1,5 @@
+$toolbar-height: 40px;
+
 .woocommerce-rich-text-editor {
 	.woocommerce-rich-text-editor__writing-flow {
 		border: 1px solid $gray-600;
@@ -51,11 +53,25 @@
 	}
 
 	.components-accessible-toolbar {
+		height: $toolbar-height;
 		width: 100%;
 		background-color: $white;
 		border-color: $gray-700;
 		border-bottom-left-radius: 0;
 		border-bottom-right-radius: 0;
+
+		.components-button {
+			height: $toolbar-height;
+		}
+	}
+
+	.block-editor-block-mover:not(.is-horizontal) .block-editor-block-mover__move-button-container > * {
+		height: calc( $toolbar-height / 2 );
+	}
+
+	.block-editor-block-contextual-toolbar.is-fixed,
+	.components-toolbar-group {
+		min-height: $toolbar-height;
 	}
 
 	.wp-block-quote {
