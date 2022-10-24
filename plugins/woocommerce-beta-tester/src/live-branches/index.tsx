@@ -3,11 +3,14 @@
  */
 import { addFilter } from '@wordpress/hooks';
 
-const DummyApp = () => <div>Hello World, Insert App Content Here.</div>
+/**
+ * Internal dependencies
+ */
+import { App } from './App';
 
-addFilter( 'woocommerce_admin_pages_list', 'live-branches', ( pages ) => {
+addFilter( 'woocommerce_admin_pages_list', 'live-branches', ( pages ) => {	
 	pages.push( {
-		container: DummyApp,
+		container: App,
 		path: '/live-branches',
 		wpOpenMenu: 'toplevel_page_woocommerce',
 		capability: 'read',

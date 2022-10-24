@@ -12,6 +12,7 @@
 	"devDependencies": {
 		"@types/react": "^17.0.0",
 		"@types/react-dom": "^18.0.6",
+		"@types/wordpress__components": "^19.10.1",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/env": "^4.8.0",
@@ -22,10 +23,11 @@
 		"uglify-js": "^3.5.3"
 	},
 	"dependencies": {
+		"@emotion/react": "^11.10.4",
 		"@types/prop-types": "^15.7.4",
 		"@woocommerce/data": "workspace:*",
 		"@wordpress/api-fetch": "^3.21.5",
-		"@wordpress/components": "^12.0.7",
+		"@wordpress/components": "^12.0.9",
 		"@wordpress/compose": "^3.24.4",
 		"@wordpress/data": "^4.26.7",
 		"@wordpress/data-controls": "^1.20.7",
