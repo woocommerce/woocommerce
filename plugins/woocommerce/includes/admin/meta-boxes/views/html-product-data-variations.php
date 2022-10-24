@@ -159,7 +159,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</div>
 				<div class="woocommerce-usage-modal__wrapper">
 					<div class="woocommerce-usage-modal__message">
-						<span>Add price to all variations (<?php echo esc_attr( get_woocommerce_currency_symbol() ); ?> <?php echo esc_textarea( get_woocommerce_currency() ); ?>)</span>
+						<span>Add price to all variations that don't have a price (<?php echo esc_attr( get_woocommerce_currency_symbol() ); ?> <?php echo esc_textarea( get_woocommerce_currency() ); ?>)</span>
 						<input type="text" class="components-text-control__input wc_input_variations_price"/>
 					</div>
 					<div class="woocommerce-usage-modal__actions">
