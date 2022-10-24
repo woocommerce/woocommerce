@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Switch DateTimePickerControl formatting to PHP style, for WP compatibility.
