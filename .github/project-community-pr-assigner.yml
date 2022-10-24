@@ -23,6 +23,7 @@
 
 "packages/js/components/**/*":
   - team: mothra
+  - team: ghidorah
 
 "packages/js/csv-export/**/*":
   - team: mothra
