@@ -179,9 +179,10 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		onChangePropFunctionRef.current = onChange;
 	}, [ onChange ] );
 
-	const inputStringChangeHandlerFunctionRef = useRef<
-		( newInputString: string, fireOnChange: boolean ) => void
-	>( ( newInputString: string, fireOnChange: boolean ) => {
+	function inputStringChangeHandlerFunction(
+		newInputString: string,
+		fireOnChange: boolean
+	) {
 		if ( ! isMounted.current ) return;
 
 		let newDateTime = parseMoment( newInputString );
@@ -201,7 +202,17 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 				isValid
 			);
 		}
-	} );
+	}
+
+	const inputStringChangeHandlerFunctionRef = useRef<
+		( newInputString: string, fireOnChange: boolean ) => void
+	>( inputStringChangeHandlerFunction );
+	// whenever forceTimeTo changes, we need to reset the ref to inputStringChangeHandlerFunction
+	// so that we are using the most current forceTimeTo value inside of it
+	useEffect( () => {
+		inputStringChangeHandlerFunctionRef.current =
+			inputStringChangeHandlerFunction;
+	}, [ forceTimeTo ] );
 
 	const debouncedInputStringChangeHandler = useDebounce(
 		inputStringChangeHandlerFunctionRef.current,
@@ -247,7 +258,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		} else {
 			changeImmediate( currentDate || '', fireOnChange );
 		}
-	}, [ currentDate, displayFormat ] );
+	}, [ currentDate, displayFormat, forceTimeTo ] );
 
 	return (
 		<Dropdown
