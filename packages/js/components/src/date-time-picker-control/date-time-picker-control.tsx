@@ -23,9 +23,11 @@ import {
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
-export const defaultDateFormat = 'MM/DD/YYYY';
-export const default12HourDateTimeFormat = 'MM/DD/YYYY h:mm a';
-export const default24HourDateTimeFormat = 'MM/DD/YYYY H:mm';
+// PHP style formatting:
+// https://wordpress.org/support/article/formatting-date-and-time/
+export const defaultDateFormat = 'm/d/Y';
+export const default12HourDateTimeFormat = 'm/d/Y h:i a';
+export const default24HourDateTimeFormat = 'm/d/Y H:i';
 
 export type DateTimePickerControlOnChangeHandler = (
 	date: string,
