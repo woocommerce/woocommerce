@@ -15,7 +15,5 @@ addFilter( 'woocommerce_admin_pages_list', 'live-branches', ( pages ) => {
 		navArgs: { id: 'live-branches' },
 	} );
 
-	console.log(pages);
-
 	return pages;
 } );
