@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update pnpm command to run e2e tests for consistency. Also update docs with new command.
