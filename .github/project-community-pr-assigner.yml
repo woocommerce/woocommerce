@@ -79,6 +79,7 @@
   
 "plugins/woocommerce-admin/**/*":
   - team: mothra
+  - team: ghidorah
 
 "plugins/woocommerce-beta-tester/**/*":
   - team: atlas
