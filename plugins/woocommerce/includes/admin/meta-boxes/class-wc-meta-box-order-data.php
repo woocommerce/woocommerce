@@ -317,8 +317,9 @@ class WC_Meta_Box_Order_Data {
 							}
 							?>
 							<select class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php esc_attr_e( 'Guest', 'woocommerce' ); ?>" data-allow_clear="true">
-
+								<!-- // @codingStandardsIgnoreStart -->
 								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo esc_html( htmlspecialchars( wp_kses_post( current( apply_filters( 'woocommerce_json_search_found_customers', array( $user_string ) ) ) ) ) ); // htmlspecialchars to prevent XSS when rendered by selectWoo. ?></option>
+								<!-- // @codingStandardsIgnoreEnd -->
 							</select>
 							<!--/email_off-->
 						</p>
