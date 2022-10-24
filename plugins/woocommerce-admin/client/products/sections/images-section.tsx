@@ -182,8 +182,10 @@ export const ImagesSection: React.FC = () => {
 										}
 									} }
 									onUpload={ ( files ) => {
-										recordEvent( 'product_image_upload' );
 										if ( files[ 0 ].id ) {
+											recordEvent(
+												'product_image_upload'
+											);
 											setValue( 'images', [
 												...images,
 												...files,
