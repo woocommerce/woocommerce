@@ -88,7 +88,6 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Prevent resource hinting when cart/checkout blocks are not in use. ([7364](https://github.com/woocommerce/woocommerce-blocks/pull/7364))
 - Separate filter title and filter controls by converting the Rating filter block to use Inner Blocks. ([7362](https://github.com/woocommerce/woocommerce-blocks/pull/7362))
 - Products by Rating: Add support for Display Options. ([7311](https://github.com/woocommerce/woocommerce-blocks/pull/7311))
-- Introduce collection method block. ([7258](https://github.com/woocommerce/woocommerce-blocks/pull/7258))
 - Store API: Introduced `woocommerce_store_api_add_to_cart_data` hook. ([7252](https://github.com/woocommerce/woocommerce-blocks/pull/7252))
 
 #### Bug Fixes
