@@ -36,6 +36,7 @@
 
 "packages/js/data/**/*":
   - team: mothra
+  - team: ghidorah
 
 "packages/js/date/**/*":
   - team: mothra
