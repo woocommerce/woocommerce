@@ -74,7 +74,7 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 					onChange={ debounceChange }
 				>
 					<ShortcutProvider>
-						<EditorWritingFlow />
+						<EditorWritingFlow onChange={ onChange } />
 					</ShortcutProvider>
 					<Popover.Slot />
 				</BlockEditorProvider>
