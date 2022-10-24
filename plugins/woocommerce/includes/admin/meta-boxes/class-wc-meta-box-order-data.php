@@ -317,7 +317,19 @@ class WC_Meta_Box_Order_Data {
 							}
 							?>
 							<select class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php esc_attr_e( 'Guest', 'woocommerce' ); ?>" data-allow_clear="true">
-								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo esc_html( htmlspecialchars( wp_kses_post( current( apply_filters( 'woocommerce_json_search_found_customers', array( $user_string ) ) ) ) ) ); // htmlspecialchars to prevent XSS when rendered by selectWoo. ?></option>
+								<?php
+								// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+								/**
+								 * Filter to customize the display of the currently selected customer for an order in the order edit page.
+								 * This is the same filter used in the ajax call for customer search in the same metabox.
+								 *
+								 * @since 7.2.0 (this instance of the filter)
+								 *
+								 * @param array @user_info An array containing one item with the name and email of the user currently selected as the customer for the order.
+								 */
+								?>
+								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo esc_html( htmlspecialchars( wp_kses_post( current( apply_filters( 'woocommerce_json_search_found_customers', array( $user_string ) ) ) ) ) ); ?></option>
+								<?php // phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 							</select>
 							<!--/email_off-->
 						</p>
