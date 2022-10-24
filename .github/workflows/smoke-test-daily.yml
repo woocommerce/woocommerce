@@ -20,13 +20,16 @@ jobs:
         runs-on: ubuntu-20.04
         if: always()
         env:
-            BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
-            ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
             ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
+            ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
             ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
-            CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
+            BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
             CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
+            CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
             DEFAULT_TIMEOUT_OVERRIDE: 120000
+
         steps:
             - uses: actions/checkout@v3
               with:
