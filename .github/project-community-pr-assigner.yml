@@ -52,6 +52,7 @@
 
 "packages/js/explat/**/*":
   - team: mothra
+  - team: ghidorah
 
 "packages/js/navigation/**/*":
   - team: mothra
