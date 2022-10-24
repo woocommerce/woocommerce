@@ -4,6 +4,7 @@ export { default as AnimationSlider } from './animation-slider';
 export { default as Chart } from './chart';
 export { default as ChartPlaceholder } from './chart/placeholder';
 export { CompareButton, CompareFilter } from './compare-filter';
+export { ConditionalWrapper as __experimentalConditionalWrapper } from './conditional-wrapper';
 export { default as Date } from './date';
 export { default as DateRangeFilterPicker } from './date-range-filter-picker';
 export { default as DateRange } from './calendar/date-range';
