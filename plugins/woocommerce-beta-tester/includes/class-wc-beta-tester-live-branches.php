@@ -33,7 +33,7 @@ class WC_Beta_Tester_Live_Branches {
 		}
 
 		$script_path       = '/build/live-branches.js';
-		$script_asset_path = dirname( __FILE__ ) . '/build/live-branches.asset.php';
+		$script_asset_path = dirname( __FILE__ ) . '../build/live-branches.asset.php';
 		$script_asset      = file_exists( $script_asset_path )
 			? require( $script_asset_path )
 			: array( 'dependencies' => array(), 'version' => filemtime( $script_path ) );
@@ -66,15 +66,11 @@ class WC_Beta_Tester_Live_Branches {
 
 		wc_admin_register_page(
 			array(
-				'id'       => 'wc-beta-tester-live-branches',
+				'id'       => 'woocommerce-beta-tester-live-branches',
 				'title'    => __( 'Live Branches', 'woocommerce-beta-tester' ),
-				'path'     => 'live-branches',
+				'path'     => '/live-branches',
 				'parent'   => 'woocommerce',
-				'capability' => 'manage_woocommerce',
-				'nav_args' => array(
-					'order'  => 10,
-					'parent' => 'woocommerce',
-				),
+				'capability' => 'read',
 			)
 		);
   }
