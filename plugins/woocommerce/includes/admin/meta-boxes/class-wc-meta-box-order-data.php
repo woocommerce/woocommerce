@@ -308,7 +308,7 @@ class WC_Meta_Box_Order_Data {
 								$customer = new WC_Customer( $user_id );
 								/* translators: 1: user display name 2: user ID 3: user email */
 								$user_string = sprintf(
-								    /* translators: $1: customer name, $2 customer id, $3: customer email */
+								    /* translators: 1: customer name, 2 customer id, 3: customer email */
 								    esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
 								    $customer->get_first_name() . ' ' . $customer->get_last_name(),
 								    $customer->get_id(),
