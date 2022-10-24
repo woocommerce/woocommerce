@@ -25,7 +25,9 @@ test.describe( 'Add New Coupon Page', () => {
 	} );
 
 	test( 'can create new coupon', async ( { page } ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=shop_coupon' );
+		await page.goto( 'wp-admin/post-new.php?post_type=shop_coupon', {
+			waitUntil: 'networkidle',
+		} );
 		await page.fill( '#title', couponCode );
 		await page.fill( '#woocommerce-coupon-description', 'test coupon' );
 
