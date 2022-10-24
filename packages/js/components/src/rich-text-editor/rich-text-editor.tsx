@@ -25,12 +25,14 @@ type RichTextEditorProps = {
 	label?: string;
 	onChange: ( changes: BlockInstance[] ) => void;
 	entryId?: string;
+	placeholder?: string;
 };
 
 export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 	blocks,
 	label,
 	onChange,
+	placeholder = '',
 } ) => {
 	const blocksRef = useRef( blocks );
 
@@ -74,7 +76,10 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 					onChange={ debounceChange }
 				>
 					<ShortcutProvider>
-						<EditorWritingFlow onChange={ onChange } />
+						<EditorWritingFlow
+							onChange={ onChange }
+							placeholder={ placeholder }
+						/>
 					</ShortcutProvider>
 					<Popover.Slot />
 				</BlockEditorProvider>

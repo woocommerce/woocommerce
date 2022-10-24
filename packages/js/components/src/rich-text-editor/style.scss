@@ -19,11 +19,6 @@
 		border-color: $gray-600;
 	}
 
-	/* Hide rich text placeholder text */
-	.rich-text [data-rich-text-placeholder] {
-		display: none !important;
-	}
-
 	/* hide block boundary background styling */
 	.rich-text:focus *[data-rich-text-format-boundary] {
 		background: none !important;

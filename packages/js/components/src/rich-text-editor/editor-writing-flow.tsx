@@ -17,9 +17,13 @@ import {
 
 type EditorWritingFlowProps = {
 	onChange: ( changes: BlockInstance[] ) => void;
+	placeholder?: string;
 };
 
-export const EditorWritingFlow = ( { onChange }: EditorWritingFlowProps ) => {
+export const EditorWritingFlow = ( {
+	onChange,
+	placeholder = '',
+}: EditorWritingFlowProps ) => {
 	const instanceId = useInstanceId( EditorWritingFlow );
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore This action is available in the block editor data store.
@@ -55,6 +59,7 @@ export const EditorWritingFlow = ( { onChange }: EditorWritingFlowProps ) => {
 		if ( isEmpty ) {
 			const initialBlock = createBlock( 'core/paragraph', {
 				content: '',
+				placeholder,
 			} );
 			insertBlock( initialBlock );
 			onChange( [ initialBlock ] );
