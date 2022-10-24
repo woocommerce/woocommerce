@@ -16,14 +16,15 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { getCheckboxProps, getTextControlProps } from '../utils';
+import { getCheckboxTracks } from '../utils';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { ProductSectionLayout } from '../../layout/product-section-layout';
 import { ManageStockSection } from './manage-stock-section';
 import { ManualStockSection } from './manual-stock-section';
 
 export const ProductInventorySection: React.FC = () => {
-	const { getInputProps, values } = useFormContext< Product >();
+	const { getCheckboxControlProps, getInputProps, values } =
+		useFormContext< Product >();
 	const canManageStock = getAdminSetting( 'manageStock', 'yes' ) === 'yes';
 
 	return (
@@ -67,7 +68,7 @@ export const ProductInventorySection: React.FC = () => {
 							'washed-oxford-button-down-shirt',
 							'woocommerce'
 						) }
-						{ ...getTextControlProps( getInputProps( 'sku' ) ) }
+						{ ...getInputProps( 'sku' ) }
 					/>
 					{ canManageStock && (
 						<>
@@ -76,8 +77,9 @@ export const ProductInventorySection: React.FC = () => {
 									'Track quantity for this product',
 									'woocommerce'
 								) }
-								{ ...getCheckboxProps(
-									getInputProps( 'manage_stock' )
+								{ ...getCheckboxControlProps(
+									'manage_stock',
+									getCheckboxTracks( 'manage_stock' )
 								) }
 							/>
 							{ values.manage_stock && <ManageStockSection /> }
