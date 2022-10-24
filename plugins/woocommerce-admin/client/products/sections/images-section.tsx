@@ -125,6 +125,9 @@ export const ImagesSection: React.FC = () => {
 								setValue( 'images', images );
 							}
 						} }
+						onSelectAsCover={ () =>
+							recordEvent( 'product_image_select_as_cover' )
+						}
 					>
 						{ images.map( ( image ) => (
 							<ImageGalleryItem
