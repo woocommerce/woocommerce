@@ -1,17 +1,11 @@
 /**
  * External dependencies
  */
-import { BaseControl, SlotFillProvider } from '@wordpress/components';
+import { BaseControl, Popover, SlotFillProvider } from '@wordpress/components';
 import { BlockEditorProvider } from '@wordpress/block-editor';
 import { BlockInstance } from '@wordpress/blocks';
+import { createElement, useEffect, useState, useRef } from '@wordpress/element';
 import { debounce } from 'lodash';
-import {
-	createElement,
-	useCallback,
-	useEffect,
-	useState,
-	useRef,
-} from '@wordpress/element';
 import React from 'react';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -82,6 +76,7 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 					<ShortcutProvider>
 						<EditorWritingFlow />
 					</ShortcutProvider>
+					<Popover.Slot />
 				</BlockEditorProvider>
 			</SlotFillProvider>
 		</div>
