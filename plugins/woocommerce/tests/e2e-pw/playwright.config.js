@@ -32,6 +32,8 @@ const config = {
 			{
 				outputFolder:
 					ALLURE_RESULTS_DIR ?? 'tests/e2e-pw/allure-results',
+				detail: true,
+				suiteTitle: true,
 			},
 		],
 		[ 'json', { outputFile: 'tests/e2e-pw/test-results.json' } ],
