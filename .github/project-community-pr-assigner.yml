@@ -71,6 +71,7 @@
 
 "plugins/woocommerce/src/Admin/**/*":
   - team: mothra
+  - team: ghidorah
 
 "plugins/woocommerce/src/Internal/Admin/**/*":
   - team: mothra
