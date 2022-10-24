@@ -285,6 +285,7 @@ jQuery( function ( $ ) {
 					$( el ).val( variation_price ).trigger( 'change' );
 				}
 			} );
+			wc_meta_boxes_product_variations_ajax.save_variations();
 		},
 
 		/**
