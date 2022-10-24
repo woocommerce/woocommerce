@@ -71,6 +71,7 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 						// @ts-ignore This property was recently added in the block editor data store.
 						__experimentalClearBlockSelection: false,
+						mediaUpload: true,
 					} }
 					onInput={ debounceChange }
 					onChange={ debounceChange }
