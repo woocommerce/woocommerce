@@ -173,7 +173,7 @@ export const ImagesSection: React.FC = () => {
 											) === undefined
 										) {
 											recordEvent(
-												'product_choose_image_button'
+												'product_image_add_from_media_library'
 											);
 											setValue( 'images', [
 												...images,
