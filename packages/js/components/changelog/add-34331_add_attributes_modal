@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add disabled option to the Select Control input component and alter the onInputChange callback

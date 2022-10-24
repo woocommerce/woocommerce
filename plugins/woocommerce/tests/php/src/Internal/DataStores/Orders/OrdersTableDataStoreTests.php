@@ -481,6 +481,38 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test the trash-untrash cycle with sync enabled.
+	 */
+	public function test_cot_datastore_untrash() {
+		global $wpdb;
+
+		$this->enable_cot_sync();
+
+		// Tests trashing of orders.
+		$order = $this->create_complex_cot_order();
+		$order->set_status( 'on-hold' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$this->sut->trash_order( $order );
+
+		//phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders
+		$orders_table = $this->sut::get_orders_table_name();
+		$this->assertEquals( 'trash', $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$orders_table} WHERE id = %d", $order_id ) ) );
+		$this->assertEquals( 'trash', $wpdb->get_var( $wpdb->prepare( "SELECT post_status FROM {$wpdb->posts} WHERE id = %d", $order_id ) ) );
+
+		$this->sut->read( $order );
+		$this->sut->untrash_order( $order );
+
+		$this->assertEquals( 'on-hold', $order->get_status() );
+		$this->assertEquals( 'wc-on-hold', get_post_status( $order_id ) );
+
+		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->sut->get_meta_table_name()} WHERE order_id = %d AND meta_key LIKE '_wp_trash_meta_%'", $order_id ) ) );
+		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key LIKE '_wp_trash_meta_%'", $order_id ) ) );
+		//phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders
+	}
+
+	/**
 	 * @testDox Tests the `delete()` method on the COT datastore -- full deletes.
 	 *
 	 * @return void
@@ -1120,7 +1152,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$this->enable_cot_sync();
 		$order                         = $this->create_complex_cot_order();
 		$post_order_comparison_closure = function ( $order ) {
-			$post_order = $this->get_post_orders_for_ids( array( $order->get_id() ) )[ $order->get_id() ];
+			$post_order = $this->get_post_orders_for_ids( array( $order->get_id() => $order ) )[ $order->get_id() ];
 
 			return $this->is_post_different_from_order( $order, $post_order );
 		};
@@ -1135,6 +1167,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		$r_order = new WC_Order();
 		$r_order->set_id( $order->get_id() );
+		$this->switch_data_store( $r_order, $this->sut );
 		// Reading again will make a call to migrate_post_record.
 		$this->sut->read( $r_order );
 		$this->assertFalse( $post_order_comparison_closure->call( $this->sut, $r_order ) );
@@ -1806,6 +1839,8 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * @testDox Test that multiple calls to read don't try to sync again.
 	 */
 	public function test_read_multiple_dont_sync_again_for_same_order() {
+		$this->toggle_cot( true );
+		$this->enable_cot_sync();
 		$order = $this->create_complex_cot_order();
 
 		$order_id = $order->get_id();
@@ -1814,12 +1849,22 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			return $this->should_sync_order( $order );
 		};
 
-		$this->enable_cot_sync();
 		$order = new WC_Order();
 		$order->set_id( $order_id );
 		$orders = array( $order_id => $order );
 		$this->assertTrue( $should_sync_callable->call( $this->sut, $order ) );
 		$this->sut->read_multiple( $orders );
 		$this->assertFalse( $should_sync_callable->call( $this->sut, $order ) );
+	}
+
+	/**
+	 * @testDox Make sure get_order return false when checking an order of different order types without warning.
+	 */
+	public function test_get_order_with_id_for_different_type() {
+		$this->toggle_cot( true );
+		$this->disable_cot_sync();
+		$product = new \WC_Product();
+		$product->save();
+		$this->assertFalse( wc_get_order( $product->get_id() ) );
 	}
 }

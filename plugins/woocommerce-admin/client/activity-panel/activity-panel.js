@@ -45,6 +45,7 @@ import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-n
 import { getAdminSetting } from '~/utils/admin-settings';
 import { useActiveSetupTasklist } from '~/tasks';
 import { LayoutContext } from '~/layout';
+import { getSegmentsFromPath } from '~/utils/url-helpers';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -236,6 +237,13 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		return query.page === 'wc-admin' && ! query.path;
 	};
 
+	const isProductPage = () => {
+		const [ firstPathSegment ] = getSegmentsFromPath( query.path );
+		return (
+			firstPathSegment === 'add-product' || firstPathSegment === 'product'
+		);
+	};
+
 	const isPerformingSetupTask = () => {
 		return (
 			query.task &&
@@ -254,7 +262,9 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			icon: <IconFlag />,
 			unread: hasUnreadNotes || hasAbbreviatedNotifications,
 			visible:
-				( isEmbedded || ! isHomescreen() ) && ! isPerformingSetupTask(),
+				( isEmbedded || ! isHomescreen() ) &&
+				! isPerformingSetupTask() &&
+				! isProductPage(),
 		};
 
 		const setup = {
@@ -273,7 +283,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				! requestingTaskListOptions &&
 				! setupTaskListComplete &&
 				! setupTaskListHidden &&
-				! isHomescreen(),
+				! isHomescreen() &&
+				! isProductPage(),
 		};
 
 		const help = {
