@@ -34,9 +34,19 @@ const config = {
 		],
 		[
 			'allure-playwright',
-			{ outputFolder: 'api-test-report/allure-results' },
+			{
+				outputFolder:
+					process.env.ALLURE_RESULTS_DIR ??
+					'tests/api-core-tests/api-test-report/allure-results',
+			},
 		],
-		[ 'json', { outputFile: 'api-test-report/test-results.json' } ],
+		[
+			'json',
+			{
+				outputFile:
+					'tests/api-core-tests/api-test-report/test-results.json',
+			},
+		],
 	],
 	use: {
 		screenshot: 'only-on-failure',
