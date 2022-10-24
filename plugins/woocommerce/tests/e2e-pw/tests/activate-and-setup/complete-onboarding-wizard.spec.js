@@ -12,7 +12,6 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 			page,
 			storeDetails.us.store
 		);
-		await page.click( 'button >> text=Continue' );
 	} );
 
 	// eslint-disable-next-line jest/expect-expect
