@@ -55,7 +55,7 @@ jobs:
               id: e2e
               env:
                   E2E_MAX_FAILURES: 15
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js basic.spec.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
             - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
