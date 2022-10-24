@@ -57,7 +57,7 @@ jobs:
               working-directory: plugins/woocommerce
               id: e2e
               env:
-                  E2E_MAX_FAILURES: 15
+                  E2E_MAX_FAILURES: 25
               run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
             - name: Generate Playwright E2E Test report.
