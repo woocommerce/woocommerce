@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Added npm script for Playwright API Core Tests
