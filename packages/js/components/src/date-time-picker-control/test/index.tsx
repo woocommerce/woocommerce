@@ -3,6 +3,7 @@
  */
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { format as formatDate } from '@wordpress/date';
 import { createElement, Fragment } from '@wordpress/element';
 import moment from 'moment';
 
@@ -102,7 +103,7 @@ describe( 'DateTimePickerControl', () => {
 
 		const input = container.querySelector( 'input' );
 		expect( input?.value ).toBe(
-			dateTime.format( default24HourDateTimeFormat )
+			formatDate( default24HourDateTimeFormat, dateTime )
 		);
 	} );
 
@@ -119,10 +120,10 @@ describe( 'DateTimePickerControl', () => {
 		const input = container.querySelector( 'input' );
 
 		expect( input?.value ).toBe(
-			moment
-				.utc( ambiguousISODateTimeString )
-				.local()
-				.format( default24HourDateTimeFormat )
+			formatDate(
+				default24HourDateTimeFormat,
+				moment.utc( ambiguousISODateTimeString ).local()
+			)
 		);
 	} );
 
@@ -139,10 +140,10 @@ describe( 'DateTimePickerControl', () => {
 		const input = container.querySelector( 'input' );
 
 		expect( input?.value ).toBe(
-			moment
-				.utc( unambiguousISODateTimeString )
-				.local()
-				.format( default24HourDateTimeFormat )
+			formatDate(
+				default24HourDateTimeFormat,
+				moment.utc( unambiguousISODateTimeString ).local()
+			)
 		);
 	} );
 
@@ -158,7 +159,7 @@ describe( 'DateTimePickerControl', () => {
 
 		const input = container.querySelector( 'input' );
 		expect( input?.value ).toBe(
-			dateTime.format( default12HourDateTimeFormat )
+			formatDate( default12HourDateTimeFormat, dateTime )
 		);
 	} );
 
@@ -174,7 +175,7 @@ describe( 'DateTimePickerControl', () => {
 		);
 
 		const input = container.querySelector( 'input' );
-		expect( input?.value ).toBe( dateTime.format( dateTimeFormat ) );
+		expect( input?.value ).toBe( formatDate( dateTimeFormat, dateTime ) );
 	} );
 
 	it( 'should update the input when currentDate is changed', () => {
@@ -197,7 +198,7 @@ describe( 'DateTimePickerControl', () => {
 
 		const input = container.querySelector( 'input' );
 		expect( input?.value ).toBe(
-			updatedDateTime.format( default24HourDateTimeFormat )
+			formatDate( default24HourDateTimeFormat, updatedDateTime )
 		);
 	} );
 
@@ -305,9 +306,9 @@ describe( 'DateTimePickerControl', () => {
 	//       TypeError: Cannot read properties of null (reading 'createEvent')
 	it( 'should call onChange when the input is changed', async () => {
 		const originalDateTime = moment( '2022-09-15 02:30:40' );
-		const dateTimeFormat = 'HH:mm, MM-DD-YYYY';
-		const newDateTimeInputString = '02:04, 06-08-2010';
-		const newDateTime = moment( newDateTimeInputString, dateTimeFormat );
+		const dateTimeFormat = 'm-d-Y, H:i';
+		const newDateTimeInputString = '06-08-2010, 02:04';
+		const newDateTime = moment( newDateTimeInputString );
 		const onChangeHandler = jest.fn();
 
 		const { container } = render(
@@ -377,9 +378,9 @@ describe( 'DateTimePickerControl', () => {
 	//       TypeError: Cannot read properties of null (reading 'createEvent')
 	it( 'should call the current onChange when the input is changed', async () => {
 		const originalDateTime = moment( '2022-09-15 02:30:40' );
-		const dateTimeFormat = 'HH:mm, MM-DD-YYYY';
-		const newDateTimeInputString = '02:04, 06-08-2010';
-		const newDateTime = moment( newDateTimeInputString, dateTimeFormat );
+		const dateTimeFormat = 'm-d-Y, H:i';
+		const newDateTimeInputString = '06-08-2010, 02:04';
+		const newDateTime = moment( newDateTimeInputString );
 		const originalOnChangeHandler = jest.fn();
 		const newOnChangeHandler = jest.fn();
 

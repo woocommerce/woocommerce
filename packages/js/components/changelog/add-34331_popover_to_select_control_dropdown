@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Add support in SelectControl for using the popover slot for the popover.

@@ -78,7 +78,9 @@ describe( 'ProductDetailsSection', () => {
 					</Form>
 				</RegistryProvider>
 			);
-			userEvent.clear( screen.getByLabelText( 'Name' ) );
+			userEvent.clear(
+				screen.getByLabelText( 'Name', { exact: false } )
+			);
 			userEvent.tab();
 
 			expect( screen.queryByText( linkUrl ) ).not.toBeInTheDocument();
