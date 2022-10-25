@@ -18,8 +18,9 @@ jobs:
               id: run
               working-directory: tools/code-analyzer
               run: |
-                  version=$(pnpm run analyzer major-minor "${{ github.head_ref || github.ref_name }}" "plugins/woocommerce/woocommerce.php" | tail -n 1)
-                  pnpm run analyzer "$GITHUB_HEAD_REF" $version -o "github"
+                  HEAD_REF=$(git rev-parse HEAD)
+                  version=$(pnpm run analyzer major-minor "$HEAD_REF" "plugins/woocommerce/woocommerce.php" | tail -n 1)
+                  pnpm run analyzer "$HEAD_REF" $version -o "github"
             - name: Print results
               id: results
               run: echo "::set-output name=results::${{ steps.run.outputs.templates }}${{ steps.run.outputs.wphooks }}${{ steps.run.outputs.schema }}${{ steps.run.outputs.database }}"
