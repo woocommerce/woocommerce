@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import qs from 'qs';
 
@@ -13,7 +12,7 @@ import { waitUntilElementTopNotChange } from '../add-product-tour/utils';
 import { getTourConfig } from './get-config';
 
 const WCAddonsTour = () => {
-	const [ showTour, setShowTour ] = useState< boolean >( false );
+	const [ showTour, setShowTour ] = useState( false );
 	const [ tourConfig, setTourConfig ] = useState< TourKitTypes.WooConfig >();
 
 	const closeHandler: TourKitTypes.CloseHandler = (
@@ -51,7 +50,7 @@ const WCAddonsTour = () => {
 		setTourConfig( theConfig );
 
 		const query = qs.parse( window.location.search.slice( 1 ) );
-		if ( query && query.tutorial === 'true' ) {
+		if ( query?.tutorial === 'true' ) {
 			const intervalId = waitUntilElementTopNotChange(
 				theConfig.steps[ 0 ].referenceElements?.desktop || '',
 				() => {
@@ -71,11 +70,7 @@ const WCAddonsTour = () => {
 		return null;
 	}
 
-	return (
-		<>
-			<TourKit config={ tourConfig } />
-		</>
-	);
+	return <TourKit config={ tourConfig } />;
 };
 
 export default WCAddonsTour;
