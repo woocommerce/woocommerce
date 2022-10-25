@@ -4,7 +4,9 @@ const fs = require( 'fs' );
 
 const setupPermalinks = async ( adminPage, baseURL ) => {
 	console.log( 'Trying to setup permalinks!' );
-	await adminPage.goto( baseURL + '/wp-admin/options-permalink.php' );
+	await adminPage.goto( baseURL + '/wp-admin/options-permalink.php', {
+		waitUntil: 'networkidle',
+	} );
 	await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
 		'Permalink Settings'
 	);
@@ -13,7 +15,7 @@ const setupPermalinks = async ( adminPage, baseURL ) => {
 	await adminPage.click( '#submit' );
 
 	console.log( 'Permalinks Set!' );
-}
+};
 
 module.exports = async ( config ) => {
 	const { stateDir, baseURL, userAgent } = config.projects[ 0 ].use;
