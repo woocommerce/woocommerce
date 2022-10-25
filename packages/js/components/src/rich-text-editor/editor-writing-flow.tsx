@@ -49,7 +49,7 @@ export const EditorWritingFlow = ( {
 	);
 
 	useEffect( () => {
-		if ( selectedBlockClientIds.length || ! firstBlock ) {
+		if ( selectedBlockClientIds?.length || ! firstBlock ) {
 			return;
 		}
 		selectBlock( firstBlock.clientId );
