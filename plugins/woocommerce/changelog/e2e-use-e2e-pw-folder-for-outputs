@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Use plugins/woocommerce/tests/e2e-pw folder for saving test outputs

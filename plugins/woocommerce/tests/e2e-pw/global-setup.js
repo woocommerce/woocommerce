@@ -1,9 +1,31 @@
 const { chromium, expect } = require( '@playwright/test' );
 const fs = require( 'fs' );
+const {
+	ADMIN_USER,
+	ADMIN_PASSWORD,
+	CUSTOMER_USER,
+	CUSTOMER_PASSWORD,
+} = process.env;
+const adminUsername = ADMIN_USER ?? 'admin';
+const adminPassword = ADMIN_PASSWORD ?? 'password';
+const customerUsername = CUSTOMER_USER ?? 'customer';
+const customerPassword = CUSTOMER_PASSWORD ?? 'password';
+
+const setupPermalinks = async ( adminPage, baseURL ) => {
+	console.log( 'Trying to setup permalinks!' );
+	await adminPage.goto( baseURL + '/wp-admin/options-permalink.php' );
+	await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
+		'Permalink Settings'
+	);
+	await adminPage.click( '#custom_selection' );
+	await adminPage.fill( '#permalink_structure', '/%postname%/' );
+	await adminPage.click( '#submit' );
+
+	console.log( 'Permalinks Set!' );
+}
 
 module.exports = async ( config ) => {
-	const { stateDir } = config.projects[ 0 ].use;
-	const { baseURL } = config.projects[ 0 ].use;
+	const { stateDir, baseURL, userAgent } = config.projects[ 0 ].use;
 
 	console.log( `State Dir: ${ stateDir }` );
 	console.log( `Base URL: ${ baseURL }` );
@@ -39,20 +61,27 @@ module.exports = async ( config ) => {
 	let customerLoggedIn = false;
 	let customerKeyConfigured = false;
 
+	// Specify user agent when running against an external test site to avoid getting HTTP 406 NOT ACCEPTABLE errors.
+	const contextOptions = { baseURL, userAgent };
+
+	// Create browser, browserContext, and page for customer and admin users
 	const browser = await chromium.launch();
-	const adminPage = await browser.newPage();
-	const customerPage = await browser.newPage();
+	const adminContext = await browser.newContext( contextOptions );
+	const customerContext = await browser.newContext( contextOptions );
+	const adminPage = await adminContext.newPage();
+	const customerPage = await customerContext.newPage();
 
 	// Sign in as admin user and save state
 	const adminRetries = 5;
 	for ( let i = 0; i < adminRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as admin...' );
-			await adminPage.goto( `${ baseURL }/wp-admin` );
-			await adminPage.fill( 'input[name="log"]', 'admin' );
-			await adminPage.fill( 'input[name="pwd"]', 'password' );
+			await adminPage.goto( `/wp-admin` );
+			await adminPage.fill( 'input[name="log"]', adminUsername );
+			await adminPage.fill( 'input[name="pwd"]', adminPassword );
 			await adminPage.click( 'text=Log In' );
-			await adminPage.goto( `${ baseURL }/wp-admin` );
+			await adminPage.waitForLoadState( 'networkidle' );
+
 			await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
 				'Dashboard'
 			);
@@ -84,7 +113,7 @@ module.exports = async ( config ) => {
 		try {
 			console.log( 'Trying to add consumer token...' );
 			await adminPage.goto(
-				`${ baseURL }/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
+				`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
 			);
 			await adminPage.fill( '#key_description', 'Key for API access' );
 			await adminPage.selectOption( '#key_permissions', 'read_write' );
@@ -113,25 +142,51 @@ module.exports = async ( config ) => {
 		process.exit( 1 );
 	}
 
+	// Ensure that permalinks are correctly setup since we can't set it up using wp-env when not using the default WP version.
+	// More info here: https://github.com/WordPress/gutenberg/issues/28201
+	let permalinkConfigured = false;
+	const permalinkRetries = 5;
+	for ( let i = 0; i < permalinkRetries; i++ ) {
+		try {
+			await setupPermalinks( adminPage, baseURL );
+			permalinkConfigured = true;
+			break;
+		} catch ( e ) {
+			console.log(
+				`Setting permalink failed, Retrying... ${ i }/${ permalinkRetries }`
+			);
+			console.log( e );
+		}
+	}
+
+	if ( ! permalinkConfigured ) {
+		console.error(
+			'Cannot proceed e2e test, as we could not setup permalinks. Please check if the test site has been setup correctly.'
+		);
+		process.exit( 1 );
+	}
+
 	// Sign in as customer user and save state
 	const customerRetries = 5;
 	for ( let i = 0; i < customerRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as customer...' );
-			await customerPage.goto( `${ baseURL }/wp-admin` );
-			await customerPage.fill( 'input[name="log"]', 'customer' );
-			await customerPage.fill( 'input[name="pwd"]', 'password' );
+			await customerPage.goto( `/wp-admin` );
+			await customerPage.fill( 'input[name="log"]', customerUsername );
+			await customerPage.fill( 'input[name="pwd"]', customerPassword );
 			await customerPage.click( 'text=Log In' );
 
-			await customerPage.goto( `${ baseURL }/my-account/` );
+			await customerPage.goto( `/my-account` );
 			await expect(
-				customerPage.locator( 'h1.entry-title' )
-			).toContainText( 'My account' );
+				customerPage.locator(
+					'.woocommerce-MyAccount-navigation-link--customer-logout'
+				)
+			).toBeVisible();
 			await expect(
 				customerPage.locator(
 					'div.woocommerce-MyAccount-content > p >> nth=0'
 				)
-			).toContainText( 'Jane Smith' );
+			).toContainText( 'Hello' );
 
 			await customerPage
 				.context()
@@ -154,5 +209,7 @@ module.exports = async ( config ) => {
 		process.exit( 1 );
 	}
 
+	await adminContext.close();
+	await customerContext.close();
 	await browser.close();
 };
