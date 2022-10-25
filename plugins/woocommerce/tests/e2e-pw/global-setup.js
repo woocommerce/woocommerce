@@ -4,7 +4,7 @@ const fs = require( 'fs' );
 
 const setupPermalinks = async ( adminPage, baseURL ) => {
 	console.log( 'Trying to setup permalinks!' );
-	await adminPage.goto( baseURL + '/wp-admin/options-permalink.php', {
+	await adminPage.goto( '/wp-admin/options-permalink.php', {
 		waitUntil: 'networkidle',
 	} );
 	console.log( `adminPage.url(): ${ adminPage.url() }` ); // mytodo remove
