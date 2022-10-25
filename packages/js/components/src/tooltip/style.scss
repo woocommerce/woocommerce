@@ -6,7 +6,8 @@
     }
 
     &__text .components-popover__content {
-        padding: $gap-smaller;
+        font-size: $default-font-size;
+        padding: $gap;
         width: max-content;
     }    
 }
