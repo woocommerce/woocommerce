@@ -817,9 +817,7 @@
 
 	// Improve styling of the 'Have a coupon?' section on the checkout page.
 	form.checkout_coupon {
-		background-color: transparent;
 		padding-left: 1.5rem;
-		float: left;
 		// 1.5 rem is to account for extra padding we added above.
 		width: calc(100% - 1.5rem);
 
@@ -943,6 +941,74 @@
 			text-transform: uppercase;
 		}
 	}
+
+	/*
+		Thank you page (after checkout).
+	 */
+
+	// Adds a tiny bit of vertical spacing on the Thank you (after checkout) page.
+	.woocommerce-order > * {
+		margin-bottom: var(--wp--style--block-gap);
+	}
+
+	// Improves the presentation of order overview (order #, date, email, etc, not the line items) on the Thank you page.
+	ul.woocommerce-order-overview {
+
+		li {
+			display: inline;
+			text-transform: uppercase;
+
+			strong {
+				text-transform: none;
+				display: block;
+			}
+		}
+	}
+
+	// Bottom section of the Thank you page---customer details: align, add border, make it look nice.
+	.woocommerce-customer-details {
+		address {
+			border: 1px solid var(--wp--preset--color--black);
+			font-style: inherit;
+
+			p[class^="woocommerce-customer-details--"] {
+				&:first-of-type {
+					margin-top: 2rem;
+				}
+
+				margin-top: 1rem;
+				margin-bottom: 0;
+			}
+
+			.woocommerce-customer-details--phone::before {
+				content: "\01F4DE";
+				margin-right: 1rem;
+			}
+
+			.woocommerce-customer-details--email::before {
+				content: "\2709";
+				margin-right: 1rem;
+				font-size: 1.8rem;
+			}
+		}
+	}
+
+	// Better styling for Order line items on the Thank you page: create a table and align it to the left side.
+	.woocommerce-table--order-details {
+		border: 1px solid var(--wp--preset--color--black);
+
+		th,
+		td {
+			text-align: left;
+			border-top: 1px solid var(--wp--preset--color--black);
+			border-bottom: 1px solid var(--wp--preset--color--black);
+			font-weight: normal;
+		}
+
+		thead th {
+			text-transform: uppercase;
+		}
+	}
 }
 
 /*
@@ -963,6 +1029,7 @@
 	}
 }
 
+// TODO: This could look nicer.
 .select2-container {
 
 	.select2-selection,
