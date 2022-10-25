@@ -31,22 +31,11 @@ test.describe( 'Add New Coupon Page', () => {
 
 		await page.fill( '#title', couponCode );
 
-		// Coupon will be saved as a draft after typing the coupon code and removing focus from the coupon code input box.
-		// Wait for the save operation to finish first before proceeding.
-		await page.focus( '#woocommerce-coupon-description' );
-		await page.waitForLoadState( 'networkidle' );
-
-		// While saving the draft coupon, the Publish button will have the 'disabled' CSS class.
-		// Wait for this class to go away before proceeding.
-		// Otherwise, Playwright will not recognize this button as disabled and would still be able to successfully click on it on the 'Publish' step later on.
-		await expect( page.locator( '#publish' ) ).not.toHaveClass(
-			/disabled/
-		);
-
 		await page.fill( '#woocommerce-coupon-description', 'test coupon' );
 
 		await page.fill( '#coupon_amount', '100' );
 
+		await expect( page.locator( '#publish:not(.disabled)' ) ).toBeVisible();
 		await page.click( '#publish' );
 
 		await expect( page.locator( 'div.notice.notice-success' ) ).toHaveText(
