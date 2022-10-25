@@ -7,7 +7,7 @@ const setupPermalinks = async ( adminPage, baseURL ) => {
 	await adminPage.goto( baseURL + '/wp-admin/options-permalink.php', {
 		waitUntil: 'networkidle',
 	} );
-	await expect( adminPage ).toHaveURL( 'options-permalink.php' );
+	console.log( `adminPage.url(): ${ adminPage.url() }` ); // mytodo remove
 	await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
 		'Permalink Settings'
 	);
