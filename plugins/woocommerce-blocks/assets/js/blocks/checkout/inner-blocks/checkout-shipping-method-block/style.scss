@@ -5,6 +5,7 @@
 	justify-content: space-between;
 }
 
+.edit-post-visual-editor .wc-block-checkout__shipping-method-option,
 .wc-block-checkout__shipping-method-option {
 	flex-grow: 1;
 	display: flex;
@@ -19,9 +20,19 @@
 	color: inherit;
 	background-color: transparent;
 	border: none;
+	box-shadow: none !important;
 	outline: 1px solid currentColor;
+	border-radius: 0 !important;
+	&.components-button:hover:not(:disabled),
+	&.components-button:focus:not(:disabled),
+	&:focus,
+	&:hover {
+		background-color: #d5d5d5;
+		border-color: #d5d5d5;
+		color: #333;
+	}
 	&.wc-block-checkout__shipping-method-option--selected {
-		outline-width: 2px;
+		outline: 3px solid currentColor;
 	}
 }
 

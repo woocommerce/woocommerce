@@ -3,15 +3,16 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	PanelBody,
 	ToggleControl,
 	__experimentalRadio as Radio,
 	__experimentalRadioGroup as RadioGroup,
+	ExternalLink,
 } from '@wordpress/components';
 import { Icon, store, shipping } from '@wordpress/icons';
+import { ADMIN_URL, getSetting } from '@woocommerce/settings';
 import {
 	InspectorControls,
 	useBlockProps,
@@ -21,6 +22,7 @@ import { useShippingData } from '@woocommerce/base-context/hooks';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
+import ExternalLinkCard from '@woocommerce/editor-components/external-link-card';
 
 /**
  * Internal dependencies
@@ -236,6 +238,43 @@ export const Edit = ( {
 								showPrice: ! showPrice,
 							} )
 						}
+					/>
+				</PanelBody>
+				<PanelBody
+					title={ __(
+						'Shipping Methods',
+						'woo-gutenberg-products-block'
+					) }
+				>
+					<p className="wc-block-checkout__controls-text">
+						{ __(
+							'Methods can be made managed in your store settings.',
+							'woo-gutenberg-products-block'
+						) }
+					</p>
+					<ExternalLinkCard
+						key={ 'shipping_methods' }
+						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping` }
+						title={ __(
+							'Shipping',
+							'woo-gutenberg-products-block'
+						) }
+						description={ __(
+							'Manage your shipping zones, methods, and rates.',
+							'woo-gutenberg-products-block'
+						) }
+					/>
+					<ExternalLinkCard
+						key={ 'pickup_location' }
+						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=pickup_location` }
+						title={ __(
+							'Local Pickup',
+							'woo-gutenberg-products-block'
+						) }
+						description={ __(
+							'Allow customers to choose a local pickup location during checkout.',
+							'woo-gutenberg-products-block'
+						) }
 					/>
 				</PanelBody>
 			</InspectorControls>
