@@ -9,6 +9,8 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\ReviewShippingOptions;
+use WP_Error;
+
 /**
  * Task Lists class.
  */
@@ -266,7 +268,7 @@ class TaskLists {
 	 */
 	public static function add_list( $args ) {
 		if ( isset( self::$lists[ $args['id'] ] ) ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'woocommerce_task_list_exists',
 				__( 'Task list ID already exists', 'woocommerce' )
 			);
@@ -285,7 +287,7 @@ class TaskLists {
 	 */
 	public static function add_task( $list_id, $args ) {
 		if ( ! isset( self::$lists[ $list_id ] ) ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'woocommerce_task_list_invalid_list',
 				__( 'Task list ID does not exist', 'woocommerce' )
 			);
