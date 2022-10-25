@@ -75,7 +75,7 @@ $border-radius: 5px;
 
 	.wc-block-components-express-payment__content {
 		@include with-translucent-border(0 $border-width $border-width);
-		padding: em($gap-large) #{$gap-large - $border-width};
+		padding: #{$gap-large - $border-radius} $gap-large $gap-large;
 
 		&::after {
 			border-radius: 0 0 $border-radius $border-radius;
@@ -92,17 +92,18 @@ $border-radius: 5px;
 			width: 50%;
 		}
 
-		> li:only-child {
-			display: block;
-			width: 100%;
-		}
-
 		> li:nth-child(even) {
 			padding-left: $gap-smaller;
 		}
 
 		> li:nth-child(odd) {
 			padding-right: $gap-smaller;
+		}
+
+		> li:only-child {
+			display: block;
+			width: 100%;
+			padding: 0;
 		}
 	}
 }
