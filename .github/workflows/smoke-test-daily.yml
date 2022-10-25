@@ -195,8 +195,6 @@ jobs:
     test-plugins:
         name: Smoke tests with ${{ matrix.plugin }} plugin installed
         runs-on: ubuntu-20.04
-        needs: [k6-tests]
-        if: always()
         env:
             USE_WP_ENV: 1
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
@@ -281,7 +279,7 @@ jobs:
         if: always() &&
             ! github.event.pull_request.head.repo.fork
         runs-on: ubuntu-20.04
-        needs: [test-plugins]
+        needs: [test-plugins, k6-tests]
         steps:
             - name: Create dirs
               run: |
@@ -337,7 +335,7 @@ jobs:
             always() &&
             ! github.event.pull_request.head.repo.fork
         runs-on: ubuntu-20.04
-        needs: [test-plugins]
+        needs: [test-plugins, k6-tests]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             RUN_ID: ${{ github.run_id }}
