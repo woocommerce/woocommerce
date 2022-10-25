@@ -11,7 +11,7 @@ use Automattic\Jetpack\Constants;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Twenty_Twenty_One class.
+ * WC_Twenty_Twenty_Three class.
  */
 class WC_Twenty_Twenty_Three {
 
