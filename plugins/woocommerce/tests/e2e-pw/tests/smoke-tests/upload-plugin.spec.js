@@ -2,6 +2,7 @@ const {
 	ADMINSTATE,
 	GITHUB_TOKEN,
 	PLUGIN_NAME,
+	PLUGIN_PATH,
 	PLUGIN_REPOSITORY,
 } = process.env;
 const { test, expect } = require( '@playwright/test' );
@@ -15,35 +16,49 @@ const {
 	getLatestReleaseZipUrl,
 } = require( '../../utils/plugin-utils' );
 
-let pluginZipPath;
 let pluginSlug;
+let pluginZipPath;
 
 test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
-	// Skip test if PLUGIN_REPOSITORY is falsy.
 	test.skip(
-		! PLUGIN_REPOSITORY,
-		`Skipping this test because value of PLUGIN_REPOSITORY was falsy: ${ PLUGIN_REPOSITORY }`
+		! ( PLUGIN_PATH || PLUGIN_REPOSITORY ),
+		'Skipped: Either PLUGIN_PATH or PLUGIN_REPOSITORY should be defined. PLUGIN_PATH takes precedence over PLUGIN_REPOSITORY.'
 	);
 
 	test.use( { storageState: ADMINSTATE } );
 
 	test.beforeAll( async () => {
-		pluginSlug = PLUGIN_REPOSITORY.split( '/' ).pop();
+		// If PLUGIN_PATH was specified, use it to set up the test, ignoring PLUGIN_REPOSITORY.
+		if ( PLUGIN_PATH ) {
+			const extname = path.extname( PLUGIN_PATH );
+			pluginSlug = path.basename( PLUGIN_PATH, extname );
+			pluginZipPath = PLUGIN_PATH;
 
-		// Get the download URL and filename of the plugin
-		const pluginDownloadURL = await getLatestReleaseZipUrl( {
-			repository: PLUGIN_REPOSITORY,
-			authorizationToken: GITHUB_TOKEN,
-		} );
-		const zipFilename = pluginDownloadURL.split( '/' ).pop();
-		pluginZipPath = path.resolve( __dirname, `../../tmp/${ zipFilename }` );
+			return;
+		}
 
-		// Download the needed plugin.
-		await downloadZip( {
-			url: pluginDownloadURL,
-			downloadPath: pluginZipPath,
-			authToken: GITHUB_TOKEN,
-		} );
+		// Set up the test using PLUGIN_REPOSITORY only when PLUGIN_PATH was not defined.
+		if ( PLUGIN_REPOSITORY ) {
+			pluginSlug = path.basename( PLUGIN_REPOSITORY );
+
+			// Get the download URL and filename of the plugin
+			const pluginDownloadURL = await getLatestReleaseZipUrl( {
+				repository: PLUGIN_REPOSITORY,
+				authorizationToken: GITHUB_TOKEN,
+			} );
+			const zipFilename = path.basename( pluginDownloadURL );
+			pluginZipPath = path.resolve(
+				__dirname,
+				`../../tmp/${ zipFilename }`
+			);
+
+			// Download the plugin.
+			await downloadZip( {
+				url: pluginDownloadURL,
+				downloadPath: pluginZipPath,
+				authToken: GITHUB_TOKEN,
+			} );
+		}
 	} );
 
 	test.afterAll( async ( { baseURL, playwright } ) => {
@@ -78,7 +93,7 @@ test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 		await createPlugin( {
 			request: playwright.request,
 			baseURL,
-			slug: pluginSlug.split( '/' ).pop(),
+			slug: pluginSlug,
 			username: admin.username,
 			password: admin.password,
 		} );
