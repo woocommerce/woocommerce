@@ -213,7 +213,7 @@ jobs:
                   PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
                   PLUGIN_NAME: ${{ matrix.plugin }}
                   GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js upload-plugin.spec.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/daily.playwright.config.js upload-plugin.spec.js
 
             - name: Run the rest of E2E tests
               id: e2e
