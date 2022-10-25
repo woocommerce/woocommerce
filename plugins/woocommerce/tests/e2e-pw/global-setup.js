@@ -2,12 +2,11 @@ const { chromium, expect } = require( '@playwright/test' );
 const { admin, customer } = require( './test-data/data' );
 const fs = require( 'fs' );
 
-const setupPermalinks = async ( adminPage, baseURL ) => {
+const setupPermalinks = async ( adminPage ) => {
 	console.log( 'Trying to setup permalinks!' );
 	await adminPage.goto( '/wp-admin/options-permalink.php', {
 		waitUntil: 'networkidle',
 	} );
-	console.log( `adminPage.url(): ${ adminPage.url() }` ); // mytodo remove
 	await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
 		'Permalink Settings'
 	);
@@ -143,7 +142,7 @@ module.exports = async ( config ) => {
 	const permalinkRetries = 5;
 	for ( let i = 0; i < permalinkRetries; i++ ) {
 		try {
-			await setupPermalinks( adminPage, baseURL );
+			await setupPermalinks( adminPage );
 			permalinkConfigured = true;
 			break;
 		} catch ( e ) {
