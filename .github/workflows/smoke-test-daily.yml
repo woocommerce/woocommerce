@@ -58,11 +58,13 @@ jobs:
               run: pnpm exec playwright test --config=tests/e2e-pw/daily.playwright.config.js
 
             - name: Generate Playwright E2E Test report.
+              id: e2e-report
               if: success() || failure()
               working-directory: plugins/woocommerce
               run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
             - name: Archive E2E test report
+              if: steps.e2e-report.conclusion == 'success'
               uses: actions/upload-artifact@v3
               with:
                   name: ${{ env.E2E_ARTIFACT }}
@@ -101,12 +103,13 @@ jobs:
               run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js hello.test.js
 
             - name: Generate API Test report.
-              id: generate_api_report
+              id: api-report
               if: success() || failure()
               working-directory: plugins/woocommerce
               run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
             - name: Archive API test report
+              if: steps.api-report.conclusion == 'success'
               uses: actions/upload-artifact@v3
               with:
                   name: ${{ env.API_ARTIFACT }}
@@ -223,12 +226,13 @@ jobs:
               run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
             - name: Generate E2E Test report.
-              id: report
+              id: plugins-report
               if: success() || failure()
               working-directory: plugins/woocommerce
               run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
             - name: Archive E2E test report
+              if: steps.plugins-report.conclusion == 'success'
               uses: actions/upload-artifact@v3
               with:
                   name: Smoke tests with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
