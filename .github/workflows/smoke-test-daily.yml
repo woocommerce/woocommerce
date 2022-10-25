@@ -185,7 +185,7 @@ jobs:
                     - plugin: 'WooCommerce Shipping & Tax'
                       repo: 'automattic/woocommerce-services'
                     - plugin: 'WooCommerce Subscriptions'
-                      repo: ${{ secrets.WC_SUBSCRIPTIONS_REPO }}
+                      repo: WC_SUBSCRIPTIONS_REPO
                       private: true
                     - plugin: 'WordPress SEO' # Yoast SEO in the UI, but the slug is wordpress-seo
                       repo: 'Yoast/wordpress-seo'
@@ -207,23 +207,12 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
 
-            - name: Download plugin zip from private repo
-              id: private-zip
-              if: ${{ matrix.private }}
-              working-directory: plugins/woocommerce/tests/e2e-pw
-              env:
-                  GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
-              run: |
-                  gh release download --archive zip --dir tmp --repo ${{ matrix.repo }}
-                  echo "PLUGIN_PATH=$PWD/$(ls tmp)" >> $GITHUB_OUTPUT
-
             - name: Run 'Upload plugin' test
               working-directory: plugins/woocommerce
               env:
-                  GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
+                  PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
                   PLUGIN_NAME: ${{ matrix.plugin }}
-                  PLUGIN_PATH: ${{ steps.private-zip.outputs.PLUGIN_PATH }}
-                  PLUGIN_REPOSITORY: ${{ matrix.repo }}
+                  GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
               run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js upload-plugin.spec.js
 
             - name: Run the rest of E2E tests
