@@ -49,7 +49,7 @@ jobs:
               id: e2e-update
               env:
                   UPDATE_WC: true
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-woocommerce.spec.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/daily.playwright.config.js update-woocommerce.spec.js
 
             - name: Run the rest of E2E tests.
               timeout-minutes: 60
@@ -57,7 +57,7 @@ jobs:
               id: e2e
               env:
                   E2E_MAX_FAILURES: 25
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/daily.playwright.config.js
 
             - name: Generate Playwright E2E Test report.
               id: generate_e2e_report

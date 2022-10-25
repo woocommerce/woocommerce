@@ -47,7 +47,6 @@ const config = {
 		video: 'on-first-retry',
 		viewport: { width: 1280, height: 720 },
 	},
-	testIgnore: '**/shopper/**',
 	projects: [
 		{
 			name: 'Chrome',
