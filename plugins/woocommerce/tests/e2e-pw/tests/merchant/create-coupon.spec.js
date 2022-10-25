@@ -29,14 +29,16 @@ test.describe( 'Add New Coupon Page', () => {
 			waitUntil: 'networkidle',
 		} );
 
-		// Wait until the "Publish" button no longer has the 'disabled' HTML class,
-		// which could take a while on external sites.
-		await expect( page.locator( '#publish:not(.disabled)' ) ).toBeVisible();
-
 		await page.fill( '#title', couponCode );
 		await page.fill( '#woocommerce-coupon-description', 'test coupon' );
 
 		await page.fill( '#coupon_amount', '100' );
+
+		// Wait until the "Publish" button no longer has the 'disabled' HTML class,
+		// which could take a while on external sites.
+		await expect( page.locator( '#publish' ) ).not.toHaveClass(
+			'disabled'
+		);
 
 		await page.click( '#publish' );
 
