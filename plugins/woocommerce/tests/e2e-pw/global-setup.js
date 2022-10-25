@@ -4,9 +4,7 @@ const fs = require( 'fs' );
 
 const setupPermalinks = async ( adminPage ) => {
 	console.log( 'Trying to setup permalinks!' );
-	await adminPage.goto( '/wp-admin/options-permalink.php', {
-		waitUntil: 'networkidle',
-	} );
+	await adminPage.goto( '/wp-admin/options-permalink.php' );
 	await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
 		'Permalink Settings'
 	);
