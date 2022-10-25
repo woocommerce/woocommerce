@@ -18,7 +18,6 @@ jobs:
     e2e-tests:
         name: E2E tests on trunk
         runs-on: ubuntu-20.04
-        if: always()
         env:
             ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
             ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
