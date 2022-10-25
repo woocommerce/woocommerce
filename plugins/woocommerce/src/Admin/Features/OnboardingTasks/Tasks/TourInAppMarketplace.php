@@ -59,6 +59,6 @@ class TourInAppMarketplace extends Task {
 	 * @return string
 	 */
 	public function get_action_url() {
-		return admin_url( 'admin.php?page=wc-addons' );
+		return admin_url( 'admin.php?page=wc-addons&tutorial=true' );
 	}
 }

@@ -3,6 +3,8 @@
  */
 import { useEffect, useState } from '@wordpress/element';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
+import { useDispatch } from '@wordpress/data';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import qs from 'qs';
 
 /**
@@ -15,11 +17,22 @@ const WCAddonsTour = () => {
 	const [ showTour, setShowTour ] = useState( false );
 	const [ tourConfig, setTourConfig ] = useState< TourKitTypes.WooConfig >();
 
+	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+
 	const closeHandler: TourKitTypes.CloseHandler = (
 		steps,
 		currentStepIndex
 	) => {
 		setShowTour( false );
+		// mark tour as completed
+		updateOptions( {
+			woocommerce_admin_dismissed_in_app_marketplace_tour: 'yes',
+		} );
+		// remove `tutorial` from search query, so it's not shown on page refresh
+		const url = new URL( window.location.href );
+		url.searchParams.delete( 'tutorial' );
+		window.history.replaceState( null, '', url );
+
 		if ( steps.length - 1 === currentStepIndex ) {
 			// TODO: Track Tour as completed
 		} else {
