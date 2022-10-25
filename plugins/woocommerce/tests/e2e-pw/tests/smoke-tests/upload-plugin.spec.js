@@ -28,14 +28,14 @@ test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 	test.use( { storageState: ADMINSTATE } );
 
 	test.beforeAll( async () => {
-		pluginSlug = PLUGIN_REPOSITORY.split( '/' ).pop();
+		pluginSlug = path.basename( PLUGIN_REPOSITORY );
 
 		// Get the download URL and filename of the plugin
 		const pluginDownloadURL = await getLatestReleaseZipUrl( {
 			repository: PLUGIN_REPOSITORY,
 			authorizationToken: GITHUB_TOKEN,
 		} );
-		const zipFilename = pluginDownloadURL.split( '/' ).pop();
+		const zipFilename = path.basename( pluginDownloadURL );
 		pluginZipPath = path.resolve( __dirname, `../../tmp/${ zipFilename }` );
 
 		// Download the needed plugin.
@@ -78,7 +78,7 @@ test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 		await createPlugin( {
 			request: playwright.request,
 			baseURL,
-			slug: pluginSlug.split( '/' ).pop(),
+			slug: pluginSlug,
 			username: admin.username,
 			password: admin.password,
 		} );
