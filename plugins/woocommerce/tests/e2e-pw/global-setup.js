@@ -7,9 +7,11 @@ const setupPermalinks = async ( adminPage, baseURL ) => {
 	await adminPage.goto( baseURL + '/wp-admin/options-permalink.php', {
 		waitUntil: 'networkidle',
 	} );
+	await expect( adminPage ).toHaveURL( 'options-permalink.php' );
 	await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
 		'Permalink Settings'
 	);
+
 	await adminPage.click( '#custom_selection' );
 	await adminPage.fill( '#permalink_structure', '/%postname%/' );
 	await adminPage.click( '#submit' );
