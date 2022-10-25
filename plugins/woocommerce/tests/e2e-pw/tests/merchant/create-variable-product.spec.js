@@ -41,7 +41,6 @@ test.describe( 'Add New Variable Product Page', () => {
 	} );
 
 	// tests build upon one another, so running one in the middle will fail.
-	// mytodo remove only
 	test( 'can create product, attributes and variations', async ( {
 		page,
 	} ) => {
