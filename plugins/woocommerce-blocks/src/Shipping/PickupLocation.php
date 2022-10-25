@@ -15,7 +15,7 @@ class PickupLocation extends WC_Shipping_Method {
 	 */
 	public function __construct() {
 		$this->id                 = 'pickup_location';
-		$this->method_title       = __( 'Pickup Locations', 'woo-gutenberg-products-block' );
+		$this->method_title       = __( 'Local Pickup', 'woo-gutenberg-products-block' );
 		$this->method_description = __( 'Allow customers to choose a local pickup location during checkout.', 'woo-gutenberg-products-block' );
 		$this->init();
 	}
