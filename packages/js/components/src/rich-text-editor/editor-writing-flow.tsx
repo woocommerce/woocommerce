@@ -16,37 +16,31 @@ import {
 } from '@wordpress/block-editor';
 
 type EditorWritingFlowProps = {
+	blocks: BlockInstance[];
 	onChange: ( changes: BlockInstance[] ) => void;
 	placeholder?: string;
 };
 
 export const EditorWritingFlow = ( {
+	blocks,
 	onChange,
 	placeholder = '',
 }: EditorWritingFlowProps ) => {
 	const instanceId = useInstanceId( EditorWritingFlow );
+	const firstBlock = blocks[ 0 ];
+	const isEmpty = ! blocks.length;
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore This action is available in the block editor data store.
 	const { insertBlock, selectBlock } = useDispatch( blockEditorStore );
+	const { selectedBlockClientIds } = useSelect( ( select ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore This selector is available in the block editor data store.
+		const { getSelectedBlockClientIds } = select( blockEditorStore );
 
-	const { firstBlock, isEmpty, selectedBlockClientIds } = useSelect(
-		( select ) => {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore This selector is available in the block editor data store.
-			const { getBlocks, getSelectedBlockClientIds } =
-				select( blockEditorStore );
-			const blocks = getBlocks();
-
-			return {
-				firstBlock: blocks[ 0 ],
-				isEmpty: blocks.length
-					? blocks.length <= 1 &&
-					  blocks[ 0 ].attributes?.content?.trim() === ''
-					: true,
-				selectedBlockClientIds: getSelectedBlockClientIds(),
-			};
-		}
-	);
+		return {
+			selectedBlockClientIds: getSelectedBlockClientIds(),
+		};
+	} );
 
 	useEffect( () => {
 		if ( selectedBlockClientIds?.length || ! firstBlock ) {
@@ -64,7 +58,7 @@ export const EditorWritingFlow = ( {
 			insertBlock( initialBlock );
 			onChange( [ initialBlock ] );
 		}
-	}, [] );
+	}, [ isEmpty ] );
 
 	return (
 		/* Gutenberg handles the keyboard events when focusing the content editable area. */

@@ -38,7 +38,6 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 } ) => {
 	const blocksRef = useRef( blocks );
 	const { currentUserCan } = useUser();
-
 	const [ , setRefresh ] = useState( 0 );
 
 	// If there is a props change we need to update the ref and force re-render.
@@ -99,6 +98,7 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 				>
 					<ShortcutProvider>
 						<EditorWritingFlow
+							blocks={ blocksRef.current }
 							onChange={ onChange }
 							placeholder={ placeholder }
 						/>
