@@ -92,12 +92,17 @@ export const ProductDetailsSection: React.FC = () => {
 						<TextControl
 							label={ interpolateComponents( {
 								mixedString: __(
-									'Name {{span}}(required){{/span}}',
+									'Name {{required/}}',
 									'woocommerce'
 								),
 								components: {
-									span: (
-										<span className="woocommerce-product-form__optional-input" />
+									required: (
+										<span className="woocommerce-product-form__optional-input">
+											{ __(
+												'(required)',
+												'woocommerce'
+											) }
+										</span>
 									),
 								},
 							} ) }

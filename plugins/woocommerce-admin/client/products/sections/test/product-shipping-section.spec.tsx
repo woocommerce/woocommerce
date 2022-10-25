@@ -32,12 +32,12 @@ function getShippingClassSelect() {
 
 async function getShippingClassNameInput() {
 	const dialog = getShippingClassDialog();
-	return within( dialog ).getByLabelText( __( 'Name', 'woocommerce' ) );
+	return within( dialog ).getByLabelText( 'Name', { exact: false } );
 }
 
 async function getShippingClassSlugInput() {
 	const dialog = getShippingClassDialog();
-	return within( dialog ).getByLabelText( 'Slug', { exact: false } );
+	return within( dialog ).getByLabelText( __( 'Slug', 'woocommerce' ) );
 }
 
 async function openShippingClassDialog() {
