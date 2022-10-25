@@ -164,10 +164,10 @@ export function __internalUpdateAvailablePaymentMethods() {
 		const registered = await checkPaymentMethodsCanPay( false );
 		const { paymentMethodsInitialized, expressPaymentMethodsInitialized } =
 			select;
-		if ( registered && paymentMethodsInitialized ) {
+		if ( registered && ! paymentMethodsInitialized() ) {
 			dispatch( __internalSetPaymentMethodsInitialized( true ) );
 		}
-		if ( expressRegistered && expressPaymentMethodsInitialized ) {
+		if ( expressRegistered && ! expressPaymentMethodsInitialized() ) {
 			dispatch( __internalSetExpressPaymentMethodsInitialized( true ) );
 		}
 	};
