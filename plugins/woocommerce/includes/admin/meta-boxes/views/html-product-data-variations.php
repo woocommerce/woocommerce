@@ -164,7 +164,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</div>
 					<div class="woocommerce-usage-modal__actions">
 						<button class="modal-close components-button is-secondary"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
-						<button class="modal-close button components-button add_variations_price_button is-primary" disabled><?php esc_html_e( 'OK', 'woocommerce' ); ?></button>
+						<button class="modal-close button components-button add_variations_price_button is-primary" disabled><?php esc_html_e( 'Add prices', 'woocommerce' ); ?></button>
 					</div>
 				</div>
 			</div>
