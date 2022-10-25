@@ -37,7 +37,7 @@ test.describe( 'Add New Coupon Page', () => {
 		// Wait until the "Publish" button no longer has the 'disabled' HTML class,
 		// which could take a while on external sites.
 		await expect( page.locator( '#publish' ) ).not.toHaveClass(
-			'disabled'
+			/disabled/
 		);
 
 		await page.click( '#publish' );
