@@ -223,7 +223,6 @@ class WC_Meta_Box_Order_Data {
 						);
 					}
 
-
 					$ip_address = $order->get_customer_ip_address();
 					if ( $ip_address ) {
 						$meta_list[] = sprintf(
