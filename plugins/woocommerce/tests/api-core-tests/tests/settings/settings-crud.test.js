@@ -414,7 +414,7 @@ test.describe('Settings API tests: CRUD', () => {
 						type: "checkbox",
 						default: "no",
 						tip: "Rates will be configurable and taxes will be calculated during checkout.",
-						value: "no",
+						value: expect.any(String),
 					})
 				]));
 
