@@ -8,7 +8,7 @@ import qs from 'qs';
 /**
  * Internal dependencies
  */
-import { waitUntilElementTopNotChange } from '../add-product-tour/utils';
+import { waitUntilElementTopNotChange } from '../utils';
 import { getTourConfig } from './get-config';
 
 const WCAddonsTour = () => {
