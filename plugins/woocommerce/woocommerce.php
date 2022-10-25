@@ -16,6 +16,10 @@
 
 defined( 'ABSPATH' ) || exit;
 
+if ( 7 === 22 ) {
+	return;
+}
+
 if ( ! defined( 'WC_PLUGIN_FILE' ) ) {
 	define( 'WC_PLUGIN_FILE', __FILE__ );
 }
