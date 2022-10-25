@@ -488,8 +488,6 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							$visibility_class[] = 'show_options_if_checked';
 						}
 
-						$must_disable = ArrayUtil::get_value_or_default( $value, 'disabled', false );
-
 						if ( ! isset( $value['checkboxgroup'] ) || 'start' === $value['checkboxgroup'] ) {
 							?>
 								<tr valign="top" class="<?php echo esc_attr( implode( ' ', $visibility_class ) ); ?>">
@@ -512,12 +510,12 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						?>
 							<label for="<?php echo esc_attr( $value['id'] ); ?>">
 								<input
-									<?php echo $must_disable ? 'disabled' : ''; ?>
 									name="<?php echo esc_attr( $value['field_name'] ); ?>"
 									id="<?php echo esc_attr( $value['id'] ); ?>"
 									type="checkbox"
 									class="<?php echo esc_attr( isset( $value['class'] ) ? $value['class'] : '' ); ?>"
 									value="1"
+									<?php disabled( $value['disabled'] ?? false ); ?>
 									<?php checked( $option_value, 'yes' ); ?>
 									<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
 								/> <?php echo $description; // WPCS: XSS ok. ?>

@@ -8,9 +8,6 @@
  * @package WooCommerce\Classes
  */
 
-use Automattic\WooCommerce\Caches\OrderCache;
-use Automattic\WooCommerce\Utilities\OrderUtil;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -31,26 +28,13 @@ class WC_Order_Factory {
 			return false;
 		}
 
-		$use_orders_cache = OrderUtil::orders_cache_usage_is_enabled();
-		if ( $use_orders_cache ) {
-			$order_cache = wc_get_container()->get( OrderCache::class );
-			$order       = $order_cache->get( $order_id );
-			if ( ! is_null( $order ) ) {
-				return $order;
-			}
-		}
-
 		$classname = self::get_class_name_for_order_id( $order_id );
 		if ( ! $classname ) {
 			return false;
 		}
 
 		try {
-			$order = new $classname( $order_id );
-			if ( $use_orders_cache && $order instanceof \WC_Abstract_Legacy_Order ) {
-				$order_cache->set( $order, $order_id );
-			}
-			return $order;
+			return new $classname( $order_id );
 		} catch ( Exception $e ) {
 			wc_caught_exception( $e, __FUNCTION__, array( $order_id ) );
 			return false;
@@ -70,27 +54,10 @@ class WC_Order_Factory {
 		$result    = array();
 		$order_ids = array_filter( array_map( array( __CLASS__, 'get_order_id' ), $order_ids ) );
 
-		$already_cached_orders = array();
-		$use_orders_cache      = OrderUtil::orders_cache_usage_is_enabled();
-		if ( $use_orders_cache ) {
-			$uncached_order_ids = array();
-			$order_cache        = wc_get_container()->get( OrderCache::class );
-			foreach ( $order_ids as $order_id ) {
-				$cached_order = $order_cache->get( absint( $order_id ) );
-				if ( is_null( $cached_order ) ) {
-					$uncached_order_ids[] = $order_id;
-				} else {
-					$already_cached_orders[] = $cached_order;
-				}
-			}
-			$order_ids = $uncached_order_ids;
-		}
-
 		// We separate order list by class, since their datastore might be different.
 		$order_list_by_class = array();
-
-		foreach ( $order_ids as $order_id ) {
-			$classname = self::get_class_name_for_order_id( $order_id );
+		$order_id_classnames = self::get_class_names_for_order_ids( $order_ids );
+		foreach ( $order_id_classnames as $order_id => $classname ) {
 			if ( ! $classname && ! $skip_invalid ) {
 				// translators: %d is an order ID.
 				throw new \Exception( sprintf( __( 'Could not find classname for order ID %d', 'woocommerce' ), $order_id ) );
@@ -130,16 +97,9 @@ class WC_Order_Factory {
 		}
 
 		// restore the sort order.
-		$result = array_values( array_replace( array_flip( $order_ids ), $result ) );
+		$result = array_replace( array_flip( $order_ids ), $result );
 
-		if ( $use_orders_cache ) {
-			foreach ( $result as $order ) {
-				$order_cache->set( $order );
-			}
-			return array_merge( $already_cached_orders, $result );
-		} else {
-			return $result;
-		}
+		return array_values( $result );
 	}
 
 	/**
@@ -221,6 +181,50 @@ class WC_Order_Factory {
 	}
 
 	/**
+	 * Gets the class name bunch of order instances should have based on their IDs.
+	 *
+	 * @param array $order_ids Order IDs to get the class name for.
+	 *
+	 * @return array Array of order_id => class_name.
+	 */
+	public static function get_class_names_for_order_ids( $order_ids ) {
+		$order_data_store = WC_Data_Store::load( 'order' );
+		if ( $order_data_store->has_callable( 'get_orders_type' ) ) {
+			$order_types = $order_data_store->get_orders_type( $order_ids );
+		} else {
+			$order_types = array();
+			foreach ( $order_ids as $order_id ) {
+				$order_types[ $order_id ] = $order_data_store->get_order_type( $order_id );
+			}
+		}
+		$order_class_names = array();
+		foreach ( $order_types as $order_id => $order_type ) {
+			$order_type_data = wc_get_order_type( $order_type );
+			if ( $order_type_data ) {
+				$order_class_names[ $order_id ] = $order_type_data['class_name'];
+			} else {
+				$order_class_names[ $order_id ] = false;
+			}
+
+			/**
+			 * Filter classname so that the class can be overridden if extended.
+			 *
+			 * @param string $classname  Order classname.
+			 * @param string $order_type Order type.
+			 * @param int    $order_id   Order ID.
+			 *
+			 * @since 3.0.0
+			 */
+			$order_class_names[ $order_id ] = apply_filters( 'woocommerce_order_class', $order_class_names[ $order_id ], $order_type, $order_id );
+
+			if ( ! class_exists( $order_class_names[ $order_id ] ) ) {
+				$order_class_names[ $order_id ] = false;
+			}
+		}
+		return $order_class_names;
+	}
+
+	/**
 	 * Gets the class name an order instance should have based on its ID.
 	 *
 	 * @since 6.9.0
@@ -228,28 +232,8 @@ class WC_Order_Factory {
 	 * @return string The class name or FALSE if the class does not exist.
 	 */
 	private static function get_class_name_for_order_id( $order_id ) {
-		$order_type      = WC_Data_Store::load( 'order' )->get_order_type( $order_id );
-		$order_type_data = wc_get_order_type( $order_type );
-		if ( $order_type_data ) {
-			$classname = $order_type_data['class_name'];
-		} else {
-			$classname = false;
-		}
-
-		/**
-		 * Filter classname so that the class can be overridden if extended.
-		 *
-		 * @param $classname  Order classname.
-		 * @param $order_type Order type.
-		 * @param $order_id   Order ID.
-		 */
-		$classname = apply_filters( 'woocommerce_order_class', $classname, $order_type, $order_id );
-
-		if ( ! class_exists( $classname ) ) {
-			return false;
-		}
-
-		return $classname;
+		$classname = self::get_class_names_for_order_ids( array( $order_id ) );
+		return $classname[ $order_id ];
 	}
 
 }

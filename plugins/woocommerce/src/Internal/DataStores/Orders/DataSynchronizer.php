@@ -5,11 +5,10 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
-use Automattic\WooCommerce\Caches\OrderCache;
-use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -54,18 +53,11 @@ class DataSynchronizer implements BatchProcessorInterface {
 	private $posts_to_cot_migrator;
 
 	/**
-	 * The orders cache to use.
+	 * Logger object to be used to log events.
 	 *
-	 * @var OrderCache
+	 * @var \WC_Logger
 	 */
-	private $cache;
-
-	/**
-	 * The orders cache controller to use.
-	 *
-	 * @var OrderCacheController
-	 */
-	private $cache_controller;
+	private $error_logger;
 
 	/**
 	 * Class constructor.
@@ -101,21 +93,13 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * @param OrdersTableDataStore             $data_store The data store to use.
 	 * @param DatabaseUtil                     $database_util The database util class to use.
 	 * @param PostsToOrdersMigrationController $posts_to_cot_migrator The posts to COT migration class to use.
-	 * @param OrderCache                       $cache The orders cache to use.
-	 * @param OrderCacheController             $cache_controller The orders cache controller to use.
 	 *@internal
 	 */
-	final public function init(
-		OrdersTableDataStore $data_store,
-		DatabaseUtil $database_util,
-		PostsToOrdersMigrationController $posts_to_cot_migrator,
-		OrderCache $cache,
-		OrderCacheController $cache_controller ) {
+	final public function init( OrdersTableDataStore $data_store, DatabaseUtil $database_util, PostsToOrdersMigrationController $posts_to_cot_migrator, LegacyProxy $legacy_proxy ) {
 		$this->data_store            = $data_store;
 		$this->database_util         = $database_util;
 		$this->posts_to_cot_migrator = $posts_to_cot_migrator;
-		$this->cache                 = $cache;
-		$this->cache_controller      = $cache_controller;
+		$this->error_logger          = $legacy_proxy->call_function( 'wc_get_logger' );
 	}
 
 	/**
@@ -140,7 +124,6 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * Delete the custom orders database tables.
 	 */
 	public function delete_database_tables() {
-		$this->cache->flush();
 		$table_names = $this->data_store->get_all_table_names();
 
 		foreach ( $table_names as $table_name ) {
@@ -171,15 +154,32 @@ class DataSynchronizer implements BatchProcessorInterface {
 	}
 
 	/**
+	 * Get the total number of orders pending synchronization.
+	 *
+	 * @return int
+	 */
+	public function get_current_orders_pending_sync_count_cached() : int {
+		return $this->get_current_orders_pending_sync_count( true );
+	}
+
+	/**
 	 * Calculate how many orders need to be synchronized currently.
 	 * A database query is performed to get how many orders match one of the following:
 	 *
 	 * - Existing in the authoritative table but not in the backup table.
 	 * - Existing in both tables, but they have a different update date.
+	 *
+	 * @param bool $use_cache Whether to use the cached value instead of fetching from database.
 	 */
-	public function get_current_orders_pending_sync_count(): int {
+	public function get_current_orders_pending_sync_count( $use_cache = false ): int {
 		global $wpdb;
 
+		if ( $use_cache ) {
+			$pending_count = wp_cache_get( 'woocommerce_hpos_pending_sync_count' );
+			if ( false !== $pending_count ) {
+				return (int) $pending_count;
+			}
+		}
 		$orders_table                = $this->data_store::get_orders_table_name();
 		$order_post_types            = wc_get_order_types( 'cot-migration' );
 		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
@@ -227,7 +227,9 @@ SELECT(
 		// phpcs:enable
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		return (int) $wpdb->get_var( $sql );
+		$pending_count = (int) $wpdb->get_var( $sql );
+		wp_cache_set( 'woocommerce_hpos_pending_sync_count', $pending_count );
+		return $pending_count;
 	}
 
 	/**
@@ -323,11 +325,13 @@ WHERE
 	 * @param array $batch Batch details.
 	 */
 	public function process_batch( array $batch ) : void {
-		$this->cache_controller->temporarily_disable_orders_cache_usage();
-
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			foreach ( $batch as $id ) {
-				$order      = wc_get_order( $id );
+				$order = wc_get_order( $id );
+				if ( ! $order ) {
+					$this->error_logger->error( "Order $id not found during batch process, skipping." );
+					continue;
+				}
 				$data_store = $order->get_data_store();
 				$data_store->backfill_post_record( $order );
 			}
@@ -336,7 +340,6 @@ WHERE
 		}
 		if ( 0 === $this->get_total_pending_count() ) {
 			$this->cleanup_synchronization_state();
-			$this->cache_controller->maybe_restore_orders_cache_usage();
 		}
 	}
 

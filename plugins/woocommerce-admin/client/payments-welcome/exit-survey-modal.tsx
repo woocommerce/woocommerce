@@ -37,13 +37,8 @@ function ExitSurveyModal( {
 
 	const closeModal = () => {
 		setOpen( false );
-		setExitSurveyModalOpen( false );
-	};
 
-	const removeWCPayMenu = () => {
-		recordEvent( 'wcpay_exit_survey', {
-			just_remove: true /* eslint-disable-line camelcase */,
-		} );
+		// Dismiss WCPay menu
 		apiFetch( {
 			path: 'wc-admin/options',
 			method: 'POST',
@@ -53,8 +48,14 @@ function ExitSurveyModal( {
 		} ).then( () => {
 			window.location.href = 'admin.php?page=wc-admin';
 		} );
+	};
 
-		setOpen( false );
+	const exitSurvey = () => {
+		recordEvent( 'wcpay_exit_survey', {
+			just_remove: true /* eslint-disable-line camelcase */,
+		} );
+
+		closeModal();
 	};
 
 	const sendFeedback = () => {
@@ -69,7 +70,7 @@ function ExitSurveyModal( {
 			/* eslint-enable camelcase */
 		} );
 
-		removeWCPayMenu();
+		closeModal();
 	};
 
 	if ( ! isOpen ) {
@@ -132,7 +133,7 @@ function ExitSurveyModal( {
 				<Button
 					isTertiary
 					isDestructive
-					onClick={ removeWCPayMenu }
+					onClick={ exitSurvey }
 					name="cancel"
 				>
 					{ strings.surveyCancelButton }

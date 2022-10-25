@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import {
 	ModelTransformation,
 	ModelTransformer,
@@ -11,7 +14,8 @@ import { Model, ModelConstructor } from '../../models';
  * @template T
  */
 export class ModelTransformerTransformation< T extends Model >
-implements ModelTransformation {
+	implements ModelTransformation
+{
 	public readonly fromModelOrder = TransformationOrder.Normal;
 
 	/**
@@ -42,9 +46,9 @@ implements ModelTransformation {
 	/**
 	 * Creates a new transformation.
 	 *
-	 * @param {string} property The property we want to apply the transformer to.
-	 * @param {ModelConstructor.<T>} modelClass The model to transform into.
-	 * @param {ModelTransformer} transformer The transformer we want to apply.
+	 * @param {string}               property    The property we want to apply the transformer to.
+	 * @param {ModelConstructor.<T>} modelClass  The model to transform into.
+	 * @param {ModelTransformer}     transformer The transformer we want to apply.
 	 * @template T
 	 */
 	public constructor(

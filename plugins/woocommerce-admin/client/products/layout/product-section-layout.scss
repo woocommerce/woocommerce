@@ -13,9 +13,11 @@
 			}
 		}
 
-		.components-base-control {
+		.components-base-control,
+		.woocommerce-rich-text-editor {
 			&:not(:first-child) {
 				margin-top: $gap-large - $gap-smaller;
+				margin-bottom: 0;
 			}
 		}
 	}

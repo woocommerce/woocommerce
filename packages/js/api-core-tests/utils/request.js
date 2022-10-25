@@ -1,5 +1,6 @@
 require( 'dotenv' ).config();
 const { USER_KEY, USER_SECRET } = process.env;
+// eslint-disable-next-line
 const request = require( 'supertest' )( API_PATH );
 
 /**
@@ -7,7 +8,7 @@ const request = require( 'supertest' )( API_PATH );
  *
  * @param {string} requestPath The path of the request.
  * @param {Object} queryString Optional. An object of one or more `key: value` query string parameters.
- * @return {Response}
+ * @return {Response} The response object.
  */
 const getRequest = async ( requestPath, queryString = {} ) => {
 	const response = await request
@@ -23,7 +24,7 @@ const getRequest = async ( requestPath, queryString = {} ) => {
  *
  * @param {string} requestPath The path of the request.
  * @param {Object} requestBody The body of the request to submit.
- * @return {Response}
+ * @return {Response} The response object.
  */
 const postRequest = async ( requestPath, requestBody ) => {
 	const response = await request
@@ -39,7 +40,7 @@ const postRequest = async ( requestPath, requestBody ) => {
  *
  * @param {string} requestPath The path of the request.
  * @param {Object} requestBody The body of the request to submit.
- * @return {Request}
+ * @return {Request} The request object.
  */
 const putRequest = async ( requestPath, requestBody ) => {
 	const response = await request
@@ -55,7 +56,7 @@ const putRequest = async ( requestPath, requestBody ) => {
  *
  * @param {string}  requestPath       The path of the request.
  * @param {boolean} deletePermanently Flag to permanently delete the resource.
- * @return {Response}
+ * @return {Response} The response object.
  */
 const deleteRequest = async ( requestPath, deletePermanently = false ) => {
 	const requestBody = deletePermanently ? { force: true } : {};

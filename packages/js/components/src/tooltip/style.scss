@@ -1,0 +1,13 @@
+.woocommerce-tooltip {
+    display: inline-flex;
+
+    .woocommerce-tooltip__button {
+        height: auto;
+    }
+
+    &__text .components-popover__content {
+        padding: $gap-smaller;
+        width: max-content;
+    }    
+}
+

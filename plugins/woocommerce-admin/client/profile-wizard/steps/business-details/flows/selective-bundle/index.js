@@ -819,7 +819,7 @@ export const BusinessFeaturesList = compose(
 			? getInstallableExtensions( {
 					freeExtensionBundleByCategory: freeExtensions,
 					country,
-					productTypes: profileItems.product_types,
+					productTypes: profileItems.product_types || [],
 			  } )
 			: [];
 		const hasInstallableExtensions = installableExtensions.some(

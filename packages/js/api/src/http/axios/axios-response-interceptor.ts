@@ -1,4 +1,11 @@
+/**
+ * External dependencies
+ */
 import { AxiosResponse } from 'axios';
+
+/**
+ * Internal dependencies
+ */
 import { AxiosInterceptor } from './axios-interceptor';
 import { HTTPResponse } from '../http-client';
 
