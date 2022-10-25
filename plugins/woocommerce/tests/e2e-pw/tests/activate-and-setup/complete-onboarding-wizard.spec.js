@@ -6,6 +6,11 @@ const { api } = require( '../../utils' );
 test.describe( 'Store owner can complete onboarding wizard', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
+	test.beforeEach( async () => {
+		// Complete "Store Details" step through the API to prevent flakiness when run on external sites.
+		await api.update.storeDetails( storeDetails.us.store );
+	} );
+
 	// eslint-disable-next-line jest/expect-expect
 	test( 'can complete the "Store Details" section', async ( { page } ) => {
 		await onboarding.completeStoreDetailsSection(
