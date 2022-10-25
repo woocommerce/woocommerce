@@ -1,9 +1,10 @@
 const { devices } = require( '@playwright/test' );
 const {
-	CI,
-	E2E_MAX_FAILURES,
+	ALLURE_RESULTS_DIR,
 	BASE_URL,
+	CI,
 	DEFAULT_TIMEOUT_OVERRIDE,
+	E2E_MAX_FAILURES,
 } = process.env;
 
 const config = {
@@ -26,17 +27,23 @@ const config = {
 				open: CI ? 'never' : 'always',
 			},
 		],
-		[ 'allure-playwright', { outputFolder: 'e2e/allure-results' } ],
-		[ 'json', { outputFile: 'e2e/test-results.json' } ],
+		[
+			'allure-playwright',
+			{
+				outputFolder:
+					ALLURE_RESULTS_DIR ?? 'tests/e2e-pw/allure-results',
+			},
+		],
+		[ 'json', { outputFile: 'tests/e2e-pw/test-results.json' } ],
 	],
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
 	use: {
-		screenshot: 'only-on-failure',
-		video: 'on-first-retry',
-		trace: 'retain-on-failure',
-		viewport: { width: 1280, height: 720 },
 		baseURL: BASE_URL ?? 'http://localhost:8086',
-		stateDir: 'e2e/storage/',
+		screenshot: 'only-on-failure',
+		stateDir: 'tests/e2e-pw/storage/',
+		trace: 'retain-on-failure',
+		video: 'on-first-retry',
+		viewport: { width: 1280, height: 720 },
 	},
 	projects: [
 		{

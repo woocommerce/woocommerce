@@ -139,7 +139,6 @@ export const PricingSection: React.FC = () => {
 						<InputControl
 							{ ...regularPriceProps }
 							label={ __( 'List price', 'woocommerce' ) }
-							placeholder={ __( '10.59', 'woocommerce' ) }
 							value={ formatCurrencyDisplayValue(
 								String( regularPriceProps?.value ),
 								currencyConfig,
@@ -161,7 +160,6 @@ export const PricingSection: React.FC = () => {
 						<InputControl
 							{ ...salePriceProps }
 							label={ salePriceTitle }
-							placeholder={ __( '8.59', 'woocommerce' ) }
 							value={ formatCurrencyDisplayValue(
 								String( salePriceProps?.value ),
 								currencyConfig,
