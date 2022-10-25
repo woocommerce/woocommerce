@@ -40,7 +40,7 @@ export type DateTimePickerControlProps = {
 	disabled?: boolean;
 	isDateOnlyPicker?: boolean;
 	is12HourPicker?: boolean;
-	forceTimeTo?: 'start-of-day' | 'end-of-day';
+	timeForDateOnly?: 'start-of-day' | 'end-of-day';
 	onChange?: DateTimePickerControlOnChangeHandler;
 	onBlur?: () => void;
 	label?: string;
@@ -53,7 +53,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	currentDate,
 	isDateOnlyPicker = false,
 	is12HourPicker = true,
-	forceTimeTo,
+	timeForDateOnly,
 	dateTimeFormat,
 	disabled = false,
 	onChange,
@@ -123,11 +123,13 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	}
 
 	function maybeForceTime( momentDate: Moment ): Moment {
+		if ( ! isDateOnlyPicker ) return momentDate;
+
 		const updatedMomentDate = momentDate.clone();
 
-		if ( forceTimeTo === 'start-of-day' ) {
+		if ( timeForDateOnly === 'start-of-day' ) {
 			updatedMomentDate.startOf( 'day' );
-		} else if ( forceTimeTo === 'end-of-day' ) {
+		} else if ( timeForDateOnly === 'end-of-day' ) {
 			updatedMomentDate.endOf( 'day' );
 		}
 
@@ -212,7 +214,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	useEffect( () => {
 		inputStringChangeHandlerFunctionRef.current =
 			inputStringChangeHandlerFunction;
-	}, [ forceTimeTo ] );
+	}, [ timeForDateOnly ] );
 
 	const debouncedInputStringChangeHandler = useDebounce(
 		inputStringChangeHandlerFunctionRef.current,
@@ -258,7 +260,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		} else {
 			changeImmediate( currentDate || '', fireOnChange );
 		}
-	}, [ currentDate, displayFormat, forceTimeTo ] );
+	}, [ currentDate, displayFormat, timeForDateOnly ] );
 
 	return (
 		<Dropdown
