@@ -10,7 +10,7 @@ const shippingZoneNameLocalPickup = 'Mayne Island with Local pickup';
 test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeAll( async () => {
+	test.beforeAll( async ( { baseURL } ) => {
 		// Set selling location to all countries.
 		const api = new wcApi( {
 			url: baseURL,
