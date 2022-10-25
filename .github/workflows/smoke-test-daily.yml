@@ -64,7 +64,7 @@ jobs:
               run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
             - name: Archive E2E test report
-              if: steps.e2e-report.conclusion == 'success'
+              if: success() || failure()
               uses: actions/upload-artifact@v3
               with:
                   name: ${{ env.E2E_ARTIFACT }}
