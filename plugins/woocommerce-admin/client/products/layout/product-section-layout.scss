@@ -21,6 +21,14 @@
 			}
 		}
 
+		.woocommerce-product-form__field {
+			margin-top: $gap-large;
+
+			> .components-base-control {
+				margin-bottom: 0;
+			}
+		}
+
 		.components-radio-control .components-v-stack {
 			gap: $gap-small;
 		}

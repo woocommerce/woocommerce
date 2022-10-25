@@ -58,6 +58,30 @@
 			margin-bottom: 0;
 		}
 	}
+
+	// This is needed because Gutenberg disables tooltip events on disabled elements.
+	// We are explicitly using this on a disabled item so this overlay prevents
+	// the tooltip from seeing the disabled property and allows mouse events to occur.
+	// See https://github.com/WordPress/gutenberg/blob/411b6eee8376e31bf9db4c15c92a80524ae38e9b/packages/components/src/tooltip/index.js#L99-L102
+	.woocommerce-product-form__tooltip-disabled-overlay {
+		position: relative;
+		display: inline-block;
+		&::after {
+			content: '';
+			display: inline-block;
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			background: transparent;
+			left: 0;
+			top: 0;
+			cursor: default;
+		}
+
+		.components-base-control {
+			margin-bottom: 0;
+		}
+	}
 }
 
 .woocommerce-edit-product {

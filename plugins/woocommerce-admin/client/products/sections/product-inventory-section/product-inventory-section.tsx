@@ -3,15 +3,21 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
+	__experimentalConditionalWrapper as ConditionalWrapper,
+	Link,
+	useFormContext,
+} from '@woocommerce/components';
+import { cloneElement } from '@wordpress/element';
+import { getAdminLink } from '@woocommerce/settings';
+import { Product } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
+import {
 	Card,
 	CardBody,
 	ToggleControl,
 	TextControl,
+	Tooltip,
 } from '@wordpress/components';
-import { getAdminLink } from '@woocommerce/settings';
-import { Link, useFormContext } from '@woocommerce/components';
-import { Product } from '@woocommerce/data';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -70,8 +76,23 @@ export const ProductInventorySection: React.FC = () => {
 						) }
 						{ ...getInputProps( 'sku' ) }
 					/>
-					{ canManageStock && (
-						<>
+					<div className="woocommerce-product-form__field">
+						<ConditionalWrapper
+							condition={ ! canManageStock }
+							wrapper={ ( children: JSX.Element ) => (
+								<Tooltip
+									text={ __(
+										'Quantity tracking is disabled for all products. Go to global store settings to change it.',
+										'woocommerce'
+									) }
+									position="top center"
+								>
+									<div className="woocommerce-product-form__tooltip-disabled-overlay">
+										{ children }
+									</div>
+								</Tooltip>
+							) }
+						>
 							<ToggleControl
 								label={ __(
 									'Track quantity for this product',
@@ -81,11 +102,17 @@ export const ProductInventorySection: React.FC = () => {
 									'manage_stock',
 									getCheckboxTracks( 'manage_stock' )
 								) }
+								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+								// @ts-ignore This prop does exist, but is not typed in @wordpress/components.
+								disabled={ ! canManageStock }
 							/>
-							{ values.manage_stock && <ManageStockSection /> }
-						</>
+						</ConditionalWrapper>
+					</div>
+					{ values.manage_stock ? (
+						<ManageStockSection />
+					) : (
+						<ManualStockSection />
 					) }
-					{ ! values.manage_stock && <ManualStockSection /> }
 				</CardBody>
 			</Card>
 		</ProductSectionLayout>
