@@ -80,7 +80,7 @@ export const ProductDetailsSection: React.FC = () => {
 
 	return (
 		<ProductSectionLayout
-			title={ __( 'Product info', 'woocommerce' ) }
+			title={ __( 'Product details', 'woocommerce' ) }
 			description={ __(
 				'This info will be displayed on the product page, category pages, social media, and search results.',
 				'woocommerce'
