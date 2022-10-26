@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Change the sass variable names to more predictable ones.
