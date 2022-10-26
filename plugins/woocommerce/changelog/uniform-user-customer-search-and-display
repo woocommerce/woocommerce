@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Make the user search metabox for orders show the same information for the loaded user and for search results
