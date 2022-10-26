@@ -198,7 +198,6 @@ $tt2-gray: #f7f7f7;
 		&:hover {
 			background-color: var(--wp--preset--color--foreground, $primary);
 			color: var(--wp--preset--color--background, $primarytext);
-			opacity: 0.9;
 		}
 
 		&.disabled,
@@ -209,7 +208,6 @@ $tt2-gray: #f7f7f7;
 		&:disabled[disabled]:hover {
 			background-color: var(--wp--preset--color--foreground, $primary);
 			color: var(--wp--preset--color--background, $primarytext);
-			opacity: 0.5;
 		}
 	}
 
@@ -260,7 +258,6 @@ $tt2-gray: #f7f7f7;
 		&:disabled[disabled]:hover {
 			background-color: var(--wp--preset--color--foreground, $primary);
 			color: var(--wp--preset--color--background, $primarytext);
-			opacity: 0.5;
 		}
 	}
 
