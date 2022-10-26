@@ -1035,6 +1035,8 @@ WHERE
 	 * For post based data stores, this was used to filter internal meta data. For custom tables, technically there is no internal meta data,
 	 * (i.e. we store all core data as properties for the order, and not in meta data). So this method is a no-op.
 	 *
+	 * Except that some meta such as billing_address_index and shipping_address_index are infact stored in meta data, so we need to filter those out.
+	 *
 	 * However, declaring $internal_meta_keys is still required so that our backfill and other comparison checks works as expected.
 	 *
 	 * @param \WC_Data $object Object to filter meta data for.
@@ -1043,7 +1045,19 @@ WHERE
 	 * @return array Filtered meta data.
 	 */
 	public function filter_raw_meta_data( &$object, $raw_meta_data ) {
-		return $raw_meta_data;
+		$filtered_meta_data = parent::filter_raw_meta_data($object, $raw_meta_data );
+		$allowed_keys = array(
+			'_billing_address_index',
+			'_shipping_address_index',
+		);
+		$allowed_meta = array_filter(
+			$raw_meta_data,
+			function( $meta ) use ( $allowed_keys ) {
+				return in_array( $meta->meta_key, $allowed_keys, true );
+			}
+		);
+
+		return array_merge( $allowed_meta, $filtered_meta_data );
 	}
 
 	/**
