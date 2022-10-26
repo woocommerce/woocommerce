@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Enable Playwright tests on Daily Smoke Test workflow and upload its Allure reports to S3 bucket.

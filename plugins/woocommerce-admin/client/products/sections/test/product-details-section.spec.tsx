@@ -1,11 +1,20 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { useSelect } from '@wordpress/data';
+import { createRegistry, RegistryProvider, useSelect } from '@wordpress/data';
 import { Form } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
+import { render, screen } from '@testing-library/react';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { store as blockEditorStore } from '@wordpress/block-editor';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { store as coreDataStore } from '@wordpress/core-data';
+// eslint-disable-next-line @woocommerce/dependency-group
+import userEvent from '@testing-library/user-event';
 
 /**
  * Internal dependencies
@@ -18,6 +27,14 @@ jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
 	useSelect: jest.fn(),
 } ) );
+
+const registry = createRegistry();
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+registry.register( coreDataStore );
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+registry.register( blockEditorStore );
 
 describe( 'ProductDetailsSection', () => {
 	const useSelectMock = useSelect as jest.Mock;
@@ -43,9 +60,11 @@ describe( 'ProductDetailsSection', () => {
 
 		it( 'should render the product link', () => {
 			render(
-				<Form initialValues={ product } validate={ validate }>
-					<ProductDetailsSection />
-				</Form>
+				<RegistryProvider value={ registry }>
+					<Form initialValues={ product } validate={ validate }>
+						<ProductDetailsSection />
+					</Form>
+				</RegistryProvider>
 			);
 
 			expect( screen.queryByText( linkUrl ) ).toBeInTheDocument();
@@ -53,11 +72,15 @@ describe( 'ProductDetailsSection', () => {
 
 		it( 'should hide the product link if field name has errors', () => {
 			render(
-				<Form initialValues={ product } validate={ validate }>
-					<ProductDetailsSection />
-				</Form>
+				<RegistryProvider value={ registry }>
+					<Form initialValues={ product } validate={ validate }>
+						<ProductDetailsSection />
+					</Form>
+				</RegistryProvider>
 			);
-			userEvent.clear( screen.getByLabelText( 'Name' ) );
+			userEvent.clear(
+				screen.getByLabelText( 'Name', { exact: false } )
+			);
 			userEvent.tab();
 
 			expect( screen.queryByText( linkUrl ) ).not.toBeInTheDocument();
