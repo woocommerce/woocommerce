@@ -34,11 +34,11 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 		$this->action = 'wc_regenerate_images';
 
 		// Limit Imagick to only use 1 thread to avoid memory issues with OpenMP
-		if (extension_loaded('imagick') && method_exists(Imagick::class, 'setResourceLimit')) {
-			if (defined('Imagick::RESOURCETYPE_THREAD')) {
-				Imagick::setResourceLimit(Imagick::RESOURCETYPE_THREAD, 1);
+		if ( extension_loaded( 'imagick' ) && method_exists( Imagick::class, 'setResourceLimit' ) ) {
+			if ( defined( 'Imagick::RESOURCETYPE_THREAD' ) ) {
+				Imagick::setResourceLimit( Imagick::RESOURCETYPE_THREAD, 1 );
 			} else {
-				Imagick::setResourceLimit(6, 1);
+				Imagick::setResourceLimit( 6, 1 );
 			}
 		}
 
