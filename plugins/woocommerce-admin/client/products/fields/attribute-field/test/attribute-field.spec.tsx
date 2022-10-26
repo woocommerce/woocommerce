@@ -83,11 +83,7 @@ describe( 'AttributeField', () => {
 	describe( 'empty state', () => {
 		it( 'should show subtitle and "Add first attribute" button', () => {
 			const { queryByText } = render(
-				<AttributeField
-					productId={ 1 }
-					value={ [] }
-					onChange={ () => {} }
-				/>
+				<AttributeField value={ [] } onChange={ () => {} } />
 			);
 			expect( queryByText( 'No attributes yet' ) ).toBeInTheDocument();
 			expect( queryByText( 'Add first attribute' ) ).toBeInTheDocument();
@@ -97,7 +93,6 @@ describe( 'AttributeField', () => {
 	it( 'should render the list of existing attributes', () => {
 		const { queryByText } = render(
 			<AttributeField
-				productId={ 1 }
 				value={ [ ...attributeList ] }
 				onChange={ () => {} }
 			/>
@@ -111,7 +106,6 @@ describe( 'AttributeField', () => {
 	it( 'should render the first two terms of each attribute, and show "+ n more" for the rest', () => {
 		const { queryByText } = render(
 			<AttributeField
-				productId={ 1 }
 				value={ [ ...attributeList ] }
 				onChange={ () => {} }
 			/>
@@ -140,7 +134,6 @@ describe( 'AttributeField', () => {
 			jest.spyOn( global, 'confirm' ).mockReturnValueOnce( false );
 			const { queryAllByLabelText } = render(
 				<AttributeField
-					productId={ 1 }
 					value={ [ ...attributeList ] }
 					onChange={ () => {} }
 				/>
@@ -154,7 +147,6 @@ describe( 'AttributeField', () => {
 			const onChange = jest.fn();
 			const { queryAllByLabelText } = render(
 				<AttributeField
-					productId={ 1 }
 					value={ [ ...attributeList ] }
 					onChange={ onChange }
 				/>
@@ -169,7 +161,6 @@ describe( 'AttributeField', () => {
 			const onChange = jest.fn();
 			const { queryAllByLabelText } = render(
 				<AttributeField
-					productId={ 1 }
 					value={ [ ...attributeList ] }
 					onChange={ onChange }
 				/>
@@ -185,7 +176,6 @@ describe( 'AttributeField', () => {
 			const onChange = jest.fn();
 			const { queryAllByLabelText } = render(
 				<AttributeField
-					productId={ 1 }
 					value={ [ ...attributeList ] }
 					onChange={ onChange }
 				/>

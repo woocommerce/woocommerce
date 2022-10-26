@@ -26,7 +26,7 @@ import { reorderSortableProductAttributePositions } from './utils';
 type AttributeFieldProps = {
 	value: ProductAttribute[];
 	onChange: ( value: ProductAttribute[] ) => void;
-	productId: number;
+	productId?: number;
 };
 
 export type HydratedAttributeType = Omit< ProductAttribute, 'options' > & {

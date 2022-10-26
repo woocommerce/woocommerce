@@ -45,11 +45,8 @@ export const AttributesSection: React.FC = () => {
 				</>
 			}
 		>
-			{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
-			{ /* @ts-ignore */ }
 			<AttributeField
-				{ ...getInputProps( 'attributes' ) }
-				productId={ productId }
+				{ ...getInputProps( 'attributes', { productId } ) }
 			/>
 		</ProductSectionLayout>
 	);
