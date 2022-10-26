@@ -1045,12 +1045,12 @@ WHERE
 	 * @return array Filtered meta data.
 	 */
 	public function filter_raw_meta_data( &$object, $raw_meta_data ) {
-		$filtered_meta_data = parent::filter_raw_meta_data($object, $raw_meta_data );
-		$allowed_keys = array(
+		$filtered_meta_data = parent::filter_raw_meta_data( $object, $raw_meta_data );
+		$allowed_keys       = array(
 			'_billing_address_index',
 			'_shipping_address_index',
 		);
-		$allowed_meta = array_filter(
+		$allowed_meta       = array_filter(
 			$raw_meta_data,
 			function( $meta ) use ( $allowed_keys ) {
 				return in_array( $meta->meta_key, $allowed_keys, true );
