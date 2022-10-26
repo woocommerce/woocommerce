@@ -672,6 +672,7 @@ class WC_Checkout {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		$data = array(
 			'terms'                              => (int) isset( $_POST['terms'] ),
+			'terms-field'                        => (int) isset( $_POST['terms-field'] ),
 			'createaccount'                      => (int) ( $this->is_registration_enabled() ? ! empty( $_POST['createaccount'] ) : false ),
 			'payment_method'                     => isset( $_POST['payment_method'] ) ? wc_clean( wp_unslash( $_POST['payment_method'] ) ) : '',
 			'shipping_method'                    => isset( $_POST['shipping_method'] ) ? wc_clean( wp_unslash( $_POST['shipping_method'] ) ) : '',
@@ -851,7 +852,7 @@ class WC_Checkout {
 		$this->check_cart_items();
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		if ( empty( $data['woocommerce_checkout_update_totals'] ) && empty( $data['terms'] ) && ! empty( $_POST['terms-field'] ) ) {
+		if ( empty( $data['woocommerce_checkout_update_totals'] ) && empty( $data['terms'] ) && ! empty( $data['terms-field'] ) ) {
 			$errors->add( 'terms', __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ) );
 		}
 
