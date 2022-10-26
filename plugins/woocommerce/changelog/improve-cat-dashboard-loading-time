@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Improve the loading time of WooCommerce setup widget for large databases
