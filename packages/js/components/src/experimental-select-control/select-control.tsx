@@ -139,8 +139,6 @@ function SelectControl< ItemType = DefaultItemType >( {
 		setInputValue( getItemLabel( singleSelectedItem ) );
 	}, [ singleSelectedItem ] );
 
-	// TODO: for some reason the value in getInputProps is not updated when singleSelectedItem changes
-
 	const {
 		isOpen,
 		getLabelProps,
@@ -190,6 +188,11 @@ function SelectControl< ItemType = DefaultItemType >( {
 							...changes,
 							inputValue: '',
 						};
+					}
+					break;
+				case selectControlStateChangeTypes.ControlledPropUpdatedSelectedItem:
+					if ( changes?.selectedItem ) {
+						setInputValue( getItemLabel( changes.selectedItem ) );
 					}
 					break;
 				default:
