@@ -20,8 +20,8 @@ import {
  * Internal dependencies
  */
 import './pricing-section.scss';
+import { formatCurrencyDisplayValue, getCurrencySymbolProps } from './utils';
 import { ProductSectionLayout } from '../layout/product-section-layout';
-import { getInputControlProps } from './utils';
 import { ADMIN_URL } from '../../utils/admin-settings';
 import { CurrencyContext } from '../../lib/currency-context';
 import { useProductHelper } from '../use-product-helper';
@@ -44,6 +44,8 @@ export const PricingSection: React.FC = () => {
 	const pricesIncludeTax =
 		taxSettings.woocommerce_prices_include_tax === 'yes';
 	const context = useContext( CurrencyContext );
+	const { getCurrencyConfig, formatAmount } = context;
+	const currencyConfig = getCurrencyConfig();
 
 	const taxIncludedInPriceText = __(
 		'Per your {{link}}store settings{{/link}}, tax is {{strong}}included{{/strong}} in the price.',
@@ -77,24 +79,17 @@ export const PricingSection: React.FC = () => {
 		},
 	} );
 
-	const salePriceTitle = interpolateComponents( {
-		mixedString: __(
-			'Sale price {{span}}(optional){{/span}}',
-			'woocommerce'
-		),
-		components: {
-			span: <span className="woocommerce-product-form__optional-input" />,
+	const currencyInputProps = {
+		...getCurrencySymbolProps( currencyConfig ),
+		sanitize: ( value: Product[ keyof Product ] ) => {
+			return sanitizePrice( String( value ) );
 		},
-	} );
-
-	const regularPriceProps = getInputControlProps( {
-		...getInputProps( 'regular_price' ),
-		context,
-	} );
-	const salePriceProps = getInputControlProps( {
-		...getInputProps( 'sale_price' ),
-		context,
-	} );
+	};
+	const regularPriceProps = getInputProps(
+		'regular_price',
+		currencyInputProps
+	);
+	const salePriceProps = getInputProps( 'sale_price', currencyInputProps );
 
 	return (
 		<ProductSectionLayout
@@ -134,11 +129,11 @@ export const PricingSection: React.FC = () => {
 						<InputControl
 							{ ...regularPriceProps }
 							label={ __( 'List price', 'woocommerce' ) }
-							placeholder={ __( '10.59', 'woocommerce' ) }
-							onChange={ ( value: string ) => {
-								const sanitizedValue = sanitizePrice( value );
-								regularPriceProps?.onChange( sanitizedValue );
-							} }
+							value={ formatCurrencyDisplayValue(
+								String( regularPriceProps?.value ),
+								currencyConfig,
+								formatAmount
+							) }
 						/>
 					</BaseControl>
 					{ ! isTaxSettingsResolving && (
@@ -154,12 +149,12 @@ export const PricingSection: React.FC = () => {
 					>
 						<InputControl
 							{ ...salePriceProps }
-							label={ salePriceTitle }
-							placeholder={ __( '8.59', 'woocommerce' ) }
-							onChange={ ( value: string ) => {
-								const sanitizedValue = sanitizePrice( value );
-								salePriceProps?.onChange( sanitizedValue );
-							} }
+							label={ __( 'Sale price', 'woocommerce' ) }
+							value={ formatCurrencyDisplayValue(
+								String( salePriceProps?.value ),
+								currencyConfig,
+								formatAmount
+							) }
 						/>
 					</BaseControl>
 				</CardBody>
