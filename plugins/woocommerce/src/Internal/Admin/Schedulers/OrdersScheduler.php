@@ -13,6 +13,8 @@ use \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsData
 use \Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Admin\Overrides\Order;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
@@ -37,7 +39,8 @@ class OrdersScheduler extends ImportScheduler {
 		\Automattic\WooCommerce\Admin\Overrides\OrderRefund::add_filters();
 
 		// Order and refund data must be run on these hooks to ensure meta data is set.
-		add_action( 'save_post', array( __CLASS__, 'possibly_schedule_import' ) );
+		add_action( 'woocommerce_update_order', array( __CLASS__, 'possibly_schedule_import' ) );
+		add_action( 'woocommerce_create_order', array( __CLASS__, 'possibly_schedule_import' ) );
 		add_action( 'woocommerce_refund_created', array( __CLASS__, 'possibly_schedule_import' ) );
 
 		OrdersStatsDataStore::init();
@@ -70,13 +73,32 @@ class OrdersScheduler extends ImportScheduler {
 	 * @param bool     $skip_existing Skip already imported orders.
 	 */
 	public static function get_items( $limit = 10, $page = 1, $days = false, $skip_existing = false ) {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return self::get_items_from_orders_table( $limit, $page, $days, $skip_existing );
+		} else {
+			return self::get_items_from_posts_table( $limit, $page, $days, $skip_existing );
+		}
+	}
+
+	/**
+	 * Helper method to ger order/refund IDS and total count that needs to be synced.
+	 *
+	 * @internal
+	 * @param int      $limit Number of records to retrieve.
+	 * @param int      $page  Page number.
+	 * @param int|bool $days Number of days prior to current date to limit search results.
+	 * @param bool     $skip_existing Skip already imported orders.
+	 *
+	 * @return object Total counts.
+	 */
+	private static function get_items_from_posts_table( $limit, $page, $days, $skip_existing ) {
 		global $wpdb;
 		$where_clause = '';
 		$offset       = $page > 1 ? ( $page - 1 ) * $limit : 0;
 
 		if ( is_int( $days ) ) {
 			$days_ago      = gmdate( 'Y-m-d 00:00:00', time() - ( DAY_IN_SECONDS * $days ) );
-			$where_clause .= " AND post_date_gmt >= '{$days_ago}'";
+			$where_clause  .= " AND post_date_gmt >= '{$days_ago}'";
 		}
 
 		if ( $skip_existing ) {
@@ -114,6 +136,64 @@ class OrdersScheduler extends ImportScheduler {
 	}
 
 	/**
+	 * Helper method to ger order/refund IDS and total count that needs to be synced from HPOS.
+	 *
+	 * @internal
+	 * @param int      $limit Number of records to retrieve.
+	 * @param int      $page  Page number.
+	 * @param int|bool $days Number of days prior to current date to limit search results.
+	 * @param bool     $skip_existing Skip already imported orders.
+	 *
+	 * @return object Total counts.
+	 */
+	private static function get_items_from_orders_table( $limit, $page, $days, $skip_existing ) {
+		global $wpdb;
+		$where_clause = '';
+		$offset       = $page > 1 ? ( $page - 1 ) * $limit : 0;
+		$order_table = OrdersTableDataStore::get_orders_table_name();
+
+		if ( is_int( $days ) ) {
+			$days_ago      = gmdate( 'Y-m-d 00:00:00', time() - ( DAY_IN_SECONDS * $days ) );
+			$where_clause .= " AND orders.date_created_gmt >= '{$days_ago}'";
+		}
+
+		if ( $skip_existing ) {
+			$where_clause .= "AND NOT EXiSTS (
+					SELECT 1 FROM {$wpdb->prefix}wc_order_stats
+					WHERE {$wpdb->prefix}wc_order_stats.order_id = orders.id
+					)
+				";
+		}
+
+		$count = $wpdb->get_var( "
+SELECT COUNT(*) FROM {$order_table} AS orders
+WHERE type in ( 'shop_order', 'shop_order_refund' )
+AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
+{$where_clause}
+"
+		); // phpcs:ignore unprepared SQL ok.
+
+		$order_ids = absint( $count ) > 0 ? $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT id FROM {$order_table} AS orders
+				WHERE type IN ( 'shop_order', 'shop_order_refund' )
+				AND status NOT IN ( 'wc-auto-draft', 'auto-draft', 'trash' )
+				{$where_clause}
+				ORDER BY date_created_gmt ASC
+				LIMIT %d
+				OFFSET %d",
+				$limit,
+				$offset
+			)
+		) : array(); // phpcs:ignore unprepared SQL ok.
+
+		return (object) array(
+			'total' => absint( $count ),
+			'ids'   => $order_ids,
+		);
+	}
+
+	/**
 	 * Get total number of rows imported.
 	 *
 	 * @internal
@@ -126,15 +206,16 @@ class OrdersScheduler extends ImportScheduler {
 	/**
 	 * Schedule this import if the post is an order or refund.
 	 *
-	 * @internal
-	 * @param int $post_id Post ID.
+	 * @param int $order_id Post ID.
+	 *
+	 *@internal
 	 */
-	public static function possibly_schedule_import( $post_id ) {
-		if ( ! OrderUtil::is_order( $post_id, array( 'shop_order') ) && 'woocommerce_refund_created' !== current_filter() ) {
+	public static function possibly_schedule_import( $order_id ) {
+		if ( ! OrderUtil::is_order( $order_id, array( 'shop_order') ) && 'woocommerce_refund_created' !== current_filter() ) {
 			return;
 		}
 
-		self::schedule_action( 'import', array( $post_id ) );
+		self::schedule_action( 'import', array( $order_id ) );
 	}
 
 	/**
