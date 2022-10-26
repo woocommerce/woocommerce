@@ -20,7 +20,6 @@ use \Automattic\WooCommerce\Internal\Admin\Notes\EditProductsOnTheMove;
 use \Automattic\WooCommerce\Internal\Admin\Notes\EUVATNumber;
 use \Automattic\WooCommerce\Internal\Admin\Notes\FirstDownlaodableProduct;
 use \Automattic\WooCommerce\Internal\Admin\Notes\FirstProduct;
-use \Automattic\WooCommerce\Internal\Admin\Notes\InsightFirstSale;
 use \Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
 use \Automattic\WooCommerce\Internal\Admin\Notes\LaunchChecklist;
 use \Automattic\WooCommerce\Internal\Admin\Notes\MagentoMigration;
@@ -83,7 +82,6 @@ class Events {
 		EUVATNumber::class,
 		FirstDownlaodableProduct::class,
 		FirstProduct::class,
-		InsightFirstSale::class,
 		LaunchChecklist::class,
 		MagentoMigration::class,
 		ManageOrdersOnTheGo::class,
