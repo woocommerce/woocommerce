@@ -10,7 +10,9 @@ class AttributeFilter extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'attribute-filter';
+	protected $block_name             = 'attribute-filter';
+	const FILTER_QUERY_VAR_PREFIX     = 'filter_';
+	const QUERY_TYPE_QUERY_VAR_PREFIX = 'query_type_';
 
 	/**
 	 * Extra data passed through from server to client for block.
