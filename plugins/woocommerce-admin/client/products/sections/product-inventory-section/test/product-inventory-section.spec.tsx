@@ -23,7 +23,7 @@ describe( 'ProductInventorySection', () => {
 		( getAdminSetting as jest.Mock ).mockImplementation(
 			( key, value = false ) => {
 				const values = {
-					manage_stock: 'yes',
+					manageStock: 'yes',
 					notifyLowStockAmount: 5,
 				};
 				if ( values.hasOwnProperty( key ) ) {
@@ -53,10 +53,16 @@ describe( 'ProductInventorySection', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'should not render the manage stock section if inventory management is turned off', () => {
-		( getAdminSetting as jest.Mock ).mockImplementation( () => ( {
-			manage_stock: 'no',
-		} ) );
+	it( 'should disable the manage stock section if inventory management is turned off', () => {
+		( getAdminSetting as jest.Mock ).mockImplementation( ( key, value ) => {
+			const values = {
+				manageStock: 'no',
+			};
+			if ( values.hasOwnProperty( key ) ) {
+				return values[ key as keyof typeof values ];
+			}
+			return value;
+		} );
 
 		render(
 			<Form initialValues={ product }>
@@ -65,8 +71,9 @@ describe( 'ProductInventorySection', () => {
 		);
 
 		expect(
-			screen.queryByLabelText( 'Track quantity for this product' )
-		).not.toBeInTheDocument();
+			screen.getByText( 'Track quantity for this product' )
+				.previousSibling
+		).toHaveClass( 'is-disabled' );
 	} );
 
 	it( 'should not render the manage stock section if inventory management is turned on', () => {
