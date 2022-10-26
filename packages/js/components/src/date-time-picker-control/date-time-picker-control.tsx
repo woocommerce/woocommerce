@@ -53,7 +53,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	currentDate,
 	isDateOnlyPicker = false,
 	is12HourPicker = true,
-	timeForDateOnly,
+	timeForDateOnly = 'start-of-day',
 	dateTimeFormat,
 	disabled = false,
 	onChange,
