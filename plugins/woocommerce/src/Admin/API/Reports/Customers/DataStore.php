@@ -12,6 +12,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use \Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use \Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Admin\API\Reports\Customers\DataStore.
@@ -122,7 +123,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public static function sync_order_customer( $post_id ) {
 		global $wpdb;
 
-		if ( 'shop_order' !== get_post_type( $post_id ) && 'shop_order_refund' !== get_post_type( $post_id ) ) {
+		if ( ! OrderUtil::is_order( $post_id, array( 'shop_order', 'shop_order_refund' ) ) ) {
 			return -1;
 		}
 

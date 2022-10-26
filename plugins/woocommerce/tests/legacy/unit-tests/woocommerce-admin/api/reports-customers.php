@@ -503,7 +503,8 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$this->assertTrue( $result );
+		$this->assertNotEquals( -1, $result );
+
 		$request  = new WP_REST_Request( 'GET', $this->endpoint );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
@@ -599,7 +600,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		WC_Helper_Queue::run_all_pending();
 
 		// Didn't update anything.
-		$this->assertTrue( $result );
+		$this->assertNotEquals( -1, $result );
 		$request  = new WP_REST_Request( 'GET', $this->endpoint );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
