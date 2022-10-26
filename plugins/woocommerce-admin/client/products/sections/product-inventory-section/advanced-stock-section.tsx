@@ -9,10 +9,11 @@ import { useFormContext } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { getCheckboxProps } from '../utils';
+import { getCheckboxTracks } from '../utils';
 
 export const AdvancedStockSection: React.FC = () => {
-	const { getInputProps, values } = useFormContext< Product >();
+	const { getCheckboxControlProps, getInputProps, values } =
+		useFormContext< Product >();
 
 	const backordersProp = getInputProps( 'backorders' );
 	// These properties cause issues with the RadioControl component.
@@ -53,9 +54,10 @@ export const AdvancedStockSection: React.FC = () => {
 					'Limit purchases to 1 item per order',
 					'woocommerce'
 				) }
-				{ ...getCheckboxProps( {
-					...getInputProps( 'sold_individually' ),
-				} ) }
+				{ ...getCheckboxControlProps(
+					'sold_individually',
+					getCheckboxTracks( 'sold_individually' )
+				) }
 			/>
 		</>
 	);
