@@ -826,6 +826,7 @@ class WC_Install {
 			'wc-admin-store-notice-setting-moved',
 			'wc-admin-store-notice-giving-feedback',
 			'wc-admin-learn-more-about-product-settings',
+			'wc-admin-adding-and-managing-products',
 			'wc-admin-onboarding-profiler-reminder',
 			'wc-admin-historical-data',
 			'wc-admin-review-shipping-settings',
