@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/filter-wrapper",
 	"version": "1.0.0",
-	"title": "Filter Wrapper",
+	"title": "Filter Block",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"attributes": {
