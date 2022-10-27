@@ -7,6 +7,7 @@ import { store as WP_BLOCKS_STORE } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
+import { QUERY_LOOP_ID } from './constants';
 import {
 	ProductQueryArguments,
 	ProductQueryBlock,
@@ -29,7 +30,7 @@ export function ArrayXOR< T extends Array< unknown > >( a: T, b: T ) {
  */
 export function isWooQueryBlockVariation( block: ProductQueryBlock ) {
 	return (
-		block.name === 'core/query' &&
+		block.name === QUERY_LOOP_ID &&
 		Object.values( QueryVariation ).includes(
 			block.attributes.namespace as QueryVariation
 		)
@@ -71,7 +72,7 @@ export function useAllowedControls(
 	return useSelect(
 		( select ) =>
 			select( WP_BLOCKS_STORE ).getActiveBlockVariation(
-				'core/query',
+				QUERY_LOOP_ID,
 				attributes
 			)?.allowedControls,
 

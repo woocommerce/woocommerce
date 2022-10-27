@@ -14,12 +14,13 @@ import {
 	DEFAULT_ALLOWED_CONTROLS,
 	INNER_BLOCKS_TEMPLATE,
 	QUERY_DEFAULT_ATTRIBUTES,
+	QUERY_LOOP_ID,
 } from '../constants';
 
 const VARIATION_NAME = 'woocommerce/product-query';
 
 if ( isExperimentalBuild() ) {
-	registerBlockVariation( 'core/query', {
+	registerBlockVariation( QUERY_LOOP_ID, {
 		name: VARIATION_NAME,
 		title: __( 'Product Query', 'woo-gutenberg-products-block' ),
 		isActive: ( blockAttributes ) =>
