@@ -11,6 +11,8 @@ env:
     E2E_ARTIFACT: e2e-release--run-${{ github.run_number }}
     FORCE_COLOR: 1
     BRANCH_NAME: ${{ github.ref_name }}
+    ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
+    ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
