@@ -1,4 +1,5 @@
 <?php
+// phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps
 /**
  * Reports Customers REST API Test
  *

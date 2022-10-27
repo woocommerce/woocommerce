@@ -114,6 +114,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @param array $query_args      Query arguments supplied by the user.
 	 */
 	protected function orders_stats_sql_filter( $query_args ) {
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
 		// @todo Performance of all of this?
 		global $wpdb;
 
@@ -336,6 +337,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				return new \WP_Error( 'woocommerce_analytics_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 			}
 
+			// phpcs:ignore Generic.Commenting.Todo.TaskFound
 			// @todo Remove these assignements when refactoring segmenter classes to use query objects.
 			$totals_query    = array(
 				'from_clause'       => $this->total_query->get_sql_clause( 'join' ),
@@ -506,6 +508,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 *
 		 * @param array $data Data written to order stats lookup table.
 		 * @param WC_Order $order  Order object.
+		 *
+		 * @since 4.0.0
 		 */
 		$data = apply_filters(
 			'woocommerce_analytics_update_order_stats_data',
@@ -556,6 +560,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 * Fires when order's stats reports are updated.
 		 *
 		 * @param int $order_id Order ID.
+		 *
+		 * @since 4.0.0.
 		 */
 		do_action( 'woocommerce_analytics_update_order_stats', $order->get_id() );
 
@@ -587,6 +593,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 *
 		 * @param int $order_id Order ID.
 		 * @param int $customer_id Customer ID.
+		 *
+		 * @since 4.0.0
 		 */
 		do_action( 'woocommerce_analytics_delete_order_stats', $order_id, $customer_id );
 

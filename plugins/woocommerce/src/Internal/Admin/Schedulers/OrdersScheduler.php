@@ -98,7 +98,7 @@ class OrdersScheduler extends ImportScheduler {
 
 		if ( is_int( $days ) ) {
 			$days_ago      = gmdate( 'Y-m-d 00:00:00', time() - ( DAY_IN_SECONDS * $days ) );
-			$where_clause  .= " AND post_date_gmt >= '{$days_ago}'";
+			$where_clause .= " AND post_date_gmt >= '{$days_ago}'";
 		}
 
 		if ( $skip_existing ) {
@@ -150,7 +150,7 @@ class OrdersScheduler extends ImportScheduler {
 		global $wpdb;
 		$where_clause = '';
 		$offset       = $page > 1 ? ( $page - 1 ) * $limit : 0;
-		$order_table = OrdersTableDataStore::get_orders_table_name();
+		$order_table  = OrdersTableDataStore::get_orders_table_name();
 
 		if ( is_int( $days ) ) {
 			$days_ago      = gmdate( 'Y-m-d 00:00:00', time() - ( DAY_IN_SECONDS * $days ) );
@@ -165,7 +165,8 @@ class OrdersScheduler extends ImportScheduler {
 				";
 		}
 
-		$count = $wpdb->get_var( "
+		$count = $wpdb->get_var(
+			"
 SELECT COUNT(*) FROM {$order_table} AS orders
 WHERE type in ( 'shop_order', 'shop_order_refund' )
 AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
@@ -208,10 +209,10 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 *
 	 * @param int $order_id Post ID.
 	 *
-	 *@internal
+	 * @internal
 	 */
 	public static function possibly_schedule_import( $order_id ) {
-		if ( ! OrderUtil::is_order( $order_id, array( 'shop_order') ) && 'woocommerce_refund_created' !== current_filter() ) {
+		if ( ! OrderUtil::is_order( $order_id, array( 'shop_order' ) ) && 'woocommerce_refund_created' !== current_filter() ) {
 			return;
 		}
 
