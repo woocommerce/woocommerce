@@ -69,12 +69,16 @@ class CartExtensionsSchema extends AbstractSchema {
 				400
 			);
 		}
-		if ( is_callable( $callback ) ) {
-			$callback( $request['data'] );
-		}
 
 		$controller = new CartController();
-		$cart       = $controller->get_cart_instance();
+
+		if ( is_callable( $callback ) ) {
+			$callback( $request['data'] );
+			// We recalculate the cart if we had something to run.
+			$controller->calculate_totals();
+		}
+
+		$cart = $controller->get_cart_instance();
 
 		return rest_ensure_response( $this->cart_schema->get_item_response( $cart ) );
 	}

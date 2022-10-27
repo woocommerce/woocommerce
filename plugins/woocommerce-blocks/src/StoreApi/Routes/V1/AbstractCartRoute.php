@@ -78,7 +78,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 */
 	public function get_response( \WP_REST_Request $request ) {
 		$this->load_cart_session( $request );
-		$this->calculate_totals();
+		$this->cart_controller->calculate_totals();
 
 		if ( $this->requires_nonce( $request ) ) {
 			$nonce_check = $this->check_nonce( $request );
@@ -227,16 +227,6 @@ abstract class AbstractCartRoute extends AbstractRoute {
 			 */
 			do_action( 'woocommerce_store_api_cart_update_order_from_request', $draft_order, $request );
 		}
-	}
-
-	/**
-	 * Ensures the cart totals are calculated before an API response is generated.
-	 */
-	protected function calculate_totals() {
-		wc()->cart->get_cart();
-		wc()->cart->calculate_fees();
-		wc()->cart->calculate_shipping();
-		wc()->cart->calculate_totals();
 	}
 
 	/**
