@@ -669,7 +669,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Customer note.
 		if ( isset( $_POST['customer_note'] ) ) {
-			$props['customer_note'] = sanitize_text_field( wp_unslash( $_POST['customer_note'] ) );
+			$props['customer_note'] = sanitize_textarea_field( wp_unslash( $_POST['customer_note'] ) );
 		}
 
 		// Save order data.
