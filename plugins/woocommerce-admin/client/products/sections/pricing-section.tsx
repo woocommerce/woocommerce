@@ -7,6 +7,7 @@ import {
 	Link,
 	Spinner,
 	useFormContext,
+	__experimentalTooltip as Tooltip,
 } from '@woocommerce/components';
 import {
 	Product,
@@ -16,6 +17,7 @@ import {
 import { recordEvent } from '@woocommerce/tracks';
 import { useContext, useEffect, useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
+import { format as formatDate } from '@wordpress/date';
 import moment from 'moment';
 import interpolateComponents from '@automattic/interpolate-components';
 import {
@@ -36,6 +38,8 @@ import { ProductSectionLayout } from '../layout/product-section-layout';
 import { ADMIN_URL } from '../../utils/admin-settings';
 import { CurrencyContext } from '../../lib/currency-context';
 import { useProductHelper } from '../use-product-helper';
+
+const PRODUCT_SCHEDULED_SALE_SLUG = 'product-scheduled-sale';
 
 export const PricingSection: React.FC = () => {
 	const { sanitizePrice } = useProductHelper();
@@ -72,16 +76,19 @@ export const PricingSection: React.FC = () => {
 		'woocommerce'
 	);
 
-	const { dateFormat, hasResolvedDateFormat } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
-		return {
-			dateFormat: getOption( 'date_format' ) as string,
-			hasResolvedDateFormat: hasFinishedResolution( 'getOption', [
-				'date_format',
-			] ),
-		};
-	} );
+	const { dateFormat, timeFormat, hasResolvedDateFormat } = useSelect(
+		( select ) => {
+			const { getOption, hasFinishedResolution } =
+				select( OPTIONS_STORE_NAME );
+			return {
+				dateFormat: getOption( 'date_format' ) as string,
+				timeFormat: ( getOption( 'time_format' ) as string ) || 'H:i',
+				hasResolvedDateFormat: hasFinishedResolution( 'getOption', [
+					'date_format',
+				] ),
+			};
+		}
+	);
 
 	const onSaleScheduleToggleChange = ( value: boolean ) => {
 		setUserToggledSaleSchedule( true );
@@ -228,7 +235,60 @@ export const PricingSection: React.FC = () => {
 					</BaseControl>
 
 					<ToggleControl
-						label={ __( 'Schedule sale', 'woocommerce' ) }
+						label={
+							<>
+								{ __( 'Schedule sale', 'woocommerce' ) }
+								<Tooltip
+									text={ interpolateComponents( {
+										mixedString: __(
+											'The sale will start at the beginning of the "From" date ({{startTime/}}) and expire at the end of the "To" date ({{endTime/}}). {{moreLink/}}',
+											'woocommerce'
+										),
+										components: {
+											startTime: (
+												<span>
+													{ formatDate(
+														timeFormat,
+														moment().startOf(
+															'day'
+														)
+													) }
+												</span>
+											),
+											endTime: (
+												<span>
+													{ formatDate(
+														timeFormat,
+														moment().endOf( 'day' )
+													) }
+												</span>
+											),
+											moreLink: (
+												<Link
+													href="https://woocommerce.com/document/managing-products/#product-data"
+													target="_blank"
+													type="external"
+													onClick={ () =>
+														recordEvent(
+															'add_product_learn_more',
+															{
+																category:
+																	PRODUCT_SCHEDULED_SALE_SLUG,
+															}
+														)
+													}
+												>
+													{ __(
+														'Learn more',
+														'woocommerce'
+													) }
+												</Link>
+											),
+										},
+									} ) }
+								/>
+							</>
+						}
 						checked={ showSaleSchedule }
 						onChange={ onSaleScheduleToggleChange }
 						// @ts-ignore disabled prop exists
