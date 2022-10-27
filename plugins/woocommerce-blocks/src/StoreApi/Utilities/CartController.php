@@ -33,6 +33,17 @@ class CartController {
 	}
 
 	/**
+	 * Recalculates the cart totals.
+	 */
+	public function calculate_totals() {
+		$cart = $this->get_cart_instance();
+		$cart->get_cart();
+		$cart->calculate_fees();
+		$cart->calculate_shipping();
+		$cart->calculate_totals();
+	}
+
+	/**
 	 * Based on the core cart class but returns errors rather than rendering notices directly.
 	 *
 	 * @todo Overriding the core add_to_cart method was necessary because core outputs notices when an item is added to
