@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add name to exported popover slot so that it is not used for any popover items.
