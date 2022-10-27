@@ -141,7 +141,6 @@ class ProductQuery extends AbstractBlock {
 			},
 			$common_query_values
 		);
-
 	}
 
 	/**
@@ -152,6 +151,23 @@ class ProductQuery extends AbstractBlock {
 	private function get_on_sale_products_query() {
 		return array(
 			'post__in' => wc_get_product_ids_on_sale(),
+		);
+	}
+
+	/**
+	 * Return a query for products depending on their stock status.
+	 *
+	 * @param array $stock_statii An array of acceptable stock statii.
+	 * @return array
+	 */
+	private function get_stock_status_query( $stock_statii ) {
+		return array(
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'meta_query' => array(
+				'key'     => '_stock_status',
+				'value'   => (array) $stock_statii,
+				'compare' => 'IN',
+			),
 		);
 	}
 
@@ -231,9 +247,12 @@ class ProductQuery extends AbstractBlock {
 	 * @return array
 	 */
 	private function get_queries_by_attributes( $parsed_block ) {
-		$on_sale_enabled = isset( $parsed_block['attrs']['query']['__woocommerceOnSale'] ) && true === $parsed_block['attrs']['query']['__woocommerceOnSale'];
+		$query           = $parsed_block['attrs']['query'];
+		$on_sale_enabled = isset( $query['__woocommerceOnSale'] ) && true === $query['__woocommerceOnSale'];
+
 		return array(
-			'on_sale' => ( $on_sale_enabled ? $this->get_on_sale_products_query() : array() ),
+			'on_sale'      => ( $on_sale_enabled ? $this->get_on_sale_products_query() : array() ),
+			'stock_status' => isset( $query['__woocommerceStockStatus'] ) ? $this->get_stock_status_query( $query['__woocommerceStockStatus'] ) : array(),
 		);
 	}
 
