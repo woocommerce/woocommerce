@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import {
 	DateTimePickerControl,
 	Link,
-	Spinner,
 	useFormContext,
 	__experimentalTooltip as Tooltip,
 } from '@woocommerce/components';
@@ -76,19 +75,13 @@ export const PricingSection: React.FC = () => {
 		'woocommerce'
 	);
 
-	const { dateFormat, timeFormat, hasResolvedDateFormat } = useSelect(
-		( select ) => {
-			const { getOption, hasFinishedResolution } =
-				select( OPTIONS_STORE_NAME );
-			return {
-				dateFormat: getOption( 'date_format' ) as string,
-				timeFormat: ( getOption( 'time_format' ) as string ) || 'H:i',
-				hasResolvedDateFormat: hasFinishedResolution( 'getOption', [
-					'date_format',
-				] ),
-			};
-		}
-	);
+	const { dateFormat, timeFormat } = useSelect( ( select ) => {
+		const { getOption } = select( OPTIONS_STORE_NAME );
+		return {
+			dateFormat: ( getOption( 'date_format' ) as string ) || 'F j, Y',
+			timeFormat: ( getOption( 'time_format' ) as string ) || 'H:i',
+		};
+	} );
 
 	const onSaleScheduleToggleChange = ( value: boolean ) => {
 		setUserToggledSaleSchedule( true );
@@ -165,6 +158,7 @@ export const PricingSection: React.FC = () => {
 	const dateTimePickerProps = {
 		className: 'woocommerce-product__date-time-picker',
 		isDateOnlyPicker: true,
+		dateTimeFormat: dateFormat,
 	};
 
 	return (
@@ -300,40 +294,32 @@ export const PricingSection: React.FC = () => {
 						}
 					/>
 
-					{ showSaleSchedule &&
-						( hasResolvedDateFormat ? (
-							<>
-								<DateTimePickerControl
-									label={ __( 'From', 'woocommerce' ) }
-									placeholder={ __( 'Now', 'woocommerce' ) }
-									timeForDateOnly={ 'start-of-day' }
-									currentDate={ values.date_on_sale_from_gmt }
-									{ ...getInputProps(
-										'date_on_sale_from_gmt',
-										{
-											...dateTimePickerProps,
-										}
-									) }
-								/>
+					{ showSaleSchedule && (
+						<>
+							<DateTimePickerControl
+								label={ __( 'From', 'woocommerce' ) }
+								placeholder={ __( 'Now', 'woocommerce' ) }
+								timeForDateOnly={ 'start-of-day' }
+								currentDate={ values.date_on_sale_from_gmt }
+								{ ...getInputProps( 'date_on_sale_from_gmt', {
+									...dateTimePickerProps,
+								} ) }
+							/>
 
-								<DateTimePickerControl
-									label={ __( 'To', 'woocommerce' ) }
-									placeholder={ __(
-										'No end date',
-										'woocommerce'
-									) }
-									timeForDateOnly={ 'end-of-day' }
-									currentDate={ values.date_on_sale_to_gmt }
-									{ ...getInputProps( 'date_on_sale_to_gmt', {
-										...dateTimePickerProps,
-									} ) }
-								/>
-							</>
-						) : (
-							<div className="product-pricing-section__scheduled-sale__spinner-wrapper">
-								<Spinner />
-							</div>
-						) ) }
+							<DateTimePickerControl
+								label={ __( 'To', 'woocommerce' ) }
+								placeholder={ __(
+									'No end date',
+									'woocommerce'
+								) }
+								timeForDateOnly={ 'end-of-day' }
+								currentDate={ values.date_on_sale_to_gmt }
+								{ ...getInputProps( 'date_on_sale_to_gmt', {
+									...dateTimePickerProps,
+								} ) }
+							/>
+						</>
+					) }
 				</CardBody>
 			</Card>
 		</ProductSectionLayout>
