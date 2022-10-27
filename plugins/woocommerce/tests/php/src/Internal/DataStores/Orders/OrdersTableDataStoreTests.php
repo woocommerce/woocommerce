@@ -1880,7 +1880,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	/**
 	 * @testDox Test get order type working as expected.
 	 */
-	public function test_get_order_type_for_order(){
+	public function test_get_order_type_for_order() {
 		$order = $this->create_complex_cot_order();
 		$this->assertEquals( 'shop_order', $this->sut->get_order_type( $order->get_id() ) );
 	}
