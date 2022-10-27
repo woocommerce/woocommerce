@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: A simple fix to the underlying code to prevent issues in PHP 8.0+
+
+
