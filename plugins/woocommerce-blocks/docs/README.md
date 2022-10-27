@@ -131,6 +131,8 @@ The following posts from [developer.woocommerce.com](https://developer.woocommer
 
 -   [Store API is now considered stable](https://developer.woocommerce.com/2022/03/25/store-api-is-now-considered-stable/)
 -   [Available Extensibility Interfaces for The Cart and Checkout Blocks](https://developer.woocommerce.com/2021/11/09/available-extensibility-interfaces-for-the-cart-and-checkout-blocks/)
+-   [How The Checkout Block Processes An Order](https://developer.woocommerce.com/2022/10/06/how-the-checkout-block-processes-an-order/)
+-   [New @wordpress/data stores in WooCommerce Blocks](https://developer.woocommerce.com/2022/10/17/new-wordpress-data-stores-in-woocommerce-blocks/)
 
 ### Tutorials
 
