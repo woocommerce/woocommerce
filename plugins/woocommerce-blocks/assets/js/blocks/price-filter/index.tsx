@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { createBlock, registerBlockType } from '@wordpress/blocks';
+import { registerBlockType } from '@wordpress/blocks';
 import classNames from 'classnames';
 import { Icon, currencyDollar } from '@wordpress/icons';
 import { useBlockProps } from '@wordpress/block-editor';
@@ -26,30 +25,6 @@ registerBlockType( metadata, {
 	attributes: {
 		...metadata.attributes,
 		...blockAttributes,
-	},
-	transforms: {
-		from: [
-			{
-				type: 'block',
-				blocks: [ 'core/legacy-widget' ],
-				// We can't transform if raw instance isn't shown in the REST API.
-				isMatch: ( { idBase, instance } ) =>
-					idBase === 'woocommerce_price_filter' && !! instance?.raw,
-				transform: ( { instance } ) =>
-					createBlock( 'woocommerce/price-filter', {
-						showInputFields: false,
-						showFilterButton: true,
-						heading:
-							instance?.raw?.title ||
-							__(
-								'Filter by price',
-								'woo-gutenberg-products-block'
-							),
-						headingLevel: 3,
-						inlineInput: false,
-					} ),
-			},
-		],
 	},
 	edit,
 	save( { attributes } ) {

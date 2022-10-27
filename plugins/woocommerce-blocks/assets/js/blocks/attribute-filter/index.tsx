@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { createBlock, registerBlockType } from '@wordpress/blocks';
+import { registerBlockType } from '@wordpress/blocks';
 import { useBlockProps } from '@wordpress/block-editor';
 import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 import { Icon, category } from '@wordpress/icons';
@@ -38,34 +37,6 @@ registerBlockType( metadata, {
 	attributes: {
 		...metadata.attributes,
 		...blockAttributes,
-	},
-	transforms: {
-		from: [
-			{
-				type: 'block',
-				blocks: [ 'core/legacy-widget' ],
-				// We can't transform if raw instance isn't shown in the REST API.
-				isMatch: ( { idBase, instance } ) =>
-					idBase === 'woocommerce_layered_nav' && !! instance?.raw,
-				transform: ( { instance } ) =>
-					createBlock( 'woocommerce/attribute-filter', {
-						attributeId: 0,
-						showCounts: true,
-						queryType: instance?.raw?.query_type || 'or',
-						heading:
-							instance?.raw?.title ||
-							__(
-								'Filter by attribute',
-								'woo-gutenberg-products-block'
-							),
-						headingLevel: 3,
-						displayStyle: instance?.raw?.display_type || 'list',
-						showFilterButton: false,
-						selectType: instance?.raw?.select_type || 'multiple',
-						isPreview: false,
-					} ),
-			},
-		],
 	},
 	edit,
 	// Save the props to post content.
