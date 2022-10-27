@@ -11,7 +11,6 @@ import { ProductShippingClass } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { getTextControlProps } from '../../sections/utils';
 import './add-new-shipping-class-modal.scss';
 
 export type ShippingClassFormProps = {
@@ -20,15 +19,9 @@ export type ShippingClassFormProps = {
 };
 
 function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
-	const { getInputProps, isValidForm } =
+	const { errors, getInputProps, isValidForm } =
 		useFormContext< ProductShippingClass >();
 	const [ isLoading, setIsLoading ] = useState( false );
-
-	const inputNameProps = getTextControlProps( getInputProps( 'name' ) );
-	const inputSlugProps = getTextControlProps( getInputProps( 'slug' ) );
-	const inputDescriptionProps = getTextControlProps(
-		getInputProps( 'description' )
-	);
 
 	function handleAdd() {
 		setIsLoading( true );
@@ -45,38 +38,28 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 	return (
 		<div className="woocommerce-add-new-shipping-class-modal__wrapper">
 			<TextControl
-				{ ...inputNameProps }
-				label={ __( 'Name', 'woocommerce' ) }
-			/>
-			<TextControl
-				{ ...inputSlugProps }
+				{ ...getInputProps( 'name' ) }
+				placeholder={ __( 'e.g. Fragile products', 'woocommerce' ) }
 				label={ interpolateComponents( {
-					mixedString: __(
-						'Slug {{span}}(optional){{/span}}',
-						'woocommerce'
-					),
+					mixedString: __( 'Name {{required/}}', 'woocommerce' ),
 					components: {
-						span: (
-							<span className="woocommerce-add-new-shipping-class-modal__optional-input" />
+						required: (
+							<span className="woocommerce-add-new-shipping-class-modal__optional-input">
+								{ __( '(required)', 'woocommerce' ) }
+							</span>
 						),
 					},
 				} ) }
 			/>
 			<TextControl
-				{ ...inputDescriptionProps }
-				label={ interpolateComponents( {
-					mixedString: __(
-						'Description {{span}}(optional){{/span}}',
-						'woocommerce'
-					),
-					components: {
-						span: (
-							<span className="woocommerce-add-new-shipping-class-modal__optional-input" />
-						),
-					},
-				} ) }
+				{ ...getInputProps( 'slug' ) }
+				label={ __( 'Slug', 'woocommerce' ) }
+			/>
+			<TextControl
+				{ ...getInputProps( 'description' ) }
+				label={ __( 'Description', 'woocommerce' ) }
 				help={
-					inputDescriptionProps?.help ??
+					errors?.description ??
 					__(
 						'Describe how you and other store administrators can use this shipping class.',
 						'woocommerce'
@@ -123,10 +106,7 @@ export type AddNewShippingClassModalProps = {
 	onCancel: () => void;
 };
 
-const INITIAL_VALUES = {
-	name: __( 'New shipping class', 'woocommerce' ),
-	slug: __( 'new-shipping-class', 'woocommerce' ),
-};
+const INITIAL_VALUES = { name: '', slug: '', description: '' };
 
 export function AddNewShippingClassModal( {
 	shippingClass,

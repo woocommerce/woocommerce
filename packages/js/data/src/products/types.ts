@@ -86,6 +86,7 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	backordered: boolean;
 	shipping_required: boolean;
 	shipping_taxable: boolean;
+	shipping_class: string;
 	shipping_class_id: number;
 	average_rating: string;
 	rating_count: number;

@@ -1,30 +1,27 @@
 const { devices } = require( '@playwright/test' );
+const {
+	BASE_URL,
+	CI,
+	DEFAULT_TIMEOUT_OVERRIDE,
+	USER_KEY,
+	USER_SECRET,
+} = process.env;
 require( 'dotenv' ).config();
 
-let baseURL = 'http://localhost:8086';
-let userKey = 'admin';
-let userSecret = 'password';
-
-if ( process.env.BASE_URL ) {
-	baseURL = process.env.BASE_URL;
-}
-
-if ( process.env.USER_KEY ) {
-	userKey = process.env.USER_KEY;
-}
-
-if ( process.env.USER_SECRET ) {
-	userSecret = process.env.USER_SECRET;
-}
+const baseURL = BASE_URL ?? 'http://localhost:8086';
+const userKey = USER_KEY ?? 'admin';
+const userSecret = USER_SECRET ?? 'password';
 
 const base64auth = btoa( `${ userKey }:${ userSecret }` );
 
 const config = {
-	timeout: 90 * 1000,
+	timeout: DEFAULT_TIMEOUT_OVERRIDE
+		? Number( DEFAULT_TIMEOUT_OVERRIDE )
+		: 90 * 1000,
 	expect: { timeout: 20 * 1000 },
 	outputDir: './report',
 	testDir: 'tests',
-	retries: process.env.CI ? 4 : 2,
+	retries: CI ? 4 : 2,
 	workers: 4,
 	reporter: [
 		[ 'list' ],
@@ -32,14 +29,24 @@ const config = {
 			'html',
 			{
 				outputFolder: 'output',
-				open: process.env.CI ? 'never' : 'always',
+				open: CI ? 'never' : 'always',
 			},
 		],
 		[
 			'allure-playwright',
-			{ outputFolder: 'api-test-report/allure-results' },
+			{
+				outputFolder:
+					process.env.ALLURE_RESULTS_DIR ??
+					'tests/api-core-tests/api-test-report/allure-results',
+			},
 		],
-		[ 'json', { outputFile: 'api-test-report/test-results.json' } ],
+		[
+			'json',
+			{
+				outputFile:
+					'tests/api-core-tests/api-test-report/test-results.json',
+			},
+		],
 	],
 	use: {
 		screenshot: 'only-on-failure',

@@ -1,0 +1,34 @@
+{
+	"apiVersion": 2,
+	"name": "{{slug}}/checkout-newsletter-subscription",
+	"version": "2.0.0",
+	"title": "Newsletter Subscription!",
+	"category": "{{slug}}",
+	"description": "Adds a newsletter subscription checkbox to the checkout.",
+	"supports": {
+		"html": false,
+		"align": false,
+		"multiple": false,
+		"reusable": false
+	},
+	"parent": [
+		"woocommerce/checkout-contact-information-block"
+	],
+	"attributes": {
+		"lock": {
+			"type": "object",
+			"default": {
+				"remove": true,
+				"move": true
+			}
+		},
+		"text": {
+			"type": "string",
+			"source": "html",
+			"selector": ".wp-block-{{slug}}-checkout-newsletter-subscription",
+			"default": ""
+		}
+	},
+	"textdomain": "{{slug}}",
+	"editorStyle": "file:../../../build/style-{{slug}}-checkout-newsletter-subscription-block.css"
+}

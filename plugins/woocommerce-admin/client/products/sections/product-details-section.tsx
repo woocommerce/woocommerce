@@ -34,19 +34,28 @@ import { BlockInstance, serialize, parse } from '@wordpress/blocks';
 import './product-details-section.scss';
 import { CategoryField } from '../fields/category-field';
 import { EditProductLinkModal } from '../shared/edit-product-link-modal';
-import { getCheckboxProps, getTextControlProps } from './utils';
+import { getCheckboxTracks } from './utils';
 import { ProductSectionLayout } from '../layout/product-section-layout';
 
 const PRODUCT_DETAILS_SLUG = 'product-details';
 
 export const ProductDetailsSection: React.FC = () => {
-	const { getInputProps, values, setValue, touched, errors } =
-		useFormContext< Product >();
+	const {
+		getCheckboxControlProps,
+		getInputProps,
+		values,
+		touched,
+		errors,
+		setValue,
+	} = useFormContext< Product >();
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
 		useState( false );
 	const [ descriptionBlocks, setDescriptionBlocks ] = useState<
 		BlockInstance[]
 	>( parse( values.description || '' ) );
+	const [ summaryBlocks, setSummaryBlocks ] = useState< BlockInstance[] >(
+		parse( values.short_description || '' )
+	);
 	const { permalinkPrefix, permalinkSuffix } = useSelect(
 		( select: WCDataSelector ) => {
 			const { getPermalinkParts } = select( PRODUCTS_STORE_NAME );
@@ -66,7 +75,7 @@ export const ProductDetailsSection: React.FC = () => {
 	};
 
 	const setSkuIfEmpty = () => {
-		if ( values.sku || ! values.name.length ) {
+		if ( values.sku || ! values.name?.length ) {
 			return;
 		}
 		setValue( 'sku', cleanForSlug( values.name ) );
@@ -74,7 +83,7 @@ export const ProductDetailsSection: React.FC = () => {
 
 	return (
 		<ProductSectionLayout
-			title={ __( 'Product info', 'woocommerce' ) }
+			title={ __( 'Product details', 'woocommerce' ) }
 			description={ __(
 				'This info will be displayed on the product page, category pages, social media, and search results.',
 				'woocommerce'
@@ -84,19 +93,30 @@ export const ProductDetailsSection: React.FC = () => {
 				<CardBody>
 					<div>
 						<TextControl
-							label={ __( 'Name', 'woocommerce' ) }
+							label={ interpolateComponents( {
+								mixedString: __(
+									'Name {{required/}}',
+									'woocommerce'
+								),
+								components: {
+									required: (
+										<span className="woocommerce-product-form__optional-input">
+											{ __(
+												'(required)',
+												'woocommerce'
+											) }
+										</span>
+									),
+								},
+							} ) }
 							name={ `${ PRODUCT_DETAILS_SLUG }-name` }
 							placeholder={ __(
 								'e.g. 12 oz Coffee Mug',
 								'woocommerce'
 							) }
-							{ ...getTextControlProps(
-								getInputProps( 'name' )
-							) }
-							onBlur={ () => {
-								setSkuIfEmpty();
-								getInputProps( 'name' ).onBlur();
-							} }
+							{ ...getInputProps( 'name', {
+								onBlur: setSkuIfEmpty,
+							} ) }
 						/>
 						{ values.id && ! hasNameError() && permalinkPrefix && (
 							<span className="woocommerce-product-form__secondary-text product-details-section__product-link">
@@ -170,12 +190,10 @@ export const ProductDetailsSection: React.FC = () => {
 								/>
 							</>
 						}
-						{ ...getCheckboxProps( {
-							...getInputProps( 'featured' ),
-							name: 'featured',
-							className:
-								'product-details-section__feature-checkbox',
-						} ) }
+						{ ...getCheckboxControlProps(
+							'featured',
+							getCheckboxTracks( 'featured' )
+						) }
 					/>
 					{ showProductLinkEditModal && (
 						<EditProductLinkModal
@@ -190,6 +208,17 @@ export const ProductDetailsSection: React.FC = () => {
 							}
 						/>
 					) }
+					<RichTextEditor
+						label={ __( 'Summary', 'woocommerce' ) }
+						blocks={ summaryBlocks }
+						onChange={ ( blocks ) => {
+							setSummaryBlocks( blocks );
+							setValue(
+								'short_description',
+								serialize( blocks )
+							);
+						} }
+					/>
 					<RichTextEditor
 						label={ __( 'Description', 'woocommerce' ) }
 						blocks={ descriptionBlocks }
