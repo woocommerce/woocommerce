@@ -187,6 +187,7 @@ export const getLatestReleaseZipUrl = async ( {
 		: `https://api.github.com/repos/${ repository }/releases/latest`;
 
 	const options = {
+		method: 'get',
 		url: requesturl,
 		headers: {
 			Authorization: authorizationToken
@@ -196,23 +197,58 @@ export const getLatestReleaseZipUrl = async ( {
 	};
 
 	// Get the first prerelease, or the latest release.
-	const { data: body } = await axios( options );
-	release = prerelease ? body.find( ( { prerelease } ) => prerelease ) : body;
+	let response;
+	try {
+		response = await axios( options );
+	} catch ( error ) {
+		let errorMessage =
+			'Something went wrong when downloading the plugin.\n';
+
+		if ( error.response ) {
+			// The request was made and the server responded with a status code
+			// that falls out of the range of 2xx
+			errorMessage = errorMessage.concat(
+				`Response status: ${ error.response.status } ${ error.response.statusText }`,
+				'\n',
+				`Response body:`,
+				'\n',
+				JSON.stringify( error.response.data, null, 2 ),
+				'\n'
+			);
+		} else if ( error.request ) {
+			// The request was made but no response was received
+			// `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+			// http.ClientRequest in node.js
+			errorMessage = errorMessage.concat(
+				JSON.stringify( error.request, null, 2 ),
+				'\n'
+			);
+		} else {
+			// Something happened in setting up the request that triggered an Error
+			errorMessage = errorMessage.concat( error.toJSON(), '\n' );
+		}
+
+		throw new Error( errorMessage );
+	}
+
+	release = prerelease
+		? response.data.find( ( { prerelease } ) => prerelease )
+		: response.data;
 
 	// If response contains assets, return URL of first asset.
 	// Otherwise, return the github.com URL from the tag name.
-	const { assets } = body;
+	const { assets } = release;
 	if ( assets && assets.length ) {
 		return assets[ 0 ].url;
 	} else {
-		const tagName = body.tag_name;
+		const tagName = release.tag_name;
 		return `https://github.com/${ repository }/archive/${ tagName }.zip`;
 	}
 };
 
 /**
  * Install a plugin using WP CLI within a WP ENV environment.
- * This is a workaround to the "The uploaded file exceeds the upload_max_filesize directive in php.ini" error encountered when uploading a plugin to the local WP Env E2E environment.
+ * This is a workaround to the "The uploaded file exceeds the upload_max_filesize directive in php.ini" error encountered when uploading a plugin to the local WP Env E2E environment through the UI.
  *
  * @see https://github.com/WordPress/gutenberg/issues/29430
  *
