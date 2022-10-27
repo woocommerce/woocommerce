@@ -25,12 +25,6 @@
 * General
 */
 .woocommerce {
-	mark {
-		// Style the mark element in theme colors.
-		// For details see https://github.com/woocommerce/woocommerce/pull/31631.
-		background-color: var(--wp--preset--color--foreground, $highlight);
-		color: var(--wp--preset--color--background, $highlightext);
-	}
 
 	/**
 	* Buttons
@@ -107,9 +101,6 @@
 
 		.woocommerce-tabs {
 			ul.tabs li.active {
-				// Style active tab in theme colors.
-				background: var(--wp--preset--color--background, $contentbg);
-				border-bottom-color: var(--wp--preset--color--background, $contentbg);
 
 				&::before {
 					box-shadow: 2px 2px 0 var(--wp--preset--color--background, $contentbg);
