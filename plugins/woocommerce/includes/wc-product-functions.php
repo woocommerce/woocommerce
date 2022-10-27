@@ -170,7 +170,7 @@ function wc_get_product_ids_on_sale() {
 
 	$data_store          = WC_Data_Store::load( 'product' );
 	$on_sale_products    = $data_store->get_on_sale_products();
-	$product_ids_on_sale = wp_parse_id_list( array_merge( wp_list_pluck( $on_sale_products, 'id' ), array_diff( wp_list_pluck( $on_sale_products, 'parent_id' ), array( 0 ) ) ) );
+	$product_ids_on_sale = wp_parse_id_list( array_replace( wp_list_pluck( $on_sale_products, 'id' ), array_diff( wp_list_pluck( $on_sale_products, 'parent_id' ), array( 0 ) ) ) );
 
 	set_transient( 'wc_products_onsale', $product_ids_on_sale, DAY_IN_SECONDS * 30 );
 
