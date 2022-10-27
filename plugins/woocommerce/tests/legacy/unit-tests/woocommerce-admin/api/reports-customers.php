@@ -1,11 +1,12 @@
 <?php
-// phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps
 /**
  * Reports Customers REST API Test
  *
  * @package WooCommerce\Admin\Tests\API
  * @since 3.5.0
  */
+
+// phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps
 
 use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 
