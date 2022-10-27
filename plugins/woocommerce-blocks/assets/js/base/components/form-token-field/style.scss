@@ -16,8 +16,10 @@
 	}
 
 	.components-form-token-field__input-container {
+		background-color: #fff;
 		border-radius: 0;
 		box-shadow: none;
+		color: #000;
 		position: relative;
 
 		input[type="text"].components-form-token-field__input {
@@ -64,6 +66,7 @@
 			margin-right: 0;
 			position: relative;
 			width: 100%;
+			z-index: 1;
 		}
 
 		.components-form-token-field__remove-token.components-button,
