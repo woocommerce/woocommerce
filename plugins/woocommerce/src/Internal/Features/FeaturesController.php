@@ -712,7 +712,7 @@ class FeaturesController {
 		}
 
 		// phpcs:disable WordPress.Security.NonceVerification
-		if ( get_current_screen() && 'plugins' !== get_current_screen()->id || 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) {
+		if ( ! function_exists( 'get_current_screen' ) || get_current_screen() && 'plugins' !== get_current_screen()->id || 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) {
 			return $list;
 		}
 
