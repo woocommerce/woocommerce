@@ -105,6 +105,7 @@ test.describe( 'Add New Simple Product Page', () => {
 		await page.goto( 'wp-admin/post-new.php?post_type=product' );
 		await page.fill( '#title', nonVirtualProductName );
 		await page.fill( '#_regular_price', productPrice );
+		await expect( page.locator( '#publish:not(.disabled)' ) ).toBeVisible();
 		await page.click( '#publish' );
 		await page.waitForLoadState( 'networkidle' );
 
