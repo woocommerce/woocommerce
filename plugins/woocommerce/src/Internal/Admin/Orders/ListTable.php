@@ -154,18 +154,19 @@ class ListTable extends WP_List_Table {
 				<hr class='wp-header-end'>"
 		);
 
-		if ( $this->has_items() || $this->has_filter ) {
-			$this->views();
-
-			echo '<form id="wc-orders-filter" method="get" action="' . esc_url( get_admin_url( null, 'admin.php' ) ) . '">';
-			$this->print_hidden_form_fields();
-			$this->search_box( esc_html__( 'Search orders', 'woocommerce' ), 'orders-search-input' );
-
-			parent::display();
-			echo '</form> </div>';
-		} else {
+		if ( ! $this->has_filter && $this->should_render_blank_state() ) {
 			$this->render_blank_state();
+			return;
 		}
+
+		$this->views();
+
+		echo '<form id="wc-orders-filter" method="get" action="' . esc_url( get_admin_url( null, 'admin.php' ) ) . '">';
+		$this->print_hidden_form_fields();
+		$this->search_box( esc_html__( 'Search orders', 'woocommerce' ), 'orders-search-input' );
+
+		parent::display();
+		echo '</form> </div>';
 	}
 
 	/**
