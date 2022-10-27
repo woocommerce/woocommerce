@@ -61,4 +61,4 @@ function wc_get_container() {
 // Global for backwards compatibility.
 $GLOBALS['woocommerce'] = WC();
 
-// Test change
+// Test change.
