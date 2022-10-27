@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { isFeaturePluginBuild } from '@woocommerce/block-settings';
-import { createBlock, registerBlockType } from '@wordpress/blocks';
+import { registerBlockType } from '@wordpress/blocks';
 import { Icon, starEmpty } from '@wordpress/icons';
 import classNames from 'classnames';
 import { useBlockProps } from '@wordpress/block-editor';
@@ -26,19 +26,6 @@ if ( isFeaturePluginBuild() ) {
 		},
 		attributes: {
 			...metadata.attributes,
-		},
-		transforms: {
-			from: [
-				{
-					type: 'block',
-					blocks: [ 'core/legacy-widget' ],
-					// We can't transform if raw instance isn't shown in the REST API.
-					isMatch: ( { idBase, instance } ) =>
-						idBase === 'woocommerce_rating_filter' &&
-						!! instance?.raw,
-					transform: () => createBlock( 'woocommerce/rating-filter' ),
-				},
-			],
 		},
 		edit,
 		// Save the props to post content.
