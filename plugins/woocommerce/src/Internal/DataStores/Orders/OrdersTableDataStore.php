@@ -948,7 +948,7 @@ WHERE
 	 */
 	public function get_order_type( $order_id ) {
 		$type = $this->get_orders_type( array( $order_id ) );
-		return $type[ $order_id ];
+		return $type[ $order_id ] ?? '';
 	}
 
 	/**

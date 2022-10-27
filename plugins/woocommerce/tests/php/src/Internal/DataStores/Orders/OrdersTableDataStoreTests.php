@@ -1867,4 +1867,21 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$product->save();
 		$this->assertFalse( wc_get_order( $product->get_id() ) );
 	}
+
+	/**
+	 * @testDox Make sure that getting order type for non order return without warning.
+	 */
+	public function test_get_order_type_for_non_order() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->save();
+		$this->assertEquals( '', $this->sut->get_order_type( $product->get_id() ) );
+	}
+
+	/**
+	 * @testDox Test get order type working as expected.
+	 */
+	public function test_get_order_type_for_order(){
+		$order = $this->create_complex_cot_order();
+		$this->assertEquals( 'shop_order', $this->sut->get_order_type( $order->get_id() ) );
+	}
 }
