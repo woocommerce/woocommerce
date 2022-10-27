@@ -58,8 +58,7 @@ jobs:
         
           # Plugin data is passed as a JSON object.
           PLUGIN_DATA="{}"          
-          PLUGIN_DATA=$( jq -c --arg slug "woocommerce" --arg ver "$CURRENT_VERSION" '.[ $slug ] = { version: $ver }' 
-<<<"$PLUGIN_DATA" )
+          PLUGIN_DATA=$( jq -c --arg slug "woocommerce" --arg ver "$CURRENT_VERSION" '.[ $slug ] = { version: $ver }' <<<"$PLUGIN_DATA" )
           echo "plugin-data=$PLUGIN_DATA" >> $GITHUB_OUTPUT
           
       - name: Create plugins artifact
