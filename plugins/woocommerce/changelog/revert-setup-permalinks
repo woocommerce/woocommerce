@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Revert the changes introduced in PR #35282

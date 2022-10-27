@@ -34,7 +34,7 @@ Closes # .
 
 -   [ ] Have you added an explanation of what your changes do and why you'd like us to include them?
 -   [ ] Have you written new tests for your changes, as applicable?
--   [ ] Have you created a changelog file for each project being changed, ie `pnpm changelog add --filter=<project>`?
+-   [ ] Have you created a changelog file for each project being changed, ie `pnpm --filter=<project> changelog add`?
 
 <!-- Mark completed items with an [x] -->
 

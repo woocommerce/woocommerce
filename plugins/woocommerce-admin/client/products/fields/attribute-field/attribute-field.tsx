@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { sprintf, __ } from '@wordpress/i18n';
-import { Button, Card, CardBody, Popover } from '@wordpress/components';
+import { Button, Card, CardBody } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { ProductAttribute } from '@woocommerce/data';
 import { Text } from '@woocommerce/experimental';
@@ -94,7 +94,6 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 								) }
 							/>
 						) }
-						<Popover.Slot />
 					</div>
 				</CardBody>
 			</Card>
@@ -179,7 +178,6 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
 				/>
 			) }
-			<Popover.Slot />
 		</div>
 	);
 };

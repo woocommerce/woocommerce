@@ -74,7 +74,8 @@ const program = new Command()
 				currentVersion,
 				false,
 				'https://github.com/woocommerce/woocommerce.git',
-				previousVersion.toString()
+				previousVersion.toString(),
+				'cli'
 			);
 
 			const schemaChanges = changes.schema.filter(
