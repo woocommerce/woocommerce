@@ -319,7 +319,7 @@ class CustomOrdersTableController {
 	 * @return array The updated settings array.
 	 */
 	private function get_settings( array $settings, string $section_id ): array {
-		if ( ! $this->is_feature_visible() || $section_id !== 'custom_data_stores' ) {
+		if ( ! $this->is_feature_visible() || 'custom_data_stores' !== $section_id ) {
 			return $settings;
 		}
 
@@ -337,7 +337,7 @@ class CustomOrdersTableController {
 			);
 
 			$sync_status     = $this->data_synchronizer->get_sync_status();
-			$sync_is_pending = $sync_status['current_pending_count'] !== 0;
+		$sync_is_pending = 0 !== $sync_status['current_pending_count'];
 
 			$settings[] = array(
 				'title'         => __( 'Data store for orders', 'woocommerce' ),
@@ -456,7 +456,7 @@ class CustomOrdersTableController {
 	 * @param mixed  $value New value of the setting.
 	 */
 	private function process_updated_option( $option, $old_value, $value ) {
-		if ( $option === DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION && $value === 'no' ) {
+		if ( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION === $option && 'no' === $value ) {
 			$this->data_synchronizer->cleanup_synchronization_state();
 		}
 	}
@@ -472,7 +472,7 @@ class CustomOrdersTableController {
 	 * @throws \Exception Attempt to change the authoritative orders table while orders sync is pending.
 	 */
 	private function process_pre_update_option( $value, $option, $old_value ) {
-		if ( $option !== self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION || $value === $old_value || $old_value === false ) {
+		if ( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION !== $option || $value === $old_value || false === $old_value ) {
 			return $value;
 		}
 
