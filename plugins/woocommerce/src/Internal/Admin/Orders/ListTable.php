@@ -408,16 +408,17 @@ class ListTable extends WP_List_Table {
 	/**
 	 * Count orders by status.
 	 *
-	 * @param string $status The order status we are interested in.
+	 * @param string|string[] $status The order status we are interested in.
 	 *
 	 * @return int
 	 */
-	private function count_orders_by_status( string $status ): int {
+	private function count_orders_by_status( $status ): int {
 		$orders = wc_get_orders(
 			array(
 				'limit'  => -1,
 				'return' => 'ids',
 				'status' => $status,
+				'type'   => 'shop_order',
 			)
 		);
 
