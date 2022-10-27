@@ -1867,4 +1867,32 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$product->save();
 		$this->assertFalse( wc_get_order( $product->get_id() ) );
 	}
+
+	/**
+	 * @testDox Test that we are not duplicating address indexing when updating.
+	 */
+	public function test_address_index_saved_on_update() {
+		global $wpdb;
+		$this->toggle_cot( true );
+		$this->disable_cot_sync();
+		$order = new WC_Order();
+		$order->set_billing_address_1( '123 Main St' );
+		$order->save();
+
+		$this->assertTrue( false !== strpos( $order->get_meta( '_billing_address_index', true ), '123 Main St' ) );
+		$order = wc_get_order( $order->get_id() );
+		$order->set_billing_address_2( 'Apt 1' );
+		$order->save();
+
+		$order_meta_table = $this->sut::get_meta_table_name();
+		// Assert that we are not duplicating address indexes.
+		$result = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$order_meta_table} WHERE order_id = %d AND meta_key = '_billing_address_index'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$order->get_id()
+			)
+		);
+
+		$this->assertEquals( 1, $result );
+	}
 }

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Override filter_meta_data method, since it should be a no-op anyway.
