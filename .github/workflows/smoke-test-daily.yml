@@ -210,7 +210,7 @@ jobs:
             - name: Run 'Upload plugin' test
               working-directory: plugins/woocommerce
               env:
-                  PLUGIN_REPOSITORY: ${{ matrix.repo }}
+                  PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
                   PLUGIN_NAME: ${{ matrix.plugin }}
                   GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
               run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js upload-plugin.spec.js
