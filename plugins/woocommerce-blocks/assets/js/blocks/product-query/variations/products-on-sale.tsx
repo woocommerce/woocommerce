@@ -10,9 +10,10 @@ import { Icon, percent } from '@wordpress/icons';
  * Internal dependencies
  */
 import {
-	DEFAULT_CORE_ALLOWED_CONTROLS,
+	DEFAULT_ALLOWED_CONTROLS,
 	INNER_BLOCKS_TEMPLATE,
 	QUERY_DEFAULT_ATTRIBUTES,
+	QUERY_LOOP_ID,
 } from '../constants';
 import { ArrayXOR } from '../utils';
 
@@ -20,7 +21,7 @@ const VARIATION_NAME = 'woocommerce/query-products-on-sale';
 const DISABLED_INSPECTOR_CONTROLS = [ 'onSale' ];
 
 if ( isExperimentalBuild() ) {
-	registerBlockVariation( 'core/query', {
+	registerBlockVariation( QUERY_LOOP_ID, {
 		name: VARIATION_NAME,
 		title: __( 'Products on Sale', 'woo-gutenberg-products-block' ),
 		isActive: ( blockAttributes ) =>
@@ -47,7 +48,7 @@ if ( isExperimentalBuild() ) {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		allowedControls: ArrayXOR(
-			DEFAULT_CORE_ALLOWED_CONTROLS,
+			DEFAULT_ALLOWED_CONTROLS,
 			DISABLED_INSPECTOR_CONTROLS
 		),
 		innerBlocks: INNER_BLOCKS_TEMPLATE,
