@@ -93,6 +93,7 @@ const renderNotes = ( {
 	notes,
 	onDismiss,
 	onNoteActionClick,
+	onNoteVisible,
 	setShowDismissAllModal: onDismissAll,
 	showHeader = true,
 	loadMoreNotes,
@@ -113,17 +114,6 @@ const renderNotes = ( {
 		} );
 		hasFiredPanelViewTrack = true;
 	}
-
-	const screen = getScreenName();
-	const onNoteVisible = ( note ) => {
-		recordEvent( 'inbox_note_view', {
-			note_content: note.content,
-			note_name: note.name,
-			note_title: note.title,
-			note_type: note.type,
-			screen,
-		} );
-	};
 
 	const notesArray = Object.keys( notes ).map( ( key ) => notes[ key ] );
 
@@ -223,6 +213,7 @@ const InboxPanel = ( { showHeader = true } ) => {
 		triggerNoteAction,
 		invalidateResolutionForStoreSelector,
 	} = useDispatch( NOTES_STORE_NAME );
+	const screen = getScreenName();
 
 	const inboxQuery = useMemo( () => {
 		return {
@@ -284,9 +275,22 @@ const InboxPanel = ( { showHeader = true } ) => {
 
 	const [ showDismissAllModal, setShowDismissAllModal ] = useState( false );
 
-	const onDismiss = async ( note ) => {
-		const screen = getScreenName();
+	const onNoteVisible = ( note ) => {
+		if ( ! note.is_read ) {
+			updateNote( note.id, {
+				is_read: true,
+			} );
+		}
+		recordEvent( 'inbox_note_view', {
+			note_content: note.content,
+			note_name: note.name,
+			note_title: note.title,
+			note_type: note.type,
+			screen,
+		} );
+	};
 
+	const onDismiss = async ( note ) => {
 		recordEvent( 'inbox_action_dismiss', {
 			note_name: note.name,
 			note_title: note.title,
@@ -383,6 +387,7 @@ const InboxPanel = ( { showHeader = true } ) => {
 							onNoteActionClick: ( note, action ) => {
 								triggerNoteAction( note.id, action.id );
 							},
+							onNoteVisible,
 							setShowDismissAllModal,
 							showHeader,
 							allNotesFetched,
