@@ -752,7 +752,7 @@ function get_woocommerce_currency_symbols() {
 			'LKR' => '&#xdbb;&#xdd4;',
 			'LRD' => '&#36;',
 			'LSL' => 'L',
-			'LYD' => '&#x644;.&#x62f;',
+			'LYD' => '&#x62f;.&#x644;',
 			'MAD' => '&#x62f;.&#x645;.',
 			'MDL' => 'MDL',
 			'MGA' => 'Ar',
