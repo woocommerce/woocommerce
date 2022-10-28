@@ -152,4 +152,25 @@ window.addEventListener( 'load', () => {
 			);
 		}
 	} );
+
+	/**
+	 * Get the background color of the body then set it as the background color
+	 * of the Mini Cart Contents block. We use :where here to make customized
+	 * background color alway have higher priority.
+	 *
+	 * We only set the background color, instead of the whole background. As
+	 * we only provide the option to customize the background color.
+	 */
+	const style = document.createElement( 'style' );
+	const backgroundColor = getComputedStyle( document.body ).backgroundColor;
+
+	style.appendChild(
+		document.createTextNode(
+			`:where(.wp-block-woocommerce-mini-cart-contents) {
+				background-color: ${ backgroundColor };
+			}`
+		)
+	);
+
+	document.head.appendChild( style );
 } );
