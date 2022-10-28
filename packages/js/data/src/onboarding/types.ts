@@ -25,6 +25,7 @@ export type TaskType = {
 	isActioned: boolean;
 	eventPrefix: string;
 	level: number;
+	recordViewEvent: boolean;
 	additionalData?: {
 		woocommerceTaxCountries?: string[];
 		taxJarActivated?: boolean;

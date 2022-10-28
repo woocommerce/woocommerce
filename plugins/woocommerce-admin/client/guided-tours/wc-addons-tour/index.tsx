@@ -3,6 +3,7 @@
  */
 import { useEffect, useState } from '@wordpress/element';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import qs from 'qs';
@@ -13,64 +14,27 @@ import qs from 'qs';
 import { observePositionChange, waitUntilElementTopNotChange } from '../utils';
 import { getTourConfig } from './get-config';
 import { scrollPopperToVisibleAreaIfNeeded } from './utils';
+import { getSteps } from './get-steps';
 
 const WCAddonsTour = () => {
 	const [ showTour, setShowTour ] = useState( false );
-	const [ tourConfig, setTourConfig ] = useState< TourKitTypes.WooConfig >();
 
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
-	const closeHandler: TourKitTypes.CloseHandler = (
-		steps,
-		currentStepIndex
-	) => {
-		setShowTour( false );
-		// mark tour as completed
-		updateOptions( {
-			woocommerce_admin_dismissed_in_app_marketplace_tour: 'yes',
-		} );
-		// remove `tutorial` from search query, so it's not shown on page refresh
-		const url = new URL( window.location.href );
-		url.searchParams.delete( 'tutorial' );
-		window.history.replaceState( null, '', url );
-
-		if ( steps.length - 1 === currentStepIndex ) {
-			// TODO: Track Tour as completed
-		} else {
-			// TODO: Track Tour as dismissed
-		}
-	};
-
-	const onNextStepHandler = ( stepIndex: number ) => {
-		// const stepName = tourConfig?.steps[ stepIndex ]?.meta?.name || '';
-		// TODO: Maybe scroll to a proper element
-		// TODO: Track tour's step as completed
-	};
-
-	const onPreviousStepHandler = ( stepIndex: number ) => {
-		// TODO: Maybe scroll to a proper element
-	};
-
+	const steps = getSteps();
 	const defaultAutoScrollBlock: ScrollLogicalPosition = 'center';
 
 	useEffect( () => {
-		const theConfig = getTourConfig( {
-			closeHandler,
-			onNextStepHandler,
-			onPreviousStepHandler,
-			autoScrollBlock: defaultAutoScrollBlock,
-		} );
-
-		setTourConfig( theConfig );
-
 		const query = qs.parse( window.location.search.slice( 1 ) );
 		if ( query?.tutorial === 'true' ) {
 			const intervalId = waitUntilElementTopNotChange(
-				theConfig.steps[ 0 ].referenceElements?.desktop || '',
+				steps[ 0 ].referenceElements?.desktop || '',
 				() => {
+					const stepName = steps[ 0 ]?.meta?.name;
 					setShowTour( true );
-
-					// TODO: track the tour is started
+					recordEvent( 'in_app_marketplace_tour_started', {
+						step: stepName,
+					} );
 				},
 				500
 			);
@@ -110,9 +74,47 @@ const WCAddonsTour = () => {
 		}
 	}, [ showTour ] );
 
-	if ( ! showTour || ! tourConfig ) {
+	if ( ! showTour ) {
 		return null;
 	}
+
+	const closeHandler: TourKitTypes.CloseHandler = (
+		tourSteps,
+		currentStepIndex
+	) => {
+		setShowTour( false );
+		// mark tour as completed
+		updateOptions( {
+			woocommerce_admin_dismissed_in_app_marketplace_tour: 'yes',
+		} );
+		// remove `tutorial` from search query, so it's not shown on page refresh
+		const url = new URL( window.location.href );
+		url.searchParams.delete( 'tutorial' );
+		window.history.replaceState( null, '', url );
+
+		if ( steps.length - 1 === currentStepIndex ) {
+			recordEvent( 'in_app_marketplace_tour_completed' );
+		} else {
+			const stepName = tourSteps[ currentStepIndex ]?.meta?.name;
+			recordEvent( 'in_app_marketplace_tour_dismissed', {
+				step: stepName,
+			} );
+		}
+	};
+
+	const onNextStepHandler = ( previousStepIndex: number ) => {
+		const stepName = steps[ previousStepIndex + 1 ]?.meta?.name || '';
+		recordEvent( 'in_app_marketplace_tour_step_viewed', {
+			step: stepName,
+		} );
+	};
+
+	const tourConfig = getTourConfig( {
+		closeHandler,
+		onNextStepHandler,
+		autoScrollBlock: defaultAutoScrollBlock,
+		steps,
+	} );
 
 	return <TourKit config={ tourConfig } />;
 };

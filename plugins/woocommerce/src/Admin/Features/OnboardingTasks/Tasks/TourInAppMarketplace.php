@@ -61,4 +61,13 @@ class TourInAppMarketplace extends Task {
 	public function get_action_url() {
 		return admin_url( 'admin.php?page=wc-addons&tutorial=true' );
 	}
+
+	/**
+	 * Check if should record event when task is viewed
+	 *
+	 * @return bool
+	 */
+	public function get_record_view_event(): bool {
+		return true;
+	}
 }
