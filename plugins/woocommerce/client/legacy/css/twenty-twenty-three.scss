@@ -836,7 +836,6 @@
 				a.button,
 				button {
 					margin-bottom: 1rem;
-					border: none;
 					padding: 0.5rem 1rem 0.5rem 1rem;
 				}
 
@@ -883,6 +882,11 @@
 					}
 				}
 			}
+		}
+
+		td,
+		th {
+			padding: 0.5rem;
 		}
 	}
 
