@@ -15,6 +15,7 @@ global.wcSettings = {
 	date: {
 		dow: 0,
 	},
+	has_filterable_products: true,
 	orderStatuses: {
 		pending: 'Pending payment',
 		processing: 'Processing',
@@ -87,6 +88,24 @@ global.wcSettings = {
 			state: { label: 'Province' },
 		},
 	},
+	attributes: [
+		{
+			attribute_id: '1',
+			attribute_name: 'color',
+			attribute_label: 'Color',
+			attribute_type: 'select',
+			attribute_orderby: 'menu_order',
+			attribute_public: 0,
+		},
+		{
+			attribute_id: '2',
+			attribute_name: 'size',
+			attribute_label: 'Size',
+			attribute_type: 'select',
+			attribute_orderby: 'menu_order',
+			attribute_public: 0,
+		},
+	],
 };
 
 global.jQuery = () => ( {
