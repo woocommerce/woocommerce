@@ -249,6 +249,7 @@
 				font-size: revert;
 			}
 
+			// Add to cart/Select options/Read more buttons.
 			a.button {
 				padding: 0.8rem 2.7rem;
 				margin-left: auto;
@@ -257,6 +258,11 @@
 				&.loading {
 					opacity: 0.5;
 				}
+			}
+
+			// View cart link.
+			a.added_to_cart {
+				margin: 1rem auto;
 			}
 
 		}
@@ -1069,6 +1075,22 @@
 	// Make sure the floated content of My Account section doesn't overlap with the footer.
 	.woocommerce {
 		overflow: auto;
+
+		table.woocommerce-table--order-downloads,
+		table.woocommerce-MyAccount-orders {
+			thead tr {
+				border-top: 2px solid var(--wp--preset--color--contrast);
+
+				span {
+					font-weight: bold;
+				}
+
+			}
+
+			tbody a.button {
+				margin: calc(var(--wp--style--block-gap) / 6) 0;
+			}
+		}
 	}
 
 	// Make the Log in form on My Account page less wide.
@@ -1076,6 +1098,7 @@
 		max-width: 516px;
 		margin: 0 auto;
 	}
+
 }
 
 // TODO: This could look nicer.
