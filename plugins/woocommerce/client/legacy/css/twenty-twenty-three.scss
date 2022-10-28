@@ -27,57 +27,69 @@
 
 @import "mixins";
 @import "animation";
-@import "variables";
 
-$tt2-gray: #f7f7f7;
 
-/**
- * Main layout.
+/*
+	Layout fix.
  */
-
 .woocommerce-page {
 
-	h1.wp-block-post-title {
-		font-size: var(--wp--preset--font-size--huge);
-	}
-
-	h2 {
-		font-size: var(--wp--preset--font-size--large);
-	}
-
 	main {
+		// This is to allow .woocommerce div to have width of 1000px on styles with full width layout (such as Pitch).
+		max-width: calc(1000px + var(--wp--style--root--padding-right) + var(--wp--style--root--padding-left));
+		margin-left: auto;
+		margin-right: auto;
+
 		.woocommerce {
 			@include clearfix();
-			max-width: 1000px;
 		}
 	}
 }
 
+.theme-twentytwentythree {
+	.container-colors {
+		display: flex;
+		flex-direction: row;
+	}
+
+	.cube {
+		width: 20%;
+		height: 100px;
+		text-align: center;
+		vert-align: middle;
+	}
+
+	.base {
+		background-color: var(--wp--preset--color--base);
+	}
+
+	.contrast {
+		background-color: var(--wp--preset--color--contrast);
+		color: var(--wp--preset--color--base);
+	}
+
+	.primary {
+		background-color: var(--wp--preset--color--primary);
+	}
+
+	.secondary {
+		background-color: var(--wp--preset--color--secondary);
+	}
+
+	.tertiary {
+		background-color: var(--wp--preset--color--tertiary);
+	}
+
+
+}
+
 .woocommerce {
 
-	// Common
-	.woocommerce-products-header {
-		h1.page-title {
-			font-family: var(--wp--preset--font-family--source-serif-pro);
-			font-size: var(--wp--custom--typography--font-size--gigantic);
-			font-weight: 300;
-			line-height: var(--wp--custom--typography--line-height--tiny);
-			margin-bottom: var(--wp--custom--spacing--medium);
-		}
-	}
+	/*
+	    Common/global
+	 */
 
-	span.onsale {
-		top: -1rem;
-		right: -1rem;
-		position: absolute;
-		background: var(--wp--preset--color--secondary);
-		color: inherit;
-		border-radius: 2rem;
-		line-height: 2.6rem;
-		font-size: 0.8rem;
-		padding: 0 0.5rem 0 0.5rem;
-	}
-
+	// Make quantity selector less wide.
 	.quantity {
 		input[type="number"] {
 			width: 3em;
@@ -89,28 +101,36 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 
+	// Breadcrumbs are unnecessary on the shop page.
 	&.woocommerce-shop .woocommerce-breadcrumb {
 		display: none;
 	}
 
+	// Make sure breadcrumbs are not overlapping with Sale badge on the Single product page, etc.
 	.woocommerce-breadcrumb {
 		margin-bottom: 1rem;
 	}
 
+	/*
+		Notice messages (like 'Added to cart', 'Billing address needs to be filled in', etc.
+	 */
 	.woocommerce-message,
 	.woocommerce-error,
 	.woocommerce-info {
-		background: $tt2-gray;
+		background-color: rgba(176, 176, 176, 0.6);
+		color: #222;
 		border-top-color: var(--wp--preset--color--primary);
 		border-top-style: solid;
+		border-top-width: 2px;
 		padding: 1rem 1.5rem;
 		margin-bottom: 2rem;
 		list-style: none;
 		font-size: var(--wp--preset--font-size--small);
+		display: flow-root;
 
 		&[role="alert"]::before {
-			color: var(--wp--preset--color--background);
-			background: var(--wp--preset--color--primary);
+			background: #d5d5d5;
+			color: black;
 			border-radius: 5rem;
 			font-size: 1rem;
 			padding-left: 3px;
@@ -118,16 +138,13 @@ $tt2-gray: #f7f7f7;
 			margin-right: 1rem;
 		}
 
-		a.button {
-			margin-top: -0.5rem;
-			border: none;
-			background: #ebe9eb;
-			color: var(--wp--preset--color--black);
-			padding: 0.5rem 1rem;
+		a {
+			color: var(--wp--preset--color--contrast);
 
-			&:hover,
-			&:visited {
-				color: var(--wp--preset--color--black);
+			.button {
+				margin-top: -0.5rem;
+				border: none;
+				padding: 0.5rem 1rem;
 			}
 		}
 	}
@@ -152,8 +169,12 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 
+	// Checkout notice group styling.
 	.woocommerce-NoticeGroup-checkout {
 		ul.woocommerce-error[role="alert"] {
+			color: var(--wp--preset--color--contrast);
+			background: var(--wp--preset--color--primary);
+
 			&::before {
 				display: none;
 			}
@@ -164,6 +185,11 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 
+	/*
+	  Shop page.
+	 */
+
+	// Styling the buttons on the Shop page.
 	a.button,
 	button[name="add-to-cart"],
 	input[name="submit"],
@@ -172,147 +198,103 @@ $tt2-gray: #f7f7f7;
 		display: inline-block;
 		text-align: center;
 		word-break: break-word;
-		background-color: var(--wp--preset--color--primary);
-		color: #fff;
-		border: 1px solid var(--wp--preset--color--black);
 		padding: 1rem 2rem;
 		margin-top: 1rem;
 		text-decoration: none;
 		font-size: medium;
 		cursor: pointer;
 
-		&:hover,
-		&:visited {
-			color: var(--wp--preset--color--white);
-			text-decoration: underline;
-		}
 	}
 
-	// Moved from blocktheme.css to make sure TT2 won't be changed.
-	#respond input#submit,
-	input.button {
-		// Style primary WooCommerce CTAs in theme colors by default.
-		background-color: var(--wp--preset--color--foreground, $primary);
-		color: var(--wp--preset--color--background, $primarytext);
-
-		&:hover {
-			background-color: var(--wp--preset--color--foreground, $primary);
-			color: var(--wp--preset--color--background, $primarytext);
-		}
-
-		&.disabled,
-		&:disabled,
-		&:disabled[disabled],
-		&.disabled:hover,
-		&:disabled:hover,
-		&:disabled[disabled]:hover {
-			background-color: var(--wp--preset--color--foreground, $primary);
-			color: var(--wp--preset--color--background, $primarytext);
-		}
-	}
-
-	#respond input#submit.alt,
-	a.button.alt,
-	button.button.alt,
-	input.button.alt {
-		background-color: var(--wp--preset--color--primary);
-		color: #fff;
-
-		&:hover {
-			background-color: var(--wp--preset--color--primary);
-			color: #fff;
-			opacity: 1;
-		}
-
-		&.disabled,
-		&:disabled,
-		&:disabled[disabled],
-		&.disabled:hover,
-		&:disabled:hover,
-		&:disabled[disabled]:hover {
-			background-color: var(--wp--preset--color--primary);
-			color: #fff;
-			opacity: 0.5;
-			cursor: not-allowed;
-		}
-	}
-
-	button.woocommerce-form-login__submit,
-	button.single_add_to_cart_button,
-	a.checkout-button {
-		font-size: 18px;
-		padding: 1.5rem 3.5rem;
-	}
-
-	// Moved from blockthemes.css to make sure TT2 won't be changed.
-	button.button,
-	a.button {
-		background-color: var(--wp--preset--color--foreground, $primary);
-		color: var(--wp--preset--color--background, $primarytext);
-
-		&.disabled,
-		&:disabled,
-		&:disabled[disabled],
-		&.disabled:hover,
-		&:disabled:hover,
-		&:disabled[disabled]:hover {
-			background-color: var(--wp--preset--color--foreground, $primary);
-			color: var(--wp--preset--color--background, $primarytext);
-		}
-	}
-
-	// Shop page
-
+	// Style the 'Showing A-B of X results' text.
 	.woocommerce-result-count {
 		margin-top: 0;
-		font-size: 0.9rem;
 	}
 
-	.woocommerce-ordering {
-		margin-top: -0.2rem;
-		margin-bottom: 3rem;
-
-		select {
-			padding: 0.2rem 0 0.2rem 0.5rem;
-		}
+	// The 'order by' dropdown on the Shop page is rather tiny unless the font size is increased.
+	select.orderby {
+		font-size: var(--wp--preset--font-size--medium);
 	}
 
 	// Products.
 	ul.products {
 
 		padding-inline-start: 0;
+		display: flex;
+		align-items: stretch;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		@media only screen and (max-width: 768px) {
+			justify-content: space-between;
+		}
 
 		li.product {
 			list-style: none;
 			margin-top: var(--wp--style--block-gap);
 			text-align: center;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			align-items: flex-start;
 
 			a.woocommerce-loop-product__link {
 				text-decoration: none;
 				display: block;
+				border: 0;
 			}
 
 			h2.woocommerce-loop-product__title {
-				color: var(--wp--preset--color--primary);
+				color: var(--wp--preset--color--contrast);
 				font-family: var(--wp--preset--font-family--system-font);
 				text-decoration: none;
 				margin-bottom: 0;
 			}
 
-			a.add_to_cart_button {
-				padding: 0.8rem 2.7rem;
+			h2.woocommerce-loop-category__title {
+				font-size: revert;
+			}
+
+			// Add to cart/Select options/Read more buttons.
+			a.button {
+				padding: 0.8rem 10%;
+				margin-left: auto;
+				margin-right: auto;
 
 				&.loading {
 					opacity: 0.5;
 				}
 			}
 
+			// View cart link.
+			a.added_to_cart {
+				margin: 1rem auto;
+			}
+
 		}
 	}
 
+	// Position page numbers under list of products horizontally in the centre of the page.
 	ul.page-numbers {
 		text-align: center;
 	}
+
+	// On sale badge.
+	span.onsale {
+		top: -1rem;
+		right: -1rem;
+		position: absolute;
+		background: var(--wp--preset--color--tertiary);
+		color: var(--wp--preset--color--contrast);
+		border-radius: 2rem;
+		line-height: 2.6rem;
+		font-size: 0.8rem;
+		padding: 0 0.5rem 0 0.5rem;
+	}
+
+	/*
+		Single product page.
+	 */
 
 	div.product {
 		position: relative;
@@ -323,6 +305,15 @@ $tt2-gray: #f7f7f7;
 			top: -1rem;
 			width: 1.8rem;
 			z-index: 1;
+		}
+
+		// How price gets displayed
+		.entry-summary {
+			.woocommerce-Price-amount,
+			del,
+			.price {
+				font-size: var(--wp--preset--font-size--large);
+			}
 		}
 
 		div.woocommerce-product-gallery {
@@ -363,7 +354,7 @@ $tt2-gray: #f7f7f7;
 			font-size: 1rem;
 
 			h1.product_title {
-				font-size: 2.5rem;
+				font-size: var(--wp--preset--font-size--huge);
 				margin: 0;
 			}
 
@@ -383,6 +374,25 @@ $tt2-gray: #f7f7f7;
 					font-size: 1em;
 				}
 			}
+
+			.quantity {
+				display: inline-block;
+			}
+		}
+
+		table.variations tr {
+
+			display: table-row;
+			margin-bottom: 0;
+			text-align: left;
+
+			td select {
+				margin: calc(var(--wp--style--block-gap) / 4) 0;
+			}
+		}
+
+		.single_variation_wrap {
+			margin-top: var(--wp--style--block-gap);
 		}
 
 		button[name="add-to-cart"],
@@ -421,8 +431,10 @@ $tt2-gray: #f7f7f7;
 		.related.products {
 			margin-top: 7rem;
 		}
+
 	}
 
+	// Description/Additional info/Reviews tabs.
 	.woocommerce-tabs {
 		padding-top: var(--wp--style--block-gap);
 
@@ -433,7 +445,8 @@ $tt2-gray: #f7f7f7;
 			border-bottom-color: #eae9eb;
 
 			li {
-				background: #eae9eb;
+				opacity: 0.5;
+				color: var(--wp--preset--color--contrast);
 				margin: 0;
 				padding: 0.5em 1em 0.5em 1em;
 				border-color: #eae9eb;
@@ -442,7 +455,6 @@ $tt2-gray: #f7f7f7;
 				float: left;
 				border-style: solid;
 				border-width: 1px;
-				border-left-color: var(--wp--preset--color--background);
 				font-weight: 600;
 				font-size: var(--wp--preset--font-size--medium);
 
@@ -452,22 +464,17 @@ $tt2-gray: #f7f7f7;
 				}
 
 				&.active {
-					box-shadow: 0 1px var(--wp--preset--color--background);
+					background: var(--wp--preset--color--tertiary);
+					color: var(--wp--preset--color--contrast);
+					opacity: 1;
 				}
 
 				a {
 					text-decoration: none;
+					color: var(--wp--preset--color--contrast);
 				}
 			}
 		}
-
-		// Moved from blocktheme.scss to retain full styling.
-		ul.tabs li.active {
-			// Style active tab in theme colors.
-			background: var(--wp--preset--color--background, $contentbg);
-			border-bottom-color: var(--wp--preset--color--background, $contentbg);
-		}
-
 
 		.woocommerce-Tabs-panel {
 			padding-top: var(--wp--style--block-gap);
@@ -477,13 +484,22 @@ $tt2-gray: #f7f7f7;
 			h2 {
 				display: none;
 			}
+
+			table.woocommerce-product-attributes {
+				text-align: left;
+			}
 		}
 	}
 
+	// Reviews tab.
 	.woocommerce-Reviews {
 		ol.commentlist {
 			list-style: none;
 			padding-left: 0;
+
+			li {
+				margin-bottom: var(--wp--style--block-gap);
+			}
 
 			img.avatar {
 				float: left;
@@ -494,7 +510,7 @@ $tt2-gray: #f7f7f7;
 			}
 
 			.comment-text {
-				display: inline-block;
+				display: flow-root;
 				padding-left: var(--wp--style--block-gap);
 
 				.star-rating {
@@ -515,7 +531,7 @@ $tt2-gray: #f7f7f7;
 			p.stars {
 				display: inline;
 				a::before {
-					color: var(--wp--preset--color--secondary);
+					color: var(--wp--preset--color--contrast);
 				}
 			}
 		}
@@ -532,7 +548,7 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 
-
+	// Rating: show stars instead of 1, 2, 3, 4, 5.
 	.star-rating {
 		overflow: hidden;
 		position: relative;
@@ -540,7 +556,8 @@ $tt2-gray: #f7f7f7;
 		line-height: 1;
 		width: 5.4rem;
 		font-family: star;
-		color: var(--wp--preset--color--secondary);
+		font-style: normal;
+		color: var(--wp--preset--color--contrast);
 		margin: 1rem auto 0.7rem auto;
 
 		&::before {
@@ -570,6 +587,7 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 
+	// Rating stars.
 	p.stars {
 		margin-top: 0;
 
@@ -581,6 +599,7 @@ $tt2-gray: #f7f7f7;
 			display: inline-block;
 			text-decoration: none;
 			box-shadow: none;
+			font-style: normal;
 
 			&::before {
 				display: block;
@@ -635,199 +654,29 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 
-	.woocommerce-product-gallery__trigger {
-		position: absolute;
-		top: 1rem;
-		right: 1rem;
-		z-index: 99;
-	}
-
-	.return-to-shop {
-		a.button {
-			background-color: #fff;
-			color: var(--wp--preset--color--primary);
-			border: 2px solid var(--wp--preset--color--primary);
-			padding: 0.7rem 2rem;
-		}
-	}
-
+	// Highlights for specific info, e.g. on the My Account > Orders > Order X: Order ___ was placed on ____
 	mark {
-		background: var(--wp--preset--color--secondary);
-		color: initial;
+		font-weight: bold;
+		background-color: transparent;
 	}
+
 }
 
-/**
- * Form fields
- */
 .woocommerce-page {
-
-	form {
-
-		.input-text {
-			border: 1px solid var(--wp--preset--color--black);
-			border-radius: 0;
-		}
-
-		abbr.required {
-			text-decoration: none;
-		}
-
-		ul {
-			margin-top: 0;
-			margin-bottom: 0;
-			list-style-type: none;
-			padding-left: 0;
-		}
-	}
-
-	input[type="radio"][name="payment_method"],
-	input[type="radio"].shipping_method {
-		display: none;
-
-		& + label {
-
-			&::before {
-				content: "";
-				display: inline-block;
-				width: 1rem;
-				height: 1rem;
-				border: 2px solid var(--wp--preset--color--black);
-				background: var(--wp--preset--color--white);
-				margin-left: 4px;
-				margin-right: 1.2rem;
-				border-radius: 100%;
-				transform: translateY(0.2rem);
-			}
-		}
-
-		& ~ .payment_box {
-			padding-left: 3rem;
-			margin-top: 1rem;
-		}
-
-		&:checked + label {
-
-			&::before {
-				background: radial-gradient(circle at center, black 45%, white 0);
-			}
-		}
-	}
-
-	label.woocommerce-form__label-for-checkbox {
-		font-weight: normal;
-		cursor: pointer;
-
-		span {
-
-			&::before {
-				content: "";
-				display: inline-block;
-				height: 1rem;
-				width: 1rem;
-				border: 2px solid var(--wp--preset--color--black);
-				background: var(--wp--preset--color--white);
-				margin-right: 0.5rem;
-				transform: translateY(0.2rem);
-			}
-		}
-
-		input[type="checkbox"] {
-			display: none;
-		}
-
-		input[type="checkbox"]:checked + span::before {
-			background: var(--wp--preset--color--black);
-			box-shadow: inset 0.2rem 0.2rem var(--wp--preset--color--white), inset -0.2rem -0.2rem var(--wp--preset--color--white);
-		}
-	}
-
-	table.shop_table_responsive {
-		text-align: left;
-
-		th,
-		td {
-			font-size: var(--wp--preset--font-size--small);
-			font-weight: normal;
-		}
-
-		th {
-			padding-bottom: 1rem;
-		}
-
-		tbody {
-
-			tr {
-				border-top: 1px solid var(--wp--preset--color--black);
-			}
-
-			td {
-				a.button,
-				button {
-					margin-bottom: 1rem;
-					border: none;
-					background: #ebe9eb;
-					color: var(--wp--preset--color--black);
-					padding: 0.5rem 1rem 0.5rem 1rem;
-
-					&:hover,
-					&:visited {
-						color: var(--wp--preset--color--black);
-					}
-				}
-
-				&.woocommerce-orders-table__cell-order-actions {
-					a.button {
-						display: block;
-					}
-				}
-			}
-		}
-	}
-
-	table.shop_table,
-	table.shop_table_responsive {
-		tbody {
-			.product-name {
-				a:not(:hover) {
-					text-decoration: none;
-				}
-
-				a:hover {
-					text-decoration: underline;
-					text-decoration-thickness: 1px;
-				}
-
-				.variation {
-					dt {
-						font-style: italic;
-						margin-right: 0.25rem;
-						float: left;
-					}
-
-					dd {
-						font-style: normal;
-
-						a {
-							font-style: normal;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	/*
-	 * Cart / Checkout
-	 */
 	.woocommerce-cart-form {
 
-		#coupon_code,
-		.actions .button {
-			height: auto;
-			margin-right: 0;
+		// Make coupon code input less ginormous.
+		#coupon_code {
+			padding: 0 1rem;
 		}
 
+		.actions {
+			button.button {
+				height: initial;
+			}
+		}
+
+		// Cart table, aka review of cart items.
 		table.shop_table_responsive {
 
 			td,
@@ -857,13 +706,6 @@ $tt2-gray: #f7f7f7;
 				}
 			}
 
-			button[name="apply_coupon"],
-			button[name="update_cart"] {
-				padding: 1rem 2rem;
-				border: 2px solid #ebe9eb;
-				margin: 0;
-			}
-
 			.product-remove {
 				font-size: var(--wp--preset--font-size--large);
 
@@ -874,6 +716,7 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 
+	// Elements around "Proceed to Checkout" button.
 	.cart-collaterals {
 		margin-top: 1.5rem;
 
@@ -908,13 +751,177 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 
+	// Style the payment gateway selection input--improve the size of the click target, etc
+	input[type="radio"][name="payment_method"],
+	input[type="radio"].shipping_method {
+		display: none;
+
+		& + label {
+
+			&::before {
+				content: "";
+				display: inline-block;
+				width: 1rem;
+				height: 1rem;
+				border: 2px solid var(--wp--preset--color--black);
+				background: var(--wp--preset--color--white);
+				margin-left: 4px;
+				margin-right: 1.2rem;
+				border-radius: 100%;
+				transform: translateY(0.2rem);
+			}
+		}
+
+		& ~ .payment_box {
+			padding-left: 3rem;
+			margin-top: 1rem;
+		}
+
+		&:checked + label {
+
+			&::before {
+				background: radial-gradient(circle at center, black 45%, white 0);
+			}
+		}
+	}
+
+	// Style labels like "Remember me?" or "Ship to different address".
+	label.woocommerce-form__label-for-checkbox {
+		font-weight: normal;
+		cursor: pointer;
+
+		span {
+
+			&::before {
+				content: "";
+				display: inline-block;
+				height: 1rem;
+				width: 1rem;
+				border: 2px solid var(--wp--preset--color--black);
+				background: var(--wp--preset--color--white);
+				margin-right: 0.5rem;
+				transform: translateY(0.2rem);
+			}
+		}
+
+		input[type="checkbox"] {
+			display: none;
+		}
+
+		input[type="checkbox"]:checked + span::before {
+			background: var(--wp--preset--color--black);
+			box-shadow: inset 0.2rem 0.2rem var(--wp--preset--color--white), inset -0.2rem -0.2rem var(--wp--preset--color--white);
+		}
+	}
+
+	// Cart totals, Cart page table or Order list in My Account.
+	table.shop_table_responsive {
+		text-align: left;
+
+		th,
+		td {
+			font-size: var(--wp--preset--font-size--small);
+			font-weight: normal;
+		}
+
+		th {
+			padding-bottom: 1rem;
+		}
+
+		tbody {
+
+			tr {
+				border-top: 1px solid var(--wp--preset--color--contrast);
+			}
+
+			td {
+				a.button,
+				button {
+					margin-bottom: 1rem;
+					padding: 0.5rem 1rem 0.5rem 1rem;
+				}
+
+				&.woocommerce-orders-table__cell-order-actions {
+					a.button {
+						display: block;
+
+						@media only screen and (max-width: 768px) {
+							width: 50%;
+							margin-left: auto;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	table.shop_table,
+	table.shop_table_responsive {
+		tbody {
+			.product-name {
+
+				.variation {
+					dt {
+						font-style: italic;
+						margin-right: 0.25rem;
+						float: left;
+					}
+
+					dd {
+						font-style: normal;
+
+						a {
+							font-style: normal;
+						}
+					}
+				}
+			}
+		}
+
+		td,
+		th {
+			padding: 0.5rem;
+		}
+	}
+
+	// Improve styling of the 'Have a coupon?' section on the checkout page.
+	form.checkout_coupon {
+		padding-left: 1.5rem;
+		// 1.5 rem is to account for extra padding we added above.
+		width: calc(100% - 1.5rem);
+
+		.form-row {
+			button[name="apply_coupon"] {
+				margin-top: 0;
+			}
+		}
+	}
+
+	// Hide the dot to the left of list items as we style the checkboxes: Shipping method and Payment method selection.
+	ul.wc_payment_methods,
+	ul.woocommerce-shipping-methods {
+		margin-top: 0;
+		margin-bottom: 0;
+		list-style-type: none;
+		padding-left: 0;
+
+		input[type="radio"] {
+			margin-right: 0.6rem;
+		}
+
+		li.wc_payment_method {
+			margin-bottom: 1rem;
+		}
+	}
+
+	// Layout of the checkout: Billing vs Shipping address, Cart overview, etc.
 	.woocommerce-checkout,
 	&.woocommerce-order-pay {
 		display: table;
 
 		h3 {
 			font-family: inherit;
-			font-size: var(--wp--preset--font-size--normal);
+			font-size: var(--wp--preset--font-size--large);
 			font-weight: 700;
 		}
 
@@ -1004,49 +1011,16 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 
-	form.checkout_coupon {
-		background: $tt2-gray;
-		padding-left: 1.5rem;
-		float: left;
-		// 1.5 rem is to account for extra padding we added above.
-		width: calc(100% - 1.5rem);
+	/*
+		Thank you page (after checkout).
+	 */
 
-		.form-row {
-			button[name="apply_coupon"] {
-				margin-top: 0;
-			}
-		}
-	}
-
-	ul.wc_payment_methods,
-	ul.woocommerce-shipping-methods {
-		margin-top: 0;
-		margin-bottom: 0;
-		list-style-type: none;
-		padding-left: 0;
-
-		input[type="radio"] {
-			margin-right: 0.6rem;
-		}
-
-		li.wc_payment_method {
-			margin-bottom: 1rem;
-		}
-	}
-
-	.woocommerce-thankyou-order-received {
-		margin-top: 0;
-	}
-
-	.woocommerce-thankyou-order-received,
-	h2.woocommerce-column__title {
-		font-family: var(--wp--preset--font-family--source-serif-pro);
-	}
-
+	// Adds a tiny bit of vertical spacing on the Thank you (after checkout) page.
 	.woocommerce-order > * {
 		margin-bottom: var(--wp--style--block-gap);
 	}
 
+	// Improves the presentation of order overview (order #, date, email, etc, not the line items) on the Thank you page.
 	ul.woocommerce-order-overview {
 
 		li {
@@ -1060,6 +1034,7 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 
+	// Bottom section of the Thank you page---customer details: align, add border, make it look nice.
 	.woocommerce-customer-details {
 		address {
 			border: 1px solid var(--wp--preset--color--black);
@@ -1087,6 +1062,7 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 
+	// Better styling for Order line items on the Thank you page: create a table and align it to the left side.
 	.woocommerce-table--order-details {
 		border: 1px solid var(--wp--preset--color--black);
 
@@ -1104,6 +1080,60 @@ $tt2-gray: #f7f7f7;
 	}
 }
 
+/*
+	My Account
+ */
+
+.woocommerce-account {
+
+	// Make sure the floated content of My Account section doesn't overlap with the footer.
+	.woocommerce {
+		overflow: auto;
+
+		table.woocommerce-table--order-downloads,
+		table.woocommerce-MyAccount-orders {
+			thead tr {
+				border-top: 2px solid var(--wp--preset--color--contrast);
+
+				span {
+					font-weight: bold;
+				}
+
+			}
+
+			tbody a.button {
+				margin: calc(var(--wp--style--block-gap) / 6) 0;
+			}
+		}
+
+		.woocommerce-MyAccount-navigation li {
+			&.is-active a {
+				&::before {
+					content: "> ";
+				}
+			}
+
+			a {
+				text-decoration: initial;
+
+				&:hover {
+					text-decoration: initial;
+				}
+			}
+		}
+
+
+	}
+
+	// Make the Log in form on My Account page less wide.
+	.woocommerce-form-login {
+		max-width: 516px;
+		margin: 0 auto;
+	}
+
+}
+
+// TODO: This could look nicer.
 .select2-container {
 
 	.select2-selection,
@@ -1122,83 +1152,12 @@ $tt2-gray: #f7f7f7;
 	}
 }
 
-/**
- * Account section
- */
-.woocommerce-account {
 
-	.woocommerce-MyAccount-navigation {
-
-		li {
-
-			a {
-				box-shadow: none;
-			}
-
-			&.is-active {
-
-				a {
-					color: var(--wp--preset--color--primary);
-				}
-			}
-		}
-	}
-
-	table.shop_table_responsive.my_account_orders th {
-		padding-top: 0;
-	}
-
-	.woocommerce-form-login {
-		max-width: 516px;
-		margin: 0 auto;
-	}
-}
-
-.wp-block-search {
-	.wp-block-search__label {
-		font-weight: normal;
-	}
-	.wp-block-search__input {
-		padding: 0.9rem 1.1rem;
-		border: 1px solid var(--wp--preset--color--black);
-	}
-	.wp-block-search__button {
-		padding: 1rem 1.2rem;
-	}
-}
-
-.wc-block-product-search {
-	form {
-		.wc-block-product-search__fields {
-			display: flex;
-			flex: auto;
-			flex-wrap: nowrap;
-			max-width: 100%;
-
-			.wc-block-product-search__field {
-				padding: 0.9rem 1.1rem;
-				flex-grow: 1;
-				border: 1px solid var(--wp--preset--color--black);
-				font-size: inherit;
-				font-family: inherit;
-			}
-
-			.wc-block-product-search__button {
-				display: flex;
-				background-color: var(--wp--preset--color--primary);
-				color: #fff;
-				border: 1px solid var(--wp--preset--color--black);
-				padding: 1rem 1.2rem;
-				margin: 0 0 0 0.7rem;
-			}
-		}
-	}
-}
-
-.theme-twentytwentytwo .woocommerce-store-notice {
-	color: var(--wp--preset--color--black);
+// Store-wide notice
+.theme-twentytwentythree .woocommerce-store-notice {
+	color: black;
 	border-top: 2px solid var(--wp--preset--color--primary);
-	background: $tt2-gray;
+	background: lightgray;
 	padding: 2rem;
 	position: fixed;
 	bottom: 0;
