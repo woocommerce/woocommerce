@@ -10,8 +10,9 @@ import qs from 'qs';
 /**
  * Internal dependencies
  */
-import { waitUntilElementTopNotChange } from '../utils';
+import { observePositionChange, waitUntilElementTopNotChange } from '../utils';
 import { getTourConfig } from './get-config';
+import { scrollPopperToVisibleAreaIfNeeded } from './utils';
 
 const WCAddonsTour = () => {
 	const [ showTour, setShowTour ] = useState( false );
@@ -78,6 +79,36 @@ const WCAddonsTour = () => {
 		// only run once
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
+
+	useEffect( () => {
+		if ( showTour ) {
+			function showPopper() {
+				const tourKitElement = document.querySelector(
+					'.tour-kit-frame__container'
+				);
+				if ( tourKitElement ) {
+					scrollPopperToVisibleAreaIfNeeded(
+						tourKitElement.getBoundingClientRect()
+					);
+				}
+			}
+
+			// In a rare case, admin notices might load before observe is added below (moving `.wc-addons-wrap`).
+			// In such a case, if Tour is shown before this effect is called, it might not be position correctly.
+			// Updating popper's position here, ensures it's always visible.
+			const timeoutId = setTimeout( showPopper, 500 );
+
+			const intervalId = observePositionChange(
+				'.wc-addons-wrap',
+				showPopper,
+				150
+			);
+			return () => {
+				clearTimeout( timeoutId );
+				clearInterval( intervalId );
+			};
+		}
+	}, [ showTour ] );
 
 	if ( ! showTour || ! tourConfig ) {
 		return null;

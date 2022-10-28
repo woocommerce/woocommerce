@@ -19,6 +19,26 @@ export const waitUntilElementTopNotChange = (
 	return intervalId;
 };
 
+// Observer position changes of an element
+export const observePositionChange = (
+	selector: string,
+	callback: () => void,
+	pollMs: number
+) => {
+	const initialElement = document.querySelector(
+		selector
+	) as HTMLElement | null;
+	let lastInitialElementTop = initialElement?.offsetTop;
+
+	return setInterval( () => {
+		const top = initialElement?.offsetTop;
+		if ( lastInitialElementTop !== top ) {
+			callback();
+		}
+		lastInitialElementTop = top;
+	}, pollMs );
+};
+
 // Overwrite the default behavior of click event for the "Enable guided mode" button
 export const bindEnableGuideModeClickEvent = (
 	onClick: EventListenerOrEventListenerObject
