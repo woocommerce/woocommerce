@@ -283,16 +283,6 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		onChangeDebounceWait
 	);
 
-	function change( newInputString: string ) {
-		debouncedUpdateStateWithNewInputString( newInputString, true );
-	}
-
-	function blur() {
-		if ( onBlur ) {
-			onBlur();
-		}
-	}
-
 	function focusInputControl() {
 		if ( inputControl.current ) {
 			inputControl.current.focus();
@@ -319,8 +309,8 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			focusOnMount={ false }
 			// @ts-expect-error `onToggle` does exist.
 			onToggle={ ( willOpen ) => {
-				if ( ! willOpen ) {
-					blur();
+				if ( ! willOpen && typeof onBlur === 'function' ) {
+					onBlur();
 				}
 			} }
 			renderToggle={ ( { isOpen, onToggle } ) => (
@@ -330,7 +320,12 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 						ref={ inputControl }
 						disabled={ disabled }
 						value={ inputString }
-						onChange={ change }
+						onChange={ ( newInputString: string ) =>
+							debouncedUpdateStateWithNewInputString(
+								newInputString,
+								true
+							)
+						}
 						onBlur={ (
 							event: React.FocusEvent< HTMLInputElement >
 						) => {
