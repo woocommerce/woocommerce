@@ -55,7 +55,9 @@ function wc_get_screen_ids() {
 		}
 	}
 
+	/* phpcs:disable */
 	return apply_filters( 'woocommerce_screen_ids', $screen_ids );
+	/* phpcs: enable */
 }
 
 /**
@@ -107,7 +109,9 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 		$valid_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status NOT IN ( 'pending', 'trash', 'future', 'auto-draft' )  AND post_name = %s LIMIT 1;", $slug ) );
 	}
 
+	/* phpcs:disable */
 	$valid_page_found = apply_filters( 'woocommerce_create_page_id', $valid_page_found, $slug, $page_content );
+	/* phpcs: enable */
 
 	if ( $valid_page_found ) {
 		if ( $option ) {
@@ -145,7 +149,9 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 		);
 		$page_id   = wp_insert_post( $page_data );
 
+		/* phpcs:disable */
 		do_action( 'woocommerce_page_created', $page_id, $page_data );
+		/* phpcs: enable */
 	}
 
 	if ( $option ) {
@@ -287,7 +293,9 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
  */
 function wc_save_order_items( $order_id, $items ) {
 	// Allow other plugins to check change in order items before they are saved.
+	/* phpcs:disable */
 	do_action( 'woocommerce_before_save_order_items', $order_id, $items );
+	/* phpcs: enable */
 
 	$qty_change_order_notes = array();
 	$order                  = wc_get_order( $order_id );
@@ -361,7 +369,9 @@ function wc_save_order_items( $order_id, $items ) {
 			}
 
 			// Allow other plugins to change item object before it is saved.
+			/* phpcs:disable */
 			do_action( 'woocommerce_before_save_order_item', $item );
+			/* phpcs: enable */
 
 			$item->save();
 
@@ -438,7 +448,9 @@ function wc_save_order_items( $order_id, $items ) {
 	$order->calculate_totals( false );
 
 	// Inform other plugins that the items have been saved.
+	/* phpcs:disable */
 	do_action( 'woocommerce_saved_order_items', $order_id, $items );
+	/* phpcs: enable */
 }
 
 /**
@@ -472,9 +484,11 @@ function wc_render_invalid_variation_notice( $product_object ) {
 	global $wpdb;
 
 	// Give ability for extensions to hide this notice.
+	/* phpcs:disable */
 	if ( ! apply_filters( 'woocommerce_show_invalid_variations_notice', true, $product_object ) ) {
 		return;
 	}
+	/* phpcs: enable */
 
 	$variation_ids = $product_object ? $product_object->get_children() : array();
 
