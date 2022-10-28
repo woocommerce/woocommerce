@@ -5,6 +5,7 @@ import { Logger } from 'cli-core/src/logger';
 import { join } from 'path';
 import { cloneRepo, generateDiff } from 'cli-core/src/git';
 import { readFile } from 'fs/promises';
+import { execSync } from 'child_process';
 
 /**
  * Internal dependencies
@@ -20,7 +21,8 @@ export const scanForChanges = async (
 	sinceVersion: string,
 	skipSchemaCheck: boolean,
 	source: string,
-	base: string
+	base: string,
+	outputStyle: string
 ) => {
 	Logger.startTask( `Making temporary clone of ${ source }...` );
 	const tmpRepoPath = await cloneRepo( source );
@@ -37,10 +39,17 @@ export const scanForChanges = async (
 		Logger.error
 	);
 
+	// Only checkout the compare version if we're in CLI mode.
+	if ( outputStyle === 'cli' ) {
+		execSync( `cd ${ tmpRepoPath } && git checkout ${ compareVersion }`, {
+			stdio: 'pipe',
+		} );
+	}
+
 	const pluginPath = join( tmpRepoPath, 'plugins/woocommerce' );
 
 	Logger.startTask( 'Detecting hook changes...' );
-	const hookChanges = scanForHookChanges( diff, sinceVersion );
+	const hookChanges = scanForHookChanges( diff, sinceVersion, tmpRepoPath );
 	Logger.endTask();
 
 	Logger.startTask( 'Detecting template changes...' );
