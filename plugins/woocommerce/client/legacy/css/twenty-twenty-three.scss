@@ -423,7 +423,6 @@
 				float: left;
 				border-style: solid;
 				border-width: 1px;
-				border-left-color: var(--wp--preset--color--background);
 				font-weight: 600;
 				font-size: var(--wp--preset--font-size--medium);
 
@@ -433,7 +432,6 @@
 				}
 
 				&.active {
-					box-shadow: 0 1px var(--wp--preset--color--background);
 					background: var(--wp--preset--color--tertiary);
 					color: var(--wp--preset--color--contrast);
 					opacity: 1;
