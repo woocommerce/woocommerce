@@ -125,7 +125,9 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	function maybeForceTime( momentDate: Moment ): Moment {
 		if ( ! isDateOnlyPicker ) return momentDate;
 
-		const updatedMomentDate = momentDate.clone();
+		// We want to set to the start/end of the local time, so
+		// we need to put our Moment instance into "local" mode
+		const updatedMomentDate = momentDate.clone().local();
 
 		if ( timeForDateOnly === 'start-of-day' ) {
 			updatedMomentDate.startOf( 'day' );
@@ -174,11 +176,11 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	// - [useDebounce hook loses function calls if the dependency changes](https://github.com/WordPress/gutenberg/issues/35505)
 	// - [useMemoOne and useCallbackOne](https://github.com/alexreardon/use-memo-one)
 
-	const onChangePropFunctionRef = useRef<
+	const onChangeRef = useRef<
 		DateTimePickerControlOnChangeHandler | undefined
 	>();
 	useLayoutEffect( () => {
-		onChangePropFunctionRef.current = onChange;
+		onChangeRef.current = onChange;
 	}, [ onChange ] );
 
 	function updateInputString( dateTime: Moment ) {
@@ -194,14 +196,14 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			? formatMomentIso( dateTime )
 			: dateTime.creationData().input?.toString() || '';
 
-		if ( typeof onChangePropFunctionRef.current === 'function' ) {
-			onChangePropFunctionRef.current( valueToSend, dateTime.isValid() );
+		if ( typeof onChangeRef.current === 'function' ) {
+			onChangeRef.current( valueToSend, dateTime.isValid() );
 		}
 	}
 
-	function inputStringChangeHandlerFunction(
+	function updateStateWithNewInputString(
 		newInputString: string,
-		fireOnChange: boolean
+		maybeFireOnChange: boolean
 	) {
 		if ( ! isMounted.current ) return;
 
@@ -213,39 +215,32 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			setLastValidDate( newDateTime );
 		}
 
-		if (
-			fireOnChange &&
-			typeof onChangePropFunctionRef.current === 'function'
-		) {
-			if ( newDateTime.utc().isSame( parseMomentIso( currentDate ) ) )
-				return;
+		// we don't want to reformat what the user manually entered in,
+		// so we just set it directly
+		setInputString( newInputString );
 
-			const valueToSend = isValid
-				? formatMomentIso( newDateTime )
-				: newInputString;
-
-			onChangePropFunctionRef.current( valueToSend, isValid );
+		if ( maybeFireOnChange && ! newDateTime.isSame( lastValidDate ) ) {
+			callOnChange( newDateTime );
 		}
 	}
 
-	const inputStringChangeHandlerFunctionRef = useRef<
+	const updateStateWithNewInputStringRef = useRef<
 		( newInputString: string, fireOnChange: boolean ) => void
-	>( inputStringChangeHandlerFunction );
+	>( updateStateWithNewInputString );
 	// whenever currentDate or timeForDateOnly changes, we need to reset the ref to inputStringChangeHandlerFunction
 	// so that we are using the most current values inside of it
 	useEffect( () => {
-		inputStringChangeHandlerFunctionRef.current =
-			inputStringChangeHandlerFunction;
+		updateStateWithNewInputStringRef.current =
+			updateStateWithNewInputString;
 	}, [ currentDate, timeForDateOnly ] );
 
-	const debouncedInputStringChangeHandler = useDebounce(
-		inputStringChangeHandlerFunctionRef.current,
+	const debouncedUpdateStateWithNewInputString = useDebounce(
+		updateStateWithNewInputStringRef.current,
 		onChangeDebounceWait
 	);
 
 	function change( newInputString: string ) {
-		setInputString( newInputString );
-		debouncedInputStringChangeHandler( newInputString, true );
+		debouncedUpdateStateWithNewInputString( newInputString, true );
 	}
 
 	function blur() {
@@ -265,13 +260,14 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		assumeLocalTime: boolean,
 		maybeFireOnChange: boolean
 	) {
-		const newDateTime = parseMomentIso(
+		let newDateTime = parseMomentIso(
 			newDateTimeIsoString,
 			assumeLocalTime
 		);
 		const isValid = newDateTime.isValid();
 
 		if ( isValid ) {
+			newDateTime = maybeForceTime( newDateTime );
 			setLastValidDate( newDateTime );
 		}
 
