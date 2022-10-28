@@ -153,6 +153,24 @@ export const getTourConfig = ( {
 			},
 			{
 				referenceElements: {
+					desktop: '.marketplace-header__search-form',
+				},
+				focusElement: {
+					desktop: '.marketplace-header__search-form',
+				},
+				meta: {
+					name: 'wc-addons-search',
+					heading: __( 'Find exactly what you need', 'woocommerce' ),
+					descriptions: {
+						desktop: __(
+							'You can use the search box to find specific products in the Marketplace.',
+							'woocommerce'
+						),
+					},
+				},
+			},
+			{
+				referenceElements: {
 					desktop: '#marketplace-current-section-dropdown',
 				},
 				focusElement: {
@@ -160,11 +178,11 @@ export const getTourConfig = ( {
 				},
 				meta: {
 					name: 'wc-addons-categories',
-					heading: __( 'Find exactly what you need', 'woocommerce' ),
+					heading: __( 'Browse for new ideas', 'woocommerce' ),
 					descriptions: {
 						desktop: createInterpolateElement(
 							__(
-								'You can use the search box to find specific products or browse all available products by category.<br/><br/>The Featured category is regularly updated with new and noteworthy products.',
+								'Or browse all available products by category.<br/><br/>The Featured category is regularly updated with new and noteworthy products.',
 								'woocommerce'
 							),
 							{
