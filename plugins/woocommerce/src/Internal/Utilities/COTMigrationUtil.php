@@ -160,7 +160,7 @@ class COTMigrationUtil {
 	 *
 	 * @return string|null Type of the order.
 	 */
-	public function get_order_type( $order_id ) : ?string {
+	public function get_order_type( $order_id ) {
 		$order_id         = $this->get_post_or_order_id( $order_id );
 		$order_data_store = \WC_Data_Store::load( 'order' );
 		return $order_data_store->get_order_type( $order_id );
