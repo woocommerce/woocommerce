@@ -248,14 +248,6 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		debouncedInputStringChangeHandler( newInputString, true );
 	}
 
-	function changeImmediate( newInputString: string, fireOnChange: boolean ) {
-		setInputString( newInputString );
-		inputStringChangeHandlerFunctionRef.current(
-			newInputString,
-			fireOnChange
-		);
-	}
-
 	function blur() {
 		if ( onBlur ) {
 			onBlur();
