@@ -241,6 +241,7 @@
 			a.woocommerce-loop-product__link {
 				text-decoration: none;
 				display: block;
+				border: 0;
 			}
 
 			h2.woocommerce-loop-product__title {
@@ -857,14 +858,6 @@
 	table.shop_table_responsive {
 		tbody {
 			.product-name {
-				a:not(:hover) {
-					text-decoration: none;
-				}
-
-				a:hover {
-					text-decoration: underline;
-					text-decoration-thickness: 1px;
-				}
 
 				.variation {
 					dt {
@@ -1111,6 +1104,24 @@
 				margin: calc(var(--wp--style--block-gap) / 6) 0;
 			}
 		}
+
+		.woocommerce-MyAccount-navigation li {
+			&.is-active a {
+				&::before {
+					content: "> ";
+				}
+			}
+
+			a {
+				text-decoration: initial;
+
+				&:hover {
+					text-decoration: initial;
+				}
+			}
+		}
+
+
 	}
 
 	// Make the Log in form on My Account page less wide.
