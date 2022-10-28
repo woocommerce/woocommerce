@@ -30,7 +30,7 @@ export const default12HourDateTimeFormat = 'm/d/Y h:i a';
 export const default24HourDateTimeFormat = 'm/d/Y H:i';
 
 export type DateTimePickerControlOnChangeHandler = (
-	date: string,
+	dateTimeIsoString: string,
 	isValid: boolean
 ) => void;
 
@@ -181,6 +181,24 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		onChangePropFunctionRef.current = onChange;
 	}, [ onChange ] );
 
+	function updateInputString( dateTime: Moment ) {
+		const newInputString = dateTime.isValid()
+			? formatMoment( dateTime )
+			: dateTime.creationData().input?.toString() || '';
+
+		setInputString( newInputString );
+	}
+
+	function callOnChange( dateTime: Moment ) {
+		const valueToSend = dateTime.isValid()
+			? formatMomentIso( dateTime )
+			: dateTime.creationData().input?.toString() || '';
+
+		if ( typeof onChangePropFunctionRef.current === 'function' ) {
+			onChangePropFunctionRef.current( valueToSend, dateTime.isValid() );
+		}
+	}
+
 	function inputStringChangeHandlerFunction(
 		newInputString: string,
 		fireOnChange: boolean
@@ -199,22 +217,26 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			fireOnChange &&
 			typeof onChangePropFunctionRef.current === 'function'
 		) {
-			onChangePropFunctionRef.current(
-				isValid ? formatMomentIso( newDateTime ) : newInputString,
-				isValid
-			);
+			if ( newDateTime.utc().isSame( parseMomentIso( currentDate ) ) )
+				return;
+
+			const valueToSend = isValid
+				? formatMomentIso( newDateTime )
+				: newInputString;
+
+			onChangePropFunctionRef.current( valueToSend, isValid );
 		}
 	}
 
 	const inputStringChangeHandlerFunctionRef = useRef<
 		( newInputString: string, fireOnChange: boolean ) => void
 	>( inputStringChangeHandlerFunction );
-	// whenever forceTimeTo changes, we need to reset the ref to inputStringChangeHandlerFunction
-	// so that we are using the most current forceTimeTo value inside of it
+	// whenever currentDate or timeForDateOnly changes, we need to reset the ref to inputStringChangeHandlerFunction
+	// so that we are using the most current values inside of it
 	useEffect( () => {
 		inputStringChangeHandlerFunctionRef.current =
 			inputStringChangeHandlerFunction;
-	}, [ timeForDateOnly ] );
+	}, [ currentDate, timeForDateOnly ] );
 
 	const debouncedInputStringChangeHandler = useDebounce(
 		inputStringChangeHandlerFunctionRef.current,
@@ -248,17 +270,23 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 
 	const isInitialUpdate = useRef( true );
 	useEffect( () => {
-		const fireOnChange = ! isInitialUpdate.current;
-		if ( isInitialUpdate.current ) {
-			isInitialUpdate.current = false;
+		const newDateTime = parseMomentIso( currentDate );
+		const isValid = newDateTime.isValid();
+		const fireOnChange =
+			! isInitialUpdate.current && ! newDateTime.isSame( lastValidDate );
+
+		if ( isValid ) {
+			setLastValidDate( newDateTime );
 		}
 
-		const newDate = parseMomentIso( currentDate );
+		updateInputString( newDateTime );
 
-		if ( newDate.isValid() ) {
-			changeImmediate( formatMoment( newDate ), fireOnChange );
-		} else {
-			changeImmediate( currentDate || '', fireOnChange );
+		if ( fireOnChange ) {
+			callOnChange( newDateTime );
+		}
+
+		if ( isInitialUpdate.current ) {
+			isInitialUpdate.current = false;
 		}
 	}, [ currentDate, displayFormat, timeForDateOnly ] );
 
