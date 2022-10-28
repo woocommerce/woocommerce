@@ -76,13 +76,25 @@
 
 .wc-block-components-price-slider__range-input-wrapper {
 	@include reset;
-	background: $gray-300;
+	background: transparent;
 	border-radius: 4px;
 	clear: both;
 	flex-grow: 1;
 	height: 4px;
 	margin: 15px 0;
 	position: relative;
+
+	&::before {
+		content: "";
+		position: absolute;
+		top: 0;
+		right: 0;
+		left: 0;
+		bottom: 0;
+		background: currentColor;
+		opacity: 0.2;
+	}
+
 	&.is-loading {
 		@include placeholder();
 		height: em(9px);
