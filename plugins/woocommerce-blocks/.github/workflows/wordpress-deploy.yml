@@ -1,7 +1,7 @@
 name: Deploy to WordPress.org
 on:
     release:
-        types: [published]
+        types: [released]
 jobs:
     tag:
         name: New Release
