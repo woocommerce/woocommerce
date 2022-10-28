@@ -39,4 +39,12 @@ class AllProducts extends AbstractBlock {
 	protected function hydrate_from_api() {
 		$this->asset_data_registry->hydrate_api_request( '/wc/store/v1/cart' );
 	}
+
+	/**
+	 * It is necessary to register and enqueue assets during the render phase because we want to load assets only if the block has the content.
+	 */
+	protected function register_block_type_assets() {
+		parent::register_block_type_assets();
+		$this->register_chunk_translations( [ $this->block_name ] );
+	}
 }
