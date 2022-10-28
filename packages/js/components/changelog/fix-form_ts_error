@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Augment forwardRef type within Form component to fix Form component type.
