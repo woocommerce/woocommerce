@@ -77,9 +77,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	} );
 
 	const [ inputString, setInputString ] = useState( '' );
-	const [ lastValidDate, setLastValidDate ] = useState< Moment | null >(
-		null
-	);
+	const lastValidDate = useRef< Moment | null >( null );
 
 	const displayFormat = ( () => {
 		if ( dateTimeFormat ) {
@@ -207,6 +205,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		isManuallyTypedInput: boolean,
 		maybeFireOnChange: boolean
 	) {
+		const previousLastValidDate = lastValidDate.current;
 		let newDateTime = isManuallyTypedInput
 			? parseMoment( newDateTimeString )
 			: parseMomentIso( newDateTimeString, isLocalTime );
@@ -214,7 +213,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 
 		if ( isValid ) {
 			newDateTime = maybeForceTime( newDateTime );
-			setLastValidDate( newDateTime );
+			lastValidDate.current = newDateTime;
 		}
 
 		if ( isManuallyTypedInput ) {
@@ -224,7 +223,10 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			setInputStringWithMoment( newDateTime );
 		}
 
-		if ( maybeFireOnChange && ! newDateTime.isSame( lastValidDate ) ) {
+		if (
+			maybeFireOnChange &&
+			! newDateTime.isSame( previousLastValidDate )
+		) {
 			callOnChange( newDateTime );
 		}
 	}
@@ -271,7 +273,8 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	const updateStateWithNewInputStringRef = useRef<
 		( newInputString: string, fireOnChange: boolean ) => void
 	>( updateStateWithNewInputString );
-	// whenever currentDate or timeForDateOnly changes, we need to reset the ref to inputStringChangeHandlerFunction
+	// whenever currentDate or timeForDateOnly changes,
+	// we need to reset the ref to inputStringChangeHandlerFunction
 	// so that we are using the most current values inside of it
 	useEffect( () => {
 		updateStateWithNewInputStringRef.current =
@@ -369,8 +372,8 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 				return (
 					<Picker
 						currentDate={
-							lastValidDate
-								? formatMomentIso( lastValidDate )
+							lastValidDate.current
+								? formatMomentIso( lastValidDate.current )
 								: undefined
 						}
 						onChange={ updateStateWithNewSelectedLocalDateTime }
