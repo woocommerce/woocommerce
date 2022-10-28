@@ -167,7 +167,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
-* Fix - false [#35371](https://github.com/woocommerce/woocommerce/pull/35371)
 * Fix - Fix (un)trashing of orders when using HPOS [#35125](https://github.com/woocommerce/woocommerce/pull/35125)
 * Fix - Check whether order has classname before returning. [#35207](https://github.com/woocommerce/woocommerce/pull/35207)
 * Fix - Add billing and shipping address indexes on order update. [#35121](https://github.com/woocommerce/woocommerce/pull/35121)
