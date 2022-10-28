@@ -116,6 +116,12 @@ const renderNotes = ( {
 	}
 
 	const notesArray = Object.keys( notes ).map( ( key ) => notes[ key ] );
+	const unreadNotesCount = notesArray.reduce( ( count, note ) => {
+		if ( ! note.is_read ) {
+			return count + 1;
+		}
+		return count;
+	}, 0 );
 
 	return (
 		<Card size="large">
@@ -125,7 +131,7 @@ const renderNotes = ( {
 						<Text size="20" lineHeight="28px" variant="title.small">
 							{ __( 'Inbox', 'woocommerce' ) }
 						</Text>
-						<Badge count={ notesArray.length } />
+						<Badge count={ unreadNotesCount } />
 					</div>
 					<EllipsisMenu
 						label={ __( 'Inbox Notes Options', 'woocommerce' ) }
