@@ -484,6 +484,10 @@
 			list-style: none;
 			padding-left: 0;
 
+			li {
+				margin-bottom: var(--wp--style--block-gap);
+			}
+
 			img.avatar {
 				float: left;
 			}
@@ -493,7 +497,7 @@
 			}
 
 			.comment-text {
-				display: inline-block;
+				display: flow-root;
 				padding-left: var(--wp--style--block-gap);
 
 				.star-rating {
