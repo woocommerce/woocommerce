@@ -183,7 +183,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		onChangeRef.current = onChange;
 	}, [ onChange ] );
 
-	function updateInputString( dateTime: Moment ) {
+	function setInputStringWithMoment( dateTime: Moment ) {
 		const newInputString = dateTime.isValid()
 			? formatMoment( dateTime )
 			: dateTime.creationData().input?.toString() || '';
@@ -201,13 +201,15 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		}
 	}
 
-	function updateStateWithNewInputString(
-		newInputString: string,
+	function updateState(
+		newDateTimeString: string,
+		isLocalTime: boolean,
+		isManuallyTypedInput: boolean,
 		maybeFireOnChange: boolean
 	) {
-		if ( ! isMounted.current ) return;
-
-		let newDateTime = parseMoment( newInputString );
+		let newDateTime = isManuallyTypedInput
+			? parseMoment( newDateTimeString )
+			: parseMomentIso( newDateTimeString, isLocalTime );
 		const isValid = newDateTime.isValid();
 
 		if ( isValid ) {
@@ -215,13 +217,55 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			setLastValidDate( newDateTime );
 		}
 
-		// we don't want to reformat what the user manually entered in,
-		// so we just set it directly
-		setInputString( newInputString );
+		if ( isManuallyTypedInput ) {
+			// We don't want to reformat what the user typed in
+			setInputString( newDateTimeString );
+		} else {
+			setInputStringWithMoment( newDateTime );
+		}
 
 		if ( maybeFireOnChange && ! newDateTime.isSame( lastValidDate ) ) {
 			callOnChange( newDateTime );
 		}
+	}
+
+	function updateStateWithNewDateTime(
+		newDateTimeIsoString: string,
+		assumeLocalTime: boolean,
+		maybeFireOnChange: boolean
+	) {
+		updateState(
+			newDateTimeIsoString,
+			assumeLocalTime,
+			false,
+			maybeFireOnChange
+		);
+	}
+
+	function updateStateWithNewCurrentDateProp(
+		newDateTimeIsoString: string,
+		maybeFireOnChange: boolean
+	) {
+		updateStateWithNewDateTime(
+			newDateTimeIsoString,
+			false,
+			maybeFireOnChange
+		);
+	}
+
+	function updateStateWithNewSelectedLocalDateTime(
+		newLocalDateTimeIsoString: string
+	) {
+		updateStateWithNewDateTime( newLocalDateTimeIsoString, true, true );
+	}
+
+	function updateStateWithNewInputString(
+		newInputString: string,
+		maybeFireOnChange: boolean
+	) {
+		if ( ! isMounted.current ) return;
+
+		updateState( newInputString, true, true, maybeFireOnChange );
 	}
 
 	const updateStateWithNewInputStringRef = useRef<
@@ -255,36 +299,14 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		}
 	}
 
-	function updateStateWithNewDateTime(
-		newDateTimeIsoString: string,
-		assumeLocalTime: boolean,
-		maybeFireOnChange: boolean
-	) {
-		let newDateTime = parseMomentIso(
-			newDateTimeIsoString,
-			assumeLocalTime
-		);
-		const isValid = newDateTime.isValid();
-
-		if ( isValid ) {
-			newDateTime = maybeForceTime( newDateTime );
-			setLastValidDate( newDateTime );
-		}
-
-		updateInputString( newDateTime );
-
-		if ( maybeFireOnChange && ! newDateTime.isSame( lastValidDate ) ) {
-			callOnChange( newDateTime );
-		}
-	}
-
 	const isInitialUpdate = useRef( true );
 	useEffect( () => {
-		updateStateWithNewDateTime(
+		updateStateWithNewCurrentDateProp(
 			currentDate || '',
-			false,
 			! isInitialUpdate.current
 		);
+
+		isInitialUpdate.current = false;
 	}, [ currentDate, displayFormat, timeForDateOnly ] );
 
 	return (
@@ -356,13 +378,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 								? formatMomentIso( lastValidDate )
 								: undefined
 						}
-						onChange={ ( localDateTimeIsoString: string ) => {
-							updateStateWithNewDateTime(
-								localDateTimeIsoString,
-								true,
-								true
-							);
-						} }
+						onChange={ updateStateWithNewSelectedLocalDateTime }
 						is12Hour={ is12HourPicker }
 					/>
 				);
