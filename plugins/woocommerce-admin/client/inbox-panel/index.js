@@ -99,6 +99,7 @@ const renderNotes = ( {
 	loadMoreNotes,
 	allNotesFetched,
 	notesHaveResolved,
+	unreadNotesCount,
 } ) => {
 	if ( isBatchUpdating ) {
 		return;
@@ -116,12 +117,6 @@ const renderNotes = ( {
 	}
 
 	const notesArray = Object.keys( notes ).map( ( key ) => notes[ key ] );
-	const unreadNotesCount = notesArray.reduce( ( count, note ) => {
-		if ( ! note.is_read ) {
-			return count + 1;
-		}
-		return count;
-	}, 0 );
 
 	return (
 		<Card size="large">
@@ -228,25 +223,35 @@ const InboxPanel = ( { showHeader = true } ) => {
 		};
 	}, [ noteDisplayQty ] );
 
-	const { isError, notes, notesHaveResolved, isBatchUpdating } = useSelect(
-		( select ) => {
-			const {
-				getNotes,
-				getNotesError,
-				isNotesRequesting,
-				hasFinishedResolution,
-			} = select( NOTES_STORE_NAME );
+	const {
+		isError,
+		notes,
+		notesHaveResolved,
+		isBatchUpdating,
+		unreadNotesCount,
+	} = useSelect( ( select ) => {
+		const {
+			getNotes,
+			getNotesError,
+			isNotesRequesting,
+			hasFinishedResolution,
+		} = select( NOTES_STORE_NAME );
 
-			return {
-				notes: getNotes( inboxQuery ),
-				isError: Boolean( getNotesError( 'getNotes', [ inboxQuery ] ) ),
-				isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
-				notesHaveResolved:
-					! isNotesRequesting( 'batchUpdateNotes' ) &&
-					hasFinishedResolution( 'getNotes', [ inboxQuery ] ),
-			};
-		}
-	);
+		return {
+			notes: getNotes( inboxQuery ),
+			unreadNotesCount: getNotes( {
+				...DEFAULT_INBOX_QUERY,
+				_fields: [ 'id' ],
+				is_read: false,
+				per_page: -1,
+			} ).length,
+			isError: Boolean( getNotesError( 'getNotes', [ inboxQuery ] ) ),
+			isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
+			notesHaveResolved:
+				! isNotesRequesting( 'batchUpdateNotes' ) &&
+				hasFinishedResolution( 'getNotes', [ inboxQuery ] ),
+		};
+	} );
 
 	useEffect( () => {
 		if ( notesHaveResolved && notes.length < noteDisplayQty ) {
@@ -398,6 +403,7 @@ const InboxPanel = ( { showHeader = true } ) => {
 							showHeader,
 							allNotesFetched,
 							notesHaveResolved,
+							unreadNotesCount,
 						} ) }
 				</Section>
 			</div>
