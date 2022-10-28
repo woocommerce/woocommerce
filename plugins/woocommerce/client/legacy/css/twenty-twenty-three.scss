@@ -298,7 +298,8 @@
 
 		.entry-summary {
 			.woocommerce-Price-amount,
-			del {
+			del,
+			.price {
 				font-size: var(--wp--preset--font-size--large);
 			}
 		}
