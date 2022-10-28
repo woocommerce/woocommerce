@@ -76,7 +76,7 @@ describe( 'ProductInventorySection', () => {
 		).toHaveClass( 'is-disabled' );
 	} );
 
-	it( 'should not render the manage stock section if inventory management is turned on', () => {
+	it( 'should not disable the manage stock section if inventory management is turned on', () => {
 		render(
 			<Form initialValues={ product }>
 				<ProductInventorySection />
@@ -84,8 +84,9 @@ describe( 'ProductInventorySection', () => {
 		);
 
 		expect(
-			screen.getByLabelText( 'Track quantity for this product' )
-		).toBeInTheDocument();
+			screen.getByText( 'Track quantity for this product' )
+				.previousSibling
+		).not.toHaveClass( 'is-disabled' );
 	} );
 
 	it( 'should render the quantity field when product stock is being managed', () => {
