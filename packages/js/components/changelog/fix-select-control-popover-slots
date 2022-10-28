@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add name to exported popover slot used to display SelectControl Menu, so it is only used for SelectControl menus.

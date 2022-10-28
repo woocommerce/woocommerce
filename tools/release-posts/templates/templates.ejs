@@ -12,11 +12,11 @@
         </th>
       </thead>
       <tbody>
-        
+
         <!-- for each template change (template / description) -->
         <% changes.templates.forEach((change) => { %>
           <tr>
-            <td><%= change %></td>
+            <td><%= change.filePath %></td>
           </tr>
         <% }) %>
       </tbody>

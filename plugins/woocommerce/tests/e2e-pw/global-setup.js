@@ -11,19 +11,6 @@ const adminPassword = ADMIN_PASSWORD ?? 'password';
 const customerUsername = CUSTOMER_USER ?? 'customer';
 const customerPassword = CUSTOMER_PASSWORD ?? 'password';
 
-const setupPermalinks = async ( adminPage, baseURL ) => {
-	console.log( 'Trying to setup permalinks!' );
-	await adminPage.goto( baseURL + '/wp-admin/options-permalink.php' );
-	await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
-		'Permalink Settings'
-	);
-	await adminPage.click( '#custom_selection' );
-	await adminPage.fill( '#permalink_structure', '/%postname%/' );
-	await adminPage.click( '#submit' );
-
-	console.log( 'Permalinks Set!' );
-}
-
 module.exports = async ( config ) => {
 	const { stateDir, baseURL, userAgent } = config.projects[ 0 ].use;
 
@@ -138,30 +125,6 @@ module.exports = async ( config ) => {
 	if ( ! customerKeyConfigured ) {
 		console.error(
 			'Cannot proceed e2e test, as we could not set the customer key. Please check if the test site has been setup correctly.'
-		);
-		process.exit( 1 );
-	}
-
-	// Ensure that permalinks are correctly setup since we can't set it up using wp-env when not using the default WP version.
-	// More info here: https://github.com/WordPress/gutenberg/issues/28201
-	let permalinkConfigured = false;
-	const permalinkRetries = 5;
-	for ( let i = 0; i < permalinkRetries; i++ ) {
-		try {
-			await setupPermalinks( adminPage, baseURL );
-			permalinkConfigured = true;
-			break;
-		} catch ( e ) {
-			console.log(
-				`Setting permalink failed, Retrying... ${ i }/${ permalinkRetries }`
-			);
-			console.log( e );
-		}
-	}
-
-	if ( ! permalinkConfigured ) {
-		console.error(
-			'Cannot proceed e2e test, as we could not setup permalinks. Please check if the test site has been setup correctly.'
 		);
 		process.exit( 1 );
 	}
