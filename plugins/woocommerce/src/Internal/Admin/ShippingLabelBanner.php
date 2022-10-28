@@ -82,7 +82,7 @@ class ShippingLabelBanner {
 	 * @param \WP_Post $post Current post object.
 	 */
 	public function add_meta_boxes( $post_type, $post ) {
-		if ( $post_type !== 'shop_order' ) {
+		if ( 'shop_order' !== $post_type ) {
 			return;
 		}
 		$order = wc_get_order( $post );
