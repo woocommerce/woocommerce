@@ -7780,3 +7780,21 @@ table.bar_chart {
 		}
 	}
 }
+
+#postdivrich.woocommerce-product-description {
+	margin-top: 20px;
+	margin-bottom: 0px;
+	
+	.wp-editor-tools {
+		background: none;
+		padding-top: 0px;
+		width: 100%;
+	}
+	.wp-editor-wrap {
+		margin: 6px 12px 0;
+	}
+	#post-status-info {
+		margin: 0px 12px 12px;
+		width: calc( 100% - 24px );
+	}
+}
