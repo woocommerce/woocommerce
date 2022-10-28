@@ -215,11 +215,20 @@
 	ul.products {
 
 		padding-inline-start: 0;
+		display: flex;
+		align-items: stretch;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: space-between;
 
 		li.product {
 			list-style: none;
 			margin-top: var(--wp--style--block-gap);
 			text-align: center;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			align-items: flex-start;
 
 			a.woocommerce-loop-product__link {
 				text-decoration: none;
@@ -239,6 +248,8 @@
 
 			a.add_to_cart_button {
 				padding: 0.8rem 2.7rem;
+				margin-left: auto;
+				margin-right: auto;
 
 				&.loading {
 					opacity: 0.5;
