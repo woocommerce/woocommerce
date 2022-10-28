@@ -72,6 +72,10 @@ class WC_Admin_Pointers {
 			return;
 		}
 
+		if ( wp_is_mobile() ) {
+			return; // Permit In-App Marketplace Tour on desktops only
+		}
+
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'wc-addons-tour', true );
 	}
 }
