@@ -1,5 +1,7 @@
 .woocommerce-create-attribute-term-modal {
-	min-width: 650px;
+	@mixin break-medium {
+		min-width: 650px;
+	}
 
 	&__buttons {
 		margin-top: $gap-larger;

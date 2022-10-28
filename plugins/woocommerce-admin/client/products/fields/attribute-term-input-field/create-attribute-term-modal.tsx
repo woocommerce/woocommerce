@@ -27,13 +27,18 @@ import './create-attribute-term-modal.scss';
 type CreateAttributeTermModalProps = {
 	initialAttributeTermName: string;
 	attributeId: number;
-	onCancel: () => void;
-	onCreated: ( newAttribute: ProductAttributeTerm ) => void;
+	onCancel?: () => void;
+	onCreated?: ( newAttribute: ProductAttributeTerm ) => void;
 };
 
 export const CreateAttributeTermModal: React.FC<
 	CreateAttributeTermModalProps
-> = ( { initialAttributeTermName, attributeId, onCancel, onCreated } ) => {
+> = ( {
+	initialAttributeTermName,
+	attributeId,
+	onCancel = () => {},
+	onCreated = () => {},
+} ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const [ isCreating, setIsCreating ] = useState( false );
 	const { createProductAttributeTerm, invalidateResolutionForStoreSelector } =

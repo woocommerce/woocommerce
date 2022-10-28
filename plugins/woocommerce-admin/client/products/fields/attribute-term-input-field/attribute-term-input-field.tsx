@@ -217,7 +217,7 @@ export const AttributeTermInputField: React.FC<
 													/>
 													<span>
 														{ sprintf(
-															/* translators: The name of the new attribute to be created */
+															/* translators: The name of the new attribute term to be created */
 															__(
 																'Create "%s"',
 																'woocommerce'
