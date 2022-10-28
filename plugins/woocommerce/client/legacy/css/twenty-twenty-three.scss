@@ -296,6 +296,7 @@
 			z-index: 1;
 		}
 
+		// How price gets displayed
 		.entry-summary {
 			.woocommerce-Price-amount,
 			del,
@@ -362,6 +363,24 @@
 					font-size: 1em;
 				}
 			}
+
+			.quantity {
+				display: inline-block;
+			}
+		}
+
+		table.variations tr {
+
+			display: table-row;
+			margin-bottom: 0;
+
+			td select {
+				margin: calc(var(--wp--style--block-gap) / 4) 0;
+			}
+		}
+
+		.single_variation_wrap {
+			margin-top: var(--wp--style--block-gap);
 		}
 
 		button[name="add-to-cart"],
