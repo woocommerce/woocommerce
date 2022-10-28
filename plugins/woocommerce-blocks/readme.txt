@@ -79,7 +79,7 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
-= 8.8.1 - 2022-10-27 =
+= 8.8.1 - 2022-10-28 =
 
 #### Bug fixes
 
