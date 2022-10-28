@@ -99,3 +99,10 @@ ControlledDateOnly.args = {
 	isDateOnlyPicker: true,
 };
 ControlledDateOnly.decorators = Controlled.decorators;
+
+export const ControlledDateOnlyEndOfDay = Template.bind( {} );
+ControlledDateOnlyEndOfDay.args = {
+	...ControlledDateOnly.args,
+	timeForDateOnly: 'end-of-day',
+};
+ControlledDateOnlyEndOfDay.decorators = Controlled.decorators;

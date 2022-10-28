@@ -51,7 +51,14 @@ const program = new Command()
 
 		if ( ! options.previousVersion && previousVersion ) {
 			// e.g 6.8.0 -> 6.7.0
-			previousVersion.minor -= 1;
+			previousVersion.major =
+				previousVersion.minor === 0
+					? previousVersion.major - 1
+					: previousVersion.major;
+
+			previousVersion.minor =
+				previousVersion.minor === 0 ? 9 : previousVersion.minor - 1;
+
 			previousVersion.format();
 		}
 
@@ -74,7 +81,8 @@ const program = new Command()
 				currentVersion,
 				false,
 				'https://github.com/woocommerce/woocommerce.git',
-				previousVersion.toString()
+				previousVersion.toString(),
+				'cli'
 			);
 
 			const schemaChanges = changes.schema.filter(
