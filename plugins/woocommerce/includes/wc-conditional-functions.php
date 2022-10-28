@@ -500,7 +500,7 @@ function wc_is_file_valid_csv( $file, $check_path = true ) {
 /**
  * Check if the current theme is a block theme.
  *
- * @since x.x.x
+ * @since 6.0.0
  * @return bool
  */
 function wc_current_theme_is_fse_theme() {
@@ -517,10 +517,27 @@ function wc_current_theme_is_fse_theme() {
 /**
  * Check if the current theme has WooCommerce support or is a FSE theme.
  *
- * @since x.x.x
+ * @since 6.0.0
  * @return bool
  */
 function wc_current_theme_supports_woocommerce_or_fse() {
 	return (bool) current_theme_supports( 'woocommerce' ) || wc_current_theme_is_fse_theme();
 }
 
+/**
+ * Given an element name, returns a class name.
+ *
+ * If the WP-related function is not defined, return empty string.
+ *
+ * @param string $element The name of the element.
+ *
+ * @since 7.1.0
+ * @return string
+ */
+function wc_wp_theme_get_element_class_name( $element ) {
+	if ( function_exists( 'wp_theme_get_element_class_name' ) ) {
+		return wp_theme_get_element_class_name( $element );
+	}
+
+	return '';
+}
