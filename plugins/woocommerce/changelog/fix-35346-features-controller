@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: The introduction of the FeaturesController is covered by an earlier changelog entry. Since the feature is unreleased, we probably do not need to itemize this small adjustment.
-
-
