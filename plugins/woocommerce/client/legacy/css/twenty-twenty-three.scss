@@ -1154,9 +1154,9 @@
 
 // Store-wide notice
 .theme-twentytwentythree .woocommerce-store-notice {
-	color: var(--wp--preset--color--contrast);
+	color: black;
 	border-top: 2px solid var(--wp--preset--color--primary);
-	background: var(--wp--preset--color--primary);
+	background: lightgray;
 	padding: 2rem;
 	position: fixed;
 	bottom: 0;
