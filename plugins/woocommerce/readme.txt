@@ -189,6 +189,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Implement missing method of calculating shipping and total tax. [#34805](https://github.com/woocommerce/woocommerce/pull/34805)
 * Fix - Serialize meta value before rendering so that it's rendered properly. [#34952](https://github.com/woocommerce/woocommerce/pull/34952)
 * Fix - Set correct timezone when backfilling data. [#35033](https://github.com/woocommerce/woocommerce/pull/35033)
+* Add - Twenty Twenty-Three theme compatibility. [#35306](https://github.com/woocommerce/woocommerce/pull/35306)
 * Add - Add handling for plugin-feature incompatibilities [#34879](https://github.com/woocommerce/woocommerce/pull/34879)
 * Add - Add inventory stock management to new product management experience [#34984](https://github.com/woocommerce/woocommerce/pull/34984)
 * Add - Add new attributes section and field for the new Product Management Experience. [#34751](https://github.com/woocommerce/woocommerce/pull/34751)
