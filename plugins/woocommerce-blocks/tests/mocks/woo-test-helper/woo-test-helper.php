@@ -114,12 +114,14 @@ function setup_cross_sells() {
 	global $wpdb;
 
 	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-	$select     = "SELECT * FROM {$wpdb->prefix}posts WHERE post_title = '128GB USB Stick' AND post_status = 'publish' AND post_type = 'product'";
-	$id_product = $wpdb->get_row( $select );
+	$select      = "SELECT * FROM {$wpdb->prefix}posts WHERE post_title = '128GB USB Stick' AND post_status = 'publish' AND post_type = 'product'";
+	$id_products = $wpdb->get_results( $select );
 
 	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-	$select        = "SELECT * FROM {$wpdb->prefix}posts WHERE post_title = '32GB USB Stick' AND post_status = 'publish' AND post_type = 'product'";
-	$id_cross_sell = $wpdb->get_row( $select );
+	$select         = "SELECT * FROM {$wpdb->prefix}posts WHERE post_title = '32GB USB Stick' AND post_status = 'publish' AND post_type = 'product'";
+	$id_cross_sells = $wpdb->get_results( $select );
 
-	add_post_meta( $id_product->ID, '_crosssell_ids', $id_cross_sell->ID );
+	foreach ( $id_products as $id_product ) {
+		update_post_meta( $id_product->ID, '_crosssell_ids', wp_list_pluck( $id_cross_sells, 'ID' ) );
+	}
 }

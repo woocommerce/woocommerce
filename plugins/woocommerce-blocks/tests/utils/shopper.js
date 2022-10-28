@@ -5,6 +5,7 @@ import {
 	shopper as wcShopper,
 	uiUnblocked,
 	SHOP_CART_PAGE,
+	SHOP_PAGE,
 } from '@woocommerce/e2e-utils';
 import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
 
@@ -36,12 +37,17 @@ export const shopper = {
 			} );
 		},
 
+		goToShop: async () => {
+			await page.goto( SHOP_PAGE );
+			// Wait for Shop block to finish loading, otherwise we get flakey tests
+			await page.waitForSelector( '.add_to_cart_button' );
+		},
+
 		goToCart: async () => {
 			await shopper.block.goToBlockPage( 'Cart' );
 			// Wait for Cart block to finish loading, otherwise we get flakey tests
 			await page.waitForSelector(
-				'.wp-block-woocommerce-cart.is-loading',
-				{ hidden: true }
+				'.wp-block-woocommerce-cart:not(.is-loading)'
 			);
 		},
 
@@ -49,8 +55,7 @@ export const shopper = {
 			await shopper.block.goToBlockPage( 'Checkout' );
 			// Wait for Checkout block to finish loading, otherwise we get flakey tests
 			await page.waitForSelector(
-				'.wp-block-woocommerce-checkout.is-loading',
-				{ hidden: true }
+				'.wp-block-woocommerce-checkout:not(.is-loading)'
 			);
 		},
 
@@ -110,6 +115,14 @@ export const shopper = {
 		},
 
 		placeOrder: async () => {
+			// Wait for payment methods to be shown, otherwise we get flakey tests
+			await page.waitForSelector(
+				'.wc-block-components-payment-method-label'
+			);
+			// Wait for place order button to be clickable, otherwise we get flakey tests
+			await page.waitForSelector(
+				'.wc-block-components-checkout-place-order-button:not([disabled])'
+			);
 			await Promise.all( [
 				page.click(
 					'.wc-block-components-checkout-place-order-button'
@@ -324,13 +337,15 @@ export const shopper = {
 			shippingName,
 			shippingPrice
 		) => {
+			await page.waitForSelector(
+				'.wc-block-components-radio-control__label'
+			);
 			await expect( page ).toClick(
 				'.wc-block-components-radio-control__label',
 				{
 					text: shippingName,
 				}
 			);
-
 			//eslint-disable-next-line no-shadow
 			const checkIfShippingHasChanged = ( el, shippingName ) => {
 				const checkShippingTotal = () => {
