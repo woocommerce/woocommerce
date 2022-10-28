@@ -41,7 +41,7 @@ describe( 'Shopper → Cart', () => {
 	} );
 
 	it( 'User can remove a product from cart', async () => {
-		await shopper.goToShop();
+		await shopper.block.goToShop();
 		await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await shopper.block.goToCart();
 		const removeProductLink = await page.$(
@@ -59,7 +59,7 @@ describe( 'Shopper → Cart', () => {
 	} );
 
 	it( 'User can update product quantity via the input field', async () => {
-		await shopper.goToShop();
+		await shopper.block.goToShop();
 		await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await shopper.block.goToCart();
 		await shopper.block.setCartQuantity( SIMPLE_VIRTUAL_PRODUCT_NAME, 4 );
@@ -107,10 +107,10 @@ describe( 'Shopper → Cart', () => {
 
 	it( 'User can see Cross-Sells products block', async () => {
 		await shopper.block.emptyCart();
-		await shopper.goToShop();
+		await shopper.block.goToShop();
 		await shopper.addToCartFromShopPage( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await shopper.block.goToCart();
-		await expect( page ).toMatchElement(
+		await page.waitForSelector(
 			'.wp-block-woocommerce-cart-cross-sells-block'
 		);
 		await shopper.block.addCrossSellsProductToCart();
@@ -122,7 +122,7 @@ describe( 'Shopper → Cart', () => {
 	} );
 
 	it( 'User can proceed to checkout', async () => {
-		await shopper.goToShop();
+		await shopper.block.goToShop();
 		await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await shopper.block.goToCart();
 

@@ -30,7 +30,7 @@ describe( 'Shopper → Cart & Checkout → Taxes', () => {
 	describe( '"Enable tax rate calculations" is unchecked in WC settings -> general', () => {
 		it( 'User cannot view the tax on Cart, Checkout & Order Summary', async () => {
 			await showTaxes( false );
-			await shopper.goToShop();
+			await shopper.block.goToShop();
 			await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
 			await shopper.block.goToCart();
 
@@ -54,7 +54,7 @@ describe( 'Shopper → Cart & Checkout → Taxes', () => {
 	describe( '"Enable tax rate calculations" is checked in WC settings -> general', () => {
 		it( 'User can view the tax on Cart, Checkout & Order Summary', async () => {
 			await showTaxes( true );
-			await shopper.goToShop();
+			await shopper.block.goToShop();
 			await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
 			await shopper.block.goToCart();
 

@@ -44,6 +44,9 @@ export async function getTaxesFromCurrentPage(): Promise<
 		value: string;
 	} >
 > {
+	// Wait for totals area otherwise we get flaky results.
+	await page.waitForSelector( '.wc-block-components-totals-wrapper' );
+
 	return await page.$$eval( '.wc-block-components-totals-taxes', ( nodes ) =>
 		nodes.map( ( node ) => {
 			const label = node.querySelector(
