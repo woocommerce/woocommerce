@@ -38,8 +38,15 @@ CustomDateTimeFormat.args = {
 };
 
 function ControlledContainer( { children, ...props } ) {
+	function nowWithZeroedSeconds() {
+		const now = new Date();
+		now.setSeconds( 0 );
+		now.setMilliseconds( 0 );
+		return now;
+	}
+
 	const [ controlledDate, setControlledDate ] = useState(
-		new Date().toISOString()
+		nowWithZeroedSeconds().toISOString()
 	);
 
 	return (
@@ -48,7 +55,9 @@ function ControlledContainer( { children, ...props } ) {
 			<div>
 				<Button
 					onClick={ () =>
-						setControlledDate( new Date().toISOString() )
+						setControlledDate(
+							nowWithZeroedSeconds().toISOString()
+						)
 					}
 				>
 					Reset to now
