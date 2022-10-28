@@ -52,6 +52,8 @@ export const Menu = ( {
 			) }
 		>
 			<Popover
+				// @ts-expect-error this prop does exist, see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L180.
+				__unstableSlotName="woocommerce-select-control-menu"
 				focusOnMount={ false }
 				className={ classnames(
 					'woocommerce-experimental-select-control__popover-menu',
@@ -85,7 +87,8 @@ export const Menu = ( {
 export const MenuSlot: React.FC = () =>
 	createPortal(
 		<div aria-live="off">
-			<Popover.Slot />
+			{ /* @ts-expect-error name does exist on PopoverSlot see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L555 */ }
+			<Popover.Slot name="woocommerce-select-control-menu" />
 		</div>,
 		document.body
 	);

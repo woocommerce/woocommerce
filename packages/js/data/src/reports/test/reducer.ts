@@ -7,6 +7,7 @@
  */
 import reducer from '../reducer';
 import TYPES from '../action-types';
+import { Action } from '../actions';
 
 const defaultState = {
 	itemErrors: {},
@@ -17,7 +18,7 @@ const defaultState = {
 
 describe( 'reports reducer', () => {
 	it( 'should return a default state', () => {
-		const state = reducer( undefined, {} );
+		const state = reducer( undefined, {} as Action );
 		expect( state ).toEqual( defaultState );
 		expect( state ).not.toBe( defaultState );
 	} );
@@ -26,6 +27,7 @@ describe( 'reports reducer', () => {
 		const state = reducer( defaultState, {
 			type: TYPES.SET_REPORT_ITEMS,
 			resourceName: 'test-resource-items',
+			// @ts-expect-error This is a test.
 			items: [ 1, 2 ],
 		} );
 
@@ -38,6 +40,7 @@ describe( 'reports reducer', () => {
 		const state = reducer( defaultState, {
 			type: TYPES.SET_REPORT_STATS,
 			resourceName: 'test-resource-stats',
+			// @ts-expect-error This is a test.
 			stats: [ 3, 4 ],
 		} );
 
@@ -53,9 +56,10 @@ describe( 'reports reducer', () => {
 			error: { code: 'error' },
 		} );
 
-		expect( state.itemErrors[ 'test-resource-items' ].code ).toBe(
-			'error'
-		);
+		expect(
+			( state.itemErrors[ 'test-resource-items' ] as { code: string } )
+				.code
+		).toBe( 'error' );
 	} );
 
 	it( 'should handle SET_STAT_ERROR', () => {
@@ -65,8 +69,9 @@ describe( 'reports reducer', () => {
 			error: { code: 'error' },
 		} );
 
-		expect( state.statErrors[ 'test-resource-stats' ].code ).toBe(
-			'error'
-		);
+		expect(
+			( state.statErrors[ 'test-resource-stats' ] as { code: string } )
+				.code
+		).toBe( 'error' );
 	} );
 } );

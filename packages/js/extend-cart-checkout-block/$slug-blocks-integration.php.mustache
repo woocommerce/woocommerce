@@ -19,9 +19,18 @@ class {{slugPascalCase}}_Blocks_Integration implements IntegrationInterface {
 
 	/**
 	 * When called invokes any initialization/setup for the integration.
-	 *
 	 */
 	public function initialize() {
+		$this->register_newsletter_block_frontend_scripts();
+		$this->register_newsletter_block_editor_scripts();
+        $this->register_newsletter_block_editor_styles();
+        $this->register_main_integration();
+	}
+
+	/**
+	 * Registers the main JS file required to add filters and Slot/Fills.
+	 */
+	public function register_main_integration() {
 		$script_path = '/build/index.js';
 		$style_path  = '/build/style-index.css';
 
@@ -53,7 +62,6 @@ class {{slugPascalCase}}_Blocks_Integration implements IntegrationInterface {
 		wp_set_script_translations(
 			'{{slug}}-blocks-integration',
 			'{{slug}}',
-			'{{slug}}',
 			dirname( __FILE__ ) . '/languages'
 		);
 	}
@@ -64,7 +72,7 @@ class {{slugPascalCase}}_Blocks_Integration implements IntegrationInterface {
 	 * @return string[]
 	 */
 	public function get_script_handles() {
-		return array( '{{slug}}-blocks-integration' );
+		return array( '{{slug}}-blocks-integration', '{{slug}}-checkout-newsletter-subscription-block-frontend' );
 	}
 
 	/**
@@ -73,7 +81,7 @@ class {{slugPascalCase}}_Blocks_Integration implements IntegrationInterface {
 	 * @return string[]
 	 */
 	public function get_editor_script_handles() {
-		return array( '{{slug}}-blocks-integration' );
+		return array( '{{slug}}-blocks-integration', '{{slug}}-checkout-newsletter-subscription-block-editor' );
 	}
 
 	/**
@@ -84,12 +92,76 @@ class {{slugPascalCase}}_Blocks_Integration implements IntegrationInterface {
 	public function get_script_data() {
 		$data = array(
 			'{{slug}}-active' => true,
-			'example-data' => 'This is some example data from the server',
+			'example-data' => __( 'This is some example data from the server', '{{slug}}' ),
+            'optInDefaultText' => __( 'I want to receive updates about products and promotions.', '{{ slug }}' ),
 		);
 
 		return $data;
 
 	}
+
+    public function register_newsletter_block_editor_styles() {
+        $style_path  = '/build/style-{{slug}}-checkout-newsletter-subscription-block.css';
+
+        $style_url  = plugins_url( $style_path, __FILE__ );
+        wp_enqueue_style(
+            '{{slug}}-blocks-integration',
+            $style_url,
+            [],
+            $this->get_file_version( $style_path )
+        );
+    }
+
+    public function register_newsletter_block_editor_scripts() {
+        $script_path       = '/build/{{slug}}-checkout-newsletter-subscription-block.js';
+        $script_url        = plugins_url( $script_path, __FILE__ );
+        $script_asset_path = dirname( __FILE__ ) . '/build/{{slug}}-checkout-newsletter-subscription-block.asset.php';
+        $script_asset      = file_exists( $script_asset_path )
+            ? require $script_asset_path
+            : array(
+                'dependencies' => array(),
+                'version'      => $this->get_file_version( $script_asset_path ),
+            );
+
+        wp_register_script(
+            '{{slug}}-checkout-newsletter-subscription-block-editor',
+            $script_url,
+            $script_asset['dependencies'],
+            $script_asset['version'],
+            true
+        );
+
+        wp_set_script_translations(
+            '{{slug}}-newsletter-block-editor', // script handle
+            '{{slug}}', // text domain
+            dirname( __FILE__ ) . '/languages'
+        );
+    }
+
+    public function register_newsletter_block_frontend_scripts() {
+        $script_path       = '/build/{{slug}}-checkout-newsletter-subscription-block-frontend.js';
+        $script_url        = plugins_url( $script_path, __FILE__ );
+        $script_asset_path = dirname( __FILE__ ) . '/build/newsletter-block-frontend.asset.php';
+        $script_asset      = file_exists( $script_asset_path )
+            ? require $script_asset_path
+            : array(
+                'dependencies' => array(),
+                'version'      => $this->get_file_version( $script_asset_path ),
+            );
+
+        wp_register_script(
+            '{{slug}}-checkout-newsletter-subscription-block-frontend',
+            $script_url,
+            $script_asset['dependencies'],
+            $script_asset['version'],
+            true
+        );
+        wp_set_script_translations(
+            '{{slug}}-checkout-newsletter-subscription-block-frontend', // script handle
+            '{{slug}}', // text domain
+            dirname( __FILE__ ) . '/languages'
+        );
+    }
 
 	/**
 	 * Get the file modified time as a cache buster if we're in dev mode.
