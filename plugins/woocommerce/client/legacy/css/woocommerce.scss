@@ -329,6 +329,7 @@ p.demo_store,
 				li {
 					border: 1px solid darken($secondary, 10%);
 					background-color: $secondary;
+					color: $secondarytext;
 					display: inline-block;
 					position: relative;
 					z-index: 0;
@@ -351,6 +352,7 @@ p.demo_store,
 
 					&.active {
 						background: $contentbg;
+						color: $secondarytext;
 						z-index: 2;
 						border-bottom-color: $contentbg;
 
