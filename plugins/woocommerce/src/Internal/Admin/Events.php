@@ -18,7 +18,7 @@ use \Automattic\WooCommerce\Internal\Admin\Notes\CustomizeStoreWithBlocks;
 use \Automattic\WooCommerce\Internal\Admin\Notes\CustomizingProductCatalog;
 use \Automattic\WooCommerce\Internal\Admin\Notes\EditProductsOnTheMove;
 use \Automattic\WooCommerce\Internal\Admin\Notes\EUVATNumber;
-use \Automattic\WooCommerce\Internal\Admin\Notes\FirstDownlaodableProduct;
+use \Automattic\WooCommerce\Internal\Admin\Notes\FirstDownloadableProduct;
 use \Automattic\WooCommerce\Internal\Admin\Notes\FirstProduct;
 use \Automattic\WooCommerce\Internal\Admin\Notes\InsightFirstProductAndPayment;
 use \Automattic\WooCommerce\Internal\Admin\Notes\InsightFirstSale;
@@ -82,7 +82,7 @@ class Events {
 		CustomizingProductCatalog::class,
 		EditProductsOnTheMove::class,
 		EUVATNumber::class,
-		FirstDownlaodableProduct::class,
+		FirstDownloadableProduct::class,
 		FirstProduct::class,
 		InsightFirstProductAndPayment::class,
 		InsightFirstSale::class,
