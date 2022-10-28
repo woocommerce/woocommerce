@@ -126,6 +126,7 @@
 		margin-bottom: 2rem;
 		list-style: none;
 		font-size: var(--wp--preset--font-size--small);
+		display: flow-root;
 
 		&[role="alert"]::before {
 			background: #d5d5d5;
