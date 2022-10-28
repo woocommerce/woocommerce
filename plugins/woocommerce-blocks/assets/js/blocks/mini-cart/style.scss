@@ -64,11 +64,13 @@
 }
 
 .wp-block-woocommerce-mini-cart-contents {
-	background: #fff;
 	box-sizing: border-box;
 	height: 100vh;
 	padding: 0;
 	justify-content: center;
+}
+:where(.wp-block-woocommerce-mini-cart-contents) {
+	background: #fff;
 }
 
 .wp-block-woocommerce-empty-mini-cart-contents-block,
