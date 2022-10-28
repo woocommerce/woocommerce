@@ -268,12 +268,16 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		}
 	}
 
-	const isInitialUpdate = useRef( true );
-	useEffect( () => {
-		const newDateTime = parseMomentIso( currentDate );
+	function updateStateWithNewDateTime(
+		newDateTimeIsoString: string,
+		assumeLocalTime: boolean,
+		maybeFireOnChange: boolean
+	) {
+		const newDateTime = parseMomentIso(
+			newDateTimeIsoString,
+			assumeLocalTime
+		);
 		const isValid = newDateTime.isValid();
-		const fireOnChange =
-			! isInitialUpdate.current && ! newDateTime.isSame( lastValidDate );
 
 		if ( isValid ) {
 			setLastValidDate( newDateTime );
@@ -281,13 +285,18 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 
 		updateInputString( newDateTime );
 
-		if ( fireOnChange ) {
+		if ( maybeFireOnChange && ! newDateTime.isSame( lastValidDate ) ) {
 			callOnChange( newDateTime );
 		}
+	}
 
-		if ( isInitialUpdate.current ) {
-			isInitialUpdate.current = false;
-		}
+	const isInitialUpdate = useRef( true );
+	useEffect( () => {
+		updateStateWithNewDateTime(
+			currentDate || '',
+			false,
+			! isInitialUpdate.current
+		);
 	}, [ currentDate, displayFormat, timeForDateOnly ] );
 
 	return (
@@ -359,12 +368,12 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 								? formatMomentIso( lastValidDate )
 								: undefined
 						}
-						onChange={ ( date: string ) => {
-							// the picker returns the date in local time
-							const formattedDate = formatMoment(
-								parseMomentIso( date, true )
+						onChange={ ( localDateTimeIsoString: string ) => {
+							updateStateWithNewDateTime(
+								localDateTimeIsoString,
+								true,
+								true
 							);
-							changeImmediate( formattedDate, true );
 						} }
 						is12Hour={ is12HourPicker }
 					/>
