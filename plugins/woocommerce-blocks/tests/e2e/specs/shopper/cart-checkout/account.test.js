@@ -58,7 +58,7 @@ describe( 'Shopper → Checkout → Account', () => {
 
 	beforeEach( async () => {
 		await shopper.block.emptyCart();
-		await shopper.goToShop();
+		await shopper.block.goToShop();
 		await shopper.addToCartFromShopPage( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await shopper.block.goToCheckout();
 	} );
@@ -77,6 +77,7 @@ describe( 'Shopper → Checkout → Account', () => {
 	} );
 
 	it( 'user can can create an account', async () => {
+		await page.waitForSelector( '.wc-block-checkout__create-account' );
 		await expect( page ).toClick( 'span', {
 			text: 'Create an account?',
 		} );
