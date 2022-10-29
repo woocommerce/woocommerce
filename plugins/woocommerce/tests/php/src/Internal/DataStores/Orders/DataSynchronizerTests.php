@@ -162,7 +162,7 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 
 		// When a new order is manually created in the admin environment, WordPress automatically creates an empty
 		// draft post for us.
-		$order_id = wp_insert_post(
+		$order_id = (int) wp_insert_post(
 			array(
 				'post_type'   => 'shop_order',
 				'post_status' => 'draft',
@@ -177,7 +177,7 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 		// record in the COT table.
 		$this->assertEquals(
 			'draft',
-			$wpdb->get_var( "SELECT status FROM $orders_table WHERE id = $order_id" ),
+			$wpdb->get_var( "SELECT status FROM $orders_table WHERE id = $order_id" ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			'When HPOS is enabled but the posts data store is authoritative, saving an order will result in a duplicate with the same status being saved in the COT table.'
 		);
 
@@ -188,7 +188,7 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 		$order->save();
 		$this->assertEquals(
 			'wc-pending',
-			$wpdb->get_var( "SELECT status FROM $orders_table WHERE id = $order_id" ),
+			$wpdb->get_var( "SELECT status FROM $orders_table WHERE id = $order_id" ), //phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			'When the order status is updated, the change should be observed by the DataSynhronizer and a matching update will take place in the COT table.'
 		);
 	}
