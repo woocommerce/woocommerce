@@ -16,18 +16,28 @@ jobs:
               with:
                   fetch-depth: 0
 
+            - name: Get Changed Files
+              id: changed-files
+              uses: tj-actions/changed-files@v32
+              with:
+                  files: |
+                      **/*.php
+
             - name: Setup WooCommerce Monorepo
+              if: steps.changed-files.outputs.any_changed == 'true'
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
                   build: false
 
             - name: Tool versions
+              if: steps.changed-files.outputs.any_changed == 'true'
               run: |
                   php --version
                   composer --version
                   phpcs-changed --version
 
             - name: Run PHPCS
+              if: steps.changed-files.outputs.any_changed == 'true'
               run: |
                   git status
                   git log -1
@@ -35,4 +45,4 @@ jobs:
                   git checkout $HEAD_REF 
                   git status
                   git log -1
-                  phpcs-changed --git --git-base ${{ github.base_ref }} **/*.php
+                  phpcs-changed --git --git-base ${{ github.base_ref }} ${{ steps.changed-files.outputs.all_changed_files }}
