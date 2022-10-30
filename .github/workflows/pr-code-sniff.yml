@@ -22,19 +22,21 @@ jobs:
               with:
                   build: false
 
+            - name: Install PHPCS Changed
+              run: composer require sirbrillig/phpcs-changed
+
             - name: Tool versions
               run: |
                   php --version
                   composer --version
-
-            - name: Install PHPCS Changed
-              run: composer global require sirbrillig/phpcs-changed
+                  phpcs-changed --version
 
             - name: Run PHPCS
               run: |
                   git status
                   git log -1
                   HEAD_REF=$(git rev-parse HEAD)
+                  git checkout $HEAD_REF 
                   git status
                   git log -1
                   phpcs-changed --git --git-base ${{ github.base_ref }} **/*.php
