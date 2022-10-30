@@ -22,9 +22,6 @@ jobs:
               with:
                   build: false
 
-            - name: Install PHPCS Changed
-              run: composer require sirbrillig/phpcs-changed
-
             - name: Tool versions
               run: |
                   php --version
