@@ -47,10 +47,6 @@ class WC_Admin_Exporters {
 		);
 	}
 
-	public function foo() {
-		return 'bar';
-	}
-
 	/**
 	 * Return true if WooCommerce export is allowed for current user, false otherwise.
 	 *
