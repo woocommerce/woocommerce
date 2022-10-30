@@ -17,7 +17,6 @@ jobs:
                   fetch-depth: 0
 
             - name: Setup WooCommerce Monorepo
-              if: steps.changed-files.outputs.any_changed == 'true'
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
                   build: false
