@@ -6,6 +6,8 @@ defaults:
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
+env:
+    PHPCS: ./plugins/woocommerce/vendor/bin/phpcs
 jobs:
     test:
         name: Code sniff (PHP 7.4, WP Latest)
@@ -39,10 +41,6 @@ jobs:
             - name: Run PHPCS
               if: steps.changed-files.outputs.any_changed == 'true'
               run: |
-                  git status
-                  git log -1
                   HEAD_REF=$(git rev-parse HEAD)
                   git checkout $HEAD_REF 
-                  git status
-                  git log -1
                   phpcs-changed --git --git-base ${{ github.base_ref }} ${{ steps.changed-files.outputs.all_changed_files }}
