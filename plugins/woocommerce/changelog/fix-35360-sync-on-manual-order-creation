@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+When HPOS is enabled, posts are authoritative, and sync is enabled, ensure the HPOS record correctly tracks the CPT order record.
