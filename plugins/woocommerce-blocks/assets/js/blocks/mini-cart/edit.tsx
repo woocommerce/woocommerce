@@ -13,7 +13,6 @@ import {
 import { getSetting } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
-import { useTypographyProps } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -43,8 +42,6 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 
 	const productCount = 0;
 	const productTotal = 0;
-
-	const typographyProps = useTypographyProps( attributes );
 
 	return (
 		<div { ...blockProps }>
@@ -127,10 +124,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 			<Noninteractive>
 				<button className="wc-block-mini-cart__button">
 					{ ! hasHiddenPrice && (
-						<span
-							className="wc-block-mini-cart__amount"
-							style={ typographyProps.style }
-						>
+						<span className="wc-block-mini-cart__amount">
 							{ formatPrice( productTotal ) }
 						</span>
 					) }
