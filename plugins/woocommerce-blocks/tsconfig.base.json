@@ -39,6 +39,7 @@
 			"@woocommerce/base-hocs/*": [ "assets/js/base/hocs/*" ],
 			"@woocommerce/base-hooks": [ "assets/js/base/hooks" ],
 			"@woocommerce/base-utils": [ "assets/js/base/utils" ],
+			"@woocommerce/blocks/*": [ "assets/js/blocks/*" ],
 			"@woocommerce/editor-components/*": [
 				"assets/js/editor-components/*"
 			],
