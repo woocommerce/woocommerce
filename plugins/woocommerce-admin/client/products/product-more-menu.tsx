@@ -3,8 +3,11 @@
  */
 import { __ } from '@wordpress/i18n';
 import { DropdownMenu, MenuItem } from '@wordpress/components';
+import { getAdminLink } from '@woocommerce/settings';
 import { moreVertical } from '@wordpress/icons';
+import { Product } from '@woocommerce/data';
 import { registerPlugin } from '@wordpress/plugins';
+import { useFormContext } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -15,6 +18,12 @@ import { WelcomeGuideIcon } from './images/welcome-guide-icon';
 import { WooHeaderItem } from '~/header/utils';
 
 export const ProductMoreMenu = () => {
+	const { values } = useFormContext< Product >();
+
+	const classEditorUrl = values.id
+		? getAdminLink( `post.php?post=${ values.id }&action=edit` )
+		: getAdminLink( 'post-new.php?post_type=product' );
+
 	return (
 		<WooHeaderItem>
 			<DropdownMenu
@@ -39,6 +48,9 @@ export const ProductMoreMenu = () => {
 							onClick={ () => {
 								onClose();
 							} }
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore The href prop exists as buttonProps.
+							href={ classEditorUrl }
 							icon={ <ClassicEditorIcon /> }
 							iconPosition="right"
 						>
