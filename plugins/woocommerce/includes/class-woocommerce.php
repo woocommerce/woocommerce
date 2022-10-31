@@ -601,6 +601,9 @@ final class WooCommerce {
 				case 'twentytwentytwo':
 					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twenty-two.php';
 					break;
+				case 'twentytwentythree':
+					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twenty-three.php';
+					break;
 			}
 		}
 	}

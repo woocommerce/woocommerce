@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Check order type is set before returning to prevent notice.

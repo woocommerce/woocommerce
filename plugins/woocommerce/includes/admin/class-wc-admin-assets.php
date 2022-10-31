@@ -233,6 +233,19 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_localize_script( 'woocommerce_quick-edit', 'woocommerce_quick_edit', $params );
 			}
 
+			// Product description.
+			if ( in_array( $screen_id, array( 'product' ), true ) ) {
+				wp_enqueue_script( 'wc-admin-product-editor', WC()->plugin_url() . '/assets/js/admin/product-editor' . $suffix . '.js', array( 'jquery' ), $version, false );
+
+				wp_localize_script(
+					'wc-admin-product-editor',
+					'woocommerce_admin_product_editor',
+					array(
+						'i18n_description' => esc_js( __( 'Product description', 'woocommerce' ) ),
+					)
+				);
+			}
+
 			// Meta boxes.
 			if ( in_array( $screen_id, array( 'product', 'edit-product' ) ) ) {
 				wp_enqueue_media();
