@@ -32,6 +32,10 @@
 		.components-radio-control .components-v-stack {
 			gap: $gap-small;
 		}
+
+		.woocommerce-collapsible-content {
+			margin-top: $gap-large;
+		}
 	}
 
 	&__header {
