@@ -37,7 +37,7 @@ class WC_Admin_Exporters {
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'admin_init', array( $this, 'download_export_file' ) );
 		add_action( 'wp_ajax_woocommerce_do_ajax_product_export', array( $this, 'do_ajax_product_export' ) );
-
+		do_action( 'hello' );
 		// Register WooCommerce exporters.
 		$this->exporters['product_exporter'] = array(
 			'menu'       => 'edit.php?post_type=product',
