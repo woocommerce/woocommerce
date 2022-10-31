@@ -1,5 +1,21 @@
 == Changelog ==
 
+= 7.0.1 2022-11-01 =
+
+**WooCommerce**
+
+* Dev - Twenty Twenty-Three theme compatibility. [#35306](https://github.com/woocommerce/woocommerce/pull/35306)
+* Dev - Simplify and reduce size of payload supplied by the woocommerce_get_customer_details ajax endpoint.
+
+**WooCommerce Blocks 8.5.2**
+
+* Enhancement - Fix Mini Cart Global Styles. [7515](https://github.com/woocommerce/woocommerce-blocks/pull/7515)
+* Enhancement - Fix inconsistent button styling with TT3. ([7516](https://github.com/woocommerce/woocommerce-blocks/pull/7516))
+* Enhancement - Make the Filter by Price block range color dependent of the theme color. [7525](https://github.com/woocommerce/woocommerce-blocks/pull/7525)
+* Enhancement - Filter by Price block: fix price slider visibility on dark themes. [7527](https://github.com/woocommerce/woocommerce-blocks/pull/7527)
+* Enhancement - Update the Mini Cart block drawer to honor the theme's background. [7510](https://github.com/woocommerce/woocommerce-blocks/pull/7510)
+* Enhancement - Add white background to Filter by Attribute block dropdown so text is legible in dark backgrounds. [7506](https://github.com/woocommerce/woocommerce-blocks/pull/7506)
+
 = 7.0.0 2022-10-11 =
 
 **WooCommerce**
