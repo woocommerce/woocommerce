@@ -6,7 +6,6 @@ import { DropdownMenu, MenuItem } from '@wordpress/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { moreVertical } from '@wordpress/icons';
 import { Product } from '@woocommerce/data';
-import { registerPlugin } from '@wordpress/plugins';
 import { useFormContext } from '@woocommerce/components';
 
 /**
