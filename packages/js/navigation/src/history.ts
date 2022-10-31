@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { BrowserHistory, createBrowserHistory, Location } from 'history';
-import { parse } from 'qs';
 
 // See https://github.com/ReactTraining/react-router/blob/master/FAQ.md#how-do-i-access-the-history-object-outside-of-components
 // ^ This is a bit outdated but there's no newer documentation - the replacement for this is to use <unstable_HistoryRouter /> https://reactrouter.com/docs/en/v6/routers/history-router
@@ -41,25 +40,13 @@ function getHistory(): WooBrowserHistory {
 			},
 			get location() {
 				const { location } = browserHistory;
-				const query = parse( location.search.substring( 1 ) );
-				let pathname: string;
 
-				if ( query && typeof query.path === 'string' ) {
-					pathname = query.path;
-				} else if (
-					query &&
-					query.path &&
-					typeof query.path !== 'string'
-				) {
-					// this branch was added when converting to TS as it is technically possible for a query.path to not be a string.
-					// eslint-disable-next-line no-console
-					console.warn(
-						`Query path parameter should be a string but instead was: ${ query.path }, undefined behaviour may occur.`
-					);
-					pathname = query.path as unknown as string; // ts override only, no coercion going on
-				} else {
-					pathname = '/';
-				}
+				const query = new URLSearchParams( location.search );
+				const pathname = query.has( 'path' )
+					? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- We already asserted non-null above.
+					  query.get( 'path' )!
+					: '/';
+
 				return {
 					...location,
 					pathname,
