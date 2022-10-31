@@ -29,7 +29,7 @@ export const ProductMoreMenu = () => {
 		<WooHeaderItem>
 			<DropdownMenu
 				className="woocommerce-product-form-more-menu"
-				label={ __( 'Publish options', 'woocommerce' ) }
+				label={ __( 'More product options', 'woocommerce' ) }
 				icon={ moreVertical }
 				popoverProps={ { position: 'bottom left' } }
 			>
