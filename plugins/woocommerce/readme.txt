@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Allow line breaks in order note again. [#35366](https://github.com/woocommerce/woocommerce/pull/35366)
 * Fix - Fix (un)trashing of orders when using HPOS [#35125](https://github.com/woocommerce/woocommerce/pull/35125)
 * Fix - Check whether order has classname before returning. [#35207](https://github.com/woocommerce/woocommerce/pull/35207)
 * Fix - Add billing and shipping address indexes on order update. [#35121](https://github.com/woocommerce/woocommerce/pull/35121)
