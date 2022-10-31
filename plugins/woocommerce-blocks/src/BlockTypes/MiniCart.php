@@ -303,9 +303,7 @@ class MiniCart extends AbstractBlock {
 		$cart_controller     = $this->get_cart_controller();
 		$cart                = $cart_controller->get_cart_instance();
 		$cart_contents_total = $cart->get_subtotal();
-		$typography_styles   = isset( StyleAttributesUtils::get_font_weight_class_and_style( $attributes )['style'] ) ? StyleAttributesUtils::get_font_weight_class_and_style( $attributes )['style'] : null;
-
-		return '<span class="wc-block-mini-cart__amount" style="' . esc_attr( $typography_styles ) . '">' . esc_html( wp_strip_all_tags( wc_price( $cart_contents_total ) ) ) . '</span>
+		return '<span class="wc-block-mini-cart__amount">' . esc_html( wp_strip_all_tags( wc_price( $cart_contents_total ) ) ) . '</span>
 		' . $this->get_include_tax_label_markup();
 	}
 
@@ -358,7 +356,7 @@ class MiniCart extends AbstractBlock {
 			$cart_contents_total += $cart->get_subtotal_tax();
 		}
 
-		$classes_styles  = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_family' ) );
+		$classes_styles  = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_weight', 'font_family' ) );
 		$wrapper_classes = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
 		if ( ! empty( $attributes['className'] ) ) {
 			$wrapper_classes .= ' ' . $attributes['className'];
