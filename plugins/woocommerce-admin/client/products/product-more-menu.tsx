@@ -16,6 +16,7 @@ import { ClassicEditorIcon } from './images/classic-editor-icon';
 import { FeedbackIcon } from './images/feedback-icon';
 import { WelcomeGuideIcon } from './images/welcome-guide-icon';
 import { WooHeaderItem } from '~/header/utils';
+import './product-more-menu.scss';
 
 export const ProductMoreMenu = () => {
 	const { values } = useFormContext< Product >();
@@ -27,10 +28,10 @@ export const ProductMoreMenu = () => {
 	return (
 		<WooHeaderItem>
 			<DropdownMenu
-				className="woocommerce-product-form-actions__publish-dropdown"
+				className="woocommerce-product-form-more-menu"
 				label={ __( 'Publish options', 'woocommerce' ) }
 				icon={ moreVertical }
-				popoverProps={ { position: 'bottom right' } }
+				popoverProps={ { position: 'bottom left' } }
 			>
 				{ ( { onClose } ) => (
 					<>
