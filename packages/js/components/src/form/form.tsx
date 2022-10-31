@@ -1,9 +1,3 @@
-declare module 'react' {
-	function forwardRef< T, P = unknown >(
-		render: ( props: P, ref: React.Ref< T > ) => React.ReactElement | null
-	): ( props: P & React.RefAttributes< T > ) => React.ReactElement | null;
-}
-
 /**
  * External dependencies
  */
@@ -140,9 +134,7 @@ function FormComponent< Values extends Record< string, any > >(
 		onChange = () => {},
 		onChanges = () => {},
 		...props
-	}: PropsWithChildren< FormProps< Values > > & {
-		ref?: React.Ref< FormRef< Values > >;
-	},
+	}: PropsWithChildren< FormProps< Values > >,
 	ref: React.Ref< FormRef< Values > >
 ): React.ReactElement | null {
 	const initialValues = useRef( props.initialValues ?? ( {} as Values ) );
@@ -417,6 +409,14 @@ function FormComponent< Values extends Record< string, any > >(
 	);
 }
 
-const Form: typeof FormComponent = forwardRef( FormComponent );
+const Form = forwardRef( FormComponent ) as <
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	Values extends Record< string, any >
+>(
+	props: PropsWithChildren< FormProps< Values > > & {
+		ref?: React.ForwardedRef< FormRef< Values > >;
+	},
+	ref: React.Ref< FormRef< Values > >
+) => React.ReactElement | null;
 
 export { Form };
