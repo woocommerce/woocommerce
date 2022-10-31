@@ -4,7 +4,7 @@
 import { sprintf, __ } from '@wordpress/i18n';
 import { CheckboxControl, Icon, Spinner } from '@wordpress/components';
 import { resolveSelect } from '@wordpress/data';
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
 import { plus } from '@wordpress/icons';
 import {
@@ -32,9 +32,14 @@ type AttributeTermInputFieldProps = {
 	disabled?: boolean;
 };
 
+let uniqueId = 0;
+
 export const AttributeTermInputField: React.FC<
 	AttributeTermInputFieldProps
 > = ( { value = [], onChange, placeholder, disabled, attributeId } ) => {
+	const attributeTermInputId = useRef(
+		`woocommerce-attribute-term-field-${ ++uniqueId }`
+	);
 	const [ fetchedItems, setFetchedItems ] = useState<
 		ProductAttributeTerm[]
 	>( [] );
@@ -97,6 +102,20 @@ export const AttributeTermInputField: React.FC<
 		onChange( [ ...value, item ] );
 	};
 
+	const focusSelectControl = () => {
+		const selectControlInputField: HTMLInputElement | null =
+			document.querySelector(
+				'.' +
+					attributeTermInputId.current +
+					' .woocommerce-experimental-select-control__input'
+			);
+		if ( selectControlInputField ) {
+			setTimeout( () => {
+				selectControlInputField.focus();
+			}, 0 );
+		}
+	};
+
 	const selectedTermSlugs = ( value || [] ).map( ( term ) => term.slug );
 
 	return (
@@ -157,7 +176,10 @@ export const AttributeTermInputField: React.FC<
 				selected={ value }
 				onSelect={ onSelect }
 				onRemove={ onRemove }
-				className="woocommerce-attribute-term-field"
+				className={
+					'woocommerce-attribute-term-field ' +
+					attributeTermInputId.current
+				}
 			>
 				{ ( {
 					items,
@@ -241,11 +263,15 @@ export const AttributeTermInputField: React.FC<
 			{ addNewAttributeTermName && attributeId !== undefined && (
 				<CreateAttributeTermModal
 					initialAttributeTermName={ addNewAttributeTermName }
-					onCancel={ () => setAddNewAttributeTermName( undefined ) }
+					onCancel={ () => {
+						setAddNewAttributeTermName( undefined );
+						focusSelectControl();
+					} }
 					attributeId={ attributeId }
 					onCreated={ ( newAttribute ) => {
 						onSelect( newAttribute );
 						setAddNewAttributeTermName( undefined );
+						focusSelectControl();
 					} }
 				/>
 			) }
