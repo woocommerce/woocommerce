@@ -75,7 +75,7 @@ class COTMigrationUtil {
 	 */
 	public function is_custom_order_tables_in_sync() : bool {
 		$sync_status = $this->data_synchronizer->get_sync_status();
-		return $sync_status['current_pending_count'] === 0 && $this->data_synchronizer->data_sync_is_enabled();
+		return 0 === $sync_status['current_pending_count'] && $this->data_synchronizer->data_sync_is_enabled();
 	}
 
 	/**
@@ -160,7 +160,7 @@ class COTMigrationUtil {
 	 *
 	 * @return string|null Type of the order.
 	 */
-	public function get_order_type( $order_id ) : ?string {
+	public function get_order_type( $order_id ) {
 		$order_id         = $this->get_post_or_order_id( $order_id );
 		$order_data_store = \WC_Data_Store::load( 'order' );
 		return $order_data_store->get_order_type( $order_id );
