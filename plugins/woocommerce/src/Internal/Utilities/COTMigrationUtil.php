@@ -122,15 +122,15 @@ class COTMigrationUtil {
 	}
 
 	/**
-	 * Helper function to id from an post or order object.
+	 * Helper function to get ID from a post or order object.
 	 *
 	 * @param WP_Post/WC_Order $post_or_order_object WP_Post/WC_Order object to get ID for.
 	 *
 	 * @return int Order or post ID.
 	 */
 	public function get_post_or_order_id( $post_or_order_object ) : int {
-		if ( is_int( $post_or_order_object ) ) {
-			return $post_or_order_object;
+		if ( is_numeric( $post_or_order_object ) ) {
+			return (int) $post_or_order_object;
 		} elseif ( $post_or_order_object instanceof WC_Order ) {
 			return $post_or_order_object->get_id();
 		} elseif ( $post_or_order_object instanceof WP_Post ) {
