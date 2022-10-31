@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
+import type { BlockConfiguration } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -15,17 +16,21 @@ import {
 	BLOCK_DESCRIPTION as description,
 } from './constants';
 import { supports } from './support';
-import { Save } from './save';
 
-const blockConfig = {
+const blockConfig: BlockConfiguration = {
 	apiVersion: 2,
 	title,
 	description,
+	usesContext: [ 'query', 'queryId', 'postId' ],
+	ancestor: [
+		'@woocommerce/all-products',
+		'@woocommerce/single-product',
+		'core/post-template',
+	],
 	icon: { src: icon },
 	attributes,
 	supports,
 	edit,
-	save: Save,
 };
 
 registerBlockType( 'woocommerce/product-rating', {

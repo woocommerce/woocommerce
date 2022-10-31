@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
 import {
@@ -14,11 +13,34 @@ import {
 	useTypographyProps,
 } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
+import { isNumber, ProductResponseItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+
+type Props = {
+	className?: string;
+};
+
+const getAverageRating = (
+	product: Omit< ProductResponseItem, 'average_rating' > & {
+		average_rating: string;
+	}
+) => {
+	const rating = parseFloat( product.average_rating );
+
+	return Number.isFinite( rating ) && rating > 0 ? rating : 0;
+};
+
+const getRatingCount = ( product: ProductResponseItem ) => {
+	const count = isNumber( product.review_count )
+		? product.review_count
+		: parseInt( product.review_count, 10 );
+
+	return Number.isFinite( count ) && count > 0 ? count : 0;
+};
 
 /**
  * Product Rating Block Component.
@@ -27,7 +49,7 @@ import './style.scss';
  * @param {string} [props.className] CSS Class name for the component.
  * @return {*} The component.
  */
-export const Block = ( props ) => {
+export const Block = ( props: Props ): JSX.Element | null => {
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
 	const rating = getAverageRating( product );
@@ -94,22 +116,6 @@ export const Block = ( props ) => {
 			</div>
 		</div>
 	);
-};
-
-const getAverageRating = ( product ) => {
-	const rating = parseFloat( product.average_rating );
-
-	return Number.isFinite( rating ) && rating > 0 ? rating : 0;
-};
-
-const getRatingCount = ( product ) => {
-	const count = parseInt( product.review_count, 10 );
-
-	return Number.isFinite( count ) && count > 0 ? count : 0;
-};
-
-Block.propTypes = {
-	className: PropTypes.string,
 };
 
 export default withProductDataContext( Block );
