@@ -35,7 +35,7 @@ class WC_Admin_Addons {
 			if ( ! empty( $auth['access_token'] ) ) {
 				$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
 			}
-
+			do_action( 'hello' );
 			$raw_featured = wp_safe_remote_get(
 				'https://woocommerce.com/wp-json/wccom-extensions/1.0/featured',
 				array(
