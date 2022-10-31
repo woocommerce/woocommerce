@@ -19,11 +19,10 @@ export const printTemplateResults = (
 	title: string,
 	log: ( s: string ) => void
 ): void => {
-	//[code,title,message]
 	if ( output === 'github' ) {
 		let opt = '\\n\\n### Template changes:';
 		for ( const { filePath, code, message } of data ) {
-			opt += `\\n* **file:** ${ filePath }`;
+			opt += `\\n* **File:** ${ filePath }`;
 			opt += `\\n  * ${ code.toUpperCase() }: ${ message }`;
 			log(
 				`::${ code } file=${ filePath },line=1,title=${ title }::${ message }`
@@ -56,12 +55,6 @@ export const printHookResults = (
 	sectionTitle: string,
 	log: ( s: string ) => void
 ) => {
-	// [
-	// 	'NOTICE',
-	// 	title,
-	// 	message,
-	// 	description,
-	// ]
 	if ( output === 'github' ) {
 		let opt = '\\n\\n### New hooks:';
 		for ( const {
@@ -70,9 +63,9 @@ export const printHookResults = (
 			version,
 			description,
 			hookType,
-			changeType,
+			changeType
 		} of data ) {
-			opt += `\\n* **file:** ${ filePath }`;
+			opt += `\\n* **File:** ${ filePath }`;
 
 			const cliMessage = `**${ name }** introduced in ${ version }`;
 			const ghMessage = `\\'${ name }\\' introduced in ${ version }`;
@@ -96,6 +89,7 @@ export const printHookResults = (
 			description,
 			hookType,
 			changeType,
+			ghLink,
 		} of data ) {
 			const cliMessage = `**${ name }** introduced in ${ version }`;
 			const ghMessage = `\\'${ name }\\' introduced in ${ version }`;
@@ -106,8 +100,10 @@ export const printHookResults = (
 			log( '---------------------------------------------------' );
 			log( `HOOK: ${ name }: ${ description }` );
 			log( '---------------------------------------------------' );
-			log( `NOTICE | ${ title } | ${ message }` );
+			log( `GITHUB: ${ ghLink }` );
 			log( '---------------------------------------------------' );
+			log( `NOTICE | ${ title } | ${ message }` );
+			log( '---------------------------------------------------\n' );
 		}
 	}
 };
