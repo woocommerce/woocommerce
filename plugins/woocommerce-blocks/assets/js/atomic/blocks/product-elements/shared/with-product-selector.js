@@ -27,7 +27,10 @@ const withProductSelector = ( selectorArgs ) => ( OriginalComponent ) => {
 		const { productId } = attributes;
 		const [ isEditing, setIsEditing ] = useState( ! productId );
 
-		if ( productDataContext.hasContext ) {
+		if (
+			productDataContext.hasContext ||
+			Number.isFinite( props.context?.queryId )
+		) {
 			return <OriginalComponent { ...props } />;
 		}
 
