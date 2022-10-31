@@ -193,8 +193,8 @@ class PluginsHelper {
 			if ( is_wp_error( $api ) ) {
 				$properties = array(
 					/* translators: %s: plugin slug (example: woocommerce-services) */
-					'error_message' => __( 'The requested plugin `%s` could not be installed. Plugin API call failed.', 'woocommerce' ),
-					'api'           => $api,
+					'error_message' => sprintf( __( 'The requested plugin `%s` could not be installed. Plugin API call failed.', 'woocommerce' ), $slug ),
+					'api'           => $api->get_error_message(),
 					'slug'          => $slug,
 				);
 				wc_admin_record_tracks_event( 'install_plugin_error', $properties );
@@ -221,11 +221,12 @@ class PluginsHelper {
 			if ( is_wp_error( $result ) || is_null( $result ) ) {
 				$properties = array(
 					/* translators: %s: plugin slug (example: woocommerce-services) */
-					'error_message' => __( 'The requested plugin `%s` could not be installed.', 'woocommerce' ),
-					'slug'          => $slug,
-					'api'           => $api,
-					'upgrader'      => $upgrader,
-					'result'        => $result,
+					'error_message'         => sprintf( __( 'The requested plugin `%s` could not be installed.', 'woocommerce' ), $slug ),
+					'slug'                  => $slug,
+					'api_version'           => $api->version,
+					'api_download_link'     => $api->download_link,
+					'upgrader_skin_message' => implode( ',', $upgrader->skin->get_upgrade_messages() ),
+					'result'                => $result,
 				);
 				wc_admin_record_tracks_event( 'install_plugin_error', $properties );
 
