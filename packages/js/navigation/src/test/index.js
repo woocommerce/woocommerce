@@ -34,7 +34,7 @@ describe( 'getQuery', () => {
 			buz: '-1',
 		} );
 	} );
-	// Support non-standard array-syntax.
+	// Ignore overwritten params, and treat [] as a part of the name.
 	it( 'should return an object containing array-like parameters', () => {
 		getHistory().push( {
 			search: 'foo=bar&biz=1&buz[]=a&buz[]=-1&buz[2]=2&fuz=0&fuz=1',
@@ -43,8 +43,9 @@ describe( 'getQuery', () => {
 		expect( getQuery() ).toEqual( {
 			foo: 'bar',
 			biz: '1',
-			buz: [ 'a', '-1', '2' ],
-			fuz: [ '0', '1' ],
+			'buz[]': '-1',
+			'buz[2]': '2',
+			fuz: '1',
 		} );
 	} );
 } );

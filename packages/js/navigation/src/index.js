@@ -176,11 +176,9 @@ export function getNewPath(
  * @return {Object}  Current query object, defaults to empty object.
  */
 export function getQuery() {
-	const search = getHistory().location.search;
-	if ( search.length ) {
-		return parse( search.substring( 1 ) ) || {};
-	}
-	return {};
+	return Object.fromEntries(
+		new URLSearchParams( getHistory().location.search )
+	);
 }
 
 /**
