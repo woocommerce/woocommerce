@@ -12,11 +12,11 @@ import { __ } from '@wordpress/i18n';
  * @return string
  */
 export const getProductTitle = (
-	name: string,
-	type: string,
+	name: string | undefined,
+	type: string | undefined,
 	persistedName: string | undefined
 ) => {
-	if ( name.length ) {
+	if ( name?.length ) {
 		return name;
 	}
 
