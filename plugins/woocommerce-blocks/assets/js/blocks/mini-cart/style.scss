@@ -10,7 +10,7 @@
 	display: flex;
 	font-size: inherit;
 	font-family: inherit;
-	font-weight: 400;
+	font-weight: inherit;
 	padding: em($gap-small) em($gap-smaller);
 
 	&:hover:not([disabled]) {
@@ -29,7 +29,8 @@
 @media screen and (min-width: 768px) {
 	.wc-block-mini-cart__amount {
 		display: initial;
-		font-weight: 600;
+		font-size: inherit;
+		font-weight: inherit;
 		margin-right: $gap-smaller;
 	}
 }
@@ -64,11 +65,13 @@
 }
 
 .wp-block-woocommerce-mini-cart-contents {
-	background: #fff;
 	box-sizing: border-box;
 	height: 100vh;
 	padding: 0;
 	justify-content: center;
+}
+:where(.wp-block-woocommerce-mini-cart-contents) {
+	background: #fff;
 }
 
 .wp-block-woocommerce-empty-mini-cart-contents-block,
