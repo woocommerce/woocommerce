@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Removed qs dependency, replaced with native `URLSearchParams`.
