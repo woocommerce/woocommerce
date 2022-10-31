@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix invalid wcadmin_install_plugin_error event props
