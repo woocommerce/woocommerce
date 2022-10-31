@@ -1,6 +1,6 @@
-# WooCommerce Playwright End to End Tests
+# WooCommerce Core API Test Suite
 
-This is the documentation for the new api-core-tests setup based on Playwright and wp-env. It superseedes the Puppeteer and e2e-environment [setup](../tests/e2e), which we will gradually deprecate.
+This package contains automated API tests for WooCommerce, based on Playwright and `wp-env`. It supersedes the SuperTest based [api-core-tests package](https://www.npmjs.com/package/@woocommerce/api-core-tests) and e2e-environment [setup](../tests/e2e), which we will gradually deprecate.
 
 ## Table of contents
 
@@ -21,36 +21,33 @@ This is the documentation for the new api-core-tests setup based on Playwright a
 - PNPM ([Installation instructions](https://pnpm.io/installation))
 - Docker and Docker Compose ([Installation instructions](https://docs.docker.com/engine/install/))
 
-Note, that if you are on Mac and you install docker through other methods such as homebrew, for example, your steps to set it up might be different. The commands listed in steps below may also vary.
+Note, that if you are on Mac and you install Docker through other methods such as homebrew, for example, your steps to set it up might be different. The commands listed in steps below may also vary.
 
-If you are using Windows, we recommend using [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/) for running E2E tests. Follow the [WSL Setup Instructions](../tests/e2e/WSL_SETUP_INSTRUCTIONS.md) first before proceeding with the steps below.
+If you are using Windows, we recommend using [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/) for running tests. Follow the [WSL Setup Instructions](../tests/e2e/WSL_SETUP_INSTRUCTIONS.md) first before proceeding with the steps below.
 
 ### Introduction
 
-api-core-tests are powered by Playwright. The test site is spinned up using `wp-env` (recommended), but we will continue to support `e2e-environment` in the meantime.
+WooCommerce's `api-core-tests` are powered by Playwright. The test site is spun up using `wp-env` (recommended), but we will continue to support `e2e-environment` in the meantime.
 
 **Running tests for the first time:**
-Note: the commands may need to be executed in `plugins/woocommerce` (or a subdirectory thereof)
 
 - `nvm use`
 - `pnpm install`
 - `pnpm run build --filter=woocommerce`
-- `pnpm env:test --filter=woocommerce`
-
-Then execute the tests with the following command:
-
-- `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js` (headless)
+- `cd plugins/woocommerce`
+- `pnpm env:test`
+- `pnpm test:api-pw`
 
 To run the test again, re-create the environment to start with a fresh state 
 
-- `pnpm env:destroy --filter=woocommerce`
-- `pnpm env:test --filter=woocommerce`
+- `pnpm env:destroy`
+- `pnpm env:test`
+- `pnpm test:api-pw`
 
 Other ways of running tests:
 
-- `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js --headed` (headed)
-- `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js --debug` (debug)
-- `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js ./tests/api-core-tests/tests/hello/hello.test.js` (running a single test)
+- `pnpm test:api-pw --debug` (debug)
+- `pnpm test:api-pw ./tests/api-core-tests/tests/hello/hello.test.js` (running a single test)
 
 To see all options, run `cd plugins/woocommerce && pnpm playwright test --help`
 
@@ -69,8 +66,7 @@ USER_KEY=""
 USER_SECRET=""
 ```
 
-For local setup, create a `.env` file in the `woocommerce/plugins/woocommerce` folder with the three required values described above.
-If any of these variables are configured they will override the values automatically set in the `playwright.config.js`
+For local setup, create a `.env` file in the `woocommerce/plugins/woocommerce` folder with the three required values described above. If any of these variables are configured they will override the values automatically set in the `playwright.config.js`
 
 When using a username and password combination instead of a consumer secret and consumer key, make sure to have the [JSON Basic Authentication plugin](https://github.com/WP-API/Basic-Auth) installed and activated on the test site.
 
@@ -113,11 +109,11 @@ The test environment uses the following test variables:
 
 If you need to modify the port for your local test environment (eg. port is already in use) or use, edit [playwright.config.js](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/playwright.config.js). Depending on what environment tool you are using, you will need to also edit the respective `.json` file.
 
-**Modiify the port wp-env**
+**Modify the port wp-env**
 
 Edit [.wp-env.json](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/.wp-env.json) and [playwright.config.js](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/playwright.config.js).
 
-**Modiify port for e2e-environment**
+**Modify port for e2e-environment**
 
 Edit [tests/e2e/config/default.json](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/config/default.json).****
 
@@ -125,9 +121,9 @@ Edit [tests/e2e/config/default.json](https://github.com/woocommerce/woocommerce/
 
 After you run a test, it's best to restart the environment to start from a fresh state. We are currently working to reset the state more efficiently to avoid the restart being needed, but this is a work-in-progress.
 
-- `pnpm env:down --filter=woocommerce` to stop the environment
-- `pnpm env:destroy --filter=woocommerce` when you make changes to `.wp-env.json`
-- `pnpm env:test --filter=woocommerce` to spin up the test environment
+- `pnpm env:down` to stop the environment
+- `pnpm env:destroy` when you make changes to `.wp-env.json`
+- `pnpm env:test` to spin up the test environment
 
 ## Guide for writing tests
 
@@ -142,17 +138,11 @@ Based on our example, the test skeleton would look as follows:
 
 ```js
 test.describe( 'Merchant can create virtual product', () => {
-	test( 'merchant can log in', async () => {
+	test( 'merchant can log in', async () => { } );
 
-	} );
+	test( 'merchant can create virtual product', async () => { } );
 
-	test( 'merchant can create virtual product', async () => {
-
-	} );
-
-	test( 'merchant can verify that virtual product was created', async () => {
-
-	} );
+	test( 'merchant can verify that virtual product was created', async () => { } );
 } );
 ```
 

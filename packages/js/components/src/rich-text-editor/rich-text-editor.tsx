@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
+import { BaseControl, SlotFillProvider } from '@wordpress/components';
 import { BlockEditorProvider } from '@wordpress/block-editor';
 import { BlockInstance } from '@wordpress/blocks';
-import { SlotFillProvider } from '@wordpress/components';
 import { debounce } from 'lodash';
 import {
 	createElement,
@@ -28,12 +28,14 @@ registerBlocks();
 
 type RichTextEditorProps = {
 	blocks: BlockInstance[];
+	label?: string;
 	onChange: ( changes: BlockInstance[] ) => void;
 	entryId?: string;
 };
 
 export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 	blocks,
+	label,
 	onChange,
 } ) => {
 	const blocksRef = useRef( blocks );
@@ -61,6 +63,9 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 
 	return (
 		<div className="woocommerce-rich-text-editor">
+			{ label && (
+				<BaseControl.VisualLabel>{ label }</BaseControl.VisualLabel>
+			) }
 			<SlotFillProvider>
 				<BlockEditorProvider
 					value={ blocksRef.current }

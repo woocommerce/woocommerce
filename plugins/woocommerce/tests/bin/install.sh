@@ -131,7 +131,11 @@ install_test_suite() {
 		sed $ioption "s/youremptytestdbnamehere/$DB_NAME/" "$WP_TESTS_DIR"/wp-tests-config.php
 		sed $ioption "s/yourusernamehere/$DB_USER/" "$WP_TESTS_DIR"/wp-tests-config.php
 		sed $ioption "s/yourpasswordhere/$DB_PASS/" "$WP_TESTS_DIR"/wp-tests-config.php
-		sed $ioption "s|localhost|${DB_HOST}|" "$WP_TESTS_DIR"/wp-tests-config.php
+		if [[ "$DB_HOST" == *.sock ]]; then
+			sed $ioption "s|localhost|:${DB_HOST}|" "$WP_TESTS_DIR"/wp-tests-config.php
+		else
+			sed $ioption "s|localhost|${DB_HOST}|" "$WP_TESTS_DIR"/wp-tests-config.php
+		fi
 	fi
 
 }
@@ -145,7 +149,7 @@ install_db() {
 	# If we're trying to connect to a socket we want to handle it differently.
 	if [[ "$DB_HOST" == *.sock ]]; then
 		# create database using the socket
-		mysqladmin create $DB_NAME --socket="$DB_HOST"
+		mysqladmin create $DB_NAME --user="$DB_USER" --password="$DB_PASS" --socket="$DB_HOST"
 	else
 		# Decide whether or not there is a port.
 		local PARTS=(${DB_HOST//\:/ })

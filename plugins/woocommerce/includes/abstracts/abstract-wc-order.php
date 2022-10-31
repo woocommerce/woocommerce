@@ -539,6 +539,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		return wc_string_to_bool( $this->get_prop( 'recorded_coupon_usage_counts', $context ) );
 	}
 
+	/**
+	 * Get basic order data in array format.
+	 *
+	 * @return array
+	 */
+	public function get_base_data() {
+		return array_merge(
+			array( 'id' => $this->get_id() ),
+			$this->data
+		);
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters

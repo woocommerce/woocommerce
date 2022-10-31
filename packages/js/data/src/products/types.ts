@@ -59,9 +59,7 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	description: string;
 	short_description: string;
 	sku: string;
-	date_on_sale_from: string | null;
 	date_on_sale_from_gmt: string | null;
-	date_on_sale_to: string | null;
 	date_on_sale_to_gmt: string | null;
 	virtual: boolean;
 	downloadable: boolean;
@@ -88,6 +86,7 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	backordered: boolean;
 	shipping_required: boolean;
 	shipping_taxable: boolean;
+	shipping_class: string;
 	shipping_class_id: number;
 	average_rating: string;
 	rating_count: number;

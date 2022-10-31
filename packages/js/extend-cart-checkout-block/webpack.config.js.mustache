@@ -10,6 +10,23 @@ const defaultRules = defaultConfig.module.rules.filter( ( rule ) => {
 
 module.exports = {
 	...defaultConfig,
+	entry: {
+		index: path.resolve(process.cwd(), 'src', 'js', 'index.js'),
+		'{{slug}}-checkout-newsletter-subscription-block': path.resolve(
+			process.cwd(),
+			'src',
+			'js',
+			'checkout-newsletter-subscription-block',
+			'index.js'
+		),
+		'{{slug}}-checkout-newsletter-subscription-block-frontend': path.resolve(
+			process.cwd(),
+			'src',
+			'js',
+			'checkout-newsletter-subscription-block',
+			'frontend.js'
+		),
+	},
 	module: {
 		...defaultConfig.module,
 		rules: [

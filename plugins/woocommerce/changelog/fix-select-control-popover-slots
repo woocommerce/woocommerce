@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Remove Popover.Slot usage and make use of exported SelectControlMenuSlot.

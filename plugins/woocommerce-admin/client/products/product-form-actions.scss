@@ -1,11 +1,12 @@
-$gutenberg-blue: #007cba;
-$gutenberg-blue-darker: #0063a1;
+$gutenberg-blue: var(--wp-admin-theme-color);
+$gutenberg-blue-darker: var(--wp-admin-theme-color-darker-20);
 
 .woocommerce-product-form-actions {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	justify-content: flex-end;
+	padding-right: var(--large-gap);
 
 	> .components-button {
 		margin-right: $gap-smaller;

@@ -12,23 +12,4 @@
 			margin-left: $gap-smaller;
 		}
 	}
-
-	&__feature-checkbox {
-		.components-base-control__field {
-			display: flex;
-			.components-checkbox-control {
-				&__label {
-					display: flex;
-				}
-
-				&__input-container {
-					align-self: center;
-				}
-			}
-			.woocommerce-enriched-label__text {
-				align-self: center;
-				margin-right: $gap-smaller;
-			}
-		}
-	}
 }

@@ -13,6 +13,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use \Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use \Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * API\Reports\Orders\Stats\DataStore.
@@ -113,6 +114,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @param array $query_args      Query arguments supplied by the user.
 	 */
 	protected function orders_stats_sql_filter( $query_args ) {
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
 		// @todo Performance of all of this?
 		global $wpdb;
 
@@ -335,6 +337,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				return new \WP_Error( 'woocommerce_analytics_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 			}
 
+			// phpcs:ignore Generic.Commenting.Todo.TaskFound
 			// @todo Remove these assignements when refactoring segmenter classes to use query objects.
 			$totals_query    = array(
 				'from_clause'       => $this->total_query->get_sql_clause( 'join' ),
@@ -474,7 +477,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return int|bool Returns -1 if order won't be processed, or a boolean indicating processing success.
 	 */
 	public static function sync_order( $post_id ) {
-		if ( 'shop_order' !== get_post_type( $post_id ) && 'shop_order_refund' !== get_post_type( $post_id ) ) {
+		if ( ! OrderUtil::is_order( $post_id, array( 'shop_order', 'shop_order_refund' ) ) ) {
 			return -1;
 		}
 
@@ -505,6 +508,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 *
 		 * @param array $data Data written to order stats lookup table.
 		 * @param WC_Order $order  Order object.
+		 *
+		 * @since 4.0.0
 		 */
 		$data = apply_filters(
 			'woocommerce_analytics_update_order_stats_data',
@@ -555,6 +560,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 * Fires when order's stats reports are updated.
 		 *
 		 * @param int $order_id Order ID.
+		 *
+		 * @since 4.0.0.
 		 */
 		do_action( 'woocommerce_analytics_update_order_stats', $order->get_id() );
 
@@ -571,7 +578,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		global $wpdb;
 		$order_id = (int) $post_id;
 
-		if ( 'shop_order' !== get_post_type( $order_id ) && 'shop_order_refund' !== get_post_type( $order_id ) ) {
+		if ( ! OrderUtil::is_order( $post_id, array( 'shop_order', 'shop_order_refund' ) ) ) {
 			return;
 		}
 
@@ -586,6 +593,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 *
 		 * @param int $order_id Order ID.
 		 * @param int $customer_id Customer ID.
+		 *
+		 * @since 4.0.0
 		 */
 		do_action( 'woocommerce_analytics_delete_order_stats', $order_id, $customer_id );
 

@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { format as formatDate } from '@wordpress/date';
 import {
 	createElement,
 	useState,
@@ -22,9 +23,11 @@ import {
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
-export const defaultDateFormat = 'MM/DD/YYYY';
-export const default12HourDateTimeFormat = 'MM/DD/YYYY h:mm a';
-export const default24HourDateTimeFormat = 'MM/DD/YYYY H:mm';
+// PHP style formatting:
+// https://wordpress.org/support/article/formatting-date-and-time/
+export const defaultDateFormat = 'm/d/Y';
+export const default12HourDateTimeFormat = 'm/d/Y h:i a';
+export const default24HourDateTimeFormat = 'm/d/Y H:i';
 
 export type DateTimePickerControlOnChangeHandler = (
 	date: string,
@@ -37,6 +40,7 @@ export type DateTimePickerControlProps = {
 	disabled?: boolean;
 	isDateOnlyPicker?: boolean;
 	is12HourPicker?: boolean;
+	timeForDateOnly?: 'start-of-day' | 'end-of-day';
 	onChange?: DateTimePickerControlOnChangeHandler;
 	onBlur?: () => void;
 	label?: string;
@@ -49,6 +53,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	currentDate,
 	isDateOnlyPicker = false,
 	is12HourPicker = true,
+	timeForDateOnly = 'start-of-day',
 	dateTimeFormat,
 	disabled = false,
 	onChange,
@@ -103,9 +108,10 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		return moment.utc( dateString, moment.ISO_8601, true );
 	}
 
-	function parseMoment( dateString?: string | null ): Moment {
-		// parse input date string as local time
-		return moment( dateString, displayFormat );
+	function parseMoment( dateString: string | null ): Moment {
+		// parse input date string as local time;
+		// be lenient of user input and try to match any format Moment can
+		return moment( dateString );
 	}
 
 	function formatMomentIso( momentDate: Moment ): string {
@@ -113,7 +119,21 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	}
 
 	function formatMoment( momentDate: Moment ): string {
-		return momentDate.local().format( displayFormat );
+		return formatDate( displayFormat, momentDate.local() );
+	}
+
+	function maybeForceTime( momentDate: Moment ): Moment {
+		if ( ! isDateOnlyPicker ) return momentDate;
+
+		const updatedMomentDate = momentDate.clone();
+
+		if ( timeForDateOnly === 'start-of-day' ) {
+			updatedMomentDate.startOf( 'day' );
+		} else if ( timeForDateOnly === 'end-of-day' ) {
+			updatedMomentDate.endOf( 'day' );
+		}
+
+		return updatedMomentDate;
 	}
 
 	function hasFocusLeftInputAndDropdownContent(
@@ -161,15 +181,17 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		onChangePropFunctionRef.current = onChange;
 	}, [ onChange ] );
 
-	const inputStringChangeHandlerFunctionRef = useRef<
-		( newInputString: string, fireOnChange: boolean ) => void
-	>( ( newInputString: string, fireOnChange: boolean ) => {
+	function inputStringChangeHandlerFunction(
+		newInputString: string,
+		fireOnChange: boolean
+	) {
 		if ( ! isMounted.current ) return;
 
-		const newDateTime = parseMoment( newInputString );
+		let newDateTime = parseMoment( newInputString );
 		const isValid = newDateTime.isValid();
 
 		if ( isValid ) {
+			newDateTime = maybeForceTime( newDateTime );
 			setLastValidDate( newDateTime );
 		}
 
@@ -182,7 +204,17 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 				isValid
 			);
 		}
-	} );
+	}
+
+	const inputStringChangeHandlerFunctionRef = useRef<
+		( newInputString: string, fireOnChange: boolean ) => void
+	>( inputStringChangeHandlerFunction );
+	// whenever forceTimeTo changes, we need to reset the ref to inputStringChangeHandlerFunction
+	// so that we are using the most current forceTimeTo value inside of it
+	useEffect( () => {
+		inputStringChangeHandlerFunctionRef.current =
+			inputStringChangeHandlerFunction;
+	}, [ timeForDateOnly ] );
 
 	const debouncedInputStringChangeHandler = useDebounce(
 		inputStringChangeHandlerFunctionRef.current,
@@ -228,7 +260,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		} else {
 			changeImmediate( currentDate || '', fireOnChange );
 		}
-	}, [ currentDate, displayFormat ] );
+	}, [ currentDate, displayFormat, timeForDateOnly ] );
 
 	return (
 		<Dropdown
