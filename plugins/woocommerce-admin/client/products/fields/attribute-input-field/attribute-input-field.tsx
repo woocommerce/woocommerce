@@ -27,7 +27,6 @@ type AttributeInputFieldProps = {
 	placeholder?: string;
 	disabled?: boolean;
 	ignoredAttributeIds?: number[];
-	onlyAttributeIds?: number[];
 };
 
 export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
@@ -37,7 +36,6 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	label,
 	disabled,
 	ignoredAttributeIds = [],
-	onlyAttributeIds = [],
 } ) => {
 	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
 		const { getProductAttributes, hasFinishedResolution } = select(
@@ -53,24 +51,18 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 		allItems: NarrowedQueryAttribute[],
 		inputValue: string
 	) => {
-		const onlyIdsFilter = ( item: NarrowedQueryAttribute ) =>
-			onlyAttributeIds.length
-				? onlyAttributeIds.includes( item.id )
-				: true;
-
 		const ignoreIdsFilter = ( item: NarrowedQueryAttribute ) =>
 			ignoredAttributeIds.length
 				? ! ignoredAttributeIds.includes( item.id )
 				: true;
 
-		return allItems
-			.filter( onlyIdsFilter )
-			.filter( ignoreIdsFilter )
-			.filter( ( item ) =>
+		return allItems.filter(
+			( item ) =>
+				ignoreIdsFilter( item ) &&
 				( item.name || '' )
 					.toLowerCase()
 					.startsWith( inputValue.toLowerCase() )
-			);
+		);
 	};
 
 	return (
