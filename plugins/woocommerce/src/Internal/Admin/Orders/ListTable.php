@@ -154,7 +154,7 @@ class ListTable extends WP_List_Table {
 				<hr class='wp-header-end'>"
 		);
 
-		if ( ! $this->has_filter && $this->should_render_blank_state() ) {
+		if ( $this->should_render_blank_state() ) {
 			$this->render_blank_state();
 			return;
 		}
@@ -430,7 +430,7 @@ class ListTable extends WP_List_Table {
 	 * @return boolean TRUE when the blank state should be rendered, FALSE otherwise.
 	 */
 	private function should_render_blank_state(): bool {
-		return 0 === $this->count_orders_by_status( $this->get_visible_statuses() );
+		return ( ! $this->has_filter ) &&  0 === $this->count_orders_by_status( array_keys( $this->get_visible_statuses() ) );
 	}
 
 	/**
