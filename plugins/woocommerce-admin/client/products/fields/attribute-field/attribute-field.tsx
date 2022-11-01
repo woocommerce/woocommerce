@@ -93,12 +93,10 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		);
 	}, [ productId, value, hydrationComplete ] );
 
-	useEffect( () => {
-		if ( ! hydrationComplete ) {
-			return;
-		}
+	const updateAttributes = ( attributes: HydratedAttributeType[] ) => {
+		setHydratedAttributes( attributes );
 		onChange(
-			hydratedAttributes.map( ( attr ) => {
+			attributes.map( ( attr ) => {
 				return {
 					...attr,
 					options: attr.terms.map( ( term ) => term.name ),
@@ -106,12 +104,12 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 				};
 			} )
 		);
-	}, [ hydratedAttributes, hydrationComplete ] );
+	};
 
 	const onRemove = ( attribute: ProductAttribute ) => {
 		// eslint-disable-next-line no-alert
 		if ( window.confirm( __( 'Remove this attribute?', 'woocommerce' ) ) ) {
-			setHydratedAttributes(
+			updateAttributes(
 				hydratedAttributes.filter(
 					( attr ) => attr.id !== attribute.id
 				)
@@ -120,7 +118,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 	};
 
 	const onAddNewAttributes = ( newAttributes: HydratedAttributeType[] ) => {
-		setHydratedAttributes( [
+		updateAttributes( [
 			...( hydratedAttributes || [] ),
 			...newAttributes
 				.filter(
@@ -284,7 +282,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 							changedAttribute
 						);
 
-						setHydratedAttributes( newAttributesSet );
+						updateAttributes( newAttributesSet );
 						setEditingAttributeId( null );
 					} }
 					attribute={
