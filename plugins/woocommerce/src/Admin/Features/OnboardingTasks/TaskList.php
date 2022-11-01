@@ -106,6 +106,8 @@ class TaskList {
 	/**
 	 * Key value map of task class and id used for sections.
 	 *
+	 * @deprecated 7.2.0
+	 *
 	 * @var array
 	 */
 	public $task_class_id_map = array();
@@ -126,7 +128,6 @@ class TaskList {
 			'options'                 => array(),
 			'visible'                 => true,
 			'display_progress_header' => false,
-			'sections'                => array(),
 		);
 
 		$data = wp_parse_args( $data, $defaults );
@@ -274,8 +275,6 @@ class TaskList {
 			return;
 		}
 
-		$task_class_name                             = substr( get_class( $task ), strrpos( get_class( $task ), '\\' ) + 1 );
-		$this->task_class_id_map[ $task_class_name ] = $task->get_id();
 		$this->tasks[]                               = $task;
 	}
 
