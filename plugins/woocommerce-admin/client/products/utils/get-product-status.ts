@@ -5,6 +5,26 @@ import { __ } from '@wordpress/i18n';
 import { PartialProduct } from '@woocommerce/data';
 
 /**
+ * Labels for product statuses.
+ */
+export const PRODUCT_STATUS_KEYS = {
+	unsaved: 'unsaved',
+	draft: 'draft',
+	instock: 'instock',
+	outofstock: 'outofstock',
+};
+
+/**
+ * Labels for product statuses.
+ */
+export const PRODUCT_STATUS_LABELS = {
+	[ PRODUCT_STATUS_KEYS.unsaved ]: __( 'Unsaved', 'woocommerce' ),
+	[ PRODUCT_STATUS_KEYS.draft ]: __( 'Draft', 'woocommerce' ),
+	[ PRODUCT_STATUS_KEYS.instock ]: __( 'In stock', 'woocommerce' ),
+	[ PRODUCT_STATUS_KEYS.outofstock ]: __( 'Out of stock', 'woocommerce' ),
+};
+
+/**
  * Get the product status for use in the header.
  *
  * @param  product Product instance.
@@ -12,16 +32,16 @@ import { PartialProduct } from '@woocommerce/data';
  */
 export const getProductStatus = ( product: PartialProduct | undefined ) => {
 	if ( ! product ) {
-		return __( 'Unsaved', 'woocommerce' );
+		return PRODUCT_STATUS_KEYS.unsaved;
 	}
 
 	if ( product.status === 'draft' ) {
-		return __( 'Draft', 'woocommerce' );
+		return PRODUCT_STATUS_KEYS.draft;
 	}
 
 	if ( product.stock_status === 'instock' ) {
-		return __( 'In stock', 'woocommerce' );
+		return PRODUCT_STATUS_KEYS.instock;
 	}
 
-	return __( 'Out of stock', 'woocommerce' );
+	return PRODUCT_STATUS_KEYS.outofstock;
 };
