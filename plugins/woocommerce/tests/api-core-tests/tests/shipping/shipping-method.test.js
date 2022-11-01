@@ -38,7 +38,12 @@ test.describe('Shipping methods API tests', () => {
 	test('cannot create a shipping method', async ({
 		request,
 	}) => {
-		// call API to create a webhook
+		/**
+		 * call API to attempt to create a shipping method
+		 * This call will not work as we have no ability to create new shipping methods,
+		 * only retrieve the existing shipping methods
+		 * i.e. Flat rate, Free shipping and Local pickup
+		 */
 		const response = await request.post(
 			'/wp-json/wc/v3/shipping_methods', {
 				data: {
@@ -56,7 +61,7 @@ test.describe('Shipping methods API tests', () => {
 	test('can retrieve all shipping methods', async ({
 		request
 	}) => {
-		// call API to retrieve all webhooks
+		// call API to retrieve all shipping methods
 		const response = await request.get('/wp-json/wc/v3/shipping_methods');
 		const responseJSON = await response.json();
 		expect(response.status()).toEqual(200);
@@ -70,7 +75,7 @@ test.describe('Shipping methods API tests', () => {
 	test('can retrieve a shipping method', async ({
 		request
 	}) => {
-		// call API to retrieve the previously saved webhook
+		// call API to retrieve a shipping method
 		const response = await request.get(
 			`/wp-json/wc/v3/shipping_methods/local_pickup`
 		);
@@ -83,7 +88,12 @@ test.describe('Shipping methods API tests', () => {
 	test(`cannot update a shipping method`, async ({
 		request,
 	}) => {
-		// update webhook
+		/**
+		 * call API to attempt to update a shipping method
+		 * This call will not work as we have no ability to update new shipping methods,
+		 * only retrieve the existing shipping methods
+		 * i.e. Flat rate, Free shipping and Local pickup
+		 */
 		const response = await request.put(
 			'/wp-json/wc/v3/shipping_methods/local_pickup', {
 				data: {
@@ -101,6 +111,12 @@ test.describe('Shipping methods API tests', () => {
 	test('cannot delete a shipping method', async ({
 		request
 	}) => {
+		/**
+		 * call API to attempt to delete a shipping method
+		 * This call will not work as we have no ability to delete shipping methods,
+		 * only retrieve the existing shipping methods
+		 * i.e. Flat rate, Free shipping and Local pickup
+		 */
 		const response = await request.delete('/wp-json/wc/v3/shipping_methods', {
 			data: {
 				force: true
