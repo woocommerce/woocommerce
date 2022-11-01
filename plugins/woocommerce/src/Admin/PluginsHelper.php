@@ -335,6 +335,7 @@ class PluginsHelper {
 			if ( ! is_null( $result ) ) {
 				/**
 				 * Action triggered when a plugin activation fails.
+				 *
 				 * @param string $slug The plugin slug.
 				 * @param null|\WP_Error $result The result of the plugin activation.
 				 * @since 6.4.0
