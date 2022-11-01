@@ -3,8 +3,8 @@
  */
 import { sprintf, __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
-import { Spinner } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { Spinner, Icon } from '@wordpress/components';
+import { plus } from '@wordpress/icons';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
 	QueryProductAttribute,
@@ -22,12 +22,12 @@ import {
  */
 import { CreateAttributeModal } from './create-attribute-modal';
 
-type NarrowedQueryAttribute = Pick< QueryProductAttribute, 'id' | 'name' >;
-
 type AttributeInputFieldProps = {
 	value?: Pick< QueryProductAttribute, 'id' | 'name' > | null;
 	onChange: (
-		value?: Omit< ProductAttribute, 'position' | 'visible' | 'variation' >
+		value?:
+			| Omit< ProductAttribute, 'position' | 'visible' | 'variation' >
+			| string
 	) => void;
 	label?: string;
 	placeholder?: string;
@@ -43,8 +43,6 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	disabled,
 	ignoredAttributeIds = [],
 } ) => {
-	const [ addNewAttributeName, setAddNewAttributeName ] =
-		useState< string >();
 	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
 		const { getProductAttributes, hasFinishedResolution } = select(
 			EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
@@ -91,6 +89,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	return (
 		<>
 			<SelectControl< NarrowedQueryAttribute >
+				className="woocommerce-attribute-input-field"
 				items={ attributes || [] }
 				label={ label || '' }
 				disabled={ disabled }
@@ -100,15 +99,15 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 				getItemValue={ ( item ) => item?.id || '' }
 				selected={ value }
 				onSelect={ ( attribute ) => {
-					if ( attribute.id === -99 ) {
-						setAddNewAttributeName( attribute.name );
-						return;
-					}
-					onChange( {
-						id: attribute.id,
-						name: attribute.name,
-						options: [],
-					} );
+					onChange(
+						attribute.id === -99
+							? attribute.name
+							: {
+									id: attribute.id,
+									name: attribute.name,
+									options: [],
+							  }
+					);
 				} }
 				onRemove={ () => onChange() }
 			>
@@ -132,16 +131,27 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 										item={ item }
 										getItemProps={ getItemProps }
 									>
-										{ index === -99
-											? sprintf(
-													/* translators: The name of the new attribute to be created */
-													__(
-														'Create "%s"',
-														'woocommerce'
-													),
-													item.name
-											  )
-											: item.name }
+										{ item.id === -99 ? (
+											<div className="woocommerce-attribute-input-field__add-new">
+												<Icon
+													icon={ plus }
+													size={ 20 }
+													className="woocommerce-attribute-input-field__add-new-icon"
+												/>
+												<span>
+													{ sprintf(
+														/* translators: The name of the new attribute term to be created */
+														__(
+															'Create "%s"',
+															'woocommerce'
+														),
+														item.name
+													) }
+												</span>
+											</div>
+										) : (
+											item.name
+										) }
 									</MenuItem>
 								) )
 							) }
@@ -149,20 +159,6 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 					);
 				} }
 			</SelectControl>
-			{ addNewAttributeName && (
-				<CreateAttributeModal
-					initialAttributeName={ addNewAttributeName }
-					onCancel={ () => setAddNewAttributeName( undefined ) }
-					onCreated={ ( newAttribute ) => {
-						onChange( {
-							id: newAttribute.id,
-							name: newAttribute.name,
-							options: [],
-						} );
-						setAddNewAttributeName( undefined );
-					} }
-				/>
-			) }
 		</>
 	);
 };
