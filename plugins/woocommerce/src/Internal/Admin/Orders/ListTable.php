@@ -421,7 +421,7 @@ class ListTable extends WP_List_Table {
 	 * @return boolean TRUE when the blank state should be rendered, FALSE otherwise.
 	 */
 	private function should_render_blank_state(): bool {
-		return ( ! $this->has_filter ) &&  0 === $this->count_orders_by_status( array_keys( $this->get_visible_statuses() ) );
+		return ( ! $this->has_filter ) && 0 === $this->count_orders_by_status( array_keys( $this->get_visible_statuses() ) );
 	}
 
 	/**
