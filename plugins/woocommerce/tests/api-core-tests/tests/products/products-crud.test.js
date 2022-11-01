@@ -405,7 +405,7 @@ test.describe('Products API tests: CRUD', () => {
 		test('can retrieve all product categories', async ({
 			request
 		}) => {
-			// call API to retrieve all product tags
+			// call API to retrieve all product categories
 			const response = await request.get('/wp-json/wc/v3/products/categories');
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
@@ -417,7 +417,7 @@ test.describe('Products API tests: CRUD', () => {
 		test('can update a product category', async ({
 			request
 		}) => {
-			// call API to retrieve all product tags
+			// call API to retrieve all product categories
 			const response = await request.put(`wp-json/wc/v3/products/categories/${productCategoryId}`, {
 				data: {
 					description: 'Games played on a video games console or computer.'
@@ -611,7 +611,7 @@ test.describe('Products API tests: CRUD', () => {
 		test('can retrieve all product reviews', async ({
 			request
 		}) => {
-			// call API to retrieve all product tags
+			// call API to retrieve all product reviews
 			const response = await request.get('/wp-json/wc/v3/products/reviews');
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
@@ -622,7 +622,7 @@ test.describe('Products API tests: CRUD', () => {
 		test('can update a product review', async ({
 			request
 		}) => {
-			// call API to retrieve all product tags
+			// call API to retrieve all product reviews
 			const response = await request.put(`wp-json/wc/v3/products/reviews/${productReviewId}`, {
 				data: {
 					rating: 1
@@ -644,7 +644,7 @@ test.describe('Products API tests: CRUD', () => {
 		test('can permanently delete a product review', async ({
 			request
 		}) => {
-			// Delete the product category.
+			// Delete the product review.
 			const response = await request.delete(
 				`wp-json/wc/v3/products/reviews/${productReviewId}`, {
 					data: {
@@ -801,7 +801,7 @@ test.describe('Products API tests: CRUD', () => {
 		test('can retrieve all product shipping classes', async ({
 			request
 		}) => {
-			// call API to retrieve all product tags
+			// call API to retrieve all product shipping classes
 			const response = await request.get('/wp-json/wc/v3/products/shipping_classes');
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
@@ -812,7 +812,7 @@ test.describe('Products API tests: CRUD', () => {
 		test('can update a product shipping class', async ({
 			request
 		}) => {
-			// call API to retrieve all product tags
+			// call API to retrieve a product shipping class
 			const response = await request.put(`wp-json/wc/v3/products/shipping_classes/${productShippingClassId}`, {
 				data: {
 					description: 'This is a description for the Priority shipping class.'
@@ -959,7 +959,7 @@ test.describe('Products API tests: CRUD', () => {
 		test('can update a product tag', async ({
 			request
 		}) => {
-			// call API to retrieve all product tags
+			// call API to update a product tag
 			const response = await request.put(`wp-json/wc/v3/products/tags/${productTagId}`, {
 				data: {
 					description: 'Genuine leather.'
@@ -1148,7 +1148,7 @@ test.describe('Products API tests: CRUD', () => {
 		test('can retrieve all product variations', async ({
 			request
 		}) => {
-			// call API to retrieve all product tags
+			// call API to retrieve all product variations
 			const response = await request.get(`wp-json/wc/v3/products/${variableProductId}/variations`);
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
@@ -1159,7 +1159,7 @@ test.describe('Products API tests: CRUD', () => {
 		test('can update a product variation', async ({
 			request
 		}) => {
-			// call API to retrieve all product tags
+			// call API to update the product variation
 			const response = await request.put(`wp-json/wc/v3/products/${variableProductId}/variations/${productVariationId}`, {
 				data: {
 					"regular_price": "30.00",
@@ -1174,7 +1174,7 @@ test.describe('Products API tests: CRUD', () => {
 		test('can permanently delete a product variation', async ({
 			request
 		}) => {
-			// Delete the product tag.
+			// Delete the product variation.
 			const response = await request.delete(
 				`wp-json/wc/v3/products/${variableProductId}/variations/${productVariationId}`, {
 					data: {
@@ -1184,7 +1184,7 @@ test.describe('Products API tests: CRUD', () => {
 			);
 			expect(response.status()).toEqual(200);
 
-			// Verify that the product tag can no longer be retrieved.
+			// Verify that the product variation can no longer be retrieved.
 			const getDeletedProductVariationResponse = await request.get(
 				`wp-json/wc/v3/products/${variableProductId}/variations/${productVariationId}`
 			);
