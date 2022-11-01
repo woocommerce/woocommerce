@@ -57,19 +57,6 @@ export const ProductMoreMenu = () => {
 						>
 							{ __( 'Use the classic editor', 'woocommerce' ) }
 						</MenuItem>
-						<MenuItem
-							onClick={ () => {
-								onClose();
-							} }
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							// @ts-ignore The href prop exists as buttonProps.
-							href="#"
-							icon={ <WelcomeGuideIcon /> }
-							iconPosition="right"
-							target="_blank"
-						>
-							{ __( 'Welcome guide', 'woocommerce' ) }
-						</MenuItem>
 					</>
 				) }
 			</DropdownMenu>
