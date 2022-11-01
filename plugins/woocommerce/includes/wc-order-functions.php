@@ -341,11 +341,12 @@ function wc_processing_order_count() {
  * @return int
  */
 function wc_orders_count( $status ) {
-	$count          = 0;
-	$status         = 'wc-' . $status;
-	$order_statuses = array_keys( wc_get_order_statuses() );
+	$count           = 0;
+	$legacy_statuses = array( 'draft', 'trash' );
+	$valid_statuses  = array_merge( array_keys( wc_get_order_statuses() ), $legacy_statuses );
+	$status          = ( ! in_array( $status, $legacy_statuses, true ) && 0 !== strpos( $status, 'wc-' ) ) ? 'wc-' . $status : $status;
 
-	if ( ! in_array( $status, $order_statuses, true ) ) {
+	if ( ! in_array( $status, $valid_statuses, true ) ) {
 		return 0;
 	}
 
