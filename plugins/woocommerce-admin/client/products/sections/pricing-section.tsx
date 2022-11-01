@@ -286,12 +286,7 @@ export const PricingSection: React.FC = () => {
 						checked={ showSaleSchedule }
 						onChange={ onSaleScheduleToggleChange }
 						// @ts-ignore disabled prop exists
-						disabled={
-							! (
-								values.sale_price &&
-								values.sale_price.length > 0
-							)
-						}
+						disabled={ ! ( values.sale_price?.length > 0 ) }
 					/>
 
 					{ showSaleSchedule && (
