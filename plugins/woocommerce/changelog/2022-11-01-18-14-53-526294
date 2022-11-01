@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Remove text color definition for buttons for TT3 to allow default style to apply.
