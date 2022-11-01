@@ -11,6 +11,7 @@ import {
 	ProductAttribute,
 	WCDataSelector,
 } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 import {
 	__experimentalSelectControl as SelectControl,
 	__experimentalSelectControlMenu as Menu,
@@ -99,6 +100,11 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 				getItemValue={ ( item ) => item?.id || '' }
 				selected={ value }
 				onSelect={ ( attribute ) => {
+					if ( attribute.id === -99 ) {
+						recordEvent( 'product_attribute_add_custom_attribute', {
+							new_product_page: true,
+						} );
+					}
 					onChange(
 						attribute.id === -99
 							? attribute.name
