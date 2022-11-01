@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { trash } from '@wordpress/icons';
-import { ProductAttribute, ProductAttributeTerm } from '@woocommerce/data';
 import {
 	Form,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
@@ -33,7 +32,7 @@ type AddAttributeModalProps = {
 };
 
 type AttributeForm = {
-	attributes: Partial< HydratedAttributeType >[];
+	attributes: Array< HydratedAttributeType | { id: undefined; terms: [] } >;
 };
 
 export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
@@ -177,10 +176,7 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 															value={
 																formAttr.id &&
 																formAttr.name
-																	? {
-																			id: formAttr.id,
-																			name: formAttr.name,
-																	  }
+																	? formAttr
 																	: null
 															}
 															onChange={ (
