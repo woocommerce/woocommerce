@@ -178,9 +178,13 @@ abstract class Task {
 	/**
 	 * Level.
 	 *
+	 * @deprecated 7.2.0
+	 *
 	 * @return string
 	 */
 	public function get_level() {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '7.2.0' );
+
 		return 3;
 	}
 
@@ -267,18 +271,26 @@ abstract class Task {
 	/**
 	 * Check if a task is snoozeable.
 	 *
+	 * @deprecated 7.2.0
+	 *
 	 * @return bool
 	 */
 	public function is_snoozeable() {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '7.2.0' );
+
 		return false;
 	}
 
 	/**
 	 * Get the snoozed until datetime.
 	 *
+	 * @deprecated 7.2.0
+	 *
 	 * @return string
 	 */
 	public function get_snoozed_until() {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '7.2.0' );
+
 		$snoozed_tasks = get_option( self::SNOOZED_OPTION, array() );
 		if ( isset( $snoozed_tasks[ $this->get_id() ] ) ) {
 			return $snoozed_tasks[ $this->get_id() ];
@@ -290,9 +302,13 @@ abstract class Task {
 	/**
 	 * Bool for task snoozed.
 	 *
+	 * @deprecated 7.2.0
+	 *
 	 * @return bool
 	 */
 	public function is_snoozed() {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '7.2.0' );
+
 		if ( ! $this->is_snoozeable() ) {
 			return false;
 		}
@@ -306,9 +322,14 @@ abstract class Task {
 	 * Snooze the task.
 	 *
 	 * @param string $duration Duration to snooze. day|hour|week.
+	 *
+	 * @deprecated 7.2.0
+	 *
 	 * @return bool
 	 */
 	public function snooze( $duration = 'day' ) {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '7.2.0' );
+
 		if ( ! $this->is_snoozeable() ) {
 			return false;
 		}
@@ -330,9 +351,13 @@ abstract class Task {
 	/**
 	 * Undo task snooze.
 	 *
+	 * @deprecated 7.2.0
+	 *
 	 * @return bool
 	 */
 	public function undo_snooze() {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '7.2.0' );
+
 		$snoozed = get_option( self::SNOOZED_OPTION, array() );
 		unset( $snoozed[ $this->get_id() ] );
 		$update = update_option( self::SNOOZED_OPTION, $snoozed );
@@ -406,9 +431,13 @@ abstract class Task {
 	/**
 	 * Check if task is disabled.
 	 *
+	 * @deprecated 7.2.0
+	 *
 	 * @return bool
 	 */
 	public function is_disabled() {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '7.2.0' );
+
 		return false;
 	}
 
@@ -453,15 +482,15 @@ abstract class Task {
 			'actionUrl'      => $this->get_action_url(),
 			'isComplete'     => $this->is_complete(),
 			'time'           => $this->get_time(),
-			'level'          => $this->get_level(),
+			'level'          => 3,
 			'isActioned'     => $this->is_actioned(),
 			'isDismissed'    => $this->is_dismissed(),
 			'isDismissable'  => $this->is_dismissable(),
-			'isSnoozed'      => $this->is_snoozed(),
-			'isSnoozeable'   => $this->is_snoozeable(),
+			'isSnoozed'      => false,
+			'isSnoozeable'   => false,
 			'isVisited'      => $this->is_visited(),
-			'isDisabled'     => $this->is_disabled(),
-			'snoozedUntil'   => $this->get_snoozed_until(),
+			'isDisabled'     => false,
+			'snoozedUntil'   => null,
 			'additionalData' => self::convert_object_to_camelcase( $this->get_additional_data() ),
 			'eventPrefix'    => $this->prefix_event( '' ),
 		);
