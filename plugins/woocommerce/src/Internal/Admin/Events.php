@@ -127,7 +127,7 @@ class Events {
 	 * @return object Instance.
 	 */
 	final public static function instance() {
-		if ( static::$instance === null ) {
+		if ( null === static::$instance ) {
 			static::$instance = new static();
 		}
 		return static::$instance;
