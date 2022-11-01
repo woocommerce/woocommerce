@@ -5,7 +5,10 @@ import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { trash } from '@wordpress/icons';
 import { ProductAttribute, ProductAttributeTerm } from '@woocommerce/data';
-import { Form } from '@woocommerce/components';
+import {
+	Form,
+	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
+} from '@woocommerce/components';
 import {
 	Button,
 	Modal,
@@ -310,6 +313,8 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 					);
 				} }
 			</Form>
+			{ /* Add slot so select control menu renders correctly within Modal */ }
+			<SelectControlMenuSlot />
 			{ showConfirmClose && (
 				<ConfirmDialog
 					cancelButtonText={ __( 'No thanks', 'woocommerce' ) }

@@ -1,18 +1,14 @@
 /**
  * External dependencies
  */
-import { BaseControl, SlotFillProvider } from '@wordpress/components';
+import { BaseControl, Popover, SlotFillProvider } from '@wordpress/components';
 import { BlockEditorProvider } from '@wordpress/block-editor';
 import { BlockInstance } from '@wordpress/blocks';
+import { createElement, useEffect, useState, useRef } from '@wordpress/element';
 import { debounce } from 'lodash';
-import {
-	createElement,
-	useCallback,
-	useEffect,
-	useState,
-	useRef,
-} from '@wordpress/element';
 import React from 'react';
+import { uploadMedia } from '@wordpress/media-utils';
+import { useUser } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -31,15 +27,17 @@ type RichTextEditorProps = {
 	label?: string;
 	onChange: ( changes: BlockInstance[] ) => void;
 	entryId?: string;
+	placeholder?: string;
 };
 
 export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 	blocks,
 	label,
 	onChange,
+	placeholder = '',
 } ) => {
 	const blocksRef = useRef( blocks );
-
+	const { currentUserCan } = useUser();
 	const [ , setRefresh ] = useState( 0 );
 
 	// If there is a props change we need to update the ref and force re-render.
@@ -61,6 +59,24 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 		forceRerender();
 	}, 200 );
 
+	const mediaUpload = currentUserCan( 'upload_files' )
+		? ( {
+				onError,
+				...rest
+		  }: {
+				onError: ( message: string ) => void;
+		  } ) => {
+				uploadMedia(
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore The upload function passes the remaining required props.
+					{
+						onError: ( { message } ) => onError( message ),
+						...rest,
+					}
+				);
+		  }
+		: undefined;
+
 	return (
 		<div className="woocommerce-rich-text-editor">
 			{ label && (
@@ -75,13 +91,19 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 						// @ts-ignore This property was recently added in the block editor data store.
 						__experimentalClearBlockSelection: false,
+						mediaUpload,
 					} }
 					onInput={ debounceChange }
 					onChange={ debounceChange }
 				>
 					<ShortcutProvider>
-						<EditorWritingFlow />
+						<EditorWritingFlow
+							blocks={ blocksRef.current }
+							onChange={ onChange }
+							placeholder={ placeholder }
+						/>
 					</ShortcutProvider>
+					<Popover.Slot />
 				</BlockEditorProvider>
 			</SlotFillProvider>
 		</div>
