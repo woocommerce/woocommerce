@@ -36,13 +36,13 @@ defined( 'ABSPATH' ) || exit;
 				</option>
 				<?php if ( $attribute->is_taxonomy() ) : ?>
 					<?php foreach ( $attribute->get_terms() as $option ) : ?>
-						<?php /* phpcs:disable */ ?>
+						<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 						<option <?php selected( $selected_value, $option->slug ); ?> value="<?php echo esc_attr( $option->slug ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option->name, $option, $attribute->get_name(), $product_object ) ); ?></option>
 						<?php /* phpcs:enable */ ?>
 					<?php endforeach; ?>
 				<?php else : ?>
 					<?php foreach ( $attribute->get_options() as $option ) : ?>
-						<?php /* phpcs:disable */ ?>
+						<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 						<option <?php selected( $selected_value, $option ); ?> value="<?php echo esc_attr( $option ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option, null, $attribute->get_name(), $product_object ) ); ?></option>
 						<?php /* phpcs:enable */ ?>
 					<?php endforeach; ?>
@@ -110,7 +110,7 @@ defined( 'ABSPATH' ) || exit;
 					</label>
 				<?php endif; ?>
 
-				<?php /* phpcs:disable */ ?>
+				<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 				<?php do_action( 'woocommerce_variation_options', $loop, $variation_data, $variation ); ?>
 				<?php /* phpcs:enable */ ?>
 			</p>
@@ -158,7 +158,7 @@ defined( 'ABSPATH' ) || exit;
 				$sale_price_dates_from = $sale_price_dates_from_timestamp ? date_i18n( 'Y-m-d', $sale_price_dates_from_timestamp ) : '';
 				$sale_price_dates_to   = $sale_price_dates_to_timestamp ? date_i18n( 'Y-m-d', $sale_price_dates_to_timestamp ) : '';
 
-				/* phpcs:disable */
+				/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 				echo '<div class="form-field sale_price_dates_fields hidden">
 					<p class="form-row form-row-first">
 						<label>' . esc_html__( 'Sale start date', 'woocommerce' ) . '</label>
@@ -509,7 +509,7 @@ defined( 'ABSPATH' ) || exit;
 				do_action( 'woocommerce_variation_options_download', $loop, $variation_data, $variation );
 				?>
 			</div>
-			<?php /* phpcs:disable */ ?>
+			<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 			<?php do_action( 'woocommerce_product_after_variable_attributes', $loop, $variation_data, $variation ); ?>
 			<?php /* phpcs:enable */ ?>
 		</div>

@@ -84,7 +84,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			// @deprecated 2.3.
 			if ( has_action( 'woocommerce_admin_css' ) ) {
-				/* phpcs:disable */
+				/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 				do_action( 'woocommerce_admin_css' );
 				/* phpcs: enable */
 				wc_deprecated_function( 'The woocommerce_admin_css action', '2.3', 'admin_enqueue_scripts' );
@@ -249,7 +249,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			}
 
 			// Meta boxes.
-			/* phpcs:disable */
+			/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 			if ( in_array( $screen_id, array( 'product', 'edit-product' ) ) ) {
 				wp_enqueue_media();
 				wp_register_script( 'wc-admin-product-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-product' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'media-models' ), $version );
@@ -310,7 +310,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					)
 				);
 			}
-			/* phpcs:disable */
+			/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 			if ( in_array( $screen_id, array( 'shop_coupon', 'edit-shop_coupon' ) ) ) {
 				wp_enqueue_script( 'wc-admin-coupon-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-coupon' . $suffix . '.js', array( 'wc-admin-meta-boxes' ), $version );
 				wp_localize_script(
@@ -415,7 +415,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			}
 
 			// Term ordering - only when sorting by term_order.
-			/* phpcs:disable */
+			/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 			if ( ( strstr( $screen_id, 'edit-pa_' ) || ( ! empty( $_GET['taxonomy'] ) && in_array( wp_unslash( $_GET['taxonomy'] ), apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ) ) ) ) && ! isset( $_GET['orderby'] ) ) {
 
 				wp_register_script( 'woocommerce_term_ordering', WC()->plugin_url() . '/assets/js/admin/term-ordering' . $suffix . '.js', array( 'jquery-ui-sortable' ), $version );
@@ -438,7 +438,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			}
 
 			// Reports Pages.
-			/* phpcs:disable */
+			/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 			if ( in_array( $screen_id, apply_filters( 'woocommerce_reports_screen_ids', array( $wc_screen_id . '_page_wc-reports', 'toplevel_page_wc-reports', 'dashboard' ) ) ) ) {
 				wp_register_script( 'wc-reports', WC()->plugin_url() . '/assets/js/admin/reports' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker' ), $version );
 

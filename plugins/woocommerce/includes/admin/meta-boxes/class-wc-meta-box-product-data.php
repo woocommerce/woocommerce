@@ -53,7 +53,7 @@ class WC_Meta_Box_Product_Data {
 	 * @return array
 	 */
 	private static function get_product_type_options() {
-		/* phpcs:disable */
+		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		return apply_filters(
 			'product_type_options',
 			array(
@@ -82,7 +82,7 @@ class WC_Meta_Box_Product_Data {
 	 * @return array
 	 */
 	private static function get_product_data_tabs() {
-		/* phpcs:disable */
+		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		$tabs = apply_filters(
 			'woocommerce_product_data_tabs',
 			array(
@@ -177,7 +177,7 @@ class WC_Meta_Box_Product_Data {
 
 		$variation_attributes   = array_filter( $product_object->get_attributes(), array( __CLASS__, 'filter_variation_attributes' ) );
 		$default_attributes     = $product_object->get_default_attributes();
-		/* phpcs:disable */
+		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		$variations_count       = absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_count', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(ID) FROM $wpdb->posts WHERE post_parent = %d AND post_type = 'product_variation' AND post_status IN ('publish', 'private')", $post->ID ) ), $post->ID ) );
 		$variations_per_page    = absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) );
 		/* phpcs: enable */
@@ -279,7 +279,7 @@ class WC_Meta_Box_Product_Data {
 				$attribute->set_position( $attribute_position[ $i ] );
 				$attribute->set_visible( isset( $attribute_visibility[ $i ] ) );
 				$attribute->set_variation( isset( $attribute_variation[ $i ] ) );
-				/* phpcs:disable */
+				/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 				$attributes[] = apply_filters( 'woocommerce_admin_meta_boxes_prepare_attribute', $attribute, $data, $i );
 				/* phpcs: enable */
 			}
@@ -434,7 +434,7 @@ class WC_Meta_Box_Product_Data {
 
 			$product->get_data_store()->sync_variation_names( $product, $original_post_title, $post_title );
 		}
-		/* phpcs:disable */
+		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		do_action( 'woocommerce_process_product_meta_' . $product_type, $post_id );
 		/* phpcs: enable */
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
@@ -570,7 +570,7 @@ class WC_Meta_Box_Product_Data {
 				do_action( 'woocommerce_admin_process_variation_object', $variation, $i );
 
 				$variation->save();
-				/* phpcs:disable */
+				/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 				do_action( 'woocommerce_save_product_variation', $variation_id, $i );
 				/* phpcs: enable */
 			}

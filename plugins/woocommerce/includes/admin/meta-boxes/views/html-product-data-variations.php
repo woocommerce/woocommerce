@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<div id="message" class="inline notice woocommerce-message">
 				<p><?php echo wp_kses_post( __( 'Before you can add a variation you need to add some variation attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ) ); ?></p>
-				<?php /* phpcs:disable */ ?>
+				<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 				<p><a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/document/variable-product/', 'product-variations' ) ); ?>" target="_blank"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a></p>
 				<?php /* phpcs:enable */ ?>
 			</div>
@@ -35,13 +35,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<option value=""><?php echo esc_html( sprintf( __( 'No default %s&hellip;', 'woocommerce' ), wc_attribute_label( $attribute->get_name() ) ) ); ?></option>
 							<?php if ( $attribute->is_taxonomy() ) : ?>
 								<?php foreach ( $attribute->get_terms() as $option ) : ?>
-									<?php /* phpcs:disable */ ?>
+									<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 									<option <?php selected( $selected_value, $option->slug ); ?> value="<?php echo esc_attr( $option->slug ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option->name, $option, $attribute->get_name(), $product_object ) ); ?></option>
 									<?php /* phpcs:enable */ ?>
 								<?php endforeach; ?>
 							<?php else : ?>
 								<?php foreach ( $attribute->get_options() as $option ) : ?>
-									<?php /* phpcs:disable */ ?>
+									<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 									<option <?php selected( $selected_value, $option ); ?> value="<?php echo esc_attr( $option ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option, null, $attribute->get_name(), $product_object ) ); ?></option>
 									<?php /* phpcs:enable */ ?>
 								<?php endforeach; ?>
@@ -54,7 +54,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="clear"></div>
 			</div>
 
-			<?php /* phpcs:disable */ ?>
+			<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 			<?php do_action( 'woocommerce_variable_product_before_variations' ); ?>
 			<?php /* phpcs:enable */ ?>
 
@@ -95,7 +95,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<option value="variable_download_limit"><?php esc_html_e( 'Download limit', 'woocommerce' ); ?></option>
 						<option value="variable_download_expiry"><?php esc_html_e( 'Download expiry', 'woocommerce' ); ?></option>
 					</optgroup>
-					<?php /* phpcs:disable */ ?>
+					<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 					<?php do_action( 'woocommerce_variable_product_bulk_edit_actions' ); ?>
 					<?php /* phpcs:enable */ ?>
 				</select>
@@ -114,7 +114,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<label for="current-page-selector-1" class="screen-reader-text"><?php esc_html_e( 'Select Page', 'woocommerce' ); ?></label>
 							<select class="page-selector" id="current-page-selector-1" title="<?php esc_attr_e( 'Current page', 'woocommerce' ); ?>">
 								<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
-									<?php /* phpcs:disable */ ?>
+									<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 									<option value="<?php echo $i; // WPCS: XSS ok. ?>"><?php echo $i; // WPCS: XSS ok. ?></option>
 									<?php /* phpcs:enable */ ?>
 								<?php endfor; ?>
@@ -128,7 +128,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="clear"></div>
 			</div>
 
-			<?php /* phpcs:disable */ ?>
+			<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 			<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php echo wc_esc_json( wp_json_encode( wc_list_pluck( $variation_attributes, 'get_data' ) ) ); // WPCS: XSS ok. ?>" data-total="<?php echo esc_attr( $variations_count ); ?>" data-total_pages="<?php echo esc_attr( $variations_total_pages ); ?>" data-page="1" data-edited="false"></div>
 			<?php /* phpcs:enable */ ?>
 
@@ -149,7 +149,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<label for="current-page-selector-1" class="screen-reader-text"><?php esc_html_e( 'Select Page', 'woocommerce' ); ?></label>
 							<select class="page-selector" id="current-page-selector-1" title="<?php esc_attr_e( 'Current page', 'woocommerce' ); ?>">
 								<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
-									<?php /* phpcs:disable */ ?>
+									<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 									<option value="<?php echo $i; // WPCS: XSS ok. ?>"><?php echo $i; // WPCS: XSS ok. ?></option>
 									<?php /* phpcs:enable */ ?>
 								<?php endfor; ?>
