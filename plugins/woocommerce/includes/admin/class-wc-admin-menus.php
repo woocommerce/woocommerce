@@ -6,6 +6,7 @@
  * @version 2.5.0
  */
 
+use Automattic\WooCommerce\Internal\Admin\Orders\COTRedirectionController;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController as Custom_Orders_PageController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Admin\Features\Features;
@@ -316,6 +317,8 @@ class WC_Admin_Menus {
 		if ( wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ) {
 			$this->orders_page_controller = new Custom_Orders_PageController();
 			$this->orders_page_controller->setup();
+		} else {
+			wc_get_container()->get( COTRedirectionController::class )->setup();
 		}
 	}
 
