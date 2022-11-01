@@ -27,6 +27,8 @@ abstract class Task {
 	 * Name of the snooze option.
 	 *
 	 * @var string
+	 *
+	 * @deprecated 7.2.0
 	 */
 	const SNOOZED_OPTION = 'woocommerce_task_list_remind_me_later_tasks';
 
