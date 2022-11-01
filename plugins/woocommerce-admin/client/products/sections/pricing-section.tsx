@@ -285,6 +285,7 @@ export const PricingSection: React.FC = () => {
 						}
 						checked={ showSaleSchedule }
 						onChange={ onSaleScheduleToggleChange }
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 						// @ts-ignore disabled prop exists
 						disabled={ ! ( values.sale_price?.length > 0 ) }
 					/>
