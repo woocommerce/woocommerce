@@ -14,7 +14,6 @@ import { useFormContext } from '@woocommerce/components';
  */
 import { ClassicEditorIcon } from './images/classic-editor-icon';
 import { FeedbackIcon } from './images/feedback-icon';
-import { WelcomeGuideIcon } from './images/welcome-guide-icon';
 import { WooHeaderItem } from '~/header/utils';
 import './product-more-menu.scss';
 
