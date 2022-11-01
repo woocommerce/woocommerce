@@ -271,7 +271,7 @@ class TaskList {
 			return;
 		}
 
-		$this->tasks[]                               = $task;
+		$this->tasks[] = $task;
 	}
 
 	/**
