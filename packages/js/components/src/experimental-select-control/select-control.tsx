@@ -190,11 +190,6 @@ function SelectControl< ItemType = DefaultItemType >( {
 						};
 					}
 					break;
-				case selectControlStateChangeTypes.ControlledPropUpdatedSelectedItem:
-					if ( changes?.selectedItem ) {
-						setInputValue( getItemLabel( changes.selectedItem ) );
-					}
-					break;
 				default:
 					break;
 			}
