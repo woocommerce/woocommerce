@@ -19,6 +19,7 @@ jest.mock( '@wordpress/data', () => ( {
 jest.mock( '@wordpress/components', () => ( {
 	__esModule: true,
 	Spinner: () => <div>spinner</div>,
+	Icon: () => <div>icon</div>,
 } ) );
 
 jest.mock( '@woocommerce/components', () => {
@@ -97,10 +98,6 @@ jest.mock( '@woocommerce/components', () => {
 		},
 	};
 } );
-
-jest.mock( '../create-attribute-modal', () => ( {
-	CreateAttributeModal: () => <div>create_attribute_modal</div>,
-} ) );
 
 const attributeList: ProductAttribute[] = [
 	{
@@ -255,20 +252,17 @@ describe( 'AttributeInputField', () => {
 		expect( queryByText( 'Create "Co"' ) ).toBeInTheDocument();
 	} );
 
-	it( 'should render the create attribute modal when the create item is clicked', async () => {
+	it( 'trigger the onChange callback when the create new value is clicked with only a string', async () => {
+		const onChangeMock = jest.fn();
 		( useSelect as jest.Mock ).mockReturnValue( {
 			isLoading: false,
 			attributes: [ attributeList[ 0 ] ],
 		} );
 		const { queryByText } = render(
-			<AttributeInputField onChange={ jest.fn() } />
+			<AttributeInputField onChange={ onChangeMock } />
 		);
 		queryByText( 'Update Input' )?.click();
 		queryByText( 'Create "Co"' )?.click();
-		await waitFor( () => {
-			expect(
-				queryByText( 'create_attribute_modal' )
-			).toBeInTheDocument();
-		} );
+		expect( onChangeMock ).toHaveBeenCalledWith( 'Co' );
 	} );
 } );
