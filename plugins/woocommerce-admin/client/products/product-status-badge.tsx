@@ -15,6 +15,7 @@ import {
 	getProductStatus,
 	PRODUCT_STATUS_LABELS,
 } from './utils/get-product-status';
+import './product-status-badge.scss';
 
 export const ProductStatusBadge: React.FC = () => {
 	const { productId } = useParams();
