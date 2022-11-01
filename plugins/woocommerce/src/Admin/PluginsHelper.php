@@ -150,6 +150,7 @@ class PluginsHelper {
 		 * Filter the list of plugins to install.
 		 *
 		 * @param array $plugins A list of the plugins to install.
+		 * @since 6.4.0
 		 */
 		$plugins = apply_filters( 'woocommerce_admin_plugins_pre_install', $plugins );
 
@@ -199,6 +200,13 @@ class PluginsHelper {
 				);
 				wc_admin_record_tracks_event( 'install_plugin_error', $properties );
 
+				/**
+				 * Action triggered when a plugin API call failed.
+				 *
+				 * @param string $slug The plugin slug.
+				 * @param \WP_Error $api The API response.
+				 * @since 6.4.0
+				 */
 				do_action( 'woocommerce_plugins_install_api_error', $slug, $api );
 
 				$errors->add(
@@ -230,6 +238,15 @@ class PluginsHelper {
 				);
 				wc_admin_record_tracks_event( 'install_plugin_error', $properties );
 
+				/**
+				 * Action triggered when a plugin installation fails.
+				 *
+				 * @param string $slug The plugin slug.
+				 * @param object $api The plugin API object.
+				 * @param \WP_Error|null $result The result of the plugin installation.
+				 * @param \Plugin_Upgrader $upgrader The plugin upgrader.
+				 * @since 6.4.0
+				*/
 				do_action( 'woocommerce_plugins_install_error', $slug, $api, $result, $upgrader );
 
 				$errors->add(
@@ -293,6 +310,7 @@ class PluginsHelper {
 		 * Filter the list of plugins to activate.
 		 *
 		 * @param array $plugins A list of the plugins to activate.
+		 * @since 6.4.0
 		 */
 		$plugins = apply_filters( 'woocommerce_admin_plugins_pre_activate', $plugins );
 
@@ -315,6 +333,12 @@ class PluginsHelper {
 
 			$result = activate_plugin( $path );
 			if ( ! is_null( $result ) ) {
+				/**
+				 * Action triggered when a plugin activation fails.
+				 * @param string $slug The plugin slug.
+				 * @param null|\WP_Error $result The result of the plugin activation.
+				 * @since 6.4.0
+				 */
 				do_action( 'woocommerce_plugins_activate_error', $slug, $result );
 
 				$errors->add(
