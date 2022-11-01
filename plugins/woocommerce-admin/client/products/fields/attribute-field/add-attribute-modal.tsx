@@ -138,7 +138,16 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 					return (
 						<Modal
 							title={ __( 'Add attributes', 'woocommerce' ) }
-							onRequestClose={ () => onClose( values ) }
+							onRequestClose={ (
+								event:
+									| React.KeyboardEvent< Element >
+									| React.MouseEvent< Element >
+									| React.FocusEvent< Element >
+							) => {
+								if ( ! event.isPropagationStopped() ) {
+									onClose( values );
+								}
+							} }
 							className="woocommerce-add-attribute-modal"
 						>
 							<Notice isDismissible={ false }>
