@@ -194,9 +194,9 @@ class PluginsHelper {
 			if ( is_wp_error( $api ) ) {
 				$properties = array(
 					/* translators: %s: plugin slug (example: woocommerce-services) */
-					'error_message' => sprintf( __( 'The requested plugin `%s` could not be installed. Plugin API call failed.', 'woocommerce' ), $slug ),
-					'api'           => $api->get_error_message(),
-					'slug'          => $slug,
+					'error_message'     => sprintf( __( 'The requested plugin `%s` could not be installed. Plugin API call failed.', 'woocommerce' ), $slug ),
+					'api_error_message' => $api->get_error_message(),
+					'slug'              => $slug,
 				);
 				wc_admin_record_tracks_event( 'install_plugin_error', $properties );
 
