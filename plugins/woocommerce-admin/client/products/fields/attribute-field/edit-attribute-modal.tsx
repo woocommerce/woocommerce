@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, Modal, CheckboxControl } from '@wordpress/components';
+import {
+	Button,
+	Modal,
+	CheckboxControl,
+	TextControl,
+} from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 import { __experimentalTooltip as Tooltip } from '@woocommerce/components';
 
@@ -10,7 +15,6 @@ import { __experimentalTooltip as Tooltip } from '@woocommerce/components';
  * Internal dependencies
  */
 import './add-attribute-modal.scss';
-import { AttributeInputField } from '../attribute-input-field';
 import { AttributeTermInputField } from '../attribute-term-input-field';
 import { HydratedAttributeType } from './attribute-field';
 
@@ -19,30 +23,17 @@ import './edit-attribute-modal.scss';
 type EditAttributeModalProps = {
 	onCancel: () => void;
 	onEdit: ( alteredAttribute: HydratedAttributeType ) => void;
-	allAttributes: HydratedAttributeType[];
-	clickedAttributeId: number;
+	attribute: HydratedAttributeType;
 };
 
 export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 	onCancel,
 	onEdit,
-	allAttributes,
-	clickedAttributeId,
+	attribute,
 } ) => {
 	const [ editableAttribute, setEditableAttribute ] = useState<
 		HydratedAttributeType | undefined
-	>( undefined );
-	const [ selectedAttributeId, setSelectedAttributeId ] =
-		useState< number >( clickedAttributeId );
-
-	useEffect( () => {
-		const selectedAttribute = allAttributes.find(
-			( attribute ) => attribute.id === selectedAttributeId
-		);
-		if ( selectedAttribute ) {
-			setEditableAttribute( { ...selectedAttribute } );
-		}
-	}, [ allAttributes, selectedAttributeId ] );
+	>( { ...attribute } );
 
 	return (
 		<Modal
@@ -51,21 +42,17 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 			className="woocommerce-edit-attribute-modal"
 		>
 			<div className="woocommerce-edit-attribute-modal__body">
-				<AttributeInputField
-					placeholder={ __(
-						'Search or create attribute',
-						'woocommerce'
-					) }
-					value={ editableAttribute }
-					onChange={ ( val ) => {
-						if ( val?.id ) {
-							setSelectedAttributeId( val.id );
-						}
-					} }
-					onlyAttributeIds={ allAttributes.map(
-						( attr ) => attr.id
-					) }
-					label={ __( 'Attribute', 'woocommerce' ) }
+				<TextControl
+					label={ __( 'Name', 'woocommerce' ) }
+					value={
+						editableAttribute?.name ? editableAttribute?.name : ''
+					}
+					onChange={ ( val ) =>
+						setEditableAttribute( {
+							...( editableAttribute as HydratedAttributeType ),
+							name: val,
+						} )
+					}
 				/>
 				<AttributeTermInputField
 					label={ __( 'Values', 'woocommerce' ) }
@@ -114,7 +101,7 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 					/>
 					<Tooltip
 						text={ __(
-							'Show or hide this attribute in the filters section on your store’s category and shop pages',
+							`Show or hide this attribute in the filters section on your store's category and shop pages`,
 							'woocommerce'
 						) }
 					/>

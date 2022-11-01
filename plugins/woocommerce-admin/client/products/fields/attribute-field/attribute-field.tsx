@@ -287,8 +287,11 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 						setHydratedAttributes( newAttributesSet );
 						setEditingAttributeId( null );
 					} }
-					clickedAttributeId={ editingAttributeId }
-					allAttributes={ hydratedAttributes }
+					attribute={
+						hydratedAttributes.find(
+							( attr ) => attr.id === editingAttributeId
+						) as HydratedAttributeType
+					}
 				/>
 			) }
 			<Popover.Slot />
