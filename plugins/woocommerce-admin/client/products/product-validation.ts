@@ -16,6 +16,53 @@ import moment from 'moment';
  */
 import { validate as validateInventory } from './sections/product-inventory-section';
 
+function validateScheduledSaleFields(
+	values: Partial< Product< ProductStatus, ProductType > >
+): FormErrors< typeof values > {
+	const errors: FormErrors< typeof values > = {};
+
+	const dateOnSaleFrom = moment(
+		values.date_on_sale_from_gmt,
+		moment.ISO_8601,
+		true
+	);
+	const dateOnSaleTo = moment(
+		values.date_on_sale_to_gmt,
+		moment.ISO_8601,
+		true
+	);
+
+	if ( values.date_on_sale_from_gmt && ! dateOnSaleFrom.isValid() ) {
+		errors.date_on_sale_from_gmt = __(
+			'Please enter a valid date.',
+			'woocommerce'
+		);
+	}
+
+	if ( values.date_on_sale_to_gmt && ! dateOnSaleTo.isValid() ) {
+		errors.date_on_sale_to_gmt = __(
+			'Please enter a valid date.',
+			'woocommerce'
+		);
+	}
+
+	if ( dateOnSaleFrom.isAfter( dateOnSaleTo ) ) {
+		errors.date_on_sale_from_gmt = __(
+			'The start date of the sale must be before the end date.',
+			'woocommerce'
+		);
+	}
+
+	if ( dateOnSaleTo.isBefore( dateOnSaleFrom ) ) {
+		errors.date_on_sale_to_gmt = __(
+			'The end date of the sale must be after the start date.',
+			'woocommerce'
+		);
+	}
+
+	return errors;
+}
+
 export const validate = (
 	values: Partial< Product< ProductStatus, ProductType > >
 ) => {
@@ -59,44 +106,10 @@ export const validate = (
 		);
 	}
 
-	const dateOnSaleFrom = moment(
-		values.date_on_sale_from_gmt,
-		moment.ISO_8601,
-		true
-	);
-	const dateOnSaleTo = moment(
-		values.date_on_sale_to_gmt,
-		moment.ISO_8601,
-		true
-	);
-
-	if ( values.date_on_sale_from_gmt && ! dateOnSaleFrom.isValid() ) {
-		errors.date_on_sale_from_gmt = __(
-			'Please enter a valid date.',
-			'woocommerce'
-		);
-	}
-
-	if ( values.date_on_sale_to_gmt && ! dateOnSaleTo.isValid() ) {
-		errors.date_on_sale_to_gmt = __(
-			'Please enter a valid date.',
-			'woocommerce'
-		);
-	}
-
-	if ( dateOnSaleFrom.isAfter( dateOnSaleTo ) ) {
-		errors.date_on_sale_from_gmt = __(
-			'The start date of the sale must be before the end date.',
-			'woocommerce'
-		);
-	}
-
-	if ( dateOnSaleTo.isBefore( dateOnSaleFrom ) ) {
-		errors.date_on_sale_to_gmt = __(
-			'The end date of the sale must be after the start date.',
-			'woocommerce'
-		);
-	}
+	errors = {
+		...errors,
+		...validateScheduledSaleFields( values ),
+	};
 
 	if ( values.dimensions?.width && +values.dimensions.width <= 0 ) {
 		errors.dimensions = {
