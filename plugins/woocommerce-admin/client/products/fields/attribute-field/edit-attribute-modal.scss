@@ -10,7 +10,8 @@
 		margin-top: 1.3em;
 	}
 
-	.woocommerce-experimental-select-control__label, .components-base-control__label {
+	.woocommerce-experimental-select-control__label,
+	.components-base-control__label {
 		font-size: 14px;
 		color: #757575;
 		font-weight: bold;
@@ -29,6 +30,6 @@
 
 	.woocommerce-edit-attribute-modal__helper-text {
 		color: #757575;
-		margin: .5em 0 1.5em 0;
+		margin: 0.5em 0 1.5em 0;
 	}
 }
