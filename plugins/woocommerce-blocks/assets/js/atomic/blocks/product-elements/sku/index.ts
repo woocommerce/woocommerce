@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { registerExperimentalBlockType } from '@woocommerce/block-settings';
+import type { BlockConfiguration } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -15,7 +16,9 @@ import {
 	BLOCK_DESCRIPTION as description,
 } from './constants';
 
-const blockConfig = {
+const blockConfig: BlockConfiguration = {
+	...sharedConfig,
+	apiVersion: 2,
 	title,
 	description,
 	icon: { src: icon },
