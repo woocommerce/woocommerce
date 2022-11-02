@@ -3,7 +3,7 @@
  */
 import { useState, useEffect, useMemo } from '@wordpress/element';
 import { useDebounce } from 'use-debounce';
-import { sortBy } from 'lodash';
+import { isEmpty, sortBy } from 'lodash';
 import { useShallowEqual } from '@woocommerce/base-hooks';
 import { objectHasProp } from '@woocommerce/types';
 
@@ -47,6 +47,7 @@ interface UseCollectionDataProps {
 	queryStock?: boolean;
 	queryRating?: boolean;
 	queryState: Record< string, unknown >;
+	productIds?: number[];
 }
 
 export const useCollectionData = ( {
@@ -55,6 +56,7 @@ export const useCollectionData = ( {
 	queryStock,
 	queryRating,
 	queryState,
+	productIds,
 }: UseCollectionDataProps ) => {
 	let context = useQueryStateContext();
 	context = `${ context }-collection-data`;
@@ -163,6 +165,7 @@ export const useCollectionData = ( {
 			per_page: undefined,
 			orderby: undefined,
 			order: undefined,
+			...( ! isEmpty( productIds ) && { include: productIds } ),
 			...collectionDataQueryVars,
 		},
 		shouldSelect: debouncedShouldSelect,

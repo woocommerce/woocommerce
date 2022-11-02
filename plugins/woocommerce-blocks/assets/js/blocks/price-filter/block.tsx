@@ -99,6 +99,10 @@ const PriceFilterBlock = ( {
 		isBoolean
 	);
 
+	const productIds = isEditor
+		? []
+		: getSettingWithCoercion( 'product_ids', [], Array.isArray );
+
 	const [ hasSetFilterDefaultsFromUrl, setHasSetFilterDefaultsFromUrl ] =
 		useState( false );
 
@@ -108,6 +112,7 @@ const PriceFilterBlock = ( {
 	const { results, isLoading } = useCollectionData( {
 		queryPrices: true,
 		queryState,
+		productIds,
 	} );
 
 	const currency = getCurrencyFromPriceResponse(
