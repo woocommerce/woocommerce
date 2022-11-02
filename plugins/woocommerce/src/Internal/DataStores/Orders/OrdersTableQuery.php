@@ -115,6 +115,8 @@ class OrdersTableQuery {
 	 */
 	private $sql = '';
 
+	private $count_sql = '';
+
 	/**
 	 * The number of pages (when pagination is enabled).
 	 *
@@ -586,11 +588,7 @@ class OrdersTableQuery {
 		$fields       = $this->fields;
 
 		// SQL_CALC_FOUND_ROWS.
-		if ( ( ! $this->arg_isset( 'no_found_rows' ) || ! $this->args['no_found_rows'] ) && $this->limits ) {
-			$found_rows = 'SQL_CALC_FOUND_ROWS';
-		} else {
-			$found_rows = '';
-		}
+		$found_rows = '';
 
 		// JOIN.
 		$join = implode( ' ', array_unique( array_filter( array_map( 'trim', $this->join ) ) ) );
@@ -617,6 +615,15 @@ class OrdersTableQuery {
 		$groupby = $this->groupby ? 'GROUP BY ' . implode( ', ', (array) $this->groupby ) : '';
 
 		$this->sql = "SELECT $found_rows DISTINCT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
+		$this->build_count_query( $fields, $join, $where, $groupby );
+	}
+
+	private function build_count_query( $fields, $join, $where, $groupby ) {
+		if ( ! isset( $this->sql ) || '' === $this->sql ) {
+			wc_doing_it_wrong( __FUNCTION__, 'Count query can only be build after main query is built.', '7.2.0' );
+		}
+		$orders_table = $this->tables['orders'];
+		$this->count_sql = "SELECT COUNT(DISTINCT $fields) FROM  $orders_table $join WHERE $where $groupby";
 	}
 
 	/**
@@ -1014,7 +1021,7 @@ class OrdersTableQuery {
 		}
 
 		if ( $this->limits ) {
-			$this->found_orders  = absint( $wpdb->get_var( 'SELECT FOUND_ROWS()' ) );
+			$this->found_orders  = absint( $wpdb->get_var( $this->count_sql ) );
 			$this->max_num_pages = (int) ceil( $this->found_orders / $this->args['limit'] );
 		} else {
 			$this->found_orders = count( $this->orders );
