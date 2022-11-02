@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { omitBy } from 'lodash';
-import { Story } from '@storybook/react';
+import type { Story } from '@storybook/react';
 import { useState } from '@wordpress/element';
 import { Icon } from '@wordpress/icons';
 

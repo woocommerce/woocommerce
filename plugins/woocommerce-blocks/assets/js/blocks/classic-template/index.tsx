@@ -2,12 +2,12 @@
  * External dependencies
  */
 import {
-	BlockEditProps,
 	createBlock,
 	getBlockType,
 	registerBlockType,
 	unregisterBlockType,
 } from '@wordpress/blocks';
+import type { BlockEditProps } from '@wordpress/blocks';
 import {
 	isExperimentalBuild,
 	WC_BLOCKS_IMAGE_URL,

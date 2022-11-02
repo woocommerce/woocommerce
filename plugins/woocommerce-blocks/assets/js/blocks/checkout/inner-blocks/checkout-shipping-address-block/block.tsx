@@ -69,7 +69,12 @@ const Block = ( {
 			setBillingAddress( shippingAddress );
 		}
 		setAddressesSynced( true );
-	}, [ setBillingAddress, shippingAddress, useShippingAsBilling ] );
+	}, [
+		addressesSynced,
+		setBillingAddress,
+		shippingAddress,
+		useShippingAsBilling,
+	] );
 
 	const addressFieldsConfig = useMemo( () => {
 		return {
