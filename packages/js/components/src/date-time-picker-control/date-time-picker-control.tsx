@@ -95,7 +95,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		return default24HourDateTimeFormat;
 	} )();
 
-	function parseMomentIso(
+	function parseAsISODateTime(
 		dateString?: string | null,
 		assumeLocalTime = false
 	): Moment {
@@ -106,7 +106,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		return moment.utc( dateString, moment.ISO_8601, true );
 	}
 
-	function parseMoment( dateString: string | null ): Moment {
+	function parseAsLocalDateTime( dateString: string | null ): Moment {
 		// parse input date string as local time;
 		// be lenient of user input and try to match any format Moment can
 		return moment( dateString );
@@ -201,8 +201,8 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	) {
 		const previousLastValidDate = lastValidDate.current;
 		let newDateTime = isManuallyTypedInput
-			? parseMoment( newDateTimeString )
-			: parseMomentIso( newDateTimeString, isLocalTime );
+			? parseAsLocalDateTime( newDateTimeString )
+			: parseAsISODateTime( newDateTimeString, isLocalTime );
 		const isValid = newDateTime.isValid();
 
 		if ( isValid ) {
