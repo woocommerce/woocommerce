@@ -184,9 +184,9 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'jquery-ui-sortable' );
 				wp_enqueue_script( 'jquery-ui-autocomplete' );
 
-				$locale  = localeconv();
+				$locale        = localeconv();
 				$decimal_point = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
-				$decimal = ( ! empty( wc_get_price_decimal_separator() ) ) ? wc_get_price_decimal_separator() : $decimal_point;
+				$decimal       = ( ! empty( wc_get_price_decimal_separator() ) ) ? wc_get_price_decimal_separator() : $decimal_point;
 
 				$params = array(
 					/* translators: %s: decimal */
@@ -249,7 +249,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			}
 
 			// Meta boxes.
-			/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
+			/* phpcs:disable */
 			if ( in_array( $screen_id, array( 'product', 'edit-product' ) ) ) {
 				wp_enqueue_media();
 				wp_register_script( 'wc-admin-product-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-product' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'media-models' ), $version );
@@ -320,8 +320,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'generate_button_text' => esc_html__( 'Generate coupon code', 'woocommerce' ),
 						'characters'           => apply_filters( 'woocommerce_coupon_code_generator_characters', 'ABCDEFGHJKMNPQRSTUVWXYZ23456789' ),
 						'char_length'          => apply_filters( 'woocommerce_coupon_code_generator_character_length', 8 ),
-						'prefix'                => apply_filters( 'woocommerce_coupon_code_generator_prefix', '' ),
-						'suffix'                => apply_filters( 'woocommerce_coupon_code_generator_suffix', '' ),
+						'prefix'               => apply_filters( 'woocommerce_coupon_code_generator_prefix', '' ),
+						'suffix'               => apply_filters( 'woocommerce_coupon_code_generator_suffix', '' ),
 					)
 				);
 			}
