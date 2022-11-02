@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { sprintf, __ } from '@wordpress/i18n';
-import { Button, Card, CardBody, Popover } from '@wordpress/components';
+import { Button, Card, CardBody } from '@wordpress/components';
 import { useState, useCallback, useEffect } from '@wordpress/element';
 import {
 	ProductAttribute,
@@ -11,7 +11,11 @@ import {
 } from '@woocommerce/data';
 import { resolveSelect } from '@wordpress/data';
 import { Text } from '@woocommerce/experimental';
-import { Sortable, ListItem } from '@woocommerce/components';
+import {
+	Sortable,
+	ListItem,
+	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
+} from '@woocommerce/components';
 import { closeSmall } from '@wordpress/icons';
 
 /**
@@ -310,7 +314,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					}
 				/>
 			) }
-			<Popover.Slot />
+			<SelectControlMenuSlot />
 		</div>
 	);
 };
