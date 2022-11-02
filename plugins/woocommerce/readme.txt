@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix business details step when Gutenberg is active [#35448](https://github.com/woocommerce/woocommerce/pull/35448)
 * Fix - Check order type is set before returning to prevent notice. [#35349](https://github.com/woocommerce/woocommerce/pull/35349)
 * Fix - When HPOS is enabled, posts are authoritative, and sync is enabled, ensure the HPOS record correctly tracks the CPT order record. [#35402](https://github.com/woocommerce/woocommerce/pull/35402)
 * Fix - Allow line breaks in order note again. [#35366](https://github.com/woocommerce/woocommerce/pull/35366)
