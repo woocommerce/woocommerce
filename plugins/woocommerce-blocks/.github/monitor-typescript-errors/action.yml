@@ -1,0 +1,13 @@
+name: 'Typescript Monitor'
+description: 'Check TypesScript errors'
+inputs:
+    repo-token:
+        description: 'GitHub token'
+        required: true
+    compare:
+        description: 'Path checkstyle.xml file'
+        required: true
+
+runs:
+    using: 'node16'
+    main: 'index.js'
