@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useArgs } from '@storybook/client-api';
-import { Story, Meta } from '@storybook/react';
+import type { Story, Meta } from '@storybook/react';
 
 /**
  * Internal dependencies

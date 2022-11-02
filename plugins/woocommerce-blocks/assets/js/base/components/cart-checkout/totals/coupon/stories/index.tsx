@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useArgs } from '@storybook/client-api';
-import { Story, Meta } from '@storybook/react';
+import type { Story, Meta } from '@storybook/react';
 import { INTERACTION_TIMEOUT } from '@woocommerce/storybook-controls';
 import { useDispatch } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
