@@ -8,14 +8,22 @@ import {
 	CheckboxControl,
 	TextControl,
 } from '@wordpress/components';
-import { useState, useEffect } from '@wordpress/element';
-import { __experimentalTooltip as Tooltip } from '@woocommerce/components';
+import { useState } from '@wordpress/element';
+import {
+	__experimentalTooltip as Tooltip,
+	Link,
+} from '@woocommerce/components';
+import interpolateComponents from '@automattic/interpolate-components';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import './add-attribute-modal.scss';
-import { AttributeTermInputField } from '../attribute-term-input-field';
+import {
+	AttributeTermInputField,
+	CustomAttributeTermInputField,
+} from '../attribute-term-input-field';
 import { HydratedAttributeType } from './attribute-field';
 
 import './edit-attribute-modal.scss';
@@ -35,6 +43,8 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 		HydratedAttributeType | undefined
 	>( { ...attribute } );
 
+	const isCustomAttribute = editableAttribute?.id === 0;
+
 	return (
 		<Modal
 			title={ __( 'Edit attribute', 'woocommerce' ) }
@@ -44,6 +54,7 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 			<div className="woocommerce-edit-attribute-modal__body">
 				<TextControl
 					label={ __( 'Name', 'woocommerce' ) }
+					disabled={ ! isCustomAttribute }
 					value={
 						editableAttribute?.name ? editableAttribute?.name : ''
 					}
@@ -54,22 +65,66 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 						} )
 					}
 				/>
-				<AttributeTermInputField
-					label={ __( 'Values', 'woocommerce' ) }
-					placeholder={ __(
-						'Search or create value',
-						'woocommerce'
-					) }
-					value={ editableAttribute?.terms }
-					disabled={ ! editableAttribute?.id }
-					attributeId={ editableAttribute?.id }
-					onChange={ ( val ) => {
-						setEditableAttribute( {
-							...( editableAttribute as HydratedAttributeType ),
-							terms: val,
-						} );
-					} }
-				/>
+				<p className="woocommerce-edit-attribute-modal__helper-text">
+					{ ! isCustomAttribute
+						? interpolateComponents( {
+								mixedString: __(
+									`You can change the attribute's name in {{link}}Attributes{{/link}}.`,
+									'woocommerce'
+								),
+								components: {
+									link: (
+										<Link
+											href={ getAdminLink(
+												'edit.php?post_type=product&page=product_attributes'
+											) }
+											target="_blank"
+											type="wp-admin"
+										>
+											<></>
+										</Link>
+									),
+								},
+						  } )
+						: __(
+								'Your customers will see this on the product page',
+								'woocommerce'
+						  ) }
+				</p>
+				{ attribute.terms ? (
+					<AttributeTermInputField
+						label={ __( 'Values', 'woocommerce' ) }
+						placeholder={ __(
+							'Search or create value',
+							'woocommerce'
+						) }
+						value={ editableAttribute?.terms }
+						attributeId={ editableAttribute?.id }
+						onChange={ ( val ) => {
+							setEditableAttribute( {
+								...( editableAttribute as HydratedAttributeType ),
+								terms: val,
+							} );
+						} }
+					/>
+				) : (
+					<CustomAttributeTermInputField
+						label={ __( 'Values', 'woocommerce' ) }
+						placeholder={ __(
+							'Search or create value',
+							'woocommerce'
+						) }
+						disabled={ ! attribute?.name }
+						value={ editableAttribute?.options }
+						onChange={ ( val ) => {
+							setEditableAttribute( {
+								...( editableAttribute as HydratedAttributeType ),
+								options: val,
+							} );
+						} }
+					/>
+				) }
+
 				<div className="woocommerce-edit-attribute-modal__option-container">
 					<CheckboxControl
 						onChange={ ( val ) =>

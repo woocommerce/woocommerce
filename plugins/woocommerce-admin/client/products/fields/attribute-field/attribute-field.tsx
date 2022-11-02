@@ -22,6 +22,7 @@ import AttributeEmptyStateLogo from './attribute-empty-state-logo.svg';
 import { AddAttributeModal } from './add-attribute-modal';
 import { EditAttributeModal } from './edit-attribute-modal';
 import { reorderSortableProductAttributePositions } from './utils';
+import { sift } from '../../../utils';
 
 type AttributeFieldProps = {
 	value: ProductAttribute[];
@@ -30,7 +31,8 @@ type AttributeFieldProps = {
 };
 
 export type HydratedAttributeType = Omit< ProductAttribute, 'options' > & {
-	terms: ProductAttributeTerm[];
+	options?: string[];
+	terms?: ProductAttributeTerm[];
 };
 
 export const AttributeField: React.FC< AttributeFieldProps > = ( {
@@ -47,7 +49,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		HydratedAttributeType[]
 	>( [] );
 	const [ editingAttributeId, setEditingAttributeId ] = useState<
-		null | number
+		null | string
 	>( null );
 
 	const fetchTerms = useCallback(
@@ -75,23 +77,31 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		if ( ! value || hydrationComplete ) {
 			return;
 		}
-		Promise.all( value.map( ( attr ) => fetchTerms( attr.id ) ) ).then(
-			( allResults ) => {
-				setHydratedAttributes(
-					value.map( ( attr, index ) => {
-						const newAttr = {
-							...attr,
-							terms: allResults[ index ],
-							options: undefined,
-						};
 
-						return newAttr;
-					} )
-				);
-				setHydrationComplete( true );
-			}
-		);
+		const [ customAttributes, globalAttributes ]: ProductAttribute[][] =
+			sift( value, ( attr: ProductAttribute ) => attr.id === 0 );
+
+		Promise.all(
+			globalAttributes.map( ( attr ) => fetchTerms( attr.id ) )
+		).then( ( allResults ) => {
+			setHydratedAttributes( [
+				...globalAttributes.map( ( attr, index ) => {
+					const newAttr = {
+						...attr,
+						terms: allResults[ index ],
+						options: undefined,
+					};
+
+					return newAttr;
+				} ),
+				...customAttributes,
+			] );
+			setHydrationComplete( true );
+		} );
 	}, [ productId, value, hydrationComplete ] );
+
+	const fetchAttributeId = ( attribute: { id: number; name: string } ) =>
+		`${ attribute.id }=${ attribute.name }`;
 
 	const updateAttributes = ( attributes: HydratedAttributeType[] ) => {
 		setHydratedAttributes( attributes );
@@ -99,7 +109,9 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 			attributes.map( ( attr ) => {
 				return {
 					...attr,
-					options: attr.terms.map( ( term ) => term.name ),
+					options: attr.terms
+						? attr.terms.map( ( term ) => term.name )
+						: ( attr.options as string[] ),
 					terms: undefined,
 				};
 			} )
@@ -111,7 +123,9 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		if ( window.confirm( __( 'Remove this attribute?', 'woocommerce' ) ) ) {
 			updateAttributes(
 				hydratedAttributes.filter(
-					( attr ) => attr.id !== attribute.id
+					( attr ) =>
+						fetchAttributeId( attr ) !==
+						fetchAttributeId( attribute )
 				)
 			);
 		}
@@ -193,6 +207,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		},
 		{} as Record< number, ProductAttribute >
 	);
+
 	return (
 		<div className="woocommerce-attribute-field">
 			<Sortable
@@ -206,7 +221,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 				} }
 			>
 				{ sortedAttributes.map( ( attribute ) => (
-					<ListItem key={ attribute.id }>
+					<ListItem key={ fetchAttributeId( attribute ) }>
 						<div>{ attribute.name }</div>
 						<div className="woocommerce-attribute-field__attribute-options">
 							{ attribute.options
@@ -232,7 +247,9 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 							<Button
 								variant="tertiary"
 								onClick={ () =>
-									setEditingAttributeId( attribute.id )
+									setEditingAttributeId(
+										fetchAttributeId( attribute )
+									)
 								}
 							>
 								{ __( 'edit', 'woocommerce' ) }
@@ -287,7 +304,8 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					} }
 					attribute={
 						hydratedAttributes.find(
-							( attr ) => attr.id === editingAttributeId
+							( attr ) =>
+								fetchAttributeId( attr ) === editingAttributeId
 						) as HydratedAttributeType
 					}
 				/>

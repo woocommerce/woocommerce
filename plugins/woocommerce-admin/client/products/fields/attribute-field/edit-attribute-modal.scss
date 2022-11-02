@@ -1,3 +1,7 @@
+.woocommerce-edit-attribute-modal {
+	overflow: visible;
+}
+
 .woocommerce-edit-attribute-modal__body {
 	width: 500px;
 	max-width: 100%;
@@ -8,7 +12,7 @@
 
 	.woocommerce-experimental-select-control__label, .components-base-control__label {
 		font-size: 14px;
-		color: gray;
+		color: #757575;
 		font-weight: bold;
 	}
 
@@ -20,5 +24,10 @@
 
 	.woocommerce-attribute-term-field {
 		margin-bottom: 1.5em;
+	}
+
+	.woocommerce-edit-attribute-modal__helper-text {
+		color: #757575;
+		margin: .5em 0 1.5em 0;
 	}
 }
