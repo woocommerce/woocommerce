@@ -39,8 +39,8 @@ class COTRedirectionController {
 			return;
 		}
 
-		$params  = wp_unslash( $query_params );
-		$action  = $params['action'] ?? '';
+		$params = wp_unslash( $query_params );
+		$action = $params['action'] ?? '';
 		unset( $params['page'] );
 
 		if ( 'edit' === $action && isset( $params['id'] ) ) {
@@ -50,7 +50,7 @@ class COTRedirectionController {
 		} elseif ( 'new' === $action ) {
 			unset( $params['action'] );
 			$params['post_type'] = 'shop_order';
-			$new_url = add_query_arg( $params, get_admin_url( null, 'post-new.php' ) );
+			$new_url             = add_query_arg( $params, get_admin_url( null, 'post-new.php' ) );
 		} else {
 			// If nonce parameters are present and valid, rebuild them for the CPT admin list table.
 			if ( isset( $params['_wpnonce'] ) && check_admin_referer( 'bulk-orders' ) ) {
@@ -61,11 +61,11 @@ class COTRedirectionController {
 			// If an `order` array parameter is present, rename as `post`.
 			if ( isset( $params['order'] ) && is_array( $params['order'] ) ) {
 				$params['post'] = $params['order'];
-				unset( $params['order']);
+				unset( $params['order'] );
 			}
 
 			$params['post_type'] = 'shop_order';
-			$new_url = add_query_arg( $params, get_admin_url( null, 'edit.php' ) );
+			$new_url             = add_query_arg( $params, get_admin_url( null, 'edit.php' ) );
 		}
 
 		if ( ! empty( $new_url ) && wp_safe_redirect( $new_url, 301 ) ) {
