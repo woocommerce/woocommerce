@@ -105,7 +105,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 	}, [ productId, value, hydrationComplete ] );
 
 	const fetchAttributeId = ( attribute: { id: number; name: string } ) =>
-		`${ attribute.id }=${ attribute.name }`;
+		`${ attribute.id }-${ attribute.name }`;
 
 	const updateAttributes = ( attributes: HydratedAttributeType[] ) => {
 		setHydratedAttributes( attributes );
@@ -153,7 +153,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		setShowAddAttributeModal( false );
 	};
 
-	if ( ! value || value.length === 0 ) {
+	if ( ! value || value.length === 0 || hydratedAttributes.length === 0 ) {
 		return (
 			<Card>
 				<CardBody>

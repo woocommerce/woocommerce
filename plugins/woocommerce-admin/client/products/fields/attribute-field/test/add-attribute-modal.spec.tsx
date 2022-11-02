@@ -259,7 +259,7 @@ describe( 'AddAttributeModal', () => {
 			expect( onAddMock ).toHaveBeenCalledWith( [] );
 		} );
 
-		it( 'should add attribute with terms as string of options', () => {
+		it( 'should add attribute with array of terms', () => {
 			const onAddMock = jest.fn();
 			const { queryByRole } = render(
 				<AddAttributeModal
@@ -275,15 +275,17 @@ describe( 'AddAttributeModal', () => {
 				attributeTermList[ 1 ],
 			] );
 			queryByRole( 'button', { name: 'Add attributes' } )?.click();
-			expect( onAddMock ).toHaveBeenCalledWith( [
-				{
-					...attributeList[ 0 ],
-					options: [
-						attributeTermList[ 0 ].name,
-						attributeTermList[ 1 ].name,
-					],
-				},
-			] );
+
+			const onAddMockCalls = onAddMock.mock.calls[ 0 ][ 0 ];
+
+			expect( onAddMockCalls ).toHaveLength( 1 );
+			expect( onAddMockCalls[ 0 ].id ).toEqual( attributeList[ 0 ].id );
+			expect( onAddMockCalls[ 0 ].terms[ 0 ].name ).toEqual(
+				attributeTermList[ 0 ].name
+			);
+			expect( onAddMockCalls[ 0 ].terms[ 1 ].name ).toEqual(
+				attributeTermList[ 1 ].name
+			);
 		} );
 	} );
 } );
