@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Story, Meta } from '@storybook/react';
+import type { Story, Meta } from '@storybook/react';
 import { useArgs } from '@storybook/client-api';
 import { INTERACTION_TIMEOUT } from '@woocommerce/storybook-controls';
 

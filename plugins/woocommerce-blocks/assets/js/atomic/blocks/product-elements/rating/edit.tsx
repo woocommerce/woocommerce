@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
-import { BlockEditProps } from '@wordpress/blocks';
+import type { BlockEditProps } from '@wordpress/blocks';
 import { useEffect } from 'react';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
 

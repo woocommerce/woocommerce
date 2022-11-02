@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { sanitize } from 'dompurify';
+import DOMPurify from 'dompurify';
 
 const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br' ];
 const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download' ];
@@ -13,7 +13,7 @@ export const sanitizeHTML = (
 	const tagsValue = config?.tags || ALLOWED_TAGS;
 	const attrValue = config?.attr || ALLOWED_ATTR;
 
-	return sanitize( html, {
+	return DOMPurify.sanitize( html, {
 		ALLOWED_TAGS: tagsValue,
 		ALLOWED_ATTR: attrValue,
 	} );

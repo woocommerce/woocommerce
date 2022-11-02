@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Block } from '@wordpress/blocks';
+import type { Block } from '@wordpress/blocks';
 
 /**
  * Internal dependencies

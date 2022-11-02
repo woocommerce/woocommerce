@@ -232,12 +232,7 @@ const StockStatusFilterBlock = ( {
 
 			updateFilterUrl( checkedOptions );
 		},
-		[
-			isEditor,
-			setProductStockStatusQuery,
-			checked,
-			filteringForPhpTemplate,
-		]
+		[ isEditor, setProductStockStatusQuery, filteringForPhpTemplate ]
 	);
 
 	// Track checked STATE changes - if state changes, update the query.

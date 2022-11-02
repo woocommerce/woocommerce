@@ -38,7 +38,7 @@ Let's see the code in detail.
 This is the minimal scaffold you need for your new Story:
 
 ```tsx
-import { Story, Meta } from '@storybook/react';
+import type { Story, Meta } from '@storybook/react';
 import MyComponent, { MyComponentProps } from '..';
 
 export default {

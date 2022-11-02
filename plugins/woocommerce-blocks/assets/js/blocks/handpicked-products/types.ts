@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { BlockAlignment } from '@wordpress/blocks';
+import type { BlockAlignment } from '@wordpress/blocks';
 
 export interface Attributes {
 	align?: BlockAlignment;
