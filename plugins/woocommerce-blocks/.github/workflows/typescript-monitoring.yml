@@ -1,5 +1,8 @@
 name: Monitor TypeScript errors
-on: pull_request
+on:
+    push:
+        branches: [trunk]
+    pull_request:
 
 jobs:
     check-typescript-errors-with-trunk:
