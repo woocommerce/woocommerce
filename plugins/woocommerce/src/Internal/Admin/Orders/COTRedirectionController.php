@@ -32,8 +32,8 @@ class COTRedirectionController {
 	 *
 	 * @param array|null $query_params The query parameters to use when determining the redirect. If not provided, the $_GET superglobal will be used.
 	 */
-	private function handle_hpos_admin_requests( array $query_params = array() ) {
-		$query_params = ( empty( $query_params ) && isset( $_GET ) ) ? $_GET : $query_params;
+	private function handle_hpos_admin_requests( $query_params = null ) {
+		$query_params = is_array( $query_params ) ? $query_params : $_GET;
 
 		if ( ! isset( $query_params['page'] ) || 'wc-orders' !== $query_params['page'] ) {
 			return;
