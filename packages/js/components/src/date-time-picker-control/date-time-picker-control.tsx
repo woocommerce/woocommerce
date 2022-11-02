@@ -112,10 +112,6 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		return moment( dateString );
 	}
 
-	function formatMomentIso( momentDate: Moment ): string {
-		return momentDate.utc().toISOString();
-	}
-
 	function maybeForceTime( momentDate: Moment ): Moment {
 		if ( ! isDateOnlyPicker ) return momentDate;
 
@@ -183,10 +179,14 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			: dateTime.creationData().input?.toString() || '';
 	}
 
-	function callOnChange( dateTime: Moment ) {
-		const valueToSend = dateTime.isValid()
-			? formatMomentIso( dateTime )
+	function formatDateTimeAsISO( dateTime: Moment ): string {
+		return dateTime.isValid()
+			? dateTime.utc().toISOString()
 			: dateTime.creationData().input?.toString() || '';
+	}
+
+	function callOnChange( dateTime: Moment ) {
+		const valueToSend = formatDateTimeAsISO( dateTime );
 
 		if ( typeof onChangeRef.current === 'function' ) {
 			onChangeRef.current( valueToSend, dateTime.isValid() );
@@ -369,7 +369,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 					<Picker
 						currentDate={
 							lastValidDate.current
-								? formatMomentIso( lastValidDate.current )
+								? formatDateTimeAsISO( lastValidDate.current )
 								: undefined
 						}
 						onChange={ updateStateWithNewSelectedLocalDateTime }
