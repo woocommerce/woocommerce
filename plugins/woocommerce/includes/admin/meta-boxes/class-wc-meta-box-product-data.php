@@ -175,14 +175,14 @@ class WC_Meta_Box_Product_Data {
 	public static function output_variations() {
 		global $post, $wpdb, $product_object;
 
+		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		$variation_attributes   = array_filter( $product_object->get_attributes(), array( __CLASS__, 'filter_variation_attributes' ) );
 		$default_attributes     = $product_object->get_default_attributes();
-		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		$variations_count       = absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_count', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(ID) FROM $wpdb->posts WHERE post_parent = %d AND post_type = 'product_variation' AND post_status IN ('publish', 'private')", $post->ID ) ), $post->ID ) );
 		$variations_per_page    = absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) );
-		/* phpcs: enable */
 		$variations_total_pages = ceil( $variations_count / $variations_per_page );
 		$modal_title            = get_bloginfo( 'name' ) . __( ' says', 'woocommerce' );
+		/* phpcs: enable */
 
 		include __DIR__ . '/views/html-product-data-variations.php';
 	}
