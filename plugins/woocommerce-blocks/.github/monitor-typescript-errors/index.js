@@ -15,6 +15,7 @@ const runner = async () => {
 	const fileName = getInput( 'compare', {
 		required: true,
 	} );
+
 	const newCheckStyleFile = fs.readFileSync( fileName );
 	const newCheckStyleFileParsed = parseXml( newCheckStyleFile );
 	const currentCheckStyleFile = await getFileContent( {
