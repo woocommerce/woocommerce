@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
 
 /**
@@ -9,9 +8,18 @@ import { useBlockProps } from '@wordpress/block-editor';
  */
 import Block from './block';
 import withProductSelector from '../shared/with-product-selector';
-import { BLOCK_TITLE, BLOCK_ICON } from './constants';
+import {
+	BLOCK_TITLE as label,
+	BLOCK_ICON as icon,
+	BLOCK_DESCRIPTION as description,
+} from './constants';
+import type { BlockAttributes } from './types';
 
-const Edit = ( { attributes } ) => {
+interface Props {
+	attributes: BlockAttributes;
+}
+
+const Edit = ( { attributes }: Props ): JSX.Element => {
 	const blockProps = useBlockProps();
 	return (
 		<div { ...blockProps }>
@@ -20,11 +28,4 @@ const Edit = ( { attributes } ) => {
 	);
 };
 
-export default withProductSelector( {
-	icon: BLOCK_ICON,
-	label: BLOCK_TITLE,
-	description: __(
-		'Choose a product to display its sale-badge.',
-		'woo-gutenberg-products-block'
-	),
-} )( Edit );
+export default withProductSelector( { icon, label, description } )( Edit );

@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import Label from '@woocommerce/base-components/label';
@@ -16,27 +15,22 @@ import {
 	useTypographyProps,
 } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
+import type { HTMLAttributes } from 'react';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+import type { BlockAttributes } from './types';
 
-/**
- * Product Sale Badge Block Component.
- *
- * @param {Object} props             Incoming props.
- * @param {string} [props.className] CSS Class name for the component.
- * @param {string} [props.align]     Alignment of the badge.
- * @return {*} The component.
- */
-export const Block = ( props ) => {
+type Props = BlockAttributes & HTMLAttributes< HTMLDivElement >;
+
+const Block = ( props: Props ): JSX.Element | null => {
 	const { className, align } = props;
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
 	const borderProps = useBorderProps( props );
 	const colorProps = useColorProps( props );
-
 	const typographyProps = useTypographyProps( props );
 	const spacingProps = useSpacingProps( props );
 
@@ -77,11 +71,6 @@ export const Block = ( props ) => {
 			/>
 		</div>
 	);
-};
-
-Block.propTypes = {
-	className: PropTypes.string,
-	align: PropTypes.string,
 };
 
 export default withProductDataContext( Block );
