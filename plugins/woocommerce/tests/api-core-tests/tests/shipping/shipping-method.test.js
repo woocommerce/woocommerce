@@ -65,7 +65,7 @@ test.describe('Shipping methods API tests', () => {
 		const response = await request.get('/wp-json/wc/v3/shipping_methods');
 		const responseJSON = await response.json();
 		expect(response.status()).toEqual(200);
-		expect(Array.isArray(responseJSON));
+		expect(Array.isArray(responseJSON)).toBe(true);
 		expect(responseJSON.length).toEqual(3);
 		expect(responseJSON[0].id).toEqual("flat_rate");
 		expect(responseJSON[1].id).toEqual("free_shipping");
