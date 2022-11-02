@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import {
+	getQuery,
 	getIdsFromQuery,
 	getSetOfIdsFromQuery,
 	getHistory,
@@ -16,6 +17,38 @@ import {
 global.window = Object.create( window );
 global.window.wcNavigation = {};
 
+describe( 'getQuery', () => {
+	it( "should return an empty object if the query doesn't contain any parameters", () => {
+		getHistory().push( { search: '' } );
+
+		expect( getQuery() ).toEqual( {} );
+	} );
+	it( 'should return an object containing all query parameters', () => {
+		getHistory().push( {
+			search: 'foo=bar&biz=1&buz=-1',
+		} );
+
+		expect( getQuery() ).toEqual( {
+			foo: 'bar',
+			biz: '1',
+			buz: '-1',
+		} );
+	} );
+	// Ignore overwritten params, and treat [] as a part of the name.
+	it( 'should return an object containing array-like parameters', () => {
+		getHistory().push( {
+			search: 'foo=bar&biz=1&buz[]=a&buz[]=-1&buz[2]=2&fuz=0&fuz=1',
+		} );
+
+		expect( getQuery() ).toEqual( {
+			foo: 'bar',
+			biz: '1',
+			'buz[]': '-1',
+			'buz[2]': '2',
+			fuz: '1',
+		} );
+	} );
+} );
 describe( 'getPersistedQuery', () => {
 	beforeEach( () => {
 		getHistory().push(
