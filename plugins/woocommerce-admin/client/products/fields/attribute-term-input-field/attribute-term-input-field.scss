@@ -1,0 +1,13 @@
+.woocommerce-attribute-term-field {
+	&__loading-spinner {
+		padding: 12px 0;
+	}
+	&__add-new {
+		display: flex;
+		align-items: center;
+		font-weight: 600;
+	}
+	&__add-new-icon {
+		margin-right: $gap-small;
+	}
+}

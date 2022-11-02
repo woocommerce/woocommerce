@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add playwright api-core-tests for product variations crud operations

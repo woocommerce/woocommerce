@@ -28,11 +28,13 @@ Basic.args = {
 	help: 'Type a date and time or use the picker',
 };
 
+const customFormat = 'Y-m-d H:i';
+
 export const CustomDateTimeFormat = Template.bind( {} );
 CustomDateTimeFormat.args = {
 	...Basic.args,
-	help: 'Format: YYYY-MM-DD HH:mm',
-	dateTimeFormat: 'YYYY-MM-DD HH:mm',
+	help: 'Format: ' + customFormat,
+	dateTimeFormat: customFormat,
 };
 
 function ControlledContainer( { children, ...props } ) {
@@ -97,3 +99,10 @@ ControlledDateOnly.args = {
 	isDateOnlyPicker: true,
 };
 ControlledDateOnly.decorators = Controlled.decorators;
+
+export const ControlledDateOnlyEndOfDay = Template.bind( {} );
+ControlledDateOnlyEndOfDay.args = {
+	...ControlledDateOnly.args,
+	timeForDateOnly: 'end-of-day',
+};
+ControlledDateOnlyEndOfDay.decorators = Controlled.decorators;

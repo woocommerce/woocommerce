@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Fix up initial block selection in RichTextEditor and add media blocks

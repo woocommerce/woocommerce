@@ -656,6 +656,18 @@ class FeaturesController {
 			}
 		}
 
+		/**
+		 * Filter to customize the description tip that appears under the description of each feature in the features settings page.
+		 *
+		 * @since 7.1.0
+		 *
+		 * @param string $desc_tip The original description tip.
+		 * @param string $feature_id The id of the feature for which the description tip is being customized.
+		 * @param bool $disabled True if the UI currently prevents changing the enable/disable status of the feature.
+		 * @return string The new description tip to use.
+		 */
+		$desc_tip = apply_filters( 'woocommerce_feature_description_tip', $desc_tip, $feature_id, $disabled );
+
 		return array(
 			'title'    => $feature['name'],
 			'desc'     => $description,
@@ -700,7 +712,7 @@ class FeaturesController {
 		}
 
 		// phpcs:disable WordPress.Security.NonceVerification
-		if ( get_current_screen() && 'plugins' !== get_current_screen()->id || 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) {
+		if ( ! function_exists( 'get_current_screen' ) || get_current_screen() && 'plugins' !== get_current_screen()->id || 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) {
 			return $list;
 		}
 
@@ -713,7 +725,7 @@ class FeaturesController {
 
 		// phpcs:enable WordPress.Security.NonceVerification
 		foreach ( array_keys( $list ) as $plugin_name ) {
-			if ( ! $this->plugin_util->is_woocommerce_aware_plugin( $plugin_name ) ) {
+			if ( ! $this->plugin_util->is_woocommerce_aware_plugin( $plugin_name ) || ! $this->proxy->call_function( 'is_plugin_active', $plugin_name ) ) {
 				continue;
 			}
 
@@ -728,10 +740,6 @@ class FeaturesController {
 			}
 		}
 
-		if ( 0 === count( $incompatibles ) ) {
-			return $list;
-		}
-
 		return array_intersect_key( $list, array_flip( $incompatibles ) );
 	}
 
@@ -743,25 +751,18 @@ class FeaturesController {
 			return;
 		}
 
-		if ( 'plugins' !== get_current_screen()->id ) {
-			return;
+		$feature_filter_description_shown = $this->maybe_display_current_feature_filter_description();
+		if ( ! $feature_filter_description_shown ) {
+			$this->maybe_display_feature_incompatibility_warning();
 		}
-
-		$this->maybe_display_feature_incompatibility_warning();
-		$this->maybe_display_current_feature_filter_description();
 	}
 
 	/**
-	 * Shows a warning (on the plugins screen) when there are any incompatibility between active plugins and enabled
-	 * features.
+	 * Shows a warning when there are any incompatibility between active plugins and enabled features.
+	 * The warning is shown in on any admin screen except the plugins screen itself, since
+	 * there's already a "You are viewing
 	 */
 	private function maybe_display_feature_incompatibility_warning(): void {
-		$plugin_status = $_GET['plugin_status'] ?? ''; // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
-
-		if ( ! in_array( $plugin_status, array( '', 'all', 'active' ), true ) ) {
-			return;
-		}
-
 		$incompatible_plugins = false;
 
 		foreach ( $this->plugin_util->get_woocommerce_aware_plugins( true ) as $plugin ) {
@@ -789,7 +790,7 @@ class FeaturesController {
 
 		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 		?>
-		<div class="notice notice-warning">
+		<div class="notice notice-error">
 		<p><?php echo $message; ?></p>
 		</div>
 		<?php
@@ -801,20 +802,24 @@ class FeaturesController {
 	 * if we are in the plugins page and the query string of the current request
 	 * looks like '?plugin_status=incompatible_with_feature&feature_id=<feature id>'.
 	 */
-	private function maybe_display_current_feature_filter_description(): void {
+	private function maybe_display_current_feature_filter_description(): bool {
+		if ( 'plugins' !== get_current_screen()->id ) {
+			return false;
+		}
+
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput
 		$plugin_status = $_GET['plugin_status'] ?? '';
 		$feature_id    = $_GET['feature_id'] ?? '';
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput
 
 		if ( 'incompatible_with_feature' !== $plugin_status ) {
-			return;
+			return false;
 		}
 
 		$feature_id = ( '' === $feature_id ) ? 'all' : $feature_id;
 
 		if ( 'all' !== $feature_id && ! $this->feature_exists( $feature_id ) ) {
-			return;
+			return false;
 		}
 
 		// phpcs:enable WordPress.Security.NonceVerification
@@ -823,10 +828,10 @@ class FeaturesController {
 
 		$message =
 			'all' === $feature_id
-			? __( 'You are viewing plugins that are incompatible with currently enabled WooCommerce features.', 'woocommerce' )
+			? __( 'You are viewing active plugins that are incompatible with currently enabled WooCommerce features.', 'woocommerce' )
 			: sprintf(
 				/* translators: %s is a feature name. */
-				__( "You are viewing the plugins that are incompatible with the '%s' feature.", 'woocommerce' ),
+				__( "You are viewing the active plugins that are incompatible with the '%s' feature.", 'woocommerce' ),
 				$this->features[ $feature_id ]['name']
 			);
 
@@ -844,6 +849,8 @@ class FeaturesController {
 		</div>
 		<?php
 		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+
+		return true;
 	}
 
 	/**
@@ -856,11 +863,15 @@ class FeaturesController {
 	private function handle_plugin_list_rows( $plugin_file, $plugin_data ) {
 		global $wp_list_table;
 
+		if ( 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			return;
+		}
+
 		if ( is_null( $wp_list_table ) || ! $this->plugin_util->is_woocommerce_aware_plugin( $plugin_data ) ) {
 			return;
 		}
 
-		if ( 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		if ( ! $this->proxy->call_function( 'is_plugin_active', $plugin_file ) ) {
 			return;
 		}
 
@@ -878,7 +889,7 @@ class FeaturesController {
 		$incompatible_features_count = count( $incompatible_features );
 		if ( $incompatible_features_count > 0 ) {
 			$columns_count      = $wp_list_table->get_column_count();
-			$is_active          = $this->proxy->call_function( 'is_plugin_active', $plugin_file );
+			$is_active          = true; // For now we are showing active plugins in the "Incompatible with..." view.
 			$is_active_class    = $is_active ? 'active' : 'inactive';
 			$is_active_td_style = $is_active ? " style='border-left: 4px solid #72aee6;'" : '';
 

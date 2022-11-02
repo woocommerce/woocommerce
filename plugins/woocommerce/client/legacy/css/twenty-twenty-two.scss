@@ -27,6 +27,7 @@
 
 @import "mixins";
 @import "animation";
+@import "variables";
 
 $tt2-gray: #f7f7f7;
 
@@ -187,6 +188,29 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 
+	// Moved from blocktheme.css to make sure TT2 won't be changed.
+	#respond input#submit,
+	input.button {
+		// Style primary WooCommerce CTAs in theme colors by default.
+		background-color: var(--wp--preset--color--foreground, $primary);
+		color: var(--wp--preset--color--background, $primarytext);
+
+		&:hover {
+			background-color: var(--wp--preset--color--foreground, $primary);
+			color: var(--wp--preset--color--background, $primarytext);
+		}
+
+		&.disabled,
+		&:disabled,
+		&:disabled[disabled],
+		&.disabled:hover,
+		&:disabled:hover,
+		&:disabled[disabled]:hover {
+			background-color: var(--wp--preset--color--foreground, $primary);
+			color: var(--wp--preset--color--background, $primarytext);
+		}
+	}
+
 	#respond input#submit.alt,
 	a.button.alt,
 	button.button.alt,
@@ -218,6 +242,23 @@ $tt2-gray: #f7f7f7;
 	a.checkout-button {
 		font-size: 18px;
 		padding: 1.5rem 3.5rem;
+	}
+
+	// Moved from blockthemes.css to make sure TT2 won't be changed.
+	button.button,
+	a.button {
+		background-color: var(--wp--preset--color--foreground, $primary);
+		color: var(--wp--preset--color--background, $primarytext);
+
+		&.disabled,
+		&:disabled,
+		&:disabled[disabled],
+		&.disabled:hover,
+		&:disabled:hover,
+		&:disabled[disabled]:hover {
+			background-color: var(--wp--preset--color--foreground, $primary);
+			color: var(--wp--preset--color--background, $primarytext);
+		}
 	}
 
 	// Shop page
@@ -419,6 +460,14 @@ $tt2-gray: #f7f7f7;
 				}
 			}
 		}
+
+		// Moved from blocktheme.scss to retain full styling.
+		ul.tabs li.active {
+			// Style active tab in theme colors.
+			background: var(--wp--preset--color--background, $contentbg);
+			border-bottom-color: var(--wp--preset--color--background, $contentbg);
+		}
+
 
 		.woocommerce-Tabs-panel {
 			padding-top: var(--wp--style--block-gap);

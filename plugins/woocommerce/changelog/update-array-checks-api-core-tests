@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update Array checks in playwright api-core-tests as some of the existing tests would produce false positives

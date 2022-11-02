@@ -1,7 +1,9 @@
 /**
  * External dependencies
  */
+import { PropsWithChildren } from 'react';
 import { render, waitFor, screen, within } from '@testing-library/react';
+import { Fragment } from '@wordpress/element';
 import { Form, FormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -18,7 +20,13 @@ const updateProductWithStatus = jest.fn();
 const copyProductWithStatus = jest.fn();
 const deleteProductAndRedirect = jest.fn();
 
+jest.mock( '@wordpress/plugins', () => ( { registerPlugin: jest.fn() } ) );
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
+jest.mock( '~/header/utils', () => ( {
+	WooHeaderItem: ( props: { children: () => React.ReactElement } ) => (
+		<Fragment { ...props }>{ props.children() }</Fragment>
+	),
+} ) );
 jest.mock( '../use-product-helper', () => {
 	return {
 		useProductHelper: () => ( {
