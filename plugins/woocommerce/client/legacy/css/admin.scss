@@ -952,7 +952,43 @@
 
 #variable_product_options #message,
 #variable_product_options .notice {
+	display: flex;
 	margin: 10px;
+	background-color: #FCFAE8;
+	> p {
+		width: 85%;
+	}
+	.woocommerce-add-variation-price-container {
+		width: 15%;
+		display: flex;
+		justify-content: flex-end;
+		> button {
+			align-self: center;
+		}
+	}
+}
+
+.woocommerce-set-price-variations {
+	.woocommerce-usage-modal__wrapper{
+		.woocommerce-usage-modal__message {
+			height: 60px;
+			flex-wrap: wrap;
+			display: flex;
+			> span {
+				padding-bottom: 16px;
+			}
+		}
+		.woocommerce-usage-modal__actions {
+			display: flex;
+			justify-content: flex-end;
+			margin-top: 20px;
+			> button{
+				margin-left: 16px;
+				width: 88px;
+				display: unset;
+			}
+		}
+	}
 }
 
 #variable_product_options {
@@ -5090,7 +5126,6 @@ img.help_tip {
 		font-size: 15px;
 		font-weight: 400;
 		margin-right: 0.5em;
-		visibility: hidden;
 		text-align: center;
 		vertical-align: middle;
 
@@ -5110,11 +5145,22 @@ img.help_tip {
 			color: #777;
 		}
 	}
+	.edit_variation {
+		margin-left: 0.5em;
+	}
 
 	h3:hover,
 	&.ui-sortable-helper {
 		.sort {
 			visibility: visible;
+		}
+	}
+}
+
+.woocommerce_attribute {
+	h3 {
+		.sort, a.delete {
+			visibility: hidden;
 		}
 	}
 }
@@ -5442,7 +5488,8 @@ img.help_tip {
 			cursor: move;
 
 			button,
-			a.delete {
+			a.delete,
+			a.edit {
 				float: right;
 			}
 
@@ -5452,7 +5499,17 @@ img.help_tip {
 				line-height: 26px;
 				text-decoration: none;
 				position: relative;
-				visibility: hidden;
+			}
+
+			a.edit {
+				font-weight: normal;
+				line-height: 26px;
+				text-decoration: none;
+				position: relative;
+			}
+
+			a.remove_variation {
+				margin: 0 0.5em;
 			}
 
 			strong {
@@ -5484,9 +5541,17 @@ img.help_tip {
 			padding: 0.5em 0.75em 0.5em 1em !important;
 
 			a.delete,
+			a.edit,
 			.handlediv,
 			.sort {
 				margin-top: 0.25em;
+			}
+		}
+		&.woocommerce_variation h3 {
+			a.delete,
+			a.edit,
+			.sort {
+				margin-top: 0.45em;
 			}
 		}
 
