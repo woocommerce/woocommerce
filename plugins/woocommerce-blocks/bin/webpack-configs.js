@@ -227,7 +227,7 @@ const getMainConfig = ( options = {} ) => {
 				automaticNameDelimiter: '--',
 				cacheGroups: {
 					commons: {
-						test: /[\\/]node_modules[\\/]/,
+						test: /[\/\\]node_modules[\/\\]/,
 						name: 'wc-blocks-vendors',
 						chunks: 'all',
 						enforce: true,
@@ -277,7 +277,6 @@ const getMainConfig = ( options = {} ) => {
 
 							if ( metadata.parent )
 								return `./inner-blocks/${ blockName }/block.json`;
-
 							return `./${ blockName }/block.json`;
 						},
 					},
@@ -658,7 +657,7 @@ const getStylingConfig = ( options = {} ) => {
 						priority: 10,
 					},
 					vendorsStyle: {
-						test: /\/node_modules\/.*?style\.s?css$/,
+						test: /[\/\\]node_modules[\/\\].*?style\.s?css$/,
 						name: 'wc-blocks-vendors-style',
 						chunks: 'all',
 						priority: 7,
@@ -676,7 +675,7 @@ const getStylingConfig = ( options = {} ) => {
 		module: {
 			rules: [
 				{
-					test: /\/node_modules\/.*?style\.s?css$/,
+					test: /[\/\\]node_modules[\/\\].*?style\.s?css$/,
 					use: [
 						MiniCssExtractPlugin.loader,
 						{ loader: 'css-loader', options: { importLoaders: 1 } },
@@ -731,6 +730,9 @@ const getStylingConfig = ( options = {} ) => {
 									if (
 										relativePath.startsWith(
 											'assets/css/abstracts/'
+										) ||
+										relativePath.startsWith(
+											'assets\\css\\abstracts\\'
 										)
 									) {
 										return content;
