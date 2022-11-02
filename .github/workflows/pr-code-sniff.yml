@@ -1,41 +1,46 @@
 name: Run code sniff on PR
-on:
-  pull_request
+on: pull_request
 defaults:
-  run:
-    shell: bash
-concurrency: 
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    run:
+        shell: bash
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+env:
+    PHPCS: ./plugins/woocommerce/vendor/bin/phpcs # Run WooCommerce phpcs setup in phpcs-changed instead of default
 jobs:
-  test:
-    name: Code sniff (PHP 7.4, WP Latest)
-    timeout-minutes: 15
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      
-      - name: Get Changed Files
-        id: changed-files
-        uses: tj-actions/changed-files@v32  
-        with:
-          files: |
-            **/*.php
+    test:
+        name: Code sniff (PHP 7.4, WP Latest)
+        timeout-minutes: 15
+        runs-on: ubuntu-20.04
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
 
-      - name: Setup WooCommerce Monorepo
-        if: steps.changed-files.outputs.any_changed == 'true'
-        uses: ./.github/actions/setup-woocommerce-monorepo
-        with:
-          build: false
+            - name: Get Changed Files
+              id: changed-files
+              uses: tj-actions/changed-files@v32
+              with:
+                  files: |
+                      **/*.php
 
-      - name: Tool versions
-        if: steps.changed-files.outputs.any_changed == 'true'
-        run: |
-          php --version
-          composer --version
+            - name: Setup WooCommerce Monorepo
+              if: steps.changed-files.outputs.any_changed == 'true'
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  build: false
 
-      - name: Run PHPCS
-        if: steps.changed-files.outputs.any_changed == 'true'
-        run: ./plugins/woocommerce/vendor/bin/phpcs -n -q --report=checkstyle ${{ steps.changed-files.outputs.all_changed_files }} | cs2pr        
+            - name: Tool versions
+              if: steps.changed-files.outputs.any_changed == 'true'
+              run: |
+                  php --version
+                  composer --version
+                  phpcs-changed --version
+
+            - name: Run PHPCS
+              if: steps.changed-files.outputs.any_changed == 'true'
+              run: |
+                  HEAD_REF=$(git rev-parse HEAD)
+                  git checkout $HEAD_REF
+                  phpcs-changed --git --git-base ${{ github.base_ref }} ${{ steps.changed-files.outputs.all_changed_files }}

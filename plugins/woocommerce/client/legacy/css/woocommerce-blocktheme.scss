@@ -17,16 +17,14 @@
 	}
 }
 
+.clear {
+	clear: both;
+}
+
 /**
 * General
 */
 .woocommerce {
-	mark {
-		// Style the mark element in theme colors.
-		// For details see https://github.com/woocommerce/woocommerce/pull/31631.
-		background-color: var(--wp--preset--color--foreground, $highlight);
-		color: var(--wp--preset--color--background, $highlightext);
-	}
 
 	/**
 	* Buttons
@@ -42,8 +40,6 @@
 
 	button.button,
 	a.button {
-		background-color: var(--wp--preset--color--foreground, $primary);
-		color: var(--wp--preset--color--background, $primarytext);
 
 		&.disabled,
 		&:disabled,
@@ -51,8 +47,6 @@
 		&.disabled:hover,
 		&:disabled:hover,
 		&:disabled[disabled]:hover {
-			background-color: var(--wp--preset--color--foreground, $primary);
-			color: var(--wp--preset--color--background, $primarytext);
 			opacity: 0.5;
 		}
 	}
@@ -60,13 +54,8 @@
 	#respond input#submit,
 	input.button,
 	a.button.alt {
-		// Style primary WooCommerce CTAs in theme colors by default.
-		background-color: var(--wp--preset--color--foreground, $primary);
-		color: var(--wp--preset--color--background, $primarytext);
 
 		&:hover {
-			background-color: var(--wp--preset--color--foreground, $primary);
-			color: var(--wp--preset--color--background, $primarytext);
 			opacity: 0.9;
 		}
 
@@ -76,8 +65,6 @@
 		&.disabled:hover,
 		&:disabled:hover,
 		&:disabled[disabled]:hover {
-			background-color: var(--wp--preset--color--foreground, $primary);
-			color: var(--wp--preset--color--background, $primarytext);
 			opacity: 0.5;
 		}
 	}
@@ -114,9 +101,6 @@
 
 		.woocommerce-tabs {
 			ul.tabs li.active {
-				// Style active tab in theme colors.
-				background: var(--wp--preset--color--background, $contentbg);
-				border-bottom-color: var(--wp--preset--color--background, $contentbg);
 
 				&::before {
 					box-shadow: 2px 2px 0 var(--wp--preset--color--background, $contentbg);

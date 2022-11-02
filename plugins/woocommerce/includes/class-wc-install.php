@@ -822,6 +822,7 @@ class WC_Install {
 		global $wpdb;
 		$obsolete_notes_names = array(
 			'wc-admin-welcome-note',
+			'wc-admin-insight-first-product-and-payment',
 			'wc-admin-store-notice-setting-moved',
 			'wc-admin-store-notice-giving-feedback',
 			'wc-admin-learn-more-about-product-settings',

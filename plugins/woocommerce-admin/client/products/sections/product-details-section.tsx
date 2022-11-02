@@ -53,6 +53,9 @@ export const ProductDetailsSection: React.FC = () => {
 	const [ descriptionBlocks, setDescriptionBlocks ] = useState<
 		BlockInstance[]
 	>( parse( values.description || '' ) );
+	const [ summaryBlocks, setSummaryBlocks ] = useState< BlockInstance[] >(
+		parse( values.short_description || '' )
+	);
 	const { permalinkPrefix, permalinkSuffix } = useSelect(
 		( select: WCDataSelector ) => {
 			const { getPermalinkParts } = select( PRODUCTS_STORE_NAME );
@@ -206,12 +209,27 @@ export const ProductDetailsSection: React.FC = () => {
 						/>
 					) }
 					<RichTextEditor
+						label={ __( 'Summary', 'woocommerce' ) }
+						blocks={ summaryBlocks }
+						onChange={ ( blocks ) => {
+							setSummaryBlocks( blocks );
+							setValue(
+								'short_description',
+								serialize( blocks )
+							);
+						} }
+					/>
+					<RichTextEditor
 						label={ __( 'Description', 'woocommerce' ) }
 						blocks={ descriptionBlocks }
 						onChange={ ( blocks ) => {
 							setDescriptionBlocks( blocks );
 							setValue( 'description', serialize( blocks ) );
 						} }
+						placeholder={ __(
+							'Describe this product. What makes it unique? What are its most important features?',
+							'woocommerce'
+						) }
 					/>
 				</CardBody>
 			</Card>

@@ -239,7 +239,7 @@ test.describe('Settings API tests: CRUD', () => {
 
 	test.describe('List all settings options', () => {
 
-		test('can retrieve all general settings', async ({
+		test.fixme('can retrieve all general settings', async ({
 			request
 		}) => {
 			// call API to retrieve all settings options
