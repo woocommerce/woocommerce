@@ -116,10 +116,6 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		return momentDate.utc().toISOString();
 	}
 
-	function formatMoment( momentDate: Moment ): string {
-		return formatDate( displayFormat, momentDate.local() );
-	}
-
 	function maybeForceTime( momentDate: Moment ): Moment {
 		if ( ! isDateOnlyPicker ) return momentDate;
 
@@ -181,12 +177,10 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		onChangeRef.current = onChange;
 	}, [ onChange ] );
 
-	function setInputStringWithMoment( dateTime: Moment ) {
-		const newInputString = dateTime.isValid()
-			? formatMoment( dateTime )
+	function formatDateTimeForDisplay( dateTime: Moment ): string {
+		return dateTime.isValid()
+			? formatDate( displayFormat, dateTime.local() )
 			: dateTime.creationData().input?.toString() || '';
-
-		setInputString( newInputString );
 	}
 
 	function callOnChange( dateTime: Moment ) {
@@ -220,7 +214,9 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			// We don't want to reformat what the user typed in
 			setInputString( newDateTimeString );
 		} else {
-			setInputStringWithMoment( newDateTime );
+			const formattedDateTimeString =
+				formatDateTimeForDisplay( newDateTime );
+			setInputString( formattedDateTimeString );
 		}
 
 		if (
