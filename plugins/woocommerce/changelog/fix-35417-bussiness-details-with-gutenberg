@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix business details step when Gutenberg is active
