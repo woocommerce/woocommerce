@@ -101,6 +101,10 @@ const AttributeFilterBlock = ( {
 		isString
 	);
 
+	const productIds = isEditor
+		? []
+		: getSettingWithCoercion( 'product_ids', [], Array.isArray );
+
 	const [ hasSetFilterDefaultsFromUrl, setHasSetFilterDefaultsFromUrl ] =
 		useState( false );
 
@@ -158,6 +162,7 @@ const AttributeFilterBlock = ( {
 				...queryState,
 				attributes: filterAvailableTerms ? queryState.attributes : null,
 			},
+			productIds,
 		} );
 
 	/**
