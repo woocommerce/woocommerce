@@ -37,7 +37,7 @@ import {
 type SelectControlProps< ItemType > = {
 	children?: ChildrenType< ItemType >;
 	items: ItemType[];
-	label: string;
+	label: string | JSX.Element;
 	getItemLabel?: getItemLabelType< ItemType >;
 	getItemValue?: getItemValueType< ItemType >;
 	getFilteredItems?: (

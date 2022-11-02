@@ -28,7 +28,7 @@ export const CategoryFieldAddNewItem: React.FC<
 				index,
 			} ) }
 			className={ classNames(
-				'woocommerce-category-field-dropdown__item woocommerce-category-field-dropdown__new-item',
+				'woocommerce-category-field-dropdown__item is-new',
 				{
 					item_highlighted: highlightedIndex === index,
 				}

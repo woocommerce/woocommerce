@@ -2,16 +2,13 @@
  * External dependencies
  */
 import { useMemo, useState } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
-import { Icon } from '@wordpress/components';
-import { plus } from '@wordpress/icons';
+import { __ } from '@wordpress/i18n';
 import {
 	selectControlStateChangeTypes,
 	Spinner,
 	__experimentalSelectControl as SelectControl,
 	__experimentalSelectControlMenuSlot as MenuSlot,
 	__experimentalSelectControlMenu as Menu,
-	__experimentalSelectControlMenuItem as MenuItem,
 } from '@woocommerce/components';
 import { ProductCategory } from '@woocommerce/data';
 import { debounce } from 'lodash';
@@ -43,9 +40,10 @@ function getSelectedWithParents(
 ): Pick< ProductCategory, 'id' | 'name' >[] {
 	selected.push( { id: item.id, name: item.name } );
 
-	const parentId = item.parent
-		? item.parent
-		: treeKeyValues[ item.id ].parentID;
+	const parentId =
+		item.parent !== undefined
+			? item.parent
+			: treeKeyValues[ item.id ].parentID;
 	if (
 		parentId > 0 &&
 		treeKeyValues[ parentId ] &&
@@ -253,7 +251,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 				<CreateCategoryModal
 					initialCategoryName={ searchValue }
 					onCancel={ () => setShowCreateNewModal( false ) }
-					onCreated={ ( newCategory ) => {
+					onCreate={ ( newCategory ) => {
 						onChange(
 							getSelectedWithParents(
 								[ ...value ],
