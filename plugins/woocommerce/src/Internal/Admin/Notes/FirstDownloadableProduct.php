@@ -2,7 +2,7 @@
 /**
  * WooCommerce Admin Digital/Downloadable Producdt Handling note provider
  *
- * Adds a note with a link to the downlaodable product handling
+ * Adds a note with a link to the downloadable product handling
  */
 
 namespace Automattic\WooCommerce\Internal\Admin\Notes;
@@ -13,9 +13,9 @@ use \Automattic\WooCommerce\Admin\Notes\Note;
 use \Automattic\WooCommerce\Admin\Notes\NoteTraits;
 
 /**
- * FirstDownlaodableProduct.
+ * FirstDownloadableProduct.
  */
-class FirstDownlaodableProduct {
+class FirstDownloadableProduct {
 	/**
 	 * Note traits.
 	 */
