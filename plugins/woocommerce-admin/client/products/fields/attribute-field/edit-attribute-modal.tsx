@@ -19,7 +19,6 @@ import { getAdminLink } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
-import './add-attribute-modal.scss';
 import {
 	AttributeTermInputField,
 	CustomAttributeTermInputField,
