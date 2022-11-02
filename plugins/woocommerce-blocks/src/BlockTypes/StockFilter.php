@@ -10,7 +10,8 @@ class StockFilter extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'stock-filter';
+	protected $block_name        = 'stock-filter';
+	const STOCK_STATUS_QUERY_VAR = 'filter_stock_status';
 
 	/**
 	 * Extra data passed through from server to client for block.
@@ -24,5 +25,12 @@ class StockFilter extends AbstractBlock {
 		$this->asset_data_registry->add( 'stockStatusOptions', wc_get_product_stock_status_options(), true );
 		$this->asset_data_registry->add( 'hideOutOfStockItems', 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ), true );
 
+	}
+
+	/**
+	 * Get Stock status query variables values.
+	 */
+	public static function get_stock_status_query_var_values() {
+		return array_keys( wc_get_product_stock_status_options() );
 	}
 }
