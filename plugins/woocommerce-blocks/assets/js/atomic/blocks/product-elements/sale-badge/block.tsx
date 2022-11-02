@@ -25,7 +25,7 @@ import type { BlockAttributes } from './types';
 
 type Props = BlockAttributes & HTMLAttributes< HTMLDivElement >;
 
-const Block = ( props: Props ): JSX.Element | null => {
+export const Block = ( props: Props ): JSX.Element | null => {
 	const { className, align } = props;
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
