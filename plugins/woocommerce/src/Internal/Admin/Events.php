@@ -23,7 +23,6 @@ use \Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
 use \Automattic\WooCommerce\Internal\Admin\Notes\LaunchChecklist;
 use \Automattic\WooCommerce\Internal\Admin\Notes\MagentoMigration;
 use \Automattic\WooCommerce\Internal\Admin\Notes\ManageOrdersOnTheGo;
-use \Automattic\WooCommerce\Internal\Admin\Notes\ManageStoreActivityFromHomeScreen;
 use \Automattic\WooCommerce\Internal\Admin\Notes\MarketingJetpack;
 use \Automattic\WooCommerce\Internal\Admin\Notes\MerchantEmailNotifications;
 use \Automattic\WooCommerce\Internal\Admin\Notes\MigrateFromShopify;
@@ -106,7 +105,6 @@ class Events {
 	private static $other_note_classes = array(
 		CouponPageMoved::class,
 		InstallJPAndWCSPlugins::class,
-		ManageStoreActivityFromHomeScreen::class,
 		OrderMilestones::class,
 		SellingOnlineCourses::class,
 		UnsecuredReportFiles::class,

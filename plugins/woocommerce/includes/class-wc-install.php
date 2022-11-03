@@ -829,6 +829,7 @@ class WC_Install {
 			'wc-admin-adding-and-managing-products',
 			'wc-admin-onboarding-profiler-reminder',
 			'wc-admin-historical-data',
+			'wc-admin-manage-store-activity-from-home-screen',
 			'wc-admin-review-shipping-settings',
 			'wc-admin-home-screen-feedback',
 			'wc-admin-update-store-details',
