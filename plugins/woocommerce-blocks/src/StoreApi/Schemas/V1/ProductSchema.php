@@ -249,7 +249,7 @@ class ProductSchema extends AbstractSchema {
 				],
 			],
 			'attributes'          => [
-				'description' => __( 'List of attributes assigned to the product/variation that are visible or used for variations.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'List of attributes (taxonomy terms) assigned to the product. For variable products, these are mapped to variations (see the `variations` field).', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
 				'items'       => [
