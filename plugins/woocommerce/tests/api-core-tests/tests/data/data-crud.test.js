@@ -26206,7 +26206,7 @@ test.describe('Data API tests', () => {
 			expect.objectContaining({
 				"code": "LYD",
 				"name": "Libyan dinar",
-				"symbol": "&#x644;.&#x62f;",
+				"symbol": "&#x62f;.&#x644;",
 				"_links": {
 					"self": [{
 						"href": expect.stringContaining("data/currencies/LYD")
