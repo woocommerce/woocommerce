@@ -7,6 +7,8 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
+use Automattic\WooCommerce\Utilities\OrderUtil as OrderUtil;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer as Order_DataSynchronizer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -762,6 +764,18 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is your site enforcing the use of Approved Product Download Directories?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td><?php echo wc_get_container()->get( Download_Directories::class )->get_mode() === Download_Directories::MODE_ENABLED ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
+		<tr>
+			<td data-export-label="Order datastore"><?php esc_html_e( 'Order datastore:', 'woocommerce' ); ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Datastore currently in use for orders.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( WC_Data_Store::load( 'order' )->get_current_class_name() ); ?></td>
+		</tr>
+		<?php if ( wc_get_container()->get( OrderUtil::class )->custom_orders_table_usage_is_enabled() ): ?>
+		<tr>
+			<td data-export-label="HPOS data sync enabled"><?php esc_html_e( 'HPOS data sync enabled:' ); ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is data sync enabled for HPOS?', 'woocommerce' ) ); ?></td>
+			<td><?php echo wc_get_container()->get( Order_DataSynchronizer::class )->data_sync_is_enabled() ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
+		</tr>
+		<?php endif; ?>
 	</tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">
