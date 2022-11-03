@@ -216,6 +216,20 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		return formatDateTimeForDisplay( newDateTime );
 	}
 
+	// We keep a ref to the onBlur prop so that we can be sure we are
+	// always using the more up-to-date value, otherwise, we get in
+	// any infinite loop when calling onBlur
+	const onBlurRef = useRef< () => void >();
+	useEffect( () => {
+		onBlurRef.current = onBlur;
+	}, [ onBlur ] );
+
+	const callOnBlurIfDropdownIsNotOpening = useCallback( ( willOpen ) => {
+		if ( ! willOpen && typeof onBlurRef.current === 'function' ) {
+			onBlurRef.current();
+		}
+	}, [] );
+
 	return (
 		<Dropdown
 			className={ classNames(
@@ -225,12 +239,8 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			position="bottom left"
 			focusOnMount={ false }
 			// @ts-expect-error `onToggle` does exist.
-			onToggle={ ( willOpen ) => {
-				if ( ! willOpen && typeof onBlur === 'function' ) {
-					onBlur();
-				}
-			} }
-			renderToggle={ ( { isOpen, onToggle } ) => (
+			onToggle={ callOnBlurIfDropdownIsNotOpening }
+			renderToggle={ ( { isOpen, onClose, onToggle } ) => (
 				<BaseControl id={ id } label={ label } help={ help }>
 					<InputControl
 						id={ id }
@@ -249,7 +259,9 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 							if (
 								hasFocusLeftInputAndDropdownContent( event )
 							) {
-								onToggle(); // hide the dropdown
+								// close the dropdown, which will also trigger
+								// the component's onBlur to be called
+								onClose();
 							}
 						} }
 						suffix={
