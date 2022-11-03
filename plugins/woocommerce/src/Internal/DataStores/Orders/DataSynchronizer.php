@@ -472,7 +472,7 @@ WHERE
 			$extra_tip = sprintf(
 				_n(
 					"⚠ There's one order pending sync from the posts table to the orders table. The feature shouldn't be disabled until this order is synchronized.",
-					"⚠ There are %%1\$d orders pending sync from the posts table to the orders table. The feature shouldn't be disabled until these orders are synchronized.",
+					"⚠ There are %1\$d orders pending sync from the posts table to the orders table. The feature shouldn't be disabled until these orders are synchronized.",
 					$pending_sync_count,
 					'woocommerce'
 				),
