@@ -17,7 +17,6 @@ use \Automattic\WooCommerce\Internal\Admin\Notes\CustomizeStoreWithBlocks;
 use \Automattic\WooCommerce\Internal\Admin\Notes\CustomizingProductCatalog;
 use \Automattic\WooCommerce\Internal\Admin\Notes\EditProductsOnTheMove;
 use \Automattic\WooCommerce\Internal\Admin\Notes\EUVATNumber;
-use \Automattic\WooCommerce\Internal\Admin\Notes\FirstDownloadableProduct;
 use \Automattic\WooCommerce\Internal\Admin\Notes\FirstProduct;
 use \Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
 use \Automattic\WooCommerce\Internal\Admin\Notes\LaunchChecklist;
@@ -76,7 +75,6 @@ class Events {
 		CustomizingProductCatalog::class,
 		EditProductsOnTheMove::class,
 		EUVATNumber::class,
-		FirstDownloadableProduct::class,
 		FirstProduct::class,
 		LaunchChecklist::class,
 		MagentoMigration::class,
