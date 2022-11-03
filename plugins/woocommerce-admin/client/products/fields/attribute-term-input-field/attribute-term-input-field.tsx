@@ -30,13 +30,21 @@ type AttributeTermInputFieldProps = {
 	attributeId?: number;
 	placeholder?: string;
 	disabled?: boolean;
+	label?: string;
 };
 
 let uniqueId = 0;
 
 export const AttributeTermInputField: React.FC<
 	AttributeTermInputFieldProps
-> = ( { value = [], onChange, placeholder, disabled, attributeId } ) => {
+> = ( {
+	value = [],
+	onChange,
+	placeholder,
+	disabled,
+	attributeId,
+	label = '',
+} ) => {
 	const attributeTermInputId = useRef(
 		`woocommerce-attribute-term-field-${ ++uniqueId }`
 	);
@@ -48,7 +56,7 @@ export const AttributeTermInputField: React.FC<
 		useState< string >();
 
 	const fetchItems = useCallback(
-		( searchString: string | undefined ) => {
+		( searchString?: string | undefined ) => {
 			setIsFetching( true );
 			return resolveSelect(
 				EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
@@ -80,7 +88,7 @@ export const AttributeTermInputField: React.FC<
 			attributeId !== undefined &&
 			! fetchedItems.length
 		) {
-			fetchItems( '' );
+			fetchItems();
 		}
 	}, [ disabled, attributeId ] );
 
@@ -124,7 +132,7 @@ export const AttributeTermInputField: React.FC<
 				items={ fetchedItems }
 				multiple
 				disabled={ disabled || ! attributeId }
-				label=""
+				label={ label }
 				getFilteredItems={ ( allItems, inputValue ) => {
 					if (
 						inputValue.length > 0 &&
