@@ -830,6 +830,7 @@ class WC_Install {
 			'wc-admin-historical-data',
 			'wc-admin-review-shipping-settings',
 			'wc-admin-home-screen-feedback',
+			'wc-admin-update-store-details',
 			'wc-admin-effortless-payments-by-mollie',
 			'wc-admin-google-ads-and-marketing',
 			'wc-admin-marketing-intro',
