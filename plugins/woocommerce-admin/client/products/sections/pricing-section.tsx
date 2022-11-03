@@ -84,6 +84,10 @@ export const PricingSection: React.FC = () => {
 	} );
 
 	const onSaleScheduleToggleChange = ( value: boolean ) => {
+		recordEvent( 'product_pricing_schedule_sale_toggle_click', {
+			enabled: value,
+		} );
+
 		setUserToggledSaleSchedule( true );
 		setShowSaleSchedule( value );
 
