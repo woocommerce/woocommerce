@@ -7,7 +7,6 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
-use Automattic\WooCommerce\Utilities\OrderUtil as OrderUtil;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer as Order_DataSynchronizer;
 
 defined( 'ABSPATH' ) || exit;
