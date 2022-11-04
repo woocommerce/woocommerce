@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
     e2e-tests:
-        name: E2E tests on trunk
+        name: E2E tests on nightly build
         runs-on: ubuntu-20.04
         env:
             ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
@@ -74,7 +74,7 @@ jobs:
                   retention-days: 5
 
     api-tests:
-        name: API tests on trunk
+        name: API tests on nightly build
         runs-on: ubuntu-20.04
         needs: [e2e-tests]
         if: success() || failure()
@@ -118,7 +118,7 @@ jobs:
                   retention-days: 5
 
     k6-tests:
-        name: k6 tests on trunk
+        name: k6 tests on nightly build
         runs-on: ubuntu-20.04
         needs: [api-tests]
         if: success() || failure()
@@ -168,7 +168,7 @@ jobs:
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
 
     test-plugins:
-        name: Smoke tests with ${{ matrix.plugin }} plugin installed
+        name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed
         runs-on: ubuntu-20.04
         env:
             USE_WP_ENV: 1
@@ -230,7 +230,7 @@ jobs:
               if: success() || failure()
               uses: actions/upload-artifact@v3
               with:
-                  name: Smoke tests with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
+                  name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
                   path: |
                       ${{ env.ALLURE_RESULTS_DIR }}
                       ${{ env.ALLURE_REPORT_DIR }}
@@ -238,7 +238,7 @@ jobs:
                   retention-days: 5
 
     trunk-results:
-        name: Publish report on smoke tests on trunk
+        name: Publish report on smoke tests on nightly build
         if: |
             ( success() || failure() ) &&
             ! github.event.pull_request.head.repo.fork
@@ -294,7 +294,7 @@ jobs:
                     --repo woocommerce/woocommerce-test-reports
 
     plugins-results:
-        name: Publish report on smoke tests with plugins
+        name: Publish report on Smoke tests on trunk with plugins
         if: |
             ( success() || failure() ) &&
             ! github.event.pull_request.head.repo.fork
@@ -303,7 +303,7 @@ jobs:
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             RUN_ID: ${{ github.run_id }}
-            ARTIFACT: Smoke tests with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
+            ARTIFACT: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
         strategy:
             fail-fast: false
             matrix:
