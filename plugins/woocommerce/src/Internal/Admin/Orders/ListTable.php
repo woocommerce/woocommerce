@@ -897,6 +897,19 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Gets the current action selected from the bulk actions dropdown.
+	 *
+	 * @return string|false The action name. False if no action was selected.
+	 */
+	public function current_action() {
+		if ( ! empty( $_REQUEST['delete_all'] ) ) {
+			return 'delete_all';
+		}
+
+		return parent::current_action();
+	}
+
+	/**
 	 * Handle bulk actions.
 	 */
 	public function handle_bulk_actions() {
@@ -911,6 +924,22 @@ class ListTable extends WP_List_Table {
 		$redirect_to = remove_query_arg( array( 'deleted', 'ids' ), wp_get_referer() );
 		$redirect_to = add_query_arg( 'paged', $this->get_pagenum(), $redirect_to );
 
+		if ( 'delete_all' === $action ) {
+			// Get all trashed orders.
+			$ids = wc_get_orders(
+				array(
+					'type'   => 'shop_order',
+					'status' => 'trash',
+					'limit'  => -1,
+					'return' => 'ids',
+				)
+			);
+
+			$action = 'delete';
+		} else {
+			$ids = isset( $_REQUEST['order'] ) ? array_reverse( array_map( 'absint', $_REQUEST['order'] ) ) : array();
+		}
+
 		/**
 		 * Allows 3rd parties to modify order IDs about to be affected by a bulk action.
 		 *
@@ -918,7 +947,7 @@ class ListTable extends WP_List_Table {
 		 */
 		$ids = apply_filters( // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 			'woocommerce_bulk_action_ids',
-			isset( $_REQUEST['order'] ) ? array_reverse( array_map( 'absint', $_REQUEST['order'] ) ) : array(),
+			$ids,
 			$action,
 			'order'
 		);
