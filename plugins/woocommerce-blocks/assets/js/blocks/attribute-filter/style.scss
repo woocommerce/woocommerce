@@ -109,6 +109,15 @@
 	width: 100%;
 }
 
+.wc-block-attribute-filter__instructions {
+	padding-bottom: 1em;
+	border-bottom: 1px solid $gray-100;
+}
+
+.wc-block-attribute-filter__selection {
+	padding-top: 1em;
+}
+
 .woocommerce-product-attributes {
 	.woocommerce-search-list__search {
 		.components-base-control__label {
