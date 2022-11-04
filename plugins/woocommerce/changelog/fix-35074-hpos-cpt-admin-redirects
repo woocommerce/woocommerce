@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+When custom order tables are not authoritative, admin UI requests will be redirected to the matching legacy order screen as appropriate.

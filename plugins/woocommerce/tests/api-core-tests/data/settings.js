@@ -96,7 +96,7 @@ const currencies = {
 	"LKR": "Sri Lankan rupee (&#xdbb;&#xdd4;)",
 	"LRD": "Liberian dollar (&#36;)",
 	"LSL": "Lesotho loti (L)",
-	"LYD": "Libyan dinar (&#x644;.&#x62f;)",
+	"LYD": "Libyan dinar (&#x62f;.&#x644;)",
 	"MAD": "Moroccan dirham (&#x62f;.&#x645;.)",
 	"MDL": "Moldovan leu (MDL)",
 	"MGA": "Malagasy ariary (Ar)",

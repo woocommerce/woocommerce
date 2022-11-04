@@ -67,7 +67,7 @@ test.describe('Customers API tests: CRUD', () => {
 			const response = await request.get('/wp-json/wc/v3/customers');
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
-			expect(Array.isArray(responseJSON));
+			expect(Array.isArray(responseJSON)).toBe(true);
 			expect(responseJSON.length).toEqual(0);
 		});
 
@@ -85,7 +85,7 @@ test.describe('Customers API tests: CRUD', () => {
 			});
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
-			expect(Array.isArray(responseJSON));
+			expect(Array.isArray(responseJSON)).toBe(true);
 			expect(responseJSON.length).toBeGreaterThanOrEqual(2);
 		});
 	});
@@ -132,7 +132,7 @@ test.describe('Customers API tests: CRUD', () => {
 			const response = await request.get('/wp-json/wc/v3/customers');
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
-			expect(Array.isArray(responseJSON));
+			expect(Array.isArray(responseJSON)).toBe(true);
 			expect(responseJSON.length).toBeGreaterThan(0);
 		});
 	});
