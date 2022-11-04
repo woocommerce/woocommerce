@@ -1,0 +1,76 @@
+/**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
+import {
+	Button,
+	CheckboxControl,
+	Panel,
+	PanelBody,
+	PanelHeader,
+	TextControl,
+} from '@wordpress/components';
+import { Icon, closeSmall, cog } from '@wordpress/icons';
+import { Product } from '@woocommerce/data';
+import { registerPlugin } from '@wordpress/plugins';
+import { useFormContext } from '@woocommerce/components';
+import { useState } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
+import { getCheckboxTracks } from './sections/utils';
+import { WooHeaderItem } from '~/header/utils';
+import './product-settings.scss';
+
+export const ProductSettings = () => {
+	const { getCheckboxControlProps, getInputProps } = useFormContext< Product >();
+	const [ isOpen, setIsOpen ] = useState( false );
+
+	return (
+		<WooHeaderItem>
+			<>
+				<Button
+					isPressed={ isOpen }
+					onClick={ () => setIsOpen( ! isOpen ) }
+				>
+					<Icon icon={ cog } />
+				</Button>
+				{ isOpen && (
+					<Panel className="product-settings__panel">
+						<PanelHeader label={ __( 'Settings', 'woocommerce' ) }>
+							<Button
+								variant="tertiary"
+								onClick={ () => setIsOpen( false ) }
+								aria-label={ __(
+									'Close settings',
+									'woocommerce'
+								) }
+							>
+								<Icon icon={ closeSmall } />
+							</Button>
+						</PanelHeader>
+						<PanelBody title={ __( 'Advanced', 'woocommerce' ) }>
+							<CheckboxControl
+								label={ __( 'Enable reviews', 'woocommerce' ) }
+								{ ...getCheckboxControlProps(
+									'reviews_allowed',
+									getCheckboxTracks( 'reviews_allowed' )
+								) }
+							/>
+							<TextControl
+								label={ __( 'Menu order', 'woocommerce' ) }
+								{ ...getInputProps( 'menu_order' ) }
+							/>
+						</PanelBody>
+					</Panel>
+				) }
+			</>
+		</WooHeaderItem>
+	);
+};
+
+registerPlugin( 'woocommerce-product-settings', {
+	render: ProductSettings,
+	icon: 'admin-generic',
+} );
