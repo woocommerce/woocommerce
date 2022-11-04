@@ -34,6 +34,13 @@ class ListTable extends WP_List_Table {
 	private $page_controller;
 
 	/**
+	 * Tracks whether we're currently inside the trash.
+	 *
+	 * @var boolean
+	 */
+	private $is_trash = false;
+
+	/**
 	 * Sets up the admin list table for orders (specifically, for orders managed by the OrdersTableDataStore).
 	 *
 	 * @see WC_Admin_List_Table_Orders for the corresponding class used in relation to the traditional WP Post store.
@@ -281,6 +288,9 @@ class ListTable extends WP_List_Table {
 				'total_pages' => $max_num_pages,
 			)
 		);
+
+		// Are we inside the trash?
+		$this->is_trash = isset( $_REQUEST['status'] ) && 'trash' === $_REQUEST['status'];
 	}
 
 	/**
