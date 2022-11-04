@@ -92,7 +92,7 @@ const productAttributes = [ 'Color', 'Size' ];
 const errorMessage =
 	'Invalid file type. The importer supports CSV and TXT file formats.';
 
-test.describe( 'Import Products from a CSV file', () => {
+test.describe.serial( 'Import Products from a CSV file', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -106,15 +106,6 @@ test.describe( 'Import Products from a CSV file', () => {
 		await api.put( 'settings/general/woocommerce_currency', {
 			value: 'USD',
 		} );
-
-		// delete all products with "Imported" in their name
-		const { data: products } = await api.get( 'products', {
-			search: 'Imported',
-			per_page: 100,
-		} );
-
-		const ids = products.map( ( { id } ) => id );
-		await api.post( 'products/batch', { delete: ids } );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
