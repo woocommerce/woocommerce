@@ -79,6 +79,7 @@ test.describe( 'Analytics pages', () => {
 				.click();
 			await expect( page.locator( 'text=Move up' ) ).not.toBeVisible();
 			await expect( page.locator( 'text=Move down' ) ).toBeVisible();
+			await page.keyboard.press( 'Escape' );
 
 			// check the bottom section
 			await page
@@ -87,6 +88,7 @@ test.describe( 'Analytics pages', () => {
 				.click();
 			await expect( page.locator( 'text=Move down' ) ).not.toBeVisible();
 			await expect( page.locator( 'text=Move up' ) ).toBeVisible();
+			await page.keyboard.press( 'Escape' );
 		} );
 
 		test( 'should allow a user to move a section down', async ( {
