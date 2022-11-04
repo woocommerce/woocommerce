@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { Button, Popover, SlotFillProvider } from '@wordpress/components';
-import { createElement, useState } from '@wordpress/element';
+import { createElement, useCallback, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -61,13 +61,19 @@ function ControlledDecorator( Story, props ) {
 		nowWithZeroedSeconds().toISOString()
 	);
 
+	const onChange = useCallback( ( newDateTimeISOString ) => {
+		setControlledDate( newDateTimeISOString );
+		// eslint-disable-next-line no-console
+		console.log( 'onChange', newDateTimeISOString );
+	}, [] );
+
 	return (
 		<div>
 			<Story
 				args={ {
 					...props.args,
 					currentDate: controlledDate,
-					onChange: setControlledDate,
+					onChange,
 				} }
 			/>
 			<div>
