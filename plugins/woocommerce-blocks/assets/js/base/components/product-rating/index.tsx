@@ -50,7 +50,11 @@ const Rating = ( {
 					dangerouslySetInnerHTML={ ratingHTML }
 				/>
 			</div>
-			{ ratedProductsCount !== null ? `(${ ratedProductsCount })` : null }
+			{ ratedProductsCount !== null ? (
+				<span className={ 'wc-block-components-product-rating-count' }>
+					({ ratedProductsCount })
+				</span>
+			) : null }
 		</div>
 	);
 };
