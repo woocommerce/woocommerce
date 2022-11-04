@@ -37,42 +37,6 @@ CustomDateTimeFormat.args = {
 	dateTimeFormat: customFormat,
 };
 
-function ControlledContainer( { children, ...props } ) {
-	function nowWithZeroedSeconds() {
-		const now = new Date();
-		now.setSeconds( 0 );
-		now.setMilliseconds( 0 );
-		return now;
-	}
-
-	const [ controlledDate, setControlledDate ] = useState(
-		nowWithZeroedSeconds().toISOString()
-	);
-
-	return (
-		<div { ...props }>
-			<div>{ children( controlledDate, setControlledDate ) }</div>
-			<div>
-				<Button
-					onClick={ () =>
-						setControlledDate(
-							nowWithZeroedSeconds().toISOString()
-						)
-					}
-				>
-					Reset to now
-				</Button>
-				<div>
-					<div>
-						Controlled date:
-						<br /> <span>{ controlledDate }</span>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
-}
-
 export const ReallyLongHelp = Template.bind( {} );
 ReallyLongHelp.args = {
 	...Basic.args,
