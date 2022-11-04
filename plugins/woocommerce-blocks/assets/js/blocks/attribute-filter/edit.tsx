@@ -374,11 +374,13 @@ const Edit = ( {
 					'Filter by Attribute',
 					'woo-gutenberg-products-block'
 				) }
-				instructions={ __(
-					'Display a list of filters based on the selected attributes.',
-					'woo-gutenberg-products-block'
-				) }
 			>
+				<div className="wc-block-attribute-filter__instructions">
+					{ __(
+						'Display a list of filters based on the selected attributes.',
+						'woo-gutenberg-products-block'
+					) }
+				</div>
 				<div className="wc-block-attribute-filter__selection">
 					{ renderAttributeControl( { isCompact: false } ) }
 					<Button isPrimary onClick={ onDone }>
