@@ -2,9 +2,9 @@
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, rodrigosprimo, peterfabian1000, vedjain, jamosova, obliviousharmony, konamiman, sadowski, wpmuguru, royho, barryhughes-1
 Tags: online store, ecommerce, shop, shopping cart, storefront, checkout, downloadable, downloads, payments, paypal, storefront, stripe, woo commerce, e-commerce, store, sales, sell, woo, cart
 Requires at least: 5.8
-Tested up to: 6.0
+Tested up to: 6.1
 Requires PHP: 7.2
-Stable tag: 7.0.1
+Stable tag: 7.1.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -227,7 +227,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Track orders origin in WC_Tracker. [#35069](https://github.com/woocommerce/woocommerce/pull/35069)
 * Update - Updates a few css selectors to be more robust [#34790](https://github.com/woocommerce/woocommerce/pull/34790)
 * Update - Update WCPay promo requirements and ensure it's dismissed on every scenario [#35030](https://github.com/woocommerce/woocommerce/pull/35030)
-* Update - Update WooCommerce Blocks to 8.7.4 [#35257](https://github.com/woocommerce/woocommerce/pull/35257)
 * Dev - Add api-core-tests for playwright [#34835](https://github.com/woocommerce/woocommerce/pull/34835)
 * Dev - Add fail-fast configuration to Playwright E2E tests. [#33977](https://github.com/woocommerce/woocommerce/pull/33977)
 * Dev - Add new shippping class modal to a shipping class section in product page [#34937](https://github.com/woocommerce/woocommerce/pull/34937)
@@ -252,5 +251,29 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Enable async typeahead fields for the attribute and term fields within products. [#34744](https://github.com/woocommerce/woocommerce/pull/34744)
 * Enhancement - Enchance tour experience for store location [#34697](https://github.com/woocommerce/woocommerce/pull/34697)
 
+**WooCommerce Blocks 8.7.0 & 8.7.1 & 8.7.2 & 8.7.3 & 8.7.4 & 8.7.5**
+
+* Enhancement - Improve visual consistency between block links. ([7340](https://github.com/woocommerce/woocommerce-blocks/pull/7340))
+* Enhancement - Update the titles of some inner blocks of the Cart block and remove the lock of the Cross-Sells parent block. ([7232](https://github.com/woocommerce/woocommerce-blocks/pull/7232))
+* Enhancement - Add filter for place order button label. ([7154](https://github.com/woocommerce/woocommerce-blocks/pull/7154))
+* Enhancement - Exposed data related to the checkout through wordpress/data stores. ([6612](https://github.com/woocommerce/woocommerce-blocks/pull/6612))
+* Enhancement - Add simple, large & two menus footer patterns. ([7306](https://github.com/woocommerce/woocommerce-blocks/pull/7306))
+* Enhancement - Add minimal, large, and essential header patterns. ([7292](https://github.com/woocommerce/woocommerce-blocks/pull/7292))
+* Enhancement - Add `showRemoveItemLink` as a new checkout filter to allow extensions to toggle the visibility of the `Remove item` button under each cart line item. ([7242](https://github.com/woocommerce/woocommerce-blocks/pull/7242))
+* Enhancement - Add support for a GT tracking ID for Google Analytics. ([7213](https://github.com/woocommerce/woocommerce-blocks/pull/7213))
+* Enhancement - Separate filter titles and filter controls by converting filter blocks to use Inner Blocks. ([6978](https://github.com/woocommerce/woocommerce-blocks/pull/6978))
+* Enhancement - StoreApi requests will return a `Cart-Token` header that can be used to retrieve the cart from the corresponding session via **GET** `/wc/store/v1/cart`. ([5953](https://github.com/woocommerce/woocommerce-blocks/pull/5953))
+* Fix - Fixed HTML rendering in description of active payment integrations. ([7313](https://github.com/woocommerce/woocommerce-blocks/pull/7313))
+* Fix - Hide the shipping address form from the Checkout when the "Force shipping to the customer billing address" is enabled. ([7268](https://github.com/woocommerce/woocommerce-blocks/pull/7268))
+* Fix - Fixed an error where adding new pages would cause an infinite loop and large amounts of memory use in redux. ([7256](https://github.com/woocommerce/woocommerce-blocks/pull/7256))
+* Fix - Ensure error messages containing HTML are shown correctly in the Cart and Checkout blocks. ([7231](https://github.com/woocommerce/woocommerce-blocks/pull/7231))
+* Fix - Prevent locked inner blocks from sometimes displaying twice. ([6676](https://github.com/woocommerce/woocommerce-blocks/pull/6676))
+* Fix - StoreApi `/checkout` endpoint now returns HTTP 402 instead of HTTP 400 when payment fails. ([7273](https://github.com/woocommerce/woocommerce-blocks/pull/7273))
+* Fix - Fix a problem that causes an infinite loop when inserting Cart block in wordpress.com. ([7367](https://github.com/woocommerce/woocommerce-blocks/pull/7367))
+* Fix - Fixed an issue where JavaScript errors would occur when more than one extension tried to filter specific payment methods in the Cart and Checkout blocks. ([7377](https://github.com/woocommerce/woocommerce-blocks/pull/7377))
+* Fix - Fixed a problem where Custom Order Tables compatibility declaration could fail due to the unpredictable plugin order load. ([7395](https://github.com/woocommerce/woocommerce-blocks/pull/7395))
+* Fix - Refactor useCheckoutAddress hook to enable "Use same address for billing" option in Editor ([7393](https://github.com/woocommerce/woocommerce-blocks/pull/7393))
+* Fix - Fixed an issue where the argument passed to `canMakePayment` contained the incorrect keys. Also fixed the current user's customer data appearing in the editor when editing the Checkout block.
+* Fix - Compatibility fix for Cart and Checkout inner blocks for WordPress 6.1.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
