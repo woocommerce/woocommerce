@@ -411,7 +411,14 @@ class ListTable extends WP_List_Table {
 	 * @return int
 	 */
 	private function count_orders_by_status( $status ): int {
-		return array_sum( array_map( 'wc_orders_count', (array) $status ) );
+		return array_sum(
+			array_map(
+				function( $order_status ) {
+					return wc_orders_count( $order_status, 'shop_order' );
+				},
+				(array) $status
+			)
+		);
 	}
 
 	/**
