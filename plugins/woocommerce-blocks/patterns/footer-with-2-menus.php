@@ -1,29 +1,33 @@
 <?php
 /**
- * Title: WooCommerce Footer with 2 menus | Light
- * Slug: woocommerce-blocks/footer-with-2-menus-light
+ * Title: WooCommerce Footer with 2 menus
+ * Slug: woocommerce-blocks/footer-with-2-menus
  * Categories: WooCommerce
  */
 ?>
 
-<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"32px","right":"4%","bottom":"32px","left":"4%"},"blockGap":"40px"},"elements":{"link":{"color":{"text":"var:preset|color|black"}}}},"backgroundColor":"background","textColor":"black"} -->
-<div class="wp-block-group alignfull has-black-color has-background-background-color has-text-color has-background has-link-color" style="padding-top:32px;padding-right:4%;padding-bottom:32px;padding-left:4%"><!-- wp:columns -->
+<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"32px","right":"4%","bottom":"32px","left":"4%"},"blockGap":"40px"}}} -->
+<div class="wp-block-group alignfull" style="padding-top:32px;padding-right:4%;padding-bottom:32px;padding-left:4%"><!-- wp:columns -->
 <div class="wp-block-columns"><!-- wp:column {"width":"70%"} -->
 <div class="wp-block-column" style="flex-basis:70%"><!-- wp:group {"style":{"spacing":{"blockGap":"32px"}},"layout":{"type":"flex","flexWrap":"wrap"}} -->
 <div class="wp-block-group"><!-- wp:site-logo {"shouldSyncIcon":false} /-->
 
 <!-- wp:group {"style":{"spacing":{"blockGap":"8px"}},"layout":{"type":"flex","orientation":"vertical","flexWrap":"nowrap"}} -->
-<div class="wp-block-group"><!-- wp:navigation /-->
+<div class="wp-block-group"><!-- wp:navigation -->
+<!-- wp:page-list /-->
+<!-- /wp:navigation -->
 
-<!-- wp:navigation /--></div>
+<!-- wp:navigation -->
+<!-- wp:page-list /-->
+<!-- /wp:navigation --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column -->
 
 <!-- wp:column {"style":{"spacing":{"blockGap":"16px"}}} -->
 <div class="wp-block-column"><!-- wp:group {"style":{"spacing":{"blockGap":"4px"}},"layout":{"type":"flex","orientation":"vertical"}} -->
-<div class="wp-block-group"><!-- wp:paragraph {"textColor":"black","fontSize":"medium"} -->
-<p class="has-black-color has-text-color has-medium-font-size"><strong>Join our community</strong></p>
+<div class="wp-block-group"><!-- wp:paragraph {"fontSize":"medium"} -->
+<p class="has-medium-font-size"><strong>Join our community</strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"style":{"typography":{"fontSize":"14px"}}} -->
@@ -31,8 +35,8 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:social-links {"iconColor":"black","iconColorValue":"#000000","className":"is-style-logos-only"} -->
-<ul class="wp-block-social-links has-icon-color is-style-logos-only"><!-- wp:social-link {"service":"facebook"} /-->
+<!-- wp:social-links {"className":"is-style-logos-only"} -->
+<ul class="wp-block-social-links is-style-logos-only"><!-- wp:social-link {"service":"facebook"} /-->
 
 <!-- wp:social-link {"service":"instagram"} /-->
 
