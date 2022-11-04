@@ -1,13 +1,13 @@
 <?php
 /**
- * Title: WooCommerce Large Footer | Light
- * Slug: woocommerce-blocks/footer-large-light
+ * Title: WooCommerce Large Footer
+ * Slug: woocommerce-blocks/footer-large
  * Categories: WooCommerce
  */
 ?>
 
-<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"32px","right":"4%","bottom":"32px","left":"4%"},"blockGap":"40px"},"elements":{"link":{"color":{"text":"var:preset|color|black"}}}},"backgroundColor":"background","textColor":"black"} -->
-<div class="wp-block-group alignfull has-black-color has-background-background-color has-text-color has-background has-link-color" style="padding-top:32px;padding-right:4%;padding-bottom:32px;padding-left:4%"><!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":"16px"}}} -->
+<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"32px","right":"4%","bottom":"32px","left":"4%"},"blockGap":"40px"}}} -->
+<div class="wp-block-group alignfull" style="padding-top:32px;padding-right:4%;padding-bottom:32px;padding-left:4%"><!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":"16px"}}} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"width":"45%","style":{"spacing":{"padding":{"right":"50px"}}}} -->
 <div class="wp-block-column" style="padding-right:50px;flex-basis:45%"><!-- wp:group {"style":{"spacing":{"blockGap":"8px"}},"layout":{"type":"flex","orientation":"vertical"}} -->
 <div class="wp-block-group"><!-- wp:heading {"level":5} -->
@@ -19,8 +19,8 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:social-links {"iconColor":"black","iconColorValue":"#000000","size":"has-small-icon-size","className":"is-style-logos-only"} -->
-<ul class="wp-block-social-links has-small-icon-size has-icon-color is-style-logos-only"><!-- wp:social-link {"service":"facebook"} /-->
+<!-- wp:social-links {"size":"has-small-icon-size","className":"is-style-logos-only"} -->
+<ul class="wp-block-social-links has-small-icon-size is-style-logos-only"><!-- wp:social-link {"service":"facebook"} /-->
 
 <!-- wp:social-link {"service":"twitter"} /-->
 
@@ -33,7 +33,9 @@
 <!-- /wp:column -->
 
 <!-- wp:column {"verticalAlignment":"top","width":"20%","style":{"spacing":{"blockGap":"16px"}}} -->
-<div class="wp-block-column is-vertically-aligned-top" style="flex-basis:20%"><!-- wp:navigation {"layout":{"type":"flex","orientation":"vertical"}} /--></div>
+<div class="wp-block-column is-vertically-aligned-top" style="flex-basis:20%"><!-- wp:navigation {"layout":{"type":"flex","orientation":"vertical"}} -->
+<!-- wp:page-list /-->
+<!-- /wp:navigation --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
 
