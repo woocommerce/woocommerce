@@ -7612,99 +7612,111 @@ test.describe('Data API tests', () => {
 							"thousand_sep": " ",
 							"weight_unit": "kg",
 							"states": [{
-									"code": "VN",
-									"name": "Vinnytsia Oblast"
+									"code": "UA05",
+									"name": "Vinnychchyna"
 								},
 								{
-									"code": "VL",
-									"name": "Volyn Oblast"
+									"code": "UA07",
+									"name": "Volyn"
 								},
 								{
-									"code": "DP",
-									"name": "Dnipropetrovsk Oblast"
+									"code": "UA09",
+									"name": "Luhanshchyna"
 								},
 								{
-									"code": "DT",
-									"name": "Donetsk Oblast"
+									"code": "UA12",
+									"name": "Dnipropetrovshchyna"
 								},
 								{
-									"code": "ZT",
-									"name": "Zhytomyr Oblast"
+									"code": "UA14",
+									"name": "Donechchyna"
 								},
 								{
-									"code": "ZK",
-									"name": "Zakarpattia Oblast"
+									"code": "UA18",
+									"name": "Zhytomyrshchyna"
 								},
 								{
-									"code": "ZP",
-									"name": "Zaporizhzhia Oblast"
+									"code": "UA21",
+									"name": "Zakarpattia"
 								},
 								{
-									"code": "IF",
-									"name": "Ivano-Frankivsk Oblast"
+									"code": "UA23",
+									"name": "Zaporizhzhya"
 								},
 								{
-									"code": "KV",
-									"name": "Kyiv Oblast"
+									"code": "UA26",
+									"name": "Prykarpattia"
 								},
 								{
-									"code": "KH",
-									"name": "Kirovohrad Oblast"
+									"code": "UA30",
+									"name": "Kyiv"
 								},
 								{
-									"code": "LH",
-									"name": "Luhansk Oblast"
+									"code": "UA32",
+									"name": "Kyivshchyna"
 								},
 								{
-									"code": "LV",
-									"name": "Lviv Oblast"
+									"code": "UA35",
+									"name": "Kirovohradschyna"
 								},
 								{
-									"code": "MY",
-									"name": "Mykolaiv Oblast"
+									"code": "UA40",
+									"name": "Sevastopol"
 								},
 								{
-									"code": "OD",
-									"name": "Odessa Oblast"
+									"code": "UA43",
+									"name": "Crimea"
 								},
 								{
-									"code": "PL",
-									"name": "Poltava Oblast"
+									"code": "UA46",
+									"name": "Lvivshchyna"
 								},
 								{
-									"code": "RV",
-									"name": "Rivne Oblast"
+									"code": "UA48",
+									"name": "Mykolayivschyna"
 								},
 								{
-									"code": "SM",
-									"name": "Sumy Oblast"
+									"code": "UA51",
+									"name": "Odeshchyna"
 								},
 								{
-									"code": "TP",
-									"name": "Ternopil Oblast"
+									"code": "UA53",
+									"name": "Poltavshchyna"
 								},
 								{
-									"code": "KK",
-									"name": "Kharkiv Oblast"
+									"code": "UA56",
+									"name": "Rivnenshchyna"
 								},
 								{
-									"code": "KS",
-									"name": "Kherson Oblast"
+									"code": "UA59",
+									"name": "Sumshchyna"
 								},
 								{
-									"code": "KM",
-									"name": "Khmelnytskyi Oblast"
+									"code": "UA61",
+									"name": "Ternopilshchyna"
 								},
 								{
-									"code": "CK",
-									"name": "Cherkasy Oblast"
+									"code": "UA63",
+									"name": "Kharkivshchyna"
 								},
 								{
-									"code": "CH",
-									"name": "Chernihiv Oblast"
+									"code": "UA65",
+									"name": "Khersonshchyna"
 								},
 								{
-									"code": "CV",
+									"code": "UA68",
+									"name": "Khmelnychchyna"
+								},
+								{
+									"code": "UA71",
+									"name": "Cherkashchyna"
+								},
+								{
+									"code": "UA74",
+									"name": "Chernihivshchyna"
+								},
+								{
+									"code": "UA77",
 									"name": "Chernivtsi Oblast"
 								}
 							]
@@ -13307,99 +13319,111 @@ test.describe('Data API tests', () => {
 						"thousand_sep": " ",
 						"weight_unit": "kg",
 						"states": [{
-								"code": "VN",
-								"name": "Vinnytsia Oblast"
+							"code": "UA05",
+							"name": "Vinnychchyna"
+						},
+							{
+								"code": "UA07",
+								"name": "Volyn"
 							},
 							{
-								"code": "VL",
-								"name": "Volyn Oblast"
+								"code": "UA09",
+								"name": "Luhanshchyna"
 							},
 							{
-								"code": "DP",
-								"name": "Dnipropetrovsk Oblast"
+								"code": "UA12",
+								"name": "Dnipropetrovshchyna"
 							},
 							{
-								"code": "DT",
-								"name": "Donetsk Oblast"
+								"code": "UA14",
+								"name": "Donechchyna"
 							},
 							{
-								"code": "ZT",
-								"name": "Zhytomyr Oblast"
+								"code": "UA18",
+								"name": "Zhytomyrshchyna"
 							},
 							{
-								"code": "ZK",
-								"name": "Zakarpattia Oblast"
+								"code": "UA21",
+								"name": "Zakarpattia"
 							},
 							{
-								"code": "ZP",
-								"name": "Zaporizhzhia Oblast"
+								"code": "UA23",
+								"name": "Zaporizhzhya"
 							},
 							{
-								"code": "IF",
-								"name": "Ivano-Frankivsk Oblast"
+								"code": "UA26",
+								"name": "Prykarpattia"
 							},
 							{
-								"code": "KV",
-								"name": "Kyiv Oblast"
+								"code": "UA30",
+								"name": "Kyiv"
 							},
 							{
-								"code": "KH",
-								"name": "Kirovohrad Oblast"
+								"code": "UA32",
+								"name": "Kyivshchyna"
 							},
 							{
-								"code": "LH",
-								"name": "Luhansk Oblast"
+								"code": "UA35",
+								"name": "Kirovohradschyna"
 							},
 							{
-								"code": "LV",
-								"name": "Lviv Oblast"
+								"code": "UA40",
+								"name": "Sevastopol"
 							},
 							{
-								"code": "MY",
-								"name": "Mykolaiv Oblast"
+								"code": "UA43",
+								"name": "Crimea"
 							},
 							{
-								"code": "OD",
-								"name": "Odessa Oblast"
+								"code": "UA46",
+								"name": "Lvivshchyna"
 							},
 							{
-								"code": "PL",
-								"name": "Poltava Oblast"
+								"code": "UA48",
+								"name": "Mykolayivschyna"
 							},
 							{
-								"code": "RV",
-								"name": "Rivne Oblast"
+								"code": "UA51",
+								"name": "Odeshchyna"
 							},
 							{
-								"code": "SM",
-								"name": "Sumy Oblast"
+								"code": "UA53",
+								"name": "Poltavshchyna"
 							},
 							{
-								"code": "TP",
-								"name": "Ternopil Oblast"
+								"code": "UA56",
+								"name": "Rivnenshchyna"
 							},
 							{
-								"code": "KK",
-								"name": "Kharkiv Oblast"
+								"code": "UA59",
+								"name": "Sumshchyna"
 							},
 							{
-								"code": "KS",
-								"name": "Kherson Oblast"
+								"code": "UA61",
+								"name": "Ternopilshchyna"
 							},
 							{
-								"code": "KM",
-								"name": "Khmelnytskyi Oblast"
+								"code": "UA63",
+								"name": "Kharkivshchyna"
 							},
 							{
-								"code": "CK",
-								"name": "Cherkasy Oblast"
+								"code": "UA65",
+								"name": "Khersonshchyna"
 							},
 							{
-								"code": "CH",
-								"name": "Chernihiv Oblast"
+								"code": "UA68",
+								"name": "Khmelnychchyna"
 							},
 							{
-								"code": "CV",
+								"code": "UA71",
+								"name": "Cherkashchyna"
+							},
+							{
+								"code": "UA74",
+								"name": "Chernihivshchyna"
+							},
+							{
+								"code": "UA77",
 								"name": "Chernivtsi Oblast"
 							}
 						]
@@ -23992,99 +24016,111 @@ test.describe('Data API tests', () => {
 				"code": "UA",
 				"name": "Ukraine",
 				"states": [{
-						"code": "VN",
-						"name": "Vinnytsia Oblast"
+					"code": "UA05",
+					"name": "Vinnychchyna"
+				},
+					{
+						"code": "UA07",
+						"name": "Volyn"
 					},
 					{
-						"code": "VL",
-						"name": "Volyn Oblast"
+						"code": "UA09",
+						"name": "Luhanshchyna"
 					},
 					{
-						"code": "DP",
-						"name": "Dnipropetrovsk Oblast"
+						"code": "UA12",
+						"name": "Dnipropetrovshchyna"
 					},
 					{
-						"code": "DT",
-						"name": "Donetsk Oblast"
+						"code": "UA14",
+						"name": "Donechchyna"
 					},
 					{
-						"code": "ZT",
-						"name": "Zhytomyr Oblast"
+						"code": "UA18",
+						"name": "Zhytomyrshchyna"
 					},
 					{
-						"code": "ZK",
-						"name": "Zakarpattia Oblast"
+						"code": "UA21",
+						"name": "Zakarpattia"
 					},
 					{
-						"code": "ZP",
-						"name": "Zaporizhzhia Oblast"
+						"code": "UA23",
+						"name": "Zaporizhzhya"
 					},
 					{
-						"code": "IF",
-						"name": "Ivano-Frankivsk Oblast"
+						"code": "UA26",
+						"name": "Prykarpattia"
 					},
 					{
-						"code": "KV",
-						"name": "Kyiv Oblast"
+						"code": "UA30",
+						"name": "Kyiv"
 					},
 					{
-						"code": "KH",
-						"name": "Kirovohrad Oblast"
+						"code": "UA32",
+						"name": "Kyivshchyna"
 					},
 					{
-						"code": "LH",
-						"name": "Luhansk Oblast"
+						"code": "UA35",
+						"name": "Kirovohradschyna"
 					},
 					{
-						"code": "LV",
-						"name": "Lviv Oblast"
+						"code": "UA40",
+						"name": "Sevastopol"
 					},
 					{
-						"code": "MY",
-						"name": "Mykolaiv Oblast"
+						"code": "UA43",
+						"name": "Crimea"
 					},
 					{
-						"code": "OD",
-						"name": "Odessa Oblast"
+						"code": "UA46",
+						"name": "Lvivshchyna"
 					},
 					{
-						"code": "PL",
-						"name": "Poltava Oblast"
+						"code": "UA48",
+						"name": "Mykolayivschyna"
 					},
 					{
-						"code": "RV",
-						"name": "Rivne Oblast"
+						"code": "UA51",
+						"name": "Odeshchyna"
 					},
 					{
-						"code": "SM",
-						"name": "Sumy Oblast"
+						"code": "UA53",
+						"name": "Poltavshchyna"
 					},
 					{
-						"code": "TP",
-						"name": "Ternopil Oblast"
+						"code": "UA56",
+						"name": "Rivnenshchyna"
 					},
 					{
-						"code": "KK",
-						"name": "Kharkiv Oblast"
+						"code": "UA59",
+						"name": "Sumshchyna"
 					},
 					{
-						"code": "KS",
-						"name": "Kherson Oblast"
+						"code": "UA61",
+						"name": "Ternopilshchyna"
 					},
 					{
-						"code": "KM",
-						"name": "Khmelnytskyi Oblast"
+						"code": "UA63",
+						"name": "Kharkivshchyna"
 					},
 					{
-						"code": "CK",
-						"name": "Cherkasy Oblast"
+						"code": "UA65",
+						"name": "Khersonshchyna"
 					},
 					{
-						"code": "CH",
-						"name": "Chernihiv Oblast"
+						"code": "UA68",
+						"name": "Khmelnychchyna"
 					},
 					{
-						"code": "CV",
+						"code": "UA71",
+						"name": "Cherkashchyna"
+					},
+					{
+						"code": "UA74",
+						"name": "Chernihivshchyna"
+					},
+					{
+						"code": "UA77",
 						"name": "Chernivtsi Oblast"
 					}
 				],
