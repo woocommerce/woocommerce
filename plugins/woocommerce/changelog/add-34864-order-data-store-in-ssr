@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Include order datastore information in status report.
