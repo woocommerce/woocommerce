@@ -70,6 +70,16 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	}
 
 	/**
+	 * Are we updating data or getting data?
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return boolean
+	 */
+	protected function is_update_request( \WP_REST_Request $request ) {
+		return in_array( $request->get_method(), [ 'POST', 'PUT', 'PATCH', 'DELETE' ], true );
+	}
+
+	/**
 	 * Get the route response based on the type of request.
 	 *
 	 * @param \WP_REST_Request $request Request object.
@@ -97,8 +107,10 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		}
 
 		if ( is_wp_error( $response ) ) {
-			$response = $this->error_to_response( $response );
-		} elseif ( in_array( $request->get_method(), [ 'POST', 'PUT', 'PATCH', 'DELETE' ], true ) ) {
+			return $this->error_to_response( $response );
+		}
+
+		if ( $this->is_update_request( $request ) ) {
 			$this->cart_updated( $request );
 		}
 
@@ -192,7 +204,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @return bool
 	 */
 	protected function requires_nonce( \WP_REST_Request $request ) {
-		return 'GET' !== $request->get_method();
+		return $this->is_update_request( $request );
 	}
 
 	/**
