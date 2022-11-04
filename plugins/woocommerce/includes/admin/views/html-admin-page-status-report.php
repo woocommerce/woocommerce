@@ -769,7 +769,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Datastore currently in use for orders.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( WC_Data_Store::load( 'order' )->get_current_class_name() ); ?></td>
 		</tr>
-		<?php if ( wc_get_container()->get( OrderUtil::class )->custom_orders_table_usage_is_enabled() ) : ?>
+		<?php if ( wc_get_container()->get( Automattic\WooCommerce\Internal\Features\FeaturesController::class )->feature_is_enabled( 'custom_order_tables' ) ) : ?>
 		<tr>
 			<td data-export-label="HPOS data sync enabled"><?php esc_html_e( 'HPOS data sync enabled:', 'woocommerce' ); ?></td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is data sync enabled for HPOS?', 'woocommerce' ) ); ?></td>
