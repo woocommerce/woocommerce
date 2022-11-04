@@ -297,13 +297,13 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			} }
 			renderContent={ () => {
 				const Picker = isDateOnlyPicker ? DatePicker : WpDateTimePicker;
-				const inputDateTime = parseAsLocalDateTime( inputString );
+				const currentDateTime = parseAsISODateTime( currentDate );
 
 				return (
 					<Picker
 						currentDate={
-							inputDateTime.isValid()
-								? formatDateTimeAsISO( inputDateTime )
+							currentDate && currentDateTime.isValid()
+								? currentDate
 								: undefined
 						}
 						onChange={ ( newDateTimeISOString: string ) =>
