@@ -1,7 +1,7 @@
 name: Smoke test daily
 on:
-    # schedule:
-    #     - cron: '25 3 * * *'
+    schedule:
+        - cron: '25 3 * * *'
     workflow_dispatch:
 
 env:
