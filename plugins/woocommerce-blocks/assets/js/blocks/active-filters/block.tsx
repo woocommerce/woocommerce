@@ -63,7 +63,7 @@ const ActiveFiltersBlock = ( {
 	/*
 		activeAttributeFilters is the only async query in this block. Because of this the rest of the filters will render null
 		when in a loading state and activeAttributeFilters renders the placeholders.
-	 */
+	*/
 	const shouldShowLoadingPlaceholders =
 		maybeUrlContainsFilters() && ! isEditor && isLoading;
 	const [ productAttributes, setProductAttributes ] = useQueryStateByKey(
@@ -92,26 +92,42 @@ const ActiveFiltersBlock = ( {
 			return null;
 		}
 
-		return productStockStatus.map( ( slug ) => {
-			return renderRemovableListItem( {
-				type: __( 'Stock Status', 'woo-gutenberg-products-block' ),
-				name: STOCK_STATUS_OPTIONS[ slug ],
-				removeCallback: () => {
-					removeArgsFromFilterUrl( {
-						filter_stock_status: slug,
-					} );
-					if ( ! filteringForPhpTemplate ) {
-						const newStatuses = productStockStatus.filter(
-							( status ) => {
-								return status !== slug;
-							}
-						);
-						setProductStockStatus( newStatuses );
-					}
-				},
-				displayStyle: blockAttributes.displayStyle,
-			} );
-		} );
+		const stockStatusLabel = __(
+			'Stock Status',
+			'woo-gutenberg-products-block'
+		);
+
+		return (
+			<li>
+				<span className="wc-block-active-filters__list-item-type">
+					{ stockStatusLabel }:
+				</span>
+				<ul>
+					{ productStockStatus.map( ( slug ) => {
+						return renderRemovableListItem( {
+							type: stockStatusLabel,
+							name: STOCK_STATUS_OPTIONS[ slug ],
+							removeCallback: () => {
+								removeArgsFromFilterUrl( {
+									filter_stock_status: slug,
+								} );
+								if ( ! filteringForPhpTemplate ) {
+									const newStatuses =
+										productStockStatus.filter(
+											( status ) => {
+												return status !== slug;
+											}
+										);
+									setProductStockStatus( newStatuses );
+								}
+							},
+							showLabel: false,
+							displayStyle: blockAttributes.displayStyle,
+						} );
+					} ) }
+				</ul>
+			</li>
+		);
 	}, [
 		shouldShowLoadingPlaceholders,
 		STOCK_STATUS_OPTIONS,
@@ -225,30 +241,45 @@ const ActiveFiltersBlock = ( {
 			return null;
 		}
 
-		return productRatings.map( ( slug ) => {
-			return renderRemovableListItem( {
-				type: __( 'Rating', 'woo-gutenberg-products-block' ),
-				name: sprintf(
-					/* translators: %s is referring to the average rating value */
-					__( 'Rated %s out of 5', 'woo-gutenberg-products-block' ),
-					slug
-				),
-				removeCallback: () => {
-					removeArgsFromFilterUrl( {
-						rating_filter: slug,
-					} );
-					if ( ! filteringForPhpTemplate ) {
-						const newRatings = productRatings.filter(
-							( rating ) => {
-								return rating !== slug;
-							}
-						);
-						setProductRatings( newRatings );
-					}
-				},
-				displayStyle: blockAttributes.displayStyle,
-			} );
-		} );
+		const ratingLabel = __( 'Rating', 'woo-gutenberg-products-block' );
+
+		return (
+			<li>
+				<span className="wc-block-active-filters__list-item-type">
+					{ ratingLabel }:
+				</span>
+				<ul>
+					{ productRatings.map( ( slug ) => {
+						return renderRemovableListItem( {
+							type: ratingLabel,
+							name: sprintf(
+								/* translators: %s is referring to the average rating value */
+								__(
+									'Rated %s out of 5',
+									'woo-gutenberg-products-block'
+								),
+								slug
+							),
+							removeCallback: () => {
+								removeArgsFromFilterUrl( {
+									rating_filter: slug,
+								} );
+								if ( ! filteringForPhpTemplate ) {
+									const newRatings = productRatings.filter(
+										( rating ) => {
+											return rating !== slug;
+										}
+									);
+									setProductRatings( newRatings );
+								}
+							},
+							showLabel: false,
+							displayStyle: blockAttributes.displayStyle,
+						} );
+					} ) }
+				</ul>
+			</li>
+		);
 	}, [
 		shouldShowLoadingPlaceholders,
 		productRatings,
