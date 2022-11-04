@@ -188,7 +188,7 @@ export const controls = {
 						if ( errorResponse.body ) {
 							reject( errorResponse.body );
 						} else {
-							reject();
+							reject( errorResponse );
 						}
 					} );
 			}
