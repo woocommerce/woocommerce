@@ -216,8 +216,12 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			parseAsISODateTime( currentDate, false )
 		);
 
+		if ( ! newDateTime.isValid() ) {
+			// keep the invalid string, so the user can correct it
+			return currentDate;
+		}
+
 		if (
-			! newDateTime.isValid() ||
 			newDateTime.isSame(
 				maybeForceTime( parseAsLocalDateTime( inputString ) )
 			)
