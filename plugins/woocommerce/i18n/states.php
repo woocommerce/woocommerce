@@ -1808,7 +1808,7 @@ return array(
 		'RSVO' => _x( 'Vojvodina', 'district', 'woocommerce' ),
 	),
 	'SE' => array(),
-	'UA' => array( // Ukrainian oblasts. https://github.com/unicode-org/cldr/blob/release-42/common/subdivisions/en.xml#L5243
+	'UA' => array( // Ukrainian oblasts. https://github.com/unicode-org/cldr/blob/release-42/common/subdivisions/en.xml#L5243.
 		'UA05' => __( 'Vinnychchyna', 'woocommerce' ),
 		'UA07' => __( 'Volyn', 'woocommerce' ),
 		'UA09' => __( 'Luhanshchyna', 'woocommerce' ),
