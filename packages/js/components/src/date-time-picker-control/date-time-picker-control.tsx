@@ -310,12 +310,12 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			} }
 			renderContent={ () => {
 				const Picker = isDateOnlyPicker ? DatePicker : WpDateTimePicker;
-				const currentDateTime = parseAsISODateTime( currentDate );
+				const pickerCurrentDateTime = parseAsISODateTime( currentDate );
 
 				return (
 					<Picker
 						currentDate={
-							currentDate && currentDateTime.isValid()
+							currentDate && pickerCurrentDateTime.isValid()
 								? currentDate
 								: undefined
 						}
