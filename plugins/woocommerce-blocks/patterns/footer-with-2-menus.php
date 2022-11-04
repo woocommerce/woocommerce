@@ -14,11 +14,9 @@
 
 <!-- wp:group {"style":{"spacing":{"blockGap":"8px"}},"layout":{"type":"flex","orientation":"vertical","flexWrap":"nowrap"}} -->
 <div class="wp-block-group"><!-- wp:navigation -->
-<!-- wp:page-list /-->
 <!-- /wp:navigation -->
 
 <!-- wp:navigation -->
-<!-- wp:page-list /-->
 <!-- /wp:navigation --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
