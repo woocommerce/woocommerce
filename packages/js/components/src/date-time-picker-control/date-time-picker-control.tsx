@@ -69,8 +69,6 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	const id = `inspector-date-time-picker-control-${ instanceId }`;
 	const inputControl = useRef< InputControl >();
 
-	const [ inputString, setInputString ] = useState( '' );
-
 	const displayFormat = useMemo( () => {
 		if ( dateTimeFormat ) {
 			return dateTimeFormat;
@@ -145,6 +143,13 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			: dateTime.creationData().input?.toString() || '';
 	}
 
+	const currentDateTime = parseAsISODateTime( currentDate );
+	const [ inputString, setInputString ] = useState(
+		currentDateTime.isValid()
+			? formatDateTimeForDisplay( maybeForceTime( currentDateTime ) )
+			: ''
+	);
+
 	const inputStringDateTime = useMemo( () => {
 		return maybeForceTime( parseAsLocalDateTime( inputString ) );
 	}, [ inputString, maybeForceTime ] );
@@ -161,15 +166,23 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 
 	const setInputStringAndMaybeCallOnChange = useCallback(
 		( newInputString: string, isUserTypedInput: boolean ) => {
+			// InputControl doesn't fire an onChange if what the user has typed
+			// matches the current value of the input field. To get around this,
+			// we pull the value directly out of the input field. This fixes
+			// the issue where the user ends up typing the same value. Unless they
+			// are typing extra slow. Without this workaround, we miss the last
+			// character typed.
+			const lastTypedValue = inputControl.current.value;
+
 			const newDateTime = maybeForceTime(
 				isUserTypedInput
-					? parseAsLocalDateTime( newInputString )
+					? parseAsLocalDateTime( lastTypedValue )
 					: parseAsISODateTime( newInputString, true )
 			);
 			const isDateTimeSame = newDateTime.isSame( inputStringDateTime );
 
 			if ( isUserTypedInput ) {
-				setInputString( newInputString );
+				setInputString( lastTypedValue );
 			} else if ( ! isDateTimeSame ) {
 				setInputString( formatDateTimeForDisplay( newDateTime ) );
 			}
@@ -198,7 +211,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		}
 	}
 
-	function getUserInputOrUpdatedCurrentDate() {
+	const getUserInputOrUpdatedCurrentDate = useCallback( () => {
 		const newDateTime = maybeForceTime(
 			parseAsISODateTime( currentDate, false )
 		);
@@ -214,7 +227,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		}
 
 		return formatDateTimeForDisplay( newDateTime );
-	}
+	}, [ currentDate, formatDateTimeForDisplay, inputString, maybeForceTime ] );
 
 	// We keep a ref to the onBlur prop so that we can be sure we are
 	// always using the more up-to-date value, otherwise, we get in
