@@ -3261,8 +3261,8 @@
 </file>
 <file name="assets/js/blocks/filter-wrapper/index.tsx">
 <error line="8" column="25" severity="error" message="Module &apos;&quot;@wordpress/block-editor&quot;&apos; has no exported member &apos;useInnerBlocksProps&apos;." source="TS2305" />
-<error line="47" column="34" severity="error" message="Parameter &apos;instance&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
-<error line="112" column="20" severity="error" message="No overload matches this call.
+<error line="46" column="34" severity="error" message="Parameter &apos;instance&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
+<error line="111" column="20" severity="error" message="No overload matches this call.
   Overload 1 of 2, &apos;(metadata: BlockConfiguration&lt;Attributes&gt;, settings?: Partial&lt;BlockConfiguration&lt;Attributes&gt;&gt; | undefined): Block&lt;...&gt; | undefined&apos;, gave the following error.
     Argument of type &apos;{ name: string; version: string; title: string; category: string; keywords: string[]; attributes: { filterType: { type: string; }; heading: { type: string; }; }; textdomain: string; apiVersion: number; $schema: string; }&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;Attributes&gt;&apos;.
       Type &apos;{ name: string; version: string; title: string; category: string; keywords: string[]; attributes: { filterType: { type: string; }; heading: { type: string; }; }; textdomain: string; apiVersion: number; $schema: string; }&apos; is not assignable to type &apos;Partial&lt;Omit&lt;Block&lt;Attributes&gt;, &quot;icon&quot;&gt;&gt;&apos;.
@@ -3271,15 +3271,15 @@
             Type &apos;{ type: string; }&apos; is missing the following properties from type &apos;Query&lt;string&gt;&apos;: source, selector, query
   Overload 2 of 2, &apos;(name: string, settings: BlockConfiguration&lt;Attributes&gt;): Block&lt;Attributes&gt; | undefined&apos;, gave the following error.
     Argument of type &apos;{ name: string; version: string; title: string; category: string; keywords: string[]; attributes: { filterType: { type: string; }; heading: { type: string; }; }; textdomain: string; apiVersion: number; $schema: string; }&apos; is not assignable to parameter of type &apos;string&apos;." source="TS2769" />
-<error line="136" column="16" severity="error" message="Parameter &apos;attributes&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
-<error line="160" column="16" severity="error" message="Parameter &apos;attributes&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
-<error line="185" column="16" severity="error" message="Parameter &apos;attributes&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
-<error line="210" column="16" severity="error" message="Parameter &apos;attributes&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
-<error line="236" column="17" severity="error" message="Parameter &apos;attributes&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
-<error line="262" column="18" severity="error" message="Property &apos;idBase&apos; does not exist on type &apos;Attributes&apos;." source="TS2339" />
-<error line="262" column="26" severity="error" message="Property &apos;instance&apos; does not exist on type &apos;Attributes&apos;." source="TS2339" />
-<error line="264" column="20" severity="error" message="Property &apos;idBase&apos; does not exist on type &apos;Attributes&apos;." source="TS2339" />
-<error line="264" column="28" severity="error" message="Property &apos;instance&apos; does not exist on type &apos;Attributes&apos;." source="TS2339" />
+<error line="135" column="16" severity="error" message="Parameter &apos;attributes&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
+<error line="159" column="16" severity="error" message="Parameter &apos;attributes&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
+<error line="184" column="16" severity="error" message="Parameter &apos;attributes&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
+<error line="209" column="16" severity="error" message="Parameter &apos;attributes&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
+<error line="234" column="16" severity="error" message="Parameter &apos;attributes&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
+<error line="259" column="18" severity="error" message="Property &apos;idBase&apos; does not exist on type &apos;Attributes&apos;." source="TS2339" />
+<error line="259" column="26" severity="error" message="Property &apos;instance&apos; does not exist on type &apos;Attributes&apos;." source="TS2339" />
+<error line="261" column="20" severity="error" message="Property &apos;idBase&apos; does not exist on type &apos;Attributes&apos;." source="TS2339" />
+<error line="261" column="28" severity="error" message="Property &apos;instance&apos; does not exist on type &apos;Attributes&apos;." source="TS2339" />
 </file>
 <file name="assets/js/blocks/handpicked-products/block.tsx">
 <error line="4" column="30" severity="error" message="Could not find a declaration file for module &apos;@wordpress/server-side-render&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@wordpress/server-side-render/build/index.js&apos; implicitly has an &apos;any&apos; type.
@@ -3835,7 +3835,7 @@
     Argument of type &apos;{ name: string; title: string; category: string; keywords: string[]; description: string; supports: { align: string[]; html: boolean; }; attributes: { attributes: { type: string; default: never[]; }; attrOperator: { ...; }; ... 6 more ...; stockStatus: { ...; }; }; textdomain: string; apiVersion: number; $schema: st...&apos; is not assignable to parameter of type &apos;string&apos;." source="TS2769" />
 </file>
 <file name="assets/js/blocks/rating-filter/index.tsx">
-<error line="18" column="21" severity="error" message="No overload matches this call.
+<error line="16" column="20" severity="error" message="No overload matches this call.
   Overload 1 of 2, &apos;(metadata: BlockConfiguration&lt;Attributes&gt;, settings?: Partial&lt;BlockConfiguration&lt;Attributes&gt;&gt; | undefined): Block&lt;...&gt; | undefined&apos;, gave the following error.
     Argument of type &apos;{ name: string; version: string; title: string; description: string; category: string; keywords: string[]; supports: { html: boolean; multiple: boolean; color: { __experimentalDefaultControls: { text: boolean; }; }; inserter: boolean; lock: boolean; }; ... 4 more ...; $schema: string; }&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;Attributes&gt;&apos;.
       Type &apos;{ name: string; version: string; title: string; description: string; category: string; keywords: string[]; supports: { html: boolean; multiple: boolean; color: { __experimentalDefaultControls: { text: boolean; }; }; inserter: boolean; lock: boolean; }; ... 4 more ...; $schema: string; }&apos; is not assignable to type &apos;Partial&lt;Omit&lt;Block&lt;Attributes&gt;, &quot;icon&quot;&gt;&gt;&apos;.
