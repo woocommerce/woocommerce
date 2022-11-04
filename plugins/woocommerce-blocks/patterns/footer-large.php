@@ -34,7 +34,6 @@
 
 <!-- wp:column {"verticalAlignment":"top","width":"20%","style":{"spacing":{"blockGap":"16px"}}} -->
 <div class="wp-block-column is-vertically-aligned-top" style="flex-basis:20%"><!-- wp:navigation {"layout":{"type":"flex","orientation":"vertical"}} -->
-<!-- wp:page-list /-->
 <!-- /wp:navigation --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
