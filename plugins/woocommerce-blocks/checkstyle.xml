@@ -2229,8 +2229,8 @@
 <error line="71" column="20" severity="error" message="Variable &apos;renderer&apos; implicitly has an &apos;any&apos; type." source="TS7005" />
 </file>
 <file name="assets/js/blocks/active-filters/block.tsx">
-<error line="158" column="35" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;StoreAttributes[]&apos;." source="TS2345" />
-<error line="166" column="35" severity="error" message="Parameter &apos;attribute&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
+<error line="174" column="35" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;StoreAttributes[]&apos;." source="TS2345" />
+<error line="182" column="35" severity="error" message="Parameter &apos;attribute&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
 </file>
 <file name="assets/js/editor-components/block-title/index.js">
 <error line="15" column="2" severity="error" message="Binding element &apos;className&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
