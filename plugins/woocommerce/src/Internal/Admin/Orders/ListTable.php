@@ -468,7 +468,7 @@ class ListTable extends WP_List_Table {
 			submit_button( __( 'Filter', 'woocommerce' ), '', 'filter_action', false, array( 'id' => 'order-query-submit' ) );
 		}
 
-		if ( $this->is_trash && $this->has_items() && current_user_can( 'edit_others_orders' ) ) {
+		if ( $this->is_trash && $this->has_items() && current_user_can( 'edit_others_shop_orders' ) ) {
 			submit_button( __( 'Empty Trash', 'woocommerce' ), 'apply', 'delete_all', false );
 		}
 
