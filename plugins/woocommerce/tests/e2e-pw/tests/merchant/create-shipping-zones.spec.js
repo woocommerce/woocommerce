@@ -323,7 +323,7 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 
 	test.beforeEach( async ( { context, page } ) => {
 		// Shopping cart is very sensitive to cookies, so be explicit
-		context.clearCookies();
+		await context.clearCookies();
 
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );

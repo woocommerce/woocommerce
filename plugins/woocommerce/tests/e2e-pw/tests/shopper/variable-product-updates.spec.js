@@ -136,7 +136,7 @@ test.describe( 'Shopper > Update variable product', () => {
 
 	test.beforeEach( async ( { context } ) => {
 		// Shopping cart is very sensitive to cookies, so be explicit
-		context.clearCookies();
+		await context.clearCookies();
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {

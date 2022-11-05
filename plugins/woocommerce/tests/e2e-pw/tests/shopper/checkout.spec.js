@@ -106,7 +106,7 @@ test.describe( 'Checkout page', () => {
 
 	test.beforeEach( async ( { context } ) => {
 		// Shopping cart is very sensitive to cookies, so be explicit
-		context.clearCookies();
+		await context.clearCookies();
 	} );
 
 	test( 'should display cart items in order review', async ( { page } ) => {
