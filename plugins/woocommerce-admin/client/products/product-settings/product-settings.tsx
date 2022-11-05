@@ -57,6 +57,7 @@ export const ProductSettings = () => {
 							/>
 							<TextControl
 								label={ __( 'Menu order', 'woocommerce' ) }
+								type="number"
 								{ ...getInputProps( 'menu_order' ) }
 							/>
 						</PanelBody>
