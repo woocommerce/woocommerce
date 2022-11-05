@@ -12,7 +12,6 @@ import {
 } from '@wordpress/components';
 import { closeSmall, cog } from '@wordpress/icons';
 import { Product } from '@woocommerce/data';
-import { registerPlugin } from '@wordpress/plugins';
 import { useFormContext } from '@woocommerce/components';
 import { useState } from '@wordpress/element';
 
@@ -67,8 +66,3 @@ export const ProductSettings = () => {
 		</WooHeaderItem>
 	);
 };
-
-registerPlugin( 'woocommerce-product-settings', {
-	render: ProductSettings,
-	icon: 'admin-generic',
-} );
