@@ -29,6 +29,7 @@ const AddProductPage: React.FC = () => {
 		<div className="woocommerce-add-product">
 			<Form< Partial< Product > >
 				initialValues={ {
+					reviews_allowed: true,
 					name: '',
 					sku: '',
 					stock_quantity: 0,
