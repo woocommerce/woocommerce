@@ -19,7 +19,7 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { getCheckboxTracks } from './sections/utils';
+import { getCheckboxTracks } from '../sections/utils';
 import { WooHeaderItem } from '~/header/utils';
 import './product-settings.scss';
 
