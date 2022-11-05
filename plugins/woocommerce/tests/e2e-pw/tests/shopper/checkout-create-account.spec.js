@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { admin } = require( '../../test-data/data' );
 
 const billingEmail = 'marge-test-account@example.com';
 
@@ -69,6 +70,21 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		await api.put( 'payment_gateways/cod', {
 			enabled: true,
 		} );
+
+		// make sure test customer does not exist
+		const { data: customersList } = await api.get( 'customers', {
+			email: billingEmail,
+		} );
+
+		if ( customersList && customersList.length ) {
+			const customerId = customersList[ 0 ].id;
+
+			console.log(
+				`Customer with email ${ billingEmail } exists! Deleting it before starting test...`
+			);
+
+			await api.delete( `customers/${ customerId }`, { force: true } );
+		}
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -99,10 +115,10 @@ test.describe( 'Shopper Checkout Create Account', () => {
 			enabled: false,
 		} );
 		// clear out the customer we create during the test
-		await api.get( 'customers' ).then( ( response ) => {
+		await api.get( 'customers' ).then( async ( response ) => {
 			for ( let i = 0; i < response.data.length; i++ ) {
 				if ( response.data[ i ].billing.email === billingEmail ) {
-					api.delete( `customers/${ response.data[ i ].id }`, {
+					await api.delete( `customers/${ response.data[ i ].id }`, {
 						force: true,
 					} );
 				}
@@ -155,8 +171,8 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		);
 		await page.click( 'text=Logout' );
 		// sign in as admin to confirm account creation
-		await page.fill( '#username', 'admin' );
-		await page.fill( '#password', 'password' );
+		await page.fill( '#username', admin.username );
+		await page.fill( '#password', admin.password );
 		await page.click( 'text=Log in' );
 
 		await page.goto( 'wp-admin/users.php' );
