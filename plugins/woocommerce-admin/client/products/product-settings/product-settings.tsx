@@ -31,6 +31,7 @@ export const ProductSettings = () => {
 		<WooHeaderItem>
 			<>
 				<Button
+					aria-label={ __( 'Settings', 'woocommerce' ) }
 					icon={ cog }
 					isPressed={ isOpen }
 					onClick={ () => setIsOpen( ! isOpen ) }
