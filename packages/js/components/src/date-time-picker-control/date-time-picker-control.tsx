@@ -212,6 +212,12 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	}
 
 	const getUserInputOrUpdatedCurrentDate = useCallback( () => {
+		if ( currentDate === undefined ) {
+			// the component is uncontrolled (not using currentDate),
+			// so just return the input string
+			return inputString;
+		}
+
 		const newDateTime = maybeForceTime(
 			parseAsISODateTime( currentDate, false )
 		);
@@ -314,13 +320,12 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			} }
 			renderContent={ () => {
 				const Picker = isDateOnlyPicker ? DatePicker : WpDateTimePicker;
-				const pickerCurrentDateTime = parseAsISODateTime( currentDate );
 
 				return (
 					<Picker
 						currentDate={
-							currentDate && pickerCurrentDateTime.isValid()
-								? currentDate
+							inputStringDateTime.isValid()
+								? formatDateTimeAsISO( inputStringDateTime )
 								: undefined
 						}
 						onChange={ ( newDateTimeISOString: string ) =>
