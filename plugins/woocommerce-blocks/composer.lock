@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
-            "version": "v2.11.10",
+            "version": "v2.11.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-autoloader.git",
-                "reference": "0d0835f25c67a814f6f64e0538d8cfa46d7aad70"
+                "reference": "c4c5e729bf797b67518936f28053ad9bd396562b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/0d0835f25c67a814f6f64e0538d8cfa46d7aad70",
-                "reference": "0d0835f25c67a814f6f64e0538d8cfa46d7aad70",
+                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/c4c5e729bf797b67518936f28053ad9bd396562b",
+                "reference": "c4c5e729bf797b67518936f28053ad9bd396562b",
                 "shasum": ""
             },
             "require": {
@@ -53,9 +53,9 @@
             ],
             "description": "Creates a custom autoloader for a plugin or theme.",
             "support": {
-                "source": "https://github.com/Automattic/jetpack-autoloader/tree/v2.11.10"
+                "source": "https://github.com/Automattic/jetpack-autoloader/tree/v2.11.11"
             },
-            "time": "2022-10-05T17:57:35+00:00"
+            "time": "2022-10-25T09:01:02+00:00"
         },
         {
             "name": "composer/installers",
