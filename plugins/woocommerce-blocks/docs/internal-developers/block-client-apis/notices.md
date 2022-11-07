@@ -2,280 +2,70 @@
 
 ## Table of contents <!-- omit in toc -->
 
-- [useStoreNotices()](#usestorenotices)
-    - [API](#api)
-        - [`addDefaultNotice( text = '', noticeProps = {} )`](#adddefaultnotice-text---noticeprops---)
-        - [`addErrorNotice( text = '', noticeProps = {} )`](#adderrornotice-text---noticeprops---)
-        - [`addWarningNotice( text = '', noticeProps = {} )`](#addwarningnotice-text---noticeprops---)
-        - [`addInfoNotice( text = '', noticeProps = {} )`](#addinfonotice-text---noticeprops---)
-        - [`addSuccessNotice( text = '', noticeProps = {} )`](#addsuccessnotice-text---noticeprops---)
-        - [`hasNoticesOfType( type )`](#hasnoticesoftype-type-)
-        - [`notices`](#notices)
-        - [`removeNotice( id, ctx )`](#removenotice-id-ctx-)
-        - [`removeNotices( status = null )`](#removenotices-status--null-)
-        - [`setIsSuppressed( val )`](#setissuppressed-val-)
-- [StoreNoticesProvider](#storenoticesprovider)
-    - [Actions](#actions)
-        - [`createNotice( status = 'default', content = '', options = {} )`](#createnotice-status--default-content---options---)
-        - [`createSnackbarNotice( content = '', options = {} )`](#createsnackbarnotice-content---options---)
-        - [`removeNotice( id, ctx )`](#removenotice-id-ctx--1)
-        - [`setIsSuppressed( val )`](#setissuppressed-val--1)
-    - [Statuses](#statuses)
-    - [Notice options](#notice-options)
-- [useStoreSnackbarNotices()](#usestoresnackbarnotices)
-    - [API](#api-1)
-        - [`addSnackbarNotice( text = '', noticeProps = {} )`](#addsnackbarnotice-text---noticeprops---)
-        - [`notices`](#notices-1)
-        - [`removeNotices( status = null )`](#removenotices-status--null--1)
-- [StoreSnackbarNoticesProvider](#storesnackbarnoticesprovider)
-    - [Actions](#actions-1)
-        - [`createSnackbarNotice( content = '', options = {} )`](#createsnackbarnotice-content---options----1)
-        - [`removeSnackbarNotice( id, ctx )`](#removesnackbarnotice-id-ctx-)
-        - [`setIsSuppressed( val )`](#setissuppressed-val--2)
-- [Example usage](#example-usage)
+- [Notices in WooCommerce Blocks](#notices-in-woocommerce-blocks)
+    - [`StoreNoticesContainer`](#storenoticescontainer)
+- [Snackbar notices in WooCommerce Blocks](#snackbar-notices-in-woocommerce-blocks)
+    - [`SnackbarNoticesContainer`](#snackbarnoticescontainer)
 
-## useStoreNotices()
+## Notices in WooCommerce Blocks
 
-The `useStoreNotices()` hook allows reading and manipulating notices in the frontend.
+WooCommerce Blocks uses the [`@wordpress/notices`](https://github.com/WordPress/gutenberg/blob/d9eb36d80e05b4e45b1ad8462c8bace4e9cf1f6f/docs/reference-guides/data/data-core-notices.md) package to display notices in the frontend. For more information on the actiona and selectors available on this data store, please review [the `@wordpress/notices` documentation](https://github.com/WordPress/gutenberg/blob/d9eb36d80e05b4e45b1ad8462c8bace4e9cf1f6f/docs/reference-guides/data/data-core-notices.md)
 
-### API
+### `StoreNoticesContainer`
 
-> _Note: if the context is not specified in `noticeProps` or `ctxt` params (depending on the method), the current context is used._
+To display notices of a certain context, use the `StoreNoticesContainer` and pass the context as a prop to it.
 
-#### `addDefaultNotice( text = '', noticeProps = {} )`
+The below example will show all notices with type `default` that are in the `wc/cart` context. If no context prop is passed, then the `default` context will be used.
 
-Create a new notice with `default` status.
-
-| Argument      | Type   | Description                                        |
-| ------------- | ------ | -------------------------------------------------- |
-| `text`        | string | Text to be displayed in the notice.                |
-| `noticeProps` | Object | Object with the [notice options](#notice-options). |
-
-#### `addErrorNotice( text = '', noticeProps = {} )`
-
-Create a new error notice.
-
-| Argument      | Type   | Description                                        |
-| ------------- | ------ | -------------------------------------------------- |
-| `text`        | string | Text to be displayed in the notice.                |
-| `noticeProps` | Object | Object with the [notice options](#notice-options). |
-
-#### `addWarningNotice( text = '', noticeProps = {} )`
-
-Create a new warning notice.
-
-| Argument      | Type   | Description                                        |
-| ------------- | ------ | -------------------------------------------------- |
-| `text`        | string | Text to be displayed in the notice.                |
-| `noticeProps` | Object | Object with the [notice options](#notice-options). |
-
-#### `addInfoNotice( text = '', noticeProps = {} )`
-
-Create a new info notice.
-
-| Argument      | Type   | Description                                        |
-| ------------- | ------ | -------------------------------------------------- |
-| `text`        | string | Text to be displayed in the notice.                |
-| `noticeProps` | Object | Object with the [notice options](#notice-options). |
-
-#### `addSuccessNotice( text = '', noticeProps = {} )`
-
-Create a new success notice.
-
-| Argument      | Type   | Description                                        |
-| ------------- | ------ | -------------------------------------------------- |
-| `text`        | string | Text to be displayed in the notice.                |
-| `noticeProps` | Object | Object with the [notice options](#notice-options). |
-
-#### `hasNoticesOfType( type )`
-
-Check whether there are notices of the provided type in the current context.
-
-| Argument | Type   | Description                   |
-| -------- | ------ | ----------------------------- |
-| `type`   | string | Type of the notices to check. |
-
-#### `notices`
-
-An array of the notices in the current context.
-
-#### `removeNotice( id, ctx )`
-
-Remove an existing notice.
-
-| Argument | Type   | Description                                   |
-| -------- | ------ | --------------------------------------------- |
-| `id`     | string | Id of the notice to remove.                   |
-| `ctx`    | string | Context where the notice to remove is stored. |
-
-#### `removeNotices( status = null )`
-
-Remove all notices from the current context. If a `status` is provided, only the notices with that status are removed.
-
-| Argument | Type   | Description                                                                                           |
-| -------- | ------ | ----------------------------------------------------------------------------------------------------- |
-| `status` | string | Status that notices must match to be removed. If not provided, all notices of any status are removed. |
-
-#### `setIsSuppressed( val )`
-
-Whether notices are suppressed. If true, it will hide the notices from the frontend.
-
-| Argument | Type    | Description                 |
-| -------- | ------- | --------------------------- |
-| `val`    | boolean | Id of the notice to remove. |
-
-## StoreNoticesProvider
-
-The `StoreNoticesProvider` allows managing notices in the frontend. Notices are rendered before React Children.
-
-Internally, it uses the `StoreNoticesContext` which relies on the [`notices` package](https://github.com/WordPress/gutenberg/tree/master/packages/notices) from Gutenberg.
-
-### Actions
-
-#### `createNotice( status = 'default', content = '', options = {} )`
-
-This action creates a new notice. If the context is not specified in the `options` object, the current context is used.
-
-| Argument  | Type   | Description                                        |
-| --------- | ------ | -------------------------------------------------- |
-| `status`  | string | One of the statuses listed below.                  |
-| `content` | string | Text to be displayed in the notice.                |
-| `options` | Object | Object with the [notice options](#notice-options). |
-
-#### `createSnackbarNotice( content = '', options = {} )`
-
-This action creates a new snackbar notice. If the context is not specified in the `options` object, the current context is used.
-
-| Argument  | Type   | Description                                        |
-| --------- | ------ | -------------------------------------------------- |
-| `content` | string | Text to be displayed in the notice.                |
-| `options` | Object | Object with the [notice options](#notice-options). |
-
-#### `removeNotice( id, ctx )`
-
-This action removes an existing notice. If the context is not specified, the current context is used.
-
-| Argument | Type   | Description                                                                                                 |
-| -------- | ------ | ----------------------------------------------------------------------------------------------------------- |
-| `id`     | string | Id of the notice to remove.                                                                                 |
-| `ctx`    | string | Context where the notice to remove is stored. If the context is not specified, the current context is used. |
-
-#### `setIsSuppressed( val )`
-
-Whether notices are suppressed. If true, it will hide the notices from the frontend.
-
-| Argument | Type    | Description                 |
-| -------- | ------- | --------------------------- |
-| `val`    | boolean | Id of the notice to remove. |
-
-### Statuses
-
-All notices must have one of the following statuses: `default`, `error`, `success`, `info`, `warning`.
-
-### Notice options
-
-Object of the form:
-
-```js
-{
-  id: 'checkout',
-  type: string,
-  isDismissible: false,
-}
-```
-
-Refer to the [Gutenberg docs](https://github.com/WordPress/gutenberg/blob/master/packages/notices/src/store/actions.js#L46) to know the available options.
-
-## useStoreSnackbarNotices()
-
-The `useStoreNotices()` hook allows reading and manipulating snackbar notices in the frontend.
-
-The snackbar is a small toast-like notification that appears at the bottom of a user's screen.
-
-![Applied coupon code](https://user-images.githubusercontent.com/5656702/124294673-dd803b80-db4f-11eb-81ec-02fb962d04ed.png)
-
-### API
-
-#### `addSnackbarNotice( text = '', noticeProps = {} )`
-
-Create a new snackbar notice.
-
-| Argument      | Type   | Description                                        |
-| ------------- | ------ | -------------------------------------------------- |
-| `text`        | string | Text to be displayed in the notice.                |
-| `noticeProps` | Object | Object with the [notice options](#notice-options). |
-
-#### `notices`
-
-An array of the notices in the current context.
-
-#### `removeNotices( status = null )`
-
-Remove all notices from the current context. If a `status` is provided, only the notices with that status are removed.
-
-| Argument | Type   | Description                                                                                           |
-| -------- | ------ | ----------------------------------------------------------------------------------------------------- |
-| `status` | string | Status that notices must match to be removed. If not provided, all notices of any status are removed. |
-
-## StoreSnackbarNoticesProvider
-
-The `StoreSnackbarNoticesProvider` allows managing snackbar notices in the frontend. Snackbar notices are displayed in the bottom left corner and disappear after a certain time.
-
-Internally, it uses the `StoreNoticesContext` which relies on the [`notices` package](https://github.com/WordPress/gutenberg/tree/master/packages/notices) from Gutenberg.
-
-### Actions
-
-#### `createSnackbarNotice( content = '', options = {} )`
-
-This action creates a new snackbar notice. If the context is not specified in the `options` object, the current context is used.
-
-| Argument  | Type   | Description                                        |
-| --------- | ------ | -------------------------------------------------- |
-| `content` | string | Text to be displayed in the notice.                |
-| `options` | Object | Object with the [notice options](#notice-options). |
-
-#### `removeSnackbarNotice( id, ctx )`
-
-This action removes an existing notice. If the context is not specified, the current context is used.
-
-| Argument | Type   | Description                                                                                                 |
-| -------- | ------ | ----------------------------------------------------------------------------------------------------------- |
-| `id`     | string | Id of the notice to remove.                                                                                 |
-| `ctx`    | string | Context where the notice to remove is stored. If the context is not specified, the current context is used. |
-
-#### `setIsSuppressed( val )`
-
-Whether notices are suppressed. If true, it will hide the notices from the frontend.
-
-| Argument | Type    | Description                 |
-| -------- | ------- | --------------------------- |
-| `val`    | boolean | Id of the notice to remove. |
-
-## Example usage
-
-The following example shows a `CheckoutProcessor` component that displays an error notice when the payment process fails and it removes it every time the payment is started. When the payment is completed correctly, it shows a snackbar notice.
+On the Cart Block, a `StoreNoticesContainer` is already rendered with the `wc/cart` context, and on the Checkout Block, a `StoreNoticesContainer` is already rendered with the `wc/checkout` context. To display errors from other contexts, you can use the `StoreNoticesProvider` component with context passed as a prop.
 
 ```jsx
-const CheckoutProcessor = () => {
-  const { addErrorNotice, removeNotice } = useStoreNotices();
-  // ...
-  const paymentFail = () => {
-    addErrorNotice( 'Something went wrong.', { id: 'checkout' } );
-  };
-  const paymentStart = () => {
-    removeNotice( 'checkout' );
-  };
-  // ...
+import { StoreNoticesContainer } from '@woocommerce/base-components/store-notices-container';
+
+const PaymentErrors = () => {
+    return (
+        <StoreNoticesContainer context="wc/payment" />
+    );
 };
 ```
 
+## Snackbar notices in WooCommerce Blocks
+
+WooCommerce Blocks also shows snackbar notices, to add a snackbar notice you need to create a notice with `type:snackbar` in the options object.
+
+```js
+import { dispatch } from '@wordpress/data';
+
+dispatch( 'core/notices' ).createNotice(
+    'snackbar',
+    'This is a snackbar notice',
+    {
+        type: 'snackbar',
+        actions: [
+            {
+                label: 'Dismiss',
+                onClick: () => {
+                    dispatch( 'core/notices' ).removeNotice( 'snackbar-notice-id' );
+                },
+            },
+        ],
+    },
+    'snackbar-notice-id'
+);
+```
+
+### `SnackbarNoticesContainer`
+
+To display snackbar notices, use the `SnackbarNoticesContainer` component. This component is rendered with the Cart and Checkout blocks, so there is no need to add another. The context it displays notices for is `default`.  If, for some reason you do need to show snackbar messages for a different context, you can render this component again  and pass the context as a prop to the component.
+
 ```jsx
-<StoreNoticesSnackbarProvider context="wc/checkout">
-	<StoreNoticesProvider context="wc/checkout">
-		// ...
-		<CheckoutProcessor />
-	</StoreNoticesProvider>
-</StoreSnackbarNoticesProvider>
+import { SnackbarNoticesContainer } from '@woocommerce/base-components/snackbar-notices-container';
+
+const AlternativeSnackbarNotices = () => {
+    return (
+        <SnackbarNoticesContainer context="wc/alternative-snackbar-notices" />
+    );
+};
 ```
 
 <!-- FEEDBACK -->
@@ -287,4 +77,3 @@ const CheckoutProcessor = () => {
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/block-client-apis/notices.md)
 
 <!-- /FEEDBACK -->
-
