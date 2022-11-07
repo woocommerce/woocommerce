@@ -24,7 +24,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 				descriptions: {
 					desktop: createInterpolateElement(
 						__(
-							'The WooCommerce Marketplace is the place to go to find vetted extensions, themes, and services for your store.<br/><br/>There are hundreds of options available, and new products are added regularly. So start here when you want to enhance your store or discover new ways to grow your business.<br/><br/>The WooCommerce Marketplace is also available at WooCommerce.com.',
+							'This is the place to find extensions, themes, and services for your store - all reviewed and approved by the WooCommerce team.<br/><br/>Whether you’re looking to improve your store or grow your business, you can find a solution here. There are hundreds of options available, and new products are added regularly.<br/><br/>The WooCommerce Marketplace is also available at WooCommerce.com.',
 							'woocommerce'
 						),
 						{
@@ -46,7 +46,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 				heading: __( 'Find exactly what you need', 'woocommerce' ),
 				descriptions: {
 					desktop: __(
-						'You can use the search box to find specific products in the Marketplace.',
+						'Use the search box to find specific products.',
 						'woocommerce'
 					),
 				},
@@ -65,7 +65,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 				descriptions: {
 					desktop: createInterpolateElement(
 						__(
-							'Or browse all available products by category.<br/><br/>The Featured category is regularly updated with new and noteworthy products.',
+							'Or browse all available products by category.',
 							'woocommerce'
 						),
 						{
@@ -85,13 +85,13 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 			meta: {
 				name: 'wc-addons-featured',
 				heading: __(
-					'Learn more about available products',
+					'Learn more about products',
 					'woocommerce'
 				),
 				descriptions: {
 					desktop: createInterpolateElement(
 						__(
-							'All available products will be displayed here (scroll down to see them all), along with a summary about each product.<br/><br/>You can click on any product to see more information about it, including its features, requirements, and available documentation.',
+							'Scroll down to see all available products for a search or selected category.<br/><br/>Click on any product to see more information about it, including features, requirements, and available documentation.',
 							'woocommerce'
 						),
 						{
@@ -114,7 +114,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 				descriptions: {
 					desktop: createInterpolateElement(
 						__(
-							"Products purchased from the WooCommerce Marketplace can be managed in My Subscriptions, either here or on WooCommerce.com after logging in.<br/><br/>Every purchase is backed by our <a1>30-day money-back guarantee</a1> and includes <a2>email and live chat support</a2> from our dedicated Happiness Engineers.<br/><br/>That's it! We hope the Marketplace helps you build the business of your dreams. We’re rooting for you.",
+							"Products purchased from the WooCommerce Marketplace can be managed in My Subscriptions, either here or on WooCommerce.com.<br/><br/>Every purchase is backed by our <a1>30-day money-back guarantee</a1>, and includes <a2>email and live chat support</a2>.<br/><br/>That's it! We hope the Marketplace helps you build the business of your dreams.",
 							'woocommerce'
 						),
 						{
