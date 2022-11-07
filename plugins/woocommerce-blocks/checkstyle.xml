@@ -1539,20 +1539,6 @@
               Types of parameters &apos;__0&apos; and &apos;props&apos; are incompatible.
                 Property &apos;context&apos; is missing in type &apos;BlockEditProps&lt;{}&gt; &amp; { children?: ReactNode; }&apos; but required in type &apos;{ attributes: any; setAttributes: any; context: any; }&apos;." source="TS2769" />
 </file>
-<file name="assets/js/atomic/blocks/product-elements/summary/edit.js">
-<error line="15" column="18" severity="error" message="Binding element &apos;attributes&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-</file>
-<file name="assets/js/atomic/blocks/product-elements/summary/index.js">
-<error line="31" column="1" severity="error" message="No overload matches this call.
-  Overload 1 of 2, &apos;(metadata: BlockConfiguration&lt;{}&gt;, settings?: Partial&lt;BlockConfiguration&lt;{}&gt;&gt; | undefined): Block&lt;{}&gt; | undefined&apos;, gave the following error.
-    Argument of type &apos;string&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{}&gt;&apos;.
-      Type &apos;string&apos; is not assignable to type &apos;Pick&lt;Block&lt;{}&gt;, &quot;title&quot; | &quot;category&quot; | &quot;attributes&quot;&gt;&apos;.
-  Overload 2 of 2, &apos;(name: string, settings: BlockConfiguration&lt;{}&gt;): Block&lt;{}&gt; | undefined&apos;, gave the following error.
-    Argument of type &apos;{ apiVersion: number; title: string; description: string; icon: { src: JSX.Element; }; attributes: { productId: { type: string; default: number; }; }; supports: { color?: { text: boolean; background: boolean; link: boolean; }; typography?: { ...; }; __experimentalSelector?: string; }; ... 19 more ...; merge?: ((attr...&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{}&gt;&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the types of the target&apos;s properties.
-      Type &apos;{ apiVersion: number; title: string; description: string; icon: { src: JSX.Element; }; attributes: { productId: { type: string; default: number; }; }; supports: { color?: { text: boolean; background: boolean; link: boolean; }; typography?: { ...; }; __experimentalSelector?: string; }; ... 19 more ...; merge?: ((attr...&apos; is not assignable to type &apos;Partial&lt;Omit&lt;Block&lt;{}&gt;, &quot;icon&quot;&gt;&gt;&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the types of the target&apos;s properties.
-        The types of &apos;supports.color.text&apos; are incompatible between these types.
-          Type &apos;boolean&apos; is not assignable to type &apos;string&apos;." source="TS2769" />
-</file>
 <file name="assets/js/editor-components/edit-product-link/index.js">
 <error line="18" column="40" severity="error" message="Property &apos;productId&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
 </file>
