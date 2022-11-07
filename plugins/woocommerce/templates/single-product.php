@@ -55,7 +55,7 @@ get_header( 'shop' ); ?>
 		 */
 		do_action( 'woocommerce_sidebar' );
 	?>
-
+<!-- this is an html comment -->
 <?php
 get_footer( 'shop' );
 
