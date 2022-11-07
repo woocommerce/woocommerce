@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import Summary from '@woocommerce/base-components/summary';
 import { blocksConfig } from '@woocommerce/block-settings';
@@ -12,22 +11,18 @@ import {
 } from '@woocommerce/shared-context';
 import { useColorProps, useTypographyProps } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
+import type { HTMLAttributes } from 'react';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+import type { BlockAttributes } from './types';
 
-/**
- * Product Summary Block Component.
- *
- * @param {Object} props             Incoming props.
- * @param {string} [props.className] CSS Class name for the component.
- * @return {*} The component.
- */
-const Block = ( props ) => {
+type Props = BlockAttributes & HTMLAttributes< HTMLDivElement >;
+
+const Block = ( props: Props ): JSX.Element | null => {
 	const { className } = props;
-
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
 	const colorProps = useColorProps( props );
@@ -76,10 +71,6 @@ const Block = ( props ) => {
 			} }
 		/>
 	);
-};
-
-Block.propTypes = {
-	className: PropTypes.string,
 };
 
 export default withProductDataContext( Block );
