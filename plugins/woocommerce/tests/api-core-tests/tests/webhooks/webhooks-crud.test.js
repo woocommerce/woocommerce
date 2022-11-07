@@ -82,7 +82,7 @@ test.describe('Webhooks API tests', () => {
 			const response = await request.get('/wp-json/wc/v3/webhooks');
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
-			expect(Array.isArray(responseJSON));
+			expect(Array.isArray(responseJSON)).toBe(true);
 			expect(responseJSON.length).toBeGreaterThan(0);
 		});
 	});

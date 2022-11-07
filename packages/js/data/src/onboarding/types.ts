@@ -54,15 +54,6 @@ export type DeprecatedTaskType = {
 	type?: string;
 };
 
-export type TaskListSection = {
-	id: string;
-	title: string;
-	description: string;
-	image: string;
-	tasks: string[];
-	isComplete: boolean;
-};
-
 export type TaskListType = {
 	id: string;
 	title: string;
@@ -74,7 +65,6 @@ export type TaskListType = {
 	displayProgressHeader: boolean;
 	keepCompletedTaskList: 'yes' | 'no';
 	showCESFeedback?: boolean;
-	sections?: TaskListSection[];
 	isToggleable?: boolean;
 	isCollapsible?: boolean;
 	isExpandable?: boolean;

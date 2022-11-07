@@ -4,9 +4,10 @@
 import { format as formatDate } from '@wordpress/date';
 import {
 	createElement,
+	useCallback,
 	useState,
 	useEffect,
-	useLayoutEffect,
+	useMemo,
 	useRef,
 } from '@wordpress/element';
 import { Icon, calendar } from '@wordpress/icons';
@@ -30,7 +31,7 @@ export const default12HourDateTimeFormat = 'm/d/Y h:i a';
 export const default24HourDateTimeFormat = 'm/d/Y H:i';
 
 export type DateTimePickerControlOnChangeHandler = (
-	date: string,
+	dateTimeIsoString: string,
 	isValid: boolean
 ) => void;
 
@@ -68,20 +69,9 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	const id = `inspector-date-time-picker-control-${ instanceId }`;
 	const inputControl = useRef< InputControl >();
 
-	const isMounted = useRef( false );
-	useEffect( () => {
-		isMounted.current = true;
-		return () => {
-			isMounted.current = false;
-		};
-	} );
-
 	const [ inputString, setInputString ] = useState( '' );
-	const [ lastValidDate, setLastValidDate ] = useState< Moment | null >(
-		null
-	);
 
-	const displayFormat = ( () => {
+	const displayFormat = useMemo( () => {
 		if ( dateTimeFormat ) {
 			return dateTimeFormat;
 		}
@@ -95,46 +85,42 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		}
 
 		return default24HourDateTimeFormat;
-	} )();
+	}, [ dateTimeFormat, isDateOnlyPicker, is12HourPicker ] );
 
-	function parseMomentIso(
+	function parseAsISODateTime(
 		dateString?: string | null,
 		assumeLocalTime = false
 	): Moment {
-		if ( assumeLocalTime ) {
-			return moment( dateString, moment.ISO_8601, true ).utc();
-		}
-
-		return moment.utc( dateString, moment.ISO_8601, true );
+		return assumeLocalTime
+			? moment( dateString, moment.ISO_8601, true ).utc()
+			: moment.utc( dateString, moment.ISO_8601, true );
 	}
 
-	function parseMoment( dateString: string | null ): Moment {
+	function parseAsLocalDateTime( dateString: string | null ): Moment {
 		// parse input date string as local time;
 		// be lenient of user input and try to match any format Moment can
 		return moment( dateString );
 	}
 
-	function formatMomentIso( momentDate: Moment ): string {
-		return momentDate.utc().toISOString();
-	}
+	const maybeForceTime = useCallback(
+		( momentDate: Moment ) => {
+			if ( ! isDateOnlyPicker || ! momentDate.isValid() )
+				return momentDate;
 
-	function formatMoment( momentDate: Moment ): string {
-		return formatDate( displayFormat, momentDate.local() );
-	}
+			// We want to set to the start/end of the local time, so
+			// we need to put our Moment instance into "local" mode
+			const updatedMomentDate = momentDate.clone().local();
 
-	function maybeForceTime( momentDate: Moment ): Moment {
-		if ( ! isDateOnlyPicker ) return momentDate;
+			if ( timeForDateOnly === 'start-of-day' ) {
+				updatedMomentDate.startOf( 'day' );
+			} else if ( timeForDateOnly === 'end-of-day' ) {
+				updatedMomentDate.endOf( 'day' );
+			}
 
-		const updatedMomentDate = momentDate.clone();
-
-		if ( timeForDateOnly === 'start-of-day' ) {
-			updatedMomentDate.startOf( 'day' );
-		} else if ( timeForDateOnly === 'end-of-day' ) {
-			updatedMomentDate.endOf( 'day' );
-		}
-
-		return updatedMomentDate;
-	}
+			return updatedMomentDate;
+		},
+		[ isDateOnlyPicker, timeForDateOnly ]
+	);
 
 	function hasFocusLeftInputAndDropdownContent(
 		event: React.FocusEvent< HTMLInputElement >
@@ -144,101 +130,67 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		);
 	}
 
-	// We setup the debounced handling of the input string changes using
-	// useRef because useCallback does *not* guarantee that the resulting
-	// callback function will not be recreated, even if the dependencies
-	// haven't changed (this is because of it's use of useMemo under the
-	// hood, which also makes not guarantee). And, even if it did, the
-	// equality check for useCallback dependencies is by reference. So, if
-	// the "same" function is passed in, but it is a different instance, it
-	// will trigger the recreation of the callback.
-	//
-	// With useDebounce, if the callback function changes, the current
-	// debounce is canceled. This results in the callback function never being
-	// called.
-	//
-	// We *need* to ensure that our handler is called at least once,
-	// and also that we call the passed in onChange callback.
-	//
-	// We guarantee this by keeping references to both our handler and the
-	// passed in prop.
-	//
-	// The consumer of DateTimePickerControl should ensure that the
-	// function passed into onChange does not change (using references or
-	// useCallbackOne). But, even if they do not, and the function changes,
-	// things will likely function as expected unless the consumer is doing
-	// something really convoluted.
-	//
-	// See also:
-	// - [note regarding useMemo not being a semantic guarantee](https://reactjs.org/docs/hooks-reference.html#usememo)
-	// - [useDebounce hook loses function calls if the dependency changes](https://github.com/WordPress/gutenberg/issues/35505)
-	// - [useMemoOne and useCallbackOne](https://github.com/alexreardon/use-memo-one)
-
-	const onChangePropFunctionRef = useRef<
-		DateTimePickerControlOnChangeHandler | undefined
-	>();
-	useLayoutEffect( () => {
-		onChangePropFunctionRef.current = onChange;
-	}, [ onChange ] );
-
-	function inputStringChangeHandlerFunction(
-		newInputString: string,
-		fireOnChange: boolean
-	) {
-		if ( ! isMounted.current ) return;
-
-		let newDateTime = parseMoment( newInputString );
-		const isValid = newDateTime.isValid();
-
-		if ( isValid ) {
-			newDateTime = maybeForceTime( newDateTime );
-			setLastValidDate( newDateTime );
-		}
-
-		if (
-			fireOnChange &&
-			typeof onChangePropFunctionRef.current === 'function'
-		) {
-			onChangePropFunctionRef.current(
-				isValid ? formatMomentIso( newDateTime ) : newInputString,
-				isValid
-			);
-		}
-	}
-
-	const inputStringChangeHandlerFunctionRef = useRef<
-		( newInputString: string, fireOnChange: boolean ) => void
-	>( inputStringChangeHandlerFunction );
-	// whenever forceTimeTo changes, we need to reset the ref to inputStringChangeHandlerFunction
-	// so that we are using the most current forceTimeTo value inside of it
-	useEffect( () => {
-		inputStringChangeHandlerFunctionRef.current =
-			inputStringChangeHandlerFunction;
-	}, [ timeForDateOnly ] );
-
-	const debouncedInputStringChangeHandler = useDebounce(
-		inputStringChangeHandlerFunctionRef.current,
-		onChangeDebounceWait
+	const formatDateTimeForDisplay = useCallback(
+		( dateTime: Moment ) => {
+			return dateTime.isValid()
+				? formatDate( displayFormat, dateTime.local() )
+				: dateTime.creationData().input?.toString() || '';
+		},
+		[ displayFormat ]
 	);
 
-	function change( newInputString: string ) {
-		setInputString( newInputString );
-		debouncedInputStringChangeHandler( newInputString, true );
+	function formatDateTimeAsISO( dateTime: Moment ): string {
+		return dateTime.isValid()
+			? dateTime.utc().toISOString()
+			: dateTime.creationData().input?.toString() || '';
 	}
 
-	function changeImmediate( newInputString: string, fireOnChange: boolean ) {
-		setInputString( newInputString );
-		inputStringChangeHandlerFunctionRef.current(
-			newInputString,
-			fireOnChange
-		);
-	}
+	const inputStringDateTime = useMemo( () => {
+		return maybeForceTime( parseAsLocalDateTime( inputString ) );
+	}, [ inputString, maybeForceTime ] );
 
-	function blur() {
-		if ( onBlur ) {
-			onBlur();
-		}
-	}
+	// We keep a ref to the onChange prop so that we can be sure we are
+	// always using the more up-to-date value, even if it changes
+	// it while a debounced onChange handler is in progress
+	const onChangeRef = useRef<
+		DateTimePickerControlOnChangeHandler | undefined
+	>();
+	useEffect( () => {
+		onChangeRef.current = onChange;
+	}, [ onChange ] );
+
+	const setInputStringAndMaybeCallOnChange = useCallback(
+		( newInputString: string, isUserTypedInput: boolean ) => {
+			const newDateTime = maybeForceTime(
+				isUserTypedInput
+					? parseAsLocalDateTime( newInputString )
+					: parseAsISODateTime( newInputString, true )
+			);
+			const isDateTimeSame = newDateTime.isSame( inputStringDateTime );
+
+			if ( isUserTypedInput ) {
+				setInputString( newInputString );
+			} else if ( ! isDateTimeSame ) {
+				setInputString( formatDateTimeForDisplay( newDateTime ) );
+			}
+
+			if (
+				typeof onChangeRef.current === 'function' &&
+				! isDateTimeSame
+			) {
+				onChangeRef.current(
+					formatDateTimeAsISO( newDateTime ),
+					newDateTime.isValid()
+				);
+			}
+		},
+		[ formatDateTimeForDisplay, inputStringDateTime, maybeForceTime ]
+	);
+
+	const debouncedSetInputStringAndMaybeCallOnChange = useDebounce(
+		setInputStringAndMaybeCallOnChange,
+		onChangeDebounceWait
+	);
 
 	function focusInputControl() {
 		if ( inputControl.current ) {
@@ -246,21 +198,23 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		}
 	}
 
-	const isInitialUpdate = useRef( true );
-	useEffect( () => {
-		const fireOnChange = ! isInitialUpdate.current;
-		if ( isInitialUpdate.current ) {
-			isInitialUpdate.current = false;
+	function getUserInputOrUpdatedCurrentDate() {
+		const newDateTime = maybeForceTime(
+			parseAsISODateTime( currentDate, false )
+		);
+
+		if (
+			! newDateTime.isValid() ||
+			newDateTime.isSame(
+				maybeForceTime( parseAsLocalDateTime( inputString ) )
+			)
+		) {
+			// keep the input string as the user entered it
+			return inputString;
 		}
 
-		const newDate = parseMomentIso( currentDate );
-
-		if ( newDate.isValid() ) {
-			changeImmediate( formatMoment( newDate ), fireOnChange );
-		} else {
-			changeImmediate( currentDate || '', fireOnChange );
-		}
-	}, [ currentDate, displayFormat, timeForDateOnly ] );
+		return formatDateTimeForDisplay( newDateTime );
+	}
 
 	return (
 		<Dropdown
@@ -272,8 +226,8 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			focusOnMount={ false }
 			// @ts-expect-error `onToggle` does exist.
 			onToggle={ ( willOpen ) => {
-				if ( ! willOpen ) {
-					blur();
+				if ( ! willOpen && typeof onBlur === 'function' ) {
+					onBlur();
 				}
 			} }
 			renderToggle={ ( { isOpen, onToggle } ) => (
@@ -282,8 +236,13 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 						id={ id }
 						ref={ inputControl }
 						disabled={ disabled }
-						value={ inputString }
-						onChange={ change }
+						value={ getUserInputOrUpdatedCurrentDate() }
+						onChange={ ( newValue: string ) =>
+							debouncedSetInputStringAndMaybeCallOnChange(
+								newValue,
+								true
+							)
+						}
 						onBlur={ (
 							event: React.FocusEvent< HTMLInputElement >
 						) => {
@@ -321,23 +280,26 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 					/>
 				</BaseControl>
 			) }
+			popoverProps={ {
+				className: 'woocommerce-date-time-picker-control__popover',
+			} }
 			renderContent={ () => {
 				const Picker = isDateOnlyPicker ? DatePicker : WpDateTimePicker;
+				const inputDateTime = parseAsLocalDateTime( inputString );
 
 				return (
 					<Picker
 						currentDate={
-							lastValidDate
-								? formatMomentIso( lastValidDate )
+							inputDateTime.isValid()
+								? formatDateTimeAsISO( inputDateTime )
 								: undefined
 						}
-						onChange={ ( date: string ) => {
-							// the picker returns the date in local time
-							const formattedDate = formatMoment(
-								parseMomentIso( date, true )
-							);
-							changeImmediate( formattedDate, true );
-						} }
+						onChange={ ( newDateTimeISOString: string ) =>
+							setInputStringAndMaybeCallOnChange(
+								newDateTimeISOString,
+								false
+							)
+						}
 						is12Hour={ is12HourPicker }
 					/>
 				);

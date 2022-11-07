@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix inconsistent return type of class WC_Shipping_Rate->get_shipping_tax()

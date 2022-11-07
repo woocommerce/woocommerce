@@ -226,6 +226,10 @@ export const ProductDetailsSection: React.FC = () => {
 							setDescriptionBlocks( blocks );
 							setValue( 'description', serialize( blocks ) );
 						} }
+						placeholder={ __(
+							'Describe this product. What makes it unique? What are its most important features?',
+							'woocommerce'
+						) }
 					/>
 				</CardBody>
 			</Card>

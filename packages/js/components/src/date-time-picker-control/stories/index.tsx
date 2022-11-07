@@ -2,13 +2,13 @@
  * External dependencies
  */
 import React from 'react';
-import { Button } from '@wordpress/components';
+import { Button, Popover, SlotFillProvider } from '@wordpress/components';
 import { createElement, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { DateTimePickerControl } from '../';
+import { DateTimePickerControl, defaultDateFormat } from '../';
 
 export default {
 	title: 'WooCommerce Admin/components/DateTimePickerControl',
@@ -38,8 +38,15 @@ CustomDateTimeFormat.args = {
 };
 
 function ControlledContainer( { children, ...props } ) {
+	function nowWithZeroedSeconds() {
+		const now = new Date();
+		now.setSeconds( 0 );
+		now.setMilliseconds( 0 );
+		return now;
+	}
+
 	const [ controlledDate, setControlledDate ] = useState(
-		new Date().toISOString()
+		nowWithZeroedSeconds().toISOString()
 	);
 
 	return (
@@ -48,11 +55,19 @@ function ControlledContainer( { children, ...props } ) {
 			<div>
 				<Button
 					onClick={ () =>
-						setControlledDate( new Date().toISOString() )
+						setControlledDate(
+							nowWithZeroedSeconds().toISOString()
+						)
 					}
 				>
 					Reset to now
 				</Button>
+				<div>
+					<div>
+						Controlled date:
+						<br /> <span>{ controlledDate }</span>
+					</div>
+				</div>
 			</div>
 		</div>
 	);
@@ -70,28 +85,54 @@ CustomClassName.args = {
 	className: 'custom-class-name',
 };
 
+function ControlledDecorator( Story, props ) {
+	function nowWithZeroedSeconds() {
+		const now = new Date();
+		now.setSeconds( 0 );
+		now.setMilliseconds( 0 );
+		return now;
+	}
+
+	const [ controlledDate, setControlledDate ] = useState(
+		nowWithZeroedSeconds().toISOString()
+	);
+
+	return (
+		<div>
+			<Story
+				args={ {
+					...props.args,
+					currentDate: controlledDate,
+					onChange: setControlledDate,
+				} }
+			/>
+			<div>
+				<Button
+					onClick={ () =>
+						setControlledDate(
+							nowWithZeroedSeconds().toISOString()
+						)
+					}
+				>
+					Reset to now
+				</Button>
+				<div>
+					<div>
+						Controlled date:
+						<br /> <span>{ controlledDate }</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 export const Controlled = Template.bind( {} );
 Controlled.args = {
 	...Basic.args,
 	help: "I'm controlled by a container that uses React state",
 };
-Controlled.decorators = [
-	( story, props ) => {
-		return (
-			<ControlledContainer>
-				{ ( controlledDate, setControlledDate ) =>
-					story( {
-						args: {
-							currentDate: controlledDate,
-							onChange: setControlledDate,
-							...props.args,
-						},
-					} )
-				}
-			</ControlledContainer>
-		);
-	},
-];
+Controlled.decorators = [ ControlledDecorator ];
 
 export const ControlledDateOnly = Template.bind( {} );
 ControlledDateOnly.args = {
@@ -106,3 +147,30 @@ ControlledDateOnlyEndOfDay.args = {
 	timeForDateOnly: 'end-of-day',
 };
 ControlledDateOnlyEndOfDay.decorators = Controlled.decorators;
+
+function PopoverSlotDecorator( Story, props ) {
+	return (
+		<div>
+			<SlotFillProvider>
+				<div>
+					<Story
+						args={ {
+							...props.args,
+						} }
+					/>
+				</div>
+				<Popover.Slot />
+			</SlotFillProvider>
+		</div>
+	);
+}
+
+export const WithPopoverSlot = Template.bind( {} );
+WithPopoverSlot.args = {
+	...Basic.args,
+	label: 'Start date',
+	placeholder: 'Enter the start date',
+	help: 'There is a SlotFillProvider and Popover.Slot on the page',
+	isDateOnlyPicker: true,
+};
+WithPopoverSlot.decorators = [ PopoverSlotDecorator ];
