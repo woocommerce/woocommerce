@@ -73,6 +73,9 @@ Available resources in the Store API are listed below, with links to more detail
 | [`Product Attributes`](docs/product-attributes.md)           | `GET`                          | [`/wc/store/v1/products/attributes`](docs/product-attributes.md#list-product-attributes)      |
 |                                                              | `GET`                          | [`/wc/store/v1/products/attributes/:id`](docs/product-attributes.md#single-product-attribute) |
 | [`Product Attribute Terms`](docs/product-attribute-terms.md) | `GET`                          | [`/wc/store/v1/products/attributes/:id/terms`](docs/product-attribute-terms.md)               |
+| [`Product Categories`](docs/product-categories.md)           | `GET`                          | [`/wc/store/v1/products/categories`](docs/product-attribute-terms.md)                         |
+| [`Product Reviews`](docs/product-reviews.md)                 | `GET`                          | [`/wc/store/v1/products/reviews`](docs/product-attribute-terms.md)                            |
+| [`Product Tags`](docs/product-tags.md)                       | `GET`                          | [`/wc/store/v1/products/tags`](docs/product-attribute-terms.md)                               |
 
 ## Pagination
 
@@ -164,4 +167,3 @@ If the data is sensitive (for example, a core setting that should be private), o
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/README.md)
 
 <!-- /FEEDBACK -->
-
