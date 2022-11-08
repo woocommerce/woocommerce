@@ -12,12 +12,12 @@
  */
  const customer = {
     email: "john.doe@example.com",
-    first_name: "Jon",
-    last_name: "Do",
+    first_name: "John",
+    last_name: "Doe",
     username: "john.doe",
     billing: {
-      first_name: "Jon",
-      last_name: "Do",
+      first_name: "John",
+      last_name: "Doe",
       company: "",
       address_1: "969 Market",
       address_2: "",
@@ -29,8 +29,8 @@
       phone: "(555) 555-5555"
     },
     shipping: {
-      first_name: "Jon",
-      last_name: "Do",
+      first_name: "John",
+      last_name: "Doe",
       company: "",
       address_1: "969 Market",
       address_2: "",
