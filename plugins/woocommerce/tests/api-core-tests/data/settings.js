@@ -96,7 +96,6 @@ const currencies = {
 	"LKR": "Sri Lankan rupee (&#xdbb;&#xdd4;)",
 	"LRD": "Liberian dollar (&#36;)",
 	"LSL": "Lesotho loti (L)",
-	"LYD": "Libyan dinar (&#x62f;.&#x644;)",
 	"MAD": "Moroccan dirham (&#x62f;.&#x645;.)",
 	"MDL": "Moldovan leu (MDL)",
 	"MGA": "Malagasy ariary (Ar)",
@@ -173,7 +172,7 @@ const currencies = {
 	"ZMW": "Zambian kwacha (ZK)"
 };
 
-const stateOptions =  {
+const stateOptions = {
 	"AF": "Afghanistan",
 	"AX": "Åland Islands",
 	"AL:AL-01": "Albania - Berat",
@@ -1353,22 +1352,6 @@ const stateOptions =  {
 	"NP:SET": "Nepal - Seti",
 	"NL": "Netherlands",
 	"NC": "New Caledonia",
-	"NZ:NTL": "New Zealand - Northland",
-	"NZ:AUK": "New Zealand - Auckland",
-	"NZ:WKO": "New Zealand - Waikato",
-	"NZ:BOP": "New Zealand - Bay of Plenty",
-	"NZ:TKI": "New Zealand - Taranaki",
-	"NZ:GIS": "New Zealand - Gisborne",
-	"NZ:HKB": "New Zealand - Hawke’s Bay",
-	"NZ:MWT": "New Zealand - Manawatu-Wanganui",
-	"NZ:WGN": "New Zealand - Wellington",
-	"NZ:NSN": "New Zealand - Nelson",
-	"NZ:MBH": "New Zealand - Marlborough",
-	"NZ:TAS": "New Zealand - Tasman",
-	"NZ:WTC": "New Zealand - West Coast",
-	"NZ:CAN": "New Zealand - Canterbury",
-	"NZ:OTA": "New Zealand - Otago",
-	"NZ:STL": "New Zealand - Southland",
 	"NI:NI-AN": "Nicaragua - Atlántico Norte",
 	"NI:NI-AS": "Nicaragua - Atlántico Sur",
 	"NI:NI-BO": "Nicaragua - Boaco",
@@ -1642,7 +1625,6 @@ const stateOptions =  {
 	"WS": "Samoa",
 	"SM": "San Marino",
 	"SA": "Saudi Arabia",
-	"SN": "Senegal",
 	"RS:RS00": "Serbia - Belgrade",
 	"RS:RS14": "Serbia - Bor",
 	"RS:RS11": "Serbia - Braničevo",

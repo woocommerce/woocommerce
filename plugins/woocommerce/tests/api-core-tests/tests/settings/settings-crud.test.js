@@ -239,7 +239,7 @@ test.describe('Settings API tests: CRUD', () => {
 
 	test.describe('List all settings options', () => {
 
-		test.fixme('can retrieve all general settings', async ({
+		test('can retrieve all general settings', async ({
 			request
 		}) => {
 			// call API to retrieve all settings options
@@ -828,9 +828,9 @@ test.describe('Settings API tests: CRUD', () => {
 						"label": "Notification recipient(s)",
 						"description": "Enter recipients (comma separated) that will receive this notification.",
 						"type": "text",
-						"default": "wordpress@example.com",
+						"default": expect.any(String),
 						"tip": "Enter recipients (comma separated) that will receive this notification.",
-						"value": "wordpress@example.com",
+						"value": expect.any(String),
 					})
 				]));
 			expect(responseJSON).toEqual(
@@ -1348,9 +1348,9 @@ test.describe('Settings API tests: CRUD', () => {
 						"label": "\"From\" name",
 						"description": "How the sender name appears in outgoing WooCommerce emails.",
 						"type": "text",
-						"default": "WooCommerce Core E2E Test Suite",
+						"default": expect.any(String),
 						"tip": "How the sender name appears in outgoing WooCommerce emails.",
-						"value": "woocommerce",
+						"value": expect.any(String),
 					})
 				]));
 			expect(responseJSON).toEqual(
@@ -1360,9 +1360,9 @@ test.describe('Settings API tests: CRUD', () => {
 						"label": "\"From\" address",
 						"description": "How the sender email appears in outgoing WooCommerce emails.",
 						"type": "email",
-						"default": "wordpress@example.com",
+						"default": expect.any(String),
 						"tip": "How the sender email appears in outgoing WooCommerce emails.",
-						"value": "wordpress@example.com",
+						"value": expect.any(String),
 					})
 				]));
 			expect(responseJSON).toEqual(
@@ -1730,8 +1730,7 @@ test.describe('Settings API tests: CRUD', () => {
 						"label": "Navigation",
 						"description": "Adds the new WooCommerce navigation experience to the dashboard",
 						"type": "checkbox",
-						"default": "no",
-						"value": "no",
+						"value": expect.any(String),
 					})
 				]));
 
@@ -1765,10 +1764,10 @@ test.describe('Settings API tests: CRUD', () => {
 					expect.objectContaining({
 						"id": "recipient",
 						"label": "Recipient(s)",
-						"description": "Enter recipients (comma separated) for this email. Defaults to <code>wordpress@example.com</code>.",
+						"description": expect.stringContaining("Enter recipients (comma separated) for this email. Defaults to"),
 						"type": "text",
 						"default": "",
-						"tip": "Enter recipients (comma separated) for this email. Defaults to <code>wordpress@example.com</code>.",
+						"tip": expect.stringContaining("Enter recipients (comma separated) for this email. Defaults to"),
 						"value": "",
 					})
 				]));
@@ -1855,10 +1854,10 @@ test.describe('Settings API tests: CRUD', () => {
 					expect.objectContaining({
 						"id": "recipient",
 						"label": "Recipient(s)",
-						"description": "Enter recipients (comma separated) for this email. Defaults to <code>wordpress@example.com</code>.",
+						"description": expect.stringContaining("Enter recipients (comma separated) for this email. Defaults to"),
 						"type": "text",
 						"default": "",
-						"tip": "Enter recipients (comma separated) for this email. Defaults to <code>wordpress@example.com</code>.",
+						"tip": expect.stringContaining("Enter recipients (comma separated) for this email. Defaults to"),
 						"value": "",
 					})
 				]));
