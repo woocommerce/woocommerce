@@ -4,6 +4,8 @@ jobs:
     analyze:
         name: Check pull request changes to highlight
         runs-on: ubuntu-20.04
+        outputs:
+            results: ${{ steps.results.outputs.results }}
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
@@ -23,6 +25,31 @@ jobs:
               uses: actions/github-script@v6
               with:
                 script: |
-                  if ( '${{ steps.run.outputs.templates }}' ) {
-                    core.setFailed( 'Templates have changed but template versions were not bumped:\n${{ steps.run.outputs.templates }}' );
+                  const template = '${{ steps.run.outputs.templates }}';
+
+                  if ( template === '' ) {
+                    return;
+                  }
+
+                  const templateArr = template.split( '\n' );
+                  const modTemplateArr = [];
+                  let needsVersionBump = false;
+
+                  templateArr.forEach( ( el ) => {
+                    if ( el.match( /NOTICE/ ) ) {
+                      modTemplateArr.pop();
+                      return;
+                    }
+
+                    if ( el.match( /WARNING/ ) ) {
+                      needsVersionBump = true;
+                    }
+
+                    modTemplateArr.push( el );
+                  } );
+
+                  const templateResult = modTemplateArr.join( '\n' );
+
+                  if ( needsVersionBump ) {
+                    core.setFailed( `Templates have changed but template versions were not bumped:\n${ templateResult }` );
                   }
