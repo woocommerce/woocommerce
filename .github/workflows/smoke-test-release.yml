@@ -206,8 +206,8 @@ jobs:
                 mkdir -p tmp/woocommerce
                 
           - uses: actions/checkout@v3
-              with:
-                  path: package/woocommerce
+            with:
+                path: package/woocommerce
 
           - name: Setup WooCommerce Monorepo
             uses: ./.github/actions/setup-woocommerce-monorepo
@@ -273,7 +273,7 @@ jobs:
         steps:
             - uses: actions/checkout@v3
               with:
-                  ref: ${{ env.BRANCH_NAME }}
+                  ref: trunk
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
