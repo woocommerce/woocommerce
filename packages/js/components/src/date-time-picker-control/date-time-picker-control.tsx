@@ -144,6 +144,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	}
 
 	const currentDateTime = parseAsISODateTime( currentDate );
+
 	const [ inputString, setInputString ] = useState(
 		currentDateTime.isValid()
 			? formatDateTimeForDisplay( maybeForceTime( currentDateTime ) )
@@ -192,7 +193,9 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 				! isDateTimeSame
 			) {
 				onChangeRef.current(
-					formatDateTimeAsISO( newDateTime ),
+					newDateTime.isValid()
+						? formatDateTimeAsISO( newDateTime )
+						: lastTypedValue,
 					newDateTime.isValid()
 				);
 			}
@@ -212,31 +215,28 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	}
 
 	const getUserInputOrUpdatedCurrentDate = useCallback( () => {
-		if ( currentDate === undefined ) {
-			// the component is uncontrolled (not using currentDate),
-			// so just return the input string
+		if ( currentDate !== undefined ) {
+			const newDateTime = maybeForceTime(
+				parseAsISODateTime( currentDate, false )
+			);
+
+			if ( ! newDateTime.isValid() ) {
+				// keep the invalid string, so the user can correct it
+				return currentDate;
+			}
+
+			if ( ! newDateTime.isSame( inputStringDateTime ) ) {
+				return formatDateTimeForDisplay( newDateTime );
+			}
+
+			// the new currentDate is the same date as the inputString,
+			// so keep exactly what the user typed in
 			return inputString;
 		}
 
-		const newDateTime = maybeForceTime(
-			parseAsISODateTime( currentDate, false )
-		);
-
-		if ( ! newDateTime.isValid() ) {
-			// keep the invalid string, so the user can correct it
-			return currentDate;
-		}
-
-		if (
-			newDateTime.isSame(
-				maybeForceTime( parseAsLocalDateTime( inputString ) )
-			)
-		) {
-			// keep the input string as the user entered it
-			return inputString;
-		}
-
-		return formatDateTimeForDisplay( newDateTime );
+		// the component is uncontrolled (not using currentDate),
+		// so just return the input string
+		return inputString;
 	}, [ currentDate, formatDateTimeForDisplay, inputString, maybeForceTime ] );
 
 	// We keep a ref to the onBlur prop so that we can be sure we are
@@ -249,6 +249,14 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 
 	const callOnBlurIfDropdownIsNotOpening = useCallback( ( willOpen ) => {
 		if ( ! willOpen && typeof onBlurRef.current === 'function' ) {
+			// in case the component is blurred before a debounced
+			// change has been processed, immediately set the input string
+			// to the current value of the input field, so that
+			// it won't be set back to the pre-change value
+			setInputStringAndMaybeCallOnChange(
+				inputControl.current.value,
+				true
+			);
 			onBlurRef.current();
 		}
 	}, [] );
@@ -323,10 +331,11 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 
 				return (
 					<Picker
+						// @ts-expect-error null is valid for currentDate
 						currentDate={
 							inputStringDateTime.isValid()
 								? formatDateTimeAsISO( inputStringDateTime )
-								: undefined
+								: null
 						}
 						onChange={ ( newDateTimeISOString: string ) =>
 							setInputStringAndMaybeCallOnChange(
