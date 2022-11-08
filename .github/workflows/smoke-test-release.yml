@@ -197,7 +197,8 @@ jobs:
         runs-on: ubuntu-20.04
         needs: [k6-tests]
         strategy:
-            matrix: ['1', '2']
+            matrix: 
+                wp: ['1', '2']
         
         steps:
           - name: Create dirs
@@ -226,23 +227,23 @@ jobs:
                     const script = require( './package/woocommerce/.github/workflows/scripts/fetch-asset-id.js' )
                     await script({github, context, core})
                       
-            - name: Download WooCommerce release zip
-              working-directory: tmp
-              run: |
-                  curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
-                  unzip woocommerce.zip -d woocommerce
-                  rsync -a woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
-                  
-            - name: Download and install Chromium browser.
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium
-              
-            - name: Run the rest of E2E tests.
-              timeout-minutes: 60
-              working-directory: plugins/woocommerce
-              env:
-                  E2E_MAX_FAILURES: 25
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js        
+          - name: Download WooCommerce release zip
+            working-directory: tmp
+            run: |
+                curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
+                unzip woocommerce.zip -d woocommerce
+                rsync -a woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
+                
+          - name: Download and install Chromium browser.
+            working-directory: plugins/woocommerce
+            run: pnpm exec playwright install chromium
+            
+          - name: Run the rest of E2E tests.
+            timeout-minutes: 60
+            working-directory: plugins/woocommerce
+            env:
+                E2E_MAX_FAILURES: 25
+            run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js        
     
     test-plugins:
         name: Smoke tests with ${{ matrix.plugin }} plugin installed
