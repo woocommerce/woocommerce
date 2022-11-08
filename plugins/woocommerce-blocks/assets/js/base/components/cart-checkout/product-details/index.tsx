@@ -32,11 +32,13 @@ const ProductDetails = ( {
 			{ details.map( ( detail ) => {
 				// Support both `key` and `name` props
 				const name = detail?.key || detail.name || '';
-				const className = name
-					? `wc-block-components-product-details__${ kebabCase(
-							name
-					  ) }`
-					: '';
+				const className =
+					detail?.className ||
+					( name
+						? `wc-block-components-product-details__${ kebabCase(
+								name
+						  ) }`
+						: '' );
 				return (
 					<li
 						key={ name + ( detail.display || detail.value ) }
