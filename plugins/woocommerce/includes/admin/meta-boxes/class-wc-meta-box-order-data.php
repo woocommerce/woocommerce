@@ -38,6 +38,13 @@ class WC_Meta_Box_Order_Data {
 	 */
 	public static function init_address_fields() {
 
+		/**
+		 * Provides an opportunity to modify the list of order billing fields displayed on the admin.
+		 *
+		 * @since 1.4.0
+		 *
+		 * @param array Billing fields.
+		 */
 		self::$billing_fields = apply_filters(
 			'woocommerce_admin_billing_fields',
 			array(
@@ -90,6 +97,13 @@ class WC_Meta_Box_Order_Data {
 			)
 		);
 
+		/**
+		 * Provides an opportunity to modify the list of order shipping fields displayed on the admin.
+		 *
+		 * @since 1.4.0
+		 *
+		 * @param array Shipping fields.
+		 */
 		self::$shipping_fields = apply_filters(
 			'woocommerce_admin_shipping_fields',
 			array(
@@ -533,6 +547,13 @@ class WC_Meta_Box_Order_Data {
 								}
 							}
 
+							/**
+							 * Allows 3rd parties to alter whether the customer note should be displayed on the admin.
+							 *
+							 * @since 2.1.0
+							 *
+							 * @param bool TRUE if the note should be displayed. FALSE otherwise.
+							 */
 							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) ) :
 								?>
 								<p class="form-field form-field-wide">
@@ -669,7 +690,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Customer note.
 		if ( isset( $_POST['customer_note'] ) ) {
-			$props['customer_note'] = sanitize_text_field( wp_unslash( $_POST['customer_note'] ) );
+			$props['customer_note'] = sanitize_textarea_field( wp_unslash( $_POST['customer_note'] ) );
 		}
 
 		// Save order data.

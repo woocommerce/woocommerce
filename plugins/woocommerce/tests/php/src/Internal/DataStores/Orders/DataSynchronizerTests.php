@@ -146,4 +146,50 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 			'The order was successfully copied to the COT table, outside of a dedicated synchronization batch.'
 		);
 	}
+
+	/**
+	 * When sync is enbabled and the posts store is authoritative, creating an order and updating the status from
+	 * draft to some non-draft status (as happens when an order is manually created in the admin environment) should
+	 * result in the same status change being made in the duplicate COT record.
+	 */
+	public function test_status_syncs_correctly_after_order_creation() {
+		global $wpdb;
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+
+		// Enable sync, make the posts table authoritative.
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+
+		// When a new order is manually created in the admin environment, WordPress automatically creates an empty
+		// draft post for us.
+		$order_id = (int) wp_insert_post(
+			array(
+				'post_type'   => 'shop_order',
+				'post_status' => 'draft',
+			)
+		);
+
+		// Once the admin user decides to go ahead and save the order (ie, they click 'Create'), we start performing
+		// various updates to the order record.
+		wc_get_order( $order_id )->save();
+
+		// As soon as the order is saved via our own internal API, the DataSynchronizer should create a copy of the
+		// record in the COT table.
+		$this->assertEquals(
+			'draft',
+			$wpdb->get_var( "SELECT status FROM $orders_table WHERE id = $order_id" ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			'When HPOS is enabled but the posts data store is authoritative, saving an order will result in a duplicate with the same status being saved in the COT table.'
+		);
+
+		// In a separate operation, the status will be updated to an actual non-draft order status. This should also be
+		// observed by the DataSynchronizer and a further update made to the COT table.
+		$order = wc_get_order( $order_id );
+		$order->set_status( 'pending' );
+		$order->save();
+		$this->assertEquals(
+			'wc-pending',
+			$wpdb->get_var( "SELECT status FROM $orders_table WHERE id = $order_id" ), //phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			'When the order status is updated, the change should be observed by the DataSynhronizer and a matching update will take place in the COT table.'
+		);
+	}
 }

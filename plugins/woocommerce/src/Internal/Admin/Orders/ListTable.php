@@ -941,9 +941,24 @@ class ListTable extends WP_List_Table {
 			if ( isset( $order_statuses[ 'wc-' . $new_status ] ) ) {
 				$changed = $this->do_bulk_action_mark_orders( $ids, $new_status );
 			}
+		} else {
+			$screen = get_current_screen()->id;
+
+			/**
+			 * This action is documented in /wp-admin/edit.php (it is a core WordPress hook).
+			 *
+			 * @since 7.2.0
+			 *
+			 * @param string $redirect_to The URL to redirect to after processing the bulk actions.
+			 * @param string $action      The current bulk action.
+			 * @param int[]  $ids         IDs for the orders to be processed.
+			 */
+			$custom_sendback = apply_filters( "handle_bulk_actions-{$screen}", $redirect_to, $action, $ids ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 		}
 
-		if ( $changed ) {
+		if ( ! empty( $custom_sendback ) ) {
+			$redirect_to = $custom_sendback;
+		} elseif ( $changed ) {
 			$redirect_to = add_query_arg(
 				array(
 					'bulk_action' => $report_action,

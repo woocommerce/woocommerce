@@ -70,6 +70,9 @@ export const scanForChanges = async (
 			);
 			const packageJSON = JSON.parse( fileStr );
 
+			// Temporarily save the current PNPM version.
+			await execAsync( `tmpgPNPM="$(pnpm --version)"` );
+
 			if ( packageJSON.engines && packageJSON.engines.pnpm ) {
 				await execAsync(
 					`npm i -g pnpm@${ packageJSON.engines.pnpm }`,
@@ -100,6 +103,9 @@ export const scanForChanges = async (
 		);
 
 		schemaChanges = schemaDiff || [];
+
+		// Restore the previously saved PNPM version
+		await execAsync( `npm i -g pnpm@"$tmpgPNPM"` );
 
 		Logger.endTask();
 	}

@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Make it possible to add custom bulk action handling to the admin order list screen (when HPOS is enabled).
