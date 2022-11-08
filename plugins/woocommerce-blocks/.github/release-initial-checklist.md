@@ -16,7 +16,7 @@ The release pull request has been created! This checklist is a guide to follow f
     -   [ ] Update _Requires at least_, _Tested up to_, and _Requires PHP_ sections at the top of `readme.txt`. Note, this should also be the latest WordPress version available at time of release.
     -   [ ] Update _Requires at least_, _Requires PHP_, _WC requires at least_, and _WC tested up to_ at the top of `woocommerce-gutenberg-products-block.php`. Note, this should include requiring the latest WP version at the time of release. For _WC requires at least_, use L1 (we publicly communicate L0 but technically support L1 to provide some space for folks to update). So this means if the current version of WooCommerce core is 5.8.0, then you'll want to put 5.7.0 here.
     -   [ ] If necessary, update the value of `$minimum_wp_version` at the top of the `woocommerce-gutenberg-products-block.php` file to the latest available version of WordPress.
-    -   [ ] If necessary, update the `phpcs.xml` file to reference the minimum WP version supported by **WooCommerce Core**. It would be this line: `<config name="minimum_supported_wp_version" value="5.6" />`.
+    -   [ ] Check the minimum WP version supported by **WooCommerce Core** (you can find it in [its readme.txt - line `Requires at least`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/readme.txt#L4)). If necessary, update it in `phpcs.xml`. It would be this line: `<config name="minimum_supported_wp_version" value="5.6" />`.
 -   [ ] Push above changes to the release branch.
 
 ## Create the Testing Notes
