@@ -36,6 +36,7 @@ class InstalledExtensions {
 				return [
 					'slug'                    => $channel->get_slug(),
 					'status'                  => $channel->is_setup_completed() ? 'configured' : 'activated',
+					'settingsUrl'             => $channel->get_setup_url(),
 					'name'                    => $channel->get_name(),
 					'description'             => $channel->get_description(),
 					'product_listings_status' => $channel->get_product_listings_status(),
