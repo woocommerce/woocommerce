@@ -216,15 +216,15 @@ jobs:
                 build: false
           
           - name: Fetch Asset ID
-              uses: actions/github-script@v5
-              env:
-                  RELEASE_ID: ${{ github.event.inputs.release_id }}
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  REPO: ${{ github.repository }}
-              with:
-                  script: |
-                      const script = require( './package/woocommerce/.github/workflows/scripts/fetch-asset-id.js' )
-                      await script({github, context, core})
+            uses: actions/github-script@v5
+            env:
+                RELEASE_ID: ${{ github.event.inputs.release_id }}
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                REPO: ${{ github.repository }}
+            with:
+                script: |
+                    const script = require( './package/woocommerce/.github/workflows/scripts/fetch-asset-id.js' )
+                    await script({github, context, core})
                       
             - name: Download WooCommerce release zip
               working-directory: tmp
