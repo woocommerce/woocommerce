@@ -20,11 +20,13 @@ test.describe('Customers API tests: CRUD', () => {
 	test.beforeAll(async ({
 		request
 	}) => {
-		// Call the API to Create list of coupons for testing.
-		// call API to retrieve the previously saved customer
+		// Call the API to determine if customer id 2 exists
+		// If so then verify if a subscriber user has been created
 		const response = await request.get('/wp-json/wc/v3/customers/2');
 		const responseJSON = await response.json();
 
+		// if customer id 2 has a subscriber role then set testEnvWithSubscriber 
+		// variable for use in subscriber users tests
 		if (response.status() === 200 && responseJSON.role === 'subscriber') {
 			testEnvWithSubscriber = true;
 		}
