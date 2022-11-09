@@ -4,7 +4,7 @@ const { setFailed, getInput } = require( '@actions/core' );
 const { parseXml, getFilesWithNewErrors } = require( './utils/xml' );
 const { generateMarkdownMessage } = require( './utils/markdown' );
 const { addRecord } = require( './utils/airtable' );
-const { getFileContent } = require( './utils/github' );
+const { getFileContent, addComment } = require( './utils/github' );
 
 const runner = async () => {
 	const token = getInput( 'repo-token', { required: true } );
@@ -53,11 +53,12 @@ const runner = async () => {
 			: '🎉 🎉 This PR does not introduce new TS errors.' );
 
 	if ( process.env[ 'CURRENT_BRANCH' ] !== 'trunk' ) {
-		await octokit.rest.issues.createComment( {
+		await addComment( {
+			octokit,
 			owner,
 			repo,
-			issue_number: payload.pull_request.number,
-			body: message,
+			message,
+			payload,
 		} );
 	}
 
