@@ -2369,12 +2369,6 @@
     Argument of type &apos;{ icon: { src: JSX.Element; }; edit: ({ clientId }: Props) =&gt; JSX.Element; save: () =&gt; JSX.Element; }&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{}&gt;&apos;.
       Type &apos;{ icon: { src: Element; }; edit: ({ clientId }: Props) =&gt; Element; save: () =&gt; Element; }&apos; is missing the following properties from type &apos;Pick&lt;Block&lt;{}&gt;, &quot;title&quot; | &quot;category&quot; | &quot;attributes&quot;&gt;&apos;: title, category, attributes" source="TS2769" />
 </file>
-<file name="assets/js/blocks/cart/cart-line-items-table/cart-line-item-row.tsx">
-<error line="24" column="2" severity="error" message="Module &apos;&quot;@woocommerce/price-format&quot;&apos; has no exported member &apos;Currency&apos;." source="TS2305" />
-<error line="50" column="34" severity="error" message="Parameter &apos;value&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
-<error line="215" column="5" severity="error" message="Type &apos;number | null&apos; is not assignable to type &apos;number | undefined&apos;.
-  Type &apos;null&apos; is not assignable to type &apos;number | undefined&apos;." source="TS2322" />
-</file>
 <file name="assets/js/blocks/cart/inner-blocks/cart-line-items-block/index.tsx">
 <error line="12" column="1" severity="error" message="No overload matches this call.
   Overload 1 of 2, &apos;(metadata: BlockConfiguration&lt;{ className: string; }&gt;, settings?: Partial&lt;BlockConfiguration&lt;{ className: string; }&gt;&gt; | undefined): Block&lt;...&gt; | undefined&apos;, gave the following error.
