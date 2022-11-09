@@ -43,7 +43,7 @@ export const DEFAULT_TIMEOUT = 30000;
 export const SHOP_CHECKOUT_BLOCK_PAGE = BASE_URL + 'checkout-block/';
 
 const SELECTORS = {
-	canvas: 'iframe[name="editor-canvas"]',
+	canvas: 'iframe[name="editor-canvas"],.edit-post-visual-editor',
 	inserter: {
 		search: '.components-search-control__input,.block-editor-inserter__search input,.block-editor-inserter__search-input,input.block-editor-inserter__search',
 	},
