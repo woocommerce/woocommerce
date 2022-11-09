@@ -215,6 +215,10 @@ jobs:
             with:
                 install-filters: woocommerce
                 build: false
+                
+          - name: Download and install Chromium browser.
+            working-directory: plugins/woocommerce
+            run: pnpm exec playwright install chromium
           
           - name: Fetch Asset ID
             uses: actions/github-script@v5
@@ -233,10 +237,6 @@ jobs:
                 curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
                 unzip woocommerce.zip -d woocommerce
                 rsync -a woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
-                
-          - name: Download and install Chromium browser.
-            working-directory: plugins/woocommerce
-            run: pnpm exec playwright install chromium
             
           - name: Run the rest of E2E tests.
             timeout-minutes: 60
@@ -278,6 +278,10 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
 
             - name: Run 'Upload plugin' test
               id: e2e-upload
@@ -305,10 +309,6 @@ jobs:
                   curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
                   unzip woocommerce.zip -d woocommerce
                   rsync -a woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
-                  
-            - name: Download and install Chromium browser.
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium
 
             - name: Run the rest of E2E tests
               id: e2e
