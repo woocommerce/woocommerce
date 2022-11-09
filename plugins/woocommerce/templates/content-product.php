@@ -24,6 +24,7 @@ if ( empty( $product ) || ! $product->is_visible() ) {
 	return;
 }
 ?>
+<!-- this is a comment -->
 <li <?php wc_product_class( '', $product ); ?>>
 	<?php
 	/**
