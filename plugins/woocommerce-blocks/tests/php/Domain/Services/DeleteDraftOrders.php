@@ -24,7 +24,7 @@ class DeleteDraftOrders extends TestCase {
 	 *
 	 * @return void
 	 */
-	public function setUp() {
+	protected function setUp(): void {
 		global $wpdb;
 
 		$this->draft_orders_instance = new DraftOrders( new Package( 'test', './', new FeatureGating( 2 ) ) );
@@ -87,7 +87,7 @@ class DeleteDraftOrders extends TestCase {
 		parent::setUp();
 	}
 
-	public function tearDown() {
+	protected function tearDown(): void {
 		$this->draft_orders_instance = null;
 		// delete all orders
 		$orders = wc_get_orders([]);
@@ -131,7 +131,7 @@ class DeleteDraftOrders extends TestCase {
 		};
 		$this->mock_results_for_wc_query($sample_results);
 		$this->draft_orders_instance->delete_expired_draft_orders();
-		$this->assertContains( 'unexpected number of results', $this->caught_exception->getMessage() );
+		$this->assertStringContainsString( 'unexpected number of results', $this->caught_exception->getMessage() );
 		$this->unset_mock_results_for_wc_query( $sample_results );
 	}
 
@@ -144,7 +144,7 @@ class DeleteDraftOrders extends TestCase {
 		};
 		$this->mock_results_for_wc_query( $sample_results );
 		$this->draft_orders_instance->delete_expired_draft_orders();
-		$this->assertContains( 'value that is not a WC_Order', $this->caught_exception->getMessage() );
+		$this->assertStringContainsString( 'value that is not a WC_Order', $this->caught_exception->getMessage() );
 		$this->unset_mock_results_for_wc_query( $sample_results );
 	}
 
@@ -159,7 +159,7 @@ class DeleteDraftOrders extends TestCase {
 		};
 		$this->mock_results_for_wc_query( $sample_results );
 		$this->draft_orders_instance->delete_expired_draft_orders();
-		$this->assertContains( 'order that is not a `wc-checkout-draft`', $this->caught_exception->getMessage() );
+		$this->assertStringContainsString( 'order that is not a `wc-checkout-draft`', $this->caught_exception->getMessage() );
 		$this->unset_mock_results_for_wc_query( $sample_results );
 	}
 

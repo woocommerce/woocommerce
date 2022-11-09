@@ -25,7 +25,7 @@ abstract class ControllerTestCase extends \WP_Test_REST_TestCase {
 	/**
 	 * Setup Rest API server.
 	 */
-	public function setUp() {
+	protected function setUp(): void {
 		parent::setUp();
 
 		/** @var \WP_REST_Server $wp_rest_server */
@@ -46,7 +46,7 @@ abstract class ControllerTestCase extends \WP_Test_REST_TestCase {
 	/**
 	 * Tear down Rest API server.
 	 */
-	public function tearDown() {
+	protected function tearDown(): void {
 		parent::tearDown();
 		/** @var \WP_REST_Server $wp_rest_server */
 		global $wp_rest_server;
@@ -77,19 +77,21 @@ abstract class ControllerTestCase extends \WP_Test_REST_TestCase {
 
 		foreach ( $fields as $field_name => $field_value ) {
 			$this->assertObjectHasAttribute( $field_name, $object, $message . " Property $field_name does not exist on the object." );
-			$this->assertSame( $field_value, $object->$field_name, $message . " Value of property $field_name is not $field_value." );
+			$this->assertSame( $field_value, $object->$field_name, $message . " Value of property $field_name is not" . print_r( $field_value, true ) );
 		}
 	}
+
 	/**
 	 * Asserts that the contents of two un-keyed, single arrays are equal, without accounting for the order of elements.
 	 *
-	 * @param array $expected Expected array.
-	 * @param array $actual   Array to check.
+	 * @param array  $expected Expected array.
+	 * @param array  $actual Array to check.
+	 * @param string $message Optional. Message to display when the assertion fails.
 	 */
-	public function assertEqualSets( $expected, $actual ) {
+	public function assertEqualSets( $expected, $actual, $message = '' ) {
 		sort( $expected );
 		sort( $actual );
-		$this->assertEquals( $expected, $actual );
+		$this->assertEquals( $expected, $actual, $message );
 	}
 
 	/**

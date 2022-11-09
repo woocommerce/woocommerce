@@ -19,7 +19,7 @@ class Cart extends \WP_UnitTestCase {
 	/**
 	 * Initiate the cart mock.
 	 */
-	public function setUp() {
+	protected function setUp(): void {
 		$this->cart_block_instance = new CartMock();
 	}
 

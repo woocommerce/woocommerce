@@ -27,7 +27,7 @@ class MainFile extends WP_UnitTestCase {
 	/**
 	 * Ensure that container is reset between tests.
 	 */
-	public function setUp() {
+	protected function setUp(): void {
 		// reset container
 		$this->container = Package::container( true );
 	}

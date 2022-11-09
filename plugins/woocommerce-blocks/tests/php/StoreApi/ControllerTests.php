@@ -12,7 +12,7 @@ class ControllerTests extends \WP_Test_REST_TestCase {
 	/**
 	 * Setup Rest API server.
 	 */
-	public function setUp() {
+	protected function setUp(): void {
 		/** @var \WP_REST_Server $wp_rest_server */
 		global $wp_rest_server;
 		$wp_rest_server = new \Spy_REST_Server();

@@ -22,7 +22,7 @@
 		"woocommerce/woocommerce-sniffs": "0.1.0",
 		"yoast/phpunit-polyfills": "^1.0",
 		"johnbillion/wp-hooks-generator": "^0.9.0",
-		"mockery/mockery": "^1.4"
+		"mockery/mockery": "^1.5"
 	},
 	"autoload": {
 		"psr-4": {
@@ -49,7 +49,7 @@
 	},
 	"config": {
 		"platform": {
-			"php": "7.4.24"
+			"php": "7.4.32"
 		},
 		"allow-plugins": {
 			"automattic/jetpack-autoloader": true,

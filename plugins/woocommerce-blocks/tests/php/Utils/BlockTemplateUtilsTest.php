@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Blocks\Options;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 class BlockTemplateUtilsTest extends \WP_UnitTestCase {
-	public function setUp() {
+	protected function setUp(): void {
 		parent::setUp();
 		delete_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE );
 		delete_option( Options::WC_BLOCK_VERSION );
