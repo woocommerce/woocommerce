@@ -51,7 +51,7 @@ test.describe('Customers API tests: CRUD', () => {
 			expect(response.status()).toEqual(200);
 			expect(responseJSON.is_paying_customer).toEqual(false);
 			expect(responseJSON.role).toEqual('administrator');
-			// this test was updated to allow for local test setup and JN
+			// this test was updated to allow for local test setup and other test sites.
 			expect(['admin', 'demo']).toContain(responseJSON.username);
 		});
 
