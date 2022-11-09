@@ -32,7 +32,7 @@ const blockConfig = {
 		'woo-gutenberg-products-block'
 	),
 	usesContext: [ 'query', 'queryId', 'postId' ],
-	parent: [
+	ancestor: [
 		'@woocommerce/all-products',
 		'@woocommerce/single-product',
 		'core/post-template',
