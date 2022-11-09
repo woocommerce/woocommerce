@@ -42,7 +42,7 @@ jobs:
 
             - name: Get Composer Cache Directory
               id: composer-cache
-              run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+              run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
             - uses: actions/cache@v2
               with:
                   path: ${{ steps.composer-cache.outputs.dir }}
@@ -53,7 +53,7 @@ jobs:
             - name: Set up PHP
               uses: shivammathur/setup-php@v2
               with:
-                  php-version: 7.4
+                  php-version: "8.0" # This is not the PHP version used to run the tests, that is set by wp-env
                   coverage: none
                   tools: composer
 
@@ -61,9 +61,13 @@ jobs:
               run: composer install
 
     PHPUnitTests:
-        name: PHP Unit Tests
+        name: PHP ${{ matrix.php }}
         needs: Setup
         runs-on: ubuntu-latest
+        strategy:
+          fail-fast: false
+          matrix:
+            php: [ '7.4', '8.0' ]
 
         steps:
             - uses: actions/checkout@v3
@@ -89,11 +93,11 @@ jobs:
                   name: build-assets
 
             - name: blocks.ini setup
-              run: echo 'woocommerce_blocks_phase = 3' > blocks.ini
+              run: echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = test' > blocks.ini
 
             - name: Get Composer cache directory
               id: composer-cache
-              run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+              run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
             - name: Set up Composer caching
               uses: actions/cache@v2
@@ -108,19 +112,26 @@ jobs:
             - name: Install PHP deps
               run: composer install
 
-            - name: Setup Environment
+            - name: Setup Permissions
               run: |
-                  chmod -R 767 ./ #TODO: Might get implemented in wp-env
-                  npm run wp-env start
+                mkdir -p ./wp-content/uploads/wc-logs
+                echo 'deny from all' > ./wp-content/uploads/wc-logs/.htaccess
+                chmod -R 777 ./
 
             - name: Run PHPUnit tests
-              run: npm run test:php
+              run: |
+                JSON='{"phpVersion": "${{ matrix.php }}"}'
+                echo $JSON > .wp-env.override.json
+                npm run wp-env start --update
+                npm run test:php
 
             - name: Run PHPUnit tests (WooCommerce Development Version)
               run: |
-                  JSON='{"plugins": [".","https://downloads.wordpress.org/plugin/woocommerce.zip"]}'
+                  JSON='{"plugins": [".","https://downloads.wordpress.org/plugin/woocommerce.zip"], "phpVersion": "${{ matrix.php }}"}'
                   echo $JSON > .wp-env.override.json
-                  npm run wp-env start
+                  npm run wp-env stop
+                  rm -rf /home/runner/wp-env/*
+                  npm run wp-env start --update
                   npm run test:php
 
     JSUnitTests:
@@ -151,7 +162,7 @@ jobs:
                   name: build-assets
 
             - name: blocks.ini setup
-              run: echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
+              run: echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = test' > blocks.ini
 
             - name: Run JavaScript Unit tests
               run: npm run test

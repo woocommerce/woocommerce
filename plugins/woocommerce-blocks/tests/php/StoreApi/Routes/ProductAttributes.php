@@ -15,9 +15,9 @@ use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
 class ProductAttributes extends ControllerTestCase {
 
 	/**
-	 * Setup test products data. Called before every test.
+	 * Setup test product data. Called before every test.
 	 */
-	public function setUp() {
+	protected function setUp(): void {
 		parent::setUp();
 
 		$fixtures = new FixtureData();
@@ -53,7 +53,7 @@ class ProductAttributes extends ControllerTestCase {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 2, count( $data ) );
+		$this->assertEquals( count( wc_get_attribute_taxonomies() ), count( $data ) );
 		$this->assertArrayHasKey( 'id', $data[0] );
 		$this->assertArrayHasKey( 'name', $data[0] );
 		$this->assertArrayHasKey( 'taxonomy', $data[0] );
@@ -86,7 +86,6 @@ class ProductAttributes extends ControllerTestCase {
 	public function test_get_item_schema() {
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'product-attributes' );
-		$schema     = $controller->get_item_schema();
 		$attribute  = wc_get_attribute( $this->attributes[0]['attribute_id'] );
 		$response   = $controller->prepare_item_for_response( $attribute, new \WP_REST_Request() );
 		$schema     = $controller->get_item_schema();
