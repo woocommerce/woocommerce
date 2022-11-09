@@ -64,7 +64,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 							icon={ () => (
 								<SortableHandle itemIndex={ childIndex } />
 							) }
-							label={ __( 'Drag', 'woocommerce' ) }
+							label={ __( 'Drag to reorder', 'woocommerce' ) }
 						/>
 						<ToolbarButton
 							disabled={ childIndex < 2 }
@@ -85,7 +85,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 						<ToolbarButton
 							onClick={ () => setAsCoverImage( childIndex ) }
 							icon={ CoverImageIcon }
-							label={ __( 'Set as cover image', 'woocommerce' ) }
+							label={ __( 'Set as cover', 'woocommerce' ) }
 						/>
 					</ToolbarGroup>
 				) }
@@ -106,7 +106,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 					<ToolbarButton
 						onClick={ () => removeItem( childIndex ) }
 						icon={ trash }
-						label={ __( 'Delete', 'woocommerce' ) }
+						label={ __( 'Remove', 'woocommerce' ) }
 					/>
 				</ToolbarGroup>
 			</Toolbar>
