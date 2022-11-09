@@ -18,8 +18,8 @@ concurrency:
     cancel-in-progress: true
 
 jobs:
-    E2E-on-trunk:
-        name: E2E tests on trunk
+    e2e-release:
+        name: E2E tests on release
         runs-on: ubuntu-20.04
         env:
             BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
@@ -32,13 +32,7 @@ jobs:
             CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
             DEFAULT_TIMEOUT_OVERRIDE: 120000
             
-        steps:
-          
-            - name: Create tmp dir
-              run: |
-                  mkdir -p tmp/woocommerce
-                  mkdir -p package/woocommerce
-
+        steps:    
             - uses: actions/checkout@v3
               with:
                 ref: ${{ env.BRANCH_NAME }}
@@ -71,7 +65,7 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   rsync -a woocommerce/woocommerce/* plugins/woocommerce/
 
-            - name: Run the rest of E2E tests.
+            - name: Run the E2E tests.
               timeout-minutes: 60
               working-directory: plugins/woocommerce
               env:
@@ -88,6 +82,69 @@ jobs:
               uses: actions/upload-artifact@v3
               with:
                   name: ${{ env.E2E_ARTIFACT }}
+                  path: |
+                      ${{ env.ALLURE_RESULTS_DIR }}
+                      ${{ env.ALLURE_REPORT_DIR }}
+                  if-no-files-found: ignore
+                  retention-days: 5
+    
+    api-release:
+        name: API tests on release
+        runs-on: ubuntu-20.04
+        needs: [e2e-release]
+        if: success() || failure()
+        env:
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-results
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-report
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                  ref: ${{ env.BRANCH_NAME }}
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  install-filters: woocommerce
+                  build: false
+                  
+            - name: Fetch Asset ID
+              id: fetch_asset_id
+              uses: actions/github-script@v5
+              env:
+                  RELEASE_ID: ${{ github.event.inputs.release_id }}
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  REPO: ${{ github.repository }}
+              with:
+                  script: |
+                      const script = require( '.github/workflows/scripts/fetch-asset-id.js' )
+                      await script({github, context, core})
+                      
+            - name: Download WooCommerce release zip
+              run: |
+                  curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
+                  unzip woocommerce.zip -d woocommerce
+                  rsync -a woocommerce/woocommerce/* plugins/woocommerce/
+
+            - name: Run API tests.
+              if: success() || failure()
+              working-directory: plugins/woocommerce
+              env:
+                  BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
+                  USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
+                  USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
+                  DEFAULT_TIMEOUT_OVERRIDE: 120000
+              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js
+
+            - name: Generate API Test report.
+              if: success() || failure()
+              working-directory: plugins/woocommerce
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+
+            - name: Archive API test report
+              if: success() || failure()
+              uses: actions/upload-artifact@v3
+              with:
+                  name: ${{ env.API_ARTIFACT }}
                   path: |
                       ${{ env.ALLURE_RESULTS_DIR }}
                       ${{ env.ALLURE_REPORT_DIR }}
