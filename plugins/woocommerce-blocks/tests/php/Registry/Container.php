@@ -18,7 +18,7 @@ use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 class Container extends TestCase {
 	private $container;
 
-	public function setUp() {
+	protected function setUp(): void {
 		$this->container = new ContainerTest;
 	}
 

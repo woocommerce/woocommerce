@@ -7,9 +7,9 @@ use Automattic\WooCommerce\Blocks\Tests\Helpers\FixtureData;
 
 class ProductQueryFiltersTest extends TestCase {
 	/**
-	 * Setup test products data. Called before every test.
+	 * Setup test product data. Called before every test.
 	 */
-	public function setUp() {
+	protected function setUp(): void {
 		parent::setUp();
 
 		$fixtures = new FixtureData();
