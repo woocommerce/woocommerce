@@ -1583,63 +1583,6 @@ test.describe('Data API tests', () => {
 							"thousand_sep": ".",
 							"weight_unit": "kg",
 							"states": expect.arrayContaining([]),
-							// "states": [{
-							// 		"code": "SNDB",
-							// 		"name": "Diourbel"
-							// 	},
-							// 	{
-							// 		"code": "SNDK",
-							// 		"name": "Dakar"
-							// 	},
-							// 	{
-							// 		"code": "SNFK",
-							// 		"name": "Fatick"
-							// 	},
-							// 	{
-							// 		"code": "SNKA",
-							// 		"name": "Kaffrine"
-							// 	},
-							// 	{
-							// 		"code": "SNKD",
-							// 		"name": "Kolda"
-							// 	},
-							// 	{
-							// 		"code": "SNKE",
-							// 		"name": "Kédougou"
-							// 	},
-							// 	{
-							// 		"code": "SNKL",
-							// 		"name": "Kaolack"
-							// 	},
-							// 	{
-							// 		"code": "SNLG",
-							// 		"name": "Louga"
-							// 	},
-							// 	{
-							// 		"code": "SNMT",
-							// 		"name": "Matam"
-							// 	},
-							// 	{
-							// 		"code": "SNSE",
-							// 		"name": "Sédhiou"
-							// 	},
-							// 	{
-							// 		"code": "SNSL",
-							// 		"name": "Saint-Louis"
-							// 	},
-							// 	{
-							// 		"code": "SNTC",
-							// 		"name": "Tambacounda"
-							// 	},
-							// 	{
-							// 		"code": "SNTH",
-							// 		"name": "Thiès"
-							// 	},
-							// 	{
-							// 		"code": "SNZG",
-							// 		"name": "Ziguinchor"
-							// 	}
-							// ]
 						},
 						{
 							"code": "SO",
@@ -9317,71 +9260,6 @@ test.describe('Data API tests', () => {
 							"thousand_sep": ",",
 							"weight_unit": "kg",
 							"states": expect.arrayContaining([]),
-							// "states": [{
-							// 		"code": "NTL",
-							// 		"name": "Northland"
-							// 	},
-							// 	{
-							// 		"code": "AUK",
-							// 		"name": "Auckland"
-							// 	},
-							// 	{
-							// 		"code": "WKO",
-							// 		"name": "Waikato"
-							// 	},
-							// 	{
-							// 		"code": "BOP",
-							// 		"name": "Bay of Plenty"
-							// 	},
-							// 	{
-							// 		"code": "TKI",
-							// 		"name": "Taranaki"
-							// 	},
-							// 	{
-							// 		"code": "GIS",
-							// 		"name": "Gisborne"
-							// 	},
-							// 	{
-							// 		"code": "HKB",
-							// 		"name": "Hawke’s Bay"
-							// 	},
-							// 	{
-							// 		"code": "MWT",
-							// 		"name": "Manawatu-Wanganui"
-							// 	},
-							// 	{
-							// 		"code": "WGN",
-							// 		"name": "Wellington"
-							// 	},
-							// 	{
-							// 		"code": "NSN",
-							// 		"name": "Nelson"
-							// 	},
-							// 	{
-							// 		"code": "MBH",
-							// 		"name": "Marlborough"
-							// 	},
-							// 	{
-							// 		"code": "TAS",
-							// 		"name": "Tasman"
-							// 	},
-							// 	{
-							// 		"code": "WTC",
-							// 		"name": "West Coast"
-							// 	},
-							// 	{
-							// 		"code": "CAN",
-							// 		"name": "Canterbury"
-							// 	},
-							// 	{
-							// 		"code": "OTA",
-							// 		"name": "Otago"
-							// 	},
-							// 	{
-							// 		"code": "STL",
-							// 		"name": "Southland"
-							// 	}
-							// ]
 						},
 						{
 							"code": "PF",
@@ -19845,71 +19723,6 @@ test.describe('Data API tests', () => {
 				"code": "NZ",
 				"name": "New Zealand",
 				"states": expect.arrayContaining([]),
-				// "states": [{
-				// 		"code": "NTL",
-				// 		"name": "Northland"
-				// 	},
-				// 	{
-				// 		"code": "AUK",
-				// 		"name": "Auckland"
-				// 	},
-				// 	{
-				// 		"code": "WKO",
-				// 		"name": "Waikato"
-				// 	},
-				// 	{
-				// 		"code": "BOP",
-				// 		"name": "Bay of Plenty"
-				// 	},
-				// 	{
-				// 		"code": "TKI",
-				// 		"name": "Taranaki"
-				// 	},
-				// 	{
-				// 		"code": "GIS",
-				// 		"name": "Gisborne"
-				// 	},
-				// 	{
-				// 		"code": "HKB",
-				// 		"name": "Hawke’s Bay"
-				// 	},
-				// 	{
-				// 		"code": "MWT",
-				// 		"name": "Manawatu-Wanganui"
-				// 	},
-				// 	{
-				// 		"code": "WGN",
-				// 		"name": "Wellington"
-				// 	},
-				// 	{
-				// 		"code": "NSN",
-				// 		"name": "Nelson"
-				// 	},
-				// 	{
-				// 		"code": "MBH",
-				// 		"name": "Marlborough"
-				// 	},
-				// 	{
-				// 		"code": "TAS",
-				// 		"name": "Tasman"
-				// 	},
-				// 	{
-				// 		"code": "WTC",
-				// 		"name": "West Coast"
-				// 	},
-				// 	{
-				// 		"code": "CAN",
-				// 		"name": "Canterbury"
-				// 	},
-				// 	{
-				// 		"code": "OTA",
-				// 		"name": "Otago"
-				// 	},
-				// 	{
-				// 		"code": "STL",
-				// 		"name": "Southland"
-				// 	}
-				// ],
 				"_links": {
 					"self": [{
 						"href": expect.any(String)
@@ -21467,63 +21280,6 @@ test.describe('Data API tests', () => {
 				"code": "SN",
 				"name": "Senegal",
 				"states": expect.arrayContaining([]),
-				// "states": [{
-				// 		"code": "SNDB",
-				// 		"name": "Diourbel"
-				// 	},
-				// 	{
-				// 		"code": "SNDK",
-				// 		"name": "Dakar"
-				// 	},
-				// 	{
-				// 		"code": "SNFK",
-				// 		"name": "Fatick"
-				// 	},
-				// 	{
-				// 		"code": "SNKA",
-				// 		"name": "Kaffrine"
-				// 	},
-				// 	{
-				// 		"code": "SNKD",
-				// 		"name": "Kolda"
-				// 	},
-				// 	{
-				// 		"code": "SNKE",
-				// 		"name": "Kédougou"
-				// 	},
-				// 	{
-				// 		"code": "SNKL",
-				// 		"name": "Kaolack"
-				// 	},
-				// 	{
-				// 		"code": "SNLG",
-				// 		"name": "Louga"
-				// 	},
-				// 	{
-				// 		"code": "SNMT",
-				// 		"name": "Matam"
-				// 	},
-				// 	{
-				// 		"code": "SNSE",
-				// 		"name": "Sédhiou"
-				// 	},
-				// 	{
-				// 		"code": "SNSL",
-				// 		"name": "Saint-Louis"
-				// 	},
-				// 	{
-				// 		"code": "SNTC",
-				// 		"name": "Tambacounda"
-				// 	},
-				// 	{
-				// 		"code": "SNTH",
-				// 		"name": "Thiès"
-				// 	},
-				// 	{
-				// 		"code": "SNZG",
-				// 		"name": "Ziguinchor"
-				// 	}
-				// ],
 				"_links": {
 					"self": [{
 						"href": expect.any(String)
