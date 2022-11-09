@@ -22,14 +22,14 @@ jobs:
         name: E2E tests on release
         runs-on: ubuntu-20.04
         env:
-            BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
-            ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
-            ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
-            ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
+            # BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
+            # ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
+            # ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
+            # ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
-            CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
-            CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
+            # CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
+            # CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
             DEFAULT_TIMEOUT_OVERRIDE: 120000
             
         steps:    
@@ -64,6 +64,10 @@ jobs:
                   curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
                   unzip woocommerce.zip -d woocommerce
                   rsync -a woocommerce/woocommerce/* plugins/woocommerce/
+                
+            - name: Launch wp-env e2e environment
+              working-directory: plugins/woocommerce
+              run: pnpm env:test --filter=woocommerce
 
             - name: Run the E2E tests.
               timeout-minutes: 60
@@ -234,12 +238,12 @@ jobs:
       env:
         ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
         ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
-        BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
-        ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
-        ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
-        ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
-        CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
-        CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
+        # BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
+        # ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
+        # ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
+        # ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
+        # CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
+        # CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
         DEFAULT_TIMEOUT_OVERRIDE: 120000
             
       steps:
