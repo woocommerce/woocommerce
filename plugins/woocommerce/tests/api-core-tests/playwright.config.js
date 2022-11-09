@@ -53,7 +53,7 @@ const config = {
 		video: 'on-first-retry',
 		trace: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
-		baseURL:baseURL,
+		baseURL: baseURL,
 		extraHTTPHeaders: {
 			// Add authorization token to all requests.
 			Authorization: `Basic ${ base64auth }`,
