@@ -56,7 +56,10 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			if ( $screen && $screen->is_block_editor() ) {
 				wp_register_style( 'woocommerce-general', WC()->plugin_url() . '/assets/css/woocommerce.css', array(), $version );
+				wp_register_style( 'woocommerce-blocktheme', WC()->plugin_url() . '/assets/css/woocommerce-blocktheme.css', array(), $version );
 				wp_style_add_data( 'woocommerce-general', 'rtl', 'replace' );
+				wp_style_add_data( 'woocommerce-blocktheme', 'rtl', 'replace' );
+				wp_enqueue_style( 'woocommerce-blocktheme' );
 			}
 
 			// Sitewide menu CSS.
