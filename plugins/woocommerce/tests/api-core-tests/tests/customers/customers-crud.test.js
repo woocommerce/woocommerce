@@ -5,6 +5,10 @@ const {
 const {
 	customer
 } = require('../../data');
+const {
+	USER_KEY,
+} = process.env;
+const userKey = USER_KEY ? ? 'admin';
 
 /**
  * Tests for the WooCommerce Customers API.
@@ -15,20 +19,64 @@ const {
  */
 test.describe('Customers API tests: CRUD', () => {
 	let customerId;
-	let testEnvWithSubscriber = false;
+	let subscriberUserId;
+	let subscriberUserCreatedDuringTests = false;
 
 	test.beforeAll(async ({
 		request
 	}) => {
-		// Call the API to determine if customer id 2 exists
-		// If so then verify if a subscriber user has been created
-		const response = await request.get('/wp-json/wc/v3/customers/2');
-		const responseJSON = await response.json();
+		// Call the API to return all users and determine if a 
+		// subscriber user has been created
+		const customersResponse = await request.get('/wp-json/wc/v3/customers', {
+			params: {
+				role: 'all'
+			}
+		});
+		const customersResponseJSON = await customersResponse.json();
 
-		// if customer id 2 has a subscriber role then set testEnvWithSubscriber 
-		// variable for use in subscriber users tests
-		if (response.status() === 200 && responseJSON.role === 'subscriber') {
-			testEnvWithSubscriber = true;
+		for (const element of customersResponseJSON) {
+			if (element.role === 'subscriber') {
+				subscriberUserId = element.id;
+				break;
+			}
+		}
+
+		// If a subscriber user has not been created then create one
+		if (!subscriberUserId) {
+			const userResponse = await request.post('/wp-json/wp/v2/users', {
+				data: {
+					username: "customer",
+					email: "customer@woocommercecoretestsuite.com",
+					first_name: "Jane",
+					last_name: "Smith",
+					roles: ["subscriber"],
+					password: "password",
+					name: "Jane",
+				}
+			});
+			const userResponseJSON = await userResponse.json();
+			// set subscriber user id to newly created user
+			subscriberUserId = userResponseJSON.id;
+			subscriberUserCreatedDuringTests = true;
+		}
+
+		// Verify the subscriber user has been created
+		const response = await request.get(`/wp-json/wc/v3/customers/${subscriberUserId}`);
+		const responseJSON = await response.json();
+		expect(response.status()).toEqual(200);
+		expect(responseJSON.role).toEqual('subscriber');
+	});
+
+	test.afterAll(async ({
+		request
+	}) => {
+		// delete subscriber user if one was created during the execution of these tests
+		if (subscriberUserCreatedDuringTests) {
+			await request.delete(`/wp-json/wc/v3/customers/${subscriberUserId}`, {
+				data: {
+					force: true
+				}
+			});
 		}
 	});
 
@@ -52,21 +100,19 @@ test.describe('Customers API tests: CRUD', () => {
 			expect(responseJSON.is_paying_customer).toEqual(false);
 			expect(responseJSON.role).toEqual('administrator');
 			// this test was updated to allow for local test setup and other test sites.
-			expect(['admin', 'demo']).toContain(responseJSON.username);
+			expect(responseJSON.username).toEqual(userKey);
 		});
 
 		test('can retrieve subscriber user', async ({
 			request
 		}) => {
 			// if environment was created with subscriber user
-			if (testEnvWithSubscriber) {
-				// call API to retrieve the customer with id 2
-				const response = await request.get('/wp-json/wc/v3/customers/2');
-				const responseJSON = await response.json();
-				expect(response.status()).toEqual(200);
-				expect(responseJSON.is_paying_customer).toEqual(false);
-				expect(responseJSON.role).toEqual('subscriber');
-			}
+			// call API to retrieve the customer with id 2
+			const response = await request.get(`/wp-json/wc/v3/customers/${subscriberUserId}`);
+			const responseJSON = await response.json();
+			expect(response.status()).toEqual(200);
+			expect(responseJSON.is_paying_customer).toEqual(false);
+			expect(responseJSON.role).toEqual('subscriber');
 		});
 
 		test('retrieve user with id 0 is invalid', async ({
@@ -202,41 +248,37 @@ test.describe('Customers API tests: CRUD', () => {
 		test(`can update the subscriber user/customer`, async ({
 			request,
 		}) => {
-			if (testEnvWithSubscriber) {
-				// update customer names (billing and shipping) to Jane
-				// (these were initialised blank, only regular first_name was populated)
-				const response = await request.put(
-					`/wp-json/wc/v3/customers/2`, {
-						data: {
-							billing: {
-								first_name: 'Jane'
-							},
-							shipping: {
-								first_name: 'Jane'
-							}
+			// update customer names (billing and shipping) to Jane
+			// (these were initialised blank, only regular first_name was populated)
+			const response = await request.put(
+				`/wp-json/wc/v3/customers/${subscriberUserId}`, {
+					data: {
+						billing: {
+							first_name: 'Jane'
+						},
+						shipping: {
+							first_name: 'Jane'
 						}
 					}
-				);
-				const responseJSON = await response.json();
-				expect(response.status()).toEqual(200);
-				expect(responseJSON.first_name).toEqual('Jane');
-				expect(responseJSON.billing.first_name).toEqual('Jane');
-				expect(responseJSON.shipping.first_name).toEqual('Jane');
-			}
+				}
+			);
+			const responseJSON = await response.json();
+			expect(response.status()).toEqual(200);
+			expect(responseJSON.first_name).toEqual('Jane');
+			expect(responseJSON.billing.first_name).toEqual('Jane');
+			expect(responseJSON.shipping.first_name).toEqual('Jane');
 		});
 
 		test('retrieve after update subscriber', async ({
 			request
 		}) => {
-			if (testEnvWithSubscriber) {
-				// call API to retrieve the subscriber customer we updated above
-				const response = await request.get('/wp-json/wc/v3/customers/2');
-				const responseJSON = await response.json();
-				expect(response.status()).toEqual(200);
-				expect(responseJSON.first_name).toEqual('Jane');
-				expect(responseJSON.billing.first_name).toEqual('Jane');
-				expect(responseJSON.shipping.first_name).toEqual('Jane');
-			}
+			// call API to retrieve the subscriber customer we updated above
+			const response = await request.get(`/wp-json/wc/v3/customers/${subscriberUserId}`);
+			const responseJSON = await response.json();
+			expect(response.status()).toEqual(200);
+			expect(responseJSON.first_name).toEqual('Jane');
+			expect(responseJSON.billing.first_name).toEqual('Jane');
+			expect(responseJSON.shipping.first_name).toEqual('Jane');
 		});
 
 		test(`can update a customer`, async ({

@@ -1,4 +1,6 @@
 const { devices } = require( '@playwright/test' );
+require( 'dotenv' ).config({ path: __dirname + '/.env' });
+
 const {
 	BASE_URL,
 	CI,
@@ -6,8 +8,6 @@ const {
 	USER_KEY,
 	USER_SECRET,
 } = process.env;
-require( 'dotenv' ).config({ path: __dirname + '.env' });
-
 
 const baseURL = BASE_URL ?? 'http://localhost:8086';
 const userKey = USER_KEY ?? 'admin';
