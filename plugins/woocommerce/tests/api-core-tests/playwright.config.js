@@ -6,7 +6,7 @@ const {
 	USER_KEY,
 	USER_SECRET,
 } = process.env;
-require( 'dotenv' ).config();
+require( 'dotenv' ).config({ path: __dirname + '.env' });
 
 
 const baseURL = BASE_URL ?? 'http://localhost:8086';
