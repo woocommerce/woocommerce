@@ -150,3 +150,75 @@ jobs:
                       ${{ env.ALLURE_REPORT_DIR }}
                   if-no-files-found: ignore
                   retention-days: 5
+
+    k6-on-release:
+        name: k6 tests on release
+        runs-on: ubuntu-20.04
+        needs: [api-release]
+        if: success() || failure()
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                  ref: ${{ env.BRANCH_NAME }}
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  install-filters: woocommerce
+                  build: false
+
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
+              
+            - name: Fetch Asset ID
+              id: fetch_asset_id
+              uses: actions/github-script@v5
+              env:
+                  RELEASE_ID: ${{ github.event.inputs.release_id }}
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  REPO: ${{ github.repository }}
+              with:
+                  script: |
+                      const script = require( '.github/workflows/scripts/fetch-asset-id.js' )
+                      await script({github, context, core})
+                      
+            - name: Download WooCommerce release zip
+              run: |
+                  curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
+                  unzip woocommerce.zip -d woocommerce
+                  rsync -a woocommerce/woocommerce/* plugins/woocommerce/
+
+            - name: Install k6
+              if: success() || failure()
+              run: |
+                  curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
+
+            - name: Run k6 smoke tests
+              if: success() || failure()
+              env:
+                  URL: ${{ secrets.SMOKE_TEST_PERF_URL }}
+                  HOST: ${{ secrets.SMOKE_TEST_PERF_HOST }}
+                  A_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
+                  A_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
+                  C_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
+                  C_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
+                  P_ID: 274
+              run: |
+                  ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
+            
+            - name: Generate k6 Test report.
+              if: success() || failure()
+              working-directory: plugins/woocommerce
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+
+            - name: Archive k6 test report
+              if: success() || failure()
+              uses: actions/upload-artifact@v3
+              with:
+                  name: ${{ env.K6_ARTIFACT }}
+                  path: |
+                      ${{ env.ALLURE_RESULTS_DIR }}
+                      ${{ env.ALLURE_REPORT_DIR }}
+                  if-no-files-found: ignore
+                  retention-days: 5
