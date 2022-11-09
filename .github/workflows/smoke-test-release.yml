@@ -170,7 +170,7 @@ jobs:
                   retention-days: 5
                   
     Common-PHP-versions-on-release:
-      name: Release smoke test on common PHP versions
+      name: Common PHP versions on release
       runs-on: ubuntu-20.04
       needs: [E2E-on-trunk]
       if: success() || failure()
@@ -247,7 +247,7 @@ jobs:
                 retention-days: 5
 
     Recent-WP-versions-on-release:
-        name: Release smoke test on previous WordPress version
+        name: Previous WP versions on release
         runs-on: ubuntu-20.04
         needs: [E2E-on-trunk]
         strategy:
@@ -304,7 +304,7 @@ jobs:
             run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js        
     
     Common-plugins-on-release:
-        name: Smoke tests with ${{ matrix.plugin }} plugin installed
+        name: Release test with ${{ matrix.plugin }} plugin installed
         runs-on: ubuntu-20.04
         needs: [E2E-on-trunk]
         if: success() || failure()
