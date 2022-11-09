@@ -392,11 +392,11 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
-    trunk-results:
+    Publish-trunk-results:
         name: Publish report on smoke tests on trunk
         if: success() || failure()
         runs-on: ubuntu-20.04
-        needs: [api-tests]
+        needs: [API-on-trunk]
         steps:
             - name: Create dirs
               run: |
@@ -446,11 +446,11 @@ jobs:
                     -f s3_root=public \
                     --repo woocommerce/woocommerce-test-reports
 
-    plugins-results:
+    Publish-plugin-results:
         name: Publish report on smoke tests with plugins
         if: success() || failure()
         runs-on: ubuntu-20.04
-        needs: [test-plugins]
+        needs: [Common-plugins-on-release]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             RUN_ID: ${{ github.run_id }}
@@ -474,8 +474,6 @@ jobs:
               uses: actions/download-artifact@v3
               with:
                   name: ${{ env.ARTIFACT }}
-
-            # TODO: Add step to post job summary
 
             - name: Get slug
               id: get-slug
