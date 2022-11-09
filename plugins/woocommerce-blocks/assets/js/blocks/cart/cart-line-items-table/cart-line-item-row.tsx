@@ -19,10 +19,7 @@ import {
 	ProductMetadata,
 	ProductSaleBadge,
 } from '@woocommerce/base-components/cart-checkout';
-import {
-	getCurrencyFromPriceResponse,
-	Currency,
-} from '@woocommerce/price-format';
+import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
 	__experimentalApplyCheckoutFilter,
 	mustContain,
@@ -30,7 +27,7 @@ import {
 import Dinero from 'dinero.js';
 import { forwardRef, useMemo } from '@wordpress/element';
 import type { CartItem } from '@woocommerce/type-defs/cart';
-import { objectHasProp } from '@woocommerce/types';
+import { objectHasProp, Currency } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
 
 /**
@@ -47,7 +44,8 @@ const getAmountFromRawPrice = (
 	return priceObject.convertPrecision( currency.minorUnit ).getAmount();
 };
 
-const productPriceValidation = ( value ) => mustContain( value, '<price/>' );
+const productPriceValidation = ( value: string ) =>
+	mustContain( value, '<price/>' );
 
 interface CartLineItemRowProps {
 	lineItem: CartItem | Record< string, never >;
@@ -58,9 +56,11 @@ interface CartLineItemRowProps {
 /**
  * Cart line item table row component.
  */
-const CartLineItemRow = forwardRef< HTMLTableRowElement, CartLineItemRowProps >(
+const CartLineItemRow: React.ForwardRefExoticComponent<
+	CartLineItemRowProps & React.RefAttributes< HTMLTableRowElement >
+> = forwardRef< HTMLTableRowElement, CartLineItemRowProps >(
 	(
-		{ lineItem, onRemove = () => void null, tabIndex = null },
+		{ lineItem, onRemove = () => void null, tabIndex },
 		ref
 	): JSX.Element => {
 		const {
@@ -367,5 +367,4 @@ const CartLineItemRow = forwardRef< HTMLTableRowElement, CartLineItemRowProps >(
 		);
 	}
 );
-
 export default CartLineItemRow;
