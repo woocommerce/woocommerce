@@ -84,10 +84,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 			},
 			meta: {
 				name: 'wc-addons-featured',
-				heading: __(
-					'Learn more about products',
-					'woocommerce'
-				),
+				heading: __( 'Learn more about products', 'woocommerce' ),
 				descriptions: {
 					desktop: createInterpolateElement(
 						__(
