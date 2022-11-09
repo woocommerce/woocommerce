@@ -766,7 +766,11 @@ class BusinessDetails extends Component {
 				activeClass="is-active"
 				initialTabName="current-tab"
 				onSelect={ ( tabName ) => {
-					if ( this.state.currentTab !== tabName ) {
+					if (
+						this.state.currentTab !== tabName &&
+						// TabPanel calls onSelect on mount when initialTabName is provided, so we need to check if the tabName is valid.
+						tabName !== 'current-tab'
+					) {
 						this.setState( {
 							currentTab: tabName,
 							savedValues:
@@ -819,7 +823,7 @@ export const BusinessFeaturesList = compose(
 			? getInstallableExtensions( {
 					freeExtensionBundleByCategory: freeExtensions,
 					country,
-					productTypes: profileItems.product_types,
+					productTypes: profileItems.product_types || [],
 			  } )
 			: [];
 		const hasInstallableExtensions = installableExtensions.some(

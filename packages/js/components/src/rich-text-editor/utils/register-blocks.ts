@@ -14,6 +14,8 @@ export const HEADING_BLOCK_ID = 'core/heading';
 export const LIST_BLOCK_ID = 'core/list';
 export const LIST_ITEM_BLOCK_ID = 'core/list-item';
 export const QUOTE_BLOCK_ID = 'core/quote';
+export const IMAGE_BLOCK_ID = 'core/image';
+export const VIDEO_BLOCK_ID = 'core/video';
 
 const ALLOWED_CORE_BLOCKS = [
 	PARAGRAPH_BLOCK_ID,
@@ -21,6 +23,8 @@ const ALLOWED_CORE_BLOCKS = [
 	LIST_BLOCK_ID,
 	LIST_ITEM_BLOCK_ID,
 	QUOTE_BLOCK_ID,
+	IMAGE_BLOCK_ID,
+	VIDEO_BLOCK_ID,
 ];
 
 const registerCoreBlocks = () => {

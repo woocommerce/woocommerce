@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Card, CardBody } from '@wordpress/components';
 import { Link, useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -15,7 +14,10 @@ import { ProductSectionLayout } from '../layout/product-section-layout';
 import { AttributeField } from '../fields/attribute-field';
 
 export const AttributesSection: React.FC = () => {
-	const { getInputProps } = useFormContext< Product >();
+	const {
+		getInputProps,
+		values: { id: productId },
+	} = useFormContext< Product >();
 
 	return (
 		<ProductSectionLayout
@@ -43,11 +45,9 @@ export const AttributesSection: React.FC = () => {
 				</>
 			}
 		>
-			<Card>
-				<CardBody>
-					<AttributeField { ...getInputProps( 'attributes' ) } />
-				</CardBody>
-			</Card>
+			<AttributeField
+				{ ...getInputProps( 'attributes', { productId } ) }
+			/>
 		</ProductSectionLayout>
 	);
 };

@@ -262,7 +262,7 @@ class TaskLists {
 	 * Add a task list.
 	 *
 	 * @param array $args Task list properties.
-	 * @return WP_Error|TaskList
+	 * @return \WP_Error|TaskList
 	 */
 	public static function add_list( $args ) {
 		if ( isset( self::$lists[ $args['id'] ] ) ) {
@@ -281,7 +281,7 @@ class TaskLists {
 	 *
 	 * @param string $list_id List ID to add the task to.
 	 * @param array  $args Task properties.
-	 * @return WP_Error|Task
+	 * @return \WP_Error|Task
 	 */
 	public static function add_task( $list_id, $args ) {
 		if ( ! isset( self::$lists[ $list_id ] ) ) {
