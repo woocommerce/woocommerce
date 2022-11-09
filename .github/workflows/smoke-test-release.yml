@@ -195,7 +195,7 @@ jobs:
     test-wp-version:
         name: Release smoke test on L-${{ matrix.wp }} WordPress version
         runs-on: ubuntu-20.04
-        needs: [k6-tests]
+        needs: [e2e-tests]
         strategy:
             matrix: 
                 wp: ['1', '2']
@@ -248,7 +248,7 @@ jobs:
     test-plugins:
         name: Smoke tests with ${{ matrix.plugin }} plugin installed
         runs-on: ubuntu-20.04
-        needs: [test-wp-version]
+        needs: [e2e-tests]
         if: success() || failure()
         env:
             USE_WP_ENV: 1
