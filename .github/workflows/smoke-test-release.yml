@@ -33,6 +33,9 @@ jobs:
             DEFAULT_TIMEOUT_OVERRIDE: 120000
             
         steps:
+          
+            - name: Create tmp dir
+              run: mkdir -p tmp/
 
             - uses: actions/checkout@v3
               with:
