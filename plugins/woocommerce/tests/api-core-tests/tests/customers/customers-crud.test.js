@@ -8,7 +8,7 @@ const {
 const {
 	USER_KEY,
 } = process.env;
-const userKey = USER_KEY ? ? 'admin';
+const userKey = USER_KEY ?? 'admin';
 
 /**
  * Tests for the WooCommerce Customers API.
