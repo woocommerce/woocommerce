@@ -227,7 +227,7 @@ jobs:
       name: Common PHP versions on release
       runs-on: ubuntu-20.04
       needs: [e2e-release]
-      if: success() || failure()
+      if: success()
       strategy:
         matrix:
           php: ['7.4', '8.0', '8.1']
@@ -249,8 +249,6 @@ jobs:
 
           - name: Setup WooCommerce Monorepo
             uses: ./.github/actions/setup-woocommerce-monorepo
-            env:
-              WP_ENV_PHP_VERSION: ${{ matrix.php}}
             with:
                 install-filters: woocommerce
                 build: false
@@ -276,8 +274,14 @@ jobs:
                 curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
                 unzip woocommerce.zip -d woocommerce
                 rsync -a woocommerce/woocommerce/* plugins/woocommerce/
+                
+          - name: Launch wp-env e2e environment
+            working-directory: plugins/woocommerce
+            env:
+              WP_ENV_PHP_VERSION: ${{ matrix.php}}
+            run: pnpm env:test --filter=woocommerce
 
-          - name: Run the rest of E2E tests.
+          - name: Run the E2E tests.
             timeout-minutes: 60
             working-directory: plugins/woocommerce
             env:
