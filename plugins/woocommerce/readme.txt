@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, rodrigosprimo
 Tags: online store, ecommerce, shop, shopping cart, storefront, checkout, downloadable, downloads, payments, paypal, storefront, stripe, woo commerce, e-commerce, store, sales, sell, woo, cart
 Requires at least: 5.8
 Tested up to: 6.0
-Requires PHP: 7.2
+Requires PHP: 7.4
 Stable tag: 7.0.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
