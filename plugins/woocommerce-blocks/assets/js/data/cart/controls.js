@@ -2,7 +2,6 @@
  * External dependencies
  */
 import {
-	triggerFragmentRefresh,
 	triggerAddedToCartEvent,
 	triggerAddingToCartEvent,
 } from '@woocommerce/base-utils';
@@ -13,9 +12,6 @@ import {
  * @return {Object} An object with the controls to register with the store on the controls property of the registration object.
  */
 export const controls = {
-	UPDATE_LEGACY_CART_FRAGMENTS() {
-		triggerFragmentRefresh();
-	},
 	TRIGGER_ADDING_TO_CART_EVENT() {
 		triggerAddingToCartEvent();
 	},

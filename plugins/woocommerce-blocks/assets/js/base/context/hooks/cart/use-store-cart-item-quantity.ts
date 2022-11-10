@@ -6,7 +6,6 @@ import { useCallback, useState, useEffect } from '@wordpress/element';
 import { CART_STORE_KEY, CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { useDebounce } from 'use-debounce';
 import { usePrevious } from '@woocommerce/base-hooks';
-import { triggerFragmentRefresh } from '@woocommerce/base-utils';
 import {
 	CartItem,
 	StoreCartItemQuantity,
@@ -86,10 +85,7 @@ export const useStoreCartItemQuantity = (
 
 	const removeItem = useCallback( () => {
 		return cartItemKey
-			? removeItemFromCart( cartItemKey ).then( () => {
-					triggerFragmentRefresh();
-					return true;
-			  } )
+			? removeItemFromCart( cartItemKey )
 			: Promise.resolve( false );
 	}, [ cartItemKey, removeItemFromCart ] );
 
