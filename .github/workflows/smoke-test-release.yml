@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
     e2e-release:
-        name: E2E tests on release
+        name: Run small set of E2E tests to verify
         runs-on: ubuntu-20.04
         env:
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
@@ -68,7 +68,7 @@ jobs:
               working-directory: plugins/woocommerce
               env:
                   E2E_MAX_FAILURES: 50
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js ./tests/e2e-pw/tests/basic.spec.js
               
             - name: Generate Playwright E2E Test report.
               if: success() || failure()
@@ -98,12 +98,6 @@ jobs:
             - uses: actions/checkout@v3
               with:
                   ref: ${{ env.BRANCH_NAME }}
-
-            - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                  install-filters: woocommerce
-                  build: false
                   
             - name: Fetch Asset ID
               id: fetch_asset_id
@@ -122,6 +116,12 @@ jobs:
                   curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
                   unzip woocommerce.zip -d woocommerce
                   rsync -a woocommerce/woocommerce/* plugins/woocommerce/
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  install-filters: woocommerce
+                  build: false
                   
             - name: Launch wp-env e2e environment
               working-directory: plugins/woocommerce
@@ -162,17 +162,7 @@ jobs:
             - uses: actions/checkout@v3
               with:
                   ref: ${{ env.BRANCH_NAME }}
-
-            - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                  install-filters: woocommerce
-                  build: false
-
-            - name: Download and install Chromium browser.
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium
-              
+                  
             - name: Fetch Asset ID
               id: fetch_asset_id
               uses: actions/github-script@v5
@@ -190,6 +180,16 @@ jobs:
                   curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
                   unzip woocommerce.zip -d woocommerce
                   rsync -a woocommerce/woocommerce/* plugins/woocommerce/
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  install-filters: woocommerce
+                  build: false
+
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
                   
             - name: Install k6
               if: success() || failure()
@@ -229,7 +229,7 @@ jobs:
       name: PHP version ${{ matrix.php }} on release
       runs-on: ubuntu-20.04
       needs: [e2e-release]
-      if: success() || failure()
+      if: success()
       strategy:
         matrix:
           php: ['7.4', '8.0', '8.1']
@@ -242,17 +242,7 @@ jobs:
           - uses: actions/checkout@v3
             with:
                 ref: trunk
-
-          - name: Setup WooCommerce Monorepo
-            uses: ./.github/actions/setup-woocommerce-monorepo
-            with:
-                install-filters: woocommerce
-                build: false
-
-          - name: Download and install Chromium browser.
-            working-directory: plugins/woocommerce
-            run: pnpm exec playwright install chromium
-            
+                
           - name: Fetch Asset ID
             id: fetch_asset_id
             uses: actions/github-script@v5
@@ -270,6 +260,16 @@ jobs:
                 curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
                 unzip woocommerce.zip -d woocommerce
                 rsync -a woocommerce/woocommerce/* plugins/woocommerce/
+
+          - name: Setup WooCommerce Monorepo
+            uses: ./.github/actions/setup-woocommerce-monorepo
+            with:
+                install-filters: woocommerce
+                build: false
+
+          - name: Download and install Chromium browser.
+            working-directory: plugins/woocommerce
+            run: pnpm exec playwright install chromium
                 
           - name: Launch wp-env e2e environment
             working-directory: plugins/woocommerce
@@ -304,7 +304,7 @@ jobs:
         name: WP version ${{ matrix.wp }} on release
         runs-on: ubuntu-20.04
         needs: [e2e-release]
-        if: success() || failure()
+        if: success()
         strategy:
           matrix:
             wp: ['6.1', '6.0.3']
@@ -317,17 +317,7 @@ jobs:
             - uses: actions/checkout@v3
               with:
                   ref: trunk
-
-            - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                  install-filters: woocommerce
-                  build: false
-
-            - name: Download and install Chromium browser.
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium
-              
+                  
             - name: Fetch Asset ID
               id: fetch_asset_id
               uses: actions/github-script@v5
@@ -345,6 +335,16 @@ jobs:
                   curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
                   unzip woocommerce.zip -d woocommerce
                   rsync -a woocommerce/woocommerce/* plugins/woocommerce/
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  install-filters: woocommerce
+                  build: false
+
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
                   
             - name: Launch wp-env e2e environment
               working-directory: plugins/woocommerce
@@ -369,6 +369,101 @@ jobs:
               uses: actions/upload-artifact@v3
               with:
                   name: ${{ env.E2E_ARTIFACT }}
+                  path: |
+                      ${{ env.ALLURE_RESULTS_DIR }}
+                      ${{ env.ALLURE_REPORT_DIR }}
+                  if-no-files-found: ignore
+                  retention-days: 5
+
+    Common-plugins:
+        name: Release test with ${{ matrix.plugin }} plugin installed
+        runs-on: ubuntu-20.04
+        needs: [e2e-release]
+        if: success() || failure()
+        env:
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - plugin: 'WooCommerce Payments'
+                      repo: 'automattic/woocommerce-payments'
+                    - plugin: 'WooCommerce PayPal Payments'
+                      repo: 'woocommerce/woocommerce-paypal-payments'
+                    - plugin: 'WooCommerce Shipping & Tax'
+                      repo: 'automattic/woocommerce-services'
+                    - plugin: 'WooCommerce Subscriptions'
+                      repo: WC_SUBSCRIPTIONS_REPO
+                      private: true
+                    - plugin: 'WordPress SEO' # Yoast SEO in the UI, but the slug is wordpress-seo
+                      repo: 'Yoast/wordpress-seo'
+                    - plugin: 'Contact Form 7'
+                      repo: 'takayukister/contact-form-7'
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                  ref: trunk
+
+            - name: Fetch Asset ID
+              id: fetch_asset_id
+              uses: actions/github-script@v5
+              env:
+                  RELEASE_ID: ${{ github.event.inputs.release_id }}
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  REPO: ${{ github.repository }}
+              with:
+                  script: |
+                      const script = require( '.github/workflows/scripts/fetch-asset-id.js' )
+                      await script({github, context, core})
+                      
+            - name: Download WooCommerce release zip
+              run: |
+                  curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
+                  unzip woocommerce.zip -d woocommerce
+                  rsync -a woocommerce/woocommerce/* plugins/woocommerce/
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  install-filters: woocommerce
+                  build: false
+                  
+            - name: Run 'Upload plugin' test
+              id: e2e-upload
+              working-directory: plugins/woocommerce
+              env:
+                  PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
+                  PLUGIN_NAME: ${{ matrix.plugin }}
+                  GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js upload-plugin.spec.js
+
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
+                
+            - name: Launch wp-env e2e environment
+              working-directory: plugins/woocommerce
+              run: pnpm env:test
+
+            - name: Run the rest of E2E tests
+              id: e2e
+              working-directory: plugins/woocommerce
+              env:
+                  E2E_MAX_FAILURES: 50
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
+
+            - name: Generate E2E Test report.
+              id: report
+              if: success() || failure()
+              working-directory: plugins/woocommerce
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+
+            - name: Archive E2E test report
+              if: success() || failure()
+              uses: actions/upload-artifact@v3
+              with:
+                  name: Smoke tests with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
                   path: |
                       ${{ env.ALLURE_RESULTS_DIR }}
                       ${{ env.ALLURE_REPORT_DIR }}
