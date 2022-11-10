@@ -30,17 +30,7 @@ jobs:
             - uses: actions/checkout@v3
               with:
                 ref: ${{ env.BRANCH_NAME }}
-
-            - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                  install-filters: woocommerce
-                  build: false
-
-            - name: Download and install Chromium browser.
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium
-        
+                
             - name: Fetch Asset ID
               id: fetch_asset_id
               uses: actions/github-script@v5
@@ -58,6 +48,16 @@ jobs:
                   curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
                   unzip woocommerce.zip -d woocommerce
                   rsync -a woocommerce/woocommerce/* plugins/woocommerce/
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  install-filters: woocommerce
+                  build: false
+
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
                 
             - name: Launch wp-env e2e environment
               working-directory: plugins/woocommerce
@@ -67,7 +67,7 @@ jobs:
               timeout-minutes: 60
               working-directory: plugins/woocommerce
               env:
-                  E2E_MAX_FAILURES: 25
+                  E2E_MAX_FAILURES: 50
               run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
               
             - name: Generate Playwright E2E Test report.
@@ -281,7 +281,7 @@ jobs:
             timeout-minutes: 60
             working-directory: plugins/woocommerce
             env:
-                E2E_MAX_FAILURES: 25
+                E2E_MAX_FAILURES: 50
             run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
           - name: Generate Playwright E2E Test report.
@@ -356,7 +356,7 @@ jobs:
               timeout-minutes: 60
               working-directory: plugins/woocommerce
               env:
-                  E2E_MAX_FAILURES: 25
+                  E2E_MAX_FAILURES: 50
               run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
             - name: Generate Playwright E2E Test report.
