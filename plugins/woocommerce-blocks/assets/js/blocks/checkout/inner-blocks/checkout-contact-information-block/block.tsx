@@ -2,10 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { ValidatedTextInput } from '@woocommerce/base-components/text-input';
 import { useCheckoutAddress, useStoreEvents } from '@woocommerce/base-context';
 import { getSetting } from '@woocommerce/settings';
-import { CheckboxControl } from '@woocommerce/blocks-checkout';
+import {
+	CheckboxControl,
+	ValidatedTextInput,
+} from '@woocommerce/blocks-checkout';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 

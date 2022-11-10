@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { useCallback, useMemo, useEffect, useRef } from '@wordpress/element';
 import classnames from 'classnames';
-import { ValidatedTextInput } from '@woocommerce/base-components/text-input';
+import { ValidatedTextInput } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies

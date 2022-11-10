@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { ValidatedTextInput } from '@woocommerce/base-components/text-input';
+import { ValidatedTextInput } from '@woocommerce/blocks-checkout';
 import {
 	BillingCountryInput,
 	ShippingCountryInput,

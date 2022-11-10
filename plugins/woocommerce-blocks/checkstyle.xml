@@ -240,6 +240,122 @@
     Argument of type &apos;string | BlockConfiguration&lt;{}&gt;&apos; is not assignable to parameter of type &apos;string&apos;.
       Type &apos;BlockConfiguration&lt;{}&gt;&apos; is not assignable to type &apos;string&apos;." source="TS2769" />
 </file>
+<file name="packages/prices/utils/price.ts">
+<error line="52" column="8" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="53" column="10" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="54" column="21" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="55" column="20" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="56" column="13" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="58" column="3" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="59" column="3" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="62" column="3" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="63" column="3" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+</file>
+<file name="packages/prices/utils/index.js">
+<error line="1" column="15" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/prices/utils/price.ts&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
+</file>
+<file name="packages/prices/index.js">
+<error line="1" column="15" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/prices/utils/index.js&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
+</file>
+<file name="packages/checkout/components/totals/item/index.tsx">
+<error line="8" column="15" severity="error" message="Module &apos;&quot;@woocommerce/price-format&quot;&apos; has no exported member &apos;Currency&apos;." source="TS2305" />
+<error line="8" column="31" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/prices/index.js&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern.
+  The file is in the program because:
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/totals/item/index.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/totals/subtotal/index.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/totals/taxes/index.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/totals/fees/index.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/components/product-price/index.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/atomic/blocks/product-elements/price/block.js&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/context/hooks/payment-methods/use-payment-method-interface.ts&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/components/cart-checkout/order-summary/order-summary-item.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/components/cart-checkout/product-sale-badge/index.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/components/cart-checkout/shipping-rates-control-package/render-package-rate-option.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/components/cart-checkout/totals/shipping/index.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/active-filters/utils.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/cart-line-items-table/cart-line-item-row.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-block/edit.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-subtotal/block.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-fee/block.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-discount/block.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-shipping/block.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-taxes/block.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-block/frontend.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-block/edit.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-shipping-methods-block/block.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-subtotal/block.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-fee/block.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-discount/block.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-shipping/block.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-taxes/block.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-block/frontend.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/price-filter/block.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/mini-cart/block.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/mini-cart-footer-block/block.tsx&apos;
+    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/mini-cart/edit.tsx&apos;" source="TS6307" />
+</file>
+<file name="packages/checkout/components/totals/subtotal/index.tsx">
+<error line="5" column="15" severity="error" message="Module &apos;&quot;@woocommerce/price-format&quot;&apos; has no exported member &apos;Currency&apos;." source="TS2305" />
+<error line="35" column="4" severity="error" message="Type &apos;{ className: string | undefined; currency: Currency; label: string; value: number; }&apos; is not assignable to type &apos;TotalsItemProps&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the types of the target&apos;s properties.
+  Types of property &apos;className&apos; are incompatible.
+    Type &apos;string | undefined&apos; is not assignable to type &apos;string&apos;.
+      Type &apos;undefined&apos; is not assignable to type &apos;string&apos;." source="TS2375" />
+</file>
+<file name="packages/checkout/components/totals/taxes/index.tsx">
+<error line="7" column="15" severity="error" message="Module &apos;&quot;@woocommerce/price-format&quot;&apos; has no exported member &apos;Currency&apos;." source="TS2305" />
+</file>
+<file name="packages/checkout/components/totals/fees/index.tsx">
+<error line="7" column="15" severity="error" message="Module &apos;&quot;@woocommerce/price-format&quot;&apos; has no exported member &apos;Currency&apos;." source="TS2305" />
+</file>
+<file name="packages/checkout/components/error-boundary/index.js">
+<error line="9" column="35" severity="error" message="Parameter &apos;error&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
+</file>
+<file name="packages/checkout/slot/index.js">
+<error line="11" column="8" severity="error" message="Could not find a declaration file for module &apos;wordpress-components&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/wordpress-components/build/index.js&apos; implicitly has an &apos;any&apos; type.
+  If the &apos;@wordpress/components&apos; package actually exposes this module, consider sending a pull request to amend &apos;https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/wordpress__components&apos;" source="TS7016" />
+<error line="42" column="12" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
+<error line="83" column="13" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
+<error line="87" column="8" severity="error" message="Parameter &apos;fillProps&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
+</file>
+<file name="packages/checkout/components/order-meta/index.js">
+<error line="9" column="41" severity="error" message="Variable &apos;useSlot&apos; implicitly has type &apos;any&apos; in some locations where its type cannot be determined." source="TS7034" />
+<error line="14" column="9" severity="error" message="Property &apos;Fill&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
+<error line="14" column="38" severity="error" message="Property &apos;Slot&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
+<error line="17" column="18" severity="error" message="Binding element &apos;className&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="17" column="29" severity="error" message="Binding element &apos;extensions&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="17" column="41" severity="error" message="Binding element &apos;cart&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="17" column="47" severity="error" message="Binding element &apos;context&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="18" column="20" severity="error" message="Variable &apos;useSlot&apos; implicitly has an &apos;any&apos; type." source="TS7005" />
+</file>
+<file name="packages/checkout/components/discounts-meta/index.js">
+<error line="9" column="41" severity="error" message="Variable &apos;useSlot&apos; implicitly has type &apos;any&apos; in some locations where its type cannot be determined." source="TS7034" />
+<error line="14" column="9" severity="error" message="Property &apos;Fill&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
+<error line="14" column="42" severity="error" message="Property &apos;Slot&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
+<error line="17" column="18" severity="error" message="Binding element &apos;className&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="17" column="29" severity="error" message="Binding element &apos;extensions&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="17" column="41" severity="error" message="Binding element &apos;cart&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="17" column="47" severity="error" message="Binding element &apos;context&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="18" column="20" severity="error" message="Variable &apos;useSlot&apos; implicitly has an &apos;any&apos; type." source="TS7005" />
+</file>
+<file name="packages/checkout/components/order-shipping-packages/index.js">
+<error line="9" column="26" severity="error" message="Variable &apos;useSlot&apos; implicitly has type &apos;any&apos; in some locations where its type cannot be determined." source="TS7034" />
+<error line="13" column="2" severity="error" message="Property &apos;Fill&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
+<error line="14" column="2" severity="error" message="Property &apos;Slot&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
+<error line="18" column="2" severity="error" message="Binding element &apos;className&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="19" column="2" severity="error" message="Binding element &apos;collapsible&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="20" column="2" severity="error" message="Binding element &apos;noResultsMessage&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="21" column="2" severity="error" message="Binding element &apos;renderOption&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="22" column="2" severity="error" message="Binding element &apos;extensions&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="23" column="2" severity="error" message="Binding element &apos;cart&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="24" column="2" severity="error" message="Binding element &apos;components&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="25" column="2" severity="error" message="Binding element &apos;context&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="26" column="2" severity="error" message="Binding element &apos;shippingRates&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="28" column="20" severity="error" message="Variable &apos;useSlot&apos; implicitly has an &apos;any&apos; type." source="TS7005" />
+</file>
+<file name="assets/js/base/components/button/index.tsx">
+<error line="4" column="36" severity="error" message="Could not find a declaration file for module &apos;wordpress-components&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/wordpress-components/build/index.js&apos; implicitly has an &apos;any&apos; type.
+  If the &apos;@wordpress/components&apos; package actually exposes this module, consider sending a pull request to amend &apos;https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/wordpress__components&apos;" source="TS7016" />
+</file>
 <file name="assets/js/data/schema/selectors.js">
 <error line="19" column="12" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
 <error line="106" column="7" severity="error" message="Variable &apos;namespaceRoutes&apos; implicitly has type &apos;any[]&apos; in some locations where its type cannot be determined." source="TS7034" />
@@ -608,6 +724,18 @@
       Type &apos;Object&apos; is not assignable to type &apos;AnyAction | Generator&lt;any, any, unknown&gt;&apos;.
         The &apos;Object&apos; type is assignable to very few other types. Did you mean to use the &apos;any&apos; type instead?" source="TS2322" />
 </file>
+<file name="packages/checkout/filter-registry/index.ts">
+<error line="36" column="37" severity="error" message="Cannot find name &apos;T&apos;." source="TS2304" />
+</file>
+<file name="packages/checkout/blocks-registry/register-checkout-block.ts">
+<error line="34" column="3" severity="error" message="Type &apos;LazyExoticComponent&lt;ComponentType&lt;unknown&gt;&gt; | (() =&gt; Element | null) | null&apos; is not assignable to type &apos;Function&apos;.
+  Type &apos;null&apos; is not assignable to type &apos;Function&apos;." source="TS2322" />
+<error line="44" column="43" severity="error" message="Property &apos;lock&apos; does not exist on type &apos;{}&apos;." source="TS2339" />
+</file>
+<file name="packages/checkout/index.js">
+<error line="6" column="34" severity="error" message="Could not find a declaration file for module &apos;wordpress-components&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/wordpress-components/build/index.js&apos; implicitly has an &apos;any&apos; type.
+  If the &apos;@wordpress/components&apos; package actually exposes this module, consider sending a pull request to amend &apos;https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/wordpress__components&apos;" source="TS7016" />
+</file>
 <file name="assets/js/types/type-defs/payment-method-interface.ts">
 <error line="20" column="53" severity="error" message="Cannot find module &apos;../../base/context/providers/cart-checkout/payment-events/types&apos; or its corresponding type declarations." source="TS2307" />
 </file>
@@ -624,58 +752,7 @@
 <error line="78" column="28" severity="error" message="Element implicitly has an &apos;any&apos; type because expression of type &apos;string&apos; can&apos;t be used to index type &apos;Object&apos;.
   No index signature with a parameter of type &apos;string&apos; was found on type &apos;Object&apos;." source="TS7053" />
 </file>
-<file name="packages/prices/utils/price.ts">
-<error line="52" column="8" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="53" column="10" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="54" column="21" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="55" column="20" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="56" column="13" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="58" column="3" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="59" column="3" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="62" column="3" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="63" column="3" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-</file>
-<file name="packages/prices/utils/index.js">
-<error line="1" column="15" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/prices/utils/price.ts&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-</file>
-<file name="packages/prices/index.js">
-<error line="1" column="15" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/prices/utils/index.js&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-</file>
 <file name="assets/js/base/components/product-price/index.tsx">
-<error line="7" column="29" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/prices/index.js&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern.
-  The file is in the program because:
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/components/product-price/index.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/atomic/blocks/product-elements/price/block.js&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/context/hooks/payment-methods/use-payment-method-interface.ts&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/totals/item/index.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/totals/subtotal/index.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/totals/taxes/index.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/totals/fees/index.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/components/cart-checkout/order-summary/order-summary-item.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/components/cart-checkout/product-sale-badge/index.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/components/cart-checkout/shipping-rates-control-package/render-package-rate-option.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/components/cart-checkout/totals/shipping/index.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/active-filters/utils.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/cart-line-items-table/cart-line-item-row.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-block/edit.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-subtotal/block.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-fee/block.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-discount/block.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-shipping/block.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-taxes/block.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-block/frontend.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-block/edit.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-shipping-methods-block/block.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-subtotal/block.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-fee/block.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-discount/block.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-shipping/block.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-taxes/block.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-block/frontend.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/price-filter/block.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/mini-cart/block.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/mini-cart-footer-block/block.tsx&apos;
-    Imported via &apos;@woocommerce/price-format&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/mini-cart/edit.tsx&apos;" source="TS6307" />
 <error line="285" column="5" severity="error" message="Type &apos;{ currency: Currency | Record&lt;string, never&gt;; price: string | number; priceClassName: string | undefined; priceStyle: CSSProperties | undefined; regularPrice: string | number; regularPriceClassName: string | undefined; regularPriceStyle: CSSProperties | undefined; }&apos; is not assignable to type &apos;SalePriceProps&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the types of the target&apos;s properties.
   Types of property &apos;regularPriceClassName&apos; are incompatible.
     Type &apos;string | undefined&apos; is not assignable to type &apos;string&apos;.
@@ -807,144 +884,6 @@
 <error line="93" column="3" severity="error" message="Type &apos;(quantity?: number) =&gt; Promise&lt;void&gt;&apos; is not assignable to type &apos;(quantity?: number | undefined) =&gt; Promise&lt;boolean&gt;&apos;.
   Type &apos;Promise&lt;void&gt;&apos; is not assignable to type &apos;Promise&lt;boolean&gt;&apos;.
     Type &apos;void&apos; is not assignable to type &apos;boolean&apos;." source="TS2322" />
-</file>
-<file name="packages/checkout/components/totals/item/index.tsx">
-<error line="8" column="15" severity="error" message="Module &apos;&quot;@woocommerce/price-format&quot;&apos; has no exported member &apos;Currency&apos;." source="TS2305" />
-</file>
-<file name="packages/checkout/components/totals/subtotal/index.tsx">
-<error line="5" column="15" severity="error" message="Module &apos;&quot;@woocommerce/price-format&quot;&apos; has no exported member &apos;Currency&apos;." source="TS2305" />
-<error line="35" column="4" severity="error" message="Type &apos;{ className: string | undefined; currency: Currency; label: string; value: number; }&apos; is not assignable to type &apos;TotalsItemProps&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the types of the target&apos;s properties.
-  Types of property &apos;className&apos; are incompatible.
-    Type &apos;string | undefined&apos; is not assignable to type &apos;string&apos;.
-      Type &apos;undefined&apos; is not assignable to type &apos;string&apos;." source="TS2375" />
-</file>
-<file name="packages/checkout/components/totals/taxes/index.tsx">
-<error line="7" column="15" severity="error" message="Module &apos;&quot;@woocommerce/price-format&quot;&apos; has no exported member &apos;Currency&apos;." source="TS2305" />
-</file>
-<file name="packages/checkout/components/totals/fees/index.tsx">
-<error line="7" column="15" severity="error" message="Module &apos;&quot;@woocommerce/price-format&quot;&apos; has no exported member &apos;Currency&apos;." source="TS2305" />
-</file>
-<file name="packages/checkout/components/totals/index.js">
-<error line="1" column="39" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/totals/item/index.tsx&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern.
-  The file is in the program because:
-    Imported via &apos;./item&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/totals/index.js&apos;
-    Imported via &apos;../item&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/totals/subtotal/index.tsx&apos;
-    Imported via &apos;../item&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/totals/taxes/index.tsx&apos;
-    Imported via &apos;../item&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/totals/fees/index.tsx&apos;" source="TS6307" />
-<error line="2" column="37" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/totals/subtotal/index.tsx&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-<error line="3" column="40" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/totals/taxes/index.tsx&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-<error line="4" column="39" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/totals/fees/index.tsx&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-</file>
-<file name="packages/checkout/components/error-boundary/index.js">
-<error line="9" column="35" severity="error" message="Parameter &apos;error&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
-</file>
-<file name="packages/checkout/slot/index.js">
-<error line="11" column="8" severity="error" message="Could not find a declaration file for module &apos;wordpress-components&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/wordpress-components/build/index.js&apos; implicitly has an &apos;any&apos; type.
-  If the &apos;@wordpress/components&apos; package actually exposes this module, consider sending a pull request to amend &apos;https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/wordpress__components&apos;" source="TS7016" />
-<error line="16" column="32" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/error-boundary/index.js&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-<error line="42" column="12" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
-<error line="83" column="13" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
-<error line="87" column="8" severity="error" message="Parameter &apos;fillProps&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
-</file>
-<file name="packages/checkout/components/order-meta/index.js">
-<error line="9" column="41" severity="error" message="Variable &apos;useSlot&apos; implicitly has type &apos;any&apos; in some locations where its type cannot be determined." source="TS7034" />
-<error line="9" column="56" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/slot/index.js&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern.
-  The file is in the program because:
-    Imported via &apos;../../slot&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/order-meta/index.js&apos;
-    Imported via &apos;../../slot&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/discounts-meta/index.js&apos;
-    Imported via &apos;../../slot&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/order-shipping-packages/index.js&apos;
-    Imported via &apos;./slot&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/index.js&apos;" source="TS6307" />
-<error line="14" column="9" severity="error" message="Property &apos;Fill&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
-<error line="14" column="38" severity="error" message="Property &apos;Slot&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
-<error line="17" column="18" severity="error" message="Binding element &apos;className&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="17" column="29" severity="error" message="Binding element &apos;extensions&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="17" column="41" severity="error" message="Binding element &apos;cart&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="17" column="47" severity="error" message="Binding element &apos;context&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="18" column="20" severity="error" message="Variable &apos;useSlot&apos; implicitly has an &apos;any&apos; type." source="TS7005" />
-</file>
-<file name="packages/checkout/components/discounts-meta/index.js">
-<error line="9" column="41" severity="error" message="Variable &apos;useSlot&apos; implicitly has type &apos;any&apos; in some locations where its type cannot be determined." source="TS7034" />
-<error line="14" column="9" severity="error" message="Property &apos;Fill&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
-<error line="14" column="42" severity="error" message="Property &apos;Slot&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
-<error line="17" column="18" severity="error" message="Binding element &apos;className&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="17" column="29" severity="error" message="Binding element &apos;extensions&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="17" column="41" severity="error" message="Binding element &apos;cart&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="17" column="47" severity="error" message="Binding element &apos;context&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="18" column="20" severity="error" message="Variable &apos;useSlot&apos; implicitly has an &apos;any&apos; type." source="TS7005" />
-</file>
-<file name="packages/checkout/components/order-shipping-packages/index.js">
-<error line="9" column="26" severity="error" message="Variable &apos;useSlot&apos; implicitly has type &apos;any&apos; in some locations where its type cannot be determined." source="TS7034" />
-<error line="13" column="2" severity="error" message="Property &apos;Fill&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
-<error line="14" column="2" severity="error" message="Property &apos;Slot&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
-<error line="18" column="2" severity="error" message="Binding element &apos;className&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="19" column="2" severity="error" message="Binding element &apos;collapsible&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="20" column="2" severity="error" message="Binding element &apos;noResultsMessage&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="21" column="2" severity="error" message="Binding element &apos;renderOption&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="22" column="2" severity="error" message="Binding element &apos;extensions&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="23" column="2" severity="error" message="Binding element &apos;cart&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="24" column="2" severity="error" message="Binding element &apos;components&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="25" column="2" severity="error" message="Binding element &apos;context&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="26" column="2" severity="error" message="Binding element &apos;shippingRates&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="28" column="20" severity="error" message="Variable &apos;useSlot&apos; implicitly has an &apos;any&apos; type." source="TS7005" />
-</file>
-<file name="assets/js/base/components/button/index.tsx">
-<error line="4" column="36" severity="error" message="Could not find a declaration file for module &apos;wordpress-components&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/wordpress-components/build/index.js&apos; implicitly has an &apos;any&apos; type.
-  If the &apos;@wordpress/components&apos; package actually exposes this module, consider sending a pull request to amend &apos;https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/wordpress__components&apos;" source="TS7016" />
-</file>
-<file name="packages/checkout/components/index.js">
-<error line="1" column="15" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/totals/index.js&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-<error line="2" column="42" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/totals-wrapper/index.tsx&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern.
-  The file is in the program because:
-    Imported via &apos;./totals-wrapper&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/index.js&apos;
-    Imported via &apos;../totals-wrapper&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/order-meta/index.js&apos;
-    Imported via &apos;../totals-wrapper&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/discounts-meta/index.js&apos;" source="TS6307" />
-<error line="3" column="50" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/order-meta/index.js&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-<error line="4" column="54" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/discounts-meta/index.js&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-<error line="5" column="62" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/order-shipping-packages/index.js&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-<error line="6" column="34" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/panel/index.tsx&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-<error line="7" column="35" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/button/index.ts&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-<error line="8" column="34" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/label/index.ts&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-<error line="9" column="44" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/checkbox-control/index.tsx&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-</file>
-<file name="packages/checkout/utils/index.js">
-<error line="1" column="15" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/utils/validation/index.ts&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-<error line="2" column="37" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/utils/extension-cart-update.ts&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-</file>
-<file name="packages/checkout/filter-registry/index.ts">
-<error line="36" column="37" severity="error" message="Cannot find name &apos;T&apos;." source="TS2304" />
-</file>
-<file name="packages/checkout/blocks-registry/get-registered-blocks.ts">
-<error line="4" column="50" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/blocks-registry/types.ts&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern.
-  The file is in the program because:
-    Imported via &apos;./types&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/blocks-registry/get-registered-blocks.ts&apos;
-    Imported via &apos;./types&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/blocks-registry/registered-blocks.ts&apos;
-    Imported via &apos;./types&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/blocks-registry/register-checkout-block.ts&apos;
-    Imported via &apos;./types&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/blocks-registry/index.ts&apos;" source="TS6307" />
-<error line="5" column="34" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/blocks-registry/registered-blocks.ts&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern.
-  The file is in the program because:
-    Imported via &apos;./registered-blocks&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/blocks-registry/get-registered-blocks.ts&apos;
-    Imported via &apos;./registered-blocks&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/blocks-registry/register-checkout-block.ts&apos;" source="TS6307" />
-</file>
-<file name="packages/checkout/blocks-registry/register-checkout-block.ts">
-<error line="15" column="8" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/blocks-registry/utils.ts&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-<error line="34" column="3" severity="error" message="Type &apos;LazyExoticComponent&lt;ComponentType&lt;unknown&gt;&gt; | (() =&gt; Element | null) | null&apos; is not assignable to type &apos;Function&apos;.
-  Type &apos;null&apos; is not assignable to type &apos;Function&apos;." source="TS2322" />
-<error line="44" column="43" severity="error" message="Property &apos;lock&apos; does not exist on type &apos;{}&apos;." source="TS2339" />
-</file>
-<file name="packages/checkout/blocks-registry/index.ts">
-<error line="1" column="15" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/blocks-registry/get-registered-blocks.ts&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern.
-  The file is in the program because:
-    Imported via &apos;./get-registered-blocks&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/blocks-registry/index.ts&apos;
-    Imported via &apos;./get-registered-blocks&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/blocks-registry/utils.ts&apos;" source="TS6307" />
-<error line="2" column="15" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/blocks-registry/register-checkout-block.ts&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-</file>
-<file name="packages/checkout/index.js">
-<error line="1" column="15" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/components/index.js&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-<error line="2" column="15" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/utils/index.js&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-<error line="4" column="15" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/filter-registry/index.ts&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-<error line="5" column="15" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/blocks-registry/index.ts&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern." source="TS6307" />
-<error line="6" column="34" severity="error" message="Could not find a declaration file for module &apos;wordpress-components&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/wordpress-components/build/index.js&apos; implicitly has an &apos;any&apos; type.
-  If the &apos;@wordpress/components&apos; package actually exposes this module, consider sending a pull request to amend &apos;https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/wordpress__components&apos;" source="TS7016" />
 </file>
 <file name="assets/js/base/context/providers/add-to-cart-form/form-state/actions.js">
 <error line="42" column="27" severity="error" message="Parameter &apos;data&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
@@ -1148,67 +1087,6 @@
 </file>
 <file name="assets/js/base/context/providers/index.js">
 <error line="6" column="1" severity="error" message="Module &apos;./cart-checkout&apos; has already exported a member named &apos;React&apos;. Consider explicitly re-exporting to resolve the ambiguity." source="TS2308" />
-</file>
-<file name="assets/js/base/context/hooks/use-checkout-submit.js">
-<error line="7" column="51" severity="error" message="File &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/packages/checkout/index.js&apos; is not listed within the file list of project &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/tsconfig.json&apos;. Projects must list all files or use an &apos;include&apos; pattern.
-  The file is in the program because:
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/context/hooks/use-checkout-submit.js&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/context/providers/store-snackbar-notices/components/snackbar-notices-container.js&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/atomic/utils/render-parent-block.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/components/cart-checkout/order-summary/index.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/components/cart-checkout/order-summary/order-summary-item.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/components/cart-checkout/shipping-rates-control/index.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/components/cart-checkout/shipping-rates-control-package/index.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/components/cart-checkout/totals/coupon/index.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/components/cart-checkout/totals/discount/index.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/components/cart-checkout/totals/footer-item/index.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/components/cart-checkout/totals/shipping/index.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/base/components/checkbox-list/index.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/block.js&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/filled-cart-block/edit.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-items-block/edit.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/cart-line-items-table/cart-line-item-row.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-totals-block/edit.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart-checkout-shared/payment-methods/payment-method-card.js&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/empty-cart-block/edit.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-block/edit.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-block/slotfills.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-subtotal/block.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-fee/block.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-discount/block.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-shipping/block.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-coupon-form/block.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/cart-order-summary-taxes/block.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/inner-blocks/register-components.ts&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/test/block.js&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/cart/test/slots.js&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/block.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-fields-block/edit.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-totals-block/edit.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-shipping-address-block/edit.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-shipping-address-block/block.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-terms-block/edit.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-contact-information-block/edit.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-contact-information-block/block.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-billing-address-block/edit.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/order-notes/index.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-block/edit.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-block/slotfills.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-payment-block/edit.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-shipping-methods-block/edit.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-subtotal/block.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-fee/block.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-discount/block.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-shipping/block.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-coupon-form/block.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-taxes/block.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-order-summary-cart-items/block.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/register-components.ts&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/checkout/inner-blocks/checkout-terms-block/frontend.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/register-components.ts&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/mini-cart-footer-block/block.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/filled-mini-cart-contents-block/edit.tsx&apos;
-    Imported via &apos;@woocommerce/blocks-checkout&apos; from file &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/blocks/mini-cart/test/block.js&apos;" source="TS6307" />
 </file>
 <file name="assets/js/base/context/hooks/use-checkout-extension-data.ts">
 <error line="12" column="15" severity="error" message="Module &apos;&quot;../../../data/checkout/types&quot;&apos; declares &apos;CheckoutState&apos; locally, but it is not exported." source="TS2459" />
@@ -1617,18 +1495,6 @@
 <file name="node_modules/@types/webpack-env/index.d.ts">
 <error line="297" column="13" severity="error" message="Cannot redeclare block-scoped variable &apos;__webpack_public_path__&apos;." source="TS2451" />
 </file>
-<file name="assets/js/base/components/text-input/text-input.tsx">
-<error line="93" column="6" severity="error" message="Type &apos;{ label: string | undefined; screenReaderLabel: string | undefined; wrapperElement: string; wrapperProps: { htmlFor: string; }; htmlFor: string; }&apos; is not assignable to type &apos;LabelProps&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the types of the target&apos;s properties.
-  Types of property &apos;label&apos; are incompatible.
-    Type &apos;string | undefined&apos; is not assignable to type &apos;string&apos;.
-      Type &apos;undefined&apos; is not assignable to type &apos;string&apos;." source="TS2375" />
-</file>
-<file name="assets/js/base/components/text-input/validated-text-input.tsx">
-<error line="136" column="4" severity="error" message="Type &apos;{ className: string; &quot;aria-invalid&quot;: boolean; id: string; onBlur: () =&gt; void; feedback: false | Element; ref: RefObject&lt;HTMLInputElement&gt;; onChange: (val: string) =&gt; void; ariaDescribedBy: string | undefined; value: string; }&apos; is not assignable to type &apos;TextInputProps&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the types of the target&apos;s properties.
-  Types of property &apos;ariaDescribedBy&apos; are incompatible.
-    Type &apos;string | undefined&apos; is not assignable to type &apos;string&apos;.
-      Type &apos;undefined&apos; is not assignable to type &apos;string&apos;." source="TS2375" />
-</file>
 <file name="assets/js/base/components/combobox/index.tsx">
 <error line="8" column="33" severity="error" message="Could not find a declaration file for module &apos;wordpress-components&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/wordpress-components/build/index.js&apos; implicitly has an &apos;any&apos; type.
   If the &apos;@wordpress/components&apos; package actually exposes this module, consider sending a pull request to amend &apos;https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/wordpress__components&apos;" source="TS7016" />
@@ -1644,8 +1510,6 @@
 <file name="assets/js/base/components/state-input/state-input.tsx">
 <error line="93" column="6" severity="error" message="Type &apos;{ className: string; id: string; label: string; onChange: (stateValue: string) =&gt; void; options: { value: string; label: string; }[]; value: string; errorMessage: string; required: boolean; autoComplete: string; }&apos; is not assignable to type &apos;IntrinsicAttributes &amp; Omit&lt;{ instanceId: string | number; }, &quot;instanceId&quot;&gt; &amp; { children?: ReactNode; }&apos;.
   Property &apos;className&apos; does not exist on type &apos;IntrinsicAttributes &amp; Omit&lt;{ instanceId: string | number; }, &quot;instanceId&quot;&gt; &amp; { children?: ReactNode; }&apos;." source="TS2322" />
-<error line="136" column="4" severity="error" message="Type &apos;{ className: string | undefined; id: string; label: string; onChange: (stateValue: string) =&gt; void; autoComplete: string; value: string; required: boolean; }&apos; is not assignable to type &apos;IntrinsicAttributes &amp; Omit&lt;ValidatedTextInputProps, &quot;instanceId&quot;&gt; &amp; { children?: ReactNode; }&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the types of the target&apos;s properties.
-  Property &apos;label&apos; does not exist on type &apos;IntrinsicAttributes &amp; Omit&lt;ValidatedTextInputProps, &quot;instanceId&quot;&gt; &amp; { children?: ReactNode; }&apos;." source="TS2375" />
 </file>
 <file name="assets/js/base/components/state-input/billing-state-input.tsx">
 <error line="13" column="21" severity="error" message="Type &apos;Record&lt;string, string&gt;&apos; is not assignable to type &apos;Record&lt;string, Record&lt;string, string&gt;&gt;&apos;.
@@ -1661,8 +1525,6 @@
   Types of property &apos;errorMessage&apos; are incompatible.
     Type &apos;string | undefined&apos; is not assignable to type &apos;string&apos;.
       Type &apos;undefined&apos; is not assignable to type &apos;string&apos;." source="TS2375" />
-<error line="224" column="7" severity="error" message="Type &apos;{ key: &quot;first_name&quot; | &quot;last_name&quot; | &quot;company&quot; | &quot;address_1&quot; | &quot;address_2&quot; | &quot;city&quot; | &quot;postcode&quot;; id: string; className: string; label: string; value: string; autoCapitalize: string | undefined; autoComplete: string; onChange: (newValue: string) =&gt; void; errorMessage: string | undefined; required: boolean; }&apos; is not assignable to type &apos;IntrinsicAttributes &amp; Omit&lt;ValidatedTextInputProps, &quot;instanceId&quot;&gt; &amp; { children?: ReactNode; }&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the types of the target&apos;s properties.
-  Property &apos;label&apos; does not exist on type &apos;IntrinsicAttributes &amp; Omit&lt;ValidatedTextInputProps, &quot;instanceId&quot;&gt; &amp; { children?: ReactNode; }&apos;." source="TS2375" />
 </file>
 <file name="assets/js/base/components/cart-checkout/form-step/index.tsx">
 <error line="81" column="6" severity="error" message="Type &apos;{ title: string; stepHeadingContent: Element | undefined; }&apos; is not assignable to type &apos;StepHeadingProps&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the types of the target&apos;s properties.
@@ -1687,10 +1549,6 @@
 <error line="30" column="5" severity="error" message="Type &apos;Partial&lt;keyof ShippingAddress&gt;[]&apos; is not assignable to type &apos;Partial&lt;keyof AddressFields&gt;[]&apos;.
   Type &apos;Partial&lt;keyof ShippingAddress&gt;&apos; is not assignable to type &apos;Partial&lt;keyof AddressFields&gt;&apos;.
     Type &apos;&quot;phone&quot;&apos; is not assignable to type &apos;Partial&lt;keyof AddressFields&gt;&apos;." source="TS2322" />
-</file>
-<file name="assets/js/base/components/cart-checkout/totals/coupon/index.tsx">
-<error line="102" column="8" severity="error" message="Type &apos;{ id: string; errorId: string; className: string; label: string; value: string; ariaDescribedBy: string | undefined; onChange: (newCouponValue: string) =&gt; void; focusOnMount: true; showError: false; }&apos; is not assignable to type &apos;IntrinsicAttributes &amp; Omit&lt;ValidatedTextInputProps, &quot;instanceId&quot;&gt; &amp; { children?: ReactNode; }&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the types of the target&apos;s properties.
-  Property &apos;label&apos; does not exist on type &apos;IntrinsicAttributes &amp; Omit&lt;ValidatedTextInputProps, &quot;instanceId&quot;&gt; &amp; { children?: ReactNode; }&apos;." source="TS2375" />
 </file>
 <file name="assets/js/base/components/chip/chip.tsx">
 <error line="66" column="4" severity="error" message="Type &apos;{ children: (false | {} | Element | null)[]; className: string; }&apos; is not assignable to type &apos;IntrinsicAttributes&apos;.
@@ -1767,17 +1625,17 @@
 <error line="51" column="22" severity="error" message="Type &apos;{ code: string; decimalSeparator: string; minorUnit: number; prefix: string; suffix: string; symbol: string; thousandSeparator: string; }&apos; is not assignable to type &apos;Currency&apos;.
   Types of property &apos;code&apos; are incompatible.
     Type &apos;string&apos; is not assignable to type &apos;CurrencyCode&apos;." source="TS2322" />
-<error line="51" column="44" severity="error" message="Type &apos;{ currency_code: string; currency_decimal_separator: string; currency_minor_unit: number; currency_prefix: string; currency_suffix: string; currency_symbol: string; currency_thousand_separator: string; ... 11 more ...; total_tax: string; }&apos; is not assignable to type &apos;LooselyMustHave&lt;CartResponseTotals, &quot;total_price&quot; | &quot;total_tax&quot;&gt;&apos;.
+<error line="51" column="44" severity="error" message="Type &apos;{ currency_code: string; currency_decimal_separator: string; currency_minor_unit: number; currency_prefix: string; currency_suffix: string; currency_symbol: string; currency_thousand_separator: string; ... 11 more ...; total_tax: string; }&apos; is not assignable to type &apos;LooselyMustHave&lt;CartResponseTotals, &quot;total_tax&quot; | &quot;total_price&quot;&gt;&apos;.
   Type &apos;{ currency_code: string; currency_decimal_separator: string; currency_minor_unit: number; currency_prefix: string; currency_suffix: string; currency_symbol: string; currency_thousand_separator: string; ... 11 more ...; total_tax: string; }&apos; is not assignable to type &apos;Partial&lt;CartResponseTotals&gt;&apos;.
     Types of property &apos;currency_code&apos; are incompatible.
       Type &apos;string&apos; is not assignable to type &apos;CurrencyCode&apos;." source="TS2322" />
 <error line="65" column="22" severity="error" message="Type &apos;{ code: string; decimalSeparator: string; minorUnit: number; prefix: string; suffix: string; symbol: string; thousandSeparator: string; }&apos; is not assignable to type &apos;Currency&apos;." source="TS2322" />
-<error line="65" column="44" severity="error" message="Type &apos;{ total_tax: string; total_items_tax: string; currency_code: string; currency_decimal_separator: string; currency_minor_unit: number; currency_prefix: string; currency_suffix: string; ... 11 more ...; total_shipping_tax: string; }&apos; is not assignable to type &apos;LooselyMustHave&lt;CartResponseTotals, &quot;total_price&quot; | &quot;total_tax&quot;&gt;&apos;.
+<error line="65" column="44" severity="error" message="Type &apos;{ total_tax: string; total_items_tax: string; currency_code: string; currency_decimal_separator: string; currency_minor_unit: number; currency_prefix: string; currency_suffix: string; ... 11 more ...; total_shipping_tax: string; }&apos; is not assignable to type &apos;LooselyMustHave&lt;CartResponseTotals, &quot;total_tax&quot; | &quot;total_price&quot;&gt;&apos;.
   Type &apos;{ total_tax: string; total_items_tax: string; currency_code: string; currency_decimal_separator: string; currency_minor_unit: number; currency_prefix: string; currency_suffix: string; ... 11 more ...; total_shipping_tax: string; }&apos; is not assignable to type &apos;Partial&lt;CartResponseTotals&gt;&apos;.
     Types of property &apos;currency_code&apos; are incompatible.
       Type &apos;string&apos; is not assignable to type &apos;CurrencyCode&apos;." source="TS2322" />
 <error line="77" column="22" severity="error" message="Type &apos;{ code: string; decimalSeparator: string; minorUnit: number; prefix: string; suffix: string; symbol: string; thousandSeparator: string; }&apos; is not assignable to type &apos;Currency&apos;." source="TS2322" />
-<error line="77" column="44" severity="error" message="Type &apos;{ total_tax: string; total_items_tax: string; currency_code: string; currency_decimal_separator: string; currency_minor_unit: number; currency_prefix: string; currency_suffix: string; ... 11 more ...; total_shipping_tax: string; }&apos; is not assignable to type &apos;LooselyMustHave&lt;CartResponseTotals, &quot;total_price&quot; | &quot;total_tax&quot;&gt;&apos;.
+<error line="77" column="44" severity="error" message="Type &apos;{ total_tax: string; total_items_tax: string; currency_code: string; currency_decimal_separator: string; currency_minor_unit: number; currency_prefix: string; currency_suffix: string; ... 11 more ...; total_shipping_tax: string; }&apos; is not assignable to type &apos;LooselyMustHave&lt;CartResponseTotals, &quot;total_tax&quot; | &quot;total_price&quot;&gt;&apos;.
   Type &apos;{ total_tax: string; total_items_tax: string; currency_code: string; currency_decimal_separator: string; currency_minor_unit: number; currency_prefix: string; currency_suffix: string; ... 11 more ...; total_shipping_tax: string; }&apos; is not assignable to type &apos;Partial&lt;CartResponseTotals&gt;&apos;.
     Types of property &apos;currency_code&apos; are incompatible.
       Type &apos;string&apos; is not assignable to type &apos;CurrencyCode&apos;." source="TS2322" />
@@ -2816,10 +2674,6 @@
 <error line="21" column="19" severity="error" message="Argument of type &apos;{ clientId: string; registeredBlocks: string[]; }&apos; is not assignable to parameter of type &apos;{ clientId: string; registeredBlocks: string[]; defaultTemplate: TemplateArray; }&apos;.
   Property &apos;defaultTemplate&apos; is missing in type &apos;{ clientId: string; registeredBlocks: string[]; }&apos; but required in type &apos;{ clientId: string; registeredBlocks: string[]; defaultTemplate: TemplateArray; }&apos;." source="TS2345" />
 </file>
-<file name="assets/js/blocks/checkout/phone-number/index.tsx">
-<error line="24" column="4" severity="error" message="Type &apos;{ id: string; type: string; autoComplete: string; required: boolean; label: string; value: string; onChange: (value: string) =&gt; void; }&apos; is not assignable to type &apos;IntrinsicAttributes &amp; Omit&lt;ValidatedTextInputProps, &quot;instanceId&quot;&gt; &amp; { children?: ReactNode; }&apos;.
-  Property &apos;type&apos; does not exist on type &apos;IntrinsicAttributes &amp; Omit&lt;ValidatedTextInputProps, &quot;instanceId&quot;&gt; &amp; { children?: ReactNode; }&apos;." source="TS2322" />
-</file>
 <file name="assets/js/blocks/checkout/inner-blocks/checkout-shipping-address-block/index.tsx">
 <error line="13" column="1" severity="error" message="No overload matches this call.
   Overload 1 of 2, &apos;(metadata: BlockConfiguration&lt;{ title: string; description: string; showStepNumber: boolean; className: string; }&gt;, settings?: Partial&lt;BlockConfiguration&lt;{ title: string; description: string; showStepNumber: boolean; className: string; }&gt;&gt; | undefined): Block&lt;...&gt; | undefined&apos;, gave the following error.
@@ -2848,10 +2702,6 @@
   Overload 2 of 2, &apos;(name: string, settings: BlockConfiguration&lt;{ text: string; checkbox: boolean; }&gt;): Block&lt;{ text: string; checkbox: boolean; }&gt; | undefined&apos;, gave the following error.
     Argument of type &apos;{ icon: { src: JSX.Element; }; edit: ({ attributes: { checkbox, text }, setAttributes, }: { attributes: { text: string; checkbox: boolean; }; setAttributes: (attributes: Record&lt;string, unknown&gt;) =&gt; void; }) =&gt; JSX.Element; save: () =&gt; JSX.Element; }&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{ text: string; checkbox: boolean; }&gt;&apos;.
       Type &apos;{ icon: { src: Element; }; edit: ({ attributes: { checkbox, text }, setAttributes, }: { attributes: { text: string; checkbox: boolean; }; setAttributes: (attributes: Record&lt;string, unknown&gt;) =&gt; void; }) =&gt; Element; save: () =&gt; Element; }&apos; is missing the following properties from type &apos;Pick&lt;Block&lt;{ text: string; checkbox: boolean; }&gt;, &quot;title&quot; | &quot;category&quot; | &quot;attributes&quot;&gt;&apos;: title, category, attributes" source="TS2769" />
-</file>
-<file name="assets/js/blocks/checkout/inner-blocks/checkout-contact-information-block/block.tsx">
-<error line="56" column="5" severity="error" message="Type &apos;{ id: string; type: string; label: string; value: string; autoComplete: string; onChange: (value: string) =&gt; void; required: boolean; }&apos; is not assignable to type &apos;IntrinsicAttributes &amp; Omit&lt;ValidatedTextInputProps, &quot;instanceId&quot;&gt; &amp; { children?: ReactNode; }&apos;.
-  Property &apos;type&apos; does not exist on type &apos;IntrinsicAttributes &amp; Omit&lt;ValidatedTextInputProps, &quot;instanceId&quot;&gt; &amp; { children?: ReactNode; }&apos;." source="TS2322" />
 </file>
 <file name="assets/js/blocks/checkout/inner-blocks/checkout-contact-information-block/index.tsx">
 <error line="13" column="1" severity="error" message="No overload matches this call.
@@ -4385,6 +4235,23 @@
 <error line="62" column="43" severity="error" message="Argument of type &apos;{}&apos; is not assignable to parameter of type &apos;{ images: any[]; }&apos;.
   Property &apos;images&apos; is missing in type &apos;{}&apos; but required in type &apos;{ images: any[]; }&apos;." source="TS2345" />
 <error line="68" column="45" severity="error" message="Type &apos;null&apos; is not assignable to type &apos;any[]&apos;." source="TS2322" />
+</file>
+<file name="packages/checkout/blocks-registry/test/index.js">
+<error line="16" column="24" severity="error" message="Parameter &apos;blockName&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
+<error line="16" column="35" severity="error" message="Parameter &apos;options&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
+<error line="17" column="45" severity="error" message="Expected 1 arguments, but got 2." source="TS2554" />
+</file>
+<file name="packages/checkout/components/text-input/test/validated-text-input.tsx">
+<error line="92" column="9" severity="error" message="Property &apos;toBeInTheDocument&apos; does not exist on type &apos;Matchers&lt;void, HTMLElement | null&gt;&apos;." source="TS2339" />
+<error line="93" column="45" severity="error" message="Property &apos;toBeInTheDocument&apos; does not exist on type &apos;JestMatchers&lt;HTMLElement&gt;&apos;." source="TS2339" />
+<error line="114" column="39" severity="error" message="Property &apos;toBeInTheDocument&apos; does not exist on type &apos;JestMatchers&lt;HTMLElement&gt;&apos;." source="TS2339" />
+</file>
+<file name="packages/checkout/filter-registry/test/index.js">
+<error line="31" column="9" severity="error" message="Property &apos;toUpperCase&apos; does not exist on type &apos;T&apos;." source="TS2339" />
+<error line="31" column="25" severity="error" message="Object is possibly &apos;null&apos; or &apos;undefined&apos;." source="TS2533" />
+<error line="49" column="35" severity="error" message="Property &apos;toUpperCase&apos; does not exist on type &apos;T&apos;." source="TS2339" />
+<error line="55" column="5" severity="error" message="Type &apos;(val: string) =&gt; boolean&apos; is not assignable to type &apos;(value: string) =&gt; true | Error&apos;.
+  Type &apos;boolean&apos; is not assignable to type &apos;true | Error&apos;." source="TS2322" />
 </file>
 <file name="storybook/main.js">
 <error line="20" column="24" severity="error" message="Parameter &apos;config&apos; implicitly has an &apos;any&apos; type." source="TS7006" />

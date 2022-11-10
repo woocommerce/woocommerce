@@ -7,3 +7,6 @@ export { default as Panel } from './panel';
 export { default as Button } from './button';
 export { default as Label } from './label';
 export { default as CheckboxControl } from './checkbox-control';
+export { default as ValidatedTextInput } from './text-input/validated-text-input';
+export { default as TextInput } from './text-input/text-input';
+export { default as ValidationInputError } from './validation-input-error';

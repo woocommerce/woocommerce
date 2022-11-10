@@ -18,12 +18,12 @@ interface TextInputProps
 	> {
 	id: string;
 	ariaLabel?: string;
-	label?: string;
-	ariaDescribedBy?: string;
+	label?: string | undefined;
+	ariaDescribedBy?: string | undefined;
 	screenReaderLabel?: string;
 	help?: string;
 	feedback?: boolean | JSX.Element;
-	autoComplete?: string;
+	autoComplete?: string | undefined;
 	onChange: ( newValue: string ) => void;
 	onBlur?: ( newValue: string ) => void;
 }
