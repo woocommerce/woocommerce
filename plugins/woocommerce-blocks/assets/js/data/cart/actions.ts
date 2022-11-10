@@ -185,14 +185,6 @@ export const shippingRatesBeingSelected = ( isResolving: boolean ) =>
 	} as const );
 
 /**
- * Returns an action object for updating legacy cart fragments.
- */
-export const updateCartFragments = () =>
-	( {
-		type: types.UPDATE_LEGACY_CART_FRAGMENTS,
-	} as const );
-
-/**
  * Triggers an adding to cart event so other blocks can update accordingly.
  */
 export const triggerAddingToCartEvent = () =>
@@ -227,7 +219,6 @@ export function* applyExtensionCartUpdate(
 			cache: 'no-store',
 		} );
 		yield receiveCart( response );
-		yield updateCartFragments();
 		return response;
 	} catch ( error ) {
 		yield receiveError( error );
@@ -265,7 +256,6 @@ export function* applyCoupon(
 
 		yield receiveCart( response );
 		yield receiveApplyingCoupon( '' );
-		yield updateCartFragments();
 	} catch ( error ) {
 		yield receiveError( error );
 		yield receiveApplyingCoupon( '' );
@@ -306,7 +296,6 @@ export function* removeCoupon(
 
 		yield receiveCart( response );
 		yield receiveRemovingCoupon( '' );
-		yield updateCartFragments();
 	} catch ( error ) {
 		yield receiveError( error );
 		yield receiveRemovingCoupon( '' );
@@ -351,7 +340,6 @@ export function* addItemToCart(
 
 		yield receiveCart( response );
 		yield triggerAddedToCartEvent( { preserveCartData: true } );
-		yield updateCartFragments();
 	} catch ( error ) {
 		yield receiveError( error );
 
@@ -390,7 +378,6 @@ export function* removeItemFromCart(
 		} );
 
 		yield receiveCart( response );
-		yield updateCartFragments();
 	} catch ( error ) {
 		yield receiveError( error );
 
@@ -437,7 +424,6 @@ export function* changeCartItemQuantity(
 		} );
 
 		yield receiveCart( response );
-		yield updateCartFragments();
 	} catch ( error ) {
 		yield receiveError( error );
 
@@ -559,5 +545,4 @@ export type CartAction = ReturnOrGeneratorYieldUnion<
 	| typeof removeItemFromCart
 	| typeof changeCartItemQuantity
 	| typeof addItemToCart
-	| typeof updateCartFragments
 >;

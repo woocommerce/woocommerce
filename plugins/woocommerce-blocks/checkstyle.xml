@@ -497,30 +497,30 @@
 </file>
 <file name="assets/js/data/cart/actions.ts">
 <error line="14" column="10" severity="error" message="Module &apos;&quot;@wordpress/data&quot;&apos; has no exported member &apos;controls&apos;." source="TS2305" />
-<error line="233" column="23" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;ResponseError | null | undefined&apos;." source="TS2345" />
-<error line="235" column="8" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="236" column="23" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="270" column="23" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;ResponseError | null | undefined&apos;." source="TS2345" />
-<error line="274" column="8" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="275" column="23" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="311" column="23" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;ResponseError | null | undefined&apos;." source="TS2345" />
-<error line="315" column="8" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="316" column="23" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="356" column="23" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;ResponseError | null | undefined&apos;." source="TS2345" />
-<error line="359" column="8" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="360" column="23" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="395" column="23" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;ResponseError | null | undefined&apos;." source="TS2345" />
-<error line="398" column="8" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="399" column="23" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="442" column="23" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;ResponseError | null | undefined&apos;." source="TS2345" />
-<error line="445" column="8" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="446" column="23" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="477" column="23" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;ResponseError | null | undefined&apos;." source="TS2345" />
-<error line="481" column="8" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="482" column="23" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="528" column="23" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;ResponseError | null | undefined&apos;." source="TS2345" />
-<error line="532" column="8" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
-<error line="533" column="23" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="224" column="23" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;ResponseError | null | undefined&apos;." source="TS2345" />
+<error line="226" column="8" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="227" column="23" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="260" column="23" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;ResponseError | null | undefined&apos;." source="TS2345" />
+<error line="264" column="8" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="265" column="23" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="300" column="23" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;ResponseError | null | undefined&apos;." source="TS2345" />
+<error line="304" column="8" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="305" column="23" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="344" column="23" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;ResponseError | null | undefined&apos;." source="TS2345" />
+<error line="347" column="8" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="348" column="23" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="382" column="23" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;ResponseError | null | undefined&apos;." source="TS2345" />
+<error line="385" column="8" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="386" column="23" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="428" column="23" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;ResponseError | null | undefined&apos;." source="TS2345" />
+<error line="431" column="8" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="432" column="23" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="463" column="23" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;ResponseError | null | undefined&apos;." source="TS2345" />
+<error line="467" column="8" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="468" column="23" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="514" column="23" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;ResponseError | null | undefined&apos;." source="TS2345" />
+<error line="518" column="8" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
+<error line="519" column="23" severity="error" message="Object is of type &apos;unknown&apos;." source="TS2571" />
 </file>
 <file name="assets/js/data/cart/resolvers.ts">
 <error line="5" column="10" severity="error" message="Module &apos;&quot;@wordpress/data&quot;&apos; has no exported member &apos;controls&apos;." source="TS2305" />
@@ -633,7 +633,7 @@
 <error line="30" column="42" severity="error" message="Property &apos;type&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
 </file>
 <file name="assets/js/data/cart/controls.js">
-<error line="22" column="31" severity="error" message="Parameter &apos;preserveCartData&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
+<error line="18" column="31" severity="error" message="Parameter &apos;preserveCartData&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
 </file>
 <file name="assets/js/utils/notices.ts">
 <error line="12" column="52" severity="error" message="Property &apos;type&apos; does not exist on type &apos;Notice&apos;." source="TS2339" />
@@ -834,6 +834,12 @@
 <error line="118" column="14" severity="error" message="Parameter &apos;error&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
 <error line="124" column="5" severity="error" message="Cannot find name &apos;receiveApplyingCoupon&apos;." source="TS2304" />
 </file>
+<file name="assets/js/base/context/hooks/cart/use-store-cart-item-quantity.ts">
+<error line="149" column="3" severity="error" message="Type &apos;() =&gt; Promise&lt;boolean&gt; | Promise&lt;void&gt;&apos; is not assignable to type &apos;() =&gt; Promise&lt;boolean&gt;&apos;.
+  Type &apos;Promise&lt;boolean&gt; | Promise&lt;void&gt;&apos; is not assignable to type &apos;Promise&lt;boolean&gt;&apos;.
+    Type &apos;Promise&lt;void&gt;&apos; is not assignable to type &apos;Promise&lt;boolean&gt;&apos;.
+      Type &apos;void&apos; is not assignable to type &apos;boolean&apos;." source="TS2322" />
+</file>
 <file name="assets/js/base/context/hooks/use-query-state.js">
 <error line="28" column="13" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
 <error line="131" column="5" severity="error" message="Argument of type &apos;Object | undefined&apos; is not assignable to parameter of type &apos;any[] | ComparableObject&apos;.
@@ -882,8 +888,7 @@
 </file>
 <file name="assets/js/base/context/hooks/use-store-add-to-cart.ts">
 <error line="93" column="3" severity="error" message="Type &apos;(quantity?: number) =&gt; Promise&lt;void&gt;&apos; is not assignable to type &apos;(quantity?: number | undefined) =&gt; Promise&lt;boolean&gt;&apos;.
-  Type &apos;Promise&lt;void&gt;&apos; is not assignable to type &apos;Promise&lt;boolean&gt;&apos;.
-    Type &apos;void&apos; is not assignable to type &apos;boolean&apos;." source="TS2322" />
+  Type &apos;Promise&lt;void&gt;&apos; is not assignable to type &apos;Promise&lt;boolean&gt;&apos;." source="TS2322" />
 </file>
 <file name="assets/js/base/context/providers/add-to-cart-form/form-state/actions.js">
 <error line="42" column="27" severity="error" message="Parameter &apos;data&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
