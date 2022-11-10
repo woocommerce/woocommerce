@@ -1425,6 +1425,10 @@
 <file name="assets/js/editor-components/edit-product-link/index.js">
 <error line="18" column="40" severity="error" message="Property &apos;productId&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
 </file>
+<file name="assets/js/atomic/blocks/product-elements/sku/index.ts">
+<error line="25" column="2" severity="error" message="Type &apos;{ apiVersion: number; title: string; description: string; icon: { src: JSX.Element; }; usesContext: string[]; ancestor: string[]; attributes: Record&lt;string, Record&lt;string, unknown&gt;&gt;; edit: (props: any) =&gt; JSX.Element; }&apos; is not assignable to type &apos;BlockConfiguration&lt;{}&gt;&apos;.
+  Object literal may only specify known properties, and &apos;ancestor&apos; does not exist in type &apos;BlockConfiguration&lt;{}&gt;&apos;." source="TS2322" />
+</file>
 <file name="assets/js/atomic/blocks/product-elements/category-list/index.ts">
 <error line="36" column="5" severity="error" message="Type &apos;{ color?: { text: true; link: true; background: false; __experimentalSkipSerialization: true; }; typography?: { fontSize: true; lineHeight: true; __experimentalFontStyle: true; __experimentalFontWeight: true; __experimentalSkipSerialization: true; }; __experimentalSelector?: string; }&apos; is not assignable to type &apos;BlockSupports&apos;.
   Types of property &apos;color&apos; are incompatible.

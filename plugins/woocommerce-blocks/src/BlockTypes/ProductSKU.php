@@ -21,12 +21,48 @@ class ProductSKU extends AbstractBlock {
 	protected $api_version = '2';
 
 	/**
-	 * Register script and style assets for the block type before it is registered.
+	 * Overwrite parent method to prevent script registration.
 	 *
-	 * This registers the scripts; it does not enqueue them.
+	 * It is necessary to register and enqueues assets during the render
+	 * phase because we want to load assets only if the block has the content.
 	 */
 	protected function register_block_type_assets() {
-		parent::register_block_type_assets();
-		$this->register_chunk_translations( [ $this->block_name ] );
+		return null;
+	}
+
+	/**
+	 * Register the context.
+	 */
+	protected function get_block_type_uses_context() {
+		return [ 'query', 'queryId', 'postId' ];
+	}
+
+	/**
+	 * Include and render the block.
+	 *
+	 * @param array    $attributes Block attributes. Default empty array.
+	 * @param string   $content    Block content. Default empty string.
+	 * @param WP_Block $block      Block instance.
+	 * @return string Rendered block type output.
+	 */
+	protected function render( $attributes, $content, $block ) {
+		if ( ! empty( $content ) ) {
+			parent::register_block_type_assets();
+			$this->register_chunk_translations( [ $this->block_name ] );
+			return $content;
+		}
+
+		$post_id = $block->context['postId'];
+		$product = wc_get_product( $post_id );
+
+		if ( $product ) {
+			return sprintf(
+				'<div class="wc-block-components-product-sku wc-block-grid__product-sku">
+					SKU:
+					<strong>%s</strong>
+				</div>',
+				$product->get_sku()
+			);
+		}
 	}
 }
