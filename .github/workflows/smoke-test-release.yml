@@ -226,7 +226,7 @@ jobs:
                   retention-days: 5
 
     PHP-versions:
-      name: Common PHP versions on release
+      name: PHP version ${{ matrix.php }} on release
       runs-on: ubuntu-20.04
       needs: [e2e-release]
       if: success() || failure()
@@ -301,7 +301,7 @@ jobs:
                 retention-days: 5
 
     WP-versions:
-        name: Common WP versions
+        name: WP version ${{ matrix.wp }} on release
         runs-on: ubuntu-20.04
         needs: [e2e-release]
         if: success() || failure()
