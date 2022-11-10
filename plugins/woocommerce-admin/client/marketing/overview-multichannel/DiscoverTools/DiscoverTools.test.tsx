@@ -6,6 +6,7 @@ import { render, screen } from '@testing-library/react';
 /**
  * Internal dependencies
  */
+import { useInstalledPlugins } from '../../hooks';
 import { useRecommendedPlugins } from './useRecommendedPlugins';
 import { DiscoverTools } from './DiscoverTools';
 
@@ -23,11 +24,18 @@ jest.mock( './useRecommendedPlugins', () => ( {
 	useRecommendedPlugins: jest.fn(),
 } ) );
 
+jest.mock( '../../hooks', () => ( {
+	useInstalledPlugins: jest.fn(),
+} ) );
+
 describe( 'DiscoverTools component', () => {
 	it( 'should render a Spinner when loading is in progress', () => {
 		( useRecommendedPlugins as jest.Mock ).mockReturnValue( {
 			isLoading: true,
 			plugins: [],
+		} );
+		( useInstalledPlugins as jest.Mock ).mockReturnValue( {
+			loadInstalledPluginsAfterActivation: jest.fn(),
 		} );
 		render( <DiscoverTools /> );
 
@@ -38,6 +46,9 @@ describe( 'DiscoverTools component', () => {
 		( useRecommendedPlugins as jest.Mock ).mockReturnValue( {
 			isLoading: false,
 			plugins: [],
+		} );
+		( useInstalledPlugins as jest.Mock ).mockReturnValue( {
+			loadInstalledPluginsAfterActivation: jest.fn(),
 		} );
 		render( <DiscoverTools /> );
 
@@ -78,6 +89,9 @@ describe( 'DiscoverTools component', () => {
 					],
 				},
 			],
+		} );
+		( useInstalledPlugins as jest.Mock ).mockReturnValue( {
+			loadInstalledPluginsAfterActivation: jest.fn(),
 		} );
 		render( <DiscoverTools /> );
 
