@@ -2,11 +2,17 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useCallback, useRef, useEffect, useState } from 'react';
+import {
+	useCallback,
+	useRef,
+	useEffect,
+	useState,
+	InputHTMLAttributes,
+} from 'react';
 import classnames from 'classnames';
 import { withInstanceId } from '@wordpress/compose';
-import { isString } from '@woocommerce/types';
-import { dispatch, useSelect } from '@wordpress/data';
+import { isObject, isString } from '@woocommerce/types';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 
 /**
@@ -16,16 +22,21 @@ import TextInput from './text-input';
 import './style.scss';
 import { ValidationInputError } from '../validation-input-error';
 
-interface ValidatedTextInputProps {
+interface ValidatedTextInputProps
+	extends Omit<
+		InputHTMLAttributes< HTMLInputElement >,
+		'onChange' | 'onBlur'
+	> {
 	id?: string;
 	instanceId: string;
-	className?: string;
-	ariaDescribedBy?: string;
+	className?: string | undefined;
+	ariaDescribedBy?: string | undefined;
 	errorId?: string;
 	focusOnMount?: boolean;
 	showError?: boolean;
-	errorMessage?: string;
+	errorMessage?: string | undefined;
 	onChange: ( newValue: string ) => void;
+	label?: string | undefined;
 	value: string;
 }
 
@@ -46,7 +57,7 @@ const ValidatedTextInput = ( {
 	const inputRef = useRef< HTMLInputElement >( null );
 
 	const { setValidationErrors, hideValidationError, clearValidationError } =
-		dispatch( VALIDATION_STORE_KEY );
+		useDispatch( VALIDATION_STORE_KEY );
 	const textInputId =
 		typeof id !== 'undefined' ? id : 'textinput-' + instanceId;
 	const errorIdString = errorId !== undefined ? errorId : textInputId;
@@ -122,7 +133,11 @@ const ValidatedTextInput = ( {
 		};
 	}, [ clearValidationError, errorIdString ] );
 
-	if ( isString( passedErrorMessage ) && passedErrorMessage !== '' ) {
+	if (
+		isString( passedErrorMessage ) &&
+		passedErrorMessage !== '' &&
+		isObject( passedErrorMessage )
+	) {
 		validationError.message = passedErrorMessage;
 	}
 
@@ -161,5 +176,5 @@ const ValidatedTextInput = ( {
 		/>
 	);
 };
-
+export const __ValidatedTexInputWithoutId = ValidatedTextInput;
 export default withInstanceId( ValidatedTextInput );

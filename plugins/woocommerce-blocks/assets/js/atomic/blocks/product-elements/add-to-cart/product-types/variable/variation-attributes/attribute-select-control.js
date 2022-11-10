@@ -6,7 +6,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { SelectControl } from 'wordpress-components';
 import { useEffect } from 'react';
 import classnames from 'classnames';
-import { ValidationInputError } from '@woocommerce/base-components/validation-input-error';
+import { ValidationInputError } from '@woocommerce/blocks-checkout';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 
