@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "36ee14925c7f406b67a2aeb615850f86",
+    "content-hash": "30fc6e134195a05d7f6ae11691dc7423",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -450,57 +450,6 @@
                 "source": "https://github.com/hamcrest/hamcrest-php/tree/v2.0.1"
             },
             "time": "2020-07-09T08:09:16+00:00"
-        },
-        {
-            "name": "johnbillion/wp-hooks-generator",
-            "version": "0.9.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/wp-hooks/generator.git",
-                "reference": "6c7f173d85452db52a59a3a6bb943cbe7d845cde"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/wp-hooks/generator/zipball/6c7f173d85452db52a59a3a6bb943cbe7d845cde",
-                "reference": "6c7f173d85452db52a59a3a6bb943cbe7d845cde",
-                "shasum": ""
-            },
-            "require": {
-                "ext-libxml": "*",
-                "johnbillion/wp-parser-lib": "^1.3.0",
-                "php": ">=7"
-            },
-            "require-dev": {
-                "oomphinc/composer-installers-extender": "^2",
-                "opis/json-schema": "^1"
-            },
-            "bin": [
-                "bin/wp-hooks-generator"
-            ],
-            "type": "library",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-3.0-or-later"
-            ],
-            "authors": [
-                {
-                    "name": "John Blackbourn",
-                    "homepage": "https://johnblackbourn.com/"
-                }
-            ],
-            "description": "Generates a JSON representation of the WordPress actions and filters in your code",
-            "support": {
-                "issues": "https://github.com/wp-hooks/generator/issues",
-                "source": "https://github.com/wp-hooks/generator/tree/0.9.0"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/sponsors/johnbillion",
-                    "type": "github"
-                }
-            ],
-            "abandoned": "wp-hooks/generator",
-            "time": "2022-07-03T12:35:07+00:00"
         },
         {
             "name": "johnbillion/wp-parser-lib",
@@ -2713,6 +2662,59 @@
                 "wiki": "https://github.com/WordPress/WordPress-Coding-Standards/wiki"
             },
             "time": "2020-05-13T23:57:56+00:00"
+        },
+        {
+            "name": "wp-hooks/generator",
+            "version": "0.9.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/wp-hooks/generator.git",
+                "reference": "6c7f173d85452db52a59a3a6bb943cbe7d845cde"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wp-hooks/generator/zipball/6c7f173d85452db52a59a3a6bb943cbe7d845cde",
+                "reference": "6c7f173d85452db52a59a3a6bb943cbe7d845cde",
+                "shasum": ""
+            },
+            "require": {
+                "ext-libxml": "*",
+                "johnbillion/wp-parser-lib": "^1.3.0",
+                "php": ">=7"
+            },
+            "replace": {
+                "johnbillion/wp-hooks-generator": "*"
+            },
+            "require-dev": {
+                "oomphinc/composer-installers-extender": "^2",
+                "opis/json-schema": "^1"
+            },
+            "bin": [
+                "bin/wp-hooks-generator"
+            ],
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "John Blackbourn",
+                    "homepage": "https://johnblackbourn.com/"
+                }
+            ],
+            "description": "Generates a JSON representation of the WordPress actions and filters in your code",
+            "support": {
+                "issues": "https://github.com/wp-hooks/generator/issues",
+                "source": "https://github.com/wp-hooks/generator/tree/0.9.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/johnbillion",
+                    "type": "github"
+                }
+            ],
+            "time": "2022-07-03T12:35:07+00:00"
         },
         {
             "name": "wp-phpunit/wp-phpunit",

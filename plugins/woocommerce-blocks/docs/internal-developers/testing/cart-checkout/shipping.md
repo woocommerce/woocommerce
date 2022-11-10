@@ -2,11 +2,11 @@
 
 ## Table of Contents <!-- omit in toc -->
 
--   [Setup](#setup)
--   [What to test](#what-to-test)
-    -   [With shipping zones available](#with-shipping-zones-available)
-    -   [If you don't have any shipping zones set up and/or shipping is disabled](#if-you-dont-have-any-shipping-zones-set-up-andor-shipping-is-disabled)
-    -   [If you don't have any shipping zones set up, but shipping is enabled](#if-you-dont-have-any-shipping-zones-set-up-but-shipping-is-enabled)
+- [Setup](#setup)
+- [What to test](#what-to-test)
+    - [With shipping zones available](#with-shipping-zones-available)
+    - [If you don't have any shipping zones set up and/or shipping is disabled](#if-you-dont-have-any-shipping-zones-set-up-andor-shipping-is-disabled)
+    - [If you don't have any shipping zones set up, but shipping is enabled](#if-you-dont-have-any-shipping-zones-set-up-but-shipping-is-enabled)
 
 ## Setup
 
@@ -42,14 +42,3 @@
 -   [ ] In the editor, Checkout Block will show you a placeholder promoting you to set up shipping zones.
 
 [![Create Todo list](https://raw.githubusercontent.com/senadir/todo-my-markdown/master/public/github-button.svg?sanitize=true)](https://git-todo.netlify.app/create)
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/testing/cart-checkout/shipping.md)
-
-<!-- /FEEDBACK -->
-

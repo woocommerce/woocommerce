@@ -62,14 +62,3 @@ While a PTE can approve, change and add translations for a certain plugin or the
 While it's possible to request GTE permissions, usually a Locale Manager of the corresponding locale promotes a GTE.
 
 See also <https://make.wordpress.org/polyglots/handbook/about/roles-and-capabilities/#project-translation-editor>.
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/translations/translation-management.md)
-
-<!-- /FEEDBACK -->
-

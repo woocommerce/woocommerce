@@ -47,14 +47,3 @@ See also <https://developer.wordpress.org/plugins/internationalization/how-to-in
 Only plugins that are not hosted in the official WordPress Plugin Directory need to define a `Domain Path`. As the WooCommerce Blocks plugin is hosted in the official WordPress Plugin Directory, it does not need a `Domain Path`.
 
 See also <https://developer.wordpress.org/plugins/internationalization/how-to-internationalize-your-plugin/#domain-path>.
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/translations/translation-basics.md)
-
-<!-- /FEEDBACK -->
-

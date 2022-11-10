@@ -2,10 +2,10 @@
 
 ## Table of Contents <!-- omit in toc -->
 
--   [Setup](#setup)
--   [What to test](#what-to-test)
-    -   [With coupons disabled](#with-coupons-disabled)
-    -   [With coupons enabled](#with-coupons-enabled)
+- [Setup](#setup)
+- [What to test](#what-to-test)
+    - [With coupons disabled](#with-coupons-disabled)
+    - [With coupons enabled](#with-coupons-enabled)
 
 ## Setup
 
@@ -40,14 +40,3 @@ You will need to setup some types of coupon in order to test this.
 -   [ ] Adding `freeship` should show the free shipping method you previously created.
 
 [![Create Todo list](https://raw.githubusercontent.com/senadir/todo-my-markdown/master/public/github-button.svg?sanitize=true)](https://git-todo.netlify.app/create)
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/testing/cart-checkout/coupons.md)
-
-<!-- /FEEDBACK -->
-

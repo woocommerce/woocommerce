@@ -98,14 +98,3 @@ See also <https://developer.wordpress.org/reference/functions/_nx/>.
 Template literals cannot be used in JS/TS translations. To use variables in JS/TS translations, the function `sprintf()` needs to be used, as variables cannot be used directly. Various examples on how to use this function, can be seen in the previous examples.
 
 See also <https://developer.wordpress.org/block-editor/reference-guides/packages/packages-i18n/#sprintf>.
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/translations/translations-in-JS-TS-files.md)
-
-<!-- /FEEDBACK -->
-
