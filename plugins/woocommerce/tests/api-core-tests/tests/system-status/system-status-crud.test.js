@@ -354,31 +354,6 @@ test.describe('System Status API tests', () => {
 		);
 		expect(responseJSON).toEqual(
 			expect.objectContaining({
-				inactive_plugins: expect.arrayContaining([{
-						"plugin": expect.any(String),
-						"name": expect.any(String),
-						"version": expect.any(String),
-						"version_latest": expect.any(String),
-						"url": expect.any(String),
-						"author_name": expect.any(String),
-						"author_url": expect.any(String),
-						"network_activated": expect.any(Boolean)
-					},
-					{
-						"plugin": expect.any(String),
-						"name": expect.any(String),
-						"version": expect.any(String),
-						"version_latest": expect.any(String),
-						"url": expect.any(String),
-						"author_name": expect.any(String),
-						"author_url": expect.any(String),
-						"network_activated": expect.any(Boolean)
-					}
-				])
-			})
-		);
-		expect(responseJSON).toEqual(
-			expect.objectContaining({
 				dropins_mu_plugins: expect.objectContaining({
 					"dropins": [],
 					"mu_plugins": []

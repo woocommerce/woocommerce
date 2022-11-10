@@ -2,6 +2,10 @@ const {
 	test,
 	expect
 } = require('@playwright/test');
+const exp = require('constants');
+const {
+	keys
+} = require('lodash');
 const {
 	countries,
 	currencies,
@@ -640,14 +644,8 @@ test.describe('Settings API tests: CRUD', () => {
 						"type": "select",
 						"default": "",
 						"tip": "This sets the base page of your shop - this is where your product archive will be.",
-						"value": "5",
-						"options": {
-							"2": "Sample Page",
-							"5": "Shop",
-							"6": "Cart",
-							"7": "Checkout",
-							"8": "My account"
-						},
+						"value": expect.any(String),
+						"options": expect.objectContaining({}),
 					})
 				]));
 
@@ -682,7 +680,7 @@ test.describe('Settings API tests: CRUD', () => {
 						"type": "text",
 						"default": "",
 						"tip": "This is the attachment ID, or image URL, used for placeholder images in the product catalog. Products with no image will use this.",
-						"value": "4",
+						"value": expect.any(String),
 					})
 				]));
 			expect(responseJSON).toEqual(
@@ -1472,14 +1470,8 @@ test.describe('Settings API tests: CRUD', () => {
 						"type": "select",
 						"default": "",
 						"tip": "Page contents: [woocommerce_cart]",
-						"value": "6",
-						"options": {
-							"2": "Sample Page",
-							"5": "Shop",
-							"6": "Cart",
-							"7": "Checkout",
-							"8": "My account"
-						},
+						"value": expect.any(String),
+						"options": expect.any(Object),
 					})
 				]));
 			expect(responseJSON).toEqual(
@@ -1489,16 +1481,10 @@ test.describe('Settings API tests: CRUD', () => {
 						"label": "Checkout page",
 						"description": "Page contents: [woocommerce_checkout]",
 						"type": "select",
-						"default": 7,
+						"default": expect.any(Number),
 						"tip": "Page contents: [woocommerce_checkout]",
-						"value": "7",
-						"options": {
-							"2": "Sample Page",
-							"5": "Shop",
-							"6": "Cart",
-							"7": "Checkout",
-							"8": "My account"
-						}
+						"value": expect.any(String),
+						"options": expect.any(Object)
 					})
 				]));
 			expect(responseJSON).toEqual(
@@ -1510,14 +1496,8 @@ test.describe('Settings API tests: CRUD', () => {
 						"type": "select",
 						"default": "",
 						"tip": "Page contents: [woocommerce_my_account]",
-						"value": "8",
-						"options": {
-							"2": "Sample Page",
-							"5": "Shop",
-							"6": "Cart",
-							"7": "Checkout",
-							"8": "My account"
-						},
+						"value": expect.any(String),
+						"options": expect.any(Object)
 					})
 				]));
 			expect(responseJSON).toEqual(
