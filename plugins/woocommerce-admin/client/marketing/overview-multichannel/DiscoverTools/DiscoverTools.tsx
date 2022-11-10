@@ -1,12 +1,14 @@
 /**
  * External dependencies
  */
-import { Fragment } from '@wordpress/element';
+import { Fragment, useState } from '@wordpress/element';
+import { useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { TabPanel, Button } from '@wordpress/components';
 import { Icon, trendingUp } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
 import { Pill, Spinner } from '@woocommerce/components';
+import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 import { flatMapDeep, uniqBy } from 'lodash';
 
 /**
@@ -19,6 +21,7 @@ import {
 	PluginCardBody,
 } from '~/marketing/components';
 import { getInAppPurchaseUrl } from '~/lib/in-app-purchase';
+import { createNoticesFromResponse } from '~/lib/notices';
 import { Plugin } from './types';
 import { useRecommendedPlugins } from './useRecommendedPlugins';
 import './DiscoverTools.scss';
@@ -45,40 +48,34 @@ const getTabs = ( plugins: Plugin[] ) => {
 	} ) );
 };
 
-const renderPluginCardBodies = ( plugins: Plugin[] ) => {
-	return plugins.map( ( el, idx ) => {
-		return (
-			<Fragment key={ el.product }>
-				<PluginCardBody
-					icon={ <img src={ el.icon } alt={ el.title } /> }
-					name={ el.title }
-					pills={ el.tags.map( ( tag ) => (
-						<Pill key={ tag.slug }>{ tag.name }</Pill>
-					) ) }
-					description={ el.description }
-					button={
-						<Button
-							variant="secondary"
-							href={ getInAppPurchaseUrl( el.url ) }
-							onClick={ () => {
-								recordEvent(
-									'marketing_recommended_extension',
-									{ name: el.title }
-								);
-							} }
-						>
-							{ __( 'Get started', 'woocommerce' ) }
-						</Button>
-					}
-				/>
-				{ idx !== plugins.length - 1 && <CardDivider /> }
-			</Fragment>
-		);
-	} );
-};
-
 export const DiscoverTools = () => {
-	const { isLoading, plugins } = useRecommendedPlugins();
+	const { isLoading, plugins, invalidateResolution } =
+		useRecommendedPlugins();
+	const [ currentPlugin, setCurrentPlugin ] = useState< string | null >(
+		null
+	);
+	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
+
+	const installAndActivate = async ( plugin: Plugin ) => {
+		setCurrentPlugin( plugin.product );
+
+		try {
+			recordEvent( 'marketing_recommended_extension', {
+				name: plugin.title,
+			} );
+
+			const response = await installAndActivatePlugins( [
+				plugin.product,
+			] );
+
+			invalidateResolution();
+			createNoticesFromResponse( response );
+		} catch ( error ) {
+			createNoticesFromResponse( error );
+		}
+
+		setCurrentPlugin( null );
+	};
 
 	/**
 	 * Renders card body.
@@ -133,8 +130,75 @@ export const DiscoverTools = () => {
 
 					return (
 						<>
-							<CardDivider />
-							{ renderPluginCardBodies( subcategoryPlugins ) }
+							{ subcategoryPlugins.map( ( el ) => {
+								return (
+									<Fragment key={ el.product }>
+										<CardDivider />
+										<PluginCardBody
+											icon={
+												<img
+													src={ el.icon }
+													alt={ el.title }
+												/>
+											}
+											name={ el.title }
+											pills={ el.tags.map( ( tag ) => (
+												<Pill key={ tag.slug }>
+													{ tag.name }
+												</Pill>
+											) ) }
+											description={ el.description }
+											button={
+												el.direct_install ? (
+													<Button
+														variant="secondary"
+														isBusy={
+															currentPlugin ===
+															el.product
+														}
+														disabled={
+															!! currentPlugin
+														}
+														onClick={ () => {
+															installAndActivate(
+																el
+															);
+														} }
+													>
+														{ __(
+															'Install plugin',
+															'woocommerce'
+														) }
+													</Button>
+												) : (
+													<Button
+														variant="secondary"
+														href={ getInAppPurchaseUrl(
+															el.url
+														) }
+														disabled={
+															!! currentPlugin
+														}
+														onClick={ () => {
+															recordEvent(
+																'marketing_recommended_extension',
+																{
+																	name: el.title,
+																}
+															);
+														} }
+													>
+														{ __(
+															'View details',
+															'woocommerce'
+														) }
+													</Button>
+												)
+											}
+										/>
+									</Fragment>
+								);
+							} ) }
 						</>
 					);
 				} }
