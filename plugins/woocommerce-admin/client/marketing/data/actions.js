@@ -39,6 +39,16 @@ export function receiveRecommendedPlugins( plugins, category ) {
 	};
 }
 
+export function removeRecommendedPlugin( pluginSlug, category ) {
+	return {
+		type: TYPES.REMOVE_RECOMMENDED_PLUGIN,
+		data: {
+			pluginSlug,
+			category,
+		},
+	};
+}
+
 export function receiveBlogPosts( posts, category ) {
 	return {
 		type: TYPES.SET_BLOG_POSTS,

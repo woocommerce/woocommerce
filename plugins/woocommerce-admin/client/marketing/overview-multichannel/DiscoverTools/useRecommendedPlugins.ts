@@ -16,15 +16,18 @@ const category = 'marketing';
 type SelectResult = {
 	isLoading: boolean;
 	plugins: Plugin[];
-	invalidateResolution: () => void;
+	removeRecommendedPlugin: ( slug: string ) => void;
 };
 
 export const useRecommendedPlugins = () => {
-	const { invalidateResolution } = useDispatch( STORE_KEY );
+	const { removeRecommendedPlugin } = useDispatch( STORE_KEY );
 
-	const callback = useCallback( () => {
-		invalidateResolution( selector, [ category ] );
-	}, [ invalidateResolution ] );
+	const callback = useCallback(
+		( slug ) => {
+			removeRecommendedPlugin( slug, category );
+		},
+		[ removeRecommendedPlugin ]
+	);
 
 	return useSelect< SelectResult >(
 		( select ) => {
@@ -33,7 +36,7 @@ export const useRecommendedPlugins = () => {
 			return {
 				isLoading: isResolving( selector, [ category ] ),
 				plugins: getRecommendedPlugins( category ),
-				invalidateResolution: callback,
+				removeRecommendedPlugin: callback,
 			};
 		},
 		[ category ]
