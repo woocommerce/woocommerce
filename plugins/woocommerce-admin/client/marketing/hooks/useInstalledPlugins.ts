@@ -16,7 +16,7 @@ export type UsePluginsType = {
 	loadInstalledPluginsAfterActivation: ( slug: string ) => void;
 };
 
-export const usePlugins = (): UsePluginsType => {
+export const useInstalledPlugins = (): UsePluginsType => {
 	const { installedPlugins, activatingPlugins } = useSelect( ( select ) => {
 		const { getInstalledPlugins, getActivatingPlugins } =
 			select( STORE_KEY );

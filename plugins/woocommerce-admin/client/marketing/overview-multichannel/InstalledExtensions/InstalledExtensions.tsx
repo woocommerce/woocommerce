@@ -16,11 +16,11 @@ import {
 	PluginCardBody,
 } from '~/marketing/components';
 import { Plugin } from '~/marketing/types';
-import { usePlugins } from '~/marketing/hooks';
+import { useInstalledPlugins } from '~/marketing/hooks';
 
 export const InstalledExtensions = () => {
 	const { installedPlugins, activatingPlugins, activateInstalledPlugin } =
-		usePlugins();
+		useInstalledPlugins();
 
 	if ( installedPlugins.length === 0 ) {
 		return null;

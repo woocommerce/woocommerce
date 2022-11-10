@@ -20,7 +20,7 @@ import {
 	CardBody,
 	PluginCardBody,
 } from '~/marketing/components';
-import { usePlugins } from '~/marketing/hooks/usePlugins';
+import { useInstalledPlugins } from '~/marketing/hooks';
 import { getInAppPurchaseUrl } from '~/lib/in-app-purchase';
 import { createNoticesFromResponse } from '~/lib/notices';
 import { Plugin } from './types';
@@ -56,7 +56,7 @@ export const DiscoverTools = () => {
 		null
 	);
 	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
-	const { loadInstalledPluginsAfterActivation } = usePlugins();
+	const { loadInstalledPluginsAfterActivation } = useInstalledPlugins();
 
 	const installAndActivate = async ( plugin: Plugin ) => {
 		setCurrentPlugin( plugin.product );

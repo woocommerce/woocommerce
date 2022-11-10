@@ -1,1 +1,1 @@
-export { usePlugins } from './usePlugins';
+export { useInstalledPlugins } from './useInstalledPlugins';
