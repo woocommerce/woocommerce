@@ -1703,13 +1703,6 @@ FROM $order_meta_table
 		}
 
 		if ( ! empty( $args['force_delete'] ) ) {
-			$this->delete_order_data_from_custom_order_tables( $order_id );
-			$order->set_id( 0 );
-
-			// If this datastore method is called while the posts table is authoritative, refrain from deleting post data.
-			if ( ! is_a( $order->get_data_store(), self::class ) ) {
-				return;
-			}
 
 			/**
 			 * Fires immediately before an order is deleted from the database.
@@ -1720,6 +1713,14 @@ FROM $order_meta_table
 			 * @param WC_Order $order    Instance of the order that is about to be deleted.
 			 */
 			do_action( 'woocommerce_before_delete_order', $order_id, $order );
+
+			$this->delete_order_data_from_custom_order_tables( $order_id );
+			$order->set_id( 0 );
+
+			// If this datastore method is called while the posts table is authoritative, refrain from deleting post data.
+			if ( ! is_a( $order->get_data_store(), self::class ) ) {
+				return;
+			}
 
 			// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
 			// Once we stop creating posts for orders, we should do the cleanup here instead.
