@@ -35,13 +35,14 @@ export const useCheckoutSubmit = () => {
 			hasError: store.hasError(),
 		};
 	} );
-	const { currentStatus: paymentStatus, activePaymentMethod } = useSelect(
+	const { activePaymentMethod, isExpressPaymentMethodActive } = useSelect(
 		( select ) => {
 			const store = select( PAYMENT_STORE_KEY );
 
 			return {
-				currentStatus: store.getCurrentStatus(),
 				activePaymentMethod: store.getActivePaymentMethod(),
+				isExpressPaymentMethodActive:
+					store.isExpressPaymentMethodActive(),
 			};
 		}
 	);
@@ -65,7 +66,7 @@ export const useCheckoutSubmit = () => {
 		submitButtonText: label,
 		onSubmit,
 		isCalculating,
-		isDisabled: isProcessing || paymentStatus.isDoingExpressPayment,
+		isDisabled: isProcessing || isExpressPaymentMethodActive,
 		waitingForProcessing,
 		waitingForRedirect,
 	};
