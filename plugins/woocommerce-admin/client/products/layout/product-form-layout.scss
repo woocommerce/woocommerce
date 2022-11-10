@@ -11,7 +11,8 @@
 		text-transform: none;
 	}
 
-	.components-card__body h4:first-child {
+	.components-card__body h4:first-child,
+	.components-radio-control:first-child .components-base-control__label {
 		margin-top: 0;
 	}
 

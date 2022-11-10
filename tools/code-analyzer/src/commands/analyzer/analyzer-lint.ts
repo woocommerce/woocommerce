@@ -53,7 +53,8 @@ const program = new Command()
 			sinceVersion,
 			skipSchemaCheck,
 			source,
-			base
+			base,
+			outputStyle
 		);
 
 		if ( changes.templates.size ) {

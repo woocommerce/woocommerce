@@ -16,24 +16,26 @@ import {
 	__experimentalSelectControlMenuItem as MenuItem,
 } from '@woocommerce/components';
 
+type NarrowedQueryAttribute = Pick< QueryProductAttribute, 'id' | 'name' >;
+
 type AttributeInputFieldProps = {
-	value?: ProductAttribute;
+	value?: Pick< QueryProductAttribute, 'id' | 'name' > | null;
 	onChange: (
 		value?: Omit< ProductAttribute, 'position' | 'visible' | 'variation' >
 	) => void;
 	label?: string;
 	placeholder?: string;
 	disabled?: boolean;
-	filteredAttributeIds?: number[];
+	ignoredAttributeIds?: number[];
 };
 
 export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
-	value,
+	value = null,
 	onChange,
 	placeholder,
 	label,
 	disabled,
-	filteredAttributeIds = [],
+	ignoredAttributeIds = [],
 } ) => {
 	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
 		const { getProductAttributes, hasFinishedResolution } = select(
@@ -46,26 +48,25 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	} );
 
 	const getFilteredItems = (
-		allItems: Pick< QueryProductAttribute, 'id' | 'name' >[],
+		allItems: NarrowedQueryAttribute[],
 		inputValue: string
 	) => {
+		const ignoreIdsFilter = ( item: NarrowedQueryAttribute ) =>
+			ignoredAttributeIds.length
+				? ! ignoredAttributeIds.includes( item.id )
+				: true;
+
 		return allItems.filter(
 			( item ) =>
-				filteredAttributeIds.indexOf( item.id ) < 0 &&
+				ignoreIdsFilter( item ) &&
 				( item.name || '' )
 					.toLowerCase()
 					.startsWith( inputValue.toLowerCase() )
 		);
 	};
-	const selected: Pick< QueryProductAttribute, 'id' | 'name' > | null = value
-		? {
-				id: value.id,
-				name: value.name,
-		  }
-		: null;
 
 	return (
-		<SelectControl< Pick< QueryProductAttribute, 'id' | 'name' > >
+		<SelectControl< NarrowedQueryAttribute >
 			items={ attributes || [] }
 			label={ label || '' }
 			disabled={ disabled }
@@ -73,14 +74,14 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			placeholder={ placeholder }
 			getItemLabel={ ( item ) => item?.name || '' }
 			getItemValue={ ( item ) => item?.id || '' }
-			selected={ selected }
-			onSelect={ ( attribute ) =>
+			selected={ value }
+			onSelect={ ( attribute ) => {
 				onChange( {
 					id: attribute.id,
 					name: attribute.name,
 					options: [],
-				} )
-			}
+				} );
+			} }
 			onRemove={ () => onChange() }
 		>
 			{ ( {

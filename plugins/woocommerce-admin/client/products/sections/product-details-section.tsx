@@ -53,6 +53,9 @@ export const ProductDetailsSection: React.FC = () => {
 	const [ descriptionBlocks, setDescriptionBlocks ] = useState<
 		BlockInstance[]
 	>( parse( values.description || '' ) );
+	const [ summaryBlocks, setSummaryBlocks ] = useState< BlockInstance[] >(
+		parse( values.short_description || '' )
+	);
 	const { permalinkPrefix, permalinkSuffix } = useSelect(
 		( select: WCDataSelector ) => {
 			const { getPermalinkParts } = select( PRODUCTS_STORE_NAME );
@@ -80,7 +83,7 @@ export const ProductDetailsSection: React.FC = () => {
 
 	return (
 		<ProductSectionLayout
-			title={ __( 'Product info', 'woocommerce' ) }
+			title={ __( 'Product details', 'woocommerce' ) }
 			description={ __(
 				'This info will be displayed on the product page, category pages, social media, and search results.',
 				'woocommerce'
@@ -90,7 +93,22 @@ export const ProductDetailsSection: React.FC = () => {
 				<CardBody>
 					<div>
 						<TextControl
-							label={ __( 'Name', 'woocommerce' ) }
+							label={ interpolateComponents( {
+								mixedString: __(
+									'Name {{required/}}',
+									'woocommerce'
+								),
+								components: {
+									required: (
+										<span className="woocommerce-product-form__optional-input">
+											{ __(
+												'(required)',
+												'woocommerce'
+											) }
+										</span>
+									),
+								},
+							} ) }
 							name={ `${ PRODUCT_DETAILS_SLUG }-name` }
 							placeholder={ __(
 								'e.g. 12 oz Coffee Mug',
@@ -191,12 +209,27 @@ export const ProductDetailsSection: React.FC = () => {
 						/>
 					) }
 					<RichTextEditor
+						label={ __( 'Summary', 'woocommerce' ) }
+						blocks={ summaryBlocks }
+						onChange={ ( blocks ) => {
+							setSummaryBlocks( blocks );
+							setValue(
+								'short_description',
+								serialize( blocks )
+							);
+						} }
+					/>
+					<RichTextEditor
 						label={ __( 'Description', 'woocommerce' ) }
 						blocks={ descriptionBlocks }
 						onChange={ ( blocks ) => {
 							setDescriptionBlocks( blocks );
 							setValue( 'description', serialize( blocks ) );
 						} }
+						placeholder={ __(
+							'Describe this product. What makes it unique? What are its most important features?',
+							'woocommerce'
+						) }
 					/>
 				</CardBody>
 			</Card>

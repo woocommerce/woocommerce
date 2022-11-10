@@ -211,45 +211,45 @@ jobs:
                   if ( changelogEntry.match( /comment:/i ) ) {
                     changelogEntry = false;
                   }
-                } );
 
-                if ( changelogEntry === false ) {
-                  continue;
-                }
-
-                fs.readFile( './plugins/woocommerce/readme.txt', 'utf-8', function( err, data ) {
-                  if ( err ) {
-                    console.error( err );
+                  if ( ! changelogEntry ) {
+                    return;
                   }
 
-                  changelogTxt = data.split( "\n" );
-                  let isInRange = false;
-                  let newChangelogTxt = [];
-
-                  for ( const line of changelogTxt ) {
-                    if ( isInRange === false && line === '== Changelog ==' ) {
-                      isInRange = true;
-                    }
-
-                    if ( isInRange === true && line.match( /\*\*WooCommerce Blocks/ ) ) {
-                      isInRange = false;
-                    }
-
-                    // Find the first match of the entry "Type".
-                    if ( isInRange && line.match( `\\* ${changelogEntryType} -` ) ) {
-                      newChangelogTxt.push( '* ' + changelogEntryType + ' - ' + changelogEntry + ` [#${{ needs.prep.outputs.pr }}](https://github.com/woocommerce/woocommerce/pull/${{ needs.prep.outputs.pr }})` );
-                      newChangelogTxt.push( line );
-                      isInRange = false;
-                      continue;
-                    }
-
-                    newChangelogTxt.push( line );
-                  }
-
-                  fs.writeFile( './plugins/woocommerce/readme.txt', newChangelogTxt.join( "\n" ), err => {
+                  fs.readFile( './plugins/woocommerce/readme.txt', 'utf-8', function( err, data ) {
                     if ( err ) {
-                      console.error( `Unable to generate the changelog entry for PR ${{ needs.prep.outputs.pr }}` );
+                      console.error( err );
                     }
+
+                    changelogTxt = data.split( "\n" );
+                    let isInRange = false;
+                    let newChangelogTxt = [];
+
+                    for ( const line of changelogTxt ) {
+                      if ( isInRange === false && line === '== Changelog ==' ) {
+                        isInRange = true;
+                      }
+
+                      if ( isInRange === true && line.match( /\*\*WooCommerce Blocks/ ) ) {
+                        isInRange = false;
+                      }
+
+                      // Find the first match of the entry "Type".
+                      if ( isInRange && line.match( `\\* ${changelogEntryType} -` ) ) {
+                        newChangelogTxt.push( '* ' + changelogEntryType + ' - ' + changelogEntry + ` [#${{ needs.prep.outputs.pr }}](https://github.com/woocommerce/woocommerce/pull/${{ needs.prep.outputs.pr }})` );
+                        newChangelogTxt.push( line );
+                        isInRange = false;
+                        continue;
+                      }
+
+                      newChangelogTxt.push( line );
+                    }
+
+                    fs.writeFile( './plugins/woocommerce/readme.txt', newChangelogTxt.join( "\n" ), err => {
+                      if ( err ) {
+                        console.error( `Unable to generate the changelog entry for PR ${{ needs.prep.outputs.pr }}` );
+                      }
+                    } );
                   } );
                 } );
               }

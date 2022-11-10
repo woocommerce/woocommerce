@@ -144,7 +144,7 @@ describe( 'AttributeInputField', () => {
 		expect( queryByText( attributeList[ 1 ].name ) ).toBeInTheDocument();
 	} );
 
-	it( 'should filter out attribute ids passed into filteredAttributeIds', () => {
+	it( 'should filter out attribute ids passed into ignoredAttributeIds', () => {
 		( useSelect as jest.Mock ).mockReturnValue( {
 			isLoading: false,
 			attributes: attributeList,
@@ -152,7 +152,7 @@ describe( 'AttributeInputField', () => {
 		const { queryByText } = render(
 			<AttributeInputField
 				onChange={ jest.fn() }
-				filteredAttributeIds={ [ attributeList[ 0 ].id ] }
+				ignoredAttributeIds={ [ attributeList[ 0 ].id ] }
 			/>
 		);
 		expect( queryByText( 'spinner' ) ).not.toBeInTheDocument();
@@ -177,7 +177,7 @@ describe( 'AttributeInputField', () => {
 		expect( queryByText( attributeList[ 1 ].name ) ).toBeInTheDocument();
 	} );
 
-	it( 'should filter out attributes ids from filteredAttributeIds', () => {
+	it( 'should filter out attributes ids from ignoredAttributeIds', () => {
 		( useSelect as jest.Mock ).mockReturnValue( {
 			isLoading: false,
 			attributes: attributeList,
@@ -185,7 +185,7 @@ describe( 'AttributeInputField', () => {
 		const { queryByText } = render(
 			<AttributeInputField
 				onChange={ jest.fn() }
-				filteredAttributeIds={ [ attributeList[ 1 ].id ] }
+				ignoredAttributeIds={ [ attributeList[ 1 ].id ] }
 			/>
 		);
 		expect( queryByText( attributeList[ 0 ].name ) ).toBeInTheDocument();
