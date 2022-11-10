@@ -3,6 +3,10 @@ export const blockAttributes: Record< string, Record< string, unknown > > = {
 		type: 'number',
 		default: 0,
 	},
+	isDescendentOfQueryLoop: {
+		type: 'boolean',
+		default: false,
+	},
 };
 
 export default blockAttributes;

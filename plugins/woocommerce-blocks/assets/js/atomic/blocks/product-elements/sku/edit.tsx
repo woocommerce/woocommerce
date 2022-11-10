@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import type { BlockEditProps } from '@wordpress/blocks';
 import EditProductLink from '@woocommerce/editor-components/edit-product-link';
+import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
+import { useEffect } from 'react';
 
 /**
  * Internal dependencies
@@ -10,17 +13,28 @@ import EditProductLink from '@woocommerce/editor-components/edit-product-link';
 import Block from './block';
 import withProductSelector from '../shared/with-product-selector';
 import { BLOCK_TITLE, BLOCK_ICON } from './constants';
-import type { BlockAttributes } from './types';
+import type { Attributes } from './types';
 
-interface Props {
-	attributes: BlockAttributes;
-}
+const Edit = ( {
+	attributes,
+	setAttributes,
+	context,
+}: BlockEditProps< Attributes > & { context: Context } ): JSX.Element => {
+	const blockAttrs = {
+		...attributes,
+		...context,
+	};
+	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
 
-const Edit = ( { attributes }: Props ): JSX.Element => {
+	useEffect(
+		() => setAttributes( { isDescendentOfQueryLoop } ),
+		[ setAttributes, isDescendentOfQueryLoop ]
+	);
+
 	return (
 		<>
 			<EditProductLink />
-			<Block { ...attributes } />
+			<Block { ...blockAttrs } />
 		</>
 	);
 };
