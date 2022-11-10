@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update playwright api-core-tests to execute for both base test environment and base JN environment with WooCommerce
