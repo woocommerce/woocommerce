@@ -80,8 +80,6 @@ export type PaymentMethodCurrentStatusType = {
 	hasFailed: boolean;
 	// If true then the payment method has completed it's processing successfully.
 	isSuccessful: boolean;
-	// If true, an express payment is in progress.
-	isDoingExpressPayment: boolean;
 };
 
 export type PaymentMethodsDispatcherType = (
@@ -112,5 +110,4 @@ export interface PaymentStatus {
 	hasError?: boolean;
 	hasFailed?: boolean;
 	isSuccessful?: boolean;
-	isDoingExpressPayment?: boolean;
 }

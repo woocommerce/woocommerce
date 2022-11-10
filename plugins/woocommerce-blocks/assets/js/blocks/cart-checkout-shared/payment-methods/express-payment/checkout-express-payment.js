@@ -41,7 +41,7 @@ const CheckoutExpressPayment = () => {
 	const {
 		availableExpressPaymentMethods,
 		expressPaymentMethodsInitialized,
-		paymentStatus,
+		isExpressPaymentMethodActive,
 	} = useSelect( ( select ) => {
 		const store = select( PAYMENT_STORE_KEY );
 		return {
@@ -49,7 +49,7 @@ const CheckoutExpressPayment = () => {
 				store.getAvailableExpressPaymentMethods(),
 			expressPaymentMethodsInitialized:
 				store.expressPaymentMethodsInitialized(),
-			paymentStatus: store.getCurrentStatus(),
+			isExpressPaymentMethodActive: store.isExpressPaymentMethodActive(),
 		};
 	} );
 	const { isEditor } = useEditorContext();
@@ -84,7 +84,7 @@ const CheckoutExpressPayment = () => {
 				isLoading={
 					isCalculating ||
 					checkoutProcessing ||
-					paymentStatus.isDoingExpressPayment
+					isExpressPaymentMethodActive
 				}
 			>
 				<div className="wc-block-components-express-payment wc-block-components-express-payment--checkout">
