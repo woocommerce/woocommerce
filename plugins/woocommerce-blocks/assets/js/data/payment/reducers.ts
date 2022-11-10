@@ -47,10 +47,6 @@ const reducer: Reducer< PaymentMethodDataState > = (
 						action.status.hasError ||
 						action.status.hasFailed ||
 						action.status.isSuccessful,
-					isDoingExpressPayment:
-						! action.status.isPristine &&
-						! state.currentStatus.isPristine &&
-						state.isExpressPaymentMethodActive,
 				},
 				paymentMethodData:
 					action.paymentMethodData || state.paymentMethodData,

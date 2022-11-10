@@ -120,7 +120,8 @@ member contains a `name` entry with the payment method ID as its value.
 
 ```js
 const store = select( 'wc/store/payment' );
-const availableExpressPaymentMethods = store.getAvailableExpressPaymentMethods();
+const availableExpressPaymentMethods =
+	store.getAvailableExpressPaymentMethods();
 ```
 
 `availableExpressPaymentMethods` will look like this:
@@ -166,24 +167,24 @@ method. As an example, Stripe's saved tokens are returned like so:
 
 ```js
 savedPaymentMethods: {
-    cc: [
-        {
-            method: {
-                gateway: 'stripe',
-                last4: '4242',
-                brand: 'Visa'
-            },
-            expires: '04/24',
-            is_default: true,
-            actions: {
-                wcs_deletion_error: {
-                    url: '#choose_default',
-                    name: 'Delete'
-                }
-            },
-            tokenId: 2
-        }
-    ]
+	cc: [
+		{
+			method: {
+				gateway: 'stripe',
+				last4: '4242',
+				brand: 'Visa',
+			},
+			expires: '04/24',
+			is_default: true,
+			actions: {
+				wcs_deletion_error: {
+					url: '#choose_default',
+					name: 'Delete',
+				},
+			},
+			tokenId: 2,
+		},
+	];
 }
 ```
 
@@ -207,24 +208,24 @@ returned like so:
 
 ```js
 activeSavedPaymentMethods: {
-    cc: [
-        {
-            method: {
-                gateway: 'stripe',
-                last4: '4242',
-                brand: 'Visa'
-            },
-            expires: '04/24',
-            is_default: true,
-            actions: {
-                wcs_deletion_error: {
-                    url: '#choose_default',
-                    name: 'Delete'
-                }
-            },
-            tokenId: 2
-        }
-    ]
+	cc: [
+		{
+			method: {
+				gateway: 'stripe',
+				last4: '4242',
+				brand: 'Visa',
+			},
+			expires: '04/24',
+			is_default: true,
+			actions: {
+				wcs_deletion_error: {
+					url: '#choose_default',
+					name: 'Delete',
+				},
+			},
+			tokenId: 2,
+		},
+	];
 }
 ```
 
@@ -251,14 +252,13 @@ Returns the current payment status.
 
 `object` - The current payment status. This will be an object with the following keys, the values are all booleans:
 
-- `isPristine` - True if the payment process has not started, does not have an error and has not finished. This is true
-initially.
-- `isStarted` - True if the payment process has started.
-- `isProcessing` - True if the payment is processing.
-- `hasError` - True if the payment process has resulted in an error.
-- `hasFailed` - True if the payment process has failed.
-- `isSuccessful` - True if the payment process is successful.
-- `isDoingExpressPayment` - True if the payment process is being done using an express payment method.
+-   `isPristine` - True if the payment process has not started, does not have an error and has not finished. This is true
+    initially.
+-   `isStarted` - True if the payment process has started.
+-   `isProcessing` - True if the payment is processing.
+-   `hasError` - True if the payment process has resulted in an error.
+-   `hasFailed` - True if the payment process has failed.
+-   `isSuccessful` - True if the payment process is successful.
 
 #### Example
 
@@ -294,7 +294,8 @@ Returns whether the express payment methods have been initialized.
 
 ```js
 const store = select( 'wc/store/payment' );
-const expressPaymentMethodsInitialized = store.expressPaymentMethodsInitialized();
+const expressPaymentMethodsInitialized =
+	store.expressPaymentMethodsInitialized();
 ```
 
 <!-- FEEDBACK -->

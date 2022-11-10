@@ -37,13 +37,9 @@ const CartExpressPayment = () => {
 			hasError: store.hasError(),
 		};
 	} );
-	const { paymentStatus } = useSelect( ( select ) => {
-		const store = select( PAYMENT_STORE_KEY );
-
-		return {
-			paymentStatus: store.getCurrentStatus(),
-		};
-	} );
+	const isExpressPaymentMethodActive = useSelect( ( select ) =>
+		select( PAYMENT_STORE_KEY ).isExpressPaymentMethodActive()
+	);
 
 	if (
 		! isInitialized ||
@@ -65,7 +61,7 @@ const CartExpressPayment = () => {
 				isLoading={
 					isCalculating ||
 					checkoutProcessing ||
-					paymentStatus.isDoingExpressPayment
+					isExpressPaymentMethodActive
 				}
 			>
 				<div className="wc-block-components-express-payment wc-block-components-express-payment--cart">
