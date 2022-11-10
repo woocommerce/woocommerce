@@ -128,6 +128,7 @@ export const PricingSection: React.FC = () => {
 					>
 						<InputControl
 							{ ...regularPriceProps }
+							className="woocommerce-field-width"
 							label={ __( 'List price', 'woocommerce' ) }
 							value={ formatCurrencyDisplayValue(
 								String( regularPriceProps?.value ),
@@ -149,6 +150,7 @@ export const PricingSection: React.FC = () => {
 					>
 						<InputControl
 							{ ...salePriceProps }
+							className="woocommerce-field-width"
 							label={ __( 'Sale price', 'woocommerce' ) }
 							value={ formatCurrencyDisplayValue(
 								String( salePriceProps?.value ),
