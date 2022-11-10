@@ -9,14 +9,3 @@ For more details about extensibility points in the blocks, you can reference the
 | [Checkout API interface](checkout/checkout-api.md)                                                           | This doc goes into some detail about some of the API specifics for the checkout block architecture.         |
 | [Checkout Flow and Events](../../internal-developers/block-client-apis/checkout/checkout-flow-and-events.md) | All about the checkout flow in the checkout block and the various emitted events that can be subscribed to. |
 | [Notices](notices.md)                                                                                        | Explains how the notices system works and which methods are available to add an remove them.                |
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/block-client-apis/README.md)
-
-<!-- /FEEDBACK -->
-

@@ -46,56 +46,57 @@ final class StoreApi {
 			$container = null;
 		}
 
-		// phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
-		return $container = $container ?: ( function() {
-			$container = new Container();
-			$container->register(
-				Authentication::class,
-				function () {
-					return new Authentication();
-				}
-			);
-			$container->register(
-				Legacy::class,
-				function () {
-					return new Legacy();
-				}
-			);
-			$container->register(
-				RoutesController::class,
-				function ( $container ) {
-					return new RoutesController(
-						$container->get( SchemaController::class )
-					);
-				}
-			);
-			$container->register(
-				SchemaController::class,
-				function ( $container ) {
-					return new SchemaController(
-						$container->get( ExtendSchema::class )
-					);
-				}
-			);
-			$container->register(
-				ExtendSchema::class,
-				function ( $container ) {
-					return new ExtendSchema(
-						$container->get( Formatters::class )
-					);
-				}
-			);
-			$container->register(
-				Formatters::class,
-				function ( $container ) {
-					$formatters = new Formatters();
-					$formatters->register( 'money', MoneyFormatter::class );
-					$formatters->register( 'html', HtmlFormatter::class );
-					$formatters->register( 'currency', CurrencyFormatter::class );
-					return $formatters;
-				}
-			);
+		if ( $container ) {
 			return $container;
-		} )();
+		}
+
+		$container = new Container();
+		$container->register(
+			Authentication::class,
+			function () {
+				return new Authentication();
+			}
+		);
+		$container->register(
+			Legacy::class,
+			function () {
+				return new Legacy();
+			}
+		);
+		$container->register(
+			RoutesController::class,
+			function ( $container ) {
+				return new RoutesController(
+					$container->get( SchemaController::class )
+				);
+			}
+		);
+		$container->register(
+			SchemaController::class,
+			function ( $container ) {
+				return new SchemaController(
+					$container->get( ExtendSchema::class )
+				);
+			}
+		);
+		$container->register(
+			ExtendSchema::class,
+			function ( $container ) {
+				return new ExtendSchema(
+					$container->get( Formatters::class )
+				);
+			}
+		);
+		$container->register(
+			Formatters::class,
+			function () {
+				$formatters = new Formatters();
+				$formatters->register( 'money', MoneyFormatter::class );
+				$formatters->register( 'html', HtmlFormatter::class );
+				$formatters->register( 'currency', CurrencyFormatter::class );
+				return $formatters;
+			}
+		);
+		return $container;
 	}
 }

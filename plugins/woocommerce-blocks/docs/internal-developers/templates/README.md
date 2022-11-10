@@ -2,13 +2,13 @@
 
 ## Table of contents <!-- omit in toc -->
 
-- [Overview](#overview)
-    - [Requirements](#requirements)
-- [Technical Overview](#technical-overview)
-    - [The Problem](#the-problem)
-    - [The Solution](#the-solution)
-    - [Some things to be aware of](#some-things-to-be-aware-of)
-- [Related files](#related-files)
+-   [Overview](#overview)
+    -   [Requirements](#requirements)
+-   [Technical Overview](#technical-overview)
+    -   [The Problem](#the-problem)
+    -   [The Solution](#the-solution)
+    -   [Some things to be aware of](#some-things-to-be-aware-of)
+-   [Related files](#related-files)
 
 This page includes documentation related to WooCommerce Block Templates.
 
@@ -54,14 +54,3 @@ The BlockTemplateController.php is primarily responsible for hooking into both W
 | ClassicTemplate.php         | Class used to setup the block on the server-side and render the correct template                                                                                                | [Source file](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/BlockTypes/ClassicTemplate.php) | [README](./classic-template.md)                                |
 | BlockTemplateController.php | Class which contains all the business logic which loads the templates into the Site Editor or on the front-end through various hooks available in WordPress & WooCommerce core. | [Source file](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/BlockTemplatesController.php)   | [README](./block-template-controller.md)                       |
 | BlockTemplateUtils.php      | Class containing a collection of useful utility methods.                                                                                                                        | [Source file](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/Utils/BlockTemplateUtils.php)   |                                                                |
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/templates/README.md)
-
-<!-- /FEEDBACK -->
-

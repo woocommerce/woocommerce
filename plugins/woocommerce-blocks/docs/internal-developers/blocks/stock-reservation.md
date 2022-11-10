@@ -2,12 +2,12 @@
 
 ## Table of contents <!-- omit in toc -->
 
-- [The Reserved Stock Database Table](#the-reserved-stock-database-table)
-    - [Usage Example](#usage-example)
-    - [What about concurrency?](#what-about-concurrency)
-- [The Reserve Stock Process](#the-reserve-stock-process)
-    - [How the queries work](#how-the-queries-work)
-- [How this all fits into Checkout Block vs Traditional Checkout](#how-this-all-fits-into-checkout-block-vs-traditional-checkout)
+-   [The Reserved Stock Database Table](#the-reserved-stock-database-table)
+    -   [Usage Example](#usage-example)
+    -   [What about concurrency?](#what-about-concurrency)
+-   [The Reserve Stock Process](#the-reserve-stock-process)
+    -   [How the queries work](#how-the-queries-work)
+-   [How this all fits into Checkout Block vs Traditional Checkout](#how-this-all-fits-into-checkout-block-vs-traditional-checkout)
 
 To prevent multiple customers trying to purchase the same stock when limits are in place, both WooCommerce ([4.3+](https://github.com/woocommerce/woocommerce/pull/26395#pullrequestreview-430633490)) and the Blocks plugin have a stock reservation system which is used during checkout.
 
@@ -100,14 +100,3 @@ The point of which stock is reserved differs between the new Block based checkou
 ![Checkout Processes](checkout.jpg)
 
 You can see that in both Checkouts, if stock cannot be reserved for all items in the order, either the order is rejected, or the user cannot proceed with checkout.
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/blocks/stock-reservation.md)
-
-<!-- /FEEDBACK -->
-

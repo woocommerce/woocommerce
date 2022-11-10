@@ -84,14 +84,3 @@ This allows us to hook into WooCommerce core through the filter `woocommerce_has
 ### Return value
 
 Void. This method does not return a value but rather sets up hooks to render block templates on the front-end.
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/templates/block-template-controller.md)
-
-<!-- /FEEDBACK -->
-

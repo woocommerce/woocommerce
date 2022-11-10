@@ -84,6 +84,30 @@
             "args": 2
         },
         {
+            "name": "deprecated_function_trigger_error",
+            "file": "Domain/Bootstrap.php",
+            "type": "filter",
+            "doc": {
+                "description": "",
+                "long_description": "",
+                "tags": [],
+                "long_description_html": ""
+            },
+            "args": 1
+        },
+        {
+            "name": "wc_session_expiration",
+            "file": "StoreApi/Routes/V1/AbstractCartRoute.php",
+            "type": "filter",
+            "doc": {
+                "description": "",
+                "long_description": "",
+                "tags": [],
+                "long_description_html": ""
+            },
+            "args": 1
+        },
+        {
             "name": "woocommerce_add_cart_item",
             "file": "StoreApi/Utilities/CartController.php",
             "type": "filter",
@@ -604,6 +628,10 @@
                         "content": "Matches filter name in GA extension."
                     },
                     {
+                        "name": "since",
+                        "content": "4.9.0"
+                    },
+                    {
                         "name": "param",
                         "content": "If true, tracking will be disabled.",
                         "types": [
@@ -653,6 +681,18 @@
                     }
                 ],
                 "long_description_html": "<p>Filters the variation option name for custom option slugs.</p>"
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_loop_add_to_cart_link",
+            "file": "BlockTypes/ProductButton.php",
+            "type": "filter",
+            "doc": {
+                "description": "",
+                "long_description": "",
+                "tags": [],
+                "long_description_html": ""
             },
             "args": 2
         },
@@ -831,6 +871,34 @@
             "args": 1
         },
         {
+            "name": "woocommerce_store_api_add_to_cart_data",
+            "file": "StoreApi/Routes/V1/CartAddItem.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters cart item data sent via the API before it is passed to the cart controller.",
+                "long_description": "This hook filters cart items. It allows the request data to be changed, for example, quantity, or supplemental cart item data, before it is passed into CartController::add_to_cart and stored to session.\n CartController::add_to_cart only expects the keys id, quantity, variation, and cart_item_data, so other values may be ignored. CartController::add_to_cart (and core) do already have a filter hook called woocommerce_add_cart_item, but this does not have access to the original Store API request like this hook does.",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "An array of customer (user) data.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$customer_data"
+                    },
+                    {
+                        "name": "return",
+                        "content": "",
+                        "types": [
+                            "array"
+                        ]
+                    }
+                ],
+                "long_description_html": "<p>This hook filters cart items. It allows the request data to be changed, for example, quantity, or supplemental cart item data, before it is passed into CartController::add_to_cart and stored to session.</p> <p>CartController::add_to_cart only expects the keys id, quantity, variation, and cart_item_data, so other values may be ignored. CartController::add_to_cart (and core) do already have a filter hook called woocommerce_add_cart_item, but this does not have access to the original Store API request like this hook does.</p>"
+            },
+            "args": 2
+        },
+        {
             "name": "woocommerce_store_api_disable_nonce_check",
             "file": "StoreApi/Routes/V1/AbstractCartRoute.php",
             "type": "filter",
@@ -938,6 +1006,34 @@
                 "long_description_html": "<p>The suffix of the hook will vary depending on the value being filtered. For example, minimum, maximum, multiple_of, editable.</p>"
             },
             "args": 3
+        },
+        {
+            "name": "woocommerce_store_api_rate_limit_options",
+            "file": "StoreApi/Utilities/RateLimits.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters options for Rate Limits.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "Array of option values.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$rate_limit_options"
+                    },
+                    {
+                        "name": "return",
+                        "content": "",
+                        "types": [
+                            "array"
+                        ]
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 1
         },
         {
             "name": "woocommerce_variation_option_name",

@@ -2,6 +2,18 @@
     "$schema": "https://raw.githubusercontent.com/wp-hooks/generator/0.9.0/schema.json",
     "hooks": [
         {
+            "name": "deprecated_function_run",
+            "file": "Domain/Bootstrap.php",
+            "type": "action",
+            "doc": {
+                "description": "",
+                "long_description": "",
+                "tags": [],
+                "long_description_html": ""
+            },
+            "args": 3
+        },
+        {
             "name": "woocommerce_add_to_cart",
             "file": "StoreApi/Utilities/CartController.php",
             "type": "action",
@@ -333,6 +345,18 @@
                 "long_description": "",
                 "tags": [],
                 "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_blocks_loaded",
+            "file": "Domain/Bootstrap.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when the woocommerce blocks are loaded and ready to use.",
+                "long_description": "This hook is intended to be used as a safe event hook for when the plugin has been loaded, and all dependency requirements have been met.\n To ensure blocks are initialized, you must use the `woocommerce_blocks_loaded` hook instead of the `plugins_loaded` hook. This is because the functions hooked into plugins_loaded on the same priority load in an inconsistent and unpredictable manner.",
+                "tags": [],
+                "long_description_html": "<p>This hook is intended to be used as a safe event hook for when the plugin has been loaded, and all dependency requirements have been met.</p> <p>To ensure blocks are initialized, you must use the <code>woocommerce_blocks_loaded</code> hook instead of the <code>plugins_loaded</code> hook. This is because the functions hooked into plugins_loaded on the same priority load in an inconsistent and unpredictable manner.</p>"
             },
             "args": 0
         },
@@ -740,6 +764,18 @@
                     }
                 ],
                 "long_description_html": "<p>This hook gives extensions the chance to add or update meta data on the $order. Throwing an exception from a callback attached to this action will make the Checkout Block render in a warning state, effectively preventing checkout.</p> <p>This is similar to existing core hook woocommerce_checkout_update_order_meta. We're using a new action:</p> <ul> <li>To keep the interface focused (only pass $order, not passing request data).</li> <li>This also explicitly indicates these orders are from checkout block/StoreAPI.</li> </ul>"
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_store_api_rate_limit_exceeded",
+            "file": "StoreApi/Authentication.php",
+            "type": "action",
+            "doc": {
+                "description": "",
+                "long_description": "",
+                "tags": [],
+                "long_description_html": ""
             },
             "args": 1
         },

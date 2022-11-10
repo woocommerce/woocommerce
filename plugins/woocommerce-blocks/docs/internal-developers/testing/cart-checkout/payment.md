@@ -2,10 +2,10 @@
 
 ## Table of Contents <!-- omit in toc -->
 
--   [Setup](#setup)
-    -   [Special Cases](#special-cases)
-    -   [Unsupported](#unsupported)
--   [What to test](#what-to-test)
+- [Setup](#setup)
+    - [Special Cases](#special-cases)
+    - [Unsupported](#unsupported)
+- [What to test](#what-to-test)
 
 ## Setup
 
@@ -46,14 +46,3 @@ If you have a payment method available:
 -   [ ] You should be able to perform a failed checkout credit card payment using this cart `4000000000000002`
 
 [![Create Todo list](https://raw.githubusercontent.com/senadir/todo-my-markdown/master/public/github-button.svg?sanitize=true)](https://git-todo.netlify.app/create)
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/testing/cart-checkout/payment.md)
-
-<!-- /FEEDBACK -->
-

@@ -2,8 +2,8 @@
 
 ## Table of Contents <!-- omit in toc -->
 
--   [Setup](#setup)
--   [What to test](#what-to-test)
+- [Setup](#setup)
+- [What to test](#what-to-test)
 
 ## Setup
 
@@ -22,14 +22,3 @@ This is a general flow of the main functionality of the blocks without going too
 -   [ ] You should see an order received page.
 
 [![Create Todo list](https://raw.githubusercontent.com/senadir/todo-my-markdown/master/public/github-button.svg?sanitize=true)](https://git-todo.netlify.app/create)
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/testing/cart-checkout/general-flow.md)
-
-<!-- /FEEDBACK -->
-

@@ -70,10 +70,14 @@ class Bootstrap {
 		if ( $this->has_core_dependencies() ) {
 			$this->init();
 			/**
-			 * Fires after WooCommerce Blocks plugin has loaded.
+			 * Fires when the woocommerce blocks are loaded and ready to use.
 			 *
-			 * This hook is intended to be used as a safe event hook for when the plugin has been loaded, and all
-			 * dependency requirements have been met.
+			 * This hook is intended to be used as a safe event hook for when the plugin
+			 * has been loaded, and all dependency requirements have been met.
+			 *
+			 * To ensure blocks are initialized, you must use the `woocommerce_blocks_loaded`
+			 * hook instead of the `plugins_loaded` hook. This is because the functions
+			 * hooked into plugins_loaded on the same priority load in an inconsistent and unpredictable manner.
 			 */
 			do_action( 'woocommerce_blocks_loaded' );
 		}
@@ -309,28 +313,28 @@ class Bootstrap {
 			'Automattic\WooCommerce\Blocks\StoreApi\Formatters',
 			function( Container $container ) {
 				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\Formatters', '7.2.0', 'Automattic\WooCommerce\StoreApi\Formatters', '7.4.0' );
-				return $container->get( StoreApi::class )::container()->get( \Automattic\WooCommerce\StoreApi\Formatters::class );
+				return $container->get( StoreApi::class )->container()->get( \Automattic\WooCommerce\StoreApi\Formatters::class );
 			}
 		);
 		$this->container->register(
 			'Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi',
 			function( Container $container ) {
 				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi', '7.2.0', 'Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema', '7.4.0' );
-				return $container->get( StoreApi::class )::container()->get( \Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema::class );
+				return $container->get( StoreApi::class )->container()->get( \Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema::class );
 			}
 		);
 		$this->container->register(
 			'Automattic\WooCommerce\Blocks\StoreApi\SchemaController',
 			function( Container $container ) {
 				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\SchemaController', '7.2.0', 'Automattic\WooCommerce\StoreApi\SchemaController', '7.4.0' );
-				return $container->get( StoreApi::class )::container()->get( SchemaController::class );
+				return $container->get( StoreApi::class )->container()->get( SchemaController::class );
 			}
 		);
 		$this->container->register(
 			'Automattic\WooCommerce\Blocks\StoreApi\RoutesController',
 			function( Container $container ) {
 				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\RoutesController', '7.2.0', 'Automattic\WooCommerce\StoreApi\RoutesController', '7.4.0' );
-				return $container->get( StoreApi::class )::container()->get( RoutesController::class );
+				return $container->get( StoreApi::class )->container()->get( RoutesController::class );
 			}
 		);
 		$this->container->register(

@@ -7,6 +7,7 @@
 ## Table of Contents
 
 
+ - [deprecated_function_run](#deprecated_function_run)
  - [woocommerce_add_to_cart](#woocommerce_add_to_cart)
  - [woocommerce_after_main_content](#woocommerce_after_main_content)
  - [woocommerce_after_shop_loop](#woocommerce_after_shop_loop)
@@ -20,6 +21,7 @@
  - [woocommerce_blocks_enqueue_cart_block_scripts_before](#woocommerce_blocks_enqueue_cart_block_scripts_before)
  - [woocommerce_blocks_enqueue_checkout_block_scripts_after](#woocommerce_blocks_enqueue_checkout_block_scripts_after)
  - [woocommerce_blocks_enqueue_checkout_block_scripts_before](#woocommerce_blocks_enqueue_checkout_block_scripts_before)
+ - [woocommerce_blocks_loaded](#woocommerce_blocks_loaded)
  - [woocommerce_blocks_{$this->registry_identifier}_registration](#woocommerce_blocks_-this--registry_identifier-_registration)
  - [woocommerce_check_cart_items](#-woocommerce_check_cart_items)
  - [woocommerce_created_customer](#woocommerce_created_customer)
@@ -34,8 +36,25 @@
  - [woocommerce_store_api_checkout_update_customer_from_request](#woocommerce_store_api_checkout_update_customer_from_request)
  - [woocommerce_store_api_checkout_update_order_from_request](#woocommerce_store_api_checkout_update_order_from_request)
  - [woocommerce_store_api_checkout_update_order_meta](#woocommerce_store_api_checkout_update_order_meta)
+ - [woocommerce_store_api_rate_limit_exceeded](#woocommerce_store_api_rate_limit_exceeded)
  - [woocommerce_store_api_validate_add_to_cart](#woocommerce_store_api_validate_add_to_cart)
  - [woocommerce_store_api_validate_cart_item](#woocommerce_store_api_validate_cart_item)
+
+---
+
+## deprecated_function_run
+
+
+
+
+```php
+do_action( 'deprecated_function_run' )
+```
+
+### Source
+
+
+ - [Domain/Bootstrap.php](../../../../src/Domain/Bootstrap.php)
 
 ---
 
@@ -312,6 +331,26 @@ do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_before' )
 
 
  - [BlockTypes/Checkout.php](../../../../src/BlockTypes/Checkout.php)
+
+---
+
+## woocommerce_blocks_loaded
+
+
+Fires when the woocommerce blocks are loaded and ready to use.
+
+```php
+do_action( 'woocommerce_blocks_loaded' )
+```
+
+### Description
+
+<p>This hook is intended to be used as a safe event hook for when the plugin has been loaded, and all dependency requirements have been met.</p> <p>To ensure blocks are initialized, you must use the <code>woocommerce_blocks_loaded</code> hook instead of the <code>plugins_loaded</code> hook. This is because the functions hooked into plugins_loaded on the same priority load in an inconsistent and unpredictable manner.</p>
+
+### Source
+
+
+ - [Domain/Bootstrap.php](../../../../src/Domain/Bootstrap.php)
 
 ---
 
@@ -710,6 +749,22 @@ do_action( 'woocommerce_store_api_checkout_update_order_meta', \WC_Order $order 
 
 
  - [StoreApi/Routes/V1/Checkout.php](../../../../src/StoreApi/Routes/V1/Checkout.php)
+
+---
+
+## woocommerce_store_api_rate_limit_exceeded
+
+
+
+
+```php
+do_action( 'woocommerce_store_api_rate_limit_exceeded' )
+```
+
+### Source
+
+
+ - [StoreApi/Authentication.php](../../../../src/StoreApi/Authentication.php)
 
 ---
 

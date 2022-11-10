@@ -10,6 +10,8 @@
  - [__experimental_woocommerce_blocks_add_data_attributes_to_block](#__experimental_woocommerce_blocks_add_data_attributes_to_block)
  - [__experimental_woocommerce_blocks_add_data_attributes_to_namespace](#__experimental_woocommerce_blocks_add_data_attributes_to_namespace)
  - [__experimental_woocommerce_blocks_payment_gateway_features_list](#__experimental_woocommerce_blocks_payment_gateway_features_list)
+ - [deprecated_function_trigger_error](#deprecated_function_trigger_error)
+ - [wc_session_expiration](#wc_session_expiration)
  - [woocommerce_add_cart_item](#woocommerce_add_cart_item)
  - [woocommerce_add_cart_item_data](#woocommerce_add_cart_item_data)
  - [woocommerce_add_to_cart_sold_individually_quantity](#woocommerce_add_to_cart_sold_individually_quantity)
@@ -23,14 +25,17 @@
  - [woocommerce_cart_contents_changed](#woocommerce_cart_contents_changed)
  - [woocommerce_ga_disable_tracking](#woocommerce_ga_disable_tracking)
  - [woocommerce_get_item_data](#woocommerce_get_item_data)
+ - [woocommerce_loop_add_to_cart_link](#woocommerce_loop_add_to_cart_link)
  - [woocommerce_new_customer_data](#woocommerce_new_customer_data)
  - [woocommerce_registration_errors](#woocommerce_registration_errors)
  - [woocommerce_shared_settings](#-woocommerce_shared_settings)
  - [woocommerce_shipping_package_name](#woocommerce_shipping_package_name)
  - [woocommerce_show_page_title](#woocommerce_show_page_title)
+ - [woocommerce_store_api_add_to_cart_data](#woocommerce_store_api_add_to_cart_data)
  - [woocommerce_store_api_disable_nonce_check](#woocommerce_store_api_disable_nonce_check)
  - [woocommerce_store_api_product_quantity_limit](#woocommerce_store_api_product_quantity_limit)
  - [woocommerce_store_api_product_quantity_{$value_type}](#woocommerce_store_api_product_quantity_-value_type)
+ - [woocommerce_store_api_rate_limit_options](#woocommerce_store_api_rate_limit_options)
  - [woocommerce_variation_option_name](#woocommerce_variation_option_name)
 
 ---
@@ -130,6 +135,38 @@ add_filter( '__experimental_woocommerce_blocks_payment_gateway_features_list', '
 
 
  - [Payments/Integrations/PayPal.php](../../../../src/Payments/Integrations/PayPal.php)
+
+---
+
+## deprecated_function_trigger_error
+
+
+
+
+```php
+apply_filters( 'deprecated_function_trigger_error' )
+```
+
+### Source
+
+
+ - [Domain/Bootstrap.php](../../../../src/Domain/Bootstrap.php)
+
+---
+
+## wc_session_expiration
+
+
+
+
+```php
+apply_filters( 'wc_session_expiration' )
+```
+
+### Source
+
+
+ - [StoreApi/Routes/V1/AbstractCartRoute.php](../../../../src/StoreApi/Routes/V1/AbstractCartRoute.php)
 
 ---
 
@@ -543,6 +580,22 @@ apply_filters( 'woocommerce_get_item_data', array $item_data, array $cart_item )
 
 ---
 
+## woocommerce_loop_add_to_cart_link
+
+
+
+
+```php
+apply_filters( 'woocommerce_loop_add_to_cart_link' )
+```
+
+### Source
+
+
+ - [BlockTypes/ProductButton.php](../../../../src/BlockTypes/ProductButton.php)
+
+---
+
 ## woocommerce_new_customer_data
 
 
@@ -697,6 +750,37 @@ apply_filters( 'woocommerce_show_page_title' )
 
 ---
 
+## woocommerce_store_api_add_to_cart_data
+
+
+Filters cart item data sent via the API before it is passed to the cart controller.
+
+```php
+apply_filters( 'woocommerce_store_api_add_to_cart_data', array $customer_data )
+```
+
+### Description
+
+<p>This hook filters cart items. It allows the request data to be changed, for example, quantity, or supplemental cart item data, before it is passed into CartController::add_to_cart and stored to session.</p> <p>CartController::add_to_cart only expects the keys id, quantity, variation, and cart_item_data, so other values may be ignored. CartController::add_to_cart (and core) do already have a filter hook called woocommerce_add_cart_item, but this does not have access to the original Store API request like this hook does.</p>
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $customer_data | array | An array of customer (user) data. |
+
+### Returns
+
+
+`array` 
+
+### Source
+
+
+ - [StoreApi/Routes/V1/CartAddItem.php](../../../../src/StoreApi/Routes/V1/CartAddItem.php)
+
+---
+
 ## woocommerce_store_api_disable_nonce_check
 
 
@@ -790,6 +874,33 @@ apply_filters( 'woocommerce_store_api_product_quantity_{$value_type}', mixed $va
 
 
  - [StoreApi/Utilities/QuantityLimits.php](../../../../src/StoreApi/Utilities/QuantityLimits.php)
+
+---
+
+## woocommerce_store_api_rate_limit_options
+
+
+Filters options for Rate Limits.
+
+```php
+apply_filters( 'woocommerce_store_api_rate_limit_options', array $rate_limit_options )
+```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $rate_limit_options | array | Array of option values. |
+
+### Returns
+
+
+`array` 
+
+### Source
+
+
+ - [StoreApi/Utilities/RateLimits.php](../../../../src/StoreApi/Utilities/RateLimits.php)
 
 ---
 

@@ -19,7 +19,7 @@ function update_footer {
 	printf '%s\n' "<!-- FEEDBACK -->$REPLACEWITH<!-- /FEEDBACK -->" '' >> $1
 }
 
-find ./docs -name "*.md" -or -path "./docs/examples" -prune|while read filename; do
+find ./docs -name "*.md" ! -path "./docs/examples*"  ! -path "./docs/internal-developers*"|while read filename; do
   update_footer $filename
 done
 

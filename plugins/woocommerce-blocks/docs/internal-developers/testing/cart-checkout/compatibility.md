@@ -2,8 +2,8 @@
 
 ## Table of Contents <!-- omit in toc -->
 
--   [Setup](#setup)
--   [What to test](#what-to-test)
+- [Setup](#setup)
+- [What to test](#what-to-test)
 
 The main goal of this is to test in a variety of themes, browsers, platforms, and setups, this is a list of things you can test with, with sane expectations.
 
@@ -17,14 +17,3 @@ The main goal of this is to test in a variety of themes, browsers, platforms, an
 ## What to test
 
 Test the WooCommerce Blocks plugin against the versions as listed above.
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/testing/cart-checkout/compatibility.md)
-
-<!-- /FEEDBACK -->
-
