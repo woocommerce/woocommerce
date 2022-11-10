@@ -21,6 +21,8 @@ import {
 	debouncedUpdatePaymentMethods,
 } from './update-payment-methods';
 
+// Please update from deprecated "registerStore" to "createReduxStore" when this PR is merged:
+// https://github.com/WordPress/gutenberg/pull/45513
 const registeredStore = registerStore< State >( STORE_KEY, {
 	reducer,
 	actions,
