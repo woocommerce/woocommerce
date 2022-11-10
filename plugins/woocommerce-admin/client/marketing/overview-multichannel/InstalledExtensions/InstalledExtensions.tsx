@@ -15,8 +15,8 @@ import {
 	ProductIcon,
 	PluginCardBody,
 } from '~/marketing/components';
-import { Plugin } from './types';
-import { usePlugins } from '../usePlugins';
+import { Plugin } from '~/marketing/types';
+import { usePlugins } from '~/marketing/hooks';
 
 export const InstalledExtensions = () => {
 	const { installedPlugins, activatingPlugins, activateInstalledPlugin } =

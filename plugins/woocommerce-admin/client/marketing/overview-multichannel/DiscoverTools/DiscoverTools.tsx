@@ -20,12 +20,12 @@ import {
 	CardBody,
 	PluginCardBody,
 } from '~/marketing/components';
+import { usePlugins } from '~/marketing/hooks/usePlugins';
 import { getInAppPurchaseUrl } from '~/lib/in-app-purchase';
 import { createNoticesFromResponse } from '~/lib/notices';
 import { Plugin } from './types';
 import { useRecommendedPlugins } from './useRecommendedPlugins';
 import './DiscoverTools.scss';
-import { usePlugins } from '../usePlugins';
 
 /**
  * Return tabs (`{ name, title }`) for the TabPanel.
