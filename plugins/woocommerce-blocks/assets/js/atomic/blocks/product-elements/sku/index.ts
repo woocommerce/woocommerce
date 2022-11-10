@@ -17,11 +17,16 @@ import {
 } from './constants';
 
 const blockConfig: BlockConfiguration = {
-	...sharedConfig,
 	apiVersion: 2,
 	title,
 	description,
 	icon: { src: icon },
+	usesContext: [ 'query', 'queryId', 'postId' ],
+	ancestor: [
+		'@woocommerce/all-products',
+		'@woocommerce/single-product',
+		'core/post-template',
+	],
 	attributes,
 	edit,
 };
