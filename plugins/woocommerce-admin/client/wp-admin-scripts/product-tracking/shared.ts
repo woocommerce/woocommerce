@@ -324,4 +324,10 @@ export const initProductScreenTracks = () => {
 				} );
 			}
 		} );
+
+	document
+		.querySelector( '#view-product-link' )
+		?.addEventListener( 'click', () => {
+			recordEvent( 'product_view_product_click', getProductData() );
+		} );
 };
