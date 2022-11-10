@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { registerStore } from '@wordpress/data';
+import { register, createReduxStore } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -11,10 +11,12 @@ import * as selectors from './selectors';
 import * as actions from './actions';
 import reducer from './reducers';
 
-registerStore( STORE_KEY, {
+const store = createReduxStore( STORE_KEY, {
 	reducer,
 	actions,
 	selectors,
 } );
+
+register( store );
 
 export const QUERY_STATE_STORE_KEY = STORE_KEY;
