@@ -191,10 +191,6 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   rsync -a woocommerce/woocommerce/* plugins/woocommerce/
                   
-            - name: Launch wp-env e2e environment
-              working-directory: plugins/woocommerce
-              run: pnpm env:test
-
             - name: Install k6
               if: success() || failure()
               run: |
@@ -203,12 +199,12 @@ jobs:
             - name: Run k6 smoke tests
               if: success() || failure()
               env:
-              #    URL: ${{ secrets.SMOKE_TEST_PERF_URL }}
+                  URL: ${{ secrets.SMOKE_TEST_PERF_URL }}
                   HOST: ${{ secrets.SMOKE_TEST_PERF_HOST }}
-              #    A_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
-              #    A_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
-              #    C_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
-              #    C_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
+                  A_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
+                  A_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
+                  C_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
+                  C_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
                   P_ID: 274
               run: |
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
@@ -233,7 +229,7 @@ jobs:
       name: Common PHP versions on release
       runs-on: ubuntu-20.04
       needs: [e2e-release]
-      if: success()
+      if: success() || failure()
       strategy:
         matrix:
           php: ['7.4', '8.0', '8.1']
@@ -308,7 +304,7 @@ jobs:
         name: Common WP versions
         runs-on: ubuntu-20.04
         needs: [e2e-release]
-        if: success()
+        if: success() || failure()
         strategy:
           matrix:
             wp: ['6.1', '6.0.3']
