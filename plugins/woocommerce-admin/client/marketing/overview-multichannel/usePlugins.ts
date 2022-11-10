@@ -7,12 +7,13 @@ import { useSelect, useDispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import { STORE_KEY } from '~/marketing/data/constants';
-import { Plugin } from './types';
+import { Plugin } from './InstalledExtensions/types';
 
 export type UsePluginsType = {
 	installedPlugins: Plugin[];
 	activatingPlugins: string[];
 	activateInstalledPlugin: ( slug: string ) => void;
+	loadInstalledPluginsAfterActivation: ( slug: string ) => void;
 };
 
 export const usePlugins = (): UsePluginsType => {
@@ -25,11 +26,13 @@ export const usePlugins = (): UsePluginsType => {
 			activatingPlugins: getActivatingPlugins(),
 		};
 	}, [] );
-	const { activateInstalledPlugin } = useDispatch( STORE_KEY );
+	const { activateInstalledPlugin, loadInstalledPluginsAfterActivation } =
+		useDispatch( STORE_KEY );
 
 	return {
 		installedPlugins,
 		activatingPlugins,
 		activateInstalledPlugin,
+		loadInstalledPluginsAfterActivation,
 	};
 };

@@ -25,6 +25,7 @@ import { createNoticesFromResponse } from '~/lib/notices';
 import { Plugin } from './types';
 import { useRecommendedPlugins } from './useRecommendedPlugins';
 import './DiscoverTools.scss';
+import { usePlugins } from '../usePlugins';
 
 /**
  * Return tabs (`{ name, title }`) for the TabPanel.
@@ -55,6 +56,7 @@ export const DiscoverTools = () => {
 		null
 	);
 	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
+	const { loadInstalledPluginsAfterActivation } = usePlugins();
 
 	const installAndActivate = async ( plugin: Plugin ) => {
 		setCurrentPlugin( plugin.product );
@@ -69,6 +71,7 @@ export const DiscoverTools = () => {
 			] );
 
 			invalidateResolution();
+			loadInstalledPluginsAfterActivation( plugin.product );
 			createNoticesFromResponse( response );
 		} catch ( error ) {
 			createNoticesFromResponse( error );
