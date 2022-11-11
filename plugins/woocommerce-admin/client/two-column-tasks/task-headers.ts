@@ -10,6 +10,8 @@ import ProductsHeader from './headers/products';
 import PurchaseHeader from './headers/purchase';
 import PaymentsHeader from './headers/payments';
 import WoocommercePaymentsHeader from './headers/woocommerce-payments';
+import AddDomainHeader from './headers/add-domain';
+import LaunchSiteHeader from './headers/launch-site';
 
 const taskHeaders: Record< string, React.ElementType > = {
 	store_details: StoreDetailsHeader,
@@ -21,6 +23,8 @@ const taskHeaders: Record< string, React.ElementType > = {
 	products: ProductsHeader,
 	purchase: PurchaseHeader,
 	'woocommerce-payments': WoocommercePaymentsHeader,
+	add_domain: AddDomainHeader,
+	launch_site: LaunchSiteHeader,
 };
 
 export default taskHeaders;

@@ -10,22 +10,24 @@ import { __ } from '@wordpress/i18n';
 import TimerImage from './timer.svg';
 import { WC_ASSET_URL } from '../../utils/admin-settings';
 
-const ProductsHeader = ( { task, goToTask } ) => {
+const StoreDetailsHeader = ( { task, goToTask } ) => {
 	return (
 		<div className="woocommerce-task-header__contents-container">
 			<img
-				alt={ __( 'Products illustration', 'woocommerce' ) }
+				alt={ __( 'Launch your store illustration', 'woocommerce' ) }
 				src={
 					WC_ASSET_URL +
-					'images/task_list/sales-section-illustration.png'
+					'images/task_list/store-details-illustration.png'
 				}
 				className="svg-background"
 			/>
 			<div className="woocommerce-task-header__contents">
-				<h1>{ __( 'Add products to sell', 'woocommerce' ) }</h1>
+				<h1>
+					{ __( 'Your store is ready for launch', 'woocommerce' ) }
+				</h1>
 				<p>
 					{ __(
-						'Build your catalog by adding what you want to sell. You can add products manually or import them from a different store.',
+						"You are absolutely on the right track and your store is already in good shape, so why not launch your store?",
 						'woocommerce'
 					) }
 				</p>
@@ -34,7 +36,7 @@ const ProductsHeader = ( { task, goToTask } ) => {
 					isPrimary={ ! task.isComplete }
 					onClick={ goToTask }
 				>
-					{ __( 'Add products', 'woocommerce' ) }
+					{ __( 'Launch your store', 'woocommerce' ) }
 				</Button>
 				<p className="woocommerce-task-header__timer">
 					<img src={ TimerImage } alt="Timer" />{ ' ' }
@@ -45,4 +47,4 @@ const ProductsHeader = ( { task, goToTask } ) => {
 	);
 };
 
-export default ProductsHeader;
+export default StoreDetailsHeader;

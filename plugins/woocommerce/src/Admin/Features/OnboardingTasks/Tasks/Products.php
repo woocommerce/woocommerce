@@ -64,7 +64,7 @@ class Products extends Task {
 	 * @return string
 	 */
 	public function get_time() {
-		return __( '1 minute per product', 'woocommerce' );
+		return __( '2 minutes', 'woocommerce' );
 	}
 
 	/**

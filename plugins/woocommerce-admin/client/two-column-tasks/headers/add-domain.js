@@ -10,22 +10,24 @@ import { __ } from '@wordpress/i18n';
 import TimerImage from './timer.svg';
 import { WC_ASSET_URL } from '../../utils/admin-settings';
 
-const ProductsHeader = ( { task, goToTask } ) => {
+const StoreDetailsHeader = ( { task, goToTask } ) => {
 	return (
 		<div className="woocommerce-task-header__contents-container">
 			<img
-				alt={ __( 'Products illustration', 'woocommerce' ) }
+				alt={ __( 'Add a domain illustration', 'woocommerce' ) }
 				src={
 					WC_ASSET_URL +
-					'images/task_list/sales-section-illustration.png'
+					'images/task_list/store-details-illustration.png'
 				}
 				className="svg-background"
 			/>
 			<div className="woocommerce-task-header__contents">
-				<h1>{ __( 'Add products to sell', 'woocommerce' ) }</h1>
+				<h1>
+					{ __( 'Claim your free domain', 'woocommerce' ) }
+				</h1>
 				<p>
 					{ __(
-						'Build your catalog by adding what you want to sell. You can add products manually or import them from a different store.',
+						"You have a free one-year domain registration or transfer included with your plan.",
 						'woocommerce'
 					) }
 				</p>
@@ -34,7 +36,7 @@ const ProductsHeader = ( { task, goToTask } ) => {
 					isPrimary={ ! task.isComplete }
 					onClick={ goToTask }
 				>
-					{ __( 'Add products', 'woocommerce' ) }
+					{ __( 'Add a domain', 'woocommerce' ) }
 				</Button>
 				<p className="woocommerce-task-header__timer">
 					<img src={ TimerImage } alt="Timer" />{ ' ' }
@@ -45,4 +47,4 @@ const ProductsHeader = ( { task, goToTask } ) => {
 	);
 };
 
-export default ProductsHeader;
+export default StoreDetailsHeader;

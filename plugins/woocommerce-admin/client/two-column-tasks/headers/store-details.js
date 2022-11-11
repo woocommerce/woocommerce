@@ -40,7 +40,7 @@ const StoreDetailsHeader = ( { task, goToTask } ) => {
 				</Button>
 				<p className="woocommerce-task-header__timer">
 					<img src={ TimerImage } alt="Timer" />{ ' ' }
-					<span>{ __( '2 minutes', 'woocommerce' ) }</span>
+					<span>{ task.time }</span>
 				</p>
 			</div>
 		</div>
