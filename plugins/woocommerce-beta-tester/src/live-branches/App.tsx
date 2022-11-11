@@ -26,7 +26,9 @@ export const App = () => {
       Live Branches - Install and test WooCommerce PRs
     </Heading>
     <Card elevation={3} css={cardStyle} >
-      <CardHeader><h2>Active PRs</h2></CardHeader>
+      <CardHeader>
+        <h2>Active PRs</h2>
+      </CardHeader>
       <CardBody>
         <BranchList branches={prs} />
       </CardBody>

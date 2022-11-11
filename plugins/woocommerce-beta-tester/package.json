@@ -26,7 +26,7 @@
 		"@emotion/react": "^11.10.4",
 		"@types/prop-types": "^15.7.4",
 		"@woocommerce/data": "workspace:*",
-		"@wordpress/api-fetch": "^3.21.5",
+		"@wordpress/api-fetch": "^3.23.1",
 		"@wordpress/components": "^12.0.9",
 		"@wordpress/compose": "^3.24.4",
 		"@wordpress/data": "^4.26.7",

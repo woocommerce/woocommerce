@@ -1,4 +1,8 @@
 // @ts-ignore
+import apiFetch from '@wordpress/api-fetch';
+import { useState } from 'react';
+// @ts-ignore
+import { API_NAMESPACE } from '../../features/data/constants';
 import data from './jetpack-branches-test-data.json';
 
 export type Branch = {
@@ -11,7 +15,22 @@ export type Branch = {
 }
 
 export const useLiveBranchesData = () => {
-  return Object.entries(data.pr).map(([, value]) => {
-    return value;
-  }) as Branch[];
+  const [branches, setBranches] = useState<Branch[]>([]);
+
+  const getBranches = async () => {
+
+    const res = await apiFetch( {
+			path: `${ API_NAMESPACE }/live-branches/manifest/v1`,
+			method: 'GET',
+		} )
+
+    // @ts-ignore
+    setBranches(Object.entries(res).map(([, value]) => {
+      return value;
+    }) as Branch[]);
+  }
+  
+  getBranches();
+  
+  return branches;
 } 

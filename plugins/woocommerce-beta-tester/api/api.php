@@ -54,3 +54,4 @@ require( 'tracks/class-tracks-debug-log.php' );
 require( 'features/features.php' );
 require( 'rest-api-filters/rest-api-filters.php' );
 require( 'rest-api-filters/hook.php' );
+require( 'live-branches/manifest.php' );
