@@ -1270,15 +1270,15 @@ class WC_Helper {
 			return $data;
 		}
 
-		$request_uri = $_SERVER['REQUEST_URI'];
-		$source = '';
-		if ( stripos( $request_uri, 'wc-addons' ) ):
+		$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$source      = '';
+		if ( stripos( $request_uri, 'wc-addons' ) ) :
 			$source = 'my-subscriptions';
-		elseif ( stripos( $request_uri, 'plugins.php' ) ):
+		elseif ( stripos( $request_uri, 'plugins.php' ) ) :
 			$source = 'plugins';
-		elseif ( stripos( $request_uri, 'wc-admin' ) ):
+		elseif ( stripos( $request_uri, 'wc-admin' ) ) :
 			$source = 'inbox-notes';
-		elseif ( stripos( $request_uri, 'admin-ajax.php' ) ):
+		elseif ( stripos( $request_uri, 'admin-ajax.php' ) ) :
 			$source = 'heartbeat-api';
 		endif;
 
