@@ -28,7 +28,7 @@ describe( 'setDefaultPaymentMethod', () => {
 		},
 	};
 
-	it( ' correctly sets the first payment method in the list of available payment methods', async () => {
+	it( 'correctly sets the first payment method in the list of available payment methods', async () => {
 		jest.spyOn( wpDataFunctions, 'select' ).mockImplementation(
 			( storeName ) => {
 				const originalStore = originalSelect( storeName );
@@ -72,7 +72,7 @@ describe( 'setDefaultPaymentMethod', () => {
 			'wc-payment-gateway-1'
 		);
 	} );
-	it( ' correctly sets the saved payment method if one is available', async () => {
+	it( 'correctly sets the saved payment method if one is available', async () => {
 		jest.spyOn( wpDataFunctions, 'select' ).mockImplementation(
 			( storeName ) => {
 				const originalStore = originalSelect( storeName );
