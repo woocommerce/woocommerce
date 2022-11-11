@@ -77,6 +77,7 @@ module.exports = {
 				ignoreGlobals: true,
 			},
 		],
+		'react/react-in-jsx-scope': 'off',
 	},
 	overrides: [
 		{
@@ -125,6 +126,7 @@ module.exports = {
 						},
 					},
 				],
+				'react/react-in-jsx-scope': 'off',
 			},
 		},
 		{

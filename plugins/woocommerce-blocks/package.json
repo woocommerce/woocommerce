@@ -133,7 +133,7 @@
 		"@woocommerce/api": "0.2.0",
 		"@woocommerce/data": "^4.1.0",
 		"@woocommerce/e2e-utils": "0.2.0",
-		"@woocommerce/eslint-plugin": "2.0.0",
+		"@woocommerce/eslint-plugin": "2.2.0",
 		"@woocommerce/woocommerce-rest-api": "1.0.1",
 		"@wordpress/api-fetch": "6.11.0",
 		"@wordpress/babel-preset-default": "6.14.0",

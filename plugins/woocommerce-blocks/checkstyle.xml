@@ -2155,7 +2155,6 @@
 <error line="188" column="26" severity="error" message="Property &apos;toBeDisabled&apos; does not exist on type &apos;JestMatchers&lt;HTMLElement&gt;&apos;." source="TS2339" />
 </file>
 <file name="assets/js/blocks/cart/block.js">
-<error line="16" column="30" severity="error" message="Cannot find module &apos;@woocommerce/base-context/providers&apos; or its corresponding type declarations." source="TS2307" />
 <error line="25" column="55" severity="error" message="Expected 0 arguments, but got 1." source="TS2554" />
 <error line="27" column="18" severity="error" message="Binding element &apos;children&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
 <error line="29" column="10" severity="error" message="Property &apos;hasDarkControls&apos; does not exist on type &apos;{}&apos;." source="TS2339" />
@@ -2650,7 +2649,6 @@
 <error line="15" column="68" severity="error" message="Expected 0 arguments, but got 1." source="TS2554" />
 </file>
 <file name="assets/js/blocks/checkout/block.tsx">
-<error line="12" column="39" severity="error" message="Cannot find module &apos;@woocommerce/base-context/providers&apos; or its corresponding type declarations." source="TS2307" />
 <error line="95" column="4" severity="error" message="Type &apos;{ allowCreateAccount: boolean; showCompanyField: boolean; requireCompanyField: boolean; showApartmentField: boolean; showPhoneField: boolean; requirePhoneField: boolean; }&apos; is missing the following properties from type &apos;CheckoutBlockContextProps&apos;: showOrderNotes, showPolicyLinks, showReturnToCart, cartPageId, showRateAfterTaxName" source="TS2739" />
 <error line="184" column="4" severity="error" message="No overload matches this call.
   Overload 1 of 2, &apos;(props: BlockErrorBoundaryProps | Readonly&lt;BlockErrorBoundaryProps&gt;): BlockErrorBoundary&apos;, gave the following error.
@@ -3230,11 +3228,6 @@
 <error line="30" column="3" severity="error" message="Type &apos;(attributes: Props) =&gt; JSX.Element&apos; is not assignable to type &apos;BlockType&lt;Record&lt;string, unknown&gt;, Record&lt;string, unknown&gt;&gt;&apos;.
   Types of parameters &apos;attributes&apos; and &apos;props&apos; are incompatible.
     Type &apos;BlockProps&lt;Record&lt;string, unknown&gt;, Record&lt;string, unknown&gt;&gt;&apos; is missing the following properties from type &apos;Props&apos;: contents, addToCartBehaviour, hasHiddenPrice" source="TS2322" />
-</file>
-<file name="assets/js/blocks/mini-cart/frontend.ts">
-<error line="5" column="27" severity="error" message="Cannot find module &apos;@woocommerce/base-utils/preload-script&apos; or its corresponding type declarations." source="TS2307" />
-<error line="6" column="28" severity="error" message="Cannot find module &apos;@woocommerce/base-utils/lazy-load-script&apos; or its corresponding type declarations." source="TS2307" />
-<error line="7" column="46" severity="error" message="Cannot find module &apos;@woocommerce/base-utils/legacy-events&apos; or its corresponding type declarations." source="TS2307" />
 </file>
 <file name="assets/js/blocks/mini-cart/index.tsx">
 <error line="36" column="3" severity="error" message="Type &apos;true&apos; has no properties in common with type &apos;Partial&lt;ColorProps&gt;&apos;." source="TS2559" />

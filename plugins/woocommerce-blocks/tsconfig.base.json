@@ -30,6 +30,7 @@
 			"@woocommerce/atomic-utils": [ "assets/js/atomic/utils" ],
 			"@woocommerce/base-components/*": [ "assets/js/base/components/*" ],
 			"@woocommerce/base-context": [ "assets/js/base/context" ],
+			"@woocommerce/base-context/*": [ "assets/js/base/context/*" ],
 			"@woocommerce/base-context/hooks": [
 				"assets/js/base/context/hooks"
 			],
@@ -39,6 +40,7 @@
 			"@woocommerce/base-hocs/*": [ "assets/js/base/hocs/*" ],
 			"@woocommerce/base-hooks": [ "assets/js/base/hooks" ],
 			"@woocommerce/base-utils": [ "assets/js/base/utils" ],
+			"@woocommerce/base-utils/*": [ "assets/js/base/utils/*" ],
 			"@woocommerce/blocks/*": [ "assets/js/blocks/*" ],
 			"@woocommerce/editor-components/*": [
 				"assets/js/editor-components/*"
