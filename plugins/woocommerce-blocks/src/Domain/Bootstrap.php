@@ -349,8 +349,10 @@ class Bootstrap {
 		);
 		$this->container->register(
 			ShippingController::class,
-			function () {
-				return new ShippingController( $this->package );
+			function ( $container ) {
+				$asset_api           = $container->get( AssetApi::class );
+				$asset_data_registry = $container->get( AssetDataRegistry::class );
+				return new ShippingController( $asset_api, $asset_data_registry );
 			}
 		);
 	}
