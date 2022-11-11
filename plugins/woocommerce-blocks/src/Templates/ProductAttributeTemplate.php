@@ -31,7 +31,7 @@ class ProductAttributeTemplate {
 	 */
 	public function update_taxonomy_template_hierarchy( $templates ) {
 		$queried_object = get_queried_object();
-		if ( taxonomy_is_product_attribute( $queried_object->slug ) && wc_current_theme_is_fse_theme() ) {
+		if ( taxonomy_is_product_attribute( $queried_object->taxonomy ) && wc_current_theme_is_fse_theme() ) {
 			array_unshift( $templates, self::SLUG );
 		}
 
