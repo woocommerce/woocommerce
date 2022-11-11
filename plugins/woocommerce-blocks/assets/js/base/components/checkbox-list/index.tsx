@@ -141,6 +141,7 @@ const CheckboxList = ( {
 								onChange={ () => {
 									onChange( option.value );
 								} }
+								disabled={ isDisabled }
 							/>
 						</li>
 						{ shouldTruncateOptions &&

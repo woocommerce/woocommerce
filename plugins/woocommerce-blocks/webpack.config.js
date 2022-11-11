@@ -155,7 +155,7 @@ const LegacyStylingConfig = {
  * so the legacy builds are not used. Keeping the config so we can conveniently reinstate
  * these builds as needed (hence eslint-disable).
  */
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 const legacyConfigs = [
 	LegacyMainConfig,
 	LegacyFrontendConfig,
