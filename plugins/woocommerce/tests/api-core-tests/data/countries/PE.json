@@ -1,0 +1,122 @@
+{
+    "code": "PE",
+    "name": "Peru",
+    "states": [
+        {
+            "code": "CAL",
+            "name": "El Callao"
+        },
+        {
+            "code": "LMA",
+            "name": "Municipalidad Metropolitana de Lima"
+        },
+        {
+            "code": "AMA",
+            "name": "Amazonas"
+        },
+        {
+            "code": "ANC",
+            "name": "Ancash"
+        },
+        {
+            "code": "APU",
+            "name": "Apurímac"
+        },
+        {
+            "code": "ARE",
+            "name": "Arequipa"
+        },
+        {
+            "code": "AYA",
+            "name": "Ayacucho"
+        },
+        {
+            "code": "CAJ",
+            "name": "Cajamarca"
+        },
+        {
+            "code": "CUS",
+            "name": "Cusco"
+        },
+        {
+            "code": "HUV",
+            "name": "Huancavelica"
+        },
+        {
+            "code": "HUC",
+            "name": "Huánuco"
+        },
+        {
+            "code": "ICA",
+            "name": "Ica"
+        },
+        {
+            "code": "JUN",
+            "name": "Junín"
+        },
+        {
+            "code": "LAL",
+            "name": "La Libertad"
+        },
+        {
+            "code": "LAM",
+            "name": "Lambayeque"
+        },
+        {
+            "code": "LIM",
+            "name": "Lima"
+        },
+        {
+            "code": "LOR",
+            "name": "Loreto"
+        },
+        {
+            "code": "MDD",
+            "name": "Madre de Dios"
+        },
+        {
+            "code": "MOQ",
+            "name": "Moquegua"
+        },
+        {
+            "code": "PAS",
+            "name": "Pasco"
+        },
+        {
+            "code": "PIU",
+            "name": "Piura"
+        },
+        {
+            "code": "PUN",
+            "name": "Puno"
+        },
+        {
+            "code": "SAM",
+            "name": "San Martín"
+        },
+        {
+            "code": "TAC",
+            "name": "Tacna"
+        },
+        {
+            "code": "TUM",
+            "name": "Tumbes"
+        },
+        {
+            "code": "UCA",
+            "name": "Ucayali"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/pe"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}
