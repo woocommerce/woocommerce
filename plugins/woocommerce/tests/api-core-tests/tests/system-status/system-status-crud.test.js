@@ -2,12 +2,9 @@ const {
 	test,
 	expect
 } = require('@playwright/test');
-const {
-	refund
-} = require('../../data');
 
 /**
- * Tests for the WooCommerce Refunds API.
+ * Tests for the WooCommerce API.
  *
  * @group api
  * @group system status
@@ -18,7 +15,7 @@ test.describe('System Status API tests', () => {
 	test('can view all system status items', async ({
 		request
 	}) => {
-		// call API to create a refund
+		// call API to view all system status items
 		const response = await request.get('/wp-json/wc/v3/system_status');
 		const responseJSON = await response.json();
 		expect(response.status()).toEqual(200);
@@ -67,80 +64,80 @@ test.describe('System Status API tests', () => {
 					"wc_database_version": expect.any(String),
 					"database_prefix": expect.any(String),
 					"maxmind_geoip_database": expect.any(String),
-					"database_tables": {
-						"woocommerce": {
-							"wp_woocommerce_sessions": {
+					"database_tables": expect.objectContaining({
+						"woocommerce": expect.objectContaining({
+							"wp_woocommerce_sessions": expect.objectContaining({
 								"data": expect.any(String),
 								"index": expect.any(String),
 								"engine": expect.any(String),
-							},
-							"wp_woocommerce_api_keys": {
+							}),
+							"wp_woocommerce_api_keys": expect.objectContaining({
 								"data": expect.any(String),
 								"index": expect.any(String),
 								"engine": expect.any(String),
-							},
-							"wp_woocommerce_attribute_taxonomies": {
+							}),
+							"wp_woocommerce_attribute_taxonomies": expect.objectContaining({
 								"data": expect.any(String),
 								"index": expect.any(String),
 								"engine": expect.any(String),
-							},
-							"wp_woocommerce_downloadable_product_permissions": {
+							}),
+							"wp_woocommerce_downloadable_product_permissions": expect.objectContaining({
 								"data": expect.any(String),
 								"index": expect.any(String),
 								"engine": expect.any(String),
-							},
-							"wp_woocommerce_order_items": {
+							}),
+							"wp_woocommerce_order_items": expect.objectContaining({
 								"data": expect.any(String),
 								"index": expect.any(String),
 								"engine": expect.any(String),
-							},
-							"wp_woocommerce_order_itemmeta": {
+							}),
+							"wp_woocommerce_order_itemmeta": expect.objectContaining({
 								"data": expect.any(String),
 								"index": expect.any(String),
 								"engine": expect.any(String),
-							},
-							"wp_woocommerce_tax_rates": {
+							}),
+							"wp_woocommerce_tax_rates": expect.objectContaining({
 								"data": expect.any(String),
 								"index": expect.any(String),
 								"engine": expect.any(String),
-							},
-							"wp_woocommerce_tax_rate_locations": {
+							}),
+							"wp_woocommerce_tax_rate_locations": expect.objectContaining({
 								"data": expect.any(String),
 								"index": expect.any(String),
 								"engine": expect.any(String),
-							},
-							"wp_woocommerce_shipping_zones": {
+							}),
+							"wp_woocommerce_shipping_zones": expect.objectContaining({
 								"data": expect.any(String),
 								"index": expect.any(String),
 								"engine": expect.any(String),
-							},
-							"wp_woocommerce_shipping_zone_locations": {
+							}),
+							"wp_woocommerce_shipping_zone_locations": expect.objectContaining({
 								"data": expect.any(String),
 								"index": expect.any(String),
 								"engine": expect.any(String),
-							},
-							"wp_woocommerce_shipping_zone_methods": {
+							}),
+							"wp_woocommerce_shipping_zone_methods": expect.objectContaining({
 								"data": expect.any(String),
 								"index": expect.any(String),
 								"engine": expect.any(String),
-							},
-							"wp_woocommerce_payment_tokens": {
+							}),
+							"wp_woocommerce_payment_tokens": expect.objectContaining({
 								"data": expect.any(String),
 								"index": expect.any(String),
 								"engine": expect.any(String),
-							},
-							"wp_woocommerce_payment_tokenmeta": {
+							}),
+							"wp_woocommerce_payment_tokenmeta": expect.objectContaining({
 								"data": expect.any(String),
 								"index": expect.any(String),
 								"engine": expect.any(String),
-							},
-							"wp_woocommerce_log": {
+							}),
+							"wp_woocommerce_log": expect.objectContaining({
 								"data": expect.any(String),
 								"index": expect.any(String),
 								"engine": expect.any(String),
-							}
-						},
-						"other": {
+							})
+						}),
+						"other": expect.objectContaining({
 							"wp_actionscheduler_actions": {
 								"data": expect.any(String),
 								"index": expect.any(String),
@@ -300,14 +297,9 @@ test.describe('System Status API tests', () => {
 								"data": expect.any(String),
 								"index": expect.any(String),
 								"engine": expect.any(String),
-							},
-							"wp_wpml_mails": {
-								"data": expect.any(String),
-								"index": expect.any(String),
-								"engine": expect.any(String),
 							}
-						}
-					},
+						})
+					}),
 					"database_size": {
 						"data": expect.any(Number),
 						"index": expect.any(Number)
@@ -338,31 +330,6 @@ test.describe('System Status API tests', () => {
 						"network_activated": expect.any(Boolean)
 					},
 					{
-						"plugin": expect.any(String),
-						"name": expect.any(String),
-						"version": expect.any(String),
-						"version_latest": expect.any(String),
-						"url": expect.any(String),
-						"author_name": expect.any(String),
-						"author_url": expect.any(String),
-						"network_activated": expect.any(Boolean)
-					},
-					{
-						"plugin": expect.any(String),
-						"name": expect.any(String),
-						"version": expect.any(String),
-						"version_latest": expect.any(String),
-						"url": expect.any(String),
-						"author_name": expect.any(String),
-						"author_url": expect.any(String),
-						"network_activated": expect.any(Boolean)
-					}
-				])
-			})
-		);
-		expect(responseJSON).toEqual(
-			expect.objectContaining({
-				inactive_plugins: expect.arrayContaining([{
 						"plugin": expect.any(String),
 						"name": expect.any(String),
 						"version": expect.any(String),
@@ -545,7 +512,7 @@ test.describe('System Status API tests', () => {
 	test('can view all system status tools', async ({
 		request
 	}) => {
-		// call API to create a refund
+		// call API to view system status tools
 		const response = await request.get('/wp-json/wc/v3/system_status/tools');
 		const responseJSON = await response.json();
 		expect(response.status()).toEqual(200);
@@ -578,13 +545,12 @@ test.describe('System Status API tests', () => {
 				}),
 			])
 		);
-
 	});
 
 	test('can retrieve a system status tool', async ({
 		request
 	}) => {
-		// call API to create a refund
+		// call API to retrieve a system staus tool
 		const response = await request.get('/wp-json/wc/v3/system_status/tools/clear_transients');
 		const responseJSON = await response.json();
 		expect(response.status()).toEqual(200);
@@ -602,7 +568,7 @@ test.describe('System Status API tests', () => {
 	test('can run a tool from system status', async ({
 		request
 	}) => {
-		// call API to create a refund
+		// call API to run a system status tool
 		const response = await request.put('/wp-json/wc/v3/system_status/tools/clear_transients');
 		const responseJSON = await response.json();
 		expect(response.status()).toEqual(200);
@@ -618,6 +584,5 @@ test.describe('System Status API tests', () => {
 			}),
 		);
 	});
-
 
 });

@@ -1,4 +1,6 @@
 const { devices } = require( '@playwright/test' );
+require( 'dotenv' ).config({ path: __dirname + '/.env' });
+
 const {
 	BASE_URL,
 	CI,
@@ -6,12 +8,10 @@ const {
 	USER_KEY,
 	USER_SECRET,
 } = process.env;
-require( 'dotenv' ).config();
 
 const baseURL = BASE_URL ?? 'http://localhost:8086';
 const userKey = USER_KEY ?? 'admin';
 const userSecret = USER_SECRET ?? 'password';
-
 const base64auth = btoa( `${ userKey }:${ userSecret }` );
 
 const config = {
@@ -53,7 +53,7 @@ const config = {
 		video: 'on-first-retry',
 		trace: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
-		baseURL,
+		baseURL: baseURL,
 		extraHTTPHeaders: {
 			// Add authorization token to all requests.
 			Authorization: `Basic ${ base64auth }`,
