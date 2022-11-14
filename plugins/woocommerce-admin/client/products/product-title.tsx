@@ -7,7 +7,6 @@ import {
 	PRODUCTS_STORE_NAME,
 	WCDataSelector,
 } from '@woocommerce/data';
-import { registerPlugin } from '@wordpress/plugins';
 import { useFormContext } from '@woocommerce/components';
 import { useParams } from 'react-router-dom';
 import { useSelect } from '@wordpress/data';
@@ -38,8 +37,3 @@ export const ProductTitle: React.FC = () => {
 
 	return <WooHeaderPageTitle>{ title }</WooHeaderPageTitle>;
 };
-
-registerPlugin( 'woocommerce-product-title', {
-	render: ProductTitle,
-	icon: 'admin-generic',
-} );
