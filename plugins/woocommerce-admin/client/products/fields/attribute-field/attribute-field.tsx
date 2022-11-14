@@ -57,6 +57,9 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		null | string
 	>( null );
 
+	const CANCEL_BUTTON_EVENT_NAME =
+		'product_add_attributes_modal_cancel_button_click';
+
 	const fetchTerms = useCallback(
 		( attributeId: number ) => {
 			return resolveSelect(
@@ -192,9 +195,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 						{ showAddAttributeModal && (
 							<AddAttributeModal
 								onCancel={ () => {
-									recordEvent(
-										'product_modal_attribute_cancel_button'
-									);
+									recordEvent( CANCEL_BUTTON_EVENT_NAME );
 									setShowAddAttributeModal( false );
 								} }
 								onAdd={ onAddNewAttributes }
@@ -294,7 +295,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 			{ showAddAttributeModal && (
 				<AddAttributeModal
 					onCancel={ () => {
-						recordEvent( 'product_modal_attribute_cancel_button' );
+						recordEvent( CANCEL_BUTTON_EVENT_NAME );
 						setShowAddAttributeModal( false );
 					} }
 					onAdd={ onAddNewAttributes }
