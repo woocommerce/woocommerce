@@ -127,9 +127,11 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 	};
 
 	const onRemove = ( attribute: ProductAttribute ) => {
-		recordEvent( 'product_remove_attribute_button_click' );
 		// eslint-disable-next-line no-alert
 		if ( window.confirm( __( 'Remove this attribute?', 'woocommerce' ) ) ) {
+			recordEvent(
+				'product_remove_attribute_confirmation_confirm_click'
+			);
 			updateAttributes(
 				hydratedAttributes.filter(
 					( attr ) =>
@@ -137,6 +139,8 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 						fetchAttributeId( attribute )
 				)
 			);
+		} else {
+			recordEvent( 'product_remove_attribute_confirmation_cancel_click' );
 		}
 	};
 
