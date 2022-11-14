@@ -20,10 +20,6 @@ export const config = {
 	actions,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	controls: { ...dataControls, ...sharedControls } as any,
-	// TODO: Gutenberg with Thunks was released in WP 6.0. Once 6.1 is released, remove the experimental flag here
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore We pass this in case there is an older version of Gutenberg running.
-	__experimentalUseThunks: true,
 };
 
 const store = createReduxStore( STORE_KEY, config );
