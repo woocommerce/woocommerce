@@ -647,7 +647,7 @@
 <error line="164" column="25" severity="error" message="Property &apos;SET_PRISTINE&apos; does not exist on type &apos;{ readonly SET_IDLE: &quot;SET_IDLE&quot;; readonly SET_REDIRECT_URL: &quot;SET_REDIRECT_URL&quot;; readonly SET_COMPLETE: &quot;SET_CHECKOUT_COMPLETE&quot;; readonly SET_BEFORE_PROCESSING: &quot;SET_BEFORE_PROCESSING&quot;; ... 11 more ...; readonly SET_IS_CART: &quot;SET_IS_CART&quot;; }&apos;." source="TS2339" />
 </file>
 <file name="assets/js/data/checkout/index.ts">
-<error line="25" column="44" severity="error" message="Argument of type &apos;{ reducer: (state: CheckoutState | undefined, action: actions.CheckoutAction) =&gt; CheckoutState; selectors: typeof selectors; actions: typeof actions; __experimentalUseThunks: boolean; }&apos; is not assignable to parameter of type &apos;StoreConfig&lt;CheckoutState&gt;&apos;.
+<error line="21" column="44" severity="error" message="Argument of type &apos;{ reducer: (state: CheckoutState | undefined, action: actions.CheckoutAction) =&gt; CheckoutState; selectors: typeof selectors; actions: typeof actions; }&apos; is not assignable to parameter of type &apos;StoreConfig&lt;CheckoutState&gt;&apos;.
   Types of property &apos;actions&apos; are incompatible.
     Type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/data/checkout/actions&quot;)&apos; is not assignable to type &apos;{ [k: string]: (...args: readonly any[]) =&gt; AnyAction | Generator&lt;any, any, unknown&gt;; }&apos;.
       Property &apos;__internalProcessCheckoutResponse&apos; is incompatible with index signature.
@@ -700,7 +700,7 @@
 <error line="162" column="27" severity="error" message="Binding element &apos;dispatch&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
 </file>
 <file name="assets/js/data/payment/index.ts">
-<error line="29" column="44" severity="error" message="Argument of type &apos;{ reducer: Reducer&lt;PaymentMethodDataState, AnyAction&gt;; selectors: typeof selectors; actions: typeof actions; controls: any; __experimentalUseThunks: boolean; }&apos; is not assignable to parameter of type &apos;StoreConfig&lt;PaymentMethodDataState&gt;&apos;.
+<error line="25" column="44" severity="error" message="Argument of type &apos;{ reducer: Reducer&lt;PaymentMethodDataState, AnyAction&gt;; selectors: typeof selectors; actions: typeof actions; controls: any; }&apos; is not assignable to parameter of type &apos;StoreConfig&lt;PaymentMethodDataState&gt;&apos;.
   Types of property &apos;actions&apos; are incompatible.
     Type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/data/payment/actions&quot;)&apos; is not assignable to type &apos;{ [k: string]: (...args: readonly any[]) =&gt; AnyAction | Generator&lt;any, any, unknown&gt;; }&apos;.
       Property &apos;__internalUpdateAvailablePaymentMethods&apos; is incompatible with index signature.
