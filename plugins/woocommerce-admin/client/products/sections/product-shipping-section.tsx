@@ -400,9 +400,6 @@ export function ProductShippingSection( {
 							.catch( handleShippingClassServerError )
 					}
 					onCancel={ () => {
-						recordEvent(
-							'product_new_shipping_class_modal_cancel_button_click'
-						);
 						setShowShippingClassModal( false );
 					} }
 				/>
