@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import {
 	useInnerBlockLayoutContext,
@@ -10,20 +9,35 @@ import {
 } from '@woocommerce/shared-context';
 import { useColorProps, useTypographyProps } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
+import type { HTMLAttributes } from 'react';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+import type { BlockAttributes } from './types';
 
-/**
- * Product Stock Indicator Block Component.
- *
- * @param {Object} props             Incoming props.
- * @param {string} [props.className] CSS Class name for the component.
- * @return {*} The component.
- */
-const Block = ( props ) => {
+const lowStockText = ( lowStock: string ): string => {
+	return sprintf(
+		/* translators: %d stock amount (number of items in stock for product) */
+		__( '%d left in stock', 'woo-gutenberg-products-block' ),
+		lowStock
+	);
+};
+
+const stockText = ( inStock: boolean, isBackordered: boolean ): string => {
+	if ( isBackordered ) {
+		return __( 'Available on backorder', 'woo-gutenberg-products-block' );
+	}
+
+	return inStock
+		? __( 'In Stock', 'woo-gutenberg-products-block' )
+		: __( 'Out of Stock', 'woo-gutenberg-products-block' );
+};
+
+type Props = BlockAttributes & HTMLAttributes< HTMLDivElement >;
+
+export const Block = ( props: Props ): JSX.Element | null => {
 	const { className } = props;
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
@@ -64,28 +78,6 @@ const Block = ( props ) => {
 				: stockText( inStock, isBackordered ) }
 		</div>
 	);
-};
-
-const lowStockText = ( lowStock ) => {
-	return sprintf(
-		/* translators: %d stock amount (number of items in stock for product) */
-		__( '%d left in stock', 'woo-gutenberg-products-block' ),
-		lowStock
-	);
-};
-
-const stockText = ( inStock, isBackordered ) => {
-	if ( isBackordered ) {
-		return __( 'Available on backorder', 'woo-gutenberg-products-block' );
-	}
-
-	return inStock
-		? __( 'In Stock', 'woo-gutenberg-products-block' )
-		: __( 'Out of Stock', 'woo-gutenberg-products-block' );
-};
-
-Block.propTypes = {
-	className: PropTypes.string,
 };
 
 export default withProductDataContext( Block );
