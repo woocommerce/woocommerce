@@ -1172,11 +1172,6 @@
 <error line="4" column="23" severity="error" message="Could not find a declaration file for module &apos;@wordpress/wordcount&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@wordpress/wordcount/build/index.js&apos; implicitly has an &apos;any&apos; type.
   Try `npm i --save-dev @types/wordpress__wordcount` if it exists or add a new declaration (.d.ts) file containing `declare module &apos;@wordpress/wordcount&apos;;`" source="TS7016" />
 </file>
-<file name="assets/js/atomic/blocks/product-elements/stock-indicator/block.js">
-<error line="69" column="24" severity="error" message="Parameter &apos;lowStock&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
-<error line="77" column="21" severity="error" message="Parameter &apos;inStock&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
-<error line="77" column="30" severity="error" message="Parameter &apos;isBackordered&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
-</file>
 <file name="assets/js/atomic/blocks/product-elements/add-to-cart/shared/add-to-cart-button.js">
 <error line="120" column="4" severity="error" message="Type &apos;{ children: string; className: string; href: string; onClick: () =&gt; any; rel: string; }&apos; is not assignable to type &apos;IntrinsicAttributes &amp; ButtonProps&apos;.
   Property &apos;href&apos; does not exist on type &apos;IntrinsicAttributes &amp; ButtonProps&apos;." source="TS2322" />
