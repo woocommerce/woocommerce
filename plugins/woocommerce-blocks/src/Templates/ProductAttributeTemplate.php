@@ -30,7 +30,8 @@ class ProductAttributeTemplate {
 	 * @param array $templates Templates that match the product attributes taxonomy.
 	 */
 	public function update_taxonomy_template_hierarchy( $templates ) {
-		if ( taxonomy_is_product_attribute( get_query_var( 'taxonomy' ) ) && wc_current_theme_is_fse_theme() ) {
+		$queried_object = get_queried_object();
+		if ( taxonomy_is_product_attribute( $queried_object->taxonomy ) && wc_current_theme_is_fse_theme() ) {
 			array_unshift( $templates, self::SLUG );
 		}
 

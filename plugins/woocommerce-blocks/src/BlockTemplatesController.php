@@ -426,17 +426,24 @@ class BlockTemplatesController {
 			$this->block_template_is_available( 'taxonomy-product_tag' )
 		) {
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
-		} elseif ( taxonomy_is_product_attribute( get_query_var( 'taxonomy' ) ) &&
-			! BlockTemplateUtils::theme_has_template( 'archive-product' ) &&
-			$this->block_template_is_available( 'archive-product' )
-		) {
-			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		} elseif (
 			( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) &&
 			! BlockTemplateUtils::theme_has_template( 'archive-product' ) &&
 			$this->block_template_is_available( 'archive-product' )
 		) {
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
+		} else {
+			$queried_object = get_queried_object();
+			if ( is_null( $queried_object ) ) {
+				return;
+			}
+
+			if ( isset( $queried_object->taxonomy ) && taxonomy_is_product_attribute( $queried_object->taxonomy ) &&
+				! BlockTemplateUtils::theme_has_template( 'archive-product' ) &&
+				$this->block_template_is_available( 'archive-product' )
+			) {
+				add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
+			}
 		}
 	}
 
