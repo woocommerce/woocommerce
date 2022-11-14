@@ -159,7 +159,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					return newAttr;
 				} ),
 		] );
-		recordEvent( 'product_modal_attribute_add_button' );
+		recordEvent( 'product_add_attributes_modal_add_button_click' );
 		setShowAddAttributeModal( false );
 	};
 
