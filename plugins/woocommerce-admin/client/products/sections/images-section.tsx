@@ -101,7 +101,9 @@ export const ImagesSection: React.FC = () => {
 						} }
 						onDragEnd={ () => {
 							if ( isRemoving && draggedImageId ) {
-								recordEvent( 'product_image_remove' );
+								recordEvent(
+									'product_images_remove_image_button_click'
+								);
 								setValue(
 									'images',
 									images.filter(
@@ -121,12 +123,16 @@ export const ImagesSection: React.FC = () => {
 								) === undefined
 							) {
 								images[ replaceIndex ] = media as Image;
-								recordEvent( 'product_image_replace' );
+								recordEvent(
+									'product_images_replace_image_button_click'
+								);
 								setValue( 'images', images );
 							}
 						} }
 						onSelectAsCover={ () =>
-							recordEvent( 'product_image_select_as_cover' )
+							recordEvent(
+								'product_images_select_image_as_cover_button_click'
+							)
 						}
 					>
 						{ images.map( ( image ) => (
