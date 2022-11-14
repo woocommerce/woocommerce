@@ -330,4 +330,20 @@ export const initProductScreenTracks = () => {
 		?.addEventListener( 'click', () => {
 			recordEvent( 'product_view_product_click', getProductData() );
 		} );
+
+	waitUntilElementIsPresent(
+		'.notice-success.is-dismissible > button',
+		() => {
+			document
+				.querySelector( '.notice-success.is-dismissible > button' )
+				?.addEventListener( 'click ', () => {
+					console.log( 'dismissed' );
+					recordEvent(
+						'product_view_product_dismiss',
+						getProductData()
+					);
+				} );
+			console.log( 'attached event' );
+		}
+	);
 };
