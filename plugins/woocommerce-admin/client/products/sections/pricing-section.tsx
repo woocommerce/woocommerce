@@ -81,7 +81,6 @@ export const PricingSection: React.FC = () => {
 
 	const currencyInputProps = {
 		...getCurrencySymbolProps( currencyConfig ),
-		className: 'half-width-field',
 		sanitize: ( value: Product[ keyof Product ] ) => {
 			return sanitizePrice( String( value ) );
 		},
@@ -129,6 +128,7 @@ export const PricingSection: React.FC = () => {
 					>
 						<InputControl
 							{ ...regularPriceProps }
+							className="half-width-field"
 							label={ __( 'List price', 'woocommerce' ) }
 							value={ formatCurrencyDisplayValue(
 								String( regularPriceProps?.value ),
@@ -150,6 +150,7 @@ export const PricingSection: React.FC = () => {
 					>
 						<InputControl
 							{ ...salePriceProps }
+							className="half-width-field"
 							label={ __( 'Sale price', 'woocommerce' ) }
 							value={ formatCurrencyDisplayValue(
 								String( salePriceProps?.value ),
