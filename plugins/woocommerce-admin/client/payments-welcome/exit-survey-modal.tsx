@@ -8,6 +8,8 @@ import {
 	CheckboxControl,
 	TextareaControl,
 } from '@wordpress/components';
+import { useDispatch } from '@wordpress/data';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -34,6 +36,7 @@ function ExitSurveyModal( {
 	const [ isSomethingElseChecked, setSomethingElseChecked ] =
 		useState( false );
 	const [ comments, setComments ] = useState( '' );
+	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
 	const closeModal = () => {
 		setOpen( false );
@@ -70,6 +73,14 @@ function ExitSurveyModal( {
 			/* eslint-enable camelcase */
 		} );
 
+		if ( isMoreInfoChecked ) {
+			// Record that the user would possibly consider installing WCPay with more information in the future.
+			updateOptions( {
+				wc_pay_exit_survey_more_info_needed_timestamp: Math.floor(
+					Date.now() / 1000
+				),
+			} );
+		}
 		closeModal();
 	};
 

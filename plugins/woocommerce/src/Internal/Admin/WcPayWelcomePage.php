@@ -61,55 +61,55 @@ class WcPayWelcomePage {
 		global $menu;
 
 		// WC Payment must not be installed.
-		if ( WooCommercePayments::is_installed() ) {
-			return;
-		}
+		// if ( WooCommercePayments::is_installed() ) {
+		// 	return;
+		// }
 
-		// Live store for at least 90 days.
-		if ( ! WCAdminHelper::is_wc_admin_active_for( DAY_IN_SECONDS * 90 ) ) {
-			return;
-		}
+		// // Live store for at least 90 days.
+		// if ( ! WCAdminHelper::is_wc_admin_active_for( DAY_IN_SECONDS * 90 ) ) {
+		// 	return;
+		// }
 
-		// Must be a US based business.
-		if ( WC()->countries->get_base_country() !== 'US' ) {
-			return;
-		}
+		// // Must be a US based business.
+		// if ( WC()->countries->get_base_country() !== 'US' ) {
+		// 	return;
+		// }
 
-		// Has another payment gateway installed.
-		if ( ! $this->is_another_payment_gateway_installed() ) {
-			return;
-		}
+		// // Has another payment gateway installed.
+		// if ( ! $this->is_another_payment_gateway_installed() ) {
+		// 	return;
+		// }
 
-		// No existing WCPay account.
-		if ( $this->has_wcpay_account() ) {
-			return;
-		}
+		// // No existing WCPay account.
+		// if ( $this->has_wcpay_account() ) {
+		// 	return;
+		// }
 
-		// Suggestions may be disabled via a setting.
-		if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) === 'no' ) {
-			return;
-		}
+		// // Suggestions may be disabled via a setting.
+		// if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) === 'no' ) {
+		// 	return;
+		// }
 
-		/**
-		 * Filter allow marketplace suggestions.
-		 *
-		 * User can disabled all suggestions via filter.
-		 *
-		 * @since 3.6.0
-		 */
-		if ( ! apply_filters( 'woocommerce_allow_marketplace_suggestions', true ) ) {
-			return;
-		}
+		// /**
+		//  * Filter allow marketplace suggestions.
+		//  *
+		//  * User can disabled all suggestions via filter.
+		//  *
+		//  * @since 3.6.0
+		//  */
+		// if ( ! apply_filters( 'woocommerce_allow_marketplace_suggestions', true ) ) {
+		// 	return;
+		// }
 
-		// Manually dismissed.
-		if ( get_option( 'wc_calypso_bridge_payments_dismissed', 'no' ) === 'yes' ) {
-			return;
-		}
+		// // Manually dismissed.
+		// if ( get_option( 'wc_calypso_bridge_payments_dismissed', 'no' ) === 'yes' ) {
+		// 	return;
+		// }
 
-		// Users must be in the experiment.
-		if ( ! $this->is_user_in_treatment_mode() ) {
-			return;
-		}
+		// // Users must be in the experiment.
+		// if ( ! $this->is_user_in_treatment_mode() ) {
+		// 	return;
+		// }
 
 		$menu_icon = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjxzdmcKICAgdmVyc2lvbj0iMS4xIgogICBpZD0ic3ZnNjciCiAgIHNvZGlwb2RpOmRvY25hbWU9IndjcGF5X21lbnVfaWNvbi5zdmciCiAgIHdpZHRoPSI4NTIiCiAgIGhlaWdodD0iNjg0IgogICBpbmtzY2FwZTp2ZXJzaW9uPSIxLjEgKGM0ZThmOWUsIDIwMjEtMDUtMjQpIgogICB4bWxuczppbmtzY2FwZT0iaHR0cDovL3d3dy5pbmtzY2FwZS5vcmcvbmFtZXNwYWNlcy9pbmtzY2FwZSIKICAgeG1sbnM6c29kaXBvZGk9Imh0dHA6Ly9zb2RpcG9kaS5zb3VyY2Vmb3JnZS5uZXQvRFREL3NvZGlwb2RpLTAuZHRkIgogICB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgIHhtbG5zOnN2Zz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxkZWZzCiAgICAgaWQ9ImRlZnM3MSIgLz4KICA8c29kaXBvZGk6bmFtZWR2aWV3CiAgICAgaWQ9Im5hbWVkdmlldzY5IgogICAgIHBhZ2Vjb2xvcj0iI2ZmZmZmZiIKICAgICBib3JkZXJjb2xvcj0iIzY2NjY2NiIKICAgICBib3JkZXJvcGFjaXR5PSIxLjAiCiAgICAgaW5rc2NhcGU6cGFnZXNoYWRvdz0iMiIKICAgICBpbmtzY2FwZTpwYWdlb3BhY2l0eT0iMC4wIgogICAgIGlua3NjYXBlOnBhZ2VjaGVja2VyYm9hcmQ9IjAiCiAgICAgc2hvd2dyaWQ9ImZhbHNlIgogICAgIGZpdC1tYXJnaW4tdG9wPSIwIgogICAgIGZpdC1tYXJnaW4tbGVmdD0iMCIKICAgICBmaXQtbWFyZ2luLXJpZ2h0PSIwIgogICAgIGZpdC1tYXJnaW4tYm90dG9tPSIwIgogICAgIGlua3NjYXBlOnpvb209IjI1NiIKICAgICBpbmtzY2FwZTpjeD0iLTg0Ljg1NzQyMiIKICAgICBpbmtzY2FwZTpjeT0iLTgzLjI5NDkyMiIKICAgICBpbmtzY2FwZTp3aW5kb3ctd2lkdGg9IjEzMTIiCiAgICAgaW5rc2NhcGU6d2luZG93LWhlaWdodD0iMTA4MSIKICAgICBpbmtzY2FwZTp3aW5kb3cteD0iMTE2IgogICAgIGlua3NjYXBlOndpbmRvdy15PSIyMDIiCiAgICAgaW5rc2NhcGU6d2luZG93LW1heGltaXplZD0iMCIKICAgICBpbmtzY2FwZTpjdXJyZW50LWxheWVyPSJzdmc2NyIgLz4KICA8cGF0aAogICAgIHRyYW5zZm9ybT0ic2NhbGUoLTEsIDEpIHRyYW5zbGF0ZSgtODUwLCAwKSIKICAgICBkPSJNIDc2OCw4NiBWIDU5OCBIIDg0IFYgODYgWiBtIDAsNTk4IGMgNDgsMCA4NCwtMzggODQsLTg2IFYgODYgQyA4NTIsMzggODE2LDAgNzY4LDAgSCA4NCBDIDM2LDAgMCwzOCAwLDg2IHYgNTEyIGMgMCw0OCAzNiw4NiA4NCw4NiB6IE0gMzg0LDEyOCB2IDQ0IGggLTg2IHYgODQgaCAxNzAgdiA0NCBIIDM0MCBjIC0yNCwwIC00MiwxOCAtNDIsNDIgdiAxMjggYyAwLDI0IDE4LDQyIDQyLDQyIGggNDQgdiA0NCBoIDg0IHYgLTQ0IGggODYgViA0MjggSCAzODQgdiAtNDQgaCAxMjggYyAyNCwwIDQyLC0xOCA0MiwtNDIgViAyMTQgYyAwLC0yNCAtMTgsLTQyIC00MiwtNDIgaCAtNDQgdiAtNDQgeiIKICAgICBmaWxsPSIjYTJhYWIyIgogICAgIGlkPSJwYXRoNjUiIC8+Cjwvc3ZnPgo=';
 
