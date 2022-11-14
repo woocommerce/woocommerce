@@ -1361,20 +1361,6 @@
 <error line="20" column="3" severity="error" message="Type &apos;{ textAlign: { type: string; }; productId: { type: string; default: number; }; isDescendentOfQueryLoop: { type: string; default: boolean; }; }&apos; is not assignable to type &apos;{ productId: { type: string; default: number; }; isDescendentOfQueryLoop: { type: string; default: boolean; }; }&apos;.
   Object literal may only specify known properties, and &apos;textAlign&apos; does not exist in type &apos;{ productId: { type: string; default: number; }; isDescendentOfQueryLoop: { type: string; default: boolean; }; }&apos;." source="TS2322" />
 </file>
-<file name="assets/js/atomic/blocks/product-elements/price/index.js">
-<error line="53" column="1" severity="error" message="No overload matches this call.
-  Overload 1 of 2, &apos;(metadata: BlockConfiguration&lt;{}&gt;, settings?: Partial&lt;BlockConfiguration&lt;{}&gt;&gt; | undefined): Block&lt;{}&gt; | undefined&apos;, gave the following error.
-    Argument of type &apos;string&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{}&gt;&apos;.
-      Type &apos;string&apos; is not assignable to type &apos;Pick&lt;Block&lt;{}&gt;, &quot;title&quot; | &quot;category&quot; | &quot;attributes&quot;&gt;&apos;.
-  Overload 2 of 2, &apos;(name: string, settings: BlockConfiguration&lt;{}&gt;): Block&lt;{}&gt; | undefined&apos;, gave the following error.
-    Argument of type &apos;{ apiVersion: number; title: string; description: string; ancestor: string[]; usesContext: string[]; icon: { src: JSX.Element; }; attributes: { productId: { type: string; default: number; }; isDescendentOfQueryLoop: { ...; }; }; ... 19 more ...; merge?: ((attributes: {}, attributesToMerge: {}) =&gt; Partial&lt;...&gt;) | und...&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{}&gt;&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the types of the target&apos;s properties.
-      Type &apos;{ apiVersion: number; title: string; description: string; ancestor: string[]; usesContext: string[]; icon: { src: JSX.Element; }; attributes: { productId: { type: string; default: number; }; isDescendentOfQueryLoop: { ...; }; }; ... 19 more ...; merge?: ((attributes: {}, attributesToMerge: {}) =&gt; Partial&lt;...&gt;) | und...&apos; is not assignable to type &apos;Partial&lt;Omit&lt;Block&lt;{}&gt;, &quot;icon&quot;&gt;&gt;&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the types of the target&apos;s properties.
-        The types of &apos;supports.color&apos; are incompatible between these types.
-          Type &apos;Partial&lt;ColorProps&gt; | { text: boolean; background: boolean; link: boolean; __experimentalSkipSerialization: boolean; } | undefined&apos; is not assignable to type &apos;Partial&lt;ColorProps&gt; | undefined&apos;.
-            Type &apos;{ text: boolean; background: boolean; link: boolean; __experimentalSkipSerialization: boolean; }&apos; is not assignable to type &apos;Partial&lt;ColorProps&gt;&apos;.
-              Types of property &apos;text&apos; are incompatible.
-                Type &apos;boolean&apos; is not assignable to type &apos;string&apos;." source="TS2769" />
-</file>
 <file name="assets/js/atomic/blocks/product-elements/image/edit.js">
 <error line="14" column="2" severity="error" message="Module &apos;&quot;@wordpress/components&quot;&apos; has no exported member &apos;__experimentalToggleGroupControl&apos;." source="TS2305" />
 <error line="16" column="2" severity="error" message="Module &apos;&quot;@wordpress/components&quot;&apos; has no exported member &apos;__experimentalToggleGroupControlOption&apos;." source="TS2305" />
@@ -1399,9 +1385,8 @@
                 Property &apos;context&apos; is missing in type &apos;BlockEditProps&lt;{}&gt; &amp; { children?: ReactNode; }&apos; but required in type &apos;{ attributes: any; setAttributes: any; context: any; }&apos;." source="TS2769" />
 </file>
 <file name="assets/js/atomic/blocks/product-elements/rating/index.ts">
-<error line="32" column="2" severity="error" message="Type &apos;{ __experimentalSelector?: string; spacing?: { margin: boolean; __experimentalSkipSerialization: boolean; }; color?: { text: boolean; background: boolean; link: boolean; __experimentalSkipSerialization: boolean; }; typography?: { ...; }; }&apos; is not assignable to type &apos;BlockSupports&apos;.
-  The types of &apos;color.text&apos; are incompatible between these types.
-    Type &apos;boolean&apos; is not assignable to type &apos;string&apos;." source="TS2322" />
+<error line="25" column="2" severity="error" message="Type &apos;{ apiVersion: number; title: string; description: string; usesContext: string[]; ancestor: string[]; icon: { src: JSX.Element; }; attributes: { productId: { type: string; default: number; }; isDescendentOfQueryLoop: { ...; }; }; supports: { ...; }; edit: (props: any) =&gt; JSX.Element; }&apos; is not assignable to type &apos;BlockConfiguration&lt;{}&gt;&apos;.
+  Object literal may only specify known properties, and &apos;ancestor&apos; does not exist in type &apos;BlockConfiguration&lt;{}&gt;&apos;." source="TS2322" />
 </file>
 <file name="assets/js/atomic/blocks/product-elements/button/edit.js">
 <error line="13" column="18" severity="error" message="Binding element &apos;attributes&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
@@ -1441,11 +1426,6 @@
         Types of property &apos;attributes&apos; are incompatible.
           Type &apos;Readonly&lt;{}&gt;&apos; is not assignable to type &apos;Record&lt;string, unknown&gt; &amp; { className: string; }&apos;.
             Property &apos;className&apos; is missing in type &apos;Readonly&lt;{}&gt;&apos; but required in type &apos;{ className: string; }&apos;." source="TS2322" />
-</file>
-<file name="assets/js/atomic/blocks/product-elements/tag-list/index.ts">
-<error line="28" column="2" severity="error" message="Type &apos;{ color?: { text: boolean; background: boolean; link: boolean; }; typography?: { fontSize: boolean; }; __experimentalSelector?: string; }&apos; is not assignable to type &apos;BlockSupports&apos;.
-  The types of &apos;color.text&apos; are incompatible between these types.
-    Type &apos;boolean&apos; is not assignable to type &apos;string&apos;." source="TS2322" />
 </file>
 <file name="assets/js/atomic/blocks/product-elements/stock-indicator/edit.js">
 <error line="15" column="18" severity="error" message="Binding element &apos;attributes&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
@@ -1540,10 +1520,6 @@
   Types of property &apos;stepHeadingContent&apos; are incompatible.
     Type &apos;Element | undefined&apos; is not assignable to type &apos;Element&apos;.
       Type &apos;undefined&apos; is not assignable to type &apos;Element&apos;." source="TS2375" />
-</file>
-<file name="assets/js/base/components/cart-checkout/product-details/index.tsx">
-<error line="36" column="14" severity="error" message="Property &apos;className&apos; does not exist on type &apos;ProductResponseItemData&apos;.
-  Property &apos;className&apos; does not exist on type &apos;ProductResponseItemBaseData &amp; { key: string; name?: never; }&apos;." source="TS2339" />
 </file>
 <file name="assets/js/base/components/cart-checkout/product-summary/index.tsx">
 <error line="32" column="4" severity="error" message="Type &apos;{ className: string | undefined; source: string; maxLength: number; countType: WordCountType; }&apos; is not assignable to type &apos;SummaryProps&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the types of the target&apos;s properties.
@@ -3464,12 +3440,6 @@
     Type &apos;{ orderby: { type: &quot;string&quot;; default: string; }; columns: { type: string; default: any; }; rows: { type: string; default: any; }; alignButtons: { type: string; default: boolean; }; categories: { type: string; default: never[]; }; catOperator: { ...; }; contentVisibility: { ...; }; isPreview: { ...; }; stockStatus: {...&apos; is not assignable to type &apos;{ readonly orderby: BlockAttribute&lt;unknown&gt;; readonly columns: BlockAttribute&lt;unknown&gt;; readonly rows: BlockAttribute&lt;unknown&gt;; readonly alignButtons: BlockAttribute&lt;unknown&gt;; ... 4 more ...; readonly stockStatus: BlockAttribute&lt;...&gt;; }&apos;.
       Types of property &apos;columns&apos; are incompatible.
         Type &apos;{ type: string; default: any; }&apos; is not assignable to type &apos;BlockAttribute&lt;unknown&gt;&apos;." source="TS2769" />
-</file>
-<file name="assets/js/blocks/product-query/constants.ts">
-<error line="71" column="4" severity="error" message="Type &apos;[string]&apos; is not assignable to type &apos;InnerBlockTemplate&apos;.
-  Source has 1 element(s) but target requires 3." source="TS2322" />
-<error line="82" column="2" severity="error" message="Type &apos;[string]&apos; is not assignable to type &apos;InnerBlockTemplate&apos;." source="TS2322" />
-<error line="83" column="2" severity="error" message="Type &apos;[string]&apos; is not assignable to type &apos;InnerBlockTemplate&apos;." source="TS2322" />
 </file>
 <file name="assets/js/blocks/product-query/utils.tsx">
 <error line="5" column="10" severity="error" message="Module &apos;&quot;@wordpress/blocks&quot;&apos; has no exported member &apos;store&apos;." source="TS2305" />
