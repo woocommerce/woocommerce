@@ -399,9 +399,7 @@ export function ProductShippingSection( {
 							} )
 							.catch( handleShippingClassServerError )
 					}
-					onCancel={ () => {
-						setShowShippingClassModal( false );
-					} }
+					onCancel={ () => setShowShippingClassModal( false ) }
 				/>
 			) }
 		</ProductSectionLayout>
