@@ -77,7 +77,9 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 			value: AttributeForm[ keyof AttributeForm ]
 		) => void
 	) => {
-		recordEvent( 'product_remove_attribute_button' );
+		recordEvent(
+			'product_add_attributes_modal_remove_attribute_button_click'
+		);
 		if ( values.attributes.length > 1 ) {
 			setValue(
 				'attributes',
@@ -287,7 +289,7 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 									) }
 									onClick={ () => {
 										recordEvent(
-											'product_add_another_attribute_button'
+											'product_add_attributes_modal_add_another_attribute_button_click'
 										);
 										addAnother( values, setValue );
 									} }

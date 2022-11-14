@@ -245,7 +245,7 @@ export function ProductShippingSection( {
 												type="external"
 												onClick={ () => {
 													recordEvent(
-														'product_shipping_global_settings'
+														'product_shipping_global_settings_link_click'
 													);
 												} }
 											>
@@ -389,7 +389,7 @@ export function ProductShippingSection( {
 						>( shippingClassValues )
 							.then( ( value ) => {
 								recordEvent(
-									'product_modal_new_shipping_class_add_button'
+									'product_new_shipping_class_modal_add_button_click'
 								);
 								invalidateResolution(
 									'getProductShippingClasses'
@@ -401,7 +401,7 @@ export function ProductShippingSection( {
 					}
 					onCancel={ () => {
 						recordEvent(
-							'product_modal_new_shipping_class_cancel_button'
+							'product_new_shipping_class_modal_cancel_button_click'
 						);
 						setShowShippingClassModal( false );
 					} }

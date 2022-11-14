@@ -176,7 +176,7 @@ export const ImagesSection: React.FC = () => {
 											) === undefined
 										) {
 											recordEvent(
-												'product_image_add_from_media_library'
+												'product_images_add_via_media_library'
 											);
 											setValue( 'images', [
 												...images,
@@ -187,7 +187,7 @@ export const ImagesSection: React.FC = () => {
 									onUpload={ ( files ) => {
 										if ( files[ 0 ].id ) {
 											recordEvent(
-												'product_image_upload'
+												'product_images_add_via_drag_and_drop_upload'
 											);
 											setValue( 'images', [
 												...images,

@@ -124,7 +124,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 	};
 
 	const onRemove = ( attribute: ProductAttribute ) => {
-		recordEvent( 'product_remove_attribute_button' );
+		recordEvent( 'product_remove_attribute_button_click' );
 		// eslint-disable-next-line no-alert
 		if ( window.confirm( __( 'Remove this attribute?', 'woocommerce' ) ) ) {
 			updateAttributes(
