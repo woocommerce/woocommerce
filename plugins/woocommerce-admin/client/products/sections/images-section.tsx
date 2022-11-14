@@ -48,7 +48,7 @@ export const ImagesSection: React.FC = () => {
 				( file ) => file.id === parseInt( image?.props?.id, 10 )
 			);
 		} );
-		recordEvent( 'product_image_change_order' );
+		recordEvent( 'product_images_change_image_order_via_image_gallery' );
 		setValue( 'images', orderedImages );
 	};
 
