@@ -4,10 +4,3 @@
 		margin-top: $gap-small;
 	}
 }
-
-.woocommerce-field-width {
-	@media only screen and (max-width: 1032px) {
-		width: 100%;
-	}
-	width: 50%;
-}
