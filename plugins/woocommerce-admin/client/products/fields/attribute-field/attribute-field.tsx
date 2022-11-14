@@ -184,7 +184,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 								className="woocommerce-attribute-field__add-new"
 								onClick={ () => {
 									recordEvent(
-										'product_add_first_attribute_button'
+										'product_add_first_attribute_button_click'
 									);
 									setShowAddAttributeModal( true );
 								} }
