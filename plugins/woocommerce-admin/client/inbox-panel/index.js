@@ -207,6 +207,7 @@ const InboxPanel = ( { showHeader = true } ) => {
 	);
 	const [ allNotesFetched, setAllNotesFetched ] = useState( false );
 	const [ allNotes, setAllNotes ] = useState( [] );
+	const [ viewedNotes, setViewedNotes ] = useState( {} );
 	const { createNotice } = useDispatch( 'core/notices' );
 	const {
 		removeNote,
@@ -241,7 +242,6 @@ const InboxPanel = ( { showHeader = true } ) => {
 			notes: getNotes( inboxQuery ),
 			unreadNotesCount: getNotes( {
 				...DEFAULT_INBOX_QUERY,
-				_fields: [ 'id' ],
 				is_read: false,
 				per_page: -1,
 			} ).length,
@@ -287,10 +287,13 @@ const InboxPanel = ( { showHeader = true } ) => {
 	const [ showDismissAllModal, setShowDismissAllModal ] = useState( false );
 
 	const onNoteVisible = ( note ) => {
-		if ( ! note.is_read ) {
-			updateNote( note.id, {
-				is_read: true,
-			} );
+		if ( ! viewedNotes[ note.id ] && ! note.is_read ) {
+			setViewedNotes( { ...viewedNotes, [ note.id ]: true } );
+			setTimeout( () => {
+				updateNote( note.id, {
+					is_read: true,
+				} );
+			}, 3000 );
 		}
 		recordEvent( 'inbox_note_view', {
 			note_content: note.content,
