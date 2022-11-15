@@ -17,12 +17,12 @@ import {
 	__experimentalSelectControlMenu as Menu,
 	__experimentalSelectControlMenuItem as MenuItem,
 } from '@woocommerce/components';
-import { HydratedAttributeType } from '../attribute-field';
 
 /**
  * Internal dependencies
  */
 import './attribute-input-field.scss';
+import { HydratedAttributeType } from '../attribute-field';
 
 type NarrowedQueryAttribute = Pick< QueryProductAttribute, 'id' | 'name' >;
 
