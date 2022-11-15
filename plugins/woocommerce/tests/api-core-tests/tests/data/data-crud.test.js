@@ -24493,7 +24493,7 @@ test.describe('Data API tests', () => {
 			expect.objectContaining({
 				"code": "AZN",
 				"name": "Azerbaijani manat",
-				"symbol": "AZN",
+				"symbol": "&#8380;",
 				"_links": {
 					"self": [{
 						"href": expect.stringContaining("data/currencies/AZN")
