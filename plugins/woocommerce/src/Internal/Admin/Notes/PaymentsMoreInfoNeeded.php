@@ -40,9 +40,9 @@ class PaymentsMoreInfoNeeded {
 	public static function should_display_note() {
 		// If user has installed WCPay, don't show this note.
 		$installed_plugins = PluginsHelper::get_installed_plugin_slugs();
-		 if ( in_array( 'woocommerce-payments', $installed_plugins, true ) ) {
-		 	return false;
-		 }
+		if ( in_array( 'woocommerce-payments', $installed_plugins, true ) ) {
+			return false;
+		}
 
 		// User has dismissed the WCPay Welcome Page.
 		if ( 'yes' !== get_option( 'wc_calypso_bridge_payments_dismissed', 'no' ) ) {
@@ -51,11 +51,13 @@ class PaymentsMoreInfoNeeded {
 
 		// More than 30 days since viewing the welcome page.
 		$exit_survey_timestamp = get_option( 'wc_pay_exit_survey_more_info_needed_timestamp', false );
+
 		if ( ! $exit_survey_timestamp ||
 			( time() - $exit_survey_timestamp < 30 * DAY_IN_SECONDS )
 		) {
 			return false;
 		}
+
 		return true;
 	}
 
