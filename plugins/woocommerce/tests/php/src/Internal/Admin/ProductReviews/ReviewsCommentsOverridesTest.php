@@ -52,7 +52,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	public function test_display_notices( string $current_screen_base, bool $should_display_notices ) : void {
 		global $current_screen;
 
-		$screen       = new \stdClass();
+		$screen = new \stdClass();
 		$screen->base = $current_screen_base;
 
 		$current_screen = $screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -98,7 +98,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 		// phpcs:disable Squiz.Commenting
 		$instance = new class($should_display_notice) extends ReviewsCommentsOverrides {
 			public $should_display_reviews_moved_notice_called = 0;
-			public $display_reviews_moved_notice_called        = 0;
+			public $display_reviews_moved_notice_called = 0;
 
 			public function __construct( $should_display_notice ) {
 				$this->should_display_notice = $should_display_notice;
@@ -117,7 +117,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 		// phpcs:enable Squiz.Commenting
 
 		$reflection = new ReflectionClass( $instance );
-		$method     = $reflection->getMethod( 'maybe_display_reviews_moved_notice' );
+		$method = $reflection->getMethod( 'maybe_display_reviews_moved_notice' );
 		$method->setAccessible( true );
 
 		$method->invoke( $instance );
@@ -155,7 +155,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 						return current_user_can( $capability, $args );
 					}
 				},
-				'get_user_meta'    => function ( int $user_id, string $key = '', bool $single = false ) use ( $user_has_dismissed_notice ) {
+				'get_user_meta' => function ( int $user_id, string $key = '', bool $single = false ) use ( $user_has_dismissed_notice ) {
 					if ( 'dismissed_product_reviews_moved_notice' === $key ) {
 						return $user_has_dismissed_notice;
 					} else {
@@ -166,7 +166,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 		);
 
 		$reflection = new ReflectionClass( ReviewsCommentsOverrides::class );
-		$method     = $reflection->getMethod( 'should_display_reviews_moved_notice' );
+		$method = $reflection->getMethod( 'should_display_reviews_moved_notice' );
 		$method->setAccessible( true );
 
 		$should_display_notice = $method->invoke( wc_get_container()->get( ReviewsCommentsOverrides::class ) );
@@ -191,7 +191,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	 */
 	public function test_display_reviews_moved_notice() : void {
 		$overrides = wc_get_container()->get( ReviewsCommentsOverrides::class );
-		$method    = ( new ReflectionClass( $overrides ) )->getMethod( 'display_reviews_moved_notice' );
+		$method = ( new ReflectionClass( $overrides ) )->getMethod( 'display_reviews_moved_notice' );
 		$method->setAccessible( true );
 
 		ob_start();

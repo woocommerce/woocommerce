@@ -43,7 +43,7 @@ class WC_REST_Order_Refunds_Controller_Test extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() . '/refunds/' . $refund->get_id() );
 
 		$response = $this->server->dispatch( $request );
-		$data     = $response->get_data();
+		$data = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 

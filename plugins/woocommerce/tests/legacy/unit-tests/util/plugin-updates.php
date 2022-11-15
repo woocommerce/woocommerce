@@ -114,7 +114,7 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_get_untested_plugins_major_bad() {
-		$release               = 'major';
+		$release = 'major';
 		$current_version_parts = explode( '.', WC_VERSION );
 		$current_major_version = $current_version_parts[0];
 

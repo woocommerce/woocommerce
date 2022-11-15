@@ -23,17 +23,17 @@ class TotalPaymentsVolumeProcessor implements RuleProcessorInterface {
 	 * @return bool The result of the operation.
 	 */
 	public function process( $rule, $stored_state ) {
-		$dates           = TimeInterval::get_timeframe_dates( $rule->timeframe );
+		$dates      = TimeInterval::get_timeframe_dates( $rule->timeframe );
 		$reports_revenue = new RevenueQuery(
 			array(
-				'before'   => $dates['end'],
-				'after'    => $dates['start'],
+				'before' => $dates['end'],
+				'after'  => $dates['start'],
 				'interval' => 'year',
-				'fields'   => array( 'total_sales' ),
+				'fields' => array( 'total_sales' ),
 			)
 		);
-		$report_data     = $reports_revenue->get_data();
-		$value           = $report_data->totals->total_sales;
+		$report_data    = $reports_revenue->get_data();
+		$value          = $report_data->totals->total_sales;
 
 		return ComparisonOperation::compare(
 			$value,

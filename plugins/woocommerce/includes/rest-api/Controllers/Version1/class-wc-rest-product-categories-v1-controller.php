@@ -146,12 +146,10 @@ class WC_REST_Product_Categories_V1_Controller extends WC_REST_Terms_Controller 
 
 				// Set the image title.
 				if ( ! empty( $request['image']['title'] ) ) {
-					wp_update_post(
-						array(
-							'ID'         => $image_id,
-							'post_title' => wc_clean( $request['image']['title'] ),
-						)
-					);
+					wp_update_post( array(
+						'ID'         => $image_id,
+						'post_title' => wc_clean( $request['image']['title'] ),
+					) );
 				}
 			} else {
 				delete_term_meta( $id, 'thumbnail_id' );
@@ -168,17 +166,17 @@ class WC_REST_Product_Categories_V1_Controller extends WC_REST_Terms_Controller 
 	 */
 	public function get_item_schema() {
 		$schema = array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => $this->taxonomy,
-			'type'       => 'object',
-			'properties' => array(
-				'id'          => array(
+			'$schema'              => 'http://json-schema.org/draft-04/schema#',
+			'title'                => $this->taxonomy,
+			'type'                 => 'object',
+			'properties'           => array(
+				'id' => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'name'        => array(
+				'name' => array(
 					'description' => __( 'Category name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -186,7 +184,7 @@ class WC_REST_Product_Categories_V1_Controller extends WC_REST_Terms_Controller 
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
-				'slug'        => array(
+				'slug' => array(
 					'description' => __( 'An alphanumeric identifier for the resource unique to its type.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -194,7 +192,7 @@ class WC_REST_Product_Categories_V1_Controller extends WC_REST_Terms_Controller 
 						'sanitize_callback' => 'sanitize_title',
 					),
 				),
-				'parent'      => array(
+				'parent' => array(
 					'description' => __( 'The ID for the parent of the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
@@ -207,24 +205,24 @@ class WC_REST_Product_Categories_V1_Controller extends WC_REST_Terms_Controller 
 						'sanitize_callback' => 'wp_filter_post_kses',
 					),
 				),
-				'display'     => array(
+				'display' => array(
 					'description' => __( 'Category archive display type.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'default',
 					'enum'        => array( 'default', 'products', 'subcategories', 'both' ),
 					'context'     => array( 'view', 'edit' ),
 				),
-				'image'       => array(
+				'image' => array(
 					'description' => __( 'Image data.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
-						'id'            => array(
+						'id' => array(
 							'description' => __( 'Image ID.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'date_created'  => array(
+						'date_created' => array(
 							'description' => __( "The date the image was created, in the site's timezone.", 'woocommerce' ),
 							'type'        => 'date-time',
 							'context'     => array( 'view', 'edit' ),
@@ -236,30 +234,30 @@ class WC_REST_Product_Categories_V1_Controller extends WC_REST_Terms_Controller 
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
-						'src'           => array(
+						'src' => array(
 							'description' => __( 'Image URL.', 'woocommerce' ),
 							'type'        => 'string',
 							'format'      => 'uri',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'title'         => array(
+						'title' => array(
 							'description' => __( 'Image name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'alt'           => array(
+						'alt' => array(
 							'description' => __( 'Image alternative text.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 					),
 				),
-				'menu_order'  => array(
+				'menu_order' => array(
 					'description' => __( 'Menu order, used to custom sort the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'count'       => array(
+				'count' => array(
 					'description' => __( 'Number of published products for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),

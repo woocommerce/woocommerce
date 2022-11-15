@@ -77,14 +77,9 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 
 	private function initialize_template_loader() {
 		// be sure shop is always returning same id doesn't matter the test setup environment
-		add_filter(
-			'woocommerce_get_shop_page_id',
-			function ( $page ) {
-				return 5;
-			},
-			10,
-			1
-		);
+		add_filter( 'woocommerce_get_shop_page_id', function ( $page ) {
+			return 5;
+		}, 10, 1 );
 
 		if ( ! function_exists( 'wp_is_block_theme' ) ) {
 			function wp_is_block_theme() {

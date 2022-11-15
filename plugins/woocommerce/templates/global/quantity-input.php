@@ -47,7 +47,7 @@ if ( $max_value && $min_value === $max_value ) {
 		value="<?php echo esc_attr( $input_value ); ?>"
 		title="<?php echo esc_attr_x( 'Qty', 'Product quantity input tooltip', 'woocommerce' ); ?>"
 		size="4"
-		<?php if ( ! $is_readonly ) : ?>
+		<?php if ( ! $is_readonly ): ?>
 			step="<?php echo esc_attr( $step ); ?>"
 			min="<?php echo esc_attr( $min_value ); ?>"
 			max="<?php echo esc_attr( 0 < $max_value ? $max_value : '' ); ?>"

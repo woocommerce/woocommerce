@@ -1342,7 +1342,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			// Block checks.
 			if ( $values['block'] && get_post( $page_id ) ) {
 				$block_required = true;
-				$block_present  = WC_Blocks_Utils::has_block_in_page( $page_id, $values['block'] );
+				$block_present = WC_Blocks_Utils::has_block_in_page( $page_id, $values['block'] );
 			}
 
 			// Wrap up our findings into an output array.

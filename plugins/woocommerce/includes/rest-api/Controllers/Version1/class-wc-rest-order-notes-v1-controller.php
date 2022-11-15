@@ -47,78 +47,67 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 	 * Register the routes for order notes.
 	 */
 	public function register_routes() {
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base,
+		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
+			'args' => array(
+				'order_id'  => array(
+					'description' => __( 'The order ID.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
-				'args'   => array(
-					'order_id' => array(
-						'description' => __( 'The order ID.', 'woocommerce' ),
-						'type'        => 'integer',
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_items' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				'args'                => $this->get_collection_params(),
+			),
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'create_item' ),
+				'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
+					'note' => array(
+						'type'        => 'string',
+						'description' => __( 'Order note content.', 'woocommerce' ),
+						'required'    => true,
 					),
-				),
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_items' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-					'args'                => $this->get_collection_params(),
-				),
-				array(
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'create_item' ),
-					'permission_callback' => array( $this, 'create_item_permissions_check' ),
-					'args'                => array_merge(
-						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
-						array(
-							'note' => array(
-								'type'        => 'string',
-								'description' => __( 'Order note content.', 'woocommerce' ),
-								'required'    => true,
-							),
-						)
-					),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
+				) ),
+			),
+			'schema' => array( $this, 'get_public_item_schema' ),
+		) );
 
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>[\d]+)',
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			'args' => array(
+				'id' => array(
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+				'order_id'  => array(
+					'description' => __( 'The order ID.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
-				'args'   => array(
-					'id'       => array(
-						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
-						'type'        => 'integer',
-					),
-					'order_id' => array(
-						'description' => __( 'The order ID.', 'woocommerce' ),
-						'type'        => 'integer',
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_item' ),
+				'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				'args'                => array(
+					'context' => $this->get_context_param( array( 'default' => 'view' ) ),
+				),
+			),
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_item' ),
+				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+				'args'                => array(
+					'force' => array(
+						'default'     => false,
+						'type'        => 'boolean',
+						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
 					),
 				),
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_item' ),
-					'permission_callback' => array( $this, 'get_item_permissions_check' ),
-					'args'                => array(
-						'context' => $this->get_context_param( array( 'default' => 'view' ) ),
-					),
-				),
-				array(
-					'methods'             => WP_REST_Server::DELETABLE,
-					'callback'            => array( $this, 'delete_item' ),
-					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
-					'args'                => array(
-						'force' => array(
-							'default'     => false,
-							'type'        => 'boolean',
-							'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
-						),
-					),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
+			),
+			'schema' => array( $this, 'get_public_item_schema' ),
+		) );
 	}
 
 	/**
@@ -342,7 +331,7 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a single order note output for response.
 	 *
-	 * @param WP_Comment      $note Order note object.
+	 * @param WP_Comment $note Order note object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
@@ -383,13 +372,13 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 		$order_id = (int) $note->comment_post_ID;
 		$base     = str_replace( '(?P<order_id>[\d]+)', $order_id, $this->rest_base );
 		$links    = array(
-			'self'       => array(
+			'self' => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $note->comment_ID ) ),
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),
 			),
-			'up'         => array(
+			'up' => array(
 				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $order_id ) ),
 			),
 		);
@@ -408,19 +397,19 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 			'title'      => 'order_note',
 			'type'       => 'object',
 			'properties' => array(
-				'id'            => array(
+				'id' => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'date_created'  => array(
+				'date_created' => array(
 					'description' => __( "The date the order note was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'note'          => array(
+				'note' => array(
 					'description' => __( 'Order note.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),

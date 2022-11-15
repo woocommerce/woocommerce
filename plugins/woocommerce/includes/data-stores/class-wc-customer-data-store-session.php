@@ -126,7 +126,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 */
 	protected function set_defaults( &$customer ) {
 		try {
-			$default              = wc_get_customer_default_location();
+			$default = wc_get_customer_default_location();
 			$has_shipping_address = $customer->has_shipping_address();
 
 			if ( ! $customer->get_billing_country() ) {

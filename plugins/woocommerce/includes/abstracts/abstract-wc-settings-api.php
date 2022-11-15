@@ -219,8 +219,8 @@ abstract class WC_Settings_API {
 		}
 
 		$option_key = $this->get_option_key();
-		do_action( 'woocommerce_update_option', array( 'id' => $option_key ) );
-		return update_option( $option_key, apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ), 'yes' );
+        do_action( 'woocommerce_update_option', array( 'id' => $option_key ) );
+        return update_option( $option_key, apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ), 'yes' );
 	}
 
 	/**
@@ -715,7 +715,7 @@ abstract class WC_Settings_API {
 			'options'           => array(),
 		);
 
-		$data  = wp_parse_args( $data, $defaults );
+		$data = wp_parse_args( $data, $defaults );
 		$value = $this->get_option( $key );
 
 		ob_start();

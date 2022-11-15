@@ -89,7 +89,7 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 		$shipping_address_is_effectively_empty->save();
 
 		return array(
-			'has_billing_address_only'              => array(
+			'has_billing_address_only' => array(
 				$has_billing_address_only,
 				true,
 				true,
@@ -99,7 +99,7 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 				false,
 				false,
 			),
-			'separate_billing_state_same_country'   => array(
+			'separate_billing_state_same_country' => array(
 				$separate_billing_state_same_country,
 				false,
 				true,

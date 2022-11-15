@@ -17,7 +17,7 @@ class ReviewsUtilTest extends WC_Unit_Test_Case {
 	public function setUp() : void {
 		global $wpdb, $current_screen;
 
-		$this->old_wpdb           = $wpdb;
+		$this->old_wpdb = $wpdb;
 		$this->old_current_screen = $current_screen;
 
 		parent::setUp();
@@ -29,7 +29,7 @@ class ReviewsUtilTest extends WC_Unit_Test_Case {
 	public function tearDown() : void {
 		global $wpdb, $current_screen;
 
-		$wpdb           = $this->old_wpdb; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wpdb = $this->old_wpdb; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$current_screen = $this->old_current_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		parent::tearDown();
@@ -55,7 +55,7 @@ class ReviewsUtilTest extends WC_Unit_Test_Case {
 
 		$clauses = ReviewsUtil::comments_clauses_without_product_reviews(
 			[
-				'join'  => '',
+				'join' => '',
 				'where' => $where_value,
 			]
 		);
@@ -69,28 +69,28 @@ class ReviewsUtilTest extends WC_Unit_Test_Case {
 	/** @see test_can_get_comments_clauses_without_product_reviews */
 	public function provider_can_get_comments_clauses_without_product_reviews() : Generator {
 
-		$join  = ' LEFT JOIN test_table AS wp_posts_to_exclude_reviews ON comment_post_ID = wp_posts_to_exclude_reviews.ID ';
+		$join = ' LEFT JOIN test_table AS wp_posts_to_exclude_reviews ON comment_post_ID = wp_posts_to_exclude_reviews.ID ';
 		$where = ' wp_posts_to_exclude_reviews.post_type NOT IN (\'product\') ';
 
 		yield 'Current screen is not edit comments' => [
 			'current_screen_value' => 'test-page',
-			'where_value'          => '',
-			'expected_join'        => '',
-			'expected_where'       => '',
+			'where_value' => '',
+			'expected_join' => '',
+			'expected_where' => '',
 		];
 
 		yield 'Where is empty' => [
 			'current_screen_value' => 'edit-comments',
-			'where_value'          => '',
-			'expected_join'        => $join,
-			'expected_where'       => $where,
+			'where_value' => '',
+			'expected_join' => $join,
+			'expected_where' => $where,
 		];
 
 		yield 'Where is not empty' => [
 			'current_screen_value' => 'edit-comments',
-			'where_value'          => 'WHERE 1=1',
-			'expected_join'        => $join,
-			'expected_where'       => 'WHERE 1=1 AND ' . $where,
+			'where_value' => 'WHERE 1=1',
+			'expected_join' => $join,
+			'expected_where' => 'WHERE 1=1 AND ' . $where,
 		];
 	}
 

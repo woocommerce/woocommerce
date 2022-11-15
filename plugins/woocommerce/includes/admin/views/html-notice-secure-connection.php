@@ -13,13 +13,11 @@ defined( 'ABSPATH' ) || exit;
 
 	<p>
 	<?php
-		echo wp_kses_post(
-			sprintf(
+		echo wp_kses_post( sprintf(
 			/* translators: %s: documentation URL */
-				__( 'Your store does not appear to be using a secure connection. We highly recommend serving your entire website over an HTTPS connection to help keep customer data secure. <a href="%s">Learn more here.</a>', 'woocommerce' ),
-				'https://docs.woocommerce.com/document/ssl-and-https/'
-			)
-		);
-		?>
+			__( 'Your store does not appear to be using a secure connection. We highly recommend serving your entire website over an HTTPS connection to help keep customer data secure. <a href="%s">Learn more here.</a>', 'woocommerce' ),
+			'https://docs.woocommerce.com/document/ssl-and-https/'
+		) );
+	?>
 	</p>
 </div>

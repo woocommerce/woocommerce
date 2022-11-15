@@ -39,9 +39,7 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base,
-			array(
+			$this->namespace, '/' . $this->rest_base, array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),

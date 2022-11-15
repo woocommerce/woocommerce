@@ -1855,21 +1855,14 @@ class WC_Admin_Setup_Wizard {
 					alt="<?php echo esc_attr( $img_alt ); ?>" />
 				<div class="recommended-item-description-container">
 					<h3><?php echo esc_html( $title ); ?></h3>
-					<p>
-					<?php
-					echo wp_kses(
-						$description,
-						array(
-							'a'  => array(
-								'href'   => array(),
-								'target' => array(),
-								'rel'    => array(),
-							),
-							'em' => array(),
-						)
-					);
-					?>
-					</p>
+					<p><?php echo wp_kses( $description, array(
+						'a' => array(
+							'href'   => array(),
+							'target' => array(),
+							'rel'    => array(),
+						),
+						'em' => array(),
+					) ); ?></p>
 				</div>
 			</label>
 		</li>
@@ -1894,90 +1887,62 @@ class WC_Admin_Setup_Wizard {
 				if ( $this->should_show_theme() ) :
 					$theme      = wp_get_theme();
 					$theme_name = $theme['Name'];
-					$this->display_recommended_item(
-						array(
-							'type'        => 'storefront_theme',
-							'title'       => __( 'Storefront Theme', 'woocommerce' ),
-							'description' => sprintf(
-								__(
-									'Design your store with deep WooCommerce integration. If toggled on, we’ll install <a href="https://woocommerce.com/storefront/" target="_blank" rel="noopener noreferrer">Storefront</a>, and your current theme <em>%s</em> will be deactivated.',
-									'woocommerce'
-								),
+					$this->display_recommended_item( array(
+						'type'        => 'storefront_theme',
+						'title'       => __( 'Storefront Theme', 'woocommerce' ),
+						'description' => sprintf( __(
+								'Design your store with deep WooCommerce integration. If toggled on, we’ll install <a href="https://woocommerce.com/storefront/" target="_blank" rel="noopener noreferrer">Storefront</a>, and your current theme <em>%s</em> will be deactivated.', 'woocommerce' ),
 								$theme_name
-							),
-							'img_url'     => WC()->plugin_url() . '/assets/images/obw-storefront-icon.svg',
-							'img_alt'     => __( 'Storefront icon', 'woocommerce' ),
-						)
-					);
+						),
+						'img_url'     => WC()->plugin_url() . '/assets/images/obw-storefront-icon.svg',
+						'img_alt'     => __( 'Storefront icon', 'woocommerce' ),
+					) );
 				endif;
 
 				if ( $this->should_show_automated_tax() ) :
-					$this->display_recommended_item(
-						array(
-							'type'        => 'automated_taxes',
-							'title'       => __( 'Automated Taxes', 'woocommerce' ),
-							'description' => __( 'Save time and errors with automated tax calculation and collection at checkout. Powered by WooCommerce Services and Jetpack.', 'woocommerce' ),
-							'img_url'     => WC()->plugin_url() . '/assets/images/obw-taxes-icon.svg',
-							'img_alt'     => __( 'automated taxes icon', 'woocommerce' ),
-							'plugins'     => $this->get_wcs_requisite_plugins(),
-						)
-					);
+					$this->display_recommended_item( array(
+						'type'        => 'automated_taxes',
+						'title'       => __( 'Automated Taxes', 'woocommerce' ),
+						'description' => __( 'Save time and errors with automated tax calculation and collection at checkout. Powered by WooCommerce Services and Jetpack.', 'woocommerce' ),
+						'img_url'     => WC()->plugin_url() . '/assets/images/obw-taxes-icon.svg',
+						'img_alt'     => __( 'automated taxes icon', 'woocommerce' ),
+						'plugins'     => $this->get_wcs_requisite_plugins(),
+					) );
 				endif;
 
 				if ( $this->should_show_wc_admin() ) :
-					$this->display_recommended_item(
-						array(
-							'type'        => 'wc_admin',
-							'title'       => __( 'WooCommerce Admin', 'woocommerce' ),
-							'description' => __( 'Manage your store\'s reports and monitor key metrics with a new and improved interface and dashboard.', 'woocommerce' ),
-							'img_url'     => WC()->plugin_url() . '/assets/images/obw-woocommerce-admin-icon.svg',
-							'img_alt'     => __( 'WooCommerce Admin icon', 'woocommerce' ),
-							'plugins'     => array(
-								array(
-									'name' => __( 'WooCommerce Admin', 'woocommerce' ),
-									'slug' => 'woocommerce-admin',
-								),
-							),
-						)
-					);
+					$this->display_recommended_item( array(
+						'type'        => 'wc_admin',
+						'title'       => __( 'WooCommerce Admin', 'woocommerce' ),
+						'description' => __( 'Manage your store\'s reports and monitor key metrics with a new and improved interface and dashboard.', 'woocommerce' ),
+						'img_url'     => WC()->plugin_url() . '/assets/images/obw-woocommerce-admin-icon.svg',
+						'img_alt'     => __( 'WooCommerce Admin icon', 'woocommerce' ),
+						'plugins'     => array( array( 'name' => __( 'WooCommerce Admin', 'woocommerce' ), 'slug' => 'woocommerce-admin' ) ),
+					) );
 				endif;
 
 				if ( $this->should_show_mailchimp() ) :
-					$this->display_recommended_item(
-						array(
-							'type'        => 'mailchimp',
-							'title'       => __( 'Mailchimp', 'woocommerce' ),
-							'description' => __( 'Join the 16 million customers who use Mailchimp. Sync list and store data to send automated emails, and targeted campaigns.', 'woocommerce' ),
-							'img_url'     => WC()->plugin_url() . '/assets/images/obw-mailchimp-icon.svg',
-							'img_alt'     => __( 'Mailchimp icon', 'woocommerce' ),
-							'plugins'     => array(
-								array(
-									'name' => __( 'Mailchimp for WooCommerce', 'woocommerce' ),
-									'slug' => 'mailchimp-for-woocommerce',
-								),
-							),
-						)
-					);
+					$this->display_recommended_item( array(
+						'type'        => 'mailchimp',
+						'title'       => __( 'Mailchimp', 'woocommerce' ),
+						'description' => __( 'Join the 16 million customers who use Mailchimp. Sync list and store data to send automated emails, and targeted campaigns.', 'woocommerce' ),
+						'img_url'     => WC()->plugin_url() . '/assets/images/obw-mailchimp-icon.svg',
+						'img_alt'     => __( 'Mailchimp icon', 'woocommerce' ),
+						'plugins'     => array( array( 'name' => __( 'Mailchimp for WooCommerce', 'woocommerce' ), 'slug' => 'mailchimp-for-woocommerce' ) ),
+					) );
 				endif;
 
 				if ( $this->should_show_facebook() ) :
-					$this->display_recommended_item(
-						array(
-							'type'        => 'facebook',
-							'title'       => __( 'Facebook', 'woocommerce' ),
-							'description' => __( 'Enjoy all Facebook products combined in one extension: pixel tracking, catalog sync, messenger chat, shop functionality and Instagram shopping (coming soon)!', 'woocommerce' ),
-							'img_url'     => WC()->plugin_url() . '/assets/images/obw-facebook-icon.svg',
-							'img_alt'     => __( 'Facebook icon', 'woocommerce' ),
-							'plugins'     => array(
-								array(
-									'name' => __( 'Facebook for WooCommerce', 'woocommerce' ),
-									'slug' => 'facebook-for-woocommerce',
-								),
-							),
-						)
-					);
+					$this->display_recommended_item( array(
+						'type'        => 'facebook',
+						'title'       => __( 'Facebook', 'woocommerce' ),
+						'description' => __( 'Enjoy all Facebook products combined in one extension: pixel tracking, catalog sync, messenger chat, shop functionality and Instagram shopping (coming soon)!', 'woocommerce' ),
+						'img_url'     => WC()->plugin_url() . '/assets/images/obw-facebook-icon.svg',
+						'img_alt'     => __( 'Facebook icon', 'woocommerce' ),
+						'plugins'     => array( array( 'name' => __( 'Facebook for WooCommerce', 'woocommerce' ), 'slug' => 'facebook-for-woocommerce' ) ),
+					) );
 				endif;
-				?>
+			?>
 		</ul>
 			<p class="wc-setup-actions step">
 				<?php $this->plugin_install_info(); ?>
@@ -2045,17 +2010,17 @@ class WC_Admin_Setup_Wizard {
 		$features = $this->wc_setup_activate_get_feature_list();
 		if ( $features['payment'] && $features['taxes'] && $features['labels'] ) {
 			return __( 'payment setup, automated taxes and discounted shipping labels', 'woocommerce' );
-		} elseif ( $features['payment'] && $features['taxes'] ) {
+		} else if ( $features['payment'] && $features['taxes'] ) {
 			return __( 'payment setup and automated taxes', 'woocommerce' );
-		} elseif ( $features['payment'] && $features['labels'] ) {
+		} else if ( $features['payment'] && $features['labels'] ) {
 			return __( 'payment setup and discounted shipping labels', 'woocommerce' );
-		} elseif ( $features['payment'] ) {
+		} else if ( $features['payment'] ) {
 			return __( 'payment setup', 'woocommerce' );
-		} elseif ( $features['taxes'] && $features['labels'] ) {
+		} else if ( $features['taxes'] && $features['labels'] ) {
 			return __( 'automated taxes and discounted shipping labels', 'woocommerce' );
-		} elseif ( $features['taxes'] ) {
+		} else if ( $features['taxes'] ) {
 			return __( 'automated taxes', 'woocommerce' );
-		} elseif ( $features['labels'] ) {
+		} else if ( $features['labels'] ) {
 			return __( 'discounted shipping labels', 'woocommerce' );
 		}
 		return false;
@@ -2079,7 +2044,7 @@ class WC_Admin_Setup_Wizard {
 			$title = __( "Sorry, we couldn't connect your store to Jetpack", 'woocommerce' );
 
 			$error_message = $this->get_activate_error_message( sanitize_text_field( wp_unslash( $_GET['activate_error'] ) ) );
-			$description   = $error_message;
+			$description = $error_message;
 		} else {
 			$feature_list = $this->wc_setup_activate_get_feature_list_str();
 
@@ -2096,12 +2061,12 @@ class WC_Admin_Setup_Wizard {
 			}
 
 			if ( ! $jetpack_connected ) {
-				$title       = $feature_list ?
+				$title = $feature_list ?
 					__( 'Connect your store to Jetpack', 'woocommerce' ) :
 					__( 'Connect your store to Jetpack to enable extra features', 'woocommerce' );
 				$button_text = __( 'Continue with Jetpack', 'woocommerce' );
 			} elseif ( $feature_list ) {
-				$title       = __( 'Connect your store to activate WooCommerce Services', 'woocommerce' );
+				$title = __( 'Connect your store to activate WooCommerce Services', 'woocommerce' );
 				$button_text = __( 'Continue with WooCommerce Services', 'woocommerce' );
 			} else {
 				wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
@@ -2161,8 +2126,7 @@ class WC_Admin_Setup_Wizard {
 			<?php if ( ! $jetpack_connected ) : ?>
 				<h3 class="jetpack-reasons">
 					<?php
-						echo esc_html(
-							$description ?
+						echo esc_html( $description ?
 							__( "Bonus reasons you'll love Jetpack", 'woocommerce' ) :
 							__( "Reasons you'll love Jetpack", 'woocommerce' )
 						);
@@ -2204,7 +2168,7 @@ class WC_Admin_Setup_Wizard {
 				</ul>
 			<?php endif; ?>
 		<?php endif; ?>
-		<?php
+	<?php
 	}
 
 	/**
@@ -2214,10 +2178,10 @@ class WC_Admin_Setup_Wizard {
 	protected function get_all_activate_errors() {
 		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', 'Onboarding is maintained in WooCommerce Admin.' );
 		return array(
-			'default'                      => __( "Sorry! We tried, but we couldn't connect Jetpack just now 😭. Please go to the Plugins tab to connect Jetpack, so that you can finish setting up your store.", 'woocommerce' ),
-			'jetpack_cant_be_installed'    => __( "Sorry! We tried, but we couldn't install Jetpack for you 😭. Please go to the Plugins tab to install it, and finish setting up your store.", 'woocommerce' ),
+			'default' => __( "Sorry! We tried, but we couldn't connect Jetpack just now 😭. Please go to the Plugins tab to connect Jetpack, so that you can finish setting up your store.", 'woocommerce' ),
+			'jetpack_cant_be_installed' => __( "Sorry! We tried, but we couldn't install Jetpack for you 😭. Please go to the Plugins tab to install it, and finish setting up your store.", 'woocommerce' ),
 			'register_http_request_failed' => __( "Sorry! We couldn't contact Jetpack just now 😭. Please make sure that your site is visible over the internet, and that it accepts incoming and outgoing requests via curl. You can also try to connect to Jetpack again, and if you run into any more issues, please contact support.", 'woocommerce' ),
-			'siteurl_private_ip_dev'       => __( 'Your site might be on a private network. Jetpack can only connect to public sites. Please make sure your site is visible over the internet, and then try connecting again 🙏.', 'woocommerce' ),
+			'siteurl_private_ip_dev' => __( "Your site might be on a private network. Jetpack can only connect to public sites. Please make sure your site is visible over the internet, and then try connecting again 🙏." , 'woocommerce' ),
 		);
 	}
 
@@ -2252,9 +2216,9 @@ class WC_Admin_Setup_Wizard {
 		// We've made it! Don't prompt the user to run the wizard again.
 		WC_Admin_Notices::remove_notice( 'install', true );
 
-		$user_email = $this->get_current_user_email();
-		$docs_url   = 'https://docs.woocommerce.com/documentation/plugins/woocommerce/getting-started/?utm_source=setupwizard&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin';
-		$help_text  = sprintf(
+		$user_email   = $this->get_current_user_email();
+		$docs_url     = 'https://docs.woocommerce.com/documentation/plugins/woocommerce/getting-started/?utm_source=setupwizard&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin';
+		$help_text    = sprintf(
 			/* translators: %1$s: link to docs */
 			__( 'Visit WooCommerce.com to learn more about <a href="%1$s" target="_blank">getting started</a>.', 'woocommerce' ),
 			$docs_url
@@ -2328,19 +2292,7 @@ class WC_Admin_Setup_Wizard {
 						<a class="button button-large" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings' ) ); ?>">
 							<?php esc_html_e( 'Review Settings', 'woocommerce' ); ?>
 						</a>
-						<a class="button button-large" href="
-						<?php
-						echo esc_url(
-							add_query_arg(
-								array(
-									'autofocus' => array( 'panel' => 'woocommerce' ),
-									'url'       => wc_get_page_permalink( 'shop' ),
-								),
-								admin_url( 'customize.php' )
-							)
-						);
-						?>
-																">
+						<a class="button button-large" href="<?php echo esc_url( add_query_arg( array( 'autofocus' => array( 'panel' => 'woocommerce' ), 'url' => wc_get_page_permalink( 'shop' ) ), admin_url( 'customize.php' ) ) ); ?>">
 							<?php esc_html_e( 'View &amp; Customize', 'woocommerce' ); ?>
 						</a>
 					</p>

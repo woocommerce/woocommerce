@@ -10,11 +10,11 @@ class HtmlSanitizer {
 	 * Rules for allowing minimal HTML (breaks, images, paragraphs and spans) without any links.
 	 */
 	public const LOW_HTML_BALANCED_TAGS_NO_LINKS = array(
-		'pre_processors' => array(
+		'pre_processors'  => array(
 			'stripslashes',
 			'force_balance_tags',
 		),
-		'wp_kses_rules'  => array(
+		'wp_kses_rules'   => array(
 			'br'   => true,
 			'img'  => array(
 				'alt'   => true,

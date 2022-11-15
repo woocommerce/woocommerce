@@ -23,9 +23,7 @@ class WC_REST_Shipping_Zones_V2_Controller extends WC_REST_Shipping_Zones_Contro
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base,
-			array(
+			$this->namespace, '/' . $this->rest_base, array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -36,8 +34,7 @@ class WC_REST_Shipping_Zones_V2_Controller extends WC_REST_Shipping_Zones_Contro
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => array_merge(
-						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
-						array(
+						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
 							'name' => array(
 								'required'    => true,
 								'type'        => 'string',
@@ -51,9 +48,7 @@ class WC_REST_Shipping_Zones_V2_Controller extends WC_REST_Shipping_Zones_Contro
 		);
 
 		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>[\d]+)',
-			array(
+			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
 				'args'   => array(
 					'id' => array(
 						'description' => __( 'Unique ID for the resource.', 'woocommerce' ),

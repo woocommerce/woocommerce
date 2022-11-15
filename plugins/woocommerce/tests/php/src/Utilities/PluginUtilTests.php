@@ -126,7 +126,7 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 				'get_plugins' => function() {
 					return array(
 						'woocommerce/woocommerce.php' => array( 'WC tested up to' => '1.0' ),
-						'jetpack/jetpack.php'         => array( 'foo' => 'bar' ),
+						'jetpack/jetpack.php' => array( 'foo' => 'bar' ),
 						'classic-editor/classic-editor.php' => array( 'foo' => 'bar' ),
 					);
 				},

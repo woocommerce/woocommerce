@@ -69,7 +69,7 @@ class WC_HTTPS {
 	 * Force a post link to be SSL if needed.
 	 *
 	 * @param string $link
-	 * @param int    $page_id
+	 * @param int $page_id
 	 *
 	 * @return string
 	 */
@@ -125,7 +125,7 @@ class WC_HTTPS {
 	 *        https://www.paypal-knowledge.com/infocenter/index?page=content&widgetview=true&id=FAQ1914&viewlocale=en_US
 	 *
 	 * @param string $handle
-	 * @param mixed  $r
+	 * @param mixed $r
 	 * @param string $url
 	 */
 	public static function http_api_curl( $handle, $r, $url ) {

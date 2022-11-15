@@ -58,7 +58,7 @@ class HtmlSanitizerTest extends WC_Unit_Test_Case {
 		$output = $this->sut->sanitize(
 			'Test string',
 			array(
-				'pre_processors'  => array(
+				'pre_processors' => array(
 					'strtoupper',
 					'invalid_callback_1',
 				),

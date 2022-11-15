@@ -37,9 +37,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base,
-			array(
+			$this->namespace, '/' . $this->rest_base, array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -51,8 +49,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => array_merge(
-						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
-						array(
+						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
 							'product_id'     => array(
 								'required'    => true,
 								'description' => __( 'Unique identifier for the product.', 'woocommerce' ),
@@ -81,9 +78,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>[\d]+)',
-			array(
+			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
 				'args'   => array(
 					'id' => array(
 						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
@@ -121,9 +116,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/batch',
-			array(
+			$this->namespace, '/' . $this->rest_base . '/batch', array(
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'batch_items' ),
@@ -831,60 +824,60 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			'title'      => 'product_review',
 			'type'       => 'object',
 			'properties' => array(
-				'id'                => array(
+				'id'               => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'date_created'      => array(
+				'date_created'     => array(
 					'description' => __( "The date the review was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'date_created_gmt'  => array(
+				'date_created_gmt' => array(
 					'description' => __( 'The date the review was created, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'product_id'        => array(
+				'product_id'       => array(
 					'description' => __( 'Unique identifier for the product that the review belongs to.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'product_name'      => array(
+				'product_name'       => array(
 					'description' => __( 'Product name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'product_permalink' => array(
+				'product_permalink'       => array(
 					'description' => __( 'Product URL.', 'woocommerce' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'status'            => array(
+				'status'           => array(
 					'description' => __( 'Status of the review.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'approved',
 					'enum'        => array( 'approved', 'hold', 'spam', 'unspam', 'trash', 'untrash' ),
 					'context'     => array( 'view', 'edit' ),
 				),
-				'reviewer'          => array(
+				'reviewer'         => array(
 					'description' => __( 'Reviewer name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'reviewer_email'    => array(
+				'reviewer_email'   => array(
 					'description' => __( 'Reviewer email.', 'woocommerce' ),
 					'type'        => 'string',
 					'format'      => 'email',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'review'            => array(
+				'review'           => array(
 					'description' => __( 'The content of the review.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -892,12 +885,12 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 						'sanitize_callback' => 'wp_filter_post_kses',
 					),
 				),
-				'rating'            => array(
+				'rating'           => array(
 					'description' => __( 'Review rating (0 to 5).', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'verified'          => array(
+				'verified'         => array(
 					'description' => __( 'Shows if the reviewer bought the product or not.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),

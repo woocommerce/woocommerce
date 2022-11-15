@@ -491,7 +491,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
-						'type' => 'object',
+						'type'    => 'object',
 					),
 				),
 				'update' => array(
@@ -499,7 +499,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
-						'type' => 'object',
+						'type'    => 'object',
 					),
 				),
 				'delete' => array(
@@ -507,7 +507,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
-						'type' => 'integer',
+						'type'    => 'integer',
 					),
 				),
 			),

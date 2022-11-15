@@ -16,7 +16,7 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 			$product2->get_id() => 0,
 			$product3->get_id() => 0,
 		);
-		$product_id_array      = array_keys( $expected_review_count );
+		$product_id_array = array_keys( $expected_review_count );
 
 		$this->assertEquals( $expected_review_count, WC_Comments::get_review_counts_for_product_ids( $product_id_array ) );
 

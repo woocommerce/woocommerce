@@ -41,7 +41,7 @@ class WC_Tests_Account_Permissions extends WC_Unit_Test_Case {
 	 * Test that guest orders can be paid when not logged in.
 	 */
 	public function test_wc_guest_pay_guest_order() {
-		$order = WC_Helper_Order::create_order( 0 );
+		$order    = WC_Helper_Order::create_order( 0 );
 		$this->assertEquals( true, current_user_can( 'pay_for_order', $order->get_id() ) );
 	}
 
@@ -62,7 +62,7 @@ class WC_Tests_Account_Permissions extends WC_Unit_Test_Case {
 	public function test_wc_customer_can_pay_their_order() {
 		$customer = WC_Helper_Customer::create_customer();
 		wp_set_current_user( $customer->get_id() );
-		$order = WC_Helper_Order::create_order( $customer->get_id() );
+		$order     = WC_Helper_Order::create_order( $customer->get_id() );
 		$this->assertEquals( true, current_user_can( 'pay_for_order', $order->get_id() ) );
 	}
 

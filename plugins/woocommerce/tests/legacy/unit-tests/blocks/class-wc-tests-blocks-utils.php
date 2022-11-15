@@ -87,19 +87,19 @@ class WC_Test_Blocks_Utils extends WC_Unit_Test_Case {
 
 		$expected = array(
 			0 => array(
-				'blockName'    => 'core/heading',
-				'attrs'        => array(),
-				'innerBlocks'  => array(),
-				'innerHTML'    => '<h2>test1</h2>',
+				'blockName' => 'core/heading',
+				'attrs' => array(),
+				'innerBlocks' => array(),
+				'innerHTML' => '<h2>test1</h2>',
 				'innerContent' => array(
 					0 => '<h2>test1</h2>',
 				),
 			),
 			1 => array(
-				'blockName'    => 'core/heading',
-				'attrs'        => array(),
-				'innerBlocks'  => array(),
-				'innerHTML'    => '<h1>test2</h1>',
+				'blockName' => 'core/heading',
+				'attrs' => array(),
+				'innerBlocks' => array(),
+				'innerHTML' => '<h1>test2</h1>',
 				'innerContent' => array(
 					0 => '<h1>test2</h1>',
 				),

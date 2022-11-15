@@ -430,8 +430,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 					// Radio inputs.
 					case 'radio':
-						$option_value    = $value['value'];
-						$disabled_values = ArrayUtil::get_value_or_default( $value, 'disabled', array() );
+						$option_value = $value['value'];
+						$disabled_values = ArrayUtil::get_value_or_default($value, 'disabled', array());
 
 						?>
 						<tr valign="top">
@@ -450,10 +450,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 												name="<?php echo esc_attr( $value['field_name'] ); ?>"
 												value="<?php echo esc_attr( $key ); ?>"
 												type="radio"
-												<?php
-												if ( in_array( $key, $disabled_values ) ) {
-													echo 'disabled'; }
-												?>
+												<?php if( in_array( $key, $disabled_values ) ) { echo 'disabled'; } ?>
 												style="<?php echo esc_attr( $value['css'] ); ?>"
 												class="<?php echo esc_attr( $value['class'] ); ?>"
 												<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>

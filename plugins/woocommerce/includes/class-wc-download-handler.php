@@ -273,11 +273,11 @@ class WC_Download_Handler {
 		 * via filters we can still do the string replacement on a HTTP file.
 		 */
 		$replacements = array(
-			$wp_uploads_url                  => $wp_uploads_dir,
-			network_site_url( '/', 'https' ) => ABSPATH,
+			$wp_uploads_url                                                   => $wp_uploads_dir,
+			network_site_url( '/', 'https' )                                  => ABSPATH,
 			str_replace( 'https:', 'http:', network_site_url( '/', 'http' ) ) => ABSPATH,
-			site_url( '/', 'https' )         => ABSPATH,
-			str_replace( 'https:', 'http:', site_url( '/', 'http' ) ) => ABSPATH,
+			site_url( '/', 'https' )                                          => ABSPATH,
+			str_replace( 'https:', 'http:', site_url( '/', 'http' ) )         => ABSPATH,
 		);
 
 		$count            = 0;

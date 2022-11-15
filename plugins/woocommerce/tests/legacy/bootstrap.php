@@ -89,7 +89,7 @@ class WC_Unit_Tests_Bootstrap {
 		// re-initialize dependency injection, this needs to be the last operation after everything else is in place.
 		$this->initialize_dependency_injection();
 
-		error_reporting( error_reporting() & ~E_DEPRECATED );
+		error_reporting(error_reporting() & ~E_DEPRECATED);
 	}
 
 	/**

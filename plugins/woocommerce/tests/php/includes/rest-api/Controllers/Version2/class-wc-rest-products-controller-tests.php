@@ -132,7 +132,7 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	public function test_product_api_get_all_fields_v2() {
 		$expected_response_fields = $this->get_expected_response_fields();
 
-		$product  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() ) );
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -155,7 +155,7 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		$call_product_data_wrapper = function () use ( $product ) {
 			return $this->get_product_data( $product );
 		};
-		$response                  = $call_product_data_wrapper->call( new WC_REST_Products_Controller() );
+		$response = $call_product_data_wrapper->call( new WC_REST_Products_Controller() );
 		$this->assertArrayHasKey( 'id', $response );
 	}
 
@@ -164,7 +164,7 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_products_get_each_field_one_by_one_v2() {
 		$expected_response_fields = $this->get_expected_response_fields();
-		$product                  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 
 		foreach ( $expected_response_fields as $field ) {
 			$request = new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() );

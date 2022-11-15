@@ -607,7 +607,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'low_stock_amount'      => array(
+				'low_stock_amount'       => array(
 					'description' => __( 'Low Stock amount for the variation.', 'woocommerce' ),
 					'type'        => array( 'integer', 'null' ),
 					'context'     => array( 'view', 'edit' ),

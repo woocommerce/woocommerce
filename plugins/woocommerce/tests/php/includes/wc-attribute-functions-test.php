@@ -29,7 +29,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 		$this->filter_recorder = $this->any();
 
 		$filter_mock = $this->getMockBuilder( stdClass::class )
-			->setMethods( array( '__invoke' ) )
+			->setMethods( [ '__invoke' ] )
 			->getMock();
 		$filter_mock->expects( $this->filter_recorder )
 			->method( '__invoke' )
@@ -55,14 +55,14 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_attribute_taxonomy_ids() {
 		$ids = wc_get_attribute_taxonomy_ids();
-		$this->assertEquals( array(), $ids );
+		$this->assertEquals( [], $ids );
 		$this->assertEquals(
 			1,
 			$this->filter_recorder->getInvocationCount(),
 			'Filter `woocommerce_attribute_taxonomies` should have been triggered once after fetching all attribute taxonomies.'
 		);
 		$ids = wc_get_attribute_taxonomy_ids();
-		$this->assertEquals( array(), $ids );
+		$this->assertEquals( [], $ids );
 		$this->assertEquals(
 			1,
 			$this->filter_recorder->getInvocationCount(),
@@ -76,14 +76,14 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_attribute_taxonomy_labels() {
 		$labels = wc_get_attribute_taxonomy_labels();
-		$this->assertEquals( array(), $labels );
+		$this->assertEquals( [], $labels );
 		$this->assertEquals(
 			1,
 			$this->filter_recorder->getInvocationCount(),
 			'Filter `woocommerce_attribute_taxonomies` should have been triggered once after fetching all attribute taxonomies.'
 		);
 		$labels = wc_get_attribute_taxonomy_labels();
-		$this->assertEquals( array(), $labels );
+		$this->assertEquals( [], $labels );
 		$this->assertEquals(
 			1,
 			$this->filter_recorder->getInvocationCount(),
@@ -170,11 +170,11 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	public function get_attribute_names_and_slugs() {
-		return array(
-			array( 'Dash Me', 'dash-me' ),
-			array( '', '' ),
-			array( 'pa_SubStr', 'substr' ),
-			array( 'ĂnîC°Dę', 'anicde' ),
-		);
+		return [
+			[ 'Dash Me', 'dash-me' ],
+			[ '', '' ],
+			[ 'pa_SubStr', 'substr' ],
+			[ 'ĂnîC°Dę', 'anicde' ],
+		];
 	}
 }

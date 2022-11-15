@@ -117,9 +117,9 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 	 * @throws Exception When unable to create order.
 	 */
 	public function test_create_order_with_usage_limit_deleted() {
-		$coupon_code       = 'coupon4one';
+		$coupon_code = 'coupon4one';
 		$coupon_data_store = WC_Data_Store::load( 'coupon' );
-		$coupon            = WC_Helper_Coupon::create_coupon(
+		$coupon = WC_Helper_Coupon::create_coupon(
 			$coupon_code,
 			array( 'usage_limit' => 1 )
 		);
@@ -132,7 +132,7 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 		$checkout = WC_Checkout::instance();
 		$order_id = $checkout->create_order(
 			array(
-				'billing_email'  => 'a@b.com',
+				'billing_email' => 'a@b.com',
 				'payment_method' => 'dummy_payment_gateway',
 			)
 		);
@@ -149,19 +149,19 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 		wp_set_current_user( 0 );
 		wc_clear_notices();
 		$coupon_code = 'coupon4one';
-		$coupon      = WC_Helper_Coupon::create_coupon(
+		$coupon = WC_Helper_Coupon::create_coupon(
 			$coupon_code,
 			array( 'usage_limit_per_user' => 1 )
 		);
-		$product     = WC_Helper_Product::create_simple_product( true );
+		$product = WC_Helper_Product::create_simple_product( true );
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->add_discount( $coupon->get_code() );
-		$checkout    = WC_Checkout::instance();
+		$checkout = WC_Checkout::instance();
 		$posted_data = array(
-			'billing_email'  => 'a@b.com',
+			'billing_email' => 'a@b.com',
 			'payment_method' => 'dummy_payment_gateway',
 		);
-		$order_id    = $checkout->create_order( $posted_data );
+		$order_id = $checkout->create_order( $posted_data );
 		$this->assertNotWPError( $order_id );
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
