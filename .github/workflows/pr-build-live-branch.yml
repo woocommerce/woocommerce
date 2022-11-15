@@ -5,7 +5,7 @@ on:
     types: [opened,edited,labeled] 
 
 concurrency:
-  # Cancel concurrent jobs on pull_request but not push, by including the run_id in the concurrency group for the latter.
+  # Cancel concurrent jobs on pull_request but not push, by including the run_id in the concurrency group for the former.
   group: build-${{ github.event_name == 'push' && github.run_id || 'pr' }}-${{ github.ref }}
   cancel-in-progress: true
 
