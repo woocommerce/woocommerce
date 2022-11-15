@@ -36,7 +36,10 @@ const ExpressPaymentMethods = () => {
 	);
 	const {
 		__internalSetActivePaymentMethod,
-		__internalSetPaymentStatus,
+		__internalSetPaymentStarted,
+		__internalSetPaymentPristine,
+		__internalSetPaymentError,
+		__internalSetPaymentMethodData,
 		__internalSetExpressPaymentError,
 	} = useDispatch( PAYMENT_STORE_KEY );
 	const { paymentMethods } = useExpressPaymentMethods();
@@ -55,14 +58,14 @@ const ExpressPaymentMethods = () => {
 		( paymentMethodId ) => () => {
 			previousActivePaymentMethod.current = activePaymentMethod;
 			previousPaymentMethodData.current = paymentMethodData;
-			__internalSetPaymentStatus( { isStarted: true } );
+			__internalSetPaymentStarted();
 			__internalSetActivePaymentMethod( paymentMethodId );
 		},
 		[
 			activePaymentMethod,
 			paymentMethodData,
 			__internalSetActivePaymentMethod,
-			__internalSetPaymentStatus,
+			__internalSetPaymentStarted,
 		]
 	);
 
@@ -72,12 +75,12 @@ const ExpressPaymentMethods = () => {
 	 * This restores the active method and returns the state to pristine.
 	 */
 	const onExpressPaymentClose = useCallback( () => {
-		__internalSetPaymentStatus( { isPristine: true } );
+		__internalSetPaymentPristine();
 		__internalSetActivePaymentMethod(
 			previousActivePaymentMethod.current,
 			previousPaymentMethodData.current
 		);
-	}, [ __internalSetActivePaymentMethod, __internalSetPaymentStatus ] );
+	}, [ __internalSetActivePaymentMethod, __internalSetPaymentPristine ] );
 
 	/**
 	 * onExpressPaymentError should be triggered when the express payment process errors.
@@ -86,7 +89,8 @@ const ExpressPaymentMethods = () => {
 	 */
 	const onExpressPaymentError = useCallback(
 		( errorMessage ) => {
-			__internalSetPaymentStatus( { hasError: true }, errorMessage );
+			__internalSetPaymentError();
+			__internalSetPaymentMethodData( errorMessage );
 			__internalSetExpressPaymentError( errorMessage );
 			__internalSetActivePaymentMethod(
 				previousActivePaymentMethod.current,
@@ -95,7 +99,8 @@ const ExpressPaymentMethods = () => {
 		},
 		[
 			__internalSetActivePaymentMethod,
-			__internalSetPaymentStatus,
+			__internalSetPaymentError,
+			__internalSetPaymentMethodData,
 			__internalSetExpressPaymentError,
 		]
 	);

@@ -102,17 +102,23 @@ The status is exposed on the `currentErrorStatus` object provided by the `useShi
 
 ### Payment Method Data Store Status
 
-The status of the payment lives in the payment data store. It can be retrieved with the `getCurrentStatus` selector, liek so:
+The status of the payment lives in the payment data store. You can query the status with the following selectors:
 
 ```jsx
-import { useSelect } from '@wordpress/data';
+import { select } from '@wordpress/data';
 import { PAYMENT_STORE_KEY } from '@woocommerce/blocks-data';
 
 const MyComponent = ( props ) => {
-	const currentStatus = useSelect( ( select ) =>
-		select( PAYMENT_STORE_KEY ).getCurrentStatus()
-	);
-	// do something with status
+	const isPaymentPristine = select( PAYMENT_STORE_KEY ).isPaymentPristine();
+	const isPaymentStarted = select( PAYMENT_STORE_KEY ).isPaymentStarted();
+	const isPaymentProcessing =
+		select( PAYMENT_STORE_KEY ).isPaymentProcessing();
+	const isPaymentSuccess = select( PAYMENT_STORE_KEY ).isPaymentSuccess();
+	const isPaymentFailed = select( PAYMENT_STORE_KEY ).isPaymentFailed();
+	const hasPaymentError = select( PAYMENT_STORE_KEY ).hasPaymentError();
+	const hasPaymentFinished = select( PAYMENT_STORE_KEY ).hasPaymentFinished();
+
+	// do something with the boolean values
 };
 ```
 
@@ -126,16 +132,6 @@ The possible _internal_ statuses that may be set are:
 -   `SUCCESS`: This status is set after all the observers hooked into the payment processing event have completed successfully. The `CheckoutProcessor` component uses this along with the checkout `PROCESSING` status to signal things are ready to send the order to the server with data for processing.
 -   `FAILED`: This status is set after an observer hooked into the payment processing event returns a fail response. This in turn will end up causing the checkout `hasError` flag to be set to true.
 -   `ERROR`: This status is set after an observer hooked into the payment processing event returns an error response. This in turn will end up causing the checkout `hasError` flag to be set to true.
-
-The `currentStatus` object has the following properties:
-
--   `isPristine`: This is true when the current payment status is `PRISTINE`.
--   `isStarted`: This is true when the current payment status is `STARTED`.
--   `isProcessing`: This is true when the current payment status is `PROCESSING`.
--   `isFinished`: This is true when the current payment status is one of `ERROR`, `FAILED`, or`SUCCESS`.
--   `hasError`: This is true when the current payment status is `ERROR`.
--   `hasFailed`: This is true when the current payment status is `FAILED`.
--   `isSuccessful`: This is true when the current payment status is `SUCCESS`
 
 ### Emitting Events
 

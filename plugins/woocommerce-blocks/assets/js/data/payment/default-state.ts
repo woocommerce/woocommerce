@@ -12,17 +12,10 @@ import {
  * Internal dependencies
  */
 import { SavedPaymentMethod } from './types';
+import { STATUS as PAYMENT_STATUS } from './constants';
 
 export interface PaymentMethodDataState {
-	currentStatus: {
-		isPristine: boolean;
-		isStarted: boolean;
-		isProcessing: boolean;
-		isFinished: boolean;
-		hasError: boolean;
-		hasFailed: boolean;
-		isSuccessful: boolean;
-	};
+	status: string;
 	activePaymentMethod: string;
 	activeSavedToken: string;
 	// Avilable payment methods are payment methods which have been validated and can make payment
@@ -37,15 +30,7 @@ export interface PaymentMethodDataState {
 	shouldSavePaymentMethod: boolean;
 }
 export const defaultPaymentMethodDataState: PaymentMethodDataState = {
-	currentStatus: {
-		isPristine: true,
-		isStarted: false,
-		isProcessing: false,
-		isFinished: false,
-		hasError: false,
-		hasFailed: false,
-		isSuccessful: false,
-	},
+	status: PAYMENT_STATUS.PRISTINE,
 	activePaymentMethod: '',
 	activeSavedToken: '',
 	availablePaymentMethods: {},

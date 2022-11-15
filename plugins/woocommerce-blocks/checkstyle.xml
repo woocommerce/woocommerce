@@ -680,24 +680,24 @@
 <error line="4" column="10" severity="error" message="Module &apos;&quot;@wordpress/notices&quot;&apos; has no exported member &apos;store&apos;." source="TS2305" />
 <error line="22" column="13" severity="error" message="Binding element &apos;registry&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
 <error line="74" column="23" severity="error" message="Property &apos;meta&apos; does not exist on type &apos;never&apos;." source="TS2339" />
-<error line="92" column="24" severity="error" message="Property &apos;message&apos; does not exist on type &apos;never&apos;." source="TS2339" />
-<error line="92" column="49" severity="error" message="Property &apos;message&apos; does not exist on type &apos;never&apos;." source="TS2339" />
-<error line="93" column="39" severity="error" message="Property &apos;message&apos; does not exist on type &apos;never&apos;." source="TS2339" />
-<error line="97" column="23" severity="error" message="Property &apos;messageContext&apos; does not exist on type &apos;never&apos;." source="TS2339" />
-<error line="103" column="21" severity="error" message="Property &apos;meta&apos; does not exist on type &apos;never&apos;." source="TS2339" />
-<error line="113" column="24" severity="error" message="Property &apos;message&apos; does not exist on type &apos;never&apos;." source="TS2339" />
-<error line="113" column="49" severity="error" message="Property &apos;message&apos; does not exist on type &apos;never&apos;." source="TS2339" />
-<error line="114" column="39" severity="error" message="Property &apos;message&apos; does not exist on type &apos;never&apos;." source="TS2339" />
-<error line="118" column="23" severity="error" message="Property &apos;messageContext&apos; does not exist on type &apos;never&apos;." source="TS2339" />
-<error line="124" column="41" severity="error" message="Property &apos;validationErrors&apos; does not exist on type &apos;never&apos;." source="TS2339" />
+<error line="90" column="24" severity="error" message="Property &apos;message&apos; does not exist on type &apos;never&apos;." source="TS2339" />
+<error line="90" column="49" severity="error" message="Property &apos;message&apos; does not exist on type &apos;never&apos;." source="TS2339" />
+<error line="91" column="39" severity="error" message="Property &apos;message&apos; does not exist on type &apos;never&apos;." source="TS2339" />
+<error line="95" column="23" severity="error" message="Property &apos;messageContext&apos; does not exist on type &apos;never&apos;." source="TS2339" />
+<error line="101" column="21" severity="error" message="Property &apos;meta&apos; does not exist on type &apos;never&apos;." source="TS2339" />
+<error line="109" column="24" severity="error" message="Property &apos;message&apos; does not exist on type &apos;never&apos;." source="TS2339" />
+<error line="109" column="49" severity="error" message="Property &apos;message&apos; does not exist on type &apos;never&apos;." source="TS2339" />
+<error line="110" column="39" severity="error" message="Property &apos;message&apos; does not exist on type &apos;never&apos;." source="TS2339" />
+<error line="114" column="23" severity="error" message="Property &apos;messageContext&apos; does not exist on type &apos;never&apos;." source="TS2339" />
+<error line="120" column="41" severity="error" message="Property &apos;validationErrors&apos; does not exist on type &apos;never&apos;." source="TS2339" />
 </file>
 <file name="assets/js/data/payment/actions.ts">
-<error line="43" column="19" severity="error" message="Binding element &apos;select&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="43" column="27" severity="error" message="Binding element &apos;dispatch&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="114" column="19" severity="error" message="Binding element &apos;dispatch&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="114" column="29" severity="error" message="Binding element &apos;select&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="162" column="19" severity="error" message="Binding element &apos;select&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="162" column="27" severity="error" message="Binding element &apos;dispatch&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="51" column="19" severity="error" message="Binding element &apos;select&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="51" column="27" severity="error" message="Binding element &apos;dispatch&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="122" column="19" severity="error" message="Binding element &apos;dispatch&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="122" column="29" severity="error" message="Binding element &apos;select&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="170" column="19" severity="error" message="Binding element &apos;select&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="170" column="27" severity="error" message="Binding element &apos;dispatch&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
 </file>
 <file name="assets/js/data/payment/index.ts">
 <error line="25" column="44" severity="error" message="Argument of type &apos;{ reducer: Reducer&lt;PaymentMethodDataState, AnyAction&gt;; selectors: typeof selectors; actions: typeof actions; controls: any; }&apos; is not assignable to parameter of type &apos;StoreConfig&lt;PaymentMethodDataState&gt;&apos;.
@@ -735,9 +735,6 @@
 <file name="packages/checkout/index.js">
 <error line="6" column="34" severity="error" message="Could not find a declaration file for module &apos;wordpress-components&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/wordpress-components/build/index.js&apos; implicitly has an &apos;any&apos; type.
   If the &apos;@wordpress/components&apos; package actually exposes this module, consider sending a pull request to amend &apos;https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/wordpress__components&apos;" source="TS7016" />
-</file>
-<file name="assets/js/types/type-defs/payment-method-interface.ts">
-<error line="20" column="53" severity="error" message="Cannot find module &apos;../../base/context/providers/cart-checkout/payment-events/types&apos; or its corresponding type declarations." source="TS2307" />
 </file>
 <file name="assets/js/blocks-registry/block-components/register-block-component.js">
 <error line="42" column="2" severity="error" message="Type &apos;Function&apos; is not assignable to type &apos;RegisteredBlockComponent&apos;." source="TS2322" />
@@ -1039,17 +1036,17 @@
 <error line="128" column="35" severity="error" message="Parameter &apos;response&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
 </file>
 <file name="assets/js/base/context/providers/cart-checkout/checkout-processor.js">
-<error line="174" column="7" severity="error" message="Variable &apos;unsubscribeProcessing&apos; implicitly has type &apos;any&apos; in some locations where its type cannot be determined." source="TS7034" />
-<error line="183" column="5" severity="error" message="Variable &apos;unsubscribeProcessing&apos; implicitly has an &apos;any&apos; type." source="TS7005" />
-<error line="229" column="9" severity="error" message="Property &apos;shipping_address&apos; does not exist on type &apos;{ extensions: { [x: string]: Record&lt;string, unknown&gt;; }; payment_method: string | undefined; payment_data: { key: string; value: unknown; }[]; billing_address: BillingAddress; customer_note: string; create_account: boolean; } | { ...; }&apos;.
+<error line="172" column="7" severity="error" message="Variable &apos;unsubscribeProcessing&apos; implicitly has type &apos;any&apos; in some locations where its type cannot be determined." source="TS7034" />
+<error line="181" column="5" severity="error" message="Variable &apos;unsubscribeProcessing&apos; implicitly has an &apos;any&apos; type." source="TS7005" />
+<error line="227" column="9" severity="error" message="Property &apos;shipping_address&apos; does not exist on type &apos;{ extensions: { [x: string]: Record&lt;string, unknown&gt;; }; payment_method: string | undefined; payment_data: { key: string; value: unknown; }[]; billing_address: BillingAddress; customer_note: string; create_account: boolean; } | { ...; }&apos;.
   Property &apos;shipping_address&apos; does not exist on type &apos;{ extensions: { [x: string]: Record&lt;string, unknown&gt;; }; payment_method: string | undefined; payment_data: { key: string; value: unknown; }[]; billing_address: BillingAddress; customer_note: string; create_account: boolean; }&apos;." source="TS2339" />
-<error line="258" column="35" severity="error" message="Parameter &apos;response&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
-<error line="268" column="9" severity="error" message="Argument of type &apos;{ id: string; context: string; __unstableHTML: boolean; }&apos; is not assignable to parameter of type &apos;Partial&lt;Options&gt;&apos;.
+<error line="256" column="35" severity="error" message="Parameter &apos;response&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
+<error line="266" column="9" severity="error" message="Argument of type &apos;{ id: string; context: string; __unstableHTML: boolean; }&apos; is not assignable to parameter of type &apos;Partial&lt;Options&gt;&apos;.
   Object literal may only specify known properties, and &apos;__unstableHTML&apos; does not exist in type &apos;Partial&lt;Options&gt;&apos;." source="TS2345" />
-<error line="272" column="10" severity="error" message="Parameter &apos;additionalError&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
-<error line="276" column="10" severity="error" message="Argument of type &apos;{ id: any; context: string; __unstableHTML: boolean; }&apos; is not assignable to parameter of type &apos;Partial&lt;Options&gt;&apos;.
+<error line="270" column="10" severity="error" message="Parameter &apos;additionalError&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
+<error line="274" column="10" severity="error" message="Argument of type &apos;{ id: any; context: string; __unstableHTML: boolean; }&apos; is not assignable to parameter of type &apos;Partial&lt;Options&gt;&apos;.
   Object literal may only specify known properties, and &apos;__unstableHTML&apos; does not exist in type &apos;Partial&lt;Options&gt;&apos;." source="TS2345" />
-<error line="299" column="8" severity="error" message="Argument of type &apos;{ id: string; context: string; __unstableHTML: boolean; }&apos; is not assignable to parameter of type &apos;Partial&lt;Options&gt;&apos;.
+<error line="297" column="8" severity="error" message="Argument of type &apos;{ id: string; context: string; __unstableHTML: boolean; }&apos; is not assignable to parameter of type &apos;Partial&lt;Options&gt;&apos;.
   Object literal may only specify known properties, and &apos;__unstableHTML&apos; does not exist in type &apos;Partial&lt;Options&gt;&apos;." source="TS2345" />
 </file>
 <file name="assets/js/base/context/providers/cart-checkout/checkout-provider.js">

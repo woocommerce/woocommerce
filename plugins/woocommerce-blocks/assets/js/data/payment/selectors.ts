@@ -2,12 +2,40 @@
  * External dependencies
  */
 import { objectHasProp } from '@woocommerce/types';
+import deprecated from '@wordpress/deprecated';
 
 /**
  * Internal dependencies
  */
 import { PaymentMethodDataState } from './default-state';
 import { filterActiveSavedPaymentMethods } from './utils';
+import { STATUS as PAYMENT_STATUS } from './constants';
+
+export const isPaymentPristine = ( state: PaymentMethodDataState ) =>
+	state.status === PAYMENT_STATUS.PRISTINE;
+
+export const isPaymentStarted = ( state: PaymentMethodDataState ) =>
+	state.status === PAYMENT_STATUS.STARTED;
+
+export const isPaymentProcessing = ( state: PaymentMethodDataState ) =>
+	state.status === PAYMENT_STATUS.PROCESSING;
+
+export const isPaymentSuccess = ( state: PaymentMethodDataState ) =>
+	state.status === PAYMENT_STATUS.SUCCESS;
+
+export const hasPaymentError = ( state: PaymentMethodDataState ) =>
+	state.status === PAYMENT_STATUS.ERROR;
+
+export const isPaymentFailed = ( state: PaymentMethodDataState ) =>
+	state.status === PAYMENT_STATUS.FAILED;
+
+export const isPaymentFinished = ( state: PaymentMethodDataState ) => {
+	return (
+		state.status === PAYMENT_STATUS.SUCCESS ||
+		state.status === PAYMENT_STATUS.ERROR ||
+		state.status === PAYMENT_STATUS.FAILED
+	);
+};
 
 export const isExpressPaymentMethodActive = (
 	state: PaymentMethodDataState
@@ -73,8 +101,29 @@ export const expressPaymentMethodsInitialized = (
 	return state.expressPaymentMethodsInitialized;
 };
 
+/**
+ * @deprecated - use these selectors instead: isPaymentPristine, isPaymentStarted, isPaymentProcessing,
+ * isPaymentFinished, hasPaymentError, isPaymentSuccess, isPaymentFailed
+ */
 export const getCurrentStatus = ( state: PaymentMethodDataState ) => {
-	return state.currentStatus;
+	deprecated( 'getCurrentStatus', {
+		since: '8.9.0',
+		alternative:
+			'isPaymentPristine, isPaymentStarted, isPaymentProcessing, isPaymentFinished, hasPaymentError, isPaymentSuccess, isPaymentFailed',
+		plugin: 'WooCommerce Blocks',
+		link: 'https://github.com/woocommerce/woocommerce-blocks/pull/7666',
+	} );
+
+	return {
+		isPristine: isPaymentPristine( state ),
+		isStarted: isPaymentStarted( state ),
+		isProcessing: isPaymentProcessing( state ),
+		isFinished: isPaymentFinished( state ),
+		hasError: hasPaymentError( state ),
+		hasFailed: isPaymentFailed( state ),
+		isSuccessful: isPaymentSuccess( state ),
+		isDoingExpressPayment: isExpressPaymentMethodActive( state ),
+	};
 };
 
 export const getShouldSavePaymentMethod = ( state: PaymentMethodDataState ) => {

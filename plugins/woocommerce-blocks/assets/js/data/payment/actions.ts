@@ -12,24 +12,32 @@ import {
 import { ACTION_TYPES } from './action-types';
 import { checkPaymentMethodsCanPay } from './check-payment-methods';
 import { setDefaultPaymentMethod } from './set-default-payment-method';
-import { PaymentStatus } from './types';
 
 // `Thunks are functions that can be dispatched, similar to actions creators
 export * from './thunks';
 
-/**
- * Set the status of the payment
- *
- * @param  status            An object that holds properties representing different status values
- * @param  paymentMethodData A config object for the payment method being used
- */
-export const __internalSetPaymentStatus = (
-	status: PaymentStatus,
-	paymentMethodData?: Record< string, unknown >
-) => ( {
-	type: ACTION_TYPES.SET_PAYMENT_STATUS,
-	status,
-	paymentMethodData,
+export const __internalSetPaymentPristine = () => ( {
+	type: ACTION_TYPES.SET_PAYMENT_PRISTINE,
+} );
+
+export const __internalSetPaymentStarted = () => ( {
+	type: ACTION_TYPES.SET_PAYMENT_STARTED,
+} );
+
+export const __internalSetPaymentProcessing = () => ( {
+	type: ACTION_TYPES.SET_PAYMENT_PROCESSING,
+} );
+
+export const __internalSetPaymentFailed = () => ( {
+	type: ACTION_TYPES.SET_PAYMENT_FAILED,
+} );
+
+export const __internalSetPaymentError = () => ( {
+	type: ACTION_TYPES.SET_PAYMENT_ERROR,
+} );
+
+export const __internalSetPaymentSuccess = () => ( {
+	type: ACTION_TYPES.SET_PAYMENT_SUCCESS,
 } );
 
 /**
