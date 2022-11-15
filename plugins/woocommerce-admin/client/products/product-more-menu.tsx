@@ -62,8 +62,3 @@ export const ProductMoreMenu = () => {
 		</WooHeaderItem>
 	);
 };
-
-registerPlugin( 'woocommerce-product-more-menu', {
-	render: ProductMoreMenu,
-	icon: 'admin-generic',
-} );
