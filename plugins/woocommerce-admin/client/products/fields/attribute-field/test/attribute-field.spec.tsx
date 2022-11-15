@@ -1,10 +1,9 @@
 /**
  * External dependencies
  */
-import { render, act, screen, waitFor } from '@testing-library/react';
+import { render, act, screen } from '@testing-library/react';
 import { useState, useEffect } from '@wordpress/element';
 import { ProductAttribute } from '@woocommerce/data';
-import { resolveSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -75,7 +74,6 @@ jest.mock( '@woocommerce/components', () => ( {
 	__esModule: true,
 	__experimentalSelectControlMenuSlot: () => <div></div>,
 	ListItem: ( { children }: { children: JSX.Element } ) => children,
-	__experimentalSelectControlMenuSlot: () => null,
 	Sortable: ( {
 		onOrderChange,
 		children,
