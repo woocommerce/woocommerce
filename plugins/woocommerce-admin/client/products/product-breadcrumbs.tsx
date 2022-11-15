@@ -9,27 +9,42 @@ import { Link } from '@woocommerce/components';
  */
 import './product-breadcrumbs.scss';
 
-type BreadCrumb = {
-	href: string;
-	title: string;
+type Breadcrumb = {
+	href?: string;
+	title: string | JSX.Element;
 	type?: 'wp-admin' | 'wc-admin';
 };
 
 export const ProductBreadcrumbs = ( {
 	breadcrumbs,
 }: {
-	breadcrumbs: BreadCrumb[];
+	breadcrumbs: Breadcrumb[];
 } ) => {
+	const visibleBreadcrumbs =
+		breadcrumbs.length > 3
+			? [
+					breadcrumbs[ 0 ],
+					{
+						title: <>&hellip;</>,
+					},
+					breadcrumbs[ breadcrumbs.length - 1 ],
+			  ]
+			: breadcrumbs;
+
 	return (
 		<span className="woocommerce-product-breadcrumbs">
-			{ breadcrumbs.map( ( breadcrumb ) => {
+			{ visibleBreadcrumbs.map( ( breadcrumb ) => {
 				const { href, title, type } = breadcrumb;
 				return (
 					<>
 						<span className="woocommerce-product-breadcrumbs__item">
-							<Link href={ href } type={ type || 'wp-admin' }>
-								{ title }
-							</Link>
+							{ href ? (
+								<Link href={ href } type={ type || 'wp-admin' }>
+									{ title }
+								</Link>
+							) : (
+								title
+							) }
 						</span>
 						<span className="woocommerce-product-breadcrumbs__separator">
 							<Icon icon={ chevronRightSmall } />
