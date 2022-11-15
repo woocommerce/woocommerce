@@ -1,16 +1,11 @@
 .wc-block-filter-title-placeholder {
 	@include placeholder();
-	background-color: $gray-400 !important;
 	border-radius: em(26px);
 	box-shadow: none;
 	min-width: 80px;
 	margin-top: $gap-small;
 	margin-bottom: $gap-small;
 	max-width: max-content !important;
-
-	&::after {
-		background-image: linear-gradient(90deg, $gray-400, $gray-200, $gray-400);
-	}
 
 	.wc-block-stock-filter__title,
 	.wc-block-price-filter__title,
