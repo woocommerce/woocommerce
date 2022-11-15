@@ -85,9 +85,7 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 					);
 				}
 				dispatch.__internalSetPaymentMethodData( paymentMethodData );
-				dispatch.__internalSetPaymentStatus( {
-					isSuccessful: true,
-				} );
+				dispatch.__internalSetPaymentSuccess();
 			} else if ( errorResponse && isFailResponse( errorResponse ) ) {
 				if ( errorResponse.message && errorResponse.message.length ) {
 					createErrorNotice( errorResponse.message, {
@@ -105,10 +103,8 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 				if ( billingAddress ) {
 					setBillingAddress( billingAddress );
 				}
-				dispatch.__internalSetPaymentStatus(
-					{ hasFailed: true },
-					paymentMethodData
-				);
+				dispatch.__internalSetPaymentFailed();
+				dispatch.__internalSetPaymentMethodData( paymentMethodData );
 			} else if ( errorResponse ) {
 				if ( errorResponse.message && errorResponse.message.length ) {
 					createErrorNotice( errorResponse.message, {
@@ -120,14 +116,12 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 					} );
 				}
 
-				dispatch.__internalSetPaymentStatus( { hasError: true } );
+				dispatch.__internalSetPaymentError();
 				setValidationErrors( errorResponse?.validationErrors );
 			} else {
 				// otherwise there are no payment methods doing anything so
 				// just consider success
-				dispatch.__internalSetPaymentStatus( {
-					isSuccessful: true,
-				} );
+				dispatch.__internalSetPaymentSuccess();
 			}
 		} );
 	};
