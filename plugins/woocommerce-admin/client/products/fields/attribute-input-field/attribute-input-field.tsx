@@ -17,14 +17,17 @@ import {
 	__experimentalSelectControlMenu as Menu,
 	__experimentalSelectControlMenuItem as MenuItem,
 } from '@woocommerce/components';
+import { HydratedAttributeType } from '../attribute-field';
 
 /**
  * Internal dependencies
  */
-import { CreateAttributeModal } from './create-attribute-modal';
+import './attribute-input-field.scss';
+
+type NarrowedQueryAttribute = Pick< QueryProductAttribute, 'id' | 'name' >;
 
 type AttributeInputFieldProps = {
-	value?: Pick< QueryProductAttribute, 'id' | 'name' > | null;
+	value?: HydratedAttributeType | null;
 	onChange: (
 		value?:
 			| Omit< ProductAttribute, 'position' | 'visible' | 'variation' >
@@ -63,16 +66,17 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 				? ! ignoredAttributeIds.includes( item.id )
 				: true;
 
-		return allItems.filter(
+		const filteredItems = allItems.filter(
 			( item ) =>
 				ignoreIdsFilter( item ) &&
 				( item.name || '' )
 					.toLowerCase()
 					.startsWith( inputValue.toLowerCase() )
 		);
+
 		if (
 			inputValue.length > 0 &&
-			! filteredItems.find(
+			! allItems.find(
 				( item ) => item.name.toLowerCase() === inputValue.toLowerCase()
 			)
 		) {
@@ -84,87 +88,86 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 				},
 			];
 		}
+
 		return filteredItems;
 	};
 
 	return (
-		<>
-			<SelectControl< NarrowedQueryAttribute >
-				className="woocommerce-attribute-input-field"
-				items={ attributes || [] }
-				label={ label || '' }
-				disabled={ disabled }
-				getFilteredItems={ getFilteredItems }
-				placeholder={ placeholder }
-				getItemLabel={ ( item ) => item?.name || '' }
-				getItemValue={ ( item ) => item?.id || '' }
-				selected={ value }
-				onSelect={ ( attribute ) => {
-					if ( attribute.id === -99 ) {
-						recordEvent( 'product_attribute_add_custom_attribute', {
-							new_product_page: true,
-						} );
-					}
-					onChange(
-						attribute.id === -99
-							? attribute.name
-							: {
-									id: attribute.id,
-									name: attribute.name,
-									options: [],
-							  }
-					);
-				} }
-				onRemove={ () => onChange() }
-			>
-				{ ( {
-					items: renderItems,
-					highlightedIndex,
-					getItemProps,
-					getMenuProps,
-					isOpen,
-				} ) => {
-					return (
-						<Menu getMenuProps={ getMenuProps } isOpen={ isOpen }>
-							{ isLoading ? (
-								<Spinner />
-							) : (
-								renderItems.map( ( item, index: number ) => (
-									<MenuItem
-										key={ item.id }
-										index={ index }
-										isActive={ highlightedIndex === index }
-										item={ item }
-										getItemProps={ getItemProps }
-									>
-										{ item.id === -99 ? (
-											<div className="woocommerce-attribute-input-field__add-new">
-												<Icon
-													icon={ plus }
-													size={ 20 }
-													className="woocommerce-attribute-input-field__add-new-icon"
-												/>
-												<span>
-													{ sprintf(
-														/* translators: The name of the new attribute term to be created */
-														__(
-															'Create "%s"',
-															'woocommerce'
-														),
-														item.name
-													) }
-												</span>
-											</div>
-										) : (
-											item.name
-										) }
-									</MenuItem>
-								) )
-							) }
-						</Menu>
-					);
-				} }
-			</SelectControl>
-		</>
+		<SelectControl< NarrowedQueryAttribute >
+			className="woocommerce-attribute-input-field"
+			items={ attributes || [] }
+			label={ label || '' }
+			disabled={ disabled }
+			getFilteredItems={ getFilteredItems }
+			placeholder={ placeholder }
+			getItemLabel={ ( item ) => item?.name || '' }
+			getItemValue={ ( item ) => item?.id || '' }
+			selected={ value }
+			onSelect={ ( attribute ) => {
+				if ( attribute.id === -99 ) {
+					recordEvent( 'product_attribute_add_custom_attribute', {
+						new_product_page: true,
+					} );
+				}
+				onChange(
+					attribute.id === -99
+						? attribute.name
+						: {
+								id: attribute.id,
+								name: attribute.name,
+								options: [],
+						  }
+				);
+			} }
+			onRemove={ () => onChange() }
+		>
+			{ ( {
+				items: renderItems,
+				highlightedIndex,
+				getItemProps,
+				getMenuProps,
+				isOpen,
+			} ) => {
+				return (
+					<Menu getMenuProps={ getMenuProps } isOpen={ isOpen }>
+						{ isLoading ? (
+							<Spinner />
+						) : (
+							renderItems.map( ( item, index: number ) => (
+								<MenuItem
+									key={ item.id }
+									index={ index }
+									isActive={ highlightedIndex === index }
+									item={ item }
+									getItemProps={ getItemProps }
+								>
+									{ item.id === -99 ? (
+										<div className="woocommerce-attribute-input-field__add-new">
+											<Icon
+												icon={ plus }
+												size={ 20 }
+												className="woocommerce-attribute-input-field__add-new-icon"
+											/>
+											<span>
+												{ sprintf(
+													/* translators: The name of the new attribute term to be created */
+													__(
+														'Create "%s"',
+														'woocommerce'
+													),
+													item.name
+												) }
+											</span>
+										</div>
+									) : (
+										item.name
+									) }
+								</MenuItem>
+							) )
+						) }
+					</Menu>
+				);
+			} }
+		</SelectControl>
 	);
 };

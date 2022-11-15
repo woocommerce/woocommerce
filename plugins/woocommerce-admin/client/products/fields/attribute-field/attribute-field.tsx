@@ -141,8 +141,10 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 			...newAttributes
 				.filter(
 					( newAttr ) =>
-						! ( value || [] ).find(
-							( attr ) => attr.id === newAttr.id
+						! ( value || [] ).find( ( attr ) =>
+							newAttr.id === 0
+								? newAttr.name === attr.name // check name if custom attribute = id === 0.
+								: attr.id === newAttr.id
 						)
 				)
 				.map( ( newAttr, index ) => {

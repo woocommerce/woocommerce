@@ -35,10 +35,14 @@ type AddAttributeModalProps = {
 };
 
 type AttributeForm = {
-	attributes: Array<
-		HydratedAttributeType | { id: undefined; terms: []; options: [] }
-	>;
+	attributes: Array< HydratedAttributeType | { id: undefined } >;
 };
+
+function isEmptyItem(
+	item: HydratedAttributeType | { id: undefined }
+): item is { id: undefined } {
+	return item.id === undefined;
+}
 
 export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 	onCancel,
@@ -57,8 +61,6 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 			...values.attributes,
 			{
 				id: undefined,
-				options: [],
-				terms: [],
 			},
 		] );
 	};
@@ -67,16 +69,18 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 		const newAttributesToAdd: HydratedAttributeType[] = [];
 		values.attributes.forEach( ( attr ) => {
 			if (
-				attr.id &&
-				attr.name &&
-				( ( attr.terms || [] ).length > 0 || attr.options.length > 0 )
+				! isEmptyItem( attr ) &&
+				attr?.name &&
+				( ( attr.terms || [] ).length > 0 ||
+					( attr.options || [] ).length > 0 )
 			) {
 				const options =
-					attr.id !== undefined
-						? attr.terms.map( ( term ) => term.name )
+					attr.id !== 0
+						? ( attr.terms || [] ).map( ( term ) => term.name )
 						: attr.options;
 				newAttributesToAdd.push( {
 					...( attr as HydratedAttributeType ),
+					options,
 				} );
 			}
 		} );
@@ -88,7 +92,7 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 		values: AttributeForm,
 		setValue: (
 			name: string,
-			value: AttributeForm[ keyof AttributeForm ]
+			value: Partial< HydratedAttributeType >[]
 		) => void
 	) => {
 		if ( values.attributes.length > 1 ) {
@@ -97,9 +101,7 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 				values.attributes.filter( ( val, i ) => i !== index )
 			);
 		} else {
-			setValue( `attributes[${ index }]`, [
-				{ id: undefined, terms: [], options: [] },
-			] );
+			setValue( `attributes[${ index }]`, [ { id: undefined } ] );
 		}
 	};
 
@@ -118,7 +120,10 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 
 	const onClose = ( values: AttributeForm ) => {
 		const hasValuesSet = values.attributes.some(
-			( value ) => value?.id && value?.terms && value?.terms.length > 0
+			( value ) =>
+				! isEmptyItem( value ) &&
+				value?.terms &&
+				value?.terms.length > 0
 		);
 		if ( hasValuesSet ) {
 			setShowConfirmClose( true );
@@ -131,7 +136,11 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 		<>
 			<Form< AttributeForm >
 				initialValues={ {
-					attributes: [ { id: undefined, terms: [], options: [] } ],
+					attributes: [
+						{
+							id: undefined,
+						},
+					],
 				} }
 			>
 				{ ( {
@@ -188,10 +197,11 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 																'woocommerce'
 															) }
 															value={
-																formAttr.id &&
-																formAttr.name
-																	? formAttr
-																	: null
+																isEmptyItem(
+																	formAttr
+																)
+																	? null
+																	: formAttr
 															}
 															onChange={ (
 																val
@@ -199,8 +209,16 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 																setValue(
 																	'attributes[' +
 																		index +
-																		'].attribute',
-																	val
+																		']',
+																	typeof val ===
+																		'string'
+																		? {
+																				id: 0,
+																				name: val,
+																				options:
+																					[],
+																		  }
+																		: val
 																);
 																if ( val ) {
 																	focusValueField(
@@ -228,9 +246,10 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 														/>
 													</td>
 													<td className="woocommerce-add-attribute-modal__table-attribute-value-column">
-														{ ! formAttr ||
-														formAttr.id !==
-															undefined ? (
+														{ isEmptyItem(
+															formAttr
+														) ||
+														formAttr.id !== 0 ? (
 															<AttributeTermInputField
 																placeholder={ __(
 																	'Search or create value',
@@ -243,7 +262,11 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 																	formAttr.id
 																}
 																value={
-																	formAttr.terms
+																	isEmptyItem(
+																		formAttr
+																	)
+																		? []
+																		: formAttr.terms
 																}
 																onChange={ (
 																	val
@@ -289,9 +312,10 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 																	.attributes
 																	.length ===
 																	1 &&
-																! values
-																	.attributes[ 0 ]
-																	?.name
+																isEmptyItem(
+																	values
+																		.attributes[ 0 ]
+																)
 															}
 															label={ __(
 																'Remove attribute',
@@ -344,9 +368,7 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 									) }
 									disabled={
 										values.attributes.length === 1 &&
-										! values.attributes[ 0 ]?.name &&
-										values.attributes[ 0 ]?.terms
-											?.length === 0
+										isEmptyItem( values.attributes[ 0 ] )
 									}
 									onClick={ () =>
 										onAddingAttributes( values )
