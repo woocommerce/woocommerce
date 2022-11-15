@@ -1212,10 +1212,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		/**
-		 * woocommerce_order_applied_coupon action hook.
-		 * 
+		 * Action to signal that a coupon has been applied to an order.
+		 *
 		 * @param  WC_Coupon $coupon The applied coupon object.
 		 * @param  WC_Order  $order  The current order object.
+		 *
+		 * @since 7.2
 		 */
 		do_action( 'woocommerce_order_applied_coupon', $coupon, $this );
 
