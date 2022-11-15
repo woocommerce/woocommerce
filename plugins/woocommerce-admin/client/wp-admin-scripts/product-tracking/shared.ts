@@ -326,7 +326,9 @@ export const initProductScreenTracks = () => {
 		} );
 
 	document
-		.querySelector( '#view-product-link' )
+		.querySelector(
+			'#woocommerce-product-updated-message-view-product__link'
+		)
 		?.addEventListener( 'click', () => {
 			recordEvent( 'product_view_product_click', getProductData() );
 		} );
