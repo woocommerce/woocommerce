@@ -41,16 +41,13 @@ function ExitSurveyModal( {
 	const closeModal = () => {
 		setOpen( false );
 
-		// Dismiss WCPay menu
-		apiFetch( {
-			path: 'wc-admin/options',
-			method: 'POST',
-			data: {
-				wc_calypso_bridge_payments_dismissed: 'yes',
-			},
-		} ).then( () => {
-			window.location.href = 'admin.php?page=wc-admin';
+		// Record that the modal was dismissed.
+		updateOptions( {
+			wc_calypso_bridge_payments_dismissed: 'yes',
 		} );
+
+		// Redirect back to the admin page.
+		window.location.href = 'admin.php?page=wc-admin';
 	};
 
 	const exitSurvey = () => {
