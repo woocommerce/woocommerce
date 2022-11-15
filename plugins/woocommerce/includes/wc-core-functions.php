@@ -673,7 +673,7 @@ function get_woocommerce_currency_symbols() {
 			'ARS' => '&#36;',
 			'AUD' => '&#36;',
 			'AWG' => 'Afl.',
-			'AZN' => '&#8916',
+			'AZN' => '&#8380;',
 			'BAM' => 'KM',
 			'BBD' => '&#36;',
 			'BDT' => '&#2547;&nbsp;',
@@ -2580,4 +2580,3 @@ function wc_cache_get_multiple( $keys, $group = '', $force = false ) {
 	}
 	return $values;
 }
- 
