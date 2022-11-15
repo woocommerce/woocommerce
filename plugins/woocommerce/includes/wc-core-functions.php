@@ -2580,3 +2580,4 @@ function wc_cache_get_multiple( $keys, $group = '', $force = false ) {
 	}
 	return $values;
 }
+ 
