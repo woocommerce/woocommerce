@@ -1,8 +1,6 @@
 name: Build Live Branch
 on:
-  push:
   pull_request:
-    types: [opened,edited,labeled] 
 
 concurrency:
   # Cancel concurrent jobs on pull_request but not push, by including the run_id in the concurrency group for the latter.
