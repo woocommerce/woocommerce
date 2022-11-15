@@ -92,7 +92,7 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 		values: AttributeForm,
 		setValue: (
 			name: string,
-			value: Partial< HydratedAttributeType >[]
+			value: AttributeForm[ keyof AttributeForm ]
 		) => void
 	) => {
 		if ( values.attributes.length > 1 ) {
