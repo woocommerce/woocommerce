@@ -82,12 +82,12 @@ class WcPayWelcomePage {
 
 		// No existing WCPay account.
 		if ( $this->has_wcpay_account() ) {
-		 	return;
+			return;
 		}
 
 		// Suggestions may be disabled via a setting.
 		if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) === 'no' ) {
-		 	return;
+			return;
 		}
 
 		/**
