@@ -3,6 +3,7 @@
  */
 // @ts-ignore
 import { Card, CardBody, CardFooter, CardHeader, __experimentalHeading as Heading } from '@wordpress/components';
+import { Spinner } from '@woocommerce/components';
 import { css } from '@emotion/react';
 
 /**
@@ -17,9 +18,7 @@ const cardStyle = css({
 })
 
 export const App = () => {
-  const prs = useLiveBranchesData();
-
-  console.log(prs[0]);
+  const {branches, isLoading} = useLiveBranchesData();
      
   return (<>
     <Heading level={1}>
@@ -30,7 +29,7 @@ export const App = () => {
         <h2>Active PRs</h2>
       </CardHeader>
       <CardBody>
-        <BranchList branches={prs} />
+        {isLoading ? <Spinner /> : <BranchList branches={branches} />}
       </CardBody>
       <CardFooter></CardFooter>
     </Card>

@@ -2,7 +2,10 @@
 
 register_woocommerce_admin_test_helper_rest_route(
 	'/live-branches/manifest/v1',
-	'fetch_live_branches_manifest'	
+	'fetch_live_branches_manifest',
+	array(
+		'methods' => 'GET',
+	)
 );
 
 function fetch_live_branches_manifest() {
