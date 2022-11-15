@@ -76,7 +76,8 @@ const CheckoutProcessor = () => {
 		activePaymentMethod,
 		paymentMethodData,
 		isExpressPaymentMethodActive,
-		currentPaymentStatus,
+		hasPaymentError,
+		isPaymentSuccess,
 		shouldSavePayment,
 	} = useSelect( ( select ) => {
 		const store = select( PAYMENT_STORE_KEY );
@@ -85,7 +86,8 @@ const CheckoutProcessor = () => {
 			activePaymentMethod: store.getActivePaymentMethod(),
 			paymentMethodData: store.getPaymentMethodData(),
 			isExpressPaymentMethodActive: store.isExpressPaymentMethodActive(),
-			currentPaymentStatus: store.getCurrentStatus(),
+			hasPaymentError: store.hasPaymentError(),
+			isPaymentSuccess: store.isPaymentSuccess(),
 			shouldSavePayment: store.getShouldSavePaymentMethod(),
 		};
 	}, [] );
@@ -107,13 +109,13 @@ const CheckoutProcessor = () => {
 
 	const checkoutWillHaveError =
 		( hasValidationErrors() && ! isExpressPaymentMethodActive ) ||
-		currentPaymentStatus.hasError ||
+		hasPaymentError ||
 		shippingErrorStatus.hasError;
 
 	const paidAndWithoutErrors =
 		! checkoutHasError &&
 		! checkoutWillHaveError &&
-		( currentPaymentStatus.isSuccessful || ! cartNeedsPayment ) &&
+		( isPaymentSuccess || ! cartNeedsPayment ) &&
 		checkoutIsProcessing;
 
 	// Determine if checkout has an error.
@@ -145,7 +147,7 @@ const CheckoutProcessor = () => {
 		if ( hasValidationErrors() ) {
 			return false;
 		}
-		if ( currentPaymentStatus.hasError ) {
+		if ( hasPaymentError ) {
 			return {
 				errorMessage: __(
 					'There was a problem with your payment option.',
@@ -163,11 +165,7 @@ const CheckoutProcessor = () => {
 		}
 
 		return true;
-	}, [
-		hasValidationErrors,
-		currentPaymentStatus.hasError,
-		shippingErrorStatus.hasError,
-	] );
+	}, [ hasValidationErrors, hasPaymentError, shippingErrorStatus.hasError ] );
 
 	// Validate the checkout using the CHECKOUT_VALIDATION_BEFORE_PROCESSING event
 	useEffect( () => {

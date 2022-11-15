@@ -7,5 +7,4 @@ export enum STATUS {
 	ERROR = 'has_error',
 	FAILED = 'failed',
 	SUCCESS = 'success',
-	COMPLETE = 'complete',
 }
