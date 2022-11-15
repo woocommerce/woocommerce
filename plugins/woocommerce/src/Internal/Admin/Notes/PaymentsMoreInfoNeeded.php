@@ -51,7 +51,6 @@ class PaymentsMoreInfoNeeded {
 
 		// More than 30 days since viewing the welcome page.
 		$exit_survey_timestamp = get_option( 'wc_pay_exit_survey_more_info_needed_timestamp', false );
-
 		if ( ! $exit_survey_timestamp ||
 			( time() - $exit_survey_timestamp < 30 * DAY_IN_SECONDS )
 		) {
