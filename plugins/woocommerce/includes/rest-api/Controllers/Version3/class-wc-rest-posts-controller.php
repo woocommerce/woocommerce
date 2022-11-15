@@ -153,7 +153,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			return new WP_Error( "woocommerce_rest_invalid_{$this->post_type}_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$data = $this->prepare_item_for_response( $post, $request );
+		$data     = $this->prepare_item_for_response( $post, $request );
 		$response = rest_ensure_response( $data );
 
 		if ( $this->public ) {
@@ -305,18 +305,18 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$args                         = array();
-		$args['offset']               = $request['offset'];
-		$args['order']                = $request['order'];
-		$args['orderby']              = $request['orderby'];
-		$args['paged']                = $request['page'];
-		$args['post__in']             = $request['include'];
-		$args['post__not_in']         = $request['exclude'];
-		$args['posts_per_page']       = $request['per_page'];
-		$args['name']                 = $request['slug'];
-		$args['post_parent__in']      = $request['parent'];
-		$args['post_parent__not_in']  = $request['parent_exclude'];
-		$args['s']                    = $request['search'];
+		$args                        = array();
+		$args['offset']              = $request['offset'];
+		$args['order']               = $request['order'];
+		$args['orderby']             = $request['orderby'];
+		$args['paged']               = $request['page'];
+		$args['post__in']            = $request['include'];
+		$args['post__not_in']        = $request['exclude'];
+		$args['posts_per_page']      = $request['per_page'];
+		$args['name']                = $request['slug'];
+		$args['post_parent__in']     = $request['parent'];
+		$args['post_parent__not_in'] = $request['parent_exclude'];
+		$args['s']                   = $request['search'];
 
 		$args['date_query'] = array();
 		// Set before into date query. Date query must be specified as an array of an array.
@@ -348,10 +348,10 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		 * @param array           $args    Key value array of query var to query value.
 		 * @param WP_REST_Request $request The request used.
 		 */
-		$args = apply_filters( "woocommerce_rest_{$this->post_type}_query", $args, $request );
+		$args       = apply_filters( "woocommerce_rest_{$this->post_type}_query", $args, $request );
 		$query_args = $this->prepare_items_query( $args, $request );
 
-		$posts_query = new WP_Query();
+		$posts_query  = new WP_Query();
 		$query_result = $posts_query->query( $query_args );
 
 		$posts = array();
@@ -360,11 +360,11 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 				continue;
 			}
 
-			$data = $this->prepare_item_for_response( $post, $request );
+			$data    = $this->prepare_item_for_response( $post, $request );
 			$posts[] = $this->prepare_response_for_collection( $data );
 		}
 
-		$page = (int) $query_args['paged'];
+		$page        = (int) $query_args['paged'];
 		$total_posts = $posts_query->found_posts;
 
 		if ( $total_posts < 1 ) {
@@ -488,7 +488,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 */
 	protected function prepare_links( $post, $request ) {
 		$links = array(
-			'self' => array(
+			'self'       => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $post->ID ) ),
 			),
 			'collection' => array(
@@ -569,7 +569,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			 * @param array $private_query_vars Array of allowed query vars for authorized users.
 			 * }
 			 */
-			$private = apply_filters( 'woocommerce_rest_private_query_vars', $wp->private_query_vars );
+			$private    = apply_filters( 'woocommerce_rest_private_query_vars', $wp->private_query_vars );
 			$valid_vars = array_merge( $valid_vars, $private );
 		}
 		// Define our own in addition to WP's normal vars.
@@ -620,23 +620,23 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 
 		$params['context']['default'] = 'view';
 
-		$params['after'] = array(
-			'description'        => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
-			'type'               => 'string',
-			'format'             => 'date-time',
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['after']   = array(
+			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['before'] = array(
-			'description'        => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
-			'type'               => 'string',
-			'format'             => 'date-time',
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['before']  = array(
+			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['exclude'] = array(
 			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
-				'type'          => 'integer',
+				'type' => 'integer',
 			),
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -645,29 +645,29 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			'description'       => __( 'Limit result set to specific ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
-				'type'          => 'integer',
+				'type' => 'integer',
 			),
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['offset'] = array(
-			'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
-			'type'               => 'integer',
-			'sanitize_callback'  => 'absint',
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['offset']  = array(
+			'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
+			'type'              => 'integer',
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order'] = array(
-			'description'        => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
-			'type'               => 'string',
-			'default'            => 'desc',
-			'enum'               => array( 'asc', 'desc' ),
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['order']   = array(
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
+			'type'              => 'string',
+			'default'           => 'desc',
+			'enum'              => array( 'asc', 'desc' ),
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orderby'] = array(
-			'description'        => __( 'Sort collection by object attribute.', 'woocommerce' ),
-			'type'               => 'string',
-			'default'            => 'date',
-			'enum'               => array(
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
+			'type'              => 'string',
+			'default'           => 'date',
+			'enum'              => array(
 				'date',
 				'id',
 				'include',
@@ -675,17 +675,17 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 				'slug',
 				'modified',
 			),
-			'validate_callback'  => 'rest_validate_request_arg',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$post_type_obj = get_post_type_object( $this->post_type );
 
 		if ( isset( $post_type_obj->hierarchical ) && $post_type_obj->hierarchical ) {
-			$params['parent'] = array(
+			$params['parent']         = array(
 				'description'       => __( 'Limit result set to those of particular parent IDs.', 'woocommerce' ),
 				'type'              => 'array',
 				'items'             => array(
-					'type'          => 'integer',
+					'type' => 'integer',
 				),
 				'sanitize_callback' => 'wp_parse_id_list',
 				'default'           => array(),
@@ -694,7 +694,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 				'description'       => __( 'Limit result set to all items except those of a particular parent ID.', 'woocommerce' ),
 				'type'              => 'array',
 				'items'             => array(
-					'type'          => 'integer',
+					'type' => 'integer',
 				),
 				'sanitize_callback' => 'wp_parse_id_list',
 				'default'           => array(),

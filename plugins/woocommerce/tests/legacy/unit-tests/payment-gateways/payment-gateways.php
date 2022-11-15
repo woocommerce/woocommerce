@@ -13,7 +13,7 @@ class WC_Tests_Payment_Gateway extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		WC()->session = null;
+		WC()->session        = null;
 		$wc_payment_gateways = WC_Payment_Gateways::instance();
 		$wc_payment_gateways->init();
 		foreach ( $wc_payment_gateways->payment_gateways() as $name => $gateway ) {
@@ -38,7 +38,7 @@ class WC_Tests_Payment_Gateway extends WC_Unit_Test_Case {
 		WC()->initialize_session();
 		wp_set_current_user( 1 );
 
-		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
+		$gateways                 = WC()->payment_gateways()->get_available_payment_gateways();
 		$gateways['bacs']->chosen = false;
 		WC()->session->set( 'chosen_payment_method', 'bacs' );
 		WC()->payment_gateways()->set_current_gateway( $gateways );
@@ -49,8 +49,8 @@ class WC_Tests_Payment_Gateway extends WC_Unit_Test_Case {
 	 * Test that we can set a current gateway without session.
 	 */
 	public function test_wc_set_current_gateway_without_session() {
-		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
-		$current_gateway = current( $gateways );
+		$gateways                = WC()->payment_gateways()->get_available_payment_gateways();
+		$current_gateway         = current( $gateways );
 		$current_gateway->chosen = false;
 		WC()->payment_gateways()->set_current_gateway( $gateways );
 		$this->assertTrue( $current_gateway->chosen );

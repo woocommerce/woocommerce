@@ -142,6 +142,11 @@ class Events {
 	 * Note: Order_Milestones::possibly_add_note is hooked to this as well.
 	 */
 	public function do_wc_admin_daily() {
+		$logger  = wc_get_logger();
+		$context = array( 'source' => 'mal' );
+		$log     = 'Hit do_wc_admin_daily!';
+		$logger->info( $log, $context );
+
 		$this->possibly_add_notes();
 		$this->possibly_delete_notes();
 		$this->possibly_update_notes();

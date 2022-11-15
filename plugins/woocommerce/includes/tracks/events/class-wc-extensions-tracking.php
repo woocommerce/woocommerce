@@ -34,7 +34,7 @@ class WC_Extensions_Tracking {
 			'section' => empty( $_REQUEST['section'] ) ? '_featured' : wc_clean( wp_unslash( $_REQUEST['section'] ) ),
 		);
 
-		$event      = 'extensions_view';
+		$event = 'extensions_view';
 		if ( 'helper' === $properties['section'] ) {
 			$event = 'subscriptions_view';
 		}

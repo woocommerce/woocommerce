@@ -338,7 +338,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			),
 
 		);
-		$params['extended_info'] = array(
+		$params['extended_info']       = array(
 			'description'       => __( 'Add additional piece of info about each product to the report.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'default'           => false,

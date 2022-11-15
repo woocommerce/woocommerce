@@ -351,9 +351,9 @@ function wc_format_localized_price( $value ) {
  * @return string
  */
 function wc_format_localized_decimal( $value ) {
-	$locale = localeconv();
+	$locale        = localeconv();
 	$decimal_point = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
-	$decimal = ( ! empty( wc_get_price_decimal_separator() ) ) ? wc_get_price_decimal_separator() : $decimal_point;
+	$decimal       = ( ! empty( wc_get_price_decimal_separator() ) ) ? wc_get_price_decimal_separator() : $decimal_point;
 	return apply_filters( 'woocommerce_format_localized_decimal', str_replace( '.', $decimal, strval( $value ) ), $value );
 }
 

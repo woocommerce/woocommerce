@@ -117,8 +117,8 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		}
 		$expected_data = array(
 			'environment' => array(
-				'version' => WC()->version
-			)
+				'version' => WC()->version,
+			),
 		);
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/system_status' );

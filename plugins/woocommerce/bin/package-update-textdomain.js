@@ -1,11 +1,13 @@
 const wpTextdomain = require( 'wp-textdomain' );
 
-wpTextdomain( 'packages/**/*.php', {
-	domain: 'woocommerce',
-	fix: true,
-	missingDomain: true,
-	variableDomain: true,
-	keywords: [
+wpTextdomain(
+	'packages/**/*.php',
+	{
+		domain: 'woocommerce',
+		fix: true,
+		missingDomain: true,
+		variableDomain: true,
+		keywords: [
 		'__:1,2d',
 		'_e:1,2d',
 		'_x:1,2c,3d',
@@ -21,5 +23,6 @@ wpTextdomain( 'packages/**/*.php', {
 		'_n_noop:1,2,3d',
 		'_nx_noop:1,2,3c,4d',
 		'wp_set_script_translations:1,2d,3'
-	],
-} );
+		],
+	}
+);

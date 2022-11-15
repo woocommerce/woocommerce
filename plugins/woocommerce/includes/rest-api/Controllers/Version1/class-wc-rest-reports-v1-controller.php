@@ -40,15 +40,19 @@ class WC_REST_Reports_V1_Controller extends WC_REST_Controller {
 	 * Register the routes for reports.
 	 */
 	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base,
 			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-				'args'                => $this->get_collection_params(),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -105,7 +109,7 @@ class WC_REST_Reports_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a report object for serialization.
 	 *
-	 * @param stdClass $report Report data.
+	 * @param stdClass        $report Report data.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
@@ -116,19 +120,21 @@ class WC_REST_Reports_V1_Controller extends WC_REST_Controller {
 		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data = $this->add_additional_fields_to_object( $data, $request );
-		$data = $this->filter_response_by_context( $data, $context );
+		$data    = $this->add_additional_fields_to_object( $data, $request );
+		$data    = $this->filter_response_by_context( $data, $context );
 
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
-		$response->add_links( array(
-			'self' => array(
-				'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $this->rest_base, $report->slug ) ),
-			),
-			'collection' => array(
-				'href' => rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ),
-			),
-		) );
+		$response->add_links(
+			array(
+				'self'       => array(
+					'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $this->rest_base, $report->slug ) ),
+				),
+				'collection' => array(
+					'href' => rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ),
+				),
+			)
+		);
 
 		/**
 		 * Filter a report returned from the API.
@@ -153,7 +159,7 @@ class WC_REST_Reports_V1_Controller extends WC_REST_Controller {
 			'title'      => 'report',
 			'type'       => 'object',
 			'properties' => array(
-				'slug' => array(
+				'slug'        => array(
 					'description' => __( 'An alphanumeric identifier for the resource.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),

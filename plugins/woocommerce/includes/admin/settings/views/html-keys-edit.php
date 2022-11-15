@@ -36,9 +36,9 @@ defined( 'ABSPATH' ) || exit;
 				<td class="forminp">
 					<?php
 					$current_user_id = get_current_user_id();
-					$user_id        = ! empty( $key_data['user_id'] ) ? absint( $key_data['user_id'] ) : $current_user_id;
-					$user           = get_user_by( 'id', $user_id );
-					$user_string    = sprintf(
+					$user_id         = ! empty( $key_data['user_id'] ) ? absint( $key_data['user_id'] ) : $current_user_id;
+					$user            = get_user_by( 'id', $user_id );
+					$user_string     = sprintf(
 						/* translators: 1: user display name 2: user ID 3: user email */
 						esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
 						$user->display_name,

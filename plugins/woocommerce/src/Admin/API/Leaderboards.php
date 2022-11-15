@@ -70,7 +70,7 @@ class Leaderboards extends \WC_REST_Data_Controller {
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<leaderboard>\w+)',
 			array(
-				'args' => array(
+				'args'   => array(
 					'leaderboard' => array(
 						'type' => 'string',
 						'enum' => array( 'customers', 'coupons', 'categories', 'products' ),

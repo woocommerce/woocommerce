@@ -113,8 +113,8 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_addition_of_invalid_product_downloads_by_shop_manager() {
 		wp_set_current_user( $this->shop_manager_user );
-		$downloads        = $this->product->get_downloads();
-		$downloads[]      = array(
+		$downloads   = $this->product->get_downloads();
+		$downloads[] = array(
 			'id'   => '',
 			'file' => 'https://also.not.yet.added/file.pdf',
 			'name' => 'Another file',

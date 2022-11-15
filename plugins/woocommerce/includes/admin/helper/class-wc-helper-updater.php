@@ -77,7 +77,7 @@ class WC_Helper_Updater {
 			}
 		}
 
-		$translations = self::get_translations_update_data();
+		$translations            = self::get_translations_update_data();
 		$transient->translations = array_merge( isset( $transient->translations ) ? $transient->translations : array(), $translations );
 
 		return $transient;
@@ -232,8 +232,8 @@ class WC_Helper_Updater {
 		}
 
 		// Scan local plugins which may or may not have a subscription.
-		$plugins                 = WC_Helper::get_local_woo_plugins();
-		$active_woo_plugins      = array_intersect( array_keys( $plugins ), get_option( 'active_plugins', array() ) );
+		$plugins            = WC_Helper::get_local_woo_plugins();
+		$active_woo_plugins = array_intersect( array_keys( $plugins ), get_option( 'active_plugins', array() ) );
 
 		/*
 		* Use only plugins that are subscribed to the automatic translations updates.
@@ -263,16 +263,16 @@ class WC_Helper_Updater {
 		);
 
 		foreach ( $active_for_translations as $active_plugin ) {
-			$plugin = $plugins[ $active_plugin ];
+			$plugin                                     = $plugins[ $active_plugin ];
 			$request_body['plugins'][ $plugin['slug'] ] = array( 'version' => $plugin['Version'] );
 		}
 
 		$raw_response = wp_remote_post(
 			'https://translate.wordpress.com/api/translations-updates/woocommerce',
 			array(
-				'body'        => json_encode( $request_body ),
-				'headers'     => array( 'Content-Type: application/json' ),
-				'timeout'     => $timeout,
+				'body'    => json_encode( $request_body ),
+				'headers' => array( 'Content-Type: application/json' ),
+				'timeout' => $timeout,
 			)
 		);
 

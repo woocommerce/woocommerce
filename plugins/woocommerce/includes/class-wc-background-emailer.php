@@ -121,10 +121,12 @@ class WC_Background_Emailer extends WC_Background_Process {
 			if ( 'PHPSESSID' === $name ) {
 				continue;
 			}
-			$cookies[] = new WP_Http_Cookie( array(
-				'name'  => $name,
-				'value' => $value,
-			) );
+			$cookies[] = new WP_Http_Cookie(
+				array(
+					'name'  => $name,
+					'value' => $value,
+				)
+			);
 		}
 
 		return array(

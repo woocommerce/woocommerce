@@ -177,7 +177,7 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 		// An 'update required' notice should be created.
 		$this->assertEquals( 1, count( $note_ids ), 'A db update note should be created if db is NOT up to date.' );
 
-		$note = new Note( $note_ids[0] );
+		$note    = new Note( $note_ids[0] );
 		$actions = $note->get_actions();
 		$this->assertEquals( 'update-db_run', $actions[0]->name, 'A db update note to update the database should be displayed now.' );
 
@@ -187,7 +187,7 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 		// Magic 2: update-db note to thank you note.
 		WC_Notes_Run_Db_Update::show_reminder();
 
-		$note = new Note( $note_ids[0] );
+		$note    = new Note( $note_ids[0] );
 		$actions = $note->get_actions();
 		$this->assertEquals( 'update-db_done', $actions[0]->name, 'A db update note--Thanks for the update--should be displayed now.' );
 	}

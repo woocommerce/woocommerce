@@ -135,7 +135,7 @@ class ReviewsListTable extends WP_List_Table {
 	protected function set_review_product() : void {
 
 		$product_id = isset( $_REQUEST['product_id'] ) ? absint( $_REQUEST['product_id'] ) : null;
-		$product = $product_id ? wc_get_product( $product_id ) : null;
+		$product    = $product_id ? wc_get_product( $product_id ) : null;
 
 		if ( $product instanceof WC_Product ) {
 			$this->current_product_for_reviews = $product;
@@ -1014,7 +1014,7 @@ class ReviewsListTable extends WP_List_Table {
 	protected function column_author( $item ) : void {
 		global $comment_status;
 
-		$author_url = $this->get_item_author_url();
+		$author_url         = $this->get_item_author_url();
 		$author_url_display = $this->get_item_author_url_for_display( $author_url );
 
 		if ( get_option( 'show_avatars' ) ) {
@@ -1078,7 +1078,7 @@ class ReviewsListTable extends WP_List_Table {
 	private function get_item_author_url() : string {
 
 		$author_url = get_comment_author_url();
-		$protocols = [ 'https://', 'http://' ];
+		$protocols  = [ 'https://', 'http://' ];
 
 		if ( in_array( $author_url, $protocols ) ) {
 			$author_url = '';
@@ -1226,7 +1226,7 @@ class ReviewsListTable extends WP_List_Table {
 				$rating
 			);
 
-			$stars = str_repeat( '&#9733;', $rating );
+			$stars  = str_repeat( '&#9733;', $rating );
 			$stars .= str_repeat( '&#9734;', 5 - $rating );
 
 			?>

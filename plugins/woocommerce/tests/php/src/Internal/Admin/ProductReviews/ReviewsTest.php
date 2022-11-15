@@ -85,7 +85,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 
 		$this->assertNull( $list_table_property->getValue( $reviews ) );
 
-		$method  = ( new ReflectionClass( $reviews ) )->getMethod( 'load_reviews_screen' );
+		$method = ( new ReflectionClass( $reviews ) )->getMethod( 'load_reviews_screen' );
 		$method->setAccessible( true );
 		$method->invoke( $reviews );
 
@@ -131,8 +131,8 @@ class ReviewsTest extends WC_Unit_Test_Case {
 			$this->factory()->comment->create_many(
 				$number_pending,
 				[
-					'comment_type' => 'review',
-					'comment_post_ID' => $product_id,
+					'comment_type'     => 'review',
+					'comment_post_ID'  => $product_id,
 					'comment_approved' => '0',
 				]
 			);
@@ -141,8 +141,8 @@ class ReviewsTest extends WC_Unit_Test_Case {
 			$this->factory()->comment->create_many(
 				2,
 				[
-					'comment_type' => 'review',
-					'comment_post_ID' => $product_id,
+					'comment_type'     => 'review',
+					'comment_post_ID'  => $product_id,
 					'comment_approved' => '1',
 				]
 			);
@@ -178,11 +178,11 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	public function test_edit_review_parent_file() : void {
 		global $submenu_file, $current_screen;
 
-		$product = $this->factory()->post->create( [ 'post_type' => 'product' ] );
-		$review = $this->factory()->comment->create( [ 'comment_post_ID' => $product ] );
+		$product        = $this->factory()->post->create( [ 'post_type' => 'product' ] );
+		$review         = $this->factory()->comment->create( [ 'comment_post_ID' => $product ] );
 		$current_screen = (object) [ 'id' => 'comment' ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$_GET['c'] = $review;
-		$reviews = wc_get_container()->get( Reviews::class );
+		$_GET['c']      = $review;
+		$reviews        = wc_get_container()->get( Reviews::class );
 
 		$method = ( new ReflectionClass( $reviews ) )->getMethod( 'edit_review_parent_file' );
 		$method->setAccessible( true );
@@ -254,7 +254,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	public function test_render_reviews_list_table() : void {
 		$GLOBALS['hook_suffix'] = 'product_page_product-reviews'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		$reviews = wc_get_container()->get( Reviews::class );
+		$reviews    = wc_get_container()->get( Reviews::class );
 		$list_table = new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
 
 		$property = ( new ReflectionClass( $reviews ) )->getProperty( 'reviews_list_table' );
@@ -598,17 +598,17 @@ test2</p></div>',
 
 		$regular_comment = $this->factory()->comment->create_and_get(
 			[
-				'comment_post_ID'  => $this->factory()->post->create(),
+				'comment_post_ID' => $this->factory()->post->create(),
 			]
 		);
 		$this->assertFalse( $method->invoke( $reviews, $regular_comment ) );
 
 		$review = $this->factory()->comment->create_and_get(
 			[
-				'comment_type'     => 'review',
-				'comment_post_ID'  => $this->factory()->post->create(
+				'comment_type'    => 'review',
+				'comment_post_ID' => $this->factory()->post->create(
 					[
-						'post_type'  => 'product',
+						'post_type' => 'product',
 					]
 				),
 			]
@@ -617,10 +617,10 @@ test2</p></div>',
 
 		$review_reply = $this->factory()->comment->create_and_get(
 			[
-				'comment_type'     => 'comment',
-				'comment_post_ID'  => $this->factory()->post->create(
+				'comment_type'    => 'comment',
+				'comment_post_ID' => $this->factory()->post->create(
 					[
-						'post_type'  => 'product',
+						'post_type' => 'product',
 					]
 				),
 			]

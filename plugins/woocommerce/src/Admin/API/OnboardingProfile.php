@@ -399,7 +399,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 						'google-listings-and-ads',
 						'mailpoet',
 						'tiktok-for-business',
-						'tiktok-for-business:alt'
+						'tiktok-for-business:alt',
 					),
 					'type' => 'string',
 				),

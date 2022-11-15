@@ -59,7 +59,7 @@ class WC_Meta_Box_Order_Downloads {
 						}
 
 						// Show file title instead of count if set.
-						$file       = $product->get_file( $download->get_download_id() );
+						$file = $product->get_file( $download->get_download_id() );
 						// translators: file name.
 						$file_count = isset( $file['name'] ) ? $file['name'] : sprintf( __( 'File %d', 'woocommerce' ), $file_counter );
 

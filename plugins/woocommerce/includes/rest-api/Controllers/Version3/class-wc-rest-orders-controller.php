@@ -244,7 +244,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		$cpt_hidden_keys = array();
 
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$cpt_hidden_keys = (new \WC_Order_Data_Store_CPT())->get_internal_meta_keys();
+			$cpt_hidden_keys = ( new \WC_Order_Data_Store_CPT() )->get_internal_meta_keys();
 		}
 
 		// XXX: This might be removed once we finalize the design for internal keys vs meta vs props in COT.

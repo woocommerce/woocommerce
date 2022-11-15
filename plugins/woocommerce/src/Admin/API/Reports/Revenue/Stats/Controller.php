@@ -354,9 +354,9 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params              = array();
-		$params['context']   = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['page']      = array(
+		$params                        = array();
+		$params['context']             = $this->get_context_param( array( 'default' => 'view' ) );
+		$params['page']                = array(
 			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 1,
@@ -364,7 +364,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'validate_callback' => 'rest_validate_request_arg',
 			'minimum'           => 1,
 		);
-		$params['per_page']  = array(
+		$params['per_page']            = array(
 			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 10,
@@ -373,26 +373,26 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['after']     = array(
+		$params['after']               = array(
 			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['before']    = array(
+		$params['before']              = array(
 			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order']     = array(
+		$params['order']               = array(
 			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orderby']   = array(
+		$params['orderby']             = array(
 			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'date',
@@ -410,7 +410,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['interval']  = array(
+		$params['interval']            = array(
 			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'week',
@@ -424,7 +424,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['segmentby'] = array(
+		$params['segmentby']           = array(
 			'description'       => __( 'Segment the response by additional constraint.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array(

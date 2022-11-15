@@ -173,7 +173,7 @@ trait NoteTraits {
 				self::update_note_field_if_changed( $note_in_db, $note, 'type' ),
 				self::update_note_field_if_changed( $note_in_db, $note, 'locale' ),
 				self::update_note_field_if_changed( $note_in_db, $note, 'source' ),
-				self::update_note_field_if_changed( $note_in_db, $note, 'actions' )
+				self::update_note_field_if_changed( $note_in_db, $note, 'actions' ),
 			),
 			true
 		);
@@ -205,7 +205,7 @@ trait NoteTraits {
 		return false;
 	}
 
-/**
+	/**
 	 * Update a note field of note1 if it's different from note2 with getter and setter.
 	 *
 	 * @param Note   $note1 Note to update.

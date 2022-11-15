@@ -53,7 +53,7 @@ class WC_REST_Tax_Classes_V2_Controller extends WC_REST_Tax_Classes_V1_Controlle
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<slug>\w[\w\s\-]*)',
 			array(
-				'args' => array(
+				'args'   => array(
 					'slug' => array(
 						'description' => __( 'Unique slug for the resource.', 'woocommerce' ),
 						'type'        => 'string',

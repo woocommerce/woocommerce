@@ -123,10 +123,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 									''  => __( '— No change —', 'woocommerce' ),
 									'1' => __( 'Change to:', 'woocommerce' ),
 								);
-							foreach ( $options as $key => $value ) {
-								echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $value ) . '</option>';
-							}
-							?>
+								foreach ( $options as $key => $value ) {
+									echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $value ) . '</option>';
+								}
+								?>
 						</select>
 					</span>
 				</label>

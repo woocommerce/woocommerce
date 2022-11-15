@@ -191,7 +191,7 @@ class URL {
 
 		// Protect against empty relative paths.
 		if ( count( $this->path_parts ) === 0 && ! $this->is_absolute ) {
-			$this->path_parts = array( '.' );
+			$this->path_parts            = array( '.' );
 			$this->is_non_root_directory = true;
 		}
 

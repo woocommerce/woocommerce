@@ -57,7 +57,7 @@ class Product_Variations_API_V2 extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_variations_with_orderby() {
 		wp_set_current_user( $this->user );
-		$product    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
 		$request = new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() . '/variations' );
 		$request->set_query_params( array( 'orderby' => 'menu_order' ) );
 		$response   = $this->server->dispatch( $request );
@@ -307,9 +307,9 @@ class Product_Variations_API_V2 extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
 		$product->save();
-		$variations = $product->get_available_variations( 'objects' );
+		$variations         = $product->get_available_variations( 'objects' );
 		$first_variation_id = $variations[0]->get_id();
-		$url = '/wc/v2/products/' . $product->get_id() . '/variations/' . $first_variation_id;
+		$url                = '/wc/v2/products/' . $product->get_id() . '/variations/' . $first_variation_id;
 		$this->assert_update_complex_meta( $url );
 	}
 

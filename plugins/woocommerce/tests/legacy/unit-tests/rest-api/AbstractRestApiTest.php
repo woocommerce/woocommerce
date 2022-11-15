@@ -38,14 +38,14 @@ abstract class AbstractRestApiTest extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var array Keys are property names, values are supported context.
 	 */
-	protected $properties = [];
+	protected $properties = array();
 
 	/**
 	 * Routes that this endpoint creates.
 	 *
 	 * @var array
 	 */
-	protected $routes = [];
+	protected $routes = array();
 
 	/**
 	 * User variable.
@@ -131,12 +131,12 @@ abstract class AbstractRestApiTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * Perform a request and return the status and returned data.
 	 *
-	 * @param string  $endpoint Endpoint to hit.
-	 * @param string  $type Type of request e.g GET or POST.
-	 * @param array   $params Request body or query.
+	 * @param string $endpoint Endpoint to hit.
+	 * @param string $type Type of request e.g GET or POST.
+	 * @param array  $params Request body or query.
 	 * @return object
 	 */
-	protected function do_request( $endpoint, $type = 'GET', $params = [] ) {
+	protected function do_request( $endpoint, $type = 'GET', $params = array() ) {
 		$request = new \WP_REST_Request( $type, untrailingslashit( $endpoint ) );
 		'GET' === $type ? $request->set_query_params( $params ) : $request->set_body_params( $params );
 		$response = $this->server->dispatch( $request );
@@ -206,8 +206,13 @@ abstract class AbstractRestApiTest extends WC_REST_Unit_Test_Case {
 	 * @return array
 	 */
 	protected function get_properties( $context = 'edit' ) {
-		return array_keys( array_filter( $this->properties, function( $contexts ) use( $context ) {
-			return in_array( $context, $contexts );
-		} ) );
+		return array_keys(
+			array_filter(
+				$this->properties,
+				function( $contexts ) use ( $context ) {
+					return in_array( $context, $contexts );
+				}
+			)
+		);
 	}
 }

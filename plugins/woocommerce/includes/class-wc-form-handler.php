@@ -891,7 +891,7 @@ class WC_Form_Handler {
 		$quantity     = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) );  // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$variations   = array();
 
-		$product      = wc_get_product( $product_id );
+		$product = wc_get_product( $product_id );
 
 		foreach ( $_REQUEST as $key => $value ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( 'attribute_' !== substr( $key, 0, 10 ) ) {

@@ -59,7 +59,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_variations_with_orderby() {
 		wp_set_current_user( $this->user );
-		$product    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations' );
 		$request->set_query_params( array( 'orderby' => 'menu_order' ) );
 		$response   = $this->server->dispatch( $request );

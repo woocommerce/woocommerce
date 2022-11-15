@@ -51,12 +51,15 @@ class WC_REST_Report_Coupons_Totals_Controller extends WC_REST_Reports_Controlle
 
 		foreach ( $types as $slug => $name ) {
 			$results = $wpdb->get_results(
-				$wpdb->prepare( "
+				$wpdb->prepare(
+					"
 					SELECT count(meta_id) AS total
 					FROM $wpdb->postmeta
 					WHERE meta_key = 'discount_type'
 					AND meta_value = %s
-				", $slug )
+				",
+					$slug
+				)
 			);
 
 			$total = isset( $results[0] ) ? (int) $results[0]->total : 0;

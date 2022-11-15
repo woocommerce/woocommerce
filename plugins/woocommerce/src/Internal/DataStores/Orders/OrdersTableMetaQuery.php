@@ -158,8 +158,8 @@ class OrdersTableMetaQuery {
 					unset( $arg['value'] );
 				}
 
-				$arg['compare']      = isset( $arg['compare'] ) ? strtoupper( $arg['compare'] ) : ( isset( $arg['value'] ) && is_array( $arg['value'] ) ? 'IN' : '=' );
-				$arg['compare_key']  = isset( $arg['compare_key'] ) ? strtoupper( $arg['compare_key'] ) : ( isset( $arg['key'] ) && is_array( $arg['key'] ) ? 'IN' : '=' );
+				$arg['compare']     = isset( $arg['compare'] ) ? strtoupper( $arg['compare'] ) : ( isset( $arg['value'] ) && is_array( $arg['value'] ) ? 'IN' : '=' );
+				$arg['compare_key'] = isset( $arg['compare_key'] ) ? strtoupper( $arg['compare_key'] ) : ( isset( $arg['key'] ) && is_array( $arg['key'] ) ? 'IN' : '=' );
 
 				if ( ! in_array( $arg['compare'], self::NON_NUMERIC_OPERATORS, true ) && ! in_array( $arg['compare'], self::NUMERIC_OPERATORS, true ) ) {
 					$arg['compare'] = '=';

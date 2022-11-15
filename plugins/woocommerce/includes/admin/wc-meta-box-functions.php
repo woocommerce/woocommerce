@@ -194,7 +194,8 @@ function woocommerce_wp_select( $field, WC_Data $data = null ) {
 	global $post;
 
 	$field = wp_parse_args(
-		$field, array(
+		$field,
+		array(
 			'class'             => 'select short',
 			'style'             => '',
 			'wrapper_class'     => '',

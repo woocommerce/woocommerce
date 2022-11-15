@@ -51,27 +51,29 @@ class WC_REST_Report_Top_Sellers_V1_Controller extends WC_REST_Report_Sales_V1_C
 		);
 		$this->setup_report( $filter );
 
-		$report_data = $this->report->get_order_report_data( array(
-			'data' => array(
-				'_product_id' => array(
-					'type'            => 'order_item_meta',
-					'order_item_type' => 'line_item',
-					'function'        => '',
-					'name'            => 'product_id',
+		$report_data = $this->report->get_order_report_data(
+			array(
+				'data'         => array(
+					'_product_id' => array(
+						'type'            => 'order_item_meta',
+						'order_item_type' => 'line_item',
+						'function'        => '',
+						'name'            => 'product_id',
+					),
+					'_qty'        => array(
+						'type'            => 'order_item_meta',
+						'order_item_type' => 'line_item',
+						'function'        => 'SUM',
+						'name'            => 'order_item_qty',
+					),
 				),
-				'_qty' => array(
-					'type'            => 'order_item_meta',
-					'order_item_type' => 'line_item',
-					'function'        => 'SUM',
-					'name'            => 'order_item_qty',
-				),
-			),
-			'order_by'     => 'order_item_qty DESC',
-			'group_by'     => 'product_id',
-			'limit'        => isset( $filter['limit'] ) ? absint( $filter['limit'] ) : 12,
-			'query_type'   => 'get_results',
-			'filter_range' => true,
-		) );
+				'order_by'     => 'order_item_qty DESC',
+				'group_by'     => 'product_id',
+				'limit'        => isset( $filter['limit'] ) ? absint( $filter['limit'] ) : 12,
+				'query_type'   => 'get_results',
+				'filter_range' => true,
+			)
+		);
 
 		$top_sellers = array();
 
@@ -80,7 +82,7 @@ class WC_REST_Report_Top_Sellers_V1_Controller extends WC_REST_Report_Sales_V1_C
 
 			if ( $product ) {
 				$top_sellers[] = array(
-					'name'      => $product->get_name(),
+					'name'       => $product->get_name(),
 					'product_id' => (int) $item->product_id,
 					'quantity'   => wc_stock_amount( $item->order_item_qty ),
 				);
@@ -99,7 +101,7 @@ class WC_REST_Report_Top_Sellers_V1_Controller extends WC_REST_Report_Sales_V1_C
 	/**
 	 * Prepare a report sales object for serialization.
 	 *
-	 * @param stdClass $top_seller
+	 * @param stdClass        $top_seller
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
@@ -116,14 +118,16 @@ class WC_REST_Report_Top_Sellers_V1_Controller extends WC_REST_Report_Sales_V1_C
 
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
-		$response->add_links( array(
-			'about' => array(
-				'href' => rest_url( sprintf( '%s/reports', $this->namespace ) ),
-			),
-			'product' => array(
-				'href' => rest_url( sprintf( '/%s/products/%s', $this->namespace, $top_seller->product_id ) ),
-			),
-		) );
+		$response->add_links(
+			array(
+				'about'   => array(
+					'href' => rest_url( sprintf( '%s/reports', $this->namespace ) ),
+				),
+				'product' => array(
+					'href' => rest_url( sprintf( '/%s/products/%s', $this->namespace, $top_seller->product_id ) ),
+				),
+			)
+		);
 
 		/**
 		 * Filter a report top sellers returned from the API.
@@ -148,7 +152,7 @@ class WC_REST_Report_Top_Sellers_V1_Controller extends WC_REST_Report_Sales_V1_C
 			'title'      => 'top_sellers_report',
 			'type'       => 'object',
 			'properties' => array(
-				'name' => array(
+				'name'       => array(
 					'description' => __( 'Product name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
@@ -160,7 +164,7 @@ class WC_REST_Report_Top_Sellers_V1_Controller extends WC_REST_Report_Sales_V1_C
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'quantity' => array(
+				'quantity'   => array(
 					'description' => __( 'Total number of purchases.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view' ),
