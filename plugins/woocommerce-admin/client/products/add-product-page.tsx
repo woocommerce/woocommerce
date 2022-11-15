@@ -9,8 +9,8 @@ import { Product } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
+import { ProductFormHeader } from './layout/product-form-header';
 import { ProductFormLayout } from './layout/product-form-layout';
-import { ProductFormActions } from './product-form-actions';
 import { ProductDetailsSection } from './sections/product-details-section';
 import { ProductInventorySection } from './sections/product-inventory-section';
 import { PricingSection } from './sections/pricing-section';
@@ -37,6 +37,7 @@ const AddProductPage: React.FC = () => {
 				errors={ {} }
 				validate={ validate }
 			>
+				<ProductFormHeader />
 				<ProductFormLayout>
 					<ProductDetailsSection />
 					<PricingSection />
@@ -44,7 +45,6 @@ const AddProductPage: React.FC = () => {
 					<ProductInventorySection />
 					<ProductShippingSection />
 					<AttributesSection />
-					<ProductFormActions />
 				</ProductFormLayout>
 			</Form>
 		</div>
