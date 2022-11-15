@@ -7,12 +7,12 @@ import { PartialProduct } from '@woocommerce/data';
 /**
  * Labels for product statuses.
  */
-export const PRODUCT_STATUS_KEYS = {
-	unsaved: 'unsaved',
-	draft: 'draft',
-	instock: 'instock',
-	outofstock: 'outofstock',
-};
+export enum PRODUCT_STATUS_KEYS {
+	unsaved = 'unsaved',
+	draft = 'draft',
+	instock = 'instock',
+	outofstock = 'outofstock',
+}
 
 /**
  * Labels for product statuses.
