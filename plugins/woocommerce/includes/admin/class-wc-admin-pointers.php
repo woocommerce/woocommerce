@@ -39,6 +39,9 @@ class WC_Admin_Pointers {
 			case 'product':
 				$this->create_product_tutorial();
 				break;
+			case 'woocommerce_page_wc-addons':
+				$this->create_wc_addons_tutorial();
+				break;
 		}
 	}
 
@@ -59,6 +62,21 @@ class WC_Admin_Pointers {
 		$labels          = $wp_post_types['product']->labels;
 		$labels->add_new = __( 'Enable guided mode', 'woocommerce' );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'product-tour', true );
+	}
+
+	/**
+	 * Pointers for accessing In-App Marketplace.
+	 */
+	public function create_wc_addons_tutorial() {
+		if ( ! isset( $_GET['tutorial'] ) || ! current_user_can( 'manage_options' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+
+		if ( wp_is_mobile() ) {
+			return; // Permit In-App Marketplace Tour on desktops only.
+		}
+
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'wc-addons-tour', true );
 	}
 }
 
