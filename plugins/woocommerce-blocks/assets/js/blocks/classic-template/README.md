@@ -18,7 +18,7 @@ This block does not have any customizable options available, so any style or cus
 ### Props
 
 -   `attributes`
-    -   `template`: `single-product` | `archive-product` | `taxonomy-product_cat` | `taxonomy-product_tag`
+    -   `template`: `single-product` | `archive-product` | `taxonomy-product_cat` | `taxonomy-product_tag` | `taxonomy-product_attribute`
     -   `align`: `wide` | `full`
 
 ```html

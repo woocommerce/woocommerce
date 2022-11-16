@@ -93,6 +93,14 @@ const BLOCK_DATA = {
 		},
 		name: 'woocommerce/legacy-template',
 	},
+	'taxonomy-product_attribute': {
+		attributes: {
+			placeholder: 'archive-product',
+			template: 'taxonomy-product_attribute',
+			title: 'WooCommerce Product Attribute Block',
+		},
+		name: 'woocommerce/legacy-template',
+	},
 	'product-search-results': {
 		attributes: {
 			title: 'WooCommerce Product Search Results Block',
@@ -508,6 +516,100 @@ describe( 'Store Editing Templates', () => {
 
 		it( 'should show the user customization on the front-end', async () => {
 			await page.goto( new URL( '/product-tag/newest', BASE_URL ) );
+
+			await expect( page ).toMatchElement( 'p', {
+				text: CUSTOMIZED_STRING,
+				timeout: DEFAULT_TIMEOUT,
+			} );
+		} );
+	} );
+
+	describe( 'Products by Attribute template', () => {
+		it( 'default template from WooCommerce Blocks is available on an FSE theme', async () => {
+			const EXPECTED_TEMPLATE = defaultTemplateProps(
+				'Products by Attribute'
+			);
+
+			await goToTemplatesList();
+
+			const templates = await getAllTemplates();
+
+			try {
+				expect( templates ).toContainEqual( EXPECTED_TEMPLATE );
+			} catch ( ok ) {
+				// Depending on the speed of the execution and whether Chrome is headless or not
+				// the id might be parsed or not
+
+				expect( templates ).toContainEqual( {
+					...EXPECTED_TEMPLATE,
+					addedBy: WOOCOMMERCE_PARSED_ID,
+				} );
+			}
+		} );
+
+		runOnlyWhenGutenbergIsDisabled( () =>
+			it( 'should contain the "WooCommerce Product Taxonomy Block" classic template', async () => {
+				await goToTemplateEditor( {
+					postId: 'woocommerce/woocommerce//taxonomy-product_attribute',
+				} );
+
+				const [ classicBlock ] = await filterCurrentBlocks(
+					( block ) =>
+						block.name ===
+						BLOCK_DATA[ 'taxonomy-product_attribute' ].name
+				);
+
+				expect( classicBlock.attributes.template ).toBe(
+					BLOCK_DATA[ 'taxonomy-product_attribute' ].attributes
+						.template
+				);
+				expect( await getCurrentSiteEditorContent() ).toMatchSnapshot();
+			} )
+		);
+
+		it( 'should show the action menu if the template has been customized by the user', async () => {
+			const EXPECTED_TEMPLATE = {
+				...defaultTemplateProps( 'Products by Attribute' ),
+				hasActions: true,
+			};
+
+			await visitTemplateAndAddCustomParagraph(
+				'taxonomy-product_attribute'
+			);
+
+			await goToTemplatesList( { waitFor: 'actions' } );
+
+			const templates = await getAllTemplates();
+
+			try {
+				expect( templates ).toContainEqual( EXPECTED_TEMPLATE );
+			} catch ( ok ) {
+				// Depending on the speed of the execution and whether Chrome is headless or not
+				// the id might be parsed or not
+
+				expect( templates ).toContainEqual( {
+					...EXPECTED_TEMPLATE,
+					addedBy: WOOCOMMERCE_PARSED_ID,
+				} );
+			}
+		} );
+
+		it( 'should preserve and correctly show the user customization on the back-end', async () => {
+			await goToTemplateEditor( {
+				postId: 'woocommerce/woocommerce//taxonomy-product_attribute',
+			} );
+
+			await expect( canvas() ).toMatchElement(
+				SELECTORS.blocks.paragraph,
+				{
+					text: CUSTOMIZED_STRING,
+					timeout: DEFAULT_TIMEOUT,
+				}
+			);
+		} );
+
+		it( 'should show the user customization on the front-end', async () => {
+			await page.goto( new URL( '/shade/red', BASE_URL ) );
 
 			await expect( page ).toMatchElement( 'p', {
 				text: CUSTOMIZED_STRING,
