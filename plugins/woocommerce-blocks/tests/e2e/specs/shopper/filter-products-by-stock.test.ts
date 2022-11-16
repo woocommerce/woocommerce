@@ -8,7 +8,10 @@ import {
 	switchUserToAdmin,
 	publishPost,
 } from '@wordpress/e2e-test-utils';
-import { selectBlockByName } from '@woocommerce/blocks-test-utils';
+import {
+	selectBlockByName,
+	insertBlockUsingSlash,
+} from '@woocommerce/blocks-test-utils';
 
 /**
  * Internal dependencies
@@ -61,7 +64,7 @@ describe( `${ block.name } Block`, () => {
 			} );
 
 			await insertBlock( block.name );
-			await insertBlock( 'All Products' );
+			await insertBlockUsingSlash( 'All Products' );
 			await publishPost();
 
 			link = await page.evaluate( () =>
@@ -160,7 +163,7 @@ describe( `${ block.name } Block`, () => {
 
 			await waitForCanvas();
 			await selectBlockByName( block.slug );
-			await openBlockEditorSettings( { isFSEEditor: true } );
+			await openBlockEditorSettings();
 			await page.waitForXPath(
 				block.selectors.editor.filterButtonToggle
 			);

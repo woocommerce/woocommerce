@@ -46,7 +46,7 @@ describe( 'Shopper → Checkout → Account', () => {
 		await selectBlockByName(
 			'woocommerce/checkout-contact-information-block'
 		);
-		await openBlockEditorSettings( { isFSEEditor: false } );
+		await openBlockEditorSettings();
 		//Enable shoppers to sign up at checkout option.
 		// eslint-disable-next-line jest/no-standalone-expect
 		await expect( page ).toClick( 'label', {

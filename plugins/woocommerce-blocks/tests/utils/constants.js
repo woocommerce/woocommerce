@@ -17,3 +17,4 @@ export const BILLING_DETAILS = config.get( 'addresses.customer.billing' );
 export const PERFORMANCE_REPORT_FILENAME = 'reports/e2e-performance.json';
 export const SHIPPING_DETAILS = config.get( 'addresses.customer.shipping' );
 export const BASE_URL = config.get( 'url' );
+export const DEFAULT_TIMEOUT = 30000;

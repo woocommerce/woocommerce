@@ -409,24 +409,20 @@ export const createCoupon = async ( coupon ) => {
 };
 
 /**
- * Open the block editor settings menu.
+ * Open the block editor settings menu if it hasn't opened.
  *
- * @param {Object}  [root0]
- * @param {boolean} [root0.isFSEEditor] Amount to be applied. Defaults to 5.
+ * @todo Replace openBlockEditorSettings with ensureSidebarOpened when WordPress/gutenberg#45480 is released. See https://github.com/WordPress/gutenberg/pull/45480.
  */
+export const openBlockEditorSettings = async () => {
+	const toggleSidebarButton = await page.$(
+		'.edit-post-header__settings [aria-label="Settings"][aria-expanded="false"],' +
+			'.edit-site-header__actions [aria-label="Settings"][aria-expanded="false"],' +
+			'.edit-widgets-header__actions [aria-label="Settings"][aria-expanded="false"],' +
+			'.edit-site-header-edit-mode__actions [aria-label="Settings"][aria-expanded="false"]'
+	);
 
-export const openBlockEditorSettings = async ( { isFSEEditor = false } ) => {
-	const buttonSelector = isFSEEditor
-		? '.edit-site-header__actions button[aria-label="Settings"]'
-		: '.edit-post-header__settings button[aria-label="Settings"]';
-
-	const isPressed = `${ buttonSelector }.is-pressed`;
-
-	const isSideBarAlreadyOpened = await page.$( isPressed );
-
-	if ( isSideBarAlreadyOpened === null ) {
-		// @ts-ignore
-		await page.$eval( buttonSelector, ( el ) => el.click() );
+	if ( toggleSidebarButton ) {
+		await toggleSidebarButton.click();
 	}
 };
 
@@ -449,10 +445,3 @@ export const waitForAllProductsBlockLoaded = async () => {
  */
 export const describeOrSkip = ( condition ) =>
 	condition ? describe : describe.skip;
-
-/**
- * Execute or skip the test base on the provided condition.
- *
- * @param {boolean} condition Condition to execute test.
- */
-export const itOrSkip = ( condition ) => ( condition ? it : it.skip );
