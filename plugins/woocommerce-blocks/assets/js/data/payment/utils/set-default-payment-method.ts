@@ -7,7 +7,7 @@ import { PlainPaymentMethods } from '@woocommerce/type-defs/payments';
 /**
  * Internal dependencies
  */
-import { STORE_KEY as PAYMENT_STORE_KEY } from './constants';
+import { STORE_KEY as PAYMENT_STORE_KEY } from '../constants';
 
 export const setDefaultPaymentMethod = async (
 	paymentMethods: PlainPaymentMethods
