@@ -18,3 +18,6 @@ export * from './taxes';
 export * from './constants';
 export { insertInnerBlock } from './insert-inner-block';
 export { getFixtureProductsData } from './get-fixture-products-data';
+export { getToggleIdByLabel } from './get-toggle-id-by-label';
+export { insertBlockUsingQuickInserter } from './insert-block-using-quick-inserter';
+export { insertBlockUsingSlash } from './insert-block-using-slash';

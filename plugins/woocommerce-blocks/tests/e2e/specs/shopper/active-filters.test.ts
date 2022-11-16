@@ -11,6 +11,7 @@ import {
 } from '@wordpress/e2e-test-utils';
 import { SHOP_PAGE } from '@woocommerce/e2e-utils';
 import { Frame, Page } from 'puppeteer';
+import { insertBlockUsingSlash } from '@woocommerce/blocks-test-utils';
 
 /**
  * Internal dependencies
@@ -97,7 +98,7 @@ describe( 'Shopper → Active Filters Block', () => {
 			} );
 
 			await insertBlocks();
-			await insertBlock( 'All Products' );
+			await insertBlockUsingSlash( 'All Products' );
 			await configurateFilterProductsByAttributeBlock( page );
 			await publishPost();
 
