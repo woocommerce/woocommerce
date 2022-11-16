@@ -27,6 +27,9 @@ function getReviewImage( review, imageType, isLoading ) {
 					src={ review.product_image?.thumbnail || '' }
 				/>
 			) : (
+				// The alt text is left empty on purpose, as it's considered a decorative image.
+				// More can be found here: https://www.w3.org/WAI/tutorials/images/decorative/.
+				// Github discussion for a context: https://github.com/woocommerce/woocommerce-blocks/pull/7651#discussion_r1019560494.
 				<img
 					aria-hidden="true"
 					alt=""
