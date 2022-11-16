@@ -30,7 +30,6 @@ const ALLOW_TRACKING_OPTION_NAME = 'woocommerce_allow_tracking';
  * @param {number}   props.storeAgeInWeeks    The age of the store in weeks.
  * @param {Function} props.updateOptions      Function to update options.
  * @param {Function} props.createNotice       Function to create a snackbar.
- * @param {Object}   props.cesProps           Additional props sent to CES component.
  */
 function CustomerEffortScoreTracks( {
 	action,
@@ -43,7 +42,6 @@ function CustomerEffortScoreTracks( {
 	storeAgeInWeeks,
 	updateOptions,
 	createNotice,
-	cesProps,
 } ) {
 	const [ modalShown, setModalShown ] = useState( false );
 
@@ -133,7 +131,6 @@ function CustomerEffortScoreTracks( {
 					✏️
 				</span>
 			}
-			{ ...cesProps }
 		/>
 	);
 }

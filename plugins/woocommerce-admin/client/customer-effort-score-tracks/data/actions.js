@@ -29,7 +29,6 @@ export function setCesSurveyQueue( queue ) {
  * @param {string} adminPage     value of window.adminpage
  * @param {string} onsubmitLabel label for the snackback onsubmit
  * @param {Object} trackProps    object for optional track props
- * @param {Object} cesProps      object for optional CES props
  */
 export function addCesSurvey(
 	action,
@@ -37,8 +36,7 @@ export function addCesSurvey(
 	pageNow = window.pagenow,
 	adminPage = window.adminpage,
 	onsubmitLabel = undefined,
-	trackProps = {},
-	cesProps = {}
+	trackProps = {}
 ) {
 	return {
 		type: TYPES.ADD_CES_SURVEY,
@@ -48,7 +46,6 @@ export function addCesSurvey(
 		adminPage,
 		onsubmit_label: onsubmitLabel,
 		props: trackProps,
-		cesProps,
 	};
 }
 

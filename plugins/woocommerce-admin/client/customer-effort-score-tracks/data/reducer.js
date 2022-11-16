@@ -29,7 +29,6 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 				adminpage: action.adminPage,
 				onSubmitLabel: action.onSubmitLabel,
 				props: action.props,
-				cesProps: action.cesProps,
 			};
 			return {
 				...state,

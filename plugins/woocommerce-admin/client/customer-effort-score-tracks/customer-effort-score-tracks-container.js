@@ -52,7 +52,6 @@ function CustomerEffortScoreTracksContainer( {
 					label={ item.label }
 					onSubmitLabel={ item.onsubmit_label }
 					trackProps={ item.props || {} }
-					cesProps={ item.cesProps || {} }
 				/>
 			) ) }
 		</>
