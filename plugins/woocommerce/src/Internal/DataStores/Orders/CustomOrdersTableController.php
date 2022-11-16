@@ -171,7 +171,7 @@ class CustomOrdersTableController {
 	 * @return bool True if the custom orders table usage is enabled
 	 */
 	public function custom_orders_table_usage_is_enabled(): bool {
-		return get_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) === 'yes';
+		return $this->is_feature_visible() && get_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) === 'yes';
 	}
 
 	/**
@@ -205,7 +205,7 @@ class CustomOrdersTableController {
 	 * @return \WC_Object_Data_Store_Interface|string The actual data store to use.
 	 */
 	private function get_data_store_instance( $default_data_store, string $type ) {
-		if ( $this->is_feature_visible() && $this->custom_orders_table_usage_is_enabled() ) {
+		if ( $this->custom_orders_table_usage_is_enabled() ) {
 			switch ( $type ) {
 				case 'order_refund':
 					return $this->refund_data_store;
