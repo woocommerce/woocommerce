@@ -16,6 +16,9 @@ export type UsePluginsType = {
 	loadInstalledPluginsAfterActivation: ( slug: string ) => void;
 };
 
+/**
+ * Hook to return plugins and methods for "Installed extensions" card.
+ */
 export const useInstalledPlugins = (): UsePluginsType => {
 	const { installedPlugins, activatingPlugins } = useSelect( ( select ) => {
 		const { getInstalledPlugins, getActivatingPlugins } =

@@ -58,6 +58,16 @@ export const DiscoverTools = () => {
 	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
 	const { loadInstalledPluginsAfterActivation } = useInstalledPlugins();
 
+	/**
+	 * Install and activate a plugin.
+	 *
+	 * When the process is successful, the plugin will disappear in the recommended list,
+	 * and appear in the installed extension list. A success notice will be displayed.
+	 *
+	 * When the process is not successful, an error notice will be displayed.
+	 *
+	 * @param  plugin Plugin to be installed and activated.
+	 */
 	const installAndActivate = async ( plugin: Plugin ) => {
 		setCurrentPlugin( plugin.product );
 
