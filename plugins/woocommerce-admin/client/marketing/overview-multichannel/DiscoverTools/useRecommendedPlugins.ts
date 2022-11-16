@@ -30,10 +30,13 @@ export const useRecommendedPlugins = () => {
 
 	return useSelect< SelectResult >(
 		( select ) => {
-			const { getRecommendedPlugins, isResolving } = select( STORE_KEY );
+			const { getRecommendedPlugins, hasFinishedResolution } =
+				select( STORE_KEY );
 
 			return {
-				isLoading: isResolving( 'getRecommendedPlugins', [ category ] ),
+				isLoading: ! hasFinishedResolution( 'getRecommendedPlugins', [
+					category,
+				] ),
 				plugins: getRecommendedPlugins( category ),
 				removeRecommendedPlugin: callback,
 			};
