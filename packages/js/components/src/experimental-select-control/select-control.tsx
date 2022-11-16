@@ -69,7 +69,7 @@ type SelectControlProps< ItemType > = {
 	 * current downshift version get updated.
 	 *
 	 * @see https://www.downshift-js.com/use-multiple-selection#usage-with-combobox
-	 * @defaults false
+	 * @default false
 	 */
 	__experimentalOpenMenuOnClick?: boolean;
 };
