@@ -51,7 +51,7 @@ class WC_Helper_Options {
 	 */
 	public static function get( $key, $default = false ) {
 		$options = get_option( self::$option_name, array() );
-		if ( array_key_exists( $key, $options ) ) {
+		if ( is_array( $options ) && array_key_exists( $key, $options ) ) {
 			return $options[ $key ];
 		}
 
