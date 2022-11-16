@@ -8,11 +8,11 @@ import {
 	unsetCheckbox,
 	withRestApi,
 } from '@woocommerce/e2e-utils';
-
 import {
 	visitBlockPage,
 	selectBlockByName,
 	saveOrPublish,
+	getToggleIdByLabel,
 } from '@woocommerce/blocks-test-utils';
 
 /**
@@ -36,7 +36,6 @@ if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 ) {
 	test.only( 'Skipping Cart & Checkout tests', () => {} );
 }
 
-let companyCheckboxId = null;
 let coupon;
 
 describe( 'Shopper → Checkout', () => {
@@ -75,16 +74,7 @@ describe( 'Shopper → Checkout', () => {
 				'woocommerce/checkout-shipping-address-block'
 			);
 
-			// This checkbox ID is unstable, so, we're getting its value from "for" attribute of the label
-			const [ companyCheckboxLabel ] = await page.$x(
-				`//label[contains(text(), "Company") and contains(@class, "components-toggle-control__label")]`
-			);
-			companyCheckboxId = await page.evaluate(
-				( label ) => `#${ label.getAttribute( 'for' ) }`,
-				companyCheckboxLabel
-			);
-
-			await setCheckbox( companyCheckboxId );
+			await setCheckbox( await getToggleIdByLabel( 'Company' ) );
 			await saveOrPublish();
 			await shopper.block.emptyCart();
 		} );
@@ -96,7 +86,7 @@ describe( 'Shopper → Checkout', () => {
 			await selectBlockByName(
 				'woocommerce/checkout-shipping-address-block'
 			);
-			await unsetCheckbox( companyCheckboxId );
+			await unsetCheckbox( await getToggleIdByLabel( 'Company' ) );
 			await saveOrPublish();
 			await merchant.logout();
 			await reactivateCompatibilityNotice();

@@ -3,7 +3,7 @@
 exports[`Store Editing Templates Product Catalog block template should contain the "WooCommerce Product Grid Block" classic template 1`] = `
 "<!-- wp:template-part {\\"slug\\":\\"header\\",\\"theme\\":\\"emptytheme\\",\\"tagName\\":\\"header\\"} /-->
 
-<!-- wp:group {\\"layout\\":{\\"inherit\\":true}} -->
+<!-- wp:group {\\"layout\\":{\\"inherit\\":true,\\"type\\":\\"constrained\\"}} -->
 <div class=\\"wp-block-group\\"><!-- wp:woocommerce/legacy-template {\\"template\\":\\"archive-product\\"} /--></div>
 <!-- /wp:group -->
 
@@ -13,7 +13,7 @@ exports[`Store Editing Templates Product Catalog block template should contain t
 exports[`Store Editing Templates Product Search Results block template should contain the "WooCommerce Product Grid Block" classic template 1`] = `
 "<!-- wp:template-part {\\"slug\\":\\"header\\",\\"theme\\":\\"emptytheme\\",\\"tagName\\":\\"header\\"} /-->
 
-<!-- wp:group {\\"layout\\":{\\"inherit\\":true}} -->
+<!-- wp:group {\\"layout\\":{\\"inherit\\":true,\\"type\\":\\"constrained\\"}} -->
 <div class=\\"wp-block-group\\"><!-- wp:woocommerce/legacy-template {\\"template\\":\\"product-search-results\\"} /--></div>
 <!-- /wp:group -->
 
@@ -23,7 +23,7 @@ exports[`Store Editing Templates Product Search Results block template should co
 exports[`Store Editing Templates Product by Category block template should contain the "WooCommerce Product Taxonomy Block" classic template 1`] = `
 "<!-- wp:template-part {\\"slug\\":\\"header\\",\\"theme\\":\\"emptytheme\\",\\"tagName\\":\\"header\\"} /-->
 
-<!-- wp:group {\\"layout\\":{\\"inherit\\":true}} -->
+<!-- wp:group {\\"layout\\":{\\"inherit\\":true,\\"type\\":\\"constrained\\"}} -->
 <div class=\\"wp-block-group\\"><!-- wp:woocommerce/legacy-template {\\"template\\":\\"taxonomy-product_cat\\"} /--></div>
 <!-- /wp:group -->
 
@@ -33,7 +33,7 @@ exports[`Store Editing Templates Product by Category block template should conta
 exports[`Store Editing Templates Products by Tag block template should contain the "WooCommerce Product Taxonomy Block" classic template 1`] = `
 "<!-- wp:template-part {\\"slug\\":\\"header\\",\\"theme\\":\\"emptytheme\\",\\"tagName\\":\\"header\\"} /-->
 
-<!-- wp:group {\\"layout\\":{\\"inherit\\":true}} -->
+<!-- wp:group {\\"layout\\":{\\"inherit\\":true,\\"type\\":\\"constrained\\"}} -->
 <div class=\\"wp-block-group\\"><!-- wp:woocommerce/legacy-template {\\"template\\":\\"taxonomy-product_tag\\"} /--></div>
 <!-- /wp:group -->
 
@@ -43,7 +43,7 @@ exports[`Store Editing Templates Products by Tag block template should contain t
 exports[`Store Editing Templates Single Product block template should contain the "WooCommerce Single Product Block" classic template 1`] = `
 "<!-- wp:template-part {\\"slug\\":\\"header\\",\\"theme\\":\\"emptytheme\\",\\"tagName\\":\\"header\\"} /-->
 
-<!-- wp:group {\\"layout\\":{\\"inherit\\":true}} -->
+<!-- wp:group {\\"layout\\":{\\"inherit\\":true,\\"type\\":\\"constrained\\"}} -->
 <div class=\\"wp-block-group\\"><!-- wp:woocommerce/legacy-template {\\"template\\":\\"single-product\\"} /--></div>
 <!-- /wp:group -->
 
