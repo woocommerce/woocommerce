@@ -20,6 +20,10 @@ const TEMPLATES = {
 		title: 'Product Taxonomy Title',
 		placeholder: 'Product Taxonomy Placeholder',
 	},
+	'taxonomy-product_attribute': {
+		title: 'Product Attribute Title',
+		placeholder: 'Product Attribute Placeholder',
+	},
 };
 
 describe( 'getTemplateDetailsBySlug', function () {
