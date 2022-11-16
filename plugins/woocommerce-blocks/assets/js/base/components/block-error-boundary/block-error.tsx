@@ -23,6 +23,9 @@ const BlockError = ( {
 	return showErrorBlock ? (
 		<div className="wc-block-error wc-block-components-error">
 			{ imageUrl && (
+				// The alt text is left empty on purpose, as it's considered a decorative image.
+				// More can be found here: https://www.w3.org/WAI/tutorials/images/decorative/.
+				// Github discussion for a context: https://github.com/woocommerce/woocommerce-blocks/pull/7651#discussion_r1019560494.
 				<img
 					className="wc-block-error__image wc-block-components-error__image"
 					src={ imageUrl }
