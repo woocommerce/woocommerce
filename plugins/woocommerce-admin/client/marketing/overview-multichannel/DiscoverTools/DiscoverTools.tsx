@@ -125,46 +125,48 @@ export const DiscoverTools = () => {
 		return (
 			<TabPanel tabs={ getTabs( plugins ) }>
 				{ ( tab ) => {
-					const subcategoryPlugins = plugins.filter( ( el ) =>
-						el.subcategories.some(
+					const subcategoryPlugins = plugins.filter( ( plugin ) =>
+						plugin.subcategories.some(
 							( subcategory ) => subcategory.slug === tab.name
 						)
 					);
 
 					return (
 						<>
-							{ subcategoryPlugins.map( ( el ) => {
+							{ subcategoryPlugins.map( ( plugin ) => {
 								return (
-									<Fragment key={ el.product }>
+									<Fragment key={ plugin.product }>
 										<CardDivider />
 										<PluginCardBody
 											icon={
 												<img
-													src={ el.icon }
-													alt={ el.title }
+													src={ plugin.icon }
+													alt={ plugin.title }
 												/>
 											}
-											name={ el.title }
-											pills={ el.tags.map( ( tag ) => (
-												<Pill key={ tag.slug }>
-													{ tag.name }
-												</Pill>
-											) ) }
-											description={ el.description }
+											name={ plugin.title }
+											pills={ plugin.tags.map(
+												( tag ) => (
+													<Pill key={ tag.slug }>
+														{ tag.name }
+													</Pill>
+												)
+											) }
+											description={ plugin.description }
 											button={
-												el.direct_install ? (
+												plugin.direct_install ? (
 													<Button
 														variant="secondary"
 														isBusy={
 															currentPlugin ===
-															el.product
+															plugin.product
 														}
 														disabled={
 															!! currentPlugin
 														}
 														onClick={ () => {
 															installAndActivate(
-																el
+																plugin
 															);
 														} }
 													>
@@ -177,7 +179,7 @@ export const DiscoverTools = () => {
 													<Button
 														variant="secondary"
 														href={ getInAppPurchaseUrl(
-															el.url
+															plugin.url
 														) }
 														disabled={
 															!! currentPlugin
@@ -186,7 +188,7 @@ export const DiscoverTools = () => {
 															recordEvent(
 																'marketing_recommended_extension',
 																{
-																	name: el.title,
+																	name: plugin.title,
 																}
 															);
 														} }
