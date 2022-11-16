@@ -70,7 +70,7 @@ export const DiscoverTools = () => {
 				plugin.product,
 			] );
 
-			removeRecommendedPlugin( plugin.product );
+			removeRecommendedPlugin( plugin.product, 'marketing' );
 			loadInstalledPluginsAfterActivation( plugin.product );
 			createNoticesFromResponse( response );
 		} catch ( error ) {

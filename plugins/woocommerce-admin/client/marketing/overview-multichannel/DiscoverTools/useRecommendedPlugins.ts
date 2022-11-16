@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { useCallback } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
@@ -15,32 +14,22 @@ const category = 'marketing';
 type SelectResult = {
 	isLoading: boolean;
 	plugins: Plugin[];
-	removeRecommendedPlugin: ( slug: string ) => void;
+	removeRecommendedPlugin: ( slug: string, category: string ) => void;
 };
 
 export const useRecommendedPlugins = () => {
 	const { removeRecommendedPlugin } = useDispatch( STORE_KEY );
 
-	const callback = useCallback(
-		( slug ) => {
-			removeRecommendedPlugin( slug, category );
-		},
-		[ removeRecommendedPlugin ]
-	);
+	return useSelect< SelectResult >( ( select ) => {
+		const { getRecommendedPlugins, hasFinishedResolution } =
+			select( STORE_KEY );
 
-	return useSelect< SelectResult >(
-		( select ) => {
-			const { getRecommendedPlugins, hasFinishedResolution } =
-				select( STORE_KEY );
-
-			return {
-				isLoading: ! hasFinishedResolution( 'getRecommendedPlugins', [
-					category,
-				] ),
-				plugins: getRecommendedPlugins( category ),
-				removeRecommendedPlugin: callback,
-			};
-		},
-		[ category ]
-	);
+		return {
+			isLoading: ! hasFinishedResolution( 'getRecommendedPlugins', [
+				category,
+			] ),
+			plugins: getRecommendedPlugins( category ),
+			removeRecommendedPlugin,
+		};
+	}, [] );
 };
