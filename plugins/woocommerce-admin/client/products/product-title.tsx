@@ -36,8 +36,10 @@ export const ProductTitle: React.FC = () => {
 
 	const title = getProductTitle( values.name, values.type, persistedName );
 
-	return <WooHeaderPageTitle>
-        { title }
-        <ProductStatusBadge />
-    </WooHeaderPageTitle>;
+	return (
+		<WooHeaderPageTitle>
+			{ title }
+			<ProductStatusBadge />
+		</WooHeaderPageTitle>
+	);
 };
