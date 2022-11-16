@@ -10,7 +10,6 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { STORE_KEY } from '~/marketing/data/constants';
 import { Plugin } from './types';
 
-const selector = 'getRecommendedPlugins';
 const category = 'marketing';
 
 type SelectResult = {
@@ -34,7 +33,7 @@ export const useRecommendedPlugins = () => {
 			const { getRecommendedPlugins, isResolving } = select( STORE_KEY );
 
 			return {
-				isLoading: isResolving( selector, [ category ] ),
+				isLoading: isResolving( 'getRecommendedPlugins', [ category ] ),
 				plugins: getRecommendedPlugins( category ),
 				removeRecommendedPlugin: callback,
 			};
