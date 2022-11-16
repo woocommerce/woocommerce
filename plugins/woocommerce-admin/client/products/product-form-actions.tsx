@@ -74,12 +74,7 @@ export const ProductFormActions: React.FC = () => {
 			'new_product_update',
 			PRODUCT_CES_CONTENT,
 			'woocommerce_page_wc-admin',
-			'woocommerce_page_wc-admin',
-			undefined,
-			{},
-			{
-				icon: null, // To be replaced by BETA pill.
-			}
+			'woocommerce_page_wc-admin'
 		);
 	};
 
