@@ -1,13 +1,13 @@
 /**
  * Internal dependencies
  */
-import * as setDefaultPaymentMethodFunctions from '../set-default-payment-method';
+import { setDefaultPaymentMethod as setDefaultPaymentMethodOriginal } from '../utils/set-default-payment-method';
 import { PAYMENT_STORE_KEY } from '..';
 import { PlainPaymentMethods } from '../../../types';
 
 const originalDispatch = jest.requireActual( '@wordpress/data' ).dispatch;
 
-jest.mock( '../set-default-payment-method', () => ( {
+jest.mock( '../utils/set-default-payment-method', () => ( {
 	setDefaultPaymentMethod: jest.fn(),
 } ) );
 
@@ -28,9 +28,7 @@ describe( 'payment data store actions', () => {
 				Object.keys( paymentMethods )[ 0 ]
 			);
 			actions.__internalSetAvailablePaymentMethods( paymentMethods );
-			expect(
-				setDefaultPaymentMethodFunctions.setDefaultPaymentMethod
-			).not.toBeCalled();
+			expect( setDefaultPaymentMethodOriginal ).not.toBeCalled();
 		} );
 
 		it( 'Resets the default gateway if the current method is no longer available', () => {
@@ -41,9 +39,7 @@ describe( 'payment data store actions', () => {
 			actions.__internalSetAvailablePaymentMethods( [
 				paymentMethods[ Object.keys( paymentMethods )[ 0 ] ],
 			] );
-			expect(
-				setDefaultPaymentMethodFunctions.setDefaultPaymentMethod
-			).toBeCalled();
+			expect( setDefaultPaymentMethodOriginal ).toBeCalled();
 		} );
 	} );
 } );

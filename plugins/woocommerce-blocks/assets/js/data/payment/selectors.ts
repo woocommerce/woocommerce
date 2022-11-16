@@ -8,7 +8,7 @@ import deprecated from '@wordpress/deprecated';
  * Internal dependencies
  */
 import { PaymentMethodDataState } from './default-state';
-import { filterActiveSavedPaymentMethods } from './utils';
+import { filterActiveSavedPaymentMethods } from './utils/filter-active-saved-payment-methods';
 import { STATUS as PAYMENT_STATUS } from './constants';
 
 export const isPaymentPristine = ( state: PaymentMethodDataState ) =>

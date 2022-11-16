@@ -7,7 +7,7 @@ import * as wpDataFunctions from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { setDefaultPaymentMethod } from '../set-default-payment-method';
+import { setDefaultPaymentMethod } from '../utils/set-default-payment-method';
 import { PlainPaymentMethods } from '../../../types';
 import { PAYMENT_STORE_KEY } from '..';
 

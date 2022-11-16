@@ -666,15 +666,12 @@
 <error line="411" column="5" severity="error" message="Type &apos;{ currency_code: &quot;USD&quot;; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; total: string; total_tax: string; tax_lines: { ...; }[]; }&apos; is not assignable to type &apos;CartResponseFeeItemTotals&apos;.
   Object literal may only specify known properties, and &apos;tax_lines&apos; does not exist in type &apos;CartResponseFeeItemTotals&apos;." source="TS2322" />
 </file>
-<file name="assets/js/data/payment/check-payment-methods.ts">
+<file name="assets/js/data/payment/utils/check-payment-methods.ts">
 <error line="15" column="10" severity="error" message="Module &apos;&quot;@wordpress/notices&quot;&apos; has no exported member &apos;store&apos;." source="TS2305" />
-<error line="132" column="37" severity="error" message="Property &apos;paymentRequirements&apos; does not exist on type &apos;CartResponse&apos;. Did you mean &apos;payment_requirements&apos;?" source="TS2551" />
-<error line="134" column="25" severity="error" message="Property &apos;receiveCart&apos; does not exist on type &apos;CartResponse&apos;." source="TS2339" />
-<error line="135" column="20" severity="error" message="Property &apos;receiveCart&apos; does not exist on type &apos;CartResponse&apos;." source="TS2339" />
-<error line="146" column="5" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;CartShippingRate[]&apos;." source="TS2345" />
-<error line="176" column="37" severity="error" message="Argument of type &apos;Record&lt;string, unknown&gt;&apos; is not assignable to parameter of type &apos;CanMakePaymentArgument&apos;.
+<error line="143" column="5" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;CartShippingRate[]&apos;." source="TS2345" />
+<error line="174" column="37" severity="error" message="Argument of type &apos;Record&lt;string, unknown&gt;&apos; is not assignable to parameter of type &apos;CanMakePaymentArgument&apos;.
   Type &apos;Record&lt;string, unknown&gt;&apos; is missing the following properties from type &apos;CanMakePaymentArgument&apos;: cart, cartTotals, cartNeedsShipping, billingData, and 3 more." source="TS2345" />
-<error line="188" column="13" severity="error" message="Property &apos;createErrorNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
+<error line="186" column="13" severity="error" message="Property &apos;createErrorNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
 </file>
 <file name="assets/js/data/payment/thunks.ts">
 <error line="4" column="10" severity="error" message="Module &apos;&quot;@wordpress/notices&quot;&apos; has no exported member &apos;store&apos;." source="TS2305" />

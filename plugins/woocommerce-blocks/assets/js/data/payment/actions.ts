@@ -10,8 +10,8 @@ import {
  * Internal dependencies
  */
 import { ACTION_TYPES } from './action-types';
-import { checkPaymentMethodsCanPay } from './check-payment-methods';
-import { setDefaultPaymentMethod } from './set-default-payment-method';
+import { checkPaymentMethodsCanPay } from './utils/check-payment-methods';
+import { setDefaultPaymentMethod } from './utils/set-default-payment-method';
 
 // `Thunks are functions that can be dispatched, similar to actions creators
 export * from './thunks';

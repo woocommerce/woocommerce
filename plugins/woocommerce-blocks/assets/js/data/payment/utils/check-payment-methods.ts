@@ -23,18 +23,18 @@ import { previewCart } from '@woocommerce/resource-previews';
 /**
  * Internal dependencies
  */
-import { STORE_KEY as CART_STORE_KEY } from '../cart/constants';
-import { STORE_KEY as PAYMENT_STORE_KEY } from './constants';
-import { noticeContexts } from '../../base/context/event-emit';
+import { STORE_KEY as CART_STORE_KEY } from '../../cart/constants';
+import { STORE_KEY as PAYMENT_STORE_KEY } from '../constants';
+import { noticeContexts } from '../../../base/context/event-emit';
 import {
 	EMPTY_CART_ERRORS,
 	EMPTY_CART_ITEM_ERRORS,
 	EMPTY_EXTENSIONS,
-} from '../../data/constants';
+} from '../../constants';
 import {
 	defaultBillingAddress,
 	defaultShippingAddress,
-} from '../../base/context/providers/cart-checkout/customer/constants';
+} from '../../../base/context/providers/cart-checkout/customer/constants';
 
 export const checkPaymentMethodsCanPay = async ( express = false ) => {
 	const isEditor = !! select( 'core/editor' );
@@ -129,11 +129,8 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 			shippingRates: previewCart.shipping_rates,
 			isLoadingRates: false,
 			cartHasCalculatedShipping: previewCart.has_calculated_shipping,
-			paymentRequirements: previewCart.paymentRequirements,
-			receiveCart:
-				typeof previewCart?.receiveCart === 'function'
-					? previewCart.receiveCart
-					: () => undefined,
+			paymentRequirements: previewCart.payment_requirements,
+			receiveCart: () => undefined,
 		};
 		canPayArgument = {
 			cart: cartForCanPayArgument,
@@ -149,6 +146,7 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 		};
 	}
 
+	// Order payment methods
 	let paymentMethodsOrder;
 	if ( express ) {
 		paymentMethodsOrder = Object.keys( paymentMethods );
