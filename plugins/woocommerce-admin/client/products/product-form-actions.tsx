@@ -9,6 +9,7 @@ import {
 	MenuGroup,
 	MenuItem,
 } from '@wordpress/components';
+import { useDispatch } from '@wordpress/data';
 import { chevronDown, check, Icon } from '@wordpress/icons';
 import { registerPlugin } from '@wordpress/plugins';
 import { useFormContext } from '@woocommerce/components';
@@ -21,8 +22,15 @@ import { recordEvent } from '@woocommerce/tracks';
 import { WooHeaderItem } from '~/header/utils';
 import { useProductHelper } from './use-product-helper';
 import './product-form-actions.scss';
+import { STORE_KEY as CES_STORE_KEY } from '../customer-effort-score-tracks/data/constants';
+
+const PRODUCT_CES_CONTENT = __(
+	"You're using the new product editor (currently in development). How is your experience so far?",
+	'woocommerce'
+);
 
 export const ProductFormActions: React.FC = () => {
+	const { addCesSurvey } = useDispatch( CES_STORE_KEY );
 	const {
 		createProductWithStatus,
 		updateProductWithStatus,
@@ -62,6 +70,17 @@ export const ProductFormActions: React.FC = () => {
 				resetForm( product );
 			}
 		}
+		addCesSurvey(
+			'new_product_update',
+			PRODUCT_CES_CONTENT,
+			'woocommerce_page_wc-admin',
+			'woocommerce_page_wc-admin',
+			undefined,
+			{},
+			{
+				icon: null, // To be replaced by BETA pill.
+			}
+		);
 	};
 
 	const onPublish = async () => {
@@ -81,6 +100,12 @@ export const ProductFormActions: React.FC = () => {
 				resetForm( product );
 			}
 		}
+		addCesSurvey(
+			'new_product_add_publish',
+			PRODUCT_CES_CONTENT,
+			'woocommerce_page_wc-admin',
+			'woocommerce_page_wc-admin'
+		);
 	};
 
 	const onPublishAndDuplicate = async () => {
