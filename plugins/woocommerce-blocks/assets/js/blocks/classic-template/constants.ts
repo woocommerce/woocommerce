@@ -38,6 +38,13 @@ export const TEMPLATES: TemplateDetails = {
 		),
 		placeholder: 'archive-product',
 	},
+	'taxonomy-product_attribute': {
+		title: __(
+			'WooCommerce Product Attribute Block',
+			'woo-gutenberg-products-block'
+		),
+		placeholder: 'archive-product',
+	},
 	'product-search-results': {
 		title: __(
 			'WooCommerce Product Search Results Block',

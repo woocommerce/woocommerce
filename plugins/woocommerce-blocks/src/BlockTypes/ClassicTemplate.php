@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use WC_Query;
@@ -61,7 +62,7 @@ class ClassicTemplate extends AbstractDynamicBlock {
 			$frontend_scripts::load_scripts();
 		}
 
-		$archive_templates = array( 'archive-product', 'taxonomy-product_cat', 'taxonomy-product_tag', ProductSearchResultsTemplate::SLUG );
+		$archive_templates = array( 'archive-product', 'taxonomy-product_cat', 'taxonomy-product_tag', ProductAttributeTemplate::SLUG, ProductSearchResultsTemplate::SLUG );
 
 		if ( 'single-product' === $attributes['template'] ) {
 			return $this->render_single_product();

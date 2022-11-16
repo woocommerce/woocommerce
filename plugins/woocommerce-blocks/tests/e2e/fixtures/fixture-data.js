@@ -26,7 +26,10 @@ const Attributes = () => [
 		],
 	},
 	{
-		attribute: { name: 'Shade' },
+		attribute: {
+			name: 'Shade',
+			has_archives: true,
+		},
 		terms: [
 			{
 				name: 'Red',

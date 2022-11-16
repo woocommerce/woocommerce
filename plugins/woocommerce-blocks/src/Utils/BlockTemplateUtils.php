@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Utils;
 
+use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 use Automattic\WooCommerce\Blocks\Options;
@@ -312,6 +313,10 @@ class BlockTemplateUtils {
 				'title'       => _x( 'Products by Tag', 'Template name', 'woo-gutenberg-products-block' ),
 				'description' => __( 'Displays products filtered by a tag.', 'woo-gutenberg-products-block' ),
 			),
+			ProductAttributeTemplate::SLUG     => array(
+				'title'       => _x( 'Products by Attribute', 'Template name', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Displays products filtered by an attribute.', 'woo-gutenberg-products-block' ),
+			),
 			ProductSearchResultsTemplate::SLUG => array(
 				'title'       => _x( 'Product Search Results', 'Template name', 'woo-gutenberg-products-block' ),
 				'description' => __( 'Displays search results for your store.', 'woo-gutenberg-products-block' ),
@@ -449,14 +454,14 @@ class BlockTemplateUtils {
 	/**
 	 * Checks if we can fallback to the `archive-product` template for a given slug
 	 *
-	 * `taxonomy-product_cat` and `taxonomy-product_tag` templates can generally use the
-	 * `archive-product` as a fallback if there are no specific overrides.
+	 * `taxonomy-product_cat`, `taxonomy-product_tag`, `taxonomy-attribute` templates can
+	 *  generally use the `archive-product` as a fallback if there are no specific overrides.
 	 *
 	 * @param string $template_slug Slug to check for fallbacks.
 	 * @return boolean
 	 */
 	public static function template_is_eligible_for_product_archive_fallback( $template_slug ) {
-		$eligible_for_fallbacks = array( 'taxonomy-product_cat', 'taxonomy-product_tag' );
+		$eligible_for_fallbacks = array( 'taxonomy-product_cat', 'taxonomy-product_tag', ProductAttributeTemplate::SLUG );
 
 		return in_array( $template_slug, $eligible_for_fallbacks, true )
 			&& ! self::theme_has_template( $template_slug )
