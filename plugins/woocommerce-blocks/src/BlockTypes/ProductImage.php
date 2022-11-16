@@ -147,7 +147,10 @@ class ProductImage extends AbstractBlock {
 		$image_info = wp_get_attachment_image_src( get_post_thumbnail_id( $product->get_id() ), 'woocommerce_thumbnail' );
 
 		if ( ! isset( $image_info[0] ) ) {
-			return sprintf( '<img src="%s" alt="" width="500 height="500" />', wc_placeholder_img_src( 'woocommerce_thumbnail' ) );
+			// The alt text is left empty on purpose, as it's considered a decorative image.
+			// More can be found here: https://www.w3.org/WAI/tutorials/images/decorative/.
+			// Github discussion for a context: https://github.com/woocommerce/woocommerce-blocks/pull/7651#discussion_r1019560494.
+			return sprintf( '<img src="%s" alt="" />', wc_placeholder_img_src( 'woocommerce_thumbnail' ) );
 		}
 
 		return sprintf(
