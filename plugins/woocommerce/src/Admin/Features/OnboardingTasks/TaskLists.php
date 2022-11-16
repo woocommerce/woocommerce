@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\ReviewShippingOptions;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\TourInAppMarketplace;
 /**
  * Task Lists class.
  */
@@ -52,6 +53,7 @@ class TaskLists {
 		'AdditionalPayments',
 		'ReviewShippingOptions',
 		'GetMobileApp',
+		'TourInAppMarketplace',
 	);
 
 	/**
@@ -218,6 +220,12 @@ class TaskLists {
 					'visible'      => false,
 				)
 			);
+		}
+
+		if ( ! wp_is_mobile() ) { // Permit In-App Marketplace Tour on desktops only.
+			$tour_task = new TourInAppMarketplace();
+			self::add_task( 'extended', $tour_task );
+			self::add_task( 'extended_two_column', $tour_task );
 		}
 	}
 
