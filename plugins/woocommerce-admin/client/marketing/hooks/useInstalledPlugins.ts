@@ -9,7 +9,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { STORE_KEY } from '~/marketing/data/constants';
 import { Plugin } from '~/marketing/types';
 
-export type UsePluginsType = {
+export type UseInstalledPlugins = {
 	installedPlugins: Plugin[];
 	activatingPlugins: string[];
 	activateInstalledPlugin: ( slug: string ) => void;
@@ -19,7 +19,7 @@ export type UsePluginsType = {
 /**
  * Hook to return plugins and methods for "Installed extensions" card.
  */
-export const useInstalledPlugins = (): UsePluginsType => {
+export const useInstalledPlugins = (): UseInstalledPlugins => {
 	const { installedPlugins, activatingPlugins } = useSelect( ( select ) => {
 		const { getInstalledPlugins, getActivatingPlugins } =
 			select( STORE_KEY );
