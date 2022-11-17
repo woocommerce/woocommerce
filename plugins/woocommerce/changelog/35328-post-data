@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove the direct dependency on `$_POST` when validating checkout data.
