@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Adds new filter `woocommerce_get_customer_payment_tokens_limit` to set limit on number of payment methods fetched within the My Account page.
