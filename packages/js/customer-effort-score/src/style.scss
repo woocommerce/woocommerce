@@ -3,6 +3,15 @@
 .woocommerce-customer-effort-score__selection {
 	margin: 1em 0;
 
+	.components-v-stack {
+		display: flex;
+		flex-direction: column;
+
+		@include breakpoint( '>600px' ) {
+			flex-direction: row;
+		}
+	}
+
 	.components-base-control__field {
 		display: flex;
 		flex-direction: column;
