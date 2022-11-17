@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { ProductListContainer } from '@woocommerce/base-components/product-list';
 import { InnerBlockLayoutContextProvider } from '@woocommerce/shared-context';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
-import { StoreNoticesContainer } from '@woocommerce/base-context';
+import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
 
 /**
  * The All Products Block.
