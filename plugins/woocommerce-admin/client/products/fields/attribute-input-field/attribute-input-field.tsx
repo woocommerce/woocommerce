@@ -39,6 +39,10 @@ type AttributeInputFieldProps = {
 	ignoredAttributeIds?: number[];
 };
 
+function isNewAttributeListItem( attribute: NarrowedQueryAttribute ): boolean {
+	return attribute.id === -99;
+}
+
 export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	value = null,
 	onChange,
@@ -104,13 +108,13 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			getItemValue={ ( item ) => item?.id || '' }
 			selected={ value }
 			onSelect={ ( attribute ) => {
-				if ( attribute.id === -99 ) {
+				if ( isNewAttributeListItem( attribute ) ) {
 					recordEvent( 'product_attribute_add_custom_attribute', {
 						new_product_page: true,
 					} );
 				}
 				onChange(
-					attribute.id === -99
+					isNewAttributeListItem( attribute )
 						? attribute.name
 						: {
 								id: attribute.id,
