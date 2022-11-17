@@ -7,7 +7,7 @@ import {
 	InnerBlockLayoutContextProvider,
 	ProductDataContextProvider,
 } from '@woocommerce/shared-context';
-import { StoreNoticesContainer } from '@woocommerce/base-context';
+import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
 
 /**

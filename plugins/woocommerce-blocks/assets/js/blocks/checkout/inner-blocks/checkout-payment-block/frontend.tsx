@@ -7,13 +7,13 @@ import { withFilteredAttributes } from '@woocommerce/shared-hocs';
 import { FormStep } from '@woocommerce/base-components/cart-checkout';
 import { useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
+import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
  */
 import Block from './block';
 import attributes from './attributes';
-import { StoreNoticesContainer } from '../../../../base/context/providers';
 import { noticeContexts } from '../../../../base/context/event-emit';
 
 const FrontendBlock = ( {
