@@ -27,5 +27,6 @@
 	},
 	"parent": [ "woocommerce/cart-cross-sells-block" ],
 	"textdomain": "woo-gutenberg-products-block",
+	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2
 }
