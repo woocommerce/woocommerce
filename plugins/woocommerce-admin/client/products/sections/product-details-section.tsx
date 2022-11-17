@@ -213,6 +213,9 @@ export const ProductDetailsSection: React.FC = () => {
 						blocks={ summaryBlocks }
 						onChange={ ( blocks ) => {
 							setSummaryBlocks( blocks );
+							if ( ! summaryBlocks.length ) {
+								return;
+							}
 							setValue(
 								'short_description',
 								serialize( blocks )
@@ -224,6 +227,9 @@ export const ProductDetailsSection: React.FC = () => {
 						blocks={ descriptionBlocks }
 						onChange={ ( blocks ) => {
 							setDescriptionBlocks( blocks );
+							if ( ! descriptionBlocks.length ) {
+								return;
+							}
 							setValue( 'description', serialize( blocks ) );
 						} }
 						placeholder={ __(
