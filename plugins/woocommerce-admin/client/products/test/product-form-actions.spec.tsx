@@ -4,7 +4,6 @@
 import { PropsWithChildren } from 'react';
 import { render, waitFor, screen, within } from '@testing-library/react';
 import { Fragment } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
 import { Form, FormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -22,12 +21,6 @@ const copyProductWithStatus = jest.fn();
 const deleteProductAndRedirect = jest.fn();
 
 jest.mock( '@wordpress/plugins', () => ( { registerPlugin: jest.fn() } ) );
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useDispatch: jest.fn().mockReturnValue( {
-		addCesSurvey: jest.fn(),
-	} ),
-} ) );
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 jest.mock( '~/header/utils', () => ( {
 	WooHeaderItem: ( props: { children: () => React.ReactElement } ) => (
@@ -112,24 +105,6 @@ describe( 'ProductFormActions', () => {
 			} );
 		} );
 
-		it( 'should trigger cesSurvey when save draft is clicked', () => {
-			const product = { name: 'Name' };
-			const addCesSurveyMock = jest.fn();
-			( useDispatch as jest.Mock ).mockReturnValue( {
-				addCesSurvey: addCesSurveyMock,
-			} );
-			const { queryByText } = render(
-				<Form initialValues={ product }>
-					<ProductFormActions />
-				</Form>
-			);
-			queryByText( 'Save draft' )?.click();
-			expect( addCesSurveyMock ).toHaveBeenCalled();
-			expect( addCesSurveyMock.mock.calls[ 0 ][ 0 ] ).toEqual(
-				'new_product_update'
-			);
-		} );
-
 		it( 'should trigger createProductWithStatus and the product_update track when Publish is clicked', () => {
 			const product = { name: 'Name' };
 			const { queryByText } = render(
@@ -150,24 +125,6 @@ describe( 'ProductFormActions', () => {
 				is_virtual: undefined,
 				manage_stock: undefined,
 			} );
-		} );
-
-		it( 'should trigger cesSurvey when publish is clicked', () => {
-			const product = { name: 'Name' };
-			const addCesSurveyMock = jest.fn();
-			( useDispatch as jest.Mock ).mockReturnValue( {
-				addCesSurvey: addCesSurveyMock,
-			} );
-			const { queryByText } = render(
-				<Form initialValues={ product }>
-					<ProductFormActions />
-				</Form>
-			);
-			queryByText( 'Publish' )?.click();
-			expect( addCesSurveyMock ).toHaveBeenCalled();
-			expect( addCesSurveyMock.mock.calls[ 0 ][ 0 ] ).toEqual(
-				'new_product_add_publish'
-			);
 		} );
 
 		it( 'should have the Preview button disabled', () => {
