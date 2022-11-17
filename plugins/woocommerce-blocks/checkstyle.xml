@@ -2191,26 +2191,25 @@
       Type &apos;{ icon: { src: Element; }; edit: ({ attributes, }: { attributes: { className: string; }; }) =&gt; Element; save: () =&gt; Element; }&apos; is missing the following properties from type &apos;Pick&lt;Block&lt;{ className: string; }&gt;, &quot;title&quot; | &quot;category&quot; | &quot;attributes&quot;&gt;&apos;: title, category, attributes" source="TS2769" />
 </file>
 <file name="assets/js/blocks/cart/inner-blocks/cart-cross-sells-block/index.tsx">
-<error line="13" column="20" severity="error" message="No overload matches this call.
+<error line="12" column="1" severity="error" message="No overload matches this call.
   Overload 1 of 2, &apos;(metadata: BlockConfiguration&lt;{}&gt;, settings?: Partial&lt;BlockConfiguration&lt;{}&gt;&gt; | undefined): Block&lt;{}&gt; | undefined&apos;, gave the following error.
-    Argument of type &apos;{ name: string; version: string; title: string; description: string; category: string; supports: { align: boolean; html: boolean; multiple: boolean; reusable: boolean; inserter: boolean; }; parent: string[]; textdomain: string; apiVersion: number; }&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{}&gt;&apos;.
-      Property &apos;attributes&apos; is missing in type &apos;{ name: string; version: string; title: string; description: string; category: string; supports: { align: boolean; html: boolean; multiple: boolean; reusable: boolean; inserter: boolean; }; parent: string[]; textdomain: string; apiVersion: number; }&apos; but required in type &apos;Pick&lt;Block&lt;{}&gt;, &quot;title&quot; | &quot;category&quot; | &quot;attributes&quot;&gt;&apos;.
+    Argument of type &apos;string&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{}&gt;&apos;.
+      Type &apos;string&apos; is not assignable to type &apos;Pick&lt;Block&lt;{}&gt;, &quot;title&quot; | &quot;category&quot; | &quot;attributes&quot;&gt;&apos;.
   Overload 2 of 2, &apos;(name: string, settings: BlockConfiguration&lt;{}&gt;): Block&lt;{}&gt; | undefined&apos;, gave the following error.
-    Argument of type &apos;{ name: string; version: string; title: string; description: string; category: string; supports: { align: boolean; html: boolean; multiple: boolean; reusable: boolean; inserter: boolean; }; parent: string[]; textdomain: string; apiVersion: number; }&apos; is not assignable to parameter of type &apos;string&apos;." source="TS2769" />
+    Argument of type &apos;{ icon: { src: JSX.Element; }; edit: () =&gt; JSX.Element; save: () =&gt; JSX.Element; }&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{}&gt;&apos;.
+      Type &apos;{ icon: { src: Element; }; edit: () =&gt; Element; save: () =&gt; Element; }&apos; is missing the following properties from type &apos;Pick&lt;Block&lt;{}&gt;, &quot;title&quot; | &quot;category&quot; | &quot;attributes&quot;&gt;&apos;: title, category, attributes" source="TS2769" />
 </file>
 <file name="assets/js/blocks/cart/cart-cross-sells-product-list/cart-cross-sells-product.tsx">
 <error line="51" column="8" severity="error" message="Type &apos;{}&apos; is missing the following properties from type &apos;BlockAttributes&apos;: productId, align" source="TS2739" />
 </file>
 <file name="assets/js/blocks/cart/inner-blocks/cart-cross-sells-products/index.tsx">
-<error line="13" column="20" severity="error" message="No overload matches this call.
+<error line="12" column="1" severity="error" message="No overload matches this call.
   Overload 1 of 2, &apos;(metadata: BlockConfiguration&lt;{ className?: string; columns: number; }&gt;, settings?: Partial&lt;BlockConfiguration&lt;{ className?: string; columns: number; }&gt;&gt; | undefined): Block&lt;...&gt; | undefined&apos;, gave the following error.
-    Argument of type &apos;{ name: string; version: string; title: string; description: string; category: string; supports: { align: boolean; html: boolean; multiple: boolean; reusable: boolean; inserter: boolean; lock: boolean; }; attributes: { ...; }; parent: string[]; textdomain: string; apiVersion: number; }&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{ className?: string; columns: number; }&gt;&apos;.
-      Type &apos;{ name: string; version: string; title: string; description: string; category: string; supports: { align: boolean; html: boolean; multiple: boolean; reusable: boolean; inserter: boolean; lock: boolean; }; attributes: { ...; }; parent: string[]; textdomain: string; apiVersion: number; }&apos; is not assignable to type &apos;Partial&lt;Omit&lt;Block&lt;{ className?: string; columns: number; }&gt;, &quot;icon&quot;&gt;&gt;&apos;.
-        The types of &apos;attributes.columns&apos; are incompatible between these types.
-          Type &apos;{ type: string; default: number; }&apos; is not assignable to type &apos;BlockAttribute&lt;number&gt;&apos;.
-            Type &apos;{ type: string; default: number; }&apos; is missing the following properties from type &apos;Query&lt;number&gt;&apos;: source, selector, query
+    Argument of type &apos;string&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{ className?: string; columns: number; }&gt;&apos;.
+      Type &apos;string&apos; is not assignable to type &apos;Pick&lt;Block&lt;{ className?: string; columns: number; }&gt;, &quot;title&quot; | &quot;category&quot; | &quot;attributes&quot;&gt;&apos;.
   Overload 2 of 2, &apos;(name: string, settings: BlockConfiguration&lt;{ className?: string; columns: number; }&gt;): Block&lt;{ className?: string; columns: number; }&gt; | undefined&apos;, gave the following error.
-    Argument of type &apos;{ name: string; version: string; title: string; description: string; category: string; supports: { align: boolean; html: boolean; multiple: boolean; reusable: boolean; inserter: boolean; lock: boolean; }; attributes: { ...; }; parent: string[]; textdomain: string; apiVersion: number; }&apos; is not assignable to parameter of type &apos;string&apos;." source="TS2769" />
+    Argument of type &apos;{ icon: { src: JSX.Element; }; edit: ({ attributes, setAttributes }: Props) =&gt; JSX.Element; save: () =&gt; JSX.Element; }&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{ className?: string; columns: number; }&gt;&apos;.
+      Type &apos;{ icon: { src: Element; }; edit: ({ attributes, setAttributes }: Props) =&gt; Element; save: () =&gt; Element; }&apos; is missing the following properties from type &apos;Pick&lt;Block&lt;{ className?: string; columns: number; }&gt;, &quot;title&quot; | &quot;category&quot; | &quot;attributes&quot;&gt;&apos;: title, category, attributes" source="TS2769" />
 </file>
 <file name="assets/js/blocks/cart/inner-blocks/cart-totals-block/index.tsx">
 <error line="12" column="1" severity="error" message="No overload matches this call.
