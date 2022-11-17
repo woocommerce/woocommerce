@@ -212,7 +212,9 @@ export function ProductShippingSection( {
 						<>
 							<SelectControl
 								label={ __( 'Shipping class', 'woocommerce' ) }
-								{ ...getSelectControlProps( 'shipping_class' ) }
+								{ ...getSelectControlProps( 'shipping_class', {
+									className: 'half-width-field',
+								} ) }
 								onChange={ ( value: string ) => {
 									if (
 										value ===
