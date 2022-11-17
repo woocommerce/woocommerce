@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { chevronRightSmall, Icon } from '@wordpress/icons';
+import { Fragment } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 
 /**
@@ -36,7 +37,7 @@ export const ProductBreadcrumbs = ( {
 			{ visibleBreadcrumbs.map( ( breadcrumb ) => {
 				const { href, title, type } = breadcrumb;
 				return (
-					<>
+					<Fragment key={ href }>
 						<span className="woocommerce-product-breadcrumbs__item">
 							{ href ? (
 								<Link href={ href } type={ type || 'wp-admin' }>
@@ -49,7 +50,7 @@ export const ProductBreadcrumbs = ( {
 						<span className="woocommerce-product-breadcrumbs__separator">
 							<Icon icon={ chevronRightSmall } />
 						</span>
-					</>
+					</Fragment>
 				);
 			} ) }
 		</span>
