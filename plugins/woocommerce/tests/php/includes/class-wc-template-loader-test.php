@@ -122,6 +122,13 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Loads a test taxonomy with the given name.
+	 *
+	 * @param string $taxonomy Taxonomy name
+	 *
+	 * @return void
+	 */
 	private function load_tax_in_query( $taxonomy ) {
 		global $wp_query;
 
@@ -134,8 +141,15 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Loads a test product attribute taxonomy with the given name.
+	 *
+	 * @param string $taxonomy Taxonomy name
+	 *
+	 * @return void
+	 */
 	private function load_product_attribute_tax_in_query( $taxonomy ) {
-		register_taxonomy( $taxonomy, 'product' );
+		wc_create_attribute( array( 'name' => $taxonomy ) );
 
 		$this->load_tax_in_query( $taxonomy );
 	}
