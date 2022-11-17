@@ -71,7 +71,7 @@ type SelectControlProps< ItemType > = {
 	 * @see https://www.downshift-js.com/use-multiple-selection#usage-with-combobox
 	 * @default false
 	 */
-	__experimentalOpenMenuOnClick?: boolean;
+	__experimentalOpenMenuOnFocus?: boolean;
 };
 
 export const selectControlStateChangeTypes = useCombobox.stateChangeTypes;
@@ -116,7 +116,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 	selected,
 	className,
 	disabled,
-	__experimentalOpenMenuOnClick = false,
+	__experimentalOpenMenuOnFocus = false,
 }: SelectControlProps< ItemType > ) {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
@@ -257,9 +257,9 @@ function SelectControl< ItemType = DefaultItemType >( {
 					onFocus: () => {
 						setIsFocused( true );
 						onFocus( { inputValue } );
+						__experimentalOpenMenuOnFocus && openMenu();
 					},
 					onBlur: () => setIsFocused( false ),
-					onClick: () => __experimentalOpenMenuOnClick && openMenu(),
 					placeholder,
 					disabled,
 				} ) }

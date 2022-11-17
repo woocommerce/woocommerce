@@ -182,7 +182,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 							return changes;
 					}
 				} }
-				__experimentalOpenMenuOnClick
+				__experimentalOpenMenuOnFocus
 			>
 				{ ( {
 					items,
