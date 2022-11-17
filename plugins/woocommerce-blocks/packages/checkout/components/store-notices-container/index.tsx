@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { Notice } from 'wordpress-components';
 import { sanitizeHTML } from '@woocommerce/utils';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { PAYMENT_STORE_KEY } from '@woocommerce/block-data';
+import type { Notice as NoticeType } from '@wordpress/notices';
 
 /**
  * Internal dependencies
@@ -26,11 +26,28 @@ const getWooClassName = ( { status = 'default' } ) => {
 	return '';
 };
 
+interface StoreNoticesContainerProps {
+	className?: string;
+	context?: string;
+	additionalNotices?: NoticeType[];
+}
+
+/**
+ * Component that displays notices from the core/notices data store. See
+ * https://developer.wordpress.org/block-editor/reference-guides/data/data-core-notices/ for more information on this
+ * data store.
+ *
+ * @param  props
+ * @param  props.className         Class name to add to the container.
+ * @param  props.context           Context to show notices from.
+ * @param  props.additionalNotices Additional notices to display.
+ * @function Object() { [native code] }
+ */
 export const StoreNoticesContainer = ( {
 	className,
 	context = 'default',
 	additionalNotices = [],
-} ) => {
+}: StoreNoticesContainerProps ): JSX.Element | null => {
 	const isExpressPaymentMethodActive = useSelect( ( select ) =>
 		select( PAYMENT_STORE_KEY ).isExpressPaymentMethodActive()
 	);
@@ -74,19 +91,6 @@ export const StoreNoticesContainer = ( {
 			) ) }
 		</div>
 	);
-};
-
-StoreNoticesContainer.propTypes = {
-	className: PropTypes.string,
-	notices: PropTypes.arrayOf(
-		PropTypes.shape( {
-			content: PropTypes.string.isRequired,
-			id: PropTypes.string.isRequired,
-			status: PropTypes.string.isRequired,
-			isDismissible: PropTypes.bool,
-			type: PropTypes.oneOf( [ 'default', 'snackbar' ] ),
-		} )
-	),
 };
 
 export default StoreNoticesContainer;

@@ -356,6 +356,16 @@
 <error line="4" column="36" severity="error" message="Could not find a declaration file for module &apos;wordpress-components&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/wordpress-components/build/index.js&apos; implicitly has an &apos;any&apos; type.
   If the &apos;@wordpress/components&apos; package actually exposes this module, consider sending a pull request to amend &apos;https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/wordpress__components&apos;" source="TS7016" />
 </file>
+<file name="node_modules/@types/wordpress__block-editor/index.d.ts">
+<error line="21" column="14" severity="error" message="Cannot redeclare block-scoped variable &apos;store&apos;." source="TS2451" />
+</file>
+<file name="assets/js/utils/global-style.js">
+<error line="5" column="10" severity="error" message="Module &apos;&quot;@wordpress/block-editor&quot;&apos; has no exported member &apos;__experimentalGetSpacingClassesAndStyles&apos;." source="TS2305" />
+</file>
+<file name="assets/js/utils/products.js">
+<error line="5" column="12" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
+<error line="20" column="12" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
+</file>
 <file name="assets/js/data/schema/selectors.js">
 <error line="19" column="12" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
 <error line="106" column="7" severity="error" message="Variable &apos;namespaceRoutes&apos; implicitly has type &apos;any[]&apos; in some locations where its type cannot be determined." source="TS7034" />
@@ -635,9 +645,6 @@
 <file name="assets/js/data/cart/controls.js">
 <error line="18" column="31" severity="error" message="Parameter &apos;preserveCartData&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
 </file>
-<file name="assets/js/utils/notices.ts">
-<error line="12" column="52" severity="error" message="Property &apos;type&apos; does not exist on type &apos;Notice&apos;." source="TS2339" />
-</file>
 <file name="assets/js/data/checkout/thunks.ts">
 <error line="5" column="10" severity="error" message="Module &apos;&quot;@wordpress/notices&quot;&apos; has no exported member &apos;store&apos;." source="TS2305" />
 <error line="57" column="11" severity="error" message="Property &apos;createErrorNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
@@ -721,6 +728,10 @@
       Type &apos;Object&apos; is not assignable to type &apos;AnyAction | Generator&lt;any, any, unknown&gt;&apos;.
         The &apos;Object&apos; type is assignable to very few other types. Did you mean to use the &apos;any&apos; type instead?" source="TS2322" />
 </file>
+<file name="packages/checkout/components/store-notices-container/index.tsx">
+<error line="5" column="24" severity="error" message="Could not find a declaration file for module &apos;wordpress-components&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/wordpress-components/build/index.js&apos; implicitly has an &apos;any&apos; type.
+  If the &apos;@wordpress/components&apos; package actually exposes this module, consider sending a pull request to amend &apos;https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/wordpress__components&apos;" source="TS7016" />
+</file>
 <file name="packages/checkout/filter-registry/index.ts">
 <error line="36" column="37" severity="error" message="Cannot find name &apos;T&apos;." source="TS2304" />
 </file>
@@ -772,16 +783,6 @@
 <file name="assets/js/base/hooks/use-position-relative-to-viewport.js">
 <error line="26" column="13" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
 <error line="75" column="24" severity="error" message="Argument of type &apos;null&apos; is not assignable to parameter of type &apos;Element&apos;." source="TS2345" />
-</file>
-<file name="node_modules/@types/wordpress__block-editor/index.d.ts">
-<error line="21" column="14" severity="error" message="Cannot redeclare block-scoped variable &apos;store&apos;." source="TS2451" />
-</file>
-<file name="assets/js/utils/global-style.js">
-<error line="5" column="10" severity="error" message="Module &apos;&quot;@wordpress/block-editor&quot;&apos; has no exported member &apos;__experimentalGetSpacingClassesAndStyles&apos;." source="TS2305" />
-</file>
-<file name="assets/js/utils/products.js">
-<error line="5" column="12" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
-<error line="20" column="12" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
 </file>
 <file name="assets/js/base/hooks/use-spacing-props.ts">
 <error line="5" column="10" severity="error" message="Module &apos;&quot;@wordpress/block-editor&quot;&apos; has no exported member &apos;__experimentalGetSpacingClassesAndStyles&apos;." source="TS2305" />
@@ -1064,18 +1065,10 @@
 <error line="20" column="4" severity="error" message="Type &apos;Object | undefined&apos; is not assignable to type &apos;Object&apos;.
   Type &apos;undefined&apos; is not assignable to type &apos;Object&apos;." source="TS2322" />
 </file>
-<file name="assets/js/base/context/providers/store-notices/components/store-notices-container.js">
-<error line="6" column="24" severity="error" message="Could not find a declaration file for module &apos;wordpress-components&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/wordpress-components/build/index.js&apos; implicitly has an &apos;any&apos; type.
-  If the &apos;@wordpress/components&apos; package actually exposes this module, consider sending a pull request to amend &apos;https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/wordpress__components&apos;" source="TS7016" />
-<error line="30" column="2" severity="error" message="Binding element &apos;className&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="32" column="2" severity="error" message="Binding element &apos;additionalNotices&apos; implicitly has an &apos;any[]&apos; type." source="TS7031" />
-<error line="46" column="33" severity="error" message="Property &apos;type&apos; does not exist on type &apos;Notice&apos;." source="TS2339" />
-</file>
 <file name="assets/js/base/context/providers/store-snackbar-notices/components/snackbar-notices-container.js">
 <error line="5" column="30" severity="error" message="Could not find a declaration file for module &apos;wordpress-components&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/wordpress-components/build/index.js&apos; implicitly has an &apos;any&apos; type.
   If the &apos;@wordpress/components&apos; package actually exposes this module, consider sending a pull request to amend &apos;https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/wordpress__components&apos;" source="TS7016" />
 <error line="18" column="2" severity="error" message="Binding element &apos;className&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="36" column="24" severity="error" message="Property &apos;type&apos; does not exist on type &apos;Notice&apos;." source="TS2339" />
 <error line="42" column="6" severity="error" message="Element implicitly has an &apos;any&apos; type because expression of type &apos;string&apos; can&apos;t be used to index type &apos;{}&apos;.
   No index signature with a parameter of type &apos;string&apos; was found on type &apos;{}&apos;." source="TS7053" />
 <error line="53" column="17" severity="error" message="Element implicitly has an &apos;any&apos; type because expression of type &apos;string&apos; can&apos;t be used to index type &apos;{}&apos;.
@@ -1085,7 +1078,7 @@
 <error line="10" column="56" severity="error" message="Namespace &apos;&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/types/type-defs/contexts&quot;&apos; has no exported member &apos;ContainerWidthContext&apos;." source="TS2694" />
 </file>
 <file name="assets/js/base/context/providers/index.js">
-<error line="6" column="1" severity="error" message="Module &apos;./cart-checkout&apos; has already exported a member named &apos;React&apos;. Consider explicitly re-exporting to resolve the ambiguity." source="TS2308" />
+<error line="5" column="1" severity="error" message="Module &apos;./cart-checkout&apos; has already exported a member named &apos;React&apos;. Consider explicitly re-exporting to resolve the ambiguity." source="TS2308" />
 </file>
 <file name="assets/js/base/context/hooks/use-checkout-extension-data.ts">
 <error line="12" column="15" severity="error" message="Module &apos;&quot;../../../data/checkout/types&quot;&apos; declares &apos;CheckoutState&apos; locally, but it is not exported." source="TS2459" />
@@ -2235,6 +2228,8 @@
 <file name="assets/js/blocks/cart-checkout-shared/payment-methods/payment-method-error-boundary.js">
 <error line="9" column="10" severity="error" message="Module &apos;&quot;@woocommerce/base-context/hooks&quot;&apos; has no exported member &apos;noticeContexts&apos;." source="TS2305" />
 <error line="14" column="35" severity="error" message="Parameter &apos;error&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
+<error line="50" column="6" severity="error" message="Type &apos;{ id: string; content: string; isDismissible: boolean; status: string; }[]&apos; is not assignable to type &apos;Notice[]&apos;.
+  Type &apos;{ id: string; content: string; isDismissible: boolean; status: string; }&apos; is missing the following properties from type &apos;Notice&apos;: spokenMessage, __unstableHTML, type, speak, actions" source="TS2322" />
 </file>
 <file name="assets/js/blocks/cart-checkout-shared/payment-methods/payment-method-options.js">
 <error line="60" column="22" severity="error" message="No overload matches this call.
@@ -2602,13 +2597,13 @@
 <error line="15" column="68" severity="error" message="Expected 0 arguments, but got 1." source="TS2554" />
 </file>
 <file name="assets/js/blocks/checkout/block.tsx">
-<error line="95" column="4" severity="error" message="Type &apos;{ allowCreateAccount: boolean; showCompanyField: boolean; requireCompanyField: boolean; showApartmentField: boolean; showPhoneField: boolean; requirePhoneField: boolean; }&apos; is missing the following properties from type &apos;CheckoutBlockContextProps&apos;: showOrderNotes, showPolicyLinks, showReturnToCart, cartPageId, showRateAfterTaxName" source="TS2739" />
-<error line="184" column="4" severity="error" message="No overload matches this call.
+<error line="98" column="4" severity="error" message="Type &apos;{ allowCreateAccount: boolean; showCompanyField: boolean; requireCompanyField: boolean; showApartmentField: boolean; showPhoneField: boolean; requirePhoneField: boolean; }&apos; is missing the following properties from type &apos;CheckoutBlockContextProps&apos;: showOrderNotes, showPolicyLinks, showReturnToCart, cartPageId, showRateAfterTaxName" source="TS2739" />
+<error line="187" column="4" severity="error" message="No overload matches this call.
   Overload 1 of 2, &apos;(props: BlockErrorBoundaryProps | Readonly&lt;BlockErrorBoundaryProps&gt;): BlockErrorBoundary&apos;, gave the following error.
     Type &apos;unknown&apos; is not assignable to type &apos;boolean&apos;.
   Overload 2 of 2, &apos;(props: BlockErrorBoundaryProps, context: any): BlockErrorBoundary&apos;, gave the following error.
     Type &apos;unknown&apos; is not assignable to type &apos;boolean&apos;." source="TS2769" />
-<error line="207" column="33" severity="error" message="Argument of type &apos;({ attributes, children, scrollToTop, }: { attributes: Attributes; children: React.ReactChildren; scrollToTop: (props: Record&lt;string, unknown&gt;) =&gt; void; }) =&gt; JSX.Element&apos; is not assignable to parameter of type &apos;FunctionComponent&lt;Record&lt;string, unknown&gt;&gt;&apos;.
+<error line="210" column="33" severity="error" message="Argument of type &apos;({ attributes, children, scrollToTop, }: { attributes: Attributes; children: React.ReactChildren; scrollToTop: (props: Record&lt;string, unknown&gt;) =&gt; void; }) =&gt; JSX.Element&apos; is not assignable to parameter of type &apos;FunctionComponent&lt;Record&lt;string, unknown&gt;&gt;&apos;.
   Types of parameters &apos;__0&apos; and &apos;props&apos; are incompatible.
     Type &apos;PropsWithChildren&lt;Record&lt;string, unknown&gt;&gt;&apos; is missing the following properties from type &apos;{ attributes: Attributes; children: ReactChildren; scrollToTop: (props: Record&lt;string, unknown&gt;) =&gt; void; }&apos;: attributes, scrollToTop" source="TS2345" />
 </file>
@@ -4189,6 +4184,18 @@
 <error line="16" column="24" severity="error" message="Parameter &apos;blockName&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
 <error line="16" column="35" severity="error" message="Parameter &apos;options&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
 <error line="17" column="45" severity="error" message="Expected 1 arguments, but got 2." source="TS2554" />
+</file>
+<file name="packages/checkout/components/store-notices-container/test/index.tsx">
+<error line="4" column="10" severity="error" message="Module &apos;&quot;@wordpress/notices&quot;&apos; has no exported member &apos;store&apos;." source="TS2305" />
+<error line="15" column="28" severity="error" message="Property &apos;createErrorNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
+<error line="23" column="29" severity="error" message="Property &apos;removeNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
+<error line="30" column="28" severity="error" message="Property &apos;getNotices&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/selectors&quot;)&apos;." source="TS2339" />
+<error line="36" column="28" severity="error" message="Property &apos;createErrorNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
+<error line="46" column="29" severity="error" message="Property &apos;removeNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
+<error line="53" column="28" severity="error" message="Property &apos;getNotices&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/selectors&quot;)&apos;." source="TS2339" />
+<error line="59" column="28" severity="error" message="Property &apos;createErrorNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
+<error line="70" column="29" severity="error" message="Property &apos;removeNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
+<error line="77" column="28" severity="error" message="Property &apos;getNotices&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/selectors&quot;)&apos;." source="TS2339" />
 </file>
 <file name="packages/checkout/components/text-input/test/validated-text-input.tsx">
 <error line="92" column="9" severity="error" message="Property &apos;toBeInTheDocument&apos; does not exist on type &apos;Matchers&lt;void, HTMLElement | null&gt;&apos;." source="TS2339" />

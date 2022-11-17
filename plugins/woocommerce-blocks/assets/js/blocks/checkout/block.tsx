@@ -9,11 +9,14 @@ import {
 	CheckoutProvider,
 	SnackbarNoticesContainer,
 } from '@woocommerce/base-context';
-import { StoreNoticesContainer } from '@woocommerce/base-context/providers';
+
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import { SidebarLayout } from '@woocommerce/base-components/sidebar-layout';
 import { CURRENT_USER_IS_ADMIN, getSetting } from '@woocommerce/settings';
-import { SlotFillProvider } from '@woocommerce/blocks-checkout';
+import {
+	SlotFillProvider,
+	StoreNoticesContainer,
+} from '@woocommerce/blocks-checkout';
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {

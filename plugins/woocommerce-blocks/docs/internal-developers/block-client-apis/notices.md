@@ -9,7 +9,7 @@
 
 ## Notices in WooCommerce Blocks
 
-WooCommerce Blocks uses the [`@wordpress/notices`](https://github.com/WordPress/gutenberg/blob/d9eb36d80e05b4e45b1ad8462c8bace4e9cf1f6f/docs/reference-guides/data/data-core-notices.md) package to display notices in the frontend. For more information on the actiona and selectors available on this data store, please review [the `@wordpress/notices` documentation](https://github.com/WordPress/gutenberg/blob/d9eb36d80e05b4e45b1ad8462c8bace4e9cf1f6f/docs/reference-guides/data/data-core-notices.md)
+WooCommerce Blocks uses the [`@wordpress/notices`](https://github.com/WordPress/gutenberg/blob/d9eb36d80e05b4e45b1ad8462c8bace4e9cf1f6f/docs/reference-guides/data/data-core-notices.md) package to display notices in the frontend. For more information on the actions and selectors available on this data store, please review [the `@wordpress/notices` documentation](https://github.com/WordPress/gutenberg/blob/d9eb36d80e05b4e45b1ad8462c8bace4e9cf1f6f/docs/reference-guides/data/data-core-notices.md)
 
 ### `StoreNoticesContainer`
 
@@ -17,10 +17,10 @@ To display notices of a certain context, use the `StoreNoticesContainer` and pas
 
 The below example will show all notices with type `default` that are in the `wc/cart` context. If no context prop is passed, then the `default` context will be used.
 
-On the Cart Block, a `StoreNoticesContainer` is already rendered with the `wc/cart` context, and on the Checkout Block, a `StoreNoticesContainer` is already rendered with the `wc/checkout` context. To display errors from other contexts, you can use the `StoreNoticesProvider` component with context passed as a prop.
+On the Cart Block, a `StoreNoticesContainer` is already rendered with the `wc/cart` context, and on the Checkout Block, a `StoreNoticesContainer` is already rendered with the `wc/checkout` context. To display errors from other contexts, you can use the `StoreNoticesContainer` component with context passed as a prop.
 
 ```jsx
-import { StoreNoticesContainer } from '@woocommerce/base-components/store-notices-container';
+import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
 
 const PaymentErrors = () => {
 	return <StoreNoticesContainer context="wc/payment" />;
