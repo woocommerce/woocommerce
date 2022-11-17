@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { useState, useEffect } from '@wordpress/element';
-import { loadExperimentAssignment } from '@woocommerce/explat';
 
 type Layout = 'control' | 'card' | 'stacked';
 
