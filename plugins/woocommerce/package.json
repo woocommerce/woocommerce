@@ -21,6 +21,7 @@
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
 		"lint": "pnpm lint:php",
+		"prebuild": "find ./assets/css/. ! -name '.gitkeep' -type f -exec rm -f {} + && find ./assets/client/. ! -name '.gitkeep' -type f -exec rm -f {} + && find ./assets/js/. ! -name '.gitkeep' -type f -exec rm -f {} +",
 		"build:feature-config": "php bin/generate-feature-config.php",
 		"build:zip": "./bin/build-zip.sh",
 		"lint:fix": "pnpm lint:js:fix && pnpm lint:php:fix",
