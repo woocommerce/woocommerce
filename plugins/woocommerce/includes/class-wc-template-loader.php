@@ -193,7 +193,7 @@ class WC_Template_Loader {
 			if ( self::taxonomy_has_block_template( $object ) ) {
 				$default_file = '';
 			} else {
-				if (taxonomy_is_product_attribute( $object->taxonomy )) {
+				if ( taxonomy_is_product_attribute( $object->taxonomy ) ) {
 					$default_file = 'taxonomy-product-attribute.php';
 				} elseif ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
 					$default_file = 'taxonomy-' . $object->taxonomy . '.php';
