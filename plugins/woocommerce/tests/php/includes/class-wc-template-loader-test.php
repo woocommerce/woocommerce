@@ -135,9 +135,7 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 	}
 
 	private function load_product_attribute_tax_in_query( $taxonomy ) {
-		global $wp_taxonomies, $wc_product_attributes;
-		$wp_taxonomies[ $taxonomy ]         = new WP_Taxonomy( $taxonomy, 'product' );
-		$wc_product_attributes[ $taxonomy ] = '';
+		register_taxonomy( $taxonomy, 'product' );
 
 		$this->load_tax_in_query( $taxonomy );
 	}
