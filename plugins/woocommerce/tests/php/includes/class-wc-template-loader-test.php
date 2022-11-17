@@ -125,7 +125,7 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Loads a test taxonomy with the given name.
 	 *
-	 * @param string $taxonomy Taxonomy name
+	 * @param string $taxonomy Taxonomy name.
 	 *
 	 * @return void
 	 */
@@ -144,7 +144,7 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Loads a test product attribute taxonomy with the given name.
 	 *
-	 * @param string $taxonomy Taxonomy name
+	 * @param string $taxonomy Taxonomy name.
 	 *
 	 * @return void
 	 */
