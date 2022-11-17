@@ -257,7 +257,9 @@ function SelectControl< ItemType = DefaultItemType >( {
 					onFocus: () => {
 						setIsFocused( true );
 						onFocus( { inputValue } );
-						__experimentalOpenMenuOnFocus && openMenu();
+						if ( __experimentalOpenMenuOnFocus ) {
+							openMenu();
+						}
 					},
 					onBlur: () => setIsFocused( false ),
 					placeholder,
