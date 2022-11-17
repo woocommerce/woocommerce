@@ -14,7 +14,7 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 
 	public function test_wc_template_loader_loads_default_file_without_blocks() {
 
-		global $wp_taxonomies;
+		global $wp_taxonomies, $wc_product_attributes;
 
 		$this->initialize_template_loader();
 
@@ -33,7 +33,9 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 		$this->assertDefaultTemplateFileName( 'taxonomy-product-tag' );
 
 		// Check Woo Taxonomy Product Attribute
-		$this->load_tax_in_query( 'product_attribute' );
+		$wp_taxonomies['pa_color'] = new WP_Taxonomy( 'pa_color', 'product' );
+		$wc_product_attributes['pa_color'] = '';
+		$this->load_tax_in_query( 'pa_color' );
 		$this->assertDefaultTemplateFileName( 'taxonomy-product-attribute' );
 
 		// Check Custom Product Taxonomies
@@ -49,7 +51,7 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 
 	public function test_wc_template_loader_loads_template_with_blocks() {
 
-		global $wp_taxonomies;
+		global $wp_taxonomies, $wc_product_attributes;
 
 		$this->initialize_template_loader();
 
@@ -65,6 +67,12 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 		$this->assertDefaultTemplateFileName();
 
 		$this->load_tax_in_query( 'product_tag' );
+		$this->assertDefaultTemplateFileName();
+
+		// Check Woo Taxonomy Product Attribute
+		$wp_taxonomies['pa_color'] = new WP_Taxonomy( 'pa_color', 'product' );
+		$wc_product_attributes['pa_color'] = '';
+		$this->load_tax_in_query( 'pa_color' );
 		$this->assertDefaultTemplateFileName();
 
 		// Check Custom Product Taxonomies
