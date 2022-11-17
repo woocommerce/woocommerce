@@ -70,7 +70,7 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 		$this->assertDefaultTemplateFileName();
 
 		// Check Woo Taxonomy Product Attribute
-		$wp_taxonomies['pa_color'] = new WP_Taxonomy( 'pa_color', 'product' );
+		$wp_taxonomies['pa_color']         = new WP_Taxonomy( 'pa_color', 'product' );
 		$wc_product_attributes['pa_color'] = '';
 		$this->load_tax_in_query( 'pa_color' );
 		$this->assertDefaultTemplateFileName();

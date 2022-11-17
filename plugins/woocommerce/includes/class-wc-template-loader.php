@@ -110,13 +110,13 @@ class WC_Template_Loader {
 	 * @return boolean
 	 */
 	private static function taxonomy_has_block_template( $taxonomy ) {
-		if ( taxonomy_is_product_attribute($taxonomy->taxonomy) ) {
+		if ( taxonomy_is_product_attribute( $taxonomy->taxonomy ) ) {
 			$template_name = 'taxonomy-product_attribute';
 		} else {
-			$template_name = 'taxonomy-'.$taxonomy->taxonomy;
+			$template_name = 'taxonomy-' . $taxonomy->taxonomy;
 		}
 
-		return self::has_block_template($template_name);
+		return self::has_block_template( $template_name );
 	}
 
 	/**
