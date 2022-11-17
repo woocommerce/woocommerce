@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixing bug with CES modal styles after breaking change in GB radio component.
