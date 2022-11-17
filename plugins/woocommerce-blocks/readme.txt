@@ -29,7 +29,7 @@ Use this plugin if you want access to the bleeding edge of available blocks for 
 - **Filter by Attribute**
 - **Filter by Price**
 - **Filter by Rating**
-- **Filter Products by Stock**
+- **Filter by Stock**
 - **Hand-picked Products**
 - **Mini Cart**
 - **Newest Products**
