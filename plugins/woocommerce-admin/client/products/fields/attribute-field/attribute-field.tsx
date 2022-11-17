@@ -289,7 +289,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
 				/>
 			) }
-
+			<SelectControlMenuSlot />
 			{ editingAttributeId && (
 				<EditAttributeModal
 					onCancel={ () => setEditingAttributeId( null ) }
@@ -317,7 +317,6 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					}
 				/>
 			) }
-			<SelectControlMenuSlot />
 		</div>
 	);
 };

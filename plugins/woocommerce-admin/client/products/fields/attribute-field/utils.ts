@@ -26,3 +26,22 @@ export function reorderSortableProductAttributePositions(
 		} )
 		.filter( ( attr ): attr is ProductAttribute => attr !== undefined );
 }
+
+/**
+ * Helper function to return the product attribute object. If attribute is a string it will create an object.
+ *
+ * @param { Object | string } attribute product attribute as string or object.
+ */
+export function getProductAttributeObject(
+	attribute:
+		| string
+		| Omit< ProductAttribute, 'position' | 'visible' | 'variation' >
+): Omit< ProductAttribute, 'position' | 'visible' | 'variation' > {
+	return typeof attribute === 'string'
+		? {
+				id: 0,
+				name: attribute,
+				options: [],
+		  }
+		: attribute;
+}
