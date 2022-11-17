@@ -32,6 +32,10 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 		$this->load_tax_in_query( 'product_tag' );
 		$this->assertDefaultTemplateFileName( 'taxonomy-product-tag' );
 
+		// Check Woo Taxonomy Product Attribute
+		$this->load_tax_in_query( 'product_attribute' );
+		$this->assertDefaultTemplateFileName( 'taxonomy-product-attribute' );
+
 		// Check Custom Product Taxonomies
 		$wp_taxonomies['product_tax'] = new WP_Taxonomy( 'product_tax', 'product' );
 		$this->load_tax_in_query( 'product_tax' );
