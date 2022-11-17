@@ -50,8 +50,7 @@ const getTabs = ( plugins: Plugin[] ) => {
 };
 
 export const DiscoverTools = () => {
-	const { isLoading, plugins, removeRecommendedPlugin } =
-		useRecommendedPlugins();
+	const { isLoading, plugins, refetch } = useRecommendedPlugins();
 	const [ currentPlugin, setCurrentPlugin ] = useState< string | null >(
 		null
 	);
@@ -80,7 +79,7 @@ export const DiscoverTools = () => {
 				plugin.product,
 			] );
 
-			removeRecommendedPlugin( plugin.product, 'marketing' );
+			refetch();
 			loadInstalledPluginsAfterActivation( plugin.product );
 			createNoticesFromResponse( response );
 		} catch ( error ) {

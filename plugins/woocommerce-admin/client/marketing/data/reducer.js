@@ -50,20 +50,6 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 					[ action.data.category ]: action.data.plugins,
 				},
 			};
-		case TYPES.REMOVE_RECOMMENDED_PLUGIN:
-			const newPlugins = state.recommendedPlugins[
-				action.data.category
-			]?.filter(
-				( plugin ) => plugin.product !== action.data.pluginSlug
-			);
-
-			return {
-				...state,
-				recommendedPlugins: {
-					...state.recommendedPlugins,
-					[ action.data.category ]: newPlugins,
-				},
-			};
 		case TYPES.SET_BLOG_POSTS:
 			return {
 				...state,

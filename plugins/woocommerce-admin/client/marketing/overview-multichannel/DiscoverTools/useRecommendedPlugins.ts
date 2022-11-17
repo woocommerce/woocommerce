@@ -9,27 +9,27 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { STORE_KEY } from '~/marketing/data/constants';
 import { Plugin } from './types';
 
+const selector = 'getRecommendedPlugins';
 const category = 'marketing';
 
-type SelectResult = {
-	isLoading: boolean;
-	plugins: Plugin[];
-	removeRecommendedPlugin: ( slug: string, category: string ) => void;
-};
-
 export const useRecommendedPlugins = () => {
-	const { removeRecommendedPlugin } = useDispatch( STORE_KEY );
+	const { invalidateResolution } = useDispatch( STORE_KEY );
 
-	return useSelect< SelectResult >( ( select ) => {
+	const refetch = () => {
+		invalidateResolution( selector, [ category ] );
+	};
+
+	return useSelect( ( select ) => {
 		const { getRecommendedPlugins, hasFinishedResolution } =
 			select( STORE_KEY );
+		const plugins = getRecommendedPlugins< Plugin[] >( category );
 
 		return {
-			isLoading: ! hasFinishedResolution( 'getRecommendedPlugins', [
-				category,
-			] ),
-			plugins: getRecommendedPlugins( category ),
-			removeRecommendedPlugin,
+			isLoading:
+				! hasFinishedResolution( selector, [ category ] ) &&
+				! plugins.length,
+			plugins,
+			refetch,
 		};
 	}, [] );
 };

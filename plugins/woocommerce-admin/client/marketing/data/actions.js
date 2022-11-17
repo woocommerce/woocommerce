@@ -39,22 +39,6 @@ export function receiveRecommendedPlugins( plugins, category ) {
 	};
 }
 
-/**
- * Remove a plugin from the recommended list.
- *
- * @param {string} pluginSlug Plugin slug.
- * @param {string} category   Category.
- */
-export function removeRecommendedPlugin( pluginSlug, category ) {
-	return {
-		type: TYPES.REMOVE_RECOMMENDED_PLUGIN,
-		data: {
-			pluginSlug,
-			category,
-		},
-	};
-}
-
 export function receiveBlogPosts( posts, category ) {
 	return {
 		type: TYPES.SET_BLOG_POSTS,
