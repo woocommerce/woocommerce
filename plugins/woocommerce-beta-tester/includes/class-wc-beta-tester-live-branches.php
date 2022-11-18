@@ -53,10 +53,10 @@ class WC_Beta_Tester_Live_Branches {
 		wp_enqueue_script( 'woocommerce-beta-tester-live-branches' );
 	}
 
-  public function register_page() {    
+	public function register_page() {    
 		if ( ! function_exists( 'wc_admin_register_page' ) ) {
-      return;
-    }
+			return;
+		}
 
 		wc_admin_register_page(
 			array(
@@ -67,7 +67,7 @@ class WC_Beta_Tester_Live_Branches {
 				'capability' => 'read',
 			)
 		);
-  }
+	}
 }
 
 return new WC_Beta_Tester_Live_Branches();
