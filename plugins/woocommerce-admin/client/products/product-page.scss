@@ -88,6 +88,12 @@
 			margin-bottom: 0;
 		}
 	}
+	.half-width-field {
+		@include breakpoint( '<960px' ) {
+			width: 100%;
+		}
+		width: 50%;
+	}
 }
 
 .woocommerce-edit-product {
