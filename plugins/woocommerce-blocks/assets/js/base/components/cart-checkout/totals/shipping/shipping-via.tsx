@@ -11,7 +11,14 @@ export const ShippingVia = ( {
 } ): JSX.Element => {
 	return (
 		<div className="wc-block-components-totals-item__description wc-block-components-totals-shipping__via">
-			{ decodeEntities( selectedShippingRates.join( ', ' ) ) }
+			{ decodeEntities(
+				selectedShippingRates
+					.filter(
+						( item, index ) =>
+							selectedShippingRates.indexOf( item ) === index
+					)
+					.join( ', ' )
+			) }
 		</div>
 	);
 };

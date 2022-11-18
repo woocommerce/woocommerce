@@ -12,9 +12,11 @@ import type { CartShippingPackageShippingRate } from '@woocommerce/type-defs/car
 export const RatePrice = ( {
 	minRate,
 	maxRate,
+	multiple = false,
 }: {
 	minRate: CartShippingPackageShippingRate | undefined;
 	maxRate: CartShippingPackageShippingRate | undefined;
+	multiple: boolean;
 } ) => {
 	if ( minRate === undefined || maxRate === undefined ) {
 		return null;
@@ -37,7 +39,7 @@ export const RatePrice = ( {
 
 	return (
 		<span className="wc-block-checkout__shipping-method-option-price">
-			{ minRatePrice === maxRatePrice
+			{ minRatePrice === maxRatePrice && ! multiple
 				? priceElement
 				: createInterpolateElement(
 						__( 'from <price />', 'woo-gutenberg-products-block' ),

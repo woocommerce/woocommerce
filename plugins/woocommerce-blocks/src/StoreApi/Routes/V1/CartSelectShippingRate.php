@@ -36,9 +36,9 @@ class CartSelectShippingRate extends AbstractCartRoute {
 				'permission_callback' => '__return_true',
 				'args'                => [
 					'package_id' => array(
-						'description' => __( 'The ID of the package being shipped.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'The ID of the package being shipped. Leave blank to apply to all packages.', 'woo-gutenberg-products-block' ),
 						'type'        => [ 'integer', 'string' ],
-						'required'    => true,
+						'required'    => false,
 					),
 					'rate_id'    => [
 						'description' => __( 'The chosen rate ID for the package.', 'woo-gutenberg-products-block' ),
@@ -64,23 +64,41 @@ class CartSelectShippingRate extends AbstractCartRoute {
 			throw new RouteException( 'woocommerce_rest_shipping_disabled', __( 'Shipping is disabled.', 'woo-gutenberg-products-block' ), 404 );
 		}
 
-		if ( ! isset( $request['package_id'] ) ) {
-			throw new RouteException( 'woocommerce_rest_cart_missing_package_id', __( 'Invalid Package ID.', 'woo-gutenberg-products-block' ), 400 );
+		if ( ! isset( $request['rate_id'] ) ) {
+			throw new RouteException( 'woocommerce_rest_cart_missing_rate_id', __( 'Invalid Rate ID.', 'woo-gutenberg-products-block' ), 400 );
 		}
 
 		$cart       = $this->cart_controller->get_cart_instance();
-		$package_id = wc_clean( wp_unslash( $request['package_id'] ) );
+		$package_id = isset( $request['package_id'] ) ? wc_clean( wp_unslash( $request['package_id'] ) ) : null;
 		$rate_id    = wc_clean( wp_unslash( $request['rate_id'] ) );
 
 		try {
-			$this->cart_controller->select_shipping_rate( $package_id, $rate_id );
+			if ( ! is_null( $package_id ) ) {
+				$this->cart_controller->select_shipping_rate( $package_id, $rate_id );
+			} else {
+				foreach ( $this->cart_controller->get_shipping_packages() as $package ) {
+					$this->cart_controller->select_shipping_rate( $package['package_id'], $rate_id );
+				}
+			}
 		} catch ( \WC_Rest_Exception $e ) {
 			throw new RouteException( $e->getErrorCode(), $e->getMessage(), $e->getCode() );
 		}
 
+		/**
+		 * Fires an action after a shipping method has been chosen for package(s) via the Store API.
+		 *
+		 * This allows extensions to perform addition actions after a shipping method has been chosen, but before the
+		 * cart totals are recalculated.
+		 *
+		 * @param string|null $package_id The sanitized ID of the package being updated. Null if all packages are being updated.
+		 * @param string $rate_id The sanitized chosen rate ID for the package.
+		 * @param \WP_REST_Request $request Full details about the request.
+		 */
+		do_action( 'woocommerce_store_api_cart_select_shipping_rate', $package_id, $rate_id, $request );
+
 		$cart->calculate_shipping();
 		$cart->calculate_totals();
 
-		return rest_ensure_response( $this->schema->get_item_response( $cart ) );
+		return rest_ensure_response( $this->cart_schema->get_item_response( $cart ) );
 	}
 }
