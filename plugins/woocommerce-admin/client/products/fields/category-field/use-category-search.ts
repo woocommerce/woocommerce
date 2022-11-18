@@ -171,7 +171,7 @@ export const useCategorySearch = () => {
 			};
 		}
 	);
-	const [ isSearching, setIsSearching ] = useState( false );
+	const [ isSearching, setIsSearching ] = useState( true );
 	const [ categoriesAndNewItem, setCategoriesAndNewItem ] = useState<
 		[
 			ProductCategory[],

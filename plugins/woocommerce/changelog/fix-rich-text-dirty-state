@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Check if blocks have been added to rich text editors before updating value

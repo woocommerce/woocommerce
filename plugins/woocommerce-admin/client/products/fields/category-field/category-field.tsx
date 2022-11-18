@@ -182,6 +182,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 							return changes;
 					}
 				} }
+				__experimentalOpenMenuOnFocus
 			>
 				{ ( {
 					items,
@@ -205,14 +206,13 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 							className="woocommerce-category-field-dropdown__menu"
 						>
 							<>
-								{ isOpen && isSearching && items.length === 0 && (
+								{ isSearching ? (
 									<li className="woocommerce-category-field-dropdown__item">
 										<div className="woocommerce-category-field-dropdown__item-content">
 											<Spinner />
 										</div>
 									</li>
-								) }
-								{ isOpen &&
+								) : (
 									rootItems.map( ( item ) => {
 										return item.id === -99 ? (
 											<CategoryFieldAddNewItem
@@ -240,7 +240,8 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 												getItemProps={ getItemProps }
 											/>
 										);
-									} ) }
+									} )
+								) }
 							</>
 						</Menu>
 					);
