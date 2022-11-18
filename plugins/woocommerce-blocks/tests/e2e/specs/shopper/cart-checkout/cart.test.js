@@ -105,7 +105,6 @@ describe( 'Shopper → Cart', () => {
 		await shopper.block.productIsInCart( SIMPLE_VIRTUAL_PRODUCT_NAME, 4 );
 	} );
 
-	// eslint-disable-next-line jest/expect-expect
 	it( 'User can see Cross-Sells products block', async () => {
 		await shopper.block.emptyCart();
 		await shopper.block.goToShop();
@@ -119,7 +118,9 @@ describe( 'Shopper → Cart', () => {
 		await page.waitForSelector(
 			'.wp-block-woocommerce-cart-line-items-block tr:nth-child(2)'
 		);
-		await shopper.block.productIsInCart( '32GB USB Stick', 1 );
+		await expect(
+			shopper.block.productIsInCart( '32GB USB Stick', 1 )
+		).toBeTruthy();
 	} );
 
 	it( 'User can proceed to checkout', async () => {

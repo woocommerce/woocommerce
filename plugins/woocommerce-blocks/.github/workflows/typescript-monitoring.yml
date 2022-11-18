@@ -13,7 +13,7 @@ jobs:
                   ref: ${{ github.event.pull_request.head.ref }}
 
             - name: Cache node modules
-              uses: actions/cache@v2
+              uses: actions/cache@v3
               env:
                   cache-name: cache-node-modules
               with:
@@ -51,7 +51,7 @@ jobs:
             - name: Check if the checklist.xml file is changed
               id: verify_diff
               run: |
-                  git diff --quiet checkstyle.xml || echo "::set-output name=is_different_checkstyle::true"
+                  git diff --quiet checkstyle.xml || echo "is_different_checkstyle=true" >> $GITHUB_OUTPUT
 
             - name: Commit the new checklist.xml file
               if: steps.verify_diff.outputs.is_different_checkstyle == 'true'
