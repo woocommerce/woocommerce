@@ -8,7 +8,7 @@ import { addFilter } from '@wordpress/hooks';
  */
 import { App } from './App';
 
-addFilter( 'woocommerce_admin_pages_list', 'live-branches', ( pages ) => {	
+addFilter( 'woocommerce_admin_pages_list', 'live-branches', ( pages ) => {
 	pages.push( {
 		container: App,
 		path: '/live-branches',
