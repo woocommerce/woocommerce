@@ -18,7 +18,10 @@ class WC_Beta_Tester_Live_Branches {
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
 		
 		// By the time this code runs it appears too late to hook into `admin_menu`
-		$this->register_page();
+		
+		// NOTE - We don't have feature flags, so comment this line to disable it 
+		// till we are ready to release.
+		// $this->register_page();
 	}
 
 	/**
@@ -33,7 +36,7 @@ class WC_Beta_Tester_Live_Branches {
 		}
 
 		$script_path       = '/build/live-branches.js';
-		$script_asset_path = dirname( __FILE__ ) . '../build/live-branches.asset.php';
+		$script_asset_path = dirname( __FILE__ ) . '/../build/live-branches.asset.php';
 		$script_asset      = file_exists( $script_asset_path )
 			? require( $script_asset_path )
 			: array( 'dependencies' => array(), 'version' => filemtime( $script_path ) );
@@ -47,16 +50,7 @@ class WC_Beta_Tester_Live_Branches {
 			true
 		);
 
-		// wp_register_style(
-		// 	'woocommerce-beta-tester',
-		// 	plugins_url( '/build/index.css', __FILE__ ),
-		// 	// Add any dependencies styles may have, such as wp-components.
-		// 	array(),
-		// 	filemtime( dirname( __FILE__ ) . '/build/index.css' )
-		// );
-
 		wp_enqueue_script( 'woocommerce-beta-tester-live-branches' );
-		// wp_enqueue_style( '{{extension_slug}}' );
 	}
 
   public function register_page() {    
