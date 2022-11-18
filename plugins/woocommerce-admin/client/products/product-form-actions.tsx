@@ -18,6 +18,7 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
+import usePreventLeavingPage from '~/hooks/usePreventLeavingPage';
 import { WooHeaderItem } from '~/header/utils';
 import { useProductHelper } from './use-product-helper';
 import './product-form-actions.scss';
@@ -34,6 +35,8 @@ export const ProductFormActions: React.FC = () => {
 	} = useProductHelper();
 	const { isDirty, isValidForm, values, resetForm } =
 		useFormContext< Product >();
+
+	usePreventLeavingPage( isDirty );
 
 	const getProductDataForTracks = () => {
 		return {

@@ -24,6 +24,11 @@
 				margin-top: 0;
 			}
 		}
+		&.is-new {
+			.category-field-dropdown__toggle {
+				margin-right: $gap-smaller;
+			}
+		}
 	}
 	&__item-content {
 		height: 48px;

@@ -1,6 +1,6 @@
 === WooCommerce ===
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, rodrigosprimo, peterfabian1000, vedjain, jamosova, obliviousharmony, konamiman, sadowski, wpmuguru, royho, barryhughes-1
-Tags: online store, ecommerce, shop, shopping cart, storefront, checkout, downloadable, downloads, payments, paypal, storefront, stripe, woo commerce, e-commerce, store, sales, sell, woo, cart
+Tags: online store, ecommerce, shop, shopping cart, sell online, storefront, checkout, payments, woo, woo commerce, e-commerce, store
 Requires at least: 5.8
 Tested up to: 6.0
 Requires PHP: 7.2
@@ -163,6 +163,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 7.2.0 2022-XX-XX =
+= 7.3.0 2022-XX-XX =
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).

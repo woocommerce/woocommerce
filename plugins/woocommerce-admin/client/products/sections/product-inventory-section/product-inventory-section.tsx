@@ -71,7 +71,9 @@ export const ProductInventorySection: React.FC = () => {
 							'SKU (Stock Keeping Unit)',
 							'woocommerce'
 						) }
-						{ ...getInputProps( 'sku' ) }
+						{ ...getInputProps( 'sku', {
+							className: 'half-width-field',
+						} ) }
 					/>
 					<div className="woocommerce-product-form__field">
 						<ConditionalWrapper
