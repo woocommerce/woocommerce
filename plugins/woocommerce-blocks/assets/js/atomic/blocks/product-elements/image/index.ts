@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
-import { image, Icon } from '@wordpress/icons';
-import { __ } from '@wordpress/i18n';
+import type { BlockConfiguration } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -11,26 +10,26 @@ import { __ } from '@wordpress/i18n';
 import edit from './edit';
 
 import { supports } from './supports';
-import { attributes } from './attributes';
+import attributes from './attributes';
 import sharedConfig from '../shared/config';
+import {
+	BLOCK_TITLE as title,
+	BLOCK_ICON as icon,
+	BLOCK_DESCRIPTION as description,
+} from './constants';
 
-const blockConfig = {
+type CustomBlockConfiguration = BlockConfiguration & {
+	ancestor: string[];
+};
+
+const blockConfig: CustomBlockConfiguration = {
+	...sharedConfig,
 	apiVersion: 2,
 	name: 'woocommerce/product-image',
-	title: __( 'Product Image', 'woo-gutenberg-products-block' ),
-	icon: {
-		src: (
-			<Icon
-				icon={ image }
-				className="wc-block-editor-components-block-icon"
-			/>
-		),
-	},
+	title,
+	icon: { src: icon },
 	keywords: [ 'WooCommerce' ],
-	description: __(
-		'Display the main product image.',
-		'woo-gutenberg-products-block'
-	),
+	description,
 	usesContext: [ 'query', 'queryId', 'postId' ],
 	ancestor: [
 		'@woocommerce/all-products',
@@ -43,7 +42,4 @@ const blockConfig = {
 	edit,
 };
 
-registerBlockType( 'woocommerce/product-image', {
-	...sharedConfig,
-	...blockConfig,
-} );
+registerBlockType( 'woocommerce/product-image', { ...blockConfig } );

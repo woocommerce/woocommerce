@@ -66,7 +66,14 @@ describe( 'Product Image Block', () => {
 					product={ productWithImages }
 					isLoading={ false }
 				>
-					<Block showProductLink={ true } />
+					<Block
+						showProductLink={ true }
+						productId={ productWithImages.id }
+						showSaleBadge={ false }
+						saleBadgeAlign={ 'left' }
+						imageSizing={ 'full-size' }
+						isDescendentOfQueryLoop={ false }
+					/>
 				</ProductDataContextProvider>
 			);
 
@@ -93,7 +100,14 @@ describe( 'Product Image Block', () => {
 					product={ productWithoutImages }
 					isLoading={ false }
 				>
-					<Block showProductLink={ true } />
+					<Block
+						showProductLink={ true }
+						productId={ productWithoutImages.id }
+						showSaleBadge={ false }
+						saleBadgeAlign={ 'left' }
+						imageSizing={ 'full-size' }
+						isDescendentOfQueryLoop={ false }
+					/>
 				</ProductDataContextProvider>
 			);
 
@@ -119,7 +133,14 @@ describe( 'Product Image Block', () => {
 					product={ productWithImages }
 					isLoading={ false }
 				>
-					<Block showProductLink={ false } />
+					<Block
+						showProductLink={ false }
+						productId={ productWithImages.id }
+						showSaleBadge={ false }
+						saleBadgeAlign={ 'left' }
+						imageSizing={ 'full-size' }
+						isDescendentOfQueryLoop={ false }
+					/>
 				</ProductDataContextProvider>
 			);
 			const image = component.getByTestId( 'product-image' );
@@ -142,7 +163,14 @@ describe( 'Product Image Block', () => {
 					product={ productWithoutImages }
 					isLoading={ false }
 				>
-					<Block showProductLink={ false } />
+					<Block
+						showProductLink={ false }
+						productId={ productWithoutImages.id }
+						showSaleBadge={ false }
+						saleBadgeAlign={ 'left' }
+						imageSizing={ 'full-size' }
+						isDescendentOfQueryLoop={ false }
+					/>
 				</ProductDataContextProvider>
 			);
 
@@ -163,7 +191,14 @@ describe( 'Product Image Block', () => {
 					product={ productWithoutImages }
 					isLoading={ false }
 				>
-					<Block showProductLink={ true } />
+					<Block
+						showProductLink={ true }
+						productId={ productWithoutImages.id }
+						showSaleBadge={ false }
+						saleBadgeAlign={ 'left' }
+						imageSizing={ 'full-size' }
+						isDescendentOfQueryLoop={ false }
+					/>
 				</ProductDataContextProvider>
 			);
 
