@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-CustomOrdersTableController::custom_orders_table_usage_is_enabled returns now false if the HPOS feature is disabled

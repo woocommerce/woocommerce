@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Added default additional content to emails via filter woocommerce_email_additional_content_.
