@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { getAdminLink } from '@woocommerce/settings';
 import {
 	Product,
 	PRODUCTS_STORE_NAME,
@@ -15,6 +16,7 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import { getProductTitle } from './utils/get-product-title';
+import { ProductBreadcrumbs } from './product-breadcrumbs';
 import { ProductStatusBadge } from './product-status-badge';
 import { WooHeaderPageTitle } from '~/header/utils';
 
@@ -34,10 +36,17 @@ export const ProductTitle: React.FC = () => {
 		};
 	} );
 
+	const breadcrumbs = [
+		{
+			href: getAdminLink( 'edit.php?post_type=product' ),
+			title: __( 'Products', 'woocommerce' ),
+		},
+	];
 	const title = getProductTitle( values.name, values.type, persistedName );
 
 	return (
 		<WooHeaderPageTitle>
+			<ProductBreadcrumbs breadcrumbs={ breadcrumbs } />
 			{ title }
 			<ProductStatusBadge />
 		</WooHeaderPageTitle>
