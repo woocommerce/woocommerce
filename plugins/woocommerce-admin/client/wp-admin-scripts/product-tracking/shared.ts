@@ -14,7 +14,40 @@ import { waitUntilElementIsPresent } from './utils';
  * @return object
  */
 const getProductData = () => {
-	return {
+	let isBlockEditor = false;
+
+	if (
+		document.querySelectorAll( '.block-editor' ).length !== 0 &&
+		document.querySelectorAll( '.block-editor' )[ 0 ]
+	) {
+		isBlockEditor = true;
+	}
+
+	let description_value = '';
+	let tagsText = '';
+
+	if ( ! isBlockEditor ) {
+		tagsText = (
+			document.querySelector(
+				'[name="tax_input[product_tag]"]'
+			) as HTMLInputElement
+		 ).value;
+		if ( jQuery( '#content' ).is( ':visible' ) ) {
+			description_value = (
+				document.querySelector( '#content' ) as HTMLInputElement
+			 ).value;
+		} else if ( typeof tinymce === 'object' && tinymce.get( 'content' ) ) {
+			description_value = tinymce.get( 'content' ).getContent();
+		}
+	} else {
+		description_value = (
+			document.querySelector(
+				'.block-editor-rich-text__editable'
+			) as HTMLInputElement
+		 )?.value;
+	}
+
+	const productData = {
 		product_id: ( document.querySelector( '#post_ID' ) as HTMLInputElement )
 			?.value,
 		product_type: (
@@ -29,7 +62,66 @@ const getProductData = () => {
 		manage_stock: (
 			document.querySelector( '#_manage_stock' ) as HTMLInputElement
 		 )?.value,
+		attributes: document.querySelectorAll( '.woocommerce_attribute' )
+			.length,
+		categories: document.querySelectorAll(
+			'[name="tax_input[product_cat][]"]:checked'
+		).length,
+		cross_sells: document.querySelectorAll( '#crosssell_ids option' ).length
+			? 'Yes'
+			: 'No',
+		description: description_value.trim() !== '' ? 'Yes' : 'No',
+		enable_reviews: (
+			document.querySelector( '#comment_status' ) as HTMLInputElement
+		 ).checked
+			? 'Yes'
+			: 'No',
+		is_block_editor: isBlockEditor,
+		menu_order: (
+			document.querySelector( '#menu_order' ) as HTMLInputElement
+		 )?.value
+			? 'Yes'
+			: 'No',
+		product_gallery: document.querySelectorAll(
+			'#product_images_container .product_images > li'
+		).length,
+		product_image:
+			parseInt(
+				(
+					document.querySelector(
+						'#_thumbnail_id'
+					) as HTMLInputElement
+				 )?.value,
+				2
+			) > 0
+				? 'Yes'
+				: 'No',
+		purchase_note: (
+			document.querySelector( '#_purchase_note' ) as HTMLInputElement
+		 )?.value.length
+			? 'Yes'
+			: 'No',
+		sale_price: (
+			document.querySelector( '#_sale_price' ) as HTMLInputElement
+		 )?.value
+			? 'Yes'
+			: 'No',
+		short_description: (
+			document.querySelector( '#excerpt' ) as HTMLInputElement
+		 )?.value.length
+			? 'Yes'
+			: 'No',
+		tags: tagsText.length > 0 ? tagsText.split( ',' ).length : 0,
+		upsells: document.querySelectorAll( '#upsell_ids option' ).length
+			? 'Yes'
+			: 'No',
+		weight: ( document.querySelector( '#_weight' ) as HTMLInputElement )
+			.value
+			? 'Yes'
+			: 'No',
+		// stock_quantity_update: TODO
 	};
+	return productData;
 };
 
 /**
