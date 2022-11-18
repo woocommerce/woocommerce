@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { PaymentResult } from '@woocommerce/types';
-
-/**
  * Internal dependencies
  */
 import { ACTION_TYPES as types } from './action-types';
@@ -58,16 +53,6 @@ export const __internalSetComplete = (
 export const __internalSetRedirectUrl = ( redirectUrl: string ) => ( {
 	type: types.SET_REDIRECT_URL,
 	redirectUrl,
-} );
-
-/**
- * Store the result of the payment attempt from the /checkout StoreApi call
- *
- * @param  data The result of the payment attempt through the StoreApi /checkout endpoints
- */
-export const __internalSetPaymentResult = ( data: PaymentResult ) => ( {
-	type: types.SET_PAYMENT_RESULT,
-	data,
 } );
 
 /**
@@ -157,7 +142,6 @@ export type CheckoutAction =
 			| typeof __internalSetIdle
 			| typeof __internalSetComplete
 			| typeof __internalSetProcessing
-			| typeof __internalSetPaymentResult
 			| typeof __internalSetBeforeProcessing
 			| typeof __internalSetAfterProcessing
 			| typeof __internalSetRedirectUrl

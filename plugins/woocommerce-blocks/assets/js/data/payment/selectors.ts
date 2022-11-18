@@ -7,29 +7,29 @@ import deprecated from '@wordpress/deprecated';
 /**
  * Internal dependencies
  */
-import { PaymentMethodDataState } from './default-state';
+import { PaymentState } from './default-state';
 import { filterActiveSavedPaymentMethods } from './utils/filter-active-saved-payment-methods';
 import { STATUS as PAYMENT_STATUS } from './constants';
 
-export const isPaymentPristine = ( state: PaymentMethodDataState ) =>
+export const isPaymentPristine = ( state: PaymentState ) =>
 	state.status === PAYMENT_STATUS.PRISTINE;
 
-export const isPaymentStarted = ( state: PaymentMethodDataState ) =>
+export const isPaymentStarted = ( state: PaymentState ) =>
 	state.status === PAYMENT_STATUS.STARTED;
 
-export const isPaymentProcessing = ( state: PaymentMethodDataState ) =>
+export const isPaymentProcessing = ( state: PaymentState ) =>
 	state.status === PAYMENT_STATUS.PROCESSING;
 
-export const isPaymentSuccess = ( state: PaymentMethodDataState ) =>
+export const isPaymentSuccess = ( state: PaymentState ) =>
 	state.status === PAYMENT_STATUS.SUCCESS;
 
-export const hasPaymentError = ( state: PaymentMethodDataState ) =>
+export const hasPaymentError = ( state: PaymentState ) =>
 	state.status === PAYMENT_STATUS.ERROR;
 
-export const isPaymentFailed = ( state: PaymentMethodDataState ) =>
+export const isPaymentFailed = ( state: PaymentState ) =>
 	state.status === PAYMENT_STATUS.FAILED;
 
-export const isPaymentFinished = ( state: PaymentMethodDataState ) => {
+export const isPaymentFinished = ( state: PaymentState ) => {
 	return (
 		state.status === PAYMENT_STATUS.SUCCESS ||
 		state.status === PAYMENT_STATUS.ERROR ||
@@ -37,40 +37,36 @@ export const isPaymentFinished = ( state: PaymentMethodDataState ) => {
 	);
 };
 
-export const isExpressPaymentMethodActive = (
-	state: PaymentMethodDataState
-) => {
+export const isExpressPaymentMethodActive = ( state: PaymentState ) => {
 	return Object.keys( state.availableExpressPaymentMethods ).includes(
 		state.activePaymentMethod
 	);
 };
 
-export const getActiveSavedToken = ( state: PaymentMethodDataState ) => {
+export const getActiveSavedToken = ( state: PaymentState ) => {
 	return typeof state.paymentMethodData === 'object' &&
 		objectHasProp( state.paymentMethodData, 'token' )
 		? state.paymentMethodData.token + ''
 		: '';
 };
 
-export const getActivePaymentMethod = ( state: PaymentMethodDataState ) => {
+export const getActivePaymentMethod = ( state: PaymentState ) => {
 	return state.activePaymentMethod;
 };
 
-export const getAvailablePaymentMethods = ( state: PaymentMethodDataState ) => {
+export const getAvailablePaymentMethods = ( state: PaymentState ) => {
 	return state.availablePaymentMethods;
 };
 
-export const getAvailableExpressPaymentMethods = (
-	state: PaymentMethodDataState
-) => {
+export const getAvailableExpressPaymentMethods = ( state: PaymentState ) => {
 	return state.availableExpressPaymentMethods;
 };
 
-export const getPaymentMethodData = ( state: PaymentMethodDataState ) => {
+export const getPaymentMethodData = ( state: PaymentState ) => {
 	return state.paymentMethodData;
 };
 
-export const getSavedPaymentMethods = ( state: PaymentMethodDataState ) => {
+export const getSavedPaymentMethods = ( state: PaymentState ) => {
 	return state.savedPaymentMethods;
 };
 
@@ -78,9 +74,7 @@ export const getSavedPaymentMethods = ( state: PaymentMethodDataState ) => {
  * Filters the list of saved payment methods and returns only the ones which
  * are active and supported by the payment gateway
  */
-export const getActiveSavedPaymentMethods = (
-	state: PaymentMethodDataState
-) => {
+export const getActiveSavedPaymentMethods = ( state: PaymentState ) => {
 	const availablePaymentMethodKeys = Object.keys(
 		state.availablePaymentMethods
 	);
@@ -91,13 +85,11 @@ export const getActiveSavedPaymentMethods = (
 	);
 };
 
-export const paymentMethodsInitialized = ( state: PaymentMethodDataState ) => {
+export const paymentMethodsInitialized = ( state: PaymentState ) => {
 	return state.paymentMethodsInitialized;
 };
 
-export const expressPaymentMethodsInitialized = (
-	state: PaymentMethodDataState
-) => {
+export const expressPaymentMethodsInitialized = ( state: PaymentState ) => {
 	return state.expressPaymentMethodsInitialized;
 };
 
@@ -105,7 +97,7 @@ export const expressPaymentMethodsInitialized = (
  * @deprecated - use these selectors instead: isPaymentPristine, isPaymentStarted, isPaymentProcessing,
  * isPaymentFinished, hasPaymentError, isPaymentSuccess, isPaymentFailed
  */
-export const getCurrentStatus = ( state: PaymentMethodDataState ) => {
+export const getCurrentStatus = ( state: PaymentState ) => {
 	deprecated( 'getCurrentStatus', {
 		since: '8.9.0',
 		alternative:
@@ -126,10 +118,14 @@ export const getCurrentStatus = ( state: PaymentMethodDataState ) => {
 	};
 };
 
-export const getShouldSavePaymentMethod = ( state: PaymentMethodDataState ) => {
+export const getShouldSavePaymentMethod = ( state: PaymentState ) => {
 	return state.shouldSavePaymentMethod;
 };
 
-export const getState = ( state: PaymentMethodDataState ) => {
+export const getPaymentResult = ( state: PaymentState ) => {
+	return state.paymentResult;
+};
+
+export const getState = ( state: PaymentState ) => {
 	return state;
 };

@@ -9,6 +9,7 @@ import { DataRegistry } from '@wordpress/data';
  */
 import type { EventObserversType } from '../../base/context/event-emit/types';
 import type { CheckoutState } from './default-state';
+import type { PaymentState } from '../payment/default-state';
 import type { DispatchFromMap, SelectFromMap } from '../mapped-types';
 import * as selectors from './selectors';
 import * as actions from './actions';
@@ -19,7 +20,7 @@ export type CheckoutAfterProcessingWithErrorEventData = {
 	orderId: CheckoutState[ 'orderId' ];
 	customerId: CheckoutState[ 'customerId' ];
 	orderNotes: CheckoutState[ 'orderNotes' ];
-	processingResponse: CheckoutState[ 'paymentResult' ];
+	processingResponse: PaymentState[ 'paymentResult' ];
 };
 export type CheckoutAndPaymentNotices = {
 	checkoutNotices: Notice[];

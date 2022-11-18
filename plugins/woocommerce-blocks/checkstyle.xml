@@ -645,22 +645,6 @@
 <file name="assets/js/data/cart/controls.js">
 <error line="18" column="31" severity="error" message="Parameter &apos;preserveCartData&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
 </file>
-<file name="assets/js/data/checkout/thunks.ts">
-<error line="5" column="10" severity="error" message="Module &apos;&quot;@wordpress/notices&quot;&apos; has no exported member &apos;store&apos;." source="TS2305" />
-<error line="57" column="11" severity="error" message="Property &apos;createErrorNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
-<error line="92" column="12" severity="error" message="Property &apos;createErrorNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
-</file>
-<file name="assets/js/data/checkout/reducers.ts">
-<error line="164" column="25" severity="error" message="Property &apos;SET_PRISTINE&apos; does not exist on type &apos;{ readonly SET_IDLE: &quot;SET_IDLE&quot;; readonly SET_REDIRECT_URL: &quot;SET_REDIRECT_URL&quot;; readonly SET_COMPLETE: &quot;SET_CHECKOUT_COMPLETE&quot;; readonly SET_BEFORE_PROCESSING: &quot;SET_BEFORE_PROCESSING&quot;; ... 11 more ...; readonly SET_IS_CART: &quot;SET_IS_CART&quot;; }&apos;." source="TS2339" />
-</file>
-<file name="assets/js/data/checkout/index.ts">
-<error line="21" column="44" severity="error" message="Argument of type &apos;{ reducer: (state: CheckoutState | undefined, action: actions.CheckoutAction) =&gt; CheckoutState; selectors: typeof selectors; actions: typeof actions; }&apos; is not assignable to parameter of type &apos;StoreConfig&lt;CheckoutState&gt;&apos;.
-  Types of property &apos;actions&apos; are incompatible.
-    Type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/data/checkout/actions&quot;)&apos; is not assignable to type &apos;{ [k: string]: (...args: readonly any[]) =&gt; AnyAction | Generator&lt;any, any, unknown&gt;; }&apos;.
-      Property &apos;__internalProcessCheckoutResponse&apos; is incompatible with index signature.
-        Type &apos;(response: CheckoutResponse) =&gt; ({ dispatch, }: { dispatch: DispatchFromMap&lt;typeof actions&gt;; }) =&gt; void&apos; is not assignable to type &apos;(...args: readonly any[]) =&gt; AnyAction | Generator&lt;any, any, unknown&gt;&apos;.
-          Type &apos;({ dispatch, }: { dispatch: DispatchFromMap&lt;typeof actions&gt;; }) =&gt; void&apos; is not assignable to type &apos;AnyAction | Generator&lt;any, any, unknown&gt;&apos;." source="TS2345" />
-</file>
 <file name="assets/js/previews/cart.ts">
 <error line="75" column="4" severity="error" message="Property &apos;price_range&apos; is missing in type &apos;{ currency_code: &quot;USD&quot;; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; raw_prices: { ...; }; }&apos; but required in type &apos;CartItemPrices&apos;." source="TS2741" />
 <error line="141" column="4" severity="error" message="Property &apos;price_range&apos; is missing in type &apos;{ currency_code: &quot;USD&quot;; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; raw_prices: { ...; }; }&apos; but required in type &apos;CartItemPrices&apos;." source="TS2741" />
@@ -696,15 +680,31 @@
 <error line="120" column="41" severity="error" message="Property &apos;validationErrors&apos; does not exist on type &apos;never&apos;." source="TS2339" />
 </file>
 <file name="assets/js/data/payment/actions.ts">
-<error line="51" column="19" severity="error" message="Binding element &apos;select&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="51" column="27" severity="error" message="Binding element &apos;dispatch&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="122" column="19" severity="error" message="Binding element &apos;dispatch&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="122" column="29" severity="error" message="Binding element &apos;select&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="170" column="19" severity="error" message="Binding element &apos;select&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="170" column="27" severity="error" message="Binding element &apos;dispatch&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="52" column="19" severity="error" message="Binding element &apos;select&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="52" column="27" severity="error" message="Binding element &apos;dispatch&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="133" column="19" severity="error" message="Binding element &apos;dispatch&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="133" column="29" severity="error" message="Binding element &apos;select&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="181" column="19" severity="error" message="Binding element &apos;select&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+<error line="181" column="27" severity="error" message="Binding element &apos;dispatch&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
+</file>
+<file name="assets/js/data/checkout/thunks.ts">
+<error line="5" column="10" severity="error" message="Module &apos;&quot;@wordpress/notices&quot;&apos; has no exported member &apos;store&apos;." source="TS2305" />
+<error line="63" column="11" severity="error" message="Property &apos;createErrorNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
+<error line="98" column="12" severity="error" message="Property &apos;createErrorNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
+</file>
+<file name="assets/js/data/checkout/reducers.ts">
+<error line="152" column="25" severity="error" message="Property &apos;SET_PRISTINE&apos; does not exist on type &apos;{ readonly SET_IDLE: &quot;SET_IDLE&quot;; readonly SET_REDIRECT_URL: &quot;SET_REDIRECT_URL&quot;; readonly SET_COMPLETE: &quot;SET_CHECKOUT_COMPLETE&quot;; readonly SET_BEFORE_PROCESSING: &quot;SET_BEFORE_PROCESSING&quot;; ... 10 more ...; readonly SET_IS_CART: &quot;SET_IS_CART&quot;; }&apos;." source="TS2339" />
+</file>
+<file name="assets/js/data/checkout/index.ts">
+<error line="21" column="44" severity="error" message="Argument of type &apos;{ reducer: (state: CheckoutState | undefined, action: actions.CheckoutAction) =&gt; CheckoutState; selectors: typeof selectors; actions: typeof actions; }&apos; is not assignable to parameter of type &apos;StoreConfig&lt;CheckoutState&gt;&apos;.
+  Types of property &apos;actions&apos; are incompatible.
+    Type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/data/checkout/actions&quot;)&apos; is not assignable to type &apos;{ [k: string]: (...args: readonly any[]) =&gt; AnyAction | Generator&lt;any, any, unknown&gt;; }&apos;.
+      Property &apos;__internalProcessCheckoutResponse&apos; is incompatible with index signature.
+        Type &apos;(response: CheckoutResponse) =&gt; ({ dispatch, }: { dispatch: DispatchFromMap&lt;typeof actions&gt;; }) =&gt; void&apos; is not assignable to type &apos;(...args: readonly any[]) =&gt; AnyAction | Generator&lt;any, any, unknown&gt;&apos;.
+          Type &apos;({ dispatch, }: { dispatch: DispatchFromMap&lt;typeof actions&gt;; }) =&gt; void&apos; is not assignable to type &apos;AnyAction | Generator&lt;any, any, unknown&gt;&apos;." source="TS2345" />
 </file>
 <file name="assets/js/data/payment/index.ts">
-<error line="25" column="44" severity="error" message="Argument of type &apos;{ reducer: Reducer&lt;PaymentMethodDataState, AnyAction&gt;; selectors: typeof selectors; actions: typeof actions; controls: any; }&apos; is not assignable to parameter of type &apos;StoreConfig&lt;PaymentMethodDataState&gt;&apos;.
+<error line="25" column="44" severity="error" message="Argument of type &apos;{ reducer: Reducer&lt;PaymentState, AnyAction&gt;; selectors: typeof selectors; actions: typeof actions; controls: any; }&apos; is not assignable to parameter of type &apos;StoreConfig&lt;PaymentState&gt;&apos;.
   Types of property &apos;actions&apos; are incompatible.
     Type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/data/payment/actions&quot;)&apos; is not assignable to type &apos;{ [k: string]: (...args: readonly any[]) =&gt; AnyAction | Generator&lt;any, any, unknown&gt;; }&apos;.
       Property &apos;__internalUpdateAvailablePaymentMethods&apos; is incompatible with index signature.

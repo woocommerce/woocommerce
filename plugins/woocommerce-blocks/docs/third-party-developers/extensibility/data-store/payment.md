@@ -405,6 +405,31 @@ const expressPaymentMethodsInitialized =
 	store.expressPaymentMethodsInitialized();
 ```
 
+### getPaymentResult
+
+Returns the result of the last payment attempt
+
+#### _Returns_
+
+`object` - An object with the following properties:
+
+```ts
+{
+	message: string;
+	paymentStatus: 'success' | 'failure' | 'pending' | 'error' | 'not set';
+	paymentDetails: Record< string, string > | Record< string, never >;
+	redirectUrl: string;
+}
+```
+
+#### Example
+
+```js
+const store = select( 'wc/store/payment' );
+const expressPaymentMethodsInitialized =
+	store.expressPaymentMethodsInitialized();
+```
+
 <!-- FEEDBACK -->
 
 ---

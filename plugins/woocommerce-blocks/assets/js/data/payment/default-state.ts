@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { EmptyObjectType } from '@woocommerce/types';
+import type { EmptyObjectType, PaymentResult } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
 import {
 	PlainPaymentMethods,
@@ -14,7 +14,7 @@ import {
 import { SavedPaymentMethod } from './types';
 import { STATUS as PAYMENT_STATUS } from './constants';
 
-export interface PaymentMethodDataState {
+export interface PaymentState {
 	status: string;
 	activePaymentMethod: string;
 	activeSavedToken: string;
@@ -25,11 +25,12 @@ export interface PaymentMethodDataState {
 		| Record< string, SavedPaymentMethod[] >
 		| EmptyObjectType;
 	paymentMethodData: Record< string, unknown >;
+	paymentResult: PaymentResult | null;
 	paymentMethodsInitialized: boolean;
 	expressPaymentMethodsInitialized: boolean;
 	shouldSavePaymentMethod: boolean;
 }
-export const defaultPaymentMethodDataState: PaymentMethodDataState = {
+export const defaultPaymentState: PaymentState = {
 	status: PAYMENT_STATUS.PRISTINE,
 	activePaymentMethod: '',
 	activeSavedToken: '',
@@ -39,6 +40,7 @@ export const defaultPaymentMethodDataState: PaymentMethodDataState = {
 		Record< string, SavedPaymentMethod[] > | EmptyObjectType
 	>( 'customerPaymentMethods', {} ),
 	paymentMethodData: {},
+	paymentResult: null,
 	paymentMethodsInitialized: false,
 	expressPaymentMethodsInitialized: false,
 	shouldSavePaymentMethod: false,

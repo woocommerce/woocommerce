@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { isSameAddress } from '@woocommerce/base-utils';
-import { PaymentResult } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -14,8 +13,6 @@ export type CheckoutState = {
 	status: STATUS;
 	// If any of the totals, taxes, shipping, etc need to be calculated, the count will be increased here
 	calculatingCount: number;
-	// The result of the payment processing
-	paymentResult: PaymentResult | null;
 	// True when the checkout is in an error state. Whatever caused the error (validation/payment method) will likely have triggered a notice.
 	hasError: boolean;
 	// This is the url that checkout will redirect to when it's ready.
@@ -47,6 +44,5 @@ export const defaultState: CheckoutState = {
 		checkoutData.shipping_address
 	),
 	shouldCreateAccount: false,
-	paymentResult: null,
 	extensionData: {},
 };
