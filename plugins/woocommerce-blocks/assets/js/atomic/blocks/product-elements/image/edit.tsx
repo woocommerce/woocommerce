@@ -6,12 +6,18 @@ import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { createInterpolateElement, useEffect } from '@wordpress/element';
 import { getAdminLink, getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean } from '@woocommerce/types';
+import type { BlockEditProps } from '@wordpress/blocks';
+import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
 import {
 	Disabled,
 	PanelBody,
 	ToggleControl,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore - Ignoring because `__experimentalToggleGroupControl` is not yet in the type definitions.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControl as ToggleGroupControl,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore - Ignoring because `__experimentalToggleGroupControl` is not yet in the type definitions.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
@@ -20,24 +26,35 @@ import {
  * Internal dependencies
  */
 import Block from './block';
+import withProductSelector from '../shared/with-product-selector';
+import {
+	BLOCK_TITLE as label,
+	BLOCK_ICON as icon,
+	BLOCK_DESCRIPTION as description,
+} from './constants';
+import type { BlockAttributes } from './types';
 
-const Edit = ( { attributes, setAttributes, context } ) => {
+type SaleBadgeAlignProps = 'left' | 'center' | 'right';
+type ImageSizingProps = 'full-size' | 'cropped';
+
+const Edit = ( {
+	attributes,
+	setAttributes,
+	context,
+}: BlockEditProps< BlockAttributes > & { context: Context } ): JSX.Element => {
 	const { showProductLink, imageSizing, showSaleBadge, saleBadgeAlign } =
 		attributes;
-
 	const blockProps = useBlockProps();
-
 	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
-
-	useEffect(
-		() => setAttributes( { isDescendentOfQueryLoop } ),
-		[ setAttributes, isDescendentOfQueryLoop ]
-	);
-
 	const isBlockThemeEnabled = getSettingWithCoercion(
 		'is_block_theme_enabled',
 		false,
 		isBoolean
+	);
+
+	useEffect(
+		() => setAttributes( { isDescendentOfQueryLoop } ),
+		[ setAttributes, isDescendentOfQueryLoop ]
 	);
 
 	useEffect( () => {
@@ -91,7 +108,7 @@ const Edit = ( { attributes, setAttributes, context } ) => {
 								'woo-gutenberg-products-block'
 							) }
 							value={ saleBadgeAlign }
-							onChange={ ( value ) =>
+							onChange={ ( value: SaleBadgeAlignProps ) =>
 								setAttributes( { saleBadgeAlign: value } )
 							}
 						>
@@ -143,7 +160,7 @@ const Edit = ( { attributes, setAttributes, context } ) => {
 								}
 							) }
 							value={ imageSizing }
-							onChange={ ( value ) =>
+							onChange={ ( value: ImageSizingProps ) =>
 								setAttributes( { imageSizing: value } )
 							}
 						>
@@ -172,4 +189,4 @@ const Edit = ( { attributes, setAttributes, context } ) => {
 	);
 };
 
-export default Edit;
+export default withProductSelector( { icon, label, description } )( Edit );
