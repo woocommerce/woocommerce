@@ -1,4 +1,4 @@
-.product-settings__panel {
+.woocommerce-product-settings__panel {
 	position: absolute;
 	top: 100%;
 	right: 0;
@@ -25,5 +25,12 @@
 		padding: 0;
 		min-width: 24px;
 		height: 24px;
+	}
+}
+
+@include breakpoint( '<782px' ) {
+	.woocommerce-product-settings__toggle,
+	.woocommerce-product-settings__panel {
+		display: none;
 	}
 }
