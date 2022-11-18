@@ -5,6 +5,7 @@ import {
 	PlainPaymentMethods,
 	PlainExpressPaymentMethods,
 } from '@woocommerce/type-defs/payments';
+import type { PaymentResult } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -110,6 +111,16 @@ export const __internalSetPaymentMethodData = (
 ) => ( {
 	type: ACTION_TYPES.SET_PAYMENT_METHOD_DATA,
 	paymentMethodData,
+} );
+
+/**
+ * Store the result of the payment attempt from the /checkout StoreApi call
+ *
+ * @param  data The result of the payment attempt through the StoreApi /checkout endpoints
+ */
+export const __internalSetPaymentResult = ( data: PaymentResult ) => ( {
+	type: ACTION_TYPES.SET_PAYMENT_RESULT,
+	data,
 } );
 
 /**

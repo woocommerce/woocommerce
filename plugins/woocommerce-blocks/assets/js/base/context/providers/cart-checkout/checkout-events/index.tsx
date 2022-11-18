@@ -197,7 +197,6 @@ export const CheckoutEventsProvider = ( {
 		checkoutState.orderId,
 		checkoutState.customerId,
 		checkoutState.orderNotes,
-		checkoutState.paymentResult,
 		previousStatus,
 		previousHasError,
 		createErrorNotice,
