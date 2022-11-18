@@ -3,10 +3,12 @@
  */
 import type { CheckoutResponse } from '@woocommerce/types';
 import { store as noticesStore } from '@wordpress/notices';
+import { dispatch as wpDispatch, select as wpSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
+import { STORE_KEY as PAYMENT_STORE_KEY } from '../payment/constants';
 import { removeNoticesByStatus } from '../../utils/notices';
 import {
 	getPaymentResultFromCheckoutResponse,
@@ -40,7 +42,11 @@ export const __internalProcessCheckoutResponse = (
 	} ) => {
 		const paymentResult = getPaymentResultFromCheckoutResponse( response );
 		dispatch.__internalSetRedirectUrl( paymentResult?.redirectUrl || '' );
-		dispatch.__internalSetPaymentResult( paymentResult );
+		// The local `dispatch` here is bound  to the actions of the data store. We need to use the global dispatch here
+		// to dispatch an action on a different store.
+		wpDispatch( PAYMENT_STORE_KEY ).__internalSetPaymentResult(
+			paymentResult
+		);
 		dispatch.__internalSetAfterProcessing();
 	};
 };
@@ -90,15 +96,16 @@ export const __internalEmitAfterProcessingEvents: emitAfterProcessingEventsType 
 	( { observers, notices } ) => {
 		return ( { select, dispatch, registry } ) => {
 			const { createErrorNotice } = registry.dispatch( noticesStore );
-			const state = select.getCheckoutState();
+			const checkoutState = select.getCheckoutState();
 			const data = {
-				redirectUrl: state.redirectUrl,
-				orderId: state.orderId,
-				customerId: state.customerId,
-				orderNotes: state.orderNotes,
-				processingResponse: state.paymentResult,
+				redirectUrl: checkoutState.redirectUrl,
+				orderId: checkoutState.orderId,
+				customerId: checkoutState.customerId,
+				orderNotes: checkoutState.orderNotes,
+				processingResponse:
+					wpSelect( PAYMENT_STORE_KEY ).getPaymentResult(),
 			};
-			if ( state.hasError ) {
+			if ( checkoutState.hasError ) {
 				// allow payment methods or other things to customize the error
 				// with a fallback if nothing customizes it.
 				emitEventWithAbort(

@@ -180,4 +180,25 @@ describe( 'paymentMethodDataReducer', () => {
 			activeSavedToken: '',
 		} );
 	} );
+
+	it( 'should handle SET_PAYMENT_RESULT', () => {
+		const mockResponse = {
+			message: 'success',
+			redirectUrl: 'https://example.com',
+			paymentStatus: 'not set',
+			paymentDetails: {},
+		};
+
+		const expectedState = {
+			...originalState,
+			paymentResult: mockResponse,
+		};
+
+		expect(
+			reducer( originalState, {
+				type: ACTION_TYPES.SET_PAYMENT_RESULT,
+				data: mockResponse,
+			} )
+		).toEqual( expectedState );
+	} );
 } );

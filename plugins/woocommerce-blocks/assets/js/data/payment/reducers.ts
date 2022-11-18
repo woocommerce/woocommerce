@@ -2,20 +2,17 @@
  * External dependencies
  */
 import type { Reducer } from 'redux';
-import { objectHasProp } from '@woocommerce/types';
+import { objectHasProp, PaymentResult } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import {
-	defaultPaymentMethodDataState,
-	PaymentMethodDataState,
-} from './default-state';
+import { defaultPaymentState, PaymentState } from './default-state';
 import { ACTION_TYPES } from './action-types';
 import { STATUS } from './constants';
 
-const reducer: Reducer< PaymentMethodDataState > = (
-	state = defaultPaymentMethodDataState,
+const reducer: Reducer< PaymentState > = (
+	state = defaultPaymentState,
 	action
 ) => {
 	let newState = state;
@@ -73,6 +70,13 @@ const reducer: Reducer< PaymentMethodDataState > = (
 			newState = {
 				...state,
 				paymentMethodData: action.paymentMethodData,
+			};
+			break;
+
+		case ACTION_TYPES.SET_PAYMENT_RESULT:
+			newState = {
+				...state,
+				paymentResult: action.data as PaymentResult,
 			};
 			break;
 
