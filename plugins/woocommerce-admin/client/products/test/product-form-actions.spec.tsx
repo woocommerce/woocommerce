@@ -37,6 +37,7 @@ jest.mock( '../use-product-helper', () => {
 		} ),
 	};
 } );
+jest.mock( '~/hooks/usePreventLeavingPage' );
 
 describe( 'ProductFormActions', () => {
 	beforeEach( () => {
