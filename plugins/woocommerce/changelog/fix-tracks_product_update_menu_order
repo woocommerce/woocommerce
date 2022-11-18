@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Corrected the `wcadmin_product_update` Tracks event `menu_order` property value.
-
-
