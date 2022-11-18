@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\WC_Template_Loader.
  */
 
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+
 
 /**
  * Class WC_Template_Loader
@@ -14,7 +16,7 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 
 	public function test_wc_template_loader_loads_default_file_without_blocks() {
 
-		global $wp_taxonomies, $wc_product_attributes;
+		global $wp_taxonomies;
 
 		$this->initialize_template_loader();
 
@@ -33,7 +35,7 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 		$this->assertDefaultTemplateFileName( 'taxonomy-product-tag' );
 
 		// Check Woo Taxonomy Product Attribute.
-		$this->load_product_attribute_tax_in_query( 'pa_color' );
+		$this->load_product_attribute_tax_in_query();
 		$this->assertDefaultTemplateFileName( 'taxonomy-product-attribute' );
 
 		// Check Custom Product Taxonomies
@@ -49,7 +51,7 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 
 	public function test_wc_template_loader_loads_template_with_blocks() {
 
-		global $wp_taxonomies, $wc_product_attributes;
+		global $wp_taxonomies;
 
 		$this->initialize_template_loader();
 
@@ -68,7 +70,7 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 		$this->assertDefaultTemplateFileName();
 
 		// Check Woo Taxonomy Product Attribute.
-		$this->load_product_attribute_tax_in_query( 'pa_color' );
+		$this->load_product_attribute_tax_in_query();
 		$this->assertDefaultTemplateFileName();
 
 		// Check Custom Product Taxonomies
@@ -142,16 +144,13 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Loads a test product attribute taxonomy with the given name.
-	 *
-	 * @param string $taxonomy Taxonomy name.
+	 * Loads a test product attribute taxonomy.
 	 *
 	 * @return void
 	 */
-	private function load_product_attribute_tax_in_query( $taxonomy ) {
-		wc_create_attribute( array( 'name' => $taxonomy ) );
-
-		$this->load_tax_in_query( $taxonomy );
+	private function load_product_attribute_tax_in_query() {
+		$attr = ProductHelper::create_attribute( 'color', array( 'red', 'blue' ) );
+		$this->load_tax_in_query( $attr['attribute_taxonomy'] );
 	}
 
 	private function assertDefaultTemplateFileName( $expected = '' ) {
