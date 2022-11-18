@@ -23,12 +23,14 @@ const LocalPickupSelector = ( {
 	showPrice,
 	showIcon,
 	toggleText,
+	multiple,
 }: {
 	checked: string;
 	rate: minMaxPrices;
 	showPrice: boolean;
 	showIcon: boolean;
 	toggleText: string;
+	multiple: boolean;
 } ) => {
 	return (
 		<Radio
@@ -52,7 +54,11 @@ const LocalPickupSelector = ( {
 				{ toggleText }
 			</span>
 			{ showPrice === true && (
-				<RatePrice minRate={ rate.min } maxRate={ rate.max } />
+				<RatePrice
+					multiple={ multiple }
+					minRate={ rate.min }
+					maxRate={ rate.max }
+				/>
 			) }
 		</Radio>
 	);
@@ -145,6 +151,7 @@ const Block = ( {
 				rate={ getLocalPickupPrices(
 					shippingRates[ 0 ]?.shipping_rates
 				) }
+				multiple={ shippingRates.length > 1 }
 				showPrice={ showPrice }
 				showIcon={ showIcon }
 				toggleText={ localPickupText }

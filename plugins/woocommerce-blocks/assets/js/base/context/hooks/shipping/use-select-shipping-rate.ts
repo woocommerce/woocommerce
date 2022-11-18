@@ -30,7 +30,7 @@ export const useSelectShippingRate = (): SelectShippingRateType => {
 	} as {
 		selectShippingRate: (
 			newShippingRateId: string,
-			packageId: string | number
+			packageId?: string | number
 		) => Promise< unknown >;
 	};
 
