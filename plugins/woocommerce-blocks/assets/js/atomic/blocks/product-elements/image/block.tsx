@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import { Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
@@ -17,26 +16,69 @@ import {
 } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
+import type { HTMLAttributes } from 'react';
 
 /**
  * Internal dependencies
  */
 import ProductSaleBadge from '../sale-badge/block';
 import './style.scss';
+import type { BlockAttributes } from './types';
 
-/**
- * Product Image Block Component.
- *
- * @param {Object}            props                           Incoming props.
- * @param {string}            [props.className]               CSS Class name for the component.
- * @param {string|undefined}  [props.imageSizing]             Size of image to use.
- * @param {boolean|undefined} [props.showProductLink]         Whether or not to display a link to the product page.
- * @param {boolean}           [props.showSaleBadge]           Whether or not to display the on sale badge.
- * @param {string|undefined}  [props.saleBadgeAlign]          How should the sale badge be aligned if displayed.
- * @param {boolean}           [props.isDescendentOfQueryLoop] Whether or not be a children of Query Loop Block.
- * @return {*} The component.
- */
-export const Block = ( props ) => {
+const ImagePlaceholder = (): JSX.Element => {
+	return (
+		<img
+			src={ PLACEHOLDER_IMG_SRC }
+			alt=""
+			width={ undefined }
+			height={ undefined }
+		/>
+	);
+};
+
+interface ImageProps {
+	image?: null | {
+		alt?: string | undefined;
+		id: number;
+		name: string;
+		sizes?: string | undefined;
+		src?: string | undefined;
+		srcset?: string | undefined;
+		thumbnail?: string | undefined;
+	};
+	loaded: boolean;
+	showFullSize: boolean;
+	fallbackAlt: string;
+}
+
+const Image = ( {
+	image,
+	loaded,
+	showFullSize,
+	fallbackAlt,
+}: ImageProps ): JSX.Element => {
+	const { thumbnail, src, srcset, sizes, alt } = image || {};
+	const imageProps = {
+		alt: alt || fallbackAlt,
+		hidden: ! loaded,
+		src: thumbnail,
+		...( showFullSize && { src, srcSet: srcset, sizes } ),
+	};
+
+	return (
+		<>
+			{ imageProps.src && (
+				/* eslint-disable-next-line jsx-a11y/alt-text */
+				<img data-testid="product-image" { ...imageProps } />
+			) }
+			{ ! image && <ImagePlaceholder /> }
+		</>
+	);
+};
+
+type Props = BlockAttributes & HTMLAttributes< HTMLDivElement >;
+
+export const Block = ( props: Props ): JSX.Element | null => {
 	const {
 		className,
 		imageSizing = 'full-size',
@@ -44,12 +86,9 @@ export const Block = ( props ) => {
 		showSaleBadge,
 		saleBadgeAlign = 'right',
 	} = props;
-
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product, isLoading } = useProductDataContext();
-
 	const { dispatchStoreEvent } = useStoreEvents();
-
 	const typographyProps = useTypographyProps( props );
 	const borderProps = useBorderProps( props );
 	const spacingProps = useSpacingProps( props );
@@ -126,41 +165,6 @@ export const Block = ( props ) => {
 			</ParentComponent>
 		</div>
 	);
-};
-
-const ImagePlaceholder = () => {
-	// The alt text is left empty on purpose, as it's considered a decorative image.
-	// More can be found here: https://www.w3.org/WAI/tutorials/images/decorative/.
-	// Github discussion for a context: https://github.com/woocommerce/woocommerce-blocks/pull/7651#discussion_r1019560494.
-	return <img src={ PLACEHOLDER_IMG_SRC } alt="" />;
-};
-
-const Image = ( { image, loaded, showFullSize, fallbackAlt } ) => {
-	const { thumbnail, src, srcset, sizes, alt } = image || {};
-	const imageProps = {
-		alt: alt || fallbackAlt,
-		hidden: ! loaded,
-		src: thumbnail,
-		...( showFullSize && { src, srcSet: srcset, sizes } ),
-	};
-
-	return (
-		<>
-			{ imageProps.src && (
-				/* eslint-disable-next-line jsx-a11y/alt-text */
-				<img data-testid="product-image" { ...imageProps } />
-			) }
-			{ ! image && <ImagePlaceholder /> }
-		</>
-	);
-};
-
-Block.propTypes = {
-	className: PropTypes.string,
-	fallbackAlt: PropTypes.string,
-	showProductLink: PropTypes.bool,
-	showSaleBadge: PropTypes.bool,
-	saleBadgeAlign: PropTypes.string,
 };
 
 export default withProductDataContext( Block );
