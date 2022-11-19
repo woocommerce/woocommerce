@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fixed date filter date selection in WordPress 6.1.
+Fixed DatePicker to work in WordPress 6.1 when currentDate is set to a moment instance.

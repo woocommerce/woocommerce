@@ -179,7 +179,7 @@ class DateFilter extends Component {
 	getFormControl( { date, error, onUpdate, text } ) {
 		return (
 			<DatePicker
-				date={ date ? date.toDate() : null }
+				date={ date }
 				dateFormat={ dateFormat }
 				error={ error }
 				isInvalidDate={ this.isFutureDate }
