@@ -519,8 +519,16 @@ class CustomerEffortScoreTracks {
 		$this->enqueue_to_ces_tracks(
 			array(
 				'action'         => self::SETTINGS_CHANGE_ACTION_NAME,
-				'label'          => __(
+				'title'          => __(
 					'How easy was it to update your settings?',
+					'woocommerce'
+				),
+				'firstQuestion'	 => __(
+					'The settings screen is easy to use.',
+					'woocommerce'
+				),
+				'secondQuestion' => __(
+					'The settings screen\'s functionality meets my needs.',
 					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,

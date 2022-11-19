@@ -14,8 +14,14 @@ import { CustomerFeedbackModal } from './customer-feedback-modal';
 const noop = () => {};
 
 type CustomerEffortScoreProps = {
-	recordScoreCallback: ( score: number, comments: string ) => void;
-	label: string;
+	recordScoreCallback: (
+		score: number,
+		secondScore: number,
+		comments: string
+	) => void;
+	title: string;
+	firstQuestion: string;
+	secondQuestion: string;
 	onNoticeShownCallback?: () => void;
 	onNoticeDismissedCallback?: () => void;
 	onModalShownCallback?: () => void;
@@ -30,7 +36,9 @@ type CustomerEffortScoreProps = {
  *
  * @param {Object}   props                           Component props.
  * @param {Function} props.recordScoreCallback       Function to call when the score should be recorded.
- * @param {string}   props.label                     The label displayed in the modal.
+ * @param {string}   props.title                     The title displayed in the modal.
+ * @param {string}   props.firstQuestion             The first survey question.
+ * @param {string}   props.secondQuestion            The second survey question.
  * @param {Function} props.onNoticeShownCallback     Function to call when the notice is shown.
  * @param {Function} props.onNoticeDismissedCallback Function to call when the notice is dismissed.
  * @param {Function} props.onModalShownCallback      Function to call when the modal is shown.
@@ -38,7 +46,9 @@ type CustomerEffortScoreProps = {
  */
 const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 	recordScoreCallback,
-	label,
+	title,
+	firstQuestion,
+	secondQuestion,
 	onNoticeShownCallback = noop,
 	onNoticeDismissedCallback = noop,
 	onModalShownCallback = noop,
@@ -53,7 +63,7 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 			return;
 		}
 
-		createNotice( 'success', label, {
+		createNotice( 'success', title, {
 			actions: [
 				{
 					label: __( 'Give feedback', 'woocommerce' ),
@@ -83,7 +93,9 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 
 	return (
 		<CustomerFeedbackModal
-			label={ label }
+			title={ title }
+			firstQuestion={ firstQuestion }
+			secondQuestion={ secondQuestion }
 			recordScoreCallback={ recordScoreCallback }
 		/>
 	);
@@ -95,9 +107,9 @@ CustomerEffortScore.propTypes = {
 	 */
 	recordScoreCallback: PropTypes.func.isRequired,
 	/**
-	 * The label displayed in the modal.
+	 * The title displayed in the modal.
 	 */
-	label: PropTypes.string.isRequired,
+	title: PropTypes.string.isRequired,
 	/**
 	 * The function to call when the notice is shown.
 	 */

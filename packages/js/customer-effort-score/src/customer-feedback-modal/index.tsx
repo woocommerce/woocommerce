@@ -25,18 +25,28 @@ import { __ } from '@wordpress/i18n';
  *
  * @param {Object}   props                     Component props.
  * @param {Function} props.recordScoreCallback Function to call when the results are sent.
- * @param {string}   props.label               Question to ask the customer.
+ * @param {string}   props.title               Title displayed in the modal.
+ * @param {string}   props.firstQuestion       The first survey question.
+ * @param {string}   props.secondQuestion      The second survey question.
  * @param {string}   props.defaultScore        Default score.
  * @param {Function} props.onCloseModal        Callback for when user closes modal by clicking cancel.
  */
 function CustomerFeedbackModal( {
 	recordScoreCallback,
-	label,
+	title,
+	firstQuestion,
+	secondQuestion,
 	defaultScore = NaN,
 	onCloseModal,
 }: {
-	recordScoreCallback: ( score: number, comments: string ) => void;
-	label: string;
+	recordScoreCallback: (
+		score: number,
+		secondScore: number,
+		comments: string
+	) => void;
+	title: string;
+	firstQuestion: string;
+	secondQuestion: string;
 	defaultScore?: number;
 	onCloseModal?: () => void;
 } ): JSX.Element | null {
@@ -63,7 +73,12 @@ function CustomerFeedbackModal( {
 		},
 	];
 
-	const [ score, setScore ] = useState( defaultScore || NaN );
+	const [ firstQuestionScore, setFirstQuestionScore ] = useState(
+		defaultScore || NaN
+	);
+	const [ secondQuestionScore, setSecondQuestionScore ] = useState(
+		defaultScore || NaN
+	);
 	const [ comments, setComments ] = useState( '' );
 	const [ showNoScoreMessage, setShowNoScoreMessage ] = useState( false );
 	const [ isOpen, setOpen ] = useState( true );
@@ -75,19 +90,26 @@ function CustomerFeedbackModal( {
 		}
 	};
 
-	const onRadioControlChange = ( value: string ) => {
+	const onRadioControlChange = (
+		value: string,
+		setter: ( val: number ) => void
+	) => {
 		const valueAsInt = parseInt( value, 10 );
-		setScore( valueAsInt );
+		setter( valueAsInt );
 		setShowNoScoreMessage( ! Number.isInteger( valueAsInt ) );
 	};
 
 	const sendScore = () => {
-		if ( ! Number.isInteger( score ) ) {
+		if ( ! Number.isInteger( firstQuestionScore ) ) {
 			setShowNoScoreMessage( true );
 			return;
 		}
 		setOpen( false );
-		recordScoreCallback( score, comments );
+		recordScoreCallback(
+			firstQuestionScore,
+			secondQuestionScore,
+			comments
+		);
 	};
 
 	if ( ! isOpen ) {
@@ -97,7 +119,7 @@ function CustomerFeedbackModal( {
 	return (
 		<Modal
 			className="woocommerce-customer-effort-score"
-			title={ __( 'Please share your feedback', 'woocommerce' ) }
+			title={ title }
 			onRequestClose={ closeModal }
 			shouldCloseOnClickOutside={ false }
 		>
@@ -108,18 +130,46 @@ function CustomerFeedbackModal( {
 				size="14"
 				lineHeight="20px"
 			>
-				{ label }
+				{ firstQuestion }
 			</Text>
 
 			<div className="woocommerce-customer-effort-score__selection">
 				<RadioControl
-					selected={ score.toString( 10 ) }
+					selected={ firstQuestionScore.toString( 10 ) }
 					options={ options }
-					onChange={ onRadioControlChange }
+					onChange={ ( value ) =>
+						onRadioControlChange(
+							value as string,
+							setFirstQuestionScore
+						)
+					}
 				/>
 			</div>
 
-			{ ( score === 1 || score === 2 ) && (
+			<Text
+				variant="subtitle.small"
+				as="p"
+				weight="600"
+				size="14"
+				lineHeight="20px"
+			>
+				{ secondQuestion }
+			</Text>
+
+			<div className="woocommerce-customer-effort-score__selection">
+				<RadioControl
+					selected={ secondQuestionScore.toString( 10 ) }
+					options={ options }
+					onChange={ ( value ) =>
+						onRadioControlChange(
+							value as string,
+							setSecondQuestionScore
+						)
+					}
+				/>
+			</div>
+
+			{ ( secondQuestionScore === 1 || secondQuestionScore === 2 ) && (
 				<div className="woocommerce-customer-effort-score__comments">
 					<TextareaControl
 						label={ __( 'Comments (optional)', 'woocommerce' ) }
@@ -162,7 +212,9 @@ function CustomerFeedbackModal( {
 
 CustomerFeedbackModal.propTypes = {
 	recordScoreCallback: PropTypes.func.isRequired,
-	label: PropTypes.string.isRequired,
+	title: PropTypes.string.isRequired,
+	firstQuestion: PropTypes.string.isRequired,
+	secondQuestion: PropTypes.string.isRequired,
 	defaultScore: PropTypes.number,
 	onCloseModal: PropTypes.func,
 };
