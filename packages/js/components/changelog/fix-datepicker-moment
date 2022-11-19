@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed date filter date selection in WordPress 6.1.
