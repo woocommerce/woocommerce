@@ -111,8 +111,8 @@ function CustomerEffortScoreTracks( {
 	const recordScore = ( score, secondScore, comments ) => {
 		recordEvent( 'ces_feedback', {
 			action,
-			ease_of_use_score: score,
-			usefulness_score: secondScore,
+			score,
+			score_second_question: secondScore,
 			score_combined: score + secondScore,
 			comments: comments || '',
 			store_age: storeAgeInWeeks,
