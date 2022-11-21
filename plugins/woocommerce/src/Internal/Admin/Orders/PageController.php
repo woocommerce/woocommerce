@@ -11,6 +11,8 @@ class PageController {
 
 	use AccessiblePrivateMethods;
 
+	private $order_type = '';
+
 	/**
 	 * Instance of the posts redirection controller.
 	 *
@@ -55,9 +57,15 @@ class PageController {
 		if ( 'edit_order' === $this->current_action && ( ! isset( $this->order ) || ! $this->order ) ) {
 			wp_die( esc_html__( 'You attempted to edit an order that does not exist. Perhaps it was deleted?', 'woocommerce' ) );
 		}
-		if ( ! current_user_can( 'edit_others_shop_orders' ) && ! current_user_can( 'manage_woocommerce' ) ) {
+
+		if ( $this->order->get_type() !== $this->order_type ) {
+			wp_die( esc_html__( 'Order type mismatch.', 'woocommerce' ) );
+		}
+
+		if ( ! current_user_can( get_post_type_object( $this->order_type )->cap->edit_post, $this->order->get_id() ) && ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_die( esc_html__( 'You do not have permission to edit this order', 'woocommerce' ) );
 		}
+
 		if ( 'trash' === $this->order->get_status() ) {
 			wp_die( esc_html__( 'You cannot edit this item because it is in the Trash. Please restore it and try again.', 'woocommerce' ) );
 		}
@@ -69,9 +77,10 @@ class PageController {
 	 * @return void
 	 */
 	private function verify_create_permission() {
-		if ( ! current_user_can( 'publish_shop_orders' ) && ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! current_user_can( get_post_type_object( $this->order_type )->cap->publish_posts ) && ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_die( esc_html__( 'You don\'t have permission to create a new order', 'woocommerce' ) );
 		}
+
 		if ( isset( $this->order ) ) {
 			$this->verify_edit_permission();
 		}
@@ -92,9 +101,12 @@ class PageController {
 			add_action( 'admin_menu', 'register_menu', 9 );
 		}
 
+		$this->set_order_type();
 		$this->set_action();
 
-		self::add_action( 'load-woocommerce_page_wc-orders', array( $this, 'handle_load_page_action' ) );
+		$page_suffix = ( 'shop_order' === $this->order_type ? '' : '--' . $this->order_type );
+
+		self::add_action( 'load-woocommerce_page_wc-orders' . $page_suffix, array( $this, 'handle_load_page_action' ) );
 	}
 
 	/**
@@ -103,6 +115,24 @@ class PageController {
 	private function handle_load_page_action() {
 		if ( method_exists( $this, 'setup_action_' . $this->current_action ) ) {
 			$this->{"setup_action_{$this->current_action}"}();
+		}
+	}
+
+	private function set_order_type() {
+		global $plugin_page, $pagenow;
+
+		if ( 'admin.php' !== $pagenow || 0 !== strpos( $plugin_page, 'wc-orders' ) ) {
+			return;
+		}
+
+		$this->order_type = str_replace( array( 'wc-orders--', 'wc-orders' ), '', $plugin_page );
+		$this->order_type = empty( $this->order_type ) ? 'shop_order' : $this->order_type;
+
+		$wc_order_type = wc_get_order_type( $this->order_type );
+		$wp_order_type = get_post_type_object( $this->order_type );
+
+		if ( ! $wc_order_type || ! $wp_order_type || ! $wp_order_type->show_ui || ! current_user_can( $wp_order_type->cap->edit_posts ) ) {
+			wp_die();
 		}
 	}
 
@@ -188,7 +218,12 @@ class PageController {
 	 */
 	private function setup_action_list_orders(): void {
 		$this->orders_table = wc_get_container()->get( ListTable::class );
-		$this->orders_table->setup();
+		$this->orders_table->setup(
+			array(
+				'order_type' => $this->order_type,
+			)
+		);
+
 		if ( $this->orders_table->current_action() ) {
 			$this->orders_table->handle_bulk_actions();
 		}
@@ -230,12 +265,24 @@ class PageController {
 	 */
 	private function setup_action_new_order(): void {
 		global $theorder;
+
 		$this->verify_create_permission();
-		$this->order = new \WC_Order();
+
+		$order_class_name = wc_get_order_type( $this->order_type )['class_name'];
+		if ( ! $order_class_name || ! class_exists( $order_class_name ) ) {
+			wp_die();
+		}
+
+		$this->order = new $order_class_name();
 		$this->order->set_object_read( false );
 		$this->order->set_status( 'auto-draft' );
 		$this->order->save();
+
 		$theorder = $this->order;
+	}
+
+	public function get_order_type() {
+		return $this->order_type;
 	}
 
 	/**
