@@ -1,7 +1,13 @@
 /**
+ * External dependencies
+ */
+import { canvas } from '@wordpress/e2e-test-utils';
+
+/**
  * Internal dependencies
  */
 import { DEFAULT_TIMEOUT } from './constants';
+import { getFormElementIdByLabel } from './get-form-element-id-by-label';
 
 /**
  * Get the ID of the setting toogle so test can manipulate the toggle using
@@ -12,24 +18,20 @@ import { DEFAULT_TIMEOUT } from './constants';
  * check if the node still attached to the document before returning its
  * ID. If the node is detached, it means that the toggle is rendered, then
  * we retry by calling this function again with increased retry argument. We
- * will retry until the timeout is reached.
+ * will retry until the default timeout is reached, which is 30s.
  */
 export const getToggleIdByLabel = async (
 	label: string,
 	retry = 0
 ): Promise< string > => {
 	const delay = 1000;
-	const labelElement = await page.waitForXPath(
-		`//label[contains(text(), "${ label }") and contains(@class, "components-toggle-control__label")]`,
-		{ visible: true }
-	);
-	const checkboxId = await page.evaluate(
-		( toggleLabel ) => `#${ toggleLabel.getAttribute( 'for' ) }`,
-		labelElement
-	);
 	// Wait a bit for toggle to finish rerendering.
-	await page.waitForTimeout( delay );
-	const checkbox = await page.$( checkboxId );
+	await canvas().waitForTimeout( delay );
+	const checkboxId = await getFormElementIdByLabel(
+		label,
+		'components-toggle-control__label'
+	);
+	const checkbox = await canvas().$( checkboxId );
 	if ( ! checkbox ) {
 		if ( retry * delay < DEFAULT_TIMEOUT ) {
 			return await getToggleIdByLabel( label, retry + 1 );
