@@ -173,7 +173,7 @@ describe.only( 'Checkout Store Reducer', () => {
 		).toEqual( expectedState );
 	} );
 
-	it( 'should handle SET_SHIPPING_ADDRESS_AS_BILLING_ADDRESS', () => {
+	it( 'should handle SET_USE_SHIPPING_AS_BILLING', () => {
 		const expectedState = {
 			...defaultState,
 			status: STATUS.IDLE,
