@@ -10,7 +10,7 @@
 	"version": "2.1.0",
 	"homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
 	"devDependencies": {
-		"@types/react": "^17.0.0",
+		"@types/react": "^17.0.2",
 		"@types/react-dom": "^18.0.6",
 		"@types/wordpress__components": "^19.10.1",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
