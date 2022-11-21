@@ -88,6 +88,9 @@ export const ProductMVPCESFooter: React.FC = () => {
 				...cesShownForActions,
 			],
 		} );
+		updateOptions( {
+			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: '',
+		} );
 	};
 
 	const recordScore = ( score: number, comments: string ) => {
@@ -104,6 +107,9 @@ export const ProductMVPCESFooter: React.FC = () => {
 				'woocommerce'
 			)
 		);
+		updateOptions( {
+			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: '',
+		} );
 	};
 
 	const showCESFooter =
