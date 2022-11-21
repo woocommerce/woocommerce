@@ -28,7 +28,7 @@ export const PRODUCT_MVP_CES_ACTION_OPTION_NAME =
 
 export const ProductMVPCESFooter: React.FC = () => {
 	const [ showFeedbackModal, setShowFeedbackModal ] = useState( false );
-	const { createNotice } = useDispatch( 'core/notices' );
+	const { createSuccessNotice } = useDispatch( 'core/notices' );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const {
 		storeAgeInWeeks,
@@ -101,12 +101,15 @@ export const ProductMVPCESFooter: React.FC = () => {
 			comments: comments || '',
 			store_age: storeAgeInWeeks,
 		} );
-		createNotice(
-			'success',
+		createSuccessNotice(
 			__(
 				"Thanks for the feedback. We'll put it to good use!",
 				'woocommerce'
-			)
+			),
+			{
+				type: 'snackbar',
+				icon: <span>🌟</span>,
+			}
 		);
 		updateOptions( {
 			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: '',
