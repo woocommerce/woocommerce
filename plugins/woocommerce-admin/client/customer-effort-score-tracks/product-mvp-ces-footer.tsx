@@ -95,7 +95,7 @@ export const ProductMVPCESFooter: React.FC = () => {
 
 	const recordScore = ( score: number, comments: string ) => {
 		recordEvent( 'ces_feedback', {
-			action: 'action',
+			action: cesAction,
 			score,
 			comments: comments || '',
 			store_age: storeAgeInWeeks,
