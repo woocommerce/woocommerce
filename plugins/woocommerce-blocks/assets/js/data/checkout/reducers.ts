@@ -98,7 +98,7 @@ const reducer = ( state = defaultState, action: CheckoutAction ) => {
 			}
 			break;
 
-		case types.SET_SHIPPING_ADDRESS_AS_BILLING_ADDRESS:
+		case types.SET_USE_SHIPPING_AS_BILLING:
 			if (
 				action.useShippingAsBilling !== undefined &&
 				action.useShippingAsBilling !== state.useShippingAsBilling

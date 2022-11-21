@@ -99,7 +99,7 @@ export const __internalSetCustomerId = ( customerId: number ) => ( {
 export const __internalSetUseShippingAsBilling = (
 	useShippingAsBilling: boolean
 ) => ( {
-	type: types.SET_SHIPPING_ADDRESS_AS_BILLING_ADDRESS,
+	type: types.SET_USE_SHIPPING_AS_BILLING,
 	useShippingAsBilling,
 } );
 
