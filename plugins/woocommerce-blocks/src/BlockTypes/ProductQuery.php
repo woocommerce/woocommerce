@@ -3,6 +3,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 // phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 // phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 
 /**
  * ProductQuery class.
@@ -21,6 +22,13 @@ class ProductQuery extends AbstractBlock {
 	 * @var array
 	 */
 	protected $parsed_block;
+
+	/**
+	 * Orderby options not natively supported by WordPress REST API
+	 *
+	 * @var array
+	 */
+	protected $custom_order_opts = array( 'popularity' );
 
 	/**
 	 * All the query args related to the filter by attributes block.
@@ -46,6 +54,7 @@ class ProductQuery extends AbstractBlock {
 			2
 		);
 		add_filter( 'rest_product_query', array( $this, 'update_rest_query' ), 10, 2 );
+		add_filter( 'rest_product_collection_params', array( $this, 'extend_rest_query_allowed_params' ), 10, 1 );
 	}
 
 	/**
@@ -94,8 +103,9 @@ class ProductQuery extends AbstractBlock {
 	 */
 	public function update_rest_query( $args, $request ) {
 		$on_sale_query = $request->get_param( '__woocommerceOnSale' ) !== 'true' ? array() : $this->get_on_sale_products_query();
+		$orderby_query = $this->get_custom_orderby_query( $request->get_param( 'orderby' ) );
 
-		return array_merge( $args, $on_sale_query );
+		return array_merge( $args, $on_sale_query, $orderby_query );
 	}
 
 	/**
@@ -124,6 +134,12 @@ class ProductQuery extends AbstractBlock {
 
 		$queries_by_attributes = $this->get_queries_by_attributes( $parsed_block );
 		$queries_by_filters    = $this->get_queries_by_applied_filters();
+		$orderby_query         = $this->get_custom_orderby_query( $query['orderby'] );
+
+		$base_query = array_merge(
+			$common_query_values,
+			$orderby_query
+		);
 
 		return array_reduce(
 			array_merge(
@@ -133,7 +149,7 @@ class ProductQuery extends AbstractBlock {
 			function( $acc, $query ) {
 				return $this->merge_queries( $acc, $query );
 			},
-			$common_query_values
+			$base_query
 		);
 	}
 
@@ -183,6 +199,21 @@ class ProductQuery extends AbstractBlock {
 	}
 
 	/**
+	 * Extends allowed `collection_params` for the REST API
+	 *
+	 * By itself, the REST API doesn't accept custom `orderby` values,
+	 * even if they are supported by a custom post type.
+	 *
+	 * @param array $params  A list of allowed `orderby` values.
+	 *
+	 * @return array
+	 */
+	public function extend_rest_query_allowed_params( $params ) {
+		$params['orderby']['enum'] = array_merge( $params['orderby']['enum'], $this->custom_order_opts );
+		return $params;
+	}
+
+	/**
 	 * Return a query for on sale products.
 	 *
 	 * @return array
@@ -190,6 +221,28 @@ class ProductQuery extends AbstractBlock {
 	private function get_on_sale_products_query() {
 		return array(
 			'post__in' => wc_get_product_ids_on_sale(),
+		);
+	}
+
+	/**
+	 * Return query params to support custom sort values
+	 *
+	 * @param string $orderby  Sort order option.
+	 *
+	 * @return array
+	 */
+	private function get_custom_orderby_query( $orderby ) {
+		if ( ! in_array( $orderby, $this->custom_order_opts, true ) ) {
+			return array( 'orderby' => $orderby );
+		}
+
+		$meta_keys = array(
+			'popularity' => 'total_sales',
+		);
+
+		return array(
+			'meta_key' => $meta_keys[ $orderby ],
+			'orderby'  => 'meta_value_num',
 		);
 	}
 

@@ -26,7 +26,7 @@ import {
 } from './types';
 import {
 	isWooQueryBlockVariation,
-	setCustomQueryAttribute,
+	setQueryAttribute,
 	useAllowedControls,
 } from './utils';
 import {
@@ -34,6 +34,7 @@ import {
 	QUERY_LOOP_ID,
 	STOCK_STATUS_OPTIONS,
 } from './constants';
+import { PopularPresets } from './inspector-controls/popular-presets';
 
 const NAMESPACED_CONTROLS = ALL_PRODUCT_QUERY_CONTROLS.map(
 	( id ) =>
@@ -82,7 +83,7 @@ function getStockStatusIdByLabel( statusLabel: FormTokenField.Value ) {
 	)?.[ 0 ];
 }
 
-export const INSPECTOR_CONTROLS = {
+export const TOOLS_PANEL_CONTROLS = {
 	onSale: ( props: ProductQueryBlock ) => {
 		const { query } = props.attributes;
 
@@ -98,7 +99,7 @@ export const INSPECTOR_CONTROLS = {
 					) }
 					checked={ query.__woocommerceOnSale || false }
 					onChange={ ( __woocommerceOnSale ) => {
-						setCustomQueryAttribute( props, {
+						setQueryAttribute( props, {
 							__woocommerceOnSale,
 						} );
 					} }
@@ -124,7 +125,7 @@ export const INSPECTOR_CONTROLS = {
 							.map( getStockStatusIdByLabel )
 							.filter( Boolean ) as string[];
 
-						setCustomQueryAttribute( props, {
+						setQueryAttribute( props, {
 							__woocommerceStockStatus,
 						} );
 					} }
@@ -154,22 +155,21 @@ export const withProductQueryControls =
 
 		return isWooQueryBlockVariation( props ) ? (
 			<>
-				<BlockEdit { ...props } />
 				<InspectorControls>
+					{ allowedControls?.includes( 'presets' ) && (
+						<PopularPresets { ...props } />
+					) }
 					<ToolsPanel
 						class="woocommerce-product-query-toolspanel"
 						label={ __(
-							'Product filters',
+							'Advanced Filters',
 							'woo-gutenberg-products-block'
 						) }
 						resetAll={ () => {
-							setCustomQueryAttribute(
-								props,
-								defaultWooQueryParams
-							);
+							setQueryAttribute( props, defaultWooQueryParams );
 						} }
 					>
-						{ Object.entries( INSPECTOR_CONTROLS ).map(
+						{ Object.entries( TOOLS_PANEL_CONTROLS ).map(
 							( [ key, Control ] ) =>
 								allowedControls?.includes( key ) ? (
 									<Control { ...props } />
@@ -177,6 +177,7 @@ export const withProductQueryControls =
 						) }
 					</ToolsPanel>
 				</InspectorControls>
+				<BlockEdit { ...props } />
 			</>
 		) : (
 			<BlockEdit { ...props } />

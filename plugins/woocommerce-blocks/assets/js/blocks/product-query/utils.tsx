@@ -9,8 +9,8 @@ import { store as WP_BLOCKS_STORE } from '@wordpress/blocks';
  */
 import { QUERY_LOOP_ID } from './constants';
 import {
-	ProductQueryArguments,
 	ProductQueryBlock,
+	ProductQueryBlockQuery,
 	QueryVariation,
 } from './types';
 
@@ -40,14 +40,11 @@ export function isWooQueryBlockVariation( block: ProductQueryBlock ) {
 /**
  * Sets the new query arguments of a Product Query block
  *
- * Because we add a new set of deeply nested attributes to the query
- * block, this utility function makes it easier to change just the
- * options relating to our custom query, while keeping the code
- * clean.
+ * Shorthand for setting new nested query parameters.
  */
-export function setCustomQueryAttribute(
+export function setQueryAttribute(
 	block: ProductQueryBlock,
-	queryParams: Partial< ProductQueryArguments >
+	queryParams: Partial< ProductQueryBlockQuery >
 ) {
 	const { query } = block.attributes;
 

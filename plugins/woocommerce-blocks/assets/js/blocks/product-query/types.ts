@@ -10,6 +10,13 @@ import type { EditorBlock } from '@woocommerce/types';
 /* eslint-disable @typescript-eslint/naming-convention */
 export interface ProductQueryArguments {
 	/**
+	 * Available sorting options specific to the Product Query block
+	 *
+	 * Other sorting options may be possible, but we are restricting
+	 * the choice to those.
+	 */
+	orderBy: 'date' | 'popularity';
+	/**
 	 * Display only products on sale.
 	 *
 	 * Will generate the following `meta_query`:
@@ -52,7 +59,11 @@ export interface ProductQueryArguments {
 
 export type ProductQueryBlock = EditorBlock< QueryBlockAttributes >;
 
-export type ProductQueryBlockQuery = QueryBlockQuery & ProductQueryArguments;
+export type ProductQueryBlockQuery = Omit<
+	QueryBlockQuery,
+	keyof ProductQueryArguments
+> &
+	ProductQueryArguments;
 
 export interface QueryBlockAttributes {
 	allowedControls?: string[];
@@ -81,7 +92,7 @@ export interface QueryBlockQuery {
 }
 
 export interface ProductQueryContext {
-	query?: QueryBlockQuery & ProductQueryArguments;
+	query?: ProductQueryBlockQuery;
 	queryId?: number;
 }
 
