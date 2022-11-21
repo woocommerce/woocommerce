@@ -43,6 +43,12 @@
 			"outputMode": "new-only"
 		},
 
+		"woocommerce#build:zip": {
+			"dependsOn": [
+				"^build:assets-cleanup"
+			]
+		},
+
 		"woocommerce/client/legacy#turbo:build": {
 			"dependsOn": [ "build:assets-cleanup", "^turbo:build" ],
 			"outputs": [
