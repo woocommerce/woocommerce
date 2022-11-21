@@ -4,8 +4,11 @@ inputs:
     repo-token:
         description: 'GitHub token'
         required: true
-    compare:
-        description: 'Path checkstyle.xml file'
+    checkstyle:
+        description: 'Path checkstyle.xml file of current PR/branch'
+        required: true
+    checkstyle-trunk:
+        description: 'Path checkstyle.xml file of trunk'
         required: true
 
 runs:
