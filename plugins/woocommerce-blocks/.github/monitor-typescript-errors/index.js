@@ -4,7 +4,7 @@ const { setFailed, getInput } = require( '@actions/core' );
 const { parseXml, getFilesWithNewErrors } = require( './utils/xml' );
 const { generateMarkdownMessage } = require( './utils/markdown' );
 const { addRecord } = require( './utils/airtable' );
-const { getFileContent, addComment } = require( './utils/github' );
+const { addComment } = require( './utils/github' );
 
 const runner = async () => {
 	const token = getInput( 'repo-token', { required: true } );
@@ -12,27 +12,18 @@ const runner = async () => {
 	const payload = context.payload;
 	const repo = payload.repository.name;
 	const owner = payload.repository.owner.login;
-	const fileName = getInput( 'compare', {
+	const fileName = getInput( 'checkstyle', {
+		required: true,
+	} );
+	const trunkFileName = getInput( 'checkstyle-trunk', {
 		required: true,
 	} );
 
 	const newCheckStyleFile = fs.readFileSync( fileName );
 	const newCheckStyleFileParsed = parseXml( newCheckStyleFile );
-	const currentCheckStyleFile = await getFileContent( {
-		octokit,
-		owner,
-		repo,
-		fileName,
-		onFail: setFailed,
-	} );
-
-	if ( ! currentCheckStyleFile.data ) {
-		setFailed( 'No Content Available' );
-		return;
-	}
-
+	const currentCheckStyleFile = fs.readFileSync( trunkFileName );
 	const currentCheckStyleFileContentParsed = parseXml(
-		currentCheckStyleFile.data
+		currentCheckStyleFile
 	);
 
 	const { header } = generateMarkdownMessage( newCheckStyleFileParsed );
