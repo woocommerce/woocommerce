@@ -145,7 +145,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 									item={ item }
 									getItemProps={ getItemProps }
 								>
-									{ item.id === -99 ? (
+									{ isNewAttributeListItem( item ) ? (
 										<div className="woocommerce-attribute-input-field__add-new">
 											<Icon
 												icon={ plus }
