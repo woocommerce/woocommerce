@@ -68,11 +68,14 @@ function wc_get_screen_ids() {
  * @return string Page ID. Empty string if resource not found.
  */
 function wc_get_page_screen_id( $for ) {
-	switch ( $for ) {
-		case 'shop-order':
-			return 'woocommerce_page_wc-orders';
+	$order_types_with_ui = wc_get_order_types( 'admin-menu' );
+
+	$for_ = str_replace( '-', '_', $for );
+	if ( in_array( $for_, $order_types_with_ui, true ) ) {
+		$screen_id = 'woocommerce_page_wc-orders' . ( 'shop_order' === $for_ ? '' : '--' . $for_ );
 	}
-	return '';
+
+	return $screen_id;
 }
 
 /**
