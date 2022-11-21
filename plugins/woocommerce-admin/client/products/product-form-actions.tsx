@@ -55,7 +55,13 @@ export const ProductFormActions: React.FC = () => {
 			...getProductDataForTracks(),
 		} );
 		if ( ! values.id ) {
-			await createProductWithStatus( values, 'draft' );
+			const product = await createProductWithStatus( values, 'draft' );
+			if ( product?.id ) {
+				resetForm();
+				navigateTo( {
+					url: 'admin.php?page=wc-admin&path=/product/' + product.id,
+				} );
+			}
 		} else {
 			const product = await updateProductWithStatus(
 				values.id,
