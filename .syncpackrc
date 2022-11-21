@@ -16,7 +16,7 @@
 			"dependencyTypes": [
 				"devDependencies"
 			],
-			"pinVersion": "5.43.0",
+			"pinVersion": "^5.43.0",
 			"packages": [
 				"**"
 			]
