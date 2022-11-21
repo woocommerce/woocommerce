@@ -8,9 +8,9 @@ jobs:
     check-typescript-errors-with-trunk:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
               with:
-                  ref: ${{ github.event.pull_request.head.ref }}
+                  ref: 'trunk'
 
             - name: Cache node modules
               uses: actions/cache@v3
@@ -30,10 +30,19 @@ jobs:
                   node-version-file: '.nvmrc'
                   cache: 'npm'
 
-            - name: npm install
+            - name: Generate checkstyle for trunk
               run: |
                   npm ci
                   npm run ts:log-errors
+                  mv checkstyle.xml $HOME/checkstyle-trunk.xml
+
+            - uses: actions/checkout@v3
+
+            - name: Generate checkstyle for current PR
+              run: |
+                  npm ci
+                  npm run ts:log-errors
+                  mv $HOME/checkstyle-trunk.xml checkstyle-trunk.xml
 
             - name: Get branch name
               id: branch-name
@@ -43,21 +52,8 @@ jobs:
               uses: ./.github/monitor-typescript-errors
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
-                  compare: checkstyle.xml
+                  checkstyle: checkstyle.xml
+                  checkstyle-trunk: checkstyle-trunk.xml
               env:
                   AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
                   CURRENT_BRANCH: ${{ steps.branch-name.outputs.current_branch }}
-
-            - name: Check if the checklist.xml file is changed
-              id: verify_diff
-              run: |
-                  git diff --quiet checkstyle.xml || echo "is_different_checkstyle=true" >> $GITHUB_OUTPUT
-
-            - name: Commit the new checklist.xml file
-              if: steps.verify_diff.outputs.is_different_checkstyle == 'true'
-              run: |
-                  git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-                  git config --global user.name "github-actions[bot]"
-                  git add checkstyle.xml
-                  git commit -m "bot: update checkstyle.xml"
-                  git push
