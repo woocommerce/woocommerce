@@ -12,4 +12,9 @@
     .components-button {
         margin-left: $gap;
     }
+
+    &__close-button {
+        position: absolute;
+        right: $gap;
+    }
 }

@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
+import { closeSmall } from '@wordpress/icons';
 import { Pill } from '@woocommerce/components';
 import { CustomerFeedbackModal } from '@woocommerce/customer-effort-score';
 import { recordEvent } from '@woocommerce/tracks';
@@ -134,6 +135,15 @@ export const ProductMVPCESFooter: React.FC = () => {
 						<Button onClick={ onDisablingCES } variant="tertiary">
 							{ __( 'Turn it off', 'woocommerce' ) }
 						</Button>
+						<Button
+							className="woocommerce-product-mvp-ces-footer__close-button"
+							icon={ closeSmall }
+							label={ __(
+								'Remove share feedback',
+								'woocommerce'
+							) }
+							onClick={ onDisablingCES }
+						></Button>
 					</div>
 				</WooFooterItem>
 			) }
