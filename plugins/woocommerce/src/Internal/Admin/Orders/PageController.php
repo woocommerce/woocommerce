@@ -131,21 +131,29 @@ class PageController {
 	 * @return void
 	 */
 	public function register_menu(): void {
-		add_submenu_page(
-			'woocommerce',
-			__( 'Orders', 'woocommerce' ),
-			__( 'Orders', 'woocommerce' ),
-			'edit_others_shop_orders',
-			'wc-orders',
-			array( $this, 'output' )
-		);
+		$order_types = wc_get_order_types( 'admin-menu' );
+
+		foreach ( $order_types as $order_type ) {
+			$post_type = get_post_type_object( $order_type );
+
+			add_submenu_page(
+				'woocommerce',
+				$post_type->labels->name,
+				$post_type->labels->menu_name,
+				$post_type->cap->edit_posts,
+				'wc-orders' . ( 'shop_order' === $order_type ? '' : '--' . $order_type ),
+				array( $this, 'output' )
+			);
+		}
 
 		// In some cases (such as if the authoritative order store was changed earlier in the current request) we
 		// need an extra step to remove the menu entry for the menu post type.
 		add_action(
 			'admin_init',
-			function() {
-				remove_submenu_page( 'woocommerce', 'edit.php?post_type=shop_order' );
+			function() use ( $order_types ) {
+				foreach ( $order_types as $order_type ) {
+					remove_submenu_page( 'woocommerce', 'edit.php?post_type=' . $order_type );
+				}
 			}
 		);
 	}
