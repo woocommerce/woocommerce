@@ -18,12 +18,16 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
 use Automattic\WooCommerce\Internal\Admin\Marketing;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 /**
  * Update file paths for 2.0
@@ -2470,4 +2474,62 @@ function wc_update_700_remove_download_log_fk() {
  */
 function wc_update_700_remove_recommended_marketing_plugins_transient() {
 	delete_transient( Marketing::RECOMMENDED_PLUGINS_TRANSIENT );
+}
+
+/**
+ * Update the New Zealand state codes in shipping locations and store location
+ * after they were updated in code to the CLDR standard.
+ */
+function wc_update_720_adjust_new_zealand_and_ukraine_states() {
+	MigrationHelper::migrate_country_states(
+		'NZ',
+		array(
+			'NL' => 'NTL',
+			'AK' => 'AUK',
+			'WA' => 'WKO',
+			'BP' => 'BOP',
+			'TK' => 'TKI',
+			'GI' => 'GIS',
+			'HB' => 'HKB',
+			'MW' => 'MWT',
+			'WE' => 'WGN',
+			'NS' => 'NSN',
+			'MB' => 'MBH',
+			'TM' => 'TAS',
+			'WC' => 'WTC',
+			'CT' => 'CAN',
+			'OT' => 'OTA',
+			'SL' => 'STL',
+		)
+	);
+
+	MigrationHelper::migrate_country_states(
+		'UA',
+		array(
+			'VN' => 'UA05',
+			'LH' => 'UA09',
+			'VL' => 'UA07',
+			'DP' => 'UA12',
+			'DT' => 'UA14',
+			'ZT' => 'UA18',
+			'ZK' => 'UA21',
+			'ZP' => 'UA23',
+			'IF' => 'UA26',
+			'KV' => 'UA32',
+			'KH' => 'UA35',
+			'LV' => 'UA46',
+			'MY' => 'UA48',
+			'OD' => 'UA51',
+			'PL' => 'UA53',
+			'RV' => 'UA56',
+			'SM' => 'UA59',
+			'TP' => 'UA61',
+			'KK' => 'UA63',
+			'KS' => 'UA65',
+			'KM' => 'UA68',
+			'CK' => 'UA71',
+			'CH' => 'UA74',
+			'CV' => 'UA77',
+		)
+	);
 }
