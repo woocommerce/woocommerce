@@ -124,6 +124,20 @@ function CustomerFeedbackModal( {
 			shouldCloseOnClickOutside={ false }
 		>
 			<Text
+				variant="body"
+				as="p"
+				className="woocommerce-customer-effort-score__intro"
+				size={ 14 }
+				lineHeight="20px"
+				marginBottom="1.5em"
+			>
+				{ __(
+					'Your feedback will help create a better experience for thousands of merchants like you. Please tell us to what extent you agree or disagree with the statements below.',
+					'woocommerce'
+				) }
+			</Text>
+
+			<Text
 				variant="subtitle.small"
 				as="p"
 				weight="600"
@@ -169,15 +183,24 @@ function CustomerFeedbackModal( {
 				/>
 			</div>
 
-			{ ( secondQuestionScore === 1 || secondQuestionScore === 2 ) && (
+			{ [ firstQuestionScore, secondQuestionScore ].some(
+				( score ) => score === 1 || score === 2
+			) && (
 				<div className="woocommerce-customer-effort-score__comments">
 					<TextareaControl
-						label={ __( 'Comments (optional)', 'woocommerce' ) }
+						label={ __(
+							'How is that screen useful to you? What features would you add or change?',
+							'woocommerce'
+						) }
 						help={ __(
 							'Your feedback will go to the WooCommerce development team',
 							'woocommerce'
 						) }
 						value={ comments }
+						placeholder={ __(
+							'Optional, much much apprecated. We love reading your feedback!',
+							'woocommerce'
+						) }
 						onChange={ ( value: string ) => setComments( value ) }
 						rows={ 5 }
 					/>
@@ -203,7 +226,7 @@ function CustomerFeedbackModal( {
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
 				<Button isPrimary onClick={ sendScore } name="send">
-					{ __( 'Send', 'woocommerce' ) }
+					{ __( 'Share', 'woocommerce' ) }
 				</Button>
 			</div>
 		</Modal>
