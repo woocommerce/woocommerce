@@ -257,9 +257,17 @@ class PageController {
 	 * @return string Edit link.
 	 */
 	public function get_edit_url( int $order_id ) : string {
-		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ?
-			admin_url( 'admin.php?page=wc-orders&id=' . absint( $order_id ) ) . '&action=edit' :
-			admin_url( 'post.php?post=' . absint( $order_id ) ) . '&action=edit';
+		if ( ! wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ) {
+			return admin_url( 'post.php?post=' . absint( $order_id ) ) . '&action=edit';
+		}
+
+		return add_query_arg(
+			array(
+				'action' => 'edit',
+				'id' => absint( $order_id ),
+			),
+			$this->get_base_page_url( wc_get_order( $order_id )->get_type() )
+		);
 	}
 
 	/**
@@ -267,10 +275,22 @@ class PageController {
 	 *
 	 * @return string
 	 */
-	public function get_new_page_url() : string {
-		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ?
-			admin_url( 'admin.php?page=wc-orders&action=new' ) :
-			admin_url( 'post-new.php?post_type=shop_order' );
+	public function get_new_page_url( $order_type = 'shop_order' ) : string {
+		$url = wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ?
+			add_query_arg( 'action', 'new', $this->get_base_page_url( $order_type ) ) :
+			admin_url( 'post-new.php?post_type=' . $order_type );
+
+		return $url;
+	}
+
+	private function get_base_page_url( $order_type ) {
+		$order_types_with_ui = wc_get_order_types( 'admin-menu' );
+
+		if ( ! in_array( $order_type, $order_types_with_ui, true ) ) {
+			throw new \Exception('invalid order type');
+		}
+
+		return admin_url( 'admin.php?page=wc-orders' . ( 'shop_order' === $order_type ? '' : '--' . $order_type ) );
 	}
 
 }
