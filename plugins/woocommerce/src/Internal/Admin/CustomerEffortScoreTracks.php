@@ -271,8 +271,16 @@ class CustomerEffortScoreTracks {
 		$this->enqueue_to_ces_tracks(
 			array(
 				'action'         => self::SEARCH_ACTION_NAME,
-				'label'          => __(
+				'title'          => __(
 					'How easy was it to use search?',
+					'woocommerce'
+				),
+				'firstQuestion'	 => __(
+					'The search feature in WooCommerce is easy to use.',
+					'woocommerce'
+				),
+				'secondQuestion' => __(
+					'The search\'s functionality meets my needs.',
 					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
@@ -337,8 +345,16 @@ class CustomerEffortScoreTracks {
 		$this->enqueue_to_ces_tracks(
 			array(
 				'action'         => self::PRODUCT_ADD_PUBLISH_ACTION_NAME,
-				'label'          => __(
+				'title'          => __(
 					'How easy was it to add a product?',
+					'woocommerce'
+				),
+				'firstQuestion'	 => __(
+					'The product creation screen is easy to use.',
+					'woocommerce'
+				),
+				'secondQuestion' => __(
+					'The product creation screen\'s functionality meets my needs.',
 					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
@@ -362,8 +378,16 @@ class CustomerEffortScoreTracks {
 		$this->enqueue_to_ces_tracks(
 			array(
 				'action'         => self::PRODUCT_UPDATE_ACTION_NAME,
-				'label'          => __(
+				'title'          => __(
 					'How easy was it to edit your product?',
+					'woocommerce'
+				),
+				'firstQuestion'	 => __(
+					'The product update process is easy to complete.',
+					'woocommerce'
+				),
+				'secondQuestion' => __(
+					'The product update process meets my needs.',
 					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
@@ -387,8 +411,16 @@ class CustomerEffortScoreTracks {
 		$this->enqueue_to_ces_tracks(
 			array(
 				'action'         => self::SHOP_ORDER_UPDATE_ACTION_NAME,
-				'label'          => __(
+				'title'          => __(
 					'How easy was it to update an order?',
+					'woocommerce'
+				),
+				'firstQuestion'	 => __(
+					'The order details screen is easy to use.',
+					'woocommerce'
+				),
+				'secondQuestion' => __(
+					'The order details screen\'s functionality meets my needs.',
 					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
@@ -484,8 +516,16 @@ class CustomerEffortScoreTracks {
 		$this->enqueue_to_ces_tracks(
 			array(
 				'action'         => self::IMPORT_PRODUCTS_ACTION_NAME,
-				'label'          => __(
+				'title'          => __(
 					'How easy was it to import products?',
+					'woocommerce'
+				),
+				'firstQuestion'	 => __(
+					'The product import process is easy to complete.',
+					'woocommerce'
+				),
+				'secondQuestion' => __(
+					'The product import process meets my needs.',
 					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
@@ -550,8 +590,16 @@ class CustomerEffortScoreTracks {
 		$this->enqueue_to_ces_tracks(
 			array(
 				'action'         => self::ADD_PRODUCT_ATTRIBUTES_ACTION_NAME,
-				'label'          => __(
+				'title'          => __(
 					'How easy was it to add a product attribute?',
+					'woocommerce'
+				),
+				'firstQuestion'	 => __(
+					'Product attributes are easy to use.',
+					'woocommerce'
+				),
+				'secondQuestion' => __(
+					'Product attributes\' functionality meets my needs.',
 					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
