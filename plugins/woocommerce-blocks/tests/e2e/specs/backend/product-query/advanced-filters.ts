@@ -48,7 +48,7 @@ const SELECTORS = {
 	) =>
 		`.components-tools-panel-header .components-dropdown-menu button[aria-expanded="${ expanded }"]`,
 	productFiltersDropdown:
-		'.components-dropdown-menu__menu[aria-label="Product filters options"]',
+		'.components-dropdown-menu__menu[aria-label="Advanced Filters options"]',
 	productFiltersDropdownItem: '.components-menu-item__button',
 	editorPreview: {
 		productsGrid: 'ul.wp-block-post-template',
@@ -63,7 +63,7 @@ const SELECTORS = {
 
 const toggleProductFilter = async ( filterName: string ) => {
 	const $productFiltersPanel = await findToolsPanelWithTitle(
-		'Product filters'
+		'Advanced Filters'
 	);
 	await expect( $productFiltersPanel ).toClick(
 		SELECTORS.productFiltersDropdownButton()
@@ -96,7 +96,7 @@ const getFrontEndProducts = async (): Promise< ElementHandle[] > => {
 };
 
 describeOrSkip( GUTENBERG_EDITOR_CONTEXT === 'gutenberg' )(
-	'Product Query > Products Filters',
+	'Product Query > Advanced Filters',
 	() => {
 		let $productFiltersPanel: ElementHandle< Node >;
 		beforeEach( async () => {
@@ -109,7 +109,7 @@ describeOrSkip( GUTENBERG_EDITOR_CONTEXT === 'gutenberg' )(
 			await openBlockEditorSettings();
 			await selectBlockByName( block.slug );
 			$productFiltersPanel = await findToolsPanelWithTitle(
-				'Product filters'
+				'Advanced Filters'
 			);
 		} );
 
