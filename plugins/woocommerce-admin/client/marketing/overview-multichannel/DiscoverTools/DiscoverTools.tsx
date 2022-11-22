@@ -50,7 +50,8 @@ const getTabs = ( plugins: Plugin[] ) => {
 };
 
 export const DiscoverTools = () => {
-	const { isLoading, plugins, refetch } = useRecommendedPlugins();
+	const { isInitializing, isLoading, plugins, refetch } =
+		useRecommendedPlugins();
 	const [ currentPlugin, setCurrentPlugin ] = useState< string | null >(
 		null
 	);
@@ -97,7 +98,7 @@ export const DiscoverTools = () => {
 	 * - Otherwise, it renders a TabPanel. Each tab is a subcategory displaying the plugins.
 	 */
 	const renderCardContent = () => {
-		if ( isLoading ) {
+		if ( isInitializing ) {
 			return (
 				<CardBody>
 					<Spinner />
@@ -139,6 +140,7 @@ export const DiscoverTools = () => {
 							( subcategory ) => subcategory.slug === tab.name
 						)
 					);
+					const buttonDisabled = !! currentPlugin || isLoading;
 
 					return (
 						<>
@@ -171,7 +173,7 @@ export const DiscoverTools = () => {
 															plugin.product
 														}
 														disabled={
-															!! currentPlugin
+															buttonDisabled
 														}
 														onClick={ () => {
 															installAndActivate(
@@ -191,7 +193,7 @@ export const DiscoverTools = () => {
 															plugin.url
 														) }
 														disabled={
-															!! currentPlugin
+															buttonDisabled
 														}
 														onClick={ () => {
 															recordEvent(

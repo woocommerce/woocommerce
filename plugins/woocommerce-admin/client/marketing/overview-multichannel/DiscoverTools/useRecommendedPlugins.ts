@@ -23,11 +23,11 @@ export const useRecommendedPlugins = () => {
 		const { getRecommendedPlugins, hasFinishedResolution } =
 			select( STORE_KEY );
 		const plugins = getRecommendedPlugins< Plugin[] >( category );
+		const isLoading = ! hasFinishedResolution( selector, [ category ] );
 
 		return {
-			isLoading:
-				! hasFinishedResolution( selector, [ category ] ) &&
-				! plugins.length,
+			isInitializing: ! plugins.length && isLoading,
+			isLoading,
 			plugins,
 			refetch,
 		};
