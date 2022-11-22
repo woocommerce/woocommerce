@@ -110,7 +110,7 @@ export const generateSchemaDiff = async (
 		}
 	);
 
-	stopWPEnv( tmpRepoPath, error );
+	await stopWPEnv( tmpRepoPath, error );
 
 	if ( ! baseSchema || ! compareSchema ) {
 		return null;

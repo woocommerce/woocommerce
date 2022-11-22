@@ -17,7 +17,7 @@ const currencies = {
 	"ARS": "Argentine peso (&#36;)",
 	"AUD": "Australian dollar (&#36;)",
 	"AWG": "Aruban florin (Afl.)",
-	"AZN": "Azerbaijani manat (AZN)",
+	"AZN": "Azerbaijani manat (&#8380;)",
 	"BAM": "Bosnia and Herzegovina convertible mark (KM)",
 	"BBD": "Barbadian dollar (&#36;)",
 	"BDT": "Bangladeshi taka (&#2547;&nbsp;)",

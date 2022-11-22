@@ -162,6 +162,10 @@
 				}
 			}
 		}
+
+		&.wp-tour-kit-spotlit {
+			padding: 20px;
+		}
 	}
 
 	.current-section-name {
@@ -444,6 +448,10 @@
 
 	.addon-product-group {
 		margin-bottom: 24px;
+
+		&.wp-tour-kit-spotlit {
+			padding: 20px;
+		}
 	}
 
 	.addon-product-group-title {
@@ -2588,6 +2596,10 @@ ul.wc_coupon_list_block {
 			.select2-selection__arrow {
 				height: 30px;
 			}
+		}
+
+		#order-query-submit {
+			margin: 0 8px 0 0;
 		}
 	}
 
