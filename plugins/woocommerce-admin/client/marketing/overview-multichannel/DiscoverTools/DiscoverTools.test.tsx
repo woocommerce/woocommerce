@@ -31,6 +31,7 @@ jest.mock( '../../hooks', () => ( {
 describe( 'DiscoverTools component', () => {
 	it( 'should render a Spinner when loading is in progress', () => {
 		( useRecommendedPlugins as jest.Mock ).mockReturnValue( {
+			isInitializing: true,
 			isLoading: true,
 			plugins: [],
 		} );
@@ -44,6 +45,7 @@ describe( 'DiscoverTools component', () => {
 
 	it( 'should render message and link when loading is finish and there are no plugins', () => {
 		( useRecommendedPlugins as jest.Mock ).mockReturnValue( {
+			isInitializing: false,
 			isLoading: false,
 			plugins: [],
 		} );
@@ -65,6 +67,7 @@ describe( 'DiscoverTools component', () => {
 	describe( 'With plugins loaded', () => {
 		it( 'should render `direct_install: true` plugins with "Install plugin" button', () => {
 			( useRecommendedPlugins as jest.Mock ).mockReturnValue( {
+				isInitializing: false,
 				isLoading: false,
 				plugins: [
 					{
@@ -110,6 +113,7 @@ describe( 'DiscoverTools component', () => {
 
 		it( 'should render `direct_install: false` plugins with "View details" button', () => {
 			( useRecommendedPlugins as jest.Mock ).mockReturnValue( {
+				isInitializing: false,
 				isLoading: false,
 				plugins: [
 					{
