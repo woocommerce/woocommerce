@@ -79,7 +79,7 @@ class ListTable extends WP_List_Table {
 		$this->order_type = $args['order_type'] ?? 'shop_order';
 
 		add_action( 'admin_notices', array( $this, 'bulk_action_notices' ) );
-		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'get_columns' ), 0 );
+		add_filter( "manage_{$this->screen->id}_columns", array( $this, 'get_columns' ), 0 );
 		add_filter( 'set_screen_option_edit_' . $this->order_type . '_per_page', array( $this, 'set_items_per_page' ), 10, 3 );
 		add_filter( 'default_hidden_columns', array( $this, 'default_hidden_columns' ), 10, 2 );
 		add_action( 'admin_footer', array( $this, 'enqueue_scripts' ) );
