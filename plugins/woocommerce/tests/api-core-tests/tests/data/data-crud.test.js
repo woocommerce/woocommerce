@@ -3724,7 +3724,7 @@ test.describe('Data API tests', () => {
 				expect.objectContaining({
 					"code": countryData.code,
 					"name": countryData.name,
-					"states": countryData.states,
+					"states": expect.arrayContaining(countryData.states),
 					"_links": {
 						"self": [{
 							"href": expect.stringContaining(`/wp-json/wc/v3/data/countries/${country}`)
@@ -3736,7 +3736,6 @@ test.describe('Data API tests', () => {
 				})
 			]));
 		}
-
 	});
 
 	test('can view all currencies', async ({
