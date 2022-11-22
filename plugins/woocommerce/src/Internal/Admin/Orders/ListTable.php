@@ -253,7 +253,7 @@ class ListTable extends WP_List_Table {
 	 * Prepares the list of items for displaying.
 	 */
 	public function prepare_items() {
-		$limit = $this->get_items_per_page( 'edit_orders_per_page' );
+		$limit = $this->get_items_per_page( 'edit_' . $this->order_type . '_per_page' );
 
 		$this->order_query_args = array(
 			'limit'    => $limit,
