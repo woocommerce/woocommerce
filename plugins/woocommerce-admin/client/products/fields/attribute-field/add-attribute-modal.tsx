@@ -8,7 +8,7 @@ import {
 	Form,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
 } from '@woocommerce/components';
-
+import { recordEvent } from '@woocommerce/tracks';
 import {
 	Button,
 	Modal,
@@ -85,6 +85,9 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 			value: AttributeForm[ keyof AttributeForm ]
 		) => void
 	) => {
+		recordEvent(
+			'product_add_attributes_modal_remove_attribute_button_click'
+		);
 		if ( values.attributes.length > 1 ) {
 			setValue(
 				'attributes',
@@ -318,9 +321,12 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 										'Add another attribute',
 										'woocommerce'
 									) }
-									onClick={ () =>
-										addAnother( values, setValue )
-									}
+									onClick={ () => {
+										recordEvent(
+											'product_add_attributes_modal_add_another_attribute_button_click'
+										);
+										addAnother( values, setValue );
+									} }
 								>
 									+&nbsp;
 									{ __( 'Add another', 'woocommerce' ) }
