@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_Beta_Tester_Live_Branches {
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
@@ -53,7 +53,7 @@ class WC_Beta_Tester_Live_Branches {
 		wp_enqueue_script( 'woocommerce-beta-tester-live-branches' );
 	}
 
-	public function register_page() {    
+	public function register_page() {
 		if ( ! function_exists( 'wc_admin_register_page' ) ) {
 			return;
 		}
