@@ -249,7 +249,7 @@ function wc_get_order_types( $for = '' ) {
 				array_keys( $wc_order_types ),
 				get_post_types(
 					array(
-						'show_ui' => true,
+						'show_ui'      => true,
 						'show_in_menu' => 'woocommerce',
 					)
 				)
