@@ -9,11 +9,10 @@ import {
 	MenuGroup,
 	MenuItem,
 } from '@wordpress/components';
-import { useDispatch } from '@wordpress/data';
 import { chevronDown, check, Icon } from '@wordpress/icons';
 import { registerPlugin } from '@wordpress/plugins';
 import { useFormContext } from '@woocommerce/components';
-import { OPTIONS_STORE_NAME, Product } from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { navigateTo } from '@woocommerce/navigation';
 import { useSelect } from '@wordpress/data';
@@ -29,7 +28,7 @@ import usePreventLeavingPage from '~/hooks/usePreventLeavingPage';
 import { WooHeaderItem } from '~/header/utils';
 import { useProductHelper } from './use-product-helper';
 import './product-form-actions.scss';
-import { PRODUCT_MVP_CES_ACTION_OPTION_NAME } from '~/customer-effort-score-tracks/product-mvp-ces-footer';
+import { useProductMVPCESFooter } from '~/customer-effort-score-tracks/use-product-mvp-ces-footer';
 
 export const ProductFormActions: React.FC = () => {
 	const {
@@ -41,7 +40,9 @@ export const ProductFormActions: React.FC = () => {
 		isUpdatingPublished,
 		isDeleting,
 	} = useProductHelper();
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+
+	const { onPublish: triggerPublishCES, onSaveDraft: triggerDraftCES } =
+		useProductMVPCESFooter();
 	const { isDirty, isValidForm, values, resetForm } =
 		useFormContext< Product >();
 
@@ -88,9 +89,7 @@ export const ProductFormActions: React.FC = () => {
 				resetForm( product );
 			}
 		}
-		updateOptions( {
-			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: 'new_product_update',
-		} );
+		await triggerDraftCES();
 	};
 
 	const onPublish = async () => {
@@ -116,9 +115,7 @@ export const ProductFormActions: React.FC = () => {
 				resetForm( product );
 			}
 		}
-		updateOptions( {
-			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: 'new_product_add_publish',
-		} );
+		await triggerPublishCES();
 	};
 
 	const onPublishAndDuplicate = async () => {

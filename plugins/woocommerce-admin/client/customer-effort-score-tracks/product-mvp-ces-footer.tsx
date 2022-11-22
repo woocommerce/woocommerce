@@ -84,13 +84,7 @@ export const ProductMVPCESFooter: React.FC = () => {
 
 	const onDisablingCES = () => {
 		updateOptions( {
-			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
-				cesAction,
-				...cesShownForActions,
-			],
-		} );
-		updateOptions( {
-			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: '',
+			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: 'hide',
 		} );
 	};
 
@@ -111,16 +105,11 @@ export const ProductMVPCESFooter: React.FC = () => {
 				icon: <span>🌟</span>,
 			}
 		);
-		updateOptions( {
-			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: '',
-		} );
+		setShowFeedbackModal( false );
 	};
 
 	const showCESFooter =
-		! isLoading &&
-		allowTracking &&
-		cesAction &&
-		! ( cesShownForActions || [] ).includes( cesAction );
+		! isLoading && allowTracking && cesAction && cesAction !== 'hide';
 
 	return (
 		<>
@@ -157,6 +146,7 @@ export const ProductMVPCESFooter: React.FC = () => {
 						'woocommerce'
 					) }
 					recordScoreCallback={ recordScore }
+					onCloseModal={ () => setShowFeedbackModal( false ) }
 				/>
 			) }
 		</>
