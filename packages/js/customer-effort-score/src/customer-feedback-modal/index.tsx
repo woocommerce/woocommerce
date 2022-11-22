@@ -198,7 +198,7 @@ function CustomerFeedbackModal( {
 						) }
 						value={ comments }
 						placeholder={ __(
-							'Optional, much much apprecated. We love reading your feedback!',
+							'Optional, but much apprecated. We love reading your feedback!',
 							'woocommerce'
 						) }
 						onChange={ ( value: string ) => setComments( value ) }
