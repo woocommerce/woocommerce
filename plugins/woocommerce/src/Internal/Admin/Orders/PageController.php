@@ -330,7 +330,7 @@ class PageController {
 		return $url;
 	}
 
-	private function get_base_page_url( $order_type ) {
+	public function get_base_page_url( $order_type ) {
 		$order_types_with_ui = wc_get_order_types( 'admin-menu' );
 
 		if ( ! in_array( $order_type, $order_types_with_ui, true ) ) {
