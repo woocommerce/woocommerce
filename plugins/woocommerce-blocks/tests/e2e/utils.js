@@ -430,9 +430,22 @@ export const openBlockEditorSettings = async () => {
  *  Wait for all Products Block is loaded completely: when the skeleton disappears, and the products are visible
  */
 export const waitForAllProductsBlockLoaded = async () => {
-	await page.waitForSelector(
-		'.wc-block-grid__products.is-loading-products'
-	);
+	/**
+	 * We use try with empty catch block here to avoid the race condition
+	 * between the block loading and the test execution. After user actions,
+	 * the products may or may not finish loading at the time we try to wait for
+	 * the loading class.
+	 *
+	 * We need to wait for the loading class to be added then removed because
+	 * only waiting for the loading class to be removed could result in a false
+	 * positive pass.
+	 */
+	try {
+		await page.waitForSelector(
+			'.wc-block-grid__products.is-loading-products'
+		);
+	} catch ( ok ) {}
+
 	await page.waitForSelector(
 		'.wc-block-grid__products:not(.is-loading-products)'
 	);
