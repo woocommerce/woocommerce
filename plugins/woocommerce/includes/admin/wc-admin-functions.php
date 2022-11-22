@@ -39,12 +39,12 @@ function wc_get_screen_ids() {
 		'edit-product_tag',
 		'profile',
 		'user-edit',
-		wc_get_page_screen_id( 'shop-order' ),
 	);
 
 	foreach ( wc_get_order_types() as $type ) {
 		$screen_ids[] = $type;
 		$screen_ids[] = 'edit-' . $type;
+		$screen_ids[] = wc_get_page_screen_id( $type );
 	}
 
 	$attributes = wc_get_attribute_taxonomies();
@@ -73,6 +73,8 @@ function wc_get_page_screen_id( $for ) {
 	$for_ = str_replace( '-', '_', $for );
 	if ( in_array( $for_, $order_types_with_ui, true ) ) {
 		$screen_id = 'woocommerce_page_wc-orders' . ( 'shop_order' === $for_ ? '' : '--' . $for_ );
+	} else {
+		$screen_id = '';
 	}
 
 	return $screen_id;
