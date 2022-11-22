@@ -15,6 +15,8 @@ class ListTable extends WP_List_Table {
 
 	private $order_type;
 
+	private $request = array();
+
 	/**
 	 * Contains the arguments to be used in the order query.
 	 *
@@ -257,6 +259,11 @@ class ListTable extends WP_List_Table {
 			'type'     => $this->order_type,
 		);
 
+		foreach ( array( 'status', 's', 'm', '_customer_user' ) as $query_var ) {
+			$this->request[ $query_var ] = sanitize_text_field( wp_unslash( $_REQUEST[ $query_var ] ?? '' ) );
+		}
+		$this->request = apply_filters( 'woocommerce_' . $this->order_type . '_list_table_request', $this->request );
+
 		$this->set_status_args();
 		$this->set_order_args();
 		$this->set_date_args();
@@ -299,7 +306,7 @@ class ListTable extends WP_List_Table {
 		);
 
 		// Are we inside the trash?
-		$this->is_trash = isset( $_REQUEST['status'] ) && 'trash' === $_REQUEST['status'];
+		$this->is_trash = 'trash' === $this->request['status'];
 	}
 
 	/**
@@ -359,27 +366,28 @@ class ListTable extends WP_List_Table {
 	 * Implements filtering of orders by status.
 	 */
 	private function set_status_args() {
-		$status         = trim( sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? '' ) ) );
-		$query_statuses = array();
+		$status         = array_map( 'trim', (array) $this->request['status'] );
 
-		if ( empty( $status ) || 'all' === $status ) {
-			$query_statuses = array_intersect(
-				array_keys( wc_get_order_statuses() ),
-				get_post_stati( array( 'show_in_admin_all_list' => true ), 'names' )
+		if ( empty( $status ) || in_array( 'all', $status, true ) ) {
+			$status = apply_filters(
+				'woocommerce_' . $this->order_type . '_list_table_default_statuses',
+				array_intersect(
+					array_keys( wc_get_order_statuses() ),
+					get_post_stati( array( 'show_in_admin_all_list' => true ), 'names' )
+				)
 			);
 		} else {
-			$query_statuses[] = $status;
 			$this->has_filter = true;
 		}
 
-		$this->order_query_args['status'] = $query_statuses;
+		$this->order_query_args['status'] = $status;
 	}
 
 	/**
 	 * Implements order search.
 	 */
 	private function set_search_args(): void {
-		$search_term = trim( sanitize_text_field( wp_unslash( $_REQUEST['s'] ?? '' ) ) );
+		$search_term = trim( sanitize_text_field( $this->request['s'] ) );
 
 		if ( ! empty( $search_term ) ) {
 			$this->order_query_args['s'] = $search_term;
@@ -397,8 +405,7 @@ class ListTable extends WP_List_Table {
 		$view_counts = array();
 		$view_links  = array();
 		$statuses    = $this->get_visible_statuses();
-		$current     = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? '' ) ) : 'all';
-		$all_count   = 0;
+		$current     = ! empty( $this->request['status'] ) ? sanitize_text_field( $this->request['status'] ) : 'all';
 
 		foreach ( array_keys( $statuses ) as $slug ) {
 			$total_in_status = $this->count_orders_by_status( $slug );
