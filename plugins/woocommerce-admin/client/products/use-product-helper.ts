@@ -247,7 +247,7 @@ export function useProductHelper() {
 			( error ) => {
 				createNotice(
 					'error',
-					__( 'Failed to moved product to Trash.', 'woocommerce' )
+					__( 'Failed to move product to Trash.', 'woocommerce' )
 				);
 				setIsDeleting( false );
 				return error;
