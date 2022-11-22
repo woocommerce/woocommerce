@@ -17,8 +17,8 @@ import { useParams } from 'react-router-dom';
 /**
  * Internal dependencies
  */
+import { ProductFormHeader } from './layout/product-form-header';
 import { ProductFormLayout } from './layout/product-form-layout';
-import { ProductFormActions } from './product-form-actions';
 import { ProductDetailsSection } from './sections/product-details-section';
 import { ProductInventorySection } from './sections/product-inventory-section';
 import { PricingSection } from './sections/pricing-section';
@@ -126,6 +126,7 @@ const EditProductPage: React.FC = () => {
 						validate={ validate }
 						errors={ {} }
 					>
+						<ProductFormHeader />
 						<ProductFormLayout>
 							<ProductDetailsSection />
 							<PricingSection />
@@ -133,7 +134,6 @@ const EditProductPage: React.FC = () => {
 							<ProductInventorySection />
 							<ProductShippingSection product={ product } />
 							<AttributesSection />
-							<ProductFormActions />
 						</ProductFormLayout>
 					</Form>
 				) }

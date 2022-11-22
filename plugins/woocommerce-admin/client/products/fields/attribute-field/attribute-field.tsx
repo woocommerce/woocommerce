@@ -17,6 +17,7 @@ import {
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
 } from '@woocommerce/components';
 import { closeSmall } from '@wordpress/icons';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -55,6 +56,9 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 	const [ editingAttributeId, setEditingAttributeId ] = useState<
 		null | string
 	>( null );
+
+	const CANCEL_BUTTON_EVENT_NAME =
+		'product_add_attributes_modal_cancel_button_click';
 
 	const fetchTerms = useCallback(
 		( attributeId: number ) => {
@@ -125,6 +129,9 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 	const onRemove = ( attribute: ProductAttribute ) => {
 		// eslint-disable-next-line no-alert
 		if ( window.confirm( __( 'Remove this attribute?', 'woocommerce' ) ) ) {
+			recordEvent(
+				'product_remove_attribute_confirmation_confirm_click'
+			);
 			updateAttributes(
 				hydratedAttributes.filter(
 					( attr ) =>
@@ -132,6 +139,8 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 						fetchAttributeId( attribute )
 				)
 			);
+		} else {
+			recordEvent( 'product_remove_attribute_confirmation_cancel_click' );
 		}
 	};
 
@@ -141,8 +150,10 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 			...newAttributes
 				.filter(
 					( newAttr ) =>
-						! ( value || [] ).find(
-							( attr ) => attr.id === newAttr.id
+						! ( value || [] ).find( ( attr ) =>
+							newAttr.id === 0
+								? newAttr.name === attr.name // check name if custom attribute = id === 0.
+								: attr.id === newAttr.id
 						)
 				)
 				.map( ( newAttr, index ) => {
@@ -150,6 +161,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					return newAttr;
 				} ),
 		] );
+		recordEvent( 'product_add_attributes_modal_add_button_click' );
 		setShowAddAttributeModal( false );
 	};
 
@@ -176,24 +188,29 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 							<Button
 								variant="secondary"
 								className="woocommerce-attribute-field__add-new"
-								onClick={ () =>
-									setShowAddAttributeModal( true )
-								}
+								onClick={ () => {
+									recordEvent(
+										'product_add_first_attribute_button_click'
+									);
+									setShowAddAttributeModal( true );
+								} }
 							>
 								{ __( 'Add first attribute', 'woocommerce' ) }
 							</Button>
 						</div>
 						{ showAddAttributeModal && (
 							<AddAttributeModal
-								onCancel={ () =>
-									setShowAddAttributeModal( false )
-								}
+								onCancel={ () => {
+									recordEvent( CANCEL_BUTTON_EVENT_NAME );
+									setShowAddAttributeModal( false );
+								} }
 								onAdd={ onAddNewAttributes }
 								selectedAttributeIds={ ( value || [] ).map(
 									( attr ) => attr.id
 								) }
 							/>
 						) }
+						<SelectControlMenuSlot />
 					</div>
 				</CardBody>
 			</Card>
@@ -274,19 +291,25 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 				<Button
 					variant="secondary"
 					className="woocommerce-attribute-field__add-attribute"
-					onClick={ () => setShowAddAttributeModal( true ) }
+					onClick={ () => {
+						recordEvent( 'product_add_attribute_button' );
+						setShowAddAttributeModal( true );
+					} }
 				>
 					{ __( 'Add attribute', 'woocommerce' ) }
 				</Button>
 			</ListItem>
 			{ showAddAttributeModal && (
 				<AddAttributeModal
-					onCancel={ () => setShowAddAttributeModal( false ) }
+					onCancel={ () => {
+						recordEvent( CANCEL_BUTTON_EVENT_NAME );
+						setShowAddAttributeModal( false );
+					} }
 					onAdd={ onAddNewAttributes }
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
 				/>
 			) }
-
+			<SelectControlMenuSlot />
 			{ editingAttributeId && (
 				<EditAttributeModal
 					onCancel={ () => setEditingAttributeId( null ) }
@@ -314,7 +337,6 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					}
 				/>
 			) }
-			<SelectControlMenuSlot />
 		</div>
 	);
 };

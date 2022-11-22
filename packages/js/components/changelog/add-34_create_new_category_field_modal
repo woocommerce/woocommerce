@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Move classname down in SelectControl Menu so it is on the actual Menu element.

@@ -11,6 +11,13 @@
 
 		@include breakpoint( '>600px' ) {
 			flex-direction: row;
+			justify-content: center;
+		}
+
+		.components-h-stack {
+			@include breakpoint( '>600px' ) {
+				flex-direction: row;
+			}
 		}
 	}
 
