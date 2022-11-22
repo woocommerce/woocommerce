@@ -13,8 +13,18 @@ use WP_Screen;
  */
 class ListTable extends WP_List_Table {
 
+	/**
+	 * Order type.
+	 *
+	 * @var string
+	 */
 	private $order_type;
 
+	/**
+	 * Request vars.
+	 *
+	 * @var array
+	 */
 	private $request = array();
 
 	/**
@@ -73,6 +83,8 @@ class ListTable extends WP_List_Table {
 	/**
 	 * Performs setup work required before rendering the table.
 	 *
+	 * @param array $args Args to initialize this list table.
+	 *
 	 * @return void
 	 */
 	public function setup( $args = array() ): void {
@@ -114,6 +126,15 @@ class ListTable extends WP_List_Table {
 	 */
 	public function column_default( $order, $column_name ) {
 		if ( has_action( 'woocommerce_' . $this->order_type . '_list_table_custom_column' ) ) {
+			/**
+			 * Fires for each custom column for a specific order type. This hook takes precedence over the generic
+			 * action `manage_{$this->screen->id}_custom_column`.
+			 *
+			 * @param string    $column_name Identifier for the custom column.
+			 * @param \WC_Order $order       Current WooCommerce order object.
+			 *
+			 * @since 7.3.0
+			 */
 			do_action( 'woocommerce_' . $this->order_type . '_list_table_custom_column', $column_name, $order );
 		} else {
 			/**
@@ -266,6 +287,14 @@ class ListTable extends WP_List_Table {
 		foreach ( array( 'status', 's', 'm', '_customer_user' ) as $query_var ) {
 			$this->request[ $query_var ] = sanitize_text_field( wp_unslash( $_REQUEST[ $query_var ] ?? '' ) );
 		}
+
+		/**
+		 * Allows 3rd parties to filter the initial request vars before defaults and other logic is applied.
+		 *
+		 * @param array $request Request to be passed to `wc_get_orders()`.
+		 *
+		 * @since 7.3.0
+		 */
 		$this->request = apply_filters( 'woocommerce_' . $this->order_type . '_list_table_request', $this->request );
 
 		$this->set_status_args();
@@ -283,6 +312,14 @@ class ListTable extends WP_List_Table {
 		 * @param array $query_args Arguments to be passed to `wc_get_orders()`.
 		 */
 		$order_query_args = (array) apply_filters( 'woocommerce_order_list_table_prepare_items_query_args', $this->order_query_args );
+
+		/**
+		 * Same as `woocommerce_order_list_table_prepare_items_query_args` but for a specific order type.
+		 *
+		 * @param array $query_args Arguments to be passed to `wc_get_orders()`.
+		 *
+		 * @since 7.3.0
+		 */
 		$order_query_args = apply_filters( 'woocommerce_' . $this->order_type . '_list_table_prepare_items_query_args', $this->order_query_args );
 
 		// We must ensure the 'paginate' argument is set.
@@ -371,9 +408,16 @@ class ListTable extends WP_List_Table {
 	 * Implements filtering of orders by status.
 	 */
 	private function set_status_args() {
-		$status         = array_map( 'trim', (array) $this->request['status'] );
+		$status = array_map( 'trim', (array) $this->request['status'] );
 
 		if ( empty( $status ) || in_array( 'all', $status, true ) ) {
+			/**
+			 * Allows 3rd parties to set the default list of statuses for a given order type.
+			 *
+			 * @param string[] $statuses Statuses.
+			 *
+			 * @since 7.3.0
+			 */
 			$status = apply_filters(
 				'woocommerce_' . $this->order_type . '_list_table_default_statuses',
 				array_intersect(
@@ -611,6 +655,13 @@ class ListTable extends WP_List_Table {
 	 * @return array
 	 */
 	public function get_columns() {
+		/**
+		 * Filters the list of columns.
+		 *
+		 * @param array $columns List of sortable columns.
+		 *
+		 * @since 7.3.0
+		 */
 		return apply_filters(
 			'woocommerce_' . $this->order_type . '_list_table_columns',
 			array(
@@ -632,6 +683,13 @@ class ListTable extends WP_List_Table {
 	 * @return string[]
 	 */
 	public function get_sortable_columns() {
+		/**
+		 * Filters the list of sortable columns.
+		 *
+		 * @param array $sortable_columns List of sortable columns.
+		 *
+		 * @since 7.3.0
+		 */
 		return apply_filters(
 			'woocommerce_' . $this->order_type . '_list_table_sortable_columns',
 			array(

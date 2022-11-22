@@ -247,7 +247,12 @@ function wc_get_order_types( $for = '' ) {
 		case 'admin-menu':
 			$order_types = array_intersect(
 				array_keys( $wc_order_types ),
-				get_post_types( array( 'show_ui' => true, 'show_in_menu' => 'woocommerce' ) )
+				get_post_types(
+					array(
+						'show_ui' => true,
+						'show_in_menu' => 'woocommerce',
+					)
+				)
 			);
 			break;
 		default:
