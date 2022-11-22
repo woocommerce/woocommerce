@@ -239,6 +239,7 @@ class WC_Structured_Data {
 						'lowPrice'   => wc_format_decimal( $lowest, wc_get_price_decimals() ),
 						'highPrice'  => wc_format_decimal( $highest, wc_get_price_decimals() ),
 						'offerCount' => count( $product->get_children() ),
+						'priceCurrency' => $currency,
 					);
 				}
 			} else {
