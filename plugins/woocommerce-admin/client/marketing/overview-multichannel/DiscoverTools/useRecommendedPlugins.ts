@@ -13,9 +13,11 @@ const selector = 'getRecommendedPlugins';
 const category = 'marketing';
 
 export const useRecommendedPlugins = () => {
-	const { invalidateResolution } = useDispatch( STORE_KEY );
+	const { invalidateResolution, installAndActivateRecommendedPlugin } =
+		useDispatch( STORE_KEY );
 
-	const refetch = () => {
+	const installAndActivate = ( plugin: string ) => {
+		installAndActivateRecommendedPlugin( plugin, category );
 		invalidateResolution( selector, [ category ] );
 	};
 
@@ -29,7 +31,7 @@ export const useRecommendedPlugins = () => {
 			isInitializing: ! plugins.length && isLoading,
 			isLoading,
 			plugins,
-			refetch,
+			installAndActivate,
 		};
 	}, [] );
 };

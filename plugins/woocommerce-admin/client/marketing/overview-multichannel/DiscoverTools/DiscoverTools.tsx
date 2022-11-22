@@ -16,7 +16,7 @@ import { PluginsTabPanel } from './PluginsTabPanel';
 import './DiscoverTools.scss';
 
 export const DiscoverTools = () => {
-	const { isInitializing, isLoading, plugins, refetch } =
+	const { isInitializing, isLoading, plugins, installAndActivate } =
 		useRecommendedPlugins();
 
 	/**
@@ -65,7 +65,7 @@ export const DiscoverTools = () => {
 			<PluginsTabPanel
 				plugins={ plugins }
 				isLoading={ isLoading }
-				onRefetch={ refetch }
+				onInstallAndActivate={ installAndActivate }
 			/>
 		);
 	};

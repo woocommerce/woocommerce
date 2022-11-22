@@ -45,7 +45,7 @@ const getTabs = ( plugins: Plugin[] ) => {
 type PluginsTabPanelType = {
 	isLoading: boolean;
 	plugins: Plugin[];
-	onRefetch: () => void;
+	onInstallAndActivate: ( pluginSlug: string ) => void;
 };
 
 /**
@@ -54,7 +54,7 @@ type PluginsTabPanelType = {
 export const PluginsTabPanel = ( {
 	isLoading,
 	plugins,
-	onRefetch,
+	onInstallAndActivate,
 }: PluginsTabPanelType ) => {
 	const [ currentPlugin, setCurrentPlugin ] = useState< string | null >(
 		null
@@ -84,7 +84,7 @@ export const PluginsTabPanel = ( {
 				plugin.product,
 			] );
 
-			onRefetch();
+			onInstallAndActivate( plugin.product );
 			loadInstalledPluginsAfterActivation( plugin.product );
 			createNoticesFromResponse( response );
 		} catch ( error ) {
