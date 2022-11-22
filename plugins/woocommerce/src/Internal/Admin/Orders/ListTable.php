@@ -113,15 +113,19 @@ class ListTable extends WP_List_Table {
 	 * @param string    $column_name Identifier for the custom column.
 	 */
 	public function column_default( $order, $column_name ) {
-		/**
-		 * Fires for each custom column in the Custom Order Table in the administrative screen.
-		 *
-		 * @param string    $column_name Identifier for the custom column.
-		 * @param \WC_Order $order       Current WooCommerce order object.
-		 *
-		 * @since 7.0.0
-		 */
-		do_action( "manage_{$this->screen->id}_custom_column", $column_name, $order );
+		if ( has_action( 'woocommerce_' . $this->order_type . '_list_table_custom_column' ) ) {
+			do_action( 'woocommerce_' . $this->order_type . '_list_table_custom_column', $column_name, $order );
+		} else {
+			/**
+			 * Fires for each custom column in the Custom Order Table in the administrative screen.
+			 *
+			 * @param string    $column_name Identifier for the custom column.
+			 * @param \WC_Order $order       Current WooCommerce order object.
+			 *
+			 * @since 7.0.0
+			 */
+			do_action( "manage_{$this->screen->id}_custom_column", $column_name, $order );
+		}
 	}
 
 	/**
@@ -279,6 +283,7 @@ class ListTable extends WP_List_Table {
 		 * @param array $query_args Arguments to be passed to `wc_get_orders()`.
 		 */
 		$order_query_args = (array) apply_filters( 'woocommerce_order_list_table_prepare_items_query_args', $this->order_query_args );
+		$order_query_args = apply_filters( 'woocommerce_' . $this->order_type . '_list_table_prepare_items_query_args', $this->order_query_args );
 
 		// We must ensure the 'paginate' argument is set.
 		$order_query_args['paginate'] = true;
@@ -606,15 +611,18 @@ class ListTable extends WP_List_Table {
 	 * @return array
 	 */
 	public function get_columns() {
-		return array(
-			'cb'               => '<input type="checkbox" />',
-			'order_number'     => esc_html__( 'Order', 'woocommerce' ),
-			'order_date'       => esc_html__( 'Date', 'woocommerce' ),
-			'order_status'     => esc_html__( 'Status', 'woocommerce' ),
-			'billing_address'  => esc_html__( 'Billing', 'woocommerce' ),
-			'shipping_address' => esc_html__( 'Ship to', 'woocommerce' ),
-			'order_total'      => esc_html__( 'Total', 'woocommerce' ),
-			'wc_actions'       => esc_html__( 'Actions', 'woocommerce' ),
+		return apply_filters(
+			'woocommerce_' . $this->order_type . '_list_table_columns',
+			array(
+				'cb'               => '<input type="checkbox" />',
+				'order_number'     => esc_html__( 'Order', 'woocommerce' ),
+				'order_date'       => esc_html__( 'Date', 'woocommerce' ),
+				'order_status'     => esc_html__( 'Status', 'woocommerce' ),
+				'billing_address'  => esc_html__( 'Billing', 'woocommerce' ),
+				'shipping_address' => esc_html__( 'Ship to', 'woocommerce' ),
+				'order_total'      => esc_html__( 'Total', 'woocommerce' ),
+				'wc_actions'       => esc_html__( 'Actions', 'woocommerce' ),
+			)
 		);
 	}
 
@@ -624,10 +632,13 @@ class ListTable extends WP_List_Table {
 	 * @return string[]
 	 */
 	public function get_sortable_columns() {
-		return array(
-			'order_number' => 'ID',
-			'order_date'   => 'date',
-			'order_total'  => 'order_total',
+		return apply_filters(
+			'woocommerce_' . $this->order_type . '_list_table_sortable_columns',
+			array(
+				'order_number' => 'ID',
+				'order_date'   => 'date',
+				'order_total'  => 'order_total',
+			)
 		);
 	}
 
