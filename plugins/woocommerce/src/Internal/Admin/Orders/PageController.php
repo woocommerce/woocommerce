@@ -11,6 +11,11 @@ class PageController {
 
 	use AccessiblePrivateMethods;
 
+	/**
+	 * The order type.
+	 *
+	 * @var string
+	 */
 	private $order_type = '';
 
 	/**
@@ -118,6 +123,11 @@ class PageController {
 		}
 	}
 
+	/**
+	 * Determines the order type for the current screen.
+	 *
+	 * @return void
+	 */
 	private function set_order_type() {
 		global $plugin_page, $pagenow;
 
@@ -281,6 +291,11 @@ class PageController {
 		$theorder = $this->order;
 	}
 
+	/**
+	 * Returns the current order type.
+	 *
+	 * @return string
+	 */
 	public function get_order_type() {
 		return $this->order_type;
 	}
@@ -311,7 +326,7 @@ class PageController {
 		return add_query_arg(
 			array(
 				'action' => 'edit',
-				'id' => absint( $order_id ),
+				'id'     => absint( $order_id ),
 			),
 			$this->get_base_page_url( wc_get_order( $order_id )->get_type() )
 		);
@@ -320,6 +335,7 @@ class PageController {
 	/**
 	 * Helper method to generate a link for creating order.
 	 *
+	 * @param string $order_type The order type. Defaults to 'shop_order'.
 	 * @return string
 	 */
 	public function get_new_page_url( $order_type = 'shop_order' ) : string {
@@ -330,11 +346,21 @@ class PageController {
 		return $url;
 	}
 
-	public function get_base_page_url( $order_type ) {
+	/**
+	 * Helper method to generate a link to the main screen for a custom order type.
+	 *
+	 * @param string $order_type The order type.
+	 *
+	 * @return string
+	 *
+	 * @throws \Exception When an invalid order type is passed.
+	 */
+	public function get_base_page_url( $order_type ): string {
 		$order_types_with_ui = wc_get_order_types( 'admin-menu' );
 
 		if ( ! in_array( $order_type, $order_types_with_ui, true ) ) {
-			throw new \Exception('invalid order type');
+			// translators: %s is a custom order type.
+			throw new \Exception( sprintf( __( 'Invalid order type: %s.', 'woocommerce' ), esc_html( $order_type ) ) );
 		}
 
 		return admin_url( 'admin.php?page=wc-orders' . ( 'shop_order' === $order_type ? '' : '--' . $order_type ) );

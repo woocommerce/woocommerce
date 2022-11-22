@@ -201,7 +201,7 @@ class Edit {
 			<?php echo esc_html( $post_type->labels->edit_item ); ?>
 		</h1>
 		<?php
-		echo ' <a href="' . esc_url( $new_page_url ) . '" class="page-title-action">' . esc_html( $post_type->labels->add_new )  . '</a>';
+		echo ' <a href="' . esc_url( $new_page_url ) . '" class="page-title-action">' . esc_html( $post_type->labels->add_new ) . '</a>';
 		?>
 		<hr class="wp-header-end">
 
