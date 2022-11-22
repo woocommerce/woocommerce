@@ -146,7 +146,7 @@ class CustomerEffortScoreTracks {
 	 *
 	 * @return string Generated JavaScript to append to page.
 	 */
-	private function get_script_track_edit_php( $action, $label ) {
+	private function get_script_track_edit_php( $action, $title, $first_question, $second_question ) {
 		return sprintf(
 			"(function( $ ) {
 				'use strict';
@@ -158,7 +158,7 @@ class CustomerEffortScoreTracks {
 						if ( $('.tags tbody > tr').length > initialCount ) {
 							// New tag detected.
 							clearInterval( interval );
-							wp.data.dispatch('wc/customer-effort-score').addCesSurvey( '%s', '%s', window.pagenow, window.adminpage, '%s' );
+							wp.data.dispatch('wc/customer-effort-score').addCesSurvey({ action: '%s', title: '%s', firstQuestion: '%s', secondQuestion: '%s', onsubmitLabel: '%s' });
 						} else {
 							// Form is no longer loading, most likely failed.
 							if ( $( '#addtag .submit .spinner.is-active' ).length < 1 ) {
@@ -169,7 +169,9 @@ class CustomerEffortScoreTracks {
 				});
 			})( jQuery );",
 			esc_js( $action ),
-			esc_js( $label ),
+			esc_js( $title ),
+			esc_js( $first_question ),
+			esc_js( $second_question ),
 			esc_js( $this->onsubmit_label )
 		);
 	}
@@ -479,7 +481,9 @@ class CustomerEffortScoreTracks {
 		wc_enqueue_js(
 			$this->get_script_track_edit_php(
 				self::ADD_PRODUCT_CATEGORIES_ACTION_NAME,
-				__( 'How easy was it to add product category?', 'woocommerce' )
+				__( 'How easy was it to add product category?', 'woocommerce' ),
+				__( 'The product category details screen is easy to use.', 'woocommerce' ),
+				__( "The product category details screen's functionality meets my needs.", 'woocommerce' )
 			)
 		);
 	}
@@ -495,7 +499,9 @@ class CustomerEffortScoreTracks {
 		wc_enqueue_js(
 			$this->get_script_track_edit_php(
 				self::ADD_PRODUCT_TAGS_ACTION_NAME,
-				__( 'How easy was it to add a product tag?', 'woocommerce' )
+				__( 'How easy was it to add a product tag?', 'woocommerce' ),
+				__( 'The product tag details screen is easy to use.', 'woocommerce' ),
+				__( "The product tag details screen's functionality meets my needs.", 'woocommerce' )
 			)
 		);
 	}
