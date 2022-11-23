@@ -105,6 +105,10 @@ module.exports = async ( config ) => {
 			await adminPage.fill( '#key_description', 'Key for API access' );
 			await adminPage.selectOption( '#key_permissions', 'read_write' );
 			await adminPage.click( 'text=Generate API key' );
+
+			await adminPage.waitForSelector( '#key_consumer_key' );
+			await adminPage.waitForSelector( '#key_consumer_secret' );
+
 			process.env.CONSUMER_KEY = await adminPage.inputValue(
 				'#key_consumer_key'
 			);
