@@ -327,6 +327,27 @@ class StyleAttributesUtils {
 		return null;
 	}
 
+
+	/**
+	 * If spacing value is in preset format, convert it to a CSS var. Else return same value
+	 * For example:
+	 * "var:preset|spacing|50" -> "var(--wp--preset--spacing--50)"
+	 * "50px" -> "50px"
+	 *
+	 * @param string $spacing_value value to be processed.
+	 *
+	 * @return (string)
+	 */
+	public static function get_spacing_value( $spacing_value ) {
+		// Used following code as reference: https://github.com/WordPress/gutenberg/blob/cff6d70d6ff5a26e212958623dc3130569f95685/lib/block-supports/layout.php/#L219-L225.
+		if ( is_string( $spacing_value ) && str_contains( $spacing_value, 'var:preset|spacing|' ) ) {
+			$spacing_value = str_replace( 'var:preset|spacing|', '', 'var:preset|spacing|50' );
+			return sprintf( 'var(--wp--preset--spacing--%s)', $spacing_value );
+		}
+
+		return $spacing_value;
+	}
+
 	/**
 	 * Get class and style for padding from attributes.
 	 *
@@ -341,9 +362,23 @@ class StyleAttributesUtils {
 			return null;
 		}
 
+		$padding_top    = $padding['top'] ? self::get_spacing_value( $padding['top'] ) : null;
+		$padding_right  = $padding['right'] ? self::get_spacing_value( $padding['right'] ) : null;
+		$padding_bottom = $padding['bottom'] ? self::get_spacing_value( $padding['bottom'] ) : null;
+		$padding_left   = $padding['left'] ? self::get_spacing_value( $padding['left'] ) : null;
+
 		return array(
 			'class' => null,
-			'style' => sprintf( 'padding: %s;', implode( ' ', $padding ) ),
+			'style' => sprintf(
+				'padding-top:%s;
+				padding-right:%s;
+				padding-bottom:%s;
+				padding-left:%s;',
+				$padding_top,
+				$padding_right,
+				$padding_bottom,
+				$padding_left
+			),
 		);
 	}
 
