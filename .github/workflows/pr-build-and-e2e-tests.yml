@@ -3,10 +3,6 @@ on:
     pull_request:
     workflow_dispatch:
 
-concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
-
 jobs:
     e2e-tests-run:
         name: Runs E2E tests.
