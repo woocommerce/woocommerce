@@ -18,7 +18,7 @@ If you would like to read more about the syntax, please check out [the Turborepo
 
 ### Examples
 
-Here are some examples of the ways you can use Turborepo / pnpm commands:
+Here are some examples of the ways you can use Turborepo/pnpm commands:
 
 ```bash
 # Lint and build all plugins, packages, and tools. Note the use of `-r` for lint,
