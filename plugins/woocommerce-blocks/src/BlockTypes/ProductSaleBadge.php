@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+
 /**
  * ProductSaleBadge class.
  */
@@ -54,12 +56,57 @@ class ProductSaleBadge extends AbstractBlock {
 	}
 
 	/**
-	 * Register script and style assets for the block type before it is registered.
+	 * Overwrite parent method to prevent script registration.
 	 *
-	 * This registers the scripts; it does not enqueue them.
+	 * It is necessary to register and enqueues assets during the render
+	 * phase because we want to load assets only if the block has the content.
 	 */
 	protected function register_block_type_assets() {
-		parent::register_block_type_assets();
-		$this->register_chunk_translations( [ $this->block_name ] );
+		return null;
+	}
+
+	/**
+	 * Register the context.
+	 */
+	protected function get_block_type_uses_context() {
+		return [ 'query', 'queryId', 'postId' ];
+	}
+
+	/**
+	 * Include and render the block.
+	 *
+	 * @param array    $attributes Block attributes. Default empty array.
+	 * @param string   $content    Block content. Default empty string.
+	 * @param WP_Block $block      Block instance.
+	 * @return string Rendered block type output.
+	 */
+	protected function render( $attributes, $content, $block ) {
+		if ( ! empty( $content ) ) {
+			parent::register_block_type_assets();
+			$this->register_chunk_translations( [ $this->block_name ] );
+			return $content;
+		}
+
+		$post_id    = $block->context['postId'];
+		$product    = wc_get_product( $post_id );
+		$is_on_sale = $product->is_on_sale();
+
+		if ( ! $is_on_sale ) {
+			return null;
+		}
+
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+		$classname          = isset( $attributes['className'] ) ? $attributes['className'] : '';
+
+		$output  = '';
+		$output .= '<div class="wc-block-components-product-sale-badge ' . $classes_and_styles['classes'] . ' ' . $classname . '" style="' . $classes_and_styles['styles'] . '"">';
+		$output .= '<span class="wc-block-components-product-sale-badge__text" aria-hidden="true">' . __( 'Sale', 'woo-gutenberg-products-block' ) . '</span>';
+		$output .= '<span class="screen-reader-text">' . __(
+			'Product on sale',
+			'woo-gutenberg-products-block'
+		) . '</span>';
+		$output .= '</div>';
+
+		return $output;
 	}
 }
