@@ -82,25 +82,23 @@ export function useProductHelper() {
 				status,
 			} ).then(
 				( newProduct ) => {
+					const noticeContent =
+						newProduct.status === 'publish'
+							? __(
+									'Product published. View in store.',
+									'woocommerce'
+							  )
+							: __(
+									'Product successfully created.',
+									'woocommerce'
+							  );
 					if ( ! skipNotice ) {
-						createNotice(
-							'success',
-							newProduct.status === 'publish'
-								? __(
-										'🎉 Product published. View in store',
-										'woocommerce'
-								  )
-								: __(
-										'🎉 Product successfully created.',
-										'woocommerce'
-								  ),
-							{
-								actions: getNoticePreviewActions(
-									newProduct.status,
-									newProduct.permalink
-								),
-							}
-						);
+						createNotice( 'success', `🎉‎ ${ noticeContent }`, {
+							actions: getNoticePreviewActions(
+								newProduct.status,
+								newProduct.permalink
+							),
+						} );
 					}
 					setUpdating( {
 						...updating,
@@ -159,26 +157,24 @@ export function useProductHelper() {
 				status,
 			} ).then(
 				( updatedProduct ) => {
+					const noticeContent =
+						product.status === 'draft' &&
+						updatedProduct.status === 'publish'
+							? __(
+									'Product published. View in store.',
+									'woocommerce'
+							  )
+							: __(
+									'Product successfully updated.',
+									'woocommerce'
+							  );
 					if ( ! skipNotice ) {
-						createNotice(
-							'success',
-							product.status === 'draft' &&
-								updatedProduct.status === 'publish'
-								? __(
-										'🎉 Product published. View in store.',
-										'woocommerce'
-								  )
-								: __(
-										'🎉 Product successfully updated.',
-										'woocommerce'
-								  ),
-							{
-								actions: getNoticePreviewActions(
-									updatedProduct.status,
-									updatedProduct.permalink
-								),
-							}
-						);
+						createNotice( 'success', `🎉‎ ${ noticeContent }`, {
+							actions: getNoticePreviewActions(
+								updatedProduct.status,
+								updatedProduct.permalink
+							),
+						} );
 					}
 					setUpdating( {
 						...updating,
@@ -234,13 +230,11 @@ export function useProductHelper() {
 		setIsDeleting( true );
 		return deleteProduct( id ).then(
 			( product ) => {
-				createNotice(
-					'success',
-					__(
-						'🎉 Successfully moved product to Trash.',
-						'woocommerce'
-					)
+				const noticeContent = __(
+					'Successfully moved product to Trash.',
+					'woocommerce'
 				);
+				createNotice( 'success', `🎉‎ ${ noticeContent }` );
 				setIsDeleting( false );
 				return product;
 			},
