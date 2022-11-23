@@ -5,6 +5,8 @@ import TYPES from './action-types';
 
 const DEFAULT_STATE = {
 	queue: [],
+	cesModalData: undefined,
+	showCESModal: false,
 };
 
 const reducer = ( state = DEFAULT_STATE, action ) => {
@@ -13,6 +15,25 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			return {
 				...state,
 				queue: action.queue,
+			};
+		case TYPES.HIDE_CES_MODAL:
+			return {
+				...state,
+				showCESModal: false,
+				cesModalData: undefined,
+			};
+		case TYPES.SHOW_CES_MODAL:
+			const cesModalData = {
+				action: action.action,
+				label: action.label,
+				onSubmitLabel: action.onSubmitLabel,
+				onSubmitNoticeProps: action.onSubmitNoticeProps || {},
+				props: action.props,
+			};
+			return {
+				...state,
+				showCESModal: true,
+				cesModalData,
 			};
 		case TYPES.ADD_CES_SURVEY:
 			// Prevent duplicate
