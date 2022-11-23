@@ -8,6 +8,7 @@ import { Icon, search } from '@wordpress/icons';
  * Internal dependencies
  */
 import { Props } from './types';
+import classNames from 'classnames';
 
 type ComboBoxProps = {
 	children?: JSX.Element | JSX.Element[] | null;
@@ -40,7 +41,13 @@ export const ComboBox = ( {
 		// Keyboard users are still able to tab to and interact with elements in the combobox.
 		/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
 		<div
-			className="woocommerce-experimental-select-control__combo-box-wrapper"
+			className={ classNames(
+				'woocommerce-experimental-select-control__combo-box-wrapper',
+				{
+					'woocommerce-experimental-select-control__combo-box-wrapper--disabled':
+						inputProps.disabled,
+				}
+			) }
 			onMouseDown={ maybeFocusInput }
 		>
 			{ children }
