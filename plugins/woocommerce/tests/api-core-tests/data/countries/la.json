@@ -1,0 +1,90 @@
+{
+    "code": "LA",
+    "name": "Laos",
+    "states": [
+        {
+            "code": "AT",
+            "name": "Attapeu"
+        },
+        {
+            "code": "BK",
+            "name": "Bokeo"
+        },
+        {
+            "code": "BL",
+            "name": "Bolikhamsai"
+        },
+        {
+            "code": "CH",
+            "name": "Champasak"
+        },
+        {
+            "code": "HO",
+            "name": "Houaphanh"
+        },
+        {
+            "code": "KH",
+            "name": "Khammouane"
+        },
+        {
+            "code": "LM",
+            "name": "Luang Namtha"
+        },
+        {
+            "code": "LP",
+            "name": "Luang Prabang"
+        },
+        {
+            "code": "OU",
+            "name": "Oudomxay"
+        },
+        {
+            "code": "PH",
+            "name": "Phongsaly"
+        },
+        {
+            "code": "SL",
+            "name": "Salavan"
+        },
+        {
+            "code": "SV",
+            "name": "Savannakhet"
+        },
+        {
+            "code": "VI",
+            "name": "Vientiane Province"
+        },
+        {
+            "code": "VT",
+            "name": "Vientiane"
+        },
+        {
+            "code": "XA",
+            "name": "Sainyabuli"
+        },
+        {
+            "code": "XE",
+            "name": "Sekong"
+        },
+        {
+            "code": "XI",
+            "name": "Xiangkhouang"
+        },
+        {
+            "code": "XS",
+            "name": "Xaisomboun"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/la"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}
