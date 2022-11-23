@@ -72,7 +72,7 @@ class WC_Admin_Menus {
 
 		// Work around https://github.com/woocommerce/woocommerce/issues/35677 (and related https://core.trac.wordpress.org/ticket/18857).
 		// Translating the menu item breaks screen IDs and page hooks, so we force the hookname to be untranslated.
-		$admin_page_hooks['woocommerce'] = 'woocommerce';
+		$admin_page_hooks['woocommerce'] = 'woocommerce'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		add_submenu_page( 'edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'product_attributes', array( $this, 'attributes_page' ) );
 	}
