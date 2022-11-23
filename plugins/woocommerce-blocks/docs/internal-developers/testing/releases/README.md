@@ -103,3 +103,4 @@ Every release includes specific testing instructions for new features and bug fi
     -   [8.8.2](./882.md)
 -   [8.9.0](./890.md)
     -   [8.9.1](./891.md)
+-   [9.0.0](./900.md)
