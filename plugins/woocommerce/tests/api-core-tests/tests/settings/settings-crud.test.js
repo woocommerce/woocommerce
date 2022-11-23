@@ -261,7 +261,7 @@ test.describe('Settings API tests: CRUD', () => {
 						type: "text",
 						default: "",
 						tip: "The street address for your business location.",
-						value: ""
+						value: "addr1"
 					})
 				]));
 
@@ -287,7 +287,7 @@ test.describe('Settings API tests: CRUD', () => {
 						type: "text",
 						default: "",
 						tip: "The city in which your business is located.",
-						value: ""
+						value: "San Francisco"
 					})
 				]));
 			expect(responseJSON).toEqual(
@@ -313,7 +313,7 @@ test.describe('Settings API tests: CRUD', () => {
 						type: "text",
 						default: "",
 						tip: "The postal code, if any, in which your business is located.",
-						value: "",
+						value: "94107",
 					})
 				]));
 
@@ -342,7 +342,7 @@ test.describe('Settings API tests: CRUD', () => {
 						description: "",
 						type: "multiselect",
 						default: "",
-						value: "",
+						value: [],
 						options: expect.objectContaining(countries),
 					})
 				]));
@@ -355,7 +355,7 @@ test.describe('Settings API tests: CRUD', () => {
 						description: "",
 						type: "multiselect",
 						default: "",
-						value: "",
+						value: [],
 						options: expect.objectContaining(countries)
 					})
 				]));
@@ -386,7 +386,7 @@ test.describe('Settings API tests: CRUD', () => {
 						description: "",
 						type: "multiselect",
 						default: "",
-						value: "",
+						value: [],
 						options: expect.objectContaining(countries)
 					})
 				]));
