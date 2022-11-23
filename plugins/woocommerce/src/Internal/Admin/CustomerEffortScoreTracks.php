@@ -142,7 +142,9 @@ class CustomerEffortScoreTracks {
 	 * an increase of the number of rows in tags table
 	 *
 	 * @param string $action Action name for the survey.
-	 * @param string $label Label for the snackbar.
+	 * @param string $title Title for the snackbar.
+	 * @param string $first_question The text for the first question.
+	 * @param string $second_question The text for the second question.
 	 *
 	 * @return string Generated JavaScript to append to page.
 	 */
@@ -277,7 +279,7 @@ class CustomerEffortScoreTracks {
 					'How easy was it to use search?',
 					'woocommerce'
 				),
-				'firstQuestion'	 => __(
+				'firstQuestion'  => __(
 					'The search feature in WooCommerce is easy to use.',
 					'woocommerce'
 				),
@@ -351,7 +353,7 @@ class CustomerEffortScoreTracks {
 					'How easy was it to add a product?',
 					'woocommerce'
 				),
-				'firstQuestion'	 => __(
+				'firstQuestion'  => __(
 					'The product creation screen is easy to use.',
 					'woocommerce'
 				),
@@ -384,7 +386,7 @@ class CustomerEffortScoreTracks {
 					'How easy was it to edit your product?',
 					'woocommerce'
 				),
-				'firstQuestion'	 => __(
+				'firstQuestion'  => __(
 					'The product update process is easy to complete.',
 					'woocommerce'
 				),
@@ -417,7 +419,7 @@ class CustomerEffortScoreTracks {
 					'How easy was it to update an order?',
 					'woocommerce'
 				),
-				'firstQuestion'	 => __(
+				'firstQuestion'  => __(
 					'The order details screen is easy to use.',
 					'woocommerce'
 				),
@@ -526,7 +528,7 @@ class CustomerEffortScoreTracks {
 					'How easy was it to import products?',
 					'woocommerce'
 				),
-				'firstQuestion'	 => __(
+				'firstQuestion'  => __(
 					'The product import process is easy to complete.',
 					'woocommerce'
 				),
@@ -569,7 +571,7 @@ class CustomerEffortScoreTracks {
 					'How easy was it to update your settings?',
 					'woocommerce'
 				),
-				'firstQuestion'	 => __(
+				'firstQuestion'  => __(
 					'The settings screen is easy to use.',
 					'woocommerce'
 				),
@@ -600,7 +602,7 @@ class CustomerEffortScoreTracks {
 					'How easy was it to add a product attribute?',
 					'woocommerce'
 				),
-				'firstQuestion'	 => __(
+				'firstQuestion'  => __(
 					'Product attributes are easy to use.',
 					'woocommerce'
 				),
