@@ -23,14 +23,15 @@ export function setCesSurveyQueue( queue ) {
 /**
  * Add a new CES track to the state.
  *
- * @param {string} action         action name for the survey
- * @param {string} title          title for the snackback
- * @param {string} firstQuestion  first question for modal survey
- * @param {string} secondQuestion second question for modal survey
- * @param {string} pageNow        value of window.pagenow
- * @param {string} adminPage      value of window.adminpage
- * @param {string} onsubmitLabel  label for the snackback onsubmit
- * @param {Object} props          object for optional props
+ * @param {Object} args                All arguments.
+ * @param {string} args.action         action name for the survey
+ * @param {string} args.title          title for the snackback
+ * @param {string} args.firstQuestion  first question for modal survey
+ * @param {string} args.secondQuestion second question for modal survey
+ * @param {string} args.pageNow        value of window.pagenow
+ * @param {string} args.adminPage      value of window.adminpage
+ * @param {string} args.onsubmitLabel  label for the snackback onsubmit
+ * @param {Object} args.props          object for optional props
  */
 export function addCesSurvey( {
 	action,
