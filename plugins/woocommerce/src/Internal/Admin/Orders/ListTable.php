@@ -714,9 +714,9 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function render_order_status_column( WC_Order $order ): void {
-		$tooltip                 = '';
+		$tooltip = '';
 		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
-		$comment_count           = get_comment_count( $order->get_id() );
+		$comment_count = get_comment_count( $order->get_id() );
 		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
 		$approved_comments_count = absint( $comment_count['approved'] );
 
