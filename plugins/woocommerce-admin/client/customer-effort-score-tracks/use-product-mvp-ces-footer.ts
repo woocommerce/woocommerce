@@ -9,7 +9,10 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
  */
 import { PRODUCT_MVP_CES_ACTION_OPTION_NAME } from './product-mvp-ces-footer';
 
-function isProductMVPCESHidden( productCESAction: string ): boolean {
+async function isProductMVPCESHidden(): Promise< boolean > {
+	const productCESAction: string = await resolveSelect(
+		OPTIONS_STORE_NAME
+	).getOption( PRODUCT_MVP_CES_ACTION_OPTION_NAME );
 	return productCESAction === 'hide';
 }
 
@@ -17,27 +20,17 @@ export const useProductMVPCESFooter = () => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
 	const onSaveDraft = async () => {
-		const productCESAction: string = await resolveSelect(
-			OPTIONS_STORE_NAME
-		).getOption( PRODUCT_MVP_CES_ACTION_OPTION_NAME );
-		if (
-			isProductMVPCESHidden( productCESAction ) === false &&
-			productCESAction !== 'new_product_add_publish'
-		) {
+		if ( ( await isProductMVPCESHidden() ) === false ) {
 			updateOptions( {
-				[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: 'new_product_update',
+				[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: 'new_product',
 			} );
 		}
 	};
 
 	const onPublish = async () => {
-		const productCESAction: string = await resolveSelect(
-			OPTIONS_STORE_NAME
-		).getOption( PRODUCT_MVP_CES_ACTION_OPTION_NAME );
-		if ( isProductMVPCESHidden( productCESAction ) === false ) {
+		if ( ( await isProductMVPCESHidden() ) === false ) {
 			updateOptions( {
-				[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]:
-					'new_product_add_publish',
+				[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: 'new_product',
 			} );
 		}
 	};
