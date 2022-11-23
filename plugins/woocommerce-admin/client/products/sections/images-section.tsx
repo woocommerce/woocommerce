@@ -213,7 +213,7 @@ export const ImagesSection: React.FC = () => {
 												if (
 													(
 														target as HTMLButtonElement
-													)?.type !== 'button'
+													 )?.type !== 'button'
 												) {
 													openFileDialog();
 												}
@@ -267,7 +267,7 @@ export const ImagesSection: React.FC = () => {
 												}
 											/>
 										</div>
-								) }
+									) }
 								/>
 							</CardBody>
 						) }
