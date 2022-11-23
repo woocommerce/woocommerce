@@ -64,11 +64,13 @@ module.exports = async ( config ) => {
 		try {
 			console.log( 'Trying to log-in as admin...' );
 			await adminPage.goto( `/wp-admin` );
+			await adminPage.screenshot( { path: './tests/e2e-pw/output/signIn.png', fullPage: true } );
 			await adminPage.fill( 'input[name="log"]', adminUsername );
 			await adminPage.fill( 'input[name="pwd"]', adminPassword );
 			await adminPage.click( 'text=Log In' );
 			await adminPage.waitForLoadState( 'networkidle' );
 
+			await adminPage.screenshot( { path: './tests/e2e-pw/output/dashboard.png', fullPage: true } );
 			await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
 				'Dashboard'
 			);
@@ -77,34 +79,6 @@ module.exports = async ( config ) => {
 				.storageState( { path: process.env.ADMINSTATE } );
 			console.log( 'Logged-in as admin successfully.' );
 			adminLoggedIn = true;
-			try {
-				console.log( 'Trying to add consumer token...' );
-
-				await adminPage.goto(
-					`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
-				);
-				await adminPage.fill( '#key_description', 'Key for API access' );
-				await adminPage.selectOption( '#key_permissions', 'read_write' );
-				await adminPage.click( 'text=Generate API key' );
-
-				await adminPage.waitForSelector( '#key_consumer_key' );
-				await adminPage.waitForSelector( '#key_consumer_secret' );
-
-				process.env.CONSUMER_KEY = await adminPage.inputValue(
-					'#key_consumer_key'
-				);
-				process.env.CONSUMER_SECRET = await adminPage.inputValue(
-					'#key_consumer_secret'
-				);
-				console.log( 'Added consumer token successfully.' );
-				customerKeyConfigured = true;
-				break;
-			} catch ( e ) {
-				console.log(
-					`Failed to add consumer token. Retrying... ${ i }/${ nRetries }`
-				);
-				console.log( e );
-			}
 			break;
 		} catch ( e ) {
 			console.log(
@@ -119,6 +93,41 @@ module.exports = async ( config ) => {
 			'Cannot proceed e2e test, as admin login failed. Please check if the test site has been setup correctly.'
 		);
 		process.exit( 1 );
+	}
+
+	// While we're here, let's add a consumer token for API access
+	// This step was failing occasionally, and globalsetup doesn't retry, so make it retry
+	const nRetries = 5;
+	for ( let i = 0; i < nRetries; i++ ) {
+		try {
+			console.log( 'Trying to add consumer token...' );
+			await adminPage.goto(
+				`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
+			);
+			await adminPage.screenshot( { path: './tests/e2e-pw/output/tokenPage.png', fullPage: true } );
+			await adminPage.fill( '#key_description', 'Key for API access' );
+			await adminPage.selectOption( '#key_permissions', 'read_write' );
+			await adminPage.click( 'text=Generate API key' );
+
+			await adminPage.screenshot( { path: './tests/e2e-pw/output/tokens.png', fullPage: true } );
+			await adminPage.waitForSelector( '#key_consumer_key' );
+			await adminPage.waitForSelector( '#key_consumer_secret' );
+
+			process.env.CONSUMER_KEY = await adminPage.inputValue(
+				'#key_consumer_key'
+			);
+			process.env.CONSUMER_SECRET = await adminPage.inputValue(
+				'#key_consumer_secret'
+			);
+			console.log( 'Added consumer token successfully.' );
+			customerKeyConfigured = true;
+			break;
+		} catch ( e ) {
+			console.log(
+				`Failed to add consumer token. Retrying... ${ i }/${ nRetries }`
+			);
+			console.log( e );
+		}
 	}
 
 	if ( ! customerKeyConfigured ) {
