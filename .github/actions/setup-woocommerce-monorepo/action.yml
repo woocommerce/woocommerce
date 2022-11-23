@@ -57,13 +57,6 @@ runs:
         pnpm -w install turbo
         pnpm install ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
 
-    - name: Cache Build Output
-      uses: actions/cache@fd5de65bc895cf536527842281bea11763fefd77
-      with:
-        path: node_modules/.cache/turbo
-        key: ${{ runner.os }}-build-output-${{ hashFiles('node_modules/.cache/turbo/*-meta.json') }}
-        restore-keys: ${{ runner.os }}-build-output-
-
     - name: Build
       if: ${{ inputs.build == 'true' }}
       shell: bash
