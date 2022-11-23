@@ -16,6 +16,10 @@ const PRESETS = [
 		key: 'popularity/desc',
 		name: __( 'Best Selling', 'woo-gutenberg-products-block' ),
 	},
+	{
+		key: 'rating/desc',
+		name: __( 'Top Rated', 'woo-gutenberg-products-block' ),
+	},
 ];
 
 export function PopularPresets( props: ProductQueryBlock ) {
