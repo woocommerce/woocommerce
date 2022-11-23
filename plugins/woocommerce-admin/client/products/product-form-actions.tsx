@@ -14,6 +14,7 @@ import { registerPlugin } from '@wordpress/plugins';
 import { useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { navigateTo } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -54,7 +55,13 @@ export const ProductFormActions: React.FC = () => {
 			...getProductDataForTracks(),
 		} );
 		if ( ! values.id ) {
-			createProductWithStatus( values, 'draft' );
+			const product = await createProductWithStatus( values, 'draft' );
+			if ( product?.id ) {
+				resetForm();
+				navigateTo( {
+					url: 'admin.php?page=wc-admin&path=/product/' + product.id,
+				} );
+			}
 		} else {
 			const product = await updateProductWithStatus(
 				values.id,
@@ -73,7 +80,13 @@ export const ProductFormActions: React.FC = () => {
 			...getProductDataForTracks(),
 		} );
 		if ( ! values.id ) {
-			createProductWithStatus( values, 'publish' );
+			const product = await createProductWithStatus( values, 'publish' );
+			if ( product?.id ) {
+				resetForm();
+				navigateTo( {
+					url: 'admin.php?page=wc-admin&path=/product/' + product.id,
+				} );
+			}
 		} else {
 			const product = await updateProductWithStatus(
 				values.id,
@@ -94,7 +107,7 @@ export const ProductFormActions: React.FC = () => {
 		if ( values.id ) {
 			await updateProductWithStatus( values.id, values, 'publish' );
 		} else {
-			await createProductWithStatus( values, 'publish', false, true );
+			await createProductWithStatus( values, 'publish', false );
 		}
 		await copyProductWithStatus( values );
 	};
@@ -114,13 +127,17 @@ export const ProductFormActions: React.FC = () => {
 		await copyProductWithStatus( values );
 	};
 
-	const onTrash = () => {
+	const onTrash = async () => {
 		recordEvent( 'product_delete', {
 			new_product_page: true,
 			...getProductDataForTracks(),
 		} );
 		if ( values.id ) {
-			deleteProductAndRedirect( values.id );
+			const product = await deleteProductAndRedirect( values.id );
+			if ( product?.id ) {
+				resetForm( product );
+				navigateTo( { url: 'edit.php?post_type=product' } );
+			}
 		}
 	};
 

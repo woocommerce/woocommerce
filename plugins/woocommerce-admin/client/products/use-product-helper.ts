@@ -14,7 +14,6 @@ import {
 	productReadOnlyProperties,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { navigateTo } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -66,21 +65,19 @@ export function useProductHelper() {
 	 * @param {Product} product the product to be created.
 	 * @param {string}  status the product status.
 	 * @param {boolean} skipNotice if the notice should be skipped (default: false).
-	 * @param {boolean} skipRedirect if the user should skip the redirection to the new product page (default: false).
 	 * @return {Promise<Product>} Returns a promise with the created product.
 	 */
 	const createProductWithStatus = useCallback(
 		async (
 			product: Omit< Product, ReadOnlyProperties >,
 			status: ProductStatus,
-			skipNotice = false,
-			skipRedirect = false
+			skipNotice = false
 		) => {
 			setUpdating( {
 				...updating,
 				[ status ]: true,
 			} );
-			createProduct( {
+			return createProduct( {
 				...product,
 				status,
 			} ).then(
@@ -109,15 +106,9 @@ export function useProductHelper() {
 						...updating,
 						[ status ]: false,
 					} );
-					if ( ! skipRedirect ) {
-						navigateTo( {
-							url:
-								'admin.php?page=wc-admin&path=/product/' +
-								newProduct.id,
-						} );
-					}
+					return newProduct;
 				},
-				() => {
+				( error ) => {
 					if ( ! skipNotice ) {
 						createNotice(
 							'error',
@@ -136,6 +127,7 @@ export function useProductHelper() {
 						...updating,
 						[ status ]: false,
 					} );
+					return error;
 				}
 			);
 		},
@@ -236,13 +228,12 @@ export function useProductHelper() {
 	 * Deletes a product by given id and redirects to the product list page.
 	 *
 	 * @param {number} id the product id to be deleted.
-	 * @param {string} redirectUrl the redirection url, defaults to product list ('edit.php?post_type=product').
 	 * @return {Promise<Product>} promise with the deleted product.
 	 */
-	const deleteProductAndRedirect = useCallback(
-		( id: number, redirectUrl = 'edit.php?post_type=product' ) => {
-			setIsDeleting( true );
-			return deleteProduct( id ).then( () => {
+	const deleteProductAndRedirect = useCallback( async ( id: number ) => {
+		setIsDeleting( true );
+		return deleteProduct( id ).then(
+			( product ) => {
 				createNotice(
 					'success',
 					__(
@@ -250,14 +241,19 @@ export function useProductHelper() {
 						'woocommerce'
 					)
 				);
-				navigateTo( {
-					url: redirectUrl,
-				} );
 				setIsDeleting( false );
-			} );
-		},
-		[]
-	);
+				return product;
+			},
+			( error ) => {
+				createNotice(
+					'error',
+					__( 'Failed to move product to Trash.', 'woocommerce' )
+				);
+				setIsDeleting( false );
+				return error;
+			}
+		);
+	}, [] );
 
 	/**
 	 * Sanitizes a price.
