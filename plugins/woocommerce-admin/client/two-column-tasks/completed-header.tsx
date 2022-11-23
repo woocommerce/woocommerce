@@ -109,8 +109,8 @@ export const TaskListCompletedHeader: React.FC<
 		recordEvent( 'ces_feedback', {
 			action: CUSTOMER_EFFORT_SCORE_ACTION,
 			score: firstScore,
-			score_second_question: secondScore ? secondScore : null,
-			score_combined: score + ( secondScore ? secondScore : 0 ),
+			score_second_question: secondScore ?? null,
+			score_combined: firstScore + ( secondScore ?? 0 ),
 			comments: comments || '',
 			store_age: storeAgeInWeeks,
 		} );
