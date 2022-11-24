@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Improve structured data for AggregateOffers by adding the priceCurrency field.
