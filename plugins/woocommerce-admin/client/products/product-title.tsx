@@ -19,6 +19,7 @@ import { getProductTitle } from './utils/get-product-title';
 import { ProductBreadcrumbs } from './product-breadcrumbs';
 import { ProductStatusBadge } from './product-status-badge';
 import { WooHeaderPageTitle } from '~/header/utils';
+import './product-title.scss';
 
 export const ProductTitle: React.FC = () => {
 	const { values } = useFormContext< Product >();
@@ -46,9 +47,13 @@ export const ProductTitle: React.FC = () => {
 
 	return (
 		<WooHeaderPageTitle>
-			<ProductBreadcrumbs breadcrumbs={ breadcrumbs } />
-			{ title }
-			<ProductStatusBadge />
+			<span className="woocommerce-product-title">
+				<ProductBreadcrumbs breadcrumbs={ breadcrumbs } />
+				<span className="woocommerce-product-title__wrapper">
+					{ title }
+					<ProductStatusBadge />
+				</span>
+			</span>
 		</WooHeaderPageTitle>
 	);
 };
