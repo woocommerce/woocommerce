@@ -167,6 +167,26 @@ export const PricingSection: React.FC = () => {
 				event.currentTarget
 			);
 		},
+		onKeyUp( event: React.KeyboardEvent< HTMLInputElement > ) {
+			const name = event.currentTarget.name as keyof Pick<
+				Product,
+				'regular_price' | 'sale_price'
+			>;
+			const amount = Number.parseFloat(
+				sanitizePrice( values[ name ] || '0' )
+			);
+			const step = Number( event.currentTarget.step || '1' );
+			if ( event.code === 'ArrowUp' ) {
+				setValues( {
+					[ name ]: String( amount + step ),
+				} as unknown as Product );
+			}
+			if ( event.code === 'ArrowDown' ) {
+				setValues( {
+					[ name ]: String( amount - step ),
+				} as unknown as Product );
+			}
+		},
 	};
 	const regularPriceProps = getInputProps(
 		'regular_price',
@@ -216,6 +236,7 @@ export const PricingSection: React.FC = () => {
 					>
 						<InputControl
 							{ ...regularPriceProps }
+							name="regular_price"
 							label={ __( 'List price', 'woocommerce' ) }
 							value={ formatCurrencyDisplayValue(
 								String( regularPriceProps?.value ),
@@ -236,6 +257,7 @@ export const PricingSection: React.FC = () => {
 					>
 						<InputControl
 							{ ...salePriceProps }
+							name="sale_price"
 							label={ __( 'Sale price', 'woocommerce' ) }
 							value={ formatCurrencyDisplayValue(
 								String( salePriceProps?.value ),
