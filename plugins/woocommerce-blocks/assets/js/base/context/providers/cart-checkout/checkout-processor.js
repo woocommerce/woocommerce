@@ -19,6 +19,7 @@ import {
 	CHECKOUT_STORE_KEY,
 	PAYMENT_STORE_KEY,
 	VALIDATION_STORE_KEY,
+	CART_STORE_KEY,
 } from '@woocommerce/block-data';
 import {
 	getPaymentMethods,
@@ -31,7 +32,6 @@ import {
 import { preparePaymentData, processCheckoutResponseHeaders } from './utils';
 import { useCheckoutEventsContext } from './checkout-events';
 import { useShippingDataContext } from './shipping';
-import { useCustomerDataContext } from './customer';
 import { useStoreCart } from '../../hooks/cart/use-store-cart';
 
 /**
@@ -72,7 +72,11 @@ const CheckoutProcessor = () => {
 		( select ) => select( VALIDATION_STORE_KEY ).hasValidationErrors
 	);
 	const { shippingErrorStatus } = useShippingDataContext();
-	const { billingAddress, shippingAddress } = useCustomerDataContext();
+
+	const { billingAddress, shippingAddress } = useSelect( ( select ) =>
+		select( CART_STORE_KEY ).getCustomerData()
+	);
+
 	const { cartNeedsPayment, cartNeedsShipping, receiveCart } = useStoreCart();
 	const { createErrorNotice, removeNotice } = useDispatch( 'core/notices' );
 
