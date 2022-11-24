@@ -39,6 +39,9 @@
 	}
 	.woocommerce-tooltip {
 		margin-left: $gap-smaller;
+		&__button {
+			padding: 0;
+		}
 	}
 	.woocommerce-product-form {
 		&__custom-label-input {
