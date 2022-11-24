@@ -153,6 +153,20 @@ export const PricingSection: React.FC = () => {
 		sanitize: ( value: Product[ keyof Product ] ) => {
 			return sanitizePrice( String( value ) );
 		},
+		onFocus( event: React.FocusEvent< HTMLInputElement > ) {
+			// In some browsers like safari .select() function inside
+			// the onFocus event doesn't work as expected because it
+			// conflicts with onClick the first time user click the
+			// input. Using setTimeout defers the text selection and
+			// avoid the unexpected behaviour.
+			setTimeout(
+				function deferSelection( element: HTMLInputElement ) {
+					element.select();
+				},
+				0,
+				event.currentTarget
+			);
+		},
 	};
 	const regularPriceProps = getInputProps(
 		'regular_price',
