@@ -1,0 +1,66 @@
+{
+    "code": "BJ",
+    "name": "Benin",
+    "states": [
+        {
+            "code": "AL",
+            "name": "Alibori"
+        },
+        {
+            "code": "AK",
+            "name": "Atakora"
+        },
+        {
+            "code": "AQ",
+            "name": "Atlantique"
+        },
+        {
+            "code": "BO",
+            "name": "Borgou"
+        },
+        {
+            "code": "CO",
+            "name": "Collines"
+        },
+        {
+            "code": "KO",
+            "name": "Kouffo"
+        },
+        {
+            "code": "DO",
+            "name": "Donga"
+        },
+        {
+            "code": "LI",
+            "name": "Littoral"
+        },
+        {
+            "code": "MO",
+            "name": "Mono"
+        },
+        {
+            "code": "OU",
+            "name": "Ouémé"
+        },
+        {
+            "code": "PL",
+            "name": "Plateau"
+        },
+        {
+            "code": "ZO",
+            "name": "Zou"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/bj"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

@@ -1,0 +1,74 @@
+{
+    "code": "JM",
+    "name": "Jamaica",
+    "states": [
+        {
+            "code": "JM-01",
+            "name": "Kingston"
+        },
+        {
+            "code": "JM-02",
+            "name": "Saint Andrew"
+        },
+        {
+            "code": "JM-03",
+            "name": "Saint Thomas"
+        },
+        {
+            "code": "JM-04",
+            "name": "Portland"
+        },
+        {
+            "code": "JM-05",
+            "name": "Saint Mary"
+        },
+        {
+            "code": "JM-06",
+            "name": "Saint Ann"
+        },
+        {
+            "code": "JM-07",
+            "name": "Trelawny"
+        },
+        {
+            "code": "JM-08",
+            "name": "Saint James"
+        },
+        {
+            "code": "JM-09",
+            "name": "Hanover"
+        },
+        {
+            "code": "JM-10",
+            "name": "Westmoreland"
+        },
+        {
+            "code": "JM-11",
+            "name": "Saint Elizabeth"
+        },
+        {
+            "code": "JM-12",
+            "name": "Manchester"
+        },
+        {
+            "code": "JM-13",
+            "name": "Clarendon"
+        },
+        {
+            "code": "JM-14",
+            "name": "Saint Catherine"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/jm"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

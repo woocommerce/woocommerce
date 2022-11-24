@@ -508,6 +508,10 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			$where_clauses .= " AND source IN ($escaped_where_source)";
 		}
 
+		if ( isset( $args['is_read'] ) ) {
+			$where_clauses .= $args['is_read'] ? ' AND is_read = 1' : ' AND is_read = 0';
+		}
+
 		$where_clauses .= $escaped_is_deleted ? ' AND is_deleted = 1' : ' AND is_deleted = 0';
 
 		return $where_clauses;

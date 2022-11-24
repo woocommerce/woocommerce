@@ -4,11 +4,8 @@
 		"build:feature-config": {
 			"cache": false
 		},
-		"build:assets-cleanup": {
-			"cache": false
-		},
 		"turbo:build": {
-			"dependsOn": [ "build:feature-config", "build:assets-cleanup", "^turbo:build", "$WC_ADMIN_PHASE" ],
+			"dependsOn": [ "build:feature-config", "^turbo:build", "$WC_ADMIN_PHASE" ],
 			"inputs": [
 				"src/**/*.js",
 				"src/**/*.jsx",
@@ -30,7 +27,6 @@
 		"woocommerce#turbo:build": {
 			"dependsOn": [
 				"build:feature-config",
-				"build:assets-cleanup",
 				"^turbo:build",
 				"woocommerce/client/admin#turbo:build",
 				"woocommerce/client/legacy#turbo:build"
@@ -43,14 +39,8 @@
 			"outputMode": "new-only"
 		},
 
-		"woocommerce#build:zip": {
-			"dependsOn": [
-				"^build:assets-cleanup"
-			]
-		},
-
 		"woocommerce/client/legacy#turbo:build": {
-			"dependsOn": [ "build:assets-cleanup", "^turbo:build" ],
+			"dependsOn": [ "^turbo:build" ],
 			"outputs": [
 				"../../assets/js/**",
 				"../../assets/css/**"
