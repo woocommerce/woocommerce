@@ -13,6 +13,10 @@
 	> * {
 		display: inline-flex;
 	}
+
+	&--disabled {
+		opacity: 0.5;
+	}
 }
 
 .woocommerce-experimental-select-control__combox-box {
