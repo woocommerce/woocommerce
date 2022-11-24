@@ -7,8 +7,10 @@
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	padding: $gap-smallest 36px $gap-smallest $gap-smaller;
+	padding: 2px 36px 2px $gap-smaller;
 	margin-bottom: 4px;
+	min-height: 36px;
+	box-sizing: border-box;
 
 	> * {
 		display: inline-flex;
