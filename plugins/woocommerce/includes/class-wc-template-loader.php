@@ -103,13 +103,13 @@ class WC_Template_Loader {
 	/**
 	 * Checks whether a block template for a given taxonomy exists.
 	 *
-	 * **Note: ** This checks both the `templates` and `block-templates` directories
+	 * **Note:** This checks both the `templates` and `block-templates` directories
 	 * as both conventions should be supported.
 	 *
 	 * @param object $taxonomy Object taxonomy to check.
 	 * @return boolean
 	 */
-	private static function taxonomy_has_block_template( $taxonomy ) {
+	private static function taxonomy_has_block_template( $taxonomy ) : bool {
 		if ( taxonomy_is_product_attribute( $taxonomy->taxonomy ) ) {
 			$template_name = 'taxonomy-product_attribute';
 		} else {
