@@ -25,6 +25,7 @@ import {
 	useTheme,
 	waitForAllProductsBlockLoaded,
 } from '../../utils';
+import { saveOrPublish } from '../../../utils';
 
 const block = {
 	name: 'Filter by Attribute',
@@ -42,6 +43,7 @@ const block = {
 			firstAttributeInTheList:
 				'.wc-block-attribute-filter-list > li:not([class^="is-loading"])',
 			productsList: '.wc-block-grid__products > li',
+			queryProductsList: '.wp-block-post-template > li',
 			classicProductsList: '.products.columns-3 > li',
 			filter: "input[id='128gb']",
 			submitButton: '.wc-block-components-filter-submit-button',
@@ -87,7 +89,7 @@ describe( `${ block.name } Block`, () => {
 			await page.goto( link );
 		} );
 
-		it( 'should render', async () => {
+		it( 'should render products', async () => {
 			await waitForAllProductsBlockLoaded();
 			const products = await page.$$( selectors.frontend.productsList );
 
@@ -142,7 +144,7 @@ describe( `${ block.name } Block`, () => {
 			await goToShopPage();
 		} );
 
-		it( 'should render', async () => {
+		it( 'should render products', async () => {
 			const products = await page.$$(
 				selectors.frontend.classicProductsList
 			);
@@ -182,7 +184,7 @@ describe( `${ block.name } Block`, () => {
 			);
 		} );
 
-		it( 'should refresh the page only if the user click on button', async () => {
+		it( 'should refresh the page only if the user clicks on button', async () => {
 			await goToTemplateEditor( {
 				postId: productCatalogTemplateId,
 			} );
@@ -215,6 +217,120 @@ describe( `${ block.name } Block`, () => {
 
 			const products = await page.$$(
 				selectors.frontend.classicProductsList
+			);
+			const pageURL = page.url();
+			const parsedURL = new URL( pageURL );
+
+			expect( isRefreshed ).toBeCalledTimes( 1 );
+			expect( products ).toHaveLength( 1 );
+			await expect( page ).toMatch( block.foundProduct );
+			expect( parsedURL.search ).toEqual(
+				block.urlSearchParamWhenFilterIsApplied
+			);
+		} );
+	} );
+
+	describe( 'with Product Query Block', () => {
+		let editorPageUrl = '';
+		let frontedPageUrl = '';
+
+		useTheme( 'emptytheme' );
+		beforeAll( async () => {
+			await switchUserToAdmin();
+			await createNewPost( {
+				postType: 'post',
+				title: block.name,
+			} );
+
+			await insertBlock( 'Product Query' );
+			await insertBlock( block.name );
+			await page.waitForNetworkIdle();
+
+			// It seems that .click doesn't work well with radio input element.
+			await page.$eval(
+				block.selectors.editor.firstAttributeInTheList,
+				( el ) => ( el as HTMLInputElement ).click()
+			);
+			await page.click( selectors.editor.doneButton );
+			await publishPost();
+
+			editorPageUrl = page.url();
+			frontedPageUrl = await page.evaluate( () =>
+				wp.data.select( 'core/editor' ).getPermalink()
+			);
+			await page.goto( frontedPageUrl );
+		} );
+
+		it( 'should render products', async () => {
+			const products = await page.$$(
+				selectors.frontend.queryProductsList
+			);
+
+			expect( products ).toHaveLength( 5 );
+		} );
+
+		it( 'should show only products that match the filter', async () => {
+			const isRefreshed = jest.fn( () => void 0 );
+			page.on( 'load', isRefreshed );
+
+			await page.waitForSelector( block.class + '.is-loading', {
+				hidden: true,
+			} );
+
+			expect( isRefreshed ).not.toBeCalled();
+
+			await page.waitForSelector( selectors.frontend.filter );
+
+			await Promise.all( [
+				page.waitForNavigation(),
+				page.click( selectors.frontend.filter ),
+			] );
+
+			const products = await page.$$(
+				selectors.frontend.queryProductsList
+			);
+
+			const pageURL = page.url();
+			const parsedURL = new URL( pageURL );
+
+			expect( isRefreshed ).toBeCalledTimes( 1 );
+			expect( products ).toHaveLength( 1 );
+			await expect( page ).toMatch( block.foundProduct );
+			expect( parsedURL.search ).toEqual(
+				block.urlSearchParamWhenFilterIsApplied
+			);
+		} );
+
+		it( 'should refresh the page only if the user clicks on button', async () => {
+			await page.goto( editorPageUrl );
+			await openBlockEditorSettings();
+			await selectBlockByName( block.slug );
+			const [ filterButtonToggle ] = await page.$x(
+				block.selectors.editor.filterButtonToggle
+			);
+			await filterButtonToggle.click();
+			await saveOrPublish();
+			await page.goto( frontedPageUrl );
+
+			const isRefreshed = jest.fn( () => void 0 );
+			page.on( 'load', isRefreshed );
+			await page.waitForSelector( block.class + '.is-loading', {
+				hidden: true,
+			} );
+			await page.waitForSelector( selectors.frontend.filter );
+			await page.click( selectors.frontend.filter );
+
+			expect( isRefreshed ).not.toBeCalled();
+
+			await Promise.all( [
+				page.waitForNavigation( {
+					waitUntil: 'networkidle0',
+				} ),
+				page.click( selectors.frontend.submitButton ),
+			] );
+
+			const products = await page.$$(
+				selectors.frontend.queryProductsList
 			);
 			const pageURL = page.url();
 			const parsedURL = new URL( pageURL );
