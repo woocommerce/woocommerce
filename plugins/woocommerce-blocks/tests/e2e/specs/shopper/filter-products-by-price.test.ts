@@ -64,7 +64,7 @@ const setMaxPrice = async () => {
 	await page.keyboard.press( 'Tab' );
 };
 
-describe( `${ block.name } Block`, () => {
+describe.skip( `${ block.name } Block`, () => {
 	describe( 'with All Products Block', () => {
 		beforeAll( async () => {
 			await switchUserToAdmin();

@@ -21,7 +21,7 @@ class ProductAttributeTemplate {
 	 * Initialization method.
 	 */
 	protected function init() {
-		add_filter( 'taxonomy_template_hierarchy', array( $this, 'update_taxonomy_template_hierarchy' ), 10, 3 );
+		add_filter( 'taxonomy_template_hierarchy', array( $this, 'update_taxonomy_template_hierarchy' ), 1, 3 );
 	}
 
 	/**

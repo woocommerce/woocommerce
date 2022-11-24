@@ -53,7 +53,7 @@ const goToShopPage = () =>
 		waitUntil: 'networkidle0',
 	} );
 
-describe( `${ block.name } Block`, () => {
+describe.skip( `${ block.name } Block`, () => {
 	describe( 'with All Products Block', () => {
 		let link = '';
 		beforeAll( async () => {
