@@ -1049,10 +1049,10 @@
 <file name="assets/js/base/context/providers/cart-checkout/checkout-provider.js">
 <error line="4" column="28" severity="error" message="Could not find a declaration file for module &apos;@wordpress/plugins&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@wordpress/plugins/build/index.js&apos; implicitly has an &apos;any&apos; type.
   Try `npm i --save-dev @types/wordpress__plugins` if it exists or add a new declaration (.d.ts) file containing `declare module &apos;@wordpress/plugins&apos;;`" source="TS7016" />
-<error line="30" column="27" severity="error" message="Type &apos;string | undefined&apos; is not assignable to type &apos;string&apos;.
+<error line="29" column="27" severity="error" message="Type &apos;string | undefined&apos; is not assignable to type &apos;string&apos;.
   Type &apos;undefined&apos; is not assignable to type &apos;string&apos;." source="TS2322" />
-<error line="31" column="4" severity="error" message="Type &apos;Element&apos; is missing the following properties from type &apos;ReactChildren&apos;: map, forEach, count, only, toArray" source="TS2739" />
-<error line="38" column="8" severity="error" message="No overload matches this call.
+<error line="30" column="4" severity="error" message="Type &apos;Element&apos; is missing the following properties from type &apos;ReactChildren&apos;: map, forEach, count, only, toArray" source="TS2739" />
+<error line="36" column="7" severity="error" message="No overload matches this call.
   Overload 1 of 2, &apos;(props: BlockErrorBoundaryProps | Readonly&lt;BlockErrorBoundaryProps&gt;): BlockErrorBoundary&apos;, gave the following error.
     Type &apos;(() =&gt; null) | null&apos; is not assignable to type &apos;(props: RenderErrorProps) =&gt; ReactNode&apos;.
       Type &apos;null&apos; is not assignable to type &apos;(props: RenderErrorProps) =&gt; ReactNode&apos;.

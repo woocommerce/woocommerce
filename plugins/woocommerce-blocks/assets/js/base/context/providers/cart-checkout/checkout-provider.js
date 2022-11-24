@@ -9,7 +9,6 @@ import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundar
  */
 import { PaymentEventsProvider } from './payment-events';
 import { ShippingDataProvider } from './shipping';
-import { CustomerDataProvider } from './customer';
 import { CheckoutEventsProvider } from './checkout-events';
 import CheckoutProcessor from './checkout-processor';
 
@@ -28,23 +27,21 @@ import CheckoutProcessor from './checkout-processor';
 export const CheckoutProvider = ( { children, redirectUrl } ) => {
 	return (
 		<CheckoutEventsProvider redirectUrl={ redirectUrl }>
-			<CustomerDataProvider>
-				<ShippingDataProvider>
-					<PaymentEventsProvider>
-						{ children }
-						{ /* If the current user is an admin, we let BlockErrorBoundary render
+			<ShippingDataProvider>
+				<PaymentEventsProvider>
+					{ children }
+					{ /* If the current user is an admin, we let BlockErrorBoundary render
 								the error, or we simply die silently. */ }
-						<BlockErrorBoundary
-							renderError={
-								CURRENT_USER_IS_ADMIN ? null : () => null
-							}
-						>
-							<PluginArea scope="woocommerce-checkout" />
-						</BlockErrorBoundary>
-						<CheckoutProcessor />
-					</PaymentEventsProvider>
-				</ShippingDataProvider>
-			</CustomerDataProvider>
+					<BlockErrorBoundary
+						renderError={
+							CURRENT_USER_IS_ADMIN ? null : () => null
+						}
+					>
+						<PluginArea scope="woocommerce-checkout" />
+					</BlockErrorBoundary>
+					<CheckoutProcessor />
+				</PaymentEventsProvider>
+			</ShippingDataProvider>
 		</CheckoutEventsProvider>
 	);
 };

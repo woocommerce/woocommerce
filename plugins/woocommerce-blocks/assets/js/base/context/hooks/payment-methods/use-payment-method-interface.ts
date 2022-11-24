@@ -11,7 +11,11 @@ import deprecated from '@wordpress/deprecated';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import type { PaymentMethodInterface } from '@woocommerce/types';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { CHECKOUT_STORE_KEY, PAYMENT_STORE_KEY } from '@woocommerce/block-data';
+import {
+	CHECKOUT_STORE_KEY,
+	PAYMENT_STORE_KEY,
+	CART_STORE_KEY,
+} from '@woocommerce/block-data';
 import { ValidationInputError } from '@woocommerce/blocks-checkout';
 
 /**
@@ -23,7 +27,6 @@ import { noticeContexts, responseTypes } from '../../event-emit';
 import { useCheckoutEventsContext } from '../../providers/cart-checkout/checkout-events';
 import { usePaymentEventsContext } from '../../providers/cart-checkout/payment-events';
 import { useShippingDataContext } from '../../providers/cart-checkout/shipping';
-import { useCustomerDataContext } from '../../providers/cart-checkout/customer';
 import { prepareTotalItems } from './utils';
 import { useShippingData } from '../shipping/use-shipping-data';
 
@@ -92,8 +95,11 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 		selectShippingRate,
 		needsShipping,
 	} = useShippingData();
-	const { billingAddress, shippingAddress, setShippingAddress } =
-		useCustomerDataContext();
+
+	const { billingAddress, shippingAddress } = useSelect( ( select ) =>
+		select( CART_STORE_KEY ).getCustomerData()
+	);
+	const { setShippingAddress } = useDispatch( CART_STORE_KEY );
 	const { cartItems, cartFees, cartTotals, extensions } = useStoreCart();
 	const { appliedCoupons } = useStoreCartCoupons();
 	const currentCartTotals = useRef(

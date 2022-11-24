@@ -79,15 +79,6 @@ Much of the data and api interface for components in the Checkout Block are cons
 
 You can find type definitions (`typedef`) for contexts in [this file](../../../../assets/js/types/type-defs/contexts.js).
 
-### Customer Data Context
-
-The customer data context exposes the api interfaces for the following things via the `useCustomerDataContext` hook:
-
--   `billingData`: The currently set billing data.
--   `setBillingData`: A state updated for updating the billing data state with new billing data.
--   `shippingAddress`: The current set shipping address.
--   `setShippingAddress`: A function for setting the shipping address. This will trigger shipping rates updates.
-
 ### Shipping Method Data context
 
 The shipping method data context exposes the api interfaces for the following things (typedef `ShippingMethodDataContext`) via the `useShippingMethodData` hook:

@@ -30,11 +30,8 @@ import {
 	EMPTY_CART_ERRORS,
 	EMPTY_CART_ITEM_ERRORS,
 	EMPTY_EXTENSIONS,
-} from '../../constants';
-import {
-	defaultBillingAddress,
-	defaultShippingAddress,
-} from '../../../base/context/providers/cart-checkout/customer/constants';
+} from '../../../data/constants';
+import { defaultCartState } from '../../../data/cart/default-state';
 
 export const checkPaymentMethodsCanPay = async ( express = false ) => {
 	const isEditor = !! select( 'core/editor' );
@@ -122,9 +119,9 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 			cartTotals: previewCart.totals,
 			cartIsLoading: false,
 			cartErrors: EMPTY_CART_ERRORS,
-			billingData: defaultBillingAddress,
-			billingAddress: defaultBillingAddress,
-			shippingAddress: defaultShippingAddress,
+			billingData: defaultCartState.cartData.billingAddress,
+			billingAddress: defaultCartState.cartData.billingAddress,
+			shippingAddress: defaultCartState.cartData.shippingAddress,
 			extensions: EMPTY_EXTENSIONS,
 			shippingRates: previewCart.shipping_rates,
 			isLoadingRates: false,
