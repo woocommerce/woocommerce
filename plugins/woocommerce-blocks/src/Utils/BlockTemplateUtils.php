@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Blocks\Templates\MiniCartTemplate;
  * {@internal This class and its methods should only be used within the BlockTemplateController.php and is not intended for public use.}
  */
 class BlockTemplateUtils {
+	const ELIGIBLE_FOR_ARCHIVE_PRODUCT_FALLBACK = array( 'taxonomy-product_cat', 'taxonomy-product_tag', ProductAttributeTemplate::SLUG );
 	/**
 	 * Directory names for block templates
 	 *
@@ -452,7 +453,65 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Checks if we can fallback to the `archive-product` template for a given slug
+	 * Checks if we can fall back to the `archive-product` template for a given slug.
+	 *
+	 * `taxonomy-product_cat`, `taxonomy-product_tag`, `taxonomy-product_attribute` templates can
+	 *  generally use the `archive-product` as a fallback if there are no specific overrides.
+	 *
+	 * @param string $template_slug Slug to check for fallbacks.
+	 * @return boolean
+	 */
+	public static function template_is_eligible_for_product_archive_fallback( $template_slug ) {
+		return in_array( $template_slug, self::ELIGIBLE_FOR_ARCHIVE_PRODUCT_FALLBACK, true );
+	}
+
+	/**
+	 * Checks if we can fall back to an `archive-product` template stored on the db for a given slug.
+	 *
+	 * @param string $template_slug Slug to check for fallbacks.
+	 * @param array  $db_templates Templates that have already been found on the db.
+	 * @return boolean
+	 */
+	public static function template_is_eligible_for_product_archive_fallback_from_db( $template_slug, $db_templates ) {
+		$eligible_for_fallback = self::template_is_eligible_for_product_archive_fallback( $template_slug );
+		if ( ! $eligible_for_fallback ) {
+			return false;
+		}
+
+		$array_filter = array_filter(
+			$db_templates,
+			function ( $template ) use ( $template_slug ) {
+				return 'archive-product' === $template->slug;
+			}
+		);
+
+		return count( $array_filter ) > 0;
+	}
+
+	/**
+	 * Gets the `archive-product` fallback template stored on the db for a given slug.
+	 *
+	 * @param string $template_slug Slug to check for fallbacks.
+	 * @param array  $db_templates Templates that have already been found on the db.
+	 * @return boolean|object
+	 */
+	public static function get_fallback_template_from_db( $template_slug, $db_templates ) {
+		$eligible_for_fallback = self::template_is_eligible_for_product_archive_fallback( $template_slug );
+		if ( ! $eligible_for_fallback ) {
+			return false;
+		}
+
+		foreach ( $db_templates as $template ) {
+			if ( 'archive-product' === $template->slug ) {
+				return $template;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Checks if we can fall back to the `archive-product` file template for a given slug in the current theme.
 	 *
 	 * `taxonomy-product_cat`, `taxonomy-product_tag`, `taxonomy-attribute` templates can
 	 *  generally use the `archive-product` as a fallback if there are no specific overrides.
@@ -460,10 +519,8 @@ class BlockTemplateUtils {
 	 * @param string $template_slug Slug to check for fallbacks.
 	 * @return boolean
 	 */
-	public static function template_is_eligible_for_product_archive_fallback( $template_slug ) {
-		$eligible_for_fallbacks = array( 'taxonomy-product_cat', 'taxonomy-product_tag', ProductAttributeTemplate::SLUG );
-
-		return in_array( $template_slug, $eligible_for_fallbacks, true )
+	public static function template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) {
+		return self::template_is_eligible_for_product_archive_fallback( $template_slug )
 			&& ! self::theme_has_template( $template_slug )
 			&& self::theme_has_template( 'archive-product' );
 	}
@@ -471,7 +528,7 @@ class BlockTemplateUtils {
 	/**
 	 * Sets the `has_theme_file` to `true` for templates with fallbacks
 	 *
-	 * There are cases (such as tags and categories) in which fallback templates
+	 * There are cases (such as tags, categories and attributes) in which fallback templates
 	 * can be used; so, while *technically* the theme doesn't have a specific file
 	 * for them, it is important that we tell Gutenberg that we do, in fact,
 	 * have a theme file (i.e. the fallback one).
@@ -491,7 +548,7 @@ class BlockTemplateUtils {
 				$query_result_template->slug === $template->slug
 				&& $query_result_template->theme === $template->theme
 			) {
-				if ( self::template_is_eligible_for_product_archive_fallback( $template->slug ) ) {
+				if ( self::template_is_eligible_for_product_archive_fallback_from_theme( $template->slug ) ) {
 					$query_result_template->has_theme_file = true;
 				}
 
@@ -585,5 +642,15 @@ class BlockTemplateUtils {
 		}
 
 		return wc_string_to_bool( $use_blockified_templates );
+	}
+
+	/**
+	 * Returns whether the passed `$template` has a title, and it's different from the slug.
+	 *
+	 * @param object $template The template object.
+	 * @return boolean
+	 */
+	public static function template_has_title( $template ) {
+		return ! empty( $template->title ) && $template->title !== $template->slug;
 	}
 }
