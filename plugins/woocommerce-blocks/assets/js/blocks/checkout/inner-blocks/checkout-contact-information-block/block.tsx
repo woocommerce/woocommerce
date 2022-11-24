@@ -20,9 +20,13 @@ const Block = ( {
 }: {
 	allowCreateAccount: boolean;
 } ): JSX.Element => {
-	const { customerId, shouldCreateAccount } = useSelect( ( select ) =>
-		select( CHECKOUT_STORE_KEY ).getCheckoutState()
-	);
+	const { customerId, shouldCreateAccount } = useSelect( ( select ) => {
+		const store = select( CHECKOUT_STORE_KEY );
+		return {
+			customerId: store.getCustomerId(),
+			shouldCreateAccount: store.getShouldCreateAccount(),
+		};
+	} );
 
 	const { __internalSetShouldCreateAccount } =
 		useDispatch( CHECKOUT_STORE_KEY );
