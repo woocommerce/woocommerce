@@ -149,7 +149,7 @@ export const PricingSection: React.FC = () => {
 
 	const currencyInputProps = {
 		prefix: currencyConfig.symbol,
-		className: 'half-width-field',
+		className: 'half-width-field components-currency-control',
 		sanitize: ( value: Product[ keyof Product ] ) => {
 			return sanitizePrice( String( value ) );
 		},

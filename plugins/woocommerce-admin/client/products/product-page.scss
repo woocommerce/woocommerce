@@ -17,6 +17,11 @@
 			margin-right: $gap-smaller;
 		}
 	}
+	.components-currency-control {
+		.components-input-control__prefix {
+			color: $gray-700;
+		}
+	}
 	.components-checkbox-control {
 		&__label {
 			display: flex;
