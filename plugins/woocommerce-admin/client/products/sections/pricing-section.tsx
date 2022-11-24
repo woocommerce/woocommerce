@@ -32,7 +32,7 @@ import {
  * Internal dependencies
  */
 import './pricing-section.scss';
-import { formatCurrencyDisplayValue, getCurrencySymbolProps } from './utils';
+import { formatCurrencyDisplayValue } from './utils';
 import { ProductSectionLayout } from '../layout/product-section-layout';
 import { ADMIN_URL } from '../../utils/admin-settings';
 import { CurrencyContext } from '../../lib/currency-context';
@@ -148,7 +148,7 @@ export const PricingSection: React.FC = () => {
 	} );
 
 	const currencyInputProps = {
-		...getCurrencySymbolProps( currencyConfig ),
+		prefix: currencyConfig.symbol,
 		className: 'half-width-field',
 		sanitize: ( value: Product[ keyof Product ] ) => {
 			return sanitizePrice( String( value ) );
