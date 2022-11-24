@@ -85,10 +85,7 @@ export function useProductHelper() {
 					if ( ! skipNotice ) {
 						const noticeContent =
 							newProduct.status === 'publish'
-								? __(
-										'Product published. View in store.',
-										'woocommerce'
-								  )
+								? __( 'Product published.', 'woocommerce' )
 								: __(
 										'Product successfully created.',
 										'woocommerce'
@@ -161,10 +158,7 @@ export function useProductHelper() {
 						const noticeContent =
 							product.status === 'draft' &&
 							updatedProduct.status === 'publish'
-								? __(
-										'Product published. View in store.',
-										'woocommerce'
-								  )
+								? __( 'Product published.', 'woocommerce' )
 								: __(
 										'Product successfully updated.',
 										'woocommerce'
