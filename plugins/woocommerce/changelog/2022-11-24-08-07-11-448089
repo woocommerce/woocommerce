@@ -1,0 +1,4 @@
+Significance: major
+Type: enhancement
+
+Fix deprecated error in PageController ini PHP v8.0
