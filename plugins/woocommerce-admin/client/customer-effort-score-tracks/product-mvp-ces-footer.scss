@@ -17,4 +17,11 @@
 		position: absolute;
 		right: $gap;
 	}
+
+	&__container {
+		margin-right: $gap-larger;
+		flex-wrap: nowrap;
+		display: flex;
+		align-items: center;
+	}
 }

@@ -37,7 +37,8 @@ export const ProductMVPCESFooter: React.FC = () => {
 		cesShownForActions,
 		resolving: isLoading,
 	} = useSelect( ( select ) => {
-		const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
+		const { getOption, hasFinishedResolution } =
+			select( OPTIONS_STORE_NAME );
 
 		const action = getOption(
 			PRODUCT_MVP_CES_ACTION_OPTION_NAME
@@ -53,15 +54,19 @@ export const ProductMVPCESFooter: React.FC = () => {
 			getOption( ALLOW_TRACKING_OPTION_NAME ) || 'no';
 
 		const resolving =
-			isResolving( 'getOption', [ SHOWN_FOR_ACTIONS_OPTION_NAME ] ) ||
-			isResolving( 'getOption', [
+			! hasFinishedResolution( 'getOption', [
+				SHOWN_FOR_ACTIONS_OPTION_NAME,
+			] ) ||
+			! hasFinishedResolution( 'getOption', [
 				PRODUCT_MVP_CES_ACTION_OPTION_NAME,
 			] ) ||
 			adminInstallTimestamp === null ||
-			isResolving( 'getOption', [
+			! hasFinishedResolution( 'getOption', [
 				ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
 			] ) ||
-			isResolving( 'getOption', [ ALLOW_TRACKING_OPTION_NAME ] );
+			! hasFinishedResolution( 'getOption', [
+				ALLOW_TRACKING_OPTION_NAME,
+			] );
 
 		return {
 			cesShownForActions: shownForActions,
@@ -116,17 +121,25 @@ export const ProductMVPCESFooter: React.FC = () => {
 			{ showCESFooter && (
 				<WooFooterItem>
 					<div className="woocommerce-product-mvp-ces-footer">
-						<Pill>{ __( 'BETA', 'woocommerce' ) }</Pill>
-						{ __(
-							"You're using the new product editor (currently in development). How is your experience so far?",
-							'woocommerce'
-						) }
-						<Button variant="secondary" onClick={ shareFeedback }>
-							{ __( 'Share feedback', 'woocommerce' ) }
-						</Button>
-						<Button onClick={ onDisablingCES } variant="tertiary">
-							{ __( 'Turn it off', 'woocommerce' ) }
-						</Button>
+						<div className="woocommerce-product-mvp-ces-footer__container">
+							<Pill>{ __( 'BETA', 'woocommerce' ) }</Pill>
+							{ __(
+								"You're using the new product editor (currently in development). How is your experience so far?",
+								'woocommerce'
+							) }
+							<Button
+								variant="secondary"
+								onClick={ shareFeedback }
+							>
+								{ __( 'Share feedback', 'woocommerce' ) }
+							</Button>
+							<Button
+								onClick={ onDisablingCES }
+								variant="tertiary"
+							>
+								{ __( 'Turn it off', 'woocommerce' ) }
+							</Button>
+						</div>
 						<Button
 							className="woocommerce-product-mvp-ces-footer__close-button"
 							icon={ closeSmall }
