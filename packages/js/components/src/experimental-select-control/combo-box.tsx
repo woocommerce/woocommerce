@@ -3,12 +3,12 @@
  */
 import { createElement, MouseEvent, useRef } from 'react';
 import { Icon, search } from '@wordpress/icons';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
  */
 import { Props } from './types';
-import classNames from 'classnames';
 
 type ComboBoxProps = {
 	children?: JSX.Element | JSX.Element[] | null;
