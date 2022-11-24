@@ -82,17 +82,17 @@ export function useProductHelper() {
 				status,
 			} ).then(
 				( newProduct ) => {
-					const noticeContent =
-						newProduct.status === 'publish'
-							? __(
-									'Product published. View in store.',
-									'woocommerce'
-							  )
-							: __(
-									'Product successfully created.',
-									'woocommerce'
-							  );
 					if ( ! skipNotice ) {
+						const noticeContent =
+							newProduct.status === 'publish'
+								? __(
+										'Product published. View in store.',
+										'woocommerce'
+								  )
+								: __(
+										'Product successfully created.',
+										'woocommerce'
+								  );
 						createNotice( 'success', `🎉‎ ${ noticeContent }`, {
 							actions: getNoticePreviewActions(
 								newProduct.status,
@@ -157,18 +157,18 @@ export function useProductHelper() {
 				status,
 			} ).then(
 				( updatedProduct ) => {
-					const noticeContent =
-						product.status === 'draft' &&
-						updatedProduct.status === 'publish'
-							? __(
-									'Product published. View in store.',
-									'woocommerce'
-							  )
-							: __(
-									'Product successfully updated.',
-									'woocommerce'
-							  );
 					if ( ! skipNotice ) {
+						const noticeContent =
+							product.status === 'draft' &&
+							updatedProduct.status === 'publish'
+								? __(
+										'Product published. View in store.',
+										'woocommerce'
+								  )
+								: __(
+										'Product successfully updated.',
+										'woocommerce'
+								  );
 						createNotice( 'success', `🎉‎ ${ noticeContent }`, {
 							actions: getNoticePreviewActions(
 								updatedProduct.status,
