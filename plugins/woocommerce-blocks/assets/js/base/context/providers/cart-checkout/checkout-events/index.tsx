@@ -25,10 +25,8 @@ import {
  */
 import { useEventEmitters, reducer as emitReducer } from './event-emit';
 import type { emitterCallback } from '../../../event-emit';
-import { STATUS } from '../../../../../data/checkout/constants';
 import { useStoreEvents } from '../../../hooks/use-store-events';
 import { useCheckoutNotices } from '../../../hooks/use-checkout-notices';
-import { CheckoutState } from '../../../../../data/checkout/default-state';
 import {
 	getExpressPaymentMethods,
 	getPaymentMethods,
@@ -101,13 +99,38 @@ export const CheckoutEventsProvider = ( {
 		__internalUpdateAvailablePaymentMethods,
 	] );
 
-	const checkoutActions = useDispatch( CHECKOUT_STORE_KEY );
-	const checkoutState: CheckoutState = useSelect( ( select ) =>
-		select( CHECKOUT_STORE_KEY ).getCheckoutState()
-	);
+	const {
+		__internalSetRedirectUrl,
+		__internalEmitValidateEvent,
+		__internalEmitAfterProcessingEvents,
+		__internalSetBeforeProcessing,
+	} = useDispatch( CHECKOUT_STORE_KEY );
 
-	if ( redirectUrl && redirectUrl !== checkoutState.redirectUrl ) {
-		checkoutActions.__internalSetRedirectUrl( redirectUrl );
+	const {
+		checkoutRedirectUrl,
+		checkoutStatus,
+		isCheckoutBeforeProcessing,
+		isCheckoutAfterProcessing,
+		checkoutHasError,
+		checkoutOrderId,
+		checkoutOrderNotes,
+		checkoutCustomerId,
+	} = useSelect( ( select ) => {
+		const store = select( CHECKOUT_STORE_KEY );
+		return {
+			checkoutRedirectUrl: store.getRedirectUrl(),
+			checkoutStatus: store.getCheckoutStatus(),
+			isCheckoutBeforeProcessing: store.isBeforeProcessing(),
+			isCheckoutAfterProcessing: store.isAfterProcessing(),
+			checkoutHasError: store.hasError(),
+			checkoutOrderId: store.getOrderId(),
+			checkoutOrderNotes: store.getOrderNotes(),
+			checkoutCustomerId: store.getCustomerId(),
+		};
+	} );
+
+	if ( redirectUrl && redirectUrl !== checkoutRedirectUrl ) {
+		__internalSetRedirectUrl( redirectUrl );
 	}
 
 	const { setValidationErrors } = useDispatch( VALIDATION_STORE_KEY );
@@ -154,34 +177,34 @@ export const CheckoutEventsProvider = ( {
 	// Emit CHECKOUT_VALIDATE event and set the error state based on the response of
 	// the registered callbacks
 	useEffect( () => {
-		if ( checkoutState.status === STATUS.BEFORE_PROCESSING ) {
-			checkoutActions.__internalEmitValidateEvent( {
+		if ( isCheckoutBeforeProcessing ) {
+			__internalEmitValidateEvent( {
 				observers: currentObservers.current,
 				setValidationErrors,
 			} );
 		}
 	}, [
-		checkoutState.status,
+		isCheckoutBeforeProcessing,
 		setValidationErrors,
 		createErrorNotice,
-		checkoutActions,
+		__internalEmitValidateEvent,
 	] );
 
-	const previousStatus = usePrevious( checkoutState.status );
-	const previousHasError = usePrevious( checkoutState.hasError );
+	const previousStatus = usePrevious( checkoutStatus );
+	const previousHasError = usePrevious( checkoutHasError );
 
 	// Emit CHECKOUT_AFTER_PROCESSING_WITH_SUCCESS and CHECKOUT_AFTER_PROCESSING_WITH_ERROR events
 	// and set checkout errors according to the callback responses
 	useEffect( () => {
 		if (
-			checkoutState.status === previousStatus &&
-			checkoutState.hasError === previousHasError
+			checkoutStatus === previousStatus &&
+			checkoutHasError === previousHasError
 		) {
 			return;
 		}
 
-		if ( checkoutState.status === STATUS.AFTER_PROCESSING ) {
-			checkoutActions.__internalEmitAfterProcessingEvents( {
+		if ( isCheckoutAfterProcessing ) {
+			__internalEmitAfterProcessingEvents( {
 				observers: currentObservers.current,
 				notices: {
 					checkoutNotices,
@@ -191,25 +214,28 @@ export const CheckoutEventsProvider = ( {
 			} );
 		}
 	}, [
-		checkoutState.status,
-		checkoutState.hasError,
-		checkoutState.redirectUrl,
-		checkoutState.orderId,
-		checkoutState.customerId,
-		checkoutState.orderNotes,
+		checkoutStatus,
+		checkoutHasError,
+		checkoutRedirectUrl,
+		checkoutOrderId,
+		checkoutCustomerId,
+		checkoutOrderNotes,
+		isCheckoutAfterProcessing,
+		isCheckoutBeforeProcessing,
 		previousStatus,
 		previousHasError,
 		createErrorNotice,
 		checkoutNotices,
 		expressPaymentNotices,
 		paymentNotices,
-		checkoutActions,
+		__internalEmitValidateEvent,
+		__internalEmitAfterProcessingEvents,
 	] );
 
 	const onSubmit = useCallback( () => {
 		dispatchCheckoutEvent( 'submit' );
-		checkoutActions.__internalSetBeforeProcessing();
-	}, [ dispatchCheckoutEvent, checkoutActions ] );
+		__internalSetBeforeProcessing();
+	}, [ dispatchCheckoutEvent, __internalSetBeforeProcessing ] );
 
 	const checkoutEventHandlers = {
 		onSubmit,

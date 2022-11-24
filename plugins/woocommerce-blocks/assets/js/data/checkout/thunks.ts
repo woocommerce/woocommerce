@@ -96,16 +96,15 @@ export const __internalEmitAfterProcessingEvents: emitAfterProcessingEventsType 
 	( { observers, notices } ) => {
 		return ( { select, dispatch, registry } ) => {
 			const { createErrorNotice } = registry.dispatch( noticesStore );
-			const checkoutState = select.getCheckoutState();
 			const data = {
-				redirectUrl: checkoutState.redirectUrl,
-				orderId: checkoutState.orderId,
-				customerId: checkoutState.customerId,
-				orderNotes: checkoutState.orderNotes,
+				redirectUrl: select.getRedirectUrl(),
+				orderId: select.getOrderId(),
+				customerId: select.getCustomerId(),
+				orderNotes: select.getOrderNotes(),
 				processingResponse:
 					wpSelect( PAYMENT_STORE_KEY ).getPaymentResult(),
 			};
-			if ( checkoutState.hasError ) {
+			if ( select.hasError() ) {
 				// allow payment methods or other things to customize the error
 				// with a fallback if nothing customizes it.
 				emitEventWithAbort(
