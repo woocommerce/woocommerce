@@ -54,10 +54,14 @@ const CheckoutProcessor = () => {
 	} = useSelect( ( select ) => {
 		const store = select( CHECKOUT_STORE_KEY );
 		return {
-			...store.getCheckoutState(),
+			hasError: store.hasError(),
+			redirectUrl: store.getRedirectUrl(),
 			isProcessing: store.isProcessing(),
 			isBeforeProcessing: store.isBeforeProcessing(),
 			isComplete: store.isComplete(),
+			orderNotes: store.getOrderNotes(),
+			shouldCreateAccount: store.getShouldCreateAccount(),
+			extensionData: store.getExtensionData(),
 		};
 	} );
 
