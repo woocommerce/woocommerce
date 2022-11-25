@@ -81,5 +81,3 @@ export const formatCurrencyDisplayValue = (
 
 	return value === undefined ? value : format( value ).replace( regex, '' );
 };
-
-export function stepUp() {}
