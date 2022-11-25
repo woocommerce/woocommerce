@@ -13,7 +13,7 @@
 <!-- /wp:heading -->
 
 <!-- wp:woocommerce/active-filters {"heading":"","lock":{"remove":true}} -->
-<div class="wp-block-woocommerce-active-filters is-loading" data-display-style="list" data-heading="" data-heading-level="3"><span aria-hidden="true" class="wc-block-active-product-filters__placeholder"></span></div>
+<div class="wp-block-woocommerce-active-filters is-loading" data-display-style="list" data-heading="" data-heading-level="3"><span aria-hidden="true" class="wc-block-active-filters__placeholder"></span></div>
 <!-- /wp:woocommerce/active-filters --></div>
 <!-- /wp:woocommerce/filter-wrapper -->
 

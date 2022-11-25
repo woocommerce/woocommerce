@@ -18,7 +18,7 @@ For more information on what blocks are available, and how to use them, check ou
 
 Use this plugin if you want access to the bleeding edge of available blocks for WooCommerce. However, stable blocks are bundled into WooCommerce, and can be added from the "WooCommerce" section in the block inserter.
 
-- **Active Product Filters**
+- **Active Filters**
 - **All Products**
 - **All Reviews**
 - **Best Selling Products**

@@ -119,12 +119,9 @@ registerBlockType( metadata, {
 	variations: [
 		{
 			name: 'active-filters',
-			title: __(
-				'Active Product Filters',
-				'woo-gutenberg-products-block'
-			),
+			title: __( 'Active Filters', 'woo-gutenberg-products-block' ),
 			description: __(
-				'Display the currently active product filters.',
+				'Display the currently active filters.',
 				'woo-gutenberg-products-block'
 			),
 			/**
