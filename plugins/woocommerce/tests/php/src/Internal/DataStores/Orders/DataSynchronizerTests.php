@@ -9,7 +9,7 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 /**
  * Tests for DataSynchronizer class.
  */
-	class DataSynchronizerTests extends WC_Unit_Test_Case {
+class DataSynchronizerTests extends WC_Unit_Test_Case {
 
 	/**
 	 * @var DataSynchronizer
@@ -148,7 +148,7 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 	}
 
 	/**
-	 * When sync is enbabled and the posts store is authoritative, creating an order and updating the status from
+	 * When sync is enabled and the posts store is authoritative, creating an order and updating the status from
 	 * draft to some non-draft status (as happens when an order is manually created in the admin environment) should
 	 * result in the same status change being made in the duplicate COT record.
 	 */
