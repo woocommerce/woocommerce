@@ -47,7 +47,7 @@ registerBlockType( metadata, {
 			>
 				<span
 					aria-hidden
-					className="wc-block-active-product-filters__placeholder"
+					className="wc-block-active-filters__placeholder"
 				/>
 			</div>
 		);

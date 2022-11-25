@@ -12,7 +12,7 @@ import {
 } from '@woocommerce/blocks-test-utils';
 
 const block = {
-	name: 'Active Product Filters',
+	name: 'Active Filters',
 	slug: 'woocommerce/active-filters',
 	class: '.wc-block-active-filters',
 	title: 'Active filters',

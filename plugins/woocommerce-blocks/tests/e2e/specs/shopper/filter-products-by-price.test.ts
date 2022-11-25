@@ -75,7 +75,7 @@ describe.skip( `${ block.name } Block`, () => {
 
 			await insertBlock( block.name );
 			await insertBlockUsingSlash( 'All Products' );
-			await insertBlock( 'Active Product Filters' );
+			await insertBlock( 'Active Filters' );
 			await publishPost();
 
 			const link = await page.evaluate( () =>
@@ -243,7 +243,7 @@ describe.skip( `${ block.name } Block`, () => {
 
 			await insertBlock( 'Product Query' );
 			await insertBlock( block.name );
-			await insertBlock( 'Active Product Filters' );
+			await insertBlock( 'Active Filters' );
 			await page.waitForNetworkIdle();
 			await publishPost();
 

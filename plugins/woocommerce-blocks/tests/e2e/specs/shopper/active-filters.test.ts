@@ -29,7 +29,7 @@ import {
 } from '../../../utils';
 
 const block = {
-	name: 'Active Product Filters',
+	name: 'Active Filters',
 	slug: 'woocommerce/active-filters',
 	class: '.wp-block-woocommerce-active-filters',
 	selectors: {
