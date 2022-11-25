@@ -168,6 +168,7 @@
 }
 
 // Hide an element from sighted users, but availble to screen reader users.
+// @deprecated in favor of sr-only
 @mixin visually-hidden() {
 	clip: rect(1px, 1px, 1px, 1px);
 	clip-path: inset(50%);
@@ -180,7 +181,20 @@
 	word-wrap: normal !important;
 }
 
+@mixin sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border-width: 0;
+}
+
 // Unhide a visually hidden element
+// @deprecated in favor of not-sr-only
 @mixin visually-shown() {
 	clip: auto;
 	clip-path: none;
@@ -188,6 +202,17 @@
 	width: auto;
 	margin: unset;
 	overflow: hidden;
+}
+
+@mixin not-sr-only {
+	position: static;
+	width: auto;
+	height: auto;
+	padding: 0;
+	margin: 0;
+	overflow: visible;
+	clip: auto;
+	white-space: normal;
 }
 
 // Create a string-repeat function
