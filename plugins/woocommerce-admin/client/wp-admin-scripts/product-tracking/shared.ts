@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { recordEvent } from '@woocommerce/tracks';
-import { addCustomerEffortScoreExitPageListener } from '~/customer-effort-score-tracks/customer-effort-score-exit-page';
 
 /**
  * Internal dependencies
  */
 import { waitUntilElementIsPresent } from './utils';
+import { addCustomerEffortScoreExitPageListener } from '~/customer-effort-score-tracks/customer-effort-score-exit-page';
 
 /**
  * Get the product data.
@@ -474,12 +474,13 @@ export function addExitPageListener( pageId: string ) {
 		return isDisabled;
 	}
 	window.addEventListener( 'beforeunload', function ( event ) {
+		// Check if button disabled or triggered delete to see if user saved or deleted the product instead.
 		if ( checkIfSubmitButtonsDisabled() || triggeredDelete ) {
 			productChanged = false;
 			triggeredDelete = false;
 			return;
 		}
-		var editor = window.tinymce && window.tinymce.get( 'content' );
+		const editor = window.tinymce && window.tinymce.get( 'content' );
 
 		if ( window.wp.autosave ) {
 			productChanged = window.wp.autosave.server.postChanged();

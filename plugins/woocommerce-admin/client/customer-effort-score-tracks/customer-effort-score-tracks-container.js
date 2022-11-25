@@ -3,7 +3,7 @@
  */
 import { compose } from '@wordpress/compose';
 import { useEffect } from '@wordpress/element';
-import { withDispatch, withSelect, dispatch } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import PropTypes from 'prop-types';
 

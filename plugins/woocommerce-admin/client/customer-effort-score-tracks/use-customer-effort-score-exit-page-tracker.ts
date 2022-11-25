@@ -2,6 +2,10 @@
  * External dependencies
  */
 import { useEffect } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
 import {
 	addCustomerEffortScoreExitPageListener,
 	addExitPage,
