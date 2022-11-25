@@ -12,7 +12,7 @@ import { decodeEntities } from '@wordpress/html-entities';
  * @param {string} query      The search term to match in the string.
  * @return {Object} A list in three parts: before, match, and after.
  */
-export function computeSuggestionMatch( suggestion, query ) {
+export function computeSuggestionMatch( suggestion: string, query: string ) {
 	if ( ! query ) {
 		return null;
 	}
@@ -33,7 +33,14 @@ export function computeSuggestionMatch( suggestion, query ) {
 	};
 }
 
-export function getTaxCode( tax ) {
+type Tax = Partial< {
+	country: string;
+	state: string;
+	name: string;
+	priority: number;
+} >;
+
+export function getTaxCode( tax: Tax ) {
 	return [
 		tax.country,
 		tax.state,
@@ -41,6 +48,6 @@ export function getTaxCode( tax ) {
 		tax.priority,
 	]
 		.filter( Boolean )
-		.map( ( item ) => item.toString().toUpperCase().trim() )
+		.map( ( item ) => item?.toString().toUpperCase().trim() )
 		.join( '-' );
 }
