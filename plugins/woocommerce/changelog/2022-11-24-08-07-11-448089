@@ -1,4 +1,4 @@
-Significance: major
-Type: enhancement
+Significance: patch
+Type: tweak
 
 Fix deprecated error in PageController ini PHP v8.0
