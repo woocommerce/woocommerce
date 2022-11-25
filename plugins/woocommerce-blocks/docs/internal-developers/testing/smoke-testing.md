@@ -227,7 +227,7 @@ In the `wp:woocommerce/product-search` substitute the URL used for the `action` 
 		>
 			<span
 				aria-hidden="true"
-				class="wc-block-active-product-filters__placeholder"
+				class="wc-block-active-filters__placeholder"
 			></span>
 		</div>
 		<!-- /wp:woocommerce/active-filters -->
