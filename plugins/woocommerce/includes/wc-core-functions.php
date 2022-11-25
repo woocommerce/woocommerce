@@ -239,7 +239,8 @@ function wc_get_path_define_tokens() {
  * @param mixed  $slug Template slug.
  * @param string $name Template name (default: '').
  */
-function wc_get_template_part( $slug, $name = '' ) {
+// TODO test $args
+function wc_get_template_part( $slug, $name = '', $args = array() ) {
 	$cache_key = sanitize_key( implode( '-', array( 'template-part', $slug, $name, Constants::get_constant( 'WC_VERSION' ) ) ) );
 	$template  = (string) wp_cache_get( $cache_key, 'woocommerce' );
 
@@ -278,10 +279,10 @@ function wc_get_template_part( $slug, $name = '' ) {
 	}
 
 	// Allow 3rd party plugins to filter template file from their plugin.
-	$template = apply_filters( 'wc_get_template_part', $template, $slug, $name );
+	$template = apply_filters( 'wc_get_template_part', $template, $slug, $name, $args );
 
 	if ( $template ) {
-		load_template( $template, false );
+		load_template( $template, false, $args );
 	}
 }
 
