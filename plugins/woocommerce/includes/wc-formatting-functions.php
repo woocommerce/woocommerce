@@ -1001,7 +1001,7 @@ function wc_format_postcode( $postcode, $country ) {
 			}
 			break;
 		case 'DK':
-			$postcode = preg_replace('/^(DK)(.+)$/', '${1}-${2}', $postcode);
+			$postcode = preg_replace( '/^(DK)(.+)$/', '${1}-${2}', $postcode );
 			break;
 	}
 
