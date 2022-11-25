@@ -24,8 +24,11 @@ type MediaUploaderProps = {
 	MediaUploadComponent?: < T extends boolean = false >(
 		props: MediaUpload.Props< T >
 	) => JSX.Element;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	onSelect?: ( value: { id: number } & { [ k: string ]: any } ) => void;
+	multipleSelect?: boolean;
+	onSelect?: (
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		value: ( { id: number } & { [ k: string ]: any } ) | MediaItem[]
+	) => void;
 	onError?: ( error: {
 		code: UploadMediaErrorCode;
 		message: string;
@@ -43,6 +46,7 @@ export const MediaUploader = ( {
 	label = __( 'Drag images here or click to upload', 'woocommerce' ),
 	maxUploadFileSize = 10000000,
 	MediaUploadComponent = MediaUpload,
+	multipleSelect = false,
 	onError = () => null,
 	onFileUploadChange = () => null,
 	onUpload = () => null,
@@ -90,6 +94,7 @@ export const MediaUploader = ( {
 						<MediaUploadComponent
 							onSelect={ onSelect }
 							allowedTypes={ allowedMediaTypes }
+							multiple={ multipleSelect }
 							render={ ( { open } ) => (
 								<Button variant="secondary" onClick={ open }>
 									{ buttonText }
