@@ -145,7 +145,11 @@ export function triggerExitPageCesSurvey() {
 				'exit_' + exitPageItems[ 0 ].replaceAll( '-', '_' ),
 				copy,
 				window.pagenow,
-				window.adminpage
+				window.adminpage,
+				undefined,
+				{
+					ces_location: 'outside',
+				}
 			);
 		}
 		removeExitPage( exitPageItems[ 0 ] );
