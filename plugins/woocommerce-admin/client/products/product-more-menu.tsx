@@ -40,7 +40,7 @@ export const ProductMoreMenu = () => {
 							onClick={ () => {
 								// @todo This should open the CES modal.
 								showCesModal(
-									'new_product_page',
+									'new_product',
 									__(
 										"How's your experience with the product editor?",
 										'woocommerce'
