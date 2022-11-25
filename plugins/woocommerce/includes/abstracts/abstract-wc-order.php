@@ -1217,7 +1217,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 * @param  WC_Coupon $coupon The applied coupon object.
 		 * @param  WC_Order  $order  The current order object.
 		 *
-		 * @since 7.2
+		 * @since 7.3
 		 */
 		do_action( 'woocommerce_order_applied_coupon', $coupon, $this );
 
