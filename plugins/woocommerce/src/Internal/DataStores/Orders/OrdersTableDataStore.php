@@ -1765,7 +1765,7 @@ FROM $order_meta_table
 			$order->set_id( 0 );
 
 			// If this datastore method is called while the posts table is authoritative, refrain from deleting post data.
-			if ( ! is_a( $order->get_data_store(), self::class ) ) {
+			if ( $order->get_data_store()->get_current_class_name() !== self::class ) {
 				return;
 			}
 
