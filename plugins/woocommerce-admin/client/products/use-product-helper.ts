@@ -83,24 +83,19 @@ export function useProductHelper() {
 			} ).then(
 				( newProduct ) => {
 					if ( ! skipNotice ) {
-						createNotice(
-							'success',
+						const noticeContent =
 							newProduct.status === 'publish'
-								? __(
-										'🎉 Product published. View in store',
-										'woocommerce'
-								  )
+								? __( 'Product published.', 'woocommerce' )
 								: __(
-										'🎉 Product successfully created.',
+										'Product successfully created.',
 										'woocommerce'
-								  ),
-							{
-								actions: getNoticePreviewActions(
-									newProduct.status,
-									newProduct.permalink
-								),
-							}
-						);
+								  );
+						createNotice( 'success', `🎉‎ ${ noticeContent }`, {
+							actions: getNoticePreviewActions(
+								newProduct.status,
+								newProduct.permalink
+							),
+						} );
 					}
 					setUpdating( {
 						...updating,
@@ -160,25 +155,20 @@ export function useProductHelper() {
 			} ).then(
 				( updatedProduct ) => {
 					if ( ! skipNotice ) {
-						createNotice(
-							'success',
+						const noticeContent =
 							product.status === 'draft' &&
-								updatedProduct.status === 'publish'
-								? __(
-										'🎉 Product published. View in store.',
-										'woocommerce'
-								  )
+							updatedProduct.status === 'publish'
+								? __( 'Product published.', 'woocommerce' )
 								: __(
-										'🎉 Product successfully updated.',
+										'Product successfully updated.',
 										'woocommerce'
-								  ),
-							{
-								actions: getNoticePreviewActions(
-									updatedProduct.status,
-									updatedProduct.permalink
-								),
-							}
-						);
+								  );
+						createNotice( 'success', `🎉‎ ${ noticeContent }`, {
+							actions: getNoticePreviewActions(
+								updatedProduct.status,
+								updatedProduct.permalink
+							),
+						} );
 					}
 					setUpdating( {
 						...updating,
@@ -234,13 +224,11 @@ export function useProductHelper() {
 		setIsDeleting( true );
 		return deleteProduct( id ).then(
 			( product ) => {
-				createNotice(
-					'success',
-					__(
-						'🎉 Successfully moved product to Trash.',
-						'woocommerce'
-					)
+				const noticeContent = __(
+					'Successfully moved product to Trash.',
+					'woocommerce'
 				);
+				createNotice( 'success', `🎉‎ ${ noticeContent }` );
 				setIsDeleting( false );
 				return product;
 			},
