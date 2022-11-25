@@ -14,7 +14,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 		case TYPES.SET_CES_SURVEY_QUEUE:
 			return {
 				...state,
-				queue: action.queue,
+				queue: [ ...state.queue, ...action.queue ],
 			};
 		case TYPES.HIDE_CES_MODAL:
 			return {

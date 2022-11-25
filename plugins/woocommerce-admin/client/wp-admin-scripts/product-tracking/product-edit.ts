@@ -6,7 +6,7 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { initProductScreenTracks } from './shared';
+import { addExitPageListener, initProductScreenTracks } from './shared';
 
 const initTracks = () => {
 	recordEvent( 'product_edit_view' );
@@ -15,4 +15,6 @@ const initTracks = () => {
 
 if ( productScreen && productScreen.name === 'edit' ) {
 	initTracks();
+
+	addExitPageListener( 'edit-product' );
 }

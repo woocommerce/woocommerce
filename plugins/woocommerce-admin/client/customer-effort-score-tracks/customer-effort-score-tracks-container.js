@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { compose } from '@wordpress/compose';
-import { withDispatch, withSelect } from '@wordpress/data';
+import { useEffect } from '@wordpress/element';
+import { withDispatch, withSelect, dispatch } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import PropTypes from 'prop-types';
 
@@ -11,6 +12,7 @@ import PropTypes from 'prop-types';
  */
 import CustomerEffortScoreTracks from './customer-effort-score-tracks';
 import { STORE_KEY, QUEUE_OPTION_NAME } from './data/constants';
+import { triggerExitPageCesSurvey } from './customer-effort-score-exit-page.ts';
 import './data';
 
 /**
@@ -29,6 +31,10 @@ function CustomerEffortScoreTracksContainer( {
 	resolving,
 	clearQueue,
 } ) {
+	useEffect( () => {
+		triggerExitPageCesSurvey();
+	}, [] );
+
 	if ( resolving ) {
 		return null;
 	}
