@@ -9,7 +9,7 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 /**
  * Tests for DataSynchronizer class.
  */
-class DataSynchronizerTests extends WC_Unit_Test_Case {
+	class DataSynchronizerTests extends WC_Unit_Test_Case {
 
 	/**
 	 * @var DataSynchronizer
@@ -190,6 +190,35 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 			'wc-pending',
 			$wpdb->get_var( "SELECT status FROM $orders_table WHERE id = $order_id" ), //phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			'When the order status is updated, the change should be observed by the DataSynhronizer and a matching update will take place in the COT table.'
+		);
+	}
+
+	/**
+	 * When sync is enabled, and an order is deleted either from the post table or the COT table, the
+	 * change should propagate across to the other table.
+	 *
+	 * @return void
+	 */
+	public function test_order_deletions_propagate(): void {
+		// Sync enabled and COT authoritative.
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+
+		$order = OrderHelper::create_order();
+		wp_delete_post( $order->get_id(), true );
+
+		$this->assertFalse(
+			wc_get_order( $order->get_id() ),
+			'After the order post record was deleted, the order was also deleted from COT.'
+		);
+
+		$order    = OrderHelper::create_order();
+		$order_id = $order->get_id();
+		$order->delete( true );
+
+		$this->assertNull(
+			get_post( $order_id ),
+			'After the COT order record was deleted, the order was also deleted from the posts table.'
 		);
 	}
 }
