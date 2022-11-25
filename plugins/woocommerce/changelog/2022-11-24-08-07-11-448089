@@ -1,4 +1,4 @@
 Significance: patch
 Type: tweak
 
-Fix deprecated error in PageController ini PHP v8.0
+Avoid deprecation notices under PHP 8.1 when calling wp_parse_url().
