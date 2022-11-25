@@ -29,28 +29,30 @@ import {
 } from './autocompleters';
 
 type Option = {
-	key: string;
+	key: string | number;
 	label: React.ReactNode;
 	keywords: string[];
 	value: unknown;
 };
 
+type SearchType =
+	| 'attributes'
+	| 'categories'
+	| 'countries'
+	| 'coupons'
+	| 'customers'
+	| 'downloadIps'
+	| 'emails'
+	| 'orders'
+	| 'products'
+	| 'taxes'
+	| 'usernames'
+	| 'variableProducts'
+	| 'variations'
+	| 'custom';
+
 type Props = {
-	type:
-		| 'attributes'
-		| 'categories'
-		| 'countries'
-		| 'coupons'
-		| 'customers'
-		| 'downloadIps'
-		| 'emails'
-		| 'orders'
-		| 'products'
-		| 'taxes'
-		| 'usernames'
-		| 'variableProducts'
-		| 'variations'
-		| 'custom';
+	type: SearchType;
 	allowFreeTextSearch?: boolean;
 	className?: string;
 	onChange?: ( value: Option | OptionCompletionValue[] ) => void;
@@ -177,7 +179,7 @@ export class Search extends Component< Props, State > {
 		this.updateSelected = this.updateSelected.bind( this );
 	}
 
-	getAutocompleter(): AutoCompleter | Record< string, never > {
+	getAutocompleter() {
 		switch ( this.props.type ) {
 			case 'attributes':
 				return attributes;
@@ -214,9 +216,11 @@ export class Search extends Component< Props, State > {
 						"Invalid autocompleter provided to Search component, it requires a completer object when using 'custom' type."
 					);
 				}
-				return this.props.autocompleter as AutoCompleter;
+				return this.props.autocompleter;
 			default:
-				return {};
+				throw new Error(
+					`No autocompleter found for type: ${ this.props.type }`
+				);
 		}
 	}
 
