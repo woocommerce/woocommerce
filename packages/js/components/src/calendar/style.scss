@@ -1,3 +1,14 @@
+/**
+ * We don't convert react-dates styles to RTL because react-dates uses an isRTL flag instead.
+ *
+ * We have to include the RTL-ignore directives via imports because of the ordering of how
+ * @imports are included in the output (see https://github.com/MohammadYounes/rtlcss/issues/113).
+ **/
+@import './calendar/begin-rtl-ignore.css';
+@import '../node_modules/react-dates/lib/css/_datepicker.css';
+@import './calendar/end-rtl-ignore.css';
+
+
 .woocommerce-calendar {
 	width: 100%;
 	background-color: $gray-100;
