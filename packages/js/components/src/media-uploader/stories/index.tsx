@@ -105,8 +105,8 @@ const readImage = ( file: Blob ) => {
 };
 
 const mockUploadMedia = async ( { filesList, onFileChange } ) => {
-	// The value sent by the FormFileUpload and the DropZone components are different.
-	// This is why we need transform everything into an array.
+	// The values sent by the FormFileUpload and the DropZone components are different.
+	// This is why we need to transform everything into an array.
 	const list = await Object.keys( filesList ).map(
 		( key ) => filesList[ key ]
 	);
