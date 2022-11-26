@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, DropZone } from '@wordpress/components';
+import { Button, DropZone, FormFileUpload } from '@wordpress/components';
 import { createElement } from 'react';
 import {
 	MediaItem,
@@ -32,6 +32,7 @@ type MediaUploaderProps = {
 		file: File;
 	} ) => void;
 	onUpload?: ( files: MediaItem[] ) => void;
+	onFileUploadChange?: ( files: MediaItem[] ) => void;
 	uploadMedia?: ( options: UploadMediaOptions ) => Promise< void >;
 };
 
@@ -43,36 +44,74 @@ export const MediaUploader = ( {
 	maxUploadFileSize = 10000000,
 	MediaUploadComponent = MediaUpload,
 	onError = () => null,
+	onFileUploadChange = () => null,
 	onUpload = () => null,
 	onSelect = () => null,
 	uploadMedia = wpUploadMedia,
 }: MediaUploaderProps ) => {
+	const getFormFileUploadAcceptedFiles = () =>
+		allowedMediaTypes.map( ( type ) => `${ type }/*` );
+
 	return (
-		<div className="woocommerce-media-uploader">
-			<div className="woocommerce-media-uploader__label">{ label }</div>
+		<FormFileUpload
+			accept={ getFormFileUploadAcceptedFiles().toString() }
+			multiple={ true }
+			onChange={ ( { currentTarget } ) => {
+				uploadMedia( {
+					filesList: currentTarget.files as FileList,
+					onError,
+					onFileChange: onFileUploadChange,
+					maxUploadFileSize,
+				} );
+			} }
+			render={ ( { openFileDialog } ) => (
+				<div
+					className="woocommerce-form-file-upload"
+					onKeyPress={ () => {} }
+					tabIndex={ 0 }
+					role="button"
+					onClick={ (
+						event: React.MouseEvent< HTMLDivElement, MouseEvent >
+					) => {
+						const { target } = event;
+						if (
+							( target as HTMLButtonElement )?.type !== 'button'
+						) {
+							openFileDialog();
+						}
+					} }
+					onBlur={ () => {} }
+				>
+					<div className="woocommerce-media-uploader">
+						<div className="woocommerce-media-uploader__label">
+							{ label }
+						</div>
 
-			<MediaUploadComponent
-				onSelect={ onSelect }
-				allowedTypes={ allowedMediaTypes }
-				render={ ( { open } ) => (
-					<Button variant="secondary" onClick={ open }>
-						{ buttonText }
-					</Button>
-				) }
-			/>
+						<MediaUploadComponent
+							onSelect={ onSelect }
+							allowedTypes={ allowedMediaTypes }
+							render={ ( { open } ) => (
+								<Button variant="secondary" onClick={ open }>
+									{ buttonText }
+								</Button>
+							) }
+						/>
 
-			{ hasDropZone && (
-				<DropZone
-					onFilesDrop={ ( files ) =>
-						uploadMedia( {
-							filesList: files,
-							onError,
-							onFileChange: onUpload,
-							maxUploadFileSize,
-						} )
-					}
-				/>
+						{ hasDropZone && (
+							<DropZone
+								onFilesDrop={ ( files ) =>
+									uploadMedia( {
+										filesList: files,
+										onError,
+										onFileChange: onUpload,
+										maxUploadFileSize,
+									} )
+								}
+							/>
+						) }
+					</div>
+				</div>
 			) }
-		</div>
+		/>
 	);
 };
