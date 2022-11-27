@@ -41,11 +41,14 @@ class Tracks_Debug_Log {
 	 * Initialize hooks.
 	 */
 	public function __construct() {
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
+		// WooCommerce might not be installed/activated between installs of WC versions.
+		if ( class_exists( 'WooCommerce' ) ) {
+			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
+			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
 
-		add_action( 'admin_footer', array( $this, 'log_footer_pixels' ), 5 );
-		add_action( 'pre_http_request', array( $this, 'log_remote_pixels' ), 10, 3 );
+			add_action( 'admin_footer', array( $this, 'log_footer_pixels' ), 5 );
+			add_action( 'pre_http_request', array( $this, 'log_remote_pixels' ), 10, 3 );
+		}
 	}
 
 	/**
