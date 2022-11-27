@@ -14,6 +14,12 @@ import { registerPlugin } from '@wordpress/plugins';
 import { useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { navigateTo } from '@woocommerce/navigation';
+import { useSelect } from '@wordpress/data';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { store } from '@wordpress/viewport';
 
 /**
  * Internal dependencies
@@ -38,6 +44,14 @@ export const ProductFormActions: React.FC = () => {
 
 	usePreventLeavingPage( isDirty );
 
+	const { isSmallViewport } = useSelect( ( select ) => {
+		return {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			//@ts-ignore Types don't appear to be working correctly on this package.
+			isSmallViewport: select( store ).isViewportMatch( '< medium' ),
+		};
+	} );
+
 	const getProductDataForTracks = () => {
 		return {
 			product_id: values.id,
@@ -54,7 +68,13 @@ export const ProductFormActions: React.FC = () => {
 			...getProductDataForTracks(),
 		} );
 		if ( ! values.id ) {
-			createProductWithStatus( values, 'draft' );
+			const product = await createProductWithStatus( values, 'draft' );
+			if ( product?.id ) {
+				resetForm();
+				navigateTo( {
+					url: 'admin.php?page=wc-admin&path=/product/' + product.id,
+				} );
+			}
 		} else {
 			const product = await updateProductWithStatus(
 				values.id,
@@ -73,7 +93,13 @@ export const ProductFormActions: React.FC = () => {
 			...getProductDataForTracks(),
 		} );
 		if ( ! values.id ) {
-			createProductWithStatus( values, 'publish' );
+			const product = await createProductWithStatus( values, 'publish' );
+			if ( product?.id ) {
+				resetForm();
+				navigateTo( {
+					url: 'admin.php?page=wc-admin&path=/product/' + product.id,
+				} );
+			}
 		} else {
 			const product = await updateProductWithStatus(
 				values.id,
@@ -94,7 +120,7 @@ export const ProductFormActions: React.FC = () => {
 		if ( values.id ) {
 			await updateProductWithStatus( values.id, values, 'publish' );
 		} else {
-			await createProductWithStatus( values, 'publish', false, true );
+			await createProductWithStatus( values, 'publish', false );
 		}
 		await copyProductWithStatus( values );
 	};
@@ -114,70 +140,78 @@ export const ProductFormActions: React.FC = () => {
 		await copyProductWithStatus( values );
 	};
 
-	const onTrash = () => {
+	const onTrash = async () => {
 		recordEvent( 'product_delete', {
 			new_product_page: true,
 			...getProductDataForTracks(),
 		} );
 		if ( values.id ) {
-			deleteProductAndRedirect( values.id );
+			const product = await deleteProductAndRedirect( values.id );
+			if ( product?.id ) {
+				resetForm( product );
+				navigateTo( { url: 'edit.php?post_type=product' } );
+			}
 		}
 	};
 
 	const isPublished = values.id && values.status === 'publish';
+	const SecondaryActionsComponent = isSmallViewport ? MenuItem : Button;
+	const secondaryActions = (
+		<>
+			<SecondaryActionsComponent
+				onClick={ onSaveDraft }
+				disabled={
+					! isValidForm ||
+					( ! isDirty &&
+						!! values.id &&
+						values.status !== 'publish' ) ||
+					isUpdatingDraft ||
+					isUpdatingPublished ||
+					isDeleting
+				}
+			>
+				{ ! isDirty && values.id && values.status !== 'publish' && (
+					<Icon icon={ check } />
+				) }
+				{ isUpdatingDraft ? __( 'Saving', 'woocommerce' ) : null }
+				{ ( isDirty || ! values.id ) &&
+				! isUpdatingDraft &&
+				values.status !== 'publish'
+					? __( 'Save draft', 'woocommerce' )
+					: null }
+				{ values.status === 'publish' && ! isUpdatingDraft
+					? __( 'Switch to draft', 'woocommerce' )
+					: null }
+				{ ! isDirty &&
+				values.id &&
+				! isUpdatingDraft &&
+				values.status !== 'publish'
+					? __( 'Saved', 'woocommerce' )
+					: null }
+			</SecondaryActionsComponent>
+			<SecondaryActionsComponent
+				onClick={ () =>
+					recordEvent( 'product_preview_changes', {
+						new_product_page: true,
+						...getProductDataForTracks(),
+					} )
+				}
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				//@ts-ignore The `href` prop works for both Buttons and MenuItem's.
+				href={ values.permalink + '?preview=true' }
+				disabled={ ! isValidForm || ! values.permalink }
+				target="_blank"
+			>
+				{ __( 'Preview', 'woocommerce' ) }
+			</SecondaryActionsComponent>
+		</>
+	);
 
 	return (
 		<WooHeaderItem>
 			{ () => (
 				<div className="woocommerce-product-form-actions">
-					<Button
-						onClick={ onSaveDraft }
-						disabled={
-							! isValidForm ||
-							( ! isDirty &&
-								!! values.id &&
-								values.status !== 'publish' ) ||
-							isUpdatingDraft ||
-							isUpdatingPublished ||
-							isDeleting
-						}
-					>
-						{ ! isDirty &&
-							values.id &&
-							values.status !== 'publish' && (
-								<Icon icon={ check } />
-							) }
-						{ isUpdatingDraft
-							? __( 'Saving', 'woocommerce' )
-							: null }
-						{ ( isDirty || ! values.id ) &&
-						! isUpdatingDraft &&
-						values.status !== 'publish'
-							? __( 'Save draft', 'woocommerce' )
-							: null }
-						{ values.status === 'publish' && ! isUpdatingDraft
-							? __( 'Switch to draft', 'woocommerce' )
-							: null }
-						{ ! isDirty &&
-						values.id &&
-						! isUpdatingDraft &&
-						values.status !== 'publish'
-							? __( 'Saved', 'woocommerce' )
-							: null }
-					</Button>
-					<Button
-						onClick={ () =>
-							recordEvent( 'product_preview_changes', {
-								new_product_page: true,
-								...getProductDataForTracks(),
-							} )
-						}
-						href={ values.permalink + '?preview=true' }
-						disabled={ ! isValidForm || ! values.permalink }
-						target="_blank"
-					>
-						{ __( 'Preview', 'woocommerce' ) }
-					</Button>
+					{ ! isSmallViewport && secondaryActions }
 					<ButtonGroup className="woocommerce-product-form-actions__publish-button-group">
 						<Button
 							onClick={ onPublish }
@@ -214,6 +248,7 @@ export const ProductFormActions: React.FC = () => {
 							{ () => (
 								<>
 									<MenuGroup>
+										{ isSmallViewport && secondaryActions }
 										<MenuItem
 											onClick={ onPublishAndDuplicate }
 											disabled={ ! isValidForm }

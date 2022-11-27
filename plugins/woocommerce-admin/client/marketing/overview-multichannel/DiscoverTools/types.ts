@@ -12,6 +12,7 @@ export type Plugin = {
 	title: string;
 	description: string;
 	url: string;
+	direct_install: boolean;
 	icon: string;
 	product: string;
 	plugin: string;

@@ -26,7 +26,8 @@ jobs:
               working-directory: plugins/woocommerce
               env:
                 ENABLE_HPOS: 0
-              run: pnpm env:test --filter=woocommerce
+                WP_ENV_PHP_VERSION: 7.4
+              run: pnpm run env:test
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce

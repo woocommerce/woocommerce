@@ -9,13 +9,18 @@ import {
 	ImageGallery,
 	ImageGalleryItem,
 } from '@woocommerce/components';
-import { Card, CardBody, DropZone } from '@wordpress/components';
+import {
+	Card,
+	CardBody,
+	DropZone,
+	FormFileUpload,
+} from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { useState } from '@wordpress/element';
 import { Product } from '@woocommerce/data';
 import classnames from 'classnames';
 import { Icon, trash } from '@wordpress/icons';
-import { MediaItem } from '@wordpress/media-utils';
+import { MediaItem, uploadMedia } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
@@ -37,6 +42,7 @@ export const ImagesSection: React.FC = () => {
 	const [ draggedImageId, setDraggedImageId ] = useState< number | null >(
 		null
 	);
+	const ALLOWED_MEDIA_TYPES = 'image';
 
 	const toggleRemoveZone = () => {
 		setIsRemovingZoneVisible( ! isRemovingZoneVisible );
@@ -48,7 +54,14 @@ export const ImagesSection: React.FC = () => {
 				( file ) => file.id === parseInt( image?.props?.id, 10 )
 			);
 		} );
+		recordEvent( 'product_images_change_image_order_via_image_gallery' );
 		setValue( 'images', orderedImages );
+	};
+	const onFileUpload = ( files: MediaItem[] ) => {
+		if ( files[ 0 ].id ) {
+			recordEvent( 'product_images_add_via_file_upload_area' );
+			setValue( 'images', [ ...images, ...files ] );
+		}
 	};
 
 	return (
@@ -100,6 +113,9 @@ export const ImagesSection: React.FC = () => {
 						} }
 						onDragEnd={ () => {
 							if ( isRemoving && draggedImageId ) {
+								recordEvent(
+									'product_images_remove_image_button_click'
+								);
 								setValue(
 									'images',
 									images.filter(
@@ -119,9 +135,17 @@ export const ImagesSection: React.FC = () => {
 								) === undefined
 							) {
 								images[ replaceIndex ] = media as Image;
+								recordEvent(
+									'product_images_replace_image_button_click'
+								);
 								setValue( 'images', images );
 							}
 						} }
+						onSelectAsCover={ () =>
+							recordEvent(
+								'product_images_select_image_as_cover_button_click'
+							)
+						}
 					>
 						{ images.map( ( image ) => (
 							<ImageGalleryItem
@@ -161,43 +185,89 @@ export const ImagesSection: React.FC = () => {
 							</CardBody>
 						) : (
 							<CardBody>
-								<MediaUploader
-									onError={ () => null }
-									onSelect={ ( file ) => {
-										if (
-											images.find(
-												( img ) => file.id === img.id
-											) === undefined
-										) {
-											setValue( 'images', [
-												...images,
-												file,
-											] );
-										}
+								<FormFileUpload
+									accept={ ALLOWED_MEDIA_TYPES }
+									multiple={ true }
+									onChange={ ( { currentTarget } ) => {
+										uploadMedia( {
+											filesList:
+												currentTarget.files as FileList,
+											onError: () => null,
+											onFileChange: onFileUpload,
+											maxUploadFileSize: 10000000,
+										} );
 									} }
-									onUpload={ ( files ) => {
-										if ( files[ 0 ].id ) {
-											setValue( 'images', [
-												...images,
-												...files,
-											] );
-										}
-									} }
-									label={
-										<>
-											<img
-												src={ DragAndDrop }
-												alt="Completed"
-												className="woocommerce-product-form__drag-and-drop-image"
+									render={ ( { openFileDialog } ) => (
+										<div
+											className="woocommerce-form-file-upload"
+											onKeyPress={ () => {} }
+											tabIndex={ 0 }
+											role="button"
+											onClick={ (
+												event: React.MouseEvent<
+													HTMLDivElement,
+													MouseEvent
+												>
+											) => {
+												const { target } = event;
+												if (
+													(
+														target as HTMLButtonElement
+													 )?.type !== 'button'
+												) {
+													openFileDialog();
+												}
+											} }
+											onBlur={ () => {} }
+										>
+											<MediaUploader
+												onError={ () => null }
+												onSelect={ ( file ) => {
+													if (
+														images.find(
+															( img ) =>
+																file.id ===
+																img.id
+														) === undefined
+													) {
+														recordEvent(
+															'product_images_add_via_media_library'
+														);
+														setValue( 'images', [
+															...images,
+															file,
+														] );
+													}
+												} }
+												onUpload={ ( files ) => {
+													if ( files[ 0 ].id ) {
+														recordEvent(
+															'product_images_add_via_drag_and_drop_upload'
+														);
+														setValue( 'images', [
+															...images,
+															...files,
+														] );
+													}
+												} }
+												label={
+													<>
+														<img
+															src={ DragAndDrop }
+															alt="Completed"
+															className="woocommerce-product-form__drag-and-drop-image"
+														/>
+														<span>
+															{ __(
+																'Drag images here or click to upload',
+																'woocommerce'
+															) }
+														</span>
+													</>
+												}
 											/>
-											<span>
-												{ __(
-													'Drag images here or click to upload',
-													'woocommerce'
-												) }
-											</span>
-										</>
-									}
+										</div>
+									) }
 								/>
 							</CardBody>
 						) }

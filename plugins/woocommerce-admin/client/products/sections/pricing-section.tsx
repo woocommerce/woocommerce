@@ -32,7 +32,7 @@ import {
  * Internal dependencies
  */
 import './pricing-section.scss';
-import { formatCurrencyDisplayValue, getCurrencySymbolProps } from './utils';
+import { formatCurrencyDisplayValue } from './utils';
 import { ProductSectionLayout } from '../layout/product-section-layout';
 import { ADMIN_URL } from '../../utils/admin-settings';
 import { CurrencyContext } from '../../lib/currency-context';
@@ -148,10 +148,44 @@ export const PricingSection: React.FC = () => {
 	} );
 
 	const currencyInputProps = {
-		...getCurrencySymbolProps( currencyConfig ),
-		className: 'half-width-field',
+		prefix: currencyConfig.symbol,
+		className: 'half-width-field components-currency-control',
 		sanitize: ( value: Product[ keyof Product ] ) => {
 			return sanitizePrice( String( value ) );
+		},
+		onFocus( event: React.FocusEvent< HTMLInputElement > ) {
+			// In some browsers like safari .select() function inside
+			// the onFocus event doesn't work as expected because it
+			// conflicts with onClick the first time user click the
+			// input. Using setTimeout defers the text selection and
+			// avoid the unexpected behaviour.
+			setTimeout(
+				function deferSelection( element: HTMLInputElement ) {
+					element.select();
+				},
+				0,
+				event.currentTarget
+			);
+		},
+		onKeyUp( event: React.KeyboardEvent< HTMLInputElement > ) {
+			const name = event.currentTarget.name as keyof Pick<
+				Product,
+				'regular_price' | 'sale_price'
+			>;
+			const amount = Number.parseFloat(
+				sanitizePrice( values[ name ] || '0' )
+			);
+			const step = Number( event.currentTarget.step || '1' );
+			if ( event.code === 'ArrowUp' ) {
+				setValues( {
+					[ name ]: String( amount + step ),
+				} as unknown as Product );
+			}
+			if ( event.code === 'ArrowDown' ) {
+				setValues( {
+					[ name ]: String( amount - step ),
+				} as unknown as Product );
+			}
 		},
 	};
 	const regularPriceProps = getInputProps(
@@ -202,6 +236,7 @@ export const PricingSection: React.FC = () => {
 					>
 						<InputControl
 							{ ...regularPriceProps }
+							name="regular_price"
 							label={ __( 'List price', 'woocommerce' ) }
 							value={ formatCurrencyDisplayValue(
 								String( regularPriceProps?.value ),
@@ -222,6 +257,7 @@ export const PricingSection: React.FC = () => {
 					>
 						<InputControl
 							{ ...salePriceProps }
+							name="sale_price"
 							label={ __( 'Sale price', 'woocommerce' ) }
 							value={ formatCurrencyDisplayValue(
 								String( salePriceProps?.value ),

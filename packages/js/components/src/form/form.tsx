@@ -166,11 +166,11 @@ function FormComponent< Values extends Record< string, any > >(
 		validate( values );
 	}, [] );
 
-	const resetForm = (
-		newInitialValues = {} as Values,
-		newTouchedFields = {},
-		newErrors = {}
-	) => {
+	const resetForm: (
+		newInitialValues?: Values,
+		newTouchedFields?: { [ P in keyof Values ]?: boolean | undefined },
+		newErrors?: FormErrors< Values >
+	) => void = ( newInitialValues, newTouchedFields = {}, newErrors = {} ) => {
 		const newValues = newInitialValues ?? initialValues.current ?? {};
 		initialValues.current = newValues;
 		setValuesInternal( newValues );
@@ -183,7 +183,7 @@ function FormComponent< Values extends Record< string, any > >(
 	} ) );
 
 	const isValidForm = async () => {
-		await validate( values );
+		validate( values );
 		return ! Object.keys( errors ).length;
 	};
 
