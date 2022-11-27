@@ -60,7 +60,7 @@ class Tracks_Debug_Log {
 	public function log_event( $event_name, $properties ) {
 		$logger = $this->get_logger();
 		
-		if ($logger != null) {
+		if ( ! $logger ) {
 			$logger->debug(
 				$event_name,
 				array( 'source' => $this->source )
@@ -68,7 +68,7 @@ class Tracks_Debug_Log {
 		}
 		
 		foreach ( $properties as $key => $property ) {
-			if ($logger != null) {
+			if ( ! $logger ) {
 				$logger->debug(
 					"  - {$key}: {$property}",
 					array( 'source' => $this->source )
