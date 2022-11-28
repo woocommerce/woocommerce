@@ -17,8 +17,6 @@ import { waitUntilElementIsPresent } from './utils';
 const isElementVisible = ( element: HTMLElement ) =>
 	! ( window.getComputedStyle( element ).display === 'none' );
 
-let initialStockValue = 0;
-
 const getProductData = () => {
 	const isBlockEditor =
 		document.querySelectorAll( '.block-editor' ).length > 0;
@@ -56,13 +54,19 @@ const getProductData = () => {
 		 )?.value,
 		is_downloadable: (
 			document.querySelector( '#_downloadable' ) as HTMLInputElement
-		 )?.checked,
+		 )?.checked
+			? 'Yes'
+			: 'No',
 		is_virtual: (
 			document.querySelector( '#_virtual' ) as HTMLInputElement
-		 )?.checked,
+		 )?.checked
+			? 'Yes'
+			: 'No',
 		manage_stock: (
 			document.querySelector( '#_manage_stock' ) as HTMLInputElement
-		 )?.checked,
+		 )?.checked
+			? 'Yes'
+			: 'No',
 		attributes: document.querySelectorAll( '.woocommerce_attribute' )
 			.length,
 		categories: document.querySelectorAll(
@@ -123,15 +127,6 @@ const getProductData = () => {
 			?.value
 			? 'Yes'
 			: 'No',
-		stock_quantity_update:
-			initialStockValue !==
-			parseInt(
-				( document.querySelector( '#_stock' ) as HTMLInputElement )
-					?.value,
-				10
-			)
-				? 'Yes'
-				: 'No',
 	};
 	return productData;
 };
@@ -209,11 +204,6 @@ const prefixObjectKeys = (
 
 export const initProductScreenTracks = () => {
 	const initialPublishingData = getPublishingWidgetData();
-
-	initialStockValue = parseInt(
-		( document.querySelector( '#_stock' ) as HTMLInputElement )?.value,
-		10
-	);
 
 	document
 		.querySelector( '#post-preview' )
