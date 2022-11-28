@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+
 /**
  * ProductCategoryList class.
  */
@@ -31,10 +33,9 @@ class ProductCategoryList extends AbstractBlock {
 		return array(
 			'color'                  =>
 			array(
-				'text'                            => true,
-				'link'                            => true,
-				'background'                      => false,
-				'__experimentalSkipSerialization' => true,
+				'text'       => true,
+				'link'       => true,
+				'background' => false,
 			),
 			'typography'             =>
 			array(
@@ -48,12 +49,59 @@ class ProductCategoryList extends AbstractBlock {
 	}
 
 	/**
-	 * Register script and style assets for the block type before it is registered.
+	 * Overwrite parent method to prevent script registration.
 	 *
-	 * This registers the scripts; it does not enqueue them.
+	 * It is necessary to register and enqueues assets during the render
+	 * phase because we want to load assets only if the block has the content.
 	 */
 	protected function register_block_type_assets() {
-		parent::register_block_type_assets();
-		$this->register_chunk_translations( [ $this->block_name ] );
+		return null;
+	}
+
+	/**
+	 * Register the context.
+	 */
+	protected function get_block_type_uses_context() {
+		return [ 'query', 'queryId', 'postId' ];
+	}
+
+	/**
+	 * Include and render the block.
+	 *
+	 * @param array    $attributes Block attributes. Default empty array.
+	 * @param string   $content    Block content. Default empty string.
+	 * @param WP_Block $block      Block instance.
+	 * @return string Rendered block type output.
+	 */
+	protected function render( $attributes, $content, $block ) {
+		if ( ! empty( $content ) ) {
+			parent::register_block_type_assets();
+			$this->register_chunk_translations( [ $this->block_name ] );
+			return $content;
+		}
+
+		$post_id                  = $block->context['postId'];
+		$product                  = wc_get_product( $post_id );
+		$product_categories_terms = get_the_terms( $product->get_id(), 'product_cat' );
+
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+		$classname          = isset( $attributes['className'] ) ? $attributes['className'] : '';
+
+		$output  = '';
+		$output .= '
+			<div class="wc-block-components-product-category-list ' . $classes_and_styles['classes'] . ' ' . $classname . '" style="' . $classes_and_styles['styles'] . '"">
+				' . __( 'Categories:', 'woo-gutenberg-products-block' )
+				. '<ul>';
+
+		foreach ( $product_categories_terms as $product_category_term ) {
+			$output .= '
+				<li class="category-list-item-' . $product_category_term->slug . '">
+					<a href="' . get_term_link( $product_category_term->term_id ) . '">' . $product_category_term->name . '</a></li>
+			';
+		}
+
+		$output .= '</ul> </div>';
+
+		return $output;
 	}
 }
