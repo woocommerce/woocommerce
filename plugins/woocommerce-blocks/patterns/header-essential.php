@@ -3,6 +3,7 @@
  * Title: WooCommerce Essential Header
  * Slug: woocommerce-blocks/header-essential
  * Categories: WooCommerce
+ * Block Types: core/template-part/header
  */
 ?>
 <!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"1rem","bottom":"1rem","right":"1rem","left":"1rem"},"blockGap":"1rem"}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->

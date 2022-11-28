@@ -3,6 +3,7 @@
  * Title: WooCommerce Footer with 2 menus
  * Slug: woocommerce-blocks/footer-with-2-menus
  * Categories: WooCommerce
+ * Block Types: core/template-part/footer
  */
 ?>
 

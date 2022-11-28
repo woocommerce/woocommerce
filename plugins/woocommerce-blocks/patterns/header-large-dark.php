@@ -3,6 +3,7 @@
  * Title: WooCommerce Large Header | Dark
  * Slug: woocommerce-blocks/header-large-dark
  * Categories: WooCommerce
+ * Block Types: core/template-part/header
  */
 ?>
 <!-- wp:group {"align":"full","style":{"spacing":{"blockGap":"0px","padding":{"top":"1rem","right":"1rem","bottom":"1rem","left":"1rem"}},"elements":{"link":{"color":{"text":"var:preset|color|background"}}}},"backgroundColor":"black","textColor":"white","layout":{"type":"default"}} -->

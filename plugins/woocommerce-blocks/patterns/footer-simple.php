@@ -3,6 +3,7 @@
  * Title: WooCommerce Simple Footer
  * Slug: woocommerce-blocks/footer-simple
  * Categories: WooCommerce
+ * Block Types: core/template-part/footer
  */
 ?>
 

@@ -3,6 +3,7 @@
  * Title: WooCommerce Simple Footer | Dark
  * Slug: woocommerce-blocks/footer-simple-dark
  * Categories: WooCommerce
+ * Block Types: core/template-part/footer
  */
 ?>
 
