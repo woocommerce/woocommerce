@@ -3,6 +3,7 @@
  * Title: WooCommerce Essential Header | Dark
  * Slug: woocommerce-blocks/header-essential-dark
  * Categories: WooCommerce
+ * Block Types: core/template-part/header
  */
 ?>
 <!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"1rem","bottom":"1rem","right":"1rem","left":"1rem"},"blockGap":"1rem"},"elements":{"link":{"color":{"text":"var:preset|color|background"}}}},"backgroundColor":"black","textColor":"white","className":"has-background-color","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->

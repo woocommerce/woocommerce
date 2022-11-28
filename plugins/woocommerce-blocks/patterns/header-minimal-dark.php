@@ -3,6 +3,7 @@
  * Title: WooCommerce Minimal Header | Dark
  * Slug: woocommerce-blocks/minimal-header-dark
  * Categories: WooCommerce
+ * Block Types: core/template-part/header
  */
 ?>
 <!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"2%","bottom":"16px","left":"2%","top":"16px"},"margin":{"top":"0px","bottom":"0px"}},"elements":{"link":{"color":{"text":"var:preset|color|background"}}}},"backgroundColor":"black","textColor":"white","className":"sticky-header","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->

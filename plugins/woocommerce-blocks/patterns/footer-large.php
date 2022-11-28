@@ -3,6 +3,7 @@
  * Title: WooCommerce Large Footer
  * Slug: woocommerce-blocks/footer-large
  * Categories: WooCommerce
+ * Block Types: core/template-part/footer
  */
 ?>
 
