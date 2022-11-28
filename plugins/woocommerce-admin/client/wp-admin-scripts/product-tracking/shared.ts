@@ -13,15 +13,13 @@ import { waitUntilElementIsPresent } from './utils';
  *
  * @return object
  */
-const getProductData = () => {
-	let isBlockEditor = false;
 
-	if (
-		document.querySelectorAll( '.block-editor' ).length !== 0 &&
-		document.querySelectorAll( '.block-editor' )[ 0 ]
-	) {
-		isBlockEditor = true;
-	}
+const isElementVisible = ( element: HTMLElement ) =>
+	! ( window.getComputedStyle( element ).display === 'none' );
+
+const getProductData = () => {
+	const isBlockEditor =
+		document.querySelectorAll( '.block-editor' ).length > 0;
 
 	let description_value = '';
 	let tagsText = '';
@@ -32,10 +30,11 @@ const getProductData = () => {
 				'[name="tax_input[product_tag]"]'
 			) as HTMLInputElement
 		 ).value;
-		if ( jQuery( '#content' ).is( ':visible' ) ) {
-			description_value = (
-				document.querySelector( '#content' ) as HTMLInputElement
-			 ).value;
+		const content = document.querySelector(
+			'#content'
+		) as HTMLInputElement;
+		if ( content && isElementVisible( content ) ) {
+			description_value = content.value;
 		} else if ( typeof tinymce === 'object' && tinymce.get( 'content' ) ) {
 			description_value = tinymce.get( 'content' ).getContent();
 		}
@@ -55,13 +54,13 @@ const getProductData = () => {
 		 )?.value,
 		is_downloadable: (
 			document.querySelector( '#_downloadable' ) as HTMLInputElement
-		 )?.value,
+		 )?.checked,
 		is_virtual: (
 			document.querySelector( '#_virtual' ) as HTMLInputElement
-		 )?.value,
+		 )?.checked,
 		manage_stock: (
 			document.querySelector( '#_manage_stock' ) as HTMLInputElement
-		 )?.value,
+		 )?.checked,
 		attributes: document.querySelectorAll( '.woocommerce_attribute' )
 			.length,
 		categories: document.querySelectorAll(
@@ -73,15 +72,18 @@ const getProductData = () => {
 		description: description_value.trim() !== '' ? 'Yes' : 'No',
 		enable_reviews: (
 			document.querySelector( '#comment_status' ) as HTMLInputElement
-		 ).checked
+		 )?.checked
 			? 'Yes'
 			: 'No',
 		is_block_editor: isBlockEditor,
-		menu_order: (
-			document.querySelector( '#menu_order' ) as HTMLInputElement
-		 )?.value
-			? 'Yes'
-			: 'No',
+		menu_order:
+			parseInt(
+				( document.querySelector( '#menu_order' ) as HTMLInputElement )
+					?.value ?? 0,
+				10
+			) !== 0
+				? 'Yes'
+				: 'No',
 		product_gallery: document.querySelectorAll(
 			'#product_images_container .product_images > li'
 		).length,
@@ -92,7 +94,7 @@ const getProductData = () => {
 						'#_thumbnail_id'
 					) as HTMLInputElement
 				 )?.value,
-				2
+				10
 			) > 0
 				? 'Yes'
 				: 'No',
@@ -116,7 +118,7 @@ const getProductData = () => {
 			? 'Yes'
 			: 'No',
 		weight: ( document.querySelector( '#_weight' ) as HTMLInputElement )
-			.value
+			?.value
 			? 'Yes'
 			: 'No',
 		// stock_quantity_update: TODO
