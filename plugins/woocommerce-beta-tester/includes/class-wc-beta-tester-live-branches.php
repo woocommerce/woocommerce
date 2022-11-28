@@ -16,10 +16,10 @@ class WC_Beta_Tester_Live_Branches {
 	 */
 	public function __construct() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
-		
+
 		// By the time this code runs it appears too late to hook into `admin_menu`
-		
-		// NOTE - We don't have feature flags, so comment this line to disable it 
+
+		// NOTE - We don't have feature flags, so comment this line to disable it
 		// till we are ready to release.
 		// $this->register_page();
 	}
@@ -28,8 +28,7 @@ class WC_Beta_Tester_Live_Branches {
 	 * Register live branches scripts.
 	 */
 	public function register_scripts() {
-		if ( 
-			! method_exists( 'Automattic\WooCommerce\Admin\Loader', 'is_admin_or_embed_page' ) ||
+		if ( ! method_exists( 'Automattic\WooCommerce\Admin\Loader', 'is_admin_or_embed_page' ) ||
 			! \Automattic\WooCommerce\Admin\Loader::is_admin_or_embed_page()
 		) {
 			return;
@@ -38,9 +37,12 @@ class WC_Beta_Tester_Live_Branches {
 		$script_path       = '/build/live-branches.js';
 		$script_asset_path = dirname( __FILE__ ) . '/../build/live-branches.asset.php';
 		$script_asset      = file_exists( $script_asset_path )
-			? require( $script_asset_path )
-			: array( 'dependencies' => array(), 'version' => filemtime( $script_path ) );
-		$script_url = WC_Beta_Tester::instance()->plugin_url() . $script_path;
+			? require $script_asset_path
+			: array(
+				'dependencies' => array(),
+				'version'      => filemtime( $script_path ),
+			);
+		$script_url        = WC_Beta_Tester::instance()->plugin_url() . $script_path;
 
 		wp_register_script(
 			'woocommerce-beta-tester-live-branches',
@@ -60,10 +62,10 @@ class WC_Beta_Tester_Live_Branches {
 
 		wc_admin_register_page(
 			array(
-				'id'       => 'woocommerce-beta-tester-live-branches',
-				'title'    => __( 'Live Branches', 'woocommerce-beta-tester' ),
-				'path'     => '/live-branches',
-				'parent'   => 'woocommerce',
+				'id'         => 'woocommerce-beta-tester-live-branches',
+				'title'      => __( 'Live Branches', 'woocommerce-beta-tester' ),
+				'path'       => '/live-branches',
+				'parent'     => 'woocommerce',
 				'capability' => 'read',
 			)
 		);
