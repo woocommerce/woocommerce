@@ -1,0 +1,18 @@
+{
+	"name": "paulsealock/woo-plugin-setup",
+	"description": "WooCommerce plugin setup",
+	"autoload": {
+		"psr-4": {
+			"WooPluginSetup\\": "includes/"
+		}
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^9.0",
+		"automattic/jetpack-autoloader": "^2"
+	},
+	"config": {
+		"allow-plugins": {
+			"automattic/jetpack-autoloader": true
+		}
+	}
+}
