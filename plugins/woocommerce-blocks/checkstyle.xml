@@ -3420,7 +3420,7 @@
 <error line="14" column="2" severity="error" message="Module &apos;&quot;@wordpress/components&quot;&apos; has no exported member &apos;__experimentalToolsPanel&apos;." source="TS2305" />
 <error line="16" column="2" severity="error" message="Module &apos;&quot;@wordpress/components&quot;&apos; has no exported member &apos;__experimentalToolsPanelItem&apos;." source="TS2305" />
 <error line="51" column="6" severity="error" message="Property &apos;getBlockVariations&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__blocks/store/selectors&quot;)&apos;." source="TS2339" />
-<error line="118" column="6" severity="error" message="Type &apos;{ label: string; onChange: (statusLabels: readonly Value[]) =&gt; void; suggestions: string[]; validateInput: (value: string) =&gt; boolean; value: string[]; __experimentalExpandOnFocus: boolean; }&apos; is not assignable to type &apos;IntrinsicAttributes &amp; Props &amp; { children?: ReactNode; }&apos;.
+<error line="130" column="6" severity="error" message="Type &apos;{ label: string; onChange: (statusLabels: readonly Value[]) =&gt; void; suggestions: string[]; validateInput: (value: string) =&gt; boolean; value: string[]; __experimentalExpandOnFocus: boolean; }&apos; is not assignable to type &apos;IntrinsicAttributes &amp; Props &amp; { children?: ReactNode; }&apos;.
   Property &apos;label&apos; does not exist on type &apos;IntrinsicAttributes &amp; Props &amp; { children?: ReactNode; }&apos;." source="TS2322" />
 </file>
 <file name="assets/js/blocks/product-search/block.js">
