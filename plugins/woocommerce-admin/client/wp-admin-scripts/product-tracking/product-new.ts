@@ -16,5 +16,5 @@ if ( productScreen && productScreen.name === 'new' ) {
 	initTracks();
 	initProductScreenTracks();
 
-	addExitPageListener( 'new-product' );
+	addExitPageListener( 'product_add_view' );
 }

@@ -16,5 +16,5 @@ const initTracks = () => {
 if ( productScreen && productScreen.name === 'edit' ) {
 	initTracks();
 
-	addExitPageListener( 'edit-product' );
+	addExitPageListener( 'product_edit_view' );
 }

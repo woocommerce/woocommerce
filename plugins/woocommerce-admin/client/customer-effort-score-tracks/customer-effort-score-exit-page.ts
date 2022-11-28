@@ -120,10 +120,9 @@ export const removeCustomerEffortScoreExitPageListener = ( pageId: string ) => {
  */
 function getExitPageCESCopy( pageId: string ): string {
 	switch ( pageId ) {
-		case 'edit-product':
-		case 'new-product':
-		case 'edit-product-mvp':
-		case 'new-product-mvp':
+		case 'product_edit_view':
+		case 'product_add_view':
+		case 'new_product':
 			return __(
 				'We noticed you started editing a product, then left. How was it? Your feedback will help create a better experience for thousands of merchants like you.',
 				'woocommerce'

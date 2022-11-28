@@ -51,7 +51,7 @@ describe( 'triggerExitPageCesSurvey', () => {
 	it( 'should trigger addCESSurvey if copy does exist for item, and clear localStorage still', () => {
 		window.localStorage.setItem(
 			'customer-effort-score-exit-page',
-			JSON.stringify( [ 'edit-product' ] )
+			JSON.stringify( [ 'new_product' ] )
 		);
 		triggerExitPageCesSurvey();
 		expect( addCESSurveyMock ).toHaveBeenCalled();

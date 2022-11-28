@@ -19,9 +19,11 @@ export const useCustomerEffortScoreExitPageTracker = (
 	// Using unmounting as a way to see when the react router changes.
 	useEffect( () => {
 		return () => {
-			addExitPage( pageId );
+			if ( hasUnsavedChanges ) {
+				addExitPage( pageId );
+			}
 		};
-	}, [] );
+	}, [ hasUnsavedChanges ] );
 
 	// This effect listen to the native beforeunload event to show
 	// a confirmation message
