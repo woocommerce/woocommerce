@@ -1405,17 +1405,10 @@
   Object literal may only specify known properties, and &apos;ancestor&apos; does not exist in type &apos;BlockConfiguration&lt;{}&gt;&apos;." source="TS2322" />
 </file>
 <file name="assets/js/atomic/blocks/product-elements/category-list/index.ts">
-<error line="36" column="5" severity="error" message="Type &apos;{ color?: { text: true; link: true; background: false; __experimentalSkipSerialization: true; }; typography?: { fontSize: true; lineHeight: true; __experimentalFontStyle: true; __experimentalFontWeight: true; __experimentalSkipSerialization: true; }; __experimentalSelector?: string; }&apos; is not assignable to type &apos;BlockSupports&apos;.
+<error line="41" column="5" severity="error" message="Type &apos;{ color?: { text: true; link: true; background: false; __experimentalSkipSerialization: true; }; typography?: { fontSize: true; lineHeight: true; __experimentalFontStyle: true; __experimentalFontWeight: true; __experimentalSkipSerialization: true; }; __experimentalSelector?: string; }&apos; is not assignable to type &apos;BlockSupports&apos;.
   Types of property &apos;color&apos; are incompatible.
     Type &apos;{ text: true; link: true; background: false; __experimentalSkipSerialization: true; }&apos; is not assignable to type &apos;Partial&lt;ColorProps&gt;&apos;.
       Object literal may only specify known properties, and &apos;__experimentalSkipSerialization&apos; does not exist in type &apos;Partial&lt;ColorProps&gt;&apos;." source="TS2322" />
-<error line="49" column="2" severity="error" message="Type &apos;({ attributes }: Props) =&gt; JSX.Element&apos; is not assignable to type &apos;ComponentType&lt;BlockSaveProps&lt;{}&gt;&gt;&apos;.
-  Type &apos;({ attributes }: Props) =&gt; JSX.Element&apos; is not assignable to type &apos;FunctionComponent&lt;BlockSaveProps&lt;{}&gt;&gt;&apos;.
-    Types of parameters &apos;__0&apos; and &apos;props&apos; are incompatible.
-      Type &apos;PropsWithChildren&lt;BlockSaveProps&lt;{}&gt;&gt;&apos; is not assignable to type &apos;Props&apos;.
-        Types of property &apos;attributes&apos; are incompatible.
-          Type &apos;Readonly&lt;{}&gt;&apos; is not assignable to type &apos;Record&lt;string, unknown&gt; &amp; { className: string; }&apos;.
-            Property &apos;className&apos; is missing in type &apos;Readonly&lt;{}&gt;&apos; but required in type &apos;{ className: string; }&apos;." source="TS2322" />
 </file>
 <file name="assets/js/atomic/blocks/product-elements/add-to-cart/edit.js">
 <error line="25" column="18" severity="error" message="Binding element &apos;attributes&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
