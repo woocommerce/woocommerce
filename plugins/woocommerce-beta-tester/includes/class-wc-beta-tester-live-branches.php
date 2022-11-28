@@ -54,6 +54,9 @@ class WC_Beta_Tester_Live_Branches {
 		wp_enqueue_script( 'woocommerce-beta-tester-live-branches' );
 	}
 
+	/**
+	 * Register live branches page.
+	 */
 	public function register_page() {
 		if ( ! function_exists( 'wc_admin_register_page' ) ) {
 			return;
@@ -62,6 +65,7 @@ class WC_Beta_Tester_Live_Branches {
 		wc_admin_register_page(
 			array(
 				'id'         => 'woocommerce-beta-tester-live-branches',
+				// phpcs:disable
 				'title'      => __( 'Live Branches', 'woocommerce-beta-tester' ),
 				'path'       => '/live-branches',
 				'parent'     => 'woocommerce',
