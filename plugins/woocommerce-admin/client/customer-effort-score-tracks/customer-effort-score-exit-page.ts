@@ -179,6 +179,30 @@ function getExitPageCESCopy( pageId: string ): {
 					'woocommerce'
 				),
 			};
+		case 'settings_change':
+			return {
+				action: pageId,
+				noticeLabel: __(
+					'Did you find the right setting?',
+					'woocommerce'
+				),
+				title: __(
+					'How’s your experience with settings?',
+					'woocommerce'
+				),
+				description: __(
+					'We noticed you started changing store settings, then left. How was it? Your feedback will help create a better experience for thousands of merchants like you.',
+					'woocommerce'
+				),
+				firstQuestion: __(
+					'The settings screen is easy to use',
+					'woocommerce'
+				),
+				secondQuestion: __(
+					"The settings screen's functionality meets my needs",
+					'woocommerce'
+				),
+			};
 		default:
 			return null;
 	}
