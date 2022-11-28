@@ -1,9 +1,9 @@
 <?php
 
-namespace WooPluginSetup\Admin;
+namespace {{slugPascalCase}}\Admin;
 
 /**
- * Woo Plugin Setup Class
+ * {{slugSnakeCase}} Setup Class
  */
 class Setup {
 	/**
@@ -29,17 +29,17 @@ class Setup {
 		}
 
 		$script_path       = '/build/index.js';
-		$script_asset_path = dirname( WOO_PLUGIN_SETUP_PLUGIN_FILE ) . '/build/index.asset.php';
+		$script_asset_path = dirname( MAIN_PLUGIN_FILE ) . '/build/index.asset.php';
 		$script_asset      = file_exists( $script_asset_path )
 		? require $script_asset_path
 		: array(
 			'dependencies' => array(),
 			'version'      => filemtime( $script_path ),
 		);
-		$script_url        = plugins_url( $script_path, WOO_PLUGIN_SETUP_PLUGIN_FILE );
+		$script_url        = plugins_url( $script_path, MAIN_PLUGIN_FILE );
 
 		wp_register_script(
-			'woo-plugin-setup',
+			'{{slug}}',
 			$script_url,
 			$script_asset['dependencies'],
 			$script_asset['version'],
@@ -47,15 +47,15 @@ class Setup {
 		);
 
 		wp_register_style(
-			'woo-plugin-setup',
-			plugins_url( '/build/index.css', WOO_PLUGIN_SETUP_PLUGIN_FILE ),
+			'{{slug}}',
+			plugins_url( '/build/index.css', MAIN_PLUGIN_FILE ),
 			// Add any dependencies styles may have, such as wp-components.
 			array(),
-			filemtime( dirname( WOO_PLUGIN_SETUP_PLUGIN_FILE ) . '/build/index.css' )
+			filemtime( dirname( MAIN_PLUGIN_FILE ) . '/build/index.css' )
 		);
 
-		wp_enqueue_script( 'woo-plugin-setup' );
-		wp_enqueue_style( 'woo-plugin-setup' );
+		wp_enqueue_script( '{{slug}}' );
+		wp_enqueue_style( '{{slug}}' );
 	}
 
 	/**

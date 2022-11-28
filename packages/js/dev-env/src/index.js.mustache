@@ -10,14 +10,14 @@ import { __ } from '@wordpress/i18n';
 import './index.scss';
 
 const MyExamplePage = () => (
-	<h1>{ __( 'My Example Extension', 'woo-plugin-setup' ) }</h1>
+	<h1>{ __( 'My Example Extension', '{{slug}}' ) }</h1>
 );
 
-addFilter( 'woocommerce_admin_pages_list', 'my-namespace', ( pages ) => {
+addFilter( 'woocommerce_admin_pages_list', '{{slug}}', ( pages ) => {
 	pages.push( {
 		container: MyExamplePage,
 		path: '/example',
-		breadcrumbs: [ __( 'My Example Page', 'woo-plugin-setup' ) ],
+		breadcrumbs: [ __( 'My Example Page', '{{slug}}' ) ],
 		navArgs: {
 			id: 'my-example-page',
 		},

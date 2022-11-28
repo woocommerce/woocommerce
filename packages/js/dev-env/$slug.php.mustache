@@ -21,8 +21,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-if ( ! defined( 'WOO_PLUGIN_SETUP_PLUGIN_FILE' ) ) {
-	define( 'WOO_PLUGIN_SETUP_PLUGIN_FILE', __FILE__ );
+if ( ! defined( 'MAIN_PLUGIN_FILE' ) ) {
+	define( 'MAIN_PLUGIN_FILE', __FILE__ );
 }
 
 require_once plugin_dir_path( __FILE__ ) . '/vendor/autoload_packages.php';
@@ -59,7 +59,7 @@ class Woo_Plugin_Setup {
 		if ( is_admin() ) {
 			// Load plugin translations.
 			$plugin_rel_path = basename( dirname( __FILE__ ) ) . '/languages'; /* Relative to WP_PLUGIN_DIR */
-			load_plugin_textdomain( 'woo-plugin-setup', false, $plugin_rel_path );
+			load_plugin_textdomain( '{{slug}}', false, $plugin_rel_path );
 
 			new Setup();
 		}
