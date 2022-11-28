@@ -3,6 +3,7 @@
  * Title: WooCommerce Minimal Header
  * Slug: woocommerce-blocks/header-minimal
  * Categories: WooCommerce
+ * Block Types: core/template-part/header
  */
 ?>
 <!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"2%","bottom":"16px","left":"2%","top":"16px"},"margin":{"top":"0px","bottom":"0px"}}},"className":"sticky-header","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
