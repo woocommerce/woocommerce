@@ -17,6 +17,8 @@ import { waitUntilElementIsPresent } from './utils';
 const isElementVisible = ( element: HTMLElement ) =>
 	! ( window.getComputedStyle( element ).display === 'none' );
 
+let initialStockValue = 0;
+
 const getProductData = () => {
 	const isBlockEditor =
 		document.querySelectorAll( '.block-editor' ).length > 0;
@@ -121,7 +123,15 @@ const getProductData = () => {
 			?.value
 			? 'Yes'
 			: 'No',
-		// stock_quantity_update: TODO
+		stock_quantity_update:
+			initialStockValue !==
+			parseInt(
+				( document.querySelector( '#_stock' ) as HTMLInputElement )
+					?.value,
+				10
+			)
+				? 'Yes'
+				: 'No',
 	};
 	return productData;
 };
@@ -196,8 +206,14 @@ const prefixObjectKeys = (
 /**
  * Initialize all product screen tracks.
  */
+
 export const initProductScreenTracks = () => {
 	const initialPublishingData = getPublishingWidgetData();
+
+	initialStockValue = parseInt(
+		( document.querySelector( '#_stock' ) as HTMLInputElement )?.value,
+		10
+	);
 
 	document
 		.querySelector( '#post-preview' )
