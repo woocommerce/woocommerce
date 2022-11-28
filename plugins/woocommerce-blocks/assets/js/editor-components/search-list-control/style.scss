@@ -25,6 +25,8 @@
 
 	ul {
 		list-style: none;
+		margin: 0;
+		padding: 0;
 
 		li {
 			float: left;
@@ -44,6 +46,7 @@
 
 .woocommerce-search-list__list {
 	border: 1px solid $gray-200;
+	margin: 0;
 	padding: 0;
 	max-height: 17em;
 	overflow-x: hidden;

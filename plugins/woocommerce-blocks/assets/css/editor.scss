@@ -1,15 +1,3 @@
-// Hack to hide preview overflow.
-.editor-block-preview__content {
-	overflow: hidden;
-}
-
-// Align the block icons in edit mode
-.components-placeholder__label .gridicon,
-.components-placeholder__label .material-icon {
-	margin-right: 1ch;
-	fill: currentColor;
-}
-
 // Remove the list styling, which is added back by core GB styles.
 .editor-styles-wrapper {
 	.wc-block-grid {
@@ -59,19 +47,6 @@ svg.wc-block-editor-components-block-icon--sparkles path {
 			color: currentColor;
 		}
 	}
-}
-
-// Selectors with extra specificity to override some editor styles.
-.woocommerce-search-list__list.woocommerce-search-list__list {
-	box-sizing: border-box;
-	margin: 0;
-	padding: 0;
-}
-
-.woocommerce-search-list__selected.woocommerce-search-list__selected > ul {
-	list-style: none;
-	margin: 0;
-	padding: 0;
 }
 
 .theme-twentytwenty {
