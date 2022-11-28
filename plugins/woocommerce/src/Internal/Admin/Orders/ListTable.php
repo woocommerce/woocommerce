@@ -969,7 +969,7 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	private function print_hidden_form_fields(): void {
-		echo '<input type="hidden" name="page" value="wc-orders" >';
+		echo '<input type="hidden" name="page" value="wc-orders' . ( 'shop_order' === $this->order_type ? '' : '--' . $this->order_type ) . '" >';
 
 		$state_params = array(
 			'paged',
