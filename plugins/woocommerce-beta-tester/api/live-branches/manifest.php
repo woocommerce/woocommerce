@@ -1,4 +1,9 @@
 <?php
+/**
+ * Register REST endpoint for fetching live branches manifest.
+ *
+ * @package WC_Beta_Tester
+ */
 
 register_woocommerce_admin_test_helper_rest_route(
 	'/live-branches/manifest/v1',
