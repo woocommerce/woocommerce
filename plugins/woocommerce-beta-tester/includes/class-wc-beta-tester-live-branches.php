@@ -1,6 +1,6 @@
 <?php
 /**
- * Beta Tester Plugin Live Branches feature class
+ * Beta Tester Plugin Live Branches feature class.
  *
  * @package WC_Beta_Tester
  */
@@ -17,11 +17,10 @@ class WC_Beta_Tester_Live_Branches {
 	public function __construct() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
 
-		// By the time this code runs it appears too late to hook into `admin_menu`
+		// By the time this code runs it appears too late to hook into `admin_menu`.
 
-		// NOTE - We don't have feature flags, so comment this line to disable it
-		// till we are ready to release.
-		// $this->register_page();
+		// NOTE - We don't have feature flags, so add the following code to enable it
+		// in development: `$this->register_page()`.
 	}
 
 	/**
