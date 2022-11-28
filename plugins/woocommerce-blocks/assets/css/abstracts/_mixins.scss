@@ -192,7 +192,7 @@ $fontSizes: (
 }
 
 // Add support for content alignment classes
-@mixin with-alignment {
+@mixin with-alignment() {
 	// Apply max-width to floated items that have no intrinsic width
 	&.alignleft,
 	&.alignright {
