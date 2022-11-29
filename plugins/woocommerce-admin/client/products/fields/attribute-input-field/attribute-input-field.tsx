@@ -124,6 +124,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 				);
 			} }
 			onRemove={ () => onChange() }
+			__experimentalOpenMenuOnFocus
 		>
 			{ ( {
 				items: renderItems,
