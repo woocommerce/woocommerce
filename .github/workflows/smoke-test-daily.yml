@@ -48,14 +48,14 @@ jobs:
               working-directory: plugins/woocommerce
               env:
                   UPDATE_WC: true
-              run: pnpm exec playwright test --config=tests/e2e-pw/daily.playwright.config.js update-woocommerce.spec.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-woocommerce.spec.js
 
             - name: Run the rest of E2E tests.
               timeout-minutes: 60
               working-directory: plugins/woocommerce
               env:
                   E2E_MAX_FAILURES: 25
-              run: pnpm exec playwright test --config=tests/e2e-pw/daily.playwright.config.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
             - name: Generate Playwright E2E Test report.
               if: success() || failure()
@@ -219,7 +219,7 @@ jobs:
               working-directory: plugins/woocommerce
               env:
                   E2E_MAX_FAILURES: 15
-              run: pnpm exec playwright test --config=tests/e2e-pw/daily.playwright.config.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
             - name: Generate E2E Test report.
               if: success() || failure()
