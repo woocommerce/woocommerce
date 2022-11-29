@@ -72,9 +72,9 @@ class Setup {
 		wc_admin_register_page(
 			array(
 				'id'     => '{{slugSnakeCase}}-example-page',
-				'title'  => __( '{{slug}}', '{{slugSnakeCase}}' ),
+				'title'  => __( '{{title}}', '{{slugSnakeCase}}' ),
 				'parent' => 'woocommerce',
-				'path'   => '/{{slugSnakeCase}}',
+				'path'   => '/{{slug}}',
 			)
 		);
 	}

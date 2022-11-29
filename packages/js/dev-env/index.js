@@ -8,6 +8,7 @@ module.exports = {
 			'@wordpress/prettier-config',
 			'@wordpress/scripts',
 		],
+		namespace: 'extension',
 		license: 'GPL-3.0+',
 	},
 	customScripts: {
