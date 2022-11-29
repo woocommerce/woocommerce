@@ -79,11 +79,16 @@
 	}
 
 	.wc-blocks-components-form-token-field-wrapper .components-form-token-field__input-container {
+		@include reset-typography();
 		border: 0;
 		padding: $gap-smaller;
 
-		.components-form-token-field__input::placeholder {
-			color: $black;
+		.components-form-token-field__input {
+			@include font-size(small);
+
+			&::placeholder {
+				color: $black;
+			}
 		}
 
 		.components-form-token-field__suggestions-list {
@@ -99,6 +104,11 @@
 				margin: $gap-small;
 				padding: $gap-small;
 			}
+		}
+
+		.components-form-token-field__token,
+		.components-form-token-field__suggestion {
+			@include font-size(small);
 		}
 	}
 }
@@ -143,8 +153,10 @@
 		}
 	}
 
+	// The specificity here is needed to overwrite the margin-top that is inherited on WC block template pages such as Shop.
 	.wc-block-filter-submit-button.wc-block-components-filter-submit-button.wc-block-attribute-filter__button {
 		margin-top: 0;
+		@include font-size(small);
 	}
 }
 
@@ -191,6 +203,5 @@
 	padding: em($gap-smaller) em($gap);
 	@include font-size(small);
 	height: max-content;
-	line-height: normal;
 	width: max-content;
 }
