@@ -371,7 +371,7 @@ class WC_Discounts {
 			// Run coupon calculations.
 			$discount = floor( $price_to_discount * ( $coupon_amount / 100 ) );
 
-			if ( is_a( $this->object, 'WC_Cart' ) && has_filter( 'woocommerce_coupon_get_discount_amount' ) ) {
+			if ( ( is_a( $this->object, 'WC_Cart' ) || is_a( $this->object, 'WC_Order' ) ) && has_filter( 'woocommerce_coupon_get_discount_amount' ) ) {
 				// Send through the legacy filter, but not as cents.
 				$filtered_discount = wc_add_number_precision( apply_filters( 'woocommerce_coupon_get_discount_amount', wc_remove_number_precision( $discount ), wc_remove_number_precision( $price_to_discount ), $item->object, false, $coupon ) );
 
@@ -436,7 +436,7 @@ class WC_Discounts {
 				$discount       = $amount * $apply_quantity;
 			}
 
-			if ( is_a( $this->object, 'WC_Cart' ) && has_filter( 'woocommerce_coupon_get_discount_amount' ) ) {
+			if ( ( is_a( $this->object, 'WC_Cart' ) || is_a( $this->object, 'WC_Order' ) ) && has_filter( 'woocommerce_coupon_get_discount_amount' ) ) {
 				// Send through the legacy filter, but not as cents.
 				$discount = wc_add_number_precision( apply_filters( 'woocommerce_coupon_get_discount_amount', wc_remove_number_precision( $discount ), wc_remove_number_precision( $price_to_discount ), $item->object, false, $coupon ) );
 			}
