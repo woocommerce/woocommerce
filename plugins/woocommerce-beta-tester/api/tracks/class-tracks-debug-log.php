@@ -25,7 +25,7 @@ class Tracks_Debug_Log {
 
 	/**
 	 * Get the logger instance.
-	 * 
+	 *
 	 * @return WC_Logger_Interface|null
 	 */
 	private function get_logger() {
@@ -34,7 +34,7 @@ class Tracks_Debug_Log {
 			$this->logger = wc_get_logger();
 		}
 
-		return $this->logger;		
+		return $this->logger;
 	}
 
 	/**
@@ -59,21 +59,21 @@ class Tracks_Debug_Log {
 	 */
 	public function log_event( $event_name, $properties ) {
 		$logger = $this->get_logger();
-		
-		if ( ! $logger ) {
+
+		if ( $logger ) {
 			$logger->debug(
 				$event_name,
 				array( 'source' => $this->source )
 			);
 		}
-		
+
 		foreach ( $properties as $key => $property ) {
-			if ( ! $logger ) {
+			if ( $logger ) {
 				$logger->debug(
 					"  - {$key}: {$property}",
 					array( 'source' => $this->source )
-				);	
-			}	
+				);
+			}
 		}
 	}
 
