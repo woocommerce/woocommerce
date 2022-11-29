@@ -22,7 +22,9 @@ const ALLOW_TRACKING_OPTION_NAME = 'woocommerce_allow_tracking';
  * @param {Object}   props                    Component props.
  * @param {string}   props.action             The action name sent to Tracks.
  * @param {Object}   props.trackProps         Additional props sent to Tracks.
- * @param {string}   props.label              The label displayed in the modal.
+ * @param {string}   props.title              The title displayed in the modal.
+ * @param {string}   props.firstQuestion      The first survey question.
+ * @param {string}   props.secondQuestion     The second survey question.
  * @param {string}   props.onSubmitLabel      The label displayed upon survey submission.
  * @param {Array}    props.cesShownForActions The array of actions that the CES modal has been shown for.
  * @param {boolean}  props.allowTracking      Whether tracking is allowed or not.
@@ -34,7 +36,9 @@ const ALLOW_TRACKING_OPTION_NAME = 'woocommerce_allow_tracking';
 function CustomerEffortScoreTracks( {
 	action,
 	trackProps,
-	label,
+	title,
+	firstQuestion,
+	secondQuestion,
 	onSubmitLabel = __( 'Thank you for your feedback!', 'woocommerce' ),
 	cesShownForActions,
 	allowTracking,
@@ -104,10 +108,12 @@ function CustomerEffortScoreTracks( {
 		addActionToShownOption();
 	};
 
-	const recordScore = ( score, comments ) => {
+	const recordScore = ( score, secondScore, comments ) => {
 		recordEvent( 'ces_feedback', {
 			action,
 			score,
+			score_second_question: secondScore,
+			score_combined: score + secondScore,
 			comments: comments || '',
 			store_age: storeAgeInWeeks,
 			...trackProps,
@@ -118,7 +124,9 @@ function CustomerEffortScoreTracks( {
 	return (
 		<CustomerEffortScore
 			recordScoreCallback={ recordScore }
-			label={ label }
+			title={ title }
+			firstQuestion={ firstQuestion }
+			secondQuestion={ secondQuestion }
 			onNoticeShownCallback={ onNoticeShown }
 			onNoticeDismissedCallback={ onNoticeDismissed }
 			onModalShownCallback={ onModalShown }
