@@ -52,7 +52,8 @@ describe( 'Shopper → Cart & Checkout → Translations', () => {
 		await expect( orderSummary ).toMatch( 'Totaal' );
 	} );
 
-	it( 'User can view translated Checkout block', async () => {
+	// The translation of WooCommerce Core is taking over translations of WC Blocks. We have to fix this issue https://github.com/woocommerce/woocommerce-blocks/issues/7775 before we can enable this test.
+	it.skip( 'User can view translated Checkout block', async () => {
 		await shopper.block.goToCheckout();
 
 		const contactHeading = await page.$(
