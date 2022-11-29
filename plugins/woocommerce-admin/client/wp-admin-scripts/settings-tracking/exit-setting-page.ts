@@ -9,8 +9,19 @@ type FormElements = {
 } & HTMLCollectionOf< HTMLFormElement >;
 const forms: FormElements = document.forms;
 if ( forms && forms.mainform ) {
+	let triggeredSaveButton = false;
+	const saveButton = document.querySelector( '.woocommerce-save-button' );
+
+	if ( saveButton ) {
+		saveButton.addEventListener( 'click', () => {
+			triggeredSaveButton = true;
+		} );
+	}
 	const formData = staticFormDataToObject( forms.mainform );
 	addCustomerEffortScoreExitPageListener( 'settings_change', () => {
+		if ( triggeredSaveButton ) {
+			return false;
+		}
 		const newFormData = forms.mainform
 			? staticFormDataToObject( forms.mainform )
 			: {};
