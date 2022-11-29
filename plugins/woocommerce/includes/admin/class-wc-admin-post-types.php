@@ -124,14 +124,14 @@ class WC_Admin_Post_Types {
 
 		$messages['product'] = array(
 			0  => '', // Unused. Messages start at index 1.
-			/* translators: %s: Product view URL. */
-			1  => sprintf( __( 'Product updated. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post->ID ) ) ),
+			/* translators: %1$s: Product link opening tag. %2$s: Product link closing tag.*/
+			1  => sprintf( __( 'Product updated. %1$sView Product%2$s', 'woocommerce' ), '<a id="woocommerce-product-updated-message-view-product__link" href="' . esc_url( get_permalink( $post->ID ) ) . '">', '</a>' ),
 			2  => __( 'Custom field updated.', 'woocommerce' ),
 			3  => __( 'Custom field deleted.', 'woocommerce' ),
 			4  => __( 'Product updated.', 'woocommerce' ),
 			5  => __( 'Revision restored.', 'woocommerce' ),
-			/* translators: %s: product url */
-			6  => sprintf( __( 'Product published. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post->ID ) ) ),
+			/* translators: %1$s: Product link opening tag. %2$s: Product link closing tag.*/
+			6  => sprintf( __( 'Product published. %1$sView Product%2$s', 'woocommerce' ), '<a id="woocommerce-product-updated-message-view-product__link" href="' . esc_url( get_permalink( $post->ID ) ) . '">', '</a>' ),
 			7  => __( 'Product saved.', 'woocommerce' ),
 			/* translators: %s: product url */
 			8  => sprintf( __( 'Product submitted. <a target="_blank" href="%s">Preview product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),

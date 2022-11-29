@@ -531,7 +531,7 @@ function wc_current_theme_supports_woocommerce_or_fse() {
  *
  * @param string $element The name of the element.
  *
- * @since 7.1.0
+ * @since 7.0.1
  * @return string
  */
 function wc_wp_theme_get_element_class_name( $element ) {
