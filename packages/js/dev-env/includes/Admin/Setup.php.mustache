@@ -3,7 +3,7 @@
 namespace {{slugPascalCase}}\Admin;
 
 /**
- * {{slugSnakeCase}} Setup Class
+ * {{slugPascalCase}} Setup Class
  */
 class Setup {
 	/**
@@ -71,10 +71,10 @@ class Setup {
 
 		wc_admin_register_page(
 			array(
-				'id'     => 'my-example-page',
-				'title'  => __( 'My Example Page', 'my-textdomain' ),
+				'id'     => '{{slugSnakeCase}}-example-page',
+				'title'  => __( '{{slug}}', '{{slugSnakeCase}}' ),
 				'parent' => 'woocommerce',
-				'path'   => '/example',
+				'path'   => '/{{slugSnakeCase}}',
 			)
 		);
 	}
