@@ -27,8 +27,8 @@ class WC_Beta_Tester_Live_Branches {
 	 * Register live branches scripts.
 	 */
 	public function register_scripts() {
-		if ( ! method_exists( 'Automattic\WooCommerce\Admin\Loader', 'is_admin_or_embed_page' ) ||
-			! \Automattic\WooCommerce\Admin\Loader::is_admin_or_embed_page()
+		if ( ! method_exists( 'Automattic\WooCommerce\Admin\PageController', 'is_admin_or_embed_page' ) ||
+			! \Automattic\WooCommerce\Admin\PageController::is_admin_or_embed_page()
 		) {
 			return;
 		}
