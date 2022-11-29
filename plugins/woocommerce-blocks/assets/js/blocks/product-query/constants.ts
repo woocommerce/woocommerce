@@ -23,6 +23,7 @@ export const QUERY_LOOP_ID = 'core/query';
 export const DEFAULT_CORE_ALLOWED_CONTROLS = [ 'taxQuery', 'search' ];
 
 export const ALL_PRODUCT_QUERY_CONTROLS = [
+	'attributes',
 	'presets',
 	'onSale',
 	'stockStatus',
@@ -61,6 +62,7 @@ export const QUERY_DEFAULT_ATTRIBUTES: QueryBlockAttributes = {
 		exclude: [],
 		sticky: '',
 		inherit: false,
+		__woocommerceAttributes: [],
 		__woocommerceStockStatus: GLOBAL_HIDE_OUT_OF_STOCK
 			? Object.keys( objectOmit( STOCK_STATUS_OPTIONS, 'outofstock' ) )
 			: Object.keys( STOCK_STATUS_OPTIONS ),

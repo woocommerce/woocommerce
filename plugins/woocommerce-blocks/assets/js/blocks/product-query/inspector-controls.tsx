@@ -35,6 +35,7 @@ import {
 	STOCK_STATUS_OPTIONS,
 } from './constants';
 import { PopularPresets } from './inspector-controls/popular-presets';
+import { AttributesFilter } from './inspector-controls/attributes-filter';
 
 const NAMESPACED_CONTROLS = ALL_PRODUCT_QUERY_CONTROLS.map(
 	( id ) =>
@@ -84,6 +85,7 @@ function getStockStatusIdByLabel( statusLabel: FormTokenField.Value ) {
 }
 
 export const TOOLS_PANEL_CONTROLS = {
+	attributes: AttributesFilter,
 	onSale: ( props: ProductQueryBlock ) => {
 		const { query } = props.attributes;
 
