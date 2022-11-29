@@ -32,6 +32,7 @@
 	}
 	.wc-block-components-chip__text {
 		flex-grow: 1;
+		@include font-size(small);
 	}
 	&.is-removable .wc-block-components-chip__text {
 		padding-right: 0.5em;
