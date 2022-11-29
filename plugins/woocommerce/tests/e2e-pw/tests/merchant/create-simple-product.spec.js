@@ -6,7 +6,7 @@ const nonVirtualProductName = 'Non Virtual Product Name';
 const productPrice = '9.99';
 let shippingZoneId, virtualProductPermalink, nonVirtualProductPermalink;
 
-test.describe( 'Add New Simple Product Page', () => {
+test.describe.serial( 'Add New Simple Product Page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
