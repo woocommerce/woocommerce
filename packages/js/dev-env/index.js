@@ -10,4 +10,7 @@ module.exports = {
 		],
 		license: 'GPL-3.0+',
 	},
+	customScripts: {
+		postinstall: 'composer install',
+	},
 };
