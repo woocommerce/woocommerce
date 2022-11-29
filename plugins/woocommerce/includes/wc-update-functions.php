@@ -25,9 +25,6 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
-use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
-use Automattic\WooCommerce\Utilities\OrderUtil;
-use Automattic\WooCommerce\Utilities\StringUtil;
 
 /**
  * Update file paths for 2.0
@@ -2477,11 +2474,11 @@ function wc_update_700_remove_recommended_marketing_plugins_transient() {
 }
 
 /**
- * Update the New Zealand state codes in shipping locations and store location
+ * Update the New Zealand state codes in the database
  * after they were updated in code to the CLDR standard.
  */
-function wc_update_720_adjust_new_zealand_and_ukraine_states() {
-	MigrationHelper::migrate_country_states(
+function wc_update_720_adjust_new_zealand_states() {
+	return MigrationHelper::migrate_country_states(
 		'NZ',
 		array(
 			'NL' => 'NTL',
@@ -2502,8 +2499,14 @@ function wc_update_720_adjust_new_zealand_and_ukraine_states() {
 			'SL' => 'STL',
 		)
 	);
+}
 
-	MigrationHelper::migrate_country_states(
+/**
+ * Update the Ukraine state codes in the database
+ * after they were updated in code to the CLDR standard.
+ */
+function wc_update_720_adjust_ukraine_states() {
+	return MigrationHelper::migrate_country_states(
 		'UA',
 		array(
 			'VN' => 'UA05',
@@ -2533,3 +2536,4 @@ function wc_update_720_adjust_new_zealand_and_ukraine_states() {
 		)
 	);
 }
+

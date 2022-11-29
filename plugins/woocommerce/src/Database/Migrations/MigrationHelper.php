@@ -5,8 +5,8 @@
 
 namespace Automattic\WooCommerce\Database\Migrations;
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
-use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 /**
@@ -78,23 +78,29 @@ class MigrationHelper {
 	}
 
 	/**
-	 * Migrate state codes in all the required places in the database (hopefully) when they change for a given country.
+	 * Migrate state codes in all the required places in the database, needed after they change for a given country.
+	 *
+	 * @param string $country_code The country that has the states for which the migration is needed.
+	 * @param array  $old_to_new_states_mapping An associative array where keys are the old state codes and values are the new state codes.
+	 * @return bool True if there are more records that need to be migrated, false otherwise.
+	 */
+	public static function migrate_country_states( string $country_code, array $old_to_new_states_mapping ): bool {
+		$more_remaining = self::migrate_country_states_for_orders( $country_code, $old_to_new_states_mapping );
+		if ( ! $more_remaining ) {
+			self::migrate_country_states_for_misc_data( $country_code, $old_to_new_states_mapping );
+		}
+		return $more_remaining;
+	}
+
+	/**
+	 * Migrate state codes in all the required places in the database (except orders).
 	 *
 	 * @param string $country_code The country that has the states for which the migration is needed.
 	 * @param array  $old_to_new_states_mapping An associative array where keys are the old state codes and values are the new state codes.
 	 * @return void
 	 */
-	public static function migrate_country_states( string $country_code, array $old_to_new_states_mapping ): void {
+	private static function migrate_country_states_for_misc_data( string $country_code, array $old_to_new_states_mapping ): void {
 		self::migrate_country_states_for_shipping_locations( $country_code, $old_to_new_states_mapping );
-
-		// We'll migrate only the authoritative orders table,
-		// the sync mechanism (if enabled) will take care of updating the backup table.
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			self::migrate_country_states_for_cot_orders( $country_code, $old_to_new_states_mapping );
-		} else {
-			self::migrate_country_states_for_post_orders( $country_code, $old_to_new_states_mapping );
-		}
-
 		self::migrate_country_states_for_store_location( $country_code, $old_to_new_states_mapping );
 	}
 
@@ -130,96 +136,6 @@ class MigrationHelper {
 	}
 
 	/**
-	 * Migrate state codes for orders in the orders table.
-	 *
-	 * @param string $country_code The country that has the states for which the migration is needed.
-	 * @param array  $old_to_new_states_mapping An associative array where keys are the old state codes and values are the new state codes.
-	 * @return void
-	 */
-	private static function migrate_country_states_for_cot_orders( string $country_code, array $old_to_new_states_mapping ): void {
-		global $wpdb;
-
-		$current_date_gmt          = current_time( 'Y-m-d H:i:s', true );
-		$states_as_comma_separated = "('" . join( "','", array_keys( $old_to_new_states_mapping ) ) . "')";
-
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-		$sql            = $wpdb->prepare(
-			"SELECT id, order_id, state FROM {$wpdb->prefix}wc_order_addresses WHERE country=%s AND state IN {$states_as_comma_separated}",
-			$country_code
-		);
-		$addresses_data = $wpdb->get_results( $sql, ARRAY_A );
-
-		foreach ( $addresses_data as $address_data ) {
-			$update_query = $wpdb->prepare(
-				"UPDATE {$wpdb->prefix}wc_order_addresses SET state=%s WHERE id=%d",
-				$old_to_new_states_mapping[ $address_data['state'] ],
-				$address_data['id']
-			);
-			$wpdb->query( $update_query );
-
-			$update_query = $wpdb->prepare(
-				"UPDATE {$wpdb->prefix}wc_orders SET date_updated_gmt=%s WHERE id=%d",
-				$current_date_gmt,
-				$address_data['order_id']
-			);
-			$wpdb->query( $update_query );
-		}
-
-		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	}
-
-	/**
-	 * Migrate state codes for orders in the posts table.
-	 *
-	 * @param string $country_code The country that has the states for which the migration is needed.
-	 * @param array  $old_to_new_states_mapping An associative array where keys are the old state codes and values are the new state codes.
-	 * @return void
-	 */
-	private static function migrate_country_states_for_post_orders( string $country_code, array $old_to_new_states_mapping ): void {
-		global $wpdb;
-
-		$current_date              = current_time( 'Y-m-d H:i:s', false );
-		$current_date_gmt          = current_time( 'Y-m-d H:i:s', true );
-		$states_as_comma_separated = "('" . join( "','", array_keys( $old_to_new_states_mapping ) ) . "')";
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$sql = $wpdb->prepare(
-			"SELECT meta_id, post_id, meta_value FROM {$wpdb->prefix}postmeta
-				WHERE (meta_key='_billing_state' OR meta_key='_shipping_state')
-				AND meta_value IN {$states_as_comma_separated}
-				AND post_id IN (
-					SELECT post_id FROM {$wpdb->prefix}postmeta WHERE
-					(meta_key = '_billing_country' OR meta_key='_shipping_country')
-					AND meta_value=%s
-				)",
-			$country_code
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		$addresses_data = $wpdb->get_results( $sql, ARRAY_A );
-
-		foreach ( $addresses_data as $address_data ) {
-			$update_query = $wpdb->prepare(
-				"UPDATE {$wpdb->prefix}postmeta SET meta_value=%s WHERE meta_id=%d",
-				$old_to_new_states_mapping[ $address_data['meta_value'] ],
-				$address_data['meta_id']
-			);
-			$wpdb->query( $update_query );
-
-			$update_query = $wpdb->prepare(
-				"UPDATE {$wpdb->prefix}posts SET post_modified=%s, post_modified_gmt=%s WHERE ID=%d",
-				$current_date,
-				$current_date_gmt,
-				$address_data['post_id']
-			);
-			$wpdb->query( $update_query );
-		}
-		//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
-	}
-
-	/**
 	 * Migrate the state code for the store location.
 	 *
 	 * @param string $country_code The country that has the states for which the migration is needed.
@@ -235,5 +151,101 @@ class MigrationHelper {
 				update_option( 'woocommerce_default_country', $new_location_code );
 			}
 		}
+	}
+
+	/**
+	 * Migrate state codes for orders in the orders table and in the posts table.
+	 * It will migrate only N*2*(number of states) records, being N equal to 100 by default
+	 * but this number can be modified via the woocommerce_migrate_country_states_for_orders_batch_size filter.
+	 *
+	 * @param string $country_code The country that has the states for which the migration is needed.
+	 * @param array  $old_to_new_states_mapping An associative array where keys are the old state codes and values are the new state codes.
+	 * @return bool True if there are more records that need to be migrated, false otherwise.
+	 */
+	private static function migrate_country_states_for_orders( string $country_code, array $old_to_new_states_mapping ): bool {
+		global $wpdb;
+
+		/**
+		 * Filters the value of N, where the maximum count of database records that will be updated in one single run of migrate_country_states_for_orders
+		 * is N*2*count($old_to_new_states_mapping) if the woocommerce_orders table exists, or N*count($old_to_new_states_mapping) otherwise.
+		 *
+		 * @param int $batch_size Default value for the count of records to update.
+		 * @param string $country_code Country code for the update.
+		 * @param array  $old_to_new_states_mapping Associative array of old to new state codes.
+		 *
+		 * @since 7.2.0
+		 */
+		$limit      = apply_filters( 'woocommerce_migrate_country_states_for_orders_batch_size', 100, $country_code, $old_to_new_states_mapping );
+		$cot_exists = wc_get_container()->get( DataSynchronizer::class )->check_orders_table_exists();
+
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		foreach ( $old_to_new_states_mapping as $old_state => $new_state ) {
+			if ( $cot_exists ) {
+				$update_query = $wpdb->prepare(
+					"UPDATE {$wpdb->prefix}wc_order_addresses SET state=%s WHERE country=%s AND state=%s LIMIT %d",
+					$new_state,
+					$country_code,
+					$old_state,
+					$limit
+				);
+
+				$wpdb->query( $update_query );
+			}
+
+			$update_query = $wpdb->prepare(
+				"UPDATE {$wpdb->prefix}postmeta
+				SET meta_value=%s
+				WHERE (meta_key='_billing_state' OR meta_key='_shipping_state')
+				AND meta_value=%s
+				AND post_id IN (
+					SELECT post_id FROM {$wpdb->prefix}postmeta WHERE
+					(meta_key = '_billing_country' OR meta_key='_shipping_country')
+					AND meta_value=%s
+				)
+				LIMIT %d",
+				$new_state,
+				$old_state,
+				$country_code,
+				$limit
+			);
+
+			$wpdb->query( $update_query );
+		}
+
+		$states_as_comma_separated = "('" . join( "','", array_keys( $old_to_new_states_mapping ) ) . "')";
+
+		$posts_exist_query = $wpdb->prepare(
+			"
+			SELECT 1 FROM {$wpdb->prefix}postmeta
+			WHERE (meta_key='_billing_state' OR meta_key='_shipping_state')
+			AND meta_value IN {$states_as_comma_separated}
+			AND post_id IN (
+				SELECT post_id FROM {$wpdb->prefix}postmeta WHERE
+				(meta_key = '_billing_country' OR meta_key='_shipping_country')
+				AND meta_value=%s
+			)",
+			$country_code
+		);
+
+		if ( $cot_exists ) {
+			$more_exist_query = $wpdb->prepare(
+				"
+			SELECT EXISTS(
+				SELECT 1 FROM {$wpdb->prefix}wc_order_addresses
+				WHERE country=%s AND state IN {$states_as_comma_separated}
+			)
+			OR EXISTS (
+			  {$posts_exist_query}
+			)",
+				$country_code
+			);
+		} else {
+			$more_exist_query = "SELECT EXISTS ({$posts_exist_query})";
+		}
+
+		return $wpdb->get_var( $more_exist_query ) !== 0;
+
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 }
