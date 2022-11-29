@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix DateTimePickerControl's popover styling when slot-fill is used.

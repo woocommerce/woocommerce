@@ -19,6 +19,7 @@ jest.mock( '@wordpress/data', () => ( {
 jest.mock( '@wordpress/components', () => ( {
 	__esModule: true,
 	Spinner: () => <div>spinner</div>,
+	Icon: () => <div>icon</div>,
 } ) );
 
 jest.mock( '@woocommerce/components', () => {
@@ -31,9 +32,19 @@ jest.mock( '@woocommerce/components', () => {
 		} ) => children,
 		__experimentalSelectControlMenuItem: ( {
 			children,
+			getItemProps,
+			item,
 		}: {
 			children: JSX.Element;
-		} ) => <div>{ children }</div>,
+			getItemProps: ( options: { item: QueryProductAttribute } ) => {
+				onClick: () => void;
+			};
+			item: QueryProductAttribute;
+		} ) => (
+			<button onClick={ () => getItemProps( { item } ).onClick() }>
+				{ children }
+			</button>
+		),
 		__experimentalSelectControl: ( {
 			children,
 			items,
@@ -45,7 +56,9 @@ jest.mock( '@woocommerce/components', () => {
 				isOpen: boolean;
 				items: QueryProductAttribute[];
 				getMenuProps: () => Record< string, string >;
-				getItemProps: () => Record< string, string >;
+				getItemProps: ( options: { item: QueryProductAttribute } ) => {
+					onClick: () => void;
+				};
 			} ) => JSX.Element;
 			items: QueryProductAttribute[];
 			onSelect: ( item: QueryProductAttribute ) => void;
@@ -63,9 +76,6 @@ jest.mock( '@woocommerce/components', () => {
 					<button onClick={ () => setInput( 'Co' ) }>
 						Update Input
 					</button>
-					<button onClick={ () => onSelect( items[ 0 ] ) }>
-						select attribute
-					</button>
 					<button onClick={ () => onRemove( items[ 0 ] ) }>
 						remove attribute
 					</button>
@@ -74,7 +84,13 @@ jest.mock( '@woocommerce/components', () => {
 							isOpen: true,
 							items: getFilteredItems( items, input, [] ),
 							getMenuProps: () => ( {} ),
-							getItemProps: () => ( {} ),
+							getItemProps: ( {
+								item,
+							}: {
+								item: QueryProductAttribute;
+							} ) => ( {
+								onClick: () => onSelect( item ),
+							} ),
 						} ) }
 					</div>
 				</div>
@@ -203,7 +219,7 @@ describe( 'AttributeInputField', () => {
 		const { queryByText } = render(
 			<AttributeInputField onChange={ onChangeMock } />
 		);
-		queryByText( 'select attribute' )?.click();
+		queryByText( attributeList[ 0 ].name )?.click();
 		expect( onChangeMock ).toHaveBeenCalledWith( {
 			id: attributeList[ 0 ].id,
 			name: attributeList[ 0 ].name,
@@ -222,5 +238,31 @@ describe( 'AttributeInputField', () => {
 		);
 		queryByText( 'remove attribute' )?.click();
 		expect( onChangeMock ).toHaveBeenCalledWith();
+	} );
+
+	it( 'should show the create option when the search value does not match any attributes', () => {
+		( useSelect as jest.Mock ).mockReturnValue( {
+			isLoading: false,
+			attributes: [ attributeList[ 0 ] ],
+		} );
+		const { queryByText } = render(
+			<AttributeInputField onChange={ jest.fn() } />
+		);
+		queryByText( 'Update Input' )?.click();
+		expect( queryByText( 'Create "Co"' ) ).toBeInTheDocument();
+	} );
+
+	it( 'trigger the onChange callback when the create new value is clicked with only a string', async () => {
+		const onChangeMock = jest.fn();
+		( useSelect as jest.Mock ).mockReturnValue( {
+			isLoading: false,
+			attributes: [ attributeList[ 0 ] ],
+		} );
+		const { queryByText } = render(
+			<AttributeInputField onChange={ onChangeMock } />
+		);
+		queryByText( 'Update Input' )?.click();
+		queryByText( 'Create "Co"' )?.click();
+		expect( onChangeMock ).toHaveBeenCalledWith( 'Co' );
 	} );
 } );

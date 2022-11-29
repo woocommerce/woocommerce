@@ -1,4 +1,4 @@
-name: Highlight templates and hooks changes
+name: Highlight templates changes
 on: pull_request
 jobs:
     analyze:
@@ -21,77 +21,35 @@ jobs:
                   HEAD_REF=$(git rev-parse HEAD)
                   version=$(pnpm run analyzer major-minor "$HEAD_REF" "plugins/woocommerce/woocommerce.php" | tail -n 1)
                   pnpm run analyzer "$HEAD_REF" $version -o "github"
-            - name: Print results
-              id: results
-              run: echo "::set-output name=results::${{ steps.run.outputs.templates }}${{ steps.run.outputs.wphooks }}${{ steps.run.outputs.schema }}${{ steps.run.outputs.database }}"
-    comment:
-        name: Add comment to highlight changes
-        needs: analyze
-        runs-on: ubuntu-20.04
-        steps:
-            - name: Find Comment
-              uses: peter-evans/find-comment@v2
-              id: find-comment
+            - name: Check results
+              uses: actions/github-script@v6
               with:
-                  issue-number: ${{ github.event.number }}
-                  body-includes: New hook, template, or database changes in this PR
-            - name: Add comment
-              if: ${{ needs.analyze.outputs.results && (steps.find-comment.outputs.comment-id == '') }}
-              uses: actions/github-script@v5
-              with:
-                  github-token: ${{ secrets.GITHUB_TOKEN  }}
-                  script: |
-                      github.rest.issues.createComment({
-                        issue_number: context.issue.number,
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        body: '## New hook, template, or database changes in this PR${{ needs.analyze.outputs.results }}'
-                      })
-            - name: Update comment
-              if: ${{ needs.analyze.outputs.results && steps.find-comment.outputs.comment-id }}
-              uses: actions/github-script@v5
-              with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }}
-                  script: |
-                      github.rest.issues.updateComment({
-                        comment_id: ${{ steps.find-comment.outputs.comment-id }},
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        body: '## New hook, template, or database changes in this PR${{ needs.analyze.outputs.results }}'
-                      })
-            - name: Delete comment
-              if: ${{ !needs.analyze.outputs.results && steps.find-comment.outputs.comment-id }}
-              uses: actions/github-script@v5
-              with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }}
-                  script: |
-                      github.rest.issues.deleteComment({
-                        comment_id: ${{ steps.find-comment.outputs.comment-id }},
-                        owner: context.repo.owner,
-                        repo: context.repo.repo
-                      })
-            - name: Add label
-              if: ${{ needs.analyze.outputs.results }}
-              uses: actions/github-script@v5
-              with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }}
-                  script: |
-                      github.rest.issues.addLabels({
-                        issue_number: context.issue.number,
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        labels: ['release: highlight']
-                      })
-            - name: Remove label
-              if: ${{ !needs.analyze.outputs.results }}
-              continue-on-error: true
-              uses: actions/github-script@v5
-              with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }}
-                  script: |
-                      github.rest.issues.removeLabel({
-                        issue_number: context.issue.number,
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        name: ['release: highlight']
-                      })
+                script: |
+                  const template = '${{ steps.run.outputs.templates }}';
+
+                  if ( template === '' ) {
+                    return;
+                  }
+
+                  const templateArr = template.split( '\n' );
+                  const modTemplateArr = [];
+                  let needsVersionBump = false;
+
+                  templateArr.forEach( ( el ) => {
+                    if ( el.match( /NOTICE/ ) ) {
+                      modTemplateArr.pop();
+                      return;
+                    }
+
+                    if ( el.match( /WARNING/ ) ) {
+                      needsVersionBump = true;
+                    }
+
+                    modTemplateArr.push( el );
+                  } );
+
+                  const templateResult = modTemplateArr.join( '\n' );
+
+                  if ( needsVersionBump ) {
+                    core.setFailed( `Templates have changed but template versions were not bumped:\n${ templateResult }` );
+                  }

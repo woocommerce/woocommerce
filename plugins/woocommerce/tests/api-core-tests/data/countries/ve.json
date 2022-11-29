@@ -1,0 +1,118 @@
+{
+    "code": "VE",
+    "name": "Venezuela",
+    "states": [
+        {
+            "code": "VE-A",
+            "name": "Capital"
+        },
+        {
+            "code": "VE-B",
+            "name": "Anzoátegui"
+        },
+        {
+            "code": "VE-C",
+            "name": "Apure"
+        },
+        {
+            "code": "VE-D",
+            "name": "Aragua"
+        },
+        {
+            "code": "VE-E",
+            "name": "Barinas"
+        },
+        {
+            "code": "VE-F",
+            "name": "Bolívar"
+        },
+        {
+            "code": "VE-G",
+            "name": "Carabobo"
+        },
+        {
+            "code": "VE-H",
+            "name": "Cojedes"
+        },
+        {
+            "code": "VE-I",
+            "name": "Falcón"
+        },
+        {
+            "code": "VE-J",
+            "name": "Guárico"
+        },
+        {
+            "code": "VE-K",
+            "name": "Lara"
+        },
+        {
+            "code": "VE-L",
+            "name": "Mérida"
+        },
+        {
+            "code": "VE-M",
+            "name": "Miranda"
+        },
+        {
+            "code": "VE-N",
+            "name": "Monagas"
+        },
+        {
+            "code": "VE-O",
+            "name": "Nueva Esparta"
+        },
+        {
+            "code": "VE-P",
+            "name": "Portuguesa"
+        },
+        {
+            "code": "VE-R",
+            "name": "Sucre"
+        },
+        {
+            "code": "VE-S",
+            "name": "Táchira"
+        },
+        {
+            "code": "VE-T",
+            "name": "Trujillo"
+        },
+        {
+            "code": "VE-U",
+            "name": "Yaracuy"
+        },
+        {
+            "code": "VE-V",
+            "name": "Zulia"
+        },
+        {
+            "code": "VE-W",
+            "name": "Federal Dependencies"
+        },
+        {
+            "code": "VE-X",
+            "name": "La Guaira (Vargas)"
+        },
+        {
+            "code": "VE-Y",
+            "name": "Delta Amacuro"
+        },
+        {
+            "code": "VE-Z",
+            "name": "Amazonas"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/ve"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

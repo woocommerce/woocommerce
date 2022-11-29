@@ -1,0 +1,13 @@
+.woocommerce-product-title {
+	display: flex;
+	align-items: center;
+
+	@include breakpoint( '<782px' ) {
+		flex-direction: column;
+		align-items: baseline;
+
+		.woocommerce-product-breadcrumbs {
+			font-size: 13px;
+		}
+	}
+}

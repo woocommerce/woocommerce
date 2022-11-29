@@ -171,7 +171,7 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 	const actionWrapperClassName = classnames(
 		'woocommerce-inbox-message__actions',
 		{
-			'has-multiple-actions': note.actions.length > 1,
+			'has-multiple-actions': note.actions?.length > 1,
 		}
 	);
 
