@@ -32,7 +32,7 @@
 		width: 100%;
 		margin-top: $gap-large;
 
-		@include breakpoint('<782px') {
+		@include breakpoint( '<782px' ) {
 			thead {
 				@include sr-only();
 			}
@@ -57,17 +57,19 @@
 	}
 	&__table-row {
 		padding: $gap-large 0;
-		td:not(:last-child) {
+		td:not( :last-child ) {
 			margin-right: $gap;
 		}
 
-		@include breakpoint('<782px') {
+		@include breakpoint( '<782px' ) {
 			position: relative;
 			grid-template-columns: 1fr;
+			// Added the width of the trash icon as padding
+			// so that it can be displayed correctly
 			padding-right: 42px;
 		}
 
-		@include breakpoint('>782px') {
+		@include breakpoint( '>782px' ) {
 			.woocommerce-experimental-select-control__label {
 				@include sr-only();
 			}
@@ -81,7 +83,7 @@
 		display: flex;
 		justify-content: center;
 
-		@include breakpoint('<782px') {
+		@include breakpoint( '<782px' ) {
 			position: absolute;
 			top: 0;
 			right: 0;
