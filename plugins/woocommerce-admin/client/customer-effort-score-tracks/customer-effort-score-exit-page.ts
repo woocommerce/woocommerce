@@ -141,7 +141,7 @@ export function triggerExitPageCesSurvey() {
 		const copy = getExitPageCESCopy( exitPageItems[ 0 ] );
 		if ( copy && copy.length > 0 ) {
 			dispatch( 'wc/customer-effort-score' ).addCesSurvey(
-				'exit_' + exitPageItems[ 0 ].replaceAll( '-', '_' ),
+				exitPageItems[ 0 ].replaceAll( '-', '_' ),
 				copy,
 				window.pagenow,
 				window.adminpage,
