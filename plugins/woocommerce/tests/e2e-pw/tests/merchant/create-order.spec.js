@@ -8,12 +8,15 @@ const groupedProductName = 'Add new order grouped product';
 const taxClasses = [
 	{
 		name: 'Tax Class Simple',
+		slug: 'tax-class-simple',
 	},
 	{
 		name: 'Tax Class Variable',
+		slug: 'tax-class-variable',
 	},
 	{
 		name: 'Tax Class External',
+		slug: 'tax-class-external',
 	},
 ];
 const taxRates = [
@@ -33,7 +36,6 @@ const taxRates = [
 		class: 'tax-class-external',
 	},
 ];
-const taxClassSlugs = [];
 const taxTotals = [ '10.00', '20.00', '240.00' ];
 let simpleProductId,
 	variableProductId,
@@ -57,13 +59,30 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		await api.put( 'settings/general/woocommerce_calc_taxes', {
 			value: 'yes',
 		} );
-		// add tax classes
-		for ( let i = 0; i < taxClasses.length; i++ ) {
+		// delete tax classes left by previous runs of this test
+		for ( const { slug } of taxClasses ) {
 			await api
-				.post( 'taxes/classes', taxClasses[ i ] )
+				.delete( `taxes/classes/${ slug }`, {
+					force: true,
+				} )
 				.then( ( response ) => {
-					taxClassSlugs[ i ] = response.data.slug;
+					console.log(
+						`Tax class with slug "${ slug }" was found and was deleted.`
+					);
+				} )
+				.catch( ( error ) => {
+					if ( error.response.data.message === 'Invalid tax class' ) {
+						// Tax class does not exist, do nothing.
+					} else {
+						throw new Error(
+							`Response status: ${ error.response.status } ${ error.response.statusText }\nResponse data:\n${ error.response.data }`
+						);
+					}
 				} );
+		}
+		// add tax classes
+		for ( const taxClass of taxClasses ) {
+			await api.post( 'taxes/classes', taxClass );
 		}
 		// attach rates to the classes
 		for ( let i = 0; i < taxRates.length; i++ ) {
@@ -181,8 +200,8 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 			],
 		} );
 		// clean up tax classes and rates
-		for ( let i = 0; i < taxClassSlugs.length; i++ ) {
-			await api.delete( `taxes/classes/${ taxClassSlugs[ i ] }`, {
+		for ( const { slug } of taxClasses ) {
+			await api.delete( `taxes/classes/${ slug }`, {
 				force: true,
 			} );
 		}
