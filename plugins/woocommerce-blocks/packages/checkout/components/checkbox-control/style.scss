@@ -6,6 +6,7 @@
 		align-items: flex-start;
 		display: flex;
 		position: relative;
+		@include font-size(small);
 	}
 
 	.wc-block-components-checkbox__input[type="checkbox"] {
@@ -17,7 +18,7 @@
 		height: em(24px);
 		width: em(24px);
 		margin: 0;
-		margin-right: $gap;
+		margin-right: em($gap);
 		min-height: em(24px);
 		min-width: em(24px);
 		overflow: hidden;
