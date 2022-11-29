@@ -24,7 +24,7 @@ if ( forms && forms.post ) {
 		} );
 	}
 	const formData = staticFormDataToObject( forms.post );
-	addCustomerEffortScoreExitPageListener( 'order_change', () => {
+	addCustomerEffortScoreExitPageListener( 'shop_order_update', () => {
 		if ( triggeredSaveOrDeleteButton ) {
 			return false;
 		}
