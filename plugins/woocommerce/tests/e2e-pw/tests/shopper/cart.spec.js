@@ -58,7 +58,7 @@ test.describe( 'Cart page', () => {
 	test( 'should add the product to the cart from the shop page', async ( {
 		page,
 	} ) => {
-		await page.goto( '/shop/' );
+		await page.goto( '/shop/?orderby=date' );
 		await page.click(
 			`a[data-product_id='${ productId }'][href*=add-to-cart]`
 		);
@@ -73,14 +73,14 @@ test.describe( 'Cart page', () => {
 	test( 'should increase item quantity when "Add to cart" of the same product is clicked', async ( {
 		page,
 	} ) => {
-		await page.goto( '/shop/' );
+		await page.goto( '/shop/?orderby=date' );
 		await page.click(
 			`a[data-product_id='${ productId }'][href*=add-to-cart]`
 		);
 		// Once the view cart link is visible, item has been added
 		await page.waitForSelector( 'a.added_to_cart' );
 		// Click add to cart a second time (load the shop in case redirection enabled)
-		await page.goto( '/shop/' );
+		await page.goto( '/shop/?orderby=date' );
 		await page.click(
 			`a[data-product_id='${ productId }'][href*=add-to-cart]`
 		);
@@ -93,7 +93,7 @@ test.describe( 'Cart page', () => {
 	test( 'should update quantity when updated via quantity input', async ( {
 		page,
 	} ) => {
-		await page.goto( '/shop/' );
+		await page.goto( '/shop/?orderby=date' );
 		await page.click(
 			`a[data-product_id='${ productId }'][href*=add-to-cart]`
 		);
@@ -111,7 +111,7 @@ test.describe( 'Cart page', () => {
 	test( 'should remove the item from the cart when remove is clicked', async ( {
 		page,
 	} ) => {
-		await page.goto( '/shop/' );
+		await page.goto( '/shop/?orderby=date' );
 		await page.click(
 			`a[data-product_id='${ productId }'][href*=add-to-cart]`
 		);
@@ -133,7 +133,7 @@ test.describe( 'Cart page', () => {
 	test( 'should update subtotal in cart totals when adding product to the cart', async ( {
 		page,
 	} ) => {
-		await page.goto( '/shop/' );
+		await page.goto( '/shop/?orderby=date' );
 		await page.click(
 			`a[data-product_id='${ productId }'][href*=add-to-cart]`
 		);
@@ -155,7 +155,7 @@ test.describe( 'Cart page', () => {
 	test( 'should go to the checkout page when "Proceed to Checkout" is clicked', async ( {
 		page,
 	} ) => {
-		await page.goto( '/shop/' );
+		await page.goto( '/shop/?orderby=date' );
 		await page.click(
 			`a[data-product_id='${ productId }'][href*=add-to-cart]`
 		);
