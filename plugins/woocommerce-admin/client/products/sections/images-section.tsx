@@ -180,20 +180,24 @@ export const ImagesSection: React.FC = () => {
 						) : (
 							<CardBody>
 								<MediaUploader
+									multipleSelect={ true }
 									onError={ () => null }
 									onFileUploadChange={ onFileUpload }
-									onSelect={ ( file ) => {
-										if (
-											images.find(
-												( img ) => file.id === img.id
-											) === undefined
-										) {
+									onSelect={ ( files ) => {
+										const newImages = files.filter(
+											( img: Image ) =>
+												! images.find(
+													( image ) =>
+														image.id === img.id
+												)
+										);
+										if ( newImages.length > 0 ) {
 											recordEvent(
 												'product_images_add_via_media_library'
 											);
 											setValue( 'images', [
 												...images,
-												file,
+												...newImages,
 											] );
 										}
 									} }
