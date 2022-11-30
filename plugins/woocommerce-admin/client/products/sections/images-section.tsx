@@ -16,7 +16,6 @@ import { Product } from '@woocommerce/data';
 import classnames from 'classnames';
 import { Icon, trash } from '@wordpress/icons';
 import { MediaItem } from '@wordpress/media-utils';
-import { intersectionBy } from 'lodash';
 
 /**
  * Internal dependencies
@@ -185,19 +184,20 @@ export const ImagesSection: React.FC = () => {
 									onError={ () => null }
 									onFileUploadChange={ onFileUpload }
 									onSelect={ ( files ) => {
-										if (
-											intersectionBy(
-												images,
-												files,
-												'id'
-											).length === 0
-										) {
+										const newImages = files.filter(
+											( img: Image ) =>
+												! images.find(
+													( image ) =>
+														image.id === img.id
+												)
+										);
+										if ( newImages.length > 0 ) {
 											recordEvent(
 												'product_images_add_via_media_library'
 											);
 											setValue( 'images', [
 												...images,
-												...( files as Image[] ),
+												...newImages,
 											] );
 										}
 									} }
