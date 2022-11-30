@@ -1,18 +1,54 @@
-const { api } = require( './utils' );
+const api = require( './api' );
+
+const deleteAllProducts = async () => {
+	console.log( 'Deleting all products...' );
+
+	let products,
+		page = 1;
+
+	while (
+		( products = await api.get.products( { per_page: 100, page: page++ } ) )
+			.length > 0
+	) {
+		const ids = products.map( ( { id } ) => id );
+		await api.deletePost.product( ids );
+	}
+
+	console.log( 'Done.' );
+};
+
+const deleteAllOrders = async () => {
+	console.log( 'Deleting all orders...' );
+
+	let orders,
+		page = 1;
+
+	while (
+		( orders = await api.get.orders( { per_page: 100, page: page++ } ) )
+			.length > 0
+	) {
+		const ids = orders.map( ( { id } ) => id );
+		await api.deletePost.order( ids );
+	}
+
+	console.log( 'Done.' );
+};
 
 /**
- * Clear the test environment from all unwanted data.
+ * Reset the test site. Useful when running E2E tests on a hosted test site to reset it to a somewhat pristine state prior to running tests.
+ *
+ * @param {string} cKey Consumer key
+ * @param {string} cSecret Consumer secret
  */
-const reset = async () => {
-	console.log( 'Deleting all existing products...' );
-	const products = await api.get.products( { per_page: 100 } );
-	console.log(
-		`TEST: products: ${ JSON.stringify(
-			products.map( ( { id } ) => id ),
-			null,
-			2
-		) }`
-	);
+const reset = async ( cKey, cSecret ) => {
+	console.log( '--------------------------' );
+	console.log( 'Resetting test site...' );
+	console.log( '--------------------------' );
+
+	api.constructWith( cKey, cSecret );
+
+	await deleteAllProducts();
+	await deleteAllOrders();
 };
 
 module.exports = {
