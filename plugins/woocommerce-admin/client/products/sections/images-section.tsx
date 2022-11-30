@@ -51,6 +51,12 @@ export const ImagesSection: React.FC = () => {
 		recordEvent( 'product_images_change_image_order_via_image_gallery' );
 		setValue( 'images', orderedImages );
 	};
+	const onFileUpload = ( files: MediaItem[] ) => {
+		if ( files[ 0 ].id ) {
+			recordEvent( 'product_images_add_via_file_upload_area' );
+			setValue( 'images', [ ...images, ...files ] );
+		}
+	};
 
 	return (
 		<ProductSectionLayout
@@ -174,19 +180,24 @@ export const ImagesSection: React.FC = () => {
 						) : (
 							<CardBody>
 								<MediaUploader
+									multipleSelect={ true }
 									onError={ () => null }
-									onSelect={ ( file ) => {
-										if (
-											images.find(
-												( img ) => file.id === img.id
-											) === undefined
-										) {
+									onFileUploadChange={ onFileUpload }
+									onSelect={ ( files ) => {
+										const newImages = files.filter(
+											( img: Image ) =>
+												! images.find(
+													( image ) =>
+														image.id === img.id
+												)
+										);
+										if ( newImages.length > 0 ) {
 											recordEvent(
 												'product_images_add_via_media_library'
 											);
 											setValue( 'images', [
 												...images,
-												file,
+												...newImages,
 											] );
 										}
 									} }
@@ -205,7 +216,10 @@ export const ImagesSection: React.FC = () => {
 										<>
 											<img
 												src={ DragAndDrop }
-												alt="Completed"
+												alt={ __(
+													'Completed',
+													'woocommerce'
+												) }
 												className="woocommerce-product-form__drag-and-drop-image"
 											/>
 											<span>

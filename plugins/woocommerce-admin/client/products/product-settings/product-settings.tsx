@@ -35,9 +35,10 @@ export const ProductSettings = () => {
 					icon={ cog }
 					isPressed={ isOpen }
 					onClick={ () => setIsOpen( ! isOpen ) }
+					className="woocommerce-product-settings__toggle"
 				/>
 				{ isOpen && (
-					<Panel className="product-settings__panel">
+					<Panel className="woocommerce-product-settings__panel">
 						<PanelHeader label={ __( 'Settings', 'woocommerce' ) }>
 							<Button
 								icon={ closeSmall }

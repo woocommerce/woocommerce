@@ -24,7 +24,9 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			}
 			const newTrack = {
 				action: action.action,
-				label: action.label,
+				title: action.title,
+				firstQuestion: action.firstQuestion,
+				secondQuestion: action.secondQuestion,
 				pagenow: action.pageNow,
 				adminpage: action.adminPage,
 				onSubmitLabel: action.onSubmitLabel,

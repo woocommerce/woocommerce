@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Include react-dates styles (no longer in WP 6.1+).
