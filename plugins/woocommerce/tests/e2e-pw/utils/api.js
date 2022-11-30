@@ -59,6 +59,33 @@ const get = {
 
 		return code;
 	},
+	products: async ( params = { per_page: 20 } ) => {
+		const response = await api
+			.get( 'products', params )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				const message = 'Something went wrong when trying to list all products.'
+					.concat(
+						`\nResponse status: ${ error.response.status } ${ error.response.statusText }`
+					)
+					.concat(
+						`\nResponse headers:\n${ JSON.stringify(
+							error.response.headers,
+							null,
+							2
+						) }`
+					).concat( `\nResponse data:\n${ JSON.stringify(
+					error.response.data,
+					null,
+					2
+				) }
+				` );
+
+				throw new Error( message );
+			} );
+
+		return response.data;
+	},
 };
 
 const create = {
