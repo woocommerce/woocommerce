@@ -41,16 +41,17 @@ function register_woocommerce_admin_test_helper_rest_route( $route, $callback, $
 	);
 }
 
-require( 'admin-notes/delete-all-notes.php' );
-require( 'admin-notes/add-note.php' );
-require( 'tools/trigger-wca-install.php' );
-require( 'tools/trigger-cron-job.php' );
-require( 'tools/run-wc-admin-daily.php' );
-require( 'options/rest-api.php' );
-require( 'tools/delete-all-products.php' );
-require( 'tools/disable-wc-email.php' );
-require( 'tools/trigger-update-callbacks.php' );
-require( 'tracks/class-tracks-debug-log.php' );
-require( 'features/features.php' );
-require( 'rest-api-filters/rest-api-filters.php' );
-require( 'rest-api-filters/hook.php' );
+require 'admin-notes/delete-all-notes.php';
+require 'admin-notes/add-note.php';
+require 'tools/trigger-wca-install.php';
+require 'tools/trigger-cron-job.php';
+require 'tools/run-wc-admin-daily.php';
+require 'options/rest-api.php';
+require 'tools/delete-all-products.php';
+require 'tools/disable-wc-email.php';
+require 'tools/trigger-update-callbacks.php';
+require 'tracks/class-tracks-debug-log.php';
+require 'features/features.php';
+require 'rest-api-filters/rest-api-filters.php';
+require 'rest-api-filters/hook.php';
+require 'live-branches/manifest.php';
