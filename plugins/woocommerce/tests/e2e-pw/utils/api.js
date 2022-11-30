@@ -13,6 +13,45 @@ if ( process.env.CONSUMER_KEY && process.env.CONSUMER_SECRET ) {
 	} );
 }
 
+/**
+ * Explicitly construct a WooCommerce REST API object.
+ *
+ * @param {string} consumerKey
+ * @param {string} consumerSecret
+ */
+const constructWith = ( consumerKey, consumerSecret ) => {
+	api = new wcApi( {
+		url: config.use.baseURL,
+		consumerKey,
+		consumerSecret,
+		version: 'wc/v3',
+	} );
+};
+
+const throwCustomError = (
+	error,
+	customMessage = 'Something went wrong. See details below.'
+) => {
+	throw new Error(
+		customMessage
+			.concat(
+				`\nResponse status: ${ error.response.status } ${ error.response.statusText }`
+			)
+			.concat(
+				`\nResponse headers:\n${ JSON.stringify(
+					error.response.headers,
+					null,
+					2
+				) }`
+			).concat( `\nResponse data:\n${ JSON.stringify(
+			error.response.data,
+			null,
+			2
+		) }
+` )
+	);
+};
+
 const update = {
 	storeDetails: async ( store ) => {
 		// ensure store address is US
@@ -59,29 +98,28 @@ const get = {
 
 		return code;
 	},
-	products: async ( params = { per_page: 20 } ) => {
+	orders: async ( params ) => {
+		const response = await api
+			.get( 'orders', params )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					'Something went wrong when trying to list all orders.'
+				);
+			} );
+
+		return response.data;
+	},
+	products: async ( params ) => {
 		const response = await api
 			.get( 'products', params )
 			.then( ( response ) => response )
 			.catch( ( error ) => {
-				const message = 'Something went wrong when trying to list all products.'
-					.concat(
-						`\nResponse status: ${ error.response.status } ${ error.response.statusText }`
-					)
-					.concat(
-						`\nResponse headers:\n${ JSON.stringify(
-							error.response.headers,
-							null,
-							2
-						) }`
-					).concat( `\nResponse data:\n${ JSON.stringify(
-					error.response.data,
-					null,
-					2
-				) }
-				` );
-
-				throw new Error( message );
+				throwCustomError(
+					error,
+					'Something went wrong when trying to list all products.'
+				);
 			} );
 
 		return response.data;
@@ -102,14 +140,38 @@ const create = {
 
 const deletePost = {
 	product: async ( id ) => {
-		await api.delete( `products/${ id }`, {
-			force: true,
-		} );
+		if ( Array.isArray( id ) ) {
+			await api
+				.post( 'products/batch', { delete: id } )
+				.then( ( response ) => response )
+				.catch( ( error ) => {
+					throwCustomError(
+						error,
+						'Something went wrong when batch deleting products.'
+					);
+				} );
+		} else {
+			await api.delete( `products/${ id }`, {
+				force: true,
+			} );
+		}
 	},
 	order: async ( id ) => {
-		await api.delete( `orders/${ id }`, {
-			force: true,
-		} );
+		if ( Array.isArray( id ) ) {
+			await api
+				.post( 'orders/batch', { delete: id } )
+				.then( ( response ) => response )
+				.catch( ( error ) => {
+					throwCustomError(
+						error,
+						'Something went wrong when batch deleting orders.'
+					);
+				} );
+		} else {
+			await api.delete( `orders/${ id }`, {
+				force: true,
+			} );
+		}
 	},
 };
 
@@ -118,4 +180,5 @@ module.exports = {
 	get,
 	create,
 	deletePost,
+	constructWith,
 };
