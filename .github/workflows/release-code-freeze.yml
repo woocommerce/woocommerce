@@ -158,8 +158,8 @@ jobs:
               with:
                   script: |
                       github.rest.actions.createWorkflowDispatch({
-                        owner: github.repository_owner,
-                        repo: github.repository,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
                         workflow_id: 'release-changelog.yml',
                         ref: 'trunk',
                       })
