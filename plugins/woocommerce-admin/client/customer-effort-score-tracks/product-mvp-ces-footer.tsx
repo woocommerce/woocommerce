@@ -93,10 +93,16 @@ export const ProductMVPCESFooter: React.FC = () => {
 		} );
 	};
 
-	const recordScore = ( score: number, comments: string ) => {
+	const recordScore = (
+		score: number,
+		secondScore: number,
+		comments: string
+	) => {
 		recordEvent( 'ces_feedback', {
 			action: cesAction,
 			score,
+			score_second_question: secondScore ?? null,
+			score_combined: score + ( secondScore ?? 0 ),
 			comments: comments || '',
 			store_age: storeAgeInWeeks,
 		} );
@@ -154,8 +160,16 @@ export const ProductMVPCESFooter: React.FC = () => {
 			) }
 			{ showFeedbackModal && (
 				<CustomerFeedbackModal
-					label={ __(
+					title={ __(
 						"How's your experience with the product editor?",
+						'woocommerce'
+					) }
+					firstQuestion={ __(
+						'The product editing screen is easy to use',
+						'woocommerce'
+					) }
+					secondQuestion={ __(
+						"The product editing screen's functionality meets my needs",
 						'woocommerce'
 					) }
 					recordScoreCallback={ recordScore }
