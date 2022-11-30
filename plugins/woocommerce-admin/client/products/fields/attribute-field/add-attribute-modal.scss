@@ -34,7 +34,7 @@
 
 		@include breakpoint( '<782px' ) {
 			thead {
-				@include sr-only();
+				@include screen-reader-only();
 			}
 		}
 
@@ -57,7 +57,7 @@
 	}
 	&__table-row {
 		padding: $gap-large 0;
-		td:not( :last-child ) {
+		td:not(:last-child) {
 			margin-right: $gap;
 		}
 
@@ -71,7 +71,7 @@
 
 		@include breakpoint( '>782px' ) {
 			.woocommerce-experimental-select-control__label {
-				@include sr-only();
+				@include screen-reader-only();
 			}
 			.woocommerce-experimental-select-control__combo-box-wrapper {
 				margin-bottom: 0;
