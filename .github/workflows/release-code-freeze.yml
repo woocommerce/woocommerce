@@ -162,4 +162,8 @@ jobs:
                         repo: context.repo.repo,
                         workflow_id: 'release-changelog.yml',
                         ref: 'trunk',
+                        inputs: {
+                          releaseVersion: "release/${{ needs.maybe-create-next-milestone-and-release-branch.outputs.next_version }}",
+                          releaseBranch: "${{ needs.maybe-create-next-milestone-and-release-branch.outputs.next_version }}"
+                        }
                       })
