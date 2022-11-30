@@ -30,6 +30,7 @@ import { __ } from '@wordpress/i18n';
  * @param {string}   props.secondQuestion      The second survey question.
  * @param {string}   props.defaultScore        Default score.
  * @param {Function} props.onCloseModal        Callback for when user closes modal by clicking cancel.
+ * @param {Function} props.customOptions       List of custom score options, contains label and value.
  */
 function CustomerFeedbackModal( {
 	recordScoreCallback,
