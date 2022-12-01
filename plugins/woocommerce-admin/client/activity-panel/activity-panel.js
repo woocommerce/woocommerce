@@ -9,7 +9,7 @@ import {
 	useMemo,
 	useEffect,
 } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import { Icon, help as helpIcon, external } from '@wordpress/icons';
 import { H, Section } from '@woocommerce/components';
@@ -43,9 +43,12 @@ import {
 import { getUnapprovedReviews } from '../homescreen/activity-panel/reviews/utils';
 import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-notifications-panel';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { getUrlParams } from '~/utils';
 import { useActiveSetupTasklist } from '~/tasks';
 import { LayoutContext } from '~/layout';
 import { getSegmentsFromPath } from '~/utils/url-helpers';
+import { FeedbackIcon } from '~/products/images/feedback-icon';
+import { STORE_KEY as CES_STORE_KEY } from '~/customer-effort-score-tracks/data/constants';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -202,6 +205,9 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			),
 		};
 	} );
+
+	const { showCesModal } = useDispatch( CES_STORE_KEY );
+
 	const { currentUserCan } = useUser();
 
 	const togglePanel = ( { name: tabName }, isTabOpen ) => {
@@ -237,7 +243,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		return query.page === 'wc-admin' && ! query.path;
 	};
 
-	const isProductPage = () => {
+	const isProductScreen = () => {
 		const [ firstPathSegment ] = getSegmentsFromPath( query.path );
 		return (
 			firstPathSegment === 'add-product' || firstPathSegment === 'product'
@@ -256,6 +262,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 	// @todo Pull in dynamic unread status/count
 	const getTabs = () => {
+		const urlParams = getUrlParams( window.location.search );
+
 		const activity = {
 			name: 'activity',
 			title: __( 'Activity', 'woocommerce' ),
@@ -264,7 +272,32 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			visible:
 				( isEmbedded || ! isHomescreen() ) &&
 				! isPerformingSetupTask() &&
-				! isProductPage(),
+				! isProductScreen(),
+		};
+
+		const feedback = {
+			name: 'feedback',
+			title: __( 'Feedback', 'woocommerce' ),
+			icon: <FeedbackIcon />,
+			onClick: () => {
+				showCesModal(
+					'product_feedback',
+					__(
+						"How's your experience with the product editor?",
+						'woocommerce'
+					),
+					undefined,
+					{},
+					{
+						type: 'snackbar',
+						icon: <span>🌟</span>,
+					}
+				);
+			},
+			visible:
+				isEmbedded &&
+				urlParams?.post_type === 'product' &&
+				! urlParams?.taxonomy,
 		};
 
 		const setup = {
@@ -284,7 +317,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				! setupTaskListComplete &&
 				! setupTaskListHidden &&
 				! isHomescreen() &&
-				! isProductPage(),
+				! isProductScreen(),
 		};
 
 		const help = {
@@ -337,6 +370,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 		return [
 			activity,
+			feedback,
 			setup,
 			previewSite,
 			previewStore,
