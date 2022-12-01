@@ -29,8 +29,8 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 			const products = response.data;
 			for ( const product of products ) {
 				if (
-					product.name === variableProductName ||
-					product.name === manualVariableProduct
+					product.name.includes( variableProductName ) ||
+					product.name.includes( manualVariableProduct )
 				) {
 					api.delete( `products/${ product.id }`, {
 						force: true,
