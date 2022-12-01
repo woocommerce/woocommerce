@@ -105,8 +105,8 @@ class ProductImage extends AbstractBlock {
 		</div>
 	',
 			$attributes['saleBadgeAlign'],
-			isset( $font_size['class'] ) ? $font_size['class'] : '',
-			isset( $font_size['style'] ) ? $font_size['style'] : '',
+			isset( $font_size['class'] ) ? esc_attr( $font_size['class'] ) : '',
+			isset( $font_size['style'] ) ? esc_attr( $font_size['style'] ) : '',
 			esc_html__( 'Sale', 'woo-gutenberg-products-block' )
 		);
 		return $on_sale_badge;
@@ -199,8 +199,8 @@ class ProductImage extends AbstractBlock {
 				'<div class="wc-block-components-product-image wc-block-grid__product-image" style="%1$s %2$s">
 					%3$s
 				</div>',
-				isset( $border_radius['style'] ) ? $border_radius['style'] : '',
-				isset( $margin['style'] ) ? $margin['style'] : '',
+				isset( $border_radius['style'] ) ? esc_attr( $border_radius['style'] ) : '',
+				isset( $margin['style'] ) ? esc_attr( $margin['style'] ) : '',
 				$this->render_anchor(
 					$product,
 					$this->render_on_sale_badge( $product, $parsed_attributes ),
