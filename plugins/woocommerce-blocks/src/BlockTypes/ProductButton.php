@@ -102,8 +102,8 @@ class ProductButton extends AbstractBlock {
 					esc_attr( $product->get_sku() ),
 					$product->is_purchasable() ? 'ajax_add_to_cart add_to_cart_button' : '',
 					esc_attr( $product->get_type() ),
-					$styles_and_classes['classes'],
-					$styles_and_classes['styles'],
+					esc_attr( $styles_and_classes['classes'] ),
+					esc_attr( $styles_and_classes['styles'] ),
 					esc_html( $product->add_to_cart_text() ),
 					$html_element
 				),
