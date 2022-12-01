@@ -17,6 +17,25 @@ const deleteAllProducts = async () => {
 	console.log( 'Done.' );
 };
 
+const deleteAllProductAttributes = async () => {
+	console.log( 'Deleting all product attributes...' );
+
+	let attributes,
+		page = 1;
+
+	while (
+		( attributes = await api.get.productAttributes( {
+			per_page: 100,
+			page: page++,
+		} ) ).length > 0
+	) {
+		const ids = attributes.map( ( { id } ) => id );
+		await api.deletePost.productAttributes( ids );
+	}
+
+	console.log( 'Done.' );
+};
+
 const deleteAllProductCategories = async () => {
 	console.log( 'Deleting all product categories...' );
 
@@ -86,6 +105,7 @@ const reset = async ( cKey, cSecret ) => {
 	api.constructWith( cKey, cSecret );
 
 	await deleteAllProducts();
+	await deleteAllProductAttributes();
 	await deleteAllProductCategories();
 	await deleteAllProductTags();
 	await deleteAllOrders();
