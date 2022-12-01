@@ -11,7 +11,7 @@ const deleteAllProducts = async () => {
 			.length > 0
 	) {
 		const ids = products.map( ( { id } ) => id );
-		await api.deletePost.product( ids );
+		await api.deletePost.products( ids );
 	}
 
 	console.log( 'Done.' );
@@ -85,7 +85,7 @@ const deleteAllOrders = async () => {
 			.length > 0
 	) {
 		const ids = orders.map( ( { id } ) => id );
-		await api.deletePost.order( ids );
+		await api.deletePost.orders( ids );
 	}
 
 	console.log( 'Done.' );

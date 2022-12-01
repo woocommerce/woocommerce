@@ -179,89 +179,69 @@ const create = {
 
 const deletePost = {
 	product: async ( id ) => {
-		if ( Array.isArray( id ) ) {
-			await api
-				.post( 'products/batch', { delete: id } )
-				.then( ( response ) => response )
-				.catch( ( error ) => {
-					throwCustomError(
-						error,
-						'Something went wrong when batch deleting products.'
-					);
-				} );
-		} else {
-			await api.delete( `products/${ id }`, {
-				force: true,
+		await api.delete( `products/${ id }`, {
+			force: true,
+		} );
+	},
+	products: async ( ids ) => {
+		await api
+			.post( 'products/batch', { delete: ids } )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					'Something went wrong when batch deleting products.'
+				);
 			} );
-		}
 	},
 	productAttributes: async ( id ) => {
-		if ( Array.isArray( id ) ) {
-			await api
-				.post( 'products/attributes/batch', { delete: id } )
-				.then( ( response ) => response )
-				.catch( ( error ) => {
-					throwCustomError(
-						error,
-						'Something went wrong when batch deleting product attributes.'
-					);
-				} );
-		} else {
-			await api.delete( `products/attributes/${ id }`, {
-				force: true,
+		await api
+			.post( 'products/attributes/batch', { delete: id } )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					'Something went wrong when batch deleting product attributes.'
+				);
 			} );
-		}
 	},
-	productCategories: async ( id ) => {
-		if ( Array.isArray( id ) ) {
-			await api
-				.post( 'products/categories/batch', { delete: id } )
-				.then( ( response ) => response )
-				.catch( ( error ) => {
-					throwCustomError(
-						error,
-						'Something went wrong when batch deleting product categories.'
-					);
-				} );
-		} else {
-			await api.delete( `products/categories/${ id }`, {
-				force: true,
+	productCategories: async ( ids ) => {
+		await api
+			.post( 'products/categories/batch', { delete: ids } )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					'Something went wrong when batch deleting product categories.'
+				);
 			} );
-		}
 	},
-	productTags: async ( id ) => {
-		if ( Array.isArray( id ) ) {
-			await api
-				.post( 'products/tags/batch', { delete: id } )
-				.then( ( response ) => response )
-				.catch( ( error ) => {
-					throwCustomError(
-						error,
-						'Something went wrong when batch deleting product tags.'
-					);
-				} );
-		} else {
-			await api.delete( `products/tags/${ id }`, {
-				force: true,
+	productTags: async ( ids ) => {
+		await api
+			.post( 'products/tags/batch', { delete: ids } )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					'Something went wrong when batch deleting product tags.'
+				);
 			} );
-		}
 	},
 	order: async ( id ) => {
-		if ( Array.isArray( id ) ) {
-			await api
-				.post( 'orders/batch', { delete: id } )
-				.then( ( response ) => response )
-				.catch( ( error ) => {
-					throwCustomError(
-						error,
-						'Something went wrong when batch deleting orders.'
-					);
-				} );
-		} else {
-			await api.delete( `orders/${ id }`, {
-				force: true,
+		await api.delete( `orders/${ id }`, {
+			force: true,
+		} );
+	},
+	orders: async ( ids ) => {
+		await api
+			.post( 'orders/batch', { delete: ids } )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					'Something went wrong when batch deleting orders.'
+				);
 			} );
-		}
 	},
 };
 
