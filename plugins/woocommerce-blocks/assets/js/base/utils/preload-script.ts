@@ -13,9 +13,12 @@ const preloadScript = ( {
 	src,
 	version,
 }: PreloadScriptParams ): void => {
-	const handleScriptElements = document.querySelectorAll(
-		`#${ handle }-js, #${ handle }-js-prefetch`
-	);
+	const srcParts = src.split( '?' );
+	if ( srcParts?.length > 1 ) {
+		src = srcParts[ 0 ];
+	}
+	const selector = `#${ handle }-js, #${ handle }-js-prefetch, script[src*="${ src }"]`;
+	const handleScriptElements = document.querySelectorAll( selector );
 
 	if ( handleScriptElements.length === 0 ) {
 		const prefetchLink = document.createElement( 'link' );
