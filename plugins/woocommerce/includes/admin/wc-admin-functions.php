@@ -69,7 +69,7 @@ function wc_get_screen_ids() {
  *
  * @return string Page ID. Empty string if resource not found.
  */
-function wc_get_page_screen_id( $for, $context = '' ) {
+function wc_get_page_screen_id( $for ) {
 	$screen_id = '';
 	$for       = str_replace( '-', '_', $for );
 
@@ -77,7 +77,7 @@ function wc_get_page_screen_id( $for, $context = '' ) {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$screen_id = 'woocommerce_page_wc-orders' . ( 'shop_order' === $for ? '' : '--' . $for );
 		} else {
-			$screen_id = ( 'edit' === $context ? 'edit-' : '' ) . $for;
+			$screen_id = $for;
 		}
 	}
 
