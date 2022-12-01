@@ -137,6 +137,19 @@ const get = {
 
 		return response.data;
 	},
+	productTags: async ( params ) => {
+		const response = await api
+			.get( 'products/tags', params )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					'Something went wrong when trying to list all product tags.'
+				);
+			} );
+
+		return response.data;
+	},
 };
 
 const create = {
@@ -181,7 +194,24 @@ const deletePost = {
 					);
 				} );
 		} else {
-			await api.delete( `products/${ id }`, {
+			await api.delete( `products/categories/${ id }`, {
+				force: true,
+			} );
+		}
+	},
+	productTags: async ( id ) => {
+		if ( Array.isArray( id ) ) {
+			await api
+				.post( 'products/tags/batch', { delete: id } )
+				.then( ( response ) => response )
+				.catch( ( error ) => {
+					throwCustomError(
+						error,
+						'Something went wrong when batch deleting product tags.'
+					);
+				} );
+		} else {
+			await api.delete( `products/tags/${ id }`, {
 				force: true,
 			} );
 		}
