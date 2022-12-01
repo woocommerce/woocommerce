@@ -117,6 +117,49 @@ const deleteAllShippingZones = async () => {
 	console.log( 'Done.' );
 };
 
+const deleteAllTaxClasses = async () => {
+	console.log( 'Deleting all non-default tax classes...' );
+
+	let taxClasses;
+
+	const getExistingNonDefaultTaxClasses = async () => {
+		return (
+			await api.get.taxClasses(  )
+		 ).filter(
+			( { slug } ) =>
+				! [ 'standard', 'reduced-rate', 'zero-rate' ].includes( slug )
+		);
+	};
+
+	while (
+		( taxClasses = await getExistingNonDefaultTaxClasses() ).length > 0
+	) {
+		const slugs = taxClasses.map( ( { slug } ) => slug );
+		for ( const slug of slugs ) {
+			await api.deletePost.taxClass( slug );
+		}
+	}
+
+	console.log( 'Done.' );
+};
+
+const deleteAllTaxRates = async () => {
+	console.log( 'Deleting all tax rates...' );
+
+	let taxes,
+		page = 1;
+
+	while (
+		( taxes = await api.get.taxRates( { per_page: 100, page: page++ } ) )
+			.length > 0
+	) {
+		const ids = taxes.map( ( { id } ) => id );
+		await api.deletePost.taxRates( ids );
+	}
+
+	console.log( 'Done.' );
+};
+
 /**
  * Reset the test site. Useful when running E2E tests on a hosted test site to reset it to a somewhat pristine state prior to running tests.
  *
@@ -136,6 +179,8 @@ const reset = async ( cKey, cSecret ) => {
 	await deleteAllProductTags();
 	await deleteAllOrders();
 	await deleteAllShippingZones();
+	await deleteAllTaxClasses();
+	await deleteAllTaxRates();
 };
 
 module.exports = {

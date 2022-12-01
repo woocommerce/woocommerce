@@ -176,6 +176,32 @@ const get = {
 
 		return response.data;
 	},
+	taxClasses: async () => {
+		const response = await api
+			.get( 'taxes/classes' )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					'Something went wrong when trying to list all tax classes.'
+				);
+			} );
+
+		return response.data;
+	},
+	taxRates: async ( params ) => {
+		const response = await api
+			.get( 'taxes', params )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					'Something went wrong when trying to list all tax rates.'
+				);
+			} );
+
+		return response.data;
+	},
 };
 
 const create = {
@@ -260,6 +286,30 @@ const deletePost = {
 		await api.delete( `shipping/zones/${ id }`, {
 			force: true,
 		} );
+	},
+	taxClass: async ( slug ) => {
+		await api
+			.delete( `taxes/classes/${ slug }`, {
+				force: true,
+			} )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					`Something went wrong when deleting tax class ${ slug }.`
+				);
+			} );
+	},
+	taxRates: async ( ids ) => {
+		await api
+			.post( 'taxes/batch', { delete: ids } )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					'Something went wrong when batch deleting tax rates.'
+				);
+			} );
 	},
 };
 
