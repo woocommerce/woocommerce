@@ -146,9 +146,9 @@ test.describe( 'Shopper > Update variable product', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
-		// await api.delete( `products/${ variableProductId }`, {
-		// 	force: true,
-		// } );
+		await api.delete( `products/${ variableProductId }`, {
+			force: true,
+		} );
 	} );
 
 	test( 'Shopper can change variable attributes to the same value', async ( {
