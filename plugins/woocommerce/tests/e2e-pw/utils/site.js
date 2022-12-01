@@ -91,6 +91,32 @@ const deleteAllOrders = async () => {
 	console.log( 'Done.' );
 };
 
+const deleteAllShippingZones = async () => {
+	console.log( 'Deleting all shipping zones...' );
+
+	let shippingZones,
+		page = 1;
+
+	// Exclude "Locations not covered by your other zones" as it cannot be deleted.
+	while (
+		( shippingZones = (
+			await api.get.shippingZones( {
+				per_page: 100,
+				page: page++,
+			} )
+		 ).filter(
+			( { name } ) => name !== 'Locations not covered by your other zones'
+		) ).length > 0
+	) {
+		const ids = shippingZones.map( ( { id } ) => id );
+		for ( const id of ids ) {
+			await api.deletePost.shippingZone( id );
+		}
+	}
+
+	console.log( 'Done.' );
+};
+
 /**
  * Reset the test site. Useful when running E2E tests on a hosted test site to reset it to a somewhat pristine state prior to running tests.
  *
@@ -109,6 +135,7 @@ const reset = async ( cKey, cSecret ) => {
 	await deleteAllProductCategories();
 	await deleteAllProductTags();
 	await deleteAllOrders();
+	await deleteAllShippingZones();
 };
 
 module.exports = {

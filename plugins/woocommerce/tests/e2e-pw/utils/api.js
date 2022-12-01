@@ -163,6 +163,19 @@ const get = {
 
 		return response.data;
 	},
+	shippingZones: async ( params ) => {
+		const response = await api
+			.get( 'shipping/zones', params )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					'Something went wrong when trying to list all shipping zones.'
+				);
+			} );
+
+		return response.data;
+	},
 };
 
 const create = {
@@ -242,6 +255,11 @@ const deletePost = {
 					'Something went wrong when batch deleting orders.'
 				);
 			} );
+	},
+	shippingZone: async ( id ) => {
+		await api.delete( `shipping/zones/${ id }`, {
+			force: true,
+		} );
 	},
 };
 
