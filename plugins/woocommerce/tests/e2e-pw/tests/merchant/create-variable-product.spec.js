@@ -14,8 +14,35 @@ const defaultAttributes = [ 'val2', 'val1', 'val2' ];
 const stockAmount = '100';
 const lowStockAmount = '10';
 
+const deleteProducts = async ( api ) => {
+	const varProducts = await api
+		.get( 'products', { per_page: 100, search: variableProductName } )
+		.then( ( response ) => response.data );
+
+	const manualProducts = await api
+		.get( 'products', { per_page: 100, search: manualVariableProduct } )
+		.then( ( response ) => response.data );
+
+	const ids = Array.concat( varProducts.map( ( { id } ) => id ) ).concat(
+		manualProducts.map( ( { id } ) => id )
+	);
+
+	await api.post( 'products/batch', { delete: ids } );
+};
+
 test.describe.serial( 'Add New Variable Product Page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
+
+	test.beforeAll( async ( { baseURL } ) => {
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		// delete products
+		await deleteProducts( api );
+	} );
 
 	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -25,19 +52,7 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 			version: 'wc/v3',
 		} );
 		// delete products
-		await api.get( 'products' ).then( ( response ) => {
-			const products = response.data;
-			for ( const product of products ) {
-				if (
-					product.name.includes( variableProductName ) ||
-					product.name.includes( manualVariableProduct )
-				) {
-					api.delete( `products/${ product.id }`, {
-						force: true,
-					} );
-				}
-			}
-		} );
+		await deleteProducts( api );
 	} );
 
 	// tests build upon one another, so running one in the middle will fail.
