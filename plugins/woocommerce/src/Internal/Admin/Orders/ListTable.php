@@ -569,7 +569,7 @@ class ListTable extends WP_List_Table {
 			$output = ob_get_clean();
 
 			if ( ! empty( $output ) ) {
-				echo $output;
+				echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				submit_button( __( 'Filter', 'woocommerce' ), '', 'filter_action', false, array( 'id' => 'order-query-submit' ) );
 			}
 		}
@@ -1008,7 +1008,7 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	private function print_hidden_form_fields(): void {
-		echo '<input type="hidden" name="page" value="wc-orders' . ( 'shop_order' === $this->order_type ? '' : '--' . $this->order_type ) . '" >';
+		echo '<input type="hidden" name="page" value="wc-orders' . ( 'shop_order' === $this->order_type ? '' : '--' . $this->order_type ) . '" >'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 		$state_params = array(
 			'paged',
