@@ -21,17 +21,6 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 		await api.put( 'settings/general/woocommerce_allowed_countries', {
 			value: 'all',
 		} );
-
-		// Delete all pre-existing shipping zones
-		const { data: zones } = await api.get( 'shipping/zones' );
-
-		const zoneIds = zones
-			.filter( ( { id } ) => id > 0 )
-			.map( ( { id } ) => id );
-
-		for ( const id of zoneIds ) {
-			await api.delete( `shipping/zones/${ id }`, { force: true } );
-		}
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
