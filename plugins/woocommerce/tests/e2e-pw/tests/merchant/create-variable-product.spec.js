@@ -94,6 +94,9 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 		}
 
 		await page.locator( '#save-post' ).click();
+		await expect( page.locator( '#message.notice-success' ) ).toContainText(
+			'Product draft updated.'
+		);
 	} );
 
 	test( 'can set the variation attributes, bulk edit variations', async ( {
