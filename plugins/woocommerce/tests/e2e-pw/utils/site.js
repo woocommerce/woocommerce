@@ -17,6 +17,25 @@ const deleteAllProducts = async () => {
 	console.log( 'Done.' );
 };
 
+const deleteAllProductCategories = async () => {
+	console.log( 'Deleting all product categories...' );
+
+	let categories,
+		page = 1;
+
+	// Exclude "Uncategorized" as it cannot be deleted
+	while (
+		( categories = (
+			await api.get.productCategories( { per_page: 100, page: page++ } )
+		 ).filter( ( { slug } ) => slug !== 'uncategorized' ) ).length > 0
+	) {
+		const ids = categories.map( ( { id } ) => id );
+		await api.deletePost.productCategories( ids );
+	}
+
+	console.log( 'Done.' );
+};
+
 const deleteAllOrders = async () => {
 	console.log( 'Deleting all orders...' );
 
@@ -48,6 +67,7 @@ const reset = async ( cKey, cSecret ) => {
 	api.constructWith( cKey, cSecret );
 
 	await deleteAllProducts();
+	await deleteAllProductCategories();
 	await deleteAllOrders();
 };
 

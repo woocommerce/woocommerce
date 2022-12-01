@@ -124,6 +124,19 @@ const get = {
 
 		return response.data;
 	},
+	productCategories: async ( params ) => {
+		const response = await api
+			.get( 'products/categories', params )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					'Something went wrong when trying to list all product categories.'
+				);
+			} );
+
+		return response.data;
+	},
 };
 
 const create = {
@@ -148,6 +161,23 @@ const deletePost = {
 					throwCustomError(
 						error,
 						'Something went wrong when batch deleting products.'
+					);
+				} );
+		} else {
+			await api.delete( `products/${ id }`, {
+				force: true,
+			} );
+		}
+	},
+	productCategories: async ( id ) => {
+		if ( Array.isArray( id ) ) {
+			await api
+				.post( 'products/categories/batch', { delete: id } )
+				.then( ( response ) => response )
+				.catch( ( error ) => {
+					throwCustomError(
+						error,
+						'Something went wrong when batch deleting product categories.'
 					);
 				} );
 		} else {
