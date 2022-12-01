@@ -6,6 +6,8 @@
  * @version  2.4.0
  */
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -67,14 +69,16 @@ function wc_get_screen_ids() {
  *
  * @return string Page ID. Empty string if resource not found.
  */
-function wc_get_page_screen_id( $for ) {
-	$order_types_with_ui = wc_get_order_types( 'admin-menu' );
+function wc_get_page_screen_id( $for, $context = '' ) {
+	$screen_id = '';
+	$for       = str_replace( '-', '_', $for );
 
-	$for_ = str_replace( '-', '_', $for );
-	if ( in_array( $for_, $order_types_with_ui, true ) ) {
-		$screen_id = 'woocommerce_page_wc-orders' . ( 'shop_order' === $for_ ? '' : '--' . $for_ );
-	} else {
-		$screen_id = '';
+	if ( in_array( $for, wc_get_order_types( 'admin-menu' ), true ) ) {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$screen_id = 'woocommerce_page_wc-orders' . ( 'shop_order' === $for ? '' : '--' . $for );
+		} else {
+			$screen_id = ( 'edit' === $context ? 'edit-' : '' ) . $for;
+		}
 	}
 
 	return $screen_id;
