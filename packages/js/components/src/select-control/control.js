@@ -125,8 +125,14 @@ class Control extends Component {
 			placeholder,
 			searchInputType,
 			autoComplete,
+			multiple,
+			isFocused,
 		} = this.props;
 		const { isActive } = this.state;
+
+		const inputValue = this.getInputValue();
+		const arialabel =
+			! multiple && ! isFocused && ! inlineTags ? inputValue : null;
 
 		return (
 			<input
@@ -135,7 +141,7 @@ class Control extends Component {
 				id={ `woocommerce-select-control-${ instanceId }__control-input` }
 				ref={ this.input }
 				type={ isSearchable ? searchInputType : 'button' }
-				value={ this.getInputValue() }
+				value={ inputValue }
 				placeholder={ isActive ? placeholder : '' }
 				onChange={ this.updateSearch( onSearch ) }
 				onFocus={ this.onFocus( onSearch ) }
@@ -154,6 +160,7 @@ class Control extends Component {
 						: null
 				}
 				disabled={ disabled }
+				aria-label={ arialabel }
 			/>
 		);
 	}
