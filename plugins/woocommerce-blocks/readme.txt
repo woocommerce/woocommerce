@@ -104,6 +104,12 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 - Change action type name for use shipping as billing option. ([7695](https://github.com/woocommerce/woocommerce-blocks/pull/7695))
 - Block Checkout: Apply selected Local Pickup rate to entire order (all packages). ([7484](https://github.com/woocommerce/woocommerce-blocks/pull/7484))
+= 8.9.2 - 2022-12-01
+
+#### Bug Fixes
+
+- Mini Cart block: fix compatibility with Page Optimize and Product Bundles plugins [#7794](https://github.com/woocommerce/woocommerce-blocks/pull/7794)
+- Mini Cart block: Load wc-blocks-registry package at the page's load instead of lazy load it [#7813](https://github.com/woocommerce/woocommerce-blocks/pull/7813)
 
 = 8.9.1 - 2022-11-14 =
 
