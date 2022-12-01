@@ -120,11 +120,13 @@ class ProductQuery extends AbstractBlock {
 	 * @param WP_REST_Request $request Request.
 	 */
 	public function update_rest_query( $args, $request ) {
-		$on_sale_query = $request->get_param( '__woocommerceOnSale' ) !== 'true' ? array() : $this->get_on_sale_products_query();
-		$orderby_query = $this->get_custom_orderby_query( $request->get_param( 'orderby' ) );
-		$tax_query     = $this->get_product_attributes_query( $request->get_param( '__woocommerceAttributes' ) );
+		$orderby          = $request->get_param( 'orderby' );
+		$woo_attributes   = $request->get_param( '__woocommerceAttributes' );
+		$on_sale_query    = $request->get_param( '__woocommerceOnSale' ) === 'true' ? $this->get_on_sale_products_query() : array();
+		$orderby_query    = isset( $orderby ) ? $this->get_custom_orderby_query( $orderby ) : array();
+		$attributes_query = is_array( $woo_attributes ) ? $this->get_product_attributes_query( $woo_attributes ) : array();
 
-		return array_merge( $args, $on_sale_query, $orderby_query, $tax_query );
+		return array_merge( $args, $on_sale_query, $orderby_query, $attributes_query );
 	}
 
 	/**
@@ -287,7 +289,7 @@ class ProductQuery extends AbstractBlock {
 	 *
 	 * @return array
 	 */
-	private function get_product_attributes_query( $attributes ) {
+	private function get_product_attributes_query( $attributes = array() ) {
 		$grouped_attributes = array_reduce(
 			$attributes,
 			function ( $carry, $item ) {
