@@ -83,7 +83,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<tr>
 					<td>
 						<div class="enable_variation show_if_variable">
-							<label><input type="checkbox" class="checkbox" <?php checked( $attribute->get_variation(), true ); ?> name="attribute_variation[<?php echo esc_attr( $i ); ?>]" value="1" /> <?php esc_html_e( 'Used for variations', 'woocommerce' ); ?></label>
+							<label><input id="used-for-variation" type="checkbox" class="checkbox" <?php checked( $attribute->get_variation(), true ); ?> name="attribute_variation[<?php echo esc_attr( $i ); ?>]" value="1" /> <?php esc_html_e( 'Used for variations', 'woocommerce' ); ?></label>
 						</div>
 					</td>
 				</tr>
