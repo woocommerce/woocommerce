@@ -89,18 +89,23 @@ class ProductCategoryList extends AbstractBlock {
 
 		$output  = '';
 		$output .= '
-			<div class="wc-block-components-product-category-list ' . $classes_and_styles['classes'] . ' ' . $classname . '" style="' . $classes_and_styles['styles'] . '"">
-				' . __( 'Categories:', 'woo-gutenberg-products-block' )
-				. '<ul>';
+			<div class="wc-block-components-product-category-list '
+				. esc_attr( $classes_and_styles['classes'] ) . ' '
+				. esc_attr( $classname ) . '" '
+				. 'style="' . esc_attr( $classes_and_styles['styles'] ) . '">'
+					. __( 'Categories:', 'woo-gutenberg-products-block' )
+					. '<ul>';
 
 		foreach ( $product_categories_terms as $product_category_term ) {
 			$output .= '
-				<li class="category-list-item-' . $product_category_term->slug . '">
-					<a href="' . get_term_link( $product_category_term->term_id ) . '">' . $product_category_term->name . '</a></li>
-			';
+				<li class="category-list-item-' . esc_attr( $product_category_term->slug ) . '">
+					<a href="' . esc_url( get_term_link( $product_category_term->term_id ) ) . '">'
+						. esc_html( $product_category_term->name )
+				. '</a>'
+			. '</li>';
 		}
 
-		$output .= '</ul> </div>';
+		$output .= '</ul></div>';
 
 		return $output;
 	}
