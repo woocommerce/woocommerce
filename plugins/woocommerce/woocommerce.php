@@ -60,3 +60,5 @@ function wc_get_container() {
 
 // Global for backwards compatibility.
 $GLOBALS['woocommerce'] = WC();
+
+do_action( 'testing_sniff_codes' );
