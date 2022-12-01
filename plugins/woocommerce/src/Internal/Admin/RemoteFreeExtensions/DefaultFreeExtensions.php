@@ -83,7 +83,7 @@ class DefaultFreeExtensions {
 					'<a href="https://woocommerce.com/products/google-listings-and-ads" target="_blank">',
 					'</a>'
 				),
-				'image_url'      => plugins_url( '/assets/images/onboarding/google-listings-and-ads.png', WC_PLUGIN_FILE ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/google.svg', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
 				'is_visible'     => [
@@ -101,7 +101,7 @@ class DefaultFreeExtensions {
 			'google-listings-and-ads:alt'       => [
 				'name'           => __( 'Google Listings & Ads', 'woocommerce' ),
 				'description'    => __( 'Reach more shoppers and drive sales for your store. Integrate with Google to list your products for free and launch paid ad campaigns.', 'woocommerce' ),
-				'image_url'      => plugins_url( '/assets/images/onboarding/google-listings-and-ads.png', WC_PLUGIN_FILE ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/google.svg', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
 			],
