@@ -552,10 +552,26 @@ class ListTable extends WP_List_Table {
 		echo '<div class="alignleft actions">';
 
 		if ( 'top' === $which ) {
+			ob_start();
+
 			$this->months_filter();
 			$this->customers_filter();
 
-			submit_button( __( 'Filter', 'woocommerce' ), '', 'filter_action', false, array( 'id' => 'order-query-submit' ) );
+			/**
+			 * Fires before the "Filter" button on the list table for orders and other order types.
+			 *
+			 * @since x.x.x
+			 * @param string $order_type  The order type.
+			 * @param string $which       The location of the extra table nav: 'top' or 'bottom'.
+			 */
+			do_action( 'woocommerce_order_list_table_extra_tablenav', $this->order_type, $which );
+
+			$output = ob_get_clean();
+
+			if ( ! empty( $output ) ) {
+				echo $output;
+				submit_button( __( 'Filter', 'woocommerce' ), '', 'filter_action', false, array( 'id' => 'order-query-submit' ) );
+			}
 		}
 
 		if ( $this->is_trash && $this->has_items() && current_user_can( 'edit_others_shop_orders' ) ) {
