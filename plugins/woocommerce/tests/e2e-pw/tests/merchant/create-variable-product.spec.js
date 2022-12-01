@@ -23,9 +23,9 @@ const deleteProducts = async ( api ) => {
 		.get( 'products', { per_page: 100, search: manualVariableProduct } )
 		.then( ( response ) => response.data );
 
-	const ids = Array.concat( varProducts.map( ( { id } ) => id ) ).concat(
-		manualProducts.map( ( { id } ) => id )
-	);
+	const ids = varProducts
+		.map( ( { id } ) => id )
+		.concat( manualProducts.map( ( { id } ) => id ) );
 
 	await api.post( 'products/batch', { delete: ids } );
 };
