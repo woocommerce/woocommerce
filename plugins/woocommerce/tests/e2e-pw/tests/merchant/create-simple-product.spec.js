@@ -45,8 +45,8 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 			const products = response.data;
 			for ( const product of products ) {
 				if (
-					product.name === virtualProductName ||
-					product.name === nonVirtualProductName
+					product.name.includes( virtualProductName ) ||
+					product.name.includes( nonVirtualProductName )
 				) {
 					api.delete( `products/${ product.id }`, {
 						force: true,
