@@ -17,6 +17,14 @@
 			margin-right: $gap-smaller;
 		}
 	}
+	.components-currency-control {
+		.components-input-control__prefix {
+			color: $gray-700;
+		}
+		.components-input-control__input {
+			text-align: right;
+		}
+	}
 	.components-checkbox-control {
 		&__label {
 			display: flex;
@@ -39,6 +47,9 @@
 	}
 	.woocommerce-tooltip {
 		margin-left: $gap-smaller;
+		&__button {
+			padding: 0;
+		}
 	}
 	.woocommerce-product-form {
 		&__custom-label-input {

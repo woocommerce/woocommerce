@@ -221,6 +221,10 @@ export const ProductDetailsSection: React.FC = () => {
 								serialize( blocks )
 							);
 						} }
+						placeholder={ __(
+							"Summarize this product in 1-2 short sentences. We'll show it at the top of the page.",
+							'woocommerce'
+						) }
 					/>
 					<RichTextEditor
 						label={ __( 'Description', 'woocommerce' ) }
