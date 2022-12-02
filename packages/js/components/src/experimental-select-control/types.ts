@@ -16,7 +16,7 @@ export type DefaultItemType = {
 export type SelectedType< ItemType > = ItemType | null;
 
 export type Props = {
-	[ key: string ]: string;
+	[ key: string ]: string | boolean | number | undefined;
 };
 
 export type getItemPropsType< ItemType > = (
@@ -41,7 +41,6 @@ export type ChildrenProps< ItemType > = {
 	getItemLabel: getItemLabelType< ItemType >;
 	getItemValue: getItemValueType< ItemType >;
 	selectItem: ( item: ItemType ) => void;
-	setInputValue: ( value: string ) => void;
 	openMenu: () => void;
 	closeMenu: () => void;
 };
