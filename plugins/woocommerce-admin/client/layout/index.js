@@ -34,6 +34,7 @@ import { PluginArea } from '@wordpress/plugins';
 import './style.scss';
 import { Controller, getPages } from './controller';
 import { Header } from '../header';
+import { Footer } from './footer';
 import Notices from './notices';
 import TransientNotices from './transient-notices';
 import { getAdminSetting } from '~/utils/admin-settings';
@@ -246,6 +247,7 @@ class _Layout extends Component {
 								<WCPayUsageModal />
 							</Suspense>
 						) }
+						<Footer />
 					</div>
 					<PluginArea scope="woocommerce-admin" />
 					{ window.wcAdminFeatures.navigation && (

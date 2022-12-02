@@ -30,6 +30,7 @@ import { __ } from '@wordpress/i18n';
  * @param {string}   props.secondQuestion      The second survey question.
  * @param {string}   props.defaultScore        Default score.
  * @param {Function} props.onCloseModal        Callback for when user closes modal by clicking cancel.
+ * @param {Function} props.customOptions       List of custom score options, contains label and value.
  */
 function CustomerFeedbackModal( {
 	recordScoreCallback,
@@ -38,6 +39,7 @@ function CustomerFeedbackModal( {
 	secondQuestion,
 	defaultScore = NaN,
 	onCloseModal,
+	customOptions,
 }: {
 	recordScoreCallback: (
 		score: number,
@@ -49,29 +51,33 @@ function CustomerFeedbackModal( {
 	secondQuestion: string;
 	defaultScore?: number;
 	onCloseModal?: () => void;
+	customOptions?: { label: string; value: string }[];
 } ): JSX.Element | null {
-	const options = [
-		{
-			label: __( 'Very difficult', 'woocommerce' ),
-			value: '1',
-		},
-		{
-			label: __( 'Somewhat difficult', 'woocommerce' ),
-			value: '2',
-		},
-		{
-			label: __( 'Neutral', 'woocommerce' ),
-			value: '3',
-		},
-		{
-			label: __( 'Somewhat easy', 'woocommerce' ),
-			value: '4',
-		},
-		{
-			label: __( 'Very easy', 'woocommerce' ),
-			value: '5',
-		},
-	];
+	const options =
+		customOptions && customOptions.length > 0
+			? customOptions
+			: [
+					{
+						label: __( 'Strongly disagree', 'woocommerce' ),
+						value: '1',
+					},
+					{
+						label: __( 'Disagree', 'woocommerce' ),
+						value: '2',
+					},
+					{
+						label: __( 'Neutral', 'woocommerce' ),
+						value: '3',
+					},
+					{
+						label: __( 'Agree', 'woocommerce' ),
+						value: '4',
+					},
+					{
+						label: __( 'Strongly Agree', 'woocommerce' ),
+						value: '5',
+					},
+			  ];
 
 	const [ firstQuestionScore, setFirstQuestionScore ] = useState(
 		defaultScore || NaN

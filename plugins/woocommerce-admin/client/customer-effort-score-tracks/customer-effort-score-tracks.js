@@ -7,13 +7,18 @@ import { recordEvent } from '@woocommerce/tracks';
 import { CustomerEffortScore } from '@woocommerce/customer-effort-score';
 import { compose } from '@wordpress/compose';
 import { withSelect, withDispatch } from '@wordpress/data';
-import { OPTIONS_STORE_NAME, WEEK } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
 
-const SHOWN_FOR_ACTIONS_OPTION_NAME = 'woocommerce_ces_shown_for_actions';
-const ADMIN_INSTALL_TIMESTAMP_OPTION_NAME =
-	'woocommerce_admin_install_timestamp';
-const ALLOW_TRACKING_OPTION_NAME = 'woocommerce_allow_tracking';
+/**
+ * Internal dependencies
+ */
+import {
+	SHOWN_FOR_ACTIONS_OPTION_NAME,
+	ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
+	ALLOW_TRACKING_OPTION_NAME,
+} from './constants';
+import { getStoreAgeInWeeks } from './utils';
 
 /**
  * A CustomerEffortScore wrapper that uses tracks to track the selected
@@ -185,19 +190,6 @@ CustomerEffortScoreTracks.propTypes = {
 	 */
 	createNotice: PropTypes.func,
 };
-
-function getStoreAgeInWeeks( adminInstallTimestamp ) {
-	if ( adminInstallTimestamp === 0 ) {
-		return null;
-	}
-
-	// Date.now() is ms since Unix epoch, adminInstallTimestamp is in
-	// seconds since Unix epoch.
-	const storeAgeInMs = Date.now() - adminInstallTimestamp * 1000;
-	const storeAgeInWeeks = Math.round( storeAgeInMs / WEEK );
-
-	return storeAgeInWeeks;
-}
 
 export default compose(
 	withSelect( ( select ) => {
