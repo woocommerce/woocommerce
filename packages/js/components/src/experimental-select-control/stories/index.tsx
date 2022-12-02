@@ -8,16 +8,21 @@ import {
 	SlotFillProvider,
 	Spinner,
 } from '@wordpress/components';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { createElement, useState } from '@wordpress/element';
 import { tag } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
-import { SelectedType, DefaultItemType, getItemLabelType } from '../types';
+import { SelectedType, DefaultItemType } from '../types';
 import { MenuItem } from '../menu-item';
-import { SelectControl, selectControlStateChangeTypes } from '../';
+import {
+	SelectControl,
+	selectControlStateChangeTypes,
+	useAsyncFilter,
+	useSyncFilter,
+} from '../';
 import { Menu, MenuSlot } from '../menu';
 import { SuffixIcon } from '../suffix-icon';
 
@@ -97,38 +102,38 @@ export const ExternalTags: React.FC = () => {
 };
 
 export const FuzzyMatching: React.FC = () => {
+	const [ items, setItems ] = useState< DefaultItemType[] >( sampleItems );
 	const [ selected, setSelected ] = useState< DefaultItemType[] >( [] );
 
-	const getFilteredItems = (
-		allItems: DefaultItemType[],
-		inputValue: string,
-		selectedItems: DefaultItemType[]
-	) => {
-		const pattern =
-			'.*' + inputValue.toLowerCase().split( '' ).join( '.*' ) + '.*';
-		const re = new RegExp( pattern );
+	const filter = useCallback(
+		( inputValue = '' ) => {
+			const pattern =
+				'.*' + inputValue.toLowerCase().split( '' ).join( '.*' ) + '.*';
+			const re = new RegExp( pattern );
 
-		return allItems.filter( ( item ) => {
-			if ( selectedItems.indexOf( item ) >= 0 ) {
-				return false;
-			}
-			return re.test( item.label.toLowerCase() );
-		} );
-	};
-
-	return (
-		<SelectControl
-			multiple
-			getFilteredItems={ getFilteredItems }
-			items={ sampleItems }
-			label="Fuzzy matching"
-			selected={ selected }
-			onSelect={ ( item ) => setSelected( [ ...selected, item ] ) }
-			onRemove={ ( item ) =>
-				setSelected( selected.filter( ( i ) => i !== item ) )
-			}
-		/>
+			return sampleItems.filter( ( item ) => {
+				if ( selected.indexOf( item ) >= 0 ) {
+					return false;
+				}
+				return re.test( item.label.toLowerCase() );
+			} );
+		},
+		[ selected ]
 	);
+
+	const selectProps = useSyncFilter( {
+		items,
+		selected,
+		label: 'Fuzzy matching',
+		multiple: true,
+		onSelect: ( item ) => setSelected( [ ...selected, item ] ),
+		onRemove: ( item ) =>
+			setSelected( selected.filter( ( i ) => i !== item ) ),
+		filter,
+		onFilterEnd: setItems,
+	} );
+
+	return <SelectControl { ...selectProps } />;
 };
 
 export const Async: React.FC = () => {
@@ -139,30 +144,42 @@ export const Async: React.FC = () => {
 	);
 	const [ isFetching, setIsFetching ] = useState( false );
 
-	const fetchItems = ( value: string | undefined ) => {
-		setIsFetching( true );
-		setFetchedItems( [] );
-		setTimeout( () => {
-			const results = sampleItems.sort( () => 0.5 - Math.random() );
-			setFetchedItems( results );
+	const filter = useCallback(
+		( value = '' ) =>
+			new Promise< DefaultItemType[] >( ( resolve ) => {
+				setTimeout( () => {
+					const results = sampleItems
+						.sort( () => 0.5 - Math.random() )
+						.filter( ( { label } ) =>
+							label.toLowerCase().includes( value )
+						);
+					resolve( results );
+				}, 500 );
+			} ),
+		[]
+	);
+
+	const selectProps = useAsyncFilter( {
+		label: 'Async',
+		items: fetchedItems,
+		selected: selectedItem,
+		onSelect: ( item ) => setSelectedItem( item ),
+		onRemove: () => setSelectedItem( null ),
+		placeholder: 'Start typing...',
+		filter,
+		onFilterStart() {
+			setIsFetching( true );
+			setFetchedItems( [] );
+		},
+		onFilterEnd( filteredItems: DefaultItemType[] ) {
+			setFetchedItems( filteredItems );
 			setIsFetching( false );
-		}, 1500 );
-	};
+		},
+	} );
 
 	return (
 		<>
-			<SelectControl
-				label="Async"
-				getFilteredItems={ ( allItems ) => {
-					return allItems;
-				} }
-				items={ fetchedItems }
-				onInputChange={ fetchItems }
-				selected={ selectedItem }
-				onSelect={ ( item ) => setSelectedItem( item ) }
-				onRemove={ () => setSelectedItem( null ) }
-				placeholder="Start typing..."
-			>
+			<SelectControl { ...selectProps }>
 				{ ( {
 					items,
 					isOpen,
@@ -196,6 +213,7 @@ export const Async: React.FC = () => {
 };
 
 export const CustomRender: React.FC = () => {
+	const [ items, setItems ] = useState< DefaultItemType[] >( sampleItems );
 	const [ selected, setSelected ] = useState< DefaultItemType[] >( [
 		sampleItems[ 0 ],
 	] );
@@ -213,55 +231,53 @@ export const CustomRender: React.FC = () => {
 		setSelected( [ ...selected, item ] );
 	};
 
-	const getFilteredItems = (
-		allItems: DefaultItemType[],
-		inputValue: string,
-		selectedItems: DefaultItemType[],
-		getItemLabel: getItemLabelType< DefaultItemType >
-	) => {
+	const filter = useCallback( ( inputValue = '' ) => {
 		const escapedInputValue = inputValue.replace(
 			/[.*+?^${}()|[\]\\]/g,
 			'\\$&'
 		);
 		const re = new RegExp( escapedInputValue, 'gi' );
 
-		return allItems.filter( ( item ) => {
-			return re.test( getItemLabel( item ).toLowerCase() );
+		return sampleItems.filter( ( item ) => {
+			return re.test( item.label.toLowerCase() );
 		} );
-	};
+	}, [] );
+
+	const selectProps = useSyncFilter( {
+		multiple: true,
+		label: 'Custom render',
+		items,
+		selected,
+		onSelect,
+		onRemove,
+		stateReducer: ( state, actionAndChanges ) => {
+			const { changes, type } = actionAndChanges;
+			switch ( type ) {
+				case selectControlStateChangeTypes.ControlledPropUpdatedSelectedItem:
+					return {
+						...changes,
+						inputValue: state.inputValue,
+					};
+				case selectControlStateChangeTypes.ItemClick:
+					return {
+						...changes,
+						isOpen: true,
+						inputValue: state.inputValue,
+						highlightedIndex: state.highlightedIndex,
+					};
+				default:
+					return changes;
+			}
+		},
+		filter,
+		onFilterEnd: setItems,
+	} );
 
 	return (
 		<>
-			<SelectControl
-				multiple
-				label="Custom render"
-				items={ sampleItems }
-				selected={ selected }
-				onSelect={ onSelect }
-				onRemove={ onRemove }
-				getFilteredItems={ getFilteredItems }
-				stateReducer={ ( state, actionAndChanges ) => {
-					const { changes, type } = actionAndChanges;
-					switch ( type ) {
-						case selectControlStateChangeTypes.ControlledPropUpdatedSelectedItem:
-							return {
-								...changes,
-								inputValue: state.inputValue,
-							};
-						case selectControlStateChangeTypes.ItemClick:
-							return {
-								...changes,
-								isOpen: true,
-								inputValue: state.inputValue,
-								highlightedIndex: state.highlightedIndex,
-							};
-						default:
-							return changes;
-					}
-				} }
-			>
+			<SelectControl { ...selectProps }>
 				{ ( {
-					items,
+					items: internalItems,
 					highlightedIndex,
 					getItemProps,
 					getMenuProps,
@@ -269,7 +285,7 @@ export const CustomRender: React.FC = () => {
 				} ) => {
 					return (
 						<Menu isOpen={ isOpen } getMenuProps={ getMenuProps }>
-							{ items.map( ( item, index: number ) => {
+							{ internalItems.map( ( item, index: number ) => {
 								const isSelected = selected.includes( item );
 
 								return (
