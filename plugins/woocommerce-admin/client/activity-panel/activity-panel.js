@@ -49,6 +49,7 @@ import { LayoutContext } from '~/layout';
 import { getSegmentsFromPath } from '~/utils/url-helpers';
 import { FeedbackIcon } from '~/products/images/feedback-icon';
 import { STORE_KEY as CES_STORE_KEY } from '~/customer-effort-score-tracks/data/constants';
+import { ProductFeedbackTour } from '~/guided-tours/add-product-feedback-tour';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -80,12 +81,21 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		() => layoutContext.getExtendedContext( 'activity-panel' ),
 		[ layoutContext ]
 	);
+	const [ displayFeedbackTour, setDisplayFeedbackTour ] = useState( false );
 
 	useEffect( () => {
 		return addHistoryListener( () => {
 			closePanel();
 			clearPanel();
 		} );
+	}, [] );
+
+	useEffect( () => {
+		const tourTimeout = setTimeout( () => {
+			setDisplayFeedbackTour( true );
+		}, 5 * 1000 );
+
+		return () => clearTimeout( tourTimeout );
 	}, [] );
 
 	const getPreviewSiteBtnTrackData = ( select, getOption ) => {
@@ -485,6 +495,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 						clearPanel={ () => clearPanel() }
 					/>
 				</Section>
+				{ displayFeedbackTour && <ProductFeedbackTour /> }
 				{ showHelpHighlightTooltip ? (
 					<HighlightTooltip
 						delay={ 1000 }
