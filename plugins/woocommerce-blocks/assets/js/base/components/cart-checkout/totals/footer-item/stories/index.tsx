@@ -42,8 +42,43 @@ Default.decorators = [
 	},
 ];
 
-export const IncludingTaxes = Template.bind( {} );
-IncludingTaxes.decorators = [
+export const NoTaxLabel = Template.bind( {} );
+NoTaxLabel.decorators = [
+	( StoryComponent ) => {
+		allSettings.displayCartPricesIncludingTax = true;
+
+		return <StoryComponent />;
+	},
+];
+
+export const SingleTaxLabel = Template.bind( {} );
+SingleTaxLabel.args = {
+	values: {
+		total_price: '2500',
+		total_tax: '550',
+		tax_lines: [ { name: '10% VAT', price: '550', rate: '10.00' } ],
+	},
+};
+SingleTaxLabel.decorators = [
+	( StoryComponent ) => {
+		allSettings.displayCartPricesIncludingTax = true;
+
+		return <StoryComponent />;
+	},
+];
+
+export const MultipleTaxLabels = Template.bind( {} );
+MultipleTaxLabels.args = {
+	values: {
+		total_price: '2500',
+		total_tax: '550',
+		tax_lines: [
+			{ name: '10% VAT', price: '300', rate: '10.00' },
+			{ name: '5% VAT', price: '250', rate: '5.00' },
+		],
+	},
+};
+MultipleTaxLabels.decorators = [
 	( StoryComponent ) => {
 		allSettings.displayCartPricesIncludingTax = true;
 
