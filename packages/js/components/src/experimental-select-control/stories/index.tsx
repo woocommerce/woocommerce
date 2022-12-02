@@ -10,6 +10,7 @@ import {
 } from '@wordpress/components';
 import React from 'react';
 import { createElement, useState } from '@wordpress/element';
+import { tag } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -18,6 +19,7 @@ import { SelectedType, DefaultItemType, getItemLabelType } from '../types';
 import { MenuItem } from '../menu-item';
 import { SelectControl, selectControlStateChangeTypes } from '../';
 import { Menu, MenuSlot } from '../menu';
+import { SuffixIcon } from '../suffix-icon';
 
 const sampleItems = [
 	{ value: 'apple', label: 'Apple' },
@@ -407,6 +409,77 @@ export const SingleWithinModalUsingBodyDropdownPlacement: React.FC = () => {
 			) }
 			<MenuSlot />
 		</SlotFillProvider>
+	);
+};
+
+export const DefaultSuffix: React.FC = () => {
+	const [ selected, setSelected ] = useState<
+		SelectedType< DefaultItemType >
+	>( sampleItems[ 1 ] );
+
+	return (
+		<SelectControl
+			items={ sampleItems }
+			label="Default suffix"
+			selected={ selected }
+			onSelect={ ( item ) => item && setSelected( item ) }
+			onRemove={ () => setSelected( null ) }
+		/>
+	);
+};
+
+export const CustomSuffixIcon: React.FC = () => {
+	const [ selected, setSelected ] = useState<
+		SelectedType< DefaultItemType >
+	>( sampleItems[ 1 ] );
+
+	return (
+		<SelectControl
+			items={ sampleItems }
+			label="Custom suffix icon"
+			selected={ selected }
+			onSelect={ ( item ) => item && setSelected( item ) }
+			onRemove={ () => setSelected( null ) }
+			suffix={ <SuffixIcon icon={ tag } /> }
+		/>
+	);
+};
+
+export const NoSuffix: React.FC = () => {
+	const [ selected, setSelected ] = useState<
+		SelectedType< DefaultItemType >
+	>( sampleItems[ 1 ] );
+
+	return (
+		<SelectControl
+			items={ sampleItems }
+			label="No suffix"
+			selected={ selected }
+			onSelect={ ( item ) => item && setSelected( item ) }
+			onRemove={ () => setSelected( null ) }
+			suffix={ null }
+		/>
+	);
+};
+
+export const CustomSuffix: React.FC = () => {
+	const [ selected, setSelected ] = useState<
+		SelectedType< DefaultItemType >
+	>( sampleItems[ 1 ] );
+
+	return (
+		<SelectControl
+			items={ sampleItems }
+			label="Custom suffix"
+			selected={ selected }
+			onSelect={ ( item ) => item && setSelected( item ) }
+			onRemove={ () => setSelected( null ) }
+			suffix={
+				<div style={ { background: 'red', height: '100%' } }>
+					Suffix!
+				</div>
+			}
+		/>
 	);
 };
 
