@@ -21,16 +21,16 @@ export default function useAsyncFilter< T >( {
 }: UseAsyncFilterInput< T > ): SelectControlProps< T > {
 	const handleInputChange = useCallback(
 		function handleInputChangeCallback( value?: string ) {
-			onFilterStart && onFilterStart( value );
+			if ( onFilterStart ) onFilterStart( value );
 			filter( value )
 				.then( ( filteredItems ) => {
-					onFilterEnd && onFilterEnd( filteredItems, value );
+					if ( onFilterEnd ) onFilterEnd( filteredItems, value );
 				} )
 				.catch( () => {
-					onFilterEnd && onFilterEnd( [], value );
+					if ( onFilterEnd ) onFilterEnd( [], value );
 				} )
 				.finally( () => {
-					onInputChange && onInputChange( value );
+					if ( onInputChange ) onInputChange( value );
 				} );
 		},
 		[ filter, onFilterStart, onFilterEnd, onInputChange ]
