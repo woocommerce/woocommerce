@@ -5,7 +5,7 @@ import classnames from 'classnames';
 import { useBlockProps } from '@wordpress/block-editor';
 import { useCheckoutAddress } from '@woocommerce/base-context/hooks';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
-
+import { BlockAttributes } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
@@ -19,6 +19,10 @@ import {
 	useCheckoutBlockControlsContext,
 } from '../../context';
 import Block from './block';
+import {
+	getBillingAddresssBlockTitle,
+	getBillingAddresssBlockDescription,
+} from './utils';
 
 export const Edit = ( {
 	attributes,
@@ -30,7 +34,7 @@ export const Edit = ( {
 		showStepNumber: boolean;
 		className: string;
 	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
+	setAttributes: ( attributes: BlockAttributes ) => void;
 } ): JSX.Element | null => {
 	const {
 		showCompanyField,
@@ -41,11 +45,19 @@ export const Edit = ( {
 	} = useCheckoutBlockContext();
 	const { addressFieldControls: Controls } =
 		useCheckoutBlockControlsContext();
-	const { showBillingFields } = useCheckoutAddress();
+	const { showBillingFields, forcedBillingAddress } = useCheckoutAddress();
 
-	if ( ! showBillingFields ) {
+	if ( ! showBillingFields && ! forcedBillingAddress ) {
 		return null;
 	}
+	attributes.title = getBillingAddresssBlockTitle(
+		attributes.title,
+		forcedBillingAddress
+	);
+	attributes.description = getBillingAddresssBlockDescription(
+		attributes.description,
+		forcedBillingAddress
+	);
 
 	return (
 		<FormStepBlock

@@ -14,6 +14,10 @@ import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import Block from './block';
 import attributes from './attributes';
 import { useCheckoutBlockContext } from '../../context';
+import {
+	getBillingAddresssBlockTitle,
+	getBillingAddresssBlockDescription,
+} from './utils';
 
 const FrontendBlock = ( {
 	title,
@@ -43,7 +47,11 @@ const FrontendBlock = ( {
 	if ( ! showBillingFields && ! forcedBillingAddress ) {
 		return null;
 	}
-
+	title = getBillingAddresssBlockTitle( title, forcedBillingAddress );
+	description = getBillingAddresssBlockDescription(
+		description,
+		forcedBillingAddress
+	);
 	return (
 		<FormStep
 			id="billing-fields"
