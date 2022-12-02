@@ -25,7 +25,8 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 		resolving: isLoading,
 		visibleCESModalData,
 	} = useSelect( ( select ) => {
-		const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
+		const { getOption, hasFinishedResolution } =
+			select( OPTIONS_STORE_NAME );
 		const { getVisibleCESModalData } = select( STORE_KEY );
 
 		const adminInstallTimestamp =
@@ -33,7 +34,9 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 
 		const resolving =
 			adminInstallTimestamp === null ||
-			isResolving( 'getOption', [ ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ] );
+			! hasFinishedResolution( 'getOption', [
+				ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
+			] );
 
 		return {
 			storeAgeInWeeks: getStoreAgeInWeeks( adminInstallTimestamp ),
@@ -63,7 +66,6 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 				),
 			visibleCESModalData.onSubmitNoticeProps || {}
 		);
-		hideCesModal();
 	};
 
 	if ( ! visibleCESModalData || isLoading ) {
@@ -75,7 +77,10 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 			title={ visibleCESModalData.label }
 			firstQuestion={ visibleCESModalData.firstQuestion }
 			secondQuestion={ visibleCESModalData.secondQuestion }
-			recordScoreCallback={ recordScore }
+			recordScoreCallback={ ( ...args ) => {
+				recordScore( ...args );
+				hideCesModal();
+			} }
 			onCloseModal={ () => hideCesModal() }
 		/>
 	);
