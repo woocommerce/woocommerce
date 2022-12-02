@@ -21,6 +21,7 @@ import { isNumber, ProductResponseItem } from '@woocommerce/types';
 import './style.scss';
 
 type Props = {
+	textAlign?: string;
 	className?: string;
 };
 
@@ -47,9 +48,12 @@ const getRatingCount = ( product: ProductResponseItem ) => {
  *
  * @param {Object} props             Incoming props.
  * @param {string} [props.className] CSS Class name for the component.
+ * @param {string} [props.textAlign] Text alignment.
+ *
  * @return {*} The component.
  */
 export const Block = ( props: Props ): JSX.Element | null => {
+	const { textAlign } = props;
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
 	const rating = getAverageRating( product );
@@ -93,6 +97,9 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				'wc-block-components-product-rating',
 				{
 					[ `${ parentClassName }__product-rating` ]: parentClassName,
+				},
+				{
+					[ `has-text-align-${ textAlign }` ]: textAlign,
 				}
 			) }
 			style={ {

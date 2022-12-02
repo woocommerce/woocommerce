@@ -7,6 +7,10 @@ export const blockAttributes = {
 		type: 'boolean',
 		default: false,
 	},
+	textAlign: {
+		type: 'string',
+		default: '',
+	},
 };
 
 export default blockAttributes;
