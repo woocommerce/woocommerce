@@ -31,18 +31,19 @@ export const defaultGetFilteredItems = < ItemType >(
 	allItems: ItemType[],
 	inputValue: string,
 	selectedItems: ItemType[],
-	getItemLabel: getItemLabelType< ItemType >
+	getItemLabel?: getItemLabelType< ItemType >
 ) => {
 	const escapedInputValue = inputValue.replace(
 		/[.*+?^${}()|[\]\\]/g,
 		'\\$&'
 	);
 	const re = new RegExp( escapedInputValue, 'gi' );
+	const getLabel = getItemLabel ?? ( ( item: ItemType ) => String( item ) );
 
 	return allItems.filter( ( item ) => {
 		return (
 			selectedItems.indexOf( item ) < 0 &&
-			re.test( getItemLabel( item ).toLowerCase() )
+			re.test( getLabel( item ).toLowerCase() )
 		);
 	} );
 };
