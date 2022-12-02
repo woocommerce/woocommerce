@@ -56,7 +56,8 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			// this shipping zone already exists, don't create it
 		} else {
 			await page.goto(
-				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new'
+				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new',
+				{ waitUntil: 'networkidle' }
 			);
 			await page.fill( '#zone_name', shippingZoneNameLocalPickup );
 
@@ -79,6 +80,12 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				'local_pickup'
 			);
 			await page.click( '#btn-ok' );
+			await page.waitForLoadState( 'networkidle' );
+			await expect(
+				page
+					.locator( '.wc-shipping-zone-method-title' )
+					.filter( { hasText: 'Local pickup' } )
+			).toBeVisible();
 
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
@@ -105,7 +112,8 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			// this shipping zone already exists, don't create it
 		} else {
 			await page.goto(
-				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new'
+				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new',
+				{ waitUntil: 'networkidle' }
 			);
 			await page.fill( '#zone_name', shippingZoneNameFreeShip );
 
@@ -125,6 +133,12 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				'free_shipping'
 			);
 			await page.click( '#btn-ok' );
+			await page.waitForLoadState( 'networkidle' );
+			await expect(
+				page
+					.locator( '.wc-shipping-zone-method-title' )
+					.filter( { hasText: 'Free shipping' } )
+			).toBeVisible();
 
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
@@ -148,7 +162,8 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			// this shipping zone already exists, don't create it
 		} else {
 			await page.goto(
-				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new'
+				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new',
+				{ waitUntil: 'networkidle' }
 			);
 			await page.fill( '#zone_name', shippingZoneNameFlatRate );
 
@@ -165,10 +180,17 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				'flat_rate'
 			);
 			await page.click( '#btn-ok' );
+			await page.waitForLoadState( 'networkidle' );
+			await expect(
+				page
+					.locator( '.wc-shipping-zone-method-title' )
+					.filter( { hasText: 'Flat rate' } )
+			).toBeVisible();
 
 			await page.click( 'a.wc-shipping-zone-method-settings' );
 			await page.fill( '#woocommerce_flat_rate_cost', '10' );
 			await page.click( '#btn-ok' );
+			await page.waitForLoadState( 'networkidle' );
 
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
