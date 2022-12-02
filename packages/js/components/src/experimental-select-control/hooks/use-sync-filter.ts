@@ -17,11 +17,11 @@ export default function useSyncFilter< T >( {
 }: UseSyncFilterInput< T > ): SelectControlProps< T > {
 	const handleInputChange = useCallback(
 		function handleInputChangeCallback( value?: string ) {
-			onFilterStart && onFilterStart( value );
+			if ( onFilterStart ) onFilterStart( value );
 			const filteredItems = filter( value );
-			onFilterEnd && onFilterEnd( filteredItems, value );
+			if ( onFilterEnd ) onFilterEnd( filteredItems, value );
 
-			onInputChange && onInputChange( value );
+			if ( onInputChange ) onInputChange( value );
 		},
 		[ filter, onFilterStart, onFilterEnd, onInputChange ]
 	);
