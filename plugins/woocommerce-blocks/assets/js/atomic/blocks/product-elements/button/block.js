@@ -33,17 +33,18 @@ import './style.scss';
  *
  * @param {Object} props             Incoming props.
  * @param {string} [props.className] CSS Class name for the component.
+ * @param {string} [props.textAlign] Text alignment.
  * @return {*} The component.
  */
 export const Block = ( props ) => {
 	const { className } = props;
-
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
 	const colorProps = useColorProps( props );
 	const borderProps = useBorderProps( props );
 	const typographyProps = useTypographyProps( props );
 	const spacingProps = useSpacingProps( props );
+	const { textAlign } = props;
 
 	return (
 		<div
@@ -54,6 +55,9 @@ export const Block = ( props ) => {
 				{
 					[ `${ parentClassName }__product-add-to-cart` ]:
 						parentClassName,
+				},
+				{
+					[ `has-text-align-${ textAlign }` ]: textAlign,
 				}
 			) }
 		>
@@ -86,6 +90,7 @@ export const Block = ( props ) => {
  * @param {Object} [props.borderStyles]     Object contains CSS class and CSS style for border.
  * @param {Object} [props.typographyStyles] Object contains CSS class and CSS style for typography.
  * @param {Object} [props.spacingStyles]    Object contains CSS style for spacing.
+ * @param {Object} [props.textAlign]        Text alignment.
  *
  * @return {*} The component.
  */
@@ -95,6 +100,7 @@ const AddToCartButton = ( {
 	borderStyles,
 	typographyStyles,
 	spacingStyles,
+	textAlign,
 } ) => {
 	const {
 		id,
@@ -170,6 +176,9 @@ const AddToCartButton = ( {
 				{
 					loading: addingToCart,
 					added: addedToCart,
+				},
+				{
+					[ `has-text-align-${ textAlign }` ]: textAlign,
 				}
 			) }
 			style={ {
