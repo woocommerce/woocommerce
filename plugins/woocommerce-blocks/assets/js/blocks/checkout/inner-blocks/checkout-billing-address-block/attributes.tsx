@@ -1,20 +1,18 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { BlockAttributes } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import formStepAttributes from '../../form-step/attributes';
+import { DEFAULT_TITLE, DEFAULT_DESCRIPTION } from './constants';
 
-export default {
+const attributes: BlockAttributes = {
 	...formStepAttributes( {
-		defaultTitle: __( 'Billing address', 'woo-gutenberg-products-block' ),
-		defaultDescription: __(
-			'Enter the billing address that matches your payment method.',
-			'woo-gutenberg-products-block'
-		),
+		defaultTitle: DEFAULT_TITLE,
+		defaultDescription: DEFAULT_DESCRIPTION,
 	} ),
 	className: {
 		type: 'string',
@@ -28,3 +26,4 @@ export default {
 		},
 	},
 };
+export default attributes;

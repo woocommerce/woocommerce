@@ -3,7 +3,6 @@
  */
 import { Icon, mapMarker } from '@wordpress/icons';
 import { registerBlockType } from '@wordpress/blocks';
-
 /**
  * Internal dependencies
  */
