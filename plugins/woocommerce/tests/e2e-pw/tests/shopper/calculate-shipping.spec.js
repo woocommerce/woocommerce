@@ -89,7 +89,7 @@ test.describe( 'Cart Calculate Shipping', () => {
 			method_id: 'local_pickup',
 		} );
 		// confirm that we allow shipping to any country
-		api.put( 'settings/general/woocommerce_allowed_countries', {
+		await api.put( 'settings/general/woocommerce_allowed_countries', {
 			value: 'all',
 		} );
 	} );
