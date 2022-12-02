@@ -85,7 +85,7 @@ test.describe( 'Checkout coupons', () => {
 		test( `allows checkout to apply coupon of type ${ coupons[ i ].discount_type }`, async ( {
 			page,
 		} ) => {
-			await page.goto( '/checkout/' );
+			await page.goto( '/checkout/', { waitUntil: 'networkidle' } );
 			await page.click( 'text=Click here to enter your code' );
 			await page.fill( '#coupon_code', coupons[ i ].code );
 			await page.click( 'text=Apply coupon' );
