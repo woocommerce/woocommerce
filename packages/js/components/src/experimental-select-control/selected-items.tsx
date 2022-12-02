@@ -9,7 +9,7 @@ import { createElement, Fragment } from '@wordpress/element';
 import Tag from '../tag';
 import { getItemLabelType, getItemValueType } from './types';
 
-type SelectedItemsProps< ItemType > = {
+export type SelectedItemsProps< ItemType > = {
 	items: ItemType[];
 	getItemLabel: getItemLabelType< ItemType >;
 	getItemValue: getItemValueType< ItemType >;
