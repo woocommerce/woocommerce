@@ -74,8 +74,7 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 
 	return (
 		<CustomerFeedbackModal
-			title={ visibleCESModalData.label }
-			description={ visibleCESModalData.description }
+			title={ visibleCESModalData.title }
 			firstQuestion={ visibleCESModalData.firstQuestion }
 			secondQuestion={ visibleCESModalData.secondQuestion }
 			recordScoreCallback={ ( ...args ) => {

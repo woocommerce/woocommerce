@@ -42,7 +42,7 @@ export const ProductMoreMenu = () => {
 								showCesModal(
 									{
 										action: 'new_product',
-										label: __(
+										title: __(
 											"How's your experience with the product editor?",
 											'woocommerce'
 										),

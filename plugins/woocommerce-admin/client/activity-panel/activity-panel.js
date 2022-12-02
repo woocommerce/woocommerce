@@ -281,12 +281,21 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			icon: <FeedbackIcon />,
 			onClick: () => {
 				showCesModal(
-					'product_feedback',
-					__(
-						"How's your experience with the product editor?",
-						'woocommerce'
-					),
-					undefined,
+					{
+						action: 'product_feedback',
+						title: __(
+							"How's your experience with the product editor?",
+							'woocommerce'
+						),
+						firstQuestion: __(
+							'The product editing screen is easy to use',
+							'woocommerce'
+						),
+						secondQuestion: __(
+							"The product editing screen's functionality meets my needs",
+							'woocommerce'
+						),
+					},
 					{},
 					{
 						type: 'snackbar',
