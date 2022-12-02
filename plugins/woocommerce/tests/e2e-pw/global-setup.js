@@ -168,7 +168,7 @@ module.exports = async ( config ) => {
 	await customerContext.close();
 	await browser.close();
 
-	if ( baseURL !== 'http://localhost:8086' ) {
+	if ( process.env.RESET_SITE === 'true' ) {
 		await site.reset(
 			process.env.CONSUMER_KEY,
 			process.env.CONSUMER_SECRET
