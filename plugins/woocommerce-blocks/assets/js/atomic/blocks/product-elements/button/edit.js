@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { Disabled } from '@wordpress/components';
-import { useBlockProps } from '@wordpress/block-editor';
+import {
+	AlignmentToolbar,
+	BlockControls,
+	useBlockProps,
+} from '@wordpress/block-editor';
 import { useEffect } from '@wordpress/element';
 
 /**
@@ -19,11 +23,23 @@ const Edit = ( { attributes, setAttributes, context } ) => {
 		[ setAttributes, isDescendentOfQueryLoop ]
 	);
 	return (
-		<div { ...blockProps }>
-			<Disabled>
-				<Block { ...{ ...attributes, ...context } } />
-			</Disabled>
-		</div>
+		<>
+			<BlockControls>
+				{ isDescendentOfQueryLoop && (
+					<AlignmentToolbar
+						value={ attributes.textAlign }
+						onChange={ ( newAlign ) => {
+							setAttributes( { textAlign: newAlign || '' } );
+						} }
+					/>
+				) }
+			</BlockControls>
+			<div { ...blockProps }>
+				<Disabled>
+					<Block { ...{ ...attributes, ...context } } />
+				</Disabled>
+			</div>
+		</>
 	);
 };
 
