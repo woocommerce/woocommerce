@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useBlockProps } from '@wordpress/block-editor';
+import {
+	AlignmentToolbar,
+	BlockControls,
+	useBlockProps,
+} from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { useEffect } from 'react';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
@@ -35,9 +39,21 @@ const Edit = ( {
 	);
 
 	return (
-		<div { ...blockProps }>
-			<Block { ...blockAttrs } />
-		</div>
+		<>
+			<BlockControls>
+				{ isDescendentOfQueryLoop && (
+					<AlignmentToolbar
+						value={ attributes.textAlign }
+						onChange={ ( newAlign ) => {
+							setAttributes( { textAlign: newAlign || '' } );
+						} }
+					/>
+				) }
+			</BlockControls>
+			<div { ...blockProps }>
+				<Block { ...blockAttrs } />
+			</div>
+		</>
 	);
 };
 export default withProductSelector( {

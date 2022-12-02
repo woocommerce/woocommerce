@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 /**
  * ProductRating class.
  */
@@ -109,10 +110,13 @@ class ProductRating extends AbstractBlock {
 		);
 
 		if ( $product ) {
+			$classes_and_styles = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
+
 			return sprintf(
-				'<div class="wc-block-components-product-rating wc-block-grid__product-rating">
+				'<div class="wc-block-components-product-rating wc-block-grid__product-rating %s">
 					%s
 				</div>',
+				esc_attr( $classes_and_styles['class'] ?? '' ),
 				wc_get_rating_html( $product->get_average_rating() )
 			);
 		}
