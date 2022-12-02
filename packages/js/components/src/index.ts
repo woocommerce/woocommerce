@@ -48,6 +48,7 @@ export {
 	useAsyncFilter,
 	useSyncFilter,
 } from './experimental-select-control';
+export type { SelectControlProps } from './experimental-select-control';
 export {
 	MenuItem as __experimentalSelectControlMenuItem,
 	MenuItemProps as __experimentalSelectControlMenuItemProps,
