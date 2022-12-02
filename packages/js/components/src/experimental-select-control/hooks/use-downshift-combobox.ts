@@ -150,7 +150,7 @@ export default function useDownshiftCombobox< T >( {
 			onRemove: onRemoveItem,
 		},
 		children:
-			typeof children == 'function'
+			typeof children === 'function'
 				? children( {
 						items,
 						isOpen,
