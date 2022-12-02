@@ -65,15 +65,25 @@ export const ProductMVPCESFooter: React.FC = () => {
 
 	const shareFeedback = () => {
 		showCesModal(
-			cesAction,
-			__(
-				"How's your experience with the product editor?",
-				'woocommerce'
-			),
-			__(
-				"Thanks for the feedback. We'll put it to good use!",
-				'woocommerce'
-			),
+			{
+				action: cesAction,
+				label: __(
+					"How's your experience with the product editor?",
+					'woocommerce'
+				),
+				firstQuestion: __(
+					'The product editing screen is easy to use',
+					'woocommerce'
+				),
+				secondQuestion: __(
+					"The product editing screen's functionality meets my needs",
+					'woocommerce'
+				),
+				onsubmitLabel: __(
+					"Thanks for the feedback. We'll put it to good use!",
+					'woocommerce'
+				),
+			},
 			{},
 			{
 				type: 'snackbar',
@@ -92,32 +102,6 @@ export const ProductMVPCESFooter: React.FC = () => {
 		updateOptions( {
 			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: 'hide',
 		} );
-	};
-
-	const recordScore = (
-		score: number,
-		secondScore: number,
-		comments: string
-	) => {
-		recordEvent( 'ces_feedback', {
-			action: cesAction,
-			score,
-			score_second_question: secondScore ?? null,
-			score_combined: score + ( secondScore ?? 0 ),
-			comments: comments || '',
-			store_age: storeAgeInWeeks,
-		} );
-		createSuccessNotice(
-			__(
-				"Thanks for the feedback. We'll put it to good use!",
-				'woocommerce'
-			),
-			{
-				type: 'snackbar',
-				icon: <span>🌟</span>,
-			}
-		);
-		setShowFeedbackModal( false );
 	};
 
 	const showCESFooter =
@@ -158,24 +142,6 @@ export const ProductMVPCESFooter: React.FC = () => {
 						></Button>
 					</div>
 				</WooFooterItem>
-			) }
-			{ showFeedbackModal && (
-				<CustomerFeedbackModal
-					title={ __(
-						"How's your experience with the product editor?",
-						'woocommerce'
-					) }
-					firstQuestion={ __(
-						'The product editing screen is easy to use',
-						'woocommerce'
-					) }
-					secondQuestion={ __(
-						"The product editing screen's functionality meets my needs",
-						'woocommerce'
-					) }
-					recordScoreCallback={ recordScore }
-					onCloseModal={ () => setShowFeedbackModal( false ) }
-				/>
 			) }
 		</>
 	);

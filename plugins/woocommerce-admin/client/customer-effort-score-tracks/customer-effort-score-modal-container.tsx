@@ -42,10 +42,16 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 		};
 	} );
 
-	const recordScore = ( score: number, comments: string ) => {
+	const recordScore = (
+		score: number,
+		secondScore: number,
+		comments: string
+	) => {
 		recordEvent( 'ces_feedback', {
 			action: visibleCESModalData.action,
 			score,
+			score_second_question: secondScore ?? null,
+			score_combined: score + ( secondScore ?? 0 ),
 			comments: comments || '',
 			store_age: storeAgeInWeeks,
 		} );
@@ -66,7 +72,9 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 
 	return (
 		<CustomerFeedbackModal
-			label={ visibleCESModalData.label }
+			title={ visibleCESModalData.label }
+			firstQuestion={ visibleCESModalData.firstQuestion }
+			secondQuestion={ visibleCESModalData.secondQuestion }
 			recordScoreCallback={ recordScore }
 			onCloseModal={ () => hideCesModal() }
 		/>
