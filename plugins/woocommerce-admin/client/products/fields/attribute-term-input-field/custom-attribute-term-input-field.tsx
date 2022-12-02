@@ -3,9 +3,11 @@
  */
 import { sprintf, __ } from '@wordpress/i18n';
 import { CheckboxControl, Icon } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { useCallback, useState } from '@wordpress/element';
 import { plus } from '@wordpress/icons';
 import {
+	SelectControlProps,
+	useSyncFilter,
 	__experimentalSelectControl as SelectControl,
 	__experimentalSelectControlMenu as Menu,
 	__experimentalSelectControlMenuItem as MenuItem,
@@ -35,6 +37,44 @@ function isNewTermItem(
 	return item !== null && typeof item === 'object' && !! item.label;
 }
 
+/**
+ * Add a new item at the end of the list if the
+ * current set of items do not match exactly the
+ * input's value
+ *
+ * @param allItems The item list
+ * @param inputValue The input's value
+ * @return The `allItems` + 1 new item if condition is met
+ */
+function addCreateNewAttributeTermItem(
+	allItems: ( string | NewTermItem )[],
+	inputValue: string
+) {
+	const filteredItems = allItems.filter(
+		( item ) =>
+			! inputValue.length ||
+			( ! isNewTermItem( item ) &&
+				item.toLowerCase().includes( inputValue.toLowerCase() ) )
+	);
+	if (
+		inputValue.length > 0 &&
+		! filteredItems.find(
+			( item ) =>
+				! isNewTermItem( item ) &&
+				item.toLowerCase() === inputValue.toLowerCase()
+		)
+	) {
+		return [
+			...filteredItems,
+			{
+				id: 'is-new',
+				label: inputValue,
+			},
+		];
+	}
+	return filteredItems;
+}
+
 export const CustomAttributeTermInputField: React.FC<
 	CustomAttributeTermInputFieldProps
 > = ( { value = [], onChange, placeholder, disabled, label } ) => {
@@ -60,51 +100,39 @@ export const CustomAttributeTermInputField: React.FC<
 		onChange( [ ...value, item ] );
 	};
 
+	const selectProps: SelectControlProps< string | NewTermItem > = {
+		items: listItems,
+		multiple: true,
+		disabled,
+		label: label || '',
+		placeholder: placeholder || '',
+		getItemLabel: ( item: string | NewTermItem | null ) =>
+			isNewTermItem( item ) ? item.label : item || '',
+		getItemValue: ( item: string | NewTermItem | null ) =>
+			isNewTermItem( item ) ? item.id : item || '',
+		selected: value,
+		onSelect,
+		onRemove,
+		className: 'woocommerce-attribute-term-field',
+	};
+
+	const selectPropsWithSyncFilter = useSyncFilter< string | NewTermItem >( {
+		...selectProps,
+		filter: useCallback(
+			function filter( inputValue = '' ) {
+				return addCreateNewAttributeTermItem( value, inputValue );
+			},
+			[ value ]
+		),
+		onFilterEnd( filteredItems: ( string | NewTermItem )[] ) {
+			setListItems( filteredItems );
+		},
+	} );
+
 	return (
 		<>
 			<SelectControl< string | NewTermItem >
-				items={ listItems }
-				multiple
-				disabled={ disabled }
-				label={ label || '' }
-				placeholder={ placeholder || '' }
-				getItemLabel={ ( item ) =>
-					isNewTermItem( item ) ? item.label : item || ''
-				}
-				getItemValue={ ( item ) =>
-					isNewTermItem( item ) ? item.id : item || ''
-				}
-				getFilteredItems={ ( allItems, inputValue ) => {
-					const filteredItems = allItems.filter(
-						( item ) =>
-							! inputValue.length ||
-							( ! isNewTermItem( item ) &&
-								item
-									.toLowerCase()
-									.includes( inputValue.toLowerCase() ) )
-					);
-					if (
-						inputValue.length > 0 &&
-						! filteredItems.find(
-							( item ) =>
-								! isNewTermItem( item ) &&
-								item.toLowerCase() === inputValue.toLowerCase()
-						)
-					) {
-						return [
-							...filteredItems,
-							{
-								id: 'is-new',
-								label: inputValue,
-							},
-						];
-					}
-					return filteredItems;
-				} }
-				selected={ value }
-				onSelect={ onSelect }
-				onRemove={ onRemove }
-				className="woocommerce-attribute-term-field"
+				{ ...selectPropsWithSyncFilter }
 			>
 				{ ( {
 					items,
