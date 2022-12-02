@@ -37,6 +37,7 @@ import { Header } from '../header';
 import { Footer } from './footer';
 import Notices from './notices';
 import TransientNotices from './transient-notices';
+import { CustomerEffortScoreModalContainer } from '../customer-effort-score-tracks';
 import { getAdminSetting } from '~/utils/admin-settings';
 import '~/activity-panel';
 import '~/mobile-banner';
@@ -248,6 +249,7 @@ class _Layout extends Component {
 							</Suspense>
 						) }
 						<Footer />
+						<CustomerEffortScoreModalContainer />
 					</div>
 					<PluginArea scope="woocommerce-admin" />
 					{ window.wcAdminFeatures.navigation && (
