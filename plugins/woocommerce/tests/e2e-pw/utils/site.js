@@ -1,5 +1,22 @@
 const api = require( './api' );
 
+const deleteAllCoupons = async () => {
+	console.log( 'Deleting all coupons...' );
+
+	let coupons,
+		page = 1;
+
+	while (
+		( coupons = await api.get.coupons( { per_page: 100, page: page++ } ) )
+			.length > 0
+	) {
+		const ids = coupons.map( ( { id } ) => id );
+		await api.deletePost.coupons( ids );
+	}
+
+	console.log( 'Done.' );
+};
+
 const deleteAllProducts = async () => {
 	console.log( 'Deleting all products...' );
 
@@ -117,15 +134,49 @@ const deleteAllShippingZones = async () => {
 	console.log( 'Done.' );
 };
 
+const deleteAllShippingClasses = async () => {
+	console.log( 'Deleting all shipping classes...' );
+
+	let shippingClasses,
+		page = 1;
+
+	while (
+		( shippingClasses = await api.get.shippingClasses( {
+			per_page: 100,
+			page: page++,
+		} ) ).length > 0
+	) {
+		const ids = shippingClasses.map( ( { id } ) => id );
+		await api.deletePost.shippingClasses( ids );
+	}
+
+	console.log( 'Done.' );
+};
+
+const deleteAllShippingMethodsInDefaultShippingZone = async () => {
+	console.log( 'Deleting all shipping methods...' );
+
+	let shippingMethods;
+
+	while (
+		( shippingMethods = await api.get.shippingZoneMethods( 0 ) ).length > 0
+	) {
+		const ids = shippingMethods.map( ( { id } ) => id );
+		for ( const id of ids ) {
+			await api.deletePost.shippingZoneMethod( 0, id );
+		}
+	}
+
+	console.log( 'Done.' );
+};
+
 const deleteAllTaxClasses = async () => {
 	console.log( 'Deleting all non-default tax classes...' );
 
 	let taxClasses;
 
 	const getExistingNonDefaultTaxClasses = async () => {
-		return (
-			await api.get.taxClasses(  )
-		 ).filter(
+		return ( await api.get.taxClasses() ).filter(
 			( { slug } ) =>
 				! [ 'standard', 'reduced-rate', 'zero-rate' ].includes( slug )
 		);
@@ -173,12 +224,15 @@ const reset = async ( cKey, cSecret ) => {
 
 	api.constructWith( cKey, cSecret );
 
+	await deleteAllCoupons();
 	await deleteAllProducts();
 	await deleteAllProductAttributes();
 	await deleteAllProductCategories();
 	await deleteAllProductTags();
 	await deleteAllOrders();
+	await deleteAllShippingClasses();
 	await deleteAllShippingZones();
+	await deleteAllShippingMethodsInDefaultShippingZone();
 	await deleteAllTaxClasses();
 	await deleteAllTaxRates();
 };

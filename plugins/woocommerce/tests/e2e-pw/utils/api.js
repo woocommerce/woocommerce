@@ -89,6 +89,19 @@ const update = {
 };
 
 const get = {
+	coupons: async ( params ) => {
+		const response = await api
+			.get( 'coupons', params )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					'Something went wrong when trying to list all coupons.'
+				);
+			} );
+
+		return response.data;
+	},
 	defaultCountry: async () => {
 		const response = await api.get(
 			'settings/general/woocommerce_default_country'
@@ -163,6 +176,20 @@ const get = {
 
 		return response.data;
 	},
+	shippingClasses: async ( params ) => {
+		const response = await api
+			.get( 'products/shipping_classes', params )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					'Something went wrong when trying to list all shipping classes.'
+				);
+			} );
+
+		return response.data;
+	},
+
 	shippingZones: async ( params ) => {
 		const response = await api
 			.get( 'shipping/zones', params )
@@ -171,6 +198,19 @@ const get = {
 				throwCustomError(
 					error,
 					'Something went wrong when trying to list all shipping zones.'
+				);
+			} );
+
+		return response.data;
+	},
+	shippingZoneMethods: async ( shippingZoneId ) => {
+		const response = await api
+			.get( `shipping/zones/${ shippingZoneId }/methods` )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					`Something went wrong when trying to list all shipping methods in shipping zone ${ shippingZoneId }.`
 				);
 			} );
 
@@ -217,6 +257,17 @@ const create = {
 };
 
 const deletePost = {
+	coupons: async ( ids ) => {
+		await api
+			.post( 'coupons/batch', { delete: ids } )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					'Something went wrong when batch deleting coupons.'
+				);
+			} );
+	},
 	product: async ( id ) => {
 		await api.delete( `products/${ id }`, {
 			force: true,
@@ -282,10 +333,45 @@ const deletePost = {
 				);
 			} );
 	},
+	shippingClasses: async ( ids ) => {
+		await api
+			.post( 'products/shipping_classes/batch', { delete: ids } )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					'Something went wrong when batch deleting shipping classes.'
+				);
+			} );
+	},
 	shippingZone: async ( id ) => {
-		await api.delete( `shipping/zones/${ id }`, {
-			force: true,
-		} );
+		await api
+			.delete( `shipping/zones/${ id }`, {
+				force: true,
+			} )
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					'Something went wrong when deleting shipping zone.'
+				);
+			} );
+	},
+	shippingZoneMethod: async ( shippingZoneId, shippingMethodId ) => {
+		await api
+			.delete(
+				`shipping/zones/${ shippingZoneId }/methods/${ shippingMethodId }`,
+				{
+					force: true,
+				}
+			)
+			.then( ( response ) => response )
+			.catch( ( error ) => {
+				throwCustomError(
+					error,
+					'Something went wrong when deleting shipping zone method.'
+				);
+			} );
 	},
 	taxClass: async ( slug ) => {
 		await api
