@@ -43,6 +43,7 @@ export default function useDownshiftCombobox< T >( {
 	onSelect = () => {},
 	onRemove = () => {},
 	onFocus = () => {},
+	...props
 }: UseDownshiftComboboxInput< T > ): UseDownshiftComboboxOutput< T > {
 	const [ isFocused, setIsFocused ] = useState( false );
 
@@ -121,6 +122,7 @@ export default function useDownshiftCombobox< T >( {
 	};
 
 	return {
+		...props,
 		hasExternalTags,
 		className: classNames( className, { 'is-focused': isFocused } ),
 		labelProps: getLabelProps( { children: label } ),
@@ -185,6 +187,7 @@ export type UseDownshiftComboboxInput< T > = {
 	selected: T | T[] | null;
 	className?: string;
 	disabled?: boolean;
+	suffix?: JSX.Element | null;
 	/**
 	 * This is a feature already implemented in downshift@7.0.0 through the
 	 * reducer. In order for us to use it this prop is added temporarily until
@@ -206,4 +209,5 @@ export type UseDownshiftComboboxOutput< T > = React.PropsWithChildren< {
 	selectedItemsProps: SelectedItemsProps< T >;
 	className?: string;
 	hasExternalTags?: boolean;
+	suffix?: JSX.Element | null;
 } >;
