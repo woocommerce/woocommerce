@@ -27,7 +27,7 @@ If you are using Windows, we recommend using [Windows Subsystem for Linux (WSL)]
 
 ### Introduction
 
-End-to-end tests are powered by Playwright. The test site is spinned up using `wp-env` (recommended), but we also temporarily support `e2e-environment` (deprecated).
+End-to-end tests are powered by Playwright. The test site is spinned up using `wp-env` (recommended), but we will continue to support `e2e-environment` in the meantime.
 
 **Running tests for the first time:**
 

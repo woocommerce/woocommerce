@@ -75,11 +75,38 @@ class WC_Site_Tracking {
 		 * @since 6.5.0
 		 */
 		$filtered_properties = apply_filters( 'woocommerce_tracks_event_properties', $client_tracking_properties, false );
+		$environment_type    = function_exists( 'wp_get_environment_type' ) ? wp_get_environment_type() : 'production';
 		?>
 		<!-- WooCommerce Tracks -->
 		<script type="text/javascript">
 			window.wcTracks = window.wcTracks || {};
 			window.wcTracks.isEnabled = <?php echo self::is_tracking_enabled() ? 'true' : 'false'; ?>;
+			window.wcTracks.validateEvent = function( eventName, props = {} ) {
+				let isValid = true;
+				if ( ! <?php echo esc_js( WC_Tracks_Event::EVENT_NAME_REGEX ); ?>.test( eventName ) ) {
+					if ( <?php echo $environment_type !== 'production' ? 'true' : 'false'; ?> ) {
+						/* eslint-disable no-console */
+						console.error(
+							`A valid event name must be specified. The event name: "${ eventName }" is not valid.`
+						);
+						/* eslint-enable no-console */
+					}
+					isValid = false;
+				}
+				for ( const prop of Object.keys( props ) ) {
+					if ( ! <?php echo esc_js( WC_Tracks_Event::PROP_NAME_REGEX ); ?>.test( prop ) ) {
+						if ( <?php echo $environment_type !== 'production' ? 'true' : 'false'; ?> ) {
+							/* eslint-disable no-console */
+							console.error(
+								`A valid prop name must be specified. The property name: "${ prop }" is not valid.`
+							);
+							/* eslint-enable no-console */
+						}
+						isValid = false;
+					}
+				}
+				return isValid;
+			}
 			window.wcTracks.recordEvent = function( name, properties ) {
 				if ( ! window.wcTracks.isEnabled ) {
 					return;
@@ -93,15 +120,9 @@ class WC_Site_Tracking {
 					delete( eventProperties._ui );
 					delete( eventProperties._ut );
 				}
-				// Verify the event name is correct
-				if ( ! <?php echo esc_js( WC_Tracks_Event::EVENT_NAME_REGEX ); ?>.test( eventName ) ) {
-					console.error( `A valid event name must be specified. The event name: "${ eventName }" is not valid.` );
-				}
-				// Verify the properties are correct
-				for( prop in eventProperties ) {
-					if ( ! <?php echo esc_js( WC_Tracks_Event::PROP_NAME_REGEX ); ?>.test( prop ) ) {
-						console.error( `A valid prop name must be specified. The property name: "${ prop }" is not valid.` );
-					}
+
+				if ( ! window.wcTracks.validateEvent( eventName, eventProperties ) ) {
+					return;
 				}
 				window._tkq = window._tkq || [];
 				window._tkq.push( [ 'recordEvent', eventName, eventProperties ] );

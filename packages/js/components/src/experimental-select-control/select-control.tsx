@@ -2,45 +2,86 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { createElement } from 'react';
-import { useCombobox, useMultipleSelection } from 'downshift';
-import { useState, Fragment } from '@wordpress/element';
+import {
+	useCombobox,
+	UseComboboxState,
+	UseComboboxStateChangeOptions,
+	useMultipleSelection,
+} from 'downshift';
+import {
+	useState,
+	useEffect,
+	createElement,
+	Fragment,
+} from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { ChildrenType, ItemType } from './types';
+import {
+	ChildrenType,
+	DefaultItemType,
+	getItemLabelType,
+	getItemValueType,
+} from './types';
 import { SelectedItems } from './selected-items';
 import { ComboBox } from './combo-box';
 import { Menu } from './menu';
 import { MenuItem } from './menu-item';
 import {
-	itemToString as defaultItemToString,
-	getFilteredItems as defaultGetFilteredItems,
+	defaultGetItemLabel,
+	defaultGetItemValue,
+	defaultGetFilteredItems,
 } from './utils';
 
-type SelectControlProps = {
-	children?: ChildrenType;
+type SelectControlProps< ItemType > = {
+	children?: ChildrenType< ItemType >;
 	items: ItemType[];
-	label: string;
-	initialSelectedItems?: ItemType[];
-	itemToString?: ( item: ItemType | null ) => string;
+	label: string | JSX.Element;
+	getItemLabel?: getItemLabelType< ItemType >;
+	getItemValue?: getItemValueType< ItemType >;
 	getFilteredItems?: (
 		allItems: ItemType[],
 		inputValue: string,
-		selectedItems: ItemType[]
+		selectedItems: ItemType[],
+		getItemLabel: getItemLabelType< ItemType >
 	) => ItemType[];
+	hasExternalTags?: boolean;
 	multiple?: boolean;
-	onInputChange?: ( value: string | undefined ) => void;
+	onInputChange?: (
+		value: string | undefined,
+		changes: Partial< Omit< UseComboboxState< ItemType >, 'inputValue' > >
+	) => void;
 	onRemove?: ( item: ItemType ) => void;
 	onSelect?: ( selected: ItemType ) => void;
+	onFocus?: ( data: { inputValue: string } ) => void;
+	stateReducer?: (
+		state: UseComboboxState< ItemType | null >,
+		actionAndChanges: UseComboboxStateChangeOptions< ItemType | null >
+	) => Partial< UseComboboxState< ItemType | null > >;
 	placeholder?: string;
 	selected: ItemType | ItemType[] | null;
+	className?: string;
+	disabled?: boolean;
+	/**
+	 * This is a feature already implemented in downshift@7.0.0 through the
+	 * reducer. In order for us to use it this prop is added temporarily until
+	 * current downshift version get updated.
+	 *
+	 * @see https://www.downshift-js.com/use-multiple-selection#usage-with-combobox
+	 * @default false
+	 */
+	__experimentalOpenMenuOnFocus?: boolean;
 };
 
-export const SelectControl = ( {
+export const selectControlStateChangeTypes = useCombobox.stateChangeTypes;
+
+function SelectControl< ItemType = DefaultItemType >( {
+	getItemLabel = defaultGetItemLabel,
+	getItemValue = defaultGetItemValue,
+	hasExternalTags = false,
 	children = ( {
-		items,
+		items: renderItems,
 		highlightedIndex,
 		getItemProps,
 		getMenuProps,
@@ -48,15 +89,15 @@ export const SelectControl = ( {
 	} ) => {
 		return (
 			<Menu getMenuProps={ getMenuProps } isOpen={ isOpen }>
-				{ items.map( ( item, index: number ) => (
+				{ renderItems.map( ( item, index: number ) => (
 					<MenuItem
-						key={ `${ item.value }${ index }` }
+						key={ `${ getItemValue( item ) }${ index }` }
 						index={ index }
 						isActive={ highlightedIndex === index }
 						item={ item }
 						getItemProps={ getItemProps }
 					>
-						{ item.label }
+						{ getItemLabel( item ) }
 					</MenuItem>
 				) ) }
 			</Menu>
@@ -65,22 +106,48 @@ export const SelectControl = ( {
 	multiple = false,
 	items,
 	label,
-	itemToString = defaultItemToString,
 	getFilteredItems = defaultGetFilteredItems,
 	onInputChange = () => null,
 	onRemove = () => null,
 	onSelect = () => null,
+	onFocus = () => null,
+	stateReducer = ( state, actionAndChanges ) => actionAndChanges.changes,
 	placeholder,
 	selected,
-}: SelectControlProps ) => {
+	className,
+	disabled,
+	__experimentalOpenMenuOnFocus = false,
+}: SelectControlProps< ItemType > ) {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
-	const { getSelectedItemProps, getDropdownProps } = useMultipleSelection();
+
 	let selectedItems = selected === null ? [] : selected;
 	selectedItems = Array.isArray( selectedItems )
 		? selectedItems
 		: [ selectedItems ].filter( Boolean );
-	const filteredItems = getFilteredItems( items, inputValue, selectedItems );
+	const singleSelectedItem =
+		! multiple && selectedItems.length ? selectedItems[ 0 ] : null;
+	const filteredItems = getFilteredItems(
+		items,
+		inputValue,
+		selectedItems,
+		getItemLabel
+	);
+	const {
+		getSelectedItemProps,
+		getDropdownProps,
+		removeSelectedItem,
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+	} = useMultipleSelection( { itemToString: getItemLabel, selectedItems } );
+
+	useEffect( () => {
+		if ( multiple ) {
+			return;
+		}
+
+		setInputValue( getItemLabel( singleSelectedItem ) );
+	}, [ singleSelectedItem ] );
 
 	const {
 		isOpen,
@@ -90,74 +157,136 @@ export const SelectControl = ( {
 		getComboboxProps,
 		highlightedIndex,
 		getItemProps,
-	} = useCombobox( {
+		selectItem,
+		selectedItem: comboboxSingleSelectedItem,
+		openMenu,
+		closeMenu,
+	} = useCombobox< ItemType | null >( {
+		initialSelectedItem: singleSelectedItem,
 		inputValue,
 		items: filteredItems,
-		itemToString,
-		selectedItem: null,
-		onStateChange: ( { inputValue: value, type, selectedItem } ) => {
+		selectedItem: multiple ? null : singleSelectedItem,
+		itemToString: getItemLabel,
+		onSelectedItemChange: ( { selectedItem } ) =>
+			selectedItem && onSelect( selectedItem ),
+		onInputValueChange: ( { inputValue: value, ...changes } ) => {
+			if ( value !== undefined ) {
+				setInputValue( value );
+				onInputChange( value, changes );
+			}
+		},
+		stateReducer: ( state, actionAndChanges ) => {
+			const { changes, type } = actionAndChanges;
+			let newChanges;
 			switch ( type ) {
-				case useCombobox.stateChangeTypes.InputChange:
-					onInputChange( value );
-					setInputValue( value || '' );
-
+				case selectControlStateChangeTypes.InputBlur:
+					// Set input back to selected item if there is a selected item, blank otherwise.
+					newChanges = {
+						...changes,
+						inputValue:
+							changes.selectedItem === state.selectedItem &&
+							! multiple
+								? getItemLabel( comboboxSingleSelectedItem )
+								: '',
+					};
 					break;
-				case useCombobox.stateChangeTypes.InputKeyDownEnter:
-				case useCombobox.stateChangeTypes.ItemClick:
-				case useCombobox.stateChangeTypes.InputBlur:
-					if ( selectedItem ) {
-						onSelect( selectedItem );
-						setInputValue(
-							multiple ? '' : itemToString( selectedItem )
-						);
+				case selectControlStateChangeTypes.InputKeyDownEnter:
+				case selectControlStateChangeTypes.FunctionSelectItem:
+				case selectControlStateChangeTypes.ItemClick:
+					if ( changes.selectedItem && multiple ) {
+						newChanges = {
+							...changes,
+							inputValue: '',
+						};
 					}
-
 					break;
 				default:
 					break;
 			}
+			return stateReducer( state, {
+				...actionAndChanges,
+				changes: newChanges ?? changes,
+			} );
 		},
 	} );
 
+	const onRemoveItem = ( item: ItemType ) => {
+		selectItem( null );
+		removeSelectedItem( item );
+		onRemove( item );
+	};
+
+	const selectedItemTags = multiple ? (
+		<SelectedItems
+			items={ selectedItems }
+			getItemLabel={ getItemLabel }
+			getItemValue={ getItemValue }
+			getSelectedItemProps={ getSelectedItemProps }
+			onRemove={ onRemoveItem }
+		/>
+	) : null;
+
 	return (
 		<div
-			className={ classnames( 'woocommerce-experimental-select-control', {
-				'is-focused': isFocused,
-			} ) }
+			className={ classnames(
+				'woocommerce-experimental-select-control',
+				className,
+				{
+					'is-focused': isFocused,
+				}
+			) }
 		>
 			{ /* Downshift's getLabelProps handles the necessary label attributes. */ }
 			{ /* eslint-disable jsx-a11y/label-has-for */ }
-			<label { ...getLabelProps() }>{ label }</label>
+			{ label && (
+				<label
+					{ ...getLabelProps() }
+					className="woocommerce-experimental-select-control__label"
+				>
+					{ label }
+				</label>
+			) }
 			{ /* eslint-enable jsx-a11y/label-has-for */ }
-			<div className="woocommerce-experimental-select-control__combo-box-wrapper">
-				{ multiple && (
-					<SelectedItems
-						items={ selectedItems }
-						itemToString={ itemToString }
-						getSelectedItemProps={ getSelectedItemProps }
-						onRemove={ onRemove }
-					/>
-				) }
-				<ComboBox
-					comboBoxProps={ getComboboxProps() }
-					inputProps={ getInputProps( {
-						...getDropdownProps( { preventKeyAction: isOpen } ),
-						className:
-							'woocommerce-experimental-select-control__input',
-						onFocus: () => setIsFocused( true ),
-						onBlur: () => setIsFocused( false ),
-						placeholder,
+			<ComboBox
+				comboBoxProps={ getComboboxProps() }
+				inputProps={ getInputProps( {
+					...getDropdownProps( {
+						preventKeyAction: isOpen,
+					} ),
+					className: 'woocommerce-experimental-select-control__input',
+					onFocus: () => {
+						setIsFocused( true );
+						onFocus( { inputValue } );
+						if ( __experimentalOpenMenuOnFocus ) {
+							openMenu();
+						}
+					},
+					onBlur: () => setIsFocused( false ),
+					placeholder,
+					disabled,
+				} ) }
+			>
+				<>
+					{ children( {
+						items: filteredItems,
+						highlightedIndex,
+						getItemProps,
+						getMenuProps,
+						isOpen,
+						getItemLabel,
+						getItemValue,
+						selectItem,
+						setInputValue,
+						openMenu,
+						closeMenu,
 					} ) }
-				/>
-			</div>
+					{ ! hasExternalTags && selectedItemTags }
+				</>
+			</ComboBox>
 
-			{ children( {
-				items: filteredItems,
-				highlightedIndex,
-				getItemProps,
-				getMenuProps,
-				isOpen,
-			} ) }
+			{ hasExternalTags && selectedItemTags }
 		</div>
 	);
-};
+}
+
+export { SelectControl };

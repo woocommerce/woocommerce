@@ -39,6 +39,7 @@ class DefaultFreeExtensions {
 					self::get_plugin( 'mailpoet' ),
 					self::get_plugin( 'google-listings-and-ads' ),
 					self::get_plugin( 'facebook-for-woocommerce' ),
+					self::get_plugin( 'tiktok-for-business:alt' ),
 				],
 			],
 			[
@@ -82,7 +83,7 @@ class DefaultFreeExtensions {
 					'<a href="https://woocommerce.com/products/google-listings-and-ads" target="_blank">',
 					'</a>'
 				),
-				'image_url'      => plugins_url( '/assets/images/onboarding/google-listings-and-ads.png', WC_PLUGIN_FILE ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/google.svg', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
 				'is_visible'     => [
@@ -100,7 +101,7 @@ class DefaultFreeExtensions {
 			'google-listings-and-ads:alt'       => [
 				'name'           => __( 'Google Listings & Ads', 'woocommerce' ),
 				'description'    => __( 'Reach more shoppers and drive sales for your store. Integrate with Google to list your products for free and launch paid ad campaigns.', 'woocommerce' ),
-				'image_url'      => plugins_url( '/assets/images/onboarding/google-listings-and-ads.png', WC_PLUGIN_FILE ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/google.svg', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
 			],
@@ -667,6 +668,18 @@ class DefaultFreeExtensions {
 						],
 					],
 				],
+				'is_built_by_wc' => false,
+			],
+			'tiktok-for-business:alt'               => [
+				'name'           => __( 'TikTok for WooCommerce', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/tiktok.svg', WC_PLUGIN_FILE ),
+				'description'    => sprintf(
+					/* translators: 1: opening product link tag. 2: closing link tag */
+					__( 'Create ad campaigns and reach one billion global users with %1$sTikTok for WooCommerce%2$s', 'woocommerce' ),
+					'<a href="https://woocommerce.com/products/tiktok-for-woocommerce" target="_blank">',
+					'</a>'
+				),
+				'manage_url'     => 'admin.php?page=tiktok',
 				'is_built_by_wc' => false,
 			],
 		);

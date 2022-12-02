@@ -1,15 +1,43 @@
-.woocommerce-experimental-select-control__combox-box {
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
+.woocommerce-experimental-select-control__combo-box-wrapper {
+	cursor: text;
+	border: 1px solid $studio-gray-20;
+	border-radius: 2px;
+	background: $studio-white;
+	position: relative;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	padding: 2px 36px 2px $gap-smaller;
+	margin-bottom: 4px;
+	min-height: 36px;
+	box-sizing: border-box;
 
-    input {
-        width: 100%;
-        padding: $gap-smaller 0;
-    }
+	> * {
+		display: inline-flex;
+	}
+
+	&--disabled {
+		opacity: 0.5;
+	}
+}
+
+.woocommerce-experimental-select-control__combox-box {
+	flex-grow: 1;
+	align-items: center;
+	flex-basis: 120px;
+	display: inline-flex;
+
+	input {
+		width: 100%;
+		margin-top: 2px;
+		margin-bottom: 2px;
+		font-size: 13px;
+	}
 }
 
 .woocommerce-experimental-select-control__combox-box-icon {
-    padding-left: 10px;
-    margin-right: -2px;
+	position: absolute;
+	right: 6px;
+	top: 50%;
+	transform: translateY( -50% );
 }

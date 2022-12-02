@@ -1,7 +1,9 @@
 /**
  * External dependencies
  */
-import { render, waitFor } from '@testing-library/react';
+import { PropsWithChildren } from 'react';
+import { render, waitFor, screen, within } from '@testing-library/react';
+import { Fragment } from '@wordpress/element';
 import { Form, FormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -11,13 +13,20 @@ import userEvent from '@testing-library/user-event';
  * Internal dependencies
  */
 import { ProductFormActions } from '../product-form-actions';
+import { validate } from '../product-validation';
 
 const createProductWithStatus = jest.fn();
 const updateProductWithStatus = jest.fn();
 const copyProductWithStatus = jest.fn();
 const deleteProductAndRedirect = jest.fn();
 
+jest.mock( '@wordpress/plugins', () => ( { registerPlugin: jest.fn() } ) );
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
+jest.mock( '~/header/utils', () => ( {
+	WooHeaderItem: ( props: { children: () => React.ReactElement } ) => (
+		<Fragment { ...props }>{ props.children() }</Fragment>
+	),
+} ) );
 jest.mock( '../use-product-helper', () => {
 	return {
 		useProductHelper: () => ( {
@@ -28,6 +37,7 @@ jest.mock( '../use-product-helper', () => {
 		} ),
 	};
 } );
+jest.mock( '~/hooks/usePreventLeavingPage' );
 
 describe( 'ProductFormActions', () => {
 	beforeEach( () => {
@@ -45,19 +55,35 @@ describe( 'ProductFormActions', () => {
 		expect( queryByText( 'Publish' ) ).toBeInTheDocument();
 	} );
 
-	it( 'should have a publish dropdown button with three other actions', () => {
-		const { queryByText, queryByLabelText, debug } = render(
+	it( 'should have a publish dropdown button with two other actions', () => {
+		render(
 			<Form initialValues={ {} }>
 				<ProductFormActions />
 			</Form>
 		);
-		queryByLabelText( 'Publish options' )?.click();
-		expect( queryByText( 'Publish & duplicate' ) ).toBeInTheDocument();
-		expect( queryByText( 'Copy to a new draft' ) ).toBeInTheDocument();
-		expect( queryByText( 'Move to trash' ) ).toBeInTheDocument();
+		screen.getByLabelText( 'Publish options' ).click();
+		expect(
+			screen.queryByText( 'Publish & duplicate' )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText( 'Copy to a new draft' )
+		).toBeInTheDocument();
 	} );
 
 	describe( 'with new product', () => {
+		it( 'should not have the Move to trash button present', () => {
+			render(
+				<Form initialValues={ {} }>
+					<ProductFormActions />
+				</Form>
+			);
+
+			screen.getByLabelText( 'Publish options' ).click();
+			expect(
+				screen.queryByText( 'Move to trash' )
+			).not.toBeInTheDocument();
+		} );
+
 		it( 'should trigger createProductWithStatus and the product_edit track when Save draft is clicked', () => {
 			const product = { name: 'Name' };
 			const { queryByText } = render(
@@ -114,24 +140,24 @@ describe( 'ProductFormActions', () => {
 				true
 			);
 		} );
+	} );
 
-		it( 'should have the Move to trash button disabled', () => {
-			const product = { name: 'Name' };
-			const { queryByText, queryByLabelText } = render(
+	describe( 'with existing product', () => {
+		it( 'should have the Move to trash button present', () => {
+			const product: Partial< Product > = {
+				id: 5,
+				name: 'Name',
+			};
+			render(
 				<Form initialValues={ product }>
 					<ProductFormActions />
 				</Form>
 			);
-			queryByLabelText( 'Publish options' )?.click();
-			const moveToTrashButton = queryByText( 'Move to trash' );
-			expect(
-				( moveToTrashButton?.parentElement as HTMLButtonElement )
-					.disabled
-			).toEqual( true );
-		} );
-	} );
 
-	describe( 'with existing product', () => {
+			screen.getByLabelText( 'Publish options' ).click();
+			expect( screen.queryByText( 'Move to trash' ) ).toBeInTheDocument();
+		} );
+
 		it( 'The publish button should be renamed to Update when product is published', () => {
 			const { queryByText } = render(
 				<Form< Partial< Product > >
@@ -415,5 +441,135 @@ describe( 'ProductFormActions', () => {
 				expect( copyProductWithStatus ).toHaveBeenCalledWith( product )
 			);
 		} );
+	} );
+
+	describe( 'when the form is invalid', () => {
+		[ 'Save draft', 'Preview', 'Publish' ].forEach( ( buttonText ) => {
+			it( `should have the ${ buttonText } button disabled`, () => {
+				render(
+					<Form initialValues={ {} } validate={ validate }>
+						<ProductFormActions />
+					</Form>
+				);
+				const actionButton = screen.getByText( buttonText );
+				expect( actionButton ).toBeDisabled();
+			} );
+		} );
+
+		it( 'should have the Publish options menu button disabled', () => {
+			render(
+				<Form initialValues={ {} } validate={ validate }>
+					<ProductFormActions />
+				</Form>
+			);
+			expect( screen.getByLabelText( 'Publish options' ) ).toBeDisabled();
+		} );
+
+		it( 'should have the Publish options menu items disabled', () => {
+			render(
+				// This consider a product created and published
+				<Form
+					initialValues={ { id: 1, status: 'publish' } }
+					validate={ validate }
+				>
+					<ProductFormActions />
+				</Form>
+			);
+
+			const publishOptionsButton =
+				screen.getByLabelText( 'Publish options' );
+
+			userEvent.click( publishOptionsButton );
+
+			const optionsMenu = screen.getByRole( 'menu' );
+			[ 'Update & duplicate', 'Copy to a new draft' ].forEach(
+				( itemText ) => {
+					const menuItem = within( optionsMenu )
+						.getByText( itemText )
+						.closest( 'button' );
+					expect( menuItem ).toBeDisabled();
+				}
+			);
+		} );
+	} );
+} );
+
+describe( 'Validations', () => {
+	it( 'should not allow an empty product name', () => {
+		const nameErrorMessage = 'This field is required.';
+		const priceErrorMessage =
+			'Please enter a price with one monetary decimal point without thousand separators and currency symbols.';
+		const salePriceErrorMessage =
+			'Please enter a price with one monetary decimal point without thousand separators and currency symbols.';
+		const highSalePriceErrorMessage =
+			'Sale price cannot be equal to or higher than list price.';
+		const productWithoutName: Partial< Product > = {
+			name: '',
+		};
+		const productPriceWithText: Partial< Product > = {
+			name: 'My Product',
+			regular_price: 'text',
+		};
+		const productPriceWithNotAllowedCharacters: Partial< Product > = {
+			name: 'My Product',
+			regular_price: '%&@#¢∞¬÷200',
+		};
+		const productPriceWithSpaces: Partial< Product > = {
+			name: 'My Product',
+			regular_price: '2 0 0',
+		};
+		const productSalePriceWithText: Partial< Product > = {
+			name: 'My Product',
+			regular_price: '201',
+			sale_price: 'text',
+		};
+		const productSalePriceWithNotAllowedCharacters: Partial< Product > = {
+			name: 'My Product',
+			regular_price: '201',
+			sale_price: '%&@#¢∞¬÷200',
+		};
+		const productSalePriceWithSpaces: Partial< Product > = {
+			name: 'My Product',
+			regular_price: '201',
+			sale_price: '2 0 0',
+		};
+		const productSalePriceHigherThanRegular: Partial< Product > = {
+			name: 'My Product',
+			regular_price: '201',
+			sale_price: '202',
+		};
+		const validProduct: Partial< Product > = {
+			name: 'My Product',
+			regular_price: '200',
+			sale_price: '199',
+		};
+		expect( validate( productWithoutName ) ).toEqual( {
+			name: nameErrorMessage,
+		} );
+		expect( validate( productPriceWithText ) ).toEqual( {
+			regular_price: priceErrorMessage,
+		} );
+		expect( validate( productPriceWithNotAllowedCharacters ) ).toEqual( {
+			regular_price: priceErrorMessage,
+		} );
+		expect( validate( productPriceWithSpaces ) ).toEqual( {
+			regular_price: priceErrorMessage,
+		} );
+
+		expect( validate( productSalePriceWithText ) ).toEqual( {
+			sale_price: salePriceErrorMessage,
+		} );
+		expect( validate( productSalePriceWithNotAllowedCharacters ) ).toEqual(
+			{
+				sale_price: salePriceErrorMessage,
+			}
+		);
+		expect( validate( productSalePriceWithSpaces ) ).toEqual( {
+			sale_price: salePriceErrorMessage,
+		} );
+		expect( validate( productSalePriceHigherThanRegular ) ).toEqual( {
+			sale_price: highSalePriceErrorMessage,
+		} );
+		expect( validate( validProduct ) ).toEqual( {} );
 	} );
 } );

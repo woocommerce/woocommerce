@@ -133,15 +133,35 @@ final class WC_Cart_Session {
 			 *
 			 * @since 3.6.0
 			 *
-			 * @param bool $remove_cart_item_from_session If true, the item will not be added to the cart. Default: false.
-			 * @param string $key Cart item key.
-			 * @param array $values Cart item values e.g. quantity and product_id.
+			 * @param bool       $remove_cart_item_from_session If true, the item will not be added to the cart. Default: false.
+			 * @param string     $key Cart item key.
+			 * @param array      $values Cart item values e.g. quantity and product_id.
+			 * @param WC_Product $product The product being added to the cart.
 			 */
-			if ( apply_filters( 'woocommerce_pre_remove_cart_item_from_session', false, $key, $values ) ) {
+			if ( apply_filters( 'woocommerce_pre_remove_cart_item_from_session', false, $key, $values, $product ) ) {
 				$update_cart_session = true;
-				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
+				/**
+				 * Fires when cart item is removed from the session.
+				 *
+				 * @since 3.6.0
+				 *
+				 * @param string     $key Cart item key.
+				 * @param array      $values Cart item values e.g. quantity and product_id.
+				 * @param WC_Product $product The product being added to the cart.
+				 */
+				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values, $product );
 
-			} elseif ( ! $product->is_purchasable() ) {
+			/**
+			 * Allow 3rd parties to override this item's is_purchasable() result with cart item data.
+			 *
+			 * @param bool       $is_purchasable If false, the item will not be added to the cart. Default: product's is_purchasable() status.
+			 * @param string     $key Cart item key.
+			 * @param array      $values Cart item values e.g. quantity and product_id.
+			 * @param WC_Product $product The product being added to the cart.
+			 *
+			 * @since 7.0.0
+			 */
+			} elseif ( ! apply_filters( 'woocommerce_cart_item_is_purchasable', $product->is_purchasable(), $key, $values, $product ) ) {
 				$update_cart_session = true;
 				/* translators: %s: product name */
 				$message = sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $product->get_name() );
@@ -386,10 +406,7 @@ final class WC_Cart_Session {
 			}
 
 			foreach ( $item->get_meta_data() as $meta ) {
-				if ( taxonomy_is_product_attribute( $meta->key ) ) {
-					$term                     = get_term_by( 'slug', $meta->value, $meta->key );
-					$variations[ $meta->key ] = $term ? $term->name : $meta->value;
-				} elseif ( meta_is_product_attribute( $meta->key, $meta->value, $product_id ) ) {
+				if ( taxonomy_is_product_attribute( $meta->key ) || meta_is_product_attribute( $meta->key, $meta->value, $product_id ) ) {
 					$variations[ $meta->key ] = $meta->value;
 				}
 			}

@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as ProductDownloadDirectories;
@@ -31,7 +32,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '7.0.0';
+	public $version = '7.3.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -230,6 +231,7 @@ final class WooCommerce {
 		$container->get( CustomOrdersTableController::class );
 		$container->get( OptionSanitizer::class );
 		$container->get( BatchProcessingController::class );
+		$container->get( FeaturesController::class );
 	}
 
 	/**
@@ -598,6 +600,9 @@ final class WooCommerce {
 					break;
 				case 'twentytwentytwo':
 					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twenty-two.php';
+					break;
+				case 'twentytwentythree':
+					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twenty-three.php';
 					break;
 			}
 		}

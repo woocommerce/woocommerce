@@ -10,15 +10,24 @@ import {
 	MenuItem,
 } from '@wordpress/components';
 import { chevronDown, check, Icon } from '@wordpress/icons';
+import { registerPlugin } from '@wordpress/plugins';
 import { useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { navigateTo } from '@woocommerce/navigation';
+import { useSelect } from '@wordpress/data';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { store } from '@wordpress/viewport';
 
 /**
  * Internal dependencies
  */
-import './product-form-actions.scss';
+import usePreventLeavingPage from '~/hooks/usePreventLeavingPage';
+import { WooHeaderItem } from '~/header/utils';
 import { useProductHelper } from './use-product-helper';
+import './product-form-actions.scss';
 
 export const ProductFormActions: React.FC = () => {
 	const {
@@ -30,7 +39,18 @@ export const ProductFormActions: React.FC = () => {
 		isUpdatingPublished,
 		isDeleting,
 	} = useProductHelper();
-	const { isDirty, values, resetForm } = useFormContext< Product >();
+	const { isDirty, isValidForm, values, resetForm } =
+		useFormContext< Product >();
+
+	usePreventLeavingPage( isDirty );
+
+	const { isSmallViewport } = useSelect( ( select ) => {
+		return {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			//@ts-ignore Types don't appear to be working correctly on this package.
+			isSmallViewport: select( store ).isViewportMatch( '< medium' ),
+		};
+	} );
 
 	const getProductDataForTracks = () => {
 		return {
@@ -48,7 +68,13 @@ export const ProductFormActions: React.FC = () => {
 			...getProductDataForTracks(),
 		} );
 		if ( ! values.id ) {
-			createProductWithStatus( values, 'draft' );
+			const product = await createProductWithStatus( values, 'draft' );
+			if ( product?.id ) {
+				resetForm();
+				navigateTo( {
+					url: 'admin.php?page=wc-admin&path=/product/' + product.id,
+				} );
+			}
 		} else {
 			const product = await updateProductWithStatus(
 				values.id,
@@ -67,7 +93,13 @@ export const ProductFormActions: React.FC = () => {
 			...getProductDataForTracks(),
 		} );
 		if ( ! values.id ) {
-			createProductWithStatus( values, 'publish' );
+			const product = await createProductWithStatus( values, 'publish' );
+			if ( product?.id ) {
+				resetForm();
+				navigateTo( {
+					url: 'admin.php?page=wc-admin&path=/product/' + product.id,
+				} );
+			}
 		} else {
 			const product = await updateProductWithStatus(
 				values.id,
@@ -88,7 +120,7 @@ export const ProductFormActions: React.FC = () => {
 		if ( values.id ) {
 			await updateProductWithStatus( values.id, values, 'publish' );
 		} else {
-			await createProductWithStatus( values, 'publish', false, true );
+			await createProductWithStatus( values, 'publish', false );
 		}
 		await copyProductWithStatus( values );
 	};
@@ -108,23 +140,28 @@ export const ProductFormActions: React.FC = () => {
 		await copyProductWithStatus( values );
 	};
 
-	const onTrash = () => {
+	const onTrash = async () => {
 		recordEvent( 'product_delete', {
 			new_product_page: true,
 			...getProductDataForTracks(),
 		} );
 		if ( values.id ) {
-			deleteProductAndRedirect( values.id );
+			const product = await deleteProductAndRedirect( values.id );
+			if ( product?.id ) {
+				resetForm( product );
+				navigateTo( { url: 'edit.php?post_type=product' } );
+			}
 		}
 	};
 
 	const isPublished = values.id && values.status === 'publish';
-
-	return (
-		<div className="woocommerce-product-form-actions">
-			<Button
+	const SecondaryActionsComponent = isSmallViewport ? MenuItem : Button;
+	const secondaryActions = (
+		<>
+			<SecondaryActionsComponent
 				onClick={ onSaveDraft }
 				disabled={
+					! isValidForm ||
 					( ! isDirty &&
 						!! values.id &&
 						values.status !== 'publish' ) ||
@@ -151,81 +188,113 @@ export const ProductFormActions: React.FC = () => {
 				values.status !== 'publish'
 					? __( 'Saved', 'woocommerce' )
 					: null }
-			</Button>
-			<Button
+			</SecondaryActionsComponent>
+			<SecondaryActionsComponent
 				onClick={ () =>
 					recordEvent( 'product_preview_changes', {
 						new_product_page: true,
 						...getProductDataForTracks(),
 					} )
 				}
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				//@ts-ignore The `href` prop works for both Buttons and MenuItem's.
 				href={ values.permalink + '?preview=true' }
-				disabled={ ! values.permalink }
+				disabled={ ! isValidForm || ! values.permalink }
 				target="_blank"
 			>
 				{ __( 'Preview', 'woocommerce' ) }
-			</Button>
-			<ButtonGroup className="woocommerce-product-form-actions__publish-button-group">
-				<Button
-					onClick={ onPublish }
-					variant="primary"
-					isBusy={ isUpdatingPublished }
-					disabled={
-						( ! isDirty && !! isPublished ) ||
-						isUpdatingDraft ||
-						isUpdatingPublished ||
-						isDeleting
-					}
-				>
-					{ isUpdatingPublished
-						? __( 'Updating', 'woocommerce' )
-						: null }
-					{ isPublished && ! isUpdatingPublished
-						? __( 'Update', 'woocommerce' )
-						: null }
-					{ ! isPublished && ! isUpdatingPublished
-						? __( 'Publish', 'woocommerce' )
-						: null }
-				</Button>
-				<DropdownMenu
-					className="woocommerce-product-form-actions__publish-dropdown"
-					label={ __( 'Publish options', 'woocommerce' ) }
-					icon={ chevronDown }
-					popoverProps={ { position: 'bottom left' } }
-					toggleProps={ { variant: 'primary' } }
-				>
-					{ () => (
-						<>
-							<MenuGroup>
-								<MenuItem onClick={ onPublishAndDuplicate }>
-									{ isPublished
-										? __(
-												'Update & duplicate',
+			</SecondaryActionsComponent>
+		</>
+	);
+
+	return (
+		<WooHeaderItem>
+			{ () => (
+				<div className="woocommerce-product-form-actions">
+					{ ! isSmallViewport && secondaryActions }
+					<ButtonGroup className="woocommerce-product-form-actions__publish-button-group">
+						<Button
+							onClick={ onPublish }
+							variant="primary"
+							isBusy={ isUpdatingPublished }
+							disabled={
+								! isValidForm ||
+								( ! isDirty && !! isPublished ) ||
+								isUpdatingDraft ||
+								isUpdatingPublished ||
+								isDeleting
+							}
+						>
+							{ isUpdatingPublished
+								? __( 'Updating', 'woocommerce' )
+								: null }
+							{ isPublished && ! isUpdatingPublished
+								? __( 'Update', 'woocommerce' )
+								: null }
+							{ ! isPublished && ! isUpdatingPublished
+								? __( 'Publish', 'woocommerce' )
+								: null }
+						</Button>
+						<DropdownMenu
+							className="woocommerce-product-form-actions__publish-dropdown"
+							label={ __( 'Publish options', 'woocommerce' ) }
+							icon={ chevronDown }
+							popoverProps={ { position: 'bottom left' } }
+							toggleProps={ {
+								variant: 'primary',
+								disabled: ! values.id && ! isValidForm,
+							} }
+						>
+							{ () => (
+								<>
+									<MenuGroup>
+										{ isSmallViewport && secondaryActions }
+										<MenuItem
+											onClick={ onPublishAndDuplicate }
+											disabled={ ! isValidForm }
+										>
+											{ isPublished
+												? __(
+														'Update & duplicate',
+														'woocommerce'
+												  )
+												: __(
+														'Publish & duplicate',
+														'woocommerce'
+												  ) }
+										</MenuItem>
+										<MenuItem
+											onClick={ onCopyToNewDraft }
+											disabled={ ! isValidForm }
+										>
+											{ __(
+												'Copy to a new draft',
 												'woocommerce'
-										  )
-										: __(
-												'Publish & duplicate',
-												'woocommerce'
-										  ) }
-								</MenuItem>
-								<MenuItem onClick={ onCopyToNewDraft }>
-									{ __(
-										'Copy to a new draft',
-										'woocommerce'
-									) }
-								</MenuItem>
-								<MenuItem
-									onClick={ onTrash }
-									isDestructive
-									disabled={ ! values.id }
-								>
-									{ __( 'Move to trash', 'woocommerce' ) }
-								</MenuItem>
-							</MenuGroup>
-						</>
-					) }
-				</DropdownMenu>
-			</ButtonGroup>
-		</div>
+											) }
+										</MenuItem>
+										{ values.id && (
+											<MenuItem
+												onClick={ onTrash }
+												isDestructive
+											>
+												{ __(
+													'Move to trash',
+													'woocommerce'
+												) }
+											</MenuItem>
+										) }
+									</MenuGroup>
+								</>
+							) }
+						</DropdownMenu>
+					</ButtonGroup>
+				</div>
+			) }
+		</WooHeaderItem>
 	);
 };
+
+registerPlugin( 'action-buttons-header-item', {
+	render: ProductFormActions,
+	icon: 'admin-generic',
+} );

@@ -515,6 +515,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									type="checkbox"
 									class="<?php echo esc_attr( isset( $value['class'] ) ? $value['class'] : '' ); ?>"
 									value="1"
+									<?php disabled( $value['disabled'] ?? false ); ?>
 									<?php checked( $option_value, 'yes' ); ?>
 									<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
 								/> <?php echo $description; // WPCS: XSS ok. ?>

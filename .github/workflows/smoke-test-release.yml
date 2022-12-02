@@ -14,18 +14,10 @@ jobs:
               with:
                   ref: trunk
 
-            - uses: ./.github/actions/cache-deps
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                workflow_name: smoke-test-release
-                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
-
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                php-version: '7.4'
-
-            - name: Install and Build
-              uses: ./.github/actions/install-build
+                build-filters: woocommerce
 
             - name: Install Jest
               run: npm install -g jest
@@ -70,10 +62,10 @@ jobs:
               with:
                   path: package/woocommerce
 
-            - uses: ./package/woocommerce/.github/actions/cache-deps
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                workflow_name: smoke-test-release
-                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+                build-filters: woocommerce
 
             - name: Fetch Asset ID
               id: fetch_asset_id
@@ -86,16 +78,6 @@ jobs:
                   script: |
                       const script = require( './package/woocommerce/.github/workflows/scripts/fetch-asset-id.js' )
                       await script({github, context, core})
-
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                php-version: '7.4'
-
-            - name: Install and Build
-              uses: ./package/woocommerce/.github/actions/install-build
-              with:
-                working_directory: package/woocommerce
 
             - name: Download WooCommerce release zip
               working-directory: tmp
@@ -149,10 +131,10 @@ jobs:
               with:
                   path: package/woocommerce
 
-            - uses: ./package/woocommerce/.github/actions/cache-deps
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                workflow_name: smoke-test-release
-                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+                build-filters: woocommerce
 
             - name: Fetch Asset ID
               id: fetch_asset_id
@@ -165,16 +147,6 @@ jobs:
                   script: |
                       const script = require( './package/woocommerce/.github/workflows/scripts/fetch-asset-id.js' )
                       await script({github, context, core})
-
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                php-version: '7.4'
-
-            - name: Install and Build
-              uses: ./package/woocommerce/.github/actions/install-build
-              with:
-                working_directory: package/woocommerce
 
             - name: Download WooCommerce release zip
               working-directory: tmp

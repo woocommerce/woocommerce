@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { Model } from '../../model';
 import { BackorderStatus, StockStatus } from '../shared';
 
@@ -62,4 +65,4 @@ abstract class AbstractProductInventory extends Model {
 	public readonly lowStockThreshold: number = -1;
 }
 
-export interface IProductInventory extends AbstractProductInventory {}
+export type IProductInventory = AbstractProductInventory;

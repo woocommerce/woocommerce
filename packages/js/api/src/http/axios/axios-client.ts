@@ -1,5 +1,12 @@
-import { HTTPClient, HTTPResponse } from '../http-client';
+/**
+ * External dependencies
+ */
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+
+/**
+ * Internal dependencies
+ */
+import { HTTPClient, HTTPResponse } from '../http-client';
 import { AxiosInterceptor } from './axios-interceptor';
 import { AxiosResponseInterceptor } from './axios-response-interceptor';
 
@@ -26,7 +33,7 @@ export class AxiosClient implements HTTPClient {
 	/**
 	 * Creates a new axios client.
 	 *
-	 * @param {AxiosRequestConfig} config The request configuration.
+	 * @param {AxiosRequestConfig} config            The request configuration.
 	 * @param {AxiosInterceptor[]} extraInterceptors An array of additional interceptors to apply to the client.
 	 */
 	public constructor(
@@ -49,7 +56,7 @@ export class AxiosClient implements HTTPClient {
 	/**
 	 * Performs a GET request.
 	 *
-	 * @param {string} path The path we should send the request to.
+	 * @param {string} path   The path we should send the request to.
 	 * @param {Object} params Any parameters that should be passed in the request.
 	 * @return {Promise.<HTTPResponse>} The response from the API.
 	 */
@@ -92,7 +99,7 @@ export class AxiosClient implements HTTPClient {
 	 * Performs a PATCH request.
 	 *
 	 * @param {string} path The path we should query.
-	 * @param {*} data Any parameters that should be passed in the request.
+	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise.<HTTPResponse>} The response from the API.
 	 */
 	public patch< T = any >(
@@ -106,7 +113,7 @@ export class AxiosClient implements HTTPClient {
 	 * Performs a DELETE request.
 	 *
 	 * @param {string} path The path we should send the request to.
-	 * @param {*} data Any parameters that should be passed in the request.
+	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise.<HTTPResponse>} The response from the API.
 	 */
 	public delete< T = any >(

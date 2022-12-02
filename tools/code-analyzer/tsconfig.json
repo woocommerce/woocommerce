@@ -1,17 +1,10 @@
 {
-	"compilerOptions": {
-		"declaration": true,
-		"importHelpers": true,
-		"module": "commonjs",
-		"outDir": "dist",
-		"rootDir": "src",
-		"strict": true,
-		"target": "es2019",
-		"typeRoots": [
-			"./node_modules/@types"
-		],
-	},
-	"include": [
+  "extends": "@tsconfig/node16/tsconfig.json",
+  "ts-node": {
+    "transpileOnly": true,
+    "files": true,
+  },
+  "include": [
 		"src/**/*"
 	]
 }

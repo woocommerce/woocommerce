@@ -1,18 +1,18 @@
 /**
+ * External dependencies
+ */
+import {
+	clearAndFillInput,
+	verifyCheckboxIsSet,
+	verifyCheckboxIsUnset,
+} from '@woocommerce/e2e-utils';
+import config from 'config';
+/**
  * Internal dependencies
  */
 import { DropdownTypeaheadField } from '../../elements/DropdownTypeaheadField';
 import { BasePage } from '../../pages/BasePage';
 import { waitForElementByText } from '../../utils/actions';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-const {
-	clearAndFillInput,
-	verifyCheckboxIsSet,
-	verifyCheckboxIsUnset,
-} = require( '@woocommerce/e2e-utils' );
-const config = require( 'config' );
-/* eslint-enable @typescript-eslint/no-var-requires */
 
 export interface StoreDetails {
 	addressLine1?: string;

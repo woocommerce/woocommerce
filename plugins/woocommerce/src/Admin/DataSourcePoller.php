@@ -169,6 +169,9 @@ abstract class DataSourcePoller {
 				'locale',
 				get_user_locale(),
 				$url
+			),
+			array(
+				'user-agent' => 'WooCommerce/' . WC_VERSION . '; ' . home_url( '/' ),
 			)
 		);
 

@@ -81,16 +81,25 @@ jobs:
 
               console.log( "::set-output name=version::" + version )
               console.log( "::set-output name=release::${{ inputs.release_branch }}" )
-            } else {
-              const version = '${{ github.event.pull_request.milestone.title }}'
+            } else if ( event.action === 'milestoned' ) {
+              const version = '${{ github.event.issue.milestone.title }}'
+              const release = version.substring( 0, 3 )
 
               console.log( "::set-output name=version::" + version )
-              console.log( "::set-output name=release::release/${{ github.event.pull_request.milestone.title }}" )
+              console.log( "::set-output name=release::release/" + release )
+            } else {
+              const version = '${{ github.event.pull_request.milestone.title }}'
+              const release = version.substring( 0, 3 )
+
+              console.log( "::set-output name=version::" + version )
+              console.log( "::set-output name=release::release/" + release )
             }
 
             // Means this workflow was triggered manually.
             if ( event.inputs && event.inputs.pull_requests ) {
               console.log( "::set-output name=pr::${{ inputs.pull_requests }}" )
+            } else if ( event.action === 'milestoned' ) {
+              console.log( "::set-output name=pr::${{ github.event.issue.number }}" )
             } else {
               console.log( "::set-output name=pr::${{ github.event.pull_request.number }}" )
             }
@@ -119,7 +128,7 @@ jobs:
       - name: Checkout release branch
         uses: actions/checkout@v3
         with:
-          fetch-depth: 100
+          fetch-depth: 0
 
       - name: Git fetch the release branch
         run: git fetch origin ${{ needs.prep.outputs.release }}
@@ -202,45 +211,45 @@ jobs:
                   if ( changelogEntry.match( /comment:/i ) ) {
                     changelogEntry = false;
                   }
-                } );
 
-                if ( changelogEntry === false ) {
-                  continue;
-                }
-
-                fs.readFile( './plugins/woocommerce/readme.txt', 'utf-8', function( err, data ) {
-                  if ( err ) {
-                    console.error( err );
+                  if ( ! changelogEntry ) {
+                    return;
                   }
 
-                  changelogTxt = data.split( "\n" );
-                  let isInRange = false;
-                  let newChangelogTxt = [];
-
-                  for ( const line of changelogTxt ) {
-                    if ( isInRange === false && line === '== Changelog ==' ) {
-                      isInRange = true;
-                    }
-
-                    if ( isInRange === true && line.match( /\*\*WooCommerce Blocks/ ) ) {
-                      isInRange = false;
-                    }
-
-                    // Find the first match of the entry "Type".
-                    if ( isInRange && line.match( `\\* ${changelogEntryType} -` ) ) {
-                      newChangelogTxt.push( '* ' + changelogEntryType + ' - ' + changelogEntry + ` [#${{ needs.prep.outputs.pr }}](https://github.com/woocommerce/woocommerce/pull/${{ needs.prep.outputs.pr }})` );
-                      newChangelogTxt.push( line );
-                      isInRange = false;
-                      continue;
-                    }
-
-                    newChangelogTxt.push( line );
-                  }
-
-                  fs.writeFile( './plugins/woocommerce/readme.txt', newChangelogTxt.join( "\n" ), err => {
+                  fs.readFile( './plugins/woocommerce/readme.txt', 'utf-8', function( err, data ) {
                     if ( err ) {
-                      console.error( `Unable to generate the changelog entry for PR ${{ needs.prep.outputs.pr }}` );
+                      console.error( err );
                     }
+
+                    changelogTxt = data.split( "\n" );
+                    let isInRange = false;
+                    let newChangelogTxt = [];
+
+                    for ( const line of changelogTxt ) {
+                      if ( isInRange === false && line === '== Changelog ==' ) {
+                        isInRange = true;
+                      }
+
+                      if ( isInRange === true && line.match( /\*\*WooCommerce Blocks/ ) ) {
+                        isInRange = false;
+                      }
+
+                      // Find the first match of the entry "Type".
+                      if ( isInRange && line.match( `\\* ${changelogEntryType} -` ) ) {
+                        newChangelogTxt.push( '* ' + changelogEntryType + ' - ' + changelogEntry + ` [#${{ needs.prep.outputs.pr }}](https://github.com/woocommerce/woocommerce/pull/${{ needs.prep.outputs.pr }})` );
+                        newChangelogTxt.push( line );
+                        isInRange = false;
+                        continue;
+                      }
+
+                      newChangelogTxt.push( line );
+                    }
+
+                    fs.writeFile( './plugins/woocommerce/readme.txt', newChangelogTxt.join( "\n" ), err => {
+                      if ( err ) {
+                        console.error( `Unable to generate the changelog entry for PR ${{ needs.prep.outputs.pr }}` );
+                      }
+                    } );
                   } );
                 } );
               }
@@ -249,9 +258,11 @@ jobs:
             console.log( `::set-output name=changelogsToBeDeleted::${ changelogsToBeDeleted }` )
 
       - name: Delete changelog files from cherry pick branch
+        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
         run: git rm ${{ steps.changelog.outputs.changelogsToBeDeleted }}
 
       - name: Commit changes for cherry pick
+        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
         run: git commit --no-verify -am "Prep for cherry pick ${{ needs.prep.outputs.pr }}"
 
       - name: Push cherry pick branch up
@@ -277,22 +288,28 @@ jobs:
 
             console.log( `::set-output name=cherry-pick-pr::${ pr.data.html_url }` )
       - name: Checkout trunk branch
+        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
         run: git checkout trunk
 
       - name: Create a branch based on trunk branch
+        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
         run: git checkout -b delete-changelogs/${{ needs.prep.outputs.pr }}
 
       - name: Delete changelogs from trunk
+        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
         run: git rm ${{ steps.changelog.outputs.changelogsToBeDeleted }}
 
       - name: Commit changes for deletion
+        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
         run: git commit --no-verify -am "Delete changelog files for ${{ needs.prep.outputs.pr }}"
 
       - name: Push deletion branch up
+        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
         run: git push origin delete-changelogs/${{ needs.prep.outputs.pr }}
 
       - name: Create the PR for deletion branch
         id: deletion-pr
+        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
         uses: actions/github-script@v6
         with:
           script: |

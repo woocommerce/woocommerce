@@ -288,6 +288,7 @@ Object {
               data-wp-component="CardFooter"
             >
               <button
+                aria-disabled="true"
                 class="components-button is-primary"
                 disabled=""
                 type="button"
@@ -316,7 +317,7 @@ Object {
             class="components-button woocommerce-profile-wizard__footer-link is-link"
             type="button"
           >
-            Skip
+            Skip setup store details
           </button>
           <button
             aria-label="Manual setup is only recommended for
@@ -601,6 +602,7 @@ Object {
             data-wp-component="CardFooter"
           >
             <button
+              aria-disabled="true"
               class="components-button is-primary"
               disabled=""
               type="button"
@@ -629,7 +631,7 @@ Object {
           class="components-button woocommerce-profile-wizard__footer-link is-link"
           type="button"
         >
-          Skip
+          Skip setup store details
         </button>
         <button
           aria-label="Manual setup is only recommended for

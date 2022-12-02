@@ -23,6 +23,9 @@ jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
 	useSelect: jest.fn().mockImplementation( ( fn ) =>
 		fn( () => ( {
+			getActivePlugins: jest.fn().mockReturnValue( [] ),
+			getInstalledPlugins: jest.fn().mockReturnValue( [] ),
+			isPluginsRequesting: jest.fn().mockReturnValue( false ),
 			getSettings: () => ( {
 				general: {
 					woocommerce_default_country: 'US',

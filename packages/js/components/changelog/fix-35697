@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Set editor mode on initialization to prevent initial text editor focus

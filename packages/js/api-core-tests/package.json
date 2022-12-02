@@ -1,8 +1,12 @@
 {
 	"name": "@woocommerce/api-core-tests",
-	"version": "0.1.0",
+	"version": "1.0.0",
 	"description": "API tests for WooCommerce",
 	"main": "index.js",
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "^7.13.3"
+	},
 	"scripts": {
 		"e2e": "jest",
 		"e2e:api": "jest --group=api",

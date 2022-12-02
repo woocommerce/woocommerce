@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { createInterpolateElement } from '@wordpress/element';
 
 export default {
@@ -55,21 +55,18 @@ export default {
 		'Give your buyers more ways to pay',
 		'woocommerce'
 	),
-	surveyTitle: __( 'Remove WooCommerce Payments', 'woocommerce' ),
+	surveyTitle: __(
+		'No thanks, I don’t want WooCommerce Payments',
+		'woocommerce'
+	),
 
-	surveyIntro: createInterpolateElement(
-		// Note: \xa0 is used to create a non-breaking space.
-		__(
-			'Please take a moment to tell us why you’d like to remove WooCommerce Payments. This will remove WooCommerce\xa0Payments from the navigation. You can enable it again in <strong>WooCommerce\xa0Settings\xa0>\xa0Payments</strong>, however the promotion will not apply.',
-			'woocommerce'
-		),
-		{
-			strong: <strong />,
-		}
+	surveyIntro: __(
+		'Note that the extension hasn’t been installed, this will simply remove WooCommerce Payments from the navigation. Please take a moment to tell us why you’d like to dismiss WooCommerce Payments.',
+		'woocommerce'
 	),
 
 	surveyQuestion: __(
-		'What made you disable the new payments experience?',
+		'Why would you like to dismiss the new payments experience?',
 		'woocommerce'
 	),
 
@@ -100,9 +97,12 @@ export default {
 
 	surveyCommentsLabel: __( 'Comments (Optional)', 'woocommerce' ),
 
-	surveyCancelButton: __( 'Just remove WooCommerce Payments', 'woocommerce' ),
+	surveyCancelButton: __(
+		'Just dismiss WooCommerce Payments',
+		'woocommerce'
+	),
 
-	surveySubmitButton: __( 'Remove and send feedback', 'woocommerce' ),
+	surveySubmitButton: __( 'Dismiss and send feedback', 'woocommerce' ),
 
 	terms: createInterpolateElement(
 		__(
@@ -147,7 +147,7 @@ export default {
 		),
 
 		question3: __(
-			'Why should I choose WCPay over other payment gateways?',
+			'Why should I choose WooCommerce Payments over other payment gateways?',
 			'woocommerce'
 		),
 
@@ -377,5 +377,59 @@ export default {
 		haveMoreQuestions: __( 'Have more questions?', 'woocommerce' ),
 
 		getInTouch: __( 'Get in touch', 'woocommerce' ),
+	},
+	apms: {
+		addMoreWaysToPay: __(
+			'Add more ways for buyers to pay',
+			'woocommerce'
+		),
+		seeMore: __( 'See more', 'woocommerce' ),
+		paypal: {
+			title: __( 'PayPal Payments', 'woocommerce' ),
+			description: __(
+				'Enable PayPal Payments alongside WooCommerce Payments. Give your customers another way to pay safely and conveniently via PayPal, PayLater, and Venmo.',
+				'woocommerce'
+			),
+		},
+		amazonpay: {
+			title: __( 'Amazon Pay', 'woocommerce' ),
+			description: __(
+				'Enable Amazon Pay alongside WooCommerce Payments and give buyers the ability to pay via Amazon Pay. Transactions take place via Amazon embedded widgets, so the buyer never leaves your site.',
+				'woocommerce'
+			),
+		},
+		klarna: {
+			title: __( 'Klarna', 'woocommerce' ),
+			description: __(
+				'Enable Klarna alongside WooCommerce Payments. With Klarna Payments buyers can choose the payment installment option they want, Pay Now, Pay Later, or Slice It. No credit card numbers, no passwords, no worries.',
+				'woocommerce'
+			),
+		},
+		affirm: {
+			title: __( 'Affirm', 'woocommerce' ),
+			description: __(
+				'Enable Affirm alongside WooCommerce Payments and give buyers the ability to pick the payment option that works for them and their budget — from 4 interest-free payments every 2 weeks to monthly installments.',
+				'woocommerce'
+			),
+		},
+		installText: ( extensionsString: string ) => {
+			const extensionsNumber = extensionsString.split( ', ' ).length;
+			return createInterpolateElement(
+				sprintf(
+					/* translators: %s = names of the installed extensions */
+					_n(
+						'Installing <strong>WooCommerce Payments</strong> will automatically activate <strong>%s</strong> extension in your store.',
+						'Installing <strong>WooCommerce Payments</strong> will automatically activate <strong>%s</strong> extensions in your store.',
+						extensionsNumber,
+						'woocommerce'
+					),
+					extensionsString
+				),
+				{
+					strong: <strong />,
+				}
+			);
+		},
+		installTextPost: __( 'extension in your store.', 'woocommerce' ),
 	},
 };

@@ -1,10 +1,22 @@
 <?php
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+
 /**
  * Controls the different pages/screens associated to the "Orders" menu page.
  */
 class PageController {
+
+	use AccessiblePrivateMethods;
+
+	/**
+	 * Instance of the posts redirection controller.
+	 *
+	 * @var PostsRedirectionController
+	 */
+	private $redirection_controller;
 
 	/**
 	 * Instance of the orders list table.
@@ -46,6 +58,9 @@ class PageController {
 		if ( ! current_user_can( 'edit_others_shop_orders' ) && ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_die( esc_html__( 'You do not have permission to edit this order', 'woocommerce' ) );
 		}
+		if ( 'trash' === $this->order->get_status() ) {
+			wp_die( esc_html__( 'You cannot edit this item because it is in the Trash. Please restore it and try again.', 'woocommerce' ) );
+		}
 	}
 
 	/**
@@ -68,6 +83,8 @@ class PageController {
 	 * @return void
 	 */
 	public function setup(): void {
+		$this->redirection_controller = new PostsRedirectionController( $this );
+
 		// Register menu.
 		if ( 'admin_menu' === current_action() ) {
 			$this->register_menu();
@@ -77,15 +94,16 @@ class PageController {
 
 		$this->set_action();
 
-		// Perform initialization for the current action.
-		add_action(
-			'load-woocommerce_page_wc-orders',
-			function() {
-				if ( method_exists( $this, 'setup_action_' . $this->current_action ) ) {
-					$this->{"setup_action_{$this->current_action}"}();
-				}
-			}
-		);
+		self::add_action( 'load-woocommerce_page_wc-orders', array( $this, 'handle_load_page_action' ) );
+	}
+
+	/**
+	 * Perform initialization for the current action.
+	 */
+	private function handle_load_page_action() {
+		if ( method_exists( $this, 'setup_action_' . $this->current_action ) ) {
+			$this->{"setup_action_{$this->current_action}"}();
+		}
 	}
 
 	/**
@@ -161,7 +179,7 @@ class PageController {
 	 * @return void
 	 */
 	private function setup_action_list_orders(): void {
-		$this->orders_table = new ListTable();
+		$this->orders_table = wc_get_container()->get( ListTable::class );
 		$this->orders_table->setup();
 		if ( $this->orders_table->current_action() ) {
 			$this->orders_table->handle_bulk_actions();
@@ -211,4 +229,40 @@ class PageController {
 		$this->order->save();
 		$theorder = $this->order;
 	}
+
+	/**
+	 * Helper method to generate a link to the main orders screen.
+	 *
+	 * @return string Orders screen URL.
+	 */
+	public function get_orders_url(): string {
+		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ?
+			admin_url( 'admin.php?page=wc-orders' ) :
+			admin_url( 'edit.php?post_type=shop_order' );
+	}
+
+	/**
+	 * Helper method to generate edit link for an order.
+	 *
+	 * @param int $order_id Order ID.
+	 *
+	 * @return string Edit link.
+	 */
+	public function get_edit_url( int $order_id ) : string {
+		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ?
+			admin_url( 'admin.php?page=wc-orders&id=' . absint( $order_id ) ) . '&action=edit' :
+			admin_url( 'post.php?post=' . absint( $order_id ) ) . '&action=edit';
+	}
+
+	/**
+	 * Helper method to generate a link for creating order.
+	 *
+	 * @return string
+	 */
+	public function get_new_page_url() : string {
+		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ?
+			admin_url( 'admin.php?page=wc-orders&action=new' ) :
+			admin_url( 'post-new.php?post_type=shop_order' );
+	}
+
 }

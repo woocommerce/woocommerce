@@ -8,6 +8,9 @@
  * @version 2.2.0
  */
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -344,19 +347,40 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 			return false;
 		}
 
-		$result = $wpdb->get_col(
-			"
-			SELECT im.meta_value FROM {$wpdb->posts} AS p
-			INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
-			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
-			INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
-			WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
-			AND pm.meta_key IN ( '_billing_email', '_customer_user' )
-			AND im.meta_key IN ( '_product_id', '_variation_id' )
-			AND im.meta_value != 0
-			AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$statuses = array_map(
+				function ( $status ) {
+					return "wc-$status";
+				},
+				$statuses
+			);
+			$order_table = OrdersTableDataStore::get_orders_table_name();
+			$sql = "
+SELECT im.meta_value FROM $order_table AS o
+INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON o.id = i.order_id
+INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
+WHERE o.status IN ('" . implode( "','", $statuses ) . "')
+AND im.meta_key IN ('_product_id', '_variation_id' )
+AND im.meta_value != 0
+AND ( o.customer_id IN ('" . implode( "','", $customer_data ) . "') OR o.billing_email IN ('" . implode( "','", $customer_data ) . "') )
+
+";
+			$result = $wpdb->get_col( $sql );
+		} else {
+			$result = $wpdb->get_col(
+				"
+SELECT im.meta_value FROM {$wpdb->posts} AS p
+INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
+INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
+INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
+WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
+AND pm.meta_key IN ( '_billing_email', '_customer_user' )
+AND im.meta_key IN ( '_product_id', '_variation_id' )
+AND im.meta_value != 0
+AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
 		"
-		); // WPCS: unprepared SQL ok.
+			); // WPCS: unprepared SQL ok.
+		}
 		$result = array_map( 'absint', $result );
 
 		$transient_value = array(

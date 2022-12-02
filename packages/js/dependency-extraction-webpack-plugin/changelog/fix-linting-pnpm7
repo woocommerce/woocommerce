@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Remove direct dependency on eslint so that linting works properly with pnpm7

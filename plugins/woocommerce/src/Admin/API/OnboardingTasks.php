@@ -362,14 +362,14 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 */
 	public static function is_experiment_product_task() {
 		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
-		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
+		$allow_tracking = get_option( 'woocommerce_allow_tracking' ) === 'yes';
 		$abtest         = new \WooCommerce\Admin\Experimental_Abtest(
 			$anon_id,
 			'woocommerce',
 			$allow_tracking
 		);
-		return $abtest->get_variation( 'woocommerce_products_task_layout_stacked_v2' ) === 'treatment' ||
-			$abtest->get_variation( 'woocommerce_products_task_layout_card_v2' ) === 'treatment';
+		return $abtest->get_variation( 'woocommerce_products_task_layout_stacked_v3' ) === 'treatment' ||
+			$abtest->get_variation( 'woocommerce_products_task_layout_card_v3' ) === 'treatment';
 	}
 
 	/**
@@ -472,9 +472,11 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			<p class="has-text-color has-text-align-center">' . __( 'Write a short welcome message here', 'woocommerce' ) . '</p>
 			<!-- /wp:paragraph -->
 
-			<!-- wp:button {"align":"center"} -->
-			<div class="wp-block-button aligncenter"><a href="' . esc_url( $shop_url ) . '" class="wp-block-button__link">' . __( 'Go shopping', 'woocommerce' ) . '</a></div>
-			<!-- /wp:button --></div></div>
+			<!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
+			<div class="wp-block-buttons"><!-- wp:button -->
+			<div class="wp-block-button"><a class="wp-block-button__link" href="' . esc_url( $shop_url ) . '">' . __( 'Go shopping', 'woocommerce' ) . '</a></div>
+			<!-- /wp:button --></div>
+			<!-- /wp:buttons --></div></div>
 			<!-- /wp:cover -->';
 		}
 
@@ -487,9 +489,11 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		<p class="has-text-color has-text-align-center">' . __( 'Write a short welcome message here', 'woocommerce' ) . '</p>
 		<!-- /wp:paragraph -->
 
-		<!-- wp:button {"align":"center"} -->
-		<div class="wp-block-button aligncenter"><a href="' . esc_url( $shop_url ) . '" class="wp-block-button__link">' . __( 'Go shopping', 'woocommerce' ) . '</a></div>
-		<!-- /wp:button --></div></div>
+		<!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
+		<div class="wp-block-buttons"><!-- wp:button -->
+		<div class="wp-block-button"><a class="wp-block-button__link" href="' . esc_url( $shop_url ) . '">' . __( 'Go shopping', 'woocommerce' ) . '</a></div>
+		<!-- /wp:button --></div>
+		<!-- /wp:buttons --></div></div>
 		<!-- /wp:cover -->';
 	}
 

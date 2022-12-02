@@ -229,7 +229,7 @@ class Note extends \WC_Data {
 	 * Get note content data (i.e. values that would be needed for re-localization)
 	 *
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
-	 * @return array
+	 * @return object
 	 */
 	public function get_content_data( $context = 'view' ) {
 		return $this->get_prop( 'content_data', $context );

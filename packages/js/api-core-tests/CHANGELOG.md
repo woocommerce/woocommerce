@@ -1,5 +1,7 @@
 # Unreleased
 
+# 1.0.0
+
 ## Changed
 - Bumped jest version to v27
 - Used the jest packaged bundled in this module to run tests

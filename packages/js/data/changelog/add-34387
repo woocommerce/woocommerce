@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add missing low_stock_amount to product type

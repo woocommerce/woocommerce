@@ -78,14 +78,27 @@ class OnboardingProducts {
 	 * @return array
 	 */
 	public static function get_product_data( $product_types ) {
-		$woocommerce_products = get_transient( self::PRODUCT_DATA_TRANSIENT );
+		$locale = get_user_locale();
+		// Transient value is an array of product data keyed by locale.
+		$transient_value      = get_transient( self::PRODUCT_DATA_TRANSIENT );
+		$transient_value      = is_array( $transient_value ) ? $transient_value : array();
+		$woocommerce_products = $transient_value[ $locale ] ?? false;
+
 		if ( false === $woocommerce_products ) {
-			$woocommerce_products = wp_remote_get( 'https://woocommerce.com/wp-json/wccom-extensions/1.0/search' );
+			$woocommerce_products = wp_remote_get(
+				add_query_arg(
+					array(
+						'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
+						'locale'     => $locale,
+					),
+					'https://woocommerce.com/wp-json/wccom-extensions/1.0/search'
+				)
+			);
 			if ( is_wp_error( $woocommerce_products ) ) {
 				return $product_types;
 			}
-
-			set_transient( self::PRODUCT_DATA_TRANSIENT, $woocommerce_products, DAY_IN_SECONDS );
+			$transient_value[ $locale ] = $woocommerce_products;
+			set_transient( self::PRODUCT_DATA_TRANSIENT, $transient_value, DAY_IN_SECONDS );
 		}
 
 		$data         = json_decode( $woocommerce_products['body'] );

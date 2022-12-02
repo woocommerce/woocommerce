@@ -33,6 +33,10 @@ test.describe( 'Cart applying coupons', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
+		// make sure the currency is USD
+		await api.put( 'settings/general/woocommerce_currency', {
+			value: 'USD',
+		} );
 		// add product
 		await api
 			.post( 'products', {
@@ -109,8 +113,10 @@ test.describe( 'Cart applying coupons', () => {
 		);
 		await page.waitForLoadState( 'networkidle' );
 		// try to apply the same coupon
+		await page.goto( '/cart/' );
 		await page.fill( '#coupon_code', coupons[ 0 ].code );
 		await page.click( 'text=Apply coupon' );
+		await page.waitForLoadState( 'networkidle' );
 		// error received
 		await expect( page.locator( '.woocommerce-error' ) ).toContainText(
 			'Coupon code already applied!'
@@ -134,6 +140,7 @@ test.describe( 'Cart applying coupons', () => {
 		);
 
 		await page.waitForLoadState( 'networkidle' );
+		await page.click( '#coupon_code' );
 		await page.fill( '#coupon_code', coupons[ 2 ].code );
 		await page.click( 'text=Apply coupon' );
 		// successful

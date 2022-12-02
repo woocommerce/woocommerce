@@ -8,6 +8,8 @@ import {
 	CheckboxControl,
 	TextareaControl,
 } from '@wordpress/components';
+import { useDispatch } from '@wordpress/data';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -34,27 +36,26 @@ function ExitSurveyModal( {
 	const [ isSomethingElseChecked, setSomethingElseChecked ] =
 		useState( false );
 	const [ comments, setComments ] = useState( '' );
+	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
 	const closeModal = () => {
 		setOpen( false );
-		setExitSurveyModalOpen( false );
+
+		// Record that the modal was dismissed.
+		updateOptions( {
+			wc_calypso_bridge_payments_dismissed: 'yes',
+		} );
+
+		// Redirect back to the admin page.
+		window.location.href = 'admin.php?page=wc-admin';
 	};
 
-	const removeWCPayMenu = () => {
+	const exitSurvey = () => {
 		recordEvent( 'wcpay_exit_survey', {
 			just_remove: true /* eslint-disable-line camelcase */,
 		} );
-		apiFetch( {
-			path: 'wc-admin/options',
-			method: 'POST',
-			data: {
-				wc_calypso_bridge_payments_dismissed: 'yes',
-			},
-		} ).then( () => {
-			window.location.href = 'admin.php?page=wc-admin';
-		} );
 
-		setOpen( false );
+		closeModal();
 	};
 
 	const sendFeedback = () => {
@@ -69,7 +70,15 @@ function ExitSurveyModal( {
 			/* eslint-enable camelcase */
 		} );
 
-		removeWCPayMenu();
+		if ( isMoreInfoChecked ) {
+			// Record that the user would possibly consider installing WCPay with more information in the future.
+			updateOptions( {
+				wc_pay_exit_survey_more_info_needed_timestamp: Math.floor(
+					Date.now() / 1000
+				),
+			} );
+		}
+		closeModal();
 	};
 
 	if ( ! isOpen ) {
@@ -132,7 +141,7 @@ function ExitSurveyModal( {
 				<Button
 					isTertiary
 					isDestructive
-					onClick={ removeWCPayMenu }
+					onClick={ exitSurvey }
 					name="cancel"
 				>
 					{ strings.surveyCancelButton }

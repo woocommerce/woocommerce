@@ -9,7 +9,7 @@ use \Automattic\WooCommerce\Internal\Admin\Notes\OrderMilestones;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 
 /**
- * Class WC_Admin_Tests_Marketing_Notes
+ * Class WC_Admin_Tests_Order_Milestones
  */
 class WC_Admin_Tests_Order_Milestones extends WC_Unit_Test_Case {
 
@@ -112,5 +112,23 @@ class WC_Admin_Tests_Order_Milestones extends WC_Unit_Test_Case {
 		$this->instance->possibly_add_note();
 		$note = Notes::get_note_by_name( OrderMilestones::NOTE_NAME );
 		$this->assertEquals( $note->get_content(), "You've hit the 10 orders milestone! Look at you go. Browse some WooCommerce success stories for inspiration." );
+	}
+
+
+	/**
+	 * Tests get_note method return false when note does not exist in db.
+	 */
+	public function test_get_note_when_note_not_exist_in_db() {
+		$this->assertFalse( OrderMilestones::get_note() );
+	}
+
+	/**
+	 * Tests get_note method return note when note exists in db.
+	 */
+	public function test_get_note_when_note_exists_in_db() {
+		WC_Helper_Order::create_order();
+		$this->instance->possibly_add_note();
+		$note = OrderMilestones::get_note();
+		$this->assertEquals( $note->get_title(), 'First order received' );
 	}
 }

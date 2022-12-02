@@ -5,7 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { createElement, Fragment, useState } from '@wordpress/element';
 import classnames from 'classnames';
 import { Button, Popover } from '@wordpress/components';
-import { Icon, cancelCircleFilled } from '@wordpress/icons';
+import { Icon, closeSmall } from '@wordpress/icons';
 import { decodeEntities } from '@wordpress/html-entities';
 import PropTypes from 'prop-types';
 import { withInstanceId } from '@wordpress/compose';
@@ -81,7 +81,7 @@ const Tag = ( {
 					aria-describedby={ labelId }
 				>
 					<Icon
-						icon={ cancelCircleFilled }
+						icon={ closeSmall }
 						size={ 20 }
 						className="clear-icon"
 					/>

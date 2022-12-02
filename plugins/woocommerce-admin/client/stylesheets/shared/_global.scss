@@ -34,9 +34,9 @@
 		color: $gray-900;
 	}
 
-	select.components-select-control__input {
+	.components-base-control select.components-select-control__input {
 		max-width: 100%;
-		line-height: 1;
+		line-height: normal;
 	}
 
 	.components-panel__body > .components-panel__body-title,
@@ -45,6 +45,17 @@
 		&:hover {
 			background: $gray-0;
 		}
+	}
+	/**
+	* JITM specific styles
+	*/
+	&__jitm {
+		.jitm-card {
+			margin: 3rem 1.25rem 1.25rem;
+		}
+	}
+	&__jitm-hide {
+		display: none;
 	}
 }
 

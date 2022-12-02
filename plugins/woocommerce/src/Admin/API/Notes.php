@@ -263,6 +263,10 @@ class Notes extends \WC_REST_CRUD_Controller {
 		$args['source']     = isset( $request['source'] ) ? $request['source'] : array();
 		$args['is_deleted'] = 0;
 
+		if ( isset( $request['is_read'] ) ) {
+			$args['is_read'] = filter_var( $request['is_read'], FILTER_VALIDATE_BOOLEAN );
+		}
+
 		if ( 'date' === $args['orderby'] ) {
 			$args['orderby'] = 'date_created';
 		}
@@ -812,6 +816,12 @@ class Notes extends \WC_REST_CRUD_Controller {
 				),
 				'is_deleted'        => array(
 					'description' => __( 'Registers whether the note is deleted or not', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'is_read'           => array(
+					'description' => __( 'Registers whether the note is read or not', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

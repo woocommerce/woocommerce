@@ -220,6 +220,12 @@ module.exports = function ( grunt ) {
 						src: 'jquery-ui/**',
 						dest: '<%= dirs.cssDest %>/',
 					},
+					{
+						cwd: '<%= dirs.css %>',
+						expand: true,
+						src: '*.scss',
+						dest: '<%= dirs.cssDest %>/',
+					}
 				],
 			},
 			js: {
@@ -237,7 +243,6 @@ module.exports = function ( grunt ) {
 	grunt.loadNpmTasks( 'grunt-rtlcss' );
 	grunt.loadNpmTasks( 'grunt-postcss' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
-	grunt.loadNpmTasks( 'gruntify-eslint' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-concat' );
@@ -250,7 +255,7 @@ module.exports = function ( grunt ) {
 	// Register tasks.
 	grunt.registerTask( 'default', [ 'js', 'css' ] );
 
-	grunt.registerTask( 'js', [ 'eslint', 'copy:js', 'uglify:js_assets' ] );
+	grunt.registerTask( 'js', [ 'copy:js', 'uglify:js_assets' ] );
 
 	grunt.registerTask( 'css', [
 		'sass',
