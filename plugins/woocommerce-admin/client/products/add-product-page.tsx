@@ -19,6 +19,7 @@ import { ImagesSection } from './sections/images-section';
 import './product-page.scss';
 import { validate } from './product-validation';
 import { AttributesSection } from './sections/attributes-section';
+import { ProductFormFooter } from './layout/product-form-footer';
 
 const AddProductPage: React.FC = () => {
 	useEffect( () => {
@@ -47,6 +48,7 @@ const AddProductPage: React.FC = () => {
 					<ProductShippingSection />
 					<AttributesSection />
 				</ProductFormLayout>
+				<ProductFormFooter />
 			</Form>
 		</div>
 	);

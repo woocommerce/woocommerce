@@ -71,7 +71,7 @@ describe( 'CustomerFeedbackModal', () => {
 		).not.toBeInTheDocument();
 	} );
 
-	it.each( [ 'Very difficult', 'Somewhat difficult' ] )(
+	it.each( [ 'Strongly disagree', 'Disagree' ] )(
 		'should toggle the comments field when %s is selected',
 		async ( labelText ) => {
 			render(

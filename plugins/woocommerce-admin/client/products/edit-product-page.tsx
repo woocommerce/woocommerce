@@ -27,6 +27,7 @@ import { ImagesSection } from './sections/images-section';
 import './product-page.scss';
 import { validate } from './product-validation';
 import { AttributesSection } from './sections/attributes-section';
+import { ProductFormFooter } from './layout/product-form-footer';
 
 const EditProductPage: React.FC = () => {
 	const { productId } = useParams();
@@ -135,6 +136,7 @@ const EditProductPage: React.FC = () => {
 							<ProductShippingSection product={ product } />
 							<AttributesSection />
 						</ProductFormLayout>
+						<ProductFormFooter />
 					</Form>
 				) }
 		</div>
