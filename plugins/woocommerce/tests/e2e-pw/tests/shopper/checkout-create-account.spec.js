@@ -71,7 +71,7 @@ test.describe( 'Shopper Checkout Create Account', () => {
 			enabled: true,
 		} );
 
-		// make sure test customer does not exist
+		// make sure there's no pre-existing customer that has the same email we're going to use for account creation
 		const { data: customersList } = await api.get( 'customers', {
 			email: billingEmail,
 		} );
@@ -136,7 +136,7 @@ test.describe( 'Shopper Checkout Create Account', () => {
 	} );
 
 	test( 'can create an account during checkout', async ( { page } ) => {
-		await page.goto( 'checkout/' );
+		await page.goto( 'checkout/', { waitUntil: 'networkidle' } );
 		await page.fill( '#billing_first_name', 'Marge' );
 		await page.fill( '#billing_last_name', 'Simpson' );
 		await page.fill( '#billing_address_1', '742 Evergreen Terrace' );
