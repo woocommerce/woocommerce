@@ -5,14 +5,15 @@ import { sprintf, __ } from '@wordpress/i18n';
 import { CheckboxControl, Icon, Spinner } from '@wordpress/components';
 import { resolveSelect } from '@wordpress/data';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
-import { useDebounce } from '@wordpress/compose';
 import { plus } from '@wordpress/icons';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
 	ProductAttributeTerm,
 } from '@woocommerce/data';
 import {
+	SelectControlProps,
 	selectControlStateChangeTypes,
+	useAsyncFilter,
 	__experimentalSelectControl as SelectControl,
 	__experimentalSelectControlMenu as Menu,
 	__experimentalSelectControlMenuItem as MenuItem,
@@ -35,6 +36,36 @@ type AttributeTermInputFieldProps = {
 
 let uniqueId = 0;
 
+/**
+ * Add a new item at the end of the list if the
+ * current set of items do not match exactly the
+ * input's value
+ *
+ * @param allItems The item list
+ * @param inputValue The input's value
+ * @return The `allItems` + 1 new item if condition is met
+ */
+function addCreateNewAttributeTermItem(
+	allItems: ProductAttributeTerm[],
+	inputValue: string
+) {
+	if (
+		inputValue.length > 0 &&
+		! allItems.some(
+			( item ) => item.name.toLowerCase() === inputValue.toLowerCase()
+		)
+	) {
+		return [
+			...allItems,
+			{
+				id: -99,
+				name: inputValue,
+			} as ProductAttributeTerm,
+		];
+	}
+	return allItems;
+}
+
 export const AttributeTermInputField: React.FC<
 	AttributeTermInputFieldProps
 > = ( {
@@ -56,7 +87,7 @@ export const AttributeTermInputField: React.FC<
 		useState< string >();
 
 	const fetchItems = useCallback(
-		( searchString?: string | undefined ) => {
+		( searchString?: string ) => {
 			setIsFetching( true );
 			return resolveSelect(
 				EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
@@ -67,9 +98,13 @@ export const AttributeTermInputField: React.FC<
 				} )
 				.then(
 					( attributeTerms ) => {
-						setFetchedItems( attributeTerms );
+						const items = addCreateNewAttributeTermItem(
+							attributeTerms,
+							searchString ?? ''
+						);
+						setFetchedItems( items );
 						setIsFetching( false );
-						return attributeTerms;
+						return items;
 					},
 					( error ) => {
 						setIsFetching( false );
@@ -79,8 +114,6 @@ export const AttributeTermInputField: React.FC<
 		},
 		[ attributeId ]
 	);
-
-	const debouncedSearch = useDebounce( fetchItems, 250 );
 
 	useEffect( () => {
 		if (
@@ -126,69 +159,56 @@ export const AttributeTermInputField: React.FC<
 
 	const selectedTermSlugs = ( value || [] ).map( ( term ) => term.slug );
 
+	const selectProps: SelectControlProps< ProductAttributeTerm > = {
+		items: fetchedItems,
+		multiple: true,
+		disabled: disabled || ! attributeId,
+		label,
+		placeholder: placeholder || '',
+		getItemLabel: ( item: ProductAttributeTerm | null ) => item?.name || '',
+		getItemValue: ( item: ProductAttributeTerm | null ) => item?.slug || '',
+		stateReducer: ( state, actionAndChanges ) => {
+			const { changes, type } = actionAndChanges;
+			switch ( type ) {
+				case selectControlStateChangeTypes.ControlledPropUpdatedSelectedItem:
+					return {
+						...changes,
+						inputValue: state.inputValue,
+					};
+				case selectControlStateChangeTypes.ItemClick:
+					if (
+						changes.selectedItem &&
+						changes.selectedItem.id === -99
+					) {
+						return changes;
+					}
+					return {
+						...changes,
+						isOpen: true,
+						inputValue: state.inputValue,
+						highlightedIndex: state.highlightedIndex,
+					};
+				default:
+					return changes;
+			}
+		},
+		selected: value,
+		onSelect,
+		onRemove,
+		className:
+			'woocommerce-attribute-term-field ' + attributeTermInputId.current,
+		__experimentalOpenMenuOnFocus: true,
+	};
+
+	const selectPropsWithAsyncFilter = useAsyncFilter< ProductAttributeTerm >( {
+		filter: fetchItems,
+		...selectProps,
+	} );
+
 	return (
 		<>
 			<SelectControl< ProductAttributeTerm >
-				items={ fetchedItems }
-				multiple
-				disabled={ disabled || ! attributeId }
-				label={ label }
-				getFilteredItems={ ( allItems, inputValue ) => {
-					if (
-						inputValue.length > 0 &&
-						! allItems.find(
-							( item ) =>
-								item.name.toLowerCase() ===
-								inputValue.toLowerCase()
-						)
-					) {
-						return [
-							...allItems,
-							{
-								id: -99,
-								name: inputValue,
-							} as ProductAttributeTerm,
-						];
-					}
-					return allItems;
-				} }
-				onInputChange={ debouncedSearch }
-				placeholder={ placeholder || '' }
-				getItemLabel={ ( item ) => item?.name || '' }
-				getItemValue={ ( item ) => item?.slug || '' }
-				stateReducer={ ( state, actionAndChanges ) => {
-					const { changes, type } = actionAndChanges;
-					switch ( type ) {
-						case selectControlStateChangeTypes.ControlledPropUpdatedSelectedItem:
-							return {
-								...changes,
-								inputValue: state.inputValue,
-							};
-						case selectControlStateChangeTypes.ItemClick:
-							if (
-								changes.selectedItem &&
-								changes.selectedItem.id === -99
-							) {
-								return changes;
-							}
-							return {
-								...changes,
-								isOpen: true,
-								inputValue: state.inputValue,
-								highlightedIndex: state.highlightedIndex,
-							};
-						default:
-							return changes;
-					}
-				} }
-				selected={ value }
-				onSelect={ onSelect }
-				onRemove={ onRemove }
-				className={
-					'woocommerce-attribute-term-field ' +
-					attributeTermInputId.current
-				}
-				__experimentalOpenMenuOnFocus
+				{ ...selectPropsWithAsyncFilter }
 			>
 				{ ( {
 					items,

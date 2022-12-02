@@ -39,7 +39,6 @@ jest.mock( '@woocommerce/components', () => {
 		__experimentalSelectControl: ( {
 			children,
 			items,
-			getFilteredItems,
 		}: {
 			children: ( options: {
 				isOpen: boolean;
@@ -48,11 +47,6 @@ jest.mock( '@woocommerce/components', () => {
 				getItemProps: () => Record< string, string >;
 			} ) => JSX.Element;
 			items: ProductAttributeTerm[];
-			getFilteredItems: (
-				allItems: ProductAttributeTerm[],
-				inputValue: string,
-				selectedItems: ProductAttributeTerm[]
-			) => ProductAttributeTerm[];
 		} ) => {
 			const [ input, setInput ] = useState( '' );
 			return (
@@ -64,7 +58,7 @@ jest.mock( '@woocommerce/components', () => {
 					<div>
 						{ children( {
 							isOpen: true,
-							items: getFilteredItems( items, input, [] ),
+							items,
 							getMenuProps: () => ( {} ),
 							getItemProps: () => ( {} ),
 						} ) }
@@ -72,6 +66,22 @@ jest.mock( '@woocommerce/components', () => {
 				</div>
 			);
 		},
+		useAsyncFilter: jest.fn(
+			( { filter, onFilterStart, onFilterEnd, ...props } ) => {
+				const onInputChange = ( value = '' ) => {
+					onFilterStart( value );
+					filter( value )
+						.then( ( items: [] ) => {
+							onFilterEnd( items, value );
+						} )
+						.catch( () => {
+							onFilterEnd( [], value );
+						} );
+					if ( props.onInputChange ) props.onInputChange( value );
+				};
+				return { ...props, onInputChange };
+			}
+		),
 	};
 } );
 
@@ -155,30 +165,39 @@ describe( 'AttributeTermInputField', () => {
 		jest.clearAllMocks();
 	} );
 
-	it( 'should not trigger resolveSelect if attributeId is not defined', () => {
-		render( <AttributeTermInputField onChange={ jest.fn() } /> );
+	it( 'should not trigger resolveSelect if attributeId is not defined', async () => {
+		await act( async () => {
+			render( <AttributeTermInputField onChange={ jest.fn() } /> );
+		} );
 		expect( resolveSelect ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should not trigger resolveSelect if attributeId is defined but field disabled', () => {
-		render(
-			<AttributeTermInputField
-				onChange={ jest.fn() }
-				attributeId={ 2 }
-				disabled={ true }
-			/>
-		);
+	it( 'should not trigger resolveSelect if attributeId is defined but field disabled', async () => {
+		await act( async () => {
+			render(
+				<AttributeTermInputField
+					onChange={ jest.fn() }
+					attributeId={ 2 }
+					disabled={ true }
+				/>
+			);
+		} );
 		expect( resolveSelect ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should trigger resolveSelect if attributeId is defined and field not disabled', () => {
+	it( 'should trigger resolveSelect if attributeId is defined and field not disabled', async () => {
 		const getProductAttributesMock = jest.fn().mockResolvedValue( [] );
 		( resolveSelect as jest.Mock ).mockReturnValue( {
 			getProductAttributeTerms: getProductAttributesMock,
 		} );
-		render(
-			<AttributeTermInputField onChange={ jest.fn() } attributeId={ 2 } />
-		);
+		await act( async () => {
+			render(
+				<AttributeTermInputField
+					onChange={ jest.fn() }
+					attributeId={ 2 }
+				/>
+			);
+		} );
 		expect( getProductAttributesMock ).toHaveBeenCalledWith( {
 			search: '',
 			attribute_id: 2,
@@ -200,7 +219,6 @@ describe( 'AttributeTermInputField', () => {
 				/>
 			);
 		} );
-		// debug();
 		await waitFor( () => {
 			expect( screen.queryByText( 'spinner' ) ).toBeInTheDocument();
 		} );
