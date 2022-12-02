@@ -167,8 +167,21 @@ class DataSynchronizer implements BatchProcessorInterface {
 				return (int) $pending_count;
 			}
 		}
-		$orders_table                = $this->data_store::get_orders_table_name();
-		$order_post_types            = wc_get_order_types( 'cot-migration' );
+		$orders_table     = $this->data_store::get_orders_table_name();
+		$order_post_types = wc_get_order_types( 'cot-migration' );
+
+		if ( empty( $order_post_types ) ) {
+			$this->error_logger->debug(
+				sprintf(
+					/* translators: 1: method name. */
+					esc_html__( '%1$s was called but no order types were registered: it may have been called too early.', 'woocommerce' ),
+					__METHOD__
+				)
+			);
+
+			return 0;
+		}
+
 		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
 
 		if ( $this->custom_orders_table_is_authoritative() ) {

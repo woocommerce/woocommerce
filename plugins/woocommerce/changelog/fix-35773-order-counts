@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+If order types have not been registered, do not attempt to count orders.
