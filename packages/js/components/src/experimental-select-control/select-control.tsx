@@ -23,6 +23,32 @@ export { selectControlStateChangeTypes } from './hooks/use-downshift-combobox';
 export type SelectControlProps< ItemType > =
 	UseDownshiftComboboxInput< ItemType >;
 
+function renderChildren< T >( {
+	items,
+	highlightedIndex,
+	getItemProps,
+	getMenuProps,
+	getItemValue,
+	getItemLabel,
+	isOpen,
+}: ChildrenProps< T > ) {
+	return (
+		<Menu getMenuProps={ getMenuProps } isOpen={ isOpen }>
+			{ items.map( ( item, index: number ) => (
+				<MenuItem
+					key={ `${ getItemValue( item ) }${ index }` }
+					index={ index }
+					isActive={ highlightedIndex === index }
+					item={ item }
+					getItemProps={ getItemProps }
+				>
+					{ getItemLabel( item ) }
+				</MenuItem>
+			) ) }
+		</Menu>
+	);
+}
+
 export function SelectControl< ItemType = DefaultItemType >(
 	props: SelectControlProps< ItemType >
 ) {
@@ -54,6 +80,7 @@ export function SelectControl< ItemType = DefaultItemType >(
 			{ labelProps.children && (
 				<label
 					{ ...labelProps }
+					htmlFor={ labelProps.htmlFor }
 					className={ classnames(
 						labelProps.className,
 						'woocommerce-experimental-select-control__label'
@@ -79,31 +106,5 @@ export function SelectControl< ItemType = DefaultItemType >(
 
 			{ hasExternalTags && selectedItemTags }
 		</div>
-	);
-}
-
-function renderChildren< T >( {
-	items,
-	highlightedIndex,
-	getItemProps,
-	getMenuProps,
-	getItemValue,
-	getItemLabel,
-	isOpen,
-}: ChildrenProps< T > ) {
-	return (
-		<Menu getMenuProps={ getMenuProps } isOpen={ isOpen }>
-			{ items.map( ( item, index: number ) => (
-				<MenuItem
-					key={ `${ getItemValue( item ) }${ index }` }
-					index={ index }
-					isActive={ highlightedIndex === index }
-					item={ item }
-					getItemProps={ getItemProps }
-				>
-					{ getItemLabel( item ) }
-				</MenuItem>
-			) ) }
-		</Menu>
 	);
 }
