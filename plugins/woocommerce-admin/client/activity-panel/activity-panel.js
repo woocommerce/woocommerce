@@ -296,7 +296,12 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 							'woocommerce'
 						),
 					},
-					{},
+					{
+						onCloseModal: () => {
+							togglePanel( feedback, false );
+							closePanel();
+						},
+					},
 					{
 						type: 'snackbar',
 						icon: <span>🌟</span>,

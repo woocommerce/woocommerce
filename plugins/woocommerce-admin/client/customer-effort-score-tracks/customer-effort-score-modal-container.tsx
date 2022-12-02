@@ -81,7 +81,10 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 				recordScore( ...args );
 				hideCesModal();
 			} }
-			onCloseModal={ () => hideCesModal() }
+			onCloseModal={ () => {
+				visibleCESModalData.props?.onCloseModal?.();
+				hideCesModal();
+			} }
 		/>
 	);
 };
