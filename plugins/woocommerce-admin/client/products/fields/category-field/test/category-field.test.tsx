@@ -39,11 +39,6 @@ jest.mock( '@woocommerce/components', () => {
 		label: string;
 		initialSelectedItems?: ProductCategory[];
 		itemToString?: ( item: ProductCategory | null ) => string;
-		getFilteredItems?: (
-			allItems: ProductCategory[],
-			inputValue: string,
-			selectedItems: ProductCategory[]
-		) => ProductCategory[];
 		multiple?: boolean;
 		onInputChange?: ( value: string | undefined ) => void;
 		onRemove?: ( item: ProductCategory ) => void;
@@ -97,7 +92,6 @@ jest.mock( '../use-category-search', () => {
 			originalModule.getCategoriesTreeWithMissingParents,
 		useCategorySearch: jest.fn().mockReturnValue( {
 			searchCategories: jest.fn(),
-			getFilteredItems: jest.fn(),
 			isSearching: false,
 			categoriesSelectList: [],
 			categoryTreeKeyValues: {},
@@ -160,7 +154,6 @@ describe( 'CategoryField', () => {
 			);
 			( useCategorySearch as jest.Mock ).mockReturnValue( {
 				searchCategories: jest.fn(),
-				getFilteredItems: jest.fn(),
 				isSearching: false,
 				categoriesSelectList: items[ 0 ],
 				categoryTreeKeyValues: items[ 2 ],
