@@ -2,10 +2,9 @@
  * External dependencies
  */
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
-import { useSelect, resolveSelect } from '@wordpress/data';
+import { resolveSelect } from '@wordpress/data';
 import {
 	EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME,
-	WCDataSelector,
 	ProductCategory,
 } from '@woocommerce/data';
 import { escapeRegExp } from 'lodash';
@@ -17,6 +16,9 @@ import { CategoryTreeItem } from './category-field-item';
 
 const PAGE_SIZE = 100;
 const parentCategoryCache: Record< number, ProductCategory > = {};
+const productCategoryQueryObject = {
+	per_page: PAGE_SIZE,
+};
 
 /**
  * Recursive function to set isOpen to true for all the childrens parents.
@@ -64,13 +66,44 @@ function flattenCategoryTreeAndSortChildren(
 	return items;
 }
 
+async function getProductCategories(
+	args?: Record< string, string | string[] | number | number[] | undefined >
+) {
+	return resolveSelect(
+		EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME
+	).getProductCategories< ProductCategory[] >( args );
+}
+
+async function getProductCategoriesTotalCount() {
+	return resolveSelect(
+		EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME
+	).getProductCategoriesTotalCount< number >( productCategoryQueryObject );
+}
+
+const filterItems = (
+	allItems: ProductCategory[],
+	inputValue: string,
+	selectedItems: ProductCategory[],
+	categoryTreeKeyValues: Record< number, CategoryTreeItem >
+) => {
+	const searchRegex = new RegExp( escapeRegExp( inputValue ), 'i' );
+	return allItems.filter(
+		( item ) =>
+			selectedItems.indexOf( item ) < 0 &&
+			( searchRegex.test( item.name ) ||
+				( categoryTreeKeyValues[ item.id ] &&
+					categoryTreeKeyValues[ item.id ].isOpen ) )
+	);
+};
+
 /**
  * Recursive function to turn a category list into a tree and retrieve any missing parents.
  * It checks if any parents are missing, and then does a single request to retrieve those, running this function again after.
  */
 export async function getCategoriesTreeWithMissingParents(
 	newCategories: ProductCategory[],
-	search: string
+	search: string,
+	selectedItems: ProductCategory[] = []
 ): Promise<
 	[
 		ProductCategory[],
@@ -122,19 +155,18 @@ export async function getCategoriesTreeWithMissingParents(
 
 	// Retrieve the missing parent objects incase not all of them were included.
 	if ( missingParents.length > 0 ) {
-		return resolveSelect( EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME )
-			.getProductCategories( {
-				include: missingParents,
-			} )
-			.then( ( parentCategories ) => {
-				return getCategoriesTreeWithMissingParents(
-					[
-						...( parentCategories as ProductCategory[] ),
-						...newCategories,
-					],
-					search
-				);
-			} );
+		return getProductCategories( {
+			include: missingParents,
+		} ).then( ( parentCategories ) => {
+			return getCategoriesTreeWithMissingParents(
+				[
+					...( parentCategories as ProductCategory[] ),
+					...newCategories,
+				],
+				search,
+				selectedItems
+			);
+		} );
 	}
 	const categoryTreeList = sortCategoryTreeItems(
 		Object.values( items ).filter( ( item ) => item.parentID === 0 )
@@ -143,34 +175,25 @@ export async function getCategoriesTreeWithMissingParents(
 		[],
 		categoryTreeList
 	);
+	const filterdCategories = filterItems(
+		categoryCheckboxList,
+		search,
+		selectedItems,
+		items
+	);
 
-	return Promise.resolve( [ categoryCheckboxList, categoryTreeList, items ] );
+	return Promise.resolve( [ filterdCategories, categoryTreeList, items ] );
 }
-
-const productCategoryQueryObject = {
-	per_page: PAGE_SIZE,
-};
 
 /**
  * A hook used to handle all the search logic for the category search component.
  * This hook also handles the data structure and provides a tree like structure see: CategoryTreeItema.
  */
-export const useCategorySearch = () => {
-	const lastSearchValue = useRef( '' );
-	const { initialCategories, totalCount } = useSelect(
-		( select: WCDataSelector ) => {
-			const { getProductCategories, getProductCategoriesTotalCount } =
-				select( EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME );
-			return {
-				initialCategories: getProductCategories(
-					productCategoryQueryObject
-				),
-				totalCount: getProductCategoriesTotalCount(
-					productCategoryQueryObject
-				),
-			};
-		}
-	);
+export const useCategorySearch = ( selectedItems?: ProductCategory[] ) => {
+	const [ initialCategories, setInitialCategories ] = useState<
+		ProductCategory[]
+	>( [] );
+	const [ totalCount, setTotalCount ] = useState< number >( 0 );
 	const [ isSearching, setIsSearching ] = useState( true );
 	const [ categoriesAndNewItem, setCategoriesAndNewItem ] = useState<
 		[
@@ -179,99 +202,78 @@ export const useCategorySearch = () => {
 			Record< number, CategoryTreeItem >
 		]
 	>( [ [], [], {} ] );
+	const lastSearchValue = useRef( '' );
 	const isAsync =
 		! initialCategories ||
 		( initialCategories.length > 0 && totalCount > PAGE_SIZE );
 
 	useEffect( () => {
-		if (
-			initialCategories &&
-			initialCategories.length > 0 &&
-			( categoriesAndNewItem[ 0 ].length === 0 ||
-				lastSearchValue.current.length === 0 )
-		) {
-			setIsSearching( true );
-			getCategoriesTreeWithMissingParents(
-				[ ...initialCategories ],
-				''
-			).then(
-				( categoryTree ) => {
-					setCategoriesAndNewItem( categoryTree );
-					setIsSearching( false );
-				},
-				() => {
-					setIsSearching( false );
-				}
-			);
-		}
-	}, [ initialCategories ] );
+		setIsSearching( true );
+		getProductCategories( productCategoryQueryObject )
+			.then( ( categories ) => {
+				setInitialCategories( categories );
+				return getCategoriesTreeWithMissingParents(
+					categories,
+					'',
+					selectedItems
+				);
+			} )
+			.then( setCategoriesAndNewItem )
+			.then( getProductCategoriesTotalCount )
+			.then( setTotalCount )
+			.catch( () => {} )
+			.finally( () => {
+				setIsSearching( false );
+			} );
+	}, [ selectedItems ] );
 
 	const searchCategories = useCallback(
-		async ( search?: string ): Promise< CategoryTreeItem[] > => {
+		async ( search?: string ): Promise< ProductCategory[] > => {
 			lastSearchValue.current = search || '';
 			if ( ! isAsync && initialCategories.length > 0 ) {
 				return getCategoriesTreeWithMissingParents(
 					[ ...initialCategories ],
-					search || ''
+					search || '',
+					selectedItems
 				).then( ( categoryData ) => {
 					setCategoriesAndNewItem( categoryData );
-					return categoryData[ 1 ];
+					return categoryData[ 0 ];
 				} );
 			}
 			setIsSearching( true );
 			try {
-				const newCategories = await resolveSelect(
-					EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME
-				).getProductCategories( {
+				const newCategories = await getProductCategories( {
 					search,
 					per_page: PAGE_SIZE,
 				} );
-
 				const categoryTreeData =
 					await getCategoriesTreeWithMissingParents(
-						newCategories as ProductCategory[],
-						search || ''
+						newCategories,
+						search || '',
+						selectedItems
 					);
 				setIsSearching( false );
 				setCategoriesAndNewItem( categoryTreeData );
-				return categoryTreeData[ 1 ];
+				return categoryTreeData[ 0 ];
 			} catch ( e ) {
 				setIsSearching( false );
 				return [];
 			}
 		},
-		[ initialCategories ]
+		[ initialCategories, isAsync, selectedItems ]
 	);
 
 	const categoryTreeKeyValues = categoriesAndNewItem[ 2 ];
 
-	/**
-	 * getFilteredItems callback for use in the SelectControl component.
-	 */
-	const getFilteredItems = useCallback(
-		(
-			allItems: Pick< ProductCategory, 'id' | 'name' >[],
-			inputValue: string,
-			selectedItems: Pick< ProductCategory, 'id' | 'name' >[]
-		) => {
-			const searchRegex = new RegExp( escapeRegExp( inputValue ), 'i' );
-			return allItems.filter(
-				( item ) =>
-					selectedItems.indexOf( item ) < 0 &&
-					( searchRegex.test( item.name ) ||
-						( categoryTreeKeyValues[ item.id ] &&
-							categoryTreeKeyValues[ item.id ].isOpen ) )
-			);
-		},
-		[ categoriesAndNewItem ]
-	);
-
 	return {
 		searchCategories,
-		getFilteredItems,
 		categoriesSelectList: categoriesAndNewItem[ 0 ],
 		categories: categoriesAndNewItem[ 1 ],
 		isSearching,
 		categoryTreeKeyValues,
 	};
+};
+
+export type UseCategorySearchInput = {
+	selectedItems?: ProductCategory[];
 };
