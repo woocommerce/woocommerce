@@ -60,7 +60,7 @@ export function SelectControl< ItemType = DefaultItemType >(
 		selectedItemsProps,
 		children,
 		hasExternalTags,
-		suffix,
+		suffix = <SuffixIcon icon={ search } />,
 	} = useDownshiftCombobox( {
 		...props,
 		children: props.children ?? renderChildren,
@@ -96,7 +96,7 @@ export function SelectControl< ItemType = DefaultItemType >(
 						'woocommerce-experimental-select-control__input'
 					),
 				} }
-				suffix={ suffix ?? <SuffixIcon icon={ search } /> }
+				suffix={ suffix }
 			>
 				<>
 					{ children }
