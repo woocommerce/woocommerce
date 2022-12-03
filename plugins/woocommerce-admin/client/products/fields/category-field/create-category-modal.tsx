@@ -4,10 +4,10 @@
 import { __ } from '@wordpress/i18n';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Button, Modal, Spinner, TextControl } from '@wordpress/components';
-import { useDebounce } from '@wordpress/compose';
 import { useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import {
+	useAsyncFilter,
 	__experimentalSelectControl as SelectControl,
 	__experimentalSelectControlMenu as Menu,
 } from '@woocommerce/components';
@@ -23,6 +23,8 @@ import {
 import './create-category-modal.scss';
 import { useCategorySearch } from './use-category-search';
 import { CategoryFieldItem } from './category-field-item';
+
+type CategoryItem = Pick< ProductCategory, 'id' | 'name' >;
 
 type CreateCategoryModalProps = {
 	initialCategoryName?: string;
@@ -40,7 +42,6 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 		isSearching,
 		categoryTreeKeyValues,
 		searchCategories,
-		getFilteredItems,
 	} = useCategorySearch();
 	const { createNotice } = useDispatch( 'core/notices' );
 	const [ isCreating, setIsCreating ] = useState( false );
@@ -49,10 +50,8 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 	const [ categoryName, setCategoryName ] = useState(
 		initialCategoryName || ''
 	);
-	const [ categoryParent, setCategoryParent ] = useState< Pick<
-		ProductCategory,
-		'id' | 'name'
-	> | null >( null );
+	const [ categoryParent, setCategoryParent ] =
+		useState< CategoryItem | null >( null );
 
 	const onSave = async () => {
 		recordEvent( 'product_category_add', {
@@ -77,7 +76,29 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 		}
 	};
 
-	const debouncedSearch = useDebounce( searchCategories, 250 );
+	const selectProps = {
+		items: categoriesSelectList,
+		label: interpolateComponents( {
+			mixedString: __( 'Parent category {{optional/}}', 'woocommerce' ),
+			components: {
+				optional: (
+					<span className="woocommerce-product-form__optional-input">
+						{ __( '(optional)', 'woocommerce' ) }
+					</span>
+				),
+			},
+		} ),
+		selected: categoryParent,
+		onSelect: ( item: CategoryItem ) => item && setCategoryParent( item ),
+		onRemove: () => setCategoryParent( null ),
+		getItemLabel: ( item: CategoryItem | null ) => item?.name || '',
+		getItemValue: ( item: CategoryItem | null ) => item?.id || '',
+	};
+
+	const selectPropsWithAsycFilter = useAsyncFilter< CategoryItem >( {
+		...selectProps,
+		filter: searchCategories,
+	} );
 
 	return (
 		<Modal
@@ -92,29 +113,7 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 					value={ categoryName }
 					onChange={ setCategoryName }
 				/>
-				<SelectControl< Pick< ProductCategory, 'id' | 'name' > >
-					items={ categoriesSelectList }
-					label={ interpolateComponents( {
-						mixedString: __(
-							'Parent category {{optional/}}',
-							'woocommerce'
-						),
-						components: {
-							optional: (
-								<span className="woocommerce-product-form__optional-input">
-									{ __( '(optional)', 'woocommerce' ) }
-								</span>
-							),
-						},
-					} ) }
-					selected={ categoryParent }
-					onSelect={ ( item ) => item && setCategoryParent( item ) }
-					onRemove={ () => setCategoryParent( null ) }
-					onInputChange={ debouncedSearch }
-					getFilteredItems={ getFilteredItems }
-					getItemLabel={ ( item ) => item?.name || '' }
-					getItemValue={ ( item ) => item?.id || '' }
-				>
+				<SelectControl< CategoryItem > { ...selectPropsWithAsycFilter }>
 					{ ( {
 						items,
 						isOpen,
