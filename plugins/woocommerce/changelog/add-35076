@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add sync and async filtering support to the select-control component
