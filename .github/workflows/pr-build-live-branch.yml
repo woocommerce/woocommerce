@@ -62,7 +62,7 @@ jobs:
 
             - name: Create plugins artifact
               uses: actions/upload-artifact@v3
-              if: steps.prepare.outputs.plugin-data != '{}' && github.repository_owner == 'woocommerce'
+              if: steps.prepare.outputs.plugin-data != '{}'
               with:
                   name: plugins
                   path: zips
@@ -70,7 +70,7 @@ jobs:
                   retention-days: 1
 
             - name: Inform Beta Download webhook
-              if: steps.prepare.outputs.plugin-data != '{}' && github.repository_owner == 'woocommerce'
+              if: steps.prepare.outputs.plugin-data != '{}'
               env:
                   SECRET: ${{ secrets.WOOBETA_SECRET }}
                   PLUGIN_DATA: ${{ steps.prepare.outputs.plugin-data }}
