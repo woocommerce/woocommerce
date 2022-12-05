@@ -361,6 +361,26 @@
 			$( this ).trigger( 'focus' );
 		} );
 
+		$( '#set-post-thumbnail' )
+			.parent()
+			.append(
+				'<span class="woocommerce-help-tip" tabindex="-1"></span>'
+			)
+			.find( '.woocommerce-help-tip' )
+			.attr( 'for', 'content' )
+			.attr(
+				'aria-label',
+				woocommerce_admin_meta_boxes.i18n_product_image_tip
+			)
+			.tipTip( {
+				attribute: 'data-tip',
+				content: woocommerce_admin_meta_boxes.i18n_product_image_tip,
+				fadeIn: 50,
+				fadeOut: 50,
+				delay: 200,
+				keepAlive: true,
+			} );
+
 		$( '.wc_input_table .remove_rows' ).on( 'click', function () {
 			var $tbody = $( this ).closest( '.wc_input_table' ).find( 'tbody' );
 			if ( $tbody.find( 'tr.current' ).length > 0 ) {
