@@ -20,7 +20,7 @@ import {
 } from '../../../utils';
 
 const block = {
-	name: 'Product Query',
+	name: 'Products (Beta)',
 	slug: 'woocommerce/product-query',
 	class: '.wp-block-query',
 };
@@ -45,7 +45,7 @@ describeOrSkip( GUTENBERG_EDITOR_CONTEXT === 'gutenberg' )(
 		afterAll( async () => {
 			await visitBlockPage( `${ block.name } Block` );
 			await setPostContent( '' );
-			await insertBlock( 'Product Query' );
+			await insertBlock( 'Products (Beta)' );
 			await saveOrPublish();
 		} );
 

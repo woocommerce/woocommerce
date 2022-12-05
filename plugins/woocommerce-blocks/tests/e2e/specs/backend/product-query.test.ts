@@ -22,7 +22,7 @@ import {
 } from '../../utils';
 
 const block = {
-	name: 'Product Query',
+	name: 'Products (Beta)',
 	slug: 'woocommerce/product-query',
 	class: '.wp-block-query',
 };
