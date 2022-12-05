@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect, useRef } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import { Form, Spinner, FormRef } from '@woocommerce/components';
+import { Spinner, FormRef } from '@woocommerce/components';
 import {
 	PartialProduct,
 	Product,
@@ -13,21 +13,12 @@ import {
 	WCDataSelector,
 } from '@woocommerce/data';
 import { useParams } from 'react-router-dom';
-
 /**
  * Internal dependencies
  */
-import { ProductFormHeader } from './layout/product-form-header';
 import { ProductFormLayout } from './layout/product-form-layout';
-import { ProductDetailsSection } from './sections/product-details-section';
-import { ProductInventorySection } from './sections/product-inventory-section';
-import { PricingSection } from './sections/pricing-section';
-import { ProductShippingSection } from './sections/product-shipping-section';
-import { ImagesSection } from './sections/images-section';
 import './product-page.scss';
-import { validate } from './product-validation';
-import { AttributesSection } from './sections/attributes-section';
-import { ProductFormFooter } from './layout/product-form-footer';
+import { ProductForm } from './product-form';
 
 const EditProductPage: React.FC = () => {
 	const { productId } = useParams();
@@ -121,23 +112,7 @@ const EditProductPage: React.FC = () => {
 				) }
 			{ product &&
 				( product.status !== 'trash' || wasDeletedUsingAction ) && (
-					<Form< Partial< Product > >
-						ref={ formRef }
-						initialValues={ product || {} }
-						validate={ validate }
-						errors={ {} }
-					>
-						<ProductFormHeader />
-						<ProductFormLayout>
-							<ProductDetailsSection />
-							<PricingSection />
-							<ImagesSection />
-							<ProductInventorySection />
-							<ProductShippingSection product={ product } />
-							<AttributesSection />
-						</ProductFormLayout>
-						<ProductFormFooter />
-					</Form>
+					<ProductForm formRef={ formRef } product={ product } />
 				) }
 		</div>
 	);
