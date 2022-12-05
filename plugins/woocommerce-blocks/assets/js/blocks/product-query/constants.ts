@@ -8,6 +8,7 @@ import type { InnerBlockTemplate } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { QueryBlockAttributes } from './types';
+import { VARIATION_NAME as PRODUCT_TITLE_ID } from './variations/elements/product-title';
 
 /**
  * Returns an object without a key.
@@ -76,48 +77,23 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 		[
 			[ 'woocommerce/product-image' ],
 			[
-				'core/post-terms',
-				{
-					term: 'product_cat',
-					textAlign: 'center',
-					fontSize: 'small',
-				},
-				[],
-			],
-			[
 				'core/post-title',
 				{
 					textAlign: 'center',
 					level: 3,
 					fontSize: 'medium',
-				},
-				[],
-			],
-			[
-				'woocommerce/product-rating',
-				{
-					isDescendentOfQueryLoop: true,
-					textAlign: 'center',
-					fontSize: 'small',
+					__woocommerceNamespace: PRODUCT_TITLE_ID,
 				},
 				[],
 			],
 			[
 				'woocommerce/product-price',
-				{
-					isDescendentOfQueryLoop: true,
-					textAlign: 'center',
-					fontSize: 'small',
-				},
+				{ textAlign: 'center', fontSize: 'small' },
 				[],
 			],
 			[
 				'woocommerce/product-button',
-				{
-					isDescendentOfQueryLoop: true,
-					textAlign: 'center',
-					fontSize: 'small',
-				},
+				{ textAlign: 'center', fontSize: 'small' },
 				[],
 			],
 		],
