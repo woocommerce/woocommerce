@@ -81,7 +81,8 @@ class WC_Meta_Box_Product_Images {
 			<a href="#" data-choose="<?php esc_attr_e( 'Add images to product gallery', 'woocommerce' ); ?>" data-update="<?php esc_attr_e( 'Add to gallery', 'woocommerce' ); ?>" data-delete="<?php esc_attr_e( 'Delete image', 'woocommerce' ); ?>" data-text="<?php esc_attr_e( 'Delete', 'woocommerce' ); ?>"><?php esc_html_e( 'Add product gallery images', 'woocommerce' ); ?></a>
 			<?php
 			/* translators: %s: maximum file size */
-			echo wc_help_tip( sprintf( __( 'For best results, upload JPEG or PNG files that are 1000 by 1000 pixels or larger. Maximum upload file size: %1$s.', 'woocommerce' ), size_format( wp_max_upload_size() ) ) ); ?>
+			echo wc_help_tip( sprintf( __( 'For best results, upload JPEG or PNG files that are 1000 by 1000 pixels or larger. Maximum upload file size: %1$s.', 'woocommerce' ), size_format( wp_max_upload_size() ) ) );
+			?>
 		</p>
 		<?php
 	}
