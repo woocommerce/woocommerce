@@ -240,6 +240,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - set the store country in the test step [#34972](https://github.com/woocommerce/woocommerce/pull/34972)
 * Dev - Update Playwright to 1.26.0 and fix a few flaky tests [#34790](https://github.com/woocommerce/woocommerce/pull/34790)
 * Dev - Update pnpm version constraint to 7.13.3 to avoid auto-install-peers issues [#35007](https://github.com/woocommerce/woocommerce/pull/35007)
+* Tweak - Move HPOS hook woocommerce_before_delete_order before deleting order. [#35517](https://github.com/woocommerce/woocommerce/pull/35517)
 * Tweak - Add hooks that fire before an HPOS order is deleted or trashed. [#34858](https://github.com/woocommerce/woocommerce/pull/34858)
 * Tweak - Disable new-product-management-experience feature flag in development. [#34836](https://github.com/woocommerce/woocommerce/pull/34836)
 * Tweak - Update copy in the payments welcome modal [#35031](https://github.com/woocommerce/woocommerce/pull/35031)
