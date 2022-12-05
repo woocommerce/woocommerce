@@ -49,9 +49,9 @@ jobs:
 
                   // If 26 days from now isn't the second Tuesday, then it's not code freeze day.
                   if ( 'Tuesday' !== $release_day_of_week || $release_day_of_month < 8 || $release_day_of_month > 14 ) {
-                    echo '::set-output name=freeze::1';
+                    file_put_contents( getenv( 'GITHUB_OUTPUT' ), "freeze=1\n", FILE_APPEND );
                   } else {
-                    echo '::set-output name=freeze::0';
+                    file_put_contents( getenv( 'GITHUB_OUTPUT' ), "freeze=0\n", FILE_APPEND );                    
                   }
 
     maybe-create-next-milestone-and-release-branch:
