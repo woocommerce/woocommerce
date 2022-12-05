@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
 import { useSelect } from '@wordpress/data';
 import { addFilter } from '@wordpress/hooks';
+import { ProductQueryFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 import { EditorBlock } from '@woocommerce/types';
 import {
 	FormTokenField,
@@ -190,6 +191,13 @@ export const withProductQueryControls =
 								) : null
 						) }
 					</ToolsPanel>
+				</InspectorControls>
+				{
+					// Hacky temporary solution to display the feedback prompt
+					// at the bottom of the inspector controls
+				 }
+				<InspectorControls __experimentalGroup="color">
+					<ProductQueryFeedbackPrompt />
 				</InspectorControls>
 				<BlockEdit { ...props } />
 			</>

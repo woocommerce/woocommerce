@@ -15,6 +15,7 @@ import { withProductDataContext } from '@woocommerce/shared-hocs';
 /**
  * Internal dependencies
  */
+import './style.scss';
 
 /**
  * Product Price Block Component.
