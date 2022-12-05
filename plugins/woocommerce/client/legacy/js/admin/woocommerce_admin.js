@@ -361,25 +361,25 @@
 			$( this ).trigger( 'focus' );
 		} );
 
-		$( '#set-post-thumbnail' )
-			.parent()
-			.append(
-				'<span class="woocommerce-help-tip" tabindex="-1"></span>'
-			)
-			.find( '.woocommerce-help-tip' )
-			.attr( 'for', 'content' )
-			.attr(
-				'aria-label',
-				woocommerce_admin_meta_boxes.i18n_product_image_tip
-			)
-			.tipTip( {
-				attribute: 'data-tip',
-				content: woocommerce_admin_meta_boxes.i18n_product_image_tip,
-				fadeIn: 50,
-				fadeOut: 50,
-				delay: 200,
-				keepAlive: true,
-			} );
+		const setPostThumbnail = $( '#set-post-thumbnail' );
+
+		if ( setPostThumbnail ) {
+			setPostThumbnail
+				.after(
+					`<span class="woocommerce-help-tip" tabindex="-1" for="content" aria-label="${ woocommerce_admin_meta_boxes.i18n_product_image_tip }"></span>`
+				)
+				.parent()
+				.find( '.woocommerce-help-tip' )
+				.tipTip( {
+					attribute: 'data-tip',
+					content:
+						woocommerce_admin_meta_boxes.i18n_product_image_tip,
+					fadeIn: 50,
+					fadeOut: 50,
+					delay: 200,
+					keepAlive: true,
+				} );
+		}
 
 		$( '.wc_input_table .remove_rows' ).on( 'click', function () {
 			var $tbody = $( this ).closest( '.wc_input_table' ).find( 'tbody' );
