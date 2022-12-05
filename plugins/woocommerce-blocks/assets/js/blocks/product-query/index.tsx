@@ -7,32 +7,35 @@ import { addFilter } from '@wordpress/hooks';
 /**
  * Internal dependencies
  */
-import { QUERY_LOOP_ID } from './constants';
+import { CORE_NAME as PRODUCT_TITLE_ID } from './variations/elements/product-title';
 import './inspector-controls';
 import './style.scss';
 import './variations/product-query';
 import './variations/products-on-sale';
 
-function registerProductQueryVariationAttributes(
+const EXTENDED_CORE_ELEMENTS = [ PRODUCT_TITLE_ID ];
+
+function registerProductQueryElementsNamespace(
 	props: Block,
 	blockName: string
 ) {
-	if ( blockName === QUERY_LOOP_ID ) {
+	if ( EXTENDED_CORE_ELEMENTS.includes( blockName ) ) {
 		// Gracefully handle if settings.attributes is undefined.
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore -- We need this because `attributes` is marked as `readonly`
 		props.attributes = {
 			...props.attributes,
-			__woocommerceVariationProps: {
-				type: 'object',
+			__woocommerceNamespace: {
+				type: 'string',
 			},
 		};
 	}
+
 	return props;
 }
 
 addFilter(
 	'blocks.registerBlockType',
 	'core/custom-class-name/attribute',
-	registerProductQueryVariationAttributes
+	registerProductQueryElementsNamespace
 );
