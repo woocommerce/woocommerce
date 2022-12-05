@@ -8,7 +8,7 @@ import {
 	SlotFillProvider,
 	Spinner,
 } from '@wordpress/components';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { createElement, useState } from '@wordpress/element';
 import { tag } from '@wordpress/icons';
 
@@ -17,11 +17,15 @@ import { tag } from '@wordpress/icons';
  */
 import { SelectedType, DefaultItemType, getItemLabelType } from '../types';
 import { MenuItem } from '../menu-item';
-import { SelectControl, selectControlStateChangeTypes } from '../';
+import {
+	SelectControl,
+	selectControlStateChangeTypes,
+	useAsyncFilter,
+} from '../';
 import { Menu, MenuSlot } from '../menu';
 import { SuffixIcon } from '../suffix-icon';
 
-const sampleItems = [
+const sampleItems: DefaultItemType[] = [
 	{ value: 'apple', label: 'Apple' },
 	{ value: 'pear', label: 'Pear' },
 	{ value: 'orange', label: 'Orange' },
@@ -133,36 +137,50 @@ export const FuzzyMatching: React.FC = () => {
 
 export const Async: React.FC = () => {
 	const [ selectedItem, setSelectedItem ] =
-		useState< SelectedType< DefaultItemType > >( null );
+		useState< DefaultItemType | null >( null );
 	const [ fetchedItems, setFetchedItems ] = useState< DefaultItemType[] >(
 		[]
 	);
 	const [ isFetching, setIsFetching ] = useState( false );
 
-	const fetchItems = ( value: string | undefined ) => {
-		setIsFetching( true );
-		setFetchedItems( [] );
-		setTimeout( () => {
-			const results = sampleItems.sort( () => 0.5 - Math.random() );
-			setFetchedItems( results );
+	const filter = useCallback(
+		( value = '' ) =>
+			new Promise< DefaultItemType[] >( ( resolve ) => {
+				setTimeout( () => {
+					const filteredItems = [ ...sampleItems ]
+						.sort( ( a, b ) => a.label.localeCompare( b.label ) )
+						.filter( ( { label } ) => label.includes( value ) );
+					resolve( filteredItems );
+				}, 1500 );
+			} ),
+		[ selectedItem ]
+	);
+
+	const selectProps = useAsyncFilter< DefaultItemType >( {
+		label: 'Async',
+		items: fetchedItems,
+		selected: selectedItem,
+		placeholder: 'Start typing...',
+		getFilteredItems: ( allItems ) => allItems,
+		onSelect: ( item: DefaultItemType | null ) => setSelectedItem( item ),
+		onRemove: () => setSelectedItem( null ),
+		filter,
+		onFilterStart() {
+			setIsFetching( true );
+			setFetchedItems( [] );
+		},
+		onFilterEnd( filteredItems ) {
+			setFetchedItems( filteredItems );
 			setIsFetching( false );
-		}, 1500 );
-	};
+		},
+		onFilterError() {
+			setIsFetching( false );
+		},
+	} );
 
 	return (
 		<>
-			<SelectControl
-				label="Async"
-				getFilteredItems={ ( allItems ) => {
-					return allItems;
-				} }
-				items={ fetchedItems }
-				onInputChange={ fetchItems }
-				selected={ selectedItem }
-				onSelect={ ( item ) => setSelectedItem( item ) }
-				onRemove={ () => setSelectedItem( null ) }
-				placeholder="Start typing..."
-			>
+			<SelectControl< DefaultItemType > { ...selectProps }>
 				{ ( {
 					items,
 					isOpen,
