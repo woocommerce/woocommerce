@@ -175,7 +175,7 @@ export const withProductQueryControls =
 						<PopularPresets { ...props } />
 					) }
 					<ToolsPanel
-						class="woocommerce-product-query-toolspanel"
+						className="woocommerce-product-query-toolspanel"
 						label={ __(
 							'Advanced Filters',
 							'woo-gutenberg-products-block'
@@ -187,7 +187,7 @@ export const withProductQueryControls =
 						{ Object.entries( TOOLS_PANEL_CONTROLS ).map(
 							( [ key, Control ] ) =>
 								allowedControls?.includes( key ) ? (
-									<Control { ...props } />
+									<Control { ...props } key={ key } />
 								) : null
 						) }
 					</ToolsPanel>

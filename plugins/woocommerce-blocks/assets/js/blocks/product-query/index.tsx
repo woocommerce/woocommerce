@@ -8,12 +8,13 @@ import { addFilter } from '@wordpress/hooks';
  * Internal dependencies
  */
 import { CORE_NAME as PRODUCT_TITLE_ID } from './variations/elements/product-title';
+import { CORE_NAME as PRODUCT_SUMMARY_ID } from './variations/elements/product-summary';
 import './inspector-controls';
 import './style.scss';
 import './variations/product-query';
 import './variations/products-on-sale';
 
-const EXTENDED_CORE_ELEMENTS = [ PRODUCT_TITLE_ID ];
+const EXTENDED_CORE_ELEMENTS = [ PRODUCT_SUMMARY_ID, PRODUCT_TITLE_ID ];
 
 function registerProductQueryElementsNamespace(
 	props: Block,
