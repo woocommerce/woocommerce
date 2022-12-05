@@ -97,7 +97,7 @@ const completer: AutoCompleter = {
 		);
 		return (
 			<Fragment>
-				{ /* @ts-expect-error <Flag /> TODO: migrate ProductImage component to TS. */ }
+				{ /* @ts-expect-error TODO: migrate ProductImage component to TS. */ }
 				<ProductImage
 					key="thumbnail"
 					className="woocommerce-search__result-thumbnail"

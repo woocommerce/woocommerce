@@ -65,12 +65,12 @@ const completer: AutoCompleter = {
 
 		return (
 			<Fragment>
-				{ /* @ts-expect-error <Flag /> TODO: migrate Flag component to TS. */ }
+				{ /* @ts-expect-error TODO: migrate Flag component to TS. */ }
 				<Flag
 					key="thumbnail"
 					className="woocommerce-search__result-thumbnail"
 					code={ country.code }
-					// @ts-expect-error <Flag /> TODO: migrate Flag component.
+					// @ts-expect-error TODO: migrate Flag component.
 					size={ 18 }
 					hideFromScreenReader
 				/>
