@@ -6,15 +6,15 @@ import {
 	BLOCK_DESCRIPTION,
 	BLOCK_ICON,
 	BLOCK_TITLE,
-} from '@woocommerce/atomic-blocks/product-elements/title/constants';
+} from '@woocommerce/atomic-blocks/product-elements/summary/constants';
 
 /**
  * Internal dependencies
  */
 import { registerElementVariation } from './utils';
 
-export const CORE_NAME = 'core/post-title';
-export const VARIATION_NAME = 'woocommerce/product-query/product-title';
+export const CORE_NAME = 'core/post-excerpt';
+export const VARIATION_NAME = 'woocommerce/product-query/product-summary';
 
 if ( isFeaturePluginBuild() ) {
 	registerElementVariation( CORE_NAME, {
