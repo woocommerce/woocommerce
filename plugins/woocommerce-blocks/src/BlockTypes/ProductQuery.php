@@ -122,11 +122,13 @@ class ProductQuery extends AbstractBlock {
 	public function update_rest_query( $args, $request ) {
 		$orderby          = $request->get_param( 'orderby' );
 		$woo_attributes   = $request->get_param( '__woocommerceAttributes' );
+		$woo_stock_status = $request->get_param( '__woocommerceStockStatus' );
 		$on_sale_query    = $request->get_param( '__woocommerceOnSale' ) === 'true' ? $this->get_on_sale_products_query() : array();
 		$orderby_query    = isset( $orderby ) ? $this->get_custom_orderby_query( $orderby ) : array();
 		$attributes_query = is_array( $woo_attributes ) ? $this->get_product_attributes_query( $woo_attributes ) : array();
+		$stock_query      = is_array( $woo_stock_status ) ? $this->get_stock_status_query( $woo_stock_status ) : array();
 
-		return array_merge( $args, $on_sale_query, $orderby_query, $attributes_query );
+		return array_merge( $args, $on_sale_query, $orderby_query, $attributes_query, $stock_query );
 	}
 
 	/**
@@ -434,11 +436,12 @@ class ProductQuery extends AbstractBlock {
 		$query            = $parsed_block['attrs']['query'];
 		$on_sale_enabled  = isset( $query['__woocommerceOnSale'] ) && true === $query['__woocommerceOnSale'];
 		$attributes_query = isset( $query['__woocommerceAttributes'] ) ? $this->get_product_attributes_query( $query['__woocommerceAttributes'] ) : array();
+		$stock_query      = isset( $query['__woocommerceStockStatus'] ) ? $this->get_stock_status_query( $query['__woocommerceStockStatus'] ) : array();
 
 		return array(
-			'attributes'   => $attributes_query,
 			'on_sale'      => ( $on_sale_enabled ? $this->get_on_sale_products_query() : array() ),
-			'stock_status' => isset( $query['__woocommerceStockStatus'] ) ? $this->get_stock_status_query( $query['__woocommerceStockStatus'] ) : array(),
+			'attributes'   => $attributes_query,
+			'stock_status' => $stock_query,
 		);
 	}
 
