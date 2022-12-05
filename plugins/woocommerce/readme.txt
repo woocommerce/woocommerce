@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, sell online, storefront, che
 Requires at least: 5.8
 Tested up to: 6.1
 Requires PHP: 7.2
-Stable tag: 7.1.0
+Stable tag: 7.1.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -162,6 +162,17 @@ If you encounter issues with the shop/category pages after an update, flush the 
 WooCommerce comes with some sample data you can use to see how products look; import sample_products.xml via the [WordPress importer](https://wordpress.org/plugins/wordpress-importer/). You can also use the core [CSV importer](https://docs.woocommerce.com/document/product-csv-importer-exporter/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) or our [CSV Import Suite extension](https://woocommerce.com/products/product-csv-import-suite/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) to import sample_products.csv
 
 == Changelog ==
+
+= 7.1.1 2022-12-08 =
+
+**WooCommerce**
+
+* Patch - Move HPOS hook woocommerce_before_delete_order before deleting order. [#35517](https://github.com/woocommerce/woocommerce/pull/35517)
+
+**WooCommerce Blocks 8.7.6**
+
+* Fix - Mini Cart block: fix compatibility with Page Optimize and Product Bundles plugins. [#7794](https://github.com/woocommerce/woocommerce-blocks/pull/7794)
+* Fix - Mini Cart block: Load wc-blocks-registry package at the page's load instead of lazy load it. [#7813](https://github.com/woocommerce/woocommerce-blocks/pull/7813)
 
 = 7.1.0 2022-11-08 =
 
