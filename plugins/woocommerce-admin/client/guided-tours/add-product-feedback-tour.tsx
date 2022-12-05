@@ -5,7 +5,7 @@ import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useState, useEffect, useRef } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -14,23 +14,18 @@ import { recordEvent } from '@woocommerce/tracks';
 
 const FEEDBACK_TOUR_OPTION = 'woocommerce_ces_product_feedback_shown';
 
-const useShowProductFeedbackTour = () => {
-	const { tourOptionValue, isLoading } = useSelect( ( select ) => {
-		const { hasFinishedResolution, getOption } =
-			select( OPTIONS_STORE_NAME );
+const useShowProductFeedbackTour = (): undefined | boolean => {
+	const { tourOptionValue } = useSelect( ( select ) => {
+		const { getOption } = select( OPTIONS_STORE_NAME );
 
 		return {
-			isLoading: ! hasFinishedResolution( 'getOption', [
-				FEEDBACK_TOUR_OPTION,
-			] ),
-			tourOptionValue: getOption( FEEDBACK_TOUR_OPTION ),
+			tourOptionValue: getOption( FEEDBACK_TOUR_OPTION ) as
+				| boolean
+				| undefined,
 		};
 	} );
 
-	return {
-		isLoading,
-		tourOptionValue,
-	};
+	return tourOptionValue;
 };
 
 type ProductFeedbackTour = {
@@ -40,25 +35,28 @@ type ProductFeedbackTour = {
 export const ProductFeedbackTour: React.FC< ProductFeedbackTour > = ( {
 	currentTab,
 } ) => {
-	const { isLoading, tourOptionValue } = useShowProductFeedbackTour();
+	const tourOptionValue = useShowProductFeedbackTour();
 	const [ isTourVisible, setIsTourVisible ] = useState( false );
 	const tourTimeout = useRef< ReturnType< typeof setTimeout > | null >(
 		null
 	);
+	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
 	const clearTourTimeout = () => {
 		clearTimeout( tourTimeout.current as ReturnType< typeof setTimeout > );
 	};
 
-	console.debug( 'render', isLoading, tourOptionValue );
-
 	useEffect( () => {
+		if ( tourOptionValue !== false ) {
+			return;
+		}
+
 		tourTimeout.current = setTimeout( () => {
 			setIsTourVisible( true );
 		}, 5 * 1000 );
 
 		return () => clearTourTimeout();
-	}, [] );
+	}, [ tourOptionValue ] );
 
 	useEffect( () => {
 		if ( currentTab === 'feedback' ) {
@@ -66,6 +64,15 @@ export const ProductFeedbackTour: React.FC< ProductFeedbackTour > = ( {
 			clearTourTimeout();
 		}
 	}, [ currentTab ] );
+
+	useEffect( () => {
+		if ( ! isTourVisible ) {
+			return;
+		}
+		updateOptions( {
+			[ FEEDBACK_TOUR_OPTION ]: true,
+		} );
+	}, [ isTourVisible ] );
 
 	const config: TourKitTypes.WooConfig = {
 		steps: [
@@ -78,7 +85,7 @@ export const ProductFeedbackTour: React.FC< ProductFeedbackTour > = ( {
 					heading: __( '🫣 Feeling stuck?', 'woocommerce' ),
 					descriptions: {
 						desktop: __(
-							'You have been working on this product for a few minutes now. Is there something you’re struggling with? Share your feedback.',
+							"You have been working on this product for a few minutes now. Is there something you're struggling with? Share your feedback.",
 							'woocommerce'
 						),
 					},
@@ -94,7 +101,9 @@ export const ProductFeedbackTour: React.FC< ProductFeedbackTour > = ( {
 				liveResize: { mutation: true, resize: true },
 			},
 		},
-		closeHandler: ( _steps ) => {
+		closeHandler: () => {
+			setIsTourVisible( false );
+			// Add tracks?
 			// recordEvent( 'settings_store_address_tour_dismiss', {
 			// 	source,
 			// } );
