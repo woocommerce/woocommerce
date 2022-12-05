@@ -241,7 +241,7 @@ describe.skip( `${ block.name } Block`, () => {
 				title: block.name,
 			} );
 
-			await insertBlock( 'Product Query' );
+			await insertBlock( 'Products (Beta)' );
 			await insertBlock( block.name );
 			await insertBlock( 'Active Filters' );
 			await page.waitForNetworkIdle();

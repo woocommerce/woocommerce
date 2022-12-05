@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { registerExperimentalBlockType } from '@woocommerce/block-settings';
+import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 import type { BlockConfiguration } from '@wordpress/blocks';
 
 /**
@@ -31,7 +31,7 @@ const blockConfig: BlockConfiguration = {
 	edit,
 };
 
-registerExperimentalBlockType( 'woocommerce/product-sku', {
+registerFeaturePluginBlockType( 'woocommerce/product-sku', {
 	...sharedConfig,
 	...blockConfig,
 } );
