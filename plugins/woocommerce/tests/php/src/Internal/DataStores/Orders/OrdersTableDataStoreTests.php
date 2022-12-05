@@ -1020,7 +1020,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			$order->save();
 		}
 
-		$query = new OrdersTableQuery( array( 'limit'  => 5 ) );
+		$query = new OrdersTableQuery( array( 'limit' => 5 ) );
 		$this->assertEquals( 30, $query->found_orders, 'Specifying limits still calculate all found orders.' );
 
 		// Count does not change based on the fields that we are fetching.
@@ -1036,7 +1036,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			array(
 				'field_query' => array(
 					array(
-						'field'   => 'billing_address_2',
+						'field' => 'billing_address_2',
 						'value' => 'Test',
 					),
 				),

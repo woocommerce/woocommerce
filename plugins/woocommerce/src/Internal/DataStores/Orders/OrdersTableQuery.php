@@ -630,8 +630,6 @@ class OrdersTableQuery {
 	 * @param string $join Prepared JOIN clause.
 	 * @param string $where Prepared WHERE clause.
 	 * @param string $groupby Prepared GROUP BY clause.
-	 *
-	 * @return string SQL query for counting total number of results.
 	 */
 	private function build_count_query( $fields, $join, $where, $groupby ) {
 		if ( ! isset( $this->sql ) || '' === $this->sql ) {
@@ -1036,7 +1034,7 @@ class OrdersTableQuery {
 		}
 
 		if ( $this->limits ) {
-			$this->found_orders  = absint( $wpdb->get_var( $this->count_sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared.
+			$this->found_orders  = absint( $wpdb->get_var( $this->count_sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$this->max_num_pages = (int) ceil( $this->found_orders / $this->args['limit'] );
 		} else {
 			$this->found_orders = count( $this->orders );
