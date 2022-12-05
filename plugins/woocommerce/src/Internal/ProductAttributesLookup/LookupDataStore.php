@@ -433,7 +433,7 @@ class LookupDataStore {
 			$terms               = WC()->call_function(
 				'get_terms',
 				array(
-					'taxonomy'   => $taxonomy,
+					'taxonomy'   => wc_sanitize_taxonomy_name( $taxonomy ),
 					'hide_empty' => false,
 					'fields'     => 'id=>slug',
 				)

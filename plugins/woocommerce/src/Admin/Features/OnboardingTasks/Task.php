@@ -27,6 +27,8 @@ abstract class Task {
 	 * Name of the snooze option.
 	 *
 	 * @var string
+	 *
+	 * @deprecated 7.2.0
 	 */
 	const SNOOZED_OPTION = 'woocommerce_task_list_remind_me_later_tasks';
 
@@ -178,9 +180,13 @@ abstract class Task {
 	/**
 	 * Level.
 	 *
+	 * @deprecated 7.2.0
+	 *
 	 * @return string
 	 */
 	public function get_level() {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '7.2.0' );
+
 		return 3;
 	}
 
@@ -267,18 +273,26 @@ abstract class Task {
 	/**
 	 * Check if a task is snoozeable.
 	 *
+	 * @deprecated 7.2.0
+	 *
 	 * @return bool
 	 */
 	public function is_snoozeable() {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '7.2.0' );
+
 		return false;
 	}
 
 	/**
 	 * Get the snoozed until datetime.
 	 *
+	 * @deprecated 7.2.0
+	 *
 	 * @return string
 	 */
 	public function get_snoozed_until() {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '7.2.0' );
+
 		$snoozed_tasks = get_option( self::SNOOZED_OPTION, array() );
 		if ( isset( $snoozed_tasks[ $this->get_id() ] ) ) {
 			return $snoozed_tasks[ $this->get_id() ];
@@ -290,9 +304,13 @@ abstract class Task {
 	/**
 	 * Bool for task snoozed.
 	 *
+	 * @deprecated 7.2.0
+	 *
 	 * @return bool
 	 */
 	public function is_snoozed() {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '7.2.0' );
+
 		if ( ! $this->is_snoozeable() ) {
 			return false;
 		}
@@ -306,9 +324,14 @@ abstract class Task {
 	 * Snooze the task.
 	 *
 	 * @param string $duration Duration to snooze. day|hour|week.
+	 *
+	 * @deprecated 7.2.0
+	 *
 	 * @return bool
 	 */
 	public function snooze( $duration = 'day' ) {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '7.2.0' );
+
 		if ( ! $this->is_snoozeable() ) {
 			return false;
 		}
@@ -330,9 +353,13 @@ abstract class Task {
 	/**
 	 * Undo task snooze.
 	 *
+	 * @deprecated 7.2.0
+	 *
 	 * @return bool
 	 */
 	public function undo_snooze() {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '7.2.0' );
+
 		$snoozed = get_option( self::SNOOZED_OPTION, array() );
 		unset( $snoozed[ $this->get_id() ] );
 		$update = update_option( self::SNOOZED_OPTION, $snoozed );
@@ -406,9 +433,13 @@ abstract class Task {
 	/**
 	 * Check if task is disabled.
 	 *
+	 * @deprecated 7.2.0
+	 *
 	 * @return bool
 	 */
 	public function is_disabled() {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '7.2.0' );
+
 		return false;
 	}
 
@@ -435,6 +466,15 @@ abstract class Task {
 	}
 
 	/**
+	 * Check if should record event when task is viewed
+	 *
+	 * @return bool
+	 */
+	public function get_record_view_event(): bool {
+		return false;
+	}
+
+	/**
 	 * Get the task as JSON.
 	 *
 	 * @return array
@@ -443,27 +483,28 @@ abstract class Task {
 		$this->possibly_track_completion();
 
 		return array(
-			'id'             => $this->get_id(),
-			'parentId'       => $this->get_parent_id(),
-			'title'          => $this->get_title(),
-			'canView'        => $this->can_view(),
-			'content'        => $this->get_content(),
-			'additionalInfo' => $this->get_additional_info(),
-			'actionLabel'    => $this->get_action_label(),
-			'actionUrl'      => $this->get_action_url(),
-			'isComplete'     => $this->is_complete(),
-			'time'           => $this->get_time(),
-			'level'          => $this->get_level(),
-			'isActioned'     => $this->is_actioned(),
-			'isDismissed'    => $this->is_dismissed(),
-			'isDismissable'  => $this->is_dismissable(),
-			'isSnoozed'      => $this->is_snoozed(),
-			'isSnoozeable'   => $this->is_snoozeable(),
-			'isVisited'      => $this->is_visited(),
-			'isDisabled'     => $this->is_disabled(),
-			'snoozedUntil'   => $this->get_snoozed_until(),
-			'additionalData' => self::convert_object_to_camelcase( $this->get_additional_data() ),
-			'eventPrefix'    => $this->prefix_event( '' ),
+			'id'              => $this->get_id(),
+			'parentId'        => $this->get_parent_id(),
+			'title'           => $this->get_title(),
+			'canView'         => $this->can_view(),
+			'content'         => $this->get_content(),
+			'additionalInfo'  => $this->get_additional_info(),
+			'actionLabel'     => $this->get_action_label(),
+			'actionUrl'       => $this->get_action_url(),
+			'isComplete'      => $this->is_complete(),
+			'time'            => $this->get_time(),
+			'level'           => 3,
+			'isActioned'      => $this->is_actioned(),
+			'isDismissed'     => $this->is_dismissed(),
+			'isDismissable'   => $this->is_dismissable(),
+			'isSnoozed'       => false,
+			'isSnoozeable'    => false,
+			'isVisited'       => $this->is_visited(),
+			'isDisabled'      => false,
+			'snoozedUntil'    => null,
+			'additionalData'  => self::convert_object_to_camelcase( $this->get_additional_data() ),
+			'eventPrefix'     => $this->prefix_event( '' ),
+			'recordViewEvent' => $this->get_record_view_event(),
 		);
 	}
 

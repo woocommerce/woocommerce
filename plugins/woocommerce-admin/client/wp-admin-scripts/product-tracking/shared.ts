@@ -13,8 +13,40 @@ import { waitUntilElementIsPresent } from './utils';
  *
  * @return object
  */
+
+const isElementVisible = ( element: HTMLElement ) =>
+	! ( window.getComputedStyle( element ).display === 'none' );
+
 const getProductData = () => {
-	return {
+	const isBlockEditor =
+		document.querySelectorAll( '.block-editor' ).length > 0;
+
+	let description_value = '';
+	let tagsText = '';
+
+	if ( ! isBlockEditor ) {
+		tagsText = (
+			document.querySelector(
+				'[name="tax_input[product_tag]"]'
+			) as HTMLInputElement
+		 ).value;
+		const content = document.querySelector(
+			'#content'
+		) as HTMLInputElement;
+		if ( content && isElementVisible( content ) ) {
+			description_value = content.value;
+		} else if ( typeof tinymce === 'object' && tinymce.get( 'content' ) ) {
+			description_value = tinymce.get( 'content' ).getContent();
+		}
+	} else {
+		description_value = (
+			document.querySelector(
+				'.block-editor-rich-text__editable'
+			) as HTMLInputElement
+		 )?.value;
+	}
+
+	const productData = {
 		product_id: ( document.querySelector( '#post_ID' ) as HTMLInputElement )
 			?.value,
 		product_type: (
@@ -22,14 +54,81 @@ const getProductData = () => {
 		 )?.value,
 		is_downloadable: (
 			document.querySelector( '#_downloadable' ) as HTMLInputElement
-		 )?.value,
+		 )?.checked
+			? 'Yes'
+			: 'No',
 		is_virtual: (
 			document.querySelector( '#_virtual' ) as HTMLInputElement
-		 )?.value,
+		 )?.checked
+			? 'Yes'
+			: 'No',
 		manage_stock: (
 			document.querySelector( '#_manage_stock' ) as HTMLInputElement
-		 )?.value,
+		 )?.checked
+			? 'Yes'
+			: 'No',
+		attributes: document.querySelectorAll( '.woocommerce_attribute' )
+			.length,
+		categories: document.querySelectorAll(
+			'[name="tax_input[product_cat][]"]:checked'
+		).length,
+		cross_sells: document.querySelectorAll( '#crosssell_ids option' ).length
+			? 'Yes'
+			: 'No',
+		description: description_value.trim() !== '' ? 'Yes' : 'No',
+		enable_reviews: (
+			document.querySelector( '#comment_status' ) as HTMLInputElement
+		 )?.checked
+			? 'Yes'
+			: 'No',
+		is_block_editor: isBlockEditor,
+		menu_order:
+			parseInt(
+				( document.querySelector( '#menu_order' ) as HTMLInputElement )
+					?.value ?? 0,
+				10
+			) !== 0
+				? 'Yes'
+				: 'No',
+		product_gallery: document.querySelectorAll(
+			'#product_images_container .product_images > li'
+		).length,
+		product_image:
+			parseInt(
+				(
+					document.querySelector(
+						'#_thumbnail_id'
+					) as HTMLInputElement
+				 )?.value,
+				10
+			) > 0
+				? 'Yes'
+				: 'No',
+		purchase_note: (
+			document.querySelector( '#_purchase_note' ) as HTMLInputElement
+		 )?.value.length
+			? 'Yes'
+			: 'No',
+		sale_price: (
+			document.querySelector( '#_sale_price' ) as HTMLInputElement
+		 )?.value
+			? 'Yes'
+			: 'No',
+		short_description: (
+			document.querySelector( '#excerpt' ) as HTMLInputElement
+		 )?.value.length
+			? 'Yes'
+			: 'No',
+		tags: tagsText.length > 0 ? tagsText.split( ',' ).length : 0,
+		upsells: document.querySelectorAll( '#upsell_ids option' ).length
+			? 'Yes'
+			: 'No',
+		weight: ( document.querySelector( '#_weight' ) as HTMLInputElement )
+			?.value
+			? 'Yes'
+			: 'No',
 	};
+	return productData;
 };
 
 /**
@@ -102,6 +201,7 @@ const prefixObjectKeys = (
 /**
  * Initialize all product screen tracks.
  */
+
 export const initProductScreenTracks = () => {
 	const initialPublishingData = getPublishingWidgetData();
 
@@ -324,4 +424,23 @@ export const initProductScreenTracks = () => {
 				} );
 			}
 		} );
+
+	document
+		.querySelector(
+			'#woocommerce-product-updated-message-view-product__link'
+		)
+		?.addEventListener( 'click', () => {
+			recordEvent( 'product_view_product_click', getProductData() );
+		} );
+
+	const dismissProductUpdatedButtonSelector =
+		'.notice-success.is-dismissible > button';
+
+	waitUntilElementIsPresent( dismissProductUpdatedButtonSelector, () => {
+		document
+			.querySelector( dismissProductUpdatedButtonSelector )
+			?.addEventListener( 'click', () => {
+				recordEvent( 'product_view_product_dismiss', getProductData() );
+			} );
+	} );
 };

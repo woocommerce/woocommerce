@@ -34,6 +34,13 @@ class ListTable extends WP_List_Table {
 	private $page_controller;
 
 	/**
+	 * Tracks whether we're currently inside the trash.
+	 *
+	 * @var boolean
+	 */
+	private $is_trash = false;
+
+	/**
 	 * Sets up the admin list table for orders (specifically, for orders managed by the OrdersTableDataStore).
 	 *
 	 * @see WC_Admin_List_Table_Orders for the corresponding class used in relation to the traditional WP Post store.
@@ -281,6 +288,9 @@ class ListTable extends WP_List_Table {
 				'total_pages' => $max_num_pages,
 			)
 		);
+
+		// Are we inside the trash?
+		$this->is_trash = isset( $_REQUEST['status'] ) && 'trash' === $_REQUEST['status'];
 	}
 
 	/**
@@ -458,7 +468,7 @@ class ListTable extends WP_List_Table {
 			submit_button( __( 'Filter', 'woocommerce' ), '', 'filter_action', false, array( 'id' => 'order-query-submit' ) );
 		}
 
-		if ( $this->is_trash && $this->has_items() && current_user_can( 'edit_others_orders' ) ) {
+		if ( $this->is_trash && $this->has_items() && current_user_can( 'edit_others_shop_orders' ) ) {
 			submit_button( __( 'Empty Trash', 'woocommerce' ), 'apply', 'delete_all', false );
 		}
 
@@ -704,8 +714,10 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function render_order_status_column( WC_Order $order ): void {
-		$tooltip                 = '';
-		$comment_count           = get_comment_count( $order->get_id() );
+		$tooltip = '';
+		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
+		$comment_count = get_comment_count( $order->get_id() );
+		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
 		$approved_comments_count = absint( $comment_count['approved'] );
 
 		if ( $approved_comments_count ) {
@@ -887,6 +899,19 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Gets the current action selected from the bulk actions dropdown.
+	 *
+	 * @return string|false The action name. False if no action was selected.
+	 */
+	public function current_action() {
+		if ( ! empty( $_REQUEST['delete_all'] ) ) {
+			return 'delete_all';
+		}
+
+		return parent::current_action();
+	}
+
+	/**
 	 * Handle bulk actions.
 	 */
 	public function handle_bulk_actions() {
@@ -901,6 +926,22 @@ class ListTable extends WP_List_Table {
 		$redirect_to = remove_query_arg( array( 'deleted', 'ids' ), wp_get_referer() );
 		$redirect_to = add_query_arg( 'paged', $this->get_pagenum(), $redirect_to );
 
+		if ( 'delete_all' === $action ) {
+			// Get all trashed orders.
+			$ids = wc_get_orders(
+				array(
+					'type'   => 'shop_order',
+					'status' => 'trash',
+					'limit'  => -1,
+					'return' => 'ids',
+				)
+			);
+
+			$action = 'delete';
+		} else {
+			$ids = isset( $_REQUEST['order'] ) ? array_reverse( array_map( 'absint', $_REQUEST['order'] ) ) : array();
+		}
+
 		/**
 		 * Allows 3rd parties to modify order IDs about to be affected by a bulk action.
 		 *
@@ -908,7 +949,7 @@ class ListTable extends WP_List_Table {
 		 */
 		$ids = apply_filters( // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 			'woocommerce_bulk_action_ids',
-			isset( $_REQUEST['order'] ) ? array_reverse( array_map( 'absint', $_REQUEST['order'] ) ) : array(),
+			$ids,
 			$action,
 			'order'
 		);
@@ -941,9 +982,24 @@ class ListTable extends WP_List_Table {
 			if ( isset( $order_statuses[ 'wc-' . $new_status ] ) ) {
 				$changed = $this->do_bulk_action_mark_orders( $ids, $new_status );
 			}
+		} else {
+			$screen = get_current_screen()->id;
+
+			/**
+			 * This action is documented in /wp-admin/edit.php (it is a core WordPress hook).
+			 *
+			 * @since 7.2.0
+			 *
+			 * @param string $redirect_to The URL to redirect to after processing the bulk actions.
+			 * @param string $action      The current bulk action.
+			 * @param int[]  $ids         IDs for the orders to be processed.
+			 */
+			$custom_sendback = apply_filters( "handle_bulk_actions-{$screen}", $redirect_to, $action, $ids ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 		}
 
-		if ( $changed ) {
+		if ( ! empty( $custom_sendback ) ) {
+			$redirect_to = $custom_sendback;
+		} elseif ( $changed ) {
 			$redirect_to = add_query_arg(
 				array(
 					'bulk_action' => $report_action,

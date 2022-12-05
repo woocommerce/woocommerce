@@ -249,7 +249,7 @@ class OrdersTableQuery {
 		);
 
 		foreach ( $mapping as $query_key => $table_field ) {
-			if ( isset( $this->args[ $query_key ] ) ) {
+			if ( isset( $this->args[ $query_key ] ) && '' !== $this->args[ $query_key ] ) {
 				$this->args[ $table_field ] = $this->args[ $query_key ];
 				unset( $this->args[ $query_key ] );
 			}

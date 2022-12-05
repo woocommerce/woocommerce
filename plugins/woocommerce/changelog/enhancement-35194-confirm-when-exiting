@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Add a confirmation modal when the user tries to navigate away with unsaved changes

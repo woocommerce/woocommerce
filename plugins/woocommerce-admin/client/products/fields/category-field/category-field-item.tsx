@@ -18,7 +18,6 @@ export type CategoryTreeItem = {
 type CategoryFieldItemProps = {
 	item: CategoryTreeItem;
 	selectedIds: number[];
-	onSelect: ( item: ProductCategory ) => void;
 	items: Pick< ProductCategory, 'id' | 'name' >[];
 	highlightedIndex: number;
 	openParent?: () => void;
@@ -30,7 +29,6 @@ type CategoryFieldItemProps = {
 export const CategoryFieldItem: React.FC< CategoryFieldItemProps > = ( {
 	item,
 	selectedIds = [],
-	onSelect,
 	items,
 	highlightedIndex,
 	openParent,
@@ -89,7 +87,7 @@ export const CategoryFieldItem: React.FC< CategoryFieldItemProps > = ( {
 				<CheckboxControl
 					label={ item.data.name }
 					checked={ selectedIds.includes( item.data.id ) }
-					onChange={ () => item.data /*&& onSelect( item.data )*/ }
+					onChange={ () => item.data }
 				/>
 			</div>
 			{ children.length > 0 ? (
@@ -107,7 +105,6 @@ export const CategoryFieldItem: React.FC< CategoryFieldItemProps > = ( {
 							key={ child.data.id }
 							item={ child }
 							selectedIds={ selectedIds }
-							onSelect={ onSelect }
 							items={ items }
 							highlightedIndex={ highlightedIndex }
 							openParent={ () => ! isOpen && setIsOpen( true ) }

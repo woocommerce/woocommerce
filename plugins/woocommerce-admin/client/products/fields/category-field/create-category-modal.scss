@@ -1,0 +1,33 @@
+.woocommerce-create-new-category-modal {
+	min-width: 650px;
+
+	&__buttons {
+		margin-top: $gap-larger;
+		display: flex;
+		flex-direction: row;
+		gap: $gap-smaller;
+		justify-content: flex-end;
+	}
+
+	.category-field-dropdown {
+		&__menu {
+			padding: 0;
+			border: none;
+		}
+	}
+}
+
+.woocommerce-select-control__popover-menu {
+	margin-top: -$gap-small;
+}
+.woocommerce-select-control__popover-menu-container {
+	max-height: 300px;
+	overflow-y: scroll;
+	padding: 0 $gap-smaller 0 $gap-small;
+
+	> .category-field-dropdown__item:not(:first-child) {
+		.category-field-dropdown__item-content {
+			border-top: 1px solid $gray-200;
+		}
+	}
+}

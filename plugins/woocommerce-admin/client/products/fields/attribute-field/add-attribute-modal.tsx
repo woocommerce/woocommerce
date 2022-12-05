@@ -4,11 +4,11 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { trash } from '@wordpress/icons';
-import { ProductAttribute, ProductAttributeTerm } from '@woocommerce/data';
 import {
 	Form,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
 } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 import {
 	Button,
 	Modal,
@@ -22,22 +22,24 @@ import {
  */
 import './add-attribute-modal.scss';
 import { AttributeInputField } from '../attribute-input-field';
-import { AttributeTermInputField } from '../attribute-term-input-field';
+import {
+	AttributeTermInputField,
+	CustomAttributeTermInputField,
+} from '../attribute-term-input-field';
+import { HydratedAttributeType } from '../attribute-field';
+import { getProductAttributeObject } from './utils';
 
-type CreateCategoryModalProps = {
+type AddAttributeModalProps = {
 	onCancel: () => void;
-	onAdd: ( newCategories: ProductAttribute[] ) => void;
+	onAdd: ( newCategories: HydratedAttributeType[] ) => void;
 	selectedAttributeIds?: number[];
 };
 
 type AttributeForm = {
-	attributes: {
-		attribute?: ProductAttribute;
-		terms: ProductAttributeTerm[];
-	}[];
+	attributes: Array< HydratedAttributeType | null >;
 };
 
-export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
+export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 	onCancel,
 	onAdd,
 	selectedAttributeIds = [],
@@ -50,26 +52,25 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 			value: AttributeForm[ keyof AttributeForm ]
 		) => void
 	) => {
-		setValue( 'attributes', [
-			...values.attributes,
-			{
-				attribute: undefined,
-				terms: [],
-			},
-		] );
+		setValue( 'attributes', [ ...values.attributes, null ] );
 	};
 
 	const onAddingAttributes = ( values: AttributeForm ) => {
-		const newAttributesToAdd: ProductAttribute[] = [];
+		const newAttributesToAdd: HydratedAttributeType[] = [];
 		values.attributes.forEach( ( attr ) => {
 			if (
-				attr.attribute &&
-				attr.attribute.name &&
-				attr.terms.length > 0
+				attr !== null &&
+				attr.name &&
+				( ( attr.terms || [] ).length > 0 ||
+					( attr.options || [] ).length > 0 )
 			) {
+				const options =
+					attr.id !== 0
+						? ( attr.terms || [] ).map( ( term ) => term.name )
+						: attr.options;
 				newAttributesToAdd.push( {
-					...( attr.attribute as ProductAttribute ),
-					options: attr.terms.map( ( term ) => term.name ),
+					...( attr as HydratedAttributeType ),
+					options,
 				} );
 			}
 		} );
@@ -84,34 +85,37 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 			value: AttributeForm[ keyof AttributeForm ]
 		) => void
 	) => {
+		recordEvent(
+			'product_add_attributes_modal_remove_attribute_button_click'
+		);
 		if ( values.attributes.length > 1 ) {
 			setValue(
 				'attributes',
 				values.attributes.filter( ( val, i ) => i !== index )
 			);
 		} else {
-			setValue( `attributes[${ index }]`, [
-				{ attribute: undefined, terms: [] },
-			] );
+			setValue( `attributes[${ index }]`, [ null ] );
 		}
 	};
 
 	const focusValueField = ( index: number ) => {
-		const valueInputField: HTMLInputElement | null = document.querySelector(
-			'.woocommerce-add-attribute-modal__table-row-' +
-				index +
-				' .woocommerce-add-attribute-modal__table-attribute-value-column .woocommerce-experimental-select-control__input'
-		);
-		if ( valueInputField ) {
-			setTimeout( () => {
+		setTimeout( () => {
+			const valueInputField: HTMLInputElement | null =
+				document.querySelector(
+					'.woocommerce-add-attribute-modal__table-row-' +
+						index +
+						' .woocommerce-add-attribute-modal__table-attribute-value-column .woocommerce-experimental-select-control__input'
+				);
+			if ( valueInputField ) {
 				valueInputField.focus();
-			}, 0 );
-		}
+			}
+		}, 0 );
 	};
 
 	const onClose = ( values: AttributeForm ) => {
 		const hasValuesSet = values.attributes.some(
-			( value ) => value?.attribute?.id && value?.terms?.length > 0
+			( value ) =>
+				value !== null && value?.terms && value?.terms.length > 0
 		);
 		if ( hasValuesSet ) {
 			setShowConfirmClose( true );
@@ -120,11 +124,14 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 		}
 	};
 
+	const attributeLabel = __( 'Attribute', 'woocommerce' );
+	const valueLabel = __( 'Values', 'woocommerce' );
+
 	return (
 		<>
 			<Form< AttributeForm >
 				initialValues={ {
-					attributes: [ { attribute: undefined, terms: [] } ],
+					attributes: [ null ],
 				} }
 			>
 				{ ( {
@@ -138,7 +145,16 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 					return (
 						<Modal
 							title={ __( 'Add attributes', 'woocommerce' ) }
-							onRequestClose={ () => onClose( values ) }
+							onRequestClose={ (
+								event:
+									| React.KeyboardEvent< Element >
+									| React.MouseEvent< Element >
+									| React.FocusEvent< Element >
+							) => {
+								if ( ! event.isPropagationStopped() ) {
+									onClose( values );
+								}
+							} }
 							className="woocommerce-add-attribute-modal"
 						>
 							<Notice isDismissible={ false }>
@@ -154,13 +170,13 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 								<table className="woocommerce-add-attribute-modal__table">
 									<thead>
 										<tr className="woocommerce-add-attribute-modal__table-header">
-											<th>Attribute</th>
-											<th>Values</th>
+											<th>{ attributeLabel }</th>
+											<th>{ valueLabel }</th>
 										</tr>
 									</thead>
 									<tbody>
 										{ values.attributes.map(
-											( { attribute, terms }, index ) => (
+											( attribute, index ) => (
 												<tr
 													key={ index }
 													className={ `woocommerce-add-attribute-modal__table-row woocommerce-add-attribute-modal__table-row-${ index }` }
@@ -172,14 +188,20 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 																'woocommerce'
 															) }
 															value={ attribute }
+															label={
+																attributeLabel
+															}
 															onChange={ (
 																val
 															) => {
 																setValue(
 																	'attributes[' +
 																		index +
-																		'].attribute',
-																	val
+																		']',
+																	val &&
+																		getProductAttributeObject(
+																			val
+																		)
 																);
 																if ( val ) {
 																	focusValueField(
@@ -187,51 +209,90 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 																	);
 																}
 															} }
-															filteredAttributeIds={ [
+															ignoredAttributeIds={ [
 																...selectedAttributeIds,
 																...values.attributes
 																	.map(
 																		(
 																			attr
 																		) =>
-																			attr
-																				?.attribute
-																				?.id
+																			attr?.id
 																	)
 																	.filter(
 																		(
-																			id
-																		): id is number =>
-																			id !==
+																			attrId
+																		): attrId is number =>
+																			attrId !==
 																			undefined
 																	),
 															] }
 														/>
 													</td>
 													<td className="woocommerce-add-attribute-modal__table-attribute-value-column">
-														<AttributeTermInputField
-															placeholder={ __(
-																'Search or create value',
-																'woocommerce'
-															) }
-															disabled={
-																! attribute?.id
-															}
-															attributeId={
-																attribute?.id
-															}
-															value={ terms }
-															onChange={ (
-																val
-															) =>
-																setValue(
-																	'attributes[' +
-																		index +
-																		'].terms',
+														{ attribute === null ||
+														attribute.id !== 0 ? (
+															<AttributeTermInputField
+																placeholder={ __(
+																	'Search or create value',
+																	'woocommerce'
+																) }
+																disabled={
+																	attribute
+																		? ! attribute.id
+																		: true
+																}
+																attributeId={
+																	attribute
+																		? attribute.id
+																		: undefined
+																}
+																value={
+																	attribute ===
+																	null
+																		? []
+																		: attribute.terms
+																}
+																label={
+																	valueLabel
+																}
+																onChange={ (
 																	val
-																)
-															}
-														/>
+																) =>
+																	setValue(
+																		'attributes[' +
+																			index +
+																			'].terms',
+																		val
+																	)
+																}
+															/>
+														) : (
+															<CustomAttributeTermInputField
+																placeholder={ __(
+																	'Search or create value',
+																	'woocommerce'
+																) }
+																disabled={
+																	! attribute.name
+																}
+																value={
+																	attribute.options
+																}
+																label={
+																	valueLabel
+																}
+																onChange={ (
+																	val
+																) =>
+																	setValue(
+																		'attributes[' +
+																			index +
+																			'].options',
+																		val
+																	)
+																}
+															/>
+														) }
 													</td>
 													<td className="woocommerce-add-attribute-modal__table-attribute-trash-column">
 														<Button
@@ -241,10 +302,9 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 																	.attributes
 																	.length ===
 																	1 &&
-																! values
-																	.attributes[ 0 ]
-																	?.attribute
-																	?.id
+																values
+																	.attributes[ 0 ] ===
+																	null
 															}
 															label={ __(
 																'Remove attribute',
@@ -273,9 +333,12 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 										'Add another attribute',
 										'woocommerce'
 									) }
-									onClick={ () =>
-										addAnother( values, setValue )
-									}
+									onClick={ () => {
+										recordEvent(
+											'product_add_attributes_modal_add_another_attribute_button_click'
+										);
+										addAnother( values, setValue );
+									} }
 								>
 									+&nbsp;
 									{ __( 'Add another', 'woocommerce' ) }
@@ -297,10 +360,7 @@ export const AddAttributeModal: React.FC< CreateCategoryModalProps > = ( {
 									) }
 									disabled={
 										values.attributes.length === 1 &&
-										! values.attributes[ 0 ]?.attribute
-											?.id &&
-										values.attributes[ 0 ]?.terms
-											?.length === 0
+										values.attributes[ 0 ] === null
 									}
 									onClick={ () =>
 										onAddingAttributes( values )

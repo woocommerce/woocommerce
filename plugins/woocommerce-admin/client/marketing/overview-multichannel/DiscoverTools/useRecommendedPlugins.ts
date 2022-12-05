@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -9,23 +9,29 @@ import { useSelect } from '@wordpress/data';
 import { STORE_KEY } from '~/marketing/data/constants';
 import { Plugin } from './types';
 
+const selector = 'getRecommendedPlugins';
 const category = 'marketing';
 
-type SelectResult = {
-	isLoading: boolean;
-	plugins: Plugin[];
-};
-
 export const useRecommendedPlugins = () => {
-	return useSelect< SelectResult >(
-		( select ) => {
-			const { getRecommendedPlugins, isResolving } = select( STORE_KEY );
+	const { invalidateResolution, installAndActivateRecommendedPlugin } =
+		useDispatch( STORE_KEY );
 
-			return {
-				isLoading: isResolving( 'getRecommendedPlugins', [ category ] ),
-				plugins: getRecommendedPlugins( category ),
-			};
-		},
-		[ category ]
-	);
+	const installAndActivate = ( plugin: string ) => {
+		installAndActivateRecommendedPlugin( plugin, category );
+		invalidateResolution( selector, [ category ] );
+	};
+
+	return useSelect( ( select ) => {
+		const { getRecommendedPlugins, hasFinishedResolution } =
+			select( STORE_KEY );
+		const plugins = getRecommendedPlugins< Plugin[] >( category );
+		const isLoading = ! hasFinishedResolution( selector, [ category ] );
+
+		return {
+			isInitializing: ! plugins.length && isLoading,
+			isLoading,
+			plugins,
+			installAndActivate,
+		};
+	}, [] );
 };

@@ -17,8 +17,8 @@ import { useParams } from 'react-router-dom';
 /**
  * Internal dependencies
  */
+import { ProductFormHeader } from './layout/product-form-header';
 import { ProductFormLayout } from './layout/product-form-layout';
-import { ProductFormActions } from './product-form-actions';
 import { ProductDetailsSection } from './sections/product-details-section';
 import { ProductInventorySection } from './sections/product-inventory-section';
 import { PricingSection } from './sections/pricing-section';
@@ -27,6 +27,7 @@ import { ImagesSection } from './sections/images-section';
 import './product-page.scss';
 import { validate } from './product-validation';
 import { AttributesSection } from './sections/attributes-section';
+import { ProductFormFooter } from './layout/product-form-footer';
 
 const EditProductPage: React.FC = () => {
 	const { productId } = useParams();
@@ -126,6 +127,7 @@ const EditProductPage: React.FC = () => {
 						validate={ validate }
 						errors={ {} }
 					>
+						<ProductFormHeader />
 						<ProductFormLayout>
 							<ProductDetailsSection />
 							<PricingSection />
@@ -133,8 +135,8 @@ const EditProductPage: React.FC = () => {
 							<ProductInventorySection />
 							<ProductShippingSection product={ product } />
 							<AttributesSection />
-							<ProductFormActions />
 						</ProductFormLayout>
+						<ProductFormFooter />
 					</Form>
 				) }
 		</div>

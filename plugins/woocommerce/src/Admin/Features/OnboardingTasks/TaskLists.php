@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\ReviewShippingOptions;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\TourInAppMarketplace;
 /**
  * Task Lists class.
  */
@@ -52,6 +53,7 @@ class TaskLists {
 		'AdditionalPayments',
 		'ReviewShippingOptions',
 		'GetMobileApp',
+		'TourInAppMarketplace',
 	);
 
 	/**
@@ -219,6 +221,12 @@ class TaskLists {
 				)
 			);
 		}
+
+		if ( ! wp_is_mobile() ) { // Permit In-App Marketplace Tour on desktops only.
+			$tour_task = new TourInAppMarketplace();
+			self::add_task( 'extended', $tour_task );
+			self::add_task( 'extended_two_column', $tour_task );
+		}
 	}
 
 	/**
@@ -262,7 +270,7 @@ class TaskLists {
 	 * Add a task list.
 	 *
 	 * @param array $args Task list properties.
-	 * @return WP_Error|TaskList
+	 * @return \WP_Error|TaskList
 	 */
 	public static function add_list( $args ) {
 		if ( isset( self::$lists[ $args['id'] ] ) ) {
@@ -281,7 +289,7 @@ class TaskLists {
 	 *
 	 * @param string $list_id List ID to add the task to.
 	 * @param array  $args Task properties.
-	 * @return WP_Error|Task
+	 * @return \WP_Error|Task
 	 */
 	public static function add_task( $list_id, $args ) {
 		if ( ! isset( self::$lists[ $list_id ] ) ) {
