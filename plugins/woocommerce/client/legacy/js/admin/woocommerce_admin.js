@@ -362,7 +362,7 @@
 		} );
 
 		const setProductImageLink = $( '#set-post-thumbnail' );
-		const tooltipMarkup = `<span class="woocommerce-help-tip" tabindex="-1" aria-label="${ woocommerce_admin_meta_boxes.i18n_product_image_tip }"></span>`;
+		const tooltipMarkup = `<span class="woocommerce-help-tip" tabindex="0" aria-label="${ woocommerce_admin_meta_boxes.i18n_product_image_tip }"></span>`;
 		const tooltipData = {
 			attribute: 'data-tip',
 			content: woocommerce_admin_meta_boxes.i18n_product_image_tip,
