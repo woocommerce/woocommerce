@@ -52,12 +52,14 @@ $product-form-tabs-height: 56px;
 		padding-left: 0;
 		padding-right: 0;
 		margin-right: $gap-large;
+		font-weight: 400;
 
 		&:last-child {
 			margin-right: 0;
 		}
 
 		&.is-active {
+			font-weight: 600;
 			box-shadow: inset 0 0 0 var(--wp-admin-border-width-focus) transparent, inset 0 -3px 0 0 var(--wp-admin-theme-color);
 		}
 	}
