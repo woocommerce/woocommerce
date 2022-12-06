@@ -4,8 +4,6 @@
 import { STORE_NAME, WC_PRODUCT_VARIATIONS_NAMESPACE } from './constants';
 import { createCrudDataStore } from '../crud';
 
-console.log('creating');
-
 createCrudDataStore( {
 	storeName: STORE_NAME,
 	resourceName: 'ProductVariation',
