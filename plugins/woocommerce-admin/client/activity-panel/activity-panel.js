@@ -280,6 +280,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			title: __( 'Feedback', 'woocommerce' ),
 			icon: <FeedbackIcon />,
 			onClick: () => {
+				setCurrentTab( 'feedback' );
+				setIsPanelOpen( true );
 				showCesModal(
 					{
 						action: 'product_feedback',
@@ -298,8 +300,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 					},
 					{
 						onCloseModal: () => {
-							togglePanel( feedback, false );
-							closePanel();
+							setCurrentTab( '' );
+							setIsPanelOpen( false );
 						},
 					},
 					{
