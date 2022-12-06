@@ -9,7 +9,7 @@ import { DispatchFromMap } from '@automattic/data-stores';
 import { CrudActions, CrudSelectors } from '../crud/types';
 import { Product, ProductQuery, ReadOnlyProperties } from '../products/types';
 
-type ProductVariation = Omit< Product, 'name' | 'slug' >;
+export type ProductVariation = Omit< Product, 'name' | 'slug' >;
 
 type Query = Omit< ProductQuery, 'name' >;
 
