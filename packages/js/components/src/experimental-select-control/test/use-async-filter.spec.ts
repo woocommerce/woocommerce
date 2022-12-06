@@ -26,6 +26,7 @@ describe( 'useAsyncFilter', () => {
 
 	it( 'should filter the items successfully', async () => {
 		const filteredItems: string[] = [];
+
 		filter.mockResolvedValue( filteredItems );
 
 		const { result } = renderHook( () =>
@@ -34,7 +35,7 @@ describe( 'useAsyncFilter', () => {
 			} )
 		);
 
-		const inputValue = '';
+		const inputValue = 'Apple';
 
 		await act( async () => {
 			if ( result.current.onInputChange )
@@ -67,7 +68,7 @@ describe( 'useAsyncFilter', () => {
 			} )
 		);
 
-		const inputValue = '';
+		const inputValue = 'Apple';
 
 		await act( async () => {
 			if ( result.current.onInputChange )
@@ -90,7 +91,7 @@ describe( 'useAsyncFilter', () => {
 			} )
 		);
 
-		const inputValue = '';
+		const inputValue = 'Apple';
 
 		await act( async () => {
 			if ( result.current.onInputChange )
@@ -114,7 +115,7 @@ describe( 'useAsyncFilter', () => {
 			} )
 		);
 
-		const inputValue = '';
+		const inputValue = 'Apple';
 
 		await act( async () => {
 			if ( result.current.onInputChange )

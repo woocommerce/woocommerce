@@ -157,7 +157,7 @@ export const Async: React.FC = () => {
 		[ selectedItem ]
 	);
 
-	const { isFetching, onInputChange } = useAsyncFilter< DefaultItemType >( {
+	const { isFetching, ...selectProps } = useAsyncFilter< DefaultItemType >( {
 		filter,
 		onFilterStart() {
 			setFetchedItems( [] );
@@ -170,14 +170,13 @@ export const Async: React.FC = () => {
 	return (
 		<>
 			<SelectControl< DefaultItemType >
+				{ ...selectProps }
 				label="Async"
 				items={ fetchedItems }
 				selected={ selectedItem }
 				placeholder="Start typing..."
-				getFilteredItems={ ( allItems ) => allItems }
 				onSelect={ setSelectedItem }
 				onRemove={ () => setSelectedItem( null ) }
-				onInputChange={ onInputChange }
 			>
 				{ ( {
 					items,
@@ -239,21 +238,20 @@ export const AsyncWithoutListeningFilterEvents: React.FC = () => {
 		[ selectedItem ]
 	);
 
-	const { isFetching, onInputChange } = useAsyncFilter< DefaultItemType >( {
+	const { isFetching, ...selectProps } = useAsyncFilter< DefaultItemType >( {
 		filter,
 	} );
 
 	return (
 		<>
 			<SelectControl< DefaultItemType >
+				{ ...selectProps }
 				label="Async"
 				items={ fetchedItems }
 				selected={ selectedItem }
 				placeholder="Start typing..."
-				getFilteredItems={ ( allItems ) => allItems }
 				onSelect={ setSelectedItem }
 				onRemove={ () => setSelectedItem( null ) }
-				onInputChange={ onInputChange }
 			>
 				{ ( {
 					items,

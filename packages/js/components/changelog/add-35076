@@ -1,4 +1,4 @@
 Significance: patch
 Type: add
 
-Add async filtering support to the select-control component
+Add async filtering support to the `__experimentalSelectControl` component
