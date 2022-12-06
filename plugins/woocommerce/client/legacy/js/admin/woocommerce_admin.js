@@ -361,24 +361,29 @@
 			$( this ).trigger( 'focus' );
 		} );
 
-		const setPostThumbnail = $( '#set-post-thumbnail' );
+		const setProductImageLink = $( '#set-post-thumbnail' );
+		const tooltipMarkup = `<span class="woocommerce-help-tip" tabindex="-1" aria-label="${ woocommerce_admin_meta_boxes.i18n_product_image_tip }"></span>`;
+		const tooltipData = {
+			attribute: 'data-tip',
+			content: woocommerce_admin_meta_boxes.i18n_product_image_tip,
+			fadeIn: 50,
+			fadeOut: 50,
+			delay: 200,
+			keepAlive: true,
+		};
 
-		if ( setPostThumbnail ) {
-			setPostThumbnail
-				.after(
-					`<span class="woocommerce-help-tip" tabindex="-1" for="content" aria-label="${ woocommerce_admin_meta_boxes.i18n_product_image_tip }"></span>`
-				)
-				.parent()
-				.find( '.woocommerce-help-tip' )
-				.tipTip( {
-					attribute: 'data-tip',
-					content:
-						woocommerce_admin_meta_boxes.i18n_product_image_tip,
-					fadeIn: 50,
-					fadeOut: 50,
-					delay: 200,
-					keepAlive: true,
-				} );
+		if ( setProductImageLink ) {
+			$( tooltipMarkup )
+				.insertAfter( setProductImageLink )
+				.tipTip( tooltipData );
+		}
+
+		const addProductImagesLink = $( '.add_product_images > a' );
+
+		if ( addProductImagesLink ) {
+			$( tooltipMarkup )
+				.insertAfter( addProductImagesLink )
+				.tipTip( tooltipData );
 		}
 
 		$( '.wc_input_table .remove_rows' ).on( 'click', function () {
