@@ -38,7 +38,6 @@ export const ProductMoreMenu = () => {
 					<>
 						<MenuItem
 							onClick={ () => {
-								// @todo This should open the CES modal.
 								showCesModal(
 									{
 										action: 'new_product',
