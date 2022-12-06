@@ -40,6 +40,7 @@ export const ProductFeedbackTour: React.FC< ProductFeedbackTour > = ( {
 
 	const clearTourTimeout = () => {
 		clearTimeout( tourTimeout.current as ReturnType< typeof setTimeout > );
+		tourTimeout.current = null;
 	};
 
 	useEffect( () => {
@@ -63,7 +64,10 @@ export const ProductFeedbackTour: React.FC< ProductFeedbackTour > = ( {
 		} );
 	}, [ isTourVisible ] );
 
-	if ( currentTab === 'feedback' && isTourVisible ) {
+	if (
+		currentTab === 'feedback' &&
+		( isTourVisible || tourTimeout.current )
+	) {
 		setIsTourVisible( false );
 		clearTourTimeout();
 	}
