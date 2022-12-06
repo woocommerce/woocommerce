@@ -361,31 +361,6 @@
 			$( this ).trigger( 'focus' );
 		} );
 
-		const setProductImageLink = $( '#set-post-thumbnail' );
-		const tooltipMarkup = `<span class="woocommerce-help-tip" tabindex="0" aria-label="${ woocommerce_admin_meta_boxes.i18n_product_image_tip }"></span>`;
-		const tooltipData = {
-			attribute: 'data-tip',
-			content: woocommerce_admin_meta_boxes.i18n_product_image_tip,
-			fadeIn: 50,
-			fadeOut: 50,
-			delay: 200,
-			keepAlive: true,
-		};
-
-		if ( setProductImageLink ) {
-			$( tooltipMarkup )
-				.insertAfter( setProductImageLink )
-				.tipTip( tooltipData );
-		}
-
-		const addProductImagesLink = $( '.add_product_images > a' );
-
-		if ( addProductImagesLink ) {
-			$( tooltipMarkup )
-				.insertAfter( addProductImagesLink )
-				.tipTip( tooltipData );
-		}
-
 		$( '.wc_input_table .remove_rows' ).on( 'click', function () {
 			var $tbody = $( this ).closest( '.wc_input_table' ).find( 'tbody' );
 			if ( $tbody.find( 'tr.current' ).length > 0 ) {
