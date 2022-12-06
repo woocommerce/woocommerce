@@ -19,7 +19,6 @@ describe( 'useAsyncFilter', () => {
 	const onFilterStart = jest.fn();
 	const onFilterEnd = jest.fn();
 	const onFilterError = jest.fn();
-	const onInputChange = jest.fn();
 
 	afterEach( () => {
 		jest.clearAllMocks();
@@ -31,10 +30,6 @@ describe( 'useAsyncFilter', () => {
 
 		const { result } = renderHook( () =>
 			useAsyncFilter( {
-				items: [],
-				label: '',
-				selected: null,
-				getFilteredItems: ( items ) => items,
 				filter,
 			} )
 		);
@@ -67,10 +62,6 @@ describe( 'useAsyncFilter', () => {
 
 		const { result } = renderHook( () =>
 			useAsyncFilter( {
-				items: [],
-				label: '',
-				selected: null,
-				getFilteredItems: ( items ) => items,
 				filter,
 				onFilterStart,
 			} )
@@ -93,10 +84,6 @@ describe( 'useAsyncFilter', () => {
 
 		const { result } = renderHook( () =>
 			useAsyncFilter( {
-				items: [],
-				label: '',
-				selected: null,
-				getFilteredItems: ( items ) => items,
 				filter,
 				onFilterEnd,
 				onFilterError,
@@ -121,10 +108,6 @@ describe( 'useAsyncFilter', () => {
 
 		const { result } = renderHook( () =>
 			useAsyncFilter( {
-				items: [],
-				label: '',
-				selected: null,
-				getFilteredItems: ( items ) => items,
 				filter,
 				onFilterEnd,
 				onFilterError,
@@ -140,49 +123,5 @@ describe( 'useAsyncFilter', () => {
 
 		expect( onFilterEnd ).not.toHaveBeenCalled();
 		expect( onFilterError ).toHaveBeenCalledWith( error, inputValue );
-	} );
-
-	it( 'should call onInputChange if filtering is fullfiled or rejected', async () => {
-		const filteredItems: string[] = [];
-		const error = new Error();
-
-		filter.mockResolvedValue( filteredItems );
-
-		const { result, rerender } = renderHook( () =>
-			useAsyncFilter( {
-				items: [],
-				label: '',
-				selected: null,
-				getFilteredItems: ( items ) => items,
-				filter,
-				onFilterEnd,
-				onFilterError,
-				onInputChange,
-			} )
-		);
-
-		const inputValue = '';
-
-		await act( async () => {
-			if ( result.current.onInputChange )
-				result.current.onInputChange( inputValue, {} );
-		} );
-
-		filter.mockRejectedValue( error );
-
-		expect( onFilterEnd ).toHaveBeenCalled();
-		expect( onInputChange ).toHaveBeenNthCalledWith( 1, inputValue, {} );
-
-		await act( async () => {
-			rerender( { filter } );
-		} );
-
-		await act( async () => {
-			if ( result.current.onInputChange )
-				result.current.onInputChange( inputValue, {} );
-		} );
-
-		expect( onFilterError ).toHaveBeenCalled();
-		expect( onInputChange ).toHaveBeenNthCalledWith( 2, inputValue, {} );
 	} );
 } );

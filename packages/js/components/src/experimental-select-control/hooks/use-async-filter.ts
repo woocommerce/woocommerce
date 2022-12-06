@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useDebounce } from '@wordpress/compose';
-import { useCallback } from '@wordpress/element';
+import { useCallback, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -16,37 +16,53 @@ export default function useAsyncFilter< T >( {
 	onFilterStart,
 	onFilterEnd,
 	onFilterError,
-	onInputChange,
-	debounceTime = DEFAULT_DEBOUNCE_TIME,
-	...props
-}: UseAsyncFilterInput< T > ): SelectControlProps< T > {
+	debounceTime,
+}: UseAsyncFilterInput< T > ): UseAsyncFilterOutput< T > {
+	const [ isFetching, setIsFetching ] = useState( false );
+
 	const handleInputChange = useCallback(
 		function handleInputChangeCallback( value?: string ) {
-			if ( onFilterStart ) onFilterStart( value );
+			if ( typeof onFilterStart === 'function' ) onFilterStart( value );
+			setIsFetching( true );
+
 			filter( value )
 				.then( ( filteredItems ) => {
-					if ( onFilterEnd ) onFilterEnd( filteredItems, value );
+					if ( typeof onFilterEnd === 'function' )
+						onFilterEnd( filteredItems, value );
 				} )
 				.catch( ( error: Error ) => {
-					if ( onFilterError ) onFilterError( error, value );
+					if ( typeof onFilterError === 'function' )
+						onFilterError( error, value );
 				} )
 				.finally( () => {
-					if ( onInputChange ) onInputChange( value, {} );
+					setIsFetching( false );
 				} );
 		},
-		[ filter, onFilterStart, onFilterEnd, onFilterError, onInputChange ]
+		[ filter, onFilterStart, onFilterEnd, onFilterError ]
 	);
 
 	return {
-		...props,
-		onInputChange: useDebounce( handleInputChange, debounceTime ),
+		isFetching,
+		onInputChange: useDebounce(
+			handleInputChange,
+			typeof debounceTime === 'number'
+				? debounceTime
+				: DEFAULT_DEBOUNCE_TIME
+		),
 	};
 }
 
-export type UseAsyncFilterInput< T > = SelectControlProps< T > & {
+export type UseAsyncFilterInput< T > = {
 	filter( value?: string ): Promise< T[] >;
 	onFilterStart?( value?: string ): void;
 	onFilterEnd?( filteredItems: T[], value?: string ): void;
 	onFilterError?( error: Error, value?: string ): void;
 	debounceTime?: number;
+};
+
+export type UseAsyncFilterOutput< T > = Pick<
+	SelectControlProps< T >,
+	'onInputChange'
+> & {
+	isFetching: boolean;
 };

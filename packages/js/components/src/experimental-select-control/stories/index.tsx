@@ -141,7 +141,6 @@ export const Async: React.FC = () => {
 	const [ fetchedItems, setFetchedItems ] = useState< DefaultItemType[] >(
 		[]
 	);
-	const [ isFetching, setIsFetching ] = useState( false );
 
 	const filter = useCallback(
 		( value = '' ) =>
@@ -149,38 +148,113 @@ export const Async: React.FC = () => {
 				setTimeout( () => {
 					const filteredItems = [ ...sampleItems ]
 						.sort( ( a, b ) => a.label.localeCompare( b.label ) )
-						.filter( ( { label } ) => label.includes( value ) );
+						.filter( ( { label } ) =>
+							label.toLowerCase().includes( value.toLowerCase() )
+						);
 					resolve( filteredItems );
 				}, 1500 );
 			} ),
 		[ selectedItem ]
 	);
 
-	const selectProps = useAsyncFilter< DefaultItemType >( {
-		label: 'Async',
-		items: fetchedItems,
-		selected: selectedItem,
-		placeholder: 'Start typing...',
-		getFilteredItems: ( allItems ) => allItems,
-		onSelect: ( item: DefaultItemType | null ) => setSelectedItem( item ),
-		onRemove: () => setSelectedItem( null ),
+	const { isFetching, onInputChange } = useAsyncFilter< DefaultItemType >( {
 		filter,
 		onFilterStart() {
-			setIsFetching( true );
 			setFetchedItems( [] );
 		},
 		onFilterEnd( filteredItems ) {
 			setFetchedItems( filteredItems );
-			setIsFetching( false );
-		},
-		onFilterError() {
-			setIsFetching( false );
 		},
 	} );
 
 	return (
 		<>
-			<SelectControl< DefaultItemType > { ...selectProps }>
+			<SelectControl< DefaultItemType >
+				label="Async"
+				items={ fetchedItems }
+				selected={ selectedItem }
+				placeholder="Start typing..."
+				getFilteredItems={ ( allItems ) => allItems }
+				onSelect={ setSelectedItem }
+				onRemove={ () => setSelectedItem( null ) }
+				onInputChange={ onInputChange }
+			>
+				{ ( {
+					items,
+					isOpen,
+					highlightedIndex,
+					getItemProps,
+					getMenuProps,
+				} ) => {
+					return (
+						<Menu isOpen={ isOpen } getMenuProps={ getMenuProps }>
+							{ isFetching ? (
+								<Spinner />
+							) : (
+								items.map( ( item, index: number ) => (
+									<MenuItem
+										key={ `${ item.value }${ index }` }
+										index={ index }
+										isActive={ highlightedIndex === index }
+										item={ item }
+										getItemProps={ getItemProps }
+									>
+										{ item.label }
+									</MenuItem>
+								) )
+							) }
+						</Menu>
+					);
+				} }
+			</SelectControl>
+		</>
+	);
+};
+
+export const AsyncWithoutListeningFilterEvents: React.FC = () => {
+	const [ selectedItem, setSelectedItem ] =
+		useState< DefaultItemType | null >( null );
+	const [ fetchedItems, setFetchedItems ] = useState< DefaultItemType[] >(
+		[]
+	);
+
+	const filter = useCallback(
+		async ( value = '' ) => {
+			setFetchedItems( [] );
+			return new Promise< DefaultItemType[] >( ( resolve ) => {
+				setTimeout( () => {
+					const filteredItems = [ ...sampleItems ]
+						.sort( ( a, b ) => a.label.localeCompare( b.label ) )
+						.filter( ( { label } ) =>
+							label.toLowerCase().includes( value.toLowerCase() )
+						);
+
+					resolve( filteredItems );
+				}, 1500 );
+			} ).then( ( filteredItems ) => {
+				setFetchedItems( filteredItems );
+				return filteredItems;
+			} );
+		},
+		[ selectedItem ]
+	);
+
+	const { isFetching, onInputChange } = useAsyncFilter< DefaultItemType >( {
+		filter,
+	} );
+
+	return (
+		<>
+			<SelectControl< DefaultItemType >
+				label="Async"
+				items={ fetchedItems }
+				selected={ selectedItem }
+				placeholder="Start typing..."
+				getFilteredItems={ ( allItems ) => allItems }
+				onSelect={ setSelectedItem }
+				onRemove={ () => setSelectedItem( null ) }
+				onInputChange={ onInputChange }
+			>
 				{ ( {
 					items,
 					isOpen,
