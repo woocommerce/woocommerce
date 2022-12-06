@@ -79,6 +79,33 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 9.1.0 - 2022-12-06 =
+
+#### Enhancements
+
+- The "WooCommerce Alternating Image and Text" block pattern has been added. This design can be used by adding two attention-grabbing images, customizing the text to match your needs and customizing the button block to be linked to any page. ([7827](https://github.com/woocommerce/woocommerce-blocks/pull/7827))
+- Add to Cart Button: Add support for the alignment setting. ([7816](https://github.com/woocommerce/woocommerce-blocks/pull/7816))
+- Products block: Make the block available to the users of the feature plugin. ([7815](https://github.com/woocommerce/woocommerce-blocks/pull/7815))
+- The "WooCommerce Product Hero 2 Column 2 Row" block pattern has been added. It is a straightforward hero design that can be used by adding two attention-grabbing images, some custom product description text and customizing the button block to be linked to any page. ([7814](https://github.com/woocommerce/woocommerce-blocks/pull/7814))
+- The "Just Arrived Full Hero" block pattern has been added. It is a straightforward hero design that can be used with an attention-grabber image some simple callout text, and a button block that can be linked to any page. ([7812](https://github.com/woocommerce/woocommerce-blocks/pull/7812))
+- Product Rating: Add support for the alignment setting. ([7790](https://github.com/woocommerce/woocommerce-blocks/pull/7790))
+- Rename Active Product Filters block to Active Filters. ([7753](https://github.com/woocommerce/woocommerce-blocks/pull/7753))
+- Product Query: Add support for filtering by attributes within the block. ([7743](https://github.com/woocommerce/woocommerce-blocks/pull/7743))
+- Align the font-sizes in filters. ([7707](https://github.com/woocommerce/woocommerce-blocks/pull/7707))
+
+#### Bug Fixes
+
+- Mini Cart block: Load `wc-blocks-registry` package at the page's load instead of lazy load it. ([7813](https://github.com/woocommerce/woocommerce-blocks/pull/7813))
+- Hide the shipping address form from Checkout Block in Editor and rename the Billing Address label when "Force shipping to the customer billing address" is enabled. ([7800](https://github.com/woocommerce/woocommerce-blocks/pull/7800))
+- Product Price: Fix the alignment setting. ([7795](https://github.com/woocommerce/woocommerce-blocks/pull/7795))
+- Fix: Show tax label in Cart and Checkout block. ([7785](https://github.com/woocommerce/woocommerce-blocks/pull/7785))
+- Make Footer and Header patterns available in pattern chooser. ([7699](https://github.com/woocommerce/woocommerce-blocks/pull/7699))
+- Fix: Product Query editor preview with Stock Status setting. ([7682](https://github.com/woocommerce/woocommerce-blocks/pull/7682))
+
+#### technical debt
+
+- Clean up unused CSS code. ([7751](https://github.com/woocommerce/woocommerce-blocks/pull/7751))
+
 = 9.0.0 - 2022-11-21 =
 
 #### Bug Fixes
