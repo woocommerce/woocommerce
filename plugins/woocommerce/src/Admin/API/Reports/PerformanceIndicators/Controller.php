@@ -147,7 +147,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		$endpoints = $response->get_data();
 
 		foreach ( $endpoints as $endpoint ) {
-			if ( '/stats' === substr( $endpoint['slug'], -6 ) ) {
+			if ( is_array( $endpoint ) && ! empty( $endpoint['slug'] ) && '/stats' === substr( $endpoint['slug'], -6 ) ) {
 				$request  = new \WP_REST_Request( 'OPTIONS', $endpoint['path'] );
 				$response = rest_do_request( $request );
 
