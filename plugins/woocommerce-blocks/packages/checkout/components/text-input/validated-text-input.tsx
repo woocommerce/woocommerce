@@ -3,17 +3,18 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
-	useCallback,
 	useRef,
 	useEffect,
 	useState,
+	useCallback,
 	InputHTMLAttributes,
 } from 'react';
 import classnames from 'classnames';
 import { withInstanceId } from '@wordpress/compose';
-import { isObject, isString } from '@woocommerce/types';
+import { isObject } from '@woocommerce/types';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
+import { usePrevious } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -38,6 +39,10 @@ interface ValidatedTextInputProps
 	onChange: ( newValue: string ) => void;
 	label?: string | undefined;
 	value: string;
+	requiredMessage?: string | undefined;
+	customValidation?:
+		| ( ( inputObject: HTMLInputElement ) => boolean )
+		| undefined;
 }
 
 const ValidatedTextInput = ( {
@@ -51,16 +56,19 @@ const ValidatedTextInput = ( {
 	showError = true,
 	errorMessage: passedErrorMessage = '',
 	value = '',
+	requiredMessage,
+	customValidation,
 	...rest
 }: ValidatedTextInputProps ): JSX.Element => {
 	const [ isPristine, setIsPristine ] = useState( true );
 	const inputRef = useRef< HTMLInputElement >( null );
-
-	const { setValidationErrors, hideValidationError, clearValidationError } =
-		useDispatch( VALIDATION_STORE_KEY );
+	const previousValue = usePrevious( value );
 	const textInputId =
 		typeof id !== 'undefined' ? id : 'textinput-' + instanceId;
 	const errorIdString = errorId !== undefined ? errorId : textInputId;
+
+	const { setValidationErrors, hideValidationError, clearValidationError } =
+		useDispatch( VALIDATION_STORE_KEY );
 
 	const { validationError, validationErrorId } = useSelect( ( select ) => {
 		const store = select( VALIDATION_STORE_KEY );
@@ -73,36 +81,67 @@ const ValidatedTextInput = ( {
 	const validateInput = useCallback(
 		( errorsHidden = true ) => {
 			const inputObject = inputRef.current || null;
-			if ( ! inputObject ) {
+
+			if ( inputObject === null ) {
 				return;
 			}
+
 			// Trim white space before validation.
 			inputObject.value = inputObject.value.trim();
-			const inputIsValid = inputObject.checkValidity();
+			inputObject.setCustomValidity( '' );
+
+			const inputIsValid = customValidation
+				? inputObject.checkValidity() && customValidation( inputObject )
+				: inputObject.checkValidity();
+
 			if ( inputIsValid ) {
 				clearValidationError( errorIdString );
-			} else {
-				const validationErrors = {
-					[ errorIdString ]: {
-						message:
-							inputObject.validationMessage ||
-							__(
-								'Invalid value.',
-								'woo-gutenberg-products-block'
-							),
-						hidden: errorsHidden,
-					},
-				};
-				setValidationErrors( validationErrors );
+				return;
 			}
+
+			const validityState = inputObject.validity;
+
+			if ( validityState.valueMissing && requiredMessage ) {
+				inputObject.setCustomValidity( requiredMessage );
+			}
+
+			setValidationErrors( {
+				[ errorIdString ]: {
+					message:
+						inputObject.validationMessage ||
+						__( 'Invalid value.', 'woo-gutenberg-products-block' ),
+					hidden: errorsHidden,
+				},
+			} );
 		},
-		[ clearValidationError, errorIdString, setValidationErrors ]
+		[
+			clearValidationError,
+			customValidation,
+			errorIdString,
+			requiredMessage,
+			setValidationErrors,
+		]
 	);
 
 	/**
-	 * Focus on mount
-	 *
-	 * If the input is in pristine state, focus the element.
+	 * Trigger validation on state change if the current element is not in focus. This is because autofilled elements do not
+	 * trigger the blur() event, and so values can be validated in the background if the state changes elsewhere.
+	 */
+	useEffect( () => {
+		if (
+			value !== previousValue &&
+			( value || previousValue ) &&
+			inputRef &&
+			inputRef.current !== null &&
+			inputRef.current?.ownerDocument?.activeElement !== inputRef.current
+		) {
+			validateInput( false );
+		}
+		// We need to track value even if it is not directly used so we know when it changes.
+	}, [ value, previousValue, validateInput ] );
+
+	/**
+	 * If the input is in pristine state on mount, focus the element.
 	 */
 	useEffect( () => {
 		if ( isPristine && focusOnMount ) {
@@ -111,21 +150,6 @@ const ValidatedTextInput = ( {
 		setIsPristine( false );
 	}, [ focusOnMount, isPristine, setIsPristine ] );
 
-	/**
-	 * Value Validation
-	 *
-	 * Runs validation on state change if the current element is not in focus. This is because autofilled elements do not
-	 * trigger the blur() event, and so values can be validated in the background if the state changes elsewhere.
-	 */
-	useEffect( () => {
-		if (
-			inputRef.current?.ownerDocument?.activeElement !== inputRef.current
-		) {
-			validateInput( true );
-		}
-		// We need to track value even if it is not directly used so we know when it changes.
-	}, [ value, validateInput ] );
-
 	// Remove validation errors when unmounted.
 	useEffect( () => {
 		return () => {
@@ -133,11 +157,7 @@ const ValidatedTextInput = ( {
 		};
 	}, [ clearValidationError, errorIdString ] );
 
-	if (
-		isString( passedErrorMessage ) &&
-		passedErrorMessage !== '' &&
-		isObject( passedErrorMessage )
-	) {
+	if ( passedErrorMessage !== '' && isObject( validationError ) ) {
 		validationError.message = passedErrorMessage;
 	}
 
@@ -154,9 +174,6 @@ const ValidatedTextInput = ( {
 			} ) }
 			aria-invalid={ hasError === true }
 			id={ textInputId }
-			onBlur={ () => {
-				validateInput( false );
-			} }
 			feedback={
 				showError && (
 					<ValidationInputError
@@ -167,8 +184,17 @@ const ValidatedTextInput = ( {
 			}
 			ref={ inputRef }
 			onChange={ ( val ) => {
+				// Hide errors while typing.
 				hideValidationError( errorIdString );
+
+				// Revalidate on user input so we know if the value is valid.
+				validateInput( true );
+
+				// Push the changes up to the parent component if the value is valid.
 				onChange( val );
+			} }
+			onBlur={ () => {
+				validateInput( false );
 			} }
 			ariaDescribedBy={ describedBy }
 			value={ value }
