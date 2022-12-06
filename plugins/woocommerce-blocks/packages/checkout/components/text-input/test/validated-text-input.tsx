@@ -5,6 +5,7 @@ import { act, render, screen } from '@testing-library/react';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { dispatch, select } from '@wordpress/data';
 import userEvent from '@testing-library/user-event';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -12,7 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { __ValidatedTexInputWithoutId as ValidatedTextInput } from '../validated-text-input';
 
 describe( 'ValidatedTextInput', () => {
-	it( 'Hides related validation error on change', async () => {
+	it( 'Removes related validation error on change', async () => {
 		render(
 			<ValidatedTextInput
 				instanceId={ '0' }
@@ -32,12 +33,15 @@ describe( 'ValidatedTextInput', () => {
 				},
 			} )
 		);
+
+		await expect(
+			select( VALIDATION_STORE_KEY ).getValidationError( 'test-input' )
+		).not.toBe( undefined );
 		const textInputElement = await screen.getByLabelText( 'Test Input' );
 		await userEvent.type( textInputElement, 'New value' );
 		await expect(
 			select( VALIDATION_STORE_KEY ).getValidationError( 'test-input' )
-				.hidden
-		).toBe( true );
+		).toBe( undefined );
 	} );
 	it( 'Hides related validation error on change when id is not specified', async () => {
 		render(
@@ -58,12 +62,14 @@ describe( 'ValidatedTextInput', () => {
 				},
 			} )
 		);
+		await expect(
+			select( VALIDATION_STORE_KEY ).getValidationError( 'textinput-1' )
+		).not.toBe( undefined );
 		const textInputElement = await screen.getByLabelText( 'Test Input' );
 		await userEvent.type( textInputElement, 'New value' );
 		await expect(
 			select( VALIDATION_STORE_KEY ).getValidationError( 'textinput-1' )
-				.hidden
-		).toBe( true );
+		).toBe( undefined );
 	} );
 	it( 'Displays a passed error message', async () => {
 		render(
@@ -112,5 +118,34 @@ describe( 'ValidatedTextInput', () => {
 		);
 		const errorMessageElement = await screen.getByText( 'Error message 3' );
 		await expect( errorMessageElement ).toBeInTheDocument();
+	} );
+	it( 'Runs custom validation on the input', async () => {
+		const TestComponent = () => {
+			const [ inputValue, setInputValue ] = useState( 'Test' );
+			return (
+				<ValidatedTextInput
+					instanceId={ '4' }
+					id={ 'test-input' }
+					onChange={ ( value ) => setInputValue( value ) }
+					value={ inputValue }
+					label={ 'Test Input' }
+					customValidation={ ( inputObject ) => {
+						return inputObject.value === 'Valid Value';
+					} }
+				/>
+			);
+		};
+		render( <TestComponent /> );
+
+		const textInputElement = await screen.getByLabelText( 'Test Input' );
+		await userEvent.type( textInputElement, 'Invalid Value' );
+		await expect(
+			select( VALIDATION_STORE_KEY ).getValidationError( 'test-input' )
+		).not.toBe( undefined );
+		await userEvent.type( textInputElement, '{selectall}{del}Valid Value' );
+		await expect( textInputElement.value ).toBe( 'Valid Value' );
+		await expect(
+			select( VALIDATION_STORE_KEY ).getValidationError( 'test-input' )
+		).toBe( undefined );
 	} );
 } );
