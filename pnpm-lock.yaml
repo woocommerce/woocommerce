@@ -203,6 +203,7 @@ importers:
       '@testing-library/user-event': ^13.5.0
       '@types/jest': ^27.4.1
       '@types/lodash': ^4.14.184
+      '@types/prop-types': ^15.7.4
       '@types/react': ^17.0.2
       '@types/testing-library__jest-dom': ^5.14.3
       '@types/wordpress__block-editor': ^7.0.0
@@ -357,6 +358,7 @@ importers:
       '@testing-library/user-event': 13.5.0_gzufz4q333be4gqfrvipwvqt6a
       '@types/jest': 27.4.1
       '@types/lodash': 4.14.184
+      '@types/prop-types': 15.7.5
       '@types/react': 17.0.50
       '@types/testing-library__jest-dom': 5.14.3
       '@types/wordpress__components': 19.10.1_sfoxds7t5ydpegc3knd667wn6m

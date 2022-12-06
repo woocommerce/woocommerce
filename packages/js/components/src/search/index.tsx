@@ -24,14 +24,152 @@ import {
 	usernames,
 	variableProduct,
 	variations,
+	AutoCompleter,
+	OptionCompletionValue,
 } from './autocompleters';
+
+type Option = {
+	key: string | number;
+	label: React.ReactNode;
+	keywords: string[];
+	value: unknown;
+};
+
+type SearchType =
+	| 'attributes'
+	| 'categories'
+	| 'countries'
+	| 'coupons'
+	| 'customers'
+	| 'downloadIps'
+	| 'emails'
+	| 'orders'
+	| 'products'
+	| 'taxes'
+	| 'usernames'
+	| 'variableProducts'
+	| 'variations'
+	| 'custom';
+
+type Props = {
+	type: SearchType;
+	allowFreeTextSearch?: boolean;
+	className?: string;
+	onChange?: ( value: Option | OptionCompletionValue[] ) => void;
+	autocompleter?: AutoCompleter;
+	placeholder?: string;
+	selected?:
+		| string
+		| Array< {
+				key: number | string;
+				label?: string;
+		  } >;
+	inlineTags?: boolean;
+	showClearButton?: boolean;
+	staticResults?: boolean;
+	disabled?: boolean;
+	multiple?: boolean;
+};
+
+type State = {
+	options: unknown[];
+};
 
 /**
  * A search box which autocompletes results while typing, allowing for the user to select an existing object
  * (product, order, customer, etc). Currently only products are supported.
  */
-export class Search extends Component {
-	constructor( props ) {
+export class Search extends Component< Props, State > {
+	static propTypes = {
+		/**
+		 * Render additional options in the autocompleter to allow free text entering depending on the type.
+		 */
+		allowFreeTextSearch: PropTypes.bool,
+		/**
+		 * Class name applied to parent div.
+		 */
+		className: PropTypes.string,
+		/**
+		 * Function called when selected results change, passed result list.
+		 */
+		onChange: PropTypes.func,
+		/**
+		 * The object type to be used in searching.
+		 */
+		type: PropTypes.oneOf( [
+			'attributes',
+			'categories',
+			'countries',
+			'coupons',
+			'customers',
+			'downloadIps',
+			'emails',
+			'orders',
+			'products',
+			'taxes',
+			'usernames',
+			'variableProducts',
+			'variations',
+			'custom',
+		] ).isRequired,
+		/**
+		 * The custom autocompleter to be used in searching when type is 'custom'
+		 */
+		autocompleter: PropTypes.object,
+		/**
+		 * A placeholder for the search input.
+		 */
+		placeholder: PropTypes.string,
+		/**
+		 * An array of objects describing selected values or optionally a string for a single value.
+		 * If the label of the selected value is omitted, the Tag of that value will not
+		 * be rendered inside the search box.
+		 */
+		selected: PropTypes.oneOfType( [
+			PropTypes.string,
+			PropTypes.arrayOf(
+				PropTypes.shape( {
+					key: PropTypes.oneOfType( [
+						PropTypes.number,
+						PropTypes.string,
+					] ).isRequired,
+					label: PropTypes.string,
+				} )
+			),
+		] ),
+		/**
+		 * Render tags inside input, otherwise render below input.
+		 */
+		inlineTags: PropTypes.bool,
+		/**
+		 * Render a 'Clear' button next to the input box to remove its contents.
+		 */
+		showClearButton: PropTypes.bool,
+		/**
+		 * Render results list positioned statically instead of absolutely.
+		 */
+		staticResults: PropTypes.bool,
+		/**
+		 * Whether the control is disabled or not.
+		 */
+		disabled: PropTypes.bool,
+		/**
+		 * Allow multiple option selections.
+		 */
+		multiple: PropTypes.bool,
+	};
+	static defaultProps = {
+		allowFreeTextSearch: false,
+		onChange: noop,
+		selected: [],
+		inlineTags: false,
+		showClearButton: false,
+		staticResults: false,
+		disabled: false,
+		multiple: true,
+	};
+
+	constructor( props: Props ) {
 		super( props );
 		this.state = {
 			options: [],
@@ -80,13 +218,15 @@ export class Search extends Component {
 				}
 				return this.props.autocompleter;
 			default:
-				return {};
+				throw new Error(
+					`No autocompleter found for type: ${ this.props.type }`
+				);
 		}
 	}
 
-	getFormattedOptions( options, query ) {
+	getFormattedOptions( options: unknown[], query: string ) {
 		const autocompleter = this.getAutocompleter();
-		const formattedOptions = [];
+		const formattedOptions: Option[] = [];
 
 		options.forEach( ( option ) => {
 			const formattedOption = {
@@ -103,7 +243,7 @@ export class Search extends Component {
 		return formattedOptions;
 	}
 
-	fetchOptions( previousOptions, query ) {
+	fetchOptions( previousOptions: unknown[], query: string ) {
 		if ( ! query ) {
 			return [];
 		}
@@ -123,11 +263,14 @@ export class Search extends Component {
 		} );
 	}
 
-	updateSelected( selected ) {
-		const { onChange } = this.props;
+	updateSelected( selected: Option[] ) {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { onChange = ( _option: unknown[] ) => {} } = this.props;
 		const autocompleter = this.getAutocompleter();
 
-		const formattedSelections = selected.map( ( option ) => {
+		const formattedSelections = selected.map<
+			Option | OptionCompletionValue
+		>( ( option ) => {
 			return option.value
 				? autocompleter.getOptionCompletion( option.value )
 				: option;
@@ -136,17 +279,21 @@ export class Search extends Component {
 		onChange( formattedSelections );
 	}
 
-	appendFreeTextSearch( options, query ) {
+	appendFreeTextSearch( options: unknown[], query: string ) {
 		const { allowFreeTextSearch } = this.props;
 
 		if ( ! query || ! query.length ) {
 			return [];
 		}
 
-		if ( ! allowFreeTextSearch ) {
+		const autocompleter = this.getAutocompleter();
+
+		if (
+			! allowFreeTextSearch ||
+			typeof autocompleter.getFreeTextOptions !== 'function'
+		) {
 			return options;
 		}
-		const autocompleter = this.getAutocompleter();
 
 		return [ ...autocompleter.getFreeTextOptions( query ), ...options ];
 	}
@@ -194,91 +341,5 @@ export class Search extends Component {
 		);
 	}
 }
-
-Search.propTypes = {
-	/**
-	 * Render additional options in the autocompleter to allow free text entering depending on the type.
-	 */
-	allowFreeTextSearch: PropTypes.bool,
-	/**
-	 * Class name applied to parent div.
-	 */
-	className: PropTypes.string,
-	/**
-	 * Function called when selected results change, passed result list.
-	 */
-	onChange: PropTypes.func,
-	/**
-	 * The object type to be used in searching.
-	 */
-	type: PropTypes.oneOf( [
-		'attributes',
-		'categories',
-		'countries',
-		'coupons',
-		'customers',
-		'downloadIps',
-		'emails',
-		'orders',
-		'products',
-		'taxes',
-		'usernames',
-		'variableProducts',
-		'variations',
-		'custom',
-	] ).isRequired,
-	/**
-	 * The custom autocompleter to be used in searching when type is 'custom'
-	 */
-	autocompleter: PropTypes.object,
-	/**
-	 * A placeholder for the search input.
-	 */
-	placeholder: PropTypes.string,
-	/**
-	 * An array of objects describing selected values or optionally a string for a single value.
-	 * If the label of the selected value is omitted, the Tag of that value will not
-	 * be rendered inside the search box.
-	 */
-	selected: PropTypes.oneOfType( [
-		PropTypes.string,
-		PropTypes.arrayOf(
-			PropTypes.shape( {
-				key: PropTypes.oneOfType( [
-					PropTypes.number,
-					PropTypes.string,
-				] ).isRequired,
-				label: PropTypes.string,
-			} )
-		),
-	] ),
-	/**
-	 * Render tags inside input, otherwise render below input.
-	 */
-	inlineTags: PropTypes.bool,
-	/**
-	 * Render a 'Clear' button next to the input box to remove its contents.
-	 */
-	showClearButton: PropTypes.bool,
-	/**
-	 * Render results list positioned statically instead of absolutely.
-	 */
-	staticResults: PropTypes.bool,
-	/**
-	 * Whether the control is disabled or not.
-	 */
-	disabled: PropTypes.bool,
-};
-
-Search.defaultProps = {
-	allowFreeTextSearch: false,
-	onChange: noop,
-	selected: [],
-	inlineTags: false,
-	showClearButton: false,
-	staticResults: false,
-	disabled: false,
-	multiple: true,
-};
 
 export default Search;
