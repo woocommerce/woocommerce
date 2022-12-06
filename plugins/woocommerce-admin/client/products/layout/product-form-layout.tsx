@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Children } from '@wordpress/element';
+import { Children, useEffect } from '@wordpress/element';
 import { TabPanel } from '@wordpress/components';
 
 /**
@@ -13,6 +13,18 @@ import './product-form-layout.scss';
 export const ProductFormLayout: React.FC< {
 	children: JSX.Element | JSX.Element[];
 } > = ( { children } ) => {
+	useEffect( () => {
+		window.document.body.classList.add(
+			'woocommerce-admin-product-layout'
+		);
+
+		return () => {
+			window.document.body.classList.remove(
+				'woocommerce-admin-product-layout'
+			);
+		};
+	}, [] );
+
 	const tabs = Children.map( children, ( child: JSX.Element ) => {
 		if ( child.type.name !== 'ProductFormTab' ) {
 			return null;
