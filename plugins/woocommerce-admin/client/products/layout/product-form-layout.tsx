@@ -40,6 +40,7 @@ export const ProductFormLayout: React.FC< {
 			className="product-form-layout"
 			activeClass="is-active"
 			tabs={ tabs }
+			onSelect={ () => ( window.document.documentElement.scrollTop = 0 ) }
 		>
 			{ ( tab ) => (
 				<>
