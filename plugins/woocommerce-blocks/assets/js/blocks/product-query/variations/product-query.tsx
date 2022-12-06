@@ -36,14 +36,12 @@ if ( isFeaturePluginBuild() ) {
 		title: __( 'Products (Beta)', 'woo-gutenberg-products-block' ),
 		isActive: ( blockAttributes ) =>
 			blockAttributes.namespace === VARIATION_NAME,
-		icon: {
-			src: (
-				<Icon
-					icon={ stacks }
-					className="wc-block-editor-components-block-icon wc-block-editor-components-block-icon--stacks"
-				/>
-			),
-		},
+		icon: (
+			<Icon
+				icon={ stacks }
+				className="wc-block-editor-components-block-icon wc-block-editor-components-block-icon--stacks"
+			/>
+		),
 		attributes: {
 			...QUERY_DEFAULT_ATTRIBUTES,
 			namespace: VARIATION_NAME,
@@ -56,6 +54,6 @@ if ( isFeaturePluginBuild() ) {
 			? [ ...DEFAULT_ALLOWED_CONTROLS, 'wooInherit' ]
 			: DEFAULT_ALLOWED_CONTROLS,
 		innerBlocks: INNER_BLOCKS_TEMPLATE,
-		scope: [ 'block', 'inserter' ],
+		scope: [ 'inserter' ],
 	} );
 }

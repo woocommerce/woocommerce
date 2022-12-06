@@ -3,8 +3,9 @@
  */
 import { isExperimentalBuild } from '@woocommerce/block-settings';
 import { registerBlockVariation } from '@wordpress/blocks';
+import { Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { Icon, percent } from '@wordpress/icons';
+import { percent } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -27,14 +28,12 @@ if ( isExperimentalBuild() ) {
 		isActive: ( blockAttributes ) =>
 			blockAttributes.namespace === VARIATION_NAME ||
 			blockAttributes.query?.__woocommerceOnSale === true,
-		icon: {
-			src: (
-				<Icon
-					icon={ percent }
-					className="wc-block-editor-components-block-icon wc-block-editor-components-block-icon--percent"
-				/>
-			),
-		},
+		icon: (
+			<Icon
+				icon={ percent }
+				className="wc-block-editor-components-block-icon wc-block-editor-components-block-icon--percent"
+			/>
+		),
 		attributes: {
 			...QUERY_DEFAULT_ATTRIBUTES,
 			namespace: VARIATION_NAME,
@@ -52,6 +51,6 @@ if ( isExperimentalBuild() ) {
 			DISABLED_INSPECTOR_CONTROLS
 		),
 		innerBlocks: INNER_BLOCKS_TEMPLATE,
-		scope: [ 'block', 'inserter' ],
+		scope: [ 'inserter' ],
 	} );
 }
