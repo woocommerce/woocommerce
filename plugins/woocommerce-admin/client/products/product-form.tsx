@@ -19,6 +19,7 @@ import './product-page.scss';
 import { validate } from './product-validation';
 import { AttributesSection } from './sections/attributes-section';
 import { ProductFormFooter } from './layout/product-form-footer';
+import { ProductFormTab } from './product-form-tab';
 
 export const ProductForm: React.FC< {
 	product?: PartialProduct;
@@ -41,12 +42,20 @@ export const ProductForm: React.FC< {
 		>
 			<ProductFormHeader />
 			<ProductFormLayout>
-				<ProductDetailsSection />
-				<PricingSection />
-				<ImagesSection />
-				<ProductInventorySection />
-				<ProductShippingSection product={ product } />
-				<AttributesSection />
+				<ProductFormTab name="general" title="General">
+					<ProductDetailsSection />
+					<ImagesSection />
+					<AttributesSection />
+				</ProductFormTab>
+				<ProductFormTab name="pricing" title="Pricing">
+					<PricingSection />
+				</ProductFormTab>
+				<ProductFormTab name="inventory" title="Inventory">
+					<ProductInventorySection />
+				</ProductFormTab>
+				<ProductFormTab name="shipping" title="Shipping">
+					<ProductShippingSection product={ product } />
+				</ProductFormTab>
 			</ProductFormLayout>
 			<ProductFormFooter />
 		</Form>
