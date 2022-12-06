@@ -1,18 +1,14 @@
 /**
  * External dependencies
  */
-import { TourKit, TourKitTypes } from '@woocommerce/components';
+import { TourKit } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useState, useEffect, useRef } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { recordEvent } from '@woocommerce/tracks';
-
-/**
- * Internal dependencies
- */
 
 const FEEDBACK_TOUR_OPTION = 'woocommerce_ces_product_feedback_shown';
+const FEEDBACK_TIMEOUT_MS = 7 * 60 * 1000;
 
 const useShowProductFeedbackTour = (): undefined | boolean => {
 	const { tourOptionValue } = useSelect( ( select ) => {
@@ -53,17 +49,10 @@ export const ProductFeedbackTour: React.FC< ProductFeedbackTour > = ( {
 
 		tourTimeout.current = setTimeout( () => {
 			setIsTourVisible( true );
-		}, 5 * 1000 );
+		}, FEEDBACK_TIMEOUT_MS );
 
 		return () => clearTourTimeout();
 	}, [ tourOptionValue ] );
-
-	useEffect( () => {
-		if ( currentTab === 'feedback' ) {
-			setIsTourVisible( false );
-			clearTourTimeout();
-		}
-	}, [ currentTab ] );
 
 	useEffect( () => {
 		if ( ! isTourVisible ) {
@@ -74,44 +63,48 @@ export const ProductFeedbackTour: React.FC< ProductFeedbackTour > = ( {
 		} );
 	}, [ isTourVisible ] );
 
-	const config: TourKitTypes.WooConfig = {
-		steps: [
-			{
-				referenceElements: {
-					desktop: '#activity-panel-tab-feedback',
-				},
-				meta: {
-					name: 'product-feedback-tour-1',
-					heading: __( '🫣 Feeling stuck?', 'woocommerce' ),
-					descriptions: {
-						desktop: __(
-							"You have been working on this product for a few minutes now. Is there something you're struggling with? Share your feedback.",
-							'woocommerce'
-						),
-					},
-					primaryButton: {
-						isHidden: true,
-					},
-				},
-			},
-		],
-		placement: 'bottom-start',
-		options: {
-			effects: {
-				liveResize: { mutation: true, resize: true },
-			},
-		},
-		closeHandler: () => {
-			setIsTourVisible( false );
-			// Add tracks?
-			// recordEvent( 'settings_store_address_tour_dismiss', {
-			// 	source,
-			// } );
-		},
-	};
+	if ( currentTab === 'feedback' && isTourVisible ) {
+		setIsTourVisible( false );
+		clearTourTimeout();
+	}
 
 	if ( ! isTourVisible ) {
 		return null;
 	}
-	return <TourKit config={ config }></TourKit>;
+
+	return (
+		<TourKit
+			config={ {
+				steps: [
+					{
+						referenceElements: {
+							desktop: '#activity-panel-tab-feedback',
+						},
+						meta: {
+							name: 'product-feedback-tour-1',
+							heading: __( '🫣 Feeling stuck?', 'woocommerce' ),
+							descriptions: {
+								desktop: __(
+									"You have been working on this product for a few minutes now. Is there something you're struggling with? Share your feedback.",
+									'woocommerce'
+								),
+							},
+							primaryButton: {
+								isHidden: true,
+							},
+						},
+					},
+				],
+				placement: 'bottom-start',
+				options: {
+					effects: {
+						liveResize: { mutation: true, resize: true },
+					},
+				},
+				closeHandler: () => {
+					setIsTourVisible( false );
+				},
+			} }
+		/>
+	);
 };
