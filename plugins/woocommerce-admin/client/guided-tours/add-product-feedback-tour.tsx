@@ -11,17 +11,17 @@ const FEEDBACK_TOUR_OPTION = 'woocommerce_ces_product_feedback_shown';
 const FEEDBACK_TIMEOUT_MS = 7 * 60 * 1000;
 
 const useShowProductFeedbackTour = (): undefined | boolean => {
-	const { tourOptionValue } = useSelect( ( select ) => {
+	const { hasShownTour } = useSelect( ( select ) => {
 		const { getOption } = select( OPTIONS_STORE_NAME );
 
 		return {
-			tourOptionValue: getOption( FEEDBACK_TOUR_OPTION ) as
+			hasShownTour: getOption( FEEDBACK_TOUR_OPTION ) as
 				| boolean
 				| undefined,
 		};
 	} );
 
-	return tourOptionValue;
+	return hasShownTour;
 };
 
 type ProductFeedbackTourProps = {
@@ -31,7 +31,7 @@ type ProductFeedbackTourProps = {
 export const ProductFeedbackTour: React.FC< ProductFeedbackTourProps > = ( {
 	currentTab,
 } ) => {
-	const tourOptionValue = useShowProductFeedbackTour();
+	const hasShownTour = useShowProductFeedbackTour();
 	const [ isTourVisible, setIsTourVisible ] = useState( false );
 	const tourTimeout = useRef< ReturnType< typeof setTimeout > | null >(
 		null
@@ -44,7 +44,7 @@ export const ProductFeedbackTour: React.FC< ProductFeedbackTourProps > = ( {
 	};
 
 	useEffect( () => {
-		if ( tourOptionValue !== false ) {
+		if ( hasShownTour !== false ) {
 			return;
 		}
 
@@ -53,7 +53,7 @@ export const ProductFeedbackTour: React.FC< ProductFeedbackTourProps > = ( {
 		}, FEEDBACK_TIMEOUT_MS );
 
 		return () => clearTourTimeout();
-	}, [ tourOptionValue ] );
+	}, [ hasShownTour ] );
 
 	useEffect( () => {
 		if ( ! isTourVisible ) {
