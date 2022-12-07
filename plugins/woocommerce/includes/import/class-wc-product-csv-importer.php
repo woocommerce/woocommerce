@@ -81,7 +81,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			// Remove line breaks in keys, to avoid mismatch mapping of keys
 			$this->raw_keys = wc_clean( wp_unslash( $this->raw_keys ) );
-			
+
 			// Remove BOM signature from the first item.
 			if ( isset( $this->raw_keys[0] ) ) {
 				$this->raw_keys[0] = $this->remove_utf8_bom( $this->raw_keys[0] );
