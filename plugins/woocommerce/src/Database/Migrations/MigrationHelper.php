@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Database\Migrations;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 /**
@@ -175,7 +176,7 @@ class MigrationHelper {
 		 *
 		 * @since 7.2.0
 		 */
-		$limit      = apply_filters( 'woocommerce_migrate_country_states_for_orders_batch_size', 5, $country_code, $old_to_new_states_mapping );
+		$limit      = apply_filters( 'woocommerce_migrate_country_states_for_orders_batch_size', 100, $country_code, $old_to_new_states_mapping );
 		$cot_exists = wc_get_container()->get( DataSynchronizer::class )->check_orders_table_exists();
 
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -193,23 +194,37 @@ class MigrationHelper {
 				$wpdb->query( $update_query );
 			}
 
-			$update_query = $wpdb->prepare(
-				"UPDATE /*+ NO_MERGE(posts_with_address_in_country) */ {$wpdb->prefix}postmeta,
+			// We need to split the update query for the postmeta table in two, select + update,
+			// because MySQL doesn't support the LIMIT keyword in multi-table UPDATE statements.
+
+			$select_meta_ids_query = $wpdb->prepare(
+				"SELECT meta_id FROM {$wpdb->prefix}postmeta,
 					(SELECT DISTINCT post_id FROM {$wpdb->prefix}postmeta
 					WHERE (meta_key = '_billing_country' OR meta_key='_shipping_country') AND meta_value=%s)
-					AS posts_with_address_in_country
-				SET meta_value=%s
+					AS states_in_country
 				WHERE (meta_key='_billing_state' OR meta_key='_shipping_state')
 				AND meta_value=%s
-				AND {$wpdb->prefix}postmeta.post_id = posts_with_address_in_country.post_id
+				AND wp_postmeta.post_id = states_in_country.post_id
 				LIMIT %d",
 				$country_code,
-				$new_state,
 				$old_state,
 				$limit
 			);
 
-			$wpdb->query( $update_query );
+			$meta_ids = $wpdb->get_results( $select_meta_ids_query, ARRAY_A );
+			if ( ! empty( $meta_ids ) ) {
+				$meta_ids                    = ArrayUtil::select( $meta_ids, 'meta_id' );
+				$meta_ids_as_comma_separated = '(' . join( ',', $meta_ids ) . ')';
+
+				$update_query = $wpdb->prepare(
+					"UPDATE {$wpdb->prefix}postmeta
+					SET meta_value=%s
+					WHERE meta_id IN {$meta_ids_as_comma_separated}",
+					$new_state
+				);
+
+				$wpdb->query( $update_query );
+			}
 		}
 
 		$states_as_comma_separated = "('" . join( "','", array_keys( $old_to_new_states_mapping ) ) . "')";
@@ -243,7 +258,7 @@ class MigrationHelper {
 			$more_exist_query = "SELECT EXISTS ({$posts_exist_query})";
 		}
 
-		return intval( $wpdb->get_var( $more_exist_query ) ) !== 0;
+		return (int) ( $wpdb->get_var( $more_exist_query ) ) !== 0;
 
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
