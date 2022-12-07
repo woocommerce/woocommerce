@@ -2,36 +2,30 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { closeSmall } from '@wordpress/icons';
 import { Pill } from '@woocommerce/components';
-import { CustomerFeedbackModal } from '@woocommerce/customer-effort-score';
-import { recordEvent } from '@woocommerce/tracks';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import './product-mvp-ces-footer.scss';
-import { getStoreAgeInWeeks } from './utils';
 import {
-	ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
 	ALLOW_TRACKING_OPTION_NAME,
 	SHOWN_FOR_ACTIONS_OPTION_NAME,
 } from './constants';
 import { WooFooterItem } from '~/layout/footer';
+import { STORE_KEY } from './data/constants';
 
 export const PRODUCT_MVP_CES_ACTION_OPTION_NAME =
 	'woocommerce_ces_product_mvp_ces_action';
 
 export const ProductMVPCESFooter: React.FC = () => {
-	const [ showFeedbackModal, setShowFeedbackModal ] = useState( false );
-	const { createSuccessNotice } = useDispatch( 'core/notices' );
+	const { showCesModal } = useDispatch( STORE_KEY );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const {
-		storeAgeInWeeks,
 		cesAction,
 		allowTracking,
 		cesShownForActions,
@@ -47,9 +41,6 @@ export const ProductMVPCESFooter: React.FC = () => {
 		const shownForActions =
 			( getOption( SHOWN_FOR_ACTIONS_OPTION_NAME ) as string[] ) || [];
 
-		const adminInstallTimestamp =
-			( getOption( ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ) as number ) || 0;
-
 		const allowTrackingOption =
 			getOption( ALLOW_TRACKING_OPTION_NAME ) || 'no';
 
@@ -60,10 +51,6 @@ export const ProductMVPCESFooter: React.FC = () => {
 			! hasFinishedResolution( 'getOption', [
 				PRODUCT_MVP_CES_ACTION_OPTION_NAME,
 			] ) ||
-			adminInstallTimestamp === null ||
-			! hasFinishedResolution( 'getOption', [
-				ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
-			] ) ||
 			! hasFinishedResolution( 'getOption', [
 				ALLOW_TRACKING_OPTION_NAME,
 			] );
@@ -71,14 +58,38 @@ export const ProductMVPCESFooter: React.FC = () => {
 		return {
 			cesShownForActions: shownForActions,
 			allowTracking: allowTrackingOption === 'yes',
-			storeAgeInWeeks: getStoreAgeInWeeks( adminInstallTimestamp ),
 			cesAction: action,
 			resolving,
 		};
 	} );
 
 	const shareFeedback = () => {
-		setShowFeedbackModal( true );
+		showCesModal(
+			{
+				action: cesAction,
+				label: __(
+					"How's your experience with the product editor?",
+					'woocommerce'
+				),
+				firstQuestion: __(
+					'The product editing screen is easy to use',
+					'woocommerce'
+				),
+				secondQuestion: __(
+					"The product editing screen's functionality meets my needs",
+					'woocommerce'
+				),
+				onsubmitLabel: __(
+					"Thanks for the feedback. We'll put it to good use!",
+					'woocommerce'
+				),
+			},
+			{},
+			{
+				type: 'snackbar',
+				icon: <span>🌟</span>,
+			}
+		);
 		updateOptions( {
 			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
 				cesAction,
@@ -91,32 +102,6 @@ export const ProductMVPCESFooter: React.FC = () => {
 		updateOptions( {
 			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: 'hide',
 		} );
-	};
-
-	const recordScore = (
-		score: number,
-		secondScore: number,
-		comments: string
-	) => {
-		recordEvent( 'ces_feedback', {
-			action: cesAction,
-			score,
-			score_second_question: secondScore ?? null,
-			score_combined: score + ( secondScore ?? 0 ),
-			comments: comments || '',
-			store_age: storeAgeInWeeks,
-		} );
-		createSuccessNotice(
-			__(
-				"Thanks for the feedback. We'll put it to good use!",
-				'woocommerce'
-			),
-			{
-				type: 'snackbar',
-				icon: <span>🌟</span>,
-			}
-		);
-		setShowFeedbackModal( false );
 	};
 
 	const showCESFooter =
@@ -157,24 +142,6 @@ export const ProductMVPCESFooter: React.FC = () => {
 						></Button>
 					</div>
 				</WooFooterItem>
-			) }
-			{ showFeedbackModal && (
-				<CustomerFeedbackModal
-					title={ __(
-						"How's your experience with the product editor?",
-						'woocommerce'
-					) }
-					firstQuestion={ __(
-						'The product editing screen is easy to use',
-						'woocommerce'
-					) }
-					secondQuestion={ __(
-						"The product editing screen's functionality meets my needs",
-						'woocommerce'
-					) }
-					recordScoreCallback={ recordScore }
-					onCloseModal={ () => setShowFeedbackModal( false ) }
-				/>
 			) }
 		</>
 	);

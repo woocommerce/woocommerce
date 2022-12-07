@@ -43,4 +43,4 @@ jobs:
               run: |
                   HEAD_REF=$(git rev-parse HEAD)
                   git checkout $HEAD_REF
-                  phpcs-changed --git --git-base ${{ github.base_ref }} ${{ steps.changed-files.outputs.all_changed_files }}
+                  phpcs-changed -s --git --git-base ${{ github.base_ref }} ${{ steps.changed-files.outputs.all_changed_files }}

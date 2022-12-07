@@ -57,6 +57,36 @@ export function addCesSurvey( {
 }
 
 /**
+ * Add show CES modal.
+ *
+ * @param {Object} surveyProps         props for CES survey, similar to addCesSurvey.
+ * @param {Object} props               object for optional props
+ * @param {Object} onSubmitNoticeProps object for on submit notice props.
+ */
+export function showCesModal(
+	surveyProps = {},
+	props = {},
+	onSubmitNoticeProps = {}
+) {
+	return {
+		type: TYPES.SHOW_CES_MODAL,
+		surveyProps,
+		onsubmit_label: surveyProps.onsubmitLabel || '',
+		props,
+		onSubmitNoticeProps,
+	};
+}
+
+/**
+ * Hide CES Modal.
+ */
+export function hideCesModal() {
+	return {
+		type: TYPES.HIDE_CES_MODAL,
+	};
+}
+
+/**
  * Add a new CES survey track for the pages in Analytics menu
  */
 export function addCesSurveyForAnalytics() {
