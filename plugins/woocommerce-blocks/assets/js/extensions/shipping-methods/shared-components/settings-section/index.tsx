@@ -16,7 +16,7 @@ const StyledSectionWrapper = styled.div`
 	}
 	.components-base-control {
 		label {
-			text-transform: capitalize !important;
+			text-transform: none !important;
 		}
 	}
 `;

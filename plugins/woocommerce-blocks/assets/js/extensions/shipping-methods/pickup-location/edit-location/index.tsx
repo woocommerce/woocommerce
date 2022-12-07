@@ -40,9 +40,9 @@ const EditLocation = ( {
 			onRequestClose={ onClose }
 			title={
 				editingLocation === 'new'
-					? __( 'Pickup Location', 'woo-gutenberg-products-block' )
+					? __( 'Pickup location', 'woo-gutenberg-products-block' )
 					: __(
-							'Edit Pickup Location',
+							'Edit pickup location',
 							'woo-gutenberg-products-block'
 					  )
 			}

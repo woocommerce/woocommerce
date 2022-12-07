@@ -48,7 +48,7 @@ const Form = ( {
 	return (
 		<form ref={ formRef }>
 			<TextControl
-				label={ __( 'Location Name', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Location name', 'woo-gutenberg-products-block' ) }
 				name={ 'location_name' }
 				value={ values.name }
 				onChange={ setLocationField( 'name' ) }
@@ -120,7 +120,7 @@ const Form = ( {
 				] }
 			/>
 			<TextControl
-				label={ __( 'Pickup Details', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Pickup details', 'woo-gutenberg-products-block' ) }
 				name={ 'pickup_details' }
 				value={ values.details }
 				onChange={ setLocationField( 'details' ) }

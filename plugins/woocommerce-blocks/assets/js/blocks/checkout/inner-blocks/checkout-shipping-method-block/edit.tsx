@@ -9,10 +9,9 @@ import {
 	ToggleControl,
 	__experimentalRadio as Radio,
 	__experimentalRadioGroup as RadioGroup,
-	ExternalLink,
 } from '@wordpress/components';
 import { Icon, store, shipping } from '@wordpress/icons';
-import { ADMIN_URL, getSetting } from '@woocommerce/settings';
+import { ADMIN_URL } from '@woocommerce/settings';
 import {
 	InspectorControls,
 	useBlockProps,

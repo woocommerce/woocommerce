@@ -23,7 +23,7 @@ const GeneralSettingsDescription = () => (
 		<h2>{ __( 'General', 'woo-gutenberg-products-block' ) }</h2>
 		<p>
 			{ __(
-				'Enable or disable Local Pickup on your store, and define costs. Local Pickup is only available from the Block Checkout.',
+				'Enable or disable local pickup on your store, and define costs. Local pickup is only available from the block checkout.',
 				'woo-gutenberg-products-block'
 			) }
 		</p>
@@ -47,7 +47,7 @@ const GeneralSettings = () => {
 					name="local_pickup_enabled"
 					onChange={ setSettingField( 'enabled' ) }
 					label={ __(
-						'Enable Local Pickup',
+						'Enable local pickup',
 						'woo-gutenberg-products-block'
 					) }
 					help={ __(

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Modal } from '@wordpress/components';
-import { HorizontalRule } from '@wordpress/primitives';
 import styled from '@emotion/styled';
 
 const StyledModal = styled( Modal )`
@@ -43,7 +42,7 @@ const StyledModal = styled( Modal )`
 		.components-base-control {
 			label {
 				margin-top: 8px;
-				text-transform: capitalize !important;
+				text-transform: none !important;
 			}
 		}
 	}
