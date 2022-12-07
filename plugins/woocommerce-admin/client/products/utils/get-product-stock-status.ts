@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { PartialProduct } from '@woocommerce/data';
+import { PartialProduct, ProductVariation } from '@woocommerce/data';
 
 /**
  * Labels for product stock statuses.
@@ -35,7 +35,7 @@ export const PRODUCT_STOCK_STATUS_LABELS = {
  * @return {PRODUCT_STOCK_STATUS_KEYS} Product staus key.
  */
 export const getProductStockStatus = (
-	product: PartialProduct
+	product: PartialProduct | Partial< ProductVariation >
 ): string | number => {
 	if ( product.manage_stock ) {
 		return product.stock_quantity || 0;
