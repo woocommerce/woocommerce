@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix error in onboarding wizard when plugin is activated but includes unexpected output.
