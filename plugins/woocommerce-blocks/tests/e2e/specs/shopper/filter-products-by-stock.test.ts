@@ -53,7 +53,7 @@ const goToShopPage = () =>
 		waitUntil: 'networkidle0',
 	} );
 
-describe.skip( `${ block.name } Block`, () => {
+describe( `${ block.name } Block`, () => {
 	describe( 'with All Products Block', () => {
 		let link = '';
 		beforeAll( async () => {
@@ -92,7 +92,9 @@ describe.skip( `${ block.name } Block`, () => {
 		} );
 	} );
 
-	describe( 'with PHP classic template', () => {
+	// Re-enable this test once wordpress/e2e-test-utils is updated.
+	// https://github.com/woocommerce/woocommerce-blocks/issues/7744
+	describe.skip( 'with PHP classic template', () => {
 		const productCatalogTemplateId =
 			'woocommerce/woocommerce//archive-product';
 
