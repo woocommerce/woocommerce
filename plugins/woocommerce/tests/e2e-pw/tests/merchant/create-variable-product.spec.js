@@ -14,7 +14,14 @@ const defaultAttributes = [ 'val2', 'val1', 'val2' ];
 const stockAmount = '100';
 const lowStockAmount = '10';
 
-const deleteProducts = async ( api ) => {
+const deleteProducts = async ( baseURL ) => {
+	const api = new wcApi( {
+		url: baseURL,
+		consumerKey: process.env.CONSUMER_KEY,
+		consumerSecret: process.env.CONSUMER_SECRET,
+		version: 'wc/v3',
+	} );
+
 	const varProducts = await api
 		.get( 'products', { per_page: 100, search: variableProductName } )
 		.then( ( response ) => response.data );
@@ -34,25 +41,11 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-		// delete products
-		await deleteProducts( api );
+		await deleteProducts( baseURL );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-		// delete products
-		await deleteProducts( api );
+		await deleteProducts( baseURL );
 	} );
 
 	// tests build upon one another, so running one in the middle will fail.
