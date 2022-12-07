@@ -15,6 +15,7 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import { CurrencyContext } from '../../../lib/currency-context';
+import { getProductStockStatus } from '../../utils/get-product-stock-status';
 import './variations.scss';
 
 export const Variations: React.FC = () => {
@@ -63,7 +64,7 @@ export const Variations: React.FC = () => {
 							{ formatAmount( variation.price ) }
 						</div>
 						<div className="woocommerce-product-variations__quantity">
-							{ variation.stock_quantity }
+							{ getProductStockStatus( variation ) }
 						</div>
 					</ListItem>
 				) ) }
