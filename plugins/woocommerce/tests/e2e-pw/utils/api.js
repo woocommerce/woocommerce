@@ -15,7 +15,7 @@ if ( process.env.CONSUMER_KEY && process.env.CONSUMER_SECRET ) {
  * Allow explicit construction of api client
  */
 const constructWith = ( consumerKey, consumerSecret ) => {
-	api = new wcApi( {
+	return new wcApi( {
 		url: config.use.baseURL,
 		consumerKey,
 		consumerSecret,
