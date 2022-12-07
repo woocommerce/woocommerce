@@ -537,7 +537,7 @@ class Reviews {
 
 		if ( isset( $comment->comment_parent ) && $comment->comment_parent > 0 ) {
 			$is_reply = true;
-			$comment  = get_comment( $comment->comment_parent ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$comment  = get_comment($comment_id); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 
 		// Only replace the translated text if we are editing a comment left on a product (ie. a review).
