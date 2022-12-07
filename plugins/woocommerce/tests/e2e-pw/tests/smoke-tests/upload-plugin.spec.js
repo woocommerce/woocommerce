@@ -20,7 +20,7 @@ let pluginSlug;
 test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 	test.skip(
 		! PLUGIN_REPOSITORY,
-		`SKIPPED: PLUGIN_REPOSITORY is falsy: ${ PLUGIN_REPOSITORY }`
+		'Skipping this test because PLUGIN_REPOSITORY is undefined'
 	);
 
 	test.use( { storageState: ADMINSTATE } );

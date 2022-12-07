@@ -13,10 +13,9 @@ let pluginZipPath;
 test.describe.serial(
 	'WooCommerce plugin can be uploaded and activated',
 	() => {
-		// Skip test if UPDATE_WC is falsy.
 		test.skip(
-			! Boolean( UPDATE_WC ),
-			`Skipping this test because UPDATE_WC is falsy: ${ UPDATE_WC }`
+			UPDATE_WC !== 'true',
+			"Skipping this test because UPDATE_WC was not set to 'true'"
 		);
 
 		test.use( { storageState: ADMINSTATE } );
