@@ -8,16 +8,23 @@ const {
 	deleteZip,
 } = require( '../../utils/plugin-utils' );
 
+const skipMessage = 'Skipping this test because UPDATE_WC is not "true"';
+
 let pluginZipPath;
+
+test.skip( () => {
+	const shouldSkip = UPDATE_WC !== 'true';
+
+	if ( shouldSkip ) {
+		console.log( skipMessage );
+	}
+
+	return shouldSkip;
+}, skipMessage );
 
 test.describe.serial(
 	'WooCommerce plugin can be uploaded and activated',
 	() => {
-		test.skip(
-			UPDATE_WC !== 'true',
-			"Skipping this test because UPDATE_WC was not set to 'true'"
-		);
-
 		test.use( { storageState: ADMINSTATE } );
 
 		test.beforeAll( async () => {
@@ -100,10 +107,13 @@ test.describe.serial(
 			} );
 
 			// Skip this test if the "Update WooCommerce Database" button didn't appear.
-			test.skip(
-				! ( await updateButton.isVisible() ),
-				'The "Update WooCommerce Database" button did not appear after updating WooCommerce. Verify with the team if the WooCommerce version being tested does not really trigger a database update.'
-			);
+			const shouldSkip = ! ( await updateButton.isVisible() );
+			if ( shouldSkip ) {
+				const skipMessage =
+					'The "Update WooCommerce Database" button did not appear after updating WooCommerce. Verify with the team if the WooCommerce version being tested does not really trigger a database update.';
+				console.log( skipMessage );
+				test.skip( shouldSkip, skipMessage );
+			}
 
 			// If the notice appears, start DB update
 			await updateButton.click();
