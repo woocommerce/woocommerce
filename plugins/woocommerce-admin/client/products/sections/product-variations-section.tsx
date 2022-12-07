@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Card } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Link } from '@woocommerce/components';
 
@@ -41,9 +40,7 @@ export const ProductVariationsSection: React.FC = () => {
 				</>
 			}
 		>
-			<Card>
-				<Variations />
-			</Card>
+			<Variations />
 		</ProductSectionLayout>
 	);
 };

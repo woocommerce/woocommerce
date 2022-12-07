@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import { Card, Spinner } from '@wordpress/components';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	ProductVariation,
@@ -22,24 +23,34 @@ export const Variations: React.FC = () => {
 	const { productId } = useParams();
 	const context = useContext( CurrencyContext );
 	const { formatAmount, getCurrencyConfig } = context;
-	const currencyConfig = getCurrencyConfig();
-	const { variations } = useSelect( ( select ) => {
-		const { getProductVariations } = select(
+	const { isLoading, variations } = useSelect( ( select ) => {
+		const { getProductVariations, hasFinishedResolution } = select(
 			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 		);
 		return {
+			isLoading: ! hasFinishedResolution( 'getProductVariations', [
+				{
+					product_id: productId,
+				},
+			] ),
 			variations: getProductVariations< ProductVariation[] >( {
 				product_id: productId,
 			} ),
 		};
 	} );
 
-	if ( ! variations ) {
-		return null;
+	if ( ! variations || isLoading ) {
+		return (
+			<Card className="woocommerce-product-variations is-loading">
+				<Spinner />
+			</Card>
+		);
 	}
 
+	const currencyConfig = getCurrencyConfig();
+
 	return (
-		<div className="woocommerce-product-variations">
+		<Card className="woocommerce-product-variations">
 			<div className="woocommerce-product-variations__header">
 				<h4>{ __( 'Variation', 'woocommerce' ) }</h4>
 				<h4>
@@ -75,6 +86,6 @@ export const Variations: React.FC = () => {
 					</ListItem>
 				) ) }
 			</Sortable>
-		</div>
+		</Card>
 	);
 };

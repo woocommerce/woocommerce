@@ -1,4 +1,6 @@
 .woocommerce-product-variations {
+    min-height: 300px;
+
     &__header {
         display: grid;
         grid-template-columns: calc(38px + 25%) 25% 25%;
@@ -22,6 +24,16 @@
     }
 
     .woocommerce-sortable {
+        margin: 0;
+    }
+
+    .components-spinner {
+        width: 34px;
+        height: 34px;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        position: absolute;
         margin: 0;
     }
 }
