@@ -4,7 +4,7 @@
 {{#description}}
  * Description: {{description}}
 {{/description}}
-  * Version: {{version}}
+ * Version: {{version}}
 {{#author}}
  * Author: {{author}}
 {{/author}}
@@ -28,57 +28,102 @@ require_once plugin_dir_path( __FILE__ ) . '/vendor/autoload_packages.php';
 
 use {{slugPascalCase}}\Admin\Setup;
 
+// phpcs:disable WordPress.Files.FileName
+
 /**
- * {{slugPascalCase}} class.
+ * WooCommerce fallback notice.
+ *
+ * @since {{version}}
  */
-class {{slugPascalCase}} {
-	/**
-	 * This class instance.
-	 *
-	 * @var \{{slugPascalCase}} single instance of this class.
-	 */
-	private static $instance;
+function {{slugSnakeCase}}_missing_wc_notice() {
+	/* translators: %s WC download URL link. */
+	echo '<div class="error"><p><strong>' . sprintf( esc_html__( '{{title}} requires WooCommerce to be installed and active. You can download %s here.', '{{slugSnakeCase}}' ), '<a href="https://woocommerce.com/" target="_blank">WooCommerce</a>' ) . '</strong></p></div>';
+}
 
-	/**
-	 * Constructor.
-	 */
-	public function __construct() {
-		add_action( 'plugins_loaded', array( $this, 'init' ) );
-	}
+register_activation_hook( __FILE__, '{{slugSnakeCase}}_activate' );
 
-	/**
-	 * Init the plugin once WP is loaded.
-	 */
-	public function init() {
-		// If WooCommerce does not exist, deactivate plugin.
-		if ( ! class_exists( 'WooCommerce' ) ) {
-			deactivate_plugins( plugin_basename( __FILE__ ) );
-		}
-
-		if ( is_admin() ) {
-			// Load plugin translations.
-			$plugin_rel_path = basename( dirname( __FILE__ ) ) . '/languages'; /* Relative to WP_PLUGIN_DIR */
-			load_plugin_textdomain( '{{slug}}', false, $plugin_rel_path );
-
-			new Setup();
-		}
-	}
-
-	/**
-	 * Gets the main instance.
-	 *
-	 * Ensures only one instance can be loaded.
-	 *
-	 * @return \{{slugPascalCase}}
-	 */
-	public static function instance() {
-
-		if ( null === self::$instance ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
+/**
+ * Activation hook.
+ *
+ * @since {{version}}
+ */
+function {{slugSnakeCase}}_activate() {
+	if ( ! class_exists( 'WooCommerce' ) ) {
+		add_action( 'admin_notices', '{{slugSnakeCase}}_missing_wc_notice' );
+		return;
 	}
 }
 
-{{slugPascalCase}}::instance();
+if ( ! class_exists( '{{slugSnakeCase}}' ) ) :
+	/**
+	 * The {{slugSnakeCase}} class.
+	 */
+	class {{slugSnakeCase}} {
+		/**
+		 * This class instance.
+		 *
+		 * @var \{{slugSnakeCase}} single instance of this class.
+		 */
+		private static $instance;
+
+		/**
+		 * Constructor.
+		 */
+		public function __construct() {
+			if ( is_admin() ) {
+				new Setup();
+			}
+		}
+
+		/**
+		 * Cloning is forbidden.
+		 *
+		 */
+		public function __clone() {
+			wc_doing_it_wrong( __FUNCTION__, __( 'Cloning is forbidden.', '{{slugSnakeCase}}' ), $this->version );
+		}
+
+		/**
+		 * Unserializing instances of this class is forbidden.
+		 *
+		 */
+		public function __wakeup() {
+			wc_doing_it_wrong( __FUNCTION__, __( 'Unserializing instances of this class is forbidden.', '{{slugSnakeCase}}' ), $this->version );
+		}
+
+		/**
+		 * Gets the main instance.
+		 *
+		 * Ensures only one instance can be loaded.
+		 *
+		 * @return \{{slugSnakeCase}}
+		 */
+		public static function instance() {
+
+			if ( null === self::$instance ) {
+				self::$instance = new self();
+			}
+
+			return self::$instance;
+		}
+	}
+endif;
+
+add_action( 'plugins_loaded', '{{slugSnakeCase}}_init', 10 );
+
+/**
+ * Initialize the plugin.
+ *
+ * @since {{version}}
+ */
+function {{slugSnakeCase}}_init() {
+	load_plugin_textdomain( '{{slugSnakeCase}}', false, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
+
+	if ( ! class_exists( 'WooCommerce' ) ) {
+		add_action( 'admin_notices', '{{slugSnakeCase}}_missing_wc_notice' );
+		return;
+	}
+
+	{{slugSnakeCase}}::instance();
+
+}
