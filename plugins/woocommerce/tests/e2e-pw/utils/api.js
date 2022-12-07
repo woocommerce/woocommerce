@@ -13,6 +13,18 @@ if ( process.env.CONSUMER_KEY && process.env.CONSUMER_SECRET ) {
 	} );
 }
 
+/**
+ * Allow explicit construction of api client.
+ */
+const constructWith = ( consumerKey, consumerSecret ) => {
+	api = new wcApi( {
+		url: config.use.baseURL,
+		consumerKey,
+		consumerSecret,
+		version: 'wc/v3',
+	} );
+};
+
 const throwCustomError = (
 	error,
 	customMessage = 'Something went wrong. See details below.'
@@ -401,4 +413,5 @@ module.exports = {
 	get,
 	create,
 	deletePost,
+	constructWith,
 };

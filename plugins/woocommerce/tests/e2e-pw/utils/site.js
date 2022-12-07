@@ -217,10 +217,12 @@ const deleteAllTaxRates = async () => {
  * @param {string} cKey Consumer key
  * @param {string} cSecret Consumer secret
  */
-const reset = async () => {
+const reset = async ( cKey, cSecret ) => {
 	console.log( '--------------------------' );
 	console.log( 'Resetting test site...' );
 	console.log( '--------------------------' );
+
+	api.constructWith( cKey, cSecret );
 
 	await deleteAllCoupons();
 	await deleteAllProducts();
