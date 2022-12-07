@@ -51,7 +51,7 @@ const applyLabelToCommunityContributor = async () => {
 		username
 	);
 
-	core.setOutput( 'is-commuinity', isCommunityUser ? 'yes' : 'no' );
+	core.setOutput( 'is-community', isCommunityUser ? 'yes' : 'no' );
 
 	if ( isCommunityUser ) {
 		console.log( 'Adding community contributor label' );
