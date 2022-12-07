@@ -24,11 +24,11 @@ const useShowProductFeedbackTour = (): undefined | boolean => {
 	return tourOptionValue;
 };
 
-type ProductFeedbackTour = {
+type ProductFeedbackTourProps = {
 	currentTab: string;
 };
 
-export const ProductFeedbackTour: React.FC< ProductFeedbackTour > = ( {
+export const ProductFeedbackTour: React.FC< ProductFeedbackTourProps > = ( {
 	currentTab,
 } ) => {
 	const tourOptionValue = useShowProductFeedbackTour();
