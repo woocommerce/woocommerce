@@ -138,13 +138,16 @@ class WC_Admin_Tests_Plugins_Helper extends WP_UnitTestCase {
 		$this->assertEquals( false, $actual_data, 'Should return false if plugin is not found.' );
 	}
 
+	/**
+	 * Test activate_plugins() by using Akismet.
+	 */
 	public function test_activate_akismet() {
 		// Prepare Akismet plugin in the "installed" state.
 		deactivate_plugins( 'akismet/akismet.php' );
 		$this->assertTrue( PluginsHelper::is_plugin_installed( 'akismet' ) );
 
 		// Activate the plugin.
-		$test = PluginsHelper::activate_plugins( [ 'akismet' ] );
+		$test = PluginsHelper::activate_plugins( array( 'akismet' ) );
 
 		// Assert plugin activated.
 		$this->assertSame( 'akismet', $test['activated'][0] );
@@ -152,14 +155,17 @@ class WC_Admin_Tests_Plugins_Helper extends WP_UnitTestCase {
 		// Assert no errors return.
 		$this->assertFalse( $test['errors']->has_errors() );
 
-		// Clean up
+		// Clean up.
 		deactivate_plugins( 'akismet/akismet.php' );
 	}
 
+	/**
+	 * Test error handling in activate_plugins().
+	 */
 	public function test_activate_plugins_with_error() {
 		// Try to activate a plugin that has not been installed.
 		$this->assertFalse( PluginsHelper::is_plugin_installed( 'foo-bar' ) );
-		$test = PluginsHelper::activate_plugins( [ 'foo-bar' ] );
+		$test = PluginsHelper::activate_plugins( array( 'foo-bar' ) );
 
 		// Assert plugin is NOT activated.
 		$this->assertFalse( PluginsHelper::is_plugin_active( 'foo-bar' ) );
