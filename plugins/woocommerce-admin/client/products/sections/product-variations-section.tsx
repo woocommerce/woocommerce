@@ -10,6 +10,7 @@ import { Link } from '@woocommerce/components';
  * Internal dependencies
  */
 import { ProductSectionLayout } from '../layout/product-section-layout';
+import { Variations } from '../fields/variations';
 
 export const ProductVariationsSection: React.FC = () => {
 	return (
@@ -40,7 +41,9 @@ export const ProductVariationsSection: React.FC = () => {
 				</>
 			}
 		>
-			<Card></Card>
+			<Card>
+				<Variations />
+			</Card>
 		</ProductSectionLayout>
 	);
 };
