@@ -7,8 +7,6 @@ import { useState } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { TotalsItem } from '@woocommerce/blocks-checkout';
 import type { Currency } from '@woocommerce/price-format';
-import type { ReactElement } from 'react';
-import { ShippingAddress as ShippingAddressType } from '@woocommerce/settings';
 import { ShippingVia } from '@woocommerce/base-components/cart-checkout/totals/shipping/shipping-via';
 import { useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
@@ -17,10 +15,10 @@ import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
  * Internal dependencies
  */
 import ShippingCalculator from '../../shipping-calculator';
-import ShippingRateSelector from './shipping-rate-selector';
 import { hasShippingRate, getTotalShippingValue } from './utils';
 import ShippingPlaceholder from './shipping-placeholder';
 import ShippingAddress from './shipping-address';
+import ShippingRateSelector from './shipping-rate-selector';
 import './style.scss';
 
 export interface TotalShippingProps {
