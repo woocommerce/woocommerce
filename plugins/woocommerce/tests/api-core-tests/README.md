@@ -66,7 +66,7 @@ USER_KEY=""
 USER_SECRET=""
 ```
 
-For local setup, create a `.env` file in the `woocommerce/plugins/woocommerce` folder with the three required values described above. If any of these variables are configured they will override the values automatically set in the `playwright.config.js`
+For local setup, create a `.env` file in the `woocommerce/plugins/woocommerce/tests/api-core-tests` folder with the three required values described above. If any of these variables are configured they will override the values automatically set in the `playwright.config.js`
 
 When using a username and password combination instead of a consumer secret and consumer key, make sure to have the [JSON Basic Authentication plugin](https://github.com/WP-API/Basic-Auth) installed and activated on the test site.
 

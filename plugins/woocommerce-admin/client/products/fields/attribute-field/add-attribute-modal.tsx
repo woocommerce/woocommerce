@@ -124,6 +124,9 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 		}
 	};
 
+	const attributeLabel = __( 'Attribute', 'woocommerce' );
+	const valueLabel = __( 'Values', 'woocommerce' );
+
 	return (
 		<>
 			<Form< AttributeForm >
@@ -167,8 +170,8 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 								<table className="woocommerce-add-attribute-modal__table">
 									<thead>
 										<tr className="woocommerce-add-attribute-modal__table-header">
-											<th>Attribute</th>
-											<th>Values</th>
+											<th>{ attributeLabel }</th>
+											<th>{ valueLabel }</th>
 										</tr>
 									</thead>
 									<tbody>
@@ -185,6 +188,9 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 																'woocommerce'
 															) }
 															value={ attribute }
+															label={
+																attributeLabel
+															}
 															onChange={ (
 																val
 															) => {
@@ -246,6 +252,9 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 																		? []
 																		: attribute.terms
 																}
+																label={
+																	valueLabel
+																}
 																onChange={ (
 																	val
 																) =>
@@ -268,6 +277,9 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 																}
 																value={
 																	attribute.options
+																}
+																label={
+																	valueLabel
 																}
 																onChange={ (
 																	val

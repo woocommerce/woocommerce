@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Increased margin so that overflow modal content doesn't clip header

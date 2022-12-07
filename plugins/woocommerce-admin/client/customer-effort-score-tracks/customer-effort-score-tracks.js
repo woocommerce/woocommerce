@@ -7,13 +7,18 @@ import { recordEvent } from '@woocommerce/tracks';
 import { CustomerEffortScore } from '@woocommerce/customer-effort-score';
 import { compose } from '@wordpress/compose';
 import { withSelect, withDispatch } from '@wordpress/data';
-import { OPTIONS_STORE_NAME, WEEK } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
 
-const SHOWN_FOR_ACTIONS_OPTION_NAME = 'woocommerce_ces_shown_for_actions';
-const ADMIN_INSTALL_TIMESTAMP_OPTION_NAME =
-	'woocommerce_admin_install_timestamp';
-const ALLOW_TRACKING_OPTION_NAME = 'woocommerce_allow_tracking';
+/**
+ * Internal dependencies
+ */
+import {
+	SHOWN_FOR_ACTIONS_OPTION_NAME,
+	ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
+	ALLOW_TRACKING_OPTION_NAME,
+} from './constants';
+import { getStoreAgeInWeeks } from './utils';
 
 /**
  * A CustomerEffortScore wrapper that uses tracks to track the selected
@@ -22,7 +27,9 @@ const ALLOW_TRACKING_OPTION_NAME = 'woocommerce_allow_tracking';
  * @param {Object}   props                    Component props.
  * @param {string}   props.action             The action name sent to Tracks.
  * @param {Object}   props.trackProps         Additional props sent to Tracks.
- * @param {string}   props.label              The label displayed in the modal.
+ * @param {string}   props.title              The title displayed in the modal.
+ * @param {string}   props.firstQuestion      The first survey question.
+ * @param {string}   props.secondQuestion     The second survey question.
  * @param {string}   props.onSubmitLabel      The label displayed upon survey submission.
  * @param {Array}    props.cesShownForActions The array of actions that the CES modal has been shown for.
  * @param {boolean}  props.allowTracking      Whether tracking is allowed or not.
@@ -34,7 +41,9 @@ const ALLOW_TRACKING_OPTION_NAME = 'woocommerce_allow_tracking';
 function CustomerEffortScoreTracks( {
 	action,
 	trackProps,
-	label,
+	title,
+	firstQuestion,
+	secondQuestion,
 	onSubmitLabel = __( 'Thank you for your feedback!', 'woocommerce' ),
 	cesShownForActions,
 	allowTracking,
@@ -104,10 +113,12 @@ function CustomerEffortScoreTracks( {
 		addActionToShownOption();
 	};
 
-	const recordScore = ( score, comments ) => {
+	const recordScore = ( score, secondScore, comments ) => {
 		recordEvent( 'ces_feedback', {
 			action,
 			score,
+			score_second_question: secondScore,
+			score_combined: score + secondScore,
 			comments: comments || '',
 			store_age: storeAgeInWeeks,
 			...trackProps,
@@ -118,7 +129,9 @@ function CustomerEffortScoreTracks( {
 	return (
 		<CustomerEffortScore
 			recordScoreCallback={ recordScore }
-			label={ label }
+			title={ title }
+			firstQuestion={ firstQuestion }
+			secondQuestion={ secondQuestion }
 			onNoticeShownCallback={ onNoticeShown }
 			onNoticeDismissedCallback={ onNoticeDismissed }
 			onModalShownCallback={ onModalShown }
@@ -177,19 +190,6 @@ CustomerEffortScoreTracks.propTypes = {
 	 */
 	createNotice: PropTypes.func,
 };
-
-function getStoreAgeInWeeks( adminInstallTimestamp ) {
-	if ( adminInstallTimestamp === 0 ) {
-		return null;
-	}
-
-	// Date.now() is ms since Unix epoch, adminInstallTimestamp is in
-	// seconds since Unix epoch.
-	const storeAgeInMs = Date.now() - adminInstallTimestamp * 1000;
-	const storeAgeInWeeks = Math.round( storeAgeInMs / WEEK );
-
-	return storeAgeInWeeks;
-}
 
 export default compose(
 	withSelect( ( select ) => {

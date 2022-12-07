@@ -28,7 +28,6 @@ const customerShipping = {
 	state: 'NY',
 	postcode: '14201',
 	phone: '123456789',
-	email: 'john.doe.ordersearch@example.com',
 };
 
 const queries = [
@@ -50,6 +49,25 @@ const queries = [
 	[ customerShipping.postcode, 'shipping post code' ],
 	[ itemName, 'shipping item name' ],
 ];
+
+/**
+ * Check first if customer already exists. Delete if it does.
+ */
+const deleteCustomer = async ( api ) => {
+	const { data: customersList } = await api.get( 'customers', {
+		email: customerBilling.email,
+	} );
+
+	if ( customersList && customersList.length ) {
+		const customerId = customersList[ 0 ].id;
+
+		console.log(
+			`Customer with email ${ customerBilling.email } exists! Deleting it before starting test...`
+		);
+
+		await api.delete( `customers/${ customerId }`, { force: true } );
+	}
+};
 
 test.describe( 'WooCommerce Orders > Search orders', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -73,19 +91,23 @@ test.describe( 'WooCommerce Orders > Search orders', () => {
 			.then( ( response ) => {
 				productId = response.data.id;
 			} );
-		// update customer info
+
+		await deleteCustomer( api );
+
+		// Create test customer.
 		await api
 			.post( 'customers', {
 				email: customerBilling.email,
 				first_name: customerBilling.first_name,
 				last_name: customerBilling.last_name,
-				username: 'john.doe',
+				username: 'john.doe.ordersearch',
 				billing: customerBilling,
 				shipping: customerShipping,
 			} )
 			.then( ( response ) => {
 				customerId = response.data.id;
 			} );
+
 		// create order
 		await api
 			.post( 'orders', {
@@ -134,10 +156,11 @@ test.describe( 'WooCommerce Orders > Search orders', () => {
 			await page.fill( '#post-search-input', queries[ i ][ 0 ] );
 			await page.click( '#search-submit' );
 
-			// always check the last item, in case of multiples
 			await expect(
-				page.locator( '.order_number > a.order-view >> nth=-1' )
-			).toContainText( `#${ orderId } ${ searchString }` );
+				page.locator( '.order_number > a.order-view', {
+					hasText: `#${ orderId } ${ searchString }`,
+				} )
+			).toBeVisible();
 		} );
 	}
 } );

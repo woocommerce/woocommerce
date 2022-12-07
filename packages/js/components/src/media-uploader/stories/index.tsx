@@ -17,7 +17,7 @@ declare let Blob: {
 	new (): Blob;
 };
 
-export const MockMediaUpload = ( { onSelect, render } ) => {
+const MockMediaUpload = ( { onSelect, render } ) => {
 	const [ isOpen, setOpen ] = useState( false );
 
 	return (
@@ -28,7 +28,10 @@ export const MockMediaUpload = ( { onSelect, render } ) => {
 			{ isOpen && (
 				<Modal
 					title="Media Modal"
-					onRequestClose={ () => setOpen( false ) }
+					onRequestClose={ ( event ) => {
+						setOpen( false );
+						event.stopPropagation();
+					} }
 				>
 					<p>
 						Use the default built-in{ ' ' }
@@ -39,12 +42,13 @@ export const MockMediaUpload = ( { onSelect, render } ) => {
 						return (
 							<button
 								key={ i }
-								onClick={ () => {
+								onClick={ ( event ) => {
 									onSelect( {
 										alt: 'Random',
 										url: `https://picsum.photos/200?i=${ i }`,
 									} );
 									setOpen( false );
+									event.stopPropagation();
 								} }
 								style={ {
 									marginRight: '16px',
@@ -101,8 +105,19 @@ const readImage = ( file: Blob ) => {
 };
 
 const mockUploadMedia = async ( { filesList, onFileChange } ) => {
+	// The values sent by the FormFileUpload and the DropZone components are different.
+	// This is why we need to transform everything into an array.
+	const list = await Object.keys( filesList ).map(
+		( key ) => filesList[ key ]
+	);
+
 	const images = await Promise.all(
-		filesList.map( ( file ) => readImage( file ) )
+		list.map( ( file ) => {
+			if ( typeof file === 'object' ) {
+				return readImage( file );
+			}
+			return {};
+		} )
 	);
 	onFileChange( images );
 };
@@ -118,6 +133,9 @@ export const Basic: React.FC = () => {
 					MediaUploadComponent={ MockMediaUpload }
 					onSelect={ ( file ) => setImages( [ ...images, file ] ) }
 					onError={ () => null }
+					onFileUploadChange={ ( files ) =>
+						setImages( [ ...images, ...files ] )
+					}
 					onUpload={ ( files ) =>
 						setImages( [ ...images, ...files ] )
 					}
@@ -139,6 +157,9 @@ export const DisabledDropZone: React.FC = () => {
 					hasDropZone={ false }
 					label={ 'Click the button below to upload' }
 					MediaUploadComponent={ MockMediaUpload }
+					onFileUploadChange={ ( files ) =>
+						setImages( [ ...images, ...files ] )
+					}
 					onSelect={ ( file ) => setImages( [ ...images, file ] ) }
 					onError={ () => null }
 					uploadMedia={ mockUploadMedia }

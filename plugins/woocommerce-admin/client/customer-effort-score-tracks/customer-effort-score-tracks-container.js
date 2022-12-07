@@ -49,7 +49,9 @@ function CustomerEffortScoreTracksContainer( {
 				<CustomerEffortScoreTracks
 					key={ index }
 					action={ item.action }
-					label={ item.label }
+					firstQuestion={ item.firstQuestion }
+					secondQuestion={ item.secondQuestion }
+					title={ item.title }
 					onSubmitLabel={ item.onsubmit_label }
 					trackProps={ item.props || {} }
 				/>

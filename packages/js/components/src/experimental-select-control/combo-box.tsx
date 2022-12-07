@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createElement, MouseEvent, useRef } from 'react';
-import { Icon, search } from '@wordpress/icons';
 import classNames from 'classnames';
 
 /**
@@ -14,12 +13,14 @@ type ComboBoxProps = {
 	children?: JSX.Element | JSX.Element[] | null;
 	comboBoxProps: Props;
 	inputProps: Props;
+	suffix?: JSX.Element | null;
 };
 
 export const ComboBox = ( {
 	children,
 	comboBoxProps,
 	inputProps,
+	suffix,
 }: ComboBoxProps ) => {
 	const inputRef = useRef< HTMLInputElement | null >( null );
 
@@ -50,27 +51,30 @@ export const ComboBox = ( {
 			) }
 			onMouseDown={ maybeFocusInput }
 		>
-			{ children }
-			<div
-				{ ...comboBoxProps }
-				className="woocommerce-experimental-select-control__combox-box"
-			>
-				<input
-					{ ...inputProps }
-					ref={ ( node ) => {
-						inputRef.current = node;
-						(
-							inputProps.ref as unknown as (
-								node: HTMLInputElement | null
-							) => void
-						 )( node );
-					} }
-				/>
+			<div className="woocommerce-experimental-select-control__items-wrapper">
+				{ children }
+				<div
+					{ ...comboBoxProps }
+					className="woocommerce-experimental-select-control__combox-box"
+				>
+					<input
+						{ ...inputProps }
+						ref={ ( node ) => {
+							inputRef.current = node;
+							(
+								inputProps.ref as unknown as (
+									node: HTMLInputElement | null
+								) => void
+							 )( node );
+						} }
+					/>
+				</div>
 			</div>
-			<Icon
-				className="woocommerce-experimental-select-control__combox-box-icon"
-				icon={ search }
-			/>
+			{ suffix && (
+				<div className="woocommerce-experimental-select-control__suffix">
+					{ suffix }
+				</div>
+			) }
 		</div>
 	);
 };

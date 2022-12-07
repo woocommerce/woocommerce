@@ -28,6 +28,7 @@ import usePreventLeavingPage from '~/hooks/usePreventLeavingPage';
 import { WooHeaderItem } from '~/header/utils';
 import { useProductHelper } from './use-product-helper';
 import './product-form-actions.scss';
+import { useProductMVPCESFooter } from '~/customer-effort-score-tracks/use-product-mvp-ces-footer';
 
 export const ProductFormActions: React.FC = () => {
 	const {
@@ -39,6 +40,9 @@ export const ProductFormActions: React.FC = () => {
 		isUpdatingPublished,
 		isDeleting,
 	} = useProductHelper();
+
+	const { onPublish: triggerPublishCES, onSaveDraft: triggerDraftCES } =
+		useProductMVPCESFooter();
 	const { isDirty, isValidForm, values, resetForm } =
 		useFormContext< Product >();
 
@@ -85,6 +89,7 @@ export const ProductFormActions: React.FC = () => {
 				resetForm( product );
 			}
 		}
+		await triggerDraftCES();
 	};
 
 	const onPublish = async () => {
@@ -110,6 +115,7 @@ export const ProductFormActions: React.FC = () => {
 				resetForm( product );
 			}
 		}
+		await triggerPublishCES();
 	};
 
 	const onPublishAndDuplicate = async () => {
