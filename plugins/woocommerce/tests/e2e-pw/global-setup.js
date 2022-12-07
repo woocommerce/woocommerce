@@ -170,9 +170,6 @@ module.exports = async ( config ) => {
 	if ( process.env.RESET_SITE === 'true' ) {
 		const { site } = require( './utils' );
 
-		await site.reset(
-			process.env.CONSUMER_KEY,
-			process.env.CONSUMER_SECRET
-		);
+		await site.reset();
 	}
 };
