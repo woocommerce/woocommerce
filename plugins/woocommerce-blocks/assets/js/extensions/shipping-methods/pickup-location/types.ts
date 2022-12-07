@@ -30,8 +30,13 @@ export type ShippingMethodSettings = {
 	cost: string;
 };
 
+export type ReadOnlySettings = {
+	hasLegacyPickup: boolean;
+};
+
 export type SettingsContextType = {
 	settings: ShippingMethodSettings;
+	readOnlySettings: ReadOnlySettings;
 	setSettingField: (
 		field: keyof ShippingMethodSettings
 	) => ( value: unknown ) => void;

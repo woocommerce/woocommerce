@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Card, CardBody } from '@wordpress/components';
+import type { ReactNode } from 'react';
 import styled from '@emotion/styled';
 
 const StyledCard = styled( Card )`
@@ -9,6 +10,8 @@ const StyledCard = styled( Card )`
 `;
 
 const StyledCardBody = styled( CardBody )`
+	padding: 24px;
+
 	// increasing the specificity of the styles to override the Gutenberg ones
 	&.is-size-medium.is-size-medium {
 		padding: 24px;
@@ -21,7 +24,7 @@ const StyledCardBody = styled( CardBody )`
 
 	> * {
 		margin-top: 0;
-		margin-bottom: 1em;
+		margin-bottom: 1.5em;
 
 		// fixing the spacing on the inputs and their help text, to ensure it is consistent
 		&:last-child {
@@ -52,7 +55,7 @@ const SettingsCard = ( {
 	children,
 	...props
 }: {
-	children: ( JSX.Element | null )[];
+	children: ReactNode;
 } ): JSX.Element => (
 	<StyledCard>
 		<StyledCardBody { ...props }>{ children }</StyledCardBody>
