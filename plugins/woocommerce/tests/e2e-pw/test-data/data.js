@@ -22,8 +22,8 @@ const customer = {
 	username: CUSTOMER_USER ?? 'customer',
 	password: CUSTOMER_PASSWORD ?? 'password',
 	email: CUSTOMER_USER_EMAIL ?? 'customer@woocommercecoree2etestsuite.com',
-	first_name: 'Jane',
-	last_name: 'Smith',
+	first_name: CUSTOMER_FIRST_NAME ?? 'Jane',
+	last_name: CUSTOMER_LAST_NAME ?? 'Smith',
 	billing: {
 		us: {
 			first_name: 'Maggie',
