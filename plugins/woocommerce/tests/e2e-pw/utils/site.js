@@ -222,8 +222,6 @@ const reset = async ( cKey, cSecret ) => {
 	console.log( 'Resetting test site...' );
 	console.log( '--------------------------' );
 
-	api.constructWith( cKey, cSecret );
-
 	await deleteAllCoupons();
 	await deleteAllProducts();
 	await deleteAllProductAttributes();

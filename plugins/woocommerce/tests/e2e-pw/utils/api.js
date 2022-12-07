@@ -13,21 +13,6 @@ if ( process.env.CONSUMER_KEY && process.env.CONSUMER_SECRET ) {
 	} );
 }
 
-/**
- * Explicitly construct a WooCommerce REST API object.
- *
- * @param {string} consumerKey
- * @param {string} consumerSecret
- */
-const constructWith = ( consumerKey, consumerSecret ) => {
-	api = new wcApi( {
-		url: config.use.baseURL,
-		consumerKey,
-		consumerSecret,
-		version: 'wc/v3',
-	} );
-};
-
 const throwCustomError = (
 	error,
 	customMessage = 'Something went wrong. See details below.'
@@ -258,7 +243,7 @@ const create = {
 
 const deletePost = {
 	coupons: async ( ids ) => {
-		await api
+		const res = await api
 			.post( 'coupons/batch', { delete: ids } )
 			.then( ( response ) => response )
 			.catch( ( error ) => {
@@ -267,6 +252,8 @@ const deletePost = {
 					'Something went wrong when batch deleting coupons.'
 				);
 			} );
+
+		return res.data;
 	},
 	product: async ( id ) => {
 		await api.delete( `products/${ id }`, {
@@ -274,7 +261,7 @@ const deletePost = {
 		} );
 	},
 	products: async ( ids ) => {
-		await api
+		const res = await api
 			.post( 'products/batch', { delete: ids } )
 			.then( ( response ) => response )
 			.catch( ( error ) => {
@@ -283,9 +270,10 @@ const deletePost = {
 					'Something went wrong when batch deleting products.'
 				);
 			} );
+		return res.data;
 	},
 	productAttributes: async ( id ) => {
-		await api
+		const res = await api
 			.post( 'products/attributes/batch', { delete: id } )
 			.then( ( response ) => response )
 			.catch( ( error ) => {
@@ -294,9 +282,10 @@ const deletePost = {
 					'Something went wrong when batch deleting product attributes.'
 				);
 			} );
+		return res.data;
 	},
 	productCategories: async ( ids ) => {
-		await api
+		const res = await api
 			.post( 'products/categories/batch', { delete: ids } )
 			.then( ( response ) => response )
 			.catch( ( error ) => {
@@ -305,9 +294,10 @@ const deletePost = {
 					'Something went wrong when batch deleting product categories.'
 				);
 			} );
+		return res.data;
 	},
 	productTags: async ( ids ) => {
-		await api
+		const res = await api
 			.post( 'products/tags/batch', { delete: ids } )
 			.then( ( response ) => response )
 			.catch( ( error ) => {
@@ -316,6 +306,7 @@ const deletePost = {
 					'Something went wrong when batch deleting product tags.'
 				);
 			} );
+		return res.data;
 	},
 	order: async ( id ) => {
 		await api.delete( `orders/${ id }`, {
@@ -323,7 +314,7 @@ const deletePost = {
 		} );
 	},
 	orders: async ( ids ) => {
-		await api
+		const res = await api
 			.post( 'orders/batch', { delete: ids } )
 			.then( ( response ) => response )
 			.catch( ( error ) => {
@@ -332,9 +323,10 @@ const deletePost = {
 					'Something went wrong when batch deleting orders.'
 				);
 			} );
+		return res.data;
 	},
 	shippingClasses: async ( ids ) => {
-		await api
+		const res = await api
 			.post( 'products/shipping_classes/batch', { delete: ids } )
 			.then( ( response ) => response )
 			.catch( ( error ) => {
@@ -343,9 +335,10 @@ const deletePost = {
 					'Something went wrong when batch deleting shipping classes.'
 				);
 			} );
+		return res.data;
 	},
 	shippingZone: async ( id ) => {
-		await api
+		const res = await api
 			.delete( `shipping/zones/${ id }`, {
 				force: true,
 			} )
@@ -356,9 +349,10 @@ const deletePost = {
 					'Something went wrong when deleting shipping zone.'
 				);
 			} );
+		return res.data;
 	},
 	shippingZoneMethod: async ( shippingZoneId, shippingMethodId ) => {
-		await api
+		const res = await api
 			.delete(
 				`shipping/zones/${ shippingZoneId }/methods/${ shippingMethodId }`,
 				{
@@ -372,9 +366,10 @@ const deletePost = {
 					'Something went wrong when deleting shipping zone method.'
 				);
 			} );
+		return res.data;
 	},
 	taxClass: async ( slug ) => {
-		await api
+		const res = await api
 			.delete( `taxes/classes/${ slug }`, {
 				force: true,
 			} )
@@ -385,9 +380,10 @@ const deletePost = {
 					`Something went wrong when deleting tax class ${ slug }.`
 				);
 			} );
+		return res.data;
 	},
 	taxRates: async ( ids ) => {
-		await api
+		const res = await api
 			.post( 'taxes/batch', { delete: ids } )
 			.then( ( response ) => response )
 			.catch( ( error ) => {
@@ -396,6 +392,7 @@ const deletePost = {
 					'Something went wrong when batch deleting tax rates.'
 				);
 			} );
+		return res.data;
 	},
 };
 
@@ -404,5 +401,4 @@ module.exports = {
 	get,
 	create,
 	deletePost,
-	constructWith,
 };

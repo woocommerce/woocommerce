@@ -1,7 +1,6 @@
 const { chromium, expect } = require( '@playwright/test' );
 const { admin, customer } = require( './test-data/data' );
 const fs = require( 'fs' );
-const { site } = require( './utils' );
 
 module.exports = async ( config ) => {
 	const { stateDir, baseURL, userAgent } = config.projects[ 0 ].use;
@@ -169,6 +168,8 @@ module.exports = async ( config ) => {
 	await browser.close();
 
 	if ( process.env.RESET_SITE === 'true' ) {
+		const { site } = require( './utils' );
+
 		await site.reset(
 			process.env.CONSUMER_KEY,
 			process.env.CONSUMER_SECRET
