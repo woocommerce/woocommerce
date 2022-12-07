@@ -2018,6 +2018,7 @@ importers:
 
   tools/storybook:
     specifiers:
+      '@babel/plugin-proposal-class-properties': ^7.16.7
       '@babel/preset-env': ^7.16.11
       '@babel/preset-typescript': ^7.16.7
       '@babel/runtime': ^7.17.2
@@ -2046,6 +2047,7 @@ importers:
     dependencies:
       '@babel/preset-typescript': 7.16.7_@babel+core@7.17.8
     devDependencies:
+      '@babel/plugin-proposal-class-properties': 7.18.6_@babel+core@7.17.8
       '@babel/preset-env': 7.16.11_@babel+core@7.17.8
       '@babel/runtime': 7.17.7
       '@storybook/addon-a11y': 6.4.19_sfoxds7t5ydpegc3knd667wn6m
