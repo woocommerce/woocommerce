@@ -11,5 +11,7 @@ class RatingFilter extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'rating-filter';
+	protected $block_name  = 'rating-filter';
+	const RATING_QUERY_VAR = 'rating_filter';
+
 }
