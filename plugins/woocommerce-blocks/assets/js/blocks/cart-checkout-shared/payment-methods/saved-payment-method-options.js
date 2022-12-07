@@ -64,7 +64,14 @@ const getDefaultLabel = ( { method } ) => {
 
 const SavedPaymentMethodOptions = () => {
 	const { activeSavedToken, activePaymentMethod, savedPaymentMethods } =
-		useSelect( ( select ) => select( PAYMENT_STORE_KEY ).getState() );
+		useSelect( ( select ) => {
+			const store = select( PAYMENT_STORE_KEY );
+			return {
+				activeSavedToken: store.getActiveSavedToken(),
+				activePaymentMethod: store.getActivePaymentMethod(),
+				savedPaymentMethods: store.getSavedPaymentMethods(),
+			};
+		} );
 	const { __internalSetActivePaymentMethod } =
 		useDispatch( PAYMENT_STORE_KEY );
 	const paymentMethods = getPaymentMethods();
