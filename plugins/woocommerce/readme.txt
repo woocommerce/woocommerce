@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, sell online, storefront, che
 Requires at least: 5.8
 Tested up to: 6.0
 Requires PHP: 7.2
-Stable tag: 7.1.0
+Stable tag: 7.1.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -168,6 +168,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 **WooCommerce**
 
 * Fix - Fix error in onboarding wizard when plugin is activated but includes unexpected output. [#35866](https://github.com/woocommerce/woocommerce/pull/35866)
+* Fix - Increased margin so that overflow modal content doesn't clip header [#35780](https://github.com/woocommerce/woocommerce/pull/35780)
 * Fix - Added default additional content to emails via filter woocommerce_email_additional_content_. [#35195](https://github.com/woocommerce/woocommerce/pull/35195)
 * Fix - Corrects the currency symbol for Libyan Dinar (LYD). [#35395](https://github.com/woocommerce/woocommerce/pull/35395)
 * Fix - Fix 'Invalid payment method' error upon double click on Delete button of Payment methods table [#30884](https://github.com/woocommerce/woocommerce/pull/30884)
@@ -222,6 +223,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Make it possible to add custom bulk action handling to the admin order list screen (when HPOS is enabled). [#35442](https://github.com/woocommerce/woocommerce/pull/35442)
 * Add - Set In-App Marketplace Tour as completed on tour close [#35278](https://github.com/woocommerce/woocommerce/pull/35278)
 * Add - When custom order tables are not authoritative, admin UI requests will be redirected to the matching legacy order screen as appropriate. [#35463](https://github.com/woocommerce/woocommerce/pull/35463)
+* Update - Woo Blocks 8.9.2 [#35805](https://github.com/woocommerce/woocommerce/pull/35805)
 * Update - Comment: Update WooCommerce Blocks to 8.7.2 [#35101](https://github.com/woocommerce/woocommerce/pull/35101)
 * Update - Comment: Update WooCommerce Blocks to 8.7.3 [#35219](https://github.com/woocommerce/woocommerce/pull/35219)
 * Update - Comment: Update WooCommerce Blocks to 8.9.1 [#35564](https://github.com/woocommerce/woocommerce/pull/35564)
