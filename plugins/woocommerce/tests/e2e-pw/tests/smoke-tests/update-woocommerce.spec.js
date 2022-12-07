@@ -1,7 +1,6 @@
 const { ADMINSTATE, UPDATE_WC } = process.env;
 const { admin } = require( '../../test-data/data' );
 const { test, expect } = require( '@playwright/test' );
-const path = require( 'path' );
 const {
 	deletePlugin,
 	downloadZip,
@@ -107,13 +106,10 @@ test.describe.serial(
 			} );
 
 			// Skip this test if the "Update WooCommerce Database" button didn't appear.
-			const shouldSkip = ! ( await updateButton.isVisible() );
-			if ( shouldSkip ) {
-				const skipMessage =
-					'The "Update WooCommerce Database" button did not appear after updating WooCommerce. Verify with the team if the WooCommerce version being tested does not really trigger a database update.';
-				console.log( skipMessage );
-				test.skip( shouldSkip, skipMessage );
-			}
+			test.skip(
+				! ( await updateButton.isVisible() ),
+				'The "Update WooCommerce Database" button did not appear after updating WooCommerce. Verify with the team if the WooCommerce version being tested does not really trigger a database update.'
+			);
 
 			// If the notice appears, start DB update
 			await updateButton.click();
