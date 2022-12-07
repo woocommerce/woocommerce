@@ -180,9 +180,21 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		} );
 		// clean up tax classes and rates
 		for ( const { slug } of taxClasses ) {
-			await api.delete( `taxes/classes/${ slug }`, {
-				force: true,
-			} );
+			await api
+				.delete( `taxes/classes/${ slug }`, {
+					force: true,
+				} )
+				.catch( ( error ) => {
+					if (
+						error.response.data.code ===
+						'woocommerce_rest_invalid_tax_class'
+					) {
+						// do nothing, probably the tax class was not created due to a failing test
+					} else {
+						// Something else went wrong.
+						throw new Error( error.response.data );
+					}
+				} );
 		}
 		// turn off taxes
 		await api.put( 'settings/general/woocommerce_calc_taxes', {
