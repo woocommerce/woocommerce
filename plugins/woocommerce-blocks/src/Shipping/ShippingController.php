@@ -40,29 +40,6 @@ class ShippingController {
 	 * Initialization method.
 	 */
 	public function init() {
-		// @todo This should be moved inline for the settings page only.
-		$this->asset_data_registry->add(
-			'pickupLocationSettings',
-			get_option( 'woocommerce_pickup_location_settings', [] ),
-			true
-		);
-		$this->asset_data_registry->add(
-			'pickupLocations',
-			function() {
-				$locations = get_option( 'pickup_location_pickup_locations', [] );
-				$formatted = [];
-				foreach ( $locations as $location ) {
-					$formatted[] = [
-						'name'    => $location['name'],
-						'address' => $location['address'],
-						'details' => $location['details'],
-						'enabled' => wc_string_to_bool( $location['enabled'] ),
-					];
-				}
-				return $formatted;
-			},
-			true
-		);
 		if ( is_admin() ) {
 			$this->asset_data_registry->add(
 				'countryStates',
@@ -74,6 +51,7 @@ class ShippingController {
 		}
 		add_action( 'rest_api_init', [ $this, 'register_settings' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'admin_scripts' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'hydrate_client_settings' ] );
 		add_action( 'woocommerce_load_shipping_methods', array( $this, 'register_local_pickup' ) );
 		add_filter( 'woocommerce_local_pickup_methods', array( $this, 'register_local_pickup_method' ) );
 		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'filter_taxable_address' ) );
@@ -170,6 +148,65 @@ class ShippingController {
 		);
 	}
 
+	/**
+	 * Hydrate client settings
+	 */
+	public function hydrate_client_settings() {
+		$locations = get_option( 'pickup_location_pickup_locations', [] );
+
+		$formatted_pickup_locations = [];
+		foreach ( $locations as $location ) {
+			$formatted_pickup_locations[] = [
+				'name'    => $location['name'],
+				'address' => $location['address'],
+				'details' => $location['details'],
+				'enabled' => wc_string_to_bool( $location['enabled'] ),
+			];
+		}
+
+		$has_legacy_pickup = false;
+
+		// Get all shipping zones.
+		$shipping_zones              = \WC_Shipping_Zones::get_zones( 'admin' );
+		$international_shipping_zone = new \WC_Shipping_Zone( 0 );
+
+		// Loop through each shipping zone.
+		foreach ( $shipping_zones as $shipping_zone ) {
+			// Get all registered rates for this shipping zone.
+			$shipping_methods = $shipping_zone['shipping_methods'];
+			// Loop through each registered rate.
+			foreach ( $shipping_methods as $shipping_method ) {
+				if ( 'local_pickup' === $shipping_method->id && 'yes' === $shipping_method->enabled ) {
+					$has_legacy_pickup = true;
+					break 2;
+				}
+			}
+		}
+
+		foreach ( $international_shipping_zone->get_shipping_methods( true ) as $shipping_method ) {
+			if ( 'local_pickup' === $shipping_method->id ) {
+				$has_legacy_pickup = true;
+				break;
+			}
+		}
+
+		$settings = array(
+			'pickupLocationSettings' => get_option( 'woocommerce_pickup_location_settings', [] ),
+			'pickupLocations'        => $formatted_pickup_locations,
+			'readonlySettings'       => array(
+				'hasLegacyPickup' => $has_legacy_pickup,
+			),
+		);
+
+		wp_add_inline_script(
+			'wc-shipping-method-pickup-location',
+			sprintf(
+				'var hydratedScreenSettings = %s;',
+				wp_json_encode( $settings )
+			),
+			'before'
+		);
+	}
 	/**
 	 * Load admin scripts.
 	 */

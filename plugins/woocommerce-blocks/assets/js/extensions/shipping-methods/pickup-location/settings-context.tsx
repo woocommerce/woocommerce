@@ -25,11 +25,14 @@ import type {
 import {
 	defaultSettings,
 	getInitialSettings,
+	defaultReadyOnlySettings,
+	readOnlySettings,
 	getInitialPickupLocations,
 } from './utils';
 
 const SettingsContext = createContext< SettingsContextType >( {
 	settings: defaultSettings,
+	readOnlySettings: defaultReadyOnlySettings,
 	setSettingField: () => () => void null,
 	pickupLocations: [],
 	setPickupLocations: () => void null,
@@ -155,6 +158,7 @@ export const SettingsProvider = ( {
 	const settingsData = {
 		settings,
 		setSettingField,
+		readOnlySettings,
 		pickupLocations,
 		setPickupLocations,
 		toggleLocation,
