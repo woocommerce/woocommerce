@@ -119,6 +119,10 @@ const LocationSettings = () => {
 				setData={ ( newData ) => {
 					setPickupLocations( newData as SortablePickupLocation[] );
 				} }
+				placeholder={ __(
+					'When you add a pickup location, it will appear here.',
+					'woo-gutenberg-products-block'
+				) }
 				footerContent={ FooterContent }
 			/>
 			{ editingLocation && (
