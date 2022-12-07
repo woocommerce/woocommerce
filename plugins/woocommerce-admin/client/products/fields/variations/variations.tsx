@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	ProductVariation,
@@ -21,7 +21,8 @@ import './variations.scss';
 export const Variations: React.FC = () => {
 	const { productId } = useParams();
 	const context = useContext( CurrencyContext );
-	const { formatAmount } = context;
+	const { formatAmount, getCurrencyConfig } = context;
+	const currencyConfig = getCurrencyConfig();
 	const { variations } = useSelect( ( select ) => {
 		const { getProductVariations } = select(
 			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
@@ -42,7 +43,13 @@ export const Variations: React.FC = () => {
 			<div className="woocommerce-product-variations__header">
 				<span />
 				<h4>{ __( 'Variation', 'woocommerce' ) }</h4>
-				<h4>{ __( 'Price', 'woocommerce' ) }</h4>
+				<h4>
+					{ sprintf(
+						/** Translators: The 3 letter currency code for the store. */
+						__( 'Price (%s)', 'woocommerce' ),
+						currencyConfig.code
+					) }
+				</h4>
 				<h4>{ __( 'Quantity', 'woocommerce' ) }</h4>
 			</div>
 			<Sortable>
