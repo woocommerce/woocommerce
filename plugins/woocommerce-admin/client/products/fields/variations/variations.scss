@@ -1,8 +1,7 @@
 .woocommerce-product-variations {
-
     &__header {
         display: grid;
-        grid-template-columns: 38px 25% 25% 25%;
+        grid-template-columns: calc(38px + 25%) 25% 25%;
         padding: $gap-small $gap;
 
         h4 {

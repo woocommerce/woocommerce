@@ -41,7 +41,6 @@ export const Variations: React.FC = () => {
 	return (
 		<div className="woocommerce-product-variations">
 			<div className="woocommerce-product-variations__header">
-				<span />
 				<h4>{ __( 'Variation', 'woocommerce' ) }</h4>
 				<h4>
 					{ sprintf(
