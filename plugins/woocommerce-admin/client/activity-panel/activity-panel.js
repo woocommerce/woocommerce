@@ -251,6 +251,16 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		);
 	};
 
+	const isAddProductPage = () => {
+		const urlParams = getUrlParams( window.location.search );
+
+		return (
+			isEmbedded &&
+			/post-new\.php$/.test( window.location.pathname ) &&
+			urlParams?.post_type === 'product'
+		);
+	};
+
 	const isPerformingSetupTask = () => {
 		return (
 			query.task &&
@@ -263,8 +273,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 	// @todo Pull in dynamic unread status/count
 	const getTabs = () => {
-		const urlParams = getUrlParams( window.location.search );
-
 		const activity = {
 			name: 'activity',
 			title: __( 'Activity', 'woocommerce' ),
@@ -315,10 +323,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 					}
 				);
 			},
-			visible:
-				isEmbedded &&
-				urlParams?.post_type === 'product' &&
-				! urlParams?.taxonomy,
+			visible: isAddProductPage(),
 		};
 
 		const setup = {
@@ -486,7 +491,9 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 						clearPanel={ () => clearPanel() }
 					/>
 				</Section>
-				<ProductFeedbackTour currentTab={ currentTab } />
+				{ isAddProductPage() && (
+					<ProductFeedbackTour currentTab={ currentTab } />
+				) }
 				{ showHelpHighlightTooltip ? (
 					<HighlightTooltip
 						delay={ 1000 }
