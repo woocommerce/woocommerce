@@ -5,23 +5,13 @@ let api;
 
 // Ensure that global-setup.js runs before creating api client
 if ( process.env.CONSUMER_KEY && process.env.CONSUMER_SECRET ) {
-	api = constructWith(
-		process.env.CONSUMER_KEY,
-		process.env.CONSUMER_SECRET
-	);
-}
-
-/**
- * Allow explicit construction of api client
- */
-const constructWith = ( consumerKey, consumerSecret ) => {
-	return new wcApi( {
+	api = new wcApi( {
 		url: config.use.baseURL,
-		consumerKey,
-		consumerSecret,
+		consumerKey: process.env.CONSUMER_KEY,
+		consumerSecret: process.env.CONSUMER_SECRET,
 		version: 'wc/v3',
 	} );
-};
+}
 
 const throwCustomError = (
 	error,
@@ -411,5 +401,4 @@ module.exports = {
 	get,
 	create,
 	deletePost,
-	constructWith,
 };
