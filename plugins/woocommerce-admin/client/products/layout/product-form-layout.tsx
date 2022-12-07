@@ -32,6 +32,7 @@ export const ProductFormLayout: React.FC< {
 		return {
 			name: child.props.name,
 			title: child.props.title,
+			disabled: child.props.disabled,
 		};
 	} );
 

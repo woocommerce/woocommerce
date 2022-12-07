@@ -48,13 +48,25 @@ export const ProductForm: React.FC< {
 					<ImagesSection />
 					<AttributesSection />
 				</ProductFormTab>
-				<ProductFormTab name="pricing" title="Pricing">
+				<ProductFormTab
+					name="pricing"
+					title="Pricing"
+					disabled={ !! product?.variations?.length }
+				>
 					<PricingSection />
 				</ProductFormTab>
-				<ProductFormTab name="inventory" title="Inventory">
+				<ProductFormTab
+					name="inventory"
+					title="Inventory"
+					disabled={ !! product?.variations?.length }
+				>
 					<ProductInventorySection />
 				</ProductFormTab>
-				<ProductFormTab name="shipping" title="Shipping">
+				<ProductFormTab
+					name="shipping"
+					title="Shipping"
+					disabled={ !! product?.variations?.length }
+				>
 					<ProductShippingSection product={ product } />
 				</ProductFormTab>
 				<ProductFormTab name="options" title="Options">
