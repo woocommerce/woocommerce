@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix error in onboarding wizard when plugin is activated but includes unexpected output. [#35866](https://github.com/woocommerce/woocommerce/pull/35866)
 * Fix - Increased margin so that overflow modal content doesn't clip header [#35780](https://github.com/woocommerce/woocommerce/pull/35780)
 * Fix - Added default additional content to emails via filter woocommerce_email_additional_content_. [#35195](https://github.com/woocommerce/woocommerce/pull/35195)
 * Fix - Corrects the currency symbol for Libyan Dinar (LYD). [#35395](https://github.com/woocommerce/woocommerce/pull/35395)
