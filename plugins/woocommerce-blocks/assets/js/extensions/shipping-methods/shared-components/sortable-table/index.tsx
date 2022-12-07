@@ -55,7 +55,7 @@ const TableRow = ( {
 	return (
 		<tr ref={ setNodeRef } style={ style }>
 			<>
-				<td>
+				<td style={ { width: '1%' } }>
 					<Icon
 						icon={ dragHandle }
 						size={ 14 }
@@ -168,11 +168,13 @@ export const SortableTable = ( {
 	setData,
 	className,
 	footerContent: FooterContent,
+	placeholder,
 }: {
 	columns: ColumnProps[];
 	data: SortableData[];
 	setData: ( data: SortableData[] ) => void;
 	className?: string;
+	placeholder?: string | ( () => JSX.Element );
 	footerContent?: () => JSX.Element;
 } ): JSX.Element => {
 	const items = useMemo( () => data.map( ( { id } ) => id ), [ data ] );
@@ -216,19 +218,14 @@ export const SortableTable = ( {
 			<StyledTable className={ `${ className } sortable-table` }>
 				<thead>
 					<tr>
-						<th
-							className={ `sortable-table__sort` }
-							style={ { width: '1%' } }
-						>
-							&nbsp;
-						</th>
-						{ columns.map( ( column ) => (
+						{ columns.map( ( column, index ) => (
 							<th
 								key={ column.name }
 								{ ...getColumnProps(
 									column,
 									`sortable-table__column`
 								) }
+								colSpan={ index === 0 ? 2 : 1 }
 							>
 								{ column.label }
 							</th>
@@ -249,7 +246,7 @@ export const SortableTable = ( {
 						items={ items }
 						strategy={ verticalListSortingStrategy }
 					>
-						{ data &&
+						{ !! data.length ? (
 							data.map(
 								( row ) =>
 									row && (
@@ -285,7 +282,14 @@ export const SortableTable = ( {
 											) ) }
 										</TableRow>
 									)
-							) }
+							)
+						) : (
+							<tr>
+								<td colSpan={ columns.length + 1 }>
+									{ placeholder }
+								</td>
+							</tr>
+						) }
 					</SortableContext>
 				</tbody>
 			</StyledTable>
