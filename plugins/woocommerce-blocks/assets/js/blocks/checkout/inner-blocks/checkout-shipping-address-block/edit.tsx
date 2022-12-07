@@ -5,7 +5,7 @@ import classnames from 'classnames';
 import { useBlockProps } from '@wordpress/block-editor';
 import { useCheckoutAddress } from '@woocommerce/base-context/hooks';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
-import { useCheckoutAddress } from '@woocommerce/base-context/hooks';
+
 /**
  * Internal dependencies
  */

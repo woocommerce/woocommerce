@@ -22,7 +22,7 @@ import { useSettingsContext } from './settings-context';
 
 const LocationSettingsDescription = () => (
 	<>
-		<h2>{ __( 'Pickup Locations', 'woo-gutenberg-products-block' ) }</h2>
+		<h2>{ __( 'Pickup locations', 'woo-gutenberg-products-block' ) }</h2>
 		<p>
 			{ __(
 				'Define pickup locations for your customers to choose from during checkout.',
@@ -55,7 +55,7 @@ const LocationSettings = () => {
 	const tableColumns = [
 		{
 			name: 'name',
-			label: __( 'Pickup Location', 'woo-gutenberg-products-block' ),
+			label: __( 'Pickup location', 'woo-gutenberg-products-block' ),
 			width: '50%',
 			renderCallback: ( row: SortableData ): JSX.Element => (
 				<>
@@ -106,7 +106,7 @@ const LocationSettings = () => {
 				setEditingLocation( 'new' );
 			} }
 		>
-			{ __( 'Add Pickup Location', 'woo-gutenberg-products-block' ) }
+			{ __( 'Add pickup location', 'woo-gutenberg-products-block' ) }
 		</Button>
 	);
 
