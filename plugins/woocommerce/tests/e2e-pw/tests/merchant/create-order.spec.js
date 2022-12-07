@@ -59,27 +59,6 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		await api.put( 'settings/general/woocommerce_calc_taxes', {
 			value: 'yes',
 		} );
-		// delete tax classes left by previous runs of this test
-		for ( const { slug } of taxClasses ) {
-			await api
-				.delete( `taxes/classes/${ slug }`, {
-					force: true,
-				} )
-				.then( ( response ) => {
-					console.log(
-						`Tax class with slug "${ slug }" was found and was deleted.`
-					);
-				} )
-				.catch( ( error ) => {
-					if ( error.response.data.message === 'Invalid tax class' ) {
-						// Tax class does not exist, do nothing.
-					} else {
-						throw new Error(
-							`Response status: ${ error.response.status } ${ error.response.statusText }\nResponse data:\n${ error.response.data }`
-						);
-					}
-				} );
-		}
 		// add tax classes
 		for ( const taxClass of taxClasses ) {
 			await api.post( 'taxes/classes', taxClass );
