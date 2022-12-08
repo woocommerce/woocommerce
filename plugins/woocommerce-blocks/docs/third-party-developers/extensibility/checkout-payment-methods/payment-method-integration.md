@@ -45,6 +45,7 @@ import { registerExpressPaymentMethod } from '@woocommerce/blocks-registry';
 ```js
 const { registerExpressPaymentMethod } = wc.wcBlocksRegistry;
 ```
+#### The registration options
 
 The registry function expects a JavaScript object with options specific to the payment method:
 
@@ -130,6 +131,7 @@ import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 ```js
 const { registerPaymentMethod } = wc.wcBlocksRegistry;
 ```
+#### The registration options
 
 The registry function expects a JavaScript object with options specific to the payment method (see `PaymentMethodRegistrationOptions` typedef):
 
