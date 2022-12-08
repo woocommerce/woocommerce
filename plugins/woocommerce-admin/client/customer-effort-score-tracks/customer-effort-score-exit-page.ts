@@ -48,8 +48,9 @@ export const addExitPage = ( pageId: string ) => {
 
 	let items = getExitPageData();
 
-	items = items.filter( ( item ) => item !== pageId );
-	items.push( pageId );
+	if ( ! items.find( ( pageExitedId ) => pageExitedId === pageId ) ) {
+		items.push( pageId );
+	}
 	items = items.slice( -10 ); // Upper limit.
 
 	window.localStorage.setItem(
@@ -118,38 +119,51 @@ export const removeCustomerEffortScoreExitPageListener = ( pageId: string ) => {
  *
  * @param {string} pageId page id.
  */
-function getExitPageCESCopy( pageId: string ): string {
+function getExitPageCESCopy( pageId: string ): {
+	title: string;
+	firstQuestion: string;
+	secondQuestion: string;
+} | null {
 	switch ( pageId ) {
 		case 'product_edit_view':
 		case 'product_add_view':
 		case 'new_product':
-			return __(
-				'We noticed you started editing a product, then left. How was it? Your feedback will help create a better experience for thousands of merchants like you.',
-				'woocommerce'
-			);
+			return {
+				title: __(
+					'We noticed you started editing a product, then left. How was it? Your feedback will help create a better experience for thousands of merchants like you.',
+					'woocommerce'
+				),
+				firstQuestion: __(
+					'The product editing screen is easy to use',
+					'woocommerce'
+				),
+				secondQuestion: __(
+					"The product editing screen's functionality meets my needs",
+					'woocommerce'
+				),
+			};
 		default:
-			return '';
+			return null;
 	}
 }
 
 /**
- * checks the exit page list and triggers a CES survey for the first item in the list.
+ * Checks the exit page list and triggers a CES survey for the first item in the list.
  */
 export function triggerExitPageCesSurvey() {
 	const exitPageItems: string[] = getExitPageData();
 	if ( exitPageItems && exitPageItems.length > 0 ) {
 		const copy = getExitPageCESCopy( exitPageItems[ 0 ] );
-		if ( copy && copy.length > 0 ) {
-			dispatch( 'wc/customer-effort-score' ).addCesSurvey(
-				exitPageItems[ 0 ].replaceAll( '-', '_' ),
-				copy,
-				window.pagenow,
-				window.adminpage,
-				undefined,
-				{
+		if ( copy && copy.title.length > 0 ) {
+			dispatch( 'wc/customer-effort-score' ).addCesSurvey( {
+				action: exitPageItems[ 0 ].replaceAll( '-', '_' ),
+				...copy,
+				pageNow: window.pagenow,
+				adminPage: window.adminpage,
+				props: {
 					ces_location: 'outside',
-				}
-			);
+				},
+			} );
 		}
 		removeExitPage( exitPageItems[ 0 ] );
 	}

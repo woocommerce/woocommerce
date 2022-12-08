@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useEffect } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -16,14 +16,21 @@ export const useCustomerEffortScoreExitPageTracker = (
 	pageId: string,
 	hasUnsavedChanges: boolean
 ) => {
+	const hasUnsavedChangesRef = useRef( hasUnsavedChanges );
+
 	// Using unmounting as a way to see when the react router changes.
 	useEffect( () => {
+		hasUnsavedChangesRef.current = hasUnsavedChanges;
+	}, [ hasUnsavedChanges ] );
+
+	useEffect( () => {
 		return () => {
-			if ( hasUnsavedChanges ) {
+			if ( hasUnsavedChangesRef.current ) {
+				// unmounted.
 				addExitPage( pageId );
 			}
 		};
-	}, [ hasUnsavedChanges ] );
+	}, [] );
 
 	// This effect listen to the native beforeunload event to show
 	// a confirmation message
