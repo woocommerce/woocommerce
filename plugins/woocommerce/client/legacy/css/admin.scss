@@ -5169,13 +5169,6 @@ img.help_tip {
 	}
 }
 
-.woocommerce_attribute {
-	h3 {
-		.sort, a.delete {
-			visibility: hidden;
-		}
-	}
-}
 
 .woocommerce_options_panel {
 	min-height: 175px;
@@ -7861,7 +7854,7 @@ table.bar_chart {
 #postdivrich.woocommerce-product-description {
 	margin-top: 20px;
 	margin-bottom: 0px;
-	
+
 	.wp-editor-tools {
 		background: none;
 		padding-top: 0px;
