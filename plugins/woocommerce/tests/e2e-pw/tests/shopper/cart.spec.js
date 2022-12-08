@@ -73,18 +73,15 @@ test.describe( 'Cart page', () => {
 	test( 'should increase item quantity when "Add to cart" of the same product is clicked', async ( {
 		page,
 	} ) => {
-		await page.goto( '/shop/?orderby=date' );
-		await page.click(
-			`a[data-product_id='${ productId }'][href*=add-to-cart]`
-		);
-		// Once the view cart link is visible, item has been added
-		await page.waitForSelector( 'a.added_to_cart' );
-		// Click add to cart a second time (load the shop in case redirection enabled)
-		await page.goto( '/shop/?orderby=date' );
-		await page.click(
-			`a[data-product_id='${ productId }'][href*=add-to-cart]`
-		);
-		await page.waitForSelector( 'a.added_to_cart' );
+		let qty = 2;
+		while ( qty-- ) {
+			// (load the shop in case redirection enabled)
+			await page.goto( '/shop/?orderby=date' );
+			await page.click(
+				`a[data-product_id='${ productId }'][href*=add-to-cart]`
+			);
+			await page.waitForLoadState( 'networkidle' );
+		}
 
 		await page.goto( '/cart/' );
 		await expect( page.locator( 'input.qty' ) ).toHaveValue( '2' );
