@@ -299,6 +299,10 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 						),
 					},
 					{
+						onRecordScore: () => {
+							setCurrentTab( '' );
+							setIsPanelOpen( false );
+						},
 						onCloseModal: () => {
 							setCurrentTab( '' );
 							setIsPanelOpen( false );

@@ -80,6 +80,7 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 			recordScoreCallback={ ( ...args ) => {
 				recordScore( ...args );
 				hideCesModal();
+				visibleCESModalData.props?.onRecordScore?.();
 			} }
 			onCloseModal={ () => {
 				visibleCESModalData.props?.onCloseModal?.();
