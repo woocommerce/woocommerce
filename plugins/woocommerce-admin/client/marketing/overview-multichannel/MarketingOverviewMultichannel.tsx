@@ -7,6 +7,7 @@ import { useUser } from '@woocommerce/data';
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
+import { Channels } from './Channels';
 import { InstalledExtensions } from './InstalledExtensions';
 import { DiscoverTools } from './DiscoverTools';
 import { LearnMarketing } from './LearnMarketing';
@@ -22,6 +23,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 
 	return (
 		<div className="woocommerce-marketing-overview-multichannel">
+			<Channels />
 			<InstalledExtensions />
 			{ shouldShowExtensions && <DiscoverTools /> }
 			<LearnMarketing />
