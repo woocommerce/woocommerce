@@ -24,6 +24,7 @@
 		"storybook-rtl": "USE_RTL_STYLE=true pnpm run storybook"
 	},
 	"devDependencies": {
+		"@babel/plugin-proposal-class-properties": "^7.16.7",
 		"@babel/preset-env": "^7.16.11",
 		"@babel/runtime": "^7.17.2",
 		"@storybook/addon-a11y": "^6.4.19",

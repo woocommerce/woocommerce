@@ -36,7 +36,7 @@ import {
 	defaultGetFilteredItems,
 } from './utils';
 
-type SelectControlProps< ItemType > = {
+export type SelectControlProps< ItemType > = {
 	children?: ChildrenType< ItemType >;
 	items: ItemType[];
 	label: string | JSX.Element;
