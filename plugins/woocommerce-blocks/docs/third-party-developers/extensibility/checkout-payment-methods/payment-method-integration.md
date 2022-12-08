@@ -4,21 +4,27 @@ The checkout block has an API interface for payment methods to integrate that co
 
 ## Table of Contents <!-- omit in toc -->
 
--   [Client Side integration](#client-side-integration)
-    -   [Express payment methods - `registerExpressPaymentMethod( options )`](#express-payment-methods---registerexpresspaymentmethod-options-)
-    -   [`name` (required)](#name-required)
-    -   [`content` (required)](#content-required)
-    -   [`edit` (required)](#edit-required)
-    -   [`canMakePayment` (required):](#canmakepayment-required)
-    -   [`paymentMethodId`](#paymentmethodid)
-    -   [`supports:features`](#supportsfeatures)
-    -   [Payment Methods - `registerPaymentMethod( options )`](#payment-methods---registerpaymentmethod-options-)
-    -   [Props Fed to Payment Method Nodes](#props-fed-to-payment-method-nodes)
--   [Server Side Integration](#server-side-integration)
-    -   [Processing Payment](#processing-payment)
-    -   [Registering Assets](#registering-assets)
-    -   [Hooking into the Checkout processing by the Store API.](#hooking-into-the-checkout-processing-by-the-store-api)
-    -   [Putting it all together](#putting-it-all-together)
+- [Client Side integration](#client-side-integration)
+  - [Express payment methods - `registerExpressPaymentMethod( options )`](#express-payment-methods---registerexpresspaymentmethod-options-)
+    - [Aliased import](#aliased-import)
+    - [`wc global`](#wc-global)
+    - [The registration options](#the-registration-options)
+    - [`name` (required)](#name-required)
+    - [`content` (required)](#content-required)
+    - [`edit` (required)](#edit-required)
+    - [`canMakePayment` (required)](#canmakepayment-required)
+    - [`paymentMethodId`](#paymentmethodid)
+    - [`supports:features`](#supportsfeatures)
+  - [Payment Methods - `registerPaymentMethod( options )`](#payment-methods---registerpaymentmethod-options-)
+    - [Aliased import](#aliased-import-1)
+    - [`wc global`](#wc-global-1)
+    - [The registration options](#the-registration-options-1)
+  - [Props Fed to Payment Method Nodes](#props-fed-to-payment-method-nodes)
+- [Server Side Integration](#server-side-integration)
+  - [Processing Payment](#processing-payment)
+  - [Registering Assets](#registering-assets)
+  - [Hooking into the Checkout processing by the Store API](#hooking-into-the-checkout-processing-by-the-store-api)
+  - [Putting it all together](#putting-it-all-together)
 
 ## Client Side integration
 
@@ -45,6 +51,7 @@ import { registerExpressPaymentMethod } from '@woocommerce/blocks-registry';
 ```js
 const { registerExpressPaymentMethod } = wc.wcBlocksRegistry;
 ```
+
 #### The registration options
 
 The registry function expects a JavaScript object with options specific to the payment method:
@@ -131,6 +138,7 @@ import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 ```js
 const { registerPaymentMethod } = wc.wcBlocksRegistry;
 ```
+
 #### The registration options
 
 The registry function expects a JavaScript object with options specific to the payment method (see `PaymentMethodRegistrationOptions` typedef):
@@ -153,8 +161,8 @@ The options you feed the configuration instance are the same as those for expres
 
 A big part of the payment method integration is the interface that is exposed for payment methods to use via props when the node provided is cloned and rendered on block mount. While all the props are listed below, you can find more details about what the props reference, their types etc via the [typedefs described in this file](../../../../assets/js/types/type-defs/payment-method-interface.ts).
 
-| Property | Type | Description | Values |
-| ------ | ------ | ------ | ------ |                                                                                               
+| Property                 | Type     | Description                                                                                                                                                                                                                                                                                                        | Values                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ------ | ------------------------------------------------------------- | ------------------------------------------------------- |
 | `activePaymentMethod`    | String   | The slug of the current active payment method in the checkout.                                                                                                                                                                                                                                                     |
 | `billing`                | Object   | Contains everything related to billing.                                                                                                                                                                                                                                                                            | `billingData`, `cartTotal`, `currency`, `cartTotalItems`, `displayPricesIncludingTax`, `appliedCoupons`, `customerId`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `cartData`               | Object   | Data exposed from the cart including items, fees, and any registered extension data. Note that this data should be treated as immutable (should not be modified/mutated) or it will result in errors in your application.                                                                                          | `cartItems`, `cartFees`, `extensions`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | `checkoutStatus` | Object | The current checkout status exposed as various boolean state. | `isCalculating`, `isComplete`, `isIdle`, `isProcessing` |

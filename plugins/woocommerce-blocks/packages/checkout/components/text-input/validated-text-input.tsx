@@ -124,8 +124,12 @@ const ValidatedTextInput = ( {
 	);
 
 	/**
+	 * Handle browser autofill / changes via data store.
+	 *
 	 * Trigger validation on state change if the current element is not in focus. This is because autofilled elements do not
 	 * trigger the blur() event, and so values can be validated in the background if the state changes elsewhere.
+	 *
+	 * Errors are immediately visible.
 	 */
 	useEffect( () => {
 		if (
@@ -141,14 +145,23 @@ const ValidatedTextInput = ( {
 	}, [ value, previousValue, validateInput ] );
 
 	/**
-	 * If the input is in pristine state on mount, focus the element.
+	 * Validation on mount.
+	 *
+	 * If the input is in pristine state on mount, focus the element (if focusOnMount is enabled), and validate in the
+	 * background.
+	 *
+	 * Errors are hidden until blur.
 	 */
 	useEffect( () => {
-		if ( isPristine && focusOnMount ) {
+		if ( ! isPristine ) {
+			return;
+		}
+		if ( focusOnMount ) {
 			inputRef.current?.focus();
 		}
+		validateInput( true );
 		setIsPristine( false );
-	}, [ focusOnMount, isPristine, setIsPristine ] );
+	}, [ focusOnMount, isPristine, setIsPristine, validateInput ] );
 
 	// Remove validation errors when unmounted.
 	useEffect( () => {
