@@ -1,6 +1,6 @@
 // Note you'll need to install these dependencies as part of your workflow.
 const { Octokit } = require( '@octokit/action' );
-const core = require( '@action/core' );
+const core = require( '@actions/core' );
 
 // Note that this script assumes you set GITHUB_TOKEN in env, if you don't
 // this won't work.
