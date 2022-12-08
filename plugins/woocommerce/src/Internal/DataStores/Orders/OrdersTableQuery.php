@@ -123,6 +123,13 @@ class OrdersTableQuery {
 	private $count_sql = '';
 
 	/**
+	 * SQL query to see if there are more pages after the current page.
+	 *
+	 * @var string
+	 */
+	private $approx_count_sql = '';
+
+	/**
 	 * The number of pages (when pagination is enabled).
 	 *
 	 * @var int
@@ -625,6 +632,7 @@ class OrdersTableQuery {
 
 		$this->sql = "SELECT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
 		$this->build_count_query( $fields, $join, $where, $groupby );
+		$this->build_approx_count_query( $fields, $join, $where, $groupby, $this->args['approx_page_count'] ?? 10 );
 	}
 
 	/**
@@ -641,6 +649,28 @@ class OrdersTableQuery {
 		}
 		$orders_table    = $this->tables['orders'];
 		$this->count_sql = "SELECT COUNT(DISTINCT $fields) FROM  $orders_table $join WHERE $where";
+	}
+
+	/**
+	 * Unlike MSSQL, currently MySQL does not support a APPROX_COUNT_DISTINCT function, so we very crudly simulate it by calculating if there are alteast X records, where X is Nth page from current page (N defaults to 10). Pagination UI can use this information to display a "more" button.
+	 *
+	 * This function builds a query for approx count distinct.
+	 *
+	 * @param string $fields    Prepared fields for SELECT clause.
+	 * @param string $join      Prepared JOIN clause.
+	 * @param string $where     Prepared WHERE clause.
+	 * @param string $groupby   Prepared GROUP BY clause.
+	 * @param int    $approx_page_count Till what page we should check for existance of records.
+	 */
+	private function build_approx_count_query( $fields, $join, $where, $groupby, $approx_page_count = 10 ) {
+		if ( ! isset( $this->sql ) || '' === $this->sql ) {
+			wc_doing_it_wrong( __FUNCTION__, 'Approx count query can only be build after main query is built.', '7.2.0' );
+		}
+
+		$offset = absint( $this->limits[0] + ( absint( $approx_page_count ) * $this->limits[1] ) ); // limit[0] = offset, limit[1] = row count.
+
+		$orders_table           = $this->tables['orders'];
+		$this->approx_count_sql = "SELECT 1 FROM $orders_table $join WHERE $where $groupby LIMIT 1 OFFSET $offset"; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**
@@ -1048,7 +1078,17 @@ class OrdersTableQuery {
 		}
 
 		if ( $this->limits ) {
-			$this->found_orders  = absint( $wpdb->get_var( $this->count_sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			if ( $this->arg_isset( 'approx_page_count' ) ) {
+				$has_lot_more_pages = $wpdb->get_var( $this->approx_count_sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				if ( $has_lot_more_pages ) {
+					$this->found_orders = $this->limits[0] + ( absint( $this->args['approx_page_count'] ) * $this->limits[1] );
+				}
+			}
+
+			if ( ! isset( $this->found_orders ) || 0 === $this->found_orders ) {
+				$this->found_orders = absint( $wpdb->get_var( $this->count_sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			}
+
 			$this->max_num_pages = (int) ceil( $this->found_orders / $this->args['limit'] );
 		} else {
 			$this->found_orders = count( $this->orders );
