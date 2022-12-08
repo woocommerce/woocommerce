@@ -45,6 +45,7 @@ export { default as SelectControl } from './select-control';
 export {
 	SelectControl as __experimentalSelectControl,
 	selectControlStateChangeTypes,
+	useAsyncFilter,
 } from './experimental-select-control';
 export {
 	MenuItem as __experimentalSelectControlMenuItem,

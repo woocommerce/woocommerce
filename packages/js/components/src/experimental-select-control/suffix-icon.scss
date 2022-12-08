@@ -3,4 +3,8 @@
 	align-items: center;
 	height: 100%;
 	padding-right: $gap-smaller;
+
+	.components-spinner {
+		margin: 0;
+	}
 }
