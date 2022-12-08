@@ -280,6 +280,7 @@ WHERE
   AND orders.id IS NULL",
 					$order_post_types
 				);
+				// phpcs:enable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 				break;
 			case self::ID_TYPE_MISSING_IN_POSTS_TABLE:
 				$sql = "
