@@ -37,7 +37,9 @@ if ( ! is_a( $product, 'WC_Product' ) ) {
 		<?php echo wc_get_rating_html( $product->get_average_rating() ); // PHPCS:Ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 	<?php endif; ?>
 
-	<?php echo $product->get_price_html(); // PHPCS:Ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+	<?php if ( $price_html = $product->get_price_html() ) : ?>
+		<span class="price"><?php echo $price_html; ?></span>
+	<?php endif; ?>
 
 	<?php do_action( 'woocommerce_widget_product_item_end', $args ); ?>
 </li>
