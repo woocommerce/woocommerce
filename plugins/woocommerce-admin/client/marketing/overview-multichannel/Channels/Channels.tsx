@@ -3,12 +3,11 @@
  */
 import { __ } from '@wordpress/i18n';
 import { CardBody } from '@wordpress/components';
-import { Spinner } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
-import { Card } from '~/marketing/components';
+import { Card, CenteredSpinner } from '~/marketing/components';
 import { useChannels } from './useChannels';
 
 export const Channels = () => {
@@ -21,7 +20,7 @@ export const Channels = () => {
 		return (
 			<Card title={ __( 'Channels', 'woocommerce' ) }>
 				<CardBody>
-					<Spinner />
+					<CenteredSpinner />
 				</CardBody>
 			</Card>
 		);
