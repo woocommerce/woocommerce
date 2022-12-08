@@ -145,7 +145,7 @@ describe( 'Shopper → Checkout', () => {
 			await expect( page ).toMatchElement(
 				'#email ~ .wc-block-components-validation-error p',
 				{
-					text: 'Please fill',
+					text: 'Please provide a valid email address',
 				}
 			);
 			await expect( page ).toMatchElement(
