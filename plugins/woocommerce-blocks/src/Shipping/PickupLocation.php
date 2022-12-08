@@ -43,15 +43,15 @@ class PickupLocation extends WC_Shipping_Method {
 				}
 				$this->add_rate(
 					array(
-						'id'          => $this->id . ':' . $index,
+						'id'        => $this->id . ':' . $index,
 						// This is the label shown in shipping rate/method context e.g. London (Local Pickup).
-						'label'       => wp_kses_post( $this->title . ' (' . $location['name'] . ')' ),
-						'package'     => $package,
-						'cost'        => $this->cost,
-						'description' => $location['details'],
-						'meta_data'   => array(
+						'label'     => wp_kses_post( $this->title . ' (' . $location['name'] . ')' ),
+						'package'   => $package,
+						'cost'      => $this->cost,
+						'meta_data' => array(
 							'pickup_location' => wp_kses_post( $location['name'] ),
 							'pickup_address'  => wc()->countries->get_formatted_address( $location['address'], ', ' ),
+							'pickup_details'  => wp_kses_post( $location['details'] ),
 						),
 					)
 				);

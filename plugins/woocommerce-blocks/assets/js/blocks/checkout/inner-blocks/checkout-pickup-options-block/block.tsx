@@ -50,6 +50,18 @@ const getPickupAddress = (
 	return '';
 };
 
+const getPickupDetails = (
+	option: CartShippingPackageShippingRate
+): string => {
+	if ( option?.meta_data ) {
+		const match = option.meta_data.find(
+			( meta ) => meta.key === 'pickup_details'
+		);
+		return match ? match.value : '';
+	}
+	return '';
+};
+
 const renderPickupLocation = (
 	option: CartShippingPackageShippingRate,
 	packageCount: number
@@ -59,6 +71,8 @@ const renderPickupLocation = (
 		: option.price;
 	const location = getPickupLocation( option );
 	const address = getPickupAddress( option );
+	const details = getPickupDetails( option );
+
 	return {
 		value: option.rate_id,
 		label: location
@@ -82,7 +96,7 @@ const renderPickupLocation = (
 				packageCount: <>{ packageCount }</>,
 			}
 		),
-		description: decodeEntities( option.description ),
+		description: decodeEntities( details ),
 		secondaryDescription: address ? (
 			<>
 				<Icon
