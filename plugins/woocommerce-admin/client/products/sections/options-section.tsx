@@ -56,6 +56,7 @@ export const OptionsSection: React.FC = () => {
 					productId,
 					filter,
 					newAttributeProps,
+					addButtonLabel: __( 'Add option', 'woocommerce' ),
 				} ) }
 			/>
 		</ProductSectionLayout>

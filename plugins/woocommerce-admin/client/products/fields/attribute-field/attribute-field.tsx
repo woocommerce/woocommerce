@@ -35,6 +35,7 @@ type AttributeFieldProps = {
 	productId?: number;
 	filter?: ( attribute: ProductAttribute ) => boolean;
 	newAttributeProps?: Partial< ProductAttribute >;
+	addButtonLabel?: string;
 };
 
 export type HydratedAttributeType = Omit< ProductAttribute, 'options' > & {
@@ -48,6 +49,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 	productId,
 	filter,
 	newAttributeProps,
+	addButtonLabel = __( 'Add attribute', 'woocommerce' ),
 } ) => {
 	const [ showAddAttributeModal, setShowAddAttributeModal ] =
 		useState( false );
@@ -265,6 +267,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 				) ) }
 			</Sortable>
 			<AddAttributeListItem
+				label={ addButtonLabel }
 				onAddClick={ () => {
 					recordEvent( 'product_add_attribute_button' );
 					setShowAddAttributeModal( true );
