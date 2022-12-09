@@ -9,31 +9,31 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import './attributes-section.scss';
+import './options-section.scss';
 import { ProductSectionLayout } from '../layout/product-section-layout';
 import { AttributeField } from '../fields/attribute-field';
 
-export const AttributesSection: React.FC = () => {
+export const OptionsSection: React.FC = () => {
 	const {
 		getInputProps,
 		values: { id: productId },
 	} = useFormContext< Product >();
 
 	const filter = ( attribute: ProductAttribute ) => {
-		return attribute.variation === false;
+		return attribute.variation === true;
 	};
 
-	const newAttributeProps = { variation: false };
+	const newAttributeProps = { variation: true };
 
 	return (
 		<ProductSectionLayout
-			title={ __( 'Attributes', 'woocommerce' ) }
-			className="woocommerce-product-attributes-section"
+			title={ __( 'Options', 'woocommerce' ) }
+			className="woocommerce-product-options-section"
 			description={
 				<>
 					<span>
 						{ __(
-							'Add descriptive pieces of information that customers can use to filter and search for this product.',
+							'Add and manage options, such as size and color, for customers to choose on the product page.',
 							'woocommerce'
 						) }
 					</span>
@@ -43,10 +43,10 @@ export const AttributesSection: React.FC = () => {
 						target="_blank"
 						type="external"
 						onClick={ () => {
-							recordEvent( 'learn_more_about_attributes_help' );
+							recordEvent( 'learn_more_about_options_help' );
 						} }
 					>
-						{ __( 'Learn more about attributes', 'woocommerce' ) }
+						{ __( 'Learn more about options', 'woocommerce' ) }
 					</Link>
 				</>
 			}

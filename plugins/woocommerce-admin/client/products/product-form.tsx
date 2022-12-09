@@ -18,6 +18,7 @@ import { ProductVariationsSection } from './sections/product-variations-section'
 import { ImagesSection } from './sections/images-section';
 import { validate } from './product-validation';
 import { AttributesSection } from './sections/attributes-section';
+import { OptionsSection } from './sections/options-section';
 import { ProductFormFooter } from './layout/product-form-footer';
 import { ProductFormTab } from './product-form-tab';
 

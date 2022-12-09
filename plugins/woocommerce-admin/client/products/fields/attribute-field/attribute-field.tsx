@@ -33,6 +33,8 @@ type AttributeFieldProps = {
 	value: ProductAttribute[];
 	onChange: ( value: ProductAttribute[] ) => void;
 	productId?: number;
+	filter?: ( attribute: ProductAttribute ) => boolean;
+	newAttributeProps?: Partial< ProductAttribute >;
 };
 
 export type HydratedAttributeType = Omit< ProductAttribute, 'options' > & {
@@ -44,6 +46,8 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 	value,
 	onChange,
 	productId,
+	filter,
+	newAttributeProps,
 } ) => {
 	const [ showAddAttributeModal, setShowAddAttributeModal ] =
 		useState( false );
@@ -82,7 +86,19 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 	);
 
 	useEffect( () => {
-		if ( ! value || hydrationComplete ) {
+		// Temporarily always doing hydration, since otherwise new attributes
+		// get removed from Options and Attributes when the other list is then
+		// modified
+		//
+		// This is because the hydration is out of date -- the logic currently
+		// assumes modifications are only made from within the component
+		//
+		// I think we'll need to move the hydration out of the individual component
+		// instance. To where, I do not yet know... maybe in the form context
+		// somewhere so that a single hydration source can be shared between multiple
+		// instances? Something like a simple key-value store in the form context
+		// would be handy.
+		if ( ! value /*|| hydrationComplete*/ ) {
 			return;
 		}
 
@@ -90,21 +106,31 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 			sift( value, ( attr: ProductAttribute ) => attr.id === 0 );
 
 		Promise.all(
-			globalAttributes.map( ( attr ) => fetchTerms( attr.id ) )
+			globalAttributes.map( ( attr ) => {
+				return fetchTerms( attr.id );
+			} )
 		).then( ( allResults ) => {
 			setHydratedAttributes( [
 				...globalAttributes.map( ( attr, index ) => {
+					const fetchedTerms = allResults[ index ];
+
 					const newAttr = {
 						...attr,
-						terms: allResults[ index ],
-						options: undefined,
+						// I'm not sure this is quite right for handling unpersisted terms,
+						// but this gets things kinda working for now
+						terms:
+							fetchedTerms.length > 0 ? fetchedTerms : undefined,
+						options:
+							fetchedTerms.length === 0
+								? attr.options
+								: undefined,
 					};
 
 					return newAttr;
 				} ),
 				...customAttributes,
 			] );
-			setHydrationComplete( true );
+			//setHydrationComplete( true );
 		} );
 	}, [ productId, value, hydrationComplete ] );
 
@@ -157,8 +183,11 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 						)
 				)
 				.map( ( newAttr, index ) => {
-					newAttr.position = ( value || [] ).length + index;
-					return newAttr;
+					return {
+						...newAttributeProps,
+						...newAttr,
+						position: ( value || [] ).length + index,
+					};
 				} ),
 		] );
 		recordEvent( 'product_add_attributes_modal_add_button_click' );
@@ -193,8 +222,13 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		);
 	}
 
-	const sortedAttributes = value.sort( ( a, b ) => a.position - b.position );
-	const attributeKeyValues = value.reduce(
+	const filteredAttributes =
+		typeof filter === 'function' ? value.filter( filter ) : value;
+
+	const sortedAttributes = filteredAttributes.sort(
+		( a, b ) => a.position - b.position
+	);
+	const attributeKeyValues = filteredAttributes.reduce(
 		(
 			keyValue: Record< number, ProductAttribute >,
 			attribute: ProductAttribute
