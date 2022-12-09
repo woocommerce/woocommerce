@@ -6,6 +6,7 @@ import { withFilteredAttributes } from '@woocommerce/shared-hocs';
 import { FormStep } from '@woocommerce/base-components/cart-checkout';
 import { useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
+import { LOCAL_PICKUP_ENABLED } from '@woocommerce/block-settings';
 /**
  * Internal dependencies
  */
@@ -35,7 +36,7 @@ const FrontendBlock = ( {
 		}
 	);
 
-	if ( ! prefersCollection ) {
+	if ( ! prefersCollection || ! LOCAL_PICKUP_ENABLED ) {
 		return null;
 	}
 

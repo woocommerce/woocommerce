@@ -56,3 +56,7 @@ export const ALLOWED_STATES = getSetting< Record< string, string > >(
 	'allowedStates',
 	{}
 );
+export const LOCAL_PICKUP_ENABLED = getSetting< boolean >(
+	'localPickupEnabled',
+	false
+);

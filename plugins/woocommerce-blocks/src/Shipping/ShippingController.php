@@ -218,7 +218,10 @@ class ShippingController {
 	 * Registers the Local Pickup shipping method used by the Checkout Block.
 	 */
 	public function register_local_pickup() {
-		wc()->shipping->register_shipping_method( new PickupLocation() );
+		$checkout_page_id = wc_get_page_id( 'checkout' );
+		if ( $checkout_page_id && has_block( 'woocommerce/checkout', $checkout_page_id ) ) {
+			wc()->shipping->register_shipping_method( new PickupLocation() );
+		}
 	}
 
 	/**
