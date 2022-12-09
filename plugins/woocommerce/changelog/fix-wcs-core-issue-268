@@ -1,4 +1,4 @@
 Significance: patch
 Type: tweak
 
-Make the OrdersTableDataStore::set_order_props_from_data() function protected rather than private
+Make the OrdersTableDataStore init_order_record() and get_order_data_for_ids() functions protected rather than private
