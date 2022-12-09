@@ -217,6 +217,10 @@ class WC_Install {
 			'wc_update_700_remove_download_log_fk',
 			'wc_update_700_remove_recommended_marketing_plugins_transient',
 		),
+		'7.2.0' => array(
+			'wc_update_720_adjust_new_zealand_states',
+			'wc_update_720_adjust_ukraine_states',
+		),
 	);
 
 	/**
