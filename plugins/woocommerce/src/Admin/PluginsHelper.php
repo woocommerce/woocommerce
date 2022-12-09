@@ -332,7 +332,7 @@ class PluginsHelper {
 			}
 
 			$result = activate_plugin( $path );
-			if ( ! is_null( $result ) ) {
+			if ( ! is_plugin_active( $path ) ) {
 				/**
 				 * Action triggered when a plugin activation fails.
 				 *

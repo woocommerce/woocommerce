@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Automatically create the custom order tables if the corresponding feature is enabled
