@@ -16,6 +16,7 @@ import {
 } from '~/marketing/components';
 import { useChannels } from './useChannels';
 import './Channels.scss';
+import { InstalledChannelCardBody } from './InstalledChannelCardBody';
 
 export const Channels = () => {
 	const {
@@ -90,10 +91,23 @@ export const Channels = () => {
 			</CardHeader>
 
 			{ /* TODO: registered channels here. */ }
+			{ registeredChannels.map( ( el, idx ) => {
+				return (
+					<Fragment key={ el.slug }>
+						<InstalledChannelCardBody installedChannel={ el } />
+						{ idx < registeredChannels.length - 1 && (
+							<CardDivider />
+						) }
+					</Fragment>
+				);
+			} ) }
 
 			{ /* TODO: recommended channels here. */ }
 			{ recommendedChannels.length > 0 && (
-				<CardBody>recommended</CardBody>
+				<>
+					<CardDivider />
+					<CardBody>recommended</CardBody>
+				</>
 			) }
 		</Card>
 	);
