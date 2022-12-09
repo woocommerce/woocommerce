@@ -150,13 +150,18 @@ If a route includes the extensibility interface, 3rd party developers can use th
 
 This differs from the traditional filter hook approach in that it is more limiting, but it reduces the likelihood of a 3rd party extension breaking routes and endpoints or overwriting returned data which other apps may rely upon.
 
-If any of the following statements are true, choose to _extend_ the Store API rather than contributing new data to the Store API:
+If new schema is required, and any of the following statements are true, choose to _extend_ the Store API rather than introducing new schema to existing Store API schemas:
 
 -   The data is part of an extension, not core
 -   The data is related to a resource, but not technically part of it
 -   The data is difficult to query (performance wise) or has a very narrow or niche use-case
 
 If the data is sensitive (for example, a core setting that should be private), or not related to the current user (for example, looking up an order by order ID), [choose to use the authenticated WC REST API](https://woocommerce.github.io/woocommerce-rest-api-docs/#introduction).
+
+If you're looking to add _new routes and endpoints_, rather than extending the Store API _schema_, extending the Store API is not necessary. You can instead utilize core WordPress functionality to create new routes, choosing to use the same pattern of Store API if you wish. See:
+
+-   https://developer.wordpress.org/reference/functions/register_rest_route/
+-   https://developer.wordpress.org/rest-api/extending-the-rest-api/adding-custom-endpoints/#permissions-callback
 
 <!-- FEEDBACK -->
 
@@ -167,4 +172,3 @@ If the data is sensitive (for example, a core setting that should be private), o
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/README.md)
 
 <!-- /FEEDBACK -->
-
