@@ -5,7 +5,6 @@ const {
 	BASE_URL,
 	CI,
 	DEFAULT_TIMEOUT_OVERRIDE,
-	PLAYWRIGHT_HTML_REPORT,
 	USER_KEY,
 	USER_SECRET,
 } = process.env;
@@ -29,7 +28,7 @@ const config = {
 		[
 			'html',
 			{
-				outputFolder: PLAYWRIGHT_HTML_REPORT ?? './test-results/playwright-report',
+				outputFolder: process.env.PLAYWRIGHT_HTML_REPORT ?? './test-results/playwright-report',
 				open: CI ? 'never' : 'always',
 			},
 		],
@@ -44,7 +43,7 @@ const config = {
 		[
 			'json',
 			{
-				outputFile:
+				outputFile: process.env.PLAYWRIGHT_JSON_OUTPUT_NAME ?? 
 					'./test-results/test-results.json',
 			},
 		],
