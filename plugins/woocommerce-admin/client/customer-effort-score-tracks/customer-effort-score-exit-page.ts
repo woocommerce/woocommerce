@@ -71,7 +71,7 @@ export const removeExitPage = ( pageId: string ) => {
 
 	let items = getExitPageData();
 
-	items = items.filter( ( item ) => item !== pageId );
+	items = items.filter( ( pageExitedId ) => pageExitedId !== pageId );
 	items = items.slice( -10 ); // Upper limit.
 
 	window.localStorage.setItem(
