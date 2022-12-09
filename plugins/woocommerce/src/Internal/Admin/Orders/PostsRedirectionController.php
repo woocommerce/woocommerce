@@ -56,7 +56,7 @@ class PostsRedirectionController {
 	 * @return void
 	 */
 	private function maybe_redirect_to_orders_page(): void {
-		$post_type = $_GET['post_type'] ?? '';
+		$post_type = $_GET['post_type'] ?? ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		if ( ! $post_type || ! in_array( $post_type, wc_get_order_types( 'admin-menu' ), true ) ) {
 			return;
@@ -102,7 +102,7 @@ class PostsRedirectionController {
 	 * @return void
 	 */
 	private function maybe_redirect_to_new_order_page(): void {
-		$post_type = $_GET['post_type'] ?? '';
+		$post_type = $_GET['post_type'] ?? ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		if ( ! $post_type || ! in_array( $post_type, wc_get_order_types( 'admin-menu' ), true ) ) {
 			return;
