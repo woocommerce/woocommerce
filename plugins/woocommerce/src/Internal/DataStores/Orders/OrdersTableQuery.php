@@ -633,7 +633,7 @@ class OrdersTableQuery {
 	 */
 	private function build_count_query( $fields, $join, $where, $groupby ) {
 		if ( ! isset( $this->sql ) || '' === $this->sql ) {
-			wc_doing_it_wrong( __FUNCTION__, 'Count query can only be build after main query is built.', '7.2.0' );
+			wc_doing_it_wrong( __FUNCTION__, 'Count query can only be build after main query is built.', '7.3.0' );
 		}
 		$orders_table    = $this->tables['orders'];
 		$this->count_sql = "SELECT COUNT(DISTINCT $fields) FROM  $orders_table $join WHERE $where $groupby";
