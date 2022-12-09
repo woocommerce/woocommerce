@@ -126,6 +126,7 @@ function getExitPageCESCopy( pageId: string ): {
 	secondQuestion: string;
 	noticeLabel?: string;
 	description?: string;
+	icon?: string;
 } | null {
 	switch ( pageId ) {
 		case 'product_edit_view':
@@ -182,6 +183,7 @@ function getExitPageCESCopy( pageId: string ): {
 		case 'settings_change':
 			return {
 				action: pageId,
+				icon: '⚙️',
 				noticeLabel: __(
 					'Did you find the right setting?',
 					'woocommerce'

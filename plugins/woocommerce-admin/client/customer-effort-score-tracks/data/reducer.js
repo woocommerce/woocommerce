@@ -52,6 +52,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 				noticeLabel: action.noticeLabel,
 				firstQuestion: action.firstQuestion,
 				secondQuestion: action.secondQuestion,
+				icon: action.icon,
 				pagenow: action.pageNow,
 				adminpage: action.adminPage,
 				onSubmitLabel: action.onSubmitLabel,
