@@ -243,6 +243,9 @@ class Checkout extends AbstractBlock {
 		$this->asset_data_registry->add( 'hasDarkEditorStyleSupport', current_theme_supports( 'dark-editor-style' ), true );
 		$this->asset_data_registry->register_page_id( isset( $attributes['cartPageId'] ) ? $attributes['cartPageId'] : 0 );
 
+		$local_pickup_enabled = filter_var( get_option( 'woocommerce_pickup_location_settings' )['enabled'], FILTER_VALIDATE_BOOLEAN ) ?? false;
+		$this->asset_data_registry->add( 'localPickupEnabled', $local_pickup_enabled, true );
+
 		$is_block_editor = $this->is_block_editor();
 
 		// Hydrate the following data depending on admin or frontend context.

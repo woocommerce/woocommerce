@@ -7,6 +7,7 @@ import { FormStep } from '@woocommerce/base-components/cart-checkout';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { useShippingData } from '@woocommerce/base-context/hooks';
+import { LOCAL_PICKUP_ENABLED } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -56,7 +57,8 @@ const FrontendBlock = ( {
 		! needsShipping ||
 		! hasCalculatedShipping ||
 		! shippingRates ||
-		! isCollectable
+		! isCollectable ||
+		! LOCAL_PICKUP_ENABLED
 	) {
 		return null;
 	}

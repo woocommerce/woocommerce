@@ -4,7 +4,7 @@
 import { lazy } from '@wordpress/element';
 import {
 	WC_BLOCKS_BUILD_URL,
-	isExperimentalBuild,
+	LOCAL_PICKUP_ENABLED,
 } from '@woocommerce/block-settings';
 import { registerCheckoutBlock } from '@woocommerce/blocks-checkout';
 
@@ -48,7 +48,7 @@ registerCheckoutBlock( {
 	),
 } );
 
-if ( isExperimentalBuild() ) {
+if ( LOCAL_PICKUP_ENABLED ) {
 	registerCheckoutBlock( {
 		metadata: metadata.CHECKOUT_SHIPPING_METHOD,
 		component: lazy(
