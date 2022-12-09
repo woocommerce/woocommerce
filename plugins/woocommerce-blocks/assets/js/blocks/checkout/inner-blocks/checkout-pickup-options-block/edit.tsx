@@ -7,6 +7,7 @@ import { useBlockProps } from '@wordpress/block-editor';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 import { useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
+import { LOCAL_PICKUP_ENABLED } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -38,7 +39,7 @@ export const Edit = ( {
 	} );
 	const { className } = attributes;
 
-	if ( ! prefersCollection ) {
+	if ( ! prefersCollection || ! LOCAL_PICKUP_ENABLED ) {
 		return null;
 	}
 

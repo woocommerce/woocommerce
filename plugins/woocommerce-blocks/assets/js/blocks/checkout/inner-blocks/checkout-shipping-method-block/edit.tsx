@@ -12,6 +12,7 @@ import {
 } from '@wordpress/components';
 import { Icon, store, shipping } from '@wordpress/icons';
 import { ADMIN_URL } from '@woocommerce/settings';
+import { LOCAL_PICKUP_ENABLED } from '@woocommerce/block-settings';
 import {
 	InspectorControls,
 	useBlockProps,
@@ -182,7 +183,8 @@ export const Edit = ( {
 		! needsShipping ||
 		! hasCalculatedShipping ||
 		! shippingRates ||
-		! isCollectable
+		! isCollectable ||
+		! LOCAL_PICKUP_ENABLED
 	) {
 		return null;
 	}
