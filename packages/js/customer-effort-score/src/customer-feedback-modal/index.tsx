@@ -26,6 +26,7 @@ import { __ } from '@wordpress/i18n';
  * @param {Object}   props                     Component props.
  * @param {Function} props.recordScoreCallback Function to call when the results are sent.
  * @param {string}   props.title               Title displayed in the modal.
+ * @param {string}   props.description         Description displayed in the modal.
  * @param {string}   props.firstQuestion       The first survey question.
  * @param {string}   props.secondQuestion      The second survey question.
  * @param {string}   props.defaultScore        Default score.

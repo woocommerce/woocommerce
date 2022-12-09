@@ -39,6 +39,8 @@ type CustomerEffortScoreProps = {
  * @param {Object}   props                           Component props.
  * @param {Function} props.recordScoreCallback       Function to call when the score should be recorded.
  * @param {string}   props.title                     The title displayed in the modal.
+ * @param {string}   props.description               The description displayed in the modal.
+ * @param {string}   props.noticeLabel               The notice label displayed in the notice.
  * @param {string}   props.firstQuestion             The first survey question.
  * @param {string}   props.secondQuestion            The second survey question.
  * @param {Function} props.onNoticeShownCallback     Function to call when the notice is shown.
