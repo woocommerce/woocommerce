@@ -8,7 +8,7 @@ type Tag = {
 	name: string;
 };
 
-export type Plugin = {
+export type RecommendedPlugin = {
 	title: string;
 	description: string;
 	url: string;
