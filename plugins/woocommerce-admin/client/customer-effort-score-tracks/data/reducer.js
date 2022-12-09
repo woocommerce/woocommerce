@@ -48,6 +48,8 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			const newTrack = {
 				action: action.action,
 				title: action.title,
+				description: action.description,
+				noticeLabel: action.noticeLabel,
 				firstQuestion: action.firstQuestion,
 				secondQuestion: action.secondQuestion,
 				pagenow: action.pageNow,

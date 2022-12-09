@@ -20,6 +20,8 @@ type CustomerEffortScoreProps = {
 		comments: string
 	) => void;
 	title: string;
+	description?: string;
+	noticeLabel?: string;
 	firstQuestion: string;
 	secondQuestion: string;
 	onNoticeShownCallback?: () => void;
@@ -47,6 +49,8 @@ type CustomerEffortScoreProps = {
 const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 	recordScoreCallback,
 	title,
+	description,
+	noticeLabel,
 	firstQuestion,
 	secondQuestion,
 	onNoticeShownCallback = noop,
@@ -63,7 +67,7 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 			return;
 		}
 
-		createNotice( 'success', title, {
+		createNotice( 'success', noticeLabel || title, {
 			actions: [
 				{
 					label: __( 'Give feedback', 'woocommerce' ),
@@ -94,6 +98,7 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 	return (
 		<CustomerFeedbackModal
 			title={ title }
+			description={ description }
 			firstQuestion={ firstQuestion }
 			secondQuestion={ secondQuestion }
 			recordScoreCallback={ recordScoreCallback }

@@ -120,16 +120,28 @@ export const removeCustomerEffortScoreExitPageListener = ( pageId: string ) => {
  * @param {string} pageId page id.
  */
 function getExitPageCESCopy( pageId: string ): {
+	action: string;
 	title: string;
 	firstQuestion: string;
 	secondQuestion: string;
+	noticeLabel?: string;
+	description?: string;
 } | null {
 	switch ( pageId ) {
 		case 'product_edit_view':
-		case 'product_add_view':
-		case 'new_product':
+		case 'editing_new_product':
 			return {
+				action:
+					pageId === 'editing_new_product' ? 'new_product' : pageId,
+				noticeLabel: __(
+					'How is your experience with editing products?',
+					'woocommerce'
+				),
 				title: __(
+					"How's your experience with editing products?",
+					'woocommerce'
+				),
+				description: __(
 					'We noticed you started editing a product, then left. How was it? Your feedback will help create a better experience for thousands of merchants like you.',
 					'woocommerce'
 				),
@@ -139,6 +151,31 @@ function getExitPageCESCopy( pageId: string ): {
 				),
 				secondQuestion: __(
 					"The product editing screen's functionality meets my needs",
+					'woocommerce'
+				),
+			};
+		case 'product_add_view':
+		case 'new_product':
+			return {
+				action: pageId,
+				noticeLabel: __(
+					'How is your experience with creating products?',
+					'woocommerce'
+				),
+				title: __(
+					'How is your experience with creating products?',
+					'woocommerce'
+				),
+				description: __(
+					'We noticed you started creating a product, then left. How was it? Your feedback will help create a better experience for thousands of merchants like you.',
+					'woocommerce'
+				),
+				firstQuestion: __(
+					'The product creation screen is easy to use',
+					'woocommerce'
+				),
+				secondQuestion: __(
+					"The product creation screen's functionality meets my needs",
 					'woocommerce'
 				),
 			};
@@ -156,7 +193,6 @@ export function triggerExitPageCesSurvey() {
 		const copy = getExitPageCESCopy( exitPageItems[ 0 ] );
 		if ( copy && copy.title.length > 0 ) {
 			dispatch( 'wc/customer-effort-score' ).addCesSurvey( {
-				action: exitPageItems[ 0 ].replaceAll( '-', '_' ),
 				...copy,
 				pageNow: window.pagenow,
 				adminPage: window.adminpage,

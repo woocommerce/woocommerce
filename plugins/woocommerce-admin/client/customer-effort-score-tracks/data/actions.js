@@ -26,6 +26,8 @@ export function setCesSurveyQueue( queue ) {
  * @param {Object} args                All arguments.
  * @param {string} args.action         action name for the survey
  * @param {string} args.title          title for the snackback
+ * @param {string} args.description    description for feedback modal.
+ * @param {string} args.noticeLabel    noticeLabel for notice.
  * @param {string} args.firstQuestion  first question for modal survey
  * @param {string} args.secondQuestion second question for modal survey
  * @param {string} args.pageNow        value of window.pagenow
@@ -36,6 +38,8 @@ export function setCesSurveyQueue( queue ) {
 export function addCesSurvey( {
 	action,
 	title,
+	description,
+	noticeLabel,
 	firstQuestion,
 	secondQuestion,
 	pageNow = window.pagenow,
@@ -47,6 +51,8 @@ export function addCesSurvey( {
 		type: TYPES.ADD_CES_SURVEY,
 		action,
 		title,
+		description,
+		noticeLabel,
 		firstQuestion,
 		secondQuestion,
 		pageNow,

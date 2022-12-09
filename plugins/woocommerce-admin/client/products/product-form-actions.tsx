@@ -48,7 +48,10 @@ export const ProductFormActions: React.FC = () => {
 		useFormContext< Product >();
 
 	usePreventLeavingPage( isDirty );
-	useCustomerEffortScoreExitPageTracker( 'new_product', isDirty );
+	useCustomerEffortScoreExitPageTracker(
+		! values.id ? 'new_product' : 'editing_new_product',
+		isDirty
+	);
 
 	const { isSmallViewport } = useSelect( ( select ) => {
 		return {

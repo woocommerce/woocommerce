@@ -28,6 +28,8 @@ import { getStoreAgeInWeeks } from './utils';
  * @param {string}   props.action             The action name sent to Tracks.
  * @param {Object}   props.trackProps         Additional props sent to Tracks.
  * @param {string}   props.title              The title displayed in the modal.
+ * @param {string}   props.noticeLabel        Label for notice, defaults to title.
+ * @param {string}   props.description        Description shown in CES modal.
  * @param {string}   props.firstQuestion      The first survey question.
  * @param {string}   props.secondQuestion     The second survey question.
  * @param {string}   props.onSubmitLabel      The label displayed upon survey submission.
@@ -42,6 +44,8 @@ function CustomerEffortScoreTracks( {
 	action,
 	trackProps,
 	title,
+	description,
+	noticeLabel,
 	firstQuestion,
 	secondQuestion,
 	onSubmitLabel = __( 'Thank you for your feedback!', 'woocommerce' ),
@@ -134,6 +138,8 @@ function CustomerEffortScoreTracks( {
 		<CustomerEffortScore
 			recordScoreCallback={ recordScore }
 			title={ title }
+			description={ description }
+			noticeLabel={ noticeLabel }
 			firstQuestion={ firstQuestion }
 			secondQuestion={ secondQuestion }
 			onNoticeShownCallback={ onNoticeShown }
