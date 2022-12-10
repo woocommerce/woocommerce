@@ -12,6 +12,9 @@ This is the documentation for the new e2e testing setup based on Playwright and 
   - [Tools for writing tests](#tools-for-writing-tests)
   - [Creating test structure](#creating-test-structure)
   - [Writing the test](#writing-the-test)
+- [Guide for using test reports](#guide-for-using-test-reports)
+  - [Viewing the Playwright HTML report](#viewing-the-playwright-html-report)
+  - [Viewing the Allure report](#viewing-the-allure-report)
 - [Debugging tests](#debugging-tests)
 
 ## Pre-requisites
