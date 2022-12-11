@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Skip invalid child product to avoid calling get_download_files_and_permissions() with `false` value.
