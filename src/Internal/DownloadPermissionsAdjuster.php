@@ -99,7 +99,10 @@ class DownloadPermissionsAdjuster {
 
 		$children_with_downloads = array();
 		foreach ( $children_ids as $child_id ) {
-			$child                                = wc_get_product( $child_id );
+			$child = wc_get_product( $child_id );
+			if ( ! $child ) {
+				continue;
+			}
 			$children_with_downloads[ $child_id ] = $this->get_download_files_and_permissions( $child );
 		}
 
