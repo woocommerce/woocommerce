@@ -48,7 +48,7 @@ jobs:
           targetDir: ${{ secrets.FTP_DIR }}
 
       - name: Add release ZIP URL as comment to the PR
-        uses: mshick/add-pr-comment@v1
+        uses: mshick/add-pr-comment@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
