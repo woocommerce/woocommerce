@@ -41,7 +41,7 @@ class ProductQuery extends AbstractBlock {
 
 	/** This is a feature flag to enable the custom inherit Global Query implementation.
 	 * This is not intended to be a permanent feature flag, but rather a temporary.
-	 * It is also necessary to enable this feature flag on the PHP side: `assets/js/blocks/product-query/variations/product-query.tsx:26`.
+	 * It is also necessary to enable this feature flag on the PHP side: `assets/js/blocks/product-query/utils.tsx:83`.
 	 * https://github.com/woocommerce/woocommerce-blocks/pull/7382
 	 *
 	 * @var boolean

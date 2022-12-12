@@ -26,6 +26,7 @@ import {
 	QueryBlockAttributes,
 } from './types';
 import {
+	isCustomInheritGlobalQueryImplementationEnabled,
 	isWooQueryBlockVariation,
 	setQueryAttribute,
 	useAllowedControls,
@@ -37,6 +38,8 @@ import {
 } from './constants';
 import { PopularPresets } from './inspector-controls/popular-presets';
 import { AttributesFilter } from './inspector-controls/attributes-filter';
+
+import './editor.scss';
 
 const NAMESPACED_CONTROLS = ALL_PRODUCT_QUERY_CONTROLS.map(
 	( id ) =>
@@ -146,59 +149,82 @@ export const TOOLS_PANEL_CONTROLS = {
 			</ToolsPanelItem>
 		);
 	},
-	wooInherit: ( props: ProductQueryBlock ) => (
-		<ToggleControl
-			label={ __(
-				'Woo Inherit query from template',
-				'woo-gutenberg-products-block'
-			) }
-			checked={ props.attributes.query.__woocommerceInherit || false }
-			onChange={ ( __woocommerceInherit ) => {
-				setQueryAttribute( props, { __woocommerceInherit } );
-			} }
-		/>
-	),
+	wooInherit: ( props: ProductQueryBlock ) => {
+		return (
+			<ToggleControl
+				className="woo-inherit-query-toggle"
+				label={ __(
+					'Inherit query from template',
+					'woo-gutenberg-products-block'
+				) }
+				help={ __(
+					'Toggle to use the global query context that is set with the current template, such as variations of the product catalog or search. Disable to customize the filtering independently.',
+					'woo-gutenberg-products-block'
+				) }
+				checked={
+					isCustomInheritGlobalQueryImplementationEnabled
+						? props.attributes.query.__woocommerceInherit || false
+						: props.attributes.query.inherit || false
+				}
+				onChange={ ( inherit ) => {
+					if ( isCustomInheritGlobalQueryImplementationEnabled ) {
+						return setQueryAttribute( props, {
+							__woocommerceInherit: inherit,
+						} );
+					}
+					return setQueryAttribute( props, { inherit } );
+				} }
+			/>
+		);
+	},
+};
+
+const ProductQueryControls = ( props: ProductQueryBlock ) => {
+	const allowedControls = useAllowedControls( props.attributes );
+	const defaultWooQueryParams = useDefaultWooQueryParamsForVariation(
+		props.attributes.namespace
+	);
+	return (
+		<>
+			<InspectorControls>
+				{ allowedControls?.includes( 'presets' ) && (
+					<PopularPresets { ...props } />
+				) }
+				<ToolsPanel
+					className="woocommerce-product-query-toolspanel"
+					label={ __(
+						'Advanced Filters',
+						'woo-gutenberg-products-block'
+					) }
+					resetAll={ () => {
+						setQueryAttribute( props, defaultWooQueryParams );
+					} }
+				>
+					{ Object.entries( TOOLS_PANEL_CONTROLS ).map(
+						( [ key, Control ] ) =>
+							allowedControls?.includes( key ) ? (
+								<Control { ...props } key={ key } />
+							) : null
+					) }
+				</ToolsPanel>
+			</InspectorControls>
+			{
+				// Hacky temporary solution to display the feedback prompt
+				// at the bottom of the inspector controls
+			 }
+			<InspectorControls __experimentalGroup="color">
+				<ProductQueryFeedbackPrompt />
+			</InspectorControls>
+		</>
+	);
 };
 
 export const withProductQueryControls =
 	< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
 	( props: ProductQueryBlock ) => {
-		const allowedControls = useAllowedControls( props.attributes );
-		const defaultWooQueryParams = useDefaultWooQueryParamsForVariation(
-			props.attributes.namespace
-		);
-
 		return isWooQueryBlockVariation( props ) ? (
 			<>
-				<InspectorControls>
-					{ allowedControls?.includes( 'presets' ) && (
-						<PopularPresets { ...props } />
-					) }
-					<ToolsPanel
-						className="woocommerce-product-query-toolspanel"
-						label={ __(
-							'Advanced Filters',
-							'woo-gutenberg-products-block'
-						) }
-						resetAll={ () => {
-							setQueryAttribute( props, defaultWooQueryParams );
-						} }
-					>
-						{ Object.entries( TOOLS_PANEL_CONTROLS ).map(
-							( [ key, Control ] ) =>
-								allowedControls?.includes( key ) ? (
-									<Control { ...props } key={ key } />
-								) : null
-						) }
-					</ToolsPanel>
-				</InspectorControls>
-				{
-					// Hacky temporary solution to display the feedback prompt
-					// at the bottom of the inspector controls
-				 }
-				<InspectorControls __experimentalGroup="color">
-					<ProductQueryFeedbackPrompt />
-				</InspectorControls>
+				<ProductQueryControls { ...props } />
 				<BlockEdit { ...props } />
 			</>
 		) : (
