@@ -71,7 +71,9 @@ export const getActiveFilters = (
 				? defaultAttributeParam.split( ',' )
 				: [];
 
-		return defaultCheckedValue;
+		return defaultCheckedValue.map( ( value ) =>
+			encodeURIComponent( value ).toLowerCase()
+		);
 	}
 
 	return [];
