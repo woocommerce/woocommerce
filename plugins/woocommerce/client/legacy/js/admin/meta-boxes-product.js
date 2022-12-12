@@ -774,8 +774,7 @@ jQuery( function ( $ ) {
 				var isUsedForVariations = $( 'input#used-for-variation' ).is(
 					':checked'
 				);
-
-				$( 'select.wc-attribute-search' ).data(
+				$( 'select.attribute_taxonomy' ).data(
 					'add-attribute-used-for-variations',
 					isUsedForVariations
 				);

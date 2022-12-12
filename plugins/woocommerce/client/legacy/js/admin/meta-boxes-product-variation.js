@@ -383,13 +383,13 @@ jQuery( function ( $ ) {
 		 */
 		maybe_add_attributes_to_variations: function () {
 			var has_variation_attributes = $(
-				'select.wc-attribute-search'
+				'select.attribute_taxonomy'
 			).data( 'add-attribute-used-for-variations' );
 			if ( has_variation_attributes ) {
 				wc_meta_boxes_product_variations_ajax.link_all_variations(
 					true
 				);
-				$( 'select.wc-attribute-search' ).data(
+				$( 'select.attribute_taxonomy' ).data(
 					'add-attribute-used-for-variations',
 					false
 				);
