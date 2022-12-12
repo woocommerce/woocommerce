@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Update nightly tag
-        uses: richardsimko/github-tag-action@v1.0.5
+        uses: richardsimko/github-tag-action@v1.0.7
         with:
           tag_name: nightly
         env:
