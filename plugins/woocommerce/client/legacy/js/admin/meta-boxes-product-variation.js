@@ -384,13 +384,13 @@ jQuery( function ( $ ) {
 		maybe_add_attributes_to_variations: function () {
 			var has_variation_attributes = $(
 				'select.attribute_taxonomy'
-			).data( 'add-attribute-used-for-variations' );
+			).data( 'is-used-for-variations' );
 			if ( has_variation_attributes ) {
 				wc_meta_boxes_product_variations_ajax.link_all_variations(
 					true
 				);
 				$( 'select.attribute_taxonomy' ).data(
-					'add-attribute-used-for-variations',
+					'is-used-for-variations',
 					false
 				);
 			}

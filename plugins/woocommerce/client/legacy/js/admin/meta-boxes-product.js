@@ -775,7 +775,7 @@ jQuery( function ( $ ) {
 					':checked'
 				);
 				$( 'select.attribute_taxonomy' ).data(
-					'add-attribute-used-for-variations',
+					'is-used-for-variations',
 					isUsedForVariations
 				);
 
