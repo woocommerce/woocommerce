@@ -282,6 +282,13 @@ const AttributeFilterBlock = ( {
 	 */
 	const updateFilterUrl = useCallback(
 		( query, allFiltersRemoved = false ) => {
+			query = query.map( ( item: AttributeQuery ) => ( {
+				...item,
+				slug: item.slug.map( ( slug: string ) =>
+					decodeURIComponent( slug )
+				),
+			} ) );
+
 			if ( allFiltersRemoved ) {
 				if ( ! attributeObject?.taxonomy ) {
 					return;
