@@ -160,8 +160,8 @@ If the data is sensitive (for example, a core setting that should be private), o
 
 If you're looking to add _new routes and endpoints_, rather than extending the Store API _schema_, extending the Store API is not necessary. You can instead utilize core WordPress functionality to create new routes, choosing to use the same pattern of Store API if you wish. See:
 
--   https://developer.wordpress.org/reference/functions/register_rest_route/
--   https://developer.wordpress.org/rest-api/extending-the-rest-api/adding-custom-endpoints/#permissions-callback
+-   <https://developer.wordpress.org/reference/functions/register_rest_route/>
+-   <https://developer.wordpress.org/rest-api/extending-the-rest-api/adding-custom-endpoints/#permissions-callback>
 
 <!-- FEEDBACK -->
 
