@@ -2,7 +2,9 @@
 
 ## Table of Contents
 
+-   [wc/store/cart](cart.md)
 -   [wc/store/checkout](checkout.md)
+-   [wc/store/payment](payment.md)
 -   [wc/store/validation](validation.md)
 
 <!-- FEEDBACK -->
