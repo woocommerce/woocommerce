@@ -23,6 +23,7 @@ export const useTypographyProps = ( attributes: unknown ): WithStyle => {
 				: typography.fontSize,
 			lineHeight: typography.lineHeight,
 			fontWeight: typography.fontWeight,
+			fontStyle: typography.fontStyle,
 			textTransform: typography.textTransform,
 			fontFamily: attributesObject.fontFamily,
 		},

@@ -35,7 +35,7 @@ const blockConfig = {
 		...( isFeaturePluginBuild() && {
 			color: {
 				text: true,
-				background: false,
+				background: true,
 				link: false,
 				__experimentalSkipSerialization: true,
 			},
