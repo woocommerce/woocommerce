@@ -57,6 +57,25 @@ class StyleAttributesUtils {
 		return null;
 	}
 
+	/**
+	 * Get class and style for font-style from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return (array | null)
+	 */
+	public static function get_font_style_class_and_style( $attributes ) {
+
+		$custom_font_style = $attributes['style']['typography']['fontStyle'] ?? '';
+
+		if ( '' !== $custom_font_style ) {
+			return array(
+				'class' => null,
+				'style' => sprintf( 'font-style: %s;', $custom_font_style ),
+			);
+		}
+		return null;
+	}
 
 	/**
 	 * Get class and style for font-family from attributes.
@@ -204,32 +223,50 @@ class StyleAttributesUtils {
 	/**
 	 * Get class and style for border-color from attributes.
 	 *
+	 * Data passed to this function is not always consistent. It can be:
+	 * Linked - preset color: $attributes['borderColor'] => 'luminous-vivid-orange'.
+	 * Linked - custom color: $attributes['style']['border']['color'] => '#681228'.
+	 * Unlinked - preset color: $attributes['style']['border']['top']['color'] => 'var:preset|color|luminous-vivid-orange'
+	 * Unlinked - custom color: $attributes['style']['border']['top']['color'] => '#681228'.
+	 *
 	 * @param array $attributes Block attributes.
 	 *
 	 * @return (array | null)
 	 */
 	public static function get_border_color_class_and_style( $attributes ) {
 
-		$border_color = $attributes['borderColor'] ?? '';
+		$border_color_linked_preset = $attributes['borderColor'] ?? '';
+		$border_color_linked_custom = $attributes['style']['border']['color'] ?? '';
+		$custom_border              = $attributes['style']['border'] ?? '';
 
-		$custom_border_color = $attributes['style']['border']['color'] ?? '';
+		$border_color_class = '';
+		$border_color_css   = '';
 
-		if ( ! $border_color && '' === $custom_border_color ) {
+		if ( $border_color_linked_preset ) {
+			// Linked preset color.
+			$border_color_class = sprintf( 'has-border-color has-%s-border-color', $border_color_linked_preset );
+		} elseif ( $border_color_linked_custom ) {
+			// Linked custom color.
+			$border_color_css .= 'border-color:' . $border_color_linked_custom . ';';
+		} else {
+			// Unlinked.
+			if ( is_array( $custom_border ) ) {
+				foreach ( $custom_border as $border_color_key => $border_color_value ) {
+					if ( is_array( $border_color_value ) && array_key_exists( 'color', ( $border_color_value ) ) ) {
+						$border_color_css .= 'border-' . $border_color_key . '-color:' . self::get_color_value( $border_color_value['color'] ) . ';';
+					}
+				}
+			}
+		}
+
+		if ( ! $border_color_class && ! $border_color_css ) {
 			return null;
 		}
 
-		if ( $border_color ) {
-			return array(
-				'class' => sprintf( 'has-border-color has-%s-border-color', $border_color ),
-				'style' => null,
-			);
-		} elseif ( '' !== $custom_border_color ) {
-			return array(
-				'class' => null,
-				'style' => sprintf( 'border-color: %s;', $custom_border_color ),
-			);
-		}
-		return null;
+		return array(
+			'class' => $border_color_class,
+			'style' => $border_color_css,
+		);
 	}
 
 	/**
@@ -247,9 +284,30 @@ class StyleAttributesUtils {
 			return null;
 		}
 
+		$border_radius_css = '';
+
+		if ( is_string( $custom_border_radius ) ) {
+			// Linked sides.
+			$border_radius_css = 'border-radius:' . $custom_border_radius . ';';
+		} else {
+			// Unlinked sides.
+			$border_radius = array();
+
+			$border_radius['border-top-left-radius']     = $custom_border_radius['topLeft'] ?? '';
+			$border_radius['border-top-right-radius']    = $custom_border_radius['topRight'] ?? '';
+			$border_radius['border-bottom-right-radius'] = $custom_border_radius['bottomRight'] ?? '';
+			$border_radius['border-bottom-left-radius']  = $custom_border_radius['bottomLeft'] ?? '';
+
+			foreach ( $border_radius as $border_radius_side => $border_radius_value ) {
+				if ( '' !== $border_radius_value ) {
+					$border_radius_css .= $border_radius_side . ':' . $border_radius_value . ';';
+				}
+			}
+		}
+
 		return array(
 			'class' => null,
-			'style' => sprintf( 'border-radius: %s;', $custom_border_radius ),
+			'style' => $border_radius_css,
 		);
 	}
 
@@ -262,15 +320,29 @@ class StyleAttributesUtils {
 	 */
 	public static function get_border_width_class_and_style( $attributes ) {
 
-		$custom_border_width = $attributes['style']['border']['width'] ?? '';
+		$custom_border = $attributes['style']['border'] ?? '';
 
-		if ( '' === $custom_border_width ) {
+		if ( '' === $custom_border ) {
 			return null;
+		}
+
+		$border_width_css = '';
+
+		if ( array_key_exists( 'width', ( $custom_border ) ) ) {
+			// Linked sides.
+			$border_width_css = 'border-width:' . $custom_border['width'] . ';';
+		} else {
+			// Unlinked sides.
+			foreach ( $custom_border as $border_width_side => $border_width_value ) {
+				if ( isset( $border_width_value['width'] ) ) {
+					$border_width_css .= 'border-' . $border_width_side . '-width:' . $border_width_value['width'] . ';';
+				}
+			}
 		}
 
 		return array(
 			'class' => null,
-			'style' => sprintf( 'border-width: %s;', $custom_border_width ),
+			'style' => $border_width_css,
 		);
 	}
 
@@ -400,23 +472,15 @@ class StyleAttributesUtils {
 			return null;
 		}
 
-		$padding_top    = $padding['top'] ? self::get_spacing_value( $padding['top'] ) : null;
-		$padding_right  = $padding['right'] ? self::get_spacing_value( $padding['right'] ) : null;
-		$padding_bottom = $padding['bottom'] ? self::get_spacing_value( $padding['bottom'] ) : null;
-		$padding_left   = $padding['left'] ? self::get_spacing_value( $padding['left'] ) : null;
+		$spacing_values_css = '';
+
+		foreach ( $padding as $padding_side => $padding_value ) {
+			$spacing_values_css .= 'padding-' . $padding_side . ':' . self::get_spacing_value( $padding_value ) . ';';
+		}
 
 		return array(
 			'class' => null,
-			'style' => sprintf(
-				'padding-top:%s;
-				padding-right:%s;
-				padding-bottom:%s;
-				padding-left:%s;',
-				$padding_top,
-				$padding_right,
-				$padding_bottom,
-				$padding_left
-			),
+			'style' => $spacing_values_css,
 		);
 	}
 
@@ -434,9 +498,15 @@ class StyleAttributesUtils {
 			return null;
 		}
 
+		$spacing_values_css = '';
+
+		foreach ( $margin as $margin_side => $margin_value ) {
+			$spacing_values_css .= 'margin-' . $margin_side . ':' . self::get_spacing_value( $margin_value ) . ';';
+		}
+
 		return array(
 			'class' => null,
-			'style' => sprintf( 'margin: %s;', implode( ' ', $margin ) ),
+			'style' => $spacing_values_css,
 		);
 	}
 
@@ -455,6 +525,7 @@ class StyleAttributesUtils {
 			'font_size'        => self::get_font_size_class_and_style( $attributes ),
 			'font_family'      => self::get_font_family_class_and_style( $attributes ),
 			'font_weight'      => self::get_font_weight_class_and_style( $attributes ),
+			'font_style'       => self::get_font_style_class_and_style( $attributes ),
 			'link_color'       => self::get_link_color_class_and_style( $attributes ),
 			'background_color' => self::get_background_color_class_and_style( $attributes ),
 			'border_color'     => self::get_border_color_class_and_style( $attributes ),
@@ -534,5 +605,24 @@ class StyleAttributesUtils {
 	 */
 	public static function get_preset_value( $preset_name ) {
 		return "var(--wp--preset--color--$preset_name)";
+	}
+
+	/**
+	 * If color value is in preset format, convert it to a CSS var. Else return same value
+	 * For example:
+	 * "var:preset|color|pale-pink" -> "var(--wp--preset--color--pale-pink)"
+	 * "#98b66e" -> "#98b66e"
+	 *
+	 * @param string $color_value value to be processed.
+	 *
+	 * @return (string)
+	 */
+	public static function get_color_value( $color_value ) {
+		if ( is_string( $color_value ) && str_contains( $color_value, 'var:preset|color|' ) ) {
+			$color_value = str_replace( 'var:preset|color|', '', $color_value );
+			return sprintf( 'var(--wp--preset--color--%s)', $color_value );
+		}
+
+		return $color_value;
 	}
 }
