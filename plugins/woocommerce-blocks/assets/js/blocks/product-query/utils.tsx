@@ -56,6 +56,19 @@ export function setQueryAttribute(
 	} );
 }
 
+// This is a feature flag to enable the custom inherit Global Query implementation.
+// This is not intended to be a permanent feature flag, but rather a temporary.
+// https://github.com/woocommerce/woocommerce-blocks/pull/7382
+export const isCustomInheritGlobalQueryImplementationEnabled = false;
+
+export function isWooInheritQueryEnabled(
+	attributes: ProductQueryBlock[ 'attributes' ]
+) {
+	return isCustomInheritGlobalQueryImplementationEnabled
+		? attributes.query.__woocommerceInherit
+		: attributes.query.inherit;
+}
+
 /**
  * Hook that returns the query properties' names defined by the active
  * block variation, to determine which block inspector controls to show.
@@ -66,13 +79,22 @@ export function setQueryAttribute(
 export function useAllowedControls(
 	attributes: ProductQueryBlock[ 'attributes' ]
 ) {
-	return useSelect(
+	const isSiteEditor = useSelect( 'core/edit-site' ) !== undefined;
+
+	const controls = useSelect(
 		( select ) =>
 			select( WP_BLOCKS_STORE ).getActiveBlockVariation(
 				QUERY_LOOP_ID,
 				attributes
 			)?.allowedControls,
-
 		[ attributes ]
 	);
+
+	if ( ! isSiteEditor ) {
+		return controls.filter( ( control ) => control !== 'wooInherit' );
+	}
+
+	return isWooInheritQueryEnabled( attributes )
+		? controls.filter( ( control ) => control === 'wooInherit' )
+		: controls;
 }

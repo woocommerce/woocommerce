@@ -94,7 +94,7 @@ export interface QueryBlockQuery {
 	inherit: boolean;
 	offset?: number;
 	order: 'asc' | 'desc';
-	orderBy: 'date' | 'relevance';
+	orderBy: 'date' | 'relevance' | 'title';
 	pages?: number;
 	parents?: number[];
 	perPage?: number;

@@ -30,6 +30,10 @@ module.exports = {
 		'<rootDir>/tests/e2e/config/jest.setup.js',
 		'expect-puppeteer',
 	],
-	testPathIgnorePatterns: [ '<rootDir>/tests/e2e/specs/performance' ],
+	testPathIgnorePatterns: [
+		'<rootDir>/tests/e2e/specs/performance',
+		// Ignore all the files that have utils in the name
+		'utils',
+	],
 	transformIgnorePatterns: [ 'node_modules/(?!(woocommerce)/)' ],
 };
