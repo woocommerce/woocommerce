@@ -72,7 +72,7 @@ Each porter is responsible for testing the PRs that fall under the focus of thei
 
 ## Pull request in WooCommerce Core for Package update
 
-This only needs done if the patch release needs to be included in WooCommerce Core.
+This only needs done if the patch release needs to be included in WooCommerce Core. Reviewing and merging the PR is your team's responsibility, except in the case of `Fix Release Request`. In this case, the WooCommerce release manager reviews and merges the PR.
 
 -   [ ] Create a pull request for updating the package in WooCommerce core (based off of the WooCommerce core release branch this is deployed for).
 
