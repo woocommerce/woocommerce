@@ -205,7 +205,7 @@ function getExitPageCESCopy( pageId: string ): {
 					'woocommerce'
 				),
 			};
-		case 'order_change':
+		case 'shop_order_update':
 			return {
 				action: pageId,
 				icon: '📦',
