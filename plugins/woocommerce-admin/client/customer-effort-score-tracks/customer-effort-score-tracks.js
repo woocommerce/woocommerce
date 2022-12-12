@@ -74,7 +74,11 @@ function CustomerEffortScoreTracks( {
 	// (we don't want to return null early), if the modal was shown for this
 	// instantiation, so that the component doesn't go away while we are
 	// still showing it.
-	if ( cesShownForActions.indexOf( action ) !== -1 && ! modalShown ) {
+	if (
+		cesShownForActions &&
+		cesShownForActions.indexOf( action ) !== -1 &&
+		! modalShown
+	) {
 		return null;
 	}
 
@@ -91,7 +95,7 @@ function CustomerEffortScoreTracks( {
 		updateOptions( {
 			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
 				action,
-				...cesShownForActions,
+				...( cesShownForActions || [] ),
 			],
 		} );
 	};
@@ -170,7 +174,7 @@ CustomerEffortScoreTracks.propTypes = {
 	/**
 	 * The label displayed in the modal.
 	 */
-	label: PropTypes.string.isRequired,
+	title: PropTypes.string.isRequired,
 	/**
 	 * The label for the snackbar that appears upon survey submission.
 	 */
@@ -178,7 +182,7 @@ CustomerEffortScoreTracks.propTypes = {
 	/**
 	 * The array of actions that the CES modal has been shown for.
 	 */
-	cesShownForActions: PropTypes.arrayOf( PropTypes.string ).isRequired,
+	cesShownForActions: PropTypes.arrayOf( PropTypes.string ),
 	/**
 	 * Whether tracking is allowed or not.
 	 */
@@ -203,10 +207,10 @@ CustomerEffortScoreTracks.propTypes = {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
+		const { getOption, hasFinishedResolution } =
+			select( OPTIONS_STORE_NAME );
 
-		const cesShownForActions =
-			getOption( SHOWN_FOR_ACTIONS_OPTION_NAME ) || [];
+		const cesShownForActions = getOption( SHOWN_FOR_ACTIONS_OPTION_NAME );
 
 		const adminInstallTimestamp =
 			getOption( ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ) || 0;
@@ -217,12 +221,16 @@ export default compose(
 		const allowTracking = allowTrackingOption === 'yes';
 
 		const resolving =
-			isResolving( 'getOption', [ SHOWN_FOR_ACTIONS_OPTION_NAME ] ) ||
+			! hasFinishedResolution( 'getOption', [
+				SHOWN_FOR_ACTIONS_OPTION_NAME,
+			] ) ||
 			storeAgeInWeeks === null ||
-			isResolving( 'getOption', [
+			! hasFinishedResolution( 'getOption', [
 				ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
 			] ) ||
-			isResolving( 'getOption', [ ALLOW_TRACKING_OPTION_NAME ] );
+			! hasFinishedResolution( 'getOption', [
+				ALLOW_TRACKING_OPTION_NAME,
+			] );
 
 		return {
 			cesShownForActions,
