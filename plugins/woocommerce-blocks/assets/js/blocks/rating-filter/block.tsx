@@ -4,6 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
 import Rating from '@woocommerce/base-components/product-rating';
+import { Notice } from 'wordpress-components';
 import { usePrevious, useShallowEqual } from '@woocommerce/base-hooks';
 import {
 	useQueryStateByKey,
@@ -89,6 +90,9 @@ const RatingFilterBlock = ( {
 		'rating',
 		initialFilters
 	);
+
+	const [ displayNoProductRatingsNotice, setDisplayNoProductRatingsNotice ] =
+		useState( false );
 
 	/**
 	 * Used to redirect the page when filters are changed so templates using the Classic Template block can filter.
@@ -189,12 +193,19 @@ const RatingFilterBlock = ( {
 		if ( filteredCountsLoading || blockAttributes.isPreview ) {
 			return;
 		}
+
 		const orderedRatings =
 			! filteredCountsLoading &&
 			objectHasProp( filteredCounts, 'rating_counts' ) &&
 			Array.isArray( filteredCounts.rating_counts )
 				? [ ...filteredCounts.rating_counts ].reverse()
 				: [];
+
+		if ( isEditor && orderedRatings.length === 0 ) {
+			setDisplayedOptions( previewOptions );
+			setDisplayNoProductRatingsNotice( true );
+			return;
+		}
 
 		const newOptions = orderedRatings
 			.filter(
@@ -229,6 +240,7 @@ const RatingFilterBlock = ( {
 		filteredCounts,
 		filteredCountsLoading,
 		productRatings,
+		isEditor,
 	] );
 
 	/**
@@ -292,6 +304,16 @@ const RatingFilterBlock = ( {
 
 	return (
 		<>
+			{ displayNoProductRatingsNotice && (
+				<Notice status="warning" isDismissible={ false }>
+					<p>
+						{ __(
+							"Your store doesn't have any products with ratings yet. This filter option will display when a product receives a review.",
+							'woo-gutenberg-products-block'
+						) }
+					</p>
+				</Notice>
+			) }
 			<div
 				className={ classnames( 'wc-block-rating-filter', {
 					'is-loading': isLoading,
