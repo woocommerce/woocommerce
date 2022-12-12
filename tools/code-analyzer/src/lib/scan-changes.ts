@@ -36,7 +36,8 @@ export const scanForChanges = async (
 		tmpRepoPath,
 		base,
 		compareVersion,
-		Logger.error
+		Logger.error,
+		[ 'tools' ]
 	);
 
 	// Only checkout the compare version if we're in CLI mode.
