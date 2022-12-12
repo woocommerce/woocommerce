@@ -94,7 +94,7 @@ class OnboardingProducts {
 				),
 				array(
 					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
-				),
+				)
 			);
 			if ( is_wp_error( $woocommerce_products ) ) {
 				return $product_types;
