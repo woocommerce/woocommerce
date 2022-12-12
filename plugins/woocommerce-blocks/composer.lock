@@ -8,23 +8,23 @@
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
-            "version": "v2.11.11",
+            "version": "v2.11.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-autoloader.git",
-                "reference": "c4c5e729bf797b67518936f28053ad9bd396562b"
+                "reference": "60a1cbf0a0acff63b412c49baf9d417e5bd5779e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/c4c5e729bf797b67518936f28053ad9bd396562b",
-                "reference": "c4c5e729bf797b67518936f28053ad9bd396562b",
+                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/60a1cbf0a0acff63b412c49baf9d417e5bd5779e",
+                "reference": "60a1cbf0a0acff63b412c49baf9d417e5bd5779e",
                 "shasum": ""
             },
             "require": {
                 "composer-plugin-api": "^1.1 || ^2.0"
             },
             "require-dev": {
-                "automattic/jetpack-changelogger": "^3.2",
+                "automattic/jetpack-changelogger": "^3.2.1",
                 "yoast/phpunit-polyfills": "1.0.3"
             },
             "type": "composer-plugin",
@@ -53,9 +53,9 @@
             ],
             "description": "Creates a custom autoloader for a plugin or theme.",
             "support": {
-                "source": "https://github.com/Automattic/jetpack-autoloader/tree/v2.11.11"
+                "source": "https://github.com/Automattic/jetpack-autoloader/tree/v2.11.12"
             },
-            "time": "2022-10-25T09:01:02+00:00"
+            "time": "2022-11-22T17:02:32+00:00"
         },
         {
             "name": "composer/installers",
