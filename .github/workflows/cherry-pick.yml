@@ -255,7 +255,7 @@ jobs:
                         }
                       }
 
-                      core.setOutput( 'changelogsToBeDeleted', changeLogsToBeDeleted )
+                      core.setOutput( 'changelogsToBeDeleted', changelogsToBeDeleted )
 
             - name: Delete changelog files from cherry pick branch
               if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
