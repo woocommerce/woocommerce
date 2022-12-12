@@ -1,5 +1,7 @@
 declare global {
 	interface Window {
+		pagenow: string;
+		adminpage: string;
 		wcSettings: {
 			preloadOptions: Record< string, unknown >;
 			adminUrl: string;
@@ -31,6 +33,19 @@ declare global {
 			'woo-mobile-welcome': boolean;
 			'shipping-smart-defaults': boolean;
 			'shipping-setting-tour': boolean;
+		};
+		wp: {
+			autosave?: {
+				server: {
+					postChanged: () => boolean;
+				};
+			};
+		};
+		tinymce?: {
+			get: ( name: string ) => {
+				isHidden: () => boolean;
+				isDirty: () => boolean;
+			};
 		};
 	}
 }

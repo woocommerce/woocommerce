@@ -14,7 +14,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 		case TYPES.SET_CES_SURVEY_QUEUE:
 			return {
 				...state,
-				queue: action.queue,
+				queue: [ ...state.queue, ...action.queue ],
 			};
 		case TYPES.HIDE_CES_MODAL:
 			return {
@@ -48,6 +48,8 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			const newTrack = {
 				action: action.action,
 				title: action.title,
+				description: action.description,
+				noticeLabel: action.noticeLabel,
 				firstQuestion: action.firstQuestion,
 				secondQuestion: action.secondQuestion,
 				pagenow: action.pageNow,

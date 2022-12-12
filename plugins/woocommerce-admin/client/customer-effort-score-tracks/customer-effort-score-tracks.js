@@ -28,6 +28,8 @@ import { getStoreAgeInWeeks } from './utils';
  * @param {string}   props.action             The action name sent to Tracks.
  * @param {Object}   props.trackProps         Additional props sent to Tracks.
  * @param {string}   props.title              The title displayed in the modal.
+ * @param {string}   props.noticeLabel        Label for notice, defaults to title.
+ * @param {string}   props.description        Description shown in CES modal.
  * @param {string}   props.firstQuestion      The first survey question.
  * @param {string}   props.secondQuestion     The second survey question.
  * @param {string}   props.onSubmitLabel      The label displayed upon survey submission.
@@ -42,6 +44,8 @@ function CustomerEffortScoreTracks( {
 	action,
 	trackProps,
 	title,
+	description,
+	noticeLabel,
 	firstQuestion,
 	secondQuestion,
 	onSubmitLabel = __( 'Thank you for your feedback!', 'woocommerce' ),
@@ -70,7 +74,11 @@ function CustomerEffortScoreTracks( {
 	// (we don't want to return null early), if the modal was shown for this
 	// instantiation, so that the component doesn't go away while we are
 	// still showing it.
-	if ( cesShownForActions.indexOf( action ) !== -1 && ! modalShown ) {
+	if (
+		cesShownForActions &&
+		cesShownForActions.indexOf( action ) !== -1 &&
+		! modalShown
+	) {
 		return null;
 	}
 
@@ -78,6 +86,7 @@ function CustomerEffortScoreTracks( {
 		recordEvent( 'ces_snackbar_view', {
 			action,
 			store_age: storeAgeInWeeks,
+			ces_location: 'inside',
 			...trackProps,
 		} );
 	};
@@ -86,7 +95,7 @@ function CustomerEffortScoreTracks( {
 		updateOptions( {
 			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
 				action,
-				...cesShownForActions,
+				...( cesShownForActions || [] ),
 			],
 		} );
 	};
@@ -95,6 +104,7 @@ function CustomerEffortScoreTracks( {
 		recordEvent( 'ces_snackbar_dismiss', {
 			action,
 			store_age: storeAgeInWeeks,
+			ces_location: 'inside',
 			...trackProps,
 		} );
 
@@ -107,6 +117,7 @@ function CustomerEffortScoreTracks( {
 		recordEvent( 'ces_view', {
 			action,
 			store_age: storeAgeInWeeks,
+			ces_location: 'inside',
 			...trackProps,
 		} );
 
@@ -121,6 +132,7 @@ function CustomerEffortScoreTracks( {
 			score_combined: score + secondScore,
 			comments: comments || '',
 			store_age: storeAgeInWeeks,
+			ces_location: 'inside',
 			...trackProps,
 		} );
 		createNotice( 'success', onSubmitLabel );
@@ -130,6 +142,8 @@ function CustomerEffortScoreTracks( {
 		<CustomerEffortScore
 			recordScoreCallback={ recordScore }
 			title={ title }
+			description={ description }
+			noticeLabel={ noticeLabel }
 			firstQuestion={ firstQuestion }
 			secondQuestion={ secondQuestion }
 			onNoticeShownCallback={ onNoticeShown }
@@ -160,7 +174,7 @@ CustomerEffortScoreTracks.propTypes = {
 	/**
 	 * The label displayed in the modal.
 	 */
-	label: PropTypes.string.isRequired,
+	title: PropTypes.string.isRequired,
 	/**
 	 * The label for the snackbar that appears upon survey submission.
 	 */
@@ -168,7 +182,7 @@ CustomerEffortScoreTracks.propTypes = {
 	/**
 	 * The array of actions that the CES modal has been shown for.
 	 */
-	cesShownForActions: PropTypes.arrayOf( PropTypes.string ).isRequired,
+	cesShownForActions: PropTypes.arrayOf( PropTypes.string ),
 	/**
 	 * Whether tracking is allowed or not.
 	 */
@@ -193,10 +207,10 @@ CustomerEffortScoreTracks.propTypes = {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
+		const { getOption, hasFinishedResolution } =
+			select( OPTIONS_STORE_NAME );
 
-		const cesShownForActions =
-			getOption( SHOWN_FOR_ACTIONS_OPTION_NAME ) || [];
+		const cesShownForActions = getOption( SHOWN_FOR_ACTIONS_OPTION_NAME );
 
 		const adminInstallTimestamp =
 			getOption( ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ) || 0;
@@ -207,12 +221,16 @@ export default compose(
 		const allowTracking = allowTrackingOption === 'yes';
 
 		const resolving =
-			isResolving( 'getOption', [ SHOWN_FOR_ACTIONS_OPTION_NAME ] ) ||
+			! hasFinishedResolution( 'getOption', [
+				SHOWN_FOR_ACTIONS_OPTION_NAME,
+			] ) ||
 			storeAgeInWeeks === null ||
-			isResolving( 'getOption', [
+			! hasFinishedResolution( 'getOption', [
 				ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
 			] ) ||
-			isResolving( 'getOption', [ ALLOW_TRACKING_OPTION_NAME ] );
+			! hasFinishedResolution( 'getOption', [
+				ALLOW_TRACKING_OPTION_NAME,
+			] );
 
 		return {
 			cesShownForActions,
