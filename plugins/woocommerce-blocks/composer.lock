@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "30fc6e134195a05d7f6ae11691dc7423",
+    "content-hash": "a68864122c290ca1c66be92a676bb3ce",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -2718,7 +2718,7 @@
         },
         {
             "name": "wp-phpunit/wp-phpunit",
-            "version": "6.1.0",
+            "version": "6.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-phpunit/wp-phpunit.git",
