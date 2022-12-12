@@ -392,7 +392,10 @@ importers:
       webpack-cli: 3.3.12_webpack@5.70.0
 
   packages/js/create-woo-extension:
-    specifiers: {}
+    specifiers:
+      node-fetch: ^2.6.7
+    dependencies:
+      node-fetch: 2.6.7
 
   packages/js/csv-export:
     specifiers:
