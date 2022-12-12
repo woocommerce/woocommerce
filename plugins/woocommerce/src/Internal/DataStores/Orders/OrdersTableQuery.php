@@ -667,7 +667,11 @@ class OrdersTableQuery {
 			wc_doing_it_wrong( __FUNCTION__, 'Approx count query can only be build after main query is built.', '7.2.0' );
 		}
 
-		$offset = absint( $this->limits[0] + ( absint( $approx_page_count ) * $this->limits[1] ) ); // limit[0] = offset, limit[1] = row count.
+		if ( ! isset( $this->limits ) || count( $this->limits ) < 2 ) {
+			$offset = get_option( 'posts_per_page', 10 );
+		} else {
+			$offset = absint( ( $this->limits[0] ?? 0 ) + ( absint( $approx_page_count ) * ( $this->limits[1] ?? 10 ) ) ); // limit[0] = offset, limit[1] = row count.
+		}
 
 		$orders_table           = $this->tables['orders'];
 		$this->approx_count_sql = "SELECT 1 FROM $orders_table $join WHERE $where $groupby LIMIT 1 OFFSET $offset"; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
