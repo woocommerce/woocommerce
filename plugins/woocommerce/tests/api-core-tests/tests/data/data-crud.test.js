@@ -13186,9 +13186,6 @@ test.describe('Data API tests', () => {
 						"num_decimals": 2,
 						"thousand_sep": " ",
 						"weight_unit": "kg",
-<<<<<<< HEAD
-						"states": expect.arrayContaining([])
-=======
 						"states": [{
 								"code": "VN",
 								"name": "Vinnytsia Oblast"
@@ -13286,7 +13283,6 @@ test.describe('Data API tests', () => {
 								"name": "Chernivtsi Oblast"
 							}
 						]
->>>>>>> parent of 076f6f2839 (Add missing Ukrainian Subdivisions to States.php (#35493))
 					},
 					{
 						"code": "VA",
