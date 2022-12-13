@@ -7555,7 +7555,103 @@ test.describe('Data API tests', () => {
 							"num_decimals": 2,
 							"thousand_sep": " ",
 							"weight_unit": "kg",
-							"states": expect.arrayContaining([])
+							"states": [{
+									"code": "VN",
+									"name": "Vinnytsia Oblast"
+								},
+								{
+									"code": "VL",
+									"name": "Volyn Oblast"
+								},
+								{
+									"code": "DP",
+									"name": "Dnipropetrovsk Oblast"
+								},
+								{
+									"code": "DT",
+									"name": "Donetsk Oblast"
+								},
+								{
+									"code": "ZT",
+									"name": "Zhytomyr Oblast"
+								},
+								{
+									"code": "ZK",
+									"name": "Zakarpattia Oblast"
+								},
+								{
+									"code": "ZP",
+									"name": "Zaporizhzhia Oblast"
+								},
+								{
+									"code": "IF",
+									"name": "Ivano-Frankivsk Oblast"
+								},
+								{
+									"code": "KV",
+									"name": "Kyiv Oblast"
+								},
+								{
+									"code": "KH",
+									"name": "Kirovohrad Oblast"
+								},
+								{
+									"code": "LH",
+									"name": "Luhansk Oblast"
+								},
+								{
+									"code": "LV",
+									"name": "Lviv Oblast"
+								},
+								{
+									"code": "MY",
+									"name": "Mykolaiv Oblast"
+								},
+								{
+									"code": "OD",
+									"name": "Odessa Oblast"
+								},
+								{
+									"code": "PL",
+									"name": "Poltava Oblast"
+								},
+								{
+									"code": "RV",
+									"name": "Rivne Oblast"
+								},
+								{
+									"code": "SM",
+									"name": "Sumy Oblast"
+								},
+								{
+									"code": "TP",
+									"name": "Ternopil Oblast"
+								},
+								{
+									"code": "KK",
+									"name": "Kharkiv Oblast"
+								},
+								{
+									"code": "KS",
+									"name": "Kherson Oblast"
+								},
+								{
+									"code": "KM",
+									"name": "Khmelnytskyi Oblast"
+								},
+								{
+									"code": "CK",
+									"name": "Cherkasy Oblast"
+								},
+								{
+									"code": "CH",
+									"name": "Chernihiv Oblast"
+								},
+								{
+									"code": "CV",
+									"name": "Chernivtsi Oblast"
+								}
+							]
 						},
 						{
 							"code": "VA",
@@ -13090,7 +13186,107 @@ test.describe('Data API tests', () => {
 						"num_decimals": 2,
 						"thousand_sep": " ",
 						"weight_unit": "kg",
+<<<<<<< HEAD
 						"states": expect.arrayContaining([])
+=======
+						"states": [{
+								"code": "VN",
+								"name": "Vinnytsia Oblast"
+							},
+							{
+								"code": "VL",
+								"name": "Volyn Oblast"
+							},
+							{
+								"code": "DP",
+								"name": "Dnipropetrovsk Oblast"
+							},
+							{
+								"code": "DT",
+								"name": "Donetsk Oblast"
+							},
+							{
+								"code": "ZT",
+								"name": "Zhytomyr Oblast"
+							},
+							{
+								"code": "ZK",
+								"name": "Zakarpattia Oblast"
+							},
+							{
+								"code": "ZP",
+								"name": "Zaporizhzhia Oblast"
+							},
+							{
+								"code": "IF",
+								"name": "Ivano-Frankivsk Oblast"
+							},
+							{
+								"code": "KV",
+								"name": "Kyiv Oblast"
+							},
+							{
+								"code": "KH",
+								"name": "Kirovohrad Oblast"
+							},
+							{
+								"code": "LH",
+								"name": "Luhansk Oblast"
+							},
+							{
+								"code": "LV",
+								"name": "Lviv Oblast"
+							},
+							{
+								"code": "MY",
+								"name": "Mykolaiv Oblast"
+							},
+							{
+								"code": "OD",
+								"name": "Odessa Oblast"
+							},
+							{
+								"code": "PL",
+								"name": "Poltava Oblast"
+							},
+							{
+								"code": "RV",
+								"name": "Rivne Oblast"
+							},
+							{
+								"code": "SM",
+								"name": "Sumy Oblast"
+							},
+							{
+								"code": "TP",
+								"name": "Ternopil Oblast"
+							},
+							{
+								"code": "KK",
+								"name": "Kharkiv Oblast"
+							},
+							{
+								"code": "KS",
+								"name": "Kherson Oblast"
+							},
+							{
+								"code": "KM",
+								"name": "Khmelnytskyi Oblast"
+							},
+							{
+								"code": "CK",
+								"name": "Cherkasy Oblast"
+							},
+							{
+								"code": "CH",
+								"name": "Chernihiv Oblast"
+							},
+							{
+								"code": "CV",
+								"name": "Chernivtsi Oblast"
+							}
+						]
+>>>>>>> parent of 076f6f2839 (Add missing Ukrainian Subdivisions to States.php (#35493))
 					},
 					{
 						"code": "VA",
@@ -23559,7 +23755,107 @@ test.describe('Data API tests', () => {
 			expect.objectContaining({
 				"code": "UA",
 				"name": "Ukraine",
+<<<<<<< HEAD
 				"states": expect.arrayContaining([]),
+=======
+				"states": [{
+						"code": "VN",
+						"name": "Vinnytsia Oblast"
+					},
+					{
+						"code": "VL",
+						"name": "Volyn Oblast"
+					},
+					{
+						"code": "DP",
+						"name": "Dnipropetrovsk Oblast"
+					},
+					{
+						"code": "DT",
+						"name": "Donetsk Oblast"
+					},
+					{
+						"code": "ZT",
+						"name": "Zhytomyr Oblast"
+					},
+					{
+						"code": "ZK",
+						"name": "Zakarpattia Oblast"
+					},
+					{
+						"code": "ZP",
+						"name": "Zaporizhzhia Oblast"
+					},
+					{
+						"code": "IF",
+						"name": "Ivano-Frankivsk Oblast"
+					},
+					{
+						"code": "KV",
+						"name": "Kyiv Oblast"
+					},
+					{
+						"code": "KH",
+						"name": "Kirovohrad Oblast"
+					},
+					{
+						"code": "LH",
+						"name": "Luhansk Oblast"
+					},
+					{
+						"code": "LV",
+						"name": "Lviv Oblast"
+					},
+					{
+						"code": "MY",
+						"name": "Mykolaiv Oblast"
+					},
+					{
+						"code": "OD",
+						"name": "Odessa Oblast"
+					},
+					{
+						"code": "PL",
+						"name": "Poltava Oblast"
+					},
+					{
+						"code": "RV",
+						"name": "Rivne Oblast"
+					},
+					{
+						"code": "SM",
+						"name": "Sumy Oblast"
+					},
+					{
+						"code": "TP",
+						"name": "Ternopil Oblast"
+					},
+					{
+						"code": "KK",
+						"name": "Kharkiv Oblast"
+					},
+					{
+						"code": "KS",
+						"name": "Kherson Oblast"
+					},
+					{
+						"code": "KM",
+						"name": "Khmelnytskyi Oblast"
+					},
+					{
+						"code": "CK",
+						"name": "Cherkasy Oblast"
+					},
+					{
+						"code": "CH",
+						"name": "Chernihiv Oblast"
+					},
+					{
+						"code": "CV",
+						"name": "Chernivtsi Oblast"
+					}
+				],
+>>>>>>> parent of 076f6f2839 (Add missing Ukrainian Subdivisions to States.php (#35493))
 				"_links": {
 					"self": [{
 						"href": expect.any(String)
