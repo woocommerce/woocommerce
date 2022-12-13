@@ -408,7 +408,7 @@ class ListTable extends WP_List_Table {
 	 * Implements filtering of orders by status.
 	 */
 	private function set_status_args() {
-		$status = array_map( 'trim', (array) $this->request['status'] );
+		$status = array_filter( array_map( 'trim', (array) $this->request['status'] ) );
 
 		if ( empty( $status ) || in_array( 'all', $status, true ) ) {
 			/**
