@@ -12,6 +12,9 @@ use WP_Screen;
  * Admin list table for orders as managed by the OrdersTableDataStore.
  */
 class ListTable extends WP_List_Table {
+
+	private $order_type;
+
 	/**
 	 * Contains the arguments to be used in the order query.
 	 *
@@ -70,16 +73,19 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function setup(): void {
+	public function setup( $args = array() ): void {
+		$this->order_type = $args['order_type'] ?? 'shop_order';
+
 		add_action( 'admin_notices', array( $this, 'bulk_action_notices' ) );
 		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'get_columns' ), 0 );
-		add_filter( 'set_screen_option_edit_orders_per_page', array( $this, 'set_items_per_page' ), 10, 3 );
+		add_filter( 'set_screen_option_edit_' . $this->order_type . '_per_page', array( $this, 'set_items_per_page' ), 10, 3 );
 		add_filter( 'default_hidden_columns', array( $this, 'default_hidden_columns' ), 10, 2 );
 		add_action( 'admin_footer', array( $this, 'enqueue_scripts' ) );
 
 		$this->items_per_page();
 		set_screen_options();
-		add_action( 'manage_' . wc_get_page_screen_id( 'shop-order' ) . '_custom_column', array( $this, 'render_column' ), 10, 2 );
+
+		add_action( 'manage_' . wc_get_page_screen_id( $this->order_type ) . '_custom_column', array( $this, 'render_column' ), 10, 2 );
 	}
 
 	/**
@@ -124,7 +130,7 @@ class ListTable extends WP_List_Table {
 			'per_page',
 			array(
 				'default' => 20,
-				'option'  => 'edit_orders_per_page',
+				'option'  => 'edit_' . $this->order_type . '_per_page',
 			)
 		);
 	}
@@ -139,7 +145,7 @@ class ListTable extends WP_List_Table {
 	 * @return mixed
 	 */
 	public function set_items_per_page( $default, string $option, int $value ) {
-		return 'edit_orders_per_page' === $option ? absint( $value ) : $default;
+		return 'edit_' . $this->order_type . '_per_page' === $option ? absint( $value ) : $default;
 	}
 
 	/**
@@ -148,9 +154,11 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function display() {
-		$title         = esc_html__( 'Orders', 'woocommerce' );
-		$add_new       = esc_html__( 'Add Order', 'woocommerce' );
-		$new_page_link = $this->page_controller->get_new_page_url();
+		$post_type = get_post_type_object( $this->order_type );
+
+		$title         = esc_html( $post_type->labels->name );
+		$add_new       = esc_html( $post_type->labels->add_new );
+		$new_page_link = $this->page_controller->get_new_page_url( $this->order_type );
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo wp_kses_post(
@@ -246,7 +254,7 @@ class ListTable extends WP_List_Table {
 			'limit'    => $limit,
 			'page'     => $this->get_pagenum(),
 			'paginate' => true,
-			'type'     => 'shop_order',
+			'type'     => $this->order_type,
 		);
 
 		$this->set_status_args();
@@ -424,7 +432,7 @@ class ListTable extends WP_List_Table {
 		return array_sum(
 			array_map(
 				function( $order_status ) {
-					return wc_orders_count( $order_status, 'shop_order' );
+					return wc_orders_count( $order_status, $this->order_type );
 				},
 				(array) $status
 			)
@@ -470,10 +478,11 @@ class ListTable extends WP_List_Table {
 	 * @return string
 	 */
 	private function get_view_link( string $slug, string $name, int $count, bool $current ): string {
-		$url   = esc_url( add_query_arg( 'status', $slug, get_admin_url( null, 'admin.php?page=wc-orders' ) ) );
-		$name  = esc_html( $name );
-		$count = absint( $count );
-		$class = $current ? 'class="current"' : '';
+		$base_url = get_admin_url( null, 'admin.php?page=wc-orders' . ( 'shop_order' === $this->order_type ? '' : '--' . $this->order_type ) );
+		$url      = esc_url( add_query_arg( 'status', $slug, $base_url ) );
+		$name     = esc_html( $name );
+		$count    = absint( $count );
+		$class    = $current ? 'class="current"' : '';
 
 		return "<a href='$url' $class>$name <span class='count'>($count)</span></a>";
 	}
@@ -955,7 +964,7 @@ class ListTable extends WP_List_Table {
 			// Get all trashed orders.
 			$ids = wc_get_orders(
 				array(
-					'type'   => 'shop_order',
+					'type'   => $this->order_type,
 					'status' => 'trash',
 					'limit'  => -1,
 					'return' => 'ids',
