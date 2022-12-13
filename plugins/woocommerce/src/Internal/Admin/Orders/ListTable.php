@@ -486,13 +486,33 @@ class ListTable extends WP_List_Table {
 	 * @return int
 	 */
 	private function count_orders_by_status( $status ): int {
-		return array_sum(
-			array_map(
-				function( $order_status ) {
-					return wc_orders_count( $order_status, $this->order_type );
-				},
-				(array) $status
+		global $wpdb;
+
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$status       = (array) $status;
+
+		$status_placeholders = implode( ',', array_fill( 0, count( $status ), '%s' ) );
+
+		$count = absint(
+			$wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM {$orders_table} WHERE type = %s AND status IN ({$status_placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					array_merge( array( $this->order_type ), $status )
+				)
 			)
+		);
+
+		/**
+		 * Allows 3rd parties to modify the count of orders by status.
+		 *
+		 * @param int      $count  Number of orders for the given status.
+		 * @param string[] $status List of order statuses in the count.
+		 * @since 7.3.0
+		 */
+		return apply_filters(
+			'woocommerce_' . $this->order_type . '_list_table_order_count',
+			$count,
+			$status
 		);
 	}
 
