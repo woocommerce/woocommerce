@@ -9,7 +9,7 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { Products } from '../';
+import { Products } from '..';
 import { defaultSurfacedProductTypes, productTypes } from '../constants';
 import { getAdminSetting } from '~/utils/admin-settings';
 

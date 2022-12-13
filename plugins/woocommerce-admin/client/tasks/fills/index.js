@@ -15,7 +15,7 @@ const possiblyImportProductTaskExperiment = async () => {
 	if ( isImportProductExperiment() ) {
 		import( './experimental-import-products' );
 	} else {
-		import( './experimental-products' );
+		import( './products' );
 	}
 };
 
