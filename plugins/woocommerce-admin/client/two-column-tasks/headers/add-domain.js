@@ -10,14 +10,14 @@ import { __ } from '@wordpress/i18n';
 import TimerImage from './timer.svg';
 import { WC_ASSET_URL } from '../../utils/admin-settings';
 
-const StoreDetailsHeader = ( { task, goToTask } ) => {
+const AddDomainHeader = ( { task, goToTask } ) => {
 	return (
 		<div className="woocommerce-task-header__contents-container">
 			<img
 				alt={ __( 'Add a domain illustration', 'woocommerce' ) }
 				src={
 					WC_ASSET_URL +
-					'images/task_list/store-details-illustration.png'
+					'images/task_list/add-domain-illustration.png'
 				}
 				className="svg-background"
 			/>
@@ -27,7 +27,7 @@ const StoreDetailsHeader = ( { task, goToTask } ) => {
 				</h1>
 				<p>
 					{ __(
-						"You have a free one-year domain registration or transfer included with your plan.",
+						"Choose a new website address for your store – free of charge for one year, or transfer one you already own.",
 						'woocommerce'
 					) }
 				</p>
@@ -47,4 +47,4 @@ const StoreDetailsHeader = ( { task, goToTask } ) => {
 	);
 };
 
-export default StoreDetailsHeader;
+export default AddDomainHeader;

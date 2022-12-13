@@ -10,24 +10,24 @@ import { __ } from '@wordpress/i18n';
 import TimerImage from './timer.svg';
 import { WC_ASSET_URL } from '../../utils/admin-settings';
 
-const StoreDetailsHeader = ( { task, goToTask } ) => {
+const LaunchSiteHeader = ( { task, goToTask } ) => {
 	return (
 		<div className="woocommerce-task-header__contents-container">
 			<img
 				alt={ __( 'Launch your store illustration', 'woocommerce' ) }
 				src={
 					WC_ASSET_URL +
-					'images/task_list/store-details-illustration.png'
+					'images/task_list/store-launch-illustration.png'
 				}
 				className="svg-background"
 			/>
 			<div className="woocommerce-task-header__contents">
 				<h1>
-					{ __( 'Your store is ready for launch', 'woocommerce' ) }
+					{ __( 'Your store is ready for launch!', 'woocommerce' ) }
 				</h1>
 				<p>
 					{ __(
-						"You are absolutely on the right track and your store is already in good shape, so why not launch your store?",
+						"It's time to celebrate – you're ready to launch your store! Woo!",
 						'woocommerce'
 					) }
 				</p>
@@ -47,4 +47,4 @@ const StoreDetailsHeader = ( { task, goToTask } ) => {
 	);
 };
 
-export default StoreDetailsHeader;
+export default LaunchSiteHeader;
