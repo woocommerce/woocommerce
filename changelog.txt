@@ -1,5 +1,16 @@
 == Changelog ==
 
+= 7.1.1 2022-12-07 =
+
+**WooCommerce**
+
+* Patch - Move HPOS hook woocommerce_before_delete_order before deleting order. [#35517](https://github.com/woocommerce/woocommerce/pull/35517)
+
+**WooCommerce Blocks 8.7.6**
+
+* Fix - Mini Cart block: fix compatibility with Page Optimize and Product Bundles plugins. [#7794](https://github.com/woocommerce/woocommerce-blocks/pull/7794)
+* Fix - Mini Cart block: Load wc-blocks-registry package at the page's load instead of lazy load it. [#7813](https://github.com/woocommerce/woocommerce-blocks/pull/7813)
+
 = 7.1.0 2022-11-08 =
 
 **WooCommerce**

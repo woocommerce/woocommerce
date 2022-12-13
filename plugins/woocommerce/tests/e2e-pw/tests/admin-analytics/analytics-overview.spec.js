@@ -72,19 +72,23 @@ test.describe( 'Analytics pages', () => {
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 			);
-			// check the top section (Performance)
-			await page.click(
-				'//button[@title="Choose which analytics to display and the section name"]'
-			);
+			// check the top section
+			await page
+				.locator( 'button.woocommerce-ellipsis-menu__toggle' )
+				.first()
+				.click();
 			await expect( page.locator( 'text=Move up' ) ).not.toBeVisible();
 			await expect( page.locator( 'text=Move down' ) ).toBeVisible();
+			await page.keyboard.press( 'Escape' );
 
-			// check the bottom section (Leaderboards)
-			await page.click(
-				'//button[@title="Choose which leaderboards to display and other settings"]'
-			);
+			// check the bottom section
+			await page
+				.locator( 'button.woocommerce-ellipsis-menu__toggle' )
+				.last()
+				.click();
 			await expect( page.locator( 'text=Move down' ) ).not.toBeVisible();
 			await expect( page.locator( 'text=Move up' ) ).toBeVisible();
+			await page.keyboard.press( 'Escape' );
 		} );
 
 		test( 'should allow a user to move a section down', async ( {

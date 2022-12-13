@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add experimental open menu when user focus the select control input element

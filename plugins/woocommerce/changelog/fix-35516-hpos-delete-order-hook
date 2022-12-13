@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Move HPOS hook woocommerce_before_delete_order before deleting order.

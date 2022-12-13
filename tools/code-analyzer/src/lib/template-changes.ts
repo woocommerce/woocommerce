@@ -23,14 +23,15 @@ export const scanForTemplateChanges = ( content: string, version: string ) => {
 		/\./g,
 		'\\.'
 	) }).*`;
+
 	const versionRegex = new RegExp( matchVersion, 'g' );
 
 	for ( const p in patches ) {
 		const patch = patches[ p ];
 		const lines = patch.split( '\n' );
 		const filePath = getFilename( lines[ 0 ] );
-		let code = 'warning';
 
+		let code = 'warning';
 		let message = 'This template may require a version bump!';
 
 		for ( const l in lines ) {

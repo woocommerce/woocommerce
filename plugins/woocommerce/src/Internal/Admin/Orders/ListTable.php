@@ -34,6 +34,13 @@ class ListTable extends WP_List_Table {
 	private $page_controller;
 
 	/**
+	 * Tracks whether we're currently inside the trash.
+	 *
+	 * @var boolean
+	 */
+	private $is_trash = false;
+
+	/**
 	 * Sets up the admin list table for orders (specifically, for orders managed by the OrdersTableDataStore).
 	 *
 	 * @see WC_Admin_List_Table_Orders for the corresponding class used in relation to the traditional WP Post store.
@@ -154,18 +161,19 @@ class ListTable extends WP_List_Table {
 				<hr class='wp-header-end'>"
 		);
 
-		if ( $this->has_items() || $this->has_filter ) {
-			$this->views();
-
-			echo '<form id="wc-orders-filter" method="get" action="' . esc_url( get_admin_url( null, 'admin.php' ) ) . '">';
-			$this->print_hidden_form_fields();
-			$this->search_box( esc_html__( 'Search orders', 'woocommerce' ), 'orders-search-input' );
-
-			parent::display();
-			echo '</form> </div>';
-		} else {
+		if ( $this->should_render_blank_state() ) {
 			$this->render_blank_state();
+			return;
 		}
+
+		$this->views();
+
+		echo '<form id="wc-orders-filter" method="get" action="' . esc_url( get_admin_url( null, 'admin.php' ) ) . '">';
+		$this->print_hidden_form_fields();
+		$this->search_box( esc_html__( 'Search orders', 'woocommerce' ), 'orders-search-input' );
+
+		parent::display();
+		echo '</form> </div>';
 	}
 
 	/**
@@ -281,6 +289,9 @@ class ListTable extends WP_List_Table {
 				'total_pages' => $max_num_pages,
 			)
 		);
+
+		// Are we inside the trash?
+		$this->is_trash = isset( $_REQUEST['status'] ) && 'trash' === $_REQUEST['status'];
 	}
 
 	/**
@@ -377,25 +388,22 @@ class ListTable extends WP_List_Table {
 	public function get_views() {
 		$view_counts = array();
 		$view_links  = array();
-		$statuses    = wc_get_order_statuses();
+		$statuses    = $this->get_visible_statuses();
 		$current     = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? '' ) ) : 'all';
+		$all_count   = 0;
 
-		// Add 'draft' and 'trash' to list.
-		foreach ( array( 'draft', 'trash' ) as $wp_status ) {
-			$statuses[ $wp_status ] = ( get_post_status_object( $wp_status ) )->label;
-		}
-
-		$statuses_in_list = array_intersect( array_keys( $statuses ), get_post_stati( array( 'show_in_admin_status_list' => true ) ) );
-
-		foreach ( $statuses_in_list as $slug ) {
+		foreach ( array_keys( $statuses ) as $slug ) {
 			$total_in_status = $this->count_orders_by_status( $slug );
 
 			if ( $total_in_status > 0 ) {
 				$view_counts[ $slug ] = $total_in_status;
 			}
+
+			if ( ( get_post_status_object( $slug ) )->show_in_admin_all_list ) {
+				$all_count += $total_in_status;
+			}
 		}
 
-		$all_count         = array_sum( $view_counts );
 		$view_links['all'] = $this->get_view_link( 'all', __( 'All', 'woocommerce' ), $all_count, '' === $current || 'all' === $current );
 
 		foreach ( $view_counts as $slug => $count ) {
@@ -408,20 +416,47 @@ class ListTable extends WP_List_Table {
 	/**
 	 * Count orders by status.
 	 *
-	 * @param string $status The order status we are interested in.
+	 * @param string|string[] $status The order status we are interested in.
 	 *
 	 * @return int
 	 */
-	private function count_orders_by_status( string $status ): int {
-		$orders = wc_get_orders(
-			array(
-				'limit'  => -1,
-				'return' => 'ids',
-				'status' => $status,
+	private function count_orders_by_status( $status ): int {
+		return array_sum(
+			array_map(
+				function( $order_status ) {
+					return wc_orders_count( $order_status, 'shop_order' );
+				},
+				(array) $status
 			)
 		);
+	}
 
-		return count( $orders );
+	/**
+	 * Checks whether the blank state should be rendered or not. This depends on whether there are others with a visible
+	 * status.
+	 *
+	 * @return boolean TRUE when the blank state should be rendered, FALSE otherwise.
+	 */
+	private function should_render_blank_state(): bool {
+		return ( ! $this->has_filter ) && 0 === $this->count_orders_by_status( array_keys( $this->get_visible_statuses() ) );
+	}
+
+	/**
+	 * Returns a list of slug and labels for order statuses that should be visible in the status list.
+	 *
+	 * @return array slug => label array of order statuses.
+	 */
+	private function get_visible_statuses(): array {
+		return array_intersect_key(
+			array_merge(
+				wc_get_order_statuses(),
+				array(
+					'trash' => ( get_post_status_object( 'trash' ) )->label,
+					'draft' => ( get_post_status_object( 'draft' ) )->label,
+				)
+			),
+			array_flip( get_post_stati( array( 'show_in_admin_status_list' => true ) ) )
+		);
 	}
 
 	/**
@@ -458,7 +493,7 @@ class ListTable extends WP_List_Table {
 			submit_button( __( 'Filter', 'woocommerce' ), '', 'filter_action', false, array( 'id' => 'order-query-submit' ) );
 		}
 
-		if ( $this->is_trash && $this->has_items() && current_user_can( 'edit_others_orders' ) ) {
+		if ( $this->is_trash && $this->has_items() && current_user_can( 'edit_others_shop_orders' ) ) {
 			submit_button( __( 'Empty Trash', 'woocommerce' ), 'apply', 'delete_all', false );
 		}
 
@@ -704,8 +739,10 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function render_order_status_column( WC_Order $order ): void {
-		$tooltip                 = '';
-		$comment_count           = get_comment_count( $order->get_id() );
+		$tooltip = '';
+		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
+		$comment_count = get_comment_count( $order->get_id() );
+		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
 		$approved_comments_count = absint( $comment_count['approved'] );
 
 		if ( $approved_comments_count ) {
@@ -887,6 +924,19 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Gets the current action selected from the bulk actions dropdown.
+	 *
+	 * @return string|false The action name. False if no action was selected.
+	 */
+	public function current_action() {
+		if ( ! empty( $_REQUEST['delete_all'] ) ) {
+			return 'delete_all';
+		}
+
+		return parent::current_action();
+	}
+
+	/**
 	 * Handle bulk actions.
 	 */
 	public function handle_bulk_actions() {
@@ -901,6 +951,22 @@ class ListTable extends WP_List_Table {
 		$redirect_to = remove_query_arg( array( 'deleted', 'ids' ), wp_get_referer() );
 		$redirect_to = add_query_arg( 'paged', $this->get_pagenum(), $redirect_to );
 
+		if ( 'delete_all' === $action ) {
+			// Get all trashed orders.
+			$ids = wc_get_orders(
+				array(
+					'type'   => 'shop_order',
+					'status' => 'trash',
+					'limit'  => -1,
+					'return' => 'ids',
+				)
+			);
+
+			$action = 'delete';
+		} else {
+			$ids = isset( $_REQUEST['order'] ) ? array_reverse( array_map( 'absint', $_REQUEST['order'] ) ) : array();
+		}
+
 		/**
 		 * Allows 3rd parties to modify order IDs about to be affected by a bulk action.
 		 *
@@ -908,7 +974,7 @@ class ListTable extends WP_List_Table {
 		 */
 		$ids = apply_filters( // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 			'woocommerce_bulk_action_ids',
-			isset( $_REQUEST['order'] ) ? array_reverse( array_map( 'absint', $_REQUEST['order'] ) ) : array(),
+			$ids,
 			$action,
 			'order'
 		);

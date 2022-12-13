@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix WooCommerce Admin client React build warnings and remove unnecessary scss imports.

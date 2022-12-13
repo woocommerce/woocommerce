@@ -10,7 +10,7 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { TaskItem, useSlot } from '@woocommerce/experimental';
-import { useCallback, useContext } from '@wordpress/element';
+import { useCallback, useContext, useEffect } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 
@@ -59,7 +59,20 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		title,
 		level,
 		additionalInfo,
+		recordViewEvent,
 	} = task;
+
+	useEffect( () => {
+		if ( recordViewEvent ) {
+			recordEvent( 'tasklist_item_view', {
+				task_name: id,
+				is_complete: isComplete,
+				context: layoutContext.toString(),
+			} );
+		}
+		// run the effect only when component mounts
+		// eslint-disable-next-line
+	}, [] );
 
 	const slot = useSlot( `woocommerce_onboarding_task_list_item_${ id }` );
 	const hasFills = Boolean( slot?.fills?.length );

@@ -74,6 +74,14 @@ class WC_Payment_Tokens {
 			array(
 				'user_id'    => $customer_id,
 				'gateway_id' => $gateway_id,
+				/**
+				 * Controls the maximum number of Payment Methods that will be listed via the My Account page.
+				 *
+				 * @since 7.2.0
+				 *
+				 * @param int $limit Defaults to the value of the `posts_per_page` option.
+				 */
+				'limit'      => apply_filters( 'woocommerce_get_customer_payment_tokens_limit', get_option( 'posts_per_page' ) ),
 			)
 		);
 

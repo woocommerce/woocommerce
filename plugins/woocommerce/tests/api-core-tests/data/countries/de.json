@@ -1,0 +1,82 @@
+{
+    "code": "DE",
+    "name": "Germany",
+    "states": [
+        {
+            "code": "DE-BW",
+            "name": "Baden-Württemberg"
+        },
+        {
+            "code": "DE-BY",
+            "name": "Bavaria"
+        },
+        {
+            "code": "DE-BE",
+            "name": "Berlin"
+        },
+        {
+            "code": "DE-BB",
+            "name": "Brandenburg"
+        },
+        {
+            "code": "DE-HB",
+            "name": "Bremen"
+        },
+        {
+            "code": "DE-HH",
+            "name": "Hamburg"
+        },
+        {
+            "code": "DE-HE",
+            "name": "Hesse"
+        },
+        {
+            "code": "DE-MV",
+            "name": "Mecklenburg-Vorpommern"
+        },
+        {
+            "code": "DE-NI",
+            "name": "Lower Saxony"
+        },
+        {
+            "code": "DE-NW",
+            "name": "North Rhine-Westphalia"
+        },
+        {
+            "code": "DE-RP",
+            "name": "Rhineland-Palatinate"
+        },
+        {
+            "code": "DE-SL",
+            "name": "Saarland"
+        },
+        {
+            "code": "DE-SN",
+            "name": "Saxony"
+        },
+        {
+            "code": "DE-ST",
+            "name": "Saxony-Anhalt"
+        },
+        {
+            "code": "DE-SH",
+            "name": "Schleswig-Holstein"
+        },
+        {
+            "code": "DE-TH",
+            "name": "Thuringia"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/de"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}
