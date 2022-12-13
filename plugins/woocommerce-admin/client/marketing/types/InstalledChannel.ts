@@ -6,8 +6,10 @@ export type InstalledChannel = {
 	title: string;
 	description: string;
 	icon: string;
+	isSetupCompleted: boolean;
+	setupUrl: string;
+	manageUrl: string;
 	syncStatus: SyncStatusType;
 	issueType: IssueTypeType;
 	issueText: string;
-	manageUrl: string;
 };
