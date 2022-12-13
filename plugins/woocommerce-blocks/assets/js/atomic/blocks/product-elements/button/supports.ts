@@ -22,6 +22,7 @@ export const supports = {
 		},
 		...( hasSpacingStyleSupport() && {
 			spacing: {
+				margin: true,
 				padding: true,
 				__experimentalSkipSerialization: true,
 			},
