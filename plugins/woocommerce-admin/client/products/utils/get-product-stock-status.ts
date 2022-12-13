@@ -32,7 +32,7 @@ export const PRODUCT_STOCK_STATUS_LABELS = {
  * Get the product stock quantity or stock status label.
  *
  * @param  product Product instance.
- * @return {PRODUCT_STOCK_STATUS_KEYS} Product staus key.
+ * @return {PRODUCT_STOCK_STATUS_KEYS} Product status key.
  */
 export const getProductStockStatus = (
 	product: PartialProduct | Partial< ProductVariation >
