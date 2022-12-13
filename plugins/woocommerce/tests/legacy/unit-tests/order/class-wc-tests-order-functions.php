@@ -80,6 +80,61 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		// Invalid status returns 0.
 		$this->assertEquals( 0, wc_orders_count( 'unkown-status' ) );
+
+		// Invalid order type should return 0.
+		$this->assertEquals( 0, wc_orders_count( 'wc-pending', 'invalid-order-type' ) );
+
+		wp_cache_flush();
+
+		// Fake some datastores and order types for testing.
+		$test_counts = array(
+			'order'           => array(
+				array( 'wc-on-hold', 2 ),
+				array( 'trash', 1 ),
+			),
+			'order-fake-type' => array(
+				array( 'wc-on-hold', 3 ),
+				array( 'trash', 0 ),
+			),
+		);
+
+		$mock_datastores = array();
+		foreach ( array( 'order', 'order-fake-type' ) as $order_type ) {
+			$mock_datastores[ $order_type ] = $this->getMockBuilder( 'Abstract_WC_Order_Data_Store_CPT' )
+				->setMethods( array( 'get_order_count' ) )
+				->getMock();
+
+			$mock_datastores[ $order_type ]
+				->method( 'get_order_count' )
+				->will( $this->returnValueMap( $test_counts[ $order_type ] ) );
+		}
+
+		$add_mock_datastores = function( $stores ) use ( $mock_datastores ) {
+			return array_merge( $stores, $mock_datastores );
+		};
+		$add_mock_order_type = function( $order_types ) use ( $mock_datastores ) {
+			return array( 'shop_order', 'order-fake-type' );
+		};
+
+		add_filter( 'woocommerce_data_stores', $add_mock_datastores );
+		add_filter( 'wc_order_types', $add_mock_order_type );
+
+		// Check counts for specific order types.
+		$this->assertEquals( 2, wc_orders_count( 'on-hold', 'shop_order' ) );
+		$this->assertEquals( 1, wc_orders_count( 'trash', 'shop_order' ) );
+		$this->assertEquals( 3, wc_orders_count( 'on-hold', 'order-fake-type' ) );
+		$this->assertEquals( 0, wc_orders_count( 'trash', 'order-fake-type' ) );
+
+		// Check that counts with no order type include all order types.
+		$this->assertEquals( 5, wc_orders_count( 'on-hold' ) );
+		$this->assertEquals( 1, wc_orders_count( 'trash' ) );
+
+		remove_filter( 'woocommerce_data_stores', $add_mock_datastores );
+		remove_filter( 'wc_order_types', $add_mock_order_type );
+
+		// Confirm that everything's back to normal.
+		wp_cache_flush();
+		$this->assertEquals( 0, wc_orders_count( 'on-hold' ) );
 	}
 
 	/**

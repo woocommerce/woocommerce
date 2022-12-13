@@ -161,18 +161,19 @@ class ListTable extends WP_List_Table {
 				<hr class='wp-header-end'>"
 		);
 
-		if ( $this->has_items() || $this->has_filter ) {
-			$this->views();
-
-			echo '<form id="wc-orders-filter" method="get" action="' . esc_url( get_admin_url( null, 'admin.php' ) ) . '">';
-			$this->print_hidden_form_fields();
-			$this->search_box( esc_html__( 'Search orders', 'woocommerce' ), 'orders-search-input' );
-
-			parent::display();
-			echo '</form> </div>';
-		} else {
+		if ( $this->should_render_blank_state() ) {
 			$this->render_blank_state();
+			return;
 		}
+
+		$this->views();
+
+		echo '<form id="wc-orders-filter" method="get" action="' . esc_url( get_admin_url( null, 'admin.php' ) ) . '">';
+		$this->print_hidden_form_fields();
+		$this->search_box( esc_html__( 'Search orders', 'woocommerce' ), 'orders-search-input' );
+
+		parent::display();
+		echo '</form> </div>';
 	}
 
 	/**
@@ -387,25 +388,22 @@ class ListTable extends WP_List_Table {
 	public function get_views() {
 		$view_counts = array();
 		$view_links  = array();
-		$statuses    = wc_get_order_statuses();
+		$statuses    = $this->get_visible_statuses();
 		$current     = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? '' ) ) : 'all';
+		$all_count   = 0;
 
-		// Add 'draft' and 'trash' to list.
-		foreach ( array( 'draft', 'trash' ) as $wp_status ) {
-			$statuses[ $wp_status ] = ( get_post_status_object( $wp_status ) )->label;
-		}
-
-		$statuses_in_list = array_intersect( array_keys( $statuses ), get_post_stati( array( 'show_in_admin_status_list' => true ) ) );
-
-		foreach ( $statuses_in_list as $slug ) {
+		foreach ( array_keys( $statuses ) as $slug ) {
 			$total_in_status = $this->count_orders_by_status( $slug );
 
 			if ( $total_in_status > 0 ) {
 				$view_counts[ $slug ] = $total_in_status;
 			}
+
+			if ( ( get_post_status_object( $slug ) )->show_in_admin_all_list ) {
+				$all_count += $total_in_status;
+			}
 		}
 
-		$all_count         = array_sum( $view_counts );
 		$view_links['all'] = $this->get_view_link( 'all', __( 'All', 'woocommerce' ), $all_count, '' === $current || 'all' === $current );
 
 		foreach ( $view_counts as $slug => $count ) {
@@ -418,20 +416,47 @@ class ListTable extends WP_List_Table {
 	/**
 	 * Count orders by status.
 	 *
-	 * @param string $status The order status we are interested in.
+	 * @param string|string[] $status The order status we are interested in.
 	 *
 	 * @return int
 	 */
-	private function count_orders_by_status( string $status ): int {
-		$orders = wc_get_orders(
-			array(
-				'limit'  => -1,
-				'return' => 'ids',
-				'status' => $status,
+	private function count_orders_by_status( $status ): int {
+		return array_sum(
+			array_map(
+				function( $order_status ) {
+					return wc_orders_count( $order_status, 'shop_order' );
+				},
+				(array) $status
 			)
 		);
+	}
 
-		return count( $orders );
+	/**
+	 * Checks whether the blank state should be rendered or not. This depends on whether there are others with a visible
+	 * status.
+	 *
+	 * @return boolean TRUE when the blank state should be rendered, FALSE otherwise.
+	 */
+	private function should_render_blank_state(): bool {
+		return ( ! $this->has_filter ) && 0 === $this->count_orders_by_status( array_keys( $this->get_visible_statuses() ) );
+	}
+
+	/**
+	 * Returns a list of slug and labels for order statuses that should be visible in the status list.
+	 *
+	 * @return array slug => label array of order statuses.
+	 */
+	private function get_visible_statuses(): array {
+		return array_intersect_key(
+			array_merge(
+				wc_get_order_statuses(),
+				array(
+					'trash' => ( get_post_status_object( 'trash' ) )->label,
+					'draft' => ( get_post_status_object( 'draft' ) )->label,
+				)
+			),
+			array_flip( get_post_stati( array( 'show_in_admin_status_list' => true ) ) )
+		);
 	}
 
 	/**
