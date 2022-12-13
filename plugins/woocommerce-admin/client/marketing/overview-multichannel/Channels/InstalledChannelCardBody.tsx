@@ -57,6 +57,50 @@ const SyncStatus: React.FC< SyncStatusPropsType > = ( { status } ) => {
 	);
 };
 
+type IssueStatusPropsType = {
+	installedChannel: InstalledChannel;
+};
+
+const issueStatusClassName = 'woocommerce-marketing-issue-status';
+
+const IssueStatus: React.FC< IssueStatusPropsType > = ( {
+	installedChannel,
+} ) => {
+	if ( installedChannel.issueType === 'error' ) {
+		return (
+			<div
+				className={ classnames(
+					issueStatusClassName,
+					`${ issueStatusClassName }__error`
+				) }
+			>
+				<GridiconNotice size={ iconSize } />
+				{ installedChannel.issueText }
+			</div>
+		);
+	}
+
+	if ( installedChannel.issueType === 'warning' ) {
+		return (
+			<div
+				className={ classnames(
+					issueStatusClassName,
+					`${ issueStatusClassName }__warning`
+				) }
+			>
+				<GridiconNotice size={ iconSize } />
+				{ installedChannel.issueText }
+			</div>
+		);
+	}
+
+	return (
+		<div className={ issueStatusClassName }>
+			{ installedChannel.issueText }
+		</div>
+	);
+};
+
 export const InstalledChannelCardBody: React.FC<
 	InstalledChannelCardBodyProps
 > = ( { installedChannel } ) => {
@@ -71,8 +115,10 @@ export const InstalledChannelCardBody: React.FC<
 			}
 			name={ installedChannel.title }
 			description={
-				<div>
+				<div className="woocommerce-marketing-installed-channel-description">
 					<SyncStatus status={ installedChannel.syncStatus } />
+					<div className="woocommerce-marketing-installed-channel-description__separator" />
+					<IssueStatus installedChannel={ installedChannel } />
 				</div>
 			}
 			button={
