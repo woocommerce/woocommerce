@@ -20,6 +20,7 @@ import { BranchList } from './components/BranchList';
 
 const cardStyle = css( {
 	marginTop: '32px',
+	maxWidth: '960px',
 } );
 
 export const App = () => {
@@ -27,12 +28,9 @@ export const App = () => {
 
 	return (
 		<>
-			<Heading level={ 1 }>
-				Live Branches - Install and test WooCommerce PRs
-			</Heading>
 			<Card elevation={ 3 } css={ cardStyle }>
 				<CardHeader>
-					<h2>Active PRs</h2>
+					<h2>Install and test WooCommerce Branches</h2>
 				</CardHeader>
 				<CardBody>
 					{ isLoading ? (

@@ -2,32 +2,30 @@
  * External dependencies
  */
 import {
-	// @ts-ignore
-	__experimentalItemGroup as ItemGroup,
-	// @ts-ignore
-	__experimentalItem as Item,
 	Button,
+	ComboboxControl,
 } from '@wordpress/components';
+import { useState } from 'react';
 
 /**
  * Internal dependencies
  */
 import { Branch } from '../hooks/live-branches';
 
-const BranchListItem = ( { branch }: { branch: Branch } ) => {
+const BranchInfo = ( { branch }: { branch: Branch } ) => {
 	return (
-		<Item>
+		<div>
 			<p>
-				Download URL:{ ' ' }
-				<a href={ branch.download_url }>{ branch.download_url }</a>
-			</p>
-			<p>
-				Pull Request:{ ' ' }
+				Pull Request Branch:{ ' ' }
 				<a
 					href={ `https://github.com/woocommerce/woocommerce/pull/${ branch.pr }` }
 				>
 					{ branch.branch }
 				</a>
+			</p>
+			<p>
+				Download URL:{ ' ' }
+				<a href={ branch.download_url }>{ branch.download_url }</a>
 			</p>
 			<Button
 				variant="primary"
@@ -35,17 +33,28 @@ const BranchListItem = ( { branch }: { branch: Branch } ) => {
 			>
 				Install
 			</Button>
-		</Item>
+		</div>
 	);
 };
 
 export const BranchList = ( { branches }: { branches: Branch[] } ) => {
+	const [ selectedBranchCommit, setSelectedBranchCommit ] = useState< string >( branches[0].commit );
+	const selectedBranch = branches.filter( ( branch: Branch ) => branch.commit === selectedBranchCommit )[0];
+
 	return (
-		<ItemGroup isSeparated>
-			{ /* @ts-ignore */ }
-			{ branches.map( ( branch ) => (
-				<BranchListItem key={ branch.commit } branch={ branch } />
-			) ) }
-		</ItemGroup>
+		<>
+			Branch:{ ' ' }
+			<ComboboxControl
+				onChange={ branch => setSelectedBranchCommit( branch as string ) }
+				value={ selectedBranchCommit }
+				options={ branches.map( branch => {
+					return {
+						value: branch.commit,
+						label: branch.branch,
+					};
+				} ) }
+			/>
+			{ selectedBranch && BranchInfo( { branch: selectedBranch } ) }
+		</>
 	);
 };
