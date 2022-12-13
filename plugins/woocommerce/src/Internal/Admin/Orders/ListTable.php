@@ -455,6 +455,7 @@ class ListTable extends WP_List_Table {
 		$view_links  = array();
 		$statuses    = $this->get_visible_statuses();
 		$current     = ! empty( $this->request['status'] ) ? sanitize_text_field( $this->request['status'] ) : 'all';
+		$all_count   = 0;
 
 		foreach ( array_keys( $statuses ) as $slug ) {
 			$total_in_status = $this->count_orders_by_status( $slug );
