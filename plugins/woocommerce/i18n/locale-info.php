@@ -10,6 +10,40 @@ defined( 'ABSPATH' ) || exit;
 
 $locales = include 'currency-info.php';
 
+// Up until 2023-01-01 Croatia uses the Croatian Kuna.
+$croatia = array(
+	'currency_code'  => 'HRK',
+	'currency_pos'   => 'right_space',
+	'thousand_sep'   => '.',
+	'decimal_sep'    => ',',
+	'num_decimals'   => 2,
+	'weight_unit'    => 'kg',
+	'dimension_unit' => 'cm',
+	'direction'      => 'ltr',
+	'default_locale' => 'hr_HR',
+	'name'           => 'Croatian kuna',
+	'singular'       => 'Croatian kuna',
+	'plural'         => 'Croatian kunas',
+	'short_symbol'   => 'kn',
+	'locales'        => $locales['HRK'],
+);
+
+// On 2023-01-01 Croatia switches to using the Euro. After the two week transition period, we no longer
+// need to support the Kuna, so this (and the above) can be collapsed back into the main array.
+if ( date_i18n( 'Y-m-d' ) >= '2023-01-01' ) {
+	$croatia = array_merge(
+		$croatia,
+		array(
+			'currency_code' => 'EUR',
+			'name'          => 'Euro',
+			'singular'      => 'euro',
+			'plural'        => 'euros',
+			'short_symbol'  => '€',
+			'locales'       => $locales['EUR'],
+		)
+	);
+}
+
 return array(
 	'AD' => array(
 		'currency_code'  => 'EUR',
@@ -1531,22 +1565,7 @@ return array(
 		'short_symbol'   => 'L',
 		'locales'        => $locales['HNL'],
 	),
-	'HR' => array(
-		'currency_code'  => 'HRK',
-		'currency_pos'   => 'right_space',
-		'thousand_sep'   => '.',
-		'decimal_sep'    => ',',
-		'num_decimals'   => 2,
-		'weight_unit'    => 'kg',
-		'dimension_unit' => 'cm',
-		'direction'      => 'ltr',
-		'default_locale' => 'hr_HR',
-		'name'           => 'Croatian kuna',
-		'singular'       => 'Croatian kuna',
-		'plural'         => 'Croatian kunas',
-		'short_symbol'   => 'kn',
-		'locales'        => $locales['HRK'],
-	),
+	'HR' => $croatia,
 	'HT' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'right_space',
