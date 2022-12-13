@@ -4,4 +4,8 @@
 		align-items: flex-start;
 		gap: $gap-smallest;
 	}
+
+	.components-button.is-link {
+		text-decoration: none;
+	}
 }

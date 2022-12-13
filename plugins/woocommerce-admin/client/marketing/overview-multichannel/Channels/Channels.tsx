@@ -17,6 +17,7 @@ import {
 import { useChannels } from './useChannels';
 import './Channels.scss';
 import { InstalledChannelCardBody } from './InstalledChannelCardBody';
+import { CollapsibleRecommendedChannels } from './CollapsibleRecommendedChannels';
 
 export const Channels = () => {
 	const {
@@ -46,7 +47,8 @@ export const Channels = () => {
 
 	/*
 	 * If users have no registered channels,
-	 * we display recommended channels without collapsible list.
+	 * we display recommended channels without collapsible list
+	 * and with a description in the card header.
 	 */
 	if ( registeredChannels.length === 0 && recommendedChannels.length > 0 ) {
 		return (
@@ -77,10 +79,10 @@ export const Channels = () => {
 	}
 
 	/*
-	 * TODO: Users have registered channels,
-	 * display the registered channels.
+	 * Users have registered channels,
+	 * so here we display the registered channels first.
 	 * If there are recommended channels,
-	 * display them in a collapsible list.
+	 * we display them next in a collapsible list.
 	 */
 	return (
 		<Card className="woocommerce-marketing-channels-card">
@@ -90,7 +92,7 @@ export const Channels = () => {
 				</CardHeaderTitle>
 			</CardHeader>
 
-			{ /* TODO: registered channels here. */ }
+			{ /* Registered channels section. */ }
 			{ registeredChannels.map( ( el, idx ) => {
 				return (
 					<Fragment key={ el.slug }>
@@ -102,12 +104,11 @@ export const Channels = () => {
 				);
 			} ) }
 
-			{ /* TODO: recommended channels here. */ }
+			{ /* Recommended channels section. */ }
 			{ recommendedChannels.length > 0 && (
-				<>
-					<CardDivider />
-					<CardBody>recommended</CardBody>
-				</>
+				<CollapsibleRecommendedChannels
+					recommendedChannels={ recommendedChannels }
+				/>
 			) }
 		</Card>
 	);
