@@ -9,8 +9,8 @@ import { chevronUp, chevronDown } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import { SmartPluginCardBody } from '~/marketing/components';
 import { RecommendedChannel } from './types';
+import { RecommendedChannelsList } from './RecommendedChannelsList';
 import './Channels.scss';
 
 type RecommendedChannelsType = {
@@ -37,17 +37,11 @@ export const CollapsibleRecommendedChannels: React.FC<
 					/>
 				</Button>
 			</CardBody>
-			{ ! collapsed &&
-				recommendedChannels.map( ( el, idx ) => {
-					return (
-						<Fragment key={ el.plugin }>
-							<SmartPluginCardBody plugin={ el } />
-							{ idx < recommendedChannels.length - 1 && (
-								<CardDivider />
-							) }
-						</Fragment>
-					);
-				} ) }
+			{ ! collapsed && (
+				<RecommendedChannelsList
+					recommendedChannels={ recommendedChannels }
+				/>
+			) }
 		</>
 	);
 };

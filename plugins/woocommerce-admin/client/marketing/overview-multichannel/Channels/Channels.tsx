@@ -12,12 +12,12 @@ import {
 	CardHeaderTitle,
 	CardHeaderDescription,
 	CenteredSpinner,
-	SmartPluginCardBody,
 } from '~/marketing/components';
 import { useChannels } from './useChannels';
 import './Channels.scss';
 import { InstalledChannelCardBody } from './InstalledChannelCardBody';
 import { CollapsibleRecommendedChannels } from './CollapsibleRecommendedChannels';
+import { RecommendedChannelsList } from './RecommendedChannelsList';
 
 export const Channels = () => {
 	const {
@@ -64,16 +64,9 @@ export const Channels = () => {
 						) }
 					</CardHeaderDescription>
 				</CardHeader>
-				{ recommendedChannels.map( ( el, idx ) => {
-					return (
-						<Fragment key={ el.plugin }>
-							<SmartPluginCardBody plugin={ el } />
-							{ idx < recommendedChannels.length - 1 && (
-								<CardDivider />
-							) }
-						</Fragment>
-					);
-				} ) }
+				<RecommendedChannelsList
+					recommendedChannels={ recommendedChannels }
+				/>
 			</Card>
 		);
 	}
