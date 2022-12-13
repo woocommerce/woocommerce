@@ -11,7 +11,7 @@ jobs:
             SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         runs-on: ubuntu-latest
         steps:
-            - uses: act10ns/slack@v1
+            - uses: act10ns/slack@v2
               with:
                   status: starting
               if: ${{ always() }}
@@ -28,7 +28,7 @@ jobs:
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   automations: release
-            - uses: act10ns/slack@v1
+            - uses: act10ns/slack@v2
               with:
                   status: ${{ job.status }}
                   steps: ${{ toJson(steps) }}
