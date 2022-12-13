@@ -1,3 +1,8 @@
+/**
+ * Internal dependencies
+ */
+import { defaultButtonLabel } from './constants';
+
 export default {
 	checkoutPageId: {
 		type: 'number',
@@ -9,5 +14,9 @@ export default {
 			move: true,
 			remove: true,
 		},
+	},
+	buttonLabel: {
+		type: 'string',
+		default: defaultButtonLabel,
 	},
 };
