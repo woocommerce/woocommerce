@@ -9,7 +9,7 @@ jobs:
         env:
             SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         steps:
-            - uses: act10ns/slack@v1
+            - uses: act10ns/slack@v2
               with:
                   status: starting
               if: ${{ always() }}
@@ -33,7 +33,7 @@ jobs:
                   asset_path: ${{github.workspace}}/woo-gutenberg-products-block.zip
                   asset_name: woo-gutenberg-products-block.zip
                   asset_content_type: application/zip
-            - uses: act10ns/slack@v1
+            - uses: act10ns/slack@v2
               with:
                   status: ${{ job.status }}
                   steps: ${{ toJson(steps) }}
