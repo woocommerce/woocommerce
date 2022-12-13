@@ -11,7 +11,6 @@ import './style.scss';
 
 const Rating = ( {
 	className,
-	key,
 	rating,
 	ratedProductsCount,
 }: RatingProps ): JSX.Element => {
@@ -39,7 +38,7 @@ const Rating = ( {
 	};
 
 	return (
-		<div className={ ratingClassName } key={ key }>
+		<div className={ ratingClassName }>
 			<div
 				className={ 'wc-block-components-product-rating__stars' }
 				role="img"
@@ -58,10 +57,11 @@ const Rating = ( {
 		</div>
 	);
 };
+
+export type RatingValues = 0 | 1 | 2 | 3 | 4 | 5;
 interface RatingProps {
-	className: string;
-	key: 0 | 1 | 2 | 3 | 4 | 5;
-	rating: 0 | 1 | 2 | 3 | 4 | 5;
+	className?: string;
+	rating: RatingValues;
 	ratedProductsCount?: number | null;
 }
 

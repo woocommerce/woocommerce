@@ -64,5 +64,26 @@ describe( `${ block.name } Block`, () => {
 				text: "Show 'Apply filters' button",
 			} );
 		} );
+
+		it( 'allows changing the Display Style', async () => {
+			// Turn the display style to Dropdown
+			await expect( page ).toClick( 'button', { text: 'Dropdown' } );
+
+			await page.waitForSelector(
+				'.wc-block-rating-filter.style-dropdown'
+			);
+			await expect( page ).toMatchElement(
+				'.wc-block-rating-filter.style-dropdown'
+			);
+			// Turn the display style to List
+			await expect( page ).toClick( 'button', {
+				text: 'List',
+			} );
+
+			await page.waitForSelector( '.wc-block-rating-filter.style-list' );
+			await expect( page ).toMatchElement(
+				'.wc-block-rating-filter.style-list'
+			);
+		} );
 	} );
 } );
