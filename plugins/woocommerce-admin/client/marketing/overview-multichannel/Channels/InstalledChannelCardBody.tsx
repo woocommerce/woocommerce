@@ -104,6 +104,40 @@ const IssueStatus: React.FC< IssueStatusPropsType > = ( {
 export const InstalledChannelCardBody: React.FC<
 	InstalledChannelCardBodyProps
 > = ( { installedChannel } ) => {
+	/**
+	 * The description section in the channel card.
+	 *
+	 * If setup is not completed, this would be the channel description.
+	 *
+	 * If setup is completed, this would be an element with sync status and issue status.
+	 */
+	const description = ! installedChannel.isSetupCompleted ? (
+		installedChannel.description
+	) : (
+		<div className="woocommerce-marketing-installed-channel-description">
+			<SyncStatus status={ installedChannel.syncStatus } />
+			<div className="woocommerce-marketing-installed-channel-description__separator" />
+			<IssueStatus installedChannel={ installedChannel } />
+		</div>
+	);
+
+	/**
+	 * The action button in the channel card.
+	 *
+	 * If setup is not completed, this would be a "Finish setup" primary button.
+	 *
+	 * If setup is completed, this would be a "Manage" secondary button.
+	 */
+	const button = ! installedChannel.isSetupCompleted ? (
+		<Button variant="primary" href={ installedChannel.setupUrl }>
+			{ __( 'Finish setup', 'woocommerce' ) }
+		</Button>
+	) : (
+		<Button variant="secondary" href={ installedChannel.manageUrl }>
+			{ __( 'Manage', 'woocommerce' ) }
+		</Button>
+	);
+
 	return (
 		<PluginCardBody
 			className="woocommerce-marketing-installed-channel-card-body"
@@ -114,18 +148,8 @@ export const InstalledChannelCardBody: React.FC<
 				/>
 			}
 			name={ installedChannel.title }
-			description={
-				<div className="woocommerce-marketing-installed-channel-description">
-					<SyncStatus status={ installedChannel.syncStatus } />
-					<div className="woocommerce-marketing-installed-channel-description__separator" />
-					<IssueStatus installedChannel={ installedChannel } />
-				</div>
-			}
-			button={
-				<Button variant="secondary" href={ installedChannel.manageUrl }>
-					{ __( 'Manage', 'woocommerce' ) }
-				</Button>
-			}
+			description={ description }
+			button={ button }
 		/>
 	);
 };
