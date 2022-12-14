@@ -1,10 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	Button,
-	ComboboxControl,
-} from '@wordpress/components';
+import { Button, ComboboxControl } from '@wordpress/components';
 import { useState } from 'react';
 
 /**
@@ -14,7 +11,7 @@ import { Branch } from '../hooks/live-branches';
 
 const BranchInfo = ( { branch }: { branch: Branch } ) => {
 	return (
-		<div>
+		<>
 			<p>
 				Pull Request Branch:{ ' ' }
 				<a
@@ -33,13 +30,16 @@ const BranchInfo = ( { branch }: { branch: Branch } ) => {
 			>
 				Install
 			</Button>
-		</div>
+		</>
 	);
 };
 
 export const BranchList = ( { branches }: { branches: Branch[] } ) => {
-	const [ selectedBranchCommit, setSelectedBranchCommit ] = useState< string >( branches[0].commit );
-	const selectedBranch = branches.filter( ( branch: Branch ) => branch.commit === selectedBranchCommit )[0];
+	const [ selectedBranchCommit, setSelectedBranchCommit ] =
+		useState< string >( branches[ 0 ].commit );
+	const selectedBranch = branches.filter(
+		( branch: Branch ) => branch.commit === selectedBranchCommit
+	)[ 0 ];
 
 	return (
 		<>
@@ -51,7 +51,7 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 					}
 				} }
 				value={ selectedBranchCommit }
-				options={ branches.map( branch => {
+				options={ branches.map( ( branch ) => {
 					return {
 						value: branch.commit,
 						label: branch.branch,
