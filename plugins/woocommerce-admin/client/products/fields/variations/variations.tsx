@@ -11,12 +11,16 @@ import { ListItem, Sortable, Tag } from '@woocommerce/components';
 import { useContext } from '@wordpress/element';
 import { useParams } from 'react-router-dom';
 import { useSelect } from '@wordpress/data';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
  */
 import { CurrencyContext } from '../../../lib/currency-context';
-import { getProductStockStatus } from '../../utils/get-product-stock-status';
+import {
+	getProductStockStatus,
+	getProductStockStatusClass,
+} from '../../utils/get-product-stock-status';
 import './variations.scss';
 
 export const Variations: React.FC = () => {
@@ -81,6 +85,14 @@ export const Variations: React.FC = () => {
 							{ formatAmount( variation.price ) }
 						</div>
 						<div className="woocommerce-product-variations__quantity">
+							<span
+								className={ classnames(
+									'woocommerce-product-variations__status-dot',
+									getProductStockStatusClass( variation )
+								) }
+							>
+								●
+							</span>
 							{ getProductStockStatus( variation ) }
 						</div>
 					</ListItem>
