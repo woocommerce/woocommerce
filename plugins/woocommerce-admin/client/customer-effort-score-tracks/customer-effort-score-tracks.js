@@ -113,6 +113,15 @@ function CustomerEffortScoreTracks( {
 		addActionToShownOption();
 	};
 
+	const onModalDismissed = () => {
+		recordEvent( 'ces_view_dismiss', {
+			action,
+			store_age: storeAgeInWeeks,
+			ces_location: 'inside',
+			...trackProps,
+		} );
+	};
+
 	const onModalShown = () => {
 		setModalShown( true );
 
@@ -151,6 +160,7 @@ function CustomerEffortScoreTracks( {
 			onNoticeShownCallback={ onNoticeShown }
 			onNoticeDismissedCallback={ onNoticeDismissed }
 			onModalShownCallback={ onModalShown }
+			onModalDismissedCallback={ onModalDismissed }
 			icon={
 				<span
 					style={ { height: 21, width: 21 } }
