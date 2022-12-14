@@ -56,6 +56,13 @@ class ListTable extends WP_List_Table {
 	private $is_trash = false;
 
 	/**
+	 * Caches order counts by status.
+	 *
+	 * @var array
+	 */
+	private $status_count_cache = null;
+
+	/**
 	 * Sets up the admin list table for orders (specifically, for orders managed by the OrdersTableDataStore).
 	 *
 	 * @see WC_Admin_List_Table_Orders for the corresponding class used in relation to the traditional WP Post store.
@@ -488,19 +495,26 @@ class ListTable extends WP_List_Table {
 	private function count_orders_by_status( $status ): int {
 		global $wpdb;
 
-		$orders_table = OrdersTableDataStore::get_orders_table_name();
-		$status       = (array) $status;
+		// Compute all counts and cache if necessary.
+		if ( is_null( $this->status_count_cache ) ) {
+			$orders_table = OrdersTableDataStore::get_orders_table_name();
 
-		$status_placeholders = implode( ',', array_fill( 0, count( $status ), '%s' ) );
-
-		$count = absint(
-			$wpdb->get_var(
+			$res = $wpdb->get_results(
 				$wpdb->prepare(
-					"SELECT COUNT(*) FROM {$orders_table} WHERE type = %s AND status IN ({$status_placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					array_merge( array( $this->order_type ), $status )
-				)
-			)
-		);
+					"SELECT status, COUNT(*) AS cnt FROM {$orders_table} WHERE type = %s GROUP BY status", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$this->order_type
+				),
+				ARRAY_A
+			);
+
+			$this->status_count_cache =
+				$res
+				? array_combine( array_column( $res, 'status' ), array_map( 'absint', array_column( $res, 'cnt' ) ) )
+				: array();
+		}
+
+		$status = (array) $status;
+		$count  = array_sum( array_intersect_key( $this->status_count_cache, array_flip( $status ) ) );
 
 		/**
 		 * Allows 3rd parties to modify the count of orders by status.
