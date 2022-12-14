@@ -219,7 +219,7 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$simple_product->set_regular_price( 25 );
 		$simple_product->save();
 
-		$order = WC_Helper_Order::create_order( 1, $variation );
+		$order  = WC_Helper_Order::create_order( 1, $variation );
 		$order2 = WC_Helper_Order::create_order( 1, $simple_product );
 		// Add simple product.
 		$item = new WC_Order_Item_Product();
@@ -265,7 +265,7 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 			'product_includes' => array( $parent_product->get_id() ),
 		);
 		// Test retrieving the stats through the data store.
-		$data     = $data_store->get_data( $args );
+		$data = $data_store->get_data( $args );
 		$this->assertEquals( 1, $data->total );
 
 		$args_variation = array(
@@ -274,7 +274,7 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 			'variation_includes' => array( $variation->get_id() ),
 		);
 		// Test retrieving the stats through the data store.
-		$data_variation     = $data_store->get_data( $args_variation );
+		$data_variation = $data_store->get_data( $args_variation );
 		$this->assertEquals( 1, $data_variation->total );
 	}
 
