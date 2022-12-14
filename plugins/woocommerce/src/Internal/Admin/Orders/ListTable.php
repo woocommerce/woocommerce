@@ -132,28 +132,26 @@ class ListTable extends WP_List_Table {
 	 * @param string    $column_name Identifier for the custom column.
 	 */
 	public function column_default( $order, $column_name ) {
-		if ( has_action( 'woocommerce_' . $this->order_type . '_list_table_custom_column' ) ) {
-			/**
-			 * Fires for each custom column for a specific order type. This hook takes precedence over the generic
-			 * action `manage_{$this->screen->id}_custom_column`.
-			 *
-			 * @param string    $column_name Identifier for the custom column.
-			 * @param \WC_Order $order       Current WooCommerce order object.
-			 *
-			 * @since 7.3.0
-			 */
-			do_action( 'woocommerce_' . $this->order_type . '_list_table_custom_column', $column_name, $order );
-		} else {
-			/**
-			 * Fires for each custom column in the Custom Order Table in the administrative screen.
-			 *
-			 * @param string    $column_name Identifier for the custom column.
-			 * @param \WC_Order $order       Current WooCommerce order object.
-			 *
-			 * @since 7.0.0
-			 */
-			do_action( "manage_{$this->screen->id}_custom_column", $column_name, $order );
-		}
+		/**
+		 * Fires for each custom column for a specific order type. This hook takes precedence over the generic
+		 * action `manage_{$this->screen->id}_custom_column`.
+		 *
+		 * @param string    $column_name Identifier for the custom column.
+		 * @param \WC_Order $order       Current WooCommerce order object.
+		 *
+		 * @since 7.3.0
+		 */
+		do_action( 'woocommerce_' . $this->order_type . '_list_table_custom_column', $column_name, $order );
+
+		/**
+		 * Fires for each custom column in the Custom Order Table in the administrative screen.
+		 *
+		 * @param string    $column_name Identifier for the custom column.
+		 * @param \WC_Order $order       Current WooCommerce order object.
+		 *
+		 * @since 7.0.0
+		 */
+		do_action( "manage_{$this->screen->id}_custom_column", $column_name, $order );
 	}
 
 	/**
