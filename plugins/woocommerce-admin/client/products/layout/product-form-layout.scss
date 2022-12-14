@@ -63,13 +63,14 @@ $product-form-tabs-height: 56px;
 			box-shadow: inset 0 0 0 var(--wp-admin-border-width-focus) transparent, inset 0 -3px 0 0 var(--wp-admin-theme-color);
 		}
 
-		&:disabled {
+		&:disabled,
+		&[aria-disabled='true'] {
 			// We need tooltips at full opacity so only child elements have reduced opacity.
 			opacity: 1;
-		}
 
-		&:disabled .woocommerce-product-form-tab__item-inner-text {
-			opacity: 0.3;
+			.woocommerce-product-form-tab__item-inner-text {
+				opacity: 0.3;
+			}
 		}
 
 		.woocommerce-product-form-tab__item-inner {
