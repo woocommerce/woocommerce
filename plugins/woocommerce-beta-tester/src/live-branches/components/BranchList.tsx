@@ -7,14 +7,21 @@ import {
 	// @ts-ignore
 	__experimentalItem as Item,
 	Button,
+	Spinner,
 } from '@wordpress/components';
+import { useState } from 'react';
 
 /**
  * Internal dependencies
  */
-import { Branch } from '../hooks/live-branches';
+import { Branch, useLiveBranchInstall } from '../hooks/live-branches';
 
 const BranchListItem = ( { branch }: { branch: Branch } ) => {
+	const { isError, isInstalling, install } = useLiveBranchInstall(
+		branch.download_url,
+		`https://github.com/woocommerce/woocommerce/pull/${ branch.pr }`
+	);
+
 	return (
 		<Item>
 			<p>
@@ -29,12 +36,13 @@ const BranchListItem = ( { branch }: { branch: Branch } ) => {
 					{ branch.branch }
 				</a>
 			</p>
-			<Button
-				variant="primary"
-				onClick={ () => console.log( 'Do install stuffs' ) }
-			>
-				Install
-			</Button>
+			{ isError && <p>Something Went Wrong!</p> }
+			{ isInstalling && <Spinner /> }
+			{ ! isError && ! isInstalling && (
+				<Button variant="primary" onClick={ install }>
+					Install
+				</Button>
+			) }
 		</Item>
 	);
 };

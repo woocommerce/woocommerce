@@ -39,3 +39,37 @@ export const useLiveBranchesData = () => {
 
 	return { branches, isLoading: loading };
 };
+
+export const useLiveBranchInstall = ( downloadUrl: string, prName: string ) => {
+	const [ isInstalling, setIsInstalling ] = useState( false );
+	const [ isError, setIsError ] = useState( false );
+
+	const install = async () => {
+		setIsInstalling( true );
+
+		try {
+			const res = await apiFetch< Response >( {
+				path: `${ API_NAMESPACE }/live-branches/install/v1`,
+				method: 'POST',
+				body: JSON.stringify( {
+					pr_name: prName,
+					download_url: downloadUrl,
+				} ),
+			} );
+
+			if ( res.status >= 400 ) {
+				setIsError( true );
+			}
+		} catch ( e ) {
+			setIsError( true );
+		}
+
+		setIsInstalling( false );
+	};
+
+	return {
+		install,
+		isError,
+		isInstalling,
+	};
+};
