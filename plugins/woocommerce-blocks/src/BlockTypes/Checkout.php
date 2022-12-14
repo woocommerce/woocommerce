@@ -146,6 +146,18 @@ class Checkout extends AbstractBlock {
 			$content = preg_replace( $regex_for_order_summary, $order_summary_with_inner_blocks, $content );
 		}
 
+		/**
+		 * Add the Local Pickup toggle to checkouts missing this forced template.
+		 */
+		$local_pickup_inner_blocks = '<div data-block-name="woocommerce/checkout-shipping-method-block" class="wp-block-woocommerce-checkout-shipping-method-block"></div>' . PHP_EOL . PHP_EOL . '<div data-block-name="woocommerce/checkout-pickup-options-block" class="wp-block-woocommerce-checkout-pickup-options-block"></div>' . PHP_EOL . PHP_EOL . '$0';
+		$has_local_pickup_regex    = '/<div[\n\r\s\ta-zA-Z0-9_\-=\'"]*data-block-name="woocommerce\/checkout-shipping-method-block"[\n\r\s\ta-zA-Z0-9_\-=\'"]*>/mi';
+		$has_local_pickup          = preg_match( $has_local_pickup_regex, $content );
+
+		if ( ! $has_local_pickup ) {
+			$shipping_address_block_regex = '/<div[\n\r\s\ta-zA-Z0-9_\-=\'"]*data-block-name="woocommerce\/checkout-shipping-address-block" class="wp-block-woocommerce-checkout-shipping-address-block"[\n\r\s\ta-zA-Z0-9_\-=\'"]*><\/div>/mi';
+			$content                      = preg_replace( $shipping_address_block_regex, $local_pickup_inner_blocks, $content );
+		}
+
 		return $content;
 	}
 
