@@ -2478,7 +2478,7 @@ function wc_update_700_remove_recommended_marketing_plugins_transient() {
  * after they were updated in code to the CLDR standard.
  */
 function wc_update_721_adjust_new_zealand_states() {
-		return MigrationHelper::migrate_country_states(
+	return MigrationHelper::migrate_country_states(
 		'NZ',
 		array(
 			'NL' => 'NTL',
