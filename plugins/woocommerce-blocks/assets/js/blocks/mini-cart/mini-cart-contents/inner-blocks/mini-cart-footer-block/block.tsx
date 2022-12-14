@@ -16,6 +16,14 @@ import Button from '@woocommerce/base-components/button';
 import { PaymentEventsProvider } from '@woocommerce/base-context';
 import classNames from 'classnames';
 
+/**
+ * Internal dependencies
+ */
+import {
+	defaultCartButtonLabel,
+	defaultCheckoutButtonLabel,
+} from './constants';
+
 const PaymentMethodIconsElement = (): JSX.Element => {
 	const { paymentMethods } = usePaymentMethods();
 	return (
@@ -27,14 +35,21 @@ const PaymentMethodIconsElement = (): JSX.Element => {
 
 interface Props {
 	className?: string;
+	cartButtonLabel: string;
+	checkoutButtonLabel: string;
 }
 
-const Block = ( { className }: Props ): JSX.Element => {
+const Block = ( {
+	className,
+	cartButtonLabel,
+	checkoutButtonLabel,
+}: Props ): JSX.Element => {
 	const { cartTotals } = useStoreCart();
 	const subTotal = getSetting( 'displayCartPricesIncludingTax', false )
 		? parseInt( cartTotals.total_items, 10 ) +
 		  parseInt( cartTotals.total_items_tax, 10 )
 		: parseInt( cartTotals.total_items, 10 );
+
 	return (
 		<div
 			className={ classNames( className, 'wc-block-mini-cart__footer' ) }
@@ -56,7 +71,7 @@ const Block = ( { className }: Props ): JSX.Element => {
 						href={ CART_URL }
 						variant="outlined"
 					>
-						{ __( 'View my cart', 'woo-gutenberg-products-block' ) }
+						{ cartButtonLabel || defaultCartButtonLabel }
 					</Button>
 				) }
 				{ CHECKOUT_URL && (
@@ -64,10 +79,7 @@ const Block = ( { className }: Props ): JSX.Element => {
 						className="wc-block-mini-cart__footer-checkout"
 						href={ CHECKOUT_URL }
 					>
-						{ __(
-							'Go to checkout',
-							'woo-gutenberg-products-block'
-						) }
+						{ checkoutButtonLabel || defaultCheckoutButtonLabel }
 					</Button>
 				) }
 			</div>

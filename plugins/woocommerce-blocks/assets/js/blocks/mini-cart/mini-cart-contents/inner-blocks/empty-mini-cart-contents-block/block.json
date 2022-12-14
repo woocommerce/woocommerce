@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/empty-mini-cart-contents-block",
 	"version": "1.0.0",
-	"title": "Empty Mini Cart view.",
+	"title": "Empty Mini Cart view",
 	"description": "Blocks that are displayed when the Mini Cart is empty.",
 	"category": "woocommerce",
 	"supports": {
