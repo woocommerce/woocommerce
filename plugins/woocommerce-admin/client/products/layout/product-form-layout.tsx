@@ -9,6 +9,7 @@ import { TabPanel } from '@wordpress/components';
  * Internal dependencies
  */
 import './product-form-layout.scss';
+import { ProductFormTab } from '../product-form-tab';
 
 export const ProductFormLayout: React.FC< {
 	children: JSX.Element | JSX.Element[];
@@ -26,7 +27,7 @@ export const ProductFormLayout: React.FC< {
 	}, [] );
 
 	const tabs = Children.map( children, ( child: JSX.Element ) => {
-		if ( child.type.name !== 'ProductFormTab' ) {
+		if ( child.type !== ProductFormTab ) {
 			return null;
 		}
 		return {
@@ -46,7 +47,7 @@ export const ProductFormLayout: React.FC< {
 				<>
 					{ Children.map( children, ( child: JSX.Element ) => {
 						if (
-							child.type.name !== 'ProductFormTab' ||
+							child.type !== ProductFormTab ||
 							child.props.name !== tab.name
 						) {
 							return null;
