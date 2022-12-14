@@ -426,6 +426,11 @@ class WC_API_Orders extends WC_API_Resource {
 				$default_order_args['customer_id'] = $data['customer_id'];
 			}
 
+			// if custom order id is set
+			if ( isset( $data['number'] ) ) {
+				$default_order_args['number'] = $data['number'];
+			}
+
 			// create the pending order
 			$order = $this->create_base_order( $default_order_args, $data );
 

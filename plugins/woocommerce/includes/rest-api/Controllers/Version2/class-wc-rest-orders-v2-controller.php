@@ -1049,7 +1049,6 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'description' => __( 'Order number.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
 				),
 				'order_key'            => array(
 					'description' => __( 'Order key.', 'woocommerce' ),

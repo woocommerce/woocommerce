@@ -82,6 +82,7 @@ function wc_maybe_define_constant( $name, $value ) {
  * @return WC_Order|WP_Error
  */
 function wc_create_order( $args = array() ) {
+	$custom_order_number_set = isset( $args['number'] ) ? true : null;
 	$default_args = array(
 		'status'        => null,
 		'customer_id'   => null,
@@ -89,7 +90,7 @@ function wc_create_order( $args = array() ) {
 		'parent'        => null,
 		'created_via'   => null,
 		'cart_hash'     => null,
-		'order_id'      => 0,
+		'order_id'      => isset( $custom_order_number_set ) ? $args['number'] : 0,
 	);
 
 	try {
@@ -122,7 +123,8 @@ function wc_create_order( $args = array() ) {
 		}
 
 		// Set these fields when creating a new order but not when updating an existing order.
-		if ( ! $args['order_id'] ) {
+		// custom order number is always a new order
+		if ( ! $args['order_id'] || ! is_null($custom_order_number_set) ) {
 			$order->set_currency( get_woocommerce_currency() );
 			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
