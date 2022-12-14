@@ -40,7 +40,7 @@ class InstalledExtensions {
 					'name'                    => $channel->get_name(),
 					'description'             => $channel->get_description(),
 					'product_listings_status' => $channel->get_product_listings_status(),
-					'errors_no'               => $channel->get_errors_no(),
+					'errors_count'            => $channel->get_errors_count(),
 					'icon'                    => $channel->get_icon_url(),
 				];
 			},

@@ -71,7 +71,7 @@ interface MarketingChannelInterface {
 	 *
 	 * @return int The number of issues to resolve, or 0 if there are no issues with the channel.
 	 */
-	public function get_errors_no(): int;
+	public function get_errors_count(): int;
 
 	/**
 	 * Returns an array of the channel's marketing campaigns.
