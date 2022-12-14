@@ -274,18 +274,15 @@ class MigrationHelper {
 	private static function migrate_country_states_for_tax_rates( string $country_code, array $old_to_new_states_mapping ): void {
 		global $wpdb;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-
 		foreach ( $old_to_new_states_mapping as $old_state_code => $new_state_code ) {
-			$update_query = $wpdb->prepare(
-				"UPDATE {$wpdb->prefix}woocommerce_tax_rates SET tax_rate_state=%s WHERE tax_rate_country=%s AND tax_rate_state=%s",
-				$new_state_code,
-				$country_code,
-				$old_state_code
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$wpdb->prefix}woocommerce_tax_rates SET tax_rate_state=%s WHERE tax_rate_country=%s AND tax_rate_state=%s",
+					$new_state_code,
+					$country_code,
+					$old_state_code
+				)
 			);
-			$wpdb->query( $update_query );
 		}
-
-		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	}
 }
