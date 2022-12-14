@@ -23,8 +23,8 @@ const blockConfig: BlockConfiguration = {
 	icon: { src: icon },
 	usesContext: [ 'query', 'queryId', 'postId' ],
 	ancestor: [
-		'@woocommerce/all-products',
-		'@woocommerce/single-product',
+		'woocommerce/all-products',
+		'woocommerce/single-product',
 		'core/post-template',
 	],
 	attributes,
