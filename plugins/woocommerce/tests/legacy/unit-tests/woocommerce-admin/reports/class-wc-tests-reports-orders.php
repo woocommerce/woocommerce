@@ -262,7 +262,7 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 			'after'            => $start_time,
 			'before'           => $end_time,
 			'extended_info'    => 1,
-			'product_includes' => array( $parent_product->get_id() )
+			'product_includes' => array( $parent_product->get_id() ),
 		);
 		// Test retrieving the stats through the data store.
 		$data     = $data_store->get_data( $args );
@@ -271,7 +271,7 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$args_variation = array(
 			'after'              => $start_time,
 			'before'             => $end_time,
-			'variation_includes' => array( $variation->get_id() )
+			'variation_includes' => array( $variation->get_id() ),
 		);
 		// Test retrieving the stats through the data store.
 		$data_variation     = $data_store->get_data( $args_variation );
