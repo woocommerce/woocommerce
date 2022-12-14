@@ -8,6 +8,26 @@ type UseRecommendedChannels = {
 	data: Array< RecommendedChannel >;
 };
 
+// // TODO: to be removed. This is to test for loading state.
+// export const useRecommendedChannels = (): UseRecommendedChannels => {
+// 	// TODO: call API here to get data.
+// 	// The following are just dummy data for testing now.
+// 	return {
+// 		loading: true,
+// 		data: [],
+// 	};
+// };
+
+// // TODO: to be removed. This is to test for empty data.
+// export const useRecommendedChannels = (): UseRecommendedChannels => {
+// 	TODO: call API here to get data.
+// 	The following are just dummy data for testing now.
+// 	return {
+// 		loading: false,
+// 		data: [],
+// 	};
+// };
+
 export const useRecommendedChannels = (): UseRecommendedChannels => {
 	// TODO: call API here to get data.
 	// The following are just dummy data for testing now.
