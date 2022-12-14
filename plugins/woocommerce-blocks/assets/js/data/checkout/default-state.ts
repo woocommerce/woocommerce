@@ -28,7 +28,7 @@ export type CheckoutState = {
 	// Should a user account be created?
 	shouldCreateAccount: boolean;
 	// If customer wants to checkout with a local pickup option.
-	prefersCollection: boolean;
+	prefersCollection?: boolean | undefined;
 	// Custom checkout data passed to the store API on processing.
 	extensionData: Record< string, Record< string, unknown > >;
 };
@@ -46,6 +46,6 @@ export const defaultState: CheckoutState = {
 		checkoutData.shipping_address
 	),
 	shouldCreateAccount: false,
-	prefersCollection: false,
+	prefersCollection: undefined,
 	extensionData: {},
 };
