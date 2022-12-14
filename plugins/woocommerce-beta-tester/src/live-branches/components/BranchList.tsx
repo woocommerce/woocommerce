@@ -45,7 +45,11 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 		<>
 			Branch:{ ' ' }
 			<ComboboxControl
-				onChange={ branch => setSelectedBranchCommit( branch as string ) }
+				onChange={ ( branch ) => {
+					if ( branch ) {
+						setSelectedBranchCommit( branch );
+					}
+				} }
 				value={ selectedBranchCommit }
 				options={ branches.map( branch => {
 					return {
