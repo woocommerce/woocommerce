@@ -2,12 +2,11 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
-import { staticFormDataToObject } from '../static-form-helper';
 
 /**
  * Internal dependencies
  */
-import { getSegmentsFromPath } from '../url-helpers';
+import { staticFormDataToObject } from '../static-form-helper';
 
 describe( 'staticFormDataToObject', () => {
 	it( 'should create object of all nested input, select, textarea fields within form element', () => {
