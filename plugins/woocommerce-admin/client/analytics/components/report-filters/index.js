@@ -21,6 +21,9 @@ import { recordEvent } from '@woocommerce/tracks';
 import { CurrencyContext } from '../../../lib/currency-context';
 import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
 import { LOCALE } from '~/utils/admin-settings';
+import { addExitPage } from '~/customer-effort-score-tracks/customer-effort-score-exit-page';
+
+const queueExitPageSurvey = () => addExitPage( 'analytics_filtered' );
 
 class ReportFilters extends Component {
 	constructor() {
@@ -32,6 +35,8 @@ class ReportFilters extends Component {
 
 	onDateSelect( data ) {
 		const { report, addCesSurveyForAnalytics } = this.props;
+
+		queueExitPageSurvey();
 		addCesSurveyForAnalytics();
 		recordEvent( 'datepicker_update', {
 			report,
@@ -41,6 +46,8 @@ class ReportFilters extends Component {
 
 	onFilterSelect( data ) {
 		const { report, addCesSurveyForAnalytics } = this.props;
+
+		queueExitPageSurvey();
 
 		// This event gets triggered in the following cases.
 		// 1. Select "Single product" and choose a product.

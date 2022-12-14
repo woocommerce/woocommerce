@@ -205,6 +205,31 @@ function getExitPageCESCopy( pageId: string ): {
 					'woocommerce'
 				),
 			};
+		case 'analytics_filtered':
+			return {
+				action: pageId,
+				icon: '📊',
+				noticeLabel: __(
+					'Did you find the data you were looking for?',
+					'woocommerce'
+				),
+				title: __(
+					`How's your experience with analytics?`,
+					'woocommerce'
+				),
+				description: __(
+					'We noticed you started filtering store data, then left. How was it? Your feedback will help create a better experience for thousands of merchants like you.',
+					'woocommerce'
+				),
+				firstQuestion: __(
+					'The store analytics screen is easy to use',
+					'woocommerce'
+				),
+				secondQuestion: __(
+					"The store analytics screen's functionality meets my needs",
+					'woocommerce'
+				),
+			};
 		default:
 			return null;
 	}
