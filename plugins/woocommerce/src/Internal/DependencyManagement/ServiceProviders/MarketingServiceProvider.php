@@ -38,7 +38,7 @@ class MarketingServiceProvider extends AbstractServiceProvider {
 	 */
 	public function register() {
 		$this->share( MarketingSpecs::class );
-		$this->share( MarketingChannels::class )->addArgument( MarketingSpecs::class );
+		$this->share( MarketingChannels::class );
 		$this->share( InstalledExtensions::class )->addArgument( MarketingChannels::class );
 	}
 }
