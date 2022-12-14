@@ -27,7 +27,7 @@ import './variations.scss';
  *
  * @see https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/components/src/pagination/index.js#L12
  */
-const DEFAULT_PER_PAGE_OPTION = 2;
+const DEFAULT_PER_PAGE_OPTION = 25;
 
 export const Variations: React.FC = () => {
 	const [ currentPage, setCurrentPage ] = useState( 1 );
