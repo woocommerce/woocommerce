@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { RecommendedChannel } from './types';
+import { RecommendedChannel } from '~/marketing/types';
 
 type UseRecommendedChannels = {
 	loading: boolean;

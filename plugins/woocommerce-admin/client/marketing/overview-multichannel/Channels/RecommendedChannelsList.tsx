@@ -9,7 +9,7 @@ import { CardDivider } from '@wordpress/components';
  * Internal dependencies
  */
 import { SmartPluginCardBody } from '~/marketing/components';
-import { RecommendedChannel } from './types';
+import { RecommendedChannel } from '~/marketing/types';
 import './Channels.scss';
 
 type RecommendedChannelListPropsType = {
