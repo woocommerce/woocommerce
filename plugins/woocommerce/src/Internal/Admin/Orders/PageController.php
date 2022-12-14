@@ -323,12 +323,29 @@ class PageController {
 			return admin_url( 'post.php?post=' . absint( $order_id ) ) . '&action=edit';
 		}
 
+		$order = wc_get_order( $order_id );
+
+		// Confirm we could obtain the order object (since it's possible it will not exist, due to a sync issue, or may
+		// have been deleted in a separate concurrent request).
+		if ( false === $order ) {
+			wc_get_logger()->debug(
+				sprintf(
+					/* translators: %d order ID. */
+					__( 'Attempted to determine the edit URL for order %d, however the order does not exist.', 'woocommerce' ),
+					$order_id
+				)
+			);
+			$order_type = 'shop_order';
+		} else {
+			$order_type = $order->get_type();
+		}
+
 		return add_query_arg(
 			array(
 				'action' => 'edit',
 				'id'     => absint( $order_id ),
 			),
-			$this->get_base_page_url( wc_get_order( $order_id )->get_type() )
+			$this->get_base_page_url( $order_type )
 		);
 	}
 
