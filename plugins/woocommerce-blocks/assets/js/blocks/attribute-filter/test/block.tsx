@@ -16,7 +16,7 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 	...jest.requireActual( '@woocommerce/base-context/hooks' ),
 } ) );
 
-const setWindowUrl = ( { url }: SetWindowUrlParams ) => {
+const setWindowUrl = ( { url }: { url: string } ) => {
 	global.window = Object.create( window );
 	Object.defineProperty( window, 'location', {
 		value: {

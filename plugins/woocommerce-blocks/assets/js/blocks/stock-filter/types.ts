@@ -5,10 +5,18 @@ export interface Attributes {
 	showCounts: boolean;
 	showFilterButton: boolean;
 	isPreview?: boolean;
+	displayStyle: string;
+	selectType: string;
 }
 
 export interface DisplayOption {
 	value: string;
 	name: string;
 	label: JSX.Element;
+	textLabel: string;
 }
+
+export type Current = {
+	slug: string;
+	name: string;
+};
