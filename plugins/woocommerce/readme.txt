@@ -256,6 +256,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Update unit test install script for db sockets. [#35152](https://github.com/woocommerce/woocommerce/pull/35152)
 * Dev - Use plugins/woocommerce/tests/e2e-pw folder for saving test outputs [#35206](https://github.com/woocommerce/woocommerce/pull/35206)
 * Dev - Uses the globa-setup.js to setup permalinks structure [#35282](https://github.com/woocommerce/woocommerce/pull/35282)
+* Tweak - WooCommerce has now been tested up to WordPress 6.1.x. [#35985](https://github.com/woocommerce/woocommerce/pull/35985)
 * Tweak - Move HPOS hook woocommerce_before_delete_order before deleting order. [#35517](https://github.com/woocommerce/woocommerce/pull/35517)
 * Tweak - Adds new filter `woocommerce_get_customer_payment_tokens_limit` to set limit on number of payment methods fetched within the My Account page. [#29850](https://github.com/woocommerce/woocommerce/pull/29850)
 * Tweak - Add source parameter for calls to the subscriptions endpoint on WooCommerce.com [#35051](https://github.com/woocommerce/woocommerce/pull/35051)
