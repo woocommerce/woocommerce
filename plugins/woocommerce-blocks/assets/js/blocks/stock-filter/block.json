@@ -39,6 +39,14 @@
 			"type": "boolean",
 			"default": false
 		},
+		"displayStyle": {
+			"type": "string",
+			"default": "list"
+		},
+		"selectType": {
+			"type": "string",
+			"default": "multiple"
+		},
 		"isPreview": {
 			"type": "boolean",
 			"default": false

@@ -1,9 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Testing stock filter renders the stock filter block 1`] = `
+exports[`Filter by Stock block renders the stock filter block 1`] = `
 <div>
+  
   <div
-    class="wc-block-stock-filter"
+    class="wc-block-stock-filter style-list"
   >
     <ul
       class="wc-block-checkbox-list wc-block-components-checkbox-list wc-block-stock-filter-list"
@@ -109,10 +110,11 @@ exports[`Testing stock filter renders the stock filter block 1`] = `
 </div>
 `;
 
-exports[`Testing stock filter renders the stock filter block with the filter button 1`] = `
+exports[`Filter by Stock block renders the stock filter block with the filter button 1`] = `
 <div>
+  
   <div
-    class="wc-block-stock-filter"
+    class="wc-block-stock-filter style-list"
   >
     <ul
       class="wc-block-checkbox-list wc-block-components-checkbox-list wc-block-stock-filter-list"
@@ -234,10 +236,11 @@ exports[`Testing stock filter renders the stock filter block with the filter but
 </div>
 `;
 
-exports[`Testing stock filter renders the stock filter block with the product counts 1`] = `
+exports[`Filter by Stock block renders the stock filter block with the product counts 1`] = `
 <div>
+  
   <div
-    class="wc-block-stock-filter"
+    class="wc-block-stock-filter style-list"
   >
     <ul
       class="wc-block-checkbox-list wc-block-components-checkbox-list wc-block-stock-filter-list"
