@@ -44,6 +44,10 @@ export interface ButtonProps extends WPButton.ButtonProps {
 	 * Button variant
 	 */
 	variant?: 'text' | 'contained' | 'outlined';
+	/**
+	 * Button href
+	 */
+	href?: string | undefined;
 }
 
 /**
