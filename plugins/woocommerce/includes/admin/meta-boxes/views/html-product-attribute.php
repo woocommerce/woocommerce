@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<a href="#" class="remove_row delete"><?php esc_html_e( 'Remove', 'woocommerce' ); ?></a>
 		<div class="handlediv" title="<?php esc_attr_e( 'Click to toggle', 'woocommerce' ); ?>"></div>
 		<div class="tips sort" data-tip="<?php esc_attr_e( 'Drag and drop to set admin attribute order', 'woocommerce' ); ?>"></div>
-		<strong class="attribute_name"><?php echo wc_attribute_label( $attribute->get_name() ); ?></strong>
+		<strong class="attribute_name<?php echo esc_attr( $attribute->get_name() === '' ? ' placeholder' : '' ); ?>"><?php echo esc_html( $attribute->get_name() !== '' ? wc_attribute_label( $attribute->get_name() ) : __( 'Custom attribute', 'woocommerce' ) ); ?></strong>
 	</h3>
 	<div class="woocommerce_attribute_data wc-metabox-content hidden">
 		<table cellpadding="0" cellspacing="0">
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<strong><?php echo wc_attribute_label( $attribute->get_name() ); ?></strong>
 							<input type="hidden" name="attribute_names[<?php echo esc_attr( $i ); ?>]" value="<?php echo esc_attr( $attribute->get_name() ); ?>" />
 						<?php else : ?>
-							<input type="text" class="attribute_name" name="attribute_names[<?php echo esc_attr( $i ); ?>]" value="<?php echo esc_attr( $attribute->get_name() ); ?>" />
+							<input type="text" class="attribute_name" name="attribute_names[<?php echo esc_attr( $i ); ?>]" value="<?php echo esc_attr( $attribute->get_name() ); ?>" placeholder="<?php esc_attr_e( 'e.g. Fabric or Brand', 'woocommerce' ); ?>" />
 						<?php endif; ?>
 
 						<input type="hidden" name="attribute_position[<?php echo esc_attr( $i ); ?>]" class="attribute_position" value="<?php echo esc_attr( $attribute->get_position() ); ?>" />

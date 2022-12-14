@@ -520,10 +520,14 @@ jQuery( function ( $ ) {
 	} );
 
 	$( '.product_attributes' ).on( 'blur', 'input.attribute_name', function () {
-		$( this )
+		var text = $( this ).val();
+		var attributeName = $( this )
 			.closest( '.woocommerce_attribute' )
-			.find( 'strong.attribute_name' )
-			.text( $( this ).val() );
+			.find( 'strong.attribute_name' );
+		var isPlaceholder = attributeName.hasClass( 'placeholder' );
+		if ( ( isPlaceholder && text ) || ! isPlaceholder ) {
+			attributeName.removeClass( 'placeholder' ).text( text );
+		}
 	} );
 
 	$( '.product_attributes' ).on(
