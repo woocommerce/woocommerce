@@ -30,6 +30,7 @@ export function setCesSurveyQueue( queue ) {
  * @param {string} args.noticeLabel    noticeLabel for notice.
  * @param {string} args.firstQuestion  first question for modal survey
  * @param {string} args.secondQuestion second question for modal survey
+ * @param {string} args.icon           optional icon for notice.
  * @param {string} args.pageNow        value of window.pagenow
  * @param {string} args.adminPage      value of window.adminpage
  * @param {string} args.onsubmitLabel  label for the snackback onsubmit
@@ -42,6 +43,7 @@ export function addCesSurvey( {
 	noticeLabel,
 	firstQuestion,
 	secondQuestion,
+	icon,
 	pageNow = window.pagenow,
 	adminPage = window.adminpage,
 	onsubmitLabel = undefined,
@@ -55,6 +57,7 @@ export function addCesSurvey( {
 		noticeLabel,
 		firstQuestion,
 		secondQuestion,
+		icon,
 		pageNow,
 		adminPage,
 		onsubmit_label: onsubmitLabel,

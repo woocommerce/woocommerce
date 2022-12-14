@@ -27,6 +27,7 @@ type CustomerEffortScoreProps = {
 	onNoticeShownCallback?: () => void;
 	onNoticeDismissedCallback?: () => void;
 	onModalShownCallback?: () => void;
+	onModalDismissedCallback?: () => void;
 	icon?: React.ReactElement | null;
 };
 
@@ -46,6 +47,7 @@ type CustomerEffortScoreProps = {
  * @param {Function} props.onNoticeShownCallback     Function to call when the notice is shown.
  * @param {Function} props.onNoticeDismissedCallback Function to call when the notice is dismissed.
  * @param {Function} props.onModalShownCallback      Function to call when the modal is shown.
+ * @param {Function} props.onModalDismissedCallback  Function to call when modal is dismissed.
  * @param {Object}   props.icon                      Icon (React component) to be shown on the notice.
  */
 const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
@@ -58,6 +60,7 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 	onNoticeShownCallback = noop,
 	onNoticeDismissedCallback = noop,
 	onModalShownCallback = noop,
+	onModalDismissedCallback = noop,
 	icon,
 } ) => {
 	const [ shouldCreateNotice, setShouldCreateNotice ] = useState( true );
@@ -104,6 +107,7 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 			firstQuestion={ firstQuestion }
 			secondQuestion={ secondQuestion }
 			recordScoreCallback={ recordScoreCallback }
+			onCloseModal={ onModalDismissedCallback }
 		/>
 	);
 };
