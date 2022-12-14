@@ -10,7 +10,7 @@
 
 	&__header {
 		display: grid;
-		grid-template-columns: calc(38px + 25%) 25% 25%;
+		grid-template-columns: auto 25% 25% 88px;
 		padding: $gap-small $gap;
 
 		h4 {
@@ -34,10 +34,28 @@
 			color: $alert-red;
 		}
 	}
+	
+	&__actions {
+		display: flex;
+		align-items: center;
+		justify-content: end;
+
+		.components-button svg {
+			fill: none;
+		}
+
+		.components-button--visible {
+			color: $gray-700;
+		}
+
+		.components-button--hidden {
+			color: $alert-red;
+		}
+	}
 
 	.woocommerce-list-item {
 		display: grid;
-		grid-template-columns: 38px 25% 25% 25%;
+		grid-template-columns: 38px auto 25% 25% 88px;
 		margin-left: -1px;
 		margin-right: -1px;
 		margin-bottom: -1px;

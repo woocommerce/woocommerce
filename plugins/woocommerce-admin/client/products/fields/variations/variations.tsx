@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Card, Spinner } from '@wordpress/components';
+import { Card, IconButton, Spinner } from '@wordpress/components';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	ProductVariation,
@@ -16,6 +16,8 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
+import HiddenIcon from '~/products/images/hidden-icon';
+import VisibleIcon from '~/products/images/visible-icon';
 import { CurrencyContext } from '../../../lib/currency-context';
 import {
 	getProductStockStatus,
@@ -115,6 +117,16 @@ export const Variations: React.FC = () => {
 								●
 							</span>
 							{ getProductStockStatus( variation ) }
+						</div>
+						<div className="woocommerce-product-variations__actions">
+							<IconButton
+								icon={ <HiddenIcon /> }
+								className="components-button--visible"
+							/>
+							<IconButton
+								icon={ <VisibleIcon /> }
+								className="components-button--hidden"
+							/>
 						</div>
 					</ListItem>
 				) ) }
