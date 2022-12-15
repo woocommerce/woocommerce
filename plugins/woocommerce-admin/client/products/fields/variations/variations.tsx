@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Button, Card, Spinner } from '@wordpress/components';
+import { Button, Card, Spinner, Tooltip } from '@wordpress/components';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	ProductVariation,
@@ -24,7 +24,6 @@ import {
 	getProductStockStatusClass,
 } from '../../utils/get-product-stock-status';
 import './variations.scss';
-import classNames from 'classnames';
 
 /**
  * Since the pagination component does not exposes the way of
@@ -35,6 +34,10 @@ import classNames from 'classnames';
  * @see https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/components/src/pagination/index.js#L12
  */
 const DEFAULT_PER_PAGE_OPTION = 25;
+
+const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
+const VISIBLE_TEXT = __( 'Visible to customers', 'woocommerce' );
+const UPDATING_TEXT = __( 'Updating product variation', 'woocommerce' );
 
 export const Variations: React.FC = () => {
 	const [ currentPage, setCurrentPage ] = useState( 1 );
@@ -133,7 +136,7 @@ export const Variations: React.FC = () => {
 							) ) }
 						</div>
 						<div
-							className={ classNames(
+							className={ classnames(
 								'woocommerce-product-variations__price',
 								{
 									'woocommerce-product-variations__price--fade':
@@ -144,7 +147,7 @@ export const Variations: React.FC = () => {
 							{ formatAmount( variation.price ) }
 						</div>
 						<div
-							className={ classNames(
+							className={ classnames(
 								'woocommerce-product-variations__quantity',
 								{
 									'woocommerce-product-variations__quantity--fade':
@@ -164,64 +167,65 @@ export const Variations: React.FC = () => {
 						</div>
 						<div className="woocommerce-product-variations__actions">
 							{ variation.status === 'private' && (
-								<Button
-									className="components-button--hidden"
-									icon={
-										isUpdating[ variation.id ] ? (
+								<Tooltip
+									position="top center"
+									text={ NOT_VISIBLE_TEXT }
+								>
+									<Button
+										className="components-button--hidden"
+										aria-label={
+											isUpdating[ variation.id ]
+												? UPDATING_TEXT
+												: NOT_VISIBLE_TEXT
+										}
+										aria-disabled={
+											isUpdating[ variation.id ]
+										}
+										onClick={ () =>
+											handleCustomerVisibilityClick(
+												variation.id,
+												'publish'
+											)
+										}
+									>
+										{ isUpdating[ variation.id ] ? (
 											<Spinner />
 										) : (
 											<HiddenIcon />
-										)
-									}
-									aria-label={
-										isUpdating[ variation.id ]
-											? __(
-													'Updating product variation',
-													'woocommerce'
-											  )
-											: __(
-													'Not visible to customers',
-													'woocommerce'
-											  )
-									}
-									aria-disabled={ isUpdating[ variation.id ] }
-									onClick={ () =>
-										handleCustomerVisibilityClick(
-											variation.id,
-											'publish'
-										)
-									}
-								/>
+										) }
+									</Button>
+								</Tooltip>
 							) }
+
 							{ variation.status === 'publish' && (
-								<Button
-									className="components-button--visible"
-									icon={
-										isUpdating[ variation.id ] ? (
+								<Tooltip
+									position="top center"
+									text={ VISIBLE_TEXT }
+								>
+									<Button
+										className="components-button--visible"
+										aria-label={
+											isUpdating[ variation.id ]
+												? UPDATING_TEXT
+												: VISIBLE_TEXT
+										}
+										aria-disabled={
+											isUpdating[ variation.id ]
+										}
+										onClick={ () =>
+											handleCustomerVisibilityClick(
+												variation.id,
+												'private'
+											)
+										}
+									>
+										{ isUpdating[ variation.id ] ? (
 											<Spinner />
 										) : (
 											<VisibleIcon />
-										)
-									}
-									aria-label={
-										isUpdating[ variation.id ]
-											? __(
-													'Updating product variation',
-													'woocommerce'
-											  )
-											: __(
-													'Visible to customers',
-													'woocommerce'
-											  )
-									}
-									aria-disabled={ isUpdating[ variation.id ] }
-									onClick={ () =>
-										handleCustomerVisibilityClick(
-											variation.id,
-											'private'
-										)
-									}
-								/>
+										) }
+									</Button>
+								</Tooltip>
 							) }
 						</div>
 					</ListItem>
