@@ -4,17 +4,23 @@
 import { __ } from '@wordpress/i18n';
 import { Notice } from 'wordpress-components';
 import classnames from 'classnames';
+import type { CartResponseShippingRate } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import ShippingRatesControl from '../../shipping-rates-control';
 
+interface ShippingRateSelectorProps {
+	hasRates: boolean;
+	shippingRates: CartResponseShippingRate[];
+	isLoadingRates: boolean;
+}
 const ShippingRateSelector = ( {
 	hasRates,
 	shippingRates,
 	isLoadingRates,
-} ) => {
+}: ShippingRateSelectorProps ): JSX.Element => {
 	const legend = hasRates
 		? __( 'Shipping options', 'woo-gutenberg-products-block' )
 		: __( 'Choose a shipping option', 'woo-gutenberg-products-block' );
