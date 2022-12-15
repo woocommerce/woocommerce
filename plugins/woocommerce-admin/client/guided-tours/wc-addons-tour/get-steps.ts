@@ -24,7 +24,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 				descriptions: {
 					desktop: createInterpolateElement(
 						__(
-							'This is the place to find extensions, themes, and services for your store - all reviewed and approved by the WooCommerce team.<br/><br/>Whether you’re looking to improve your store or grow your business, you can find a solution here. There are hundreds of options available, and new products are added regularly.<br/><br/>The WooCommerce Marketplace is also available at WooCommerce.com.',
+							'Power up your store by adding extra functionality using extensions, find a fresh new look with themes, or integrate your store with other software and services.<br/><br/>The WooCommerce Marketplace is your go-to for all of the above, and the only place you’ll find products that have been reviewed and approved by the WooCommerce team.<br/><br/>Whether you’re looking to improve your store or grow your business, you can find a solution here. There are hundreds of options available, and new products are added regularly.<br/><br/>The WooCommerce Marketplace is also available at WooCommerce.com.',
 							'woocommerce'
 						),
 						{
@@ -46,7 +46,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 				heading: __( 'Find exactly what you need', 'woocommerce' ),
 				descriptions: {
 					desktop: __(
-						'Use the search box to find specific products.',
+						'Use the search box to find specific products or solutions.',
 						'woocommerce'
 					),
 				},
@@ -111,7 +111,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 				descriptions: {
 					desktop: createInterpolateElement(
 						__(
-							"Products purchased from the WooCommerce Marketplace can be managed in My Subscriptions, either here or on WooCommerce.com.<br/><br/>Every purchase is backed by our <a1>30-day money-back guarantee</a1>, and includes <a2>email and live chat support</a2>.<br/><br/>That's it! We hope the Marketplace helps you build the business of your dreams.",
+							"Products purchased from the WooCommerce Marketplace can be managed in My Subscriptions, either here or on WooCommerce.com.<br/><br/>Every purchase is backed by our <a1>30-day money-back guarantee</a1>, and includes <a2>email and live chat support</a2>.<br/><br/>That's it! We hope the WooCommerce Marketplace helps you build the business of your dreams.",
 							'woocommerce'
 						),
 						{

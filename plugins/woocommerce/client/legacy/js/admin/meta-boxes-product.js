@@ -520,10 +520,14 @@ jQuery( function ( $ ) {
 	} );
 
 	$( '.product_attributes' ).on( 'blur', 'input.attribute_name', function () {
-		$( this )
+		var text = $( this ).val();
+		var attributeName = $( this )
 			.closest( '.woocommerce_attribute' )
-			.find( 'strong.attribute_name' )
-			.text( $( this ).val() );
+			.find( 'strong.attribute_name' );
+		var isPlaceholder = attributeName.hasClass( 'placeholder' );
+		if ( ( isPlaceholder && text ) || ! isPlaceholder ) {
+			attributeName.removeClass( 'placeholder' ).text( text );
+		}
 	} );
 
 	$( '.product_attributes' ).on(
@@ -770,6 +774,13 @@ jQuery( function ( $ ) {
 				$( 'select.wc-attribute-search' ).data(
 					'disabled-items',
 					newSelectedAttributes
+				);
+				var isUsedForVariations = $( 'input#used-for-variation' ).is(
+					':checked'
+				);
+				$( 'select.attribute_taxonomy' ).data(
+					'is-used-for-variations',
+					isUsedForVariations
 				);
 
 				// Reload variations panel.
@@ -1034,7 +1045,6 @@ jQuery( function ( $ ) {
 			delay: 200,
 			keepAlive: true,
 		} );
-
 
 	// add a tooltip to the right of the product image meta box "Set product image" and "Add product gallery images"
 	const setProductImageLink = $( '#set-post-thumbnail' );

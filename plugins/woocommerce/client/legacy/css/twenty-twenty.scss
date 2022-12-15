@@ -183,83 +183,6 @@ a.button {
 	}
 }
 
-.woocommerce-message,
-.woocommerce-error,
-.woocommerce-info {
-	margin-bottom: 5rem;
-	margin-left: 0;
-	background: #eee;
-	color: $body-color;
-	border-top: 3px solid var( --wc-green );
-
-	font-size: 0.88889em;
-	font-family: $headings;
-	list-style: none;
-	overflow: hidden;
-	width: 100%;
-
-	a {
-		color: #fff;
-
-		&:hover {
-			color: #fff;
-		}
-
-		&.button {
-			background: #000000;
-		}
-	}
-}
-
-.woocommerce-message,
-.woocommerce-error li,
-.woocommerce-info {
-	padding: 1.5rem 3rem;
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-
-	.button {
-		order: 2;
-	}
-}
-
-.woocommerce-info {
-	border-color: var( --wc-blue );
-}
-
-.woocommerce-error {
-	border-color: $highlights-color;
-
-	> li {
-		margin: 0;
-	}
-}
-
-#site-content {
-
-	.woocommerce-error,
-	.woocommerce-info {
-		font-family: $headings;
-	}
-}
-
-.woocommerce-store-notice {
-	background: #eee;
-	color: #000;
-	border-top: 2px solid $highlights-color;
-	padding: 2rem;
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	z-index: 999;
-}
-
-.admin-bar .woocommerce-store-notice {
-	top: 32px;
-}
-
 .woocommerce-store-notice__dismiss-link {
 	float: right;
 	color: #000;
@@ -2556,5 +2479,92 @@ a.reset_variations {
 				padding-left: 1.5rem;
 			}
 		}
+	}
+}
+
+.woocommerce-message,
+.woocommerce-error,
+.woocommerce-info {
+	margin-bottom: 5rem;
+	margin-left: 0;
+	background: #eee;
+	color: $body-color;
+	border-top: 3px solid var( --wc-green );
+
+	font-size: 0.88889em;
+	font-family: $headings;
+	list-style: none;
+	overflow: hidden;
+	width: 100%;
+
+	a {
+		color: #fff;
+
+		&:hover {
+			color: #fff;
+		}
+
+		&.button {
+			background: #000000;
+		}
+	}
+}
+
+.woocommerce-message,
+.woocommerce-error li,
+.woocommerce-info {
+	padding: 1.5rem 3rem;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+
+	.button {
+		order: 2;
+	}
+}
+
+.woocommerce-info {
+	border-color: var( --wc-blue );
+}
+
+.woocommerce-error {
+	border-color: $highlights-color;
+
+	> li {
+		margin: 0;
+	}
+}
+
+#site-content {
+
+	.woocommerce-error,
+	.woocommerce-info {
+		font-family: $headings;
+	}
+}
+
+.woocommerce-store-notice {
+	background: #eee;
+	color: #000;
+	border-top: 2px solid $highlights-color;
+	padding: 2rem;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	z-index: 999;
+}
+
+.admin-bar .woocommerce-store-notice {
+	top: 32px;
+}
+
+.woocommerce-store-notice__dismiss-link {
+	float: right;
+	color: #000;
+
+	&:hover {
+		text-decoration: none;
+		color: #000;
 	}
 }
