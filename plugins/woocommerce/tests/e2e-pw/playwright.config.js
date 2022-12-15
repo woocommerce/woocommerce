@@ -5,7 +5,7 @@ const {
 	CI,
 	DEFAULT_TIMEOUT_OVERRIDE,
 	E2E_MAX_FAILURES,
-	PLAYWRIGHT_HTML_REPORT
+	PLAYWRIGHT_HTML_REPORT,
 } = process.env;
 
 const config = {
@@ -24,15 +24,18 @@ const config = {
 		[
 			'html',
 			{
-				outputFolder: PLAYWRIGHT_HTML_REPORT ?? './test-results/playwright-report',
-				open: CI ? 'never' : 'on-failure',
+				outputFolder:
+					PLAYWRIGHT_HTML_REPORT ??
+					'./test-results/playwright-report',
+				open: CI ? 'never' : 'always',
 			},
 		],
 		[
 			'allure-playwright',
 			{
 				outputFolder:
-					ALLURE_RESULTS_DIR ?? './tests/e2e-pw/test-results/allure-results',
+					ALLURE_RESULTS_DIR ??
+					'./tests/e2e-pw/test-results/allure-results',
 				detail: true,
 				suiteTitle: true,
 			},
