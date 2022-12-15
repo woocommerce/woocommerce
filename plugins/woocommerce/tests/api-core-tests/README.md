@@ -228,7 +228,7 @@ You may need test data setup prior to the execution of your tests and removed af
 6. After writing your tests, ensure all tests pass successfully with `pnpm test:api-pw` before commiting to the codebase 
 
 
-If you have made updates to funcitonality that breaks the tests then then tests should be updated accordingly. Similarly, if there is new functionality added then new tests should be added.
+If you have made updates to functionality that breaks the tests then the tests should be updated accordingly. Similarly, if there is new functionality added then new tests should be added.
 
 ## Examples
 
