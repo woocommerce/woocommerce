@@ -48,8 +48,8 @@ To run the test again, re-create the environment to start with a fresh state
 
 Other ways of running tests:
 
-- `pnpm test:api-pw --debug` (debug)
-- `pnpm test:api-pw ./tests/api-core-tests/tests/hello/hello.test.js` (running a single test)
+- `pnpm test:api-pw ./tests/api-core-tests/tests/hello/hello.test.js` (running a single test file)
+- `pnpm test:api-pw ./tests/api-core-tests/tests/hello` (running all tests in a single folder)
 
 To see all options, run `cd plugins/woocommerce && pnpm playwright test --help`
 
@@ -131,6 +131,8 @@ After you run a test, it's best to restart the environment to start from a fresh
 
 When writing new tests, a good source on how to get started is to reference the [existing tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests/tests). Data that is required for the tests should be located in an equivalent file in the [data](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests/data) folder.
 
+Good examples to reference are the `coupons` and `customers` tests. The [Quick Start Guide](#writing-the-test---a-quick-start-guide) below has the key steps to put together a test and examples of how those steps were implemented for `coupons` and `customers`.
+
 The [Playwright documentation](https://playwright.dev/docs/intro) is a good source for finding out more details on the various methods used in the tests, including what is available to you when you write new tests. The [API testing](https://playwright.dev/docs/test-api-testing) section has a good example on how the [playwright.config.js](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/api-core-tests/playwright.config.js) is used (see [Configuration](https://playwright.dev/docs/test-api-testing#configuration) section) and also how [Setup and Teardown](https://playwright.dev/docs/test-api-testing#setup-and-teardown) works. 
 
 Note: Playwright uses the [expect](https://jestjs.io/docs/expect) library for test assertions. This library provides a lot of matchers like `toEqual`, `toContain`, `toHaveLength` and many more. Examples of these are throughout the test files.
@@ -139,10 +141,20 @@ Note: Playwright uses the [expect](https://jestjs.io/docs/expect) library for te
 
 Assuming that we have validated the API contract (inspected the spec/contract, made sure the endpoints are correctly named, resources and types reflect the object model and there is no missing/duplicate functionality) we are ready to test. 
 
+A test contains 3 different stages:
+1. `precondition`
+2. `action`  
+3. `validation`
+
+and in the case of API testing, this equates to:
+1. `data creation` - see [Test Data Setup Examples](#test-data-setup-examples) below
+2. `send API request` - see [Request Examples](#request-examples) below
+3. `response validation` - see [Validation Examples](#validation-examples) below
 
 For each API request method (`GET`, `POST`, `PUT`, `DELETE`, `PATCH`), the test would need to take the following actions: 
-1. Verify correct HTTP status code. For example, creating a resource should return 201 CREATED and unpermitted requests should return 403 FORBIDDEN, etc.
-2. Verify response payload. Check valid JSON body and correct field names, types, and values — including error responses.
+1. Verify correct HTTP status code. For example, creating a resource should return 201 CREATED and un-permitted requests should return 403 FORBIDDEN, etc.
+2. Verify response payload. Check the JSON body is valid and field names, types, and values are correct (i.e. check the response payload schema is implemented according to the specification) — including error responses.
+
 3. Verify response headers where appropriate e.g. Some headers hold information related to search totals, pagination values etc. (see [Examples](#examples) below).
 
 At a minimum, we want to ensure each possible CRUD operation can be applied and sufficient assertions have been validated based on the above. 
@@ -152,7 +164,7 @@ A reasonable process would be:
 2. Retrieve the created object using the `GET` request
 3. Update the object using a `POST` request
 4. Delete the object using a `DELETE`request
-5. Test any batch create/update/delete operations (if applicible)
+5. Test any batch create/update/delete operations (if applicable)
 
 Additional tests can also be added to test the following general test scenarios:
 
@@ -161,6 +173,7 @@ Additional tests can also be added to test the following general test scenarios:
 - Negative testing with valid input - expect to gracefully handle problem scenarios with valid user input e.g. trying to add an existing username
 - Negative testing with invalid input - expect to gracefully handle problem scenarios with invalid user input e.g. trying to add a username which is null
 
+The intention here is to validate that we get error responses when expected as per specification and the error status code and message are correct as per documentation.
 
 ### Creating test structure
 
@@ -210,23 +223,29 @@ This allows you to further subgroup tests. When viewing the tests results locall
 
 ## Test Data Setup/Teardown
 
-You may need test data setup prior to the execution of your tests and removed after the execution of your tests. This can be achieved with any of the following methods, depending on the needs of the test:
+You may need test data setup prior to the execution of your tests. If so, make sure it is removed after the execution of your tests. This can be achieved with any of the following methods, depending on the needs of the test:
 
 - [`test.beforeAll()`](https://playwright.dev/docs/api/class-test#test-before-all) - runs before all the tests in file/group
-- [`test.afterAll()`](https://playwright.dev/docs/api/class-test#test-after-all) - runs after all the tests in file/group
 - [`test.beforeEach()`](https://playwright.dev/docs/api/class-test#test-before-each) - runs before each test in file/group
 - [`test.afterEach()`](https://playwright.dev/docs/api/class-test#test-after-each) - runs after each test in file/group
+- [`test.afterAll()`](https://playwright.dev/docs/api/class-test#test-after-all) - runs after all the tests in file/group
 
 
 ## Writing the test - a Quick Start Guide
 
-1. Create test.js file inside the tests directory
-2. Import [@playwright/test module
-3. Group tests with test.describe() methods
-4. Add tests with test() methods
-5. Separate data where required into files in the data directory 
-6. After writing your tests, ensure all tests pass successfully with `pnpm test:api-pw` before commiting to the codebase 
-
+1. Create `test.js` file inside the tests directory
+    - Example for [`coupons`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/api-core-tests/tests/coupons/coupons.test.js) and [`customers`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/api-core-tests/tests/customers/customers-crud.test.js)
+2. Import `@playwright/test` module
+    - Example for [`coupons`](https://github.com/woocommerce/woocommerce/blob/b904fd428db1252f39cb64005f4b627f2a9ac08e/plugins/woocommerce/tests/api-core-tests/tests/coupons/coupons.test.js#L1) and [`customers`](https://github.com/woocommerce/woocommerce/blob/b904fd428db1252f39cb64005f4b627f2a9ac08e/plugins/woocommerce/tests/api-core-tests/tests/customers/customers-crud.test.js#L1)
+3. Group tests with `test.describe()` methods
+    - Example for [`coupons`](https://github.com/woocommerce/woocommerce/blob/b904fd428db1252f39cb64005f4b627f2a9ac08e/plugins/woocommerce/tests/api-core-tests/tests/coupons/coupons.test.js#L10) and [`customers`](https://github.com/woocommerce/woocommerce/blob/b904fd428db1252f39cb64005f4b627f2a9ac08e/plugins/woocommerce/tests/api-core-tests/tests/customers/customers-crud.test.js#L20)
+4. Add tests with `test()` methods
+    - Example for [`coupons`](https://github.com/woocommerce/woocommerce/blob/b904fd428db1252f39cb64005f4b627f2a9ac08e/plugins/woocommerce/tests/api-core-tests/tests/coupons/coupons.test.js#L14) and [`customers`](https://github.com/woocommerce/woocommerce/blob/b904fd428db1252f39cb64005f4b627f2a9ac08e/plugins/woocommerce/tests/api-core-tests/tests/customers/customers-crud.test.js#L93)
+5. Separate data where required into files in the `data` directory 
+    - Example for [`coupons`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/api-core-tests/data/coupon.js) and [`customers`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/api-core-tests/data/customer.js)
+6. Import data required by your tests
+    - Example for [`coupons`](https://github.com/woocommerce/woocommerce/blob/b904fd428db1252f39cb64005f4b627f2a9ac08e/plugins/woocommerce/tests/api-core-tests/tests/coupons/coupons.test.js#L2) and [`customers`](https://github.com/woocommerce/woocommerce/blob/b904fd428db1252f39cb64005f4b627f2a9ac08e/plugins/woocommerce/tests/api-core-tests/tests/customers/customers-crud.test.js#L5)
+7. After writing your tests, ensure all tests pass successfully with `pnpm test:api-pw`
 
 If you have made updates to functionality that breaks the tests then the tests should be updated accordingly. Similarly, if there is new functionality added then new tests should be added.
 
@@ -239,6 +258,8 @@ Playwright [configuration file](https://github.com/woocommerce/woocommerce/blob/
 Test files [location](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests/tests)
 
 Data files [location](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests/data) 
+
+### Test Data Setup Examples
 
 Setup data with [test.beforeAll()](https://github.com/woocommerce/woocommerce/blob/4ac1d822ac9082102536b0f7aa9cb0553965adaa/plugins/woocommerce/tests/api-core-tests/tests/coupons/coupons.test.js#L347)
 ```js
@@ -267,6 +288,7 @@ Teardown data with [test.afterAll()](https://github.com/woocommerce/woocommerce/
 		} );
 	} );
   ```
+### Request Examples
 
 `GET` [request](https://github.com/woocommerce/woocommerce/blob/4ac1d822ac9082102536b0f7aa9cb0553965adaa/plugins/woocommerce/tests/api-core-tests/tests/coupons/coupons.test.js#L44)
 ```js
@@ -327,6 +349,8 @@ Teardown data with [test.afterAll()](https://github.com/woocommerce/woocommerce/
 		);
 ```
 
+### Validation Examples
+
 Verify [Status code](https://github.com/woocommerce/woocommerce/blob/4ac1d822ac9082102536b0f7aa9cb0553965adaa/plugins/woocommerce/tests/api-core-tests/tests/coupons/coupons.test.js#L30)
 ```js
 		expect( response.status() ).toEqual( 201 );
@@ -374,7 +398,7 @@ Verify search [headers](https://github.com/woocommerce/woocommerce/blob/d19c2049
 			expect( page1.headers()[ 'x-wp-totalpages' ] ).toEqual( '3' );
   ```
 
-Verify Variable [not undefined](https://github.com/woocommerce/woocommerce/blob/778cb130f27d0dd0dc7da1acb0e89762f81c0f18/plugins/woocommerce/tests/api-core-tests/tests/coupons/coupons.test.js#L31)
+Verify variable [not undefined](https://github.com/woocommerce/woocommerce/blob/778cb130f27d0dd0dc7da1acb0e89762f81c0f18/plugins/woocommerce/tests/api-core-tests/tests/coupons/coupons.test.js#L31)
 ```js
 expect( couponId ).toBeDefined();
 ```
