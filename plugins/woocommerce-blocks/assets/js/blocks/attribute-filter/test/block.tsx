@@ -16,7 +16,7 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 	...jest.requireActual( '@woocommerce/base-context/hooks' ),
 } ) );
 
-const setWindowUrl = ( { url }: SetWindowUrlParams ) => {
+const setWindowUrl = ( { url }: { url: string } ) => {
 	global.window = Object.create( window );
 	Object.defineProperty( window, 'location', {
 		value: {
@@ -146,7 +146,7 @@ const setupWithoutSelectedFilterAttributes = () => {
 	};
 };
 
-describe( 'AttributeFilterBlock', () => {
+describe( 'Filter by Attribute block', () => {
 	describe( 'Given no filter attribute is selected when page loads', () => {
 		test( 'should disable Apply button when page loads', () => {
 			const { applyButton } = setupWithoutSelectedFilterAttributes();

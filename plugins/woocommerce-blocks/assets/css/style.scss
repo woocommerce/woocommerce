@@ -49,7 +49,8 @@
 	.wp-block-button__link {
 		word-break: break-word;
 		white-space: normal;
-		margin: 0 auto !important;
+		margin-right: auto !important;
+		margin-left: auto !important;
 		display: inline-flex;
 		justify-content: center;
 		text-align: center;
@@ -95,7 +96,6 @@
 
 .wc-block-grid__product-rating {
 	display: block;
-	color: #000;
 
 	.wc-block-grid__product-rating__stars,
 	.star-rating {
@@ -118,7 +118,6 @@
 			right: 0;
 			position: absolute;
 			opacity: 0.5;
-			color: #aaa;
 			white-space: nowrap;
 		}
 		span {

@@ -110,13 +110,16 @@ class ProductRating extends AbstractBlock {
 		);
 
 		if ( $product ) {
-			$classes_and_styles = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
+			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'font_size', 'margin', 'text_color' ) );
+			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
 
 			return sprintf(
-				'<div class="wc-block-components-product-rating wc-block-grid__product-rating %s">
-					%s
+				'<div class="wc-block-components-product-rating wc-block-grid__product-rating %1$s %2$s" style="%3$s">
+					%4$s
 				</div>',
-				esc_attr( $classes_and_styles['class'] ?? '' ),
+				esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
+				esc_attr( $styles_and_classes['classes'] ),
+				esc_attr( $styles_and_classes['styles'] ?? '' ),
 				wc_get_rating_html( $product->get_average_rating() )
 			);
 		}

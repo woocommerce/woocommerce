@@ -85,14 +85,14 @@ describe( `${ block.name } Block`, () => {
 				'.wc-filter-element-label-list-count'
 			);
 			await expect( page ).toClick( 'label', {
-				text: 'Include product count',
+				text: 'Display product count',
 			} );
 			await expect( page ).not.toMatchElement(
 				'.wc-filter-element-label-list-count'
 			);
 			// reset
 			await expect( page ).toClick( 'label', {
-				text: 'Include product count',
+				text: 'Display product count',
 			} );
 		} );
 
