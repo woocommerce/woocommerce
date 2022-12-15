@@ -28,6 +28,7 @@ export const ALL_PRODUCT_QUERY_CONTROLS = [
 	'presets',
 	'onSale',
 	'stockStatus',
+	'wooInherit',
 ];
 
 export const DEFAULT_ALLOWED_CONTROLS = [
@@ -56,8 +57,8 @@ export const QUERY_DEFAULT_ATTRIBUTES: QueryBlockAttributes = {
 		pages: 0,
 		offset: 0,
 		postType: 'product',
-		order: 'desc',
-		orderBy: 'date',
+		order: 'asc',
+		orderBy: 'title',
 		author: '',
 		search: '',
 		exclude: [],
@@ -98,6 +99,15 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 			],
 		],
 	],
-	[ 'core/query-pagination' ],
+	[
+		'core/query-pagination',
+		{
+			layout: {
+				type: 'flex',
+				justifyContent: 'center',
+			},
+		},
+		[],
+	],
 	[ 'core/query-no-results' ],
 ];

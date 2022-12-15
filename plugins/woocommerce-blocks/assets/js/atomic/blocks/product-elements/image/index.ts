@@ -32,8 +32,8 @@ const blockConfig: CustomBlockConfiguration = {
 	description,
 	usesContext: [ 'query', 'queryId', 'postId' ],
 	ancestor: [
-		'@woocommerce/all-products',
-		'@woocommerce/single-product',
+		'woocommerce/all-products',
+		'woocommerce/single-product',
 		'core/post-template',
 	],
 	textdomain: 'woo-gutenberg-products-block',
