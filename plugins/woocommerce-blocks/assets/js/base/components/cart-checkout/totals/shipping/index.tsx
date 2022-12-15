@@ -150,7 +150,9 @@ export const TotalsShipping = ( {
 		? parseInt( values.total_shipping, 10 ) +
 		  parseInt( values.total_shipping_tax, 10 )
 		: parseInt( values.total_shipping, 10 );
-	const hasRates = hasShippingRate( shippingRates ) || totalShippingValue;
+	const hasRates = !! (
+		hasShippingRate( shippingRates ) || totalShippingValue
+	);
 	const calculatorButtonProps = {
 		isShippingCalculatorOpen,
 		setIsShippingCalculatorOpen,

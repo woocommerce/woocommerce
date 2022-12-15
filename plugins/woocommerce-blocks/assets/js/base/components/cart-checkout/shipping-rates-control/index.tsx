@@ -27,7 +27,7 @@ interface PackagesProps {
 	collapsible?: TernaryFlag;
 	showItems?: TernaryFlag;
 	noResultsMessage: ReactElement;
-	renderOption: PackageRateRenderOption;
+	renderOption?: PackageRateRenderOption | undefined;
 }
 
 /**
@@ -77,7 +77,7 @@ interface ShippingRatesControlProps {
 	className?: string;
 	isLoadingRates: boolean;
 	noResultsMessage: ReactElement;
-	renderOption: PackageRateRenderOption;
+	renderOption?: PackageRateRenderOption | undefined;
 	context: 'woocommerce/cart' | 'woocommerce/checkout';
 }
 /**
