@@ -6,6 +6,7 @@ import semver from 'semver';
 import { writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import { cloneRepo, getCommitHash } from 'cli-core/src/git';
 import { Logger } from 'cli-core/src/logger';
 import { Command } from '@commander-js/extra-typings';
 import dotenv from 'dotenv';
@@ -14,10 +15,16 @@ import dotenv from 'dotenv';
  * Internal dependencies
  */
 import { renderTemplate } from '../../lib/render-template';
-import { createWpComDraftPost } from '../../lib/draft-post';
+import { createWpComDraftPost, fetchWpComPost, editWpComPostContent } from '../../lib/draft-post';
+import { getWordpressComAuthToken } from '../../lib/oauth-helper';
+import { getEnvVar } from '../../lib/environment';
 import { generateContributors } from '../../lib/contributors';
+import { editPostHTML } from '../../lib/edit-post.ts';
 
 const DEVELOPER_WOOCOMMERCE_SITE_ID = '96396764';
+
+//const SOURCE_REPO = 'https://github.com/woocommerce/woocommerce.git';
+const SOURCE_REPO = '/Users/jonathan/woo/woocommerce';
 
 const VERSION_VALIDATION_REGEX =
 	/^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/;
@@ -30,118 +37,181 @@ const program = new Command()
 	.description( 'CLI to automate generation of a release post.' )
 	.argument(
 		'<currentVersion>',
-		'The version of the plugin to generate a post for, please use the tag version from Github.'
+		'The current version in x.y.z or x.y.z-stage.n format. Ex: 7.1.0, 7.1.0-rc.1'
+	)
+	.argument(
+		'<previousVersion>',
+		'The previous version in x.y.z format. Ex: 7.0.0'
 	)
 	.option( '--outputOnly', 'Only output the post, do not publish it' )
-	.option(
-		'--previousVersion <previousVersion>',
-		'If you would like to compare against a version other than last minor you can provide a tag version from Github.'
-	)
-	.option(
-		'--tags <tags>',
-		'Comma separated list of tags to add to the post.',
-		'Releases,WooCommerce Core'
-	)
-	.action( async ( currentVersion, options ) => {
-		const tags = options.tags.split( ',' ).map( ( tag ) => tag.trim() );
+	.option( '--editPost <postId>', 'Updates an existing post' )
+	.option( '--siteId <siteId>', 'For posting to a non-default site (for testing)')
+	.action( async ( currentVersion, previousVersion, options ) => {
 
-		const previousVersion = options.previousVersion
-			? semver.parse( options.previousVersion )
-			: semver.parse( currentVersion );
+		const siteId = options.siteId || DEVELOPER_WOOCOMMERCE_SITE_ID;
+		const tags = ( options.tags && options.tags.split( ',' ).map( ( tag ) => tag.trim() ) ) || [ 'WooCommerce Core','Releases' ];
+		const isOutputOnly = !! options.outputOnly;
+		const isEditPost = !! options.editPost;
 
-		if ( ! options.previousVersion && previousVersion ) {
-			// e.g 6.8.0 -> 6.7.0
-			previousVersion.major =
-				previousVersion.minor === 0
-					? previousVersion.major - 1
-					: previousVersion.major;
-
-			previousVersion.minor =
-				previousVersion.minor === 0 ? 9 : previousVersion.minor - 1;
-
-			previousVersion.format();
+		if ( ! VERSION_VALIDATION_REGEX.test( currentVersion ) ) {
+			throw new Error(
+				`Invalid current version: ${ currentVersion }. Provide current version in x.y.z or x.y.z-stage.n format.`
+			);
 		}
 
-		if ( previousVersion && previousVersion.major ) {
-			const isOutputOnly = !! options.outputOnly;
+		if ( ! VERSION_VALIDATION_REGEX.test( previousVersion ) ) {
+			throw new Error(
+				`Invalid previous version: ${ previousVersion }. Provide previous version in x.y.z format.`
+			);
+		}
 
-			if ( ! VERSION_VALIDATION_REGEX.test( previousVersion.raw ) ) {
+		const clientId = getEnvVar( 'WPCOM_OAUTH_CLIENT_ID', true );
+		const clientSecret = getEnvVar( 'WPCOM_OAUTH_CLIENT_SECRET', true );
+		const redirectUri =
+			getEnvVar( 'WPCOM_OAUTH_REDIRECT_URI' ) ||
+			'http://localhost:3000/oauth';
+		const authToken = isOutputOnly || await getWordpressComAuthToken(
+			clientId,
+			clientSecret,
+			siteId,
+			redirectUri,
+			'posts'
+		);
+
+		if ( ! authToken ) {
+			throw new Error(
+				'Error getting auth token, check your env settings are correct.'
+			);
+		}
+
+
+		Logger.startTask( `Making temporary clone of ${ SOURCE_REPO }...` );
+		const currentParsed = semver.parse( currentVersion );
+		const previousParsed = semver.parse( previousVersion );
+		//const tmpRepoPath = await cloneRepo( SOURCE_REPO );
+		const tmpRepoPath = '/var/folders/hs/01mlh7d15495b666jjdj7ly80000gn/T/code-analyzer-tmp/2b527a2a-8980-4f40-8e0a-e160867f679a';
+		Logger.endTask();
+		let currentBranch;
+		let previousBranch;
+		let currentVersionRef;
+		let previousVersionRef;
+
+		try {
+			currentBranch = `release/${ currentParsed.major }.${ currentParsed.minor }`;
+			currentVersionRef = await getCommitHash( tmpRepoPath, `remotes/origin/${ currentBranch }` );
+		} catch( error: unknown ) {
+			Logger.notice( `Unable to find '${ currentBranch }', using 'trunk'.` );
+			currentBranch = 'trunk';
+			currentVersionRef = await getCommitHash( tmpRepoPath, 'remotes/origin/trunk' );
+		}
+
+		try {
+			previousBranch = `release/${ previousParsed.major }.${ previousParsed.minor }`;
+			previousVersionRef = await getCommitHash( tmpRepoPath, `remotes/origin/${ previousBranch }` );
+		} catch( error: unknown ) {
+			throw new Error(
+				`Unable to find '${ previousBranch }'. Branch for previous version must exist.`
+			);
+		}
+
+
+		Logger.notice( `Using ${ currentBranch }(${ currentVersionRef }) for current and ${ previousBranch }(${ previousVersionRef }) for previous.` );
+
+		let postContent;
+
+		if ( isEditPost ) {
+			try {
+				const prevPost = await fetchWpComPost( siteId, options.editPost, authToken );
+				postContent = prevPost.content;
+			} catch( error: unknown ) {
 				throw new Error(
-					`Invalid previous version: ${ previousVersion.raw }`
+					`Unable to fetch existing post with ID: ${ options.editPost }`
 				);
 			}
-			if ( ! VERSION_VALIDATION_REGEX.test( currentVersion ) ) {
-				throw new Error(
-					`Invalid current version: ${ currentVersion }`
-				);
-			}
+		}
 
-			const changes = await scanForChanges(
-				currentVersion,
-				currentVersion,
-				false,
-				'https://github.com/woocommerce/woocommerce.git',
-				previousVersion.toString(),
-				'cli'
+		const changes = await scanForChanges(
+			currentVersionRef,
+			`${ previousParsed.major }.${ previousParsed.minor }.${ previousParsed.patch }`,
+			//false,
+			true,
+			SOURCE_REPO,
+			previousVersionRef,
+			'cli',
+			tmpRepoPath
+		);
+
+		const schemaChanges = changes.schema.filter(
+			( s ) => ! s.areEqual
+		);
+
+		Logger.startTask( 'Finding contributors' );
+		const title = `WooCommerce ${ currentVersion } Released`;
+
+		/*const contributors = await generateContributors(
+			currentVersion,
+			previousVersion.toString()
+		);*/
+		const contributors = {};
+
+		const postVariables = {
+			contributors,
+			title,
+			changes: {
+				...changes,
+				schema: schemaChanges,
+			},
+			displayVersion: currentVersion,
+		};
+
+		const html = isEditPost ?
+			editPostHTML( postContent, {
+				hooks: await renderTemplate( 'hooks.ejs', postVariables ),
+				database: await renderTemplate( 'database.ejs', postVariables ),
+				templates: await renderTemplate( 'templates.ejs', postVariables ),
+				contributors: await renderTemplate( 'contributors.ejs', postVariables ),
+			} ) :
+			await renderTemplate( 'release.ejs', postVariables );
+
+		Logger.endTask();
+
+		if ( isOutputOnly ) {
+			const tmpFile = join(
+				tmpdir(),
+				`release-${ currentVersion }.html`
 			);
 
-			const schemaChanges = changes.schema.filter(
-				( s ) => ! s.areEqual
-			);
+			await writeFile( tmpFile, html );
 
-			Logger.startTask( 'Finding contributors' );
-			const title = `WooCommerce ${ currentVersion } Released`;
+			Logger.notice( `Output written to ${ tmpFile }` );
+		} else {
+			Logger.startTask( 'Publishing draft release post' );
 
-			const contributors = await generateContributors(
-				currentVersion,
-				previousVersion.toString()
-			);
-
-			const html = await renderTemplate( 'release.ejs', {
-				contributors,
-				title,
-				changes: {
-					...changes,
-					schema: schemaChanges,
-				},
-				displayVersion: currentVersion,
-			} );
-
-			Logger.endTask();
-
-			if ( isOutputOnly ) {
-				const tmpFile = join(
-					tmpdir(),
-					`release-${ currentVersion }.html`
-				);
-
-				await writeFile( tmpFile, html );
-
-				Logger.notice( `Output written to ${ tmpFile }` );
-			} else {
-				Logger.startTask( 'Publishing draft release post' );
-
-				try {
-					const { URL } = await createWpComDraftPost(
-						DEVELOPER_WOOCOMMERCE_SITE_ID,
+			try {
+				const { URL } = isEditPost ?
+					await editWpComPostContent(
+						siteId,
+						options.editPost,
+						html,
+						authToken
+					) :
+					await createWpComDraftPost(
+						siteId,
 						title,
 						html,
-						tags
+						tags,
+						authToken
 					);
 
-					Logger.notice( `Published draft release post at ${ URL }` );
-					Logger.endTask();
-				} catch ( error: unknown ) {
-					if ( error instanceof Error ) {
-						Logger.error( error.message );
-					}
+				Logger.notice( `Published draft release post at ${ URL }` );
+				Logger.endTask();
+			} catch ( error: unknown ) {
+				if ( error instanceof Error ) {
+					Logger.error( error.message );
 				}
 			}
-		} else {
-			throw new Error(
-				`Could not find previous version for ${ currentVersion }`
-			);
 		}
+
 	} );
 
 program.parse( process.argv );
