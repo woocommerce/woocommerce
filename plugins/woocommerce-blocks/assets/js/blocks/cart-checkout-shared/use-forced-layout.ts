@@ -122,62 +122,7 @@ export const useForcedLayout = ( {
 				.select( 'core/block-editor' )
 				.getBlocks( clientId );
 
-	const { innerBlocks, registeredBlockTypes } = useSelect(
-		( select ) => {
-			return {
-				innerBlocks:
-					select( 'core/block-editor' ).getBlocks( clientId ),
-				registeredBlockTypes: currentRegisteredBlocks.current.map(
-					( blockName ) => getBlockType( blockName )
-				),
-			};
-		},
-		[ clientId, currentRegisteredBlocks.current ]
-	);
-
-	const appendBlock = useCallback(
-		( block, position ) => {
-			const newBlock = createBlock( block.name );
-			insertBlock( newBlock, position, clientId, false );
-		},
-		// We need to skip insertBlock here due to a cache issue in wordpress.com that causes an infinite loop, see https://github.com/Automattic/wp-calypso/issues/66092 for an expanded doc.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[ clientId ]
-	);
-
-	const lockedBlockTypes = useMemo(
-		() =>
-			registeredBlockTypes.filter(
-				( block: Block | undefined ) => block && isBlockLocked( block )
-			),
-		[ registeredBlockTypes ]
-	) as Block[];
-
-	/**
-	 * If the current inner blocks differ from the registered blocks, push the differences.
-	 */
-	useLayoutEffect( () => {
-		if ( ! clientId ) {
-			return;
-		}
-
-		// If there are NO inner blocks, sync with the given template.
-		if (
-			innerBlocks.length === 0 &&
-			currentDefaultTemplate.current.length > 0
-		) {
-			const nextBlocks = createBlocksFromInnerBlocksTemplate(
-				currentDefaultTemplate.current
-			);
-			if ( ! isEqual( nextBlocks, innerBlocks ) ) {
-				replaceInnerBlocks( clientId, nextBlocks );
-				return;
-			}
-		}
-
-		// Find registered locked blocks missing from Inner Blocks and append them.
-		lockedBlockTypes.forEach( ( block ) => {
-			// If the locked block type is already in the layout, we can skip this one.
+			// If there are NO inner blocks, sync with the given template.
 			if (
 				innerBlocks.length === 0 &&
 				currentDefaultTemplate.current.length > 0
