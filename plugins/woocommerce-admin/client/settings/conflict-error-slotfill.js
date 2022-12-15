@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { registerPlugin, PluginArea } from '@wordpress/plugins';
+import { __ } from '@wordpress/i18n';
+import interpolateComponents from '@automattic/interpolate-components';
 import {
 	Button,
 	Card,
@@ -25,7 +27,7 @@ const LearnMore = () => (
 		href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/"
 		target="_blank"
 	>
-		Learn more
+		{ __( 'Learn more', 'woocommerce' ) }
 	</Button>
 );
 
@@ -63,7 +65,7 @@ const SettingsErrorFill = () => {
 
 	const ApplyRecommendedSettingsButton = () => (
 		<Button variant="primary" onClick={ handleApplyRecommendedSettings }>
-			Use recommended settings
+			{ __( 'Use recommended settings', 'woocommerce' ) }
 		</Button>
 	);
 
@@ -140,11 +142,15 @@ const SettingsErrorFill = () => {
 						<div>
 							<div className="woocommerce_tax_settings_conflict_error_card_body__body_text">
 								<p style={ { fontSize: 13 } }>
-									<b>Inconsistent tax settings:</b> To avoid
-									possible rounding errors, prices should be
-									entered and displayed consistently in all
-									locations either including, or excluding
-									taxes.
+									{ interpolateComponents( {
+										mixedString: __(
+											'{{b}}Inconsistent tax settings:{{/b}} To avoid possible rounding errors, prices should be entered and displayed consistently in all locations either including, or excluding taxes.',
+											'woocommerce'
+										),
+										components: {
+											b: <b />,
+										},
+									} ) }
 								</p>
 							</div>
 							<div className="woocommerce_tax_settings_conflict_error_card_body__buttons">
