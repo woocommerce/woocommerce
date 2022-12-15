@@ -7,6 +7,7 @@ import { useUser } from '@woocommerce/data';
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
+import { Campaigns } from './Campaigns';
 import { Channels } from './Channels';
 import { InstalledExtensions } from './InstalledExtensions';
 import { DiscoverTools } from './DiscoverTools';
@@ -23,6 +24,8 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 
 	return (
 		<div className="woocommerce-marketing-overview-multichannel">
+			{ /* TODO: show Campaigns card only when there is at least one registered channel. */ }
+			<Campaigns />
 			<Channels />
 			<InstalledExtensions />
 			{ shouldShowExtensions && <DiscoverTools /> }
