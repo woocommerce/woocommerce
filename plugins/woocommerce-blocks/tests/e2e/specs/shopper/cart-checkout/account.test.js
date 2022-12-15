@@ -1,11 +1,6 @@
 /**
  * External dependencies
  */
-import {
-	visitBlockPage,
-	selectBlockByName,
-	saveOrPublish,
-} from '@woocommerce/blocks-test-utils';
 import { setCheckbox } from '@woocommerce/e2e-utils';
 import { visitAdminPage } from '@wordpress/e2e-test-utils';
 
@@ -14,13 +9,6 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
  */
 import { shopper, merchant, clickLink } from '../../../../utils';
 import { SIMPLE_PHYSICAL_PRODUCT_NAME } from '.../../../../utils/constants';
-import { openBlockEditorSettings } from '../../../utils';
-
-const block = {
-	name: 'Checkout',
-	slug: 'woocommerce/checkout',
-	class: '.wp-block-woocommerce-checkout',
-};
 
 if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 ) {
 	// Skips all the tests if it's a WooCommerce Core process environment.
@@ -41,18 +29,6 @@ describe( 'Shopper → Checkout → Account', () => {
 		//Enable guest checkout option.
 		await setCheckbox( '#woocommerce_enable_guest_checkout' );
 		await clickLink( 'button[name="save"]' );
-		await visitBlockPage( `${ block.name } Block` );
-		await selectBlockByName( block.slug );
-		await selectBlockByName(
-			'woocommerce/checkout-contact-information-block'
-		);
-		await openBlockEditorSettings();
-		//Enable shoppers to sign up at checkout option.
-		// eslint-disable-next-line jest/no-standalone-expect
-		await expect( page ).toClick( 'label', {
-			text: 'Allow shoppers to sign up for a user account during checkout',
-		} );
-		await saveOrPublish();
 		await merchant.logout();
 	} );
 

@@ -7,7 +7,6 @@ import { createContext, useContext } from '@wordpress/element';
  * Context consumed by inner blocks.
  */
 export type CheckoutBlockContextProps = {
-	allowCreateAccount: boolean;
 	showCompanyField: boolean;
 	showApartmentField: boolean;
 	showPhoneField: boolean;
@@ -22,12 +21,10 @@ export type CheckoutBlockContextProps = {
 
 export type CheckoutBlockControlsContextProps = {
 	addressFieldControls: () => JSX.Element | null;
-	accountControls: () => JSX.Element | null;
 };
 
 export const CheckoutBlockContext: React.Context< CheckoutBlockContextProps > =
 	createContext< CheckoutBlockContextProps >( {
-		allowCreateAccount: false,
 		showCompanyField: false,
 		showApartmentField: false,
 		showPhoneField: false,
@@ -43,7 +40,6 @@ export const CheckoutBlockContext: React.Context< CheckoutBlockContextProps > =
 export const CheckoutBlockControlsContext: React.Context< CheckoutBlockControlsContextProps > =
 	createContext< CheckoutBlockControlsContextProps >( {
 		addressFieldControls: () => null,
-		accountControls: () => null,
 	} );
 
 export const useCheckoutBlockContext = (): CheckoutBlockContextProps => {
