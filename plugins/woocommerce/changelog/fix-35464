@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Split CALC_FOUND_ROW query into seperate count query for better performance.
