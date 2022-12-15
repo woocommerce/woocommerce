@@ -210,7 +210,7 @@ This allows you to further subgroup tests. When viewing the tests results locall
 
 ## Test Data Setup/Teardown
 
-You may need test data setup prior to the execution of your tests and removed after the execution of your tests. This can be achieved with 
+You may need test data setup prior to the execution of your tests and removed after the execution of your tests. This can be achieved with any of the following methods, depending on the needs of the test:
 
 - [`test.beforeAll()`](https://playwright.dev/docs/api/class-test#test-before-all) - runs before all the tests in file/group
 - [`test.afterAll()`](https://playwright.dev/docs/api/class-test#test-after-all) - runs after all the tests in file/group
