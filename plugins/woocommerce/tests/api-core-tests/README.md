@@ -129,7 +129,7 @@ After you run a test, it's best to restart the environment to start from a fresh
 
 ## Guide for writing tests
 
-When writing new tests, a good source on how to start writing and how to wire things up is to reference the other existing tests (found in the [tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests/tests) folder). Any data required for these tests should be located in an equivalent file in the [data](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests/data) folder.
+When writing new tests, a good source on how to get started is to reference the [existing tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests/tests). Data that is required for the tests should be located in an equivalent file in the [data](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests/data) folder.
 
 [Playwright docs](https://playwright.dev/docs/intro) is also a good source of learning. If you don’t understand a method, you’ll likely find more information here. The [API testing](https://playwright.dev/docs/test-api-testing) section has a good example on how the [playwright.config.js](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/api-core-tests/playwright.config.js) is used (see [Configuration](https://playwright.dev/docs/test-api-testing#configuration) section) and also how [Setup and Teardown](https://playwright.dev/docs/test-api-testing#setup-and-teardown) works. 
 
