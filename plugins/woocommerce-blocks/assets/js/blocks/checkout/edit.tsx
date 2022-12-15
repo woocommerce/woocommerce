@@ -53,7 +53,6 @@ export const Edit = ( {
 	setAttributes: ( attributes: Record< string, unknown > ) => undefined;
 } ): JSX.Element => {
 	const {
-		allowCreateAccount,
 		showCompanyField,
 		requireCompanyField,
 		showApartmentField,
@@ -76,31 +75,6 @@ export const Edit = ( {
 		newAttributes[ key ] = ! ( attributes[ key ] as boolean );
 		setAttributes( newAttributes );
 	};
-
-	const accountControls = (): JSX.Element => (
-		<InspectorControls>
-			<PanelBody
-				title={ __(
-					'Account options',
-					'woo-gutenberg-products-block'
-				) }
-			>
-				<ToggleControl
-					label={ __(
-						'Allow shoppers to sign up for a user account during checkout',
-						'woo-gutenberg-products-block'
-					) }
-					checked={ allowCreateAccount }
-					onChange={ () =>
-						setAttributes( {
-							allowCreateAccount: ! allowCreateAccount,
-						} )
-					}
-				/>
-			</PanelBody>
-			<CartCheckoutFeedbackPrompt />
-		</InspectorControls>
-	);
 
 	const addressFieldControls = (): JSX.Element => (
 		<InspectorControls>
@@ -180,14 +154,10 @@ export const Edit = ( {
 						} ) }
 					>
 						<CheckoutBlockControlsContext.Provider
-							value={ {
-								addressFieldControls,
-								accountControls,
-							} }
+							value={ { addressFieldControls } }
 						>
 							<CheckoutBlockContext.Provider
 								value={ {
-									allowCreateAccount,
 									showCompanyField,
 									requireCompanyField,
 									showApartmentField,

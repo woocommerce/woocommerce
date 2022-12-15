@@ -13,7 +13,6 @@ import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import Block from './block';
 import attributes from './attributes';
 import LoginPrompt from './login-prompt';
-import { useCheckoutBlockContext } from '../../context';
 
 const FrontendBlock = ( {
 	title,
@@ -24,7 +23,6 @@ const FrontendBlock = ( {
 }: {
 	title: string;
 	description: string;
-	allowCreateAccount: boolean;
 	showStepNumber: boolean;
 	children: JSX.Element;
 	className?: string;
@@ -32,7 +30,6 @@ const FrontendBlock = ( {
 	const checkoutIsProcessing = useSelect( ( select ) =>
 		select( CHECKOUT_STORE_KEY ).isProcessing()
 	);
-	const { allowCreateAccount } = useCheckoutBlockContext();
 
 	return (
 		<FormStep
@@ -47,7 +44,7 @@ const FrontendBlock = ( {
 			showStepNumber={ showStepNumber }
 			stepHeadingContent={ () => <LoginPrompt /> }
 		>
-			<Block allowCreateAccount={ allowCreateAccount } />
+			<Block />
 			{ children }
 		</FormStep>
 	);

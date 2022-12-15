@@ -34,7 +34,6 @@ export const Edit = ( {
 		title: string;
 		description: string;
 		showStepNumber: boolean;
-		allowCreateAccount: boolean;
 		className: string;
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
