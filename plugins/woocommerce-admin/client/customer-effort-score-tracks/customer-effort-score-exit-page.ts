@@ -43,7 +43,7 @@ export const getExitPageData = () => {
  * @param {string} pageId of page exited early.
  */
 export const addExitPage = ( pageId: string ) => {
-	if ( ! window.localStorage ) {
+	if ( ! ( window.localStorage && allowTracking ) ) {
 		return;
 	}
 
@@ -95,7 +95,7 @@ export const addCustomerEffortScoreExitPageListener = (
 	hasUnsavedChanges: () => boolean
 ) => {
 	eventListeners[ pageId ] = () => {
-		if ( hasUnsavedChanges() && allowTracking ) {
+		if ( hasUnsavedChanges() ) {
 			addExitPage( pageId );
 		}
 	};
