@@ -152,15 +152,15 @@ class DefaultFreeExtensions {
 			'codistoconnect'         => [
 				'name'           => __( 'Codisto for WooCommerce', 'woocommerce' ),
 				'description'    => __( 'Sell on Amazon, eBay, Walmart and more directly from WooCommerce with Codisto.', 'woocommerce' ),
-				'image_url'      => plugins_url( '/assets/images/onboarding/pinterest.png', WC_PLUGIN_FILE ),
-				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
+				'image_url'      => plugins_url( '/assets/images/onboarding/codistoconnect.png', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=codisto-settings',
 				'is_built_by_wc' => true,
 			],
 			'codistoconnect:alt'         => [
 				'name'           => __( 'Codisto for WooCommerce', 'woocommerce' ),
 				'description'    => __( 'Sell on Amazon, eBay, Walmart and more directly from WooCommerce.', 'woocommerce' ),
-				'image_url'      => plugins_url( '/assets/images/onboarding/pinterest.png', WC_PLUGIN_FILE ),
-				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
+				'image_url'      => plugins_url( '/assets/images/onboarding/codistoconnect.png', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=codisto-settings',
 				'is_built_by_wc' => true,
 			],
 			'woocommerce-payments'              => [
