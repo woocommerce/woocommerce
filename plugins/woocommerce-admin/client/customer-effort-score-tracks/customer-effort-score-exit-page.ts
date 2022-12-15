@@ -205,6 +205,31 @@ function getExitPageCESCopy( pageId: string ): {
 					'woocommerce'
 				),
 			};
+		case 'shop_order_update':
+			return {
+				action: pageId,
+				icon: '📦',
+				noticeLabel: __(
+					'How easy or difficult was it to update this order?',
+					'woocommerce'
+				),
+				title: __(
+					"How's your experience with orders?",
+					'woocommerce'
+				),
+				description: __(
+					'We noticed you started editing an order, then left. How was it? Your feedback will help create a better experience for thousands of merchants like you.',
+					'woocommerce'
+				),
+				firstQuestion: __(
+					'The order editing screen is easy to use',
+					'woocommerce'
+				),
+				secondQuestion: __(
+					"The order details screen's functionality meets my needs",
+					'woocommerce'
+				),
+			};
 		default:
 			return null;
 	}
