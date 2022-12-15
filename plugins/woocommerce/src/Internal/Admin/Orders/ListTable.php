@@ -593,11 +593,12 @@ class ListTable extends WP_List_Table {
 			/**
 			 * Fires before the "Filter" button on the list table for orders and other order types.
 			 *
-			 * @since x.x.x
+			 * @since 7.3.0
+			 *
 			 * @param string $order_type  The order type.
 			 * @param string $which       The location of the extra table nav: 'top' or 'bottom'.
 			 */
-			do_action( 'woocommerce_order_list_table_extra_tablenav', $this->order_type, $which );
+			do_action( 'woocommerce_order_list_table_restrict_manage_orders', $this->order_type, $which );
 
 			$output = ob_get_clean();
 
@@ -610,6 +611,17 @@ class ListTable extends WP_List_Table {
 		if ( $this->is_trash && $this->has_items() && current_user_can( 'edit_others_shop_orders' ) ) {
 			submit_button( __( 'Empty Trash', 'woocommerce' ), 'apply', 'delete_all', false );
 		}
+
+		/**
+		 * Fires immediately following the closing "actions" div in the tablenav for the order
+		 * list table.
+		 *
+		 * @since 7.3.0
+		 *
+		 * @param string $order_type  The order type.
+		 * @param string $which       The location of the extra table nav: 'top' or 'bottom'.
+		 */
+		do_action( 'woocommerce_order_list_table_extra_tablenav', $this->order_type, $which );
 
 		echo '</div>';
 	}
