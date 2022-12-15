@@ -3,7 +3,7 @@
 
 	&__header {
 		display: grid;
-		grid-template-columns: calc( 38px + 25% ) 25% 25%;
+		grid-template-columns: calc(38px + 25%) 25% 25%;
 		padding: $gap-small $gap;
 
 		h4 {
@@ -45,7 +45,7 @@
 		height: 34px;
 		left: 50%;
 		top: 50%;
-		transform: translate( -50%, -50% );
+		transform: translate(-50%, -50%);
 		position: absolute;
 		margin: 0;
 	}
