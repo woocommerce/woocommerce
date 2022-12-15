@@ -16,7 +16,6 @@ import { PricingSection } from './sections/pricing-section';
 import { ProductShippingSection } from './sections/product-shipping-section';
 import { ProductVariationsSection } from './sections/product-variations-section';
 import { ImagesSection } from './sections/images-section';
-import './product-page.scss';
 import { validate } from './product-validation';
 import { AttributesSection } from './sections/attributes-section';
 import { ProductFormFooter } from './layout/product-form-footer';
