@@ -8,10 +8,7 @@ import {
 	useCallback,
 	createInterpolateElement,
 } from '@wordpress/element';
-import {
-	useShippingData,
-	useSelectShippingRate,
-} from '@woocommerce/base-context/hooks';
+import { useShippingData } from '@woocommerce/base-context/hooks';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import { decodeEntities } from '@wordpress/html-entities';
@@ -110,8 +107,7 @@ const renderPickupLocation = (
 };
 
 const Block = (): JSX.Element | null => {
-	const { shippingRates } = useShippingData();
-	const { selectShippingRate } = useSelectShippingRate();
+	const { shippingRates, selectShippingRate } = useShippingData();
 	const [ selectedOption, setSelectedOption ] = useState< string >( '' );
 	const onSelectRate = useCallback(
 		( rateId: string ) => {
