@@ -77,6 +77,9 @@ export const isCalculating = ( state: CheckoutState ) => {
 export const prefersCollection = ( state: CheckoutState ) => {
 	if ( state.prefersCollection === undefined ) {
 		const shippingRates = select( cartStoreKey ).getShippingRates();
+		if ( ! shippingRates || ! shippingRates.length ) {
+			return false;
+		}
 		const selectedRate = shippingRates[ 0 ].shipping_rates.find(
 			( rate ) => rate.selected
 		);
