@@ -27,8 +27,14 @@ export const useStoreCart = () => ( {
 	cartHasCalculatedShipping: previewCart.has_calculated_shipping,
 	receiveCart: () => void null,
 } );
-export const useSelectShippingRate = () => ( {
+export const useShippingData = () => ( {
 	selectShippingRate: () => void null,
-	selectedShippingRates: [],
+	selectedRates: [],
+	shippingRates: previewShippingRates,
 	isSelectingRate: false,
+	needsShipping: previewCart.needs_shipping,
+	hasCalculatedShipping: previewCart.has_calculated_shipping,
+	isLoadingRates: false,
+	isCollectable: false,
+	hasSelectedLocalPickup: false,
 } );

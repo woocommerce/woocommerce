@@ -2,7 +2,7 @@
 	@include reset-typography();
 	display: block;
 	margin: em($gap) 0;
-	padding: 0 0 0 em($gap-largest);
+	padding: 0 0 0 em($gap-larger);
 	position: relative;
 
 	&:first-child {
