@@ -99,6 +99,7 @@ const Block = (): JSX.Element | null => {
 						</Notice>
 					}
 					renderOption={ renderShippingRatesControlOption }
+					collapsible={ false }
 					shippingRates={ shippingRates }
 					isLoadingRates={ isLoadingRates }
 					context="woocommerce/checkout"

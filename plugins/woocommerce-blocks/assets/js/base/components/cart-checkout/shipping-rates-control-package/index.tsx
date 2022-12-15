@@ -44,6 +44,10 @@ export type PackageRateRenderOption = (
 	option: CartShippingPackageShippingRate
 ) => PackageRateOption;
 
+// A flag can be ternary if true, false, and undefined are all valid options.
+// In our case, we use this for collapsible and showItems, having a boolean will force that
+// option, having undefined will let the component decide the logic based on other factors.
+export type TernaryFlag = boolean | undefined;
 interface PackageProps {
 	/* PackageId can be a string, WooCommerce Subscriptions uses strings for example, but WooCommerce core uses numbers */
 	packageId: string | number;
@@ -51,9 +55,9 @@ interface PackageProps {
 	collapse?: boolean;
 	packageData: PackageData;
 	className?: string;
-	collapsible?: boolean;
+	collapsible?: TernaryFlag;
 	noResultsMessage: ReactElement;
-	showItems?: boolean;
+	showItems?: TernaryFlag;
 }
 
 export const ShippingRatesControlPackage = ( {
@@ -62,15 +66,26 @@ export const ShippingRatesControlPackage = ( {
 	noResultsMessage,
 	renderOption,
 	packageData,
-	collapsible = false,
-	collapse = false,
-	showItems = false,
+	collapsible,
+	showItems,
 }: PackageProps ): ReactElement => {
 	const { selectShippingRate } = useSelectShippingRate();
+	const multiplePackages =
+		document.querySelectorAll(
+			'.wc-block-components-shipping-rates-control__package'
+		).length > 1;
+
+	// If showItems is not set, we check if we have multiple packages.
+	// We sometimes don't want to show items even if we have multiple packages.
+	const shouldShowItems = showItems ?? multiplePackages;
+
+	// If collapsible is not set, we check if we have multiple packages.
+	// We sometimes don't want to collapse even if we have multiple packages.
+	const shouldBeCollapsible = collapsible ?? multiplePackages;
 
 	const header = (
 		<>
-			{ ( showItems || collapsible ) && (
+			{ ( shouldBeCollapsible || shouldShowItems ) && (
 				<div
 					className="wc-block-components-shipping-rates-control__package-title"
 					dangerouslySetInnerHTML={ {
@@ -78,7 +93,7 @@ export const ShippingRatesControlPackage = ( {
 					} }
 				/>
 			) }
-			{ showItems && (
+			{ shouldShowItems && (
 				<ul className="wc-block-components-shipping-rates-control__package-items">
 					{ Object.values( packageData.items ).map( ( v ) => {
 						const name = decodeEntities( v.name );
@@ -127,11 +142,15 @@ export const ShippingRatesControlPackage = ( {
 			renderOption={ renderOption }
 		/>
 	);
-	if ( collapsible ) {
+	if ( shouldBeCollapsible ) {
 		return (
 			<Panel
 				className="wc-block-components-shipping-rates-control__package"
-				initialOpen={ ! collapse }
+				// initialOpen remembers only the first value provided to it, so by the
+				// time we know we have several packages, initialOpen would be hardcoded to true.
+				// If we're rendering a panel, we're more likely rendering several
+				// packages and we want to them to be closed initially.
+				initialOpen={ false }
 				title={ header }
 			>
 				{ body }
