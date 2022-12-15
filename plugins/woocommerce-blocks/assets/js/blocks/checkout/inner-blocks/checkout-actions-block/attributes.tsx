@@ -1,3 +1,8 @@
+/**
+ * Internal dependencies
+ */
+import { defaultPlaceOrderButtonLabel } from './constants';
+
 export default {
 	cartPageId: {
 		type: 'number',
@@ -17,5 +22,9 @@ export default {
 			move: true,
 			remove: true,
 		},
+	},
+	placeOrderButtonLabel: {
+		type: 'string',
+		default: defaultPlaceOrderButtonLabel,
 	},
 };

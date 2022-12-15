@@ -11,7 +11,7 @@ import { Icon, arrowLeft } from '@wordpress/icons';
 import './style.scss';
 
 interface ReturnToCartButtonProps {
-	link?: string;
+	link?: string | undefined;
 }
 
 const ReturnToCartButton = ( {
