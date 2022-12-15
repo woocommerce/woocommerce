@@ -12,7 +12,6 @@ import {
 	useShallowEqual,
 	useBorderProps,
 } from '@woocommerce/base-hooks';
-import { Notice } from 'wordpress-components';
 import {
 	useQueryStateByKey,
 	useQueryStateByContext,
@@ -126,8 +125,6 @@ const RatingFilterBlock = ( {
 	const [ remountKey, setRemountKey ] = useState( generateUniqueId() );
 
 	const borderProps = useBorderProps( blockAttributes );
-	const [ displayNoProductRatingsNotice, setDisplayNoProductRatingsNotice ] =
-		useState( false );
 
 	/**
 	 * Used to redirect the page when filters are changed so templates using the Classic Template block can filter.
