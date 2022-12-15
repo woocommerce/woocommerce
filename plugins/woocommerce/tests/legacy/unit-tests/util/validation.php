@@ -131,7 +131,18 @@ class WC_Tests_Validation extends WC_Unit_Test_Case {
 			array( false, WC_Validation::is_postcode( '0123', 'JP' ) ),
 		);
 
-		return array_merge( $it, $gb, $us, $ch, $br, $ca, $nl, $si, $ba, $jp );
+		$dk = array(
+			array( true, WC_Validation::is_postcode( 'DK-9000', 'DK' ) ),
+			array( true, WC_Validation::is_postcode( 'DK-1448', 'DK' ) ),
+			array( true, WC_Validation::is_postcode( '1448', 'DK' ) ),
+			array( true, WC_Validation::is_postcode( '1050', 'DK' ) ),
+			array( false, WC_Validation::is_postcode( 'FO-110', 'DK' ) ),
+			array( false, WC_Validation::is_postcode( 'DK-3900', 'DK' ) ),
+			array( false, WC_Validation::is_postcode( '3900', 'DK' ) ),
+			array( false, WC_Validation::is_postcode( '51467', 'DK' ) ),
+		);
+
+		return array_merge( $it, $gb, $us, $ch, $br, $ca, $nl, $si, $ba, $jp, $dk );
 	}
 
 	/**

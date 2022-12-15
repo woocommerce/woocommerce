@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { setOutput } from '@actions/core';
+
+/**
  * Internal dependencies
  */
 import { SchemaDiff } from './git';
@@ -29,7 +34,7 @@ export const printTemplateResults = (
 			);
 		}
 
-		log( `::set-output name=templates::${ opt }` );
+		setOutput( 'templates', opt );
 	} else {
 		log( `\n## ${ title }:` );
 		for ( const { filePath, code, message } of data ) {
@@ -63,7 +68,7 @@ export const printHookResults = (
 			version,
 			description,
 			hookType,
-			changeType
+			changeType,
 		} of data ) {
 			opt += `\\n* **File:** ${ filePath }`;
 
@@ -78,7 +83,7 @@ export const printHookResults = (
 			);
 		}
 
-		log( `::set-output name=wphooks::${ opt }` );
+		setOutput( 'wphooks', opt );
 	} else {
 		log( `\n## ${ sectionTitle }:` );
 		log( '---------------------------------------------------' );
@@ -130,7 +135,7 @@ export const printSchemaChange = (
 			}
 		} );
 
-		log( `::set-output name=schema::${ githubCommentContent }` );
+		setOutput( 'schema', githubCommentContent );
 	} else {
 		log( '\n## SCHEMA CHANGES' );
 		log( '---------------------------------------------------' );
@@ -163,7 +168,7 @@ export const printDatabaseUpdates = (
 ): void => {
 	if ( output === 'github' ) {
 		const githubCommentContent = `\\n\\n### New database updates:\\n * **${ updateFunctionName }** introduced in ${ updateFunctionVersion }`;
-		log( `::set-output name=database::${ githubCommentContent }` );
+		setOutput( 'database', githubCommentContent );
 	} else {
 		log( '\n## DATABASE UPDATES' );
 		log( '---------------------------------------------------' );

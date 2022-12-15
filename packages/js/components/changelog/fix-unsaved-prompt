@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Set initial values prop from reset form function as optional

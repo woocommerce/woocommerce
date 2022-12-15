@@ -25,8 +25,9 @@ jobs:
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
               env:
-                ENABLE_HPOS: 0
-              run: pnpm env:test --filter=woocommerce
+                  ENABLE_HPOS: 0
+                  WP_ENV_PHP_VERSION: 7.4
+              run: pnpm run env:test
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
@@ -39,7 +40,7 @@ jobs:
                   TOTAL_STR=$(pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --list | grep "Total:")
                   NO_PREFIX=${TOTAL_STR#*"Total: "}
                   COUNT=${NO_PREFIX%" tests in"*}
-                  echo "::set-output name=E2E_GRAND_TOTAL::$COUNT"
+                  echo "E2E_GRAND_TOTAL=$COUNT" >> $GITHUB_OUTPUT
 
             - name: Run Playwright E2E tests.
               timeout-minutes: 60
@@ -90,7 +91,7 @@ jobs:
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
               env:
-                ENABLE_HPOS: 0
+                  ENABLE_HPOS: 0
               run: pnpm env:test --filter=woocommerce
 
             - name: Run Playwright API tests.
@@ -137,7 +138,7 @@ jobs:
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
               env:
-                ENABLE_HPOS: 0
+                  ENABLE_HPOS: 0
               run: |
                   pnpm env:dev --filter=woocommerce
                   pnpm env:performance-init --filter=woocommerce

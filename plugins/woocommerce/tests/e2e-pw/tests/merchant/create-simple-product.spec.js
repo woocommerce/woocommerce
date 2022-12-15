@@ -4,7 +4,7 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const virtualProductName = 'Virtual Product Name';
 const nonVirtualProductName = 'Non Virtual Product Name';
 const productPrice = '9.99';
-let shippingZoneId;
+let shippingZoneId, virtualProductPermalink, nonVirtualProductPermalink;
 
 test.describe( 'Add New Simple Product Page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -83,13 +83,22 @@ test.describe( 'Add New Simple Product Page', () => {
 		await expect( page.locator( 'div.notice-success > p' ) ).toContainText(
 			'Product published.'
 		);
+
+		virtualProductPermalink = await page
+			.locator( '#sample-permalink a' )
+			.getAttribute( 'href' );
 	} );
 
 	test( 'can have a shopper add the simple virtual product to the cart', async ( {
 		page,
 	} ) => {
-		await page.goto( 'shop/' );
-		await page.click( `h2:has-text("${ virtualProductName }")` );
+		await page.goto( virtualProductPermalink );
+		await expect( page.locator( '.product_title' ) ).toHaveText(
+			virtualProductName
+		);
+		await expect(
+			page.locator( '.summary .woocommerce-Price-amount' )
+		).toContainText( productPrice );
 		await page.click( 'text=Add to cart' );
 		await page.click( 'text=View cart' );
 		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
@@ -105,6 +114,7 @@ test.describe( 'Add New Simple Product Page', () => {
 		await page.goto( 'wp-admin/post-new.php?post_type=product' );
 		await page.fill( '#title', nonVirtualProductName );
 		await page.fill( '#_regular_price', productPrice );
+		await expect( page.locator( '#publish:not(.disabled)' ) ).toBeVisible();
 		await page.click( '#publish' );
 		await page.waitForLoadState( 'networkidle' );
 
@@ -121,13 +131,22 @@ test.describe( 'Add New Simple Product Page', () => {
 		await expect( page.locator( 'div.notice-success > p' ) ).toContainText(
 			'Product published.'
 		);
+
+		nonVirtualProductPermalink = await page
+			.locator( '#sample-permalink a' )
+			.getAttribute( 'href' );
 	} );
 
 	test( 'can have a shopper add the simple non-virtual product to the cart', async ( {
 		page,
 	} ) => {
-		await page.goto( 'shop/' );
-		await page.click( `h2:has-text("${ nonVirtualProductName }")` );
+		await page.goto( nonVirtualProductPermalink );
+		await expect( page.locator( '.product_title' ) ).toHaveText(
+			nonVirtualProductName
+		);
+		await expect(
+			page.locator( '.summary .woocommerce-Price-amount' )
+		).toContainText( productPrice );
 		await page.click( 'text=Add to cart' );
 		await page.click( 'text=View cart' );
 		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(

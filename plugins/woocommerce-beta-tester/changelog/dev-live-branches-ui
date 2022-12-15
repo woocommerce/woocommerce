@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a basic UI screen for installing from live branches (disabled in prod)

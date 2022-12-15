@@ -125,13 +125,29 @@ export const checkoutRef = ( pathToRepo: string, ref: string ) => {
 /**
  * Do a git diff of 2 commit hashes (or branches)
  *
- * @param {string} baseDir - baseDir that the repo is in
- * @param {string} hashA   - either a git commit hash or a git branch
- * @param {string} hashB   - either a git commit hash or a git branch
+ * @param {string}        baseDir      - baseDir that the repo is in
+ * @param {string}        hashA        - either a git commit hash or a git branch
+ * @param {string}        hashB        - either a git commit hash or a git branch
+ * @param {Array<string>} excludePaths - A list of paths to exclude from the diff
  * @return {Promise<string>} - diff of the changes between the 2 hashes
  */
-export const diffHashes = ( baseDir: string, hashA: string, hashB: string ) => {
+export const diffHashes = (
+	baseDir: string,
+	hashA: string,
+	hashB: string,
+	excludePaths: string[] = []
+) => {
 	const git = simpleGit( { baseDir } );
+
+	if ( excludePaths.length ) {
+		return git.diff( [
+			`${ hashA }..${ hashB }`,
+			'--',
+			'.',
+			...excludePaths.map( ( ps ) => `:^${ ps }` ),
+		] );
+	}
+
 	return git.diff( [ `${ hashA }..${ hashB }` ] );
 };
 
@@ -177,16 +193,18 @@ export const getCommitHash = async ( baseDir: string, ref: string ) => {
 /**
  * generateDiff generates a diff for a given repo and 2 hashes or branch names.
  *
- * @param {string}   tmpRepoPath - filepath to the repo to generate a diff from.
- * @param {string}   hashA       - commit hash or branch name.
- * @param {string}   hashB       - commit hash or branch name.
- * @param {Function} onError     - the handler to call when an error occurs.
+ * @param {string}        tmpRepoPath  - filepath to the repo to generate a diff from.
+ * @param {string}        hashA        - commit hash or branch name.
+ * @param {string}        hashB        - commit hash or branch name.
+ * @param {Function}      onError      - the handler to call when an error occurs.
+ * @param {Array<string>} excludePaths - A list of directories to exclude from the diff.
  */
 export const generateDiff = async (
 	tmpRepoPath: string,
 	hashA: string,
 	hashB: string,
-	onError: ( error: string ) => void
+	onError: ( error: string ) => void,
+	excludePaths: string[] = []
 ) => {
 	try {
 		const git = simpleGit( { baseDir: tmpRepoPath } );
@@ -213,7 +231,12 @@ export const generateDiff = async (
 			throw new Error( 'Not a git repository' );
 		}
 
-		const diff = await diffHashes( tmpRepoPath, commitHashA, commitHashB );
+		const diff = await diffHashes(
+			tmpRepoPath,
+			commitHashA,
+			commitHashB,
+			excludePaths
+		);
 
 		return diff;
 	} catch ( e ) {

@@ -397,7 +397,9 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 						'creative-mail-by-constant-contact',
 						'facebook-for-woocommerce',
 						'google-listings-and-ads',
+						'pinterest-for-woocommerce',
 						'mailpoet',
+						'codistoconnect',
 						'tiktok-for-business',
 						'tiktok-for-business:alt'
 					),

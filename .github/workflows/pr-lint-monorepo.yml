@@ -10,7 +10,7 @@ jobs:
   changelogger_used:
     name: Changelogger use
     runs-on: ubuntu-20.04
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v3
         with:

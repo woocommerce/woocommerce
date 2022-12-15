@@ -9,6 +9,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Exception;
 use WC_Data;
 use WC_Order;
 
@@ -889,7 +890,12 @@ WHERE
 	 * @return int[] Array of order IDs.
 	 */
 	public function search_orders( $term ) {
-		$order_ids = wc_get_orders( array( 's' => $term ) );
+		$order_ids = wc_get_orders(
+			array(
+				's'      => $term,
+				'return' => 'ids',
+			)
+		);
 
 		/**
 		 * Provides an opportunity to modify the list of order IDs obtained during an order search.
@@ -1022,7 +1028,7 @@ WHERE
 	 *
 	 * @return void
 	 */
-	private function init_order_record( \WC_Abstract_Order &$order, int $order_id, \stdClass $order_data ) {
+	protected function init_order_record( \WC_Abstract_Order &$order, int $order_id, \stdClass $order_data ) {
 		$order->set_defaults();
 		$order->set_id( $order_id );
 		$filtered_meta_data = $this->filter_raw_meta_data( $order, $order_data->meta_data );
@@ -1145,9 +1151,26 @@ WHERE
 			foreach ( $cpt_store_orders[ $cpt_store_name ] as $order_id => $order ) {
 				$cpt_order_class_name = wc_get_order_type( $order->get_type() )['class_name'];
 				$cpt_order            = new $cpt_order_class_name();
-				$cpt_order->set_id( $order_id );
-				$cpt_store->read( $cpt_order );
-				$cpt_orders[ $order_id ] = $cpt_order;
+
+				try {
+					$cpt_order->set_id( $order_id );
+					$cpt_store->read( $cpt_order );
+					$cpt_orders[ $order_id ] = $cpt_order;
+				} catch ( Exception $e ) {
+					// If the post record has been deleted (for instance, by direct query) then an exception may be thrown.
+					$this->error_logger->warning(
+						sprintf(
+							/* translators: %1$d order ID. */
+							__( 'Unable to load the post record for order %1$d', 'woocommerce' ),
+							$order_id
+						),
+						array(
+							'exception_code' => $e->getCode(),
+							'exception_msg'  => $e->getMessage(),
+							'origin'         => __METHOD__,
+						)
+					);
+				}
 			}
 		}
 		return $cpt_orders;
@@ -1342,7 +1365,7 @@ WHERE
 	 *
 	 * @return \stdClass[]|object|null DB Order objects or error.
 	 */
-	private function get_order_data_for_ids( $ids ) {
+	protected function get_order_data_for_ids( $ids ) {
 		if ( ! $ids ) {
 			return array();
 		}
@@ -1732,13 +1755,6 @@ FROM $order_meta_table
 		}
 
 		if ( ! empty( $args['force_delete'] ) ) {
-			$this->delete_order_data_from_custom_order_tables( $order_id );
-			$order->set_id( 0 );
-
-			// If this datastore method is called while the posts table is authoritative, refrain from deleting post data.
-			if ( ! is_a( $order->get_data_store(), self::class ) ) {
-				return;
-			}
 
 			/**
 			 * Fires immediately before an order is deleted from the database.
@@ -1749,6 +1765,14 @@ FROM $order_meta_table
 			 * @param WC_Order $order    Instance of the order that is about to be deleted.
 			 */
 			do_action( 'woocommerce_before_delete_order', $order_id, $order );
+
+			$this->delete_order_data_from_custom_order_tables( $order_id );
+			$order->set_id( 0 );
+
+			// If this datastore method is called while the posts table is authoritative, refrain from deleting post data.
+			if ( $order->get_data_store()->get_current_class_name() !== self::class ) {
+				return;
+			}
 
 			// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
 			// Once we stop creating posts for orders, we should do the cleanup here instead.

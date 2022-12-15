@@ -1004,6 +1004,48 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test that the query counts works as expected.
+	 *
+	 * @return void
+	 */
+	public function test_cot_query_count() {
+		$this->assertEquals( 0, ( new OrdersTableQuery() )->found_orders, 'We initially have zero orders within our custom order tables.' );
+
+		for ( $i = 0; $i < 30; $i ++ ) {
+			$order = new WC_Order();
+			$this->switch_data_store( $order, $this->sut );
+			if ( 0 === $i % 2 ) {
+				$order->set_billing_address_2( 'Test' );
+			}
+			$order->save();
+		}
+
+		$query = new OrdersTableQuery( array( 'limit' => 5 ) );
+		$this->assertEquals( 30, $query->found_orders, 'Specifying limits still calculate all found orders.' );
+
+		// Count does not change based on the fields that we are fetching.
+		$query = new OrdersTableQuery(
+			array(
+				'fields' => 'ids',
+				'limit'  => 5,
+			)
+		);
+		$this->assertEquals( 30, $query->found_orders, 'Fetching specific field does not change query count.' );
+
+		$query = new OrdersTableQuery(
+			array(
+				'field_query' => array(
+					array(
+						'field' => 'billing_address_2',
+						'value' => 'Test',
+					),
+				),
+			)
+		);
+		$this->assertEquals( 15, $query->found_orders, 'Counting orders with a field query works.' );
+	}
+
+	/**
 	 * @testDox Test the `get_order_count()` method.
 	 */
 	public function test_get_order_count(): void {

@@ -1,7 +1,7 @@
 @import 'customer-feedback-simple/customer-feedback-simple.scss';
 
 .woocommerce-customer-effort-score__selection {
-	margin: 1em 0;
+	margin: 1em 0 1.5em 0;
 
 	.components-base-control__field {
 		display: flex;
@@ -11,6 +11,13 @@
 
 		@include breakpoint( '>600px' ) {
 			flex-direction: row;
+			justify-content: center;
+		}
+
+		.components-h-stack {
+			@include breakpoint( '>600px' ) {
+				flex-direction: row;
+			}
 		}
 	}
 
@@ -84,10 +91,14 @@
 }
 
 .woocommerce-customer-effort-score__comments {
+	margin-bottom: 1.5em;
+
 	label {
 		display: block;
 		color: inherit;
 		font-weight: bold;
+		text-transform: none;
+		font-size: 14px;
 	}
 
 	textarea {
@@ -101,4 +112,9 @@
 	.components-button {
 		margin-left: 1em;
 	}
+}
+
+.woocommerce-customer-effort-score .woocommerce-customer-effort-score__intro {
+	max-width: 550px;
+	margin: 0 0 1.5em 0;
 }

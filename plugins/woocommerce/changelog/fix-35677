@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes fatal error resulting from translating the WooCommerce main menu.
