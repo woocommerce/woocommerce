@@ -201,31 +201,51 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 			await page.click( `input[name="attribute_variation[${ i }]"]` );
 		}
 		await page.click( 'text=Save attributes' );
-		await page.click( 'a[href="#variable_product_options"]' );
+		await page.locator( '#save-post' ).click();
+		await expect(
+			page.getByText( 'Product draft updated. ' )
+		).toBeVisible();
+		await page.click( '.updated.notice .notice-dismiss' );
+
+		// verify that they were saved
+		await page.click( 'a[href="#product_attributes"]' );
+		for ( let i = 0; i < 3; i++ ) {
+			await expect(
+				page
+					.locator( '.woocommerce_attribute.closed' )
+					.filter( { hasText: `attr #${ i + 1 }` } )
+			).toBeVisible();
+		}
 
 		// manually adds a variation
+		await page.click( 'a[href="#variable_product_options"]' );
 		await page.selectOption( '#field_to_edit', 'add_variation', {
 			force: true,
 		} );
 		await page.click( 'a.do_variation_action' );
+		await expect( page.locator( '.variation-needs-update' ) ).toBeVisible();
 		for ( let i = 0; i < defaultAttributes.length; i++ ) {
 			await page.selectOption(
-				`select[name="attribute_attr-${ i + 1 }[0]"]`,
+				`.variation-needs-update h3 select >> nth=${ i }`,
 				defaultAttributes[ i ]
 			);
 		}
 		await page.click( 'button.save-variation-changes' );
 		for ( let i = 0; i < defaultAttributes.length; i++ ) {
 			await expect(
-				page.locator(
-					`select[name="attribute_attr-${
-						i + 1
-					}[0]"] > option[selected]`
-				)
+				page
+					.locator( '.woocommerce_variation' )
+					.first()
+					.locator( 'select' )
+					.nth( i )
+					.locator( 'option[selected]' )
 			).toHaveText( defaultAttributes[ i ] );
 		}
 
 		await page.locator( '#save-post' ).click();
+		await expect(
+			page.getByText( 'Product draft updated. ' )
+		).toBeVisible();
 	} );
 
 	test( 'can manage stock at variation level', async ( { page } ) => {
