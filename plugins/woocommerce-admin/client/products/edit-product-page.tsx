@@ -16,9 +16,8 @@ import { useParams } from 'react-router-dom';
 /**
  * Internal dependencies
  */
-import { ProductFormLayout } from './layout/product-form-layout';
-import './product-page.scss';
 import { ProductForm } from './product-form';
+import { ProductFormLayout } from './layout/product-form-layout';
 
 const EditProductPage: React.FC = () => {
 	const { productId } = useParams();

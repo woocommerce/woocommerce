@@ -670,7 +670,7 @@ class DefaultFreeExtensions {
 				],
 				'is_built_by_wc' => false,
 			],
-			'tiktok-for-business:alt'               => [
+			'tiktok-for-business:alt'           => [
 				'name'           => __( 'TikTok for WooCommerce', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/tiktok.svg', WC_PLUGIN_FILE ),
 				'description'    => sprintf(
@@ -681,6 +681,7 @@ class DefaultFreeExtensions {
 				),
 				'manage_url'     => 'admin.php?page=tiktok',
 				'is_built_by_wc' => false,
+				'is_visible'     => false,
 			],
 		);
 

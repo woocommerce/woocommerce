@@ -188,18 +188,20 @@ class Edit {
 	 * @param string $message Message to display, if any.
 	 */
 	private function render_wrapper_start( $notice = '', $message = '' ) {
-		$edit_page_url = admin_url( 'admin.php?page=wc-orders&action=edit&id=' . $this->order->get_id() );
+		$post_type = get_post_type_object( $this->order->get_type() );
+
+		$edit_page_url = wc_get_container()->get( PageController::class )->get_edit_url( $this->order->get_id() );
 		$form_action   = 'edit_order';
 		$referer       = wp_get_referer();
-		$new_page_url  = wc_get_container()->get( PageController::class )->get_new_page_url();
+		$new_page_url  = wc_get_container()->get( PageController::class )->get_new_page_url( $this->order->get_type() );
 
 		?>
 		<div class="wrap">
 		<h1 class="wp-heading-inline">
-			<?php echo esc_html( 'Edit order' ); ?>
+			<?php echo esc_html( $post_type->labels->edit_item ); ?>
 		</h1>
 		<?php
-		echo ' <a href="' . esc_url( $new_page_url ) . '" class="page-title-action"> Add order </a>';
+		echo ' <a href="' . esc_url( $new_page_url ) . '" class="page-title-action">' . esc_html( $post_type->labels->add_new ) . '</a>';
 		?>
 		<hr class="wp-header-end">
 
