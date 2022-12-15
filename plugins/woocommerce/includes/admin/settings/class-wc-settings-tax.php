@@ -36,15 +36,15 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
- 	 * Creates the React mount point for the embedded banner.
- 	 */
- 	public function conflict_error() {
+	 * Creates the React mount point for the embedded banner.
+	 */
+	public function conflict_error() {
 		?>
 		<tr valign="top">
-							<th scope="row" class="titledesc">
+							<th scope="row" class="titledesc woocommerce_admin_tax_settings_slotfill_th">
 							</th>
-							<td class="forminp forminp-text">
- 		<div id="wc_conflict_error_slotfill"> </div>
+							<td class="forminp forminp-text woocommerce_admin_tax_settings_slotfill_td">
+		<div id="wc_conflict_error_slotfill"> </div>
 	</td>
 	</tr>
 		<?php

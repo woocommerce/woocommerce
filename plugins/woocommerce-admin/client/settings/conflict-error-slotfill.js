@@ -8,22 +8,19 @@ import {
 	CardBody,
 	createSlotFill,
 	SlotFillProvider,
-	__experimentalText as Text,
-	__experimentalHeading as Heading,
 } from '@wordpress/components';
-import {
-	createElement,
-	Fragment,
-	useEffect,
-	useState,
-} from '@wordpress/element';
+import { Icon, closeSmall } from '@wordpress/icons';
+import { useEffect, useState } from '@wordpress/element';
+
 /**
  * Internal dependencies
  */
+import './conflict-error-slotfill.scss';
+import warningIcon from './alert-triangle-icon.svg';
 
 const { Fill, Slot } = createSlotFill( '__EXPERIMENTAL__WcAdminConflictError' );
 
-const HelpButton = () => (
+const LearnMore = () => (
 	<Button
 		href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/"
 		target="_blank"
@@ -32,41 +29,45 @@ const HelpButton = () => (
 	</Button>
 );
 
-const SettingsErrorFill = ( { form } ) => {
-	//const form = document.forms.mainForm;
-	//const mainVal = form.woocommerce_prices_include_tax.value;
+const SettingsErrorFill = () => {
+	const [ dismissedConflictWarning, setDismissedConflictWarning ] =
+		useState( false );
 
-	const [ mainVal, setMainVal ] = useState(
+	const [ pricesEnteredWithTaxSetting, setMainVal ] = useState(
 		document.forms.mainform.elements.woocommerce_prices_include_tax
 			.value === 'yes'
 			? 'incl'
 			: 'excl'
 	);
-	const [ displayShop, setDisplayShop ] = useState(
-		jQuery( '#woocommerce_tax_display_shop' ).val()
+	const [ displayPricesInShopWithTaxSetting, setDisplayShop ] = useState(
+		/** We're using jQuery in this file because the select boxes are implemented using select2 and can only be interacted with using jQuery */
+		window.jQuery( '#woocommerce_tax_display_shop' ).val()
 	);
-	const [ displayCart, setDisplayCart ] = useState(
-		jQuery( '#woocommerce_tax_display_cart' ).val()
+	const [ displayPricesInCartWithTaxSetting, setDisplayCart ] = useState(
+		/** We're using jQuery in this file because the select boxes are implemented using select2 and can only be interacted with using jQuery */
+		window.jQuery( '#woocommerce_tax_display_cart' ).val()
 	);
 
-	const fixIt = () => {
-		jQuery( '#woocommerce_tax_display_shop' )
-			.val( mainVal )
+	const handleApplyRecommendedSettings = () => {
+		/** We're using jQuery in this file because the select boxes are implemented using select2 and can only be interacted with using jQuery */
+		// eslint-disable-next-line no-undef
+		window
+			.jQuery( '#woocommerce_tax_display_shop' )
+			.val( pricesEnteredWithTaxSetting )
 			.trigger( 'change' );
-		jQuery( '#woocommerce_tax_display_cart' )
-			.val( mainVal )
+		window
+			.jQuery( '#woocommerce_tax_display_cart' )
+			.val( pricesEnteredWithTaxSetting )
 			.trigger( 'change' );
 	};
-	const MyButton = () => (
-		<Button variant="primary" onClick={ fixIt }>
+
+	const ApplyRecommendedSettingsButton = () => (
+		<Button variant="primary" onClick={ handleApplyRecommendedSettings }>
 			Use recommended settings
 		</Button>
 	);
 
-	// Similar to componentDidMount and componentDidUpdate:
 	useEffect( () => {
-		// Update the document title using the browser API
-
 		document
 			.querySelectorAll( "input[name='woocommerce_prices_include_tax']" )
 			.forEach( ( input ) => {
@@ -79,41 +80,87 @@ const SettingsErrorFill = ( { form } ) => {
 					)
 				);
 			} );
-	} );
+	}, [] );
 
 	useEffect( () => {
-		jQuery( '#woocommerce_tax_display_shop' ).on( 'click change', () =>
-			setDisplayShop(
-				document.getElementById( 'woocommerce_tax_display_shop' ).value
-			)
-		);
-	} );
+		window
+			.jQuery( '#woocommerce_tax_display_shop' )
+			.on( 'click change', () =>
+				setDisplayShop(
+					document.getElementById( 'woocommerce_tax_display_shop' )
+						.value
+				)
+			);
+	}, [] );
 
 	useEffect( () => {
-		jQuery( '#woocommerce_tax_display_cart' ).on( 'click change', () =>
-			setDisplayCart(
-				document.getElementById( 'woocommerce_tax_display_cart' ).value
-			)
-		);
-	} );
+		window
+			.jQuery( '#woocommerce_tax_display_cart' )
+			.on( 'click change', () =>
+				setDisplayCart(
+					document.getElementById( 'woocommerce_tax_display_cart' )
+						.value
+				)
+			);
+	}, [] );
 
-	if ( displayShop === mainVal && displayCart === mainVal ) {
+	const [ isConflict, setIsConflict ] = useState( false );
+
+	useEffect( () => {
+		if (
+			displayPricesInShopWithTaxSetting === pricesEnteredWithTaxSetting &&
+			displayPricesInCartWithTaxSetting === pricesEnteredWithTaxSetting
+		) {
+			setIsConflict( false );
+		} else {
+			setIsConflict( true );
+		}
+	}, [
+		displayPricesInCartWithTaxSetting,
+		displayPricesInShopWithTaxSetting,
+		pricesEnteredWithTaxSetting,
+	] );
+
+	if ( ! isConflict || dismissedConflictWarning ) {
 		return <Fill></Fill>;
 	}
+
 	return (
 		<Fill>
-			<div style={ { width: 400 } }>
+			<div className="woocommerce_tax_settings_conflict_error">
 				<Card>
-					<CardBody>
-						<p style={ { fontSize: 13 } }>
-							{ form }
-							<b>Inconsistent tax settings:</b> To avoid possible
-							rounding errors, prices should be entered and
-							displayed consistently in all locations either
-							including, or excluding taxes.
-						</p>
-						<br />
-						<MyButton /> <HelpButton />
+					<CardBody className="woocommerce_tax_settings_conflict_error_card_body">
+						<div>
+							<img
+								className="woocommerce_tax_settings_conflict_error_card_body__warning_icon"
+								src={ warningIcon }
+								alt="Warning Icon"
+							/>
+						</div>
+						<div>
+							<div className="woocommerce_tax_settings_conflict_error_card_body__body_text">
+								<p style={ { fontSize: 13 } }>
+									<b>Inconsistent tax settings:</b> To avoid
+									possible rounding errors, prices should be
+									entered and displayed consistently in all
+									locations either including, or excluding
+									taxes.
+								</p>
+							</div>
+							<div className="woocommerce_tax_settings_conflict_error_card_body__buttons">
+								<ApplyRecommendedSettingsButton /> <LearnMore />
+							</div>
+						</div>
+						<div>
+							<Button
+								className="woocommerce_tax_settings_conflict_error_card_body__close_icon"
+								onClick={ () =>
+									setDismissedConflictWarning( true )
+								}
+							>
+								<Icon icon={ closeSmall } />
+							</Button>
+						</div>
 					</CardBody>
 				</Card>
 			</div>
@@ -121,18 +168,18 @@ const SettingsErrorFill = ( { form } ) => {
 	);
 };
 
-export const WcAdminConflictErrorSlot = ( test ) => {
+export const WcAdminConflictErrorSlot = () => {
 	return (
 		<>
 			<SlotFillProvider>
-				<Slot form={ 123 } />
+				<Slot />
 				<PluginArea scope="woocommerce-settings" />
 			</SlotFillProvider>
 		</>
 	);
 };
 
-registerPlugin( 'woocommerce-admin-paymentsgateways-settings-banner', {
+registerPlugin( 'woocommerce-admin-tax-settings-conflict-warning', {
 	scope: 'woocommerce-settings',
 	render: SettingsErrorFill,
 } );
