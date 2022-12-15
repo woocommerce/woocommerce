@@ -8,7 +8,7 @@ type FormElements = {
 	post?: HTMLFormElement;
 } & HTMLCollectionOf< HTMLFormElement >;
 const forms: FormElements = document.forms;
-if ( forms && forms.post ) {
+if ( forms?.post ) {
 	let triggeredSaveOrDeleteButton = false;
 	const saveButton = document.querySelector( '.save_order' );
 	const deleteButton = document.querySelector( '.submitdelete' );
@@ -31,7 +31,6 @@ if ( forms && forms.post ) {
 		const newFormData = forms.post
 			? staticFormDataToObject( forms.post )
 			: {};
-		let isDirty = false;
 		for ( const key of Object.keys( formData ) ) {
 			const value =
 				typeof formData[ key ] === 'object'
@@ -42,10 +41,9 @@ if ( forms && forms.post ) {
 					? JSON.stringify( newFormData[ key ] )
 					: newFormData[ key ];
 			if ( value !== newValue ) {
-				isDirty = true;
-				break;
+				return true;
 			}
 		}
-		return isDirty;
+		return false;
 	} );
 }
