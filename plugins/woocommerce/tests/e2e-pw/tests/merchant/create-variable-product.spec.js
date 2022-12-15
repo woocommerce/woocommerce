@@ -65,7 +65,14 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 		}
 		await page.click( 'text=Save attributes' );
 
-		// create variations from all attributes
+		// Save before going to the Variations tab to prevent variations from all attributes to be automatically created
+		await page.locator( '#save-post' ).click();
+		await expect(
+			page.getByText( 'Product draft updated. ' )
+		).toBeVisible();
+		await page.click( '.updated.notice .notice-dismiss' );
+
+		// manually create variations from all attributes
 		await page.click( 'a[href="#variable_product_options"]' );
 		await page.selectOption( '#field_to_edit', 'link_all_variations', {
 			force: true,
@@ -199,23 +206,20 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 				'val1 | val2'
 			);
 			await page.click( `input[name="attribute_variation[${ i }]"]` );
-		}
-		await page.click( 'text=Save attributes' );
-		await page.locator( '#save-post' ).click();
-		await expect(
-			page.getByText( 'Product draft updated. ' )
-		).toBeVisible();
-		await page.click( '.updated.notice .notice-dismiss' );
-
-		// verify that they were saved
-		await page.click( 'a[href="#product_attributes"]' );
-		for ( let i = 0; i < 3; i++ ) {
+			await page.click( 'text=Save attributes' );
 			await expect(
 				page
 					.locator( '.woocommerce_attribute.closed' )
 					.filter( { hasText: `attr #${ i + 1 }` } )
 			).toBeVisible();
 		}
+
+		// Save before going to the Variations tab to prevent variations from all attributes to be automatically created
+		await page.locator( '#save-post' ).click();
+		await expect(
+			page.getByText( 'Product draft updated. ' )
+		).toBeVisible();
+		await page.click( '.updated.notice .notice-dismiss' );
 
 		// manually adds a variation
 		await page.click( 'a[href="#variable_product_options"]' );
