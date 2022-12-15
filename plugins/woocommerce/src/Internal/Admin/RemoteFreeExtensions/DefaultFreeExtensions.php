@@ -37,6 +37,7 @@ class DefaultFreeExtensions {
 				'title'   => __( 'Grow your store', 'woocommerce' ),
 				'plugins' => [
 					self::get_plugin( 'mailpoet' ),
+					self::get_plugin( 'codistoconnect' ),
 					self::get_plugin( 'google-listings-and-ads' ),
 					self::get_plugin( 'facebook-for-woocommerce' ),
 					self::get_plugin( 'tiktok-for-business:alt' ),
@@ -59,6 +60,7 @@ class DefaultFreeExtensions {
 					self::get_plugin( 'tiktok-for-business' ),
 					self::get_plugin( 'facebook-for-woocommerce:alt' ),
 					self::get_plugin( 'pinterest-for-woocommerce' ),
+					self::get_plugin( 'codistoconnect:alt' ),
 				],
 			],
 		];
@@ -146,6 +148,20 @@ class DefaultFreeExtensions {
 				'image_url'      => plugins_url( '/assets/images/onboarding/creative-mail-by-constant-contact.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=creativemail',
 				'is_built_by_wc' => false,
+			],
+			'codistoconnect'         => [
+				'name'           => __( 'Codisto for WooCommerce', 'woocommerce' ),
+				'description'    => __( 'Sell on Amazon, eBay, Walmart and more directly from WooCommerce with Codisto.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/pinterest.png', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
+				'is_built_by_wc' => true,
+			],
+			'codistoconnect:alt'         => [
+				'name'           => __( 'Codisto for WooCommerce', 'woocommerce' ),
+				'description'    => __( 'Sell on Amazon, eBay, Walmart and more directly from WooCommerce.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/pinterest.png', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
+				'is_built_by_wc' => true,
 			],
 			'woocommerce-payments'              => [
 				'description'    => sprintf(

@@ -22,10 +22,12 @@ import { getCountryCode } from '../../../../../../dashboard/utils';
 
 const ALLOWED_PLUGIN_CATEGORIES = [ 'obw/basics', 'obw/grow' ];
 
-const FreeBadge = () => {
+const FreeBadge = ( props ) => {
 	return (
 		<div className="woocommerce-admin__business-details__free-badge">
-			{ __( 'Free', 'woocommerce' ) }
+			{ props.isFreeTrial
+				? __( 'Free Trial', 'woocommerce' )
+				: __( 'Free', 'woocommerce' ) }
 		</div>
 	);
 };
@@ -133,7 +135,13 @@ const renderBusinessExtensionHelpText = ( values, isInstallingActivating ) => {
 	);
 };
 
-const BundleExtensionCheckbox = ( { onChange, description, isChecked } ) => {
+const BundleExtensionCheckbox = ( {
+	onChange,
+	description,
+	isChecked,
+	key,
+} ) => {
+	const isFreeTrial = key === 'codistoconnect';
 	const recordProductLinkClick = ( event ) => {
 		const link = event.target.closest( 'a' );
 		if (
@@ -163,13 +171,14 @@ const BundleExtensionCheckbox = ( { onChange, description, isChecked } ) => {
 				// dynamically inserted HTML and records clicks only on interaction with those items.
 				/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
 			 }
+			{ key }
 			<p
 				className="woocommerce-admin__business-details__selective-extensions-bundle__description"
 				dangerouslySetInnerHTML={ sanitizeHTML( description ) }
 				onClick={ recordProductLinkClick }
 			/>
 			{ /* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */ }
-			<FreeBadge />
+			<FreeBadge isFreeTrial={ isFreeTrial } />
 		</div>
 	);
 };
