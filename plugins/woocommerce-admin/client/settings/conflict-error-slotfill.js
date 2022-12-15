@@ -13,6 +13,8 @@ import {
 } from '@wordpress/components';
 import { Icon, closeSmall } from '@wordpress/icons';
 import { useEffect, useState } from '@wordpress/element';
+import { useDispatch } from '@wordpress/data';
+import { store as noticesStore } from '@wordpress/notices';
 
 /**
  * Internal dependencies
@@ -50,6 +52,8 @@ const SettingsErrorFill = () => {
 		window.jQuery( '#woocommerce_tax_display_cart' ).val()
 	);
 
+	const { createNotice } = useDispatch( noticesStore );
+
 	const handleApplyRecommendedSettings = () => {
 		/** We're using jQuery in this file because the select boxes are implemented using select2 and can only be interacted with using jQuery */
 		// eslint-disable-next-line no-undef
@@ -61,6 +65,11 @@ const SettingsErrorFill = () => {
 			.jQuery( '#woocommerce_tax_display_cart' )
 			.val( pricesEnteredWithTaxSetting )
 			.trigger( 'change' );
+
+		createNotice(
+			'success',
+			__( 'Recommended settings applied.', 'woocommerce' )
+		);
 	};
 
 	const ApplyRecommendedSettingsButton = () => (
