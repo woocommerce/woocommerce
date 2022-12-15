@@ -156,7 +156,8 @@ class DefaultFreeExtensions {
 					__( 'Sell on Amazon, eBay, Walmart and more directly from WooCommerce with  %1$sCodisto%2$s', 'woocommerce' ),
 					'<a href="https://woocommerce.com/pt-br/products/amazon-ebay-integration/?quid=c247a85321c9e93e7c3c6f1eb072e6e5" target="_blank">',
 					'</a>'
-				),				'image_url'      => plugins_url( '/assets/images/onboarding/codistoconnect.png', WC_PLUGIN_FILE ),
+				),
+				'image_url'      => plugins_url( '/assets/images/onboarding/codistoconnect.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=codisto-settings',
 				'is_built_by_wc' => true,
 			],
