@@ -24,6 +24,7 @@ import {
 	getProductStockStatusClass,
 } from '../../utils/get-product-stock-status';
 import './variations.scss';
+import classNames from 'classnames';
 
 /**
  * Since the pagination component does not exposes the way of
@@ -131,10 +132,26 @@ export const Variations: React.FC = () => {
 								/>
 							) ) }
 						</div>
-						<div className="woocommerce-product-variations__price">
+						<div
+							className={ classNames(
+								'woocommerce-product-variations__price',
+								{
+									'woocommerce-product-variations__price--fade':
+										variation.status === 'private',
+								}
+							) }
+						>
 							{ formatAmount( variation.price ) }
 						</div>
-						<div className="woocommerce-product-variations__quantity">
+						<div
+							className={ classNames(
+								'woocommerce-product-variations__quantity',
+								{
+									'woocommerce-product-variations__quantity--fade':
+										variation.status === 'private',
+								}
+							) }
+						>
 							<span
 								className={ classnames(
 									'woocommerce-product-variations__status-dot',

@@ -35,6 +35,11 @@
 		}
 	}
 	
+	&__price--fade,
+	&__quantity--fade {
+		opacity: 0.5;
+	}
+
 	&__actions {
 		display: flex;
 		align-items: center;
