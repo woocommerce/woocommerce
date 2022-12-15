@@ -11,7 +11,10 @@ import {
 import {
 	selectBlockByName,
 	insertBlockUsingSlash,
+	getToggleIdByLabel,
+	saveOrPublish,
 } from '@woocommerce/blocks-test-utils';
+import { setCheckbox } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -40,6 +43,7 @@ const block = {
 			classicProductsList: '.products.columns-3 > li',
 			filter: 'input[id=outofstock]',
 			submitButton: '.wc-block-components-filter-submit-button',
+			queryProductsList: '.wp-block-post-template > li',
 		},
 	},
 	urlSearchParamWhenFilterIsApplied: '?filter_stock_status=outofstock',
@@ -208,6 +212,104 @@ describe( `${ block.name } Block`, () => {
 			expect( isRefreshed ).toBeCalledTimes( 1 );
 			expect( products ).toHaveLength( 1 );
 			await expect( page ).toMatch( block.foundProduct );
+			expect( parsedURL.search ).toEqual(
+				block.urlSearchParamWhenFilterIsApplied
+			);
+		} );
+	} );
+
+	describe( 'with Product Query Block', () => {
+		let editorPageUrl = '';
+		let frontedPageUrl = '';
+
+		useTheme( 'emptytheme' );
+		beforeAll( async () => {
+			await switchUserToAdmin();
+			await createNewPost( {
+				postType: 'post',
+				title: block.name,
+			} );
+
+			await insertBlock( 'Products (Beta)' );
+			await insertBlock( block.name );
+			await publishPost();
+
+			editorPageUrl = page.url();
+			frontedPageUrl = await page.evaluate( () =>
+				wp.data.select( 'core/editor' ).getPermalink()
+			);
+			await page.goto( frontedPageUrl );
+		} );
+
+		it( 'should show only products that match the filter', async () => {
+			const isRefreshed = jest.fn( () => void 0 );
+			page.on( 'load', isRefreshed );
+
+			await page.waitForSelector( block.class + '.is-loading', {
+				hidden: true,
+			} );
+
+			expect( isRefreshed ).not.toBeCalled();
+
+			await page.waitForSelector( selectors.frontend.filter );
+
+			await Promise.all( [
+				page.waitForNavigation(),
+				page.click( selectors.frontend.filter ),
+			] );
+
+			const products = await page.$$(
+				selectors.frontend.queryProductsList
+			);
+			const pageURL = page.url();
+			const parsedURL = new URL( pageURL );
+
+			expect( isRefreshed ).toBeCalledTimes( 1 );
+			expect( products ).toHaveLength( 1 );
+			expect( parsedURL.search ).toEqual(
+				block.urlSearchParamWhenFilterIsApplied
+			);
+		} );
+
+		it( 'should refresh the page only if the user clicks on button', async () => {
+			await page.goto( editorPageUrl );
+			await openBlockEditorSettings();
+			await selectBlockByName( block.slug );
+			await setCheckbox(
+				await getToggleIdByLabel( "Show 'Apply filters' button" )
+			);
+
+			await saveOrPublish();
+			await page.goto( frontedPageUrl );
+
+			const isRefreshed = jest.fn( () => void 0 );
+			page.on( 'load', isRefreshed );
+
+			await page.waitForSelector( block.class + '.is-loading', {
+				hidden: true,
+			} );
+
+			expect( isRefreshed ).not.toBeCalled();
+
+			await page.waitForSelector( selectors.frontend.filter );
+			await page.click( selectors.frontend.filter );
+			await Promise.all( [
+				page.waitForNavigation( {
+					waitUntil: 'networkidle0',
+				} ),
+				page.click( selectors.frontend.submitButton ),
+			] );
+
+			const pageURL = page.url();
+			const parsedURL = new URL( pageURL );
+
+			await page.waitForSelector( selectors.frontend.queryProductsList );
+			const products = await page.$$(
+				selectors.frontend.queryProductsList
+			);
+
+			expect( isRefreshed ).toBeCalledTimes( 1 );
+			expect( products ).toHaveLength( 1 );
 			expect( parsedURL.search ).toEqual(
 				block.urlSearchParamWhenFilterIsApplied
 			);
