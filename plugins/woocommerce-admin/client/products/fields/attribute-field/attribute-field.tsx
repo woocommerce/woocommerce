@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, Card, CardBody } from '@wordpress/components';
 import { useState, useCallback, useEffect } from '@wordpress/element';
 import {
 	ProductAttribute,
@@ -10,7 +9,6 @@ import {
 	ProductAttributeTerm,
 } from '@woocommerce/data';
 import { resolveSelect } from '@wordpress/data';
-import { Text } from '@woocommerce/experimental';
 import {
 	Sortable,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
@@ -21,11 +19,11 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import './attribute-field.scss';
-import AttributeEmptyStateLogo from './attribute-empty-state-logo.svg';
 import { AddAttributeModal } from './add-attribute-modal';
 import { EditAttributeModal } from './edit-attribute-modal';
 import { reorderSortableProductAttributePositions } from './utils';
 import { sift } from '../../../utils';
+import { AttributeEmptyState } from '../attribute-empty-state';
 import {
 	AddAttributeListItem,
 	AttributeListItem,
@@ -169,53 +167,29 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 
 	if ( ! value || value.length === 0 || hydratedAttributes.length === 0 ) {
 		return (
-			<Card>
-				<CardBody>
-					<div className="woocommerce-attribute-field">
-						<div className="woocommerce-attribute-field__empty-container">
-							<img
-								src={ AttributeEmptyStateLogo }
-								alt="Completed"
-								className="woocommerce-attribute-field__empty-logo"
-							/>
-							<Text
-								variant="subtitle.small"
-								weight="600"
-								size="14"
-								lineHeight="20px"
-								className="woocommerce-attribute-field__empty-subtitle"
-							>
-								{ __( 'No attributes yet', 'woocommerce' ) }
-							</Text>
-							<Button
-								variant="secondary"
-								className="woocommerce-attribute-field__add-new"
-								onClick={ () => {
-									recordEvent(
-										'product_add_first_attribute_button_click'
-									);
-									setShowAddAttributeModal( true );
-								} }
-							>
-								{ __( 'Add first attribute', 'woocommerce' ) }
-							</Button>
-						</div>
-						{ showAddAttributeModal && (
-							<AddAttributeModal
-								onCancel={ () => {
-									recordEvent( CANCEL_BUTTON_EVENT_NAME );
-									setShowAddAttributeModal( false );
-								} }
-								onAdd={ onAddNewAttributes }
-								selectedAttributeIds={ ( value || [] ).map(
-									( attr ) => attr.id
-								) }
-							/>
+			<>
+				<AttributeEmptyState
+					onNewClick={ () => {
+						recordEvent(
+							'product_add_first_attribute_button_click'
+						);
+						setShowAddAttributeModal( true );
+					} }
+				/>
+				{ showAddAttributeModal && (
+					<AddAttributeModal
+						onCancel={ () => {
+							recordEvent( CANCEL_BUTTON_EVENT_NAME );
+							setShowAddAttributeModal( false );
+						} }
+						onAdd={ onAddNewAttributes }
+						selectedAttributeIds={ ( value || [] ).map(
+							( attr ) => attr.id
 						) }
-						<SelectControlMenuSlot />
-					</div>
-				</CardBody>
-			</Card>
+					/>
+				) }
+				<SelectControlMenuSlot />
+			</>
 		);
 	}
 
