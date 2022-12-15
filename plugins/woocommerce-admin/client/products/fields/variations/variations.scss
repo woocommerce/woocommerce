@@ -40,6 +40,14 @@
 		align-items: center;
 		justify-content: end;
 
+		.components-button {
+			position: relative;
+
+			.components-spinner {
+				margin: 0;
+			}
+		}
+
 		.components-button svg {
 			fill: none;
 		}
@@ -66,7 +74,7 @@
 		flex: 1 0 auto;
 	}
 
-	.components-spinner {
+	&.is-loading .components-spinner {
 		width: 34px;
 		height: 34px;
 		left: 50%;
