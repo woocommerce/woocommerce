@@ -67,7 +67,7 @@ export const ProductMVPCESFooter: React.FC = () => {
 		showCesModal(
 			{
 				action: cesAction,
-				label: __(
+				title: __(
 					"How's your experience with the product editor?",
 					'woocommerce'
 				),
