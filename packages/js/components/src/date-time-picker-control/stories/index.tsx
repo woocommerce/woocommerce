@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { Button, Popover, SlotFillProvider } from '@wordpress/components';
-import { createElement, useState } from '@wordpress/element';
+import { createElement, useCallback, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -37,42 +37,6 @@ CustomDateTimeFormat.args = {
 	dateTimeFormat: customFormat,
 };
 
-function ControlledContainer( { children, ...props } ) {
-	function nowWithZeroedSeconds() {
-		const now = new Date();
-		now.setSeconds( 0 );
-		now.setMilliseconds( 0 );
-		return now;
-	}
-
-	const [ controlledDate, setControlledDate ] = useState(
-		nowWithZeroedSeconds().toISOString()
-	);
-
-	return (
-		<div { ...props }>
-			<div>{ children( controlledDate, setControlledDate ) }</div>
-			<div>
-				<Button
-					onClick={ () =>
-						setControlledDate(
-							nowWithZeroedSeconds().toISOString()
-						)
-					}
-				>
-					Reset to now
-				</Button>
-				<div>
-					<div>
-						Controlled date:
-						<br /> <span>{ controlledDate }</span>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
-}
-
 export const ReallyLongHelp = Template.bind( {} );
 ReallyLongHelp.args = {
 	...Basic.args,
@@ -97,13 +61,19 @@ function ControlledDecorator( Story, props ) {
 		nowWithZeroedSeconds().toISOString()
 	);
 
+	const onChange = useCallback( ( newDateTimeISOString ) => {
+		setControlledDate( newDateTimeISOString );
+		// eslint-disable-next-line no-console
+		console.log( 'onChange', newDateTimeISOString );
+	}, [] );
+
 	return (
 		<div>
 			<Story
 				args={ {
 					...props.args,
 					currentDate: controlledDate,
-					onChange: setControlledDate,
+					onChange,
 				} }
 			/>
 			<div>

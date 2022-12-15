@@ -1,0 +1,51 @@
+.woocommerce-product-variations {
+	min-height: 300px;
+	display: flex;
+	flex-direction: column;
+	> div {
+		display: flex;
+		flex-direction: column;
+		flex-grow: 1;
+	}
+
+	&__header {
+		display: grid;
+		grid-template-columns: calc(38px + 25%) 25% 25%;
+		padding: $gap-small $gap;
+
+		h4 {
+			color: $gray-700;
+			font-size: 11px;
+			text-transform: uppercase;
+			margin: 0;
+			font-weight: 500;
+		}
+	}
+
+	.woocommerce-list-item {
+		display: grid;
+		grid-template-columns: 38px 25% 25% 25%;
+		margin-left: -1px;
+		margin-right: -1px;
+		margin-bottom: -1px;
+	}
+
+	.woocommerce-sortable {
+		margin: 0;
+		flex: 1 0 auto;
+	}
+
+	.components-spinner {
+		width: 34px;
+		height: 34px;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		position: absolute;
+		margin: 0;
+	}
+
+	&__footer {
+		padding: $gap;
+	}
+}

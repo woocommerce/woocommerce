@@ -153,7 +153,7 @@ class WC_Products_Tracking {
 					if ( ! isBlockEditor ) {
 						tagsText          = $( '[name=\"tax_input[product_tag]\"]' ).val();
 						if ( $( '#content' ).is( ':visible' ) ) {
-							description_value = $( '#content' ).val();	
+							description_value = $( '#content' ).val();
 						} else if ( typeof tinymce === 'object' && tinymce.get( 'content' ) ) {
 							description_value = tinymce.get( 'content' ).getContent();
 						}
@@ -171,7 +171,7 @@ class WC_Products_Tracking {
 						is_block_editor:		isBlockEditor,
 						is_downloadable:		$( '#_downloadable' ).is( ':checked' ) ? 'Yes' : 'No',
 						manage_stock:			$( '#_manage_stock' ).is( ':checked' ) ? 'Yes' : 'No',
-						menu_order:				$( '#menu_order' ).val() ? 'Yes' : 'No',
+						menu_order:				parseInt( $( '#menu_order' ).val(), 10 ) !== 0 ? 'Yes' : 'No',
 						product_gallery:		$( '#product_images_container .product_images > li' ).length,
 						product_image:			$( '#_thumbnail_id' ).val() > 0 ? 'Yes' : 'No',
 						product_type:			$( '#product-type' ).val(),
@@ -317,6 +317,7 @@ class WC_Products_Tracking {
 
 		if (
 			'post-new.php' === $hook &&
+			isset( $_GET['post_type'] ) &&
 			'product' === wp_unslash( $_GET['post_type'] )
 		) {
 			return 'new';

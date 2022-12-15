@@ -1,0 +1,10 @@
+.woocommerce-experimental-select-control__suffix-icon {
+	display: flex;
+	align-items: center;
+	height: 100%;
+	padding-right: $gap-smaller;
+
+	.components-spinner {
+		margin: 0;
+	}
+}

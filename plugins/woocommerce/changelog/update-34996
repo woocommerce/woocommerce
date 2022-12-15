@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Unwrap product page input props and pass via getInputProps

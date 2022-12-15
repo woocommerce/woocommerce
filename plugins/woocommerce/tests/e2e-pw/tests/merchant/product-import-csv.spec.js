@@ -92,7 +92,7 @@ const productAttributes = [ 'Color', 'Size' ];
 const errorMessage =
 	'Invalid file type. The importer supports CSV and TXT file formats.';
 
-test.describe( 'Import Products from a CSV file', () => {
+test.describe.serial( 'Import Products from a CSV file', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {

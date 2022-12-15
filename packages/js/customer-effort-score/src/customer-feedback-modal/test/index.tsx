@@ -16,7 +16,9 @@ describe( 'CustomerFeedbackModal', () => {
 		render(
 			<CustomerFeedbackModal
 				recordScoreCallback={ mockRecordScoreCallback }
-				label="Testing"
+				title="Testing"
+				firstQuestion="First question"
+				secondQuestion="Second question"
 			/>
 		);
 
@@ -33,13 +35,15 @@ describe( 'CustomerFeedbackModal', () => {
 		render(
 			<CustomerFeedbackModal
 				recordScoreCallback={ mockRecordScoreCallback }
-				label="Testing"
+				title="Testing"
+				firstQuestion="First question"
+				secondQuestion="Second question"
 			/>
 		);
 
 		await screen.findByRole( 'dialog' ); // Wait for the modal to render.
 
-		fireEvent.click( screen.getByRole( 'button', { name: /send/i } ) ); // Press send button.
+		fireEvent.click( screen.getByRole( 'button', { name: /share/i } ) ); // Press send button.
 
 		// Wait for error message.
 		await screen.findByRole( 'alert' );
@@ -51,7 +55,9 @@ describe( 'CustomerFeedbackModal', () => {
 		render(
 			<CustomerFeedbackModal
 				recordScoreCallback={ mockRecordScoreCallback }
-				label="Testing"
+				title="Testing"
+				firstQuestion="First question"
+				secondQuestion="Second question"
 			/>
 		);
 
@@ -59,17 +65,21 @@ describe( 'CustomerFeedbackModal', () => {
 		await screen.findByRole( 'dialog' );
 
 		expect(
-			screen.queryByLabelText( 'Comments (optional)' )
+			screen.queryByLabelText(
+				'How is that screen useful to you? What features would you add or change?'
+			)
 		).not.toBeInTheDocument();
 	} );
 
-	it.each( [ 'Very difficult', 'Somewhat difficult' ] )(
+	it.each( [ 'Strongly disagree', 'Disagree' ] )(
 		'should toggle the comments field when %s is selected',
 		async ( labelText ) => {
 			render(
 				<CustomerFeedbackModal
 					recordScoreCallback={ mockRecordScoreCallback }
-					label="Testing"
+					title="Testing"
+					firstQuestion="First question"
+					secondQuestion="Second question"
 				/>
 			);
 
@@ -77,18 +87,22 @@ describe( 'CustomerFeedbackModal', () => {
 			await screen.findByRole( 'dialog' );
 
 			// Select the option.
-			fireEvent.click( screen.getByLabelText( labelText ) );
+			fireEvent.click( screen.getAllByLabelText( labelText )[ 0 ] );
 
 			// Wait for comments field to show.
-			await screen.findByLabelText( 'Comments (optional)' );
+			await screen.findByLabelText(
+				'How is that screen useful to you? What features would you add or change?'
+			);
 
 			// Select neutral score.
-			fireEvent.click( screen.getByLabelText( 'Neutral' ) );
+			fireEvent.click( screen.getAllByLabelText( 'Neutral' )[ 0 ] );
 
 			// Wait for comments field to hide.
 			await waitFor( () => {
 				expect(
-					screen.queryByLabelText( 'Comments (optional)' )
+					screen.queryByLabelText(
+						'How is that screen useful to you? What features would you add or change?'
+					)
 				).not.toBeInTheDocument();
 			} );
 		}

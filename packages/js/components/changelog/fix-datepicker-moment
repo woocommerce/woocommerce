@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed DatePicker to work in WordPress 6.1 when currentDate is set to a moment instance.

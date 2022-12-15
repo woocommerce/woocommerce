@@ -46,39 +46,41 @@ export const Menu = ( {
 	return (
 		<div
 			ref={ selectControlMenuRef }
-			className={ classnames(
-				'woocommerce-experimental-select-control__menu',
-				className
-			) }
+			className="woocommerce-experimental-select-control__menu"
 		>
-			<Popover
-				// @ts-expect-error this prop does exist, see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L180.
-				__unstableSlotName="woocommerce-select-control-menu"
-				focusOnMount={ false }
-				className={ classnames(
-					'woocommerce-experimental-select-control__popover-menu',
-					{
-						'is-open': isOpen,
-						'has-results': Children.count( children ) > 0,
-					}
-				) }
-				position="bottom center"
-				animate={ false }
-			>
-				<ul
-					{ ...getMenuProps() }
-					className="woocommerce-experimental-select-control__popover-menu-container"
-					style={ {
-						width: boundingRect?.width,
-					} }
-					onMouseUp={ ( e ) =>
-						// Fix to prevent select control dropdown from closing when selecting within the Popover.
-						e.stopPropagation()
-					}
+			<div>
+				<Popover
+					// @ts-expect-error this prop does exist, see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L180.
+					__unstableSlotName="woocommerce-select-control-menu"
+					focusOnMount={ false }
+					className={ classnames(
+						'woocommerce-experimental-select-control__popover-menu',
+						{
+							'is-open': isOpen,
+							'has-results': Children.count( children ) > 0,
+						}
+					) }
+					position="bottom right"
+					animate={ false }
 				>
-					{ isOpen && children }
-				</ul>
-			</Popover>
+					<ul
+						{ ...getMenuProps() }
+						className={ classnames(
+							'woocommerce-experimental-select-control__popover-menu-container',
+							className
+						) }
+						style={ {
+							width: boundingRect?.width,
+						} }
+						onMouseUp={ ( e ) =>
+							// Fix to prevent select control dropdown from closing when selecting within the Popover.
+							e.stopPropagation()
+						}
+					>
+						{ isOpen && children }
+					</ul>
+				</Popover>
+			</div>
 		</div>
 	);
 	/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */

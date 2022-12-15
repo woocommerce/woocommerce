@@ -378,10 +378,10 @@ class DefaultPaymentGateways {
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/amazonpay.png',
 				'plugins'             => array( 'woocommerce-gateway-amazon-payments-advanced' ),
 				'is_visible'          => array(
-					self::get_rules_for_countries( array( 'US', 'CA' ) ),
+					self::get_rules_for_countries( array( 'US', 'CA', 'GB', 'JP', 'AT', 'BE', 'CY', 'DK', 'ES', 'FR', 'DE', 'HU', 'IE', 'IT', 'LU', 'NL', 'PT', 'SL', 'SE' ) ),
 				),
 				'category_other'      => array(),
-				'category_additional' => array( 'US', 'CA' ),
+				'category_additional' => array( 'US', 'CA', 'GB', 'JP', 'AT', 'BE', 'CY', 'DK', 'ES', 'FR', 'DE', 'HU', 'IE', 'IT', 'LU', 'NL', 'PT', 'SL', 'SE' ),
 			),
 			array(
 				'id'                  => 'affirm',

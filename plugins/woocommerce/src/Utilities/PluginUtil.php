@@ -129,7 +129,7 @@ class PluginUtil {
 
 		// Try to match plugin_basename().
 		$plugin_basename = $this->proxy->call_function( 'plugin_basename', $plugin_file );
-		if ( array_key_exists( $plugin_basename, $wp_plugins ) ) {
+		if ( in_array( $plugin_basename, $wp_plugins, true ) ) {
 			return $plugin_basename;
 		}
 
