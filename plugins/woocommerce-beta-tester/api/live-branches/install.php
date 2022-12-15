@@ -22,14 +22,19 @@ register_woocommerce_admin_test_helper_rest_route(
  * @param Object $request - The request parameter.
  */
 function install_version( $request ) {
-	$download_url = $request->get_param( 'download_url' );
-	$pr_name      = $request->get_param( 'pr_name' );
+	$params       = json_decode( $request->get_body() );
+	$download_url = $params->download_url;
+	$pr_name      = $params->pr_name;
+
+	// error_log( var_dump( $params ) );
+	// $download_url = $params['download_url'];
+	// $pr_name      = $params['pr_name'];
 
 	$installer = new WC_Beta_Tester_Live_Branches_Installer();
 	$result    = $installer->install( $download_url, $pr_name );
 
 	if ( is_wp_error( $result ) ) {
-		return new WP_Error( 400, "Could not install $pr_name", '' );
+		return new WP_Error( 400, "Could not install $pr_name with error {$result->get_error_message()}", '' );
 	} else {
 		return new WP_REST_Response( wp_json_encode( array( 'ok' => true ) ) );
 	}

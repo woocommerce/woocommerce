@@ -40,17 +40,17 @@ class WC_Beta_Tester_Live_Branches_Installer {
 	 * @param string $pr_name The name of the associated PR.
 	 */
 	public function install( $download_url, $pr_name ) {
+		$wp_filesystem = $this->init_filesystem();
+
 		// Download the plugin.
 		$tmp_dir = download_url( $download_url );
 
 		if ( is_wp_error( $tmp_dir ) ) {
 			return new WP_Error(
 				'download_error',
-				sprintf( __( 'Error Downloading: <a href="%1$s">%1$s</a> - Error: %2$s', 'woocommerce-beta-tester' ), $info->download_url, $temp_path->get_error_message() )
+				sprintf( __( 'Error Downloading: <a href="%1$s">%1$s</a> - Error: %2$s', 'woocommerce-beta-tester' ), $download_url, $tmp_dir->get_error_message() )
 			);
 		}
-
-		$wp_filesystem = $this->init_filesystem();
 
 		if ( is_wp_error( $wp_filesystem ) ) {
 			return $wp_filesystem;
@@ -58,7 +58,9 @@ class WC_Beta_Tester_Live_Branches_Installer {
 
 		// Unzip the plugin.
 		$plugin_path = str_replace( ABSPATH, $wp_filesystem->abspath(), WP_PLUGIN_DIR );
-		$unzip       = unzip_file( $tmp_dir, $plugin_path );
+		$unzip       = unzip_file( $tmp_dir, "$plugin_path/woocommerce-$pr_name" );
+
+		deactivate_plugins( 'woocommerce/woocommerce.php' );
 
 		if ( is_wp_error( $unzip ) ) {
 			return new WP_Error( 'unzip_error', sprintf( __( 'Error Unzipping file: Error: %1$s', 'woocommerce-beta-tester' ), $result->get_error_message() ) );
@@ -68,14 +70,12 @@ class WC_Beta_Tester_Live_Branches_Installer {
 		unlink( $tmp_dir );
 
 		// Activate the plugin.
-		$activate = activate_plugin( $this->get_plugin_path( $download_url ) );
+		$activate = activate_plugin( "$plugin_path/woocommerce-$pr_name" );
 
 		if ( is_wp_error( $activate ) ) {
 			return $activate;
 		}
 
-		// Record the installed version in a JSON file
-		// TODO generate a banner for this.
 		$plugin_info = (object) array(
 			'source' => $download_url,
 			'pr'     => $pr_name,
