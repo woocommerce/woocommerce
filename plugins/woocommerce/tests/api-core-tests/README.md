@@ -166,7 +166,7 @@ Additional tests can also be added to test the following general test scenarios:
 
 The structure of the test serves as a skeleton for the test itself. 
 
-Each test file requires the @playwright/test module to be imported as follows:
+Each test file requires the `@playwright/test` module to be imported as follows:
 ```js
 const { test, expect } = require( '@playwright/test' );
 ```
