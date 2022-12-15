@@ -76,7 +76,7 @@ export type CrudSelectors<
 		'': WPDataSelector< typeof getItem >;
 	},
 	ResourceName,
-	IdType,
+	IdQuery,
 	ItemType
 > &
 	MapSelectors<
