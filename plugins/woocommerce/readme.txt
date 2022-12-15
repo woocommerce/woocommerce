@@ -224,6 +224,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Make it possible to add custom bulk action handling to the admin order list screen (when HPOS is enabled). [#35442](https://github.com/woocommerce/woocommerce/pull/35442)
 * Add - Set In-App Marketplace Tour as completed on tour close [#35278](https://github.com/woocommerce/woocommerce/pull/35278)
 * Add - When custom order tables are not authoritative, admin UI requests will be redirected to the matching legacy order screen as appropriate. [#35463](https://github.com/woocommerce/woocommerce/pull/35463)
+* Update - Include taxes migration in MigrationHelper::migrate_country_states [#35967](https://github.com/woocommerce/woocommerce/pull/35967)
 * Update - Woo Blocks 8.9.2 [#35805](https://github.com/woocommerce/woocommerce/pull/35805)
 * Update - Comment: Update WooCommerce Blocks to 8.7.2 [#35101](https://github.com/woocommerce/woocommerce/pull/35101)
 * Update - Comment: Update WooCommerce Blocks to 8.7.3 [#35219](https://github.com/woocommerce/woocommerce/pull/35219)
