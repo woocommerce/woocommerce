@@ -47,9 +47,9 @@ Checkout:
 
 ### Passed parameters
 
--   `collapsible`: `Boolean` If a shipping package panel should be collapsible or not, this is false in Checkout and true in Cart.
--   `collapse`: `Boolean` If a panel should be collapsed by default, this is true if there's more than 1 fill registered (Core Shipping options are registered as a fill and they're counted).
--   `showItems`: `Boolean` If we should show the content of each package, this is true if there's more than 1 fill registered (Core Shipping options are registered as a fill and they're counted).
+-   `collapsible`: `Boolean|undefined` If a shipping package panel should be collapsible or not, this is false in Checkout and undefined in Cart.
+-   `collapse`: `Boolean` If a panel should be collapsed by default, this is true if if panels are collapsible.
+-   `showItems`: `Boolean|undefined` If we should show the content of each package, this is undefined in Cart and Checkout and is left to the actual package logic to decide.
 -   `noResultsMessage`: A React element that you can render if there are no shipping options.
 -   `renderOption`: a render function that takes a rate object and returns a render option.
 -   `cart`: `wc/store/cart` data but in `camelCase` instead of `snake_case`. [Object breakdown.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/c00da597efe4c16fcf5481c213d8052ec5df3766/assets/js/type-defs/cart.ts#L172-L188)

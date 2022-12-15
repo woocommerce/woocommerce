@@ -6,7 +6,7 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import { createSlotFill, useSlot } from '../../slot';
+import { createSlotFill } from '../../slot';
 
 const slotName = '__experimentalOrderShippingPackages';
 const {
@@ -16,17 +16,15 @@ const {
 
 const Slot = ( {
 	className,
-	collapsible,
 	noResultsMessage,
 	renderOption,
 	extensions,
 	cart,
 	components,
 	context,
-	shippingRates,
+	collapsible,
+	showItems,
 } ) => {
-	const { fills } = useSlot( slotName );
-	const hasMultiplePackages = fills.length > 1 || shippingRates?.length > 1;
 	return (
 		<OrderShippingPackagesSlot
 			className={ classnames(
@@ -34,9 +32,9 @@ const Slot = ( {
 				className
 			) }
 			fillProps={ {
+				collapse: collapsible,
 				collapsible,
-				collapse: hasMultiplePackages,
-				showItems: hasMultiplePackages,
+				showItems,
 				noResultsMessage,
 				renderOption,
 				extensions,
