@@ -5,42 +5,57 @@ import { FunctionComponent } from 'react';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useState } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { EmbeddedBodyProps } from '../embedded-body-layout/embedded-body-props';
 
-const REVIEWED_STORE_LOCATION_SETTINGS_OPTION =
-	'woocommerce_admin_reviewed_store_location_settings';
+const STORE_ADDRESS_SETTINGS_OPTION = 'woocommerce_store_address';
+const STORE_CITY_SETTINGS_OPTION = 'woocommerce_store_city';
+const STORE_POSTCODE_SETTINGS_OPTION = 'woocommerce_store_postcode';
 
 const useShowStoreLocationTour = () => {
-	const { hasReviewedStoreLocationSettings, isLoading } = useSelect(
-		( select ) => {
-			const { hasFinishedResolution, getOption } =
-				select( OPTIONS_STORE_NAME );
+	const { hasFilledStoreAddress, isLoading } = useSelect( ( select ) => {
+		const { hasFinishedResolution, getOption } =
+			select( OPTIONS_STORE_NAME );
 
-			return {
-				isLoading: ! hasFinishedResolution( 'getOption', [
-					REVIEWED_STORE_LOCATION_SETTINGS_OPTION,
+		return {
+			isLoading:
+				! hasFinishedResolution( 'getOption', [
+					STORE_ADDRESS_SETTINGS_OPTION,
+				] ) ||
+				! hasFinishedResolution( 'getOption', [
+					STORE_CITY_SETTINGS_OPTION,
+				] ) ||
+				! hasFinishedResolution( 'getOption', [
+					STORE_POSTCODE_SETTINGS_OPTION,
 				] ),
-				hasReviewedStoreLocationSettings:
-					getOption( REVIEWED_STORE_LOCATION_SETTINGS_OPTION ) ===
-					'yes',
-			};
-		}
-	);
+			hasFilledStoreAddress:
+				getOption( STORE_ADDRESS_SETTINGS_OPTION ) !== '' &&
+				getOption( STORE_CITY_SETTINGS_OPTION ) !== '' &&
+				getOption( STORE_POSTCODE_SETTINGS_OPTION ) !== '',
+		};
+	} );
 
 	return {
 		isLoading,
-		show: ! isLoading && ! hasReviewedStoreLocationSettings,
+		show: ! isLoading && ! hasFilledStoreAddress,
 	};
+};
+
+const isFieldFilled = ( fieldSelector: string ) => {
+	const field = document.querySelector< HTMLInputElement >( fieldSelector );
+	return !! field && field.value.length > 0;
 };
 
 const StoreAddressTourOverlay = () => {
 	const { isLoading, show } = useShowStoreLocationTour();
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const [ isDismissed, setIsDismissed ] = useState( false );
+
 	const config: TourKitTypes.WooConfig = {
 		steps: [
 			{
@@ -52,7 +67,7 @@ const StoreAddressTourOverlay = () => {
 					heading: 'Add your store location',
 					descriptions: {
 						desktop: __(
-							'Add your store location details such as address and Country to help us configure shipping, taxes, currency and more in a fully automated way.',
+							'Add your store location details to help us configure shipping, taxes, currency and more in a fully automated way. Once done, click on the "Save" button at the end of the form.',
 							'woocommerce'
 						),
 					},
@@ -77,14 +92,24 @@ const StoreAddressTourOverlay = () => {
 				},
 			},
 		},
-		closeHandler: () => {
-			updateOptions( {
-				[ REVIEWED_STORE_LOCATION_SETTINGS_OPTION ]: 'yes',
+		closeHandler: ( _steps, _currentStepIndex, source ) => {
+			const fields_filled = {
+				address_1: isFieldFilled( 'input#woocommerce_store_address' ),
+				address_2: isFieldFilled( 'input#woocommerce_store_address_2' ),
+				city: isFieldFilled( 'input#woocommerce_store_city' ),
+				postcode: isFieldFilled( 'input#woocommerce_store_postcode' ),
+			};
+
+			recordEvent( 'settings_store_address_tour_dismiss', {
+				source, // 'close-btn' | 'done-btn'
+				fields_filled,
 			} );
+
+			setIsDismissed( true );
 		},
 	};
 
-	if ( isLoading || ! show ) {
+	if ( isDismissed || isLoading || ! show ) {
 		return null;
 	}
 	return <TourKit config={ config }></TourKit>;

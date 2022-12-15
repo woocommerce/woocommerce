@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Close DateTimePickerControl's dropdown when blurring from input.

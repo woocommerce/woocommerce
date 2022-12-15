@@ -2,7 +2,9 @@
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Utilities\ArrayUtil as ArrayUtilAlias;
 
 if ( ! class_exists( 'WC_REST_Orders_Controller_Tests' ) ) {
 	require_once dirname( __FILE__, 5 ) . '/includes/rest-api/Controllers/Version3/class-wc-rest-orders-controller-tests.php';
@@ -69,7 +71,18 @@ class OrdersTableDataStoreRestOrdersControllerTests extends \WC_REST_Orders_Cont
 		$this->assertEmpty( array_diff_key( $response_cpt_data, $response_cot_data ) );
 		$this->assertEmpty( array_diff_key( $response_cot_data, $response_cpt_data ) );
 		$this->assertEquals( count( $response_cpt_data['meta_data'] ), count( $response_cot_data['meta_data'] ) );
-		$this->assertTrue( $response_cpt_data == $response_cot_data ); // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
+		$meta_data_cpt_by_key = ArrayUtilAlias::select_as_assoc( $response_cpt_data['meta_data'], 'key' );
+		$meta_data_cot_by_key = ArrayUtilAlias::select_as_assoc( $response_cot_data['meta_data'], 'key' );
+		foreach ( $meta_data_cot_by_key as $key => $meta_data_cot ) {
+			$meta_values_cot = ArrayUtilAlias::select( $meta_data_cot, 'value' );
+			$meta_values_cpt = ArrayUtilAlias::select( $meta_data_cpt_by_key[ $key ], 'value' );
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- This is a test.
+			$this->assertEquals( $meta_values_cot, $meta_values_cpt, "Different values for meta $key: " . print_r( array( $meta_values_cot, $meta_values_cpt ), true ) );
+		}
+		// Exclude metadata since ids of meta data are different.
+		unset( $response_cpt_data['meta_data'] );
+		unset( $response_cot_data['meta_data'] );
+		$this->assertEquals( $response_cpt_data, $response_cot_data );
 	}
 
 	/**
@@ -79,12 +92,14 @@ class OrdersTableDataStoreRestOrdersControllerTests extends \WC_REST_Orders_Cont
 	 * @return void
 	 */
 	private function toggle_cot( bool $enabled ): void {
-		$controller = wc_get_container()->get( CustomOrdersTableController::class )->show_feature();
+		$features_controller = wc_get_container()->get( Featurescontroller::class );
+		$features_controller->change_feature_enable( 'custom_order_tables', true );
+
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, wc_bool_to_string( $enabled ) );
 
 		// Confirm things are really correct.
 		$wc_data_store = WC_Data_Store::load( 'order' );
-		assert( $enabled === is_a( $wc_data_store->get_current_class_name(), OrdersTableDataStore::class, true ) );
+		assert( is_a( $wc_data_store->get_current_class_name(), OrdersTableDataStore::class, true ) === $enabled );
 	}
 
 }

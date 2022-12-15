@@ -399,8 +399,9 @@ class WC_Tracker {
 		$order_counts   = self::get_order_counts();
 		$order_totals   = self::get_order_totals();
 		$order_gateways = self::get_orders_by_gateway();
+		$order_origin   = self::get_orders_origins();
 
-		return array_merge( $order_dates, $order_counts, $order_totals, $order_gateways );
+		return array_merge( $order_dates, $order_counts, $order_totals, $order_gateways, $order_origin );
 	}
 
 	/**
@@ -543,6 +544,37 @@ class WC_Tracker {
 	}
 
 	/**
+	 * Get orders origin details.
+	 *
+	 * @return array
+	 */
+	private static function get_orders_origins() {
+		global $wpdb;
+
+		$orders_origin = $wpdb->get_results(
+			"
+			SELECT
+				meta_value as origin, COUNT( DISTINCT ( orders.id ) ) as count
+			FROM
+				$wpdb->posts orders
+			LEFT JOIN
+				$wpdb->postmeta order_meta ON order_meta.post_id = orders.id
+			WHERE
+				meta_key = '_created_via'
+			GROUP BY
+				meta_value;
+			"
+		);
+
+		$orders_by_origin = array();
+		foreach ( $orders_origin as $origin ) {
+			$orders_by_origin[ $origin->origin ] = (int) $origin->count;
+		}
+
+		return array( 'created_via' => $orders_by_origin );
+	}
+
+	/**
 	 * Get review counts for different statuses.
 	 *
 	 * @return array
@@ -658,6 +690,11 @@ class WC_Tracker {
 			'enable_myaccount_registration'         => get_option( 'woocommerce_enable_myaccount_registration' ),
 			'registration_generate_username'        => get_option( 'woocommerce_registration_generate_username' ),
 			'registration_generate_password'        => get_option( 'woocommerce_registration_generate_password' ),
+			'hpos_enabled'                          => get_option( 'woocommerce_feature_custom_order_tables_enabled' ),
+			'hpos_sync_enabled'                     => get_option( 'woocommerce_custom_orders_table_data_sync_enabled' ),
+			'hpos_cot_authoritative'                => get_option( 'woocommerce_custom_orders_table_enabled' ),
+			'hpos_transactions_enabled'             => get_option( 'woocommerce_use_db_transactions_for_custom_orders_table_data_sync' ),
+			'hpos_transactions_level'               => get_option( 'woocommerce_db_transactions_isolation_level_for_custom_orders_table_data_sync' ),
 		);
 	}
 

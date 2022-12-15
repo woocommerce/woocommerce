@@ -1,0 +1,98 @@
+.woocommerce-add-attribute-modal {
+	.components-notice.is-info {
+		margin-left: 0;
+		margin-right: 0;
+		background-color: #f0f6fc;
+	}
+
+	&__add-attribute {
+		margin-top: $gap-small;
+	}
+
+	&__buttons {
+		margin-top: $gap-larger;
+		display: flex;
+		flex-direction: row;
+		gap: 8px;
+		justify-content: flex-end;
+	}
+
+	.components-modal__content {
+		display: flex;
+		flex-direction: column;
+	}
+
+	&__body {
+		min-height: 200px;
+		flex: 1 1 auto;
+		overflow: auto;
+	}
+
+	&__table {
+		width: 100%;
+		margin-top: $gap-large;
+
+		@include breakpoint( '<782px' ) {
+			thead {
+				@include screen-reader-only();
+			}
+		}
+
+		th {
+			text-align: left;
+			color: $gray-700;
+			font-weight: normal;
+			text-transform: uppercase;
+		}
+	}
+	&__table-header {
+		padding: 0 0 $gap;
+	}
+	&__table-header,
+	&__table-row {
+		display: grid;
+		grid-template-columns: 40% 55% 5%;
+		border-bottom: 1px solid $gray-300;
+		align-items: center;
+	}
+	&__table-row {
+		padding: $gap-large 0;
+		td:not(:last-child) {
+			margin-right: $gap;
+		}
+
+		@include breakpoint( '<782px' ) {
+			position: relative;
+			grid-template-columns: 1fr;
+			// Added the width of the trash icon as padding
+			// so that it can be displayed correctly
+			padding-right: 42px;
+		}
+
+		@include breakpoint( '>782px' ) {
+			.woocommerce-experimental-select-control__label {
+				@include screen-reader-only();
+			}
+			.woocommerce-experimental-select-control__combo-box-wrapper {
+				margin-bottom: 0;
+			}
+		}
+	}
+
+	&__table-attribute-trash-column {
+		display: flex;
+		justify-content: center;
+
+		@include breakpoint( '<782px' ) {
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			align-items: center;
+		}
+
+		.components-button.has-icon {
+			padding: 8px;
+		}
+	}
+}

@@ -31,6 +31,7 @@ export const defaultState: OnboardingState = {
 		wccom_connected: null,
 		is_agree_marketing: null,
 		store_email: null,
+		is_store_country_set: null,
 	},
 	emailPrefill: '',
 	paymentMethods: [],

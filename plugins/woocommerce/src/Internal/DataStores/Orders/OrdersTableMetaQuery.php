@@ -148,31 +148,28 @@ class OrdersTableMetaQuery {
 	private function sanitize_meta_query( array $q ): array {
 		$sanitized = array();
 
-		if ( $this->is_atomic( $q ) ) {
-			if ( isset( $q['value'] ) && array() === $q['value'] ) {
-				unset( $q['value'] );
-			}
-
-			$q['compare']     = isset( $q['compare'] ) ? strtoupper( $q['compare'] ) : ( isset( $q['value'] ) && is_array( $q['value'] ) ? 'IN' : '=' );
-			$q['compare_key'] = isset( $q['compare_key'] ) ? strtoupper( $q['compare_key'] ) : ( isset( $q['key'] ) && is_array( $q['key'] ) ? 'IN' : '=' );
-
-			if ( ! in_array( $q['compare'], self::NON_NUMERIC_OPERATORS, true ) && ! in_array( $q['compare'], self::NUMERIC_OPERATORS, true ) ) {
-				$q['compare'] = '=';
-			}
-
-			if ( ! in_array( $q['compare_key'], self::NON_NUMERIC_OPERATORS, true ) ) {
-				$q['compare_key'] = '=';
-			}
-
-			return $q;
-		}
-
-		// Nested.
 		foreach ( $q as $key => $arg ) {
 			if ( 'relation' === $key ) {
 				$relation = $arg;
 			} elseif ( ! is_array( $arg ) ) {
 				continue;
+			} elseif ( $this->is_atomic( $arg ) ) {
+				if ( isset( $arg['value'] ) && array() === $arg['value'] ) {
+					unset( $arg['value'] );
+				}
+
+				$arg['compare']      = isset( $arg['compare'] ) ? strtoupper( $arg['compare'] ) : ( isset( $arg['value'] ) && is_array( $arg['value'] ) ? 'IN' : '=' );
+				$arg['compare_key']  = isset( $arg['compare_key'] ) ? strtoupper( $arg['compare_key'] ) : ( isset( $arg['key'] ) && is_array( $arg['key'] ) ? 'IN' : '=' );
+
+				if ( ! in_array( $arg['compare'], self::NON_NUMERIC_OPERATORS, true ) && ! in_array( $arg['compare'], self::NUMERIC_OPERATORS, true ) ) {
+					$arg['compare'] = '=';
+				}
+
+				if ( ! in_array( $arg['compare_key'], self::NON_NUMERIC_OPERATORS, true ) ) {
+					$arg['compare_key'] = '=';
+				}
+
+				$sanitized[ $key ] = $arg;
 			} else {
 				$sanitized_arg = $this->sanitize_meta_query( $arg );
 

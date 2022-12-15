@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import {
 	IgnorePropertyTransformation,
 	KeyChangeTransformation,
@@ -5,7 +8,6 @@ import {
 	PropertyType,
 	PropertyTypeTransformation,
 } from '../../../framework';
-
 import { Coupon } from '../../../models';
 
 /**

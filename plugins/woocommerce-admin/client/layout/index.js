@@ -34,9 +34,12 @@ import { PluginArea } from '@wordpress/plugins';
 import './style.scss';
 import { Controller, getPages } from './controller';
 import { Header } from '../header';
+import { Footer } from './footer';
 import Notices from './notices';
 import TransientNotices from './transient-notices';
+import { CustomerEffortScoreModalContainer } from '../customer-effort-score-tracks';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { triggerExitPageCesSurvey } from '~/customer-effort-score-tracks/customer-effort-score-exit-page';
 import '~/activity-panel';
 import '~/mobile-banner';
 import './navigation';
@@ -127,13 +130,13 @@ const LayoutSwitchWrapper = ( props ) => {
 class _Layout extends Component {
 	memoizedLayoutContext = memoize( ( page ) =>
 		LayoutContextPrototype.getExtendedContext(
-			page?.breadcrumbs[ page.breadcrumbs.length - 1 ]?.toLowerCase() ||
-				'page'
+			page?.navArgs?.id?.toLowerCase() || 'page'
 		)
 	);
 
 	componentDidMount() {
 		this.recordPageViewTrack();
+		triggerExitPageCesSurvey();
 	}
 
 	componentDidUpdate( prevProps ) {
@@ -146,6 +149,9 @@ class _Layout extends Component {
 
 		if ( previousPath !== currentPath ) {
 			this.recordPageViewTrack();
+			setTimeout( () => {
+				triggerExitPageCesSurvey();
+			}, 0 );
 		}
 	}
 
@@ -247,6 +253,8 @@ class _Layout extends Component {
 								<WCPayUsageModal />
 							</Suspense>
 						) }
+						<Footer />
+						<CustomerEffortScoreModalContainer />
 					</div>
 					<PluginArea scope="woocommerce-admin" />
 					{ window.wcAdminFeatures.navigation && (

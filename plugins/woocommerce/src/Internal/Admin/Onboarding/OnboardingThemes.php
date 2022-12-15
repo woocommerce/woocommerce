@@ -101,7 +101,12 @@ class OnboardingThemes {
 	public static function get_themes() {
 		$themes = get_transient( self::THEMES_TRANSIENT );
 		if ( false === $themes ) {
-			$theme_data = wp_remote_get( 'https://woocommerce.com/wp-json/wccom-extensions/1.0/search?category=themes' );
+			$theme_data = wp_remote_get(
+				'https://woocommerce.com/wp-json/wccom-extensions/1.0/search?category=themes',
+				array(
+					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
+				)
+			);
 			$themes     = array();
 
 			if ( ! is_wp_error( $theme_data ) ) {

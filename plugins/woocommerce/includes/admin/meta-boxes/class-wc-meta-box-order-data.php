@@ -38,6 +38,13 @@ class WC_Meta_Box_Order_Data {
 	 */
 	public static function init_address_fields() {
 
+		/**
+		 * Provides an opportunity to modify the list of order billing fields displayed on the admin.
+		 *
+		 * @since 1.4.0
+		 *
+		 * @param array Billing fields.
+		 */
 		self::$billing_fields = apply_filters(
 			'woocommerce_admin_billing_fields',
 			array(
@@ -90,6 +97,13 @@ class WC_Meta_Box_Order_Data {
 			)
 		);
 
+		/**
+		 * Provides an opportunity to modify the list of order shipping fields displayed on the admin.
+		 *
+		 * @since 1.4.0
+		 *
+		 * @param array Shipping fields.
+		 */
 		self::$shipping_fields = apply_filters(
 			'woocommerce_admin_shipping_fields',
 			array(
@@ -223,7 +237,6 @@ class WC_Meta_Box_Order_Data {
 						);
 					}
 
-
 					$ip_address = $order->get_customer_ip_address();
 					if ( $ip_address ) {
 						$meta_list[] = sprintf(
@@ -242,12 +255,15 @@ class WC_Meta_Box_Order_Data {
 						<h3><?php esc_html_e( 'General', 'woocommerce' ); ?></h3>
 
 						<p class="form-field form-field-wide">
-							<label for="order_date"><?php _e( 'Date created:', 'woocommerce' ); ?></label>
-							<input type="text" class="date-picker" name="order_date" maxlength="10" value="<?php echo esc_attr( date_i18n( 'Y-m-d', strtotime( $order->get_date_created() ) ) ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>" />@
+							<?php
+							$order_date_created_localised = ! is_null( $order->get_date_created() ) ? $order->get_date_created()->getOffsetTimestamp() : '';
+							?>
+							<label for="order_date"><?php esc_html_e( 'Date created:', 'woocommerce' ); ?></label>
+							<input type="text" class="date-picker" name="order_date" maxlength="10" value="<?php echo esc_attr( date_i18n( 'Y-m-d', $order_date_created_localised ) ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>" />@
 							&lrm;
-							<input type="number" class="hour" placeholder="<?php esc_attr_e( 'h', 'woocommerce' ); ?>" name="order_date_hour" min="0" max="23" step="1" value="<?php echo esc_attr( date_i18n( 'H', strtotime( $order->get_date_created() ) ) ); ?>" pattern="([01]?[0-9]{1}|2[0-3]{1})" />:
-							<input type="number" class="minute" placeholder="<?php esc_attr_e( 'm', 'woocommerce' ); ?>" name="order_date_minute" min="0" max="59" step="1" value="<?php echo esc_attr( date_i18n( 'i', strtotime( $order->get_date_created() ) ) ); ?>" pattern="[0-5]{1}[0-9]{1}" />
-							<input type="hidden" name="order_date_second" value="<?php echo esc_attr( date_i18n( 's', strtotime( $order->get_date_created() ) ) ); ?>" />
+							<input type="number" class="hour" placeholder="<?php esc_attr_e( 'h', 'woocommerce' ); ?>" name="order_date_hour" min="0" max="23" step="1" value="<?php echo esc_attr( date_i18n( 'H', $order_date_created_localised ) ); ?>" pattern="([01]?[0-9]{1}|2[0-3]{1})" />:
+							<input type="number" class="minute" placeholder="<?php esc_attr_e( 'm', 'woocommerce' ); ?>" name="order_date_minute" min="0" max="59" step="1" value="<?php echo esc_attr( date_i18n( 'i', $order_date_created_localised ) ); ?>" pattern="[0-5]{1}[0-9]{1}" />
+							<input type="hidden" name="order_date_second" value="<?php echo esc_attr( date_i18n( 's', $order_date_created_localised ) ); ?>" />
 						</p>
 
 						<p class="form-field form-field-wide wc-order-status">
@@ -301,24 +317,32 @@ class WC_Meta_Box_Order_Data {
 							$user_string = '';
 							$user_id     = '';
 							if ( $order->get_user_id() ) {
-								$user_id     = absint( $order->get_user_id() );
-								$user        = get_user_by( 'id', $user_id );
+								$user_id  = absint( $order->get_user_id() );
+								$customer = new WC_Customer( $user_id );
+								/* translators: 1: user display name 2: user ID 3: user email */
 								$user_string = sprintf(
-									/* translators: 1: user display name 2: user ID 3: user email */
+									/* translators: 1: customer name, 2 customer id, 3: customer email */
 									esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
-									$user->display_name,
-									absint( $user->ID ),
-									$user->user_email
+									$customer->get_first_name() . ' ' . $customer->get_last_name(),
+									$customer->get_id(),
+									$customer->get_email()
 								);
 							}
 							?>
 							<select class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php esc_attr_e( 'Guest', 'woocommerce' ); ?>" data-allow_clear="true">
-								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected">
-									<?php
-									// htmlspecialchars to prevent XSS when rendered by selectWoo.
-									echo esc_html( htmlspecialchars( wp_kses_post( $user_string ) ) );
-									?>
-								</option>
+								<?php
+								// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+								/**
+								 * Filter to customize the display of the currently selected customer for an order in the order edit page.
+								 * This is the same filter used in the ajax call for customer search in the same metabox.
+								 *
+								 * @since 7.2.0 (this instance of the filter)
+								 *
+								 * @param array @user_info An array containing one item with the name and email of the user currently selected as the customer for the order.
+								 */
+								?>
+								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo esc_html( htmlspecialchars( wp_kses_post( current( apply_filters( 'woocommerce_json_search_found_customers', array( $user_string ) ) ) ) ) ); ?></option>
+								<?php // phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 							</select>
 							<!--/email_off-->
 						</p>
@@ -523,11 +547,18 @@ class WC_Meta_Box_Order_Data {
 								}
 							}
 
+							/**
+							 * Allows 3rd parties to alter whether the customer note should be displayed on the admin.
+							 *
+							 * @since 2.1.0
+							 *
+							 * @param bool TRUE if the note should be displayed. FALSE otherwise.
+							 */
 							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) ) :
 								?>
 								<p class="form-field form-field-wide">
-									<label for="excerpt"><?php _e( 'Customer provided note', 'woocommerce' ); ?>:</label>
-									<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php esc_attr_e( 'Customer notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses_post( $order->get_customer_note() ); ?></textarea>
+									<label for="customer_note"><?php esc_html_e( 'Customer provided note', 'woocommerce' ); ?>:</label>
+									<textarea rows="1" cols="40" name="customer_note" tabindex="6" id="excerpt" placeholder="<?php esc_attr_e( 'Customer notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses_post( $order->get_customer_note() ); ?></textarea>
 								</p>
 							<?php endif; ?>
 						</div>
@@ -655,6 +686,11 @@ class WC_Meta_Box_Order_Data {
 		// Set created via prop if new post.
 		if ( isset( $_POST['original_post_status'] ) && 'auto-draft' === $_POST['original_post_status'] ) {
 			$props['created_via'] = 'admin';
+		}
+
+		// Customer note.
+		if ( isset( $_POST['customer_note'] ) ) {
+			$props['customer_note'] = sanitize_textarea_field( wp_unslash( $_POST['customer_note'] ) );
 		}
 
 		// Save order data.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add the woocommerce_order_applied_coupon hook

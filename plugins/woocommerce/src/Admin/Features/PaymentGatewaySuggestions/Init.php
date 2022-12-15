@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\SpecRunner;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\PaymentGatewaysController;
 
@@ -25,7 +24,6 @@ class Init {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'change_locale', array( __CLASS__, 'delete_specs_transient' ) );
 		PaymentGatewaysController::init();
 	}
 

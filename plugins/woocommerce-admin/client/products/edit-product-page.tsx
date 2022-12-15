@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect, useRef } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import { Form, Spinner, FormRef } from '@woocommerce/components';
+import { Spinner, FormRef } from '@woocommerce/components';
 import {
 	PartialProduct,
 	Product,
@@ -13,14 +13,11 @@ import {
 	WCDataSelector,
 } from '@woocommerce/data';
 import { useParams } from 'react-router-dom';
-
 /**
  * Internal dependencies
  */
+import { ProductForm } from './product-form';
 import { ProductFormLayout } from './layout/product-form-layout';
-import { ProductFormActions } from './product-form-actions';
-import { ProductDetailsSection } from './sections/product-details-section';
-import './product-page.scss';
 
 const EditProductPage: React.FC = () => {
 	const { productId } = useParams();
@@ -28,14 +25,32 @@ const EditProductPage: React.FC = () => {
 	const formRef = useRef< FormRef< Partial< Product > > >( null );
 	const { product, isLoading, isPendingAction } = useSelect(
 		( select: WCDataSelector ) => {
-			const { getProduct, hasFinishedResolution, isPending } =
-				select( PRODUCTS_STORE_NAME );
+			const {
+				getProduct,
+				hasFinishedResolution,
+				isPending,
+				getPermalinkParts,
+			} = select( PRODUCTS_STORE_NAME );
 			if ( productId ) {
+				const retrievedProduct = getProduct(
+					parseInt( productId, 10 ),
+					undefined
+				);
+				const permalinkParts = getPermalinkParts(
+					parseInt( productId, 10 )
+				);
 				return {
-					product: getProduct( parseInt( productId, 10 ), undefined ),
-					isLoading: ! hasFinishedResolution( 'getProduct', [
-						parseInt( productId, 10 ),
-					] ),
+					product:
+						permalinkParts && retrievedProduct
+							? retrievedProduct
+							: undefined,
+					isLoading:
+						! hasFinishedResolution( 'getProduct', [
+							parseInt( productId, 10 ),
+						] ) ||
+						! hasFinishedResolution( 'getPermalinkParts', [
+							parseInt( productId, 10 ),
+						] ),
 					isPendingAction:
 						isPending( 'createProduct' ) ||
 						isPending(
@@ -96,17 +111,7 @@ const EditProductPage: React.FC = () => {
 				) }
 			{ product &&
 				( product.status !== 'trash' || wasDeletedUsingAction ) && (
-					<Form< Partial< Product > >
-						ref={ formRef }
-						initialValues={ product || {} }
-						errors={ {} }
-					>
-						<ProductFormLayout>
-							<ProductDetailsSection />
-
-							<ProductFormActions />
-						</ProductFormLayout>
-					</Form>
+					<ProductForm formRef={ formRef } product={ product } />
 				) }
 		</div>
 	);

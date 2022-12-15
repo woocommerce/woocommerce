@@ -4,7 +4,7 @@
 	position: fixed;
 	bottom: $gap-small;
 	left: $admin-menu-width + $gap;
-	z-index: 99999;
+	z-index: calc(z-index('.components-snackbar-list') + 1);
 	width: auto;
 
 	@media ( max-width: 960px ) {

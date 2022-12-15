@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add remove_processor method in batch processing controller, use it when disabling orders sync

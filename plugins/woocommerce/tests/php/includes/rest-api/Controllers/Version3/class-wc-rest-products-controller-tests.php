@@ -44,6 +44,12 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'sku'  => 'waffle-3',
 			)
 		);
+
+		foreach ( self::$products as $product ) {
+			$product->add_meta_data( 'test1', 'test1', true );
+			$product->add_meta_data( 'test2', 'test2', true );
+			$product->save();
+		}
 	}
 
 	/**
@@ -68,6 +74,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'role' => 'administrator',
 			)
 		);
+		wp_set_current_user( $this->user );
 	}
 
 	/**
@@ -150,7 +157,6 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Note: This has fields hardcoded intentionally instead of fetching from schema to test for any bugs in schema result. Add new fields manually when added to schema.
 	 */
 	public function test_product_api_get_all_fields() {
-		wp_set_current_user( $this->user );
 		$expected_response_fields = $this->get_expected_response_fields();
 
 		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
@@ -184,7 +190,6 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test that all fields are returned when requested one by one.
 	 */
 	public function test_products_get_each_field_one_by_one() {
-		wp_set_current_user( $this->user );
 		$expected_response_fields = $this->get_expected_response_fields();
 		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 
@@ -205,8 +210,6 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_products_search_with_search_param_only() {
-		wp_set_current_user( $this->user );
-
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_query_params(
 			array(
@@ -232,8 +235,6 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_products_search_with_search_sku_param_only() {
-		wp_set_current_user( $this->user );
-
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_query_params(
 			array(
@@ -259,8 +260,6 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_products_search_with_search_and_search_sku_param() {
-		wp_set_current_user( $this->user );
-
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_query_params(
 			array(
@@ -285,8 +284,6 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_products_search_with_search_sku_when_skus_disabled() {
-		wp_set_current_user( $this->user );
-
 		add_filter( 'wc_product_sku_enabled', '__return_false' );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
@@ -309,5 +306,122 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $response_products[1]['sku'], 'waffle-3' );
 
 		remove_filter( 'wc_product_sku_enabled', '__return_false' );
+	}
+
+	/**
+	 * Test that the `include_meta` param filters the `meta_data` prop correctly.
+	 */
+	public function test_collection_param_include_meta() {
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_param( 'include_meta', 'test1' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data = $response->get_data();
+		$this->assertCount( 4, $response_data );
+
+		foreach ( $response_data as $order ) {
+			$this->assertArrayHasKey( 'meta_data', $order );
+			$this->assertEquals( 1, count( $order['meta_data'] ) );
+			$meta_keys = array_map(
+				function( $meta_item ) {
+					return $meta_item->get_data()['key'];
+				},
+				$order['meta_data']
+			);
+			$this->assertContains( 'test1', $meta_keys );
+		}
+	}
+
+	/**
+	 * Test that the `include_meta` param is skipped when empty.
+	 */
+	public function test_collection_param_include_meta_empty() {
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_param( 'include_meta', '' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data = $response->get_data();
+		$this->assertCount( 4, $response_data );
+
+		foreach ( $response_data as $order ) {
+			$this->assertArrayHasKey( 'meta_data', $order );
+			$meta_keys = array_map(
+				function( $meta_item ) {
+					return $meta_item->get_data()['key'];
+				},
+				$order['meta_data']
+			);
+			$this->assertContains( 'test1', $meta_keys );
+			$this->assertContains( 'test2', $meta_keys );
+		}
+	}
+
+	/**
+	 * Test that the `exclude_meta` param filters the `meta_data` prop correctly.
+	 */
+	public function test_collection_param_exclude_meta() {
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_param( 'exclude_meta', 'test1' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data = $response->get_data();
+		$this->assertCount( 4, $response_data );
+
+		foreach ( $response_data as $order ) {
+			$this->assertArrayHasKey( 'meta_data', $order );
+			$meta_keys = array_map(
+				function( $meta_item ) {
+					return $meta_item->get_data()['key'];
+				},
+				$order['meta_data']
+			);
+			$this->assertContains( 'test2', $meta_keys );
+			$this->assertNotContains( 'test1', $meta_keys );
+		}
+	}
+
+	/**
+	 * Test that the `include_meta` param overrides the `exclude_meta` param.
+	 */
+	public function test_collection_param_include_meta_override() {
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_param( 'include_meta', 'test1' );
+		$request->set_param( 'exclude_meta', 'test1' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data = $response->get_data();
+		$this->assertCount( 4, $response_data );
+
+		foreach ( $response_data as $order ) {
+			$this->assertArrayHasKey( 'meta_data', $order );
+			$this->assertEquals( 1, count( $order['meta_data'] ) );
+			$meta_keys = array_map(
+				function( $meta_item ) {
+					return $meta_item->get_data()['key'];
+				},
+				$order['meta_data']
+			);
+			$this->assertContains( 'test1', $meta_keys );
+		}
+	}
+
+	/**
+	 * Test that the meta_data property contains an array, and not an object, after being filtered.
+	 */
+	public function test_collection_param_include_meta_returns_array() {
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_param( 'include_meta', 'test2' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data       = $this->server->response_to_data( $response, false );
+		$encoded_data_string = wp_json_encode( $response_data );
+		$decoded_data_object = json_decode( $encoded_data_string, false ); // Ensure object instead of associative array.
+
+		$this->assertIsArray( $decoded_data_object[0]->meta_data );
 	}
 }

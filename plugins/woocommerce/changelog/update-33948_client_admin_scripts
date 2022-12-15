@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update package.json scripts within woocommerce/client/admin plugin. #33982

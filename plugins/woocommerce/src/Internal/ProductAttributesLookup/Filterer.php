@@ -212,12 +212,13 @@ class Filterer {
 			{$tax_query_sql['join']} {$meta_query_sql['join']}
 			INNER JOIN {$wpdb->posts} ON {$wpdb->posts}.ID = {$this->lookup_table_name}.product_or_parent_id";
 
-		$term_ids_sql   = $this->get_term_ids_sql( $term_ids );
-		$query['where'] = "
+		$encoded_taxonomy = sanitize_title( $taxonomy );
+		$term_ids_sql     = $this->get_term_ids_sql( $term_ids );
+		$query['where']   = "
 			WHERE {$wpdb->posts}.post_type IN ( 'product' )
 			AND {$wpdb->posts}.post_status = 'publish'
 			{$tax_query_sql['where']} {$meta_query_sql['where']}
-			AND {$this->lookup_table_name}.taxonomy='{$taxonomy}'
+			AND {$this->lookup_table_name}.taxonomy='{$encoded_taxonomy}'
 			AND {$this->lookup_table_name}.term_id IN $term_ids_sql
 			{$in_stock_clause}";
 

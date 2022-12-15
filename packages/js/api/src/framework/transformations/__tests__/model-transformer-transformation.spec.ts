@@ -1,4 +1,3 @@
-import { mocked } from 'ts-jest/utils';
 import { ModelTransformerTransformation } from '../model-transformer-transformation';
 import { ModelTransformer } from '../../model-transformer';
 import { DummyModel } from '../../../__test_data__/dummy-model';
@@ -19,7 +18,7 @@ describe( 'ModelTransformerTransformation', () => {
 	} );
 
 	it( 'should execute child transformer', () => {
-		mocked( propertyTransformer.toModel ).mockReturnValue( {
+		jest.mocked( propertyTransformer.toModel ).mockReturnValue( {
 			toModel: 'Test',
 		} );
 
@@ -31,7 +30,7 @@ describe( 'ModelTransformerTransformation', () => {
 			'Test'
 		);
 
-		mocked( propertyTransformer.fromModel ).mockReturnValue( {
+		jest.mocked( propertyTransformer.fromModel ).mockReturnValue( {
 			fromModel: 'Test',
 		} );
 
@@ -42,7 +41,7 @@ describe( 'ModelTransformerTransformation', () => {
 	} );
 
 	it( 'should execute child transformer on array', () => {
-		mocked( propertyTransformer.toModel ).mockReturnValue( {
+		jest.mocked( propertyTransformer.toModel ).mockReturnValue( {
 			toModel: 'Test',
 		} );
 
@@ -62,7 +61,7 @@ describe( 'ModelTransformerTransformation', () => {
 			'Test2'
 		);
 
-		mocked( propertyTransformer.fromModel ).mockReturnValue( {
+		jest.mocked( propertyTransformer.fromModel ).mockReturnValue( {
 			fromModel: 'Test',
 		} );
 

@@ -1,0 +1,13 @@
+.woocommerce-date-time-picker-control {
+	display: block;
+
+	.components-input-control__suffix {
+		margin-right: 8px;
+	}
+
+	&__popover {
+		.components-datetime__date {
+			border-top: 0;
+		}
+	}
+}

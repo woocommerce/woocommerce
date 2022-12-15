@@ -1,0 +1,29 @@
+.woocommerce-experimental-select-control__menu {
+	position: absolute;
+	width: 100%;
+	top: 100%;
+	left: 0;
+	margin-top: $gap-smaller;
+	box-sizing: border-box;
+}
+
+.components-popover.woocommerce-experimental-select-control__popover-menu {
+	background: $studio-white;
+	border: 1px solid $studio-gray-5;
+	border-radius: 3px;
+	display: none;
+	&.is-open.has-results {
+		display: block;
+	}
+}
+.woocommerce-experimental-select-control__popover-menu-container {
+	margin: 0;
+	max-height: 300px;
+	overflow-y: scroll;
+
+	> .category-field-dropdown__item:not( :first-child ) {
+		.category-field-dropdown__item-content {
+			border-top: 1px solid $gray-200;
+		}
+	}
+}

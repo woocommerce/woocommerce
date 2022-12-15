@@ -17,6 +17,7 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
 		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		OrderHelper::delete_order_custom_tables();
 		OrderHelper::create_order_custom_table_if_not_exist();
 	}
 
@@ -94,10 +95,10 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$sql =
 			'INSERT INTO ' . OrdersTableDataStore::get_orders_table_name() . "
-			( id, customer_id, status )
+			( id, customer_id, status, type )
 			VALUES
-			( 1, %d, 'wc-completed' ), ( %d, %d, 'wc-completed' ), ( 3, %d, 'wc-invalid-status' ),
-			( 4, %d, 'wc-completed' ), ( 5, %d, 'wc-completed' )";
+			( 1, %d, 'wc-completed', 'shop_order' ), ( %d, %d, 'wc-completed', 'shop_order' ), ( 3, %d, 'wc-invalid-status', 'shop_order' ),
+			( 4, %d, 'wc-completed', 'shop_order' ), ( 5, %d, 'wc-completed', 'shop_order' )";
 
 		$customer_1_id = $customer_1->get_id();
 		$customer_2_id = $customer_2->get_id();

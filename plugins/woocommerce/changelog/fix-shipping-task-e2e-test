@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix shipping task e2e test as the flow has been changed in #33533

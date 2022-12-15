@@ -51,7 +51,7 @@ cd "$SCRIPTPATH/$(dirname "$REALPATH")/.."
 # Run scripts
 case $1 in
 'test')
-	jest --group=$2 --runInBand
+	node_modules/.bin/jest --group=$2 --runInBand
 	TESTRESULT=$?
 	report
 	;;

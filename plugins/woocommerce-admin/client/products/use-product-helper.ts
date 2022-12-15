@@ -3,7 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
-import { useCallback, useState } from '@wordpress/element';
+import { useCallback, useContext, useState } from '@wordpress/element';
+import * as WooNumber from '@woocommerce/number';
 import {
 	Product,
 	ProductsStoreActions,
@@ -13,7 +14,15 @@ import {
 	productReadOnlyProperties,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { navigateTo } from '@woocommerce/navigation';
+
+/**
+ * Internal dependencies
+ */
+import { CurrencyContext } from '../lib/currency-context';
+import {
+	NUMBERS_AND_DECIMAL_SEPARATOR,
+	ONLY_ONE_DECIMAL_SEPARATOR,
+} from './constants';
 
 function removeReadonlyProperties(
 	product: Product
@@ -48,6 +57,7 @@ export function useProductHelper() {
 		draft: false,
 		publish: false,
 	} );
+	const context = useContext( CurrencyContext );
 
 	/**
 	 * Create product with status.
@@ -55,69 +65,64 @@ export function useProductHelper() {
 	 * @param {Product} product the product to be created.
 	 * @param {string}  status the product status.
 	 * @param {boolean} skipNotice if the notice should be skipped (default: false).
-	 * @param {boolean} skipRedirect if the user should skip the redirection to the new product page (default: false).
 	 * @return {Promise<Product>} Returns a promise with the created product.
 	 */
 	const createProductWithStatus = useCallback(
 		async (
 			product: Omit< Product, ReadOnlyProperties >,
 			status: ProductStatus,
-			skipNotice = false,
-			skipRedirect = false
+			skipNotice = false
 		) => {
 			setUpdating( {
 				...updating,
 				[ status ]: true,
 			} );
-			createProduct( {
+			return createProduct( {
 				...product,
 				status,
 			} ).then(
 				( newProduct ) => {
-					if ( ! skipRedirect ) {
-						navigateTo( {
-							url:
-								'admin.php?page=wc-admin&path=/product/' +
-								newProduct.id,
+					if ( ! skipNotice ) {
+						const noticeContent =
+							newProduct.status === 'publish'
+								? __( 'Product published.', 'woocommerce' )
+								: __(
+										'Product successfully created.',
+										'woocommerce'
+								  );
+						createNotice( 'success', `🎉‎ ${ noticeContent }`, {
+							actions: getNoticePreviewActions(
+								newProduct.status,
+								newProduct.permalink
+							),
 						} );
 					}
-
+					setUpdating( {
+						...updating,
+						[ status ]: false,
+					} );
+					return newProduct;
+				},
+				( error ) => {
 					if ( ! skipNotice ) {
 						createNotice(
-							'success',
-							newProduct.status === 'publish'
+							'error',
+							status === 'publish'
 								? __(
-										'🎉 Product published. View in store',
+										'Failed to publish product.',
 										'woocommerce'
 								  )
 								: __(
-										'🎉 Product successfully created.',
+										'Failed to create product.',
 										'woocommerce'
-								  ),
-							{
-								actions: getNoticePreviewActions(
-									newProduct.status,
-									newProduct.permalink
-								),
-							}
+								  )
 						);
 					}
 					setUpdating( {
 						...updating,
 						[ status ]: false,
 					} );
-				},
-				() => {
-					createNotice(
-						'error',
-						status === 'publish'
-							? __( 'Failed to publish product.', 'woocommerce' )
-							: __( 'Failed to create product.', 'woocommerce' )
-					);
-					setUpdating( {
-						...updating,
-						[ status ]: false,
-					} );
+					return error;
 				}
 			);
 		},
@@ -127,14 +132,16 @@ export function useProductHelper() {
 	/**
 	 * Update product with status.
 	 *
-	 * @param {Product} product the product to be updated (should contain product id).
+	 * @param {number} productId the product id to be updated.
+	 * @param {Product} product the product to be updated.
 	 * @param {string}  status the product status.
 	 * @param {boolean} skipNotice if the notice should be skipped (default: false).
 	 * @return {Promise<Product>} Returns a promise with the updated product.
 	 */
 	const updateProductWithStatus = useCallback(
 		async (
-			product: Product,
+			productId: number,
+			product: Partial< Product >,
 			status: ProductStatus,
 			skipNotice = false
 		): Promise< Product > => {
@@ -142,31 +149,26 @@ export function useProductHelper() {
 				...updating,
 				[ status ]: true,
 			} );
-			return updateProduct( product.id, {
+			return updateProduct( productId, {
 				...product,
 				status,
 			} ).then(
 				( updatedProduct ) => {
 					if ( ! skipNotice ) {
-						createNotice(
-							'success',
+						const noticeContent =
 							product.status === 'draft' &&
-								updatedProduct.status === 'publish'
-								? __(
-										'🎉 Product published. View in store.',
-										'woocommerce'
-								  )
+							updatedProduct.status === 'publish'
+								? __( 'Product published.', 'woocommerce' )
 								: __(
-										'🎉 Product successfully updated.',
+										'Product successfully updated.',
 										'woocommerce'
-								  ),
-							{
-								actions: getNoticePreviewActions(
-									updatedProduct.status,
-									updatedProduct.permalink
-								),
-							}
-						);
+								  );
+						createNotice( 'success', `🎉‎ ${ noticeContent }`, {
+							actions: getNoticePreviewActions(
+								updatedProduct.status,
+								updatedProduct.permalink
+							),
+						} );
 					}
 					setUpdating( {
 						...updating,
@@ -175,10 +177,12 @@ export function useProductHelper() {
 					return updatedProduct;
 				},
 				( error ) => {
-					createNotice(
-						'error',
-						__( 'Failed to update product.', 'woocommerce' )
-					);
+					if ( ! skipNotice ) {
+						createNotice(
+							'error',
+							__( 'Failed to update product.', 'woocommerce' )
+						);
+					}
 					setUpdating( {
 						...updating,
 						[ status ]: false,
@@ -214,27 +218,95 @@ export function useProductHelper() {
 	 * Deletes a product by given id and redirects to the product list page.
 	 *
 	 * @param {number} id the product id to be deleted.
-	 * @param {string} redirectUrl the redirection url, defaults to product list ('edit.php?post_type=product').
 	 * @return {Promise<Product>} promise with the deleted product.
 	 */
-	const deleteProductAndRedirect = useCallback(
-		( id: number, redirectUrl = 'edit.php?post_type=product' ) => {
-			setIsDeleting( true );
-			return deleteProduct( id ).then( () => {
-				createNotice(
-					'success',
-					__(
-						'🎉 Successfully moved product to Trash.',
-						'woocommerce'
-					)
+	const deleteProductAndRedirect = useCallback( async ( id: number ) => {
+		setIsDeleting( true );
+		return deleteProduct( id ).then(
+			( product ) => {
+				const noticeContent = __(
+					'Successfully moved product to Trash.',
+					'woocommerce'
 				);
-				navigateTo( {
-					url: redirectUrl,
-				} );
+				createNotice( 'success', `🎉‎ ${ noticeContent }` );
 				setIsDeleting( false );
-			} );
+				return product;
+			},
+			( error ) => {
+				createNotice(
+					'error',
+					__( 'Failed to move product to Trash.', 'woocommerce' )
+				);
+				setIsDeleting( false );
+				return error;
+			}
+		);
+	}, [] );
+
+	/**
+	 * Sanitizes a price.
+	 *
+	 * @param {string} price the price that will be sanitized.
+	 * @return {string} sanitized price.
+	 */
+	const sanitizePrice = useCallback(
+		( price: string ) => {
+			const { getCurrencyConfig } = context;
+			const { decimalSeparator } = getCurrencyConfig();
+			// Build regex to strip out everything except digits, decimal point and minus sign.
+			const regex = new RegExp(
+				NUMBERS_AND_DECIMAL_SEPARATOR.replace( '%s', decimalSeparator ),
+				'g'
+			);
+			const decimalRegex = new RegExp(
+				ONLY_ONE_DECIMAL_SEPARATOR.replaceAll( '%s', decimalSeparator ),
+				'g'
+			);
+			const cleanValue = price
+				.replace( regex, '' )
+				.replace( decimalRegex, '' )
+				.replace( decimalSeparator, '.' );
+			return cleanValue;
 		},
-		[]
+		[ context ]
+	);
+
+	/**
+	 * Format a value using the Woo General Currency Settings.
+	 *
+	 * @param {string} value the value that will be formatted.
+	 * @return {string} the formatted number.
+	 */
+	const formatNumber = useCallback(
+		( value: string ): string => {
+			const { getCurrencyConfig } = context;
+			const { decimalSeparator, thousandSeparator } = getCurrencyConfig();
+
+			return WooNumber.numberFormat(
+				{ decimalSeparator, thousandSeparator },
+				value
+			);
+		},
+		[ context ]
+	);
+
+	/**
+	 * Parse a value using the Woo General Currency Settings.
+	 *
+	 * @param {string} value the value that will be parsed.
+	 * @return {string} the parsed number.
+	 */
+	const parseNumber = useCallback(
+		( value: string ): string => {
+			const { getCurrencyConfig } = context;
+			const { decimalSeparator, thousandSeparator } = getCurrencyConfig();
+
+			return WooNumber.parseNumber(
+				{ decimalSeparator, thousandSeparator },
+				value
+			);
+		},
+		[ context ]
 	);
 
 	return {
@@ -242,6 +314,9 @@ export function useProductHelper() {
 		updateProductWithStatus,
 		copyProductWithStatus,
 		deleteProductAndRedirect,
+		sanitizePrice,
+		formatNumber,
+		parseNumber,
 		isUpdatingDraft: updating.draft,
 		isUpdatingPublished: updating.publish,
 		isDeleting,

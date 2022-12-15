@@ -1,0 +1,28 @@
+@import './combo-box.scss';
+@import './menu.scss';
+@import './menu-item.scss';
+@import './selected-items.scss';
+@import './suffix-icon.scss';
+
+.woocommerce-experimental-select-control {
+	position: relative;
+
+	&.is-focused .woocommerce-experimental-select-control__combo-box-wrapper {
+		box-shadow: 0 0 0 1px var( --wp-admin-theme-color );
+		border-color: var( --wp-admin-theme-color );
+	}
+
+	&__label {
+		display: inline-block;
+		margin-bottom: $gap-smaller;
+	}
+
+	.woocommerce-experimental-select-control__input {
+		border: 0;
+		box-shadow: none;
+
+		&:focus {
+			outline: none;
+		}
+	}
+}

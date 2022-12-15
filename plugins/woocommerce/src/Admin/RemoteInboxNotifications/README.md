@@ -9,6 +9,7 @@ During the fetching of the specifications, each specification and the rules with
 Following is the structure of the JSON feed, including the different rules that can be used to build up an inbox notification specification.
 
 ## JSON file:
+
 ```
 [
 	<spec>,
@@ -17,6 +18,7 @@ Following is the structure of the JSON feed, including the different rules that 
 ```
 
 ## Spec:
+
 ```
 {
 	"slug": "ad-for-automate-woo-2020-04-20",
@@ -39,28 +41,35 @@ Following is the structure of the JSON feed, including the different rules that 
 }
 ```
 
-The slug *must* be unique across all notes (not just the notes that are being implemented in the feed) otherwise it could lead to unexpected behavior.
+The slug _must_ be unique across all notes (not just the notes that are being implemented in the feed) otherwise it could lead to unexpected behavior.
 
 Valid values for `type` are:
 
-- `error`
-- `warning`
-- `update`
-- `info`
-- `marketing`
-- `survey`
+-   `error`: used for presenting error conditions
+-   `warning`: used for presenting warning conditions.
+-   `update`: used when a new version is available.
+-   `info`: used for presenting informational messages.
+-   `marketing`: used for adding marketing messages.
+-   `survey`: used for adding survey messages.
+-   `email`: used for adding notes that will be sent by email.
 
-`info`, `marketing`, and `survey` types will appear in the inbox. Other types appear in the head of the page.
+`info`, `marketing`, and `survey` types will appear in the inbox. `email` type will be sent by email. Other types appear in the head of the page.
 
-The `status` is the *initial* note status to be set when the rules are satisfied. Valid values for `status` are:
+The `status` is the _initial_ note status to be set when the rules are satisfied. Valid values for `status` are:
 
-- `unactioned`
-- `actioned`
-- `snoozed`
+-   `unactioned`: the note has not yet been actioned by a user.
+-   `actioned`: the note has had its action completed by a user.
+-   `snoozed`: the note has been snoozed by a user.
 
 The status will usually be `unactioned`, as this will get the note to appear.
 
+There are other note statuses but we just use them **internally**:
+
+-   `pending`: the note is pending - hidden but not actioned. When the spec/rules are invalid, the note status will be set to pending.
+-   `sent`: the note has been sent by email to the user.
+
 ### Locale
+
 The note locales contain the title and content of the note. Having this broken up by locale allows different translations of the note to be used. The default locale used if none of the locales match the WordPress locale is `en_US`.
 
 ```
@@ -82,6 +91,7 @@ The note locales contain the title and content of the note. Having this broken u
 ```
 
 ### Action
+
 These are the actions that can be interacted with on the note. This might be a link to a blog post, or an internal link to an admin page.
 
 ```
@@ -116,6 +126,7 @@ The action locales contain the label of the action. Having this broken up by loc
 The `status` is what the status of the created note will be set to after interacting with the action.
 
 #### ActionLocale
+
 ```
 {
 	"locale": "en_US",
@@ -124,20 +135,22 @@ The `status` is what the status of the created note will be set to after interac
 ```
 
 ## Rule
+
 Rules in an array are executed as an AND operation. If there are no rules in the array the result is false and the specified notification is not shown.
 
 ### Operations
+
 Some rule types support an `operation` value, which is used to compare two
 values. The following operations are implemented:
 
-- `=`
-- `<`
-- `<=`
-- `>`
-- `>=`
-- `!=`
-- `contains`
-- `!contains`
+-   `=`
+-   `<`
+-   `<=`
+-   `>`
+-   `>=`
+-   `!=`
+-   `contains`
+-   `!contains`
 
 `contains` and `!contains` allow checking if the provided value is present (or
 not present) in the haystack value. An example of this is using the
@@ -147,14 +160,15 @@ onboarding profile:
 
 ```json
 {
-	'type': 'onboarding_profile',
-	'index': 'product_types',
-	'operation': 'contains',
-	'value': 'physical'
+	"type": "onboarding_profile",
+	"index": "product_types",
+	"operation": "contains",
+	"value": "physical"
 }
 ```
 
 ### Plugins activated
+
 This passes if all of the listed plugins are installed and activated.
 
 `plugins` is required.
@@ -170,6 +184,7 @@ This passes if all of the listed plugins are installed and activated.
 ```
 
 ### Publish after time
+
 This passes if the system time is after the specified date/time.
 
 Note that using both `publish_after_time` and `publish_before_time` allows timeboxing a note which could be useful for promoting a sale.
@@ -184,6 +199,7 @@ Note that using both `publish_after_time` and `publish_before_time` allows timeb
 ```
 
 ### Publish before time
+
 This passes if the system time is before the specified date/time.
 
 Note that using both `publish_after_time` and `publish_before_time` allows timeboxing a note which could be useful for promoting a sale.
@@ -198,6 +214,7 @@ Note that using both `publish_after_time` and `publish_before_time` allows timeb
 ```
 
 ### Not
+
 This negates the rules in the provided set of rules. Note that the rules in `operand` get ANDed together into a single boolean.
 
 `operand` is required.
@@ -213,6 +230,7 @@ This negates the rules in the provided set of rules. Note that the rules in `ope
 ```
 
 ### Or
+
 This performs an OR operation on the operands, passing if any of the operands evaluates to true. Note that if the operands are an array of `Rule`s (as in the first example), each operand is treated as an AND operation.
 
 `operands` is required.
@@ -246,6 +264,7 @@ Alternatively:
 ```
 
 ### Fail
+
 This just returns a false value. This is useful if you want to keep a specification around, but don't want it displayed.
 
 ```
@@ -255,6 +274,7 @@ This just returns a false value. This is useful if you want to keep a specificat
 ```
 
 ### Plugin version
+
 This compares the installed version of the plugin to the required version, using the comparison operator. If the plugin isn’t activated this returns false.
 
 `plugin`, `version`, and `operator` are required.
@@ -271,6 +291,7 @@ This example passes if Jetpack 8.4.1 is installed and activated.
 ```
 
 ### Stored state
+
 This allows access to a stored state containing calculated values that otherwise would be impossible to reproduce using other rules. It performs the comparison operation against the stored state value.
 
 This example passes if the `there_were_no_products` index is equal to `true`.
@@ -297,6 +318,7 @@ new_product_count
 `index`, `operation`, and `value` are required.
 
 ### Product count
+
 This passes if the number of products currently in the system match the comparison operation.
 
 This example passes if there are more than 10 products currently in the system.
@@ -312,6 +334,7 @@ This example passes if there are more than 10 products currently in the system.
 `operation` and `value` are required.
 
 ### Order count
+
 This passes if the number of orders currently in the system match the comparison operation.
 
 This example passes if there are more than 10 orders currently in the system.
@@ -327,6 +350,7 @@ This example passes if there are more than 10 orders currently in the system.
 `operation` and `value` are required.
 
 ### WooCommerce Admin active for
+
 This passes if the time WooCommerce Admin has been active for (in days) matches the comparison operation.
 
 This is used as a proxy indicator of the age of the shop.
@@ -344,6 +368,7 @@ This example passes if it has been active for more than 8 days.
 `operation` and `days` are required.
 
 ### Onboarding profile
+
 This allows access to the onboarding profile that was built up in the onboarding wizard. The below example passes when the current revenue selected was "none".
 
 ```
@@ -358,6 +383,7 @@ This allows access to the onboarding profile that was built up in the onboarding
 `index`, `operation`, and `value` are all required.
 
 ### Is eCommerce
+
 This passes when the store is on a WordPress.com site with the eCommerce plan.
 
 ```
@@ -370,6 +396,7 @@ This passes when the store is on a WordPress.com site with the eCommerce plan.
 `value` is required.
 
 ### Base location - country
+
 This passes when the store is located in the specified country.
 
 ```
@@ -383,6 +410,7 @@ This passes when the store is located in the specified country.
 `value` and `operation` are both required.
 
 ### Base location - state
+
 This passes when the store is located in the specified state.
 
 ```
@@ -396,6 +424,7 @@ This passes when the store is located in the specified state.
 `value` and `operation` are both required.
 
 ### Note status
+
 This passes when the status of the specified note matches the specified status.
 The below example passes when the `wc-admin-mobile-app` note has not been
 actioned.
@@ -410,6 +439,7 @@ actioned.
 ```
 
 ### Total Payments Value
+
 This passes when the total value of all payments for a given timeframe
 compared to the provided value pass the operation test.
 
@@ -418,14 +448,16 @@ compared to the provided value pass the operation test.
 ```
 {
 	"type": "total_payments_value",
-	"days": "last_month",
-	"value": "actioned",
+	"timeframe": "last_month",
+	"value": 2300,
 	"operation": ">"
 }
 ```
+
 `timeframe`, `value`, and `operation` are all required.
 
 ### Option
+
 This passes when the option value matches the value using the operation.
 
 ```
@@ -449,7 +481,7 @@ Example option value:
 ```
 Array
 (
-    [setup_client] => 
+    [setup_client] =>
     [industry] => Array
         (
             [0] => Array
@@ -464,6 +496,7 @@ Array
         )
 )
 ```
+
 If you want to ensure that the industry array contains `fashion-apparel-accessories`, you can use the following Option definition with transformers.
 
 ```
@@ -499,6 +532,7 @@ If you want to ensure that the industry array contains `fashion-apparel-accessor
 You can find a list of transformers and examples in the transformer [README](./Transformers/README.md).
 
 ### WCA updated
+
 This passes when WooCommerce Admin has just been updated. The specs will be run
 on update. Note that this doesn't provide a way to check the version number as
 the `plugin_version` rule can be used to check for a specific version of the
@@ -522,6 +556,6 @@ You can see the evaluation of each specification by turning on an optional evalu
 
 You can tail the log file with a slug name to see the evaluation of a rule that you are testing.
 
-Example: 
+Example:
 
 `tail -f remote-inbox-notifications-2021-06-15-128.log | grep 'wcpay-promo-2021-6-incentive-2'`

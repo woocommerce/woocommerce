@@ -8,6 +8,7 @@
  * @version     2.1.0
  */
 
+use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -66,7 +67,7 @@ class WC_Meta_Box_Order_Actions {
 							$delete_text = __( 'Move to Trash', 'woocommerce' );
 						}
 						?>
-						<a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link( $order_id ) ); ?>"><?php echo esc_html( $delete_text ); ?></a>
+						<a class="submitdelete deletion" href="<?php echo esc_url( self::get_trash_or_delete_order_link( $order_id ) ); ?>"><?php echo esc_html( $delete_text ); ?></a>
 						<?php
 					}
 					?>
@@ -86,6 +87,32 @@ class WC_Meta_Box_Order_Actions {
 
 		</ul>
 		<?php
+	}
+
+	/**
+	 * Forms a trash/delete order URL.
+	 *
+	 * @param int $order_id The order ID for which we want a trash/delete URL.
+	 *
+	 * @return string
+	 */
+	private static function get_trash_or_delete_order_link( int $order_id ): string {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$order_type      = wc_get_order( $order_id )->get_type();
+			$order_list_url  = wc_get_container()->get( PageController::class )->get_base_page_url( $order_type );
+			$trash_order_url = add_query_arg(
+				array(
+					'action'           => 'trash',
+					'order'            => array( $order_id ),
+					'_wp_http_referer' => $order_list_url,
+				),
+				$order_list_url
+			);
+
+			return wp_nonce_url( $trash_order_url, 'bulk-orders' );
+		}
+
+		return get_delete_post_link( $order_id );
 	}
 
 	/**

@@ -123,7 +123,7 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 		$event = \WC_Tracks_Event::validate_and_sanitize(
 			array_merge(
 				$event_props,
-				array( 'invalid property name' => 'My value' )
+				array( 'invalid property name' => 'my-value' )
 			)
 		);
 		$this->assertTrue( is_wp_error( $event ) );

@@ -87,4 +87,33 @@ class WC_Admin_Tests_RemoteInboxNotifications_SpecRunner extends WC_Unit_Test_Ca
 		$action = $note->get_action( 'test-action' );
 		$this->assertEquals( 'http://test.com', $action->query );
 	}
+
+	/**
+	 * Tests get actions function.
+	 *
+	 * @group fast
+	 */
+	public function test_get_actions() {
+		$spec    = $this->get_spec( 'http://test.com', false );
+		$actions = SpecRunner::get_actions( $spec );
+		$this->assertCount( 1, $actions );
+		$this->assertEquals( $actions[0]->name, 'test-action' );
+	}
+
+	/**
+	 * Tests get actions function with no actions in specs.
+	 *
+	 * @group fast
+	 */
+	public function test_get_actions_with_empty_specs() {
+		$actions = SpecRunner::get_actions( array() );
+		$this->assertCount( 0, $actions );
+
+		$actions = SpecRunner::get_actions(
+			array(
+				'actions' => array(),
+			)
+		);
+		$this->assertCount( 0, $actions );
+	}
 }

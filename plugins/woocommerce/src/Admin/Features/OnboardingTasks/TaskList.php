@@ -99,12 +99,16 @@ class TaskList {
 	/**
 	 * Array of TaskListSection.
 	 *
+	 * @deprecated 7.2.0
+	 *
 	 * @var array
 	 */
 	private $sections = array();
 
 	/**
 	 * Key value map of task class and id used for sections.
+	 *
+	 * @deprecated 7.2.0
 	 *
 	 * @var array
 	 */
@@ -126,7 +130,6 @@ class TaskList {
 			'options'                 => array(),
 			'visible'                 => true,
 			'display_progress_header' => false,
-			'sections'                => array(),
 		);
 
 		$data = wp_parse_args( $data, $defaults );
@@ -147,12 +150,6 @@ class TaskList {
 		}
 
 		$this->possibly_remove_reminder_bar();
-		$this->sections = array_map(
-			function( $section ) {
-				return new TaskListSection( $section, $this );
-			},
-			$data['sections']
-		);
 	}
 
 	/**
@@ -239,15 +236,13 @@ class TaskList {
 	 * @return bool
 	 */
 	public function is_complete() {
-		$viewable_tasks = $this->get_viewable_tasks();
+		foreach ( $this->get_viewable_tasks() as $viewable_task ) {
+			if ( $viewable_task->is_complete() === false ) {
+				return false;
+			}
+		}
 
-		return array_reduce(
-			$viewable_tasks,
-			function( $is_complete, $task ) {
-				return ! $task->is_complete() ? false : $is_complete;
-			},
-			true
-		);
+		return true;
 	}
 
 	/**
@@ -276,9 +271,7 @@ class TaskList {
 			return;
 		}
 
-		$task_class_name                             = substr( get_class( $task ), strrpos( get_class( $task ), '\\' ) + 1 );
-		$this->task_class_id_map[ $task_class_name ] = $task->get_id();
-		$this->tasks[]                               = $task;
+		$this->tasks[] = $task;
 	}
 
 	/**
@@ -317,9 +310,13 @@ class TaskList {
 	/**
 	 * Get task list sections.
 	 *
+	 * @deprecated 7.2.0
+	 *
 	 * @return array
 	 */
 	public function get_sections() {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '7.2.0' );
+
 		return $this->sections;
 	}
 
@@ -422,12 +419,6 @@ class TaskList {
 			'eventPrefix'           => $this->prefix_event( '' ),
 			'displayProgressHeader' => $this->display_progress_header,
 			'keepCompletedTaskList' => $this->get_keep_completed_task_list(),
-			'sections'              => array_map(
-				function( $section ) {
-					return $section->get_json();
-				},
-				$this->sections
-			),
 		);
 	}
 }

@@ -555,6 +555,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		for ( $count = 0; $count < 3; $count++ ) {
 			$result = $wpdb->query( $insert_statement ); // WPCS: unprepared SQL ok.
 			if ( false !== $result ) {
+				// Clear meta cache.
+				wp_cache_delete( WC_Coupon::generate_meta_cache_key( $coupon->get_id(), 'coupons' ), 'coupons' );
 				break;
 			}
 		}
@@ -648,6 +650,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		for ( $count = 0; $count < 3; $count++ ) {
 			$result = $wpdb->query( $insert_statement ); // WPCS: unprepared SQL ok.
 			if ( false !== $result ) {
+				// Clear meta cache.
+				wp_cache_delete( WC_Coupon::generate_meta_cache_key( $coupon->get_id(), 'coupons' ), 'coupons' );
 				break;
 			}
 		}

@@ -1,0 +1,154 @@
+{
+    "code": "ID",
+    "name": "Indonesia",
+    "states": [
+        {
+            "code": "AC",
+            "name": "Daerah Istimewa Aceh"
+        },
+        {
+            "code": "SU",
+            "name": "Sumatera Utara"
+        },
+        {
+            "code": "SB",
+            "name": "Sumatera Barat"
+        },
+        {
+            "code": "RI",
+            "name": "Riau"
+        },
+        {
+            "code": "KR",
+            "name": "Kepulauan Riau"
+        },
+        {
+            "code": "JA",
+            "name": "Jambi"
+        },
+        {
+            "code": "SS",
+            "name": "Sumatera Selatan"
+        },
+        {
+            "code": "BB",
+            "name": "Bangka Belitung"
+        },
+        {
+            "code": "BE",
+            "name": "Bengkulu"
+        },
+        {
+            "code": "LA",
+            "name": "Lampung"
+        },
+        {
+            "code": "JK",
+            "name": "DKI Jakarta"
+        },
+        {
+            "code": "JB",
+            "name": "Jawa Barat"
+        },
+        {
+            "code": "BT",
+            "name": "Banten"
+        },
+        {
+            "code": "JT",
+            "name": "Jawa Tengah"
+        },
+        {
+            "code": "JI",
+            "name": "Jawa Timur"
+        },
+        {
+            "code": "YO",
+            "name": "Daerah Istimewa Yogyakarta"
+        },
+        {
+            "code": "BA",
+            "name": "Bali"
+        },
+        {
+            "code": "NB",
+            "name": "Nusa Tenggara Barat"
+        },
+        {
+            "code": "NT",
+            "name": "Nusa Tenggara Timur"
+        },
+        {
+            "code": "KB",
+            "name": "Kalimantan Barat"
+        },
+        {
+            "code": "KT",
+            "name": "Kalimantan Tengah"
+        },
+        {
+            "code": "KI",
+            "name": "Kalimantan Timur"
+        },
+        {
+            "code": "KS",
+            "name": "Kalimantan Selatan"
+        },
+        {
+            "code": "KU",
+            "name": "Kalimantan Utara"
+        },
+        {
+            "code": "SA",
+            "name": "Sulawesi Utara"
+        },
+        {
+            "code": "ST",
+            "name": "Sulawesi Tengah"
+        },
+        {
+            "code": "SG",
+            "name": "Sulawesi Tenggara"
+        },
+        {
+            "code": "SR",
+            "name": "Sulawesi Barat"
+        },
+        {
+            "code": "SN",
+            "name": "Sulawesi Selatan"
+        },
+        {
+            "code": "GO",
+            "name": "Gorontalo"
+        },
+        {
+            "code": "MA",
+            "name": "Maluku"
+        },
+        {
+            "code": "MU",
+            "name": "Maluku Utara"
+        },
+        {
+            "code": "PA",
+            "name": "Papua"
+        },
+        {
+            "code": "PB",
+            "name": "Papua Barat"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/id"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

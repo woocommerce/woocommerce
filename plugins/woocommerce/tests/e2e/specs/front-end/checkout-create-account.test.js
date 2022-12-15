@@ -1,6 +1,8 @@
 /*
  * Internal dependencies
  */
-const { runCheckoutCreateAccountTest } = require( '@woocommerce/e2e-core-tests' );
+const {
+	runCheckoutCreateAccountTest,
+} = require( '@woocommerce/e2e-core-tests' );
 
 runCheckoutCreateAccountTest();

@@ -50,3 +50,6 @@ This repository is not suitable for support. Please don't use our issue tracker 
 * For customizations, you may want to check our list of [WooExperts](https://woocommerce.com/experts/) or [Codeable](https://codeable.io/).
 
 Support requests in issues on this repository will be closed on sight.
+
+## Contributing to WooCommerce
+If you have a patch or have stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) for more information on how you can do this.

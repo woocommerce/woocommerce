@@ -15,13 +15,6 @@ defined( 'ABSPATH' ) || exit;
 class WC_Product_Simple extends WC_Product {
 
 	/**
-	 * Track wehther post_upload_ui hook was run.
-	 *
-	 * @var boolean
-	 */
-	public static $post_upload_hook_done = false;
-
-	/**
 	 * Initialize simple product.
 	 *
 	 * @param WC_Product|int $product Product instance or ID.
@@ -29,23 +22,6 @@ class WC_Product_Simple extends WC_Product {
 	public function __construct( $product = 0 ) {
 		$this->supports[] = 'ajax_add_to_cart';
 		parent::__construct( $product );
-		add_filter('admin_post_thumbnail_html', array( $this, 'add_product_photo_suggestions' ) );
-	}
-
-	/**
-	 * Adding product photo suggestions in upload modal.
-	 */
-	public function add_product_photo_suggestions ( $content ) {
-
-		$suggestion  = '<div class="image-added-detail">';
-		$suggestion .= '<p>';
-		$suggestion .= '<span class="dashicons-info-outline dashicons"></span>';
-		$suggestion .= esc_html__( 'Upload JPEG files that are 1000 x 1000 pixels or larger (max. 2 GB).', 'woocommerce' );
-		$suggestion .= ' <a href="https://woocommerce.com/posts/fast-high-quality-product-photos/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to prepare images?', 'woocommerce' ) . '<span class="dashicons-external dashicons"></span></a>';
-		$suggestion .= '</p>';
-		$suggestion .= '</div>';
-
-		return $content . $suggestion;
 	}
 
 	/**

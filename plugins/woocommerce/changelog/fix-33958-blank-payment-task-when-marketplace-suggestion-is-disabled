@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Use the default paymetn suggestions when woocommerce_show_marketplace_suggestions is set to no

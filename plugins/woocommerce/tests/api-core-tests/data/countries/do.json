@@ -1,0 +1,186 @@
+{
+    "code": "DO",
+    "name": "Dominican Republic",
+    "states": [
+        {
+            "code": "DO-01",
+            "name": "Distrito Nacional"
+        },
+        {
+            "code": "DO-02",
+            "name": "Azua"
+        },
+        {
+            "code": "DO-03",
+            "name": "Baoruco"
+        },
+        {
+            "code": "DO-04",
+            "name": "Barahona"
+        },
+        {
+            "code": "DO-33",
+            "name": "Cibao Nordeste"
+        },
+        {
+            "code": "DO-34",
+            "name": "Cibao Noroeste"
+        },
+        {
+            "code": "DO-35",
+            "name": "Cibao Norte"
+        },
+        {
+            "code": "DO-36",
+            "name": "Cibao Sur"
+        },
+        {
+            "code": "DO-05",
+            "name": "Dajabón"
+        },
+        {
+            "code": "DO-06",
+            "name": "Duarte"
+        },
+        {
+            "code": "DO-08",
+            "name": "El Seibo"
+        },
+        {
+            "code": "DO-37",
+            "name": "El Valle"
+        },
+        {
+            "code": "DO-07",
+            "name": "Elías Piña"
+        },
+        {
+            "code": "DO-38",
+            "name": "Enriquillo"
+        },
+        {
+            "code": "DO-09",
+            "name": "Espaillat"
+        },
+        {
+            "code": "DO-30",
+            "name": "Hato Mayor"
+        },
+        {
+            "code": "DO-19",
+            "name": "Hermanas Mirabal"
+        },
+        {
+            "code": "DO-39",
+            "name": "Higüamo"
+        },
+        {
+            "code": "DO-10",
+            "name": "Independencia"
+        },
+        {
+            "code": "DO-11",
+            "name": "La Altagracia"
+        },
+        {
+            "code": "DO-12",
+            "name": "La Romana"
+        },
+        {
+            "code": "DO-13",
+            "name": "La Vega"
+        },
+        {
+            "code": "DO-14",
+            "name": "María Trinidad Sánchez"
+        },
+        {
+            "code": "DO-28",
+            "name": "Monseñor Nouel"
+        },
+        {
+            "code": "DO-15",
+            "name": "Monte Cristi"
+        },
+        {
+            "code": "DO-29",
+            "name": "Monte Plata"
+        },
+        {
+            "code": "DO-40",
+            "name": "Ozama"
+        },
+        {
+            "code": "DO-16",
+            "name": "Pedernales"
+        },
+        {
+            "code": "DO-17",
+            "name": "Peravia"
+        },
+        {
+            "code": "DO-18",
+            "name": "Puerto Plata"
+        },
+        {
+            "code": "DO-20",
+            "name": "Samaná"
+        },
+        {
+            "code": "DO-21",
+            "name": "San Cristóbal"
+        },
+        {
+            "code": "DO-31",
+            "name": "San José de Ocoa"
+        },
+        {
+            "code": "DO-22",
+            "name": "San Juan"
+        },
+        {
+            "code": "DO-23",
+            "name": "San Pedro de Macorís"
+        },
+        {
+            "code": "DO-24",
+            "name": "Sánchez Ramírez"
+        },
+        {
+            "code": "DO-25",
+            "name": "Santiago"
+        },
+        {
+            "code": "DO-26",
+            "name": "Santiago Rodríguez"
+        },
+        {
+            "code": "DO-32",
+            "name": "Santo Domingo"
+        },
+        {
+            "code": "DO-41",
+            "name": "Valdesia"
+        },
+        {
+            "code": "DO-27",
+            "name": "Valverde"
+        },
+        {
+            "code": "DO-42",
+            "name": "Yuma"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/do"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

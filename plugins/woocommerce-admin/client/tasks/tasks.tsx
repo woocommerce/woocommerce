@@ -20,15 +20,13 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { DisplayOption } from '~/activity-panel/display-options';
 import { Task } from './task';
-import { TasksPlaceholder, TasksPlaceholderProps } from './placeholder';
+import { TasksPlaceholder } from './placeholder';
 import './tasks.scss';
 import { TaskList } from './task-list';
 import { TaskList as TwoColumnTaskList } from '../two-column-tasks/task-list';
-import { SectionedTaskList } from '../two-column-tasks/sectioned-task-list';
 import TwoColumnTaskListPlaceholder from '../two-column-tasks/placeholder';
 import '../two-column-tasks/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { SectionedTaskListPlaceholder } from '~/two-column-tasks/sectioned-task-list-placeholder';
 
 export type TasksProps = {
 	query: { task?: string };
@@ -99,6 +97,14 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 		return null;
 	}
 
+	if ( currentTask ) {
+		return (
+			<div className="woocommerce-task-dashboard__container">
+				<Task query={ query } task={ currentTask } />
+			</div>
+		);
+	}
+
 	const taskListIds = getAdminSetting( 'visibleTaskListIds', [] );
 	const TaskListPlaceholderComponent =
 		taskListIds[ 0 ] === 'setup'
@@ -107,14 +113,6 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 
 	if ( isResolving ) {
 		return <TaskListPlaceholderComponent query={ query } />;
-	}
-
-	if ( currentTask ) {
-		return (
-			<div className="woocommerce-task-dashboard__container">
-				<Task query={ query } task={ currentTask } />
-			</div>
-		);
 	}
 
 	return (

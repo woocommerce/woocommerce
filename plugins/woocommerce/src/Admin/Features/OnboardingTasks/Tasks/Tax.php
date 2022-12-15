@@ -14,6 +14,12 @@ use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 class Tax extends Task {
 
 	/**
+	 * Used to cache is_complete() method result.
+	 * @var null
+	 */
+	private $is_complete_result = null;
+
+	/**
 	 * Constructor
 	 *
 	 * @param TaskList $task_list Parent task list.
@@ -30,7 +36,7 @@ class Tax extends Task {
 		$page = isset( $_GET['page'] ) ? $_GET['page'] : ''; // phpcs:ignore csrf ok, sanitization ok.
 		$tab  = isset( $_GET['tab'] ) ? $_GET['tab'] : ''; // phpcs:ignore csrf ok, sanitization ok.
 
-		if ( 'wc-settings' !== $page || 'tax' !== $tab ) {
+		if ( $page !== 'wc-settings' || $tab !== 'tax' ) {
 			return;
 		}
 
@@ -38,16 +44,7 @@ class Tax extends Task {
 			return;
 		}
 
-		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'onboarding-tax-notice' );
-		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
-
-		wp_enqueue_script(
-			'onboarding-tax-notice',
-			WCAdminAssets::get_url( 'wp-admin-scripts/onboarding-tax-notice', 'js' ),
-			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
-			WC_VERSION,
-			true
-		);
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'onboarding-tax-notice', true );
 	}
 
 	/**
@@ -65,10 +62,7 @@ class Tax extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		if ( count( $this->task_list->get_sections() ) > 0 && ! $this->is_complete() ) {
-			return __( 'Get taxes out of your mind', 'woocommerce' );
-		}
-		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
+		if ( $this->get_parent_option( 'use_completed_title' ) === true ) {
 			if ( $this->is_complete() ) {
 				return __( 'You added tax rates', 'woocommerce' );
 			}
@@ -83,9 +77,6 @@ class Tax extends Task {
 	 * @return string
 	 */
 	public function get_content() {
-		if ( count( $this->task_list->get_sections() ) > 0 ) {
-			return __( 'Have sales tax calculated automatically, or add the rates manually.', 'woocommerce' );
-		}
 		return self::can_use_automated_taxes()
 			? __(
 				'Good news! WooCommerce Services and Jetpack can automate your sales tax calculations for you.',
@@ -123,9 +114,13 @@ class Tax extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		return get_option( 'wc_connect_taxes_enabled' ) ||
-			count( TaxDataStore::get_taxes( array() ) ) > 0 ||
-			false !== get_option( 'woocommerce_no_sales_tax' );
+		if ( $this->is_complete_result === null ) {
+			$this->is_complete_result = get_option( 'wc_connect_taxes_enabled' ) ||
+				count( TaxDataStore::get_taxes( array() ) ) > 0 ||
+				get_option( 'woocommerce_no_sales_tax' ) !== false;
+		}
+
+		return $this->is_complete_result;
 	}
 
 	/**

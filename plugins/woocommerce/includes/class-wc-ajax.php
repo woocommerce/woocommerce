@@ -7,8 +7,11 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Orders\CouponsController;
+use Automattic\WooCommerce\Internal\Orders\TaxesController;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
 use Automattic\WooCommerce\Utilities\NumberUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -151,6 +154,8 @@ class WC_AJAX {
 			'json_search_downloadable_products_and_variations',
 			'json_search_customers',
 			'json_search_categories',
+			'json_search_taxonomy_terms',
+			'json_search_product_attributes',
 			'json_search_pages',
 			'term_ordering',
 			'product_ordering',
@@ -1161,61 +1166,7 @@ class WC_AJAX {
 	 * @throws Exception If order or coupon is invalid.
 	 */
 	public static function add_coupon_discount() {
-		check_ajax_referer( 'order-item', 'security' );
-
-		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			wp_die( -1 );
-		}
-
-		$response = array();
-
-		try {
-			$order_id           = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
-			$order              = wc_get_order( $order_id );
-			$calculate_tax_args = array(
-				'country'  => isset( $_POST['country'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['country'] ) ) ) : '',
-				'state'    => isset( $_POST['state'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['state'] ) ) ) : '',
-				'postcode' => isset( $_POST['postcode'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['postcode'] ) ) ) : '',
-				'city'     => isset( $_POST['city'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['city'] ) ) ) : '',
-			);
-
-			if ( ! $order ) {
-				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
-			}
-
-			if ( empty( $_POST['coupon'] ) ) {
-				throw new Exception( __( 'Invalid coupon', 'woocommerce' ) );
-			}
-
-			// Add user ID and/or email so validation for coupon limits works.
-			$user_id_arg    = isset( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : 0;
-			$user_email_arg = isset( $_POST['user_email'] ) ? sanitize_email( wp_unslash( $_POST['user_email'] ) ) : '';
-
-			if ( $user_id_arg ) {
-				$order->set_customer_id( $user_id_arg );
-			}
-			if ( $user_email_arg ) {
-				$order->set_billing_email( $user_email_arg );
-			}
-
-			$result = $order->apply_coupon( wc_format_coupon_code( wp_unslash( $_POST['coupon'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-			if ( is_wp_error( $result ) ) {
-				throw new Exception( html_entity_decode( wp_strip_all_tags( $result->get_error_message() ) ) );
-			}
-
-			$order->calculate_taxes( $calculate_tax_args );
-			$order->calculate_totals( false );
-
-			ob_start();
-			include __DIR__ . '/admin/meta-boxes/views/html-order-items.php';
-			$response['html'] = ob_get_clean();
-		} catch ( Exception $e ) {
-			wp_send_json_error( array( 'error' => $e->getMessage() ) );
-		}
-
-		// wp_send_json_success must be outside the try block not to break phpunit tests.
-		wp_send_json_success( $response );
+		wc_get_container()->get( CouponsController::class )->add_coupon_discount_via_ajax();
 	}
 
 	/**
@@ -1418,33 +1369,7 @@ class WC_AJAX {
 	 * Calc line tax.
 	 */
 	public static function calc_line_taxes() {
-		check_ajax_referer( 'calc-totals', 'security' );
-
-		if ( ! current_user_can( 'edit_shop_orders' ) || ! isset( $_POST['order_id'], $_POST['items'] ) ) {
-			wp_die( -1 );
-		}
-
-		$order_id           = absint( $_POST['order_id'] );
-		$calculate_tax_args = array(
-			'country'  => isset( $_POST['country'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['country'] ) ) ) : '',
-			'state'    => isset( $_POST['state'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['state'] ) ) ) : '',
-			'postcode' => isset( $_POST['postcode'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['postcode'] ) ) ) : '',
-			'city'     => isset( $_POST['city'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['city'] ) ) ) : '',
-		);
-
-		// Parse the jQuery serialized items.
-		$items = array();
-		parse_str( wp_unslash( $_POST['items'] ), $items ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-		// Save order items first.
-		wc_save_order_items( $order_id, $items );
-
-		// Grab the order and recalculate taxes.
-		$order = wc_get_order( $order_id );
-		$order->calculate_taxes( $calculate_tax_args );
-		$order->calculate_totals( false );
-		include __DIR__ . '/admin/meta-boxes/views/html-order-items.php';
-		wp_die();
+		wc_get_container()->get( TaxesController::class )->calc_line_taxes_via_ajax();
 	}
 
 	/**
@@ -1806,6 +1731,96 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Search for taxonomy terms and return json.
+	 */
+	public static function json_search_taxonomy_terms() {
+		ob_start();
+
+		check_ajax_referer( 'search-taxonomy-terms', 'security' );
+
+		if ( ! current_user_can( 'edit_products' ) ) {
+			wp_die( -1 );
+		}
+
+		$search_text = isset( $_GET['term'] ) ? wc_clean( wp_unslash( $_GET['term'] ) ) : '';
+		$limit       = isset( $_GET['limit'] ) ? absint( wp_unslash( $_GET['limit'] ) ) : null;
+		$taxonomy    = isset( $_GET['taxonomy'] ) ? wc_clean( wp_unslash( $_GET['taxonomy'] ) ) : '';
+
+		$args = array(
+			'taxonomy'        => $taxonomy,
+			'orderby'         => 'id',
+			'order'           => 'ASC',
+			'hide_empty'      => false,
+			'fields'          => 'all',
+			'number'          => $limit,
+			'name__like'      => $search_text,
+			'suppress_filter' => true,
+		);
+
+		/**
+		 * Filter the product attribute term arguments used for search.
+		 *
+		 * @since 3.4.0
+		 * @param array $args The search arguments.
+		 */
+		$terms = get_terms( apply_filters( 'woocommerce_product_attribute_terms', $args ) );
+
+		/**
+		 * Filter the product attribute terms search results.
+		 *
+		 * @since 7.0.0
+		 * @param array  $terms    The list of matched terms.
+		 * @param string $taxonomy The terms taxonomy.
+		 */
+		wp_send_json( apply_filters( 'woocommerce_json_search_found_product_attribute_terms', $terms, $taxonomy ) );
+	}
+
+	/**
+	 * Search for product attributes and return json.
+	 */
+	public static function json_search_product_attributes() {
+		ob_start();
+
+		check_ajax_referer( 'search-product-attributes', 'security' );
+
+		if ( ! current_user_can( 'edit_products' ) ) {
+			wp_die( -1 );
+		}
+
+		$limit       = isset( $_GET['limit'] ) ? absint( wp_unslash( $_GET['limit'] ) ) : 100;
+		$search_text = isset( $_GET['term'] ) ? wc_clean( wp_unslash( $_GET['term'] ) ) : '';
+
+		$attributes = wc_get_attribute_taxonomies();
+
+		$found_product_categories = array();
+
+		foreach ( $attributes as $attribute_obj ) {
+			if ( ! $search_text || false !== stripos( $attribute_obj->attribute_label, $search_text ) ) {
+				$found_product_categories[] = array(
+					'id'           => (int) $attribute_obj->attribute_id,
+					'name'         => $attribute_obj->attribute_label,
+					'slug'         => wc_attribute_taxonomy_name( $attribute_obj->attribute_name ),
+					'type'         => $attribute_obj->attribute_type,
+					'order_by'     => $attribute_obj->attribute_orderby,
+					'has_archives' => (bool) $attribute_obj->attribute_public,
+				);
+			}
+			if ( count( $found_product_categories ) >= $limit ) {
+				break;
+			}
+		}
+
+		/**
+		 * Filter the product category search results.
+		 *
+		 * @since 7.0.0
+		 * @param array   $found_product_categories Array of matched product categories.
+		 * @param string  $search_text              Search text.
+		 */
+		wp_send_json( apply_filters( 'woocommerce_json_search_found_product_categories', $found_product_categories, $search_text ) );
+	}
+
+	/**
 	 * Ajax request handling for page searching.
 	 */
 	public static function json_search_pages() {
@@ -1905,7 +1920,11 @@ class WC_AJAX {
 			}
 			$index ++;
 			$menu_orders[ $id ] = $index;
-			$wpdb->update( $wpdb->posts, array( 'menu_order' => $index ), array( 'ID' => $id ) );
+
+			if ( $wpdb->update( $wpdb->posts, array( 'menu_order' => $index ), array( 'ID' => $id ) ) ) {
+				// We only need to clean the cache if the menu order was actually modified.
+				clean_post_cache( $id );
+			}
 
 			/**
 			 * When a single product has gotten it's ordering updated.
@@ -1923,7 +1942,10 @@ class WC_AJAX {
 			$menu_orders[ $sorting_id ] = 0;
 		}
 
-		$wpdb->update( $wpdb->posts, array( 'menu_order' => $menu_orders[ $sorting_id ] ), array( 'ID' => $sorting_id ) );
+		if ( $wpdb->update( $wpdb->posts, array( 'menu_order' => $menu_orders[ $sorting_id ] ), array( 'ID' => $sorting_id ) ) ) {
+			// We only need to clean the cache if the menu order was actually modified.
+			clean_post_cache( $sorting_id );
+		}
 
 		WC_Post_Data::delete_product_query_transients();
 
@@ -2030,7 +2052,7 @@ class WC_AJAX {
 
 		$refund_ids = array_map( 'absint', is_array( $_POST['refund_id'] ) ? wp_unslash( $_POST['refund_id'] ) : array( wp_unslash( $_POST['refund_id'] ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		foreach ( $refund_ids as $refund_id ) {
-			if ( $refund_id && 'shop_order_refund' === get_post_type( $refund_id ) ) {
+			if ( $refund_id && 'shop_order_refund' === OrderUtil::get_order_type( $refund_id ) ) {
 				$refund   = wc_get_order( $refund_id );
 				$order_id = $refund->get_parent_id();
 				$refund->delete( true );

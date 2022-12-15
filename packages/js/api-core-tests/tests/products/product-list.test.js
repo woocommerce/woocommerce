@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Internal dependencies
  */
@@ -20,11 +21,11 @@ describe( 'Products API tests: List All Products', () => {
 
 	beforeAll( async () => {
 		sampleData = await createSampleData();
-	}, 10000 );
+	}, 20000 );
 
 	afterAll( async () => {
 		await deleteSampleData( sampleData );
-	}, 10000 );
+	}, 20000 );
 
 	describe( 'List all products', () => {
 		it( 'defaults', async () => {

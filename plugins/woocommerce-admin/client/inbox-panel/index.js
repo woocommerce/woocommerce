@@ -2,14 +2,14 @@
  * External dependencies
  */
 import { __, _n } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useEffect, useState, useMemo } from '@wordpress/element';
 import {
 	EmptyContent,
 	Section,
 	Badge,
 	EllipsisMenu,
 } from '@woocommerce/components';
-import { Card, CardHeader, Button } from '@wordpress/components';
+import { Card, CardHeader, Button, CardFooter } from '@wordpress/components';
 import { NOTES_STORE_NAME, QUERY_DEFAULTS } from '@woocommerce/data';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -29,6 +29,39 @@ import { hasValidNotes, truncateRenderableHTML } from './utils';
 import { getScreenName } from '../utils';
 import DismissAllModal from './dismiss-all-modal';
 import './index.scss';
+
+const ADD_NOTES_AMOUNT = 10;
+const DEFAULT_INBOX_QUERY = {
+	page: 1,
+	per_page: 5,
+	status: 'unactioned',
+	type: QUERY_DEFAULTS.noteTypes,
+	orderby: 'date',
+	order: 'desc',
+	_fields: [
+		'id',
+		'name',
+		'title',
+		'content',
+		'type',
+		'status',
+		'actions',
+		'date_created',
+		'date_created_gmt',
+		'layout',
+		'image',
+		'is_deleted',
+		'is_read',
+		'locale',
+	],
+};
+
+const supportedLocales = [ 'en_US', 'en_AU', 'en_CA', 'en_GB', 'en_ZA' ];
+
+const WC_VERSION_61_RELEASE_DATE = moment(
+	'2022-01-11',
+	'YYYY-MM-DD'
+).valueOf();
 
 const renderEmptyCard = () => (
 	<ActivityCard
@@ -60,8 +93,13 @@ const renderNotes = ( {
 	notes,
 	onDismiss,
 	onNoteActionClick,
+	onNoteVisible,
 	setShowDismissAllModal: onDismissAll,
 	showHeader = true,
+	loadMoreNotes,
+	allNotesFetched,
+	notesHaveResolved,
+	unreadNotesCount,
 } ) => {
 	if ( isBatchUpdating ) {
 		return;
@@ -78,17 +116,6 @@ const renderNotes = ( {
 		hasFiredPanelViewTrack = true;
 	}
 
-	const screen = getScreenName();
-	const onNoteVisible = ( note ) => {
-		recordEvent( 'inbox_note_view', {
-			note_content: note.content,
-			note_name: note.name,
-			note_title: note.title,
-			note_type: note.type,
-			screen,
-		} );
-	};
-
 	const notesArray = Object.keys( notes ).map( ( key ) => notes[ key ] );
 
 	return (
@@ -99,7 +126,7 @@ const renderNotes = ( {
 						<Text size="20" lineHeight="28px" variant="title.small">
 							{ __( 'Inbox', 'woocommerce' ) }
 						</Text>
-						<Badge count={ notesArray.length } />
+						<Badge count={ unreadNotesCount } />
 					</div>
 					<EllipsisMenu
 						label={ __( 'Inbox Notes Options', 'woocommerce' ) }
@@ -142,59 +169,98 @@ const renderNotes = ( {
 					);
 				} ) }
 			</TransitionGroup>
+			{ allNotesFetched
+				? null
+				: ( () => {
+						if ( ! notesHaveResolved ) {
+							return (
+								<InboxNotePlaceholder className="banner message-is-unread" />
+							);
+						}
+
+						return (
+							<CardFooter
+								className="wooocommerce-inbox-card__footer"
+								size="medium"
+							>
+								<Button
+									isPrimary={ true }
+									onClick={ () => {
+										loadMoreNotes();
+									} }
+								>
+									{ notesArray.length >
+									DEFAULT_INBOX_QUERY.per_page
+										? __( 'Show more', 'woocommerce' )
+										: __( 'Show older', 'woocommerce' ) }
+								</Button>
+							</CardFooter>
+						);
+				  } )() }
 		</Card>
 	);
 };
 
-const INBOX_QUERY = {
-	page: 1,
-	per_page: QUERY_DEFAULTS.pageSize,
-	status: 'unactioned',
-	type: QUERY_DEFAULTS.noteTypes,
-	orderby: 'date',
-	order: 'desc',
-	_fields: [
-		'id',
-		'name',
-		'title',
-		'content',
-		'type',
-		'status',
-		'actions',
-		'date_created',
-		'date_created_gmt',
-		'layout',
-		'image',
-		'is_deleted',
-		'is_read',
-		'locale',
-	],
-};
-
 const InboxPanel = ( { showHeader = true } ) => {
+	const [ noteDisplayQty, setNoteDisplayQty ] = useState(
+		DEFAULT_INBOX_QUERY.per_page
+	);
+	const [ allNotesFetched, setAllNotesFetched ] = useState( false );
+	const [ allNotes, setAllNotes ] = useState( [] );
+	const [ viewedNotes, setViewedNotes ] = useState( {} );
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { removeNote, updateNote, triggerNoteAction } =
-		useDispatch( NOTES_STORE_NAME );
+	const {
+		removeNote,
+		updateNote,
+		triggerNoteAction,
+		invalidateResolutionForStoreSelector,
+	} = useDispatch( NOTES_STORE_NAME );
+	const screen = getScreenName();
 
-	const { isError, isResolvingNotes, isBatchUpdating, notes } = useSelect(
-		( select ) => {
-			const { getNotes, getNotesError, isResolving, isNotesRequesting } =
-				select( NOTES_STORE_NAME );
-			const WC_VERSION_61_RELEASE_DATE = moment(
-				'2022-01-11',
-				'YYYY-MM-DD'
-			).valueOf();
+	const inboxQuery = useMemo( () => {
+		return {
+			...DEFAULT_INBOX_QUERY,
+			per_page: noteDisplayQty,
+		};
+	}, [ noteDisplayQty ] );
 
-			const supportedLocales = [
-				'en_US',
-				'en_AU',
-				'en_CA',
-				'en_GB',
-				'en_ZA',
-			];
+	const {
+		isError,
+		notes,
+		notesHaveResolved,
+		isBatchUpdating,
+		unreadNotesCount,
+	} = useSelect( ( select ) => {
+		const {
+			getNotes,
+			getNotesError,
+			isNotesRequesting,
+			hasFinishedResolution,
+		} = select( NOTES_STORE_NAME );
 
-			return {
-				notes: getNotes( INBOX_QUERY ).map( ( note ) => {
+		return {
+			notes: getNotes( inboxQuery ),
+			unreadNotesCount: getNotes( {
+				...DEFAULT_INBOX_QUERY,
+				is_read: false,
+				per_page: -1,
+			} ).length,
+			isError: Boolean( getNotesError( 'getNotes', [ inboxQuery ] ) ),
+			isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
+			notesHaveResolved:
+				! isNotesRequesting( 'batchUpdateNotes' ) &&
+				hasFinishedResolution( 'getNotes', [ inboxQuery ] ),
+		};
+	} );
+
+	useEffect( () => {
+		if ( notesHaveResolved && notes.length < noteDisplayQty ) {
+			setAllNotesFetched( true );
+		}
+
+		if ( notesHaveResolved && notes.length ) {
+			setAllNotes(
+				notes.map( ( note ) => {
 					const noteDate = moment(
 						note.date_created_gmt,
 						'YYYY-MM-DD'
@@ -213,21 +279,32 @@ const InboxPanel = ( { showHeader = true } ) => {
 						};
 					}
 					return note;
-				} ),
-				isError: Boolean(
-					getNotesError( 'getNotes', [ INBOX_QUERY ] )
-				),
-				isResolvingNotes: isResolving( 'getNotes', [ INBOX_QUERY ] ),
-				isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
-			};
+				} )
+			);
 		}
-	);
+	}, [ notes, notesHaveResolved ] );
 
 	const [ showDismissAllModal, setShowDismissAllModal ] = useState( false );
 
-	const onDismiss = ( note ) => {
-		const screen = getScreenName();
+	const onNoteVisible = ( note ) => {
+		if ( ! viewedNotes[ note.id ] && ! note.is_read ) {
+			setViewedNotes( { ...viewedNotes, [ note.id ]: true } );
+			setTimeout( () => {
+				updateNote( note.id, {
+					is_read: true,
+				} );
+			}, 3000 );
+		}
+		recordEvent( 'inbox_note_view', {
+			note_content: note.content,
+			note_name: note.name,
+			note_title: note.title,
+			note_type: note.type,
+			screen,
+		} );
+	};
 
+	const onDismiss = async ( note ) => {
 		recordEvent( 'inbox_action_dismiss', {
 			note_name: note.name,
 			note_title: note.title,
@@ -238,15 +315,17 @@ const InboxPanel = ( { showHeader = true } ) => {
 
 		const noteId = note.id;
 		try {
-			removeNote( noteId );
+			await removeNote( noteId );
+			invalidateResolutionForStoreSelector( 'getNotes' );
 			createNotice( 'success', __( 'Message dismissed', 'woocommerce' ), {
 				actions: [
 					{
 						label: __( 'Undo', 'woocommerce' ),
-						onClick: () => {
-							updateNote( noteId, {
+						onClick: async () => {
+							await updateNote( noteId, {
 								is_deleted: 0,
 							} );
+							invalidateResolutionForStoreSelector( 'getNotes' );
 						},
 					},
 				],
@@ -285,10 +364,10 @@ const InboxPanel = ( { showHeader = true } ) => {
 		);
 	}
 
-	const hasNotes = hasValidNotes( notes );
+	if ( notesHaveResolved && ! allNotes.length ) {
+		return null;
+	}
 
-	// @todo After having a pagination implemented we should call the method "getNotes" with a different query since
-	// the current one is only getting 25 notes and the count of unread notes only will refer to this 25 and not all the existing ones.
 	return (
 		<>
 			{ showDismissAllModal && (
@@ -299,24 +378,35 @@ const InboxPanel = ( { showHeader = true } ) => {
 				/>
 			) }
 			<div className="woocommerce-homepage-notes-wrapper">
-				{ ( isResolvingNotes || isBatchUpdating ) && (
+				{ ! notesHaveResolved && ! allNotes.length && (
 					<Section>
 						<InboxNotePlaceholder className="banner message-is-unread" />
 					</Section>
 				) }
 				<Section>
-					{ ! isResolvingNotes &&
-						! isBatchUpdating &&
+					{ Boolean( allNotes.length ) &&
 						renderNotes( {
-							hasNotes,
+							loadMoreNotes: () => {
+								recordEvent( 'inbox_action_load_more', {
+									quantity_shown: allNotes.length,
+								} );
+								setNoteDisplayQty(
+									noteDisplayQty + ADD_NOTES_AMOUNT
+								);
+							},
+							hasNotes: hasValidNotes( allNotes ),
 							isBatchUpdating,
-							notes,
+							notes: allNotes,
 							onDismiss,
 							onNoteActionClick: ( note, action ) => {
 								triggerNoteAction( note.id, action.id );
 							},
+							onNoteVisible,
 							setShowDismissAllModal,
 							showHeader,
+							allNotesFetched,
+							notesHaveResolved,
+							unreadNotesCount,
 						} ) }
 				</Section>
 			</div>

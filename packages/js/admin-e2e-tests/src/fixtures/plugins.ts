@@ -1,10 +1,11 @@
 /**
+ * External dependencies
+ */
+import { utils } from '@woocommerce/e2e-utils';
+/**
  * Internal dependencies
  */
 import { httpClient } from './http-client';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { utils } = require( '@woocommerce/e2e-utils' );
 
 const wpPluginsEndpoint = '/wp/v2/plugins';
 

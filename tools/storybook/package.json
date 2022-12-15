@@ -1,0 +1,56 @@
+{
+	"name": "@woocommerce/storybook",
+	"title": "WooCommerce Storybook",
+	"description": "Storybook implementation for WooCommerce",
+	"homepage": "https://woocommerce.github.io/woocommerce-admin/#/components/",
+	"private": true,
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git"
+	},
+	"author": "Automattic",
+	"license": "GPL-3.0-or-later",
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "^7.13.3"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"scripts": {
+		"build-storybook": "build-storybook  -c ./.storybook",
+		"preinstall": "npx only-allow pnpm",
+		"storybook": "./import-wp-css-storybook.sh && BABEL_ENV=storybook STORYBOOK=true start-storybook -c ./.storybook -p 6007 --ci",
+		"storybook-rtl": "USE_RTL_STYLE=true pnpm run storybook"
+	},
+	"devDependencies": {
+		"@babel/plugin-proposal-class-properties": "^7.16.7",
+		"@babel/preset-env": "^7.16.11",
+		"@babel/runtime": "^7.17.2",
+		"@storybook/addon-a11y": "^6.4.19",
+		"@storybook/addon-actions": "^6.4.19",
+		"@storybook/addon-console": "^1.2.3",
+		"@storybook/addon-controls": "^6.4.19",
+		"@storybook/addon-docs": "^6.4.19",
+		"@storybook/addon-knobs": "^6.4.0",
+		"@storybook/addon-links": "^6.4.19",
+		"@storybook/addon-storysource": "^6.4.19",
+		"@storybook/addon-viewport": "^6.4.19",
+		"@storybook/addons": "^6.4.19",
+		"@storybook/api": "^6.4.19",
+		"@storybook/builder-webpack5": "^6.4.19",
+		"@storybook/components": "^6.4.19",
+		"@storybook/core-events": "^6.4.19",
+		"@storybook/manager-webpack5": "^6.4.19",
+		"@storybook/react": "^6.4.19",
+		"@storybook/theming": "^6.4.19",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2",
+		"typescript": "^4.8.3",
+		"webpack": "^5.70.0"
+	},
+	"dependencies": {
+		"@babel/preset-typescript": "^7.16.7"
+	}
+}

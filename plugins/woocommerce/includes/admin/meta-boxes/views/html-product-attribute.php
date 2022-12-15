@@ -7,8 +7,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<h3>
 		<a href="#" class="remove_row delete"><?php esc_html_e( 'Remove', 'woocommerce' ); ?></a>
 		<div class="handlediv" title="<?php esc_attr_e( 'Click to toggle', 'woocommerce' ); ?>"></div>
-		<div class="tips sort" data-tip="<?php esc_attr_e( 'Drag and drop to set admin attribute order', 'woocommerce' ); ?>"></div>			
-		<strong class="attribute_name"><?php echo wc_attribute_label( $attribute->get_name() ); ?></strong>
+		<div class="tips sort" data-tip="<?php esc_attr_e( 'Drag and drop to set admin attribute order', 'woocommerce' ); ?>"></div>
+		<strong class="attribute_name<?php echo esc_attr( $attribute->get_name() === '' ? ' placeholder' : '' ); ?>"><?php echo esc_html( $attribute->get_name() !== '' ? wc_attribute_label( $attribute->get_name() ) : __( 'Custom attribute', 'woocommerce' ) ); ?></strong>
 	</h3>
 	<div class="woocommerce_attribute_data wc-metabox-content hidden">
 		<table cellpadding="0" cellspacing="0">
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<strong><?php echo wc_attribute_label( $attribute->get_name() ); ?></strong>
 							<input type="hidden" name="attribute_names[<?php echo esc_attr( $i ); ?>]" value="<?php echo esc_attr( $attribute->get_name() ); ?>" />
 						<?php else : ?>
-							<input type="text" class="attribute_name" name="attribute_names[<?php echo esc_attr( $i ); ?>]" value="<?php echo esc_attr( $attribute->get_name() ); ?>" />
+							<input type="text" class="attribute_name" name="attribute_names[<?php echo esc_attr( $i ); ?>]" value="<?php echo esc_attr( $attribute->get_name() ); ?>" placeholder="<?php esc_attr_e( 'e.g. Fabric or Brand', 'woocommerce' ); ?>" />
 						<?php endif; ?>
 
 						<input type="hidden" name="attribute_position[<?php echo esc_attr( $i ); ?>]" class="attribute_position" value="<?php echo esc_attr( $attribute->get_position() ); ?>" />
@@ -38,18 +38,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 							if ( 'select' === $attribute_taxonomy->attribute_type ) {
 								?>
-								<select multiple="multiple" data-placeholder="<?php esc_attr_e( 'Select terms', 'woocommerce' ); ?>" class="multiselect attribute_values wc-enhanced-select" name="attribute_values[<?php echo esc_attr( $i ); ?>][]">
+								<select multiple="multiple" data-minimum_input_length="0" data-limit="50" data-return_id="id" data-placeholder="<?php esc_attr_e( 'Select terms', 'woocommerce' ); ?>" class="multiselect attribute_values wc-taxonomy-term-search" name="attribute_values[<?php echo esc_attr( $i ); ?>][]" data-taxonomy="<?php echo esc_attr( $attribute->get_taxonomy() ); ?>">
 									<?php
-									$args      = array(
+									$args           = array(
 										'orderby'    => ! empty( $attribute_taxonomy->attribute_orderby ) ? $attribute_taxonomy->attribute_orderby : 'name',
 										'hide_empty' => 0,
 									);
-									$all_terms = get_terms( $attribute->get_taxonomy(), apply_filters( 'woocommerce_product_attribute_terms', $args ) );
-									if ( $all_terms ) {
-										foreach ( $all_terms as $term ) {
-											$options = $attribute->get_options();
-											$options = ! empty( $options ) ? $options : array();
-											echo '<option value="' . esc_attr( $term->term_id ) . '"' . wc_selected( $term->term_id, $options ) . '>' . esc_html( apply_filters( 'woocommerce_product_attribute_term_name', $term->name, $term ) ) . '</option>';
+									$selected_terms = $attribute->get_terms();
+									if ( $selected_terms ) {
+										foreach ( $selected_terms as $selected_term ) {
+											/**
+											 * Filter the selected attribute term name.
+											 *
+											 * @since 3.4.0
+											 * @param string  $name Name of selected term.
+											 * @param array   $term The selected term object.
+											 */
+											echo '<option value="' . esc_attr( $selected_term->term_id ) . '" selected="selected">' . esc_html( apply_filters( 'woocommerce_product_attribute_term_name', $selected_term->name, $selected_term ) ) . '</option>';
 										}
 									}
 									?>
@@ -78,7 +83,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<tr>
 					<td>
 						<div class="enable_variation show_if_variable">
-							<label><input type="checkbox" class="checkbox" <?php checked( $attribute->get_variation(), true ); ?> name="attribute_variation[<?php echo esc_attr( $i ); ?>]" value="1" /> <?php esc_html_e( 'Used for variations', 'woocommerce' ); ?></label>
+							<label><input id="used-for-variation" type="checkbox" class="checkbox" <?php checked( $attribute->get_variation(), true ); ?> name="attribute_variation[<?php echo esc_attr( $i ); ?>]" value="1" /> <?php esc_html_e( 'Used for variations', 'woocommerce' ); ?></label>
 						</div>
 					</td>
 				</tr>

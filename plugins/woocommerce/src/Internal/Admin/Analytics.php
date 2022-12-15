@@ -49,7 +49,6 @@ class Analytics {
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
-		add_filter( 'woocommerce_settings_features', array( $this, 'add_feature_toggle' ) );
 		add_action( 'update_option_' . self::TOGGLE_OPTION_NAME, array( $this, 'reload_page_on_toggle' ), 10, 2 );
 		add_action( 'woocommerce_settings_saved', array( $this, 'maybe_reload_page' ) );
 
@@ -66,24 +65,12 @@ class Analytics {
 	/**
 	 * Add the feature toggle to the features settings.
 	 *
+	 * @deprecated 7.0 The WooCommerce Admin features are now handled by the WooCommerce features engine (see the FeaturesController class).
+	 *
 	 * @param array $features Feature sections.
 	 * @return array
 	 */
 	public static function add_feature_toggle( $features ) {
-		$description = __(
-			'Enables WooCommerce Analytics',
-			'woocommerce'
-		);
-
-		$features[] = array(
-			'title'   => __( 'Analytics', 'woocommerce' ),
-			'desc'    => $description,
-			'id'      => self::TOGGLE_OPTION_NAME,
-			'type'    => 'checkbox',
-			'default' => 'yes',
-			'class'   => '',
-		);
-
 		return $features;
 	}
 

@@ -127,7 +127,7 @@ export function getProductsTotalCountError(
 }
 
 export function* createProduct(
-	data: Omit< Product, ReadOnlyProperties >
+	data: Partial< Omit< Product, ReadOnlyProperties > >
 ): Generator< unknown, Product, Product > {
 	yield createProductStart();
 	try {
@@ -147,7 +147,7 @@ export function* createProduct(
 
 export function* updateProduct(
 	id: number,
-	data: Omit< Product, ReadOnlyProperties >
+	data: Partial< Omit< Product, ReadOnlyProperties > >
 ): Generator< unknown, Product, Product > {
 	yield updateProductStart( id );
 	try {
