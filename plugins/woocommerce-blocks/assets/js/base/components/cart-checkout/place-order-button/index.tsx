@@ -5,9 +5,12 @@ import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
 import { Icon, check } from '@wordpress/icons';
 import Button from '@woocommerce/base-components/button';
 
-const PlaceOrderButton = (): JSX.Element => {
+interface PlaceOrderButton {
+	label: string;
+}
+
+const PlaceOrderButton = ( { label }: PlaceOrderButton ): JSX.Element => {
 	const {
-		submitButtonText,
 		onSubmit,
 		isCalculating,
 		isDisabled,
@@ -27,7 +30,7 @@ const PlaceOrderButton = (): JSX.Element => {
 			}
 			showSpinner={ waitingForProcessing }
 		>
-			{ waitingForRedirect ? <Icon icon={ check } /> : submitButtonText }
+			{ waitingForRedirect ? <Icon icon={ check } /> : label }
 		</Button>
 	);
 };
