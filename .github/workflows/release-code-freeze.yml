@@ -163,7 +163,7 @@ jobs:
                         workflow_id: 'release-changelog.yml',
                         ref: 'trunk',
                         inputs: {
-                          releaseVersion: "release/${{ needs.maybe-create-next-milestone-and-release-branch.outputs.next_version }}",
-                          releaseBranch: "${{ needs.maybe-create-next-milestone-and-release-branch.outputs.next_version }}"
+                          releaseVersion: "${{ needs.maybe-create-next-milestone-and-release-branch.outputs.release_version }}",
+                          releaseBranch: "${{ needs.maybe-create-next-milestone-and-release-branch.outputs.branch }}"
                         }
                       })
