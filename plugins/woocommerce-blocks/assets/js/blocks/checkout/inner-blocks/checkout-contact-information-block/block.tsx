@@ -16,11 +16,7 @@ import { isEmail } from '@wordpress/url';
  * Internal dependencies
  */
 
-const Block = ( {
-	allowCreateAccount,
-}: {
-	allowCreateAccount: boolean;
-} ): JSX.Element => {
+const Block = (): JSX.Element => {
 	const { customerId, shouldCreateAccount } = useSelect( ( select ) => {
 		const store = select( CHECKOUT_STORE_KEY );
 		return {
@@ -40,7 +36,6 @@ const Block = ( {
 	};
 
 	const createAccountUI = ! customerId &&
-		allowCreateAccount &&
 		getSetting( 'checkoutAllowsGuest', false ) &&
 		getSetting( 'checkoutAllowsSignup', false ) && (
 			<CheckboxControl

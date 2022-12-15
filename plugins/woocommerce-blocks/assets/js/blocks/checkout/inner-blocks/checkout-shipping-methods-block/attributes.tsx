@@ -13,10 +13,6 @@ export default {
 		defaultTitle: __( 'Shipping options', 'woo-gutenberg-products-block' ),
 		defaultDescription: '',
 	} ),
-	allowCreateAccount: {
-		type: 'boolean',
-		default: false,
-	},
 	className: {
 		type: 'string',
 		default: '',
