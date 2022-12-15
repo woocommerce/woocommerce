@@ -16,7 +16,7 @@ export enum PRODUCT_STOCK_STATUS_KEYS {
 /**
  * Product stock status colors.
  */
-export enum PRODUCT_STOCK_STATUS_COLORS {
+export enum PRODUCT_STOCK_STATUS_CLASSES {
 	instock = 'green',
 	onbackorder = 'yellow',
 	outofstock = 'red',
@@ -61,7 +61,7 @@ export const getProductStockStatus = (
  * Get the product stock status class.
  *
  * @param  product Product instance.
- * @return {PRODUCT_STOCK_STATUS_COLORS} Product stock status class.
+ * @return {PRODUCT_STOCK_STATUS_CLASSES} Product stock status class.
  */
 export const getProductStockStatusClass = (
 	product: PartialProduct | Partial< ProductVariation >
@@ -69,14 +69,14 @@ export const getProductStockStatusClass = (
 	if ( product.manage_stock ) {
 		const stockQuantity: number = product.stock_quantity || 0;
 		if ( stockQuantity >= 10 ) {
-			return PRODUCT_STOCK_STATUS_COLORS.instock;
+			return PRODUCT_STOCK_STATUS_CLASSES.instock;
 		}
 		if ( stockQuantity < 10 && stockQuantity > 2 ) {
-			return PRODUCT_STOCK_STATUS_COLORS.onbackorder;
+			return PRODUCT_STOCK_STATUS_CLASSES.onbackorder;
 		}
-		return PRODUCT_STOCK_STATUS_COLORS.outofstock;
+		return PRODUCT_STOCK_STATUS_CLASSES.outofstock;
 	}
 	return product.stock_status
-		? PRODUCT_STOCK_STATUS_COLORS[ product.stock_status ]
+		? PRODUCT_STOCK_STATUS_CLASSES[ product.stock_status ]
 		: '';
 };
