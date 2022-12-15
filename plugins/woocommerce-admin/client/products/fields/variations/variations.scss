@@ -22,6 +22,19 @@
 		}
 	}
 
+	&__status-dot {
+		margin-right: $gap-smaller;
+		&.green {
+			color: $alert-green;
+		}
+		&.yellow {
+			color: $alert-yellow;
+		}
+		&.red {
+			color: $alert-red;
+		}
+	}
+
 	.woocommerce-list-item {
 		display: grid;
 		grid-template-columns: 38px 25% 25% 25%;
