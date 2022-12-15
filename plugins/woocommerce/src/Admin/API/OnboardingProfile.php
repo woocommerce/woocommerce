@@ -399,6 +399,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 						'google-listings-and-ads',
 						'pinterest-for-woocommerce',
 						'mailpoet',
+						'codistoconnect',
 						'tiktok-for-business',
 						'tiktok-for-business:alt'
 					),
