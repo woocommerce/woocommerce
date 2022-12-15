@@ -51,7 +51,7 @@ export type TernaryFlag = boolean | undefined;
 interface PackageProps {
 	/* PackageId can be a string, WooCommerce Subscriptions uses strings for example, but WooCommerce core uses numbers */
 	packageId: string | number;
-	renderOption: PackageRateRenderOption;
+	renderOption?: PackageRateRenderOption | undefined;
 	collapse?: boolean;
 	packageData: PackageData;
 	className?: string;
