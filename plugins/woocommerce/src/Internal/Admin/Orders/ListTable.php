@@ -593,7 +593,7 @@ class ListTable extends WP_List_Table {
 			/**
 			 * Fires before the "Filter" button on the list table for orders and other order types.
 			 *
-			 * @since x.x.x
+			 * @since 7.3.0
 			 *
 			 * @param string $order_type  The order type.
 			 * @param string $which       The location of the extra table nav: 'top' or 'bottom'.
@@ -616,7 +616,7 @@ class ListTable extends WP_List_Table {
 		 * Fires immediately following the closing "actions" div in the tablenav for the order
 		 * list table.
 		 *
-		 * @since x.x.x
+		 * @since 7.3.0
 		 *
 		 * @param string $order_type  The order type.
 		 * @param string $which       The location of the extra table nav: 'top' or 'bottom'.
