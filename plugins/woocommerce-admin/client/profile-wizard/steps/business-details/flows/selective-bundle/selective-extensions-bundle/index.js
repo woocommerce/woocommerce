@@ -139,9 +139,9 @@ const BundleExtensionCheckbox = ( {
 	onChange,
 	description,
 	isChecked,
-	key,
+	extensionKey,
 } ) => {
-	const isFreeTrial = key === 'codistoconnect';
+	const isFreeTrial = extensionKey === 'codistoconnect';
 	const recordProductLinkClick = ( event ) => {
 		const link = event.target.closest( 'a' );
 		if (
@@ -171,14 +171,16 @@ const BundleExtensionCheckbox = ( {
 				// dynamically inserted HTML and records clicks only on interaction with those items.
 				/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
 			 }
-			{ key }
 			<p
 				className="woocommerce-admin__business-details__selective-extensions-bundle__description"
 				dangerouslySetInnerHTML={ sanitizeHTML( description ) }
 				onClick={ recordProductLinkClick }
 			/>
 			{ /* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */ }
-			<FreeBadge isFreeTrial={ isFreeTrial } />
+			<FreeBadge
+				isFreeTrial={ isFreeTrial }
+				extensionKey={ extensionKey }
+			/>
 		</div>
 	);
 };
@@ -210,6 +212,7 @@ export const ExtensionSection = ( {
 			{ extensions.map( ( { description, key } ) => (
 				<BundleExtensionCheckbox
 					key={ key }
+					extensionKey={ key }
 					description={ description }
 					isChecked={ installExtensionOptions[ key ] }
 					onChange={ onCheckboxChange( key ) }
