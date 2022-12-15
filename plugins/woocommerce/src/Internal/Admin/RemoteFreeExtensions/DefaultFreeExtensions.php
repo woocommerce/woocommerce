@@ -37,7 +37,9 @@ class DefaultFreeExtensions {
 				'title'   => __( 'Grow your store', 'woocommerce' ),
 				'plugins' => [
 					self::get_plugin( 'mailpoet' ),
+					self::get_plugin( 'codistoconnect' ),
 					self::get_plugin( 'google-listings-and-ads' ),
+					self::get_plugin( 'pinterest-for-woocommerce' ),
 					self::get_plugin( 'facebook-for-woocommerce' ),
 					self::get_plugin( 'tiktok-for-business:alt' ),
 				],
@@ -57,8 +59,10 @@ class DefaultFreeExtensions {
 				'plugins' => [
 					self::get_plugin( 'google-listings-and-ads:alt' ),
 					self::get_plugin( 'tiktok-for-business' ),
+					self::get_plugin( 'pinterest-for-woocommerce:alt' ),
 					self::get_plugin( 'facebook-for-woocommerce:alt' ),
 					self::get_plugin( 'pinterest-for-woocommerce' ),
+					self::get_plugin( 'codistoconnect:alt' ),
 				],
 			],
 		];
@@ -121,6 +125,13 @@ class DefaultFreeExtensions {
 			],
 			'pinterest-for-woocommerce'         => [
 				'name'           => __( 'Pinterest for WooCommerce', 'woocommerce' ),
+				'description'    => __( 'Get your products in front of Pinners searching for ideas and things to buy.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/pinterest.png', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
+				'is_built_by_wc' => true,
+			],
+			'pinterest-for-woocommerce:alt'     => [
+				'name'           => __( 'Pinterest for WooCommerce', 'woocommerce' ),
 				'description'    => __( 'Get your products in front of Pinterest users searching for ideas and things to buy. Get started with Pinterest and make your entire product catalog browsable.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/pinterest.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
@@ -146,6 +157,25 @@ class DefaultFreeExtensions {
 				'image_url'      => plugins_url( '/assets/images/onboarding/creative-mail-by-constant-contact.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=creativemail',
 				'is_built_by_wc' => false,
+			],
+			'codistoconnect'                    => [
+				'name'           => __( 'Codisto for WooCommerce', 'woocommerce' ),
+				'description'    => sprintf(
+					/* translators: 1: opening product link tag. 2: closing link tag */
+					__( 'Sell on Amazon, eBay, Walmart and more directly from WooCommerce with  %1$sCodisto%2$s', 'woocommerce' ),
+					'<a href="https://woocommerce.com/pt-br/products/amazon-ebay-integration/?quid=c247a85321c9e93e7c3c6f1eb072e6e5" target="_blank">',
+					'</a>'
+				),
+				'image_url'      => plugins_url( '/assets/images/onboarding/codistoconnect.png', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=codisto-settings',
+				'is_built_by_wc' => true,
+			],
+			'codistoconnect:alt'                => [
+				'name'           => __( 'Codisto for WooCommerce', 'woocommerce' ),
+				'description'    => __( 'Sell on Amazon, eBay, Walmart and more directly from WooCommerce.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/codistoconnect.png', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=codisto-settings',
+				'is_built_by_wc' => true,
 			],
 			'woocommerce-payments'              => [
 				'description'    => sprintf(
