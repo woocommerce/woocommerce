@@ -332,9 +332,7 @@ class WC_Products_Tracking {
 			return 'edit';
 		}
 
-		if(
-			'product_page_product_importer' === $hook
-		) {
+		if ( 'product_page_product_importer' === $hook ) {
 			return 'import';
 		}
 
