@@ -231,7 +231,6 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 				) ) }
 			</Sortable>
 			<AddAttributeListItem
-				label={ __( 'Add attribute', 'woocommerce' ) }
 				onAddClick={ () => {
 					recordEvent( 'product_add_attribute_button' );
 					setShowAddAttributeModal( true );
