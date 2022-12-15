@@ -204,7 +204,7 @@ test.describe('Orders API tests: CRUD', () => {
       //test code here
     }
 ```
-This allows you to further subgroup tests. When viewing the tests results locally, each test describe 'level' will be separated by > as below: 
+This allows you to further subgroup tests. When viewing the tests results locally, each test describe 'level' will be separated by `>` in the console as below: 
 
 `Orders API tests: CRUD › Create an order › can create a pending order by default`
 
