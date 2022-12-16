@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { sprintf, __ } from '@wordpress/i18n';
-import { Button, Card, CardBody } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 import { useState, useCallback, useEffect } from '@wordpress/element';
 import {
 	ProductAttribute,
@@ -10,24 +9,25 @@ import {
 	ProductAttributeTerm,
 } from '@woocommerce/data';
 import { resolveSelect } from '@wordpress/data';
-import { Text } from '@woocommerce/experimental';
 import {
 	Sortable,
-	ListItem,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
 } from '@woocommerce/components';
-import { closeSmall } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import './attribute-field.scss';
-import AttributeEmptyStateLogo from './attribute-empty-state-logo.svg';
 import { AddAttributeModal } from './add-attribute-modal';
 import { EditAttributeModal } from './edit-attribute-modal';
 import { reorderSortableProductAttributePositions } from './utils';
 import { sift } from '../../../utils';
+import { AttributeEmptyState } from '../attribute-empty-state';
+import {
+	AddAttributeListItem,
+	AttributeListItem,
+} from '../attribute-list-item';
 
 type AttributeFieldProps = {
 	value: ProductAttribute[];
@@ -167,53 +167,29 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 
 	if ( ! value || value.length === 0 || hydratedAttributes.length === 0 ) {
 		return (
-			<Card>
-				<CardBody>
-					<div className="woocommerce-attribute-field">
-						<div className="woocommerce-attribute-field__empty-container">
-							<img
-								src={ AttributeEmptyStateLogo }
-								alt="Completed"
-								className="woocommerce-attribute-field__empty-logo"
-							/>
-							<Text
-								variant="subtitle.small"
-								weight="600"
-								size="14"
-								lineHeight="20px"
-								className="woocommerce-attribute-field__empty-subtitle"
-							>
-								{ __( 'No attributes yet', 'woocommerce' ) }
-							</Text>
-							<Button
-								variant="secondary"
-								className="woocommerce-attribute-field__add-new"
-								onClick={ () => {
-									recordEvent(
-										'product_add_first_attribute_button_click'
-									);
-									setShowAddAttributeModal( true );
-								} }
-							>
-								{ __( 'Add first attribute', 'woocommerce' ) }
-							</Button>
-						</div>
-						{ showAddAttributeModal && (
-							<AddAttributeModal
-								onCancel={ () => {
-									recordEvent( CANCEL_BUTTON_EVENT_NAME );
-									setShowAddAttributeModal( false );
-								} }
-								onAdd={ onAddNewAttributes }
-								selectedAttributeIds={ ( value || [] ).map(
-									( attr ) => attr.id
-								) }
-							/>
+			<>
+				<AttributeEmptyState
+					onNewClick={ () => {
+						recordEvent(
+							'product_add_first_attribute_button_click'
+						);
+						setShowAddAttributeModal( true );
+					} }
+				/>
+				{ showAddAttributeModal && (
+					<AddAttributeModal
+						onCancel={ () => {
+							recordEvent( CANCEL_BUTTON_EVENT_NAME );
+							setShowAddAttributeModal( false );
+						} }
+						onAdd={ onAddNewAttributes }
+						selectedAttributeIds={ ( value || [] ).map(
+							( attr ) => attr.id
 						) }
-						<SelectControlMenuSlot />
-					</div>
-				</CardBody>
-			</Card>
+					/>
+				) }
+				<SelectControlMenuSlot />
+			</>
 		);
 	}
 
@@ -242,63 +218,24 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 				} }
 			>
 				{ sortedAttributes.map( ( attribute ) => (
-					<ListItem key={ fetchAttributeId( attribute ) }>
-						<div>{ attribute.name }</div>
-						<div className="woocommerce-attribute-field__attribute-options">
-							{ attribute.options
-								.slice( 0, 2 )
-								.map( ( option, index ) => (
-									<div
-										className="woocommerce-attribute-field__attribute-option-chip"
-										key={ index }
-									>
-										{ option }
-									</div>
-								) ) }
-							{ attribute.options.length > 2 && (
-								<div className="woocommerce-attribute-field__attribute-option-chip">
-									{ sprintf(
-										__( '+ %i more', 'woocommerce' ),
-										attribute.options.length - 2
-									) }
-								</div>
-							) }
-						</div>
-						<div className="woocommerce-attribute-field__attribute-actions">
-							<Button
-								variant="tertiary"
-								onClick={ () =>
-									setEditingAttributeId(
-										fetchAttributeId( attribute )
-									)
-								}
-							>
-								{ __( 'edit', 'woocommerce' ) }
-							</Button>
-							<Button
-								icon={ closeSmall }
-								label={ __(
-									'Remove attribute',
-									'woocommerce'
-								) }
-								onClick={ () => onRemove( attribute ) }
-							></Button>
-						</div>
-					</ListItem>
+					<AttributeListItem
+						attribute={ attribute }
+						key={ fetchAttributeId( attribute ) }
+						onEditClick={ () =>
+							setEditingAttributeId(
+								fetchAttributeId( attribute )
+							)
+						}
+						onRemoveClick={ () => onRemove( attribute ) }
+					/>
 				) ) }
 			</Sortable>
-			<ListItem>
-				<Button
-					variant="secondary"
-					className="woocommerce-attribute-field__add-attribute"
-					onClick={ () => {
-						recordEvent( 'product_add_attribute_button' );
-						setShowAddAttributeModal( true );
-					} }
-				>
-					{ __( 'Add attribute', 'woocommerce' ) }
-				</Button>
-			</ListItem>
+			<AddAttributeListItem
+				onAddClick={ () => {
+					recordEvent( 'product_add_attribute_button' );
+					setShowAddAttributeModal( true );
+				} }
+			/>
 			{ showAddAttributeModal && (
 				<AddAttributeModal
 					onCancel={ () => {
