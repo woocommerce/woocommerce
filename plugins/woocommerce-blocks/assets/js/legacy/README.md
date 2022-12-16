@@ -53,12 +53,6 @@ Example:
 import { Label } from '@woocommerce/base-components/label';
 ```
 
-### Webpack Plugin
-
-The second part of the webpack magic is a custom plugin. Located in `bin/fallback-module-directory-webpack-plugin.js`, this custom plugin is used instead of the default Alias plugin. It handles trying a fallback if the original path aliased to does not exist. The fallback is a variation of the aliased path using the provided `search` and `replace` strings when instantiating the plugin. You can see it setup in the `LegacyBlocksConfig.resolve.plugins` property of the `webpack.config.js` file.
-
-<!-- FEEDBACK -->
-
 ---
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
