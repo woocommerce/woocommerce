@@ -129,10 +129,7 @@ class Bootstrap {
 		$this->container->get( ClassicTemplatesCompatibility::class );
 		$this->container->get( BlockPatterns::class );
 		$this->container->get( PaymentsApi::class );
-
-		if ( $this->package->is_experimental_build() ) {
-			$this->container->get( ShippingController::class )->init();
-		}
+		$this->container->get( ShippingController::class )->init();
 	}
 
 	/**
