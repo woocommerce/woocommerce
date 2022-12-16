@@ -175,7 +175,7 @@ Additional tests can also be added to test the following general test scenarios:
 
 The intention here is to validate that we get error responses when expected as per specification and the error status code and message are correct as per documentation.
 
-### Creating test structure
+## Creating test structure
 
 The structure of the test serves as a skeleton for the test itself. 
 
