@@ -3,8 +3,8 @@
 ## Table of Contents <!-- omit in toc -->
 
 - [Responses](#responses)
-    - [Cart Response](#cart-response)
-    - [Error Response](#error-response)
+  - [Cart Response](#cart-response)
+  - [Error Response](#error-response)
 - [Get Cart](#get-cart)
 - [Add Item](#add-item)
 - [Remove Item](#remove-item)
@@ -460,10 +460,10 @@ This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md)
 POST /cart/select-shipping-rate
 ```
 
-| Attribute    | Type    | Required | Description                         |
-| :----------- | :------ | :------: | :---------------------------------- |
-| `package_id` | integer |  string  | yes                                 | The ID of the shipping package within the cart. |
-| `rate_id`    | string  |   yes    | The chosen rate ID for the package. |
+| Attribute    | Type    | Required | Description                                     |
+| :----------- | :------ | :------: | :---------------------------------------------- |
+| `package_id` | integer |   yes    | The ID of the shipping package within the cart. |
+| `rate_id`    | string  |   yes    | The chosen rate ID for the package.             |
 
 ```sh
 curl --header "Nonce: 12345" --request POST /cart/select-shipping-rate?package_id=1&rate_id=flat_rate:1
@@ -480,4 +480,3 @@ Returns the full [Cart Response](#cart-response) on success, or an [Error Respon
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/docs/cart.md)
 
 <!-- /FEEDBACK -->
-
