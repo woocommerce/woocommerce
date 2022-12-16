@@ -10,7 +10,7 @@
 
 	&__header {
 		display: grid;
-		grid-template-columns: calc(38px + 25%) 25% 25%;
+		grid-template-columns: auto 25% 25% 88px;
 		padding: $gap-small $gap;
 
 		h4 {
@@ -35,9 +35,45 @@
 		}
 	}
 
+	&__price--fade,
+	&__quantity--fade {
+		opacity: 0.5;
+	}
+
+	&__actions {
+		display: flex;
+		align-items: center;
+		justify-content: end;
+
+		.components-button {
+			position: relative;
+
+			&:disabled,
+			&[aria-disabled='true'] {
+				opacity: 1;
+			}
+
+			.components-spinner {
+				margin: 4px;
+			}
+		}
+
+		.components-button svg {
+			fill: none;
+		}
+
+		.components-button--visible {
+			color: $gray-700;
+		}
+
+		.components-button--hidden {
+			color: $alert-red;
+		}
+	}
+
 	.woocommerce-list-item {
 		display: grid;
-		grid-template-columns: 38px 25% 25% 25%;
+		grid-template-columns: 38px auto 25% 25% 88px;
 		margin-left: -1px;
 		margin-right: -1px;
 		margin-bottom: -1px;
@@ -48,7 +84,7 @@
 		flex: 1 0 auto;
 	}
 
-	.components-spinner {
+	&.is-loading .components-spinner {
 		width: 34px;
 		height: 34px;
 		left: 50%;

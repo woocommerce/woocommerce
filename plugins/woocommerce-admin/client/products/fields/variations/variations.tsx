@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Card, Spinner } from '@wordpress/components';
+import { Button, Card, Spinner, Tooltip } from '@wordpress/components';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	ProductVariation,
@@ -10,12 +10,14 @@ import {
 import { ListItem, Pagination, Sortable, Tag } from '@woocommerce/components';
 import { useContext, useState } from '@wordpress/element';
 import { useParams } from 'react-router-dom';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import classnames from 'classnames';
 
 /**
  * Internal dependencies
  */
+import HiddenIcon from '~/products/images/hidden-icon';
+import VisibleIcon from '~/products/images/visible-icon';
 import { CurrencyContext } from '../../../lib/currency-context';
 import {
 	getProductStockStatus,
@@ -33,9 +35,16 @@ import './variations.scss';
  */
 const DEFAULT_PER_PAGE_OPTION = 25;
 
+const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
+const VISIBLE_TEXT = __( 'Visible to customers', 'woocommerce' );
+const UPDATING_TEXT = __( 'Updating product variation', 'woocommerce' );
+
 export const Variations: React.FC = () => {
 	const [ currentPage, setCurrentPage ] = useState( 1 );
 	const [ perPage, setPerPage ] = useState( DEFAULT_PER_PAGE_OPTION );
+	const [ isUpdating, setIsUpdating ] = useState< Record< string, boolean > >(
+		{}
+	);
 	const { productId } = useParams();
 	const context = useContext( CurrencyContext );
 	const { formatAmount, getCurrencyConfig } = context;
@@ -64,6 +73,10 @@ export const Variations: React.FC = () => {
 		[ currentPage, perPage ]
 	);
 
+	const { updateProductVariation } = useDispatch(
+		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+	);
+
 	if ( ! variations || isLoading ) {
 		return (
 			<Card className="woocommerce-product-variations is-loading">
@@ -73,6 +86,26 @@ export const Variations: React.FC = () => {
 	}
 
 	const currencyConfig = getCurrencyConfig();
+
+	function handleCustomerVisibilityClick(
+		variationId: number,
+		status: 'private' | 'publish'
+	) {
+		if ( isUpdating[ variationId ] ) return;
+		setIsUpdating( ( prevState ) => ( {
+			...prevState,
+			[ variationId ]: true,
+		} ) );
+		updateProductVariation< Promise< ProductVariation > >(
+			{ product_id: productId, id: variationId },
+			{ status }
+		).finally( () =>
+			setIsUpdating( ( prevState ) => ( {
+				...prevState,
+				[ variationId ]: false,
+			} ) )
+		);
+	}
 
 	return (
 		<Card className="woocommerce-product-variations">
@@ -102,10 +135,26 @@ export const Variations: React.FC = () => {
 								/>
 							) ) }
 						</div>
-						<div className="woocommerce-product-variations__price">
+						<div
+							className={ classnames(
+								'woocommerce-product-variations__price',
+								{
+									'woocommerce-product-variations__price--fade':
+										variation.status === 'private',
+								}
+							) }
+						>
 							{ formatAmount( variation.price ) }
 						</div>
-						<div className="woocommerce-product-variations__quantity">
+						<div
+							className={ classnames(
+								'woocommerce-product-variations__quantity',
+								{
+									'woocommerce-product-variations__quantity--fade':
+										variation.status === 'private',
+								}
+							) }
+						>
 							<span
 								className={ classnames(
 									'woocommerce-product-variations__status-dot',
@@ -115,6 +164,69 @@ export const Variations: React.FC = () => {
 								●
 							</span>
 							{ getProductStockStatus( variation ) }
+						</div>
+						<div className="woocommerce-product-variations__actions">
+							{ variation.status === 'private' && (
+								<Tooltip
+									position="top center"
+									text={ NOT_VISIBLE_TEXT }
+								>
+									<Button
+										className="components-button--hidden"
+										aria-label={
+											isUpdating[ variation.id ]
+												? UPDATING_TEXT
+												: NOT_VISIBLE_TEXT
+										}
+										aria-disabled={
+											isUpdating[ variation.id ]
+										}
+										onClick={ () =>
+											handleCustomerVisibilityClick(
+												variation.id,
+												'publish'
+											)
+										}
+									>
+										{ isUpdating[ variation.id ] ? (
+											<Spinner />
+										) : (
+											<HiddenIcon />
+										) }
+									</Button>
+								</Tooltip>
+							) }
+
+							{ variation.status === 'publish' && (
+								<Tooltip
+									position="top center"
+									text={ VISIBLE_TEXT }
+								>
+									<Button
+										className="components-button--visible"
+										aria-label={
+											isUpdating[ variation.id ]
+												? UPDATING_TEXT
+												: VISIBLE_TEXT
+										}
+										aria-disabled={
+											isUpdating[ variation.id ]
+										}
+										onClick={ () =>
+											handleCustomerVisibilityClick(
+												variation.id,
+												'private'
+											)
+										}
+									>
+										{ isUpdating[ variation.id ] ? (
+											<Spinner />
+										) : (
+											<VisibleIcon />
+										) }
+									</Button>
+								</Tooltip>
+							) }
 						</div>
 					</ListItem>
 				) ) }
