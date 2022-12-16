@@ -34,7 +34,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		parent::register_routes();
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/create_all', array(
+			$this->namespace, '/' . $this->rest_base . '/generate', array(
 				'args'   => array(
 					'product_id' => array(
 						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
@@ -43,7 +43,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'create_all' ),
+					'callback'            => array( $this, 'generate' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 				),
@@ -906,12 +906,12 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	}
 
 	/**
-	 * Create all variations for a given product.
+	 * Generate all variations for a given product.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function create_all( $request ) {
+	public function generate( $request ) {
 		$product_id = (int) $request['product_id'];
 
 		if ( 'product' !== get_post_type( $product_id ) ) {
