@@ -163,6 +163,12 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
+= 7.2.1 2022-12-16 =
+
+**WooCommerce**
+
+* Update - Include taxes migration in MigrationHelper::migrate_country_states [#35967](https://github.com/woocommerce/woocommerce/pull/35967)
+
 = 7.2.0 2022-12-14 =
 
 **WooCommerce**
