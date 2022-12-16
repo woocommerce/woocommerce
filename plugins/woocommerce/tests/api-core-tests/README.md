@@ -426,6 +426,8 @@ Verify [response contains an array containing an object](https://github.com/wooc
 
 ## Debugging tests
 
-When debugging API tests, it is usually simple enough to add `console.log()` statements to output the values of your response/JSON/variables/status etc. Be sure to remove them when done ;) 
+The Playwright debugger won't work for the API tests as it is based around GUI interactions.
 
+For now it's it is simple enough to add `console.log()` statements to output the values of your response/JSON/variables/status etc. Be sure to remove them when done ;) 
 
+You can also use the handy [REST API Log](https://wordpress.org/plugins/wp-rest-api-log/) plugin to see the API request information within WordPress. It displays the details, request headers, query params, body params, body content, response headers and response body information.
