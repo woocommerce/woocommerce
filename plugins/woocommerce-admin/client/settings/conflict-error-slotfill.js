@@ -15,6 +15,7 @@ import { Icon, closeSmall } from '@wordpress/icons';
 import { useEffect, useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
