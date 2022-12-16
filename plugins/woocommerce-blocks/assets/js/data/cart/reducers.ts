@@ -64,7 +64,7 @@ const reducer: Reducer< CartState > = (
 				};
 			}
 			break;
-		case types.RECEIVE_CART:
+		case types.SET_CART_DATA:
 			if ( action.response ) {
 				state = {
 					...state,
