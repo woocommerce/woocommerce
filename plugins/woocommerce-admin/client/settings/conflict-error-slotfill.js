@@ -71,6 +71,8 @@ const SettingsErrorFill = () => {
 			'success',
 			__( 'Recommended settings applied.', 'woocommerce' )
 		);
+
+		recordEvent( 'tax_settings_conflict_recommended_settings_clicked' );
 	};
 
 	const ApplyRecommendedSettingsButton = () => (
