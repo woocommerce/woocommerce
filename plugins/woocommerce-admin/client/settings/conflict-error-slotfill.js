@@ -178,9 +178,13 @@ const SettingsErrorFill = () => {
 						<div>
 							<Button
 								className="woocommerce_tax_settings_conflict_error_card_body__close_icon"
-								onClick={ () =>
-									setDismissedConflictWarning( true )
-								}
+								onClick={ () => {
+									setDismissedConflictWarning( true );
+
+									recordEvent(
+										'tax_settings_conflict_dismissed'
+									);
+								} }
 							>
 								<Icon icon={ closeSmall } />
 							</Button>
