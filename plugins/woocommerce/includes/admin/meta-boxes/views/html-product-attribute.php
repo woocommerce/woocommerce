@@ -37,12 +37,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 							}
 
 							if ( 'select' === $attribute_taxonomy->attribute_type ) {
+								$attribute_orderby = ! empty( $attribute_taxonomy->attribute_orderby ) ? $attribute_taxonomy->attribute_orderby : 'name';
 								?>
 								<select multiple="multiple"
 										data-minimum_input_length="0"
 										data-limit="50" data-return_id="id"
 										data-placeholder="<?php esc_attr_e( 'Select terms', 'woocommerce' ); ?>"
-										data-orderby="<?php echo ! empty( $attribute_taxonomy->attribute_orderby ) ? $attribute_taxonomy->attribute_orderby : 'name'; ?>"
+										data-orderby="<?php echo esc_attr( $attribute_orderby ); ?>"
 										class="multiselect attribute_values wc-taxonomy-term-search"
 										name="attribute_values[<?php echo esc_attr( $i ); ?>][]"
 										data-taxonomy="<?php echo esc_attr( $attribute->get_taxonomy() ); ?>">
