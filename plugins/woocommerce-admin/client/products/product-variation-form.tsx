@@ -11,6 +11,9 @@ import { ProductFormHeader } from './layout/product-form-header';
 import { ProductFormLayout } from './layout/product-form-layout';
 import { ProductFormFooter } from './layout/product-form-footer';
 import { ProductFormTab } from './product-form-tab';
+import { PricingSection } from './sections/pricing-section';
+import { ProductInventorySection } from './sections/product-inventory-section';
+import { ProductShippingSection } from './sections/product-shipping-section';
 
 export const ProductVariationForm: React.FC< {
 	product: PartialProduct;
@@ -27,13 +30,15 @@ export const ProductVariationForm: React.FC< {
 					<>General</>
 				</ProductFormTab>
 				<ProductFormTab name="pricing" title="Pricing">
-					<>Pricing</>
+					<PricingSection />
 				</ProductFormTab>
 				<ProductFormTab name="inventory" title="Inventory">
-					<>Inventory</>
+					<ProductInventorySection />
 				</ProductFormTab>
 				<ProductFormTab name="shipping" title="Shipping">
-					<>Shipping</>
+					<ProductShippingSection
+						product={ productVariation as PartialProduct }
+					/>
 				</ProductFormTab>
 			</ProductFormLayout>
 			<ProductFormFooter />
