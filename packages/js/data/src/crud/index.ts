@@ -9,7 +9,7 @@ import { Reducer } from 'redux';
  */
 import { createSelectors } from './selectors';
 import { createDispatchActions } from './actions';
-import controls from '../controls';
+import defaultControls from '../controls';
 import { createResolvers } from './resolvers';
 import { createReducer, ResourceState } from './reducer';
 
@@ -51,6 +51,7 @@ export const createCrudDataStore = ( {
 		actions = {},
 		selectors = {},
 		resolvers = {},
+		controls = {},
 	} = storeConfig;
 
 	registerStore( storeName, {
@@ -63,6 +64,6 @@ export const createCrudDataStore = ( {
 		actions: { ...crudActions, ...actions },
 		selectors: { ...crudSelectors, ...selectors },
 		resolvers: { ...crudResolvers, ...resolvers },
-		controls,
+		controls: { ...defaultControls, ...controls },
 	} );
 };
