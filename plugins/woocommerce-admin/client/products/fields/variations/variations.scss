@@ -48,6 +48,11 @@
 		.components-button {
 			position: relative;
 
+			&:disabled,
+			&[aria-disabled='true'] {
+				opacity: 1;
+			}
+
 			.components-spinner {
 				margin: 4px;
 			}
