@@ -173,6 +173,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Drop usage of WP 5.9 function in the product quantity selector template. [#36054](https://github.com/woocommerce/woocommerce/pull/36054)
 * Fix - Add a data migration for changed New Zealand and Ukraine state codes [#35669](https://github.com/woocommerce/woocommerce/pull/35669)
 * Fix - Fix error in onboarding wizard when plugin is activated but includes unexpected output. [#35866](https://github.com/woocommerce/woocommerce/pull/35866)
 * Fix - Increased margin so that overflow modal content doesn't clip header [#35780](https://github.com/woocommerce/woocommerce/pull/35780)
