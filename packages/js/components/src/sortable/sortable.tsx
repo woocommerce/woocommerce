@@ -32,6 +32,7 @@ import { SortableItem } from './sortable-item';
 import { SortableChild } from './types';
 
 export type SortableProps = {
+	className?: string;
 	children: SortableChild | SortableChild[] | null | undefined;
 	isHorizontal?: boolean;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
@@ -45,6 +46,7 @@ const THROTTLE_TIME = 16;
 export const SortableContext = createContext( {} );
 
 export const Sortable = ( {
+	className,
 	children,
 	isHorizontal = false,
 	onDragEnd = () => null,
@@ -226,7 +228,7 @@ export const Sortable = ( {
 	return (
 		<SortableContext.Provider value={ {} }>
 			<ol
-				className={ classnames( 'woocommerce-sortable', {
+				className={ classnames( className, 'woocommerce-sortable', {
 					'is-dragging': dragIndex !== null,
 					'is-horizontal': isHorizontal,
 				} ) }
