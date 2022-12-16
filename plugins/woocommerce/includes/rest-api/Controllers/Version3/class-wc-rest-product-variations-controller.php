@@ -34,7 +34,9 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		parent::register_routes();
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/generate', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/generate',
+			array(
 				'args'   => array(
 					'product_id' => array(
 						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
