@@ -40,7 +40,11 @@ export const useLiveBranchesData = () => {
 	return { branches, isLoading: loading };
 };
 
-export const useLiveBranchInstall = ( downloadUrl: string, prName: string ) => {
+export const useLiveBranchInstall = (
+	downloadUrl: string,
+	prName: string,
+	version: string
+) => {
 	const [ isInstalling, setIsInstalling ] = useState( false );
 	const [ isError, setIsError ] = useState( false );
 
@@ -48,17 +52,39 @@ export const useLiveBranchInstall = ( downloadUrl: string, prName: string ) => {
 		setIsInstalling( true );
 
 		try {
-			const res = await apiFetch< Response >( {
+			const installResult = await apiFetch< Response >( {
 				path: `${ API_NAMESPACE }/live-branches/install/v1`,
 				method: 'POST',
 				body: JSON.stringify( {
 					pr_name: prName,
 					download_url: downloadUrl,
+					version,
 				} ),
 			} );
 
-			if ( res.status >= 400 ) {
-				setIsError( true );
+			if ( installResult.status >= 400 ) {
+				throw new Error( 'Could not install' );
+			}
+
+			const deactivateResult = await apiFetch< Response >( {
+				path: `${ API_NAMESPACE }/live-branches/deactivate/v1`,
+				method: 'GET',
+			} );
+
+			if ( deactivateResult.status >= 400 ) {
+				throw new Error( 'Could not deactivate' );
+			}
+
+			const activateResult = await apiFetch< Response >( {
+				path: `live-branches/activate/v1`,
+				method: 'POST',
+				body: JSON.stringify( {
+					version,
+				} ),
+			} );
+
+			if ( activateResult.status >= 400 ) {
+				throw new Error( 'Could not activate' );
 			}
 		} catch ( e ) {
 			setIsError( true );

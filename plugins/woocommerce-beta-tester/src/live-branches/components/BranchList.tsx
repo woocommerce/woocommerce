@@ -9,7 +9,6 @@ import {
 	Button,
 	Spinner,
 } from '@wordpress/components';
-import { useState } from 'react';
 
 /**
  * Internal dependencies
@@ -19,7 +18,8 @@ import { Branch, useLiveBranchInstall } from '../hooks/live-branches';
 const BranchListItem = ( { branch }: { branch: Branch } ) => {
 	const { isError, isInstalling, install } = useLiveBranchInstall(
 		branch.download_url,
-		`https://github.com/woocommerce/woocommerce/pull/${ branch.pr }`
+		`https://github.com/woocommerce/woocommerce/pull/${ branch.pr }`,
+		branch.version
 	);
 
 	return (

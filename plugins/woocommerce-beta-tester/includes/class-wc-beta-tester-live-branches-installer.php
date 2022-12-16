@@ -11,10 +11,12 @@ defined( 'ABSPATH' ) || exit;
  * WC_Beta_Tester Live Branches Installer Class.
  */
 class WC_Beta_Tester_Live_Branches_Installer {
+	private $file_system;
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
+		$this->file_system = $this->init_filesystem();
 	}
 
 	/**
@@ -38,10 +40,9 @@ class WC_Beta_Tester_Live_Branches_Installer {
 	 *
 	 * @param string $download_url The download url of the plugin version.
 	 * @param string $pr_name The name of the associated PR.
+	 * @param string $version The version of the plugin.
 	 */
-	public function install( $download_url, $pr_name ) {
-		$wp_filesystem = $this->init_filesystem();
-
+	public function install( $download_url, $pr_name, $version ) {
 		// Download the plugin.
 		$tmp_dir = download_url( $download_url );
 
@@ -52,15 +53,15 @@ class WC_Beta_Tester_Live_Branches_Installer {
 			);
 		}
 
-		if ( is_wp_error( $wp_filesystem ) ) {
-			return $wp_filesystem;
-		}
-
 		// Unzip the plugin.
-		$plugin_path = str_replace( ABSPATH, $wp_filesystem->abspath(), WP_PLUGIN_DIR );
-		$unzip       = unzip_file( $tmp_dir, "$plugin_path/woocommerce-$pr_name" );
+		$plugin_dir  = str_replace( ABSPATH, $this->file_system->abspath(), WP_PLUGIN_DIR );
+		$plugin_path = $plugin_dir . "/woocommerce-$version";
 
-		deactivate_plugins( 'woocommerce/woocommerce.php' );
+		$unzip = unzip_file( $tmp_dir, $plugin_path );
+
+		// The plugin is nested under woocommerce-dev, so we need to move it up one level.
+		$this->file_system->mkdir( $plugin_dir . '/woocommerce-dev' );
+		$this->move( $plugin_path . '/woocommerce-dev', $plugin_dir . '/woocommerce-dev' );
 
 		if ( is_wp_error( $unzip ) ) {
 			return new WP_Error( 'unzip_error', sprintf( __( 'Error Unzipping file: Error: %1$s', 'woocommerce-beta-tester' ), $result->get_error_message() ) );
@@ -69,23 +70,28 @@ class WC_Beta_Tester_Live_Branches_Installer {
 		// Delete the downloaded zip file.
 		unlink( $tmp_dir );
 
-		// Activate the plugin.
-		$activate = activate_plugin( "$plugin_path/woocommerce-$pr_name" );
+		return true;
+	}
 
-		if ( is_wp_error( $activate ) ) {
-			return $activate;
+	private function move( $from, $to ) {
+		$files     = scandir( $from );
+		$oldfolder = "$from/";
+		$newfolder = "$to/";
+
+		foreach ( $files as $fname ) {
+			if ( '.' !== $fname && '..' !== $fname ) {
+				$this->file_system->move( $oldfolder . $fname, $newfolder . $fname );
+			}
 		}
+	}
 
-		$plugin_info = (object) array(
-			'source' => $download_url,
-			'pr'     => $pr_name,
-		);
-
-		$wp_filesystem->put_contents(
-			"$plugin_path/$pr_name/.wc-beta-tester.json",
-			wp_json_encode( $info, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE )
-		);
+	public function deactivate() {
+		deactivate_plugins( 'woocommerce/woocommerce.php' );
 
 		return true;
+	}
+
+	public function activate() {
+		activate_plugin( 'woocommerce-dev/woocommerce.php' );
 	}
 }
