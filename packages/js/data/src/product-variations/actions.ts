@@ -38,6 +38,8 @@ export const generateProductVariations = function* ( idQuery: IdQuery ) {
 
 		return result;
 	} catch ( error ) {
+		const { key } = parseId( idQuery, urlParameters );
+
 		yield generateProductVariationsError( key, error );
 		throw error;
 	}
