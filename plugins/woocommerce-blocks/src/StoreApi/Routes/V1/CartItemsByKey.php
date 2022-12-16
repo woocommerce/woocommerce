@@ -78,7 +78,7 @@ class CartItemsByKey extends AbstractCartRoute {
 		$cart_item = $this->cart_controller->get_cart_item( $request['key'] );
 
 		if ( empty( $cart_item ) ) {
-			throw new RouteException( 'woocommerce_rest_cart_invalid_key', __( 'Cart item does not exist.', 'woo-gutenberg-products-block' ), 404 );
+			throw new RouteException( 'woocommerce_rest_cart_invalid_key', __( 'Cart item does not exist.', 'woo-gutenberg-products-block' ), 409 );
 		}
 
 		$data     = $this->prepare_item_for_response( $cart_item, $request );
@@ -116,7 +116,7 @@ class CartItemsByKey extends AbstractCartRoute {
 		$cart_item = $this->cart_controller->get_cart_item( $request['key'] );
 
 		if ( empty( $cart_item ) ) {
-			throw new RouteException( 'woocommerce_rest_cart_invalid_key', __( 'Cart item does not exist.', 'woo-gutenberg-products-block' ), 404 );
+			throw new RouteException( 'woocommerce_rest_cart_invalid_key', __( 'Cart item does not exist.', 'woo-gutenberg-products-block' ), 409 );
 		}
 
 		$cart->remove_cart_item( $request['key'] );
