@@ -10,7 +10,7 @@ import { getCollection, getCollectionHeader } from '../resolvers';
 import { receiveCollection } from '../actions';
 import { STORE_KEY as SCHEMA_STORE_KEY } from '../../schema/constants';
 import { STORE_KEY } from '../constants';
-import { apiFetchWithHeaders } from '../../shared-controls';
+import { apiFetchWithHeadersControl } from '../../shared-controls';
 
 jest.mock( '@wordpress/data' );
 
@@ -73,7 +73,7 @@ describe( 'getCollection', () => {
 				fulfillment.next();
 				const { value } = fulfillment.next( 'https://example.org' );
 				expect( value ).toEqual(
-					apiFetchWithHeaders( {
+					apiFetchWithHeadersControl( {
 						path: 'https://example.org?foo=bar',
 					} )
 				);

@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import triggerFetch, { APIFetchOptions } from '@wordpress/api-fetch';
 import DataLoader from 'dataloader';
-import { isWpVersion } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -14,18 +13,6 @@ import {
 	assertResponseIsValid,
 	ApiResponse,
 } from './types';
-
-/**
- * Dispatched a control action for triggering an api fetch call with no parsing.
- * Typically this would be used in scenarios where headers are needed.
- *
- * @param {APIFetchOptions} options The options for the API request.
- */
-export const apiFetchWithHeaders = ( options: APIFetchOptions ) =>
-	( {
-		type: 'API_FETCH_WITH_HEADERS',
-		options,
-	} as const );
 
 const EMPTY_OBJECT = {};
 
@@ -114,6 +101,100 @@ const batchFetch = async ( request: APIFetchOptions ) => {
 };
 
 /**
+ * Dispatched a control action for triggering an api fetch call with no parsing.
+ * Typically this would be used in scenarios where headers are needed.
+ *
+ * @param {APIFetchOptions} options The options for the API request.
+ */
+export const apiFetchWithHeadersControl = ( options: APIFetchOptions ) =>
+	( {
+		type: 'API_FETCH_WITH_HEADERS',
+		options,
+	} as const );
+
+/**
+ * The underlying function that actually does the fetch. This is used by both the generator (control) version of
+ * apiFetchWithHeadersControl and the async function apiFetchWithHeaders.
+ */
+const doApiFetchWithHeaders = ( options: APIFetchOptions ) =>
+	new Promise( ( resolve, reject ) => {
+		// GET Requests cannot be batched.
+		if ( ! options.method || options.method === 'GET' ) {
+			// Parse is disabled here to avoid returning just the body--we also need headers.
+			triggerFetch( {
+				...options,
+				parse: false,
+			} )
+				.then( ( fetchResponse ) => {
+					fetchResponse
+						.json()
+						.then( ( response ) => {
+							resolve( {
+								response,
+								headers: fetchResponse.headers,
+							} );
+							setNonceOnFetch( fetchResponse.headers );
+						} )
+						.catch( () => {
+							reject( invalidJsonError );
+						} );
+				} )
+				.catch( ( errorResponse ) => {
+					setNonceOnFetch( errorResponse.headers );
+					if ( typeof errorResponse.json === 'function' ) {
+						// Parse error response before rejecting it.
+						errorResponse
+							.json()
+							.then( ( error: unknown ) => {
+								reject( error );
+							} )
+							.catch( () => {
+								reject( invalidJsonError );
+							} );
+					} else {
+						reject( errorResponse.message );
+					}
+				} );
+		} else {
+			batchFetch( options )
+				.then( ( response: ApiResponse ) => {
+					assertResponseIsValid( response );
+
+					if ( response.status >= 200 && response.status < 300 ) {
+						resolve( {
+							response: response.body,
+							headers: response.headers,
+						} );
+						setNonceOnFetch( response.headers );
+					}
+
+					// Status code indicates error.
+					throw response;
+				} )
+				.catch( ( errorResponse: ApiResponse ) => {
+					if ( errorResponse.headers ) {
+						setNonceOnFetch( errorResponse.headers );
+					}
+					if ( errorResponse.body ) {
+						reject( errorResponse.body );
+					} else {
+						reject( errorResponse );
+					}
+				} );
+		}
+	} );
+
+/**
+ * Triggers an api fetch call with no parsing.
+ * Typically this would be used in scenarios where headers are needed.
+ *
+ * @param {APIFetchOptions} options The options for the API request.
+ */
+export const apiFetchWithHeaders = ( options: APIFetchOptions ) => {
+	return doApiFetchWithHeaders( options );
+};
+
+/**
  * Default export for registering the controls with the store.
  *
  * @return {Object} An object with the controls to register with the store on
@@ -122,76 +203,9 @@ const batchFetch = async ( request: APIFetchOptions ) => {
 export const controls = {
 	API_FETCH_WITH_HEADERS: ( {
 		options,
-	}: ReturnType< typeof apiFetchWithHeaders > ): Promise< unknown > => {
-		return new Promise( ( resolve, reject ) => {
-			// GET Requests cannot be batched.
-			if (
-				! options.method ||
-				options.method === 'GET' ||
-				isWpVersion( '5.6', '<' )
-			) {
-				// Parse is disabled here to avoid returning just the body--we also need headers.
-				triggerFetch( {
-					...options,
-					parse: false,
-				} )
-					.then( ( fetchResponse ) => {
-						fetchResponse
-							.json()
-							.then( ( response ) => {
-								resolve( {
-									response,
-									headers: fetchResponse.headers,
-								} );
-								setNonceOnFetch( fetchResponse.headers );
-							} )
-							.catch( () => {
-								reject( invalidJsonError );
-							} );
-					} )
-					.catch( ( errorResponse ) => {
-						setNonceOnFetch( errorResponse.headers );
-						if ( typeof errorResponse.json === 'function' ) {
-							// Parse error response before rejecting it.
-							errorResponse
-								.json()
-								.then( ( error: unknown ) => {
-									reject( error );
-								} )
-								.catch( () => {
-									reject( invalidJsonError );
-								} );
-						} else {
-							reject( errorResponse.message );
-						}
-					} );
-			} else {
-				batchFetch( options )
-					.then( ( response: ApiResponse ) => {
-						assertResponseIsValid( response );
-
-						if ( response.status >= 200 && response.status < 300 ) {
-							resolve( {
-								response: response.body,
-								headers: response.headers,
-							} );
-							setNonceOnFetch( response.headers );
-						}
-
-						// Status code indicates error.
-						throw response;
-					} )
-					.catch( ( errorResponse: ApiResponse ) => {
-						if ( errorResponse.headers ) {
-							setNonceOnFetch( errorResponse.headers );
-						}
-						if ( errorResponse.body ) {
-							reject( errorResponse.body );
-						} else {
-							reject( errorResponse );
-						}
-					} );
-			}
-		} );
+	}: ReturnType<
+		typeof apiFetchWithHeadersControl
+	> ): Promise< unknown > => {
+		return doApiFetchWithHeaders( options );
 	},
 };

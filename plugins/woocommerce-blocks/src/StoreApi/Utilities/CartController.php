@@ -182,7 +182,7 @@ class CartController {
 		$cart_item = $this->get_cart_item( $item_id );
 
 		if ( empty( $cart_item ) ) {
-			throw new RouteException( 'woocommerce_rest_cart_invalid_key', __( 'Cart item does not exist.', 'woo-gutenberg-products-block' ), 404 );
+			throw new RouteException( 'woocommerce_rest_cart_invalid_key', __( 'Cart item does not exist.', 'woo-gutenberg-products-block' ), 409 );
 		}
 
 		$product = $cart_item['data'];

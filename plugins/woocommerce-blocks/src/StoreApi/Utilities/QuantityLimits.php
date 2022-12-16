@@ -24,7 +24,7 @@ final class QuantityLimits {
 		if ( ! $product instanceof \WC_Product ) {
 			return [
 				'minimum'     => 1,
-				'maximum'     => null,
+				'maximum'     => 9999,
 				'multiple_of' => 1,
 				'editable'    => true,
 			];

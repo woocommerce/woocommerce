@@ -221,7 +221,7 @@ class CartItems extends ControllerTestCase {
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$this->assertAPIResponse(
 			$request,
-			404
+			409
 		);
 	}
 
@@ -286,11 +286,13 @@ class CartItems extends ControllerTestCase {
 		// Simple product.
 		$response = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
 		$diff     = $validate->get_diff_from_object( $response->get_data() );
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		$this->assertEmpty( $diff, print_r( $diff, true ) );
 
 		// Variable product.
 		$response = $controller->prepare_item_for_response( end( $cart ), new \WP_REST_Request() );
 		$diff     = $validate->get_diff_from_object( $response->get_data() );
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		$this->assertEmpty( $diff, print_r( $diff, true ) );
 	}
 }

@@ -1,37 +1,44 @@
 /**
  * External dependencies
  */
-import { apiFetch } from '@wordpress/data-controls';
-import { controls } from '@wordpress/data';
-import { CartResponse, Cart } from '@woocommerce/types';
+import apiFetch from '@wordpress/api-fetch';
+import { CartResponse } from '@woocommerce/type-defs/cart-response';
 
 /**
  * Internal dependencies
  */
-import { receiveCart, receiveError } from './actions';
-import { STORE_KEY, CART_API_ERROR } from './constants';
+import { CART_API_ERROR } from './constants';
+import type { CartDispatchFromMap, CartResolveSelectFromMap } from './index';
 
 /**
  * Resolver for retrieving all cart data.
  */
-export function* getCartData(): Generator< unknown, void, CartResponse > {
-	const cartData = yield apiFetch( {
-		path: '/wc/store/v1/cart',
-		method: 'GET',
-		cache: 'no-store',
-	} );
+export const getCartData =
+	() =>
+	async ( { dispatch }: { dispatch: CartDispatchFromMap } ) => {
+		const cartData = await apiFetch< CartResponse >( {
+			path: '/wc/store/v1/cart',
+			method: 'GET',
+			cache: 'no-store',
+		} );
 
-	if ( ! cartData ) {
-		yield receiveError( CART_API_ERROR );
-		return;
-	}
-
-	yield receiveCart( cartData );
-}
+		const { receiveCart, receiveError } = dispatch;
+		if ( ! cartData ) {
+			receiveError( CART_API_ERROR );
+			return;
+		}
+		receiveCart( cartData );
+	};
 
 /**
  * Resolver for retrieving cart totals.
  */
-export function* getCartTotals(): Generator< unknown, void, Cart > {
-	yield controls.resolveSelect( STORE_KEY, 'getCartData' );
-}
+export const getCartTotals =
+	() =>
+	async ( {
+		resolveSelect,
+	}: {
+		resolveSelect: CartResolveSelectFromMap;
+	} ) => {
+		await resolveSelect.getCartData();
+	};

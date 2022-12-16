@@ -1,5 +1,3 @@
-/** @typedef { import('@woocommerce/type-defs/hooks').StoreCartCoupon } StoreCartCoupon */
-
 /**
  * External dependencies
  */
@@ -32,32 +30,23 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 	const { setValidationErrors } = useDispatch( VALIDATION_STORE_KEY );
 
 	const {
-		applyCoupon,
-		removeCoupon,
 		isApplyingCoupon,
 		isRemovingCoupon,
-	}: Pick<
-		StoreCartCoupon,
-		| 'applyCoupon'
-		| 'removeCoupon'
-		| 'isApplyingCoupon'
-		| 'isRemovingCoupon'
-		| 'receiveApplyingCoupon'
-	> = useSelect(
-		( select, { dispatch } ) => {
-			const store = select( storeKey );
-			const actions = dispatch( storeKey );
+	}: Pick< StoreCartCoupon, 'isApplyingCoupon' | 'isRemovingCoupon' > =
+		useSelect(
+			( select ) => {
+				const store = select( storeKey );
 
-			return {
-				applyCoupon: actions.applyCoupon,
-				removeCoupon: actions.removeCoupon,
-				isApplyingCoupon: store.isApplyingCoupon(),
-				isRemovingCoupon: store.isRemovingCoupon(),
-				receiveApplyingCoupon: actions.receiveApplyingCoupon,
-			};
-		},
-		[ createErrorNotice, createNotice ]
-	);
+				return {
+					isApplyingCoupon: store.isApplyingCoupon(),
+					isRemovingCoupon: store.isRemovingCoupon(),
+				};
+			},
+			[ createErrorNotice, createNotice ]
+		);
+
+	const { applyCoupon, removeCoupon, receiveApplyingCoupon } =
+		useDispatch( storeKey );
 
 	const applyCouponWithNotices = ( couponCode: string ) => {
 		applyCoupon( couponCode )

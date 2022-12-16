@@ -31,7 +31,7 @@ describe( 'cartReducer', () => {
 	} );
 	it( 'sets expected state when a cart is received', () => {
 		const testAction = {
-			type: types.RECEIVE_CART,
+			type: types.SET_CART_DATA,
 			response: {
 				coupons: [],
 				items: [],
