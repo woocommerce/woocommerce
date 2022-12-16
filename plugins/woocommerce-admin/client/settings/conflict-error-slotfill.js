@@ -128,6 +128,12 @@ const SettingsErrorFill = () => {
 			setIsConflict( false );
 		} else {
 			setIsConflict( true );
+
+			recordEvent( 'tax_settings_conflict', {
+				main: pricesEnteredWithTaxSetting,
+				shop: displayPricesInShopWithTaxSetting,
+				cart: displayPricesInCartWithTaxSetting,
+			} );
 		}
 	}, [
 		displayPricesInCartWithTaxSetting,
