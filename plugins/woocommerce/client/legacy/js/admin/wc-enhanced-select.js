@@ -324,6 +324,7 @@ jQuery( function( $ ) {
 								return {
 									taxonomy: $( this ).data( 'taxonomy' ),
 									limit:    $( this ).data( 'limit' ),
+									orderby:  $( this ).data( 'orderby'),
 									term:     params.term,
 									action:   'woocommerce_json_search_taxonomy_terms',
 									security: wc_enhanced_select_params.search_taxonomy_terms_nonce
