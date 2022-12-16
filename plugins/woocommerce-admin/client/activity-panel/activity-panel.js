@@ -49,6 +49,7 @@ import { LayoutContext } from '~/layout';
 import { getSegmentsFromPath } from '~/utils/url-helpers';
 import { FeedbackIcon } from '~/products/images/feedback-icon';
 import { STORE_KEY as CES_STORE_KEY } from '~/customer-effort-score-tracks/data/constants';
+import { ProductFeedbackTour } from '~/guided-tours/add-product-feedback-tour';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -250,6 +251,16 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		);
 	};
 
+	const isAddProductPage = () => {
+		const urlParams = getUrlParams( window.location.search );
+
+		return (
+			isEmbedded &&
+			/post-new\.php$/.test( window.location.pathname ) &&
+			urlParams?.post_type === 'product'
+		);
+	};
+
 	const isPerformingSetupTask = () => {
 		return (
 			query.task &&
@@ -262,8 +273,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 	// @todo Pull in dynamic unread status/count
 	const getTabs = () => {
-		const urlParams = getUrlParams( window.location.search );
-
 		const activity = {
 			name: 'activity',
 			title: __( 'Activity', 'woocommerce' ),
@@ -314,10 +323,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 					}
 				);
 			},
-			visible:
-				isEmbedded &&
-				urlParams?.post_type === 'product' &&
-				! urlParams?.taxonomy,
+			visible: isAddProductPage(),
 		};
 
 		const setup = {
@@ -485,6 +491,9 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 						clearPanel={ () => clearPanel() }
 					/>
 				</Section>
+				{ isAddProductPage() && (
+					<ProductFeedbackTour currentTab={ currentTab } />
+				) }
 				{ showHelpHighlightTooltip ? (
 					<HighlightTooltip
 						delay={ 1000 }
