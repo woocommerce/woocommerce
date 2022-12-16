@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Drop usage of WP 5.9 function in the product quantity selector template.
