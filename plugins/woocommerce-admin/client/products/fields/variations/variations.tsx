@@ -87,7 +87,7 @@ export const Variations: React.FC = () => {
 				</h4>
 				<h4>{ __( 'Quantity', 'woocommerce' ) }</h4>
 			</div>
-			<Sortable>
+			<Sortable className={ `rows-${ perPage }` }>
 				{ variations.map( ( variation ) => (
 					<ListItem key={ variation.id }>
 						<div className="woocommerce-product-variations__attributes">
