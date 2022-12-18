@@ -33,9 +33,8 @@ type AttributeFieldProps = {
 	value: ProductAttribute[];
 	onChange: ( value: ProductAttribute[] ) => void;
 	productId?: number;
-	filter?: ( attribute: ProductAttribute ) => boolean;
-	newAttributeProps?: Partial< ProductAttribute >;
-	addButtonLabel?: string;
+	// TODO: should we support an 'any' option to show all attributes?
+	attributeType?: 'regular' | 'for-variations';
 };
 
 export type HydratedAttributeType = Omit< ProductAttribute, 'options' > & {
@@ -47,9 +46,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 	value,
 	onChange,
 	productId,
-	filter,
-	newAttributeProps,
-	addButtonLabel = __( 'Add attribute', 'woocommerce' ),
+	attributeType = 'regular',
 } ) => {
 	const [ showAddAttributeModal, setShowAddAttributeModal ] =
 		useState( false );
@@ -63,8 +60,17 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		null | string
 	>( null );
 
-	const CANCEL_BUTTON_EVENT_NAME =
-		'product_add_attributes_modal_cancel_button_click';
+	const isOnlyForVariations = attributeType === 'for-variations';
+
+	const filter = ( attribute: ProductAttribute ) => {
+		return attribute.variation === isOnlyForVariations;
+	};
+
+	const newAttributeProps = { variation: isOnlyForVariations };
+
+	const CANCEL_BUTTON_EVENT_NAME = isOnlyForVariations
+		? 'product_add_options_modal_cancel_button_click'
+		: 'product_add_attributes_modal_cancel_button_click';
 
 	const fetchTerms = useCallback(
 		( attributeId: number ) => {
@@ -267,14 +273,27 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 				) ) }
 			</Sortable>
 			<AddAttributeListItem
-				label={ addButtonLabel }
+				label={
+					isOnlyForVariations
+						? __( 'Add option', 'woocommerce' )
+						: undefined
+				}
 				onAddClick={ () => {
-					recordEvent( 'product_add_attribute_button' );
+					recordEvent(
+						isOnlyForVariations
+							? 'product_add_option_button'
+							: 'product_add_attribute_button'
+					);
 					setShowAddAttributeModal( true );
 				} }
 			/>
 			{ showAddAttributeModal && (
 				<AddAttributeModal
+					title={
+						isOnlyForVariations
+							? __( 'Add options', 'woocommerce' )
+							: undefined
+					}
 					onCancel={ () => {
 						recordEvent( CANCEL_BUTTON_EVENT_NAME );
 						setShowAddAttributeModal( false );

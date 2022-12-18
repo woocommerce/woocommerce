@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Link, useFormContext } from '@woocommerce/components';
-import { Product, ProductAttribute } from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -11,19 +11,13 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import './options-section.scss';
 import { ProductSectionLayout } from '../layout/product-section-layout';
-import { AttributeField } from '../fields/attribute-field';
+import { Options } from '../fields/options';
 
 export const OptionsSection: React.FC = () => {
 	const {
 		getInputProps,
 		values: { id: productId },
 	} = useFormContext< Product >();
-
-	const filter = ( attribute: ProductAttribute ) => {
-		return attribute.variation === true;
-	};
-
-	const newAttributeProps = { variation: true };
 
 	return (
 		<ProductSectionLayout
@@ -51,12 +45,9 @@ export const OptionsSection: React.FC = () => {
 				</>
 			}
 		>
-			<AttributeField
+			<Options
 				{ ...getInputProps( 'attributes', {
 					productId,
-					filter,
-					newAttributeProps,
-					addButtonLabel: __( 'Add option', 'woocommerce' ),
 				} ) }
 			/>
 		</ProductSectionLayout>
