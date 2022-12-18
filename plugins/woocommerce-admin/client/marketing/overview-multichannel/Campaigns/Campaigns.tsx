@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button, Card, CardHeader, CardBody } from '@wordpress/components';
 import { Icon, megaphone } from '@wordpress/icons';
+import { Table } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -63,5 +64,39 @@ export const Campaigns = () => {
 		);
 	}
 
-	return <div>TODO: campaigns here.</div>;
+	return (
+		<Card className="woocommerce-marketing-campaigns-card">
+			<CardHeader>
+				<CardHeaderTitle>
+					{ __( 'Campaigns', 'woocommerce' ) }
+				</CardHeaderTitle>
+				<Button variant="secondary">
+					{ __( 'Create new campaign', 'woocommerce' ) }
+				</Button>
+			</CardHeader>
+			<Table
+				title={ __( 'Campaigns', 'woocommerce' ) }
+				showMenu={ false }
+				headers={ [
+					{
+						key: 'campaign',
+						label: __( 'Campaign', 'woocommerce' ),
+					},
+					{
+						key: 'cost',
+						label: __( 'Cost', 'woocommerce' ),
+					},
+				] }
+				ids={ data.map( ( el ) => el.id ) }
+				rows={ data.map( ( el ) => {
+					return [
+						{ display: <div>{ el.title }</div> },
+						{ display: el.cost },
+					];
+				} ) }
+				rowsPerPage={ 5 }
+				totalRows={ data.length }
+			/>
+		</Card>
+	);
 };
