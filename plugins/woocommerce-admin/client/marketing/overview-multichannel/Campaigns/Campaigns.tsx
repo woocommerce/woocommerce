@@ -100,6 +100,7 @@ export const Campaigns = () => {
 					{
 						key: 'cost',
 						label: __( 'Cost', 'woocommerce' ),
+						isNumeric: true,
 					},
 				] }
 				ids={ pagedData.map( ( el ) => el.id ) }
