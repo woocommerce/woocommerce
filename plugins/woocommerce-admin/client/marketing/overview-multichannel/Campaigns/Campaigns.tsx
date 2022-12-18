@@ -2,17 +2,19 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useState } from '@wordpress/element';
 import {
 	Button,
 	Card,
 	CardHeader,
 	CardBody,
+	CardFooter,
 	Flex,
 	FlexItem,
 	FlexBlock,
 } from '@wordpress/components';
 import { Icon, megaphone } from '@wordpress/icons';
-import { Table } from '@woocommerce/components';
+import { Pagination, Table } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -22,6 +24,7 @@ import { useCampaigns } from './useCampaigns';
 import './Campaigns.scss';
 
 export const Campaigns = () => {
+	const [ page, setPage ] = useState( 1 );
 	const { loading, data } = useCampaigns();
 
 	if ( loading ) {
@@ -72,6 +75,11 @@ export const Campaigns = () => {
 		);
 	}
 
+	const perPage = 5;
+	const total = data.length;
+	const start = ( page - 1 ) * perPage;
+	const pagedData = data.slice( start, start + perPage );
+
 	return (
 		<Card className="woocommerce-marketing-campaigns-card">
 			<CardHeader>
@@ -83,8 +91,7 @@ export const Campaigns = () => {
 				</Button>
 			</CardHeader>
 			<Table
-				title={ __( 'Campaigns', 'woocommerce' ) }
-				showMenu={ false }
+				caption={ __( 'Campaigns', 'woocommerce' ) }
 				headers={ [
 					{
 						key: 'campaign',
@@ -95,8 +102,8 @@ export const Campaigns = () => {
 						label: __( 'Cost', 'woocommerce' ),
 					},
 				] }
-				ids={ data.map( ( el ) => el.id ) }
-				rows={ data.map( ( el ) => {
+				ids={ pagedData.map( ( el ) => el.id ) }
+				rows={ pagedData.map( ( el ) => {
 					return [
 						{
 							display: (
@@ -127,9 +134,18 @@ export const Campaigns = () => {
 						{ display: el.cost },
 					];
 				} ) }
-				rowsPerPage={ 5 }
-				totalRows={ data.length }
 			/>
+			<CardFooter className="woocommerce-marketing-campaigns-card-footer">
+				<Pagination
+					showPerPagePicker={ false }
+					perPage={ 5 }
+					page={ page }
+					total={ total }
+					onPageChange={ ( newPage: number ) => {
+						setPage( newPage );
+					} }
+				/>
+			</CardFooter>
 		</Card>
 	);
 };

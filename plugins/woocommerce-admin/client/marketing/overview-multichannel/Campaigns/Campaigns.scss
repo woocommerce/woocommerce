@@ -42,4 +42,11 @@
 	.woocommerce-marketing-campaign-description {
 		color: $gray-700;
 	}
+
+	.woocommerce-marketing-campaigns-card-footer {
+		justify-content: center;
+
+		// Remove the border-top because the table cells already has a border-bottom.
+		border-top: none;
+	}
 }
