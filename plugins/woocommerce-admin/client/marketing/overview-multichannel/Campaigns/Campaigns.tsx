@@ -2,7 +2,15 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, Card, CardHeader, CardBody } from '@wordpress/components';
+import {
+	Button,
+	Card,
+	CardHeader,
+	CardBody,
+	Flex,
+	FlexItem,
+	FlexBlock,
+} from '@wordpress/components';
 import { Icon, megaphone } from '@wordpress/icons';
 import { Table } from '@woocommerce/components';
 
@@ -90,7 +98,32 @@ export const Campaigns = () => {
 				ids={ data.map( ( el ) => el.id ) }
 				rows={ data.map( ( el ) => {
 					return [
-						{ display: <div>{ el.title }</div> },
+						{
+							display: (
+								<Flex gap={ 4 }>
+									<FlexItem className="woocommerce-marketing-campaign-logo">
+										<img
+											src={ el.icon }
+											alt={ el.channelName }
+											width="16"
+											height="16"
+										/>
+									</FlexItem>
+									<FlexBlock>
+										<Flex direction="column" gap={ 1 }>
+											<FlexItem className="woocommerce-marketing-campaign-title">
+												<a href={ el.manageUrl }>
+													{ el.title }
+												</a>
+											</FlexItem>
+											<FlexItem className="woocommerce-marketing-campaign-description">
+												{ el.description }
+											</FlexItem>
+										</Flex>
+									</FlexBlock>
+								</Flex>
+							),
+						},
 						{ display: el.cost },
 					];
 				} ) }
