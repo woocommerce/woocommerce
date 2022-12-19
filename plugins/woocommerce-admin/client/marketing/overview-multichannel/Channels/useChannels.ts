@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { useRecommendedChannels } from './useRecommendedChannels';
+import { useRecommendedChannels } from '~/marketing/hooks';
 import { useRegisteredChannels } from './useRegisteredChannels';
 
 export const useChannels = () => {
