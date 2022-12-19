@@ -47,7 +47,7 @@ export interface BlockErrorBoundaryProps extends BlockErrorBase {
 	 * Override the default error with a function that takes the error message and returns a React component
 	 */
 	renderError?: ( props: RenderErrorProps ) => React.ReactNode;
-	showErrorMessage?: boolean;
+	showErrorMessage?: boolean | undefined;
 }
 
 export interface DerivedStateReturn {
