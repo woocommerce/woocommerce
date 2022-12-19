@@ -88,44 +88,23 @@ const StateInput = ( {
 
 	if ( options.length > 0 ) {
 		return (
-			<>
-				<Combobox
-					className={ classnames(
-						className,
-						'wc-block-components-state-input'
-					) }
-					id={ id }
-					label={ label }
-					onChange={ onChangeState }
-					options={ options }
-					value={ value }
-					errorMessage={ __(
-						'Please select a state.',
-						'woo-gutenberg-products-block'
-					) }
-					required={ required }
-					autoComplete={ autoComplete }
-				/>
-				{ autoComplete !== 'off' && (
-					<input
-						type="text"
-						aria-hidden={ true }
-						autoComplete={ autoComplete }
-						value={ value }
-						onChange={ ( event ) =>
-							onChangeState( event.target.value )
-						}
-						style={ {
-							minHeight: '0',
-							height: '0',
-							border: '0',
-							padding: '0',
-							position: 'absolute',
-						} }
-						tabIndex={ -1 }
-					/>
+			<Combobox
+				className={ classnames(
+					className,
+					'wc-block-components-state-input'
 				) }
-			</>
+				id={ id }
+				label={ label }
+				onChange={ onChangeState }
+				options={ options }
+				value={ value }
+				errorMessage={ __(
+					'Please select a state.',
+					'woo-gutenberg-products-block'
+				) }
+				required={ required }
+				autoComplete={ autoComplete }
+			/>
 		);
 	}
 
