@@ -1,0 +1,5 @@
+export enum TYPES {
+	GENERATE_VARIATIONS_ERROR = 'GENERATE_VARIATIONS_ERROR',
+}
+
+export default TYPES;
