@@ -154,7 +154,7 @@ jobs:
 
             - name: Cherry pick
               run: |
-                  git cherry-pick ${{ steps.commit-sha.outputs.sha }}
+                  git cherry-pick ${{ steps.commit-sha.outputs.sha }} -m1
 
             - name: Generate changelog
               id: changelog
