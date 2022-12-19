@@ -1,0 +1,41 @@
+<?php
+/**
+ * Product Form Traits
+ */
+
+namespace Automattic\WooCommerce\Internal\Admin\ProductForm;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * TaskTraits class.
+ */
+trait ComponentTrait {
+	/**
+	 * Component ID.
+	 *
+	 * @var string
+	 */
+	protected $id;
+
+	/**
+	 * Plugin ID.
+	 *
+	 * @var string
+	 */
+	protected $plugin_id;
+
+	/**
+	 * Product form component location.
+	 *
+	 * @var string
+	 */
+	protected $location;
+
+	/**
+	 * Product form component order.
+	 *
+	 * @var number
+	 */
+	protected $order;
+}
