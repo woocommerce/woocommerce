@@ -22,6 +22,3 @@ trim_trailing_whitespace = false
 trim_trailing_whitespace = false
 indent_style = space
 indent_size = 2
-
-[*.md]
-indent_style = space
