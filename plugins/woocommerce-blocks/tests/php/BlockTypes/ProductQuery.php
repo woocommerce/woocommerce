@@ -89,7 +89,10 @@ class ProductQuery extends \WP_UnitTestCase {
 		foreach ( $on_sale_product_ids as $id ) {
 			$this->assertContainsEquals( $id, $merged_query['post__in'] );
 		}
+
 		$this->assertCount( 4, $merged_query['post__in'] );
+
+		delete_transient( 'wc_products_onsale' );
 	}
 
 	/**
@@ -112,24 +115,34 @@ class ProductQuery extends \WP_UnitTestCase {
 			),
 			$merged_query['meta_query']
 		);
+	}
 
+	/**
+	 * Test merging default stock queries that should use product visibility
+	 * queries instead of meta query for stock status.
+	 */
+	public function test_merging_default_stock_queries() {
+		$parsed_block = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['__woocommerceStockStatus'] = array(
+			'instock',
+			'outofstock',
+			'onbackorder',
+		);
+
+		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		$this->assertEmpty( $merged_query['meta_query'] );
+
+		// Test with hide out of stock items option enabled.
 		$parsed_block = $this->get_base_parsed_block();
 		$parsed_block['attrs']['query']['__woocommerceStockStatus'] = array(
 			'instock',
 			'onbackorder',
 		);
-		$this->block_instance->set_parsed_block( $parsed_block );
 
-		$merged_query = $this->block_instance->build_query( $parsed_block['attrs']['query'] );
+		$merged_query = $this->initialize_merged_query( $parsed_block );
 
-		$this->assertContainsEquals(
-			array(
-				'compare' => 'IN',
-				'key'     => '_stock_status',
-				'value'   => array( 'instock', 'onbackorder' ),
-			),
-			$merged_query['meta_query']
-		);
+		$this->assertEmpty( $merged_query['meta_query'] );
 	}
 
 	/**
@@ -202,6 +215,57 @@ class ProductQuery extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test product visibility query exist in merged query.
+	 */
+	public function test_product_visibility_query_exist_in_merged_query() {
+		$product_visibility_terms  = wc_get_product_visibility_term_ids();
+		$product_visibility_not_in = array( is_search() ? $product_visibility_terms['exclude-from-search'] : $product_visibility_terms['exclude-from-catalog'] );
+
+		$parsed_block = $this->get_base_parsed_block();
+
+		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		$this->assertContainsEquals(
+			array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'term_taxonomy_id',
+				'terms'    => $product_visibility_not_in,
+				'operator' => 'NOT IN',
+			),
+			$merged_query['tax_query']
+		);
+
+		$fn = function() {
+			return 'yes';
+		};
+
+		// Test with hide out of stock items option enabled.
+		add_filter(
+			'pre_option_woocommerce_hide_out_of_stock_items',
+			$fn
+		);
+		$product_visibility_not_in[] = $product_visibility_terms['outofstock'];
+
+		$parsed_block = $this->get_base_parsed_block();
+
+		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		$this->assertContainsEquals(
+			array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'term_taxonomy_id',
+				'terms'    => $product_visibility_not_in,
+				'operator' => 'NOT IN',
+			),
+			$merged_query['tax_query']
+		);
+		remove_filter(
+			'pre_option_woocommerce_hide_out_of_stock_items',
+			$fn
+		);
+	}
+
+	/**
 	 * Test merging multiple queries.
 	 */
 	public function test_merging_multiple_queries() {
@@ -209,7 +273,7 @@ class ProductQuery extends \WP_UnitTestCase {
 		$parsed_block['attrs']['query']['orderBy'] = 'rating';
 		$parsed_block['attrs']['query']['__woocommerceStockStatus'] = array(
 			'instock',
-			'onbackorder',
+			'outofstock',
 		);
 		$parsed_block['attrs']['query']['__woocommerceAttributes']  = array(
 			array(
@@ -230,7 +294,7 @@ class ProductQuery extends \WP_UnitTestCase {
 			array(
 				'compare' => 'IN',
 				'key'     => '_stock_status',
-				'value'   => array( 'instock', 'onbackorder' ),
+				'value'   => array( 'instock', 'outofstock' ),
 			),
 			$merged_query['meta_query']
 		);
@@ -266,6 +330,7 @@ class ProductQuery extends \WP_UnitTestCase {
 			),
 			$merged_query['meta_query']
 		);
+		set_query_var( 'max_price', '' );
 	}
 
 	/**
@@ -289,6 +354,7 @@ class ProductQuery extends \WP_UnitTestCase {
 			),
 			$merged_query['meta_query']
 		);
+		set_query_var( 'min_price', '' );
 	}
 
 	/**
@@ -318,6 +384,9 @@ class ProductQuery extends \WP_UnitTestCase {
 			),
 			$merged_query['meta_query']
 		);
+
+		set_query_var( 'max_price', '' );
+		set_query_var( 'min_price', '' );
 	}
 
 	/**
@@ -336,6 +405,8 @@ class ProductQuery extends \WP_UnitTestCase {
 			),
 			$merged_query['meta_query']
 		);
+
+		set_query_var( 'filter_stock_status', '' );
 	}
 
 	/**
@@ -363,8 +434,16 @@ class ProductQuery extends \WP_UnitTestCase {
 
 		$merged_query = $this->initialize_merged_query();
 
-		$attribute_tax_query         = $merged_query['tax_query'][0];
+		$attribute_tax_query = array();
+
+		foreach ( $merged_query['tax_query'] as $tax_query ) {
+			if ( isset( $tax_query['relation'] ) ) {
+				$attribute_tax_query = $tax_query;
+			}
+		}
+
 		$attribute_tax_query_queries = $attribute_tax_query[0];
+
 		$this->assertEquals( 'AND', $attribute_tax_query['relation'] );
 
 		$this->assertContainsEquals(
@@ -385,6 +464,11 @@ class ProductQuery extends \WP_UnitTestCase {
 			),
 			$attribute_tax_query_queries
 		);
+
+		set_query_var( 'filter_color', '' );
+		set_query_var( 'query_type_color', '' );
+		set_query_var( 'filter_size', '' );
+		set_query_var( 'query_type_size', '' );
 	}
 
 	/**
@@ -424,6 +508,10 @@ class ProductQuery extends \WP_UnitTestCase {
 			),
 			$merged_query['meta_query']
 		);
+
+		set_query_var( 'max_price', '' );
+		set_query_var( 'min_price', '' );
+		set_query_var( 'filter_stock_status', '' );
 	}
 }
 
