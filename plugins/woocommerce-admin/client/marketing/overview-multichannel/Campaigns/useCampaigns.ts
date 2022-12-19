@@ -1,5 +1,15 @@
+/**
+ * Internal dependencies
+ */
+import { Campaign } from '~/marketing/types';
+
+type UseCampaignsType = {
+	loading: boolean;
+	data: Array< Campaign >;
+};
+
 // // TODO: testing for loading state.
-// export const useCampaigns = () => {
+// export const useCampaigns = (): UseCampaignsType => {
 // 	return {
 // 		loading: true,
 // 		data: [],
@@ -7,7 +17,7 @@
 // };
 
 // TODO: testing for empty data.
-// export const useCampaigns = () => {
+// export const useCampaigns = (): UseCampaignsType => {
 // 	return {
 // 		loading: false,
 // 		data: [],
@@ -15,7 +25,7 @@
 // };
 
 // TODO: testing with campaigns data.
-export const useCampaigns = () => {
+export const useCampaigns = (): UseCampaignsType => {
 	return {
 		loading: false,
 		data: [
@@ -35,7 +45,7 @@ export const useCampaigns = () => {
 				icon: 'https://woocommerce.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/google.svg',
 				id: 'gla-campaign-02',
 				title: 'Performance Max 02',
-				description: 'New Zealand',
+				description: '6 countries',
 				cost: '$50',
 				manageUrl: 'https://www.google.com/manage-campaign',
 			},
@@ -45,7 +55,7 @@ export const useCampaigns = () => {
 				icon: 'https://woocommerce.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/google.svg',
 				id: 'gla-campaign-03',
 				title: 'Performance Max 03',
-				description: 'New Zealand',
+				description: '10 countries • 15 Sep - 31 Oct 2022',
 				cost: '$50',
 				manageUrl: 'https://www.google.com/manage-campaign',
 			},
