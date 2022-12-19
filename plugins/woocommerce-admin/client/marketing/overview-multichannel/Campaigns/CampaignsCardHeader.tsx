@@ -9,11 +9,17 @@ import { chevronUp, chevronDown } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import { CardHeaderTitle } from '~/marketing/components';
+import {
+	CardHeaderTitle,
+	RecommendedChannelsList,
+} from '~/marketing/components';
+import { useRecommendedChannels } from '~/marketing/hooks';
 
 export const CampaignsCardHeader = () => {
 	const [ open, setOpen ] = useState( false );
 	const [ collapsed, setCollapsed ] = useState( true );
+	const { data } = useRecommendedChannels();
+
 	const openModal = () => setOpen( true );
 	const closeModal = () => setOpen( false );
 
@@ -51,7 +57,9 @@ export const CampaignsCardHeader = () => {
 							size={ 24 }
 						/>
 					</Button>
-					{ /* TODO: list of recommended channels here. */ }
+					{ ! collapsed && (
+						<RecommendedChannelsList recommendedChannels={ data } />
+					) }
 				</Modal>
 			) }
 		</CardHeader>

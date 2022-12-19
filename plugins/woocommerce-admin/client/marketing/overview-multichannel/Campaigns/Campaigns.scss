@@ -52,10 +52,27 @@
 }
 
 .woocommerce-marketing-create-campaign-modal {
+	max-width: 600px;
+
 	&__question-label {
 		font-size: 14px;
 		font-weight: 600;
 		line-height: 17px;
 		margin-bottom: 16px;
+	}
+
+	.components-button.is-link {
+		text-decoration: none;
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 17px;
+	}
+
+	.woocommerce_marketing_plugin_card_body {
+		padding: $gap 0;
+	}
+
+	.components-card-divider {
+		display: none;
 	}
 }
