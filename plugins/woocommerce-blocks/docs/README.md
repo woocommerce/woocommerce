@@ -7,9 +7,9 @@
 -   [Third-party developers](#third-party-developers)
 -   [Designers](#designers)
 -   [Developer Resources](#developer-resources)
-    - [Tools](#tools)
-    - [Articles](#articles)
-    - [Tutorials](#tutorials)
+    -   [Tools](#tools)
+    -   [Articles](#articles)
+    -   [Tutorials](#tutorials)
 
 The WooCommerce Blocks Handbook provides documentation for designers and developers on how to extend or contribute to blocks, and how internal developers should handle new releases.
 
@@ -66,7 +66,7 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
         -   [Coupons](internal-developers/testing/cart-checkout/coupons.md)
         -   [Compatibility](internal-developers/testing/cart-checkout/compatibility.md)
     -   [Releases](internal-developers/testing/releases/README.md)
-- [Translations](internal-developers/translations/README.md)
+-   [Translations](internal-developers/translations/README.md)
     -   [Translation basics](internal-developers/translations/translation-basics.md)
     -   [Translations in PHP files](internal-developers/translations/translations-in-PHP-files.md)
     -   [Translations in JS/TS files](internal-developers/translations/translations-in-JS-TS-files.md)
@@ -140,7 +140,7 @@ The following tutorials from [developer.woocommerce.com](https://developer.wooco
 
 -   [Hiding Shipping and Payment Options in the Cart and Checkout Blocks](https://developer.woocommerce.com/2022/05/20/hiding-shipping-and-payment-options-in-the-cart-and-checkout-blocks/)
 -   [Integrating your Payment Method with Cart and Checkout Blocks](https://developer.woocommerce.com/2021/03/15/integrating-your-payment-method-with-cart-and-checkout-blocks/)
--	[Exposing Payment Options in the Checkout Block](https://developer.woocommerce.com/2022/07/07/exposing-payment-options-in-the-checkout-block/)
+-   [Exposing Payment Options in the Checkout Block](https://developer.woocommerce.com/2022/07/07/exposing-payment-options-in-the-checkout-block/)
 
 <!-- FEEDBACK -->
 
@@ -151,4 +151,3 @@ The following tutorials from [developer.woocommerce.com](https://developer.wooco
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/README.md)
 
 <!-- /FEEDBACK -->
-
