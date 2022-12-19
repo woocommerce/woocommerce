@@ -5,11 +5,7 @@ import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { createInterpolateElement, useEffect } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
-import {
-	CheckoutProvider,
-	SnackbarNoticesContainer,
-} from '@woocommerce/base-context';
-
+import { CheckoutProvider, noticeContexts } from '@woocommerce/base-context';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import { SidebarLayout } from '@woocommerce/base-components/sidebar-layout';
 import { CURRENT_USER_IS_ADMIN, getSetting } from '@woocommerce/settings';
@@ -33,7 +29,6 @@ import CheckoutOrderError from './checkout-order-error';
 import { LOGIN_TO_CHECKOUT_URL, isLoginRequired, reloadPage } from './utils';
 import type { Attributes } from './types';
 import { CheckoutBlockContext } from './context';
-import { hasNoticesOfType } from '../../utils/notices';
 
 const MustLoginPrompt = () => {
 	return (
@@ -136,9 +131,7 @@ const ScrollOnError = ( {
 	const { showAllValidationErrors } = useDispatch( VALIDATION_STORE_KEY );
 
 	const hasErrorsToDisplay =
-		checkoutIsIdle &&
-		checkoutHasError &&
-		( hasValidationErrors || hasNoticesOfType( 'wc/checkout', 'default' ) );
+		checkoutIsIdle && checkoutHasError && hasValidationErrors;
 
 	useEffect( () => {
 		let scrollToTopTimeout: number;
@@ -190,8 +183,7 @@ const Block = ( {
 			) }
 			showErrorMessage={ CURRENT_USER_IS_ADMIN }
 		>
-			<SnackbarNoticesContainer context="wc/checkout" />
-			<StoreNoticesContainer context="wc/checkout" />
+			<StoreNoticesContainer context={ noticeContexts.CHECKOUT } />
 			{ /* SlotFillProvider need to be defined before CheckoutProvider so fills have the SlotFill context ready when they mount. */ }
 			<SlotFillProvider>
 				<CheckoutProvider>

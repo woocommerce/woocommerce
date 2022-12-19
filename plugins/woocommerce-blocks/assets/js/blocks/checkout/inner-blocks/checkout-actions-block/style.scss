@@ -1,19 +1,21 @@
 .wc-block-checkout__actions {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
+	&_row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 
-	.wc-block-components-checkout-place-order-button {
-		width: 50%;
-		padding: 1em;
-		height: auto;
+		.wc-block-components-checkout-place-order-button {
+			width: 50%;
+			padding: 1em;
+			height: auto;
 
-		.wc-block-components-button__text {
-			line-height: 24px;
+			.wc-block-components-button__text {
+				line-height: 24px;
 
-			> svg {
-				fill: $white;
-				vertical-align: top;
+				> svg {
+					fill: $white;
+					vertical-align: top;
+				}
 			}
 		}
 	}
