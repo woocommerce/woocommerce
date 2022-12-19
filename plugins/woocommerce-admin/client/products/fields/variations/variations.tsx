@@ -8,6 +8,7 @@ import {
 	ProductVariation,
 } from '@woocommerce/data';
 import { ListItem, Pagination, Sortable, Tag } from '@woocommerce/components';
+import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { useContext, useState } from '@wordpress/element';
 import { useParams } from 'react-router-dom';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -166,6 +167,16 @@ export const Variations: React.FC = () => {
 							{ getProductStockStatus( variation ) }
 						</div>
 						<div className="woocommerce-product-variations__actions">
+							<Button
+								href={ getNewPath(
+									getPersistedQuery(),
+									`/product/${ productId }/variation/${ variation.id }`
+								) }
+								type="wc-admin"
+							>
+								{ __( 'Edit', 'woocommerce' ) }
+							</Button>
+
 							{ variation.status === 'private' && (
 								<Tooltip
 									position="top center"
