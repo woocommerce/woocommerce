@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import triggerFetch from '@wordpress/api-fetch';
 import {
 	useEffect,
@@ -12,7 +12,7 @@ import {
 } from '@wordpress/element';
 import {
 	emptyHiddenAddressFields,
-	formatStoreApiErrorMessage,
+	removeAllNotices,
 } from '@woocommerce/base-utils';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
@@ -20,11 +20,18 @@ import {
 	PAYMENT_STORE_KEY,
 	VALIDATION_STORE_KEY,
 	CART_STORE_KEY,
+	processErrorResponse,
 } from '@woocommerce/block-data';
 import {
 	getPaymentMethods,
 	getExpressPaymentMethods,
 } from '@woocommerce/blocks-registry';
+import {
+	ApiResponse,
+	CheckoutResponseSuccess,
+	CheckoutResponseError,
+	assertResponseIsValid,
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -78,7 +85,6 @@ const CheckoutProcessor = () => {
 	);
 
 	const { cartNeedsPayment, cartNeedsShipping, receiveCart } = useStoreCart();
-	const { createErrorNotice, removeNotice } = useDispatch( 'core/notices' );
 
 	const {
 		activePaymentMethod,
@@ -177,7 +183,7 @@ const CheckoutProcessor = () => {
 
 	// Validate the checkout using the CHECKOUT_VALIDATION_BEFORE_PROCESSING event
 	useEffect( () => {
-		let unsubscribeProcessing;
+		let unsubscribeProcessing: () => void;
 		if ( ! isExpressPaymentMethodActive ) {
 			unsubscribeProcessing = onCheckoutValidationBeforeProcessing(
 				checkValidation,
@@ -185,7 +191,10 @@ const CheckoutProcessor = () => {
 			);
 		}
 		return () => {
-			if ( ! isExpressPaymentMethodActive ) {
+			if (
+				! isExpressPaymentMethodActive &&
+				typeof unsubscribeProcessing === 'function'
+			) {
 				unsubscribeProcessing();
 			}
 		};
@@ -208,7 +217,7 @@ const CheckoutProcessor = () => {
 			return;
 		}
 		setIsProcessingOrder( true );
-		removeNotice( 'checkout' );
+		removeAllNotices();
 
 		const paymentData = cartNeedsPayment
 			? {
@@ -222,6 +231,9 @@ const CheckoutProcessor = () => {
 			: {};
 
 		const data = {
+			shipping_address: cartNeedsShipping
+				? emptyHiddenAddressFields( currentShippingAddress.current )
+				: undefined,
 			billing_address: emptyHiddenAddressFields(
 				currentBillingAddress.current
 			),
@@ -231,12 +243,6 @@ const CheckoutProcessor = () => {
 			extensions: { ...extensionData },
 		};
 
-		if ( cartNeedsShipping ) {
-			data.shipping_address = emptyHiddenAddressFields(
-				currentShippingAddress.current
-			);
-		}
-
 		triggerFetch( {
 			path: '/wc/store/v1/checkout',
 			method: 'POST',
@@ -244,74 +250,49 @@ const CheckoutProcessor = () => {
 			cache: 'no-store',
 			parse: false,
 		} )
-			.then( ( response ) => {
+			.then( ( response: unknown ) => {
+				assertResponseIsValid< CheckoutResponseSuccess >( response );
 				processCheckoutResponseHeaders( response.headers );
 				if ( ! response.ok ) {
-					throw new Error( response );
+					throw response;
 				}
 				return response.json();
 			} )
-			.then( ( responseJson ) => {
+			.then( ( responseJson: CheckoutResponseSuccess ) => {
 				__internalProcessCheckoutResponse( responseJson );
 				setIsProcessingOrder( false );
 			} )
-			.catch( ( errorResponse ) => {
+			.catch( ( errorResponse: ApiResponse< CheckoutResponseError > ) => {
+				processCheckoutResponseHeaders( errorResponse?.headers );
 				try {
-					if ( errorResponse?.headers ) {
-						processCheckoutResponseHeaders( errorResponse.headers );
-					}
 					// This attempts to parse a JSON error response where the status code was 4xx/5xx.
-					errorResponse.json().then( ( response ) => {
-						// If updated cart state was returned, update the store.
-						if ( response.data?.cart ) {
-							receiveCart( response.data.cart );
-						}
-						createErrorNotice(
-							formatStoreApiErrorMessage( response ),
-							{
-								id: 'checkout',
-								context: 'wc/checkout',
-								__unstableHTML: true,
+					errorResponse
+						.json()
+						.then(
+							( response ) => response as CheckoutResponseError
+						)
+						.then( ( response: CheckoutResponseError ) => {
+							if ( response.data?.cart ) {
+								receiveCart( response.data.cart );
 							}
-						);
-						response?.additional_errors?.forEach?.(
-							( additionalError ) => {
-								createErrorNotice( additionalError.message, {
-									id: additionalError.error_code,
-									context: 'wc/checkout',
-									__unstableHTML: true,
-								} );
-							}
-						);
-						__internalProcessCheckoutResponse( response );
-					} );
+							processErrorResponse( response );
+							__internalProcessCheckoutResponse( response );
+						} );
 				} catch {
-					createErrorNotice(
-						sprintf(
-							// Translators: %s Error text.
-							__(
-								'%s Please try placing your order again.',
-								'woo-gutenberg-products-block'
-							),
-							errorResponse?.message ??
-								__(
-									'Something went wrong. Please contact us for assistance.',
-									'woo-gutenberg-products-block'
-								)
+					processErrorResponse( {
+						code: 'unknown_error',
+						message: __(
+							'Something went wrong. Please try placing your order again.',
+							'woo-gutenberg-products-block'
 						),
-						{
-							id: 'checkout',
-							context: 'wc/checkout',
-							__unstableHTML: true,
-						}
-					);
+						data: null,
+					} );
 				}
 				__internalSetHasError( true );
 				setIsProcessingOrder( false );
 			} );
 	}, [
 		isProcessingOrder,
-		removeNotice,
 		cartNeedsPayment,
 		paymentMethodId,
 		paymentMethodData,
@@ -321,7 +302,6 @@ const CheckoutProcessor = () => {
 		shouldCreateAccount,
 		extensionData,
 		cartNeedsShipping,
-		createErrorNotice,
 		receiveCart,
 		__internalSetHasError,
 		__internalProcessCheckoutResponse,

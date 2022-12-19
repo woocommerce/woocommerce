@@ -19,7 +19,6 @@ import {
  * Internal dependencies
  */
 import { useEventEmitters, reducer as emitReducer } from './event-emit';
-import { useCustomerData } from '../../../hooks/use-customer-data';
 import { emitterCallback } from '../../../event-emit';
 
 type PaymentEventsContextType = {
@@ -73,7 +72,6 @@ export const PaymentEventsProvider = ( {
 			};
 		} );
 
-	const { createErrorNotice, removeNotice } = useDispatch( 'core/notices' );
 	const { setValidationErrors } = useDispatch( VALIDATION_STORE_KEY );
 	const [ observers, observerDispatch ] = useReducer( emitReducer, {} );
 	const { onPaymentProcessing } = useEventEmitters( observerDispatch );
@@ -87,10 +85,8 @@ export const PaymentEventsProvider = ( {
 	const {
 		__internalSetPaymentProcessing,
 		__internalSetPaymentPristine,
-		__internalSetPaymentMethodData,
 		__internalEmitPaymentProcessingEvent,
 	} = useDispatch( PAYMENT_STORE_KEY );
-	const { setBillingAddress, setShippingAddress } = useCustomerData();
 
 	// flip payment to processing if checkout processing is complete, there are no errors, and payment status is started.
 	useEffect( () => {
@@ -139,11 +135,6 @@ export const PaymentEventsProvider = ( {
 	}, [
 		isPaymentProcessing,
 		setValidationErrors,
-		removeNotice,
-		createErrorNotice,
-		setBillingAddress,
-		__internalSetPaymentMethodData,
-		setShippingAddress,
 		__internalEmitPaymentProcessingEvent,
 	] );
 

@@ -7,7 +7,8 @@ import { ShippingRatesControl } from '@woocommerce/base-components/cart-checkout
 import { getShippingRatesPackageCount } from '@woocommerce/base-utils';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
-import { useEditorContext } from '@woocommerce/base-context';
+import { useEditorContext, noticeContexts } from '@woocommerce/base-context';
+import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Notice } from 'wordpress-components';
 import classnames from 'classnames';
@@ -80,6 +81,9 @@ const Block = (): JSX.Element | null => {
 
 	return (
 		<>
+			<StoreNoticesContainer
+				context={ noticeContexts.SHIPPING_METHODS }
+			/>
 			{ isEditor && ! shippingRatesPackageCount ? (
 				<NoShippingPlaceholder />
 			) : (

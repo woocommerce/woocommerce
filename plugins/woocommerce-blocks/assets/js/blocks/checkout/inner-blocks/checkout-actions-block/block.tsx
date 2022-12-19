@@ -8,7 +8,11 @@ import {
 	ReturnToCartButton,
 } from '@woocommerce/base-components/cart-checkout';
 import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
-import { __experimentalApplyCheckoutFilter } from '@woocommerce/blocks-checkout';
+import { noticeContexts } from '@woocommerce/base-context';
+import {
+	StoreNoticesContainer,
+	__experimentalApplyCheckoutFilter,
+} from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
@@ -40,12 +44,17 @@ const Block = ( {
 		<div
 			className={ classnames( 'wc-block-checkout__actions', className ) }
 		>
-			{ showReturnToCart && (
-				<ReturnToCartButton
-					link={ getSetting( 'page-' + cartPageId, false ) }
-				/>
-			) }
-			<PlaceOrderButton label={ label } />
+			<StoreNoticesContainer
+				context={ noticeContexts.CHECKOUT_ACTIONS }
+			/>
+			<div className="wc-block-checkout__actions_row">
+				{ showReturnToCart && (
+					<ReturnToCartButton
+						link={ getSetting( 'page-' + cartPageId, false ) }
+					/>
+				) }
+				<PlaceOrderButton label={ label } />
+			</div>
 		</div>
 	);
 };

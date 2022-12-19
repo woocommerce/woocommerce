@@ -34,10 +34,10 @@ describe( 'Notice utils', () => {
 				] ),
 			} );
 			const hasSnackbarNotices = hasNoticesOfType(
-				'wc/cart',
-				'snackbar'
+				'snackbar',
+				'wc/cart'
 			);
-			const hasDefaultNotices = hasNoticesOfType( 'wc/cart', 'default' );
+			const hasDefaultNotices = hasNoticesOfType( 'default', 'wc/cart' );
 			expect( hasDefaultNotices ).toBe( true );
 			expect( hasSnackbarNotices ).toBe( false );
 		} );
@@ -46,7 +46,7 @@ describe( 'Notice utils', () => {
 			select.mockReturnValue( {
 				getNotices: jest.fn().mockReturnValue( [] ),
 			} );
-			const hasDefaultNotices = hasNoticesOfType( 'wc/cart', 'default' );
+			const hasDefaultNotices = hasNoticesOfType( 'default', 'wc/cart' );
 			expect( hasDefaultNotices ).toBe( false );
 		} );
 	} );
@@ -98,12 +98,12 @@ describe( 'Notice utils', () => {
 			expect( dispatch().removeNotice ).toHaveBeenNthCalledWith(
 				1,
 				'coupon-form',
-				''
+				undefined
 			);
 			expect( dispatch().removeNotice ).toHaveBeenNthCalledWith(
 				2,
 				'address-form',
-				''
+				undefined
 			);
 		} );
 

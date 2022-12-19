@@ -4,9 +4,9 @@
 import { debounce } from 'lodash';
 import { select, dispatch } from '@wordpress/data';
 import {
-	formatStoreApiErrorMessage,
 	pluckAddress,
 	pluckEmail,
+	removeAllNotices,
 } from '@woocommerce/base-utils';
 import {
 	CartResponseBillingAddress,
@@ -20,6 +20,7 @@ import { BillingAddressShippingAddress } from '@woocommerce/type-defs/cart';
  */
 import { STORE_KEY } from './constants';
 import { VALIDATION_STORE_KEY } from '../validation';
+import { processErrorResponse } from '../utils';
 
 declare type CustomerData = {
 	billingAddress: CartResponseBillingAddress;
@@ -103,20 +104,10 @@ const updateCustomerData = debounce( (): void => {
 		dispatch( STORE_KEY )
 			.updateCustomerData( customerDataToUpdate )
 			.then( () => {
-				dispatch( 'core/notices' ).removeNotice(
-					'checkout',
-					'wc/checkout'
-				);
+				removeAllNotices();
 			} )
 			.catch( ( response ) => {
-				dispatch( 'core/notices' ).createNotice(
-					'error',
-					formatStoreApiErrorMessage( response ),
-					{
-						id: 'checkout',
-						context: 'wc/checkout',
-					}
-				);
+				processErrorResponse( response );
 			} );
 	}
 }, 1000 );

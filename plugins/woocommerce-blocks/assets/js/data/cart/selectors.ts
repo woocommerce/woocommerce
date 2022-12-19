@@ -7,6 +7,7 @@ import type {
 	CartMeta,
 	CartItem,
 	CartShippingRate,
+	ApiErrorResponse,
 } from '@woocommerce/types';
 import { BillingAddress, ShippingAddress } from '@woocommerce/settings';
 
@@ -14,7 +15,6 @@ import { BillingAddress, ShippingAddress } from '@woocommerce/settings';
  * Internal dependencies
  */
 import { CartState, defaultCartState } from './default-state';
-import type { ResponseError } from '../types';
 
 /**
  * Retrieves cart data from state.
@@ -90,11 +90,8 @@ export const getCartMeta = ( state: CartState ): CartMeta => {
 
 /**
  * Retrieves cart errors from state.
- *
- * @param {CartState} state The current state.
- * @return {Array<ResponseError>} Array of errors.
  */
-export const getCartErrors = ( state: CartState ): Array< ResponseError > => {
+export const getCartErrors = ( state: CartState ): ApiErrorResponse[] => {
 	return state.errors;
 };
 

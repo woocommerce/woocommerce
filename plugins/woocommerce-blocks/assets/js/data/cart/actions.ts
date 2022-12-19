@@ -7,6 +7,7 @@ import type {
 	CartResponseItem,
 	ExtensionCartUpdateArgs,
 	BillingAddressShippingAddress,
+	ApiErrorResponse,
 } from '@woocommerce/types';
 import { camelCase, mapKeys } from 'lodash';
 import { BillingAddress, ShippingAddress } from '@woocommerce/settings';
@@ -20,7 +21,6 @@ import {
  */
 import { ACTION_TYPES as types } from './action-types';
 import { apiFetchWithHeaders } from '../shared-controls';
-import type { ResponseError } from '../types';
 import { ReturnOrGeneratorYieldUnion } from '../mapped-types';
 import { CartDispatchFromMap, CartResolveSelectFromMap } from './index';
 
@@ -64,14 +64,9 @@ export const receiveCartContents = (
 
 /**
  * Returns an action object used for receiving customer facing errors from the API.
- *
- * @param {ResponseError|null} [error=null]   An error object containing the error
- *                                            message and response code.
- * @param {boolean}            [replace=true] Should existing errors be replaced,
- *                                            or should the error be appended.
  */
 export const receiveError = (
-	error: ResponseError | null = null,
+	error: ApiErrorResponse | null = null,
 	replace = true
 ) =>
 	( {

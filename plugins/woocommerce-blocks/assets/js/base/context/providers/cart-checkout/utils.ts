@@ -31,7 +31,12 @@ export const preparePaymentData = (
 /**
  * Process headers from an API response an dispatch updates.
  */
-export const processCheckoutResponseHeaders = ( headers: Headers ): void => {
+export const processCheckoutResponseHeaders = (
+	headers: Headers | undefined
+): void => {
+	if ( ! headers ) {
+		return;
+	}
 	const { __internalSetCustomerId } = dispatch( CHECKOUT_STORE_KEY );
 	if (
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment

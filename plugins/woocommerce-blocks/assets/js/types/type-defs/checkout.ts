@@ -3,6 +3,11 @@
  */
 import { ShippingAddress, BillingAddress } from '@woocommerce/settings';
 
+/**
+ * Internal dependencies
+ */
+import type { ApiErrorResponse } from './api-error-response';
+
 export interface CheckoutResponseSuccess {
 	billing_address: BillingAddress;
 	customer_id: number;
@@ -20,12 +25,6 @@ export interface CheckoutResponseSuccess {
 	status: string;
 }
 
-export interface CheckoutResponseError {
-	code: string;
-	message: string;
-	data: {
-		status: number;
-	};
-}
+export type CheckoutResponseError = ApiErrorResponse;
 
 export type CheckoutResponse = CheckoutResponseSuccess | CheckoutResponseError;
