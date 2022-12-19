@@ -35,20 +35,20 @@ import type { Attributes } from './types';
 import { CheckoutBlockContext } from './context';
 import { hasNoticesOfType } from '../../utils/notices';
 
-const LoginPrompt = () => {
+const MustLoginPrompt = () => {
 	return (
-		<>
+		<div className="wc-block-must-login-prompt">
 			{ __(
-				'You must be logged in to checkout. ',
+				'You must be logged in to checkout.',
 				'woo-gutenberg-products-block'
-			) }
+			) }{ ' ' }
 			<a href={ LOGIN_TO_CHECKOUT_URL }>
 				{ __(
 					'Click here to log in.',
 					'woo-gutenberg-products-block'
 				) }
 			</a>
-		</>
+		</div>
 	);
 };
 
@@ -84,22 +84,29 @@ const Checkout = ( {
 		return <CheckoutOrderError />;
 	}
 
+	/**
+	 * If checkout requires an account (guest checkout is turned off), render
+	 * a notice and prevent access to the checkout, unless we explicitly allow
+	 * account creation during the checkout flow.
+	 */
 	if (
 		isLoginRequired( customerId ) &&
-		getSetting( 'checkoutAllowsSignup', false )
+		! getSetting( 'checkoutAllowsSignup', false )
 	) {
-		<LoginPrompt />;
+		return <MustLoginPrompt />;
 	}
 
 	return (
 		<CheckoutBlockContext.Provider
-			value={ {
-				showCompanyField,
-				requireCompanyField,
-				showApartmentField,
-				showPhoneField,
-				requirePhoneField,
-			} }
+			value={
+				{
+					showCompanyField,
+					requireCompanyField,
+					showApartmentField,
+					showPhoneField,
+					requirePhoneField,
+				} as Attributes
+			}
 		>
 			{ children }
 		</CheckoutBlockContext.Provider>

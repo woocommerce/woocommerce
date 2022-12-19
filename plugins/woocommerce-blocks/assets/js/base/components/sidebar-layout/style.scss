@@ -4,6 +4,10 @@
 	margin: 0 auto $gap;
 	position: relative;
 
+	.wc-block-must-login-prompt {
+		display: block;
+	}
+
 	.wc-block-components-main {
 		box-sizing: border-box;
 		margin: 0;
