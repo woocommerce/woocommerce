@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 // @ts-ignore
 import { API_NAMESPACE } from '../../features/data/constants';
 
+type PluginStatus = 'not-installed' | 'installed' | 'active';
+
 export type Branch = {
 	branch: string;
 	commit: string;
@@ -11,6 +13,7 @@ export type Branch = {
 	update_date: string;
 	version: string;
 	pr: number;
+	install_status: PluginStatus;
 };
 
 export const useLiveBranchesData = () => {
@@ -43,31 +46,19 @@ export const useLiveBranchesData = () => {
 export const useLiveBranchInstall = (
 	downloadUrl: string,
 	prName: string,
-	version: string
+	version: string,
+	status: PluginStatus
 ) => {
-	const [ isInstalling, setIsInstalling ] = useState( false );
+	const [ isInProgress, setIsInProgress ] = useState( false );
 	const [ isError, setIsError ] = useState( false );
+	const [ pluginStatus, setPluginStatus ] = useState( status );
 
-	const install = async () => {
-		setIsInstalling( true );
+	const activate = async () => {
+		setIsInProgress( true );
 
 		try {
-			const installResult = await apiFetch< Response >( {
-				path: `${ API_NAMESPACE }/live-branches/install/v1`,
-				method: 'POST',
-				body: JSON.stringify( {
-					pr_name: prName,
-					download_url: downloadUrl,
-					version,
-				} ),
-			} );
-
-			if ( installResult.status >= 400 ) {
-				throw new Error( 'Could not install' );
-			}
-
 			const deactivateResult = await apiFetch< Response >( {
-				path: `${ API_NAMESPACE }/live-branches/deactivate_core/v1`,
+				path: `${ API_NAMESPACE }/live-branches/deactivate/v1`,
 			} );
 
 			if ( deactivateResult.status >= 400 ) {
@@ -89,12 +80,63 @@ export const useLiveBranchInstall = (
 			setIsError( true );
 		}
 
-		setIsInstalling( false );
+		setPluginStatus( 'active' );
+		setIsInProgress( false );
+	};
+
+	const installAndActivate = async () => {
+		setIsInProgress( true );
+
+		try {
+			const installResult = await apiFetch< Response >( {
+				path: `${ API_NAMESPACE }/live-branches/install/v1`,
+				method: 'POST',
+				body: JSON.stringify( {
+					pr_name: prName,
+					download_url: downloadUrl,
+					version,
+				} ),
+			} );
+
+			if ( installResult.status >= 400 ) {
+				throw new Error( 'Could not install' );
+			}
+
+			setPluginStatus( 'installed' );
+
+			const deactivateResult = await apiFetch< Response >( {
+				path: `${ API_NAMESPACE }/live-branches/deactivate/v1`,
+			} );
+
+			if ( deactivateResult.status >= 400 ) {
+				throw new Error( 'Could not deactivate' );
+			}
+
+			const activateResult = await apiFetch< Response >( {
+				path: `${ API_NAMESPACE }/live-branches/activate/v1`,
+				method: 'POST',
+				body: JSON.stringify( {
+					version,
+				} ),
+			} );
+
+			if ( activateResult.status >= 400 ) {
+				throw new Error( 'Could not activate' );
+			}
+
+			setPluginStatus( 'active' );
+		} catch ( e ) {
+			setIsError( true );
+		}
+
+		setIsInProgress( false );
 	};
 
 	return {
-		install,
+		installAndActivate,
+		activate,
 		isError,
-		isInstalling,
+		isInProgress,
+		status: pluginStatus,
 	};
 };

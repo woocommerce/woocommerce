@@ -9,6 +9,8 @@ defined( 'ABSPATH' ) || exit;
 
 require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
+const LIVE_BRANCH_PLUGIN_PREFIX = 'wc_beta_tester_live_branch';
+
 /**
  * WC_Beta_Tester Live Branches Installer Class.
  */
@@ -64,13 +66,14 @@ class WC_Beta_Tester_Live_Branches_Installer {
 
 		// Unzip the plugin.
 		$plugin_dir  = str_replace( ABSPATH, $this->file_system->abspath(), WP_PLUGIN_DIR );
-		$plugin_path = $plugin_dir . "/woocommerce-$version";
+		$plugin_path = $plugin_dir . '/' . LIVE_BRANCH_PLUGIN_PREFIX . "_$version"; 
+		$unzip_path = $plugin_dir . "/woocommerce-$version";
 
-		$unzip = unzip_file( $tmp_dir, $plugin_path );
+		$unzip = unzip_file( $tmp_dir, $unzip_path );
 
 		// The plugin is nested under woocommerce-dev, so we need to move it up one level.
-		$this->file_system->mkdir( $plugin_dir . '/woocommerce-dev' );
-		$this->move( $plugin_path . '/woocommerce-dev', $plugin_dir . '/woocommerce-dev' );
+		$this->file_system->mkdir( $plugin_path );
+		$this->move( $unzip_path . '/woocommerce-dev', $plugin_path );
 
 		if ( is_wp_error( $unzip ) ) {
 			return new WP_Error( 'unzip_error', sprintf( __( 'Error Unzipping file: Error: %1$s', 'woocommerce-beta-tester' ), $result->get_error_message() ) );
@@ -95,22 +98,57 @@ class WC_Beta_Tester_Live_Branches_Installer {
 	}
 
 	/**
-	 * Deactivate WooCommerce Core plugin.
+	 * Deactivate all currently active WooCommerce plugins.
 	 */
-	public function deactivate() {
+	public function deactivate_woocommerce() {
+		// First check is the regular woo plugin active.
 		if ( is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
 			deactivate_plugins( 'woocommerce/woocommerce.php' );
 		}
 
-		return true;
+		// Then check if any beta tester installed plugins are active
+		$active_plugins = get_option( 'active_plugins' );
+
+		error_log("active_plugins: ");
+		error_log(json_encode($active_plugins));
+		$active_woo_plugins = array_filter(
+			$active_plugins,
+			function( $plugin ) {
+				return str_contains( $plugin, LIVE_BRANCH_PLUGIN_PREFIX );
+			}
+		);
+
+		error_log("active_woo_plugins: ");
+		error_log(json_encode($active_woo_plugins));		
+		
+		if ( ! empty( $active_woo_plugins ) ) {
+			deactivate_plugins( $active_woo_plugins );
+		}
 	}
 
 	/**
 	 * Activate dev installed WooCommerce core plugin.
 	 */
-	public function activate() {
-		if ( ! is_plugin_active( 'woocommerce-dev/woocommerce.php' ) ) {
-			activate_plugin( 'woocommerce-dev/woocommerce.php' );
+	public function activate( $version ) {
+		if ( ! is_plugin_active( LIVE_BRANCH_PLUGIN_PREFIX . "_$version/woocommerce.php" ) ) {
+			activate_plugin( LIVE_BRANCH_PLUGIN_PREFIX . "_$version/woocommerce.php" );
 		}
+	}
+
+	/**
+	 * Check the install status of a plugin version.
+	 */
+	public function check_install_status( $version ) {
+		$plugin_path = WP_PLUGIN_DIR . "/" . LIVE_BRANCH_PLUGIN_PREFIX . "_$version/woocommerce.php";
+
+		if ( ! file_exists( $plugin_path ) ) {
+			return 'not-installed';
+		}
+
+		if ( is_plugin_active( LIVE_BRANCH_PLUGIN_PREFIX . "_$version/woocommerce.php" ) ) {
+			return 'active';
+		}
+
+		return 'installed';
 	}
 }
