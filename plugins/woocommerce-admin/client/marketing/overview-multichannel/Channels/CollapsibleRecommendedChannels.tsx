@@ -10,7 +10,7 @@ import { chevronUp, chevronDown } from '@wordpress/icons';
  * Internal dependencies
  */
 import { RecommendedChannel } from '~/marketing/types';
-import { RecommendedChannelsList } from './RecommendedChannelsList';
+import { RecommendedChannelsList } from '~/marketing/components';
 import './Channels.scss';
 
 type RecommendedChannelsType = {

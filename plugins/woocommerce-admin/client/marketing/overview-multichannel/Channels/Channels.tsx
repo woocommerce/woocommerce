@@ -12,12 +12,12 @@ import {
 	CardHeaderTitle,
 	CardHeaderDescription,
 	CenteredSpinner,
+	RecommendedChannelsList,
 } from '~/marketing/components';
 import { useChannels } from './useChannels';
 import './Channels.scss';
 import { InstalledChannelCardBody } from './InstalledChannelCardBody';
 import { CollapsibleRecommendedChannels } from './CollapsibleRecommendedChannels';
-import { RecommendedChannelsList } from './RecommendedChannelsList';
 
 export const Channels = () => {
 	const {
