@@ -6,6 +6,7 @@ import {
 	useCheckoutAddress,
 	useStoreEvents,
 	useEditorContext,
+	noticeContexts,
 } from '@woocommerce/base-context';
 import { AddressForm } from '@woocommerce/base-components/cart-checkout';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
@@ -14,6 +15,7 @@ import type {
 	AddressField,
 	AddressFields,
 } from '@woocommerce/settings';
+import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
@@ -39,7 +41,6 @@ const Block = ( {
 		setBillingAddress,
 		setShippingAddress,
 		setBillingPhone,
-		setShippingPhone,
 		forcedBillingAddress,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
@@ -89,6 +90,7 @@ const Block = ( {
 
 	return (
 		<AddressFormWrapperComponent>
+			<StoreNoticesContainer context={ noticeContexts.BILLING_ADDRESS } />
 			<AddressForm
 				id="billing"
 				type="billing"
@@ -117,12 +119,6 @@ const Block = ( {
 						dispatchCheckoutEvent( 'set-phone-number', {
 							step: 'billing',
 						} );
-						if ( forcedBillingAddress ) {
-							setShippingPhone( value );
-							dispatchCheckoutEvent( 'set-phone-number', {
-								step: 'shipping',
-							} );
-						}
 					} }
 				/>
 			) }
