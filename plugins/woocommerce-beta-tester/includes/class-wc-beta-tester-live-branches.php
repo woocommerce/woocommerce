@@ -21,7 +21,6 @@ class WC_Beta_Tester_Live_Branches {
 
 		// NOTE - We don't have feature flags, so add the following code to enable it
 		// in development: `$this->register_page()`.
-		$this->register_page();
 	}
 
 	/**
