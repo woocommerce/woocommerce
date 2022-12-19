@@ -4,9 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import {
-	Button,
 	Card,
-	CardHeader,
 	CardBody,
 	CardFooter,
 	Flex,
@@ -19,9 +17,10 @@ import { Pagination, Table } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { CardHeaderTitle, CenteredSpinner } from '~/marketing/components';
+import { CenteredSpinner } from '~/marketing/components';
 import { useCampaigns } from './useCampaigns';
 import './Campaigns.scss';
+import { CampaignsCardHeader } from './CampaignsCardHeader';
 
 export const Campaigns = () => {
 	const [ page, setPage ] = useState( 1 );
@@ -30,14 +29,7 @@ export const Campaigns = () => {
 	if ( loading ) {
 		return (
 			<Card>
-				<CardHeader>
-					<CardHeaderTitle>
-						{ __( 'Campaigns', 'woocommerce' ) }
-					</CardHeaderTitle>
-					<Button variant="secondary">
-						{ __( 'Create new campaign', 'woocommerce' ) }
-					</Button>
-				</CardHeader>
+				<CampaignsCardHeader />
 				<CardBody>
 					<CenteredSpinner />
 				</CardBody>
@@ -48,14 +40,7 @@ export const Campaigns = () => {
 	if ( data.length === 0 ) {
 		return (
 			<Card className="woocommerce-marketing-campaigns-card">
-				<CardHeader>
-					<CardHeaderTitle>
-						{ __( 'Campaigns', 'woocommerce' ) }
-					</CardHeaderTitle>
-					<Button variant="secondary">
-						{ __( 'Create new campaign', 'woocommerce' ) }
-					</Button>
-				</CardHeader>
+				<CampaignsCardHeader />
 				<CardBody className="woocommerce-marketing-campaigns-card-body-empty-content">
 					<Icon icon={ megaphone } size={ 32 } />
 					<div className="woocommerce-marketing-campaigns-card-body-empty-content-title">
@@ -82,14 +67,7 @@ export const Campaigns = () => {
 
 	return (
 		<Card className="woocommerce-marketing-campaigns-card">
-			<CardHeader>
-				<CardHeaderTitle>
-					{ __( 'Campaigns', 'woocommerce' ) }
-				</CardHeaderTitle>
-				<Button variant="secondary">
-					{ __( 'Create new campaign', 'woocommerce' ) }
-				</Button>
-			</CardHeader>
+			<CampaignsCardHeader />
 			<Table
 				caption={ __( 'Campaigns', 'woocommerce' ) }
 				headers={ [

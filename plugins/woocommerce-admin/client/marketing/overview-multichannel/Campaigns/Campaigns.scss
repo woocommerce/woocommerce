@@ -50,3 +50,12 @@
 		border-top: none;
 	}
 }
+
+.woocommerce-marketing-create-campaign-modal {
+	&__question-label {
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 17px;
+		margin-bottom: 16px;
+	}
+}
