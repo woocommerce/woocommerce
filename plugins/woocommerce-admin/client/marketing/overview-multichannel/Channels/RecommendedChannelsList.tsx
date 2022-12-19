@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Fragment } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
 import { CardDivider } from '@wordpress/components';
 
 /**
@@ -10,7 +9,6 @@ import { CardDivider } from '@wordpress/components';
  */
 import { SmartPluginCardBody } from '~/marketing/components';
 import { RecommendedChannel } from '~/marketing/types';
-import './Channels.scss';
 
 type RecommendedChannelListPropsType = {
 	recommendedChannels: Array< RecommendedChannel >;
