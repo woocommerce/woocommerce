@@ -57,36 +57,6 @@ export const CountryInput = ( {
 				required={ required }
 				autoComplete={ autoComplete }
 			/>
-			{ autoComplete !== 'off' && (
-				<input
-					type="text"
-					aria-hidden={ true }
-					autoComplete={ autoComplete }
-					value={ value }
-					onChange={ ( event ) => {
-						const textValue =
-							event.target.value.toLocaleUpperCase();
-						const foundOption = options.find(
-							( option ) =>
-								( textValue.length !== 2 &&
-									option.label.toLocaleUpperCase() ===
-										textValue ) ||
-								( textValue.length === 2 &&
-									option.value.toLocaleUpperCase() ===
-										textValue )
-						);
-						onChange( foundOption ? foundOption.value : '' );
-					} }
-					style={ {
-						minHeight: '0',
-						height: '0',
-						border: '0',
-						padding: '0',
-						position: 'absolute',
-					} }
-					tabIndex={ -1 }
-				/>
-			) }
 		</div>
 	);
 };
