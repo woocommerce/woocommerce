@@ -67,8 +67,7 @@ export const useLiveBranchInstall = (
 			}
 
 			const deactivateResult = await apiFetch< Response >( {
-				path: `${ API_NAMESPACE }/live-branches/deactivate/v1`,
-				method: 'GET',
+				path: `${ API_NAMESPACE }/live-branches/deactivate_core/v1`,
 			} );
 
 			if ( deactivateResult.status >= 400 ) {
@@ -76,7 +75,7 @@ export const useLiveBranchInstall = (
 			}
 
 			const activateResult = await apiFetch< Response >( {
-				path: `live-branches/activate/v1`,
+				path: `${ API_NAMESPACE }/live-branches/activate/v1`,
 				method: 'POST',
 				body: JSON.stringify( {
 					version,

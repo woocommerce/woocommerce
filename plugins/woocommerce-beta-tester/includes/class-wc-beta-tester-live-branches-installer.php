@@ -7,11 +7,20 @@
 
 defined( 'ABSPATH' ) || exit;
 
+require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
 /**
  * WC_Beta_Tester Live Branches Installer Class.
  */
 class WC_Beta_Tester_Live_Branches_Installer {
+
+	/**
+	 * Keep an instance of the WP Filesystem API.
+	 *
+	 * @var Object The WP_Filesystem API instance
+	 */
 	private $file_system;
+
 	/**
 	 * Constructor.
 	 */
@@ -85,13 +94,23 @@ class WC_Beta_Tester_Live_Branches_Installer {
 		}
 	}
 
+	/**
+	 * Deactivate WooCommerce Core plugin.
+	 */
 	public function deactivate() {
-		deactivate_plugins( 'woocommerce/woocommerce.php' );
+		if ( is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+			deactivate_plugins( 'woocommerce/woocommerce.php' );
+		}
 
 		return true;
 	}
 
+	/**
+	 * Activate dev installed WooCommerce core plugin.
+	 */
 	public function activate() {
-		activate_plugin( 'woocommerce-dev/woocommerce.php' );
+		if ( ! is_plugin_active( 'woocommerce-dev/woocommerce.php' ) ) {
+			activate_plugin( 'woocommerce-dev/woocommerce.php' );
+		}
 	}
 }
