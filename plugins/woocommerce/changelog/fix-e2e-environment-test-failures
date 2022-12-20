@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Update Playwright to 1.28.0 and explicitly set PHP version in GH action

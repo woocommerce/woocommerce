@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Update country data in api-core-tests to prevent numerous test data updates
