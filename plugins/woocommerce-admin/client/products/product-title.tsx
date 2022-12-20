@@ -90,6 +90,7 @@ export const ProductTitle: React.FC = () => {
 		},
 		{
 			href: getNewPath( {}, '/product/' + productId ),
+			type: 'wc-admin',
 			title: (
 				<>
 					{ productTitle }
