@@ -7,7 +7,7 @@ import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import { SimpleNavigationProps } from '../shared/simple-navigation';
+import { PostsNavigationProps } from '../shared/posts-navigation';
 
 export default function useProductVariationNavigation( {
 	product,
@@ -17,9 +17,9 @@ export default function useProductVariationNavigation( {
 	const variationIds = variations ?? [];
 
 	const currentIndex = variationIds.indexOf( productVariation.id ?? -1 );
-	const canNavigateBack = currentIndex > 0;
+	const canNavigatePrev = currentIndex > 0;
 	const canNavigateNext = currentIndex < variationIds.length - 1;
-	const prevVariationId = canNavigateBack
+	const prevVariationId = canNavigatePrev
 		? variationIds[ currentIndex - 1 ]
 		: undefined;
 	const nextVariationId = canNavigateNext
@@ -30,7 +30,7 @@ export default function useProductVariationNavigation( {
 
 	return {
 		actionHref: getNewPath( persistedQuery, `/product/${ product.id }` ),
-		backHref: prevVariationId
+		prevHref: prevVariationId
 			? getNewPath(
 					persistedQuery,
 					`/product/${ product.id }/variation/${ prevVariationId }`
@@ -51,6 +51,6 @@ export type UseProductVariationNavigationInput = {
 };
 
 export type UseProductVariationNavigationOutput = Pick<
-	SimpleNavigationProps,
-	'actionHref' | 'backHref' | 'nextHref'
+	PostsNavigationProps,
+	'actionHref' | 'prevHref' | 'nextHref'
 >;

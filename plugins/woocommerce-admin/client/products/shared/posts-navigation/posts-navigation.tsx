@@ -9,42 +9,44 @@ import classNames from 'classnames';
 /**
  * Internal dependencies
  */
-import './simple-navigation.scss';
+import './posts-navigation.scss';
 
-export default function SimpleNavigation( {
+export default function PostsNavigation( {
 	actionLabel,
 	actionHref,
-	backHref,
+	prevHref,
+	prevLabel,
 	nextHref,
+	nextLabel,
 	className,
 	...props
-}: SimpleNavigationProps ) {
-	const backNavigationProps = {
-		className: 'simple-navigation__back',
-		'aria-label': __( 'Back', 'woocommerce' ),
+}: PostsNavigationProps ) {
+	const prevNavigationProps = {
+		className: 'posts-navigation__prev',
+		'aria-label': prevLabel ?? __( 'Previous post', 'woocommerce' ),
 		children: <Icon icon={ arrowLeft } size={ 24 } fill="currentColor" />,
 	};
 
 	const nextNavigationProps = {
-		className: 'simple-navigation__next',
-		'aria-label': __( 'Next', 'woocommerce' ),
+		className: 'posts-navigation__next',
+		'aria-label': nextLabel ?? __( 'Next post', 'woocommerce' ),
 		children: <Icon icon={ arrowRight } size={ 24 } fill="currentColor" />,
 	};
 
 	return (
 		<nav
 			{ ...props }
-			className={ classNames( className, 'simple-navigation' ) }
+			className={ classNames( className, 'posts-navigation' ) }
 		>
-			{ backHref ? (
+			{ prevHref ? (
 				<Link
-					{ ...backNavigationProps }
+					{ ...prevNavigationProps }
 					type="wc-admin"
-					href={ backHref }
+					href={ prevHref }
 				/>
 			) : (
 				<div
-					{ ...backNavigationProps }
+					{ ...prevNavigationProps }
 					tabIndex={ -1 }
 					role="button"
 					aria-disabled="true"
@@ -52,7 +54,7 @@ export default function SimpleNavigation( {
 			) }
 
 			<Link
-				className="simple-navigation__action"
+				className="posts-navigation__action"
 				type="wc-admin"
 				href={ actionHref }
 			>
@@ -77,12 +79,14 @@ export default function SimpleNavigation( {
 	);
 }
 
-export type SimpleNavigationProps = React.DetailedHTMLProps<
+export type PostsNavigationProps = React.DetailedHTMLProps<
 	React.HTMLAttributes< HTMLElement >,
 	HTMLElement
 > & {
 	actionLabel: string;
 	actionHref: string;
-	backHref?: string;
+	prevHref?: string;
+	prevLabel?: string;
 	nextHref?: string;
+	nextLabel?: string;
 };

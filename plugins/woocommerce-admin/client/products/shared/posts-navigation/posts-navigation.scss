@@ -1,4 +1,4 @@
-.simple-navigation {
+.posts-navigation {
 	display: flex;
 	align-items: center;
 	background: $white;
@@ -8,7 +8,7 @@
 	height: 48px;
 
 	&__action,
-	&__back,
+	&__prev,
 	&__next {
 		display: flex;
 		align-items: center;

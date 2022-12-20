@@ -8,7 +8,7 @@ import { PartialProduct, ProductVariation } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import SimpleNavigation from './shared/simple-navigation';
+import PostsNavigation from './shared/posts-navigation';
 import { ProductFormHeader } from './layout/product-form-header';
 import { ProductFormLayout } from './layout/product-form-layout';
 import { ProductFormFooter } from './layout/product-form-footer';
@@ -54,12 +54,17 @@ export const ProductVariationForm: React.FC< {
 			<ProductFormFooter />
 
 			<div className="product-variation-form__navigation">
-				<SimpleNavigation
+				<PostsNavigation
 					{ ...navigationProps }
 					actionLabel={ __(
 						'Return to main product',
 						'woocommerce'
 					) }
+					prevLabel={ __(
+						'Previous product variation',
+						'woocommerce'
+					) }
+					nextLabel={ __( 'Next product variation', 'woocommerce' ) }
 				/>
 			</div>
 		</Form>
