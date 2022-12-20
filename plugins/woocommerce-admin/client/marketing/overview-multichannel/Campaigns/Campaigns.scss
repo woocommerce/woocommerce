@@ -54,11 +54,16 @@
 .woocommerce-marketing-create-campaign-modal {
 	max-width: 600px;
 
-	&__question-label {
-		font-size: 14px;
-		font-weight: 600;
-		line-height: 17px;
-		margin-bottom: 16px;
+	.woocommerce-marketing-new-campaigns {
+		padding-top: $gap-large;
+		padding-bottom: $gap;
+
+		&__question-label {
+			font-size: 14px;
+			font-weight: 600;
+			line-height: 17px;
+			margin-bottom: 16px;
+		}
 	}
 
 	.components-button.is-link {
@@ -74,5 +79,23 @@
 
 	.components-card-divider {
 		display: none;
+	}
+
+	.woocommerce-marketing-new-campaign-type {
+		padding: $gap 0;
+
+		&__name {
+			font-weight: 600;
+			font-size: 14px;
+			line-height: 20px;
+		}
+
+		&__description {
+			color: #555d66;
+		}
+	}
+
+	.woocommerce-marketing-add-channels {
+		padding-top: $gap;
 	}
 }
