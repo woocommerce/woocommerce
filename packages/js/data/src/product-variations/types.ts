@@ -43,3 +43,16 @@ export type ProductVariationSelectors = CrudSelectors<
 >;
 
 export type ActionDispatchers = DispatchFromMap< ProductVariationActions >;
+
+export type BatchUpdateRequest = {
+	create?: Partial< Omit< ProductVariation, 'id' > >[];
+	update?: ( Pick< ProductVariation, 'id' > &
+		Partial< Omit< ProductVariation, 'id' > > )[];
+	delete?: ProductVariation[ 'id' ][];
+};
+
+export type BatchUpdateResponse = {
+	create?: ProductVariation[];
+	update?: ProductVariation[];
+	delete?: ProductVariation[];
+};
