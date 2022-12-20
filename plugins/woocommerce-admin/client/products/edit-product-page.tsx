@@ -56,7 +56,7 @@ const EditProductPage: React.FC = () => {
 						isProductVariation &&
 						getProductVariation( {
 							id: parseInt( variationId, 10 ),
-							product_id: productId,
+							product_id: parseInt( productId, 10 ),
 						} ),
 					isLoading:
 						! hasProductFinishedResolution( 'getProduct', [
