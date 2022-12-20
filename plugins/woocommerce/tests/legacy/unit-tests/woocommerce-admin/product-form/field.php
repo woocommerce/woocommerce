@@ -18,7 +18,7 @@ class WC_Admin_Tests_ProductForm_Field extends WC_Unit_Test_Case {
 	public function test_get_missing_arguments() {
 		$missing_args = Field::get_missing_arguments(
 			array(
-				'location' => 'product_details',
+				'section' => 'product_details',
 			)
 		);
 

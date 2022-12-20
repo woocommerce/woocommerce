@@ -46,7 +46,7 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 		Form::add_field( 'id', 'woocommerce', array() );
 
 		$output = stream_get_contents( self::$error_log_capture );
-		$this->assertContains( 'You are missing required arguments of WooCommerce ProductForm Field: name, type, location', $output );
+		$this->assertContains( 'You are missing required arguments of WooCommerce ProductForm Field: name, type, section', $output );
 	}
 
 	/**
@@ -59,7 +59,7 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			array(
 				'name'     => 'name',
 				'type'     => 'text',
-				'location' => 'product_details',
+				'section' => 'product_details',
 			)
 		);
 
@@ -69,7 +69,7 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			array(
 				'name'     => 'name',
 				'type'     => 'text',
-				'location' => 'product_details',
+				'section' => 'product_details',
 			)
 		);
 		$output = stream_get_contents( self::$error_log_capture );
@@ -86,7 +86,7 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			array(
 				'name'     => 'name',
 				'type'     => 'text',
-				'location' => 'product_details',
+				'section' => 'product_details',
 			)
 		);
 
@@ -96,7 +96,7 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			array(
 				'name'     => 'name',
 				'type'     => 'textarea',
-				'location' => 'product_details',
+				'section' => 'product_details',
 			)
 		);
 
@@ -116,7 +116,7 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			array(
 				'name'     => 'id',
 				'type'     => 'text',
-				'location' => 'product_details',
+				'section' => 'product_details',
 			)
 		);
 
@@ -126,7 +126,7 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			array(
 				'name'     => 'id2',
 				'type'     => 'textarea',
-				'location' => 'product_details',
+				'section' => 'product_details',
 			)
 		);
 
@@ -137,7 +137,7 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 				'order'    => 1,
 				'name'     => 'first',
 				'type'     => 'textarea',
-				'location' => 'product_details',
+				'section' => 'product_details',
 			)
 		);
 

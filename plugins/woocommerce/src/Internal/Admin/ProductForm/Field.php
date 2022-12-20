@@ -36,7 +36,7 @@ class Field {
 	const REQUIRED_ARGUMENTS = array(
 		'name',
 		'type',
-		'location',
+		'section',
 	);
 
 	/**
@@ -47,7 +47,7 @@ class Field {
 	 * @param array  $args Array containing the necessary arguments.
 	 *     $args = array(
 	 *       'type'            => (string) Field type. Required.
-	 *       'location'        => (string) Field location. Required.
+	 *       'section'         => (string) Field location. Required.
 	 *       'order'           => (int) Field order.
 	 *       'properties'      => (array) Field properties.
 	 *     ).
