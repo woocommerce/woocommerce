@@ -205,7 +205,7 @@ class MigrationHelper {
 					AS states_in_country
 				WHERE (meta_key='_billing_state' OR meta_key='_shipping_state')
 				AND meta_value=%s
-				AND wp_postmeta.post_id = states_in_country.post_id
+				AND {$wpdb->postmeta}.post_id = states_in_country.post_id
 				LIMIT %d",
 				$country_code,
 				$old_state,
