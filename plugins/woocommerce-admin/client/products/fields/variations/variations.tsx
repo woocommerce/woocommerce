@@ -38,6 +38,25 @@ const DEFAULT_PER_PAGE_OPTION = 25;
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 const VISIBLE_TEXT = __( 'Visible to customers', 'woocommerce' );
 const UPDATING_TEXT = __( 'Updating product variation', 'woocommerce' );
+const KEY_SEPARATOR = ':';
+
+function createKeyFromVariation( variation: ProductVariation ) {
+	return `${ variation.id }${ KEY_SEPARATOR }${
+		( variation as any ).menu_order
+	}`;
+}
+
+function extractVariationIdFromElement( { key }: JSX.Element ) {
+	return typeof key === 'string'
+		? Number.parseInt( key.split( KEY_SEPARATOR )[ 0 ], 10 )
+		: 0;
+}
+
+function extractVariationOrderFromElement( { key }: JSX.Element ) {
+	return typeof key === 'string'
+		? Number.parseInt( key.split( KEY_SEPARATOR )[ 1 ], 10 )
+		: Number.MAX_SAFE_INTEGER;
+}
 
 export const Variations: React.FC = () => {
 	const [ currentPage, setCurrentPage ] = useState( 1 );
@@ -73,7 +92,7 @@ export const Variations: React.FC = () => {
 		[ currentPage, perPage ]
 	);
 
-	const { updateProductVariation } = useDispatch(
+	const { updateProductVariation, batchUpdateProductVariation } = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 	);
 
@@ -107,6 +126,28 @@ export const Variations: React.FC = () => {
 		);
 	}
 
+	function handleOrderChange( items: JSX.Element[] ) {
+		const minOrder = Math.min(
+			...items.map( extractVariationOrderFromElement )
+		);
+		batchUpdateProductVariation<
+			Promise< { update: ProductVariation[] } >
+		>(
+			{
+				product_id: productId,
+			},
+			{
+				update: items.map( ( item, index ) => {
+					const id = extractVariationIdFromElement( item );
+					return {
+						id,
+						menu_order: minOrder + index,
+					};
+				} ),
+			}
+		).then( ( res ) => console.log( res ) );
+	}
+
 	return (
 		<Card className="woocommerce-product-variations">
 			<div className="woocommerce-product-variations__header">
@@ -120,9 +161,9 @@ export const Variations: React.FC = () => {
 				</h4>
 				<h4>{ __( 'Quantity', 'woocommerce' ) }</h4>
 			</div>
-			<Sortable>
+			<Sortable onOrderChange={ handleOrderChange }>
 				{ variations.map( ( variation ) => (
-					<ListItem key={ variation.id }>
+					<ListItem key={ createKeyFromVariation( variation ) }>
 						<div className="woocommerce-product-variations__attributes">
 							{ variation.attributes.map( ( attribute ) => (
 								/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
