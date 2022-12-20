@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useState, useCallback, useEffect } from '@wordpress/element';
 import {
 	ProductAttribute,
@@ -40,6 +40,7 @@ type AttributeFieldProps = {
 export type HydratedAttributeType = Omit< ProductAttribute, 'options' > & {
 	options?: string[];
 	terms?: ProductAttributeTerm[];
+	visible?: boolean;
 };
 
 export const AttributeField: React.FC< AttributeFieldProps > = ( {
@@ -50,9 +51,9 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 } ) => {
 	const [ showAddAttributeModal, setShowAddAttributeModal ] =
 		useState( false );
-	const [ hydrationComplete, setHydrationComplete ] = useState< boolean >(
-		value ? false : true
-	);
+	// const [ hydrationComplete, setHydrationComplete ] = useState< boolean >(
+	// 	value ? false : true
+	// );
 	const [ hydratedAttributes, setHydratedAttributes ] = useState<
 		HydratedAttributeType[]
 	>( [] );
@@ -61,10 +62,6 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 	>( null );
 
 	const isOnlyForVariations = attributeType === 'for-variations';
-
-	const filter = ( attribute: ProductAttribute ) => {
-		return attribute.variation === isOnlyForVariations;
-	};
 
 	const newAttributeProps = { variation: isOnlyForVariations };
 
@@ -114,9 +111,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 			sift( value, ( attr: ProductAttribute ) => attr.id === 0 );
 
 		Promise.all(
-			globalAttributes.map( ( attr ) => {
-				return fetchTerms( attr.id );
-			} )
+			globalAttributes.map( ( attr ) => fetchTerms( attr.id ) )
 		).then( ( allResults ) => {
 			setHydratedAttributes( [
 				...globalAttributes.map( ( attr, index ) => {
@@ -138,9 +133,9 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 				} ),
 				...customAttributes,
 			] );
-			//setHydrationComplete( true );
 		} );
-	}, [ productId, value, hydrationComplete ] );
+	}, [ productId, value ] );
+	// }, [ productId, value, hydrationComplete ] );
 
 	const fetchAttributeId = ( attribute: { id: number; name: string } ) =>
 		`${ attribute.id }-${ attribute.name }`;
@@ -155,6 +150,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 						? attr.terms.map( ( term ) => term.name )
 						: ( attr.options as string[] ),
 					terms: undefined,
+					visible: attr.visible || false,
 				};
 			} )
 		);
@@ -202,7 +198,18 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		setShowAddAttributeModal( false );
 	};
 
-	if ( ! value || value.length === 0 || hydratedAttributes.length === 0 ) {
+	const filteredAttributes = value
+		? value.filter(
+				( attribute: ProductAttribute ) =>
+					attribute.variation === isOnlyForVariations
+		  )
+		: false;
+
+	if (
+		! filteredAttributes ||
+		filteredAttributes.length === 0 ||
+		hydratedAttributes.length === 0
+	) {
 		return (
 			<>
 				<AttributeEmptyState
@@ -220,7 +227,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 							setShowAddAttributeModal( false );
 						} }
 						onAdd={ onAddNewAttributes }
-						selectedAttributeIds={ ( value || [] ).map(
+						selectedAttributeIds={ ( filteredAttributes || [] ).map(
 							( attr ) => attr.id
 						) }
 					/>
@@ -229,9 +236,6 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 			</>
 		);
 	}
-
-	const filteredAttributes =
-		typeof filter === 'function' ? value.filter( filter ) : value;
 
 	const sortedAttributes = filteredAttributes.sort(
 		( a, b ) => a.position - b.position
@@ -247,6 +251,10 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		{} as Record< number, ProductAttribute >
 	);
 
+	const attribute = hydratedAttributes.find(
+		( attr ) => fetchAttributeId( attr ) === editingAttributeId
+	) as HydratedAttributeType;
+
 	return (
 		<div className="woocommerce-attribute-field">
 			<Sortable
@@ -259,16 +267,14 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					);
 				} }
 			>
-				{ sortedAttributes.map( ( attribute ) => (
+				{ sortedAttributes.map( ( attr ) => (
 					<AttributeListItem
-						attribute={ attribute }
-						key={ fetchAttributeId( attribute ) }
+						attribute={ attr }
+						key={ fetchAttributeId( attr ) }
 						onEditClick={ () =>
-							setEditingAttributeId(
-								fetchAttributeId( attribute )
-							)
+							setEditingAttributeId( fetchAttributeId( attr ) )
 						}
-						onRemoveClick={ () => onRemove( attribute ) }
+						onRemoveClick={ () => onRemove( attr ) }
 					/>
 				) ) }
 			</Sortable>
@@ -305,6 +311,13 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 			<SelectControlMenuSlot />
 			{ editingAttributeId && (
 				<EditAttributeModal
+					title={
+						/* translators: %s is the attribute name */
+						sprintf(
+							__( 'Edit %s', 'woocommerce' ),
+							attribute.name
+						)
+					}
 					onCancel={ () => setEditingAttributeId( null ) }
 					onEdit={ ( changedAttribute ) => {
 						const newAttributesSet = [ ...hydratedAttributes ];
@@ -322,12 +335,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 						updateAttributes( newAttributesSet );
 						setEditingAttributeId( null );
 					} }
-					attribute={
-						hydratedAttributes.find(
-							( attr ) =>
-								fetchAttributeId( attr ) === editingAttributeId
-						) as HydratedAttributeType
-					}
+					attribute={ attribute }
 				/>
 			) }
 		</div>

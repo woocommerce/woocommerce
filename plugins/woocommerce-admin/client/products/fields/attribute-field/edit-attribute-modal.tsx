@@ -170,10 +170,10 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 						onChange={ ( val ) =>
 							setEditableAttribute( {
 								...( editableAttribute as HydratedAttributeType ),
-								variation: val,
+								variation: ! val,
 							} )
 						}
-						checked={ editableAttribute?.variation }
+						checked={ ! editableAttribute?.variation }
 						label={ filtersLabel }
 					/>
 					<Tooltip text={ filtersTooltip } />
