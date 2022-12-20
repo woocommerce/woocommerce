@@ -31,8 +31,6 @@ type EditAttributeModalProps = {
 	termsPlaceholder?: string;
 	visibleLabel?: string;
 	visibleTooltip?: string;
-	filtersLabel?: string;
-	filtersTooltip?: string;
 	cancelAccessibleLabel?: string;
 	cancelLabel?: string;
 	updateAccessibleLabel?: string;
@@ -55,11 +53,6 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 	visibleLabel = __( 'Visible to customers', 'woocommerce' ),
 	visibleTooltip = __(
 		'Show or hide this attribute on the product page',
-		'woocommerce'
-	),
-	filtersLabel = __( 'Used for filters', 'woocommerce' ),
-	filtersTooltip = __(
-		`Show or hide this attribute in the filters section on your store's category and shop pages`,
 		'woocommerce'
 	),
 	cancelAccessibleLabel = __( 'Cancel', 'woocommerce' ),
@@ -141,19 +134,6 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 						label={ visibleLabel }
 					/>
 					<Tooltip text={ visibleTooltip } />
-				</div>
-				<div className="woocommerce-edit-attribute-modal__option-container">
-					<CheckboxControl
-						onChange={ ( val ) =>
-							setEditableAttribute( {
-								...( editableAttribute as HydratedAttributeType ),
-								variation: ! val,
-							} )
-						}
-						checked={ ! editableAttribute?.variation }
-						label={ filtersLabel }
-					/>
-					<Tooltip text={ filtersTooltip } />
 				</div>
 			</div>
 			<div className="woocommerce-add-attribute-modal__buttons">
