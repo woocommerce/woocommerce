@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix get orders REST API endpoint when using 'search' or 'parent' and HPOS is enabled
