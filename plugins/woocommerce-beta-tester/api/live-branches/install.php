@@ -1,6 +1,6 @@
 <?php
 /**
- * Register REST endpoint for installing live branches manifest.
+ * REST API endpoints for live branches installation.
  *
  * @package WC_Beta_Tester
  */
@@ -75,7 +75,7 @@ function activate_version( $request ) {
 	$version = $params->version;
 
 	$installer = new WC_Beta_Tester_Live_Branches_Installer();
-	$result = $installer->activate( $version );
+	$result    = $installer->activate( $version );
 
 	if ( is_wp_error( $result ) ) {
 		return new WP_Error( 400, "Could not activate version: $version with error {$result->get_error_message()}", '' );
@@ -87,7 +87,7 @@ function activate_version( $request ) {
 /**
  * Respond to GET request to deactivate WooCommerce.
  */
-function deactivate_woocommerce( ) {	
+function deactivate_woocommerce() {
 	$installer = new WC_Beta_Tester_Live_Branches_Installer();
 	$installer->deactivate_woocommerce();
 

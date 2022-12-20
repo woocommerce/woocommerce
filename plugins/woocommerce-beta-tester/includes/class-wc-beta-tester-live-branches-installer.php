@@ -38,7 +38,7 @@ class WC_Beta_Tester_Live_Branches_Installer {
 		$creds = request_filesystem_credentials( site_url() . '/wp-admin/', '', false, false, array() );
 
 		if ( ! WP_Filesystem( $creds ) ) {
-			return new WP_Error( 'fs_api_error', __( 'Jetpack Beta: No File System access', 'jetpack-beta' ) );
+			return new WP_Error( 'fs_api_error', __( 'WooCommerce Beta Tester: No File System access', 'woocommerce-beta-tester' ) ); // @codingStandardsIgnoreLine.
 		}
 
 		global $wp_filesystem;
@@ -60,14 +60,14 @@ class WC_Beta_Tester_Live_Branches_Installer {
 		if ( is_wp_error( $tmp_dir ) ) {
 			return new WP_Error(
 				'download_error',
-				sprintf( __( 'Error Downloading: <a href="%1$s">%1$s</a> - Error: %2$s', 'woocommerce-beta-tester' ), $download_url, $tmp_dir->get_error_message() )
+				sprintf( __( 'Error Downloading: <a href="%1$s">%1$s</a> - Error: %2$s', 'woocommerce-beta-tester' ), $download_url, $tmp_dir->get_error_message() ) // @codingStandardsIgnoreLine.
 			);
 		}
 
 		// Unzip the plugin.
 		$plugin_dir  = str_replace( ABSPATH, $this->file_system->abspath(), WP_PLUGIN_DIR );
-		$plugin_path = $plugin_dir . '/' . LIVE_BRANCH_PLUGIN_PREFIX . "_$version"; 
-		$unzip_path = $plugin_dir . "/woocommerce-$version";
+		$plugin_path = $plugin_dir . '/' . LIVE_BRANCH_PLUGIN_PREFIX . "_$version";
+		$unzip_path  = $plugin_dir . "/woocommerce-$version";
 
 		$unzip = unzip_file( $tmp_dir, $unzip_path );
 
@@ -76,7 +76,7 @@ class WC_Beta_Tester_Live_Branches_Installer {
 		$this->move( $unzip_path . '/woocommerce-dev', $plugin_path );
 
 		if ( is_wp_error( $unzip ) ) {
-			return new WP_Error( 'unzip_error', sprintf( __( 'Error Unzipping file: Error: %1$s', 'woocommerce-beta-tester' ), $result->get_error_message() ) );
+			return new WP_Error( 'unzip_error', sprintf( __( 'Error Unzipping file: Error: %1$s', 'woocommerce-beta-tester' ), $result->get_error_message() ) ); // @codingStandardsIgnoreLine.
 		}
 
 		// Delete the downloaded zip file.
@@ -85,6 +85,12 @@ class WC_Beta_Tester_Live_Branches_Installer {
 		return true;
 	}
 
+	/**
+	 * Move all files from one folder to another.
+	 *
+	 * @param string $from The folder to move files from.
+	 * @param string $to The folder to move files to.
+	 */
 	private function move( $from, $to ) {
 		$files     = scandir( $from );
 		$oldfolder = "$from/";
@@ -106,11 +112,9 @@ class WC_Beta_Tester_Live_Branches_Installer {
 			deactivate_plugins( 'woocommerce/woocommerce.php' );
 		}
 
-		// Then check if any beta tester installed plugins are active
+		// Check if any beta tester installed plugins are active.
 		$active_plugins = get_option( 'active_plugins' );
 
-		error_log("active_plugins: ");
-		error_log(json_encode($active_plugins));
 		$active_woo_plugins = array_filter(
 			$active_plugins,
 			function( $plugin ) {
@@ -118,16 +122,15 @@ class WC_Beta_Tester_Live_Branches_Installer {
 			}
 		);
 
-		error_log("active_woo_plugins: ");
-		error_log(json_encode($active_woo_plugins));		
-		
 		if ( ! empty( $active_woo_plugins ) ) {
 			deactivate_plugins( $active_woo_plugins );
 		}
 	}
 
 	/**
-	 * Activate dev installed WooCommerce core plugin.
+	 * Activate a beta tester installed WooCommerce plugin
+	 *
+	 * @param string $version The version of the plugin to activate.
 	 */
 	public function activate( $version ) {
 		if ( ! is_plugin_active( LIVE_BRANCH_PLUGIN_PREFIX . "_$version/woocommerce.php" ) ) {
@@ -137,9 +140,11 @@ class WC_Beta_Tester_Live_Branches_Installer {
 
 	/**
 	 * Check the install status of a plugin version.
+	 *
+	 * @param string $version The version of the plugin to check.
 	 */
 	public function check_install_status( $version ) {
-		$plugin_path = WP_PLUGIN_DIR . "/" . LIVE_BRANCH_PLUGIN_PREFIX . "_$version/woocommerce.php";
+		$plugin_path = WP_PLUGIN_DIR . '/' . LIVE_BRANCH_PLUGIN_PREFIX . "_$version/woocommerce.php";
 
 		if ( ! file_exists( $plugin_path ) ) {
 			return 'not-installed';
