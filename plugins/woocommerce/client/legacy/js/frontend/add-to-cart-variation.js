@@ -245,7 +245,7 @@
 			$dimensions    = form.$product.find(
 				'.product_dimensions, .woocommerce-product-attributes-item--dimensions .woocommerce-product-attributes-item__value'
 			),
-			$qty           = form.$singleVariationWrap.find( '.woocommerce-variation-add-to-cart .quantity' ),
+			$qty           = form.$singleVariationWrap.find( '.quantity input[name="quantity"]' ),
 			purchasable    = true,
 			variation_id   = '',
 			template       = false,
