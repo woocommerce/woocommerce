@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/create-woo-extension",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "A template to be used with `@wordpress/create-block` to create a WooCommerce extension.",
 	"main": "index.js",
 	"engines": {
