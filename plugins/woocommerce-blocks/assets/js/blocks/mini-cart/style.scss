@@ -147,21 +147,10 @@ h2.wc-block-mini-cart__title {
 
 		.wc-block-components-button {
 			flex-grow: 1;
-			font-weight: 600;
 		}
 
 		.wc-block-components-button.outlined {
-			color: currentColor;
 			display: none;
-
-			&:not(:focus) {
-				box-shadow: inset 0 0 0 1px currentColor;
-			}
-
-			&:hover,
-			&:focus {
-				color: $white;
-			}
 
 			@media only screen and (min-width: 480px) {
 				display: inline-flex;

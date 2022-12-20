@@ -63,6 +63,7 @@ const Button = ( {
 }: ButtonProps ): JSX.Element => {
 	const buttonClassName = classNames(
 		'wc-block-components-button',
+		'wp-element-button',
 		className,
 		variant,
 		{
