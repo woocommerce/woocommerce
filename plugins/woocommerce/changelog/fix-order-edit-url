@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Avoid a potential fatal error when forming edit-order URLs.
