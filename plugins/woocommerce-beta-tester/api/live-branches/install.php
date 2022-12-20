@@ -1,4 +1,4 @@
-<?php
+<?php // @codingStandardsIgnoreLine I don't know why it thinks the doc comment is missing.
 /**
  * REST API endpoints for live branches installation.
  *

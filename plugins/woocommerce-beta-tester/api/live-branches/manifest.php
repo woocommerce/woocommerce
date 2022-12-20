@@ -1,4 +1,4 @@
-<?php
+<?php // @codingStandardsIgnoreLine
 /**
  * Register REST endpoint for fetching live branches manifest.
  *
