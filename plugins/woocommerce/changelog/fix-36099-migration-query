@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Corrects a hard-coded reference to the WP post meta table within the HPOS Migration Helper, that would fail on some sites.
