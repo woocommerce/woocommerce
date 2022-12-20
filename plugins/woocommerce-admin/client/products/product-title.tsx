@@ -18,7 +18,10 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import { getProductTitle } from './utils/get-product-title';
-import { getProductVariationTitle } from './utils/get-product-variation-title';
+import {
+	getProductVariationTitle,
+	getTruncatedProductVariationTitle,
+} from './utils/get-product-variation-title';
 import { ProductBreadcrumbs } from './product-breadcrumbs';
 import { ProductStatusBadge } from './product-status-badge';
 import { WooHeaderPageTitle } from '~/header/utils';
@@ -101,9 +104,7 @@ export const ProductTitle: React.FC = () => {
 		productVariationTitle && {
 			title: (
 				<span title={ productVariationTitle }>
-					{ productVariationTitle.length > 50
-						? productVariationTitle.substring( 0, 50 ) + '…'
-						: productVariationTitle }
+					{ getTruncatedProductVariationTitle( productVariation ) }
 				</span>
 			),
 		},
