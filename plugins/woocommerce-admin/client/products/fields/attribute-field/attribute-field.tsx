@@ -12,8 +12,11 @@ import { resolveSelect } from '@wordpress/data';
 import {
 	Sortable,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
+	Link,
 } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
+import interpolateComponents from '@automattic/interpolate-components';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -255,6 +258,16 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		( attr ) => fetchAttributeId( attr ) === editingAttributeId
 	) as HydratedAttributeType;
 
+	const editAttributeCopy = isOnlyForVariations
+		? __(
+				`You can change the option's name in {{link}}Attributes{{/link}}.`,
+				'woocommerce'
+		  )
+		: __(
+				`You can change the attribute's name in {{link}}Attributes{{/link}}.`,
+				'woocommerce'
+		  );
+
 	return (
 		<div className="woocommerce-attribute-field">
 			<Sortable
@@ -318,6 +331,22 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 							attribute.name
 						)
 					}
+					globalAttributeHelperMessage={ interpolateComponents( {
+						mixedString: editAttributeCopy,
+						components: {
+							link: (
+								<Link
+									href={ getAdminLink(
+										'edit.php?post_type=product&page=product_attributes'
+									) }
+									target="_blank"
+									type="wp-admin"
+								>
+									<></>
+								</Link>
+							),
+						},
+					} ) }
 					onCancel={ () => setEditingAttributeId( null ) }
 					onEdit={ ( changedAttribute ) => {
 						const newAttributesSet = [ ...hydratedAttributes ];
