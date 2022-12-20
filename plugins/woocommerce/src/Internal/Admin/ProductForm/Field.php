@@ -82,4 +82,23 @@ class Field {
 			}
 		);
 	}
+
+	/**
+	 * Sorting function for fields.
+	 *
+	 * @param Field $a Field a.
+	 * @param Field $b Field b.
+	 * @param array $sort_by key and order to sort by.
+	 * @return int
+	 */
+	public static function sort( $a, $b, $sort_by = array() ) {
+		$key   = $sort_by['key'];
+		$a_val = $a->args[ $key ] ?? false;
+		$b_val = $b->args[ $key ] ?? false;
+		if ( 'asc' === $sort_by['order'] ) {
+			return $a_val <=> $b_val;
+		} else {
+			return $b_val <=> $a_val;
+		}
+	}
 }

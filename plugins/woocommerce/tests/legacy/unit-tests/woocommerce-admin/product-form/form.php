@@ -105,5 +105,47 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 		$this->assertEquals( 'text', $fields[0]->type );
 		$this->assertEquals( 'textarea', $fields[1]->type );
 	}
+
+	/**
+	 * Test that get_fields.
+	 */
+	public function test_get_fields_sort_default() {
+		Form::add_field(
+			'id',
+			'woocommerce',
+			array(
+				'name'     => 'id',
+				'type'     => 'text',
+				'location' => 'product_details',
+			)
+		);
+
+		Form::add_field(
+			'id2',
+			'woocommerce',
+			array(
+				'name'     => 'id2',
+				'type'     => 'textarea',
+				'location' => 'product_details',
+			)
+		);
+
+		Form::add_field(
+			'first',
+			'woocommerce',
+			array(
+				'order'    => 1,
+				'name'     => 'first',
+				'type'     => 'textarea',
+				'location' => 'product_details',
+			)
+		);
+
+		$fields = Form::get_fields();
+		$this->assertEquals( 3, count( $fields ) );
+		$this->assertEquals( 'first', $fields[0]->get_id() );
+		$this->assertEquals( 'id', $fields[1]->get_id() );
+		$this->assertEquals( 'id2', $fields[2]->get_id() );
+	}
 }
 

@@ -38,4 +38,22 @@ trait ComponentTrait {
 	 * @var number
 	 */
 	protected $order;
+
+	/**
+	 * Return id.
+	 *
+	 * @return string
+	 */
+	public function get_id() {
+		return $this->id;
+	}
+
+	/**
+	 * Return plugin id.
+	 *
+	 * @return string
+	 */
+	public function get_plugin_id() {
+		return $this->plugin_id;
+	}
 }

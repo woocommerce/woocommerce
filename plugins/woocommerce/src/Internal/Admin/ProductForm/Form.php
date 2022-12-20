@@ -102,10 +102,21 @@ class Form {
 	/**
 	 * Returns list of registered fields.
 	 *
+	 * @param array $sort_by key and order to sort by.
 	 * @return array list of registered fields.
 	 */
-	public static function get_fields() {
-		return array_values( self::$form_fields );
+	public static function get_fields( $sort_by = array(
+		'key'   => 'order',
+		'order' => 'asc',
+	) ) {
+		$fields = array_values( self::$form_fields );
+		usort(
+			$fields,
+			function( $a, $b ) use ( $sort_by ) {
+				return Field::sort( $a, $b, $sort_by );
+			}
+		);
+		return $fields;
 	}
 }
 
