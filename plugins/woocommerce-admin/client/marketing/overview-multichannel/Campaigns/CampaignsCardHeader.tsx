@@ -44,21 +44,27 @@ export const CampaignsCardHeader = () => {
 						) }
 					</div>
 					{ /* TODO: list of campaign type here. */ }
-					<Button
-						variant="link"
-						onClick={ () => setCollapsed( ! collapsed ) }
-					>
-						{ __(
-							'Add channels for other campaign types',
-							'woocommerce'
-						) }
-						<Icon
-							icon={ collapsed ? chevronDown : chevronUp }
-							size={ 24 }
-						/>
-					</Button>
-					{ ! collapsed && (
-						<RecommendedChannelsList recommendedChannels={ data } />
+					{ data.length > 0 && (
+						<>
+							<Button
+								variant="link"
+								onClick={ () => setCollapsed( ! collapsed ) }
+							>
+								{ __(
+									'Add channels for other campaign types',
+									'woocommerce'
+								) }
+								<Icon
+									icon={ collapsed ? chevronDown : chevronUp }
+									size={ 24 }
+								/>
+							</Button>
+							{ ! collapsed && (
+								<RecommendedChannelsList
+									recommendedChannels={ data }
+								/>
+							) }
+						</>
 					) }
 				</Modal>
 			) }
