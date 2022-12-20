@@ -57,8 +57,8 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id',
 			'woocommerce',
 			array(
-				'name'     => 'name',
-				'type'     => 'text',
+				'name'    => 'name',
+				'type'    => 'text',
 				'section' => 'product_details',
 			)
 		);
@@ -67,8 +67,8 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id',
 			'woocommerce',
 			array(
-				'name'     => 'name',
-				'type'     => 'text',
+				'name'    => 'name',
+				'type'    => 'text',
 				'section' => 'product_details',
 			)
 		);
@@ -84,8 +84,8 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id',
 			'woocommerce',
 			array(
-				'name'     => 'name',
-				'type'     => 'text',
+				'name'    => 'name',
+				'type'    => 'text',
 				'section' => 'product_details',
 			)
 		);
@@ -94,8 +94,8 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id2',
 			'woocommerce',
 			array(
-				'name'     => 'name',
-				'type'     => 'textarea',
+				'name'    => 'name',
+				'type'    => 'textarea',
 				'section' => 'product_details',
 			)
 		);
@@ -114,8 +114,8 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id',
 			'woocommerce',
 			array(
-				'name'     => 'id',
-				'type'     => 'text',
+				'name'    => 'id',
+				'type'    => 'text',
 				'section' => 'product_details',
 			)
 		);
@@ -124,8 +124,8 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id2',
 			'woocommerce',
 			array(
-				'name'     => 'id2',
-				'type'     => 'textarea',
+				'name'    => 'id2',
+				'type'    => 'textarea',
 				'section' => 'product_details',
 			)
 		);
@@ -134,9 +134,9 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'first',
 			'woocommerce',
 			array(
-				'order'    => 1,
-				'name'     => 'first',
-				'type'     => 'textarea',
+				'order'   => 1,
+				'name'    => 'first',
+				'type'    => 'textarea',
 				'section' => 'product_details',
 			)
 		);
