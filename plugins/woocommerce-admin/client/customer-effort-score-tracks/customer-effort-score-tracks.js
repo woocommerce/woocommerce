@@ -32,6 +32,7 @@ import { getStoreAgeInWeeks } from './utils';
  * @param {string}   props.description        Description shown in CES modal.
  * @param {string}   props.firstQuestion      The first survey question.
  * @param {string}   props.secondQuestion     The second survey question.
+ * @param {string}   props.icon               Optional icon to show in notice.
  * @param {string}   props.onSubmitLabel      The label displayed upon survey submission.
  * @param {Array}    props.cesShownForActions The array of actions that the CES modal has been shown for.
  * @param {boolean}  props.allowTracking      Whether tracking is allowed or not.
@@ -48,6 +49,7 @@ function CustomerEffortScoreTracks( {
 	noticeLabel,
 	firstQuestion,
 	secondQuestion,
+	icon,
 	onSubmitLabel = __( 'Thank you for your feedback!', 'woocommerce' ),
 	cesShownForActions,
 	allowTracking,
@@ -111,6 +113,15 @@ function CustomerEffortScoreTracks( {
 		addActionToShownOption();
 	};
 
+	const onModalDismissed = () => {
+		recordEvent( 'ces_view_dismiss', {
+			action,
+			store_age: storeAgeInWeeks,
+			ces_location: 'inside',
+			...trackProps,
+		} );
+	};
+
 	const onModalShown = () => {
 		setModalShown( true );
 
@@ -149,13 +160,14 @@ function CustomerEffortScoreTracks( {
 			onNoticeShownCallback={ onNoticeShown }
 			onNoticeDismissedCallback={ onNoticeDismissed }
 			onModalShownCallback={ onModalShown }
+			onModalDismissedCallback={ onModalDismissed }
 			icon={
 				<span
 					style={ { height: 21, width: 21 } }
 					role="img"
 					aria-label={ __( 'Pencil icon', 'woocommerce' ) }
 				>
-					✏️
+					{ icon || '✏' }
 				</span>
 			}
 		/>

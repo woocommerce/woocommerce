@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1a309c0d12d2fb4b53ea3a7d68fe7003",
+    "content-hash": "8e9c4d1c5d49505131692dfcbc8f267c",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -628,16 +628,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v8.9.2",
+            "version": "v9.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-blocks.git",
-                "reference": "9c732fe65c4137e23cff9a247fe2bb58c9a64e03"
+                "reference": "ee40ff5e5e0997d6cc82c6cfeba6ade808fadc96"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/9c732fe65c4137e23cff9a247fe2bb58c9a64e03",
-                "reference": "9c732fe65c4137e23cff9a247fe2bb58c9a64e03",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/ee40ff5e5e0997d6cc82c6cfeba6ade808fadc96",
+                "reference": "ee40ff5e5e0997d6cc82c6cfeba6ade808fadc96",
                 "shasum": ""
             },
             "require": {
@@ -647,9 +647,9 @@
                 "ext-json": "*"
             },
             "require-dev": {
-                "johnbillion/wp-hooks-generator": "^0.9.0",
                 "mockery/mockery": "^1.4",
                 "woocommerce/woocommerce-sniffs": "0.1.0",
+                "wp-hooks/generator": "^0.9.0",
                 "wp-phpunit/wp-phpunit": "^6.0",
                 "yoast/phpunit-polyfills": "^1.0"
             },
@@ -683,9 +683,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-blocks/issues",
-                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v8.9.2"
+                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v9.1.1"
             },
-            "time": "2022-12-01T18:00:35+00:00"
+            "time": "2022-12-15T08:39:05+00:00"
         }
     ],
     "packages-dev": [

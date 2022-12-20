@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Add a default placeholder title for newly added attributes and always show remove button for attributes

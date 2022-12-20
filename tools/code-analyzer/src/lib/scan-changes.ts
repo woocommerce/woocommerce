@@ -50,7 +50,11 @@ export const scanForChanges = async (
 	const pluginPath = join( tmpRepoPath, 'plugins/woocommerce' );
 
 	Logger.startTask( 'Detecting hook changes...' );
-	const hookChanges = scanForHookChanges( diff, sinceVersion, tmpRepoPath );
+	const hookChanges = await scanForHookChanges(
+		diff,
+		sinceVersion,
+		tmpRepoPath
+	);
 	Logger.endTask();
 
 	Logger.startTask( 'Detecting template changes...' );

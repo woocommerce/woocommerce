@@ -9,6 +9,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Exception;
 use WC_Data;
 use WC_Order;
 
@@ -1150,9 +1151,26 @@ WHERE
 			foreach ( $cpt_store_orders[ $cpt_store_name ] as $order_id => $order ) {
 				$cpt_order_class_name = wc_get_order_type( $order->get_type() )['class_name'];
 				$cpt_order            = new $cpt_order_class_name();
-				$cpt_order->set_id( $order_id );
-				$cpt_store->read( $cpt_order );
-				$cpt_orders[ $order_id ] = $cpt_order;
+
+				try {
+					$cpt_order->set_id( $order_id );
+					$cpt_store->read( $cpt_order );
+					$cpt_orders[ $order_id ] = $cpt_order;
+				} catch ( Exception $e ) {
+					// If the post record has been deleted (for instance, by direct query) then an exception may be thrown.
+					$this->error_logger->warning(
+						sprintf(
+							/* translators: %1$d order ID. */
+							__( 'Unable to load the post record for order %1$d', 'woocommerce' ),
+							$order_id
+						),
+						array(
+							'exception_code' => $e->getCode(),
+							'exception_msg'  => $e->getMessage(),
+							'origin'         => __METHOD__,
+						)
+					);
+				}
 			}
 		}
 		return $cpt_orders;
@@ -1752,7 +1770,7 @@ FROM $order_meta_table
 			$order->set_id( 0 );
 
 			// If this datastore method is called while the posts table is authoritative, refrain from deleting post data.
-			if ( ! is_a( $order->get_data_store(), self::class ) ) {
+			if ( $order->get_data_store()->get_current_class_name() !== self::class ) {
 				return;
 			}
 

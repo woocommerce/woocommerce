@@ -10,8 +10,8 @@ module.exports = {
 		],
 		namespace: 'extension',
 		license: 'GPL-3.0+',
-	},
-	customScripts: {
-		postinstall: 'composer install',
+		customScripts: {
+			postinstall: 'composer install',
+		},
 	},
 };

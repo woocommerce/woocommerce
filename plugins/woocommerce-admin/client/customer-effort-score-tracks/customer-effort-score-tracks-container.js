@@ -53,6 +53,7 @@ function CustomerEffortScoreTracksContainer( {
 					noticeLabel={ item.noticeLabel }
 					firstQuestion={ item.firstQuestion }
 					secondQuestion={ item.secondQuestion }
+					icon={ item.icon }
 					title={ item.title }
 					onSubmitLabel={ item.onsubmit_label }
 					trackProps={ item.props || {} }

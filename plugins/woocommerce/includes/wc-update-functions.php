@@ -2477,7 +2477,7 @@ function wc_update_700_remove_recommended_marketing_plugins_transient() {
  * Update the New Zealand state codes in the database
  * after they were updated in code to the CLDR standard.
  */
-function wc_update_720_adjust_new_zealand_states() {
+function wc_update_721_adjust_new_zealand_states() {
 	return MigrationHelper::migrate_country_states(
 		'NZ',
 		array(
@@ -2505,7 +2505,7 @@ function wc_update_720_adjust_new_zealand_states() {
  * Update the Ukraine state codes in the database
  * after they were updated in code to the CLDR standard.
  */
-function wc_update_720_adjust_ukraine_states() {
+function wc_update_721_adjust_ukraine_states() {
 	return MigrationHelper::migrate_country_states(
 		'UA',
 		array(

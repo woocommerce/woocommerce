@@ -18,6 +18,12 @@ createCrudDataStore( {
 	resourceName: 'MyThing',
 	pluralResourceName: 'MyThings',
 	namespace: '/my/rest/namespace',
+    storeConfig: {
+        actions: additionalActions,
+        selectors: additionalSelectors,
+        resolvers: additionalResolvers,
+        controls: additionalControls,
+    }
 } );
 ```
 
@@ -55,7 +61,7 @@ If the default settings are not adequate for your needs, you can always create y
 
 ```js
 import { createSelectors } from '../crud/selectors';
-import { createResolvers } from '../crud/selectors';
+import { createResolvers } from '../crud/resolvers';
 import { createActions } from '../crud/actions';
 import { registerStore, combineReducers } from '@wordpress/data';
 

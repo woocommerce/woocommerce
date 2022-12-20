@@ -23,7 +23,10 @@ class TourInAppMarketplace extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Tour the WooCommerce Marketplace', 'woocommerce' );
+		return __(
+			'Discover where to find powerful store add-ons and integrations, with a WooCommerce Marketplace tour',
+			'woocommerce'
+		);
 	}
 
 	/**
