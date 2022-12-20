@@ -16,6 +16,7 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
+import useVariationOrders from '~/products/hooks/use-variation-orders';
 import HiddenIcon from '~/products/images/hidden-icon';
 import VisibleIcon from '~/products/images/visible-icon';
 import { CurrencyContext } from '../../../lib/currency-context';
@@ -38,25 +39,6 @@ const DEFAULT_PER_PAGE_OPTION = 25;
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 const VISIBLE_TEXT = __( 'Visible to customers', 'woocommerce' );
 const UPDATING_TEXT = __( 'Updating product variation', 'woocommerce' );
-const KEY_SEPARATOR = ':';
-
-function createKeyFromVariation( variation: ProductVariation ) {
-	return `${ variation.id }${ KEY_SEPARATOR }${
-		( variation as any ).menu_order
-	}`;
-}
-
-function extractVariationIdFromElement( { key }: JSX.Element ) {
-	return typeof key === 'string'
-		? Number.parseInt( key.split( KEY_SEPARATOR )[ 0 ], 10 )
-		: 0;
-}
-
-function extractVariationOrderFromElement( { key }: JSX.Element ) {
-	return typeof key === 'string'
-		? Number.parseInt( key.split( KEY_SEPARATOR )[ 1 ], 10 )
-		: Number.MAX_SAFE_INTEGER;
-}
 
 export const Variations: React.FC = () => {
 	const [ currentPage, setCurrentPage ] = useState( 1 );
@@ -78,6 +60,8 @@ export const Variations: React.FC = () => {
 				product_id: productId,
 				page: currentPage,
 				per_page: perPage,
+				order: 'asc',
+				orderby: 'menu_order',
 			};
 			return {
 				isLoading: ! hasFinishedResolution( 'getProductVariations', [
@@ -92,9 +76,12 @@ export const Variations: React.FC = () => {
 		[ currentPage, perPage ]
 	);
 
-	const { updateProductVariation, batchUpdateProductVariation } = useDispatch(
+	const { updateProductVariation } = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 	);
+
+	const { sortedVariations, getVariationKey, onOrderChange } =
+		useVariationOrders( { variations, currentPage } );
 
 	if ( ! variations || isLoading ) {
 		return (
@@ -126,28 +113,6 @@ export const Variations: React.FC = () => {
 		);
 	}
 
-	function handleOrderChange( items: JSX.Element[] ) {
-		const minOrder = Math.min(
-			...items.map( extractVariationOrderFromElement )
-		);
-		batchUpdateProductVariation<
-			Promise< { update: ProductVariation[] } >
-		>(
-			{
-				product_id: productId,
-			},
-			{
-				update: items.map( ( item, index ) => {
-					const id = extractVariationIdFromElement( item );
-					return {
-						id,
-						menu_order: minOrder + index,
-					};
-				} ),
-			}
-		).then( ( res ) => console.log( res ) );
-	}
-
 	return (
 		<Card className="woocommerce-product-variations">
 			<div className="woocommerce-product-variations__header">
@@ -161,9 +126,9 @@ export const Variations: React.FC = () => {
 				</h4>
 				<h4>{ __( 'Quantity', 'woocommerce' ) }</h4>
 			</div>
-			<Sortable onOrderChange={ handleOrderChange }>
-				{ variations.map( ( variation ) => (
-					<ListItem key={ createKeyFromVariation( variation ) }>
+			<Sortable onOrderChange={ onOrderChange }>
+				{ sortedVariations.map( ( variation ) => (
+					<ListItem key={ getVariationKey( variation ) }>
 						<div className="woocommerce-product-variations__attributes">
 							{ variation.attributes.map( ( attribute ) => (
 								/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
