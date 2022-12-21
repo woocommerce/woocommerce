@@ -146,6 +146,7 @@ class Table extends Component {
 			query,
 			rowHeader,
 			rows,
+			noDataLabel,
 		} = this.props;
 		const { isScrollableRight, isScrollableLeft, tabIndex } = this.state;
 		const classes = classnames( 'woocommerce-table__table', classNames, {
@@ -344,10 +345,11 @@ class Table extends Component {
 									className="woocommerce-table__empty-item"
 									colSpan={ headers.length }
 								>
-									{ __(
-										'No data to display',
-										'woocommerce'
-									) }
+									{ noDataLabel ??
+										__(
+											'No data to display',
+											'woocommerce'
+										) }
 								</td>
 							</tr>
 						) }
@@ -454,6 +456,10 @@ Table.propTypes = {
 	 * Defaults to index.
 	 */
 	rowKey: PropTypes.func,
+	/**
+	 * Customize the label to show when there are no rows in the table.
+	 */
+	noDataLabel: PropTypes.string,
 };
 
 Table.defaultProps = {
@@ -462,6 +468,7 @@ Table.defaultProps = {
 	onSort: noop,
 	query: {},
 	rowHeader: 0,
+	noDataLabel: undefined,
 };
 
 export default withInstanceId( Table );
