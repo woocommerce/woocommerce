@@ -6,11 +6,11 @@
 namespace Automattic\WooCommerce\Internal\Admin\ProductForm;
 
 /**
- * Task class.
+ * Field class.
  */
 class Field {
 	/**
-	 * Task traits.
+	 * Product Component traits.
 	 */
 	use ComponentTrait;
 
@@ -29,13 +29,14 @@ class Field {
 	protected $args;
 
 	/**
-	 * Array of default tasks.
+	 * Array of required arguments.
 	 *
 	 * @var array
 	 */
 	const REQUIRED_ARGUMENTS = array(
 		'name',
 		'type',
+		'label',
 		'section',
 	);
 
@@ -47,6 +48,7 @@ class Field {
 	 * @param array  $args Array containing the necessary arguments.
 	 *     $args = array(
 	 *       'type'            => (string) Field type. Required.
+	 *       'name'            => (string) Field name.
 	 *       'section'         => (string) Field location. Required.
 	 *       'order'           => (int) Field order.
 	 *       'properties'      => (array) Field properties.

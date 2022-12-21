@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\Internal\Admin\ProductForm;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * TaskTraits class.
+ * ComponentTrait class.
  */
 trait ComponentTrait {
 	/**

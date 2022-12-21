@@ -12,41 +12,13 @@ use Automattic\WooCommerce\Internal\Admin\ProductForm\Form;
  */
 class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 	/**
-	 * @var resource
-	 */
-	public static $error_log_capture;
-	/**
-	 * @var string location of error_log output.
-	 */
-	public static $error_log_config;
-
-	/**
-	 * Overwrite the error_log output.
-	 */
-	public static function setUpBeforeClass(): void {
-		self::$error_log_capture = tmpfile();
-		// Capture error logs for testing.
-		// phpcs:ignore WordPress.PHP.IniSet.Risky
-		self::$error_log_config = ini_set( 'error_log', stream_get_meta_data( self::$error_log_capture )['uri'] );
-	}
-
-	/**
-	 * Set error_log output back to default.
-	 */
-	public static function tearDownAfterClass(): void {
-		// Set error log back to default.
-		// phpcs:ignore WordPress.PHP.IniSet.Risky
-		ini_set( 'error_log', self::$error_log_config );
-	}
-
-	/**
 	 * Test add_field with missing keys.
 	 */
 	public function test_add_field_with_missing_argument() {
-		Form::add_field( 'id', 'woocommerce', array() );
+		$field = Form::add_field( 'id', 'woocommerce', array() );
 
-		$output = stream_get_contents( self::$error_log_capture );
-		$this->assertContains( 'You are missing required arguments of WooCommerce ProductForm Field: name, type, section', $output );
+		$this->assertInstanceOf( 'WP_Error', $field );
+		$this->assertContains( 'You are missing required arguments of WooCommerce ProductForm Field: name, type, label, section', $field->get_error_message() );
 	}
 
 	/**
@@ -57,23 +29,25 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id',
 			'woocommerce',
 			array(
+				'label'   => 'label',
 				'name'    => 'name',
 				'type'    => 'text',
 				'section' => 'product_details',
 			)
 		);
 
-		Form::add_field(
+		$field_duplicate = Form::add_field(
 			'id',
 			'woocommerce',
 			array(
+				'label'   => 'label',
 				'name'    => 'name',
 				'type'    => 'text',
 				'section' => 'product_details',
 			)
 		);
-		$output = stream_get_contents( self::$error_log_capture );
-		$this->assertContains( 'You have attempted to register a duplicate form field with WooCommerce Form: `id`', $output );
+		$this->assertInstanceOf( 'WP_Error', $field_duplicate );
+		$this->assertContains( 'You have attempted to register a duplicate form field with WooCommerce Form: `id`', $field_duplicate->get_error_message() );
 	}
 
 	/**
@@ -84,6 +58,7 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id',
 			'woocommerce',
 			array(
+				'label'   => 'label',
 				'name'    => 'name',
 				'type'    => 'text',
 				'section' => 'product_details',
@@ -94,6 +69,7 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id2',
 			'woocommerce',
 			array(
+				'label'   => 'label',
 				'name'    => 'name',
 				'type'    => 'textarea',
 				'section' => 'product_details',
@@ -114,6 +90,7 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id',
 			'woocommerce',
 			array(
+				'label'   => 'label',
 				'name'    => 'id',
 				'type'    => 'text',
 				'section' => 'product_details',
@@ -124,6 +101,7 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id2',
 			'woocommerce',
 			array(
+				'label'   => 'label',
 				'name'    => 'id2',
 				'type'    => 'textarea',
 				'section' => 'product_details',
@@ -134,6 +112,7 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'first',
 			'woocommerce',
 			array(
+				'label'   => 'label',
 				'order'   => 1,
 				'name'    => 'first',
 				'type'    => 'textarea',
@@ -146,6 +125,68 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 		$this->assertEquals( 'first', $fields[0]->get_id() );
 		$this->assertEquals( 'id', $fields[1]->get_id() );
 		$this->assertEquals( 'id2', $fields[2]->get_id() );
+	}
+
+	/**
+	 * Test that get_cards.
+	 */
+	public function test_get_cards_sort_default() {
+		Form::add_card(
+			'id',
+			'woocommerce'
+		);
+
+		Form::add_card(
+			'id2',
+			'woocommerce'
+		);
+
+		Form::add_card(
+			'first',
+			'woocommerce',
+			array(
+				'order' => 1,
+			)
+		);
+
+		$cards = Form::get_cards();
+		$this->assertEquals( 3, count( $cards ) );
+		$this->assertEquals( 'first', $cards[0]->get_id() );
+		$this->assertEquals( 'id', $cards[1]->get_id() );
+		$this->assertEquals( 'id2', $cards[2]->get_id() );
+	}
+
+	/**
+	 * Test that get_sections.
+	 */
+	public function test_get_sections_sort_default() {
+		Form::add_section(
+			'id',
+			'woocommerce',
+			array()
+		);
+
+		Form::add_section(
+			'id2',
+			'woocommerce',
+			array(
+				'title' => 'title',
+			)
+		);
+
+		Form::add_section(
+			'first',
+			'woocommerce',
+			array(
+				'order' => 1,
+				'title' => 'title',
+			)
+		);
+
+		$sections = Form::get_sections();
+		$this->assertEquals( 2, count( $sections ) );
+		$this->assertEquals( 'first', $sections[0]->get_id() );
+		$this->assertEquals( 'id2', $sections[1]->get_id() );
 	}
 }
 
