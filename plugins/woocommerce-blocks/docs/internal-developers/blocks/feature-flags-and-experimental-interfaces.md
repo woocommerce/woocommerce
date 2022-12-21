@@ -33,7 +33,6 @@ The majority of our feature flagging is blocks, this is a list of them:
 
 ### Feature plugin flag
 
--   Products (Beta) block ([JS flag](https://github.com/woocommerce/woocommerce-blocks/blob/b1aa635572b9639ac357bde1ff134b7ca15c00d6/assets/js/blocks/product-query/variations/product-query.tsx#L28)).
 -   ⚛️ Product SKU ([JS flag](https://github.com/woocommerce/woocommerce-blocks/blob/4c18b1ff8511ede063e2082316a68eddc8231b51/assets/js/atomic/blocks/product-elements/sku/index.ts#L34)).
 -   ⚛️ Product stock indicator ([JS flag](https://github.com/woocommerce/woocommerce-blocks/blob/4c18b1ff8511ede063e2082316a68eddc8231b51/assets/js/atomic/blocks/product-elements/stock-indicator/index.ts#L38)).
 
