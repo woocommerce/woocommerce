@@ -19,7 +19,7 @@ const config = {
 	retries: CI ? 4 : 2,
 	workers: 4,
 	reporter: [
-		[ 'dot' ],
+		[ 'line' ],
 		[
 			'html',
 			{
