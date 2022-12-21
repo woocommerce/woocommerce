@@ -236,19 +236,21 @@ You may need test data setup prior to the execution of your tests. If so, make s
 
 ## Writing the test - a Quick Start Guide
 
-1. Create `test.js` file inside the tests directory
+1. Ensure you have your authentication setup as mentioned in the [Environment Variables](#environment-variables) section above. i.e. 
+	> For local setup, create a `.env` file
+2. Create `test.js` file inside the tests directory
     - Example for [`coupons`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/api-core-tests/tests/coupons/coupons.test.js) and [`customers`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/api-core-tests/tests/customers/customers-crud.test.js)
-2. Import `@playwright/test` module
+3. Import `@playwright/test` module
     - Example for [`coupons`](https://github.com/woocommerce/woocommerce/blob/b904fd428db1252f39cb64005f4b627f2a9ac08e/plugins/woocommerce/tests/api-core-tests/tests/coupons/coupons.test.js#L1) and [`customers`](https://github.com/woocommerce/woocommerce/blob/b904fd428db1252f39cb64005f4b627f2a9ac08e/plugins/woocommerce/tests/api-core-tests/tests/customers/customers-crud.test.js#L1)
-3. Group tests with `test.describe()` methods
+4. Group tests with `test.describe()` methods
     - Example for [`coupons`](https://github.com/woocommerce/woocommerce/blob/b904fd428db1252f39cb64005f4b627f2a9ac08e/plugins/woocommerce/tests/api-core-tests/tests/coupons/coupons.test.js#L10) and [`customers`](https://github.com/woocommerce/woocommerce/blob/b904fd428db1252f39cb64005f4b627f2a9ac08e/plugins/woocommerce/tests/api-core-tests/tests/customers/customers-crud.test.js#L20)
-4. Add tests with `test()` methods
+5. Add tests with `test()` methods
     - Example for [`coupons`](https://github.com/woocommerce/woocommerce/blob/b904fd428db1252f39cb64005f4b627f2a9ac08e/plugins/woocommerce/tests/api-core-tests/tests/coupons/coupons.test.js#L14) and [`customers`](https://github.com/woocommerce/woocommerce/blob/b904fd428db1252f39cb64005f4b627f2a9ac08e/plugins/woocommerce/tests/api-core-tests/tests/customers/customers-crud.test.js#L93)
-5. Separate data where required into files in the `data` directory 
+6. Separate data where required into files in the `data` directory 
     - Example for [`coupons`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/api-core-tests/data/coupon.js) and [`customers`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/api-core-tests/data/customer.js)
-6. Import data required by your tests
+7. Import data required by your tests
     - Example for [`coupons`](https://github.com/woocommerce/woocommerce/blob/b904fd428db1252f39cb64005f4b627f2a9ac08e/plugins/woocommerce/tests/api-core-tests/tests/coupons/coupons.test.js#L2) and [`customers`](https://github.com/woocommerce/woocommerce/blob/b904fd428db1252f39cb64005f4b627f2a9ac08e/plugins/woocommerce/tests/api-core-tests/tests/customers/customers-crud.test.js#L5)
-7. After writing your tests, ensure all tests pass successfully with `pnpm test:api-pw`
+8. After writing your tests, ensure all tests pass successfully with `pnpm test:api-pw`
 
 If you have made updates to functionality that breaks the tests then the tests should be updated accordingly. Similarly, if there is new functionality added then new tests should be added.
 
