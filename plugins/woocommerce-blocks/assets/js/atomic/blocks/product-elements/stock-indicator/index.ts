@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
+import { registerBlockType } from '@wordpress/blocks';
 import type { BlockConfiguration } from '@wordpress/blocks';
 
 /**
@@ -35,6 +35,6 @@ const blockConfig: BlockConfiguration = {
 	],
 };
 
-registerFeaturePluginBlockType( 'woocommerce/product-stock-indicator', {
+registerBlockType( 'woocommerce/product-stock-indicator', {
 	...blockConfig,
 } );
