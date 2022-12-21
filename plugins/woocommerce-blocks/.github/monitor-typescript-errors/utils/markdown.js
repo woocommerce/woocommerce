@@ -7,10 +7,10 @@ exports.generateMarkdownMessage = ( dataFromParsedXml ) => {
 
 const generateHeader = ( dataFromParsedXml ) => {
 	return `
-TypeScript Errors Report
---------------------------
-Files with errors: ${ dataFromParsedXml.totalFilesWithErrors }
-Total errors: ${ dataFromParsedXml.totalErrors }
+## TypeScript Errors Report
+
+- Files with errors: ${ dataFromParsedXml.totalFilesWithErrors }
+- Total errors: ${ dataFromParsedXml.totalErrors }
 `;
 };
 

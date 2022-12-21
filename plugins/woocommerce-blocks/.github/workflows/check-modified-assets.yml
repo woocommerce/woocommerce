@@ -69,6 +69,14 @@ jobs:
                   path: assets-list
             - name: Compare Assets
               uses: ./.github/compare-assets
+              id: compare-assets
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   compare: assets-list/assets.json
+                  create-comment: false
+            - name: Append report
+              uses: ./.github/comments-aggregator
+              with:
+                  repo-token: '${{ secrets.GITHUB_TOKEN }}'
+                  section-id: compare-assets-with-trunk
+                  content: ${{steps.compare-assets.outputs.comment}}
