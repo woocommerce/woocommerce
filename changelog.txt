@@ -24,7 +24,7 @@
 * Fix - Check whether order has classname before returning. [#35207](https://github.com/woocommerce/woocommerce/pull/35207)
 * Fix - Add billing and shipping address indexes on order update. [#35121](https://github.com/woocommerce/woocommerce/pull/35121)
 * Fix - Use correct datastore when backfilling orders. [#35176](https://github.com/woocommerce/woocommerce/pull/35176)
-* Fix - (HPOS) Ensure we use GMT when populating the `date_created_gmt` column for orders. [#34875](https://github.com/woocommerce/woocommerce/pull/34875)
+* Fix - (HPOS) Ensure we u_created_gmt` column for orders. [#34875](https://github.com/woocommerce/woocommerce/pull/34875)
 * Fix - Admin list table for orders (in HPOS mode) should check in case the user pages beyond the available range. [#34793](https://github.com/woocommerce/woocommerce/pull/34793)
 * Fix - Allow features to declare their initial enabled state. [#34867](https://github.com/woocommerce/woocommerce/pull/34867)
 * Fix - Customers should be able to pay for orders so long as any required stock reductions have already taken place. [#33575](https://github.com/woocommerce/woocommerce/pull/33575)
