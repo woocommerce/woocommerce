@@ -23,22 +23,20 @@ type CurrencyConfig = {
 /**
  * Get additional props to be passed to all checkbox inputs.
  *
- * @param {string} name Name of the checkbox
- * @return {Object} Props.
+ * @param name Name of the checkbox.
+ * @return Props.
  */
-export const getCheckboxTracks = ( name: string ) => {
+export function getCheckboxTracks< T = Product >( name: string ) {
 	return {
 		onChange: (
-			isChecked:
-				| ChangeEvent< HTMLInputElement >
-				| Product[ keyof Product ]
+			isChecked: ChangeEvent< HTMLInputElement > | T[ keyof T ]
 		) => {
 			recordEvent( `product_checkbox_${ name }`, {
 				checked: isChecked,
 			} );
 		},
 	};
-};
+}
 
 /**
  * Get input props for currency related values and symbol positions.

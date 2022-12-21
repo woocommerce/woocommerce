@@ -50,7 +50,7 @@ export const ProductVariationDetailsSection: React.FC = () => {
 						}
 						{ ...getCheckboxControlProps(
 							'status',
-							getCheckboxTracks( 'status' )
+							getCheckboxTracks< ProductVariation >( 'status' )
 						) }
 						checked={ values.status === 'publish' }
 						onChange={ () =>
