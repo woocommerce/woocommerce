@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Icon, shipping } from '@wordpress/icons';
-import { registerExperimentalBlockType } from '@woocommerce/block-settings';
+import { registerBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -10,7 +10,7 @@ import { registerExperimentalBlockType } from '@woocommerce/block-settings';
 import { Edit, Save } from './edit';
 import attributes from './attributes';
 
-registerExperimentalBlockType( 'woocommerce/checkout-shipping-method-block', {
+registerBlockType( 'woocommerce/checkout-shipping-method-block', {
 	icon: {
 		src: (
 			<Icon
