@@ -48,16 +48,16 @@ jobs:
           targetDir: ${{ secrets.FTP_DIR }}
 
       - name: Add release ZIP URL as comment to the PR
-        uses: mshick/add-pr-comment@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: ./.github/comments-aggregator
         with:
-          message: |
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          section-id: release-zip-url
+          order: 1
+          content: |
             The release ZIP for this PR is accessible via:
             ```
             https://wcblocks.wpcomstaging.com/wp-content/uploads/woocommerce-gutenberg-products-block-${{ github.event.pull_request.number }}.zip
             ```
-          allow-repeats: false
 
       - name: Delete ZIP file
         run: rm -rf wc-blocks-pr-release__temp
