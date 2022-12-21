@@ -19,12 +19,12 @@ const config = {
 	retries: CI ? 4 : 2,
 	workers: 4,
 	reporter: [
-		[ 'list' ],
+		[ 'dot' ],
 		[
 			'html',
 			{
 				outputFolder: 'output',
-				open: CI ? 'never' : 'always',
+				open: CI ? 'never' : 'on-failure',
 			},
 		],
 		[
