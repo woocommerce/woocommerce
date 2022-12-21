@@ -218,6 +218,11 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 						);
 						setShowAddAttributeModal( true );
 					} }
+					subtitle={
+						isOnlyForVariations
+							? __( 'No options yet', 'woocommerce' )
+							: undefined
+					}
 				/>
 				{ showAddAttributeModal && (
 					<AddAttributeModal
