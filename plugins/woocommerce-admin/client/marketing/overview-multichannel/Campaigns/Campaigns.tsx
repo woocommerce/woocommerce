@@ -4,7 +4,9 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import {
+	Button,
 	Card,
+	CardHeader,
 	CardBody,
 	CardFooter,
 	Flex,
@@ -17,30 +19,29 @@ import { Pagination, Table } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { CenteredSpinner } from '~/marketing/components';
+import { CenteredSpinner, CardHeaderTitle } from '~/marketing/components';
 import { useCampaigns } from './useCampaigns';
+import { CreateNewCampaignModal } from './CreateNewCampaignModal';
 import './Campaigns.scss';
-import { CampaignsCardHeader } from './CampaignsCardHeader';
+
+const PER_PAGE = 5;
 
 export const Campaigns = () => {
 	const [ page, setPage ] = useState( 1 );
+	const [ open, setOpen ] = useState( false );
 	const { loading, data } = useCampaigns();
 
-	if ( loading ) {
-		return (
-			<Card>
-				<CampaignsCardHeader />
+	const renderBody = () => {
+		if ( loading ) {
+			return (
 				<CardBody>
 					<CenteredSpinner />
 				</CardBody>
-			</Card>
-		);
-	}
+			);
+		}
 
-	if ( data.length === 0 ) {
-		return (
-			<Card className="woocommerce-marketing-campaigns-card">
-				<CampaignsCardHeader />
+		if ( data.length === 0 ) {
+			return (
 				<CardBody className="woocommerce-marketing-campaigns-card-body-empty-content">
 					<Icon icon={ megaphone } size={ 32 } />
 					<div className="woocommerce-marketing-campaigns-card-body-empty-content-title">
@@ -56,18 +57,13 @@ export const Campaigns = () => {
 						) }
 					</div>
 				</CardBody>
-			</Card>
-		);
-	}
+			);
+		}
 
-	const perPage = 5;
-	const total = data.length;
-	const start = ( page - 1 ) * perPage;
-	const pagedData = data.slice( start, start + perPage );
+		const start = ( page - 1 ) * PER_PAGE;
+		const pagedData = data.slice( start, start + PER_PAGE );
 
-	return (
-		<Card className="woocommerce-marketing-campaigns-card">
-			<CampaignsCardHeader />
+		return (
 			<Table
 				// this is `classNames`, instead of the correct `className`, due to misnaming in the Table component.
 				classNames="woocommerce-marketing-campaigns-table"
@@ -116,17 +112,46 @@ export const Campaigns = () => {
 					];
 				} ) }
 			/>
+		);
+	};
+
+	const renderFooter = () => {
+		if ( loading || data.length === 0 ) {
+			return null;
+		}
+
+		return (
 			<CardFooter className="woocommerce-marketing-campaigns-card-footer">
 				<Pagination
 					showPerPagePicker={ false }
-					perPage={ perPage }
+					perPage={ PER_PAGE }
 					page={ page }
-					total={ total }
+					total={ data.length }
 					onPageChange={ ( newPage: number ) => {
 						setPage( newPage );
 					} }
 				/>
 			</CardFooter>
+		);
+	};
+
+	return (
+		<Card className="woocommerce-marketing-campaigns-card">
+			<CardHeader>
+				<CardHeaderTitle>
+					{ __( 'Campaigns', 'woocommerce' ) }
+				</CardHeaderTitle>
+				<Button variant="secondary" onClick={ () => setOpen( true ) }>
+					{ __( 'Create new campaign', 'woocommerce' ) }
+				</Button>
+				{ open && (
+					<CreateNewCampaignModal
+						onRequestClose={ () => setOpen( false ) }
+					/>
+				) }
+			</CardHeader>
+			{ renderBody() }
+			{ renderFooter() }
 		</Card>
 	);
 };
