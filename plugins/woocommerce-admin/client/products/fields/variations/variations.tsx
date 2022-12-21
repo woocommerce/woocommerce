@@ -12,6 +12,7 @@ import { useContext, useState } from '@wordpress/element';
 import { useParams } from 'react-router-dom';
 import { useSelect, useDispatch } from '@wordpress/data';
 import classnames from 'classnames';
+import truncate from 'lodash/truncate';
 
 /**
  * Internal dependencies
@@ -39,6 +40,8 @@ const DEFAULT_PER_PAGE_OPTION = 25;
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 const VISIBLE_TEXT = __( 'Visible to customers', 'woocommerce' );
 const UPDATING_TEXT = __( 'Updating product variation', 'woocommerce' );
+
+const TRUNCATE_LENGTH = 32;
 
 export const Variations: React.FC = () => {
 	const [ currentPage, setCurrentPage ] = useState( 1 );
@@ -130,16 +133,34 @@ export const Variations: React.FC = () => {
 				{ sortedVariations.map( ( variation ) => (
 					<ListItem key={ getVariationKey( variation ) }>
 						<div className="woocommerce-product-variations__attributes">
-							{ variation.attributes.map( ( attribute ) => (
-								/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
-								/* @ts-ignore Additional props are not required. */
-								<Tag
-									id={ attribute.id }
-									className="woocommerce-product-variations__attribute"
-									key={ attribute.id }
-									label={ attribute.option }
-								/>
-							) ) }
+							{ variation.attributes.map( ( attribute ) => {
+								const tag = (
+									/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+									/* @ts-ignore Additional props are not required. */
+									<Tag
+										id={ attribute.id }
+										className="woocommerce-product-variations__attribute"
+										key={ attribute.id }
+										label={ truncate( attribute.option, {
+											length: TRUNCATE_LENGTH,
+										} ) }
+										screenReaderLabel={ attribute.option }
+									/>
+								);
+
+								return attribute.option.length <=
+									TRUNCATE_LENGTH ? (
+									tag
+								) : (
+									<Tooltip
+										key={ attribute.id }
+										text={ attribute.option }
+										position="top center"
+									>
+										<span>{ tag }</span>
+									</Tooltip>
+								);
+							} ) }
 						</div>
 						<div
 							className={ classnames(
