@@ -4,7 +4,6 @@
 		"analytics": true,
 		"coupons": true,
 		"customer-effort-score-tracks": true,
-		"experimental-products-task": true,
 		"import-products-task": true,
 		"experimental-fashion-sample-products": true,
 		"shipping-smart-defaults": true,
