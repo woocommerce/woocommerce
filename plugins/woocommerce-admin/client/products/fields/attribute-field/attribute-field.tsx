@@ -212,6 +212,11 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		return (
 			<>
 				<AttributeEmptyState
+					addNewLabel={
+						isOnlyForVariations
+							? __( 'Add options', 'woocommerce' )
+							: undefined
+					}
 					onNewClick={ () => {
 						recordEvent(
 							'product_add_first_attribute_button_click'
