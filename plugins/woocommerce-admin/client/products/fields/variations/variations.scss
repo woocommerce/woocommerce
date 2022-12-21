@@ -1,15 +1,7 @@
 .woocommerce-product-variations {
 	ol {
 		@media ( min-width: #{ ($break-medium) } ) {
-			&.rows-5 {
-				min-height: 420px;
-			}
-			&.rows-10 {
-				min-height: 840px;
-			}
-			&.rows-25 {
-				min-height: 2100px;
-			}
+			min-height: 420px;
 		}
 	}
 	display: flex;
