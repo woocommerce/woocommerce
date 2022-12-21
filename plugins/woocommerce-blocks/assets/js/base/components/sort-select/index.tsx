@@ -43,6 +43,11 @@ interface SortSelectProps {
 	 * The selected value.
 	 */
 	value?: string;
+
+	/**
+	 * Whether the select is read only.
+	 */
+	readOnly?: boolean;
 }
 
 /**

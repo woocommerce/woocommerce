@@ -2,15 +2,25 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import PropTypes from 'prop-types';
 import SortSelect from '@woocommerce/base-components/sort-select';
+import { ChangeEventHandler } from 'react';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 
-const ReviewSortSelect = ( { onChange, readOnly, value } ) => {
+interface ReviewSortSelectProps {
+	onChange: ChangeEventHandler;
+	readOnly: boolean;
+	value: 'most-recent' | 'highest-rating' | 'lowest-rating';
+}
+
+const ReviewSortSelect = ( {
+	onChange,
+	readOnly,
+	value,
+}: ReviewSortSelectProps ): JSX.Element => {
 	return (
 		<SortSelect
 			className="wc-block-review-sort-select wc-block-components-review-sort-select"
@@ -44,16 +54,6 @@ const ReviewSortSelect = ( { onChange, readOnly, value } ) => {
 			value={ value }
 		/>
 	);
-};
-
-ReviewSortSelect.propTypes = {
-	onChange: PropTypes.func,
-	readOnly: PropTypes.bool,
-	value: PropTypes.oneOf( [
-		'most-recent',
-		'highest-rating',
-		'lowest-rating',
-	] ),
 };
 
 export default ReviewSortSelect;
