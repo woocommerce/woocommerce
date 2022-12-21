@@ -9,7 +9,7 @@ inputs:
         required: true
     content:
         description: 'Comment content'
-        required: true
+        default: ''
     order:
         description: 'Order of the comment'
         required: false 
