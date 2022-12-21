@@ -1711,7 +1711,7 @@
     Type &apos;0 | Element&apos; is not assignable to type &apos;ReactElement&lt;any, any&gt; | null&apos;.
       Type &apos;number&apos; is not assignable to type &apos;ReactElement&lt;any, any&gt;&apos;." source="TS2345" />
 </file>
-<file name="assets/js/base/components/reviews/review-list-item/index.js">
+<file name="assets/js/base/components/reviews/review-list-item/index.tsx">
 <error line="14" column="26" severity="error" message="Parameter &apos;review&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
 <error line="14" column="34" severity="error" message="Parameter &apos;imageType&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
 <error line="14" column="45" severity="error" message="Parameter &apos;isLoading&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
@@ -1724,7 +1724,7 @@
 <error line="163" column="10" severity="error" message="Property &apos;rating&apos; does not exist on type &apos;{}&apos;." source="TS2339" />
 <error line="164" column="20" severity="error" message="Operator &apos;&gt;&apos; cannot be applied to types &apos;boolean&apos; and &apos;number&apos;." source="TS2365" />
 </file>
-<file name="assets/js/base/components/reviews/review-list/index.js">
+<file name="assets/js/base/components/reviews/review-list/index.tsx">
 <error line="13" column="24" severity="error" message="Binding element &apos;attributes&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
 <error line="13" column="36" severity="error" message="Binding element &apos;reviews&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
 <error line="32" column="20" severity="error" message="Parameter &apos;review&apos; implicitly has an &apos;any&apos; type." source="TS7006" />

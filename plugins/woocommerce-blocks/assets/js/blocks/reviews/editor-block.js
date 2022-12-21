@@ -57,7 +57,11 @@ class EditorBlock extends Component {
 		return (
 			<Disabled>
 				{ attributes.showOrderby && reviewRatingsEnabled && (
-					<ReviewSortSelect readOnly value={ attributes.orderby } />
+					<ReviewSortSelect
+						readOnly
+						value={ attributes.orderby }
+						onChange={ () => null }
+					/>
 				) }
 				<ReviewList attributes={ attributes } reviews={ reviews } />
 				{ attributes.showLoadMore && totalReviews > reviews.length && (
