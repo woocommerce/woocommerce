@@ -83,21 +83,18 @@ const CurrentlyRunningBranch = ( { branch }: { branch: Branch } ) => {
 
 const BranchInfo = ( { branch }: { branch: Branch } ) => {
 	return (
-		<>
-			<p>
-				Pull Request Branch:{ ' ' }
-				<a
-					href={ `https://github.com/woocommerce/woocommerce/pull/${ branch.pr }` }
-				>
-					{ branch.branch }
-				</a>
-			</p>
-			<p>Version: { branch.version }</p>
-			<p>
-				Download URL:{ ' ' }
-				<a href={ branch.download_url }>{ branch.download_url }</a>
-			</p>
-		</>
+		<p>
+			<strong>Pull Request Branch:</strong>{ ' ' }
+			<a
+				href={ `https://github.com/woocommerce/woocommerce/pull/${ branch.pr }` }
+			>
+				{ branch.branch }
+			</a>
+			{ ' | ' }
+			<strong>Version:</strong> { branch.version } |{ ' ' }
+			<strong>Download URL:</strong>{ ' ' }
+			<a href={ branch.download_url }>{ branch.download_url }</a>
+		</p>
 	);
 };
 
@@ -137,15 +134,33 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 	// );
 
 	return (
-		<Card elevation={ 2 } css={ cardStyle }>
-			<CardHeader>
-				<h2>Currently Running</h2>
-			</CardHeader>
-			<CardBody>
-				{ activeBranch && <BranchInfo branch={ activeBranch } /> }
-				{ ! activeBranch && <WooCommerceVersionInfo /> }
-			</CardBody>
-			<CardFooter></CardFooter>
-		</Card>
+		<>
+			<Card elevation={ 2 } css={ cardStyle }>
+				<CardHeader>
+					<h2>Currently Running</h2>
+				</CardHeader>
+				<CardBody>
+					{ activeBranch && <BranchInfo branch={ activeBranch } /> }
+					{ ! activeBranch && <WooCommerceVersionInfo /> }
+				</CardBody>
+				<CardFooter></CardFooter>
+			</Card>
+
+			{ installedBranches.length && (
+				<Card elevation={ 2 } css={ cardStyle }>
+					<CardHeader>
+						<h2>Other Installed Branches</h2>
+					</CardHeader>
+					<CardBody>
+						<ItemGroup>
+							{ installedBranches.map( ( branch ) => (
+								<BranchListItem branch={ branch } />
+							) ) }
+						</ItemGroup>
+					</CardBody>
+					<CardFooter></CardFooter>
+				</Card>
+			) }
+		</>
 	);
 };
