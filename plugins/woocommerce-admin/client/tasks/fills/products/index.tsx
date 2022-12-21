@@ -172,9 +172,9 @@ export const Products = () => {
 	);
 };
 
-const ExperimentalProductsFill = () => {
+const ProductsFill = () => {
 	return (
-		<WooOnboardingTask id="products" variant="stacked">
+		<WooOnboardingTask id="products">
 			<Products />
 		</WooOnboardingTask>
 	);
@@ -183,5 +183,5 @@ const ExperimentalProductsFill = () => {
 registerPlugin( 'wc-admin-onboarding-task-products', {
 	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 	scope: 'woocommerce-tasks',
-	render: () => <ExperimentalProductsFill />,
+	render: () => <ProductsFill />,
 } );
