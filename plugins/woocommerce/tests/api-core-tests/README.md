@@ -15,7 +15,6 @@ This package contains automated API tests for WooCommerce, based on Playwright a
   - [Writing the test - A Quick Start Guide](#writing-the-test---a-quick-start-guide)
   - [Examples](#examples)
   - [Debugging tests](#debugging-tests)
-  - [Writing the test](#writing-the-test)
 - [Guide for using test reports](#guide-for-using-test-reports)
   - [Viewing the Playwright HTML report](#viewing-the-playwright-html-report)
   - [Viewing the Allure report](#viewing-the-allure-report)
@@ -435,6 +434,8 @@ The Playwright debugger won't work for the API tests as it is based around GUI i
 For now it is simple enough to add `console.log()` statements to output the values of your response/JSON/variables/status etc. Be sure to remove them when done ;) 
 
 You can also use the handy [REST API Log](https://wordpress.org/plugins/wp-rest-api-log/) plugin to see the API request information within WordPress. It displays the details, request headers, query params, body params, body content, response headers and response body information.
+
+For the list of WooCommerce API endpoints, expected responses, and more, please see the [WooCommerce REST API Documentation](https://woocommerce.github.io/woocommerce-rest-api-docs/).
 
 ## Guide for using test reports
 
