@@ -50,10 +50,19 @@ jobs:
 
             - name: Monitor TypeScript errors
               uses: ./.github/monitor-typescript-errors
+              id: monitor-typescript-errors
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   checkstyle: checkstyle.xml
                   checkstyle-trunk: checkstyle-trunk.xml
+                  create-comment: false
               env:
                   AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
                   CURRENT_BRANCH: ${{ steps.branch-name.outputs.current_branch }}
+            - name: Append report
+              uses: ./.github/comments-aggregator
+              with:
+                  repo-token: '${{ secrets.GITHUB_TOKEN }}'
+                  section-id: monitor-typescript-errors
+                  content: ${{steps.monitor-typescript-errors.outputs.comment}}
+                  order: 20

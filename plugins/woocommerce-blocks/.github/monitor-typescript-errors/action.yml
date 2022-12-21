@@ -10,7 +10,13 @@ inputs:
     checkstyle-trunk:
         description: 'Path checkstyle.xml file of trunk'
         required: true
-
+    create-comment:
+        description: 'Create a dedicate comment for this report?'
+        required: false
+        default: true
+outputs:
+    comment:
+        description: 'Markdown comment'
 runs:
     using: 'node16'
     main: 'index.js'
