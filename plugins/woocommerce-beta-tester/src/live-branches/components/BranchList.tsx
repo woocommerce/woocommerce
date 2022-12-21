@@ -12,6 +12,7 @@ import {
 	CardHeader,
 	CardBody,
 	CardFooter,
+	ComboboxControl,
 } from '@wordpress/components';
 import { useState } from 'react';
 import { css } from '@emotion/react';
@@ -142,6 +143,29 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 				<CardBody>
 					{ activeBranch && <BranchInfo branch={ activeBranch } /> }
 					{ ! activeBranch && <WooCommerceVersionInfo /> }
+				</CardBody>
+				<CardFooter></CardFooter>
+			</Card>
+
+			<Card elevation={ 2 } css={ cardStyle }>
+				<CardHeader>
+					<h2>Install and Activate Live Branches</h2>
+				</CardHeader>
+				<CardBody>
+					<ComboboxControl
+						onChange={ ( branch ) => {
+							// if ( branch ) {
+							// 	setSelectedBranchCommit( branch );
+							// }
+						} }
+						value={ selectedBranchCommit }
+						options={ branches.map( ( branch ) => {
+							return {
+								value: branch.commit,
+								label: branch.branch,
+							};
+						} ) }
+					/>
 				</CardBody>
 				<CardFooter></CardFooter>
 			</Card>
