@@ -28,7 +28,7 @@ This action is meant to be used as the poster/commenter. Instead of having exist
 
 - **`repo-token`** (required): This is the GitHub token. This is required to manipulate PR comments.
 - **`section-id`** (required): The unique ID that helps this action to update the correct part of the aggregated comment.
-- **`content`** (required): The comment content.
+- **`content`** (option): The comment content. Default to empty. If nothing was provided, this action will stop gracefully.
 - **`order`** (optional): The order of the comment part inside the aggregated comment. Default to 10.
 
 ## More examples

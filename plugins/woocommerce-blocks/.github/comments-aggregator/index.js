@@ -16,12 +16,17 @@ const runner = async () => {
 		const payload = context.payload;
 		const repo = payload.repository.name;
 		const owner = payload.repository.owner.login;
+
+		// Only run this action on pull requests.
+		if ( ! payload.pull_request?.number ) {
+			return;
+		}
+
 		const sectionId = getInput( 'section-id', {
 			required: true,
 		} );
-		const content = getInput( 'content', {
-			required: true,
-		} );
+
+		const content = getInput( 'content' );
 		const order = getInput( 'order' );
 
 		if ( ! sectionId || ! content ) {
