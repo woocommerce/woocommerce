@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Form } from '@woocommerce/components';
+import { useEffect, useRef } from '@wordpress/element';
+import { Form, FormRef } from '@woocommerce/components';
 import { PartialProduct, ProductVariation } from '@woocommerce/data';
 
 /**
@@ -24,15 +25,29 @@ export const ProductVariationForm: React.FC< {
 	product: PartialProduct;
 	productVariation: Partial< ProductVariation >;
 } > = ( { product, productVariation } ) => {
+	const previousVariationIdRef = useRef< number >();
+	const formRef = useRef< FormRef< Partial< ProductVariation > > >( null );
+
 	const navigationProps = useProductVariationNavigation( {
 		product,
 		productVariation,
 	} );
 
+	useEffect( () => {
+		if (
+			productVariation &&
+			previousVariationIdRef.current !== productVariation.id
+		) {
+			formRef.current?.resetForm( productVariation );
+			previousVariationIdRef.current = productVariation.id;
+		}
+	}, [ productVariation ] );
+
 	return (
 		<Form< Partial< ProductVariation > >
 			initialValues={ productVariation }
 			errors={ {} }
+			ref={ formRef }
 		>
 			<ProductFormHeader />
 			<ProductFormLayout>
