@@ -1,16 +1,25 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import { getSetting } from '@woocommerce/settings';
+import type { BlockAttributes } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import ReviewListItem from '../review-list-item';
+import type { Review } from '../types';
 import './style.scss';
 
-const ReviewList = ( { attributes, reviews } ) => {
+interface ReviewListProps {
+	attributes: BlockAttributes;
+	reviews: Review[];
+}
+
+const ReviewList = ( {
+	attributes,
+	reviews,
+}: ReviewListProps ): JSX.Element => {
 	const showAvatars = getSetting( 'showAvatars', true );
 	const reviewRatingsEnabled = getSetting( 'reviewRatingsEnabled', true );
 	const showReviewImage =
@@ -39,11 +48,6 @@ const ReviewList = ( { attributes, reviews } ) => {
 			) }
 		</ul>
 	);
-};
-
-ReviewList.propTypes = {
-	attributes: PropTypes.object.isRequired,
-	reviews: PropTypes.array.isRequired,
 };
 
 export default ReviewList;
