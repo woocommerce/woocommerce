@@ -1,7 +1,7 @@
 const identifier = `<!-- comments-aggregator -->`;
 const separator = '<!-- separator -->';
 const footerText =
-	'[comments-aggregator](https://github.com/woocommerce/woocommerce-blocks/tree/trunk/.github/comments-aggregator).';
+	'[comments-aggregator](https://github.com/woocommerce/woocommerce-blocks/tree/trunk/.github/comments-aggregator)';
 const footer = `\n> <sub>${ footerText }</sub>\n${ identifier }`;
 
 function getSectionId( section ) {
