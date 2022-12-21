@@ -16,7 +16,7 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import useVariationOrders from '~/products/hooks/use-variation-orders';
+import useVariationsOrder from '~/products/hooks/use-variations-order';
 import HiddenIcon from '~/products/images/hidden-icon';
 import VisibleIcon from '~/products/images/visible-icon';
 import { CurrencyContext } from '../../../lib/currency-context';
@@ -81,7 +81,7 @@ export const Variations: React.FC = () => {
 	);
 
 	const { sortedVariations, getVariationKey, onOrderChange } =
-		useVariationOrders( { variations, currentPage } );
+		useVariationsOrder( { variations, currentPage } );
 
 	if ( ! variations || isLoading ) {
 		return (

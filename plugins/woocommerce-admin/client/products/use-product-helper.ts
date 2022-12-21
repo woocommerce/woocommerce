@@ -25,7 +25,7 @@ import {
 	NUMBERS_AND_DECIMAL_SEPARATOR,
 	ONLY_ONE_DECIMAL_SEPARATOR,
 } from './constants';
-import { ProductVariationOrders } from './hooks/use-variation-orders';
+import { ProductVariationsOrder } from './hooks/use-variations-order';
 
 function removeReadonlyProperties(
 	product: Product
@@ -139,9 +139,9 @@ export function useProductHelper() {
 
 	async function updateVariationOrders(
 		productId: number,
-		variationOrders?: { [ page: number ]: { [ id: number ]: number } }
+		variationsOrder?: { [ page: number ]: { [ id: number ]: number } }
 	) {
-		if ( ! variationOrders ) return undefined;
+		if ( ! variationsOrder ) return undefined;
 
 		return batchUpdateProductVariations<
 			Promise< { update: ProductVariation[] } >
@@ -150,7 +150,7 @@ export function useProductHelper() {
 				product_id: productId,
 			},
 			{
-				update: Object.values( variationOrders )
+				update: Object.values( variationsOrder )
 					.flatMap( Object.entries )
 					.map( ( [ id, menu_order ] ) => ( {
 						id,
@@ -187,7 +187,7 @@ export function useProductHelper() {
 				.then( async ( updatedProduct ) =>
 					updateVariationOrders(
 						updatedProduct.id,
-						( product as ProductVariationOrders ).variationOrders
+						( product as ProductVariationsOrder ).variationsOrder
 					)
 						.then( () =>
 							invalidateResolutionForStoreSelector(

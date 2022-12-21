@@ -29,12 +29,12 @@ function getVariationOrder( { key }: JSX.Element ) {
 function sort(
 	variations: ProductVariation[],
 	currentPage: number,
-	{ variationOrders }: ProductVariationOrders
+	{ variationsOrder }: ProductVariationsOrder
 ) {
-	if ( ! variationOrders || ! variationOrders[ currentPage ] )
+	if ( ! variationsOrder || ! variationsOrder[ currentPage ] )
 		return variations;
 
-	const currentPageOrders = variationOrders[ currentPage ];
+	const currentPageOrders = variationsOrder[ currentPage ];
 
 	return [ ...variations ].sort( ( a, b ) => {
 		if ( ! currentPageOrders[ a.id ] || ! currentPageOrders[ b.id ] )
@@ -43,17 +43,17 @@ function sort(
 	} );
 }
 
-export default function useVariationOrders( {
+export default function useVariationsOrder( {
 	variations,
 	currentPage,
-}: UseVariationOrdersInput ): UseVariationOrdersOutput {
-	const { setValue, values } = useFormContext< ProductVariationOrders >();
+}: UseVariationsOrderInput ): UseVariationsOrderOutput {
+	const { setValue, values } = useFormContext< ProductVariationsOrder >();
 
 	function onOrderChange( items: JSX.Element[] ) {
 		const minOrder = Math.min( ...items.map( getVariationOrder ) );
 
-		setValue( 'variationOrders', {
-			...values.variationOrders,
+		setValue( 'variationsOrder', {
+			...values.variationsOrder,
 			[ currentPage ]: items.reduce( ( prev, item, index ) => {
 				const id = getVariationId( item );
 				return {
@@ -71,19 +71,19 @@ export default function useVariationOrders( {
 	};
 }
 
-export type UseVariationOrdersInput = {
+export type UseVariationsOrderInput = {
 	variations: ProductVariation[];
 	currentPage: number;
 };
 
-export type UseVariationOrdersOutput = {
+export type UseVariationsOrderOutput = {
 	sortedVariations: ProductVariation[];
 	getVariationKey( variation: ProductVariation ): string;
 	onOrderChange( items: JSX.Element[] ): void;
 };
 
-export type ProductVariationOrders = {
-	variationOrders?: {
+export type ProductVariationsOrder = {
+	variationsOrder?: {
 		[ page: number ]: {
 			[ variationId: number ]: number;
 		};
