@@ -15,6 +15,14 @@ register_woocommerce_admin_test_helper_rest_route(
 	)
 );
 
+register_woocommerce_admin_test_helper_rest_route(
+	'/live-branches/woo_plugin_version/v1',
+	'woo_plugin_version',
+	array(
+		'methods' => 'GET',
+	)
+);
+
 /**
  * API endpoint to fetch the manifest of live branches.
  */
@@ -30,4 +38,9 @@ function fetch_live_branches_manifest() {
 	}
 
 	return new WP_REST_Response( $obj, 200 );
+}
+
+function woo_plugin_version() {
+	$plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/woocommerce/woocommerce.php' );
+	return new WP_REST_Response( $plugin_data['Version'], 200 );
 }

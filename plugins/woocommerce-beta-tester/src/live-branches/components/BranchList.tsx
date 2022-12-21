@@ -8,13 +8,22 @@ import {
 	__experimentalItem as Item,
 	Button,
 	Spinner,
+	Card,
+	CardHeader,
+	CardBody,
+	CardFooter,
 } from '@wordpress/components';
 import { useState } from 'react';
+import { css } from '@emotion/react';
 
 /**
  * Internal dependencies
  */
 import { Branch, useLiveBranchInstall } from '../hooks/live-branches';
+
+const cardStyle = css( {
+	marginTop: '32px',
+} );
 
 const BranchListItem = ( { branch }: { branch: Branch } ) => {
 	const { isError, isInProgress, installAndActivate, activate, status } =
@@ -64,22 +73,79 @@ const BranchListItem = ( { branch }: { branch: Branch } ) => {
 	);
 };
 
+const CurrentlyRunningBranch = ( { branch }: { branch: Branch } ) => {
+	return (
+		<>
+			<h3>Currently Running:</h3>
+		</>
+	);
+};
+
+const BranchInfo = ( { branch }: { branch: Branch } ) => {
+	return (
+		<>
+			<p>
+				Pull Request Branch:{ ' ' }
+				<a
+					href={ `https://github.com/woocommerce/woocommerce/pull/${ branch.pr }` }
+				>
+					{ branch.branch }
+				</a>
+			</p>
+			<p>Version: { branch.version }</p>
+			<p>
+				Download URL:{ ' ' }
+				<a href={ branch.download_url }>{ branch.download_url }</a>
+			</p>
+		</>
+	);
+};
+
+const WooCommerceVersionInfo = () => {
+	// @ts-ignore
+	const version = window?.wc?.WC_VERSION || 'unknown';
+
+	return (
+		<p>
+			Live branch not installed. Running WooCommerce version: { version }
+		</p>
+	);
+};
+
 export const BranchList = ( { branches }: { branches: Branch[] } ) => {
+	const [ selectedBranchCommit, setSelectedBranchCommit ] =
+		useState< string >( branches.length ? branches[ 0 ].commit : '' );
+
+	const selectedBranch = branches.filter(
+		( branch: Branch ) => branch.commit === selectedBranchCommit
+	)[ 0 ];
+
+	const installedBranches = branches.filter(
+		( branch ) => branch.install_status === 'installed'
+	);
+
 	const activeBranch = branches.find(
 		( branch ) => branch.install_status === 'active'
 	);
 
-	const nonActiveBranches = branches.filter(
-		( branch ) => branch.install_status !== 'active'
-	);
+	// const activeBranch = branches.find(
+	// 	( branch ) => branch.install_status === 'active'
+	// );
+
+	// const nonActiveBranches = branches.filter(
+	// 	( branch ) => branch.install_status !== 'active'
+	// );
 
 	return (
-		<ItemGroup isSeparated>
-			{ /* Sort the active branch if it exists to the top of the list */ }
-			{ activeBranch && <BranchListItem branch={ activeBranch } /> }
-			{ nonActiveBranches.map( ( branch ) => (
-				<BranchListItem key={ branch.commit } branch={ branch } />
-			) ) }
-		</ItemGroup>
+		<Card elevation={ 2 } css={ cardStyle }>
+			<CardHeader>
+				<h2>Currently Running</h2>
+			</CardHeader>
+			<CardBody>
+				{ activeBranch && <BranchInfo branch={ activeBranch } /> }
+				{ ! activeBranch && <WooCommerceVersionInfo /> }
+			</CardBody>
+			<CardFooter></CardFooter>
+		</Card>
 	);
 };
