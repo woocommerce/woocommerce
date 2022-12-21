@@ -54,9 +54,6 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 } ) => {
 	const [ showAddAttributeModal, setShowAddAttributeModal ] =
 		useState( false );
-	// const [ hydrationComplete, setHydrationComplete ] = useState< boolean >(
-	// 	value ? false : true
-	// );
 	const [ hydratedAttributes, setHydratedAttributes ] = useState<
 		HydratedAttributeType[]
 	>( [] );
@@ -106,7 +103,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		// somewhere so that a single hydration source can be shared between multiple
 		// instances? Something like a simple key-value store in the form context
 		// would be handy.
-		if ( ! value /*|| hydrationComplete*/ ) {
+		if ( ! value ) {
 			return;
 		}
 
@@ -137,8 +134,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 				...customAttributes,
 			] );
 		} );
-	}, [ productId, value ] );
-	// }, [ productId, value, hydrationComplete ] );
+	}, [ fetchTerms, productId, value ] );
 
 	const fetchAttributeId = ( attribute: { id: number; name: string } ) =>
 		`${ attribute.id }-${ attribute.name }`;
