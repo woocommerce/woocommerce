@@ -221,6 +221,10 @@ class WC_Install {
 			'wc_update_721_adjust_new_zealand_states',
 			'wc_update_721_adjust_ukraine_states',
 		),
+		'7.2.2' => array(
+			'wc_update_722_adjust_new_zealand_states',
+			'wc_update_722_adjust_ukraine_states',
+		),
 	);
 
 	/**

@@ -2537,3 +2537,24 @@ function wc_update_721_adjust_ukraine_states() {
 	);
 }
 
+/**
+ * Update the New Zealand state codes in the database after they were updated in code to the CLDR standard.
+ *
+ * This is a simple wrapper for the corresponding 7.2.1 update function. The reason we do this (instead of
+ * reusing the original function directly) is for better traceability in the Action Scheduler log, in case
+ * of problems.
+ */
+function wc_update_722_adjust_new_zealand_states() {
+	return wc_update_721_adjust_new_zealand_states();
+}
+
+/**
+ * Update the Ukraine state codes in the database after they were updated in code to the CLDR standard.
+ *
+ * This is a simple wrapper for the corresponding 7.2.1 update function. The reason we do this (instead of
+ * reusing the original function directly) is for better traceability in the Action Scheduler log, in case
+ * of problems.
+ */
+function wc_update_722_adjust_ukraine_states() {
+	return wc_update_721_adjust_ukraine_states();
+}
