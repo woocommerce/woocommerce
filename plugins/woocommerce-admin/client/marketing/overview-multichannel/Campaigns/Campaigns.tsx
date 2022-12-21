@@ -69,6 +69,8 @@ export const Campaigns = () => {
 		<Card className="woocommerce-marketing-campaigns-card">
 			<CampaignsCardHeader />
 			<Table
+				// this is `classNames`, instead of the correct `className`, due to misnaming in the Table component.
+				classNames="woocommerce-marketing-campaigns-table"
 				caption={ __( 'Campaigns', 'woocommerce' ) }
 				headers={ [
 					{
