@@ -12,7 +12,7 @@ import {
 	FlexBlock,
 	FlexItem,
 } from '@wordpress/components';
-import { chevronUp, chevronDown } from '@wordpress/icons';
+import { chevronUp, chevronDown, external } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -24,9 +24,13 @@ import {
 import { useRecommendedChannels } from '~/marketing/hooks';
 import { useNewCampaignTypes } from './useNewCampaignTypes';
 
+const isExternalURL = ( url: string ) =>
+	new URL( url ).origin !== location.origin;
+
 export const CampaignsCardHeader = () => {
 	const [ open, setOpen ] = useState( false );
 	const [ collapsed, setCollapsed ] = useState( true );
+	// TOOD: handle loading state.
 	const { loading, data: newCampaignTypes } = useNewCampaignTypes();
 	const { data: recommendedChannels } = useRecommendedChannels();
 
@@ -84,11 +88,34 @@ export const CampaignsCardHeader = () => {
 											<Button
 												variant="secondary"
 												href={ el.createUrl }
+												target={
+													isExternalURL(
+														el.createUrl
+													)
+														? '_blank'
+														: '_self'
+												}
 											>
-												{ __(
-													'Create',
-													'woocommerce'
-												) }
+												<Flex gap={ 1 }>
+													<FlexItem>
+														{ __(
+															'Create',
+															'woocommerce'
+														) }
+													</FlexItem>
+													{ isExternalURL(
+														el.createUrl
+													) && (
+														<FlexItem>
+															<Icon
+																icon={
+																	external
+																}
+																size={ 16 }
+															/>
+														</FlexItem>
+													) }
+												</Flex>
 											</Button>
 										</FlexItem>
 									</Flex>

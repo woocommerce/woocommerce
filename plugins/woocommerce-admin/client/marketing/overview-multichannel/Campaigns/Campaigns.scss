@@ -93,6 +93,11 @@
 		&__description {
 			color: #555d66;
 		}
+
+		img,
+		svg {
+			display: block;
+		}
 	}
 
 	.woocommerce-marketing-add-channels {
