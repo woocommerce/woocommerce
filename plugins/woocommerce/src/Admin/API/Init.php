@@ -88,6 +88,12 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\MobileAppMagicLink',
 		);
 
+		if ( Features::is_enabled( 'new-product-management-experience' ) ) {
+			$product_form_controllers = array(
+				'Automattic\WooCommerce\Admin\API\ProductForm'
+			);
+		}
+
 		if ( Features::is_enabled( 'analytics' ) ) {
 			$analytics_controllers = array(
 				'Automattic\WooCommerce\Admin\API\Customers',
@@ -118,7 +124,7 @@ class Init {
 			// The performance indicators controller must be registered last, after other /stats endpoints have been registered.
 			$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators\Controller';
 
-			$controllers = array_merge( $controllers, $analytics_controllers );
+			$controllers = array_merge( $controllers, $analytics_controllers, $product_form_controllers );
 		}
 
 		$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
