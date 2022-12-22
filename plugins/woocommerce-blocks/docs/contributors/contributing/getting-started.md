@@ -6,7 +6,6 @@
 -   [Configuring your WordPress site](#configuring-your-wordpress-site)
 -   [Installing dependencies](#installing-dependencies)
 -   [Building the plugin files](#building-the-plugin-files)
-    -   [Legacy builds](#legacy-builds)
 -   [Create a plugin package in ZIP format](#create-a-plugin-package-in-zip-format)
 -   [Linting](#linting)
 -   [Running the Blocks plugin](#running-the-blocks-plugin)
@@ -69,17 +68,6 @@ NPM is used to trigger builds. Building is required for the plugin to functional
 These scripts compile the code using `webpack` which is one of the installed dependencies from earlier.
 
 You can also run `$ npx webpack` to run the development build and not keep watching for changes.
-
-### Legacy builds
-
-This plugin supports two type of builds:
-
--   legacy builds (assets have `-legacy` suffix on their file names)
--   main builds (without the `-legacy` prefix)
-
-The legacy builds are loaded in a site environment where the WordPress version doesn't meet minimum requirements for a component used in a set build.
-
-You can read more about legacy builds in the [this doc](../../../assets/js/legacy/README.md).
 
 ## Create a plugin package in ZIP format
 
@@ -159,4 +147,3 @@ To find out more about how to run automated JavaScript tests, check out the docu
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/contributing/getting-started.md)
 
 <!-- /FEEDBACK -->
-

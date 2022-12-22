@@ -46,7 +46,6 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
     -   [Tag](../assets/js/editor-components/tag/README.md)
     -   [TextToolbarButton](../assets/js/editor-components/text-toolbar-button/README.md)
 -   [Icons](../assets/js/icons/README.md)
--   [Legacy Build](../assets/js/legacy/README.md)
 -   [Store API (REST API)](../src/StoreApi/README.md)
 -   [Storybook](../storybook/README.md)
 -   [Templates](internal-developers/templates/README.md)
