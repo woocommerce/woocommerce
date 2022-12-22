@@ -140,6 +140,7 @@ class Table extends Component {
 		const {
 			ariaHidden,
 			caption,
+			className,
 			classNames,
 			headers,
 			instanceId,
@@ -148,10 +149,15 @@ class Table extends Component {
 			rows,
 		} = this.props;
 		const { isScrollableRight, isScrollableLeft, tabIndex } = this.state;
-		const classes = classnames( 'woocommerce-table__table', classNames, {
-			'is-scrollable-right': isScrollableRight,
-			'is-scrollable-left': isScrollableLeft,
-		} );
+		const classes = classnames(
+			'woocommerce-table__table',
+			classNames,
+			className,
+			{
+				'is-scrollable-right': isScrollableRight,
+				'is-scrollable-left': isScrollableLeft,
+			}
+		);
 		const sortedBy =
 			query.orderby ||
 			get( find( headers, { defaultSort: true } ), 'key', false );
