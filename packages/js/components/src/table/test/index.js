@@ -10,6 +10,7 @@ import { createElement } from '@wordpress/element';
  * Internal dependencies
  */
 import TableCard from '../index';
+import Table from '../table';
 import mockHeaders from './data/table-mock-headers';
 import mockData from './data/table-mock-data';
 import mockSummary from './data/table-mock-summary';
@@ -170,5 +171,37 @@ describe( 'TableCard', () => {
 		expect( screen.getAllByRole( 'columnheader' )[ 3 ] ).toHaveClass(
 			'is-left-aligned'
 		);
+	} );
+} );
+
+describe( 'Table', () => {
+	it( 'should accept className prop and renders it in the HTML output', () => {
+		render(
+			<Table
+				className="class-111"
+				caption="Table with className"
+				headers={ mockHeaders }
+				rows={ mockData }
+			/>
+		);
+
+		const el = screen.getByLabelText( 'Table with className' );
+
+		expect( el ).toHaveClass( 'class-111' );
+	} );
+
+	it( 'should still work with classNames prop and renders it in the HTML output, for backward compatibility reason', () => {
+		render(
+			<Table
+				classNames="class-222"
+				caption="Table with classNames"
+				headers={ mockHeaders }
+				rows={ mockData }
+			/>
+		);
+
+		const el = screen.getByLabelText( 'Table with classNames' );
+
+		expect( el ).toHaveClass( 'class-222' );
 	} );
 } );
