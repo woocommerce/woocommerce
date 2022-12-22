@@ -1,12 +1,10 @@
 /**
  * External dependencies
  */
-import { insertBlock } from '@wordpress/e2e-test-utils';
+import { insertBlock, ensureSidebarOpened } from '@wordpress/e2e-test-utils';
 /**
  * Internal dependencies
  */
-
-import { openBlockEditorSettings } from '../../../utils';
 
 export const block = {
 	name: 'Products (Beta)',
@@ -40,7 +38,7 @@ const enableInheritQueryFromTemplateSetting = async () => {
 };
 
 export const configurateProductQueryBlock = async () => {
-	await openBlockEditorSettings();
+	await ensureSidebarOpened();
 	await enableInheritQueryFromTemplateSetting();
 };
 
