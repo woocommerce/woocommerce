@@ -69,8 +69,12 @@ const EditLocation = ( {
 					<Button
 						variant="primary"
 						onClick={ () => {
-							onSave( values );
-							onClose();
+							const form =
+								formRef?.current as unknown as HTMLFormElement;
+							if ( form.reportValidity() ) {
+								onSave( values );
+								onClose();
+							}
 						} }
 					>
 						{ __( 'Done', 'woo-gutenberg-products-block' ) }

@@ -53,6 +53,7 @@ const Form = ( {
 				value={ values.name }
 				onChange={ setLocationField( 'name' ) }
 				autoComplete="off"
+				required={ true }
 			/>
 			<TextControl
 				label={ __( 'Address', 'woo-gutenberg-products-block' ) }

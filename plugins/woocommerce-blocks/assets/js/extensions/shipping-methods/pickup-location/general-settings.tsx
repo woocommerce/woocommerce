@@ -98,6 +98,7 @@ const GeneralSettings = () => {
 					onChange={ setSettingField( 'title' ) }
 					disabled={ false }
 					autoComplete="off"
+					required={ true }
 				/>
 				<CheckboxControl
 					checked={ showCosts }
