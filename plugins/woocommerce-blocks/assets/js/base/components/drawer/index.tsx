@@ -54,10 +54,7 @@ const Drawer = ( {
 						slideOut,
 				}
 			) }
-			closeButtonLabel={ __(
-				'Close mini cart',
-				'woo-gutenberg-products-block'
-			) }
+			closeButtonLabel={ __( 'Close', 'woo-gutenberg-products-block' ) }
 		>
 			{ children }
 		</Modal>
