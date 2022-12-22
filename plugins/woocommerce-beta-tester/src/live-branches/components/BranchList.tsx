@@ -14,7 +14,7 @@ import {
 	CardFooter,
 	ComboboxControl,
 } from '@wordpress/components';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { css } from '@emotion/react';
 
 /**
@@ -90,14 +90,6 @@ const BranchListItem = ( {
 	);
 };
 
-const CurrentlyRunningBranch = ( { branch }: { branch: Branch } ) => {
-	return (
-		<>
-			<h3>Currently Running:</h3>
-		</>
-	);
-};
-
 const BranchInfo = ( { branch }: { branch: Branch } ) => {
 	return (
 		<p>
@@ -132,35 +124,47 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 			null
 	);
 
-	const [ selectedBranch, setSelectedBranch ] = useState( branches[ 0 ] );
-
 	const installedBranches = branches.filter(
 		( branch ) => branch.install_status === 'installed'
 	);
 
+	const uninstalledBranches = branches.filter(
+		( branch ) => branch.install_status === 'not-installed'
+	);
+
+	const [ selectedBranch, setSelectedBranch ] = useState(
+		uninstalledBranches[ 0 ]
+	);
+
 	return (
 		<>
-			<Card elevation={ 2 } css={ cardStyle }>
+			<Card elevation={ 3 } css={ cardStyle }>
 				<CardHeader>
 					<h2>Currently Running</h2>
 				</CardHeader>
 				<CardBody>
-					{ activeBranch && <BranchInfo branch={ activeBranch } /> }
+					{ activeBranch && (
+						<BranchInfo
+							branch={ activeBranch }
+							key={ activeBranch.version }
+						/>
+					) }
 					{ ! activeBranch && <WooCommerceVersionInfo /> }
 				</CardBody>
 				<CardFooter></CardFooter>
 			</Card>
 
-			<Card elevation={ 2 } css={ cardStyle }>
+			<Card elevation={ 3 } css={ cardStyle }>
 				<CardHeader>
 					<h2>Install and Activate Live Branches</h2>
 				</CardHeader>
 				<CardBody>
 					<ComboboxControl
-						onChange={ ( branchCommit ) => {
-							if ( branchCommit ) {
+						onChange={ ( branchVersion ) => {
+							if ( branchVersion ) {
 								const branch = branches.find(
-									( branch ) => branch.commit === branchCommit
+									( branch ) =>
+										branch.version === branchVersion
 								);
 
 								if ( branch ) {
@@ -168,10 +172,10 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 								}
 							}
 						} }
-						value={ selectedBranch.commit }
-						options={ branches.map( ( branch ) => {
+						value={ selectedBranch.version }
+						options={ uninstalledBranches.map( ( branch ) => {
 							return {
-								value: branch.commit,
+								value: branch.version,
 								label: branch.branch,
 							};
 						} ) }
@@ -180,8 +184,26 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 					<BranchListItem
 						branch={ selectedBranch }
 						onBranchActive={ setActiveBranch }
-						key={ selectedBranch.commit }
+						key={ selectedBranch.version }
 					/>
+				</CardBody>
+				<CardFooter></CardFooter>
+			</Card>
+
+			<Card elevation={ 3 } css={ cardStyle }>
+				<CardHeader>
+					<h2>Other Installed Branches</h2>
+				</CardHeader>
+				<CardBody>
+					<ItemGroup>
+						{ installedBranches.map( ( branch ) => (
+							<BranchListItem
+								branch={ branch }
+								onBranchActive={ setActiveBranch }
+								key={ branch.version }
+							/>
+						) ) }
+					</ItemGroup>
 				</CardBody>
 				<CardFooter></CardFooter>
 			</Card>
