@@ -141,15 +141,6 @@
  */
 
 /**
- * @typedef {Object} EditorDataContext
- *
- * @property {boolean}                 isEditor       Indicates whether in the editor context.
- * @property {number}                  currentPostId  The post ID being edited.
- * @property {Object}                  previewData    Object containing preview data for the editor.
- * @property {function(string):Object} getPreviewData Get data by name.
- */
-
-/**
  * @typedef {Object} AddToCartFormContext
  *
  * @property {Object}                         product              The product object to add to the cart.
