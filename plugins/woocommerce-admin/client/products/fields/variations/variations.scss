@@ -1,5 +1,9 @@
 .woocommerce-product-variations {
-	min-height: 300px;
+	ol {
+		@media ( min-width: #{ ($break-medium) } ) {
+			min-height: 420px;
+		}
+	}
 	display: flex;
 	flex-direction: column;
 	> div {
@@ -77,6 +81,7 @@
 		margin-left: -1px;
 		margin-right: -1px;
 		margin-bottom: -1px;
+		min-height: 84px;
 	}
 
 	.woocommerce-sortable {
