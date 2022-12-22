@@ -7,14 +7,11 @@ import { __ } from '@wordpress/i18n';
 import {
 	useBlockProps,
 	InnerBlocks,
-	BlockControls,
 	InspectorControls,
 } from '@wordpress/block-editor';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import { EditorProvider, CartProvider } from '@woocommerce/base-context';
 import { previewCart } from '@woocommerce/resource-previews';
-import { filledCart, removeCart } from '@woocommerce/icons';
-import { Icon } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -23,12 +20,12 @@ import './inner-blocks';
 import './editor.scss';
 import {
 	addClassToBody,
-	useViewSwitcher,
 	useBlockPropsWithLocking,
 	useForcedLayout,
 	BlockSettings,
 } from '../cart-checkout-shared';
 import '../cart-checkout-shared/sidebar-notices';
+import '../cart-checkout-shared/view-switcher';
 import { CartBlockContext } from './context';
 
 // This is adds a class to body to signal if the selected block is locked
@@ -40,25 +37,8 @@ const ALLOWED_BLOCKS = [
 	'woocommerce/empty-cart-block',
 ];
 
-const views = [
-	{
-		view: 'woocommerce/filled-cart-block',
-		label: __( 'Filled Cart', 'woo-gutenberg-products-block' ),
-		icon: <Icon icon={ filledCart } />,
-	},
-	{
-		view: 'woocommerce/empty-cart-block',
-		label: __( 'Empty Cart', 'woo-gutenberg-products-block' ),
-		icon: <Icon icon={ removeCart } />,
-	},
-];
-
 export const Edit = ( { className, attributes, setAttributes, clientId } ) => {
-	const { hasDarkControls } = attributes;
-	const { currentView, component: ViewSwitcherComponent } = useViewSwitcher(
-		clientId,
-		views
-	);
+	const { hasDarkControls, currentView } = attributes;
 	const defaultTemplate = [
 		[ 'woocommerce/filled-cart-block', {}, [] ],
 		[ 'woocommerce/empty-cart-block', {}, [] ],
@@ -98,10 +78,9 @@ export const Edit = ( { className, attributes, setAttributes, clientId } ) => {
 				) }
 			>
 				<EditorProvider
-					currentView={ currentView }
 					previewData={ { previewCart } }
+					currentView={ currentView }
 				>
-					<BlockControls>{ ViewSwitcherComponent }</BlockControls>
 					<CartBlockContext.Provider
 						value={ {
 							hasDarkControls,

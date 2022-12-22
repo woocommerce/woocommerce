@@ -3,14 +3,7 @@
  * External dependencies
  */
 import type { ReactElement } from 'react';
-import {
-	useBlockProps,
-	InnerBlocks,
-	BlockControls,
-} from '@wordpress/block-editor';
-import { __ } from '@wordpress/i18n';
-import { filledCart, removeCart } from '@woocommerce/icons';
-import { Icon } from '@wordpress/icons';
+import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { EditorProvider } from '@woocommerce/base-context';
 import type { TemplateArray } from '@wordpress/blocks';
 import { useEffect } from '@wordpress/element';
@@ -18,7 +11,7 @@ import { useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { useViewSwitcher, useForcedLayout } from '../../cart-checkout-shared';
+import { useForcedLayout } from '../../cart-checkout-shared';
 import { MiniCartInnerBlocksStyle } from './inner-blocks-style';
 import './editor.scss';
 
@@ -28,24 +21,11 @@ const ALLOWED_BLOCKS = [
 	'woocommerce/empty-mini-cart-contents-block',
 ];
 
-const views = [
-	{
-		view: 'woocommerce/filled-mini-cart-contents-block',
-		label: __( 'Filled Mini Cart', 'woo-gutenberg-products-block' ),
-		icon: <Icon icon={ filledCart } />,
-	},
-	{
-		view: 'woocommerce/empty-mini-cart-contents-block',
-		label: __( 'Empty Mini Cart', 'woo-gutenberg-products-block' ),
-		icon: <Icon icon={ removeCart } />,
-	},
-];
-
 interface Props {
 	clientId: string;
 }
 
-const Edit = ( { clientId }: Props ): ReactElement => {
+const Edit = ( { clientId, attributes }: Props ): ReactElement => {
 	const blockProps = useBlockProps( {
 		/**
 		 * This is a workaround for the Site Editor to calculate the
@@ -63,10 +43,7 @@ const Edit = ( { clientId }: Props ): ReactElement => {
 		[ 'woocommerce/empty-mini-cart-contents-block', {}, [] ],
 	] as TemplateArray;
 
-	const { currentView, component: ViewSwitcherComponent } = useViewSwitcher(
-		clientId,
-		views
-	);
+	const { currentView } = attributes;
 
 	useForcedLayout( {
 		clientId,
@@ -130,7 +107,6 @@ const Edit = ( { clientId }: Props ): ReactElement => {
 	return (
 		<div { ...blockProps }>
 			<EditorProvider currentView={ currentView }>
-				<BlockControls>{ ViewSwitcherComponent }</BlockControls>
 				<InnerBlocks
 					allowedBlocks={ ALLOWED_BLOCKS }
 					template={ defaultTemplate }
