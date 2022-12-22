@@ -79,6 +79,9 @@ export function SingleImageField( {
 							handleChange( image as MediaItem )
 						}
 						onUpload={ ( [ image ] ) => handleChange( image ) }
+						onFileUploadChange={ ( [ image ] ) =>
+							handleChange( image )
+						}
 						label={ __(
 							'Drag image here or click to upload',
 							'woocommerce'
