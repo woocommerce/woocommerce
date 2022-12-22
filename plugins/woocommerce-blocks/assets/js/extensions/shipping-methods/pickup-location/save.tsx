@@ -26,7 +26,15 @@ const SaveSettings = () => {
 				variant="primary"
 				isBusy={ isSaving }
 				disabled={ isSaving }
-				onClick={ save }
+				onClick={ (
+					event: React.MouseEvent< HTMLButtonElement, MouseEvent >
+				) => {
+					const target = event.target as HTMLButtonElement;
+					if ( target?.form?.reportValidity() ) {
+						save();
+					}
+				} }
+				type="submit"
 			>
 				{ __( 'Save changes', 'woo-gutenberg-products-block' ) }
 			</Button>
