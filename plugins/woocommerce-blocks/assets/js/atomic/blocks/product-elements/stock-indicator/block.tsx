@@ -17,7 +17,7 @@ import type { HTMLAttributes } from 'react';
 import './style.scss';
 import type { BlockAttributes } from './types';
 
-const lowStockText = ( lowStock: string ): string => {
+const lowStockText = ( lowStock: number ): string => {
 	return sprintf(
 		/* translators: %d stock amount (number of items in stock for product) */
 		__( '%d left in stock', 'woo-gutenberg-products-block' ),

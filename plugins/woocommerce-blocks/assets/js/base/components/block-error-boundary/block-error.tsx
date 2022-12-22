@@ -8,6 +8,7 @@ import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
  * Internal dependencies
  */
 import type { BlockErrorProps } from './types';
+
 const BlockError = ( {
 	imageUrl = `${ WC_BLOCKS_IMAGE_URL }/block-error.svg`,
 	header = __( 'Oops!', 'woo-gutenberg-products-block' ),
@@ -19,7 +20,7 @@ const BlockError = ( {
 	errorMessagePrefix = __( 'Error:', 'woo-gutenberg-products-block' ),
 	button,
 	showErrorBlock = true,
-}: BlockErrorProps ): React.ReactNode => {
+}: BlockErrorProps ): JSX.Element | null => {
 	return showErrorBlock ? (
 		<div className="wc-block-error wc-block-components-error">
 			{ imageUrl && (

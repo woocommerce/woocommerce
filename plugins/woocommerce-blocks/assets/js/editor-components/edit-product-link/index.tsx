@@ -7,12 +7,17 @@ import { ADMIN_URL } from '@woocommerce/settings';
 import { InspectorControls } from '@wordpress/block-editor';
 import { useProductDataContext } from '@woocommerce/shared-context';
 
+interface EditProductLinkProps {
+	id?: number | undefined;
+	productId?: number | undefined;
+}
+
 /**
  * Component to render an edit product link in the sidebar.
  *
  * @param {Object} props Component props.
  */
-const EditProductLink = ( props ) => {
+const EditProductLink = ( props: EditProductLinkProps ): JSX.Element | null => {
 	const productDataContext = useProductDataContext();
 	const product = productDataContext.product || {};
 	const productId = product.id || props.productId || 0;

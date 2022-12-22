@@ -356,6 +356,16 @@
 <error line="4" column="36" severity="error" message="Could not find a declaration file for module &apos;wordpress-components&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/wordpress-components/build/index.js&apos; implicitly has an &apos;any&apos; type.
   If the &apos;@wordpress/components&apos; package actually exposes this module, consider sending a pull request to amend &apos;https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/wordpress__components&apos;" source="TS7016" />
 </file>
+<file name="node_modules/@types/wordpress__block-editor/index.d.ts">
+<error line="21" column="14" severity="error" message="Cannot redeclare block-scoped variable &apos;store&apos;." source="TS2451" />
+</file>
+<file name="assets/js/utils/global-style.js">
+<error line="5" column="10" severity="error" message="Module &apos;&quot;@wordpress/block-editor&quot;&apos; has no exported member &apos;__experimentalGetSpacingClassesAndStyles&apos;." source="TS2305" />
+</file>
+<file name="assets/js/utils/products.js">
+<error line="5" column="12" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
+<error line="20" column="12" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
+</file>
 <file name="assets/js/data/schema/selectors.js">
 <error line="19" column="12" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
 <error line="106" column="7" severity="error" message="Variable &apos;namespaceRoutes&apos; implicitly has type &apos;any[]&apos; in some locations where its type cannot be determined." source="TS7034" />
@@ -574,15 +584,6 @@
 <error line="4" column="12" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
 <error line="13" column="12" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
 </file>
-<file name="assets/js/base/components/block-error-boundary/index.tsx">
-<error line="58" column="6" severity="error" message="Type &apos;{ showErrorBlock: boolean; errorMessage: string | null; header: string | undefined; imageUrl: string | undefined; text: ReactNode; errorMessagePrefix: string | undefined; button: ReactNode; }&apos; is not assignable to type &apos;BlockErrorProps&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the types of the target&apos;s properties.
-  Types of property &apos;imageUrl&apos; are incompatible.
-    Type &apos;string | undefined&apos; is not assignable to type &apos;string&apos;.
-      Type &apos;undefined&apos; is not assignable to type &apos;string&apos;." source="TS2375" />
-<error line="58" column="6" severity="error" message="&apos;BlockError&apos; cannot be used as a JSX component.
-  Its return type &apos;ReactNode&apos; is not a valid JSX element.
-    Type &apos;undefined&apos; is not assignable to type &apos;Element | null&apos;." source="TS2786" />
-</file>
 <file name="assets/js/base/utils/render-frontend.tsx">
 <error line="60" column="4" severity="error" message="No overload matches this call.
   Overload 1 of 2, &apos;(props: BlockErrorBoundaryProps | Readonly&lt;BlockErrorBoundaryProps&gt;): BlockErrorBoundary&apos;, gave the following error.
@@ -635,9 +636,6 @@
 <file name="assets/js/data/cart/controls.js">
 <error line="18" column="31" severity="error" message="Parameter &apos;preserveCartData&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
 </file>
-<file name="assets/js/utils/notices.ts">
-<error line="12" column="52" severity="error" message="Property &apos;type&apos; does not exist on type &apos;Notice&apos;." source="TS2339" />
-</file>
 <file name="assets/js/data/checkout/thunks.ts">
 <error line="5" column="10" severity="error" message="Module &apos;&quot;@wordpress/notices&quot;&apos; has no exported member &apos;store&apos;." source="TS2305" />
 <error line="57" column="11" severity="error" message="Property &apos;createErrorNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
@@ -657,12 +655,24 @@
 <file name="assets/js/previews/cart.ts">
 <error line="75" column="4" severity="error" message="Property &apos;price_range&apos; is missing in type &apos;{ currency_code: &quot;USD&quot;; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; raw_prices: { ...; }; }&apos; but required in type &apos;CartItemPrices&apos;." source="TS2741" />
 <error line="141" column="4" severity="error" message="Property &apos;price_range&apos; is missing in type &apos;{ currency_code: &quot;USD&quot;; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; raw_prices: { ...; }; }&apos; but required in type &apos;CartItemPrices&apos;." source="TS2741" />
-<error line="180" column="4" severity="error" message="Property &apos;price_range&apos; is missing in type &apos;{ currency_code: &quot;USD&quot;; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; raw_prices: { ...; }; }&apos; but required in type &apos;ProductResponseItemPrices&apos;." source="TS2741" />
-<error line="215" column="4" severity="error" message="Property &apos;price_range&apos; is missing in type &apos;{ currency_code: &quot;USD&quot;; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; raw_prices: { ...; }; }&apos; but required in type &apos;ProductResponseItemPrices&apos;." source="TS2741" />
-<error line="252" column="4" severity="error" message="Property &apos;price_range&apos; is missing in type &apos;{ currency_code: &quot;USD&quot;; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; raw_prices: { ...; }; }&apos; but required in type &apos;ProductResponseItemPrices&apos;." source="TS2741" />
-<error line="290" column="4" severity="error" message="Property &apos;price_range&apos; is missing in type &apos;{ currency_code: &quot;USD&quot;; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; raw_prices: { ...; }; }&apos; but required in type &apos;ProductResponseItemPrices&apos;." source="TS2741" />
-<error line="327" column="4" severity="error" message="Property &apos;price_range&apos; is missing in type &apos;{ currency_code: &quot;USD&quot;; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; raw_prices: { ...; }; }&apos; but required in type &apos;ProductResponseItemPrices&apos;." source="TS2741" />
-<error line="365" column="4" severity="error" message="Property &apos;price_range&apos; is missing in type &apos;{ currency_code: &quot;USD&quot;; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; raw_prices: { ...; }; }&apos; but required in type &apos;ProductResponseItemPrices&apos;." source="TS2741" />
+<error line="191" column="5" severity="error" message="Type &apos;{ currency_code: &quot;USD&quot;; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; raw_prices: { ...; }; }&apos; is not assignable to type &apos;ProductResponseItemPrices&apos;.
+  Object literal may only specify known properties, and &apos;raw_prices&apos; does not exist in type &apos;ProductResponseItemPrices&apos;." source="TS2322" />
+<error line="209" column="4" severity="error" message="Type &apos;number&apos; is not assignable to type &apos;string&apos;." source="TS2322" />
+<error line="226" column="5" severity="error" message="Type &apos;{ currency_code: &quot;USD&quot;; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; raw_prices: { ...; }; }&apos; is not assignable to type &apos;ProductResponseItemPrices&apos;.
+  Object literal may only specify known properties, and &apos;raw_prices&apos; does not exist in type &apos;ProductResponseItemPrices&apos;." source="TS2322" />
+<error line="245" column="4" severity="error" message="Type &apos;number&apos; is not assignable to type &apos;string&apos;." source="TS2322" />
+<error line="263" column="5" severity="error" message="Type &apos;{ currency_code: &quot;USD&quot;; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; raw_prices: { ...; }; }&apos; is not assignable to type &apos;ProductResponseItemPrices&apos;.
+  Object literal may only specify known properties, and &apos;raw_prices&apos; does not exist in type &apos;ProductResponseItemPrices&apos;." source="TS2322" />
+<error line="283" column="4" severity="error" message="Type &apos;number&apos; is not assignable to type &apos;string&apos;." source="TS2322" />
+<error line="301" column="5" severity="error" message="Type &apos;{ currency_code: &quot;USD&quot;; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; raw_prices: { ...; }; }&apos; is not assignable to type &apos;ProductResponseItemPrices&apos;.
+  Object literal may only specify known properties, and &apos;raw_prices&apos; does not exist in type &apos;ProductResponseItemPrices&apos;." source="TS2322" />
+<error line="320" column="4" severity="error" message="Type &apos;number&apos; is not assignable to type &apos;string&apos;." source="TS2322" />
+<error line="338" column="5" severity="error" message="Type &apos;{ currency_code: &quot;USD&quot;; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; raw_prices: { ...; }; }&apos; is not assignable to type &apos;ProductResponseItemPrices&apos;.
+  Object literal may only specify known properties, and &apos;raw_prices&apos; does not exist in type &apos;ProductResponseItemPrices&apos;." source="TS2322" />
+<error line="358" column="4" severity="error" message="Type &apos;number&apos; is not assignable to type &apos;string&apos;." source="TS2322" />
+<error line="376" column="5" severity="error" message="Type &apos;{ currency_code: &quot;USD&quot;; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; raw_prices: { ...; }; }&apos; is not assignable to type &apos;ProductResponseItemPrices&apos;.
+  Object literal may only specify known properties, and &apos;raw_prices&apos; does not exist in type &apos;ProductResponseItemPrices&apos;." source="TS2322" />
+<error line="394" column="4" severity="error" message="Type &apos;number&apos; is not assignable to type &apos;string&apos;." source="TS2322" />
 <error line="411" column="5" severity="error" message="Type &apos;{ currency_code: &quot;USD&quot;; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; total: string; total_tax: string; tax_lines: { ...; }[]; }&apos; is not assignable to type &apos;CartResponseFeeItemTotals&apos;.
   Object literal may only specify known properties, and &apos;tax_lines&apos; does not exist in type &apos;CartResponseFeeItemTotals&apos;." source="TS2322" />
 </file>
@@ -721,6 +731,10 @@
       Type &apos;Object&apos; is not assignable to type &apos;AnyAction | Generator&lt;any, any, unknown&gt;&apos;.
         The &apos;Object&apos; type is assignable to very few other types. Did you mean to use the &apos;any&apos; type instead?" source="TS2322" />
 </file>
+<file name="packages/checkout/components/store-notices-container/index.tsx">
+<error line="5" column="24" severity="error" message="Could not find a declaration file for module &apos;wordpress-components&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/wordpress-components/build/index.js&apos; implicitly has an &apos;any&apos; type.
+  If the &apos;@wordpress/components&apos; package actually exposes this module, consider sending a pull request to amend &apos;https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/wordpress__components&apos;" source="TS7016" />
+</file>
 <file name="packages/checkout/filter-registry/index.ts">
 <error line="36" column="37" severity="error" message="Cannot find name &apos;T&apos;." source="TS2304" />
 </file>
@@ -772,16 +786,6 @@
 <file name="assets/js/base/hooks/use-position-relative-to-viewport.js">
 <error line="26" column="13" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
 <error line="75" column="24" severity="error" message="Argument of type &apos;null&apos; is not assignable to parameter of type &apos;Element&apos;." source="TS2345" />
-</file>
-<file name="node_modules/@types/wordpress__block-editor/index.d.ts">
-<error line="21" column="14" severity="error" message="Cannot redeclare block-scoped variable &apos;store&apos;." source="TS2451" />
-</file>
-<file name="assets/js/utils/global-style.js">
-<error line="5" column="10" severity="error" message="Module &apos;&quot;@wordpress/block-editor&quot;&apos; has no exported member &apos;__experimentalGetSpacingClassesAndStyles&apos;." source="TS2305" />
-</file>
-<file name="assets/js/utils/products.js">
-<error line="5" column="12" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
-<error line="20" column="12" severity="error" message="Generic type &apos;Array&lt;T&gt;&apos; requires 1 type argument(s)." source="TS2314" />
 </file>
 <file name="assets/js/base/hooks/use-spacing-props.ts">
 <error line="5" column="10" severity="error" message="Module &apos;&quot;@wordpress/block-editor&quot;&apos; has no exported member &apos;__experimentalGetSpacingClassesAndStyles&apos;." source="TS2305" />
@@ -1033,26 +1037,26 @@
 <error line="128" column="35" severity="error" message="Parameter &apos;response&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
 </file>
 <file name="assets/js/base/context/providers/cart-checkout/checkout-processor.js">
-<error line="176" column="7" severity="error" message="Variable &apos;unsubscribeProcessing&apos; implicitly has type &apos;any&apos; in some locations where its type cannot be determined." source="TS7034" />
-<error line="185" column="5" severity="error" message="Variable &apos;unsubscribeProcessing&apos; implicitly has an &apos;any&apos; type." source="TS7005" />
-<error line="231" column="9" severity="error" message="Property &apos;shipping_address&apos; does not exist on type &apos;{ extensions: { [x: string]: Record&lt;string, unknown&gt;; }; payment_method: string | undefined; payment_data: { key: string; value: unknown; }[]; billing_address: BillingAddress; customer_note: string; create_account: boolean; } | { ...; }&apos;.
+<error line="172" column="7" severity="error" message="Variable &apos;unsubscribeProcessing&apos; implicitly has type &apos;any&apos; in some locations where its type cannot be determined." source="TS7034" />
+<error line="181" column="5" severity="error" message="Variable &apos;unsubscribeProcessing&apos; implicitly has an &apos;any&apos; type." source="TS7005" />
+<error line="227" column="9" severity="error" message="Property &apos;shipping_address&apos; does not exist on type &apos;{ extensions: { [x: string]: Record&lt;string, unknown&gt;; }; payment_method: string | undefined; payment_data: { key: string; value: unknown; }[]; billing_address: BillingAddress; customer_note: string; create_account: boolean; } | { ...; }&apos;.
   Property &apos;shipping_address&apos; does not exist on type &apos;{ extensions: { [x: string]: Record&lt;string, unknown&gt;; }; payment_method: string | undefined; payment_data: { key: string; value: unknown; }[]; billing_address: BillingAddress; customer_note: string; create_account: boolean; }&apos;." source="TS2339" />
-<error line="260" column="35" severity="error" message="Parameter &apos;response&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
-<error line="270" column="9" severity="error" message="Argument of type &apos;{ id: string; context: string; __unstableHTML: boolean; }&apos; is not assignable to parameter of type &apos;Partial&lt;Options&gt;&apos;.
+<error line="256" column="35" severity="error" message="Parameter &apos;response&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
+<error line="266" column="9" severity="error" message="Argument of type &apos;{ id: string; context: string; __unstableHTML: boolean; }&apos; is not assignable to parameter of type &apos;Partial&lt;Options&gt;&apos;.
   Object literal may only specify known properties, and &apos;__unstableHTML&apos; does not exist in type &apos;Partial&lt;Options&gt;&apos;." source="TS2345" />
-<error line="274" column="10" severity="error" message="Parameter &apos;additionalError&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
-<error line="278" column="10" severity="error" message="Argument of type &apos;{ id: any; context: string; __unstableHTML: boolean; }&apos; is not assignable to parameter of type &apos;Partial&lt;Options&gt;&apos;.
+<error line="270" column="10" severity="error" message="Parameter &apos;additionalError&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
+<error line="274" column="10" severity="error" message="Argument of type &apos;{ id: any; context: string; __unstableHTML: boolean; }&apos; is not assignable to parameter of type &apos;Partial&lt;Options&gt;&apos;.
   Object literal may only specify known properties, and &apos;__unstableHTML&apos; does not exist in type &apos;Partial&lt;Options&gt;&apos;." source="TS2345" />
-<error line="301" column="8" severity="error" message="Argument of type &apos;{ id: string; context: string; __unstableHTML: boolean; }&apos; is not assignable to parameter of type &apos;Partial&lt;Options&gt;&apos;.
+<error line="297" column="8" severity="error" message="Argument of type &apos;{ id: string; context: string; __unstableHTML: boolean; }&apos; is not assignable to parameter of type &apos;Partial&lt;Options&gt;&apos;.
   Object literal may only specify known properties, and &apos;__unstableHTML&apos; does not exist in type &apos;Partial&lt;Options&gt;&apos;." source="TS2345" />
 </file>
 <file name="assets/js/base/context/providers/cart-checkout/checkout-provider.js">
 <error line="4" column="28" severity="error" message="Could not find a declaration file for module &apos;@wordpress/plugins&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@wordpress/plugins/build/index.js&apos; implicitly has an &apos;any&apos; type.
   Try `npm i --save-dev @types/wordpress__plugins` if it exists or add a new declaration (.d.ts) file containing `declare module &apos;@wordpress/plugins&apos;;`" source="TS7016" />
-<error line="29" column="27" severity="error" message="Type &apos;string | undefined&apos; is not assignable to type &apos;string&apos;.
+<error line="30" column="27" severity="error" message="Type &apos;string | undefined&apos; is not assignable to type &apos;string&apos;.
   Type &apos;undefined&apos; is not assignable to type &apos;string&apos;." source="TS2322" />
-<error line="30" column="4" severity="error" message="Type &apos;Element&apos; is missing the following properties from type &apos;ReactChildren&apos;: map, forEach, count, only, toArray" source="TS2739" />
-<error line="36" column="7" severity="error" message="No overload matches this call.
+<error line="31" column="4" severity="error" message="Type &apos;Element&apos; is missing the following properties from type &apos;ReactChildren&apos;: map, forEach, count, only, toArray" source="TS2739" />
+<error line="38" column="8" severity="error" message="No overload matches this call.
   Overload 1 of 2, &apos;(props: BlockErrorBoundaryProps | Readonly&lt;BlockErrorBoundaryProps&gt;): BlockErrorBoundary&apos;, gave the following error.
     Type &apos;(() =&gt; null) | null&apos; is not assignable to type &apos;(props: RenderErrorProps) =&gt; ReactNode&apos;.
       Type &apos;null&apos; is not assignable to type &apos;(props: RenderErrorProps) =&gt; ReactNode&apos;.
@@ -1064,18 +1068,10 @@
 <error line="20" column="4" severity="error" message="Type &apos;Object | undefined&apos; is not assignable to type &apos;Object&apos;.
   Type &apos;undefined&apos; is not assignable to type &apos;Object&apos;." source="TS2322" />
 </file>
-<file name="assets/js/base/context/providers/store-notices/components/store-notices-container.js">
-<error line="6" column="24" severity="error" message="Could not find a declaration file for module &apos;wordpress-components&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/wordpress-components/build/index.js&apos; implicitly has an &apos;any&apos; type.
-  If the &apos;@wordpress/components&apos; package actually exposes this module, consider sending a pull request to amend &apos;https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/wordpress__components&apos;" source="TS7016" />
-<error line="30" column="2" severity="error" message="Binding element &apos;className&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="32" column="2" severity="error" message="Binding element &apos;additionalNotices&apos; implicitly has an &apos;any[]&apos; type." source="TS7031" />
-<error line="46" column="33" severity="error" message="Property &apos;type&apos; does not exist on type &apos;Notice&apos;." source="TS2339" />
-</file>
 <file name="assets/js/base/context/providers/store-snackbar-notices/components/snackbar-notices-container.js">
 <error line="5" column="30" severity="error" message="Could not find a declaration file for module &apos;wordpress-components&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/wordpress-components/build/index.js&apos; implicitly has an &apos;any&apos; type.
   If the &apos;@wordpress/components&apos; package actually exposes this module, consider sending a pull request to amend &apos;https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/wordpress__components&apos;" source="TS7016" />
 <error line="18" column="2" severity="error" message="Binding element &apos;className&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="36" column="24" severity="error" message="Property &apos;type&apos; does not exist on type &apos;Notice&apos;." source="TS2339" />
 <error line="42" column="6" severity="error" message="Element implicitly has an &apos;any&apos; type because expression of type &apos;string&apos; can&apos;t be used to index type &apos;{}&apos;.
   No index signature with a parameter of type &apos;string&apos; was found on type &apos;{}&apos;." source="TS7053" />
 <error line="53" column="17" severity="error" message="Element implicitly has an &apos;any&apos; type because expression of type &apos;string&apos; can&apos;t be used to index type &apos;{}&apos;.
@@ -1085,7 +1081,10 @@
 <error line="10" column="56" severity="error" message="Namespace &apos;&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/assets/js/types/type-defs/contexts&quot;&apos; has no exported member &apos;ContainerWidthContext&apos;." source="TS2694" />
 </file>
 <file name="assets/js/base/context/providers/index.js">
-<error line="6" column="1" severity="error" message="Module &apos;./cart-checkout&apos; has already exported a member named &apos;React&apos;. Consider explicitly re-exporting to resolve the ambiguity." source="TS2308" />
+<error line="5" column="1" severity="error" message="Module &apos;./cart-checkout&apos; has already exported a member named &apos;React&apos;. Consider explicitly re-exporting to resolve the ambiguity." source="TS2308" />
+</file>
+<file name="assets/js/base/context/hooks/use-checkout-extension-data.ts">
+<error line="12" column="15" severity="error" message="Module &apos;&quot;../../../data/checkout/types&quot;&apos; declares &apos;CheckoutState&apos; locally, but it is not exported." source="TS2459" />
 </file>
 <file name="assets/js/shared/hocs/with-product-data-context.js">
 <error line="16" column="10" severity="error" message="Property &apos;productId&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
@@ -1103,28 +1102,7 @@
 </file>
 <file name="assets/js/atomic/blocks/product-elements/price/block.js">
 <error line="52" column="18" severity="error" message="Type &apos;string | undefined&apos; is not assignable to type &apos;&quot;center&quot; | &quot;left&quot; | &quot;right&quot; | undefined&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the type of the target." source="TS2412" />
-<error line="57" column="49" severity="error" message="Argument of type &apos;{ currency_code: string; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; price_range: null; }&apos; is not assignable to parameter of type &apos;CurrencyResponse | Record&lt;string, never&gt; | CartShippingPackageShippingRate | undefined&apos;.
-  Type &apos;{ currency_code: string; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; price_range: null; }&apos; is not assignable to type &apos;Record&lt;string, never&gt;&apos;.
-    Property &apos;currency_code&apos; is incompatible with index signature.
-      Type &apos;string&apos; is not assignable to type &apos;never&apos;." source="TS2345" />
 <error line="66" column="4" severity="error" message="Type &apos;string | undefined&apos; is not assignable to type &apos;&quot;center&quot; | &quot;left&quot; | &quot;right&quot; | undefined&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the type of the target." source="TS2412" />
-<error line="74" column="36" severity="error" message="Property &apos;min_amount&apos; does not exist on type &apos;never&apos;." source="TS2339" />
-<error line="75" column="36" severity="error" message="Property &apos;max_amount&apos; does not exist on type &apos;never&apos;." source="TS2339" />
-</file>
-<file name="assets/js/atomic/blocks/product-elements/image/block.js">
-<error line="138" column="19" severity="error" message="Binding element &apos;image&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="138" column="26" severity="error" message="Binding element &apos;loaded&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="138" column="34" severity="error" message="Binding element &apos;showFullSize&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="138" column="48" severity="error" message="Binding element &apos;fallbackAlt&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-</file>
-<file name="assets/js/atomic/blocks/product-elements/rating/block.tsx">
-<error line="55" column="35" severity="error" message="Argument of type &apos;{ id: number; name: string; parent: number; type: string; variation: string; permalink: string; sku: string; short_description: string; description: string; on_sale: boolean; prices: { currency_code: string; ... 9 more ...; price_range: null; }; ... 14 more ...; add_to_cart: { ...; }; }&apos; is not assignable to parameter of type &apos;Omit&lt;ProductResponseItem, &quot;average_rating&quot;&gt; &amp; { average_rating: string; }&apos;.
-  Type &apos;{ id: number; name: string; parent: number; type: string; variation: string; permalink: string; sku: string; short_description: string; description: string; on_sale: boolean; prices: { currency_code: string; ... 9 more ...; price_range: null; }; ... 14 more ...; add_to_cart: { ...; }; }&apos; is not assignable to type &apos;Omit&lt;ProductResponseItem, &quot;average_rating&quot;&gt;&apos;.
-    Types of property &apos;prices&apos; are incompatible.
-      Property &apos;raw_prices&apos; is missing in type &apos;{ currency_code: string; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; price_range: null; }&apos; but required in type &apos;ProductResponseItemPrices&apos;." source="TS2345" />
-<error line="74" column="34" severity="error" message="Argument of type &apos;{ id: number; name: string; parent: number; type: string; variation: string; permalink: string; sku: string; short_description: string; description: string; on_sale: boolean; prices: { currency_code: string; ... 9 more ...; price_range: null; }; ... 14 more ...; add_to_cart: { ...; }; }&apos; is not assignable to parameter of type &apos;ProductResponseItem&apos;.
-  Types of property &apos;prices&apos; are incompatible.
-    Property &apos;raw_prices&apos; is missing in type &apos;{ currency_code: string; currency_symbol: string; currency_minor_unit: number; currency_decimal_separator: string; currency_thousand_separator: string; currency_prefix: string; currency_suffix: string; price: string; regular_price: string; sale_price: string; price_range: null; }&apos; but required in type &apos;ProductResponseItemPrices&apos;." source="TS2345" />
 </file>
 <file name="assets/js/atomic/blocks/product-elements/button/block.js">
 <error line="100" column="3" severity="error" message="Property &apos;id&apos; does not exist on type &apos;Object | undefined&apos;." source="TS2339" />
@@ -1347,33 +1325,6 @@
 <error line="20" column="3" severity="error" message="Type &apos;{ textAlign: { type: string; }; productId: { type: string; default: number; }; isDescendentOfQueryLoop: { type: string; default: boolean; }; }&apos; is not assignable to type &apos;{ productId: { type: string; default: number; }; isDescendentOfQueryLoop: { type: string; default: boolean; }; }&apos;.
   Object literal may only specify known properties, and &apos;textAlign&apos; does not exist in type &apos;{ productId: { type: string; default: number; }; isDescendentOfQueryLoop: { type: string; default: boolean; }; }&apos;." source="TS2322" />
 </file>
-<file name="assets/js/atomic/blocks/product-elements/image/edit.js">
-<error line="14" column="2" severity="error" message="Module &apos;&quot;@wordpress/components&quot;&apos; has no exported member &apos;__experimentalToggleGroupControl&apos;." source="TS2305" />
-<error line="16" column="2" severity="error" message="Module &apos;&quot;@wordpress/components&quot;&apos; has no exported member &apos;__experimentalToggleGroupControlOption&apos;." source="TS2305" />
-<error line="24" column="18" severity="error" message="Binding element &apos;attributes&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="24" column="30" severity="error" message="Binding element &apos;setAttributes&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="24" column="45" severity="error" message="Binding element &apos;context&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="94" column="21" severity="error" message="Parameter &apos;value&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
-<error line="146" column="21" severity="error" message="Parameter &apos;value&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
-</file>
-<file name="assets/js/atomic/blocks/product-elements/image/index.js">
-<error line="46" column="1" severity="error" message="No overload matches this call.
-  Overload 1 of 2, &apos;(metadata: BlockConfiguration&lt;{}&gt;, settings?: Partial&lt;BlockConfiguration&lt;{}&gt;&gt; | undefined): Block&lt;{}&gt; | undefined&apos;, gave the following error.
-    Argument of type &apos;string&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{}&gt;&apos;.
-      Type &apos;string&apos; is not assignable to type &apos;Pick&lt;Block&lt;{}&gt;, &quot;title&quot; | &quot;category&quot; | &quot;attributes&quot;&gt;&apos;.
-  Overload 2 of 2, &apos;(name: string, settings: BlockConfiguration&lt;{}&gt;): Block&lt;{}&gt; | undefined&apos;, gave the following error.
-    Argument of type &apos;{ apiVersion: number; name: string; title: string; icon: { src: JSX.Element; }; keywords: string[]; description: string; usesContext: string[]; ancestor: string[]; textdomain: string; attributes: { ...; }; ... 16 more ...; merge?: ((attributes: {}, attributesToMerge: {}) =&gt; Partial&lt;...&gt;) | undefined; }&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{}&gt;&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the types of the target&apos;s properties.
-      Type &apos;{ apiVersion: number; name: string; title: string; icon: { src: JSX.Element; }; keywords: string[]; description: string; usesContext: string[]; ancestor: string[]; textdomain: string; attributes: { ...; }; ... 16 more ...; merge?: ((attributes: {}, attributesToMerge: {}) =&gt; Partial&lt;...&gt;) | undefined; }&apos; is not assignable to type &apos;Partial&lt;Omit&lt;Block&lt;{}&gt;, &quot;icon&quot;&gt;&gt;&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the types of the target&apos;s properties.
-        Types of property &apos;edit&apos; are incompatible.
-          Type &apos;({ attributes, setAttributes, context }: { attributes: any; setAttributes: any; context: any; }) =&gt; Element&apos; is not assignable to type &apos;ComponentType&lt;BlockEditProps&lt;{}&gt;&gt; | undefined&apos;.
-            Type &apos;({ attributes, setAttributes, context }: { attributes: any; setAttributes: any; context: any; }) =&gt; Element&apos; is not assignable to type &apos;FunctionComponent&lt;BlockEditProps&lt;{}&gt;&gt;&apos;.
-              Types of parameters &apos;__0&apos; and &apos;props&apos; are incompatible.
-                Property &apos;context&apos; is missing in type &apos;BlockEditProps&lt;{}&gt; &amp; { children?: ReactNode; }&apos; but required in type &apos;{ attributes: any; setAttributes: any; context: any; }&apos;." source="TS2769" />
-</file>
-<file name="assets/js/atomic/blocks/product-elements/rating/index.ts">
-<error line="25" column="2" severity="error" message="Type &apos;{ apiVersion: number; title: string; description: string; usesContext: string[]; ancestor: string[]; icon: { src: JSX.Element; }; attributes: { productId: { type: string; default: number; }; isDescendentOfQueryLoop: { ...; }; }; supports: { ...; }; edit: (props: any) =&gt; JSX.Element; }&apos; is not assignable to type &apos;BlockConfiguration&lt;{}&gt;&apos;.
-  Object literal may only specify known properties, and &apos;ancestor&apos; does not exist in type &apos;BlockConfiguration&lt;{}&gt;&apos;." source="TS2322" />
-</file>
 <file name="assets/js/atomic/blocks/product-elements/button/edit.js">
 <error line="13" column="18" severity="error" message="Binding element &apos;attributes&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
 <error line="13" column="30" severity="error" message="Binding element &apos;setAttributes&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
@@ -1393,13 +1344,6 @@
               Types of parameters &apos;__0&apos; and &apos;props&apos; are incompatible.
                 Property &apos;context&apos; is missing in type &apos;BlockEditProps&lt;{}&gt; &amp; { children?: ReactNode; }&apos; but required in type &apos;{ attributes: any; setAttributes: any; context: any; }&apos;." source="TS2769" />
 </file>
-<file name="assets/js/atomic/blocks/product-elements/sale-badge/index.ts">
-<error line="30" column="2" severity="error" message="Type &apos;{ title: string; description: string; icon: { src: JSX.Element; }; apiVersion: number; supports: { __experimentalSelector?: string; spacing?: { padding: boolean; __experimentalSkipSerialization: boolean; }; color?: { ...; }; typography?: { ...; }; __experimentalBorder?: { ...; }; html: boolean; }; ... 21 more ...; m...&apos; is not assignable to type &apos;BlockConfiguration&lt;{}&gt;&apos; with &apos;exactOptionalPropertyTypes: true&apos;. Consider adding &apos;undefined&apos; to the types of the target&apos;s properties.
-  Object literal may only specify known properties, and &apos;ancestor&apos; does not exist in type &apos;BlockConfiguration&lt;{}&gt;&apos;." source="TS2375" />
-</file>
-<file name="assets/js/editor-components/edit-product-link/index.js">
-<error line="18" column="40" severity="error" message="Property &apos;productId&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
-</file>
 <file name="assets/js/atomic/blocks/product-elements/sku/index.ts">
 <error line="25" column="2" severity="error" message="Type &apos;{ apiVersion: number; title: string; description: string; icon: { src: JSX.Element; }; usesContext: string[]; ancestor: string[]; attributes: Record&lt;string, Record&lt;string, unknown&gt;&gt;; edit: (props: any) =&gt; JSX.Element; }&apos; is not assignable to type &apos;BlockConfiguration&lt;{}&gt;&apos;.
   Object literal may only specify known properties, and &apos;ancestor&apos; does not exist in type &apos;BlockConfiguration&lt;{}&gt;&apos;." source="TS2322" />
@@ -1417,25 +1361,19 @@
           Type &apos;Readonly&lt;{}&gt;&apos; is not assignable to type &apos;Record&lt;string, unknown&gt; &amp; { className: string; }&apos;.
             Property &apos;className&apos; is missing in type &apos;Readonly&lt;{}&gt;&apos; but required in type &apos;{ className: string; }&apos;." source="TS2322" />
 </file>
-<file name="assets/js/atomic/blocks/product-elements/add-to-cart/edit.js">
-<error line="25" column="18" severity="error" message="Binding element &apos;attributes&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="25" column="30" severity="error" message="Binding element &apos;setAttributes&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
-<error line="36" column="21" severity="error" message="Type &apos;{ productId: number; }&apos; is not assignable to type &apos;IntrinsicAttributes &amp; Object&apos;.
-  Property &apos;productId&apos; does not exist on type &apos;IntrinsicAttributes &amp; Object&apos;." source="TS2322" />
-</file>
 <file name="assets/js/atomic/blocks/product-elements/add-to-cart/product-types/variable/variation-attributes/test/index.js">
 <error line="195" column="38" severity="error" message="Argument of type &apos;null&apos; is not assignable to parameter of type &apos;Object&apos;." source="TS2345" />
 <error line="252" column="56" severity="error" message="Argument of type &apos;null&apos; is not assignable to parameter of type &apos;Object&apos;." source="TS2345" />
 <error line="475" column="34" severity="error" message="Argument of type &apos;null&apos; is not assignable to parameter of type &apos;Object | undefined&apos;." source="TS2345" />
 </file>
 <file name="assets/js/atomic/blocks/product-elements/title/test/block.test.js">
-<error line="22" column="6" severity="error" message="Property &apos;isLoading&apos; is missing in type &apos;{ children: Element; product: { id: number; name: string; permalink: string; }; }&apos; but required in type &apos;{ product: any; children: Object; isLoading: boolean; }&apos;." source="TS2741" />
+<error line="22" column="33" severity="error" message="Type &apos;{ id: number; name: string; permalink: string; }&apos; is missing the following properties from type &apos;ProductResponseItem&apos;: parent, type, variation, sku, and 19 more." source="TS2740" />
 <error line="23" column="7" severity="error" message="Type &apos;{ showProductLink: false; }&apos; is missing the following properties from type &apos;Attributes&apos;: headingLevel, align" source="TS2739" />
-<error line="37" column="6" severity="error" message="Property &apos;isLoading&apos; is missing in type &apos;{ children: Element; product: { id: number; name: string; permalink: string; }; }&apos; but required in type &apos;{ product: any; children: Object; isLoading: boolean; }&apos;." source="TS2741" />
+<error line="37" column="33" severity="error" message="Type &apos;{ id: number; name: string; permalink: string; }&apos; is not assignable to type &apos;ProductResponseItem&apos;." source="TS2322" />
 <error line="38" column="7" severity="error" message="Type &apos;{ showProductLink: true; }&apos; is missing the following properties from type &apos;Attributes&apos;: headingLevel, align" source="TS2739" />
 <error line="45" column="12" severity="error" message="Object is possibly &apos;null&apos;." source="TS2531" />
 <error line="46" column="12" severity="error" message="Object is possibly &apos;null&apos;." source="TS2531" />
-<error line="51" column="6" severity="error" message="Property &apos;isLoading&apos; is missing in type &apos;{ children: Element; product: { id: number; name: string; permalink: string; }; }&apos; but required in type &apos;{ product: any; children: Object; isLoading: boolean; }&apos;." source="TS2741" />
+<error line="51" column="33" severity="error" message="Type &apos;{ id: number; name: string; permalink: string; }&apos; is not assignable to type &apos;ProductResponseItem&apos;." source="TS2322" />
 <error line="52" column="7" severity="error" message="Type &apos;{ showProductLink: true; linkTarget: string; }&apos; is missing the following properties from type &apos;Attributes&apos;: headingLevel, align" source="TS2739" />
 <error line="59" column="12" severity="error" message="Object is possibly &apos;null&apos;." source="TS2531" />
 <error line="60" column="12" severity="error" message="Object is possibly &apos;null&apos;." source="TS2531" />
@@ -2199,26 +2137,22 @@
       Type &apos;{ icon: { src: Element; }; edit: ({ attributes, }: { attributes: { className: string; }; }) =&gt; Element; save: () =&gt; Element; }&apos; is missing the following properties from type &apos;Pick&lt;Block&lt;{ className: string; }&gt;, &quot;title&quot; | &quot;category&quot; | &quot;attributes&quot;&gt;&apos;: title, category, attributes" source="TS2769" />
 </file>
 <file name="assets/js/blocks/cart/inner-blocks/cart-cross-sells-block/index.tsx">
-<error line="13" column="20" severity="error" message="No overload matches this call.
+<error line="12" column="1" severity="error" message="No overload matches this call.
   Overload 1 of 2, &apos;(metadata: BlockConfiguration&lt;{}&gt;, settings?: Partial&lt;BlockConfiguration&lt;{}&gt;&gt; | undefined): Block&lt;{}&gt; | undefined&apos;, gave the following error.
-    Argument of type &apos;{ name: string; version: string; title: string; description: string; category: string; supports: { align: boolean; html: boolean; multiple: boolean; reusable: boolean; inserter: boolean; }; parent: string[]; textdomain: string; apiVersion: number; }&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{}&gt;&apos;.
-      Property &apos;attributes&apos; is missing in type &apos;{ name: string; version: string; title: string; description: string; category: string; supports: { align: boolean; html: boolean; multiple: boolean; reusable: boolean; inserter: boolean; }; parent: string[]; textdomain: string; apiVersion: number; }&apos; but required in type &apos;Pick&lt;Block&lt;{}&gt;, &quot;title&quot; | &quot;category&quot; | &quot;attributes&quot;&gt;&apos;.
+    Argument of type &apos;string&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{}&gt;&apos;.
+      Type &apos;string&apos; is not assignable to type &apos;Pick&lt;Block&lt;{}&gt;, &quot;title&quot; | &quot;category&quot; | &quot;attributes&quot;&gt;&apos;.
   Overload 2 of 2, &apos;(name: string, settings: BlockConfiguration&lt;{}&gt;): Block&lt;{}&gt; | undefined&apos;, gave the following error.
-    Argument of type &apos;{ name: string; version: string; title: string; description: string; category: string; supports: { align: boolean; html: boolean; multiple: boolean; reusable: boolean; inserter: boolean; }; parent: string[]; textdomain: string; apiVersion: number; }&apos; is not assignable to parameter of type &apos;string&apos;." source="TS2769" />
-</file>
-<file name="assets/js/blocks/cart/cart-cross-sells-product-list/cart-cross-sells-product.tsx">
-<error line="51" column="8" severity="error" message="Type &apos;{}&apos; is missing the following properties from type &apos;BlockAttributes&apos;: productId, align, isDescendentOfQueryLoop" source="TS2739" />
+    Argument of type &apos;{ icon: { src: JSX.Element; }; edit: () =&gt; JSX.Element; save: () =&gt; JSX.Element; }&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{}&gt;&apos;.
+      Type &apos;{ icon: { src: Element; }; edit: () =&gt; Element; save: () =&gt; Element; }&apos; is missing the following properties from type &apos;Pick&lt;Block&lt;{}&gt;, &quot;title&quot; | &quot;category&quot; | &quot;attributes&quot;&gt;&apos;: title, category, attributes" source="TS2769" />
 </file>
 <file name="assets/js/blocks/cart/inner-blocks/cart-cross-sells-products/index.tsx">
-<error line="13" column="20" severity="error" message="No overload matches this call.
+<error line="12" column="1" severity="error" message="No overload matches this call.
   Overload 1 of 2, &apos;(metadata: BlockConfiguration&lt;{ className?: string; columns: number; }&gt;, settings?: Partial&lt;BlockConfiguration&lt;{ className?: string; columns: number; }&gt;&gt; | undefined): Block&lt;...&gt; | undefined&apos;, gave the following error.
-    Argument of type &apos;{ name: string; version: string; title: string; description: string; category: string; supports: { align: boolean; html: boolean; multiple: boolean; reusable: boolean; inserter: boolean; lock: boolean; }; attributes: { ...; }; parent: string[]; textdomain: string; apiVersion: number; }&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{ className?: string; columns: number; }&gt;&apos;.
-      Type &apos;{ name: string; version: string; title: string; description: string; category: string; supports: { align: boolean; html: boolean; multiple: boolean; reusable: boolean; inserter: boolean; lock: boolean; }; attributes: { ...; }; parent: string[]; textdomain: string; apiVersion: number; }&apos; is not assignable to type &apos;Partial&lt;Omit&lt;Block&lt;{ className?: string; columns: number; }&gt;, &quot;icon&quot;&gt;&gt;&apos;.
-        The types of &apos;attributes.columns&apos; are incompatible between these types.
-          Type &apos;{ type: string; default: number; }&apos; is not assignable to type &apos;BlockAttribute&lt;number&gt;&apos;.
-            Type &apos;{ type: string; default: number; }&apos; is missing the following properties from type &apos;Query&lt;number&gt;&apos;: source, selector, query
+    Argument of type &apos;string&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{ className?: string; columns: number; }&gt;&apos;.
+      Type &apos;string&apos; is not assignable to type &apos;Pick&lt;Block&lt;{ className?: string; columns: number; }&gt;, &quot;title&quot; | &quot;category&quot; | &quot;attributes&quot;&gt;&apos;.
   Overload 2 of 2, &apos;(name: string, settings: BlockConfiguration&lt;{ className?: string; columns: number; }&gt;): Block&lt;{ className?: string; columns: number; }&gt; | undefined&apos;, gave the following error.
-    Argument of type &apos;{ name: string; version: string; title: string; description: string; category: string; supports: { align: boolean; html: boolean; multiple: boolean; reusable: boolean; inserter: boolean; lock: boolean; }; attributes: { ...; }; parent: string[]; textdomain: string; apiVersion: number; }&apos; is not assignable to parameter of type &apos;string&apos;." source="TS2769" />
+    Argument of type &apos;{ icon: { src: JSX.Element; }; edit: ({ attributes, setAttributes }: Props) =&gt; JSX.Element; save: () =&gt; JSX.Element; }&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{ className?: string; columns: number; }&gt;&apos;.
+      Type &apos;{ icon: { src: Element; }; edit: ({ attributes, setAttributes }: Props) =&gt; Element; save: () =&gt; Element; }&apos; is missing the following properties from type &apos;Pick&lt;Block&lt;{ className?: string; columns: number; }&gt;, &quot;title&quot; | &quot;category&quot; | &quot;attributes&quot;&gt;&apos;: title, category, attributes" source="TS2769" />
 </file>
 <file name="assets/js/blocks/cart/inner-blocks/cart-totals-block/index.tsx">
 <error line="12" column="1" severity="error" message="No overload matches this call.
@@ -2236,6 +2170,8 @@
 <file name="assets/js/blocks/cart-checkout-shared/payment-methods/payment-method-error-boundary.js">
 <error line="9" column="10" severity="error" message="Module &apos;&quot;@woocommerce/base-context/hooks&quot;&apos; has no exported member &apos;noticeContexts&apos;." source="TS2305" />
 <error line="14" column="35" severity="error" message="Parameter &apos;error&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
+<error line="50" column="6" severity="error" message="Type &apos;{ id: string; content: string; isDismissible: boolean; status: string; }[]&apos; is not assignable to type &apos;Notice[]&apos;.
+  Type &apos;{ id: string; content: string; isDismissible: boolean; status: string; }&apos; is missing the following properties from type &apos;Notice&apos;: spokenMessage, __unstableHTML, type, speak, actions" source="TS2322" />
 </file>
 <file name="assets/js/blocks/cart-checkout-shared/payment-methods/payment-method-options.js">
 <error line="60" column="22" severity="error" message="No overload matches this call.
@@ -2603,13 +2539,13 @@
 <error line="15" column="68" severity="error" message="Expected 0 arguments, but got 1." source="TS2554" />
 </file>
 <file name="assets/js/blocks/checkout/block.tsx">
-<error line="95" column="4" severity="error" message="Type &apos;{ allowCreateAccount: boolean; showCompanyField: boolean; requireCompanyField: boolean; showApartmentField: boolean; showPhoneField: boolean; requirePhoneField: boolean; }&apos; is missing the following properties from type &apos;CheckoutBlockContextProps&apos;: showOrderNotes, showPolicyLinks, showReturnToCart, cartPageId, showRateAfterTaxName" source="TS2739" />
-<error line="184" column="4" severity="error" message="No overload matches this call.
+<error line="98" column="4" severity="error" message="Type &apos;{ allowCreateAccount: boolean; showCompanyField: boolean; requireCompanyField: boolean; showApartmentField: boolean; showPhoneField: boolean; requirePhoneField: boolean; }&apos; is missing the following properties from type &apos;CheckoutBlockContextProps&apos;: showOrderNotes, showPolicyLinks, showReturnToCart, cartPageId, showRateAfterTaxName" source="TS2739" />
+<error line="187" column="4" severity="error" message="No overload matches this call.
   Overload 1 of 2, &apos;(props: BlockErrorBoundaryProps | Readonly&lt;BlockErrorBoundaryProps&gt;): BlockErrorBoundary&apos;, gave the following error.
     Type &apos;unknown&apos; is not assignable to type &apos;boolean&apos;.
   Overload 2 of 2, &apos;(props: BlockErrorBoundaryProps, context: any): BlockErrorBoundary&apos;, gave the following error.
     Type &apos;unknown&apos; is not assignable to type &apos;boolean&apos;." source="TS2769" />
-<error line="207" column="33" severity="error" message="Argument of type &apos;({ attributes, children, scrollToTop, }: { attributes: Attributes; children: React.ReactChildren; scrollToTop: (props: Record&lt;string, unknown&gt;) =&gt; void; }) =&gt; JSX.Element&apos; is not assignable to parameter of type &apos;FunctionComponent&lt;Record&lt;string, unknown&gt;&gt;&apos;.
+<error line="210" column="33" severity="error" message="Argument of type &apos;({ attributes, children, scrollToTop, }: { attributes: Attributes; children: React.ReactChildren; scrollToTop: (props: Record&lt;string, unknown&gt;) =&gt; void; }) =&gt; JSX.Element&apos; is not assignable to parameter of type &apos;FunctionComponent&lt;Record&lt;string, unknown&gt;&gt;&apos;.
   Types of parameters &apos;__0&apos; and &apos;props&apos; are incompatible.
     Type &apos;PropsWithChildren&lt;Record&lt;string, unknown&gt;&gt;&apos; is missing the following properties from type &apos;{ attributes: Attributes; children: ReactChildren; scrollToTop: (props: Record&lt;string, unknown&gt;) =&gt; void; }&apos;: attributes, scrollToTop" source="TS2345" />
 </file>
@@ -3427,7 +3363,7 @@
 <error line="14" column="2" severity="error" message="Module &apos;&quot;@wordpress/components&quot;&apos; has no exported member &apos;__experimentalToolsPanel&apos;." source="TS2305" />
 <error line="16" column="2" severity="error" message="Module &apos;&quot;@wordpress/components&quot;&apos; has no exported member &apos;__experimentalToolsPanelItem&apos;." source="TS2305" />
 <error line="51" column="6" severity="error" message="Property &apos;getBlockVariations&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__blocks/store/selectors&quot;)&apos;." source="TS2339" />
-<error line="130" column="6" severity="error" message="Type &apos;{ label: string; onChange: (statusLabels: readonly Value[]) =&gt; void; suggestions: string[]; validateInput: (value: string) =&gt; boolean; value: string[]; __experimentalExpandOnFocus: boolean; }&apos; is not assignable to type &apos;IntrinsicAttributes &amp; Props &amp; { children?: ReactNode; }&apos;.
+<error line="118" column="6" severity="error" message="Type &apos;{ label: string; onChange: (statusLabels: readonly Value[]) =&gt; void; suggestions: string[]; validateInput: (value: string) =&gt; boolean; value: string[]; __experimentalExpandOnFocus: boolean; }&apos; is not assignable to type &apos;IntrinsicAttributes &amp; Props &amp; { children?: ReactNode; }&apos;.
   Property &apos;label&apos; does not exist on type &apos;IntrinsicAttributes &amp; Props &amp; { children?: ReactNode; }&apos;." source="TS2322" />
 </file>
 <file name="assets/js/blocks/product-search/block.js">
@@ -3543,7 +3479,7 @@
   Type &apos;{ imageSizing: string; }&apos; is not assignable to type &apos;string&apos;." source="TS2345" />
 <error line="188" column="40" severity="error" message="Variable &apos;newBlocks&apos; implicitly has an &apos;any[]&apos; type." source="TS7005" />
 <error line="199" column="20" severity="error" message="Property &apos;renderAppender&apos; does not exist on type &apos;{ template: any; templateLock: boolean; allowedBlocks: string[]; }&apos;." source="TS2339" />
-<error line="222" column="11" severity="error" message="Property &apos;isLoading&apos; is missing in type &apos;{ children: Element; product: { id: number; name: string; variation: string; permalink: string; sku: string; short_description: string; description: string; price: string; price_html: string; ... 9 more ...; on_sale: boolean; }; }&apos; but required in type &apos;{ product: any; children: Object; isLoading: boolean; }&apos;." source="TS2741" />
+<error line="223" column="11" severity="error" message="Type &apos;{ id: number; name: string; variation: string; permalink: string; sku: string; short_description: string; description: string; price: string; price_html: string; images: { id: number; src: string; thumbnail: string; name: string; alt: string; srcset: string; sizes: string; }[]; ... 8 more ...; on_sale: boolean; }&apos; is missing the following properties from type &apos;ProductResponseItem&apos;: parent, type, tags, attributes, and 4 more." source="TS2740" />
 <error line="225" column="12" severity="error" message="Type &apos;{ template: any; templateLock: boolean; allowedBlocks: string[]; }&apos; is not assignable to type &apos;Props&apos;.
   Types of property &apos;templateLock&apos; are incompatible.
     Type &apos;boolean&apos; is not assignable to type &apos;EditorTemplateLock | undefined&apos;." source="TS2322" />
@@ -3735,14 +3671,11 @@
         Type &apos;{ type: string; default: boolean; }&apos; is not assignable to type &apos;BlockAttribute&lt;unknown&gt;&apos;." source="TS2769" />
 <error line="68" column="11" severity="error" message="Type &apos;{ constructor: Function; toString(): string; toLocaleString(): string; valueOf(): Object; hasOwnProperty(v: PropertyKey): boolean; isPrototypeOf(v: Object): boolean; propertyIsEnumerable(v: PropertyKey): boolean; }&apos; is missing the following properties from type &apos;Omit&lt;{ attributes: Object; debouncedSpeak: (arg0: any) =&gt; any; setAttributes: (arg0: any) =&gt; any; }, &quot;speak&quot; | &quot;debouncedSpeak&quot;&gt;&apos;: attributes, setAttributes" source="TS2739" />
 </file>
-<file name="assets/js/blocks/single-product/block.js">
-<error line="31" column="64" severity="error" message="Property &apos;id&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
-</file>
 <file name="assets/js/blocks/single-product/frontend.js">
 <error line="18" column="20" severity="error" message="Parameter &apos;el&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
-<error line="25" column="2" severity="error" message="Type &apos;ComponentType&lt;{ isLoading: boolean; product: Object; children: ReactChildren; }&gt;&apos; is not assignable to type &apos;FunctionComponent&lt;{}&gt;&apos;.
-  Type &apos;ComponentClass&lt;{ isLoading: boolean; product: Object; children: ReactChildren; }, any&gt;&apos; is not assignable to type &apos;FunctionComponent&lt;{}&gt;&apos;.
-    Type &apos;ComponentClass&lt;{ isLoading: boolean; product: Object; children: ReactChildren; }, any&gt;&apos; provides no match for the signature &apos;(props: { children?: ReactNode; }, context?: any): ReactElement&lt;any, any&gt; | null&apos;." source="TS2322" />
+<error line="25" column="2" severity="error" message="Type &apos;ComponentType&lt;BlockProps&gt;&apos; is not assignable to type &apos;FunctionComponent&lt;{}&gt;&apos;.
+  Type &apos;ComponentClass&lt;BlockProps, any&gt;&apos; is not assignable to type &apos;FunctionComponent&lt;{}&gt;&apos;.
+    Type &apos;ComponentClass&lt;BlockProps, any&gt;&apos; provides no match for the signature &apos;(props: { children?: ReactNode; }, context?: any): ReactElement&lt;any, any&gt; | null&apos;." source="TS2322" />
 </file>
 <file name="assets/js/blocks/single-product/edit/api-error.js">
 <error line="17" column="3" severity="error" message="Type &apos;string&apos; is not assignable to type &apos;ErrorObject&apos;." source="TS2322" />
@@ -3754,22 +3687,18 @@
   Property &apos;showVariations&apos; does not exist on type &apos;IntrinsicAttributes &amp; { selected: number[]; } &amp; { children?: ReactNode; }&apos;." source="TS2322" />
 <error line="17" column="16" severity="error" message="Parameter &apos;value&apos; implicitly has an &apos;any[]&apos; type." source="TS7006" />
 </file>
-<file name="assets/js/blocks/single-product/edit/layout-editor.js">
-<error line="78" column="7" severity="error" message="Type &apos;{}[][]&apos; is not assignable to type &apos;readonly Template[]&apos;.
+<file name="assets/js/blocks/single-product/edit/layout-editor.tsx">
+<error line="81" column="7" severity="error" message="Type &apos;{}[][]&apos; is not assignable to type &apos;readonly Template[]&apos;.
   Type &apos;{}[]&apos; is not assignable to type &apos;Template&apos;.
     Target requires 1 element(s) but source may have fewer." source="TS2322" />
-<error line="81" column="7" severity="error" message="Type &apos;false&apos; is not assignable to type &apos;ComponentType&lt;{}&gt; | undefined&apos;." source="TS2322" />
+<error line="84" column="7" severity="error" message="Type &apos;false&apos; is not assignable to type &apos;ComponentType&lt;{}&gt; | undefined&apos;." source="TS2322" />
 </file>
-<file name="assets/js/blocks/single-product/edit/index.js">
-<error line="46" column="10" severity="error" message="Property &apos;productId&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
-<error line="46" column="21" severity="error" message="Property &apos;isPreview&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
-<error line="65" column="5" severity="error" message="No overload matches this call.
+<file name="assets/js/blocks/single-product/edit/index.tsx">
+<error line="83" column="5" severity="error" message="No overload matches this call.
   Overload 1 of 2, &apos;(props: BlockErrorBoundaryProps | Readonly&lt;BlockErrorBoundaryProps&gt;): BlockErrorBoundary&apos;, gave the following error.
     Property &apos;text&apos; is missing in type &apos;{ children: Element[]; header: string; }&apos; but required in type &apos;Readonly&lt;BlockErrorBoundaryProps&gt;&apos;.
   Overload 2 of 2, &apos;(props: BlockErrorBoundaryProps, context: any): BlockErrorBoundary&apos;, gave the following error.
     Property &apos;text&apos; is missing in type &apos;{ children: Element[]; header: string; }&apos; but required in type &apos;Readonly&lt;BlockErrorBoundaryProps&gt;&apos;." source="TS2769" />
-<error line="113" column="24" severity="error" message="Type &apos;{ productId: any; }&apos; is not assignable to type &apos;IntrinsicAttributes &amp; Object&apos;.
-  Property &apos;productId&apos; does not exist on type &apos;IntrinsicAttributes &amp; Object&apos;." source="TS2322" />
 </file>
 <file name="assets/js/blocks/single-product/save.js">
 <error line="7" column="18" severity="error" message="Binding element &apos;attributes&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
@@ -4190,6 +4119,18 @@
 <error line="16" column="24" severity="error" message="Parameter &apos;blockName&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
 <error line="16" column="35" severity="error" message="Parameter &apos;options&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
 <error line="17" column="45" severity="error" message="Expected 1 arguments, but got 2." source="TS2554" />
+</file>
+<file name="packages/checkout/components/store-notices-container/test/index.tsx">
+<error line="4" column="10" severity="error" message="Module &apos;&quot;@wordpress/notices&quot;&apos; has no exported member &apos;store&apos;." source="TS2305" />
+<error line="15" column="28" severity="error" message="Property &apos;createErrorNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
+<error line="23" column="29" severity="error" message="Property &apos;removeNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
+<error line="30" column="28" severity="error" message="Property &apos;getNotices&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/selectors&quot;)&apos;." source="TS2339" />
+<error line="36" column="28" severity="error" message="Property &apos;createErrorNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
+<error line="46" column="29" severity="error" message="Property &apos;removeNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
+<error line="53" column="28" severity="error" message="Property &apos;getNotices&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/selectors&quot;)&apos;." source="TS2339" />
+<error line="59" column="28" severity="error" message="Property &apos;createErrorNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
+<error line="70" column="29" severity="error" message="Property &apos;removeNotice&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/actions&quot;)&apos;." source="TS2339" />
+<error line="77" column="28" severity="error" message="Property &apos;getNotices&apos; does not exist on type &apos;typeof import(&quot;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@types/wordpress__rich-text/store/selectors&quot;)&apos;." source="TS2339" />
 </file>
 <file name="packages/checkout/components/text-input/test/validated-text-input.tsx">
 <error line="92" column="9" severity="error" message="Property &apos;toBeInTheDocument&apos; does not exist on type &apos;Matchers&lt;void, HTMLElement | null&gt;&apos;." source="TS2339" />

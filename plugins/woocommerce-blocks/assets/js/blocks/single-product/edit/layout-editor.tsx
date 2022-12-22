@@ -12,6 +12,7 @@ import {
 import { createBlocksFromTemplate } from '@woocommerce/atomic-utils';
 import { PanelBody, Button } from '@wordpress/components';
 import { Icon, backup } from '@wordpress/icons';
+import { ProductResponseItem } from '@woocommerce/type-defs/product-response';
 
 /**
  * Internal dependencies
@@ -22,15 +23,17 @@ import {
 	ALLOWED_INNER_BLOCKS,
 } from '../constants';
 
-/**
- * Component to handle edit mode of the "Single Product Block".
- *
- * @param {Object}  props           Incoming props for the component.
- * @param {boolean} props.isLoading
- * @param {Object}  props.product
- * @param {string}  props.clientId
- */
-const LayoutEditor = ( { isLoading, product, clientId } ) => {
+interface LayoutEditorProps {
+	isLoading: boolean;
+	product: ProductResponseItem;
+	clientId: string;
+}
+
+const LayoutEditor = ( {
+	isLoading,
+	product,
+	clientId,
+}: LayoutEditorProps ) => {
 	const baseClassName = 'wc-block-single-product wc-block-layout';
 	const { replaceInnerBlocks } = useDispatch( 'core/block-editor' );
 

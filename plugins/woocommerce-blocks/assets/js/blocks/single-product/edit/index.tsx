@@ -9,6 +9,7 @@ import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundar
 import EditProductLink from '@woocommerce/editor-components/edit-product-link';
 import { singleProductBlockPreview } from '@woocommerce/resource-previews';
 import { InspectorControls } from '@wordpress/block-editor';
+import { ProductResponseItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -19,6 +20,23 @@ import SharedProductControl from './shared-product-control';
 import EditorBlockControls from './editor-block-controls';
 import LayoutEditor from './layout-editor';
 import { BLOCK_TITLE, BLOCK_ICON, BLOCK_DESCRIPTION } from '../constants';
+
+interface EditorProps {
+	className: string;
+	attributes: {
+		productId: number;
+		isPreview: boolean;
+	};
+	setAttributes: ( attributes: {
+		productId: number;
+		isPreview: boolean;
+	} ) => void;
+	error: string;
+	getProduct: () => void;
+	product: ProductResponseItem;
+	isLoading: boolean;
+	clientId: string;
+}
 
 /**
  * Component to handle edit mode of the "Single Product Block".
@@ -42,7 +60,7 @@ const Editor = ( {
 	product,
 	isLoading,
 	clientId,
-} ) => {
+}: EditorProps ) => {
 	const { productId, isPreview } = attributes;
 	const [ isEditing, setIsEditing ] = useState( ! productId );
 

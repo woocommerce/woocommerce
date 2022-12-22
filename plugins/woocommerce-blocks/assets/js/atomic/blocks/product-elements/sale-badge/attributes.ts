@@ -1,4 +1,9 @@
-export const blockAttributes: Record< string, Record< string, unknown > > = {
+/**
+ * External dependencies
+ */
+import { BlockAttributes } from '@wordpress/blocks';
+
+export const blockAttributes: BlockAttributes = {
 	productId: {
 		type: 'number',
 		default: 0,

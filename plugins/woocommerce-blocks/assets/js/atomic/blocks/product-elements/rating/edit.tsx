@@ -17,13 +17,13 @@ import { ProductQueryContext as Context } from '@woocommerce/blocks/product-quer
 import Block from './block';
 import withProductSelector from '../shared/with-product-selector';
 import { BLOCK_TITLE, BLOCK_ICON } from './constants';
-import { Attributes } from './types';
+import { BlockAttributes } from './types';
 
 const Edit = ( {
 	attributes,
 	setAttributes,
 	context,
-}: BlockEditProps< Attributes > & { context: Context } ): JSX.Element => {
+}: BlockEditProps< BlockAttributes > & { context: Context } ): JSX.Element => {
 	const blockProps = useBlockProps( {
 		className: 'wp-block-woocommerce-product-rating',
 	} );
