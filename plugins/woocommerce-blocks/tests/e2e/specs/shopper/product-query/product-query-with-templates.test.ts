@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { deleteAllTemplates } from '@wordpress/e2e-test-utils';
+import {
+	deleteAllTemplates,
+	ensureSidebarOpened,
+} from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -9,7 +12,6 @@ import { deleteAllTemplates } from '@wordpress/e2e-test-utils';
 import {
 	BASE_URL,
 	goToTemplateEditor,
-	openBlockEditorSettings,
 	saveTemplate,
 	useTheme,
 } from '../../../utils';
@@ -21,9 +23,7 @@ import {
 	getProductsNameFromProductQuery,
 } from './utils';
 
-// Re-enable this test once wordpress/e2e-test-utils is updated.
-// https://github.com/woocommerce/woocommerce-blocks/issues/7744
-describe.skip( `${ block.name } Block`, () => {
+describe( `${ block.name } Block`, () => {
 	useTheme( 'emptytheme' );
 
 	describe( 'with All Templates', () => {
@@ -34,7 +34,7 @@ describe.skip( `${ block.name } Block`, () => {
 			await goToTemplateEditor( {
 				postId: productCatalogTemplateId,
 			} );
-			await openBlockEditorSettings();
+			await ensureSidebarOpened();
 			await addProductQueryBlock();
 		} );
 

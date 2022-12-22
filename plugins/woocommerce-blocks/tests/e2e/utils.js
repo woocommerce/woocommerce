@@ -409,24 +409,6 @@ export const createCoupon = async ( coupon ) => {
 };
 
 /**
- * Open the block editor settings menu if it hasn't opened.
- *
- * @todo Replace openBlockEditorSettings with ensureSidebarOpened when WordPress/gutenberg#45480 is released. See https://github.com/WordPress/gutenberg/pull/45480.
- */
-export const openBlockEditorSettings = async () => {
-	const toggleSidebarButton = await page.$(
-		'.edit-post-header__settings [aria-label="Settings"][aria-expanded="false"],' +
-			'.edit-site-header__actions [aria-label="Settings"][aria-expanded="false"],' +
-			'.edit-widgets-header__actions [aria-label="Settings"][aria-expanded="false"],' +
-			'.edit-site-header-edit-mode__actions [aria-label="Settings"][aria-expanded="false"]'
-	);
-
-	if ( toggleSidebarButton ) {
-		await toggleSidebarButton.click();
-	}
-};
-
-/**
  *  Wait for all Products Block is loaded completely: when the skeleton disappears, and the products are visible
  */
 export const waitForAllProductsBlockLoaded = async () => {
