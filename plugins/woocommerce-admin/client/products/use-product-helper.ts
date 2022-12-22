@@ -137,7 +137,7 @@ export function useProductHelper() {
 		[ updating ]
 	);
 
-	async function updateVariationOrders(
+	async function updateVariationsOrder(
 		productId: number,
 		variationsOrder?: { [ page: number ]: { [ id: number ]: number } }
 	) {
@@ -185,7 +185,7 @@ export function useProductHelper() {
 				status,
 			} )
 				.then( async ( updatedProduct ) =>
-					updateVariationOrders(
+					updateVariationsOrder(
 						updatedProduct.id,
 						( product as ProductVariationsOrder ).variationsOrder
 					)

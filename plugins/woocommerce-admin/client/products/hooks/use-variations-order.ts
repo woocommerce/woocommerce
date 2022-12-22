@@ -34,12 +34,18 @@ function sort(
 	if ( ! variationsOrder || ! variationsOrder[ currentPage ] )
 		return variations;
 
-	const currentPageOrders = variationsOrder[ currentPage ];
+	const currentPageVariationsOrder = variationsOrder[ currentPage ];
 
 	return [ ...variations ].sort( ( a, b ) => {
-		if ( ! currentPageOrders[ a.id ] || ! currentPageOrders[ b.id ] )
+		if (
+			! currentPageVariationsOrder[ a.id ] ||
+			! currentPageVariationsOrder[ b.id ]
+		)
 			return 0;
-		return currentPageOrders[ a.id ] - currentPageOrders[ b.id ];
+		return (
+			currentPageVariationsOrder[ a.id ] -
+			currentPageVariationsOrder[ b.id ]
+		);
 	} );
 }
 
