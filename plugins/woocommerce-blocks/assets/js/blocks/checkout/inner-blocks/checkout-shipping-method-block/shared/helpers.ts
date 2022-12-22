@@ -30,7 +30,8 @@ export function getShippingPrices(
 					}
 					if (
 						lowestRate === undefined ||
-						currentRate.price < lowestRate.price
+						parseInt( currentRate.price, 10 ) <
+							parseInt( lowestRate.price, 10 )
 					) {
 						return currentRate;
 					}
@@ -48,7 +49,8 @@ export function getShippingPrices(
 					}
 					if (
 						highestRate === undefined ||
-						currentRate.price > highestRate.price
+						parseInt( currentRate.price, 10 ) >
+							parseInt( highestRate.price, 10 )
 					) {
 						return currentRate;
 					}
