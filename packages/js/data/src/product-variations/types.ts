@@ -55,7 +55,7 @@ export interface ProductVariationImage {
 
 export type ProductVariation = Omit<
 	Product,
-	'name' | 'slug' | 'attributes'
+	'name' | 'slug' | 'attributes' | 'images'
 > & {
 	attributes: ProductVariationAttribute[];
 	/**

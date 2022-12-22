@@ -23,7 +23,7 @@ import { useState } from '@wordpress/element';
  */
 import { getCheckboxTracks } from './utils';
 import { ProductSectionLayout } from '../layout/product-section-layout';
-import SingleImageField from '../fields/single-image-field';
+import { SingleImageField } from '../fields/single-image-field';
 
 function parseVariationImage(
 	media?: MediaItem

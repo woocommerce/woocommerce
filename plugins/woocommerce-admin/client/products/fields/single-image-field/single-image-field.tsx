@@ -16,7 +16,7 @@ import classNames from 'classnames';
  */
 import './single-image-field.scss';
 
-export default function SingleImageField( {
+export function SingleImageField( {
 	id,
 	label,
 	value,
@@ -35,11 +35,14 @@ export default function SingleImageField( {
 	return (
 		<div
 			{ ...props }
-			className={ classNames( 'single-image-field', className ) }
+			className={ classNames(
+				'woocommerce-single-image-field',
+				className
+			) }
 		>
 			<label
 				htmlFor={ fieldId }
-				className="components-base-control__label single-image-field__label"
+				className="components-base-control__label woocommerce-single-image-field__label"
 			>
 				{ label }
 			</label>
@@ -47,7 +50,7 @@ export default function SingleImageField( {
 			{ value ? (
 				<div
 					id={ fieldId }
-					className="single-image-field__gallery"
+					className="woocommerce-single-image-field__gallery"
 					tabIndex={ -1 }
 					role="region"
 				>
@@ -66,7 +69,7 @@ export default function SingleImageField( {
 			) : (
 				<div
 					id={ fieldId }
-					className="single-image-field__drop-zone"
+					className="woocommerce-single-image-field__drop-zone"
 					tabIndex={ -1 }
 					role="region"
 				>

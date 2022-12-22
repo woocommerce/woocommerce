@@ -1,1 +1,1 @@
-export { default } from './single-image-field';
+export * from './single-image-field';

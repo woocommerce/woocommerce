@@ -1,4 +1,4 @@
-.single-image-field {
+.woocommerce-single-image-field {
 	&__gallery {
 		margin-top: $gap-smaller;
 
@@ -17,7 +17,7 @@
 		gap: calc($gap * 2);
 		isolation: isolate;
 
-		height: 144px;
+		min-height: 144px;
 
 		background: $white;
 		border: 1px dashed $gray-700;
