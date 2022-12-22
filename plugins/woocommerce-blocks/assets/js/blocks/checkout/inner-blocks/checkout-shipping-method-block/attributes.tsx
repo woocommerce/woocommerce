@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import formStepAttributes from '../../form-step/attributes';
+import { defaultShippingText, defaultLocalPickupText } from './constants';
 
 export default {
 	...formStepAttributes( {
@@ -30,11 +31,11 @@ export default {
 	},
 	localPickupText: {
 		type: 'string',
-		default: __( 'Local Pickup', 'woo-gutenberg-products-block' ),
+		default: defaultLocalPickupText,
 	},
 	shippingText: {
 		type: 'string',
-		default: __( 'Shipping', 'woo-gutenberg-products-block' ),
+		default: defaultShippingText,
 	},
 	lock: {
 		type: 'object',

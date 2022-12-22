@@ -35,6 +35,7 @@ import {
 import { RatePrice, getLocalPickupPrices, getShippingPrices } from './shared';
 import type { minMaxPrices } from './shared';
 import './style.scss';
+import { defaultShippingText, defaultLocalPickupText } from './constants';
 
 const LocalPickupSelector = ( {
 	checked,
@@ -71,6 +72,7 @@ const LocalPickupSelector = ( {
 			) }
 			<RichText
 				value={ toggleText }
+				placeholder={ defaultLocalPickupText }
 				tagName="span"
 				className="wc-block-checkout__shipping-method-option-title"
 				onChange={ ( value ) =>
@@ -133,6 +135,7 @@ const ShippingSelector = ( {
 			) }
 			<RichText
 				value={ toggleText }
+				placeholder={ defaultShippingText }
 				tagName="span"
 				className="wc-block-checkout__shipping-method-option-title"
 				onChange={ ( value ) =>

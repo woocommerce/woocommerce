@@ -16,6 +16,7 @@ import { Icon, store, shipping } from '@wordpress/icons';
 import './style.scss';
 import { RatePrice, getLocalPickupPrices, getShippingPrices } from './shared';
 import type { minMaxPrices } from './shared';
+import { defaultLocalPickupText, defaultShippingText } from './constants';
 
 const LocalPickupSelector = ( {
 	checked,
@@ -144,7 +145,7 @@ const Block = ( {
 				rate={ getShippingPrices( shippingRates[ 0 ]?.shipping_rates ) }
 				showPrice={ showPrice }
 				showIcon={ showIcon }
-				toggleText={ shippingText }
+				toggleText={ shippingText || defaultShippingText }
 			/>
 			<LocalPickupSelector
 				checked={ checked }
@@ -154,7 +155,7 @@ const Block = ( {
 				multiple={ shippingRates.length > 1 }
 				showPrice={ showPrice }
 				showIcon={ showIcon }
-				toggleText={ localPickupText }
+				toggleText={ localPickupText || defaultLocalPickupText }
 			/>
 		</RadioGroup>
 	);
