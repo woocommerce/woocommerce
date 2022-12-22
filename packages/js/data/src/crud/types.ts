@@ -86,7 +86,7 @@ export type CrudSelectors<
 			UpdateError: WPDataSelector< typeof getItemUpdateError >;
 		},
 		ResourceName,
-		IdType,
+		IdQuery,
 		unknown
 	> &
 	MapSelectors<
