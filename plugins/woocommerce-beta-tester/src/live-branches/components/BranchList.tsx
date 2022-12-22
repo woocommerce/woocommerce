@@ -153,7 +153,6 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 				</CardBody>
 				<CardFooter></CardFooter>
 			</Card>
-
 			<Card elevation={ 3 } css={ cardStyle }>
 				<CardHeader>
 					<h2>Install and Activate Live Branches</h2>
@@ -189,24 +188,25 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 				</CardBody>
 				<CardFooter></CardFooter>
 			</Card>
-
-			<Card elevation={ 3 } css={ cardStyle }>
-				<CardHeader>
-					<h2>Other Installed Branches</h2>
-				</CardHeader>
-				<CardBody>
-					<ItemGroup>
-						{ installedBranches.map( ( branch ) => (
-							<BranchListItem
-								branch={ branch }
-								onBranchActive={ setActiveBranch }
-								key={ branch.version }
-							/>
-						) ) }
-					</ItemGroup>
-				</CardBody>
-				<CardFooter></CardFooter>
-			</Card>
+			{ installedBranches.length && (
+				<Card elevation={ 3 } css={ cardStyle }>
+					<CardHeader>
+						<h2>Other Installed Branches</h2>
+					</CardHeader>
+					<CardBody>
+						<ItemGroup>
+							{ installedBranches.map( ( branch ) => (
+								<BranchListItem
+									branch={ branch }
+									onBranchActive={ setActiveBranch }
+									key={ branch.version }
+								/>
+							) ) }
+						</ItemGroup>
+					</CardBody>
+					<CardFooter></CardFooter>
+				</Card>
+			) }
 		</>
 	);
 };
