@@ -16,6 +16,7 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
+import useVariationsOrder from '~/products/hooks/use-variations-order';
 import HiddenIcon from '~/products/images/hidden-icon';
 import VisibleIcon from '~/products/images/visible-icon';
 import { CurrencyContext } from '../../../lib/currency-context';
@@ -59,6 +60,8 @@ export const Variations: React.FC = () => {
 				product_id: productId,
 				page: currentPage,
 				per_page: perPage,
+				order: 'asc',
+				orderby: 'menu_order',
 			};
 			return {
 				isLoading: ! hasFinishedResolution( 'getProductVariations', [
@@ -76,6 +79,9 @@ export const Variations: React.FC = () => {
 	const { updateProductVariation } = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 	);
+
+	const { sortedVariations, getVariationKey, onOrderChange } =
+		useVariationsOrder( { variations, currentPage } );
 
 	if ( ! variations || isLoading ) {
 		return (
@@ -120,9 +126,9 @@ export const Variations: React.FC = () => {
 				</h4>
 				<h4>{ __( 'Quantity', 'woocommerce' ) }</h4>
 			</div>
-			<Sortable>
-				{ variations.map( ( variation ) => (
-					<ListItem key={ variation.id }>
+			<Sortable onOrderChange={ onOrderChange }>
+				{ sortedVariations.map( ( variation ) => (
+					<ListItem key={ getVariationKey( variation ) }>
 						<div className="woocommerce-product-variations__attributes">
 							{ variation.attributes.map( ( attribute ) => (
 								/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
