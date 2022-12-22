@@ -1,6 +1,10 @@
 .woocommerce-marketing-create-campaign-modal {
 	max-width: 600px;
 
+	.components-modal__content {
+		padding-bottom: $gap;
+	}
+
 	.woocommerce-marketing-new-campaigns {
 		padding-top: $gap-large;
 		padding-bottom: $gap;
@@ -49,5 +53,6 @@
 
 	.woocommerce-marketing-add-channels {
 		padding-top: $gap;
+		border-top: solid 1px $gray-300;
 	}
 }
