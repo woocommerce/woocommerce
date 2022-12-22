@@ -202,6 +202,7 @@ final class BlockTypesController {
 			'MiniCartContents',
 			'ProductQuery',
 			'FilterWrapper',
+			'CustomerAccount',
 		];
 
 		$block_types = array_merge( $block_types, Cart::get_cart_block_types(), Checkout::get_checkout_block_types() );

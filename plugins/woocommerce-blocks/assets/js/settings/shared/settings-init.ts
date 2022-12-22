@@ -39,6 +39,7 @@ export interface WooCommerceSharedSettings {
 	adminUrl: string;
 	countries: Record< string, string > | never[];
 	currency: WooCommerceSiteCurrency;
+	currentUserId: number;
 	currentUserIsAdmin: boolean;
 	homeUrl: string;
 	locale: WooCommerceSiteLocale;
@@ -64,6 +65,7 @@ const defaults: WooCommerceSharedSettings = {
 		priceFormat: '%1$s%2$s',
 		thousandSeparator: ',',
 	},
+	currentUserId: 0,
 	currentUserIsAdmin: false,
 	homeUrl: '',
 	locale: {
