@@ -62,6 +62,7 @@ const blocks = {
 		isExperimental: true,
 	},
 	'filter-wrapper': {},
+	'customer-account': {},
 };
 
 // Returns the entries for each block given a relative path (ie: `index.js`,
