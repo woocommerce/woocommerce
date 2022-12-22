@@ -5,7 +5,6 @@ export const blockAttributes = {
 	isPreview: {
 		type: 'boolean',
 		default: false,
-		save: false,
 	},
 	/**
 	 * The product ID to display.
