@@ -56,8 +56,7 @@ class ProductButton extends AbstractBlock {
 	 * It is necessary to register and enqueue assets during the render phase because we want to load assets only if the block has the content.
 	 */
 	protected function register_block_type_assets() {
-		parent::register_block_type_assets();
-		$this->register_chunk_translations( [ $this->block_name ] );
+		return null;
 	}
 
 	/**
