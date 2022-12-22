@@ -28,6 +28,10 @@
 	}
 }
 
+.woocommerce-product-settings__toggle {
+	margin-left: -$gap;
+}
+
 @include breakpoint( '<782px' ) {
 	.woocommerce-product-settings__toggle,
 	.woocommerce-product-settings__panel {
