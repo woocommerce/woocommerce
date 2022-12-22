@@ -72,12 +72,26 @@ const StoreNotices = ( {
 		};
 	}, [ context, registerContainer, unregisterContainer ] );
 
-	// Group notices by status. Do not group notices that are not dismissable.
-	const noticesByStatus = {
-		error: notices.filter( ( { status } ) => status === 'error' ),
-		success: notices.filter( ( { status } ) => status === 'success' ),
-		warning: notices.filter( ( { status } ) => status === 'warning' ),
-		info: notices.filter( ( { status } ) => status === 'info' ),
+	// Group notices by whether or not they are dismissable. Dismissable notices can be grouped.
+	const dismissibleNotices = notices.filter(
+		( { isDismissible } ) => !! isDismissible
+	);
+	const nonDismissibleNotices = notices.filter(
+		( { isDismissible } ) => ! isDismissible
+	);
+
+	// Group dismissibleNotices by status. They will be combined into a single notice.
+	const dismissibleNoticeGroups = {
+		error: dismissibleNotices.filter(
+			( { status } ) => status === 'error'
+		),
+		success: dismissibleNotices.filter(
+			( { status } ) => status === 'success'
+		),
+		warning: dismissibleNotices.filter(
+			( { status } ) => status === 'warning'
+		),
+		info: dismissibleNotices.filter( ( { status } ) => status === 'info' ),
 	};
 
 	return (
@@ -85,7 +99,19 @@ const StoreNotices = ( {
 			ref={ ref }
 			className={ classnames( className, 'wc-block-components-notices' ) }
 		>
-			{ Object.entries( noticesByStatus ).map(
+			{ nonDismissibleNotices.map( ( notice ) => (
+				<Notice
+					key={ notice.id }
+					className={ classnames(
+						'wc-block-components-notices__notice',
+						getClassNameFromStatus( notice.status )
+					) }
+					{ ...notice }
+				>
+					{ sanitizeHTML( decodeEntities( notice.content ) ) }
+				</Notice>
+			) ) }
+			{ Object.entries( dismissibleNoticeGroups ).map(
 				( [ status, noticeGroup ] ) => {
 					if ( ! noticeGroup.length ) {
 						return null;
