@@ -17,6 +17,7 @@ import truncate from 'lodash/truncate';
 /**
  * Internal dependencies
  */
+import { PRODUCT_VARIATION_TITLE_LIMIT } from '~/products/constants';
 import useVariationsOrder from '~/products/hooks/use-variations-order';
 import HiddenIcon from '~/products/images/hidden-icon';
 import VisibleIcon from '~/products/images/visible-icon';
@@ -40,8 +41,6 @@ const DEFAULT_PER_PAGE_OPTION = 25;
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 const VISIBLE_TEXT = __( 'Visible to customers', 'woocommerce' );
 const UPDATING_TEXT = __( 'Updating product variation', 'woocommerce' );
-
-const TRUNCATE_LENGTH = 32;
 
 export const Variations: React.FC = () => {
 	const [ currentPage, setCurrentPage ] = useState( 1 );
@@ -142,14 +141,14 @@ export const Variations: React.FC = () => {
 										className="woocommerce-product-variations__attribute"
 										key={ attribute.id }
 										label={ truncate( attribute.option, {
-											length: TRUNCATE_LENGTH,
+											length: PRODUCT_VARIATION_TITLE_LIMIT,
 										} ) }
 										screenReaderLabel={ attribute.option }
 									/>
 								);
 
 								return attribute.option.length <=
-									TRUNCATE_LENGTH ? (
+									PRODUCT_VARIATION_TITLE_LIMIT ? (
 									tag
 								) : (
 									<Tooltip

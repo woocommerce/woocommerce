@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { ProductVariation } from '@woocommerce/data';
-
-export const PRODUCT_VARIATION_TITLE_LIMIT = 32;
+import { PRODUCT_VARIATION_TITLE_LIMIT } from '../constants';
 
 /**
  * Get the product variation title for use in the header.
