@@ -9,23 +9,20 @@ import {
 } from '@woocommerce/shared-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
+import { ProductResponseItem } from '@woocommerce/type-defs/product-response';
 
 /**
  * Internal dependencies
  */
 import { BLOCK_NAME } from './constants';
 
-/** @typedef {import('react')} React */
+interface BlockProps {
+	isLoading: boolean;
+	product: ProductResponseItem;
+	children: JSX.Element | JSX.Element[];
+}
 
-/**
- * The Single Product Block.
- *
- * @param {Object}              props           Incoming props for the component.
- * @param {boolean}             props.isLoading
- * @param {Object}              props.product
- * @param {React.ReactChildren} props.children
- */
-const Block = ( { isLoading, product, children } ) => {
+const Block = ( { isLoading, product, children }: BlockProps ) => {
 	const { dispatchStoreEvent } = useStoreEvents();
 	const className = 'wc-block-single-product wc-block-layout';
 	const noticeContext = `woocommerce/single-product/${ product?.id || 0 }`;

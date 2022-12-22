@@ -22,7 +22,15 @@ import Block from './block';
 import withProductSelector from '../shared/with-product-selector';
 import { BLOCK_TITLE, BLOCK_ICON } from './constants';
 
-const Edit = ( { attributes, setAttributes } ) => {
+interface EditProps {
+	attributes: {
+		className: string;
+		showFormElements: boolean;
+	};
+	setAttributes: ( attributes: { showFormElements: boolean } ) => void;
+}
+
+const Edit = ( { attributes, setAttributes }: EditProps ) => {
 	const { product } = useProductDataContext();
 	const { className, showFormElements } = attributes;
 
