@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
+import { BlockAttributes } from '@wordpress/blocks';
 import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 
-let blockAttributes: Record< string, Record< string, unknown > > = {
+let blockAttributes: BlockAttributes = {
 	headingLevel: {
 		type: 'number',
 		default: 2,

@@ -1,12 +1,13 @@
 /**
  * External dependencies
  */
+import { ProductResponseItem } from '@woocommerce/types';
 import { createContext, useContext } from '@wordpress/element';
 
 /**
  * Default product shape matching API response.
  */
-const defaultProductData = {
+const defaultProductData: ProductResponseItem = {
 	id: 0,
 	name: '',
 	parent: 0,
@@ -67,6 +68,12 @@ const ProductDataContext = createContext( {
 
 export const useProductDataContext = () => useContext( ProductDataContext );
 
+interface ProductDataContextProviderProps {
+	product: ProductResponseItem | null;
+	isLoading: boolean;
+	children: React.ReactNode;
+}
+
 /**
  * This context is used to pass product data down to all children blocks in a given tree.
  *
@@ -79,7 +86,7 @@ export const ProductDataContextProvider = ( {
 	product = null,
 	children,
 	isLoading,
-} ) => {
+}: ProductDataContextProviderProps ) => {
 	const contextValue = {
 		product: product || defaultProductData,
 		isLoading,

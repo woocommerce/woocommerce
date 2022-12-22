@@ -3,6 +3,7 @@
  */
 import { render, fireEvent } from '@testing-library/react';
 import { ProductDataContextProvider } from '@woocommerce/shared-context';
+import { ProductResponseItem } from '@woocommerce/type-defs/product-response';
 
 /**
  * Internal dependencies
@@ -23,18 +24,57 @@ jest.mock( '@woocommerce/base-hooks', () => ( {
 	} ) ),
 } ) );
 
-const productWithoutImages = {
+const productWithoutImages: ProductResponseItem = {
 	name: 'Test product',
 	id: 1,
-	fallbackAlt: 'Test product',
 	permalink: 'http://test.com/product/test-product/',
 	images: [],
+	parent: 0,
+	type: '',
+	variation: '',
+	sku: '',
+	short_description: '',
+	description: '',
+	on_sale: false,
+	prices: {
+		currency_code: 'USD',
+		currency_symbol: '',
+		currency_minor_unit: 0,
+		currency_decimal_separator: '',
+		currency_thousand_separator: '',
+		currency_prefix: '',
+		currency_suffix: '',
+		price: '',
+		regular_price: '',
+		sale_price: '',
+		price_range: null,
+	},
+	price_html: '',
+	average_rating: '',
+	review_count: 0,
+	categories: [],
+	tags: [],
+	attributes: [],
+	variations: [],
+	has_options: false,
+	is_purchasable: false,
+	is_in_stock: false,
+	is_on_backorder: false,
+	low_stock_remaining: null,
+	sold_individually: false,
+	add_to_cart: {
+		text: '',
+		description: '',
+		url: '',
+		minimum: 0,
+		maximum: 0,
+		multiple_of: 0,
+	},
 };
 
-const productWithImages = {
+const productWithImages: ProductResponseItem = {
 	name: 'Test product',
 	id: 1,
-	fallbackAlt: 'Test product',
 	permalink: 'http://test.com/product/test-product/',
 	images: [
 		{
@@ -56,6 +96,47 @@ const productWithImages = {
 			alt: '',
 		},
 	],
+	parent: 0,
+	type: '',
+	variation: '',
+	sku: '',
+	short_description: '',
+	description: '',
+	on_sale: false,
+	prices: {
+		currency_code: 'USD',
+		currency_symbol: '',
+		currency_minor_unit: 0,
+		currency_decimal_separator: '',
+		currency_thousand_separator: '',
+		currency_prefix: '',
+		currency_suffix: '',
+		price: '',
+		regular_price: '',
+		sale_price: '',
+		price_range: null,
+	},
+	price_html: '',
+	average_rating: '',
+	review_count: 0,
+	categories: [],
+	tags: [],
+	attributes: [],
+	variations: [],
+	has_options: false,
+	is_purchasable: false,
+	is_in_stock: false,
+	is_on_backorder: false,
+	low_stock_remaining: null,
+	sold_individually: false,
+	add_to_cart: {
+		text: '',
+		description: '',
+		url: '',
+		minimum: 0,
+		maximum: 0,
+		multiple_of: 0,
+	},
 };
 
 describe( 'Product Image Block', () => {
