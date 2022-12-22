@@ -61,13 +61,14 @@ export const ProductVariationFormActions: React.FC = () => {
 	return (
 		<WooHeaderItem>
 			{ () => (
-				<div className="woocommerce-product-form-actions">
+				<div className="woocommerce-product-form-actions is-variation">
 					<Button
 						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 						//@ts-ignore The `href` prop works for both Buttons and MenuItem's.
 						href={ values.permalink + '?preview=true' }
 						disabled={ ! isValidForm || ! values.permalink }
 						target="_blank"
+                        className='woocommerce-product-form-actions__preview'
 					>
 						{ __( 'Preview', 'woocommerce' ) }
 					</Button>
