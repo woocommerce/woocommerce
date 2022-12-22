@@ -2,13 +2,12 @@
 
 ## Table of contents <!-- omit in toc -->
 
-- [Environment variables](#environment-variables)
-- [Babel](#babel)
-- [External scripts](#external-scripts)
-- [Aliases](#aliases)
-- [Styling](#styling)
-- [Legacy builds](#legacy-builds)
-- [Relevant files](#relevant-files)
+-   [Environment variables](#environment-variables)
+-   [Babel](#babel)
+-   [External scripts](#external-scripts)
+-   [Aliases](#aliases)
+-   [Styling](#styling)
+-   [Relevant files](#relevant-files)
 
 WooCommerce Blocks uses Webpack to build the files that will be consumed by browsers. There are several different Webpack configs in order to build files for different contexts of the plugin. They can all be found in [`webpack.config.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/6da64165025e7a2afc1782e4b278d72536e7b754/webpack.config.js#L162-L169), but this is a quick summary:
 
@@ -51,17 +50,11 @@ All available aliases can be found in [`webpack-helpers.js`](https://github.com/
 
 CSS builds follow a separate path from JS builds, more details can be found in the [CSS build system](css-build-system.md).
 
-## Legacy builds
-
-In the past, when building WC Blocks, special builds targeting old versions of WordPress were generated. Those builds were named 'legacy builds' and might have a smaller set of blocks available. For example, All Products and Filter blocks were not available on WP 5.2.
-
-There were legacy builds of the `MainConfig`, `FrontendConfig` and `StylingConfig`. Currently, those builds are no longer generated since WC Blocks doesn't support WP 5.2 anymore, but the built system is still in place in case legacy builds are needed in the future.
-
 ## Relevant files
 
 Webpack config is split between several files:
 
--   [`webpack.config.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/webpack.config.js): Top level webpack config. Includes support for legacy and main build.
+-   [`webpack.config.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/webpack.config.js): Top level webpack config.
 -   [`bin/webpack-configs.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-configs.js): Code for generating each build config. This most closely resembles a classic webpack config - if you're looking for something, start here.
 -   [`bin/webpack-entries.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-entries.js): Code for generating [webpack `entry` definitions](https://webpack.js.org/concepts/entry-points/) and mapping source files to entry points. If you're adding a new block or module to the build, start here.
 -   [`bin/webpack-helpers.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-helpers.js): Includes utils to load external code at run time, e.g. some dependencies from Woo and WordPress core.
@@ -75,4 +68,3 @@ Webpack config is split between several files:
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/contributing/javascript-build-system.md)
 
 <!-- /FEEDBACK -->
-

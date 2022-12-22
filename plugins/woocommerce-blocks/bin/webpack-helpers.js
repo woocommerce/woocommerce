@@ -8,10 +8,6 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const CHECK_CIRCULAR_DEPS = process.env.CHECK_CIRCULAR_DEPS || false;
 const ASSET_CHECK = process.env.ASSET_CHECK === 'true';
 
-// If a package is not available, or missing functionality, in an old but __supported__ version of WordPress, it should be listed here.
-// Some packages are not available in legacy versions of WordPress, so we don't want to extract them.
-const requiredPackagesInWPLegacy = [];
-
 const wcDepMap = {
 	'@woocommerce/blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
 	'@woocommerce/settings': [ 'wc', 'wcSettings' ],
@@ -107,29 +103,21 @@ function findModuleMatch( module, match ) {
 }
 
 const requestToExternal = ( request ) => {
-	if ( requiredPackagesInWPLegacy.includes( request ) ) {
-		return false;
-	}
 	if ( wcDepMap[ request ] ) {
 		return wcDepMap[ request ];
 	}
 };
 
 const requestToHandle = ( request ) => {
-	if ( requiredPackagesInWPLegacy.includes( request ) ) {
-		return false;
-	}
 	if ( wcHandleMap[ request ] ) {
 		return wcHandleMap[ request ];
 	}
 };
 
-const getProgressBarPluginConfig = ( name, fileSuffix ) => {
-	const isLegacy = fileSuffix && fileSuffix === 'legacy';
-	const progressBarPrefix = isLegacy ? 'Legacy ' : '';
+const getProgressBarPluginConfig = ( name ) => {
 	return {
 		format:
-			chalk.blue( `Building ${ progressBarPrefix }${ name }` ) +
+			chalk.blue( `Building ${ name }` ) +
 			' [:bar] ' +
 			chalk.green( ':percent' ) +
 			' :msg (:elapsed seconds)',
@@ -137,7 +125,7 @@ const getProgressBarPluginConfig = ( name, fileSuffix ) => {
 		customSummary: ( time ) => {
 			console.log(
 				chalk.green.bold(
-					`${ progressBarPrefix }${ name } assets build completed (${ time })`
+					`${ name } assets build completed (${ time })`
 				)
 			);
 		},
