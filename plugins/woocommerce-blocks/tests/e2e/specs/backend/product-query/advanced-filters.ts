@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { canvas, setPostContent, insertBlock } from '@wordpress/e2e-test-utils';
+import {
+	canvas,
+	setPostContent,
+	insertBlock,
+	ensureSidebarOpened,
+} from '@wordpress/e2e-test-utils';
 import {
 	visitBlockPage,
 	saveOrPublish,
@@ -22,7 +27,6 @@ import {
 	GUTENBERG_EDITOR_CONTEXT,
 	describeOrSkip,
 	waitForCanvas,
-	openBlockEditorSettings,
 } from '../../../utils';
 
 const block = {
@@ -106,7 +110,7 @@ describeOrSkip( GUTENBERG_EDITOR_CONTEXT === 'gutenberg' )(
 			 * test can be run individually.
 			 */
 			await resetProductQueryBlockPage();
-			await openBlockEditorSettings();
+			await ensureSidebarOpened();
 			await selectBlockByName( block.slug );
 			$productFiltersPanel = await findToolsPanelWithTitle(
 				'Advanced Filters'

@@ -7,6 +7,7 @@ import {
 	insertBlock,
 	switchUserToAdmin,
 	publishPost,
+	ensureSidebarOpened,
 } from '@wordpress/e2e-test-utils';
 import {
 	selectBlockByName,
@@ -19,7 +20,6 @@ import {
 import {
 	BASE_URL,
 	goToTemplateEditor,
-	openBlockEditorSettings,
 	saveTemplate,
 	useTheme,
 	waitForAllProductsBlockLoaded,
@@ -114,9 +114,7 @@ describe( `${ block.name } Block`, () => {
 		} );
 	} );
 
-	// Re-enable this test once wordpress/e2e-test-utils is updated.
-	// https://github.com/woocommerce/woocommerce-blocks/issues/7744
-	describe.skip( 'with PHP classic template', () => {
+	describe( 'with PHP classic template', () => {
 		const productCatalogTemplateId =
 			'woocommerce/woocommerce//archive-product';
 
@@ -188,7 +186,7 @@ describe( `${ block.name } Block`, () => {
 			} );
 
 			await selectBlockByName( block.slug );
-			await openBlockEditorSettings();
+			await ensureSidebarOpened();
 			await page.waitForXPath(
 				block.selectors.editor.filterButtonToggle
 			);
@@ -297,7 +295,7 @@ describe( `${ block.name } Block`, () => {
 		it( 'should refresh the page only if the user click on button', async () => {
 			await page.goto( editorPageUrl );
 
-			await openBlockEditorSettings();
+			await ensureSidebarOpened();
 			await selectBlockByName( block.slug );
 			await page.waitForXPath(
 				block.selectors.editor.filterButtonToggle
