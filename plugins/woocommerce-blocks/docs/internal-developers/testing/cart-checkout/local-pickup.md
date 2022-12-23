@@ -193,13 +193,13 @@ To test multiple packages, you need to install and configure a plugin:
 
 1. In  **WooCommerce -> Settings -> Shipping -> Local Pickup**, empty the title field and try to save.
 2. The save button should be grayed out.
-3. The title input should be red with an error message "title is required".
+3. The title input should be with an error message "title is required".
 
 #### Location title
 
 1. Try to add a new location without adding the location title.
 2. The "Done" button should be grayed out.
-3. The location name title should be red with an error message "location name is required".
+3. The location name title should be with an error message "location name is required".
 
 ### Switching back to shortcode
 

@@ -99,6 +99,21 @@ const GeneralSettings = () => {
 					disabled={ false }
 					autoComplete="off"
 					required={ true }
+					onInvalid={ (
+						event: React.InvalidEvent< HTMLInputElement >
+					) => {
+						event.target.setCustomValidity(
+							__(
+								'Local pickup title is required',
+								'woo-gutenberg-products-block'
+							)
+						);
+					} }
+					onInput={ (
+						event: React.ChangeEvent< HTMLInputElement >
+					) => {
+						event.target.setCustomValidity( '' );
+					} }
 				/>
 				<CheckboxControl
 					checked={ showCosts }

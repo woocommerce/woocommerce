@@ -54,6 +54,19 @@ const Form = ( {
 				onChange={ setLocationField( 'name' ) }
 				autoComplete="off"
 				required={ true }
+				onInvalid={ (
+					event: React.InvalidEvent< HTMLInputElement >
+				) => {
+					event.target.setCustomValidity(
+						__(
+							'A Location title is required',
+							'woo-gutenberg-products-block'
+						)
+					);
+				} }
+				onInput={ ( event: React.ChangeEvent< HTMLInputElement > ) => {
+					event.target.setCustomValidity( '' );
+				} }
 			/>
 			<TextControl
 				label={ __( 'Address', 'woo-gutenberg-products-block' ) }
