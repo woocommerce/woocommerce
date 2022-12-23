@@ -1,3 +1,13 @@
+/**
+ * Internal dependencies
+ */
+import { InstalledChannel } from '~/marketing/types';
+
+type UseRegisteredChannels = {
+	loading: boolean;
+	data: Array< InstalledChannel >;
+};
+
 // // TODO: To be removed. This is for testing loading state.
 // export const useRegisteredChannels = () => {
 // 	// TODO: call API here to get data.
@@ -17,7 +27,6 @@
 // 		data: [
 // 			{
 // 				slug: 'google-listings-and-ads',
-// 				name: 'Google Listings and Ads',
 // 				title: 'Google Listings and Ads',
 // 				description:
 // 					'Get in front of shoppers and drive traffic so you can grow your business with Smart Shopping Campaigns and free listings.',
@@ -42,7 +51,6 @@
 // 		data: [
 // 			{
 // 				slug: 'google-listings-and-ads',
-// 				name: 'Google Listings and Ads',
 // 				title: 'Google Listings and Ads',
 // 				description:
 // 					'Get in front of shoppers and drive traffic so you can grow your business with Smart Shopping Campaigns and free listings.',
@@ -59,7 +67,7 @@
 // };
 
 // TODO: To be removed. This is for testing everything works okay.
-export const useRegisteredChannels = () => {
+export const useRegisteredChannels = (): UseRegisteredChannels => {
 	// TODO: call API here to get data.
 	// The following are just dummy data for testing now.
 	return {
@@ -67,7 +75,6 @@ export const useRegisteredChannels = () => {
 		data: [
 			{
 				slug: 'google-listings-and-ads',
-				name: 'Google Listings and Ads',
 				title: 'Google Listings and Ads',
 				description:
 					'Get in front of shoppers and drive traffic so you can grow your business with Smart Shopping Campaigns and free listings.',

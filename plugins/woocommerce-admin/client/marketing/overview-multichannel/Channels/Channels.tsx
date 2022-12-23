@@ -3,7 +3,7 @@
  */
 import { Fragment } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Card, CardHeader, CardBody, CardDivider } from '@wordpress/components';
+import { Card, CardHeader, CardDivider } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -11,46 +11,28 @@ import { Card, CardHeader, CardBody, CardDivider } from '@wordpress/components';
 import {
 	CardHeaderTitle,
 	CardHeaderDescription,
-	CenteredSpinner,
 	RecommendedChannelsList,
 } from '~/marketing/components';
-import { useChannels } from './useChannels';
-import './Channels.scss';
+import { InstalledChannel, RecommendedChannel } from '~/marketing/types';
 import { InstalledChannelCardBody } from './InstalledChannelCardBody';
-import { CollapsibleRecommendedChannels } from './CollapsibleRecommendedChannels';
+import { RecommendedChannels } from './RecommendedChannels';
+import './Channels.scss';
 
-export const Channels = () => {
-	const {
-		loading,
-		data: { registeredChannels, recommendedChannels },
-	} = useChannels();
+type ChannelsProps = {
+	registeredChannels: Array< InstalledChannel >;
+	recommendedChannels: Array< RecommendedChannel >;
+};
 
-	/**
-	 * TODO: we may need to filter the channels against
-	 * `@woocommerce/data` installed plugins.
-	 */
-
-	if ( loading ) {
-		return (
-			<Card>
-				<CardHeader>
-					<CardHeaderTitle>
-						{ __( 'Channels', 'woocommerce' ) }
-					</CardHeaderTitle>
-				</CardHeader>
-				<CardBody>
-					<CenteredSpinner />
-				</CardBody>
-			</Card>
-		);
-	}
-
+export const Channels: React.FC< ChannelsProps > = ( {
+	registeredChannels,
+	recommendedChannels,
+} ) => {
 	/*
 	 * If users have no registered channels,
-	 * we display recommended channels without collapsible list
+	 * we should display recommended channels without collapsible list
 	 * and with a description in the card header.
 	 */
-	if ( registeredChannels.length === 0 && recommendedChannels.length > 0 ) {
+	if ( registeredChannels.length === 0 ) {
 		return (
 			<Card className="woocommerce-marketing-channels-card">
 				<CardHeader>
@@ -98,8 +80,8 @@ export const Channels = () => {
 			} ) }
 
 			{ /* Recommended channels section. */ }
-			{ recommendedChannels.length > 0 && (
-				<CollapsibleRecommendedChannels
+			{ recommendedChannels.length >= 1 && (
+				<RecommendedChannels
 					recommendedChannels={ recommendedChannels }
 				/>
 			) }
