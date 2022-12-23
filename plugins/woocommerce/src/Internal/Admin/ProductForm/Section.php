@@ -71,7 +71,7 @@ class Section extends Component {
 	public function get_json() {
 		return array(
 			'id'        => $this->get_id(),
-			'plugin_id'	=> $this->get_plugin_id(),
+			'plugin_id' => $this->get_plugin_id(),
 			'arguments' => $this->get_arguments(),
 		);
 	}

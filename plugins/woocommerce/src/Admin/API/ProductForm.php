@@ -100,13 +100,13 @@ class ProductForm extends \WC_REST_Data_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_form_config( $request ) {
-		$fields = array_map(
+		$fields   = array_map(
 			function( $field ) {
 				return $field->get_json();
 			},
 			Form::get_fields()
 		);
-		$cards = array_map(
+		$cards    = array_map(
 			function( $card ) {
 				return $card->get_json();
 			},
@@ -119,10 +119,12 @@ class ProductForm extends \WC_REST_Data_Controller {
 			Form::get_sections()
 		);
 
-		return rest_ensure_response( array(
-			'fields'   => $fields,
-			'cards'    => $cards,
-			'sections' => $sections
-		) );
+		return rest_ensure_response(
+			array(
+				'fields'   => $fields,
+				'cards'    => $cards,
+				'sections' => $sections,
+			)
+		);
 	}
 }
