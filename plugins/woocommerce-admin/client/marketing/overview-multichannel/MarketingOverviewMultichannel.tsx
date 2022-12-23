@@ -37,8 +37,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 
 	return (
 		<div className="woocommerce-marketing-overview-multichannel">
-			{ /* TODO: show Campaigns card only when there is at least one registered channel. */ }
-			<Campaigns />
+			{ dataRegistered.length >= 1 && <Campaigns /> }
 			{ ( dataRegistered.length >= 1 || dataRecommended.length >= 1 ) && (
 				<Channels
 					registeredChannels={ dataRegistered }
