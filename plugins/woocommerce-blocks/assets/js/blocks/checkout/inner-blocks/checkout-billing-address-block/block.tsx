@@ -41,7 +41,8 @@ const Block = ( {
 		setBillingAddress,
 		setShippingAddress,
 		setBillingPhone,
-		forcedBillingAddress,
+		setShippingPhone,
+		useBillingAsShipping,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
 	const { isEditor } = useEditorContext();
@@ -59,7 +60,7 @@ const Block = ( {
 		if ( addressesSynced ) {
 			return;
 		}
-		if ( forcedBillingAddress ) {
+		if ( useBillingAsShipping ) {
 			setShippingAddress( billingAddress );
 		}
 		setAddressesSynced( true );
@@ -67,7 +68,7 @@ const Block = ( {
 		addressesSynced,
 		setShippingAddress,
 		billingAddress,
-		forcedBillingAddress,
+		useBillingAsShipping,
 	] );
 
 	const addressFieldsConfig = useMemo( () => {
@@ -96,7 +97,7 @@ const Block = ( {
 				type="billing"
 				onChange={ ( values: Partial< BillingAddress > ) => {
 					setBillingAddress( values );
-					if ( forcedBillingAddress ) {
+					if ( useBillingAsShipping ) {
 						setShippingAddress( values );
 						dispatchCheckoutEvent( 'set-shipping-address' );
 					}
@@ -119,6 +120,12 @@ const Block = ( {
 						dispatchCheckoutEvent( 'set-phone-number', {
 							step: 'billing',
 						} );
+						if ( useBillingAsShipping ) {
+							setShippingPhone( value );
+							dispatchCheckoutEvent( 'set-phone-number', {
+								step: 'shipping',
+							} );
+						}
 					} }
 				/>
 			) }
