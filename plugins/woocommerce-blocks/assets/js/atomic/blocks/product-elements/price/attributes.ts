@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
+import { BlockAttributes } from '@wordpress/blocks';
 
-export const blockAttributes = {
+export const blockAttributes: BlockAttributes = {
 	productId: {
 		type: 'number',
 		default: 0,

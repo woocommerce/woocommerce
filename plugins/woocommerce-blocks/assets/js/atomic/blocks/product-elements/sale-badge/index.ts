@@ -17,7 +17,11 @@ import {
 } from './constants';
 import { supports } from './support';
 
-const blockConfig: BlockConfiguration = {
+type CustomBlockConfiguration = BlockConfiguration & {
+	ancestor: string[];
+};
+
+const blockConfig: CustomBlockConfiguration = {
 	...sharedConfig,
 	title,
 	description,
