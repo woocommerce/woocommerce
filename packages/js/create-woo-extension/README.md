@@ -4,9 +4,9 @@ Create Woo Extension scaffolds a fully functional modern development environment
 
 ## Configuration Free
 
-With build tooling already configured, getting started developing modern Javascript screens requires no effort. Create Woo Extension adds a React Page integrating with WooCommerce Admin. Also included are PHP and Javascript unit testing ,linting, and Prettier IDE confguration for WooCommercea and WordPress.
+With build tooling already configured, getting started developing modern Javascript screens requires no effort. Create Woo Extension adds a React page integrating with WooCommerce Admin. Also included are PHP and Javascript unit testing, linting, and Prettier IDE confguration for WooCommerce and WordPress.
 
-Add the resulting project inside of your favorite environment setup or use the built in [wp-env](https://github.com/WordPress/gutenberg/tree/trunk/packages/env) for easily setting up a local WordPress environment for building and testing plugins and themes. `wp-env` is configured to load the latest WooCommerce to easily start developing with a single command.
+Add a project inside of your favorite environment setup or use the built in [wp-env](https://github.com/WordPress/gutenberg/tree/trunk/packages/env) for easily setting up a local WordPress environment for building and testing plugins and themes. `wp-env` is configured to load the latest WooCommerce to easily start developing with a single command.
 
 ## Usage
 
@@ -24,7 +24,7 @@ npm -g i @wordpress/env # If you don't already have wp-env
 wp-env start # Start Wordpress environment
 ```
 
-Go to your WordPress plugins page and activate the plugin.
+Go to the WordPress plugins page and activate the plugin.
 
 ## Development
 
