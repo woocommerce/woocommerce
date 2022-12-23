@@ -12,5 +12,10 @@
 		.icon + .label {
 			margin-left: $gap-smaller;
 		}
+
+		.icon {
+			height: em(16px);
+			width: em(16px);
+		}
 	}
 }
