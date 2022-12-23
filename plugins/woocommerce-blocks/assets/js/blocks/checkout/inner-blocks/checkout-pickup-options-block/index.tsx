@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Icon, shipping } from '@wordpress/icons';
+import { Icon, store } from '@wordpress/icons';
 import { registerBlockType } from '@wordpress/blocks';
 
 /**
@@ -14,7 +14,7 @@ registerBlockType( 'woocommerce/checkout-pickup-options-block', {
 	icon: {
 		src: (
 			<Icon
-				icon={ shipping }
+				icon={ store }
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
