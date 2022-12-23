@@ -77,7 +77,11 @@ export * from './countries/types';
 export * from './onboarding/types';
 export * from './plugins/types';
 export * from './products/types';
-export { ProductVariation } from './product-variations/types';
+export type {
+	ProductVariation,
+	ProductVariationAttribute,
+	ProductVariationImage,
+} from './product-variations/types';
 export {
 	QueryProductAttribute,
 	ProductAttributeSelectors,

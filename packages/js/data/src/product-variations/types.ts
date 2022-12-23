@@ -15,11 +15,53 @@ export type ProductVariationAttribute = {
 	option: string;
 };
 
+/**
+ * Product variation - Image properties
+ */
+export interface ProductVariationImage {
+	/**
+	 * Image ID.
+	 */
+	id: number;
+	/**
+	 * The date the image was created, in the site's timezone.
+	 */
+	readonly date_created: string;
+	/**
+	 * The date the image was created, as GMT.
+	 */
+	readonly date_created_gmt: string;
+	/**
+	 * The date the image was last modified, in the site's timezone.
+	 */
+	readonly date_modified: string;
+	/**
+	 * The date the image was last modified, as GMT.
+	 */
+	readonly date_modified_gmt: string;
+	/**
+	 * Image URL.
+	 */
+	src: string;
+	/**
+	 * 	Image name.
+	 */
+	name: string;
+	/**
+	 * 	Image alternative text.
+	 */
+	alt: string;
+}
+
 export type ProductVariation = Omit<
 	Product,
-	'name' | 'slug' | 'attributes'
+	'name' | 'slug' | 'attributes' | 'images'
 > & {
 	attributes: ProductVariationAttribute[];
+	/**
+	 * Variation image data.
+	 */
+	image?: ProductVariationImage;
 };
 
 type Query = Omit< ProductQuery, 'name' >;
