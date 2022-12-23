@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useState, useCallback, useEffect } from '@wordpress/element';
 import {
 	ProductAttribute,
@@ -12,8 +12,11 @@ import { resolveSelect } from '@wordpress/data';
 import {
 	Sortable,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
+	Link,
 } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
+import interpolateComponents from '@automattic/interpolate-components';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -33,23 +36,24 @@ type AttributeFieldProps = {
 	value: ProductAttribute[];
 	onChange: ( value: ProductAttribute[] ) => void;
 	productId?: number;
+	// TODO: should we support an 'any' option to show all attributes?
+	attributeType?: 'regular' | 'for-variations';
 };
 
 export type HydratedAttributeType = Omit< ProductAttribute, 'options' > & {
 	options?: string[];
 	terms?: ProductAttributeTerm[];
+	visible?: boolean;
 };
 
 export const AttributeField: React.FC< AttributeFieldProps > = ( {
 	value,
 	onChange,
 	productId,
+	attributeType = 'regular',
 } ) => {
 	const [ showAddAttributeModal, setShowAddAttributeModal ] =
 		useState( false );
-	const [ hydrationComplete, setHydrationComplete ] = useState< boolean >(
-		value ? false : true
-	);
 	const [ hydratedAttributes, setHydratedAttributes ] = useState<
 		HydratedAttributeType[]
 	>( [] );
@@ -57,8 +61,13 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		null | string
 	>( null );
 
-	const CANCEL_BUTTON_EVENT_NAME =
-		'product_add_attributes_modal_cancel_button_click';
+	const isOnlyForVariations = attributeType === 'for-variations';
+
+	const newAttributeProps = { variation: isOnlyForVariations };
+
+	const CANCEL_BUTTON_EVENT_NAME = isOnlyForVariations
+		? 'product_add_options_modal_cancel_button_click'
+		: 'product_add_attributes_modal_cancel_button_click';
 
 	const fetchTerms = useCallback(
 		( attributeId: number ) => {
@@ -82,7 +91,19 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 	);
 
 	useEffect( () => {
-		if ( ! value || hydrationComplete ) {
+		// Temporarily always doing hydration, since otherwise new attributes
+		// get removed from Options and Attributes when the other list is then
+		// modified
+		//
+		// This is because the hydration is out of date -- the logic currently
+		// assumes modifications are only made from within the component
+		//
+		// I think we'll need to move the hydration out of the individual component
+		// instance. To where, I do not yet know... maybe in the form context
+		// somewhere so that a single hydration source can be shared between multiple
+		// instances? Something like a simple key-value store in the form context
+		// would be handy.
+		if ( ! value ) {
 			return;
 		}
 
@@ -94,19 +115,26 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		).then( ( allResults ) => {
 			setHydratedAttributes( [
 				...globalAttributes.map( ( attr, index ) => {
+					const fetchedTerms = allResults[ index ];
+
 					const newAttr = {
 						...attr,
-						terms: allResults[ index ],
-						options: undefined,
+						// I'm not sure this is quite right for handling unpersisted terms,
+						// but this gets things kinda working for now
+						terms:
+							fetchedTerms.length > 0 ? fetchedTerms : undefined,
+						options:
+							fetchedTerms.length === 0
+								? attr.options
+								: undefined,
 					};
 
 					return newAttr;
 				} ),
 				...customAttributes,
 			] );
-			setHydrationComplete( true );
 		} );
-	}, [ productId, value, hydrationComplete ] );
+	}, [ fetchTerms, productId, value ] );
 
 	const fetchAttributeId = ( attribute: { id: number; name: string } ) =>
 		`${ attribute.id }-${ attribute.name }`;
@@ -121,6 +149,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 						? attr.terms.map( ( term ) => term.name )
 						: ( attr.options as string[] ),
 					terms: undefined,
+					visible: attr.visible || false,
 				};
 			} )
 		);
@@ -157,24 +186,48 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 						)
 				)
 				.map( ( newAttr, index ) => {
-					newAttr.position = ( value || [] ).length + index;
-					return newAttr;
+					return {
+						...newAttributeProps,
+						...newAttr,
+						position: ( value || [] ).length + index,
+					};
 				} ),
 		] );
 		recordEvent( 'product_add_attributes_modal_add_button_click' );
 		setShowAddAttributeModal( false );
 	};
 
-	if ( ! value || value.length === 0 || hydratedAttributes.length === 0 ) {
+	const filteredAttributes = value
+		? value.filter(
+				( attribute: ProductAttribute ) =>
+					attribute.variation === isOnlyForVariations
+		  )
+		: false;
+
+	if (
+		! filteredAttributes ||
+		filteredAttributes.length === 0 ||
+		hydratedAttributes.length === 0
+	) {
 		return (
 			<>
 				<AttributeEmptyState
+					addNewLabel={
+						isOnlyForVariations
+							? __( 'Add options', 'woocommerce' )
+							: undefined
+					}
 					onNewClick={ () => {
 						recordEvent(
 							'product_add_first_attribute_button_click'
 						);
 						setShowAddAttributeModal( true );
 					} }
+					subtitle={
+						isOnlyForVariations
+							? __( 'No options yet', 'woocommerce' )
+							: undefined
+					}
 				/>
 				{ showAddAttributeModal && (
 					<AddAttributeModal
@@ -183,7 +236,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 							setShowAddAttributeModal( false );
 						} }
 						onAdd={ onAddNewAttributes }
-						selectedAttributeIds={ ( value || [] ).map(
+						selectedAttributeIds={ ( filteredAttributes || [] ).map(
 							( attr ) => attr.id
 						) }
 					/>
@@ -193,8 +246,10 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		);
 	}
 
-	const sortedAttributes = value.sort( ( a, b ) => a.position - b.position );
-	const attributeKeyValues = value.reduce(
+	const sortedAttributes = filteredAttributes.sort(
+		( a, b ) => a.position - b.position
+	);
+	const attributeKeyValues = filteredAttributes.reduce(
 		(
 			keyValue: Record< number, ProductAttribute >,
 			attribute: ProductAttribute
@@ -204,6 +259,20 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		},
 		{} as Record< number, ProductAttribute >
 	);
+
+	const attribute = hydratedAttributes.find(
+		( attr ) => fetchAttributeId( attr ) === editingAttributeId
+	) as HydratedAttributeType;
+
+	const editAttributeCopy = isOnlyForVariations
+		? __(
+				`You can change the option's name in {{link}}Attributes{{/link}}.`,
+				'woocommerce'
+		  )
+		: __(
+				`You can change the attribute's name in {{link}}Attributes{{/link}}.`,
+				'woocommerce'
+		  );
 
 	return (
 		<div className="woocommerce-attribute-field">
@@ -217,27 +286,39 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					);
 				} }
 			>
-				{ sortedAttributes.map( ( attribute ) => (
+				{ sortedAttributes.map( ( attr ) => (
 					<AttributeListItem
-						attribute={ attribute }
-						key={ fetchAttributeId( attribute ) }
+						attribute={ attr }
+						key={ fetchAttributeId( attr ) }
 						onEditClick={ () =>
-							setEditingAttributeId(
-								fetchAttributeId( attribute )
-							)
+							setEditingAttributeId( fetchAttributeId( attr ) )
 						}
-						onRemoveClick={ () => onRemove( attribute ) }
+						onRemoveClick={ () => onRemove( attr ) }
 					/>
 				) ) }
 			</Sortable>
 			<AddAttributeListItem
+				label={
+					isOnlyForVariations
+						? __( 'Add option', 'woocommerce' )
+						: undefined
+				}
 				onAddClick={ () => {
-					recordEvent( 'product_add_attribute_button' );
+					recordEvent(
+						isOnlyForVariations
+							? 'product_add_option_button'
+							: 'product_add_attribute_button'
+					);
 					setShowAddAttributeModal( true );
 				} }
 			/>
 			{ showAddAttributeModal && (
 				<AddAttributeModal
+					title={
+						isOnlyForVariations
+							? __( 'Add options', 'woocommerce' )
+							: undefined
+					}
 					onCancel={ () => {
 						recordEvent( CANCEL_BUTTON_EVENT_NAME );
 						setShowAddAttributeModal( false );
@@ -249,6 +330,29 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 			<SelectControlMenuSlot />
 			{ editingAttributeId && (
 				<EditAttributeModal
+					title={
+						/* translators: %s is the attribute name */
+						sprintf(
+							__( 'Edit %s', 'woocommerce' ),
+							attribute.name
+						)
+					}
+					globalAttributeHelperMessage={ interpolateComponents( {
+						mixedString: editAttributeCopy,
+						components: {
+							link: (
+								<Link
+									href={ getAdminLink(
+										'edit.php?post_type=product&page=product_attributes'
+									) }
+									target="_blank"
+									type="wp-admin"
+								>
+									<></>
+								</Link>
+							),
+						},
+					} ) }
 					onCancel={ () => setEditingAttributeId( null ) }
 					onEdit={ ( changedAttribute ) => {
 						const newAttributesSet = [ ...hydratedAttributes ];
@@ -266,12 +370,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 						updateAttributes( newAttributesSet );
 						setEditingAttributeId( null );
 					} }
-					attribute={
-						hydratedAttributes.find(
-							( attr ) =>
-								fetchAttributeId( attr ) === editingAttributeId
-						) as HydratedAttributeType
-					}
+					attribute={ attribute }
 				/>
 			) }
 		</div>

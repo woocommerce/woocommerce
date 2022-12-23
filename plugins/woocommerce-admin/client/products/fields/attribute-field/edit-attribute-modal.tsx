@@ -9,12 +9,7 @@ import {
 	TextControl,
 } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-import {
-	__experimentalTooltip as Tooltip,
-	Link,
-} from '@woocommerce/components';
-import interpolateComponents from '@automattic/interpolate-components';
-import { getAdminLink } from '@woocommerce/settings';
+import { __experimentalTooltip as Tooltip } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -30,14 +25,12 @@ import './edit-attribute-modal.scss';
 type EditAttributeModalProps = {
 	title?: string;
 	nameLabel?: string;
-	globalAttributeHelperMessage?: string;
+	globalAttributeHelperMessage?: JSX.Element;
 	customAttributeHelperMessage?: string;
 	termsLabel?: string;
 	termsPlaceholder?: string;
 	visibleLabel?: string;
 	visibleTooltip?: string;
-	filtersLabel?: string;
-	filtersTooltip?: string;
 	cancelAccessibleLabel?: string;
 	cancelLabel?: string;
 	updateAccessibleLabel?: string;
@@ -50,25 +43,7 @@ type EditAttributeModalProps = {
 export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 	title = __( 'Edit attribute', 'woocommerce' ),
 	nameLabel = __( 'Name', 'woocommerce' ),
-	globalAttributeHelperMessage = interpolateComponents( {
-		mixedString: __(
-			`You can change the attribute's name in {{link}}Attributes{{/link}}.`,
-			'woocommerce'
-		),
-		components: {
-			link: (
-				<Link
-					href={ getAdminLink(
-						'edit.php?post_type=product&page=product_attributes'
-					) }
-					target="_blank"
-					type="wp-admin"
-				>
-					<></>
-				</Link>
-			),
-		},
-	} ),
+	globalAttributeHelperMessage,
 	customAttributeHelperMessage = __(
 		'Your customers will see this on the product page',
 		'woocommerce'
@@ -78,11 +53,6 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 	visibleLabel = __( 'Visible to customers', 'woocommerce' ),
 	visibleTooltip = __(
 		'Show or hide this attribute on the product page',
-		'woocommerce'
-	),
-	filtersLabel = __( 'Used for filters', 'woocommerce' ),
-	filtersTooltip = __(
-		`Show or hide this attribute in the filters section on your store's category and shop pages`,
 		'woocommerce'
 	),
 	cancelAccessibleLabel = __( 'Cancel', 'woocommerce' ),
@@ -164,19 +134,6 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 						label={ visibleLabel }
 					/>
 					<Tooltip text={ visibleTooltip } />
-				</div>
-				<div className="woocommerce-edit-attribute-modal__option-container">
-					<CheckboxControl
-						onChange={ ( val ) =>
-							setEditableAttribute( {
-								...( editableAttribute as HydratedAttributeType ),
-								variation: val,
-							} )
-						}
-						checked={ editableAttribute?.variation }
-						label={ filtersLabel }
-					/>
-					<Tooltip text={ filtersTooltip } />
 				</div>
 			</div>
 			<div className="woocommerce-add-attribute-modal__buttons">
