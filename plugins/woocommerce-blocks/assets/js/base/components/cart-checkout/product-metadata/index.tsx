@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { ProductResponseItemData } from '@woocommerce/type-defs/product-response';
-import { CartVariationItem } from '@woocommerce/type-defs/cart';
+import { ProductResponseItemData, CartVariationItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies

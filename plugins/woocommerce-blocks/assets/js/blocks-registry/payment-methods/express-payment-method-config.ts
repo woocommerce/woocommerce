@@ -7,7 +7,7 @@ import type {
 	Supports,
 	CanMakePaymentCallback,
 	ExpressPaymentMethodConfigInstance,
-} from '@woocommerce/type-defs/payments';
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies

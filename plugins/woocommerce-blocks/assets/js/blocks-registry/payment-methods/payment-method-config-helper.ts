@@ -4,7 +4,7 @@
 import type {
 	CanMakePaymentCallback,
 	CanMakePaymentExtensionCallback,
-} from '@woocommerce/type-defs/payments';
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies

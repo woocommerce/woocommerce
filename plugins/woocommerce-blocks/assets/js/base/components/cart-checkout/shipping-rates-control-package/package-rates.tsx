@@ -5,7 +5,7 @@ import { useState, useEffect } from '@wordpress/element';
 import RadioControl, {
 	RadioControlOptionLayout,
 } from '@woocommerce/base-components/radio-control';
-import type { CartShippingPackageShippingRate } from '@woocommerce/type-defs/cart';
+import type { CartShippingPackageShippingRate } from '@woocommerce/types';
 
 /**
  * Internal dependencies

@@ -4,8 +4,7 @@
 import { dispatch } from '@wordpress/data';
 import { previewCart } from '@woocommerce/resource-previews';
 import { camelCase, cloneDeep, mapKeys } from 'lodash';
-import { Cart } from '@woocommerce/type-defs/cart';
-import { CartResponse } from '@woocommerce/types';
+import { Cart, CartResponse } from '@woocommerce/types';
 
 /**
  * Internal dependencies

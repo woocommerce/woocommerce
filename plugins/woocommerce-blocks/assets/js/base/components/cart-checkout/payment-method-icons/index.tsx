@@ -2,7 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import type { PaymentMethodIcons as PaymentMethodIconsType } from '@woocommerce/type-defs/payments';
+import type { PaymentMethodIcons as PaymentMethodIconsType } from '@woocommerce/types';
 
 /**
  * Internal dependencies
