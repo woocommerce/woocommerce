@@ -250,8 +250,7 @@ class Cart extends AbstractBlock {
 		parent::register_block_type_assets();
 		$chunks        = $this->get_chunks_paths( $this->chunks_folder );
 		$vendor_chunks = $this->get_chunks_paths( 'vendors--cart-blocks' );
-
-		$this->register_chunk_translations( array_merge( $chunks, $vendor_chunks ) );
+		$this->register_chunk_translations( array_merge( $vendor_chunks, $chunks ) );
 	}
 
 	/**
