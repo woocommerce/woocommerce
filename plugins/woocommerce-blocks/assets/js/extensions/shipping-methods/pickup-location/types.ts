@@ -31,6 +31,7 @@ export type ShippingMethodSettings = {
 };
 
 export type ReadOnlySettings = {
+	storeCountry: string;
 	hasLegacyPickup: boolean;
 };
 

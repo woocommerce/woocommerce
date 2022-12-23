@@ -195,6 +195,7 @@ class ShippingController {
 			'pickupLocations'        => $formatted_pickup_locations,
 			'readonlySettings'       => array(
 				'hasLegacyPickup' => $has_legacy_pickup,
+				'storeCountry'    => WC()->countries->get_base_country(),
 			),
 		);
 

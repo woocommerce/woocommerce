@@ -32,6 +32,7 @@ export const defaultSettings = {
 
 export const defaultReadyOnlySettings = {
 	hasLegacyPickup: false,
+	storeCountry: '',
 };
 declare global {
 	const hydratedScreenSettings: {

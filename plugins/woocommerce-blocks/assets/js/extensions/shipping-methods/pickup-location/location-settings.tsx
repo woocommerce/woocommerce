@@ -48,6 +48,7 @@ const LocationSettings = () => {
 		setPickupLocations,
 		toggleLocation,
 		updateLocation,
+		readOnlySettings,
 	} = useSettingsContext();
 	const [ editingLocation, setEditingLocation ] =
 		useState< UniqueIdentifier >( '' );
@@ -138,7 +139,7 @@ const LocationSettings = () => {
 										city: '',
 										state: '',
 										postcode: '',
-										country: '',
+										country: readOnlySettings.storeCountry,
 									},
 							  }
 							: pickupLocations.find( ( { id } ) => {
