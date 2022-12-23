@@ -88,10 +88,9 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\MobileAppMagicLink',
 		);
 
+		$product_form_controllers = array();
 		if ( Features::is_enabled( 'new-product-management-experience' ) ) {
-			$product_form_controllers = array(
-				'Automattic\WooCommerce\Admin\API\ProductForm',
-			);
+			$product_form_controllers[] = 'Automattic\WooCommerce\Admin\API\ProductForm';
 		}
 
 		if ( Features::is_enabled( 'analytics' ) ) {
