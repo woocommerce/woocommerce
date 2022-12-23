@@ -8,12 +8,7 @@ namespace Automattic\WooCommerce\Internal\Admin\ProductForm;
 /**
  * Field class.
  */
-class Field {
-	/**
-	 * Product Component traits.
-	 */
-	use ComponentTrait;
-
+class Field extends Component {
 	/**
 	 * Field type.
 	 *
@@ -22,22 +17,15 @@ class Field {
 	public $type;
 
 	/**
-	 * Field arguments.
-	 *
-	 * @var array
-	 */
-	protected $args;
-
-	/**
 	 * Array of required arguments.
 	 *
 	 * @var array
 	 */
 	const REQUIRED_ARGUMENTS = array(
-		'name',
 		'type',
-		'label',
 		'section',
+		'properties.name',
+		'properties.label'
 	);
 
 	/**
@@ -45,29 +33,17 @@ class Field {
 	 *
 	 * @param string $id Field id.
 	 * @param string $plugin_id Plugin id.
-	 * @param array  $args Array containing the necessary arguments.
+	 * @param array  $additional_args Array containing the necessary arguments.
 	 *     $args = array(
 	 *       'type'            => (string) Field type. Required.
-	 *       'name'            => (string) Field name.
 	 *       'section'         => (string) Field location. Required.
 	 *       'order'           => (int) Field order.
 	 *       'properties'      => (array) Field properties.
 	 *     ).
 	 */
-	public function __construct( $id, $plugin_id, $args ) {
-		$this->id        = $id;
-		$this->type      = $args['type'];
-		$this->plugin_id = $plugin_id;
-		$this->args      = $args;
-	}
-
-	/**
-	 * Field arguments.
-	 *
-	 * @return array
-	 */
-	public function get_field_arguments() {
-		return $this->args;
+	public function __construct( $id, $plugin_id, $additional_args ) {
+		parent::__construct( $id, $plugin_id, $additional_args );
+		$this->type = $additional_args['type'];
 	}
 
 	/**
@@ -80,27 +56,8 @@ class Field {
 		return array_filter(
 			self::REQUIRED_ARGUMENTS,
 			function( $arg_key ) use ( $args ) {
-				return ! isset( $args[ $arg_key ] );
+				return null === self::get_argument_from_path( $args, $arg_key );
 			}
 		);
-	}
-
-	/**
-	 * Sorting function for fields.
-	 *
-	 * @param Field $a Field a.
-	 * @param Field $b Field b.
-	 * @param array $sort_by key and order to sort by.
-	 * @return int
-	 */
-	public static function sort( $a, $b, $sort_by = array() ) {
-		$key   = $sort_by['key'];
-		$a_val = $a->args[ $key ] ?? false;
-		$b_val = $b->args[ $key ] ?? false;
-		if ( 'asc' === $sort_by['order'] ) {
-			return $a_val <=> $b_val;
-		} else {
-			return $b_val <=> $a_val;
-		}
 	}
 }

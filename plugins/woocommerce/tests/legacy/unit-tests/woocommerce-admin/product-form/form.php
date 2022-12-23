@@ -18,7 +18,7 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 		$field = Form::add_field( 'id', 'woocommerce', array() );
 
 		$this->assertInstanceOf( 'WP_Error', $field );
-		$this->assertContains( 'You are missing required arguments of WooCommerce ProductForm Field: name, type, label, section', $field->get_error_message() );
+		$this->assertContains( 'You are missing required arguments of WooCommerce ProductForm Field: type, section, properties.name, properties.label', $field->get_error_message() );
 	}
 
 	/**
@@ -29,10 +29,12 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id',
 			'woocommerce',
 			array(
-				'label'   => 'label',
-				'name'    => 'name',
 				'type'    => 'text',
 				'section' => 'product_details',
+				'properties' => array(
+					'label'   => 'label',
+					'name'    => 'name',
+				)
 			)
 		);
 
@@ -40,10 +42,12 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id',
 			'woocommerce',
 			array(
-				'label'   => 'label',
-				'name'    => 'name',
 				'type'    => 'text',
 				'section' => 'product_details',
+				'properties' => array(
+					'label'   => 'label',
+					'name'    => 'name',
+				)
 			)
 		);
 		$this->assertInstanceOf( 'WP_Error', $field_duplicate );
@@ -58,10 +62,12 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id',
 			'woocommerce',
 			array(
-				'label'   => 'label',
-				'name'    => 'name',
 				'type'    => 'text',
 				'section' => 'product_details',
+				'properties' => array(
+					'label'   => 'label',
+					'name'    => 'name',
+				)
 			)
 		);
 
@@ -69,10 +75,12 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id2',
 			'woocommerce',
 			array(
-				'label'   => 'label',
-				'name'    => 'name',
 				'type'    => 'textarea',
 				'section' => 'product_details',
+				'properties' => array(
+					'label'   => 'label',
+					'name'    => 'name',
+				)
 			)
 		);
 
@@ -90,10 +98,12 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id',
 			'woocommerce',
 			array(
-				'label'   => 'label',
-				'name'    => 'id',
 				'type'    => 'text',
 				'section' => 'product_details',
+				'properties' => array(
+					'label'   => 'label',
+					'name'    => 'name',
+				)
 			)
 		);
 
@@ -101,10 +111,12 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id2',
 			'woocommerce',
 			array(
-				'label'   => 'label',
-				'name'    => 'id2',
 				'type'    => 'textarea',
 				'section' => 'product_details',
+				'properties' => array(
+					'label'   => 'label',
+					'name'    => 'name',
+				)
 			)
 		);
 
@@ -112,11 +124,13 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'first',
 			'woocommerce',
 			array(
-				'label'   => 'label',
 				'order'   => 1,
-				'name'    => 'first',
 				'type'    => 'textarea',
 				'section' => 'product_details',
+				'properties' => array(
+					'label'   => 'label',
+					'name'    => 'name',
+				)
 			)
 		);
 
