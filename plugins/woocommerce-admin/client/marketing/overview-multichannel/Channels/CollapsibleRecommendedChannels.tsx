@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Fragment, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { CardBody, CardDivider, Button, Icon } from '@wordpress/components';
 import { chevronUp, chevronDown } from '@wordpress/icons';
@@ -11,7 +11,7 @@ import { chevronUp, chevronDown } from '@wordpress/icons';
  */
 import { RecommendedChannel } from '~/marketing/types';
 import { RecommendedChannelsList } from './RecommendedChannelsList';
-import './Channels.scss';
+import './CollapsibleRecommendedChannels.scss';
 
 type RecommendedChannelsType = {
 	recommendedChannels: Array< RecommendedChannel >;
@@ -23,7 +23,7 @@ export const CollapsibleRecommendedChannels: React.FC<
 	const [ collapsed, setCollapsed ] = useState( true );
 
 	return (
-		<>
+		<div className="woocommerce-marketing-recommended-channels">
 			<CardDivider />
 			<CardBody>
 				<Button
@@ -42,6 +42,6 @@ export const CollapsibleRecommendedChannels: React.FC<
 					recommendedChannels={ recommendedChannels }
 				/>
 			) }
-		</>
+		</div>
 	);
 };
