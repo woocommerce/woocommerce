@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/checkout-pickup-options-block",
 	"version": "1.0.0",
-	"title": "Shipping Method",
+	"title": "Pickup Method",
 	"description": "Shows local pickup options.",
 	"category": "woocommerce",
 	"supports": {
