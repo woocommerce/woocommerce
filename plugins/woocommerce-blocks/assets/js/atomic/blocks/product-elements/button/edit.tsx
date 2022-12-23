@@ -7,16 +7,25 @@ import {
 	BlockControls,
 	useBlockProps,
 } from '@wordpress/block-editor';
+import type { BlockEditProps } from '@wordpress/blocks';
 import { useEffect } from '@wordpress/element';
+import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
 
 /**
  * Internal dependencies
  */
 import Block from './block';
+import { BlockAttributes } from './types';
 
-const Edit = ( { attributes, setAttributes, context } ) => {
+const Edit = ( {
+	attributes,
+	setAttributes,
+	context,
+}: BlockEditProps< BlockAttributes > & {
+	context?: Context | undefined;
+} ): JSX.Element => {
 	const blockProps = useBlockProps();
-	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
+	const isDescendentOfQueryLoop = Number.isFinite( context?.queryId );
 
 	useEffect(
 		() => setAttributes( { isDescendentOfQueryLoop } ),
