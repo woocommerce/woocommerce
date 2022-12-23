@@ -358,7 +358,10 @@ export function StoreAddress( {
 				required
 				autoComplete="new-password" // disable autocomplete and autofill
 				getSearchExpression={ ( query: string ) => {
-					return new RegExp( '(^' + query + '| \— (' + query + '))', 'i' );
+					return new RegExp(
+						'(^' + query + '| — (' + query + '))',
+						'i'
+					);
 				} }
 				options={ countryStateOptions }
 				excludeSelectedOptions={ false }
