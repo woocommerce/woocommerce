@@ -45,9 +45,10 @@ export const Edit = ( {
 	} = useCheckoutBlockContext();
 	const { addressFieldControls: Controls } =
 		useCheckoutBlockControlsContext();
-	const { showBillingFields, forcedBillingAddress } = useCheckoutAddress();
+	const { showBillingFields, forcedBillingAddress, useBillingAsShipping } =
+		useCheckoutAddress();
 
-	if ( ! showBillingFields && ! forcedBillingAddress ) {
+	if ( ! showBillingFields && ! useBillingAsShipping ) {
 		return null;
 	}
 	attributes.title = getBillingAddresssBlockTitle(

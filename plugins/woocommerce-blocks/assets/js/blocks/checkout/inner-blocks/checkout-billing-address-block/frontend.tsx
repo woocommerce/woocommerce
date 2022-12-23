@@ -42,9 +42,10 @@ const FrontendBlock = ( {
 		showCompanyField,
 		showPhoneField,
 	} = useCheckoutBlockContext();
-	const { showBillingFields, forcedBillingAddress } = useCheckoutAddress();
+	const { showBillingFields, forcedBillingAddress, useBillingAsShipping } =
+		useCheckoutAddress();
 
-	if ( ! showBillingFields && ! forcedBillingAddress ) {
+	if ( ! showBillingFields && ! useBillingAsShipping ) {
 		return null;
 	}
 	title = getBillingAddresssBlockTitle( title, forcedBillingAddress );
