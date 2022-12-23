@@ -11,15 +11,15 @@ import { chevronUp, chevronDown } from '@wordpress/icons';
  */
 import { RecommendedChannel } from '~/marketing/types';
 import { RecommendedChannelsList } from './RecommendedChannelsList';
-import './CollapsibleRecommendedChannels.scss';
+import './RecommendedChannels.scss';
 
 type RecommendedChannelsType = {
 	recommendedChannels: Array< RecommendedChannel >;
 };
 
-export const CollapsibleRecommendedChannels: React.FC<
-	RecommendedChannelsType
-> = ( { recommendedChannels } ) => {
+export const RecommendedChannels: React.FC< RecommendedChannelsType > = ( {
+	recommendedChannels,
+} ) => {
 	const [ collapsed, setCollapsed ] = useState( true );
 
 	return (

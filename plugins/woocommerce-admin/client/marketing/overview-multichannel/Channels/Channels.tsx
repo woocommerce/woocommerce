@@ -16,7 +16,7 @@ import {
 import { useChannels } from './useChannels';
 import './Channels.scss';
 import { InstalledChannelCardBody } from './InstalledChannelCardBody';
-import { CollapsibleRecommendedChannels } from './CollapsibleRecommendedChannels';
+import { RecommendedChannels } from './RecommendedChannels';
 import { RecommendedChannelsList } from './RecommendedChannelsList';
 
 export const Channels = () => {
@@ -107,7 +107,7 @@ export const Channels = () => {
 
 			{ /* Recommended channels section. */ }
 			{ recommendedChannels.length > 0 && (
-				<CollapsibleRecommendedChannels
+				<RecommendedChannels
 					recommendedChannels={ recommendedChannels }
 				/>
 			) }
