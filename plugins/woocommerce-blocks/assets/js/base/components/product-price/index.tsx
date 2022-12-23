@@ -17,7 +17,7 @@ interface PriceRangeProps {
 	/**
 	 * Currency configuration object
 	 */
-	currency: Currency | Record< string, never >;
+	currency: Currency | Record< string, never > | undefined;
 	/**
 	 * The maximum price for the range
 	 */
@@ -31,13 +31,13 @@ interface PriceRangeProps {
 	 *
 	 * **Note:** this excludes the dash in between the elements
 	 */
-	priceClassName?: string;
+	priceClassName?: string | undefined;
 	/**
 	 * Any custom style to be applied to each of the elements containing the prices
 	 *
 	 * **Note:** this excludes the dash in between the elements
 	 */
-	priceStyle?: React.CSSProperties;
+	priceStyle?: React.CSSProperties | undefined;
 }
 
 const PriceRange = ( {
@@ -89,19 +89,19 @@ interface SalePriceProps {
 	/**
 	 * Currency configuration object
 	 */
-	currency: Currency | Record< string, never >;
+	currency: Currency | Record< string, never > | undefined;
 	/**
 	 * CSS class to be applied to the regular price container
 	 *
 	 * i.e. `<del>` element
 	 */
-	regularPriceClassName?: string;
+	regularPriceClassName?: string | undefined;
 	/**
 	 * Custom style to be applied to the regular price container
 	 *
 	 * i.e. `<del>` element
 	 */
-	regularPriceStyle?: React.CSSProperties;
+	regularPriceStyle?: React.CSSProperties | undefined;
 	/**
 	 * The regular price before the sale
 	 */
@@ -111,17 +111,17 @@ interface SalePriceProps {
 	 *
 	 * i.e. `<ins>` element
 	 */
-	priceClassName?: string;
+	priceClassName?: string | undefined;
 	/**
 	 * Custom style to be applied to the regular price container
 	 *
 	 * i.e. `<ins>` element
 	 */
-	priceStyle?: React.CSSProperties;
+	priceStyle?: React.CSSProperties | undefined;
 	/**
 	 * The new price during the sale
 	 */
-	price: number | string;
+	price: number | string | undefined;
 }
 
 const SalePrice = ( {
@@ -183,25 +183,25 @@ export interface ProductPriceProps {
 	 * Applies the `wc-block-components-product-price--align-${ align }` utility
 	 * class to the wrapper.
 	 */
-	align?: 'left' | 'center' | 'right';
+	align?: 'left' | 'center' | 'right' | undefined;
 	/**
 	 * CSS class for the wrapper
 	 */
-	className?: string;
+	className?: string | undefined;
 	/**
 	 * Currency configuration object
 	 */
-	currency: Currency | Record< string, never >;
+	currency?: Currency | Record< string, never >;
 	/**
 	 * The string version of the element to use for the price interpolation
 	 *
 	 * **Note:** It should contain `<price/>` (which is also the default value)
 	 */
-	format: string;
+	format?: string;
 	/**
 	 * The current price
 	 */
-	price: number | string;
+	price?: number | string;
 	/**
 	 * CSS class for the current price wrapper
 	 */
@@ -209,36 +209,36 @@ export interface ProductPriceProps {
 	/**
 	 * Custom style for the current price
 	 */
-	priceStyle?: React.CSSProperties;
+	priceStyle?: React.CSSProperties | undefined;
 	/**
 	 * The maximum price in a range
 	 *
 	 * If both `maxPrice` and `minPrice` are set, the component will be rendered
 	 * as a `PriceRange` component, otherwise, this value will be ignored.
 	 */
-	maxPrice?: number | string;
+	maxPrice?: number | string | undefined;
 	/**
 	 * The minimum price in a range
 	 *
 	 * If both `maxPrice` and `minPrice` are set, the component will be rendered
 	 * as a `PriceRange` component, otherwise, this value will be ignored.
 	 */
-	minPrice?: number | string;
+	minPrice?: number | string | undefined;
 	/**
 	 * The regular price if the item is currently on sale
 	 *
 	 * If this property exists and is different from the current price, then the
 	 * component will be rendered as a `SalePrice` component.
 	 */
-	regularPrice?: number | string;
+	regularPrice?: number | string | undefined;
 	/**
 	 * CSS class to apply to the regular price wrapper
 	 */
-	regularPriceClassName?: string;
+	regularPriceClassName?: string | undefined;
 	/**
 	 * Custom style to apply to the regular price wrapper.
 	 */
-	regularPriceStyle?: React.CSSProperties;
+	regularPriceStyle?: React.CSSProperties | undefined;
 }
 
 const ProductPrice = ( {
