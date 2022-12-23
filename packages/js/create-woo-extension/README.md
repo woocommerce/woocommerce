@@ -1,14 +1,14 @@
 # @woocommerce/create-woo-extension
 
-Create Woo Extension scaffolds a fully functional modern development environment for integrating with WooCommerce. Use it to build a extensions to leverage the power of WooCommerce.
+Create Woo Extension scaffolds a fully functional modern development environment for integrating with WooCommerce. Use it to build extensions leveraging the power of WooCommerce.
 
-## Leave the configuration up to us
+## Configuration Free
 
-With Javascript build tooling already configured, getting started developing modern screens requires no configuration. Create Woo Extension adds a React Page integrating with WooCommerce Admin. Also included are PHP and Javascript unit testing ,linting, and Prettier IDE confguration for WooCommercea and WordPress.
+With build tooling already configured, getting started developing modern Javascript screens requires no effort. Create Woo Extension adds a React Page integrating with WooCommerce Admin. Also included are PHP and Javascript unit testing ,linting, and Prettier IDE confguration for WooCommercea and WordPress.
 
-Drop the resulting project inside of your favorite environment setup or use the built in [wp-env](https://github.com/WordPress/gutenberg/tree/trunk/packages/env) for easily setting up a local WordPress environment for building and testing plugins and themes. `wp-env` is configured to load the lates WooCommerce to easily start developing with a single command.
+Add the resulting project inside of your favorite environment setup or use the built in [wp-env](https://github.com/WordPress/gutenberg/tree/trunk/packages/env) for easily setting up a local WordPress environment for building and testing plugins and themes. `wp-env` is configured to load the latest WooCommerce to easily start developing with a single command.
 
-## Installation
+## Usage
 
 ```
 npx @wordpress/create-block -t @woocommerce/create-woo-extension my-extension-name
@@ -24,7 +24,7 @@ npm -g i @wordpress/env # If you don't already have wp-env
 wp-env start # Start Wordpress environment
 ```
 
-When this has completed, go to your WordPress plugins page and activate the plugin.
+Go to your WordPress plugins page and activate the plugin.
 
 ## Development
 
