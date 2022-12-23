@@ -13,8 +13,10 @@ import {
 	CardHeaderDescription,
 	CenteredSpinner,
 } from '~/marketing/components';
-import { useRegisteredChannels } from './useRegisteredChannels';
-import { useRecommendedChannels } from './useRecommendedChannels';
+import {
+	useRegisteredChannels,
+	useRecommendedChannels,
+} from '~/marketing/hooks';
 import { InstalledChannelCardBody } from './InstalledChannelCardBody';
 import { RecommendedChannels } from './RecommendedChannels';
 import { RecommendedChannelsList } from './RecommendedChannelsList';
