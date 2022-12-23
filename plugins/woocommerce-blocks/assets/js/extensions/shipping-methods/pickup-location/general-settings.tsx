@@ -132,6 +132,7 @@ const GeneralSettings = () => {
 								'woo-gutenberg-products-block'
 							) }
 							type="number"
+							pattern="[0-9]+\.?[0-9]*"
 							value={ settings.cost }
 							onChange={ setSettingField( 'cost' ) }
 							disabled={ false }
