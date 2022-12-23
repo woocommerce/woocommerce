@@ -67,7 +67,7 @@ class CustomerAccount extends AbstractBlock {
 		}
 
 		if ( self::DISPLAY_ALT === $attributes['iconStyle'] ) {
-			return '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="16" height="16">
+			return '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="18" height="18">
 				<path
 					d="M9 0C4.03579 0 0 4.03579 0 9C0 13.9642 4.03579 18 9 18C13.9642 18 18 13.9642 18 9C18 4.03579 13.9642 0 9
 					 	0ZM9 4.32C10.5347 4.32 11.7664 5.57056 11.7664 7.08638C11.7664 8.62109 10.5158 9.85277 9 9.85277C7.4653

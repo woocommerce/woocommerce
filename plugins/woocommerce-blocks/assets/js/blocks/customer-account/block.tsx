@@ -27,7 +27,7 @@ const AccountIcon = ( {
 			: customerAccountStyle;
 
 	return displayStyle === DisplayStyle.TEXT_ONLY ? null : (
-		<Icon className="icon" icon={ icon } size={ 16 } />
+		<Icon className="icon" icon={ icon } size={ 18 } />
 	);
 };
 
