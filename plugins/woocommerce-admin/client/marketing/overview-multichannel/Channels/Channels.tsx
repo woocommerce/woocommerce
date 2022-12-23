@@ -47,10 +47,18 @@ export const Channels = () => {
 
 	/*
 	 * If users have no registered channels,
-	 * we display recommended channels without collapsible list
+	 * we should display recommended channels without collapsible list
 	 * and with a description in the card header.
 	 */
-	if ( registeredChannels.length === 0 && recommendedChannels.length > 0 ) {
+	if ( registeredChannels.length === 0 ) {
+		/**
+		 * If for some reasons we don't have recommended channels,
+		 * then we should not show the Channels card at all.
+		 */
+		if ( recommendedChannels.length === 0 ) {
+			return null;
+		}
+
 		return (
 			<Card className="woocommerce-marketing-channels-card">
 				<CardHeader>
