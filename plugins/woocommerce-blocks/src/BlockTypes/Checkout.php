@@ -415,8 +415,7 @@ class Checkout extends AbstractBlock {
 		parent::register_block_type_assets();
 		$chunks        = $this->get_chunks_paths( $this->chunks_folder );
 		$vendor_chunks = $this->get_chunks_paths( 'vendors--cart-blocks' );
-		$shared_chunks = [ 'cart-blocks/order-summary-shipping--checkout-blocks/order-summary-shipping-frontend' ];
-		$this->register_chunk_translations( array_merge( $chunks, $vendor_chunks, $shared_chunks ) );
+		$this->register_chunk_translations( array_merge( $vendor_chunks, $chunks ) );
 	}
 
 	/**
