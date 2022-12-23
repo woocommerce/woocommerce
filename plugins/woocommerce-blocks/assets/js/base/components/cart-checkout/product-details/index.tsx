@@ -3,7 +3,7 @@
  */
 import { kebabCase } from 'lodash';
 import { decodeEntities } from '@wordpress/html-entities';
-import type { ProductResponseItemData } from '@woocommerce/type-defs/product-response';
+import type { ProductResponseItemData } from '@woocommerce/types';
 
 /**
  * Internal dependencies

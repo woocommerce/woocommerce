@@ -5,7 +5,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { useCallback } from '@wordpress/element';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useThrowError } from '@woocommerce/base-hooks';
-import { SelectShippingRateType } from '@woocommerce/type-defs/shipping';
+import { SelectShippingRateType } from '@woocommerce/types';
 
 /**
  * Internal dependencies

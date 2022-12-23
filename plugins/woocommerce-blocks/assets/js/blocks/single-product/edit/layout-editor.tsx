@@ -12,7 +12,7 @@ import {
 import { createBlocksFromTemplate } from '@woocommerce/atomic-utils';
 import { PanelBody, Button } from '@wordpress/components';
 import { Icon, backup } from '@wordpress/icons';
-import { ProductResponseItem } from '@woocommerce/type-defs/product-response';
+import { ProductResponseItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { AddToCartEventDetail } from '@woocommerce/type-defs/events';
+import type { AddToCartEventDetail } from '@woocommerce/types';
 
 const CustomEvent = window.CustomEvent || null;
 

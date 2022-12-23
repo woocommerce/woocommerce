@@ -7,7 +7,7 @@ import type {
 	ExpressPaymentMethods,
 	PaymentMethodConfigInstance,
 	ExpressPaymentMethodConfigInstance,
-} from '@woocommerce/type-defs/payments';
+} from '@woocommerce/types';
 import {
 	getPaymentMethods,
 	getExpressPaymentMethods,

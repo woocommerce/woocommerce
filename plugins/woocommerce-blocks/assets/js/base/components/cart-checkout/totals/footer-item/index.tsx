@@ -11,8 +11,11 @@ import {
 } from '@woocommerce/blocks-checkout';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { getSetting } from '@woocommerce/settings';
-import { CartResponseTotals, Currency } from '@woocommerce/types';
-import { LooselyMustHave } from '@woocommerce/type-defs/utils';
+import {
+	CartResponseTotals,
+	Currency,
+	LooselyMustHave,
+} from '@woocommerce/types';
 import { formatPrice } from '@woocommerce/price-format';
 
 /**

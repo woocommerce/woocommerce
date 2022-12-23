@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { dispatch } from '@wordpress/data';
-import { CartResponse } from '@woocommerce/type-defs/cart-response';
-import { ExtensionCartUpdateArgs } from '@woocommerce/types';
+import { CartResponse, ExtensionCartUpdateArgs } from '@woocommerce/types';
 
 /**
  * Internal dependencies

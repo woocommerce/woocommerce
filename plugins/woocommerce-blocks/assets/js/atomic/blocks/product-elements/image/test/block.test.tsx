@@ -3,7 +3,7 @@
  */
 import { render, fireEvent } from '@testing-library/react';
 import { ProductDataContextProvider } from '@woocommerce/shared-context';
-import { ProductResponseItem } from '@woocommerce/type-defs/product-response';
+import { ProductResponseItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies

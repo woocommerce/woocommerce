@@ -1,9 +1,8 @@
 /**
  * External dependencies
  */
-import { CartResponse } from '@woocommerce/type-defs/cart-response';
+import { CartResponse, Cart } from '@woocommerce/types';
 import { camelCase, mapKeys } from 'lodash';
-import { Cart } from '@woocommerce/type-defs/cart';
 
 /**
  * Internal dependencies

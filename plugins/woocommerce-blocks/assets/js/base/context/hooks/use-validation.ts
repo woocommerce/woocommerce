@@ -5,7 +5,7 @@ import { useCallback } from '@wordpress/element';
 import type {
 	ValidationData,
 	ValidationContextError,
-} from '@woocommerce/type-defs/contexts';
+} from '@woocommerce/types';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 

@@ -4,11 +4,8 @@
 import {
 	PlainPaymentMethods,
 	PlainExpressPaymentMethods,
-} from '@woocommerce/type-defs/payments';
-import type {
-	EmptyObjectType,
-	ObjectType,
-} from '@woocommerce/type-defs/objects';
+} from '@woocommerce/types';
+import type { EmptyObjectType, ObjectType } from '@woocommerce/types';
 import { DataRegistry } from '@wordpress/data';
 
 /**

@@ -4,7 +4,7 @@
 import {
 	PlainPaymentMethods,
 	PlainExpressPaymentMethods,
-} from '@woocommerce/type-defs/payments';
+} from '@woocommerce/types';
 import type { PaymentResult } from '@woocommerce/types';
 
 /**

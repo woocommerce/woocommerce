@@ -13,8 +13,10 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { Notice } from 'wordpress-components';
 import classnames from 'classnames';
 import { getSetting } from '@woocommerce/settings';
-import type { PackageRateOption } from '@woocommerce/type-defs/shipping';
-import type { CartShippingPackageShippingRate } from '@woocommerce/type-defs/cart';
+import type {
+	PackageRateOption,
+	CartShippingPackageShippingRate,
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies

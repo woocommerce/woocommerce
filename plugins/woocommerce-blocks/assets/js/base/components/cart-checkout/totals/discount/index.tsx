@@ -13,8 +13,8 @@ import {
 	CartResponseCouponItemWithLabel,
 	CartTotalsItem,
 	Currency,
+	LooselyMustHave,
 } from '@woocommerce/types';
-import { LooselyMustHave } from '@woocommerce/type-defs/utils';
 
 /**
  * Internal dependencies

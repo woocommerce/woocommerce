@@ -11,7 +11,7 @@ import {
 	getShippingRatesRateCount,
 } from '@woocommerce/base-utils';
 import { useStoreCart, useEditorContext } from '@woocommerce/base-context';
-import { CartResponseShippingRate } from '@woocommerce/type-defs/cart-response';
+import { CartResponseShippingRate } from '@woocommerce/types';
 import { ReactElement } from 'react';
 
 /**

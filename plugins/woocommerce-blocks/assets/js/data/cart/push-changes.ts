@@ -11,9 +11,9 @@ import {
 import {
 	CartResponseBillingAddress,
 	CartResponseShippingAddress,
-} from '@woocommerce/type-defs/cart-response';
+	BillingAddressShippingAddress,
+} from '@woocommerce/types';
 import isShallowEqual from '@wordpress/is-shallow-equal';
-import { BillingAddressShippingAddress } from '@woocommerce/type-defs/cart';
 
 /**
  * Internal dependencies

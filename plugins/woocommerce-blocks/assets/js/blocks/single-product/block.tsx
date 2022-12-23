@@ -9,7 +9,7 @@ import {
 } from '@woocommerce/shared-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
-import { ProductResponseItem } from '@woocommerce/type-defs/product-response';
+import { ProductResponseItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies

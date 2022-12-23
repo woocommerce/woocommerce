@@ -3,12 +3,10 @@
  */
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
-import { Cart } from '@woocommerce/type-defs/cart';
-import { SelectShippingRateType } from '@woocommerce/type-defs/shipping';
+import { Cart, SelectShippingRateType, isObject } from '@woocommerce/types';
 import { useEffect, useRef } from '@wordpress/element';
 import { deriveSelectedShippingRates } from '@woocommerce/base-utils';
 import isShallowEqual from '@wordpress/is-shallow-equal';
-import { isObject } from '@woocommerce/types';
 import { previewCart } from '@woocommerce/resource-previews';
 
 /**

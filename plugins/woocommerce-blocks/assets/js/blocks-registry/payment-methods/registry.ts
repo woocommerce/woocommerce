@@ -9,7 +9,7 @@ import type {
 	PaymentMethodConfigInstance,
 	PaymentMethods,
 	ExpressPaymentMethods,
-} from '@woocommerce/type-defs/payments';
+} from '@woocommerce/types';
 import { dispatch } from '@wordpress/data';
 
 /**

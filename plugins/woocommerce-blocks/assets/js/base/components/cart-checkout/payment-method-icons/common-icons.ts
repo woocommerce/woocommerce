@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
-import type { PaymentMethodIcon } from '@woocommerce/type-defs/payments';
+import type { PaymentMethodIcon } from '@woocommerce/types';
 
 /**
  * Array of common assets.

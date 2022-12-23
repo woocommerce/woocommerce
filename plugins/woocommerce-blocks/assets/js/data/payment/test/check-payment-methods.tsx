@@ -9,7 +9,7 @@ import {
 	__experimentalDeRegisterPaymentMethod,
 	__experimentalDeRegisterExpressPaymentMethod,
 } from '@woocommerce/blocks-registry';
-import { CanMakePaymentArgument } from '@woocommerce/type-defs/payments';
+import { CanMakePaymentArgument } from '@woocommerce/types';
 
 /**
  * Internal dependencies

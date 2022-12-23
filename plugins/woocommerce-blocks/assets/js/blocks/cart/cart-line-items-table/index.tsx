@@ -3,7 +3,7 @@
  */
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
-import { CartResponseItem } from '@woocommerce/type-defs/cart-response';
+import { CartResponseItem } from '@woocommerce/types';
 import { createRef, useEffect, useRef } from '@wordpress/element';
 import type { RefObject } from 'react';
 

@@ -1,10 +1,7 @@
 /**
  * External dependencies
  */
-import type {
-	PaymentMethodIcon,
-	PaymentMethodIcons,
-} from '@woocommerce/type-defs/payments';
+import type { PaymentMethodIcon, PaymentMethodIcons } from '@woocommerce/types';
 import { isString } from '@woocommerce/types';
 
 /**
