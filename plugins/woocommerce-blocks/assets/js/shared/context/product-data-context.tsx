@@ -70,8 +70,8 @@ export const useProductDataContext = () => useContext( ProductDataContext );
 
 interface ProductDataContextProviderProps {
 	product: ProductResponseItem | null;
+	children: JSX.Element | JSX.Element[];
 	isLoading: boolean;
-	children: React.ReactNode;
 }
 
 /**

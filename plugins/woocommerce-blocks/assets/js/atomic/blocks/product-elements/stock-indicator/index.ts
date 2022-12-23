@@ -18,7 +18,11 @@ import {
 	BLOCK_DESCRIPTION as description,
 } from './constants';
 
-const blockConfig: BlockConfiguration = {
+type CustomBlockConfiguration = BlockConfiguration & {
+	ancestor: string[];
+};
+
+const blockConfig: CustomBlockConfiguration = {
 	...sharedConfig,
 	apiVersion: 2,
 	title,
