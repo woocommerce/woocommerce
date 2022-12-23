@@ -9,7 +9,7 @@ import type {
 	CanMakePaymentCallback,
 	PaymentMethodConfigInstance,
 	PaymentMethodIcons,
-} from '@woocommerce/type-defs/payments';
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { select, dispatch } from '@wordpress/data';
-import { PlainPaymentMethods } from '@woocommerce/type-defs/payments';
+import { PlainPaymentMethods } from '@woocommerce/types';
 
 /**
  * Internal dependencies

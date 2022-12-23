@@ -6,7 +6,7 @@ import { getSetting } from '@woocommerce/settings';
 import {
 	PlainPaymentMethods,
 	PlainExpressPaymentMethods,
-} from '@woocommerce/type-defs/payments';
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies

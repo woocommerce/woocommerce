@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { CurrencyCode } from '@woocommerce/type-defs/currency';
+import { CurrencyCode } from '@woocommerce/types';
 
 /**
  * Internal dependencies

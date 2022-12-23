@@ -5,7 +5,7 @@ import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
 import type { Currency } from '@woocommerce/price-format';
-import type { CartFeeItem } from '@woocommerce/type-defs/cart';
+import type { CartFeeItem } from '@woocommerce/types';
 import type { ReactElement } from 'react';
 
 /**

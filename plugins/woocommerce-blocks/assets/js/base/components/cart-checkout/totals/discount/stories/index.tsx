@@ -8,10 +8,10 @@ import {
 	currencyControl,
 	INTERACTION_TIMEOUT,
 } from '@woocommerce/storybook-controls';
-import { LooselyMustHave } from '@woocommerce/type-defs/utils';
 import {
 	CartResponseCouponItemWithLabel,
 	CartTotalsItem,
+	LooselyMustHave,
 } from '@woocommerce/types';
 
 /**

@@ -4,7 +4,7 @@
 import {
 	ExpressPaymentMethodConfigInstance,
 	PaymentMethodConfigInstance,
-} from '@woocommerce/type-defs/payments';
+} from '@woocommerce/types';
 import { CURRENT_USER_IS_ADMIN, getSetting } from '@woocommerce/settings';
 import { dispatch, select } from '@wordpress/data';
 import {

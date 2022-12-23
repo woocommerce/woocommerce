@@ -3,8 +3,7 @@
  */
 import { render } from '@testing-library/react';
 import { allSettings } from '@woocommerce/settings';
-import { Currency } from '@woocommerce/types';
-import { CartResponseTotals } from '@woocommerce/type-defs/cart-response';
+import { Currency, CartResponseTotals } from '@woocommerce/types';
 
 /**
  * Internal dependencies

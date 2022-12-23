@@ -5,11 +5,13 @@ import classNames from 'classnames';
 import { _n, sprintf } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import type { ReactElement } from 'react';
-import type { PackageRateOption } from '@woocommerce/type-defs/shipping';
+import type {
+	PackageRateOption,
+	CartShippingPackageShippingRate,
+} from '@woocommerce/types';
 import { Panel } from '@woocommerce/blocks-checkout';
 import Label from '@woocommerce/base-components/label';
 import { useSelectShippingRate } from '@woocommerce/base-context/hooks';
-import type { CartShippingPackageShippingRate } from '@woocommerce/type-defs/cart';
 import { sanitizeHTML } from '@woocommerce/utils';
 
 /**
