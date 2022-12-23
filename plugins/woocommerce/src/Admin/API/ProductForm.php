@@ -38,6 +38,18 @@ class ProductForm extends \WC_REST_Data_Controller {
 	public function register_routes() {
 		register_rest_route(
 			$this->namespace,
+			'/' . $this->rest_base,
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_form_config' ),
+					'permission_callback' => array( $this, 'get_product_form_permission_check' ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+		register_rest_route(
+			$this->namespace,
 			'/' . $this->rest_base . '/fields',
 			array(
 				array(
@@ -71,9 +83,46 @@ class ProductForm extends \WC_REST_Data_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_fields( $request ) {
-		$json = Form::get_fields();
-		error_log( print_r( $json, true ) );
+		$json = array_map(
+			function( $field ) {
+				return $field->get_json();
+			},
+			Form::get_fields()
+		);
 
 		return rest_ensure_response( $json );
+	}
+
+	/**
+	 * Get the form fields.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_form_config( $request ) {
+		$fields = array_map(
+			function( $field ) {
+				return $field->get_json();
+			},
+			Form::get_fields()
+		);
+		$cards = array_map(
+			function( $card ) {
+				return $card->get_json();
+			},
+			Form::get_cards()
+		);
+		$sections = array_map(
+			function( $section ) {
+				return $section->get_json();
+			},
+			Form::get_sections()
+		);
+
+		return rest_ensure_response( array(
+			'fields'   => $fields,
+			'cards'    => $cards,
+			'sections' => $sections
+		) );
 	}
 }
