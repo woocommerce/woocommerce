@@ -22,7 +22,7 @@ class WC_Admin_Tests_ProductForm_Field extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertEquals( array( 'properties.name', 'type', 'properties.label' ), $missing_args );
+		$this->assertEquals( array( 'type', 'properties.name', 'properties.label' ), $missing_args );
 	}
 }
 

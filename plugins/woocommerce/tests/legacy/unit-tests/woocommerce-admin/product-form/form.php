@@ -29,12 +29,12 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id',
 			'woocommerce',
 			array(
-				'type'    => 'text',
-				'section' => 'product_details',
+				'type'       => 'text',
+				'section'    => 'product_details',
 				'properties' => array(
-					'label'   => 'label',
-					'name'    => 'name',
-				)
+					'label' => 'label',
+					'name'  => 'name',
+				),
 			)
 		);
 
@@ -42,12 +42,12 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id',
 			'woocommerce',
 			array(
-				'type'    => 'text',
-				'section' => 'product_details',
+				'type'       => 'text',
+				'section'    => 'product_details',
 				'properties' => array(
-					'label'   => 'label',
-					'name'    => 'name',
-				)
+					'label' => 'label',
+					'name'  => 'name',
+				),
 			)
 		);
 		$this->assertInstanceOf( 'WP_Error', $field_duplicate );
@@ -62,12 +62,12 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id',
 			'woocommerce',
 			array(
-				'type'    => 'text',
-				'section' => 'product_details',
+				'type'       => 'text',
+				'section'    => 'product_details',
 				'properties' => array(
-					'label'   => 'label',
-					'name'    => 'name',
-				)
+					'label' => 'label',
+					'name'  => 'name',
+				),
 			)
 		);
 
@@ -75,12 +75,12 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id2',
 			'woocommerce',
 			array(
-				'type'    => 'textarea',
-				'section' => 'product_details',
+				'type'       => 'textarea',
+				'section'    => 'product_details',
 				'properties' => array(
-					'label'   => 'label',
-					'name'    => 'name',
-				)
+					'label' => 'label',
+					'name'  => 'name',
+				),
 			)
 		);
 
@@ -98,12 +98,12 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id',
 			'woocommerce',
 			array(
-				'type'    => 'text',
-				'section' => 'product_details',
+				'type'       => 'text',
+				'section'    => 'product_details',
 				'properties' => array(
-					'label'   => 'label',
-					'name'    => 'name',
-				)
+					'label' => 'label',
+					'name'  => 'name',
+				),
 			)
 		);
 
@@ -111,12 +111,12 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'id2',
 			'woocommerce',
 			array(
-				'type'    => 'textarea',
-				'section' => 'product_details',
+				'type'       => 'textarea',
+				'section'    => 'product_details',
 				'properties' => array(
-					'label'   => 'label',
-					'name'    => 'name',
-				)
+					'label' => 'label',
+					'name'  => 'name',
+				),
 			)
 		);
 
@@ -124,13 +124,13 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			'first',
 			'woocommerce',
 			array(
-				'order'   => 1,
-				'type'    => 'textarea',
-				'section' => 'product_details',
+				'order'      => 1,
+				'type'       => 'textarea',
+				'section'    => 'product_details',
 				'properties' => array(
-					'label'   => 'label',
-					'name'    => 'name',
-				)
+					'label' => 'label',
+					'name'  => 'name',
+				),
 			)
 		);
 

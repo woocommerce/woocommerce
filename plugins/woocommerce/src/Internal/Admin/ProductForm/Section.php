@@ -39,7 +39,7 @@ class Section extends Component {
 	 */
 	public function __construct( $id, $plugin_id, $additional_args ) {
 		parent::__construct( $id, $plugin_id, $additional_args );
-		$this->title           = $additional_args['title'];
+		$this->title = $additional_args['title'];
 	}
 
 	/**
@@ -52,7 +52,7 @@ class Section extends Component {
 		return array_filter(
 			self::REQUIRED_ARGUMENTS,
 			function( $arg_key ) use ( $args ) {
-				return ! isset( $args[ $arg_key ] );
+				return null === self::get_argument_from_path( $args, $arg_key );
 			}
 		);
 	}

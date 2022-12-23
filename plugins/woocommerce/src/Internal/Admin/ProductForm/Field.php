@@ -25,7 +25,7 @@ class Field extends Component {
 		'type',
 		'section',
 		'properties.name',
-		'properties.label'
+		'properties.label',
 	);
 
 	/**
@@ -53,11 +53,13 @@ class Field extends Component {
 	 * @return array
 	 */
 	public static function get_missing_arguments( $args ) {
-		return array_filter(
-			self::REQUIRED_ARGUMENTS,
-			function( $arg_key ) use ( $args ) {
-				return null === self::get_argument_from_path( $args, $arg_key );
-			}
+		return array_values(
+			array_filter(
+				self::REQUIRED_ARGUMENTS,
+				function( $arg_key ) use ( $args ) {
+					return null === self::get_argument_from_path( $args, $arg_key );
+				}
+			)
 		);
 	}
 }

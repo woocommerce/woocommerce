@@ -58,21 +58,22 @@ abstract class Component {
 	 *
 	 * @return array
 	 */
-	public function get_json()
-	{
-		return array(
-			'id' 		=> $this->get_id(),
-			'plugin_id' => $this->get_plugin_id(),
-			'arguments' => $this->get_arguments()
+	public function get_json() {
+		return array_merge(
+			array(
+				'id'        => $this->get_id(),
+				'plugin_id' => $this->get_plugin_id(),
+			),
+			$this->get_arguments()
 		);
 	}
 
 	/**
 	 * Sorting function for product form component.
 	 *
-	 * @param Component  $a Component a.
-	 * @param Component  $b Component b.
-	 * @param array $sort_by key and order to sort by.
+	 * @param Component $a Component a.
+	 * @param Component $b Component b.
+	 * @param array     $sort_by key and order to sort by.
 	 * @return int
 	 */
 	public static function sort( $a, $b, $sort_by = array() ) {
@@ -89,19 +90,18 @@ abstract class Component {
 	/**
 	 * Gets argument by dot notation path.
 	 *
-	 * @param array $arguments Arguments array.
+	 * @param array  $arguments Arguments array.
 	 * @param string $path Path for argument key.
 	 * @param string $delimiter Path delimiter, default: '.'.
 	 * @return mixed|null
 	 */
-	public static function get_argument_from_path( $arguments, $path, $delimiter="." ) {
+	public static function get_argument_from_path( $arguments, $path, $delimiter = '.' ) {
 		$path_keys = explode( $delimiter, $path );
-		$num_keys = count( $path_keys );
+		$num_keys  = count( $path_keys );
 
 		$val = $arguments;
 		for ( $i = 0; $i < $num_keys; $i++ ) {
-			// every iteration brings us closer to the truth
-			$key = $path_keys[$i];
+			$key = $path_keys[ $i ];
 			if ( array_key_exists( $key, $val ) ) {
 				$val = $val[ $key ];
 			} else {
