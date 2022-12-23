@@ -34,9 +34,6 @@ export const Campaigns = () => {
 					<CardHeaderTitle>
 						{ __( 'Campaigns', 'woocommerce' ) }
 					</CardHeaderTitle>
-					<Button variant="secondary">
-						{ __( 'Create new campaign', 'woocommerce' ) }
-					</Button>
 				</CardHeader>
 				<CardBody>
 					<CenteredSpinner />
@@ -52,9 +49,6 @@ export const Campaigns = () => {
 					<CardHeaderTitle>
 						{ __( 'Campaigns', 'woocommerce' ) }
 					</CardHeaderTitle>
-					<Button variant="secondary">
-						{ __( 'Create new campaign', 'woocommerce' ) }
-					</Button>
 				</CardHeader>
 				<CardBody className="woocommerce-marketing-campaigns-card-body-empty-content">
 					<Icon icon={ megaphone } size={ 32 } />
@@ -86,9 +80,6 @@ export const Campaigns = () => {
 				<CardHeaderTitle>
 					{ __( 'Campaigns', 'woocommerce' ) }
 				</CardHeaderTitle>
-				<Button variant="secondary">
-					{ __( 'Create new campaign', 'woocommerce' ) }
-				</Button>
 			</CardHeader>
 			<Table
 				caption={ __( 'Campaigns', 'woocommerce' ) }
