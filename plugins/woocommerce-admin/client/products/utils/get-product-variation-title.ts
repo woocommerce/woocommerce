@@ -2,6 +2,10 @@
  * External dependencies
  */
 import { ProductVariation } from '@woocommerce/data';
+
+/**
+ * Internal dependencies
+ */
 import { PRODUCT_VARIATION_TITLE_LIMIT } from '../constants';
 
 /**
