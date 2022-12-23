@@ -13,24 +13,25 @@ import {
 	CardHeaderDescription,
 	CenteredSpinner,
 } from '~/marketing/components';
-import { useChannels } from './useChannels';
-import './Channels.scss';
+import { useRegisteredChannels } from './useRegisteredChannels';
+import { useRecommendedChannels } from './useRecommendedChannels';
 import { InstalledChannelCardBody } from './InstalledChannelCardBody';
 import { RecommendedChannels } from './RecommendedChannels';
 import { RecommendedChannelsList } from './RecommendedChannelsList';
+import './Channels.scss';
 
 export const Channels = () => {
-	const {
-		loading,
-		data: { registeredChannels, recommendedChannels },
-	} = useChannels();
+	const { loading: loadingRegistered, data: dataRegistered } =
+		useRegisteredChannels();
+	const { loading: loadingRecommended, data: dataRecommended } =
+		useRecommendedChannels();
 
 	/**
 	 * TODO: we may need to filter the channels against
 	 * `@woocommerce/data` installed plugins.
 	 */
 
-	if ( loading ) {
+	if ( loadingRegistered || loadingRecommended ) {
 		return (
 			<Card>
 				<CardHeader>
@@ -50,12 +51,12 @@ export const Channels = () => {
 	 * we should display recommended channels without collapsible list
 	 * and with a description in the card header.
 	 */
-	if ( registeredChannels.length === 0 ) {
+	if ( dataRegistered.length === 0 ) {
 		/**
 		 * If for some reasons we don't have recommended channels,
 		 * then we should not show the Channels card at all.
 		 */
-		if ( recommendedChannels.length === 0 ) {
+		if ( dataRecommended.length === 0 ) {
 			return null;
 		}
 
@@ -73,7 +74,7 @@ export const Channels = () => {
 					</CardHeaderDescription>
 				</CardHeader>
 				<RecommendedChannelsList
-					recommendedChannels={ recommendedChannels }
+					recommendedChannels={ dataRecommended }
 				/>
 			</Card>
 		);
@@ -94,22 +95,18 @@ export const Channels = () => {
 			</CardHeader>
 
 			{ /* Registered channels section. */ }
-			{ registeredChannels.map( ( el, idx ) => {
+			{ dataRegistered.map( ( el, idx ) => {
 				return (
 					<Fragment key={ el.slug }>
 						<InstalledChannelCardBody installedChannel={ el } />
-						{ idx < registeredChannels.length - 1 && (
-							<CardDivider />
-						) }
+						{ idx < dataRegistered.length - 1 && <CardDivider /> }
 					</Fragment>
 				);
 			} ) }
 
 			{ /* Recommended channels section. */ }
-			{ recommendedChannels.length > 0 && (
-				<RecommendedChannels
-					recommendedChannels={ recommendedChannels }
-				/>
+			{ dataRecommended.length > 0 && (
+				<RecommendedChannels recommendedChannels={ dataRecommended } />
 			) }
 		</Card>
 	);
