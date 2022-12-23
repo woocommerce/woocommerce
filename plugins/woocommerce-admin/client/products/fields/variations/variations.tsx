@@ -12,10 +12,12 @@ import { useContext, useState } from '@wordpress/element';
 import { useParams } from 'react-router-dom';
 import { useSelect, useDispatch } from '@wordpress/data';
 import classnames from 'classnames';
+import truncate from 'lodash/truncate';
 
 /**
  * Internal dependencies
  */
+import { PRODUCT_VARIATION_TITLE_LIMIT } from '~/products/constants';
 import useVariationsOrder from '~/products/hooks/use-variations-order';
 import HiddenIcon from '~/products/images/hidden-icon';
 import VisibleIcon from '~/products/images/visible-icon';
@@ -130,16 +132,34 @@ export const Variations: React.FC = () => {
 				{ sortedVariations.map( ( variation ) => (
 					<ListItem key={ getVariationKey( variation ) }>
 						<div className="woocommerce-product-variations__attributes">
-							{ variation.attributes.map( ( attribute ) => (
-								/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
-								/* @ts-ignore Additional props are not required. */
-								<Tag
-									id={ attribute.id }
-									className="woocommerce-product-variations__attribute"
-									key={ attribute.id }
-									label={ attribute.option }
-								/>
-							) ) }
+							{ variation.attributes.map( ( attribute ) => {
+								const tag = (
+									/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+									/* @ts-ignore Additional props are not required. */
+									<Tag
+										id={ attribute.id }
+										className="woocommerce-product-variations__attribute"
+										key={ attribute.id }
+										label={ truncate( attribute.option, {
+											length: PRODUCT_VARIATION_TITLE_LIMIT,
+										} ) }
+										screenReaderLabel={ attribute.option }
+									/>
+								);
+
+								return attribute.option.length <=
+									PRODUCT_VARIATION_TITLE_LIMIT ? (
+									tag
+								) : (
+									<Tooltip
+										key={ attribute.id }
+										text={ attribute.option }
+										position="top center"
+									>
+										<span>{ tag }</span>
+									</Tooltip>
+								);
+							} ) }
 						</div>
 						<div
 							className={ classnames(
