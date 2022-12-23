@@ -14,6 +14,7 @@ import { find, get, noop } from 'lodash';
 import PropTypes from 'prop-types';
 import { withInstanceId } from '@wordpress/compose';
 import { Icon, chevronUp, chevronDown } from '@wordpress/icons';
+import deprecated from '@wordpress/deprecated';
 
 const ASC = 'asc';
 const DESC = 'desc';
@@ -149,6 +150,16 @@ class Table extends Component {
 			rows,
 		} = this.props;
 		const { isScrollableRight, isScrollableLeft, tabIndex } = this.state;
+
+		if ( classNames ) {
+			deprecated( `Table component's classNames prop`, {
+				since: '11.1.0',
+				version: '12.0.0',
+				alternative: 'className',
+				plugin: '@woocommerce/components',
+			} );
+		}
+
 		const classes = classnames(
 			'woocommerce-table__table',
 			classNames,
