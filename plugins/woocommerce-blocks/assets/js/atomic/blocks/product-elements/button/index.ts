@@ -2,21 +2,27 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
+import type { BlockConfiguration } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import sharedConfig from '../shared/config';
+import { supports } from './supports';
 import attributes from './attributes';
+import sharedConfig from '../shared/config';
 import edit from './edit';
 import {
 	BLOCK_TITLE as title,
 	BLOCK_ICON as icon,
 	BLOCK_DESCRIPTION as description,
 } from './constants';
-import { supports } from './supports';
 
-const blockConfig = {
+type CustomBlockConfiguration = BlockConfiguration & {
+	ancestor: string[];
+};
+
+const blockConfig: CustomBlockConfiguration = {
+	...sharedConfig,
 	apiVersion: 2,
 	title,
 	description,
@@ -32,7 +38,4 @@ const blockConfig = {
 	edit,
 };
 
-registerBlockType( 'woocommerce/product-button', {
-	...sharedConfig,
-	...blockConfig,
-} );
+registerBlockType( 'woocommerce/product-button', { ...blockConfig } );
