@@ -24,7 +24,7 @@ export const indexLocationsById = (
 };
 
 export const defaultSettings = {
-	enabled: true,
+	enabled: false,
 	title: '',
 	tax_status: 'taxable',
 	cost: '',
