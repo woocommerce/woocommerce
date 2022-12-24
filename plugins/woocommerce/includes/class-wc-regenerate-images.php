@@ -199,10 +199,13 @@ class WC_Regenerate_Images {
 	 * @return array
 	 */
 	public static function maybe_resize_image( $image, $attachment_id, $size, $icon ) {
-		if ( ! apply_filters( 'woocommerce_resize_images', true ) ) {
+		// Getting the file extension
+		$ext = pathinfo(parse_url($image[0])['path'], PATHINFO_EXTENSION);
+
+		if ( ! apply_filters( 'woocommerce_resize_images', true ) || $ext === 'svg') {
 			return $image;
 		}
-
+		
 		// List of sizes we want to resize. Ignore others.
 		if ( ! $image || ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single' ) ), true ) ) {
 			return $image;
