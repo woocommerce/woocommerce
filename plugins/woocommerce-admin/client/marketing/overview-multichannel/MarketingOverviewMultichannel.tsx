@@ -7,6 +7,7 @@ import { useUser } from '@woocommerce/data';
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
+import { IntroductionBanner } from './IntroductionBanner';
 import { Campaigns } from './Campaigns';
 import { Channels } from './Channels';
 import { InstalledExtensions } from './InstalledExtensions';
@@ -37,6 +38,8 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 
 	return (
 		<div className="woocommerce-marketing-overview-multichannel">
+			{ /* TODO: check wp_options and conditionally display introduction banner. */ }
+			<IntroductionBanner />
 			{ dataRegistered.length >= 1 && <Campaigns /> }
 			{ ( dataRegistered.length >= 1 || dataRecommended.length >= 1 ) && (
 				<Channels
