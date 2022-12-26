@@ -357,8 +357,10 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					onEdit={ ( changedAttribute ) => {
 						const newAttributesSet = [ ...hydratedAttributes ];
 						const changedAttributeIndex: number =
-							newAttributesSet.findIndex(
-								( attr ) => attr.id === changedAttribute.id
+							newAttributesSet.findIndex( ( attr ) =>
+								attr.id !== 0
+									? attr.id === changedAttribute.id
+									: attr.name === changedAttribute.name
 							);
 
 						newAttributesSet.splice(
