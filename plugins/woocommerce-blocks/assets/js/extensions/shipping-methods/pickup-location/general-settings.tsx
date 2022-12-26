@@ -148,6 +148,7 @@ const GeneralSettings = () => {
 							) }
 							type="number"
 							pattern="[0-9]+\.?[0-9]*"
+							min={ 0 }
 							value={ settings.cost }
 							onChange={ setSettingField( 'cost' ) }
 							disabled={ false }
