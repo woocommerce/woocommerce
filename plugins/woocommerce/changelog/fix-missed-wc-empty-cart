@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Load wc_empty_cart function for REST API calls.
