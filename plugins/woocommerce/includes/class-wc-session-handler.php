@@ -369,7 +369,7 @@ class WC_Session_Handler extends WC_Session {
 	public function forget_session() {
 		wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, $this->use_secure_cookie(), true );
 
-		if( ! is_admin() ) {
+		if ( ! is_admin() ) {
 			include_once WC_ABSPATH . 'includes/wc-cart-functions.php';
 
 			wc_empty_cart();
