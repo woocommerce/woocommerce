@@ -68,7 +68,7 @@ export const ProductVariationFormActions: React.FC = () => {
 						href={ values.permalink + '?preview=true' }
 						disabled={ ! isValidForm || ! values.permalink }
 						target="_blank"
-                        className='woocommerce-product-form-actions__preview'
+						className="woocommerce-product-form-actions__preview"
 					>
 						{ __( 'Preview', 'woocommerce' ) }
 					</Button>
