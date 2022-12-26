@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Make Table component accept className prop.
