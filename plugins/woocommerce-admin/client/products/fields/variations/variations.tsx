@@ -58,6 +58,7 @@ export const Variations: React.FC = () => {
 		{}
 	);
 	const { values } = useFormContext< Product >();
+	const productId = values.id;
 	const context = useContext( CurrencyContext );
 	const { formatAmount, getCurrencyConfig } = context;
 	const { isLoading, variations, totalCount } = useSelect(
@@ -68,7 +69,7 @@ export const Variations: React.FC = () => {
 				getProductVariationsTotalCount,
 			} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 			const requestParams = {
-				product_id: values.id,
+				product_id: productId,
 				page: currentPage,
 				per_page: perPage,
 				order: 'asc',
@@ -84,7 +85,7 @@ export const Variations: React.FC = () => {
 					getProductVariationsTotalCount< number >( requestParams ),
 			};
 		},
-		[ currentPage, perPage, values.id ]
+		[ currentPage, perPage, productId ]
 	);
 
 	const { updateProductVariation } = useDispatch(
