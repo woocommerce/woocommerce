@@ -51,6 +51,7 @@
 
 		.components-button {
 			position: relative;
+			color: var(--wp-admin-theme-color);
 
 			&:disabled,
 			&[aria-disabled='true'] {
