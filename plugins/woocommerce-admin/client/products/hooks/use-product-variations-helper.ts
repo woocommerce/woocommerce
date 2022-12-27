@@ -8,6 +8,7 @@ import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	PRODUCTS_STORE_NAME,
 } from '@woocommerce/data';
+import { useFormContext } from '@woocommerce/components';
 
 export function useProductVariationsHelper() {
 	const {
@@ -15,6 +16,7 @@ export function useProductVariationsHelper() {
 		invalidateResolutionForStoreSelector,
 	} = useDispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 	const { createProduct, updateProduct } = useDispatch( PRODUCTS_STORE_NAME );
+	const { setValue } = useFormContext< Product >();
 
 	const [ isGenerating, setIsGenerating ] = useState( false );
 
@@ -38,6 +40,9 @@ export function useProductVariationsHelper() {
 
 			return createOrUpdateProduct()
 				.then( ( createdOrUpdatedProduct ) => {
+					if ( ! product.id ) {
+						setValue( 'id', createdOrUpdatedProduct.id );
+					}
 					return _generateProductVariations( {
 						product_id: createdOrUpdatedProduct.id,
 					} );
