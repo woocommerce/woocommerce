@@ -1,18 +1,14 @@
 /**
  * External dependencies
  */
-import {
-	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
-	Product,
-	ProductAttribute,
-	PRODUCTS_STORE_NAME,
-} from '@woocommerce/data';
-import { useDispatch } from '@wordpress/data';
+import { Product, ProductAttribute } from '@woocommerce/data';
+import { useFormContext } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
 import { AttributeField } from '../attribute-field';
+import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
 
 type OptionsProps = {
 	value: ProductAttribute[];
@@ -25,17 +21,12 @@ export const Options: React.FC< OptionsProps > = ( {
 	onChange,
 	productId,
 } ) => {
-	const { generateProductVariations, invalidateResolutionForStoreSelector } =
-		useDispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
-	const { updateProduct } = useDispatch( PRODUCTS_STORE_NAME );
+	const { values } = useFormContext< Product >();
+	const { generateProductVariations } = useProductVariationsHelper();
 
 	const handleChange = async ( attributes: ProductAttribute[] ) => {
 		onChange( attributes );
-		await updateProduct( productId, {
-			attributes,
-		} );
-		await generateProductVariations( { product_id: productId } );
-		invalidateResolutionForStoreSelector( 'getProductVariations' );
+		generateProductVariations( { ...values, attributes } );
 	};
 
 	return (
