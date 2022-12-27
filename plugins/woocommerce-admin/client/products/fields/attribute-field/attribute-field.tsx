@@ -91,19 +91,12 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 	);
 
 	useEffect( () => {
-		// Temporarily always doing hydration, since otherwise new attributes
-		// get removed from Options and Attributes when the other list is then
-		// modified
-		//
-		// This is because the hydration is out of date -- the logic currently
-		// assumes modifications are only made from within the component
-		//
 		// I think we'll need to move the hydration out of the individual component
 		// instance. To where, I do not yet know... maybe in the form context
 		// somewhere so that a single hydration source can be shared between multiple
 		// instances? Something like a simple key-value store in the form context
 		// would be handy.
-		if ( ! value ) {
+		if ( ! value || hydratedAttributes.length !== 0 ) {
 			return;
 		}
 
@@ -134,7 +127,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 				...customAttributes,
 			] );
 		} );
-	}, [ fetchTerms, productId, value ] );
+	}, [ fetchTerms, hydratedAttributes, value ] );
 
 	const fetchAttributeId = ( attribute: { id: number; name: string } ) =>
 		`${ attribute.id }-${ attribute.name }`;
@@ -357,8 +350,10 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					onEdit={ ( changedAttribute ) => {
 						const newAttributesSet = [ ...hydratedAttributes ];
 						const changedAttributeIndex: number =
-							newAttributesSet.findIndex(
-								( attr ) => attr.id === changedAttribute.id
+							newAttributesSet.findIndex( ( attr ) =>
+								attr.id !== 0
+									? attr.id === changedAttribute.id
+									: attr.name === changedAttribute.name
 							);
 
 						newAttributesSet.splice(
