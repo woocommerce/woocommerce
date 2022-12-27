@@ -14,17 +14,32 @@ export function useProductVariationsHelper() {
 		generateProductVariations: _generateProductVariations,
 		invalidateResolutionForStoreSelector,
 	} = useDispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
-	const { updateProduct } = useDispatch( PRODUCTS_STORE_NAME );
+	const { createProduct, updateProduct } = useDispatch( PRODUCTS_STORE_NAME );
 
 	const [ isGenerating, setIsGenerating ] = useState( false );
 
 	const generateProductVariations = useCallback(
 		async ( product: Partial< Product > ) => {
 			setIsGenerating( true );
-			return updateProduct< Promise< Product > >( product.id, product )
-				.then( () => {
+
+			const createOrUpdateProduct = product.id
+				? () =>
+						updateProduct< Promise< Product > >(
+							product.id,
+							product
+						)
+				: () => {
+						return createProduct< Promise< Product > >( {
+							...product,
+							status: 'auto-draft',
+							name: product.name || 'AUTO-DRAFT',
+						} );
+				  };
+
+			return createOrUpdateProduct()
+				.then( ( createdOrUpdatedProduct ) => {
 					return _generateProductVariations( {
-						product_id: product.id,
+						product_id: createdOrUpdatedProduct.id,
 					} );
 				} )
 				.then( () => {
