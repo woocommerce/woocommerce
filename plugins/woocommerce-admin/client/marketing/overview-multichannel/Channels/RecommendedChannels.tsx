@@ -5,16 +5,13 @@ import { useState, useEffect, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { CardBody, CardDivider, Button, Icon } from '@wordpress/components';
 import { chevronUp, chevronDown } from '@wordpress/icons';
-import { useLocation } from 'react-router-dom';
 
 /**
  * Internal dependencies
  */
+import { useIsLocationHashAddChannels } from '~/marketing/hooks';
 import { RecommendedChannel } from '~/marketing/types';
-import {
-	idAddChannels,
-	hashAddChannels,
-} from '~/marketing/overview-multichannel/constants';
+import { idAddChannels } from '~/marketing/overview-multichannel/constants';
 import { RecommendedChannelsList } from './RecommendedChannelsList';
 import './RecommendedChannels.scss';
 
@@ -27,13 +24,13 @@ export const RecommendedChannels: React.FC< RecommendedChannelsType > = ( {
 } ) => {
 	const [ collapsed, setCollapsed ] = useState( true );
 	const buttonRef = useRef< HTMLAnchorElement >( null );
-	const location = useLocation();
+	const isLocationHashAddChannels = useIsLocationHashAddChannels();
 
 	useEffect( () => {
-		if ( buttonRef.current && location.hash === hashAddChannels ) {
+		if ( buttonRef.current && isLocationHashAddChannels ) {
 			buttonRef.current.focus();
 		}
-	}, [ location.hash ] );
+	}, [ isLocationHashAddChannels ] );
 
 	return (
 		<div className="woocommerce-marketing-recommended-channels">

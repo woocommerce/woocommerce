@@ -3,7 +3,6 @@
  */
 import { useUser } from '@woocommerce/data';
 import { ScrollTo } from '@woocommerce/components';
-import { useLocation } from 'react-router-dom';
 
 /**
  * Internal dependencies
@@ -20,8 +19,8 @@ import {
 	useIntroductionBanner,
 	useRegisteredChannels,
 	useRecommendedChannels,
+	useIsLocationHashAddChannels,
 } from '~/marketing/hooks';
-import { hashAddChannels } from '~/marketing/overview-multichannel/constants';
 import './MarketingOverviewMultichannel.scss';
 import { CenteredSpinner } from '../components';
 
@@ -35,7 +34,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 		useRegisteredChannels();
 	const { loading: loadingRecommended, data: dataRecommended } =
 		useRecommendedChannels();
-	const location = useLocation();
+	const isLocationHashAddChannels = useIsLocationHashAddChannels();
 	const { currentUserCan } = useUser();
 
 	const shouldShowExtensions =
@@ -60,7 +59,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 			) }
 			{ dataRegistered.length >= 1 && <Campaigns /> }
 			{ ( dataRegistered.length >= 1 || dataRecommended.length >= 1 ) &&
-				( location.hash === hashAddChannels ? (
+				( isLocationHashAddChannels ? (
 					<ScrollTo>
 						<Channels
 							registeredChannels={ dataRegistered }
