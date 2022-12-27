@@ -5,7 +5,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
-type UseIntroductionBannerType = {
+type UseIntroductionBanner = {
 	loading: boolean;
 	isIntroductionBannerDismissed: boolean;
 	dismissIntroductionBanner: () => void;
@@ -15,7 +15,7 @@ const OPTION_NAME =
 	'woocommerce_marketing_overview_multichannel_banner_dismissed';
 const OPTION_VALUE = 'yes';
 
-export const useIntroductionBanner = (): UseIntroductionBannerType => {
+export const useIntroductionBanner = (): UseIntroductionBanner => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
 	const dismissIntroductionBanner = () => {
