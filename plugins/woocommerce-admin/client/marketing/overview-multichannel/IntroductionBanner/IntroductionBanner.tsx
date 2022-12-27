@@ -2,8 +2,14 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Card, Flex, FlexItem, FlexBlock } from '@wordpress/components';
-import { Icon, trendingUp, megaphone } from '@wordpress/icons';
+import { Card, Flex, FlexItem, FlexBlock, Button } from '@wordpress/components';
+import {
+	Icon,
+	trendingUp,
+	megaphone,
+	closeSmall,
+	close,
+} from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -73,6 +79,15 @@ export const IntroductionBanner = () => {
 				</Flex>
 			</div>
 			<div className="woocommerce-marketing-introduction-banner-illustration">
+				<Button
+					isSmall
+					className="woocommerce-marketing-introduction-banner-close-button"
+					onClick={ () => {
+						// TODO: dismiss this banner and save it into wp_options.
+					} }
+				>
+					<Icon icon={ closeSmall } />
+				</Button>
 				<img
 					src={ illustrationUrl }
 					alt={ __(

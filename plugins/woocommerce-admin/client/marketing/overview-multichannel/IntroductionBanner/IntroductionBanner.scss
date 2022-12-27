@@ -34,6 +34,13 @@
 			rgba( 196, 152, 217, 0.12 ) 77.75%
 		);
 
+		.woocommerce-marketing-introduction-banner-close-button {
+			position: absolute;
+			top: $gap-smaller;
+			right: $gap;
+			padding: 0;
+		}
+
 		img {
 			display: block;
 			width: 100%;
