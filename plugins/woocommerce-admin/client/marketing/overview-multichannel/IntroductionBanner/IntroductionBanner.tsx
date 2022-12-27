@@ -8,6 +8,7 @@ import { Icon, trendingUp, megaphone, closeSmall } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
+import { hashAddChannels } from '~/marketing/overview-multichannel/constants';
 import './IntroductionBanner.scss';
 import wooIconUrl from './woo.svg';
 import illustrationUrl from './illustration.svg';
@@ -93,12 +94,7 @@ export const IntroductionBanner = ( {
 						>
 							{ __( 'Create a campaign', 'woocommerce' ) }
 						</Button>
-						<Button
-							variant="secondary"
-							onClick={ () => {
-								// TODO: scroll down to add channels area.
-							} }
-						>
+						<Button variant="secondary" href={ hashAddChannels }>
 							{ __( 'Add channels', 'woocommerce' ) }
 						</Button>
 					</Flex>
