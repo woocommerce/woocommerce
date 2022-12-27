@@ -153,7 +153,7 @@ class TableCard extends Component {
 			title,
 			totalRows,
 			rowKey,
-			noDataLabel,
+			emptyMessage,
 		} = this.props;
 		const { showCols } = this.state;
 		const allHeaders = this.props.headers;
@@ -238,7 +238,7 @@ class TableCard extends Component {
 							query={ query }
 							onSort={ onSort || onQueryChange( 'sort' ) }
 							rowKey={ rowKey }
-							noDataLabel={ noDataLabel }
+							emptyMessage={ emptyMessage }
 						/>
 					) }
 				</CardBody>
@@ -364,9 +364,9 @@ TableCard.propTypes = {
 	 */
 	rowKey: PropTypes.func,
 	/**
-	 * Customize the label to show when there are no rows in the table.
+	 * Customize the message to show when there are no rows in the table.
 	 */
-	noDataLabel: PropTypes.string,
+	emptyMessage: PropTypes.string,
 };
 
 TableCard.defaultProps = {
@@ -378,7 +378,7 @@ TableCard.defaultProps = {
 	rowHeader: 0,
 	rows: [],
 	showMenu: true,
-	noDataLabel: undefined,
+	emptyMessage: undefined,
 };
 
 export default TableCard;

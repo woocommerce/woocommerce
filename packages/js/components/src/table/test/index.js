@@ -172,7 +172,7 @@ describe( 'TableCard', () => {
 		);
 	} );
 
-	it( 'should render the default "No data to display" when there are no data and noDataLabel is unset', () => {
+	it( 'should render the default "No data to display" when there are no data and emptyMessage is unset', () => {
 		render(
 			<TableCard
 				title="My table"
@@ -188,8 +188,8 @@ describe( 'TableCard', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'should render the custom label set in noDataLabel when there are no data.', () => {
-		const noDataLabel = 'My no data label';
+	it( 'should render the custom label set in emptyMessage when there are no data.', () => {
+		const emptyMessage = 'My no data label';
 
 		render(
 			<TableCard
@@ -198,10 +198,10 @@ describe( 'TableCard', () => {
 				isLoading={ false }
 				rows={ [] }
 				rowsPerPage={ 5 }
-				noDataLabel={ noDataLabel }
+				emptyMessage={ emptyMessage }
 			/>
 		);
 
-		expect( screen.queryByText( noDataLabel ) ).toBeInTheDocument();
+		expect( screen.queryByText( emptyMessage ) ).toBeInTheDocument();
 	} );
 } );
