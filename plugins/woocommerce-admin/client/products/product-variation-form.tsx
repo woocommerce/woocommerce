@@ -10,7 +10,6 @@ import { PartialProduct, ProductVariation } from '@woocommerce/data';
  * Internal dependencies
  */
 import PostsNavigation from './shared/posts-navigation';
-import { ProductFormHeader } from './layout/product-form-header';
 import { ProductFormLayout } from './layout/product-form-layout';
 import { ProductFormFooter } from './layout/product-form-footer';
 import { ProductFormTab } from './product-form-tab';
@@ -18,6 +17,7 @@ import { PricingSection } from './sections/pricing-section';
 import { ProductInventorySection } from './sections/product-inventory-section';
 import { ProductShippingSection } from './sections/product-shipping-section';
 import { ProductVariationDetailsSection } from './sections/product-variation-details-section';
+import { ProductVariationFormHeader } from './layout/product-variation-form-header';
 import useProductVariationNavigation from './hooks/use-product-variation-navigation';
 import './product-variation-form.scss';
 
@@ -49,7 +49,7 @@ export const ProductVariationForm: React.FC< {
 			errors={ {} }
 			ref={ formRef }
 		>
-			<ProductFormHeader />
+			<ProductVariationFormHeader />
 			<ProductFormLayout>
 				<ProductFormTab name="general" title="General">
 					<ProductVariationDetailsSection />
