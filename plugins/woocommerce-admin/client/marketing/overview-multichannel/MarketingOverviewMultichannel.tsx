@@ -39,7 +39,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 	return (
 		<div className="woocommerce-marketing-overview-multichannel">
 			{ /* TODO: check wp_options and conditionally display introduction banner. */ }
-			<IntroductionBanner />
+			<IntroductionBanner showButtons={ dataRegistered.length >= 1 } />
 			{ dataRegistered.length >= 1 && <Campaigns /> }
 			{ ( dataRegistered.length >= 1 || dataRecommended.length >= 1 ) && (
 				<Channels

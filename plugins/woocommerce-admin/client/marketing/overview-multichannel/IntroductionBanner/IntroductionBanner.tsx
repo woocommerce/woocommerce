@@ -3,13 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Card, Flex, FlexItem, FlexBlock, Button } from '@wordpress/components';
-import {
-	Icon,
-	trendingUp,
-	megaphone,
-	closeSmall,
-	close,
-} from '@wordpress/icons';
+import { Icon, trendingUp, megaphone, closeSmall } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -17,8 +11,15 @@ import {
 import './IntroductionBanner.scss';
 import wooIconUrl from './woo.svg';
 import illustrationUrl from './illustration.svg';
+import illustrationLargeUrl from './illustration-large.svg';
 
-export const IntroductionBanner = () => {
+type IntroductionBannerProps = {
+	showButtons: boolean;
+};
+
+export const IntroductionBanner = ( {
+	showButtons,
+}: IntroductionBannerProps ) => {
 	return (
 		<Card className="woocommerce-marketing-introduction-banner">
 			<div className="woocommerce-marketing-introduction-banner-content">
@@ -77,6 +78,29 @@ export const IntroductionBanner = () => {
 						</Flex>
 					</FlexItem>
 				</Flex>
+				{ showButtons && (
+					<Flex
+						className="woocommerce-marketing-introduction-banner-buttons"
+						justify="flex-start"
+					>
+						<Button
+							variant="primary"
+							onClick={ () => {
+								// TODO: display create a campaign modal.
+							} }
+						>
+							{ __( 'Create a campaign', 'woocommerce' ) }
+						</Button>
+						<Button
+							variant="secondary"
+							onClick={ () => {
+								// TODO: scroll down to add channels area.
+							} }
+						>
+							{ __( 'Add channels', 'woocommerce' ) }
+						</Button>
+					</Flex>
+				) }
 			</div>
 			<div className="woocommerce-marketing-introduction-banner-illustration">
 				<Button
@@ -89,7 +113,7 @@ export const IntroductionBanner = () => {
 					<Icon icon={ closeSmall } />
 				</Button>
 				<img
-					src={ illustrationUrl }
+					src={ showButtons ? illustrationLargeUrl : illustrationUrl }
 					alt={ __(
 						'WooCommerce Marketing introduction banner illustration',
 						'woocommerce'
