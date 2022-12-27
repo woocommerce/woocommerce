@@ -15,10 +15,12 @@ import illustrationLargeUrl from './illustration-large.svg';
 
 type IntroductionBannerProps = {
 	showButtons: boolean;
+	onDismiss: () => void;
 };
 
 export const IntroductionBanner = ( {
 	showButtons,
+	onDismiss,
 }: IntroductionBannerProps ) => {
 	return (
 		<Card className="woocommerce-marketing-introduction-banner">
@@ -106,9 +108,7 @@ export const IntroductionBanner = ( {
 				<Button
 					isSmall
 					className="woocommerce-marketing-introduction-banner-close-button"
-					onClick={ () => {
-						// TODO: dismiss this banner and save it into wp_options.
-					} }
+					onClick={ onDismiss }
 				>
 					<Icon icon={ closeSmall } />
 				</Button>
