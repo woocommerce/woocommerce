@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Updates and improves the docblocks for methods WC_Order::get_total() and WC_Order::get_subtotal().

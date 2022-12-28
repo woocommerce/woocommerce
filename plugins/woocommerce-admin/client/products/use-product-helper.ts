@@ -12,6 +12,8 @@ import {
 	PRODUCTS_STORE_NAME,
 	ReadOnlyProperties,
 	productReadOnlyProperties,
+	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	ProductVariation,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -23,6 +25,7 @@ import {
 	NUMBERS_AND_DECIMAL_SEPARATOR,
 	ONLY_ONE_DECIMAL_SEPARATOR,
 } from './constants';
+import { ProductVariationsOrder } from './hooks/use-variations-order';
 
 function removeReadonlyProperties(
 	product: Product
@@ -51,6 +54,11 @@ export function useProductHelper() {
 	const { createProduct, updateProduct, deleteProduct } = useDispatch(
 		PRODUCTS_STORE_NAME
 	) as ProductsStoreActions;
+	const {
+		batchUpdateProductVariations,
+		invalidateResolutionForStoreSelector,
+	} = useDispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+
 	const { createNotice } = useDispatch( 'core/notices' );
 	const [ isDeleting, setIsDeleting ] = useState( false );
 	const [ updating, setUpdating ] = useState( {
@@ -129,6 +137,29 @@ export function useProductHelper() {
 		[ updating ]
 	);
 
+	async function updateVariationsOrder(
+		productId: number,
+		variationsOrder?: { [ page: number ]: { [ id: number ]: number } }
+	) {
+		if ( ! variationsOrder ) return undefined;
+
+		return batchUpdateProductVariations<
+			Promise< { update: ProductVariation[] } >
+		>(
+			{
+				product_id: productId,
+			},
+			{
+				update: Object.values( variationsOrder )
+					.flatMap( Object.entries )
+					.map( ( [ id, menu_order ] ) => ( {
+						id,
+						menu_order,
+					} ) ),
+			}
+		);
+	}
+
 	/**
 	 * Update product with status.
 	 *
@@ -152,44 +183,57 @@ export function useProductHelper() {
 			return updateProduct( productId, {
 				...product,
 				status,
-			} ).then(
-				( updatedProduct ) => {
-					if ( ! skipNotice ) {
-						const noticeContent =
-							product.status === 'draft' &&
-							updatedProduct.status === 'publish'
-								? __( 'Product published.', 'woocommerce' )
-								: __(
-										'Product successfully updated.',
-										'woocommerce'
-								  );
-						createNotice( 'success', `🎉‎ ${ noticeContent }`, {
-							actions: getNoticePreviewActions(
-								updatedProduct.status,
-								updatedProduct.permalink
-							),
+			} )
+				.then( async ( updatedProduct ) =>
+					updateVariationsOrder(
+						updatedProduct.id,
+						( product as ProductVariationsOrder ).variationsOrder
+					)
+						.then( () =>
+							invalidateResolutionForStoreSelector(
+								'getProductVariations'
+							)
+						)
+						.then( () => updatedProduct )
+				)
+				.then(
+					( updatedProduct ) => {
+						if ( ! skipNotice ) {
+							const noticeContent =
+								product.status === 'draft' &&
+								updatedProduct.status === 'publish'
+									? __( 'Product published.', 'woocommerce' )
+									: __(
+											'Product successfully updated.',
+											'woocommerce'
+									  );
+							createNotice( 'success', `🎉‎ ${ noticeContent }`, {
+								actions: getNoticePreviewActions(
+									updatedProduct.status,
+									updatedProduct.permalink
+								),
+							} );
+						}
+						setUpdating( {
+							...updating,
+							[ status ]: false,
 						} );
+						return updatedProduct;
+					},
+					( error ) => {
+						if ( ! skipNotice ) {
+							createNotice(
+								'error',
+								__( 'Failed to update product.', 'woocommerce' )
+							);
+						}
+						setUpdating( {
+							...updating,
+							[ status ]: false,
+						} );
+						return error;
 					}
-					setUpdating( {
-						...updating,
-						[ status ]: false,
-					} );
-					return updatedProduct;
-				},
-				( error ) => {
-					if ( ! skipNotice ) {
-						createNotice(
-							'error',
-							__( 'Failed to update product.', 'woocommerce' )
-						);
-					}
-					setUpdating( {
-						...updating,
-						[ status ]: false,
-					} );
-					return error;
-				}
-			);
+				);
 		},
 		[ updating ]
 	);

@@ -25,7 +25,7 @@ class TablePlaceholder extends Component {
 		return (
 			<Table
 				ariaHidden={ true }
-				classNames="is-loading"
+				className="is-loading"
 				rows={ rows }
 				{ ...tableProps }
 			/>

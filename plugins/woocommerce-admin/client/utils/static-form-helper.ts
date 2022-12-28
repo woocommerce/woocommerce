@@ -12,6 +12,7 @@ export function staticFormDataToObject( elForm: HTMLFormElement ) {
 			field.type === 'button' ||
 			field.type === 'image' ||
 			field.type === 'submit' ||
+			field.type === 'hidden' ||
 			! sKey
 		)
 			continue;

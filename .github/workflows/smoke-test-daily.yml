@@ -55,7 +55,8 @@ jobs:
               working-directory: plugins/woocommerce
               env:
                   E2E_MAX_FAILURES: 25
-              run: pnpm exec playwright test --config=tests/e2e-pw/daily.playwright.config.js
+                  RESET_SITE: true
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
             - name: Generate Playwright E2E Test report.
               if: success() || failure()
@@ -79,8 +80,8 @@ jobs:
         needs: [e2e-tests]
         if: success() || failure()
         env:
-            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-results
-            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-report
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-results
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-report
         steps:
             - uses: actions/checkout@v3
               with:
@@ -163,7 +164,7 @@ jobs:
                   A_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
                   C_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
                   C_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
-                  P_ID: 274
+                  P_ID: 22733
               run: |
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
 
@@ -219,7 +220,7 @@ jobs:
               working-directory: plugins/woocommerce
               env:
                   E2E_MAX_FAILURES: 15
-              run: pnpm exec playwright test --config=tests/e2e-pw/daily.playwright.config.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
             - name: Generate E2E Test report.
               if: success() || failure()

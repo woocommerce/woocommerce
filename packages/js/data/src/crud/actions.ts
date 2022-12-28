@@ -192,10 +192,11 @@ export const createDispatchActions = ( {
 			const item: Item = yield apiFetch( {
 				path: getRestPath(
 					`${ namespace }/${ id }`,
-					cleanQuery( query, namespace ),
+					{},
 					urlParameters
 				),
 				method: 'PUT',
+				data: query,
 			} );
 
 			yield updateItemSuccess( key, item );

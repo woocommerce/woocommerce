@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix total count query of orders within Analytics reports data store.

@@ -69,6 +69,7 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	id: number;
 	low_stock_amount: number;
 	manage_stock: boolean;
+	menu_order: number;
 	name: string;
 	on_sale: boolean;
 	permalink: string;

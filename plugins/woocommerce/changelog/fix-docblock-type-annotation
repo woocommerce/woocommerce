@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix docblock type annotations for $meta_value.
