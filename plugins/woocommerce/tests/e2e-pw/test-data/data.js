@@ -62,6 +62,12 @@ const storeDetails = {
 			fashion: 'Fashion, apparel, and accessories',
 			health: 'Health and beauty',
 		},
+		// For testing "Save Changes" feature, need to be different from the above
+		industries2: {
+			fashion: 'Fashion, apparel, and accessories',
+			health: 'Health and beauty',
+			foodAndDrinks: 'Food and drink',
+		},
 		products: {
 			physical: 'Physical products',
 			downloadable: 'Downloads',
