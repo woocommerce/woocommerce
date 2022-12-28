@@ -125,6 +125,8 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 		await expect( page.locator( 'small.refunded' ) ).toHaveCount( 0 );
 
 		// Verify the refund no longer shows in the list
+		await page.reload();
+		await page.click( '.save_order' );
 		await expect( page.locator( 'td.refunded-total' ) ).toHaveCount( 0 );
 	} );
 } );
@@ -233,9 +235,11 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 
 		// Update the order
 		await page.click( 'button.save_order' );
-		await expect( page.locator( 'div.notice-success' ) ).toContainText(
-			'Order updated.'
-		);
+		await expect(
+			page
+				.locator( 'div.notice-success > p' )
+				.filter( { hasText: 'Order updated.' } )
+		).toBeVisible();
 
 		// Verify that inventory wasn't modified.
 		expect(
