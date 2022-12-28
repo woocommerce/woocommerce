@@ -27,6 +27,11 @@ class MarketingCampaignsTest extends WC_REST_Unit_Test_Case {
 	const ENDPOINT = '/wc-admin/marketing/campaigns';
 
 	/**
+	 * @var MarketingChannelsService
+	 */
+	private $marketing_channels_service;
+
+	/**
 	 * Set up.
 	 */
 	public function setUp(): void {
@@ -40,12 +45,15 @@ class MarketingCampaignsTest extends WC_REST_Unit_Test_Case {
 		);
 		wp_set_current_user( $this->user );
 
-		/**
-		 * MarketingChannels class.
-		 *
-		 * @var MarketingChannelsService $marketing_channels_service
-		 */
 		$this->marketing_channels_service = wc_get_container()->get( MarketingChannelsService::class );
+	}
+
+	/**
+	 * Test teardown.
+	 */
+	public function tearDown(): void {
+		$this->marketing_channels_service->unregister_all();
+		parent::tearDown();
 	}
 
 	/**
