@@ -4,6 +4,7 @@
 	margin-bottom: $gap-small;
 
 	&__stars {
+		display: inline-block;
 		overflow: hidden;
 		position: relative;
 		width: 5.3em;
@@ -45,9 +46,36 @@
 			white-space: nowrap;
 		}
 	}
+
+	&__link {
+		display: inline-block;
+		width: 100%;
+		text-align: inherit;
+		@include font-size(small);
+	}
 }
+
 .wc-block-single-product {
 	.wc-block-components-product-rating__stars {
 		margin: 0;
+	}
+}
+
+.wc-block-all-products,
+.wp-block-query {
+	.is-loading {
+		.wc-block-components-product-rating {
+			@include placeholder();
+			width: 7em;
+			margin-left: auto;
+			margin-right: auto;
+		}
+	}
+}
+
+// Fix applied specifically to Classic Template
+.woocommerce-loop-product__link {
+	.wc-block-components-product-rating__stars {
+		display: block;
 	}
 }
