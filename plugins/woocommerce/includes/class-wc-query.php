@@ -291,6 +291,36 @@ class WC_Query {
 	}
 
 	/**
+	 * Returns a copy of `$query` with all query vars that are allowed on the front page stripped.
+	 * Used when the shop page is also the front page.
+	 *
+	 * @param array $query The unfiltered array.
+	 * @return array The filtered query vars.
+	 */
+	private function filter_out_valid_front_page_query_vars( $query ) {
+		return array_filter(
+			$query,
+			function( $key ) {
+				return ! $this->is_query_var_valid_on_front_page( $key );
+			},
+			ARRAY_FILTER_USE_KEY
+		);
+	}
+
+	/**
+	 * Checks whether a query var is allowed on the front page or not.
+	 *
+	 * @param string $query_var Query var name.
+	 * @return boolean TRUE when query var is allowed on the front page. FALSE otherwise.
+	 */
+	private function is_query_var_valid_on_front_page( $query_var ) {
+		return in_array( $query_var, array( 'preview', 'page', 'paged', 'cpage', 'orderby' ), true )
+			|| in_array( $query_var, array( 'min_price', 'max_price', 'rating_filter' ), true )
+			|| 0 === strpos( $query_var, 'filter_' )
+			|| 0 === strpos( $query_var, 'query_type_' );
+	}
+
+	/**
 	 * Hook into pre_get_posts to do the main product query.
 	 *
 	 * @param WP_Query $q Query instance.
@@ -318,8 +348,9 @@ class WC_Query {
 
 			// When orderby is set, WordPress shows posts on the front-page. Get around that here.
 			if ( $this->page_on_front_is( wc_get_page_id( 'shop' ) ) ) {
-				$_query = wp_parse_args( $q->query );
-				if ( empty( $_query ) || ! array_diff( array_keys( $_query ), array( 'preview', 'page', 'paged', 'cpage', 'orderby' ) ) ) {
+				$_query = $this->filter_out_valid_front_page_query_vars( wp_parse_args( $q->query ) );
+
+				if ( empty( $_query ) ) {
 					$q->set( 'page_id', (int) get_option( 'page_on_front' ) );
 					$q->is_page = true;
 					$q->is_home = false;
