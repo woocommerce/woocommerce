@@ -23,6 +23,13 @@ class MarketingCampaign implements JsonSerializable {
 	protected $id;
 
 	/**
+	 * The marketing channel that this campaign belongs to.
+	 *
+	 * @var MarketingChannelInterface
+	 */
+	protected $channel;
+
+	/**
 	 * Title of the marketing campaign.
 	 *
 	 * @var string
@@ -46,13 +53,15 @@ class MarketingCampaign implements JsonSerializable {
 	/**
 	 * MarketingCampaign constructor.
 	 *
-	 * @param string     $id         The marketing campaign's unique identifier.
-	 * @param string     $title      The title of the marketing campaign.
-	 * @param string     $manage_url The URL to the channel's campaign management page.
-	 * @param Price|null $cost       The cost of the marketing campaign with the currency.
+	 * @param string                    $id         The marketing campaign's unique identifier.
+	 * @param MarketingChannelInterface $channel    The marketing channel that this campaign belongs to.
+	 * @param string                    $title      The title of the marketing campaign.
+	 * @param string                    $manage_url The URL to the channel's campaign management page.
+	 * @param Price|null                $cost       The cost of the marketing campaign with the currency.
 	 */
-	public function __construct( string $id, string $title, string $manage_url, Price $cost = null ) {
+	public function __construct( string $id, MarketingChannelInterface $channel, string $title, string $manage_url, Price $cost = null ) {
 		$this->id         = $id;
+		$this->channel    = $channel;
 		$this->title      = $title;
 		$this->manage_url = $manage_url;
 		$this->cost       = $cost;
@@ -65,6 +74,15 @@ class MarketingCampaign implements JsonSerializable {
 	 */
 	public function get_id(): string {
 		return $this->id;
+	}
+
+	/**
+	 * Returns the marketing channel that this campaign belongs to.
+	 *
+	 * @return MarketingChannelInterface
+	 */
+	public function get_channel(): MarketingChannelInterface {
+		return $this->channel;
 	}
 
 	/**
@@ -102,6 +120,7 @@ class MarketingCampaign implements JsonSerializable {
 	public function jsonSerialize() {
 		return [
 			'id'         => $this->get_id(),
+			'channel'    => $this->get_channel()->get_slug(),
 			'title'      => $this->get_title(),
 			'manage_url' => $this->get_manage_url(),
 			'cost'       => $this->get_cost(),
