@@ -172,6 +172,39 @@ describe( 'TableCard', () => {
 			'is-left-aligned'
 		);
 	} );
+
+	it( 'should render the default "No data to display" when there are no data and emptyMessage is unset', () => {
+		render(
+			<TableCard
+				title="My table"
+				headers={ mockHeaders }
+				isLoading={ false }
+				rows={ [] }
+				rowsPerPage={ 5 }
+			/>
+		);
+
+		expect(
+			screen.queryByText( 'No data to display' )
+		).toBeInTheDocument();
+	} );
+
+	it( 'should render the custom label set in emptyMessage when there are no data.', () => {
+		const emptyMessage = 'My no data label';
+
+		render(
+			<TableCard
+				title="My table"
+				headers={ mockHeaders }
+				isLoading={ false }
+				rows={ [] }
+				rowsPerPage={ 5 }
+				emptyMessage={ emptyMessage }
+			/>
+		);
+
+		expect( screen.queryByText( emptyMessage ) ).toBeInTheDocument();
+	} );
 } );
 
 describe( 'Table', () => {
