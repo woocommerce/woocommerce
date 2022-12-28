@@ -30,4 +30,18 @@
 		color: inherit;
 		vertical-align: top;
 	}
+	.wc-block-editor-components-external-link-card__warning {
+		color: #cc1818;
+		display: flex;
+		align-items: flex-start;
+		font-size: 0.875em;
+		column-gap: 4px;
+		margin-top: 0.5em;
+
+		svg {
+			width: 18px;
+			height: 18px;
+			min-width: 18px;
+		}
+	}
 }

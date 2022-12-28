@@ -147,7 +147,7 @@ export function DefaultNotice( { block }: { block: string } ) {
 						isSmall={ true }
 					>
 						{ __(
-							'update your page settings',
+							'Update your page settings',
 							'woo-gutenberg-products-block'
 						) }
 					</Button>
