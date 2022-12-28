@@ -26,7 +26,7 @@ const attributeList: ProductAttribute[] = [
 		visible: true,
 		variation: true,
 		options: [
-			'Beige',
+			'beige',
 			'black',
 			'Blue',
 			'brown',
@@ -134,23 +134,24 @@ describe( 'AttributeField', () => {
 			await screen.findByText( attributeList[ 0 ].name )
 		).toBeInTheDocument();
 		expect(
-			await screen.findByText( attributeList[ 1 ].name )
-		).toBeInTheDocument();
+			await screen.queryByText( attributeList[ 1 ].name )
+		).not.toBeInTheDocument();
 	} );
 
-	it( 'should render the first two terms of each attribute, and show "+ n more" for the rest', async () => {
+	it( 'should render the first two terms of each option, and show "+ n more" for the rest', async () => {
 		act( () => {
 			render(
 				<AttributeField
 					value={ [ ...attributeList ] }
 					onChange={ () => {} }
+					attributeType="for-variations"
 				/>
 			);
 		} );
 
 		expect(
-			await screen.findByText( attributeList[ 0 ].options[ 0 ] )
-		).toBeInTheDocument();
+			await screen.queryByText( attributeList[ 0 ].options[ 0 ] )
+		).not.toBeInTheDocument();
 		expect(
 			await screen.findByText( attributeList[ 1 ].options[ 0 ] )
 		).toBeInTheDocument();

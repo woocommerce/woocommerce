@@ -1,7 +1,7 @@
 name: 'Release: Code freeze'
 on:
     schedule:
-        - cron: '0 16 * * 4' # Run at 1600 UTC on Thursdays.
+        - cron: '0 23 * * 1' # Run at 2300 UTC on Mondays.
     workflow_dispatch:
         inputs:
             timeOverride:
@@ -42,12 +42,12 @@ jobs:
                     $now = strtotime( getenv( 'TIME_OVERRIDE' ) );
                   }
 
-                  // Code freeze comes 26 days prior to release day.
-                  $release_time         = strtotime( '+26 days', $now );
+                  // Code freeze comes 22 days prior to release day.
+                  $release_time         = strtotime( '+22 days', $now );
                   $release_day_of_week  = date( 'l', $release_time );
                   $release_day_of_month = (int) date( 'j', $release_time );
 
-                  // If 26 days from now isn't the second Tuesday, then it's not code freeze day.
+                  // If 22 days from now isn't the second Tuesday, then it's not code freeze day.
                   if ( 'Tuesday' !== $release_day_of_week || $release_day_of_month < 8 || $release_day_of_month > 14 ) {
                     file_put_contents( getenv( 'GITHUB_OUTPUT' ), "freeze=1\n", FILE_APPEND );
                   } else {
@@ -163,7 +163,7 @@ jobs:
                         workflow_id: 'release-changelog.yml',
                         ref: 'trunk',
                         inputs: {
-                          releaseVersion: "release/${{ needs.maybe-create-next-milestone-and-release-branch.outputs.next_version }}",
-                          releaseBranch: "${{ needs.maybe-create-next-milestone-and-release-branch.outputs.next_version }}"
+                          releaseVersion: "${{ needs.maybe-create-next-milestone-and-release-branch.outputs.release_version }}",
+                          releaseBranch: "${{ needs.maybe-create-next-milestone-and-release-branch.outputs.branch }}"
                         }
                       })

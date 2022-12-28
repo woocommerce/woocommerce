@@ -14,6 +14,15 @@ export enum PRODUCT_STOCK_STATUS_KEYS {
 }
 
 /**
+ * Product stock status colors.
+ */
+export enum PRODUCT_STOCK_STATUS_CLASSES {
+	instock = 'green',
+	onbackorder = 'yellow',
+	outofstock = 'red',
+}
+
+/**
  * Labels for product stock statuses.
  */
 export const PRODUCT_STOCK_STATUS_LABELS = {
@@ -46,4 +55,28 @@ export const getProductStockStatus = (
 	}
 
 	return PRODUCT_STOCK_STATUS_LABELS.instock;
+};
+
+/**
+ * Get the product stock status class.
+ *
+ * @param  product Product instance.
+ * @return {PRODUCT_STOCK_STATUS_CLASSES} Product stock status class.
+ */
+export const getProductStockStatusClass = (
+	product: PartialProduct | Partial< ProductVariation >
+): string => {
+	if ( product.manage_stock ) {
+		const stockQuantity: number = product.stock_quantity || 0;
+		if ( stockQuantity >= 10 ) {
+			return PRODUCT_STOCK_STATUS_CLASSES.instock;
+		}
+		if ( stockQuantity < 10 && stockQuantity > 2 ) {
+			return PRODUCT_STOCK_STATUS_CLASSES.onbackorder;
+		}
+		return PRODUCT_STOCK_STATUS_CLASSES.outofstock;
+	}
+	return product.stock_status
+		? PRODUCT_STOCK_STATUS_CLASSES[ product.stock_status ]
+		: '';
 };

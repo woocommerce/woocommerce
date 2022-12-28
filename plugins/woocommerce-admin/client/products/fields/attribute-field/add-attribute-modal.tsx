@@ -30,6 +30,21 @@ import { HydratedAttributeType } from '../attribute-field';
 import { getProductAttributeObject } from './utils';
 
 type AddAttributeModalProps = {
+	title?: string;
+	notice?: string;
+	attributeLabel?: string;
+	valueLabel?: string;
+	attributePlaceholder?: string;
+	termPlaceholder?: string;
+	removeLabel?: string;
+	addAnotherAccessibleLabel?: string;
+	addAnotherLabel?: string;
+	cancelLabel?: string;
+	addAccessibleLabel?: string;
+	addLabel?: string;
+	confirmMessage?: string;
+	confirmCancelLabel?: string;
+	confirmConfirmLabel?: string;
 	onCancel: () => void;
 	onAdd: ( newCategories: HydratedAttributeType[] ) => void;
 	selectedAttributeIds?: number[];
@@ -40,6 +55,27 @@ type AttributeForm = {
 };
 
 export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
+	title = __( 'Add attributes', 'woocommerce' ),
+	notice = __(
+		'By default, attributes are filterable and visible on the product page. You can change these settings for each attribute separately later.',
+		'woocommerce'
+	),
+	attributeLabel = __( 'Attribute', 'woocommerce' ),
+	valueLabel = __( 'Values', 'woocommerce' ),
+	attributePlaceholder = __( 'Search or create attribute', 'woocommerce' ),
+	termPlaceholder = __( 'Search or create value', 'woocommerce' ),
+	removeLabel = __( 'Remove attribute', 'woocommerce' ),
+	addAnotherAccessibleLabel = __( 'Add another attribute', 'woocommerce' ),
+	addAnotherLabel = __( '+ Add another', 'woocommerce' ),
+	cancelLabel = __( 'Cancel', 'woocommerce' ),
+	addAccessibleLabel = __( 'Add attributes', 'woocommerce' ),
+	addLabel = __( 'Add', 'woocommerce' ),
+	confirmMessage = __(
+		'You have some attributes added to the list, are you sure you want to cancel?',
+		'woocommerce'
+	),
+	confirmCancelLabel = __( 'No thanks', 'woocommerce' ),
+	confirmConfirmLabel = __( 'Yes please!', 'woocommerce' ),
 	onCancel,
 	onAdd,
 	selectedAttributeIds = [],
@@ -124,9 +160,6 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 		}
 	};
 
-	const attributeLabel = __( 'Attribute', 'woocommerce' );
-	const valueLabel = __( 'Values', 'woocommerce' );
-
 	return (
 		<>
 			<Form< AttributeForm >
@@ -144,7 +177,7 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 				} ) => {
 					return (
 						<Modal
-							title={ __( 'Add attributes', 'woocommerce' ) }
+							title={ title }
 							onRequestClose={ (
 								event:
 									| React.KeyboardEvent< Element >
@@ -158,12 +191,7 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 							className="woocommerce-add-attribute-modal"
 						>
 							<Notice isDismissible={ false }>
-								<p>
-									{ __(
-										'By default, attributes are filterable and visible on the product page. You can change these settings for each attribute separately later.',
-										'woocommerce'
-									) }
-								</p>
+								<p>{ notice }</p>
 							</Notice>
 
 							<div className="woocommerce-add-attribute-modal__body">
@@ -183,10 +211,9 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 												>
 													<td className="woocommerce-add-attribute-modal__table-attribute-column">
 														<AttributeInputField
-															placeholder={ __(
-																'Search or create attribute',
-																'woocommerce'
-															) }
+															placeholder={
+																attributePlaceholder
+															}
 															value={ attribute }
 															label={
 																attributeLabel
@@ -232,10 +259,9 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 														{ attribute === null ||
 														attribute.id !== 0 ? (
 															<AttributeTermInputField
-																placeholder={ __(
-																	'Search or create value',
-																	'woocommerce'
-																) }
+																placeholder={
+																	termPlaceholder
+																}
 																disabled={
 																	attribute
 																		? ! attribute.id
@@ -268,10 +294,9 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 															/>
 														) : (
 															<CustomAttributeTermInputField
-																placeholder={ __(
-																	'Search or create value',
-																	'woocommerce'
-																) }
+																placeholder={
+																	termPlaceholder
+																}
 																disabled={
 																	! attribute.name
 																}
@@ -306,10 +331,9 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 																	.attributes[ 0 ] ===
 																	null
 															}
-															label={ __(
-																'Remove attribute',
-																'woocommerce'
-															) }
+															label={
+																removeLabel
+															}
 															onClick={ () =>
 																onRemove(
 																	index,
@@ -329,10 +353,7 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 								<Button
 									className="woocommerce-add-attribute-modal__add-attribute"
 									variant="tertiary"
-									label={ __(
-										'Add another attribute',
-										'woocommerce'
-									) }
+									label={ addAnotherAccessibleLabel }
 									onClick={ () => {
 										recordEvent(
 											'product_add_attributes_modal_add_another_attribute_button_click'
@@ -340,24 +361,20 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 										addAnother( values, setValue );
 									} }
 								>
-									+&nbsp;
-									{ __( 'Add another', 'woocommerce' ) }
+									{ addAnotherLabel }
 								</Button>
 							</div>
 							<div className="woocommerce-add-attribute-modal__buttons">
 								<Button
 									isSecondary
-									label={ __( 'Cancel', 'woocommerce' ) }
+									label={ cancelLabel }
 									onClick={ () => onClose( values ) }
 								>
-									{ __( 'Cancel', 'woocommerce' ) }
+									{ cancelLabel }
 								</Button>
 								<Button
 									isPrimary
-									label={ __(
-										'Add attributes',
-										'woocommerce'
-									) }
+									label={ addAccessibleLabel }
 									disabled={
 										values.attributes.length === 1 &&
 										values.attributes[ 0 ] === null
@@ -366,7 +383,7 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 										onAddingAttributes( values )
 									}
 								>
-									{ __( 'Add', 'woocommerce' ) }
+									{ addLabel }
 								</Button>
 							</div>
 						</Modal>
@@ -377,15 +394,12 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 			<SelectControlMenuSlot />
 			{ showConfirmClose && (
 				<ConfirmDialog
-					cancelButtonText={ __( 'No thanks', 'woocommerce' ) }
-					confirmButtonText={ __( 'Yes please!', 'woocommerce' ) }
+					cancelButtonText={ confirmCancelLabel }
+					confirmButtonText={ confirmConfirmLabel }
 					onCancel={ () => setShowConfirmClose( false ) }
 					onConfirm={ onCancel }
 				>
-					{ __(
-						'You have some attributes added to the list, are you sure you want to cancel?',
-						'woocommerce'
-					) }
+					{ confirmMessage }
 				</ConfirmDialog>
 			) }
 		</>

@@ -8,12 +8,15 @@ const groupedProductName = 'Add new order grouped product';
 const taxClasses = [
 	{
 		name: 'Tax Class Simple',
+		slug: 'tax-class-simple',
 	},
 	{
 		name: 'Tax Class Variable',
+		slug: 'tax-class-variable',
 	},
 	{
 		name: 'Tax Class External',
+		slug: 'tax-class-external',
 	},
 ];
 const taxRates = [
@@ -33,7 +36,6 @@ const taxRates = [
 		class: 'tax-class-external',
 	},
 ];
-const taxClassSlugs = [];
 const taxTotals = [ '10.00', '20.00', '240.00' ];
 let simpleProductId,
 	variableProductId,
@@ -58,12 +60,8 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 			value: 'yes',
 		} );
 		// add tax classes
-		for ( let i = 0; i < taxClasses.length; i++ ) {
-			await api
-				.post( 'taxes/classes', taxClasses[ i ] )
-				.then( ( response ) => {
-					taxClassSlugs[ i ] = response.data.slug;
-				} );
+		for ( const taxClass of taxClasses ) {
+			await api.post( 'taxes/classes', taxClass );
 		}
 		// attach rates to the classes
 		for ( let i = 0; i < taxRates.length; i++ ) {
@@ -181,10 +179,22 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 			],
 		} );
 		// clean up tax classes and rates
-		for ( let i = 0; i < taxClassSlugs.length; i++ ) {
-			await api.delete( `taxes/classes/${ taxClassSlugs[ i ] }`, {
-				force: true,
-			} );
+		for ( const { slug } of taxClasses ) {
+			await api
+				.delete( `taxes/classes/${ slug }`, {
+					force: true,
+				} )
+				.catch( ( error ) => {
+					if (
+						error.response.data.code ===
+						'woocommerce_rest_invalid_tax_class'
+					) {
+						// do nothing, probably the tax class was not created due to a failing test
+					} else {
+						// Something else went wrong.
+						throw new Error( error.response.data );
+					}
+				} );
 		}
 		// turn off taxes
 		await api.put( 'settings/general/woocommerce_calc_taxes', {

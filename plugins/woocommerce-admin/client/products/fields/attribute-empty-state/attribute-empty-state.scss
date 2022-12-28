@@ -1,0 +1,14 @@
+.woocommerce-attribute-empty-state {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	&__image {
+		max-width: 150px;
+		margin: $gap-larger 0 $gap-large;
+	}
+	&__add-new {
+		margin: $gap-large 0 $gap-larger;
+	}
+}
