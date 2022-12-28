@@ -9,10 +9,9 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { Products } from '../';
+import { Products } from '..';
 import { defaultSurfacedProductTypes, productTypes } from '../constants';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { useProductTaskExperiment } from '../use-product-layout-experiment';
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
@@ -21,13 +20,6 @@ jest.mock( '@wordpress/data', () => ( {
 
 jest.mock( '~/utils/admin-settings', () => ( {
 	getAdminSetting: jest.fn(),
-} ) );
-
-jest.mock( '../use-product-layout-experiment', () => ( {
-	useProductTaskExperiment: jest.fn().mockReturnValue( {
-		isLoading: false,
-		experimentLayout: 'stacked',
-	} ),
 } ) );
 
 jest.mock( '../use-create-product-by-type', () => ( {
@@ -306,41 +298,7 @@ describe( 'Products', () => {
 		);
 	} );
 
-	it( 'should show spinner when layout experiment is loading', async () => {
-		( useProductTaskExperiment as jest.Mock ).mockImplementation( () => {
-			return {
-				isLoading: true,
-				experimentLayout: 'card',
-			};
-		} );
-		const { container } = render( <Products /> );
-		expect(
-			container.getElementsByClassName( 'components-spinner' )
-		).toHaveLength( 1 );
-	} );
-
-	it( 'should render card layout when experiment is assigned', async () => {
-		( useProductTaskExperiment as jest.Mock ).mockImplementation( () => {
-			return {
-				isLoading: false,
-				experimentLayout: 'card',
-			};
-		} );
-		const { container } = render( <Products /> );
-		expect(
-			container.getElementsByClassName(
-				'woocommerce-products-card-layout'
-			)
-		).toHaveLength( 1 );
-	} );
-
-	it( 'should render stacked layout when experiment is assigned', async () => {
-		( useProductTaskExperiment as jest.Mock ).mockImplementation( () => {
-			return {
-				isLoading: false,
-				experimentLayout: 'stacked',
-			};
-		} );
+	it( 'should render stacked layout', async () => {
 		const { container } = render( <Products /> );
 		expect(
 			container.getElementsByClassName( 'woocommerce-products-stack' )

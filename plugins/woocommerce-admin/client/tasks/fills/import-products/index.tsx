@@ -13,12 +13,12 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import Stacks from '../experimental-products/stack';
+import Stacks from '../products/stack';
 import CardList from './CardList';
 import { importTypes } from './importTypes';
 import './style.scss';
-import useProductTypeListItems from '../experimental-products/use-product-types-list-items';
-import { getProductTypes } from '../experimental-products/utils';
+import useProductTypeListItems from '../products/use-product-types-list-items';
+import { getProductTypes } from '../products/utils';
 import LoadSampleProductModal from '../components/load-sample-product-modal';
 import useLoadSampleProducts from '../components/use-load-sample-products';
 import LoadSampleProductConfirmModal from '../components/load-sample-product-confirm-modal';
@@ -114,7 +114,7 @@ registerPlugin( 'wc-admin-onboarding-task-products', {
 	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 	scope: 'woocommerce-tasks',
 	render: () => (
-		<WooOnboardingTask id="products" variant="import">
+		<WooOnboardingTask id="products">
 			<Products />
 		</WooOnboardingTask>
 	),
