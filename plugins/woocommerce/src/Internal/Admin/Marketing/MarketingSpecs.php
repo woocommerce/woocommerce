@@ -29,6 +29,20 @@ class MarketingSpecs {
 	const KNOWLEDGE_BASE_TRANSIENT = 'wc_marketing_knowledge_base';
 
 	/**
+	 * Slug of the category specifying marketing extensions on the WooCommerce.com store.
+	 *
+	 * @var string
+	 */
+	const MARKETING_EXTENSION_CATEGORY_SLUG = 'marketing';
+
+	/**
+	 * Slug of the subcategory specifying marketing channels on the WooCommerce.com store.
+	 *
+	 * @var string
+	 */
+	const MARKETING_CHANNEL_SUBCATEGORY_SLUG = 'sales-channels';
+
+	/**
 	 * Load recommended plugins from WooCommerce.com
 	 *
 	 * @return array
@@ -59,6 +73,64 @@ class MarketingSpecs {
 		}
 
 		return array_values( $plugins );
+	}
+
+	/**
+	 * Return only the recommended marketing channels from WooCommerce.com.
+	 *
+	 * @return array
+	 */
+	public function get_recommended_marketing_channels(): array {
+		return array_filter( $this->get_recommended_plugins(), [ $this, 'is_marketing_channel_plugin' ] );
+	}
+
+	/**
+	 * Return all recommended marketing extensions EXCEPT the marketing channels from WooCommerce.com.
+	 *
+	 * @return array
+	 */
+	public function get_recommended_marketing_extensions_excluding_channels(): array {
+		return array_filter(
+			$this->get_recommended_plugins(),
+			function ( array $plugin_data ) {
+				return $this->is_marketing_plugin( $plugin_data ) && ! $this->is_marketing_channel_plugin( $plugin_data );
+			}
+		);
+	}
+
+	/**
+	 * Returns whether a plugin is a marketing extension.
+	 *
+	 * @param array $plugin_data The plugin properties returned by the API.
+	 *
+	 * @return bool
+	 */
+	protected function is_marketing_plugin( array $plugin_data ): bool {
+		$categories = $plugin_data['categories'] ?? [];
+
+		return in_array( self::MARKETING_EXTENSION_CATEGORY_SLUG, $categories, true );
+	}
+
+	/**
+	 * Returns whether a plugin is a marketing channel.
+	 *
+	 * @param array $plugin_data The plugin properties returned by the API.
+	 *
+	 * @return bool
+	 */
+	protected function is_marketing_channel_plugin( array $plugin_data ): bool {
+		if ( ! $this->is_marketing_plugin( $plugin_data ) ) {
+			return false;
+		}
+
+		$subcategories = $plugin_data['subcategories'] ?? [];
+		foreach ( $subcategories as $subcategory ) {
+			if ( isset( $subcategory['slug'] ) && self::MARKETING_CHANNEL_SUBCATEGORY_SLUG === $subcategory['slug'] ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
