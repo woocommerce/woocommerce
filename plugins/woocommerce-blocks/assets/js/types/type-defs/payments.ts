@@ -14,6 +14,15 @@ import {
 import type { EmptyObjectType } from './objects';
 import type { CheckoutResponseSuccess } from './checkout';
 
+/**
+ * The shape of objects on the `globalPaymentMethods` object from `allSettings`.
+ */
+export interface GlobalPaymentMethod {
+	id: string | number;
+	title: string;
+	description: string;
+}
+
 export interface SupportsConfiguration {
 	showSavedCards?: boolean;
 	showSaveOption?: boolean;

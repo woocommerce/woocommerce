@@ -13,9 +13,11 @@ import {
 	DefaultNotice,
 	LegacyNotice,
 } from '@woocommerce/editor-components/default-notice';
+import { IncompatiblePaymentGatewaysNotice } from '@woocommerce/editor-components/incompatible-payment-gateways-notice';
 import { useSelect } from '@wordpress/data';
 import { CartCheckoutFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 import { isWcVersion } from '@woocommerce/settings';
+import { useState } from '@wordpress/element';
 declare module '@wordpress/editor' {
 	let store: StoreDescriptor;
 }
@@ -36,6 +38,17 @@ const withSidebarNotices = createHigherOrderComponent(
 		if ( ! blockName.startsWith( 'woocommerce/' ) || ! isBlockSelected ) {
 			return <BlockEdit { ...props } />;
 		}
+
+		const [
+			isIncompatiblePaymentGatewaysNoticeDismissed,
+			setIsIncompatiblePaymentGatewaysNoticeDismissed,
+		] = useState( true );
+
+		const toggleIncompatiblePaymentGatewaysNoticeDismissedStatus = (
+			isDismissed: boolean
+		) => {
+			setIsIncompatiblePaymentGatewaysNoticeDismissed( isDismissed );
+		};
 
 		const addressFieldOrAccountBlocks = [
 			'woocommerce/checkout-shipping-address-block',
@@ -67,23 +80,35 @@ const withSidebarNotices = createHigherOrderComponent(
 				};
 			}
 		);
+		const MakeAsDefaultNotice = () => (
+			<>
+				{ isWcVersion( '6.9.0', '>=' ) ? (
+					<DefaultNotice block={ isCheckout ? 'checkout' : 'cart' } />
+				) : (
+					<LegacyNotice block={ isCheckout ? 'checkout' : 'cart' } />
+				) }
+			</>
+		);
+
 		return (
 			<>
 				{ ( isCart || isCheckout ) && (
 					<InspectorControls>
-						{ isWcVersion( '6.9.0', '>=' ) ? (
-							<DefaultNotice
-								block={ isCheckout ? 'checkout' : 'cart' }
-							/>
-						) : (
-							<LegacyNotice
-								block={ isCheckout ? 'checkout' : 'cart' }
-							/>
-						) }
-
-						<CartCheckoutSidebarCompatibilityNotice
-							block={ isCheckout ? 'checkout' : 'cart' }
+						<IncompatiblePaymentGatewaysNotice
+							toggleDismissedStatus={
+								toggleIncompatiblePaymentGatewaysNoticeDismissedStatus
+							}
 						/>
+
+						{ isIncompatiblePaymentGatewaysNoticeDismissed ? (
+							<>
+								<MakeAsDefaultNotice />
+								<CartCheckoutSidebarCompatibilityNotice
+									block={ isCheckout ? 'checkout' : 'cart' }
+								/>
+							</>
+						) : null }
+
 						{ isAddressFieldBlock ? null : (
 							<CartCheckoutFeedbackPrompt />
 						) }
