@@ -61,15 +61,6 @@ import CheckboxFilter from './checkbox-filter';
 import { useSetWraperVisibility } from '../filter-wrapper/context';
 
 /**
- * Formats filter values into a string for the URL parameters needed for filtering PHP templates.
- *
- * @param {string} url    Current page URL.
- * @param {Array}  params Parameters and their constraints.
- *
- * @return {string}       New URL with query parameters in it.
- */
-
-/**
  * Component displaying an attribute filter.
  *
  * @param {Object}  props            Incoming props for the component.

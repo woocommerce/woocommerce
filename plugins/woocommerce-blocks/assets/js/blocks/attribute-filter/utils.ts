@@ -28,6 +28,14 @@ export function generateUniqueId() {
 export const parseTaxonomyToGenerateURL = ( taxonomy: string ) =>
 	taxonomy.replace( 'pa_', '' );
 
+/**
+ * Formats filter values into a string for the URL parameters needed for filtering PHP templates.
+ *
+ * @param {string} url    Current page URL.
+ * @param {Array}  params Parameters and their constraints.
+ *
+ * @return {string}       New URL with query parameters in it.
+ */
 export const formatParams = ( url: string, params: Array< Param > = [] ) => {
 	const paramObject: Record< string, string > = {};
 
