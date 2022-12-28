@@ -19,7 +19,6 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
  * Internal dependencies
  */
 import { STORE_KEY } from './constants';
-import { VALIDATION_STORE_KEY } from '../validation';
 import { processErrorResponse } from '../utils';
 
 declare type CustomerData = {
@@ -118,11 +117,9 @@ const updateCustomerData = debounce( (): void => {
  */
 export const pushChanges = (): void => {
 	const store = select( STORE_KEY );
-	const hasValidationErrors =
-		select( VALIDATION_STORE_KEY ).hasValidationErrors();
 	const isInitialized = store.hasFinishedResolution( 'getCartData' );
 
-	if ( ! isInitialized || hasValidationErrors ) {
+	if ( ! isInitialized ) {
 		return;
 	}
 
