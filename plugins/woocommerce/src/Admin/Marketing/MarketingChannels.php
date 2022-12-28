@@ -33,7 +33,7 @@ class MarketingChannels {
 	 */
 	public function register( MarketingChannelInterface $channel ): void {
 		if ( isset( $this->registered_channels[ $channel->get_slug() ] ) ) {
-			throw new Exception( 'Marketing channel cannot be registered because there is already a channel registered with the same slug!' );
+			throw new Exception( __( 'Marketing channel cannot be registered because there is already a channel registered with the same slug!', 'woocommerce' ) );
 		}
 
 		$this->registered_channels[ $channel->get_slug() ] = $channel;
