@@ -23,8 +23,6 @@ class MarketingChannels {
 	/**
 	 * Registers a marketing channel.
 	 *
-	 * Note that only a predetermined list of third party extensions can be registered as a marketing channel.
-	 *
 	 * @param MarketingChannelInterface $channel The marketing channel to register.
 	 *
 	 * @return void
@@ -47,9 +45,6 @@ class MarketingChannels {
 	public function get_registered_channels(): array {
 		/**
 		 * Filter the list of registered marketing channels.
-		 *
-		 * Note that only a predetermined list of third party extensions can be registered as a marketing channel.
-		 * Any new plugins added to this array will be cross-checked with that list, which is obtained from WooCommerce.com API.
 		 *
 		 * @param MarketingChannelInterface[] $channels Array of registered marketing channels.
 		 *
