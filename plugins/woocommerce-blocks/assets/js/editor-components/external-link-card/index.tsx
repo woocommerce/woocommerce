@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Icon, external } from '@wordpress/icons';
 import { VisuallyHidden } from '@wordpress/components';
 import { sanitizeHTML } from '@woocommerce/utils';
+import { alert } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -15,6 +16,7 @@ export interface ExternalLinkCardProps {
 	href: string;
 	title: string;
 	description?: string;
+	warning?: string;
 }
 
 /**
@@ -25,6 +27,7 @@ const ExternalLinkCard = ( {
 	href,
 	title,
 	description,
+	warning,
 }: ExternalLinkCardProps ): JSX.Element => {
 	return (
 		<a
@@ -45,6 +48,12 @@ const ExternalLinkCard = ( {
 						} }
 					></span>
 				) }
+				{ warning ? (
+					<span className="wc-block-editor-components-external-link-card__warning">
+						<Icon icon={ alert } />
+						<span>{ warning }</span>
+					</span>
+				) : null }
 			</span>
 			<VisuallyHidden as="span">
 				{

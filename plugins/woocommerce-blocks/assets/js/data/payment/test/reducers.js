@@ -29,6 +29,7 @@ describe( 'paymentMethodDataReducer', () => {
 		errorMessage: '',
 		activePaymentMethod: '',
 		activeSavedToken: '',
+		incompatiblePaymentMethods: {},
 	} );
 
 	it( 'sets state as expected when adding a payment method', () => {
@@ -55,6 +56,7 @@ describe( 'paymentMethodDataReducer', () => {
 			errorMessage: '',
 			activePaymentMethod: '',
 			activeSavedToken: '',
+			incompatiblePaymentMethods: {},
 		} );
 	} );
 
@@ -78,6 +80,7 @@ describe( 'paymentMethodDataReducer', () => {
 			errorMessage: '',
 			activePaymentMethod: '',
 			activeSavedToken: '',
+			incompatiblePaymentMethods: {},
 		} );
 		const nextState = reducer( stateWithRegisteredMethod, {
 			type: ACTION_TYPES.REMOVE_AVAILABLE_PAYMENT_METHOD,
@@ -102,6 +105,7 @@ describe( 'paymentMethodDataReducer', () => {
 			errorMessage: '',
 			activePaymentMethod: '',
 			activeSavedToken: '',
+			incompatiblePaymentMethods: {},
 		} );
 	} );
 
@@ -131,6 +135,7 @@ describe( 'paymentMethodDataReducer', () => {
 			errorMessage: '',
 			activePaymentMethod: '',
 			activeSavedToken: '',
+			incompatiblePaymentMethods: {},
 		} );
 	} );
 
@@ -154,6 +159,7 @@ describe( 'paymentMethodDataReducer', () => {
 			errorMessage: '',
 			activePaymentMethod: '',
 			activeSavedToken: '',
+			incompatiblePaymentMethods: {},
 		} );
 		const nextState = reducer( stateWithRegisteredMethod, {
 			type: ACTION_TYPES.REMOVE_AVAILABLE_EXPRESS_PAYMENT_METHOD,
@@ -178,6 +184,7 @@ describe( 'paymentMethodDataReducer', () => {
 			errorMessage: '',
 			activePaymentMethod: '',
 			activeSavedToken: '',
+			incompatiblePaymentMethods: {},
 		} );
 	} );
 
