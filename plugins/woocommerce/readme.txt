@@ -232,7 +232,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Update wording for In-App Marketplace tour. [#35929](https://github.com/woocommerce/woocommerce/pull/35929)
 * Update - Updating all CES events to support two questions in modal. [#35680](https://github.com/woocommerce/woocommerce/pull/35680)
 * Dev - Allow the user to select multiple images in the Media Library [#35722](https://github.com/woocommerce/woocommerce/pull/35722)
-* Dev - Automatically show attributes in Variations [#35807](https://github.com/woocommerce/woocommerce/pull/35807)
 * Dev - Check if blocks have been added to rich text editors before updating value [#35626](https://github.com/woocommerce/woocommerce/pull/35626)
 * Dev - Make e2e tests compatible with nightly and release smoke test sites. [#35492](https://github.com/woocommerce/woocommerce/pull/35492)
 * Dev - Move file picker by clicking card into the MediaUploader component [#35738](https://github.com/woocommerce/woocommerce/pull/35738)
