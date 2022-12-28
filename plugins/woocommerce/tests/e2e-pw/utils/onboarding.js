@@ -56,9 +56,21 @@ const onboarding = {
 			await page.uncheck( currentCheck );
 		}
 
-		Object.keys( industries ).forEach( async ( industry ) => {
-			await page.click( `label >> text=${ industries[ industry ] }` );
-		} );
+		for ( let industry of Object.values( industries ) ) {
+			await page.click( `label >> text=${ industry }` );
+		}
+	},
+
+	handleSaveChangesModal: async ( page, { saveChanges } ) => {
+		// Save changes? Modal
+		await page.textContent( '.components-modal__header-heading' );
+
+		if ( saveChanges ) {
+			await page.click( 'button >> text=Save' );
+		} else {
+			await page.click( 'button >> text=Discard' );
+		}
+		await page.waitForLoadState( 'networkidle' );
 	},
 
 	completeProductTypesSection: async ( page, products ) => {

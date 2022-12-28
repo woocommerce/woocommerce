@@ -23,14 +23,14 @@ function set_output( $name, $value ) {
 	file_put_contents( getenv( 'GITHUB_OUTPUT' ), "{$name}={$value}" . PHP_EOL, FILE_APPEND );
 }
 
-// Code freeze comes 26 days prior to release day.
-$release_time         = strtotime( '+26 days', $now );
+// Code freeze comes 22 days prior to release day.
+$release_time         = strtotime( '+22 days', $now );
 $release_day_of_week  = date( 'l', $release_time );
 $release_day_of_month = (int) date( 'j', $release_time );
 
-// If 26 days from now isn't the second Tuesday, then it's not code freeze day.
+// If 22 days from now isn't the second Tuesday, then it's not code freeze day.
 if ( 'Tuesday' !== $release_day_of_week || $release_day_of_month < 8 || $release_day_of_month > 14 ) {
-	echo 'Info: Today is not the Thursday of the code freeze.' . PHP_EOL;
+	echo 'Info: Today is not the Monday of the code freeze.' . PHP_EOL;
 	exit( 1 );
 }
 

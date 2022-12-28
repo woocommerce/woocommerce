@@ -6,7 +6,7 @@ $gutenberg-blue-darker: var(--wp-admin-theme-color-darker-20);
 	flex-direction: row;
 	align-items: center;
 	justify-content: flex-end;
-	padding-right: $gap-smaller;
+	padding-right: $gap-large;
 
 	@include breakpoint( '<782px' ) {
 		position: fixed;
@@ -57,5 +57,9 @@ $gutenberg-blue-darker: var(--wp-admin-theme-color-darker-20);
 @include breakpoint( '<782px' ) {
 	.woocommerce-layout {
 		margin-bottom: calc(70px + $gap); // Product actions height + gap.
+	}
+
+	.is-variation .woocommerce-product-form-actions__preview {
+		display: none;
 	}
 }

@@ -37,13 +37,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 							}
 
 							if ( 'select' === $attribute_taxonomy->attribute_type ) {
+								$attribute_orderby = ! empty( $attribute_taxonomy->attribute_orderby ) ? $attribute_taxonomy->attribute_orderby : 'name';
 								?>
-								<select multiple="multiple" data-minimum_input_length="0" data-limit="50" data-return_id="id" data-placeholder="<?php esc_attr_e( 'Select terms', 'woocommerce' ); ?>" class="multiselect attribute_values wc-taxonomy-term-search" name="attribute_values[<?php echo esc_attr( $i ); ?>][]" data-taxonomy="<?php echo esc_attr( $attribute->get_taxonomy() ); ?>">
+								<select multiple="multiple"
+										data-minimum_input_length="0"
+										data-limit="50" data-return_id="id"
+										data-placeholder="<?php esc_attr_e( 'Select terms', 'woocommerce' ); ?>"
+										data-orderby="<?php echo esc_attr( $attribute_orderby ); ?>"
+										class="multiselect attribute_values wc-taxonomy-term-search"
+										name="attribute_values[<?php echo esc_attr( $i ); ?>][]"
+										data-taxonomy="<?php echo esc_attr( $attribute->get_taxonomy() ); ?>">
 									<?php
-									$args           = array(
-										'orderby'    => ! empty( $attribute_taxonomy->attribute_orderby ) ? $attribute_taxonomy->attribute_orderby : 'name',
-										'hide_empty' => 0,
-									);
 									$selected_terms = $attribute->get_terms();
 									if ( $selected_terms ) {
 										foreach ( $selected_terms as $selected_term ) {

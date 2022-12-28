@@ -16,9 +16,9 @@ import { PricingSection } from './sections/pricing-section';
 import { ProductShippingSection } from './sections/product-shipping-section';
 import { ProductVariationsSection } from './sections/product-variations-section';
 import { ImagesSection } from './sections/images-section';
-import './product-page.scss';
 import { validate } from './product-validation';
 import { AttributesSection } from './sections/attributes-section';
+import { OptionsSection } from './sections/options-section';
 import { ProductFormFooter } from './layout/product-form-footer';
 import { ProductFormTab } from './product-form-tab';
 
@@ -48,16 +48,29 @@ export const ProductForm: React.FC< {
 					<ImagesSection />
 					<AttributesSection />
 				</ProductFormTab>
-				<ProductFormTab name="pricing" title="Pricing">
+				<ProductFormTab
+					name="pricing"
+					title="Pricing"
+					disabled={ !! product?.variations?.length }
+				>
 					<PricingSection />
 				</ProductFormTab>
-				<ProductFormTab name="inventory" title="Inventory">
+				<ProductFormTab
+					name="inventory"
+					title="Inventory"
+					disabled={ !! product?.variations?.length }
+				>
 					<ProductInventorySection />
 				</ProductFormTab>
-				<ProductFormTab name="shipping" title="Shipping">
+				<ProductFormTab
+					name="shipping"
+					title="Shipping"
+					disabled={ !! product?.variations?.length }
+				>
 					<ProductShippingSection product={ product } />
 				</ProductFormTab>
 				<ProductFormTab name="options" title="Options">
+					<OptionsSection />
 					<ProductVariationsSection />
 				</ProductFormTab>
 			</ProductFormLayout>

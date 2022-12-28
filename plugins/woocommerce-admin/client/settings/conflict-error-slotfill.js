@@ -15,6 +15,7 @@ import { Icon, closeSmall } from '@wordpress/icons';
 import { useEffect, useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -70,6 +71,8 @@ const SettingsErrorFill = () => {
 			'success',
 			__( 'Recommended settings applied.', 'woocommerce' )
 		);
+
+		recordEvent( 'tax_settings_conflict_recommended_settings_clicked' );
 	};
 
 	const ApplyRecommendedSettingsButton = () => (
@@ -125,6 +128,12 @@ const SettingsErrorFill = () => {
 			setIsConflict( false );
 		} else {
 			setIsConflict( true );
+
+			recordEvent( 'tax_settings_conflict', {
+				main: pricesEnteredWithTaxSetting,
+				shop: displayPricesInShopWithTaxSetting,
+				cart: displayPricesInCartWithTaxSetting,
+			} );
 		}
 	}, [
 		displayPricesInCartWithTaxSetting,
@@ -169,9 +178,13 @@ const SettingsErrorFill = () => {
 						<div>
 							<Button
 								className="woocommerce_tax_settings_conflict_error_card_body__close_icon"
-								onClick={ () =>
-									setDismissedConflictWarning( true )
-								}
+								onClick={ () => {
+									setDismissedConflictWarning( true );
+
+									recordEvent(
+										'tax_settings_conflict_dismissed'
+									);
+								} }
 							>
 								<Icon icon={ closeSmall } />
 							</Button>

@@ -4,6 +4,7 @@
 import classnames from 'classnames';
 
 export const ProductFormTab: React.FC< {
+	disabled?: boolean;
 	name: string;
 	title: string;
 	children: JSX.Element | JSX.Element[] | string;

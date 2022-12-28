@@ -23,8 +23,6 @@ class MarketingChannels {
 	/**
 	 * Registers a marketing channel.
 	 *
-	 * Note that only a predetermined list of third party extensions can be registered as a marketing channel.
-	 *
 	 * @param MarketingChannelInterface $channel The marketing channel to register.
 	 *
 	 * @return void
@@ -33,7 +31,7 @@ class MarketingChannels {
 	 */
 	public function register( MarketingChannelInterface $channel ): void {
 		if ( isset( $this->registered_channels[ $channel->get_slug() ] ) ) {
-			throw new Exception( 'Marketing channel cannot be registered because there is already a channel registered with the same slug!' );
+			throw new Exception( __( 'Marketing channel cannot be registered because there is already a channel registered with the same slug!', 'woocommerce' ) );
 		}
 
 		$this->registered_channels[ $channel->get_slug() ] = $channel;
@@ -47,9 +45,6 @@ class MarketingChannels {
 	public function get_registered_channels(): array {
 		/**
 		 * Filter the list of registered marketing channels.
-		 *
-		 * Note that only a predetermined list of third party extensions can be registered as a marketing channel.
-		 * Any new plugins added to this array will be cross-checked with that list, which is obtained from WooCommerce.com API.
 		 *
 		 * @param MarketingChannelInterface[] $channels Array of registered marketing channels.
 		 *
