@@ -1766,7 +1766,7 @@ FROM $order_meta_table
 			 */
 			do_action( 'woocommerce_before_delete_order', $order_id, $order );
 
-			$this->unlink_child_orders( $order );
+			$this->upshift_child_orders( $order );
 			$this->delete_order_data_from_custom_order_tables( $order_id );
 
 			$order->set_id( 0 );
@@ -1798,7 +1798,14 @@ FROM $order_meta_table
 		}
 	}
 
-	private function unlink_child_orders( $order ) {
+	/**
+	 * Helper method to set child orders to the parent order's parent.
+	 *
+	 * @param \WC_Abstract_Order $order Order object.
+	 *
+	 * @return void
+	 */
+	private function upshift_child_orders( $order ) {
 		global $wpdb;
 		$order_table = self::get_orders_table_name();
 		$order_parent = $order->get_parent_id();
