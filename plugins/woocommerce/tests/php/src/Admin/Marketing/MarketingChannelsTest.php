@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\Tests\Admin\Marketing;
 
 use Automattic\WooCommerce\Admin\Marketing\MarketingChannelInterface;
 use Automattic\WooCommerce\Admin\Marketing\MarketingChannels;
-use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use WC_Unit_Test_Case;
 
 /**
@@ -16,29 +15,17 @@ class MarketingChannelsTest extends WC_Unit_Test_Case {
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
-		delete_transient( MarketingSpecs::RECOMMENDED_PLUGINS_TRANSIENT );
+		remove_all_filters( 'woocommerce_marketing_channels' );
 	}
 
 	/**
-	 * @testdox A marketing channel can be registered using the `register` method if it is in the allowed list.
+	 * @testdox A marketing channel can be registered using the `register` method if the same channel slug is NOT previously registered.
 	 */
-	public function test_registers_allowed_channels() {
+	public function test_registers_channel() {
 		$test_channel = $this->createMock( MarketingChannelInterface::class );
 		$test_channel->expects( $this->any() )->method( 'get_slug' )->willReturn( 'test-channel-1' );
 
-		$marketing_specs = $this->createMock( MarketingSpecs::class );
-		$marketing_specs->expects( $this->once() )
-						->method( 'get_recommended_plugins' )
-						->willReturn(
-							[
-								[
-									'product' => 'test-channel-1',
-								],
-							]
-						);
-
 		$marketing_channels = new MarketingChannels();
-		$marketing_channels->init( $marketing_specs );
 		$marketing_channels->register( $test_channel );
 
 		$this->assertNotEmpty( $marketing_channels->get_registered_channels() );
@@ -46,42 +33,33 @@ class MarketingChannelsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A marketing channel can NOT be registered using the `register` method if it is NOT in the allowed list.
+	 * @testdox A marketing channel can NOT be registered using the `register` method if it is previously registered.
 	 */
-	public function test_does_not_register_disallowed_channels() {
-		$test_channel = $this->createMock( MarketingChannelInterface::class );
-		$test_channel->expects( $this->any() )->method( 'get_slug' )->willReturn( 'test-channel-1' );
+	public function test_throws_exception_if_registering_existing_channels() {
+		$test_channel_1 = $this->createMock( MarketingChannelInterface::class );
+		$test_channel_1->expects( $this->any() )->method( 'get_slug' )->willReturn( 'test-channel-1' );
 
-		$marketing_specs = $this->createMock( MarketingSpecs::class );
-		$marketing_specs->expects( $this->once() )->method( 'get_recommended_plugins' )->willReturn( [] );
+		$test_channel_1_duplicate = $this->createMock( MarketingChannelInterface::class );
+		$test_channel_1_duplicate->expects( $this->any() )->method( 'get_slug' )->willReturn( 'test-channel-1' );
 
 		$marketing_channels = new MarketingChannels();
-		$marketing_channels->init( $marketing_specs );
-		$marketing_channels->register( $test_channel );
+		$marketing_channels->register( $test_channel_1 );
 
-		$this->assertEmpty( $marketing_channels->get_registered_channels() );
+		$this->expectException( \Exception::class );
+		$marketing_channels->register( $test_channel_1_duplicate );
+
+		$this->assertCount( 1, $marketing_channels->get_registered_channels() );
+		$this->assertEquals( $test_channel_1, $marketing_channels->get_registered_channels()[0] );
 	}
 
 	/**
-	 * @testdox A marketing channel can be registered using the `woocommerce_marketing_channels` WordPress filter if it is in the allowed list.
+	 * @testdox A marketing channel can be registered using the `woocommerce_marketing_channels` WordPress filter if the same channel slug is NOT previously registered.
 	 */
-	public function test_registers_allowed_channels_using_wp_filter() {
+	public function test_registers_channel_using_wp_filter() {
 		$test_channel = $this->createMock( MarketingChannelInterface::class );
 		$test_channel->expects( $this->any() )->method( 'get_slug' )->willReturn( 'test-channel-1' );
 
-		$marketing_specs = $this->createMock( MarketingSpecs::class );
-		$marketing_specs->expects( $this->once() )
-						->method( 'get_recommended_plugins' )
-						->willReturn(
-							[
-								[
-									'product' => 'test-channel-1',
-								],
-							]
-						);
-
 		$marketing_channels = new MarketingChannels();
-		$marketing_channels->init( $marketing_specs );
 
 		add_filter(
 			'woocommerce_marketing_channels',
@@ -97,24 +75,29 @@ class MarketingChannelsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A marketing channel can NOT be registered using the `woocommerce_marketing_channels` WordPress filter if it NOT is in the allowed list.
+	 * @testdox A marketing channel can NOT be registered using the `woocommerce_marketing_channels` WordPress filter if it is previously registered.
 	 */
-	public function test_does_not_register_disallowed_channels_using_wp_filter() {
-		$test_channel = $this->createMock( MarketingChannelInterface::class );
-		$test_channel->expects( $this->any() )->method( 'get_slug' )->willReturn( 'test-channel-1' );
+	public function test_overrides_existing_channel_if_registered_using_wp_filter() {
+		$marketing_channels = new MarketingChannels();
 
-		set_transient( MarketingSpecs::RECOMMENDED_PLUGINS_TRANSIENT, [] );
+		$test_channel_1 = $this->createMock( MarketingChannelInterface::class );
+		$test_channel_1->expects( $this->any() )->method( 'get_slug' )->willReturn( 'test-channel-1' );
+
+		$marketing_channels->register( $test_channel_1 );
+
+		$test_channel_1_duplicate = $this->createMock( MarketingChannelInterface::class );
+		$test_channel_1_duplicate->expects( $this->any() )->method( 'get_slug' )->willReturn( 'test-channel-1' );
 
 		add_filter(
 			'woocommerce_marketing_channels',
-			function ( array $channels ) use ( $test_channel ) {
-				$channels[ $test_channel->get_slug() ] = $test_channel;
+			function ( array $channels ) use ( $test_channel_1_duplicate ) {
+				$channels[ $test_channel_1_duplicate->get_slug() ] = $test_channel_1_duplicate;
 
 				return $channels;
 			}
 		);
 
-		$marketing_channels = new MarketingChannels();
-		$this->assertEmpty( $marketing_channels->get_registered_channels() );
+		$this->assertCount( 1, $marketing_channels->get_registered_channels() );
+		$this->assertEquals( $test_channel_1_duplicate, $marketing_channels->get_registered_channels()[0] );
 	}
 }

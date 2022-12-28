@@ -5,7 +5,6 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
-use Automattic\WooCommerce\Admin\Marketing\InstalledExtensions;
 use Automattic\WooCommerce\Admin\Marketing\MarketingChannels;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
@@ -30,7 +29,6 @@ class MarketingServiceProvider extends AbstractServiceProvider {
 	protected $provides = array(
 		MarketingSpecs::class,
 		MarketingChannels::class,
-		InstalledExtensions::class,
 	);
 
 	/**
@@ -38,7 +36,6 @@ class MarketingServiceProvider extends AbstractServiceProvider {
 	 */
 	public function register() {
 		$this->share( MarketingSpecs::class );
-		$this->share( MarketingChannels::class )->addArgument( MarketingSpecs::class );
-		$this->share( InstalledExtensions::class )->addArgument( MarketingChannels::class );
+		$this->share( MarketingChannels::class );
 	}
 }
