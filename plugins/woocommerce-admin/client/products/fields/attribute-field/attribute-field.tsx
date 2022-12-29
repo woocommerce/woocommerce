@@ -24,7 +24,10 @@ import { getAdminLink } from '@woocommerce/settings';
 import './attribute-field.scss';
 import { AddAttributeModal } from './add-attribute-modal';
 import { EditAttributeModal } from './edit-attribute-modal';
-import { reorderSortableProductAttributePositions } from './utils';
+import {
+	getAttributeKey,
+	reorderSortableProductAttributePositions,
+} from './utils';
 import { sift } from '../../../utils';
 import { AttributeEmptyState } from '../attribute-empty-state';
 import {
@@ -247,7 +250,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 			keyValue: Record< number | string, ProductAttribute >,
 			attribute: ProductAttribute
 		) => {
-			keyValue[ attribute.position ] = attribute;
+			keyValue[ getAttributeKey( attribute ) ] = attribute;
 			return keyValue;
 		},
 		{} as Record< number, ProductAttribute >

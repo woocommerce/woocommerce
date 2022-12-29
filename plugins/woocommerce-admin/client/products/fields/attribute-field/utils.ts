@@ -4,6 +4,18 @@
 import { ProductAttribute } from '@woocommerce/data';
 
 /**
+ * Returns the attribute key. The key will be the `id` or the `name` when the id is 0.
+ *
+ * @param { ProductAttribute } attribute product attribute.
+ * @return string|number
+ */
+export function getAttributeKey(
+	attribute: ProductAttribute
+): number | string {
+	return attribute.id !== 0 ? attribute.id : attribute.name;
+}
+
+/**
  * Updates the position of a product attribute from the new items JSX.Element list.
  *
  * @param { JSX.Element[] } items              list of JSX elements coming back from sortable container.
@@ -11,14 +23,16 @@ import { ProductAttribute } from '@woocommerce/data';
  */
 export function reorderSortableProductAttributePositions(
 	items: JSX.Element[],
-	attributeKeyValues: Record< number, ProductAttribute >
+	attributeKeyValues: Record< number | string, ProductAttribute >
 ): ProductAttribute[] {
 	return items
 		.map( ( { props }, index ): ProductAttribute | undefined => {
-			const position = props?.attribute ? props?.attribute.position : NaN;
-			if ( ! isNaN( position ) && attributeKeyValues[ position ] ) {
+			// const position = props?.attribute ? props?.attribute.position : NaN;
+			// if ( ! isNaN( position ) && attributeKeyValues[ position ] ) {
+			const key = getAttributeKey( props?.attribute );
+			if ( attributeKeyValues[ key ] ) {
 				return {
-					...attributeKeyValues[ position ],
+					...attributeKeyValues[ key ],
 					position: index,
 				};
 			}
