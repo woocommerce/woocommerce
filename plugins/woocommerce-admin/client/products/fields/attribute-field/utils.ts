@@ -27,8 +27,6 @@ export function reorderSortableProductAttributePositions(
 ): ProductAttribute[] {
 	return items
 		.map( ( { props }, index ): ProductAttribute | undefined => {
-			// const position = props?.attribute ? props?.attribute.position : NaN;
-			// if ( ! isNaN( position ) && attributeKeyValues[ position ] ) {
 			const key = getAttributeKey( props?.attribute );
 			if ( attributeKeyValues[ key ] ) {
 				return {
