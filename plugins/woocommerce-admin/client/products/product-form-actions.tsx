@@ -47,7 +47,14 @@ export const ProductFormActions: React.FC = () => {
 	const { isDirty, isValidForm, values, resetForm } =
 		useFormContext< Product >();
 
-	usePreventLeavingPage( isDirty );
+	usePreventLeavingPage( isDirty, ( toUrl, fromUrl ) => {
+		const toParams = new URLSearchParams( toUrl.search );
+		const fromParams = new URLSearchParams( fromUrl.search );
+		toParams.delete( 'tab' );
+		fromParams.delete( 'tab' );
+		return toParams.toString() !== fromParams.toString();
+	} );
+
 	useCustomerEffortScoreExitPageTracker(
 		! values.id ? 'new_product' : 'editing_new_product',
 		isDirty
