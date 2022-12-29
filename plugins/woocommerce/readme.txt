@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Remove redundant Pinterest plugin from marketing task [#36158](https://github.com/woocommerce/woocommerce/pull/36158)
 * Fix - Corrects a hard-coded reference to the WP post meta table within the HPOS Migration Helper, that would fail on some sites. [#36100](https://github.com/woocommerce/woocommerce/pull/36100)
 * Fix - Add a blank space between the emoji and the message within a notice popup [#35698](https://github.com/woocommerce/woocommerce/pull/35698)
 * Fix - Add a data migration for changed New Zealand and Ukraine state codes [#35960](https://github.com/woocommerce/woocommerce/pull/35960)
