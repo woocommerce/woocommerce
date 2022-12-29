@@ -63,10 +63,10 @@ class SchemaController {
 	 * @return Schemas\V1\AbstractSchema A new instance of the requested schema.
 	 */
 	public function get( $name, $version = 1 ) {
-		$schema = $this->schemas[ "v${version}" ][ $name ] ?? false;
+		$schema = $this->schemas[ "v{$version}" ][ $name ] ?? false;
 
 		if ( ! $schema ) {
-			throw new \Exception( "${name} v{$version} schema does not exist" );
+			throw new \Exception( "{$name} v{$version} schema does not exist" );
 		}
 
 		return new $schema( $this->extend, $this );
