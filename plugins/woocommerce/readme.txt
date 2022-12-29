@@ -212,6 +212,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Add tracks events for 'product_view_product_click' and 'product_view_product_dismiss' [#35582](https://github.com/woocommerce/woocommerce/pull/35582)
 * Add - Introduces action `woocommerce_order_list_table_restrict_manage_orders` as an equivalent of the legacy `restrict_manage_posts` hook. [#36000](https://github.com/woocommerce/woocommerce/pull/36000)
 * Add - Open categories menu list when the user focus the category field [#35606](https://github.com/woocommerce/woocommerce/pull/35606)
+* Update - Match country name or ' - region' when filtering country select control #36120 [#36159](https://github.com/woocommerce/woocommerce/pull/36159)
 * Update - Update WooCommerce Blocks to 9.1.3 [#36125](https://github.com/woocommerce/woocommerce/pull/36125)
 * Update - Adapt the summary text in the product management form. [#35717](https://github.com/woocommerce/woocommerce/pull/35717)
 * Update - Add Codisto for WooCommerce to free extensions list [#36009](https://github.com/woocommerce/woocommerce/pull/36009)
