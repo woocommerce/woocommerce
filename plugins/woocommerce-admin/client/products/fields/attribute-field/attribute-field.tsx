@@ -244,10 +244,10 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 	);
 	const attributeKeyValues = filteredAttributes.reduce(
 		(
-			keyValue: Record< number, ProductAttribute >,
+			keyValue: Record< number | string, ProductAttribute >,
 			attribute: ProductAttribute
 		) => {
-			keyValue[ attribute.id ] = attribute;
+			keyValue[ attribute.position ] = attribute;
 			return keyValue;
 		},
 		{} as Record< number, ProductAttribute >

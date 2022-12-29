@@ -14,11 +14,11 @@ export function reorderSortableProductAttributePositions(
 	attributeKeyValues: Record< number, ProductAttribute >
 ): ProductAttribute[] {
 	return items
-		.map( ( item, index ): ProductAttribute | undefined => {
-			const key = item.key ? parseInt( item.key as string, 10 ) : NaN;
-			if ( key !== NaN && attributeKeyValues[ key ] ) {
+		.map( ( { props }, index ): ProductAttribute | undefined => {
+			const position = props?.attribute ? props?.attribute.position : NaN;
+			if ( ! isNaN( position ) && attributeKeyValues[ position ] ) {
 				return {
-					...attributeKeyValues[ key ],
+					...attributeKeyValues[ position ],
 					position: index,
 				};
 			}
