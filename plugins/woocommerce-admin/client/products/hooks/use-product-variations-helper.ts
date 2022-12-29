@@ -16,7 +16,7 @@ export function useProductVariationsHelper() {
 		invalidateResolutionForStoreSelector,
 	} = useDispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 	const { createProduct, updateProduct } = useDispatch( PRODUCTS_STORE_NAME );
-	const { setValue } = useFormContext< Product >();
+	const { resetForm } = useFormContext< Product >();
 
 	const [ isGenerating, setIsGenerating ] = useState( false );
 
@@ -41,7 +41,13 @@ export function useProductVariationsHelper() {
 			return createOrUpdateProduct()
 				.then( ( createdOrUpdatedProduct ) => {
 					if ( ! product.id ) {
-						setValue( 'id', createdOrUpdatedProduct.id );
+						resetForm( {
+							...createdOrUpdatedProduct,
+							name:
+								createdOrUpdatedProduct.name === 'AUTO-DRAFT'
+									? ''
+									: createdOrUpdatedProduct.name,
+						} );
 					}
 					return _generateProductVariations( {
 						product_id: createdOrUpdatedProduct.id,
