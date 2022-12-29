@@ -815,11 +815,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				if ( ! isset( $attribute['attribute'] ) || ! isset( $attribute['term'] ) ) {
 					continue;
 				}
-				$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					$args,
 					array(
-						'key'     => 'attribute_' . $attribute['attribute'],
-						'value'   => $attribute['term'],
+						'key'   => 'attribute_' . $attribute['attribute'],
+						'value' => $attribute['term'],
 					)
 				);
 			}
