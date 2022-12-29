@@ -20,6 +20,7 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
+import { AUTO_DRAFT_NAME } from './utils/get-product-title';
 import { CurrencyContext } from '../lib/currency-context';
 import {
 	NUMBERS_AND_DECIMAL_SEPARATOR,
@@ -70,8 +71,8 @@ export function useProductHelper() {
 	/**
 	 * Create product with status.
 	 *
-	 * @param {Product} product the product to be created.
-	 * @param {string}  status the product status.
+	 * @param {Product} product    the product to be created.
+	 * @param {string}  status     the product status.
 	 * @param {boolean} skipNotice if the notice should be skipped (default: false).
 	 * @return {Promise<Product>} Returns a promise with the created product.
 	 */
@@ -163,9 +164,9 @@ export function useProductHelper() {
 	/**
 	 * Update product with status.
 	 *
-	 * @param {number} productId the product id to be updated.
-	 * @param {Product} product the product to be updated.
-	 * @param {string}  status the product status.
+	 * @param {number}  productId  the product id to be updated.
+	 * @param {Product} product    the product to be updated.
+	 * @param {string}  status     the product status.
 	 * @param {boolean} skipNotice if the notice should be skipped (default: false).
 	 * @return {Promise<Product>} Returns a promise with the updated product.
 	 */
@@ -242,7 +243,7 @@ export function useProductHelper() {
 	 * Creates a copy of the given product with the given status.
 	 *
 	 * @param {Product} product the product to be copied.
-	 * @param {string}  status the product status.
+	 * @param {string}  status  the product status.
 	 * @return {Promise<Product>} promise with the newly created and copied product.
 	 */
 	const copyProductWithStatus = useCallback(
@@ -250,7 +251,7 @@ export function useProductHelper() {
 			return createProductWithStatus(
 				removeReadonlyProperties( {
 					...product,
-					name: ( product.name || 'AUTO-DRAFT' ) + ' - Copy',
+					name: ( product.name || AUTO_DRAFT_NAME ) + ' - Copy',
 				} ),
 				status
 			);

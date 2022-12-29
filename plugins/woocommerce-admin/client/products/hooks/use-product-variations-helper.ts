@@ -10,6 +10,11 @@ import {
 } from '@woocommerce/data';
 import { useFormContext } from '@woocommerce/components';
 
+/**
+ * Internal dependencies
+ */
+import { AUTO_DRAFT_NAME } from '../utils/get-product-title';
+
 export function useProductVariationsHelper() {
 	const {
 		generateProductVariations: _generateProductVariations,
@@ -34,7 +39,7 @@ export function useProductVariationsHelper() {
 						return createProduct< Promise< Product > >( {
 							...product,
 							status: 'auto-draft',
-							name: product.name || 'AUTO-DRAFT',
+							name: product.name || AUTO_DRAFT_NAME,
 						} );
 				  };
 
@@ -43,10 +48,7 @@ export function useProductVariationsHelper() {
 					if ( ! product.id ) {
 						resetForm( {
 							...createdOrUpdatedProduct,
-							name:
-								createdOrUpdatedProduct.name === 'AUTO-DRAFT'
-									? ''
-									: createdOrUpdatedProduct.name,
+							name: product.name || '',
 						} );
 					}
 					return _generateProductVariations( {
