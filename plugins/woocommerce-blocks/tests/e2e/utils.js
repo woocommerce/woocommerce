@@ -64,6 +64,10 @@ const SELECTORS = {
 		saveButton: '.edit-site-save-button__button',
 		savePrompt: '.entities-saved-states__text-prompt',
 	},
+	templateEditor: {
+		editButton:
+			'.edit-site-layout__edit-button[aria-label="Open the editor"]',
+	},
 };
 
 /**
@@ -89,6 +93,7 @@ export async function searchForBlock( searchTerm ) {
 export async function insertBlockDontWaitForInsertClose( searchTerm ) {
 	await openGlobalBlockInserter();
 	await searchForBlock( searchTerm );
+	await page.waitForXPath( `//button//span[text()='${ searchTerm }']` );
 	const insertButton = (
 		await page.$x( `//button//span[text()='${ searchTerm }']` )
 	 )[ 0 ];
@@ -160,10 +165,16 @@ export const isBlockInsertedInWidgetsArea = async ( blockName ) => {
  * @param {'wp_template' | 'wp_template_part'} [params.postType='wp_template'] Type of template.
  */
 export async function goToSiteEditor( params = {} ) {
-	return await visitAdminPage(
-		'site-editor.php',
-		addQueryArgs( '', params )
-	);
+	await visitAdminPage( 'site-editor.php', addQueryArgs( '', params ) );
+
+	// @todo Remove the Gutenberg guard clause in goToSiteEditor when WP 6.2 is released.
+	if (
+		GUTENBERG_EDITOR_CONTEXT === 'gutenberg' &&
+		( params?.postId || Object.keys( params ).length === 0 )
+	) {
+		await page.waitForSelector( SELECTORS.templateEditor.editButton );
+		await page.click( SELECTORS.templateEditor.editButton );
+	}
 }
 
 /**
