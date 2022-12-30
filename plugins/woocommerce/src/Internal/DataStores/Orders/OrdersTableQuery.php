@@ -1029,10 +1029,7 @@ class OrdersTableQuery {
 		}
 
 		if ( $this->limits ) {
-			if ( ! isset( $this->found_orders ) ) {
-				$this->found_orders = absint( $wpdb->get_var( $this->count_sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			}
-
+			$this->found_orders = absint( $wpdb->get_var( $this->count_sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$this->max_num_pages = (int) ceil( $this->found_orders / $this->args['limit'] );
 		} else {
 			$this->found_orders = count( $this->orders );
