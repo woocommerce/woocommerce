@@ -112,6 +112,4 @@ export interface ProductQueryContext {
 export enum QueryVariation {
 	/** The main, fully customizable, Product Query block */
 	PRODUCT_QUERY = 'woocommerce/product-query',
-	/** Only shows products on sale */
-	PRODUCTS_ON_SALE = 'woocommerce/query-products-on-sale',
 }
