@@ -5,7 +5,8 @@
 		"./packages/checkout/**/*",
 		"./assets/js/blocks/**/block.json",
 		"./assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/**/block.json",
-		"./storybook/**/*"
+		"./storybook/**/*",
+		"./tests/js/setup-after-env.ts"
 	],
 	"exclude": [
 		"./storybook/build",
