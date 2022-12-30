@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __, _n } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { useEffect, useState, useMemo } from '@wordpress/element';
 import {
 	EmptyContent,
@@ -126,7 +126,18 @@ const renderNotes = ( {
 						<Text size="20" lineHeight="28px" variant="title.small">
 							{ __( 'Inbox', 'woocommerce' ) }
 						</Text>
-						<Badge count={ unreadNotesCount } />
+						<Badge
+							count={ sprintf(
+								/* translators: Number of unread notes */
+								_n(
+									'%d new message since your last visit',
+									'%d new messages since your last visit',
+									unreadNotesCount,
+									'woocommerce'
+								),
+								unreadNotesCount
+							) }
+						/>
 					</div>
 					<EllipsisMenu
 						label={ __( 'Inbox Notes Options', 'woocommerce' ) }
