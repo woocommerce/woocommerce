@@ -1289,7 +1289,7 @@ class WC_Helper {
 			'subscriptions',
 			array(
 				'authenticated' => true,
-				'query_string'  => esc_url( '?source=' . $source ),
+				'query_string'  => '' !== $source ? esc_url( '?source=' . $source ) : '',
 			)
 		);
 
