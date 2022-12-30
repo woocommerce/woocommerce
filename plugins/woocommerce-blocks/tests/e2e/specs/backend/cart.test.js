@@ -136,6 +136,9 @@ describe( `${ block.name } Block`, () => {
 			await closeModalIfExists();
 			await openWidgetsEditorBlockInserter();
 			await searchForBlock( block.name );
+			await page.waitForXPath(
+				`//button//span[text()='${ block.name }']`
+			);
 			const cartButton = await page.$x(
 				`//button//span[text()='${ block.name }']`
 			);
