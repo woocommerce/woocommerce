@@ -33,13 +33,15 @@ export default function useProductVariationNavigation( {
 		prevHref: prevVariationId
 			? getNewPath(
 					persistedQuery,
-					`/product/${ product.id }/variation/${ prevVariationId }`
+					`/product/${ product.id }/variation/${ prevVariationId }`,
+					{}
 			  )
 			: undefined,
 		nextHref: nextVariationId
 			? getNewPath(
 					persistedQuery,
-					`/product/${ product.id }/variation/${ nextVariationId }`
+					`/product/${ product.id }/variation/${ nextVariationId }`,
+					{}
 			  )
 			: undefined,
 	};
