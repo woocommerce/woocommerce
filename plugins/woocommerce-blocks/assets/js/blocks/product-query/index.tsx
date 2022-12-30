@@ -9,12 +9,17 @@ import { addFilter } from '@wordpress/hooks';
  */
 import { CORE_NAME as PRODUCT_TITLE_ID } from './variations/elements/product-title';
 import { CORE_NAME as PRODUCT_SUMMARY_ID } from './variations/elements/product-summary';
+import { CORE_NAME as PRODUCT_TEMPLATE_ID } from './variations/elements/product-template';
 import './inspector-controls';
 import './style.scss';
 import './variations/product-query';
 import './variations/products-on-sale';
 
-const EXTENDED_CORE_ELEMENTS = [ PRODUCT_SUMMARY_ID, PRODUCT_TITLE_ID ];
+const EXTENDED_CORE_ELEMENTS = [
+	PRODUCT_SUMMARY_ID,
+	PRODUCT_TEMPLATE_ID,
+	PRODUCT_TITLE_ID,
+];
 
 function registerProductQueryElementsNamespace(
 	props: Block,
