@@ -41,6 +41,7 @@ const addBlockToWidgetsArea = async () => {
 	await closeModalIfExists();
 	await openWidgetsEditorBlockInserter();
 	await searchForBlock( block.name );
+	await page.waitForXPath( block.selectors.insertButton );
 	const miniCartButton = await page.$x( block.selectors.insertButton );
 	await miniCartButton[ 0 ].click();
 };
