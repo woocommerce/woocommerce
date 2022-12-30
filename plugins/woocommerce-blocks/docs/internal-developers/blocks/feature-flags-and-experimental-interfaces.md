@@ -33,7 +33,6 @@ The majority of our feature flagging is blocks, this is a list of them:
 
 ### Feature plugin flag
 
-
 ### Experimental flag
 
 -   Cart block ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/8516e87bddee6c07a080c934f3d8cc0683adef06/assets/js/blocks/cart-checkout/cart-i2/index.js#L44) | [PHP flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/961c0c476d4228a218859c658c42f9b6eebfdec4/src/BlockTypesController.php#L182)).
