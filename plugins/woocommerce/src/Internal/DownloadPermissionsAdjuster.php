@@ -47,7 +47,7 @@ class DownloadPermissionsAdjuster {
 		$are_any_children_downloadable = false;
 		foreach ( $children_ids as $child_id ) {
 			$child = wc_get_product( $child_id );
-			if ( $child->is_downloadable() ) {
+			if ( $child && $child->is_downloadable() ) {
 				$are_any_children_downloadable = true;
 				break;
 			}
