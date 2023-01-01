@@ -48,6 +48,7 @@ interface UseCollectionDataProps {
 	queryRating?: boolean;
 	queryState: Record< string, unknown >;
 	productIds?: number[];
+	isEditor?: boolean;
 }
 
 export const useCollectionData = ( {
@@ -57,6 +58,7 @@ export const useCollectionData = ( {
 	queryRating,
 	queryState,
 	productIds,
+	isEditor = false,
 }: UseCollectionDataProps ) => {
 	let context = useQueryStateContext();
 	context = `${ context }-collection-data`;
@@ -145,7 +147,7 @@ export const useCollectionData = ( {
 	] );
 
 	// Defer the select query so all collection-data query vars can be gathered.
-	const [ shouldSelect, setShouldSelect ] = useState( false );
+	const [ shouldSelect, setShouldSelect ] = useState( isEditor );
 	const [ debouncedShouldSelect ] = useDebounce( shouldSelect, 200 );
 
 	if ( ! shouldSelect ) {
@@ -169,5 +171,6 @@ export const useCollectionData = ( {
 			...collectionDataQueryVars,
 		},
 		shouldSelect: debouncedShouldSelect,
+		isEditor,
 	} );
 };

@@ -65,7 +65,7 @@ import { useSetWraperVisibility } from '../filter-wrapper/context';
  *
  * @param {Object}  props            Incoming props for the component.
  * @param {Object}  props.attributes Incoming block attributes.
- * @param {boolean} props.isEditor
+ * @param {boolean} props.isEditor   Whether the component is being rendered in the editor.
  */
 const AttributeFilterBlock = ( {
 	attributes: blockAttributes,
@@ -138,6 +138,7 @@ const AttributeFilterBlock = ( {
 			resourceName: 'products/attributes/terms',
 			resourceValues: [ attributeObject?.id || 0 ],
 			shouldSelect: blockAttributes.attributeId > 0,
+			isEditor,
 		} );
 
 	const filterAvailableTerms =
@@ -154,6 +155,7 @@ const AttributeFilterBlock = ( {
 				attributes: filterAvailableTerms ? queryState.attributes : null,
 			},
 			productIds,
+			isEditor,
 		} );
 
 	/**
