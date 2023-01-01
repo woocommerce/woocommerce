@@ -423,7 +423,7 @@ const Edit = ( {
 						/>
 					) }
 					<Disabled>
-						<Block attributes={ attributes } isEditor />
+						<Block attributes={ attributes } isEditor={ true } />
 					</Disabled>
 				</div>
 			) }
