@@ -24,7 +24,7 @@ npm -g i @wordpress/env # If you don't already have wp-env
 wp-env start # Start Wordpress environment
 ```
 
-Go to the WordPress plugins page and activate the plugin.
+See the new plugin activated from the WordPress plugins page and navigate to http://localhost:8888/wp-admin/admin.php?page=wc-admin&path=%2Fmy-extension-name to check it out.
 
 ## Development
 
