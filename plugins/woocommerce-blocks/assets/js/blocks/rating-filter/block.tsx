@@ -68,14 +68,14 @@ const translations = {
  *
  * @param {Object}  props            Incoming props for the component.
  * @param {Object}  props.attributes Incoming block attributes.
- * @param {boolean} props.isEditor
+ * @param {boolean} props.isEditor   Whether the component is being rendered in the editor.
  */
 const RatingFilterBlock = ( {
 	attributes: blockAttributes,
-	isEditor = false,
+	isEditor,
 }: {
+	isEditor: boolean;
 	attributes: Attributes;
-	isEditor?: boolean;
 } ) => {
 	const setWrapperVisibility = useSetWraperVisibility();
 
@@ -93,6 +93,7 @@ const RatingFilterBlock = ( {
 		useCollectionData( {
 			queryRating: true,
 			queryState,
+			isEditor,
 		} );
 
 	const [ displayedOptions, setDisplayedOptions ] = useState(
