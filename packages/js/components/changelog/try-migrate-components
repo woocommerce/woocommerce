@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Migrate report components to @woocommerce/components
