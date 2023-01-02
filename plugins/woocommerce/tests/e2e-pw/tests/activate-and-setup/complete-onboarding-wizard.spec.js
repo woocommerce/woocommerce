@@ -45,8 +45,8 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 
 		// Navigate back to "Store Details" section
 		await page.click( 'button >> text=Store Details' );
-
 		await onboarding.handleSaveChangesModal( page, { saveChanges: true } );
+		await page.locator( 'text="Welcome to WooCommerce"' ).waitFor();
 
 		// Navigate back to "Industry" section
 		await page.click( 'button >> text=Industry' );
