@@ -114,7 +114,7 @@ class Edit {
 		 * Provides an opportunity to inject custom meta boxes into the order editor screen. This
 		 * hook is an analog of `add_meta_boxes_<POST_TYPE>` as provided by WordPress core.
 		 *
-		 * @since 7.3.0
+		 * @since 7.4.0
 		 *
 		 * @oaram WC_Order $order The order being edited.
 		 */
