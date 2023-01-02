@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix the signature mismatch affecting wc cli commands ability to fetch user subscription data. [#36240](https://github.com/woocommerce/woocommerce/pull/36240)
 * Fix - Remove redundant Pinterest plugin from marketing task [#36158](https://github.com/woocommerce/woocommerce/pull/36158)
 * Fix - Corrects a hard-coded reference to the WP post meta table within the HPOS Migration Helper, that would fail on some sites. [#36100](https://github.com/woocommerce/woocommerce/pull/36100)
 * Fix - Add a blank space between the emoji and the message within a notice popup [#35698](https://github.com/woocommerce/woocommerce/pull/35698)
