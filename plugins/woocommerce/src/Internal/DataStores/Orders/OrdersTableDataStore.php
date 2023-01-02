@@ -1807,7 +1807,7 @@ FROM $order_meta_table
 	 */
 	private function upshift_child_orders( $order ) {
 		global $wpdb;
-		$order_table = self::get_orders_table_name();
+		$order_table  = self::get_orders_table_name();
 		$order_parent = $order->get_parent_id();
 		$wpdb->update(
 			$order_table,
