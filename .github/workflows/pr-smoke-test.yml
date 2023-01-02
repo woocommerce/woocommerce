@@ -9,11 +9,16 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
     prcheck:
         name: Smoke test a pull request.
         if: "${{ contains(github.event.label.name, 'run: smoke tests') }}"
         runs-on: ubuntu-20.04
+        permissions:
+          contents: read
+          pull-requests: write
         steps:
             - uses: actions/checkout@v3
 
