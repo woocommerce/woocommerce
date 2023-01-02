@@ -26,6 +26,35 @@ class Authentication {
 			return $result;
 		}
 
+		// Enable Rate Limiting for logged-in users without 'edit posts' capability.
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			$result = $this->apply_rate_limiting( $result );
+		}
+
+		// Pass through errors from other authentication methods used before this one.
+		return ! empty( $result ) ? $result : true;
+	}
+
+	/**
+	 * When the login cookies are set, they are not available until the next page reload. For the Store API, specifically
+	 * for returning updated nonces, we need this to be available immediately.
+	 *
+	 * @param string $logged_in_cookie The value for the logged in cookie.
+	 */
+	public function set_logged_in_cookie( $logged_in_cookie ) {
+		if ( ! defined( 'LOGGED_IN_COOKIE' ) || ! $this->is_request_to_store_api() ) {
+			return;
+		}
+		$_COOKIE[ LOGGED_IN_COOKIE ] = $logged_in_cookie;
+	}
+
+	/**
+	 * Applies Rate Limiting to the request, and passes through any errors from other authentication methods used before this one.
+	 *
+	 * @param \WP_Error|mixed $result Error from another authentication handler, null if we should handle it, or another value if not.
+	 * @return \WP_Error|null|bool
+	 */
+	protected function apply_rate_limiting( $result ) {
 		$rate_limiting_options = RateLimits::get_options();
 
 		if ( $rate_limiting_options->enabled ) {
@@ -65,21 +94,7 @@ class Authentication {
 			$server->send_header( 'RateLimit-Reset', $rate_limit->reset );
 		}
 
-		// Pass through errors from other authentication methods used before this one.
-		return ! empty( $result ) ? $result : true;
-	}
-
-	/**
-	 * When the login cookies are set, they are not available until the next page reload. For the Store API, specifically
-	 * for returning updated nonces, we need this to be available immediately.
-	 *
-	 * @param string $logged_in_cookie The value for the logged in cookie.
-	 */
-	public function set_logged_in_cookie( $logged_in_cookie ) {
-		if ( ! defined( 'LOGGED_IN_COOKIE' ) || ! $this->is_request_to_store_api() ) {
-			return;
-		}
-		$_COOKIE[ LOGGED_IN_COOKIE ] = $logged_in_cookie;
+		return $result;
 	}
 
 	/**
