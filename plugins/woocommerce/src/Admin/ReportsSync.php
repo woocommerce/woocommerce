@@ -71,7 +71,7 @@ class ReportsSync {
 	 * Regenerate data for reports.
 	 *
 	 * @param int|bool $days Number of days to import.
-	 * @param bool     $skip_existing Skip exisiting records.
+	 * @param bool     $skip_existing Skip existing records.
 	 * @return string
 	 */
 	public static function regenerate_report_data( $days, $skip_existing ) {
