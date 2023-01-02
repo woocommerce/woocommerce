@@ -987,7 +987,10 @@ class OrdersTableQuery {
 		}
 
 		if ( 'include' === $orderby || 'post__in' === $orderby ) {
-			$ids           = $this->args['id'];
+			$ids = $this->args['id'] ?? $this->args['includes'];
+			if ( empty( $ids ) ) {
+				return;
+			}
 			$ids           = array_map( 'absint', $ids );
 			$this->orderby = array( "FIELD( {$this->tables['orders']}.id, " . implode( ',', $ids ) . ' )' );
 			return;
