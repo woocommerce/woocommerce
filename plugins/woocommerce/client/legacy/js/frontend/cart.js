@@ -9,6 +9,31 @@ jQuery( function( $ ) {
 	// Utility functions for the file.
 
 	/**
+	 * Perform an AJAX request that expects an HTML response.
+	 *
+	 * @param {Object} options
+	 */
+	var ajax = function( options ) {
+		var xhr = new XMLHttpRequest();
+		xhr.open( options.type || 'GET', options.url );
+		xhr.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8' );
+
+		xhr.onload = function() {
+			if ( xhr.status >= 200 && xhr.status < 300 || xhr.status === 304 ) {
+				options.success( xhr.responseText );
+			}
+			options.complete();
+		};
+
+		xhr.onabort = xhr.onerror = xhr.ontimeout = function() {
+			options.complete();
+		};
+
+		var data = ( options.data && typeof options.data !== 'string' ) ? $.param( options.data ) : options.data;
+		xhr.send( data );
+	};
+
+	/**
 	 * Gets a url for a given AJAX endpoint.
 	 *
 	 * @param {String} endpoint The AJAX Endpoint
@@ -225,7 +250,7 @@ jQuery( function( $ ) {
 				shipping_method: shipping_methods
 			};
 
-			$.ajax( {
+			ajax( {
 				type:     'post',
 				url:      get_url( 'update_shipping_method' ),
 				data:     data,
@@ -260,7 +285,7 @@ jQuery( function( $ ) {
 							.appendTo( $form );
 
 			// Make call to actual form post URL.
-			$.ajax( {
+			ajax( {
 				type:     $form.attr( 'method' ),
 				url:      $form.attr( 'action' ),
 				data:     $form.serialize(),
@@ -347,7 +372,7 @@ jQuery( function( $ ) {
 			block( $( 'div.cart_totals' ) );
 
 			// Make call to actual form post URL.
-			$.ajax( {
+			ajax( {
 				type:     $form.attr( 'method' ),
 				url:      $form.attr( 'action' ),
 				data:     $form.serialize(),
@@ -369,7 +394,7 @@ jQuery( function( $ ) {
 		update_cart_totals: function() {
 			block( $( 'div.cart_totals' ) );
 
-			$.ajax( {
+			ajax( {
 				url:      get_url( 'get_cart_totals' ),
 				dataType: 'html',
 				success:  function( response ) {
@@ -471,7 +496,7 @@ jQuery( function( $ ) {
 				coupon_code: coupon_code
 			};
 
-			$.ajax( {
+			ajax( {
 				type:     'POST',
 				url:      get_url( 'apply_coupon' ),
 				data:     data,
@@ -508,7 +533,7 @@ jQuery( function( $ ) {
 				coupon: coupon
 			};
 
-			$.ajax( {
+			ajax( {
 				type:    'POST',
 				url:      get_url( 'remove_coupon' ),
 				data:     data,
@@ -541,7 +566,7 @@ jQuery( function( $ ) {
 							.appendTo( $form );
 
 			// Make call to actual form post URL.
-			$.ajax( {
+			ajax( {
 				type:     $form.attr( 'method' ),
 				url:      $form.attr( 'action' ),
 				data:     $form.serialize(),
@@ -571,7 +596,7 @@ jQuery( function( $ ) {
 			block( $form );
 			block( $( 'div.cart_totals' ) );
 
-			$.ajax( {
+			ajax( {
 				type:     'GET',
 				url:      $a.attr( 'href' ),
 				dataType: 'html',
@@ -600,7 +625,7 @@ jQuery( function( $ ) {
 			block( $form );
 			block( $( 'div.cart_totals' ) );
 
-			$.ajax( {
+			ajax( {
 				type:     'GET',
 				url:      $a.attr( 'href' ),
 				dataType: 'html',
