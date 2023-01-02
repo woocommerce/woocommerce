@@ -35,12 +35,10 @@ jQuery( function( $ ) {
 		}
 	}
 
-	var $fragment_refresh = {
+	var options = {
 		url: wc_cart_fragments_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_refreshed_fragments' ),
 		type: 'POST',
-		data: {
-			time: new Date().getTime()
-		},
+		data: 'time=' + new Date().getTime(),
 		timeout: wc_cart_fragments_params.request_timeout,
 		success: function( data ) {
 			if ( data && data.fragments ) {
@@ -68,7 +66,29 @@ jQuery( function( $ ) {
 
 	/* Named callback for refreshing cart fragment */
 	function refresh_cart_fragment() {
-		$.ajax( $fragment_refresh );
+		var xhr = new XMLHttpRequest();
+		xhr.open( options.type, options.url );
+		xhr.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8' );
+		xhr.timeout = options.timeout;
+
+		xhr.onload = function() {
+			if ( xhr.status >= 200 && xhr.status < 300 || xhr.status === 304 ) {
+				try {
+					var response = JSON.parse( xhr.responseText || '{}' );
+				} catch ( e ) {
+					response = {};
+				}
+				options.success( response );
+			} else {
+				options.error();
+			}
+		};
+
+		xhr.onabort = xhr.onerror = xhr.ontimeout = function() {
+			options.error();
+		};
+
+		xhr.send( options.data );
 	}
 
 	/* Cart Handling */
