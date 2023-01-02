@@ -8,6 +8,46 @@ jQuery( function( $ ) {
 
 	$.blockUI.defaults.overlayCSS.cursor = 'default';
 
+	var parseResponse = function( responseText, dataType ) {
+		if ( dataType === 'html' ) {
+			return responseText;
+		}
+		try {
+			return JSON.parse( responseText || '{}' );
+		} catch ( e ) {
+			return {};
+		}
+	};
+
+	var ajax = function( options ) {
+		var xhr = new XMLHttpRequest();
+		xhr.open( options.type, options.url );
+		xhr.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8' );
+
+		xhr.onload = function() {
+			if ( xhr.status >= 200 && xhr.status < 300 || xhr.status === 304 ) {
+				var responseText = ajax.dataFilter( xhr.responseText, options.dataType || 'json' );
+				var response = parseResponse( responseText, options.dataType || 'json' );
+				options.success( response );
+			} else {
+				options.error && options.error( xhr, 'error', xhr.statusText );
+			}
+		};
+
+		xhr.onabort = xhr.onerror = xhr.ontimeout = function() {
+			options.error && options.error( xhr, 'error', xhr.statusText );
+		};
+
+		var data = ( options.data && typeof options.data !== 'string' ) ? $.param( options.data ) : options.data;
+		xhr.send( data );
+
+		return xhr;
+	};
+
+	ajax.dataFilter = function( raw_response, dataType ) {
+		return raw_response;
+	};
+
 	var wc_checkout_form = {
 		updateTimer: false,
 		dirtyInput: false,
@@ -338,7 +378,7 @@ jQuery( function( $ ) {
 				}
 			});
 
-			wc_checkout_form.xhr = $.ajax({
+			wc_checkout_form.xhr = ajax({
 				type:		'POST',
 				url:		wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'update_order_review' ),
 				data:		data,
@@ -486,9 +526,8 @@ jQuery( function( $ ) {
 				// Attach event to block reloading the page when the form has been submitted
 				wc_checkout_form.attachUnloadEventsOnSubmit();
 
-				// ajaxSetup is global, but we use it to ensure JSON is valid once returned.
-				$.ajaxSetup( {
-					dataFilter: function( raw_response, dataType ) {
+				// ajax.dataFilter affects all ajax() calls, but we use it to ensure JSON is valid once returned.
+				ajax.dataFilter = function( raw_response, dataType ) {
 						// We only want to work with JSON
 						if ( 'json' !== dataType ) {
 							return raw_response;
@@ -512,10 +551,9 @@ jQuery( function( $ ) {
 						}
 
 						return raw_response;
-					}
-				} );
+					};
 
-				$.ajax({
+				ajax({
 					type:		'POST',
 					url:		wc_checkout_params.checkout_url,
 					data:		$form.serialize(),
@@ -556,7 +594,7 @@ jQuery( function( $ ) {
 							}
 						}
 					},
-					error:	function( jqXHR, textStatus, errorThrown ) {
+					error:	function( xhr, textStatus, errorThrown ) {
 						// Detach the unload handler that prevents a reload / redirect
 						wc_checkout_form.detachUnloadEventsOnSubmit();
 
@@ -621,7 +659,7 @@ jQuery( function( $ ) {
 				coupon_code:	$form.find( 'input[name="coupon_code"]' ).val()
 			};
 
-			$.ajax({
+			ajax({
 				type:		'POST',
 				url:		wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'apply_coupon' ),
 				data:		data,
@@ -661,7 +699,7 @@ jQuery( function( $ ) {
 				coupon:   coupon
 			};
 
-			$.ajax({
+			ajax({
 				type:    'POST',
 				url:     wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'remove_coupon' ),
 				data:    data,
@@ -679,10 +717,10 @@ jQuery( function( $ ) {
 						$( 'form.checkout_coupon' ).find( 'input[name="coupon_code"]' ).val( '' );
 					}
 				},
-				error: function ( jqXHR ) {
+				error: function ( xhr ) {
 					if ( wc_checkout_params.debug_mode ) {
 						/* jshint devel: true */
-						console.log( jqXHR.responseText );
+						console.log( xhr.responseText );
 					}
 				},
 				dataType: 'html'
