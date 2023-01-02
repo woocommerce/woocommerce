@@ -27,6 +27,10 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 			storeDetails.us.expectedIndustries
 		);
 		await page.click( 'button >> text=Continue' );
+		await expect( page ).toHaveURL( /.*step=product-types/ );
+		await expect(
+			page.locator( '.product-types button >> text=Continue' )
+		).toBeVisible();
 	} );
 
 	// eslint-disable-next-line jest/expect-expect
