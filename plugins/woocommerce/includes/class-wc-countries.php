@@ -410,7 +410,13 @@ class WC_Countries {
 	public function shipping_to_prefix( $country_code = '' ) {
 		$country_code = $country_code ? $country_code : WC()->customer->get_shipping_country();
 		$countries    = array( 'AE', 'CZ', 'DO', 'GB', 'NL', 'PH', 'US', 'USAF' );
-		$return       = in_array( $country_code, $countries, true ) ? __( 'to the', 'woocommerce' ) : __( 'to', 'woocommerce' );
+		if ( in_array( $country_code, $countries, true ) ) {
+			/* translators: prefix for shipping countries that differ from the form 'to country', e.g. 'to the USA' */
+			$return =  __( 'to the', 'woocommerce' )
+		} else {
+			/* translators: prefix for shipping country, e.g. 'to Germany' */
+			$return =  __( 'to', 'woocommerce' );
+		}
 
 		return apply_filters( 'woocommerce_countries_shipping_to_prefix', $return, $country_code );
 	}
