@@ -1943,7 +1943,11 @@ function wc_remove_number_precision( $value ) {
  */
 function wc_add_number_precision_deep( $value, $round = true ) {
 	if ( ! is_array( $value ) ) {
-		return wc_add_number_precision( $value, $round );
+		if ( ! is_null( $value )) {
+			return wc_add_number_precision( $value, $round );
+		} else {
+			return 0;
+		}
 	}
 
 	foreach ( $value as $key => $sub_value ) {
