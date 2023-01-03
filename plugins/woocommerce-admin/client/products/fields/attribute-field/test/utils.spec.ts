@@ -6,7 +6,10 @@ import { ProductAttribute } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { reorderSortableProductAttributePositions } from '../utils';
+import {
+	getAttributeKey,
+	reorderSortableProductAttributePositions,
+} from '../utils';
 
 const attributeList: Record< number, ProductAttribute > = {
 	15: {
@@ -38,9 +41,9 @@ const attributeList: Record< number, ProductAttribute > = {
 describe( 'reorderSortableProductAttributePositions', () => {
 	it( 'should update product attribute positions depending on JSX.Element order', () => {
 		const elements = [
-			{ key: '3' },
-			{ key: '15' },
-			{ key: '1' },
+			{ props: { attribute: attributeList[ '3' ] } },
+			{ props: { attribute: attributeList[ '15' ] } },
+			{ props: { attribute: attributeList[ '1' ] } },
 		] as JSX.Element[];
 		const newList = reorderSortableProductAttributePositions(
 			elements,
@@ -53,19 +56,19 @@ describe( 'reorderSortableProductAttributePositions', () => {
 		expect( newList[ 2 ].position ).toEqual( 2 );
 		expect( newList[ 2 ].id ).toEqual( 1 );
 	} );
+} );
 
-	it( 'should filter out elements that do not contain a key', () => {
-		const elements = [
-			{ key: '3' },
-			{},
-			{ key: '15' },
-			{},
-			{ key: '1' },
-		] as JSX.Element[];
-		const newList = reorderSortableProductAttributePositions(
-			elements,
-			attributeList
-		);
-		expect( newList.length ).toEqual( 3 );
+describe( 'getAttributeKey', () => {
+	attributeList[ '20' ] = {
+		id: 0,
+		name: 'Quality',
+		position: 3,
+		visible: true,
+		variation: true,
+		options: [ 'low', 'high' ],
+	};
+	it( 'should return the attribute key', () => {
+		expect( getAttributeKey( attributeList[ '15' ] ) ).toEqual( 15 );
+		expect( getAttributeKey( attributeList[ '20' ] ) ).toEqual( 'Quality' );
 	} );
 } );
