@@ -26,9 +26,9 @@ jobs:
         include:
           - wp: nightly
             php: '7.4'
-          - wp: '5.9'
+          - wp: '6.0'
             php: 7.4
-          - wp: '5.8'
+          - wp: '5.9'
             php: 7.4
     services:
       database:
@@ -50,19 +50,6 @@ jobs:
         run: |
           php --version
           composer --version
-
-      - name: Add PHP8 Compatibility.
-        run: |
-          if [ "$(php -r "echo version_compare(PHP_VERSION,'8.0','>=');")" ]; then
-             cd plugins/woocommerce
-             curl -L https://github.com/woocommerce/phpunit/archive/add-compatibility-with-php8-to-phpunit-7.zip -o /tmp/phpunit-7.5-fork.zip
-             unzip -d /tmp/phpunit-7.5-fork /tmp/phpunit-7.5-fork.zip
-             composer bin phpunit config --unset platform
-             composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
-             composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs
-             rm -rf ./vendor/phpunit/
-             composer dump-autoload
-           fi
 
       - name: Init DB and WP
         working-directory: plugins/woocommerce
