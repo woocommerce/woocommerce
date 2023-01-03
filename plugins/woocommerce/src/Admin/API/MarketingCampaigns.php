@@ -143,7 +143,7 @@ class MarketingCampaigns extends WC_REST_Controller {
 	public function prepare_item_for_response( $item, $request ) {
 		$data = [
 			'id'         => $item->get_id(),
-			'channel'    => $item->get_channel()->get_slug(),
+			'channel'    => $item->get_type()->get_channel()->get_slug(),
 			'title'      => $item->get_title(),
 			'manage_url' => $item->get_manage_url(),
 		];
