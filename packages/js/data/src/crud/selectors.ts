@@ -8,6 +8,7 @@ import createSelector from 'rememo';
  */
 import {
 	applyNamespace,
+	getGenericActionName,
 	getRequestKey,
 	getUrlParameters,
 	parseId,
@@ -152,24 +153,6 @@ export const getItemUpdateError = (
 	return state.errors[ itemQuery ];
 };
 
-export const hasFinishedRequest = (
-	state: ResourceState,
-	action: string,
-	args = []
-) => {
-	const key = getRequestKey( action, ...args );
-	return state.requesting.hasOwnProperty( key ) && ! state.requesting[ key ];
-};
-
-export const isRequesting = (
-	state: ResourceState,
-	action: string,
-	args = []
-) => {
-	const key = getRequestKey( action, ...args );
-	return state.requesting[ key ];
-};
-
 const EMPTY_OBJECT = {};
 
 export const createSelectors = ( {
@@ -177,6 +160,30 @@ export const createSelectors = ( {
 	pluralResourceName,
 	namespace,
 }: SelectorOptions ) => {
+	const hasFinishedRequest = (
+		state: ResourceState,
+		action: string,
+		args = []
+	) => {
+		const actionName = getGenericActionName( action, resourceName );
+		const key = getRequestKey( actionName, ...args );
+		if ( action )
+			return (
+				state.requesting.hasOwnProperty( key ) &&
+				! state.requesting[ key ]
+			);
+	};
+
+	const isRequesting = (
+		state: ResourceState,
+		action: string,
+		args = []
+	) => {
+		const actionName = getGenericActionName( action, resourceName );
+		const key = getRequestKey( actionName, ...args );
+		return state.requesting[ key ];
+	};
+
 	return {
 		[ `get${ resourceName }` ]: applyNamespace( getItem, namespace ),
 		[ `get${ resourceName }Error` ]: applyNamespace(

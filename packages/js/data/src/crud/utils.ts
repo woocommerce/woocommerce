@@ -179,3 +179,26 @@ export const cleanQuery = (
 export const getRequestKey = ( action: string, ...args: unknown[] ) => {
 	return action + '/' + JSON.stringify( args );
 };
+
+/**
+ * Get a generic action name from a resource action name if one exists.
+ *
+ * @param  action       Action name to check.
+ * @param  resourceName Resurce name.
+ * @return Generic action name if one exists, otherwise the passed action name.
+ */
+export const getGenericActionName = (
+	action: string,
+	resourceName: string
+) => {
+	switch ( action ) {
+		case `create${ resourceName }`:
+			return 'createItem';
+		case `delete${ resourceName }`:
+			return 'deleteItem';
+		case `update${ resourceName }`:
+			return 'updateItem';
+	}
+
+	return action;
+};
