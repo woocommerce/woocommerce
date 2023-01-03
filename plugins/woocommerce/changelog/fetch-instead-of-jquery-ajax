@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Replace $.ajax() calls with browser-native window.fetch() calls.
