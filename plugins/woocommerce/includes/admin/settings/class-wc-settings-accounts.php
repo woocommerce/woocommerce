@@ -203,8 +203,8 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'autoload'    => false,
 			),
 			array(
-				'title'       => __( 'Retain cancelled orders', 'woocommerce' ),
-				'desc_tip'    => __( 'Cancelled orders are unpaid and may have been cancelled by the store owner or customer. They will be trashed after the specified duration.', 'woocommerce' ),
+				'title'       => __( 'Retain canceled orders', 'woocommerce' ),
+				'desc_tip'    => __( 'Canceled orders are unpaid and may have been cancelled by the store owner or customer. They will be trashed after the specified duration.', 'woocommerce' ),
 				'id'          => 'woocommerce_trash_cancelled_orders',
 				'type'        => 'relative_date_selector',
 				'placeholder' => __( 'N/A', 'woocommerce' ),
