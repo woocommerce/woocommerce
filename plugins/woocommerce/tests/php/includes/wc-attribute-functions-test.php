@@ -121,15 +121,13 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 		$ids = array();
 
 		$ids[] = wc_create_attribute( array( 'name' => 'Brand' ) );
-		$this->assertInternalType(
-			'int',
+		$this->assertIsInt(
 			end( $ids ),
 			'wc_create_attribute should return a numeric id on success.'
 		);
 
 		$ids[] = wc_create_attribute( array( 'name' => str_repeat( 'n', 28 ) ) );
-		$this->assertInternalType(
-			'int',
+		$this->assertIsInt(
 			end( $ids ),
 			'Attribute creation should succeed when its slug is 28 characters long.'
 		);

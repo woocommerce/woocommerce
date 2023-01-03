@@ -56,7 +56,7 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 		$email_object->order_meta( $order, true, true );
 		$content = ob_get_contents();
 		ob_end_clean();
-		$this->assertContains( 'dummy_key', $content );
-		$this->assertContains( 'dummy_meta_value', $content );
+		$this->assertStringContainsString( 'dummy_key', $content );
+		$this->assertStringContainsString( 'dummy_meta_value', $content );
 	}
 }
