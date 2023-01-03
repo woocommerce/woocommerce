@@ -4,12 +4,13 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import interpolateComponents from '@automattic/interpolate-components';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import DefaultDate from './default-date';
-import { getAdminSetting, ORDER_STATUSES } from '~/utils/admin-settings';
+import { getAdminSetting, ORDER_STATUSES } from './admin-settings';
 
 const SETTINGS_FILTER = 'woocommerce_admin_analytics_settings';
 export const DEFAULT_ACTIONABLE_STATUSES = [ 'processing', 'on-hold' ];

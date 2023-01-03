@@ -2,13 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component } from '@wordpress/element';
+import { Component, createElement } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { format as formatDate } from '@wordpress/date';
 import { withSelect } from '@wordpress/data';
 import { get, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
-import { Chart } from '@woocommerce/components';
 import {
 	getReportChartData,
 	getTooltipValueFormat,
@@ -30,6 +29,7 @@ import {
 import { CurrencyContext } from '../../settings/currency-context';
 import ReportError from '../report-error';
 import { getChartMode, getSelectedFilter, createDateFormatter } from './utils';
+import Chart from '../../../chart';
 
 /**
  * Component that renders the chart in reports.

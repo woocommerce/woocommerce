@@ -2,13 +2,17 @@
  * External dependencies
  */
 import { parse, stringify } from 'qs';
-import { DateRangeFilterPicker } from '@woocommerce/components';
 import { useSettings } from '@woocommerce/data';
 import {
 	getCurrentDates,
 	getDateParamsFromQuery,
 	isoDateFormat,
 } from '@woocommerce/date';
+import { createElement } from '@wordpress/element';
+/**
+ * Internal dependencies
+ */
+import DateRangeFilterPicker from '../../date-range-filter-picker';
 
 const DefaultDate = ( { value, onChange } ) => {
 	const { wcAdminSettings } = useSettings( 'wc_admin', [

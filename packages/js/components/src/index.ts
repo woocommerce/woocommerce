@@ -85,3 +85,7 @@ export { default as TourKit } from './tour-kit';
 export * as TourKitTypes from './tour-kit/types';
 export { CollapsibleContent } from './collapsible-content';
 export { default as ReportChart } from './analytics/components/report-chart';
+export { default as ReportError } from './analytics/components/report-error';
+export { default as TestReportFilters } from './analytics/components/report-filters';
+export { default as ReportSummary } from './analytics/components/report-summary';
+export { default as ReportTable } from './analytics/components/report-table';
