@@ -5,7 +5,7 @@ import { __, _n, _x } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import { Component } from '@wordpress/element';
 import { map } from 'lodash';
-import { Link, ReportTable } from '@woocommerce/components';
+import { Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from '@woocommerce/number';
 import { getAdminLink } from '@woocommerce/settings';
@@ -13,6 +13,7 @@ import { getAdminLink } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
+import ReportTable from '../../components/report-table';
 import { isLowStock } from '../products/utils';
 import { CurrencyContext } from '../../../lib/currency-context';
 import { getVariationName } from '../../../lib/async-requests';
