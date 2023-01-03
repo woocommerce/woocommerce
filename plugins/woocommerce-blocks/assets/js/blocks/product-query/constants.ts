@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { getSetting } from '@woocommerce/settings';
+import { getSetting, isWpVersion } from '@woocommerce/settings';
 import type { InnerBlockTemplate } from '@wordpress/blocks';
 
 /**
@@ -110,5 +110,7 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 		},
 		[],
 	],
-	[ 'core/query-no-results' ],
+	...( isWpVersion( '6.0', '>=' )
+		? [ [ 'core/query-no-results' ] as InnerBlockTemplate ]
+		: [] ),
 ];
