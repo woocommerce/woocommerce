@@ -63,7 +63,7 @@ jQuery( function( $ ) {
 		});
 	};
 
-	var $geolocate_customer = {
+	var options = {
 		url: wc_geolocation_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_customer_location' ),
 		type: 'GET',
 		success: function( response ) {
@@ -127,7 +127,21 @@ jQuery( function( $ ) {
 	// Get the current geo hash. If it doesn't exist, or if it doesn't match the current
 	// page URL, perform a geolocation request.
 	if ( ! get_geo_hash() || needs_refresh() ) {
-		$.ajax( $geolocate_customer );
+		var xhr = new XMLHttpRequest();
+		xhr.open( options.type, options.url );
+		xhr.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8' );
+
+		xhr.onload = function() {
+			if ( xhr.status >= 200 && xhr.status < 300 || xhr.status === 304 ) {
+				try {
+					var response = JSON.parse( xhr.responseText || '{}' );
+				} catch ( e ) {
+					response = {};
+				}
+				options.success( response );
+			}
+		};
+		xhr.send();
 	}
 
 	// Page updates.

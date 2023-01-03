@@ -51,7 +51,32 @@ jQuery( function( $ ) {
 			}
 		};
 
-		$.ajax( this.requests[0] );
+		var options = this.requests[0];
+
+		var xhr = new XMLHttpRequest();
+		xhr.open( options.type, options.url );
+		xhr.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8' );
+
+		xhr.onload = function() {
+			if ( xhr.status >= 200 && xhr.status < 300 || xhr.status === 304 ) {
+				try {
+					var response = JSON.parse( xhr.responseText || '{}' );
+				} catch ( e ) {
+					response = {};
+				}
+				options.success( response );
+			} else {
+				options.error && options.error();
+			}
+			options.complete && options.complete();
+		};
+
+		xhr.onabort = xhr.onerror = xhr.ontimeout = function() {
+			options.error && options.error();
+			options.complete && options.complete();
+		};
+
+		xhr.send( $.param( options.data ) );
 	};
 
 	/**

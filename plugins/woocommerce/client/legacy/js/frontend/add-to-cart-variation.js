@@ -173,7 +173,7 @@
 				form.$form.block( { message: null, overlayCSS: { background: '#fff', opacity: 0.6 } } );
 				currentAttributes.product_id  = parseInt( form.$form.data( 'product_id' ), 10 );
 				currentAttributes.custom_data = form.$form.data( 'custom_data' );
-				form.xhr                      = $.ajax( {
+				var options                   = {
 					url: wc_add_to_cart_variation_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_variation' ),
 					type: 'POST',
 					data: currentAttributes,
@@ -199,7 +199,30 @@
 					complete: function() {
 						form.$form.unblock();
 					}
-				} );
+				};
+
+				var xhr = new XMLHttpRequest();
+				xhr.open( options.type, options.url );
+				xhr.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8' );
+
+				xhr.onload = function() {
+					if ( xhr.status >= 200 && xhr.status < 300 || xhr.status === 304 ) {
+						try {
+							var response = JSON.parse( xhr.responseText || '{}' );
+						} catch ( e ) {
+							response = {};
+						}
+						options.success( response );
+					}
+					options.complete();
+				};
+
+				xhr.onabort = xhr.onerror = xhr.ontimeout = function() {
+					options.complete();
+				};
+
+				xhr.send( $.param( options.data ) );
+				form.xhr = xhr;
 			} else {
 				form.$form.trigger( 'update_variation_values' );
 
