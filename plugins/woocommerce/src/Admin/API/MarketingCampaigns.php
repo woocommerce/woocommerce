@@ -68,7 +68,7 @@ class MarketingCampaigns extends WC_REST_Controller {
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view marketing campaigns.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view marketing campaigns.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -192,7 +192,7 @@ class MarketingCampaigns extends WC_REST_Controller {
 					'readonly'    => true,
 				],
 				'manage_url' => [
-					'description' => __( 'URL to the campaign management page', 'woocommerce' ),
+					'description' => __( 'URL to the campaign management page.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => [ 'view' ],
 					'readonly'    => true,
