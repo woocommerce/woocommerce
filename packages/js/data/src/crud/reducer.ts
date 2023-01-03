@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { camelCase } from 'lodash';
 import { Reducer } from 'redux';
 
 /**
@@ -54,8 +55,10 @@ export const createReducer = () => {
 						},
 						requesting: {
 							...state.requesting,
-							[ getRequestKey( 'createItem', payload.query ) ]:
-								false,
+							[ getRequestKey(
+								camelCase( CRUD_ACTIONS.CREATE_ITEM ),
+								payload.query
+							) ]: false,
 						},
 					};
 				case TYPES.GET_ITEMS_TOTAL_COUNT_ERROR:
@@ -94,8 +97,10 @@ export const createReducer = () => {
 						},
 						requesting: {
 							...state.requesting,
-							[ getRequestKey( 'createItem', payload.query ) ]:
-								false,
+							[ getRequestKey(
+								camelCase( CRUD_ACTIONS.CREATE_ITEM ),
+								payload.query
+							) ]: false,
 						},
 					};
 
@@ -124,7 +129,7 @@ export const createReducer = () => {
 						requesting: {
 							...state.requesting,
 							[ getRequestKey(
-								'updateItem',
+								camelCase( CRUD_ACTIONS.UPDATE_ITEM ),
 								payload.key,
 								payload.query
 							) ]: false,
@@ -154,7 +159,7 @@ export const createReducer = () => {
 						requesting: {
 							...state.requesting,
 							[ getRequestKey(
-								'deleteItem',
+								camelCase( CRUD_ACTIONS.DELETE_ITEM ),
 								payload.key,
 								payload.force
 							) ]: false,
@@ -172,8 +177,10 @@ export const createReducer = () => {
 						},
 						requesting: {
 							...state.requesting,
-							[ getRequestKey( 'deleteItem', payload.force ) ]:
-								false,
+							[ getRequestKey(
+								camelCase( CRUD_ACTIONS.DELETE_ITEM ),
+								payload.force
+							) ]: false,
 						},
 					};
 
@@ -200,7 +207,7 @@ export const createReducer = () => {
 						requesting: {
 							...state.requesting,
 							[ getRequestKey(
-								'updateItem',
+								camelCase( CRUD_ACTIONS.UPDATE_ITEM ),
 								payload.key,
 								payload.query
 							) ]: false,
@@ -244,8 +251,10 @@ export const createReducer = () => {
 						...state,
 						requesting: {
 							...state.requesting,
-							[ getRequestKey( 'createItem', payload.query ) ]:
-								true,
+							[ getRequestKey(
+								camelCase( CRUD_ACTIONS.CREATE_ITEM ),
+								payload.query
+							) ]: true,
 						},
 					};
 
@@ -255,7 +264,7 @@ export const createReducer = () => {
 						requesting: {
 							...state.requesting,
 							[ getRequestKey(
-								'deleteItem',
+								camelCase( CRUD_ACTIONS.DELETE_ITEM ),
 								payload.key,
 								payload.force
 							) ]: true,
@@ -268,7 +277,7 @@ export const createReducer = () => {
 						requesting: {
 							...state.requesting,
 							[ getRequestKey(
-								'updateItem',
+								camelCase( CRUD_ACTIONS.UPDATE_ITEM ),
 								payload.key,
 								payload.query
 							) ]: true,
