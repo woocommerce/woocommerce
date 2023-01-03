@@ -18,6 +18,7 @@ jobs:
         runs-on: ubuntu-20.04
         permissions:
           contents: read
+          pull-requests: write
         steps:
             - uses: actions/checkout@v3
 
