@@ -6,7 +6,12 @@ import createSelector from 'rememo';
 /**
  * Internal dependencies
  */
-import { applyNamespace, getUrlParameters, parseId } from './utils';
+import {
+	applyNamespace,
+	getRequestKey,
+	getUrlParameters,
+	parseId,
+} from './utils';
 import { getResourceName, getTotalCountResourceName } from '../utils';
 import { IdQuery, IdType, Item, ItemQuery } from './types';
 import { ResourceState } from './reducer';
@@ -147,6 +152,24 @@ export const getItemUpdateError = (
 	return state.errors[ itemQuery ];
 };
 
+export const hasFinishedRequest = (
+	state: ResourceState,
+	action: string,
+	args = []
+) => {
+	const key = getRequestKey( action, ...args );
+	return state.requesting.hasOwnProperty( key ) && ! state.requesting[ key ];
+};
+
+export const isRequesting = (
+	state: ResourceState,
+	action: string,
+	args = []
+) => {
+	const key = getRequestKey( action, ...args );
+	return state.requesting[ key ];
+};
+
 const EMPTY_OBJECT = {};
 
 export const createSelectors = ( {
@@ -184,5 +207,7 @@ export const createSelectors = ( {
 			getItemUpdateError,
 			namespace
 		),
+		hasFinishedRequest,
+		isRequesting,
 	};
 };

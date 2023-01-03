@@ -168,3 +168,14 @@ export const cleanQuery = (
 
 	return cleaned;
 };
+
+/**
+ * Get the key used to track the request.
+ *
+ * @param  action Action name.
+ * @param  args   Arguments for the request.
+ * @return Key to identify the request.
+ */
+export const getRequestKey = ( action: string, ...args: unknown[] ) => {
+	return action + '/' + JSON.stringify( args );
+};

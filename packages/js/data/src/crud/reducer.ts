@@ -8,7 +8,7 @@ import { Reducer } from 'redux';
  */
 import { Actions } from './actions';
 import CRUD_ACTIONS from './crud-actions';
-import { getKey } from './utils';
+import { getKey, getRequestKey } from './utils';
 import { getResourceName, getTotalCountResourceName } from '../utils';
 import { IdType, Item, ItemQuery } from './types';
 import { TYPES } from './action-types';
@@ -24,6 +24,7 @@ export type ResourceState = {
 	data: Data;
 	itemsCount: Record< string, number >;
 	errors: Record< string, unknown >;
+	requesting: Record< string, boolean >;
 };
 
 export const createReducer = () => {
@@ -33,12 +34,30 @@ export const createReducer = () => {
 			data: {},
 			itemsCount: {},
 			errors: {},
+			requesting: {},
 		},
 		payload
 	) => {
+		const itemData = state.data || {};
+
 		if ( payload && 'type' in payload ) {
 			switch ( payload.type ) {
 				case TYPES.CREATE_ITEM_ERROR:
+					return {
+						...state,
+						errors: {
+							...state.errors,
+							[ getResourceName(
+								payload.errorType,
+								( payload.query || {} ) as ItemQuery
+							) ]: payload.error,
+						},
+						requesting: {
+							...state.requesting,
+							[ getRequestKey( 'createItem', payload.query ) ]:
+								false,
+						},
+					};
 				case TYPES.GET_ITEMS_TOTAL_COUNT_ERROR:
 				case TYPES.GET_ITEMS_ERROR:
 					return {
@@ -64,9 +83,6 @@ export const createReducer = () => {
 					};
 
 				case TYPES.CREATE_ITEM_SUCCESS:
-				case TYPES.GET_ITEM_SUCCESS:
-				case TYPES.UPDATE_ITEM_SUCCESS:
-					const itemData = state.data || {};
 					return {
 						...state,
 						data: {
@@ -75,6 +91,43 @@ export const createReducer = () => {
 								...( itemData[ payload.key ] || {} ),
 								...payload.item,
 							},
+						},
+						requesting: {
+							...state.requesting,
+							[ getRequestKey( 'createItem', payload.query ) ]:
+								false,
+						},
+					};
+
+				case TYPES.GET_ITEM_SUCCESS:
+					return {
+						...state,
+						data: {
+							...itemData,
+							[ payload.key ]: {
+								...( itemData[ payload.key ] || {} ),
+								...payload.item,
+							},
+						},
+					};
+
+				case TYPES.UPDATE_ITEM_SUCCESS:
+					return {
+						...state,
+						data: {
+							...itemData,
+							[ payload.key ]: {
+								...( itemData[ payload.key ] || {} ),
+								...payload.item,
+							},
+						},
+						requesting: {
+							...state.requesting,
+							[ getRequestKey(
+								'updateItem',
+								payload.key,
+								payload.query
+							) ]: false,
 						},
 					};
 
@@ -98,10 +151,43 @@ export const createReducer = () => {
 					return {
 						...state,
 						data: nextData,
+						requesting: {
+							...state.requesting,
+							[ getRequestKey(
+								'deleteItem',
+								payload.key,
+								payload.force
+							) ]: false,
+						},
 					};
 
 				case TYPES.DELETE_ITEM_ERROR:
+					return {
+						...state,
+						errors: {
+							...state.errors,
+							[ getResourceName( payload.errorType, {
+								key: payload.key,
+							} ) ]: payload.error,
+						},
+						requesting: {
+							...state.requesting,
+							[ getRequestKey( 'deleteItem', payload.force ) ]:
+								false,
+						},
+					};
+
 				case TYPES.GET_ITEM_ERROR:
+					return {
+						...state,
+						errors: {
+							...state.errors,
+							[ getResourceName( payload.errorType, {
+								key: payload.key,
+							} ) ]: payload.error,
+						},
+					};
+
 				case TYPES.UPDATE_ITEM_ERROR:
 					return {
 						...state,
@@ -110,6 +196,14 @@ export const createReducer = () => {
 							[ getResourceName( payload.errorType, {
 								key: payload.key,
 							} ) ]: payload.error,
+						},
+						requesting: {
+							...state.requesting,
+							[ getRequestKey(
+								'updateItem',
+								payload.key,
+								payload.query
+							) ]: false,
 						},
 					};
 
@@ -142,6 +236,42 @@ export const createReducer = () => {
 						data: {
 							...state.data,
 							...nextResources,
+						},
+					};
+
+				case TYPES.CREATE_ITEM_REQUEST:
+					return {
+						...state,
+						requesting: {
+							...state.requesting,
+							[ getRequestKey( 'createItem', payload.query ) ]:
+								true,
+						},
+					};
+
+				case TYPES.DELETE_ITEM_REQUEST:
+					return {
+						...state,
+						requesting: {
+							...state.requesting,
+							[ getRequestKey(
+								'deleteItem',
+								payload.key,
+								payload.force
+							) ]: true,
+						},
+					};
+
+				case TYPES.UPDATE_ITEM_REQUEST:
+					return {
+						...state,
+						requesting: {
+							...state.requesting,
+							[ getRequestKey(
+								'updateItem',
+								payload.key,
+								payload.query
+							) ]: true,
 						},
 					};
 
