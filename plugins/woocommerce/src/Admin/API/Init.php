@@ -67,6 +67,7 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\MarketingRecommendations',
 			'Automattic\WooCommerce\Admin\API\MarketingChannels',
 			'Automattic\WooCommerce\Admin\API\MarketingCampaigns',
+			'Automattic\WooCommerce\Admin\API\MarketingCampaignTypes',
 			'Automattic\WooCommerce\Admin\API\Options',
 			'Automattic\WooCommerce\Admin\API\Orders',
 			'Automattic\WooCommerce\Admin\API\PaymentGatewaySuggestions',
