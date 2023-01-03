@@ -32,8 +32,8 @@ class WC_Admin_Tests_RemoteInboxNotifications_TransformerService extends WC_Unit
 	 * @testdox An exception is thrown when the transformer config is missing 'use'
 	 */
 	public function test_it_throw_exception_when_transformer_config_is_missing_use() {
-		$this->expectException(InvalidArgumentException::class);
-		$this->expectExceptionMessage('Missing required config value: use');
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Missing required config value: use' );
 		TransformerService::apply( array( 'value' ), array( new stdClass() ), null );
 	}
 
@@ -41,7 +41,7 @@ class WC_Admin_Tests_RemoteInboxNotifications_TransformerService extends WC_Unit
 	 * @testdox An exception is thrown when the transformer is not found
 	 */
 	public function test_it_throws_exception_when_transformer_is_not_found() {
-		$this->expectExceptionMessage('Unable to find a transformer by name: i_do_not_exist');
+		$this->expectExceptionMessage( 'Unable to find a transformer by name: i_do_not_exist' );
 		$transformer = $this->transformer_config( 'i_do_not_exist' );
 		TransformerService::apply( array( 'value' ), array( $transformer ), null );
 	}
