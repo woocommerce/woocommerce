@@ -1,15 +1,15 @@
 /**
  * External dependencies
  */
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import Tag from '../';
+import Tag from '..';
 
-const noop = () => {};
+const noop = () => () => {};
 
 describe( 'Tag', () => {
 	test( '<Tag label="foo" /> should render a tag with the label foo', () => {
@@ -44,17 +44,14 @@ describe( 'Tag', () => {
 	} );
 
 	test( 'Show popoverContents after clicking the button', () => {
-		const { queryByText, queryByRole } = render(
-			<Tag
-				label="foo"
-				instanceId="1"
-				popoverContents={ <p>This is a popover</p> }
-			/>
+		const { queryByText } = render(
+			<Tag label="foo" popoverContents={ <p>This is a popover</p> } />
 		);
 
-		fireEvent.click(
-			queryByRole( 'button', { id: 'woocommerce-tag__label-1' } )
-		);
+		const button = screen.getByRole( 'button', {
+			name: 'foo',
+		} );
+		fireEvent.click( button );
 		expect( queryByText( 'This is a popover' ) ).toBeDefined();
 	} );
 } );
