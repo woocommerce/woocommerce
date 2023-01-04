@@ -59,10 +59,18 @@ export function getResourceIdentifier( resourceName: string ) {
 	return JSON.parse( identifierString );
 }
 
-export function* request< Query extends BaseQueryParams, DataType >(
-	namespace: string,
-	query: Partial< Query >
+function useSlugIfIdIsNotPresent< DataType extends Record< string, unknown > >(
+	data: DataType[]
 ) {
+	return data.map( ( item ) =>
+		item.id ? item : { id: item.slug, ...item }
+	);
+}
+
+export function* request<
+	Query extends BaseQueryParams,
+	DataType extends Record< string, unknown >
+>( namespace: string, query: Partial< Query > ) {
 	const url: string = addQueryArgs( namespace, query );
 	const isUnboundedRequest = query.per_page === -1;
 	const fetch = isUnboundedRequest ? apiFetch : fetchWithHeaders;
@@ -71,16 +79,18 @@ export function* request< Query extends BaseQueryParams, DataType >(
 			path: url,
 			method: 'GET',
 		} );
-
 	if ( isUnboundedRequest && ! ( 'data' in response ) ) {
-		return { items: response, totalCount: response.length };
+		return {
+			items: useSlugIfIdIsNotPresent( response ),
+			totalCount: response.length,
+		};
 	}
 	if ( ! isUnboundedRequest && 'data' in response ) {
-		const totalCount = parseInt(
-			response.headers.get( 'x-wp-total' ) || '',
-			10
-		);
+		const totalCountHeader = response.headers.get( 'x-wp-total' );
+		const totalCount = totalCountHeader
+			? Number.parseInt( totalCountHeader, 10 )
+			: response.data.length;
 
-		return { items: response.data, totalCount };
+		return { items: useSlugIfIdIsNotPresent( response.data ), totalCount };
 	}
 }
