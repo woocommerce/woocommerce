@@ -21,7 +21,7 @@ jQuery( function( $ ) {
 		} )
 			.then( response => {
 				if ( !response.ok ) {
-					throw new Error( 'HTTP error, statusText = ' + response.statusText );
+					throw new Error( response.statusText );
 				}
 				return response.text();
 			} )

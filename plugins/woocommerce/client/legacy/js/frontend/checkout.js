@@ -20,7 +20,7 @@ jQuery( function( $ ) {
 			.then( response => {
 				response.text().then( text => {
 					if ( !response.ok ) {
-						const error = new Error( 'HTTP error, statusText = ' + response.statusText );
+						const error = new Error( response.statusText );
 						error.responseText = text; // Needed for when wc_checkout_params.debug_mode is enabled
 						throw error;
 					}
@@ -30,13 +30,8 @@ jQuery( function( $ ) {
 						return;
 					}
 
-					let maybeJson = ajax.jsonFilter( text );
-					try {
-						maybeJson = JSON.parse( maybeJson || '{}' );
-					} catch ( error ) {
-						maybeJson = {};
-					}
-					options.success( maybeJson );
+					const json = JSON.parse( ajax.dataFilter( text ) );
+					options.success( json );
 				} );
 			} )
 			.catch( error => options.error && options.error( error.responseText, 'error', error.message ) );
@@ -44,7 +39,7 @@ jQuery( function( $ ) {
 		return controller;
 	};
 
-	ajax.jsonFilter = r => r;
+	ajax.dataFilter = r => r;
 
 	var wc_checkout_form = {
 		updateTimer: false,
@@ -524,8 +519,8 @@ jQuery( function( $ ) {
 				// Attach event to block reloading the page when the form has been submitted
 				wc_checkout_form.attachUnloadEventsOnSubmit();
 
-				// ajax.jsonFilter affects all ajax() calls, but we use it to ensure JSON is valid once returned.
-				ajax.jsonFilter = raw_response => {
+				// ajax.dataFilter affects all ajax() calls, but we use it to ensure JSON is valid once returned.
+				ajax.dataFilter = raw_response => {
 					if ( wc_checkout_form.is_valid_json( raw_response ) ) {
 						return raw_response;
 					} else {
