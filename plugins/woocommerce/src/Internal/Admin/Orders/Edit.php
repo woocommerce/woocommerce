@@ -218,9 +218,9 @@ class Edit {
 		 * This is used by the order edit page to show messages in the notice fields.
 		 * It should be similar to post_updated_messages filter, i.e.:
 		 * array(
-		 * 	 {order_type} => array(
-		 * 		1 => 'Order updated.',
-		 * 		2 => 'Custom field updated.',
+		 *   {order_type} => array(
+		 *      1 => 'Order updated.',
+		 *      2 => 'Custom field updated.',
 		 * ...
 		 * ).
 		 *
