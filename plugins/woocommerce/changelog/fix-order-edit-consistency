@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make HPOS UX more consistent with posts UI (so that same e2e tests passes for both).

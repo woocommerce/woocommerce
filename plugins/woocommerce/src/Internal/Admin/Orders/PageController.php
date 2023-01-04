@@ -211,6 +211,7 @@ class PageController {
 					$this->order_edit_form = new Edit();
 					$this->order_edit_form->setup( $this->order );
 				}
+				$this->order_edit_form->set_current_action( $this->current_action );
 				$this->order_edit_form->display();
 				break;
 			case 'list_orders':
@@ -285,7 +286,7 @@ class PageController {
 
 		$this->order = new $order_class_name();
 		$this->order->set_object_read( false );
-		$this->order->set_status( 'auto-draft' );
+		$this->order->set_status( 'pending' );
 		$this->order->save();
 
 		$theorder = $this->order;
