@@ -37,7 +37,7 @@ if ( ! empty( $breadcrumb ) ) {
 		echo $after;
 
 		if ( count( $breadcrumb ) !== $key + 1 ) {
-			echo $delimiter;
+			echo '<span aria-hidden="true">' . $delimiter . '</span>';
 		}
 	}
 
