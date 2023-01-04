@@ -4,8 +4,10 @@
 import {
 	applyNamespace,
 	cleanQuery,
+	getGenericActionName,
 	getKey,
 	getNamespaceKeys,
+	getRequestKey,
 	getRestPath,
 	getUrlParameters,
 	parseId,
@@ -112,5 +114,47 @@ describe( 'utils', () => {
 		const params = cleanQuery( query, namespace );
 		expect( params.other_attribute ).toBe( 'a' );
 		expect( params.my_attribute ).toBeUndefined();
+	} );
+
+	it( 'should get the rest key with no arguments', () => {
+		const key = getRequestKey( 'createItem' );
+		expect( key ).toBe( 'createItem/[]' );
+	} );
+
+	it( 'should get the rest key with a single argument', () => {
+		const key = getRequestKey( 'createItem', 'string_arg' );
+		expect( key ).toBe( 'createItem/["string_arg"]' );
+	} );
+
+	it( 'should get the rest key with multiple arguments', () => {
+		const key = getRequestKey( 'createItem', 'string_arg', {
+			object_property: 'object_value',
+		} );
+		expect( key ).toBe(
+			'createItem/["string_arg",{"object_property":"object_value"}]'
+		);
+	} );
+
+	it( 'should directly return the action when the action does not match the resource name', () => {
+		const genercActionName = getGenericActionName(
+			'createNonThing',
+			'Thing'
+		);
+		expect( genercActionName ).toBe( 'createNonThing' );
+	} );
+
+	it( 'should get the generic create action name based on resource name', () => {
+		const genercActionName = getGenericActionName( 'createThing', 'Thing' );
+		expect( genercActionName ).toBe( 'createItem' );
+	} );
+
+	it( 'should get the generic delete action name based on resource name', () => {
+		const genercActionName = getGenericActionName( 'deleteThing', 'Thing' );
+		expect( genercActionName ).toBe( 'deleteItem' );
+	} );
+
+	it( 'should get the generic update action name based on resource name', () => {
+		const genercActionName = getGenericActionName( 'updateThing', 'Thing' );
+		expect( genercActionName ).toBe( 'updateItem' );
 	} );
 } );
