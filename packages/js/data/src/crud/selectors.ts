@@ -11,7 +11,6 @@ import {
 	getGenericActionName,
 	getRequestIdentifier,
 	getUrlParameters,
-	isValidIdQuery,
 	maybeReplaceIdQuery,
 	parseId,
 } from './utils';

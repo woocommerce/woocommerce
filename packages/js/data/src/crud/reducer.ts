@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { camelCase } from 'lodash';
 import { Reducer } from 'redux';
 
 /**

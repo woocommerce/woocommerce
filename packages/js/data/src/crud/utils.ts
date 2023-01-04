@@ -2,11 +2,11 @@
  * External dependencies
  */
 import { addQueryArgs } from '@wordpress/url';
-import CRUD_ACTIONS from './crud-actions';
 
 /**
  * Internal dependencies
  */
+import CRUD_ACTIONS from './crud-actions';
 import { IdQuery, IdType, ItemQuery } from './types';
 
 /**
