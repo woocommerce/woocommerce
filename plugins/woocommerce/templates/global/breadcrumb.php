@@ -28,7 +28,7 @@ if ( ! empty( $breadcrumb ) ) {
 
 		echo $before;
 
-		if ( ! empty( $crumb[1] ) && sizeof( $breadcrumb ) !== $key + 1 ) {
+		if ( ! empty( $crumb[1] ) && count( $breadcrumb ) !== $key + 1 ) {
 			echo '<a href="' . esc_url( $crumb[1] ) . '">' . esc_html( $crumb[0] ) . '</a>';
 		} else {
 			echo '<span aria-current="page">' . esc_html( $crumb[0] ) . '</span>';
@@ -36,7 +36,7 @@ if ( ! empty( $breadcrumb ) ) {
 
 		echo $after;
 
-		if ( sizeof( $breadcrumb ) !== $key + 1 ) {
+		if ( count( $breadcrumb ) !== $key + 1 ) {
 			echo $delimiter;
 		}
 	}
