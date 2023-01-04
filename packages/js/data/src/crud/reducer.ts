@@ -44,21 +44,19 @@ export const createReducer = () => {
 		if ( payload && 'type' in payload ) {
 			switch ( payload.type ) {
 				case TYPES.CREATE_ITEM_ERROR:
+					const createItemErrorResourceName = getResourceName(
+						payload.errorType,
+						payload.query || {}
+					);
 					return {
 						...state,
 						errors: {
 							...state.errors,
-							[ getResourceName(
-								payload.errorType,
-								( payload.query || {} ) as ItemQuery
-							) ]: payload.error,
+							[ createItemErrorResourceName ]: payload.error,
 						},
 						requesting: {
 							...state.requesting,
-							[ getRequestKey(
-								camelCase( CRUD_ACTIONS.CREATE_ITEM ),
-								payload.query
-							) ]: false,
+							[ createItemErrorResourceName ]: false,
 						},
 					};
 				case TYPES.GET_ITEMS_TOTAL_COUNT_ERROR:
@@ -86,6 +84,13 @@ export const createReducer = () => {
 					};
 
 				case TYPES.CREATE_ITEM_SUCCESS:
+					const createItemSuccessResourceName = getResourceName(
+						CRUD_ACTIONS.CREATE_ITEM,
+						{
+							key: payload.key,
+							query: payload.query,
+						}
+					);
 					return {
 						...state,
 						data: {
@@ -97,10 +102,7 @@ export const createReducer = () => {
 						},
 						requesting: {
 							...state.requesting,
-							[ getRequestKey(
-								camelCase( CRUD_ACTIONS.CREATE_ITEM ),
-								payload.query
-							) ]: false,
+							[ createItemSuccessResourceName ]: false,
 						},
 					};
 
@@ -117,6 +119,13 @@ export const createReducer = () => {
 					};
 
 				case TYPES.UPDATE_ITEM_SUCCESS:
+					const updateItemSuccessResourceName = getResourceName(
+						CRUD_ACTIONS.UPDATE_ITEM,
+						{
+							key: payload.key,
+							query: payload.query,
+						}
+					);
 					return {
 						...state,
 						data: {
@@ -128,15 +137,18 @@ export const createReducer = () => {
 						},
 						requesting: {
 							...state.requesting,
-							[ getRequestKey(
-								camelCase( CRUD_ACTIONS.UPDATE_ITEM ),
-								payload.key,
-								payload.query
-							) ]: false,
+							[ updateItemSuccessResourceName ]: false,
 						},
 					};
 
 				case TYPES.DELETE_ITEM_SUCCESS:
+					const deleteItemSuccessResourceName = getResourceName(
+						CRUD_ACTIONS.DELETE_ITEM,
+						{
+							key: payload.key,
+							force: payload.force,
+						}
+					);
 					const itemKeys = Object.keys( state.data );
 					const nextData = itemKeys.reduce< Data >(
 						( items: Data, key: string ) => {
@@ -158,29 +170,27 @@ export const createReducer = () => {
 						data: nextData,
 						requesting: {
 							...state.requesting,
-							[ getRequestKey(
-								camelCase( CRUD_ACTIONS.DELETE_ITEM ),
-								payload.key,
-								payload.force
-							) ]: false,
+							[ deleteItemSuccessResourceName ]: false,
 						},
 					};
 
 				case TYPES.DELETE_ITEM_ERROR:
+					const deleteItemErrorResourceName = getResourceName(
+						payload.errorType,
+						{
+							key: payload.key,
+							force: payload.force,
+						}
+					);
 					return {
 						...state,
 						errors: {
 							...state.errors,
-							[ getResourceName( payload.errorType, {
-								key: payload.key,
-							} ) ]: payload.error,
+							[ deleteItemErrorResourceName ]: payload.error,
 						},
 						requesting: {
 							...state.requesting,
-							[ getRequestKey(
-								camelCase( CRUD_ACTIONS.DELETE_ITEM ),
-								payload.force
-							) ]: false,
+							[ deleteItemErrorResourceName ]: false,
 						},
 					};
 
@@ -196,21 +206,22 @@ export const createReducer = () => {
 					};
 
 				case TYPES.UPDATE_ITEM_ERROR:
+					const upateItemErrorResourceName = getResourceName(
+						payload.errorType,
+						{
+							key: payload.key,
+							query: payload.query,
+						}
+					);
 					return {
 						...state,
 						errors: {
 							...state.errors,
-							[ getResourceName( payload.errorType, {
-								key: payload.key,
-							} ) ]: payload.error,
+							[ upateItemErrorResourceName ]: payload.error,
 						},
 						requesting: {
 							...state.requesting,
-							[ getRequestKey(
-								camelCase( CRUD_ACTIONS.UPDATE_ITEM ),
-								payload.key,
-								payload.query
-							) ]: false,
+							[ upateItemErrorResourceName ]: false,
 						},
 					};
 

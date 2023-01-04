@@ -13,6 +13,7 @@ const defaultState: ResourceState = {
 	errors: {},
 	itemsCount: {},
 	data: {},
+	requesting: {},
 };
 
 const reducer = createReducer();
@@ -38,6 +39,7 @@ describe( 'crud reducer', () => {
 				1: { id: 1, name: 'Donkey', status: 'draft' },
 				2: { id: 2, name: 'Sauce', status: 'publish' },
 			},
+			requesting: {},
 		};
 		const update: Item = {
 			id: 2,
@@ -226,12 +228,15 @@ describe( 'crud reducer', () => {
 		} );
 
 		expect( state.errors[ resourceName ] ).toBe( error );
+		expect( state.requesting[ resourceName ] ).toBe( false );
 	} );
 
 	it( 'should handle UPDATE_ITEM_ERROR', () => {
 		const key = 2;
+		const query = { property: 'value' };
 		const resourceName = getResourceName( CRUD_ACTIONS.UPDATE_ITEM, {
 			key,
+			query,
 		} );
 		const error = 'Baaam!';
 		const state = reducer( defaultState, {
@@ -239,9 +244,11 @@ describe( 'crud reducer', () => {
 			key,
 			error,
 			errorType: CRUD_ACTIONS.UPDATE_ITEM,
+			query,
 		} );
 
 		expect( state.errors[ resourceName ] ).toBe( error );
+		expect( state.requesting[ resourceName ] ).toBe( false );
 	} );
 
 	it( 'should handle UPDATE_ITEM_SUCCESS', () => {
@@ -258,17 +265,27 @@ describe( 'crud reducer', () => {
 				1: { id: 1, name: 'Donkey', status: 'draft' },
 				2: { id: 2, name: 'Sauce', status: 'publish' },
 			},
+			requesting: {},
 		};
 		const item: Item = {
 			id: 2,
 			name: 'Holy smokes!',
 			status: 'draft',
 		};
+		const query = { property: 'value' };
+		const updateItemSuccessResourceName = getResourceName(
+			CRUD_ACTIONS.UPDATE_ITEM,
+			{
+				key: item.id,
+				query,
+			}
+		);
 
 		const state = reducer( initialState, {
 			type: TYPES.UPDATE_ITEM_SUCCESS,
 			key: item.id,
 			item,
+			query,
 		} );
 
 		expect( state.items ).toEqual( initialState.items );
@@ -278,6 +295,9 @@ describe( 'crud reducer', () => {
 		expect( state.data[ 2 ].id ).toEqual( initialState.data[ 2 ].id );
 		expect( state.data[ 2 ].title ).toEqual( initialState.data[ 2 ].title );
 		expect( state.data[ 2 ].name ).toEqual( item.name );
+		expect( state.requesting[ updateItemSuccessResourceName ] ).toEqual(
+			false
+		);
 	} );
 
 	it( 'should handle CREATE_ITEM_SUCCESS', () => {
@@ -286,15 +306,25 @@ describe( 'crud reducer', () => {
 			name: 'Off the hook!',
 			status: 'draft',
 		};
+		const query = {
+			name: 'Off the hook!',
+			status: 'draft',
+		};
+		const resourceName = getResourceName( CRUD_ACTIONS.CREATE_ITEM, {
+			key: item.id,
+			query,
+		} );
 
 		const state = reducer( defaultState, {
 			type: TYPES.CREATE_ITEM_SUCCESS,
 			key: item.id,
 			item,
+			query,
 		} );
 
 		expect( state.data[ 2 ].name ).toEqual( item.name );
 		expect( state.data[ 2 ].status ).toEqual( item.status );
+		expect( state.requesting[ resourceName ] ).toEqual( false );
 	} );
 
 	it( 'should handle DELETE_ITEM_SUCCESS', () => {
@@ -311,6 +341,7 @@ describe( 'crud reducer', () => {
 				1: { id: 1, name: 'Donkey', status: 'draft' },
 				2: { id: 2, name: 'Sauce', status: 'publish' },
 			},
+			requesting: {},
 		};
 		const item1Updated: Item = {
 			id: 1,
@@ -333,16 +364,22 @@ describe( 'crud reducer', () => {
 			item: item2Updated,
 			force: false,
 		} );
+		const resourceName = getResourceName( CRUD_ACTIONS.DELETE_ITEM, {
+			key: item1Updated.id,
+			force: true,
+		} );
 
 		expect( state.errors ).toEqual( initialState.errors );
 		expect( state.data[ 1 ] ).toEqual( undefined );
 		expect( state.data[ 2 ].status ).toEqual( 'trash' );
+		expect( state.requesting[ resourceName ] ).toBe( false );
 	} );
 
 	it( 'should handle DELETE_ITEM_ERROR', () => {
 		const key = 2;
 		const resourceName = getResourceName( CRUD_ACTIONS.DELETE_ITEM, {
 			key,
+			force: false,
 		} );
 		const error = 'Baaam!';
 		const state = reducer( defaultState, {
@@ -350,8 +387,10 @@ describe( 'crud reducer', () => {
 			key,
 			error,
 			errorType: CRUD_ACTIONS.DELETE_ITEM,
+			force: false,
 		} );
 
 		expect( state.errors[ resourceName ] ).toBe( error );
+		expect( state.requesting[ resourceName ] ).toBe( false );
 	} );
 } );
