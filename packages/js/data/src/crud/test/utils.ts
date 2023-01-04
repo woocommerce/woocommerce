@@ -8,7 +8,7 @@ import {
 	getGenericActionName,
 	getKey,
 	getNamespaceKeys,
-	getRequestKey,
+	getRequestIdentifier,
 	getRestPath,
 	getUrlParameters,
 	parseId,
@@ -118,21 +118,21 @@ describe( 'utils', () => {
 	} );
 
 	it( 'should get the rest key with no arguments', () => {
-		const key = getRequestKey( 'createItem' );
-		expect( key ).toBe( 'createItem/[]' );
+		const key = getRequestIdentifier( 'CREATE_ITEM' );
+		expect( key ).toBe( 'CREATE_ITEM/[]' );
 	} );
 
 	it( 'should get the rest key with a single argument', () => {
-		const key = getRequestKey( 'createItem', 'string_arg' );
-		expect( key ).toBe( 'createItem/["string_arg"]' );
+		const key = getRequestIdentifier( 'CREATE_ITEM', 'string_arg' );
+		expect( key ).toBe( 'CREATE_ITEM/["string_arg"]' );
 	} );
 
 	it( 'should get the rest key with multiple arguments', () => {
-		const key = getRequestKey( 'createItem', 'string_arg', {
+		const key = getRequestIdentifier( 'CREATE_ITEM', 'string_arg', {
 			object_property: 'object_value',
 		} );
 		expect( key ).toBe(
-			'createItem/["string_arg",{"object_property":"object_value"}]'
+			'CREATE_ITEM/["string_arg","{"object_property":"object_value"}"]'
 		);
 	} );
 
