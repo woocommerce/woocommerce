@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { createBlock, registerBlockType } from '@wordpress/blocks';
 import type { BlockInstance } from '@wordpress/blocks';
 import { toggle } from '@woocommerce/icons';
-import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
+import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import {
 	Icon,
 	category,
@@ -111,10 +111,11 @@ const transformFilterBlock = (
 registerBlockType( metadata, {
 	edit,
 	save() {
-		const innerBlocksProps = useInnerBlocksProps.save(
-			useBlockProps.save()
+		return (
+			<div { ...useBlockProps.save() }>
+				<InnerBlocks.Content />
+			</div>
 		);
-		return <div { ...innerBlocksProps } />;
 	},
 	variations: [
 		{
