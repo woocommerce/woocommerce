@@ -9,8 +9,8 @@ import { Reducer } from 'redux';
  */
 import { Actions } from './actions';
 import CRUD_ACTIONS from './crud-actions';
-import { getKey, getRequestKey } from './utils';
-import { getResourceName, getTotalCountResourceName } from '../utils';
+import { getKey, getRequestIdentifier } from './utils';
+import { getTotalCountResourceName } from '../utils';
 import { IdType, Item, ItemQuery } from './types';
 import { TYPES } from './action-types';
 
@@ -44,7 +44,7 @@ export const createReducer = () => {
 		if ( payload && 'type' in payload ) {
 			switch ( payload.type ) {
 				case TYPES.CREATE_ITEM_ERROR:
-					const createItemErrorResourceName = getResourceName(
+					const createItemErrorRequestId = getRequestIdentifier(
 						payload.errorType,
 						payload.query || {}
 					);
@@ -52,11 +52,11 @@ export const createReducer = () => {
 						...state,
 						errors: {
 							...state.errors,
-							[ createItemErrorResourceName ]: payload.error,
+							[ createItemErrorRequestId ]: payload.error,
 						},
 						requesting: {
 							...state.requesting,
-							[ createItemErrorResourceName ]: false,
+							[ createItemErrorRequestId ]: false,
 						},
 					};
 				case TYPES.GET_ITEMS_TOTAL_COUNT_ERROR:
@@ -65,7 +65,7 @@ export const createReducer = () => {
 						...state,
 						errors: {
 							...state.errors,
-							[ getResourceName(
+							[ getRequestIdentifier(
 								payload.errorType,
 								( payload.query || {} ) as ItemQuery
 							) ]: payload.error,
@@ -84,12 +84,10 @@ export const createReducer = () => {
 					};
 
 				case TYPES.CREATE_ITEM_SUCCESS:
-					const createItemSuccessResourceName = getResourceName(
+					const createItemSuccessRequestId = getRequestIdentifier(
 						CRUD_ACTIONS.CREATE_ITEM,
-						{
-							key: payload.key,
-							query: payload.query,
-						}
+						payload.key,
+						payload.query
 					);
 					return {
 						...state,
@@ -102,7 +100,7 @@ export const createReducer = () => {
 						},
 						requesting: {
 							...state.requesting,
-							[ createItemSuccessResourceName ]: false,
+							[ createItemSuccessRequestId ]: false,
 						},
 					};
 
@@ -119,12 +117,10 @@ export const createReducer = () => {
 					};
 
 				case TYPES.UPDATE_ITEM_SUCCESS:
-					const updateItemSuccessResourceName = getResourceName(
+					const updateItemSuccessRequestId = getRequestIdentifier(
 						CRUD_ACTIONS.UPDATE_ITEM,
-						{
-							key: payload.key,
-							query: payload.query,
-						}
+						payload.key,
+						payload.query
 					);
 					return {
 						...state,
@@ -137,17 +133,15 @@ export const createReducer = () => {
 						},
 						requesting: {
 							...state.requesting,
-							[ updateItemSuccessResourceName ]: false,
+							[ updateItemSuccessRequestId ]: false,
 						},
 					};
 
 				case TYPES.DELETE_ITEM_SUCCESS:
-					const deleteItemSuccessResourceName = getResourceName(
+					const deleteItemSuccessRequestId = getRequestIdentifier(
 						CRUD_ACTIONS.DELETE_ITEM,
-						{
-							key: payload.key,
-							force: payload.force,
-						}
+						payload.key,
+						payload.force
 					);
 					const itemKeys = Object.keys( state.data );
 					const nextData = itemKeys.reduce< Data >(
@@ -170,27 +164,25 @@ export const createReducer = () => {
 						data: nextData,
 						requesting: {
 							...state.requesting,
-							[ deleteItemSuccessResourceName ]: false,
+							[ deleteItemSuccessRequestId ]: false,
 						},
 					};
 
 				case TYPES.DELETE_ITEM_ERROR:
-					const deleteItemErrorResourceName = getResourceName(
+					const deleteItemErrorRequestId = getRequestIdentifier(
 						payload.errorType,
-						{
-							key: payload.key,
-							force: payload.force,
-						}
+						payload.key,
+						payload.force
 					);
 					return {
 						...state,
 						errors: {
 							...state.errors,
-							[ deleteItemErrorResourceName ]: payload.error,
+							[ deleteItemErrorRequestId ]: payload.error,
 						},
 						requesting: {
 							...state.requesting,
-							[ deleteItemErrorResourceName ]: false,
+							[ deleteItemErrorRequestId ]: false,
 						},
 					};
 
@@ -199,29 +191,28 @@ export const createReducer = () => {
 						...state,
 						errors: {
 							...state.errors,
-							[ getResourceName( payload.errorType, {
-								key: payload.key,
-							} ) ]: payload.error,
+							[ getRequestIdentifier(
+								payload.errorType,
+								payload.key
+							) ]: payload.error,
 						},
 					};
 
 				case TYPES.UPDATE_ITEM_ERROR:
-					const upateItemErrorResourceName = getResourceName(
+					const upateItemErrorRequestId = getRequestIdentifier(
 						payload.errorType,
-						{
-							key: payload.key,
-							query: payload.query,
-						}
+						payload.key,
+						payload.query
 					);
 					return {
 						...state,
 						errors: {
 							...state.errors,
-							[ upateItemErrorResourceName ]: payload.error,
+							[ upateItemErrorRequestId ]: payload.error,
 						},
 						requesting: {
 							...state.requesting,
-							[ upateItemErrorResourceName ]: false,
+							[ upateItemErrorRequestId ]: false,
 						},
 					};
 
@@ -240,7 +231,7 @@ export const createReducer = () => {
 						return result;
 					}, {} );
 
-					const itemQuery = getResourceName(
+					const itemQuery = getRequestIdentifier(
 						CRUD_ACTIONS.GET_ITEMS,
 						( payload.query || {} ) as ItemQuery
 					);
@@ -262,7 +253,7 @@ export const createReducer = () => {
 						...state,
 						requesting: {
 							...state.requesting,
-							[ getRequestKey(
+							[ getRequestIdentifier(
 								camelCase( CRUD_ACTIONS.CREATE_ITEM ),
 								payload.query
 							) ]: true,
@@ -274,7 +265,7 @@ export const createReducer = () => {
 						...state,
 						requesting: {
 							...state.requesting,
-							[ getRequestKey(
+							[ getRequestIdentifier(
 								camelCase( CRUD_ACTIONS.DELETE_ITEM ),
 								payload.key,
 								payload.force
@@ -287,7 +278,7 @@ export const createReducer = () => {
 						...state,
 						requesting: {
 							...state.requesting,
-							[ getRequestKey(
+							[ getRequestIdentifier(
 								camelCase( CRUD_ACTIONS.UPDATE_ITEM ),
 								payload.key,
 								payload.query

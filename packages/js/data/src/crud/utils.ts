@@ -170,14 +170,23 @@ export const cleanQuery = (
 };
 
 /**
- * Get the key used to track the request.
+ * Get the identifier for a request provided its arguments.
  *
- * @param  action Action name.
- * @param  args   Arguments for the request.
+ * @param  name Name of action or selector.
+ * @param  args Arguments for the request.
  * @return Key to identify the request.
  */
-export const getRequestKey = ( action: string, ...args: unknown[] ) => {
-	return action + '/' + JSON.stringify( args );
+export const getRequestIdentifier = ( name: string, ...args: unknown[] ) => {
+	const suffix = JSON.stringify(
+		args.map( ( arg ) => {
+			if ( typeof arg === 'object' && arg !== null ) {
+				return JSON.stringify( arg, Object.keys( arg ).sort() );
+			}
+			return arg;
+		} )
+	).replace( /\\"/g, '"' );
+
+	return name + '/' + suffix;
 };
 
 /**
