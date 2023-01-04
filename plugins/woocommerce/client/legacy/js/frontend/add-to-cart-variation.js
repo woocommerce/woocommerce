@@ -173,7 +173,7 @@
 				form.$form.block( { message: null, overlayCSS: { background: '#fff', opacity: 0.6 } } );
 				currentAttributes.product_id  = parseInt( form.$form.data( 'product_id' ), 10 );
 				currentAttributes.custom_data = form.$form.data( 'custom_data' );
-				var options                   = {
+				const options                 = {
 					url: wc_add_to_cart_variation_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_variation' ),
 					type: 'POST',
 					data: $.param( currentAttributes ),
