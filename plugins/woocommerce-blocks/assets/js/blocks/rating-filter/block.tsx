@@ -166,6 +166,10 @@ const RatingFilterBlock = ( {
 
 	const multiple = blockAttributes.selectType !== 'single';
 
+	const showChevron = multiple
+		? ! isLoading && checked.length < displayedOptions.length
+		: ! isLoading && checked.length === 0;
+
 	const onSubmit = useCallback(
 		( checkedOptions ) => {
 			if ( isEditor ) {
@@ -466,7 +470,7 @@ const RatingFilterBlock = ( {
 								),
 							} }
 						/>
-						{ multiple && (
+						{ showChevron && (
 							<Icon icon={ chevronDown } size={ 30 } />
 						) }
 					</>
