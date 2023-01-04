@@ -111,6 +111,7 @@ Every release includes specific testing instructions for new features and bug fi
     -   [9.1.2](./912.md)
     -   [9.1.3](./913.md)
 -   [9.2.0](./920.md)
+-   [9.3.0](./930.md)
 
 <!-- FEEDBACK -->
 
