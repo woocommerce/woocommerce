@@ -26,6 +26,7 @@ import {
 	Card,
 	CardBody,
 	ToggleControl,
+	RadioControl,
 } from '@wordpress/components';
 
 /**
@@ -48,18 +49,22 @@ export const PricingSection: React.FC = () => {
 		useState( false );
 	const [ autoToggledSaleSchedule, setAutoToggledSaleSchedule ] =
 		useState( false );
-	const { isResolving: isTaxSettingsResolving, taxSettings } = useSelect(
-		( select ) => {
-			const { getSettings, hasFinishedResolution } =
-				select( SETTINGS_STORE_NAME );
-			return {
-				isResolving: ! hasFinishedResolution( 'getSettings', [
-					'tax',
-				] ),
-				taxSettings: getSettings( 'tax' ).tax || {},
-			};
-		}
-	);
+	const {
+		isResolving: isTaxSettingsResolving,
+		taxSettings,
+		taxesEnabled,
+	} = useSelect( ( select ) => {
+		const { getSettings, hasFinishedResolution } =
+			select( SETTINGS_STORE_NAME );
+
+		return {
+			isResolving: ! hasFinishedResolution( 'getSettings', [ 'tax' ] ),
+			taxSettings: getSettings( 'tax' ).tax || {},
+			taxesEnabled:
+				getSettings( 'general' )?.general?.woocommerce_calc_taxes ===
+				'yes',
+		};
+	} );
 	const pricesIncludeTax =
 		taxSettings.woocommerce_prices_include_tax === 'yes';
 	const context = useContext( CurrencyContext );
@@ -199,6 +204,14 @@ export const PricingSection: React.FC = () => {
 		isDateOnlyPicker: true,
 		dateTimeFormat: dateFormat,
 	};
+
+	const taxStatusProps = getInputProps( 'tax_status' );
+	// These properties cause issues with the RadioControl component.
+	// A fix to form upstream would help if we can identify what type of input is used.
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	delete taxStatusProps.checked;
+	delete taxStatusProps.value;
 
 	return (
 		<ProductSectionLayout
@@ -357,6 +370,37 @@ export const PricingSection: React.FC = () => {
 					) }
 				</CardBody>
 			</Card>
+
+			{ taxesEnabled && (
+				<Card>
+					<CardBody>
+						<RadioControl
+							{ ...taxStatusProps }
+							label={ __( 'Charge sales tax on', 'woocommerce' ) }
+							options={ [
+								{
+									label: __(
+										'Product and shipping',
+										'woocommerce'
+									),
+									value: 'taxable',
+								},
+								{
+									label: __( 'Only shipping', 'woocommerce' ),
+									value: 'shipping',
+								},
+								{
+									label: __(
+										'Don’t charge tax',
+										'woocommerce'
+									),
+									value: 'none',
+								},
+							] }
+						/>
+					</CardBody>
+				</Card>
+			) }
 		</ProductSectionLayout>
 	);
 };
