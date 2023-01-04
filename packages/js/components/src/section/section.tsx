@@ -13,17 +13,16 @@ type SectionProps = {
 	component?: React.ComponentType | string | boolean;
 	className?: string;
 	children: React.ReactNode;
-}
+};
 
 /**
  * The section wrapper, used to indicate a sub-section (and change the header level context).
  */
-export const Section: React.VFC<SectionProps> = ({
-	component, 
-	children, 
+export const Section: React.VFC< SectionProps > = ( {
+	component,
+	children,
 	...props
-}) => {
-
+} ) => {
 	const Component = component || 'div';
 	return (
 		<Level.Consumer>
@@ -32,7 +31,7 @@ export const Section: React.VFC<SectionProps> = ({
 					{ component === false ? (
 						children
 					) : (
-						// @ts-ignore: Raises JSX component `Component` doesn't have constructor to call error.
+						// @ts-expect-error: Raises JSX component `Component` doesn't have constructor to call error.
 						// Suppressing the error since this component accepts func, string, and bool
 						// I wasn't able to find to correct type.
 						<Component { ...props }>{ children }</Component>
@@ -41,7 +40,7 @@ export const Section: React.VFC<SectionProps> = ({
 			) }
 		</Level.Consumer>
 	);
-}
+};
 
 Section.propTypes = {
 	/**
@@ -52,7 +51,7 @@ Section.propTypes = {
 		PropTypes.func,
 		PropTypes.string,
 		PropTypes.bool,
-	]),
+	] ),
 	/**
 	 * The children inside this section, rendered in the `component`. This increases the context level for the next heading used.
 	 */
