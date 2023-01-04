@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
+	CollapsibleContent,
 	DateTimePickerControl,
 	Link,
 	useFormContext,
@@ -12,6 +13,8 @@ import {
 	Product,
 	OPTIONS_STORE_NAME,
 	SETTINGS_STORE_NAME,
+	EXPERIMENTAL_TAX_CLASSES_STORE_NAME,
+	TaxClass,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useContext, useEffect, useState } from '@wordpress/element';
@@ -56,7 +59,6 @@ export const PricingSection: React.FC = () => {
 	} = useSelect( ( select ) => {
 		const { getSettings, hasFinishedResolution } =
 			select( SETTINGS_STORE_NAME );
-
 		return {
 			isResolving: ! hasFinishedResolution( 'getSettings', [ 'tax' ] ),
 			taxSettings: getSettings( 'tax' ).tax || {},
@@ -65,6 +67,19 @@ export const PricingSection: React.FC = () => {
 				'yes',
 		};
 	} );
+
+	const { isResolving: isTaxClassesResolving, taxClasses } = useSelect(
+		( select ) => {
+			const { hasFinishedResolution, getTaxClasses } = select(
+				EXPERIMENTAL_TAX_CLASSES_STORE_NAME
+			);
+			return {
+				isResolving: ! hasFinishedResolution( 'getTaxClasses' ),
+				taxClasses: getTaxClasses< TaxClass[] >(),
+			};
+		}
+	);
+
 	const pricesIncludeTax =
 		taxSettings.woocommerce_prices_include_tax === 'yes';
 	const context = useContext( CurrencyContext );
@@ -212,6 +227,14 @@ export const PricingSection: React.FC = () => {
 	// @ts-ignore
 	delete taxStatusProps.checked;
 	delete taxStatusProps.value;
+
+	const taxClassProps = getInputProps( 'tax_class' );
+	// These properties cause issues with the RadioControl component.
+	// A fix to form upstream would help if we can identify what type of input is used.
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	delete taxClassProps.checked;
+	delete taxClassProps.value;
 
 	return (
 		<ProductSectionLayout
@@ -398,6 +421,27 @@ export const PricingSection: React.FC = () => {
 								},
 							] }
 						/>
+
+						<CollapsibleContent
+							toggleText={ __( 'Advanced', 'woocommerce' ) }
+						>
+							{ ! isTaxClassesResolving &&
+								taxClasses.length > 0 && (
+									<RadioControl
+										{ ...taxClassProps }
+										label={ __(
+											'Tax class',
+											'woocommerce'
+										) }
+										options={ taxClasses.map(
+											( taxClass ) => ( {
+												label: taxClass.name,
+												value: taxClass.slug,
+											} )
+										) }
+									/>
+								) }
+						</CollapsibleContent>
 					</CardBody>
 				</Card>
 			) }
