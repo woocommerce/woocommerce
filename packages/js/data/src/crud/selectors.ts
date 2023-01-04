@@ -11,6 +11,8 @@ import {
 	getGenericActionName,
 	getRequestIdentifier,
 	getUrlParameters,
+	isValidIdQuery,
+	maybeReplaceIdQuery,
 	parseId,
 } from './utils';
 import { getTotalCountResourceName } from '../utils';
@@ -164,12 +166,13 @@ export const createSelectors = ( {
 		action: string,
 		args = []
 	) => {
+		const sanitizedArgs = maybeReplaceIdQuery( args, namespace );
 		const actionName = getGenericActionName( action, resourceName );
-		const key = getRequestIdentifier( actionName, ...args );
+		const requestId = getRequestIdentifier( actionName, ...sanitizedArgs );
 		if ( action )
 			return (
-				state.requesting.hasOwnProperty( key ) &&
-				! state.requesting[ key ]
+				state.requesting.hasOwnProperty( requestId ) &&
+				! state.requesting[ requestId ]
 			);
 	};
 
@@ -178,9 +181,10 @@ export const createSelectors = ( {
 		action: string,
 		args = []
 	) => {
+		const sanitizedArgs = maybeReplaceIdQuery( args, namespace );
 		const actionName = getGenericActionName( action, resourceName );
-		const key = getRequestIdentifier( actionName, ...args );
-		return state.requesting[ key ];
+		const requestId = getRequestIdentifier( actionName, ...sanitizedArgs );
+		return state.requesting[ requestId ];
 	};
 
 	return {

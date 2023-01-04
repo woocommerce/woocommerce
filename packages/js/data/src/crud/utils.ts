@@ -149,6 +149,50 @@ export const getUrlParameters = (
 };
 
 /**
+ * Check to see if an argument is a valid type of ID query.
+ *
+ * @param  arg       Unknow argument to check.
+ * @param  namespace The namespace string
+ * @return boolean
+ */
+export const isValidIdQuery = ( arg: unknown, namespace: string ) => {
+	if ( typeof arg === 'string' || typeof arg === 'number' ) {
+		return true;
+	}
+
+	const namespaceKeys = getNamespaceKeys( namespace );
+	if (
+		arg &&
+		typeof arg === 'object' &&
+		arg.hasOwnProperty( 'id' ) &&
+		JSON.stringify( namespaceKeys.sort() ) ===
+			JSON.stringify( Object.keys( arg ).sort() )
+	) {
+		return true;
+	}
+
+	return false;
+};
+
+/**
+ * Replace the initial argument with a key if it's a valid ID query.
+ *
+ * @param  args      Args to check.
+ * @param  namespace Namespace.
+ * @return Sanitized arguments.
+ */
+export const maybeReplaceIdQuery = ( args: unknown[], namespace: string ) => {
+	const [ firstArgument, ...rest ] = args;
+	if ( ! firstArgument || ! isValidIdQuery( firstArgument, namespace ) ) {
+		return args;
+	}
+
+	const urlParameters = getUrlParameters( namespace, firstArgument );
+	const { key } = parseId( firstArgument as IdQuery, urlParameters );
+	return [ key, ...rest ];
+};
+
+/**
  * Clean a query of all namespaced params.
  *
  * @param  query     Query to clean.
