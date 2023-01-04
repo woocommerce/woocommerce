@@ -274,7 +274,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		<div className="woocommerce-attribute-field">
 			<Sortable
 				onOrderChange={ ( items ) => {
-					const itemsPositions = items.reduce(
+					const itemPositions = items.reduce(
 						( positions, { props }, index ) => {
 							positions[ getAttributeKey( props.attribute ) ] =
 								index;
@@ -284,7 +284,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					);
 					onChange(
 						reorderSortableProductAttributePositions(
-							itemsPositions,
+							itemPositions,
 							attributeKeyValues
 						)
 					);
