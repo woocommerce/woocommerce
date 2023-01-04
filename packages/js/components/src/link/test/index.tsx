@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-import { fireEvent, render } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import Link from '../index';
+import { Link } from '..';
 
 describe( 'Link', () => {
 	it( 'should render `external` links', () => {
@@ -112,7 +112,7 @@ describe( 'Link', () => {
 			return false;
 		} );
 
-		const { container } = render(
+		render(
 			<Link
 				href="https://woocommerce.com"
 				type="external"
@@ -122,7 +122,9 @@ describe( 'Link', () => {
 			</Link>
 		);
 
-		fireEvent.click( container.firstChild );
+		const testLink = screen.getByText( 'WooCommerce.com' );
+
+		fireEvent.click( testLink );
 
 		expect( clickHandler ).toHaveBeenCalled();
 	} );

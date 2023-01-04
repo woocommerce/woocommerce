@@ -21,7 +21,7 @@ export { default as FilterPicker } from './filter-picker';
 export { H, Section } from './section';
 export { ImageGallery, ImageGalleryItem } from './image-gallery';
 export { default as ImageUpload } from './image-upload';
-export { default as Link } from './link';
+export { Link } from './link';
 export { default as List } from './list';
 export { MediaUploader } from './media-uploader';
 export { default as MenuItem } from './ellipsis-menu/menu-item';
