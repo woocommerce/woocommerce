@@ -41,6 +41,7 @@ import { ProductSectionLayout } from '../layout/product-section-layout';
 import { ADMIN_URL } from '../../utils/admin-settings';
 import { CurrencyContext } from '../../lib/currency-context';
 import { useProductHelper } from '../use-product-helper';
+import { STANDARD_RATE_TAX_CLASS_SLUG } from '../constants';
 
 const PRODUCT_SCHEDULED_SALE_SLUG = 'product-scheduled-sale';
 
@@ -436,7 +437,11 @@ export const PricingSection: React.FC = () => {
 										options={ taxClasses.map(
 											( taxClass ) => ( {
 												label: taxClass.name,
-												value: taxClass.slug,
+												value:
+													taxClass.slug ===
+													STANDARD_RATE_TAX_CLASS_SLUG
+														? ''
+														: taxClass.slug,
 											} )
 										) }
 									/>
