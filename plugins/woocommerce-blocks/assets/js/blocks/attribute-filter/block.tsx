@@ -527,6 +527,10 @@ const AttributeFilterBlock = ( {
 		return null;
 	}
 
+	const showChevron = multiple
+		? ! isLoading && checked.length < displayedOptions.length
+		: ! isLoading && checked.length === 0;
+
 	const heading = (
 		<TagName className="wc-block-attribute-filter__title">
 			{ blockAttributes.heading }
@@ -666,7 +670,7 @@ const AttributeFilterBlock = ( {
 								),
 							} }
 						/>
-						{ multiple && (
+						{ showChevron && (
 							<Icon icon={ chevronDown } size={ 30 } />
 						) }
 					</>

@@ -426,6 +426,10 @@ const StockStatusFilterBlock = ( {
 		return null;
 	}
 
+	const showChevron = allowsMultipleOptions
+		? ! isLoading && checked.length < displayedOptions.length
+		: ! isLoading && checked.length === 0;
+
 	const heading = (
 		<TagName className="wc-block-stock-filter__title">
 			{ blockAttributes.heading }
@@ -500,7 +504,7 @@ const StockStatusFilterBlock = ( {
 								),
 							} }
 						/>
-						{ allowsMultipleOptions && (
+						{ showChevron && (
 							<Icon icon={ chevronDown } size={ 30 } />
 						) }
 					</>
