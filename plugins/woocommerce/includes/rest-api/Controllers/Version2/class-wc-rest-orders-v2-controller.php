@@ -8,8 +8,11 @@
  * @since    2.6.0
  */
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Legacy class name, can't change without breaking backward compat.
 /**
  * REST API Orders controller class.
  *
@@ -18,6 +21,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
+	// phpcs:enable
 	/**
 	 * Endpoint namespace.
 	 *
@@ -314,7 +318,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		if ( array_key_exists( $meta_item->id, $formatted_meta_data ) ) {
 			$formatted_meta_item = $formatted_meta_data[ $meta_item->id ];
 
-			$result['display_key'] = wc_clean( $formatted_meta_item->display_key );
+			$result['display_key']   = wc_clean( $formatted_meta_item->display_key );
 			$result['display_value'] = wc_clean( $formatted_meta_item->display_value );
 		}
 
@@ -346,14 +350,14 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		// Only fetch fields that we need.
 		$fields = $this->get_fields_for_response( $this->request );
 		foreach ( $dependent_fields as $field_key => $dependency ) {
-			if ( in_array( $field_key, $fields ) && ! in_array( $dependency, $fields ) ) {
+			if ( in_array( $field_key, $fields, true ) && ! in_array( $dependency, $fields, true ) ) {
 				$fields[] = $dependency;
 			}
 		}
 
-		$extra_fields      = array_intersect( $extra_fields, $fields );
-		$format_decimal    = array_intersect( $format_decimal, $fields );
-		$format_date       = array_intersect( $format_date, $fields );
+		$extra_fields   = array_intersect( $extra_fields, $fields );
+		$format_decimal = array_intersect( $format_decimal, $fields );
+		$format_date    = array_intersect( $format_date, $fields );
 
 		$format_line_items = array_intersect( $format_line_items, $fields );
 
@@ -506,6 +510,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param WC_Data          $object   Object data.
 		 * @param WP_REST_Request  $request  Request object.
+		 *
+		 * @since 4.5.0
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
 	}
@@ -594,7 +600,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		// Search.
-		if ( ! empty( $args['s'] ) ) {
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() && ! empty( $args['s'] ) ) {
 			$order_ids = wc_order_search( $args['s'] );
 
 			if ( ! empty( $order_ids ) ) {
@@ -610,6 +616,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		 *
 		 * @param array           $args    Key value array of query var to query value.
 		 * @param WP_REST_Request $request The request used.
+		 *
+		 * @since 4.5.0.
 		 */
 		$args = apply_filters( 'woocommerce_rest_orders_prepare_object_query', $args, $request );
 
@@ -693,6 +701,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		 * @param WC_Data         $order    Object object.
 		 * @param WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
+		 *
+		 * @since 4.5.0.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $order, $request, $creating );
 	}
@@ -979,6 +989,14 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		// Prepare item data.
 		$item = $this->$method( $posted, $action, $item );
 
+		/**
+		 * Allow extensions be notified before the item before is saved.
+		 *
+		 * @param WC_Order_Item $item The item object.
+		 * @param array         $posted The item data.
+		 *
+		 * @since 4.5.0.
+		 */
 		do_action( 'woocommerce_rest_set_order_item', $item, $posted );
 
 		// If creating the order, add the item to it.
