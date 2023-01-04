@@ -161,12 +161,13 @@ export const isValidIdQuery = ( arg: unknown, namespace: string ) => {
 		return true;
 	}
 
-	const namespaceKeys = getNamespaceKeys( namespace );
+	const validKeys = [ 'id', ...getNamespaceKeys( namespace ) ];
+
 	if (
 		arg &&
 		typeof arg === 'object' &&
 		arg.hasOwnProperty( 'id' ) &&
-		JSON.stringify( namespaceKeys.sort() ) ===
+		JSON.stringify( validKeys.sort() ) ===
 			JSON.stringify( Object.keys( arg ).sort() )
 	) {
 		return true;
@@ -190,6 +191,7 @@ export const maybeReplaceIdQuery = ( args: unknown[], namespace: string ) => {
 
 	const urlParameters = getUrlParameters( namespace, firstArgument );
 	const { key } = parseId( firstArgument as IdQuery, urlParameters );
+
 	return [ key, ...rest ];
 };
 
