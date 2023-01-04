@@ -3,7 +3,7 @@ on:
     workflow_dispatch:
     pull_request:
         paths-ignore:
-            - 'changelog/**'
+            - '**/changelog/**'
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}

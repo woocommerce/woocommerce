@@ -2,7 +2,7 @@ name: Run code coverage on PR
 on:
     pull_request:
         paths-ignore:
-            - 'changelog/**'
+            - '**/changelog/**'
     workflow_dispatch:
 defaults:
     run:

@@ -2,7 +2,7 @@ name: Highlight templates changes
 on:
     pull_request:
         paths-ignore:
-            - 'changelog/**'
+            - '**/changelog/**'
 
 permissions: {}
 

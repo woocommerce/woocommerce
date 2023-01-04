@@ -2,7 +2,7 @@ name: Run lint checks potentially affecting projects across the monorepo
 on:
     pull_request:
         paths-ignore:
-            - 'changelog/**'
+            - '**/changelog/**'
         branches:
             - 'trunk'
 concurrency:

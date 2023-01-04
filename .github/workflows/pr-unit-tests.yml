@@ -2,7 +2,7 @@ name: Run unit tests on PR
 on:
     pull_request:
         paths-ignore:
-            - 'changelog/**'
+            - '**/changelog/**'
 defaults:
     run:
         shell: bash

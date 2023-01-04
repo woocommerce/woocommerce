@@ -3,7 +3,7 @@ name: Lint and tests for JS packages and woocommerce-admin/client
 on:
     pull_request:
         paths-ignore:
-            - 'changelog/**'
+            - '**/changelog/**'
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true

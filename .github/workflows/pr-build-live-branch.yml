@@ -2,7 +2,7 @@ name: Build Live Branch
 on:
     pull_request:
         paths-ignore:
-            - 'changelog/**'
+            - '**/changelog/**'
 
 concurrency:
     # Cancel concurrent jobs on pull_request but not push, by including the run_id in the concurrency group for the latter.
