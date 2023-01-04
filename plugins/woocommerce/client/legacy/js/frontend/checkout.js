@@ -30,7 +30,7 @@ jQuery( function( $ ) {
 						return;
 					}
 
-					const json = JSON.parse( ajax.dataFilter( text ) );
+					const json = JSON.parse( ajax.dataFilter( text, 'json' ) );
 					options.success( json );
 				} );
 			} )
@@ -38,8 +38,7 @@ jQuery( function( $ ) {
 
 		return controller;
 	};
-
-	ajax.dataFilter = r => r;
+	ajax.dataFilter = ( raw_response, dataType ) => raw_response;
 
 	var wc_checkout_form = {
 		updateTimer: false,
@@ -520,7 +519,12 @@ jQuery( function( $ ) {
 				wc_checkout_form.attachUnloadEventsOnSubmit();
 
 				// ajax.dataFilter affects all ajax() calls, but we use it to ensure JSON is valid once returned.
-				ajax.dataFilter = raw_response => {
+				ajax.dataFilter = function( raw_response, dataType ) {
+					// We only want to work with JSON
+					if ( 'json' !== dataType ) {
+						return raw_response;
+					}
+
 					if ( wc_checkout_form.is_valid_json( raw_response ) ) {
 						return raw_response;
 					} else {
