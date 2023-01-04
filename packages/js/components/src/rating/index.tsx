@@ -3,58 +3,68 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
-import { createElement, Component } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import StarIcon from 'gridicons/dist/star';
 import PropTypes from 'prop-types';
+
+type RatingProps = {
+	rating?: number;
+	totalStars?: number;
+	size?: number;
+	className?: string;
+	icon?: React.ReactNode;
+	outlineIcon?: React.ReactNode;
+};
 
 /**
  * Use `Rating` to display a set of stars, filled, empty or half-filled, that represents a
  * rating in a scale between 0 and the prop `totalStars` (default 5).
  */
-class Rating extends Component {
-	stars( icon ) {
-		const { size, totalStars } = this.props;
-
+const Rating: React.VFC< RatingProps > = ( {
+	rating = 0,
+	totalStars = 5,
+	size = 18,
+	className,
+	icon,
+	outlineIcon,
+} ) => {
+	const stars = ( _icon: React.ReactNode ) => {
 		const starStyles = {
 			width: size + 'px',
 			height: size + 'px',
 		};
 
-		const stars = [];
+		const _stars = [];
 		for ( let i = 0; i < totalStars; i++ ) {
-			const Icon = icon || StarIcon;
-			stars.push( <Icon key={ 'star-' + i } style={ starStyles } /> );
+			const Icon = _icon || StarIcon;
+			_stars.push( <Icon key={ 'star-' + i } style={ starStyles } /> );
 		}
-		return stars;
-	}
+		return _stars;
+	};
 
-	render() {
-		const { rating, totalStars, className, icon, outlineIcon } = this.props;
+	const classes = classnames( 'woocommerce-rating', className );
+	const perStar = 100 / totalStars;
+	const outlineStyles = {
+		width: Math.round( perStar * rating ) + '%',
+	};
 
-		const classes = classnames( 'woocommerce-rating', className );
-		const perStar = 100 / totalStars;
-		const outlineStyles = {
-			width: Math.round( perStar * rating ) + '%',
-		};
-
-		const label = sprintf(
-			__( '%1$s out of %2$s stars.', 'woocommerce' ),
-			rating,
-			totalStars
-		);
-		return (
-			<div className={ classes } aria-label={ label }>
-				{ this.stars( icon ) }
-				<div
-					className="woocommerce-rating__star-outline"
-					style={ outlineStyles }
-				>
-					{ this.stars( outlineIcon || icon ) }
-				</div>
+	const label = sprintf(
+		__( '%1$s out of %2$s stars.', 'woocommerce' ),
+		rating,
+		totalStars
+	);
+	return (
+		<div className={ classes } aria-label={ label }>
+			{ stars( icon ) }
+			<div
+				className="woocommerce-rating__star-outline"
+				style={ outlineStyles }
+			>
+				{ stars( outlineIcon || icon ) }
 			</div>
-		);
-	}
-}
+		</div>
+	);
+};
 
 Rating.propTypes = {
 	/**
@@ -81,12 +91,6 @@ Rating.propTypes = {
 	 * Outline icon used, the not selected rating. Defaults to props.icon or StarIcon
 	 */
 	outlineIcon: PropTypes.elementType,
-};
-
-Rating.defaultProps = {
-	rating: 0,
-	totalStars: 5,
-	size: 18,
 };
 
 export default Rating;
