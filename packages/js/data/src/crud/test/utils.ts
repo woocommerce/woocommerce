@@ -1,6 +1,7 @@
 /**
  * Internal dependencies
  */
+import CRUD_ACTIONS from '../crud-actions';
 import {
 	applyNamespace,
 	cleanQuery,
@@ -145,16 +146,16 @@ describe( 'utils', () => {
 
 	it( 'should get the generic create action name based on resource name', () => {
 		const genercActionName = getGenericActionName( 'createThing', 'Thing' );
-		expect( genercActionName ).toBe( 'createItem' );
+		expect( genercActionName ).toBe( CRUD_ACTIONS.CREATE_ITEM );
 	} );
 
 	it( 'should get the generic delete action name based on resource name', () => {
 		const genercActionName = getGenericActionName( 'deleteThing', 'Thing' );
-		expect( genercActionName ).toBe( 'deleteItem' );
+		expect( genercActionName ).toBe( CRUD_ACTIONS.DELETE_ITEM );
 	} );
 
 	it( 'should get the generic update action name based on resource name', () => {
 		const genercActionName = getGenericActionName( 'updateThing', 'Thing' );
-		expect( genercActionName ).toBe( 'updateItem' );
+		expect( genercActionName ).toBe( CRUD_ACTIONS.UPDATE_ITEM );
 	} );
 } );

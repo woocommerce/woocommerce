@@ -254,7 +254,7 @@ export const createReducer = () => {
 						requesting: {
 							...state.requesting,
 							[ getRequestIdentifier(
-								camelCase( CRUD_ACTIONS.CREATE_ITEM ),
+								CRUD_ACTIONS.CREATE_ITEM,
 								payload.query
 							) ]: true,
 						},
@@ -266,7 +266,7 @@ export const createReducer = () => {
 						requesting: {
 							...state.requesting,
 							[ getRequestIdentifier(
-								camelCase( CRUD_ACTIONS.DELETE_ITEM ),
+								CRUD_ACTIONS.DELETE_ITEM,
 								payload.key,
 								payload.force
 							) ]: true,
@@ -279,7 +279,7 @@ export const createReducer = () => {
 						requesting: {
 							...state.requesting,
 							[ getRequestIdentifier(
-								camelCase( CRUD_ACTIONS.UPDATE_ITEM ),
+								CRUD_ACTIONS.UPDATE_ITEM,
 								payload.key,
 								payload.query
 							) ]: true,

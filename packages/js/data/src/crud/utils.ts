@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { addQueryArgs } from '@wordpress/url';
+import CRUD_ACTIONS from './crud-actions';
 
 /**
  * Internal dependencies
@@ -246,11 +247,11 @@ export const getGenericActionName = (
 ) => {
 	switch ( action ) {
 		case `create${ resourceName }`:
-			return 'createItem';
+			return CRUD_ACTIONS.CREATE_ITEM;
 		case `delete${ resourceName }`:
-			return 'deleteItem';
+			return CRUD_ACTIONS.DELETE_ITEM;
 		case `update${ resourceName }`:
-			return 'updateItem';
+			return CRUD_ACTIONS.UPDATE_ITEM;
 	}
 
 	return action;
