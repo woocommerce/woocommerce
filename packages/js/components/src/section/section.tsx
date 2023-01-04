@@ -9,16 +9,21 @@ import { createElement } from '@wordpress/element';
  */
 import { Level } from './context';
 
+type SectionProps = {
+	component?: React.ComponentType | string | boolean;
+	className?: string;
+	children: React.ReactNode;
+}
+
 /**
  * The section wrapper, used to indicate a sub-section (and change the header level context).
- *
- * @param {Object}                         props
- * @param {import('react').ComponentType=} props.component
- * @param {import('react').ReactNode}      props.children  Children to render in the tip.
- * @param {string=}                        props.className
- * @return {JSX.Element} -
  */
-export function Section( { component, children, ...props } ) {
+export const Section: React.VFC<SectionProps> = ({
+	component, 
+	children, 
+	...props
+}) => {
+
 	const Component = component || 'div';
 	return (
 		<Level.Consumer>
@@ -27,6 +32,9 @@ export function Section( { component, children, ...props } ) {
 					{ component === false ? (
 						children
 					) : (
+						// @ts-ignore: Raises JSX component `Component` doesn't have constructor to call error.
+						// Suppressing the error since this component accepts func, string, and bool
+						// I wasn't able to find to correct type.
 						<Component { ...props }>{ children }</Component>
 					) }
 				</Level.Provider>
@@ -44,7 +52,7 @@ Section.propTypes = {
 		PropTypes.func,
 		PropTypes.string,
 		PropTypes.bool,
-	] ),
+	]),
 	/**
 	 * The children inside this section, rendered in the `component`. This increases the context level for the next heading used.
 	 */
