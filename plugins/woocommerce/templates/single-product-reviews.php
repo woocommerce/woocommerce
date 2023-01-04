@@ -46,7 +46,7 @@ if ( ! comments_open() ) {
 
 			<?php
 			if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) :
-				echo '<nav class="woocommerce-pagination">';
+				echo '<nav class="woocommerce-pagination" aria-label="' . esc_attr__( 'Reviews', 'woocommerce' ) . '">';
 				paginate_comments_links(
 					apply_filters(
 						'woocommerce_comment_pagination_args',

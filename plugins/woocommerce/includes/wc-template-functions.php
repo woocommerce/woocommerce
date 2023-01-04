@@ -2294,14 +2294,18 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 				'woocommerce_breadcrumb_defaults',
 				array(
 					'delimiter'   => '&nbsp;&#47;&nbsp;',
-					'wrap_before' => '<nav class="woocommerce-breadcrumb">',
+					'wrap_before' => '<nav class="woocommerce-breadcrumb" aria-label="%s">',
 					'wrap_after'  => '</nav>',
+					/* translators: accessibility text for the breadcrumb navigation. */
+					'aria_label'  => __( 'Breadcrumb', 'woocommerce' ),
 					'before'      => '',
 					'after'       => '',
 					'home'        => _x( 'Home', 'breadcrumb', 'woocommerce' ),
 				)
 			)
 		);
+
+		$args['wrap_before'] = sprintf( $args['wrap_before'], esc_attr( $args['aria_label'] ) );
 
 		$breadcrumbs = new WC_Breadcrumb();
 
