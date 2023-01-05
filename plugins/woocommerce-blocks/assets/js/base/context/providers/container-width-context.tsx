@@ -1,44 +1,46 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import { createContext, useContext } from '@wordpress/element';
 import { useContainerQueries } from '@woocommerce/base-hooks';
 import classNames from 'classnames';
 
-/**
- * @typedef {import('@woocommerce/type-defs/contexts').ContainerWidthContext} ContainerWidthContext
- * @typedef {import('react')} React
- */
+export type ContainerWidthContextProps = {
+	hasContainerWidth: boolean;
+	containerClassName: string;
+	isMobile: boolean;
+	isSmall: boolean;
+	isMedium: boolean;
+	isLarge: boolean;
+};
 
-const ContainerWidthContext = createContext( {
-	hasContainerWidth: false,
-	containerClassName: '',
-	isMobile: false,
-	isSmall: false,
-	isMedium: false,
-	isLarge: false,
-} );
+const ContainerWidthContext: React.Context< ContainerWidthContextProps > =
+	createContext< ContainerWidthContextProps >( {
+		hasContainerWidth: false,
+		containerClassName: '',
+		isMobile: false,
+		isSmall: false,
+		isMedium: false,
+		isLarge: false,
+	} );
 
-/**
- * @return {ContainerWidthContext} Returns the container width context value
- */
-export const useContainerWidthContext = () => {
+export const useContainerWidthContext = (): ContainerWidthContextProps => {
 	return useContext( ContainerWidthContext );
 };
+
+interface ContainerWidthContextProviderProps {
+	children: JSX.Element | JSX.Element[];
+	className: string;
+}
 
 /**
  * Provides an interface to useContainerQueries so children can see what size is being used by the
  * container.
- *
- * @param {Object}              props           Incoming props for the component.
- * @param {React.ReactChildren} props.children  React elements wrapped by the component.
- * @param {string}              props.className CSS class in use.
  */
 export const ContainerWidthContextProvider = ( {
 	children,
 	className = '',
-} ) => {
+}: ContainerWidthContextProviderProps ): JSX.Element => {
 	const [ resizeListener, containerClassName ] = useContainerQueries();
 
 	const contextValue = {
@@ -50,9 +52,6 @@ export const ContainerWidthContextProvider = ( {
 		isLarge: containerClassName === 'is-large',
 	};
 
-	/**
-	 * @type {ContainerWidthContext}
-	 */
 	return (
 		<ContainerWidthContext.Provider value={ contextValue }>
 			<div className={ classNames( className, containerClassName ) }>
@@ -61,8 +60,4 @@ export const ContainerWidthContextProvider = ( {
 			</div>
 		</ContainerWidthContext.Provider>
 	);
-};
-
-ContainerWidthContextProvider.propTypes = {
-	children: PropTypes.node,
 };
