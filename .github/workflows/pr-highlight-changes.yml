@@ -1,9 +1,14 @@
 name: Highlight templates changes
 on: pull_request
+
+permissions: {}
+
 jobs:
     analyze:
         name: Check pull request changes to highlight
         runs-on: ubuntu-20.04
+        permissions:
+          contents: read
         outputs:
             results: ${{ steps.results.outputs.results }}
         steps:

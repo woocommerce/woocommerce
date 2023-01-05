@@ -30,6 +30,8 @@ env:
     GIT_AUTHOR_NAME: 'WooCommerce Bot'
     GIT_AUTHOR_EMAIL: 'no-reply@woocommerce.com'
 
+permissions: {}
+
 jobs:
     verify:
         name: Verify
@@ -122,6 +124,10 @@ jobs:
     cherry-pick-run:
         name: Run cherry pick tool
         runs-on: ubuntu-20.04
+        permissions:
+          actions: write
+          contents: write
+          pull-requests: write
         needs: [prep, check-release-branch-exists]
         if: success()
         steps:

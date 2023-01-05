@@ -6,10 +6,15 @@ on:
 concurrency:
   group: changelogger-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions: {}
+
 jobs:
   changelogger_used:
     name: Changelogger use
     runs-on: ubuntu-20.04
+    permissions:
+      contents: read
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v3

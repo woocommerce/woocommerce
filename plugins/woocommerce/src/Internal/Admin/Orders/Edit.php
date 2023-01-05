@@ -89,6 +89,7 @@ class Edit {
 	 */
 	public function setup( \WC_Order $order ) {
 		$this->order    = $order;
+		$wc_screen_id   = wc_get_page_screen_id( 'shop-order' );
 		$current_screen = get_current_screen();
 		$current_screen->is_block_editor( false );
 		$this->screen_id = $current_screen->id;
@@ -107,7 +108,18 @@ class Edit {
 		 *
 		 * @since 3.8.0.
 		 */
-		do_action( 'add_meta_boxes', wc_get_page_screen_id( 'shop-order' ), $this->order );
+		do_action( 'add_meta_boxes', $wc_screen_id, $this->order );
+
+		/**
+		 * Provides an opportunity to inject custom meta boxes into the order editor screen. This
+		 * hook is an analog of `add_meta_boxes_<POST_TYPE>` as provided by WordPress core.
+		 *
+		 * @since 7.4.0
+		 *
+		 * @oaram WC_Order $order The order being edited.
+		 */
+		do_action( 'add_meta_boxes_' . $wc_screen_id, $this->order );
+
 		$this->enqueue_scripts();
 	}
 

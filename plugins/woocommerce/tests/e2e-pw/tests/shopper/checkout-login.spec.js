@@ -1,18 +1,27 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-const first_name = 'Jane';
-const last_name = 'Smith';
-const address_1 = '123 Anywhere St.';
-const address_2 = 'Apartment 42';
-const city = 'New York';
-const state = 'NY';
-const postcode = '10010';
-const country = 'US';
-const phone = '(555) 777-7777';
+const customer = {
+	username: 'customercheckoutlogin',
+	password: 'password',
+	email: `customercheckoutlogin${ new Date()
+		.getTime()
+		.toString() }@woocommercecoree2etestsuite.com`,
+	billing: {
+		first_name: 'Jane',
+		last_name: 'Smith',
+		address_1: '123 Anywhere St.',
+		address_2: 'Apartment 42',
+		city: 'New York',
+		state: 'NY',
+		postcode: '10010',
+		country: 'US',
+		phone: '(555) 777-7777',
+	},
+};
 
 test.describe( 'Shopper Checkout Login Account', () => {
-	let productId, orderId, shippingZoneId;
+	let productId, orderId, shippingZoneId, customerId;
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -54,20 +63,10 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
 			method_id: 'free_shipping',
 		} );
-		// update customer billing details.
-		await api.put( 'customers/2', {
-			billing: {
-				first_name,
-				last_name,
-				address_1,
-				address_2,
-				city,
-				state,
-				postcode,
-				country,
-				phone,
-			},
-		} );
+		// create customer and save its id
+		await api
+			.post( 'customers', customer )
+			.then( ( response ) => ( customerId = response.data.id ) );
 		// enable a payment method
 		await api.put( 'payment_gateways/cod', {
 			enabled: true,
@@ -93,17 +92,9 @@ test.describe( 'Shopper Checkout Login Account', () => {
 				value: 'no',
 			}
 		);
-		// reset the customer account to how it was at the start
-		await api.put( 'customers/2', {
-			billing: {
-				address_1: '',
-				address_2: '',
-				city: '',
-				state: '',
-				postcode: '',
-				country: '',
-				phone: '',
-			},
+		// delete the customer
+		await api.delete( `customers/${ customerId }`, {
+			force: true,
 		} );
 		// disable payment method
 		await api.put( 'payment_gateways/cod', {
@@ -117,7 +108,7 @@ test.describe( 'Shopper Checkout Login Account', () => {
 
 	test.beforeEach( async ( { page, context } ) => {
 		// Shopping cart is very sensitive to cookies, so be explicit
-		context.clearCookies();
+		await context.clearCookies();
 
 		// all tests use the first product
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
@@ -131,29 +122,35 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		await page.click( 'text=Click here to login' );
 
 		// fill in the customer account info
-		await page.fill( '#username', 'customer' );
-		await page.fill( '#password', 'password' );
+		await page.fill( '#username', customer.username );
+		await page.fill( '#password', customer.password );
 		await page.click( 'button[name="login"]' );
 
 		// billing form should pre-populate
 		await expect( page.locator( '#billing_first_name' ) ).toHaveValue(
-			first_name
+			customer.billing.first_name
 		);
 		await expect( page.locator( '#billing_last_name' ) ).toHaveValue(
-			last_name
+			customer.billing.last_name
 		);
 		await expect( page.locator( '#billing_address_1' ) ).toHaveValue(
-			address_1
+			customer.billing.address_1
 		);
 		await expect( page.locator( '#billing_address_2' ) ).toHaveValue(
-			address_2
+			customer.billing.address_2
 		);
-		await expect( page.locator( '#billing_city' ) ).toHaveValue( city );
-		await expect( page.locator( '#billing_state' ) ).toHaveValue( state );
+		await expect( page.locator( '#billing_city' ) ).toHaveValue(
+			customer.billing.city
+		);
+		await expect( page.locator( '#billing_state' ) ).toHaveValue(
+			customer.billing.state
+		);
 		await expect( page.locator( '#billing_postcode' ) ).toHaveValue(
-			postcode
+			customer.billing.postcode
 		);
-		await expect( page.locator( '#billing_phone' ) ).toHaveValue( phone );
+		await expect( page.locator( '#billing_phone' ) ).toHaveValue(
+			customer.billing.phone
+		);
 
 		// place an order
 		await page.click( 'text=Place order' );
@@ -173,7 +170,7 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		orderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
 
 		await expect( page.locator( 'ul > li.email' ) ).toContainText(
-			'customer@woocommercecoree2etestsuite.com'
+			customer.email
 		);
 
 		// check my account page

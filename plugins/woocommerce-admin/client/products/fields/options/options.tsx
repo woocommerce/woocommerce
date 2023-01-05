@@ -1,13 +1,14 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { ProductAttribute } from '@woocommerce/data';
+import { Product, ProductAttribute } from '@woocommerce/data';
+import { useFormContext } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
 import { AttributeField } from '../attribute-field';
+import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
 
 type OptionsProps = {
 	value: ProductAttribute[];
@@ -20,11 +21,19 @@ export const Options: React.FC< OptionsProps > = ( {
 	onChange,
 	productId,
 } ) => {
+	const { values } = useFormContext< Product >();
+	const { generateProductVariations } = useProductVariationsHelper();
+
+	const handleChange = async ( attributes: ProductAttribute[] ) => {
+		onChange( attributes );
+		generateProductVariations( { ...values, attributes } );
+	};
+
 	return (
 		<AttributeField
 			attributeType="for-variations"
 			value={ value }
-			onChange={ onChange }
+			onChange={ handleChange }
 			productId={ productId }
 		/>
 	);

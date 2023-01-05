@@ -809,6 +809,22 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		// Set post_status.
 		$args['post_status'] = $request['status'];
 
+		// Filter by local attributes.
+		if ( ! empty( $request['local_attributes'] ) && is_array( $request['local_attributes'] ) ) {
+			foreach ( $request['local_attributes'] as $attribute ) {
+				if ( ! isset( $attribute['attribute'] ) || ! isset( $attribute['term'] ) ) {
+					continue;
+				}
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					$args,
+					array(
+						'key'   => 'attribute_' . $attribute['attribute'],
+						'value' => $attribute['term'],
+					)
+				);
+			}
+		}
+
 		// Filter by sku.
 		if ( ! empty( $request['sku'] ) ) {
 			$skus = explode( ',', $request['sku'] );

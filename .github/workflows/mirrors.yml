@@ -4,11 +4,15 @@ on:
     branches: ["trunk", "release/**"]
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   build:
     if: github.repository == 'woocommerce/woocommerce'
     name: Build WooCommerce zip
     runs-on: ubuntu-20.04
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v3
 
@@ -35,6 +39,8 @@ jobs:
     name: Push to Mirror
     needs: [build]
     runs-on: ubuntu-20.04
+    permissions:
+      contents: read
     steps:
       - name: Create directories
         run: |

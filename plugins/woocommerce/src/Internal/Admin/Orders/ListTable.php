@@ -365,6 +365,8 @@ class ListTable extends WP_List_Table {
 		$direction = strtoupper( sanitize_text_field( wp_unslash( $_GET['order'] ?? '' ) ) );
 
 		if ( ! in_array( $field, $sortable, true ) ) {
+			$this->order_query_args['orderby'] = 'id';
+			$this->order_query_args['order']   = 'DESC';
 			return;
 		}
 

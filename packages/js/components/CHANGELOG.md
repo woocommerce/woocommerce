@@ -2,6 +2,41 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [12.0.0](https://www.npmjs.com/package/@woocommerce/components/v/12.0.0) - 2022-12-28 
+
+-   Patch - Add name to exported popover slot used to display SelectControl Menu, so it is only used for SelectControl menus. [#36124]
+-   Patch - Close DateTimePickerControl's dropdown when blurring from input. [#36124]
+-   Patch - DateTimePickerControl's onChange now only fires when there is an actual change to the datetime. [#36124]
+-   Patch - Fix DateTimePickerControl's popover styling when slot-fill is used. [#36124]
+-   Patch - Fixed DatePicker to work in WordPress 6.1 when currentDate is set to a moment instance. [#36124]
+-   Patch - Fix pagination label text from uppercase to normal and font styles [#36124]
+-   Patch - Include react-dates styles (no longer in WP 6.1+). [#36124]
+-   Minor - Set editor mode on initialization to prevent initial text editor focus [#36124]
+-   Patch - Set initial values prop from reset form function as optional [#36124]
+-   Patch - Add aria-label for simple select dropdown [#36124]
+-   Patch - Add async filtering support to the `__experimentalSelectControl` component [#36124]
+-   Minor - Add className prop to ListItem. [#36124]
+-   Minor - Add className prop to Sortable [#36124]
+-   Minor - Added ability to force time when DateTimePickerControl is date-only (timeForDateOnly prop). [#36124]
+-   Minor - Add experimental ConditionalWrapper component [#36124]
+-   Patch - Add experimental open menu when user focus the select control input element [#36124]
+-   Minor - Adding isHidden option for primary button in TourKit component. [#36124]
+-   Minor - Add support for custom suffix prop on SelectControl. [#36124]
+-   Minor - Make Table component accept className prop. [#36124]
+-   Minor - Move classname down in SelectControl Menu so it is on the actual Menu element. [#36124]
+-   Major [ **BREAKING CHANGE** ] - Switch DateTimePickerControl formatting to PHP style, for WP compatibility. [#36124]
+-   Patch - Updating downshift to 6.1.12. [#36124]
+-   Minor - Allow the user to select multiple images in the Media Library [#36124]
+-   Patch - Migrate search component to TS [#36124]
+-   Minor - Move file picker by clicking card into the MediaUploader component [#36124]
+-   Minor - Fix up initial block selection in RichTextEditor and add media blocks [#36124]
+-   Patch - Updated image gallery toolbar position and tooltips. [#36124]
+-   Patch - Update variable name within useFormContext. [#36124]
+-   Minor - Add noDataLabel property into table.js component to allow No Data label customization. [#36124]
+-   Patch - Align the field height across the whole form [#36124]
+-   Patch - Fade the value selection field in the Attributes modal when no attribute is added [#36124]
+-   Patch - Update font size and spacing in the tooltip component [#36124]
+
 ## [11.1.0](https://www.npmjs.com/package/@woocommerce/components/v/11.1.0) - 2022-10-24 
 
 -   Minor - Allow passing of additional props to form inputs [#35160]

@@ -5,6 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Button, Card, Spinner, Tooltip } from '@wordpress/components';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	Product,
 	ProductVariation,
 } from '@woocommerce/data';
 import {
@@ -13,6 +14,7 @@ import {
 	Pagination,
 	Sortable,
 	Tag,
+	useFormContext,
 } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { useContext, useState } from '@wordpress/element';
@@ -55,7 +57,8 @@ export const Variations: React.FC = () => {
 	const [ isUpdating, setIsUpdating ] = useState< Record< string, boolean > >(
 		{}
 	);
-	const { productId } = useParams();
+	const { values } = useFormContext< Product >();
+	const productId = values.id;
 	const context = useContext( CurrencyContext );
 	const { formatAmount, getCurrencyConfig } = context;
 	const { isLoading, variations, totalCount } = useSelect(
@@ -82,7 +85,7 @@ export const Variations: React.FC = () => {
 					getProductVariationsTotalCount< number >( requestParams ),
 			};
 		},
-		[ currentPage, perPage ]
+		[ currentPage, perPage, productId ]
 	);
 
 	const { updateProductVariation } = useDispatch(
@@ -202,7 +205,8 @@ export const Variations: React.FC = () => {
 							<Link
 								href={ getNewPath(
 									{},
-									`/product/${ productId }/variation/${ variation.id }`
+									`/product/${ productId }/variation/${ variation.id }`,
+									{}
 								) }
 								type="wc-admin"
 								className="components-button"
