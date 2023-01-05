@@ -16,14 +16,27 @@ type Image = {
 };
 
 type ProductImageProps = {
+	/**
+	 * Product or variation object. The image to display will be pulled from
+	 * `product.images` or `variation.image`.
+	 * See https://woocommerce.github.io/woocommerce-rest-api-docs/#product-properties
+	 * and https://woocommerce.github.io/woocommerce-rest-api-docs/#product-variation-properties
+	 */
 	product?: {
 		images?: Array< Image >;
 		image?: Image;
+		// ProductImage is only interested in product.images or varation.image
+		// but product object can have other properties that we don't control.
+		// allowing `any` here
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	} & Record< string, any >;
+	// The width of image to display.
 	width?: number;
+	// The height of image to display.
 	height?: number;
+	// Additional CSS classes.
 	className?: string;
+	// Text to use as the image alt attribute.
 	alt?: string;
 };
 
@@ -35,9 +48,9 @@ type ProductImageProps = {
 
 const ProductImage: React.VFC< ProductImageProps > = ( {
 	product,
-	width,
-	height,
-	className,
+	width = 33,
+	height = 33,
+	className = '',
 	alt,
 	...props
 } ) => {
@@ -61,38 +74,6 @@ const ProductImage: React.VFC< ProductImageProps > = ( {
 			{ ...props }
 		/>
 	);
-};
-
-ProductImage.propTypes = {
-	/**
-	 * The width of image to display.
-	 */
-	width: PropTypes.number,
-	/**
-	 * The height of image to display.
-	 */
-	height: PropTypes.number,
-	/**
-	 * Additional CSS classes.
-	 */
-	className: PropTypes.string,
-	/**
-	 * Product or variation object. The image to display will be pulled from
-	 * `product.images` or `variation.image`.
-	 * See https://woocommerce.github.io/woocommerce-rest-api-docs/#product-properties
-	 * and https://woocommerce.github.io/woocommerce-rest-api-docs/#product-variation-properties
-	 */
-	product: PropTypes.object,
-	/**
-	 * Text to use as the image alt attribute.
-	 */
-	alt: PropTypes.string,
-};
-
-ProductImage.defaultProps = {
-	width: 33,
-	height: 33,
-	className: '',
 };
 
 export default ProductImage;
