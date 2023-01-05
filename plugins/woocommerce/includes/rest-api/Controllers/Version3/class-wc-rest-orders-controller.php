@@ -158,7 +158,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		 * The dynamic portion of the hook name, `$this->post_type`,
 		 * refers to the object type slug.
 		 *
-		 * @since ?
+		 * @since 7.4.0
 		 *
 		 * @param WC_Data         $order    Object object.
 		 * @param WP_REST_Request $request  Request object.
