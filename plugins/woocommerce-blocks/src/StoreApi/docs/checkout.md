@@ -93,6 +93,46 @@ POST /wc/store/v1/checkout
 curl --header "Nonce: 12345" --request POST https://example-store.com/wp-json/wc/store/v1/checkout?payment_method=paypal&payment_data[0][key]=test-key&payment_data[0][value]=test-value
 ```
 
+**Example request:**
+
+```json
+{
+	"billing_address": {
+		"first_name": "Peter",
+		"last_name": "Venkman",
+		"company": "",
+		"address_1": "550 Central Park West",
+		"address_2": "Corner Penthouse Spook Central",
+		"city": "New York",
+		"state": "NY",
+		"postcode": "10023",
+		"country": "US",
+		"email": "admin@example.com",
+		"phone": "555-2368"
+	},
+	"shipping_address": {
+		"first_name": "Peter",
+		"last_name": "Venkman",
+		"company": "",
+		"address_1": "550 Central Park West",
+		"address_2": "Corner Penthouse Spook Central",
+		"city": "New York",
+		"state": "NY",
+		"postcode": "10023",
+		"country": "US"
+	},
+  "customer_note": "Test notes on order.",
+  "create_account": false,
+  "payment_method": "cheque",
+  "payment_data": [],
+  "extensions": {
+    "some-extension-name": {
+      "some-data-key": "some data value"
+    }
+  }
+}
+```
+
 **Example response:**
 
 ```json
@@ -132,6 +172,49 @@ curl --header "Nonce: 12345" --request POST https://example-store.com/wp-json/wc
 		"payment_details": [],
 		"redirect_url": "https://local.wordpress.test/block-checkout/order-received/146/?key=wc_order_VPffqyvgWVqWL"
 	}
+}
+```
+
+## Payment Data
+
+There are many payment gateways available for merchants to use, and each one will be expecting different `payment_data`. We cannot comprehensively list all expected requests for all payment gateways, and we would recommend reaching out to the authors of the payment gateway plugins you're working with for further information.
+
+An example of the payment data sent to the Checkout endpoint when using the [WooCommerce Stripe Payment Gateway](https://wordpress.org/plugins/woocommerce-gateway-stripe/) is shown below.
+
+For further information on generating a `stripe_source` please check [the Stripe documentation](https://stripe.com/docs).
+
+```json
+{
+  "payment_data": [
+    {
+      "key": "stripe_source",
+      "value": "src_xxxxxxxxxxxxx"
+    },
+    {
+      "key": "billing_email",
+      "value": "myemail@email.com"
+    },
+    {
+      "key": "billing_first_name",
+      "value": "Jane"
+    },
+    {
+      "key": "billing_last_name",
+      "value": "Doe"
+    },
+    {
+      "key": "paymentMethod",
+      "value": "stripe"
+    },
+    {
+      "key": "paymentRequestType",
+      "value": "cc"
+    },
+    {
+      "key": "wc-stripe-new-payment-method",
+      "value": true
+    }
+  ]
 }
 ```
 
