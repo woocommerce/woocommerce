@@ -1900,6 +1900,25 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox When parent order is deleted, child orders should be upshifted.
+	 */
+	public function test_child_orders_are_promoted_when_parent_is_deleted() {
+		$this->toggle_cot( true );
+		$order = new WC_Order();
+		$order->save();
+
+		$child_order = new WC_Order();
+		$child_order->set_parent_id( $order->get_id() );
+		$child_order->save();
+
+		$this->assertEquals( $order->get_id(), $child_order->get_parent_id() );
+		$this->sut->delete( $order, array( 'force_delete' => true ) );
+		$child_order = wc_get_order( $child_order->get_id() );
+
+		$this->assertEquals( 0, $child_order->get_parent_id() );
+	}
+
+	/**
 	 * @testDox Make sure get_order return false when checking an order of different order types without warning.
 	 */
 	public function test_get_order_with_id_for_different_type() {
