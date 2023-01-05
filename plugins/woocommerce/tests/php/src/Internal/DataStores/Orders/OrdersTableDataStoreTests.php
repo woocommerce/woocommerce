@@ -1350,6 +1350,38 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox Ensure sorting by `includes` param works as expected.
+	 */
+	public function test_cot_query_sort_includes() {
+		$this->disable_cot_sync();
+		$order_1 = new WC_Order();
+		$this->switch_data_store( $order_1, $this->sut );
+		$order_1->save();
+
+		$order_2 = new WC_Order();
+		$this->switch_data_store( $order_2, $this->sut );
+		$order_2->save();
+
+		$query        = new OrdersTableQuery(
+			array(
+				'orderby'  => 'include',
+				'includes' => array( $order_1->get_id(), $order_2->get_id() ),
+			)
+		);
+		$orders_array = $query->orders;
+		$this->assertEquals( array( $order_1->get_id(), $order_2->get_id() ), array( $orders_array[0], $orders_array[1] ) );
+
+		$query        = new OrdersTableQuery(
+			array(
+				'orderby'  => 'include',
+				'includes' => array( $order_2->get_id(), $order_1->get_id() ),
+			)
+		);
+		$orders_array = $query->orders;
+		$this->assertEquals( array( $order_2->get_id(), $order_1->get_id() ), array( $orders_array[0], $orders_array[1] ) );
+	}
+
+	/**
 	 * @testDox Ensure search works as expected on updated orders.
 	 */
 	public function test_cot_query_search_update() {

@@ -509,8 +509,17 @@ class OrdersTableQuery {
 			return;
 		}
 
+		// No need to sanitize, will be processed in calling function.
+		if ( 'include' === $orderby || 'post__in' === $orderby ) {
+			return;
+		}
+
 		if ( is_string( $orderby ) ) {
-			$orderby = array( $orderby => $order );
+			$orderby_fields = array_map( 'trim', explode( ' ', $orderby ) );
+			$orderby        = array();
+			foreach ( $orderby_fields as $field ) {
+				$orderby[ $field ] = $order;
+			}
 		}
 
 		$this->args['orderby'] = array();
@@ -969,6 +978,16 @@ class OrdersTableQuery {
 
 		if ( 'none' === $orderby ) {
 			$this->orderby = '';
+			return;
+		}
+
+		if ( 'include' === $orderby || 'post__in' === $orderby ) {
+			$ids = $this->args['id'] ?? $this->args['includes'];
+			if ( empty( $ids ) ) {
+				return;
+			}
+			$ids           = array_map( 'absint', $ids );
+			$this->orderby = array( "FIELD( {$this->tables['orders']}.id, " . implode( ',', $ids ) . ' )' );
 			return;
 		}
 
