@@ -23,8 +23,8 @@ import { editPostHTML } from '../../lib/edit-post.ts';
 
 const DEVELOPER_WOOCOMMERCE_SITE_ID = '96396764';
 
-//const SOURCE_REPO = 'https://github.com/woocommerce/woocommerce.git';
-const SOURCE_REPO = '/Users/jonathan/woo/woocommerce';
+const SOURCE_REPO = 'https://github.com/woocommerce/woocommerce.git';
+//const SOURCE_REPO = '/Users/jonathan/woo/woocommerce';
 
 const VERSION_VALIDATION_REGEX =
 	/^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/;
@@ -88,8 +88,7 @@ const program = new Command()
 		Logger.startTask( `Making temporary clone of ${ SOURCE_REPO }...` );
 		const currentParsed = semver.parse( currentVersion );
 		const previousParsed = semver.parse( previousVersion );
-		//const tmpRepoPath = await cloneRepo( SOURCE_REPO );
-		const tmpRepoPath = '/var/folders/hs/01mlh7d15495b666jjdj7ly80000gn/T/code-analyzer-tmp/2b527a2a-8980-4f40-8e0a-e160867f679a';
+		const tmpRepoPath = await cloneRepo( SOURCE_REPO );
 		Logger.endTask();
 		let currentBranch;
 		let previousBranch;
@@ -148,11 +147,10 @@ const program = new Command()
 		Logger.startTask( 'Finding contributors' );
 		const title = `WooCommerce ${ currentVersion } Released`;
 
-		/*const contributors = await generateContributors(
+		const contributors = await generateContributors(
 			currentVersion,
 			previousVersion.toString()
-		);*/
-		const contributors = {};
+		);
 
 		const postVariables = {
 			contributors,

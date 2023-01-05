@@ -62,7 +62,7 @@ export const scanForChanges = async (
 	Logger.endTask();
 
 	Logger.startTask( 'Detecting template changes...' );
-	const templateChanges = scanForTemplateChanges( diff, sinceVersion );
+	const templateChanges = await scanForTemplateChanges( diff, sinceVersion, tmpRepoPath );
 	Logger.endTask();
 
 	Logger.startTask( 'Detecting DB changes...' );
