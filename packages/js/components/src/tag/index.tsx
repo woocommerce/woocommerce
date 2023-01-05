@@ -7,7 +7,6 @@ import classnames from 'classnames';
 import { Button, Popover } from '@wordpress/components';
 import { Icon, closeSmall } from '@wordpress/icons';
 import { decodeEntities } from '@wordpress/html-entities';
-import PropTypes from 'prop-types';
 import { withInstanceId } from '@wordpress/compose';
 
 type Props = {
