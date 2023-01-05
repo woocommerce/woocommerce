@@ -41,6 +41,8 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
     -   [Checkout API interface](internal-developers/block-client-apis/checkout/checkout-api.md)
     -   [Checkout Flow and Events](internal-developers/block-client-apis/checkout/checkout-flow-and-events.md)
     -   [Notices](internal-developers/block-client-apis/notices.md)
+-   [Data store](internal-developers/data-store/README.md)
+    -   [Validation](internal-developers/data-store/validation.md)
 -   [Editor Components](../assets/js/editor-components/README.md)
     -   [SearchListControl](../assets/js/editor-components/search-list-control/README.md)
     -   [Tag](../assets/js/editor-components/tag/README.md)
