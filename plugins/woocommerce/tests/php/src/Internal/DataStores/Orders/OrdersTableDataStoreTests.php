@@ -1360,7 +1360,6 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		$order_2 = new WC_Order();
 		$this->switch_data_store( $order_2, $this->sut );
-		$this->disable_cot_sync();
 		$order_2->save();
 
 		$query        = new OrdersTableQuery(
