@@ -266,7 +266,7 @@ export const Sortable = ( {
 						<SortableItem
 							key={ child.key || index }
 							className={ itemClasses }
-							id={ `${ index }${ v4() }` }
+							id={ `${ index }-${ v4() }` }
 							index={ index }
 							isDragging={ isDragging }
 							isSelected={ selectedIndex === index }
