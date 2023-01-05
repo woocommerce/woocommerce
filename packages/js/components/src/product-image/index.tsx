@@ -11,25 +11,29 @@ import { createElement } from '@wordpress/element';
  */
 import { placeholderWhiteBackground as placeholder } from './placeholder';
 
+type ProductImageProps = {
+	product?: {
+		images?: Array< string >;
+		image?: string;
+	};
+	width?: number;
+	height?: number;
+	className?: string;
+	alt?: string;
+};
+
 /**
  * Use `ProductImage` to display a product's or variation's featured image.
  * If no image can be found, a placeholder matching the front-end image
  * placeholder will be displayed.
- *
- * @param {Object} props
- * @param {Object} props.product
- * @param {string} props.alt
- * @param {number} props.width
- * @param {number} props.height
- * @param {string} props.className
- * @return {Object} -
  */
-const ProductImage = ( {
+
+const ProductImage: React.VFC< ProductImageProps > = ( {
 	product,
-	alt,
 	width,
 	height,
 	className,
+	alt,
 	...props
 } ) => {
 	// The first returned image from the API is the featured/product image.
