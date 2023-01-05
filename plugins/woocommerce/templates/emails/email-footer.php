@@ -54,7 +54,8 @@ defined( 'ABSPATH' ) || exit;
 																		apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) )
 																	)
 																)
-															); ?>
+															);
+															?>
 														</td>
 													</tr>
 												</table>
