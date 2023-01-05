@@ -17,6 +17,7 @@
 		"new-product-management-experience": false,
 		"onboarding": true,
 		"onboarding-tasks": true,
+		"product-variation-management": false,
 		"remote-inbox-notifications": true,
 		"remote-free-extensions": true,
 		"payment-gateway-suggestions": true,
