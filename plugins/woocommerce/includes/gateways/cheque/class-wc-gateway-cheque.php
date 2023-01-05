@@ -102,6 +102,13 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 	 * @param bool     $plain_text Email format: plain text or HTML.
 	 */
 	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
+		/**
+		 * Filter the email instructions order status.
+		 *
+		 * @since 7.3
+		 * @param string $terms The order status.
+		 * @param object $order The order object.
+		 */
 		if ( $this->instructions && ! $sent_to_admin && 'cheque' === $order->get_payment_method() && $order->has_status( apply_filters( 'woocommerce_cheque_email_instructions_order_status', 'on-hold', $order ) ) ) {
 			echo wp_kses_post( wpautop( wptexturize( $this->instructions ) ) . PHP_EOL );
 		}
