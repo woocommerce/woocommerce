@@ -26,7 +26,7 @@ export function reorderSortableProductAttributePositions(
 	attributeKeyValues: Record< number | string, ProductAttribute >
 ): ProductAttribute[] {
 	return Object.keys( attributeKeyValues ).map(
-		( objectKeys: number | string ): ProductAttribute => {
+		( attributeKey: number | string ): ProductAttribute => {
 			if ( ! isNaN( items[ objectKeys ] ) ) {
 				return {
 					...attributeKeyValues[ objectKeys ],
