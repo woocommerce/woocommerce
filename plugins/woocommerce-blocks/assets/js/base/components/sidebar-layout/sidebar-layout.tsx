@@ -2,15 +2,21 @@
  * External dependencies
  */
 import classNames from 'classnames';
-import PropTypes from 'prop-types';
 import { ContainerWidthContextProvider } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+interface SidebarLayoutProps {
+	children: JSX.Element | JSX.Element[];
+	className: string;
+}
 
-const SidebarLayout = ( { children, className } ) => {
+const SidebarLayout = ( {
+	children,
+	className,
+}: SidebarLayoutProps ): JSX.Element => {
 	return (
 		<ContainerWidthContextProvider
 			className={ classNames(
@@ -21,10 +27,6 @@ const SidebarLayout = ( { children, className } ) => {
 			{ children }
 		</ContainerWidthContextProvider>
 	);
-};
-
-SidebarLayout.propTypes = {
-	className: PropTypes.string,
 };
 
 export default SidebarLayout;
