@@ -279,7 +279,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			? $request['customer']
 			: null;
 
-		if ( $cot_customer ) {
+		if ( ! is_null( $cot_customer ) ) {
 			unset( $request['customer'] );
 		}
 
