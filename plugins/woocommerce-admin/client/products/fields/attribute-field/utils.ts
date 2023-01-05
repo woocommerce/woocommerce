@@ -27,14 +27,14 @@ export function reorderSortableProductAttributePositions(
 ): ProductAttribute[] {
 	return Object.keys( attributeKeyValues ).map(
 		( attributeKey: number | string ): ProductAttribute => {
-			if ( ! isNaN( items[ objectKeys ] ) ) {
+			if ( ! isNaN( items[ attributeKey ] ) ) {
 				return {
-					...attributeKeyValues[ objectKeys ],
-					position: items[ objectKeys ],
+					...attributeKeyValues[ attributeKey ],
+					position: items[ attributeKey ],
 				};
 			}
 			return {
-				...attributeKeyValues[ objectKeys ],
+				...attributeKeyValues[ attributeKey ],
 			};
 		}
 	);
