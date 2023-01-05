@@ -36,4 +36,5 @@ module.exports = {
 		'utils',
 	],
 	transformIgnorePatterns: [ 'node_modules/(?!(woocommerce)/)' ],
+	testMatch: [ '**/?(*.)+(spec|test).[jt]s?(x)' ],
 };
