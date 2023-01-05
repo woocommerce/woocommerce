@@ -11,11 +11,16 @@ import { createElement } from '@wordpress/element';
  */
 import { placeholderWhiteBackground as placeholder } from './placeholder';
 
+type Image = {
+	src?: string;
+};
+
 type ProductImageProps = {
 	product?: {
-		images?: Array< string >;
-		image?: string;
-	};
+		images?: Array< Image >;
+		image?: Image;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	} & Record< string, any >;
 	width?: number;
 	height?: number;
 	className?: string;
