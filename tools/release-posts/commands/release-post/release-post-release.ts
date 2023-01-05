@@ -24,7 +24,6 @@ import { editPostHTML } from '../../lib/edit-post.ts';
 const DEVELOPER_WOOCOMMERCE_SITE_ID = '96396764';
 
 const SOURCE_REPO = 'https://github.com/woocommerce/woocommerce.git';
-//const SOURCE_REPO = '/Users/jonathan/woo/woocommerce';
 
 const VERSION_VALIDATION_REGEX =
 	/^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/;
