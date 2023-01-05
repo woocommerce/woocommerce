@@ -5,14 +5,19 @@ import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { createElement } from '@wordpress/element';
 import StarIcon from 'gridicons/dist/star';
-import PropTypes from 'prop-types';
 
 type RatingProps = {
+	// Number of stars that should be filled. You can pass a partial number of stars like `2.5`.
 	rating?: number;
+	// The total number of stars the rating is out of.
 	totalStars?: number;
+	// The size in pixels the stars should be rendered at.
 	size?: number;
+	// Additional CSS classes.
 	className?: string;
+	// Icon used, defaults to StarIcon
 	icon?: React.ReactNode;
+	// Outline icon used, the not selected rating. Defaults to props.icon or StarIcon
 	outlineIcon?: React.ReactNode;
 };
 
@@ -64,33 +69,6 @@ const Rating: React.VFC< RatingProps > = ( {
 			</div>
 		</div>
 	);
-};
-
-Rating.propTypes = {
-	/**
-	 * Number of stars that should be filled. You can pass a partial number of stars like `2.5`.
-	 */
-	rating: PropTypes.number,
-	/**
-	 * The total number of stars the rating is out of.
-	 */
-	totalStars: PropTypes.number,
-	/**
-	 * The size in pixels the stars should be rendered at.
-	 */
-	size: PropTypes.number,
-	/**
-	 * Additional CSS classes.
-	 */
-	className: PropTypes.string,
-	/**
-	 * Icon used, defaults to StarIcon
-	 */
-	icon: PropTypes.elementType,
-	/**
-	 * Outline icon used, the not selected rating. Defaults to props.icon or StarIcon
-	 */
-	outlineIcon: PropTypes.elementType,
 };
 
 export default Rating;
