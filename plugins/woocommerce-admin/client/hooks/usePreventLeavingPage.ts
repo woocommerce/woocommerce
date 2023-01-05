@@ -26,8 +26,7 @@ export default function usePreventLeavingPage(
 			__( 'Changes you made may not be saved.', 'woocommerce' ),
 		[ message ]
 	);
-	const nav = useContext( NavigationContext );
-	const { navigator } = nav;
+	const { navigator } = useContext( NavigationContext );
 	const fromUrl = useLocation();
 
 	// This effect prevent react router from navigate and show
