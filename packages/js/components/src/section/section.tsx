@@ -11,7 +11,7 @@ import { Level } from './context';
 type SectionProps = {
 	// The wrapper component for this section. Optional, defaults to `div`. If passed false, no wrapper is used. Additional props
 	// passed to Section are passed on to the component.
-	component?: React.ComponentType | string | boolean;
+	component?: React.ComponentType | string | false;
 	// Optional classname
 	className?: string;
 	// The children inside this section, rendered in the `component`. This increases the context level for the next heading used.
@@ -34,9 +34,6 @@ export const Section: React.VFC< SectionProps > = ( {
 					{ component === false ? (
 						children
 					) : (
-						// @ts-expect-error: Raises JSX component `Component` doesn't have constructor to call error.
-						// Suppressing the error since this component accepts func, string, and bool
-						// I wasn't able to find to correct type.
 						<Component { ...props }>{ children }</Component>
 					) }
 				</Level.Provider>
