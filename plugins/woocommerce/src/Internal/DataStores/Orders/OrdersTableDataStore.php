@@ -1761,7 +1761,9 @@ FROM $order_meta_table
 			 */
 			do_action( 'woocommerce_before_delete_order', $order_id, $order );
 
+			$this->upshift_child_orders( $order );
 			$this->delete_order_data_from_custom_order_tables( $order_id );
+
 			$order->set_id( 0 );
 
 			// If this datastore method is called while the posts table is authoritative, refrain from deleting post data.
@@ -1789,6 +1791,26 @@ FROM $order_meta_table
 
 			do_action( 'woocommerce_trash_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		}
+	}
+
+	/**
+	 * Helper method to set child orders to the parent order's parent.
+	 *
+	 * @param \WC_Abstract_Order $order Order object.
+	 *
+	 * @return void
+	 */
+	private function upshift_child_orders( $order ) {
+		global $wpdb;
+		$order_table  = self::get_orders_table_name();
+		$order_parent = $order->get_parent_id();
+		$wpdb->update(
+			$order_table,
+			array( 'parent_order_id' => $order_parent ),
+			array( 'parent_order_id' => $order->get_id() ),
+			array( '%d' ),
+			array( '%d' )
+		);
 	}
 
 	/**
