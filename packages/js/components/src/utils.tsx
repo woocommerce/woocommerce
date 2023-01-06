@@ -1,12 +1,9 @@
 /**
  * External dependencies
  */
-import { isValidElement, Fragment } from 'react';
+import React, { isValidElement, Fragment } from 'react';
 import { Slot, Fill } from '@wordpress/components';
 import { cloneElement, createElement } from '@wordpress/element';
-
-// TODO: Right now the build is breaking if I don't reference createElement in some way.
-// console.debug( 'createElement', typeof createElement );
 
 /**
  * Ordered fill item.
@@ -16,7 +13,6 @@ import { cloneElement, createElement } from '@wordpress/element';
  * @param {Array}  props    - Fill props.
  * @return {Node} Node.
  */
-// TODO: Make this more generic.
 function createOrderedChildren< T = Fill.Props >(
 	children: React.ReactNode,
 	order: number,
@@ -43,5 +39,5 @@ export const sortFillsByOrder: Slot.Props[ 'children' ] = ( fills ) => {
 		return a[ 0 ].props.order - b[ 0 ].props.order;
 	} );
 
-	return <>{ sortedFills }</>;
+	return <Fragment>{ sortedFills }</Fragment>;
 };
