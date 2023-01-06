@@ -19,6 +19,7 @@ import {
 	ToggleControl,
 	CheckboxControl,
 } from '@wordpress/components';
+import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 import type { TemplateArray } from '@wordpress/blocks';
 import { CartCheckoutFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 
@@ -147,38 +148,40 @@ export const Edit = ( {
 			<EditorProvider
 				previewData={ { previewCart, previewSavedPaymentMethods } }
 			>
-				<CheckoutProvider>
-					<SidebarLayout
-						className={ classnames( 'wc-block-checkout', {
-							'has-dark-controls': attributes.hasDarkControls,
-						} ) }
-					>
-						<CheckoutBlockControlsContext.Provider
-							value={ { addressFieldControls } }
+				<SlotFillProvider>
+					<CheckoutProvider>
+						<SidebarLayout
+							className={ classnames( 'wc-block-checkout', {
+								'has-dark-controls': attributes.hasDarkControls,
+							} ) }
 						>
-							<CheckoutBlockContext.Provider
-								value={ {
-									showCompanyField,
-									requireCompanyField,
-									showApartmentField,
-									showPhoneField,
-									requirePhoneField,
-									showOrderNotes,
-									showPolicyLinks,
-									showReturnToCart,
-									cartPageId,
-									showRateAfterTaxName,
-								} }
+							<CheckoutBlockControlsContext.Provider
+								value={ { addressFieldControls } }
 							>
-								<InnerBlocks
-									allowedBlocks={ ALLOWED_BLOCKS }
-									template={ defaultTemplate }
-									templateLock="insert"
-								/>
-							</CheckoutBlockContext.Provider>
-						</CheckoutBlockControlsContext.Provider>
-					</SidebarLayout>
-				</CheckoutProvider>
+								<CheckoutBlockContext.Provider
+									value={ {
+										showCompanyField,
+										requireCompanyField,
+										showApartmentField,
+										showPhoneField,
+										requirePhoneField,
+										showOrderNotes,
+										showPolicyLinks,
+										showReturnToCart,
+										cartPageId,
+										showRateAfterTaxName,
+									} }
+								>
+									<InnerBlocks
+										allowedBlocks={ ALLOWED_BLOCKS }
+										template={ defaultTemplate }
+										templateLock="insert"
+									/>
+								</CheckoutBlockContext.Provider>
+							</CheckoutBlockControlsContext.Provider>
+						</SidebarLayout>
+					</CheckoutProvider>
+				</SlotFillProvider>
 			</EditorProvider>
 		</div>
 	);
