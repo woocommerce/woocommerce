@@ -8,6 +8,7 @@ import { useSelect } from '@wordpress/data';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	Product,
+	ProductAttribute,
 } from '@woocommerce/data';
 
 /**
@@ -17,8 +18,23 @@ import { ProductSectionLayout } from '../layout/product-section-layout';
 import { Variations } from '../fields/variations';
 
 export const ProductVariationsSection: React.FC = () => {
-	const { values } = useFormContext< Product >();
-	const productId = values.id;
+	const {
+		getInputProps,
+		values: { id: productId },
+	} = useFormContext< Product >();
+
+	const { value: attributes }: { value: ProductAttribute[] } = getInputProps(
+		'attributes',
+		{
+			productId,
+		}
+	);
+
+	const options = attributes
+		? attributes.filter(
+				( attribute: ProductAttribute ) => attribute.variation
+		  )
+		: [];
 
 	const { totalCount } = useSelect(
 		( select ) => {
@@ -33,10 +49,10 @@ export const ProductVariationsSection: React.FC = () => {
 					getProductVariationsTotalCount< number >( requestParams ),
 			};
 		},
-		[ productId ]
+		[ productId, options ]
 	);
 
-	if ( totalCount === 0 || isNaN( totalCount ) ) {
+	if ( options.length === 0 || totalCount === 0 || isNaN( totalCount ) ) {
 		return null;
 	}
 
