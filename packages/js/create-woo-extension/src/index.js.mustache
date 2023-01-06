@@ -53,7 +53,7 @@ const MyExamplePage = () => (
 		</Woo.Section>
 
 		<Woo.Section component="article">
-			<Woo.SectionHeader title={ __( 'Datepicker', 'my-extension-name' ) } />
+			<Woo.SectionHeader title={ __( 'Datepicker', '{{textdomain}}' ) } />
 			<Woo.DatePicker
 				text={ __( 'I am a datepicker!', 'my-extension-name' ) }
 				dateFormat={ 'MM/DD/YYYY' }
