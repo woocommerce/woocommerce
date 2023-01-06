@@ -22,7 +22,7 @@
 			}
 		}
 
-		.woocommerce-product-form__field {
+		.woocommerce-product-form__field:not(:first-child) {
 			margin-top: $gap-large;
 
 			> .components-base-control {
