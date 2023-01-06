@@ -2,13 +2,8 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useState, useCallback, useEffect } from '@wordpress/element';
-import {
-	ProductAttribute,
-	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
-	ProductAttributeTerm,
-} from '@woocommerce/data';
-import { resolveSelect } from '@wordpress/data';
+import { useState } from '@wordpress/element';
+import { ProductAttribute } from '@woocommerce/data';
 import {
 	Sortable,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
@@ -24,11 +19,11 @@ import { getAdminLink } from '@woocommerce/settings';
 import './attribute-field.scss';
 import { AddAttributeModal } from './add-attribute-modal';
 import { EditAttributeModal } from './edit-attribute-modal';
+import { EnhancedProductAttribute } from '~/products/hooks/use-product-attributes';
 import {
 	getAttributeKey,
 	reorderSortableProductAttributePositions,
 } from './utils';
-import { sift } from '../../../utils';
 import { AttributeEmptyState } from '../attribute-empty-state';
 import {
 	AddAttributeListItem,
@@ -36,30 +31,19 @@ import {
 } from '../attribute-list-item';
 
 type AttributeFieldProps = {
-	value: ProductAttribute[];
+	attributes: ProductAttribute[];
 	onChange: ( value: ProductAttribute[] ) => void;
-	productId?: number;
 	// TODO: should we support an 'any' option to show all attributes?
 	attributeType?: 'regular' | 'for-variations';
 };
 
-export type HydratedAttributeType = Omit< ProductAttribute, 'options' > & {
-	options?: string[];
-	terms?: ProductAttributeTerm[];
-	visible?: boolean;
-};
-
 export const AttributeField: React.FC< AttributeFieldProps > = ( {
-	value,
+	attributes,
 	onChange,
-	productId,
 	attributeType = 'regular',
 } ) => {
 	const [ showAddAttributeModal, setShowAddAttributeModal ] =
 		useState( false );
-	const [ hydratedAttributes, setHydratedAttributes ] = useState<
-		HydratedAttributeType[]
-	>( [] );
 	const [ editingAttributeId, setEditingAttributeId ] = useState<
 		null | string
 	>( null );
@@ -72,73 +56,12 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		? 'product_add_options_modal_cancel_button_click'
 		: 'product_add_attributes_modal_cancel_button_click';
 
-	const fetchTerms = useCallback(
-		( attributeId: number ) => {
-			return resolveSelect(
-				EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
-			)
-				.getProductAttributeTerms< ProductAttributeTerm[] >( {
-					attribute_id: attributeId,
-					product: productId,
-				} )
-				.then(
-					( attributeTerms ) => {
-						return attributeTerms;
-					},
-					( error ) => {
-						return error;
-					}
-				);
-		},
-		[ productId ]
-	);
-
-	useEffect( () => {
-		// I think we'll need to move the hydration out of the individual component
-		// instance. To where, I do not yet know... maybe in the form context
-		// somewhere so that a single hydration source can be shared between multiple
-		// instances? Something like a simple key-value store in the form context
-		// would be handy.
-		if ( ! value || hydratedAttributes.length !== 0 ) {
-			return;
-		}
-
-		const [ customAttributes, globalAttributes ]: ProductAttribute[][] =
-			sift( value, ( attr: ProductAttribute ) => attr.id === 0 );
-
-		Promise.all(
-			globalAttributes.map( ( attr ) => fetchTerms( attr.id ) )
-		).then( ( allResults ) => {
-			setHydratedAttributes( [
-				...globalAttributes.map( ( attr, index ) => {
-					const fetchedTerms = allResults[ index ];
-
-					const newAttr = {
-						...attr,
-						// I'm not sure this is quite right for handling unpersisted terms,
-						// but this gets things kinda working for now
-						terms:
-							fetchedTerms.length > 0 ? fetchedTerms : undefined,
-						options:
-							fetchedTerms.length === 0
-								? attr.options
-								: undefined,
-					};
-
-					return newAttr;
-				} ),
-				...customAttributes,
-			] );
-		} );
-	}, [ fetchTerms, hydratedAttributes, value ] );
-
 	const fetchAttributeId = ( attribute: { id: number; name: string } ) =>
 		`${ attribute.id }-${ attribute.name }`;
 
-	const updateAttributes = ( attributes: HydratedAttributeType[] ) => {
-		setHydratedAttributes( attributes );
+	const handleChange = ( newAttributes: EnhancedProductAttribute[] ) => {
 		onChange(
-			attributes.map( ( attr ) => {
+			newAttributes.map( ( attr ) => {
 				return {
 					...attr,
 					options: attr.terms
@@ -157,8 +80,8 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 			recordEvent(
 				'product_remove_attribute_confirmation_confirm_click'
 			);
-			updateAttributes(
-				hydratedAttributes.filter(
+			handleChange(
+				attributes.filter(
 					( attr ) =>
 						fetchAttributeId( attr ) !==
 						fetchAttributeId( attribute )
@@ -169,13 +92,15 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		}
 	};
 
-	const onAddNewAttributes = ( newAttributes: HydratedAttributeType[] ) => {
-		updateAttributes( [
-			...( hydratedAttributes || [] ),
+	const onAddNewAttributes = (
+		newAttributes: EnhancedProductAttribute[]
+	) => {
+		handleChange( [
+			...( attributes || [] ),
 			...newAttributes
 				.filter(
 					( newAttr ) =>
-						! ( value || [] ).find( ( attr ) =>
+						! ( attributes || [] ).find( ( attr ) =>
 							newAttr.id === 0
 								? newAttr.name === attr.name // check name if custom attribute = id === 0.
 								: attr.id === newAttr.id
@@ -185,7 +110,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					return {
 						...newAttributeProps,
 						...newAttr,
-						position: ( value || [] ).length + index,
+						position: ( attributes || [] ).length + index,
 					};
 				} ),
 		] );
@@ -193,18 +118,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		setShowAddAttributeModal( false );
 	};
 
-	const filteredAttributes = value
-		? value.filter(
-				( attribute: ProductAttribute ) =>
-					attribute.variation === isOnlyForVariations
-		  )
-		: false;
-
-	if (
-		! filteredAttributes ||
-		filteredAttributes.length === 0 ||
-		hydratedAttributes.length === 0
-	) {
+	if ( ! attributes.length ) {
 		return (
 			<>
 				<AttributeEmptyState
@@ -232,9 +146,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 							setShowAddAttributeModal( false );
 						} }
 						onAdd={ onAddNewAttributes }
-						selectedAttributeIds={ ( filteredAttributes || [] ).map(
-							( attr ) => attr.id
-						) }
+						selectedAttributeIds={ [] }
 					/>
 				) }
 				<SelectControlMenuSlot />
@@ -242,10 +154,11 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		);
 	}
 
-	const sortedAttributes = filteredAttributes.sort(
+	const sortedAttributes = attributes.sort(
 		( a, b ) => a.position - b.position
 	);
-	const attributeKeyValues = value.reduce(
+
+	const attributeKeyValues = attributes.reduce(
 		(
 			keyValue: Record< number | string, ProductAttribute >,
 			attribute: ProductAttribute
@@ -256,9 +169,9 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		{} as Record< number | string, ProductAttribute >
 	);
 
-	const attribute = hydratedAttributes.find(
+	const editingAttribute = attributes.find(
 		( attr ) => fetchAttributeId( attr ) === editingAttributeId
-	) as HydratedAttributeType;
+	) as EnhancedProductAttribute;
 
 	const editAttributeCopy = isOnlyForVariations
 		? __(
@@ -328,19 +241,19 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 						setShowAddAttributeModal( false );
 					} }
 					onAdd={ onAddNewAttributes }
-					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
+					selectedAttributeIds={ attributes.map(
+						( attr ) => attr.id
+					) }
 				/>
 			) }
 			<SelectControlMenuSlot />
-			{ editingAttributeId && (
+			{ editingAttribute && (
 				<EditAttributeModal
-					title={
+					title={ sprintf(
 						/* translators: %s is the attribute name */
-						sprintf(
-							__( 'Edit %s', 'woocommerce' ),
-							attribute.name
-						)
-					}
+						__( 'Edit %s', 'woocommerce' ),
+						editingAttribute.name
+					) }
 					globalAttributeHelperMessage={ interpolateComponents( {
 						mixedString: editAttributeCopy,
 						components: {
@@ -359,7 +272,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					} ) }
 					onCancel={ () => setEditingAttributeId( null ) }
 					onEdit={ ( changedAttribute ) => {
-						const newAttributesSet = [ ...hydratedAttributes ];
+						const newAttributesSet = [ ...attributes ];
 						const changedAttributeIndex: number =
 							newAttributesSet.findIndex( ( attr ) =>
 								attr.id !== 0
@@ -373,10 +286,10 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 							changedAttribute
 						);
 
-						updateAttributes( newAttributesSet );
+						handleChange( newAttributesSet );
 						setEditingAttributeId( null );
 					} }
-					attribute={ attribute }
+					attribute={ editingAttribute }
 				/>
 			) }
 		</div>

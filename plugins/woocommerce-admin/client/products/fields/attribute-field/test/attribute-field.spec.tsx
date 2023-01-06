@@ -110,7 +110,7 @@ describe( 'AttributeField', () => {
 	describe( 'empty state', () => {
 		it( 'should show subtitle and "Add first attribute" button', () => {
 			const { queryByText } = render(
-				<AttributeField value={ [] } onChange={ () => {} } />
+				<AttributeField attributes={ [] } onChange={ () => {} } />
 			);
 			expect( queryByText( 'No attributes yet' ) ).toBeInTheDocument();
 			expect( queryByText( 'Add first attribute' ) ).toBeInTheDocument();
@@ -121,7 +121,7 @@ describe( 'AttributeField', () => {
 		act( () => {
 			render(
 				<AttributeField
-					value={ [ ...attributeList ] }
+					attributes={ [ ...attributeList ] }
 					onChange={ () => {} }
 				/>
 			);
@@ -142,7 +142,7 @@ describe( 'AttributeField', () => {
 		act( () => {
 			render(
 				<AttributeField
-					value={ [ ...attributeList ] }
+					attributes={ [ ...attributeList ] }
 					onChange={ () => {} }
 					attributeType="for-variations"
 				/>
@@ -174,7 +174,7 @@ describe( 'AttributeField', () => {
 			act( () => {
 				render(
 					<AttributeField
-						value={ [ ...attributeList ] }
+						attributes={ [ ...attributeList ] }
 						onChange={ () => {} }
 					/>
 				);
@@ -192,7 +192,7 @@ describe( 'AttributeField', () => {
 			act( () => {
 				render(
 					<AttributeField
-						value={ [ ...attributeList ] }
+						attributes={ [ ...attributeList ] }
 						onChange={ onChange }
 					/>
 				);
@@ -212,7 +212,7 @@ describe( 'AttributeField', () => {
 			act( () => {
 				render(
 					<AttributeField
-						value={ [ ...attributeList ] }
+						attributes={ [ ...attributeList ] }
 						onChange={ onChange }
 					/>
 				);
@@ -233,7 +233,7 @@ describe( 'AttributeField', () => {
 			act( () => {
 				render(
 					<AttributeField
-						value={ [ ...attributeList ] }
+						attributes={ [ ...attributeList ] }
 						onChange={ onChange }
 					/>
 				);

@@ -22,12 +22,12 @@ import {
  * Internal dependencies
  */
 import './attribute-input-field.scss';
-import { HydratedAttributeType } from '../attribute-field';
+import { EnhancedProductAttribute } from '~/products/hooks/use-product-attributes';
 
 type NarrowedQueryAttribute = Pick< QueryProductAttribute, 'id' | 'name' >;
 
 type AttributeInputFieldProps = {
-	value?: HydratedAttributeType | null;
+	value?: EnhancedProductAttribute | null;
 	onChange: (
 		value?:
 			| Omit< ProductAttribute, 'position' | 'visible' | 'variation' >
