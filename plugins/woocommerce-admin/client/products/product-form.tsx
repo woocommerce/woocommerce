@@ -69,10 +69,14 @@ export const ProductForm: React.FC< {
 				>
 					<ProductShippingSection product={ product } />
 				</ProductFormTab>
-				<ProductFormTab name="options" title="Options">
-					<OptionsSection />
-					<ProductVariationsSection />
-				</ProductFormTab>
+				{ window.wcAdminFeatures[ 'product-variation-management' ] ? (
+					<ProductFormTab name="options" title="Options">
+						<OptionsSection />
+						<ProductVariationsSection />
+					</ProductFormTab>
+				) : (
+					<></>
+				) }
 			</ProductFormLayout>
 			<ProductFormFooter />
 		</Form>
