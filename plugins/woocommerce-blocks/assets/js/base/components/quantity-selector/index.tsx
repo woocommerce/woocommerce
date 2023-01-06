@@ -186,9 +186,13 @@ const QuantitySelector = ( {
 				) }
 			/>
 			<button
-				aria-label={ __(
-					'Reduce quantity',
-					'woo-gutenberg-products-block'
+				aria-label={ sprintf(
+					/* translators: %s refers to the item name in the cart. */
+					__(
+						'Reduce quantity of %s',
+						'woo-gutenberg-products-block'
+					),
+					itemName
 				) }
 				className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus"
 				disabled={ disabled || ! canDecrease }
@@ -197,7 +201,7 @@ const QuantitySelector = ( {
 					onChange( newQuantity );
 					speak(
 						sprintf(
-							/* translators: %s refers to the item name in the cart. */
+							/* translators: %s refers to the item's new quantity in the cart. */
 							__(
 								'Quantity reduced to %s.',
 								'woo-gutenberg-products-block'
@@ -211,9 +215,13 @@ const QuantitySelector = ( {
 				&#65293;
 			</button>
 			<button
-				aria-label={ __(
-					'Increase quantity',
-					'woo-gutenberg-products-block'
+				aria-label={ sprintf(
+					/* translators: %s refers to the item's name in the cart. */
+					__(
+						'Increase quantity of %s',
+						'woo-gutenberg-products-block'
+					),
+					itemName
 				) }
 				disabled={ disabled || ! canIncrease }
 				className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus"
@@ -222,7 +230,7 @@ const QuantitySelector = ( {
 					onChange( newQuantity );
 					speak(
 						sprintf(
-							/* translators: %s refers to the item name in the cart. */
+							/* translators: %s refers to the item's new quantity in the cart. */
 							__(
 								'Quantity increased to %s.',
 								'woo-gutenberg-products-block'

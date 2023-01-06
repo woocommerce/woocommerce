@@ -311,6 +311,14 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 							{ showRemoveItemLink && (
 								<button
 									className="wc-block-cart-item__remove-link"
+									aria-label={ sprintf(
+										/* translators: %s refers to the item's name in the cart. */
+										__(
+											'Remove %s from cart',
+											'woo-gutenberg-products-block'
+										),
+										name
+									) }
 									onClick={ () => {
 										onRemove();
 										removeItem();
