@@ -11,7 +11,7 @@ import { Level } from './context';
 type SectionProps = {
 	/** The wrapper component for this section. Optional, defaults to `div`. If passed false, no wrapper is used. Additional props passed to Section are passed on to the component. */
 	component?: React.ComponentType | string | false;
-	// Optional classname
+	/** Optional classname */
 	className?: string;
 	// The children inside this section, rendered in the `component`. This increases the context level for the next heading used.
 	children: React.ReactNode;
