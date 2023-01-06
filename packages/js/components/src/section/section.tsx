@@ -13,7 +13,7 @@ type SectionProps = {
 	component?: React.ComponentType | string | false;
 	/** Optional classname */
 	className?: string;
-	// The children inside this section, rendered in the `component`. This increases the context level for the next heading used.
+	/** The children inside this section, rendered in the `component`. This increases the context level for the next heading used. */
 	children: React.ReactNode;
 };
 
