@@ -16,27 +16,28 @@ export function getAttributeKey(
 }
 
 /**
- * Updates the position of a product attribute from the new items JSX.Element list.
+ * Updates the position of a product attribute from the new items list.
  *
- * @param { JSX.Element[] } items              list of JSX elements coming back from sortable container.
- * @param { Object }        attributeKeyValues key value pair of product attributes.
+ * @param { Object } items              key value pair of list items positions.
+ * @param { Object } attributeKeyValues key value pair of product attributes.
  */
 export function reorderSortableProductAttributePositions(
-	items: JSX.Element[],
+	items: Record< number | string, number >,
 	attributeKeyValues: Record< number | string, ProductAttribute >
 ): ProductAttribute[] {
-	return items
-		.map( ( { props }, index ): ProductAttribute | undefined => {
-			const key = getAttributeKey( props?.attribute );
-			if ( attributeKeyValues[ key ] ) {
+	return Object.keys( attributeKeyValues ).map(
+		( attributeKey: number | string ): ProductAttribute => {
+			if ( ! isNaN( items[ attributeKey ] ) ) {
 				return {
-					...attributeKeyValues[ key ],
-					position: index,
+					...attributeKeyValues[ attributeKey ],
+					position: items[ attributeKey ],
 				};
 			}
-			return undefined;
-		} )
-		.filter( ( attr ): attr is ProductAttribute => attr !== undefined );
+			return {
+				...attributeKeyValues[ attributeKey ],
+			};
+		}
+	);
 }
 
 /**

@@ -245,7 +245,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 	const sortedAttributes = filteredAttributes.sort(
 		( a, b ) => a.position - b.position
 	);
-	const attributeKeyValues = filteredAttributes.reduce(
+	const attributeKeyValues = value.reduce(
 		(
 			keyValue: Record< number | string, ProductAttribute >,
 			attribute: ProductAttribute
@@ -253,7 +253,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 			keyValue[ getAttributeKey( attribute ) ] = attribute;
 			return keyValue;
 		},
-		{} as Record< number, ProductAttribute >
+		{} as Record< number | string, ProductAttribute >
 	);
 
 	const attribute = hydratedAttributes.find(
@@ -274,9 +274,17 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		<div className="woocommerce-attribute-field">
 			<Sortable
 				onOrderChange={ ( items ) => {
+					const itemPositions = items.reduce(
+						( positions, { props }, index ) => {
+							positions[ getAttributeKey( props.attribute ) ] =
+								index;
+							return positions;
+						},
+						{} as Record< number | string, number >
+					);
 					onChange(
 						reorderSortableProductAttributePositions(
-							items,
+							itemPositions,
 							attributeKeyValues
 						)
 					);
