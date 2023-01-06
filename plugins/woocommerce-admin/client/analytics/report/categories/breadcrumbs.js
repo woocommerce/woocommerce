@@ -4,6 +4,7 @@
 import { Component } from '@wordpress/element';
 import { first, last } from 'lodash';
 import { Spinner } from '@wordpress/components';
+import { decodeEntities } from '@wordpress/html-entities';
 import { Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 
@@ -49,7 +50,9 @@ export default class CategoryBreadcrumbs extends Component {
 
 		return category ? (
 			<div className="woocommerce-table__breadcrumbs">
-				{ this.getCategoryAncestors( category, categories ) }
+				{ decodeEntities(
+					this.getCategoryAncestors( category, categories )
+				) }
 				<Link
 					href={ getNewPath(
 						persistedQuery,
@@ -61,7 +64,7 @@ export default class CategoryBreadcrumbs extends Component {
 					) }
 					type="wc-admin"
 				>
-					{ category.name }
+					{ decodeEntities( category.name ) }
 				</Link>
 			</div>
 		) : (
