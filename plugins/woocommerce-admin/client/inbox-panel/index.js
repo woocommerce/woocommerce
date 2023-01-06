@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __, _n, sprintf } from '@wordpress/i18n';
+import { __, _n } from '@wordpress/i18n';
 import { useEffect, useState, useMemo } from '@wordpress/element';
 import {
 	EmptyContent,
@@ -10,6 +10,7 @@ import {
 	EllipsisMenu,
 } from '@woocommerce/components';
 import { Card, CardHeader, Button, CardFooter } from '@wordpress/components';
+import interpolateComponents from '@automattic/interpolate-components';
 import { NOTES_STORE_NAME, QUERY_DEFAULTS } from '@woocommerce/data';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -126,18 +127,22 @@ const renderNotes = ( {
 						<Text size="20" lineHeight="28px" variant="title.small">
 							{ __( 'Inbox', 'woocommerce' ) }
 						</Text>
-						<Badge
-							count={ sprintf(
-								/* translators: Number of unread notes */
-								_n(
-									'%d new message since your last visit',
-									'%d new messages since your last visit',
-									unreadNotesCount,
+						<Text
+							size="14"
+							lineHeight="28px"
+							variant="title.small"
+							className="wooocommerce-inbox-card__header-unread-messages"
+						>
+							{ interpolateComponents( {
+								mixedString: __(
+									'New messages since last visit: {{count /}}',
 									'woocommerce'
 								),
-								unreadNotesCount
-							) }
-						/>
+								components: {
+									count: <Badge count={ unreadNotesCount } />,
+								},
+							} ) }
+						</Text>
 					</div>
 					<EllipsisMenu
 						label={ __( 'Inbox Notes Options', 'woocommerce' ) }

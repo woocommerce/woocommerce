@@ -2,6 +2,14 @@
 	margin: 0 $gap-large;
 }
 
+.wooocommerce-inbox-card__header {
+	display: flex;
+}
+
+.wooocommerce-inbox-card__header-unread-messages {
+	margin-left: $gap;
+}
+
 .woocommerce-layout__inbox-panel-header {
 	padding: $gap-large;
 
