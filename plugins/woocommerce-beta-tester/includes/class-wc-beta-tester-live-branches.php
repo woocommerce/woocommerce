@@ -7,6 +7,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use WP_CLI;
+
 /**
  * WC_Beta_Tester Live Branches Feature Class.
  */
@@ -16,11 +18,20 @@ class WC_Beta_Tester_Live_Branches {
 	 */
 	public function __construct() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
+		add_action( 'cli_init', array( $this, 'register_cli' ) );
 
 		// By the time this code runs it appears too late to hook into `admin_menu`.
 
 		// NOTE - We don't have feature flags, so add the following code to enable it
 		// in development: `$this->register_page()`.
+		$this->register_page();
+	}
+
+	/**
+	 * Register CLI commands
+	 */
+	public function register_cli() {
+		WP_CLI::add_command( 'wc-beta-tester activate', WC_BEta_Tester_CLI::class );
 	}
 
 	/**
