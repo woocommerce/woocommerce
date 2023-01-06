@@ -9,7 +9,8 @@
 		"html": false,
 		"multiple": false,
 		"reusable": false,
-		"inserter": false
+		"inserter": false,
+		"lock": false
 	},
 	"attributes": {
 		"className": {
