@@ -4,6 +4,37 @@
  * Contributing Author: Tyler Smith
  */
 ;
+// Object.assign polyfill https://stackoverflow.com/questions/30498318/es5-object-assign-equivalent/49108759#49108759
+if (typeof Object.assign != 'function') {
+  // Must be writable: true, enumerable: false, configurable: true
+  Object.defineProperty(Object, 'assign', {
+    value: function assign(target, varArgs) { // .length of function is 2
+      'use strict';
+      if (target == null) { // TypeError if undefined or null
+        throw new TypeError('Cannot convert undefined or null to object');
+      }
+
+      var to = Object(target);
+
+      for (var index = 1; index < arguments.length; index++) {
+        var nextSource = arguments[index];
+
+        if (nextSource != null) { // Skip over if undefined or null
+          for (var nextKey in nextSource) {
+            // Avoid bugs when hasOwnProperty is shadowed
+            if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+              to[nextKey] = nextSource[nextKey];
+            }
+          }
+        }
+      }
+      return to;
+    },
+    writable: true,
+    configurable: true
+  });
+}
+
 (function ($) {
 
   var focused = true;
@@ -15,10 +46,10 @@
     // making variables public
 
     //if rtl value was not passed and html is in rtl..enable it by default.
-  	if(typeof options.rtl=='undefined' && $('html').attr('dir')=='rtl'){
+  	if(typeof options.rtl=='undefined' && document.documentElement.getAttribute('dir')=='rtl'){
   		options.rtl=true;
     }
-    slider.vars = $.extend({}, $.flexslider.defaults, options);
+    slider.vars = Object.assign({}, $.flexslider.defaults, options);
 
     var namespace = slider.vars.namespace,
         msGesture = window.navigator && window.navigator.msPointerEnabled && window.MSGesture,
@@ -63,18 +94,8 @@
         slider.started = false;
         slider.startTimeout = null;
         // TOUCH/USECSS:
-        slider.transitions = !slider.vars.video && !fade && slider.vars.useCSS && (function() {
-          var obj = document.createElement('div'),
-              props = ['perspectiveProperty', 'WebkitPerspective', 'MozPerspective', 'OPerspective', 'msPerspective'];
-          for (var i in props) {
-            if ( obj.style[ props[i] ] !== undefined ) {
-              slider.pfx = props[i].replace('Perspective','').toLowerCase();
-              slider.prop = "-" + slider.pfx + "-transform";
-              return true;
-            }
-          }
-          return false;
-        }());
+        slider.transitions = !slider.vars.video && !fade && slider.vars.useCSS;
+        slider.prop = slider.transitions ? "transform" : slider.prop;
         slider.isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
         slider.ensureAnimationEnd = '';
         // CONTROLSCONTAINER:
@@ -104,7 +125,7 @@
 
         // KEYBOARD:
         if (slider.vars.keyboard && ($(slider.containerSelector).length === 1 || slider.vars.multipleKeyboard)) {
-          $(document).on('keyup', function(event) {
+          document.addEventListener('keyup', function(event) {
             var keycode = event.keyCode;
             if (!slider.animating && (keycode === 39 || keycode === 37)) {
               var target = (slider.vars.rtl?
@@ -121,8 +142,9 @@
         }
         // MOUSEWHEEL:
         if (slider.vars.mousewheel) {
-          slider.on('mousewheel', function(event, delta, deltaX, deltaY) {
+          el.addEventListener('wheel', function(event) {
             event.preventDefault();
+            var delta = event.deltaY === 0 ? event.deltaX : event.deltaY; // https://github.com/jquery/jquery-mousewheel/blob/3.1.13/jquery.mousewheel.js#L118
             var target = (delta < 0) ? slider.getTarget('next') : slider.getTarget('prev');
             slider.flexAnimate(target, slider.vars.pauseOnAction);
           });
@@ -132,20 +154,21 @@
         if (slider.vars.pausePlay) { methods.pausePlay.setup(); }
 
         //PAUSE WHEN INVISIBLE
-        if (slider.vars.slideshow && slider.vars.pauseInvisible) { methods.pauseInvisible.init(); }
+        if (slider.vars.slideshow && slider.vars.pauseInvisible) { methods.pauseInvisible(); }
 
         // SLIDSESHOW
         if (slider.vars.slideshow) {
           if (slider.vars.pauseOnHover) {
-            slider.on( 'mouseenter', function() {
+            el.addEventListener( 'mouseenter', function() {
               if (!slider.manualPlay && !slider.manualPause) { slider.pause(); }
-            } ).on( 'mouseleave', function() {
+            } );
+            el.addEventListener( 'mouseleave', function() {
               if (!slider.manualPause && !slider.manualPlay && !slider.stopped) { slider.play(); }
             });
           }
           // initialize animation
           //If we're visible, or we don't use PageVisibility API
-          if(!slider.vars.pauseInvisible || !methods.pauseInvisible.isHidden()) {
+          if(!slider.vars.pauseInvisible || !document.visibilityState==='hidden') {
             (slider.vars.initDelay > 0) ? slider.startTimeout = setTimeout(slider.play, slider.vars.initDelay) : slider.play();
           }
         }
@@ -157,7 +180,11 @@
         if (touch && slider.vars.touch) { methods.touch(); }
 
         // FADE&&SMOOTHHEIGHT || SLIDE:
-        if (!fade || (fade && slider.vars.smoothHeight)) { $(window).on("resize orientationchange focus", methods.resize); }
+        if (!fade || (fade && slider.vars.smoothHeight)) {
+          window.addEventListener('resize', methods.resize);
+          window.addEventListener('orientationchange', methods.resize);
+          window.addEventListener('focus', methods.resize);
+        }
 
         slider.find("img").attr("draggable", "false");
 
@@ -171,23 +198,34 @@
           slider.asNav = true;
           slider.animatingTo = Math.floor(slider.currentSlide/slider.move);
           slider.currentItem = slider.currentSlide;
-          slider.slides.removeClass(namespace + "active-slide").eq(slider.currentItem).addClass(namespace + "active-slide");
+          slider.slides.each(function(index) {
+            index !== slider.currentItem ?
+              this.classList.remove(namespace + "active-slide") :
+              this.classList.add(namespace + "active-slide");
+          });
           if(!msGesture){
               slider.slides.on(eventType, function(e){
                 e.preventDefault();
-                var $slide = $(this),
-                    target = $slide.index();
+                var target = [].indexOf.call(this.parentNode.children, this); // Same as $(this).index()
+
+                // https://github.com/jquery/jquery/blob/3.6.3/src/offset.js#L100
+                var rect = this.getBoundingClientRect();
+                var win = this.ownerDocument.defaultView;
+                var offset = {
+                  left: rect.left + win.pageXOffset
+                };
+
         				var posFromX;
                 if(slider.vars.rtl){
-        					posFromX = -1*($slide.offset().right - $(slider).scrollLeft()); // Find position of slide relative to right of slider container
+        					posFromX = -1*(offset.right - el.pageXOffset); // Find position of slide relative to right of slider container
         				}
         				else
         				{
-        					posFromX = $slide.offset().left - $(slider).scrollLeft(); // Find position of slide relative to left of slider container
+        					posFromX = offset.left - el.pageXOffset; // Find position of slide relative to left of slider container
         				}
-                if( posFromX <= 0 && $slide.hasClass( namespace + 'active-slide' ) ) {
+                if( posFromX <= 0 && this.classList.contains( namespace + 'active-slide' ) ) {
                   slider.flexAnimate(slider.getTarget("prev"), true);
-                } else if (!$(slider.vars.asNavFor).data('flexslider').animating && !$slide.hasClass(namespace + "active-slide")) {
+                } else if (!$(slider.vars.asNavFor).data('flexslider').animating && !this.classList.contains(namespace + "active-slide")) {
                   slider.direction = (slider.currentItem < target) ? "next" : "prev";
                   slider.flexAnimate(target, slider.vars.pauseOnAction, false, true, true);
                 }
@@ -206,9 +244,8 @@
                   }, false);
                   that.addEventListener("MSGestureTap", function (e){
                       e.preventDefault();
-                      var $slide = $(this),
-                          target = $slide.index();
-                      if (!$(slider.vars.asNavFor).data('flexslider').animating && !$slide.hasClass('active')) {
+                      var target = [].indexOf.call(this.parentNode.children, this); // Same as $(this).index()
+                      if (!$(slider.vars.asNavFor).data('flexslider').animating && !this.classList.contains('active')) {
                           slider.direction = (slider.currentItem < target) ? "next" : "prev";
                           slider.flexAnimate(target, slider.vars.pauseOnAction, false, true, true);
                       }
@@ -235,28 +272,28 @@
 
           if (slider.pagingCount > 1) {
             for (var i = 0; i < slider.pagingCount; i++) {
-              slide = slider.slides.eq(i);
+              slide = slider.slides[i];
 
-              if ( undefined === slide.attr( 'data-thumb-alt' ) ) {
-                slide.attr( 'data-thumb-alt', '' );
+              if ( null === slide.getAttribute( 'data-thumb-alt' ) ) {
+                slide.setAttribute( 'data-thumb-alt', '' );
               }
 
               item = $( '<a></a>' ).attr( 'href', '#' ).text( j );
               if (slider.vars.controlNav === "thumbnails") {
                 item = $('<img/>', {
                   onload: 'this.width = this.naturalWidth; this.height = this.naturalHeight',
-                  src: slide.attr('data-thumb'),
-                  alt: slide.attr('alt')
+                  src: slide.getAttribute('data-thumb'),
+                  alt: slide.getAttribute('alt')
                 })
               }
 
-              if ( '' !== slide.attr( 'data-thumb-alt' ) ) {
-                item.attr( 'alt', slide.attr( 'data-thumb-alt' ) );
+              if ( '' !== slide.getAttribute( 'data-thumb-alt' ) ) {
+                item.attr( 'alt', slide.getAttribute( 'data-thumb-alt' ) );
               }
 
               if ( 'thumbnails' === slider.vars.controlNav && true === slider.vars.thumbCaptions ) {
-                var captn = slide.attr( 'data-thumbcaption' );
-                if ( '' !== captn && undefined !== captn ) {
+                var captn = slide.getAttribute( 'data-thumbcaption' );
+                if ( '' !== captn && null !== captn ) {
                   var caption = $('<span></span>' ).addClass( namespace + 'caption' ).text( captn );
                   item.append( caption );
                 }
@@ -285,7 +322,7 @@
               var $this = $(this),
                   target = slider.controlNav.index($this);
 
-              if (!$this.hasClass(namespace + 'active')) {
+              if (!this.classList.contains(namespace + 'active')) {
                 slider.direction = (target > slider.currentSlide) ? "next" : "prev";
                 slider.flexAnimate(target, slider.vars.pauseOnAction);
               }
@@ -310,7 +347,7 @@
               var $this = $(this),
                   target = slider.controlNav.index($this);
 
-              if (!$this.hasClass(namespace + 'active')) {
+              if (!this.classList.contains(namespace + 'active')) {
                 (target > slider.currentSlide) ? slider.direction = "next" : slider.direction = "prev";
                 slider.flexAnimate(target, slider.vars.pauseOnAction);
               }
@@ -328,7 +365,11 @@
           slider.controlNav = $('.' + namespace + 'control-nav li ' + selector, (slider.controlsContainer) ? slider.controlsContainer : slider);
         },
         active: function() {
-          slider.controlNav.removeClass(namespace + "active").eq(slider.animatingTo).addClass(namespace + "active");
+          slider.controlNav.each(function(index) {
+            index !== slider.animatingTo ?
+              this.classList.remove(namespace + "active") :
+              this.classList.add(namespace + "active");
+          });
         },
         update: function(action, pos) {
           if (slider.pagingCount > 1 && action === "add") {
@@ -365,7 +406,7 @@
             var target;
 
             if (watchedEvent === "" || watchedEvent === event.type) {
-              target = ($(this).hasClass(namespace + 'next')) ? slider.getTarget('next') : slider.getTarget('prev');
+              target = (this.classList.contains(namespace + 'next')) ? slider.getTarget('next') : slider.getTarget('prev');
               slider.flexAnimate(target, slider.vars.pauseOnAction);
             }
 
@@ -379,17 +420,40 @@
         update: function() {
           var disabledClass = namespace + 'disabled';
           if (slider.pagingCount === 1) {
-            slider.directionNav.addClass(disabledClass).attr('tabindex', '-1');
+            slider.directionNav.each(function() {
+              this.classList.add(disabledClass);
+              this.tabIndex = -1;
+            });
           } else if (!slider.vars.animationLoop) {
             if (slider.animatingTo === 0) {
-              slider.directionNav.removeClass(disabledClass).filter('.' + namespace + "prev").addClass(disabledClass).attr('tabindex', '-1');
+              slider.directionNav.each(function() {
+                if (this.classList.contains(namespace + "prev")) {
+                  this.classList.add(disabledClass);
+                  this.tabIndex = -1;
+                } else {
+                  this.classList.remove(disabledClass);
+                }
+              });
             } else if (slider.animatingTo === slider.last) {
-              slider.directionNav.removeClass(disabledClass).filter('.' + namespace + "next").addClass(disabledClass).attr('tabindex', '-1');
+              slider.directionNav.each(function() {
+                if (this.classList.contains(namespace + "next")) {
+                  this.classList.add(disabledClass);
+                  this.tabIndex = -1;
+                } else {
+                  this.classList.remove(disabledClass);
+                }
+              });
             } else {
-              slider.directionNav.removeClass(disabledClass).prop( 'tabindex', '-1' );
+              slider.directionNav.each(function() {
+                this.classList.remove(disabledClass);
+                this.tabIndex = -1;
+              });
             }
           } else {
-            slider.directionNav.removeClass(disabledClass).prop( 'tabindex', '-1' );
+            slider.directionNav.each(function() {
+              this.classList.remove(disabledClass);
+              this.tabIndex = -1;
+            });
           }
         }
       },
@@ -412,7 +476,7 @@
             event.preventDefault();
 
             if (watchedEvent === "" || watchedEvent === event.type) {
-              if ($(this).hasClass(namespace + 'pause')) {
+              if (this.classList.contains(namespace + 'pause')) {
                 slider.manualPause = true;
                 slider.manualPlay = false;
                 slider.pause();
@@ -431,7 +495,16 @@
           });
         },
         update: function(state) {
-          (state === "play") ? slider.pausePlay.removeClass(namespace + 'pause').addClass(namespace + 'play').html(slider.vars.playText) : slider.pausePlay.removeClass(namespace + 'play').addClass(namespace + 'pause').html(slider.vars.pauseText);
+          var pausePlay = slider.pausePlay[0];
+          if (state === "play") {
+            pausePlay.classList.remove(namespace + 'pause');
+            pausePlay.classList.add(namespace + 'play');
+            pausePlay.innerHTML = slider.vars.playText;
+          } else {
+            pausePlay.classList.remove(namespace + 'play');
+            pausePlay.classList.add(namespace + 'pause');
+            pausePlay.innerHTML = slider.vars.pauseText;
+          }
         }
       },
       touch: function() {
@@ -615,16 +688,16 @@
             // SMOOTH HEIGHT:
             methods.smoothHeight();
           } else if (carousel) { //CAROUSEL:
-            slider.slides.width(slider.computedW);
+            slider.slides.each(function() { this.style.width = slider.computedW + "px"; });
             slider.update(slider.pagingCount);
             slider.setProps();
           }
           else if (vertical) { //VERTICAL:
-            slider.viewport.height(slider.h);
+            slider.viewport[0].style.height = slider.h + "px";
             slider.setProps(slider.h, "setTotal");
           } else {
 			  slider.setProps(slider.computedW, "setTotal");
-			  slider.newSlides.width(slider.computedW);
+			  slider.newSlides.each(function() { this.style.width = slider.computedW + "px"; });
             // SMOOTH HEIGHT:
             if (slider.vars.smoothHeight) { methods.smoothHeight(); }
           }
@@ -649,19 +722,13 @@
       uniqueID: function($clone) {
         // Append _clone to current level and children elements with id attributes
         $clone.filter( '[id]' ).add($clone.find( '[id]' )).each(function() {
-          var $this = $(this);
-          $this.attr( 'id', $this.attr( 'id' ) + '_clone' );
+          this.setAttribute( 'id', this.getAttribute( 'id' ) + '_clone' );
         });
         return $clone;
       },
-      pauseInvisible: {
-        visProp: null,
-        init: function() {
-          var visProp = methods.pauseInvisible.getHiddenProp();
-          if (visProp) {
-            var evtname = visProp.replace(/[H|h]idden/,'') + 'visibilitychange';
-            document.addEventListener(evtname, function() {
-              if (methods.pauseInvisible.isHidden()) {
+      pauseInvisible: function() {
+            document.addEventListener('visibilitychange', function() {
+              if (document.visibilityState === 'hidden') {
                 if(slider.startTimeout) {
                   clearTimeout(slider.startTimeout); //If clock is ticking, stop timer and prevent from starting while invisible
                 } else {
@@ -680,30 +747,6 @@
                 }
               }
             });
-          }
-        },
-        isHidden: function() {
-          var prop = methods.pauseInvisible.getHiddenProp();
-          if (!prop) {
-            return false;
-          }
-          return document[prop];
-        },
-        getHiddenProp: function() {
-          var prefixes = ['webkit','moz','ms','o'];
-          // if 'hidden' is natively supported just return it
-          if ('hidden' in document) {
-            return 'hidden';
-          }
-          // otherwise loop over all the known prefixes until we find one
-          for ( var i = 0; i < prefixes.length; i++ ) {
-              if ((prefixes[i] + 'Hidden') in document) {
-                return prefixes[i] + 'Hidden';
-              }
-          }
-          // otherwise it's not supported
-          return null;
-        }
       },
       setToClearWatchedEvent: function() {
         clearTimeout(watchedEventClearTimer);
@@ -731,11 +774,19 @@
 
           if (Math.ceil((target + 1)/slider.visible) - 1 !== slider.currentSlide && target !== 0) {
             slider.currentItem = target;
-            slider.slides.removeClass(namespace + "active-slide").eq(target).addClass(namespace + "active-slide");
+            slider.slides.each(function(index) {
+              index !== target ?
+                this.classList.remove(namespace + "active-slide") : 
+                this.classList.add(namespace + "active-slide");
+            });
             target = Math.floor(target/slider.visible);
           } else {
             slider.currentItem = target;
-            slider.slides.removeClass(namespace + "active-slide").eq(target).addClass(namespace + "active-slide");
+            slider.slides.each(function(index) {
+              index !== target ?
+                this.classList.remove(namespace + "active-slide") :
+                this.classList.add(namespace + "active-slide");
+            });
             return false;
           }
         }
@@ -757,7 +808,13 @@
 
         // !CAROUSEL:
         // CANDIDATE: slide active class (for add/remove slide)
-        if (!carousel) { slider.slides.removeClass(namespace + 'active-slide').eq(target).addClass(namespace + 'active-slide'); }
+        if (!carousel) {
+          slider.slides.each(function(index) {
+            index !== target ?
+              this.classList.remove(namespace + 'active-slide') :
+              this.classList.add(namespace + 'active-slide');
+          });
+        }
 
         // INFINITE LOOP:
         // CANDIDATE: atEnd
@@ -798,11 +855,12 @@
             }
 
             // Unbind previous transitionEnd events and re-bind new transitionEnd event
-            slider.container.off("webkitTransitionEnd transitionend");
-            slider.container.on("webkitTransitionEnd transitionend", function() {
+            slider.container[0].removeEventListener("transitionend", slider.transitionend);
+            slider.transitionend = function() {
               clearTimeout(slider.ensureAnimationEnd);
               slider.wrapup(dimension);
-            });
+            };
+            slider.container[0].addEventListener("transitionend", slider.transitionend);
 
             // Insurance for the ever-so-fickle transitionEnd event
             clearTimeout(slider.ensureAnimationEnd);
@@ -816,12 +874,21 @@
             });
           }
         } else { // FADE:
+          var $current = slider.slides.eq(slider.currentSlide);
+          var $target = slider.slides.eq(target);
           if (!touch) {
-            slider.slides.eq(slider.currentSlide).css({"zIndex": 1}).animate({"opacity": 0}, slider.vars.animationSpeed, slider.vars.easing);
-            slider.slides.eq(target).css({"zIndex": 2}).animate({"opacity": 1}, slider.vars.animationSpeed, slider.vars.easing, slider.wrapup);
+            $current[0].style.zIndex = 1;
+            $current.animate({"opacity": 0}, slider.vars.animationSpeed, slider.vars.easing);
+
+            $target[0].style.zIndex = 2;
+            $target.animate({"opacity": 1}, slider.vars.animationSpeed, slider.vars.easing, slider.wrapup);
           } else {
-            slider.slides.eq(slider.currentSlide).css({ "opacity": 0, "zIndex": 1 });
-            slider.slides.eq(target).css({ "opacity": 1, "zIndex": 2 });
+            $current[0].style.opacity = 0;
+            $current[0].style.zIndex = 1;
+
+            $target[0].style.opacity = 1;
+            $target[0].style.zIndex = 2;
+
             slider.wrapup(dimension);
           }
         }
@@ -921,14 +988,13 @@
       if (slider.transitions) {
         target = (vertical) ? "translate3d(0," + target + ",0)" : "translate3d(" + (parseInt(target)+'px') + ",0,0)";
         dur = (dur !== undefined) ? (dur/1000) + "s" : "0s";
-        slider.container.css("-" + slider.pfx + "-transition-duration", dur);
-         slider.container.css("transition-duration", dur);
+        slider.container[0].style.transitionDuration = dur;
       }
 
       slider.args[slider.prop] = target;
       if (slider.transitions || dur === undefined) { slider.container.css(slider.args); }
 
-      slider.container.css('transform',target);
+      slider.container[0].style.transform = target;
     };
 
     slider.setup = function(type) {
@@ -961,24 +1027,40 @@
 
         sliderOffset = (reverse) ? slider.count - 1 - slider.currentSlide + slider.cloneOffset : slider.currentSlide + slider.cloneOffset;
         // VERTICAL:
+        var style;
         if (vertical && !carousel) {
-          slider.container.height((slider.count + slider.cloneCount) * 200 + "%").css("position", "absolute").width("100%");
+          style = slider.container[0].style;
+          style.height = (slider.count + slider.cloneCount) * 200 + "%";
+          style.position = "absolute";
+          style.width = "100%";
           setTimeout(function(){
-            slider.newSlides.css({"display": "block"});
+            slider.newSlides.each(function() { this.style.display = "block"; });
             slider.doMath();
-            slider.viewport.height(slider.h);
+            slider.viewport[0].style.height = slider.h + "px";
             slider.setProps(sliderOffset * slider.h, "init");
           }, (type === "init") ? 100 : 0);
         } else {
-          slider.container.width((slider.count + slider.cloneCount) * 200 + "%");
+          slider.container[0].style.width = (slider.count + slider.cloneCount) * 200 + "%";
           slider.setProps(sliderOffset * slider.computedW, "init");
           setTimeout(function(){
             slider.doMath();
           if(slider.vars.rtl){
-              slider.newSlides.css({"width": slider.computedW, "marginRight" : slider.computedM, "float": "right", "display": "block"});
+              slider.newSlides.each(function() {
+                style = this.style;
+                style.width = slider.computedW + "px";
+                style.marginRight = slider.computedM + "px";
+                style.float = "right";
+                style.display = "block";
+              });
            }
             else{
-              slider.newSlides.css({"width": slider.computedW, "marginRight" : slider.computedM, "float": "left", "display": "block"});
+              slider.newSlides.each(function() {
+                style = this.style;
+                style.width = slider.computedW + "px";
+                style.marginRight = slider.computedM + "px";
+                style.float = "left";
+                style.display = "block";
+              });
             }
             // SMOOTH HEIGHT:
             if (slider.vars.smoothHeight) { methods.smoothHeight(); }
@@ -986,21 +1068,56 @@
         }
       } else { // FADE:
         if(slider.vars.rtl){
-          slider.slides.css({"width": "100%", "float": 'right', "marginLeft": "-100%", "position": "relative"});
+          slider.slides.each(function() {
+            style = this.style;
+            style.width = "100%";
+            style.float = 'right';
+            style.marginLeft = "-100%";
+            style.position = "relative";
+          });
         }
         else{
-          slider.slides.css({"width": "100%", "float": 'left', "marginRight": "-100%", "position": "relative"});
+          slider.slides.each(function() {
+            style = this.style;
+            style.width = "100%";
+            style.float = 'left';
+            style.marginRight = "-100%";
+            style.position = "relative";
+          });
         }
         if (type === "init") {
+          var $currentSlide = slider.slides.eq(slider.currentSlide);
           if (!touch) {
             //slider.slides.eq(slider.currentSlide).fadeIn(slider.vars.animationSpeed, slider.vars.easing);
             if (slider.vars.fadeFirstSlide == false) {
-              slider.slides.css({ "opacity": 0, "display": "block", "zIndex": 1 }).eq(slider.currentSlide).css({"zIndex": 2}).css({"opacity": 1});
+              slider.slides.each(function() {
+                style = this.style;
+                style.opacity = 0;
+                style.display = "block";
+                style.zIndex = 1;
+              });
+              $currentSlide[0].style.zIndex = 2;
+              $currentSlide[0].style.opacity = 1;
             } else {
-              slider.slides.css({ "opacity": 0, "display": "block", "zIndex": 1 }).eq(slider.currentSlide).css({"zIndex": 2}).animate({"opacity": 1},slider.vars.animationSpeed,slider.vars.easing);
+              slider.slides.each(function() {
+                style = this.style;
+                style.opacity = 0;
+                style.display = "block";
+                style.zIndex = 1;
+              });
+              $currentSlide[0].style.zIndex = 2;
+              $currentSlide.animate({"opacity": 1},slider.vars.animationSpeed,slider.vars.easing);
             }
           } else {
-            slider.slides.css({ "opacity": 0, "display": "block", "webkitTransition": "opacity " + slider.vars.animationSpeed / 1000 + "s ease", "zIndex": 1 }).eq(slider.currentSlide).css({ "opacity": 1, "zIndex": 2});
+            slider.slides.each(function() {
+              style = this.style;
+              style.opacity = 0;
+              style.display = "block";
+              style.transition = "opacity " + slider.vars.animationSpeed / 1000 + "s ease";
+              style.zIndex = 1;
+            });
+            $currentSlide[0].style.opacity = 1;
+            $currentSlide[0].style.zIndex = 2;
           }
         }
         // SMOOTH HEIGHT:
@@ -1008,22 +1125,28 @@
       }
       // !CAROUSEL:
       // CANDIDATE: active slide
-      if (!carousel) { slider.slides.removeClass(namespace + "active-slide").eq(slider.currentSlide).addClass(namespace + "active-slide"); }
+      if (!carousel) {
+        slider.slides.each(function(index) {
+          index !== slider.currentSlide ?
+            this.classList.remove(namespace + "active-slide") :
+            this.classList.add(namespace + "active-slide");
+        });
+      }
 
       //FlexSlider: init() Callback
       slider.vars.init(slider);
     };
 
     slider.doMath = function() {
-      var slide = slider.slides.first(),
+      var slide = slider.slides[0],
           slideMargin = slider.vars.itemMargin,
           minItems = slider.vars.minItems,
           maxItems = slider.vars.maxItems;
+      var slideRect = slide.getBoundingClientRect();
 
-      slider.w = (slider.viewport===undefined) ? slider.width() : slider.viewport.width();
-      if (slider.isFirefox) { slider.w = slider.width(); }
-      slider.h = slide.height();
-      slider.boxPadding = slide.outerWidth() - slide.width();
+      slider.w = (slider.viewport===undefined) ? slider[0].getBoundingClientRect().width : slider.viewport[0].getBoundingClientRect().width;
+      slider.h = slideRect.height;
+      slider.boxPadding = slide.offsetWidth - slideRect.width;
 
       // CAROUSEL:
       if (carousel) {
@@ -1137,9 +1260,10 @@
   };
 
   // Ensure the slider isn't focussed if the window loses focus.
-  $( window ).on( 'blur', function ( e ) {
+  window.addEventListener( 'blur', function ( e ) {
     focused = false;
-  }).on( 'focus', function ( e ) {
+  });
+  window.addEventListener( 'focus', function ( e ) {
     focused = true;
   });
 
@@ -1179,7 +1303,7 @@
     // Secondary Navigation
     keyboard: true,                 //Boolean: Allow slider navigating via keyboard left/right keys
     multipleKeyboard: false,        //{NEW} Boolean: Allow keyboard navigation to affect multiple sliders. Default behavior cuts out keyboard navigation with more than one slider present.
-    mousewheel: false,              //{UPDATED} Boolean: Requires jquery.mousewheel.js (https://github.com/brandonaaron/jquery-mousewheel) - Allows slider navigating via mousewheel
+    mousewheel: false,              //{UPDATED} Boolean: Allows slider navigating via mousewheel
     pausePlay: false,               //Boolean: Create pause/play dynamic element
     pauseText: "Pause",             //String: Set the text for the "pause" pausePlay item
     playText: "Play",               //String: Set the text for the "play" pausePlay item
