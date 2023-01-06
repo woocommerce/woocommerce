@@ -84,3 +84,5 @@ export { DynamicForm } from './dynamic-form';
 export { default as TourKit } from './tour-kit';
 export * as TourKitTypes from './tour-kit/types';
 export { CollapsibleContent } from './collapsible-content';
+export { createOrderedChildren, sortFillsByOrder } from './utils';
+export { WooProductFieldItem as __experimentalWooProductFieldItem } from './woo-product-field-item';
