@@ -1,0 +1,47 @@
+/**
+ * External dependencies
+ */
+import { isValidElement, Fragment } from 'react';
+import { Slot, Fill } from '@wordpress/components';
+import { cloneElement, createElement } from '@wordpress/element';
+
+// TODO: Right now the build is breaking if I don't reference createElement in some way.
+// console.debug( 'createElement', typeof createElement );
+
+/**
+ * Ordered fill item.
+ *
+ * @param {Node}   children - Node children.
+ * @param {number} order    - Node order.
+ * @param {Array}  props    - Fill props.
+ * @return {Node} Node.
+ */
+// TODO: Make this more generic.
+function createOrderedChildren< T = Fill.Props >(
+	children: React.ReactNode,
+	order: number,
+	props: T
+) {
+	if ( typeof children === 'function' ) {
+		return cloneElement( children( props ), { order } );
+	} else if ( isValidElement( children ) ) {
+		return cloneElement( children, { ...props, order } );
+	}
+	throw Error( 'Invalid children type' );
+}
+export { createOrderedChildren };
+
+/**
+ * Sort fills by order for slot children.
+ *
+ * @param {Array} fills - slot's `Fill`s.
+ * @return {Node} Node.
+ */
+export const sortFillsByOrder: Slot.Props[ 'children' ] = ( fills ) => {
+	// Copy fills array here because its type is readonly array that doesn't have .sort method in Typescript definition.
+	const sortedFills = [ ...fills ].sort( ( a, b ) => {
+		return a[ 0 ].props.order - b[ 0 ].props.order;
+	} );
+
+	return <>{ sortedFills }</>;
+};
