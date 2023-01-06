@@ -9,8 +9,7 @@ import { createElement } from '@wordpress/element';
 import { Level } from './context';
 
 type SectionProps = {
-	// The wrapper component for this section. Optional, defaults to `div`. If passed false, no wrapper is used. Additional props
-	// passed to Section are passed on to the component.
+	/** The wrapper component for this section. Optional, defaults to `div`. If passed false, no wrapper is used. Additional props passed to Section are passed on to the component. */
 	component?: React.ComponentType | string | false;
 	// Optional classname
 	className?: string;
