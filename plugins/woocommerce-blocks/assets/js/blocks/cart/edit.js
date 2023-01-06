@@ -12,6 +12,7 @@ import {
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import { EditorProvider, CartProvider } from '@woocommerce/base-context';
 import { previewCart } from '@woocommerce/resource-previews';
+import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
@@ -86,13 +87,15 @@ export const Edit = ( { className, attributes, setAttributes, clientId } ) => {
 							hasDarkControls,
 						} }
 					>
-						<CartProvider>
-							<InnerBlocks
-								allowedBlocks={ ALLOWED_BLOCKS }
-								template={ defaultTemplate }
-								templateLock={ false }
-							/>
-						</CartProvider>
+						<SlotFillProvider>
+							<CartProvider>
+								<InnerBlocks
+									allowedBlocks={ ALLOWED_BLOCKS }
+									template={ defaultTemplate }
+									templateLock={ false }
+								/>
+							</CartProvider>
+						</SlotFillProvider>
 					</CartBlockContext.Provider>
 				</EditorProvider>
 			</BlockErrorBoundary>
