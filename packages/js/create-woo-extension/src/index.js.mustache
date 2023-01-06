@@ -15,7 +15,7 @@ import './index.scss';
 const MyExamplePage = () => (
 	<Fragment>
 		<Woo.Section component="article">
-			<Woo.SectionHeader title={ __( 'Search', 'my-extension-name' ) } />
+			<Woo.SectionHeader title={ __( 'Search', '{{textdomain}}' ) } />
 			<Woo.Search
 				type="products"
 				placeholder="Search for something"
