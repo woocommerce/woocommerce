@@ -26,7 +26,7 @@ const MyExamplePage = () => (
 		</Woo.Section>
 
 		<Woo.Section component="article">
-			<Woo.SectionHeader title={ __( 'Dropdown', 'my-extension-name' ) } />
+			<Woo.SectionHeader title={ __( 'Dropdown', '{{textdomain}}' ) } />
 			<Dropdown
 				renderToggle={ ( { isOpen, onToggle } ) => (
 					<Woo.DropdownButton
