@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Move product attribute fetching logic into a separate hook
