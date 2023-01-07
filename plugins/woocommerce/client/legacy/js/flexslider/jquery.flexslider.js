@@ -137,7 +137,7 @@
           }
           // initialize animation
           //If we're visible, or we don't use PageVisibility API
-          if(!slider.vars.pauseInvisible || !document.visibilityState==='hidden') {
+          if(!slider.vars.pauseInvisible || document.visibilityState === 'visible') {
             (slider.vars.initDelay > 0) ? slider.startTimeout = setTimeout(slider.play, slider.vars.initDelay) : slider.play();
           }
         }
@@ -186,11 +186,11 @@
 
         				var posFromX;
                 if(slider.vars.rtl){
-        					posFromX = -1*(offset.right - el.pageXOffset); // Find position of slide relative to right of slider container
+        					posFromX = -1*(offset.right - slider.scrollLeft()); // Find position of slide relative to right of slider container
         				}
         				else
         				{
-        					posFromX = offset.left - el.pageXOffset; // Find position of slide relative to left of slider container
+        					posFromX = offset.left - slider.scrollLeft(); // Find position of slide relative to left of slider container
         				}
                 if( posFromX <= 0 && this.classList.contains( namespace + 'active-slide' ) ) {
                   slider.flexAnimate(slider.getTarget("prev"), true);
@@ -1111,11 +1111,10 @@
           slideMargin = slider.vars.itemMargin,
           minItems = slider.vars.minItems,
           maxItems = slider.vars.maxItems;
-      var slideRect = slide.getBoundingClientRect();
 
-      slider.w = (slider.viewport===undefined) ? slider[0].getBoundingClientRect().width : slider.viewport[0].getBoundingClientRect().width;
-      slider.h = slideRect.height;
-      slider.boxPadding = slide.offsetWidth - slideRect.width;
+      slider.w = (slider.viewport===undefined) ? slider.width() : slider.viewport.width();
+      slider.h = slide.height();
+      slider.boxPadding = slide.outerWidth() - slide.width();
 
       // CAROUSEL:
       if (carousel) {
