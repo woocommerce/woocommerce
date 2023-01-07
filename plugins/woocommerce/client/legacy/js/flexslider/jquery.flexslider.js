@@ -733,19 +733,23 @@
           }
         } else { // FADE:
           var $current = slider.slides.eq(slider.currentSlide);
+          var current = $current[0];
+
           var $target = slider.slides.eq(target);
+          var target = $target[0];
+
           if (!touch) {
-            $current[0].style.zIndex = 1;
+            current.style.zIndex = 1;
             $current.animate({"opacity": 0}, slider.vars.animationSpeed, slider.vars.easing);
 
-            $target[0].style.zIndex = 2;
+            target.style.zIndex = 2;
             $target.animate({"opacity": 1}, slider.vars.animationSpeed, slider.vars.easing, slider.wrapup);
           } else {
-            $current[0].style.opacity = 0;
-            $current[0].style.zIndex = 1;
+            current.style.opacity = 0;
+            current.style.zIndex = 1;
 
-            $target[0].style.opacity = 1;
-            $target[0].style.zIndex = 2;
+            target.style.opacity = 1;
+            target.style.zIndex = 2;
 
             slider.wrapup(dimension);
           }
@@ -944,7 +948,8 @@
           });
         }
         if (type === "init") {
-          var $currentSlide = slider.slides.eq(slider.currentSlide);
+          var $current = slider.slides.eq(slider.currentSlide);
+          var current = $current[0];
           if (!touch) {
             //slider.slides.eq(slider.currentSlide).fadeIn(slider.vars.animationSpeed, slider.vars.easing);
             if (slider.vars.fadeFirstSlide == false) {
@@ -954,8 +959,8 @@
                 style.display = "block";
                 style.zIndex = 1;
               });
-              $currentSlide[0].style.zIndex = 2;
-              $currentSlide[0].style.opacity = 1;
+              current.style.zIndex = 2;
+              current.style.opacity = 1;
             } else {
               slider.slides.each(function() {
                 style = this.style;
@@ -963,8 +968,8 @@
                 style.display = "block";
                 style.zIndex = 1;
               });
-              $currentSlide[0].style.zIndex = 2;
-              $currentSlide.animate({"opacity": 1},slider.vars.animationSpeed,slider.vars.easing);
+              current.style.zIndex = 2;
+              $current.animate({"opacity": 1},slider.vars.animationSpeed,slider.vars.easing);
             }
           } else {
             slider.slides.each(function() {
@@ -974,8 +979,8 @@
               style.transition = "opacity " + slider.vars.animationSpeed / 1000 + "s ease";
               style.zIndex = 1;
             });
-            $currentSlide[0].style.opacity = 1;
-            $currentSlide[0].style.zIndex = 2;
+            current.style.opacity = 1;
+            current.style.zIndex = 2;
           }
         }
         // SMOOTH HEIGHT:
