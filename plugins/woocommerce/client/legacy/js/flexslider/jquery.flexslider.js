@@ -1107,7 +1107,7 @@
     };
 
     slider.doMath = function() {
-      var slide = slider.slides[0],
+      var slide = slider.slides.first(),
           slideMargin = slider.vars.itemMargin,
           minItems = slider.vars.minItems,
           maxItems = slider.vars.maxItems;
