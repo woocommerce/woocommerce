@@ -17,6 +17,13 @@
 
 defined( 'ABSPATH' ) || exit;
 
+
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	require_once dirname( __FILE__ ) . '/class-wc-beta-tester-cli.php';
+	WP_CLI::add_command( 'wc-beta-tester', WC_Beta_Tester_CLI::class );
+}
+
+
 // Define WC_BETA_TESTER_FILE.
 if ( ! defined( 'WC_BETA_TESTER_FILE' ) ) {
 	define( 'WC_BETA_TESTER_FILE', __FILE__ );
@@ -63,7 +70,7 @@ function _wc_beta_tester_bootstrap() {
 	}
 
 	// Load admin.
-	require( 'plugin.php' );
+	require 'plugin.php';
 }
 
 add_action( 'plugins_loaded', '_wc_beta_tester_bootstrap' );
@@ -75,12 +82,12 @@ function add_extension_register_script() {
 	$script_path       = '/build/index.js';
 	$script_asset_path = dirname( __FILE__ ) . '/build/index.asset.php';
 	$script_asset      = file_exists( $script_asset_path )
-		? require( $script_asset_path )
+		? require $script_asset_path
 		: array(
 			'dependencies' => array(),
 			'version'      => filemtime( $script_path ),
 		);
-	$script_url = plugins_url( $script_path, __FILE__ );
+	$script_url        = plugins_url( $script_path, __FILE__ );
 
 	wp_register_script(
 		'woocommerce-admin-test-helper',
