@@ -163,6 +163,14 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
+= 7.2.3 2023-1-9
+
+**WooCommerce Blocks 8.9.4**
+
+* Fix - fatal error in WordPress 5.8 when creating a post or page. #7496
+* Fix - hangs in the block editor with WordPress 5.8. #8095
+* Fix - Filter by Attribute block crashing in the editor of WordPress 5.8. #8101
+
 = 7.2.1 2022-12-16 =
 
 **WooCommerce**
