@@ -19,7 +19,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
-use Automattic\WooCommerce\Internal\Admin\Marketing;
+use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
@@ -2470,14 +2470,14 @@ function wc_update_700_remove_download_log_fk() {
  * Remove the transient data for recommended marketing extensions.
  */
 function wc_update_700_remove_recommended_marketing_plugins_transient() {
-	delete_transient( Marketing::RECOMMENDED_PLUGINS_TRANSIENT );
+	delete_transient( MarketingSpecs::RECOMMENDED_PLUGINS_TRANSIENT );
 }
 
 /**
  * Update the New Zealand state codes in the database
  * after they were updated in code to the CLDR standard.
  */
-function wc_update_720_adjust_new_zealand_states() {
+function wc_update_721_adjust_new_zealand_states() {
 	return MigrationHelper::migrate_country_states(
 		'NZ',
 		array(
@@ -2505,7 +2505,7 @@ function wc_update_720_adjust_new_zealand_states() {
  * Update the Ukraine state codes in the database
  * after they were updated in code to the CLDR standard.
  */
-function wc_update_720_adjust_ukraine_states() {
+function wc_update_721_adjust_ukraine_states() {
 	return MigrationHelper::migrate_country_states(
 		'UA',
 		array(
@@ -2537,3 +2537,24 @@ function wc_update_720_adjust_ukraine_states() {
 	);
 }
 
+/**
+ * Update the New Zealand state codes in the database after they were updated in code to the CLDR standard.
+ *
+ * This is a simple wrapper for the corresponding 7.2.1 update function. The reason we do this (instead of
+ * reusing the original function directly) is for better traceability in the Action Scheduler log, in case
+ * of problems.
+ */
+function wc_update_722_adjust_new_zealand_states() {
+	return wc_update_721_adjust_new_zealand_states();
+}
+
+/**
+ * Update the Ukraine state codes in the database after they were updated in code to the CLDR standard.
+ *
+ * This is a simple wrapper for the corresponding 7.2.1 update function. The reason we do this (instead of
+ * reusing the original function directly) is for better traceability in the Action Scheduler log, in case
+ * of problems.
+ */
+function wc_update_722_adjust_ukraine_states() {
+	return wc_update_721_adjust_ukraine_states();
+}

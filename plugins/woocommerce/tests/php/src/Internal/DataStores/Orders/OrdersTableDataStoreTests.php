@@ -1004,6 +1004,48 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test that the query counts works as expected.
+	 *
+	 * @return void
+	 */
+	public function test_cot_query_count() {
+		$this->assertEquals( 0, ( new OrdersTableQuery() )->found_orders, 'We initially have zero orders within our custom order tables.' );
+
+		for ( $i = 0; $i < 30; $i ++ ) {
+			$order = new WC_Order();
+			$this->switch_data_store( $order, $this->sut );
+			if ( 0 === $i % 2 ) {
+				$order->set_billing_address_2( 'Test' );
+			}
+			$order->save();
+		}
+
+		$query = new OrdersTableQuery( array( 'limit' => 5 ) );
+		$this->assertEquals( 30, $query->found_orders, 'Specifying limits still calculate all found orders.' );
+
+		// Count does not change based on the fields that we are fetching.
+		$query = new OrdersTableQuery(
+			array(
+				'fields' => 'ids',
+				'limit'  => 5,
+			)
+		);
+		$this->assertEquals( 30, $query->found_orders, 'Fetching specific field does not change query count.' );
+
+		$query = new OrdersTableQuery(
+			array(
+				'field_query' => array(
+					array(
+						'field' => 'billing_address_2',
+						'value' => 'Test',
+					),
+				),
+			)
+		);
+		$this->assertEquals( 15, $query->found_orders, 'Counting orders with a field query works.' );
+	}
+
+	/**
 	 * @testDox Test the `get_order_count()` method.
 	 */
 	public function test_get_order_count(): void {
@@ -1305,6 +1347,38 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			$orders_array,
 			'Search terms match against address data as well as order item names.'
 		);
+	}
+
+	/**
+	 * @testDox Ensure sorting by `includes` param works as expected.
+	 */
+	public function test_cot_query_sort_includes() {
+		$this->disable_cot_sync();
+		$order_1 = new WC_Order();
+		$this->switch_data_store( $order_1, $this->sut );
+		$order_1->save();
+
+		$order_2 = new WC_Order();
+		$this->switch_data_store( $order_2, $this->sut );
+		$order_2->save();
+
+		$query        = new OrdersTableQuery(
+			array(
+				'orderby'  => 'include',
+				'includes' => array( $order_1->get_id(), $order_2->get_id() ),
+			)
+		);
+		$orders_array = $query->orders;
+		$this->assertEquals( array( $order_1->get_id(), $order_2->get_id() ), array( $orders_array[0], $orders_array[1] ) );
+
+		$query        = new OrdersTableQuery(
+			array(
+				'orderby'  => 'include',
+				'includes' => array( $order_2->get_id(), $order_1->get_id() ),
+			)
+		);
+		$orders_array = $query->orders;
+		$this->assertEquals( array( $order_2->get_id(), $order_1->get_id() ), array( $orders_array[0], $orders_array[1] ) );
 	}
 
 	/**
@@ -1855,6 +1929,25 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$this->assertTrue( $should_sync_callable->call( $this->sut, $order ) );
 		$this->sut->read_multiple( $orders );
 		$this->assertFalse( $should_sync_callable->call( $this->sut, $order ) );
+	}
+
+	/**
+	 * @testDox When parent order is deleted, child orders should be upshifted.
+	 */
+	public function test_child_orders_are_promoted_when_parent_is_deleted() {
+		$this->toggle_cot( true );
+		$order = new WC_Order();
+		$order->save();
+
+		$child_order = new WC_Order();
+		$child_order->set_parent_id( $order->get_id() );
+		$child_order->save();
+
+		$this->assertEquals( $order->get_id(), $child_order->get_parent_id() );
+		$this->sut->delete( $order, array( 'force_delete' => true ) );
+		$child_order = wc_get_order( $child_order->get_id() );
+
+		$this->assertEquals( 0, $child_order->get_parent_id() );
 	}
 
 	/**

@@ -26,6 +26,7 @@ import { __ } from '@wordpress/i18n';
  * @param {Object}   props                     Component props.
  * @param {Function} props.recordScoreCallback Function to call when the results are sent.
  * @param {string}   props.title               Title displayed in the modal.
+ * @param {string}   props.description         Description displayed in the modal.
  * @param {string}   props.firstQuestion       The first survey question.
  * @param {string}   props.secondQuestion      The second survey question.
  * @param {string}   props.defaultScore        Default score.
@@ -35,6 +36,7 @@ import { __ } from '@wordpress/i18n';
 function CustomerFeedbackModal( {
 	recordScoreCallback,
 	title,
+	description,
 	firstQuestion,
 	secondQuestion,
 	defaultScore = NaN,
@@ -47,6 +49,7 @@ function CustomerFeedbackModal( {
 		comments: string
 	) => void;
 	title: string;
+	description?: string;
 	firstQuestion: string;
 	secondQuestion: string;
 	defaultScore?: number;
@@ -142,10 +145,11 @@ function CustomerFeedbackModal( {
 				lineHeight="20px"
 				marginBottom="1.5em"
 			>
-				{ __(
-					'Your feedback will help create a better experience for thousands of merchants like you. Please tell us to what extent you agree or disagree with the statements below.',
-					'woocommerce'
-				) }
+				{ description ||
+					__(
+						'Your feedback will help create a better experience for thousands of merchants like you. Please tell us to what extent you agree or disagree with the statements below.',
+						'woocommerce'
+					) }
 			</Text>
 
 			<Text

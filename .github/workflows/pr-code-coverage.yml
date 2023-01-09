@@ -8,11 +8,16 @@ defaults:
 concurrency: 
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions: {}
+
 jobs:
   test:
     name: Code coverage (PHP 7.4, WP Latest)
     timeout-minutes: 30
     runs-on: ubuntu-20.04
+    permissions:
+      contents: read
     services:
       database:
         image: mysql:5.6

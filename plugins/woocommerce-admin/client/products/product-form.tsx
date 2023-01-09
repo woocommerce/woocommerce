@@ -14,11 +14,13 @@ import { ProductDetailsSection } from './sections/product-details-section';
 import { ProductInventorySection } from './sections/product-inventory-section';
 import { PricingSection } from './sections/pricing-section';
 import { ProductShippingSection } from './sections/product-shipping-section';
+import { ProductVariationsSection } from './sections/product-variations-section';
 import { ImagesSection } from './sections/images-section';
-import './product-page.scss';
 import { validate } from './product-validation';
 import { AttributesSection } from './sections/attributes-section';
+import { OptionsSection } from './sections/options-section';
 import { ProductFormFooter } from './layout/product-form-footer';
+import { ProductFormTab } from './product-form-tab';
 
 export const ProductForm: React.FC< {
 	product?: PartialProduct;
@@ -41,12 +43,40 @@ export const ProductForm: React.FC< {
 		>
 			<ProductFormHeader />
 			<ProductFormLayout>
-				<ProductDetailsSection />
-				<PricingSection />
-				<ImagesSection />
-				<ProductInventorySection />
-				<ProductShippingSection product={ product } />
-				<AttributesSection />
+				<ProductFormTab name="general" title="General">
+					<ProductDetailsSection />
+					<ImagesSection />
+					<AttributesSection />
+				</ProductFormTab>
+				<ProductFormTab
+					name="pricing"
+					title="Pricing"
+					disabled={ !! product?.variations?.length }
+				>
+					<PricingSection />
+				</ProductFormTab>
+				<ProductFormTab
+					name="inventory"
+					title="Inventory"
+					disabled={ !! product?.variations?.length }
+				>
+					<ProductInventorySection />
+				</ProductFormTab>
+				<ProductFormTab
+					name="shipping"
+					title="Shipping"
+					disabled={ !! product?.variations?.length }
+				>
+					<ProductShippingSection product={ product } />
+				</ProductFormTab>
+				{ window.wcAdminFeatures[ 'product-variation-management' ] ? (
+					<ProductFormTab name="options" title="Options">
+						<OptionsSection />
+						<ProductVariationsSection />
+					</ProductFormTab>
+				) : (
+					<></>
+				) }
 			</ProductFormLayout>
 			<ProductFormFooter />
 		</Form>

@@ -9,10 +9,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true  
 
+permissions: {}
+
 jobs:
   prime:
     name: Prime cache
     runs-on: ubuntu-20.04
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v3
 

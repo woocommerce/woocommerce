@@ -4,27 +4,40 @@
 import { ProductAttribute } from '@woocommerce/data';
 
 /**
- * Updates the position of a product attribute from the new items JSX.Element list.
+ * Returns the attribute key. The key will be the `id` or the `name` when the id is 0.
  *
- * @param { JSX.Element[] } items              list of JSX elements coming back from sortable container.
- * @param { Object }        attributeKeyValues key value pair of product attributes.
+ * @param { ProductAttribute } attribute product attribute.
+ * @return string|number
+ */
+export function getAttributeKey(
+	attribute: ProductAttribute
+): number | string {
+	return attribute.id !== 0 ? attribute.id : attribute.name;
+}
+
+/**
+ * Updates the position of a product attribute from the new items list.
+ *
+ * @param { Object } items              key value pair of list items positions.
+ * @param { Object } attributeKeyValues key value pair of product attributes.
  */
 export function reorderSortableProductAttributePositions(
-	items: JSX.Element[],
-	attributeKeyValues: Record< number, ProductAttribute >
+	items: Record< number | string, number >,
+	attributeKeyValues: Record< number | string, ProductAttribute >
 ): ProductAttribute[] {
-	return items
-		.map( ( item, index ): ProductAttribute | undefined => {
-			const key = item.key ? parseInt( item.key as string, 10 ) : NaN;
-			if ( key !== NaN && attributeKeyValues[ key ] ) {
+	return Object.keys( attributeKeyValues ).map(
+		( attributeKey: number | string ): ProductAttribute => {
+			if ( ! isNaN( items[ attributeKey ] ) ) {
 				return {
-					...attributeKeyValues[ key ],
-					position: index,
+					...attributeKeyValues[ attributeKey ],
+					position: items[ attributeKey ],
 				};
 			}
-			return undefined;
-		} )
-		.filter( ( attr ): attr is ProductAttribute => attr !== undefined );
+			return {
+				...attributeKeyValues[ attributeKey ],
+			};
+		}
+	);
 }
 
 /**

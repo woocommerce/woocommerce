@@ -25,6 +25,7 @@ export { EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME } from './product-tags';
 export { EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME } from './product-categories';
 export { EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME } from './product-attribute-terms';
 export { EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME } from './product-variations';
+export { EXPERIMENTAL_TAX_CLASSES_STORE_NAME } from './tax-classes';
 export { PaymentGateway } from './payment-gateways/types';
 
 // Export hooks
@@ -77,7 +78,11 @@ export * from './countries/types';
 export * from './onboarding/types';
 export * from './plugins/types';
 export * from './products/types';
-export { ProductVariation } from './product-variations/types';
+export type {
+	ProductVariation,
+	ProductVariationAttribute,
+	ProductVariationImage,
+} from './product-variations/types';
 export {
 	QueryProductAttribute,
 	ProductAttributeSelectors,
@@ -93,6 +98,7 @@ export {
 	ProductCategoryImage,
 	ProductCategorySelectors,
 } from './product-categories/types';
+export { TaxClass } from './tax-classes/types';
 
 /**
  * Internal dependencies
@@ -118,6 +124,7 @@ import type { EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME } from './product-tags';
 import type { EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME } from './product-categories';
 import type { EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME } from './product-attribute-terms';
 import type { EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME } from './product-variations';
+import type { EXPERIMENTAL_TAX_CLASSES_STORE_NAME } from './tax-classes';
 
 export type WCDataStoreName =
 	| typeof REVIEWS_STORE_NAME
@@ -140,7 +147,8 @@ export type WCDataStoreName =
 	| typeof EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME
 	| typeof EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME
 	| typeof EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME
-	| typeof EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME;
+	| typeof EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+	| typeof EXPERIMENTAL_TAX_CLASSES_STORE_NAME;
 
 /**
  * Internal dependencies
@@ -159,6 +167,7 @@ import { ProductTagSelectors } from './product-tags/types';
 import { ProductCategorySelectors } from './product-categories/types';
 import { ProductAttributeTermsSelectors } from './product-attribute-terms/types';
 import { ProductVariationSelectors } from './product-variations/types';
+import { TaxClassSelectors } from './tax-classes/types';
 
 // As we add types to all the package selectors we can fill out these unknown types with real ones. See one
 // of the already typed selectors for an example of how you can do this.
@@ -204,6 +213,8 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? OrdersSelectors
 	: T extends typeof EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME
 	? ShippingZonesSelectors
+	: T extends typeof EXPERIMENTAL_TAX_CLASSES_STORE_NAME
+	? TaxClassSelectors
 	: never;
 
 export interface WCDataSelector {
@@ -220,3 +231,4 @@ export { ActionDispatchers as ProductVariationsActions } from './product-variati
 export { ActionDispatchers as ProductsStoreActions } from './products/actions';
 export { ActionDispatchers as ProductShippingClassesActions } from './product-shipping-classes/types';
 export { ActionDispatchers as ShippingZonesActions } from './shipping-zones/types';
+export { ActionDispatchers as TaxClassActions } from './tax-classes/types';

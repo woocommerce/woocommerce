@@ -7,9 +7,8 @@ import { useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-
-import './product-page.scss';
 import { ProductForm } from './product-form';
+import './product-page.scss';
 
 const AddProductPage: React.FC = () => {
 	useEffect( () => {

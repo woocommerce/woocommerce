@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+When importing product CSV, ensure line breaks within header columns do not break the import process.

@@ -9,7 +9,60 @@ import { DispatchFromMap } from '@automattic/data-stores';
 import { CrudActions, CrudSelectors } from '../crud/types';
 import { Product, ProductQuery, ReadOnlyProperties } from '../products/types';
 
-export type ProductVariation = Omit< Product, 'name' | 'slug' >;
+export type ProductVariationAttribute = {
+	id: number;
+	name: string;
+	option: string;
+};
+
+/**
+ * Product variation - Image properties
+ */
+export interface ProductVariationImage {
+	/**
+	 * Image ID.
+	 */
+	id: number;
+	/**
+	 * The date the image was created, in the site's timezone.
+	 */
+	readonly date_created: string;
+	/**
+	 * The date the image was created, as GMT.
+	 */
+	readonly date_created_gmt: string;
+	/**
+	 * The date the image was last modified, in the site's timezone.
+	 */
+	readonly date_modified: string;
+	/**
+	 * The date the image was last modified, as GMT.
+	 */
+	readonly date_modified_gmt: string;
+	/**
+	 * Image URL.
+	 */
+	src: string;
+	/**
+	 * 	Image name.
+	 */
+	name: string;
+	/**
+	 * 	Image alternative text.
+	 */
+	alt: string;
+}
+
+export type ProductVariation = Omit<
+	Product,
+	'name' | 'slug' | 'attributes' | 'images'
+> & {
+	attributes: ProductVariationAttribute[];
+	/**
+	 * Variation image data.
+	 */
+	image?: ProductVariationImage;
+};
 
 type Query = Omit< ProductQuery, 'name' >;
 
@@ -32,3 +85,16 @@ export type ProductVariationSelectors = CrudSelectors<
 >;
 
 export type ActionDispatchers = DispatchFromMap< ProductVariationActions >;
+
+export type BatchUpdateRequest = {
+	create?: Partial< Omit< ProductVariation, 'id' > >[];
+	update?: ( Pick< ProductVariation, 'id' > &
+		Partial< Omit< ProductVariation, 'id' > > )[];
+	delete?: ProductVariation[ 'id' ][];
+};
+
+export type BatchUpdateResponse = {
+	create?: ProductVariation[];
+	update?: ProductVariation[];
+	delete?: ProductVariation[];
+};

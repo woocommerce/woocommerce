@@ -1,5 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: This feature has not been released yet (and a changelog was added in PR#34282). This change simply amends things to improve compatibility with Composite Products.
-
-

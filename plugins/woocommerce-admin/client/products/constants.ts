@@ -5,3 +5,5 @@ export const ONLY_ONE_DECIMAL_SEPARATOR = '[%s](?=%s*[%s])';
 export const ADD_NEW_SHIPPING_CLASS_OPTION_VALUE =
 	'__ADD_NEW_SHIPPING_CLASS_OPTION__';
 export const UNCATEGORIZED_CATEGORY_SLUG = 'uncategorized';
+export const PRODUCT_VARIATION_TITLE_LIMIT = 32;
+export const STANDARD_RATE_TAX_CLASS_SLUG = 'standard';

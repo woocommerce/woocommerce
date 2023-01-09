@@ -24,20 +24,20 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
-		// delete products
-		await api.get( 'products' ).then( ( response ) => {
-			const products = response.data;
-			for ( const product of products ) {
-				if (
-					product.name === variableProductName ||
-					product.name === manualVariableProduct
-				) {
-					api.delete( `products/${ product.id }`, {
-						force: true,
-					} );
-				}
-			}
-		} );
+
+		const varProducts = await api
+			.get( 'products', { per_page: 100, search: variableProductName } )
+			.then( ( response ) => response.data );
+
+		const manualProducts = await api
+			.get( 'products', { per_page: 100, search: manualVariableProduct } )
+			.then( ( response ) => response.data );
+
+		const ids = varProducts
+			.map( ( { id } ) => id )
+			.concat( manualProducts.map( ( { id } ) => id ) );
+
+		await api.post( 'products/batch', { delete: ids } );
 	} );
 
 	// tests build upon one another, so running one in the middle will fail.
@@ -65,7 +65,14 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 		}
 		await page.click( 'text=Save attributes' );
 
-		// create variations from all attributes
+		// Save before going to the Variations tab to prevent variations from all attributes to be automatically created
+		await page.locator( '#save-post' ).click();
+		await expect(
+			page.getByText( 'Product draft updated. ' )
+		).toBeVisible();
+		await page.click( '.updated.notice .notice-dismiss' );
+
+		// manually create variations from all attributes
 		await page.click( 'a[href="#variable_product_options"]' );
 		await page.selectOption( '#field_to_edit', 'link_all_variations', {
 			force: true,
@@ -94,6 +101,9 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 		}
 
 		await page.locator( '#save-post' ).click();
+		await expect( page.locator( '#message.notice-success' ) ).toContainText(
+			'Product draft updated.'
+		);
 	} );
 
 	test( 'can set the variation attributes, bulk edit variations', async ( {
@@ -199,33 +209,50 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 				'val1 | val2'
 			);
 			await page.click( `input[name="attribute_variation[${ i }]"]` );
+			await page.click( 'text=Save attributes' );
+			await expect(
+				page
+					.locator( '.woocommerce_attribute.closed' )
+					.filter( { hasText: `attr #${ i + 1 }` } )
+			).toBeVisible();
 		}
-		await page.click( 'text=Save attributes' );
-		await page.click( 'a[href="#variable_product_options"]' );
+
+		// Save before going to the Variations tab to prevent variations from all attributes to be automatically created
+		await page.locator( '#save-post' ).click();
+		await expect(
+			page.getByText( 'Product draft updated. ' )
+		).toBeVisible();
+		await page.click( '.updated.notice .notice-dismiss' );
 
 		// manually adds a variation
+		await page.click( 'a[href="#variable_product_options"]' );
 		await page.selectOption( '#field_to_edit', 'add_variation', {
 			force: true,
 		} );
 		await page.click( 'a.do_variation_action' );
+		await expect( page.locator( '.variation-needs-update' ) ).toBeVisible();
 		for ( let i = 0; i < defaultAttributes.length; i++ ) {
 			await page.selectOption(
-				`select[name="attribute_attr-${ i + 1 }[0]"]`,
+				`.variation-needs-update h3 select >> nth=${ i }`,
 				defaultAttributes[ i ]
 			);
 		}
 		await page.click( 'button.save-variation-changes' );
 		for ( let i = 0; i < defaultAttributes.length; i++ ) {
 			await expect(
-				page.locator(
-					`select[name="attribute_attr-${
-						i + 1
-					}[0]"] > option[selected]`
-				)
+				page
+					.locator( '.woocommerce_variation' )
+					.first()
+					.locator( 'select' )
+					.nth( i )
+					.locator( 'option[selected]' )
 			).toHaveText( defaultAttributes[ i ] );
 		}
 
 		await page.locator( '#save-post' ).click();
+		await expect(
+			page.getByText( 'Product draft updated. ' )
+		).toBeVisible();
 	} );
 
 	test( 'can manage stock at variation level', async ( { page } ) => {

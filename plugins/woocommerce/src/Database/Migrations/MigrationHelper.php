@@ -102,6 +102,7 @@ class MigrationHelper {
 	 */
 	private static function migrate_country_states_for_misc_data( string $country_code, array $old_to_new_states_mapping ): void {
 		self::migrate_country_states_for_shipping_locations( $country_code, $old_to_new_states_mapping );
+		self::migrate_country_states_for_tax_rates( $country_code, $old_to_new_states_mapping );
 		self::migrate_country_states_for_store_location( $country_code, $old_to_new_states_mapping );
 	}
 
@@ -204,7 +205,7 @@ class MigrationHelper {
 					AS states_in_country
 				WHERE (meta_key='_billing_state' OR meta_key='_shipping_state')
 				AND meta_value=%s
-				AND wp_postmeta.post_id = states_in_country.post_id
+				AND {$wpdb->postmeta}.post_id = states_in_country.post_id
 				LIMIT %d",
 				$country_code,
 				$old_state,
@@ -261,5 +262,27 @@ class MigrationHelper {
 		return (int) ( $wpdb->get_var( $more_exist_query ) ) !== 0;
 
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	/**
+	 * Migrate state codes in the tax rates table.
+	 *
+	 * @param string $country_code The country that has the states for which the migration is needed.
+	 * @param array  $old_to_new_states_mapping An associative array where keys are the old state codes and values are the new state codes.
+	 * @return void
+	 */
+	private static function migrate_country_states_for_tax_rates( string $country_code, array $old_to_new_states_mapping ): void {
+		global $wpdb;
+
+		foreach ( $old_to_new_states_mapping as $old_state_code => $new_state_code ) {
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$wpdb->prefix}woocommerce_tax_rates SET tax_rate_state=%s WHERE tax_rate_country=%s AND tax_rate_state=%s",
+					$new_state_code,
+					$country_code,
+					$old_state_code
+				)
+			);
+		}
 	}
 }

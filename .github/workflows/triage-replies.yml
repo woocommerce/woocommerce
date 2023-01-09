@@ -3,6 +3,9 @@ on:
   issues:
     types:
       - labeled
+
+permissions: {}
+
 jobs:
   add-dev-comment:
     if: "github.event.label.name == 'needs: developer feedback'"
