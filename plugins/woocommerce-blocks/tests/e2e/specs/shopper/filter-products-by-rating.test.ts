@@ -265,6 +265,7 @@ describe( `${ block.name } Block`, () => {
 
 		it( 'should refresh the page only if the user click on button', async () => {
 			await page.goto( editorPageUrl );
+			await waitForCanvas();
 			await ensureSidebarOpened();
 			await selectBlockByName( block.slug );
 			await setCheckbox(

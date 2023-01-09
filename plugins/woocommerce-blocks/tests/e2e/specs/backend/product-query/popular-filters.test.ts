@@ -124,14 +124,20 @@ describeOrSkip( GUTENBERG_EDITOR_CONTEXT === 'gutenberg' )(
 				filter: 'Newest',
 				shortcode: '[products orderby="date" order="DESC" limit="9"]',
 			},
-			{
-				filter: 'Best Selling',
-				shortcode: '[products best_selling="true" limit="9"]',
-			},
-			{
-				filter: 'Top Rated',
-				shortcode: '[products top_rated="true" limit="9"]',
-			},
+			/**
+			 * The following tests are commented out because they are flaky
+			 * due to the lack of orders and reviews in the test environment.
+			 *
+			 * @see https://github.com/woocommerce/woocommerce-blocks/issues/8116
+			 */
+			// {
+			// 	filter: 'Best Selling',
+			// 	shortcode: '[products best_selling="true" limit="9"]',
+			// },
+			// {
+			// 	filter: 'Top Rated',
+			// 	shortcode: '[products top_rated="true" limit="9"]',
+			// },
 		] )( '$filter', ( { filter, shortcode } ) => {
 			beforeEach( async () => {
 				await selectPopularFilter( filter );
