@@ -1,0 +1,12 @@
+# Duplicate workflow that returns success for this check when there is no relevant file change. See https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/troubleshooting-required-status-checks#handling-skipped-but-required-checks
+name: Run smoke tests against pull request.
+on:
+    pull_request:
+        paths:
+            - '!**'
+            - '**/changelog/**'
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - run: 'echo "No build required"'

@@ -1,8 +1,6 @@
 name: 'Label Pull Request Project'
 on:
     pull_request_target:
-        paths-ignore:
-            - '**/changelog/**'
         types:
             - opened
             - synchronize
