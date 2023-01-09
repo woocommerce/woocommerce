@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensures product variation sort order is correctly persisted.
