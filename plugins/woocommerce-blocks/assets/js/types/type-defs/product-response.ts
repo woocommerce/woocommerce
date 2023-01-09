@@ -31,6 +31,7 @@ export interface ProductResponseImageItem {
 }
 
 export interface ProductResponseTermItem {
+	default?: boolean;
 	id: number;
 	name: string;
 	slug: string;

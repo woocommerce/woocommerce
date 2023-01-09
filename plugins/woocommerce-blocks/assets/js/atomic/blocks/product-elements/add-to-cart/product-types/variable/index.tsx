@@ -18,6 +18,7 @@ import VariationAttributes from './variation-attributes';
  * Variable Product Add To Cart Form
  */
 const Variable = () => {
+	// @todo Add types for `useAddToCartFormContext`
 	const {
 		product,
 		quantity,

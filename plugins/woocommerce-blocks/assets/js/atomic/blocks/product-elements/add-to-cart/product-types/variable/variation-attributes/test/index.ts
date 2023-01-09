@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { ProductResponseAttributeItem } from '@woocommerce/types';
+
+/**
  * Internal dependencies
  */
 import {
@@ -10,7 +15,7 @@ import {
 	getDefaultAttributes,
 } from '../utils';
 
-const rawAttributeData = [
+const rawAttributeData: ProductResponseAttributeItem[] = [
 	{
 		id: 1,
 		name: 'Color',
@@ -40,7 +45,7 @@ const rawAttributeData = [
 	{
 		id: 0,
 		name: 'Logo',
-		taxonomy: null,
+		taxonomy: 'pa_logo',
 		has_variations: true,
 		terms: [
 			{
@@ -60,7 +65,7 @@ const rawAttributeData = [
 	{
 		id: 0,
 		name: 'Non-variable attribute',
-		taxonomy: null,
+		taxonomy: 'pa_non-variable-attribute',
 		has_variations: false,
 		terms: [
 			{
@@ -227,7 +232,7 @@ describe( 'Testing utils', () => {
 				Logo: {
 					id: 0,
 					name: 'Logo',
-					taxonomy: null,
+					taxonomy: 'pa_logo',
 					has_variations: true,
 					terms: [
 						{
@@ -471,8 +476,11 @@ describe( 'Testing utils', () => {
 		} );
 
 		it( 'should return an empty object if given unexpected values', () => {
+			// @ts-expect-error Expected TS Error as we are checking how the function does with *unexpected values*.
 			expect( getDefaultAttributes( [] ) ).toStrictEqual( {} );
+			// @ts-expect-error Ditto above.
 			expect( getDefaultAttributes( null ) ).toStrictEqual( {} );
+			// @ts-expect-error Ditto above.
 			expect( getDefaultAttributes( undefined ) ).toStrictEqual( {} );
 		} );
 	} );
