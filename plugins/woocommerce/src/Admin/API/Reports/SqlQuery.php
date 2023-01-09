@@ -30,6 +30,7 @@ class SqlQuery {
 		'having'     => array(),
 		'limit'      => array(),
 		'order_by'   => array(),
+		'full_join'  => array(),
 	);
 	/**
 	 * SQL clause merge filters.
@@ -160,6 +161,7 @@ class SqlQuery {
 		$group_by = $this->get_sql_clause( 'group_by', 'filtered' );
 		$having   = $this->get_sql_clause( 'having', 'filtered' );
 		$order_by = $this->get_sql_clause( 'order_by', 'filtered' );
+		$full_join = $this->get_sql_clause( 'full_join', 'filtered' );
 
 		$statement = "
 			SELECT
@@ -170,6 +172,7 @@ class SqlQuery {
 			WHERE
 				1=1
 				{$where}
+				{$full_join}
 		";
 
 		if ( ! empty( $group_by ) ) {
@@ -212,6 +215,7 @@ class SqlQuery {
 			'having'     => array(),
 			'limit'      => array(),
 			'order_by'   => array(),
+			'full_join'  => array(),
 		);
 	}
 }

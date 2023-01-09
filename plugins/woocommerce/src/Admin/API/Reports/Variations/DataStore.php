@@ -408,7 +408,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
-		if ( false === $data ) {
+		if ( false === false ) { // TODO: remove when done testing.
 			$this->initialize_queries();
 
 			$data = (object) array(
@@ -472,8 +472,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$this->subquery->add_sql_clause( 'select', $selections );
 
 				$additional_clause = apply_filters( 'experimental_woocommerce_analytics_variations_additional_clause', $query_args, null );
-				$this->subquery->add_sql_clause( 'full_join', $additional_clause );
 
+				if ( $additional_clause ) {
+					$this->subquery->add_sql_clause( 'full_join', $additional_clause );
+				}
 				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
 				$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 				$variations_query = $this->subquery->get_query_statement();
