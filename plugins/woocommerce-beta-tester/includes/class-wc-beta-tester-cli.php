@@ -15,15 +15,15 @@ if ( ! class_exists( 'WP_CLI_Command' ) ) {
 class WC_Beta_Tester_CLI extends WP_CLI_Command {
 
 	/**
-	 * Activate a live branch of the WooCommerce plugin
+	 * Install a live branch of the WooCommerce plugin
 	 *
 	 * ## Options
 	 * <branch>
-	 * : The branch to activate.
+	 * : The branch to install.
 	 *
 	 * ## Examples
 	 *
-	 *     wp wc-beta-tester activate update/some-branch    *
+	 *     wp wc-beta-tester install update/some-branch
 	 *
 	 * @param array $args Arguments passed to CLI.
 	 */
@@ -49,6 +49,9 @@ class WC_Beta_Tester_CLI extends WP_CLI_Command {
 
 	/**
 	 * Deactivate WooCommerce.
+	 *
+	 * ## Examples
+	 *  wp wc-beta-tester deactivate_woocommerce
 	 */
 	public function deactivate_woocommerce() {
 		$installer = new WC_Beta_Tester_Live_Branches_Installer();
@@ -57,11 +60,19 @@ class WC_Beta_Tester_CLI extends WP_CLI_Command {
 		WP_CLI::success( 'Deactivated WooCommerce' );
 	}
 
-		/**
-		 * Activate a live branch of the WooCommerce plugin.
-		 *
-		 * @param array $args Arguments passed to CLI.
-		 */
+	/**
+	 * Activate a live branch of the WooCommerce plugin.
+	 *
+	 * ## Options
+	 * <branch>
+	 * : The branch to activate.
+	 *
+	 * ## Examples
+	 *
+	 *     wp wc-beta-tester activate update/some-branch*
+	 *
+	 * @param array $args Arguments passed to CLI.
+	 */
 	public function activate( $args ) {
 		$installer = new WC_Beta_Tester_Live_Branches_Installer();
 		$branch    = $args[0];
