@@ -58,7 +58,7 @@
 		"@wordpress/api-fetch": "^6.0.1",
 		"@wordpress/base-styles": "^4.3.0",
 		"@wordpress/blocks": "^11.17.0",
-		"@wordpress/components": "^19.5.0",
+		"@wordpress/components": "^19.8.5",
 		"@wordpress/compose": "^5.1.2",
 		"@wordpress/core-data": "^4.1.2",
 		"@wordpress/data-controls": "^2.3.2",
