@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Product Form
+ * WooCommerce Product Form Factory
  *
  * @package Woocommerce ProductForm
  */
@@ -10,9 +10,9 @@ namespace Automattic\WooCommerce\Internal\Admin\ProductForm;
 use WP_Error;
 
 /**
- * Contains logic for the WooCommerce Product Form.
+ * Factory that contains logic for the WooCommerce Product Form.
  */
-class Form {
+class FormFactory {
 	/**
 	 * Class instance.
 	 *

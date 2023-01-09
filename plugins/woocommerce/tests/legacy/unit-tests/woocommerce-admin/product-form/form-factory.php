@@ -5,12 +5,12 @@
  * @package WooCommerce\Internal\Admin\ProductForm
  */
 
-use Automattic\WooCommerce\Internal\Admin\ProductForm\Form;
+use Automattic\WooCommerce\Internal\Admin\ProductForm\FormFactory as Form;
 
 /**
  * class WC_Admin_Tests_ProductFrom_Field
  */
-class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
+class WC_Admin_Tests_ProductForm_Form_Factory extends WC_Unit_Test_Case {
 	/**
 	 * Test add_field with missing keys.
 	 */

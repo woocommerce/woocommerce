@@ -13,7 +13,7 @@ function add_product_form_field() {
         return;
     }
 
-    \Automattic\WooCommerce\Internal\Admin\ProductForm\Form::add_field(
+    \Automattic\WooCommerce\Internal\Admin\ProductForm\FormFactory::add_field(
         'test_new_field',
         'woocommerce-plugin-name',
         array(
