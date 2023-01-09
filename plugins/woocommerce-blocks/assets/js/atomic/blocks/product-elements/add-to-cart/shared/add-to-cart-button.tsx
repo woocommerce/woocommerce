@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import Button from '@woocommerce/base-components/button';
+import Button, { ButtonProps } from '@woocommerce/base-components/button';
 import { Icon, check } from '@wordpress/icons';
 import { useState, useEffect } from '@wordpress/element';
 import { useAddToCartFormContext } from '@woocommerce/base-context';
@@ -12,10 +12,84 @@ import {
 } from '@woocommerce/base-context/hooks';
 import { useInnerBlockLayoutContext } from '@woocommerce/shared-context';
 
+type LinkProps = Pick< ButtonProps, 'className' | 'href' | 'onClick' | 'text' >;
+
+interface ButtonComponentProps
+	extends Pick< ButtonProps, 'className' | 'onClick' > {
+	/**
+	 * Whether the button is disabled or not.
+	 */
+	isDisabled: boolean;
+	/**
+	 * Whether processing is done.
+	 */
+	isDone: boolean;
+	/**
+	 * Whether processing action is occurring.
+	 */
+	isProcessing: ButtonProps[ 'showSpinner' ];
+	/**
+	 * Quantity of said item currently in the cart.
+	 */
+	quantityInCart: number;
+}
+
+/**
+ * Button component for non-purchasable products.
+ */
+const LinkComponent = ( { className, href, text, onClick }: LinkProps ) => {
+	return (
+		<Button
+			className={ className }
+			href={ href }
+			onClick={ onClick }
+			rel="nofollow"
+		>
+			{ text }
+		</Button>
+	);
+};
+
+/**
+ * Button for purchasable products.
+ */
+const ButtonComponent = ( {
+	className,
+	quantityInCart,
+	isProcessing,
+	isDisabled,
+	isDone,
+	onClick,
+}: ButtonComponentProps ) => {
+	return (
+		<Button
+			className={ className }
+			disabled={ isDisabled }
+			showSpinner={ isProcessing }
+			onClick={ onClick }
+		>
+			{ isDone && quantityInCart > 0
+				? sprintf(
+						/* translators: %s number of products in cart. */
+						_n(
+							'%d in cart',
+							'%d in cart',
+							quantityInCart,
+							'woo-gutenberg-products-block'
+						),
+						quantityInCart
+				  )
+				: __( 'Add to cart', 'woo-gutenberg-products-block' ) }
+			{ !! isDone && <Icon icon={ check } /> }
+		</Button>
+	);
+};
+
 /**
  * Add to Cart Form Button Component.
  */
 const AddToCartButton = () => {
+	// @todo Add types for `useAddToCartFormContext`
 	const {
 		showFormElements,
 		productIsPurchasable,
@@ -101,71 +175,6 @@ const AddToCartButton = () => {
 				} );
 			} }
 		/>
-	);
-};
-
-/**
- * Button component for non-purchasable products.
- *
- * @param {Object}         props           Incoming props.
- * @param {string}         props.className Css classnames.
- * @param {string}         props.href      Link for button.
- * @param {string}         props.text      Text content for button.
- * @param {function():any} props.onClick   Callback to execute when button is clicked.
- */
-const LinkComponent = ( { className, href, text, onClick } ) => {
-	return (
-		<Button
-			className={ className }
-			href={ href }
-			onClick={ onClick }
-			rel="nofollow"
-		>
-			{ text }
-		</Button>
-	);
-};
-
-/**
- * Button for purchasable products.
- *
- * @param {Object}         props                Incoming props for component
- * @param {string}         props.className      Incoming css class name.
- * @param {number}         props.quantityInCart Quantity of item in cart.
- * @param {boolean}        props.isProcessing   Whether processing action is occurring.
- * @param {boolean}        props.isDisabled     Whether the button is disabled or not.
- * @param {boolean}        props.isDone         Whether processing is done.
- * @param {function():any} props.onClick        Callback to execute when button is clicked.
- */
-const ButtonComponent = ( {
-	className,
-	quantityInCart,
-	isProcessing,
-	isDisabled,
-	isDone,
-	onClick,
-} ) => {
-	return (
-		<Button
-			className={ className }
-			disabled={ isDisabled }
-			showSpinner={ isProcessing }
-			onClick={ onClick }
-		>
-			{ isDone && quantityInCart > 0
-				? sprintf(
-						/* translators: %s number of products in cart. */
-						_n(
-							'%d in cart',
-							'%d in cart',
-							quantityInCart,
-							'woo-gutenberg-products-block'
-						),
-						quantityInCart
-				  )
-				: __( 'Add to cart', 'woo-gutenberg-products-block' ) }
-			{ !! isDone && <Icon icon={ check } /> }
-		</Button>
 	);
 };
 

@@ -1,3 +1,5 @@
+export type Dictionary = Record< string, string >;
+
 /**
  * Allow for the entire object to be passed, with only some properties
  * required.

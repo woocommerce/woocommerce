@@ -13,6 +13,7 @@ import { AddToCartButton, QuantityInput, ProductUnavailable } from '../shared';
  * Simple Product Add To Cart Form
  */
 const Simple = () => {
+	// @todo Add types for `useAddToCartFormContext`
 	const {
 		product,
 		quantity,

@@ -23,36 +23,16 @@ import {
 	GroupedProductForm,
 } from './product-types';
 
-/**
- * Product Add to Form Block Component.
- *
- * @param {Object}  props                    Incoming props.
- * @param {string}  [props.className]        CSS Class name for the component.
- * @param {boolean} [props.showFormElements] Should form elements be shown?
- * @return {*} The component.
- */
-const Block = ( { className, showFormElements } ) => {
-	const { product } = useProductDataContext();
-	const componentClass = classnames(
-		className,
-		'wc-block-components-product-add-to-cart',
-		{
-			'wc-block-components-product-add-to-cart--placeholder':
-				isEmpty( product ),
-		}
-	);
-
-	return (
-		<AddToCartFormContextProvider
-			product={ product }
-			showFormElements={ showFormElements }
-		>
-			<div className={ componentClass }>
-				<AddToCartForm />
-			</div>
-		</AddToCartFormContextProvider>
-	);
-};
+interface Props {
+	/**
+	 * CSS Class name for the component.
+	 */
+	className?: string;
+	/**
+	 * Whether or not to show form elements.
+	 */
+	showFormElements?: boolean;
+}
 
 /**
  * Renders the add to cart form using useAddToCartFormContext.
@@ -77,6 +57,32 @@ const AddToCartForm = () => {
 	}
 
 	return <AddToCartButton />;
+};
+
+/**
+ * Product Add to Form Block Component.
+ */
+const Block = ( { className, showFormElements }: Props ) => {
+	const { product } = useProductDataContext();
+	const componentClass = classnames(
+		className,
+		'wc-block-components-product-add-to-cart',
+		{
+			'wc-block-components-product-add-to-cart--placeholder':
+				isEmpty( product ),
+		}
+	);
+
+	return (
+		<AddToCartFormContextProvider
+			product={ product }
+			showFormElements={ showFormElements }
+		>
+			<div className={ componentClass }>
+				<AddToCartForm />
+			</div>
+		</AddToCartFormContextProvider>
+	);
 };
 
 Block.propTypes = {
