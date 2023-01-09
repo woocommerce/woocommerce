@@ -15,7 +15,9 @@ import { useCallback, useEffect, useState } from '@wordpress/element';
 import { sift } from '../../utils';
 
 type useProductAttributesProps = {
-	initialAttributes: ProductAttribute[];
+	allAttributes: ProductAttribute[];
+	isVariationAttributes?: boolean;
+	onChange: ( attributes: ProductAttribute[] ) => void;
 	productId?: number;
 };
 
@@ -25,11 +27,20 @@ export type EnhancedProductAttribute = ProductAttribute & {
 };
 
 export function useProductAttributes( {
-	initialAttributes = [],
+	allAttributes = [],
+	isVariationAttributes = false,
+	onChange,
 	productId,
 }: useProductAttributesProps ) {
-	const [ attributes, setAttributes ] =
-		useState< EnhancedProductAttribute[] >( initialAttributes );
+	const getFilteredAttributes = () => {
+		return isVariationAttributes
+			? allAttributes.filter( ( attribute ) => !! attribute.variation )
+			: allAttributes.filter( ( attribute ) => ! attribute.variation );
+	};
+
+	const [ attributes, setAttributes ] = useState<
+		EnhancedProductAttribute[]
+	>( getFilteredAttributes() );
 	const [ localAttributes, globalAttributes ]: ProductAttribute[][] = sift(
 		attributes,
 		( attr: ProductAttribute ) => attr.id === 0
@@ -67,8 +78,16 @@ export function useProductAttributes( {
 		};
 	};
 
+	const handleChange = ( newAttributes: ProductAttribute[] ) => {
+		const otherAttributes = isVariationAttributes
+			? allAttributes.filter( ( attribute ) => ! attribute.variation )
+			: allAttributes.filter( ( attribute ) => !! attribute.variation );
+		setAttributes( newAttributes );
+		onChange( [ ...otherAttributes, ...newAttributes ] );
+	};
+
 	useEffect( () => {
-		if ( ! initialAttributes.length || attributes.length ) {
+		if ( ! getFilteredAttributes().length || attributes.length ) {
 			return;
 		}
 
@@ -82,10 +101,11 @@ export function useProductAttributes( {
 				...localAttributes,
 			] );
 		} );
-	}, [ attributes, fetchTerms, initialAttributes ] );
+	}, [ allAttributes, attributes, fetchTerms ] );
 
 	return {
 		attributes,
+		handleChange,
 		setAttributes,
 	};
 }

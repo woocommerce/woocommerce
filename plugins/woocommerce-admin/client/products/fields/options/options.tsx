@@ -2,17 +2,13 @@
  * External dependencies
  */
 import { Product, ProductAttribute } from '@woocommerce/data';
-import { reject } from 'lodash';
 import { useFormContext } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
 import { AttributeField } from '../attribute-field';
-import {
-	EnhancedProductAttribute,
-	useProductAttributes,
-} from '~/products/hooks/use-product-attributes';
+import { useProductAttributes } from '~/products/hooks/use-product-attributes';
 import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
 
 type OptionsProps = {
@@ -29,26 +25,18 @@ export const Options: React.FC< OptionsProps > = ( {
 	const { values } = useFormContext< Product >();
 	const { generateProductVariations } = useProductVariationsHelper();
 
-	const optionsFilter = ( attribute: EnhancedProductAttribute ) =>
-		!! attribute.variation;
-
-	const { attributes, setAttributes } = useProductAttributes( {
-		initialAttributes: ( value || [] ).filter( optionsFilter ),
+	const { attributes, handleChange } = useProductAttributes( {
+		allAttributes: value,
+		isVariationAttributes: true,
+		onChange: ( newAttributes ) => {
+			onChange( newAttributes );
+			generateProductVariations( {
+				...values,
+				attributes: newAttributes,
+			} );
+		},
 		productId,
 	} );
-
-	const handleChange = async ( newAttributes: ProductAttribute[] ) => {
-		const otherAttributes = reject(
-			value as ProductAttribute[],
-			optionsFilter
-		) as ProductAttribute[];
-		onChange( [ ...otherAttributes, ...newAttributes ] );
-		setAttributes( newAttributes );
-		generateProductVariations( {
-			...values,
-			attributes: [ ...otherAttributes, ...newAttributes ],
-		} );
-	};
 
 	return (
 		<AttributeField
