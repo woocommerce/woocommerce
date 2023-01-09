@@ -3,6 +3,8 @@
  */
 import { useState, useEffect, useMemo } from '@wordpress/element';
 import { useShallowEqual } from '@woocommerce/base-hooks';
+import type { SelectControl } from '@wordpress/components';
+import { Dictionary, ProductResponseAttributeItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -13,21 +15,27 @@ import {
 	getActiveSelectControlOptions,
 	getDefaultAttributes,
 } from './utils';
+import { AttributesMap, VariationParam } from '../types';
+
+interface Props {
+	attributes: Record< string, ProductResponseAttributeItem >;
+	setRequestParams: ( param: VariationParam ) => void;
+	variationAttributes: AttributesMap;
+}
 
 /**
  * AttributePicker component.
- *
- * @param {*} props Component props.
  */
 const AttributePicker = ( {
 	attributes,
 	variationAttributes,
 	setRequestParams,
-} ) => {
+}: Props ) => {
 	const currentAttributes = useShallowEqual( attributes );
 	const currentVariationAttributes = useShallowEqual( variationAttributes );
 	const [ variationId, setVariationId ] = useState( 0 );
-	const [ selectedAttributes, setSelectedAttributes ] = useState( {} );
+	const [ selectedAttributes, setSelectedAttributes ] =
+		useState< Dictionary >( {} );
 	const [ hasSetDefaults, setHasSetDefaults ] = useState( false );
 
 	// Get options for each attribute picker.
@@ -99,7 +107,11 @@ const AttributePicker = ( {
 				<AttributeSelectControl
 					key={ attributeName }
 					attributeName={ attributeName }
-					options={ filteredAttributeOptions[ attributeName ] }
+					options={
+						filteredAttributeOptions[ attributeName ].filter(
+							Boolean
+						) as SelectControl.Option[]
+					}
 					value={ selectedAttributes[ attributeName ] }
 					onChange={ ( selected ) => {
 						setSelectedAttributes( {

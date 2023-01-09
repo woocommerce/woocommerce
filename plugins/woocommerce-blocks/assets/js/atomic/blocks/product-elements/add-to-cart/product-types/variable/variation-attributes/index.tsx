@@ -1,23 +1,29 @@
 /**
+ * External dependencies
+ */
+import { ProductResponseItem } from '@woocommerce/types';
+
+/**
  * Internal dependencies
  */
 import './style.scss';
 import AttributePicker from './attribute-picker';
 import { getAttributes, getVariationAttributes } from './utils';
 
+interface Props {
+	dispatchers: { setRequestParams: () => void };
+	product: ProductResponseItem;
+}
+
 /**
  * VariationAttributes component.
- *
- * @param {Object} props             Incoming props
- * @param {Object} props.product     Product
- * @param {Object} props.dispatchers An object where values are dispatching functions.
  */
-const VariationAttributes = ( { product, dispatchers } ) => {
+const VariationAttributes = ( { dispatchers, product }: Props ) => {
 	const attributes = getAttributes( product.attributes );
 	const variationAttributes = getVariationAttributes( product.variations );
 	if (
 		Object.keys( attributes ).length === 0 ||
-		variationAttributes.length === 0
+		Object.keys( variationAttributes ).length === 0
 	) {
 		return null;
 	}

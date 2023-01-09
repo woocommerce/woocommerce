@@ -3,14 +3,25 @@
  */
 import { keyBy } from 'lodash';
 import { decodeEntities } from '@wordpress/html-entities';
-import { isObject } from '@woocommerce/types';
+import {
+	Dictionary,
+	isObject,
+	ProductResponseAttributeItem,
+	ProductResponseTermItem,
+	ProductResponseVariationsItem,
+} from '@woocommerce/types';
+
+/**
+ * Internal dependencies
+ */
+import { AttributesMap } from '../types';
 
 /**
  * Key an array of attributes by name,
- *
- * @param {Object} attributes Attributes array.
  */
-export const getAttributes = ( attributes ) => {
+export const getAttributes = (
+	attributes?: ProductResponseAttributeItem[] | null
+) => {
 	return attributes
 		? keyBy(
 				Object.values( attributes ).filter(
@@ -26,15 +37,18 @@ export const getAttributes = ( attributes ) => {
  *
  * Note, each item is keyed by the variation ID with an id: prefix. This is to prevent the object
  * being reordered when iterated.
- *
- * @param {Object} variations List of Variation objects and attributes keyed by variation ID.
  */
-export const getVariationAttributes = ( variations ) => {
+export const getVariationAttributes = (
+	/**
+	 * List of Variation objects and attributes keyed by variation ID.
+	 */
+	variations?: ProductResponseVariationsItem[] | null
+) => {
 	if ( ! variations ) {
 		return {};
 	}
 
-	const attributesMap = {};
+	const attributesMap: AttributesMap = {};
 
 	variations.forEach( ( { id, attributes } ) => {
 		attributesMap[ `id:${ id }` ] = {
@@ -42,7 +56,7 @@ export const getVariationAttributes = ( variations ) => {
 			attributes: attributes.reduce( ( acc, { name, value } ) => {
 				acc[ name ] = value;
 				return acc;
-			}, {} ),
+			}, {} as Dictionary ),
 		};
 	} );
 
@@ -55,20 +69,28 @@ export const getVariationAttributes = ( variations ) => {
  * Allows an attribute to be excluded by name. This is used to filter displayed options for
  * individual attribute selects.
  *
- * @param {Object} attributes          List of attribute names and terms.
- * @param {Object} variationAttributes Attributes for each variation keyed by variation ID.
- * @param {Object} selectedAttributes  Attribute Name Value pairs of current selections by the user.
- * @return {Array} List of matching variation IDs.
+ * @return List of matching variation IDs.
  */
 export const getVariationsMatchingSelectedAttributes = (
-	attributes,
-	variationAttributes,
-	selectedAttributes
+	/**
+	 * List of attribute names and terms.
+	 *
+	 * As returned from {@link getAttributes()}.
+	 */
+	attributes: Record< string, ProductResponseAttributeItem >,
+	/**
+	 * Attributes for each variation keyed by variation ID.
+	 *
+	 * As returned from {@link getVariationAttributes()}.
+	 */
+	variationAttributes: AttributesMap,
+	/**
+	 * Attribute Name Value pairs of current selections by the user.
+	 */
+	selectedAttributes: Record< string, string | null >
 ) => {
 	const variationIds = Object.values( variationAttributes ).map(
-		( { id: variationId } ) => {
-			return variationId;
-		}
+		( { id } ) => id
 	);
 
 	// If nothing is selected yet, just return all variations.
@@ -105,15 +127,25 @@ export const getVariationsMatchingSelectedAttributes = (
 /**
  * Given a list of variations and a list of attribute values, returns the first matched variation ID.
  *
- * @param {Object} attributes          List of attribute names and terms.
- * @param {Object} variationAttributes Attributes for each variation keyed by variation ID.
- * @param {Object} selectedAttributes  Attribute Name Value pairs of current selections by the user.
- * @return {number} Variation ID.
+ * @return Variation ID.
  */
 export const getVariationMatchingSelectedAttributes = (
-	attributes,
-	variationAttributes,
-	selectedAttributes
+	/**
+	 * List of attribute names and terms.
+	 *
+	 * As returned from {@link getAttributes()}.
+	 */
+	attributes: Record< string, ProductResponseAttributeItem >,
+	/**
+	 * Attributes for each variation keyed by variation ID.
+	 *
+	 * As returned from {@link getVariationAttributes()}.
+	 */
+	variationAttributes: AttributesMap,
+	/**
+	 * Attribute Name Value pairs of current selections by the user.
+	 */
+	selectedAttributes: Dictionary
 ) => {
 	const matchingVariationIds = getVariationsMatchingSelectedAttributes(
 		attributes,
@@ -127,13 +159,18 @@ export const getVariationMatchingSelectedAttributes = (
  * Given a list of terms, filter them and return valid options for the select boxes.
  *
  * @see getActiveSelectControlOptions
- * @param {Object} attributeTerms      List of attribute term objects.
- * @param {?Array} validAttributeTerms Valid values if selections have been made already.
- * @return {Array} Value/Label pairs of select box options.
+ *
+ * @return Value/Label pairs of select box options.
  */
 const getValidSelectControlOptions = (
-	attributeTerms,
-	validAttributeTerms = null
+	/**
+	 * List of attribute term objects.
+	 */
+	attributeTerms: ProductResponseTermItem[],
+	/**
+	 * Valid values if selections have been made already.
+	 */
+	validAttributeTerms: Array< string | null > | null = null
 ) => {
 	return Object.values( attributeTerms )
 		.map( ( { name, slug } ) => {
@@ -156,17 +193,30 @@ const getValidSelectControlOptions = (
  * Given a list of terms, filter them and return active options for the select boxes. This factors in
  * which options should be hidden due to current selections.
  *
- * @param {Object} attributes          List of attribute names and terms.
- * @param {Object} variationAttributes Attributes for each variation keyed by variation ID.
- * @param {Object} selectedAttributes  Attribute Name Value pairs of current selections by the user.
- * @return {Object} Select box options.
+ * @return Select box options.
  */
 export const getActiveSelectControlOptions = (
-	attributes,
-	variationAttributes,
-	selectedAttributes
+	/**
+	 * List of attribute names and terms.
+	 *
+	 * As returned from {@link getAttributes()}.
+	 */
+	attributes: Record< string, ProductResponseAttributeItem >,
+	/**
+	 * Attributes for each variation keyed by variation ID.
+	 *
+	 * As returned from {@link getVariationAttributes()}.
+	 */
+	variationAttributes: AttributesMap,
+	/**
+	 * Attribute Name Value pairs of current selections by the user.
+	 */
+	selectedAttributes: Dictionary
 ) => {
-	const options = {};
+	const options: Record<
+		string,
+		Array< { label: string; value: string } | null >
+	> = {};
 	const attributeNames = Object.keys( attributes );
 	const hasSelectedAttributes =
 		Object.values( selectedAttributes ).filter( Boolean ).length > 0;
@@ -211,30 +261,35 @@ export const getActiveSelectControlOptions = (
 /**
  * Return the default values of the given attributes in a format ready to be set in state.
  *
- * @param {Object} attributes List of attribute names and terms.
- * @return {Object} Default attributes.
+ * @return Default attributes.
  */
-export const getDefaultAttributes = ( attributes = {} ) => {
+export const getDefaultAttributes = (
+	/**
+	 * List of attribute names and terms.
+	 *
+	 * As returned from {@link getAttributes()}.
+	 */
+	attributes: Record< string, ProductResponseAttributeItem >
+) => {
 	if ( ! isObject( attributes ) ) {
 		return {};
 	}
 
 	const attributeNames = Object.keys( attributes );
-	const defaultsToSet = {};
 
 	if ( attributeNames.length === 0 ) {
-		return defaultsToSet;
+		return {};
 	}
 
-	attributeNames.forEach( ( attributeName ) => {
-		const currentAttribute = attributes[ attributeName ];
-		const defaultValue = currentAttribute.terms.filter(
-			( term ) => term.default
-		);
-		if ( defaultValue.length > 0 ) {
-			defaultsToSet[ currentAttribute.name ] = defaultValue[ 0 ]?.slug;
-		}
-	} );
+	const attributesEntries = Object.values( attributes );
 
-	return defaultsToSet;
+	return attributesEntries.reduce( ( acc, curr ) => {
+		const defaultValues = curr.terms.filter( ( term ) => term.default );
+
+		if ( defaultValues.length > 0 ) {
+			acc[ curr.name ] = defaultValues[ 0 ]?.slug;
+		}
+
+		return acc;
+	}, {} as Dictionary );
 };

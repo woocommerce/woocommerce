@@ -4,11 +4,17 @@
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { SelectControl } from 'wordpress-components';
+import type { SelectControl as SelectControlType } from '@wordpress/components';
 import { useEffect } from 'react';
 import classnames from 'classnames';
 import { ValidationInputError } from '@woocommerce/blocks-checkout';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { useDispatch, useSelect } from '@wordpress/data';
+
+interface Props extends SelectControlType.Props< string > {
+	attributeName: string;
+	errorMessage?: string;
+}
 
 // Default option for select boxes.
 const selectAnOption = {
@@ -18,19 +24,17 @@ const selectAnOption = {
 
 /**
  * VariationAttributeSelect component.
- *
- * @param {*} props Component props.
  */
 const AttributeSelectControl = ( {
 	attributeName,
 	options = [],
 	value = '',
-	onChange = () => {},
+	onChange = () => void 0,
 	errorMessage = __(
 		'Please select a value.',
 		'woo-gutenberg-products-block'
 	),
-} ) => {
+}: Props ) => {
 	const errorId = attributeName;
 
 	const { setValidationErrors, clearValidationError } =
