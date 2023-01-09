@@ -16,6 +16,7 @@ export const config = {
 	reducer,
 	selectors,
 	actions,
+	__experimentalUseThunks: true,
 };
 
 const store = createReduxStore( STORE_KEY, config );

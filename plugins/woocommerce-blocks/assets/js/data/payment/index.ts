@@ -20,6 +20,7 @@ export const config = {
 	actions,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	controls: { ...dataControls, ...sharedControls } as any,
+	__experimentalUseThunks: true,
 };
 
 const store = createReduxStore( STORE_KEY, config );
