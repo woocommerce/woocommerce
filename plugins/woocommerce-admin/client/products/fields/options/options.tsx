@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Product, ProductAttribute } from '@woocommerce/data';
+import { reject } from 'lodash';
 import { useFormContext } from '@woocommerce/components';
 
 /**
@@ -28,17 +29,25 @@ export const Options: React.FC< OptionsProps > = ( {
 	const { values } = useFormContext< Product >();
 	const { generateProductVariations } = useProductVariationsHelper();
 
+	const optionsFilter = ( attribute: EnhancedProductAttribute ) =>
+		!! attribute.variation;
+
 	const { attributes, setAttributes } = useProductAttributes( {
-		filter: ( attribute: EnhancedProductAttribute ) =>
-			!! attribute.variation,
-		inputValue: value,
+		initialAttributes: ( value || [] ).filter( optionsFilter ),
 		productId,
 	} );
 
 	const handleChange = async ( newAttributes: ProductAttribute[] ) => {
+		const otherAttributes = reject(
+			value as ProductAttribute[],
+			optionsFilter
+		) as ProductAttribute[];
+		onChange( [ ...otherAttributes, ...newAttributes ] );
 		setAttributes( newAttributes );
-		onChange( newAttributes );
-		generateProductVariations( { ...values, attributes: newAttributes } );
+		generateProductVariations( {
+			...values,
+			attributes: [ ...otherAttributes, ...newAttributes ],
+		} );
 	};
 
 	return (

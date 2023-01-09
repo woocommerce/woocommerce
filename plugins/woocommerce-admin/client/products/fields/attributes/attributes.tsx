@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { ProductAttribute } from '@woocommerce/data';
+import { reject } from 'lodash';
 
 /**
  * Internal dependencies
@@ -23,21 +24,28 @@ export const Attributes: React.FC< AttributesProps > = ( {
 	onChange,
 	productId,
 } ) => {
+	const attributesFilter = ( attribute: EnhancedProductAttribute ) =>
+		! attribute.variation;
+
 	const { attributes, setAttributes } = useProductAttributes( {
-		filter: ( attribute: EnhancedProductAttribute ) =>
-			! attribute.variation,
-		inputValue: value,
+		initialAttributes: ( value || [] ).filter( attributesFilter ),
 		productId,
 	} );
+
+	const handleChange = ( newAttributes: ProductAttribute[] ) => {
+		const otherAttributes = reject(
+			value,
+			attributesFilter
+		) as ProductAttribute[];
+		onChange( [ ...otherAttributes, ...newAttributes ] );
+		setAttributes( newAttributes );
+	};
 
 	return (
 		<AttributeField
 			attributeType="regular"
 			attributes={ attributes }
-			onChange={ ( newAttributes ) => {
-				setAttributes( newAttributes );
-				onChange( newAttributes );
-			} }
+			onChange={ handleChange }
 		/>
 	);
 };

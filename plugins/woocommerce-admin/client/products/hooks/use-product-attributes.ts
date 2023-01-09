@@ -15,8 +15,7 @@ import { useCallback, useEffect, useState } from '@wordpress/element';
 import { sift } from '../../utils';
 
 type useProductAttributesProps = {
-	filter?: ( attribute: EnhancedProductAttribute ) => boolean;
-	inputValue: ProductAttribute[];
+	initialAttributes: ProductAttribute[];
 	productId?: number;
 };
 
@@ -26,15 +25,13 @@ export type EnhancedProductAttribute = ProductAttribute & {
 };
 
 export function useProductAttributes( {
-	filter = () => true,
-	inputValue,
+	initialAttributes = [],
 	productId,
 }: useProductAttributesProps ) {
-	const [ attributes, setAttributes ] = useState<
-		EnhancedProductAttribute[]
-	>( [] );
+	const [ attributes, setAttributes ] =
+		useState< EnhancedProductAttribute[] >( initialAttributes );
 	const [ localAttributes, globalAttributes ]: ProductAttribute[][] = sift(
-		inputValue,
+		attributes,
 		( attr: ProductAttribute ) => attr.id === 0
 	);
 
@@ -71,7 +68,7 @@ export function useProductAttributes( {
 	};
 
 	useEffect( () => {
-		if ( ! inputValue || attributes.length !== 0 ) {
+		if ( ! initialAttributes.length || attributes.length ) {
 			return;
 		}
 
@@ -85,14 +82,10 @@ export function useProductAttributes( {
 				...localAttributes,
 			] );
 		} );
-	}, [ fetchTerms, attributes, inputValue ] );
-
-	const getFilteredAttributes = () => {
-		return attributes.filter( filter );
-	};
+	}, [ attributes, fetchTerms, initialAttributes ] );
 
 	return {
-		attributes: getFilteredAttributes(),
+		attributes,
 		setAttributes,
 	};
 }
