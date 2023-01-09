@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Analytics report: add/extend the query to fetch products without orders.
