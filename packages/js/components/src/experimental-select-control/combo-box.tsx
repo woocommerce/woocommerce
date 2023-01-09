@@ -1,20 +1,20 @@
 /**
  * External dependencies
  */
-import { createElement, MouseEvent, useRef } from 'react';
+import { createElement, MouseEvent, PropsWithChildren, useRef } from 'react';
 import classNames from 'classnames';
 
-/**
- * Internal dependencies
- */
-import { Props } from './types';
-
-type ComboBoxProps = {
-	children?: JSX.Element | JSX.Element[] | null;
-	comboBoxProps: Props;
-	inputProps: Props;
+export type ComboBoxProps = PropsWithChildren< {
+	comboBoxProps: React.DetailedHTMLProps<
+		React.HTMLAttributes< HTMLDivElement >,
+		HTMLDivElement
+	>;
+	inputProps: React.DetailedHTMLProps<
+		React.InputHTMLAttributes< HTMLInputElement >,
+		HTMLInputElement
+	>;
 	suffix?: JSX.Element | null;
-};
+} >;
 
 export const ComboBox = ( {
 	children,
