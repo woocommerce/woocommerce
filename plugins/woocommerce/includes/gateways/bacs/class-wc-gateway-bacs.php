@@ -262,7 +262,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		/**
 		 * Filter the email instructions order status.
 		 *
-		 * @since 7.3
+		 * @since 7.4
 		 * @param string $terms The order status.
 		 * @param object $order The order object.
 		 */
