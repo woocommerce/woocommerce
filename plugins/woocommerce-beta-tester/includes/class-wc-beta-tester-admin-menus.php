@@ -336,7 +336,7 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 		$items_to_remove = array( 'wc-beta-tester-settings', 'wc-beta-tester-version-picker', 'wc-beta-tester' );
 		if ( isset( $submenu['plugins.php'] ) ) {
 			foreach ( $submenu['plugins.php'] as $key => $menu ) {
-				if ( in_array( $menu[2], $items_to_remove ) ) {
+				if ( in_array( $menu[2], $items_to_remove, true ) ) {
 					unset( $submenu['plugins.php'][ $key ] );
 				}
 			}
