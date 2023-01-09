@@ -43,6 +43,17 @@ class Field extends Component {
 	 */
 	public function __construct( $id, $plugin_id, $additional_args ) {
 		parent::__construct( $id, $plugin_id, $additional_args );
+
+		$missing_arguments = self::get_missing_arguments( $additional_args );
+		if ( count( $missing_arguments ) > 0 ) {
+			throw new \Exception(
+				sprintf(
+				/* translators: 1: Missing arguments list. */
+					esc_html__( 'You are missing required arguments of WooCommerce ProductForm Field: %1$s', 'woocommerce' ),
+					join( ', ', $missing_arguments )
+				)
+			);
+		}
 		$this->type = $additional_args['type'];
 	}
 

@@ -145,17 +145,17 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 	 * Test that get_cards.
 	 */
 	public function test_get_cards_sort_default() {
-		Form::add_card(
+		Form::add_subsection(
 			'id',
 			'woocommerce'
 		);
 
-		Form::add_card(
+		Form::add_subsection(
 			'id2',
 			'woocommerce'
 		);
 
-		Form::add_card(
+		Form::add_subsection(
 			'first',
 			'woocommerce',
 			array(
@@ -163,11 +163,11 @@ class WC_Admin_Tests_ProductForm_Form extends WC_Unit_Test_Case {
 			)
 		);
 
-		$cards = Form::get_cards();
-		$this->assertEquals( 3, count( $cards ) );
-		$this->assertEquals( 'first', $cards[0]->get_id() );
-		$this->assertEquals( 'id', $cards[1]->get_id() );
-		$this->assertEquals( 'id2', $cards[2]->get_id() );
+		$subsections = Form::get_subsections();
+		$this->assertEquals( 3, count( $subsections ) );
+		$this->assertEquals( 'first', $subsections[0]->get_id() );
+		$this->assertEquals( 'id', $subsections[1]->get_id() );
+		$this->assertEquals( 'id2', $subsections[2]->get_id() );
 	}
 
 	/**

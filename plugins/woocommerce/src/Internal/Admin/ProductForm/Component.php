@@ -39,7 +39,7 @@ abstract class Component {
 	 *
 	 * @return array
 	 */
-	public function get_arguments() {
+	public function get_additional_args() {
 		return $this->additional_args;
 	}
 
@@ -49,7 +49,7 @@ abstract class Component {
 	 * @param string $key key of argument.
 	 * @return mixed
 	 */
-	public function get_argument( $key ) {
+	public function get_additional_argument( $key ) {
 		return self::get_argument_from_path( $this->additional_args, $key );
 	}
 
@@ -64,7 +64,7 @@ abstract class Component {
 				'id'        => $this->get_id(),
 				'plugin_id' => $this->get_plugin_id(),
 			),
-			$this->get_arguments()
+			$this->get_additional_args()
 		);
 	}
 
@@ -78,8 +78,8 @@ abstract class Component {
 	 */
 	public static function sort( $a, $b, $sort_by = array() ) {
 		$key   = $sort_by['key'];
-		$a_val = $a->get_argument( $key );
-		$b_val = $b->get_argument( $key );
+		$a_val = $a->get_additional_argument( $key );
+		$b_val = $b->get_additional_argument( $key );
 		if ( 'asc' === $sort_by['order'] ) {
 			return $a_val <=> $b_val;
 		} else {

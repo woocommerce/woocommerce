@@ -32,7 +32,7 @@ class Form {
 	 *
 	 * @var array
 	 */
-	protected static $form_cards = array();
+	protected static $form_subsections = array();
 
 	/**
 	 * Store form sections.
@@ -81,20 +81,20 @@ class Form {
 	}
 
 	/**
-	 * Adds a card to the product form.
+	 * Adds a Subsection to the product form.
 	 *
-	 * @param string $id Card id.
+	 * @param string $id Subsection id.
 	 * @param string $plugin_id Plugin id.
 	 * @param array  $args Array containing the necessary arguments.
-	 * @return Card|WP_Error New card or WP_Error.
+	 * @return Card|WP_Error New subsection or WP_Error.
 	 */
-	public static function add_card( $id, $plugin_id, $args = array() ) {
-		$new_card = self::create_item( 'card', 'Card', $id, $plugin_id, $args );
-		if ( is_wp_error( $new_card ) ) {
-			return $new_card;
+	public static function add_subsection( $id, $plugin_id, $args = array() ) {
+		$new_subsection = self::create_item( 'subsection', 'Subsection', $id, $plugin_id, $args );
+		if ( is_wp_error( $new_subsection ) ) {
+			return $new_subsection;
 		}
-		self::$form_cards[ $id ] = $new_card;
-		return $new_card;
+		self::$form_subsections[ $id ] = $new_subsection;
+		return $new_subsection;
 	}
 
 	/**
@@ -146,11 +146,11 @@ class Form {
 	 * @param array $sort_by key and order to sort by.
 	 * @return array list of registered cards.
 	 */
-	public static function get_cards( $sort_by = array(
+	public static function get_subsections( $sort_by = array(
 		'key'   => 'order',
 		'order' => 'asc',
 	) ) {
-		return self::get_items( 'card', 'Card', $sort_by );
+		return self::get_items( 'subsection', 'Subsection', $sort_by );
 	}
 
 	/**
@@ -181,7 +181,7 @@ class Form {
 		$item_list = self::${ 'form_' . $type . 's' };
 		$class     = 'Automattic\\WooCommerce\\Internal\\Admin\\ProductForm\\' . $class_name;
 		$items     = array_values( $item_list );
-		if ( method_exists( $class, 'sort' ) ) {
+		if ( class_exists( $class ) && method_exists( $class, 'sort' ) ) {
 			usort(
 				$items,
 				function ( $a, $b ) use ( $sort_by, $class ) {
@@ -205,6 +205,16 @@ class Form {
 	private static function create_item( $type, $class_name, $id, $plugin_id, $args ) {
 		$item_list = self::${ 'form_' . $type . 's' };
 		$class     = 'Automattic\\WooCommerce\\Internal\\Admin\\ProductForm\\' . $class_name;
+		if ( ! class_exists( $class ) ) {
+			return new WP_Error(
+				'wc_product_form_' . $type . '_missing_form_class',
+				sprintf(
+				/* translators: 1: missing class name. */
+					esc_html__( '%1$s class does not exist.', 'woocommerce' ),
+					$class,
+				)
+			);
+		}
 		if ( isset( $item_list[ $id ] ) ) {
 			return new WP_Error(
 				'wc_product_form_' . $type . '_duplicate_field_id',
@@ -217,26 +227,20 @@ class Form {
 			);
 		}
 
-		$missing_arguments = method_exists( $class, 'get_missing_arguments' ) ? $class::get_missing_arguments( $args ) : array();
-		if ( count( $missing_arguments ) > 0 ) {
-			return new WP_Error(
-				'wc_product_form_' . $type . '_missing_argument',
-				sprintf(
-				/* translators: 1: Class name 2: Missing arguments list. */
-					esc_html__( 'You are missing required arguments of WooCommerce ProductForm %1$s: %2$s', 'woocommerce' ),
-					$class_name,
-					join( ', ', $missing_arguments )
-				)
-			);
-		}
-
 		$defaults = array(
 			'order' => 20,
 		);
 
 		$item_arguments = wp_parse_args( $args, $defaults );
 
-		return new $class( $id, $plugin_id, $item_arguments );
+		try {
+			return new $class( $id, $plugin_id, $item_arguments );
+		} catch ( \Exception $e ) {
+			return new WP_Error(
+				'wc_product_form_' . $type . '_class_creation',
+				$e->getMessage()
+			);
+		}
 	}
 }
 
