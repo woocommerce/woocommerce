@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+By default, hide the quantity selector within the single product page if a product is sold individually.
