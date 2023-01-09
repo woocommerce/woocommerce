@@ -36,6 +36,7 @@ class Section extends Component {
 	 *       'title'       => (string) Section description.
 	 *       'description' => (string) Section description.
 	 *     ).
+	 * @throws \Exception If there are missing arguments.
 	 */
 	public function __construct( $id, $plugin_id, $additional_args ) {
 		parent::__construct( $id, $plugin_id, $additional_args );

@@ -211,7 +211,7 @@ class FormFactory {
 				sprintf(
 				/* translators: 1: missing class name. */
 					esc_html__( '%1$s class does not exist.', 'woocommerce' ),
-					$class,
+					$class
 				)
 			);
 		}

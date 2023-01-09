@@ -40,6 +40,7 @@ class Field extends Component {
 	 *       'order'           => (int) Field order.
 	 *       'properties'      => (array) Field properties.
 	 *     ).
+	 * @throws \Exception If there are missing arguments.
 	 */
 	public function __construct( $id, $plugin_id, $additional_args ) {
 		parent::__construct( $id, $plugin_id, $additional_args );
