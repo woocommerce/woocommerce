@@ -405,9 +405,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 * We need to get the cache key here because
 		 * parent::update_intervals_sql_params() modifies $query_args.
 		 */
-		$cache_key = $this->get_cache_key( $query_args );
-		$data      = $this->get_cached_data( $cache_key );
-
+	//	$cache_key = $this->get_cache_key( $query_args );
+	//	$data      = $this->get_cached_data( $cache_key );
+		$data = false;
 		if ( false === $data ) {
 			$this->initialize_queries();
 
@@ -470,6 +470,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 				$this->subquery->clear_sql_clause( 'select' );
 				$this->subquery->add_sql_clause( 'select', $selections );
+
+				$full_join = "UNION SELECT all_products.product_id, '', '', '','' FROM wp_wc_product_meta_lookup as all_products LEFT JOIN {$table_name} ON {$table_name}.product_id = all_products.product_id WHERE {$table_name}.product_id IS NULL";
+				//$this->subquery->add_sql_clause( 'full_join', $full_join );
+
 				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
 				$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 				$variations_query = $this->subquery->get_query_statement();
@@ -482,6 +486,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			);
 			/* phpcs:enable */
 
+			$variations_query_all = "\n\t\t\tSELECT\n\t\t\t\tall_products.product_id, '' as variation_id, '' as items_sold, '' as net_revenue, '' as orders_count FROM wp_wc_product_meta_lookup as all_products LEFT JOIN {$table_name} ON {$table_name}.product_id = all_products.product_id WHERE {$table_name}.product_id IS NULL";
+			$product_data_all = $wpdb->get_results(
+				$variations_query_all,
+				ARRAY_A
+			);
+			$product_data_all_sub = array_slice($product_data_all, 0, 5);
+
 			if ( null === $product_data ) {
 				return $data;
 			}
@@ -491,7 +502,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			if ( $query_args['extended_info'] ) {
 				$this->fill_deleted_product_name( $product_data );
 			}
-
+			$product_data = array_merge($product_data,$product_data_all_sub);
 			$product_data = array_map( array( $this, 'cast_numbers' ), $product_data );
 			$data         = (object) array(
 				'data'    => $product_data,

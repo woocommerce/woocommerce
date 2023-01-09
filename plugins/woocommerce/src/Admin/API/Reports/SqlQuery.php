@@ -24,6 +24,8 @@ class SqlQuery {
 		'left_join'  => array(),
 		'join'       => array(),
 		'right_join' => array(),
+		'inner_join' => array(),
+		'full_join'  => array(),
 		'where'      => array(),
 		'where_time' => array(),
 		'group_by'   => array(),
@@ -45,6 +47,7 @@ class SqlQuery {
 			'right_join',
 			'join',
 			'left_join',
+			'inner_join'
 		),
 	);
 	/**
@@ -155,11 +158,12 @@ class SqlQuery {
 	 * @return string
 	 */
 	public function get_query_statement() {
-		$join     = $this->get_sql_clause( 'join', 'filtered' );
-		$where    = $this->get_sql_clause( 'where', 'filtered' );
-		$group_by = $this->get_sql_clause( 'group_by', 'filtered' );
-		$having   = $this->get_sql_clause( 'having', 'filtered' );
-		$order_by = $this->get_sql_clause( 'order_by', 'filtered' );
+		$join      = $this->get_sql_clause( 'join', 'filtered' );
+		$full_join = $this->get_sql_clause( 'full_join', 'filtered' );
+		$where     = $this->get_sql_clause( 'where', 'filtered' );
+		$group_by  = $this->get_sql_clause( 'group_by', 'filtered' );
+		$having    = $this->get_sql_clause( 'having', 'filtered' );
+		$order_by  = $this->get_sql_clause( 'order_by', 'filtered' );
 
 		$statement = "
 			SELECT
@@ -170,6 +174,7 @@ class SqlQuery {
 			WHERE
 				1=1
 				{$where}
+		    	{$full_join}
 		";
 
 		if ( ! empty( $group_by ) ) {
@@ -206,6 +211,8 @@ class SqlQuery {
 			'left_join'  => array(),
 			'join'       => array(),
 			'right_join' => array(),
+			'inner_join' => array(),
+			'full_join'  => array(),
 			'where'      => array(),
 			'where_time' => array(),
 			'group_by'   => array(),
