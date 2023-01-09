@@ -5,7 +5,7 @@ A Slotfill component that will allow you to add a new section to the product edi
 ## Usage
 
 ```jsx
-<WooProductSectionItem id={ key } location="tab-general" order={ 2 } pluginId="test-plugin" >
+<WooProductSectionItem id={ key } location="tab/general" order={ 2 } pluginId="test-plugin" >
   { () => {
     return (
       <ProductSectionLayout
@@ -23,7 +23,7 @@ A Slotfill component that will allow you to add a new section to the product edi
 } }
 </WooProductSectionItem>
 
-<WooProductSectionItem.Slot location="tab-general" />
+<WooProductSectionItem.Slot location="tab/general" />
 ```
 
 ### WooProductSectionItem (fill)
