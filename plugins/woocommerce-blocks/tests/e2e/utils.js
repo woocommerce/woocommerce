@@ -66,7 +66,7 @@ const SELECTORS = {
 	},
 	templateEditor: {
 		editButton:
-			'.edit-site-layout__edit-button[aria-label="Open the editor"]',
+			'.edit-site-site-hub__edit-button[aria-label="Open the editor"]',
 	},
 };
 

@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { canvas } from '@wordpress/e2e-test-utils';
-
-/**
  * Internal dependencies
  */
 import { DEFAULT_TIMEOUT } from './constants';
@@ -26,12 +21,12 @@ export const getToggleIdByLabel = async (
 ): Promise< string > => {
 	const delay = 1000;
 	// Wait a bit for toggle to finish rerendering.
-	await canvas().waitForTimeout( delay );
+	await page.waitForTimeout( delay );
 	const checkboxId = await getFormElementIdByLabel(
 		label,
 		'components-toggle-control__label'
 	);
-	const checkbox = await canvas().$( checkboxId );
+	const checkbox = await page.$( checkboxId );
 	if ( ! checkbox ) {
 		if ( retry * delay < DEFAULT_TIMEOUT ) {
 			return await getToggleIdByLabel( label, retry + 1 );
