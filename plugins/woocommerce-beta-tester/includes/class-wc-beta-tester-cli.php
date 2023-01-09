@@ -43,7 +43,7 @@ class WC_Beta_Tester_CLI extends WP_CLI_Command {
 				WP_CLI::error( $install_result->get_error_message() );
 			}
 
-			WP_CLI::success( "Activated $branch" );
+			WP_CLI::success( "Installed $branch" );
 		}
 	}
 

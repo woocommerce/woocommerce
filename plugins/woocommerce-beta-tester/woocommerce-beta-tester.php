@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
 
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
-	require_once dirname( __FILE__ ) . '/class-wc-beta-tester-cli.php';
+	require_once dirname( __FILE__ ) . '/includes/class-wc-beta-tester-cli.php';
 	WP_CLI::add_command( 'wc-beta-tester', WC_Beta_Tester_CLI::class );
 }
 
