@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Add noDataLabel property into table.js component to allow No Data label customization.

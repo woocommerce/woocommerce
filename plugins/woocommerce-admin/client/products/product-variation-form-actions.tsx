@@ -16,6 +16,7 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import { preventLeavingProductForm } from './utils/prevent-leaving-product-form';
 import usePreventLeavingPage from '~/hooks/usePreventLeavingPage';
 import { WooHeaderItem } from '~/header/utils';
 import './product-form-actions.scss';
@@ -30,7 +31,7 @@ export const ProductVariationFormActions: React.FC = () => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const [ isSaving, setIsSaving ] = useState( false );
 
-	usePreventLeavingPage( isDirty );
+	usePreventLeavingPage( isDirty, preventLeavingProductForm );
 
 	const onSave = async () => {
 		setIsSaving( true );

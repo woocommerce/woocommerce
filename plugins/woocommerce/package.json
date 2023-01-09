@@ -108,5 +108,8 @@
 		"> 0.1%",
 		"ie 8",
 		"ie 9"
-	]
+	],
+	"dependencies": {
+		"@wordpress/browserslist-config": "^5.7.0"
+	}
 }

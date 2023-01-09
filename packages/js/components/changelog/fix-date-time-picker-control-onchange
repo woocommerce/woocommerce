@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-DateTimePickerControl's onChange now only fires when there is an actual change to the datetime.
