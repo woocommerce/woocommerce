@@ -103,13 +103,13 @@ This only needs to be done if this release is the last release of the feature pl
 
         -   [ ] Increase the version of `woocommerce/woocommerce-blocks` in the `plugins/woocommerce/composer.json` file
         -   [ ] Run `composer update woocommerce/woocommerce-blocks` and make sure `composer-lock.json` was updated
-        -   [ ] Add a new file similar to this one [plugins/woocommerce/changelog/update-woocommerce-blocks-7.4.1](https://github.com/woocommerce/woocommerce/blob/5040a10d01896bcf40fd0ac538f2b7bc584ffe0a/plugins/woocommerce/changelog/update-woocommerce-blocks-7.4.1) with a similar content as below. For the Significance entry we’ll always use `minor`, or `patch` when including a patch release
+        -   [ ] Run `pnpm --filter=woocommerce changelog add` to create a new changelog file similar to this one [plugins/woocommerce/changelog/update-woocommerce-blocks-7.4.1](https://github.com/woocommerce/woocommerce/blob/5040a10d01896bcf40fd0ac538f2b7bc584ffe0a/plugins/woocommerce/changelog/update-woocommerce-blocks-7.4.1). The file will be auto-generated with your answers. For the _Significance_ entry we’ll always use `minor` for WC Blocks major releases:
 
             ```md
             Significance: minor
             Type: update
 
-            Update WooCommerce Blocks to 7.4.1
+            Update WooCommerce Blocks to 7.4.0
             ```
 
     -   The PR description can follow [this example](https://github.com/woocommerce/woocommerce/pull/32627).
