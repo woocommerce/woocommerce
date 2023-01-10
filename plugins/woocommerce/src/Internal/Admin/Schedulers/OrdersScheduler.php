@@ -213,10 +213,11 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 */
 	public static function possibly_schedule_import( $order_id ) {
 		if ( ! OrderUtil::is_order( $order_id, array( 'shop_order' ) ) && 'woocommerce_refund_created' !== current_filter() ) {
-			return;
+			return $order_id;
 		}
 
 		self::schedule_action( 'import', array( $order_id ) );
+		return $order_id;
 	}
 
 	/**
