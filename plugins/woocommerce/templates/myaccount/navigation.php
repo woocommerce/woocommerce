@@ -19,6 +19,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Fires before the My account navigation is rendered.
+ *
+ * @since 2.6.0
+ */
 do_action( 'woocommerce_before_account_navigation' );
 global $wp;
 ?>
@@ -27,11 +32,17 @@ global $wp;
 	<ul>
 		<?php foreach ( wc_get_account_menu_items() as $endpoint => $label ) : ?>
 			<?php $current = isset( $wp->query_vars[ $endpoint ] ) ? ' aria-current="page"' : ''; ?>
-			<li class="<?php echo wc_get_account_menu_item_classes( $endpoint ); ?>">
+			<li class="<?php echo wc_get_account_menu_item_classes( $endpoint ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized using sanitize_html_class() ?>">
 				<a href="<?php echo esc_url( wc_get_account_endpoint_url( $endpoint ) ); ?>"<?php echo $current; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>><?php echo esc_html( $label ); ?></a>
 			</li>
 		<?php endforeach; ?>
 	</ul>
 </nav>
 
-<?php do_action( 'woocommerce_after_account_navigation' ); ?>
+<?php
+/**
+ * Fires after the My account navigation is rendered.
+ *
+ * @since 2.6.0
+ */
+do_action( 'woocommerce_after_account_navigation' );

@@ -32,7 +32,17 @@ if ( ! comments_open() ) {
 			if ( $count && wc_review_ratings_enabled() ) {
 				/* translators: 1: reviews count 2: product name */
 				$reviews_title = sprintf( esc_html( _n( '%1$s review for %2$s', '%1$s reviews for %2$s', $count, 'woocommerce' ) ), esc_html( $count ), '<span>' . get_the_title() . '</span>' );
-				echo apply_filters( 'woocommerce_reviews_title', $reviews_title, $count, $product ); // WPCS: XSS ok.
+				echo wp_kses_post(
+					/**
+					 * Filters the title for the reviews section on single product pages.
+					 *
+					 * @since 3.6.0
+					 * @param string     $reviews_title The title.
+					 * @param int        $count         The total reviews count for the product.
+					 * @param WC_Product $product       The product data.
+					 */
+					apply_filters( 'woocommerce_reviews_title', $reviews_title, $count, $product )
+				);
 			} else {
 				esc_html_e( 'Reviews', 'woocommerce' );
 			}
@@ -41,13 +51,31 @@ if ( ! comments_open() ) {
 
 		<?php if ( have_comments() ) : ?>
 			<ol class="commentlist">
-				<?php wp_list_comments( apply_filters( 'woocommerce_product_review_list_args', array( 'callback' => 'woocommerce_comments' ) ) ); ?>
+				<?php
+				wp_list_comments(
+					/**
+					 * Filters the arguments used in retrieving the review list.
+					 *
+					 * @since 2.1.0
+					 * @link https://developer.wordpress.org/reference/functions/wp_list_comments/#parameters
+					 * @param array An array of arguments for displaying reviewss.
+					 */
+					apply_filters( 'woocommerce_product_review_list_args', array( 'callback' => 'woocommerce_comments' ) )
+				);
+				?>
 			</ol>
 
 			<?php
 			if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) :
 				echo '<nav class="woocommerce-pagination" aria-label="' . esc_attr__( 'Reviews', 'woocommerce' ) . '">';
 				paginate_comments_links(
+					/**
+					 * Filters the arguments for reviews pagination links.
+					 *
+					 * @since 2.1.0
+					 * @link https://developer.wordpress.org/reference/functions/paginate_links/#parameters
+					 * @param array Pagination arguments.
+					 */
 					apply_filters(
 						'woocommerce_comment_pagination_args',
 						array(
@@ -133,7 +161,16 @@ if ( ! comments_open() ) {
 
 				$comment_form['comment_field'] .= '<p class="comment-form-comment"><label for="comment">' . esc_html__( 'Your review', 'woocommerce' ) . '&nbsp;<span class="required">*</span></label><textarea id="comment" name="comment" cols="45" rows="8" required></textarea></p>';
 
-				comment_form( apply_filters( 'woocommerce_product_review_comment_form_args', $comment_form ) );
+				comment_form(
+					/**
+					 * Filters the review comment form arguments.
+					 *
+					 * @since 2.0.0
+					 * @link https://developer.wordpress.org/reference/functions/comment_form/#parameters
+					 * @param array $comment_form The review comment form arguments.
+					 */
+					apply_filters( 'woocommerce_product_review_comment_form_args', $comment_form )
+				);
 				?>
 			</div>
 		</div>

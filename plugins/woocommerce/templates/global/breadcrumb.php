@@ -22,11 +22,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! empty( $breadcrumb ) ) {
 
-	echo $wrap_before;
+	echo wp_kses_post( $wrap_before );
 
 	foreach ( $breadcrumb as $key => $crumb ) {
 
-		echo $before;
+		echo wp_kses_post( $before );
 
 		if ( ! empty( $crumb[1] ) && count( $breadcrumb ) !== $key + 1 ) {
 			echo '<a href="' . esc_url( $crumb[1] ) . '">' . esc_html( $crumb[0] ) . '</a>';
@@ -34,13 +34,13 @@ if ( ! empty( $breadcrumb ) ) {
 			echo '<span aria-current="page">' . esc_html( $crumb[0] ) . '</span>';
 		}
 
-		echo $after;
+		echo wp_kses_post( $after );
 
 		if ( count( $breadcrumb ) !== $key + 1 ) {
-			echo '<span aria-hidden="true">' . $delimiter . '</span>';
+			echo '<span aria-hidden="true">' . wp_kses_post( $delimiter ) . '</span>';
 		}
 	}
 
-	echo $wrap_after;
+	echo wp_kses_post( $wrap_after );
 
 }

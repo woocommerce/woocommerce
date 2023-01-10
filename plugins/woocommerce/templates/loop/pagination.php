@@ -34,27 +34,29 @@ $next_text = sprintf( $prev_next, is_rtl() ? '&larr;' : '&rarr;', esc_html_x( 'N
 ?>
 <nav class="woocommerce-pagination" aria-label="<?php esc_attr_e( 'Products', 'woocommerce' ); ?>">
 	<?php
-	echo paginate_links(
-		/**
-		 * Filters the paginated links arguments of the catalog pagination.
-		 *
-		 * @param array $args The arguments of paginate_links().
-		 *
-		 * @since 2.0.0
-		 */
-		apply_filters(
-			'woocommerce_pagination_args',
-			array( // WPCS: XSS ok.
-				'base'      => $base,
-				'format'    => $format,
-				'add_args'  => false,
-				'current'   => max( 1, $current ),
-				'total'     => $total,
-				'prev_text' => $prev_text,
-				'next_text' => $next_text,
-				'type'      => 'list',
-				'end_size'  => 3,
-				'mid_size'  => 3,
+	echo wp_kses_post(
+		paginate_links(
+			/**
+			 * Filters the paginated links arguments of the catalog pagination.
+			 *
+			 * @since 2.0.0
+			 * @link https://developer.wordpress.org/reference/functions/paginate_links/#parameters
+			 * @param array $args The arguments of paginate_links().
+			 */
+			apply_filters(
+				'woocommerce_pagination_args',
+				array(
+					'base'      => $base,
+					'format'    => $format,
+					'add_args'  => false,
+					'current'   => max( 1, $current ),
+					'total'     => $total,
+					'prev_text' => $prev_text,
+					'next_text' => $next_text,
+					'type'      => 'list',
+					'end_size'  => 3,
+					'mid_size'  => 3,
+				)
 			)
 		)
 	);
