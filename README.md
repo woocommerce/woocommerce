@@ -49,7 +49,10 @@ This repository is not suitable for support. Please don't use our issue tracker 
 * [The Official WooCommerce Facebook Group](https://www.facebook.com/groups/advanced.woocommerce).
 * For customizations, you may want to check our list of [WooExperts](https://woocommerce.com/experts/) or [Codeable](https://codeable.io/).
 
-Support requests in issues on this repository will be closed on sight.
+NOTE: Unfortunately, we are unable to honor support requests in issues on this repository; as a result, any requests submitted in this manner will be closed.
+
+## Community
+For peer to peer support, real-time announcements, and office hours, please [join our slack community](https://woocommerce.com/community-slack/)!
 
 ## Contributing to WooCommerce
 If you have a patch or have stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) for more information on how you can do this.
