@@ -4,12 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import { Link, useFormContext } from '@woocommerce/components';
-import { useSelect } from '@wordpress/data';
-import {
-	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
-	Product,
-	ProductAttribute,
-} from '@woocommerce/data';
+import { Product, ProductAttribute } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -36,23 +31,7 @@ export const ProductVariationsSection: React.FC = () => {
 		  )
 		: [];
 
-	const { totalCount } = useSelect(
-		( select ) => {
-			const { getProductVariationsTotalCount } = select(
-				EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
-			);
-			const requestParams = {
-				product_id: productId,
-			};
-			return {
-				totalCount:
-					getProductVariationsTotalCount< number >( requestParams ),
-			};
-		},
-		[ productId, options ]
-	);
-
-	if ( options.length === 0 || totalCount === 0 || isNaN( totalCount ) ) {
+	if ( options.length === 0 ) {
 		return null;
 	}
 
