@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Returns the url to the lost password endpoint url.
  *
+ * @since 2.6.0
  * @param  string $default_url Default lost password URL.
  * @return string
  */
@@ -23,7 +24,7 @@ function wc_lostpassword_url( $default_url = '' ) {
 	}
 
 	// Don't redirect to the woocommerce endpoint on global network admin lost passwords.
-	if ( is_multisite() && isset( $_GET['redirect_to'] ) && false !== strpos( wp_unslash( $_GET['redirect_to'] ), network_admin_url() ) ) { // WPCS: input var ok, sanitization ok, CSRF ok.
+	if ( is_multisite() && isset( $_GET['redirect_to'] ) && false !== strpos( wp_unslash( $_GET['redirect_to'] ), network_admin_url() ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
 		return $default_url;
 	}
 
@@ -43,23 +44,36 @@ add_filter( 'lostpassword_url', 'wc_lostpassword_url', 10, 1 );
 /**
  * Get the link to the edit account details page.
  *
+ * @since 2.6.0
  * @return string
  */
 function wc_customer_edit_account_url() {
 	$edit_account_url = wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) );
 
+	/**
+	 * Filters the link to the edit account details page.
+	 *
+	 * @since 2.6.0
+	 * @param string $edit_account_url Link to the edit account details page.
+	 */
 	return apply_filters( 'woocommerce_customer_edit_account_url', $edit_account_url );
 }
 
 /**
  * Get the edit address slug translation.
  *
- * @param  string $id   Address ID.
- * @param  bool   $flip Flip the array to make it possible to retrieve the values ​​from both sides.
- *
- * @return string       Address slug i18n.
+ * @since 2.6.0
+ * @param string $id   Address ID.
+ * @param bool   $flip Flip the array to make it possible to retrieve the values ​​from both sides.
+ * @return string Address slug i18n.
  */
 function wc_edit_address_i18n( $id, $flip = false ) {
+	/**
+	 * Filters the translation of the edit address slug.
+	 *
+	 * @since 2.6.0
+	 * @param array Array of translations keyed by the address type.
+	 */
 	$slugs = apply_filters(
 		'woocommerce_edit_address_slugs',
 		array(
@@ -83,7 +97,7 @@ function wc_edit_address_i18n( $id, $flip = false ) {
  * Get My Account menu items.
  *
  * @since 2.6.0
- * @return array
+ * @return array Array of My account menu item labels keyed by endpoint slug.
  */
 function wc_get_account_menu_items() {
 	$endpoints = array(
@@ -127,6 +141,13 @@ function wc_get_account_menu_items() {
 		}
 	}
 
+	/**
+	 * Filters the My account menu items.
+	 *
+	 * @since 2.6.0
+	 * @param array $items     Array of My account menu item labels keyed by endpoint slug.
+	 * @param array $endpoints Array of endpoint query vars keyed by endpoint slug.
+	 */
 	return apply_filters( 'woocommerce_account_menu_items', $items, $endpoints );
 }
 
@@ -135,7 +156,7 @@ function wc_get_account_menu_items() {
  *
  * @since 2.6.0
  * @param string $endpoint Endpoint.
- * @return string
+ * @return string Account menu item classes
  */
 function wc_get_account_menu_item_classes( $endpoint ) {
 	global $wp;
@@ -159,6 +180,13 @@ function wc_get_account_menu_item_classes( $endpoint ) {
 		$classes[] = 'is-active';
 	}
 
+	/**
+	 * Filters the My account menu item classes.
+	 *
+	 * @since 2.6.0
+	 * @param array $classes Array of My account menu item classes.
+	 * @param string $endpoint Endpoint.
+	 */
 	$classes = apply_filters( 'woocommerce_account_menu_item_classes', $classes, $endpoint );
 
 	return implode( ' ', array_map( 'sanitize_html_class', $classes ) );
@@ -169,7 +197,7 @@ function wc_get_account_menu_item_classes( $endpoint ) {
  *
  * @since 2.6.0
  * @param string $endpoint Endpoint.
- * @return string
+ * @return string Endpoint URL.
  */
 function wc_get_account_endpoint_url( $endpoint ) {
 	if ( 'dashboard' === $endpoint ) {
@@ -187,10 +215,16 @@ function wc_get_account_endpoint_url( $endpoint ) {
  * Get My Account > Orders columns.
  *
  * @since 2.6.0
- * @return array
+ * @return array Array of column labels keyed by column IDs.
  */
 function wc_get_account_orders_columns() {
-	$columns = apply_filters(
+	/**
+	 * Filters the array of My Account > Orders columns.
+	 *
+	 * @since 2.6.0
+	 * @param array $columns Array of column labels keyed by column IDs.
+	 */
+	return apply_filters(
 		'woocommerce_account_orders_columns',
 		array(
 			'order-number'  => __( 'Order', 'woocommerce' ),
@@ -200,18 +234,21 @@ function wc_get_account_orders_columns() {
 			'order-actions' => __( 'Actions', 'woocommerce' ),
 		)
 	);
-
-	// Deprecated filter since 2.6.0.
-	return apply_filters( 'woocommerce_my_account_my_orders_columns', $columns );
 }
 
 /**
  * Get My Account > Downloads columns.
  *
  * @since 2.6.0
- * @return array
+ * @return array Array of column labels keyed by column IDs.
  */
 function wc_get_account_downloads_columns() {
+	/**
+	 * Filters the My Account > Downloads columns.
+	 *
+	 * @since 2.6.0
+	 * @param array Array of column labels keyed by column IDs.
+	 */
 	$columns = apply_filters(
 		'woocommerce_account_downloads_columns',
 		array(
@@ -234,9 +271,15 @@ function wc_get_account_downloads_columns() {
  * Get My Account > Payment methods columns.
  *
  * @since 2.6.0
- * @return array
+ * @return array Array of column labels keyed by column IDs.
  */
 function wc_get_account_payment_methods_columns() {
+	/**
+	 * Filters the My Account > Payment methods columns.
+	 *
+	 * @since 2.6.0
+	 * @param array Array of column labels keyed by column IDs.
+	 */
 	return apply_filters(
 		'woocommerce_account_payment_methods_columns',
 		array(
@@ -248,12 +291,18 @@ function wc_get_account_payment_methods_columns() {
 }
 
 /**
- * Get My Account > Payment methods types
+ * Get My Account > Payment methods types.
  *
  * @since 2.6.0
- * @return array
+ * @return array Array of payment method types keyed by their ID.
  */
 function wc_get_account_payment_methods_types() {
+	/**
+	 * Filters the My Account > Payment methods types.
+	 *
+	 * @since 2.6.0
+	 * @param array Array of payment method types keyed by their ID.
+	 */
 	return apply_filters(
 		'woocommerce_payment_methods_types',
 		array(
@@ -266,9 +315,9 @@ function wc_get_account_payment_methods_types() {
 /**
  * Get account orders actions.
  *
- * @since  3.2.0
- * @param  int|WC_Order $order Order instance or ID.
- * @return array
+ * @since 3.2.0
+ * @param int|WC_Order $order Order instance or ID.
+ * @return array Array of actions (URL, name) keyed by action ID.
  */
 function wc_get_account_orders_actions( $order ) {
 	if ( ! is_object( $order ) ) {
@@ -295,23 +344,35 @@ function wc_get_account_orders_actions( $order ) {
 		unset( $actions['pay'] );
 	}
 
-	if ( ! in_array( $order->get_status(), apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ), $order ), true ) ) {
+	/**
+	 * Filters the valid order statuses for cancellation.
+	 *
+	 * @since 3.2.0
+	 * @param array    $valid Valid statuses.
+	 * @param WC_Order $order Order instance.
+	 */
+	$valid_for_cancel = apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ), $order );
+	if ( ! in_array( $order->get_status(), $valid_for_cancel, true ) ) {
 		unset( $actions['cancel'] );
 	}
 
+	/**
+	 * Filters the account orders actions.
+	 *
+	 * @since 3.2.0
+	 * @param array    $actions Array of actions (URL, name) keyed by action ID.
+	 * @param WC_Order $order   Order instance.
+	 */
 	return apply_filters( 'woocommerce_my_account_my_orders_actions', $actions, $order );
 }
 
 /**
  * Get account formatted address.
  *
- * @since  3.2.0
- * @param  string $address_type Address type.
- *                              Accepts: 'billing' or 'shipping'.
- *                              Default to 'billing'.
- * @param  int    $customer_id  Customer ID.
- *                              Default to 0.
- * @return string
+ * @since 3.2.0
+ * @param string $address_type Address type. Accepts: 'billing' (default) or 'shipping'.
+ * @param int    $customer_id  Customer ID. Defaults to 0.
+ * @return string Country specific formatted customer address.
  */
 function wc_get_account_formatted_address( $address_type = 'billing', $customer_id = 0 ) {
 	$getter  = "get_{$address_type}";
@@ -328,16 +389,26 @@ function wc_get_account_formatted_address( $address_type = 'billing', $customer_
 		unset( $address['email'], $address['tel'] );
 	}
 
-	return WC()->countries->get_formatted_address( apply_filters( 'woocommerce_my_account_my_address_formatted_address', $address, $customer->get_id(), $address_type ) );
+	return WC()->countries->get_formatted_address(
+		/**
+		 * Filters the customer address.
+		 *
+		 * @since 3.2.0
+		 * @param string $address      Customer's address.
+		 * @param int    $customer_id  Customer ID.
+		 * @param string $address_type Address type.
+		 */
+		apply_filters( 'woocommerce_my_account_my_address_formatted_address', $address, $customer->get_id(), $address_type )
+	);
 }
 
 /**
  * Returns an array of a user's saved payments list for output on the account tab.
  *
- * @since  2.6
- * @param  array $list         List of payment methods passed from wc_get_customer_saved_methods_list().
- * @param  int   $customer_id  The customer to fetch payment methods for.
- * @return array               Filtered list of customers payment methods.
+ * @since 2.6.0
+ * @param array $list        List of payment methods passed from wc_get_customer_saved_methods_list().
+ * @param int   $customer_id The customer to fetch payment methods for.
+ * @return array Filtered list of customers payment methods.
  */
 function wc_get_account_saved_payment_methods_list( $list, $customer_id ) {
 	$payment_tokens = WC_Payment_Tokens::get_customer_tokens( $customer_id );
@@ -370,6 +441,13 @@ function wc_get_account_saved_payment_methods_list( $list, $customer_id ) {
 			);
 		}
 
+		/**
+		 * Filters the payment methods list item.
+		 *
+		 * @since 2.6.0
+		 * @param array            $list_item     The list item.
+		 * @param WC_Payment_Token $payment_token The payment token associated with this method entry.
+		 */
 		$list[ $type ][ $key ] = apply_filters( 'woocommerce_payment_methods_list_item', $list[ $type ][ $key ], $payment_token );
 	}
 	return $list;
@@ -380,10 +458,10 @@ add_filter( 'woocommerce_saved_payment_methods_list', 'wc_get_account_saved_paym
 /**
  * Controls the output for credit cards on the my account page.
  *
- * @since 2.6
- * @param  array            $item         Individual list item from woocommerce_saved_payment_methods_list.
- * @param  WC_Payment_Token $payment_token The payment token associated with this method entry.
- * @return array                           Filtered item.
+ * @since 2.6.0
+ * @param array            $item          Individual list item from woocommerce_saved_payment_methods_list.
+ * @param WC_Payment_Token $payment_token The payment token associated with this method entry.
+ * @return array Filtered item.
  */
 function wc_get_account_saved_payment_methods_list_item_cc( $item, $payment_token ) {
 	if ( 'cc' !== strtolower( $payment_token->get_type() ) ) {
@@ -404,9 +482,9 @@ add_filter( 'woocommerce_payment_methods_list_item', 'wc_get_account_saved_payme
  * Controls the output for eChecks on the my account page.
  *
  * @since 2.6
- * @param  array            $item         Individual list item from woocommerce_saved_payment_methods_list.
- * @param  WC_Payment_Token $payment_token The payment token associated with this method entry.
- * @return array                           Filtered item.
+ * @param array            $item          Individual list item from woocommerce_saved_payment_methods_list.
+ * @param WC_Payment_Token $payment_token The payment token associated with this method entry.
+ * @return array Filtered item.
  */
 function wc_get_account_saved_payment_methods_list_item_echeck( $item, $payment_token ) {
 	if ( 'echeck' !== strtolower( $payment_token->get_type() ) ) {
