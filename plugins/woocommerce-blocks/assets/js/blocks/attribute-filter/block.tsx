@@ -138,7 +138,6 @@ const AttributeFilterBlock = ( {
 			resourceName: 'products/attributes/terms',
 			resourceValues: [ attributeObject?.id || 0 ],
 			shouldSelect: blockAttributes.attributeId > 0,
-			isEditor,
 		} );
 
 	const filterAvailableTerms =

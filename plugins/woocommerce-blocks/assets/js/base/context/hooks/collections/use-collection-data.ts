@@ -171,6 +171,5 @@ export const useCollectionData = ( {
 			...collectionDataQueryVars,
 		},
 		shouldSelect: debouncedShouldSelect,
-		isEditor,
 	} );
 };

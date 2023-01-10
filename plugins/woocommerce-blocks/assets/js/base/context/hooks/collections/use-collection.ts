@@ -5,7 +5,7 @@ import { COLLECTIONS_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
 import { useRef } from '@wordpress/element';
 import { useShallowEqual, useThrowError } from '@woocommerce/base-hooks';
-import { isError, isObject } from '@woocommerce/types';
+import { isError } from '@woocommerce/types';
 
 /**
  * This is a custom hook that is wired up to the `wc/store/collections` data
@@ -61,7 +61,6 @@ export const useCollection = (
 		resourceValues = [],
 		query = {},
 		shouldSelect = true,
-		isEditor = false,
 	} = options;
 	if ( ! namespace || ! resourceName ) {
 		throw new Error(
@@ -79,17 +78,6 @@ export const useCollection = (
 	const throwError = useThrowError();
 	const results = useSelect(
 		( select ) => {
-			if (
-				isEditor &&
-				isObject( currentResults?.current?.results ) &&
-				Object.keys( currentResults.current.results ).length > 0
-			) {
-				return {
-					results: currentResults.current.results,
-					isLoading: false,
-				};
-			}
-
 			if ( ! shouldSelect ) {
 				return null;
 			}
