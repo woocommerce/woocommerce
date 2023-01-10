@@ -1,17 +1,17 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import { createElement } from '@wordpress/element';
 
 /**
- * A component to display summarized table data - the list of data passed in on a single line.
- *
- * @param {Object} props
- * @param {Array}  props.data
- * @return {Object} -
+ * Internal dependencies
  */
-const TableSummary = ( { data } ) => {
+import { TableSummaryProps } from './types';
+
+/**
+ * A component to display summarized table data - the list of data passed in on a single line.
+ */
+const TableSummary = ( { data }: TableSummaryProps ) => {
 	return (
 		<ul className="woocommerce-table__summary" role="complementary">
 			{ data.map( ( { label, value }, i ) => (
@@ -26,13 +26,6 @@ const TableSummary = ( { data } ) => {
 			) ) }
 		</ul>
 	);
-};
-
-TableSummary.propTypes = {
-	/**
-	 * An array of objects with `label` & `value` properties, which display on a single line.
-	 */
-	data: PropTypes.array,
 };
 
 export default TableSummary;
