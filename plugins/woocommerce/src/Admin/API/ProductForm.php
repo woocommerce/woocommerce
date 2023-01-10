@@ -7,7 +7,7 @@
 
 namespace Automattic\WooCommerce\Admin\API;
 
-use Automattic\WooCommerce\Internal\Admin\ProductForm\Form;
+use Automattic\WooCommerce\Internal\Admin\ProductForm\FormFactory;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -87,7 +87,7 @@ class ProductForm extends \WC_REST_Data_Controller {
 			function( $field ) {
 				return $field->get_json();
 			},
-			Form::get_fields()
+			FormFactory::get_fields()
 		);
 
 		return rest_ensure_response( $json );
@@ -100,30 +100,30 @@ class ProductForm extends \WC_REST_Data_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_form_config( $request ) {
-		$fields   = array_map(
+		$fields      = array_map(
 			function( $field ) {
 				return $field->get_json();
 			},
-			Form::get_fields()
+			FormFactory::get_fields()
 		);
-		$cards    = array_map(
+		$subsections = array_map(
 			function( $card ) {
 				return $card->get_json();
 			},
-			Form::get_cards()
+			FormFactory::get_subsections()
 		);
-		$sections = array_map(
+		$sections    = array_map(
 			function( $section ) {
 				return $section->get_json();
 			},
-			Form::get_sections()
+			FormFactory::get_sections()
 		);
 
 		return rest_ensure_response(
 			array(
-				'fields'   => $fields,
-				'cards'    => $cards,
-				'sections' => $sections,
+				'fields'      => $fields,
+				'subsections' => $subsections,
+				'sections'    => $sections,
 			)
 		);
 	}
