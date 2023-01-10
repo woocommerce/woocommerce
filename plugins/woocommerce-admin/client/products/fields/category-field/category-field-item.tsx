@@ -3,6 +3,7 @@
  */
 import { CheckboxControl, Icon } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
+import { decodeEntities } from '@wordpress/html-entities';
 import { chevronDown, chevronUp } from '@wordpress/icons';
 import { ProductCategory } from '@woocommerce/data';
 import { __experimentalSelectControlMenuItemProps as MenuItemProps } from '@woocommerce/components';
@@ -85,7 +86,7 @@ export const CategoryFieldItem: React.FC< CategoryFieldItemProps > = ( {
 					<div className="woocommerce-category-field-dropdown__toggle-placeholder"></div>
 				) }
 				<CheckboxControl
-					label={ item.data.name }
+					label={ decodeEntities( item.data.name ) }
 					checked={ selectedIds.includes( item.data.id ) }
 					onChange={ () => item.data }
 				/>
