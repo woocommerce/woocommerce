@@ -110,11 +110,8 @@ function CustomerFeedbackModal( {
 
 	const sendScore = () => {
 		if (
-			! (
-				Number.isInteger( firstQuestionScore ) &&
-				( ! secondQuestionScore ||
-					Number.isInteger( secondQuestionScore ) )
-			)
+			! Number.isInteger( firstQuestionScore ) ||
+			( secondQuestion && ! Number.isInteger( secondQuestionScore ) )
 		) {
 			setShowNoScoreMessage( true );
 			return;
