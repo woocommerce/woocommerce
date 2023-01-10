@@ -109,7 +109,7 @@ jQuery( function( $ ) {
 			e.data.addToCartHandler.addRequest({
 				type: 'POST',
 				url: wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'add_to_cart' ),
-				data: $.param( data ),
+				data: new URLSearchParams( data ).toString(),
 				success: function( response ) {
 					if ( ! response ) {
 						return;
@@ -153,7 +153,9 @@ jQuery( function( $ ) {
 		e.data.addToCartHandler.addRequest({
 			type: 'POST',
 			url: wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'remove_from_cart' ),
-			data: 'cart_item_key=' + encodeURIComponent( $thisbutton.data( 'cart_item_key' ) ),
+			data: new URLSearchParams( {
+				cart_item_key : $thisbutton.data( 'cart_item_key' )
+			} ).toString(),
 			success: function( response ) {
 				if ( ! response || ! response.fragments ) {
 					window.location = $thisbutton.attr( 'href' );
