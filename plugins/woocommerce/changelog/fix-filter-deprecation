@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Add missing deprecation notice for filter hook woocommerce_my_account_my_orders_columns.
