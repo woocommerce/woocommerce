@@ -471,15 +471,18 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$this->subquery->clear_sql_clause( 'select' );
 				$this->subquery->add_sql_clause( 'select', $selections );
 
-				$additional_clause = apply_filters( 'experimental_woocommerce_analytics_variations_additional_clause', $query_args, null );
+				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+				$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
+
+				$variations_query  = $this->subquery->get_query_statement();
+				$additional_clause = apply_filters( 'experimental_woocommerce_analytics_variations_additional_clause', '', $query_args, $variations_query );
 
 				if ( $additional_clause ) {
 					$this->subquery->add_sql_clause( 'full_join', $additional_clause );
 				}
-				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
-				$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
-				$variations_query = $this->subquery->get_query_statement();
 			}
+
+			$variations_query  = $this->subquery->get_query_statement();
 
 			/* phpcs:disable WordPress.DB.PreparedSQL.NotPrepared */
 			$product_data = $wpdb->get_results(
