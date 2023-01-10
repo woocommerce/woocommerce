@@ -17,6 +17,7 @@ import {
 	useFormContext,
 	__experimentalRichTextEditor as RichTextEditor,
 	__experimentalTooltip as Tooltip,
+	__experimentalWooProductFieldItem as WooProductFieldItem,
 } from '@woocommerce/components';
 import interpolateComponents from '@automattic/interpolate-components';
 import {
@@ -241,6 +242,7 @@ export const ProductDetailsSection: React.FC = () => {
 							'woocommerce'
 						) }
 					/>
+					<WooProductFieldItem.Slot section="details" />
 				</CardBody>
 			</Card>
 		</ProductSectionLayout>
