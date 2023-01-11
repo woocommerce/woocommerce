@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import createSelector from 'rememo';
+import memoize from 'memoize-one';
 
 /**
  * Internal dependencies
@@ -12,7 +12,9 @@ export function getProductField( state: ProductFieldState, name: string ) {
 	return state.fields[ name ] || null;
 }
 
-export const getRegisteredProductFields = createSelector(
+export const getRegisteredProductFields = memoize(
 	( state: ProductFieldState ) => Object.keys( state.fields ),
-	( state ) => [ state.fields ]
+	( [ newState ], [ oldState ] ) => {
+		return newState.fields === oldState.fields;
+	}
 );
