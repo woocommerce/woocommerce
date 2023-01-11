@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { ShippingAddress, BillingAddress } from '@woocommerce/settings';
+import type { ShippingAddress, BillingAddress } from '@woocommerce/settings';
 
 /**
  * Internal dependencies

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Modal } from '@wordpress/components';
+import { Modal } from 'wordpress-components';
 import { useDebounce } from 'use-debounce';
 import classNames from 'classnames';
 

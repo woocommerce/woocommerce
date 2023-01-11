@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { CurrencyResponse } from './currency';
+import type { CurrencyResponse } from './currency';
 
 export interface ProductResponseItemPrices extends CurrencyResponse {
 	price: string;

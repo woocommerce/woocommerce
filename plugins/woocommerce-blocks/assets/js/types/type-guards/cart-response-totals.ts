@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { CartResponseTotals } from '../type-defs';
+import type { CartResponseTotals } from '../type-defs';
 import { isObject } from './object';
 
 // It is the only way to create a type that contains all the object's keys and gets type-checking.
