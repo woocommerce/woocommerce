@@ -42,6 +42,7 @@ const DetailsSection = () => (
 			id="details/name"
 			section={ DETAILS_SECTION_ID }
 			pluginId="core"
+			order={ 1 }
 		>
 			<DetailsNameField />
 		</WooProductFieldItem>
@@ -49,6 +50,7 @@ const DetailsSection = () => (
 			id="details/categories"
 			section={ DETAILS_SECTION_ID }
 			pluginId="core"
+			order={ 3 }
 		>
 			<DetailsCategoriesField />
 		</WooProductFieldItem>
@@ -56,6 +58,7 @@ const DetailsSection = () => (
 			id="details/feature"
 			section={ DETAILS_SECTION_ID }
 			pluginId="core"
+			order={ 5 }
 		>
 			<DetailsFeatureField />
 		</WooProductFieldItem>
@@ -63,6 +66,7 @@ const DetailsSection = () => (
 			id="details/summary"
 			section={ DETAILS_SECTION_ID }
 			pluginId="core"
+			order={ 7 }
 		>
 			<DetailsSummaryField />
 		</WooProductFieldItem>
@@ -70,6 +74,7 @@ const DetailsSection = () => (
 			id="details/description"
 			section={ DETAILS_SECTION_ID }
 			pluginId="core"
+			order={ 9 }
 		>
 			<DetailsDescriptionField />
 		</WooProductFieldItem>
