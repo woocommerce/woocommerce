@@ -1,6 +1,8 @@
 name: 'Update contributor feedback labels on comment'
 on: 'issue_comment'
 
+permissions: {}
+
 jobs:
   feedback:
     if: |
@@ -10,6 +12,8 @@ jobs:
       github.event.issue.state == 'open' &&
       contains(github.event.issue.labels.*.name, 'needs: author feedback')
     runs-on: ubuntu-20.04
+    permissions:
+      issues: write
     steps:
     - name: Add has feedback
       uses: actions-ecosystem/action-add-labels@v1

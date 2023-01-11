@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { BlockInstance, serialize, parse } from '@wordpress/blocks';
+import { BlockInstance, serialize, rawHandler } from '@wordpress/blocks';
 import {
 	CheckboxControl,
 	Card,
@@ -55,7 +55,7 @@ export const ProductVariationDetailsSection: React.FC = () => {
 
 	const [ descriptionBlocks, setDescriptionBlocks ] = useState<
 		BlockInstance[]
-	>( parse( values.description || '' ) );
+	>( rawHandler( { HTML: values.description } ) );
 
 	const imageFieldProps = getInputProps( 'image' );
 

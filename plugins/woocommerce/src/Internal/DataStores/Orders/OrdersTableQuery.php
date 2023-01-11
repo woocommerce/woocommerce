@@ -509,8 +509,17 @@ class OrdersTableQuery {
 			return;
 		}
 
+		// No need to sanitize, will be processed in calling function.
+		if ( 'include' === $orderby || 'post__in' === $orderby ) {
+			return;
+		}
+
 		if ( is_string( $orderby ) ) {
-			$orderby = array( $orderby => $order );
+			$orderby_fields = array_map( 'trim', explode( ' ', $orderby ) );
+			$orderby        = array();
+			foreach ( $orderby_fields as $field ) {
+				$orderby[ $field ] = $order;
+			}
 		}
 
 		$this->args['orderby'] = array();
@@ -572,9 +581,6 @@ class OrdersTableQuery {
 			$this->join  = $sql['join'] ? array_merge( $this->join, $sql['join'] ) : $this->join;
 			$this->where = $sql['where'] ? array_merge( $this->where, array( $sql['where'] ) ) : $this->where;
 
-			if ( $sql['join'] ) {
-				$this->groupby[] = "{$this->tables['orders']}.id";
-			}
 		}
 
 		// Date queries.
@@ -588,12 +594,10 @@ class OrdersTableQuery {
 
 		$orders_table = $this->tables['orders'];
 
-		// SELECT [fields].
-		$this->fields = "{$orders_table}.id";
-		$fields       = $this->fields;
-
-		// SQL_CALC_FOUND_ROWS.
-		$found_rows = '';
+		// Group by is a faster substitute for DISTINCT, as long as we are only selecting IDs. MySQL don't like it when we join tables and use DISTINCT.
+		$this->groupby[] = "{$this->tables['orders']}.id";
+		$this->fields    = "{$orders_table}.id";
+		$fields          = $this->fields;
 
 		// JOIN.
 		$join = implode( ' ', array_unique( array_filter( array_map( 'trim', $this->join ) ) ) );
@@ -619,7 +623,7 @@ class OrdersTableQuery {
 		// GROUP BY.
 		$groupby = $this->groupby ? 'GROUP BY ' . implode( ', ', (array) $this->groupby ) : '';
 
-		$this->sql = "SELECT $found_rows DISTINCT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
+		$this->sql = "SELECT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
 		$this->build_count_query( $fields, $join, $where, $groupby );
 	}
 
@@ -636,7 +640,7 @@ class OrdersTableQuery {
 			wc_doing_it_wrong( __FUNCTION__, 'Count query can only be build after main query is built.', '7.3.0' );
 		}
 		$orders_table    = $this->tables['orders'];
-		$this->count_sql = "SELECT COUNT(DISTINCT $fields) FROM  $orders_table $join WHERE $where $groupby";
+		$this->count_sql = "SELECT COUNT(DISTINCT $fields) FROM  $orders_table $join WHERE $where";
 	}
 
 	/**
@@ -974,6 +978,16 @@ class OrdersTableQuery {
 
 		if ( 'none' === $orderby ) {
 			$this->orderby = '';
+			return;
+		}
+
+		if ( 'include' === $orderby || 'post__in' === $orderby ) {
+			$ids = $this->args['id'] ?? $this->args['includes'];
+			if ( empty( $ids ) ) {
+				return;
+			}
+			$ids           = array_map( 'absint', $ids );
+			$this->orderby = array( "FIELD( {$this->tables['orders']}.id, " . implode( ',', $ids ) . ' )' );
 			return;
 		}
 

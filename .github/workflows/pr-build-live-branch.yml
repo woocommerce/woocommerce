@@ -7,10 +7,14 @@ concurrency:
     group: build-${{ github.event_name == 'push' && github.run_id || 'pr' }}-${{ github.ref }}
     cancel-in-progress: true
 
+permissions: {}
+
 jobs:
     build:
         if: github.repository_owner == 'woocommerce'
         runs-on: ubuntu-20.04
+        permissions:
+          contents: read
         steps:
             - uses: actions/checkout@v3
 
