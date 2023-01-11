@@ -30,7 +30,8 @@ class SqlQuery {
 		'having'     => array(),
 		'limit'      => array(),
 		'order_by'   => array(),
-		'full_join'  => array(),
+		'with'       => array(),
+		'union'      => array(),
 	);
 	/**
 	 * SQL clause merge filters.
@@ -70,7 +71,7 @@ class SqlQuery {
 	 * @param string $type   Clause type.
 	 * @param string $clause SQL clause.
 	 */
-	protected function add_sql_clause( $type, $clause ) {
+	public function add_sql_clause( $type, $clause ) {
 		if ( isset( $this->sql_clauses[ $type ] ) && ! empty( $clause ) ) {
 			$this->sql_clauses[ $type ][] = $clause;
 		}
@@ -161,9 +162,20 @@ class SqlQuery {
 		$group_by = $this->get_sql_clause( 'group_by', 'filtered' );
 		$having   = $this->get_sql_clause( 'having', 'filtered' );
 		$order_by = $this->get_sql_clause( 'order_by', 'filtered' );
-		//$full_join = $this->get_sql_clause( 'full_join', 'filtered' );
+		$with = $this->get_sql_clause( 'with', 'filtered' );
+		$union = $this->get_sql_clause( 'union', 'filtered' );
 
-		$statement = "
+
+		if ( ! empty( $with ) ) {
+			$statement = "
+				WITH
+					{$with}
+			";
+		} else {
+			$statement = '';
+		}
+
+		$statement .= "
 			SELECT
 				{$this->get_sql_clause( 'select', 'filtered' )}
 			FROM
@@ -173,6 +185,13 @@ class SqlQuery {
 				1=1
 				{$where}
 		";
+
+		if ( ! empty ( $union ) ) {
+			$statement .= "
+				UNION
+					{$union}
+			";
+		}
 
 		if ( ! empty( $group_by ) ) {
 			$statement .= "
@@ -214,7 +233,8 @@ class SqlQuery {
 			'having'     => array(),
 			'limit'      => array(),
 			'order_by'   => array(),
-			'full_join'  => array(),
+			'with'       => array(),
+			'union'      => array(),
 		);
 	}
 }
