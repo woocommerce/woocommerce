@@ -284,7 +284,7 @@ jQuery( function( $ ) {
 			ajax( {
 				type:     $form.attr( 'method' ),
 				url:      $form.attr( 'action' ),
-				data:     $form.serialize(),
+				data:     new URLSearchParams( new FormData( $form[0] ) ).toString(),
 				dataType: 'html',
 				success:  function( response ) {
 					update_wc_div( response );
@@ -371,7 +371,7 @@ jQuery( function( $ ) {
 			ajax( {
 				type:     $form.attr( 'method' ),
 				url:      $form.attr( 'action' ),
-				data:     $form.serialize(),
+				data:     new URLSearchParams( new FormData( $form[0] ) ).toString(),
 				dataType: 'html',
 				success:  function( response ) {
 					update_wc_div( response, preserve_notices );
@@ -495,7 +495,7 @@ jQuery( function( $ ) {
 			ajax( {
 				type:     'POST',
 				url:      get_url( 'apply_coupon' ),
-				data:     $.param( data ),
+				data:     new URLSearchParams( data ).toString(),
 				dataType: 'html',
 				success: function( response ) {
 					$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
@@ -532,7 +532,7 @@ jQuery( function( $ ) {
 			ajax( {
 				type:    'POST',
 				url:      get_url( 'remove_coupon' ),
-				data:     $.param( data ),
+				data:     new URLSearchParams( data ).toString(),
 				dataType: 'html',
 				success: function( response ) {
 					$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
@@ -565,7 +565,7 @@ jQuery( function( $ ) {
 			ajax( {
 				type:     $form.attr( 'method' ),
 				url:      $form.attr( 'action' ),
-				data:     $form.serialize(),
+				data:     new URLSearchParams( new FormData( $form[0] ) ).toString(),
 				dataType: 'html',
 				success:  function( response ) {
 					update_wc_div( response );

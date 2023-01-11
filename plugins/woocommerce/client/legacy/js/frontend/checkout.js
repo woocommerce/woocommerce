@@ -292,7 +292,8 @@ jQuery( function( $ ) {
 				wc_checkout_form.controller.abort();
 			}
 
-			if ( $( 'form.checkout' ).length === 0 ) {
+			var $form = $( 'form.checkout' );
+			if ( $form.length === 0 ) {
 				return;
 			}
 
@@ -348,7 +349,7 @@ jQuery( function( $ ) {
 				s_address       : s_address,
 				s_address_2     : s_address_2,
 				has_full_address: has_full_address,
-				post_data       : $( 'form.checkout' ).serialize()
+				post_data       : new URLSearchParams( new FormData( $form[0] ) ).toString()
 			};
 
 			if ( false !== args.update_shipping_method ) {
@@ -435,8 +436,6 @@ jQuery( function( $ ) {
 
 					// Check for error
 					if ( data && 'failure' === data.result ) {
-
-						var $form = $( 'form.checkout' );
 
 						// Remove notices from all sources
 						$( '.woocommerce-error, .woocommerce-message' ).remove();
@@ -548,7 +547,7 @@ jQuery( function( $ ) {
 				ajax({
 					type:		'POST',
 					url:		wc_checkout_params.checkout_url,
-					data:		$form.serialize(),
+					data:		new URLSearchParams( new FormData( $form[0] ) ).toString(),
 					dataType:   'json',
 					success:	function( result ) {
 						// Detach the unload handler that prevents a reload / redirect
@@ -654,7 +653,7 @@ jQuery( function( $ ) {
 			ajax({
 				type:		'POST',
 				url:		wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'apply_coupon' ),
-				data:		$.param( data ),
+				data:		new URLSearchParams( data ).toString(),
 				success:	function( code ) {
 					$( '.woocommerce-error, .woocommerce-message' ).remove();
 					$form.removeClass( 'processing' ).unblock();
@@ -694,7 +693,7 @@ jQuery( function( $ ) {
 			ajax({
 				type:    'POST',
 				url:     wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'remove_coupon' ),
-				data:    $.param( data ),
+				data:    new URLSearchParams( data ).toString(),
 				success: function( code ) {
 					$( '.woocommerce-error, .woocommerce-message' ).remove();
 					container.removeClass( 'processing' ).unblock();
