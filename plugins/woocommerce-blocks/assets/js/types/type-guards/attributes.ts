@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { AttributeTerm, AttributeQuery } from '../type-defs';
+import type { AttributeTerm, AttributeQuery } from '../type-defs';
 import { objectHasProp } from './object';
 
 export const isAttributeTerm = ( term: unknown ): term is AttributeTerm => {

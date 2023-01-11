@@ -7,7 +7,7 @@ import type { ReactNode } from 'react';
  * Internal dependencies
  */
 import type { CartTotals, Cart } from './cart';
-import {
+import type {
 	CartResponseBillingAddress,
 	CartResponseShippingAddress,
 } from './cart-response';
