@@ -31,7 +31,7 @@ class Features {
 		'settings'                          => array( 'default' => 'no' ),
 		'new-product-management-experience' => array( 'default' => 'no' ),
 		'analytics'                         => array( 'default' => 'yes' ),
-		'remote-inbox-notifications'         => array( 'default' => 'yes' ),
+		'remote-inbox-notifications'        => array( 'default' => 'yes' ),
 	);
 
 	/**

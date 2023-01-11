@@ -90,13 +90,13 @@ class FeaturesController {
 	 */
 	public function __construct() {
 		$features = array(
-			'analytics'           => array(
+			'analytics'              => array(
 				'name'               => __( 'Analytics', 'woocommerce' ),
 				'description'        => __( 'Enables WooCommerce Analytics', 'woocommerce' ),
 				'is_experimental'    => false,
 				'enabled_by_default' => true,
 			),
-			'new_navigation'      => array(
+			'new_navigation'         => array(
 				'name'            => __( 'Navigation', 'woocommerce' ),
 				'description'     => __( 'Adds the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
 				'is_experimental' => false,
@@ -107,7 +107,7 @@ class FeaturesController {
 				'tooltip'         => __( 'Enable to try the new, simplified product editor (currently in development and only available for simple products). No extension support yet.', 'woocommerce' ),
 				'is_experimental' => false,
 			),
-			'custom_order_tables' => array(
+			'custom_order_tables'    => array(
 				'name'            => __( 'High-Performance order storage (COT)', 'woocommerce' ),
 				'description'     => __( 'Enable the high performance order storage feature.', 'woocommerce' ),
 				'is_experimental' => true,
@@ -601,7 +601,7 @@ class FeaturesController {
 		$description = $feature['description'];
 		$disabled    = false;
 		$desc_tip    = '';
-		$tooltip         = isset( $feature['tooltip'] ) ? $feature['tooltip'] : '';
+		$tooltip     = isset( $feature['tooltip'] ) ? $feature['tooltip'] : '';
 
 		if ( ( 'analytics' === $feature_id || 'new_navigation' === $feature_id ) && $admin_features_disabled ) {
 			$disabled = true;
