@@ -29,12 +29,14 @@ export function CustomerEffortScoreConsole( { label } ) {
     const onNoticeShown = () => console.log( 'onNoticeShown' );
     const onModalShown = () => console.log( 'onModalShown' );
     const onNoticeDismissed = () => console.log( 'onNoticeDismissed' );
-    const recordScore = ( score, comments ) => console.log( { score, comments } );
+    const recordScore = ( score, score2, comments ) => console.log( { score, score2, comments } );
 
     return (
         <CustomerEffortScore
 			recordScoreCallback={ recordScore }
-			label={ label }
+			title="My title" 
+            firstQuestion="My first question"
+            secondQuestion="My optional second question"
 			onNoticeShownCallback={ onNoticeShown }
 			onNoticeDismissedCallback={ onNoticeDismissed }
 			onModalShownCallback={ onModalShown }
@@ -62,7 +64,8 @@ const MyComponent = function() {
 		setCeses( 
 			ceses.concat( 
 				<CustomerEffortScoreConsole
-					label={ `survey ${ceses.length + 1}` }
+					title={ `survey ${ceses.length + 1}` }
+                    firstQuestion="My first question"
 					key={ ceses.length + 1 }
 				/> 
 			) 
