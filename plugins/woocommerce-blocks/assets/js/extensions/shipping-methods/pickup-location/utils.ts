@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { cleanForSlug } from '@wordpress/url';
-
+import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
@@ -25,7 +25,7 @@ export const indexLocationsById = (
 
 export const defaultSettings = {
 	enabled: false,
-	title: '',
+	title: __( 'Local Pickup', 'woo-gutenberg-products-block' ),
 	tax_status: 'taxable',
 	cost: '',
 };
