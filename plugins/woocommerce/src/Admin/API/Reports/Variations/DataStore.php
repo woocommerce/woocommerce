@@ -474,7 +474,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				/**
 				 * Experimental: Filter the Variations SQL query allowing extensions to add additional SQL clauses.
 				 *
-				 * @ignore
+				 * @since 7.4.0
 				 * @param array $query_args Query parameters.
 				 * @param SqlQuery $subquery Variations query class.
 				 */
