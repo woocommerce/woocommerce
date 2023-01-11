@@ -162,9 +162,8 @@ class SqlQuery {
 		$group_by = $this->get_sql_clause( 'group_by', 'filtered' );
 		$having   = $this->get_sql_clause( 'having', 'filtered' );
 		$order_by = $this->get_sql_clause( 'order_by', 'filtered' );
-		$with = $this->get_sql_clause( 'with', 'filtered' );
-		$union = $this->get_sql_clause( 'union', 'filtered' );
-
+		$with     = $this->get_sql_clause( 'with', 'filtered' );
+		$union    = $this->get_sql_clause( 'union', 'filtered' );
 
 		if ( ! empty( $with ) ) {
 			$statement = "
@@ -186,7 +185,7 @@ class SqlQuery {
 				{$where}
 		";
 
-		if ( ! empty ( $union ) ) {
+		if ( ! empty( $union ) ) {
 			$statement .= "
 				UNION
 					{$union}
