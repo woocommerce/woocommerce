@@ -426,6 +426,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$params              = $this->get_limit_params( $query_args );
 			$this->add_sql_query_params( $query_args );
 
+			$additional_clause = '';
 			if ( count( $included_variations ) > 0 ) {
 				$total_results = count( $included_variations );
 				$total_pages   = (int) ceil( $total_results / $params['per_page'] );
@@ -477,13 +478,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$variations_query  = $this->subquery->get_query_statement();
 				$additional_clause = apply_filters( 'experimental_woocommerce_analytics_variations_additional_clause', '', $query_args, $variations_query );
 
-				if ( $additional_clause ) {
-					$this->subquery->add_sql_clause( 'full_join', $additional_clause );
-				}
+				//if ( $additional_clause ) {
+				//	$this->subquery->add_sql_clause( 'full_join', $additional_clause );
+				//}
 			}
-
-			$variations_query  = $this->subquery->get_query_statement();
-
+			if ( $additional_clause ){
+				$variations_query = $additional_clause;
+			} else {
+				$variations_query = $this->subquery->get_query_statement();
+			}
 			/* phpcs:disable WordPress.DB.PreparedSQL.NotPrepared */
 			$product_data = $wpdb->get_results(
 				$variations_query,
