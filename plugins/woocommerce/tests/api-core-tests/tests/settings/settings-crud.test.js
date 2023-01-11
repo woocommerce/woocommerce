@@ -142,7 +142,7 @@ test.describe('Settings API tests: CRUD', () => {
 					expect.objectContaining({
 						id: "email_cancelled_order",
 						label: "Canceled order",
-						description: "Canceled order emails are sent to chosen recipient(s) when orders have been marked cancelled (if they were previously processing or on-hold).",
+						description: "Canceled order emails are sent to chosen recipient(s) when orders have been marked canceled (if they were previously processing or on-hold).",
 						parent_id: "email",
 						"sub_groups": expect.arrayContaining([]),
 					})
