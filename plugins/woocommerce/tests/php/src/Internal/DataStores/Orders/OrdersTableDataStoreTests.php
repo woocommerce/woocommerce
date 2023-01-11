@@ -1350,6 +1350,38 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox Ensure sorting by `includes` param works as expected.
+	 */
+	public function test_cot_query_sort_includes() {
+		$this->disable_cot_sync();
+		$order_1 = new WC_Order();
+		$this->switch_data_store( $order_1, $this->sut );
+		$order_1->save();
+
+		$order_2 = new WC_Order();
+		$this->switch_data_store( $order_2, $this->sut );
+		$order_2->save();
+
+		$query        = new OrdersTableQuery(
+			array(
+				'orderby'  => 'include',
+				'includes' => array( $order_1->get_id(), $order_2->get_id() ),
+			)
+		);
+		$orders_array = $query->orders;
+		$this->assertEquals( array( $order_1->get_id(), $order_2->get_id() ), array( $orders_array[0], $orders_array[1] ) );
+
+		$query        = new OrdersTableQuery(
+			array(
+				'orderby'  => 'include',
+				'includes' => array( $order_2->get_id(), $order_1->get_id() ),
+			)
+		);
+		$orders_array = $query->orders;
+		$this->assertEquals( array( $order_2->get_id(), $order_1->get_id() ), array( $orders_array[0], $orders_array[1] ) );
+	}
+
+	/**
 	 * @testDox Ensure search works as expected on updated orders.
 	 */
 	public function test_cot_query_search_update() {
@@ -1897,6 +1929,25 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$this->assertTrue( $should_sync_callable->call( $this->sut, $order ) );
 		$this->sut->read_multiple( $orders );
 		$this->assertFalse( $should_sync_callable->call( $this->sut, $order ) );
+	}
+
+	/**
+	 * @testDox When parent order is deleted, child orders should be upshifted.
+	 */
+	public function test_child_orders_are_promoted_when_parent_is_deleted() {
+		$this->toggle_cot( true );
+		$order = new WC_Order();
+		$order->save();
+
+		$child_order = new WC_Order();
+		$child_order->set_parent_id( $order->get_id() );
+		$child_order->save();
+
+		$this->assertEquals( $order->get_id(), $child_order->get_parent_id() );
+		$this->sut->delete( $order, array( 'force_delete' => true ) );
+		$child_order = wc_get_order( $child_order->get_id() );
+
+		$this->assertEquals( 0, $child_order->get_parent_id() );
 	}
 
 	/**

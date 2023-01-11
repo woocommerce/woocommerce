@@ -8,28 +8,10 @@ import { render } from '@testing-library/react';
  */
 import { ProductSectionLayout } from '../product-section-layout';
 
-jest.mock( '../product-field-layout', () => {
-	const productFieldLayoutMock: React.FC< {
-		fieldName: string;
-		categoryName: string;
-	} > = ( { children, fieldName, categoryName } ) => {
-		return (
-			<div className="product-field-layout-mock">
-				<span>fieldName: { fieldName }</span>
-				<span>categoryName: { categoryName }</span>
-				{ children }
-			</div>
-		);
-	};
-	return {
-		ProductFieldLayout: productFieldLayoutMock,
-	};
-} );
-
 const SampleInputField: React.FC< { name: string; onChange: () => void } > = ( {
 	name,
 } ) => {
-	return <div>smaple-input-field-{ name }</div>;
+	return <div>sample-input-field-{ name }</div>;
 };
 
 describe( 'ProductSectionLayout', () => {
@@ -59,12 +41,9 @@ describe( 'ProductSectionLayout', () => {
 			</ProductSectionLayout>
 		);
 
-		expect( queryByText( 'fieldName: name' ) ).toBeInTheDocument();
-		expect( queryAllByText( 'categoryName: Title' ).length ).toEqual( 2 );
-
-		expect( queryByText( 'smaple-input-field-name' ) ).toBeInTheDocument();
+		expect( queryByText( 'sample-input-field-name' ) ).toBeInTheDocument();
 		expect(
-			queryByText( 'smaple-input-field-description' )
+			queryByText( 'sample-input-field-description' )
 		).toBeInTheDocument();
 	} );
 

@@ -8,11 +8,15 @@ concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
 
+permissions: {}
+
 jobs:
     cot-e2e-tests-run:
         name: Runs E2E tests with COT enabled.
         if: "${{ github.event_name == 'workflow_dispatch' || github.event.label.name == 'focus: custom order tables' }}"
         runs-on: ubuntu-20.04
+        permissions:
+          contents: read
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
@@ -68,6 +72,8 @@ jobs:
         name: Runs API tests with COT enabled.
         if: "${{ github.event_name == 'workflow_dispatch' || github.event.label.name == 'focus: custom order tables' }}"
         runs-on: ubuntu-20.04
+        permissions:
+          contents: read
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-report
@@ -126,6 +132,8 @@ jobs:
               contains( needs.*.result, 'failure' )
             )
         runs-on: ubuntu-20.04
+        permissions:
+          contents: read
         needs: [cot-api-tests-run, cot-e2e-tests-run]
         steps:
             - name: Create dirs

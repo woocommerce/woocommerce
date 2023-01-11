@@ -61,7 +61,6 @@ class DefaultFreeExtensions {
 					self::get_plugin( 'tiktok-for-business' ),
 					self::get_plugin( 'pinterest-for-woocommerce:alt' ),
 					self::get_plugin( 'facebook-for-woocommerce:alt' ),
-					self::get_plugin( 'pinterest-for-woocommerce' ),
 					self::get_plugin( 'codistoconnect:alt' ),
 				],
 			],

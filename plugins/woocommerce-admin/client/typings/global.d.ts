@@ -11,7 +11,6 @@ declare global {
 			analytics: boolean;
 			coupons: boolean;
 			'customer-effort-score-tracks': boolean;
-			'experimental-products-task': boolean;
 			homescreen: boolean;
 			marketing: boolean;
 			'minified-js': boolean;
@@ -21,6 +20,7 @@ declare global {
 			onboarding: boolean;
 			'onboarding-tasks': boolean;
 			'payment-gateway-suggestions': boolean;
+			'product-variation-management': boolean;
 			'remote-inbox-notifications': boolean;
 			'remote-free-extensions': boolean;
 			settings: boolean;

@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Added ability to force time when DateTimePickerControl is date-only (timeForDateOnly prop).

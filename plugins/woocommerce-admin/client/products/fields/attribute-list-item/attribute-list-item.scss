@@ -1,0 +1,40 @@
+.woocommerce-add-attribute-list-item,
+.woocommerce-attribute-list-item {
+	min-height: 82px;
+	padding: 0 $gap-large;
+
+	&:last-child {
+		margin-bottom: -1px;
+	}
+}
+
+.woocommerce-attribute-list-item {
+	display: grid;
+	grid-template-columns: 24px 26% auto 90px;
+
+	&:last-child {
+		margin-bottom: -1px;
+	}
+
+	&__options {
+		display: flex;
+		flex-direction: row;
+		gap: $gap-smallest;
+	}
+
+	&__option-chip {
+		padding: $gap-smallest $gap-smaller;
+		gap: 2px;
+
+		background: $gray-100;
+		border-radius: 2px;
+	}
+
+	&__actions {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: end;
+		gap: $gap-smaller;
+	}
+}

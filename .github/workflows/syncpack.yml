@@ -6,9 +6,14 @@ on:
       - trunk
     paths:
       - '**/package.json'
+
+permissions: {}
+
 jobs:
   syncpack:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     name: syncpack
     steps:
       - name: 'Checkout'

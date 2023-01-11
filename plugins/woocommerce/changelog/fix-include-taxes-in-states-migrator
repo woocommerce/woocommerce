@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Include taxes migration in MigrationHelper::migrate_country_states

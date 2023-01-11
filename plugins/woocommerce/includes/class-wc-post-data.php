@@ -502,7 +502,7 @@ class WC_Post_Data {
 	 * @param  int    $meta_id    Meta ID.
 	 * @param  int    $object_id  Object ID.
 	 * @param  string $meta_key   Meta key.
-	 * @param  string $meta_value Meta value.
+	 * @param  mixed  $meta_value Meta value.
 	 */
 	public static function flush_object_meta_cache( $meta_id, $object_id, $meta_key, $meta_value ) {
 		WC_Cache_Helper::invalidate_cache_group( 'object_' . $object_id );

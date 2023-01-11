@@ -1280,6 +1280,8 @@ class WC_Helper {
 			$source = 'inbox-notes';
 		elseif ( stripos( $request_uri, 'admin-ajax.php' ) ) :
 			$source = 'heartbeat-api';
+		elseif ( defined( 'WP_CLI' ) && WP_CLI ) :
+			$source = 'wc-cli';
 		endif;
 
 		// Obtain the connected user info.
@@ -1287,7 +1289,7 @@ class WC_Helper {
 			'subscriptions',
 			array(
 				'authenticated' => true,
-				'query_string'  => esc_url( '?source=' . $source ),
+				'query_string'  => '' !== $source ? esc_url( '?source=' . $source ) : '',
 			)
 		);
 

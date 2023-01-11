@@ -3,11 +3,15 @@ on:
   pull_request_target:
     types: [closed]
 
+permissions: {}
+
 jobs:
   process-pull-request-after-merge:
     name: "Process a pull request after it's merged"
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-20.04
+    permissions:
+      pull-requests: write
     steps:
       - name: "Get the action scripts"
         run: |

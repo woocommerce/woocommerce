@@ -46,8 +46,8 @@ test.describe( 'Edit order', () => {
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
 
 		// make sure we're on the order details page
-		await expect( page.locator( 'h1.components-text' ) ).toContainText(
-			'Edit Order'
+		await expect( page.locator( 'h1.wp-heading-inline' ) ).toContainText(
+			/Edit [oO]rder/
 		);
 	} );
 

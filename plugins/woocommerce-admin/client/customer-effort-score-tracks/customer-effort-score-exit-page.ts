@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
+import { getQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -42,7 +43,7 @@ export const getExitPageData = () => {
  * @param {string} pageId of page exited early.
  */
 export const addExitPage = ( pageId: string ) => {
-	if ( ! window.localStorage ) {
+	if ( ! ( window.localStorage && allowTracking ) ) {
 		return;
 	}
 
@@ -93,8 +94,8 @@ export const addCustomerEffortScoreExitPageListener = (
 	pageId: string,
 	hasUnsavedChanges: () => boolean
 ) => {
-	eventListeners[ pageId ] = ( event ) => {
-		if ( hasUnsavedChanges() && allowTracking ) {
+	eventListeners[ pageId ] = () => {
+		if ( hasUnsavedChanges() ) {
 			addExitPage( pageId );
 		}
 	};
@@ -205,9 +206,73 @@ function getExitPageCESCopy( pageId: string ): {
 					'woocommerce'
 				),
 			};
+		case 'shop_order_update':
+			return {
+				action: pageId,
+				icon: '📦',
+				noticeLabel: __(
+					'How easy or difficult was it to update this order?',
+					'woocommerce'
+				),
+				title: __(
+					"How's your experience with orders?",
+					'woocommerce'
+				),
+				description: __(
+					'We noticed you started editing an order, then left. How was it? Your feedback will help create a better experience for thousands of merchants like you.',
+					'woocommerce'
+				),
+				firstQuestion: __(
+					'The order editing screen is easy to use',
+					'woocommerce'
+				),
+				secondQuestion: __(
+					"The order details screen's functionality meets my needs",
+					'woocommerce'
+				),
+			};
+		case 'import_products':
+			return {
+				action: pageId,
+				icon: '🔄',
+				noticeLabel: __(
+					'How is your experience with importing products?',
+					'woocommerce'
+				),
+				title: __(
+					`How's your experience with importing products?`,
+					'woocommerce'
+				),
+				description: __(
+					'We noticed you started importing products, then left. How was it? Your feedback will help create a better experience for thousands of merchants like you.',
+					'woocommerce'
+				),
+				firstQuestion: __(
+					'The product import screen is easy to use',
+					'woocommerce'
+				),
+				secondQuestion: __(
+					"The product import screen's functionality meets my needs",
+					'woocommerce'
+				),
+			};
 		default:
 			return null;
 	}
+}
+
+/**
+ * Stores trigger conditions for exit page actions.
+ *
+ * @param {string} pageId page id.
+ */
+function getShouldExitPageFire( pageId: string ) {
+	const conditionPageMap: Record< string, () => boolean > = {
+		import_products: () =>
+			( getQuery() as { page: string } ).page !== 'product_importer',
+	};
+
+	return conditionPageMap[ pageId ] ? conditionPageMap[ pageId ]() : true;
 }
 
 /**
@@ -215,9 +280,14 @@ function getExitPageCESCopy( pageId: string ): {
  */
 export function triggerExitPageCesSurvey() {
 	const exitPageItems: string[] = getExitPageData();
-	if ( exitPageItems && exitPageItems.length > 0 ) {
+	if ( exitPageItems?.length ) {
+		if ( ! getShouldExitPageFire( exitPageItems[ 0 ] ) ) {
+			return;
+		}
+
 		const copy = getExitPageCESCopy( exitPageItems[ 0 ] );
-		if ( copy && copy.title.length > 0 ) {
+
+		if ( copy?.title?.length ) {
 			dispatch( 'wc/customer-effort-score' ).addCesSurvey( {
 				...copy,
 				pageNow: window.pagenow,
