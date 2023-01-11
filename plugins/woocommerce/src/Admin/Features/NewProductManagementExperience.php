@@ -17,7 +17,12 @@ class NewProductManagementExperience {
 	 * Constructor
 	 */
 	public function __construct() {
+		if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
+			return;
+		}
+
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+		add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
 	}
 
 	/**
@@ -36,6 +41,27 @@ class NewProductManagementExperience {
 		 * @since 7.1.0
 		*/
 		do_action( 'enqueue_block_editor_assets' );
+	}
+
+	/**
+	 * Update the edit product links when the new experience is enabled.
+	 *
+	 * @param string $link    The edit link.
+	 * @param int    $post_id Post ID.
+	 * @return string
+	 */
+	public function update_edit_product_link( $link, $post_id ) {
+		$product  = wc_get_product( $post_id );
+
+		if ( ! $product ) {
+			return $link;
+		}
+
+		if ( $product->get_type() === 'simple' ) {
+			return admin_url( 'admin.php?page=wc-admin&path=/product/' . $product->get_id() );
+		}
+
+		return $link;
 	}
 
 }
