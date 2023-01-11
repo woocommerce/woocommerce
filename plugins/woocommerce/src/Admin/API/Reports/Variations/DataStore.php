@@ -472,9 +472,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$this->subquery->add_sql_clause( 'select', $selections );
 
 				/**
-				 * Filter the Variations SQL query allowing extensions to add additional SQL clauses.
+				 * Experimental: Filter the Variations SQL query allowing extensions to add additional SQL clauses.
 				 *
-				 * @since 3.5.0
+				 * @ignore
+				 * @param array $query_args Query parameters.
+				 * @param SqlQuery $subquery Variations query class.
 				 */
 				apply_filters( 'experimental_woocommerce_analytics_variations_additional_clauses', $query_args, $this->subquery );
 
