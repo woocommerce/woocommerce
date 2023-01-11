@@ -408,7 +408,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
-		if ( false === false ) { // TODO: remove when done testing.
+		if ( false === $data ) {
 			$this->initialize_queries();
 
 			$data = (object) array(
@@ -426,7 +426,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$params              = $this->get_limit_params( $query_args );
 			$this->add_sql_query_params( $query_args );
 
-			$additional_clause = '';
 			if ( count( $included_variations ) > 0 ) {
 				$total_results = count( $included_variations );
 				$total_pages   = (int) ceil( $total_results / $params['per_page'] );
