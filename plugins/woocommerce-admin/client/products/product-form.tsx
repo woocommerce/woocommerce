@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { Form, FormRef } from '@woocommerce/components';
+import {
+	Form,
+	FormRef,
+	__experimentalWooProductSectionItem as WooProductSectionItem,
+} from '@woocommerce/components';
 import { PartialProduct, Product } from '@woocommerce/data';
 import { Ref } from 'react';
 
@@ -47,6 +51,7 @@ export const ProductForm: React.FC< {
 					<ProductDetailsSection />
 					<ImagesSection />
 					<AttributesSection />
+					<WooProductSectionItem.Slot location="tab/general" />
 				</ProductFormTab>
 				<ProductFormTab
 					name="pricing"
