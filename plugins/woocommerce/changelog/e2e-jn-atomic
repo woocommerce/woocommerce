@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Make E2E tests passable on JN and atomic ephemeral sites.
