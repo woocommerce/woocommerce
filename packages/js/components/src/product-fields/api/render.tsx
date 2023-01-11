@@ -15,8 +15,8 @@ export function renderField( name: string, props: Record< string, any > ) {
 	const fieldConfig: ProductFieldDefinition =
 		select( productFieldStore ).getProductField( name );
 
-	if ( fieldConfig.edit ) {
-		return <fieldConfig.edit { ...props } />;
+	if ( fieldConfig.render ) {
+		return <fieldConfig.render { ...props } />;
 	}
 	if ( fieldConfig.type ) {
 		return createElement( 'input', {

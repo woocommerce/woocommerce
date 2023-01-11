@@ -5,13 +5,13 @@ Product Fields are used within the WooCommerce Admin product editor, for renderi
 ## Example
 
 ```js
-// block.js
+// product-field.js
 ( function ( element ) {
-	var el = element.createElement;
+	const el = element.createElement;
 
 	registerProductField( 'number', {
 		name: 'number',
-		edit: () => {
+		render: () => {
 			return <InputControl type="number" />;
 		},
 	} );
@@ -33,7 +33,7 @@ import { registerProductField } from '@woocommerce/components';
 
 registerProductField( 'number', {
 	name: 'number',
-	edit: () => {
+	render: () => {
 		return <InputControl type="number" />;
 	},
 } );
@@ -43,3 +43,4 @@ _Parameters_
 
 -   _fieldName_ `string`: Field name.
 -   _settings_ `Object`: Field settings.
+    -   _render_ `ComponentType`: React functional component to be rendered.

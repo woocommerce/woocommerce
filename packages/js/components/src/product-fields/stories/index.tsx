@@ -22,22 +22,24 @@ registry.register( store );
 
 registerProductField( 'text', {
 	name: 'text',
-	edit: ( props ) => {
+	render: ( props ) => {
 		return <InputControl type="text" { ...props } />;
 	},
 } );
 
 registerProductField( 'number', {
 	name: 'number',
-	edit: () => {
+	render: () => {
 		return <InputControl type="number" />;
 	},
 } );
 
 const RenderField = () => {
-	const [ selectedField, setSelectedField ] = useState();
-
 	const fields: string[] = select( store ).getRegisteredProductFields();
+	const [ selectedField, setSelectedField ] = useState(
+		fields ? fields[ 0 ] : undefined
+	);
+
 	const handleChange = ( event ) => {
 		setSelectedField( event.target.value );
 	};
@@ -50,7 +52,7 @@ const RenderField = () => {
 					</option>
 				) ) }
 			</select>
-			{ renderField( selectedField || fields[ 0 ], { name: 'test' } ) }
+			{ selectedField && renderField( selectedField, { name: 'test' } ) }
 		</div>
 	);
 };

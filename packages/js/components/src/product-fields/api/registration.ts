@@ -28,20 +28,18 @@ export function registerProductField(
 	fieldName: string,
 	settings: ProductFieldDefinition
 ) {
-	const name = fieldName;
-
-	if ( select( productFieldStore ).getProductField( name ) ) {
+	if ( select( productFieldStore ).getProductField( fieldName ) ) {
 		// eslint-disable-next-line no-console
-		console.error( 'Product Field "' + name + '" is already registered.' );
+		console.error(
+			'Product Field "' + fieldName + '" is already registered.'
+		);
 		return;
 	}
 
-	const blockType = {
+	dispatch( productFieldStore ).registerProductField( {
 		attributes: {},
 		...settings,
-	};
+	} );
 
-	dispatch( productFieldStore ).registerProductField( blockType );
-
-	return select( productFieldStore ).getProductField( name );
+	return select( productFieldStore ).getProductField( fieldName );
 }
