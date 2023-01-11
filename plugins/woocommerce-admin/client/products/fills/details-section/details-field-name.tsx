@@ -12,19 +12,17 @@ import {
 	PRODUCTS_STORE_NAME,
 	WCDataSelector,
 } from '@woocommerce/data';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
+import { EditProductLinkModal } from '../../shared/edit-product-link-modal';
 import { PRODUCT_DETAILS_SLUG } from './index';
 
-type DetailsNameFieldProps = {
-	setShowProductLinkEditModal: ( show: boolean ) => void;
-};
-
-export const DetailsNameField: React.FC< DetailsNameFieldProps > = ( {
-	setShowProductLinkEditModal,
-} ) => {
+export const DetailsNameField = ( {} ) => {
+	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
+		useState( false );
 	const { getInputProps, values, touched, errors, setValue } =
 		useFormContext< Product >();
 
@@ -91,6 +89,15 @@ export const DetailsNameField: React.FC< DetailsNameFieldProps > = ( {
 						{ __( 'Edit', 'woocommerce' ) }
 					</Button>
 				</span>
+			) }
+			{ showProductLinkEditModal && (
+				<EditProductLinkModal
+					permalinkPrefix={ permalinkPrefix || '' }
+					permalinkSuffix={ permalinkSuffix || '' }
+					product={ values }
+					onCancel={ () => setShowProductLinkEditModal( false ) }
+					onSaved={ () => setShowProductLinkEditModal( false ) }
+				/>
 			) }
 		</div>
 	);
