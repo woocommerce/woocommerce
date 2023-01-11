@@ -2,13 +2,13 @@
  * External dependencies
  */
 import { TableCard } from '@woocommerce/components';
-import { useState } from '@wordpress/element';
-import { createElement } from '@wordpress/element';
+import { useState, createElement } from '@wordpress/element';
+import { Button } from '@wordpress/components';
+
 /**
  * Internal dependencies
  */
 import { headers, rows, summary } from './index';
-import { Button } from '@wordpress/components';
 
 const TableCardExample = () => {
 	const [ { query }, setState ] = useState( {
