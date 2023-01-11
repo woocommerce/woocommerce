@@ -2,7 +2,7 @@
  * External dependencies
  */
 import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
-import { LazyExoticComponent } from 'react';
+import type { LazyExoticComponent } from 'react';
 
 export type EditorBlock< T > = BlockInstance< T > & BlockEditProps< T >;
 

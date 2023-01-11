@@ -15,6 +15,8 @@ type WithStyle = {
 	style: Record< string, unknown >;
 };
 
+// @todo The @wordpress/block-editor dependency should never be used on the frontend of the store due to excessive side and its dependency on @wordpress/components
+// @see https://github.com/woocommerce/woocommerce-blocks/issues/8071
 export const useBorderProps = (
 	attributes: unknown
 ): WithStyle & WithClass => {

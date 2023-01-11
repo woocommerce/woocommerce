@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { CurrencyResponse } from './currency';
+import type { CurrencyResponse } from './currency';
 import type { CartItem } from './cart';
 import type { ProductResponseItem } from './product-response';
 
