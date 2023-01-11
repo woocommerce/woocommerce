@@ -36,8 +36,14 @@ export const ProductVariationFormActions: React.FC = () => {
 	const onSave = async () => {
 		setIsSaving( true );
 		updateProductVariation< Promise< ProductVariation > >(
-			{ id: variationId, product_id: productId },
-			values
+			{ id: variationId, product_id: productId, context: 'edit' },
+			{
+				...values,
+				manage_stock:
+					values.manage_stock === 'parent'
+						? undefined
+						: values?.manage_stock,
+			}
 		)
 			.then( () => {
 				createNotice(
