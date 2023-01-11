@@ -153,6 +153,9 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 	 * @return string
 	 */
 	protected function construct_ssr() {
+		// This function depends on the WC core global being available. Sometimes, such as when we deactivate
+		// WC to install a live branches version, WC will not be available and cause a crash if we don't exit early
+		// here.
 		if ( ! class_exists( 'WC' ) ) {
 			return '';
 		}
