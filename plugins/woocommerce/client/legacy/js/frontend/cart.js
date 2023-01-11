@@ -243,13 +243,17 @@ jQuery( function( $ ) {
 
 			var data = {
 				security: wc_cart_params.update_shipping_method_nonce,
-				shipping_method: shipping_methods
 			};
+
+			// Flatten shipping_methods for use in URLSearchParams()
+			for ( var k in shipping_methods ) {
+				data[ 'shipping_method[' + k + ']' ] = shipping_methods[ k ];
+			}
 
 			ajax( {
 				type:     'post',
 				url:      get_url( 'update_shipping_method' ),
-				data:     $.param( data ),
+				data:     new URLSearchParams( data ).toString(),
 				dataType: 'html',
 				success:  function( response ) {
 					update_cart_totals_div( response );

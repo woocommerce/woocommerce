@@ -360,7 +360,10 @@ jQuery( function( $ ) {
 					shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
 				} );
 
-				data.shipping_method = shipping_methods;
+				// Flatten shipping_methods for use in URLSearchParams()
+				for ( var k in shipping_methods ) {
+					data[ 'shipping_method[' + k + ']' ] = shipping_methods[ k ];
+				}
 			}
 
 			$( '.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table' ).block({
@@ -374,7 +377,7 @@ jQuery( function( $ ) {
 			wc_checkout_form.controller = ajax({
 				type:		'POST',
 				url:		wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'update_order_review' ),
-				data:		$.param( data ),
+				data:		new URLSearchParams( data ).toString(),
 				success:	function( data ) {
 
 					// Reload the page if requested
