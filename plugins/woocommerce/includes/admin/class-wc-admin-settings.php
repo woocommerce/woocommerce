@@ -489,11 +489,10 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						}
 
 						if ( ! isset( $value['checkboxgroup'] ) || 'start' === $value['checkboxgroup'] ) {
-							$maybe_add_wc_help_tip = isset( $value['tooltip'] ) && '' !== $value['tooltip'] ? wc_help_tip( $value['tooltip'] ) : '';
 							?>
 								<tr valign="top" class="<?php echo esc_attr( implode( ' ', $visibility_class ) ); ?>">
 									<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ); ?></th>
-									<td class="help-tooltip"><?php echo esc_html( $maybe_add_wc_help_tip ); ?></td>
+									<td class="help-tooltip"><?php echo isset( $value['tooltip'] ) && '' !== $value['tooltip'] ? wc_help_tip( esc_html( $value['tooltip'] ) ) : ''; ?></td>
 									<td class="forminp forminp-checkbox">
 										<fieldset>
 							<?php
