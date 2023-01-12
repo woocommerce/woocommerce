@@ -46,6 +46,9 @@ jobs:
             - name: 'Generate the changelog file'
               run: pnpm --filter=woocommerce run changelog write --add-pr-num -n -vvv --use-version ${{ inputs.releaseVersion }}
 
+            - name: Checkout pnpm-lock.yaml to prevent issues
+              run: git checkout pnpm-lock.yaml
+
             - name: 'git rm deleted files'
               run: git rm $(git ls-files --deleted)
 
