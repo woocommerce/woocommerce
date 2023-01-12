@@ -94,7 +94,7 @@ class ProductForm extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Get the form fields.
+	 * Get the form config.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error
@@ -107,8 +107,8 @@ class ProductForm extends \WC_REST_Data_Controller {
 			FormFactory::get_fields()
 		);
 		$subsections = array_map(
-			function( $card ) {
-				return $card->get_json();
+			function( $subsection ) {
+				return $subsection->get_json();
 			},
 			FormFactory::get_subsections()
 		);
