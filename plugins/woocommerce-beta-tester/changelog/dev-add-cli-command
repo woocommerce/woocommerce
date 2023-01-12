@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a wp cli command for activating live branches.
