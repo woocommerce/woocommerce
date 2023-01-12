@@ -46,9 +46,9 @@ export const Edit = ( {
 		'activeShippingZones'
 	) as shippingAdminLink[];
 
-	const { showShippingFields } = useCheckoutAddress();
+	const { showShippingMethods } = useCheckoutAddress();
 
-	if ( ! showShippingFields ) {
+	if ( ! showShippingMethods ) {
 		return null;
 	}
 
