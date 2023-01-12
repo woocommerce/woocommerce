@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Add support for approx count in orders query for HPOS.
