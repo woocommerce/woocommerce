@@ -32,18 +32,12 @@ const FrontendBlock = ( {
 	children: JSX.Element;
 	className?: string;
 } ) => {
-	const { checkoutIsProcessing, prefersCollection } = useSelect(
-		( select ) => {
-			const checkoutStore = select( CHECKOUT_STORE_KEY );
-			return {
-				checkoutIsProcessing: checkoutStore.isProcessing(),
-				prefersCollection: checkoutStore.prefersCollection(),
-			};
-		}
+	const checkoutIsProcessing = useSelect( ( select ) =>
+		select( CHECKOUT_STORE_KEY ).isProcessing()
 	);
-	const { needsShipping } = useCheckoutAddress();
+	const { showShippingMethods } = useCheckoutAddress();
 
-	if ( ! needsShipping || prefersCollection ) {
+	if ( ! showShippingMethods ) {
 		return null;
 	}
 
