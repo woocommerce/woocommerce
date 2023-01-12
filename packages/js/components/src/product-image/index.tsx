@@ -34,7 +34,7 @@ type ProductImageProps = {
 	width?: number;
 	/** The height of image to display. */
 	height?: number;
-	// Additional CSS classes.
+	/** Additional CSS classes. */
 	className?: string;
 	/** Text to use as the image alt attribute. */
 	alt?: string;
