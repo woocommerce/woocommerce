@@ -10,7 +10,50 @@ import { useTabState, Tab, TabList, TabPanel } from 'reakit/Tab';
  */
 import './style.scss';
 
-const Tabs = ( {
+export interface TabsProps {
+	/**
+	 * Component wrapper classname
+	 */
+	className?: string;
+	/**
+	 * Event handler triggered when a tab is selected
+	 */
+	onSelect?: ( tabName: string ) => void;
+	/**
+	 * Array of tab objects
+	 */
+	tabs: Array< {
+		name: string;
+		title: string;
+		content: JSX.Element;
+		ariaLabel?: string;
+	} >;
+	/**
+	 * Classname to be applied to the active tab
+	 */
+	activeClass?: string;
+	/**
+	 * Name of the tab to be selected by default
+	 */
+	initialTabName?: string | undefined;
+	/**
+	 * Aria label for the tablist
+	 */
+	ariaLabel?: string;
+	/**
+	 * Instance ID for the component
+	 */
+	instanceId: number;
+	/**
+	 * ID for the component
+	 */
+	id?: string;
+}
+
+/**
+ * Exporting the component for Storybook. Use the default export instead.
+ */
+export const __TabsWithoutInstanceId = ( {
 	className,
 	onSelect = () => null,
 	tabs,
@@ -19,7 +62,7 @@ const Tabs = ( {
 	ariaLabel = __( 'Tabbed Content', 'woo-gutenberg-products-block' ),
 	instanceId,
 	id,
-} ) => {
+}: TabsProps ): JSX.Element | null => {
 	const initialTab = initialTabName
 		? { selectedId: `${ instanceId }-${ initialTabName }` }
 		: undefined;
@@ -77,4 +120,4 @@ const Tabs = ( {
 	);
 };
 
-export default withInstanceId( Tabs );
+export default withInstanceId( __TabsWithoutInstanceId );
