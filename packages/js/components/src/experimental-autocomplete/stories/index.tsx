@@ -13,30 +13,30 @@ import { AutocompleteItem } from '../types';
 const treeItems: AutocompleteItem[] = [
 	{
 		value: '1',
-		label: 'Child 1',
+		label: 'Technology',
 		children: [
 			{
 				value: '1.1',
-				label: 'Child 1.1',
+				label: 'Notebooks',
 				children: [],
 			},
 			{
 				value: '1.2',
-				label: 'Child 1.2',
+				label: 'Phones',
 				children: [
-					{ value: '1.2.1', label: 'Child 1.2.1', children: [] },
-					{ value: '1.2.2', label: 'Child 1.2.2', children: [] },
+					{ value: '1.2.1', label: 'iPhone', children: [] },
+					{ value: '1.2.2', label: 'Samsung', children: [] },
 				],
 			},
-			{ value: '1.3', label: 'Child 1.3', children: [] },
+			{ value: '1.3', label: 'Wearables', children: [] },
 		],
 	},
 	{
 		value: '2',
-		label: 'Child 2',
-		children: [ { value: '2.1', label: 'Child 2.1', children: [] } ],
+		label: 'Hardware',
+		children: [ { value: '2.1', label: 'CPU', children: [] } ],
 	},
-	{ value: '3', label: 'Child 3', children: [] },
+	{ value: '3', label: 'Other', children: [] },
 ];
 
 function filter(

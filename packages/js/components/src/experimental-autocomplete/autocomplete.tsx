@@ -1,22 +1,23 @@
 /**
  * External dependencies
  */
+import interpolate from '@automattic/interpolate-components';
 import { Button, Popover } from '@wordpress/components';
 import { Icon, plus, search } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import React, { createElement, forwardRef } from 'react';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
  */
+import { Tree } from '../experimental-tree';
 import { ComboBox } from '../experimental-select-control/combo-box';
 import { SelectedItems } from '../experimental-select-control/selected-items';
 import { SuffixIcon } from '../experimental-select-control/suffix-icon';
 import { useAutocomplete } from './hooks/use-autocomplete';
-import { Menu } from './menu';
 import { AutocompleteProps } from './types';
 import './autocomplete.scss';
-import classNames from 'classnames';
 
 export const Autocomplete = forwardRef( function ForwardedAutocomplete(
 	{
@@ -39,6 +40,7 @@ export const Autocomplete = forwardRef( function ForwardedAutocomplete(
 		inputProps,
 		comboBoxProps,
 		menuContainerProps,
+		menuContainerWidth,
 		menuProps,
 		allowCreateProps,
 	} = useAutocomplete( {
@@ -77,7 +79,31 @@ export const Autocomplete = forwardRef( function ForwardedAutocomplete(
 							position="bottom left"
 							className="experimental-woocommerce-autocomplete__popover-menu"
 						>
-							<Menu { ...menuProps } />
+							<div style={ { width: menuContainerWidth } }>
+								<Tree
+									{ ...menuProps }
+									getItemLabel={ ( item ) => (
+										<span>
+											{ inputProps.value
+												? interpolate( {
+														mixedString:
+															item.label.replace(
+																new RegExp(
+																	inputProps.value,
+																	'ig'
+																),
+																( group ) =>
+																	`{{bold}}${ group }{{/bold}}`
+															),
+														components: {
+															bold: <b />,
+														},
+												  } )
+												: item.label }
+										</span>
+									) }
+								/>
+							</div>
 
 							{ allowCreate && (
 								<Button

@@ -1,13 +1,50 @@
 /**
  * External dependencies
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * Internal dependencies
  */
-import { AutocompleteProps } from '../types';
+import { AutocompleteItem, AutocompleteProps } from '../types';
 import { useAllowCreate } from './use-allow-create';
+
+function containsMatchingChildren(
+	item: AutocompleteItem,
+	text: string
+): boolean {
+	if ( ! text || ! item.children?.length ) return false;
+	return item.children.some( ( child ) => {
+		if ( new RegExp( text, 'ig' ).test( child.label ) ) {
+			return true;
+		}
+		return containsMatchingChildren( child, text );
+	} );
+}
+
+function getFirstMatchingItem(
+	item: AutocompleteItem,
+	text: string,
+	memo: Record< string, string >
+) {
+	if ( ! text ) return false;
+	if ( memo[ text ] === item.value ) return true;
+
+	const matcher = new RegExp( text, 'ig' );
+	if ( matcher.test( item.label ) ) {
+		if ( ! memo[ text ] ) {
+			memo[ text ] = item.value;
+			return true;
+		}
+		return false;
+	}
+
+	item.children?.some( ( child ) => {
+		return getFirstMatchingItem( child, text, memo );
+	} );
+
+	return false;
+}
 
 export function useAutocomplete( {
 	allowCreate,
@@ -26,6 +63,7 @@ export function useAutocomplete( {
 	const highlightedRef = useRef< number >( -1 );
 	const menuContainerRef = useRef< HTMLDivElement >();
 	const creatingButtonRef = useRef< HTMLButtonElement >();
+	const highlightedItemRef = useRef< Record< string, string > >( {} );
 
 	const [ inputValue, setInputValue ] = useState( '' );
 	const [ isMenuOpen, setIsMenuOpen ] = useState( false );
@@ -43,6 +81,25 @@ export function useAutocomplete( {
 			}
 		},
 	} );
+
+	const isItemExpanded = useCallback(
+		( item ) => containsMatchingChildren( item, inputValue ),
+		[ inputValue ]
+	);
+
+	const isItemHighlighted = useCallback(
+		( item ) =>
+			getFirstMatchingItem(
+				item,
+				inputValue,
+				highlightedItemRef.current
+			),
+		[ inputValue, highlightedItemRef ]
+	);
+
+	useEffect( () => {
+		highlightedItemRef.current = {};
+	}, [ items ] );
 
 	useEffect( () => {
 		function onDocumentClick() {
@@ -182,16 +239,16 @@ export function useAutocomplete( {
 				menuContainerRef.current = element;
 			},
 		},
+		menuContainerWidth:
+			menuContainerRef.current?.getBoundingClientRect().width,
 		menuProps: {
 			items,
 			selected,
-			inputValue,
 			multiple,
+			isItemExpanded,
+			isItemHighlighted,
 			onSelect,
 			onRemove,
-			style: {
-				width: menuContainerRef.current?.getBoundingClientRect().width,
-			},
 		},
 		allowCreateProps: {
 			...allowCreateProps,

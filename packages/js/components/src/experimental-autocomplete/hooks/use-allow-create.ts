@@ -1,13 +1,12 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
 import React, { useMemo, useRef } from 'react';
 
 /**
  * Internal dependencies
  */
-import { AutocompleteItem, AutocompleteProps } from '../types';
+import { AutocompleteItem, UseAllowCreateProps } from '../types';
 
 function mapItems( items: AutocompleteItem[] ): Record< string, boolean > {
 	return items.reduce( ( map, { label, children } ) => {
@@ -24,7 +23,7 @@ export function useAllowCreate( {
 	inputValue,
 	items,
 	onCreateClick,
-}: UseAllowCreateInput ) {
+}: UseAllowCreateProps ) {
 	const creatingButtonRef = useRef< HTMLButtonElement >();
 	const mappedItems = useMemo( () => mapItems( items ), [ items ] );
 	const isInputValueInItems = inputValue ? inputValue in mappedItems : false;
@@ -62,10 +61,3 @@ export function useAllowCreate( {
 		onInputKeyDown: handleInputKeyDown,
 	};
 }
-
-export type UseAllowCreateInput = Pick<
-	AutocompleteProps,
-	'allowCreate' | 'onCreateClick' | 'items'
-> & {
-	inputValue: string;
-};
