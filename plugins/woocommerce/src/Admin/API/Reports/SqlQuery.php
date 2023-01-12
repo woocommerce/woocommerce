@@ -30,7 +30,6 @@ class SqlQuery {
 		'having'     => array(),
 		'limit'      => array(),
 		'order_by'   => array(),
-		'with'       => array(),
 		'union'      => array(),
 	);
 	/**
@@ -162,17 +161,9 @@ class SqlQuery {
 		$group_by = $this->get_sql_clause( 'group_by', 'filtered' );
 		$having   = $this->get_sql_clause( 'having', 'filtered' );
 		$order_by = $this->get_sql_clause( 'order_by', 'filtered' );
-		$with     = $this->get_sql_clause( 'with', 'filtered' );
 		$union    = $this->get_sql_clause( 'union', 'filtered' );
 
-		if ( ! empty( $with ) ) {
-			$statement = "
-				WITH
-					{$with}
-			";
-		} else {
-			$statement = '';
-		}
+		$statement = '';
 
 		$statement .= "
 			SELECT
@@ -234,7 +225,6 @@ class SqlQuery {
 			'having'     => array(),
 			'limit'      => array(),
 			'order_by'   => array(),
-			'with'       => array(),
 			'union'      => array(),
 		);
 	}
