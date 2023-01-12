@@ -174,9 +174,9 @@ class FormFactory {
 	 */
 	private static function get_item_list( $type ) {
 		$mapping = array(
-			'field' => self::$form_fields,
+			'field'      => self::$form_fields,
 			'subsection' => self::$form_subsections,
-			'section' => self::$form_sections,
+			'section'    => self::$form_sections,
 		);
 		if ( array_key_exists( $type, $mapping ) ) {
 			return $mapping[ $type ];
