@@ -743,7 +743,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$query_args = array(
 			'orderby'  => 'id',
 			'order'    => 'ASC',
-			'meta_key' => 'color',
+			'meta_key' => 'color', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 		);
 
 		// Check that orders are in order (when no meta ordering is involved).
@@ -753,38 +753,41 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		// When ordering by color $order2 should come first.
 		// Also tests that the key name is a valid synonym for the primary meta query.
 		$query_args['orderby'] = 'color';
-		$q = new OrdersTableQuery( $query_args );
+		$q                     = new OrdersTableQuery( $query_args );
 		$this->assertEquals( $q->orders, array( $order2->get_id(), $order1->get_id() ) );
 
 		// When ordering by 'numeric_meta' 1000 < 500 (due to alphabetical sorting by default).
 		// Also tests that 'meta_value' is a valid synonym for the primary meta query.
-		$query_args['meta_key'] = 'numeric_meta';
+		$query_args['meta_key'] = 'numeric_meta'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 		$query_args['orderby']  = 'meta_value';
-		$q = new OrdersTableQuery( $query_args );
+		$q                      = new OrdersTableQuery( $query_args );
 		$this->assertEquals( $q->orders, array( $order1->get_id(), $order2->get_id() ) );
 
 		// Forcing numeric sorting with 'meta_value_num' reverses the order above.
-		$query_args['orderby']  = 'meta_value_num';
-		$q = new OrdersTableQuery( $query_args );
+		$query_args['orderby'] = 'meta_value_num';
+		$q                     = new OrdersTableQuery( $query_args );
 		$this->assertEquals( $q->orders, array( $order2->get_id(), $order1->get_id() ) );
 
 		// Sorting by 'animal' meta is ambiguous. Test that we can order by various meta fields (and use the names in 'orderby').
 		unset( $query_args['meta_key'] );
-		$query_args['meta_query'] = array(
+		$query_args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			'animal_meta' => array(
 				'key' => 'animal',
 			),
-			'color_meta' => array(
+			'color_meta'  => array(
 				'key' => 'color',
 			),
 		);
-		$query_args['orderby'] = array( 'animal_meta' => 'ASC', 'color_meta' => 'DESC' );
-		$q = new OrdersTableQuery( $query_args );
+		$query_args['orderby']    = array(
+			'animal_meta' => 'ASC',
+			'color_meta'  => 'DESC',
+		);
+		$q                        = new OrdersTableQuery( $query_args );
 		$this->assertEquals( $q->orders, array( $order1->get_id(), $order2->get_id() ) );
 
 		// Order is reversed when changing the sort order for 'color_meta'.
 		$query_args['orderby']['color_meta'] = 'ASC';
-		$q = new OrdersTableQuery( $query_args );
+		$q                                   = new OrdersTableQuery( $query_args );
 		$this->assertEquals( $q->orders, array( $order2->get_id(), $order1->get_id() ) );
 
 	}
