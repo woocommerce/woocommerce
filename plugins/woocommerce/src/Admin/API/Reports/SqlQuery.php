@@ -185,13 +185,6 @@ class SqlQuery {
 				{$where}
 		";
 
-		if ( ! empty( $union ) ) {
-			$statement .= "
-				UNION
-					{$union}
-			";
-		}
-
 		if ( ! empty( $group_by ) ) {
 			$statement .= "
 				GROUP BY
@@ -205,6 +198,15 @@ class SqlQuery {
 				";
 			}
 		}
+
+		if ( ! empty( $union ) ) {
+			$statement .= "
+				UNION
+					{$union}
+			";
+		}
+
+
 
 		if ( ! empty( $order_by ) ) {
 			$statement .= "
