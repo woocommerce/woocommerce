@@ -108,17 +108,21 @@ const renderPickupLocation = (
 
 const Block = (): JSX.Element | null => {
 	const { shippingRates, selectShippingRate } = useShippingData();
-	const [ selectedOption, setSelectedOption ] = useState< string >( '' );
+
+	// Get pickup locations from the first shipping package.
+	const pickupLocations = ( shippingRates[ 0 ]?.shipping_rates || [] ).filter(
+		( { method_id: methodId } ) => methodId === 'pickup_location'
+	);
+
+	const [ selectedOption, setSelectedOption ] = useState< string >(
+		() => pickupLocations.find( ( rate ) => rate.selected )?.rate_id || ''
+	);
+
 	const onSelectRate = useCallback(
 		( rateId: string ) => {
 			selectShippingRate( rateId );
 		},
 		[ selectShippingRate ]
-	);
-
-	// Get pickup locations from the first shipping package.
-	const pickupLocations = ( shippingRates[ 0 ]?.shipping_rates || [] ).filter(
-		( { method_id: methodId } ) => methodId === 'pickup_location'
 	);
 
 	// Update the selected option if there is no rate selected on mount.
