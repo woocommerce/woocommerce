@@ -137,6 +137,73 @@ class OrdersTableMetaQuery {
 	}
 
 	/**
+	 * Returns a list of names (corresponding to meta_query clauses) that can be used as an 'orderby' arg.
+	 *
+	 * @since 7.4
+	 *
+	 * @return array
+	 */
+	public function get_orderby_keys(): array {
+		if ( ! $this->flattened_clauses ) {
+			return array();
+		}
+
+		$keys   = array();
+		$keys[] = 'meta_value';
+		$keys[] = 'meta_value_num';
+
+		$first_clause = reset( $this->flattened_clauses );
+		if ( $first_clause && ! empty( $first_clause['key'] ) ) {
+			$keys[] = $first_clause['key'];
+		}
+
+		$keys = array_merge(
+			$keys,
+			array_keys( $this->flattened_clauses )
+		);
+
+		return $keys;
+	}
+
+	/**
+	 * Returns an SQL fragment for the given meta_query key that can be used in an ORDER BY clause.
+	 * Call {@see 'get_orderby_keys'} to obtain a list of valid keys.
+	 *
+	 * @since 7.4
+	 *
+	 * @param string $key The key name.
+	 * @return string
+	 *
+	 * @throws \Exception When an invalid key is passed.
+	 */
+	public function get_orderby_clause_for_key( string $key ): string {
+		$clause = false;
+
+		if ( isset( $this->flattened_clauses[ $key ] ) ) {
+			$clause = $this->flattened_clauses[ $key ];
+		} else {
+			$first_clause = reset( $this->flattened_clauses );
+
+			if ( $first_clause && ! empty( $first_clause['key'] ) ) {
+				if ( 'meta_value_num' === $key ) {
+					return "{$first_clause['alias']}.meta_value+0";
+				}
+
+				if ( 'meta_value' === $key || $first_clause['key'] === $key ) {
+					$clause = $first_clause;
+				}
+			}
+		}
+
+		if ( ! $clause ) {
+			// translators: %s is a meta_query key.
+			throw new \Exception( sprintf( __( 'Invalid meta_query clause key: %s.', 'woocommerce' ), $key ) );
+		}
+
+		return "CAST({$clause['alias']}.meta_value AS {$clause['cast']})";
+	}
+
+	/**
 	 * Checks whether a given meta_query clause is atomic or not (i.e. not nested).
 	 *
 	 * @param array $arg The meta_query clause.
