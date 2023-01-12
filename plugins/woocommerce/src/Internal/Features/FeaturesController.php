@@ -114,7 +114,7 @@ class FeaturesController {
 			),
 		);
 
-		$this->legacy_feature_ids = array( 'analytics', 'new_navigation' );
+		$this->legacy_feature_ids = array( 'analytics', 'new_navigation', 'new_product_management' );
 
 		$this->init_features( $features );
 
