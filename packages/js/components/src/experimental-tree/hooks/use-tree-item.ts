@@ -138,10 +138,8 @@ export function useTreeItem( {
 			if ( typeof onSelect === 'function' ) {
 				onSelect( value );
 			}
-		} else {
-			if ( typeof onRemove === 'function' ) {
-				onRemove( value );
-			}
+		} else if ( typeof onRemove === 'function' ) {
+			onRemove( value );
 		}
 	}
 

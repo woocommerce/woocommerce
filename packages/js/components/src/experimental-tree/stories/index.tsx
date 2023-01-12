@@ -3,7 +3,7 @@
  */
 import interpolate from '@automattic/interpolate-components';
 import { BaseControl, TextControl } from '@wordpress/components';
-import React, { useCallback, useState } from 'react';
+import React, { createElement, useCallback, useState } from 'react';
 
 /**
  * Internal dependencies
@@ -109,8 +109,8 @@ export const MultipleSelection: React.FC = () => {
 								const newValues = value.filter(
 									( item ) =>
 										! prev.some(
-											( { value } ) =>
-												value === item.value
+											( prevItem ) =>
+												prevItem.value === item.value
 										)
 								);
 								return [ ...prev, ...newValues ];
@@ -123,8 +123,8 @@ export const MultipleSelection: React.FC = () => {
 							prev.filter( ( curr ) =>
 								Array.isArray( value )
 									? ! value.some(
-											( { value } ) =>
-												value === curr.value
+											( prevItem ) =>
+												prevItem.value === curr.value
 									  )
 									: curr.value !== value.value
 							)
@@ -255,8 +255,8 @@ export const FilterMultipleSelection: React.FC = () => {
 								const newValues = value.filter(
 									( item ) =>
 										! prev.some(
-											( { value } ) =>
-												value === item.value
+											( prevItem ) =>
+												prevItem.value === item.value
 										)
 								);
 								return [ ...prev, ...newValues ];
@@ -269,8 +269,8 @@ export const FilterMultipleSelection: React.FC = () => {
 							prev.filter( ( curr ) =>
 								Array.isArray( value )
 									? ! value.some(
-											( { value } ) =>
-												value === curr.value
+											( prevItem ) =>
+												prevItem.value === curr.value
 									  )
 									: curr.value !== value.value
 							)

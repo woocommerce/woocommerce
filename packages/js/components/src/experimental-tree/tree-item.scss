@@ -31,6 +31,9 @@
 		&:focus-within {
 			background-color: #f6f7f7;
 		}
+		.components-checkbox-control__label {
+			display: none;
+		}
 		.components-checkbox-control__input-container {
 			display: block;
 			width: 20px;

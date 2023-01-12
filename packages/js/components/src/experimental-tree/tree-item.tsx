@@ -47,6 +47,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				className="experimental-woocommerce-tree-item__heading"
 				role="treeitem"
 			>
+				{ /* eslint-disable-next-line jsx-a11y/label-has-for */ }
 				<label className="experimental-woocommerce-tree-item__label">
 					{ multiple ? (
 						<CheckboxControl
