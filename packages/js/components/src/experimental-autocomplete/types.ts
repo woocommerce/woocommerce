@@ -15,6 +15,8 @@ export type AutocompleteProps = Omit<
 	selected?: AutocompleteItem | AutocompleteItem[];
 	multiple?: boolean;
 	allowCreate?: boolean;
+	searching?: boolean;
+	suffix?: JSX.Element;
 	onSelect( value: AutocompleteItem | AutocompleteItem[] ): void;
 	onRemove( value: AutocompleteItem | AutocompleteItem[] ): void;
 	onInputChange?( value: string ): void;

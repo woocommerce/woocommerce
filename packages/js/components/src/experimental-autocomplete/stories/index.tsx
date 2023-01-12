@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { BaseControl } from '@wordpress/components';
-import React, { createElement, useState } from 'react';
+import React, { createElement, useCallback, useState } from 'react';
+import { useAsyncFilter } from '../../experimental-select-control';
 
 /**
  * Internal dependencies
@@ -236,6 +237,75 @@ export const AllowCreateMultipleSelection: React.FC = () => {
 						alert( 'onCreateNew' );
 					}
 				} }
+			/>
+		</BaseControl>
+	);
+};
+
+export const AsyncMultipleSelection: React.FC = () => {
+	const [ selected, setSelected ] = useState< AutocompleteItem[] >( [] );
+	const [ items, setItems ] = useState( treeItems );
+
+	const { isFetching, suffix, onInputChange } =
+		useAsyncFilter< AutocompleteItem >( {
+			filter: useCallback( ( value = '' ) => {
+				return new Promise< AutocompleteItem[] >( ( resolve ) => {
+					setTimeout( () => {
+						const filteredItems = filter( value );
+						resolve( filteredItems );
+					}, 1500 );
+				} );
+			}, [] ),
+			onFilterStart() {
+				setItems( [] );
+			},
+			onFilterEnd( filteredItems ) {
+				setItems( filteredItems );
+			},
+		} );
+
+	return (
+		<BaseControl
+			label="Async multiple selection"
+			id="async-mutiple-selection"
+			help="This is an async multiple selection tree autocomplete"
+		>
+			<Autocomplete
+				id="async-mutiple-selection"
+				placeholder="Start typing..."
+				multiple
+				items={ items }
+				selected={ selected }
+				onSelect={ ( value ) => {
+					setSelected( ( prev ) => {
+						if ( Array.isArray( value ) ) {
+							const newValues = value.filter(
+								( item ) =>
+									! prev.some(
+										( prevItem ) =>
+											prevItem.value === item.value
+									)
+							);
+							return [ ...prev, ...newValues ];
+						}
+						return [ ...prev, value ];
+					} );
+				} }
+				onRemove={ ( value ) =>
+					setSelected( ( prev ) =>
+						prev.filter( ( curr ) =>
+							Array.isArray( value )
+								? ! value.some(
+										( prevItem ) =>
+											prevItem.value === curr.value
+								  )
+								: curr.value !== value.value
+						)
+					)
+				}
+				onInputChange={ onInputChange as () => void }
+				suffix={ suffix as JSX.Element }
+				searching={ isFetching }
 			/>
 		</BaseControl>
 	);

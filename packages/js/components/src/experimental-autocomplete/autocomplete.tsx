@@ -2,10 +2,11 @@
  * External dependencies
  */
 import interpolate from '@automattic/interpolate-components';
-import { Button, Popover } from '@wordpress/components';
+import { Button, Popover, Spinner } from '@wordpress/components';
+import { useDebounce } from '@wordpress/compose';
 import { Icon, plus, search } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
-import React, { createElement, forwardRef } from 'react';
+import React, { createElement, forwardRef, useCallback } from 'react';
 import classNames from 'classnames';
 
 /**
@@ -16,7 +17,7 @@ import { ComboBox } from '../experimental-select-control/combo-box';
 import { SelectedItems } from '../experimental-select-control/selected-items';
 import { SuffixIcon } from '../experimental-select-control/suffix-icon';
 import { useAutocomplete } from './hooks/use-autocomplete';
-import { AutocompleteProps } from './types';
+import { AutocompleteItem, AutocompleteProps } from './types';
 import './autocomplete.scss';
 
 export const Autocomplete = forwardRef( function ForwardedAutocomplete(
@@ -25,7 +26,9 @@ export const Autocomplete = forwardRef( function ForwardedAutocomplete(
 		items,
 		selected,
 		multiple,
-		allowCreate: allowCreate,
+		allowCreate,
+		searching,
+		suffix = <SuffixIcon icon={ search } />,
 		onSelect,
 		onRemove,
 		onInputChange,
@@ -57,6 +60,26 @@ export const Autocomplete = forwardRef( function ForwardedAutocomplete(
 		...props,
 	} );
 
+	const getItemLabel = useCallback(
+		( item: AutocompleteItem ) => (
+			<span>
+				{ inputProps.value
+					? interpolate( {
+							mixedString: item.label.replace(
+								new RegExp( inputProps.value, 'ig' ),
+								( group: string ) =>
+									`{{bold}}${ group }{{/bold}}`
+							),
+							components: {
+								bold: <b />,
+							},
+					  } )
+					: item.label }
+			</span>
+		),
+		[ inputProps.value ]
+	);
+
 	return (
 		<div
 			{ ...props }
@@ -66,7 +89,7 @@ export const Autocomplete = forwardRef( function ForwardedAutocomplete(
 			<ComboBox
 				comboBoxProps={ comboBoxProps }
 				inputProps={ inputProps }
-				suffix={ <SuffixIcon icon={ search } /> }
+				suffix={ suffix }
 			>
 				<div
 					{ ...menuContainerProps }
@@ -80,29 +103,16 @@ export const Autocomplete = forwardRef( function ForwardedAutocomplete(
 							className="experimental-woocommerce-autocomplete__popover-menu"
 						>
 							<div style={ { width: menuContainerWidth } }>
-								<Tree
-									{ ...menuProps }
-									getItemLabel={ ( item ) => (
-										<span>
-											{ inputProps.value
-												? interpolate( {
-														mixedString:
-															item.label.replace(
-																new RegExp(
-																	inputProps.value,
-																	'ig'
-																),
-																( group ) =>
-																	`{{bold}}${ group }{{/bold}}`
-															),
-														components: {
-															bold: <b />,
-														},
-												  } )
-												: item.label }
-										</span>
-									) }
-								/>
+								{ searching ? (
+									<div className="experimental-woocommerce-autocomplete__spinner">
+										<Spinner />
+									</div>
+								) : (
+									<Tree
+										{ ...menuProps }
+										getItemLabel={ getItemLabel }
+									/>
+								) }
 							</div>
 
 							{ allowCreate && (

@@ -29,6 +29,15 @@
 			margin-left: 8px;
 		}
 	}
+	&__spinner {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 40px;
+		.components-spinner {
+			margin: 0;
+		}
+	}
 
 	.woocommerce-experimental-select-control__combox-box input {
 		border: none;

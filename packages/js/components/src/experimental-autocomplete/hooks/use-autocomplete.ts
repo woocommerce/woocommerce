@@ -57,6 +57,7 @@ export function useAutocomplete( {
 	onRemove,
 	onInputChange,
 	onCreateClick,
+	...props
 }: AutocompleteProps ) {
 	const autocompleteRef = useRef< HTMLDivElement >();
 	const inputRef = useRef< HTMLInputElement >();
@@ -83,12 +84,13 @@ export function useAutocomplete( {
 	} );
 
 	const isItemExpanded = useCallback(
-		( item ) => containsMatchingChildren( item, inputValue ),
+		( item: AutocompleteItem ) =>
+			containsMatchingChildren( item, inputValue ),
 		[ inputValue ]
 	);
 
 	const isItemHighlighted = useCallback(
-		( item ) =>
+		( item: AutocompleteItem ) =>
 			getFirstMatchingItem(
 				item,
 				inputValue,
@@ -131,60 +133,54 @@ export function useAutocomplete( {
 			);
 		}
 
-		if ( event.code === 'ArrowDown' ) {
+		if ( event.code === 'ArrowDown' || event.code === 'ArrowUp' ) {
 			event.preventDefault();
-
 			const listItems =
 				menuContainerRef.current?.querySelectorAll< HTMLLabelElement >(
 					'li > div > label'
 				);
 
-			const totalItems = listItems?.length ?? 1;
+			if ( event.code === 'ArrowDown' ) {
+				const totalItems = listItems?.length ?? 1;
 
-			if (
-				listItems?.length &&
-				highlightedRef.current < listItems.length - 1
-			) {
-				highlightedRef.current++;
-
-				listItems[ highlightedRef.current ].focus();
-			} else if ( allowCreate ) {
-				if ( highlightedRef.current < totalItems )
+				if (
+					listItems?.length &&
+					highlightedRef.current < listItems.length - 1
+				) {
 					highlightedRef.current++;
 
-				creatingButtonRef.current?.focus();
-			}
-		}
+					listItems[ highlightedRef.current ].focus();
+				} else if ( allowCreate ) {
+					if ( highlightedRef.current < totalItems )
+						highlightedRef.current++;
 
-		if ( event.code === 'ArrowUp' ) {
-			event.preventDefault();
-
-			if ( highlightedRef.current >= 0 ) highlightedRef.current--;
-
-			if ( highlightedRef.current === -1 ) {
-				setTimeout( ( el ) => el.focus(), 0, inputRef.current );
+					creatingButtonRef.current?.focus();
+				}
 			}
 
-			const listItems =
-				menuContainerRef.current?.querySelectorAll< HTMLLabelElement >(
-					'li > div > label'
-				);
+			if ( event.code === 'ArrowUp' ) {
+				if ( highlightedRef.current >= 0 ) highlightedRef.current--;
 
-			if ( listItems?.length && highlightedRef.current >= 0 ) {
-				listItems[ highlightedRef.current ].focus();
+				if ( highlightedRef.current === -1 ) {
+					setTimeout( ( el ) => el.focus(), 0, inputRef.current );
+				}
+
+				if ( listItems?.length && highlightedRef.current >= 0 ) {
+					listItems[ highlightedRef.current ].focus();
+				}
 			}
 		}
 	}
 
 	function handleInputChange( event: React.ChangeEvent< HTMLInputElement > ) {
 		const { value } = event.currentTarget;
-		setInputValue( value );
 		if ( typeof onInputChange === 'function' ) {
 			onInputChange( value );
 		}
 		if ( ! isMenuOpen ) {
 			setIsMenuOpen( true );
 		}
+		setInputValue( value );
 	}
 
 	function handleInputFocus() {
@@ -220,6 +216,7 @@ export function useAutocomplete( {
 		},
 		isMenuOpen,
 		inputProps: {
+			...props,
 			ref( element: HTMLInputElement ) {
 				inputRef.current = element;
 				if ( typeof ref === 'function' ) {
