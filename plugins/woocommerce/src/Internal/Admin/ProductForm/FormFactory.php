@@ -169,6 +169,24 @@ class FormFactory {
 	/**
 	 * Returns list of registered items.
 	 *
+	 * @param string $type Form component type.
+	 * @return array List of registered items.
+	 */
+	private static function get_item_list( $type ) {
+		$mapping = array(
+			'field' => self::$form_fields,
+			'subsection' => self::$form_subsections,
+			'section' => self::$form_sections,
+		);
+		if ( array_key_exists( $type, $mapping ) ) {
+			return $mapping[ $type ];
+		}
+		return array();
+	}
+
+	/**
+	 * Returns list of registered items.
+	 *
 	 * @param string       $type Form component type.
 	 * @param class-string $class_name Class of component type.
 	 * @param array        $sort_by key and order to sort by.
@@ -178,7 +196,7 @@ class FormFactory {
 		'key'   => 'order',
 		'order' => 'asc',
 	) ) {
-		$item_list = self::${ 'form_' . $type . 's' };
+		$item_list = self::get_item_list( $type );
 		$class     = 'Automattic\\WooCommerce\\Internal\\Admin\\ProductForm\\' . $class_name;
 		$items     = array_values( $item_list );
 		if ( class_exists( $class ) && method_exists( $class, 'sort' ) ) {
@@ -203,7 +221,7 @@ class FormFactory {
 	 * @return Field|Card|Section|WP_Error New product form item or WP_Error.
 	 */
 	private static function create_item( $type, $class_name, $id, $plugin_id, $args ) {
-		$item_list = self::${ 'form_' . $type . 's' };
+		$item_list = self::get_item_list( $type );
 		$class     = 'Automattic\\WooCommerce\\Internal\\Admin\\ProductForm\\' . $class_name;
 		if ( ! class_exists( $class ) ) {
 			return new WP_Error(

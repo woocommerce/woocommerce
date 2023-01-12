@@ -6,7 +6,7 @@
 namespace Automattic\WooCommerce\Internal\Admin\ProductForm;
 
 /**
- * Card class.
+ * Component class.
  */
 abstract class Component {
 	/**
@@ -15,7 +15,7 @@ abstract class Component {
 	use ComponentTrait;
 
 	/**
-	 * Card additional arguments.
+	 * Component additional arguments.
 	 *
 	 * @var array
 	 */
@@ -24,7 +24,7 @@ abstract class Component {
 	/**
 	 * Constructor
 	 *
-	 * @param string $id Card id.
+	 * @param string $id Component id.
 	 * @param string $plugin_id Plugin id.
 	 * @param array  $additional_args Array containing additional arguments.
 	 */
