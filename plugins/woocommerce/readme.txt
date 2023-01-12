@@ -258,5 +258,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Change the width of pricing fields, SKU and Shipping Class to 50% in big screens (>960px) in new product management experience [#35545](https://github.com/woocommerce/woocommerce/pull/35545)
 * Enhancement - Fix price field currency symbol position [#35718](https://github.com/woocommerce/woocommerce/pull/35718)
 * Enhancement - Improve element stacking in modals on tablet and mobile [#35733](https://github.com/woocommerce/woocommerce/pull/35733)
+* Security - Customers REST API endpoint will now return user metadata only when requester has an administrator role [#36408](https://github.com/woocommerce/woocommerce/pull/36408).
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
