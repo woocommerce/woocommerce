@@ -5,7 +5,7 @@ test.describe(
 	() => {
 		test( 'Load the home page', async ( { page } ) => {
 			await page.goto( '/' );
-			const title = page.locator( 'h1.site-title' );
+			const title = page.locator( 'header a[rel="home"]' );
 			await expect( title ).toHaveText(
 				'WooCommerce Core E2E Test Suite'
 			);
@@ -28,8 +28,8 @@ test.describe(
 			} );
 			test( 'Load customer my account page', async ( { page } ) => {
 				await page.goto( '/my-account' );
-				const title = page.locator( 'h1.entry-title' );
-				await expect( title ).toHaveText( 'My account' );
+				const title = page.locator( 'h1' ).getByText( 'My account' );
+				await expect( title ).toBeVisible();
 			} );
 		} );
 	}
