@@ -12,57 +12,57 @@ const glob = require( 'glob' );
 // If a block is experimental, it should be marked with the `isExperimental`
 // property.
 const blocks = {
+	'active-filters': {},
+	'all-products': {
+		customDir: 'products/all-products',
+	},
+	'all-reviews': {
+		customDir: 'reviews/all-reviews',
+	},
+	'attribute-filter': {},
+	cart: {},
+	checkout: {},
+	'customer-account': {},
+	'featured-category': {
+		customDir: 'featured-items/featured-category',
+	},
+	'featured-product': {
+		customDir: 'featured-items/featured-product',
+	},
+	'filter-wrapper': {},
 	'handpicked-products': {},
+	// We need to keep the legacy-template id, so we need to add a custom config to point to the renamed classic-template folder
+	'legacy-template': {
+		customDir: 'classic-template',
+	},
+	'mini-cart': {},
+	'mini-cart-contents': {
+		customDir: 'mini-cart/mini-cart-contents',
+	},
+	'price-filter': {},
 	'product-best-sellers': {},
 	'product-category': {},
 	'product-categories': {},
 	'product-new': {},
 	'product-on-sale': {},
+	'product-query': {
+		isExperimental: true,
+	},
+	'product-search': {},
+	'product-tag': {},
 	'product-top-rated': {},
 	'products-by-attribute': {},
-	'featured-product': {
-		customDir: 'featured-items/featured-product',
-	},
-	'all-reviews': {
-		customDir: 'reviews/all-reviews',
+	'rating-filter': {},
+	'reviews-by-category': {
+		customDir: 'reviews/reviews-by-category',
 	},
 	'reviews-by-product': {
 		customDir: 'reviews/reviews-by-product',
 	},
-	'reviews-by-category': {
-		customDir: 'reviews/reviews-by-category',
-	},
-	'product-search': {},
-	'product-tag': {},
-	'featured-category': {
-		customDir: 'featured-items/featured-category',
-	},
-	'all-products': {
-		customDir: 'products/all-products',
-	},
-	'price-filter': {},
-	'attribute-filter': {},
-	'stock-filter': {},
-	'active-filters': {},
-	'rating-filter': {},
-	cart: {},
-	checkout: {},
-	'mini-cart': {},
-	'mini-cart-contents': {
-		customDir: 'mini-cart/mini-cart-contents',
-	},
 	'single-product': {
 		isExperimental: true,
 	},
-	// We need to keep the legacy-template id, so we need to add a custom config to point to the renamed classic-template folder
-	'legacy-template': {
-		customDir: 'classic-template',
-	},
-	'product-query': {
-		isExperimental: true,
-	},
-	'filter-wrapper': {},
-	'customer-account': {},
+	'stock-filter': {},
 };
 
 // Returns the entries for each block given a relative path (ie: `index.js`,
