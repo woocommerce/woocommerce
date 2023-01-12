@@ -21,8 +21,8 @@ jobs:
     create-changelog-prs:
         runs-on: ubuntu-20.04
         permissions:
-          contents: read
-          pull-requests: write
+            contents: write
+            pull-requests: write
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
