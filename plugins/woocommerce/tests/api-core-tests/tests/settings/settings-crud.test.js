@@ -141,8 +141,8 @@ test.describe('Settings API tests: CRUD', () => {
 				expect.arrayContaining([
 					expect.objectContaining({
 						id: "email_cancelled_order",
-						label: "Cancelled order",
-						description: "Cancelled order emails are sent to chosen recipient(s) when orders have been marked cancelled (if they were previously processing or on-hold).",
+						label: "Canceled order",
+						description: "Canceled order emails are sent to chosen recipient(s) when orders have been marked canceled (if they were previously processing or on-hold).",
 						parent_id: "email",
 						"sub_groups": expect.arrayContaining([]),
 					})
@@ -162,7 +162,7 @@ test.describe('Settings API tests: CRUD', () => {
 					expect.objectContaining({
 						id: "email_customer_on_hold_order",
 						label: "Order on-hold",
-						description: "This is an order notification sent to customers containing order details after an order is placed on-hold from Pending, Cancelled or Failed order status.",
+						description: "This is an order notification sent to customers containing order details after an order is placed on-hold from Pending, Canceled or Failed order status.",
 						parent_id: "email",
 						"sub_groups": expect.arrayContaining([]),
 					})
