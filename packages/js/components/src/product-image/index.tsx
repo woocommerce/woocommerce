@@ -29,13 +29,13 @@ type ProductImageProps = {
 		// allowing `any` here
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	} & Record< string, any >;
-	// The width of image to display.
+	/** The width of image to display. */
 	width?: number;
-	// The height of image to display.
+	/** The height of image to display. */
 	height?: number;
-	// Additional CSS classes.
+	/** Additional CSS classes. */
 	className?: string;
-	// Text to use as the image alt attribute.
+	/** Text to use as the image alt attribute. */
 	alt?: string;
 };
 
