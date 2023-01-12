@@ -25,7 +25,7 @@ jobs:
 
             - name: Create release
               id: create_release
-              uses: samueljseay/action-gh-release@master
+              uses: woocommerce/action-gh-release@master
               with:
                   tag_name: wc-beta-tester-${{ inputs.version }}
                   name: WooCommerce Beta Tester Release ${{ inputs.version }}
