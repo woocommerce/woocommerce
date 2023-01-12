@@ -32,7 +32,7 @@ type ProductImageProps = {
 	} & Record< string, any >;
 	/** The width of image to display. */
 	width?: number;
-	// The height of image to display.
+	/** The height of image to display. */
 	height?: number;
 	// Additional CSS classes.
 	className?: string;
