@@ -55,6 +55,28 @@ class Section extends Component {
 	}
 
 	/**
+	 * Field arguments.
+	 *
+	 * @return array
+	 */
+	public function get_arguments() {
+		return $this->additional_args;
+	}
+
+	/**
+	 * Get the section as JSON.
+	 *
+	 * @return array
+	 */
+	public function get_json() {
+		return array(
+			'id'        => $this->get_id(),
+			'plugin_id' => $this->get_plugin_id(),
+			'arguments' => $this->get_arguments(),
+		);
+	}
+
+	/**
 	 * Get missing arguments of args array.
 	 *
 	 * @param array $args section arguments.

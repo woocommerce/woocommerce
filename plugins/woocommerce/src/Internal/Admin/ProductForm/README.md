@@ -8,7 +8,7 @@ This will primarily be done through the `Form` class, under the `Automattic\WooC
 ```php
 function add_product_form_field() {
     if (
-        ! method_exists( '\Automattic\WooCommerce\Internal\Admin\ProductForm\Form', 'add_field' )
+        ! method_exists( '\Automattic\WooCommerce\Internal\Admin\ProductForm\FormFactory', 'add_field' )
     ) {
         return;
     }
