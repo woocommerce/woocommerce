@@ -43,6 +43,7 @@ export function useTreeItem( {
 	level,
 	getLabel,
 	isExpanded,
+	isHighlighted,
 	onSelect,
 	onRemove,
 	...props
@@ -174,6 +175,10 @@ export function useTreeItem( {
 		multiple,
 		expanded,
 		checkedStatus,
+		highlighted:
+			typeof isHighlighted === 'function'
+				? isHighlighted( item )
+				: undefined,
 		getLabel,
 		onToggleExpand,
 		onSelectChild,
@@ -196,6 +201,7 @@ export function useTreeItem( {
 			onRemove: onRemoveChildren,
 			getItemLabel: getLabel,
 			isItemExpanded: isExpanded,
+			isItemHighlighted: isHighlighted,
 			'aria-label': item.label,
 		},
 	};

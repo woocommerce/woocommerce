@@ -3,7 +3,7 @@
  */
 import interpolate from '@automattic/interpolate-components';
 import { BaseControl, TextControl } from '@wordpress/components';
-import React, { createElement, useCallback, useState } from 'react';
+import React, { createElement, useCallback, useRef, useState } from 'react';
 
 /**
  * Internal dependencies
@@ -78,7 +78,6 @@ export const SingleSelection: React.FC = () => {
 						}
 					} }
 					onRemove={ () => setSelected( undefined ) }
-					tabIndex={ -1 }
 				/>
 			</BaseControl>
 			<pre>{ JSON.stringify( selected, null, 2 ) }</pre>
@@ -88,11 +87,9 @@ export const SingleSelection: React.FC = () => {
 
 export const MultipleSelection: React.FC = () => {
 	const [ selected, setSelected ] = useState< Item[] >( [] );
-	const [ text, setText ] = useState( '' );
 
 	return (
 		<>
-			<TextControl value={ text } onChange={ setText } />
 			<BaseControl
 				label="Multiple selection"
 				id="mutiple-selection"
@@ -227,10 +224,35 @@ function filter( value: string, items: Item[] = treeItems ): Item[] {
 	}, [] as Item[] );
 }
 
+function getFirstMatchingItem(
+	item: Item,
+	text: string,
+	memo: Record< string, string >
+) {
+	if ( ! text ) return false;
+	if ( memo[ text ] === item.value ) return true;
+
+	const matcher = new RegExp( text, 'ig' );
+	if ( matcher.test( item.label ) ) {
+		if ( ! memo[ text ] ) {
+			memo[ text ] = item.value;
+			return true;
+		}
+		return false;
+	}
+
+	item.children?.some( ( child ) => {
+		return getFirstMatchingItem( child, text, memo );
+	} );
+
+	return false;
+}
+
 export const FilterMultipleSelection: React.FC = () => {
 	const [ text, setText ] = useState( '' );
 	const [ selected, setSelected ] = useState< Item[] >( [] );
 	const [ items, setItems ] = useState< Item[] >( treeItems );
+	const highlightedItemRef = useRef< Record< string, string > >( {} );
 
 	return (
 		<>
@@ -263,8 +285,9 @@ export const FilterMultipleSelection: React.FC = () => {
 							}
 							return [ ...prev, value ];
 						} );
+						highlightedItemRef.current = {};
 					} }
-					onRemove={ ( value ) =>
+					onRemove={ ( value ) => {
 						setSelected( ( prev ) =>
 							prev.filter( ( curr ) =>
 								Array.isArray( value )
@@ -274,12 +297,22 @@ export const FilterMultipleSelection: React.FC = () => {
 									  )
 									: curr.value !== value.value
 							)
-						)
-					}
+						);
+						highlightedItemRef.current = {};
+					} }
 					getItemLabel={ ( item ) => getItemLabel( item, text ) }
 					isItemExpanded={ useCallback(
 						( item ) => isItemExpanded( item, text ),
 						[ text ]
+					) }
+					isItemHighlighted={ useCallback(
+						( item ) =>
+							getFirstMatchingItem(
+								item,
+								text,
+								highlightedItemRef.current
+							),
+						[ text, highlightedItemRef ]
 					) }
 				/>
 			</BaseControl>

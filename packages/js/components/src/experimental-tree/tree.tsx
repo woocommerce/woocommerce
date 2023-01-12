@@ -27,6 +27,7 @@ export const Tree = forwardRef( function ForwardedTree(
 		onRemove,
 		getItemLabel,
 		isItemExpanded,
+		isItemHighlighted,
 		...olProps
 	} = useTree( { ...props, ref } );
 
@@ -52,6 +53,7 @@ export const Tree = forwardRef( function ForwardedTree(
 					onRemove={ onRemove }
 					getLabel={ getItemLabel }
 					isExpanded={ isItemExpanded }
+					isHighlighted={ isItemHighlighted }
 				/>
 			) ) }
 		</ol>

@@ -14,10 +14,6 @@ type BaseTreeProps = {
 	onRemove?( value: Item | Item[] ): void;
 };
 
-export type TreeItemLabelProps = {
-	item: Item;
-};
-
 export type TreeProps = BaseTreeProps &
 	Omit<
 		React.DetailedHTMLProps<
@@ -27,6 +23,7 @@ export type TreeProps = BaseTreeProps &
 		'onSelect'
 	> & {
 		items: Item[];
+		isItemHighlighted?( item: Item ): boolean;
 		getItemLabel?( item: Item ): JSX.Element;
 		isItemExpanded?( item: Item ): boolean;
 	};
@@ -41,6 +38,8 @@ export type TreeItemProps = BaseTreeProps &
 	> & {
 		item: Item;
 		level: number;
+		highlighted?: boolean;
 		getLabel?( item: Item ): JSX.Element;
 		isExpanded?( item: Item ): boolean;
+		isHighlighted?( item: Item ): boolean;
 	};
