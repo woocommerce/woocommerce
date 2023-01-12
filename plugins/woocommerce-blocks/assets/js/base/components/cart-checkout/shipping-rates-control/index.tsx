@@ -98,7 +98,6 @@ const ShippingRatesControl = ( {
 	};
 	const { isEditor } = useEditorContext();
 	const { hasSelectedLocalPickup } = useShippingData();
-
 	return (
 		<LoadingMask
 			isLoading={ isLoadingRates }
@@ -109,21 +108,21 @@ const ShippingRatesControl = ( {
 			showSpinner={ true }
 		>
 			<ExperimentalOrderShippingPackages.Slot { ...slotFillProps } />
+			{ hasSelectedLocalPickup &&
+				shippingRates.length > 1 &&
+				! isEditor && (
+					<StoreNotice
+						className="wc-block-components-notice"
+						isDismissible={ false }
+						status="warning"
+					>
+						{ __(
+							'Multiple shipments must have the same pickup location',
+							'woo-gutenberg-products-block'
+						) }
+					</StoreNotice>
+				) }
 			<ExperimentalOrderShippingPackages>
-				{ hasSelectedLocalPickup &&
-					shippingRates.length > 1 &&
-					! isEditor && (
-						<StoreNotice
-							className="wc-block-components-notice"
-							isDismissible={ false }
-							status="warning"
-						>
-							{ __(
-								'Multiple shipments must have the same pickup location',
-								'woo-gutenberg-products-block'
-							) }
-						</StoreNotice>
-					) }
 				<Packages
 					packages={ shippingRates }
 					noResultsMessage={ noResultsMessage }
