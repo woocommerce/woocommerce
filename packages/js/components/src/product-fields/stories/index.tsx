@@ -4,41 +4,27 @@
 import React from 'react';
 import { useState, createElement } from '@wordpress/element';
 import { createRegistry, RegistryProvider, select } from '@wordpress/data';
-import {
-	// @ts-expect-error `__experimentalInputControl` does exist.
-	__experimentalInputControl as InputControl,
-} from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import { store } from '../store';
-import { registerProductField, renderField } from '../api';
+import { renderField } from '../api';
+import { registerCoreProductFields } from '../fields';
 
 const registry = createRegistry();
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 registry.register( store );
 
-registerProductField( 'text', {
-	name: 'text',
-	render: ( props ) => {
-		return <InputControl type="text" { ...props } />;
-	},
-} );
-
-registerProductField( 'number', {
-	name: 'number',
-	render: () => {
-		return <InputControl type="number" />;
-	},
-} );
+registerCoreProductFields();
 
 const RenderField = () => {
 	const fields: string[] = select( store ).getRegisteredProductFields();
 	const [ selectedField, setSelectedField ] = useState(
 		fields ? fields[ 0 ] : undefined
 	);
+	const [ value, setValue ] = useState();
 
 	const handleChange = ( event ) => {
 		setSelectedField( event.target.value );
@@ -52,7 +38,18 @@ const RenderField = () => {
 					</option>
 				) ) }
 			</select>
-			{ selectedField && renderField( selectedField, { name: 'test' } ) }
+			{ selectedField &&
+				renderField( selectedField, {
+					value,
+					name: 'test',
+					label: 'Test field',
+					onChange: setValue,
+					options: [
+						{ label: 'Option', value: 'option' },
+						{ label: 'Option 2', value: 'option2' },
+						{ label: 'Option 3', value: 'option3' },
+					],
+				} ) }
 		</div>
 	);
 };
