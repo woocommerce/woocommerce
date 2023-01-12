@@ -74,6 +74,13 @@ class OrdersTableMetaQuery {
 	private $queries = array();
 
 	/**
+	 * Flat list of clauses by name.
+	 *
+	 * @var array
+	 */
+	private $flattened_clauses = array();
+
+	/**
 	 * JOIN clauses to add to the main SQL query.
 	 *
 	 * @var array
@@ -169,7 +176,8 @@ class OrdersTableMetaQuery {
 					$arg['compare_key'] = '=';
 				}
 
-				$sanitized[ $key ] = $arg;
+				$sanitized[ $key ]          = $arg;
+				$sanitized[ $key ]['index'] = $key;
 			} else {
 				$sanitized_arg = $this->sanitize_meta_query( $arg );
 
@@ -298,12 +306,24 @@ class OrdersTableMetaQuery {
 					$this->generate_where_for_clause_value( $arg ),
 				)
 			);
+
+			// Store clauses by their key for ORDER BY purposes.
+			$flat_clause_key = is_int( $arg['index'] ) ? $arg['alias'] : $arg['index'];
+
+			$unique_flat_key = $flat_clause_key;
+			$i               = 1;
+			while ( isset( $this->flattened_clauses[ $unique_flat_key ] ) ) {
+				$unique_flat_key = $flat_clause_key . '-' . $i;
+				$i++;
+			}
+
+			$this->flattened_clauses[ $unique_flat_key ] =& $arg;
 		} else {
 			// Nested.
 			$relation = $arg['relation'];
 			unset( $arg['relation'] );
 
-			foreach ( $arg as $key => &$clause ) {
+			foreach ( $arg as $index => &$clause ) {
 				$chunks[] = $this->process( $clause, $arg );
 			}
 
