@@ -1,0 +1,287 @@
+name: Bump WP L-2 Support
+on:
+  workflow_dispatch:
+    inputs:
+      releaseBranch:
+          description: Provide the release branch you want to bump the WP L-2 support. Example release/6.9. Note that trunk will also be bumped to match.
+          default: ''
+          required: true
+
+permissions: {}
+
+env:
+    GIT_COMMITTER_NAME: 'WooCommerce Bot'
+    GIT_COMMITTER_EMAIL: 'no-reply@woocommerce.com'
+    GIT_AUTHOR_NAME: 'WooCommerce Bot'
+    GIT_AUTHOR_EMAIL: 'no-reply@woocommerce.com'
+
+jobs:
+  check-release-branch-exists:
+    name: Check for existence of release branch
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check for release branch
+        id: release-branch-check
+        uses: actions/github-script@v6
+        with:
+          script: |
+              // This will throw an error for non-200 responses, which prevents subsequent jobs from completing, as desired.
+              await github.request( 'GET /repos/{owner}/{repo}/branches/{branch}', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: '${{ inputs.releaseBranch }}',
+              } );
+
+  validate-bump:
+    name: Validate and bump WP L-2 support version
+    runs-on: ubuntu-20.04
+    needs: check-release-branch-exists
+    if: success()
+    permissions:
+      actions: write
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get latest WP version
+        id: latestWP
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const https = require( 'https' );
+
+            https.get( 'https://api.wordpress.org/core/stable-check/1.0/', ( resp ) => {
+              let data = '';
+
+              // A chunk of data has been received.
+              resp.on( 'data', ( chunk ) => {
+                data += chunk;
+              } );
+
+              // The whole response has been received. Print out the result.
+              resp.on( 'end', () => {
+                JSON.parse(data, ( key, val ) => {
+                  if ( val === 'latest' ) {
+                    core.setOutput( 'version', key )
+                  }   
+                } );
+              } );
+
+            } ).on( 'error', ( err ) => {
+              console.log( 'Error: ' + err.message );
+            } );
+
+      - name: Get L-2 WP version
+        id: l2Version
+        if: steps.latestWP.outputs.version != '' && steps.latestWP.outputs.version != null
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const version = "${{ steps.latestWP.outputs.version }}";
+            const latestWPVersionMajor = version.split( '.' )[0];
+            const latestWPVersionMinor = version.split( '.' )[1];
+            const l2 = (parseInt( ( latestWPVersionMajor + latestWPVersionMinor ), 10 ) - 2 ).toString();
+            const l2Major = l2.split( '' )[0];
+            const l2Minor = l2.split( '' )[1];
+            core.setOutput( 'version', l2Major + '.' + l2Minor );
+
+      - name: Git fetch the release branch
+        run: git fetch origin ${{ inputs.releaseBranch }}
+
+      - name: Checkout release branch
+        run: git checkout ${{ inputs.releaseBranch }}
+
+      - name: Create a PR branch based on release branch
+        run: git checkout -b WP-L-2-version-support-${{ steps.l2Version.outputs.version }}/${{ inputs.releaseBranch }}
+
+      - name: Check if WP L-2 support needs to be bumped the release branch
+        id: readmeWPVersion
+        if: steps.l2Version.outputs.version != '' && steps.l2Version.outputs.version != null
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require( 'node:fs' );
+            const l2Version = "${{ steps.l2Version.outputs.version }}";
+            let readme = '';
+
+            fs.readFile( './plugins/woocommerce/readme.txt', 'utf-8', function( err, data ) {
+              if ( err ) {
+                console.error( err );
+              }
+
+              readme = data.split( "\n" );
+              const newReadme = [];
+              let needsChange = false;
+
+              for ( const line of readme ) {
+                if ( line.match( /Requires\sat\sleast:\s\d+\.\d/ ) ) {
+                  const readmeVersion = line.match( /\d+\.\d/ );
+
+                  // If the versions don't match, means we need to make a change.
+                  if ( readmeVersion != l2Version ) {
+                    needsChange = true;
+
+                    newReadme.push( 'Requires at least: ' + l2Version );
+                    continue;
+                  }
+                }
+
+                newReadme.push( line );
+              }
+
+              if ( needsChange ) {
+                fs.writeFile( './plugins/woocommerce/readme.txt', newReadme.join( "\n" ), err => {
+                  if ( err ) {
+                    core.setFailed( `Unable to bump the WP L-2 support version. ${err}` );
+                  }
+
+                  core.setOutput( 'needsChange', needsChange );
+
+                  // Copy the readme.txt file to the root of VM to be used later.
+                  fs.writeFile( '../../readme.txt', newReadme.join( "\n" ), err => {
+                    if ( err ) {
+                      core.setFailed( `Unable to copy the readme.txt file to the root of VM. ${err}` );
+                    }
+                  } );
+                } );
+              } else {
+                core.setFailed( 'No changes needed. WP Version is L-2 compatible.' );
+              }
+            } );
+
+      - name: Commit changes
+        if: steps.readmeWPVersion.outputs.needsChange == 'true'
+        run: git commit --no-verify -am "Update readme.txt WP L-2 support version."
+
+      - name: Push changes
+        if: steps.readmeWPVersion.outputs.needsChange == 'true'
+        run: git push origin WP-L-2-version-support-${{ steps.l2Version.outputs.version }}/${{ inputs.releaseBranch }}
+     
+      - name: Push the PR up to GitHub
+        id: release-branch-pr
+        if: steps.readmeWPVersion.outputs.needsChange == 'true'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const PRBody = "This PR bumps the WP version to L-2 compatible for the release branch ${{ inputs.releaseBranch }}.\n";
+
+            const pr = await github.rest.pulls.create( {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: "Bump WP Version to L-2 compatible for ${{ inputs.releaseBranch }}",
+              head: "WP-L-2-version-support-${{ steps.l2Version.outputs.version }}/${{ inputs.releaseBranch }}",
+              base: "${{ inputs.releaseBranch }}",
+              body: PRBody
+            } );
+            
+            if ( pr.status != 201 ) {
+              core.setFailed( "Unable to push WP-L-2-version-support-${{ steps.l2Version.outputs.version }}/${{ inputs.releaseBranch }} to GitHub." );
+            }
+
+            core.setOutput( 'pr', pr.data.number );
+
+            await github.rest.pulls.requestReviewers( {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.data.number,
+              reviewers: [ context.actor ]
+            } );
+
+      - name: Checkout trunk branch
+        if: steps.release-branch-pr.outputs.pr != '' && steps.release-branch-pr.outputs.pr != null
+        run: git checkout trunk
+
+      - name: Create a branch based on trunk branch
+        if: steps.release-branch-pr.outputs.pr != '' && steps.release-branch-pr.outputs.pr != null
+        run: git checkout -b WP-L-2-version-support-${{ steps.l2Version.outputs.version }}/trunk
+
+      - name: Check if WP L-2 support needs to be bumped for trunk
+        id: readmeWPVersionTrunk
+        if: steps.release-branch-pr.outputs.pr != '' && steps.release-branch-pr.outputs.pr != null
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require( 'node:fs' );
+            const l2Version = "${{ steps.l2Version.outputs.version }}";
+            let readme = '';
+
+            fs.readFile( './plugins/woocommerce/readme.txt', 'utf-8', function( err, data ) {
+              if ( err ) {
+                console.error( err );
+              }
+
+              readme = data.split( "\n" );
+              const newReadme = [];
+              let needsChange = false;
+
+              for ( const line of readme ) {
+                if ( line.match( /Requires\sat\sleast:\s\d+\.\d/ ) ) {
+                  const readmeVersion = line.match( /\d+\.\d/ );
+
+                  // If the versions don't match, means we need to make a change.
+                  if ( readmeVersion != l2Version ) {
+                    needsChange = true;
+
+                    newReadme.push( 'Requires at least: ' + l2Version );
+                    continue;
+                  }
+                }
+
+                newReadme.push( line );
+              }
+
+              if ( needsChange ) {
+                fs.writeFile( './plugins/woocommerce/readme.txt', newReadme.join( "\n" ), err => {
+                  if ( err ) {
+                    core.setFailed( `Unable to bump the WP L-2 support version. ${err}` );
+                  }
+
+                  core.setOutput( 'needsChange', needsChange );
+
+                  // Copy the readme.txt file to the root of VM to be used later.
+                  fs.writeFile( '../../readme.txt', newReadme.join( "\n" ), err => {
+                    if ( err ) {
+                      core.setFailed( `Unable to copy the readme.txt file to the root of VM. ${err}` );
+                    }
+                  } );
+                } );
+              } else {
+                core.setFailed( 'No changes needed. WP Version is L-2 compatible.' );
+              }
+            } );
+
+      - name: Commit changes
+        if: steps.readmeWPVersionTrunk.outputs.needsChange == 'true'
+        run: git commit --no-verify -am "Update readme.txt WP L-2 support version."
+
+      - name: Push changes
+        if: steps.readmeWPVersionTrunk.outputs.needsChange == 'true'
+        run: git push origin WP-L-2-version-support-${{ steps.l2Version.outputs.version }}/trunk
+     
+      - name: Push the PR up to GitHub
+        if: steps.readmeWPVersionTrunk.outputs.needsChange == 'true'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const PRBody = "This PR bumps the WP version to L-2 compatible for trunk.\n";
+
+            const pr = await github.rest.pulls.create( {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: "Bump WP Version to L-2 compatible for trunk",
+              head: "WP-L-2-version-support-${{ steps.l2Version.outputs.version }}/trunk",
+              base: "trunk",
+              body: PRBody
+            } );
+            
+            if ( pr.status != 201 ) {
+              core.setFailed( "Unable to push WP-L-2-version-support-${{ steps.l2Version.outputs.version }}/trunk to GitHub." );
+            }
+
+            await github.rest.pulls.requestReviewers( {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.data.number,
+              reviewers: [ context.actor ]
+            } );

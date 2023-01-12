@@ -85,6 +85,7 @@ export const options = {
 	},
 	thresholds: {
 		checks: [ 'rate==1' ],
+		// Listing individual metrics due to https://github.com/grafana/k6/issues/1321
 		'http_req_duration{name:Shopper - Site Root}': [
 			`${ shopper_request_threshold }`,
 		],
@@ -140,13 +141,13 @@ export const options = {
 			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - My Account}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - My Account Orders}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - My Account Open Order}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - WP Login Page}': [
 			`${ merchant_request_threshold }`,

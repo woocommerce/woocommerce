@@ -8,9 +8,9 @@
  * @since    2.6.0
  */
 
-use Automattic\WooCommerce\Utilities\OrderUtil;
-
 defined( 'ABSPATH' ) || exit;
+
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Legacy class name, can't change without breaking backward compat.
 /**
@@ -1999,5 +1999,34 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		);
 
 		return $params;
+	}
+
+	/**
+	 * Get objects.
+	 *
+	 * @param  array $query_args Query args.
+	 * @return array
+	 */
+	protected function get_objects( $query_args ) {
+		// Do not use WC_Order_Query for the CPT datastore.
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return parent::get_objects( $query_args );
+		}
+
+		$query   = new \WC_Order_Query(
+			array_merge(
+				$query_args,
+				array(
+					'paginate' => true,
+				)
+			)
+		);
+		$results = $query->get_orders();
+
+		return array(
+			'objects' => $results->orders,
+			'total'   => $results->total,
+			'pages'   => $results->max_num_pages,
+		);
 	}
 }

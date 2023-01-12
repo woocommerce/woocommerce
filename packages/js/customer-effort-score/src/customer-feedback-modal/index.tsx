@@ -28,14 +28,14 @@ import { __ } from '@wordpress/i18n';
  * @param {string}   props.title               Title displayed in the modal.
  * @param {string}   props.description         Description displayed in the modal.
  * @param {string}   props.firstQuestion       The first survey question.
- * @param {string}   props.secondQuestion      The second survey question.
+ * @param {string}   [props.secondQuestion]    An optional second survey question.
  * @param {string}   props.defaultScore        Default score.
  * @param {Function} props.onCloseModal        Callback for when user closes modal by clicking cancel.
  * @param {Function} props.customOptions       List of custom score options, contains label and value.
  */
 function CustomerFeedbackModal( {
 	recordScoreCallback,
-	title,
+	title = __( 'Please share your feedback', 'woocommerce' ),
 	description,
 	firstQuestion,
 	secondQuestion,
@@ -48,10 +48,10 @@ function CustomerFeedbackModal( {
 		secondScore: number,
 		comments: string
 	) => void;
-	title: string;
+	title?: string;
 	description?: string;
 	firstQuestion: string;
-	secondQuestion: string;
+	secondQuestion?: string;
 	defaultScore?: number;
 	onCloseModal?: () => void;
 	customOptions?: { label: string; value: string }[];
@@ -110,10 +110,8 @@ function CustomerFeedbackModal( {
 
 	const sendScore = () => {
 		if (
-			! (
-				Number.isInteger( firstQuestionScore ) &&
-				Number.isInteger( secondQuestionScore )
-			)
+			! Number.isInteger( firstQuestionScore ) ||
+			( secondQuestion && ! Number.isInteger( secondQuestionScore ) )
 		) {
 			setShowNoScoreMessage( true );
 			return;
@@ -175,28 +173,32 @@ function CustomerFeedbackModal( {
 				/>
 			</div>
 
-			<Text
-				variant="subtitle.small"
-				as="p"
-				weight="600"
-				size="14"
-				lineHeight="20px"
-			>
-				{ secondQuestion }
-			</Text>
+			{ secondQuestion && (
+				<Text
+					variant="subtitle.small"
+					as="p"
+					weight="600"
+					size="14"
+					lineHeight="20px"
+				>
+					{ secondQuestion }
+				</Text>
+			) }
 
-			<div className="woocommerce-customer-effort-score__selection">
-				<RadioControl
-					selected={ secondQuestionScore.toString( 10 ) }
-					options={ options }
-					onChange={ ( value ) =>
-						onRadioControlChange(
-							value as string,
-							setSecondQuestionScore
-						)
-					}
-				/>
-			</div>
+			{ secondQuestion && (
+				<div className="woocommerce-customer-effort-score__selection">
+					<RadioControl
+						selected={ secondQuestionScore.toString( 10 ) }
+						options={ options }
+						onChange={ ( value ) =>
+							onRadioControlChange(
+								value as string,
+								setSecondQuestionScore
+							)
+						}
+					/>
+				</div>
+			) }
 
 			{ [ firstQuestionScore, secondQuestionScore ].some(
 				( score ) => score === 1 || score === 2
@@ -250,9 +252,9 @@ function CustomerFeedbackModal( {
 
 CustomerFeedbackModal.propTypes = {
 	recordScoreCallback: PropTypes.func.isRequired,
-	title: PropTypes.string.isRequired,
+	title: PropTypes.string,
 	firstQuestion: PropTypes.string.isRequired,
-	secondQuestion: PropTypes.string.isRequired,
+	secondQuestion: PropTypes.string,
 	defaultScore: PropTypes.number,
 	onCloseModal: PropTypes.func,
 };

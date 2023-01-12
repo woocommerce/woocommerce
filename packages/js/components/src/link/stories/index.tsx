@@ -3,11 +3,12 @@
  */
 import { withConsole } from '@storybook/addon-console';
 import { createElement } from '@wordpress/element';
+import React from 'react';
 
 /**
  * Internal dependencies
  */
-import Link from '../';
+import Link from '..';
 
 function logLinkClick( event ) {
 	const a = event.currentTarget;

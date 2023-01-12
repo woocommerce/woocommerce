@@ -47,6 +47,26 @@ class WC_Beta_Tester_Live_Branches_Installer {
 	}
 
 	/**
+	 * Get the download url of a WooCommerce plugin version from the manifest.
+	 *
+	 * @param string $branch The name of the branch.
+	 */
+	public function get_branch_info_from_manifest( $branch ) {
+		$response = wp_remote_get( 'https://betadownload.jetpack.me/woocommerce-branches.json' );
+		$body     = wp_remote_retrieve_body( $response );
+
+		$obj = json_decode( $body );
+
+		foreach ( $obj->pr as $key => $value ) {
+			if ( $value->branch === $branch ) {
+				return $value;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Install a WooCommerce plugin version by download url.
 	 *
 	 * @param string $download_url The download url of the plugin version.

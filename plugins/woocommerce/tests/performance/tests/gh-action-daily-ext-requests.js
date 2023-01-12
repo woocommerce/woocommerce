@@ -83,165 +83,166 @@ export const options = {
 		},
 	},
 	thresholds: {
-		checks: ['rate==1'],
+		checks: [ 'rate==1' ],
+		// Listing individual metrics due to https://github.com/grafana/k6/issues/1321
 		'http_req_duration{name:Shopper - Site Root}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - Shop Page}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - Search Products}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - Category Page}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - Product Page}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - wc-ajax=add_to_cart}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - View Cart}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - Remove Item From Cart}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - wc-ajax=apply_coupon}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - Update Cart}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - View Checkout}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - wc-ajax=update_order_review}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - wc-ajax=checkout}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - Order Received}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - wc-ajax=get_refreshed_fragments}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - Login to Checkout}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - My Account Login Page}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - Login to My Account}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - My Account}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - My Account Orders}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - My Account Open Order}': [
-			`${shopper_request_threshold}`,
+			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - WP Login Page}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - Login to WP Admin}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - WC-Admin}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - wc-analytics/orders?}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - wc-analytics/products/reviews?}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - wc-analytics/products/low-in-stock?}':
-			[`${merchant_request_threshold}`],
+			[ `${ merchant_request_threshold }` ],
 		'http_req_duration{name:Merchant - All Orders}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - Completed Orders}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - New Order Page}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - Create New Order}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - Open Order}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - Update Existing Order Status}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - Search Orders By Product}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - Search Orders By Customer Email}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - Search Orders By Customer Address}':
-			[`${merchant_request_threshold}`],
+			[ `${ merchant_request_threshold }` ],
 		'http_req_duration{name:Merchant - Filter Orders By Month}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - Filter Orders By Customer}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - All Products}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - Add New Product}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - action=sample-permalink}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - action=heartbeat autosave}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - Update New Product}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - Coupons}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - wc-admin/onboarding/tasks?}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - wc-analytics/admin/notes?}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - wc-admin/options?options=woocommerce_ces_tracks_queue}':
-			[`${merchant_request_threshold}`],
+			[ `${ merchant_request_threshold }` ],
 		'http_req_duration{name:Merchant - action=heartbeat}': [
-			`${merchant_request_threshold}`,
+			`${ merchant_request_threshold }`,
 		],
 		'http_req_duration{name:API - Create Order}': [
-			`${api_request_threshold}`,
+			`${ api_request_threshold }`,
 		],
 		'http_req_duration{name:API - Retrieve Order}': [
-			`${api_request_threshold}`,
+			`${ api_request_threshold }`,
 		],
 		'http_req_duration{name:API - Update Order (Status)}': [
-			`${api_request_threshold}`,
+			`${ api_request_threshold }`,
 		],
 		'http_req_duration{name:API - Delete Order}': [
-			`${api_request_threshold}`,
+			`${ api_request_threshold }`,
 		],
 		'http_req_duration{name:API - Batch Create Orders}': [
-			`${api_request_threshold}`,
+			`${ api_request_threshold }`,
 		],
 		'http_req_duration{name:API - Batch Update (Status) Orders}': [
-			`${api_request_threshold}`,
+			`${ api_request_threshold }`,
 		],
 	},
 };

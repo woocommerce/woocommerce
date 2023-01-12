@@ -1,12 +1,14 @@
 name: Run unit tests on PR
-on: 
-  pull_request
+on:
+    pull_request:
+        paths-ignore:
+            - '**/changelog/**'
 defaults:
-  run:
-    shell: bash
-concurrency: 
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    run:
+        shell: bash
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 permissions: {}
 
@@ -44,12 +46,12 @@ jobs:
       - name: Setup WooCommerce Monorepo
         uses: ./.github/actions/setup-woocommerce-monorepo
         with:
-          php-version: ${{ matrix.php }}
+            php-version: ${{ matrix.php }}
 
       - name: Tool versions
         run: |
-          php --version
-          composer --version
+            php --version
+            composer --version
 
       - name: Init DB and WP
         working-directory: plugins/woocommerce
