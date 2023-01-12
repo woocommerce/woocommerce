@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useDispatch } from '@wordpress/data';
-import { ITEMS_STORE_NAME } from '@woocommerce/data';
+import { ITEMS_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { loadExperimentAssignment } from '@woocommerce/explat';
@@ -15,9 +15,12 @@ import { useState } from '@wordpress/element';
 import { ProductTypeKey } from './constants';
 import { createNoticesFromResponse } from '../../../lib/notices';
 
+const NEW_PRODUCT_MANAGEMENT = 'woocommerce_new_product_management_enabled';
+
 export const useCreateProductByType = () => {
 	const { createProductFromTemplate } = useDispatch( ITEMS_STORE_NAME );
 	const [ isRequesting, setIsRequesting ] = useState< boolean >( false );
+	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
 	const createProductByType = async ( type: ProductTypeKey ) => {
 		if ( type === 'subscription' ) {
@@ -38,6 +41,9 @@ export const useCreateProductByType = () => {
 			);
 
 			if ( assignment.variationName === 'treatment' ) {
+				updateOptions( {
+					[ NEW_PRODUCT_MANAGEMENT ]: 'yes',
+				} );
 				navigateTo( { url: getNewPath( {}, '/add-product', {} ) } );
 				return;
 			}
