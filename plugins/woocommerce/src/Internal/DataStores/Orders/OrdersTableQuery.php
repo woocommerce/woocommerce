@@ -632,7 +632,7 @@ class OrdersTableQuery {
 
 		$this->sql = "SELECT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
 		$this->build_count_query( $fields, $join, $where, $groupby );
-		$this->build_approx_count_query( $fields, $join, $where, $groupby, $orderby,$this->args['approx_page_count'] ?? 10 );
+		$this->build_approx_count_query( $join, $where, $groupby, $orderby, $this->args['approx_page_count'] ?? 10 );
 	}
 
 	/**
@@ -641,9 +641,8 @@ class OrdersTableQuery {
 	 * @param string $fields Prepared fields for SELECT clause.
 	 * @param string $join Prepared JOIN clause.
 	 * @param string $where Prepared WHERE clause.
-	 * @param string $groupby Prepared GROUP BY clause.
 	 */
-	private function build_count_query( $fields, $join, $where, $groupby ) {
+	private function build_count_query( $fields, $join, $where ) {
 		if ( ! isset( $this->sql ) || '' === $this->sql ) {
 			wc_doing_it_wrong( __FUNCTION__, 'Count query can only be build after main query is built.', '7.3.0' );
 		}
@@ -656,13 +655,13 @@ class OrdersTableQuery {
 	 *
 	 * This function builds a query for approx count distinct.
 	 *
-	 * @param string $fields    Prepared fields for SELECT clause.
 	 * @param string $join      Prepared JOIN clause.
 	 * @param string $where     Prepared WHERE clause.
 	 * @param string $groupby   Prepared GROUP BY clause.
+	 * @param string $orderby   Prepared ORDER BY clause.
 	 * @param int    $approx_page_count Till what page we should check for existance of records.
 	 */
-	private function build_approx_count_query( $fields, $join, $where, $groupby, $orderby, $approx_page_count = 10 ) {
+	private function build_approx_count_query( $join, $where, $groupby, $orderby, $approx_page_count = 10 ) {
 		if ( ! isset( $this->sql ) || '' === $this->sql ) {
 			wc_doing_it_wrong( __FUNCTION__, 'Approx count query can only be build after main query is built.', '7.2.0' );
 		}
