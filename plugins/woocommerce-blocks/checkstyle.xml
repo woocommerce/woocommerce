@@ -2337,6 +2337,9 @@
     Target requires 1 element(s) but source may have fewer." source="TS2322" />
 <error line="113" column="9" severity="error" message="Type &apos;{}[][]&apos; is not assignable to type &apos;readonly Template[]&apos;." source="TS2322" />
 </file>
+<file name="assets/js/blocks/cart/inner-blocks/filled-cart-block/frontend.tsx">
+<error line="32" column="42" severity="error" message="Property &apos;type&apos; does not exist on type &apos;Notice&apos;." source="TS2339" />
+</file>
 <file name="assets/js/blocks/cart/inner-blocks/cart-items-block/frontend.tsx">
 <error line="15" column="4" severity="error" message="Type &apos;{ children: Element; className: string; }&apos; is not assignable to type &apos;IntrinsicAttributes &amp; RefAttributes&lt;any&gt;&apos;.
   Property &apos;children&apos; does not exist on type &apos;IntrinsicAttributes &amp; RefAttributes&lt;any&gt;&apos;." source="TS2322" />
