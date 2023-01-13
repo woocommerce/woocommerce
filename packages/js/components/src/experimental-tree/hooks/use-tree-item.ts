@@ -72,6 +72,7 @@ export function useTreeItem( {
 	...props
 }: TreeItemProps ) {
 	const [ expanded, setExpanded ] = useState( false );
+
 	const selectedItems = useMemo( () => {
 		if ( level === 1 && index === 0 ) {
 			selectedItemsMap = mapSelectedItems( selected );
@@ -89,6 +90,16 @@ export function useTreeItem( {
 		}
 		return 'unchecked';
 	}, [ selectedItems, item, multiple ] );
+
+	const highlighted = useMemo( () => {
+		if ( multiple ) {
+			if ( typeof isHighlighted === 'function' ) {
+				return isHighlighted( item );
+			}
+		} else {
+			return checkedStatus === 'checked';
+		}
+	}, [ item, multiple, checkedStatus, isHighlighted ] );
 
 	useEffect( () => {
 		if ( item.children?.length && typeof isExpanded === 'function' ) {
@@ -139,12 +150,14 @@ export function useTreeItem( {
 	}
 
 	function onSelectChild( checked: boolean ) {
-		let value: Item | Item[];
+		let value: Item | Item[] = item;
 
-		if ( multiple && item.children?.length ) {
-			value = [ item, ...getDeepChildren( item ) ];
-		} else {
-			value = item;
+		if ( multiple ) {
+			if ( item.children?.length ) {
+				value = [ item, ...getDeepChildren( item ) ];
+			}
+		} else if ( item.children?.length ) {
+			return;
 		}
 
 		if ( checked ) {
@@ -187,10 +200,7 @@ export function useTreeItem( {
 		multiple,
 		expanded,
 		checkedStatus,
-		highlighted:
-			typeof isHighlighted === 'function'
-				? isHighlighted( item )
-				: undefined,
+		highlighted,
 		getLabel,
 		onToggleExpand,
 		onSelectChild,
