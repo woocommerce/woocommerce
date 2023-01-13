@@ -56,12 +56,11 @@ class WC_Post_Types {
 			apply_filters(
 				'woocommerce_taxonomy_args_product_type',
 				array(
-					'hierarchical'      => false,
+					'hierarchical'      => true,
 					'show_ui'           => false,
 					'show_in_nav_menus' => false,
 					'query_var'         => is_admin(),
-					'rewrite'           => false,
-					'public'            => false,
+				    'show_in_rest'       => true,
 					'label'             => _x( 'Product type', 'Taxonomy name', 'woocommerce' ),
 				)
 			)
