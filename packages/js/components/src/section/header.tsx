@@ -15,7 +15,7 @@ import { Level } from './context';
  *
  * @type {HTMLElement}
  */
-export function H( props ) {
+export function H( props: React.HTMLAttributes< HTMLHeadingElement > ) {
 	const level = useContext( Level );
 
 	const Heading = 'h' + Math.min( level, 6 );

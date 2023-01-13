@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { H, Section } from '@woocommerce/components';
+import { createElement } from '@wordpress/element';
 
 export const Basic = () => (
 	<div>
