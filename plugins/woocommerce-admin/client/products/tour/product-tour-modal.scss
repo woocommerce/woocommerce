@@ -1,0 +1,68 @@
+.woocommerce-product-tour-modal {
+    max-width: 400px;
+    position: fixed;
+    left: $admin-menu-width + $gap-large;
+    bottom: $gap-large;
+    // This puts the modal on top of the RichTextEditor toolbars.
+    z-index: 31;
+
+    .components-modal__content {
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        padding: 0;
+    }
+
+    .components-modal__header {
+        position: static;
+        padding-top: $gap;
+        padding-left: $gap;
+        padding-right: $gap;
+        height: auto;
+
+        .components-button {
+            position: absolute;
+            top: $gap;
+            right: $gap;
+            left: auto;
+        }
+
+        .components-modal__header-heading {
+            font-size: 16px;
+            line-height: 24px;
+        }
+    }
+
+    .woocommerce-product-tour-modal__header-img {
+        background: #c5d9ed;
+        order: -1;
+        padding: 28px 28px 0 28px;
+
+        img {
+            max-width: 286px;
+            display: block;
+            margin: 0 auto;
+        }
+    }  
+    
+    .woocommerce-product-tour-modal__content {
+        padding: $gap-smaller $gap $gap $gap;
+
+        > p:first-child {
+            margin-top: 0;
+        }
+    }
+
+    .woocommerce-product-tour-modal__actions {
+        text-align: right;
+        margin-top: 28px;
+
+        button {
+            margin-left: $gap-smaller;
+        }
+    }
+}
+
+.woocommerce-product-tour-modal__overlay {
+    position: static;
+}
