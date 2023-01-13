@@ -2007,7 +2007,7 @@ class WC_AJAX {
 			}
 			foreach ( $line_item_qtys as $item_id => $qty ) {
 				$line_items[ $item_id ]['qty'] = max( $qty, 0 );
-				if ( isset($order_line_items[ $item_id ]) && $line_items[ $item_id ]['qty'] > $order_line_items[ $item_id ]->get_quantity() ) {
+				if ( isset( $order_line_items[ $item_id ] ) && $line_items[ $item_id ]['qty'] > $order_line_items[ $item_id ]->get_quantity() ) {
 					throw new Exception(
 						sprintf(
 						/* translators: %1s: order item name;  */

@@ -1062,7 +1062,7 @@ jQuery( function ( $ ) {
 					format:    woocommerce_admin_meta_boxes.currency_format
 				} ) );
 			},
- 
+
 			// When the refund qty is changed, increase or decrease costs
 			refund_quantity_changed: function() {
 				var $row              = $( this ).closest( 'tr.item' );
