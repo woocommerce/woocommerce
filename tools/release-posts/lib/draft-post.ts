@@ -15,7 +15,7 @@ import { Logger } from 'cli-core/src/logger';
 export const fetchWpComPost = async (
 	siteId: string,
 	postId: string,
-	authToken: string,
+	authToken: string
 ) => {
 	try {
 		const post = await fetch(

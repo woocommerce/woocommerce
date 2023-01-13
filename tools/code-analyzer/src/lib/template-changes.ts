@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { getFilename, getStartingLineNumber, getPullRequestNumberFromHash, getPatches, getLineCommitHash } from 'cli-core/src/git';
+import {
+	getFilename,
+	getStartingLineNumber,
+	getPullRequestNumberFromHash,
+	getPatches,
+	getLineCommitHash,
+} from 'cli-core/src/git';
 import { Logger } from 'cli-core/src/logger';
 
 export type TemplateChangeDescription = {
@@ -9,10 +15,14 @@ export type TemplateChangeDescription = {
 	code: string;
 	// We could probably move message out into linter later
 	message: string;
-	pullRequests: string[];
+	pullRequests: number[];
 };
 
-export const scanForTemplateChanges = async ( content: string, version: string, repositoryPath?: string ) => {
+export const scanForTemplateChanges = async (
+	content: string,
+	version: string,
+	repositoryPath?: string
+) => {
 	const changes: Map< string, TemplateChangeDescription > = new Map();
 
 	if ( ! content.match( /diff --git a\/(.+)\/templates\/(.+)\.php/g ) ) {
@@ -32,11 +42,11 @@ export const scanForTemplateChanges = async ( content: string, version: string, 
 		const patch = patches[ p ];
 		const lines = patch.split( '\n' );
 		const filePath = getFilename( lines[ 0 ] );
+		const pullRequests = [];
 
 		let lineNumber = 1;
 		let code = 'warning';
 		let message = 'This template may require a version bump!';
-		let pullRequests = [];
 
 		for ( const l in lines ) {
 			const line = lines[ l ];
@@ -48,7 +58,7 @@ export const scanForTemplateChanges = async ( content: string, version: string, 
 
 			if ( repositoryPath ) {
 				// Don't parse the headers for the patch.
-				if ( l < 4 ) {
+				if ( parseInt( l, 10 ) < 4 ) {
 					continue;
 				}
 
@@ -60,13 +70,22 @@ export const scanForTemplateChanges = async ( content: string, version: string, 
 
 				if ( line.match( /^\+/ ) ) {
 					try {
-						const commitHash = await getLineCommitHash( repositoryPath, filePath, lineNumber );
-						const prNumber = await getPullRequestNumberFromHash( repositoryPath, commitHash );
+						const commitHash = await getLineCommitHash(
+							repositoryPath,
+							filePath,
+							lineNumber
+						);
+						const prNumber = await getPullRequestNumberFromHash(
+							repositoryPath,
+							commitHash
+						);
 						if ( -1 === pullRequests.indexOf( prNumber ) ) {
 							pullRequests.push( prNumber );
 						}
-					} catch( e: unknown ) {
-						Logger.notice( `Unable to get PR number in ${filePath}:${lineNumber}` );
+					} catch ( e: unknown ) {
+						Logger.notice(
+							`Unable to get PR number in ${ filePath }:${ lineNumber }`
+						);
 					}
 				}
 
@@ -74,7 +93,6 @@ export const scanForTemplateChanges = async ( content: string, version: string, 
 				if ( ! line.match( /^-/ ) ) {
 					lineNumber++;
 				}
-
 			}
 		}
 

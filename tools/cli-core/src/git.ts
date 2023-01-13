@@ -183,7 +183,7 @@ const refIsHash = ( ref: string ) => {
  * @param {string} ref     -    Either a commit hash or a branch name.
  * @return {string} - the commit hash of the ref.
  */
-export const getCommitHash = async ( baseDir: string, ref: string ): string => {
+export const getCommitHash = async ( baseDir: string, ref: string ) => {
 	const isHash = refIsHash( ref );
 
 	// check if its in history, if its not an error will be thrown
@@ -206,7 +206,7 @@ export const getCommitHash = async ( baseDir: string, ref: string ): string => {
 
 /**
  * Get the commit hash for the last change to a line within a specific file.
- * 
+ *
  * @param {string} baseDir    - the dir of the git repo to get the hash from.
  * @param {string} filePath   - the relative path to the file to check the commit hash of.
  * @param {number} lineNumber - the line number from which to get the hash of the last commit.
@@ -216,25 +216,33 @@ export const getLineCommitHash = async (
 	baseDir: string,
 	filePath: string,
 	lineNumber: number
-): number => {
+) => {
 	// Remove leading slash, if it exists.
 	const adjustedFilePath = filePath.replace( /^\//, '' );
 	try {
 		const git = await simpleGit( { baseDir } );
-		const blame = await git.raw( [ 'blame', `-L${ lineNumber },${ lineNumber }`, adjustedFilePath ] );
+		const blame = await git.raw( [
+			'blame',
+			`-L${ lineNumber },${ lineNumber }`,
+			adjustedFilePath,
+		] );
 		const hash = blame.match( /^([a-f0-9]+)\s+/ );
 		if ( ! hash ) {
-			throw new Error( `Unable to git blame ${ adjustedFilePath }:${ lineNumber }` );
+			throw new Error(
+				`Unable to git blame ${ adjustedFilePath }:${ lineNumber }`
+			);
 		}
-		return hash[1];
+		return hash[ 1 ];
 	} catch ( e ) {
-		throw new Error( `Unable to git blame ${ adjustedFilePath }:${ lineNumber }` );
-	} 
+		throw new Error(
+			`Unable to git blame ${ adjustedFilePath }:${ lineNumber }`
+		);
+	}
 };
 
 /**
  * Get the commit hash for the last change to a line within a specific file.
- * 
+ *
  * @param {string} baseDir - the dir of the git repo to get the PR number from.
  * @param {string} hash    - the hash to get the PR number from.
  * @return {number} - the pull request number from the given inputs.
@@ -242,22 +250,31 @@ export const getLineCommitHash = async (
 export const getPullRequestNumberFromHash = async (
 	baseDir: string,
 	hash: string
-): number => {
+) => {
 	try {
 		const git = await simpleGit( { baseDir } );
 		const formerHead = await git.revparse( 'HEAD' );
 		await git.checkout( hash );
-		const cmdOutput = await git.raw( [ 'log', '-1', '--first-parent', '--format=%cI\n%s' ] );
-		const cmdLines = cmdOutput.split( "\n" );
+		const cmdOutput = await git.raw( [
+			'log',
+			'-1',
+			'--first-parent',
+			'--format=%cI\n%s',
+		] );
+		const cmdLines = cmdOutput.split( '\n' );
 		await git.checkout( formerHead );
-		const prNumber = cmdLines[1].trim().match( /(?:^Merge pull request #(\d+))|(?:\(#(\d+)\)$)/ );
+		const prNumber = cmdLines[ 1 ]
+			.trim()
+			.match( /(?:^Merge pull request #(\d+))|(?:\(#(\d+)\)$)/ );
 		if ( prNumber ) {
-			return prNumber[1] ? parseInt( prNumber[1], 10 ) : parseInt( prNumber[2], 10 );
+			return prNumber[ 1 ]
+				? parseInt( prNumber[ 1 ], 10 )
+				: parseInt( prNumber[ 2 ], 10 );
 		}
-		throw new Error( `Unable to get PR number from hash ${hash}.` );
+		throw new Error( `Unable to get PR number from hash ${ hash }.` );
 	} catch ( e ) {
-		throw new Error( `Unable to get PR number from hash ${hash}.` );
-	} 
+		throw new Error( `Unable to get PR number from hash ${ hash }.` );
+	}
 };
 
 /**

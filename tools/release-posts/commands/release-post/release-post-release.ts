@@ -15,11 +15,15 @@ import dotenv from 'dotenv';
  * Internal dependencies
  */
 import { renderTemplate } from '../../lib/render-template';
-import { createWpComDraftPost, fetchWpComPost, editWpComPostContent } from '../../lib/draft-post';
+import {
+	createWpComDraftPost,
+	fetchWpComPost,
+	editWpComPostContent,
+} from '../../lib/draft-post';
 import { getWordpressComAuthToken } from '../../lib/oauth-helper';
 import { getEnvVar } from '../../lib/environment';
 import { generateContributors } from '../../lib/contributors';
-import { editPostHTML } from '../../lib/edit-post.ts';
+import { editPostHTML } from '../../lib/edit-post';
 
 const DEVELOPER_WOOCOMMERCE_SITE_ID = '96396764';
 
@@ -43,14 +47,24 @@ const program = new Command()
 		'The previous version in x.y.z format. Ex: 7.0.0'
 	)
 	.option( '--outputOnly', 'Only output the post, do not publish it' )
-	.option( '--editPost <postId>', 'Updates an existing post' )
-	.option( '--siteId <siteId>', 'For posting to a non-default site (for testing)')
+	.option( '--editPostId <postId>', 'Updates an existing post' )
+	.option(
+		'--tags <tags>',
+		'Comma separated list of tags to add to the post.',
+		'Releases,WooCommerce Core'
+	)
+	.option(
+		'--siteId <siteId>',
+		'For posting to a non-default site (for testing)'
+	)
 	.action( async ( currentVersion, previousVersion, options ) => {
-
 		const siteId = options.siteId || DEVELOPER_WOOCOMMERCE_SITE_ID;
-		const tags = ( options.tags && options.tags.split( ',' ).map( ( tag ) => tag.trim() ) ) || [ 'WooCommerce Core','Releases' ];
+		const tags = ( options.tags &&
+			options.tags.split( ',' ).map( ( tag ) => tag.trim() ) ) || [
+			'WooCommerce Core',
+			'Releases',
+		];
 		const isOutputOnly = !! options.outputOnly;
-		const isEditPost = !! options.editPost;
 
 		if ( ! VERSION_VALIDATION_REGEX.test( currentVersion ) ) {
 			throw new Error(
@@ -69,20 +83,21 @@ const program = new Command()
 		const redirectUri =
 			getEnvVar( 'WPCOM_OAUTH_REDIRECT_URI' ) ||
 			'http://localhost:3000/oauth';
-		const authToken = isOutputOnly || await getWordpressComAuthToken(
-			clientId,
-			clientSecret,
-			siteId,
-			redirectUri,
-			'posts'
-		);
+		const authToken =
+			isOutputOnly ||
+			( await getWordpressComAuthToken(
+				clientId,
+				clientSecret,
+				siteId,
+				redirectUri,
+				'posts'
+			) );
 
 		if ( ! authToken ) {
 			throw new Error(
 				'Error getting auth token, check your env settings are correct.'
 			);
 		}
-
 
 		Logger.startTask( `Making temporary clone of ${ SOURCE_REPO }...` );
 		const currentParsed = semver.parse( currentVersion );
@@ -96,34 +111,50 @@ const program = new Command()
 
 		try {
 			currentBranch = `release/${ currentParsed.major }.${ currentParsed.minor }`;
-			currentVersionRef = await getCommitHash( tmpRepoPath, `remotes/origin/${ currentBranch }` );
-		} catch( error: unknown ) {
-			Logger.notice( `Unable to find '${ currentBranch }', using 'trunk'.` );
+			currentVersionRef = await getCommitHash(
+				tmpRepoPath,
+				`remotes/origin/${ currentBranch }`
+			);
+		} catch ( error: unknown ) {
+			Logger.notice(
+				`Unable to find '${ currentBranch }', using 'trunk'.`
+			);
 			currentBranch = 'trunk';
-			currentVersionRef = await getCommitHash( tmpRepoPath, 'remotes/origin/trunk' );
+			currentVersionRef = await getCommitHash(
+				tmpRepoPath,
+				'remotes/origin/trunk'
+			);
 		}
 
 		try {
 			previousBranch = `release/${ previousParsed.major }.${ previousParsed.minor }`;
-			previousVersionRef = await getCommitHash( tmpRepoPath, `remotes/origin/${ previousBranch }` );
-		} catch( error: unknown ) {
+			previousVersionRef = await getCommitHash(
+				tmpRepoPath,
+				`remotes/origin/${ previousBranch }`
+			);
+		} catch ( error: unknown ) {
 			throw new Error(
 				`Unable to find '${ previousBranch }'. Branch for previous version must exist.`
 			);
 		}
 
-
-		Logger.notice( `Using ${ currentBranch }(${ currentVersionRef }) for current and ${ previousBranch }(${ previousVersionRef }) for previous.` );
+		Logger.notice(
+			`Using ${ currentBranch }(${ currentVersionRef }) for current and ${ previousBranch }(${ previousVersionRef }) for previous.`
+		);
 
 		let postContent;
 
-		if ( isEditPost ) {
+		if ( 'undefined' !== typeof options.editPostId ) {
 			try {
-				const prevPost = await fetchWpComPost( siteId, options.editPost, authToken );
+				const prevPost = await fetchWpComPost(
+					siteId,
+					options.editPostId,
+					authToken
+				);
 				postContent = prevPost.content;
-			} catch( error: unknown ) {
+			} catch ( error: unknown ) {
 				throw new Error(
-					`Unable to fetch existing post with ID: ${ options.editPost }`
+					`Unable to fetch existing post with ID: ${ options.editPostId }`
 				);
 			}
 		}
@@ -139,9 +170,7 @@ const program = new Command()
 			tmpRepoPath
 		);
 
-		const schemaChanges = changes.schema.filter(
-			( s ) => ! s.areEqual
-		);
+		const schemaChanges = changes.schema.filter( ( s ) => ! s.areEqual );
 
 		Logger.startTask( 'Finding contributors' );
 		const title = `WooCommerce ${ currentVersion } Released`;
@@ -161,14 +190,27 @@ const program = new Command()
 			displayVersion: currentVersion,
 		};
 
-		const html = isEditPost ?
-			editPostHTML( postContent, {
-				hooks: await renderTemplate( 'hooks.ejs', postVariables ),
-				database: await renderTemplate( 'database.ejs', postVariables ),
-				templates: await renderTemplate( 'templates.ejs', postVariables ),
-				contributors: await renderTemplate( 'contributors.ejs', postVariables ),
-			} ) :
-			await renderTemplate( 'release.ejs', postVariables );
+		const html =
+			'undefined' !== typeof options.editPostId
+				? editPostHTML( postContent, {
+						hooks: await renderTemplate(
+							'hooks.ejs',
+							postVariables
+						),
+						database: await renderTemplate(
+							'database.ejs',
+							postVariables
+						),
+						templates: await renderTemplate(
+							'templates.ejs',
+							postVariables
+						),
+						contributors: await renderTemplate(
+							'contributors.ejs',
+							postVariables
+						),
+				  } )
+				: await renderTemplate( 'release.ejs', postVariables );
 
 		Logger.endTask();
 
@@ -185,20 +227,21 @@ const program = new Command()
 			Logger.startTask( 'Publishing draft release post' );
 
 			try {
-				const { URL } = isEditPost ?
-					await editWpComPostContent(
-						siteId,
-						options.editPost,
-						html,
-						authToken
-					) :
-					await createWpComDraftPost(
-						siteId,
-						title,
-						html,
-						tags,
-						authToken
-					);
+				const { URL } =
+					'undefined' !== typeof options.editPostId
+						? await editWpComPostContent(
+								siteId,
+								options.editPostId,
+								html,
+								authToken
+						  )
+						: await createWpComDraftPost(
+								siteId,
+								title,
+								html,
+								tags,
+								authToken
+						  );
 
 				Logger.notice( `Published draft release post at ${ URL }` );
 				Logger.endTask();
@@ -208,7 +251,6 @@ const program = new Command()
 				}
 			}
 		}
-
 	} );
 
 program.parse( process.argv );
