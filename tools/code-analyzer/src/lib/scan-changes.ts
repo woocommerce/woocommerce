@@ -25,12 +25,16 @@ export const scanForChanges = async (
 	outputStyle: string,
 	clonedPath?: string
 ) => {
-	let tmpRepoPath = clonedPath;
-	if ( ! clonedPath ) {
-		Logger.startTask( `Making temporary clone of ${ source }...` );
-		tmpRepoPath = typeof clonedPath !== 'undefined' ? clonedPath : await cloneRepo( source );
-		Logger.endTask();
-	}
+	Logger.startTask( `Making temporary clone of ${ source }...` );
+
+	const tmpRepoPath =
+		typeof clonedPath !== 'undefined'
+			? clonedPath
+			: await cloneRepo( source );
+
+	Logger.notice(
+		`Temporary clone of ${ source } created at ${ tmpRepoPath }`
+	);
 
 	Logger.notice(
 		`Temporary clone of ${ source } created at ${ tmpRepoPath }`
