@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { lazy } from '@wordpress/element';
-import { WC_BLOCKS_BUILD_URL } from '@woocommerce/block-settings';
+import {
+	WC_BLOCKS_BUILD_URL,
+	LOCAL_PICKUP_ENABLED,
+} from '@woocommerce/block-settings';
 import { registerCheckoutBlock } from '@woocommerce/blocks-checkout';
 
 /**
@@ -44,6 +47,27 @@ registerCheckoutBlock( {
 			)
 	),
 } );
+
+if ( LOCAL_PICKUP_ENABLED ) {
+	registerCheckoutBlock( {
+		metadata: metadata.CHECKOUT_SHIPPING_METHOD,
+		component: lazy(
+			() =>
+				import(
+					/* webpackChunkName: "checkout-blocks/shipping-method" */ './checkout-shipping-method-block/frontend'
+				)
+		),
+	} );
+	registerCheckoutBlock( {
+		metadata: metadata.CHECKOUT_PICKUP_LOCATION,
+		component: lazy(
+			() =>
+				import(
+					/* webpackChunkName: "checkout-blocks/pickup-options" */ './checkout-pickup-options-block/frontend'
+				)
+		),
+	} );
+}
 
 registerCheckoutBlock( {
 	metadata: metadata.CHECKOUT_SHIPPING_ADDRESS,

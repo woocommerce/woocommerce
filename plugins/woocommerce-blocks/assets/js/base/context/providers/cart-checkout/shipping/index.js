@@ -25,7 +25,6 @@ import {
 	emitEvent,
 } from './event-emit';
 import { useStoreCart } from '../../../hooks/cart/use-store-cart';
-import { useSelectShippingRate } from '../../../hooks/shipping/use-select-shipping-rate';
 import { useShippingData } from '../../../hooks/shipping/use-shipping-data';
 
 /**
@@ -53,8 +52,7 @@ export const ShippingDataProvider = ( { children } ) => {
 	const { __internalIncrementCalculating, __internalDecrementCalculating } =
 		useDispatch( CHECKOUT_STORE_KEY );
 	const { shippingRates, isLoadingRates, cartErrors } = useStoreCart();
-	const { isSelectingRate } = useSelectShippingRate();
-	const { selectedRates } = useShippingData();
+	const { selectedRates, isSelectingRate } = useShippingData();
 	const [ shippingErrorStatus, dispatchErrorStatus ] = useReducer(
 		errorStatusReducer,
 		NONE

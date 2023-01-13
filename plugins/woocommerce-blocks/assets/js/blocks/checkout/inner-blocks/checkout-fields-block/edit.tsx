@@ -40,6 +40,8 @@ export const Edit = ( {
 	const defaultTemplate = [
 		[ 'woocommerce/checkout-express-payment-block', {}, [] ],
 		[ 'woocommerce/checkout-contact-information-block', {}, [] ],
+		[ 'woocommerce/checkout-shipping-method-block', {}, [] ],
+		[ 'woocommerce/checkout-pickup-options-block', {}, [] ],
 		[ 'woocommerce/checkout-shipping-address-block', {}, [] ],
 		[ 'woocommerce/checkout-billing-address-block', {}, [] ],
 		[ 'woocommerce/checkout-shipping-methods-block', {}, [] ],

@@ -32,6 +32,9 @@ interface CheckoutAddress {
 	showShippingFields: boolean;
 	showBillingFields: boolean;
 	forcedBillingAddress: boolean;
+	useBillingAsShipping: boolean;
+	needsShipping: boolean;
+	showShippingMethods: boolean;
 }
 
 /**
@@ -39,8 +42,12 @@ interface CheckoutAddress {
  */
 export const useCheckoutAddress = (): CheckoutAddress => {
 	const { needsShipping } = useShippingData();
-	const useShippingAsBilling = useSelect( ( select ) =>
-		select( CHECKOUT_STORE_KEY ).getUseShippingAsBilling()
+	const { useShippingAsBilling, prefersCollection } = useSelect(
+		( select ) => ( {
+			useShippingAsBilling:
+				select( CHECKOUT_STORE_KEY ).getUseShippingAsBilling(),
+			prefersCollection: select( CHECKOUT_STORE_KEY ).prefersCollection(),
+		} )
 	);
 	const { __internalSetUseShippingAsBilling } =
 		useDispatch( CHECKOUT_STORE_KEY );
@@ -89,8 +96,13 @@ export const useCheckoutAddress = (): CheckoutAddress => {
 		defaultAddressFields,
 		useShippingAsBilling,
 		setUseShippingAsBilling: __internalSetUseShippingAsBilling,
-		showShippingFields: ! forcedBillingAddress && needsShipping,
-		showBillingFields: ! needsShipping || ! useShippingAsBilling,
+		needsShipping,
+		showShippingFields:
+			! forcedBillingAddress && needsShipping && ! prefersCollection,
+		showShippingMethods: needsShipping && ! prefersCollection,
+		showBillingFields:
+			! needsShipping || ! useShippingAsBilling || prefersCollection,
 		forcedBillingAddress,
+		useBillingAsShipping: forcedBillingAddress || prefersCollection,
 	};
 };

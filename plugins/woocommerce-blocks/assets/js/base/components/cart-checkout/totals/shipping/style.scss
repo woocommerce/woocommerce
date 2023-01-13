@@ -7,8 +7,9 @@
 		border: 0;
 	}
 
-	.wc-block-components-totals-shipping__via {
-		margin-bottom: $gap;
+	.wc-block-components-shipping-address {
+		margin-top: $gap;
+		display: block;
 	}
 
 	.wc-block-components-totals-shipping__options {
