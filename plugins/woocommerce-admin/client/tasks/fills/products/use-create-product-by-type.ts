@@ -4,7 +4,6 @@
 import { useDispatch } from '@wordpress/data';
 import { ITEMS_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
-import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { loadExperimentAssignment } from '@woocommerce/explat';
 import moment from 'moment';
 import { useState } from '@wordpress/element';
@@ -41,10 +40,12 @@ export const useCreateProductByType = () => {
 			);
 
 			if ( assignment.variationName === 'treatment' ) {
-				updateOptions( {
+				await updateOptions( {
 					[ NEW_PRODUCT_MANAGEMENT ]: 'yes',
 				} );
-				navigateTo( { url: getNewPath( {}, '/add-product', {} ) } );
+				window.location.href = getAdminLink(
+					'admin.php?page=wc-admin&path=/add-product'
+				);
 				return;
 			}
 		}
