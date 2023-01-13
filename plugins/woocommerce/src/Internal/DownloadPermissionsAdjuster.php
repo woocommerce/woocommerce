@@ -99,7 +99,21 @@ class DownloadPermissionsAdjuster {
 
 		$children_with_downloads = array();
 		foreach ( $children_ids as $child_id ) {
-			$child                                = wc_get_product( $child_id );
+			$child = wc_get_product( $child_id );
+
+			// Ensure we have a valid child product.
+			if ( ! $child ) {
+				wc_get_logger()->warning(
+					sprintf(
+						/* translators: 1: child product ID 2: parent product ID. */
+						__( 'Unable to load child product %1$d while adjusting download permissions for product %2$d.', 'woocommerce' ),
+						$child_id,
+						$product_id
+					)
+				);
+				continue;
+			}
+
 			$children_with_downloads[ $child_id ] = $this->get_download_files_and_permissions( $child );
 		}
 
