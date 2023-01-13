@@ -1982,8 +1982,9 @@ class WC_AJAX {
 		$response               = array();
 
 		try {
-			$order      = wc_get_order( $order_id );
-			$max_refund = wc_format_decimal( $order->get_total() - $order->get_total_refunded(), wc_get_price_decimals() );
+			$order            = wc_get_order( $order_id );
+			$order_line_items = $order->get_items();
+			$max_refund       = wc_format_decimal( $order->get_total() - $order->get_total_refunded(), wc_get_price_decimals() );
 
 			if ( ( ! $refund_amount && ( wc_format_decimal( 0, wc_get_price_decimals() ) !== $refund_amount ) ) || $max_refund < $refund_amount || 0 > $refund_amount ) {
 				throw new Exception( __( 'Invalid refund amount', 'woocommerce' ) );
@@ -2006,6 +2007,15 @@ class WC_AJAX {
 			}
 			foreach ( $line_item_qtys as $item_id => $qty ) {
 				$line_items[ $item_id ]['qty'] = max( $qty, 0 );
+				if ( isset($order_line_items[ $item_id ]) && $line_items[ $item_id ]['qty'] > $order_line_items[ $item_id ]->get_quantity() ) {
+					throw new Exception(
+						sprintf(
+						/* translators: %1s: order item name;  */
+							__( 'Invalid refund quantity for item: %1s.', 'woocommerce' ),
+							$order_line_items[ $item_id ]->get_name(),
+						)
+					);
+				}
 			}
 			foreach ( $line_item_totals as $item_id => $total ) {
 				$line_items[ $item_id ]['refund_total'] = wc_format_decimal( $total );

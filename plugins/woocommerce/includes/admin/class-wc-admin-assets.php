@@ -356,6 +356,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'remove_fee_notice'                  => $remove_fee_notice,
 					'remove_shipping_notice'             => $remove_shipping_notice,
 					'i18n_select_items'                  => __( 'Please select some items.', 'woocommerce' ),
+					'i18n_refund_invalid_item_amount'	 => __( 'Invalid line item amount to refund', 'woocommerce' ),
+					'i18n_refund_invalid_item_qty'		 => __( 'Invalid line item quantity to refund', 'woocommerce' ),
 					'i18n_do_refund'                     => __( 'Are you sure you wish to process this refund? This action cannot be undone.', 'woocommerce' ),
 					'i18n_delete_refund'                 => __( 'Are you sure you wish to delete this refund? This action cannot be undone.', 'woocommerce' ),
 					'i18n_delete_tax'                    => __( 'Are you sure you wish to delete this tax column? This action cannot be undone.', 'woocommerce' ),
