@@ -129,7 +129,7 @@ class DatabaseUtil {
 		$results = $wpdb->get_results( $wpdb->prepare( "SHOW INDEX FROM $table_name WHERE Key_name = %s", $index_name ) );
 
 		if ( empty( $results ) ) {
-			return $results;
+			return array();
 		}
 
 		return array_column( $results, 'Column_name' );
