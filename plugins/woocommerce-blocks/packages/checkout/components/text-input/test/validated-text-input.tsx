@@ -148,4 +148,24 @@ describe( 'ValidatedTextInput', () => {
 			select( VALIDATION_STORE_KEY ).getValidationError( 'test-input' )
 		).toBe( undefined );
 	} );
+	it( 'Shows a custom error message for an invalid required input', async () => {
+		const TestComponent = () => {
+			const [ inputValue, setInputValue ] = useState( '' );
+			return (
+				<ValidatedTextInput
+					instanceId={ '5' }
+					id={ 'test-input' }
+					onChange={ ( value ) => setInputValue( value ) }
+					value={ inputValue }
+					label={ 'Test Input' }
+				/>
+			);
+		};
+		render( <TestComponent /> );
+		const textInputElement = await screen.getByLabelText( 'Test Input' );
+		await userEvent.type( textInputElement, '{selectall}{del}' );
+		await expect(
+			select( VALIDATION_STORE_KEY ).getValidationError( 'test-input' )
+		).not.toBe( 'Please enter a valid test input' );
+	} );
 } );

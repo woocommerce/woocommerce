@@ -145,37 +145,37 @@ describe( 'Shopper → Checkout', () => {
 			await expect( page ).toMatchElement(
 				'#email ~ .wc-block-components-validation-error p',
 				{
-					text: 'Please provide a valid email address',
+					text: 'Please enter a valid email address',
 				}
 			);
 			await expect( page ).toMatchElement(
 				'#billing-first_name ~ .wc-block-components-validation-error p',
 				{
-					text: 'Please fill',
+					text: 'Please enter',
 				}
 			);
 			await expect( page ).toMatchElement(
 				'#billing-last_name ~ .wc-block-components-validation-error p',
 				{
-					text: 'Please fill',
+					text: 'Please enter',
 				}
 			);
 			await expect( page ).toMatchElement(
 				'#billing-address_1 ~ .wc-block-components-validation-error p',
 				{
-					text: 'Please fill',
+					text: 'Please enter',
 				}
 			);
 			await expect( page ).toMatchElement(
 				'#billing-city ~ .wc-block-components-validation-error p',
 				{
-					text: 'Please fill',
+					text: 'Please enter',
 				}
 			);
 			await expect( page ).toMatchElement(
 				'#billing-postcode ~ .wc-block-components-validation-error p',
 				{
-					text: 'Please fill',
+					text: 'Please enter',
 				}
 			);
 		} );
