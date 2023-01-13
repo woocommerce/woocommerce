@@ -7,7 +7,7 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import ProductImage from '../';
+import ProductImage from '..';
 
 describe( 'ProductImage', () => {
 	test( 'should render the passed alt prop', () => {

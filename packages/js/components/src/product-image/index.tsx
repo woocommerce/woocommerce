@@ -2,7 +2,6 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { createElement } from '@wordpress/element';
 
@@ -11,25 +10,47 @@ import { createElement } from '@wordpress/element';
  */
 import { placeholderWhiteBackground as placeholder } from './placeholder';
 
+type Image = {
+	src?: string;
+};
+
+type ProductImageProps = {
+	/**
+	 * Product or variation object. The image to display will be pulled from
+	 * `product.images` or `variation.image`.
+	 * See https://woocommerce.github.io/woocommerce-rest-api-docs/#product-properties
+	 * and https://woocommerce.github.io/woocommerce-rest-api-docs/#product-variation-properties
+	 */
+	product?: {
+		images?: Array< Image >;
+		image?: Image;
+		// ProductImage is only interested in product.images or varation.image
+		// but product object can have other properties that we don't control.
+		// allowing `any` here
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	} & Record< string, any >;
+	/** The width of image to display. */
+	width?: number;
+	/** The height of image to display. */
+	height?: number;
+	/** Additional CSS classes. */
+	className?: string;
+	/** Text to use as the image alt attribute. */
+	alt?: string;
+};
+
 /**
  * Use `ProductImage` to display a product's or variation's featured image.
  * If no image can be found, a placeholder matching the front-end image
  * placeholder will be displayed.
- *
- * @param {Object} props
- * @param {Object} props.product
- * @param {string} props.alt
- * @param {number} props.width
- * @param {number} props.height
- * @param {string} props.className
- * @return {Object} -
  */
-const ProductImage = ( {
+
+const ProductImage: React.VFC< ProductImageProps > = ( {
 	product,
+	width = 33,
+	height = 33,
+	className = '',
 	alt,
-	width,
-	height,
-	className,
 	...props
 } ) => {
 	// The first returned image from the API is the featured/product image.
@@ -52,38 +73,6 @@ const ProductImage = ( {
 			{ ...props }
 		/>
 	);
-};
-
-ProductImage.propTypes = {
-	/**
-	 * The width of image to display.
-	 */
-	width: PropTypes.number,
-	/**
-	 * The height of image to display.
-	 */
-	height: PropTypes.number,
-	/**
-	 * Additional CSS classes.
-	 */
-	className: PropTypes.string,
-	/**
-	 * Product or variation object. The image to display will be pulled from
-	 * `product.images` or `variation.image`.
-	 * See https://woocommerce.github.io/woocommerce-rest-api-docs/#product-properties
-	 * and https://woocommerce.github.io/woocommerce-rest-api-docs/#product-variation-properties
-	 */
-	product: PropTypes.object,
-	/**
-	 * Text to use as the image alt attribute.
-	 */
-	alt: PropTypes.string,
-};
-
-ProductImage.defaultProps = {
-	width: 33,
-	height: 33,
-	className: '',
 };
 
 export default ProductImage;
