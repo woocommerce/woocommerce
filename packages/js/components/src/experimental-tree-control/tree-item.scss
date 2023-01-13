@@ -6,7 +6,8 @@
 		flex-grow: 1;
 		gap: $gap-smaller;
 		min-height: $gap-largest;
-		padding: 0 $gap-small 0 calc( ( var( --level ) - 1 ) * ( $gap + $gap-small ) + $gap-small );
+		padding: 0 $gap-small 0
+			calc( ( var( --level ) - 1 ) * ( $gap + $gap-small ) + $gap-small );
 		border-radius: 2px;
 
 		&:hover,
