@@ -7,6 +7,7 @@ import {
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 } from '@woocommerce/components';
 import { PartialProduct, Product } from '@woocommerce/data';
+import { PluginArea } from '@wordpress/plugins';
 import { Ref } from 'react';
 import { PluginArea } from '@wordpress/plugins';
 
