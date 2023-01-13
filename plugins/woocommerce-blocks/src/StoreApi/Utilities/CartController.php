@@ -799,11 +799,6 @@ class CartController {
 			return [];
 		}
 
-		if ( Package::feature()->is_experimental_build() ) {
-			// This is a temporary measure until we can bring such change to WooCommerce core.
-			add_filter( 'woocommerce_get_shipping_methods', [ $this, 'enable_local_pickup_without_address' ] );
-		}
-
 		$packages = $cart->get_shipping_packages();
 
 		// Add extra package data to array.
@@ -822,38 +817,9 @@ class CartController {
 
 		$packages = $calculate_rates ? wc()->shipping()->calculate_shipping( $packages ) : $packages;
 
-		if ( Package::feature()->is_experimental_build() ) {
-			// This is a temporary measure until we can bring such change to WooCommerce core.
-			remove_filter( 'woocommerce_get_shipping_methods', [ $this, 'enable_local_pickup_without_address' ] );
-		}
-
 		return $packages;
 	}
 
-	/**
-	 * We want to make local pickup always avaiable without checking for a shipping zone or address.
-	 *
-	 * @param array $shipping_methods Package we're checking against right now.
-	 * @return array $shipping_methods Shipping methods with local pickup.
-	 */
-	public function enable_local_pickup_without_address( $shipping_methods ) {
-		$shipping_zones = \WC_Shipping_Zones::get_zones( 'admin' );
-		$worldwide_zone = new \WC_Shipping_Zone( 0 );
-		$all_methods    = array_map(
-			function( $_shipping_zone ) {
-				return $_shipping_zone['shipping_methods'];
-			},
-			$shipping_zones
-		);
-		$all_methods    = array_merge_recursive( $worldwide_zone->get_shipping_methods( false, 'admin' ), ...$all_methods );
-		$local_pickups  = array_filter(
-			$all_methods,
-			function( $method ) {
-				return 'local_pickup' === $method->id;
-			}
-		);
-		return array_merge( $shipping_methods, $local_pickups );
-	}
 	/**
 	 * Creates a name for a package.
 	 *
@@ -877,10 +843,10 @@ class CartController {
 			$index > 1 ?
 				sprintf(
 					/* translators: %d: shipping package number */
-					_x( 'Shipping method %d', 'shipping packages', 'woo-gutenberg-products-block' ),
+					_x( 'Shipment %d', 'shipping packages', 'woo-gutenberg-products-block' ),
 					$index
 				) :
-				_x( 'Shipping method', 'shipping packages', 'woo-gutenberg-products-block' ),
+				_x( 'Shipment 1', 'shipping packages', 'woo-gutenberg-products-block' ),
 			$package['package_id'],
 			$package
 		);

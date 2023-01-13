@@ -27,6 +27,7 @@ use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\StoreApi\RoutesController;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
+use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 
 /**
  * Takes care of bootstrapping the plugin.
@@ -128,7 +129,7 @@ class Bootstrap {
 		$this->container->get( ClassicTemplatesCompatibility::class );
 		$this->container->get( BlockPatterns::class );
 		$this->container->get( PaymentsApi::class );
-
+		$this->container->get( ShippingController::class )->init();
 	}
 
 	/**
@@ -341,6 +342,14 @@ class Bootstrap {
 			BlockPatterns::class,
 			function () {
 				return new BlockPatterns( $this->package );
+			}
+		);
+		$this->container->register(
+			ShippingController::class,
+			function ( $container ) {
+				$asset_api           = $container->get( AssetApi::class );
+				$asset_data_registry = $container->get( AssetDataRegistry::class );
+				return new ShippingController( $asset_api, $asset_data_registry );
 			}
 		);
 	}

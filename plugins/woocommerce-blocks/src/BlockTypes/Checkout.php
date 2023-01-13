@@ -146,6 +146,18 @@ class Checkout extends AbstractBlock {
 			$content = preg_replace( $regex_for_order_summary, $order_summary_with_inner_blocks, $content );
 		}
 
+		/**
+		 * Add the Local Pickup toggle to checkouts missing this forced template.
+		 */
+		$local_pickup_inner_blocks = '<div data-block-name="woocommerce/checkout-shipping-method-block" class="wp-block-woocommerce-checkout-shipping-method-block"></div>' . PHP_EOL . PHP_EOL . '<div data-block-name="woocommerce/checkout-pickup-options-block" class="wp-block-woocommerce-checkout-pickup-options-block"></div>' . PHP_EOL . PHP_EOL . '$0';
+		$has_local_pickup_regex    = '/<div[\n\r\s\ta-zA-Z0-9_\-=\'"]*data-block-name="woocommerce\/checkout-shipping-method-block"[\n\r\s\ta-zA-Z0-9_\-=\'"]*>/mi';
+		$has_local_pickup          = preg_match( $has_local_pickup_regex, $content );
+
+		if ( ! $has_local_pickup ) {
+			$shipping_address_block_regex = '/<div[\n\r\s\ta-zA-Z0-9_\-=\'"]*data-block-name="woocommerce\/checkout-shipping-address-block" class="wp-block-woocommerce-checkout-shipping-address-block"[\n\r\s\ta-zA-Z0-9_\-=\'"]*><\/div>/mi';
+			$content                      = preg_replace( $shipping_address_block_regex, $local_pickup_inner_blocks, $content );
+		}
+
 		return $content;
 	}
 
@@ -243,6 +255,9 @@ class Checkout extends AbstractBlock {
 		$this->asset_data_registry->add( 'hasDarkEditorStyleSupport', current_theme_supports( 'dark-editor-style' ), true );
 		$this->asset_data_registry->register_page_id( isset( $attributes['cartPageId'] ) ? $attributes['cartPageId'] : 0 );
 
+		$local_pickup_enabled = filter_var( get_option( 'woocommerce_pickup_location_settings' )['enabled'], FILTER_VALIDATE_BOOLEAN ) ?? false;
+		$this->asset_data_registry->add( 'localPickupEnabled', $local_pickup_enabled, true );
+
 		$is_block_editor = $this->is_block_editor();
 
 		// Hydrate the following data depending on admin or frontend context.
@@ -256,6 +271,9 @@ class Checkout extends AbstractBlock {
 			$formatted_shipping_methods = array_reduce(
 				$shipping_methods,
 				function( $acc, $method ) {
+					if ( 'pickup_location' === $method->id ) {
+						return $acc;
+					}
 					if ( $method->supports( 'settings' ) ) {
 						$acc[] = [
 							'id'          => $method->id,
@@ -444,6 +462,8 @@ class Checkout extends AbstractBlock {
 			'CheckoutPaymentBlock',
 			'CheckoutShippingAddressBlock',
 			'CheckoutShippingMethodsBlock',
+			'CheckoutShippingMethodBlock',
+			'CheckoutPickupOptionsBlock',
 			'CheckoutTermsBlock',
 			'CheckoutTotalsBlock',
 		];

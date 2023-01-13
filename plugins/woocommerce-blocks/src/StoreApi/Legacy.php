@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\StoreApi;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Utilities\NoticeHandler;
+use Automattic\WooCommerce\Blocks\Package;
 
 /**
  * Legacy class.

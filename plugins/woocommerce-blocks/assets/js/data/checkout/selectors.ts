@@ -1,8 +1,14 @@
 /**
+ * External dependencies
+ */
+import { select } from '@wordpress/data';
+
+/**
  * Internal dependencies
  */
 import { STATUS } from './constants';
 import { CheckoutState } from './default-state';
+import { STORE_KEY as cartStoreKey } from '../cart/constants';
 
 export const getCustomerId = ( state: CheckoutState ) => {
 	return state.customerId;
@@ -66,4 +72,18 @@ export const isProcessing = ( state: CheckoutState ) => {
 
 export const isCalculating = ( state: CheckoutState ) => {
 	return state.calculatingCount > 0;
+};
+
+export const prefersCollection = ( state: CheckoutState ) => {
+	if ( state.prefersCollection === undefined ) {
+		const shippingRates = select( cartStoreKey ).getShippingRates();
+		if ( ! shippingRates || ! shippingRates.length ) {
+			return false;
+		}
+		const selectedRate = shippingRates[ 0 ].shipping_rates.find(
+			( rate ) => rate.selected
+		);
+		return selectedRate?.method_id === 'pickup_location';
+	}
+	return state.prefersCollection;
 };

@@ -1,46 +1,32 @@
 /**
  * External dependencies
  */
-import { __, _n, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
-import { speak } from '@wordpress/a11y';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
-import { ExperimentalOrderShippingPackages } from '@woocommerce/blocks-checkout';
+import {
+	ExperimentalOrderShippingPackages,
+	StoreNotice,
+} from '@woocommerce/blocks-checkout';
 import {
 	getShippingRatesPackageCount,
 	getShippingRatesRateCount,
 } from '@woocommerce/base-utils';
-import { useStoreCart } from '@woocommerce/base-context';
-import { CartResponseShippingRate } from '@woocommerce/types';
-import { ReactElement } from 'react';
+import {
+	useStoreCart,
+	useEditorContext,
+	useShippingData,
+} from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
  */
-import ShippingRatesControlPackage, {
-	PackageRateRenderOption,
-	TernaryFlag,
-} from '../shipping-rates-control-package';
-
-interface PackagesProps {
-	packages: CartResponseShippingRate[];
-	collapsible?: TernaryFlag;
-	showItems?: TernaryFlag;
-	noResultsMessage: ReactElement;
-	renderOption?: PackageRateRenderOption | undefined;
-}
+import ShippingRatesControlPackage from '../shipping-rates-control-package';
+import { speakFoundShippingOptions } from './utils';
+import type { PackagesProps, ShippingRatesControlProps } from './types';
 
 /**
  * Renders multiple packages within the slotfill.
- *
- * @param {Object}                  props                  Incoming props.
- * @param {Array}                   props.packages         Array of packages.
- * @param {boolean|undefined}       props.collapsible      If the package should be rendered as a
- * @param {ReactElement}            props.noResultsMessage Rendered when there are no rates in a package.
- *                                                         collapsible panel.
- * @param {boolean|undefined}       props.showItems        If we should items below the package name.
- * @param {PackageRateRenderOption} [props.renderOption]   Function to render a shipping rate.
- * @return {JSX.Element|null} Rendered components.
  */
 const Packages = ( {
 	packages,
@@ -70,28 +56,8 @@ const Packages = ( {
 	);
 };
 
-interface ShippingRatesControlProps {
-	collapsible?: TernaryFlag;
-	showItems?: TernaryFlag;
-	shippingRates: CartResponseShippingRate[];
-	className?: string;
-	isLoadingRates: boolean;
-	noResultsMessage: ReactElement;
-	renderOption?: PackageRateRenderOption | undefined;
-	context: 'woocommerce/cart' | 'woocommerce/checkout';
-}
 /**
  * Renders the shipping rates control element.
- *
- * @param {Object}            props                  Incoming props.
- * @param {Array}             props.shippingRates    Array of packages containing shipping rates.
- * @param {boolean}           props.isLoadingRates   True when rates are being loaded.
- * @param {string}            props.className        Class name for package rates.
- * @param {boolean|undefined} [props.collapsible]    If true, when multiple packages are rendered they can be toggled open and closed.
- * @param {boolean|undefined} [props.showItems]      If true, when multiple packages are rendered, you can see each package's items.
- * @param {ReactElement}      props.noResultsMessage Rendered when there are no packages.
- * @param {Function}          [props.renderOption]   Function to render a shipping rate.
- * @param {string}            [props.context]        String equal to the block name where the Slot is rendered
  */
 const ShippingRatesControl = ( {
 	shippingRates,
@@ -107,46 +73,10 @@ const ShippingRatesControl = ( {
 		if ( isLoadingRates ) {
 			return;
 		}
-		const packageCount = getShippingRatesPackageCount( shippingRates );
-		const shippingOptions = getShippingRatesRateCount( shippingRates );
-		if ( packageCount === 1 ) {
-			speak(
-				sprintf(
-					/* translators: %d number of shipping options found. */
-					_n(
-						'%d shipping option was found.',
-						'%d shipping options were found.',
-						shippingOptions,
-						'woo-gutenberg-products-block'
-					),
-					shippingOptions
-				)
-			);
-		} else {
-			speak(
-				sprintf(
-					/* translators: %d number of shipping packages packages. */
-					_n(
-						'Shipping option searched for %d package.',
-						'Shipping options searched for %d packages.',
-						packageCount,
-						'woo-gutenberg-products-block'
-					),
-					packageCount
-				) +
-					' ' +
-					sprintf(
-						/* translators: %d number of shipping options available. */
-						_n(
-							'%d shipping option was found',
-							'%d shipping options were found',
-							shippingOptions,
-							'woo-gutenberg-products-block'
-						),
-						shippingOptions
-					)
-			);
-		}
+		speakFoundShippingOptions(
+			getShippingRatesPackageCount( shippingRates ),
+			getShippingRatesRateCount( shippingRates )
+		);
 	}, [ isLoadingRates, shippingRates ] );
 
 	// Prepare props to pass to the ExperimentalOrderShippingPackages slot fill.
@@ -166,6 +96,8 @@ const ShippingRatesControl = ( {
 		},
 		context,
 	};
+	const { isEditor } = useEditorContext();
+	const { hasSelectedLocalPickup } = useShippingData();
 	return (
 		<LoadingMask
 			isLoading={ isLoadingRates }
@@ -176,6 +108,20 @@ const ShippingRatesControl = ( {
 			showSpinner={ true }
 		>
 			<ExperimentalOrderShippingPackages.Slot { ...slotFillProps } />
+			{ hasSelectedLocalPickup &&
+				shippingRates.length > 1 &&
+				! isEditor && (
+					<StoreNotice
+						className="wc-block-components-notice"
+						isDismissible={ false }
+						status="warning"
+					>
+						{ __(
+							'Multiple shipments must have the same pickup location',
+							'woo-gutenberg-products-block'
+						) }
+					</StoreNotice>
+				) }
 			<ExperimentalOrderShippingPackages>
 				<Packages
 					packages={ shippingRates }

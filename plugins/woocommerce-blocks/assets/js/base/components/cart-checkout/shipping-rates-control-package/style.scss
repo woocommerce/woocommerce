@@ -1,9 +1,6 @@
 .wc-block-components-shipping-rates-control__package {
-	margin-bottom: $gap-larger;
-
-	&:last-child {
-		margin-bottom: 0;
-	}
+	margin: 0;
+	@include with-translucent-border( 0 0 1px );
 
 	&.wc-block-components-panel {
 		margin-bottom: 0;
@@ -16,10 +13,20 @@
 		padding-top: em($gap-small);
 	}
 
-	// Remove panel padding because we are adding bottom padding to `.wc-block-components-radio-control`
-	// and `.wc-block-components-radio-control__option-layout` in the next ruleset.
+	&:last-child {
+		@include with-translucent-border( 0 );
+
+		.wc-block-components-panel__button {
+			padding-bottom: 0;
+		}
+	}
+
 	.wc-block-components-panel__content {
-		padding-bottom: 0;
+		padding-bottom: em($gap-small);
+	}
+
+	.wc-block-components-radio-control {
+		margin-bottom: em($gap-small);
 	}
 
 	.wc-block-components-radio-control,
@@ -29,6 +36,14 @@
 
 	.wc-block-components-radio-control .wc-block-components-radio-control__option-layout {
 		padding-bottom: 0;
+	}
+
+	.wc-block-components-radio-control__label-group {
+		@include font-size(small);
+	}
+	.wc-block-components-radio-control__description-group {
+		@include font-size(smaller);
+		color: $gray-700;
 	}
 }
 
