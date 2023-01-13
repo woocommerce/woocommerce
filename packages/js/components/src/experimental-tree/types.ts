@@ -38,6 +38,7 @@ export type TreeItemProps = BaseTreeProps &
 	> & {
 		item: Item;
 		level: number;
+		index: number;
 		highlighted?: boolean;
 		getLabel?( item: Item ): JSX.Element;
 		isExpanded?( item: Item ): boolean;

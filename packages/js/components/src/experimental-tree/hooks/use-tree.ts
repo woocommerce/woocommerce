@@ -20,7 +20,6 @@ export function useTree( {
 	...props
 }: TreeProps ): TreeProps {
 	const treeRef = useRef< HTMLOListElement >();
-	const highlightedRef = useRef< number >( 0 );
 
 	function handleKeyDown( event: React.KeyboardEvent< HTMLOListElement > ) {
 		if ( typeof onKeyDown === 'function' ) {
@@ -34,9 +33,12 @@ export function useTree( {
 		if ( event.code === 'ArrowDown' || event.code === 'ArrowUp' ) {
 			event.preventDefault();
 
+			const selector =
+				'.experimental-woocommerce-tree-item > .experimental-woocommerce-tree-item__heading > .experimental-woocommerce-tree-item__label';
+
 			const focusableElements =
 				treeRef.current?.querySelectorAll< HTMLLabelElement >(
-					'.experimental-woocommerce-tree-item > .experimental-woocommerce-tree-item__heading > .experimental-woocommerce-tree-item__label'
+					selector
 				);
 
 			if ( ! focusableElements?.length ) {
@@ -44,33 +46,31 @@ export function useTree( {
 			}
 
 			const currentFocusedElement = treeRef.current?.querySelector(
-				'.experimental-woocommerce-tree-item > .experimental-woocommerce-tree-item__heading > .experimental-woocommerce-tree-item__label:focus-within'
+				`${ selector }:focus-within`
 			);
 
+			let currentFocusedElementIndex = 0;
 			if ( currentFocusedElement ) {
-				let index = 0;
 				for ( const element of focusableElements ) {
 					if ( element === currentFocusedElement ) {
-						highlightedRef.current = index;
 						break;
 					}
-					index++;
+					currentFocusedElementIndex++;
 				}
 			}
 
 			if ( event.code === 'ArrowDown' ) {
-				if ( highlightedRef.current < focusableElements.length - 1 ) {
-					highlightedRef.current++;
-
-					focusableElements[ highlightedRef.current ].focus();
+				if (
+					currentFocusedElementIndex <
+					focusableElements.length - 1
+				) {
+					focusableElements[ ++currentFocusedElementIndex ].focus();
 				}
 			}
 
 			if ( event.code === 'ArrowUp' ) {
-				if ( highlightedRef.current >= 0 ) highlightedRef.current--;
-
-				if ( highlightedRef.current >= 0 ) {
-					focusableElements[ highlightedRef.current ].focus();
+				if ( currentFocusedElementIndex > 0 ) {
+					focusableElements[ --currentFocusedElementIndex ].focus();
 				}
 			}
 		}

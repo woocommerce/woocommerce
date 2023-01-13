@@ -8,16 +8,25 @@ import React, { useEffect, useMemo, useState } from 'react';
  */
 import { Item, CheckedStatus, TreeItemProps } from '../types';
 
-function isIndeterminate( selectedItems: Item[], children?: Item[] ): boolean {
+let selectedItemsMap: Record< string, number > = {};
+let indeterminateMemo: Record< string, boolean > = {};
+
+function isIndeterminate(
+	selectedItems: Record< string, number >,
+	children?: Item[],
+	memo: Record< string, boolean > = indeterminateMemo
+): boolean {
 	if ( children?.length ) {
 		for ( const child of children ) {
-			const isChildSelected = selectedItems.some(
-				( { value } ) => value === child.value
-			);
+			if ( child.value in indeterminateMemo ) {
+				return true;
+			}
+			const isChildSelected = child.value in selectedItems;
 			if (
 				! isChildSelected ||
-				isIndeterminate( selectedItems, child.children )
+				isIndeterminate( selectedItems, child.children, memo )
 			) {
+				indeterminateMemo[ child.value ] = true;
 				return true;
 			}
 		}
@@ -36,11 +45,25 @@ function getDeepChildren( value: Item ) {
 	return [];
 }
 
+function mapSelectedItems(
+	selected: Item | Item[] = []
+): Record< string, number > {
+	const selectedArray = Array.isArray( selected ) ? selected : [ selected ];
+	return selectedArray.reduce(
+		( map, selectedItem, index ) => ( {
+			...map,
+			[ selectedItem.value ]: index,
+		} ),
+		{} as Record< string, number >
+	);
+}
+
 export function useTreeItem( {
 	item,
 	selected,
 	multiple,
 	level,
+	index,
 	getLabel,
 	isExpanded,
 	isHighlighted,
@@ -49,31 +72,29 @@ export function useTreeItem( {
 	...props
 }: TreeItemProps ) {
 	const [ expanded, setExpanded ] = useState( false );
-
-	useEffect( () => {
-		if ( item.children?.length ) {
-			setExpanded(
-				typeof isExpanded === 'function' && isExpanded( item )
-			);
+	const selectedItems = useMemo( () => {
+		if ( level === 1 && index === 0 ) {
+			selectedItemsMap = mapSelectedItems( selected );
+			indeterminateMemo = {} as Record< string, boolean >;
 		}
-	}, [ item, isExpanded ] );
+		return selectedItemsMap;
+	}, [ selected, level, index ] );
 
 	const checkedStatus: CheckedStatus = useMemo( () => {
-		if ( multiple && Array.isArray( selected ) ) {
-			const selectedItem = selected.some(
-				( { value } ) => value === item.value
-			);
-			if ( selectedItem ) {
-				if ( isIndeterminate( selected, item.children ) ) {
-					return 'indeterminate';
-				}
-				return 'checked';
+		if ( item.value in selectedItems ) {
+			if ( multiple && isIndeterminate( selectedItems, item.children ) ) {
+				return 'indeterminate';
 			}
-			return 'unchecked';
+			return 'checked';
 		}
+		return 'unchecked';
+	}, [ selectedItems, item, multiple ] );
 
-		return selected === item ? 'checked' : 'unchecked';
-	}, [ selected, item, multiple ] );
+	useEffect( () => {
+		if ( item.children?.length && typeof isExpanded === 'function' ) {
+			setExpanded( isExpanded( item ) );
+		}
+	}, [ item, isExpanded ] );
 
 	function onSelectChildren( value: Item | Item[] ) {
 		if ( typeof onSelect !== 'function' ) return;
@@ -93,27 +114,18 @@ export function useTreeItem( {
 		if ( typeof onRemove !== 'function' ) return;
 
 		if ( multiple && item.children?.length ) {
-			const selectedMap = ( selected as Item[] ).reduce(
-				( selection, current ) => ( {
-					...selection,
-					[ current.value ]: current,
-				} ),
-				{} as Record< string, Item >
+			const hasSelectedSibblingChildren = item.children.some(
+				( child ) => {
+					const isChildSelected = child.value in selectedItems;
+					if ( ! isChildSelected ) return false;
+					return ! ( Array.isArray( value )
+						? value.some(
+								( childValue ) =>
+									childValue.value === child.value
+						  )
+						: value.value === child.value );
+				}
 			);
-			const hasSelectedSibblingChildren =
-				Array.isArray( selected ) &&
-				item.children.some( ( child ) => {
-					const selectedItem = selectedMap[ child.value ];
-					return (
-						selectedItem &&
-						! ( Array.isArray( value )
-							? value.some(
-									( childValue ) =>
-										childValue.value === selectedItem.value
-							  )
-							: value === selectedItem )
-					);
-				} );
 			if ( hasSelectedSibblingChildren ) {
 				onRemove( value );
 			} else if ( Array.isArray( value ) ) {

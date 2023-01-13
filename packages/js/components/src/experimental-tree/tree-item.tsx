@@ -34,17 +34,6 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 		treeProps,
 	} = useTreeItem( { ...props, ref } );
 
-	// console.log( 'highlighted', {
-	// 	[ item.value ]: highlighted,
-	// 	className: classNames(
-	// 		treeItem.className,
-	// 		'experimental-woocommerce-tree-item',
-	// 		{
-	// 			'experimental-woocommerce-tree-item--highlighted': highlighted,
-	// 		}
-	// 	),
-	// } );
-
 	return (
 		<li
 			{ ...treeItem }
