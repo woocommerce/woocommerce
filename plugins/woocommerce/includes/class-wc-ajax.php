@@ -2012,7 +2012,7 @@ class WC_AJAX {
 						sprintf(
 						/* translators: %1s: order item name;  */
 							__( 'Invalid refund quantity for item: %1s.', 'woocommerce' ),
-							$order_line_items[ $item_id ]->get_name(),
+							$order_line_items[ $item_id ]->get_name()
 						)
 					);
 				}
