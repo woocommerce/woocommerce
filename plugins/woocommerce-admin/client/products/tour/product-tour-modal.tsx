@@ -21,7 +21,7 @@ export const ProductTourModal: React.FC< ProductTourModalProps > = ( {
 } ) => {
 	return (
 		<Modal
-			bodyOpenClassName={ '' }
+			bodyOpenClassName={ 'woocommerce-product-tour-modal__modal-open' }
 			className="woocommerce-product-tour-modal"
 			onRequestClose={ () => onClose() }
 			overlayClassName="woocommerce-product-tour-modal__overlay"
