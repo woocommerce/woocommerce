@@ -6,7 +6,8 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 
-const PRODUCT_TOUR_MODAL_HIDDEN = 'woocommerce_product_tour_modal_hidden';
+export const PRODUCT_TOUR_MODAL_HIDDEN =
+	'woocommerce_product_tour_modal_hidden';
 
 export const useProductTour = () => {
 	const [ isTouring, setIsTouring ] = useState( false );
