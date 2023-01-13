@@ -1062,7 +1062,7 @@ jQuery( function ( $ ) {
 					format:    woocommerce_admin_meta_boxes.currency_format
 				} ) );
 			},
-
+ 
 			// When the refund qty is changed, increase or decrease costs
 			refund_quantity_changed: function() {
 				var $row              = $( this ).closest( 'tr.item' );
@@ -1070,6 +1070,11 @@ jQuery( function ( $ ) {
 				var refund_qty        = $( this ).val();
 				var line_total        = $( 'input.line_total', $row );
 				var refund_line_total = $( 'input.refund_line_total', $row );
+
+				if( refund_qty > qty ) {
+					window.alert( woocommerce_admin_meta_boxes.i18n_refund_invalid_item_qty );
+					return;
+				}
 
 				// Totals
 				var unit_total = accounting.unformat( line_total.attr( 'data-total' ), woocommerce_admin.mon_decimal_point ) / qty;
