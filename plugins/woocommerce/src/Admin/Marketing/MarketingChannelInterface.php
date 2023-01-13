@@ -74,6 +74,13 @@ interface MarketingChannelInterface {
 	public function get_errors_count(): int;
 
 	/**
+	 * Returns an array of marketing campaign types that the channel supports.
+	 *
+	 * @return MarketingCampaignType[] Array of marketing campaign type objects.
+	 */
+	public function get_supported_campaign_types(): array;
+
+	/**
 	 * Returns an array of the channel's marketing campaigns.
 	 *
 	 * @return MarketingCampaign[]

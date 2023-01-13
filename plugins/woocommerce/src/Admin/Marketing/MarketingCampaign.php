@@ -7,20 +7,25 @@
 
 namespace Automattic\WooCommerce\Admin\Marketing;
 
-use JsonSerializable;
-
 /**
  * MarketingCampaign class
  *
  * @since x.x.x
  */
-class MarketingCampaign implements JsonSerializable {
+class MarketingCampaign {
 	/**
 	 * The unique identifier.
 	 *
 	 * @var string
 	 */
 	protected $id;
+
+	/**
+	 * The marketing campaign type.
+	 *
+	 * @var MarketingCampaignType
+	 */
+	protected $type;
 
 	/**
 	 * Title of the marketing campaign.
@@ -46,13 +51,15 @@ class MarketingCampaign implements JsonSerializable {
 	/**
 	 * MarketingCampaign constructor.
 	 *
-	 * @param string     $id         The marketing campaign's unique identifier.
-	 * @param string     $title      The title of the marketing campaign.
-	 * @param string     $manage_url The URL to the channel's campaign management page.
-	 * @param Price|null $cost       The cost of the marketing campaign with the currency.
+	 * @param string                $id         The marketing campaign's unique identifier.
+	 * @param MarketingCampaignType $type       The marketing campaign type.
+	 * @param string                $title      The title of the marketing campaign.
+	 * @param string                $manage_url The URL to the channel's campaign management page.
+	 * @param Price|null            $cost       The cost of the marketing campaign with the currency.
 	 */
-	public function __construct( string $id, string $title, string $manage_url, Price $cost = null ) {
+	public function __construct( string $id, MarketingCampaignType $type, string $title, string $manage_url, Price $cost = null ) {
 		$this->id         = $id;
+		$this->type       = $type;
 		$this->title      = $title;
 		$this->manage_url = $manage_url;
 		$this->cost       = $cost;
@@ -65,6 +72,15 @@ class MarketingCampaign implements JsonSerializable {
 	 */
 	public function get_id(): string {
 		return $this->id;
+	}
+
+	/**
+	 * Returns the marketing campaign type.
+	 *
+	 * @return MarketingCampaignType
+	 */
+	public function get_type(): MarketingCampaignType {
+		return $this->type;
 	}
 
 	/**
@@ -92,19 +108,5 @@ class MarketingCampaign implements JsonSerializable {
 	 */
 	public function get_cost(): ?Price {
 		return $this->cost;
-	}
-
-	/**
-	 * Serialize the marketing campaign data.
-	 *
-	 * @return array
-	 */
-	public function jsonSerialize() {
-		return [
-			'id'         => $this->get_id(),
-			'title'      => $this->get_title(),
-			'manage_url' => $this->get_manage_url(),
-			'cost'       => $this->get_cost(),
-		];
 	}
 }

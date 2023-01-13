@@ -38,6 +38,15 @@ class MarketingChannels {
 	}
 
 	/**
+	 * Unregisters all marketing channels.
+	 *
+	 * @return void
+	 */
+	public function unregister_all(): void {
+		unset( $this->registered_channels );
+	}
+
+	/**
 	 * Returns an array of all registered marketing channels.
 	 *
 	 * @return MarketingChannelInterface[]
