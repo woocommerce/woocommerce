@@ -14,6 +14,11 @@ use \Automattic\WooCommerce\Internal\Admin\Loader;
 class NewProductManagementExperience {
 
 	/**
+	 * Option name used to toggle this feature.
+	 */
+	const TOGGLE_OPTION_NAME = 'woocommerce_new_product_management_enabled';
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {

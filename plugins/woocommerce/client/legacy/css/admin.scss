@@ -4375,6 +4375,11 @@ img.help_tip {
 			top: 20px;
 		}
 
+		td.help-tooltip {
+			white-space: nowrap;
+			width: 8px;
+		}
+
 		.select2-container {
 			vertical-align: top;
 			margin-bottom: 3px;
