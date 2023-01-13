@@ -8,6 +8,7 @@
 namespace Automattic\WooCommerce\Tests\Admin\API;
 
 use Automattic\WooCommerce\Admin\Marketing\MarketingCampaign;
+use Automattic\WooCommerce\Admin\Marketing\MarketingCampaignType;
 use Automattic\WooCommerce\Admin\Marketing\MarketingChannelInterface;
 use Automattic\WooCommerce\Admin\Marketing\MarketingChannels as MarketingChannelsService;
 use WC_REST_Unit_Test_Case;
@@ -63,10 +64,13 @@ class MarketingCampaignsTest extends WC_REST_Unit_Test_Case {
 		// Create a mock marketing channel.
 		$test_channel_1 = $this->createMock( MarketingChannelInterface::class );
 		$test_channel_1->expects( $this->any() )->method( 'get_slug' )->willReturn( 'test-channel-1' );
+		// Create a mock marketing campaign type.
+		$test_campaign_type_1 = $this->createMock( MarketingCampaignType::class );
+		$test_campaign_type_1->expects( $this->any() )->method( 'get_channel' )->willReturn( $test_channel_1 );
 		// Create a mock marketing campaign.
 		$test_campaign_1 = $this->createMock( MarketingCampaign::class );
 		$test_campaign_1->expects( $this->any() )->method( 'get_id' )->willReturn( 'test-campaign-1' );
-		$test_campaign_1->expects( $this->any() )->method( 'get_channel' )->willReturn( $test_channel_1 );
+		$test_campaign_1->expects( $this->any() )->method( 'get_type' )->willReturn( $test_campaign_type_1 );
 		// Return the sample campaign by the mock marketing channel.
 		$test_channel_1->expects( $this->any() )->method( 'get_campaigns' )->willReturn( [ $test_campaign_1 ] );
 		// Register the marketing channel.
@@ -75,10 +79,13 @@ class MarketingCampaignsTest extends WC_REST_Unit_Test_Case {
 		// Create a second mock marketing channel.
 		$test_channel_2 = $this->createMock( MarketingChannelInterface::class );
 		$test_channel_2->expects( $this->any() )->method( 'get_slug' )->willReturn( 'test-channel-2' );
+		// Create a mock marketing campaign type for the second marketing channel.
+		$test_campaign_type_2 = $this->createMock( MarketingCampaignType::class );
+		$test_campaign_type_2->expects( $this->any() )->method( 'get_channel' )->willReturn( $test_channel_2 );
 		// Create a mock marketing campaign for the second marketing channel.
 		$test_campaign_2 = $this->createMock( MarketingCampaign::class );
 		$test_campaign_2->expects( $this->any() )->method( 'get_id' )->willReturn( 'test-campaign-2' );
-		$test_campaign_2->expects( $this->any() )->method( 'get_channel' )->willReturn( $test_channel_2 );
+		$test_campaign_2->expects( $this->any() )->method( 'get_type' )->willReturn( $test_campaign_type_2 );
 		// Return the sample campaign by the second mock marketing channel.
 		$test_channel_2->expects( $this->any() )->method( 'get_campaigns' )->willReturn( [ $test_campaign_2 ] );
 		// Register the second marketing channel.
