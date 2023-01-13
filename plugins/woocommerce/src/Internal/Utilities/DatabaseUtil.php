@@ -126,6 +126,7 @@ class DatabaseUtil {
 			$index_name = 'PRIMARY';
 		}
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$results = $wpdb->get_results( $wpdb->prepare( "SHOW INDEX FROM $table_name WHERE Key_name = %s", $index_name ) );
 
 		if ( empty( $results ) ) {
