@@ -10,7 +10,6 @@ import { createElement, forwardRef } from 'react';
 import { useTree } from './hooks/use-tree';
 import { TreeItem } from './tree-item';
 import { TreeProps } from './types';
-import './tree.scss';
 
 export const Tree = forwardRef( function ForwardedTree(
 	props: TreeProps,
