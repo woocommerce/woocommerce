@@ -1,5 +1,13 @@
 == Changelog ==
 
+= 7.2.3 2023-1-9
+
+**WooCommerce Blocks 8.9.4**
+
+* Fix - fatal error in WordPress 5.8 when creating a post or page. #7496
+* Fix - hangs in the block editor with WordPress 5.8. #8095
+* Fix - Filter by Attribute block crashing in the editor of WordPress 5.8. #8101
+
 = 7.2.2 2022-12-21 =
 
 ** WooCommerce**
