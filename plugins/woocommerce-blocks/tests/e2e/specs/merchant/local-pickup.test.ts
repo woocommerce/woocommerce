@@ -181,11 +181,6 @@ describe( `Local Pickup Settings`, () => {
 
 	describe( 'Location Settings', () => {
 		it( 'can add a new location', async () => {
-			const oldLocations = await page.$$eval(
-				'.pickup-locations tbody tr',
-				( rows ) => rows.length
-			);
-
 			await expect( page ).toClick( 'button', {
 				text: 'Add pickup location',
 			} );
@@ -224,11 +219,13 @@ describe( `Local Pickup Settings`, () => {
 			} );
 
 			await saveSettingsPageWithRefresh();
-			const locations = await page.$$eval(
-				'.pickup-locations tbody tr',
-				( rows ) => rows.length
+
+			await expect( page ).toMatchElement(
+				'.pickup-locations tbody tr td',
+				{
+					text: 'New Location Name',
+				}
 			);
-			expect( locations ).toBe( oldLocations + 1 );
 		} );
 
 		it( 'can edit a location', async () => {
@@ -242,10 +239,6 @@ describe( `Local Pickup Settings`, () => {
 		} );
 
 		it( 'can delete a location', async () => {
-			const oldLocations = await page.$$eval(
-				'.pickup-locations tbody tr',
-				( rows ) => rows.length
-			);
 			await expect( page ).toClick( '.pickup-locations button', {
 				text: 'Edit',
 			} );
@@ -255,11 +248,12 @@ describe( `Local Pickup Settings`, () => {
 			} );
 
 			await saveSettingsPageWithRefresh();
-			const locations = await page.$$eval(
-				'.pickup-locations tbody tr',
-				( rows ) => rows.length
+			await expect( page ).not.toMatchElement(
+				'.pickup-locations tbody tr td',
+				{
+					text: 'New Location Name',
+				}
 			);
-			expect( locations ).toBe( oldLocations - 1 );
 		} );
 	} );
 } );
