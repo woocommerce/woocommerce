@@ -45,7 +45,7 @@ export const ProductTour: React.FC< ProductTourProps > = ( { onClose } ) => {
 			},
 			{
 				referenceElements: {
-					desktop: `.product-form-layout .components-tab-panel__tabs`,
+					desktop: `#tab-panel-0-pricing`,
 				},
 				meta: {
 					name: 'tabs',
@@ -60,7 +60,7 @@ export const ProductTour: React.FC< ProductTourProps > = ( { onClose } ) => {
 			},
 			{
 				referenceElements: {
-					desktop: `#tab-panel-0-pricing`,
+					desktop: `.woocommerce-product-form-actions`,
 				},
 				meta: {
 					name: 'actions',
