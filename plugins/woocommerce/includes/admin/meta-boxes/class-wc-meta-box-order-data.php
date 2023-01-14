@@ -314,13 +314,13 @@ class WC_Meta_Box_Order_Data {
 								?>
 							</label>
 							<?php
-							$user_string = '';
+							$found_users = array();
 							$user_id     = '';
 							if ( $order->get_user_id() ) {
 								$user_id  = absint( $order->get_user_id() );
 								$customer = new WC_Customer( $user_id );
 								/* translators: 1: user display name 2: user ID 3: user email */
-								$user_string = sprintf(
+								$found_users[ $user_id ] = sprintf(
 									/* translators: 1: customer name, 2 customer id, 3: customer email */
 									esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
 									$customer->get_first_name() . ' ' . $customer->get_last_name(),
@@ -341,7 +341,7 @@ class WC_Meta_Box_Order_Data {
 								 * @param array @user_info An array containing one item with the name and email of the user currently selected as the customer for the order.
 								 */
 								?>
-								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo esc_html( htmlspecialchars( wp_kses_post( current( apply_filters( 'woocommerce_json_search_found_customers', array( $user_string ) ) ) ) ) ); ?></option>
+								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo esc_html( htmlspecialchars( wp_kses_post( current( apply_filters( 'woocommerce_json_search_found_customers', $found_users ) ) ) ) ); ?></option>
 								<?php // phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 							</select>
 							<!--/email_off-->
