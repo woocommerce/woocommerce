@@ -23,6 +23,7 @@ $control-size: clac( $gap - $gap-smaller );
 			background-color: $gray-100;
 		}
 	}
+
 	&__label {
 		display: flex;
 		flex-grow: 1;
@@ -33,7 +34,40 @@ $control-size: clac( $gap - $gap-smaller );
 		> span {
 			display: block;
 		}
+
+		.components-base-control__field {
+			margin: 0;
+		}
+
+		.components-radio-control__input {
+			@include screen-reader-only();
+		}
+
+		.components-checkbox-control__label {
+			display: none;
+		}
+
+		.components-checkbox-control__input-container {
+			display: block;
+			width: $control-size;
+			height: $control-size;
+		}
+
+		svg.components-checkbox-control__checked,
+		svg.components-checkbox-control__indeterminate,
+		.components-checkbox-control__input[type='checkbox'] {
+			border-color: $gray-700;
+			width: $control-size;
+			height: $control-size;
+			top: 0;
+			left: 0;
+			&:focus {
+				outline: none;
+				box-shadow: none;
+			}
+		}
 	}
+
 	&__expander {
 		display: flex;
 		align-items: center;
