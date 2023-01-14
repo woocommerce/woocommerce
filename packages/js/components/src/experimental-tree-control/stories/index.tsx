@@ -1,14 +1,14 @@
 /**
  * External dependencies
  */
-import { BaseControl } from '@wordpress/components';
-import React, { createElement } from 'react';
+import { BaseControl, TextControl } from '@wordpress/components';
+import React, { createElement, useCallback, useState } from 'react';
 
 /**
  * Internal dependencies
  */
 import { TreeControl } from '../tree-control';
-import { Item } from '../types';
+import { Item, LinkedTree } from '../types';
 
 const listItems: Item[] = [
 	{ value: '1', label: 'Technology' },
@@ -33,6 +33,36 @@ export const SimpleTree: React.FC = () => {
 		<BaseControl label="Simple tree" id="simple-tree">
 			<TreeControl id="simple-tree" items={ listItems } />
 		</BaseControl>
+	);
+};
+
+function isItemExpanded( item: LinkedTree, text: string ) {
+	if ( ! text || ! item.children?.length ) return false;
+	return item.children.some( ( child ) => {
+		if ( new RegExp( text, 'ig' ).test( child.data.label ) ) {
+			return true;
+		}
+		return isItemExpanded( child, text );
+	} );
+}
+
+export const ExpandOnSearch: React.FC = () => {
+	const [ text, setText ] = useState( '' );
+
+	return (
+		<>
+			<TextControl value={ text } onChange={ setText } />
+			<BaseControl label="Expand on search" id="expand-on-search">
+				<TreeControl
+					id="expand-on-search"
+					items={ listItems }
+					isItemExpanded={ useCallback(
+						( item ) => isItemExpanded( item, text ),
+						[ text ]
+					) }
+				/>
+			</BaseControl>
+		</>
 	);
 };
 

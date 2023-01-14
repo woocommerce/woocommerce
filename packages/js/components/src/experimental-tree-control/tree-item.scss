@@ -1,3 +1,5 @@
+$control-size: clac( $gap - $gap-smaller );
+
 .experimental-woocommerce-tree-item {
 	margin: 0;
 
@@ -29,6 +31,17 @@
 
 		> span {
 			display: block;
+		}
+	}
+	&__expander {
+		display: flex;
+		align-items: center;
+
+		.components-button {
+			padding: 0;
+			height: $control-size;
+			width: $control-size;
+			min-width: $control-size;
 		}
 	}
 }
