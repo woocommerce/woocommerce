@@ -86,4 +86,15 @@ $control-size: $gap-large;
 			min-width: $control-size;
 		}
 	}
+	&__expander {
+		display: flex;
+		align-items: center;
+
+		.components-button {
+			padding: 0;
+			height: $control-size;
+			width: $control-size;
+			min-width: $control-size;
+		}
+	}
 }
