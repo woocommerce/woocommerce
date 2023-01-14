@@ -221,6 +221,68 @@ export const CustomItemLabelOnSearch: React.FC = () => {
 	);
 };
 
+export const SelectionSingle: React.FC = () => {
+	const [ selected, setSelected ] = useState( listItems[ 1 ] );
+
+	return (
+		<>
+			<BaseControl label="Single selection" id="single-selection">
+				<TreeControl
+					id="single-selection"
+					items={ listItems }
+					selected={ selected }
+					onSelect={ ( value: Item ) => setSelected( value ) }
+				/>
+			</BaseControl>
+
+			<pre>{ JSON.stringify( selected, null, 2 ) }</pre>
+		</>
+	);
+};
+
+export const SelectionMultiple: React.FC = () => {
+	const [ selected, setSelected ] = useState( [
+		listItems[ 0 ],
+		listItems[ 1 ],
+	] );
+
+	function handleSelect( values: Item[] ) {
+		setSelected( ( items ) => {
+			const newItems = values.filter(
+				( { value } ) =>
+					! items.some( ( item ) => item.value === value )
+			);
+			return [ ...items, ...newItems ];
+		} );
+	}
+
+	function handleRemove( values: Item[] ) {
+		setSelected( ( items ) =>
+			items.filter(
+				( item ) =>
+					! values.some( ( { value } ) => item.value === value )
+			)
+		);
+	}
+
+	return (
+		<>
+			<BaseControl label="Multiple selection" id="multiple-selection">
+				<TreeControl
+					id="multiple-selection"
+					items={ listItems }
+					multiple
+					selected={ selected }
+					onSelect={ handleSelect }
+					onRemove={ handleRemove }
+				/>
+			</BaseControl>
+
+			<pre>{ JSON.stringify( selected, null, 2 ) }</pre>
+		</>
+	);
+};
+
 export default {
 	title: 'WooCommerce Admin/experimental/TreeControl',
 	component: TreeControl,
