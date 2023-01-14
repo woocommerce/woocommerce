@@ -230,7 +230,7 @@ importers:
       '@wordpress/block-library': ^7.16.0
       '@wordpress/blocks': ^11.18.0
       '@wordpress/browserslist-config': ^4.1.1
-      '@wordpress/components': ^19.5.0
+      '@wordpress/components': ^19.8.5
       '@wordpress/compose': ^5.1.2
       '@wordpress/core-data': ^4.2.1
       '@wordpress/data': ^6.2.1
@@ -303,7 +303,7 @@ importers:
       '@wordpress/block-editor': 9.8.0_vcke6catv4iqpjdw24uwvlzyyi
       '@wordpress/block-library': 7.16.0_vcke6catv4iqpjdw24uwvlzyyi
       '@wordpress/blocks': 11.18.0_react@17.0.2
-      '@wordpress/components': 19.6.1_tufdcic6wklrwyy3rhbsbktylu
+      '@wordpress/components': 19.12.0_tufdcic6wklrwyy3rhbsbktylu
       '@wordpress/compose': 5.2.1_react@17.0.2
       '@wordpress/core-data': 4.2.1_react@17.0.2
       '@wordpress/data': 6.15.0_react@17.0.2
