@@ -1,4 +1,4 @@
 Significance: minor
 Type: dev
 
-Add TreeControl expand/collapse functionality.
+Add tree-control expand/collapse on click the expander button or by a custom logic
