@@ -378,7 +378,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->update_intervals_sql_params( $query_args, $db_interval_count, $expected_interval_count, $table_name );
 			$this->interval_query->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
 			$this->interval_query->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
-			$this->interval_query->add_sql_clause( 'select', ", MAX(${table_name}.date_created) AS datetime_anchor" );
+			$this->interval_query->add_sql_clause( 'select', ", MAX({$table_name}.date_created) AS datetime_anchor" );
 			if ( '' !== $selections ) {
 				$this->interval_query->add_sql_clause( 'select', ', ' . $selections );
 			}
@@ -697,7 +697,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE ${orders_stats_table} SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d",
+				"UPDATE {$orders_stats_table} SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d",
 				$order_id,
 				$customer_id
 			)
