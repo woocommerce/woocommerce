@@ -1702,7 +1702,7 @@ function wc_get_shipping_method_count( $include_legacy = false, $enabled_only = 
 	}
 
 	$where_clause = $enabled_only ? 'WHERE is_enabled=1' : '';
-	$method_count = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods ${where_clause}" ) );
+	$method_count = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods {$where_clause}" ) );
 
 	if ( $include_legacy ) {
 		// Count activated methods that don't support shipping zones.
