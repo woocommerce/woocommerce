@@ -395,7 +395,7 @@ class FeaturesController {
 			return Init::TOGGLE_OPTION_NAME;
 		}
 
-		return "woocommerce_feature_${feature_id}_enabled";
+		return "woocommerce_feature_{$feature_id}_enabled";
 	}
 
 	/**
