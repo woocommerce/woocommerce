@@ -154,7 +154,7 @@ class DownloadPermissionsAdjuster {
 					'file' => $file,
 					'data' => (array) $permission->data,
 				);
-				$result['permission_data_by_file_order_user'][ "${file}:${permission_data['user_id']}:${permission_data['order_id']}" ] = $data;
+				$result['permission_data_by_file_order_user'][ "{$file}:{$permission_data['user_id']}:{$permission_data['order_id']}" ] = $data;
 			}
 		}
 
