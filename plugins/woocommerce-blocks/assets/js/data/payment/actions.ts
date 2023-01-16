@@ -113,13 +113,6 @@ export const __internalSetPaymentMethodData = (
 	paymentMethodData,
 } );
 
-export const setIncompatiblePaymentMethods = (
-	incompatiblePaymentMethods: Array< string > = []
-) => ( {
-	type: ACTION_TYPES.SET_INCOMPATIBLE_PAYMENT_METHODS,
-	incompatiblePaymentMethods,
-} );
-
 /**
  * Store the result of the payment attempt from the /checkout StoreApi call
  *
