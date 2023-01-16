@@ -3,6 +3,10 @@
  */
 import { select } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
+import {
+	// @ts-expect-error `__experimentalInputControl` does exist.
+	__experimentalInputControl as InputControl,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -19,10 +23,7 @@ export function renderField( name: string, props: Record< string, any > ) {
 		return <fieldConfig.render { ...props } />;
 	}
 	if ( fieldConfig.type ) {
-		return createElement( 'input', {
-			type: fieldConfig.type,
-			...props,
-		} );
+		return <InputControl type={ fieldConfig.type } { ...props } />;
 	}
 	return null;
 }
