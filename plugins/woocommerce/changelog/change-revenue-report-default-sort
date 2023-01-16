@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Change default sorting behavior in revenue report to date_paid

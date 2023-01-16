@@ -517,6 +517,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				'order_id'           => $order->get_id(),
 				'parent_id'          => $order->get_parent_id(),
 				'date_created'       => $order->get_date_created()->date( 'Y-m-d H:i:s' ),
+				'date_paid'          => $order->get_date_paid()->date( 'Y-m-d H:i:s' ),
+				'date_completed'     => $order->get_date_completed()->date( 'Y-m-d H:i:s' ),
 				'date_created_gmt'   => gmdate( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() ),
 				'num_items_sold'     => self::get_num_items_sold( $order ),
 				'total_sales'        => $order->get_total(),
@@ -533,6 +535,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$format = array(
 			'%d',
 			'%d',
+			'%s',
+			'%s',
 			'%s',
 			'%s',
 			'%d',
