@@ -225,6 +225,9 @@ class WC_Install {
 			'wc_update_722_adjust_new_zealand_states',
 			'wc_update_722_adjust_ukraine_states',
 		),
+		'7.4.0' => array(
+			'wc_update_740_add_columns_to_order_stats_table',
+		)
 	);
 
 	/**
@@ -1312,6 +1315,8 @@ CREATE TABLE {$wpdb->prefix}wc_order_stats (
 	parent_id bigint(20) unsigned DEFAULT 0 NOT NULL,
 	date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 	date_created_gmt datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	date_paid datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	date_completed datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 	num_items_sold int(11) DEFAULT 0 NOT NULL,
 	total_sales double DEFAULT 0 NOT NULL,
 	tax_total double DEFAULT 0 NOT NULL,
