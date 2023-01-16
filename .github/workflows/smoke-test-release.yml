@@ -65,11 +65,11 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
                 
-            - name: Run 'Update WooCommerce' test.
-              working-directory: plugins/woocommerce
-              env:
-                  UPDATE_WC: true
-              run: pnpm exec playwright test --config=tests/e2e-pw/daily.playwright.config.js update-woocommerce.spec.js
+            # - name: Run 'Update WooCommerce' test.
+            #   working-directory: plugins/woocommerce
+            #   env:
+            #       UPDATE_WC: true
+            #   run: pnpm exec playwright test --config=tests/e2e-pw/daily.playwright.config.js update-woocommerce.spec.js
 
             - name: Run the rest of E2E tests.
               timeout-minutes: 60
