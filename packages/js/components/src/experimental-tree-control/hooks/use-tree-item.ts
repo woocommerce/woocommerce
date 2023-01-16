@@ -2,6 +2,7 @@
  * External dependencies
  */
 import React from 'react';
+import { useInstanceId } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -48,6 +49,10 @@ export function useTreeItem( {
 		shouldItemBeHighlighted,
 	} );
 
+	const subTreeId = `experimental-woocommerce-tree__group-${ useInstanceId(
+		useTreeItem
+	) }`;
+
 	return {
 		item,
 		level: nextLevel,
@@ -57,17 +62,30 @@ export function useTreeItem( {
 		getLabel,
 		treeItemProps: {
 			...props,
+			role: 'none',
 		},
 		headingProps: {
+			role: 'treeitem',
+			'aria-selected': selection.checkedStatus !== 'unchecked',
+			'aria-expanded': item.children.length
+				? expander.isExpanded
+				: undefined,
+			'aria-owns':
+				item.children.length && expander.isExpanded
+					? subTreeId
+					: undefined,
 			style: {
 				'--level': level,
 			} as React.CSSProperties,
 		},
 		treeProps: {
+			id: subTreeId,
 			items: item.children,
 			level: nextLevel,
 			multiple: selection.multiple,
 			selected: selection.selected,
+			role: 'group',
+			'aria-label': item.data.label,
 			getItemLabel: getLabel,
 			shouldItemBeExpanded,
 			shouldItemBeHighlighted,

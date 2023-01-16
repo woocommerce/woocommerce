@@ -11,6 +11,7 @@ export function useTree( {
 	ref,
 	items,
 	level = 1,
+	role = 'tree',
 	multiple,
 	selected,
 	getItemLabel,
@@ -25,6 +26,7 @@ export function useTree( {
 		items,
 		treeProps: {
 			...props,
+			role,
 		},
 		treeItemProps: {
 			level,
