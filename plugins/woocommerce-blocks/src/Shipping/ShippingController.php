@@ -56,6 +56,8 @@ class ShippingController {
 		add_filter( 'woocommerce_local_pickup_methods', array( $this, 'register_local_pickup_method' ) );
 		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'filter_taxable_address' ) );
 		add_filter( 'woocommerce_shipping_packages', array( $this, 'filter_shipping_packages' ) );
+		add_filter( 'pre_update_option_woocommerce_pickup_location_settings', array( $this, 'flush_cache' ) );
+		add_filter( 'pre_update_option_pickup_location_pickup_locations', array( $this, 'flush_cache' ) );
 	}
 
 	/**
@@ -236,6 +238,17 @@ class ShippingController {
 		return $methods;
 	}
 
+	/**
+	 * Everytime we save or update local pickup settings, we flush the shipping
+	 * transient group.
+	 *
+	 * @param array $settings The setting array we're saving.
+	 * @return array $settings The setting array we're saving.
+	 */
+	public function flush_cache( $settings ) {
+		\WC_Cache_Helper::get_transient_version( 'shipping', true );
+		return $settings;
+	}
 	/**
 	 * Filter the location used for taxes based on the chosen pickup location.
 	 *
