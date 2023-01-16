@@ -117,7 +117,7 @@ describe( 'AttributeField', () => {
 		} );
 	} );
 
-	it( 'should render the list of existing attributes', async () => {
+	it( 'should render the list of all attributes', async () => {
 		act( () => {
 			render(
 				<AttributeField
@@ -128,14 +128,14 @@ describe( 'AttributeField', () => {
 		} );
 
 		expect(
-			await screen.findByText( 'No attributes yet' )
+			await screen.queryByText( 'No attributes yet' )
 		).not.toBeInTheDocument();
 		expect(
-			await screen.findByText( attributeList[ 0 ].name )
+			await screen.queryByText( attributeList[ 0 ].name )
 		).toBeInTheDocument();
 		expect(
 			await screen.queryByText( attributeList[ 1 ].name )
-		).not.toBeInTheDocument();
+		).toBeInTheDocument();
 	} );
 
 	it( 'should render the first two terms of each option, and show "+ n more" for the rest', async () => {
@@ -149,9 +149,6 @@ describe( 'AttributeField', () => {
 			);
 		} );
 
-		expect(
-			await screen.queryByText( attributeList[ 0 ].options[ 0 ] )
-		).not.toBeInTheDocument();
 		expect(
 			await screen.findByText( attributeList[ 1 ].options[ 0 ] )
 		).toBeInTheDocument();
