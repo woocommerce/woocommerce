@@ -134,7 +134,7 @@ jobs:
     api-release:
         name: API tests on release
         runs-on: ubuntu-20.04
-        needs: [e2e-release]
+        needs: [e2e]
         if: false
         # if: success() || failure()
         permissions:
