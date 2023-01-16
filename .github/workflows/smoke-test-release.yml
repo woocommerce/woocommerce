@@ -5,13 +5,10 @@ on:
            release_id:
                description: 'WooCommerce Release Id'
                required: true
-
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
-
 permissions: {}
-
 env:
     API_ARTIFACT: api-release--run-${{ github.run_number }}
     E2E_ARTIFACT: e2e-release--run-${{ github.run_number }}
@@ -26,8 +23,14 @@ jobs:
         permissions:
           contents: read
         env:
+            ADMIN_PASSWORD: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
+            ADMIN_USER: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
+            ADMIN_USER_EMAIL: ${{ secrets.RELEASE_TEST_ADMIN_USER_EMAIL }}
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
+            BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
+            CUSTOMER_PASSWORD: ${{ secrets.RELEASE_TEST_CUSTOMER_PASSWORD }}
+            CUSTOMER_USER: ${{ secrets.RELEASE_TEST_CUSTOMER_USER }}            
             DEFAULT_TIMEOUT_OVERRIDE: 120000
         steps:
             - uses: actions/checkout@v3
@@ -49,8 +52,8 @@ jobs:
             - name: Download WooCommerce release zip
               run: |
                   curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
-                  unzip woocommerce.zip -d woocommerce
-                  rsync -a woocommerce/woocommerce/* plugins/woocommerce/
+
+            # add step to save zip in a dedicated folder
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -62,16 +65,19 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
                 
-            - name: Launch wp-env e2e environment
+            - name: Run 'Update WooCommerce' test.
               working-directory: plugins/woocommerce
-              run: pnpm env:test
+              env:
+                  UPDATE_WC: true
+              run: pnpm exec playwright test --config=tests/e2e-pw/daily.playwright.config.js update-woocommerce.spec.js
 
-            - name: Run the E2E tests.
+            - name: Run the rest of E2E tests.
               timeout-minutes: 60
               working-directory: plugins/woocommerce
               env:
-                  E2E_MAX_FAILURES: 50
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js ./tests/e2e-pw/tests/basic.spec.js
+                  E2E_MAX_FAILURES: 25
+                  RESET_SITE: true
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js basic.spec.js
               
             - name: Generate Playwright E2E Test report.
               if: success() || failure()
