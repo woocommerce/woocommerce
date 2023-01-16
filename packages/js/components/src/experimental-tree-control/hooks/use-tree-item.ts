@@ -10,6 +10,7 @@ import { useInstanceId } from '@wordpress/compose';
 import { TreeItemProps } from '../types';
 import { useExpander } from './use-expander';
 import { useHighlighter } from './use-highlighter';
+import { useKeyboard } from './use-keyboard';
 import { useSelection } from './use-selection';
 
 export function useTreeItem( {
@@ -53,6 +54,11 @@ export function useTreeItem( {
 		useTreeItem
 	) }`;
 
+	const { onKeyDown } = useKeyboard( {
+		...expander,
+		item,
+	} );
+
 	return {
 		item,
 		level: nextLevel,
@@ -77,6 +83,7 @@ export function useTreeItem( {
 			style: {
 				'--level': level,
 			} as React.CSSProperties,
+			onKeyDown,
 		},
 		treeProps: {
 			id: subTreeId,
