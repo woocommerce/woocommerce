@@ -1,10 +1,12 @@
 name: Smoke test release
 on:
+    release:
+        types: [published]
     workflow_dispatch:
-       inputs:
-           release_id:
-               description: 'WooCommerce Release Id'
-               required: true
+        inputs:
+            tag:
+                description: 'WooCommerce Release Tag'
+                required: true
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
@@ -12,31 +14,65 @@ permissions: {}
 env:
     API_ARTIFACT: api-release--run-${{ github.run_number }}
     E2E_ARTIFACT: e2e-release--run-${{ github.run_number }}
-    K6_ARTIFACT:  k6-release--run-${{ github.run_number }}
+    K6_ARTIFACT: k6-release--run-${{ github.run_number }}
     FORCE_COLOR: 1
-    BRANCH_NAME: ${{ github.ref_name }}
 
 jobs:
-    e2e-release:
-        name: Run small set of E2E tests to verify
+    download-zip:
+        name: Download WooCommerce ZIP
         runs-on: ubuntu-20.04
+        env:
+            GH_TOKEN: ${{ github.token }}
+        steps:
+            - name: Validate tag
+              if: ${{ github.event_name == 'workflow_dispatch' }}
+              run: gh release view "${{ github.event.inputs.tag }}" --repo=woocommerce/woocommerce
+
+            - name: Get tag
+              uses: actions/github-script@v5
+              id: get-tag
+              with:
+                  result-encoding: string
+                  script: |
+                      console.log( "${{ github.event_name }}" );
+                      return "${{ github.event.release.tag_name }}" || "${{ github.event.inputs.tag }}"
+
+            - name: Download release zip
+              run: |
+                  gh release download ${{ steps.get-tag.outputs.result }} --repo woocommerce/woocommerce
+
+            - name: Upload zip as artifact
+              uses: actions/upload-artifact@v3
+              with:
+                  name: woocommerce
+                  path: woocommerce.zip
+
+    e2e:
+        name: Run E2E tests
+        runs-on: ubuntu-20.04
+        needs: [download-zip]
         permissions:
-          contents: read
+            contents: read
         env:
             ADMIN_PASSWORD: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
             ADMIN_USER: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
             ADMIN_USER_EMAIL: ${{ secrets.RELEASE_TEST_ADMIN_USER_EMAIL }}
-            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
-            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/woocommerce/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/woocommerce/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
             BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
             CUSTOMER_PASSWORD: ${{ secrets.RELEASE_TEST_CUSTOMER_PASSWORD }}
-            CUSTOMER_USER: ${{ secrets.RELEASE_TEST_CUSTOMER_USER }}            
+            CUSTOMER_USER: ${{ secrets.RELEASE_TEST_CUSTOMER_USER }}
             DEFAULT_TIMEOUT_OVERRIDE: 120000
         steps:
+            - name: Create dirs
+              run: |
+                  mkdir tmp
+                  mkdir woocommerce
+
             - uses: actions/checkout@v3
               with:
-                ref: ${{ env.BRANCH_NAME }}
-                
+                  path: woocommerce
+
             # - name: Fetch Asset ID
             #   id: fetch_asset_id
             #   uses: actions/github-script@v5
@@ -48,23 +84,23 @@ jobs:
             #       script: |
             #           const script = require( '.github/workflows/scripts/fetch-asset-id.js' )
             #           await script({github, context, core})
-                      
-            # - name: Download WooCommerce release zip
-            #   run: |
-            #       curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
-
-            # mytodo download woocommerce zip via gh cli tag
 
             - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
+              uses: ./woocommerce/.github/actions/setup-woocommerce-monorepo
               with:
                   install-filters: woocommerce
                   build: false
 
             - name: Download and install Chromium browser.
-              working-directory: plugins/woocommerce
+              working-directory: woocommerce/plugins/woocommerce
               run: pnpm exec playwright install chromium
-                
+
+            - name: Download WooCommerce zip artifact
+              uses: actions/download-artifact@v3
+              with:
+                  name: woocommerce
+                  path: tmp
+
             # - name: Run 'Update WooCommerce' test.
             #   working-directory: plugins/woocommerce
             #   env:
@@ -73,15 +109,15 @@ jobs:
 
             - name: Run the rest of E2E tests.
               timeout-minutes: 60
-              working-directory: plugins/woocommerce
+              working-directory: woocommerce/plugins/woocommerce
               env:
                   E2E_MAX_FAILURES: 25
                   RESET_SITE: true
               run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js basic.spec.js
-              
+
             - name: Generate Playwright E2E Test report.
               if: success() || failure()
-              working-directory: plugins/woocommerce
+              working-directory: woocommerce/plugins/woocommerce
               run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
             - name: Archive E2E test report
@@ -94,7 +130,7 @@ jobs:
                       ${{ env.ALLURE_REPORT_DIR }}
                   if-no-files-found: ignore
                   retention-days: 5
-    
+
     api-release:
         name: API tests on release
         runs-on: ubuntu-20.04
@@ -102,7 +138,7 @@ jobs:
         if: false
         # if: success() || failure()
         permissions:
-          contents: read
+            contents: read
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-report
@@ -113,7 +149,7 @@ jobs:
             - uses: actions/checkout@v3
               with:
                   ref: ${{ env.BRANCH_NAME }}
-                  
+
             - name: Fetch Asset ID
               id: fetch_asset_id
               uses: actions/github-script@v5
@@ -125,7 +161,7 @@ jobs:
                   script: |
                       const script = require( '.github/workflows/scripts/fetch-asset-id.js' )
                       await script({github, context, core})
-                      
+
             - name: Download WooCommerce release zip
               run: |
                   curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
@@ -137,7 +173,7 @@ jobs:
               with:
                   install-filters: woocommerce
                   build: false
-                  
+
             - name: Launch wp-env e2e environment
               working-directory: plugins/woocommerce
               run: pnpm env:test
@@ -146,9 +182,9 @@ jobs:
               if: success() || failure()
               working-directory: plugins/woocommerce
               env:
-              #    BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
-              #    USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
-              #    USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
+                  #    BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
+                  #    USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
+                  #    USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
               run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js
 
@@ -173,12 +209,12 @@ jobs:
         runs-on: ubuntu-20.04
         needs: [e2e-release]
         if: false
-        # if: success() || failure()        
+        # if: success() || failure()
         steps:
             - uses: actions/checkout@v3
               with:
                   ref: ${{ env.BRANCH_NAME }}
-                  
+
             - name: Fetch Asset ID
               id: fetch_asset_id
               uses: actions/github-script@v5
@@ -190,7 +226,7 @@ jobs:
                   script: |
                       const script = require( '.github/workflows/scripts/fetch-asset-id.js' )
                       await script({github, context, core})
-                      
+
             - name: Download WooCommerce release zip
               run: |
                   curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
@@ -206,7 +242,7 @@ jobs:
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
-                  
+
             - name: Install k6
               if: success() || failure()
               run: |
@@ -224,7 +260,7 @@ jobs:
                   P_ID: 274
               run: |
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
-            
+
             - name: Generate k6 Test report.
               if: success() || failure()
               working-directory: plugins/woocommerce
@@ -242,100 +278,24 @@ jobs:
                   retention-days: 5
 
     PHP-versions:
-      name: PHP version ${{ matrix.php }} on release
-      runs-on: ubuntu-20.04
-      needs: [e2e-release]
-      if: false
-      # if: success()
-      strategy:
-        matrix:
-          php: ['7.4', '8.0', '8.1']
-      env:
-        ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
-        ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
-        DEFAULT_TIMEOUT_OVERRIDE: 120000
-            
-      steps:
-          - uses: actions/checkout@v3
-            with:
-                ref: trunk
-                
-          - name: Fetch Asset ID
-            id: fetch_asset_id
-            uses: actions/github-script@v5
-            env:
-                RELEASE_ID: ${{ github.event.inputs.release_id }}
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                REPO: ${{ github.repository }}
-            with:
-                script: |
-                    const script = require( '.github/workflows/scripts/fetch-asset-id.js' )
-                    await script({github, context, core})
-                      
-          - name: Download WooCommerce release zip
-            run: |
-                curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
-                unzip woocommerce.zip -d woocommerce
-                rsync -a woocommerce/woocommerce/* plugins/woocommerce/
-
-          - name: Setup WooCommerce Monorepo
-            uses: ./.github/actions/setup-woocommerce-monorepo
-            with:
-                install-filters: woocommerce
-                build: false
-
-          - name: Download and install Chromium browser.
-            working-directory: plugins/woocommerce
-            run: pnpm exec playwright install chromium
-                
-          - name: Launch wp-env e2e environment
-            working-directory: plugins/woocommerce
-            env:
-              WP_ENV_PHP_VERSION: ${{ matrix.php}}
-            run: pnpm env:test
-
-          - name: Run the E2E tests.
-            timeout-minutes: 60
-            working-directory: plugins/woocommerce
-            env:
-                E2E_MAX_FAILURES: 50
-            run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
-
-          - name: Generate Playwright E2E Test report.
-            if: success() || failure()
-            working-directory: plugins/woocommerce
-            run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
-
-          - name: Archive E2E test report
-            if: success() || failure()
-            uses: actions/upload-artifact@v3
-            with:
-                name: ${{ env.E2E_ARTIFACT }}
-                path: |
-                    ${{ env.ALLURE_RESULTS_DIR }}
-                    ${{ env.ALLURE_REPORT_DIR }}
-                if-no-files-found: ignore
-                retention-days: 5
-
-    WP-versions:
-        name: WP version ${{ matrix.wp }} on release
+        name: PHP version ${{ matrix.php }} on release
         runs-on: ubuntu-20.04
         needs: [e2e-release]
         if: false
         # if: success()
         strategy:
-          matrix:
-            wp: ['6.1', '6.0.3']
+            matrix:
+                php: ['7.4', '8.0', '8.1']
         env:
-          ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
-          ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
-          DEFAULT_TIMEOUT_OVERRIDE: 120000
-              
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
+            DEFAULT_TIMEOUT_OVERRIDE: 120000
+
         steps:
             - uses: actions/checkout@v3
               with:
                   ref: trunk
-                  
+
             - name: Fetch Asset ID
               id: fetch_asset_id
               uses: actions/github-script@v5
@@ -347,7 +307,7 @@ jobs:
                   script: |
                       const script = require( '.github/workflows/scripts/fetch-asset-id.js' )
                       await script({github, context, core})
-                        
+
             - name: Download WooCommerce release zip
               run: |
                   curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
@@ -363,11 +323,87 @@ jobs:
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
-                  
+
             - name: Launch wp-env e2e environment
               working-directory: plugins/woocommerce
               env:
-                WP_ENV_CORE: WordPress/WordPress#tags/${{ matrix.wp}}
+                  WP_ENV_PHP_VERSION: ${{ matrix.php}}
+              run: pnpm env:test
+
+            - name: Run the E2E tests.
+              timeout-minutes: 60
+              working-directory: plugins/woocommerce
+              env:
+                  E2E_MAX_FAILURES: 50
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
+
+            - name: Generate Playwright E2E Test report.
+              if: success() || failure()
+              working-directory: plugins/woocommerce
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+
+            - name: Archive E2E test report
+              if: success() || failure()
+              uses: actions/upload-artifact@v3
+              with:
+                  name: ${{ env.E2E_ARTIFACT }}
+                  path: |
+                      ${{ env.ALLURE_RESULTS_DIR }}
+                      ${{ env.ALLURE_REPORT_DIR }}
+                  if-no-files-found: ignore
+                  retention-days: 5
+
+    WP-versions:
+        name: WP version ${{ matrix.wp }} on release
+        runs-on: ubuntu-20.04
+        needs: [e2e-release]
+        if: false
+        # if: success()
+        strategy:
+            matrix:
+                wp: ['6.1', '6.0.3']
+        env:
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
+            DEFAULT_TIMEOUT_OVERRIDE: 120000
+
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                  ref: trunk
+
+            - name: Fetch Asset ID
+              id: fetch_asset_id
+              uses: actions/github-script@v5
+              env:
+                  RELEASE_ID: ${{ github.event.inputs.release_id }}
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  REPO: ${{ github.repository }}
+              with:
+                  script: |
+                      const script = require( '.github/workflows/scripts/fetch-asset-id.js' )
+                      await script({github, context, core})
+
+            - name: Download WooCommerce release zip
+              run: |
+                  curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
+                  unzip woocommerce.zip -d woocommerce
+                  rsync -a woocommerce/woocommerce/* plugins/woocommerce/
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  install-filters: woocommerce
+                  build: false
+
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
+
+            - name: Launch wp-env e2e environment
+              working-directory: plugins/woocommerce
+              env:
+                  WP_ENV_CORE: WordPress/WordPress#tags/${{ matrix.wp}}
               run: pnpm env:test
 
             - name: Run the E2E tests.
@@ -400,7 +436,7 @@ jobs:
         if: false
         # if: success() || failure()
         permissions:
-          contents: read
+            contents: read
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
@@ -437,7 +473,7 @@ jobs:
                   script: |
                       const script = require( '.github/workflows/scripts/fetch-asset-id.js' )
                       await script({github, context, core})
-                      
+
             - name: Download WooCommerce release zip
               run: |
                   curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
@@ -449,7 +485,7 @@ jobs:
               with:
                   install-filters: woocommerce
                   build: false
-                  
+
             - name: Run 'Upload plugin' test
               id: e2e-upload
               working-directory: plugins/woocommerce
@@ -462,7 +498,7 @@ jobs:
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
-                
+
             - name: Launch wp-env e2e environment
               working-directory: plugins/woocommerce
               run: pnpm env:test
