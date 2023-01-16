@@ -13,7 +13,7 @@
 		"multichannel-marketing": true,
 		"minified-js": true,
 		"mobile-app-banner": true,
-		"navigation": true,
+		"navigation": false,
 		"new-product-management-experience": true,
 		"onboarding": true,
 		"onboarding-tasks": true,
