@@ -35,6 +35,15 @@
 		},
 		{
 			"dependencies": [
+				"config"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "3.3.7"
+		},
+		{
+			"dependencies": [
 				"react",
 				"react-dom"
 			],

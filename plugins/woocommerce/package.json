@@ -73,7 +73,7 @@
 		"babel-eslint": "10.1.0",
 		"chai": "4.2.0",
 		"chai-as-promised": "7.1.1",
-		"config": "3.3.3",
+		"config": "3.3.7",
 		"cross-env": "6.0.3",
 		"deasync": "0.1.26",
 		"dotenv": "^10.0.0",
