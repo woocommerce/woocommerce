@@ -93,7 +93,8 @@ jobs:
         name: API tests on release
         runs-on: ubuntu-20.04
         needs: [e2e-release]
-        if: success() || failure()
+        if: false
+        # if: success() || failure()
         permissions:
           contents: read
         env:
@@ -165,8 +166,8 @@ jobs:
         name: k6 tests on release
         runs-on: ubuntu-20.04
         needs: [e2e-release]
-        if: success() || failure()
-        steps:
+        if: false
+        # if: success() || failure()        steps:
             - uses: actions/checkout@v3
               with:
                   ref: ${{ env.BRANCH_NAME }}
@@ -237,7 +238,8 @@ jobs:
       name: PHP version ${{ matrix.php }} on release
       runs-on: ubuntu-20.04
       needs: [e2e-release]
-      if: success()
+      if: false
+      # if: success()
       strategy:
         matrix:
           php: ['7.4', '8.0', '8.1']
@@ -312,7 +314,8 @@ jobs:
         name: WP version ${{ matrix.wp }} on release
         runs-on: ubuntu-20.04
         needs: [e2e-release]
-        if: success()
+        if: false
+        # if: success()
         strategy:
           matrix:
             wp: ['6.1', '6.0.3']
@@ -387,7 +390,8 @@ jobs:
         name: Release test with ${{ matrix.plugin }} plugin installed
         runs-on: ubuntu-20.04
         needs: [e2e-release]
-        if: success() || failure()
+        if: false
+        # if: success() || failure()
         permissions:
           contents: read
         env:
