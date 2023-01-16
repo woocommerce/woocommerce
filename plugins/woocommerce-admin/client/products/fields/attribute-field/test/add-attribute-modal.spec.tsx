@@ -254,7 +254,10 @@ describe( 'AddAttributeModal', () => {
 				/>
 			);
 
-			attributeOnChange( attributeList[ 0 ] );
+			attributeOnChange( {
+				...attributeList[ 0 ],
+				options: [],
+			} );
 			queryByRole( 'button', { name: 'Add attributes' } )?.click();
 			expect( onAddMock ).toHaveBeenCalledWith( [] );
 		} );

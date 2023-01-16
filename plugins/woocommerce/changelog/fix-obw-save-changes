@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix "Save changes?" modal saves the options after selecting the 'Discard' option

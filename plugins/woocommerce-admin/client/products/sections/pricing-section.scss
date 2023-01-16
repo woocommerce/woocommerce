@@ -4,3 +4,14 @@
 		margin-top: $gap-small;
 	}
 }
+
+.product-pricing-section {
+	&__scheduled-sale {
+		&__spinner-wrapper {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			min-height: 150px;
+		}
+	}
+}

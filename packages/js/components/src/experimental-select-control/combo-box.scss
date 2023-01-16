@@ -5,10 +5,22 @@
 	background: $studio-white;
 	position: relative;
 	display: flex;
+	align-items: center;
+	margin-bottom: 4px;
+	min-height: 36px;
+	box-sizing: border-box;
+
+	&--disabled {
+		opacity: 0.5;
+	}
+}
+
+.woocommerce-experimental-select-control__items-wrapper {
+	display: flex;
+	flex-grow: 1;
 	flex-wrap: wrap;
 	align-items: center;
-	padding: $gap-smallest 36px $gap-smallest $gap-smaller;
-	margin-bottom: 4px;
+	padding: 2px $gap-smaller;
 
 	> * {
 		display: inline-flex;
@@ -29,9 +41,6 @@
 	}
 }
 
-.woocommerce-experimental-select-control__combox-box-icon {
-	position: absolute;
-	right: 6px;
-	top: 50%;
-	transform: translateY( -50% );
+.woocommerce-experimental-select-control__suffix {
+	align-self: stretch;
 }

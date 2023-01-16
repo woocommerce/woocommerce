@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Improves handling of the single product page quantity selector, in relation to variable products.

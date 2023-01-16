@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update api-core-tests readme to include a guide for writing tests

@@ -33,17 +33,34 @@ class WC_REST_Customers_V2_Controller extends WC_REST_Customers_V1_Controller {
 	 * @return array
 	 */
 	protected function get_formatted_item_data( $object ) {
+		$formatted_data                 = $this->get_formatted_item_data_core( $object );
+		$formatted_data['orders_count'] = $object->get_order_count();
+		$formatted_data['total_spent']  = $object->get_total_spent();
+		return $formatted_data;
+	}
+
+	/**
+	 * Get formatted item data, not including orders count nor total spent.
+	 * This method is needed because v3 API doesn't return those two fields.
+	 *
+	 * @internal This method could disappear or have its name or signature changed in future releases.
+	 *
+	 * @param  WC_Data $object WC_Data instance.
+	 * @return array
+	 */
+	protected function get_formatted_item_data_core( $object ) {
 		$data        = $object->get_data();
 		$format_date = array( 'date_created', 'date_modified' );
 
 		// Format date values.
 		foreach ( $format_date as $key ) {
+			// Date created is stored UTC, date modified is stored WP local time.
 			$datetime              = 'date_created' === $key ? get_date_from_gmt( gmdate( 'Y-m-d H:i:s', $data[ $key ]->getTimestamp() ) ) : $data[ $key ];
 			$data[ $key ]          = wc_rest_prepare_date_response( $datetime, false );
 			$data[ $key . '_gmt' ] = wc_rest_prepare_date_response( $datetime );
 		}
 
-		return array(
+		$formatted_data = array(
 			'id'                 => $object->get_id(),
 			'date_created'       => $data['date_created'],
 			'date_created_gmt'   => $data['date_created_gmt'],
@@ -57,11 +74,14 @@ class WC_REST_Customers_V2_Controller extends WC_REST_Customers_V1_Controller {
 			'billing'            => $data['billing'],
 			'shipping'           => $data['shipping'],
 			'is_paying_customer' => $data['is_paying_customer'],
-			'orders_count'       => $object->get_order_count(),
-			'total_spent'        => $object->get_total_spent(),
 			'avatar_url'         => $object->get_avatar_url(),
-			'meta_data'          => $data['meta_data'],
 		);
+
+		if ( wc_current_user_has_role( 'administrator' ) ) {
+			$formatted_data['meta_data'] = $data['meta_data'];
+		}
+
+		return $formatted_data;
 	}
 
 	/**
@@ -80,6 +100,7 @@ class WC_REST_Customers_V2_Controller extends WC_REST_Customers_V1_Controller {
 		$response = rest_ensure_response( $data );
 		$response->add_links( $this->prepare_links( $user_data ) );
 
+		//phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		/**
 		 * Filter customer data returned from the REST API.
 		 *
@@ -88,6 +109,7 @@ class WC_REST_Customers_V2_Controller extends WC_REST_Customers_V1_Controller {
 		 * @param WP_REST_Request  $request    Request object.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_customer', $response, $user_data, $request );
+		//phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 	}
 
 	/**

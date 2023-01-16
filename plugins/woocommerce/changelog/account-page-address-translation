@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Correct the usage of 'address' and 'addresses' within `wc_get_account_menu_items()`.

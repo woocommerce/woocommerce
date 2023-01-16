@@ -1,0 +1,8 @@
+/**
+ * Contains rules common to all supported frontend themes.
+ */
+
+/* We do not wish to display the quantity selector (within single product pages) if the product is sold individually. */
+.woocommerce.single-product .product.sold-individually .quantity {
+	display: none;
+}

@@ -68,7 +68,7 @@ test.describe( 'Single Product Page', () => {
 
 	test.beforeEach( async ( { context } ) => {
 		// Shopping cart is very sensitive to cookies, so be explicit
-		context.clearCookies();
+		await context.clearCookies();
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -158,7 +158,7 @@ test.describe( 'Variable Product Page', () => {
 
 	test.beforeEach( async ( { context } ) => {
 		// Shopping cart is very sensitive to cookies, so be explicit
-		context.clearCookies();
+		await context.clearCookies();
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -255,7 +255,7 @@ test.describe( 'Grouped Product Page', () => {
 
 	test.beforeEach( async ( { context } ) => {
 		// Shopping cart is very sensitive to cookies, so be explicit
-		context.clearCookies();
+		await context.clearCookies();
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {

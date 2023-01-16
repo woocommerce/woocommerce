@@ -5,6 +5,8 @@ import TYPES from './action-types';
 
 const DEFAULT_STATE = {
 	queue: [],
+	cesModalData: undefined,
+	showCESModal: false,
 };
 
 const reducer = ( state = DEFAULT_STATE, action ) => {
@@ -12,7 +14,28 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 		case TYPES.SET_CES_SURVEY_QUEUE:
 			return {
 				...state,
-				queue: action.queue,
+				queue: [ ...state.queue, ...action.queue ],
+			};
+		case TYPES.HIDE_CES_MODAL:
+			return {
+				...state,
+				showCESModal: false,
+				cesModalData: undefined,
+			};
+		case TYPES.SHOW_CES_MODAL:
+			const cesModalData = {
+				action: action.surveyProps.action,
+				title: action.surveyProps.title,
+				onSubmitLabel: action.onSubmitLabel,
+				firstQuestion: action.surveyProps.firstQuestion,
+				secondQuestion: action.surveyProps.secondQuestion,
+				onSubmitNoticeProps: action.onSubmitNoticeProps || {},
+				props: action.props,
+			};
+			return {
+				...state,
+				showCESModal: true,
+				cesModalData,
 			};
 		case TYPES.ADD_CES_SURVEY:
 			// Prevent duplicate
@@ -24,7 +47,12 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			}
 			const newTrack = {
 				action: action.action,
-				label: action.label,
+				title: action.title,
+				description: action.description,
+				noticeLabel: action.noticeLabel,
+				firstQuestion: action.firstQuestion,
+				secondQuestion: action.secondQuestion,
+				icon: action.icon,
 				pagenow: action.pageNow,
 				adminpage: action.adminPage,
 				onSubmitLabel: action.onSubmitLabel,

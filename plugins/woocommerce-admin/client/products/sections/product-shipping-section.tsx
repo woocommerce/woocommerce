@@ -12,6 +12,7 @@ import {
 	ProductShippingClass,
 } from '@woocommerce/data';
 import interpolateComponents from '@automattic/interpolate-components';
+import { recordEvent } from '@woocommerce/tracks';
 import {
 	BaseControl,
 	Card,
@@ -212,7 +213,9 @@ export function ProductShippingSection( {
 						<>
 							<SelectControl
 								label={ __( 'Shipping class', 'woocommerce' ) }
-								{ ...getSelectControlProps( 'shipping_class' ) }
+								{ ...getSelectControlProps( 'shipping_class', {
+									className: 'half-width-field',
+								} ) }
 								onChange={ ( value: string ) => {
 									if (
 										value ===
@@ -242,6 +245,11 @@ export function ProductShippingSection( {
 												href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=classes` }
 												target="_blank"
 												type="external"
+												onClick={ () => {
+													recordEvent(
+														'product_shipping_global_settings_link_click'
+													);
+												} }
 											>
 												<></>
 											</Link>
@@ -382,6 +390,9 @@ export function ProductShippingSection( {
 							Promise< ProductShippingClass >
 						>( shippingClassValues )
 							.then( ( value ) => {
+								recordEvent(
+									'product_new_shipping_class_modal_add_button_click'
+								);
 								invalidateResolution(
 									'getProductShippingClasses'
 								);

@@ -1000,6 +1000,9 @@ function wc_format_postcode( $postcode, $country ) {
 				$postcode = count( $matches ) >= 2 ? "LV-$matches[1]" : $postcode;
 			}
 			break;
+		case 'DK':
+			$postcode = preg_replace( '/^(DK)(.+)$/', '${1}-${2}', $postcode );
+			break;
 	}
 
 	return apply_filters( 'woocommerce_format_postcode', trim( $postcode ), $country );

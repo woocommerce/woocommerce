@@ -1,0 +1,19 @@
+.woocommerce-layout__footer {
+	background: $studio-white;
+	box-sizing: border-box;
+	padding: 0;
+	position: fixed;
+	width: calc(100% - 160px);
+	bottom: 0;
+	z-index: 1001;
+	/* on top of #wp-content-editor-tools */
+
+	@include breakpoint('782px-960px') {
+		width: calc(100% - 36px);
+	}
+
+	@include breakpoint('<782px') {
+		flex-flow: row wrap;
+		width: 100%;
+	}
+}

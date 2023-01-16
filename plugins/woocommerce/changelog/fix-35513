@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix call of array_key_exists in SSR.

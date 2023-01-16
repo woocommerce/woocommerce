@@ -1,0 +1,146 @@
+{
+    "code": "CN",
+    "name": "China",
+    "states": [
+        {
+            "code": "CN1",
+            "name": "Yunnan / 云南"
+        },
+        {
+            "code": "CN2",
+            "name": "Beijing / 北京"
+        },
+        {
+            "code": "CN3",
+            "name": "Tianjin / 天津"
+        },
+        {
+            "code": "CN4",
+            "name": "Hebei / 河北"
+        },
+        {
+            "code": "CN5",
+            "name": "Shanxi / 山西"
+        },
+        {
+            "code": "CN6",
+            "name": "Inner Mongolia / 內蒙古"
+        },
+        {
+            "code": "CN7",
+            "name": "Liaoning / 辽宁"
+        },
+        {
+            "code": "CN8",
+            "name": "Jilin / 吉林"
+        },
+        {
+            "code": "CN9",
+            "name": "Heilongjiang / 黑龙江"
+        },
+        {
+            "code": "CN10",
+            "name": "Shanghai / 上海"
+        },
+        {
+            "code": "CN11",
+            "name": "Jiangsu / 江苏"
+        },
+        {
+            "code": "CN12",
+            "name": "Zhejiang / 浙江"
+        },
+        {
+            "code": "CN13",
+            "name": "Anhui / 安徽"
+        },
+        {
+            "code": "CN14",
+            "name": "Fujian / 福建"
+        },
+        {
+            "code": "CN15",
+            "name": "Jiangxi / 江西"
+        },
+        {
+            "code": "CN16",
+            "name": "Shandong / 山东"
+        },
+        {
+            "code": "CN17",
+            "name": "Henan / 河南"
+        },
+        {
+            "code": "CN18",
+            "name": "Hubei / 湖北"
+        },
+        {
+            "code": "CN19",
+            "name": "Hunan / 湖南"
+        },
+        {
+            "code": "CN20",
+            "name": "Guangdong / 广东"
+        },
+        {
+            "code": "CN21",
+            "name": "Guangxi Zhuang / 广西壮族"
+        },
+        {
+            "code": "CN22",
+            "name": "Hainan / 海南"
+        },
+        {
+            "code": "CN23",
+            "name": "Chongqing / 重庆"
+        },
+        {
+            "code": "CN24",
+            "name": "Sichuan / 四川"
+        },
+        {
+            "code": "CN25",
+            "name": "Guizhou / 贵州"
+        },
+        {
+            "code": "CN26",
+            "name": "Shaanxi / 陕西"
+        },
+        {
+            "code": "CN27",
+            "name": "Gansu / 甘肃"
+        },
+        {
+            "code": "CN28",
+            "name": "Qinghai / 青海"
+        },
+        {
+            "code": "CN29",
+            "name": "Ningxia Hui / 宁夏"
+        },
+        {
+            "code": "CN30",
+            "name": "Macao / 澳门"
+        },
+        {
+            "code": "CN31",
+            "name": "Tibet / 西藏"
+        },
+        {
+            "code": "CN32",
+            "name": "Xinjiang / 新疆"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/cn"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

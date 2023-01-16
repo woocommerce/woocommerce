@@ -30,6 +30,7 @@ use \Automattic\WooCommerce\Internal\Admin\Notes\NewSalesRecord;
 use \Automattic\WooCommerce\Internal\Admin\Notes\OnboardingPayments;
 use \Automattic\WooCommerce\Internal\Admin\Notes\OnlineClothingStore;
 use \Automattic\WooCommerce\Internal\Admin\Notes\OrderMilestones;
+use \Automattic\WooCommerce\Internal\Admin\Notes\PaymentsMoreInfoNeeded;
 use \Automattic\WooCommerce\Internal\Admin\Notes\PaymentsRemindMeLater;
 use \Automattic\WooCommerce\Internal\Admin\Notes\PerformanceOnMobile;
 use \Automattic\WooCommerce\Internal\Admin\Notes\PersonalizeStore;
@@ -38,7 +39,6 @@ use \Automattic\WooCommerce\Internal\Admin\Notes\SellingOnlineCourses;
 use \Automattic\WooCommerce\Internal\Admin\Notes\TestCheckout;
 use \Automattic\WooCommerce\Internal\Admin\Notes\TrackingOptIn;
 use \Automattic\WooCommerce\Internal\Admin\Notes\UnsecuredReportFiles;
-use \Automattic\WooCommerce\Internal\Admin\Notes\WelcomeToWooCommerceForStoreUsers;
 use \Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
 use \Automattic\WooCommerce\Internal\Admin\Notes\WooCommerceSubscriptions;
 use \Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
@@ -85,6 +85,7 @@ class Events {
 		NewSalesRecord::class,
 		OnboardingPayments::class,
 		OnlineClothingStore::class,
+		PaymentsMoreInfoNeeded::class,
 		PaymentsRemindMeLater::class,
 		PerformanceOnMobile::class,
 		PersonalizeStore::class,
@@ -106,7 +107,6 @@ class Events {
 		OrderMilestones::class,
 		SellingOnlineCourses::class,
 		UnsecuredReportFiles::class,
-		WelcomeToWooCommerceForStoreUsers::class,
 		WooSubscriptionsNotes::class,
 	);
 
@@ -202,6 +202,7 @@ class Events {
 	 */
 	protected function possibly_delete_notes() {
 		PaymentsRemindMeLater::delete_if_not_applicable();
+		PaymentsMoreInfoNeeded::delete_if_not_applicable();
 	}
 
 	/**

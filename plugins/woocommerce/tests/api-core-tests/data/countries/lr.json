@@ -1,0 +1,78 @@
+{
+    "code": "LR",
+    "name": "Liberia",
+    "states": [
+        {
+            "code": "BM",
+            "name": "Bomi"
+        },
+        {
+            "code": "BN",
+            "name": "Bong"
+        },
+        {
+            "code": "GA",
+            "name": "Gbarpolu"
+        },
+        {
+            "code": "GB",
+            "name": "Grand Bassa"
+        },
+        {
+            "code": "GC",
+            "name": "Grand Cape Mount"
+        },
+        {
+            "code": "GG",
+            "name": "Grand Gedeh"
+        },
+        {
+            "code": "GK",
+            "name": "Grand Kru"
+        },
+        {
+            "code": "LO",
+            "name": "Lofa"
+        },
+        {
+            "code": "MA",
+            "name": "Margibi"
+        },
+        {
+            "code": "MY",
+            "name": "Maryland"
+        },
+        {
+            "code": "MO",
+            "name": "Montserrado"
+        },
+        {
+            "code": "NM",
+            "name": "Nimba"
+        },
+        {
+            "code": "RV",
+            "name": "Rivercess"
+        },
+        {
+            "code": "RG",
+            "name": "River Gee"
+        },
+        {
+            "code": "SN",
+            "name": "Sinoe"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/lr"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

@@ -56,6 +56,10 @@ const wpAdminScripts = [
 	'category-tracking',
 	'tags-tracking',
 	'product-tour',
+	'wc-addons-tour',
+	'settings-tracking',
+	'order-tracking',
+	'product-import-tracking',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
@@ -123,6 +127,7 @@ const webpackConfig = {
 							],
 							[ '@babel/preset-typescript' ],
 						],
+						plugins: [ '@babel/plugin-proposal-class-properties' ],
 					},
 				},
 			},

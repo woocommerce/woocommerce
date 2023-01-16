@@ -11,7 +11,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import './attributes-section.scss';
 import { ProductSectionLayout } from '../layout/product-section-layout';
-import { AttributeField } from '../fields/attribute-field';
+import { Attributes } from '../fields/attributes';
 
 export const AttributesSection: React.FC = () => {
 	const {
@@ -45,8 +45,10 @@ export const AttributesSection: React.FC = () => {
 				</>
 			}
 		>
-			<AttributeField
-				{ ...getInputProps( 'attributes', { productId } ) }
+			<Attributes
+				{ ...getInputProps( 'attributes', {
+					productId,
+				} ) }
 			/>
 		</ProductSectionLayout>
 	);

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix tooltips not appearing in the orders list admin page.

@@ -33,8 +33,14 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 		$this->prefix = 'wp_' . get_current_blog_id();
 		$this->action = 'wc_regenerate_images';
 
-		// This is needed to prevent timeouts due to threading. See https://core.trac.wordpress.org/ticket/36534.
-		@putenv( 'MAGICK_THREAD_LIMIT=1' ); // @codingStandardsIgnoreLine.
+		// Limit Imagick to only use 1 thread to avoid memory issues with OpenMP.
+		if ( extension_loaded( 'imagick' ) && method_exists( Imagick::class, 'setResourceLimit' ) ) {
+			if ( defined( 'Imagick::RESOURCETYPE_THREAD' ) ) {
+				Imagick::setResourceLimit( Imagick::RESOURCETYPE_THREAD, 1 );
+			} else {
+				Imagick::setResourceLimit( 6, 1 );
+			}
+		}
 
 		parent::__construct();
 	}

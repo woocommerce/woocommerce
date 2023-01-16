@@ -1,0 +1,1 @@
+export { useInstalledPlugins } from './useInstalledPlugins';

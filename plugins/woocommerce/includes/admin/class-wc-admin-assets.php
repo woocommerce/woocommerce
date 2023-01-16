@@ -57,6 +57,11 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			if ( $screen && $screen->is_block_editor() ) {
 				wp_register_style( 'woocommerce-general', WC()->plugin_url() . '/assets/css/woocommerce.css', array(), $version );
 				wp_style_add_data( 'woocommerce-general', 'rtl', 'replace' );
+				if ( wc_current_theme_is_fse_theme() ) {
+					wp_register_style( 'woocommerce-blocktheme', WC()->plugin_url() . '/assets/css/woocommerce-blocktheme.css', array(), $version );
+					wp_style_add_data( 'woocommerce-blocktheme', 'rtl', 'replace' );
+					wp_enqueue_style( 'woocommerce-blocktheme' );
+				}
 			}
 
 			// Sitewide menu CSS.
@@ -409,6 +414,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_product_other_tip'             => __( 'Product types define available product details and attributes, such as downloadable files and variations. They’re also used for analytics and inventory management.', 'woocommerce' ),
 					'i18n_product_description_tip'       => __( 'Describe this product. What makes it unique? What are its most important features?', 'woocommerce' ),
 					'i18n_product_short_description_tip' => __( 'Summarize this product in 1-2 short sentences. We’ll show it at the top of the page.', 'woocommerce' ),
+					/* translators: %1$s: maximum file size */
+					'i18n_product_image_tip'             => sprintf( __( 'For best results, upload JPEG or PNG files that are 1000 by 1000 pixels or larger. Maximum upload file size: %1$s.', 'woocommerce' ) , size_format( wp_max_upload_size() ) ),
 				);
 
 				wp_localize_script( 'wc-admin-meta-boxes', 'woocommerce_admin_meta_boxes', $params );
@@ -533,8 +540,16 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		 * @return bool Whether the current screen is an order edit screen.
 		 */
 		private function is_order_meta_box_screen( $screen_id ) {
-			return in_array( str_replace( 'edit-', '', $screen_id ), wc_get_order_types( 'order-meta-boxes' ), true ) ||
-						wc_get_page_screen_id( 'shop-order' ) === $screen_id;
+			$screen_id = str_replace( 'edit-', '', $screen_id );
+
+			$types_with_metaboxes_screen_ids = array_filter(
+				array_map(
+					'wc_get_page_screen_id',
+					wc_get_order_types( 'order-meta-boxes' )
+				)
+			);
+
+			return in_array( $screen_id, $types_with_metaboxes_screen_ids, true );
 		}
 
 	}

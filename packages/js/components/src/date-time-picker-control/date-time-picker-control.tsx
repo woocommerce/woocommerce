@@ -69,8 +69,6 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	const id = `inspector-date-time-picker-control-${ instanceId }`;
 	const inputControl = useRef< InputControl >();
 
-	const [ inputString, setInputString ] = useState( '' );
-
 	const displayFormat = useMemo( () => {
 		if ( dateTimeFormat ) {
 			return dateTimeFormat;
@@ -145,6 +143,14 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			: dateTime.creationData().input?.toString() || '';
 	}
 
+	const currentDateTime = parseAsISODateTime( currentDate );
+
+	const [ inputString, setInputString ] = useState(
+		currentDateTime.isValid()
+			? formatDateTimeForDisplay( maybeForceTime( currentDateTime ) )
+			: ''
+	);
+
 	const inputStringDateTime = useMemo( () => {
 		return maybeForceTime( parseAsLocalDateTime( inputString ) );
 	}, [ inputString, maybeForceTime ] );
@@ -161,15 +167,23 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 
 	const setInputStringAndMaybeCallOnChange = useCallback(
 		( newInputString: string, isUserTypedInput: boolean ) => {
+			// InputControl doesn't fire an onChange if what the user has typed
+			// matches the current value of the input field. To get around this,
+			// we pull the value directly out of the input field. This fixes
+			// the issue where the user ends up typing the same value. Unless they
+			// are typing extra slow. Without this workaround, we miss the last
+			// character typed.
+			const lastTypedValue = inputControl.current.value;
+
 			const newDateTime = maybeForceTime(
 				isUserTypedInput
-					? parseAsLocalDateTime( newInputString )
+					? parseAsLocalDateTime( lastTypedValue )
 					: parseAsISODateTime( newInputString, true )
 			);
 			const isDateTimeSame = newDateTime.isSame( inputStringDateTime );
 
 			if ( isUserTypedInput ) {
-				setInputString( newInputString );
+				setInputString( lastTypedValue );
 			} else if ( ! isDateTimeSame ) {
 				setInputString( formatDateTimeForDisplay( newDateTime ) );
 			}
@@ -179,7 +193,9 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 				! isDateTimeSame
 			) {
 				onChangeRef.current(
-					formatDateTimeAsISO( newDateTime ),
+					newDateTime.isValid()
+						? formatDateTimeAsISO( newDateTime )
+						: lastTypedValue,
 					newDateTime.isValid()
 				);
 			}
@@ -198,23 +214,52 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 		}
 	}
 
-	function getUserInputOrUpdatedCurrentDate() {
-		const newDateTime = maybeForceTime(
-			parseAsISODateTime( currentDate, false )
-		);
+	const getUserInputOrUpdatedCurrentDate = useCallback( () => {
+		if ( currentDate !== undefined ) {
+			const newDateTime = maybeForceTime(
+				parseAsISODateTime( currentDate, false )
+			);
 
-		if (
-			! newDateTime.isValid() ||
-			newDateTime.isSame(
-				maybeForceTime( parseAsLocalDateTime( inputString ) )
-			)
-		) {
-			// keep the input string as the user entered it
+			if ( ! newDateTime.isValid() ) {
+				// keep the invalid string, so the user can correct it
+				return currentDate;
+			}
+
+			if ( ! newDateTime.isSame( inputStringDateTime ) ) {
+				return formatDateTimeForDisplay( newDateTime );
+			}
+
+			// the new currentDate is the same date as the inputString,
+			// so keep exactly what the user typed in
 			return inputString;
 		}
 
-		return formatDateTimeForDisplay( newDateTime );
-	}
+		// the component is uncontrolled (not using currentDate),
+		// so just return the input string
+		return inputString;
+	}, [ currentDate, formatDateTimeForDisplay, inputString, maybeForceTime ] );
+
+	// We keep a ref to the onBlur prop so that we can be sure we are
+	// always using the more up-to-date value, otherwise, we get in
+	// any infinite loop when calling onBlur
+	const onBlurRef = useRef< () => void >();
+	useEffect( () => {
+		onBlurRef.current = onBlur;
+	}, [ onBlur ] );
+
+	const callOnBlurIfDropdownIsNotOpening = useCallback( ( willOpen ) => {
+		if ( ! willOpen && typeof onBlurRef.current === 'function' ) {
+			// in case the component is blurred before a debounced
+			// change has been processed, immediately set the input string
+			// to the current value of the input field, so that
+			// it won't be set back to the pre-change value
+			setInputStringAndMaybeCallOnChange(
+				inputControl.current.value,
+				true
+			);
+			onBlurRef.current();
+		}
+	}, [] );
 
 	return (
 		<Dropdown
@@ -225,12 +270,8 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			position="bottom left"
 			focusOnMount={ false }
 			// @ts-expect-error `onToggle` does exist.
-			onToggle={ ( willOpen ) => {
-				if ( ! willOpen && typeof onBlur === 'function' ) {
-					onBlur();
-				}
-			} }
-			renderToggle={ ( { isOpen, onToggle } ) => (
+			onToggle={ callOnBlurIfDropdownIsNotOpening }
+			renderToggle={ ( { isOpen, onClose, onToggle } ) => (
 				<BaseControl id={ id } label={ label } help={ help }>
 					<InputControl
 						id={ id }
@@ -249,7 +290,9 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 							if (
 								hasFocusLeftInputAndDropdownContent( event )
 							) {
-								onToggle(); // hide the dropdown
+								// close the dropdown, which will also trigger
+								// the component's onBlur to be called
+								onClose();
 							}
 						} }
 						suffix={
@@ -285,14 +328,14 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 			} }
 			renderContent={ () => {
 				const Picker = isDateOnlyPicker ? DatePicker : WpDateTimePicker;
-				const inputDateTime = parseAsLocalDateTime( inputString );
 
 				return (
 					<Picker
+						// @ts-expect-error null is valid for currentDate
 						currentDate={
-							inputDateTime.isValid()
-								? formatDateTimeAsISO( inputDateTime )
-								: undefined
+							inputStringDateTime.isValid()
+								? formatDateTimeAsISO( inputStringDateTime )
+								: null
 						}
 						onChange={ ( newDateTimeISOString: string ) =>
 							setInputStringAndMaybeCallOnChange(

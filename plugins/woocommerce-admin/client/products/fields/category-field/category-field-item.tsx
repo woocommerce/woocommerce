@@ -3,6 +3,7 @@
  */
 import { CheckboxControl, Icon } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
+import { decodeEntities } from '@wordpress/html-entities';
 import { chevronDown, chevronUp } from '@wordpress/icons';
 import { ProductCategory } from '@woocommerce/data';
 import { __experimentalSelectControlMenuItemProps as MenuItemProps } from '@woocommerce/components';
@@ -18,7 +19,6 @@ export type CategoryTreeItem = {
 type CategoryFieldItemProps = {
 	item: CategoryTreeItem;
 	selectedIds: number[];
-	onSelect: ( item: ProductCategory ) => void;
 	items: Pick< ProductCategory, 'id' | 'name' >[];
 	highlightedIndex: number;
 	openParent?: () => void;
@@ -30,7 +30,6 @@ type CategoryFieldItemProps = {
 export const CategoryFieldItem: React.FC< CategoryFieldItemProps > = ( {
 	item,
 	selectedIds = [],
-	onSelect,
 	items,
 	highlightedIndex,
 	openParent,
@@ -87,9 +86,9 @@ export const CategoryFieldItem: React.FC< CategoryFieldItemProps > = ( {
 					<div className="woocommerce-category-field-dropdown__toggle-placeholder"></div>
 				) }
 				<CheckboxControl
-					label={ item.data.name }
+					label={ decodeEntities( item.data.name ) }
 					checked={ selectedIds.includes( item.data.id ) }
-					onChange={ () => item.data /*&& onSelect( item.data )*/ }
+					onChange={ () => item.data }
 				/>
 			</div>
 			{ children.length > 0 ? (
@@ -107,7 +106,6 @@ export const CategoryFieldItem: React.FC< CategoryFieldItemProps > = ( {
 							key={ child.data.id }
 							item={ child }
 							selectedIds={ selectedIds }
-							onSelect={ onSelect }
 							items={ items }
 							highlightedIndex={ highlightedIndex }
 							openParent={ () => ! isOpen && setIsOpen( true ) }

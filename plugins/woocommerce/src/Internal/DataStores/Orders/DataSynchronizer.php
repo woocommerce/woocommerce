@@ -167,8 +167,21 @@ class DataSynchronizer implements BatchProcessorInterface {
 				return (int) $pending_count;
 			}
 		}
-		$orders_table                = $this->data_store::get_orders_table_name();
-		$order_post_types            = wc_get_order_types( 'cot-migration' );
+		$orders_table     = $this->data_store::get_orders_table_name();
+		$order_post_types = wc_get_order_types( 'cot-migration' );
+
+		if ( empty( $order_post_types ) ) {
+			$this->error_logger->debug(
+				sprintf(
+					/* translators: 1: method name. */
+					esc_html__( '%1$s was called but no order types were registered: it may have been called too early.', 'woocommerce' ),
+					__METHOD__
+				)
+			);
+
+			return 0;
+		}
+
 		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
 
 		if ( $this->custom_orders_table_is_authoritative() ) {
@@ -267,6 +280,7 @@ WHERE
   AND orders.id IS NULL",
 					$order_post_types
 				);
+				// phpcs:enable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 				break;
 			case self::ID_TYPE_MISSING_IN_POSTS_TABLE:
 				$sql = "
@@ -412,7 +426,7 @@ WHERE
 	 * @param WP_Post $post The deleted post.
 	 */
 	private function handle_deleted_post( $postid, $post ): void {
-		if ( 'shop_order' === $post->post_type && ! $this->custom_orders_table_is_authoritative() && $this->data_sync_is_enabled() ) {
+		if ( 'shop_order' === $post->post_type && $this->data_sync_is_enabled() ) {
 			$this->data_store->delete_order_data_from_custom_order_tables( $postid );
 		}
 	}

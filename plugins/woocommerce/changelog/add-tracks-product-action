@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add tracks events for 'product_view_product_click' and 'product_view_product_dismiss'

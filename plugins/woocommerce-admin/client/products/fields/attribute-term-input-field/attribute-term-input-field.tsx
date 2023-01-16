@@ -188,6 +188,7 @@ export const AttributeTermInputField: React.FC<
 					'woocommerce-attribute-term-field ' +
 					attributeTermInputId.current
 				}
+				__experimentalOpenMenuOnFocus
 			>
 				{ ( {
 					items,

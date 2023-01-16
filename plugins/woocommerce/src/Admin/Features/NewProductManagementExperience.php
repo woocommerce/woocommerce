@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features;
 
+use \Automattic\WooCommerce\Admin\PageController;
 use \Automattic\WooCommerce\Internal\Admin\Loader;
 
 /**
@@ -13,17 +14,25 @@ use \Automattic\WooCommerce\Internal\Admin\Loader;
 class NewProductManagementExperience {
 
 	/**
+	 * Option name used to toggle this feature.
+	 */
+	const TOGGLE_OPTION_NAME = 'woocommerce_new_product_management_enabled';
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'admin_init', array( $this, 'enqueue_styles' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 	}
 
 	/**
 	 * Enqueue styles needed for the rich text editor.
 	 */
 	public function enqueue_styles() {
-		wp_enqueue_style( 'wp-edit-post' );
+		if ( ! PageController::is_admin_or_embed_page() ) {
+			return;
+		}
+		wp_enqueue_style( 'wp-edit-blocks' );
 		wp_enqueue_style( 'wp-format-library' );
 		wp_enqueue_editor();
 		/**

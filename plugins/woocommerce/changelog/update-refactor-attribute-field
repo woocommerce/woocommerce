@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Refactor AttributeField into sub-components.

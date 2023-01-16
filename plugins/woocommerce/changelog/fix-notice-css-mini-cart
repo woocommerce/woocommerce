@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Move CSS about notice outside of .woocommerce class scope

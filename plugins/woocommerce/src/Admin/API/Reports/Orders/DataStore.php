@@ -256,7 +256,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->add_sql_query_params( $query_args );
 			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 			$db_records_count = (int) $wpdb->get_var(
-				"SELECT COUNT(*) FROM (
+				"SELECT COUNT( DISTINCT tt.order_id ) FROM (
 					{$this->subquery->get_query_statement()}
 				) AS tt"
 			);

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use Imagick functions to set parallel thread count instead of direct putenv call as suggested in https://core.trac.wordpress.org/ticket/36534#comment:129.

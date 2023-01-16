@@ -11,7 +11,7 @@ test.describe( 'WooCommerce General Settings', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
-		api.put( 'settings/general/woocommerce_allowed_countries', {
+		await api.put( 'settings/general/woocommerce_allowed_countries', {
 			value: 'all',
 		} );
 	} );

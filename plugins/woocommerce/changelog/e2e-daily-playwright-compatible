@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Make e2e tests compatible with nightly and release smoke test sites.

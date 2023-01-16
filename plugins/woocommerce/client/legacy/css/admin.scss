@@ -162,6 +162,10 @@
 				}
 			}
 		}
+
+		&.wp-tour-kit-spotlit {
+			padding: 20px;
+		}
 	}
 
 	.current-section-name {
@@ -444,6 +448,10 @@
 
 	.addon-product-group {
 		margin-bottom: 24px;
+
+		&.wp-tour-kit-spotlit {
+			padding: 20px;
+		}
 	}
 
 	.addon-product-group-title {
@@ -954,7 +962,7 @@
 #variable_product_options .notice {
 	display: flex;
 	margin: 10px;
-	background-color: #FCFAE8;
+	background-color: #fcfae8;
 	> p {
 		width: 85%;
 	}
@@ -969,7 +977,7 @@
 }
 
 .woocommerce-set-price-variations {
-	.woocommerce-usage-modal__wrapper{
+	.woocommerce-usage-modal__wrapper {
 		.woocommerce-usage-modal__message {
 			height: 60px;
 			flex-wrap: wrap;
@@ -982,7 +990,7 @@
 			display: flex;
 			justify-content: flex-end;
 			margin-top: 20px;
-			> button{
+			> button {
 				margin-left: 16px;
 				width: 88px;
 				display: unset;
@@ -1005,7 +1013,8 @@
 
 #product_attributes {
 	.toolbar-top {
-		.button, .select2-container {
+		.button,
+		.select2-container {
 			margin: 1px;
 		}
 	}
@@ -2588,6 +2597,10 @@ ul.wc_coupon_list_block {
 			.select2-selection__arrow {
 				height: 30px;
 			}
+		}
+
+		#order-query-submit {
+			margin: 0 8px 0 0;
 		}
 	}
 
@@ -4362,6 +4375,11 @@ img.help_tip {
 			top: 20px;
 		}
 
+		td.help-tooltip {
+			white-space: nowrap;
+			width: 8px;
+		}
+
 		.select2-container {
 			vertical-align: top;
 			margin-bottom: 3px;
@@ -5157,14 +5175,6 @@ img.help_tip {
 	}
 }
 
-.woocommerce_attribute {
-	h3 {
-		.sort, a.delete {
-			visibility: hidden;
-		}
-	}
-}
-
 .woocommerce_options_panel {
 	min-height: 175px;
 	box-sizing: border-box;
@@ -5631,6 +5641,9 @@ img.help_tip {
 			.fr {
 				float: right;
 			}
+		}
+		.placeholder {
+			opacity: 0.4;
 		}
 	}
 }
@@ -6733,7 +6746,7 @@ table.bar_chart {
 				overflow: visible;
 			}
 
-			.toggle-row {
+			.is-expanded .toggle-row {
 				top: -28px;
 			}
 		}
@@ -7849,7 +7862,7 @@ table.bar_chart {
 #postdivrich.woocommerce-product-description {
 	margin-top: 20px;
 	margin-bottom: 0px;
-	
+
 	.wp-editor-tools {
 		background: none;
 		padding-top: 0px;

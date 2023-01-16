@@ -55,6 +55,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 			isActioned: false,
 			eventPrefix: '',
 			level: 0,
+			recordViewEvent: false,
 		},
 		{
 			id: 'required',
@@ -77,6 +78,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 			isActioned: false,
 			eventPrefix: '',
 			level: 0,
+			recordViewEvent: true,
 		},
 		{
 			id: 'completed',
@@ -98,6 +100,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 			isActioned: false,
 			eventPrefix: '',
 			level: 0,
+			recordViewEvent: false,
 		},
 	],
 	extension: [
@@ -121,6 +124,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 			isActioned: false,
 			eventPrefix: '',
 			level: 0,
+			recordViewEvent: false,
 		},
 	],
 };

@@ -44,7 +44,7 @@ export type FormContext< Values extends Record< string, any > > = {
 	): InputProps< Values, Value >;
 	isValidForm: boolean;
 	resetForm: (
-		initialValues: Values,
+		initialValues?: Values,
 		touchedFields?: { [ P in keyof Values ]?: boolean | undefined },
 		errors?: FormErrors< Values >
 	) => void;

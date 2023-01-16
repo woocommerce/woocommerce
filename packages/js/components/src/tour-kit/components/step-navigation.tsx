@@ -25,7 +25,7 @@ const StepNavigation: React.FunctionComponent< Props > = ( {
 	const isFirstStep = currentStepIndex === 0;
 	const isLastStep = currentStepIndex === steps.length - 1;
 
-	const { primaryButton = { text: '', isDisabled: false } } =
+	const { primaryButton = { text: '', isDisabled: false, isHidden: false } } =
 		steps[ currentStepIndex ].meta;
 
 	const NextButton = (
@@ -79,6 +79,10 @@ const StepNavigation: React.FunctionComponent< Props > = ( {
 			</div>
 		);
 	};
+
+	if ( primaryButton.isHidden ) {
+		return null;
+	}
 
 	return (
 		<div className="woocommerce-tour-kit-step-navigation">

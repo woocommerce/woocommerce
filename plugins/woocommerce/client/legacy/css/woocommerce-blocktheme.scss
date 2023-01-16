@@ -2,6 +2,8 @@
 * woocommerce-blocktheme.scss
 * Block theme default styles to ensure WooCommerce looks better out of the box with block themes that are not optimised for WooCommerce specifically.
 */
+@import "common";
+@import "fonts";
 @import "variables";
 
 /**

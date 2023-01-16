@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce",
 	"title": "WooCommerce",
-	"version": "7.1.0",
+	"version": "7.4.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -50,10 +50,10 @@
 		"@babel/core": "7.12.9",
 		"@babel/preset-env": "7.12.7",
 		"@babel/register": "7.12.1",
-		"@playwright/test": "^1.27.1",
-		"@typescript-eslint/eslint-plugin": "3.10.1",
-		"@typescript-eslint/experimental-utils": "3.10.1",
-		"@typescript-eslint/parser": "3.10.1",
+		"@playwright/test": "^1.28.0",
+		"@typescript-eslint/eslint-plugin": "^5.43.0",
+		"@typescript-eslint/experimental-utils": "^5.43.0",
+		"@typescript-eslint/parser": "^5.43.0",
 		"@woocommerce/admin-e2e-tests": "workspace:*",
 		"@woocommerce/api": "workspace:*",
 		"@woocommerce/api-core-tests": "workspace:*",
@@ -108,5 +108,8 @@
 		"> 0.1%",
 		"ie 8",
 		"ie 9"
-	]
+	],
+	"dependencies": {
+		"@wordpress/browserslist-config": "^5.7.0"
+	}
 }

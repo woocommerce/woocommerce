@@ -48,7 +48,14 @@ export const ImagesSection: React.FC = () => {
 				( file ) => file.id === parseInt( image?.props?.id, 10 )
 			);
 		} );
+		recordEvent( 'product_images_change_image_order_via_image_gallery' );
 		setValue( 'images', orderedImages );
+	};
+	const onFileUpload = ( files: MediaItem[] ) => {
+		if ( files[ 0 ].id ) {
+			recordEvent( 'product_images_add_via_file_upload_area' );
+			setValue( 'images', [ ...images, ...files ] );
+		}
 	};
 
 	return (
@@ -100,6 +107,9 @@ export const ImagesSection: React.FC = () => {
 						} }
 						onDragEnd={ () => {
 							if ( isRemoving && draggedImageId ) {
+								recordEvent(
+									'product_images_remove_image_button_click'
+								);
 								setValue(
 									'images',
 									images.filter(
@@ -119,9 +129,17 @@ export const ImagesSection: React.FC = () => {
 								) === undefined
 							) {
 								images[ replaceIndex ] = media as Image;
+								recordEvent(
+									'product_images_replace_image_button_click'
+								);
 								setValue( 'images', images );
 							}
 						} }
+						onSelectAsCover={ () =>
+							recordEvent(
+								'product_images_select_image_as_cover_button_click'
+							)
+						}
 					>
 						{ images.map( ( image ) => (
 							<ImageGalleryItem
@@ -162,21 +180,32 @@ export const ImagesSection: React.FC = () => {
 						) : (
 							<CardBody>
 								<MediaUploader
+									multipleSelect={ true }
 									onError={ () => null }
-									onSelect={ ( file ) => {
-										if (
-											images.find(
-												( img ) => file.id === img.id
-											) === undefined
-										) {
+									onFileUploadChange={ onFileUpload }
+									onSelect={ ( files ) => {
+										const newImages = files.filter(
+											( img: Image ) =>
+												! images.find(
+													( image ) =>
+														image.id === img.id
+												)
+										);
+										if ( newImages.length > 0 ) {
+											recordEvent(
+												'product_images_add_via_media_library'
+											);
 											setValue( 'images', [
 												...images,
-												file,
+												...newImages,
 											] );
 										}
 									} }
 									onUpload={ ( files ) => {
 										if ( files[ 0 ].id ) {
+											recordEvent(
+												'product_images_add_via_drag_and_drop_upload'
+											);
 											setValue( 'images', [
 												...images,
 												...files,
@@ -187,7 +216,10 @@ export const ImagesSection: React.FC = () => {
 										<>
 											<img
 												src={ DragAndDrop }
-												alt="Completed"
+												alt={ __(
+													'Completed',
+													'woocommerce'
+												) }
 												className="woocommerce-product-form__drag-and-drop-image"
 											/>
 											<span>

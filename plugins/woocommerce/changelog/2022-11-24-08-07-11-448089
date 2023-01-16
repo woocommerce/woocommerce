@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Avoid deprecation notices under PHP 8.1 when calling wp_parse_url().

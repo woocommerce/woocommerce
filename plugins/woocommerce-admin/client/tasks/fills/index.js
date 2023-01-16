@@ -1,8 +1,7 @@
 /**
  * Internal dependencies
  */
-import { isProductTaskExperimentTreatment } from './experimental-products/use-product-layout-experiment';
-import { isImportProductExperiment } from './product-task-experiment';
+import { isImportProduct } from './utils';
 import './PaymentGatewaySuggestions';
 import './shipping';
 import './Marketing';
@@ -12,28 +11,15 @@ import './tax';
 import './woocommerce-payments';
 import './purchase';
 
-const possiblyImportProductTaskExperiment = async () => {
-	const isExperiment = await isProductTaskExperimentTreatment();
-	if ( isExperiment ) {
-		if ( isImportProductExperiment() ) {
-			import( './experimental-import-products' );
-		} else {
-			import( './experimental-products' );
-		}
+const possiblyImportProductTask = async () => {
+	if ( isImportProduct() ) {
+		import( './import-products' );
 	} else {
 		import( './products' );
 	}
 };
 
-if (
-	window.wcAdminFeatures &&
-	( window.wcAdminFeatures[ 'experimental-import-products-task' ] ||
-		window.wcAdminFeatures[ 'experimental-products-task' ] )
-) {
-	possiblyImportProductTaskExperiment();
-} else {
-	import( './products' );
-}
+possiblyImportProductTask();
 
 if (
 	window.wcAdminFeatures &&

@@ -102,6 +102,7 @@ class CustomOrdersTableController {
 		self::add_filter( DataSynchronizer::PENDING_SYNCHRONIZATION_FINISHED_ACTION, array( $this, 'process_sync_finished' ), 10, 0 );
 		self::add_action( 'woocommerce_update_options_advanced_custom_data_stores', array( $this, 'process_options_updated' ), 10, 0 );
 		self::add_action( 'woocommerce_after_register_post_type', array( $this, 'register_post_type_for_order_placeholders' ), 10, 0 );
+		self::add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'handle_feature_enabled_changed' ), 10, 2 );
 	}
 
 	/**
@@ -171,7 +172,7 @@ class CustomOrdersTableController {
 	 * @return bool True if the custom orders table usage is enabled
 	 */
 	public function custom_orders_table_usage_is_enabled(): bool {
-		return get_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) === 'yes';
+		return $this->is_feature_visible() && get_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) === 'yes';
 	}
 
 	/**
@@ -205,7 +206,7 @@ class CustomOrdersTableController {
 	 * @return \WC_Object_Data_Store_Interface|string The actual data store to use.
 	 */
 	private function get_data_store_instance( $default_data_store, string $type ) {
-		if ( $this->is_feature_visible() && $this->custom_orders_table_usage_is_enabled() ) {
+		if ( $this->custom_orders_table_usage_is_enabled() ) {
 			switch ( $type ) {
 				case 'order_refund':
 					return $this->refund_data_store;
@@ -225,38 +226,34 @@ class CustomOrdersTableController {
 	 * @return array The updated array of tools-
 	 */
 	private function add_initiate_regeneration_entry_to_tools_array( array $tools_array ): array {
-		if ( ! $this->is_feature_visible() ) {
+		if ( ! $this->data_synchronizer->check_orders_table_exists() ) {
 			return $tools_array;
 		}
 
-		if ( $this->data_synchronizer->check_orders_table_exists() ) {
-			$tools_array['delete_custom_orders_table'] = array(
-				'name'             => __( 'Delete the custom orders tables', 'woocommerce' ),
-				'desc'             => sprintf(
-					'<strong class="red">%1$s</strong> %2$s',
-					__( 'Note:', 'woocommerce' ),
-					__( 'This will delete the custom orders tables. The tables can be deleted only if they are not not in use (via Settings > Advanced > Custom data stores). You can create them again at any time with the "Create the custom orders tables" tool.', 'woocommerce' )
-				),
-				'requires_refresh' => true,
-				'callback'         => function () {
-					$this->delete_custom_orders_tables();
-					return __( 'Custom orders tables have been deleted.', 'woocommerce' );
-				},
-				'button'           => __( 'Delete', 'woocommerce' ),
-				'disabled'         => $this->custom_orders_table_usage_is_enabled(),
-			);
+		if ( $this->is_feature_visible() ) {
+			$disabled = true;
+			$message  = __( 'This will delete the custom orders tables. The tables can be deleted only if the "High-Performance order storage" feature is disabled (via Settings > Advanced > Features).', 'woocommerce' );
 		} else {
-			$tools_array['create_custom_orders_table'] = array(
-				'name'             => __( 'Create the custom orders tables', 'woocommerce' ),
-				'desc'             => __( 'This tool will create the custom orders tables. Once created you can go to WooCommerce > Settings > Advanced > Custom data stores and configure the usage of the tables.', 'woocommerce' ),
-				'requires_refresh' => true,
-				'callback'         => function() {
-					$this->create_custom_orders_tables();
-					return __( 'Custom orders tables have been created. You can now go to WooCommerce > Settings > Advanced > Custom data stores.', 'woocommerce' );
-				},
-				'button'           => __( 'Create', 'woocommerce' ),
-			);
+			$disabled = false;
+			$message  = __( 'This will delete the custom orders tables. To create them again enable the "High-Performance order storage" feature (via Settings > Advanced > Features).', 'woocommerce' );
 		}
+
+		$tools_array['delete_custom_orders_table'] = array(
+			'name'             => __( 'Delete the custom orders tables', 'woocommerce' ),
+			'desc'             => sprintf(
+				'<strong class="red">%1$s</strong> %2$s',
+				__( 'Note:', 'woocommerce' ),
+				$message
+			),
+			'requires_refresh' => true,
+			'callback'         => function () {
+				$this->features_controller->change_feature_enable( 'custom_order_tables', false );
+				$this->delete_custom_orders_tables();
+				return __( 'Custom orders tables have been deleted.', 'woocommerce' );
+			},
+			'button'           => __( 'Delete', 'woocommerce' ),
+			'disabled'         => $disabled,
+		);
 
 		return $tools_array;
 	}
@@ -264,16 +261,14 @@ class CustomOrdersTableController {
 	/**
 	 * Create the custom orders tables in response to the user pressing the tool button.
 	 *
+	 * @param bool $verify_nonce True to perform the nonce verification, false to skip it.
+	 *
 	 * @throws \Exception Can't create the tables.
 	 */
-	private function create_custom_orders_tables() {
+	private function create_custom_orders_tables( bool $verify_nonce = true ) {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		if ( ! isset( $_REQUEST['_wpnonce'] ) || wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) === false ) {
+		if ( $verify_nonce && ( ! isset( $_REQUEST['_wpnonce'] ) || wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) === false ) ) {
 			throw new \Exception( 'Invalid nonce' );
-		}
-
-		if ( ! $this->is_feature_visible() ) {
-			throw new \Exception( "Can't create the custom orders tables: the feature isn't enabled" );
 		}
 
 		$this->data_synchronizer->create_database_tables();
@@ -319,115 +314,102 @@ class CustomOrdersTableController {
 	 * @return array The updated settings array.
 	 */
 	private function get_settings( array $settings, string $section_id ): array {
-		if ( ! $this->is_feature_visible() || $section_id !== 'custom_data_stores' ) {
+		if ( ! $this->is_feature_visible() || 'custom_data_stores' !== $section_id ) {
 			return $settings;
 		}
 
-		if ( $this->data_synchronizer->check_orders_table_exists() ) {
-			$settings[] = array(
-				'title' => __( 'Custom orders tables', 'woocommerce' ),
-				'type'  => 'title',
-				'id'    => 'cot-title',
-				'desc'  => sprintf(
-					/* translators: %1$s = <strong> tag, %2$s = </strong> tag. */
-					__( '%1$sWARNING:%2$s This feature is currently under development and may cause database instability. For contributors only.', 'woocommerce' ),
-					'<strong>',
-					'</strong>'
-				),
-			);
+		$settings[] = array(
+			'title' => __( 'Custom orders tables', 'woocommerce' ),
+			'type'  => 'title',
+			'id'    => 'cot-title',
+			'desc'  => sprintf(
+				/* translators: %1$s = <strong> tag, %2$s = </strong> tag. */
+				__( '%1$sWARNING:%2$s This feature is currently under development and may cause database instability. For contributors only.', 'woocommerce' ),
+				'<strong>',
+				'</strong>'
+			),
+		);
 
-			$sync_status     = $this->data_synchronizer->get_sync_status();
-			$sync_is_pending = $sync_status['current_pending_count'] !== 0;
+		$sync_status     = $this->data_synchronizer->get_sync_status();
+		$sync_is_pending = 0 !== $sync_status['current_pending_count'];
 
-			$settings[] = array(
-				'title'         => __( 'Data store for orders', 'woocommerce' ),
-				'id'            => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
-				'default'       => 'no',
-				'type'          => 'radio',
-				'options'       => array(
-					'yes' => __( 'Use the WooCommerce orders tables', 'woocommerce' ),
-					'no'  => __( 'Use the WordPress posts table', 'woocommerce' ),
-				),
-				'checkboxgroup' => 'start',
-				'disabled'      => $sync_is_pending ? array( 'yes', 'no' ) : array(),
-			);
+		$settings[] = array(
+			'title'         => __( 'Data store for orders', 'woocommerce' ),
+			'id'            => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+			'default'       => 'no',
+			'type'          => 'radio',
+			'options'       => array(
+				'yes' => __( 'Use the WooCommerce orders tables', 'woocommerce' ),
+				'no'  => __( 'Use the WordPress posts table', 'woocommerce' ),
+			),
+			'checkboxgroup' => 'start',
+			'disabled'      => $sync_is_pending ? array( 'yes', 'no' ) : array(),
+		);
 
-			if ( $sync_is_pending ) {
-				$initial_pending_count = $sync_status['initial_pending_count'];
-				$current_pending_count = $sync_status['current_pending_count'];
-				if ( $initial_pending_count ) {
-					$text =
-						sprintf(
-							/* translators: %1$s=current number of orders pending sync, %2$s=initial number of orders pending sync */
-							_n( 'There\'s %1$s order (out of a total of %2$s) pending sync!', 'There are %1$s orders (out of a total of %2$s) pending sync!', $current_pending_count, 'woocommerce' ),
-							$current_pending_count,
-							$initial_pending_count
-						);
-				} else {
-					$text =
-						/* translators: %s=initial number of orders pending sync */
-						sprintf( _n( 'There\'s %s order pending sync!', 'There are %s orders pending sync!', $current_pending_count, 'woocommerce' ), $current_pending_count, 'woocommerce' );
-				}
-
-				if ( $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) ) ) {
-					$text .= __( "<br/>Synchronization for these orders is currently in progress.<br/>The authoritative table can't be changed until sync completes.", 'woocommerce' );
-				} else {
-					$text .= __( "<br/>The authoritative table can't be changed until these orders are synchronized.", 'woocommerce' );
-				}
-
-				$settings[] = array(
-					'type' => 'info',
-					'id'   => 'cot-out-of-sync-warning',
-					'css'  => 'color: #C00000',
-					'text' => $text,
-				);
-			}
-
-			$settings[] = array(
-				'desc' => __( 'Keep the posts table and the orders tables synchronized', 'woocommerce' ),
-				'id'   => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
-				'type' => 'checkbox',
-			);
-
-			if ( $sync_is_pending ) {
-				if ( $this->data_synchronizer->data_sync_is_enabled() ) {
-					$message    = $this->custom_orders_table_usage_is_enabled() ?
-						__( 'Switch to using the posts table as the authoritative data store for orders when sync finishes', 'woocommerce' ) :
-						__( 'Switch to using the orders table as the authoritative data store for orders when sync finishes', 'woocommerce' );
-					$settings[] = array(
-						'desc' => $message,
-						'id'   => self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION,
-						'type' => 'checkbox',
+		if ( $sync_is_pending ) {
+			$initial_pending_count = $sync_status['initial_pending_count'];
+			$current_pending_count = $sync_status['current_pending_count'];
+			if ( $initial_pending_count ) {
+				$text =
+					sprintf(
+						/* translators: %1$s=current number of orders pending sync, %2$s=initial number of orders pending sync */
+						_n( 'There\'s %1$s order (out of a total of %2$s) pending sync!', 'There are %1$s orders (out of a total of %2$s) pending sync!', $current_pending_count, 'woocommerce' ),
+						$current_pending_count,
+						$initial_pending_count
 					);
-				}
+			} else {
+				$text =
+					/* translators: %s=initial number of orders pending sync */
+					sprintf( _n( 'There\'s %s order pending sync!', 'There are %s orders pending sync!', $current_pending_count, 'woocommerce' ), $current_pending_count, 'woocommerce' );
+			}
+
+			if ( $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) ) ) {
+				$text .= __( "<br/>Synchronization for these orders is currently in progress.<br/>The authoritative table can't be changed until sync completes.", 'woocommerce' );
+			} else {
+				$text .= __( "<br/>The authoritative table can't be changed until these orders are synchronized.", 'woocommerce' );
 			}
 
 			$settings[] = array(
-				'desc' => __( 'Use database transactions for the orders data synchronization', 'woocommerce' ),
-				'id'   => self::USE_DB_TRANSACTIONS_OPTION,
-				'type' => 'checkbox',
-			);
-
-			$isolation_level_names = self::get_valid_transaction_isolation_levels();
-			$settings[]            = array(
-				'desc'    => __( 'Database transaction isolation level to use', 'woocommerce' ),
-				'id'      => self::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION,
-				'type'    => 'select',
-				'options' => array_combine( $isolation_level_names, $isolation_level_names ),
-				'default' => self::DEFAULT_DB_TRANSACTIONS_ISOLATION_LEVEL,
-			);
-		} else {
-			$settings[] = array(
-				'title' => __( 'Custom orders tables', 'woocommerce' ),
-				'type'  => 'title',
-				'desc'  => sprintf(
-					/* translators: %1$s = <em> tag, %2$s = </em> tag. */
-					__( 'Create the tables first by going to %1$sWooCommerce > Status > Tools%2$s and running %1$sCreate the custom orders tables%2$s.', 'woocommerce' ),
-					'<em>',
-					'</em>'
-				),
+				'type' => 'info',
+				'id'   => 'cot-out-of-sync-warning',
+				'css'  => 'color: #C00000',
+				'text' => $text,
 			);
 		}
+
+		$settings[] = array(
+			'desc' => __( 'Keep the posts table and the orders tables synchronized', 'woocommerce' ),
+			'id'   => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
+			'type' => 'checkbox',
+		);
+
+		if ( $sync_is_pending ) {
+			if ( $this->data_synchronizer->data_sync_is_enabled() ) {
+				$message    = $this->custom_orders_table_usage_is_enabled() ?
+					__( 'Switch to using the posts table as the authoritative data store for orders when sync finishes', 'woocommerce' ) :
+					__( 'Switch to using the orders table as the authoritative data store for orders when sync finishes', 'woocommerce' );
+				$settings[] = array(
+					'desc' => $message,
+					'id'   => self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION,
+					'type' => 'checkbox',
+				);
+			}
+		}
+
+		$settings[] = array(
+			'desc' => __( 'Use database transactions for the orders data synchronization', 'woocommerce' ),
+			'id'   => self::USE_DB_TRANSACTIONS_OPTION,
+			'type' => 'checkbox',
+		);
+
+		$isolation_level_names = self::get_valid_transaction_isolation_levels();
+		$settings[]            = array(
+			'desc'    => __( 'Database transaction isolation level to use', 'woocommerce' ),
+			'id'      => self::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION,
+			'type'    => 'select',
+			'options' => array_combine( $isolation_level_names, $isolation_level_names ),
+			'default' => self::DEFAULT_DB_TRANSACTIONS_ISOLATION_LEVEL,
+		);
 
 		$settings[] = array( 'type' => 'sectionend' );
 
@@ -456,7 +438,7 @@ class CustomOrdersTableController {
 	 * @param mixed  $value New value of the setting.
 	 */
 	private function process_updated_option( $option, $old_value, $value ) {
-		if ( $option === DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION && $value === 'no' ) {
+		if ( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION === $option && 'no' === $value ) {
 			$this->data_synchronizer->cleanup_synchronization_state();
 		}
 	}
@@ -472,7 +454,7 @@ class CustomOrdersTableController {
 	 * @throws \Exception Attempt to change the authoritative orders table while orders sync is pending.
 	 */
 	private function process_pre_update_option( $value, $option, $old_value ) {
-		if ( $option !== self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION || $value === $old_value || $old_value === false ) {
+		if ( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION !== $option || $value === $old_value || false === $old_value ) {
 			return $value;
 		}
 
@@ -534,6 +516,24 @@ class CustomOrdersTableController {
 			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
 		} else {
 			$this->batch_processing_controller->remove_processor( DataSynchronizer::class );
+		}
+	}
+
+	/**
+	 * Handle the 'woocommerce_feature_enabled_changed' action,
+	 * if the custom orders table feature is enabled create the database tables if they don't exist.
+	 *
+	 * @param string $feature_id The id of the feature that is being enabled or disabled.
+	 * @param bool   $is_enabled True if the feature is being enabled, false if it's being disabled.
+	 */
+	private function handle_feature_enabled_changed( $feature_id, $is_enabled ): void {
+		if ( 'custom_order_tables' !== $feature_id || ! $is_enabled ) {
+			return;
+		}
+
+		if ( ! $this->data_synchronizer->check_orders_table_exists() ) {
+			update_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+			$this->create_custom_orders_tables( false );
 		}
 	}
 

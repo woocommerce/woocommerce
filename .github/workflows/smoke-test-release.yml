@@ -6,6 +6,12 @@ on:
                description: 'WooCommerce Release Id'
                required: true
 
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions: {}
+
 env:
     API_ARTIFACT: api-release--run-${{ github.run_number }}
     E2E_ARTIFACT: e2e-release--run-${{ github.run_number }}
@@ -13,20 +19,17 @@ env:
     FORCE_COLOR: 1
     BRANCH_NAME: ${{ github.ref_name }}
 
-concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
-
 jobs:
     e2e-release:
         name: Run small set of E2E tests to verify
         runs-on: ubuntu-20.04
+        permissions:
+          contents: read
         env:
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
             DEFAULT_TIMEOUT_OVERRIDE: 120000
-            
-        steps:    
+        steps:
             - uses: actions/checkout@v3
               with:
                 ref: ${{ env.BRANCH_NAME }}
@@ -91,9 +94,14 @@ jobs:
         runs-on: ubuntu-20.04
         needs: [e2e-release]
         if: success() || failure()
+        permissions:
+          contents: read
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-report
+        strategy:
+            matrix:
+                wp: ['1', '2']
         steps:
             - uses: actions/checkout@v3
               with:
@@ -380,6 +388,8 @@ jobs:
         runs-on: ubuntu-20.04
         needs: [e2e-release]
         if: success() || failure()
+        permissions:
+          contents: read
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report

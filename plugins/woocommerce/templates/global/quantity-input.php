@@ -12,7 +12,7 @@
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 7.2.0
+ * @version 7.2.1
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -40,17 +40,17 @@ if ( $max_value && $min_value === $max_value ) {
 	<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php echo esc_attr( $label ); ?></label>
 	<input
 		type="<?php echo $is_readonly ? 'text' : 'number'; ?>"
-		<?php wp_readonly( $is_readonly ); ?>
+		<?php echo $is_readonly ? 'readonly="readonly"' : ''; ?>
 		id="<?php echo esc_attr( $input_id ); ?>"
 		class="<?php echo esc_attr( join( ' ', (array) $classes ) ); ?>"
 		name="<?php echo esc_attr( $input_name ); ?>"
 		value="<?php echo esc_attr( $input_value ); ?>"
 		title="<?php echo esc_attr_x( 'Qty', 'Product quantity input tooltip', 'woocommerce' ); ?>"
 		size="4"
+		min="<?php echo esc_attr( $min_value ); ?>"
+		max="<?php echo esc_attr( 0 < $max_value ? $max_value : '' ); ?>"
 		<?php if ( ! $is_readonly ): ?>
 			step="<?php echo esc_attr( $step ); ?>"
-			min="<?php echo esc_attr( $min_value ); ?>"
-			max="<?php echo esc_attr( 0 < $max_value ? $max_value : '' ); ?>"
 			placeholder="<?php echo esc_attr( $placeholder ); ?>"
 			inputmode="<?php echo esc_attr( $inputmode ); ?>"
 			autocomplete="<?php echo esc_attr( isset( $autocomplete ) ? $autocomplete : 'on' ); ?>"
