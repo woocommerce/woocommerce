@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make sure the tracking shortcode only operates in orders with billing information.
