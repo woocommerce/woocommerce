@@ -236,6 +236,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			'security'               => wp_create_nonce( 'order-item' ),
 		);
 
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$_POST = $_REQUEST;
 
 		try {
