@@ -37,23 +37,23 @@ jobs:
               with:
                 ref: ${{ env.BRANCH_NAME }}
                 
-            - name: Fetch Asset ID
-              id: fetch_asset_id
-              uses: actions/github-script@v5
-              env:
-                  RELEASE_ID: ${{ github.event.inputs.release_id }}
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  REPO: ${{ github.repository }}
-              with:
-                  script: |
-                      const script = require( '.github/workflows/scripts/fetch-asset-id.js' )
-                      await script({github, context, core})
+            # - name: Fetch Asset ID
+            #   id: fetch_asset_id
+            #   uses: actions/github-script@v5
+            #   env:
+            #       RELEASE_ID: ${{ github.event.inputs.release_id }}
+            #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            #       REPO: ${{ github.repository }}
+            #   with:
+            #       script: |
+            #           const script = require( '.github/workflows/scripts/fetch-asset-id.js' )
+            #           await script({github, context, core})
                       
-            - name: Download WooCommerce release zip
-              run: |
-                  curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
+            # - name: Download WooCommerce release zip
+            #   run: |
+            #       curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
 
-            # add step to save zip in a dedicated folder
+            # mytodo download woocommerce zip via gh cli tag
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
