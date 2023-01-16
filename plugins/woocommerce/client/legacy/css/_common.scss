@@ -3,6 +3,6 @@
  */
 
 /* We do not wish to display the quantity selector (within single product pages) if the product is sold individually. */
-.woocommerce.single-product .product.sold-individually input[name="quantity"] {
+.woocommerce.single-product .product.sold-individually .quantity {
 	display: none;
 }

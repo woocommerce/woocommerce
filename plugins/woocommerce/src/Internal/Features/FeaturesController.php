@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Internal\Features;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Admin\Features\Navigation\Init;
+use Automattic\WooCommerce\Admin\Features\NewProductManagementExperience;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -89,25 +90,31 @@ class FeaturesController {
 	 */
 	public function __construct() {
 		$features = array(
-			'analytics'           => array(
+			'analytics'              => array(
 				'name'               => __( 'Analytics', 'woocommerce' ),
 				'description'        => __( 'Enables WooCommerce Analytics', 'woocommerce' ),
 				'is_experimental'    => false,
 				'enabled_by_default' => true,
 			),
-			'new_navigation'      => array(
+			'new_navigation'         => array(
 				'name'            => __( 'Navigation', 'woocommerce' ),
 				'description'     => __( 'Adds the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
 				'is_experimental' => false,
 			),
-			'custom_order_tables' => array(
+			'new_product_management' => array(
+				'name'            => __( 'New product editor', 'woocommerce' ),
+				'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
+				'tooltip'         => __( 'Enable to try the new, simplified product editor (currently in development and only available for simple products). No extension support yet.', 'woocommerce' ),
+				'is_experimental' => false,
+			),
+			'custom_order_tables'    => array(
 				'name'            => __( 'High-Performance order storage (COT)', 'woocommerce' ),
 				'description'     => __( 'Enable the high performance order storage feature.', 'woocommerce' ),
 				'is_experimental' => true,
 			),
 		);
 
-		$this->legacy_feature_ids = array( 'analytics', 'new_navigation' );
+		$this->legacy_feature_ids = array( 'analytics', 'new_navigation', 'new_product_management' );
 
 		$this->init_features( $features );
 
@@ -393,6 +400,8 @@ class FeaturesController {
 			return Analytics::TOGGLE_OPTION_NAME;
 		} elseif ( 'new_navigation' === $feature_id ) {
 			return Init::TOGGLE_OPTION_NAME;
+		} elseif ( 'new_product_management' === $feature_id ) {
+			return NewProductManagementExperience::TOGGLE_OPTION_NAME;
 		}
 
 		return "woocommerce_feature_${feature_id}_enabled";
@@ -450,7 +459,7 @@ class FeaturesController {
 		$matches = array();
 		$success = preg_match( '/^woocommerce_feature_([a-zA-Z0-9_]+)_enabled$/', $option, $matches );
 
-		if ( ! $success && Analytics::TOGGLE_OPTION_NAME !== $option && Init::TOGGLE_OPTION_NAME !== $option ) {
+		if ( ! $success && Analytics::TOGGLE_OPTION_NAME !== $option && Init::TOGGLE_OPTION_NAME !== $option && NewProductManagementExperience::TOGGLE_OPTION_NAME !== $option ) {
 			return;
 		}
 
@@ -462,6 +471,8 @@ class FeaturesController {
 			$feature_id = 'analytics';
 		} elseif ( Init::TOGGLE_OPTION_NAME === $option ) {
 			$feature_id = 'new_navigation';
+		} elseif ( NewProductManagementExperience::TOGGLE_OPTION_NAME === $option ) {
+			$feature_id = 'new_product_management';
 		} else {
 			$feature_id = $matches[1];
 		}
@@ -590,6 +601,7 @@ class FeaturesController {
 		$description = $feature['description'];
 		$disabled    = false;
 		$desc_tip    = '';
+		$tooltip     = isset( $feature['tooltip'] ) ? $feature['tooltip'] : '';
 
 		if ( ( 'analytics' === $feature_id || 'new_navigation' === $feature_id ) && $admin_features_disabled ) {
 			$disabled = true;
@@ -675,6 +687,7 @@ class FeaturesController {
 			'id'       => $this->feature_enable_option_name( $feature_id ),
 			'disabled' => $disabled && ! $this->force_allow_enabling_features,
 			'desc_tip' => $desc_tip,
+			'tooltip'  => $tooltip,
 			'default'  => $this->feature_is_enabled_by_default( $feature_id ) ? 'yes' : 'no',
 		);
 	}

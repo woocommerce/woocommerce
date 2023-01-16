@@ -281,7 +281,7 @@ test.describe('Reports API tests', () => {
 			expect.arrayContaining([
 				expect.objectContaining({
 					"slug": "cancelled",
-					"name": "Cancelled",
+					"name": "Canceled",
 					"total": expect.any(Number)
 				})
 			]));

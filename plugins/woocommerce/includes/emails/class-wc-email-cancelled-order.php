@@ -28,8 +28,8 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 		 */
 		public function __construct() {
 			$this->id             = 'cancelled_order';
-			$this->title          = __( 'Cancelled order', 'woocommerce' );
-			$this->description    = __( 'Cancelled order emails are sent to chosen recipient(s) when orders have been marked cancelled (if they were previously processing or on-hold).', 'woocommerce' );
+			$this->title          = __( 'Canceled order', 'woocommerce' );
+			$this->description    = __( 'Canceled order emails are sent to chosen recipient(s) when orders have been marked canceled (if they were previously processing or on-hold).', 'woocommerce' );
 			$this->template_html  = 'emails/admin-cancelled-order.php';
 			$this->template_plain = 'emails/plain/admin-cancelled-order.php';
 			$this->placeholders   = array(
@@ -66,7 +66,7 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_heading() {
-			return __( 'Order Cancelled: #{order_number}', 'woocommerce' );
+			return __( 'Order Canceled: #{order_number}', 'woocommerce' );
 		}
 
 		/**

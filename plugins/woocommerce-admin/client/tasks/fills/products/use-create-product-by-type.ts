@@ -4,6 +4,9 @@
 import { useDispatch } from '@wordpress/data';
 import { ITEMS_STORE_NAME } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
+import { loadExperimentAssignment } from '@woocommerce/explat';
+import moment from 'moment';
 import { useState } from '@wordpress/element';
 
 /**
@@ -25,6 +28,21 @@ export const useCreateProductByType = () => {
 		}
 
 		setIsRequesting( true );
+
+		if ( type === 'physical' ) {
+			const momentDate = moment().utc();
+			const year = momentDate.format( 'YYYY' );
+			const month = momentDate.format( 'MM' );
+			const assignment = await loadExperimentAssignment(
+				`woocommerce_product_creation_experience_${ year }${ month }_v1`
+			);
+
+			if ( assignment.variationName === 'treatment' ) {
+				navigateTo( { url: getNewPath( {}, '/add-product', {} ) } );
+				return;
+			}
+		}
+
 		try {
 			const data: {
 				id?: number;

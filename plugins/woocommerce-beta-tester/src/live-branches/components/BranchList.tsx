@@ -109,7 +109,7 @@ const BranchInfo = ( { branch }: { branch: Branch } ) => {
 
 const WooCommerceVersionInfo = () => {
 	// @ts-ignore
-	const version = window?.wc?.WC_VERSION || 'unknown';
+	const version = window?.wc?.wcSettings?.WC_VERSION || 'unknown';
 
 	return (
 		<p>
@@ -135,6 +135,8 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 	const [ selectedBranch, setSelectedBranch ] = useState(
 		uninstalledBranches[ 0 ]
 	);
+
+	const installedBranchesExist = !! installedBranches.length;
 
 	return (
 		<>
@@ -188,7 +190,7 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 				</CardBody>
 				<CardFooter></CardFooter>
 			</Card>
-			{ installedBranches.length && (
+			{ installedBranchesExist && (
 				<Card elevation={ 3 } css={ cardStyle }>
 					<CardHeader>
 						<h2>Other Installed Branches</h2>
