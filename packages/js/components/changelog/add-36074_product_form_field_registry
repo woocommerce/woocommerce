@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add product field store and helper functions for rendering fields from config.

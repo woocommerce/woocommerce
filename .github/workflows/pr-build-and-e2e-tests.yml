@@ -1,16 +1,22 @@
 name: Run tests against PR
 on:
-    pull_request:
     workflow_dispatch:
+    pull_request:
+        paths-ignore:
+            - '**/changelog/**'
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
 
+permissions: {}
+
 jobs:
     e2e-tests-run:
         name: Runs E2E tests.
         runs-on: ubuntu-20.04
+        permissions:
+            contents: read
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
@@ -79,6 +85,8 @@ jobs:
     api-tests-run:
         name: Runs API tests.
         runs-on: ubuntu-20.04
+        permissions:
+            contents: read
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-report
@@ -129,6 +137,8 @@ jobs:
     k6-tests-run:
         name: Runs k6 Performance tests
         runs-on: ubuntu-20.04
+        permissions:
+            contents: read
         steps:
             - uses: actions/checkout@v3
 
@@ -162,6 +172,10 @@ jobs:
             )
         runs-on: ubuntu-20.04
         needs: [api-tests-run, e2e-tests-run]
+        permissions:
+            contents: read
+            issues: write
+            pull-requests: write
         env:
             E2E_GRAND_TOTAL: ${{needs.e2e-tests-run.outputs.E2E_GRAND_TOTAL}}
         steps:

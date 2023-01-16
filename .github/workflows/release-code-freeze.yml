@@ -20,6 +20,8 @@ env:
     GIT_AUTHOR_NAME: 'WooCommerce Bot'
     GIT_AUTHOR_EMAIL: 'no-reply@woocommerce.com'
 
+permissions: {}
+
 jobs:
     verify-code-freeze:
         name: 'Verify that today is the day of the code freeze'
@@ -57,6 +59,8 @@ jobs:
     maybe-create-next-milestone-and-release-branch:
         name: 'Maybe create next milestone and release branch'
         runs-on: ubuntu-20.04
+        permissions:
+          contents: read
         needs: verify-code-freeze
         if: needs.verify-code-freeze.outputs.freeze == 0
         outputs:
@@ -84,6 +88,9 @@ jobs:
     prep-trunk:
         name: Preps trunk for next development cycle
         runs-on: ubuntu-20.04
+        permissions:
+          contents: read
+          pull-requests: write
         needs: maybe-create-next-milestone-and-release-branch
         steps:
             - name: Checkout code
@@ -151,6 +158,8 @@ jobs:
     trigger-changelog-action:
         name: 'Trigger changelog action'
         runs-on: ubuntu-20.04
+        permissions:
+          actions: write
         needs: maybe-create-next-milestone-and-release-branch
         steps:
             - name: 'Trigger changelog action'

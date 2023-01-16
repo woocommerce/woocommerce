@@ -50,7 +50,7 @@ export const ProductVariationForm: React.FC< {
 			ref={ formRef }
 		>
 			<ProductVariationFormHeader />
-			<ProductFormLayout>
+			<ProductFormLayout key={ productVariation.id }>
 				<ProductFormTab name="general" title="General">
 					<ProductVariationDetailsSection />
 				</ProductFormTab>

@@ -3,6 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 
+export const AUTO_DRAFT_NAME = 'AUTO-DRAFT';
+
 /**
  * Get the product title for use in the header.
  *
@@ -20,7 +22,7 @@ export const getProductTitle = (
 		return name;
 	}
 
-	if ( persistedName ) {
+	if ( persistedName && persistedName !== AUTO_DRAFT_NAME ) {
 		return persistedName;
 	}
 

@@ -28,4 +28,9 @@ describe( 'getProductTitle', () => {
 		const title = getProductTitle( '', 'custom-type', undefined );
 		expect( title ).toBe( 'New product' );
 	} );
+
+	it( 'should return the generic add new string when the product title is the auto draft title', () => {
+		const title = getProductTitle( '', 'custom-type', 'AUTO-DRAFT' );
+		expect( title ).toBe( 'New product' );
+	} );
 } );

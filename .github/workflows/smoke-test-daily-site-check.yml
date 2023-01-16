@@ -3,6 +3,8 @@ on:
   schedule:
     - cron: '25 7 * * *'
 
+permissions: {}
+
 jobs:
   ping_site:
     runs-on: ubuntu-20.04

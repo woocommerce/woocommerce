@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\BypassFinalsHack;
 use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
-\PHPUnit\Framework\Error\Deprecated::$enabled = false;
+
 /**
  * Class WC_Unit_Tests_Bootstrap
  */

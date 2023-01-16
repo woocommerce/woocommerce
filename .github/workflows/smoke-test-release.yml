@@ -5,10 +5,15 @@ on:
             release_id:
                 description: 'WooCommerce Release Id'
                 required: true
+
+permissions: {}
+
 jobs:
     login-run:
         name: Daily smoke test on release.
         runs-on: ubuntu-20.04
+        permissions:
+          contents: read
         steps:
             - uses: actions/checkout@v3
               with:
@@ -49,6 +54,8 @@ jobs:
     test-wp-version:
         name: Smoke test on L-${{ matrix.wp }} WordPress version
         runs-on: ubuntu-20.04
+        permissions:
+          contents: read
         strategy:
             matrix:
                 wp: ['1', '2']
@@ -104,6 +111,8 @@ jobs:
     test-plugins:
         name: Smoke tests with ${{ matrix.plugin }} plugin installed
         runs-on: ubuntu-20.04
+        permissions:
+          contents: read
         strategy:
             fail-fast: false
             matrix:

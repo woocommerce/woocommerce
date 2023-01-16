@@ -775,13 +775,6 @@ jQuery( function ( $ ) {
 					'disabled-items',
 					newSelectedAttributes
 				);
-				var isUsedForVariations = $( 'input#used-for-variation' ).is(
-					':checked'
-				);
-				$( 'select.attribute_taxonomy' ).data(
-					'is-used-for-variations',
-					isUsedForVariations
-				);
 
 				// Reload variations panel.
 				var this_page = window.location.toString();
@@ -1045,6 +1038,7 @@ jQuery( function ( $ ) {
 			delay: 200,
 			keepAlive: true,
 		} );
+
 
 	// add a tooltip to the right of the product image meta box "Set product image" and "Add product gallery images"
 	const setProductImageLink = $( '#set-post-thumbnail' );

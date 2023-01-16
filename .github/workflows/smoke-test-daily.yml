@@ -14,10 +14,14 @@ concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
 
+permissions: {}
+
 jobs:
     e2e-tests:
         name: E2E tests on nightly build
         runs-on: ubuntu-20.04
+        permissions:
+          contents: read
         env:
             ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
             ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
@@ -77,6 +81,8 @@ jobs:
     api-tests:
         name: API tests on nightly build
         runs-on: ubuntu-20.04
+        permissions:
+          contents: read
         needs: [e2e-tests]
         if: success() || failure()
         env:
@@ -121,6 +127,8 @@ jobs:
     k6-tests:
         name: k6 tests on nightly build
         runs-on: ubuntu-20.04
+        permissions:
+          contents: read
         needs: [api-tests]
         if: success() || failure()
         steps:
@@ -171,6 +179,8 @@ jobs:
     test-plugins:
         name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed
         runs-on: ubuntu-20.04
+        permissions:
+          contents: read
         env:
             USE_WP_ENV: 1
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
@@ -244,6 +254,8 @@ jobs:
             ( success() || failure() ) &&
             ! github.event.pull_request.head.repo.fork
         runs-on: ubuntu-20.04
+        permissions:
+          contents: read
         needs: [test-plugins, k6-tests]
         steps:
             - name: Create dirs

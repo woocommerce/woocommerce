@@ -51,19 +51,17 @@ class WC_Validation {
 
 		switch ( $country ) {
 			case 'AT':
+			case 'BE':
+			case 'CH':
+			case 'HU':
+			case 'NO':
 				$valid = (bool) preg_match( '/^([0-9]{4})$/', $postcode );
 				break;
 			case 'BA':
 				$valid = (bool) preg_match( '/^([7-8]{1})([0-9]{4})$/', $postcode );
 				break;
-			case 'BE':
-				$valid = (bool) preg_match( '/^([0-9]{4})$/i', $postcode );
-				break;
 			case 'BR':
 				$valid = (bool) preg_match( '/^([0-9]{5})([-])?([0-9]{3})$/', $postcode );
-				break;
-			case 'CH':
-				$valid = (bool) preg_match( '/^([0-9]{4})$/i', $postcode );
 				break;
 			case 'DE':
 				$valid = (bool) preg_match( '/^([0]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{3}$/', $postcode );
@@ -78,9 +76,6 @@ class WC_Validation {
 				break;
 			case 'GB':
 				$valid = self::is_gb_postcode( $postcode );
-				break;
-			case 'HU':
-				$valid = (bool) preg_match( '/^([0-9]{4})$/i', $postcode );
 				break;
 			case 'IE':
 				$valid = (bool) preg_match( '/([AC-FHKNPRTV-Y]\d{2}|D6W)[0-9AC-FHKNPRTV-Y]{4}/', wc_normalize_postcode( $postcode ) );

@@ -29,17 +29,23 @@ export default function useProductVariationNavigation( {
 	const persistedQuery = getPersistedQuery();
 
 	return {
-		actionHref: getNewPath( persistedQuery, `/product/${ product.id }` ),
+		actionHref: getNewPath(
+			persistedQuery,
+			`/product/${ product.id }`,
+			{}
+		),
 		prevHref: prevVariationId
 			? getNewPath(
 					persistedQuery,
-					`/product/${ product.id }/variation/${ prevVariationId }`
+					`/product/${ product.id }/variation/${ prevVariationId }`,
+					{}
 			  )
 			: undefined,
 		nextHref: nextVariationId
 			? getNewPath(
 					persistedQuery,
-					`/product/${ product.id }/variation/${ nextVariationId }`
+					`/product/${ product.id }/variation/${ nextVariationId }`,
+					{}
 			  )
 			: undefined,
 	};

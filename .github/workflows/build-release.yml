@@ -2,10 +2,15 @@ name: Build release asset
 on: 
   release:
     types: [published]
+
+permissions: {}
+
 jobs:
   build:
     name: Build release asset
     runs-on: ubuntu-20.04
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
       

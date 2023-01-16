@@ -1,5 +1,6 @@
 name: Setup WooCommerce Monorepo
 description: Handles the installation, building, and caching of the projects within the monorepo.
+permissions: {}
 
 inputs:
     install-filters:

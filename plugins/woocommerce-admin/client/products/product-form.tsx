@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { Form, FormRef } from '@woocommerce/components';
+import {
+	Form,
+	FormRef,
+	__experimentalWooProductSectionItem as WooProductSectionItem,
+} from '@woocommerce/components';
 import { PartialProduct, Product } from '@woocommerce/data';
 import { Ref } from 'react';
 
@@ -47,6 +51,7 @@ export const ProductForm: React.FC< {
 					<ProductDetailsSection />
 					<ImagesSection />
 					<AttributesSection />
+					<WooProductSectionItem.Slot location="tab/general" />
 				</ProductFormTab>
 				<ProductFormTab
 					name="pricing"
@@ -69,10 +74,14 @@ export const ProductForm: React.FC< {
 				>
 					<ProductShippingSection product={ product } />
 				</ProductFormTab>
-				<ProductFormTab name="options" title="Options">
-					<OptionsSection />
-					<ProductVariationsSection />
-				</ProductFormTab>
+				{ window.wcAdminFeatures[ 'product-variation-management' ] ? (
+					<ProductFormTab name="options" title="Options">
+						<OptionsSection />
+						<ProductVariationsSection />
+					</ProductFormTab>
+				) : (
+					<></>
+				) }
 			</ProductFormLayout>
 			<ProductFormFooter />
 		</Form>
