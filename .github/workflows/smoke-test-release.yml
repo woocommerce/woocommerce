@@ -86,11 +86,11 @@ jobs:
                   name: woocommerce
                   path: plugins/woocommerce/tmp
 
-            # - name: Run 'Update WooCommerce' test.
-            #   working-directory: plugins/woocommerce
-            #   env:
-            #       UPDATE_WC: true
-            #   run: pnpm exec playwright test --config=tests/e2e-pw/daily.playwright.config.js update-woocommerce.spec.js
+            - name: Run 'Update WooCommerce' test.
+              working-directory: plugins/woocommerce
+              env:
+                  WOOCOMMERCE_ZIP_PATH: ${{ github.workspace }}/plugins/woocommerce/tmp/woocommerce.zip
+              run: pnpm exec playwright test --config=tests/e2e-pw/daily.playwright.config.js update-woocommerce.spec.js
 
             - name: Run the rest of E2E tests.
               timeout-minutes: 60

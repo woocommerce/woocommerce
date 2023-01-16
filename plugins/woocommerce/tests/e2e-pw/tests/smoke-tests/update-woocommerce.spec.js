@@ -1,18 +1,15 @@
-const { ADMINSTATE, UPDATE_WC } = process.env;
-const { admin } = require( '../../test-data/data' );
+const { ADMINSTATE, WOOCOMMERCE_ZIP_PATH } = process.env;
 const { test, expect } = require( '@playwright/test' );
-const {
-	deletePlugin,
-	downloadZip,
-	deleteZip,
-} = require( '../../utils/plugin-utils' );
+const { deleteZip } = require( '../../utils/plugin-utils' );
+const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-const skipMessage = 'Skipping this test because UPDATE_WC is not "true"';
+let initWooCommerceVersion;
 
-let pluginZipPath;
+const skipMessage =
+	'Skipping this test because WOOCOMMERCE_ZIP_PATH is undefined';
 
 test.skip( () => {
-	const shouldSkip = UPDATE_WC !== 'true';
+	const shouldSkip = WOOCOMMERCE_ZIP_PATH === undefined;
 
 	if ( shouldSkip ) {
 		console.log( skipMessage );
@@ -26,33 +23,36 @@ test.describe.serial(
 	() => {
 		test.use( { storageState: ADMINSTATE } );
 
-		test.beforeAll( async () => {
-			// Download WooCommerce ZIP
-			pluginZipPath = await downloadZip( {
-				url:
-					'https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip',
+		test.beforeAll( async ( { baseURL } ) => {
+			// Get initial WooCommerce version
+			const api = new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc/v3',
 			} );
+
+			const response = await api
+				.get( 'system_status' )
+				.catch( ( error ) => {
+					throw new Error(
+						`${ error.response.status } ${
+							error.response.statusText
+						}\n${ JSON.stringify( error.response.data, null, 2 ) }`
+					);
+				} );
+
+			initWooCommerceVersion = +response.data.environment.version;
 		} );
 
 		test.afterAll( async () => {
 			// Clean up downloaded zip
-			await deleteZip( pluginZipPath );
+			await deleteZip( WOOCOMMERCE_ZIP_PATH );
 		} );
 
 		test( 'can upload and activate the WooCommerce plugin', async ( {
 			page,
-			playwright,
-			baseURL,
 		} ) => {
-			// Delete WooCommerce if it's installed.
-			await deletePlugin( {
-				request: playwright.request,
-				baseURL,
-				slug: 'woocommerce',
-				username: admin.username,
-				password: admin.password,
-			} );
-
 			// Open the plugin install page
 			await page.goto( 'wp-admin/plugin-install.php', {
 				waitUntil: 'networkidle',
@@ -68,13 +68,16 @@ test.describe.serial(
 				page.waitForEvent( 'filechooser' ),
 				page.click( '#pluginzip' ),
 			] );
-			await fileChooser.setFiles( pluginZipPath );
+			await fileChooser.setFiles( WOOCOMMERCE_ZIP_PATH );
 			await page.click( '#install-plugin-submit' );
 			await page.waitForLoadState( 'networkidle' );
 
-			// Activate the plugin
-			await page.click( '.button-primary' );
+			// Replace current with uploaded
+			await page.click( '.button-primary.update-from-upload-overwrite' );
 			await page.waitForLoadState( 'networkidle' );
+			await expect(
+				page.getByText( 'Plugin updated successfully.' )
+			).toBeVisible();
 
 			// Go to 'Installed plugins' page
 			await page.goto( 'wp-admin/plugins.php', {
