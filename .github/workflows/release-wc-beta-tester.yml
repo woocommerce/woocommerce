@@ -1,4 +1,5 @@
 name: WooCommerce Beta Tester Release
+permissions: {}
 
 on:
     workflow_dispatch:
