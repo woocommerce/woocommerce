@@ -6,14 +6,16 @@ import { ProductFieldDefinition } from '../store/types';
 import { basicSelectControlSettings } from './basic-select-control';
 import { checkboxSettings } from './checkbox';
 import { radioSettings } from './radio';
+import { textSettings } from './text';
 import { toggleSettings } from './toggle';
 
 const getAllProductFields = (): ProductFieldDefinition[] =>
 	[
-		...[ 'text', 'number' ].map( ( type ) => ( {
+		...[ 'number' ].map( ( type ) => ( {
 			name: type,
 			type,
 		} ) ),
+		textSettings,
 		toggleSettings,
 		radioSettings,
 		basicSelectControlSettings,
