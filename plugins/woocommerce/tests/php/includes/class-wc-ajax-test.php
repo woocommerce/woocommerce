@@ -193,8 +193,13 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$this->assertEquals( 108, $order->get_total() );
 	}
 
+	/**
+	 * Tests if an error is generated when trying to refund too many of a product
+	 *
+	 * @return void
+	 */
 	public function test_refund_too_many() {
-		// Create order with products
+		// Create order with products.
 		$product1 = WC_Helper_Product::create_simple_product();
 		$product1->set_regular_price( 10 );
 		$product1->save();
@@ -212,18 +217,16 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$item    = current( $order->get_items() );
 		$item_id = $item->get_id();
 
-		// Loggin as admin
 		$this->_setRole( 'administrator' );
 
-		// Try to refund too many items
-
-		$_REQUEST = $_POST = array(
+		// Try to refund too many items.
+		$_REQUEST = array(
 			'order_id'               => $order->get_id(),
 			'refund_amount'          => 20.00,
 			'refunded_amount'        => 0,
 			'refund_reason'          => '',
-			'line_item_qtys'         => json_encode( array( $item_id => '2' ) ),
-			'line_item_totals'       => json_encode(
+			'line_item_qtys'         => wp_json_encode( array( $item_id => '2' ) ),
+			'line_item_totals'       => wp_json_encode(
 				array(
 					$item_id => 20,
 				)
@@ -232,6 +235,8 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			'restock_refunded_items' => true,
 			'security'               => wp_create_nonce( 'order-item' ),
 		);
+
+		$_POST = $_REQUEST;
 
 		try {
 			$this->_handleAjax( 'woocommerce_refund_line_items' );
