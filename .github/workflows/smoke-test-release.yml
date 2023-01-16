@@ -57,21 +57,18 @@ jobs:
             ADMIN_PASSWORD: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
             ADMIN_USER: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
             ADMIN_USER_EMAIL: ${{ secrets.RELEASE_TEST_ADMIN_USER_EMAIL }}
-            ALLURE_REPORT_DIR: ${{ github.workspace }}/woocommerce/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
-            ALLURE_RESULTS_DIR: ${{ github.workspace }}/woocommerce/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
             BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
             CUSTOMER_PASSWORD: ${{ secrets.RELEASE_TEST_CUSTOMER_PASSWORD }}
             CUSTOMER_USER: ${{ secrets.RELEASE_TEST_CUSTOMER_USER }}
             DEFAULT_TIMEOUT_OVERRIDE: 120000
         steps:
-            - name: Create dirs
-              run: |
-                  mkdir tmp
-                  mkdir woocommerce
-
             - uses: actions/checkout@v3
-              with:
-                  path: woocommerce
+
+            - name: Create tmp folder
+              run: |
+                  mkdir plugins/woocommerce/tmp
 
             # - name: Fetch Asset ID
             #   id: fetch_asset_id
@@ -86,20 +83,20 @@ jobs:
             #           await script({github, context, core})
 
             - name: Setup WooCommerce Monorepo
-              uses: ./woocommerce/.github/actions/setup-woocommerce-monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
               with:
                   install-filters: woocommerce
                   build: false
 
             - name: Download and install Chromium browser.
-              working-directory: woocommerce/plugins/woocommerce
+              working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
 
             - name: Download WooCommerce zip artifact
               uses: actions/download-artifact@v3
               with:
                   name: woocommerce
-                  path: tmp
+                  path: plugins/woocommerce/tmp
 
             # - name: Run 'Update WooCommerce' test.
             #   working-directory: plugins/woocommerce
@@ -109,7 +106,7 @@ jobs:
 
             - name: Run the rest of E2E tests.
               timeout-minutes: 60
-              working-directory: woocommerce/plugins/woocommerce
+              working-directory: plugins/woocommerce
               env:
                   E2E_MAX_FAILURES: 25
                   RESET_SITE: true
@@ -117,7 +114,7 @@ jobs:
 
             - name: Generate Playwright E2E Test report.
               if: success() || failure()
-              working-directory: woocommerce/plugins/woocommerce
+              working-directory: plugins/woocommerce
               run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
             - name: Archive E2E test report
