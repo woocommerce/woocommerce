@@ -123,6 +123,8 @@ class WC_Admin_Notices {
 		self::maybe_add_php73_required_notice();
 	}
 
+	// phpcs:disable Generic.Commenting.Todo.TaskFound
+
 	/**
 	 * Add an admin notice about the bump of the required PHP version in WooCommerce 7.7
 	 * if the current PHP version is too old.
@@ -151,6 +153,8 @@ class WC_Admin_Notices {
 			self::remove_notice( 'php73_required_in_woo_77' );
 		}
 	}
+
+	// phpcs:enable Generic.Commenting.Todo.TaskFound
 
 	/**
 	 * Show a notice.
