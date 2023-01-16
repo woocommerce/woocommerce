@@ -125,7 +125,6 @@ This only needs to be done if this release is the last release of the feature pl
 -   [ ] Search the release thread of the WooCommerce core version in WooCommerce P2 (example: p6q8Tx-2gl-p2).
     -   [ ] Subscribe to it, so you are aware of any news/changes.
     -   [ ] Make sure you are listed as the _Blocks Package_ lead or add yourself if you aren't.
-    -   [ ] Add changes you want to highlight under the _Feature Rollup_ comment. Please also look at changes from earlier versions that we didn't include in WC core yet. Ping the porters if you are unsure.
 
 ## Publish posts
 
@@ -133,6 +132,11 @@ This only needs to be done if this release is the last release of the feature pl
     -   Ping porters from each team to know which changelog entries need to be highlighted. Ask them to write a short text and optionally provide a screenshot. They can use previous posts for inspiration, we usually try to highlight new features or API changes.
     -   Ensure the release notes are included in the post verbatim.
     -   Don't forget to use category `WooCommerce Blocks Release Notes` for the post.
+-   [ ] Add highlights to the WC core release post (do this even if the release you are doing is not merged into WC core):
+    -   Check which WC core version will include the WC Blocks release you just did (reference: PdToLP-K-p2).
+    -   Go to its Release Thread and search the _Feature Highlights_ comment (example: p6q8Tx-2gl-p2).
+    -   Edit the linked draft post and add all highlights from the release you just did.
+    -   Leave a comment under the _Feature Highlights_ comment in the release thread mentioning that you updated the draft with the features included in WC Blocks X.Y.
 -   [ ] Announce the release internally (`#woo-announcements` slack).
 -   [ ] Update user-facing documentation as needed. When the plugin is released, ensure user-facing documentation is kept up to date with new blocks and compatibility information. The dev team should update documents in collaboration with support team and WooCommerce docs guild. In particular, please review and update as needed:
     -   Are there any new blocks in this release? Ensure they have adequate user documentation.
