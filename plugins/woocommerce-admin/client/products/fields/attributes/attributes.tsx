@@ -6,7 +6,7 @@ import { ProductAttribute } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { AttributeField } from '../attribute-field';
+import { AttributeControl } from '../attribute-control';
 import { useProductAttributes } from '~/products/hooks/use-product-attributes';
 
 type AttributesProps = {
@@ -27,9 +27,9 @@ export const Attributes: React.FC< AttributesProps > = ( {
 	} );
 
 	return (
-		<AttributeField
+		<AttributeControl
 			attributeType="regular"
-			attributes={ attributes }
+			value={ attributes }
 			onChange={ handleChange }
 		/>
 	);

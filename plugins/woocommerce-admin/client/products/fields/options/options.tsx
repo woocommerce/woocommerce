@@ -7,7 +7,7 @@ import { useFormContext } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { AttributeField } from '../attribute-field';
+import { AttributeControl } from '../attribute-control';
 import { useProductAttributes } from '~/products/hooks/use-product-attributes';
 import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
 
@@ -39,9 +39,9 @@ export const Options: React.FC< OptionsProps > = ( {
 	} );
 
 	return (
-		<AttributeField
+		<AttributeControl
 			attributeType="for-variations"
-			attributes={ attributes }
+			value={ attributes }
 			onChange={ handleChange }
 		/>
 	);

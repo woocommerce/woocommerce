@@ -30,17 +30,17 @@ import {
 	AttributeListItem,
 } from '../attribute-list-item';
 
-type AttributeFieldProps = {
-	attributes: ProductAttribute[];
+type AttributeControlProps = {
+	value: ProductAttribute[];
 	onChange: ( value: ProductAttribute[] ) => void;
 	// TODO: should we support an 'any' option to show all attributes?
 	attributeType?: 'regular' | 'for-variations';
 };
 
-export const AttributeField: React.FC< AttributeFieldProps > = ( {
-	attributes,
-	onChange,
+export const AttributeControl: React.FC< AttributeControlProps > = ( {
+	value,
 	attributeType = 'regular',
+	onChange,
 } ) => {
 	const [ showAddAttributeModal, setShowAddAttributeModal ] =
 		useState( false );
@@ -81,7 +81,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 				'product_remove_attribute_confirmation_confirm_click'
 			);
 			handleChange(
-				attributes.filter(
+				value.filter(
 					( attr ) =>
 						fetchAttributeId( attr ) !==
 						fetchAttributeId( attribute )
@@ -96,11 +96,11 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		newAttributes: EnhancedProductAttribute[]
 	) => {
 		handleChange( [
-			...( attributes || [] ),
+			...( value || [] ),
 			...newAttributes
 				.filter(
 					( newAttr ) =>
-						! ( attributes || [] ).find( ( attr ) =>
+						! ( value || [] ).find( ( attr ) =>
 							newAttr.id === 0
 								? newAttr.name === attr.name // check name if custom attribute = id === 0.
 								: attr.id === newAttr.id
@@ -110,7 +110,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					return {
 						...newAttributeProps,
 						...newAttr,
-						position: ( attributes || [] ).length + index,
+						position: ( value || [] ).length + index,
 					};
 				} ),
 		] );
@@ -118,7 +118,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		setShowAddAttributeModal( false );
 	};
 
-	if ( ! attributes.length ) {
+	if ( ! value.length ) {
 		return (
 			<>
 				<AttributeEmptyState
@@ -154,11 +154,9 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		);
 	}
 
-	const sortedAttributes = attributes.sort(
-		( a, b ) => a.position - b.position
-	);
+	const sortedAttributes = value.sort( ( a, b ) => a.position - b.position );
 
-	const attributeKeyValues = attributes.reduce(
+	const attributeKeyValues = value.reduce(
 		(
 			keyValue: Record< number | string, ProductAttribute >,
 			attribute: ProductAttribute
@@ -169,7 +167,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 		{} as Record< number | string, ProductAttribute >
 	);
 
-	const editingAttribute = attributes.find(
+	const editingAttribute = value.find(
 		( attr ) => fetchAttributeId( attr ) === editingAttributeId
 	) as EnhancedProductAttribute;
 
@@ -241,9 +239,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 						setShowAddAttributeModal( false );
 					} }
 					onAdd={ onAddNewAttributes }
-					selectedAttributeIds={ attributes.map(
-						( attr ) => attr.id
-					) }
+					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
 				/>
 			) }
 			<SelectControlMenuSlot />
@@ -272,7 +268,7 @@ export const AttributeField: React.FC< AttributeFieldProps > = ( {
 					} ) }
 					onCancel={ () => setEditingAttributeId( null ) }
 					onEdit={ ( changedAttribute ) => {
-						const newAttributesSet = [ ...attributes ];
+						const newAttributesSet = [ ...value ];
 						const changedAttributeIndex: number =
 							newAttributesSet.findIndex( ( attr ) =>
 								attr.id !== 0

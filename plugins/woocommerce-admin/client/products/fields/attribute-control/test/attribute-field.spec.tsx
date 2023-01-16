@@ -8,7 +8,7 @@ import { ProductAttribute } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { AttributeField } from '../attribute-field';
+import { AttributeControl } from '../attribute-control';
 
 const attributeList: ProductAttribute[] = [
 	{
@@ -102,7 +102,7 @@ jest.mock( '@woocommerce/components', () => ( {
 	},
 } ) );
 
-describe( 'AttributeField', () => {
+describe( 'AttributeControl', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 	} );
@@ -110,7 +110,7 @@ describe( 'AttributeField', () => {
 	describe( 'empty state', () => {
 		it( 'should show subtitle and "Add first attribute" button', () => {
 			const { queryByText } = render(
-				<AttributeField attributes={ [] } onChange={ () => {} } />
+				<AttributeControl value={ [] } onChange={ () => {} } />
 			);
 			expect( queryByText( 'No attributes yet' ) ).toBeInTheDocument();
 			expect( queryByText( 'Add first attribute' ) ).toBeInTheDocument();
@@ -120,8 +120,8 @@ describe( 'AttributeField', () => {
 	it( 'should render the list of all attributes', async () => {
 		act( () => {
 			render(
-				<AttributeField
-					attributes={ [ ...attributeList ] }
+				<AttributeControl
+					value={ [ ...attributeList ] }
 					onChange={ () => {} }
 				/>
 			);
@@ -141,8 +141,8 @@ describe( 'AttributeField', () => {
 	it( 'should render the first two terms of each option, and show "+ n more" for the rest', async () => {
 		act( () => {
 			render(
-				<AttributeField
-					attributes={ [ ...attributeList ] }
+				<AttributeControl
+					value={ [ ...attributeList ] }
 					onChange={ () => {} }
 					attributeType="for-variations"
 				/>
@@ -170,8 +170,8 @@ describe( 'AttributeField', () => {
 			jest.spyOn( global, 'confirm' ).mockReturnValueOnce( false );
 			act( () => {
 				render(
-					<AttributeField
-						attributes={ [ ...attributeList ] }
+					<AttributeControl
+						value={ [ ...attributeList ] }
 						onChange={ () => {} }
 					/>
 				);
@@ -188,8 +188,8 @@ describe( 'AttributeField', () => {
 
 			act( () => {
 				render(
-					<AttributeField
-						attributes={ [ ...attributeList ] }
+					<AttributeControl
+						value={ [ ...attributeList ] }
 						onChange={ onChange }
 					/>
 				);
@@ -208,8 +208,8 @@ describe( 'AttributeField', () => {
 			const onChange = jest.fn();
 			act( () => {
 				render(
-					<AttributeField
-						attributes={ [ ...attributeList ] }
+					<AttributeControl
+						value={ [ ...attributeList ] }
 						onChange={ onChange }
 					/>
 				);
@@ -229,8 +229,8 @@ describe( 'AttributeField', () => {
 
 			act( () => {
 				render(
-					<AttributeField
-						attributes={ [ ...attributeList ] }
+					<AttributeControl
+						value={ [ ...attributeList ] }
 						onChange={ onChange }
 					/>
 				);
