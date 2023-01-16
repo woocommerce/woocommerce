@@ -36,7 +36,12 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 			{ ...treeItemProps }
 			className={ classNames(
 				treeItemProps.className,
-				'experimental-woocommerce-tree-item'
+				'experimental-woocommerce-tree-item',
+				{
+					'experimental-woocommerce-tree-item--highlighted':
+						! selection.multiple &&
+						selection.checkedStatus === 'checked',
+				}
 			) }
 		>
 			<div

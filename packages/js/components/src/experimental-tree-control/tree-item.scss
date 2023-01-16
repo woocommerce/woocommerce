@@ -3,6 +3,12 @@ $control-size: clac( $gap - $gap-smaller );
 .experimental-woocommerce-tree-item {
 	margin: 0;
 
+	&--highlighted {
+		> .experimental-woocommerce-tree-item__heading {
+			background-color: #f6f7f7;
+		}
+	}
+
 	&__heading {
 		display: flex;
 		flex-grow: 1;
