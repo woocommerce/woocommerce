@@ -22,7 +22,7 @@ function createOrderedChildren< T = Fill.Props, S = Record< string, unknown > >(
 	if ( typeof children === 'function' ) {
 		return cloneElement( children( props ), { order, ...injectProps } );
 	} else if ( isValidElement( children ) ) {
-		return cloneElement( children, { ...props, order } );
+		return cloneElement( children, { ...props, order, ...injectProps } );
 	}
 	throw Error( 'Invalid children type' );
 }
