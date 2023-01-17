@@ -90,6 +90,12 @@ if ( ! process.env.WORDPRESS_URL ) {
 	process.env.WORDPRESS_URL = testConfig.url;
 }
 
+// Allow overriding default services and settings configurations.
+if ( fs.existsSync( '../../../docker-compose.override.yml' ) ) {
+	console.log( 'Using `docker-compose.override.yml`.' );
+	dockerArgs.unshift( '-f', path.resolve('../../../docker-compose.override.yml' ) );
+}
+
 // Ensure that the first Docker compose file loaded is from our local env.
 dockerArgs.unshift( '-f', resolvePackagePath( 'docker-compose.yaml' ) );
 
