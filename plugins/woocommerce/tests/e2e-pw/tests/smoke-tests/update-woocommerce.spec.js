@@ -1,30 +1,113 @@
-const { ADMINSTATE, WOOCOMMERCE_ZIP_PATH } = process.env;
-const { test, expect } = require( '@playwright/test' );
-const { deleteZip } = require( '../../utils/plugin-utils' );
+const axios = require( 'axios' ).default;
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { ADMINSTATE, UPDATE_WC } = process.env;
+const { downloadZip, deleteZip } = require( '../../utils/plugin-utils' );
+const { test, expect } = require( '@playwright/test' );
 
-let initWooCommerceVersion;
+let downloadURL, woocommerceZipPath;
 
-const skipMessage =
-	'Skipping this test because WOOCOMMERCE_ZIP_PATH is undefined';
+const skipTestIfInvalidTag = () => {
+	const skipMessage = `Skipping this test because UPDATE_WC was ${ UPDATE_WC }, which is an invalid WooCommerce release tag, or a release tag that has no build zip asset like "7.2.0-rc.2".\nTo run this test, set UPDATE_WC to a valid WooCommerce release tag that has a WooCommerce ZIP, like "nightly" or "7.1.0-beta.2".`;
 
-test.skip( () => {
-	const shouldSkip = WOOCOMMERCE_ZIP_PATH === undefined;
+	const isValidTag = async () => {
+		if ( UPDATE_WC === undefined ) {
+			return false;
+		}
 
-	if ( shouldSkip ) {
-		console.log( skipMessage );
-	}
+		const response = await axios
+			.get(
+				`https://api.github.com/repos/woocommerce/woocommerce/releases/tags/${ UPDATE_WC }`
+			)
+			.catch( ( error ) => {
+				console.log( error.toJSON() );
+				return error.response;
+			} );
 
-	return shouldSkip;
-}, skipMessage );
+		if (
+			response.status === 200 &&
+			response.data.assets &&
+			Array.isArray( response.data.assets ) &&
+			response.data.assets.length > 0 &&
+			response.data.assets[ 0 ].browser_download_url
+		) {
+			downloadURL = response.data.assets[ 0 ].browser_download_url;
+			return true;
+		}
 
-test.describe.serial(
-	'WooCommerce plugin can be uploaded and activated',
-	() => {
-		test.use( { storageState: ADMINSTATE } );
+		return false;
+	};
 
-		test.beforeAll( async ( { baseURL } ) => {
-			// Get initial WooCommerce version
+	test.skip( async () => {
+		const shouldSkip = ! ( await isValidTag() );
+
+		if ( shouldSkip ) {
+			console.log( skipMessage );
+		}
+
+		return shouldSkip;
+	}, skipMessage );
+};
+
+skipTestIfInvalidTag();
+
+test.describe.serial( 'WooCommerce update', () => {
+	test.use( { storageState: ADMINSTATE } );
+
+	test.beforeAll( async () => {
+		// Download WooCommerce zip from GitHub
+		woocommerceZipPath = await downloadZip( { url: downloadURL } );
+	} );
+
+	test.afterAll( async () => {
+		// Clean up downloaded zip
+		await deleteZip( woocommerceZipPath );
+	} );
+
+	test( `can update WooCommerce to "${ UPDATE_WC }"`, async ( {
+		page,
+		baseURL,
+	} ) => {
+		// Open the plugin install page
+		await page.goto( 'wp-admin/plugin-install.php', {
+			waitUntil: 'networkidle',
+		} );
+
+		// Upload the plugin zip
+		await page.click( 'a.upload-view-toggle' );
+		await expect( page.locator( 'p.install-help' ) ).toBeVisible();
+		await expect( page.locator( 'p.install-help' ) ).toContainText(
+			'If you have a plugin in a .zip format, you may install or update it by uploading it here.'
+		);
+		const [ fileChooser ] = await Promise.all( [
+			page.waitForEvent( 'filechooser' ),
+			page.click( '#pluginzip' ),
+		] );
+		await fileChooser.setFiles( woocommerceZipPath );
+		await page.click( '#install-plugin-submit' );
+		await page.waitForLoadState( 'networkidle' );
+
+		// Replace current with uploaded
+		await page.click( '.button-primary.update-from-upload-overwrite' );
+		await page.waitForLoadState( 'networkidle' );
+		await expect(
+			page.getByText( 'Plugin updated successfully.' )
+		).toBeVisible();
+
+		// Go to 'Installed plugins' page
+		await page.goto( 'wp-admin/plugins.php', {
+			waitUntil: 'networkidle',
+		} );
+
+		// Assert that 'WooCommerce' is listed and active
+		await expect(
+			page.locator( '.plugin-title strong', {
+				hasText: /^WooCommerce$/,
+			} )
+		).toBeVisible();
+		await expect( page.locator( '#deactivate-woocommerce' ) ).toBeVisible();
+
+		// Verify that WooCommerce was updated to the expected version.
+		if ( UPDATE_WC !== 'nightly' ) {
 			const api = new wcApi( {
 				url: baseURL,
 				consumerKey: process.env.CONSUMER_KEY,
@@ -35,104 +118,52 @@ test.describe.serial(
 			const response = await api
 				.get( 'system_status' )
 				.catch( ( error ) => {
-					throw new Error(
-						`${ error.response.status } ${
-							error.response.statusText
-						}\n${ JSON.stringify( error.response.data, null, 2 ) }`
-					);
+					throw new Error( error.message );
 				} );
 
-			initWooCommerceVersion = +response.data.environment.version;
-		} );
-
-		test.afterAll( async () => {
-			// Clean up downloaded zip
-			await deleteZip( WOOCOMMERCE_ZIP_PATH );
-		} );
-
-		test( 'can upload and activate the WooCommerce plugin', async ( {
-			page,
-		} ) => {
-			// Open the plugin install page
-			await page.goto( 'wp-admin/plugin-install.php', {
-				waitUntil: 'networkidle',
-			} );
-
-			// Upload the plugin zip
-			await page.click( 'a.upload-view-toggle' );
-			await expect( page.locator( 'p.install-help' ) ).toBeVisible();
-			await expect( page.locator( 'p.install-help' ) ).toContainText(
-				'If you have a plugin in a .zip format, you may install or update it by uploading it here.'
+			const wcPluginData = response.data.active_plugins.find(
+				( { plugin } ) => plugin === 'woocommerce/woocommerce.php'
 			);
-			const [ fileChooser ] = await Promise.all( [
-				page.waitForEvent( 'filechooser' ),
-				page.click( '#pluginzip' ),
-			] );
-			await fileChooser.setFiles( WOOCOMMERCE_ZIP_PATH );
-			await page.click( '#install-plugin-submit' );
-			await page.waitForLoadState( 'networkidle' );
 
-			// Replace current with uploaded
-			await page.click( '.button-primary.update-from-upload-overwrite' );
-			await page.waitForLoadState( 'networkidle' );
-			await expect(
-				page.getByText( 'Plugin updated successfully.' )
-			).toBeVisible();
+			expect( wcPluginData.version ).toEqual( UPDATE_WC );
+		}
+	} );
 
-			// Go to 'Installed plugins' page
+	test( 'can run the database update', async ( { page } ) => {
+		const updateButton = page.locator( 'text=Update WooCommerce Database' );
+		const updateCompleteMessage = page.locator(
+			'text=WooCommerce database update complete.'
+		);
+
+		// Navigate to 'Installed Plugins' page
+		await page.goto( 'wp-admin/plugins.php', {
+			waitUntil: 'networkidle',
+		} );
+
+		// Skip this test if the "Update WooCommerce Database" button didn't appear.
+		test.skip(
+			! ( await updateButton.isVisible() ),
+			'The "Update WooCommerce Database" button did not appear after updating WooCommerce. Verify with the team if the WooCommerce version being tested does not really trigger a database update.'
+		);
+
+		// If the notice appears, start DB update
+		await updateButton.click();
+		await page.waitForLoadState( 'networkidle' );
+
+		// Repeatedly reload the Plugins page up to 10 times until the message "WooCommerce database update complete." appears.
+		for (
+			let reloads = 0;
+			reloads < 10 && ! ( await updateCompleteMessage.isVisible() );
+			reloads++
+		) {
 			await page.goto( 'wp-admin/plugins.php', {
 				waitUntil: 'networkidle',
 			} );
 
-			// Assert that 'WooCommerce' is listed and active
-			await expect(
-				page.locator( '.plugin-title strong', {
-					hasText: /^WooCommerce$/,
-				} )
-			).toBeVisible();
-			await expect(
-				page.locator( '#deactivate-woocommerce' )
-			).toBeVisible();
-		} );
+			// Wait 10s before the next reload.
+			await page.waitForTimeout( 10000 );
+		}
 
-		test( 'can run the database update', async ( { page } ) => {
-			const updateButton = page.locator(
-				'text=Update WooCommerce Database'
-			);
-			const updateCompleteMessage = page.locator(
-				'text=WooCommerce database update complete.'
-			);
-
-			// Navigate to 'Installed Plugins' page
-			await page.goto( 'wp-admin/plugins.php', {
-				waitUntil: 'networkidle',
-			} );
-
-			// Skip this test if the "Update WooCommerce Database" button didn't appear.
-			test.skip(
-				! ( await updateButton.isVisible() ),
-				'The "Update WooCommerce Database" button did not appear after updating WooCommerce. Verify with the team if the WooCommerce version being tested does not really trigger a database update.'
-			);
-
-			// If the notice appears, start DB update
-			await updateButton.click();
-			await page.waitForLoadState( 'networkidle' );
-
-			// Repeatedly reload the Plugins page up to 10 times until the message "WooCommerce database update complete." appears.
-			for (
-				let reloads = 0;
-				reloads < 10 && ! ( await updateCompleteMessage.isVisible() );
-				reloads++
-			) {
-				await page.goto( 'wp-admin/plugins.php', {
-					waitUntil: 'networkidle',
-				} );
-
-				// Wait 10s before the next reload.
-				await page.waitForTimeout( 10000 );
-			}
-
-			await expect( updateCompleteMessage ).toBeVisible();
-		} );
-	}
-);
+		await expect( updateCompleteMessage ).toBeVisible();
+	} );
+} );
