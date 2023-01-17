@@ -18,7 +18,6 @@ export function useTree( {
 	return {
 		level,
 		items,
-		parent,
 		treeProps: {
 			...props,
 		},
