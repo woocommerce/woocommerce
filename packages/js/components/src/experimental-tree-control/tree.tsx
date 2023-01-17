@@ -15,13 +15,12 @@ export const Tree = forwardRef( function ForwardedTree(
 	props: TreeProps,
 	ref: React.ForwardedRef< HTMLOListElement >
 ) {
-	const {
-		level = 1,
-		treeProps,
-		treeItemProps,
-	} = useTree( { ...props, ref } );
+	const { level, items, treeProps, treeItemProps } = useTree( {
+		...props,
+		ref,
+	} );
 
-	if ( ! treeItemProps.items.length ) return null;
+	if ( ! items.length ) return null;
 	return (
 		<ol
 			{ ...treeProps }
@@ -31,7 +30,7 @@ export const Tree = forwardRef( function ForwardedTree(
 				`experimental-woocommerce-tree--level-${ level }`
 			) }
 		>
-			{ treeItemProps.items.map( ( child ) => (
+			{ items.map( ( child ) => (
 				<TreeItem
 					{ ...treeItemProps }
 					key={ child.data.value }

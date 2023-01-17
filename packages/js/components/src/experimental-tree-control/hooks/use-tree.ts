@@ -10,12 +10,11 @@ import { TreeProps } from '../types';
 export function useTree( { ref, items, level = 1, ...props }: TreeProps ) {
 	return {
 		level,
-		parent,
+		items,
 		treeProps: {
 			...props,
 		},
 		treeItemProps: {
-			items,
 			level,
 		},
 	};
