@@ -225,6 +225,7 @@ export const applyCoupon =
 				},
 				cache: 'no-store',
 			} );
+			dispatch.receiveApplyingCoupon( '' );
 
 			dispatch.receiveCart( response );
 		} catch ( error ) {
@@ -237,8 +238,6 @@ export const applyCoupon =
 
 			// Re-throw the error.
 			throw error;
-		} finally {
-			dispatch.receiveApplyingCoupon( '' );
 		}
 
 		return true;
