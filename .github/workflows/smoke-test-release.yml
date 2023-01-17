@@ -18,39 +18,31 @@ env:
     FORCE_COLOR: 1
 
 jobs:
-    download-zip:
+    get-tag:
         name: Download WooCommerce ZIP
         runs-on: ubuntu-20.04
-        env:
-            GH_TOKEN: ${{ github.token }}
+        outputs:
+            tag: ${{ steps.tag.outputs.result }}
         steps:
             - name: Validate tag
               if: ${{ github.event_name == 'workflow_dispatch' }}
+              env:
+                  GH_TOKEN: ${{ github.token }}
               run: gh release view "${{ github.event.inputs.tag }}" --repo=woocommerce/woocommerce
 
             - name: Get tag
               uses: actions/github-script@v5
-              id: get-tag
+              id: tag
               with:
                   result-encoding: string
                   script: |
                       console.log( "${{ github.event_name }}" );
                       return "${{ github.event.release.tag_name }}" || "${{ github.event.inputs.tag }}"
 
-            - name: Download release zip
-              run: |
-                  gh release download ${{ steps.get-tag.outputs.result }} --repo woocommerce/woocommerce
-
-            - name: Upload zip as artifact
-              uses: actions/upload-artifact@v3
-              with:
-                  name: woocommerce
-                  path: woocommerce.zip
-
     e2e:
         name: Run E2E tests
         runs-on: ubuntu-20.04
-        needs: [download-zip]
+        needs: [get-tag]
         permissions:
             contents: read
         env:
@@ -66,10 +58,6 @@ jobs:
         steps:
             - uses: actions/checkout@v3
 
-            - name: Create tmp folder
-              run: |
-                  mkdir plugins/woocommerce/tmp
-
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
@@ -80,16 +68,10 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
 
-            - name: Download WooCommerce zip artifact
-              uses: actions/download-artifact@v3
-              with:
-                  name: woocommerce
-                  path: plugins/woocommerce/tmp
-
             - name: Run 'Update WooCommerce' test.
               working-directory: plugins/woocommerce
               env:
-                  WOOCOMMERCE_ZIP_PATH: ${{ github.workspace }}/plugins/woocommerce/tmp/woocommerce.zip
+                  UPDATE_WC: ${{ needs.get-tag.outputs.tag }}
               run: pnpm exec playwright test --config=tests/e2e-pw/daily.playwright.config.js update-woocommerce.spec.js
 
             - name: Run the rest of E2E tests.
