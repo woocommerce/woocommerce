@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Improve the way we retrieve the alt text property for product attachments.
