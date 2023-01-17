@@ -28,9 +28,7 @@ import TableSummary, { TableSummaryPlaceholder } from './summary';
 import { TableCardProps } from './types';
 
 const defaultOnQueryChange =
-	( p: string ) =>
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	( ...props: any ) => {};
+	( param: string ) => ( path?: string, direction?: string ) => {};
 
 const defaultOnColumnsChange = (
 	showCols: Array< string >,
@@ -106,11 +104,11 @@ const TableCard: React.VFC< TableCardProps > = ( {
 	};
 
 	const onPageChange = (
-		newPage: number,
+		newPage: string,
 		direction?: 'previous' | 'next'
 	) => {
 		if ( props.onPageChange ) {
-			props.onPageChange( newPage, direction );
+			props.onPageChange( parseInt( newPage, 10 ), direction );
 		}
 		if ( onQueryChange ) {
 			onQueryChange( 'paged' )( newPage, direction );
