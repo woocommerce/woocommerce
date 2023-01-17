@@ -121,6 +121,30 @@ function getItemLabel( item: LinkedTree, text: string ) {
 	);
 }
 
+export const CustomItemLabelOnSearch: React.FC = () => {
+	const [ text, setText ] = useState( '' );
+
+	return (
+		<>
+			<TextControl value={ text } onChange={ setText } />
+			<BaseControl
+				label="Custom item label on search"
+				id="custom-item-label-on-search"
+			>
+				<TreeControl
+					id="custom-item-label-on-search"
+					items={ listItems }
+					getItemLabel={ ( item ) => getItemLabel( item, text ) }
+					shouldItemBeExpanded={ useCallback(
+						( item ) => shouldItemBeExpanded( item, text ),
+						[ text ]
+					) }
+				/>
+			</BaseControl>
+		</>
+	);
+};
+
 export const SelectionSingle: React.FC = () => {
 	const [ selected, setSelected ] = useState( listItems[ 1 ] );
 
