@@ -16,8 +16,8 @@
 	"module": "build-module/index.js",
 	"dependencies": {
 		"@automattic/puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
-		"@wordpress/deprecated": "^3.2.3",
-		"@wordpress/e2e-test-utils": "wp-5.8",
+		"@wordpress/deprecated": "wp-5.9",
+		"@wordpress/e2e-test-utils": "wp-5.9",
 		"config": "3.3.3",
 		"fishery": "^1.2.0"
 	},
@@ -34,9 +34,9 @@
 		"@typescript-eslint/parser": "^5.43.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-e2e-builds": "workspace:*",
-		"@wordpress/babel-plugin-import-jsx-pragma": "1.1.3",
-		"@wordpress/babel-preset-default": "3.0.2",
-		"@wordpress/browserslist-config": "^4.1.0",
+		"@wordpress/babel-plugin-import-jsx-pragma": "wp-5.9",
+		"@wordpress/babel-preset-default": "wp-5.9",
+		"@wordpress/browserslist-config": "wp-5.9",
 		"eslint": "^8.1.0",
 		"eslint-plugin-jest": "23.20.0"
 	},

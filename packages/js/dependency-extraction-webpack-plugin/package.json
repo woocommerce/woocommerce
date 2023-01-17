@@ -22,7 +22,7 @@
 	},
 	"main": "src/index.js",
 	"dependencies": {
-		"@wordpress/dependency-extraction-webpack-plugin": "^3.3.0"
+		"@wordpress/dependency-extraction-webpack-plugin": "wp-5.9"
 	},
 	"publishConfig": {
 		"access": "public"

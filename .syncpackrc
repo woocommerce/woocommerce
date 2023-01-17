@@ -54,6 +54,15 @@
 		},
 		{
 			"dependencies": [
+				"@wordpress/custom-templated-path-webpack-plugin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "wp-5.8"
+		},
+		{
+			"dependencies": [
 				"@wordpress/**"
 			],
 			"packages": [

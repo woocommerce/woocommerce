@@ -21,8 +21,10 @@ module.exports = {
 					{
 						loader: 'postcss-loader',
 						options: {
-							ident: 'postcss',
-							plugins: postcssPlugins,
+							postcssOptions: {
+								ident: 'postcss',
+								plugins: postcssPlugins,
+							},
 						},
 					},
 					{
