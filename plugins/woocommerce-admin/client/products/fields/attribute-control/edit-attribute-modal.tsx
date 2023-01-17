@@ -18,7 +18,7 @@ import {
 	AttributeTermInputField,
 	CustomAttributeTermInputField,
 } from '../attribute-term-input-field';
-import { HydratedAttributeType } from './attribute-field';
+import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 
 import './edit-attribute-modal.scss';
 
@@ -36,8 +36,8 @@ type EditAttributeModalProps = {
 	updateAccessibleLabel?: string;
 	updateLabel?: string;
 	onCancel: () => void;
-	onEdit: ( alteredAttribute: HydratedAttributeType ) => void;
-	attribute: HydratedAttributeType;
+	onEdit: ( alteredAttribute: EnhancedProductAttribute ) => void;
+	attribute: EnhancedProductAttribute;
 };
 
 export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
@@ -64,7 +64,7 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 	attribute,
 } ) => {
 	const [ editableAttribute, setEditableAttribute ] = useState<
-		HydratedAttributeType | undefined
+		EnhancedProductAttribute | undefined
 	>( { ...attribute } );
 
 	const isCustomAttribute = editableAttribute?.id === 0;
@@ -84,7 +84,7 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 					}
 					onChange={ ( val ) =>
 						setEditableAttribute( {
-							...( editableAttribute as HydratedAttributeType ),
+							...( editableAttribute as EnhancedProductAttribute ),
 							name: val,
 						} )
 					}
@@ -102,7 +102,7 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 						attributeId={ editableAttribute?.id }
 						onChange={ ( val ) => {
 							setEditableAttribute( {
-								...( editableAttribute as HydratedAttributeType ),
+								...( editableAttribute as EnhancedProductAttribute ),
 								terms: val,
 							} );
 						} }
@@ -115,7 +115,7 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 						value={ editableAttribute?.options }
 						onChange={ ( val ) => {
 							setEditableAttribute( {
-								...( editableAttribute as HydratedAttributeType ),
+								...( editableAttribute as EnhancedProductAttribute ),
 								options: val,
 							} );
 						} }
@@ -126,7 +126,7 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 					<CheckboxControl
 						onChange={ ( val ) =>
 							setEditableAttribute( {
-								...( editableAttribute as HydratedAttributeType ),
+								...( editableAttribute as EnhancedProductAttribute ),
 								visible: val,
 							} )
 						}
@@ -148,7 +148,7 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 					isPrimary
 					label={ updateAccessibleLabel }
 					onClick={ () => {
-						onEdit( editableAttribute as HydratedAttributeType );
+						onEdit( editableAttribute as EnhancedProductAttribute );
 					} }
 				>
 					{ updateLabel }

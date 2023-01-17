@@ -8,7 +8,7 @@ import { ProductAttribute } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { AttributeField } from '../attribute-field';
+import { AttributeControl } from '../attribute-control';
 
 const attributeList: ProductAttribute[] = [
 	{
@@ -102,7 +102,7 @@ jest.mock( '@woocommerce/components', () => ( {
 	},
 } ) );
 
-describe( 'AttributeField', () => {
+describe( 'AttributeControl', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 	} );
@@ -110,17 +110,17 @@ describe( 'AttributeField', () => {
 	describe( 'empty state', () => {
 		it( 'should show subtitle and "Add first attribute" button', () => {
 			const { queryByText } = render(
-				<AttributeField value={ [] } onChange={ () => {} } />
+				<AttributeControl value={ [] } onChange={ () => {} } />
 			);
 			expect( queryByText( 'No attributes yet' ) ).toBeInTheDocument();
 			expect( queryByText( 'Add first attribute' ) ).toBeInTheDocument();
 		} );
 	} );
 
-	it( 'should render the list of existing attributes', async () => {
+	it( 'should render the list of all attributes', async () => {
 		act( () => {
 			render(
-				<AttributeField
+				<AttributeControl
 					value={ [ ...attributeList ] }
 					onChange={ () => {} }
 				/>
@@ -128,20 +128,20 @@ describe( 'AttributeField', () => {
 		} );
 
 		expect(
-			await screen.findByText( 'No attributes yet' )
+			await screen.queryByText( 'No attributes yet' )
 		).not.toBeInTheDocument();
 		expect(
-			await screen.findByText( attributeList[ 0 ].name )
+			await screen.queryByText( attributeList[ 0 ].name )
 		).toBeInTheDocument();
 		expect(
 			await screen.queryByText( attributeList[ 1 ].name )
-		).not.toBeInTheDocument();
+		).toBeInTheDocument();
 	} );
 
 	it( 'should render the first two terms of each option, and show "+ n more" for the rest', async () => {
 		act( () => {
 			render(
-				<AttributeField
+				<AttributeControl
 					value={ [ ...attributeList ] }
 					onChange={ () => {} }
 					attributeType="for-variations"
@@ -149,9 +149,6 @@ describe( 'AttributeField', () => {
 			);
 		} );
 
-		expect(
-			await screen.queryByText( attributeList[ 0 ].options[ 0 ] )
-		).not.toBeInTheDocument();
 		expect(
 			await screen.findByText( attributeList[ 1 ].options[ 0 ] )
 		).toBeInTheDocument();
@@ -173,7 +170,7 @@ describe( 'AttributeField', () => {
 			jest.spyOn( global, 'confirm' ).mockReturnValueOnce( false );
 			act( () => {
 				render(
-					<AttributeField
+					<AttributeControl
 						value={ [ ...attributeList ] }
 						onChange={ () => {} }
 					/>
@@ -191,7 +188,7 @@ describe( 'AttributeField', () => {
 
 			act( () => {
 				render(
-					<AttributeField
+					<AttributeControl
 						value={ [ ...attributeList ] }
 						onChange={ onChange }
 					/>
@@ -211,7 +208,7 @@ describe( 'AttributeField', () => {
 			const onChange = jest.fn();
 			act( () => {
 				render(
-					<AttributeField
+					<AttributeControl
 						value={ [ ...attributeList ] }
 						onChange={ onChange }
 					/>
@@ -232,7 +229,7 @@ describe( 'AttributeField', () => {
 
 			act( () => {
 				render(
-					<AttributeField
+					<AttributeControl
 						value={ [ ...attributeList ] }
 						onChange={ onChange }
 					/>

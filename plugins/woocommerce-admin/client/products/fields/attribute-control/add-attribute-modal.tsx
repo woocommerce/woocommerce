@@ -26,7 +26,7 @@ import {
 	AttributeTermInputField,
 	CustomAttributeTermInputField,
 } from '../attribute-term-input-field';
-import { HydratedAttributeType } from '../attribute-field';
+import { EnhancedProductAttribute } from '~/products/hooks/use-product-attributes';
 import { getProductAttributeObject } from './utils';
 
 type AddAttributeModalProps = {
@@ -46,12 +46,12 @@ type AddAttributeModalProps = {
 	confirmCancelLabel?: string;
 	confirmConfirmLabel?: string;
 	onCancel: () => void;
-	onAdd: ( newCategories: HydratedAttributeType[] ) => void;
+	onAdd: ( newCategories: EnhancedProductAttribute[] ) => void;
 	selectedAttributeIds?: number[];
 };
 
 type AttributeForm = {
-	attributes: Array< HydratedAttributeType | null >;
+	attributes: Array< EnhancedProductAttribute | null >;
 };
 
 export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
@@ -92,7 +92,7 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 	};
 
 	const onAddingAttributes = ( values: AttributeForm ) => {
-		const newAttributesToAdd: HydratedAttributeType[] = [];
+		const newAttributesToAdd: EnhancedProductAttribute[] = [];
 		values.attributes.forEach( ( attr ) => {
 			if (
 				attr !== null &&
@@ -105,7 +105,7 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 						? ( attr.terms || [] ).map( ( term ) => term.name )
 						: attr.options;
 				newAttributesToAdd.push( {
-					...( attr as HydratedAttributeType ),
+					...( attr as EnhancedProductAttribute ),
 					options,
 				} );
 			}
