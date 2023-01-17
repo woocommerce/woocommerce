@@ -19,7 +19,7 @@ env:
 
 jobs:
     get-tag:
-        name: Download WooCommerce ZIP
+        name: Get WooCommerce release tag
         runs-on: ubuntu-20.04
         outputs:
             tag: ${{ steps.tag.outputs.result }}
