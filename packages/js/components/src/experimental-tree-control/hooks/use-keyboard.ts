@@ -2,11 +2,10 @@
  * External dependencies
  */
 
-import { LinkedTree } from '../types';
-
 /**
  * Internal dependencies
  */
+import { LinkedTree } from '../types';
 
 function getFirstChild(
 	currentHeading: HTMLDivElement
@@ -62,7 +61,7 @@ function getNextFocusableElement(
 		currentHeadingIndex++;
 	}
 	if (
-		0 > currentHeadingIndex ||
+		currentHeadingIndex < 0 ||
 		currentHeadingIndex >= headingsNodeList.length
 	) {
 		return null;
