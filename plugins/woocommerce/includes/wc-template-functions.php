@@ -1817,8 +1817,8 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 		 * type to 'text' (this prevents most browsers from rendering increment/decrement arrows, which are useless
 		 * and/or confusing in this context).
 		 */
-		$type = $args['min_value']  > 0 && $args['min_value'] === $args['max_value'] ? 'hidden' : 'number';
-		$type = $args['readonly'] && $type !== 'hidden' ? 'text' : $type;
+		$type = $args['min_value'] > 0 && $args['min_value'] === $args['max_value'] ? 'hidden' : 'number';
+		$type = $args['readonly'] && 'hidden' !== $type ? 'text' : $type;
 
 		/**
 		 * Controls the quantity input's type attribute.
