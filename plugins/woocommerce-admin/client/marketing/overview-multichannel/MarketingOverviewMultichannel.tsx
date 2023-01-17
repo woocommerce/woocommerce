@@ -12,6 +12,7 @@ import { InstalledExtensions } from './InstalledExtensions';
 import { DiscoverTools } from './DiscoverTools';
 import { LearnMarketing } from './LearnMarketing';
 import '~/marketing/data';
+import '~/marketing/data-multichannel';
 import {
 	useRegisteredChannels,
 	useRecommendedChannels,
