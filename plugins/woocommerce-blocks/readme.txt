@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 6.1.1
 Tested up to: 6.1.1
 Requires PHP: 7.2
-Stable tag: 9.4.0-dev
+Stable tag: 9.4.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -79,6 +79,35 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 Release and roadmap notes available on the [WooCommerce Developers Blog](https://woocommerce.wordpress.com/2019/01/15/woocommerce-blocks-1-3-0-release-notes/)
 
 == Changelog ==
+
+= 9.4.0 - 2023-01-16 =
+
+#### Enhancements
+
+- Product Elements: Change the color of product elements (variations of core blocks) icon blocks to match the color of the core blocks. ([8155](https://github.com/woocommerce/woocommerce-blocks/pull/8155))
+- Added context for aria-label on cart quantity controls. ([8099](https://github.com/woocommerce/woocommerce-blocks/pull/8099))
+- Add Local Pickup shipping method and its blocks. ([7433](https://github.com/woocommerce/woocommerce-blocks/pull/7433))
+
+#### Bug Fixes
+
+- Prevent undefined variable notice on checkout. ([8197](https://github.com/woocommerce/woocommerce-blocks/pull/8197))
+- Allow Slot/Fills in the Cart and Checkout blocks to correctly render in the Block Editor. ([8111](https://github.com/woocommerce/woocommerce-blocks/pull/8111))
+- Attribute, Rating and Stock filters: Dropdown indicator icon display fix. ([8080](https://github.com/woocommerce/woocommerce-blocks/pull/8080))
+- Ensure the filter controls are consistently displayed in the editor. ([8079](https://github.com/woocommerce/woocommerce-blocks/pull/8079))
+- Ensure the Checkout Totals and Checkout Order Summary blocks cannot be removed from the Checkout block. ([7873](https://github.com/woocommerce/woocommerce-blocks/pull/7873))
+- Correctly detect compatible express payment methods. ([8201](https://github.com/woocommerce/woocommerce-blocks/pull/8201))
+
+#### Documentation
+
+- Add Customer Account block name to readme.txt. ([8114](https://github.com/woocommerce/woocommerce-blocks/pull/8114))
+
+#### Technical debt
+
+- Update validation messages to reference the name of the invalid field. ([8143](https://github.com/woocommerce/woocommerce-blocks/pull/8143))
+
+#### Compatibility
+
+- Update minimum PHP required version to 7.2. ([8154](https://github.com/woocommerce/woocommerce-blocks/pull/8154))
 
 = 9.3.0 - 2023-01-02 =
 
