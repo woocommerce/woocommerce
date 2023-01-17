@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Corrects a typo in the i18n/states.php file, relating to our list of Iranian states.
