@@ -35,6 +35,12 @@ namespace Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks;
  * executed inside tests (and thus the above example won't stack-overflow).
  */
 final class StaticMockerHack extends CodeHack {
+	/**
+	 * An associative array of class name => array of class methods.
+	 *
+	 * @var array
+	 */
+	private $mockable_classes;
 
 	/**
 	 * @var StaticMockerHack Holds the only existing instance of the class.
