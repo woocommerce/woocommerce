@@ -483,10 +483,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
 				$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
-
+				$variations_query = $this->subquery->get_query_statement();
 			}
-
-			$variations_query = $this->subquery->get_query_statement();
 
 			/* phpcs:disable WordPress.DB.PreparedSQL.NotPrepared */
 			$product_data = $wpdb->get_results(
