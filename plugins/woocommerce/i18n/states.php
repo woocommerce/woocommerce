@@ -815,7 +815,7 @@ return array(
 		'LD' => __( 'Lakshadeep', 'woocommerce' ),
 		'PY' => __( 'Pondicherry (Puducherry)', 'woocommerce' ),
 	),
-	'IR' => array( // Irania states.
+	'IR' => array( // Iranian states.
 		'KHZ' => __( 'Khuzestan (خوزستان)', 'woocommerce' ),
 		'THR' => __( 'Tehran (تهران)', 'woocommerce' ),
 		'ILM' => __( 'Ilaam (ایلام)', 'woocommerce' ),
