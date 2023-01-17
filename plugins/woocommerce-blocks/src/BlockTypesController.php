@@ -189,6 +189,7 @@ final class BlockTypesController {
 			'ProductPrice',
 			'ProductQuery',
 			'ProductRating',
+			'ProductResultsCount',
 			'ProductSaleBadge',
 			'ProductSearch',
 			'ProductSKU',
@@ -247,6 +248,7 @@ final class BlockTypesController {
 				$block_types,
 				[
 					'ClassicTemplate',
+					'ProductResultsCount',
 				]
 			);
 		}
