@@ -37,12 +37,12 @@ type EllipsisMenuProps = {
  * This is a dropdown menu hidden behind a vertical ellipsis icon. When clicked, the inner MenuItems are displayed.
  */
 
-const EllipsisMenu: React.VFC< EllipsisMenuProps > = ( {
+const EllipsisMenu = ( {
 	label,
 	renderContent,
 	className,
 	onToggle,
-} ) => {
+}: EllipsisMenuProps ) => {
 	if ( ! renderContent ) {
 		return null;
 	}
