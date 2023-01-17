@@ -21,7 +21,7 @@ export { default as FilterPicker } from './filter-picker';
 export { H, Section } from './section';
 export { ImageGallery, ImageGalleryItem } from './image-gallery';
 export { default as ImageUpload } from './image-upload';
-export { default as Link } from './link';
+export { Link } from './link';
 export { default as List } from './list';
 export { MediaUploader } from './media-uploader';
 export { default as MenuItem } from './ellipsis-menu/menu-item';
@@ -84,3 +84,11 @@ export { DynamicForm } from './dynamic-form';
 export { default as TourKit } from './tour-kit';
 export * as TourKitTypes from './tour-kit/types';
 export { CollapsibleContent } from './collapsible-content';
+export { createOrderedChildren, sortFillsByOrder } from './utils';
+export { WooProductFieldItem as __experimentalWooProductFieldItem } from './woo-product-field-item';
+export { WooProductSectionItem as __experimentalWooProductSectionItem } from './woo-product-section-item';
+export {
+	ProductSectionLayout as __experimentalProductSectionLayout,
+	ProductFieldSection as __experimentalProductFieldSection,
+} from './product-section-layout';
+export * from './product-fields';

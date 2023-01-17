@@ -55,13 +55,21 @@ export interface ProductVariationImage {
 
 export type ProductVariation = Omit<
 	Product,
-	'name' | 'slug' | 'attributes' | 'images'
+	'name' | 'slug' | 'attributes' | 'images' | 'manage_stock'
 > & {
 	attributes: ProductVariationAttribute[];
 	/**
 	 * Variation image data.
 	 */
 	image?: ProductVariationImage;
+	/**
+	 * Stock management at variation level. It can have a
+	 * 'parent' value if the parent product is managing
+	 * the stock at the time the variation was created.
+	 *
+	 * @default false
+	 */
+	manage_stock: boolean | 'parent';
 };
 
 type Query = Omit< ProductQuery, 'name' >;

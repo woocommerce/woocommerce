@@ -522,11 +522,23 @@ class OrdersTableQuery {
 			}
 		}
 
+		$allowed_orderby = array_merge(
+			array_keys( $mapping ),
+			array_values( $mapping ),
+			$this->meta_query ? $this->meta_query->get_orderby_keys() : array()
+		);
+
 		$this->args['orderby'] = array();
 		foreach ( $orderby as $order_key => $order ) {
-			if ( isset( $mapping[ $order_key ] ) ) {
-				$this->args['orderby'][ $mapping[ $order_key ] ] = $this->sanitize_order( $order );
+			if ( ! in_array( $order_key, $allowed_orderby, true ) ) {
+				continue;
 			}
+
+			if ( isset( $mapping[ $order_key ] ) ) {
+				$order_key = $mapping[ $order_key ];
+			}
+
+			$this->args['orderby'][ $order_key ] = $this->sanitize_order( $order );
 		}
 	}
 
@@ -991,8 +1003,14 @@ class OrdersTableQuery {
 			return;
 		}
 
+		$meta_orderby_keys = $this->meta_query ? $this->meta_query->get_orderby_keys() : array();
+
 		$orderby_array = array();
 		foreach ( $this->args['orderby'] as $_orderby => $order ) {
+			if ( in_array( $_orderby, $meta_orderby_keys, true ) ) {
+				$_orderby = $this->meta_query->get_orderby_clause_for_key( $_orderby );
+			}
+
 			$orderby_array[] = "{$_orderby} {$order}";
 		}
 

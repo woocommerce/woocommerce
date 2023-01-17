@@ -57,10 +57,10 @@ let admin_update_order_assert;
 if ( cot_status === true ) {
 	admin_new_order_base = 'admin.php?page=wc-orders&action=new';
 	admin_update_order_base = 'admin.php?page=wc-orders&action=edit';
-	admin_new_order_assert = 'Edit order		</h1>';
-	admin_open_order_assert = 'Edit order		</h1>';
+	admin_new_order_assert = 'post_status" type="hidden" value="auto-draft';
+	admin_open_order_assert = 'post_status" type="hidden" value="pending';
 	admin_created_order_assert = 'changed from auto-draft to';
-	admin_update_order_assert = 'changed from auto-draft to';
+	admin_update_order_assert = 'changed from Pending payment to Completed';
 } else {
 	admin_new_order_base = 'post-new.php?post_type=shop_order';
 	admin_update_order_base = 'post.php';
@@ -145,7 +145,11 @@ export function addOrder() {
 			.find( 'input[id=post_ID]' )
 			.first()
 			.attr( 'value' );
-		hpos_post_id = findBetween( response.body, 'post_id":"', '",' );
+		hpos_post_id = findBetween(
+			response.body,
+			';id=',
+			'" method="post" id="order"'
+		);
 		heartbeat_nonce = findBetween(
 			response.body,
 			'heartbeatSettings = {"nonce":"',
@@ -299,18 +303,18 @@ export function addOrder() {
 			[ 'order_date_second', '01' ],
 			[ 'order_note', '' ],
 			[ 'order_note_type', '' ],
-			[ 'order_status', 'wc-pending' ], //change
-			[ 'original_post_status', 'auto-draft' ], //wc-pending
-			[ 'original_post_title', '' ], //string
+			[ 'order_status', 'wc-pending' ],
+			[ 'original_post_status', 'auto-draft' ],
+			[ 'original_post_title', '' ],
 			[ 'originalaction', 'editpost' ],
 			[ 'post_ID', `${ post_id }` ],
 			[ 'post_author', '1' ],
-			[ 'post_status', 'auto-draft' ], //pending
-			[ 'post_title', '%2COrder' ], //string
+			[ 'post_status', 'auto-draft' ],
+			[ 'post_title', '%2COrder' ],
 			[ 'post_type', 'shop_order' ],
 			[ 'referredby', '' ],
 			[ 'samplepermalinknonce', `${ sample_permalink_nonce }` ],
-			[ 'save', 'Create' ], //Update
+			[ 'save', 'Create' ],
 			[ 'user_ID', '1' ],
 			[ 'wc_order_action', '' ],
 			[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
@@ -361,11 +365,11 @@ export function addOrder() {
 			[ 'order_note', '' ],
 			[ 'order_note_type', '' ],
 			[ 'order_status', 'wc-pending' ],
-			[ 'original_order_status', 'auto-draft' ], //pending
-			[ 'post_status', 'auto-draft' ], //pending
+			[ 'original_order_status', 'auto-draft' ],
+			[ 'post_status', 'auto-draft' ],
 			[ 'post_title', 'Order' ],
 			[ 'referredby', '' ],
-			[ 'save', 'Create' ], //Save
+			[ 'save', 'Create' ],
 			[ 'wc_order_action', '' ],
 			[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 		] );
@@ -487,12 +491,12 @@ export function addOrder() {
 			[ 'order_note_type', '' ],
 			[ 'order_status', 'wc-completed' ],
 			[ 'original_post_status', 'wc-pending' ],
-			[ 'original_post_title', '' ], //string
+			[ 'original_post_title', '' ],
 			[ 'originalaction', 'editpost' ],
 			[ 'post_ID', `${ post_id }` ],
 			[ 'post_author', '1' ],
 			[ 'post_status', 'pending' ],
-			[ 'post_title', '%2COrder' ], //string
+			[ 'post_title', '%2COrder' ],
 			[ 'post_type', 'shop_order' ],
 			[ 'referredby', '' ],
 			[ 'samplepermalinknonce', `${ sample_permalink_nonce }` ],
@@ -574,8 +578,6 @@ export function addOrder() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			"body contains: 'Edit order' header": ( response ) =>
-				response.body.includes( `${ admin_open_order_assert }` ),
 			"body contains: 'Order updated' confirmation": ( response ) =>
 				response.body.includes( `${ admin_update_order_assert }` ),
 		} );

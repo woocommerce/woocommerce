@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Customers REST API endpoint will now return user metadata only when requester has an administrator role

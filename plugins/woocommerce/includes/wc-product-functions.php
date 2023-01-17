@@ -788,7 +788,7 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		}
 
 		$alt_text     = array_filter( $alt_text );
-		$props['alt'] = isset( $alt_text[0] ) ? $alt_text[0] : '';
+		$props['alt'] = $alt_text ? reset( $alt_text ) : '';
 
 		// Large version.
 		$full_size           = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );

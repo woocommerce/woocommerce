@@ -18,9 +18,7 @@ class WC_Beta_Tester_Live_Branches {
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
 
 		// By the time this code runs it appears too late to hook into `admin_menu`.
-
-		// NOTE - We don't have feature flags, so add the following code to enable it
-		// in development: `$this->register_page()`.
+		$this->register_page();
 	}
 
 	/**

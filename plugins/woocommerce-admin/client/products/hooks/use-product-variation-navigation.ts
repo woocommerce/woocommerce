@@ -29,7 +29,11 @@ export default function useProductVariationNavigation( {
 	const persistedQuery = getPersistedQuery();
 
 	return {
-		actionHref: getNewPath( persistedQuery, `/product/${ product.id }` ),
+		actionHref: getNewPath(
+			persistedQuery,
+			`/product/${ product.id }`,
+			{}
+		),
 		prevHref: prevVariationId
 			? getNewPath(
 					persistedQuery,
