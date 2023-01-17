@@ -12,6 +12,7 @@ import { useExpander } from './use-expander';
 export function useTreeItem( {
 	item,
 	level,
+	getLabel,
 	shouldItemBeExpanded,
 	...props
 }: TreeItemProps ) {
@@ -26,6 +27,7 @@ export function useTreeItem( {
 		item,
 		level: nextLevel,
 		expander,
+		getLabel,
 		treeItemProps: {
 			...props,
 		},
@@ -37,6 +39,7 @@ export function useTreeItem( {
 		treeProps: {
 			items: item.children,
 			level: nextLevel,
+			getItemLabel: getLabel,
 			shouldItemBeExpanded,
 		},
 	};

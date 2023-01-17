@@ -23,7 +23,8 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 		treeItemProps,
 		headingProps,
 		treeProps,
-		expander: { isExpanded, onToggleExpand },
+		expander: { isExpanded, onToggleExpand, getLabel },
+		getLabel,
 	} = useTreeItem( {
 		...props,
 		ref,
@@ -42,7 +43,11 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				className="experimental-woocommerce-tree-item__heading"
 			>
 				<div className="experimental-woocommerce-tree-item__label">
-					<span>{ item.data.label }</span>
+					{ typeof getLabel === 'function' ? (
+						getLabel( item )
+					) : (
+						<span>{ item.data.label }</span>
+					) }
 				</div>
 
 				{ Boolean( item.children?.length ) && (
