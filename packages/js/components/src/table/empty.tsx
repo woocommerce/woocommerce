@@ -8,7 +8,7 @@ type EmptyTableProps = {
 	children: React.ReactNode;
 
 	/** An integer with the number of rows the box should occupy. */
-	numberOfRows: number;
+	numberOfRows?: number;
 };
 
 /**
