@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore the pre-7.2.0 behavior for single product quantity inputs.
