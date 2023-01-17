@@ -168,6 +168,7 @@ final class BlockTypesController {
 			'AllProducts',
 			'AllReviews',
 			'AttributeFilter',
+			'CatalogSorting',
 			'ClassicTemplate',
 			'CustomerAccount',
 			'FeaturedCategory',
@@ -247,6 +248,7 @@ final class BlockTypesController {
 			$block_types = array_diff(
 				$block_types,
 				[
+					'CatalogSorting',
 					'ClassicTemplate',
 					'ProductResultsCount',
 				]

@@ -21,6 +21,7 @@ const blocks = {
 	},
 	'attribute-filter': {},
 	cart: {},
+	'catalog-sorting': {},
 	checkout: {},
 	'customer-account': {},
 	'featured-category': {
