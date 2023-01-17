@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal;
 
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use WC_Product;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -102,7 +103,7 @@ class DownloadPermissionsAdjuster {
 			$child = wc_get_product( $child_id );
 
 			// Ensure we have a valid child product.
-			if ( ! $child ) {
+			if ( ! $child instanceof WC_Product ) {
 				wc_get_logger()->warning(
 					sprintf(
 						/* translators: 1: child product ID 2: parent product ID. */
