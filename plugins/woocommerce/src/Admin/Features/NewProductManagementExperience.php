@@ -51,7 +51,7 @@ class NewProductManagementExperience {
 	 * @return string
 	 */
 	public function update_edit_product_link( $link, $post_id ) {
-		$product  = wc_get_product( $post_id );
+		$product = wc_get_product( $post_id );
 
 		if ( ! $product ) {
 			return $link;
