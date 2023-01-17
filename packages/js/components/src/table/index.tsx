@@ -94,7 +94,7 @@ const TableCard: React.VFC< TableCardProps > = ( {
 					onQueryChange( 'sort' )( defaultSort.key, 'desc' );
 				}
 
-				const newShowCols = without( showCols, key ) as string[];
+				const newShowCols = without( showCols, key );
 				onColumnsChange( newShowCols, key );
 				setShowCols( newShowCols );
 			} else {
