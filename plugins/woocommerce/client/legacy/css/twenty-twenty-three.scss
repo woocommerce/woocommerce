@@ -1126,44 +1126,42 @@ Notice messages (like 'Added to cart', 'Billing address needs to be filled in', 
   border-top-color: var( --wp--preset--color--primary );
   border-top-style: solid;
   border-top-width: 2px;
-  padding: 1rem 1.5rem;
+  padding: 1rem 1.5rem 1rem 3.5rem;
   margin-bottom: 2rem;
   list-style: none;
   font-size: var( --wp--preset--font-size--small );
-  display: flow-root;
+  position: relative;
+
+  @include clearfix();
 
   &[role='alert']::before {
     background: #d5d5d5;
     color: black;
     border-radius: 5rem;
     font-size: 1rem;
-    padding-left: 3px;
-    padding-right: 3px;
+    content: "\e028";
+    display: inline-block;
     margin-right: 1rem;
+    height: 1.5em;
+    line-height: 1.5em;
+    text-align: center;
+    width: 1.5em;
+    position: absolute;
+    top: 1em;
+    left: 1.5em;
   }
 
-  a {
-    color: var( --wp--preset--color--contrast );
-
-    .button {
-      margin-top: -0.5rem;
-      border: none;
-      padding: 0.5rem 1rem;
-    }
+  a.button {
+    margin-bottom: -0.5rem;
+    margin-top: -0.5rem;
+    border: none;
+    padding: 0.5rem 1rem;
   }
 }
 
-.woocommerce-error[role='alert'] {
-  margin: 0;
-
-  &::before {
+.woocommerce-error {
+  &[role='alert']::before {
     content: 'X';
-    padding-right: 4px;
-    padding-left: 4px;
-  }
-
-  li {
-    display: inline-block;
   }
 }
 
