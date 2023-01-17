@@ -468,10 +468,10 @@ export const shopper = {
 				'#wc-block-components-totals-coupon__input-0';
 			const couponApplyButtonSelector =
 				'.wc-block-components-totals-coupon__button';
-			const couponExpandButtonSelector =
-				'.wc-block-components-totals-coupon button';
+			const addCouponLinkSelector =
+				'.wc-block-components-totals-coupon-link';
 
-			await expect( page ).toClick( couponExpandButtonSelector );
+			await expect( page ).toClick( addCouponLinkSelector );
 			await expect( page ).toFill( couponInputSelector, couponCode );
 			await expect( page ).toClick( couponApplyButtonSelector );
 		},

@@ -33,10 +33,10 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 			},
 			[],
 		],
+		[ 'woocommerce/cart-order-summary-coupon-form-block', {}, [] ],
 		[ 'woocommerce/cart-order-summary-subtotal-block', {}, [] ],
 		[ 'woocommerce/cart-order-summary-fee-block', {}, [] ],
 		[ 'woocommerce/cart-order-summary-discount-block', {}, [] ],
-		[ 'woocommerce/cart-order-summary-coupon-form-block', {}, [] ],
 		[ 'woocommerce/cart-order-summary-shipping-block', {}, [] ],
 		[ 'woocommerce/cart-order-summary-taxes-block', {}, [] ],
 	] as TemplateArray;
