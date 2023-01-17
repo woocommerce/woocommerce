@@ -48,6 +48,7 @@ const blocks = {
 	'product-query': {
 		isExperimental: true,
 	},
+	'product-results-count': {},
 	'product-search': {},
 	'product-tag': {},
 	'product-top-rated': {},
