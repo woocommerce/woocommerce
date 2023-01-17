@@ -42,7 +42,7 @@ class DataStore extends SqlQuery {
 	 *
 	 * @var string
 	 */
-	protected $date_column_name = 'date_created';
+	protected $date_column_name = 'date_paid';
 
 	/**
 	 * Mapping columns to data type to return correct response types.
