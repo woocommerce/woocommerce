@@ -1,25 +1,28 @@
 /**
  * External dependencies
  */
-import { useState, useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
-import apiFetch from '@wordpress/api-fetch';
+import { useSelect } from '@wordpress/data';
+import {
+	EXPERIMENTAL_PRODUCT_FORM_STORE_NAME,
+	WCDataSelector,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
-import { ProductForm } from './types';
 import { Fields } from './product-form-field-fills';
 import { Sections } from './product-form-section-fills';
 
 const Form = () => {
-	const [ formData, setFormData ] = useState< ProductForm >();
+	const { formData } = useSelect( ( select: WCDataSelector ) => {
+		return {
+			formData: select(
+				EXPERIMENTAL_PRODUCT_FORM_STORE_NAME
+			).getProductForm(),
+		};
+	} );
 
-	useEffect( () => {
-		apiFetch< ProductForm >( { path: '/wc-admin/product-form' } ).then(
-			( data ) => setFormData( data )
-		);
-	}, [] );
 	return (
 		<>
 			{ formData && (

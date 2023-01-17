@@ -28,6 +28,7 @@ const DetailsSection = () => (
 			id={ DETAILS_SECTION_ID }
 			location="tab/general"
 			pluginId="core"
+			order={ 1 }
 		>
 			<ProductFieldSection
 				id="general/details"

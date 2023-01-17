@@ -7,14 +7,11 @@ import {
 	renderField,
 	useFormContext,
 } from '@woocommerce/components';
-import { Product } from '@woocommerce/data';
+import { Product, ProductFormField } from '@woocommerce/data';
 
-/**
- * Internal dependencies
- */
-import { Field } from './types';
-
-export const Fields: React.FC< { fields: Field[] } > = ( { fields } ) => {
+export const Fields: React.FC< { fields: ProductFormField[] } > = ( {
+	fields,
+} ) => {
 	const { getInputProps } = useFormContext< Product >();
 
 	return (

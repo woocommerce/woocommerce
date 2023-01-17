@@ -2,9 +2,9 @@
  * Internal dependencies
  */
 import TYPES from './action-types';
-import { Field, ProductForm } from './types';
+import { ProductFormField, ProductForm } from './types';
 
-export function getFieldsSuccess( fields: Field[] ) {
+export function getFieldsSuccess( fields: ProductFormField[] ) {
 	return {
 		type: TYPES.GET_FIELDS_SUCCESS as const,
 		fields,

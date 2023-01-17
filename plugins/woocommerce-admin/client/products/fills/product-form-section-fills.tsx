@@ -3,14 +3,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Card, CardBody } from '@wordpress/components';
-import { __experimentalWooProductSectionItem as WooProductSectionItem } from '@woocommerce/components';
+import {
+	__experimentalWooProductSectionItem as WooProductSectionItem,
+	__experimentalProductFieldSection as ProductFieldSection,
+} from '@woocommerce/components';
+import { ProductFormSection } from '@woocommerce/data';
 
-/**
- * Internal dependencies
- */
-import { Section } from './types';
-
-export const Sections: React.FC< { sections: Section[] } > = ( {
+export const Sections: React.FC< { sections: ProductFormSection[] } > = ( {
 	sections,
 } ) => {
 	return (
@@ -23,9 +22,11 @@ export const Sections: React.FC< { sections: Section[] } > = ( {
 					pluginId={ section.plugin_id }
 					order={ section.order }
 				>
-					<Card>
-						<CardBody>Test</CardBody>
-					</Card>
+					<ProductFieldSection
+						id={ section.id }
+						title={ section.title }
+						description={ section.description }
+					/>
 				</WooProductSectionItem>
 			) ) }
 		</>
