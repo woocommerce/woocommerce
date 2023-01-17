@@ -1,9 +1,9 @@
 {
-	"name": "{{extension_slug}}",
-	"title": "{{extension_name}}",
+	"name": "add-abbreviated-notification-example",
+	"title": "add-abbreviated-notification",
 	"license": "GPL-3.0-or-later",
 	"version": "0.1.0",
-	"description": "{{extension_name}}",
+	"description": "add-abbreviated-notification",
 	"scripts": {
 		"build": "wp-scripts build",
 		"check-engines": "wp-scripts check-engines",
@@ -20,11 +20,12 @@
 		"test:unit": "wp-scripts test-unit-js"
 	},
 	"devDependencies": {
-		"@wordpress/scripts": "^25.1.0",
+		"@woocommerce/dependency-extraction-webpack-plugin": "2.2.0",
 		"@woocommerce/eslint-plugin": "2.2.0",
-		"@woocommerce/dependency-extraction-webpack-plugin": "2.2.0"
+		"@wordpress/scripts": "^25.1.0"
 	},
 	"dependencies": {
-		"@wordpress/hooks": "^3.24.0"
+		"@wordpress/hooks": "^3.24.0",
+		"@wordpress/icons": "^9.15.0"
 	}
 }

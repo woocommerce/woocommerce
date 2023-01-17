@@ -25,6 +25,7 @@
 		"@woocommerce/dependency-extraction-webpack-plugin": "2.2.0"
 	},
 	"dependencies": {
+		"@woocommerce/onboarding": "^3.2.0",
 		"@wordpress/hooks": "^3.24.0"
 	}
 }

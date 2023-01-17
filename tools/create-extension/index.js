@@ -2,6 +2,7 @@ const fs = require( 'fs-extra' );
 const path = require( 'path' );
 const promptly = require( 'promptly' );
 const chalk = require( 'chalk' );
+const program = require( 'commander' );
 
 const files = [
 	'._gitignore',
@@ -17,6 +18,12 @@ const maybeThrowError = ( error ) => {
 	if ( error ) throw error;
 };
 
+program.option( '-e, --example [example]', 'Create extension with example' );
+
+program.parse( process.argv );
+
+const options = program.opts();
+
 ( async () => {
 	console.log( '\n' );
 	console.log(
@@ -25,17 +32,43 @@ const maybeThrowError = ( error ) => {
 		)
 	);
 	console.log( '\n' );
-	const extensionName = await promptly.prompt(
-		chalk.yellow( 'What is the name of your extension?' )
-	);
+	let extensionName = '';
+	let isExample = false;
+	if ( ! options.example ) {
+		extensionName = await promptly.prompt(
+			chalk.yellow( 'What is the name of your extension?' )
+		);
+	} else {
+		extensionName = options.example;
+		const extensionPath = path.join(
+			__dirname,
+			`examples/${ extensionName }/src/index.js`
+		);
 
-	const extensionSlug = extensionName.replace( / /g, '-' ).toLowerCase();
+		if ( ! fs.existsSync( extensionPath ) ) {
+			throw new Error( 'Extension example does not exist.' );
+		} else {
+			isExample = true;
+		}
+	}
+
+	const extensionSlug =
+		extensionName.replace( / /g, '-' ).toLowerCase() +
+		( isExample ? '-example' : '' );
 	const folder = path.join( __dirname, extensionSlug );
 
-	fs.mkdir( folder, maybeThrowError );
+	fs.mkdirSync( folder, maybeThrowError );
 
 	files.forEach( ( file ) => {
-		const from = path.join( __dirname, file );
+		let from = path.join( __dirname, file );
+		if (
+			isExample &&
+			fs.existsSync(
+				path.join( __dirname, `examples/${ extensionName }`, file )
+			)
+		) {
+			from = path.join( __dirname, `examples/${ extensionName }`, file );
+		}
 		const to = path.join(
 			folder,
 			file === '_main.php'
@@ -43,8 +76,8 @@ const maybeThrowError = ( error ) => {
 				: file.replace( '_', '' )
 		);
 
-		fs.readFile( from, 'utf8', ( error, data ) => {
-			maybeThrowError( error );
+		try {
+			const data = fs.readFileSync( from, 'utf8' );
 
 			const addSlugs = data.replace(
 				/{{extension_slug}}/g,
@@ -55,21 +88,45 @@ const maybeThrowError = ( error ) => {
 				extensionName
 			);
 
-			fs.writeFile( to, result, 'utf8', maybeThrowError );
-		} );
+			fs.writeFileSync( to, result, 'utf8' );
+		} catch ( error ) {
+			maybeThrowError( error );
+		}
 	} );
 
-	fs.copy(
-		path.join( __dirname, 'src' ),
-		path.join( folder, 'src' ),
-		maybeThrowError
-	);
+	const fromSrcPath = [ __dirname ];
+	if ( isExample ) {
+		fromSrcPath.push( 'examples', extensionName );
+	}
 
-	fs.copy( folder, path.join( '../', extensionSlug ), ( error ) => {
+	fs.mkdir( path.join( folder, 'src' ), maybeThrowError );
+	try {
+		fs.copySync(
+			path.join( ...fromSrcPath, 'src' ),
+			path.join( folder, 'src' )
+		);
+	} catch ( e ) {
+		maybeThrowError( e );
+	}
+
+	if ( fs.existsSync( path.join( ...fromSrcPath, 'includes' ) ) ) {
+		fs.mkdirSync( path.join( folder, 'includes' ) );
+		try {
+			fs.copySync(
+				path.join( ...fromSrcPath, 'includes' ),
+				path.join( folder, 'includes' )
+			);
+		} catch ( e ) {
+			maybeThrowError( e );
+		}
+	}
+
+	try {
+		fs.moveSync( folder, path.join( '../', extensionSlug ) );
+	} catch ( error ) {
 		maybeThrowError( error );
-
-		fs.remove( folder, maybeThrowError );
-	} );
+	}
+	fs.remove( folder, maybeThrowError );
 
 	process.stdout.write( '\n' );
 	console.log(

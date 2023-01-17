@@ -10,11 +10,18 @@ const woocommerceAdminConfig = require( path.resolve(
 ) );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 
-if ( ! process.env.WC_EXT ) {
+if (
+	! process.env.WC_EXT &&
+	! process.argv.find( ( arg ) => arg.startsWith( '--ext=' ) )
+) {
 	throw new Error( 'Please provide an extension.' );
 }
 
-const extension = process.env.WC_EXT;
+const extension =
+	process.env.WC_EXT ||
+	process.argv
+		.find( ( arg ) => arg.startsWith( '--ext=' ) )
+		.replace( '--ext=', '' );
 const extensionPath = path.join( __dirname, `${ extension }/js/index.js` );
 
 if ( ! fs.existsSync( extensionPath ) ) {
