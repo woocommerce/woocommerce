@@ -3,7 +3,7 @@
  */
 import interpolate from '@automattic/interpolate-components';
 import { BaseControl, TextControl } from '@wordpress/components';
-import React, { createElement, useCallback, useState } from 'react';
+import React, { createElement, useCallback, useRef, useState } from 'react';
 
 /**
  * Internal dependencies
@@ -203,6 +203,53 @@ export const SelectionMultiple: React.FC = () => {
 			</BaseControl>
 
 			<pre>{ JSON.stringify( selected, null, 2 ) }</pre>
+		</>
+	);
+};
+
+function getFirstMatchingItem(
+	item: LinkedTree,
+	text: string,
+	memo: Record< string, string >
+) {
+	if ( ! text ) return false;
+	if ( memo[ text ] === item.data.value ) return true;
+
+	const matcher = new RegExp( text, 'ig' );
+	if ( matcher.test( item.data.label ) ) {
+		if ( ! memo[ text ] ) {
+			memo[ text ] = item.data.value;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+export const HighlightFirstMatchingItem: React.FC = () => {
+	const [ text, setText ] = useState( '' );
+	const memo = useRef< Record< string, string > >( {} );
+
+	return (
+		<>
+			<TextControl value={ text } onChange={ setText } />
+			<BaseControl
+				label="Highlight first matching item"
+				id="highlight-first-matching-item"
+			>
+				<TreeControl
+					id="highlight-first-matching-item"
+					items={ listItems }
+					getItemLabel={ ( item ) => getItemLabel( item, text ) }
+					isItemExpanded={ useCallback(
+						( item ) => isItemExpanded( item, text ),
+						[ text ]
+					) }
+					isItemHighlighted={ ( item ) =>
+						getFirstMatchingItem( item, text, memo.current )
+					}
+				/>
+			</BaseControl>
 		</>
 	);
 };
