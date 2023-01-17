@@ -18,7 +18,7 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { EditProductLinkModal } from '../../shared/edit-product-link-modal';
-import { PRODUCT_DETAILS_SLUG } from './index';
+import { PRODUCT_DETAILS_SLUG } from '../constants';
 
 export const DetailsNameField = ( {} ) => {
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
