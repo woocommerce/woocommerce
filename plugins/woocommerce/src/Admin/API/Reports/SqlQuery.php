@@ -197,8 +197,6 @@ class SqlQuery {
 			";
 		}
 
-
-
 		if ( ! empty( $order_by ) ) {
 			$statement .= "
 				ORDER BY
