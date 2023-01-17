@@ -75,7 +75,7 @@ const TableCard: React.VFC< TableCardProps > = ( {
 				}
 				return false;
 			} )
-			.filter( Boolean );
+			.filter( Boolean ) as string[];
 	};
 
 	const [ showCols, setShowCols ] = useState( getShowCols( headers ) );
