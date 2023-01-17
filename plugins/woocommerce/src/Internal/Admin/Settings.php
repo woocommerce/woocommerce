@@ -288,6 +288,15 @@ class Settings {
 			'default'     => 'period=month&compare=previous_year',
 			'type'        => 'text',
 		);
+		$settings[] = array(
+			'id'          => 'woocommerce_type_of_date',
+			'option_key'  => 'woocommerce_type_of_date',
+			'label'       => __( 'TODO', 'woocommerce' ),
+			'description' => __( 'TODO', 'woocommerce' ),
+			'default'     => 'date_paid',
+			'type'        => 'select',
+			'options'     => array( 'date_created', 'date_paid', 'date_completed' )
+		);
 		return $settings;
 	}
 
