@@ -62,7 +62,7 @@ The source code is in the `assets/` folder and the compiled code is built into `
 
 ## Getting started with block development
 
-Run through the ["Writing Your First Block Type" tutorial](https://wordpress.org/gutenberg/handbook/designers-developers/developers/tutorials/block-tutorial/) for a quick course in block-building.
+Run through the ["Writing Your First Block Type" tutorial](https://developer.wordpress.org/block-editor/how-to-guides/block-tutorial/writing-your-first-block-type/) for a quick course in block-building.
 
 For deeper dive, try looking at the [core blocks code,](https://github.com/WordPress/gutenberg/tree/master/packages/block-library/src) or see what [components are available.](https://github.com/WordPress/gutenberg/tree/master/packages/components/src)
 
@@ -73,6 +73,7 @@ Other useful docs to explore:
 -   [`InnerBlocks`](https://github.com/WordPress/gutenberg/blob/master/packages/block-editor/src/components/inner-blocks/README.md)
 -   [`apiFetch`](https://wordpress.org/gutenberg/handbook/designers-developers/developers/packages/packages-api-fetch/)
 -   [`@wordpress/editor`](https://github.com/WordPress/gutenberg/blob/master/packages/editor/README.md)
+-   [`@wordpress/create-block`](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-create-block/)
 
 ## Long-term vision
 
