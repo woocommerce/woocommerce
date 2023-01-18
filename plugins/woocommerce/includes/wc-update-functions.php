@@ -2568,8 +2568,8 @@ function wc_update_740_add_columns_to_order_stats_table() {
 
 	$wpdb->get_var(
 		"ALTER TABLE wp_wc_order_stats
-		ADD COLUMN date_paid DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,
-		ADD COLUMN date_completed DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL;"
+		ADD COLUMN date_paid DATETIME DEFAULT '0000-00-00 00:00:00',
+		ADD COLUMN date_completed DATETIME DEFAULT '0000-00-00 00:00:00';"
 	);
 
 	$wpdb->get_var(
