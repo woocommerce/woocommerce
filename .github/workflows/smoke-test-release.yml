@@ -14,7 +14,7 @@ permissions: {}
 env:
     API_ARTIFACT: api-release--run-${{ github.run_number }}
     E2E_ARTIFACT: e2e-release--run-${{ github.run_number }}
-    E2E_WC_UPDATE_ARTIFACT: e2e-release-wc-update--run-${{ github.run_number }}
+    E2E_WC_UPDATE_ARTIFACT: e2e-wc-update--run-${{ github.run_number }}
     K6_ARTIFACT: k6-release--run-${{ github.run_number }}
     FORCE_COLOR: 1
 
@@ -172,6 +172,16 @@ jobs:
               timeout-minutes: 60
               working-directory: plugins/woocommerce
               run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js basic.spec.js
+
+            - name: Download 'e2e-update-wc' artifact
+              uses: actions/download-artifact@v3
+              with:
+                  name: ${{ env.E2E_WC_UPDATE_ARTIFACT }}
+                  path: plugins/woocommerce/tmp
+
+            - name: Add allure-results from 'e2e-update-wc'
+              working-directory: plugins/woocommerce
+              run: cp -r tmp/allure-results tests/e2e-pw/test-results
 
             - name: Generate E2E Test report.
               if: success() || failure()
@@ -463,3 +473,25 @@ jobs:
                       ${{ env.ALLURE_REPORT_DIR }}
                   if-no-files-found: ignore
                   retention-days: 5
+
+    publish-reports:
+        name: Publish Allure reports
+        if: |
+            ( success() || failure() ) &&
+            ! github.event.pull_request.head.repo.fork
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        needs: [e2e-release]
+        steps:
+            - name: Publish report for WP Latest
+              if: false
+              env:
+                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+              run: |
+                  gh workflow run publish-test-reports-release.yml \
+                    -f run_id=${{ github.run_id }} \
+                    -f api_artifact="${{ env.API_ARTIFACT }}" \
+                    -f e2e_artifact="${{ env.E2E_ARTIFACT }}" \
+                    -f s3_path="public/release/${{ jobs.get-tag.outputs.tag }}/wp-latest" \
+                    --repo woocommerce/woocommerce-test-reports
