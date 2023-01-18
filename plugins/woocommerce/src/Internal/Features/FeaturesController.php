@@ -608,9 +608,10 @@ class FeaturesController {
 			$desc_tip = __( 'WooCommerce Admin has been disabled', 'woocommerce' );
 		} elseif ( 'new_navigation' === $feature_id ) {
 			$update_text = sprintf(
-					__( '%1$s The development of this feature is currently on hold.', 'woocommerce' ),
-				'<br/>',
-				);
+				// translators: 1: line break tag.
+				__( '%1$s The development of this feature is currently on hold.', 'woocommerce' ),
+				'<br/>'
+			);
 			$description .= $update_text;
 			$disabled     = true;
 		}
