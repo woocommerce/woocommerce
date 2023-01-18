@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Fix and move extension examples to the create-extension tool.
