@@ -14,6 +14,7 @@ permissions: {}
 env:
     API_ARTIFACT: api-release--run-${{ github.run_number }}
     E2E_ARTIFACT: e2e-release--run-${{ github.run_number }}
+    E2E_WC_UPDATE_ARTIFACT: e2e-release-wc-update--run-${{ github.run_number }}
     K6_ARTIFACT: k6-release--run-${{ github.run_number }}
     FORCE_COLOR: 1
 
@@ -39,16 +40,15 @@ jobs:
                       console.log( "${{ github.event_name }}" );
                       return "${{ github.event.release.tag_name }}" || "${{ github.event.inputs.tag }}"
 
-    api-release:
-        name: API tests on release
+    e2e-update-wc:
+        name: Update WooCommerce version
         runs-on: ubuntu-20.04
         needs: [get-tag]
         permissions:
             contents: read
         env:
-            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-report
-            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-results
-            BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
         steps:
             - uses: actions/checkout@v3
 
@@ -67,12 +67,51 @@ jobs:
               env:
                   ADMIN_PASSWORD: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
                   ADMIN_USER: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
+                  BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
                   CUSTOMER_PASSWORD: ${{ secrets.RELEASE_TEST_CUSTOMER_PASSWORD }}
                   CUSTOMER_USER: ${{ secrets.RELEASE_TEST_CUSTOMER_USER }}
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
                   RESET_SITE: true
                   UPDATE_WC: ${{ needs.get-tag.outputs.tag }}
-              run: pnpm exec playwright test --config=tests/e2e-pw/daily.playwright.config.js update-woocommerce.spec.js
+              run: |
+                  pnpm exec playwright test \
+                      --config=tests/e2e-pw/daily.playwright.config.js \
+                      update-woocommerce.spec.js
+
+            - name: Generate 'Update WooCommerce' test report.
+              if: success() || failure()
+              working-directory: plugins/woocommerce
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+
+            - name: Archive 'Update WooCommerce' test report
+              if: success() || failure()
+              uses: actions/upload-artifact@v3
+              with:
+                  name: ${{ env.E2E_WC_UPDATE_ARTIFACT }}
+                  path: |
+                      ${{ env.ALLURE_RESULTS_DIR }}
+                      ${{ env.ALLURE_REPORT_DIR }}
+                  if-no-files-found: ignore
+                  retention-days: 5
+
+    api-release:
+        name: API tests on release
+        runs-on: ubuntu-20.04
+        needs: [e2e-update-wc]
+        permissions:
+            contents: read
+        env:
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-report
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-results
+            BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  install-filters: woocommerce
+                  build: false
 
             - name: Run API tests.
               working-directory: plugins/woocommerce
@@ -85,8 +124,6 @@ jobs:
               if: success() || failure()
               working-directory: plugins/woocommerce
               run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
-
-            # mytodo: add step to archive update-woocommerce.spec E2E test result
 
             - name: Archive API test report
               if: success() || failure()
@@ -134,9 +171,9 @@ jobs:
                   RESET_SITE: true
               timeout-minutes: 60
               working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js basic.spec.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js basic.spec.js
 
-            - name: Generate Playwright E2E Test report.
+            - name: Generate E2E Test report.
               if: success() || failure()
               working-directory: plugins/woocommerce
               run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
