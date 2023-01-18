@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -100,6 +101,17 @@ type UseRegisteredChannels = {
 
 const convert = ( data: Channel ): InstalledChannel => {
 	// TODO: map all the fields correctly from API to UI.
+
+	const issueType = data.errors_count >= 1 ? 'error' : 'none';
+	const issueText =
+		data.errors_count >= 1
+			? sprintf(
+					// translators: %d: The number of issues to resolve.
+					__( '%d issues to resolve', 'woocommerce' ),
+					data.errors_count
+			  )
+			: __( 'No issues to resolve', 'woocommerce' );
+
 	return {
 		slug: data.slug,
 		title: data.name,
@@ -109,8 +121,8 @@ const convert = ( data: Channel ): InstalledChannel => {
 		setupUrl: data.settings_url,
 		manageUrl: data.settings_url,
 		syncStatus: 'synced',
-		issueType: 'none',
-		issueText: '',
+		issueType,
+		issueText,
 	};
 };
 
