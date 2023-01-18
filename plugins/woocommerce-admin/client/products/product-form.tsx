@@ -16,7 +16,6 @@ import { Ref } from 'react';
  */
 import { ProductFormHeader } from './layout/product-form-header';
 import { ProductFormLayout } from './layout/product-form-layout';
-import { PricingSection } from './sections/pricing-section';
 import { ProductVariationsSection } from './sections/product-variations-section';
 import { validate } from './product-validation';
 import { OptionsSection } from './sections/options-section';
@@ -26,6 +25,7 @@ import {
 	TAB_GENERAL_ID,
 	TAB_SHIPPING_ID,
 	TAB_INVENTORY_ID,
+	TAB_PRICING_ID,
 } from './fills/constants';
 
 export const ProductForm: React.FC< {
@@ -60,7 +60,9 @@ export const ProductForm: React.FC< {
 						title="Pricing"
 						disabled={ !! product?.variations?.length }
 					>
-						<PricingSection />
+						<WooProductSectionItem.Slot
+							location={ TAB_PRICING_ID }
+						/>
 					</ProductFormTab>
 					<ProductFormTab
 						name="inventory"
