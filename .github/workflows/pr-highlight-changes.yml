@@ -1,5 +1,8 @@
 name: Highlight templates changes
-on: pull_request
+on:
+    pull_request:
+        paths-ignore:
+            - '**/changelog/**'
 
 permissions: {}
 
@@ -8,7 +11,7 @@ jobs:
         name: Check pull request changes to highlight
         runs-on: ubuntu-20.04
         permissions:
-          contents: read
+            contents: read
         outputs:
             results: ${{ steps.results.outputs.results }}
         steps:
@@ -29,32 +32,32 @@ jobs:
             - name: Check results
               uses: actions/github-script@v6
               with:
-                script: |
-                  const template = '${{ steps.run.outputs.templates }}';
+                  script: |
+                      const template = '${{ steps.run.outputs.templates }}';
 
-                  if ( template === '' ) {
-                    return;
-                  }
+                      if ( template === '' ) {
+                        return;
+                      }
 
-                  const templateArr = template.split( '\n' );
-                  const modTemplateArr = [];
-                  let needsVersionBump = false;
+                      const templateArr = template.split( '\n' );
+                      const modTemplateArr = [];
+                      let needsVersionBump = false;
 
-                  templateArr.forEach( ( el ) => {
-                    if ( el.match( /NOTICE/ ) ) {
-                      modTemplateArr.pop();
-                      return;
-                    }
+                      templateArr.forEach( ( el ) => {
+                        if ( el.match( /NOTICE/ ) ) {
+                          modTemplateArr.pop();
+                          return;
+                        }
 
-                    if ( el.match( /WARNING/ ) ) {
-                      needsVersionBump = true;
-                    }
+                        if ( el.match( /WARNING/ ) ) {
+                          needsVersionBump = true;
+                        }
 
-                    modTemplateArr.push( el );
-                  } );
+                        modTemplateArr.push( el );
+                      } );
 
-                  const templateResult = modTemplateArr.join( '\n' );
+                      const templateResult = modTemplateArr.join( '\n' );
 
-                  if ( needsVersionBump ) {
-                    core.setFailed( `Templates have changed but template versions were not bumped:\n${ templateResult }` );
-                  }
+                      if ( needsVersionBump ) {
+                        core.setFailed( `Templates have changed but template versions were not bumped:\n${ templateResult }` );
+                      }

@@ -492,6 +492,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							?>
 								<tr valign="top" class="<?php echo esc_attr( implode( ' ', $visibility_class ) ); ?>">
 									<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ); ?></th>
+									<td class="help-tooltip"><?php echo isset( $value['tooltip'] ) && '' !== $value['tooltip'] ? wc_help_tip( esc_html( $value['tooltip'] ) ) : ''; ?></td>
 									<td class="forminp forminp-checkbox">
 										<fieldset>
 							<?php

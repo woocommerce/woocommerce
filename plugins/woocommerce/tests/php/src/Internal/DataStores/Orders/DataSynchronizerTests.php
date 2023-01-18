@@ -5,11 +5,13 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 
 /**
  * Tests for DataSynchronizer class.
  */
 class DataSynchronizerTests extends WC_Unit_Test_Case {
+	use ArraySubsetAsserts;
 
 	/**
 	 * @var DataSynchronizer

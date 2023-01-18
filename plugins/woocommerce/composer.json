@@ -24,11 +24,12 @@
 		"woocommerce/woocommerce-blocks": "9.1.4"
 	},
 	"require-dev": {
-		"bamarni/composer-bin-plugin": "^1.4",
-		"yoast/phpunit-polyfills": "^1.0",
-		"phpunit/phpunit": "7.5.20",
 		"automattic/jetpack-changelogger": "^3.3.0",
-		"sebastian/comparator": "3.0.3"
+		"bamarni/composer-bin-plugin": "^1.4",
+		"dms/phpunit-arraysubset-asserts": "^0.4.0",
+		"phpunit/phpunit": "^8.0",
+		"sebastian/comparator": "3.0.3",
+		"yoast/phpunit-polyfills": "^1.0"
 	},
 	"config": {
 		"optimize-autoloader": true,
