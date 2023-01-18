@@ -485,7 +485,6 @@ jobs:
         needs: [e2e-release]
         steps:
             - name: Publish report for WP Latest
-              if: false
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
               run: |
