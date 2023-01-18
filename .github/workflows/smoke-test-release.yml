@@ -40,7 +40,7 @@ jobs:
                       return "${{ github.event.release.tag_name }}" || "${{ github.event.inputs.tag }}"
 
     api-release:
-        name: API tests on release smoke test site
+        name: API tests on release
         runs-on: ubuntu-20.04
         needs: [get-tag]
         permissions:
@@ -67,6 +67,8 @@ jobs:
               env:
                   ADMIN_PASSWORD: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
                   ADMIN_USER: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
+                  CUSTOMER_PASSWORD: ${{ secrets.RELEASE_TEST_CUSTOMER_PASSWORD }}
+                  CUSTOMER_USER: ${{ secrets.RELEASE_TEST_CUSTOMER_USER }}
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
                   RESET_SITE: true
                   UPDATE_WC: ${{ needs.get-tag.outputs.tag }}
@@ -98,7 +100,7 @@ jobs:
                   retention-days: 5
 
     e2e-release:
-        name: Run E2E tests
+        name: E2E tests on release
         runs-on: ubuntu-20.04
         needs: [api-release]
         permissions:
