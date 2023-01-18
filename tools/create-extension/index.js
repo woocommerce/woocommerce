@@ -3,6 +3,7 @@ const path = require( 'path' );
 const promptly = require( 'promptly' );
 const chalk = require( 'chalk' );
 const program = require( 'commander' );
+const { mergePackageJsonDependencies } = require( './utils' );
 
 const files = [
 	'._gitignore',
@@ -60,14 +61,19 @@ const options = program.opts();
 	fs.mkdirSync( folder, maybeThrowError );
 
 	files.forEach( ( file ) => {
-		let from = path.join( __dirname, file );
+		const from = path.join( __dirname, file );
+		let fromExample = '';
 		if (
 			isExample &&
 			fs.existsSync(
 				path.join( __dirname, `examples/${ extensionName }`, file )
 			)
 		) {
-			from = path.join( __dirname, `examples/${ extensionName }`, file );
+			fromExample = path.join(
+				__dirname,
+				`examples/${ extensionName }`,
+				file
+			);
 		}
 		const to = path.join(
 			folder,
@@ -77,16 +83,29 @@ const options = program.opts();
 		);
 
 		try {
-			const data = fs.readFileSync( from, 'utf8' );
+			const fromPath =
+				file !== '_package.json' && fromExample ? fromExample : from;
+			const data = fs.readFileSync( fromPath, 'utf8' );
 
 			const addSlugs = data.replace(
 				/{{extension_slug}}/g,
 				extensionSlug
 			);
-			const result = addSlugs.replace(
+			let result = addSlugs.replace(
 				/{{extension_name}}/g,
 				extensionName
 			);
+
+			if ( file === '_package.json' && fromExample ) {
+				const examplePackageJson = fs.readFileSync(
+					fromExample,
+					'utf8'
+				);
+				result = mergePackageJsonDependencies(
+					result,
+					examplePackageJson
+				);
+			}
 
 			fs.writeFileSync( to, result, 'utf8' );
 		} catch ( error ) {
