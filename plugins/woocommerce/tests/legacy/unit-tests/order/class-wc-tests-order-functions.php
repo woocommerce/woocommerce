@@ -165,6 +165,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		global $post;
 		global $theorder;
 
+		// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited
 		$original_post     = $post;
 		$original_theorder = $theorder;
 
@@ -206,6 +207,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		$post     = $original_post;
 		$theorder = $original_theorder;
+		// phpcs:enable WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 
 	/**
