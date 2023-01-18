@@ -29,6 +29,10 @@ type CustomerEffortScoreProps = {
 	onModalShownCallback?: () => void;
 	onModalDismissedCallback?: () => void;
 	icon?: React.ReactElement | null;
+	shouldShowComments?: (
+		firstQuestionScore: number,
+		secondQuestionScore: number
+	) => boolean;
 };
 
 /**
@@ -62,6 +66,10 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 	onModalShownCallback = noop,
 	onModalDismissedCallback = noop,
 	icon,
+	shouldShowComments = ( firstQuestionScore, secondQuestionScore ) =>
+		[ firstQuestionScore, secondQuestionScore ].some(
+			( score ) => score === 1 || score === 2
+		),
 } ) => {
 	const [ shouldCreateNotice, setShouldCreateNotice ] = useState( true );
 	const [ visible, setVisible ] = useState( false );
@@ -100,6 +108,9 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 		return null;
 	}
 
+console.log('in score');
+
+
 	return (
 		<CustomerFeedbackModal
 			title={ title }
@@ -108,6 +119,7 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 			secondQuestion={ secondQuestion }
 			recordScoreCallback={ recordScoreCallback }
 			onCloseModal={ onModalDismissedCallback }
+			shouldShowComments={ shouldShowComments }
 		/>
 	);
 };
@@ -145,6 +157,10 @@ CustomerEffortScore.propTypes = {
 	 * The second survey question.
 	 */
 	secondQuestion: PropTypes.string,
+	/**
+	 * A function to determine whether or not the comments field shown be shown.
+	 */
+	shouldShowComments: PropTypes.func,
 };
 
 export { CustomerEffortScore };

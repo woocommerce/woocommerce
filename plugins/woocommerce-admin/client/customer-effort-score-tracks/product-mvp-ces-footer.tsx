@@ -83,6 +83,7 @@ export const ProductMVPCESFooter: React.FC = () => {
 					"Thanks for the feedback. We'll put it to good use!",
 					'woocommerce'
 				),
+				shouldShowComments: () => true,
 			},
 			{},
 			{

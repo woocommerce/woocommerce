@@ -32,6 +32,7 @@ import { __ } from '@wordpress/i18n';
  * @param {string}   props.defaultScore        Default score.
  * @param {Function} props.onCloseModal        Callback for when user closes modal by clicking cancel.
  * @param {Function} props.customOptions       List of custom score options, contains label and value.
+ * @param {Function} props.shouldShowComments  A function to determine whether or not the comments field shown be shown.
  */
 function CustomerFeedbackModal( {
 	recordScoreCallback,
@@ -42,6 +43,7 @@ function CustomerFeedbackModal( {
 	defaultScore = NaN,
 	onCloseModal,
 	customOptions,
+	shouldShowComments,
 }: {
 	recordScoreCallback: (
 		score: number,
@@ -55,6 +57,10 @@ function CustomerFeedbackModal( {
 	defaultScore?: number;
 	onCloseModal?: () => void;
 	customOptions?: { label: string; value: string }[];
+	shouldShowComments?: (
+		firstQuestionScore: number,
+		secondQuestionScore: number
+	) => boolean;
 } ): JSX.Element | null {
 	const options =
 		customOptions && customOptions.length > 0
@@ -200,29 +206,33 @@ function CustomerFeedbackModal( {
 				</div>
 			) }
 
-			{ [ firstQuestionScore, secondQuestionScore ].some(
-				( score ) => score === 1 || score === 2
-			) && (
-				<div className="woocommerce-customer-effort-score__comments">
-					<TextareaControl
-						label={ __(
-							'How is that screen useful to you? What features would you add or change?',
-							'woocommerce'
-						) }
-						help={ __(
-							'Your feedback will go to the WooCommerce development team',
-							'woocommerce'
-						) }
-						value={ comments }
-						placeholder={ __(
-							'Optional, but much apprecated. We love reading your feedback!',
-							'woocommerce'
-						) }
-						onChange={ ( value: string ) => setComments( value ) }
-						rows={ 5 }
-					/>
-				</div>
-			) }
+			{ typeof shouldShowComments === 'function' &&
+				shouldShowComments(
+					firstQuestionScore,
+					secondQuestionScore
+				) && (
+					<div className="woocommerce-customer-effort-score__comments">
+						<TextareaControl
+							label={ __(
+								'How is that screen useful to you? What features would you add or change?',
+								'woocommerce'
+							) }
+							help={ __(
+								'Your feedback will go to the WooCommerce development team',
+								'woocommerce'
+							) }
+							value={ comments }
+							placeholder={ __(
+								'Optional, but much apprecated. We love reading your feedback!',
+								'woocommerce'
+							) }
+							onChange={ ( value: string ) =>
+								setComments( value )
+							}
+							rows={ 5 }
+						/>
+					</div>
+				) }
 
 			{ showNoScoreMessage && (
 				<div
