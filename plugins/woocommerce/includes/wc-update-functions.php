@@ -2559,23 +2559,34 @@ function wc_update_722_adjust_ukraine_states() {
 	return wc_update_721_adjust_ukraine_states();
 }
 
+/**
+ * Add new columns date_paid and date_completed to wp_wc_order_stats table in order to provide the option
+ * of using the dates in the reports
+ */
+
 function wc_update_740_add_columns_to_order_stats_table() {
 	global $wpdb;
 
-	$wpdb->get_var("ALTER TABLE wp_wc_order_stats
+	$wpdb->get_var(
+		"ALTER TABLE wp_wc_order_stats
 		ADD COLUMN date_paid DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,
-		ADD COLUMN date_completed DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL;");
-	
-	$wpdb->get_var("UPDATE wp_wc_order_stats AS order_stats
+		ADD COLUMN date_completed DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL;"
+	);
+
+	$wpdb->get_var(
+		"UPDATE wp_wc_order_stats AS order_stats
 		INNER JOIN wp_postmeta AS postmeta
 			ON postmeta.post_id = order_stats.order_id
 			and postmeta.meta_key = '_date_paid'
-		SET order_stats.date_paid = IFNULL(FROM_UNIXTIME(postmeta.meta_value), '0000-00-00 00:00:00');");
-	
-	$wpdb->get_var("UPDATE wp_wc_order_stats AS order_stats
+		SET order_stats.date_paid = IFNULL(FROM_UNIXTIME(postmeta.meta_value), '0000-00-00 00:00:00');"
+	);
+
+	$wpdb->get_var(
+		"UPDATE wp_wc_order_stats AS order_stats
 		INNER JOIN wp_postmeta AS postmeta
 			ON postmeta.post_id = order_stats.order_id
 			and postmeta.meta_key = '_date_completed'
-		SET order_stats.date_completed = IFNULL(FROM_UNIXTIME(postmeta.meta_value), '0000-00-00 00:00:00');");
-	
+		SET order_stats.date_completed = IFNULL(FROM_UNIXTIME(postmeta.meta_value), '0000-00-00 00:00:00');"
+	);
+
 }

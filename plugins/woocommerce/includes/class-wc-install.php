@@ -227,7 +227,7 @@ class WC_Install {
 		),
 		'7.4.0' => array(
 			'wc_update_740_add_columns_to_order_stats_table',
-		)
+		),
 	);
 
 	/**

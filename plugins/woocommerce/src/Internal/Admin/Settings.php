@@ -295,7 +295,11 @@ class Settings {
 			'description' => __( 'Database date field considered for reports', 'woocommerce' ),
 			'default'     => 'date_paid',
 			'type'        => 'select',
-			'options'     => array( 'date_created' => 'date_created', 'date_paid' => 'date_paid', 'date_completed' => 'date_completed' )
+			'options'     => array(
+				'date_created'   => 'date_created',
+				'date_paid'      => 'date_paid',
+				'date_completed' => 'date_completed',
+			),
 		);
 		return $settings;
 	}
