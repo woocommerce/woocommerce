@@ -136,6 +136,18 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
+                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+
+            - name: Upload artifact to bucket
+              run: |
+                  aws s3 cp ${{ env.ALLURE_RESULTS_DIR }} ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_WP_LATEST_ARTIFACT }} --recursive
+                  aws s3 cp ${{ env.ALLURE_REPORT_DIR }} ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_WP_LATEST_ARTIFACT }} --recursive
+
     e2e-wp-latest:
         name: E2E on WP Latest
         runs-on: ubuntu-20.04
@@ -198,6 +210,18 @@ jobs:
                       ${{ env.ALLURE_REPORT_DIR }}
                   if-no-files-found: ignore
                   retention-days: 5
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
+                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+
+            - name: Upload artifact to bucket
+              run: |
+                  aws s3 cp ${{ env.ALLURE_RESULTS_DIR }} ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }} --recursive
+                  aws s3 cp ${{ env.ALLURE_REPORT_DIR }} ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }} --recursive
 
     k6-on-release:
         name: k6 tests on release
@@ -490,7 +514,10 @@ jobs:
               run: |
                   gh workflow run publish-test-reports-release.yml \
                     -f run_id=${{ github.run_id }} \
+                    -f run_number=${{ github.run_number }} \
+                    -f release_tag=${{ needs.get-tag.outputs.tag }} \
                     -f api_artifact="${{ env.API_WP_LATEST_ARTIFACT }}" \
                     -f e2e_artifact="${{ env.E2E_WP_LATEST_ARTIFACT }}" \
+                    -f env_description="WP Latest" \
                     -f s3_path="test/release/${{ needs.get-tag.outputs.tag }}/wp-latest" \
                     --repo woocommerce/woocommerce-test-reports
