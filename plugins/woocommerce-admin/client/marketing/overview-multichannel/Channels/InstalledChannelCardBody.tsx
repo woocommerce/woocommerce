@@ -115,8 +115,12 @@ export const InstalledChannelCardBody: React.FC<
 		installedChannel.description
 	) : (
 		<div className="woocommerce-marketing-installed-channel-description">
-			<SyncStatus status={ installedChannel.syncStatus } />
-			<div className="woocommerce-marketing-installed-channel-description__separator" />
+			{ installedChannel.syncStatus && (
+				<>
+					<SyncStatus status={ installedChannel.syncStatus } />
+					<div className="woocommerce-marketing-installed-channel-description__separator" />
+				</>
+			) }
 			<IssueStatus installedChannel={ installedChannel } />
 		</div>
 	);

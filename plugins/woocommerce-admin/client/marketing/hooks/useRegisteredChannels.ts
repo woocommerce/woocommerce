@@ -7,9 +7,13 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { InstalledChannel } from '~/marketing/types';
+import { InstalledChannel, SyncStatusType } from '~/marketing/types';
 import { STORE_KEY } from '~/marketing/data-multichannel/constants';
-import { ApiFetchError, Channel, Channels } from '../data-multichannel/types';
+import {
+	ApiFetchError,
+	Channel,
+	Channels,
+} from '~/marketing/data-multichannel/types';
 
 type UseRegisteredChannels = {
 	loading: boolean;
@@ -99,9 +103,12 @@ type UseRegisteredChannels = {
 // 	};
 // };
 
-const convert = ( data: Channel ): InstalledChannel => {
-	// TODO: map all the fields correctly from API to UI.
+const statusMap: Record< string, SyncStatusType > = {
+	synced: 'synced',
+	'sync-in-progress': 'syncing',
+};
 
+const convert = ( data: Channel ): InstalledChannel => {
 	const issueType = data.errors_count >= 1 ? 'error' : 'none';
 	const issueText =
 		data.errors_count >= 1
@@ -120,7 +127,7 @@ const convert = ( data: Channel ): InstalledChannel => {
 		isSetupCompleted: data.is_setup_completed,
 		setupUrl: data.settings_url,
 		manageUrl: data.settings_url,
-		syncStatus: 'synced',
+		syncStatus: statusMap[ data.product_listings_status ],
 		issueType,
 		issueText,
 	};
