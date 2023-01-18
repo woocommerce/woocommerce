@@ -41,7 +41,7 @@ jobs:
                       return "${{ github.event.release.tag_name }}" || "${{ github.event.inputs.tag }}"
 
     e2e-update-wc:
-        name: Update WooCommerce version
+        name: Test WooCommerce update
         runs-on: ubuntu-20.04
         needs: [get-tag]
         permissions:
