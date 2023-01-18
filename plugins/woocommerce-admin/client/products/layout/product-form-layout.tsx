@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Children, useEffect, useLayoutEffect } from '@wordpress/element';
+import { Children, useEffect } from '@wordpress/element';
 import { TabPanel, Tooltip } from '@wordpress/components';
 import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
 
@@ -11,6 +11,7 @@ import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
  */
 import './product-form-layout.scss';
 import { ProductFormTab } from '../product-form-tab';
+import { useHeaderHeight } from '~/header/use-header-height';
 
 export const ProductFormLayout: React.FC< {
 	children: JSX.Element | JSX.Element[];
@@ -29,26 +30,14 @@ export const ProductFormLayout: React.FC< {
 		};
 	}, [] );
 
-	const updateTabsPosition = () => {
-		const wpBody = document.querySelector( '#wpbody' ) as HTMLElement;
-		const top = parseInt( wpBody.style.marginTop, 10 );
+	const { adminBarHeight, headerHeight } = useHeaderHeight();
+
+	useEffect( () => {
 		const tabPanelTabs = document.querySelector(
 			'.product-form-layout .components-tab-panel__tabs'
 		) as HTMLElement;
-		tabPanelTabs.style.top = top + 32 + 'px';
-	};
-
-	useLayoutEffect( () => {
-		const wpbody = document.querySelector( '#wpbody' ) as Node;
-		const observer = new MutationObserver( updateTabsPosition );
-		observer.observe( wpbody, {
-			attributes: true,
-		} );
-
-		return () => {
-			observer.disconnect();
-		};
-	}, [] );
+		tabPanelTabs.style.top = adminBarHeight + headerHeight + 'px';
+	}, [ adminBarHeight, headerHeight ] );
 
 	const tabs = Children.map( children, ( child: JSX.Element ) => {
 		if ( child.type !== ProductFormTab ) {
