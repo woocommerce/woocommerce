@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Children, useEffect } from '@wordpress/element';
+import { Children, useEffect, useLayoutEffect } from '@wordpress/element';
 import { TabPanel, Tooltip } from '@wordpress/components';
 import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
 
@@ -26,6 +26,27 @@ export const ProductFormLayout: React.FC< {
 			window.document.body.classList.remove(
 				'woocommerce-admin-product-layout'
 			);
+		};
+	}, [] );
+
+	const updateTabsPosition = () => {
+		const wpBody = document.querySelector( '#wpbody' ) as HTMLElement;
+		const top = parseInt( wpBody.style.marginTop, 10 );
+		const tabPanelTabs = document.querySelector(
+			'.product-form-layout .components-tab-panel__tabs'
+		) as HTMLElement;
+		tabPanelTabs.style.top = top + 32 + 'px';
+	};
+
+	useLayoutEffect( () => {
+		const wpbody = document.querySelector( '#wpbody' ) as Node;
+		const observer = new MutationObserver( updateTabsPosition );
+		observer.observe( wpbody, {
+			attributes: true,
+		} );
+
+		return () => {
+			observer.disconnect();
 		};
 	}, [] );
 
