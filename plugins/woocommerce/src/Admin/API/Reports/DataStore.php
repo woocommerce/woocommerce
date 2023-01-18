@@ -42,7 +42,7 @@ class DataStore extends SqlQuery {
 	 *
 	 * @var string
 	 */
-	protected $date_column_name = 'date_paid';
+	protected $date_column_name = '';
 
 	/**
 	 * Mapping columns to data type to return correct response types.
@@ -128,6 +128,7 @@ class DataStore extends SqlQuery {
 	public function __construct() {
 		self::set_db_table_name();
 		$this->assign_report_columns();
+		$this->date_column_name = get_option( 'woocommerce_date_type', 'date_paid' );
 
 		if ( property_exists( $this, 'report_columns' ) ) {
 			$this->report_columns = apply_filters(
