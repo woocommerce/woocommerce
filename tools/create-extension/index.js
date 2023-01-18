@@ -141,7 +141,9 @@ const options = program.opts();
 	}
 
 	try {
-		fs.moveSync( folder, path.join( '../', extensionSlug ) );
+		fs.moveSync( folder, path.join( '../', extensionSlug ), {
+			overwrite: true,
+		} );
 	} catch ( error ) {
 		maybeThrowError( error );
 	}

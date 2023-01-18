@@ -9,7 +9,7 @@
 	"repository": "woocommerce/woocommerce",
 	"dependencies": {
 		"chalk": "^4.1.2",
-		"commander": "9.4.0",
+		"commander": "^10.0.0",
 		"fs-extra": "10.1.0",
 		"promptly": "^3.2.0"
 	},
