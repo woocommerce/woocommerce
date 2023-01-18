@@ -339,6 +339,12 @@ function wc_body_class( $classes ) {
 		}
 	}
 
+	if ( wc_block_theme_has_styles_for_element( 'button' ) ) {
+
+		$classes[] = 'woocommerce-block-theme-has-button-styles';
+
+	}
+
 	$classes[] = 'woocommerce-no-js';
 
 	add_action( 'wp_footer', 'wc_no_js' );
