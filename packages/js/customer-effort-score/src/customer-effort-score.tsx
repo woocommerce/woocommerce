@@ -19,11 +19,11 @@ type CustomerEffortScoreProps = {
 		secondScore: number,
 		comments: string
 	) => void;
-	title: string;
+	title?: string;
 	description?: string;
 	noticeLabel?: string;
 	firstQuestion: string;
-	secondQuestion: string;
+	secondQuestion?: string;
 	onNoticeShownCallback?: () => void;
 	onNoticeDismissedCallback?: () => void;
 	onModalShownCallback?: () => void;
@@ -39,11 +39,11 @@ type CustomerEffortScoreProps = {
  *
  * @param {Object}   props                           Component props.
  * @param {Function} props.recordScoreCallback       Function to call when the score should be recorded.
- * @param {string}   props.title                     The title displayed in the modal.
+ * @param {string}   [props.title]                   The title displayed in the modal.
  * @param {string}   props.description               The description displayed in the modal.
  * @param {string}   props.noticeLabel               The notice label displayed in the notice.
  * @param {string}   props.firstQuestion             The first survey question.
- * @param {string}   props.secondQuestion            The second survey question.
+ * @param {string}   [props.secondQuestion]          The second survey question.
  * @param {Function} props.onNoticeShownCallback     Function to call when the notice is shown.
  * @param {Function} props.onNoticeDismissedCallback Function to call when the notice is dismissed.
  * @param {Function} props.onModalShownCallback      Function to call when the modal is shown.
@@ -120,7 +120,7 @@ CustomerEffortScore.propTypes = {
 	/**
 	 * The title displayed in the modal.
 	 */
-	title: PropTypes.string.isRequired,
+	title: PropTypes.string,
 	/**
 	 * The function to call when the notice is shown.
 	 */
@@ -137,6 +137,14 @@ CustomerEffortScore.propTypes = {
 	 * Icon (React component) to be displayed.
 	 */
 	icon: PropTypes.element,
+	/**
+	 * The first survey question.
+	 */
+	firstQuestion: PropTypes.string.isRequired,
+	/**
+	 * The second survey question.
+	 */
+	secondQuestion: PropTypes.string,
 };
 
 export { CustomerEffortScore };

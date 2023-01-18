@@ -5,14 +5,12 @@
 
 namespace Automattic\WooCommerce\Admin\Marketing;
 
-use JsonSerializable;
-
 /**
  * Price class
  *
  * @since x.x.x
  */
-class Price implements JsonSerializable {
+class Price {
 	/**
 	 * The price.
 	 *
@@ -54,17 +52,5 @@ class Price implements JsonSerializable {
 	 */
 	public function get_currency(): string {
 		return $this->currency;
-	}
-
-	/**
-	 * Serialize the price data.
-	 *
-	 * @return array
-	 */
-	public function jsonSerialize() {
-		return [
-			'value'    => $this->get_value(),
-			'currency' => $this->get_currency(),
-		];
 	}
 }

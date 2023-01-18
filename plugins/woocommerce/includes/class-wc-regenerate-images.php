@@ -158,7 +158,7 @@ class WC_Regenerate_Images {
 
 			$log = wc_get_logger();
 			$log->info(
-				__( 'Cancelled product image regeneration job.', 'woocommerce' ),
+				__( 'Canceled product image regeneration job.', 'woocommerce' ),
 				array(
 					'source' => 'wc-image-regeneration',
 				)

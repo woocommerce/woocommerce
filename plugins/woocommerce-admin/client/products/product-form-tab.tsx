@@ -8,7 +8,7 @@ export const ProductFormTab: React.FC< {
 	name: string;
 	title: string;
 	children: JSX.Element | JSX.Element[] | string;
-} > = ( { name, title, children } ) => {
+} > = ( { name, children } ) => {
 	const classes = classnames(
 		'woocommerce-product-form-tab',
 		'woocommerce-product-form-tab__' + name
