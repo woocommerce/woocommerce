@@ -530,6 +530,6 @@ jobs:
                     -f release_tag=${{ needs.get-tag.outputs.tag }} \
                     -f api_artifact="${{ env.API_WP_LATEST_ARTIFACT }}" \
                     -f e2e_artifact="${{ env.E2E_WP_LATEST_ARTIFACT }}" \
-                    -f env_description="WP Latest-1" \
-                    -f s3_path="public/release/${{ needs.get-tag.outputs.tag }}/wp-latest-1" \
+                    -f env_description="WP Latest" \
+                    -f s3_path="public/release/${{ needs.get-tag.outputs.tag }}/wp-latest" \
                     --repo woocommerce/woocommerce-test-reports
