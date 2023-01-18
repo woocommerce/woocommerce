@@ -9,9 +9,9 @@ import Ellipsis from 'gridicons/dist/ellipsis';
 import React, { MouseEvent, ReactNode } from 'react';
 
 type CallbackProps = {
-	isOpen: boolean;
-	onToggle: () => void;
-	onClose: () => void;
+	isOpen?: boolean;
+	onToggle?: () => void;
+	onClose?: () => void;
 };
 
 type EllipsisMenuProps = {
@@ -65,7 +65,9 @@ const EllipsisMenu = ( {
 					if ( onToggle ) {
 						onToggle( e );
 					}
-					_onToggle();
+					if ( _onToggle ) {
+						_onToggle();
+					}
 				} }
 				title={ label }
 				aria-expanded={ isOpen }
