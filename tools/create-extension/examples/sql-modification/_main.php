@@ -131,7 +131,7 @@ add_filter( 'woocommerce_analytics_taxes_stats_query_args', 'apply_currency_arg'
  * @param array $clauses an array of JOIN query strings.
  * @return array augmented clauses.
  */
-function add_join_subquery( $clauses ) {
+function sql_modification_add_join_subquery( $clauses ) {
 	global $wpdb;
 
 	$clauses[] = "JOIN {$wpdb->postmeta} currency_postmeta ON {$wpdb->prefix}wc_order_stats.order_id = currency_postmeta.post_id";
@@ -139,23 +139,23 @@ function add_join_subquery( $clauses ) {
 	return $clauses;
 }
 
-add_filter( 'woocommerce_analytics_clauses_join_orders_subquery', 'add_join_subquery' );
-add_filter( 'woocommerce_analytics_clauses_join_orders_stats_total', 'add_join_subquery' );
-add_filter( 'woocommerce_analytics_clauses_join_orders_stats_interval', 'add_join_subquery' );
+add_filter( 'woocommerce_analytics_clauses_join_orders_subquery', 'sql_modification_add_join_subquery' );
+add_filter( 'woocommerce_analytics_clauses_join_orders_stats_total', 'sql_modification_add_join_subquery' );
+add_filter( 'woocommerce_analytics_clauses_join_orders_stats_interval', 'sql_modification_add_join_subquery' );
 
-add_filter( 'woocommerce_analytics_clauses_join_products_subquery', 'add_join_subquery' );
-add_filter( 'woocommerce_analytics_clauses_join_products_stats_total', 'add_join_subquery' );
-add_filter( 'woocommerce_analytics_clauses_join_products_stats_interval', 'add_join_subquery' );
+add_filter( 'woocommerce_analytics_clauses_join_products_subquery', 'sql_modification_add_join_subquery' );
+add_filter( 'woocommerce_analytics_clauses_join_products_stats_total', 'sql_modification_add_join_subquery' );
+add_filter( 'woocommerce_analytics_clauses_join_products_stats_interval', 'sql_modification_add_join_subquery' );
 
-add_filter( 'woocommerce_analytics_clauses_join_categories_subquery', 'add_join_subquery' );
+add_filter( 'woocommerce_analytics_clauses_join_categories_subquery', 'sql_modification_add_join_subquery' );
 
-add_filter( 'woocommerce_analytics_clauses_join_coupons_subquery', 'add_join_subquery' );
-add_filter( 'woocommerce_analytics_clauses_join_coupons_stats_total', 'add_join_subquery' );
-add_filter( 'woocommerce_analytics_clauses_join_coupons_stats_interval', 'add_join_subquery' );
+add_filter( 'woocommerce_analytics_clauses_join_coupons_subquery', 'sql_modification_add_join_subquery' );
+add_filter( 'woocommerce_analytics_clauses_join_coupons_stats_total', 'sql_modification_add_join_subquery' );
+add_filter( 'woocommerce_analytics_clauses_join_coupons_stats_interval', 'sql_modification_add_join_subquery' );
 
-add_filter( 'woocommerce_analytics_clauses_join_taxes_subquery', 'add_join_subquery' );
-add_filter( 'woocommerce_analytics_clauses_join_taxes_stats_total', 'add_join_subquery' );
-add_filter( 'woocommerce_analytics_clauses_join_taxes_stats_interval', 'add_join_subquery' );
+add_filter( 'woocommerce_analytics_clauses_join_taxes_subquery', 'sql_modification_add_join_subquery' );
+add_filter( 'woocommerce_analytics_clauses_join_taxes_stats_total', 'sql_modification_add_join_subquery' );
+add_filter( 'woocommerce_analytics_clauses_join_taxes_stats_interval', 'sql_modification_add_join_subquery' );
 
 /**
  * Add a WHERE clause.
@@ -163,7 +163,7 @@ add_filter( 'woocommerce_analytics_clauses_join_taxes_stats_interval', 'add_join
  * @param array $clauses an array of WHERE query strings.
  * @return array augmented clauses.
  */
-function add_where_subquery( $clauses ) {
+function sql_modification_add_where_subquery( $clauses ) {
 	$currency = 'USD';
 
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended
@@ -176,23 +176,23 @@ function add_where_subquery( $clauses ) {
 
 	return $clauses;
 }
-add_filter( 'woocommerce_analytics_clauses_where_orders_subquery', 'add_where_subquery' );
-add_filter( 'woocommerce_analytics_clauses_where_orders_stats_total', 'add_where_subquery' );
-add_filter( 'woocommerce_analytics_clauses_where_orders_stats_interval', 'add_where_subquery' );
+add_filter( 'woocommerce_analytics_clauses_where_orders_subquery', 'sql_modification_add_where_subquery' );
+add_filter( 'woocommerce_analytics_clauses_where_orders_stats_total', 'sql_modification_add_where_subquery' );
+add_filter( 'woocommerce_analytics_clauses_where_orders_stats_interval', 'sql_modification_add_where_subquery' );
 
-add_filter( 'woocommerce_analytics_clauses_where_products_subquery', 'add_where_subquery' );
-add_filter( 'woocommerce_analytics_clauses_where_products_stats_total', 'add_where_subquery' );
-add_filter( 'woocommerce_analytics_clauses_where_products_stats_interval', 'add_where_subquery' );
+add_filter( 'woocommerce_analytics_clauses_where_products_subquery', 'sql_modification_add_where_subquery' );
+add_filter( 'woocommerce_analytics_clauses_where_products_stats_total', 'sql_modification_add_where_subquery' );
+add_filter( 'woocommerce_analytics_clauses_where_products_stats_interval', 'sql_modification_add_where_subquery' );
 
-add_filter( 'woocommerce_analytics_clauses_where_categories_subquery', 'add_where_subquery' );
+add_filter( 'woocommerce_analytics_clauses_where_categories_subquery', 'sql_modification_add_where_subquery' );
 
-add_filter( 'woocommerce_analytics_clauses_where_coupons_subquery', 'add_where_subquery' );
-add_filter( 'woocommerce_analytics_clauses_where_coupons_stats_total', 'add_where_subquery' );
-add_filter( 'woocommerce_analytics_clauses_where_coupons_stats_interval', 'add_where_subquery' );
+add_filter( 'woocommerce_analytics_clauses_where_coupons_subquery', 'sql_modification_add_where_subquery' );
+add_filter( 'woocommerce_analytics_clauses_where_coupons_stats_total', 'sql_modification_add_where_subquery' );
+add_filter( 'woocommerce_analytics_clauses_where_coupons_stats_interval', 'sql_modification_add_where_subquery' );
 
-add_filter( 'woocommerce_analytics_clauses_where_taxes_subquery', 'add_where_subquery' );
-add_filter( 'woocommerce_analytics_clauses_where_taxes_stats_total', 'add_where_subquery' );
-add_filter( 'woocommerce_analytics_clauses_where_taxes_stats_interval', 'add_where_subquery' );
+add_filter( 'woocommerce_analytics_clauses_where_taxes_subquery', 'sql_modification_add_where_subquery' );
+add_filter( 'woocommerce_analytics_clauses_where_taxes_stats_total', 'sql_modification_add_where_subquery' );
+add_filter( 'woocommerce_analytics_clauses_where_taxes_stats_interval', 'sql_modification_add_where_subquery' );
 
 /**
  * Add a SELECT clause.
@@ -200,26 +200,26 @@ add_filter( 'woocommerce_analytics_clauses_where_taxes_stats_interval', 'add_whe
  * @param array $clauses an array of WHERE query strings.
  * @return array augmented clauses.
  */
-function add_select_subquery( $clauses ) {
+function sql_modification_add_select_subquery( $clauses ) {
 	$clauses[] = ', currency_postmeta.meta_value AS currency';
 
 	return $clauses;
 }
 
-add_filter( 'woocommerce_analytics_clauses_select_orders_subquery', 'add_select_subquery' );
-add_filter( 'woocommerce_analytics_clauses_select_orders_stats_total', 'add_select_subquery' );
-add_filter( 'woocommerce_analytics_clauses_select_orders_stats_interval', 'add_select_subquery' );
+add_filter( 'woocommerce_analytics_clauses_select_orders_subquery', 'sql_modification_add_select_subquery' );
+add_filter( 'woocommerce_analytics_clauses_select_orders_stats_total', 'sql_modification_add_select_subquery' );
+add_filter( 'woocommerce_analytics_clauses_select_orders_stats_interval', 'sql_modification_add_select_subquery' );
 
-add_filter( 'woocommerce_analytics_clauses_select_products_subquery', 'add_select_subquery' );
-add_filter( 'woocommerce_analytics_clauses_select_products_stats_total', 'add_select_subquery' );
-add_filter( 'woocommerce_analytics_clauses_select_products_stats_interval', 'add_select_subquery' );
+add_filter( 'woocommerce_analytics_clauses_select_products_subquery', 'sql_modification_add_select_subquery' );
+add_filter( 'woocommerce_analytics_clauses_select_products_stats_total', 'sql_modification_add_select_subquery' );
+add_filter( 'woocommerce_analytics_clauses_select_products_stats_interval', 'sql_modification_add_select_subquery' );
 
-add_filter( 'woocommerce_analytics_clauses_select_categories_subquery', 'add_select_subquery' );
+add_filter( 'woocommerce_analytics_clauses_select_categories_subquery', 'sql_modification_add_select_subquery' );
 
-add_filter( 'woocommerce_analytics_clauses_select_coupons_subquery', 'add_select_subquery' );
-add_filter( 'woocommerce_analytics_clauses_select_coupons_stats_total', 'add_select_subquery' );
-add_filter( 'woocommerce_analytics_clauses_select_coupons_stats_interval', 'add_select_subquery' );
+add_filter( 'woocommerce_analytics_clauses_select_coupons_subquery', 'sql_modification_add_select_subquery' );
+add_filter( 'woocommerce_analytics_clauses_select_coupons_stats_total', 'sql_modification_add_select_subquery' );
+add_filter( 'woocommerce_analytics_clauses_select_coupons_stats_interval', 'sql_modification_add_select_subquery' );
 
-add_filter( 'woocommerce_analytics_clauses_select_taxes_subquery', 'add_select_subquery' );
-add_filter( 'woocommerce_analytics_clauses_select_taxes_stats_total', 'add_select_subquery' );
-add_filter( 'woocommerce_analytics_clauses_select_taxes_stats_interval', 'add_select_subquery' );
+add_filter( 'woocommerce_analytics_clauses_select_taxes_subquery', 'sql_modification_add_select_subquery' );
+add_filter( 'woocommerce_analytics_clauses_select_taxes_stats_total', 'sql_modification_add_select_subquery' );
+add_filter( 'woocommerce_analytics_clauses_select_taxes_stats_interval', 'sql_modification_add_select_subquery' );

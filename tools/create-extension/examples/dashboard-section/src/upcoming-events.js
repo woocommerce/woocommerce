@@ -8,7 +8,7 @@ import { flatten } from 'lodash';
  */
 import { TableCard } from '@woocommerce/components';
 
-const UpcomingEvents = ( { config } ) => {
+export const UpcomingEvents = ( { config } ) => {
 	const rows = flatten(
 		config.map( ( apple ) => {
 			return apple.events.map( ( event ) => {
@@ -34,5 +34,3 @@ const UpcomingEvents = ( { config } ) => {
 		/>
 	);
 };
-
-export default UpcomingEvents;

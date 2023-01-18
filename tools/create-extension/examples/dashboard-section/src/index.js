@@ -20,8 +20,8 @@ import {
 /**
  * Internal dependencies
  */
-import UpcomingEvents from './upcoming-events';
-import GlobalPrices from './global-prices';
+import { UpcomingEvents } from './upcoming-events';
+import { GlobalPrices } from './global-prices';
 
 const config = [
 	{
@@ -58,21 +58,20 @@ const dashboardItems = [
 	},
 ];
 
-class Section extends Component {
-	renderMenu() {
-		const {
-			hiddenBlocks,
-			onToggleHiddenBlock,
-			onTitleBlur,
-			onTitleChange,
-			titleInput,
-			onMove,
-			onRemove,
-			isFirst,
-			isLast,
-			controls: Controls,
-		} = this.props;
-
+function Section( {
+	hiddenBlocks,
+	onToggleHiddenBlock,
+	onTitleBlur,
+	onTitleChange,
+	titleInput,
+	onMove,
+	onRemove,
+	isFirst,
+	isLast,
+	controls: Controls,
+	title,
+} ) {
+	const renderMenu = () => {
 		return (
 			<EllipsisMenu
 				label={ __( 'Choose Apples', 'woocommerce-admin' ) }
@@ -108,27 +107,20 @@ class Section extends Component {
 				) }
 			/>
 		);
-	}
+	};
 
-	render() {
-		const { title, hiddenBlocks } = this.props;
-
-		return (
-			<Fragment>
-				<SectionHeader title={ title } menu={ this.renderMenu() } />
-				<div className="woocommerce-dashboard__columns">
-					{ dashboardItems.map( ( item ) => {
-						return hiddenBlocks.includes( item.key ) ? null : (
-							<item.component
-								key={ item.key }
-								config={ config }
-							/>
-						);
-					} ) }
-				</div>
-			</Fragment>
-		);
-	}
+	return (
+		<Fragment>
+			<SectionHeader title={ title } menu={ renderMenu() } />
+			<div className="woocommerce-dashboard__columns">
+				{ dashboardItems.map( ( item ) => {
+					return hiddenBlocks.includes( item.key ) ? null : (
+						<item.component key={ item.key } config={ config } />
+					);
+				} ) }
+			</div>
+		</Fragment>
+	);
 }
 
 addFilter(

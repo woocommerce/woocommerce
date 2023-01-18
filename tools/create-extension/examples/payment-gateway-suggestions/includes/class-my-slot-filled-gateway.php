@@ -58,7 +58,7 @@ class My_Slot_Filled_Gateway extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function get_post_install_script_handles() {
-		$asset_file = require __DIR__ . '/build/index.asset.php';
+		$asset_file = require __DIR__ . '/../build/index.asset.php';
 		wp_register_script(
 			'payment-gateway-suggestion-slot-fill',
 			plugins_url( '/build/index.js', __FILE__ ),

@@ -6,8 +6,10 @@ import moment from 'moment';
 /**
  * WooCommerce dependencies
  */
-import { Card, Chart } from '@woocommerce/components';
+import { Card, CardHeader, __experimentalText as Text } from '@wordpress/components';
+import { Chart } from '@woocommerce/components';
 import Currency from '@woocommerce/currency';
+import { CardBody } from '@wordpress/components';
 
 const storeCurrency = Currency();
 const data = [];
@@ -24,15 +26,18 @@ for ( let i = 1; i <= 20; i++ ) {
 	} );
 }
 
-const GlobalPrices = () => {
+export const GlobalPrices = ( { config }) => {
 	const average =
 		data.reduce( ( total, item ) => total + item.primary.value, 0 ) /
 		data.length;
 	return (
 		<Card
 			className="woocommerce-dashboard__chart-block woocommerce-analytics__card"
-			title="Global Apple Prices"
 		>
+			 <CardHeader>
+			 	<Text size={ 16 } weight={ 600 } as="h2" color="#23282d">Global Apple Prices</Text>
+      		</CardHeader>
+			<CardBody>
 			<Chart
 				title="Global Apple Prices"
 				interval="day"
@@ -43,8 +48,7 @@ const GlobalPrices = () => {
 				valueType={ 'currency' }
 				tooltipValueFormat={ storeCurrency.formatCurrency }
 			/>
+			</CardBody>
 		</Card>
 	);
 };
-
-export default GlobalPrices;
