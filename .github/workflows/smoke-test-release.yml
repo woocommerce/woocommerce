@@ -214,7 +214,7 @@ jobs:
     PHP-versions:
         name: PHP version ${{ matrix.php }} on release
         runs-on: ubuntu-20.04
-        needs: [e2e]
+        needs: [e2e-release]
         if: false
         # if: success()
         strategy:
@@ -278,7 +278,7 @@ jobs:
     WP-versions:
         name: WP version ${{ matrix.wp }} on release
         runs-on: ubuntu-20.04
-        needs: [e2e]
+        needs: [e2e-release]
         if: false
         # if: success()
         strategy:
@@ -342,7 +342,7 @@ jobs:
     Common-plugins:
         name: Release test with ${{ matrix.plugin }} plugin installed
         runs-on: ubuntu-20.04
-        needs: [e2e]
+        needs: [e2e-release]
         if: false
         # if: success() || failure()
         permissions:
