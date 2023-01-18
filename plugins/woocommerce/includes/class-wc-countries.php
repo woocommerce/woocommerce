@@ -1165,16 +1165,16 @@ class WC_Countries {
 						),
 					),
 					'IR' => array(
-						'state'      => array(
+						'state'     => array(
 							'priority' => 50,
 						),
-						'city'       => array(
+						'city'      => array(
 							'priority' => 60,
 						),
-						'address_1'  => array(
+						'address_1' => array(
 							'priority' => 70,
 						),
-						'address_2'  => array(
+						'address_2' => array(
 							'priority' => 80,
 						),
 					),
