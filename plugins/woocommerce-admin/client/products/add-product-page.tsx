@@ -8,6 +8,7 @@ import { useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import { ProductForm } from './product-form';
+import { ProductTourContainer } from './tour';
 import './product-page.scss';
 
 const AddProductPage: React.FC = () => {
@@ -18,6 +19,7 @@ const AddProductPage: React.FC = () => {
 	return (
 		<div className="woocommerce-add-product">
 			<ProductForm />
+			<ProductTourContainer />
 		</div>
 	);
 };
