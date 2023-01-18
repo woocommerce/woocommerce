@@ -1,8 +1,6 @@
 /**
- * External dependencies
+ * Internal dependencies
  */
-import { registerCoreProductFields } from '@woocommerce/components';
+import './product-form-fills';
 
-registerCoreProductFields();
-export * from './product-form-fills';
 export * from './details-section/details-section-fills';

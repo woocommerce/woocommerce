@@ -26,8 +26,6 @@ import { OptionsSection } from './sections/options-section';
 import { ProductFormFooter } from './layout/product-form-footer';
 import { ProductFormTab } from './product-form-tab';
 
-import './fills';
-
 export const ProductForm: React.FC< {
 	product?: PartialProduct;
 	formRef?: Ref< FormRef< Partial< Product > > >;
