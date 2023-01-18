@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Add permalink_template and generated_slug to products REST API response.
