@@ -162,6 +162,11 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @group test
 	 */
 	public function test_wc_get_order() {
+		global $post;
+		global $theorder;
+
+		$original_post     = $post;
+		$original_theorder = $theorder;
 
 		$order = WC_Helper_Order::create_order();
 
@@ -178,11 +183,29 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$post = $this->factory->post->create_and_get( array( 'post_type' => 'post' ) );
 		$this->assertFalse( wc_get_order( $post->ID ) );
 
+		// Assert the return when $the_order args is a random (incorrect) id.
+		$this->assertFalse( wc_get_order( 123456 ) );
+
 		// Assert the return when $the_order args is false.
 		$this->assertFalse( wc_get_order( false ) );
 
-		// Assert the return when $the_order args is a random (incorrect) id.
-		$this->assertFalse( wc_get_order( 123456 ) );
+		$post = get_post( $order->get_id() );
+		$this->assertInstanceOf(
+			'WC_Order',
+			wc_get_order(),
+			'If no order ID is specified, wc_get_order() will use the global $post object to try and determine the current order.'
+		);
+
+		unset( $post );
+		$theorder = $order;
+		$this->assertInstanceOf(
+			'WC_Order',
+			wc_get_order(),
+			'If no order ID is specified, wc_get_order() will use the global $theorder object to try and determine the current order.'
+		);
+
+		$post     = $original_post;
+		$theorder = $original_theorder;
 	}
 
 	/**
