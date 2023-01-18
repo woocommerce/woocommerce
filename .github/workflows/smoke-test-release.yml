@@ -12,9 +12,9 @@ concurrency:
     cancel-in-progress: true
 permissions: {}
 env:
-    API_ARTIFACT: api-release--run-${{ github.run_number }}
-    E2E_ARTIFACT: e2e-release--run-${{ github.run_number }}
-    E2E_WC_UPDATE_ARTIFACT: e2e-wc-update--run-${{ github.run_number }}
+    API_WP_LATEST_ARTIFACT: api-wp-latest--run-${{ github.run_number }}
+    E2E_WP_LATEST_ARTIFACT: e2e-wp-latest--run-${{ github.run_number }}
+    E2E_UPDATE_WC_ARTIFACT: e2e-update-wc--run-${{ github.run_number }}
     K6_ARTIFACT: k6-release--run-${{ github.run_number }}
     FORCE_COLOR: 1
 
@@ -87,15 +87,15 @@ jobs:
               if: success() || failure()
               uses: actions/upload-artifact@v3
               with:
-                  name: ${{ env.E2E_WC_UPDATE_ARTIFACT }}
+                  name: ${{ env.E2E_UPDATE_WC_ARTIFACT }}
                   path: |
                       ${{ env.ALLURE_RESULTS_DIR }}
                       ${{ env.ALLURE_REPORT_DIR }}
                   if-no-files-found: ignore
                   retention-days: 5
 
-    api-release:
-        name: API tests on release
+    api-wp-latest:
+        name: API on WP Latest
         runs-on: ubuntu-20.04
         needs: [e2e-update-wc]
         permissions:
@@ -129,17 +129,17 @@ jobs:
               if: success() || failure()
               uses: actions/upload-artifact@v3
               with:
-                  name: ${{ env.API_ARTIFACT }}
+                  name: ${{ env.API_WP_LATEST_ARTIFACT }}
                   path: |
                       ${{ env.ALLURE_RESULTS_DIR }}
                       ${{ env.ALLURE_REPORT_DIR }}
                   if-no-files-found: ignore
                   retention-days: 5
 
-    e2e-release:
-        name: E2E tests on release
+    e2e-wp-latest:
+        name: E2E on WP Latest
         runs-on: ubuntu-20.04
-        needs: [api-release]
+        needs: [api-wp-latest]
         permissions:
             contents: read
         env:
@@ -176,7 +176,7 @@ jobs:
             - name: Download 'e2e-update-wc' artifact
               uses: actions/download-artifact@v3
               with:
-                  name: ${{ env.E2E_WC_UPDATE_ARTIFACT }}
+                  name: ${{ env.E2E_UPDATE_WC_ARTIFACT }}
                   path: plugins/woocommerce/tmp
 
             - name: Add allure-results from 'e2e-update-wc'
@@ -192,7 +192,7 @@ jobs:
               if: success() || failure()
               uses: actions/upload-artifact@v3
               with:
-                  name: ${{ env.E2E_ARTIFACT }}
+                  name: ${{ env.E2E_WP_LATEST_ARTIFACT }}
                   path: |
                       ${{ env.ALLURE_RESULTS_DIR }}
                       ${{ env.ALLURE_REPORT_DIR }}
@@ -202,7 +202,7 @@ jobs:
     k6-on-release:
         name: k6 tests on release
         runs-on: ubuntu-20.04
-        needs: [e2e-release]
+        needs: [e2e-wp-latest]
         if: false
         # if: success() || failure()
         steps:
@@ -263,7 +263,7 @@ jobs:
     PHP-versions:
         name: PHP version ${{ matrix.php }} on release
         runs-on: ubuntu-20.04
-        needs: [e2e-release]
+        needs: [e2e-wp-latest]
         if: false
         # if: success()
         strategy:
@@ -317,7 +317,7 @@ jobs:
               if: success() || failure()
               uses: actions/upload-artifact@v3
               with:
-                  name: ${{ env.E2E_ARTIFACT }}
+                  name: ${{ env.E2E_WP_LATEST_ARTIFACT }}
                   path: |
                       ${{ env.ALLURE_RESULTS_DIR }}
                       ${{ env.ALLURE_REPORT_DIR }}
@@ -327,7 +327,7 @@ jobs:
     WP-versions:
         name: WP version ${{ matrix.wp }} on release
         runs-on: ubuntu-20.04
-        needs: [e2e-release]
+        needs: [e2e-wp-latest]
         if: false
         # if: success()
         strategy:
@@ -381,7 +381,7 @@ jobs:
               if: success() || failure()
               uses: actions/upload-artifact@v3
               with:
-                  name: ${{ env.E2E_ARTIFACT }}
+                  name: ${{ env.E2E_WP_LATEST_ARTIFACT }}
                   path: |
                       ${{ env.ALLURE_RESULTS_DIR }}
                       ${{ env.ALLURE_REPORT_DIR }}
@@ -391,7 +391,7 @@ jobs:
     Common-plugins:
         name: Release test with ${{ matrix.plugin }} plugin installed
         runs-on: ubuntu-20.04
-        needs: [e2e-release]
+        needs: [e2e-wp-latest]
         if: false
         # if: success() || failure()
         permissions:
@@ -482,15 +482,15 @@ jobs:
         runs-on: ubuntu-20.04
         permissions:
             contents: read
-        needs: [get-tag, e2e-release]
+        needs: [get-tag, e2e-wp-latest]
         steps:
-            - name: Publish report for WP Latest
+            - name: Publish report on WP Latest
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
               run: |
                   gh workflow run publish-test-reports-release.yml \
                     -f run_id=${{ github.run_id }} \
-                    -f api_artifact="${{ env.API_ARTIFACT }}" \
-                    -f e2e_artifact="${{ env.E2E_ARTIFACT }}" \
+                    -f api_artifact="${{ env.API_WP_LATEST_ARTIFACT }}" \
+                    -f e2e_artifact="${{ env.E2E_WP_LATEST_ARTIFACT }}" \
                     -f s3_path="public/release/${{ needs.get-tag.outputs.tag }}/wp-latest" \
                     --repo woocommerce/woocommerce-test-reports
