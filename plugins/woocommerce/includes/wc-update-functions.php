@@ -2563,7 +2563,6 @@ function wc_update_722_adjust_ukraine_states() {
  * Add new columns date_paid and date_completed to wp_wc_order_stats table in order to provide the option
  * of using the dates in the reports
  */
-
 function wc_update_740_add_columns_to_order_stats_table() {
 	global $wpdb;
 
