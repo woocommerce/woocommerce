@@ -40,6 +40,7 @@ const blocks = {
 	'mini-cart-contents': {
 		customDir: 'mini-cart/mini-cart-contents',
 	},
+	'store-notices': {},
 	'price-filter': {},
 	'product-best-sellers': {},
 	'product-category': {},

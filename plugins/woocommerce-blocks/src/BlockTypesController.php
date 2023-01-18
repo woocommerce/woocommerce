@@ -177,6 +177,7 @@ final class BlockTypesController {
 			'HandpickedProducts',
 			'MiniCart',
 			'MiniCartContents',
+			'StoreNotices',
 			'PriceFilter',
 			'ProductAddToCart',
 			'ProductBestSellers',
@@ -251,6 +252,7 @@ final class BlockTypesController {
 					'CatalogSorting',
 					'ClassicTemplate',
 					'ProductResultsCount',
+					'StoreNotices',
 				]
 			);
 		}
