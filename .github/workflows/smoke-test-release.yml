@@ -145,8 +145,12 @@ jobs:
 
             - name: Upload artifact to bucket
               run: |
-                  aws s3 cp ${{ env.ALLURE_RESULTS_DIR }} ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_WP_LATEST_ARTIFACT }} --recursive
-                  aws s3 cp ${{ env.ALLURE_REPORT_DIR }} ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_WP_LATEST_ARTIFACT }} --recursive
+                  aws s3 cp ${{ env.ALLURE_RESULTS_DIR }} \
+                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_WP_LATEST_ARTIFACT }}/allure-results \
+                      --recursive
+                  aws s3 cp ${{ env.ALLURE_REPORT_DIR }} \
+                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_WP_LATEST_ARTIFACT }}/allure-report \
+                      --recursive
 
     e2e-wp-latest:
         name: E2E on WP Latest
@@ -220,8 +224,12 @@ jobs:
 
             - name: Upload artifact to bucket
               run: |
-                  aws s3 cp ${{ env.ALLURE_RESULTS_DIR }} ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }} --recursive
-                  aws s3 cp ${{ env.ALLURE_REPORT_DIR }} ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }} --recursive
+                  aws s3 cp ${{ env.ALLURE_RESULTS_DIR }} \
+                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }}/allure-results \
+                      --recursive
+                  aws s3 cp ${{ env.ALLURE_REPORT_DIR }} \
+                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }}/allure-report \
+                      --recursive
 
     k6-on-release:
         name: k6 tests on release
