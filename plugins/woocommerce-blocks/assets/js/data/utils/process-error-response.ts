@@ -34,7 +34,9 @@ const isApiResponse = ( response: unknown ): response is ApiErrorResponse => {
  * - Supports 1 level of nesting.
  * - Decodes HTML entities in error messages.
  */
-const getErrorDetails = ( response: ApiErrorResponse ): ApiParamError[] => {
+export const getErrorDetails = (
+	response: ApiErrorResponse
+): ApiParamError[] => {
 	const errorDetails = objectHasProp( response.data, 'details' )
 		? Object.entries( response.data.details )
 		: null;
@@ -88,7 +90,10 @@ const getErrorDetails = ( response: ApiErrorResponse ): ApiParamError[] => {
 /**
  * Processes the response for an invalid param error, with response code rest_invalid_param.
  */
-const processInvalidParamResponse = ( response: ApiErrorResponse ) => {
+const processInvalidParamResponse = (
+	response: ApiErrorResponse,
+	context: string | undefined
+) => {
 	const errorDetails = getErrorDetails( response );
 
 	errorDetails.forEach( ( { code, message, id, param } ) => {
@@ -96,7 +101,7 @@ const processInvalidParamResponse = ( response: ApiErrorResponse ) => {
 			case 'invalid_email':
 				createNotice( 'error', message, {
 					id,
-					context: noticeContexts.CONTACT_INFORMATION,
+					context: context || noticeContexts.CONTACT_INFORMATION,
 				} );
 				return;
 		}
@@ -104,13 +109,13 @@ const processInvalidParamResponse = ( response: ApiErrorResponse ) => {
 			case 'billing_address':
 				createNoticeIfVisible( 'error', message, {
 					id,
-					context: noticeContexts.BILLING_ADDRESS,
+					context: context || noticeContexts.BILLING_ADDRESS,
 				} );
 				break;
 			case 'shipping_address':
 				createNoticeIfVisible( 'error', message, {
 					id,
-					context: noticeContexts.SHIPPING_ADDRESS,
+					context: context || noticeContexts.SHIPPING_ADDRESS,
 				} );
 				break;
 		}
@@ -122,7 +127,10 @@ const processInvalidParamResponse = ( response: ApiErrorResponse ) => {
  *
  * This is where we can handle specific error codes and display notices in specific contexts.
  */
-const processErrorResponse = ( response: ApiErrorResponse ) => {
+export const processErrorResponse = (
+	response: ApiErrorResponse,
+	context: string | undefined
+) => {
 	if ( ! isApiResponse( response ) ) {
 		return;
 	}
@@ -131,18 +139,16 @@ const processErrorResponse = ( response: ApiErrorResponse ) => {
 		case 'woocommerce_rest_invalid_email_address':
 			createNotice( 'error', response.message, {
 				id: response.code,
-				context: noticeContexts.CONTACT_INFORMATION,
+				context: context || noticeContexts.CONTACT_INFORMATION,
 			} );
 			break;
 		case 'rest_invalid_param':
-			processInvalidParamResponse( response );
+			processInvalidParamResponse( response, context );
 			break;
 		default:
 			createNotice( 'error', response.message || DEFAULT_ERROR_MESSAGE, {
 				id: response.code,
-				context: noticeContexts.CHECKOUT,
+				context: context || noticeContexts.CHECKOUT,
 			} );
 	}
 };
-
-export default processErrorResponse;

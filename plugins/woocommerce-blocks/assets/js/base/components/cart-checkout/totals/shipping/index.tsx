@@ -57,6 +57,8 @@ export const TotalsShipping = ( {
 	} );
 	const totalShippingValue = getTotalShippingValue( values );
 	const hasRates = hasShippingRate( shippingRates ) || totalShippingValue > 0;
+	const showShippingCalculatorForm =
+		showCalculator && isShippingCalculatorOpen;
 	const selectedShippingRates = shippingRates.flatMap(
 		( shippingPackage ) => {
 			return shippingPackage.shipping_rates
@@ -113,20 +115,25 @@ export const TotalsShipping = ( {
 				}
 				currency={ currency }
 			/>
-			{ showCalculator && isShippingCalculatorOpen && (
+			{ showShippingCalculatorForm && (
 				<ShippingCalculator
 					onUpdate={ () => {
 						setIsShippingCalculatorOpen( false );
 					} }
+					onCancel={ () => {
+						setIsShippingCalculatorOpen( false );
+					} }
 				/>
 			) }
-			{ showRateSelector && cartHasCalculatedShipping && (
-				<ShippingRateSelector
-					hasRates={ hasRates }
-					shippingRates={ shippingRates }
-					isLoadingRates={ isLoadingRates }
-				/>
-			) }
+			{ showRateSelector &&
+				cartHasCalculatedShipping &&
+				! showShippingCalculatorForm && (
+					<ShippingRateSelector
+						hasRates={ hasRates }
+						shippingRates={ shippingRates }
+						isLoadingRates={ isLoadingRates }
+					/>
+				) }
 		</div>
 	);
 };

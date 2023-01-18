@@ -92,3 +92,12 @@ export const removeAllNotices = () => {
 		} );
 	} );
 };
+
+export const removeNoticesWithContext = ( context: string ) => {
+	const { removeNotice } = dispatch( 'core/notices' );
+	const { getNotices } = select( 'core/notices' );
+
+	getNotices( context ).forEach( ( notice ) => {
+		removeNotice( notice.id, context );
+	} );
+};
