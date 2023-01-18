@@ -2583,3 +2583,30 @@ function wc_cache_get_multiple( $keys, $group = '', $force = false ) {
 	}
 	return $values;
 }
+
+/**
+ * Enable WebP images in WooCommerce.
+ *
+ * WebP files should be able to be imported in WooCommerce, as they've been supported in WordPress core since v5.8.
+ */
+add_filter( 'woocommerce_rest_allowed_image_mime_types', 'more_mimes_to_exts' );
+function more_mimes_to_exts( $mime_to_ext ){
+	$mime_to_ext['webp'] = 'image/webp';
+
+	return $mime_to_ext;
+}
+
+function wc_rest_allowed_image_mime_types() {
+	return apply_filters(
+		'woocommerce_rest_allowed_image_mime_types',
+		array(
+			'jpg|jpeg|jpe' => 'image/jpeg',
+			'gif'          => 'image/gif',
+			'png'          => 'image/png',
+			'bmp'          => 'image/bmp',
+			'tiff|tif'     => 'image/tiff',
+			'ico'          => 'image/x-icon',
+      'webp'          => 'image/webp',
+		)
+	);
+}
