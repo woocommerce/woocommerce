@@ -482,7 +482,7 @@ jobs:
         runs-on: ubuntu-20.04
         permissions:
             contents: read
-        needs: [e2e-release]
+        needs: [get-tag, e2e-release]
         steps:
             - name: Publish report for WP Latest
               env:
@@ -492,5 +492,5 @@ jobs:
                     -f run_id=${{ github.run_id }} \
                     -f api_artifact="${{ env.API_ARTIFACT }}" \
                     -f e2e_artifact="${{ env.E2E_ARTIFACT }}" \
-                    -f s3_path="public/release/${{ jobs.get-tag.outputs.tag }}/wp-latest" \
+                    -f s3_path="public/release/${{ needs.get-tag.outputs.tag }}/wp-latest" \
                     --repo woocommerce/woocommerce-test-reports
