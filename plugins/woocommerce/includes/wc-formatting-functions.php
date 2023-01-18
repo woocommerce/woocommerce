@@ -105,10 +105,10 @@ function wc_get_filename_from_url( $file_url ) {
  *
  * @param int|float $dimension    Dimension.
  * @param string    $to_unit      Unit to convert to.
- *                                Options: 'in', 'm', 'cm', 'm'.
+ *                                Options: 'in', 'mm', 'cm', 'm'.
  * @param string    $from_unit    Unit to convert from.
  *                                Defaults to ''.
- *                                Options: 'in', 'm', 'cm', 'm'.
+ *                                Options: 'in', 'mm', 'cm', 'm'.
  * @return float
  */
 function wc_get_dimension( $dimension, $to_unit, $from_unit = '' ) {
