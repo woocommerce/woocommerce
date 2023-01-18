@@ -289,13 +289,13 @@ class Settings {
 			'type'        => 'text',
 		);
 		$settings[] = array(
-			'id'          => 'woocommerce_type_of_date',
-			'option_key'  => 'woocommerce_type_of_date',
-			'label'       => __( 'TODO', 'woocommerce' ),
-			'description' => __( 'TODO', 'woocommerce' ),
+			'id'          => 'woocommerce_date_type',
+			'option_key'  => 'woocommerce_date_type',
+			'label'       => __( 'Date Type', 'woocommerce' ),
+			'description' => __( 'Database date field considered for Revenue report', 'woocommerce' ),
 			'default'     => 'date_paid',
 			'type'        => 'select',
-			'options'     => array( 'date_created', 'date_paid', 'date_completed' )
+			'options'     => array( 'date_created' => 'date_created', 'date_paid' => 'date_paid', 'date_completed' => 'date_completed' )
 		);
 		return $settings;
 	}
