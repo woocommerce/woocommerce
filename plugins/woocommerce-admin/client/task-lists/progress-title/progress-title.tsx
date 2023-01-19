@@ -7,7 +7,7 @@ import { useSlot } from '@woocommerce/experimental';
  * Internal dependencies
  */
 import {
-	WC_TASKLIST_PROGRESS_TITLE_SLOT_NAME,
+	WC_TASKLIST_EXPERIMENTAL_PROGRESS_TITLE_SLOT_NAME,
 	WooTaskListProgressTitleItem,
 } from './utils';
 
@@ -19,7 +19,7 @@ import {
 export const ProgressTitle: React.FC< DefaultProgressTitleProps > = ( {
 	taskListId,
 } ) => {
-	const slot = useSlot( WC_TASKLIST_PROGRESS_TITLE_SLOT_NAME );
+	const slot = useSlot( WC_TASKLIST_EXPERIMENTAL_PROGRESS_TITLE_SLOT_NAME );
 
 	return Boolean( slot?.fills?.length ) ? (
 		<WooTaskListProgressTitleItem.Slot fillProps={ { taskListId } } />

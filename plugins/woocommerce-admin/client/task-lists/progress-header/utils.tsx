@@ -9,8 +9,8 @@ import { Slot, Fill } from '@wordpress/components';
  */
 import { createOrderedChildren, sortFillsByOrder } from '../../utils';
 
-export const WC_TASKLIST_PROGRESS_HEADER_SLOT_NAME =
-	'woocommerce_tasklist_progress_header_item';
+export const WC_TASKLIST_EXPERIMENTAL_PROGRESS_HEADER_SLOT_NAME =
+	'woocommerce_tasklist_experimental_progress_header_item';
 
 export const WooTaskListProgressHeaderItem: React.FC< {
 	order?: number;
@@ -18,7 +18,7 @@ export const WooTaskListProgressHeaderItem: React.FC< {
 	Slot: React.FC< Slot.Props >;
 } = ( { children, order = 1 } ) => {
 	return (
-		<Fill name={ WC_TASKLIST_PROGRESS_HEADER_SLOT_NAME }>
+		<Fill name={ WC_TASKLIST_EXPERIMENTAL_PROGRESS_HEADER_SLOT_NAME }>
 			{ ( fillProps: Fill.Props ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }
@@ -29,7 +29,7 @@ export const WooTaskListProgressHeaderItem: React.FC< {
 WooTaskListProgressHeaderItem.Slot = ( { fillProps } ) => {
 	return (
 		<Slot
-			name={ WC_TASKLIST_PROGRESS_HEADER_SLOT_NAME }
+			name={ WC_TASKLIST_EXPERIMENTAL_PROGRESS_HEADER_SLOT_NAME }
 			fillProps={ fillProps }
 		>
 			{ sortFillsByOrder }
