@@ -1425,14 +1425,14 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$post_type_obj = get_post_type_object( $this->post_type );
 		if ( is_post_type_viewable( $post_type_obj ) && $post_type_obj->public ) {
 			$schema['properties']['permalink_template'] = array(
-				'description' => __( 'Permalink template for the product.' ),
+				'description' => __( 'Permalink template for the product.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'edit' ),
 				'readonly'    => true,
 			);
 
 			$schema['properties']['generated_slug'] = array(
-				'description' => __( 'Slug automatically generated from the product name.' ),
+				'description' => __( 'Slug automatically generated from the product name.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'edit' ),
 				'readonly'    => true,
