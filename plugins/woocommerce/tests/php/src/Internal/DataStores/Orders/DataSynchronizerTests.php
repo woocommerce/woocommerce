@@ -256,7 +256,7 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_meta_data_changes_propagate_from_cpt_to_cot(): void {
-		// Sync enabled and COT authoritative.
+		// Sync enabled and CPT authoritative.
 		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 
