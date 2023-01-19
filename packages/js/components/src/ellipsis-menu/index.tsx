@@ -6,7 +6,7 @@ import classnames from 'classnames';
 import { Button, Dropdown, NavigableMenu } from '@wordpress/components';
 import { Icon } from '@wordpress/icons';
 import Ellipsis from 'gridicons/dist/ellipsis';
-import React, { MouseEvent, ReactNode } from 'react';
+import React, { MouseEvent, KeyboardEvent, ReactNode } from 'react';
 
 type CallbackProps = {
 	isOpen?: boolean;
@@ -30,7 +30,7 @@ type EllipsisMenuProps = {
 	/**
 	 * Callback function when dropdown button is clicked, it provides the click event.
 	 */
-	onToggle: ( e?: MouseEvent< HTMLButtonElement > ) => void;
+	onToggle: ( e?: MouseEvent | KeyboardEvent ) => void;
 };
 
 /**
@@ -61,7 +61,7 @@ const EllipsisMenu = ( {
 		return (
 			<Button
 				className={ toggleClassname }
-				onClick={ ( e: MouseEvent< HTMLButtonElement > ) => {
+				onClick={ ( e: MouseEvent | KeyboardEvent ) => {
 					if ( onToggle ) {
 						onToggle( e );
 					}
