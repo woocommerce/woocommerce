@@ -30,7 +30,7 @@ type EllipsisMenuProps = {
 	/**
 	 * Callback function when dropdown button is clicked, it provides the click event.
 	 */
-	onToggle: ( e?: MouseEvent | KeyboardEvent ) => void;
+	onToggle?: ( e?: MouseEvent | KeyboardEvent ) => void;
 };
 
 /**
