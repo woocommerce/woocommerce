@@ -21,8 +21,11 @@ import './MarketingOverviewMultichannel.scss';
 import { CenteredSpinner } from '../components';
 
 export const MarketingOverviewMultichannel: React.FC = () => {
-	const { loading: loadingRegistered, data: dataRegistered } =
-		useRegisteredChannels();
+	const {
+		loading: loadingRegistered,
+		data: dataRegistered,
+		refetch,
+	} = useRegisteredChannels();
 	const { loading: loadingRecommended, data: dataRecommended } =
 		useRecommendedChannels();
 	const { currentUserCan } = useUser();
@@ -31,18 +34,25 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 		getAdminSetting( 'allowMarketplaceSuggestions', false ) &&
 		currentUserCan( 'install_plugins' );
 
-	if ( loadingRegistered || loadingRecommended ) {
+	if (
+		( loadingRegistered && ! dataRegistered ) ||
+		( loadingRecommended && ! dataRecommended )
+	) {
 		return <CenteredSpinner />;
 	}
 
 	return (
 		<div className="woocommerce-marketing-overview-multichannel">
-			{ ( dataRegistered.length >= 1 || dataRecommended.length >= 1 ) && (
-				<Channels
-					registeredChannels={ dataRegistered }
-					recommendedChannels={ dataRecommended }
-				/>
-			) }
+			{ dataRegistered &&
+				dataRecommended &&
+				( dataRegistered.length >= 1 ||
+					dataRecommended.length >= 1 ) && (
+					<Channels
+						registeredChannels={ dataRegistered }
+						recommendedChannels={ dataRecommended }
+						onInstalledAndActivated={ refetch }
+					/>
+				) }
 			<InstalledExtensions />
 			{ shouldShowExtensions && <DiscoverTools /> }
 			<LearnMarketing />

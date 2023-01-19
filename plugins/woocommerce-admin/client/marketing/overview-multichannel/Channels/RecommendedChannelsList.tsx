@@ -14,17 +14,21 @@ import './Channels.scss';
 
 type RecommendedChannelListPropsType = {
 	recommendedChannels: Array< RecommendedChannel >;
+	onInstalledAndActivated?: () => void;
 };
 
 export const RecommendedChannelsList: React.FC<
 	RecommendedChannelListPropsType
-> = ( { recommendedChannels } ) => {
+> = ( { recommendedChannels, onInstalledAndActivated } ) => {
 	return (
 		<>
 			{ recommendedChannels.map( ( el, idx ) => {
 				return (
 					<Fragment key={ el.plugin }>
-						<SmartPluginCardBody plugin={ el } />
+						<SmartPluginCardBody
+							plugin={ el }
+							onInstalledAndActivated={ onInstalledAndActivated }
+						/>
 						{ idx < recommendedChannels.length - 1 && (
 							<CardDivider />
 						) }

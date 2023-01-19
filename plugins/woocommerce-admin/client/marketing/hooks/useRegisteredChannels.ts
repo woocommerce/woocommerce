@@ -1,8 +1,16 @@
 /**
  * External dependencies
  */
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
+import {
+	createElement,
+	useCallback,
+	useState,
+	useEffect,
+	useMemo,
+	useRef,
+} from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -17,8 +25,9 @@ import {
 
 type UseRegisteredChannels = {
 	loading: boolean;
-	data: Array< InstalledChannel >;
+	data?: Array< InstalledChannel >;
 	error?: ApiFetchError;
+	refetch: () => void;
 };
 
 // // TODO: To be removed. This is for testing loading state.
@@ -134,14 +143,21 @@ const convert = ( data: Channel ): InstalledChannel => {
 };
 
 export const useRegisteredChannels = (): UseRegisteredChannels => {
+	const { invalidateResolution } = useDispatch( STORE_KEY );
+
+	const refetch = useCallback( () => {
+		invalidateResolution( 'getChannels' );
+	}, [ invalidateResolution ] );
+
 	return useSelect( ( select ) => {
 		const { hasFinishedResolution, getChannels } = select( STORE_KEY );
 		const channels = getChannels< Channels >();
 
 		return {
 			loading: ! hasFinishedResolution( 'getChannels' ),
-			data: channels.data?.map( convert ) || [],
+			data: channels.data?.map( convert ),
 			error: channels.error,
+			refetch,
 		};
 	} );
 };

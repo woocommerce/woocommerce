@@ -15,10 +15,12 @@ import './RecommendedChannels.scss';
 
 type RecommendedChannelsType = {
 	recommendedChannels: Array< RecommendedChannel >;
+	onInstalledAndActivated?: () => void;
 };
 
 export const RecommendedChannels: React.FC< RecommendedChannelsType > = ( {
 	recommendedChannels,
+	onInstalledAndActivated,
 } ) => {
 	const [ collapsed, setCollapsed ] = useState( true );
 
@@ -40,6 +42,7 @@ export const RecommendedChannels: React.FC< RecommendedChannelsType > = ( {
 			{ ! collapsed && (
 				<RecommendedChannelsList
 					recommendedChannels={ recommendedChannels }
+					onInstalledAndActivated={ onInstalledAndActivated }
 				/>
 			) }
 		</div>

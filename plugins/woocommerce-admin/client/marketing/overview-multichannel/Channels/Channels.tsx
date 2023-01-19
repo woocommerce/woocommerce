@@ -18,11 +18,13 @@ import './Channels.scss';
 type ChannelsProps = {
 	registeredChannels: Array< InstalledChannel >;
 	recommendedChannels: Array< RecommendedChannel >;
+	onInstalledAndActivated?: () => void;
 };
 
 export const Channels: React.FC< ChannelsProps > = ( {
 	registeredChannels,
 	recommendedChannels,
+	onInstalledAndActivated,
 } ) => {
 	/*
 	 * If users have no registered channels,
@@ -45,6 +47,7 @@ export const Channels: React.FC< ChannelsProps > = ( {
 				</CardHeader>
 				<RecommendedChannelsList
 					recommendedChannels={ recommendedChannels }
+					onInstalledAndActivated={ onInstalledAndActivated }
 				/>
 			</Card>
 		);
@@ -80,6 +83,7 @@ export const Channels: React.FC< ChannelsProps > = ( {
 			{ recommendedChannels.length >= 1 && (
 				<RecommendedChannels
 					recommendedChannels={ recommendedChannels }
+					onInstalledAndActivated={ onInstalledAndActivated }
 				/>
 			) }
 		</Card>
