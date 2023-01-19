@@ -145,6 +145,7 @@ class WC_Admin_Notices {
 					esc_html__( 'PHP version requirements will change soon', 'woocommerce' )
 				),
 				sprintf(
+					// translators: Placeholder is a URL.
 					wpautop( wp_kses_data( __( 'WooCommerce 7.7, scheduled for <b>May 2023</b>, will require PHP 7.3 or newer to work. Your server is currently running an older version of PHP, so this change will impact your store. Upgrading to at least PHP 8.0 is recommended. <b><a href="%s">Learn more about this change.</a></b>', 'woocommerce' ) ) ),
 					'https://developer.woocommerce.com/2023/01/10/new-requirement-for-woocommerce-7-7-php-7-3/'
 				)
