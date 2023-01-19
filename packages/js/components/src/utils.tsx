@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { isValidElement, Fragment } from 'react';
+import { isValidElement, Fragment } from 'react';
 import { Slot, Fill } from '@wordpress/components';
 import { cloneElement, createElement } from '@wordpress/element';
 
@@ -13,15 +13,16 @@ import { cloneElement, createElement } from '@wordpress/element';
  * @param {Array}  props    - Fill props.
  * @return {Node} Node.
  */
-function createOrderedChildren< T = Fill.Props >(
+function createOrderedChildren< T = Fill.Props, S = Record< string, unknown > >(
 	children: React.ReactNode,
 	order: number,
-	props: T
+	props: T,
+	injectProps?: S
 ) {
 	if ( typeof children === 'function' ) {
-		return cloneElement( children( props ), { order } );
+		return cloneElement( children( props ), { order, ...injectProps } );
 	} else if ( isValidElement( children ) ) {
-		return cloneElement( children, { ...props, order } );
+		return cloneElement( children, { ...props, order, ...injectProps } );
 	}
 	throw Error( 'Invalid children type' );
 }
