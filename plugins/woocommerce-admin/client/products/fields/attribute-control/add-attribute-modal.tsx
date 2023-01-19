@@ -85,7 +85,7 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 			const attributeRow = document.querySelector(
 				`.woocommerce-add-attribute-modal__table-row-${ index }`
 			);
-			attributeRow?.scrollIntoView();
+			attributeRow?.scrollIntoView( { behavior: 'smooth' } );
 		}, 0 );
 	};
 
