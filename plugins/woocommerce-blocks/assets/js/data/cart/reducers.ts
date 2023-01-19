@@ -48,15 +48,7 @@ const reducer: Reducer< CartState > = (
 	action: Partial< CartAction >
 ) => {
 	switch ( action.type ) {
-		case types.RECEIVE_ERROR:
-			if ( action.error ) {
-				state = {
-					...state,
-					errors: state.errors.concat( action.error ),
-				};
-			}
-			break;
-		case types.REPLACE_ERRORS:
+		case types.SET_ERROR_DATA:
 			if ( action.error ) {
 				state = {
 					...state,

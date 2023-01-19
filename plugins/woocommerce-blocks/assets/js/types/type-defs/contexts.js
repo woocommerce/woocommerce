@@ -2,38 +2,11 @@
 /* eslint-disable jsdoc/valid-types */
 /**
  * @typedef {import('./billing').BillingData} BillingData
- * @typedef {import('./cart').CartShippingOption} CartShippingOption
  * @typedef {import('./shipping').ShippingAddress} CartShippingAddress
  * @typedef {import('./cart').CartData} CartData
  * @typedef {import('./checkout').CheckoutDispatchActions} CheckoutDispatchActions
  * @typedef {import('./add-to-cart-form').AddToCartFormDispatchActions} AddToCartFormDispatchActions
  * @typedef {import('./add-to-cart-form').AddToCartFormEventRegistration} AddToCartFormEventRegistration
- */
-
-/**
- * @typedef {Object} ShippingDataContext
- *
- * @property {ShippingErrorStatus}  shippingErrorStatus         The current shipping error status.
- * @property {Function}             dispatchErrorStatus         A function for dispatching a shipping rate error status.
- * @property {ShippingErrorTypes}   shippingErrorTypes          The error type constants for the shipping rate error
- *                                                              status.
- * @property {CartShippingOption[]} shippingRates               An array of available shipping rates.
- * @property {boolean}              shippingRatesLoading        Whether or not the shipping rates are being loaded.
- * @property {string[]}             selectedRates               The ids of the rates that are selected.
- * @property {function()}           setSelectedRates            Function for setting the selected rates.
- * @property {boolean}              isSelectingRate             True when rate is being selected.
- * @property {CartShippingAddress}  shippingAddress             The current set address for shipping.
- * @property {function(Object)}     setShippingAddress          Function for setting the shipping address.
- * @property {function()}           onShippingRateSuccess       Used to register a callback to be invoked when shipping
- *                                                              rates are retrieved.
- * @property {function()}           onShippingRateSelectSuccess Used to register a callback to be invoked when shipping
- *                                                              rate is selected.
- * @property {function()}           onShippingRateSelectFail    Used to register a callback to be invoked when shipping
- *                                                              rate is selected unsuccessfully
- * @property {function()}           onShippingRateFail          Used to register a callback to be invoked when there is
- *                                                              an error with retrieving shipping rates.
- * @property {boolean}              needsShipping               True if the cart has items requiring shipping.
- * @property {boolean}              hasCalculatedShipping       True if the cart has calculated shipping costs.
  */
 
 /**

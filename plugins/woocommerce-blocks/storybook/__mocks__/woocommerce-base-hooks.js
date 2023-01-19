@@ -36,5 +36,4 @@ export const useShippingData = () => ( {
 	hasCalculatedShipping: previewCart.has_calculated_shipping,
 	isLoadingRates: false,
 	isCollectable: false,
-	hasSelectedLocalPickup: false,
 } );
