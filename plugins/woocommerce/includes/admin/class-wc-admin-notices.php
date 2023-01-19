@@ -138,7 +138,17 @@ class WC_Admin_Notices {
 
 		self::add_custom_notice(
 			'php73_required_in_woo_77',
-			__( '<h4>PHP version requirements will change soon</h4><p>WooCommerce 7.7, scheduled for <b>May 2023</b>, will require PHP 7.3 or newer to work. Your server is currently running an older version of PHP, so this change will impact your store. Upgrading to at least PHP 8.0 is recommended. <b><a href="https://developer.woocommerce.com/2023/01/10/new-requirement-for-woocommerce-7-7-php-7-3/">Learn more about this change.</a></b></p>', 'woocommerce' )
+			sprintf(
+				'%s%s',
+				sprintf(
+					'<h4>%s</h4>',
+					esc_html__( 'PHP version requirements will change soon', 'woocommerce' )
+				),
+				sprintf(
+					wpautop( wp_kses_data( __( 'WooCommerce 7.7, scheduled for <b>May 2023</b>, will require PHP 7.3 or newer to work. Your server is currently running an older version of PHP, so this change will impact your store. Upgrading to at least PHP 8.0 is recommended. <b><a href="%s">Learn more about this change.</a></b>', 'woocommerce' ) ) ),
+					'https://developer.woocommerce.com/2023/01/10/new-requirement-for-woocommerce-7-7-php-7-3/'
+				)
+			)
 		);
 	}
 
