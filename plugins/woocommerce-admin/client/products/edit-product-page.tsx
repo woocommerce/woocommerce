@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
+	EXPERIMENTAL_PRODUCT_FORM_STORE_NAME,
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	PartialProduct,
 	Product,
@@ -21,6 +22,7 @@ import { ProductForm } from './product-form';
 import { ProductFormLayout } from './layout/product-form-layout';
 import { ProductVariationForm } from './product-variation-form';
 import './product-page.scss';
+import './fills';
 
 const EditProductPage: React.FC = () => {
 	const { productId, variationId } = useParams();
@@ -35,6 +37,8 @@ const EditProductPage: React.FC = () => {
 				isPending,
 				getPermalinkParts,
 			} = select( PRODUCTS_STORE_NAME );
+			const { hasFinishedResolution: hasProductFormFinishedResolution } =
+				select( EXPERIMENTAL_PRODUCT_FORM_STORE_NAME );
 			const {
 				getProductVariation,
 				hasFinishedResolution: hasProductVariationFinishedResolution,
@@ -71,7 +75,8 @@ const EditProductPage: React.FC = () => {
 								'getProductVariation',
 								[ parseInt( variationId, 10 ) ]
 							)
-						),
+						) ||
+						! hasProductFormFinishedResolution( 'getProductForm' ),
 					isPendingAction:
 						isPending( 'createProduct' ) ||
 						isPending(

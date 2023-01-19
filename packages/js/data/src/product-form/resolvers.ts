@@ -14,7 +14,7 @@ import {
 	getProductFormError,
 } from './actions';
 import { WC_ADMIN_NAMESPACE } from '../constants';
-import { Field, ProductForm } from './types';
+import { ProductFormField, ProductForm } from './types';
 import { STORE_NAME } from './constants';
 
 const resolveSelect =
@@ -23,7 +23,7 @@ const resolveSelect =
 export function* getFields() {
 	try {
 		const url = WC_ADMIN_NAMESPACE + '/product-form/fields';
-		const results: Field[] = yield apiFetch( {
+		const results: ProductFormField[] = yield apiFetch( {
 			path: url,
 			method: 'GET',
 		} );
