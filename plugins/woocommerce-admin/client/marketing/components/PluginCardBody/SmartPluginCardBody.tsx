@@ -16,7 +16,7 @@ import { PluginCardBody } from '~/marketing/components';
 import { RecommendedPlugin } from '~/marketing/types';
 import { getInAppPurchaseUrl } from '~/lib/in-app-purchase';
 import { createNoticesFromResponse } from '~/lib/notices';
-import { useIsPluginInstalled } from './useIsPluginInstalled';
+import { useIsPluginInstalledNotActivated } from './useIsPluginInstalledNotActivated';
 import './PluginCardBody.scss';
 
 type SmartPluginCardBodyProps = {
@@ -39,7 +39,8 @@ export const SmartPluginCardBody = ( {
 		null
 	);
 	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
-	const { isPluginInstalled } = useIsPluginInstalled();
+	const { isPluginInstalledNotActivated } =
+		useIsPluginInstalledNotActivated();
 
 	/**
 	 * Install and activate a plugin.
@@ -73,7 +74,7 @@ export const SmartPluginCardBody = ( {
 	const renderButton = () => {
 		const buttonDisabled = !! currentPlugin;
 
-		if ( isPluginInstalled( plugin.product ) ) {
+		if ( isPluginInstalledNotActivated( plugin.product ) ) {
 			return (
 				<Button
 					variant="secondary"
