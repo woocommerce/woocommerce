@@ -7,8 +7,8 @@ import {
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 } from '@woocommerce/components';
 import { PartialProduct, Product } from '@woocommerce/data';
-import { Ref } from 'react';
 import { PluginArea } from '@wordpress/plugins';
+import { Ref } from 'react';
 
 /**
  * Internal dependencies
@@ -25,8 +25,6 @@ import { AttributesSection } from './sections/attributes-section';
 import { OptionsSection } from './sections/options-section';
 import { ProductFormFooter } from './layout/product-form-footer';
 import { ProductFormTab } from './product-form-tab';
-
-import './fills';
 
 export const ProductForm: React.FC< {
 	product?: PartialProduct;

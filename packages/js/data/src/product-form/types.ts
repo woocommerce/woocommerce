@@ -9,22 +9,23 @@ type FieldProperties = {
 	label: string;
 };
 
-export type Field = BaseComponent & {
+export type ProductFormField = BaseComponent & {
 	type: string;
 	section: string;
 	properties: FieldProperties;
 };
 
-export type Section = BaseComponent & {
+export type ProductFormSection = BaseComponent & {
 	title: string;
 	description: string;
+	location: string;
 };
 
 export type Subsection = BaseComponent;
 
 export type ProductForm = {
-	fields: Field[];
-	sections: Section[];
+	fields: ProductFormField[];
+	sections: ProductFormSection[];
 	subsections: Subsection[];
 };
 
