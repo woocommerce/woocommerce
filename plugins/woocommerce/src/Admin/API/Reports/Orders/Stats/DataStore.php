@@ -69,6 +69,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected $context = 'orders_stats';
 
+	public function __construct() {
+		parent::__construct();
+		$this->date_column_name = get_option( 'woocommerce_date_type', 'date_paid' );
+	}
+
 	/**
 	 * Assign report columns once full table name has been assigned.
 	 */
