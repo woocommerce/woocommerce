@@ -92,3 +92,9 @@ export {
 	ProductFieldSection as __experimentalProductFieldSection,
 } from './product-section-layout';
 export * from './product-fields';
+export {
+	SlotContextProvider,
+	useSlotContext,
+	SlotContextType,
+	SlotContextHelpersType,
+} from './slot-context';

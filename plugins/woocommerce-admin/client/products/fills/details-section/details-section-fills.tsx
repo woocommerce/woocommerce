@@ -85,7 +85,5 @@ const DetailsSection = () => (
 registerPlugin( 'wc-admin-product-editor-details-section', {
 	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 	scope: 'woocommerce-product-editor',
-	render: () => {
-		return <DetailsSection />;
-	},
+	render: () => <DetailsSection />,
 } );
