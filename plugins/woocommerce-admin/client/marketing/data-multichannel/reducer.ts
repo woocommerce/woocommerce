@@ -16,6 +16,10 @@ const initialState = {
 		data: undefined,
 		error: undefined,
 	},
+	recommendedChannels: {
+		data: undefined,
+		error: undefined,
+	},
 };
 
 export const reducer: Reducer< State, Action > = (
@@ -34,6 +38,20 @@ export const reducer: Reducer< State, Action > = (
 			return {
 				...state,
 				channels: {
+					error: action.payload,
+				},
+			};
+		case TYPES.RECEIVE_RECOMMENDED_CHANNELS_SUCCESS:
+			return {
+				...state,
+				recommendedChannels: {
+					data: action.payload,
+				},
+			};
+		case TYPES.RECEIVE_RECOMMENDED_CHANNELS_ERROR:
+			return {
+				...state,
+				recommendedChannels: {
 					error: action.payload,
 				},
 			};
