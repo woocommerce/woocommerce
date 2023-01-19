@@ -524,14 +524,14 @@ jobs:
               id: created-at
               env:
                   GH_TOKEN: ${{ github.token }}
-              run: echo "created_at=$(gh release view ${{ needs.get-tag.outputs.tag }} --json assets --jq .assets[0].createdAt)" >> $GITHUB_OUTPUT
+              run: echo "created_at=$(gh release view ${{ needs.get-tag.outputs.tag }} --json assets --jq .assets[0].createdAt --repo woocommerce/woocommerce) " >> $GITHUB_OUTPUT
 
             - name: Publish report on WP Latest
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
               run: |
                   gh workflow run publish-test-reports-release.yml \
-                    -f created_at=${{ steps.created-at.outputs.created_at }} \
+                    -f created_at="${{ steps.created-at.outputs.created_at }}" \
                     -f run_id=${{ github.run_id }} \
                     -f run_number=${{ github.run_number }} \
                     -f release_tag=${{ needs.get-tag.outputs.tag }} \
