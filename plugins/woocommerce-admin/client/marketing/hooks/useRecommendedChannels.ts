@@ -25,7 +25,7 @@ export const useRecommendedChannels = (): UseRecommendedChannels => {
 		// using @woocommerce/data/plugins.
 
 		return {
-			loading: ! hasFinishedResolution( 'getChannels' ),
+			loading: ! hasFinishedResolution( 'getRecommendedChannels' ),
 			data: channels.data || [],
 			error: channels.error,
 		};
