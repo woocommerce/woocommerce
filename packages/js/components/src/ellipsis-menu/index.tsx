@@ -10,7 +10,7 @@ import React, { MouseEvent, KeyboardEvent, ReactNode } from 'react';
 
 type CallbackProps = {
 	isOpen?: boolean;
-	onToggle?: () => void;
+	onToggle: () => void;
 	onClose?: () => void;
 };
 
@@ -22,7 +22,7 @@ type EllipsisMenuProps = {
 	/**
 	 * A function returning `MenuTitle`/`MenuItem` components as a render prop. Arguments from Dropdown passed as function arguments.
 	 */
-	renderContent?: ( props: CallbackProps ) => ReactNode;
+	renderContent?: ( props: CallbackProps ) => ReactNode | JSX.Element;
 	/**
 	 * Classname to add to ellipsis menu.
 	 */
