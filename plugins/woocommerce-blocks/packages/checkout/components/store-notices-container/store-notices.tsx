@@ -47,7 +47,8 @@ const StoreNotices = ( {
 
 		if (
 			activeElement &&
-			inputs.indexOf( activeElement.tagName.toLowerCase() ) !== -1
+			inputs.indexOf( activeElement.tagName.toLowerCase() ) !== -1 &&
+			activeElement.getAttribute( 'type' ) !== 'radio'
 		) {
 			return;
 		}
@@ -72,7 +73,7 @@ const StoreNotices = ( {
 		};
 	}, [ context, registerContainer, unregisterContainer ] );
 
-	// Group notices by whether or not they are dismissable. Dismissable notices can be grouped.
+	// Group notices by whether or not they are dismissible. Dismissible notices can be grouped.
 	const dismissibleNotices = notices.filter(
 		( { isDismissible } ) => !! isDismissible
 	);
@@ -101,7 +102,7 @@ const StoreNotices = ( {
 		>
 			{ nonDismissibleNotices.map( ( notice ) => (
 				<Notice
-					key={ notice.id }
+					key={ notice.id + '-' + notice.context }
 					className={ classnames(
 						'wc-block-components-notices__notice',
 						getClassNameFromStatus( notice.status )
@@ -140,7 +141,11 @@ const StoreNotices = ( {
 							) : (
 								<ul>
 									{ noticeGroup.map( ( notice ) => (
-										<li key={ notice.id }>
+										<li
+											key={
+												notice.id + '-' + notice.context
+											}
+										>
 											{ sanitizeHTML(
 												decodeEntities( notice.content )
 											) }
