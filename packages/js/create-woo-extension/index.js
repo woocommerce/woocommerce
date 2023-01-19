@@ -1,5 +1,10 @@
+const variantIndex = process.argv.indexOf( '--variant' );
+let templatesPath = __dirname;
+if ( variantIndex > -1 && process.argv[ variantIndex + 1 ] ) {
+	templatesPath = __dirname + '/examples/' + process.argv[ variantIndex + 1 ];
+}
 module.exports = {
-	templatesPath: __dirname,
+	templatesPath,
 	defaultValues: {
 		npmDependencies: [
 			'@wordpress/hooks',
@@ -16,6 +21,16 @@ module.exports = {
 		license: 'GPL-3.0+',
 		customScripts: {
 			postinstall: 'composer install',
+		},
+	},
+	variants: {
+		'add-task': {
+			npmDependencies: [
+				'@wordpress/hooks',
+				'@wordpress/i18n',
+				'@woocommerce/components',
+				'@woocommerce/onboarding',
+			],
 		},
 	},
 };
