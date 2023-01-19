@@ -21,6 +21,8 @@ const skipTestIfUndefined = () => {
 };
 
 const getWCDownloadURL = async () => {
+	let woocommerceZipAsset;
+
 	const response = await axios
 		.get(
 			`https://api.github.com/repos/woocommerce/woocommerce/releases/tags/${ UPDATE_WC }`
@@ -33,13 +35,17 @@ const getWCDownloadURL = async () => {
 	if (
 		response.status === 200 &&
 		response.data.assets &&
-		Array.isArray( response.data.assets ) &&
 		response.data.assets.length > 0 &&
-		response.data.assets[ 0 ].browser_download_url
+		( woocommerceZipAsset = response.data.assets.find(
+			( { browser_download_url } ) =>
+				browser_download_url.match(
+					/woocommerce(-trunk-nightly)?\.zip$/
+				)
+		) )
 	) {
-		return response.data.assets[ 0 ].browser_download_url;
+		return woocommerceZipAsset.browser_download_url;
 	} else {
-		const error = `UPDATE_WC was set to "${ UPDATE_WC }", which is an invalid WooCommerce release tag, or a tag without a WooCommerce release zip asset like "7.2.0-rc.2".`;
+		const error = `You're attempting to get the download URL of a WooCommerce release zip with tag "${ UPDATE_WC }". But "${ UPDATE_WC }" is an invalid WooCommerce release tag, or a tag without a WooCommerce release zip asset like "7.2.0-rc.2".`;
 		throw new Error( error );
 	}
 };
