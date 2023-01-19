@@ -1485,19 +1485,19 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$fields = $this->get_fields_for_response( $this->request );
 
 			// Add stock_status if needed.
-			if ( in_array( 'stock_status', $fields ) ) {
+			if ( in_array( 'stock_status', $fields, true ) ) {
 				$data['stock_status'] = $product->get_stock_status( $context );
 			}
 
 			// Add has_options if needed.
-			if ( in_array( 'has_options', $fields ) ) {
+			if ( in_array( 'has_options', $fields, true ) ) {
 				$data['has_options'] = $product->has_options( $context );
 			}
 
 			$post_type_obj = get_post_type_object( $this->post_type );
 			if ( is_post_type_viewable( $post_type_obj ) && $post_type_obj->public ) {
-				$permalink_template_requested = in_array( 'permalink_template', $fields );
-				$generated_slug_requested = in_array( 'generated_slug', $fields );
+				$permalink_template_requested = in_array( 'permalink_template', $fields, true );
+				$generated_slug_requested = in_array( 'generated_slug', $fields, true );
 
 				if ( $permalink_template_requested || $generated_slug_requested ) {
 					if ( ! function_exists( 'get_sample_permalink' ) ) {
