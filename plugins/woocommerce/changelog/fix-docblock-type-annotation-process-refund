@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Add correct type annotation for the return type of `::process_refund`.
