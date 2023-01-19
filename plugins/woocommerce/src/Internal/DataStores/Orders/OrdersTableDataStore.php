@@ -1022,8 +1022,8 @@ WHERE
 	 * Helper method to initialize order object from DB data.
 	 *
 	 * @param WC_Abstract_Order $order Order object.
-	 * @param int                $order_id Order ID.
-	 * @param \stdClass          $order_data Order data fetched from DB.
+	 * @param int               $order_id Order ID.
+	 * @param \stdClass         $order_data Order data fetched from DB.
 	 *
 	 * @return void
 	 */
@@ -1217,7 +1217,7 @@ WHERE
 	 *
 	 * @param WC_Abstract_Order $order1 Order object read from posts.
 	 * @param WC_Abstract_Order $order2 Order object read from COT.
-	 * @param bool               $sync   Whether to also sync the meta data.
+	 * @param bool              $sync   Whether to also sync the meta data.
 	 *
 	 * @return array Difference between post and COT meta data.
 	 */
@@ -1303,7 +1303,7 @@ WHERE
 	 * Sets order properties based on a row from the database.
 	 *
 	 * @param WC_Abstract_Order $order      The order object.
-	 * @param object             $order_data A row of order data from the database.
+	 * @param object            $order_data A row of order data from the database.
 	 */
 	private function set_order_props_from_data( &$order, $order_data ) {
 		foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mapping ) {
@@ -1329,8 +1329,8 @@ WHERE
 	 * Set order prop if a setter exists in either the order object or in the data store.
 	 *
 	 * @param WC_Abstract_Order $order Order object.
-	 * @param string             $prop_name Property name.
-	 * @param mixed              $prop_value Property value.
+	 * @param string            $prop_name Property name.
+	 * @param mixed             $prop_value Property value.
 	 *
 	 * @return bool True if the property was set, false otherwise.
 	 */
@@ -1562,7 +1562,7 @@ FROM $order_meta_table
 	 * Persists order changes to the database.
 	 *
 	 * @param WC_Abstract_Order $order            The order.
-	 * @param bool               $force_all_fields Force saving all fields to DB and just changed.
+	 * @param bool              $force_all_fields Force saving all fields to DB and just changed.
 	 *
 	 * @throws \Exception If order data is not valid.
 	 *
@@ -1617,8 +1617,8 @@ FROM $order_meta_table
 	 * Generates an array of rows with all the details required to insert or update an order in the database.
 	 *
 	 * @param WC_Abstract_Order $order The order.
-	 * @param string             $context The context: 'create' or 'update'.
-	 * @param boolean            $only_changes Whether to consider only changes in the order for generating the rows.
+	 * @param string            $context The context: 'create' or 'update'.
+	 * @param boolean           $only_changes Whether to consider only changes in the order for generating the rows.
 	 *
 	 * @return array
 	 * @throws \Exception When invalid data is found for the given context.
@@ -1697,8 +1697,8 @@ FROM $order_meta_table
 	 * database.
 	 *
 	 * @param WC_Abstract_Order $order          Order.
-	 * @param array              $column_mapping Table column mapping.
-	 * @param bool               $only_changes   Whether to consider only changes in the order object or all fields.
+	 * @param array             $column_mapping Table column mapping.
+	 * @param bool              $only_changes   Whether to consider only changes in the order object or all fields.
 	 * @return array
 	 *
 	 * @since 6.8.0
@@ -1739,7 +1739,7 @@ FROM $order_meta_table
 	 * Method to delete an order from the database.
 	 *
 	 * @param WC_Abstract_Order $order Order object.
-	 * @param array              $args Array of args to pass to the delete method.
+	 * @param array             $args Array of args to pass to the delete method.
 	 *
 	 * @return void
 	 */
@@ -2159,7 +2159,7 @@ FROM $order_meta_table
 	 * Helper function to update billing and shipping address metadata.
 	 *
 	 * @param WC_Abstract_Order $order Order Object.
-	 * @param array              $changes Array of changes.
+	 * @param array             $changes Array of changes.
 	 *
 	 * @return void
 	 */
