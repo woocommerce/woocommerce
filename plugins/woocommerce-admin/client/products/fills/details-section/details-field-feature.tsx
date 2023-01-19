@@ -16,7 +16,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { getCheckboxTracks } from '../../sections/utils';
-import { PRODUCT_DETAILS_SLUG } from './index';
+import { PRODUCT_DETAILS_SLUG } from '../constants';
 
 export const DetailsFeatureField = () => {
 	const { getCheckboxControlProps } = useFormContext< Product >();
