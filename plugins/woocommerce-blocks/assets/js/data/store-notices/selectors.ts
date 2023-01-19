@@ -3,6 +3,6 @@
  */
 import { StoreNoticesState } from './default-state';
 
-export const getContainers = (
+export const getRegisteredContainers = (
 	state: StoreNoticesState
 ): StoreNoticesState[ 'containers' ] => state.containers;

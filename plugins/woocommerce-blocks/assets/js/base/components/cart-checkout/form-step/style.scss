@@ -82,6 +82,7 @@
 		top: 0;
 		text-align: center;
 		transform: translateX(-50%);
+		white-space: nowrap;
 
 		.is-mobile &,
 		.is-small & {

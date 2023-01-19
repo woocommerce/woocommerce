@@ -7,7 +7,7 @@ import type { CartResponse } from './cart-response';
 export type ApiErrorResponse = {
 	code: string;
 	message: string;
-	data: ApiErrorResponseData;
+	data?: ApiErrorResponseData | undefined;
 };
 
 // API errors contain data with the status, and more in-depth error details. This may be null.

@@ -23,6 +23,7 @@ export const useShippingData = (): ShippingData => {
 		hasCalculatedShipping,
 		isLoadingRates,
 		isCollectable,
+		isSelectingRate,
 	} = useSelect( ( select ) => {
 		const isEditor = !! select( 'core/editor' );
 		const store = select( storeKey );
@@ -45,13 +46,11 @@ export const useShippingData = (): ShippingData => {
 							methodId === 'pickup_location'
 					)
 			),
+			isSelectingRate: isEditor
+				? false
+				: store.isShippingRateBeingSelected(),
 		};
 	} );
-
-	// See if rates are being selected.
-	const isSelectingRate = useSelect< boolean >( ( select ) => {
-		return select( storeKey ).isShippingRateBeingSelected();
-	}, [] );
 
 	// set selected rates on ref so it's always current.
 	const selectedRates = useRef< Record< string, string > >( {} );

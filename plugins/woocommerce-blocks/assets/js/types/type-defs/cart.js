@@ -12,16 +12,6 @@
  */
 
 /**
- * @typedef {Object} CartShippingOption
- *
- * @property {string} name          Name of the shipping rate
- * @property {string} description   Description of the shipping rate.
- * @property {string} price         Price of the shipping rate (in subunits)
- * @property {string} rate_id       The ID of the shipping rate.
- * @property {string} delivery_time The delivery time of the shipping rate
- */
-
-/**
  * @typedef {Object} CartItemImage
  *
  * @property {number} id        Image id.

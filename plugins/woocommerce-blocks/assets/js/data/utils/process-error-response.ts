@@ -7,7 +7,11 @@ import {
 	DEFAULT_ERROR_MESSAGE,
 } from '@woocommerce/base-utils';
 import { decodeEntities } from '@wordpress/html-entities';
-import { isObject, objectHasProp, ApiErrorResponse } from '@woocommerce/types';
+import {
+	objectHasProp,
+	ApiErrorResponse,
+	isApiErrorResponse,
+} from '@woocommerce/types';
 import { noticeContexts } from '@woocommerce/base-context/event-emit/utils';
 
 type ApiParamError = {
@@ -15,15 +19,6 @@ type ApiParamError = {
 	id: string;
 	code: string;
 	message: string;
-};
-
-const isApiResponse = ( response: unknown ): response is ApiErrorResponse => {
-	return (
-		isObject( response ) &&
-		objectHasProp( response, 'code' ) &&
-		objectHasProp( response, 'message' ) &&
-		objectHasProp( response, 'data' )
-	);
 };
 
 /**
@@ -131,7 +126,7 @@ export const processErrorResponse = (
 	response: ApiErrorResponse,
 	context: string | undefined
 ) => {
-	if ( ! isApiResponse( response ) ) {
+	if ( ! isApiErrorResponse( response ) ) {
 		return;
 	}
 	switch ( response.code ) {

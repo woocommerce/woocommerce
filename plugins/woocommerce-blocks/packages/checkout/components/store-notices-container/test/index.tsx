@@ -97,8 +97,44 @@ describe( 'StoreNoticesContainer', () => {
 				] }
 			/>
 		);
+		// Also counts the spokenMessage.
 		expect( screen.getAllByText( /Additional test error/i ) ).toHaveLength(
 			2
+		);
+	} );
+
+	it( 'Shows notices from unregistered sub-contexts', async () => {
+		dispatch( noticesStore ).createErrorNotice(
+			'Custom sub-context error',
+			{
+				id: 'custom-subcontext-test-error',
+				context: 'wc/checkout/shipping-address',
+			}
+		);
+		dispatch( noticesStore ).createErrorNotice(
+			'Custom sub-context error',
+			{
+				id: 'custom-subcontext-test-error',
+				context: 'wc/checkout/billing-address',
+			}
+		);
+		render( <StoreNoticesContainer context="wc/checkout" /> );
+		// This should match against 3 elements; 2 error messages, and the spoken message where they are combined into one element.
+		expect(
+			screen.getAllByText( /Custom sub-context error/i )
+		).toHaveLength( 3 );
+		// Clean up notices.
+		await act( () =>
+			dispatch( noticesStore ).removeNotice(
+				'custom-subcontext-test-error',
+				'wc/checkout/shipping-address'
+			)
+		);
+		await act( () =>
+			dispatch( noticesStore ).removeNotice(
+				'custom-subcontext-test-error',
+				'wc/checkout/billing-address'
+			)
 		);
 	} );
 } );
