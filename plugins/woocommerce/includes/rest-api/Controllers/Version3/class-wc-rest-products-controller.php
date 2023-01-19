@@ -1497,7 +1497,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$post_type_obj = get_post_type_object( $this->post_type );
 			if ( is_post_type_viewable( $post_type_obj ) && $post_type_obj->public ) {
 				$permalink_template_requested = in_array( 'permalink_template', $fields, true );
-				$generated_slug_requested = in_array( 'generated_slug', $fields, true );
+				$generated_slug_requested     = in_array( 'generated_slug', $fields, true );
 
 				if ( $permalink_template_requested || $generated_slug_requested ) {
 					if ( ! function_exists( 'get_sample_permalink' ) ) {
