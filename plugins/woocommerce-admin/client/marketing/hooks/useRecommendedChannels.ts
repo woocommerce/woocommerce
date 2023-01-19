@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
+import { PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { differenceWith } from 'lodash';
 
 /**
  * Internal dependencies
@@ -19,15 +21,27 @@ export const useRecommendedChannels = (): UseRecommendedChannels => {
 	return useSelect( ( select ) => {
 		const { hasFinishedResolution, getRecommendedChannels } =
 			select( STORE_KEY );
-		const channels = getRecommendedChannels< RecommendedChannels >();
+		const { data, error } = getRecommendedChannels< RecommendedChannels >();
 
-		// TODO: filter recommended channels against installed plugins,
-		// using @woocommerce/data/plugins.
+		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
+		const activePlugins = getActivePlugins();
+
+		/**
+		 * Recommended channels that are not in "active" state,
+		 * i.e. channels that are not installed or not activated yet.
+		 */
+		const nonActiveRecommendedChannels = differenceWith(
+			data,
+			activePlugins,
+			( a, b ) => {
+				return a.product === b;
+			}
+		);
 
 		return {
 			loading: ! hasFinishedResolution( 'getRecommendedChannels' ),
-			data: channels.data || [],
-			error: channels.error,
+			data: nonActiveRecommendedChannels,
+			error,
 		};
 	} );
 };
