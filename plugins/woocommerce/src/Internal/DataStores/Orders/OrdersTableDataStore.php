@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Exception;
+use WC_Abstract_Order;
 use WC_Data;
 use WC_Order;
 
@@ -518,7 +519,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	/**
 	 * Backfills order details in to WP_Post DB. Uses WC_Order_Data_store_CPT.
 	 *
-	 * @param \WC_Abstract_Order $order Order object to backfill.
+	 * @param WC_Abstract_Order $order Order object to backfill.
 	 */
 	public function backfill_post_record( $order ) {
 		$cpt_data_store = $this->get_post_data_store_for_backfill();
@@ -1007,11 +1008,11 @@ WHERE
 	/**
 	 * Helper method to check whether to sync the order.
 	 *
-	 * @param \WC_Abstract_Order $order Order object.
+	 * @param WC_Abstract_Order $order Order object.
 	 *
 	 * @return bool Whether the order should be synced.
 	 */
-	private function should_sync_order( \WC_Abstract_Order $order ) : bool {
+	private function should_sync_order( WC_Abstract_Order $order ) : bool {
 		$draft_order    = in_array( $order->get_status(), array( 'draft', 'auto-draft' ), true );
 		$already_synced = in_array( $order->get_id(), self::$reading_order_ids, true );
 		return ! $draft_order && ! $already_synced;
@@ -1020,13 +1021,13 @@ WHERE
 	/**
 	 * Helper method to initialize order object from DB data.
 	 *
-	 * @param \WC_Abstract_Order $order Order object.
+	 * @param WC_Abstract_Order $order Order object.
 	 * @param int                $order_id Order ID.
 	 * @param \stdClass          $order_data Order data fetched from DB.
 	 *
 	 * @return void
 	 */
-	protected function init_order_record( \WC_Abstract_Order &$order, int $order_id, \stdClass $order_data ) {
+	protected function init_order_record( WC_Abstract_Order &$order, int $order_id, \stdClass $order_data ) {
 		$order->set_defaults();
 		$order->set_id( $order_id );
 		$filtered_meta_data = $this->filter_raw_meta_data( $order, $order_data->meta_data );
@@ -1067,13 +1068,13 @@ WHERE
 	/**
 	 * Sync order to/from posts tables if we are able to detect difference between order and posts but the sync is enabled.
 	 *
-	 * @param \WC_Abstract_Order $order Order object.
-	 * @param \WC_Abstract_Order $post_order Order object initialized from post.
+	 * @param WC_Abstract_Order $order Order object.
+	 * @param WC_Abstract_Order $post_order Order object initialized from post.
 	 *
 	 * @return void
 	 * @throws \Exception If passed an invalid order.
 	 */
-	private function maybe_sync_order( \WC_Abstract_Order &$order, \WC_Abstract_Order $post_order ) {
+	private function maybe_sync_order( WC_Abstract_Order &$order, WC_Abstract_Order $post_order ) {
 		if ( ! $this->is_post_different_from_order( $order, $post_order ) ) {
 			return;
 		}
@@ -1177,8 +1178,8 @@ WHERE
 	/**
 	 * Computes whether post has been updated after last order. Tries to do it as efficiently as possible.
 	 *
-	 * @param \WC_Abstract_Order $order Order object.
-	 * @param \WC_Abstract_Order $post_order Order object read from posts table.
+	 * @param WC_Abstract_Order $order Order object.
+	 * @param WC_Abstract_Order $post_order Order object read from posts table.
 	 *
 	 * @return bool True if post is different than order.
 	 */
@@ -1198,12 +1199,12 @@ WHERE
 	/**
 	 * Migrate meta data from post to order.
 	 *
-	 * @param \WC_Abstract_Order $order Order object.
-	 * @param \WC_Abstract_Order $post_order Order object read from posts table.
+	 * @param WC_Abstract_Order $order Order object.
+	 * @param WC_Abstract_Order $post_order Order object read from posts table.
 	 *
 	 * @return array List of meta data that was migrated.
 	 */
-	private function migrate_meta_data_from_post_order( \WC_Abstract_Order &$order, \WC_Abstract_Order $post_order ) {
+	private function migrate_meta_data_from_post_order( WC_Abstract_Order &$order, WC_Abstract_Order $post_order ) {
 		$diff = $this->get_diff_meta_data_between_orders( $order, $post_order, true );
 		$order->save_meta_data();
 		return $diff;
@@ -1214,13 +1215,13 @@ WHERE
 	 *
 	 * Also provides an option to sync the metadata as well, since we are already computing the diff.
 	 *
-	 * @param \WC_Abstract_Order $order1 Order object read from posts.
-	 * @param \WC_Abstract_Order $order2 Order object read from COT.
+	 * @param WC_Abstract_Order $order1 Order object read from posts.
+	 * @param WC_Abstract_Order $order2 Order object read from COT.
 	 * @param bool               $sync   Whether to also sync the meta data.
 	 *
 	 * @return array Difference between post and COT meta data.
 	 */
-	private function get_diff_meta_data_between_orders( \WC_Abstract_Order &$order1, \WC_Abstract_Order $order2, $sync = false ): array {
+	private function get_diff_meta_data_between_orders( WC_Abstract_Order &$order1, WC_Abstract_Order $order2, $sync = false ): array {
 		$order1_meta        = ArrayUtil::select( $order1->get_meta_data(), 'get_data', ArrayUtil::SELECT_BY_OBJECT_METHOD );
 		$order2_meta        = ArrayUtil::select( $order2->get_meta_data(), 'get_data', ArrayUtil::SELECT_BY_OBJECT_METHOD );
 		$order1_meta_by_key = ArrayUtil::select_as_assoc( $order1_meta, 'key', ArrayUtil::SELECT_BY_ARRAY_KEY );
@@ -1284,12 +1285,12 @@ WHERE
 	/**
 	 * Migrate post record from a given order object.
 	 *
-	 * @param \WC_Abstract_Order $order Order object.
-	 * @param \WC_Abstract_Order $post_order Order object read from posts.
+	 * @param WC_Abstract_Order $order Order object.
+	 * @param WC_Abstract_Order $post_order Order object read from posts.
 	 *
 	 * @return void
 	 */
-	private function migrate_post_record( \WC_Abstract_Order &$order, \WC_Abstract_Order $post_order ): void {
+	private function migrate_post_record( WC_Abstract_Order &$order, WC_Abstract_Order $post_order ): void {
 		$this->migrate_meta_data_from_post_order( $order, $post_order );
 		$post_order_base_data = $post_order->get_base_data();
 		foreach ( $post_order_base_data as $key => $value ) {
@@ -1301,7 +1302,7 @@ WHERE
 	/**
 	 * Sets order properties based on a row from the database.
 	 *
-	 * @param \WC_Abstract_Order $order      The order object.
+	 * @param WC_Abstract_Order $order      The order object.
 	 * @param object             $order_data A row of order data from the database.
 	 */
 	private function set_order_props_from_data( &$order, $order_data ) {
@@ -1327,13 +1328,13 @@ WHERE
 	/**
 	 * Set order prop if a setter exists in either the order object or in the data store.
 	 *
-	 * @param \WC_Abstract_Order $order Order object.
+	 * @param WC_Abstract_Order $order Order object.
 	 * @param string             $prop_name Property name.
 	 * @param mixed              $prop_value Property value.
 	 *
 	 * @return bool True if the property was set, false otherwise.
 	 */
-	private function set_order_prop( \WC_Abstract_Order $order, string $prop_name, $prop_value ) {
+	private function set_order_prop( WC_Abstract_Order $order, string $prop_name, $prop_value ) {
 		$prop_setter_function_name = "set_{$prop_name}";
 		if ( is_callable( array( $order, $prop_setter_function_name ) ) ) {
 			return $order->{$prop_setter_function_name}( $prop_value );
@@ -1560,7 +1561,7 @@ FROM $order_meta_table
 	/**
 	 * Persists order changes to the database.
 	 *
-	 * @param \WC_Abstract_Order $order            The order.
+	 * @param WC_Abstract_Order $order            The order.
 	 * @param bool               $force_all_fields Force saving all fields to DB and just changed.
 	 *
 	 * @throws \Exception If order data is not valid.
@@ -1615,7 +1616,7 @@ FROM $order_meta_table
 	/**
 	 * Generates an array of rows with all the details required to insert or update an order in the database.
 	 *
-	 * @param \WC_Abstract_Order $order The order.
+	 * @param WC_Abstract_Order $order The order.
 	 * @param string             $context The context: 'create' or 'update'.
 	 * @param boolean            $only_changes Whether to consider only changes in the order for generating the rows.
 	 *
@@ -1624,7 +1625,7 @@ FROM $order_meta_table
 	 *
 	 * @since 6.8.0
 	 */
-	protected function get_db_rows_for_order( \WC_Abstract_Order $order, string $context = 'create', bool $only_changes = false ): array {
+	protected function get_db_rows_for_order( WC_Abstract_Order $order, string $context = 'create', bool $only_changes = false ): array {
 		$result = array();
 
 		$row = $this->get_db_row_from_order( $order, $this->order_column_mapping, $only_changes );
@@ -1695,7 +1696,7 @@ FROM $order_meta_table
 	 * `$format` parameters. Values are taken from the order changes array and properly formatted for inclusion in the
 	 * database.
 	 *
-	 * @param \WC_Abstract_Order $order          Order.
+	 * @param WC_Abstract_Order $order          Order.
 	 * @param array              $column_mapping Table column mapping.
 	 * @param bool               $only_changes   Whether to consider only changes in the order object or all fields.
 	 * @return array
@@ -1737,7 +1738,7 @@ FROM $order_meta_table
 	/**
 	 * Method to delete an order from the database.
 	 *
-	 * @param \WC_Abstract_Order $order Order object.
+	 * @param WC_Abstract_Order $order Order object.
 	 * @param array              $args Array of args to pass to the delete method.
 	 *
 	 * @return void
@@ -1796,7 +1797,7 @@ FROM $order_meta_table
 	/**
 	 * Helper method to set child orders to the parent order's parent.
 	 *
-	 * @param \WC_Abstract_Order $order Order object.
+	 * @param WC_Abstract_Order $order Order object.
 	 *
 	 * @return void
 	 */
@@ -2130,7 +2131,7 @@ FROM $order_meta_table
 	/**
 	 * Helper function to decide whether to backfill post record.
 	 *
-	 * @param \WC_Abstract_Order $order Order object.
+	 * @param WC_Abstract_Order $order Order object.
 	 *
 	 * @return void
 	 */
@@ -2157,7 +2158,7 @@ FROM $order_meta_table
 	/**
 	 * Helper function to update billing and shipping address metadata.
 	 *
-	 * @param \WC_Abstract_Order $order Order Object.
+	 * @param WC_Abstract_Order $order Order Object.
 	 * @param array              $changes Array of changes.
 	 *
 	 * @return void
@@ -2427,9 +2428,17 @@ CREATE TABLE $meta_table (
 	 *
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing at least ->id).
+	 *
+	 * @return bool
 	 */
 	public function delete_meta( &$object, $meta ) {
-		return $this->data_store_meta->delete_meta( $object, $meta );
+		$delete_meta = $this->data_store_meta->delete_meta( $object, $meta );
+
+		if ( $object instanceof WC_Abstract_Order ) {
+			$this->maybe_backfill_post_record( $object );
+		}
+
+		return $delete_meta;
 	}
 
 	/**
@@ -2437,10 +2446,17 @@ CREATE TABLE $meta_table (
 	 *
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing ->key and ->value).
-	 * @return int meta ID
+	 *
+	 * @return int|bool  meta ID or false on failure
 	 */
 	public function add_meta( &$object, $meta ) {
-		return $this->data_store_meta->add_meta( $object, $meta );
+		$add_meta = $this->data_store_meta->add_meta( $object, $meta );
+
+		if ( $object instanceof WC_Abstract_Order ) {
+			$this->maybe_backfill_post_record( $object );
+		}
+
+		return $add_meta;
 	}
 
 	/**
@@ -2448,8 +2464,16 @@ CREATE TABLE $meta_table (
 	 *
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing ->id, ->key and ->value).
+	 *
+	 * @return bool
 	 */
 	public function update_meta( &$object, $meta ) {
-		return $this->data_store_meta->update_meta( $object, $meta );
+		$update_meta = $this->data_store_meta->update_meta( $object, $meta );
+
+		if ( $object instanceof WC_Abstract_Order ) {
+			$this->maybe_backfill_post_record( $object );
+		}
+
+		return $update_meta;
 	}
 }
