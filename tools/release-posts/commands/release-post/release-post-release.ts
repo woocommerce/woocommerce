@@ -110,6 +110,9 @@ const program = new Command()
 		let previousVersionRef;
 
 		try {
+			if ( ! currentParsed ) {
+				throw new Error( 'Unable to parse current version' );
+			}
 			currentBranch = `release/${ currentParsed.major }.${ currentParsed.minor }`;
 			currentVersionRef = await getCommitHash(
 				tmpRepoPath,
@@ -127,6 +130,9 @@ const program = new Command()
 		}
 
 		try {
+			if ( ! previousParsed ) {
+				throw new Error( 'Unable to parse previous version' );
+			}
 			previousBranch = `release/${ previousParsed.major }.${ previousParsed.minor }`;
 			previousVersionRef = await getCommitHash(
 				tmpRepoPath,
