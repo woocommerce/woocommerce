@@ -141,3 +141,21 @@ export function addCesSurveyForCustomerSearch() {
 		},
 	} );
 }
+
+/**
+ * Add show product MVP Feedback modal.
+ */
+export function showProductMVPFeedbackModal() {
+	return {
+		type: TYPES.SHOW_PRODUCT_MVP_FEEDBACK_MODAL,
+	};
+}
+
+/**
+ * Hide product MVP Feedback modal.
+ */
+export function hideProductMVPFeedbackModal() {
+	return {
+		type: TYPES.HIDE_PRODUCT_MVP_FEEDBACK_MODAL,
+	};
+}
