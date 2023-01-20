@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features;
 
+use \Automattic\WooCommerce\Admin\Features\TransientNotices;
 use \Automattic\WooCommerce\Admin\PageController;
 use \Automattic\WooCommerce\Internal\Admin\Loader;
 
@@ -28,6 +29,16 @@ class NewProductManagementExperience {
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 		add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
+		if ( isset( $_GET['new-product-experience-disabled'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			TransientNotices::add(
+				array(
+					'user_id' => get_current_user_id(),
+					'id'      => 'new-product-experience-disbled',
+					'status'  => 'success',
+					'content' => __( '🌟‎ ‎ Thanks for the feedback. We’ll put it to good use!', 'woocommerce' ),
+				)
+			);
+		}
 	}
 
 	/**
