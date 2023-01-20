@@ -16,7 +16,7 @@
 
 <!-- wp:post-excerpt {"textAlign":"center","showMoreOnNewLine":false,"style":{"spacing":{"margin":{"top":"0"}}},"fontSize":"small","__woocommerceNamespace":"woocommerce/product-query/product-summary"} /-->
 
-<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small"} /-->
+<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
 <!-- /wp:post-template -->
 
 <!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->

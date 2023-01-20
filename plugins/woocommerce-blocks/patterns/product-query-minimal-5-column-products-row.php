@@ -16,7 +16,7 @@
 <!-- /wp:column -->
 
 <!-- wp:column {"width":"50%"} -->
-<div class="wp-block-column" style="flex-basis:50%"><!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"right","fontSize":"small"} /--></div>
+<div class="wp-block-column" style="flex-basis:50%"><!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"right","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /--></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
 <!-- /wp:post-template -->
