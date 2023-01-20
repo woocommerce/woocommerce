@@ -24,7 +24,7 @@ import { validate } from './product-validation';
 import { OptionsSection } from './sections/options-section';
 import { ProductFormFooter } from './layout/product-form-footer';
 import { ProductFormTab } from './product-form-tab';
-import { TAB_GENERAL_ID } from './fills/constants';
+import { TAB_GENERAL_ID, TAB_SHIPPING_ID } from './fills/constants';
 
 export const ProductForm: React.FC< {
 	product?: PartialProduct;
@@ -72,7 +72,10 @@ export const ProductForm: React.FC< {
 						title="Shipping"
 						disabled={ !! product?.variations?.length }
 					>
-						<ProductShippingSection product={ product } />
+						<WooProductSectionItem.Slot
+							location={ TAB_SHIPPING_ID }
+							fillProps={ { product } }
+						/>
 					</ProductFormTab>
 					{ window.wcAdminFeatures[
 						'product-variation-management'
