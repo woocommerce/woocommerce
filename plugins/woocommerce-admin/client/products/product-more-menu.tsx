@@ -16,10 +16,7 @@ import { ClassicEditorIcon } from './images/classic-editor-icon';
 import { FeedbackIcon } from './images/feedback-icon';
 import { WooHeaderItem } from '~/header/utils';
 import { STORE_KEY as CES_STORE_KEY } from '~/customer-effort-score-tracks/data/constants';
-import {
-	NEW_PRODUCT_MANAGEMENT,
-	NEW_PRODUCT_MANAGEMENT_FEEDBACK,
-} from '~/customer-effort-score-tracks/product-mvp-ces-footer';
+import { NEW_PRODUCT_MANAGEMENT } from '~/customer-effort-score-tracks/product-mvp-ces-footer';
 import { ALLOW_TRACKING_OPTION_NAME } from '~/customer-effort-score-tracks/constants';
 import './product-more-menu.scss';
 
@@ -29,29 +26,19 @@ export const ProductMoreMenu = () => {
 		useDispatch( CES_STORE_KEY );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
-	const {
-		allowTracking,
-		isNewProductManagementFeedbackEnabled,
-		resolving: isLoading,
-	} = useSelect( ( select ) => {
+	const { allowTracking, resolving: isLoading } = useSelect( ( select ) => {
 		const { getOption, hasFinishedResolution } =
 			select( OPTIONS_STORE_NAME );
-
-		const isProductManagementFeedbackEnabled = getOption(
-			NEW_PRODUCT_MANAGEMENT_FEEDBACK
-		) as string;
 
 		const allowTrackingOption =
 			getOption( ALLOW_TRACKING_OPTION_NAME ) || 'no';
 
 		const resolving = ! hasFinishedResolution( 'getOption', [
-			NEW_PRODUCT_MANAGEMENT_FEEDBACK,
+			ALLOW_TRACKING_OPTION_NAME,
 		] );
 
 		return {
 			allowTracking: allowTrackingOption === 'yes',
-			isNewProductManagementFeedbackEnabled:
-				isProductManagementFeedbackEnabled !== 'hide',
 			resolving,
 		};
 	} );
@@ -107,23 +94,12 @@ export const ProductMoreMenu = () => {
 						</MenuItem>
 						<MenuItem
 							onClick={ () => {
-								if (
-									isNewProductManagementFeedbackEnabled &&
-									allowTracking
-								) {
+								if ( allowTracking ) {
 									updateOptions( {
 										[ NEW_PRODUCT_MANAGEMENT ]: 'no',
 									} );
-									if (
-										isNewProductManagementFeedbackEnabled
-									) {
-										showProductMVPFeedbackModal();
-										updateOptions( {
-											[ NEW_PRODUCT_MANAGEMENT_FEEDBACK ]:
-												'hide',
-										} );
-										onClose();
-									}
+									showProductMVPFeedbackModal();
+									onClose();
 								} else {
 									window.location.href = classEditorUrl;
 									onClose();

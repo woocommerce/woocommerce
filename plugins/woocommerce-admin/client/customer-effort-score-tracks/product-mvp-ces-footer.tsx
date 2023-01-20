@@ -23,8 +23,6 @@ export const PRODUCT_MVP_CES_ACTION_OPTION_NAME =
 	'woocommerce_ces_product_mvp_ces_action';
 export const NEW_PRODUCT_MANAGEMENT =
 	'woocommerce_new_product_management_enabled';
-export const NEW_PRODUCT_MANAGEMENT_FEEDBACK =
-	'woocommerce_new_product_management_feedback';
 
 export const ProductMVPCESFooter: React.FC = () => {
 	const { showCesModal, showProductMVPFeedbackModal } =
@@ -33,7 +31,6 @@ export const ProductMVPCESFooter: React.FC = () => {
 	const {
 		cesAction,
 		allowTracking,
-		isNewProductManagementFeedbackEnabled,
 		cesShownForActions,
 		resolving: isLoading,
 	} = useSelect( ( select ) => {
@@ -42,10 +39,6 @@ export const ProductMVPCESFooter: React.FC = () => {
 
 		const action = getOption(
 			PRODUCT_MVP_CES_ACTION_OPTION_NAME
-		) as string;
-
-		const isProductManagementFeedbackEnabled = getOption(
-			NEW_PRODUCT_MANAGEMENT_FEEDBACK
 		) as string;
 
 		const shownForActions =
@@ -62,9 +55,6 @@ export const ProductMVPCESFooter: React.FC = () => {
 				PRODUCT_MVP_CES_ACTION_OPTION_NAME,
 			] ) ||
 			! hasFinishedResolution( 'getOption', [
-				NEW_PRODUCT_MANAGEMENT_FEEDBACK,
-			] ) ||
-			! hasFinishedResolution( 'getOption', [
 				ALLOW_TRACKING_OPTION_NAME,
 			] );
 
@@ -72,8 +62,6 @@ export const ProductMVPCESFooter: React.FC = () => {
 			cesShownForActions: shownForActions,
 			allowTracking: allowTrackingOption === 'yes',
 			cesAction: action,
-			isNewProductManagementFeedbackEnabled:
-				isProductManagementFeedbackEnabled !== 'hide',
 			resolving,
 		};
 	} );
@@ -120,12 +108,7 @@ export const ProductMVPCESFooter: React.FC = () => {
 		updateOptions( {
 			[ NEW_PRODUCT_MANAGEMENT ]: 'no',
 		} );
-		if ( isNewProductManagementFeedbackEnabled ) {
-			showProductMVPFeedbackModal();
-			updateOptions( {
-				[ NEW_PRODUCT_MANAGEMENT_FEEDBACK ]: 'hide',
-			} );
-		}
+		showProductMVPFeedbackModal();
 	};
 
 	const onDisablingCES = () => {
