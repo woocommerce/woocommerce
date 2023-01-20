@@ -243,7 +243,15 @@ export const TaskList: React.FC< TaskListProps > = ( {
 
 	if ( isComplete && keepCompletedTaskList !== 'yes' ) {
 		if ( hasTaskListCompletionSlotFills ) {
-			return <TaskListCompletionSlot />;
+			return (
+				<TaskListCompletionSlot
+					fillProps={ {
+						hideTasks,
+						keepTasks,
+						customerEffortScore: cesHeader,
+					} }
+				/>
+			);
 		}
 		return (
 			<>

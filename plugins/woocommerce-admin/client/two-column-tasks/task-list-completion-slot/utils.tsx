@@ -8,21 +8,21 @@ import { Slot, Fill } from '@wordpress/components';
  */
 import { createOrderedChildren, sortFillsByOrder } from '../../utils';
 
-type WooTaskListCompletionItemProps = {
+type WooTaskListCompletionProps = {
 	children: React.ReactNode;
 	order?: number;
 };
 
 export const EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME =
-	'woocommerce_task_list-completion_item';
+	'woocommerce_experimental_task_list_completion';
 /**
  * Create a Fill for extensions to add items to the WooCommerce Admin Task List completion component slot.
  *
- * @slotFill WooTaskListCompletionItem
+ * @slotFill WooTaskListCompletion
  * @scope woocommerce-admin
  * @example
  * const MyTasklistCompletionItem = () => (
- * <WooTaskListCompletionItem>My Task List completion item</WooTaskListCompletionItem>
+ * <WooTaskListCompletion>My Task List completion item</WooTaskListCompletion>
  * );
  *
  * registerPlugin( 'my-extension', {
@@ -33,10 +33,10 @@ export const EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME =
  * @param {Array}  param0.children - Node children.
  * @param {Array}  param0.order    - Node order.
  */
-export const WooTaskListCompletionItem = ( {
+export const WooTaskListCompletion = ( {
 	children,
 	order = 1,
-}: WooTaskListCompletionItemProps ) => {
+}: WooTaskListCompletionProps ) => {
 	return (
 		<Fill name={ EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME }>
 			{ ( fillProps: Fill.Props ) => {
@@ -46,10 +46,19 @@ export const WooTaskListCompletionItem = ( {
 	);
 };
 
-WooTaskListCompletionItem.Slot = ( {
+export type WooTaskListCompletionFillProps = {
+	/** Call this function to hide this Task List completion component completely, without any replacement component */
+	hideTasks: () => void;
+	/** Call this function to show the completed Task List items instead of this TaskList completion component */
+	keepTasks: () => void;
+	/** To show the CES component or not */
+	customerEffortScore: boolean;
+};
+
+WooTaskListCompletion.Slot = ( {
 	fillProps,
 }: {
-	fillProps?: Slot.Props;
+	fillProps: Slot.Props & WooTaskListCompletionFillProps;
 } ) => (
 	<Slot
 		name={ EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME }

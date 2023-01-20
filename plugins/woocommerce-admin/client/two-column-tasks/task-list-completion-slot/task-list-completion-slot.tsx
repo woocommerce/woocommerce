@@ -9,17 +9,19 @@ import classNames from 'classnames';
  */
 import {
 	EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME,
-	WooTaskListCompletionItem,
+	WooTaskListCompletion,
+	WooTaskListCompletionFillProps,
 } from './utils';
 
 export const TaskListCompletionSlot = ( {
 	className,
+	fillProps,
 }: {
 	className?: string;
+	fillProps: WooTaskListCompletionFillProps;
 } ) => {
 	const slot = useSlot( EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME );
 	const hasFills = Boolean( slot?.fills?.length );
-
 	if ( ! hasFills ) {
 		return null;
 	}
@@ -30,7 +32,7 @@ export const TaskListCompletionSlot = ( {
 				className
 			) }
 		>
-			<WooTaskListCompletionItem.Slot />
+			<WooTaskListCompletion.Slot fillProps={ fillProps } />
 		</div>
 	);
 };
