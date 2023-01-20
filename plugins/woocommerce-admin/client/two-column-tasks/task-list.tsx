@@ -100,12 +100,6 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		recordTaskListView();
 	}, [] );
 
-	const taskListHeaderSlot = useSlot(
-		`woocommerce_onboarding_task_list_header_${
-			headerData?.task?.id ?? ''
-		}`
-	);
-
 	useEffect( () => {
 		const { task: prevTask } = prevQueryRef.current;
 		const { task } = query;
@@ -168,6 +162,15 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		selectedHeaderCard = visibleTasks[ visibleTasks.length - 1 ];
 	}
 
+	const taskListHeaderSlot = useSlot(
+		`woocommerce_onboarding_task_list_header_${
+			headerData?.task?.id ?? selectedHeaderCard?.id
+		}`
+	);
+	const hasTaskListHeaderSlotFills = Boolean(
+		taskListHeaderSlot?.fills?.length
+	);
+
 	const getTaskStartedCount = ( taskId: string ) => {
 		const trackedStartedTasks =
 			userPreferences.task_list_tracked_started_tasks;
@@ -216,7 +219,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	};
 
 	const showTaskHeader = ( task: TaskType ) => {
-		if ( taskHeaders[ task.id ] ) {
+		if ( taskHeaders[ task.id ] || hasTaskListHeaderSlotFills ) {
 			setHeaderData( {
 				task,
 				goToTask: () => goToTask( task ),
@@ -235,10 +238,6 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	if ( ! visibleTasks.length ) {
 		return <div className="woocommerce-task-dashboard__container"></div>;
 	}
-
-	const hasTaskListHeaderSlotFills = Boolean(
-		taskListHeaderSlot?.fills?.length
-	);
 
 	if ( isComplete && keepCompletedTaskList !== 'yes' ) {
 		return (
