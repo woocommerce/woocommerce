@@ -22,6 +22,8 @@ type MenuProps = {
 	getMenuProps: getMenuPropsType;
 	isOpen: boolean;
 	className?: string;
+	position?: Popover.Position;
+	scrollIntoViewOnOpen?: boolean;
 };
 
 export const Menu = ( {
@@ -29,6 +31,8 @@ export const Menu = ( {
 	getMenuProps,
 	isOpen,
 	className,
+	position = 'bottom center',
+	scrollIntoViewOnOpen = false,
 }: MenuProps ) => {
 	const [ boundingRect, setBoundingRect ] = useState< DOMRect >();
 	const selectControlMenuRef = useRef< HTMLDivElement >( null );
@@ -40,6 +44,13 @@ export const Menu = ( {
 			);
 		}
 	}, [ selectControlMenuRef.current ] );
+
+	// Scroll the selected item into view when the menu opens.
+	useEffect( () => {
+		if ( isOpen && scrollIntoViewOnOpen ) {
+			selectControlMenuRef.current?.scrollIntoView();
+		}
+	}, [ isOpen, scrollIntoViewOnOpen ] );
 
 	/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
 	/* Disabled because of the onmouseup on the ul element below. */
@@ -60,7 +71,7 @@ export const Menu = ( {
 							'has-results': Children.count( children ) > 0,
 						}
 					) }
-					position="bottom right"
+					position={ position }
 					animate={ false }
 				>
 					<ul
