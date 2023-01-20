@@ -60,7 +60,10 @@ test.describe( 'WooCommerce Orders > Filter Order by Status', () => {
 		// because tests are running in parallel, we can't know how many orders there
 		// are beyond the ones we created here.
 		for ( let i = 0; i < orderStatus.length; i++ ) {
-			const statusTag = 'text=' + orderStatus[ i ][ 0 ];
+			const statusTag = `.order-status.${ orderStatus[ i ][ 1 ].replace(
+				'wc-',
+				'status-'
+			) }`;
 			const countElements = await page.locator( statusTag ).count();
 			await expect( countElements ).toBeGreaterThan( 0 );
 		}
