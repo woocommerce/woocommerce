@@ -44,3 +44,18 @@
 .woocommerce-experimental-select-control__suffix {
 	align-self: stretch;
 }
+
+.woocommerce-experimental-select-control__combox-box-icon {
+	all: unset;
+	position: absolute;
+	right: 6px;
+	top: 50%;
+	transform: translateY( -50% );
+	> svg {
+		margin-top: 4px;
+	}
+}
+
+.woocommerce-experimental-select-control:not( .is-focused ) .woocommerce-experimental-select-control__combox-box-icon {
+	pointer-events: none; // Prevents the icon from being clickable when the combobox is not focused, because otherwise we get a race condition when clicking on the icon, because focussing the combobox opens the menu, then sequentially the icon toggles it back closed
+}
