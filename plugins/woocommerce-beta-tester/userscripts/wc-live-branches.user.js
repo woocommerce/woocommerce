@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WooCommerce Live Branches
 // @namespace    https://wordpress.com/
-// @version      1.26
+// @version      1.0
 // @description  Adds links to PRs pointing to Jurassic Ninja sites for live-testing a changeset
 // @grant        GM_xmlhttpRequest
 // @connect      jurassic.ninja
