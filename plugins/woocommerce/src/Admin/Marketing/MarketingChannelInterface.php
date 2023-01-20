@@ -15,6 +15,7 @@ namespace Automattic\WooCommerce\Admin\Marketing;
 interface MarketingChannelInterface {
 	public const PRODUCT_LISTINGS_NOT_APPLICABLE   = 'not-applicable';
 	public const PRODUCT_LISTINGS_SYNC_IN_PROGRESS = 'sync-in-progress';
+	public const PRODUCT_LISTINGS_SYNC_FAILED      = 'sync-failed';
 	public const PRODUCT_LISTINGS_SYNCED           = 'synced';
 
 	/**

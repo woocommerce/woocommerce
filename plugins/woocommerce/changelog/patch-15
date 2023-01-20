@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Make related products check more robust against wrong transients.

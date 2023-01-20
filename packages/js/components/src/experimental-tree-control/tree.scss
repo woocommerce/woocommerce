@@ -1,0 +1,15 @@
+@import './tree-item.scss';
+
+.experimental-woocommerce-tree {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+
+	&--level-1 {
+		max-height: 280px;
+		overflow-y: auto;
+		background-color: $white;
+		border: 1px solid $gray-400;
+		border-radius: 2px;
+	}
+}

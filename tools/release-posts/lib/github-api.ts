@@ -3,6 +3,10 @@
  */
 import { Octokit } from '@octokit/rest';
 import shuffle from 'lodash.shuffle';
+
+/**
+ * Internal dependencies
+ */
 import { getEnvVar } from './environment';
 
 export type ContributorData = {

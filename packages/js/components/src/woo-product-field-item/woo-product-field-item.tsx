@@ -9,6 +9,7 @@ import { createElement, Children } from '@wordpress/element';
  * Internal dependencies
  */
 import { createOrderedChildren, sortFillsByOrder } from '../utils';
+import { useSlotContext, SlotContextHelpersType } from '../slot-context';
 
 type WooProductFieldItemProps = {
 	id: string;
@@ -23,36 +24,55 @@ type WooProductFieldSlotProps = {
 
 export const WooProductFieldItem: React.FC< WooProductFieldItemProps > & {
 	Slot: React.FC< Slot.Props & WooProductFieldSlotProps >;
-} = ( { children, order = 1, section } ) => (
-	<Fill name={ `woocommerce_product_field_${ section }` }>
-		{ ( fillProps: Fill.Props ) => {
-			return createOrderedChildren< Fill.Props >(
-				children,
-				order,
-				fillProps
-			);
-		} }
-	</Fill>
-);
+} = ( { children, order = 20, section, id } ) => {
+	const { registerFill, getFillHelpers } = useSlotContext();
 
-WooProductFieldItem.Slot = ( { fillProps, section } ) => (
-	<Slot
-		name={ `woocommerce_product_field_${ section }` }
-		fillProps={ fillProps }
-	>
-		{ ( fills ) => {
-			if ( ! sortFillsByOrder ) {
-				return null;
-			}
+	registerFill( id );
 
-			return Children.map(
-				sortFillsByOrder( fills )?.props.children,
-				( child ) => (
-					<div className="woocommerce-product-form__field">
-						{ child }
-					</div>
-				)
-			);
-		} }
-	</Slot>
-);
+	return (
+		<Fill name={ `woocommerce_product_field_${ section }` }>
+			{ ( fillProps: Fill.Props ) => {
+				return createOrderedChildren<
+					Fill.Props & SlotContextHelpersType,
+					{ _id: string }
+				>(
+					children,
+					order,
+					{
+						...fillProps,
+						...getFillHelpers(),
+					},
+					{ _id: id }
+				);
+			} }
+		</Fill>
+	);
+};
+
+WooProductFieldItem.Slot = ( { fillProps, section } ) => {
+	// eslint-disable-next-line react-hooks/rules-of-hooks
+	const { filterRegisteredFills } = useSlotContext();
+
+	return (
+		<Slot
+			name={ `woocommerce_product_field_${ section }` }
+			fillProps={ fillProps }
+		>
+			{ ( fills ) => {
+				if ( ! sortFillsByOrder ) {
+					return null;
+				}
+
+				return Children.map(
+					sortFillsByOrder( filterRegisteredFills( fills ) )?.props
+						.children,
+					( child ) => (
+						<div className="woocommerce-product-form__field">
+							{ child }
+						</div>
+					)
+				);
+			} }
+		</Slot>
+	);
+};
