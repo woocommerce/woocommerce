@@ -50,8 +50,6 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	const isOnlyForVariations = attributeType === 'for-variations';
 
-	const newAttributeProps = { variation: isOnlyForVariations };
-
 	const CANCEL_BUTTON_EVENT_NAME = isOnlyForVariations
 		? 'product_add_options_modal_cancel_button_click'
 		: 'product_add_attributes_modal_cancel_button_click';
@@ -97,22 +95,14 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	) => {
 		handleChange( [
 			...( value || [] ),
-			...newAttributes
-				.filter(
-					( newAttr ) =>
-						! ( value || [] ).find( ( attr ) =>
-							newAttr.id === 0
-								? newAttr.name === attr.name // check name if custom attribute = id === 0.
-								: attr.id === newAttr.id
-						)
-				)
-				.map( ( newAttr, index ) => {
-					return {
-						...newAttributeProps,
-						...newAttr,
-						position: ( value || [] ).length + index,
-					};
-				} ),
+			...newAttributes.filter(
+				( newAttr ) =>
+					! ( value || [] ).find( ( attr ) =>
+						newAttr.id === 0
+							? newAttr.name === attr.name // check name if custom attribute = id === 0.
+							: attr.id === newAttr.id
+					)
+			),
 		] );
 		recordEvent( 'product_add_attributes_modal_add_button_click' );
 		setShowAddAttributeModal( false );
