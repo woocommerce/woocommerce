@@ -1,9 +1,8 @@
 .wc-block-components-product-rating {
 	display: block;
-	margin-top: 0;
-	margin-bottom: $gap-small;
 
 	&__stars {
+		display: inline-block;
 		overflow: hidden;
 		position: relative;
 		width: 5.3em;
@@ -13,8 +12,6 @@
 		/* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
 		font-family: star;
 		font-weight: 400;
-		margin: 0 auto;
-		text-align: left;
 
 		&::before {
 			content: "\53\53\53\53\53";
@@ -52,6 +49,11 @@
 		text-align: inherit;
 		@include font-size(small);
 	}
+
+	.wc-block-all-products & {
+		margin-top: 0;
+		margin-bottom: $gap-small;
+	}
 }
 
 .wc-block-single-product {
@@ -66,8 +68,6 @@
 		.wc-block-components-product-rating {
 			@include placeholder();
 			width: 7em;
-			margin-left: auto;
-			margin-right: auto;
 		}
 	}
 }
