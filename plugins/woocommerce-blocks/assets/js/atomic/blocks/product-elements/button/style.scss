@@ -1,7 +1,6 @@
 .wp-block-button.wc-block-components-product-button {
 	word-break: break-word;
 	white-space: normal;
-	margin-bottom: $gap-small;
 
 	.wc-block-components-product-button__button {
 		border-style: none;
@@ -19,6 +18,10 @@
 		@include placeholder();
 		min-width: 8em;
 		min-height: 3em;
+	}
+
+	.wc-block-all-products & {
+		margin-bottom: $gap-small;
 	}
 }
 
