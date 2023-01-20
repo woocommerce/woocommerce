@@ -23,9 +23,15 @@ type UseRegisteredChannels = {
 	refetch: () => void;
 };
 
+/**
+ * A object that maps the product listings status in
+ * plugins/woocommerce/src/Admin/Marketing/MarketingChannelInterface.php backend
+ * to SyncStatusType frontend.
+ */
 const statusMap: Record< string, SyncStatusType > = {
-	synced: 'synced',
 	'sync-in-progress': 'syncing',
+	'sync-failed': 'failed',
+	synced: 'synced',
 };
 
 const convert = ( data: Channel ): InstalledChannel => {
