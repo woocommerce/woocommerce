@@ -209,7 +209,7 @@ jobs:
                   RESET_SITE: true
               timeout-minutes: 60
               working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js basic.spec.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js
 
             - name: Download 'e2e-update-wc' artifact
               uses: actions/download-artifact@v3
