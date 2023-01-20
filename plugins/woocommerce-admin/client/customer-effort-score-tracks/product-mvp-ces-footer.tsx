@@ -21,13 +21,19 @@ import { STORE_KEY } from './data/constants';
 
 export const PRODUCT_MVP_CES_ACTION_OPTION_NAME =
 	'woocommerce_ces_product_mvp_ces_action';
+export const NEW_PRODUCT_MANAGEMENT =
+	'woocommerce_new_product_management_enabled';
+export const NEW_PRODUCT_MANAGEMENT_FEEDBACK =
+	'woocommerce_new_product_management_feedback';
 
 export const ProductMVPCESFooter: React.FC = () => {
-	const { showCesModal } = useDispatch( STORE_KEY );
+	const { showCesModal, showProductMVPFeedbackModal } =
+		useDispatch( STORE_KEY );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const {
 		cesAction,
 		allowTracking,
+		isNewProductManagementFeedbackEnabled,
 		cesShownForActions,
 		resolving: isLoading,
 	} = useSelect( ( select ) => {
@@ -36,6 +42,10 @@ export const ProductMVPCESFooter: React.FC = () => {
 
 		const action = getOption(
 			PRODUCT_MVP_CES_ACTION_OPTION_NAME
+		) as string;
+
+		const isProductManagementFeedbackEnabled = getOption(
+			NEW_PRODUCT_MANAGEMENT_FEEDBACK
 		) as string;
 
 		const shownForActions =
@@ -52,6 +62,9 @@ export const ProductMVPCESFooter: React.FC = () => {
 				PRODUCT_MVP_CES_ACTION_OPTION_NAME,
 			] ) ||
 			! hasFinishedResolution( 'getOption', [
+				NEW_PRODUCT_MANAGEMENT_FEEDBACK,
+			] ) ||
+			! hasFinishedResolution( 'getOption', [
 				ALLOW_TRACKING_OPTION_NAME,
 			] );
 
@@ -59,6 +72,8 @@ export const ProductMVPCESFooter: React.FC = () => {
 			cesShownForActions: shownForActions,
 			allowTracking: allowTrackingOption === 'yes',
 			cesAction: action,
+			isNewProductManagementFeedbackEnabled:
+				isProductManagementFeedbackEnabled !== 'hide',
 			resolving,
 		};
 	} );
@@ -98,6 +113,21 @@ export const ProductMVPCESFooter: React.FC = () => {
 		} );
 	};
 
+	const onDisablingNewProductExperience = () => {
+		updateOptions( {
+			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: 'hide',
+		} );
+		updateOptions( {
+			[ NEW_PRODUCT_MANAGEMENT ]: 'no',
+		} );
+		if ( isNewProductManagementFeedbackEnabled ) {
+			showProductMVPFeedbackModal();
+			updateOptions( {
+				[ NEW_PRODUCT_MANAGEMENT_FEEDBACK ]: 'hide',
+			} );
+		}
+	};
+
 	const onDisablingCES = () => {
 		updateOptions( {
 			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: 'hide',
@@ -125,7 +155,7 @@ export const ProductMVPCESFooter: React.FC = () => {
 								{ __( 'Share feedback', 'woocommerce' ) }
 							</Button>
 							<Button
-								onClick={ onDisablingCES }
+								onClick={ onDisablingNewProductExperience }
 								variant="tertiary"
 							>
 								{ __( 'Turn it off', 'woocommerce' ) }
