@@ -31,7 +31,7 @@ export const Menu = ( {
 	getMenuProps,
 	isOpen,
 	className,
-	position = 'bottom center',
+	position = 'bottom right',
 	scrollIntoViewOnOpen = false,
 }: MenuProps ) => {
 	const [ boundingRect, setBoundingRect ] = useState< DOMRect >();
