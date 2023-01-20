@@ -207,6 +207,16 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js basic.spec.js
 
+            - name: Download 'e2e-update-wc' artifact
+              uses: actions/download-artifact@v3
+              with:
+                  name: ${{ env.E2E_UPDATE_WC_ARTIFACT }}
+                  path: plugins/woocommerce/tmp
+
+            - name: Add allure-results from 'e2e-update-wc'
+              working-directory: plugins/woocommerce
+              run: cp -r tmp/allure-results tests/e2e-pw/test-results
+
             - name: Generate E2E Test report.
               if: success() || failure()
               working-directory: plugins/woocommerce
