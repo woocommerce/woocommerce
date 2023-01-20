@@ -77,7 +77,8 @@ function FeedbackModal( {
 					{ cancelButtonLabel }
 				</Button>
 				<Button
-					isPrimary
+					isPrimary={ ! isSendButtonDisabled }
+					isSecondary={ isSendButtonDisabled }
 					onClick={ () => {
 						onSendFeedback();
 						setOpen( false );
