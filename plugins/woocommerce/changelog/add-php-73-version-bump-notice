@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add an admin notice about the upcoming PHP version requirement change for PHP 7.2 users

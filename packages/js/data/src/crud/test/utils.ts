@@ -1,13 +1,18 @@
 /**
  * Internal dependencies
  */
+import CRUD_ACTIONS from '../crud-actions';
 import {
 	applyNamespace,
 	cleanQuery,
+	getGenericActionName,
 	getKey,
 	getNamespaceKeys,
+	getRequestIdentifier,
 	getRestPath,
 	getUrlParameters,
+	maybeReplaceIdQuery,
+	isValidIdQuery,
 	parseId,
 } from '../utils';
 
@@ -112,5 +117,105 @@ describe( 'utils', () => {
 		const params = cleanQuery( query, namespace );
 		expect( params.other_attribute ).toBe( 'a' );
 		expect( params.my_attribute ).toBeUndefined();
+	} );
+
+	it( 'should get the request identifier with no arguments', () => {
+		const key = getRequestIdentifier( 'CREATE_ITEM' );
+		expect( key ).toBe( 'CREATE_ITEM/[]' );
+	} );
+
+	it( 'should get the request identifier with a single argument', () => {
+		const key = getRequestIdentifier( 'CREATE_ITEM', 'string_arg' );
+		expect( key ).toBe( 'CREATE_ITEM/["string_arg"]' );
+	} );
+
+	it( 'should get the request identifier with multiple arguments', () => {
+		const key = getRequestIdentifier( 'CREATE_ITEM', 'string_arg', {
+			object_property: 'object_value',
+		} );
+		expect( key ).toBe(
+			'CREATE_ITEM/["string_arg","{"object_property":"object_value"}"]'
+		);
+	} );
+
+	it( 'should sort object properties in the request identifier', () => {
+		const key = getRequestIdentifier( 'CREATE_ITEM', 'string_arg', {
+			b: '2',
+			a: '1',
+		} );
+		expect( key ).toBe( 'CREATE_ITEM/["string_arg","{"a":"1","b":"2"}"]' );
+	} );
+
+	it( 'should directly return the action when the action does not match the resource name', () => {
+		const genercActionName = getGenericActionName(
+			'createNonThing',
+			'Thing'
+		);
+		expect( genercActionName ).toBe( 'createNonThing' );
+	} );
+
+	it( 'should get the generic create action name based on resource name', () => {
+		const genercActionName = getGenericActionName( 'createThing', 'Thing' );
+		expect( genercActionName ).toBe( CRUD_ACTIONS.CREATE_ITEM );
+	} );
+
+	it( 'should get the generic delete action name based on resource name', () => {
+		const genercActionName = getGenericActionName( 'deleteThing', 'Thing' );
+		expect( genercActionName ).toBe( CRUD_ACTIONS.DELETE_ITEM );
+	} );
+
+	it( 'should get the generic update action name based on resource name', () => {
+		const genercActionName = getGenericActionName( 'updateThing', 'Thing' );
+		expect( genercActionName ).toBe( CRUD_ACTIONS.UPDATE_ITEM );
+	} );
+
+	it( 'should return false when a valid ID query is not given', () => {
+		expect( isValidIdQuery( { some: 'data' }, '/my/namespace' ) ).toBe(
+			false
+		);
+	} );
+
+	it( 'should return true when a valid ID is passed in an object', () => {
+		expect( isValidIdQuery( { id: 22 }, '/my/namespace' ) ).toBe( true );
+	} );
+
+	it( 'should return true when a valid ID is passed directly', () => {
+		expect( isValidIdQuery( 22, '/my/namespace' ) ).toBe( true );
+	} );
+
+	it( 'should return false when additional non-ID properties are provided', () => {
+		expect( isValidIdQuery( { id: 22, other: 88 }, '/my/namespace' ) ).toBe(
+			false
+		);
+	} );
+
+	it( 'should return true when namespace ID properties are provided', () => {
+		expect(
+			isValidIdQuery(
+				{ id: 22, parent_id: 88 },
+				'/my/{parent_id}/namespace/'
+			)
+		).toBe( true );
+	} );
+
+	it( 'should replace the first argument when a valid ID query exists', () => {
+		const args = [ { id: 22, parent_id: 88 }, 'second' ];
+		const sanitizedArgs = maybeReplaceIdQuery(
+			args,
+			'/my/{parent_id}/namespace/'
+		);
+		expect( sanitizedArgs ).toEqual( [ '88/22', 'second' ] );
+	} );
+
+	it( 'should remain unchanged when the first argument is a string or number', () => {
+		const args = [ 'first', 'second' ];
+		const sanitizedArgs = maybeReplaceIdQuery( args, '/my/namespace/' );
+		expect( sanitizedArgs ).toEqual( args );
+	} );
+
+	it( 'should remain unchanged when the first argument is not a valid ID query', () => {
+		const args = [ { id: 22, parent_id: 88 }, 'second' ];
+		const sanitizedArgs = maybeReplaceIdQuery( args, '/my/namespace/' );
+		expect( sanitizedArgs ).toEqual( args );
 	} );
 } );

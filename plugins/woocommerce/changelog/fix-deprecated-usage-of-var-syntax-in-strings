@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix deprecated usage of ${var} in strings

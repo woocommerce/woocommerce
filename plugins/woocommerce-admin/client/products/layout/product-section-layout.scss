@@ -23,7 +23,7 @@
 		}
 
 		.woocommerce-product-form__field:not(:first-child) {
-			margin-top: $gap-large;
+			margin-top: $gap-large - $gap-smaller;
 
 			> .components-base-control {
 				margin-bottom: 0;
