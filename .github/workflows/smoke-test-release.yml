@@ -84,6 +84,7 @@ jobs:
               run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
             - name: Configure AWS credentials
+              if: success() || failure()
               uses: aws-actions/configure-aws-credentials@v1
               with:
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
@@ -91,6 +92,7 @@ jobs:
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
 
             - name: Upload artifact to bucket
+              if: success() || failure()
               run: |
                   aws s3 sync ${{ env.ALLURE_RESULTS_DIR }} \
                       ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }}/allure-results \
@@ -153,6 +155,7 @@ jobs:
                   retention-days: 5
 
             - name: Configure AWS credentials
+              if: success() || failure()
               uses: aws-actions/configure-aws-credentials@v1
               with:
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
@@ -160,6 +163,7 @@ jobs:
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
 
             - name: Upload artifact to bucket
+              if: success() || failure()
               run: |
                   aws s3 cp ${{ env.ALLURE_RESULTS_DIR }} \
                       ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_WP_LATEST_ARTIFACT }}/allure-results \
@@ -234,6 +238,7 @@ jobs:
                   retention-days: 5
 
             - name: Configure AWS credentials
+              if: success() || failure()
               uses: aws-actions/configure-aws-credentials@v1
               with:
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
@@ -241,6 +246,7 @@ jobs:
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
 
             - name: Upload artifact to bucket
+              if: success() || failure()
               run: |
                   aws s3 sync ${{ env.ALLURE_RESULTS_DIR }} \
                       ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }}/allure-results \
