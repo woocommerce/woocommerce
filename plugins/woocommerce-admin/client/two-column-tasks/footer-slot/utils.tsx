@@ -11,17 +11,23 @@ import { createOrderedChildren, sortFillsByOrder } from '../../utils';
 export const EXPERIMENTAL_WC_TASKLIST_FOOTER_SLOT_NAME =
 	'experimental_woocommerce_tasklist_footer_item';
 /**
- * Create a Fill for extensions to add items to the WooCommerce Admin Homescreen header banner.
+ * Create a Fill for extensions to add items to the WooCommerce Admin Task List footer.
  *
  * @slotFill ExperimentalWooTaskListFooterItem
  * @scope woocommerce-admin
  * @example
- * const MyHeaderItem = () => (
- * <WooHomescreenHeaderBannerItem>My header item</WooHomescreenHeaderBannerItem>
- * );
+ * const MyFooterItem = () => (
+ * 	<Fill name="experimental_woocommerce_tasklist_footer_item">
+ * 		<div className="woocommerce-experiments-placeholder-slotfill">
+ * 			<div className="placeholder-slotfill-content">
+ * 				Slotfill goes in here!
+ * 			</div>
+ * 		</div>
+ * 	</Fill>
+ );
  *
  * registerPlugin( 'my-extension', {
- * render: MyHeaderItem,
+ * render: MyFooterItem,
  * scope: 'woocommerce-admin',
  * } );
  * @param {Object} param0
