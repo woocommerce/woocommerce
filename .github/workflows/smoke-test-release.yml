@@ -83,6 +83,24 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
+                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+
+            - name: Upload artifact to bucket
+              run: |
+                  aws s3 sync ${{ env.ALLURE_RESULTS_DIR }} \
+                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }}/allure-results \
+                      --recursive \
+                      --quiet
+                  aws s3 sync ${{ env.ALLURE_REPORT_DIR }} \
+                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }}/allure-report \
+                      --recursive \
+                      --quiet
+
             - name: Archive 'Update WooCommerce' test report
               if: success() || failure()
               uses: actions/upload-artifact@v3
@@ -191,16 +209,6 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js basic.spec.js
 
-            - name: Download 'e2e-update-wc' artifact
-              uses: actions/download-artifact@v3
-              with:
-                  name: ${{ env.E2E_UPDATE_WC_ARTIFACT }}
-                  path: plugins/woocommerce/tmp
-
-            - name: Add allure-results from 'e2e-update-wc'
-              working-directory: plugins/woocommerce
-              run: cp -r tmp/allure-results tests/e2e-pw/test-results
-
             - name: Generate E2E Test report.
               if: success() || failure()
               working-directory: plugins/woocommerce
@@ -226,11 +234,11 @@ jobs:
 
             - name: Upload artifact to bucket
               run: |
-                  aws s3 cp ${{ env.ALLURE_RESULTS_DIR }} \
+                  aws s3 sync ${{ env.ALLURE_RESULTS_DIR }} \
                       ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }}/allure-results \
                       --recursive \
                       --quiet
-                  aws s3 cp ${{ env.ALLURE_REPORT_DIR }} \
+                  aws s3 sync ${{ env.ALLURE_REPORT_DIR }} \
                       ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }}/allure-report \
                       --recursive \
                       --quiet
