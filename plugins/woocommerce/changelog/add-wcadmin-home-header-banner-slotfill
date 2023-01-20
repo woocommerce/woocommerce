@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Added a slot for extending the app with a homescreen header banner
