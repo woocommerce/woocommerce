@@ -111,7 +111,6 @@ export const ProductMoreMenu = () => {
 									isNewProductManagementFeedbackEnabled &&
 									allowTracking
 								) {
-									// showProductMVPFeedbackModal();
 									updateOptions( {
 										[ NEW_PRODUCT_MANAGEMENT ]: 'no',
 									} );
@@ -130,9 +129,6 @@ export const ProductMoreMenu = () => {
 									onClose();
 								}
 							} }
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							// @ts-ignore The href prop exists as buttonProps.
-							// href={ classEditorUrl }
 							icon={ <ClassicEditorIcon /> }
 							iconPosition="right"
 						>
