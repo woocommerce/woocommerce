@@ -9,8 +9,10 @@ import { differenceWith } from 'lodash';
  * Internal dependencies
  */
 import { STORE_KEY } from '~/marketing/data-multichannel/constants';
-import { RecommendedChannel } from '~/marketing/types';
-import { RecommendedChannelsState } from '~/marketing/data-multichannel/types';
+import {
+	RecommendedChannelsState,
+	RecommendedChannel,
+} from '~/marketing/data-multichannel/types';
 
 type UseRecommendedChannels = {
 	loading: boolean;

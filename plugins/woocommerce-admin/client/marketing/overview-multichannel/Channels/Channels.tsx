@@ -8,8 +8,9 @@ import { Card, CardHeader, CardDivider } from '@wordpress/components';
 /**
  * Internal dependencies
  */
+import { RecommendedChannel } from '~/marketing/data-multichannel/types';
 import { CardHeaderTitle, CardHeaderDescription } from '~/marketing/components';
-import { InstalledChannel, RecommendedChannel } from '~/marketing/types';
+import { InstalledChannel } from '~/marketing/types';
 import { InstalledChannelCardBody } from './InstalledChannelCardBody';
 import { RecommendedChannels } from './RecommendedChannels';
 import { RecommendedChannelsList } from './RecommendedChannelsList';

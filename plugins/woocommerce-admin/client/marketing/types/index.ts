@@ -5,4 +5,3 @@ export {
 	IssueTypeType,
 	InstalledChannel,
 } from './InstalledChannel';
-export { RecommendedChannel } from './RecommendedChannel';
