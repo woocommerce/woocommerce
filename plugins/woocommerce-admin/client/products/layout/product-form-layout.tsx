@@ -2,9 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Children, useEffect } from '@wordpress/element';
+import { useEffect } from '@wordpress/element';
 import { TabPanel, Tooltip } from '@wordpress/components';
 import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
+import { __experimentalWooProductTabItem as WooProductTabItem } from '@woocommerce/components';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -13,9 +15,7 @@ import './product-form-layout.scss';
 import { ProductFormTab } from '../product-form-tab';
 import { useHeaderHeight } from '~/header/use-header-height';
 
-export const ProductFormLayout: React.FC< {
-	children: JSX.Element | JSX.Element[];
-} > = ( { children } ) => {
+export const ProductFormLayout: React.FC = () => {
 	const query = getQuery() as Record< string, string >;
 
 	useEffect( () => {
@@ -39,13 +39,10 @@ export const ProductFormLayout: React.FC< {
 		tabPanelTabs.style.top = adminBarHeight + headerHeight + 'px';
 	}, [ adminBarHeight, headerHeight ] );
 
-	const tabs = Children.map( children, ( child: JSX.Element ) => {
-		if ( child.type !== ProductFormTab ) {
-			return null;
-		}
-		return {
-			name: child.props.name,
-			title: child.props.disabled ? (
+	const getTooltipTabs = ( tabs: TabPanel.Tab[] ) => {
+		return tabs.map( ( tab ) => ( {
+			name: tab.name,
+			title: tab.disabled ? (
 				<Tooltip
 					text={ __(
 						'Manage individual variation details in the Options tab.',
@@ -54,49 +51,55 @@ export const ProductFormLayout: React.FC< {
 				>
 					<span className="woocommerce-product-form-tab__item-inner">
 						<span className="woocommerce-product-form-tab__item-inner-text">
-							{ child.props.title }
+							{ tab.title }
 						</span>
 					</span>
 				</Tooltip>
 			) : (
 				<span className="woocommerce-product-form-tab__item-inner">
 					<span className="woocommerce-product-form-tab__item-inner-text">
-						{ child.props.title }
+						{ tab.title }
 					</span>
 				</span>
 			),
-			disabled: child.props.disabled,
-		};
-	} );
+			disabled: tab.disabled,
+		} ) );
+	};
 
 	return (
-		<TabPanel
-			className="product-form-layout"
-			activeClass="is-active"
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore Disabled properties will be included in newer versions of Gutenberg.
-			tabs={ tabs }
-			initialTabName={ query.tab ?? tabs[ 0 ].name }
-			onSelect={ ( tabName: string ) => {
-				window.document.documentElement.scrollTop = 0;
-				navigateTo( {
-					url: getNewPath( { tab: tabName } ),
-				} );
-			} }
-		>
-			{ ( tab ) => (
-				<>
-					{ Children.map( children, ( child: JSX.Element ) => {
-						if (
-							child.type !== ProductFormTab ||
-							child.props.name !== tab.name
-						) {
-							return null;
-						}
-						return child;
-					} ) }
-				</>
-			) }
-		</TabPanel>
+		<>
+			<WooProductTabItem.Slot location="tab/general">
+				{ ( tabs, childrenMap ) =>
+					tabs.length > 0 ? (
+						<TabPanel
+							className="product-form-layout"
+							activeClass="is-active"
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore Disabled properties will be included in newer versions of Gutenberg.
+							tabs={ getTooltipTabs( tabs ) }
+							initialTabName={ query.tab ?? tabs[ 0 ].name }
+							onSelect={ ( tabName: string ) => {
+								window.document.documentElement.scrollTop = 0;
+								navigateTo( {
+									url: getNewPath( { tab: tabName } ),
+								} );
+							} }
+						>
+							{ ( tab ) => {
+								const classes = classnames(
+									'woocommerce-product-form-tab',
+									'woocommerce-product-form-tab__' + tab.name
+								);
+								return (
+									<div className={ classes } key={ tab.name }>
+										{ childrenMap[ tab.name ] }
+									</div>
+								);
+							} }
+						</TabPanel>
+					) : null
+				}
+			</WooProductTabItem.Slot>
+		</>
 	);
 };

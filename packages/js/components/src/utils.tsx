@@ -19,6 +19,7 @@ function createOrderedChildren< T = Fill.Props, S = Record< string, unknown > >(
 	props: T,
 	injectProps?: S
 ) {
+	console.log( 'create ordered' );
 	if ( typeof children === 'function' ) {
 		return cloneElement( children( props ), { order, ...injectProps } );
 	} else if ( isValidElement( children ) ) {
