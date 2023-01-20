@@ -21,7 +21,7 @@ const ToggleButton = forwardRef< HTMLButtonElement >( ( props, ref ) => {
 	// using forwardRef here because getToggleButtonProps injects a ref prop
 	return (
 		<button
-			className="woocommerce-experimental-select-control__combox-box-icon"
+			className="woocommerce-experimental-select-control__combox-box-toggle-button"
 			{ ...props }
 			ref={ ref }
 		>
