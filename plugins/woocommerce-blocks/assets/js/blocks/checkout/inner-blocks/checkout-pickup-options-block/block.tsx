@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { _n } from '@wordpress/i18n';
+import { _n, __ } from '@wordpress/i18n';
 import {
 	useState,
 	useEffect,
@@ -75,24 +75,31 @@ const renderPickupLocation = (
 		label: location
 			? decodeEntities( location )
 			: decodeEntities( option.name ),
-		secondaryLabel: createInterpolateElement(
-			/* translators: %1$s name of the product (ie: Sunglasses), %2$d number of units in the current cart package */
-			_n(
-				'<price/>',
-				'<price/> x <packageCount/> packages',
-				packageCount,
-				'woo-gutenberg-products-block'
+		secondaryLabel:
+			parseInt( priceWithTaxes, 10 ) > 0 ? (
+				createInterpolateElement(
+					/* translators: %1$s name of the product (ie: Sunglasses), %2$d number of units in the current cart package */
+					_n(
+						'<price/>',
+						'<price/> x <packageCount/> packages',
+						packageCount,
+						'woo-gutenberg-products-block'
+					),
+					{
+						price: (
+							<FormattedMonetaryAmount
+								currency={ getCurrencyFromPriceResponse(
+									option
+								) }
+								value={ priceWithTaxes }
+							/>
+						),
+						packageCount: <>{ packageCount }</>,
+					}
+				)
+			) : (
+				<em>{ __( 'free', 'woo-gutenberg-products-block' ) }</em>
 			),
-			{
-				price: (
-					<FormattedMonetaryAmount
-						currency={ getCurrencyFromPriceResponse( option ) }
-						value={ priceWithTaxes }
-					/>
-				),
-				packageCount: <>{ packageCount }</>,
-			}
-		),
 		description: decodeEntities( details ),
 		secondaryDescription: address ? (
 			<>

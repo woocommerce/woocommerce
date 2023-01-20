@@ -32,6 +32,12 @@
 			display: block;
 		}
 	}
+	.wc-block-components-radio-control__label-group {
+		em {
+			text-transform: uppercase;
+			font-style: inherit;
+		}
+	}
 	.wc-block-components-radio-control__description-group {
 		width: 100%;
 		box-sizing: border-box;
