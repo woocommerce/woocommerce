@@ -3,14 +3,7 @@
  */
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
-import {
-	createElement,
-	useCallback,
-	useState,
-	useEffect,
-	useMemo,
-	useRef,
-} from '@wordpress/element';
+import { useCallback } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -20,7 +13,7 @@ import { STORE_KEY } from '~/marketing/data-multichannel/constants';
 import {
 	ApiFetchError,
 	Channel,
-	Channels,
+	ChannelsState,
 } from '~/marketing/data-multichannel/types';
 
 type UseRegisteredChannels = {
@@ -151,7 +144,7 @@ export const useRegisteredChannels = (): UseRegisteredChannels => {
 
 	return useSelect( ( select ) => {
 		const { hasFinishedResolution, getChannels } = select( STORE_KEY );
-		const channels = getChannels< Channels >();
+		const channels = getChannels< ChannelsState >();
 
 		return {
 			loading: ! hasFinishedResolution( 'getChannels' ),

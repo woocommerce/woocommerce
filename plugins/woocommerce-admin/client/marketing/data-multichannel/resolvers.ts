@@ -12,7 +12,7 @@ import {
 	receiveRecommendedChannelsSuccess,
 	receiveRecommendedChannelsError,
 } from './actions';
-import { Channel, RecommendedPlugin } from './types';
+import { Channel, RecommendedChannel } from './types';
 import { API_NAMESPACE } from './constants';
 import { isApiFetchError } from './guards';
 
@@ -34,7 +34,7 @@ export function* getChannels() {
 
 export function* getRecommendedChannels() {
 	try {
-		const data: RecommendedPlugin[] = yield apiFetch( {
+		const data: RecommendedChannel[] = yield apiFetch( {
 			path: `${ API_NAMESPACE }/recommendations?category=channels`,
 		} );
 

@@ -17,7 +17,7 @@ export type Channel = {
 	icon: string;
 };
 
-export type Channels = {
+export type ChannelsState = {
 	data?: Array< Channel >;
 	error?: ApiFetchError;
 };
@@ -35,7 +35,7 @@ type Tag = {
 	name: string;
 };
 
-export type RecommendedPlugin = {
+export type RecommendedChannel = {
 	title: string;
 	description: string;
 	url: string;
@@ -48,12 +48,12 @@ export type RecommendedPlugin = {
 	tags: Array< Tag >;
 };
 
-export type RecommendedChannels = {
-	data?: Array< RecommendedPlugin >;
+export type RecommendedChannelsState = {
+	data?: Array< RecommendedChannel >;
 	error?: ApiFetchError;
 };
 
 export type State = {
-	channels: Channels;
-	recommendedChannels: RecommendedChannels;
+	channels: ChannelsState;
+	recommendedChannels: RecommendedChannelsState;
 };

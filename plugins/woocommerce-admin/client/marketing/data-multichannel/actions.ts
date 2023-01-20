@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { TYPES } from './action-types';
-import { ApiFetchError, Channel, RecommendedPlugin } from './types';
+import { ApiFetchError, Channel, RecommendedChannel } from './types';
 
 export const receiveChannelsSuccess = ( channels: Array< Channel > ) => {
 	return {
@@ -20,7 +20,7 @@ export const receiveChannelsError = ( error: ApiFetchError ) => {
 };
 
 export const receiveRecommendedChannelsSuccess = (
-	channels: Array< RecommendedPlugin >
+	channels: Array< RecommendedChannel >
 ) => {
 	return {
 		type: TYPES.RECEIVE_RECOMMENDED_CHANNELS_SUCCESS,
