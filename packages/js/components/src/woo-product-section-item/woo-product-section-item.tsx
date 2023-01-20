@@ -23,7 +23,7 @@ type WooProductFieldSlotProps = {
 
 export const WooProductSectionItem: React.FC< WooProductSectionItemProps > & {
 	Slot: React.FC< Slot.Props & WooProductFieldSlotProps >;
-} = ( { children, order = 1, location } ) => (
+} = ( { children, order = 20, location } ) => (
 	<Fill name={ `woocommerce_product_section_${ location }` }>
 		{ ( fillProps: Fill.Props ) => {
 			return createOrderedChildren< Fill.Props >(

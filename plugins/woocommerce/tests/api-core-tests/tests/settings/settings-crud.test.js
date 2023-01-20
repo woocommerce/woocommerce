@@ -1368,10 +1368,10 @@ test.describe('Settings API tests: CRUD', () => {
 					expect.objectContaining({
 						"id": "woocommerce_email_header_image",
 						"label": "Header image",
-						"description": "URL to an image you want to show in the email header. Upload images using the media uploader (Admin > Media).",
+						"description": "Paste the URL of an image you want to show in the email header. Upload images using the media uploader (Media > Add New).",
 						"type": "text",
 						"default": "",
-						"tip": "URL to an image you want to show in the email header. Upload images using the media uploader (Admin > Media).",
+						"tip": "Paste the URL of an image you want to show in the email header. Upload images using the media uploader (Media > Add New).",
 						"value": "",
 					})
 				]));
