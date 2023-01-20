@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { ProductAttribute } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -31,6 +32,16 @@ export const Attributes: React.FC< AttributesProps > = ( {
 			attributeType="regular"
 			value={ attributes }
 			onChange={ handleChange }
+			onModalOpen={ ( attribute ) => {
+				if ( attribute ) {
+					return;
+				}
+				if ( ! attributes.length ) {
+					recordEvent( 'product_add_first_attribute_button_click' );
+					return;
+				}
+				recordEvent( 'product_add_attribute_button' );
+			} }
 		/>
 	);
 };

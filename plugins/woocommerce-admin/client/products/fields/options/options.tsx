@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Product, ProductAttribute } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 import { useFormContext } from '@woocommerce/components';
 
 /**
@@ -44,6 +45,12 @@ export const Options: React.FC< OptionsProps > = ( {
 			attributeType="for-variations"
 			value={ attributes }
 			onChange={ handleChange }
+			onModalOpen={ ( attribute ) => {
+				if ( attribute ) {
+					return;
+				}
+				recordEvent( 'product_add_option_button' );
+			} }
 			text={ {
 				addAttributeModalTitle: __( 'Add options', 'woocommerce' ),
 				emptyStateSubtitle: __( 'No options yet', 'woocommerce' ),

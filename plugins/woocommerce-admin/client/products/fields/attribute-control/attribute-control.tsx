@@ -33,6 +33,7 @@ import {
 type AttributeControlProps = {
 	value: ProductAttribute[];
 	onChange: ( value: ProductAttribute[] ) => void;
+	onModalOpen?: ( attribute?: ProductAttribute ) => void;
 	// TODO: should we support an 'any' option to show all attributes?
 	attributeType?: 'regular' | 'for-variations';
 	text?: {
@@ -47,6 +48,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	value,
 	attributeType = 'regular',
 	onChange,
+	onModalOpen,
 	text = {
 		addAttributeModalTitle: undefined,
 		emptyStateSubtitle: undefined,
@@ -123,17 +125,23 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		setShowAddAttributeModal( false );
 	};
 
+	const openModal = ( attribute?: ProductAttribute ) => {
+		if ( attribute ) {
+			setEditingAttributeId( fetchAttributeId( attribute ) );
+		} else {
+			setShowAddAttributeModal( true );
+		}
+		if ( typeof onModalOpen === 'function' ) {
+			onModalOpen( attribute );
+		}
+	};
+
 	if ( ! value.length ) {
 		return (
 			<>
 				<AttributeEmptyState
 					addNewLabel={ text.addAttributeModalTitle }
-					onNewClick={ () => {
-						recordEvent(
-							'product_add_first_attribute_button_click'
-						);
-						setShowAddAttributeModal( true );
-					} }
+					onNewClick={ () => openModal() }
 					subtitle={ text.emptyStateSubtitle }
 				/>
 				{ showAddAttributeModal && (
@@ -192,23 +200,14 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					<AttributeListItem
 						attribute={ attr }
 						key={ fetchAttributeId( attr ) }
-						onEditClick={ () =>
-							setEditingAttributeId( fetchAttributeId( attr ) )
-						}
+						onEditClick={ () => openModal( attr ) }
 						onRemoveClick={ () => onRemove( attr ) }
 					/>
 				) ) }
 			</Sortable>
 			<NewAttributeListItem
 				label={ text.newAttributeListItemLabel }
-				onClick={ () => {
-					recordEvent(
-						isOnlyForVariations
-							? 'product_add_option_button'
-							: 'product_add_attribute_button'
-					);
-					setShowAddAttributeModal( true );
-				} }
+				onClick={ () => openModal() }
 			/>
 			{ showAddAttributeModal && (
 				<AddAttributeModal
