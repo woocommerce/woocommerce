@@ -574,9 +574,8 @@ export const CustomSuffix: React.FC = () => {
 };
 
 export const ToggleButton: React.FC = () => {
-	const [ selected, setSelected ] = useState<
-		SelectedType< DefaultItemType >
-	>( sampleItems[ 1 ] );
+	const [ selected, setSelected ] =
+		useState< SelectedType< DefaultItemType > >();
 
 	return (
 		<SelectControl
@@ -587,6 +586,7 @@ export const ToggleButton: React.FC = () => {
 			onRemove={ () => setSelected( null ) }
 			suffix={ null }
 			showToggleButton={ true }
+			__experimentalOpenMenuOnFocus={ true }
 		/>
 	);
 };
