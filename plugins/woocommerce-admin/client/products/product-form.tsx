@@ -18,7 +18,6 @@ import { ProductFormHeader } from './layout/product-form-header';
 import { ProductFormLayout } from './layout/product-form-layout';
 import { ProductInventorySection } from './sections/product-inventory-section';
 import { PricingSection } from './sections/pricing-section';
-import { ProductShippingSection } from './sections/product-shipping-section';
 import { ProductVariationsSection } from './sections/product-variations-section';
 import { validate } from './product-validation';
 import { OptionsSection } from './sections/options-section';
