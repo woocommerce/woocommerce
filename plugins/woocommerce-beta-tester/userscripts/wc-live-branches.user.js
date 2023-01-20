@@ -104,62 +104,9 @@
 				'<p><strong>Cannot determine the repository for this PR.</strong></p>'
 			);
 		} else {
-			if ( ! pluginsList ) {
-				pluginsList = dofetch(
-					`${ host }/wp-json/jurassic.ninja/jetpack-beta/plugins`
-				);
-			}
-			pluginsList
-				.then( ( body ) => {
-					const plugins = [];
-
-					if ( body.status === 'ok' ) {
-						const labels = new Set(
-							$.map(
-								$( '.js-issue-labels a.IssueLabel' ),
-								( e ) => $( e ).data( 'name' )
-							)
-						);
-						Object.keys( body.data ).forEach( ( k ) => {
-							const data = body.data[ k ];
-							if ( data.repo === repo ) {
-								plugins.push( {
-									name: `branches.${ k }`,
-									value: currentBranch,
-									label: encodeHtmlEntities( data.name ),
-									checked:
-										data.labels &&
-										data.labels.some( ( l ) =>
-											labels.has( l )
-										),
-								} );
-							}
-						} );
-						if ( ! plugins.length ) {
-							throw new Error(
-								`No plugins are configured for ${ repo }`
-							);
-						}
-						plugins.sort( ( a, b ) =>
-							a.label.localeCompare( b.label )
-						);
-					} else if ( body.code === 'rest_no_route' ) {
-						plugins.push( {
-							name: 'branch',
-							value: currentBranch,
-							label: 'Jetpack',
-							checked: true,
-							disabled: true,
-						} );
-					} else {
-						throw new Error( 'Invalid response from server' );
-					}
-
-					const contents = `
+			const contents = `
 					<details>
 						<summary>Expand for JN site options:</summary>
-						<h4>Test Plugins</h4>
-						${ getOptionsList( plugins, 33 ) }
 						<h4>Settings</h4>
 						${ getOptionsList(
 							[
@@ -191,7 +138,7 @@
 							],
 							100
 						) }
-						<h4>Plugins</h4>
+						<h4>Install additional plugins</h4>
 						${ getOptionsList(
 							[
 								{
@@ -242,78 +189,13 @@
 							],
 							33
 						) }
-
-						<h4>Themes</h4>
-						${ getOptionsList(
-							[
-								{
-									label: 'TT1-Blocks FSE Theme',
-									name: 'tt1-blocks',
-								},
-							],
-							33
-						) }
 					</details>
 					<p>
 						<a id="woocommerce-beta-branch-link" target="_blank" rel="nofollow noopener" href="#">…</a>
 					</p>
 					`;
-					appendHtml( markdownBody, contents );
-					updateLink();
-				} )
-				.catch( ( e ) => {
-					pluginsList = null;
-					appendHtml(
-						markdownBody,
-						// prettier-ignore
-						`<p><strong>Error while fetching data for live testing: ${ encodeHtmlEntities( e.message ) }.</strong></p>`
-					);
-				} );
-		}
-
-		/**
-		 * Fetch a URL.
-		 *
-		 * TamperMonkey on Chrome can't use `fetch()` due to CSP.
-		 *
-		 * @param {string} url - URL.
-		 * @returns {Promise} Promise. Resolves with the JSON content from `url`.
-		 */
-		function dofetch( url ) {
-			const do_xmlhttpRequest =
-				window.GM_xmlhttpRequest ?? window.GM?.xmlhttpRequest ?? null;
-			if ( do_xmlhttpRequest ) {
-				return new Promise( ( resolve, reject ) => {
-					do_xmlhttpRequest( {
-						method: 'GET',
-						url: url,
-						onload: ( r ) => {
-							if ( r.status < 100 || r.status > 599 ) {
-								reject(
-									new TypeError(
-										`Network request failed (status ${ r.status })`
-									)
-								);
-								return;
-							}
-							resolve( JSON.parse( r.responseText ) );
-						},
-						ontimeout: () =>
-							reject(
-								new TypeError( 'Network request timed out' )
-							),
-						onabort: () =>
-							reject(
-								new TypeError( 'Network request aborted' )
-							),
-						onerror: () =>
-							reject( new TypeError( 'Network request failed' ) ),
-					} );
-				} );
-			}
-
-			// Fall back to fetch.
-			return fetch( url ).then( ( r ) => r.json() );
+			appendHtml( markdownBody, contents );
+			updateLink();
 		}
 
 		/**
@@ -335,7 +217,11 @@
 		 * @returns {string} URI.
 		 */
 		function getLink() {
-			const query = [ 'woocommerce-beta-tester' ];
+			const query = [
+				'woocommerce-beta-tester',
+				`woocommerce-beta-tester-live-branch=${ currentBranch }`,
+			];
+
 			$(
 				'#woocommerce-live-branches input[type=checkbox]:checked:not([data-invert]), #woocommerce-live-branches input[type=checkbox][data-invert]:not(:checked)'
 			).each( ( i, input ) => {
@@ -452,13 +338,9 @@
 			const $link = $( '#woocommerce-beta-branch-link' );
 			const url = getLink();
 
-			if ( url.match( /[?&]branch(es\.[^&=]*)?=/ ) ) {
-				$link.attr( 'href', url ).text( url );
-			} else {
-				$link
-					.attr( 'href', null )
-					.text( 'Select at least one plugin to test' );
-			}
+			$link
+				.attr( 'href', url )
+				.text( 'Create Jurassic Ninja site for this branch.' );
 		}
 	}
 } )();
