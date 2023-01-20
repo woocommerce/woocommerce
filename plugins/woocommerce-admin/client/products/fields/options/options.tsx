@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { Product, ProductAttribute } from '@woocommerce/data';
 import { useFormContext } from '@woocommerce/components';
 
@@ -43,6 +44,15 @@ export const Options: React.FC< OptionsProps > = ( {
 			attributeType="for-variations"
 			value={ attributes }
 			onChange={ handleChange }
+			text={ {
+				addAttributeModalTitle: __( 'Add options', 'woocommerce' ),
+				emptyStateSubtitle: __( 'No options yet', 'woocommerce' ),
+				newAttributeListItemLabel: __( 'Add option', 'woocommerce' ),
+				globalAttributeHelperMessage: __(
+					`You can change the option's name in {{link}}Attributes{{/link}}.`,
+					'woocommerce'
+				),
+			} }
 		/>
 	);
 };

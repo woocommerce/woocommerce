@@ -26,8 +26,8 @@ import {
 } from './utils';
 import { AttributeEmptyState } from '../attribute-empty-state';
 import {
-	AddAttributeListItem,
 	AttributeListItem,
+	NewAttributeListItem,
 } from '../attribute-list-item';
 
 type AttributeControlProps = {
@@ -35,12 +35,27 @@ type AttributeControlProps = {
 	onChange: ( value: ProductAttribute[] ) => void;
 	// TODO: should we support an 'any' option to show all attributes?
 	attributeType?: 'regular' | 'for-variations';
+	text?: {
+		addAttributeModalTitle?: string;
+		emptyStateSubtitle?: string;
+		newAttributeListItemLabel?: string;
+		globalAttributeHelperMessage: string;
+	};
 };
 
 export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	value,
 	attributeType = 'regular',
 	onChange,
+	text = {
+		addAttributeModalTitle: undefined,
+		emptyStateSubtitle: undefined,
+		newAttributeListItemLabel: undefined,
+		globalAttributeHelperMessage: __(
+			`You can change the attribute's name in {{link}}Attributes{{/link}}.`,
+			'woocommerce'
+		),
+	},
 } ) => {
 	const [ showAddAttributeModal, setShowAddAttributeModal ] =
 		useState( false );
@@ -112,22 +127,14 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		return (
 			<>
 				<AttributeEmptyState
-					addNewLabel={
-						isOnlyForVariations
-							? __( 'Add options', 'woocommerce' )
-							: undefined
-					}
+					addNewLabel={ text.addAttributeModalTitle }
 					onNewClick={ () => {
 						recordEvent(
 							'product_add_first_attribute_button_click'
 						);
 						setShowAddAttributeModal( true );
 					} }
-					subtitle={
-						isOnlyForVariations
-							? __( 'No options yet', 'woocommerce' )
-							: undefined
-					}
+					subtitle={ text.emptyStateSubtitle }
 				/>
 				{ showAddAttributeModal && (
 					<AddAttributeModal
@@ -161,16 +168,6 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		( attr ) => fetchAttributeId( attr ) === editingAttributeId
 	) as EnhancedProductAttribute;
 
-	const editAttributeCopy = isOnlyForVariations
-		? __(
-				`You can change the option's name in {{link}}Attributes{{/link}}.`,
-				'woocommerce'
-		  )
-		: __(
-				`You can change the attribute's name in {{link}}Attributes{{/link}}.`,
-				'woocommerce'
-		  );
-
 	return (
 		<div className="woocommerce-attribute-field">
 			<Sortable
@@ -202,13 +199,9 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					/>
 				) ) }
 			</Sortable>
-			<AddAttributeListItem
-				label={
-					isOnlyForVariations
-						? __( 'Add option', 'woocommerce' )
-						: undefined
-				}
-				onAddClick={ () => {
+			<NewAttributeListItem
+				label={ text.newAttributeListItemLabel }
+				onClick={ () => {
 					recordEvent(
 						isOnlyForVariations
 							? 'product_add_option_button'
@@ -219,11 +212,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			/>
 			{ showAddAttributeModal && (
 				<AddAttributeModal
-					title={
-						isOnlyForVariations
-							? __( 'Add options', 'woocommerce' )
-							: undefined
-					}
+					title={ text.addAttributeModalTitle }
 					onCancel={ () => {
 						recordEvent( CANCEL_BUTTON_EVENT_NAME );
 						setShowAddAttributeModal( false );
@@ -241,7 +230,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						editingAttribute.name
 					) }
 					globalAttributeHelperMessage={ interpolateComponents( {
-						mixedString: editAttributeCopy,
+						mixedString: text.globalAttributeHelperMessage,
 						components: {
 							link: (
 								<Link
