@@ -22,9 +22,6 @@ export type ChannelsState = {
 	error?: ApiFetchError;
 };
 
-// TODO: The following types are copied from plugins/woocommerce-admin/client/marketing/overview-multichannel/DiscoverTools/types.ts.
-// They are may be changed later, depending on the outcome of API development.
-
 type Subcategory = {
 	slug: string;
 	name: string;
