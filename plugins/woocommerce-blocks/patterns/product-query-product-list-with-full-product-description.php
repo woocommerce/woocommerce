@@ -14,7 +14,7 @@
 <!-- /wp:column -->
 
 <!-- wp:column {"width":"66.66%","layout":{"type":"default"}} -->
-<div class="wp-block-column" style="flex-basis:66.66%"><!-- wp:woocommerce/product-rating {"isDescendentOfQueryLoop":true,"fontSize":"small","style":{"spacing":{"margin":{"bottom":"0"}}}} /-->
+<div class="wp-block-column" style="flex-basis:66.66%"><!-- wp:woocommerce/product-rating {"isDescendentOfQueryLoop":true,"fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
 
 <!-- wp:post-terms {"term":"product_cat","style":{"spacing":{"margin":{"top":"0"}}}} /-->
 
