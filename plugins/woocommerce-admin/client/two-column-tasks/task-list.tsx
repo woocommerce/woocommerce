@@ -36,6 +36,7 @@ import { ProgressHeader } from '~/task-lists/progress-header';
 import { TaskListItemTwoColumn } from './task-list-item-two-column';
 import { TaskListCompletedHeader } from './completed-header';
 import { LayoutContext } from '~/layout';
+import { ExperimentalWooTaskListFooter } from './footer-slot';
 
 export type TaskListProps = TaskListType & {
 	eventName?: string;
@@ -295,6 +296,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 							);
 						} ) }
 					</List>
+					<ExperimentalWooTaskListFooter />
 				</Card>
 			</div>
 		</>
