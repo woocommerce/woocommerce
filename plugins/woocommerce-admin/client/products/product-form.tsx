@@ -35,7 +35,7 @@ export const ProductForm: React.FC< {
 				validate={ validate }
 			>
 				<ProductFormHeader />
-				<ProductFormLayout />
+				<ProductFormLayout id="general" product={ product } />
 				<ProductFormFooter />
 				{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
 				<PluginArea scope="woocommerce-product-editor" />

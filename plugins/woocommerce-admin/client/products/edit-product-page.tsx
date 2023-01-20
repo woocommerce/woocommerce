@@ -126,7 +126,7 @@ const EditProductPage: React.FC = () => {
 				product.status === 'trash' &&
 				! isPendingAction &&
 				! wasDeletedUsingAction && (
-					<ProductFormLayout>
+					<ProductFormLayout id="error">
 						<div className="woocommerce-edit-product__error">
 							{ __(
 								'You cannot edit this item because it is in the Trash. Please restore it and try again.',

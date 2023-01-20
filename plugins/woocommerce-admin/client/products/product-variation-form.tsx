@@ -3,12 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useEffect, useRef } from '@wordpress/element';
-import {
-	Form,
-	FormRef,
-	__experimentalWooProductSectionItem as WooProductSectionItem,
-	SlotContextProvider,
-} from '@woocommerce/components';
+import { Form, FormRef, SlotContextProvider } from '@woocommerce/components';
+import { PluginArea } from '@wordpress/plugins';
 import { PartialProduct, ProductVariation } from '@woocommerce/data';
 import { PluginArea } from '@wordpress/plugins';
 
@@ -60,27 +56,11 @@ export const ProductVariationForm: React.FC< {
 				ref={ formRef }
 			>
 				<ProductVariationFormHeader />
-				<ProductFormLayout key={ productVariation.id }>
-					<ProductFormTab name="general" title="General">
-						<ProductVariationDetailsSection />
-					</ProductFormTab>
-					<ProductFormTab name="pricing" title="Pricing">
-						<WooProductSectionItem.Slot
-							location={ TAB_PRICING_ID }
-						/>
-					</ProductFormTab>
-					<ProductFormTab name="inventory" title="Inventory">
-						<WooProductSectionItem.Slot
-							location={ TAB_INVENTORY_ID }
-						/>
-					</ProductFormTab>
-					<ProductFormTab name="shipping" title="Shipping">
-						<WooProductSectionItem.Slot
-							location={ TAB_SHIPPING_ID }
-							fillProps={ { product } }
-						/>
-					</ProductFormTab>
-				</ProductFormLayout>
+				<ProductFormLayout
+					key={ productVariation.id }
+					id="variation"
+					product={ productVariation as PartialProduct }
+				/>
 				<ProductFormFooter />
 
 				<div className="product-variation-form__navigation">

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { ReactElement } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import { Slot, Fill, TabPanel } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
 
@@ -22,7 +22,7 @@ type WooProductFieldSlotProps = {
 	location: string;
 	children: (
 		tabs: TabPanel.Tab[],
-		tabChildren: Record< string, ReactElement >
+		tabChildren: Record< string, ReactNode >
 	) => ReactElement | null;
 };
 
@@ -75,7 +75,6 @@ WooProductTabItem.Slot = ( { fillProps, location, children } ) => (
 				return a.order - b.order;
 			} );
 
-			console.log( tabData );
 			return children( orderedTabs, tabData.childrenMap );
 		} }
 	</Slot>
