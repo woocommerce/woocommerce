@@ -9,7 +9,7 @@ type WooOnboardingTaskListHeaderProps = {
 };
 
 /**
- * A Fill for adding Onboarding Task List items.
+ * A Fill for adding Onboarding Task List headers.
  *
  * @slotFill WooOnboardingTaskListHeader
  * @scope woocommerce-tasks
