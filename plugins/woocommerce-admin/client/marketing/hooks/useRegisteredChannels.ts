@@ -8,7 +8,7 @@ import { useCallback } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { InstalledChannel, SyncStatusType } from '~/marketing/types';
+import { RegisteredChannel, SyncStatusType } from '~/marketing/types';
 import { STORE_KEY } from '~/marketing/data-multichannel/constants';
 import {
 	ApiFetchError,
@@ -18,7 +18,7 @@ import {
 
 type UseRegisteredChannels = {
 	loading: boolean;
-	data?: Array< InstalledChannel >;
+	data?: Array< RegisteredChannel >;
 	error?: ApiFetchError;
 	refetch: () => void;
 };
@@ -34,7 +34,7 @@ const statusMap: Record< string, SyncStatusType > = {
 	synced: 'synced',
 };
 
-const convert = ( data: Channel ): InstalledChannel => {
+const convert = ( data: Channel ): RegisteredChannel => {
 	const issueType = data.errors_count >= 1 ? 'error' : 'none';
 	const issueText =
 		data.errors_count >= 1

@@ -10,14 +10,14 @@ import { Card, CardHeader, CardDivider } from '@wordpress/components';
  */
 import { RecommendedChannel } from '~/marketing/data-multichannel/types';
 import { CardHeaderTitle, CardHeaderDescription } from '~/marketing/components';
-import { InstalledChannel } from '~/marketing/types';
-import { InstalledChannelCardBody } from './InstalledChannelCardBody';
+import { RegisteredChannel } from '~/marketing/types';
+import { RegisteredChannelCardBody } from './RegisteredChannelCardBody';
 import { RecommendedChannels } from './RecommendedChannels';
 import { RecommendedChannelsList } from './RecommendedChannelsList';
 import './Channels.scss';
 
 type ChannelsProps = {
-	registeredChannels: Array< InstalledChannel >;
+	registeredChannels: Array< RegisteredChannel >;
 	recommendedChannels: Array< RecommendedChannel >;
 	onInstalledAndActivated?: () => void;
 };
@@ -72,7 +72,7 @@ export const Channels: React.FC< ChannelsProps > = ( {
 			{ registeredChannels.map( ( el, idx ) => {
 				return (
 					<Fragment key={ el.slug }>
-						<InstalledChannelCardBody installedChannel={ el } />
+						<RegisteredChannelCardBody registeredChannel={ el } />
 						{ idx < registeredChannels.length - 1 && (
 							<CardDivider />
 						) }

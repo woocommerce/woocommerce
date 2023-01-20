@@ -12,11 +12,11 @@ import classnames from 'classnames';
  * Internal dependencies
  */
 import { PluginCardBody } from '~/marketing/components';
-import { InstalledChannel, SyncStatusType } from '~/marketing/types';
-import './InstalledChannelCardBody.scss';
+import { RegisteredChannel, SyncStatusType } from '~/marketing/types';
+import './RegisteredChannelCardBody.scss';
 
-type InstalledChannelCardBodyProps = {
-	installedChannel: InstalledChannel;
+type RegisteredChannelCardBodyProps = {
+	registeredChannel: RegisteredChannel;
 };
 
 type SyncStatusPropsType = {
@@ -58,15 +58,15 @@ const SyncStatus: React.FC< SyncStatusPropsType > = ( { status } ) => {
 };
 
 type IssueStatusPropsType = {
-	installedChannel: InstalledChannel;
+	registeredChannel: RegisteredChannel;
 };
 
 const issueStatusClassName = 'woocommerce-marketing-issue-status';
 
 const IssueStatus: React.FC< IssueStatusPropsType > = ( {
-	installedChannel,
+	registeredChannel,
 } ) => {
-	if ( installedChannel.issueType === 'error' ) {
+	if ( registeredChannel.issueType === 'error' ) {
 		return (
 			<div
 				className={ classnames(
@@ -75,12 +75,12 @@ const IssueStatus: React.FC< IssueStatusPropsType > = ( {
 				) }
 			>
 				<GridiconNotice size={ iconSize } />
-				{ installedChannel.issueText }
+				{ registeredChannel.issueText }
 			</div>
 		);
 	}
 
-	if ( installedChannel.issueType === 'warning' ) {
+	if ( registeredChannel.issueType === 'warning' ) {
 		return (
 			<div
 				className={ classnames(
@@ -89,21 +89,21 @@ const IssueStatus: React.FC< IssueStatusPropsType > = ( {
 				) }
 			>
 				<GridiconNotice size={ iconSize } />
-				{ installedChannel.issueText }
+				{ registeredChannel.issueText }
 			</div>
 		);
 	}
 
 	return (
 		<div className={ issueStatusClassName }>
-			{ installedChannel.issueText }
+			{ registeredChannel.issueText }
 		</div>
 	);
 };
 
-export const InstalledChannelCardBody: React.FC<
-	InstalledChannelCardBodyProps
-> = ( { installedChannel } ) => {
+export const RegisteredChannelCardBody: React.FC<
+	RegisteredChannelCardBodyProps
+> = ( { registeredChannel } ) => {
 	/**
 	 * The description section in the channel card.
 	 *
@@ -111,17 +111,17 @@ export const InstalledChannelCardBody: React.FC<
 	 *
 	 * If setup is completed, this would be an element with sync status and issue status.
 	 */
-	const description = ! installedChannel.isSetupCompleted ? (
-		installedChannel.description
+	const description = ! registeredChannel.isSetupCompleted ? (
+		registeredChannel.description
 	) : (
 		<div className="woocommerce-marketing-installed-channel-description">
-			{ installedChannel.syncStatus && (
+			{ registeredChannel.syncStatus && (
 				<>
-					<SyncStatus status={ installedChannel.syncStatus } />
+					<SyncStatus status={ registeredChannel.syncStatus } />
 					<div className="woocommerce-marketing-installed-channel-description__separator" />
 				</>
 			) }
-			<IssueStatus installedChannel={ installedChannel } />
+			<IssueStatus registeredChannel={ registeredChannel } />
 		</div>
 	);
 
@@ -132,12 +132,12 @@ export const InstalledChannelCardBody: React.FC<
 	 *
 	 * If setup is completed, this would be a "Manage" secondary button.
 	 */
-	const button = ! installedChannel.isSetupCompleted ? (
-		<Button variant="primary" href={ installedChannel.setupUrl }>
+	const button = ! registeredChannel.isSetupCompleted ? (
+		<Button variant="primary" href={ registeredChannel.setupUrl }>
 			{ __( 'Finish setup', 'woocommerce' ) }
 		</Button>
 	) : (
-		<Button variant="secondary" href={ installedChannel.manageUrl }>
+		<Button variant="secondary" href={ registeredChannel.manageUrl }>
 			{ __( 'Manage', 'woocommerce' ) }
 		</Button>
 	);
@@ -147,11 +147,11 @@ export const InstalledChannelCardBody: React.FC<
 			className="woocommerce-marketing-installed-channel-card-body"
 			icon={
 				<img
-					src={ installedChannel.icon }
-					alt={ installedChannel.title }
+					src={ registeredChannel.icon }
+					alt={ registeredChannel.title }
 				/>
 			}
-			name={ installedChannel.title }
+			name={ registeredChannel.title }
 			description={ description }
 			button={ button }
 		/>

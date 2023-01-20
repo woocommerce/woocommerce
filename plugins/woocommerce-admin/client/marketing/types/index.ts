@@ -3,5 +3,5 @@ export { RecommendedPlugin } from './RecommendedPlugin';
 export {
 	SyncStatusType,
 	IssueTypeType,
-	InstalledChannel,
-} from './InstalledChannel';
+	RegisteredChannel,
+} from './RegisteredChannel';
