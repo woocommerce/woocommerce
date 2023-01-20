@@ -13,6 +13,7 @@ import { Button, Card } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { EllipsisMenu } from '@woocommerce/components';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
+import { WooOnboardingTaskListHeader } from '@woocommerce/onboarding';
 import {
 	ONBOARDING_STORE_NAME,
 	TaskType,
@@ -22,7 +23,7 @@ import {
 	WCDataSelector,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { List } from '@woocommerce/experimental';
+import { List, useSlot } from '@woocommerce/experimental';
 import classnames from 'classnames';
 
 /**
@@ -98,6 +99,12 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	useEffect( () => {
 		recordTaskListView();
 	}, [] );
+
+	const taskListHeaderSlot = useSlot(
+		`woocommerce_onboarding_task_list_header_${
+			headerData?.task?.id ?? ''
+		}`
+	);
 
 	useEffect( () => {
 		const { task: prevTask } = prevQueryRef.current;
@@ -229,6 +236,10 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		return <div className="woocommerce-task-dashboard__container"></div>;
 	}
 
+	const hasTaskListHeaderSlotFills = Boolean(
+		taskListHeaderSlot?.fills?.length
+	);
+
 	if ( isComplete && keepCompletedTaskList !== 'yes' ) {
 		return (
 			<>
@@ -273,11 +284,18 @@ export const TaskList: React.FC< TaskListProps > = ( {
 				>
 					<div className="wooocommerce-task-card__header-container">
 						<div className="wooocommerce-task-card__header">
-							{ headerData?.task &&
+							{ hasTaskListHeaderSlotFills ? (
+								<WooOnboardingTaskListHeader.Slot
+									id={ selectedHeaderCard?.id }
+									fillProps={ headerData }
+								/>
+							) : (
+								headerData?.task &&
 								createElement(
 									taskHeaders[ headerData.task.id ],
 									headerData
-								) }
+								)
+							) }
 						</div>
 						{ ! displayProgressHeader && renderMenu() }
 					</div>
