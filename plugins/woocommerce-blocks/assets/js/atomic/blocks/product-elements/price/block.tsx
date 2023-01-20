@@ -8,7 +8,11 @@ import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
 } from '@woocommerce/shared-context';
-import { useColorProps, useTypographyProps } from '@woocommerce/base-hooks';
+import {
+	useColorProps,
+	useSpacingProps,
+	useTypographyProps,
+} from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import type { HTMLAttributes } from 'react';
 import { CurrencyCode } from '@woocommerce/type-defs/currency';
@@ -41,6 +45,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	const { product } = useProductDataContext();
 
 	const colorProps = useColorProps( props );
+	const spacingProps = useSpacingProps( props );
 	const typographyProps = useTypographyProps( props );
 
 	const wrapperClassName = classnames(
@@ -52,17 +57,19 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		}
 	);
 
-	const style = {
-		...typographyProps.style,
-		...colorProps.style,
-	};
-
 	if ( ! product.id ) {
 		return (
 			<ProductPrice align={ textAlign } className={ wrapperClassName } />
 		);
 	}
 
+	const style = {
+		...colorProps.style,
+		...typographyProps.style,
+	};
+	const spacingStyle = {
+		...spacingProps.style,
+	};
 	const prices: PriceProps = product.prices;
 	const currency = getCurrencyFromPriceResponse( prices );
 	const isOnSale = prices.price !== prices.regular_price;
@@ -75,7 +82,6 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		<ProductPrice
 			align={ textAlign }
 			className={ wrapperClassName }
-			priceStyle={ style }
 			regularPriceStyle={ style }
 			priceClassName={ priceClassName }
 			currency={ currency }
@@ -89,6 +95,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				[ `${ parentClassName }__product-price__regular` ]:
 					parentClassName,
 			} ) }
+			spacingStyle={ spacingStyle }
 		/>
 	);
 };

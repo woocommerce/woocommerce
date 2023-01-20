@@ -20,7 +20,7 @@
 
 <!-- wp:post-excerpt {"style":{"spacing":{"margin":{"top":"0"}}},"fontSize":"small","__woocommerceNamespace":"woocommerce/product-query/product-summary"} /-->
 
-<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
+<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
 
 <!-- wp:woocommerce/product-button {"isDescendentOfQueryLoop":true,"fontSize":"small"} /--></div>
 <!-- /wp:column --></div>

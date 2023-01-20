@@ -82,7 +82,7 @@ class ProductPrice extends AbstractBlock {
 		$product = wc_get_product( $post_id );
 
 		if ( $product ) {
-			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'font_size', 'font_weight', 'font_style', 'text_color', 'background_color' ) );
+			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'font_size', 'font_weight', 'font_style', 'text_color', 'background_color', 'margin' ) );
 			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
 
 			return sprintf(
