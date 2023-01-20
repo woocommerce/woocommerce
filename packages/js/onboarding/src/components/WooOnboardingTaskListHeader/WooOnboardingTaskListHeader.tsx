@@ -16,16 +16,20 @@ type WooOnboardingTaskListHeaderProps = {
  * @param {Object} props    React props.
  * @param {string} props.id Task id.
  */
-export const WooOnboardingTaskListHeader: React.FC< WooOnboardingTaskListHeaderProps > & {
-	Slot: React.VFC< Slot.Props & { id: string } >;
-} = ( { id, ...props } ) => (
+export const WooOnboardingTaskListHeader = ( {
+	id,
+	...props
+}: WooOnboardingTaskListHeaderProps & Slot.Props ) => (
 	<Fill
 		name={ 'woocommerce_onboarding_task_list_header_' + id }
 		{ ...props }
 	/>
 );
 
-WooOnboardingTaskListHeader.Slot = ( { id, fillProps } ) => (
+WooOnboardingTaskListHeader.Slot = ( {
+	id,
+	fillProps,
+}: WooOnboardingTaskListHeaderProps & Slot.Props ) => (
 	<Slot
 		name={ 'woocommerce_onboarding_task_list_header_' + id }
 		fillProps={ fillProps }
