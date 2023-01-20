@@ -90,7 +90,15 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 			],
 			[
 				'woocommerce/product-price',
-				{ textAlign: 'center', fontSize: 'small' },
+				{
+					textAlign: 'center',
+					fontSize: 'small',
+					style: {
+						spacing: {
+							margin: { bottom: '1rem' },
+						},
+					},
+				},
 				[],
 			],
 			[
