@@ -107,16 +107,25 @@ class ProductRating extends AbstractBlock {
 		$post_id = $block->context['postId'];
 		$product = wc_get_product( $post_id );
 
-		add_filter(
-			'woocommerce_product_get_rating_html',
-			[ $this, 'filter_rating_html' ],
-			10,
-			3
-		);
-
 		if ( $product ) {
+
 			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'font_size', 'margin', 'text_color' ) );
 			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
+
+			add_filter(
+				'woocommerce_product_get_rating_html',
+				[ $this, 'filter_rating_html' ],
+				10,
+				3
+			);
+
+			$rating_html = wc_get_rating_html( $product->get_average_rating() );
+
+			remove_filter(
+				'woocommerce_product_get_rating_html',
+				[ $this, 'filter_rating_html' ],
+				10
+			);
 
 			return sprintf(
 				'<div class="wc-block-components-product-rating wc-block-grid__product-rating %1$s %2$s" style="%3$s">
@@ -125,7 +134,7 @@ class ProductRating extends AbstractBlock {
 				esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
 				esc_attr( $styles_and_classes['classes'] ),
 				esc_attr( $styles_and_classes['styles'] ?? '' ),
-				wc_get_rating_html( $product->get_average_rating() )
+				$rating_html
 			);
 		}
 	}
