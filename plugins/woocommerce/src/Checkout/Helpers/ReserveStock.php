@@ -213,11 +213,20 @@ final class ReserveStock {
 	 */
 	private function get_query_for_reserved_stock( $product_id, $exclude_order_id = 0 ) {
 		global $wpdb;
+
+		$join         = "$wpdb->posts posts ON stock_table.`order_id` = posts.ID";
+		$where_status = "posts.post_status IN ( 'wc-checkout-draft', 'wc-pending' )";
+		if ( $this->is_cot_in_use() ) {
+			$join         = "{$wpdb->prefix}wc_orders orders ON stock_table.`order_id` = orders.id";
+			$where_status = "orders.status IN ( 'wc-checkout-draft', 'wc-pending' )";
+		}
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$query = $wpdb->prepare(
 			"
 			SELECT COALESCE( SUM( stock_table.`stock_quantity` ), 0 ) FROM $wpdb->wc_reserved_stock stock_table
-			LEFT JOIN $wpdb->posts posts ON stock_table.`order_id` = posts.ID
-			WHERE posts.post_status IN ( 'wc-checkout-draft', 'wc-pending' )
+			LEFT JOIN $join
+			WHERE $where_status
 			AND stock_table.`expires` > NOW()
 			AND stock_table.`product_id` = %d
 			AND stock_table.`order_id` != %d
@@ -225,6 +234,7 @@ final class ReserveStock {
 			$product_id,
 			$exclude_order_id
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		/**
 		 * Filter: woocommerce_query_for_reserved_stock
