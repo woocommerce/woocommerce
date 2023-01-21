@@ -13,6 +13,7 @@ import { Button, Card } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { EllipsisMenu } from '@woocommerce/components';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
+import { WooOnboardingTaskListHeader } from '@woocommerce/onboarding';
 import {
 	ONBOARDING_STORE_NAME,
 	TaskType,
@@ -169,6 +170,15 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		selectedHeaderCard = visibleTasks[ visibleTasks.length - 1 ];
 	}
 
+	const taskListHeaderSlot = useSlot(
+		`woocommerce_onboarding_task_list_header_${
+			headerData?.task?.id ?? selectedHeaderCard?.id
+		}`
+	);
+	const hasTaskListHeaderSlotFills = Boolean(
+		taskListHeaderSlot?.fills?.length
+	);
+
 	const getTaskStartedCount = ( taskId: string ) => {
 		const trackedStartedTasks =
 			userPreferences.task_list_tracked_started_tasks;
@@ -217,7 +227,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	};
 
 	const showTaskHeader = ( task: TaskType ) => {
-		if ( taskHeaders[ task.id ] ) {
+		if ( taskHeaders[ task.id ] || hasTaskListHeaderSlotFills ) {
 			setHeaderData( {
 				task,
 				goToTask: () => goToTask( task ),
@@ -296,11 +306,18 @@ export const TaskList: React.FC< TaskListProps > = ( {
 				>
 					<div className="wooocommerce-task-card__header-container">
 						<div className="wooocommerce-task-card__header">
-							{ headerData?.task &&
+							{ hasTaskListHeaderSlotFills ? (
+								<WooOnboardingTaskListHeader.Slot
+									id={ selectedHeaderCard?.id }
+									fillProps={ headerData }
+								/>
+							) : (
+								headerData?.task &&
 								createElement(
 									taskHeaders[ headerData.task.id ],
 									headerData
-								) }
+								)
+							) }
 						</div>
 						{ ! displayProgressHeader && renderMenu() }
 					</div>

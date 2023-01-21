@@ -227,6 +227,16 @@ class TaskLists {
 			self::add_task( 'extended', $tour_task );
 			self::add_task( 'extended_two_column', $tour_task );
 		}
+
+		if ( has_filter( 'woocommerce_admin_experimental_onboarding_tasklists' ) ) {
+			/**
+			 * Filter to override default task lists.
+			 *
+			 * @since 7.4
+			 * @param array     $lists Array of tasklists.
+			 */
+			self::$lists = apply_filters( 'woocommerce_admin_experimental_onboarding_tasklists', self::$lists );
+		}
 	}
 
 	/**
