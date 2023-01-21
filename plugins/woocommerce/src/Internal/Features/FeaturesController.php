@@ -613,6 +613,7 @@ class FeaturesController {
 				'<br/>'
 			);
 			$description .= $update_text;
+			update_option( $this->feature_enable_option_name( $feature_id ),'no' );
 			$disabled     = true;
 		}
 
