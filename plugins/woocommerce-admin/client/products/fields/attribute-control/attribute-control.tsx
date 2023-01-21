@@ -244,7 +244,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 							),
 						},
 					} ) }
-					onCancel={ () => setEditingAttributeId( null ) }
+					onCancel={ () => closeModal() }
 					onEdit={ ( changedAttribute ) => {
 						const newAttributesSet = [ ...value ];
 						const changedAttributeIndex: number =
