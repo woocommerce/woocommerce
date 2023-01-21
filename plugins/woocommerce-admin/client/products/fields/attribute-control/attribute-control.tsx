@@ -33,9 +33,8 @@ import {
 type AttributeControlProps = {
 	value: ProductAttribute[];
 	onChange: ( value: ProductAttribute[] ) => void;
+	onModalClose?: ( attribute?: ProductAttribute ) => void;
 	onModalOpen?: ( attribute?: ProductAttribute ) => void;
-	// TODO: should we support an 'any' option to show all attributes?
-	attributeType?: 'regular' | 'for-variations';
 	text?: {
 		addAttributeModalTitle?: string;
 		emptyStateSubtitle?: string;
@@ -46,8 +45,8 @@ type AttributeControlProps = {
 
 export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	value,
-	attributeType = 'regular',
 	onChange,
+	onModalClose,
 	onModalOpen,
 	text = {
 		addAttributeModalTitle: undefined,
@@ -64,12 +63,6 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	const [ editingAttributeId, setEditingAttributeId ] = useState<
 		null | string
 	>( null );
-
-	const isOnlyForVariations = attributeType === 'for-variations';
-
-	const CANCEL_BUTTON_EVENT_NAME = isOnlyForVariations
-		? 'product_add_options_modal_cancel_button_click'
-		: 'product_add_attributes_modal_cancel_button_click';
 
 	const fetchAttributeId = ( attribute: { id: number; name: string } ) =>
 		`${ attribute.id }-${ attribute.name }`;
@@ -136,6 +129,17 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		}
 	};
 
+	const closeModal = ( attribute?: ProductAttribute ) => {
+		if ( attribute ) {
+			setEditingAttributeId( null );
+		} else {
+			setShowAddAttributeModal( false );
+		}
+		if ( typeof onModalClose === 'function' ) {
+			onModalClose( attribute );
+		}
+	};
+
 	if ( ! value.length ) {
 		return (
 			<>
@@ -147,8 +151,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 				{ showAddAttributeModal && (
 					<AddAttributeModal
 						onCancel={ () => {
-							recordEvent( CANCEL_BUTTON_EVENT_NAME );
-							setShowAddAttributeModal( false );
+							closeModal();
 						} }
 						onAdd={ onAddNewAttributes }
 						selectedAttributeIds={ [] }
@@ -212,10 +215,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			{ showAddAttributeModal && (
 				<AddAttributeModal
 					title={ text.addAttributeModalTitle }
-					onCancel={ () => {
-						recordEvent( CANCEL_BUTTON_EVENT_NAME );
-						setShowAddAttributeModal( false );
-					} }
+					onCancel={ () => closeModal() }
 					onAdd={ onAddNewAttributes }
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
 				/>
