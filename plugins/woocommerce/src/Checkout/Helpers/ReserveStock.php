@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Checkout\Helpers;
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -34,6 +36,15 @@ final class ReserveStock {
 	 */
 	protected function is_enabled() {
 		return $this->enabled;
+	}
+
+	/**
+	 * Check if the usage of the custom orders table is enabled.
+	 *
+	 * @return bool
+	 */
+	protected function is_cot_in_use(): bool {
+		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
 	}
 
 	/**
