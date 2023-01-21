@@ -197,21 +197,22 @@ function wc_reduce_stock_levels( $order_id ) {
 		$item->add_meta_data( '_reduced_stock', $qty, true );
 		$item->save();
 
-		$changes[] = array(
+		$change = array(
 			'product' => $product,
 			'from'    => $new_stock + $qty,
 			'to'      => $new_stock,
 		);
+		$changes[] = $change;
 
 		/**
 		 * Fires when stock reduced to a specific line item
 		 *
 		 * @param WC_Order_Item_Product $item Order item data.
-		 * @param WC_Product $product  Line item product.
+		 * @param array $change  Change Details.
 		 * @param WC_Order $order  Order data.
-		 * @since 7.0.0
+		 * @since 7.4.0
 		 */
-		do_action( 'woocommerce_reduce_order_item_stock', $item, $product, $order );
+		do_action( 'woocommerce_reduce_order_item_stock', $item, $change, $order );
 	}
 
 	wc_trigger_stock_change_notifications( $order, $changes );
