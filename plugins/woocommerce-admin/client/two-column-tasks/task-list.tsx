@@ -22,7 +22,7 @@ import {
 	WCDataSelector,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { List } from '@woocommerce/experimental';
+import { List, useSlot } from '@woocommerce/experimental';
 import classnames from 'classnames';
 
 /**
@@ -36,6 +36,10 @@ import { ProgressHeader } from '~/task-lists/progress-header';
 import { TaskListItemTwoColumn } from './task-list-item-two-column';
 import { TaskListCompletedHeader } from './completed-header';
 import { LayoutContext } from '~/layout';
+import {
+	TaskListCompletionSlot,
+	EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME,
+} from './task-list-completion-slot';
 
 export type TaskListProps = TaskListType & {
 	eventName?: string;
@@ -98,6 +102,10 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	useEffect( () => {
 		recordTaskListView();
 	}, [] );
+
+	const taskListCompletionSlot = useSlot(
+		EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME
+	);
 
 	useEffect( () => {
 		const { task: prevTask } = prevQueryRef.current;
@@ -229,7 +237,22 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		return <div className="woocommerce-task-dashboard__container"></div>;
 	}
 
+	const hasTaskListCompletionSlotFills = Boolean(
+		taskListCompletionSlot?.fills?.length
+	);
+
 	if ( isComplete && keepCompletedTaskList !== 'yes' ) {
+		if ( hasTaskListCompletionSlotFills ) {
+			return (
+				<TaskListCompletionSlot
+					fillProps={ {
+						hideTasks,
+						keepTasks,
+						customerEffortScore: cesHeader,
+					} }
+				/>
+			);
+		}
 		return (
 			<>
 				{ cesHeader ? (
