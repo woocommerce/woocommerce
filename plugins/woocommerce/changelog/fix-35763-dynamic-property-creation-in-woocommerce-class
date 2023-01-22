@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Define a public `api` property in the WooCommerce class that was previously being dynamically created
+Define a public `api` property in the WooCommerce class to prevent to prevent a PHP deprecation warning
