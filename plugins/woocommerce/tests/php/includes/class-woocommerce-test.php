@@ -8,7 +8,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Test that the $api property is defined, public and initialized correctly.
 	 */
-	public function test_api_property() {
+	public function test_api_property(): void {
 		$property = new ReflectionProperty( WooCommerce::class, 'api' );
 
 		$this->assertTrue( $property->isPublic() );
