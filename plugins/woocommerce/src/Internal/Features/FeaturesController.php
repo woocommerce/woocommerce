@@ -104,7 +104,6 @@ class FeaturesController {
 			'new_product_management' => array(
 				'name'            => __( 'New product editor', 'woocommerce' ),
 				'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
-				'tooltip'         => __( 'Enable to try the new, simplified product editor (currently in development and only available for simple products). No extension support yet.', 'woocommerce' ),
 				'is_experimental' => true,
 			),
 			'custom_order_tables'    => array(
