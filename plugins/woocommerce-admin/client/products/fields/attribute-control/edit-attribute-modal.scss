@@ -1,5 +1,13 @@
 .woocommerce-edit-attribute-modal {
 	overflow: visible;
+
+	&__buttons {
+		margin-top: $gap-larger;
+		display: flex;
+		flex-direction: row;
+		gap: 8px;
+		justify-content: flex-end;
+	}
 }
 
 .woocommerce-edit-attribute-modal__body {

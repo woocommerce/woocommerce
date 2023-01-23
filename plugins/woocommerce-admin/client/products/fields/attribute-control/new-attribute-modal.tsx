@@ -138,9 +138,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		setTimeout( () => {
 			const valueInputField: HTMLInputElement | null =
 				document.querySelector(
-					'.woocommerce-add-attribute-modal__table-row-' +
+					'.woocommerce-new-attribute-modal__table-row-' +
 						index +
-						' .woocommerce-add-attribute-modal__table-attribute-value-column .woocommerce-experimental-select-control__input'
+						' .woocommerce-new-attribute-modal__table-attribute-value-column .woocommerce-experimental-select-control__input'
 				);
 			if ( valueInputField ) {
 				valueInputField.focus();
@@ -188,16 +188,16 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 									onClose( values );
 								}
 							} }
-							className="woocommerce-add-attribute-modal"
+							className="woocommerce-new-attribute-modal"
 						>
 							<Notice isDismissible={ false }>
 								<p>{ notice }</p>
 							</Notice>
 
-							<div className="woocommerce-add-attribute-modal__body">
-								<table className="woocommerce-add-attribute-modal__table">
+							<div className="woocommerce-new-attribute-modal__body">
+								<table className="woocommerce-new-attribute-modal__table">
 									<thead>
-										<tr className="woocommerce-add-attribute-modal__table-header">
+										<tr className="woocommerce-new-attribute-modal__table-header">
 											<th>{ attributeLabel }</th>
 											<th>{ valueLabel }</th>
 										</tr>
@@ -207,9 +207,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 											( attribute, index ) => (
 												<tr
 													key={ index }
-													className={ `woocommerce-add-attribute-modal__table-row woocommerce-add-attribute-modal__table-row-${ index }` }
+													className={ `woocommerce-new-attribute-modal__table-row woocommerce-new-attribute-modal__table-row-${ index }` }
 												>
-													<td className="woocommerce-add-attribute-modal__table-attribute-column">
+													<td className="woocommerce-new-attribute-modal__table-attribute-column">
 														<AttributeInputField
 															placeholder={
 																attributePlaceholder
@@ -255,7 +255,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 															] }
 														/>
 													</td>
-													<td className="woocommerce-add-attribute-modal__table-attribute-value-column">
+													<td className="woocommerce-new-attribute-modal__table-attribute-value-column">
 														{ attribute === null ||
 														attribute.id !== 0 ? (
 															<AttributeTermInputField
@@ -319,7 +319,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 															/>
 														) }
 													</td>
-													<td className="woocommerce-add-attribute-modal__table-attribute-trash-column">
+													<td className="woocommerce-new-attribute-modal__table-attribute-trash-column">
 														<Button
 															icon={ trash }
 															disabled={
@@ -351,7 +351,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 							</div>
 							<div>
 								<Button
-									className="woocommerce-add-attribute-modal__add-attribute"
+									className="woocommerce-new-attribute-modal__add-attribute"
 									variant="tertiary"
 									label={ addAnotherAccessibleLabel }
 									onClick={ () => {
@@ -364,7 +364,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 									{ addAnotherLabel }
 								</Button>
 							</div>
-							<div className="woocommerce-add-attribute-modal__buttons">
+							<div className="woocommerce-new-attribute-modal__buttons">
 								<Button
 									isSecondary
 									label={ cancelLabel }
