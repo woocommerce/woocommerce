@@ -52,6 +52,11 @@ module.exports = async ( config ) => {
 
 	// Sign in as admin user and save state
 	const adminRetries = 5;
+	await adminContext.tracing.start( { screenshots: true, snapshots: true } );
+	await customerContext.tracing.start( {
+		screenshots: true,
+		snapshots: true,
+	} );
 	for ( let i = 0; i < adminRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as admin...' );
@@ -163,6 +168,9 @@ module.exports = async ( config ) => {
 		);
 		process.exit( 1 );
 	}
+
+	await adminContext.tracing.stop( { path: 'adminContext-trace.zip' } );
+	await customerContext.tracing.stop( { path: 'customerContext-trace.zip' } );
 
 	await adminContext.close();
 	await customerContext.close();
