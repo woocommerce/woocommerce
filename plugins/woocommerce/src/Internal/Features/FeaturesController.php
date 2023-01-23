@@ -104,8 +104,7 @@ class FeaturesController {
 			'new_product_management' => array(
 				'name'            => __( 'New product editor', 'woocommerce' ),
 				'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
-				'tooltip'         => __( 'Enable to try the new, simplified product editor (currently in development and only available for simple products). No extension support yet.', 'woocommerce' ),
-				'is_experimental' => false,
+				'is_experimental' => true,
 			),
 			'custom_order_tables'    => array(
 				'name'            => __( 'High-Performance order storage (COT)', 'woocommerce' ),
@@ -619,6 +618,10 @@ class FeaturesController {
 				$description .= $update_text;
 				$disabled     = true;
 			}
+		}
+
+		if ( 'new_product_management' === $feature_id ) {
+			$desc_tip = __( '⚠ This feature is currently in development and only available for simple products. No extension support yet.', 'woocommerce' );
 		}
 
 		if ( ! $this->is_legacy_feature( $feature_id ) && ! $disabled && $this->verify_did_woocommerce_init() ) {
