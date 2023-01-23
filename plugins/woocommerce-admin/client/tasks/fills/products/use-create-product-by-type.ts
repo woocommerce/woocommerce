@@ -42,17 +42,17 @@ export const useCreateProductByType = () => {
 				`woocommerce_product_creation_experience_${ year }${ month }_v1`
 			);
 
+			if ( isNewExperienceEnabled ) {
+				navigateTo( { url: getNewPath( {}, '/add-product', {} ) } );
+				return;
+			}
 			if ( assignment.variationName === 'treatment' ) {
-				if ( isNewExperienceEnabled ) {
-					navigateTo( { url: getNewPath( {}, '/add-product', {} ) } );
-				} else {
-					await updateOptions( {
-						[ NEW_PRODUCT_MANAGEMENT ]: 'yes',
-					} );
-					window.location.href = getAdminLink(
-						'admin.php?page=wc-admin&path=/add-product'
-					);
-				}
+				await updateOptions( {
+					[ NEW_PRODUCT_MANAGEMENT ]: 'yes',
+				} );
+				window.location.href = getAdminLink(
+					'admin.php?page=wc-admin&path=/add-product'
+				);
 				return;
 			}
 		}
