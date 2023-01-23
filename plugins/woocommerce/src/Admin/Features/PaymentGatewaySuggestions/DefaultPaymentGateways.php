@@ -420,7 +420,6 @@ class DefaultPaymentGateways {
 			),
 		);
 
-		// Add recommended priority attributes.
 		foreach ( $payment_gateways as $index => $payment_gateway ) {
 			$payment_gateways[ $index ]['recommendation_priority'] = self::get_recommendation_priority( $payment_gateway['id'] );
 		}
