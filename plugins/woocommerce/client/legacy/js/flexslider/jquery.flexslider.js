@@ -172,12 +172,13 @@
           slider.slides[slider.currentItem].classList.add(namespace + "active-slide");
               slider.slides.on(eventType, function(e){
                 e.preventDefault();
-                var target = [].indexOf.call(this.parentNode.children, this); // Same as $(this).index()
+                const target = [].indexOf.call(this.parentNode.children, this); // Same as $(this).index()
 
                 // https://github.com/jquery/jquery/blob/3.6.3/src/offset.js#L100
-                var rect = this.getBoundingClientRect();
-                var win = this.ownerDocument.defaultView;
-                var offset = {
+                // Get document-relative position by adding viewport scroll to viewport-relative gBCR
+                const rect = this.getBoundingClientRect();
+                const win = this.ownerDocument.defaultView;
+                const offset = {
                   left: rect.left + win.pageXOffset
                 };
 
@@ -438,7 +439,7 @@
           });
         },
         update: function(state) {
-          var pausePlay = slider.pausePlay[0];
+          const pausePlay = slider.pausePlay[0];
           if (state === "play") {
             pausePlay.classList.remove(namespace + 'pause');
             pausePlay.classList.add(namespace + 'play');
