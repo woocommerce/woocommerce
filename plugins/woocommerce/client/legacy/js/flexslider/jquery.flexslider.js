@@ -877,9 +877,7 @@
           style.position = "absolute";
           style.width = "100%";
           setTimeout(function(){
-            for (const elem of slider.newSlides) {
-              elem.style.display = "block";
-            }
+            for (const elem of slider.newSlides) elem.style.display = "block";
             slider.doMath();
             slider.viewport[0].style.height = slider.h + "px";
             slider.setProps(sliderOffset * slider.h, "init");
