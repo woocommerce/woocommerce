@@ -106,9 +106,7 @@ const Tabs = () => {
 						<ProductVariationsSection />
 					</>
 				</WooProductTabItem>
-			) : (
-				<></>
-			) }
+			) : null }
 		</>
 	);
 };
