@@ -20,11 +20,10 @@ import { ProductFormLayout } from './layout/product-form-layout';
 import { ProductFormFooter } from './layout/product-form-footer';
 import { ProductFormTab } from './product-form-tab';
 import { PricingSection } from './sections/pricing-section';
-import { ProductInventorySection } from './sections/product-inventory-section';
 import { ProductVariationDetailsSection } from './sections/product-variation-details-section';
 import { ProductVariationFormHeader } from './layout/product-variation-form-header';
 import useProductVariationNavigation from './hooks/use-product-variation-navigation';
-import { TAB_SHIPPING_ID } from './fills/constants';
+import { TAB_INVENTORY_ID, TAB_SHIPPING_ID } from './fills/constants';
 
 import './product-variation-form.scss';
 
@@ -66,7 +65,9 @@ export const ProductVariationForm: React.FC< {
 						<PricingSection />
 					</ProductFormTab>
 					<ProductFormTab name="inventory" title="Inventory">
-						<ProductInventorySection />
+						<WooProductSectionItem.Slot
+							location={ TAB_INVENTORY_ID }
+						/>
 					</ProductFormTab>
 					<ProductFormTab name="shipping" title="Shipping">
 						<WooProductSectionItem.Slot
