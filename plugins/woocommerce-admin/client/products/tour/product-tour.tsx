@@ -82,7 +82,7 @@ export const ProductTour: React.FC< ProductTourProps > = ( { onClose } ) => {
 					heading: __( '⚙️ Looking for more?', 'woocommerce' ),
 					descriptions: {
 						desktop: __(
-							'If the form doesn’t yet have all the feautures you need—it’s still in development—you can switch to the classic editor anytime.',
+							'If the form doesn’t yet have all the features you need —it’s still in development— you can switch to the classic editor anytime.',
 							'woocommerce'
 						),
 					},
