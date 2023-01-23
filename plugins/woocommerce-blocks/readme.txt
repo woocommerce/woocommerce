@@ -80,6 +80,12 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 9.4.1 - 2023-01-23 =
+
+#### Bug Fixes
+
+Prevent Cart and Checkout notices from disappearing immediately after adding. ([8253](https://github.com/woocommerce/woocommerce-blocks/pull/8253))
+
 = 9.4.0 - 2023-01-16 =
 
 #### Enhancements
