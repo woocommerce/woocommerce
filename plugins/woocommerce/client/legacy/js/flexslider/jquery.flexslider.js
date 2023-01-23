@@ -149,9 +149,9 @@
 
         // FADE&&SMOOTHHEIGHT || SLIDE:
         if (!fade || (fade && slider.vars.smoothHeight)) {
-          window.addEventListener('resize', methods.resize);
-          window.addEventListener('orientationchange', methods.resize);
-          window.addEventListener('focus', methods.resize);
+          window.addEventListener("resize", methods.resize);
+          window.addEventListener("orientationchange", methods.resize);
+          window.addEventListener("focus", methods.resize);
         }
 
         slider.find("img").attr("draggable", "false");
@@ -544,7 +544,7 @@
             // SMOOTH HEIGHT:
             methods.smoothHeight();
           } else if (carousel) { //CAROUSEL:
-            for (const elem of slider.slides) { elem.style.width = slider.computedW + "px"; }
+            for (const elem of slider.slides) elem.style.width = slider.computedW + "px";
             slider.update(slider.pagingCount);
             slider.setProps();
           }
@@ -553,7 +553,7 @@
             slider.setProps(slider.h, "setTotal");
           } else {
 			  slider.setProps(slider.computedW, "setTotal");
-			  for (const elem of slider.newSlides) { elem.style.width = slider.computedW + "px"; }
+			  for (const elem of slider.newSlides) elem.style.width = slider.computedW + "px";
             // SMOOTH HEIGHT:
             if (slider.vars.smoothHeight) { methods.smoothHeight(); }
           }
@@ -727,11 +727,11 @@
             });
           }
         } else { // FADE:
-          var $current = slider.slides.eq(slider.currentSlide);
-          var current = $current[0];
+          const $current = slider.slides.eq(slider.currentSlide);
+          const current = $current[0];
 
-          var $target = slider.slides.eq(target);
-          var target = $target[0];
+          const $target = slider.slides.eq(target);
+          const target = $target[0];
 
           if (!touch) {
             current.style.zIndex = 1;
@@ -884,14 +884,16 @@
 
         sliderOffset = (reverse) ? slider.count - 1 - slider.currentSlide + slider.cloneOffset : slider.currentSlide + slider.cloneOffset;
         // VERTICAL:
-        var style;
+        let style;
         if (vertical && !carousel) {
           style = slider.container[0].style;
           style.height = (slider.count + slider.cloneCount) * 200 + "%";
           style.position = "absolute";
           style.width = "100%";
           setTimeout(function(){
-            for (const elem of slider.newSlides) { elem.style.display = "block"; }
+            for (const elem of slider.newSlides) {
+              elem.style.display = "block";
+            }
             slider.doMath();
             slider.viewport[0].style.height = slider.h + "px";
             slider.setProps(sliderOffset * slider.h, "init");
@@ -943,8 +945,8 @@
           }
         }
         if (type === "init") {
-          var $current = slider.slides.eq(slider.currentSlide);
-          var current = $current[0];
+          const $current = slider.slides.eq(slider.currentSlide);
+          const current = $current[0];
           if (!touch) {
             //slider.slides.eq(slider.currentSlide).fadeIn(slider.vars.animationSpeed, slider.vars.easing);
             if (slider.vars.fadeFirstSlide == false) {
