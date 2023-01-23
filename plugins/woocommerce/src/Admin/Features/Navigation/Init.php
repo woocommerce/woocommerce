@@ -36,9 +36,7 @@ class Init {
 	public function __construct() {
 		add_action( 'update_option_' . self::TOGGLE_OPTION_NAME, array( $this, 'reload_page_on_toggle' ), 10, 2 );
 		add_action( 'woocommerce_settings_saved', array( $this, 'maybe_reload_page' ) );
-
-		// We are disabling the opt-out modal as the feature development is on hold.
-		//add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_opt_out_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_opt_out_scripts' ) );
 
 		if ( Features::is_enabled( 'navigation' ) ) {
 			Menu::instance()->init();

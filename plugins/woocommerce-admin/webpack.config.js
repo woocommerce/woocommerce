@@ -41,6 +41,7 @@ const wcAdminPackages = [
 // See ./client/wp-admin-scripts/README.md for more details
 const wpAdminScripts = [
 	'marketing-coupons',
+	'navigation-opt-out',
 	'onboarding-homepage-notice',
 	'onboarding-product-notice',
 	'onboarding-product-import-notice',
