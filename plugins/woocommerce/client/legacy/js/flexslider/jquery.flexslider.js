@@ -720,24 +720,17 @@
             });
           }
         } else { // FADE:
-          const $current = slider.slides.eq(slider.currentSlide);
-          const current = $current[0];
-
-          const $target = slider.slides.eq(target);
-          const target = $target[0];
-
           if (!touch) {
-            current.style.zIndex = 1;
-            $current.animate({"opacity": 0}, slider.vars.animationSpeed, slider.vars.easing);
-
-            target.style.zIndex = 2;
-            $target.animate({"opacity": 1}, slider.vars.animationSpeed, slider.vars.easing, slider.wrapup);
+            slider.slides.eq(slider.currentSlide).css({"zIndex": 1}).animate({"opacity": 0}, slider.vars.animationSpeed, slider.vars.easing);
+            slider.slides.eq(target).css({"zIndex": 2}).animate({"opacity": 1}, slider.vars.animationSpeed, slider.vars.easing, slider.wrapup);
           } else {
-            current.style.opacity = 0;
-            current.style.zIndex = 1;
+            let style = slider.slides[slider.currentSlide].style;
+            style.opacity = 0;
+            style.zIndex = 1;
 
-            target.style.opacity = 1;
-            target.style.zIndex = 2;
+            style = slider.slides[target].style;
+            style.opacity = 1;
+            style.zIndex = 2;
 
             slider.wrapup(dimension);
           }
@@ -938,8 +931,6 @@
           }
         }
         if (type === "init") {
-          const $current = slider.slides.eq(slider.currentSlide);
-          const current = $current[0];
           if (!touch) {
             //slider.slides.eq(slider.currentSlide).fadeIn(slider.vars.animationSpeed, slider.vars.easing);
             if (slider.vars.fadeFirstSlide == false) {
@@ -949,8 +940,9 @@
                 style.display = "block";
                 style.zIndex = 1;
               }
-              current.style.zIndex = 2;
-              current.style.opacity = 1;
+              style = slider.slides[slider.currentSlide];
+              style.zIndex = 2;
+              style.opacity = 1;
             } else {
               for (const elem of slider.slides) {
                 style = elem.style;
@@ -958,8 +950,7 @@
                 style.display = "block";
                 style.zIndex = 1;
               }
-              current.style.zIndex = 2;
-              $current.animate({"opacity": 1},slider.vars.animationSpeed,slider.vars.easing);
+              slider.slides.eq(slider.currentSlide).css({"zIndex": 2}).animate({"opacity": 1},slider.vars.animationSpeed,slider.vars.easing);
             }
           } else {
             for (const elem of slider.slides) {
@@ -969,8 +960,9 @@
               style.transition = "opacity " + slider.vars.animationSpeed / 1000 + "s ease";
               style.zIndex = 1;
             }
-            current.style.opacity = 1;
-            current.style.zIndex = 2;
+            style = slider.slides[slider.currentSlide];
+            style.opacity = 1;
+            style.zIndex = 2;
           }
         }
         // SMOOTH HEIGHT:
