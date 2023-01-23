@@ -33,6 +33,7 @@ import { NewAttributeModal } from './new-attribute-modal';
 
 type AttributeControlProps = {
 	value: ProductAttribute[];
+	onAdd?: ( attribute: EnhancedProductAttribute[] ) => void;
 	onChange: ( value: ProductAttribute[] ) => void;
 	onEdit?: ( attribute: ProductAttribute ) => void;
 	onModalClose?: ( attribute?: ProductAttribute ) => void;
@@ -47,6 +48,7 @@ type AttributeControlProps = {
 
 export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	value,
+	onAdd,
 	onChange,
 	onEdit,
 	onModalClose,
@@ -98,24 +100,6 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		}
 	};
 
-	const onAddNewAttributes = (
-		newAttributes: EnhancedProductAttribute[]
-	) => {
-		handleChange( [
-			...( value || [] ),
-			...newAttributes.filter(
-				( newAttr ) =>
-					! ( value || [] ).find( ( attr ) =>
-						newAttr.id === 0
-							? newAttr.name === attr.name // check name if custom attribute = id === 0.
-							: attr.id === newAttr.id
-					)
-			),
-		] );
-		recordEvent( 'product_add_attributes_modal_add_button_click' );
-		setIsNewModalVisible( false );
-	};
-
 	const openModal = ( attribute?: ProductAttribute ) => {
 		if ( attribute ) {
 			setCurrentAttributeId( getAttributeId( attribute ) );
@@ -136,6 +120,24 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		if ( typeof onModalClose === 'function' ) {
 			onModalClose( attribute );
 		}
+	};
+
+	const handleAdd = ( newAttributes: EnhancedProductAttribute[] ) => {
+		handleChange( [
+			...value,
+			...newAttributes.filter(
+				( newAttr ) =>
+					! value.find(
+						( attr ) =>
+							getAttributeId( newAttr ) === getAttributeId( attr )
+					)
+			),
+		] );
+		if ( typeof onAdd === 'function' ) {
+			onAdd( newAttributes );
+		}
+		recordEvent( 'product_add_attributes_modal_add_button_click' );
+		closeModal();
 	};
 
 	const handleEdit = ( updatedAttribute: ProductAttribute ) => {
@@ -169,7 +171,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						onCancel={ () => {
 							closeModal();
 						} }
-						onAdd={ onAddNewAttributes }
+						onAdd={ handleAdd }
 						selectedAttributeIds={ [] }
 					/>
 				) }
@@ -232,7 +234,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 				<NewAttributeModal
 					title={ text.addAttributeModalTitle }
 					onCancel={ () => closeModal() }
-					onAdd={ onAddNewAttributes }
+					onAdd={ handleAdd }
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
 				/>
 			) }
