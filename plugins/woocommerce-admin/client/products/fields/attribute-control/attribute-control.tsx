@@ -61,8 +61,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		),
 	},
 } ) => {
-	const [ showAddAttributeModal, setShowAddAttributeModal ] =
-		useState( false );
+	const [ isNewModalVisible, setIsNewModalVisible ] = useState( false );
 	const [ currentAttributeId, setCurrentAttributeId ] = useState<
 		null | string
 	>( null );
@@ -114,14 +113,14 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			),
 		] );
 		recordEvent( 'product_add_attributes_modal_add_button_click' );
-		setShowAddAttributeModal( false );
+		setIsNewModalVisible( false );
 	};
 
 	const openModal = ( attribute?: ProductAttribute ) => {
 		if ( attribute ) {
 			setCurrentAttributeId( getAttributeId( attribute ) );
 		} else {
-			setShowAddAttributeModal( true );
+			setIsNewModalVisible( true );
 		}
 		if ( typeof onModalOpen === 'function' ) {
 			onModalOpen( attribute );
@@ -132,7 +131,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		if ( attribute ) {
 			setCurrentAttributeId( null );
 		} else {
-			setShowAddAttributeModal( false );
+			setIsNewModalVisible( false );
 		}
 		if ( typeof onModalClose === 'function' ) {
 			onModalClose( attribute );
@@ -165,7 +164,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					onNewClick={ () => openModal() }
 					subtitle={ text.emptyStateSubtitle }
 				/>
-				{ showAddAttributeModal && (
+				{ isNewModalVisible && (
 					<AddAttributeModal
 						onCancel={ () => {
 							closeModal();
@@ -229,7 +228,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 				label={ text.newAttributeListItemLabel }
 				onClick={ () => openModal() }
 			/>
-			{ showAddAttributeModal && (
+			{ isNewModalVisible && (
 				<AddAttributeModal
 					title={ text.addAttributeModalTitle }
 					onCancel={ () => closeModal() }
