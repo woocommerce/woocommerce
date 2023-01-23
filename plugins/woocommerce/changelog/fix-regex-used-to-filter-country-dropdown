@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix regexp used for filtering country dropdown on the store details step #35941

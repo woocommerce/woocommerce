@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add WooOnboardingTaskListHeader, woocommerce_admin_experimental_onboarding_tasklists filter, and woocommerce_onboarding_task_list_header Slot to task list

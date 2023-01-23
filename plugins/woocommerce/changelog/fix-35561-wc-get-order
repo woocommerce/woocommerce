@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure wc_get_order() works without arguments when HPOS is enabled.

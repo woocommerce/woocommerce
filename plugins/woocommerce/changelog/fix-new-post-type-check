@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Resolve an error in the product tracking code by testing to see if the `post_type` query var is set before checking its value.
