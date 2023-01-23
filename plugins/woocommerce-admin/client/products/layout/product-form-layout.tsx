@@ -11,6 +11,7 @@ import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
  */
 import './product-form-layout.scss';
 import { ProductFormTab } from '../product-form-tab';
+import { useHeaderHeight } from '~/header/use-header-height';
 
 export const ProductFormLayout: React.FC< {
 	children: JSX.Element | JSX.Element[];
@@ -28,6 +29,15 @@ export const ProductFormLayout: React.FC< {
 			);
 		};
 	}, [] );
+
+	const { adminBarHeight, headerHeight } = useHeaderHeight();
+
+	useEffect( () => {
+		const tabPanelTabs = document.querySelector(
+			'.product-form-layout .components-tab-panel__tabs'
+		) as HTMLElement;
+		tabPanelTabs.style.top = adminBarHeight + headerHeight + 'px';
+	}, [ adminBarHeight, headerHeight ] );
 
 	const tabs = Children.map( children, ( child: JSX.Element ) => {
 		if ( child.type !== ProductFormTab ) {
