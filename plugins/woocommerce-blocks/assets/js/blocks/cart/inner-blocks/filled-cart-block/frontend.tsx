@@ -6,7 +6,7 @@ import { SidebarLayout } from '@woocommerce/base-components/sidebar-layout';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { useEffect } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { select, useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -24,21 +24,19 @@ const FrontendBlock = ( {
 	const { hasDarkControls } = useCartBlockContext();
 	const { createErrorNotice, removeNotice } = useDispatch( 'core/notices' );
 
-	/*
-	 * The code for removing old notices is also present in the filled-mini-cart-contents-block/frontend.tsx file and
-	 * will take care of removing outdated errors in the Mini Cart block.
-	 */
-	const currentlyDisplayedErrorNoticeCodes = useSelect( ( select ) => {
-		return select( 'core/notices' )
+	useEffect( () => {
+		/*
+		 * The code for removing old notices is also present in the filled-mini-cart-contents-block/frontend.tsx file and
+		 * will take care of removing outdated errors in the Mini Cart block.
+		 */
+		const currentlyDisplayedErrorNoticeCodes = select( 'core/notices' )
 			.getNotices( 'wc/cart' )
 			.filter(
 				( notice ) =>
 					notice.status === 'error' && notice.type === 'default'
 			)
 			.map( ( notice ) => notice.id );
-	} );
 
-	useEffect( () => {
 		// Clear errors out of the store before adding the new ones from the response.
 		currentlyDisplayedErrorNoticeCodes.forEach( ( id ) => {
 			removeNotice( id, 'wc/cart' );
@@ -52,12 +50,7 @@ const FrontendBlock = ( {
 				context: 'wc/cart',
 			} );
 		} );
-	}, [
-		createErrorNotice,
-		cartItemErrors,
-		currentlyDisplayedErrorNoticeCodes,
-		removeNotice,
-	] );
+	}, [ createErrorNotice, cartItemErrors, removeNotice ] );
 
 	if ( cartIsLoading || cartItems.length >= 1 ) {
 		return (
