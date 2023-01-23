@@ -33,6 +33,7 @@ import {
 type AttributeControlProps = {
 	value: ProductAttribute[];
 	onChange: ( value: ProductAttribute[] ) => void;
+	onEdit?: ( attribute: ProductAttribute ) => void;
 	onModalClose?: ( attribute?: ProductAttribute ) => void;
 	onModalOpen?: ( attribute?: ProductAttribute ) => void;
 	text?: {
@@ -46,6 +47,7 @@ type AttributeControlProps = {
 export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	value,
 	onChange,
+	onEdit,
 	onModalClose,
 	onModalOpen,
 	text = {
@@ -138,6 +140,32 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		if ( typeof onModalClose === 'function' ) {
 			onModalClose( attribute );
 		}
+	};
+
+	const getAttributeId = ( attribute: ProductAttribute ) => {
+		if ( attribute.id === 0 ) {
+			return attribute.name;
+		}
+
+		return attribute.id;
+	};
+
+	const handleEdit = ( updatedAttribute: ProductAttribute ) => {
+		const updatedAttributes = value.map( ( attr ) => {
+			if (
+				getAttributeId( attr ) === getAttributeId( updatedAttribute )
+			) {
+				return updatedAttribute;
+			}
+
+			return attr;
+		} );
+
+		if ( typeof onEdit === 'function' ) {
+			onEdit( updatedAttribute );
+		}
+		handleChange( updatedAttributes );
+		closeModal( updatedAttribute );
 	};
 
 	if ( ! value.length ) {
@@ -245,23 +273,8 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						},
 					} ) }
 					onCancel={ () => closeModal() }
-					onEdit={ ( changedAttribute ) => {
-						const newAttributesSet = [ ...value ];
-						const changedAttributeIndex: number =
-							newAttributesSet.findIndex( ( attr ) =>
-								attr.id !== 0
-									? attr.id === changedAttribute.id
-									: attr.name === changedAttribute.name
-							);
-
-						newAttributesSet.splice(
-							changedAttributeIndex,
-							1,
-							changedAttribute
-						);
-
-						handleChange( newAttributesSet );
-						setEditingAttributeId( null );
+					onEdit={ ( updatedAttribute ) => {
+						handleEdit( updatedAttribute );
 					} }
 					attribute={ editingAttribute }
 				/>
