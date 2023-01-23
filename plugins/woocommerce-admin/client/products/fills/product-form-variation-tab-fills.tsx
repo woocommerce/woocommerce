@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 import {
 	__experimentalWooProductTabItem as WooProductTabItem,
@@ -21,23 +22,23 @@ import {
 const tabPropData = {
 	general: {
 		name: 'general',
-		title: 'General',
+		title: __( 'General', 'woocommerce' ),
 	},
 	pricing: {
 		name: 'pricing',
-		title: 'Pricing',
+		title: __( 'Pricing', 'woocommerce' ),
 	},
 	inventory: {
 		name: 'inventory',
-		title: 'Inventory',
+		title: __( 'Inventory', 'woocommerce' ),
 	},
 	shipping: {
 		name: 'shipping',
-		title: 'Shipping',
+		title: __( 'Shipping', 'woocommerce' ),
 	},
 	options: {
 		name: 'options',
-		title: 'Options',
+		title: __( 'Options', 'woocommerce' ),
 	},
 };
 

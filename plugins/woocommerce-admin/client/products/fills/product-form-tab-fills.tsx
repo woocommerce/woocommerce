@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 import {
 	__experimentalWooProductTabItem as WooProductTabItem,
@@ -28,29 +29,29 @@ const Tabs = () => {
 		() => ( {
 			general: {
 				name: 'general',
-				title: 'General',
+				title: __( 'General', 'woocommerce' ),
 			},
 			pricing: {
 				name: 'pricing',
-				title: 'Pricing',
+				title: __( 'Pricing', 'woocommerce' ),
 				disabled: !! product?.variations?.length,
 			},
 			inventory: {
 				name: 'inventory',
-				title: 'Inventory',
+				title: __( 'Inventory', 'woocommerce' ),
 				disabled: !! product?.variations?.length,
 			},
 			shipping: {
 				name: 'shipping',
-				title: 'Shipping',
+				title: __( 'Shipping', 'woocommerce' ),
 				disabled: !! product?.variations?.length,
 			},
 			options: {
 				name: 'options',
-				title: 'Options',
+				title: __( 'Options', 'woocommerce' ),
 			},
 		} ),
-		[]
+		[ product.variations ]
 	);
 	return (
 		<>
