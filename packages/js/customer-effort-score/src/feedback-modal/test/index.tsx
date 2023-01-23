@@ -15,9 +15,9 @@ describe( 'FeedbackModal', () => {
 	it( 'should render a modal', async () => {
 		render(
 			<FeedbackModal
-				onSendFeedback={ mockRecordScoreCallback }
+				onSubmit={ mockRecordScoreCallback }
 				title="Testing"
-				sendButtonLabel="Send"
+				submitButtonLabel="Send"
 				cancelButtonLabel="Cancel"
 			/>
 		);
@@ -36,9 +36,9 @@ describe( 'FeedbackModal', () => {
 	it( 'should close modal when cancel button pressed', async () => {
 		render(
 			<FeedbackModal
-				onSendFeedback={ mockRecordScoreCallback }
+				onSubmit={ mockRecordScoreCallback }
 				title="Testing"
-				sendButtonLabel="Send"
+				submitButtonLabel="Send"
 				cancelButtonLabel="Cancel"
 			/>
 		);

@@ -12,41 +12,41 @@ import { __ } from '@wordpress/i18n';
  *
  * Answers and comments are sent to a callback function.
  *
- * @param {Object}   props                      Component props.
- * @param {Function} props.onSendFeedback       Function to call when the results are sent.
- * @param {string}   props.title                Title displayed in the modal.
- * @param {string}   props.description          Description displayed in the modal.
- * @param {string}   props.isSendButtonDisabled Boolean to enable/disable the send button.
- * @param {string}   props.sendButtonLabel      Label for the send button.
- * @param {string}   props.cancelButtonLabel    Label for the cancel button.
- * @param {Function} props.onCloseModal         Callback for when user closes modal by clicking cancel.
- * @param {Function} props.children             Children to be rendered.
+ * @param {Object}   props                        Component props.
+ * @param {Function} props.onSubmit               Function to call when the results are sent.
+ * @param {string}   props.title                  Title displayed in the modal.
+ * @param {string}   props.description            Description displayed in the modal.
+ * @param {string}   props.isSubmitButtonDisabled Boolean to enable/disable the send button.
+ * @param {string}   props.submitButtonLabel      Label for the send button.
+ * @param {string}   props.cancelButtonLabel      Label for the cancel button.
+ * @param {Function} props.onModalClose           Callback for when user closes modal by clicking cancel.
+ * @param {Function} props.children               Children to be rendered.
  */
 function FeedbackModal( {
-	onSendFeedback,
+	onSubmit,
 	title,
 	description,
-	onCloseModal,
+	onModalClose,
 	children,
-	isSendButtonDisabled,
-	sendButtonLabel,
+	isSubmitButtonDisabled,
+	submitButtonLabel,
 	cancelButtonLabel,
 }: {
-	onSendFeedback: () => void;
+	onSubmit: () => void;
 	title: string;
 	description?: string;
-	onCloseModal?: () => void;
+	onModalClose?: () => void;
 	children?: JSX.Element;
-	isSendButtonDisabled?: boolean;
-	sendButtonLabel?: string;
+	isSubmitButtonDisabled?: boolean;
+	submitButtonLabel?: string;
 	cancelButtonLabel?: string;
 } ): JSX.Element | null {
 	const [ isOpen, setOpen ] = useState( true );
 
 	const closeModal = () => {
 		setOpen( false );
-		if ( onCloseModal ) {
-			onCloseModal();
+		if ( onModalClose ) {
+			onModalClose();
 		}
 	};
 
@@ -64,7 +64,7 @@ function FeedbackModal( {
 			<Text
 				variant="body"
 				as="p"
-				className="woocommerce-feedback-modal__intro"
+				className="woocommerce-feedback-modal__description"
 				size={ 14 }
 				lineHeight="20px"
 				marginBottom="1.5em"
@@ -77,16 +77,16 @@ function FeedbackModal( {
 					{ cancelButtonLabel }
 				</Button>
 				<Button
-					isPrimary={ ! isSendButtonDisabled }
-					isSecondary={ isSendButtonDisabled }
+					isPrimary={ ! isSubmitButtonDisabled }
+					isSecondary={ isSubmitButtonDisabled }
 					onClick={ () => {
-						onSendFeedback();
+						onSubmit();
 						setOpen( false );
 					} }
 					name="send"
-					disabled={ isSendButtonDisabled }
+					disabled={ isSubmitButtonDisabled }
 				>
-					{ sendButtonLabel }
+					{ submitButtonLabel }
 				</Button>
 			</div>
 		</Modal>
@@ -94,13 +94,12 @@ function FeedbackModal( {
 }
 
 FeedbackModal.propTypes = {
-	onSendFeedback: PropTypes.func.isRequired,
+	onSubmit: PropTypes.func.isRequired,
 	title: PropTypes.string,
 	description: PropTypes.string,
-	defaultScore: PropTypes.number,
-	onCloseModal: PropTypes.func,
-	isSendButtonDisabled: PropTypes.bool,
-	sendButtonLabel: PropTypes.string,
+	onModalClose: PropTypes.func,
+	isSubmitButtonDisabled: PropTypes.bool,
+	submitButtonLabel: PropTypes.string,
 	cancelButtonLabel: PropTypes.string,
 };
 

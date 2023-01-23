@@ -91,10 +91,10 @@ function ProductMVPFeedbackModal( {
 				'We’re working on making it better, and your feedback will help improve the experience for thousands of merchants like you.',
 				'woocommerce'
 			) }
-			onSendFeedback={ onSendFeedback }
-			onCloseModal={ onCloseModal }
-			isSendButtonDisabled={ isSendButtonDisabled }
-			sendButtonLabel={ __( 'Send feedback', 'woocommerce' ) }
+			onSubmit={ onSendFeedback }
+			onModalClose={ onCloseModal }
+			isSubmitButtonDisabled={ isSendButtonDisabled }
+			submitButtonLabel={ __( 'Send feedback', 'woocommerce' ) }
 			cancelButtonLabel={ __( 'Skip', 'woocommerce' ) }
 		>
 			<>
