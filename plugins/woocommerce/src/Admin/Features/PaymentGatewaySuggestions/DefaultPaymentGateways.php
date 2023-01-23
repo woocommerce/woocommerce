@@ -90,12 +90,12 @@ class DefaultPaymentGateways {
 				'plugins'             => array( 'klarna-payments-for-woocommerce' ),
 				'is_visible'          => array(
 					self::get_rules_for_countries(
-						array( 'US', 'CA', 'DK', 'DE', 'AT', 'NL', 'CH', 'BE', 'SP', 'PL', 'FR', 'IT', 'GB', 'ES', 'FI', 'NO', 'SE', 'ES', 'FI', 'NO', 'SE' )
+						array( 'DK', 'DE', 'AT', 'NL', 'CH', 'BE', 'SP', 'PL', 'FR', 'IT', 'GB', 'ES', 'FI', 'NO', 'SE', 'ES', 'FI', 'NO', 'SE' )
 					),
 					self::get_rules_for_cbd( false ),
 				),
 				'category_other'      => array(),
-				'category_additional' => array( 'US', 'CA', 'DK', 'DE', 'AT', 'NL', 'CH', 'BE', 'SP', 'PL', 'FR', 'IT', 'GB', 'ES', 'FI', 'NO', 'SE', 'ES', 'FI', 'NO', 'SE' ),
+				'category_additional' => array( 'DK', 'DE', 'AT', 'NL', 'CH', 'BE', 'SP', 'PL', 'FR', 'IT', 'GB', 'ES', 'FI', 'NO', 'SE', 'ES', 'FI', 'NO', 'SE' ),
 			),
 			array(
 				'id'                  => 'mollie_wc_gateway_banktransfer',
@@ -378,10 +378,10 @@ class DefaultPaymentGateways {
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/amazonpay.png',
 				'plugins'             => array( 'woocommerce-gateway-amazon-payments-advanced' ),
 				'is_visible'          => array(
-					self::get_rules_for_countries( array( 'US', 'CA', 'GB', 'JP', 'AT', 'BE', 'CY', 'DK', 'ES', 'FR', 'DE', 'HU', 'IE', 'IT', 'LU', 'NL', 'PT', 'SL', 'SE' ) ),
+					self::get_rules_for_countries( array( 'US', 'GB', 'JP', 'AT', 'BE', 'CY', 'DK', 'ES', 'FR', 'DE', 'HU', 'IE', 'IT', 'LU', 'NL', 'PT', 'SL', 'SE' ) ),
 				),
 				'category_other'      => array(),
-				'category_additional' => array( 'US', 'CA', 'GB', 'JP', 'AT', 'BE', 'CY', 'DK', 'ES', 'FR', 'DE', 'HU', 'IE', 'IT', 'LU', 'NL', 'PT', 'SL', 'SE' ),
+				'category_additional' => array( 'US', 'GB', 'JP', 'AT', 'BE', 'CY', 'DK', 'ES', 'FR', 'DE', 'HU', 'IE', 'IT', 'LU', 'NL', 'PT', 'SL', 'SE' ),
 			),
 			array(
 				'id'                  => 'affirm',
