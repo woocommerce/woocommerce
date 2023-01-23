@@ -52,6 +52,7 @@ type CustomerEffortScoreProps = {
  * @param {Function} props.onNoticeDismissedCallback Function to call when the notice is dismissed.
  * @param {Function} props.onModalShownCallback      Function to call when the modal is shown.
  * @param {Function} props.onModalDismissedCallback  Function to call when modal is dismissed.
+ * @param {Function} props.shouldShowComments        Callback to determine if comments section should be shown.
  * @param {Object}   props.icon                      Icon (React component) to be shown on the notice.
  */
 const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
@@ -107,9 +108,6 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 	if ( ! visible ) {
 		return null;
 	}
-
-console.log('in score');
-
 
 	return (
 		<CustomerFeedbackModal
