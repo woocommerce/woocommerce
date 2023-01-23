@@ -263,7 +263,7 @@ jobs:
                       ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }}/allure-report \
                       --quiet
 
-    publish-wp-latest-report:
+    report-wp-latest:
         name: Publish API & E2E Allure reports on WP Latest
         if: |
             ( success() || failure() ) &&
