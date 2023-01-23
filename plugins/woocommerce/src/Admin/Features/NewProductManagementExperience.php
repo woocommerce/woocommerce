@@ -26,7 +26,6 @@ class NewProductManagementExperience {
 		$new_product_experience_param = 'new-product-experience-disabled';
 		if ( isset( $_GET[ $new_product_experience_param ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$url  = isset( $_SERVER['HTTPS'] ) && 'on' === $_SERVER['HTTPS'] ? 'https://' : 'http://';
-
 			$url .= isset( $_SERVER['HTTP_HOST'] ) && isset( $_SERVER['REQUEST_URI'] ) ? wc_clean( wp_unslash( $_SERVER['HTTP_HOST'] ) ) . wc_clean( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 			$url  = preg_replace( '/(&|\?)' . preg_quote( $new_product_experience_param ) . '=[^&]*$/', '', $url ); // phpcs:ignore WordPress.PHP.PregQuoteDelimiter.Missing
 			$url  = preg_replace( '/(&|\?)' . preg_quote( $new_product_experience_param ) . '=[^&]*&/', '$1', $url ); // phpcs:ignore WordPress.PHP.PregQuoteDelimiter.Missing
