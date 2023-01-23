@@ -267,7 +267,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 							),
 						},
 					} ) }
-					onCancel={ () => closeModal() }
+					onCancel={ () => closeModal( currentAttribute ) }
 					onEdit={ ( updatedAttribute ) => {
 						handleEdit( updatedAttribute );
 					} }
