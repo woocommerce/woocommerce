@@ -112,8 +112,8 @@
         if (slider.vars.mousewheel) {
           el.addEventListener('wheel', function(event) {
             event.preventDefault();
-            var delta = event.deltaY === 0 ? event.deltaX : event.deltaY; // https://github.com/jquery/jquery-mousewheel/blob/3.1.13/jquery.mousewheel.js#L118
-            var target = (delta < 0) ? slider.getTarget('next') : slider.getTarget('prev');
+            var delta = event.deltaY === 0 ? event.deltaX : event.deltaY;
+            var target = (delta > 0) ? slider.getTarget('next') : slider.getTarget('prev');
             slider.flexAnimate(target, slider.vars.pauseOnAction);
           });
         }
