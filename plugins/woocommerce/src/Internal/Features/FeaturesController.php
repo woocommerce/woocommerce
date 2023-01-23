@@ -607,6 +607,27 @@ class FeaturesController {
 			$disabled = true;
 			$desc_tip = __( 'WooCommerce Admin has been disabled', 'woocommerce' );
 		} elseif ( 'new_navigation' === $feature_id ) {
+			$features_controller = wc_get_container()->get( FeaturesController::class );
+			$feature_is_enabled  = $features_controller->feature_is_enabled( $feature_id );
+			if ( ! $feature_is_enabled ) {
+				$update_text = sprintf(
+				// translators: 1: line break tag.
+					__( '%1$s The development of this feature is currently on hold.', 'woocommerce' ),
+					'<br/>'
+				);
+				$disabled     = true;
+			} else {
+				$update_text = sprintf(
+				// translators: 1: line break tag, 2: line break tag.
+					__(
+						'%1$s The experimental navigation will soon become unavailable while we make necessary improvements.\
+					%1$s If you turn it off now, you won\'t be able to turn it back on.', 'woocommerce'
+					),
+					'<br/>',
+					'<br/>'
+				);
+			}
+
 			$needs_update = version_compare( get_bloginfo( 'version' ), '5.6', '<' );
 			if ( $needs_update && current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
 				$update_text = sprintf(
@@ -616,28 +637,10 @@ class FeaturesController {
 					'<a href="' . self_admin_url( 'update-core.php' ) . '" target="_blank">',
 					'</a>'
 				);
-				$disabled     = true;
-			}
-			$features_controller = wc_get_container()->get( FeaturesController::class );
-			$feature_is_enabled  = $features_controller->feature_is_enabled( $feature_id );
-			if ( ! $feature_is_enabled ) {
-				$update_text = sprintf(
-				// translators: 1: line break tag.
-					__('%1$s The development of this feature is currently on hold.', 'woocommerce'),
-					'<br/>'
-				);
-				$disabled     = true;
-			} else {
-				$update_text = sprintf(
-				// translators: 1: line break tag, 2: line break tag.
-					__('%1$s The experimental navigation will soon become unavailable while we make necessary improvements.
-					%1$s If you turn it off now, you won\'t be able to turn it back on.', 'woocommerce'),
-					'<br/>',
-					'<br/>'
-				);
+				$disabled = true;
 			}
 
-			if (!empty($update_text)) {
+			if ( ! empty( $update_text ) ) {
 				$description .= $update_text;
 			}
 		}
