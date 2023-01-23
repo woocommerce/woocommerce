@@ -63,7 +63,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 } ) => {
 	const [ showAddAttributeModal, setShowAddAttributeModal ] =
 		useState( false );
-	const [ editingAttributeId, setEditingAttributeId ] = useState<
+	const [ currentAttributeId, setCurrentAttributeId ] = useState<
 		null | string
 	>( null );
 
@@ -119,7 +119,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	const openModal = ( attribute?: ProductAttribute ) => {
 		if ( attribute ) {
-			setEditingAttributeId( getAttributeId( attribute ) );
+			setCurrentAttributeId( getAttributeId( attribute ) );
 		} else {
 			setShowAddAttributeModal( true );
 		}
@@ -130,7 +130,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	const closeModal = ( attribute?: ProductAttribute ) => {
 		if ( attribute ) {
-			setEditingAttributeId( null );
+			setCurrentAttributeId( null );
 		} else {
 			setShowAddAttributeModal( false );
 		}
@@ -192,8 +192,8 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		{} as Record< number | string, ProductAttribute >
 	);
 
-	const editingAttribute = value.find(
-		( attr ) => getAttributeId( attr ) === editingAttributeId
+	const currentAttribute = value.find(
+		( attr ) => getAttributeId( attr ) === currentAttributeId
 	) as EnhancedProductAttribute;
 
 	return (
@@ -238,12 +238,12 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 				/>
 			) }
 			<SelectControlMenuSlot />
-			{ editingAttribute && (
+			{ currentAttribute && (
 				<EditAttributeModal
 					title={ sprintf(
 						/* translators: %s is the attribute name */
 						__( 'Edit %s', 'woocommerce' ),
-						editingAttribute.name
+						currentAttribute.name
 					) }
 					globalAttributeHelperMessage={ interpolateComponents( {
 						mixedString: text.globalAttributeHelperMessage,
@@ -265,7 +265,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					onEdit={ ( updatedAttribute ) => {
 						handleEdit( updatedAttribute );
 					} }
-					attribute={ editingAttribute }
+					attribute={ currentAttribute }
 				/>
 			) }
 		</div>
