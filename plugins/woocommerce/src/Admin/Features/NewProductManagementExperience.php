@@ -23,15 +23,21 @@ class NewProductManagementExperience {
 	 * Constructor
 	 */
 	public function __construct() {
+		$this->maybe_show_disabled_notice();
+		if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
+			return;
+		}
+
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+		add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
+	}
+
+	/**
+	 * Maybe show disabled notice.
+	 */
+	public function maybe_show_disabled_notice(){
 		$new_product_experience_param = 'new-product-experience-disabled';
 		if ( isset( $_GET[ $new_product_experience_param ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$url  = isset( $_SERVER['HTTPS'] ) && 'on' === $_SERVER['HTTPS'] ? 'https://' : 'http://';
-			$url .= isset( $_SERVER['HTTP_HOST'] ) && isset( $_SERVER['REQUEST_URI'] ) ? wc_clean( wp_unslash( $_SERVER['HTTP_HOST'] ) ) . wc_clean( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
-			$url  = preg_replace( '/(&|\?)' . preg_quote( $new_product_experience_param ) . '=[^&]*$/', '', $url ); // phpcs:ignore WordPress.PHP.PregQuoteDelimiter.Missing
-			$url  = preg_replace( '/(&|\?)' . preg_quote( $new_product_experience_param ) . '=[^&]*&/', '$1', $url ); // phpcs:ignore WordPress.PHP.PregQuoteDelimiter.Missing
-
-			wp_safe_redirect( $url );
-
 			TransientNotices::add(
 				array(
 					'user_id' => get_current_user_id(),
@@ -40,13 +46,12 @@ class NewProductManagementExperience {
 					'content' => __( '🌟‎ ‎ Thanks for the feedback. We’ll put it to good use!', 'woocommerce' ),
 				)
 			);
-		}
-		if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
-			return;
-		}
 
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
-		add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
+			$url  = isset( $_SERVER['REQUEST_URI'] ) ? wc_clean( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+			$url  = remove_query_arg( 'new-product-experience-disabled', $url );
+			wp_safe_redirect( $url );
+			exit;
+		}
 	}
 
 	/**
