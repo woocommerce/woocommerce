@@ -23,13 +23,16 @@ class NewProductManagementExperience {
 	 * Constructor
 	 */
 	public function __construct() {
-		if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
-			return;
-		}
+		$new_product_experience_param = 'new-product-experience-disabled';
+		if ( isset( $_GET[ $new_product_experience_param ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$url =  isset( $_SERVER['HTTPS'] ) &&
+			$_SERVER['HTTPS'] === 'on' ? "https://" : "http://";
+			$url .= $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+			$url = preg_replace('/(&|\?)'.preg_quote( $new_product_experience_param ).'=[^&]*$/', '', $url );
+    		$url = preg_replace('/(&|\?)'.preg_quote( $new_product_experience_param ).'=[^&]*&/', '$1', $url );
 
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
-		add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
-		if ( isset( $_GET['new-product-experience-disabled'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			wp_safe_redirect( $url );
+
 			TransientNotices::add(
 				array(
 					'user_id' => get_current_user_id(),
@@ -39,6 +42,12 @@ class NewProductManagementExperience {
 				)
 			);
 		}
+		if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
+			return;
+		}
+
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+		add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
 	}
 
 	/**
