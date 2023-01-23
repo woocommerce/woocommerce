@@ -174,7 +174,6 @@
                 e.preventDefault();
                 var $slide = $(this),
                     target = $slide.index();
-
         				var posFromX;
                 if(slider.vars.rtl){
         					posFromX = -1*($slide.offset().right - slider.scrollLeft()); // Find position of slide relative to right of slider container
