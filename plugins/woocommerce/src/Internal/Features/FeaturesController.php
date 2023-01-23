@@ -607,23 +607,21 @@ class FeaturesController {
 			$disabled = true;
 			$desc_tip = __( 'WooCommerce Admin has been disabled', 'woocommerce' );
 		} elseif ( 'new_navigation' === $feature_id ) {
-			$features_controller = wc_get_container()->get( FeaturesController::class );
-			$feature_is_enabled  = $features_controller->feature_is_enabled( $feature_id );
-			if ( ! $feature_is_enabled ) {
+			$disabled = ! $this->feature_is_enabled( $feature_id );
+
+			if ( $disabled ) {
 				$update_text = sprintf(
 				// translators: 1: line break tag.
 					__( '%1$s The development of this feature is currently on hold.', 'woocommerce' ),
 					'<br/>'
 				);
-				$disabled     = true;
 			} else {
 				$update_text = sprintf(
 				// translators: 1: line break tag, 2: line break tag.
 					__(
-						'%1$s The experimental navigation will soon become unavailable while we make necessary improvements.\
-					%1$s If you turn it off now, you won\'t be able to turn it back on.', 'woocommerce'
+						'%1$s The experimental navigation will soon become unavailable while we make necessary improvements.
+			             If you turn it off now, you won\'t be able to turn it back on.', 'woocommerce'
 					),
-					'<br/>',
 					'<br/>'
 				);
 			}
