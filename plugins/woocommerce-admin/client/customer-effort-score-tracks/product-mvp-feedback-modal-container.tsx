@@ -24,18 +24,18 @@ export const ProductMVPFeedbackModalContainer: React.FC = () => {
 		};
 	} );
 
-	const classEditorUrl = values.id
+	const classicEditorUrl = values.id
 		? getAdminLink( `post.php?post=${ values.id }&action=edit` )
 		: getAdminLink( 'post-new.php?post_type=product' );
 
 	const recordScore = ( checked: string[], comments: string ) => {
 		recordEvent( 'product_mvp_feedback', {
 			action: 'disable',
-			checked: checked.join( ',' ),
+			checked,
 			comments: comments || '',
 		} );
 		hideProductMVPFeedbackModal();
-		window.location.href = `${ classEditorUrl }&new-product-experience-disabled=true`;
+		window.location.href = `${ classicEditorUrl }&new-product-experience-disabled=true`;
 	};
 
 	const onCloseModal = () => {
@@ -45,7 +45,7 @@ export const ProductMVPFeedbackModalContainer: React.FC = () => {
 			comments: '',
 		} );
 		hideProductMVPFeedbackModal();
-		window.location.href = classEditorUrl;
+		window.location.href = classicEditorUrl;
 	};
 
 	if ( ! isProductMVPModalVisible ) {
