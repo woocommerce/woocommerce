@@ -23,7 +23,8 @@ class DefaultPaymentGateways {
 		'woocommerce_payments:without-in-person-payments' => 1,
 		'stripe'                                          => 2,
 		'woo-mercado-pago-custom'                         => 3,
-		'paypal'                                          => 4,
+		// PayPal Payments.
+		'ppcp-gateway'                                    => 4,
 		'mollie_wc_gateway_banktransfer'                  => 5,
 		'razorpay'                                        => 5,
 		'payfast'                                         => 5,
@@ -420,8 +421,8 @@ class DefaultPaymentGateways {
 		);
 
 		// Add recommended priority attributes.
-		foreach ( $payment_gateways as $payment_gateway ) {
-			$payment_gateway['recommendation_priority'] = self::get_recommendation_priority( $payment_gateway['id'] );
+		foreach ( $payment_gateways as $index => $payment_gateway ) {
+			$payment_gateways[ $index ]['recommendation_priority'] = self::get_recommendation_priority( $payment_gateway['id'] );
 		}
 
 		return $payment_gateways;
@@ -524,8 +525,7 @@ class DefaultPaymentGateways {
 
 	/**
 	 * Get recommendation priority for a given payment gateway by id.
-	 * If no priority is set, return null.
-	 * If the id is not found, return 1.
+	 * If no priority is set or the id is not found, return null.
 	 *
 	 * @param string $id Payment gateway id.
 	 * @return int Priority.
