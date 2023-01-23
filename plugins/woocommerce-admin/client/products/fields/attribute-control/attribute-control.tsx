@@ -21,6 +21,7 @@ import { AddAttributeModal } from './add-attribute-modal';
 import { EditAttributeModal } from './edit-attribute-modal';
 import { EnhancedProductAttribute } from '~/products/hooks/use-product-attributes';
 import {
+	getAttributeId,
 	getAttributeKey,
 	reorderSortableProductAttributePositions,
 } from './utils';
@@ -66,9 +67,6 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		null | string
 	>( null );
 
-	const fetchAttributeId = ( attribute: { id: number; name: string } ) =>
-		`${ attribute.id }-${ attribute.name }`;
-
 	const handleChange = ( newAttributes: EnhancedProductAttribute[] ) => {
 		onChange(
 			newAttributes.map( ( attr ) => {
@@ -93,8 +91,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			handleChange(
 				value.filter(
 					( attr ) =>
-						fetchAttributeId( attr ) !==
-						fetchAttributeId( attribute )
+						getAttributeId( attr ) !== getAttributeId( attribute )
 				)
 			);
 		} else {
@@ -122,7 +119,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	const openModal = ( attribute?: ProductAttribute ) => {
 		if ( attribute ) {
-			setEditingAttributeId( fetchAttributeId( attribute ) );
+			setEditingAttributeId( getAttributeId( attribute ) );
 		} else {
 			setShowAddAttributeModal( true );
 		}
@@ -140,14 +137,6 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		if ( typeof onModalClose === 'function' ) {
 			onModalClose( attribute );
 		}
-	};
-
-	const getAttributeId = ( attribute: ProductAttribute ) => {
-		if ( attribute.id === 0 ) {
-			return attribute.name;
-		}
-
-		return attribute.id;
 	};
 
 	const handleEdit = ( updatedAttribute: ProductAttribute ) => {
@@ -204,7 +193,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	);
 
 	const editingAttribute = value.find(
-		( attr ) => fetchAttributeId( attr ) === editingAttributeId
+		( attr ) => getAttributeId( attr ) === editingAttributeId
 	) as EnhancedProductAttribute;
 
 	return (
@@ -230,7 +219,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 				{ sortedAttributes.map( ( attr ) => (
 					<AttributeListItem
 						attribute={ attr }
-						key={ fetchAttributeId( attr ) }
+						key={ getAttributeId( attr ) }
 						onEditClick={ () => openModal( attr ) }
 						onRemoveClick={ () => onRemove( attr ) }
 					/>
