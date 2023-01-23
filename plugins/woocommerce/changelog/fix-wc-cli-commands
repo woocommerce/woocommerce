@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the signature mismatch affecting wc cli commands ability to fetch user subscription data.
