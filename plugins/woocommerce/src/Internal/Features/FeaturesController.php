@@ -621,7 +621,7 @@ class FeaturesController {
 		}
 
 		if ( 'new_product_management' === $feature_id ) {
-			$desc_tip = __( "⚠ This feature is currently in development and only available for simple products. No extension support yet.", 'woocommerce' );
+			$desc_tip = __( '⚠ This feature is currently in development and only available for simple products. No extension support yet.', 'woocommerce' );
 		}
 
 		if ( ! $this->is_legacy_feature( $feature_id ) && ! $disabled && $this->verify_did_woocommerce_init() ) {
