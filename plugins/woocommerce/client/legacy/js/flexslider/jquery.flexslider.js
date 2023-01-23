@@ -724,7 +724,7 @@
             slider.slides.eq(slider.currentSlide).css({"zIndex": 1}).animate({"opacity": 0}, slider.vars.animationSpeed, slider.vars.easing);
             slider.slides.eq(target).css({"zIndex": 2}).animate({"opacity": 1}, slider.vars.animationSpeed, slider.vars.easing, slider.wrapup);
           } else {
-            let style = slider.slides[slider.currentSlide].style;
+            var style = slider.slides[slider.currentSlide].style;
             style.opacity = 0;
             style.zIndex = 1;
 
@@ -841,6 +841,7 @@
     };
 
     slider.setup = function(type) {
+      var style;
       // SLIDE:
       if (!fade) {
         var sliderOffset, arr;
@@ -870,7 +871,6 @@
 
         sliderOffset = (reverse) ? slider.count - 1 - slider.currentSlide + slider.cloneOffset : slider.currentSlide + slider.cloneOffset;
         // VERTICAL:
-        let style;
         if (vertical && !carousel) {
           style = slider.container[0].style;
           style.height = (slider.count + slider.cloneCount) * 200 + "%";
