@@ -35,7 +35,7 @@ class NewProductManagementExperience {
 	/**
 	 * Maybe show disabled notice.
 	 */
-	public function maybe_show_disabled_notice(){
+	public function maybe_show_disabled_notice() {
 		$new_product_experience_param = 'new-product-experience-disabled';
 		if ( isset( $_GET[ $new_product_experience_param ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			TransientNotices::add(
@@ -47,8 +47,8 @@ class NewProductManagementExperience {
 				)
 			);
 
-			$url  = isset( $_SERVER['REQUEST_URI'] ) ? wc_clean( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
-			$url  = remove_query_arg( 'new-product-experience-disabled', $url );
+			$url = isset( $_SERVER['REQUEST_URI'] ) ? wc_clean( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+			$url = remove_query_arg( 'new-product-experience-disabled', $url );
 			wp_safe_redirect( $url );
 			exit;
 		}
