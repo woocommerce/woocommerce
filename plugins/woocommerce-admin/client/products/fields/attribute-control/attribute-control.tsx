@@ -40,9 +40,9 @@ type AttributeControlProps = {
 	onModalClose?: ( attribute?: ProductAttribute ) => void;
 	onModalOpen?: ( attribute?: ProductAttribute ) => void;
 	text?: {
-		addAttributeModalTitle?: string;
 		emptyStateSubtitle?: string;
 		newAttributeListItemLabel?: string;
+		newAttributeModalTitle?: string;
 		globalAttributeHelperMessage: string;
 	};
 };
@@ -56,7 +56,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	onModalOpen,
 	onRemove,
 	text = {
-		addAttributeModalTitle: undefined,
+		newAttributeModalTitle: undefined,
 		emptyStateSubtitle: undefined,
 		newAttributeListItemLabel: undefined,
 		globalAttributeHelperMessage: __(
@@ -167,7 +167,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		return (
 			<>
 				<AttributeEmptyState
-					addNewLabel={ text.addAttributeModalTitle }
+					addNewLabel={ text.newAttributeModalTitle }
 					onNewClick={ () => openModal() }
 					subtitle={ text.emptyStateSubtitle }
 				/>
@@ -178,6 +178,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						} }
 						onAdd={ handleAdd }
 						selectedAttributeIds={ [] }
+						title={ text.newAttributeModalTitle }
 					/>
 				) }
 				<SelectControlMenuSlot />
@@ -237,7 +238,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			/>
 			{ isNewModalVisible && (
 				<NewAttributeModal
-					title={ text.addAttributeModalTitle }
+					title={ text.newAttributeModalTitle }
 					onCancel={ () => closeModal() }
 					onAdd={ handleAdd }
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
