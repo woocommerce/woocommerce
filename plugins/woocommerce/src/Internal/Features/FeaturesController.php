@@ -627,6 +627,14 @@ class FeaturesController {
 					'<br/>'
 				);
 				$disabled     = true;
+			} else {
+				$update_text = sprintf(
+				// translators: 1: line break tag, 2: line break tag.
+					__('%1$s The experimental navigation will soon become unavailable while we make necessary improvements.
+					%1$s If you turn it off now, you won\'t be able to turn it back on.', 'woocommerce'),
+					'<br/>',
+					'<br/>'
+				);
 			}
 
 			if (!empty($update_text)) {
