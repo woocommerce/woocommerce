@@ -2,11 +2,12 @@
  * External dependencies
  */
 import { store as noticesStore } from '@wordpress/notices';
+import deprecated from '@wordpress/deprecated';
+import type { BillingAddress, ShippingAddress } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
-
 import {
 	emitEventWithAbort,
 	isErrorResponse,
@@ -17,6 +18,10 @@ import {
 import { EMIT_TYPES } from '../../base/context/providers/cart-checkout/payment-events/event-emit';
 import type { emitProcessingEventType } from './types';
 import { CART_STORE_KEY } from '../cart';
+import {
+	isBillingAddress,
+	isShippingAddress,
+} from '../../types/type-guards/address';
 
 export const __internalSetExpressPaymentError = ( message?: string ) => {
 	return ( { registry } ) => {
@@ -47,12 +52,15 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 		const { createErrorNotice, removeNotice } =
 			registry.dispatch( 'core/notices' );
 		removeNotice( 'wc-payment-error', noticeContexts.PAYMENTS );
-		emitEventWithAbort(
+		return emitEventWithAbort(
 			currentObserver,
 			EMIT_TYPES.PAYMENT_PROCESSING,
 			{}
 		).then( ( observerResponses ) => {
-			let successResponse, errorResponse;
+			let successResponse,
+				errorResponse,
+				billingAddress: BillingAddress | undefined,
+				shippingAddress: ShippingAddress | undefined;
 			observerResponses.forEach( ( response ) => {
 				if ( isSuccessResponse( response ) ) {
 					// the last observer response always "wins" for success.
@@ -64,25 +72,64 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 				) {
 					errorResponse = response;
 				}
+				// Extensions may return shippingData, shippingAddress, billingData, and billingAddress in the response,
+				// so we need to check for all. If we detect either shippingData or billingData we need to show a
+				// deprecated warning for it, but also apply the changes to the wc/store/cart store.
+				const {
+					billingAddress: billingAddressFromResponse,
+
+					// Deprecated, but keeping it for now, for compatibility with extensions returning it.
+					billingData: billingDataFromResponse,
+					shippingAddress: shippingAddressFromResponse,
+
+					// Deprecated, but keeping it for now, for compatibility with extensions returning it.
+					shippingData: shippingDataFromResponse,
+				} = response?.meta || {};
+
+				billingAddress = billingAddressFromResponse;
+				shippingAddress = shippingAddressFromResponse;
+
+				if ( billingDataFromResponse ) {
+					// Set this here so that old extensions still using billingData can set the billingAddress.
+					billingAddress = billingDataFromResponse;
+					deprecated(
+						'returning billingData from an onPaymentProcessing observer in WooCommerce Blocks',
+						{
+							version: '9.5.0',
+							alternative: 'billingAddress',
+							link: 'https://github.com/woocommerce/woocommerce-blocks/pull/6369',
+						}
+					);
+				}
+
+				if ( shippingDataFromResponse ) {
+					// Set this here so that old extensions still using shippingData can set the shippingAddress.
+					shippingAddress = shippingDataFromResponse;
+					deprecated(
+						'returning shippingData from an onPaymentProcessing observer in WooCommerce Blocks',
+						{
+							version: '9.5.0',
+							alternative: 'shippingAddress',
+							link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8163',
+						}
+					);
+				}
 			} );
 
 			const { setBillingAddress, setShippingAddress } =
 				registry.dispatch( CART_STORE_KEY );
 
 			if ( successResponse && ! errorResponse ) {
-				const { paymentMethodData, billingAddress, shippingData } =
-					successResponse?.meta || {};
+				const { paymentMethodData } = successResponse?.meta || {};
 
-				if ( billingAddress ) {
+				if ( billingAddress && isBillingAddress( billingAddress ) ) {
 					setBillingAddress( billingAddress );
 				}
 				if (
-					typeof shippingData !== undefined &&
-					shippingData?.address
+					typeof shippingAddress !== 'undefined' &&
+					isShippingAddress( shippingAddress )
 				) {
-					setShippingAddress(
-						shippingData.address as Record< string, unknown >
-					);
+					setShippingAddress( shippingAddress );
 				}
 				dispatch.__internalSetPaymentMethodData( paymentMethodData );
 				dispatch.__internalSetPaymentSuccess();
@@ -97,10 +144,8 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 					} );
 				}
 
-				const { paymentMethodData, billingAddress } =
-					errorResponse?.meta || {};
-
-				if ( billingAddress ) {
+				const { paymentMethodData } = errorResponse?.meta || {};
+				if ( billingAddress && isBillingAddress( billingAddress ) ) {
 					setBillingAddress( billingAddress );
 				}
 				dispatch.__internalSetPaymentFailed();
