@@ -172,23 +172,16 @@
           slider.slides[slider.currentItem].classList.add(namespace + "active-slide");
               slider.slides.on(eventType, function(e){
                 e.preventDefault();
-                const target = [].indexOf.call(this.parentNode.children, this); // Same as $(this).index()
-
-                // https://github.com/jquery/jquery/blob/3.6.3/src/offset.js#L100
-                // Get document-relative position by adding viewport scroll to viewport-relative gBCR
-                const rect = this.getBoundingClientRect();
-                const win = this.ownerDocument.defaultView;
-                const offset = {
-                  left: rect.left + win.pageXOffset
-                };
+                var $slide = $(this),
+                    target = $slide.index();
 
         				var posFromX;
                 if(slider.vars.rtl){
-        					posFromX = -1*(offset.right - slider.scrollLeft()); // Find position of slide relative to right of slider container
+        					posFromX = -1*($slide.offset().right - slider.scrollLeft()); // Find position of slide relative to right of slider container
         				}
         				else
         				{
-        					posFromX = offset.left - slider.scrollLeft(); // Find position of slide relative to left of slider container
+        					posFromX = $slide.offset().left - slider.scrollLeft(); // Find position of slide relative to left of slider container
         				}
                 if( posFromX <= 0 && this.classList.contains( namespace + 'active-slide' ) ) {
                   slider.flexAnimate(slider.getTarget("prev"), true);
