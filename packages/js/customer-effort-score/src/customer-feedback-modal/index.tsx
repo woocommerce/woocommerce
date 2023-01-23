@@ -43,7 +43,10 @@ function CustomerFeedbackModal( {
 	defaultScore = NaN,
 	onCloseModal,
 	customOptions,
-	shouldShowComments,
+	shouldShowComments = ( firstQuestionScore, secondQuestionScore ) =>
+		[ firstQuestionScore, secondQuestionScore ].some(
+			( score ) => score === 1 || score === 2
+		),
 }: {
 	recordScoreCallback: (
 		score: number,
