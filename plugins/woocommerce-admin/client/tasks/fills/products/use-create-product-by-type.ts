@@ -3,6 +3,7 @@
  */
 import { useDispatch } from '@wordpress/data';
 import { ITEMS_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
 import { loadExperimentAssignment } from '@woocommerce/explat';
 import moment from 'moment';
@@ -20,6 +21,8 @@ export const useCreateProductByType = () => {
 	const { createProductFromTemplate } = useDispatch( ITEMS_STORE_NAME );
 	const [ isRequesting, setIsRequesting ] = useState< boolean >( false );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const isNewExperienceEnabled =
+		window.wcAdminFeatures[ 'new-product-management-experience' ];
 
 	const createProductByType = async ( type: ProductTypeKey ) => {
 		if ( type === 'subscription' ) {
@@ -40,12 +43,16 @@ export const useCreateProductByType = () => {
 			);
 
 			if ( assignment.variationName === 'treatment' ) {
-				await updateOptions( {
-					[ NEW_PRODUCT_MANAGEMENT ]: 'yes',
-				} );
-				window.location.href = getAdminLink(
-					'admin.php?page=wc-admin&path=/add-product'
-				);
+				if ( isNewExperienceEnabled ) {
+					navigateTo( { url: getNewPath( {}, '/add-product', {} ) } );
+				} else {
+					await updateOptions( {
+						[ NEW_PRODUCT_MANAGEMENT ]: 'yes',
+					} );
+					window.location.href = getAdminLink(
+						'admin.php?page=wc-admin&path=/add-product'
+					);
+				}
 				return;
 			}
 		}
