@@ -440,7 +440,7 @@ jobs:
     WP-versions:
         name: Run tests against ${{ matrix.version.description }} (${{ matrix.version.number }})
         runs-on: ubuntu-20.04
-        needs: [get-wp-matrix]
+        needs: [get-tag, get-wp-matrix]
         strategy:
             matrix: ${{ fromJSON(needs.get-wp-matrix.outputs.matrix) }}
         env:
