@@ -20,7 +20,7 @@ import {
 /**
  * Internal dependencies
  */
-import './add-attribute-modal.scss';
+import './new-attribute-modal.scss';
 import { AttributeInputField } from '../attribute-input-field';
 import {
 	AttributeTermInputField,
@@ -29,7 +29,7 @@ import {
 import { EnhancedProductAttribute } from '~/products/hooks/use-product-attributes';
 import { getProductAttributeObject } from './utils';
 
-type AddAttributeModalProps = {
+type NewAttributeModalProps = {
 	title?: string;
 	notice?: string;
 	attributeLabel?: string;
@@ -54,7 +54,7 @@ type AttributeForm = {
 	attributes: Array< EnhancedProductAttribute | null >;
 };
 
-export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
+export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	title = __( 'Add attributes', 'woocommerce' ),
 	notice = __(
 		'By default, attributes are filterable and visible on the product page. You can change these settings for each attribute separately later.',
@@ -80,15 +80,6 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 	onAdd,
 	selectedAttributeIds = [],
 } ) => {
-	const scrollAttributeIntoView = ( index: number ) => {
-		setTimeout( () => {
-			const attributeRow = document.querySelector(
-				`.woocommerce-add-attribute-modal__table-row-${ index }`
-			);
-			attributeRow?.scrollIntoView( { behavior: 'smooth' } );
-		}, 0 );
-	};
-
 	const [ showConfirmClose, setShowConfirmClose ] = useState( false );
 	const addAnother = (
 		values: AttributeForm,
@@ -98,7 +89,6 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 		) => void
 	) => {
 		setValue( 'attributes', [ ...values.attributes, null ] );
-		scrollAttributeIntoView( values.attributes.length );
 	};
 
 	const onAddingAttributes = ( values: AttributeForm ) => {

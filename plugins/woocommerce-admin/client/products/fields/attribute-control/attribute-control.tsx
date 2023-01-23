@@ -17,7 +17,6 @@ import { getAdminLink } from '@woocommerce/settings';
  * Internal dependencies
  */
 import './attribute-field.scss';
-import { AddAttributeModal } from './add-attribute-modal';
 import { EditAttributeModal } from './edit-attribute-modal';
 import { EnhancedProductAttribute } from '~/products/hooks/use-product-attributes';
 import {
@@ -30,6 +29,7 @@ import {
 	AttributeListItem,
 	NewAttributeListItem,
 } from '../attribute-list-item';
+import { NewAttributeModal } from './new-attribute-modal';
 
 type AttributeControlProps = {
 	value: ProductAttribute[];
@@ -165,7 +165,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					subtitle={ text.emptyStateSubtitle }
 				/>
 				{ isNewModalVisible && (
-					<AddAttributeModal
+					<NewAttributeModal
 						onCancel={ () => {
 							closeModal();
 						} }
@@ -229,7 +229,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 				onClick={ () => openModal() }
 			/>
 			{ isNewModalVisible && (
-				<AddAttributeModal
+				<NewAttributeModal
 					title={ text.addAttributeModalTitle }
 					onCancel={ () => closeModal() }
 					onAdd={ onAddNewAttributes }
