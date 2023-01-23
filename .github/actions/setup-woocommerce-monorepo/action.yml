@@ -32,14 +32,14 @@ runs:
               version: '^7.13.3'
 
         - name: Setup Node
-          uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93
+          uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
           with:
               node-version-file: .nvmrc
               cache: pnpm
               registry-url: 'https://registry.npmjs.org'
 
         - name: Setup PHP
-          uses: shivammathur/setup-php@e04e1d97f0c0481c6e1ba40f8a538454fe5d7709
+          uses: shivammathur/setup-php@8e2ac35f639d3e794c1da1f28999385ab6fdf0fc
           with:
               php-version: ${{ inputs.php-version }}
               coverage: none
