@@ -260,9 +260,9 @@ class CartShippingRateSchema extends AbstractSchema {
 	 */
 	protected function prepare_package_items_response( $package ) {
 		$items = array();
-		foreach ( $package['contents'] as $item_id => $values ) {
+		foreach ( $package['contents'] as $values ) {
 			$items[] = [
-				'key'      => $item_id,
+				'key'      => $values['key'],
 				'name'     => $values['data']->get_name(),
 				'quantity' => $values['quantity'],
 			];
