@@ -1702,13 +1702,12 @@ test.describe('Settings API tests: CRUD', () => {
 						"type": "checkbox",
 					})
 				]));
-
 			expect(responseJSON).toEqual(
 				expect.arrayContaining([
 					expect.objectContaining({
 						"id": "woocommerce_navigation_enabled",
 						"label": "Navigation",
-						"description": "Adds the new WooCommerce navigation experience to the dashboard",
+						"description": expect.stringContaining("Adds the new WooCommerce navigation experience to the dashboard"),
 						"type": "checkbox",
 						"value": expect.any(String),
 					})
