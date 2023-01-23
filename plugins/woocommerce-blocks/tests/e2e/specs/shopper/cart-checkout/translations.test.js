@@ -48,7 +48,7 @@ describe( 'Shopper → Cart & Checkout → Translations', () => {
 		);
 
 		await expect( orderSummary ).toMatch( 'Subtotaal' );
-		await expect( orderSummary ).toMatch( 'Waardebon code' );
+		await expect( orderSummary ).toMatch( 'Een waardebon code toepassen' );
 		await expect( orderSummary ).toMatch( 'Totaal' );
 	} );
 
@@ -91,7 +91,7 @@ describe( 'Shopper → Cart & Checkout → Translations', () => {
 		);
 		await expect( orderSummary ).toMatch( 'Besteloverzicht' );
 		await expect( orderSummary ).toMatch( 'Subtotaal' );
-		await expect( orderSummary ).toMatch( 'Waardebon code' );
+		await expect( orderSummary ).toMatch( 'Een waardebon code toepassen' );
 		await expect( orderSummary ).toMatch( 'Verzending' );
 		await expect( orderSummary ).toMatch( 'Totaal' );
 	} );

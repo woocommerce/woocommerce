@@ -321,7 +321,7 @@ describe( 'Checkout Order Summary', () => {
 		setUseStoreCartReturnValue();
 		const { container } = render( <Block showRateAfterTaxName={ true } /> );
 		expect(
-			await findByText( container, 'Add a coupon' )
+			await findByText( container, 'Apply a coupon code' )
 		).toBeInTheDocument();
 	} );
 
