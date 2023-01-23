@@ -95,6 +95,8 @@ export const ProductVariationForm: React.FC< {
 						) }
 					/>
 				</div>
+				{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
+				<PluginArea scope="woocommerce-product-editor" />
 			</Form>
 		</SlotContextProvider>
 	);
