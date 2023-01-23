@@ -166,11 +166,10 @@
           slider.asNav = true;
           slider.animatingTo = Math.floor(slider.currentSlide/slider.move);
           slider.currentItem = slider.currentSlide;
-          slider.slides.each(function(index) {
-            index !== slider.currentItem ?
-              this.classList.remove(namespace + "active-slide") :
-              this.classList.add(namespace + "active-slide");
-          });
+          for (const elem of slider.slides) {
+            elem.classList.remove(namespace + "active-slide");
+          }
+          slider.slides[slider.currentItem].classList.add(namespace + "active-slide");
               slider.slides.on(eventType, function(e){
                 e.preventDefault();
                 var target = [].indexOf.call(this.parentNode.children, this); // Same as $(this).index()
@@ -310,11 +309,10 @@
           slider.controlNav = $('.' + namespace + 'control-nav li ' + selector, (slider.controlsContainer) ? slider.controlsContainer : slider);
         },
         active: function() {
-          slider.controlNav.each(function(index) {
-            index !== slider.animatingTo ?
-              this.classList.remove(namespace + "active") :
-              this.classList.add(namespace + "active");
-          });
+          for (const elem of slider.controlNav) {
+            elem.classList.remove(namespace + "active");
+          }
+          slider.controlNav[slider.animatingTo].classList.add(namespace + "active");
         },
         update: function(action, pos) {
           if (slider.pagingCount > 1 && action === "add") {
@@ -632,19 +630,17 @@
 
           if (Math.ceil((target + 1)/slider.visible) - 1 !== slider.currentSlide && target !== 0) {
             slider.currentItem = target;
-            slider.slides.each(function(index) {
-              index !== target ?
-                this.classList.remove(namespace + "active-slide") : 
-                this.classList.add(namespace + "active-slide");
-            });
+            for (const elem of slider.slides) {
+              elem.classList.remove(namespace + "active-slide");
+            }
+            slider.slides[target].classList.add(namespace + "active-slide");
             target = Math.floor(target/slider.visible);
           } else {
             slider.currentItem = target;
-            slider.slides.each(function(index) {
-              index !== target ?
-                this.classList.remove(namespace + "active-slide") :
-                this.classList.add(namespace + "active-slide");
-            });
+            for (const elem of slider.slides) {
+              elem.classList.remove(namespace + "active-slide");
+            }
+            slider.slides[target].classList.add(namespace + "active-slide");
             return false;
           }
         }
@@ -667,11 +663,10 @@
         // !CAROUSEL:
         // CANDIDATE: slide active class (for add/remove slide)
         if (!carousel) {
-          slider.slides.each(function(index) {
-            index !== target ?
-              this.classList.remove(namespace + 'active-slide') :
-              this.classList.add(namespace + 'active-slide');
-          });
+          for (const elem of slider.slides) {
+            elem.classList.remove(namespace + 'active-slide');
+          }
+          slider.slides[target].classList.add(namespace + 'active-slide');
         }
 
         // INFINITE LOOP:
@@ -989,11 +984,10 @@
       // !CAROUSEL:
       // CANDIDATE: active slide
       if (!carousel) {
-        slider.slides.each(function(index) {
-          index !== slider.currentSlide ?
-            this.classList.remove(namespace + "active-slide") :
-            this.classList.add(namespace + "active-slide");
-        });
+        for (const elem of slider.slides) {
+          elem.classList.remove(namespace + "active-slide");
+        }
+        slider.slides[slider.currentSlide].classList.add(namespace + "active-slide");
       }
 
       //FlexSlider: init() Callback
