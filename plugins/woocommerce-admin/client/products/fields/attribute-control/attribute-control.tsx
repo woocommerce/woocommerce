@@ -36,6 +36,7 @@ type AttributeControlProps = {
 	onAdd?: ( attribute: EnhancedProductAttribute[] ) => void;
 	onChange: ( value: ProductAttribute[] ) => void;
 	onEdit?: ( attribute: ProductAttribute ) => void;
+	onRemove?: ( attribute: ProductAttribute ) => void;
 	onModalClose?: ( attribute?: ProductAttribute ) => void;
 	onModalOpen?: ( attribute?: ProductAttribute ) => void;
 	text?: {
@@ -53,6 +54,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	onEdit,
 	onModalClose,
 	onModalOpen,
+	onRemove,
 	text = {
 		addAttributeModalTitle: undefined,
 		emptyStateSubtitle: undefined,
@@ -83,7 +85,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		);
 	};
 
-	const onRemove = ( attribute: ProductAttribute ) => {
+	const handleRemove = ( attribute: ProductAttribute ) => {
 		// eslint-disable-next-line no-alert
 		if ( window.confirm( __( 'Remove this attribute?', 'woocommerce' ) ) ) {
 			recordEvent(
@@ -95,6 +97,9 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						getAttributeId( attr ) !== getAttributeId( attribute )
 				)
 			);
+			if ( typeof onRemove === 'function' ) {
+				onRemove( attribute );
+			}
 		} else {
 			recordEvent( 'product_remove_attribute_confirmation_cancel_click' );
 		}
@@ -222,7 +227,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						attribute={ attr }
 						key={ getAttributeId( attr ) }
 						onEditClick={ () => openModal( attr ) }
-						onRemoveClick={ () => onRemove( attr ) }
+						onRemoveClick={ () => handleRemove( attr ) }
 					/>
 				) ) }
 			</Sortable>
