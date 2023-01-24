@@ -248,7 +248,7 @@ jobs:
                   RESET_SITE: true
               timeout-minutes: 60
               working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js basic.spec.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js
 
             - name: Download 'e2e-update-wc' artifact
               uses: actions/download-artifact@v3
@@ -466,7 +466,7 @@ jobs:
                   FORCE_COLOR: 1
                   ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
               working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js basic.spec.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
             - name: Generate E2E Allure report.
               if: success() || failure()
