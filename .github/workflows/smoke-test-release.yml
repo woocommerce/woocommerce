@@ -426,8 +426,11 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v3
 
-            - name: Install axios
-              run: npm install axios
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  install-filters: woocommerce
+                  build: false
 
             - name: Get WP versions
               id: get-versions
