@@ -19,11 +19,14 @@ import PostsNavigation from './shared/posts-navigation';
 import { ProductFormLayout } from './layout/product-form-layout';
 import { ProductFormFooter } from './layout/product-form-footer';
 import { ProductFormTab } from './product-form-tab';
-import { PricingSection } from './sections/pricing-section';
 import { ProductVariationDetailsSection } from './sections/product-variation-details-section';
 import { ProductVariationFormHeader } from './layout/product-variation-form-header';
 import useProductVariationNavigation from './hooks/use-product-variation-navigation';
-import { TAB_INVENTORY_ID, TAB_SHIPPING_ID } from './fills/constants';
+import {
+	TAB_INVENTORY_ID,
+	TAB_SHIPPING_ID,
+	TAB_PRICING_ID,
+} from './fills/constants';
 
 import './product-variation-form.scss';
 
@@ -62,7 +65,9 @@ export const ProductVariationForm: React.FC< {
 						<ProductVariationDetailsSection />
 					</ProductFormTab>
 					<ProductFormTab name="pricing" title="Pricing">
-						<PricingSection />
+						<WooProductSectionItem.Slot
+							location={ TAB_PRICING_ID }
+						/>
 					</ProductFormTab>
 					<ProductFormTab name="inventory" title="Inventory">
 						<WooProductSectionItem.Slot
