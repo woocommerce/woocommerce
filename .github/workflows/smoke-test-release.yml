@@ -111,7 +111,7 @@ jobs:
               if: success() || failure()
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-                  ENV_DESCRIPTION: ${{ matrix.version.env_description }}
+                  ENV_DESCRIPTION: wp-latest
               run: |
                   gh workflow run publish-test-reports-release.yml \
                     -f created_at="${{ needs.get-tag.outputs.created }}" \
