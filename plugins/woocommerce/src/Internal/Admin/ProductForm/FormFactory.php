@@ -139,20 +139,6 @@ class FormFactory {
 	}
 
 	/**
-	 * Returns form config.
-	 *
-	 * @return array form config.
-	 */
-	public static function get_form_config() {
-		return array(
-			'fields'   => self::get_fields(),
-			'cards'    => self::get_cards(),
-			'sections' => self::get_sections(),
-			'tabs'     => self::get_tabs(),
-		);
-	}
-
-	/**
 	 * Returns list of registered fields.
 	 *
 	 * @param array $sort_by key and order to sort by.
