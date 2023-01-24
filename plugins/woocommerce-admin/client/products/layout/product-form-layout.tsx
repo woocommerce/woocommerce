@@ -13,7 +13,6 @@ import classnames from 'classnames';
  * Internal dependencies
  */
 import './product-form-layout.scss';
-import { ProductFormTab } from '../product-form-tab';
 import { useHeaderHeight } from '~/header/use-header-height';
 
 type ProductFormLayoutProps = {
@@ -45,7 +44,9 @@ export const ProductFormLayout: React.FC< ProductFormLayoutProps > = ( {
 		const tabPanelTabs = document.querySelector(
 			'.product-form-layout .components-tab-panel__tabs'
 		) as HTMLElement;
-		tabPanelTabs.style.top = adminBarHeight + headerHeight + 'px';
+		if ( tabPanelTabs ) {
+			tabPanelTabs.style.top = adminBarHeight + headerHeight + 'px';
+		}
 	}, [ adminBarHeight, headerHeight ] );
 
 	const getTooltipTabs = ( tabs: TabPanel.Tab[] ) => {
@@ -77,7 +78,7 @@ export const ProductFormLayout: React.FC< ProductFormLayoutProps > = ( {
 
 	return (
 		<>
-			<WooProductTabItem.Slot location={ 'tab/' + id }>
+			<WooProductTabItem.Slot template={ 'tab/' + id }>
 				{ ( tabs, childrenMap ) =>
 					tabs.length > 0 ? (
 						<TabPanel

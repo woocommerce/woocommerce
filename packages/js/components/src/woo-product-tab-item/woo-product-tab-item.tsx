@@ -12,14 +12,15 @@ import { createOrderedChildren } from '../utils';
 
 type WooProductTabItemProps = {
 	id: string;
-	location: string;
 	pluginId: string;
+	template?: string;
 	order?: number;
 	tabProps: TabPanel.Tab;
+	templates?: Array< { name: string; order?: number } >;
 };
 
 type WooProductFieldSlotProps = {
-	location: string;
+	template: string;
 	children: (
 		tabs: TabPanel.Tab[],
 		tabChildren: Record< string, ReactNode >
@@ -30,24 +31,41 @@ export const WooProductTabItem: React.FC< WooProductTabItemProps > & {
 	Slot: React.VFC<
 		Omit< Slot.Props, 'children' > & WooProductFieldSlotProps
 	>;
-} = ( { children, order = 20, location, tabProps } ) => {
+} = ( { children, order, template, tabProps, templates } ) => {
+	if ( ! template && ! templates ) {
+		// eslint-disable-next-line no-console
+		console.warn(
+			'WooProductTabItem fill is missing template or templates property.'
+		);
+		return null;
+	}
+	templates = templates || [ { name: template as string, order } ];
 	return (
-		<Fill name={ `woocommerce_product_tab_${ location }` }>
-			{ ( fillProps: Fill.Props ) => {
-				return createOrderedChildren< Fill.Props >(
-					children,
-					order,
-					fillProps,
-					{ tabProps }
-				);
-			} }
-		</Fill>
+		<>
+			{ templates.map( ( templateData ) => (
+				<Fill
+					name={ `woocommerce_product_tab_${ templateData.name }` }
+					key={ templateData.name }
+				>
+					{ ( fillProps: Fill.Props ) => {
+						return createOrderedChildren< Fill.Props >(
+							typeof children === 'function'
+								? children( templateData )
+								: children,
+							templateData.order || 20,
+							fillProps,
+							{ tabProps }
+						);
+					} }
+				</Fill>
+			) ) }
+		</>
 	);
 };
 
-WooProductTabItem.Slot = ( { fillProps, location, children } ) => (
+WooProductTabItem.Slot = ( { fillProps, template, children } ) => (
 	<Slot
-		name={ `woocommerce_product_tab_${ location }` }
+		name={ `woocommerce_product_tab_${ template }` }
 		fillProps={ fillProps }
 	>
 		{ ( fills ) => {

@@ -6,7 +6,6 @@ import { useEffect, useRef } from '@wordpress/element';
 import { Form, FormRef, SlotContextProvider } from '@woocommerce/components';
 import { PluginArea } from '@wordpress/plugins';
 import { PartialProduct, ProductVariation } from '@woocommerce/data';
-import { PluginArea } from '@wordpress/plugins';
 
 /**
  * Internal dependencies
@@ -14,15 +13,8 @@ import { PluginArea } from '@wordpress/plugins';
 import PostsNavigation from './shared/posts-navigation';
 import { ProductFormLayout } from './layout/product-form-layout';
 import { ProductFormFooter } from './layout/product-form-footer';
-import { ProductFormTab } from './product-form-tab';
-import { ProductVariationDetailsSection } from './sections/product-variation-details-section';
 import { ProductVariationFormHeader } from './layout/product-variation-form-header';
 import useProductVariationNavigation from './hooks/use-product-variation-navigation';
-import {
-	TAB_INVENTORY_ID,
-	TAB_SHIPPING_ID,
-	TAB_PRICING_ID,
-} from './fills/constants';
 
 import './product-variation-form.scss';
 

@@ -21,7 +21,7 @@ import {
 	TAB_SHIPPING_ID,
 	TAB_INVENTORY_ID,
 	TAB_PRICING_ID,
-} from './fills/constants';
+} from './constants';
 
 const Tabs = () => {
 	const { values: product } = useFormContext< Product >();
@@ -57,7 +57,7 @@ const Tabs = () => {
 		<>
 			<WooProductTabItem
 				id={ 'new-tab-id' }
-				location="tab/general"
+				template="tab/general"
 				pluginId="core"
 				order={ 1 }
 				tabProps={ tabPropData.general }
@@ -66,7 +66,7 @@ const Tabs = () => {
 			</WooProductTabItem>
 			<WooProductTabItem
 				id={ 'tab/pricing' }
-				location="tab/general"
+				template="tab/general"
 				pluginId="core"
 				order={ 3 }
 				tabProps={ tabPropData.pricing }
@@ -75,7 +75,7 @@ const Tabs = () => {
 			</WooProductTabItem>
 			<WooProductTabItem
 				id={ 'tab/inventory' }
-				location="tab/general"
+				template="tab/general"
 				pluginId="core"
 				order={ 5 }
 				tabProps={ tabPropData.inventory }
@@ -84,7 +84,7 @@ const Tabs = () => {
 			</WooProductTabItem>
 			<WooProductTabItem
 				id={ 'tab/shipping' }
-				location="tab/general"
+				template="tab/general"
 				pluginId="core"
 				order={ 7 }
 				tabProps={ tabPropData.shipping }
@@ -97,7 +97,7 @@ const Tabs = () => {
 			{ window.wcAdminFeatures[ 'product-variation-management' ] ? (
 				<WooProductTabItem
 					id={ 'tab/options' }
-					location="tab/general"
+					template="tab/general"
 					pluginId="core"
 					order={ 9 }
 					tabProps={ tabPropData.options }
@@ -112,10 +112,6 @@ const Tabs = () => {
 	);
 };
 
-/**
- * Preloading product form data, as product pages are waiting on this to be resolved.
- * The above Form component won't get rendered until the getProductForm is resolved.
- */
 registerPlugin( 'wc-admin-product-editor-form-tab-fills', {
 	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 	scope: 'woocommerce-product-editor',
