@@ -114,6 +114,23 @@ class ProductQuery extends AbstractBlock {
 	}
 
 	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 */
+	protected function enqueue_data( array $attributes = [] ) {
+		parent::enqueue_data( $attributes );
+
+		global $pagenow;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$post_id                     = isset( $_GET['postId'] ) ? sanitize_text_field( wp_unslash( $_GET['postId'] ) ) : null;
+		$is_archive_product_template = 'site-editor.php' === $pagenow && 'woocommerce/woocommerce//archive-product' === $post_id;
+		$this->asset_data_registry->add( 'is_archive_product_template', $is_archive_product_template, true );
+	}
+
+	/**
 	 * Update the query for the product query block in Editor.
 	 *
 	 * @param array           $args    Query args.

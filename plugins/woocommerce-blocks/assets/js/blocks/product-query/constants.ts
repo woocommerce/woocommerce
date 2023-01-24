@@ -47,6 +47,11 @@ const GLOBAL_HIDE_OUT_OF_STOCK = getSetting< boolean >(
 	false
 );
 
+const isArchiveProductTemplate = getSetting< boolean >(
+	'is_archive_product_template',
+	false
+);
+
 export const QUERY_DEFAULT_ATTRIBUTES: QueryBlockAttributes = {
 	allowedControls: DEFAULT_ALLOWED_CONTROLS,
 	displayLayout: {
@@ -64,7 +69,7 @@ export const QUERY_DEFAULT_ATTRIBUTES: QueryBlockAttributes = {
 		search: '',
 		exclude: [],
 		sticky: '',
-		inherit: false,
+		inherit: isArchiveProductTemplate,
 		__woocommerceAttributes: [],
 		__woocommerceStockStatus: GLOBAL_HIDE_OUT_OF_STOCK
 			? Object.keys( objectOmit( STOCK_STATUS_OPTIONS, 'outofstock' ) )
