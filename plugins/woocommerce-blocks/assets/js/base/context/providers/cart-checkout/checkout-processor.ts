@@ -167,6 +167,7 @@ const CheckoutProcessor = () => {
 					'There was a problem with your payment option.',
 					'woo-gutenberg-products-block'
 				),
+				context: 'wc/checkout/payments',
 			};
 		}
 		if ( shippingErrorStatus.hasError ) {
@@ -175,6 +176,7 @@ const CheckoutProcessor = () => {
 					'There was a problem with your shipping option.',
 					'woo-gutenberg-products-block'
 				),
+				context: 'wc/checkout/shipping-methods',
 			};
 		}
 
