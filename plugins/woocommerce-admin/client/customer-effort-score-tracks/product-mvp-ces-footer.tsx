@@ -21,9 +21,12 @@ import { STORE_KEY } from './data/constants';
 
 export const PRODUCT_MVP_CES_ACTION_OPTION_NAME =
 	'woocommerce_ces_product_mvp_ces_action';
+export const NEW_PRODUCT_MANAGEMENT =
+	'woocommerce_new_product_management_enabled';
 
 export const ProductMVPCESFooter: React.FC = () => {
-	const { showCesModal } = useDispatch( STORE_KEY );
+	const { showCesModal, showProductMVPFeedbackModal } =
+		useDispatch( STORE_KEY );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const {
 		cesAction,
@@ -98,6 +101,16 @@ export const ProductMVPCESFooter: React.FC = () => {
 		} );
 	};
 
+	const onDisablingNewProductExperience = () => {
+		updateOptions( {
+			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: 'hide',
+		} );
+		updateOptions( {
+			[ NEW_PRODUCT_MANAGEMENT ]: 'no',
+		} );
+		showProductMVPFeedbackModal();
+	};
+
 	const onDisablingCES = () => {
 		updateOptions( {
 			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: 'hide',
@@ -125,7 +138,7 @@ export const ProductMVPCESFooter: React.FC = () => {
 								{ __( 'Share feedback', 'woocommerce' ) }
 							</Button>
 							<Button
-								onClick={ onDisablingCES }
+								onClick={ onDisablingNewProductExperience }
 								variant="tertiary"
 							>
 								{ __( 'Turn it off', 'woocommerce' ) }
