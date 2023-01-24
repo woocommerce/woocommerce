@@ -113,6 +113,8 @@ const Block = ( {
 			/>
 			{ showPhoneField && (
 				<PhoneNumber
+					id={ 'billing-phone' }
+					errorId={ 'billing_phone' }
 					isRequired={ requirePhoneField }
 					value={ billingAddress.phone }
 					onChange={ ( value ) => {

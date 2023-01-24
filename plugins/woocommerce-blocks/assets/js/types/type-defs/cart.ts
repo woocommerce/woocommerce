@@ -216,6 +216,6 @@ export interface ExtensionCartUpdateArgs {
 }
 
 export interface BillingAddressShippingAddress {
-	billing_address: CartBillingAddress;
-	shipping_address: CartShippingAddress;
+	billing_address: Partial< CartBillingAddress >;
+	shipping_address: Partial< CartShippingAddress >;
 }

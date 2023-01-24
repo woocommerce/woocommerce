@@ -65,6 +65,7 @@ const Block = (): JSX.Element => {
 				id="email"
 				type="email"
 				autoComplete="email"
+				errorId={ 'billing_email' }
 				label={ __( 'Email address', 'woo-gutenberg-products-block' ) }
 				value={ billingAddress.email }
 				required={ true }
