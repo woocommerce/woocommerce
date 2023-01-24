@@ -311,7 +311,7 @@ jobs:
                   retention-days: 5
 
     get-wp-versions:
-        name: Get WP L-1 & L-2 versions
+        name: Get WP L-1 & L-2 version numbers
         needs: [get-tag]
         runs-on: ubuntu-20.04
         permissions:
