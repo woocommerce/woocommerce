@@ -17,8 +17,6 @@ namespace Automattic\WooCommerce\Caching;
  */
 abstract class ObjectCache {
 
-	private const CACHE_PREFIX_OPTION_NAME = 'wp_object_cache_key_prefix_';
-
 	/**
 	 * Expiration value to be passed to 'set' to use the value of $default_expiration.
 	 */
@@ -54,23 +52,9 @@ abstract class ObjectCache {
 	/**
 	 * The cache engine to use.
 	 *
-	 * @var CacheEngine
+	 * @var ?CacheEngine
 	 */
 	private $cache_engine = null;
-
-	/**
-	 * The prefix to use for cache keys to pass to the cache engine.
-	 *
-	 * @var string
-	 */
-	private $cache_key_prefix = null;
-
-	/**
-	 * The name of the option used to store the cache prefix.
-	 *
-	 * @var string
-	 */
-	private $cache_key_prefix_option_name;
 
 	/**
 	 * Gets an identifier for the types of objects cached by this class.
@@ -92,8 +76,6 @@ abstract class ObjectCache {
 		if ( empty( $this->object_type ) ) {
 			throw new CacheException( 'Class ' . get_class( $this ) . ' returns an empty value for get_object_type', $this );
 		}
-
-		$this->cache_key_prefix_option_name = self::CACHE_PREFIX_OPTION_NAME . $this->object_type;
 	}
 
 	/**
@@ -117,7 +99,7 @@ abstract class ObjectCache {
 			/**
 			 * Filters the underlying cache engine to be used by an instance of ObjectCache.
 			 *
-			 * @since 6.8.0
+			 * @since 7.4.0
 			 *
 			 * @param CacheEngine $engine The cache engine to be used by default.
 			 * @param ObjectCache $cache_instance The instance of ObjectCache that will use the cache engine.
@@ -126,39 +108,6 @@ abstract class ObjectCache {
 			$this->cache_engine = apply_filters( 'wc_object_cache_get_engine', $engine, $this );
 		}
 		return $this->cache_engine;
-	}
-
-	/**
-	 * Get the current cache prefix to use, generating one if none is in use yet.
-	 *
-	 * @return string
-	 */
-	private function get_cache_key_prefix(): string {
-		$value = $this->cache_key_prefix;
-		if ( ! $value ) {
-			$value = get_option( $this->cache_key_prefix_option_name );
-			if ( ! $value ) {
-				$value = $this->create_cache_key_prefix();
-			}
-			$this->cache_key_prefix = $value;
-		}
-		return $value;
-	}
-
-	/**
-	 * Generate a prefix for the cache keys to use, containing the object type and a random string,
-	 * and store it persistently using an option.
-	 *
-	 * @return string The generated prefix.
-	 * @throws CacheException Can't store the generated prefix.
-	 */
-	private function create_cache_key_prefix(): string {
-		$prefix_variable_part = $this->get_random_string();
-		$prefix               = "woocommerce_object_cache|{$this->object_type}|{$prefix_variable_part}|";
-		if ( ! update_option( $this->cache_key_prefix_option_name, $prefix ) ) {
-			throw new CacheException( "Can't store the key prefix option", $this );
-		}
-		return $prefix;
 	}
 
 	/**
@@ -201,24 +150,13 @@ abstract class ObjectCache {
 		}
 
 		$id   = $this->get_id_from_object_if_null( $object, $id );
-		$data = $this->serialize( $object );
 
-		/**
-		 * Filters the serialized object that will be passed by an instance of ObjectCache to its cache engine to be cached.
-		 *
-		 * @since 6.8.0
-		 *
-		 * @param array $data The already serialized object data.
-		 * @param array|object $object The object before serialization.
-		 * @returns array The actual serialized object data that will be passed to the cache engine.
-		 */
-		$data = apply_filters( "woocommerce_after_serializing_{$this->object_type}_for_caching", $data, $object, $id );
-
-		$this->last_cached_data = $data;
+		$this->last_cached_data = $object;
 		return $this->get_cache_engine()->cache_object(
-			$this->get_cache_key_prefix() . $id,
-			$data,
-			self::DEFAULT_EXPIRATION === $expiration ? $this->default_expiration : $expiration
+			$id,
+			$object,
+			self::DEFAULT_EXPIRATION === $expiration ? $this->default_expiration : $expiration,
+			$this->get_object_type()
 		);
 	}
 
@@ -246,7 +184,9 @@ abstract class ObjectCache {
 	 *
 	 * @param object|array    $object The object to get the id from.
 	 * @param int|string|null $id An object id or null.
+	 *
 	 * @return int|string|null Passed $id if it wasn't null, otherwise id obtained from $object using get_object_id.
+	 *
 	 * @throws CacheException Passed $id is null and get_object_id returned null too.
 	 */
 	private function get_id_from_object_if_null( $object, $id ) {
@@ -293,7 +233,7 @@ abstract class ObjectCache {
 
 		$this->verify_expiration_value( $expiration );
 
-		$data = $this->get_cache_engine()->get_cached_object( $this->get_cache_key_prefix() . $id );
+		$data = $this->get_cache_engine()->get_cached_object( $id, $this->get_object_type() );
 		if ( null === $data ) {
 			if ( $get_from_datastore_callback ) {
 				$object = $get_from_datastore_callback( $id );
@@ -309,18 +249,7 @@ abstract class ObjectCache {
 			$data = $this->last_cached_data;
 		}
 
-		$object = $this->deserialize( $data );
-
-		/**
-		 * Filters the deserialized object that is retrieved from the cache engine of an instance of ObjectCache and will be returned by 'get'.
-		 *
-		 * @since 6.8.0
-		 *
-		 * @param array|object $object The object after being deserialized.
-		 * @param array $data The serialized object data that was retrieved from the cache engine.
-		 * @returns array|object The actual deserialized object data that will be returned by 'get'.
-		 */
-		return apply_filters( "woocommerce_after_deserializing_{$this->object_type}_from_cache", $object, $data, $id );
+		return $data;
 	}
 
 	/**
@@ -330,41 +259,16 @@ abstract class ObjectCache {
 	 * @return bool True if the object is removed from the cache successfully, false otherwise (because the object wasn't cached or for other reason).
 	 */
 	public function remove( $id ): bool {
-		$result = $this->get_cache_engine()->delete_cached_object( $this->get_cache_key_prefix() . $id );
-
-		/**
-		 * Action triggered by an instance of ObjectCache after an object is (attempted to be) removed from the cache.
-		 *
-		 * @since 6.8.0
-		 *
-		 * @param int|string $id The id of the object being removed.
-		 * @param bool $result True if the object removal succeeded, false otherwise.
-		 */
-		do_action( "woocommerce_after_removing_{$this->object_type}_from_cache", $id, $result );
-
-		return $result;
+		return $this->get_cache_engine()->delete_cached_object( $id, $this->get_object_type() );
 	}
 
 	/**
 	 * Remove all the objects from the cache.
-	 * This is done by forcing the generation of a new cache key prefix
-	 * and leaving the old cached objects to expire.
 	 *
-	 * @return void
+	 * @return bool True on success, false on error.
 	 */
-	public function flush(): void {
-		delete_option( $this->cache_key_prefix_option_name );
-		$this->cache_key_prefix = null;
-
-		/**
-		 * Action triggered by an instance of ObjectCache after it flushes all the cached objects.
-		 *
-		 * @since 6.8.0
-		 *
-		 * @param ObjectCache $cache_instance The instance of ObjectCache whose 'flush` method has been called.
-		 * @param CacheEngine $engine The cache engine in use.
-		 */
-		do_action( "woocommerce_after_flushing_{$this->object_type}_cache", $this, $this->get_cache_engine() );
+	public function flush(): bool {
+		return $this->get_cache_engine()->delete_cache_group( $this->get_object_type() );
 	}
 
 	/**
@@ -374,7 +278,7 @@ abstract class ObjectCache {
 	 * @return bool True if there's a cached object with the specified id.
 	 */
 	public function is_cached( $id ): bool {
-		return $this->get_cache_engine()->is_cached( $this->get_cache_key_prefix() . $id );
+		return $this->get_cache_engine()->is_cached( $id, $this->get_object_type() );
 	}
 
 	/**
@@ -384,9 +288,7 @@ abstract class ObjectCache {
 	 * @param array|object $object The object to get the id for.
 	 * @return int|string|null
 	 */
-	protected function get_object_id( $object ) {
-		return null;
-	}
+	abstract protected function get_object_id( $object );
 
 	/**
 	 * Validate an object before it's cached.
@@ -394,31 +296,7 @@ abstract class ObjectCache {
 	 * @param array|object $object Object to validate.
 	 * @return array|null An array with validation error messages, null or an empty array if there are no errors.
 	 */
-	protected function validate( $object ): ?array {
-		return null;
-	}
-
-	/**
-	 * Convert an object to a serialized form suitable for caching.
-	 * If a class overrides this method it should override 'deserialize' as well.
-	 *
-	 * @param array|object $object The object to serialize.
-	 * @return array The serialized object.
-	 */
-	protected function serialize( $object ): array {
-		return array( 'data' => $object );
-	}
-
-	/**
-	 * Deserializes a set of object data after having been retrieved from the cache.
-	 * If a class overrides this method it should override 'serialize' as well.
-	 *
-	 * @param array $serialized Serialized object data as it was returned by 'validate_and_serialize'.
-	 * @return object|array Deserialized object, ready to be returned by 'get'.
-	 */
-	protected function deserialize( array $serialized ) {
-		return $serialized['data'];
-	}
+	abstract protected function validate( $object ): ?array;
 
 	/**
 	 * Get an object from an authoritative data store.
@@ -427,9 +305,7 @@ abstract class ObjectCache {
 	 * @param int|string $id The id of the object to get.
 	 * @return array|object|null The retrieved object, or null if it's not possible to retrieve an object by the given id.
 	 */
-	protected function get_from_datastore( $id ) {
-		return null;
-	}
+	abstract protected function get_from_datastore( $id );
 
 	/**
 	 * Get the instance of the cache engine to use.
@@ -437,7 +313,7 @@ abstract class ObjectCache {
 	 * @return CacheEngine
 	 */
 	protected function get_cache_engine_instance(): CacheEngine {
-		return wc_get_container()->get( WpCacheEngine::class );
+		return wc_get_container()->get( WPCacheEngine::class );
 	}
 
 	/**

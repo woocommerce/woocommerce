@@ -15,7 +15,7 @@ class OrderCache extends ObjectCache {
 	 * @return string
 	 */
 	public function get_object_type(): string {
-		return 'order';
+		return 'orders';
 	}
 
 	/**
@@ -40,5 +40,17 @@ class OrderCache extends ObjectCache {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Get an object from an authoritative data store.
+	 * This is used by 'get' if the object isn't cached and no custom object retrieval callback is suupplied.
+	 *
+	 * @param int|string $id The id of the object to get.
+	 *
+	 * @return array|object|null The retrieved object, or null if it's not possible to retrieve an object by the given id.
+	 */
+	protected function get_from_datastore( $id ) {
+		return wc_get_order( $id );
 	}
 }
