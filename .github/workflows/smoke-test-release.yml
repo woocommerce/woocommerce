@@ -12,10 +12,8 @@ concurrency:
     cancel-in-progress: true
 permissions: {}
 env:
-    API_WP_LATEST_ARTIFACT: api-wp-latest--run-${{ github.run_number }}
     E2E_WP_LATEST_ARTIFACT: e2e-wp-latest--run-${{ github.run_number }}
     E2E_UPDATE_WC_ARTIFACT: e2e-update-wc--run-${{ github.run_number }}
-    K6_ARTIFACT: k6-release--run-${{ github.run_number }}
     FORCE_COLOR: 1
 
 jobs:
@@ -99,7 +97,7 @@ jobs:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
 
-            - name: Upload artifact to bucket
+            - name: Upload Allure files to bucket
               if: success() || failure()
               run: |
                   aws s3 sync ${{ env.ALLURE_RESULTS_DIR }} \
@@ -108,6 +106,22 @@ jobs:
                   aws s3 sync ${{ env.ALLURE_REPORT_DIR }} \
                       ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }}/allure-report \
                       --quiet
+
+            - name: Publish E2E Allure report
+              if: success() || failure()
+              env:
+                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+                  ENV_DESCRIPTION: ${{ matrix.version.env_description }}
+              run: |
+                  gh workflow run publish-test-reports-release.yml \
+                    -f created_at="${{ needs.get-tag.outputs.created }}" \
+                    -f run_id=${{ github.run_id }} \
+                    -f run_number=${{ github.run_number }} \
+                    -f release_tag=${{ needs.get-tag.outputs.tag }} \
+                    -f artifact="${{ env.E2E_WP_LATEST_ARTIFACT }}" \
+                    -f env_description="${{ env.ENV_DESCRIPTION }}" \
+                    -f test_type="e2e" \
+                    --repo woocommerce/woocommerce-test-reports
 
             - name: Archive 'Update WooCommerce' test report
               if: success() || failure()
@@ -123,13 +137,13 @@ jobs:
     api-wp-latest:
         name: API on WP Latest
         runs-on: ubuntu-20.04
-        needs: [e2e-update-wc]
+        needs: [get-tag, e2e-update-wc]
         permissions:
             contents: read
         env:
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-report
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-results
-            BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
+            API_WP_LATEST_ARTIFACT: api-wp-latest--run-${{ github.run_number }}
         steps:
             - uses: actions/checkout@v3
 
@@ -142,6 +156,7 @@ jobs:
             - name: Run API tests.
               working-directory: plugins/woocommerce
               env:
+                  BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
                   USER_KEY: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
                   USER_SECRET: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
               run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js hello
@@ -150,6 +165,42 @@ jobs:
               if: success() || failure()
               working-directory: plugins/woocommerce
               run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+
+            - name: Configure AWS credentials
+              if: success() || failure()
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
+                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+
+            - name: Upload Allure files to bucket
+              if: success() || failure()
+              run: |
+                  aws s3 cp ${{ env.ALLURE_RESULTS_DIR }} \
+                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_WP_LATEST_ARTIFACT }}/allure-results \
+                      --recursive \
+                      --quiet
+                  aws s3 cp ${{ env.ALLURE_REPORT_DIR }} \
+                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_WP_LATEST_ARTIFACT }}/allure-report \
+                      --recursive \
+                      --quiet
+
+            - name: Publish API Allure report
+              if: success() || failure()
+              env:
+                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+                  ENV_DESCRIPTION: ${{ matrix.version.env_description }}
+              run: |
+                  gh workflow run publish-test-reports-release.yml \
+                    -f created_at="${{ needs.get-tag.outputs.created }}" \
+                    -f run_id=${{ github.run_id }} \
+                    -f run_number=${{ github.run_number }} \
+                    -f release_tag=${{ needs.get-tag.outputs.tag }} \
+                    -f artifact="${{ env.API_WP_LATEST_ARTIFACT }}" \
+                    -f env_description="${{ env.ENV_DESCRIPTION }}" \
+                    -f test_type="api" \
+                    --repo woocommerce/woocommerce-test-reports
 
             - name: Archive API test report
               if: success() || failure()
@@ -162,33 +213,12 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
-            - name: Configure AWS credentials
-              if: success() || failure()
-              uses: aws-actions/configure-aws-credentials@v1
-              with:
-                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
-                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
-                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-
-            - name: Upload artifact to bucket
-              if: success() || failure()
-              run: |
-                  aws s3 cp ${{ env.ALLURE_RESULTS_DIR }} \
-                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_WP_LATEST_ARTIFACT }}/allure-results \
-                      --recursive \
-                      --quiet
-                  aws s3 cp ${{ env.ALLURE_REPORT_DIR }} \
-                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_WP_LATEST_ARTIFACT }}/allure-report \
-                      --recursive \
-                      --quiet
-
     e2e-wp-latest:
         name: E2E on WP Latest
         runs-on: ubuntu-20.04
-        needs: [api-wp-latest]
+        needs: [get-tag, api-wp-latest]
         permissions:
             contents: read
-        if: success() || failure()
         env:
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
@@ -235,6 +265,40 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
+            - name: Configure AWS credentials
+              if: success() || failure()
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
+                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+
+            - name: Upload report to bucket
+              if: success() || failure()
+              run: |
+                  aws s3 sync ${{ env.ALLURE_RESULTS_DIR }} \
+                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }}/allure-results \
+                      --quiet
+                  aws s3 sync ${{ env.ALLURE_REPORT_DIR }} \
+                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }}/allure-report \
+                      --quiet
+
+            - name: Publish E2E Allure report
+              if: success() || failure()
+              env:
+                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+                  ENV_DESCRIPTION: ${{ matrix.version.env_description }}
+              run: |
+                  gh workflow run publish-test-reports-release.yml \
+                    -f created_at="${{ needs.get-tag.outputs.created }}" \
+                    -f run_id=${{ github.run_id }} \
+                    -f run_number=${{ github.run_number }} \
+                    -f release_tag=${{ needs.get-tag.outputs.tag }} \
+                    -f artifact="${{ env.E2E_WP_LATEST_ARTIFACT }}" \
+                    -f env_description="${{ env.ENV_DESCRIPTION }}" \
+                    -f test_type="e2e" \
+                    --repo woocommerce/woocommerce-test-reports
+
             - name: Archive E2E test report
               if: success() || failure()
               uses: actions/upload-artifact@v3
@@ -245,50 +309,6 @@ jobs:
                       ${{ env.ALLURE_REPORT_DIR }}
                   if-no-files-found: ignore
                   retention-days: 5
-
-            - name: Configure AWS credentials
-              if: success() || failure()
-              uses: aws-actions/configure-aws-credentials@v1
-              with:
-                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
-                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
-                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-
-            - name: Upload artifact to bucket
-              if: success() || failure()
-              run: |
-                  aws s3 sync ${{ env.ALLURE_RESULTS_DIR }} \
-                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }}/allure-results \
-                      --quiet
-                  aws s3 sync ${{ env.ALLURE_REPORT_DIR }} \
-                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }}/allure-report \
-                      --quiet
-
-    report-wp-latest:
-        name: Publish API & E2E Allure reports on WP Latest
-        if: |
-            ( success() || failure() ) &&
-            ! github.event.pull_request.head.repo.fork
-        runs-on: ubuntu-20.04
-        permissions:
-            contents: read
-        needs: [get-tag, e2e-wp-latest]
-        steps:
-            - name: Publish report on WP Latest
-              env:
-                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-                  ENV_DESCRIPTION: wp-latest
-              run: |
-                  gh workflow run publish-test-reports-release.yml \
-                    -f created_at="${{ needs.get-tag.outputs.created }}" \
-                    -f run_id=${{ github.run_id }} \
-                    -f run_number=${{ github.run_number }} \
-                    -f release_tag=${{ needs.get-tag.outputs.tag }} \
-                    -f api_artifact="${{ env.API_WP_LATEST_ARTIFACT }}" \
-                    -f e2e_artifact="${{ env.E2E_WP_LATEST_ARTIFACT }}" \
-                    -f env_description="${{ env.ENV_DESCRIPTION }}" \
-                    -f s3_path="public/release/${{ needs.get-tag.outputs.tag }}/${{ env.ENV_DESCRIPTION }}" \
-                    --repo woocommerce/woocommerce-test-reports
 
     get-wp-versions:
         name: Get WP L-1 & L-2 versions
@@ -381,6 +401,7 @@ jobs:
                   pnpm exec wp-env run tests-cli "wp user list"
 
             - name: Run API tests.
+              id: api
               working-directory: plugins/woocommerce
               env:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
@@ -390,6 +411,39 @@ jobs:
               if: success() || failure()
               working-directory: plugins/woocommerce
               run: pnpm exec allure generate --clean ${{ env.API_ALLURE_RESULTS_DIR }} --output ${{ env.API_ALLURE_REPORT_DIR }}
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
+                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+
+            - name: Upload API Allure artifacts to bucket
+              if: success() || failure()
+              run: |
+                  aws s3 sync ${{ env.API_ALLURE_RESULTS_DIR }} \
+                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_WP_LATEST_X_ARTIFACT }}/allure-results \
+                      --quiet
+                  aws s3 sync ${{ env.API_ALLURE_REPORT_DIR }} \
+                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_WP_LATEST_X_ARTIFACT }}/allure-report \
+                      --quiet
+
+            - name: Publish API Allure report
+              if: success() || failure()
+              env:
+                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+                  ENV_DESCRIPTION: ${{ matrix.version.env_description }}
+              run: |
+                  gh workflow run publish-test-reports-release.yml \
+                    -f created_at="${{ needs.get-wp-versions.outputs.created }}" \
+                    -f run_id=${{ github.run_id }} \
+                    -f run_number=${{ github.run_number }} \
+                    -f release_tag=${{ needs.get-wp-versions.outputs.tag }} \
+                    -f artifact="${{ env.API_WP_LATEST_X_ARTIFACT }}" \
+                    -f env_description="${{ env.ENV_DESCRIPTION }}" \
+                    -f test_type="api" \
+                    --repo woocommerce/woocommerce-test-reports
 
             - name: Archive API Allure reports
               if: success() || failure()
@@ -419,23 +473,9 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec allure generate --clean ${{ env.E2E_ALLURE_RESULTS_DIR }} --output ${{ env.E2E_ALLURE_REPORT_DIR }}
 
-            - name: Configure AWS credentials
-              if: success() || failure()
-              uses: aws-actions/configure-aws-credentials@v1
-              with:
-                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
-                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
-                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-
-            - name: Upload artifacts to bucket
+            - name: Upload E2E Allure artifacts to bucket
               if: success() || failure()
               run: |
-                  aws s3 sync ${{ env.API_ALLURE_RESULTS_DIR }} \
-                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_WP_LATEST_X_ARTIFACT }}/allure-results \
-                      --quiet
-                  aws s3 sync ${{ env.API_ALLURE_REPORT_DIR }} \
-                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_WP_LATEST_X_ARTIFACT }}/allure-report \
-                      --quiet
                   aws s3 sync ${{ env.E2E_ALLURE_RESULTS_DIR }} \
                       ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_X_ARTIFACT }}/allure-results \
                       --quiet
@@ -454,7 +494,7 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
-            - name: Publish report
+            - name: Publish E2E Allure report
               if: success() || failure()
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
@@ -465,8 +505,7 @@ jobs:
                     -f run_id=${{ github.run_id }} \
                     -f run_number=${{ github.run_number }} \
                     -f release_tag=${{ needs.get-wp-versions.outputs.tag }} \
-                    -f api_artifact="${{ env.API_WP_LATEST_X_ARTIFACT }}" \
-                    -f e2e_artifact="${{ env.E2E_WP_LATEST_X_ARTIFACT }}" \
+                    -f artifact="${{ env.E2E_WP_LATEST_X_ARTIFACT }}" \
                     -f env_description="${{ env.ENV_DESCRIPTION }}" \
-                    -f s3_path="public/release/${{ needs.get-wp-versions.outputs.tag }}/${{ env.ENV_DESCRIPTION }}" \
+                    -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
