@@ -54,8 +54,13 @@ export const WooProductTabItem: React.FC< WooProductTabItemProps > & {
 						return createOrderedChildren< Fill.Props >(
 							children,
 							templateData.order || 20,
-							{ ...templateData, ...fillProps },
-							{ tabProps }
+							{},
+							{
+								tabProps,
+								templateName: templateData.name,
+								order: templateData.order || 20,
+								...fillProps,
+							}
 						);
 					} }
 				</Fill>

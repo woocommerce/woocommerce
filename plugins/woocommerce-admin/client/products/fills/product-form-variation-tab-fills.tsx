@@ -75,7 +75,7 @@ const Tabs = () => {
 				order={ 7 }
 				tabProps={ tabPropData.shipping }
 			>
-				{ ( product: PartialProduct ) => (
+				{ ( { product }: { product: PartialProduct } ) => (
 					<WooProductSectionItem.Slot
 						location={ TAB_SHIPPING_ID }
 						fillProps={ { product } }
