@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Warn users that prettyPhoto and jquery-cookie are deprecated.
