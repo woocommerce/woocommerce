@@ -3,14 +3,9 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useEffect, useRef } from '@wordpress/element';
-import {
-	Form,
-	FormRef,
-	__experimentalWooProductSectionItem as WooProductSectionItem,
-	SlotContextProvider,
-} from '@woocommerce/components';
-import { PartialProduct, ProductVariation } from '@woocommerce/data';
+import { Form, FormRef, SlotContextProvider } from '@woocommerce/components';
 import { PluginArea } from '@wordpress/plugins';
+import { PartialProduct, ProductVariation } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -18,15 +13,8 @@ import { PluginArea } from '@wordpress/plugins';
 import PostsNavigation from './shared/posts-navigation';
 import { ProductFormLayout } from './layout/product-form-layout';
 import { ProductFormFooter } from './layout/product-form-footer';
-import { ProductFormTab } from './product-form-tab';
-import { ProductVariationDetailsSection } from './sections/product-variation-details-section';
 import { ProductVariationFormHeader } from './layout/product-variation-form-header';
 import useProductVariationNavigation from './hooks/use-product-variation-navigation';
-import {
-	TAB_INVENTORY_ID,
-	TAB_SHIPPING_ID,
-	TAB_PRICING_ID,
-} from './fills/constants';
 
 import './product-variation-form.scss';
 
@@ -60,27 +48,11 @@ export const ProductVariationForm: React.FC< {
 				ref={ formRef }
 			>
 				<ProductVariationFormHeader />
-				<ProductFormLayout key={ productVariation.id }>
-					<ProductFormTab name="general" title="General">
-						<ProductVariationDetailsSection />
-					</ProductFormTab>
-					<ProductFormTab name="pricing" title="Pricing">
-						<WooProductSectionItem.Slot
-							location={ TAB_PRICING_ID }
-						/>
-					</ProductFormTab>
-					<ProductFormTab name="inventory" title="Inventory">
-						<WooProductSectionItem.Slot
-							location={ TAB_INVENTORY_ID }
-						/>
-					</ProductFormTab>
-					<ProductFormTab name="shipping" title="Shipping">
-						<WooProductSectionItem.Slot
-							location={ TAB_SHIPPING_ID }
-							fillProps={ { product } }
-						/>
-					</ProductFormTab>
-				</ProductFormLayout>
+				<ProductFormLayout
+					key={ productVariation.id }
+					id="variation"
+					product={ productVariation as PartialProduct }
+				/>
 				<ProductFormFooter />
 
 				<div className="product-variation-form__navigation">

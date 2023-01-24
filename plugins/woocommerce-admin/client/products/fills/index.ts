@@ -2,6 +2,8 @@
  * Internal dependencies
  */
 import './product-form-fills';
+import './product-form-tab-fills';
+import './product-form-variation-tab-fills';
 
 export * from './shipping-section/shipping-section-fills';
 export * from './details-section/details-section-fills';
