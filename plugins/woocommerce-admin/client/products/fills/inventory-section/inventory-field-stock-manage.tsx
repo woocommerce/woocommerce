@@ -2,11 +2,11 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import { useFormContext, Link } from '@woocommerce/components';
 import { TextControl } from '@wordpress/components';
-import { getAdminLink } from '@woocommerce/settings';
-import interpolateComponents from '@automattic/interpolate-components';
-import { Link, useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
+import interpolateComponents from '@automattic/interpolate-components';
+import { getAdminLink } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -14,7 +14,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { getAdminSetting } from '~/utils/admin-settings';
 
-export const ManageStockSection: React.FC = () => {
+export const InventoryStockManageField = () => {
 	const { getInputProps } = useFormContext< Product >();
 	const notifyLowStockAmount = getAdminSetting( 'notifyLowStockAmount', 2 );
 
