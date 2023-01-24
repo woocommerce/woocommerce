@@ -52,7 +52,9 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 	} );
 
 	test( 'can create simple virtual product', async ( { page } ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=product' );
+		await page.goto( 'wp-admin/post-new.php?post_type=product', {
+			waitUntil: 'networkidle',
+		} );
 		await page.fill( '#title', virtualProductName );
 		await page.fill( '#_regular_price', productPrice );
 		await page.click( '#_virtual' );
@@ -81,7 +83,9 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 	test( 'can have a shopper add the simple virtual product to the cart', async ( {
 		page,
 	} ) => {
-		await page.goto( `/?post_type=product&p=${ virtualProductId }` );
+		await page.goto( `/?post_type=product&p=${ virtualProductId }`, {
+			waitUntil: 'networkidle',
+		} );
 		await expect( page.locator( '.product_title' ) ).toHaveText(
 			virtualProductName
 		);
@@ -104,7 +108,9 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 	} );
 
 	test( 'can create simple non-virtual product', async ( { page } ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=product' );
+		await page.goto( 'wp-admin/post-new.php?post_type=product', {
+			waitUntil: 'networkidle',
+		} );
 		await page.fill( '#title', nonVirtualProductName );
 		await page.fill( '#_regular_price', productPrice );
 		await expect( page.locator( '#publish:not(.disabled)' ) ).toBeVisible();
@@ -133,7 +139,9 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 	test( 'can have a shopper add the simple non-virtual product to the cart', async ( {
 		page,
 	} ) => {
-		await page.goto( `/?post_type=product&p=${ nonVirtualProductId }` );
+		await page.goto( `/?post_type=product&p=${ nonVirtualProductId }`, {
+			waitUntil: 'networkidle',
+		} );
 		await expect( page.locator( '.product_title' ) ).toHaveText(
 			nonVirtualProductName
 		);
