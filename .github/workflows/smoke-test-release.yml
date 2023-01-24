@@ -416,7 +416,7 @@ jobs:
 
     get-wp-versions:
         name: Get WP L-1 & L-2 versions
-        needs: [get-tag]
+        needs: [get-tag, e2e-update-wc]
         runs-on: ubuntu-20.04
         permissions:
             contents: read
