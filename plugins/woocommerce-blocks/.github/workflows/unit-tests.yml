@@ -49,7 +49,6 @@ jobs:
                   key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-composer-
-
             - name: Set up PHP
               uses: shivammathur/setup-php@v2
               with:
@@ -108,7 +107,6 @@ jobs:
                 key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
                 restore-keys: |
                   ${{ runner.os }}-composer-
-
             - name: Install PHP deps
               run: composer install
 
@@ -117,14 +115,12 @@ jobs:
                 mkdir -p ./wp-content/uploads/wc-logs
                 echo 'deny from all' > ./wp-content/uploads/wc-logs/.htaccess
                 chmod -R 777 ./
-
             - name: Run PHPUnit tests
               run: |
                 JSON='{"phpVersion": "${{ matrix.php }}"}'
                 echo $JSON > .wp-env.override.json
                 npm run wp-env start --update
                 npm run test:php
-
             - name: Run PHPUnit tests (WooCommerce Development Version)
               run: |
                   JSON='{"plugins": [".","https://downloads.wordpress.org/plugin/woocommerce.zip"], "phpVersion": "${{ matrix.php }}"}'
@@ -133,7 +129,6 @@ jobs:
                   rm -rf /home/runner/wp-env/*
                   npm run wp-env start --update
                   npm run test:php
-
     JSUnitTests:
         name: JS Unit Tests
         needs: Setup
