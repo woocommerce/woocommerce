@@ -35,3 +35,10 @@ parsers:
             loop: yes
             method: no
             macro: no
+
+comment:
+    layout: 'reach, diff, flags, files'
+    behavior: default
+    require_changes: true
+    require_base: no
+    require_head: yes
