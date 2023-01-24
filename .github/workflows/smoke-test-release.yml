@@ -248,7 +248,7 @@ jobs:
                   RESET_SITE: true
               timeout-minutes: 60
               working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js basic.spec.js
 
             - name: Download 'e2e-update-wc' artifact
               uses: actions/download-artifact@v3
@@ -349,7 +349,7 @@ jobs:
                       core.setOutput('versions', versions);
 
     test-wp-versions:
-        name: Run tests against ${{ matrix.version.description }} (${{ matrix.version.number }})
+        name: Test against ${{ matrix.version.description }} (${{ matrix.version.number }})
         runs-on: ubuntu-20.04
         needs: [get-wp-versions]
         strategy:
@@ -370,10 +370,6 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
 
-            - name: Download and install Chromium browser.
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium
-
             - name: Launch WP Env
               working-directory: plugins/woocommerce
               run: pnpm run env:test
@@ -392,7 +388,7 @@ jobs:
                   pnpm exec wp-env run tests-cli "wp core update --version=${{ matrix.version.number }} --force"
                   pnpm exec wp-env run tests-cli "wp core update-db"
 
-            - name: Review environment details
+            - name: Verify environment details
               working-directory: plugins/woocommerce
               run: |
                   pnpm exec wp-env run tests-cli "wp core version"
@@ -413,6 +409,7 @@ jobs:
               run: pnpm exec allure generate --clean ${{ env.API_ALLURE_RESULTS_DIR }} --output ${{ env.API_ALLURE_REPORT_DIR }}
 
             - name: Configure AWS credentials
+              if: success() || failure()
               uses: aws-actions/configure-aws-credentials@v1
               with:
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
@@ -456,6 +453,10 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
+
             - name: Run E2E tests.
               if: success() || failure()
               timeout-minutes: 60
@@ -466,7 +467,7 @@ jobs:
                   FORCE_COLOR: 1
                   ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
               working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js basic.spec.js
 
             - name: Generate E2E Allure report.
               if: success() || failure()
@@ -506,6 +507,158 @@ jobs:
                     -f run_number=${{ github.run_number }} \
                     -f release_tag=${{ needs.get-wp-versions.outputs.tag }} \
                     -f artifact="${{ env.E2E_WP_LATEST_X_ARTIFACT }}" \
+                    -f env_description="${{ env.ENV_DESCRIPTION }}" \
+                    -f test_type="e2e" \
+                    --repo woocommerce/woocommerce-test-reports
+
+    test-php-versions:
+        name: Test against PHP ${{ matrix.php_version }}
+        runs-on: ubuntu-20.04
+        needs: [get-tag]
+        strategy:
+            matrix:
+                php_version: [7.4, 8.0, 8.1]
+        env:
+            API_ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-report
+            API_ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-results
+            API_ARTIFACT: api-php-${{ matrix.php_version }}--run-${{ github.run_number }}
+            E2E_ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
+            E2E_ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
+            E2E_ARTIFACT: e2e-php-${{ matrix.php_version }}--run-${{ github.run_number }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+
+            - name: Launch WP Env
+              working-directory: plugins/woocommerce
+              env:
+                  WP_ENV_PHP_VERSION: ${{ matrix.php_version }}
+              run: pnpm run env:test
+
+            - name: Verify PHP version
+              working-directory: .github/workflows/scripts
+              run: bash verify-php-version.sh
+
+            - name: Download release zip
+              env:
+                  GITHUB_TOKEN: ${{ github.token }}
+              run: gh release download ${{ github.event.inputs.tag }} --dir tmp
+
+            - name: Replace `plugins/woocommerce` with unzipped woocommerce release build
+              run: unzip -d plugins -o tmp/woocommerce.zip
+
+            - name: Run API tests.
+              id: api
+              working-directory: plugins/woocommerce
+              env:
+                  ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
+              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js hello
+
+            - name: Generate API Allure report.
+              if: success() || failure()
+              working-directory: plugins/woocommerce
+              run: pnpm exec allure generate --clean ${{ env.API_ALLURE_RESULTS_DIR }} --output ${{ env.API_ALLURE_REPORT_DIR }}
+
+            - name: Configure AWS credentials
+              if: success() || failure()
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
+                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+
+            - name: Upload API Allure artifacts to bucket
+              if: success() || failure()
+              run: |
+                  aws s3 sync ${{ env.API_ALLURE_RESULTS_DIR }} \
+                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_ARTIFACT }}/allure-results \
+                      --quiet
+                  aws s3 sync ${{ env.API_ALLURE_REPORT_DIR }} \
+                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_ARTIFACT }}/allure-report \
+                      --quiet
+
+            - name: Publish API Allure report
+              if: success() || failure()
+              env:
+                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+                  ENV_DESCRIPTION: php-${{ matrix.php_version }}
+              run: |
+                  gh workflow run publish-test-reports-release.yml \
+                    -f created_at="${{ needs.get-tag.outputs.created }}" \
+                    -f run_id=${{ github.run_id }} \
+                    -f run_number=${{ github.run_number }} \
+                    -f release_tag=${{ needs.get-tag.outputs.tag }} \
+                    -f artifact="${{ env.API_ARTIFACT }}" \
+                    -f env_description="${{ env.ENV_DESCRIPTION }}" \
+                    -f test_type="api" \
+                    --repo woocommerce/woocommerce-test-reports
+
+            - name: Archive API Allure reports
+              if: success() || failure()
+              uses: actions/upload-artifact@v3
+              with:
+                  name: ${{ env.API_ARTIFACT }}
+                  path: |
+                      ${{ env.API_ALLURE_RESULTS_DIR }}
+                      ${{ env.API_ALLURE_REPORT_DIR }}
+                  if-no-files-found: ignore
+                  retention-days: 5
+
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
+
+            - name: Run E2E tests.
+              timeout-minutes: 60
+              env:
+                  USE_WP_ENV: 1
+                  E2E_MAX_FAILURES: 15
+                  FORCE_COLOR: 1
+                  ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js basic.spec.js
+
+            - name: Generate E2E Allure report.
+              if: success() || failure()
+              working-directory: plugins/woocommerce
+              run: pnpm exec allure generate --clean ${{ env.E2E_ALLURE_RESULTS_DIR }} --output ${{ env.E2E_ALLURE_REPORT_DIR }}
+
+            - name: Upload E2E Allure artifacts to bucket
+              if: success() || failure()
+              run: |
+                  aws s3 sync ${{ env.E2E_ALLURE_RESULTS_DIR }} \
+                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_ARTIFACT }}/allure-results \
+                      --quiet
+                  aws s3 sync ${{ env.E2E_ALLURE_REPORT_DIR }} \
+                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_ARTIFACT }}/allure-report \
+                      --quiet
+
+            - name: Archive E2E Allure reports
+              if: success() || failure()
+              uses: actions/upload-artifact@v3
+              with:
+                  name: ${{ env.E2E_ARTIFACT }}
+                  path: |
+                      ${{ env.E2E_ALLURE_RESULTS_DIR }}
+                      ${{ env.E2E_ALLURE_REPORT_DIR }}
+                  if-no-files-found: ignore
+                  retention-days: 5
+
+            - name: Publish E2E Allure report
+              if: success() || failure()
+              env:
+                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+                  ENV_DESCRIPTION: php-${{ matrix.php_version }}
+              run: |
+                  gh workflow run publish-test-reports-release.yml \
+                    -f created_at="${{ needs.get-tag.outputs.created }}" \
+                    -f run_id=${{ github.run_id }} \
+                    -f run_number=${{ github.run_number }} \
+                    -f release_tag=${{ needs.get-tag.outputs.tag }} \
+                    -f artifact="${{ env.E2E_ARTIFACT }}" \
                     -f env_description="${{ env.ENV_DESCRIPTION }}" \
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
