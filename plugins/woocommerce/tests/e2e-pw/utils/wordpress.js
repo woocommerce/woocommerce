@@ -1,6 +1,6 @@
 const axios = require( 'axios' ).default;
 
-module.exports = async () => {
+const getPreviousTwoVersions = async () => {
 	const response = await axios
 		.get( 'https://api.wordpress.org/core/version-check/1.7/' )
 		.catch( ( error ) => {
@@ -56,3 +56,5 @@ module.exports = async () => {
 
 	return matrix;
 };
+
+module.exports = { getPreviousTwoVersions };
