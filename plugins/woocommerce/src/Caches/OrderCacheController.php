@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Caches;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * A class to control the usage of the orders cache.
@@ -11,8 +12,6 @@ use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 class OrderCacheController {
 
 	use AccessiblePrivateMethods;
-
-	const FEATURE_NAME = 'orders_cache';
 
 	/**
 	 * The orders cache to use.
@@ -36,55 +35,22 @@ class OrderCacheController {
 	private $orders_cache_usage_backup = null;
 
 	/**
-	 * Creates a new instance of the class.
-	 */
-	public function __construct() {
-		self::add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'handle_feature_enable_changed' ), 10, 2 );
-	}
-
-	/**
 	 * Class initialization, invoked by the DI container.
 	 *
 	 * @internal
-	 * @param OrderCache         $order_cache The order cache engine to use.
-	 * @param FeaturesController $features_controller The features controller to use.
+	 * @param OrderCache $order_cache The order cache engine to use.
 	 */
-	final public function init( OrderCache $order_cache, FeaturesController $features_controller ) {
+	final public function init( OrderCache $order_cache ) {
 		$this->order_cache         = $order_cache;
-		$this->features_controller = $features_controller;
 	}
 
 	/**
-	 * Handler for the feature enable changed action, when the orders cache is enabled or disabled it flushes it.
+	 * Whether order cache usage is enabled. Currently, linked to custom orders' table usage.
 	 *
-	 * @param string $feature_id The id of the feature whose enable status changed.
-	 * @param bool   $enabled Whether the feature has been enabled or disabled.
-	 * @return void
-	 */
-	private function handle_feature_enable_changed( string $feature_id, bool $enabled ): void {
-		if ( self::FEATURE_NAME === $feature_id ) {
-			$this->order_cache->flush();
-		}
-	}
-
-	/**
-	 * Set the value of the order cache usage setting.
-	 *
-	 * @param bool $enable True if the order cache should be used, false if not.
-	 * @throws \Exception Attempt to enable the orders cache usage while it's temporarily disabled.
-	 */
-	public function set_orders_cache_usage( bool $enable ): void {
-		$this->features_controller->change_feature_enable( $enable );
-		$this->orders_cache_usage_backup = null;
-	}
-
-	/**
-	 * Get the value of the order cache usage setting.
-	 *
-	 * @return bool True if order cache usage setting is currently enabled, false if not.
+	 * @return bool True if the order cache is enabled.
 	 */
 	public function orders_cache_usage_is_enabled(): bool {
-		return ! $this->orders_cache_usage_is_temporarly_disabled() && $this->features_controller->feature_is_enabled( self::FEATURE_NAME );
+		return OrderUtil::custom_orders_table_usage_is_enabled();
 	}
 
 	/**
