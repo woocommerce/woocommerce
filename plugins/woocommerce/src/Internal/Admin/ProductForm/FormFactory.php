@@ -42,6 +42,13 @@ class FormFactory {
 	protected static $form_sections = array();
 
 	/**
+	 * Store form tabs.
+	 *
+	 * @var array
+	 */
+	protected static $form_tabs = array();
+
+	/**
 	 * Get class instance.
 	 */
 	final public static function instance() {
@@ -86,7 +93,7 @@ class FormFactory {
 	 * @param string $id Subsection id.
 	 * @param string $plugin_id Plugin id.
 	 * @param array  $args Array containing the necessary arguments.
-	 * @return Card|WP_Error New subsection or WP_Error.
+	 * @return Subsection|WP_Error New subsection or WP_Error.
 	 */
 	public static function add_subsection( $id, $plugin_id, $args = array() ) {
 		$new_subsection = self::create_item( 'subsection', 'Subsection', $id, $plugin_id, $args );
@@ -103,7 +110,7 @@ class FormFactory {
 	 * @param string $id Card id.
 	 * @param string $plugin_id Plugin id.
 	 * @param array  $args Array containing the necessary arguments.
-	 * @return Card|WP_Error New section or WP_Error.
+	 * @return Section|WP_Error New section or WP_Error.
 	 */
 	public static function add_section( $id, $plugin_id, $args ) {
 		$new_section = self::create_item( 'section', 'Section', $id, $plugin_id, $args );
@@ -112,6 +119,23 @@ class FormFactory {
 		}
 		self::$form_sections[ $id ] = $new_section;
 		return $new_section;
+	}
+
+	/**
+	 * Adds a section to the product form.
+	 *
+	 * @param string $id Card id.
+	 * @param string $plugin_id Plugin id.
+	 * @param array  $args Array containing the necessary arguments.
+	 * @return Tab|WP_Error New section or WP_Error.
+	 */
+	public static function add_tab( $id, $plugin_id, $args ) {
+		$new_tab = self::create_item( 'tab', 'Tab', $id, $plugin_id, $args );
+		if ( is_wp_error( $new_tab ) ) {
+			return $new_tab;
+		}
+		self::$form_tabs[ $id ] = $new_tab;
+		return $new_tab;
 	}
 
 	/**
@@ -124,6 +148,7 @@ class FormFactory {
 			'fields'   => self::get_fields(),
 			'cards'    => self::get_cards(),
 			'sections' => self::get_sections(),
+			'tabs'     => self::get_tabs(),
 		);
 	}
 
@@ -167,6 +192,19 @@ class FormFactory {
 	}
 
 	/**
+	 * Returns list of registered tabs.
+	 *
+	 * @param array $sort_by key and order to sort by.
+	 * @return array list of registered tabs.
+	 */
+	public static function get_tabs( $sort_by = array(
+		'key'   => 'order',
+		'order' => 'asc',
+	) ) {
+		return self::get_items( 'tab', 'Tab', $sort_by );
+	}
+
+	/**
 	 * Returns list of registered items.
 	 *
 	 * @param string $type Form component type.
@@ -177,6 +215,7 @@ class FormFactory {
 			'field'      => self::$form_fields,
 			'subsection' => self::$form_subsections,
 			'section'    => self::$form_sections,
+			'tab'        => self::$form_tabs,
 		);
 		if ( array_key_exists( $type, $mapping ) ) {
 			return $mapping[ $type ];
@@ -218,7 +257,7 @@ class FormFactory {
 	 * @param string       $id Item id.
 	 * @param string       $plugin_id Plugin id.
 	 * @param array        $args additional arguments for item.
-	 * @return Field|Card|Section|WP_Error New product form item or WP_Error.
+	 * @return Field|Card|Section|Tab|WP_Error New product form item or WP_Error.
 	 */
 	private static function create_item( $type, $class_name, $id, $plugin_id, $args ) {
 		$item_list = self::get_item_list( $type );
