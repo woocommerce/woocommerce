@@ -292,12 +292,14 @@ jobs:
 
     get-wp-versions:
         name: Get WP L-1 & L-2 versions
-        needs: [get-tag, e2e-update-wc]
+        needs: [get-tag]
         runs-on: ubuntu-20.04
         permissions:
             contents: read
         outputs:
             matrix: ${{ steps.get-versions.outputs.versions }}
+            tag: ${{ needs.get-tag.outputs.tag }}
+            created: ${{ needs.get-tag.outputs.created }}
         steps:
             - name: Checkout
               uses: actions/checkout@v3
@@ -321,7 +323,7 @@ jobs:
     test-wp-versions:
         name: Run tests against ${{ matrix.version.description }} (${{ matrix.version.number }})
         runs-on: ubuntu-20.04
-        needs: [get-tag, get-wp-versions]
+        needs: [get-wp-versions]
         strategy:
             matrix: ${{ fromJSON(needs.get-wp-versions.outputs.matrix) }}
         env:
@@ -452,12 +454,12 @@ jobs:
                   ENV_DESCRIPTION: ${{ matrix.version.env_description }}
               run: |
                   gh workflow run publish-test-reports-release.yml \
-                    -f created_at="${{ needs.get-tag.outputs.created }}" \
+                    -f created_at="${{ needs.get-wp-versions.outputs.created }}" \
                     -f run_id=${{ github.run_id }} \
                     -f run_number=${{ github.run_number }} \
-                    -f release_tag=${{ needs.get-tag.outputs.tag }} \
+                    -f release_tag=${{ needs.get-wp-versions.outputs.tag }} \
                     -f api_artifact="${{ env.API_WP_LATEST_X_ARTIFACT }}" \
                     -f e2e_artifact="${{ env.E2E_WP_LATEST_X_ARTIFACT }}" \
                     -f env_description="${{ env.ENV_DESCRIPTION }}" \
-                    -f s3_path="public/release/${{ needs.get-tag.outputs.tag }}/${{ env.ENV_DESCRIPTION }}" \
+                    -f s3_path="public/release/${{ needs.get-wp-versions.outputs.tag }}/${{ env.ENV_DESCRIPTION }}" \
                     --repo woocommerce/woocommerce-test-reports
