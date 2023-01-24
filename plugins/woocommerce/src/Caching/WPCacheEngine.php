@@ -5,28 +5,64 @@ namespace Automattic\WooCommerce\Caching;
 /**
  * Implementation of CacheEngine that uses the built-in WordPress cache.
  */
-class WpCacheEngine implements CacheEngine {
+class WPCacheEngine implements CacheEngine {
+	use CacheNameSpaceTrait;
 
-	public const CACHE_GROUP_NAME = 'wc-object-cache';
-
-	// phpcs:disable Squiz.Commenting.FunctionComment.Missing
-
-	public function get_cached_object( string $key ) {
-		$value = wp_cache_get( $key, self::CACHE_GROUP_NAME );
+	/**
+	 * Gets an object from the cache.
+	 *
+	 * @param string $key The key under which the object is cached.
+	 * @return array|object|null The cached object, or null if the object is not cached.
+	 */
+	public function get_cached_object( string $key, string $group = '' ) {
+		$prefixed_key = self::get_prefixed_key( $key, $group );
+		$value = wp_cache_get( $prefixed_key, $group );
 		return false === $value ? null : $value;
 	}
 
-	public function cache_object( string $key, $object, int $expiration ): bool {
-		return wp_cache_set( $key, $object, self::CACHE_GROUP_NAME, $expiration );
+	/**
+	 * Caches an object under a given key, and with a given expiration.
+	 *
+	 * @param string       $key The key under which the object will be cached.
+	 * @param array|object $object The object to cache.
+	 * @param int          $expiration Expiration for the cached object, in seconds.
+	 * @return bool True if the object is cached successfully, false otherwise.
+	 */
+	public function cache_object( string $key, $object, int $expiration, string $group = '' ): bool {
+		$prefixed_key = self::get_prefixed_key( $key, $group );
+		return wp_cache_set( $prefixed_key, $object, $group, $expiration );
 	}
 
-	public function delete_cached_object( string $key ): bool {
-		return wp_cache_delete( $key, self::CACHE_GROUP_NAME );
+	/**
+	 * Removes a cached object from the cache.
+	 *
+	 * @param string $key They key under which the object is cached.
+	 * @return bool True if the object is removed from the cache successfully, false otherwise (because the object wasn't cached or for other reason).
+	 */
+	public function delete_cached_object( string $key, string $group = '' ): bool {
+		$prefixed_key = self::get_prefixed_key( $key, $group );
+		return wp_cache_delete( $prefixed_key, $group );
 	}
 
-	public function is_cached( string $key ): bool {
-		return false !== wp_cache_get( $key, self::CACHE_GROUP_NAME );
+	/**
+	 * Checks if an object is cached under a given key.
+	 *
+	 * @param string $key The key to verify.
+	 * @return bool True if there's an object cached under the given key, false otherwise.
+	 */
+	public function is_cached( string $key, string $group = '' ): bool {
+		$prefixed_key = self::get_prefixed_key( $key, $group );
+		return false !== wp_cache_get( $prefixed_key, $group );
 	}
 
-	// phpcs:enable Squiz.Commenting.FunctionComment.Missing
+	/**
+	 * Deletes all cached objects under a given group.
+	 *
+	 * @param string $group The group to delete.
+	 *
+	 * @return bool True if the group is deleted successfully, false otherwise.
+	 */
+	public function delete_cache_group( string $group = '' ): bool {
+		self::invalidate_cache_group( $group );
+	}
 }
