@@ -22,7 +22,9 @@ Closes # .
 
 ### How to test the changes in this Pull Request:
 
-<!-- Otherwise, please include detailed instructions on how these changes can be tested (including pre-conditions, configuration, steps to take and expected results). It may help to write your instructions using pseudocode -- as if you're telling a computer how to execute the test. -->
+<!-- Otherwise, please include detailed instructions on how these changes can be tested. Please, make sure to review and follow the guide for writing high-quality testing instructions below. -->
+
+- [ ] Have you followed the [Writing high-quality testing instructions guide](https://github.com/woocommerce/woocommerce/wiki/Writing-high-quality-testing-instructions)?
 
 1.
 2.
