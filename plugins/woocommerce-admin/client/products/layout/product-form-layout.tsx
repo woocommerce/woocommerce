@@ -78,7 +78,10 @@ export const ProductFormLayout: React.FC< ProductFormLayoutProps > = ( {
 
 	return (
 		<>
-			<WooProductTabItem.Slot template={ 'tab/' + id }>
+			<WooProductTabItem.Slot
+				template={ 'tab/' + id }
+				fillProps={ { product } }
+			>
 				{ ( tabs, childrenMap ) =>
 					tabs.length > 0 ? (
 						<TabPanel

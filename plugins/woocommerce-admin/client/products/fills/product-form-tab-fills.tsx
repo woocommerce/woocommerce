@@ -56,7 +56,7 @@ const Tabs = () => {
 	return (
 		<>
 			<WooProductTabItem
-				id={ 'new-tab-id' }
+				id="tab/general"
 				template="tab/general"
 				pluginId="core"
 				order={ 1 }
@@ -65,7 +65,7 @@ const Tabs = () => {
 				<WooProductSectionItem.Slot location={ TAB_GENERAL_ID } />
 			</WooProductTabItem>
 			<WooProductTabItem
-				id={ 'tab/pricing' }
+				id="tab/pricing"
 				template="tab/general"
 				pluginId="core"
 				order={ 3 }
@@ -74,7 +74,7 @@ const Tabs = () => {
 				<WooProductSectionItem.Slot location={ TAB_PRICING_ID } />
 			</WooProductTabItem>
 			<WooProductTabItem
-				id={ 'tab/inventory' }
+				id="tab/inventory"
 				template="tab/general"
 				pluginId="core"
 				order={ 5 }
@@ -83,7 +83,7 @@ const Tabs = () => {
 				<WooProductSectionItem.Slot location={ TAB_INVENTORY_ID } />
 			</WooProductTabItem>
 			<WooProductTabItem
-				id={ 'tab/shipping' }
+				id="tab/shipping"
 				template="tab/general"
 				pluginId="core"
 				order={ 7 }
@@ -96,7 +96,7 @@ const Tabs = () => {
 			</WooProductTabItem>
 			{ window.wcAdminFeatures[ 'product-variation-management' ] ? (
 				<WooProductTabItem
-					id={ 'tab/options' }
+					id="tab/options"
 					template="tab/general"
 					pluginId="core"
 					order={ 9 }

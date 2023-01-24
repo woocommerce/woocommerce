@@ -42,7 +42,7 @@ const Tabs = () => {
 	return (
 		<>
 			<WooProductTabItem
-				id={ 'new-tab-id' }
+				id="tab/general/variation"
 				template="tab/variation"
 				pluginId="core"
 				order={ 1 }
@@ -51,7 +51,7 @@ const Tabs = () => {
 				<ProductVariationDetailsSection />
 			</WooProductTabItem>
 			<WooProductTabItem
-				id={ 'tab/pricing' }
+				id="tab/pricing"
 				template="tab/variation"
 				pluginId="core"
 				order={ 3 }
@@ -60,7 +60,7 @@ const Tabs = () => {
 				<WooProductSectionItem.Slot location={ TAB_PRICING_ID } />
 			</WooProductTabItem>
 			<WooProductTabItem
-				id={ 'tab/inventory' }
+				id="tab/inventory"
 				template="tab/variation"
 				pluginId="core"
 				order={ 5 }
@@ -69,7 +69,7 @@ const Tabs = () => {
 				<WooProductSectionItem.Slot location={ TAB_INVENTORY_ID } />
 			</WooProductTabItem>
 			<WooProductTabItem
-				id={ 'tab/shipping' }
+				id="tab/shipping"
 				template="tab/variation"
 				pluginId="core"
 				order={ 7 }

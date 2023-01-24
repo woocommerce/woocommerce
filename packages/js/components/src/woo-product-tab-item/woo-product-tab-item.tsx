@@ -15,7 +15,10 @@ type WooProductTabItemProps = {
 	pluginId: string;
 	template?: string;
 	order?: number;
-	tabProps: TabPanel.Tab;
+	tabProps:
+		| TabPanel.Tab
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		| ( ( fillProps: Record< string, any > | undefined ) => TabPanel.Tab );
 	templates?: Array< { name: string; order?: number } >;
 };
 
@@ -49,11 +52,9 @@ export const WooProductTabItem: React.FC< WooProductTabItemProps > & {
 				>
 					{ ( fillProps: Fill.Props ) => {
 						return createOrderedChildren< Fill.Props >(
-							typeof children === 'function'
-								? children( templateData )
-								: children,
+							children,
 							templateData.order || 20,
-							fillProps,
+							{ ...templateData, ...fillProps },
 							{ tabProps }
 						);
 					} }
@@ -74,8 +75,12 @@ WooProductTabItem.Slot = ( { fillProps, template, children } ) => (
 					const props: WooProductTabItemProps = fill[ 0 ].props;
 					if ( props && props.tabProps ) {
 						childrenMap[ props.tabProps.name ] = fill[ 0 ];
+						const tabProps =
+							typeof props.tabProps === 'function'
+								? props.tabProps( fillProps )
+								: props.tabProps;
 						tabs.push( {
-							...props.tabProps,
+							...tabProps,
 							order: props.order ?? 20,
 						} );
 					}
