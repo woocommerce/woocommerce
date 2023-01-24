@@ -212,7 +212,7 @@ class WC_Admin_Tests_ProductForm_Form_Factory extends WC_Unit_Test_Case {
 			array(),
 		);
 
-		Form::add_section(
+		Form::add_tab(
 			'id2',
 			'woocommerce',
 			array(),
