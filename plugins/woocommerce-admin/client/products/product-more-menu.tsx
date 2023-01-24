@@ -54,7 +54,7 @@ export const ProductMoreMenu = () => {
 											'woocommerce'
 										),
 									},
-									{},
+									{ shouldShowComments: () => true },
 									{
 										type: 'snackbar',
 										icon: <span>🌟</span>,
