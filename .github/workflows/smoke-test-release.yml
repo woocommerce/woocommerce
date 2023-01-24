@@ -301,21 +301,29 @@ jobs:
             tag: ${{ needs.get-tag.outputs.tag }}
             created: ${{ needs.get-tag.outputs.created }}
         steps:
+            - name: Create dirs
+              run: |
+                  mkdir script
+                  mkdir repo
+
             - name: Checkout
               uses: actions/checkout@v3
-
-            - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  install-filters: woocommerce
-                  build: false
+                  path: repo
+
+            - name: Copy script to get previous WP versions
+              run: cp repo/plugins/woocommerce/tests/e2e-pw/utils/wordpress.js script
+
+            - name: Install axios
+              working-directory: script
+              run: npm install axios
 
             - name: Get version numbers
               id: get-versions
               uses: actions/github-script@v6
               with:
                   script: |
-                      const { getPreviousTwoVersions } = require('./plugins/woocommerce/tests/e2e-pw/utils/wordpress');
+                      const { getPreviousTwoVersions } = require('./script/wordpress');
                       const versions = await getPreviousTwoVersions();
                       console.log(versions);
                       core.setOutput('versions', versions);
