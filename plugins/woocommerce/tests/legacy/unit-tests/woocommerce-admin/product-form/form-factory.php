@@ -202,5 +202,24 @@ class WC_Admin_Tests_ProductForm_Form_Factory extends WC_Unit_Test_Case {
 		$this->assertEquals( 'first', $sections[0]->get_id() );
 		$this->assertEquals( 'id2', $sections[1]->get_id() );
 	}
+	/**
+	 * Test that get_tabs.
+	 */
+	public function test_get_tabs_sort_default() {
+		Form::add_tab(
+			'id',
+			'woocommerce',
+			array(),
+		);
+
+		Form::add_section(
+			'id2',
+			'woocommerce',
+			array(),
+		);
+
+		$sections = Form::get_tabs();
+		$this->assertEquals( 2, count( $sections ) );
+	}
 }
 
