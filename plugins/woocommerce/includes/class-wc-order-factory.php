@@ -13,8 +13,6 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Utilities\OrderUtil;
-
 /**
  * Order factory class
  */
