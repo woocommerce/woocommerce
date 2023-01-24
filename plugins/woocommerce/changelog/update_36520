@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Ampersand changed to &amp on product attribute export
