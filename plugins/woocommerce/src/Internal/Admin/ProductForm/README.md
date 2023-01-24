@@ -17,10 +17,11 @@ function add_product_form_field() {
         'test_new_field',
         'woocommerce-plugin-name',
         array(
-            'type'       => 'text',
-            'location'   => 'plugin-details',
+          'type'       => 'text',
+          'section'    => 'Section',
+          'properties' => array( 'name' => 'test_new_field', 'label' => 'Test New Field' ),
         )
     );
 }
-add_filter( 'admin_init', 'add_product_form_field' );
+add_filter( 'init', 'add_product_form_field' );    
 ```
