@@ -27,6 +27,13 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	const SCHEMA_TYPE = 'cart';
 
 	/**
+	 * Schema class instance.
+	 *
+	 * @var CartSchema
+	 */
+	protected $schema;
+
+	/**
 	 * Schema class for the cart.
 	 *
 	 * @var CartSchema

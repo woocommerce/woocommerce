@@ -9,11 +9,13 @@ import { ValidatedTextInput } from '@woocommerce/blocks-checkout';
  */
 const PhoneNumber = ( {
 	id = 'phone',
+	errorId = 'phone',
 	isRequired = false,
 	value = '',
 	onChange,
 }: {
 	id?: string;
+	errorId?: string;
 	isRequired: boolean;
 	value: string;
 	onChange: ( value: string ) => void;
@@ -21,6 +23,7 @@ const PhoneNumber = ( {
 	return (
 		<ValidatedTextInput
 			id={ id }
+			errorId={ errorId }
 			type="tel"
 			autoComplete="tel"
 			required={ isRequired }
