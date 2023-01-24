@@ -280,7 +280,7 @@ jobs:
                   ENV_DESCRIPTION: wp-latest
               run: |
                   gh workflow run publish-test-reports-release.yml \
-                    -f created_at="${{ steps.created-at.outputs.created_at }}" \
+                    -f created_at="${{ needs.get-tag.outputs.created }}" \
                     -f run_id=${{ github.run_id }} \
                     -f run_number=${{ github.run_number }} \
                     -f release_tag=${{ needs.get-tag.outputs.tag }} \
@@ -333,7 +333,8 @@ jobs:
             E2E_ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/e2e/allure-report
             E2E_ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/e2e/allure-results
             E2E_WP_LATEST_X_ARTIFACT: e2e-${{ matrix.version.env_description }}--run-${{ github.run_number }}
-
+        permissions:
+            contents: read
         steps:
             - name: Checkout WooCommerce repo
               uses: actions/checkout@v3
