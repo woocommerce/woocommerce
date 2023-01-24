@@ -376,8 +376,6 @@ jobs:
               working-directory: plugins/woocommerce
               env:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
-                  USER_KEY: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
-                  USER_SECRET: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
               run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js hello
 
             - name: Generate API Allure report.
