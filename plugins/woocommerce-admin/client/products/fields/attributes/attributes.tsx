@@ -35,7 +35,9 @@ export const Attributes: React.FC< AttributesProps > = ( {
 				if ( attribute ) {
 					return;
 				}
-				recordEvent( 'product_add_options_modal_cancel_button_click' );
+				recordEvent(
+					'product_add_attributes_modal_cancel_button_click'
+				);
 			} }
 			onModalOpen={ ( attribute ) => {
 				if ( attribute ) {

@@ -80,6 +80,14 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	onAdd,
 	selectedAttributeIds = [],
 } ) => {
+	const scrollAttributeIntoView = ( index: number ) => {
+		setTimeout( () => {
+			const attributeRow = document.querySelector(
+				`.woocommerce-add-attribute-modal__table-row-${ index }`
+			);
+			attributeRow?.scrollIntoView( { behavior: 'smooth' } );
+		}, 0 );
+	};
 	const [ showConfirmClose, setShowConfirmClose ] = useState( false );
 	const addAnother = (
 		values: AttributeForm,
@@ -89,6 +97,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		) => void
 	) => {
 		setValue( 'attributes', [ ...values.attributes, null ] );
+		scrollAttributeIntoView( values.attributes.length );
 	};
 
 	const onAddingAttributes = ( values: AttributeForm ) => {
