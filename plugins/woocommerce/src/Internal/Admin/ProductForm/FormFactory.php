@@ -122,7 +122,7 @@ class FormFactory {
 	}
 
 	/**
-	 * Adds a section to the product form.
+	 * Adds a tab to the product form.
 	 *
 	 * @param string $id Card id.
 	 * @param string $plugin_id Plugin id.
