@@ -84,11 +84,16 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * @param LegacyProxy                      $legacy_proxy The legacy proxy instance to use.
 	 * @internal
 	 */
-	final public function init( OrdersTableDataStore $data_store, DatabaseUtil $database_util, PostsToOrdersMigrationController $posts_to_cot_migrator, LegacyProxy $legacy_proxy ) {
-		$this->data_store            = $data_store;
-		$this->database_util         = $database_util;
-		$this->posts_to_cot_migrator = $posts_to_cot_migrator;
-		$this->error_logger          = $legacy_proxy->call_function( 'wc_get_logger' );
+	final public function init(
+		OrdersTableDataStore $data_store,
+		DatabaseUtil $database_util,
+		PostsToOrdersMigrationController $posts_to_cot_migrator,
+		LegacyProxy $legacy_proxy
+	) {
+		$this->data_store             = $data_store;
+		$this->database_util          = $database_util;
+		$this->posts_to_cot_migrator  = $posts_to_cot_migrator;
+		$this->error_logger           = $legacy_proxy->call_function( 'wc_get_logger' );
 	}
 
 	/**
@@ -113,7 +118,6 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * Delete the custom orders database tables.
 	 */
 	public function delete_database_tables() {
-		$this->cache->flush();
 		$table_names = $this->data_store->get_all_table_names();
 
 		foreach ( $table_names as $table_name ) {
