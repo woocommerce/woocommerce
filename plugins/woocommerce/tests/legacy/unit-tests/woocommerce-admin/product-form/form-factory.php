@@ -209,13 +209,19 @@ class WC_Admin_Tests_ProductForm_Form_Factory extends WC_Unit_Test_Case {
 		Form::add_tab(
 			'id',
 			'woocommerce',
-			array(),
+			array(
+				'name'  => 'tab_name',
+				'title' => 'Tab Title',
+			)
 		);
 
 		Form::add_tab(
 			'id2',
 			'woocommerce',
-			array(),
+			array(
+				'name'  => 'tab_name2',
+				'title' => 'Tab Title 2',
+			)
 		);
 
 		$sections = Form::get_tabs();
