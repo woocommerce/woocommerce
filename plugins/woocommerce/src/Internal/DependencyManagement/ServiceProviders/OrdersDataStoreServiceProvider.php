@@ -50,7 +50,16 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 		$this->share( OrdersTableDataStoreMeta::class );
 
 		$this->share( OrdersTableDataStore::class )->addArguments( array( OrdersTableDataStoreMeta::class, DatabaseUtil::class, LegacyProxy::class ) );
-		$this->share( DataSynchronizer::class )->addArguments( array( OrdersTableDataStore::class, DatabaseUtil::class, PostsToOrdersMigrationController::class, LegacyProxy::class ) );
+		$this->share( DataSynchronizer::class )->addArguments(
+			array(
+				OrdersTableDataStore::class,
+				DatabaseUtil::class,
+				PostsToOrdersMigrationController::class,
+				OrderCache::class,
+				OrderCacheController::class,
+				LegacyProxy::class,
+			)
+		);
 		$this->share( OrdersTableRefundDataStore::class )->addArguments( array( OrdersTableDataStoreMeta::class, DatabaseUtil::class, LegacyProxy::class ) );
 		$this->share( CustomOrdersTableController::class )->addArguments(
 			array(
