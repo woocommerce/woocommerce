@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Checkout\Helpers;
 
-use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -36,15 +36,6 @@ final class ReserveStock {
 	 */
 	protected function is_enabled() {
 		return $this->enabled;
-	}
-
-	/**
-	 * Check if the usage of the custom orders table is enabled.
-	 *
-	 * @return bool
-	 */
-	protected function is_cot_in_use(): bool {
-		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
 	}
 
 	/**
@@ -216,7 +207,7 @@ final class ReserveStock {
 
 		$join         = "$wpdb->posts posts ON stock_table.`order_id` = posts.ID";
 		$where_status = "posts.post_status IN ( 'wc-checkout-draft', 'wc-pending' )";
-		if ( $this->is_cot_in_use() ) {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$join         = "{$wpdb->prefix}wc_orders orders ON stock_table.`order_id` = orders.id";
 			$where_status = "orders.status IN ( 'wc-checkout-draft', 'wc-pending' )";
 		}
