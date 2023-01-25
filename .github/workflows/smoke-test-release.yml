@@ -517,7 +517,7 @@ jobs:
         needs: [get-tag]
         strategy:
             matrix:
-                php_version: [7.4, 8.0, 8.1]
+                php_version: ['7.4', '8.0', '8.1']
         env:
             API_ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-report
             API_ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-results
