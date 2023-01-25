@@ -498,7 +498,7 @@ class CustomOrdersTableController {
 		$this->order_cache->flush();
 
 		/**
-		 * TODO: Re-enable the following code once the COT to posts table sync is implemented (it's currently commented out to ease testing).
+		 * Re-enable the following code once the COT to posts table sync is implemented (it's currently commented out to ease testing).
 		$sync_is_pending = 0 !== $this->data_synchronizer->get_current_orders_pending_sync_count();
 		if ( $sync_is_pending ) {
 			throw new \Exception( "The authoritative table for orders storage can't be changed while there are orders out of sync" );
