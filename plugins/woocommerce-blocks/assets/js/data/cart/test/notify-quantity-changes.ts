@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { dispatch } from '@wordpress/data';
+import { dispatch, select } from '@wordpress/data';
 import { previewCart } from '@woocommerce/resource-previews';
 import { camelCase, cloneDeep, mapKeys } from 'lodash';
 import { Cart, CartResponse } from '@woocommerce/types';
@@ -20,6 +20,14 @@ dispatch.mockImplementation( ( store ) => {
 			createInfoNotice: mockedCreateInfoNotice,
 		};
 	}
+} );
+
+select.mockImplementation( () => {
+	return {
+		hasFinishedResolution() {
+			return true;
+		},
+	};
 } );
 
 /**
@@ -177,5 +185,15 @@ describe( 'notifyQuantityChanges', () => {
 				id: '1-removed',
 			}
 		);
+	} );
+	it( 'does not show notices if the cart has not finished resolving', () => {
+		select.mockImplementation( () => {
+			return {
+				hasFinishedResolution() {
+					return false;
+				},
+			};
+		} );
+		expect( mockedCreateInfoNotice ).not.toHaveBeenCalled();
 	} );
 } );
