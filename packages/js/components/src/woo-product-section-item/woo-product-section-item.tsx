@@ -32,11 +32,12 @@ export const WooProductSectionItem: React.FC< WooProductSectionItemProps > & {
 					key={ tabName }
 				>
 					{ ( fillProps: Fill.Props ) => {
-						return createOrderedChildren< Fill.Props >(
-							children,
-							tabOrder || 20,
-							fillProps
-						);
+						return createOrderedChildren<
+							Fill.Props & { tabName: string }
+						>( children, tabOrder || 20, {
+							tabName,
+							...fillProps,
+						} );
 					} }
 				</Fill>
 			) ) }

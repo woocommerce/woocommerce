@@ -38,12 +38,16 @@ export const WooProductFieldItem: React.FC< WooProductFieldItemProps > & {
 				>
 					{ ( fillProps: Fill.Props ) => {
 						return createOrderedChildren<
-							Fill.Props & SlotContextHelpersType,
+							Fill.Props &
+								SlotContextHelpersType & {
+									sectionName: string;
+								},
 							{ _id: string }
 						>(
 							children,
 							sectionOrder || 20,
 							{
+								sectionName,
 								...fillProps,
 								...getFillHelpers(),
 							},
