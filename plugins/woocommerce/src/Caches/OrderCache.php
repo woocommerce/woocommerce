@@ -51,6 +51,6 @@ class OrderCache extends ObjectCache {
 	 * @return array|object|null The retrieved object, or null if it's not possible to retrieve an object by the given id.
 	 */
 	protected function get_from_datastore( $id ) {
-		return wc_get_order( $id );
+		return null;
 	}
 }
