@@ -42,7 +42,6 @@ class Cart extends ControllerTestCase {
 					'weight'        => 10,
 				)
 			),
-
 			$fixtures->get_simple_product(
 				array(
 					'name'          => 'Test Product 3',
@@ -541,6 +540,79 @@ class Cart extends ControllerTestCase {
 			JsonWebToken::validate(
 				$server->sent_headers['Cart-Token'],
 				'@' . wp_salt()
+			)
+		);
+	}
+
+	/**
+	 * Test adding a variable product to cart returns proper variation data.
+	 */
+	public function test_add_variable_product_to_cart_returns_variation_data() {
+		wc_empty_cart();
+
+		$fixtures = new FixtureData();
+
+		$variable_product = $fixtures->get_variable_product(
+			array(
+				'name'          => 'Test Variable Product 4',
+				'stock_status'  => 'instock',
+				'regular_price' => 10,
+				'weight'        => 10,
+			),
+			array(
+				$fixtures->get_product_attribute( 'color', array( 'red', 'green', 'blue' ) ),
+				$fixtures->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
+			)
+		);
+
+		$variable_product->save();
+
+		$variation = $fixtures->get_variation_product(
+			$variable_product->get_id(),
+			array(
+				'pa_color' => 'red',
+				'pa_size'  => 'small',
+			)
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+
+		$request->set_body_params(
+			array(
+				'id'        => $variation->get_id(),
+				'quantity'  => 1,
+				'variation' => array( // intentionally alphabetically disordered.
+					array(
+						'attribute' => 'pa_color',
+						'value'     => 'red',
+					),
+					array(
+						'attribute' => 'pa_size',
+						'value'     => 'small',
+					),
+				),
+			)
+		);
+
+		$this->assertAPIResponse(
+			$request,
+			201,
+			array(
+				'items' => array(
+					array(
+						'variation' => array( // order matters, alphabetical attribute order.
+							array(
+								'attribute' => 'color',
+								'value'     => 'red',
+							),
+							array(
+								'attribute' => 'size',
+								'value'     => 'small',
+							),
+						),
+					),
+				),
 			)
 		);
 	}

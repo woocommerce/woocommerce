@@ -1208,6 +1208,11 @@ class CartController {
 				);
 			}
 
+			// Fills request array with unspecified attributes that have default values. This ensures the variation always has full data.
+			if ( '' !== $expected_value && ! isset( $request['variation'][ wc_variation_attribute_name( $attribute['name'] ) ] ) ) {
+				$request['variation'][ wc_variation_attribute_name( $attribute['name'] ) ] = $expected_value;
+			}
+
 			// If no attribute was posted, only error if the variation has an 'any' attribute which requires a value.
 			if ( '' === $expected_value ) {
 				$missing_attributes[] = $attribute_label;
@@ -1222,6 +1227,8 @@ class CartController {
 				400
 			);
 		}
+
+		ksort( $request['variation'] );
 
 		return $request;
 	}
