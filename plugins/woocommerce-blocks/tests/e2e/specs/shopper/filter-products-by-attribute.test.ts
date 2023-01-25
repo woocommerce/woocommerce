@@ -13,6 +13,7 @@ import {
 import {
 	selectBlockByName,
 	insertBlockUsingSlash,
+	switchBlockInspectorTabWhenGutenbergIsInstalled,
 } from '@woocommerce/blocks-test-utils';
 
 /**
@@ -189,8 +190,10 @@ describe( `${ block.name } Block`, () => {
 				postId: productCatalogTemplateId,
 			} );
 
-			await selectBlockByName( block.slug );
 			await ensureSidebarOpened();
+			await selectBlockByName( block.slug );
+			await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
+
 			const [ filterButtonToggle ] = await page.$x(
 				block.selectors.editor.filterButtonToggle
 			);
@@ -308,6 +311,8 @@ describe( `${ block.name } Block`, () => {
 			await page.goto( editorPageUrl );
 			await ensureSidebarOpened();
 			await selectBlockByName( block.slug );
+			await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
+
 			const [ filterButtonToggle ] = await page.$x(
 				block.selectors.editor.filterButtonToggle
 			);

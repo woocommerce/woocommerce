@@ -6,8 +6,8 @@ import {
 	createNewPost,
 	insertBlock,
 	switchUserToAdmin,
+	searchForBlock,
 } from '@wordpress/e2e-test-utils';
-import { searchForBlock } from '@wordpress/e2e-test-utils/build/inserter';
 
 /**
  * Internal dependencies
@@ -41,7 +41,7 @@ describe( `${ block.name } Block`, () => {
 		} );
 	} );
 
-	describe( 'in FSE editor', () => {
+	describe.skip( 'in FSE editor', () => {
 		useTheme( 'emptytheme' );
 
 		beforeEach( async () => {

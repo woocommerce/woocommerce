@@ -8,6 +8,7 @@ import {
 import {
 	visitBlockPage,
 	selectBlockByName,
+	switchBlockInspectorTabWhenGutenbergIsInstalled,
 } from '@woocommerce/blocks-test-utils';
 
 const block = {
@@ -30,6 +31,9 @@ describe( `${ block.name } Block`, () => {
 		describe( 'Attributes', () => {
 			beforeEach( async () => {
 				await openDocumentSettingsSidebar();
+				await switchBlockInspectorTabWhenGutenbergIsInstalled(
+					'Settings'
+				);
 				await selectBlockByName( block.slug );
 			} );
 

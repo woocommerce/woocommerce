@@ -13,6 +13,7 @@ import {
 	selectBlockByName,
 	saveOrPublish,
 	getToggleIdByLabel,
+	switchBlockInspectorTabWhenGutenbergIsInstalled,
 } from '@woocommerce/blocks-test-utils';
 
 /**
@@ -70,6 +71,7 @@ describe( 'Shopper → Checkout', () => {
 			await merchant.login();
 			await visitBlockPage( 'Checkout Block' );
 			await openDocumentSettingsSidebar();
+			await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
 			await selectBlockByName(
 				'woocommerce/checkout-shipping-address-block'
 			);
@@ -83,6 +85,7 @@ describe( 'Shopper → Checkout', () => {
 			await shopper.block.emptyCart();
 			await visitBlockPage( 'Checkout Block' );
 			await openDocumentSettingsSidebar();
+			await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
 			await selectBlockByName(
 				'woocommerce/checkout-shipping-address-block'
 			);
@@ -301,7 +304,7 @@ describe( 'Shopper → Checkout', () => {
 			await shopper.block.goToCheckout();
 			await shopper.block.applyCouponFromCheckout( coupon.code );
 			await page.waitForSelector(
-				'.wc-block-components-validation-error'
+				'.wc-block-components-notices__notice'
 			);
 			await expect( page ).toMatch(
 				'Coupon usage limit has been reached.'

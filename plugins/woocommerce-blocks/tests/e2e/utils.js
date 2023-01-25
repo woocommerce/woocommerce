@@ -10,6 +10,7 @@ import {
 	visitAdminPage,
 	pressKeyWithModifier,
 	searchForBlock as searchForFSEBlock,
+	enterEditMode,
 } from '@wordpress/e2e-test-utils';
 import { addQueryArgs } from '@wordpress/url';
 import { WP_ADMIN_DASHBOARD } from '@woocommerce/e2e-utils';
@@ -172,8 +173,7 @@ export async function goToSiteEditor( params = {} ) {
 		GUTENBERG_EDITOR_CONTEXT === 'gutenberg' &&
 		( params?.postId || Object.keys( params ).length === 0 )
 	) {
-		await page.waitForSelector( SELECTORS.templateEditor.editButton );
-		await page.click( SELECTORS.templateEditor.editButton );
+		await enterEditMode();
 	}
 }
 

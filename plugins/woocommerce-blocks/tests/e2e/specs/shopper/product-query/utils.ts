@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { insertBlock, ensureSidebarOpened } from '@wordpress/e2e-test-utils';
+import { switchBlockInspectorTabWhenGutenbergIsInstalled } from '@woocommerce/blocks-test-utils';
+
 /**
  * Internal dependencies
  */
@@ -39,6 +41,7 @@ const enableInheritQueryFromTemplateSetting = async () => {
 
 export const configurateProductQueryBlock = async () => {
 	await ensureSidebarOpened();
+	await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
 	await enableInheritQueryFromTemplateSetting();
 };
 

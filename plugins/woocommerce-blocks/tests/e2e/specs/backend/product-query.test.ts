@@ -8,7 +8,10 @@ import {
 	openDocumentSettingsSidebar,
 	openListView,
 } from '@wordpress/e2e-test-utils';
-import { visitBlockPage } from '@woocommerce/blocks-test-utils';
+import {
+	visitBlockPage,
+	switchBlockInspectorTabWhenGutenbergIsInstalled,
+} from '@woocommerce/blocks-test-utils';
 
 /**
  * Internal dependencies
@@ -51,6 +54,7 @@ describeOrSkip( GUTENBERG_EDITOR_CONTEXT === 'gutenberg' )(
 			await visitBlockPage( `${ block.name } Block` );
 			const canvasEl = canvas();
 			await openDocumentSettingsSidebar();
+			await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
 			await openListView();
 			await page.click(
 				'.block-editor-list-view-block__contents-container a.components-button'
