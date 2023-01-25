@@ -74,9 +74,8 @@ const ShippingSection = () => {
 		<>
 			<WooProductSectionItem
 				id={ SHIPPING_SECTION_BASIC_ID }
-				location={ TAB_SHIPPING_ID }
+				tabs={ [ { name: TAB_SHIPPING_ID, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
-				order={ 1 }
 			>
 				<ProductSectionLayout
 					title={ __( 'Shipping', 'woocommerce' ) }
@@ -130,9 +129,8 @@ const ShippingSection = () => {
 			</WooProductSectionItem>
 			<WooProductFieldItem
 				id="shipping/class"
-				section={ SHIPPING_SECTION_BASIC_ID }
+				sections={ [ { name: SHIPPING_SECTION_BASIC_ID, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
-				order={ 1 }
 			>
 				{ ( { product }: ProductShippingSectionPropsType ) => (
 					<ShippingClassField product={ product } />
@@ -140,9 +138,10 @@ const ShippingSection = () => {
 			</WooProductFieldItem>
 			<WooProductFieldItem
 				id="shipping/dimensions/width"
-				section={ SHIPPING_SECTION_DIMENSIONS_ID }
+				sections={ [
+					{ name: SHIPPING_SECTION_DIMENSIONS_ID, order: 1 },
+				] }
 				pluginId={ PLUGIN_ID }
-				order={ 1 }
 			>
 				{ ( { ...props }: ShippingDimensionsPropsType ) => (
 					<ShippingDimensionsWidthField { ...props } />
@@ -150,9 +149,10 @@ const ShippingSection = () => {
 			</WooProductFieldItem>
 			<WooProductFieldItem
 				id="shipping/dimensions/length"
-				section={ SHIPPING_SECTION_DIMENSIONS_ID }
+				sections={ [
+					{ name: SHIPPING_SECTION_DIMENSIONS_ID, order: 3 },
+				] }
 				pluginId={ PLUGIN_ID }
-				order={ 3 }
 			>
 				{ ( { ...props }: ShippingDimensionsPropsType ) => (
 					<ShippingDimensionsLengthField { ...props } />
@@ -160,9 +160,10 @@ const ShippingSection = () => {
 			</WooProductFieldItem>
 			<WooProductFieldItem
 				id="shipping/dimensions/height"
-				section={ SHIPPING_SECTION_DIMENSIONS_ID }
+				sections={ [
+					{ name: SHIPPING_SECTION_DIMENSIONS_ID, order: 5 },
+				] }
 				pluginId={ PLUGIN_ID }
-				order={ 5 }
 			>
 				{ ( { ...props }: ShippingDimensionsPropsType ) => (
 					<ShippingDimensionsHeightField { ...props } />
@@ -170,9 +171,10 @@ const ShippingSection = () => {
 			</WooProductFieldItem>
 			<WooProductFieldItem
 				id="shipping/dimensions/weight"
-				section={ SHIPPING_SECTION_DIMENSIONS_ID }
+				sections={ [
+					{ name: SHIPPING_SECTION_DIMENSIONS_ID, order: 7 },
+				] }
 				pluginId={ PLUGIN_ID }
-				order={ 7 }
 			>
 				<ShippingDimensionsWeightField />
 			</WooProductFieldItem>

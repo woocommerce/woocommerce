@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import {
 	__experimentalWooProductFieldItem as WooProductFieldItem,
 	renderField,
@@ -20,9 +19,8 @@ export const Fields: React.FC< { fields: ProductFormField[] } > = ( {
 				<WooProductFieldItem
 					key={ field.properties.name }
 					id={ field.id }
-					section={ field.section }
+					sections={ [ { name: field.section, order: field.order } ] }
 					pluginId={ field.plugin_id }
-					order={ field.order }
 				>
 					<>
 						{ renderField( field.type, {
