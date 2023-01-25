@@ -109,7 +109,7 @@ jQuery( function( $ ) {
 			e.data.addToCartHandler.addRequest({
 				type: 'POST',
 				url: wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'add_to_cart' ),
-				data: new URLSearchParams( data ).toString(),
+				data: $.param( data ),
 				success: function( response ) {
 					if ( ! response ) {
 						return;
