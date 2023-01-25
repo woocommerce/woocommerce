@@ -23,7 +23,10 @@ export type ProductFormSection = BaseComponent & {
 
 export type Subsection = BaseComponent;
 
-export type Tabs = BaseComponent; // TODO add properties here?
+export type Tabs = BaseComponent & {
+	name: string;
+	title: string;
+};
 
 export type ProductForm = {
 	fields: ProductFormField[];
