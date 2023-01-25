@@ -223,4 +223,54 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 			'After the COT order record was deleted, the order was also deleted from the posts table.'
 		);
 	}
+
+	/**
+	 * When sync is enabled, changes to meta data should propoagate from the Custom Orders Table to
+	 * the post meta table whenever the order object's save_meta_data() method is called.
+	 *
+	 * @return void
+	 */
+	public function test_meta_data_changes_propagate_from_cot_to_cpt(): void {
+		// Sync enabled and COT authoritative.
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+
+		$order = OrderHelper::create_order();
+		$order->add_meta_data( 'foo', 'bar' );
+		$order->save_meta_data();
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+		$refreshed_order = wc_get_order( $order->get_id() );
+
+		$this->assertEquals(
+			$refreshed_order->get_meta( 'foo' ),
+			'bar',
+			'Meta data persisted via the HPOS datastore is accessible via the CPT datastore'
+		);
+	}
+
+	/**
+	 * When sync is enabled, changes to meta data should propoagate from the post meta table to
+	 * the Custom Orders Table whenever the order object's save_meta_data() method is called.
+	 *
+	 * @return void
+	 */
+	public function test_meta_data_changes_propagate_from_cpt_to_cot(): void {
+		// Sync enabled and COT authoritative.
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+
+		$order = OrderHelper::create_order();
+		$order->add_meta_data( 'foo', 'bar' );
+		$order->save_meta_data();
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		$refreshed_order = wc_get_order( $order->get_id() );
+
+		$this->assertEquals(
+			$refreshed_order->get_meta( 'foo' ),
+			'bar',
+			'Meta data persisted via the CPT datastore is accessible via the HPOS datastore'
+		);
+	}
 }

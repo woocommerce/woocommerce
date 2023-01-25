@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Exception;
+use WC_Abstract_Order;
 use WC_Data;
 use WC_Order;
 
@@ -2457,9 +2458,17 @@ CREATE TABLE $meta_table (
 	 *
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing at least ->id).
+	 *
+	 * @return bool
 	 */
 	public function delete_meta( &$object, $meta ) {
-		return $this->data_store_meta->delete_meta( $object, $meta );
+		$delete_meta = $this->data_store_meta->delete_meta( $object, $meta );
+
+		if ( $object instanceof WC_Abstract_Order ) {
+			$this->maybe_backfill_post_record( $object );
+		}
+
+		return $delete_meta;
 	}
 
 	/**
@@ -2467,10 +2476,17 @@ CREATE TABLE $meta_table (
 	 *
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing ->key and ->value).
-	 * @return int meta ID
+	 *
+	 * @return int|bool  meta ID or false on failure
 	 */
 	public function add_meta( &$object, $meta ) {
-		return $this->data_store_meta->add_meta( $object, $meta );
+		$add_meta = $this->data_store_meta->add_meta( $object, $meta );
+
+		if ( $object instanceof WC_Abstract_Order ) {
+			$this->maybe_backfill_post_record( $object );
+		}
+
+		return $add_meta;
 	}
 
 	/**
@@ -2478,8 +2494,16 @@ CREATE TABLE $meta_table (
 	 *
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing ->id, ->key and ->value).
+	 *
+	 * @return bool
 	 */
 	public function update_meta( &$object, $meta ) {
-		return $this->data_store_meta->update_meta( $object, $meta );
+		$update_meta = $this->data_store_meta->update_meta( $object, $meta );
+
+		if ( $object instanceof WC_Abstract_Order ) {
+			$this->maybe_backfill_post_record( $object );
+		}
+
+		return $update_meta;
 	}
 }
