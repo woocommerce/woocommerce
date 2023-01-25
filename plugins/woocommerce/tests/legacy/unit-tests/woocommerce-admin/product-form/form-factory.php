@@ -86,8 +86,8 @@ class WC_Admin_Tests_ProductForm_Form_Factory extends WC_Unit_Test_Case {
 
 		$fields = Form::get_fields();
 		$this->assertEquals( 2, count( $fields ) );
-		$this->assertEquals( 'text', $fields[0]->type );
-		$this->assertEquals( 'textarea', $fields[1]->type );
+		$this->assertEquals( 'text', $fields[0]->get_additional_args()['type'] );
+		$this->assertEquals( 'textarea', $fields[1]->get_additional_args()['type'] );
 	}
 
 	/**
