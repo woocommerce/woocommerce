@@ -49,7 +49,7 @@ trait CacheNameSpaceTrait {
 	 * @since 3.9.0
 	 */
 	public static function invalidate_cache_group( $group ) {
-		wp_cache_set( 'wc_' . $group . '_cache_prefix', microtime(), $group );
+		return wp_cache_set( 'wc_' . $group . '_cache_prefix', microtime(), $group );
 	}
 
 	/**

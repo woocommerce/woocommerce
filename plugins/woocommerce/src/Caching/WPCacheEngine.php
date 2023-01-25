@@ -63,6 +63,6 @@ class WPCacheEngine implements CacheEngine {
 	 * @return bool True if the group is deleted successfully, false otherwise.
 	 */
 	public function delete_cache_group( string $group = '' ): bool {
-		self::invalidate_cache_group( $group );
+		return self::invalidate_cache_group( $group );
 	}
 }

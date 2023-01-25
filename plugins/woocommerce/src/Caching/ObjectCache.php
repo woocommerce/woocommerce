@@ -244,7 +244,6 @@ abstract class ObjectCache {
 			if ( null === $object ) {
 				return null;
 			}
-
 			$this->set( $object, $id, $expiration );
 			$data = $this->last_cached_data;
 		}
