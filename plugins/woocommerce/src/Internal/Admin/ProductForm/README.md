@@ -23,5 +23,5 @@ function add_product_form_field() {
         )
     );
 }
-add_filter( 'init', 'add_product_form_field' );    
+add_action( 'init', 'add_product_form_field' );
 ```
