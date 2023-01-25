@@ -37,7 +37,7 @@ class Tab extends Component {
 			throw new \Exception(
 				sprintf(
 				/* translators: 1: Missing arguments list. */
-					esc_html__( 'You are missing required arguments of WooCommerce ProductForm Field: %1$s', 'woocommerce' ),
+					esc_html__( 'You are missing required arguments of WooCommerce ProductForm Tab: %1$s', 'woocommerce' ),
 					join( ', ', $missing_arguments )
 				)
 			);
