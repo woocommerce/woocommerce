@@ -8,6 +8,7 @@ import {
 	getFixtureProductsData,
 	shopper,
 	getToggleIdByLabel,
+	switchBlockInspectorTabWhenGutenbergIsInstalled,
 } from '@woocommerce/blocks-test-utils';
 import { ElementHandle } from 'puppeteer';
 import { setCheckbox } from '@woocommerce/e2e-utils';
@@ -47,6 +48,7 @@ describeOrSkip( GUTENBERG_EDITOR_CONTEXT === 'gutenberg' )(
 			await resetProductQueryBlockPage();
 			await ensureSidebarOpened();
 			await selectBlockByName( block.slug );
+			await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
 			$productFiltersPanel = await findToolsPanelWithTitle(
 				'Advanced Filters'
 			);
