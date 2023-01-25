@@ -205,7 +205,8 @@ export const Variations: React.FC = () => {
 							<Link
 								href={ getNewPath(
 									{},
-									`/product/${ productId }/variation/${ variation.id }`
+									`/product/${ productId }/variation/${ variation.id }`,
+									{}
 								) }
 								type="wc-admin"
 								className="components-button"

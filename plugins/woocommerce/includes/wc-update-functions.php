@@ -19,7 +19,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
-use Automattic\WooCommerce\Internal\Admin\Marketing;
+use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
@@ -2470,7 +2470,7 @@ function wc_update_700_remove_download_log_fk() {
  * Remove the transient data for recommended marketing extensions.
  */
 function wc_update_700_remove_recommended_marketing_plugins_transient() {
-	delete_transient( Marketing::RECOMMENDED_PLUGINS_TRANSIENT );
+	delete_transient( MarketingSpecs::RECOMMENDED_PLUGINS_TRANSIENT );
 }
 
 /**

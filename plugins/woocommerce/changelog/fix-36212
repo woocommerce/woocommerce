@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Skip custom search for HPOS API queries as it's handled already.

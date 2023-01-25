@@ -22,6 +22,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { AUTO_DRAFT_NAME } from './utils/get-product-title';
 import { CurrencyContext } from '../lib/currency-context';
+import { getDerivedProductType } from './utils/get-derived-product-type';
 import {
 	NUMBERS_AND_DECIMAL_SEPARATOR,
 	ONLY_ONE_DECIMAL_SEPARATOR,
@@ -89,6 +90,7 @@ export function useProductHelper() {
 			return createProduct( {
 				...product,
 				status,
+				type: getDerivedProductType( product ),
 			} ).then(
 				( newProduct ) => {
 					if ( ! skipNotice ) {
@@ -184,6 +186,7 @@ export function useProductHelper() {
 			return updateProduct( productId, {
 				...product,
 				status,
+				type: getDerivedProductType( product ),
 			} )
 				.then( async ( updatedProduct ) =>
 					updateVariationsOrder(

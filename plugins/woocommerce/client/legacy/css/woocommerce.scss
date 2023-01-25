@@ -600,6 +600,7 @@ p.demo_store,
 		}
 
 		.button {
+			display: inline-block;
 			margin-top: 1em;
 		}
 
@@ -682,98 +683,6 @@ p.demo_store,
 					background: $secondary;
 					color: darken($secondary, 40%);
 				}
-			}
-		}
-	}
-
-	/**
-	 * Buttons
-	 */
-	a.button,
-	button.button,
-	input.button,
-	#respond input#submit {
-		font-size: 100%;
-		margin: 0;
-		line-height: 1;
-		cursor: pointer;
-		position: relative;
-		text-decoration: none;
-		overflow: visible;
-		padding: 0.618em 1em;
-		font-weight: 700;
-		border-radius: 3px;
-		left: auto;
-		color: $secondarytext;
-		background-color: $secondary;
-		border: 0;
-		display: inline-block;
-		background-image: none;
-		box-shadow: none;
-		text-shadow: none;
-
-		&.loading {
-			opacity: 0.25;
-			padding-right: 2.618em;
-
-			&::after {
-				font-family: "WooCommerce";
-				content: "\e01c";
-				vertical-align: top;
-				font-weight: 400;
-				position: absolute;
-				top: 0.618em;
-				right: 1em;
-				animation: spin 2s linear infinite;
-			}
-		}
-
-		&.added::after {
-			font-family: "WooCommerce";
-			content: "\e017";
-			margin-left: 0.53em;
-			vertical-align: bottom;
-		}
-
-		&:hover {
-			background-color: darken($secondary, 5%);
-			text-decoration: none;
-			background-image: none;
-			color: $secondarytext;
-		}
-
-		&.alt {
-			background-color: $primary;
-			color: $primarytext;
-			-webkit-font-smoothing: antialiased;
-
-			&:hover {
-				background-color: darken($primary, 5%);
-				color: $primarytext;
-			}
-
-			&.disabled,
-			&:disabled,
-			&:disabled[disabled],
-			&.disabled:hover,
-			&:disabled:hover,
-			&:disabled[disabled]:hover {
-				background-color: $primary;
-				color: $primarytext;
-			}
-		}
-
-		&:disabled,
-		&.disabled,
-		&:disabled[disabled] {
-			color: inherit;
-			cursor: not-allowed;
-			opacity: 0.5;
-			padding: 0.618em 1em;
-
-			&:hover {
-				color: inherit;
-				background-color: $secondary;
 			}
 		}
 	}
@@ -1737,6 +1646,102 @@ p.demo_store,
 
 		.woocommerce-form-login__rememberme {
 			display: inline-block;
+		}
+	}
+}
+
+
+/**
+ * Buttons
+ */
+.woocommerce:where(body:not(.woocommerce-block-theme-has-button-styles)),
+:where(body:not(.woocommerce-block-theme-has-button-styles)) .woocommerce {
+	a.button,
+	button.button,
+	input.button,
+	#respond input#submit {
+		font-size: 100%;
+		margin: 0;
+		line-height: 1;
+		cursor: pointer;
+		position: relative;
+		text-decoration: none;
+		overflow: visible;
+		padding: 0.618em 1em;
+		font-weight: 700;
+		border-radius: 3px;
+		left: auto;
+		color: $secondarytext;
+		background-color: $secondary;
+		border: 0;
+		display: inline-block;
+		background-image: none;
+		box-shadow: none;
+		text-shadow: none;
+
+		&.loading {
+			opacity: 0.25;
+			padding-right: 2.618em;
+
+			&::after {
+				font-family: "WooCommerce";
+				content: "\e01c";
+				vertical-align: top;
+				font-weight: 400;
+				position: absolute;
+				top: 0.618em;
+				right: 1em;
+				animation: spin 2s linear infinite;
+			}
+		}
+
+		&.added::after {
+			font-family: "WooCommerce";
+			content: "\e017";
+			margin-left: 0.53em;
+			vertical-align: bottom;
+		}
+
+		&:hover {
+			background-color: darken($secondary, 5%);
+			text-decoration: none;
+			background-image: none;
+			color: $secondarytext;
+		}
+
+		&.alt {
+			background-color: $primary;
+			color: $primarytext;
+			-webkit-font-smoothing: antialiased;
+
+			&:hover {
+				background-color: darken($primary, 5%);
+				color: $primarytext;
+			}
+
+			&.disabled,
+			&:disabled,
+			&:disabled[disabled],
+			&.disabled:hover,
+			&:disabled:hover,
+			&:disabled[disabled]:hover {
+				background-color: $primary;
+				color: $primarytext;
+			}
+		}
+
+		&:disabled,
+		&.disabled,
+		&:disabled[disabled] {
+			color: inherit;
+			cursor: not-allowed;
+			opacity: 0.5;
+			padding: 0.618em 1em;
+
+			&:hover {
+				color: inherit;
+				background-color: $secondary;
+			}
 		}
 	}
 }

@@ -4,10 +4,6 @@
 import { useFormContext } from '@woocommerce/components';
 import type { ProductVariation } from '@woocommerce/data';
 
-/**
- * Internal dependencies
- */
-
 const KEY_SEPARATOR = ':';
 
 function getVariationKey( variation: ProductVariation ) {

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+When adjusting download permissions, confirm the child products have not been removed.

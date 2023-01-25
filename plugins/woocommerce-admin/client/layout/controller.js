@@ -199,7 +199,9 @@ export const getPages = () => {
 			wpOpenMenu: 'menu-posts-product',
 			capability: 'manage_woocommerce',
 		} );
+	}
 
+	if ( window.wcAdminFeatures[ 'product-variation-management' ] ) {
 		pages.push( {
 			container: EditProductPage,
 			path: '/product/:productId/variation/:variationId',

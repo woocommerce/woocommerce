@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Speed up HPOS search query by using group by instead of distinct.

@@ -7,7 +7,8 @@ import { useFormContext } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { AttributeField } from '../attribute-field';
+import { AttributeControl } from '../attribute-control';
+import { useProductAttributes } from '~/products/hooks/use-product-attributes';
 import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
 
 type OptionsProps = {
@@ -24,17 +25,24 @@ export const Options: React.FC< OptionsProps > = ( {
 	const { values } = useFormContext< Product >();
 	const { generateProductVariations } = useProductVariationsHelper();
 
-	const handleChange = async ( attributes: ProductAttribute[] ) => {
-		onChange( attributes );
-		generateProductVariations( { ...values, attributes } );
-	};
+	const { attributes, handleChange } = useProductAttributes( {
+		allAttributes: value,
+		isVariationAttributes: true,
+		onChange: ( newAttributes ) => {
+			onChange( newAttributes );
+			generateProductVariations( {
+				...values,
+				attributes: newAttributes,
+			} );
+		},
+		productId,
+	} );
 
 	return (
-		<AttributeField
+		<AttributeControl
 			attributeType="for-variations"
-			value={ value }
+			value={ attributes }
 			onChange={ handleChange }
-			productId={ productId }
 		/>
 	);
 };

@@ -21,6 +21,20 @@ export const getFilename = ( str: string ): string => {
 };
 
 /**
+ * Get starting line number from patch
+ *
+ * @param {string} str String to extract starting line number from.
+ * @return {number} line number.
+ */
+export const getStartingLineNumber = ( str: string ): number => {
+	const lineNumber = str.replace( /^@@ -\d+,\d+ \+(\d+),\d+ @@.*?$/, '$1' );
+	if ( ! lineNumber.match( /^\d+$/ ) ) {
+		throw new Error( 'Unable to parse line number from patch' );
+	}
+	return parseInt( lineNumber, 10 );
+};
+
+/**
  * Get patches
  *
  * @param {string} content Patch content.
@@ -188,6 +202,79 @@ export const getCommitHash = async ( baseDir: string, ref: string ) => {
 
 	// Its a hash already
 	return ref;
+};
+
+/**
+ * Get the commit hash for the last change to a line within a specific file.
+ *
+ * @param {string} baseDir    - the dir of the git repo to get the hash from.
+ * @param {string} filePath   - the relative path to the file to check the commit hash of.
+ * @param {number} lineNumber - the line number from which to get the hash of the last commit.
+ * @return {string} - the commit hash of the last change to filePath at lineNumber.
+ */
+export const getLineCommitHash = async (
+	baseDir: string,
+	filePath: string,
+	lineNumber: number
+) => {
+	// Remove leading slash, if it exists.
+	const adjustedFilePath = filePath.replace( /^\//, '' );
+	try {
+		const git = await simpleGit( { baseDir } );
+		const blame = await git.raw( [
+			'blame',
+			`-L${ lineNumber },${ lineNumber }`,
+			adjustedFilePath,
+		] );
+		const hash = blame.match( /^([a-f0-9]+)\s+/ );
+		if ( ! hash ) {
+			throw new Error(
+				`Unable to git blame ${ adjustedFilePath }:${ lineNumber }`
+			);
+		}
+		return hash[ 1 ];
+	} catch ( e ) {
+		throw new Error(
+			`Unable to git blame ${ adjustedFilePath }:${ lineNumber }`
+		);
+	}
+};
+
+/**
+ * Get the commit hash for the last change to a line within a specific file.
+ *
+ * @param {string} baseDir - the dir of the git repo to get the PR number from.
+ * @param {string} hash    - the hash to get the PR number from.
+ * @return {number} - the pull request number from the given inputs.
+ */
+export const getPullRequestNumberFromHash = async (
+	baseDir: string,
+	hash: string
+) => {
+	try {
+		const git = await simpleGit( { baseDir } );
+		const formerHead = await git.revparse( 'HEAD' );
+		await git.checkout( hash );
+		const cmdOutput = await git.raw( [
+			'log',
+			'-1',
+			'--first-parent',
+			'--format=%cI\n%s',
+		] );
+		const cmdLines = cmdOutput.split( '\n' );
+		await git.checkout( formerHead );
+		const prNumber = cmdLines[ 1 ]
+			.trim()
+			.match( /(?:^Merge pull request #(\d+))|(?:\(#(\d+)\)$)/ );
+		if ( prNumber ) {
+			return prNumber[ 1 ]
+				? parseInt( prNumber[ 1 ], 10 )
+				: parseInt( prNumber[ 2 ], 10 );
+		}
+		throw new Error( `Unable to get PR number from hash ${ hash }.` );
+	} catch ( e ) {
+		throw new Error( `Unable to get PR number from hash ${ hash }.` );
+	}
 };
 
 /**
