@@ -41,6 +41,18 @@ jobs:
                       console.log( "${{ github.event_name }}" );
                       return "${{ github.event.release.tag_name }}" || "${{ github.event.inputs.tag }}"
 
+            - name: Verify woocommerce.zip asset
+              run: |
+                  gh release download ${{ steps.tag.outputs.result }} --repo woocommerce/woocommerce
+                  if [[ -f "woocommerce.zip" ]]
+                    then
+                      echo "${{ github.event.inputs.tag }} has a valid woocommerce.zip asset."
+                      exit 0
+                  fi
+
+                  echo "${{ github.event.inputs.tag }} does not have a valid woocommerce.zip asset."
+                  exit 1
+
             - name: Get 'created-at' of WooCommerce zip
               id: created-at
               env:
