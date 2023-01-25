@@ -37,8 +37,9 @@ export const ProductForm: React.FC< {
 			<Form< Partial< Product > >
 				initialValues={
 					product || {
-						reviews_allowed: true,
+						backorders: 'no',
 						name: '',
+						reviews_allowed: true,
 						sku: '',
 						stock_quantity: 0,
 						stock_status: 'instock',
