@@ -138,8 +138,7 @@ export const useStoreCart = (
 	const { shouldSelect } = options;
 	const currentResults = useRef();
 
-	// This will keep track of jQuery and DOM events triggered by other blocks
-	// or components and will invalidate the store resolution accordingly.
+	// This will keep track of jQuery and DOM events that invalidate the store resolution.
 	useStoreCartEventListeners();
 
 	const results: StoreCart = useSelect(
