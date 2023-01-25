@@ -17,6 +17,7 @@ const reducer: Reducer< ProductFormState, Action > = (
 		fields: [],
 		sections: [],
 		subsections: [],
+		tabs: [],
 	},
 	action
 ) => {
@@ -42,6 +43,7 @@ const reducer: Reducer< ProductFormState, Action > = (
 				fields: action.fields,
 				sections: action.sections,
 				subsections: action.subsections,
+				tabs: action.tabs,
 			};
 			break;
 		case TYPES.GET_PRODUCT_FORM_ERROR:
