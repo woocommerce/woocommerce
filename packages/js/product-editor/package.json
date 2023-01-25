@@ -18,6 +18,7 @@
 	},
 	"main": "build/index.js",
 	"module": "build-module/index.js",
+	"types": "build-types",
 	"react-native": "src/index",
 	"sideEffects": [
 		"build-style/**",
@@ -26,7 +27,13 @@
 	"publishConfig": {
 		"access": "public"
 	},
+	"dependencies": {
+		"@woocommerce/components": "workspace:*",
+		"@wordpress/components": "^19.5.0",
+		"@wordpress/element": "^4.1.1"
+	},
 	"devDependencies": {
+		"@types/wordpress__components": "^19.10.1",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
 		"@wordpress/browserslist-config": "^4.1.1",
