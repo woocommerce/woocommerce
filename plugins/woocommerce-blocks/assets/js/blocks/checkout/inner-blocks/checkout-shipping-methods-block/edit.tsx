@@ -20,6 +20,7 @@ import {
 	AdditionalFieldsContent,
 } from '../../form-step';
 import Block from './block';
+import './editor.scss';
 
 type shippingAdminLink = {
 	id: number;
