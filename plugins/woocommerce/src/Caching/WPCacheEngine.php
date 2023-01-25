@@ -18,7 +18,7 @@ class WPCacheEngine implements CacheEngine {
 	 */
 	public function get_cached_object( string $key, string $group = '' ) {
 		$prefixed_key = self::get_prefixed_key( $key, $group );
-		$value = wp_cache_get( $prefixed_key, $group );
+		$value        = wp_cache_get( $prefixed_key, $group );
 		return false === $value ? null : $value;
 	}
 
