@@ -55,8 +55,6 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 				OrdersTableDataStore::class,
 				DatabaseUtil::class,
 				PostsToOrdersMigrationController::class,
-				OrderCache::class,
-				OrderCacheController::class,
 				LegacyProxy::class,
 			)
 		);
@@ -72,7 +70,8 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 				OrderCacheController::class,
 			)
 		);
-
+		$this->share( OrderCache::class );
+		$this->share( OrderCacheController::class )->addArgument( OrderCache::class );
 		if ( Constants::is_defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->share( CLIRunner::class )->addArguments( array( CustomOrdersTableController::class, DataSynchronizer::class, PostsToOrdersMigrationController::class ) );
 		}
