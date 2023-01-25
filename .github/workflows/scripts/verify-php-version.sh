@@ -5,7 +5,6 @@
 #
 
 ACTUAL_PHP_VERSION=$(pnpm exec wp-env run tests-cli "wp --info | grep 'PHP version:'")
-EXPECTED_PHP_VERSION=${{ matrix.php_version }}
 EXIT_CODE=''
 
 echo "PHP version found in WP Env environment: \"$ACTUAL_PHP_VERSION\""

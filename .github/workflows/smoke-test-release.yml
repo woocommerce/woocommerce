@@ -544,6 +544,8 @@ jobs:
 
             - name: Verify PHP version
               working-directory: .github/workflows/scripts
+              env:
+                  EXPECTED_PHP_VERSION: ${{ matrix.php_version }}
               run: bash verify-php-version.sh
 
             - name: Download release zip
