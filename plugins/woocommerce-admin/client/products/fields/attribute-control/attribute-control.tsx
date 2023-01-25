@@ -53,17 +53,17 @@ type AttributeControlProps = {
 
 export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	value,
-	onAdd,
+	onAdd = () => {},
 	onChange,
-	onEdit,
-	onNewModalCancel,
-	onNewModalClose,
-	onNewModalOpen,
-	onEditModalCancel,
-	onEditModalClose,
-	onEditModalOpen,
-	onRemove,
-	onRemoveCancel,
+	onEdit = () => {},
+	onNewModalCancel = () => {},
+	onNewModalClose = () => {},
+	onNewModalOpen = () => {},
+	onEditModalCancel = () => {},
+	onEditModalClose = () => {},
+	onEditModalOpen = () => {},
+	onRemove = () => {},
+	onRemoveCancel = () => {},
 	text = {
 		newAttributeModalTitle: undefined,
 		emptyStateSubtitle: undefined,
@@ -103,40 +103,30 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						getAttributeId( attr ) !== getAttributeId( attribute )
 				)
 			);
-			if ( typeof onRemove === 'function' ) {
-				onRemove( attribute );
-			}
-		} else if ( typeof onRemoveCancel === 'function' ) {
-			onRemoveCancel( attribute );
+			onRemove( attribute );
+			return;
 		}
+		onRemoveCancel( attribute );
 	};
 
 	const openNewModal = () => {
 		setIsNewModalVisible( true );
-		if ( typeof onNewModalOpen === 'function' ) {
-			onNewModalOpen();
-		}
+		onNewModalOpen();
 	};
 
 	const closeNewModal = () => {
 		setIsNewModalVisible( false );
-		if ( typeof onNewModalClose === 'function' ) {
-			onNewModalClose();
-		}
+		onNewModalClose();
 	};
 
 	const openEditModal = ( attribute: ProductAttribute ) => {
 		setCurrentAttributeId( getAttributeId( attribute ) );
-		if ( typeof onEditModalOpen === 'function' ) {
-			onEditModalOpen( attribute );
-		}
+		onEditModalOpen( attribute );
 	};
 
 	const closeEditModal = ( attribute: ProductAttribute ) => {
 		setCurrentAttributeId( null );
-		if ( typeof onEditModalClose === 'function' ) {
-			onEditModalClose( attribute );
-		}
+		onEditModalClose( attribute );
 	};
 
 	const handleAdd = ( newAttributes: EnhancedProductAttribute[] ) => {
@@ -150,9 +140,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					)
 			),
 		] );
-		if ( typeof onAdd === 'function' ) {
-			onAdd( newAttributes );
-		}
+		onAdd( newAttributes );
 		closeNewModal();
 	};
 
@@ -167,9 +155,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			return attr;
 		} );
 
-		if ( typeof onEdit === 'function' ) {
-			onEdit( updatedAttribute );
-		}
+		onEdit( updatedAttribute );
 		handleChange( updatedAttributes );
 		closeEditModal( updatedAttribute );
 	};
@@ -186,9 +172,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					<NewAttributeModal
 						onCancel={ () => {
 							closeNewModal();
-							if ( typeof onNewModalCancel === 'function' ) {
-								onNewModalCancel();
-							}
+							onNewModalCancel();
 						} }
 						onAdd={ handleAdd }
 						selectedAttributeIds={ [] }
@@ -255,9 +239,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					title={ text.newAttributeModalTitle }
 					onCancel={ () => {
 						closeNewModal();
-						if ( typeof onNewModalCancel === 'function' ) {
-							onNewModalCancel();
-						}
+						onNewModalCancel();
 					} }
 					onAdd={ handleAdd }
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
@@ -289,9 +271,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					} ) }
 					onCancel={ () => {
 						closeEditModal( currentAttribute );
-						if ( typeof onEditModalCancel === 'function' ) {
-							onEditModalCancel( currentAttribute );
-						}
+						onEditModalCancel( currentAttribute );
 					} }
 					onEdit={ ( updatedAttribute ) => {
 						handleEdit( updatedAttribute );
