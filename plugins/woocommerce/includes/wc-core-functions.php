@@ -1937,20 +1937,16 @@ function wc_remove_number_precision( $value ) {
 }
 
 /**
- * Add precision to an array of number and return an array of int.
+ * Add precision to an array of number and return a float or an array of float.
  *
  * @since  3.2.0
  * @param  array $value Number to add precision to.
  * @param  bool  $round Should we round after adding precision?.
- * @return int|array
+ * @return float|float[]
  */
 function wc_add_number_precision_deep( $value, $round = true ) {
 	if ( ! is_array( $value ) ) {
-		if ( ! is_null( $value )) {
 			return wc_add_number_precision( $value, $round );
-		} else {
-			return 0;
-		}
 	}
 
 	foreach ( $value as $key => $sub_value ) {
