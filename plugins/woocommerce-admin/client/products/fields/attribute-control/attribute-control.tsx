@@ -9,7 +9,6 @@ import {
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
 	Link,
 } from '@woocommerce/components';
-import { recordEvent } from '@woocommerce/tracks';
 import interpolateComponents from '@automattic/interpolate-components';
 import { getAdminLink } from '@woocommerce/settings';
 
@@ -37,6 +36,7 @@ type AttributeControlProps = {
 	onChange: ( value: ProductAttribute[] ) => void;
 	onEdit?: ( attribute: ProductAttribute ) => void;
 	onRemove?: ( attribute: ProductAttribute ) => void;
+	onRemoveCancel?: ( attribute: ProductAttribute ) => void;
 	onNewModalCancel?: () => void;
 	onNewModalClose?: () => void;
 	onNewModalOpen?: () => void;
@@ -63,6 +63,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	onEditModalClose,
 	onEditModalOpen,
 	onRemove,
+	onRemoveCancel,
 	text = {
 		newAttributeModalTitle: undefined,
 		emptyStateSubtitle: undefined,
@@ -96,9 +97,6 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	const handleRemove = ( attribute: ProductAttribute ) => {
 		// eslint-disable-next-line no-alert
 		if ( window.confirm( __( 'Remove this attribute?', 'woocommerce' ) ) ) {
-			recordEvent(
-				'product_remove_attribute_confirmation_confirm_click'
-			);
 			handleChange(
 				value.filter(
 					( attr ) =>
@@ -108,8 +106,8 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			if ( typeof onRemove === 'function' ) {
 				onRemove( attribute );
 			}
-		} else {
-			recordEvent( 'product_remove_attribute_confirmation_cancel_click' );
+		} else if ( typeof onRemoveCancel === 'function' ) {
+			onRemoveCancel( attribute );
 		}
 	};
 
@@ -155,7 +153,6 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		if ( typeof onAdd === 'function' ) {
 			onAdd( newAttributes );
 		}
-		recordEvent( 'product_add_attributes_modal_add_button_click' );
 		closeNewModal();
 	};
 

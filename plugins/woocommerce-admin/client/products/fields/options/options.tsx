@@ -43,11 +43,18 @@ export const Options: React.FC< OptionsProps > = ( {
 	return (
 		<AttributeControl
 			value={ attributes }
+			onAdd={ () => {
+				recordEvent( 'product_add_options_modal_add_button_click' );
+			} }
 			onChange={ handleChange }
 			onNewModalCancel={ () => {
 				recordEvent( 'product_add_options_modal_cancel_button_click' );
 			} }
 			onNewModalOpen={ () => {
+				if ( ! attributes.length ) {
+					recordEvent( 'product_add_first_option_button_click' );
+					return;
+				}
 				recordEvent( 'product_add_option_button' );
 			} }
 			text={ {
@@ -59,6 +66,14 @@ export const Options: React.FC< OptionsProps > = ( {
 					'woocommerce'
 				),
 			} }
+			onRemove={ () =>
+				recordEvent(
+					'product_remove_option_confirmation_confirm_click'
+				)
+			}
+			onRemoveCancel={ () =>
+				recordEvent( 'product_remove_option_confirmation_cancel_click' )
+			}
 		/>
 	);
 };

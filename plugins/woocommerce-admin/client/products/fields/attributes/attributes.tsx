@@ -30,6 +30,9 @@ export const Attributes: React.FC< AttributesProps > = ( {
 	return (
 		<AttributeControl
 			value={ attributes }
+			onAdd={ () => {
+				recordEvent( 'product_add_attributes_modal_add_button_click' );
+			} }
 			onChange={ handleChange }
 			onNewModalCancel={ () => {
 				recordEvent(
@@ -43,6 +46,16 @@ export const Attributes: React.FC< AttributesProps > = ( {
 				}
 				recordEvent( 'product_add_attribute_button' );
 			} }
+			onRemove={ () =>
+				recordEvent(
+					'product_remove_attribute_confirmation_confirm_click'
+				)
+			}
+			onRemoveCancel={ () =>
+				recordEvent(
+					'product_remove_attribute_confirmation_cancel_click'
+				)
+			}
 		/>
 	);
 };
