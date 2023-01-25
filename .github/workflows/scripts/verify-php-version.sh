@@ -4,6 +4,7 @@
 # Verify that the PHP version in the launched WP ENV environment is equal to expected.
 #
 
+cd $GITHUB_WORKSPACE/plugins/woocommerce
 ACTUAL_PHP_VERSION=$(pnpm exec wp-env run tests-cli "wp --info | grep 'PHP version:'")
 EXIT_CODE=''
 
