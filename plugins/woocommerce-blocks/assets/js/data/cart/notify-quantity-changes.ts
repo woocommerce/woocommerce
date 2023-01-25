@@ -2,8 +2,13 @@
  * External dependencies
  */
 import { Cart, CartItem } from '@woocommerce/types';
-import { dispatch } from '@wordpress/data';
+import { dispatch, select } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
+import { STORE_KEY as CART_STORE_KEY } from './constants';
 
 interface NotifyQuantityChangesArgs {
 	oldCart: Cart;
@@ -216,6 +221,11 @@ export const notifyQuantityChanges = ( {
 	cartItemsPendingQuantity = [],
 	cartItemsPendingDelete = [],
 }: NotifyQuantityChangesArgs ) => {
+	const isResolutionFinished =
+		select( CART_STORE_KEY ).hasFinishedResolution( 'getCartData' );
+	if ( ! isResolutionFinished ) {
+		return;
+	}
 	notifyIfRemoved( oldCart, newCart, cartItemsPendingDelete );
 	notifyIfQuantityLimitsChanged( oldCart, newCart );
 	notifyIfQuantityChanged( oldCart, newCart, cartItemsPendingQuantity );
