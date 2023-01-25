@@ -63,9 +63,6 @@ function unblock(el) {
 }
 
 (function($) {
-	// Don't break checkout.js
-	$.blockUI = { defaults: { overlayCSS: { cursor: '' } } };
-
 	$.fn.block = function(opts) {
 		for (const el of this) block(el, opts);
 	};

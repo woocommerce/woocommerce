@@ -6,8 +6,6 @@ jQuery( function( $ ) {
 		return false;
 	}
 
-	$.blockUI.defaults.overlayCSS.cursor = 'default';
-
 	var wc_checkout_form = {
 		updateTimer: false,
 		dirtyInput: false,
@@ -334,7 +332,8 @@ jQuery( function( $ ) {
 				message: null,
 				overlayCSS: {
 					background: '#fff',
-					opacity: 0.6
+					opacity: 0.6,
+					cursor: 'default'
 				}
 			});
 
@@ -459,7 +458,8 @@ jQuery( function( $ ) {
 					message: null,
 					overlayCSS: {
 						background: '#fff',
-						opacity: 0.6
+						opacity: 0.6,
+						cursor: 'default'
 					}
 				});
 			}
@@ -612,7 +612,8 @@ jQuery( function( $ ) {
 				message: null,
 				overlayCSS: {
 					background: '#fff',
-					opacity: 0.6
+					opacity: 0.6,
+					cursor: 'default'
 				}
 			});
 
@@ -652,7 +653,8 @@ jQuery( function( $ ) {
 				message: null,
 				overlayCSS: {
 					background: '#fff',
-					opacity: 0.6
+					opacity: 0.6,
+					cursor: 'default'
 				}
 			});
 
