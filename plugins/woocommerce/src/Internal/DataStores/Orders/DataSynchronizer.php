@@ -90,10 +90,10 @@ class DataSynchronizer implements BatchProcessorInterface {
 		PostsToOrdersMigrationController $posts_to_cot_migrator,
 		LegacyProxy $legacy_proxy
 	) {
-		$this->data_store             = $data_store;
-		$this->database_util          = $database_util;
-		$this->posts_to_cot_migrator  = $posts_to_cot_migrator;
-		$this->error_logger           = $legacy_proxy->call_function( 'wc_get_logger' );
+		$this->data_store            = $data_store;
+		$this->database_util         = $database_util;
+		$this->posts_to_cot_migrator = $posts_to_cot_migrator;
+		$this->error_logger          = $legacy_proxy->call_function( 'wc_get_logger' );
 	}
 
 	/**
