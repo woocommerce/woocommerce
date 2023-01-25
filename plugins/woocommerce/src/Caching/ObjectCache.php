@@ -149,7 +149,7 @@ abstract class ObjectCache {
 			}
 		}
 
-		$id   = $this->get_id_from_object_if_null( $object, $id );
+		$id = $this->get_id_from_object_if_null( $object, $id );
 
 		$this->last_cached_data = $object;
 		return $this->get_cache_engine()->cache_object(

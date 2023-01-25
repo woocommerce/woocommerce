@@ -41,7 +41,7 @@ class OrderCacheController {
 	 * @param OrderCache $order_cache The order cache engine to use.
 	 */
 	final public function init( OrderCache $order_cache ) {
-		$this->order_cache         = $order_cache;
+		$this->order_cache = $order_cache;
 	}
 
 	/**

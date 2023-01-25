@@ -9,10 +9,12 @@ class WPCacheEngine implements CacheEngine {
 	use CacheNameSpaceTrait;
 
 	/**
-	 * Gets an object from the cache.
+	 * Retrieves an object cached under a given key.
 	 *
-	 * @param string $key The key under which the object is cached.
-	 * @return array|object|null The cached object, or null if the object is not cached.
+	 * @param string $key They key under which the object to retrieve is cached.
+	 * @param string $group The group under which the object is cached.
+	 *
+	 * @return array|object|null The cached object, or null if there's no object cached under the passed key.
 	 */
 	public function get_cached_object( string $key, string $group = '' ) {
 		$prefixed_key = self::get_prefixed_key( $key, $group );
@@ -26,6 +28,8 @@ class WPCacheEngine implements CacheEngine {
 	 * @param string       $key The key under which the object will be cached.
 	 * @param array|object $object The object to cache.
 	 * @param int          $expiration Expiration for the cached object, in seconds.
+	 * @param string       $group The group under which the object will be cached.
+	 *
 	 * @return bool True if the object is cached successfully, false otherwise.
 	 */
 	public function cache_object( string $key, $object, int $expiration, string $group = '' ): bool {
@@ -37,6 +41,8 @@ class WPCacheEngine implements CacheEngine {
 	 * Removes a cached object from the cache.
 	 *
 	 * @param string $key They key under which the object is cached.
+	 * @param string $group The group under which the object is cached.
+	 *
 	 * @return bool True if the object is removed from the cache successfully, false otherwise (because the object wasn't cached or for other reason).
 	 */
 	public function delete_cached_object( string $key, string $group = '' ): bool {
@@ -48,6 +54,8 @@ class WPCacheEngine implements CacheEngine {
 	 * Checks if an object is cached under a given key.
 	 *
 	 * @param string $key The key to verify.
+	 * @param string $group The group under which the object is cached.
+	 *
 	 * @return bool True if there's an object cached under the given key, false otherwise.
 	 */
 	public function is_cached( string $key, string $group = '' ): bool {

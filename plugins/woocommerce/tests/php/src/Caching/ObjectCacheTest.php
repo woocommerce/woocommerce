@@ -153,8 +153,8 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( $result );
 
 		$expected_prefix = \WC_Cache_Helper::get_cache_prefix( 'the_type' );
-
 		$key             = $expected_prefix . 'the_id';
+
 		$this->assertEquals( $object, wp_cache_get( $key, 'the_type' ) );
 	}
 
@@ -169,9 +169,9 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 
 		$prefix = \WC_Cache_Helper::get_cache_prefix( 'the_type' );
 
-		$key_1           = $prefix . 'the_id_1';
+		$key_1 = $prefix . 'the_id_1';
 		$this->assertEquals( $object_1, wp_cache_get( $key_1, 'the_type' ) );
-		$key_2           = $prefix . '9999';
+		$key_2 = $prefix . '9999';
 		$this->assertEquals( $object_2, wp_cache_get( $key_2, 'the_type' ) );
 	}
 
@@ -254,8 +254,6 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox 'update_if_cached' updates an already cached object the same way as 'set'.
-	 *
-	 * @param ?int $id Id to pass to update_if_cached.
 	 */
 	public function test_update_if_cached_updates_already_cached_object() {
 		$id = 1234;
@@ -317,7 +315,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_set_with_custom_serialization_that_returns_errors( int $errors_count ) {
 		$exception = null;
-		$errors    = $errors_count === 1 ? array( 'Foo failed' ) : array( 'Foo failed', 'Bar failed' );
+		$errors    = 1 === $errors_count ? array( 'Foo failed' ) : array( 'Foo failed', 'Bar failed' );
 		$object    = array( 'foo' );
 
 		// phpcs:disable Squiz.Commenting
@@ -355,7 +353,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 		}
 
 		$expected_message = 'Object validation/serialization failed';
-		if ( $errors_count === 1 ) {
+		if ( 1 === $errors_count ) {
 			$expected_message .= ': Foo failed';
 		}
 		$this->assertEquals( $expected_message, $exception->getMessage() );
@@ -503,7 +501,6 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 		$engine = new WPCacheEngine();
 
 		// phpcs:disable Squiz.Commenting
-
 		$sut = new class($engine) extends ObjectCache {
 			public function get_object_type(): string {
 				return 'the_type';
@@ -530,7 +527,6 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 			protected function get_from_datastore( $id ) {
 			}
 		};
-
 		// phpcs:enable Squiz.Commenting
 
 		$object = array( 'foo' );
@@ -543,11 +539,12 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	 * @testdox A custom cache engine instance can be used via 'wc_object_cache_get_engine' filter.
 	 */
 	public function test_custom_cache_engine_via_hook() {
-		$engine                  = new class extends WPCacheEngine {};
+		$engine                  = new class() extends WPCacheEngine {};
 		$engine_passed_to_filter = null;
 		$cache_passed_to_filter  = null;
 
 		$sut = new class() extends ObjectCache {
+			// phpcs:disable Squiz.Commenting
 			public function get_object_type(): string {
 				return 'the_type';
 			}
@@ -561,6 +558,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 
 			protected function get_from_datastore( $id ) {
 			}
+			// phpcs:enable Squiz.Commenting
 		};
 
 		add_filter(

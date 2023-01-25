@@ -33,14 +33,9 @@ class CacheExceptionTest extends \WC_Unit_Test_Case {
 			protected function validate( $object ): ?array {
 			}
 
-			/**
-			 * @param $id
-			 *
-			 * @return mixed
-			 */
 			protected function get_from_datastore( $id ) {
-				// TODO: Implement get_from_datastore() method.
-}};
+			}
+		};
 		// phpcs:enable Squiz.Commenting
 	}
 
