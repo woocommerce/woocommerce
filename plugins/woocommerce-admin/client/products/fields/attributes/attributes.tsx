@@ -31,18 +31,12 @@ export const Attributes: React.FC< AttributesProps > = ( {
 		<AttributeControl
 			value={ attributes }
 			onChange={ handleChange }
-			onModalClose={ ( attribute ) => {
-				if ( attribute ) {
-					return;
-				}
+			onNewModalCancel={ () => {
 				recordEvent(
 					'product_add_attributes_modal_cancel_button_click'
 				);
 			} }
-			onModalOpen={ ( attribute ) => {
-				if ( attribute ) {
-					return;
-				}
+			onNewModalOpen={ () => {
 				if ( ! attributes.length ) {
 					recordEvent( 'product_add_first_attribute_button_click' );
 					return;

@@ -44,16 +44,10 @@ export const Options: React.FC< OptionsProps > = ( {
 		<AttributeControl
 			value={ attributes }
 			onChange={ handleChange }
-			onModalClose={ ( attribute ) => {
-				if ( attribute ) {
-					return;
-				}
+			onNewModalCancel={ () => {
 				recordEvent( 'product_add_options_modal_cancel_button_click' );
 			} }
-			onModalOpen={ ( attribute ) => {
-				if ( attribute ) {
-					return;
-				}
+			onNewModalOpen={ () => {
 				recordEvent( 'product_add_option_button' );
 			} }
 			text={ {

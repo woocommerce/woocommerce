@@ -37,8 +37,12 @@ type AttributeControlProps = {
 	onChange: ( value: ProductAttribute[] ) => void;
 	onEdit?: ( attribute: ProductAttribute ) => void;
 	onRemove?: ( attribute: ProductAttribute ) => void;
-	onModalClose?: ( attribute?: ProductAttribute ) => void;
-	onModalOpen?: ( attribute?: ProductAttribute ) => void;
+	onNewModalCancel?: () => void;
+	onNewModalClose?: () => void;
+	onNewModalOpen?: () => void;
+	onEditModalCancel?: ( attribute?: ProductAttribute ) => void;
+	onEditModalClose?: ( attribute?: ProductAttribute ) => void;
+	onEditModalOpen?: ( attribute?: ProductAttribute ) => void;
 	text?: {
 		emptyStateSubtitle?: string;
 		newAttributeListItemLabel?: string;
@@ -52,8 +56,12 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	onAdd,
 	onChange,
 	onEdit,
-	onModalClose,
-	onModalOpen,
+	onNewModalCancel,
+	onNewModalClose,
+	onNewModalOpen,
+	onEditModalCancel,
+	onEditModalClose,
+	onEditModalOpen,
 	onRemove,
 	text = {
 		newAttributeModalTitle: undefined,
@@ -105,25 +113,31 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		}
 	};
 
-	const openModal = ( attribute?: ProductAttribute ) => {
-		if ( attribute ) {
-			setCurrentAttributeId( getAttributeId( attribute ) );
-		} else {
-			setIsNewModalVisible( true );
-		}
-		if ( typeof onModalOpen === 'function' ) {
-			onModalOpen( attribute );
+	const openNewModal = () => {
+		setIsNewModalVisible( true );
+		if ( typeof onNewModalOpen === 'function' ) {
+			onNewModalOpen();
 		}
 	};
 
-	const closeModal = ( attribute?: ProductAttribute ) => {
-		if ( attribute ) {
-			setCurrentAttributeId( null );
-		} else {
-			setIsNewModalVisible( false );
+	const closeNewModal = () => {
+		setIsNewModalVisible( false );
+		if ( typeof onNewModalClose === 'function' ) {
+			onNewModalClose();
 		}
-		if ( typeof onModalClose === 'function' ) {
-			onModalClose( attribute );
+	};
+
+	const openEditModal = ( attribute: ProductAttribute ) => {
+		setCurrentAttributeId( getAttributeId( attribute ) );
+		if ( typeof onEditModalOpen === 'function' ) {
+			onEditModalOpen( attribute );
+		}
+	};
+
+	const closeEditModal = ( attribute: ProductAttribute ) => {
+		setCurrentAttributeId( null );
+		if ( typeof onEditModalClose === 'function' ) {
+			onEditModalClose( attribute );
 		}
 	};
 
@@ -142,7 +156,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			onAdd( newAttributes );
 		}
 		recordEvent( 'product_add_attributes_modal_add_button_click' );
-		closeModal();
+		closeNewModal();
 	};
 
 	const handleEdit = ( updatedAttribute: ProductAttribute ) => {
@@ -160,7 +174,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			onEdit( updatedAttribute );
 		}
 		handleChange( updatedAttributes );
-		closeModal( updatedAttribute );
+		closeEditModal( updatedAttribute );
 	};
 
 	if ( ! value.length ) {
@@ -168,13 +182,16 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			<>
 				<AttributeEmptyState
 					addNewLabel={ text.newAttributeModalTitle }
-					onNewClick={ () => openModal() }
+					onNewClick={ () => openNewModal() }
 					subtitle={ text.emptyStateSubtitle }
 				/>
 				{ isNewModalVisible && (
 					<NewAttributeModal
 						onCancel={ () => {
-							closeModal();
+							closeNewModal();
+							if ( typeof onNewModalCancel === 'function' ) {
+								onNewModalCancel();
+							}
 						} }
 						onAdd={ handleAdd }
 						selectedAttributeIds={ [] }
@@ -227,19 +244,24 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					<AttributeListItem
 						attribute={ attr }
 						key={ getAttributeId( attr ) }
-						onEditClick={ () => openModal( attr ) }
+						onEditClick={ () => openEditModal( attr ) }
 						onRemoveClick={ () => handleRemove( attr ) }
 					/>
 				) ) }
 			</Sortable>
 			<NewAttributeListItem
 				label={ text.newAttributeListItemLabel }
-				onClick={ () => openModal() }
+				onClick={ () => openNewModal() }
 			/>
 			{ isNewModalVisible && (
 				<NewAttributeModal
 					title={ text.newAttributeModalTitle }
-					onCancel={ () => closeModal() }
+					onCancel={ () => {
+						closeNewModal();
+						if ( typeof onNewModalCancel === 'function' ) {
+							onNewModalCancel();
+						}
+					} }
 					onAdd={ handleAdd }
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
 				/>
@@ -268,7 +290,12 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 							),
 						},
 					} ) }
-					onCancel={ () => closeModal( currentAttribute ) }
+					onCancel={ () => {
+						closeEditModal( currentAttribute );
+						if ( typeof onEditModalCancel === 'function' ) {
+							onEditModalCancel( currentAttribute );
+						}
+					} }
 					onEdit={ ( updatedAttribute ) => {
 						handleEdit( updatedAttribute );
 					} }
