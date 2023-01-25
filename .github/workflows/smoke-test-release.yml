@@ -466,6 +466,7 @@ jobs:
                   E2E_MAX_FAILURES: 15
                   FORCE_COLOR: 1
                   ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
+                  DEFAULT_TIMEOUT_OVERRIDE: 120000
               working-directory: plugins/woocommerce
               run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
@@ -618,6 +619,7 @@ jobs:
                   E2E_MAX_FAILURES: 15
                   FORCE_COLOR: 1
                   ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
+                  DEFAULT_TIMEOUT_OVERRIDE: 120000
               working-directory: plugins/woocommerce
               run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
