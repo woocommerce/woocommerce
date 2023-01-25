@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		$attribute_taxonomies = wc_get_attribute_taxonomies();
 
 		if ( empty( $attribute_taxonomies ) ) :
-		?>
+			?>
 			<div id="message" class="inline notice woocommerce-message">
 				<p><?php echo wp_kses_post( __( 'Add descriptive pieces of information that customers can use to search for this product on your store, such as “Material” or “Brand”.', 'woocommerce' ) ); ?></p>
 			</div>
