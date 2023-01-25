@@ -461,7 +461,9 @@ jobs:
               run: pnpm exec playwright install chromium
 
             - name: Run E2E tests.
-              if: success() || failure()
+              if: |
+                  success() || 
+                  ( failure() && steps.api.conclusion == 'success' )
               timeout-minutes: 60
               id: e2e
               env:
@@ -618,6 +620,9 @@ jobs:
               run: pnpm exec playwright install chromium
 
             - name: Run E2E tests.
+              if: |
+                  success() || 
+                  ( failure() && steps.api.conclusion == 'success' )
               timeout-minutes: 60
               env:
                   USE_WP_ENV: 1
