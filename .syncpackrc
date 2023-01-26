@@ -1,6 +1,6 @@
 {
 	"dev": true,
-	"filter": "^(?:react|react-dom|typescript|@typescript-eslint|@types/react).*$",
+	"filter": "^(?:config|react|react-dom|typescript|@typescript-eslint|@types/react).*$",
 	"indent": "\t",
 	"overrides": true,
 	"peer": true,
