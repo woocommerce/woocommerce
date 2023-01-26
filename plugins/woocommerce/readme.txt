@@ -296,6 +296,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Trying experimental slot context with product editor fills. [#36333](https://github.com/woocommerce/woocommerce/pull/36333)
 * Add - Using slotfill to insert attributes section in the product editor. [#36483](https://github.com/woocommerce/woocommerce/pull/36483)
 * Add - Using slotfill to insert images section in product editor. [#36461](https://github.com/woocommerce/woocommerce/pull/36461)
+* Update - Update WooCommerce Blocks to 9.4.2 [#36624](https://github.com/woocommerce/woocommerce/pull/36624)
 * Update - Adapt the summary text in the product management form. [#35717](https://github.com/woocommerce/woocommerce/pull/35717)
 * Update - Add Codisto for WooCommerce to free extensions list [#36009](https://github.com/woocommerce/woocommerce/pull/36009)
 * Update - Add experimental open menu on focus option to the attribute and attribute term input fields. [#35758](https://github.com/woocommerce/woocommerce/pull/35758)
