@@ -557,8 +557,12 @@ export const getCurrentDates = (
 		throw Error( 'Invalid date range' );
 	}
 
-	const { primaryStart, primaryEnd, secondaryStart, secondaryEnd } =
-		dateValue;
+	const {
+		primaryStart,
+		primaryEnd,
+		secondaryStart,
+		secondaryEnd,
+	} = dateValue;
 
 	return getCurrentDatesMemoized(
 		period,
