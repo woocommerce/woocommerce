@@ -8,6 +8,7 @@ import {
 	__experimentalProductSectionLayout as ProductSectionLayout,
 	Link,
 	useFormContext,
+	CollapsibleContent,
 } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Product } from '@woocommerce/data';
@@ -41,12 +42,14 @@ type PricingSectionFillsType = {
 	tabId: string;
 	basicSectionId: string;
 	taxesSectionId: string;
+	taxesAdvancedSectionId: string;
 };
 
 export const PricingSectionFills: React.FC< PricingSectionFillsType > = ( {
 	tabId,
 	basicSectionId,
 	taxesSectionId,
+	taxesAdvancedSectionId,
 } ) => {
 	const { setValues, values } = useFormContext< Product >();
 	const { sanitizePrice } = useProductHelper();
@@ -143,6 +146,13 @@ export const PricingSectionFills: React.FC< PricingSectionFillsType > = ( {
 							<WooProductFieldItem.Slot
 								section={ taxesSectionId }
 							/>
+							<CollapsibleContent
+								toggleText={ __( 'Advanced', 'woocommerce' ) }
+							>
+								<WooProductFieldItem.Slot
+									section={ taxesAdvancedSectionId }
+								/>
+							</CollapsibleContent>
 						</CardBody>
 					</Card>
 				</ProductSectionLayout>
@@ -170,7 +180,7 @@ export const PricingSectionFills: React.FC< PricingSectionFillsType > = ( {
 			</WooProductFieldItem>
 			<WooProductFieldItem
 				id="pricing/taxes/class"
-				sections={ [ { name: taxesSectionId, order: 3 } ] }
+				sections={ [ { name: taxesAdvancedSectionId, order: 3 } ] }
 				pluginId={ PLUGIN_ID }
 			>
 				<PricingTaxesClassField />

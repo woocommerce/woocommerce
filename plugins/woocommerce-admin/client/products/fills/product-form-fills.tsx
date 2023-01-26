@@ -29,6 +29,7 @@ import {
 	SHIPPING_SECTION_DIMENSIONS_ID,
 	PRICING_SECTION_BASIC_ID,
 	PRICING_SECTION_TAXES_ID,
+	PRICING_SECTION_TAXES_ADVANCED_ID,
 	INVENTORY_SECTION_ID,
 	INVENTORY_SECTION_ADVANCED_ID,
 	PLUGIN_ID,
@@ -121,26 +122,25 @@ const Tabs = () => {
 registerPlugin( 'wc-admin-product-editor-form-fills', {
 	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 	scope: 'woocommerce-product-editor',
-	render: () => {
-		return (
-			<>
-				<Tabs />
-				<ShippingSectionFills
-					tabId={ TAB_SHIPPING_ID }
-					basicSectionId={ SHIPPING_SECTION_BASIC_ID }
-					dimensionsSectionId={ SHIPPING_SECTION_DIMENSIONS_ID }
-				/>
-				<PricingSectionFills
-					tabId={ TAB_PRICING_ID }
-					basicSectionId={ PRICING_SECTION_BASIC_ID }
-					taxesSectionId={ PRICING_SECTION_TAXES_ID }
-				/>
-				<InventorySectionFills
-					tabId={ TAB_INVENTORY_ID }
-					basicSectionId={ INVENTORY_SECTION_ID }
-					advancedSectionId={ INVENTORY_SECTION_ADVANCED_ID }
-				/>
-			</>
-		);
-	},
+	render: () => (
+		<>
+			<Tabs />
+			<ShippingSectionFills
+				tabId={ TAB_SHIPPING_ID }
+				basicSectionId={ SHIPPING_SECTION_BASIC_ID }
+				dimensionsSectionId={ SHIPPING_SECTION_DIMENSIONS_ID }
+			/>
+			<PricingSectionFills
+				tabId={ TAB_PRICING_ID }
+				basicSectionId={ PRICING_SECTION_BASIC_ID }
+				taxesSectionId={ PRICING_SECTION_TAXES_ID }
+				taxesAdvancedSectionId={ PRICING_SECTION_TAXES_ADVANCED_ID }
+			/>
+			<InventorySectionFills
+				tabId={ TAB_INVENTORY_ID }
+				basicSectionId={ INVENTORY_SECTION_ID }
+				advancedSectionId={ INVENTORY_SECTION_ADVANCED_ID }
+			/>
+		</>
+	),
 } );

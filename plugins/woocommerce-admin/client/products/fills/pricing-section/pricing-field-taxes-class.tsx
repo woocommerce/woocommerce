@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	useFormContext,
-	CollapsibleContent,
-	Link,
-} from '@woocommerce/components';
+import { useFormContext, Link } from '@woocommerce/components';
 import {
 	Product,
 	EXPERIMENTAL_TAX_CLASSES_STORE_NAME,
@@ -45,7 +41,7 @@ export const PricingTaxesClassField = () => {
 	delete taxClassProps.value;
 
 	return (
-		<CollapsibleContent toggleText={ __( 'Advanced', 'woocommerce' ) }>
+		<>
 			{ ! isTaxClassesResolving && taxClasses.length > 0 && (
 				<RadioControl
 					{ ...taxClassProps }
@@ -82,6 +78,6 @@ export const PricingTaxesClassField = () => {
 					} ) ) }
 				/>
 			) }
-		</CollapsibleContent>
+		</>
 	);
 };

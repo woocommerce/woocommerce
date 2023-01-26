@@ -14,13 +14,13 @@ import { PartialProduct } from '@woocommerce/data';
  */
 import { ProductVariationDetailsSection } from '../sections/product-variation-details-section';
 import {
-	TAB_INVENTORY_ID,
 	VARIANT_TAB_SHIPPING_ID,
 	VARIANT_SHIPPING_SECTION_BASIC_ID,
 	VARIANT_SHIPPING_SECTION_DIMENSIONS_ID,
 	VARIANT_TAB_PRICING_ID,
 	VARIANT_PRICING_SECTION_BASIC_ID,
 	VARIANT_PRICING_SECTION_TAXES_ID,
+	VARIANT_PRICING_SECTION_TAXES_ADVANCED_ID,
 	VARIANT_TAB_INVENTORY_ID,
 	VARIANT_INVENTORY_SECTION_ID,
 	VARIANT_INVENTORY_SECTION_ADVANCED_ID,
@@ -118,6 +118,9 @@ registerPlugin( 'wc-admin-product-editor-form-variation-fills', {
 					tabId={ VARIANT_TAB_PRICING_ID }
 					basicSectionId={ VARIANT_PRICING_SECTION_BASIC_ID }
 					taxesSectionId={ VARIANT_PRICING_SECTION_TAXES_ID }
+					taxesAdvancedSectionId={
+						VARIANT_PRICING_SECTION_TAXES_ADVANCED_ID
+					}
 				/>
 				<InventorySectionFills
 					tabId={ VARIANT_TAB_INVENTORY_ID }
