@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Make order edit messages compatible with both posts and theorder object.
