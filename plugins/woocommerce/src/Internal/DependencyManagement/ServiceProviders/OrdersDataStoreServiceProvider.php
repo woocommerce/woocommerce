@@ -56,6 +56,7 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 				DatabaseUtil::class,
 				PostsToOrdersMigrationController::class,
 				LegacyProxy::class,
+				OrderCacheController::class,
 			)
 		);
 		$this->share( OrdersTableRefundDataStore::class )->addArguments( array( OrdersTableDataStoreMeta::class, DatabaseUtil::class, LegacyProxy::class ) );
