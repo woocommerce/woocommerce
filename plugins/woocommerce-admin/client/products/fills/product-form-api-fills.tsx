@@ -14,7 +14,7 @@ registerCoreProductFields();
 /**
  * Internal dependencies
  */
-import { Fields } from './product-form-field-fills';
+import { Fields } from './product-form-api-field-fills';
 import { Sections } from './product-form-api-section-fills';
 
 const Form = () => {
