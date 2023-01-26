@@ -13,7 +13,11 @@ import { PartialProduct } from '@woocommerce/data';
  * Internal dependencies
  */
 import { ProductVariationDetailsSection } from '../sections/product-variation-details-section';
-import { TAB_INVENTORY_ID, TAB_SHIPPING_ID, TAB_PRICING_ID } from './constants';
+import {
+	VARIANT_TAB_INVENTORY_ID,
+	VARIANT_TAB_SHIPPING_ID,
+	VARIANT_TAB_PRICING_ID,
+} from './constants';
 
 const tabPropData = {
 	general: {
@@ -55,7 +59,7 @@ const Tabs = () => {
 				pluginId="core"
 				tabProps={ tabPropData.pricing }
 			>
-				<WooProductSectionItem.Slot tab={ TAB_PRICING_ID } />
+				<WooProductSectionItem.Slot tab={ VARIANT_TAB_PRICING_ID } />
 			</WooProductTabItem>
 			<WooProductTabItem
 				id="tab/inventory"
@@ -63,7 +67,7 @@ const Tabs = () => {
 				pluginId="core"
 				tabProps={ tabPropData.inventory }
 			>
-				<WooProductSectionItem.Slot tab={ TAB_INVENTORY_ID } />
+				<WooProductSectionItem.Slot tab={ VARIANT_TAB_INVENTORY_ID } />
 			</WooProductTabItem>
 			<WooProductTabItem
 				id="tab/shipping"
@@ -73,7 +77,7 @@ const Tabs = () => {
 			>
 				{ ( { product }: { product: PartialProduct } ) => (
 					<WooProductSectionItem.Slot
-						tab={ TAB_SHIPPING_ID }
+						tab={ VARIANT_TAB_SHIPPING_ID }
 						fillProps={ { product } }
 					/>
 				) }

@@ -31,6 +31,7 @@ import {
 	INVENTORY_SECTION_ID,
 	INVENTORY_SECTION_ADVANCED_ID,
 	TAB_INVENTORY_ID,
+	VARIANT_TAB_INVENTORY_ID,
 	PLUGIN_ID,
 } from '../constants';
 
@@ -41,7 +42,10 @@ const InventorySection = () => {
 		<>
 			<WooProductSectionItem
 				id={ INVENTORY_SECTION_ID }
-				tabs={ [ { name: TAB_INVENTORY_ID, order: 1 } ] }
+				tabs={ [
+					{ name: TAB_INVENTORY_ID, order: 1 },
+					{ name: VARIANT_TAB_INVENTORY_ID, order: 1 },
+				] }
 				pluginId={ PLUGIN_ID }
 			>
 				<ProductSectionLayout

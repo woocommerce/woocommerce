@@ -12,6 +12,7 @@ import { PartialProduct, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import { Card, CardBody } from '@wordpress/components';
+import { ReactNode } from 'react';
 
 /**
  * Internal dependencies
@@ -30,7 +31,10 @@ import {
 	PLUGIN_ID,
 	SHIPPING_SECTION_BASIC_ID,
 	SHIPPING_SECTION_DIMENSIONS_ID,
+	VARIANT_SHIPPING_SECTION_BASIC_ID,
+	VARIANT_SHIPPING_SECTION_DIMENSIONS_ID,
 	TAB_SHIPPING_ID,
+	VARIANT_TAB_SHIPPING_ID,
 } from '../constants';
 import {
 	ShippingDimensionsImage,
@@ -39,6 +43,11 @@ import {
 import { useProductHelper } from '../../use-product-helper';
 
 import './shipping-section.scss';
+
+type ShippingSectionFillPropsType = {
+	basicSlot: ReactNode;
+	dimensionsSlot: ReactNode;
+};
 
 const ShippingSection = () => {
 	const [ highlightSide, setHighlightSide ] =
@@ -72,64 +81,112 @@ const ShippingSection = () => {
 
 	return (
 		<>
-			<WooProductSectionItem
+			<WooProductSectionItem< ShippingSectionFillPropsType >
 				id={ SHIPPING_SECTION_BASIC_ID }
-				tabs={ [ { name: TAB_SHIPPING_ID, order: 1 } ] }
+				tabs={ [
+					{
+						name: TAB_SHIPPING_ID,
+						order: 1,
+						fillProps: {
+							basicSlot: (
+								<WooProductFieldItem.Slot
+									section={ SHIPPING_SECTION_BASIC_ID }
+								/>
+							),
+							dimensionsSlot: (
+								<WooProductFieldItem.Slot
+									section={ SHIPPING_SECTION_DIMENSIONS_ID }
+									fillProps={
+										{
+											setHighlightSide,
+											dimensionProps,
+										} as ShippingDimensionsPropsType
+									}
+								/>
+							),
+						},
+					},
+					{
+						name: VARIANT_TAB_SHIPPING_ID,
+						order: 1,
+						fillProps: {
+							basicSlot: (
+								<WooProductFieldItem.Slot
+									section={
+										VARIANT_SHIPPING_SECTION_BASIC_ID
+									}
+								/>
+							),
+							dimensionsSlot: (
+								<WooProductFieldItem.Slot
+									section={
+										VARIANT_SHIPPING_SECTION_DIMENSIONS_ID
+									}
+									fillProps={
+										{
+											setHighlightSide,
+											dimensionProps,
+										} as ShippingDimensionsPropsType
+									}
+								/>
+							),
+						},
+					},
+				] }
 				pluginId={ PLUGIN_ID }
 			>
-				<ProductSectionLayout
-					title={ __( 'Shipping', 'woocommerce' ) }
-					description={ __(
-						'Set up shipping costs and enter dimensions used for accurate rate calculations.',
-						'woocommerce'
-					) }
-				>
-					<Card>
-						<CardBody className="product-shipping-section__classes">
-							<WooProductFieldItem.Slot
-								section={ SHIPPING_SECTION_BASIC_ID }
-							/>
-						</CardBody>
-					</Card>
-					<Card>
-						<CardBody className="product-shipping-section__dimensions">
-							<h4>{ __( 'Dimensions', 'woocommerce' ) }</h4>
-							<p className="woocommerce-product-form__secondary-text">
-								{ __(
-									`Enter the size of the product as you'd put it in a shipping box, including packaging like bubble wrap.`,
-									'woocommerce'
-								) }
-							</p>
-							<div className="product-shipping-section__dimensions-body">
-								<div className="product-shipping-section__dimensions-body-col">
-									{ hasResolvedUnits && (
-										<WooProductFieldItem.Slot
-											section={
-												SHIPPING_SECTION_DIMENSIONS_ID
-											}
-											fillProps={
-												{
-													setHighlightSide,
-													dimensionProps,
-												} as ShippingDimensionsPropsType
-											}
-										/>
-									) }
-								</div>
-								<div className="product-shipping-section__dimensions-body-col">
-									<ShippingDimensionsImage
-										highlight={ highlightSide }
-										className="product-shipping-section__dimensions-image"
-									/>
-								</div>
-							</div>
-						</CardBody>
-					</Card>
-				</ProductSectionLayout>
+				{ ( {
+					basicSlot,
+					dimensionsSlot,
+				}: ShippingSectionFillPropsType ) => {
+					return (
+						<ProductSectionLayout
+							title={ __( 'Shipping', 'woocommerce' ) }
+							description={ __(
+								'Set up shipping costs and enter dimensions used for accurate rate calculations.',
+								'woocommerce'
+							) }
+						>
+							<Card>
+								<CardBody className="product-shipping-section__classes">
+									{ basicSlot }
+								</CardBody>
+							</Card>
+							<Card>
+								<CardBody className="product-shipping-section__dimensions">
+									<h4>
+										{ __( 'Dimensions', 'woocommerce' ) }
+									</h4>
+									<p className="woocommerce-product-form__secondary-text">
+										{ __(
+											`Enter the size of the product as you'd put it in a shipping box, including packaging like bubble wrap.`,
+											'woocommerce'
+										) }
+									</p>
+									<div className="product-shipping-section__dimensions-body">
+										<div className="product-shipping-section__dimensions-body-col">
+											{ hasResolvedUnits &&
+												dimensionsSlot }
+										</div>
+										<div className="product-shipping-section__dimensions-body-col">
+											<ShippingDimensionsImage
+												highlight={ highlightSide }
+												className="product-shipping-section__dimensions-image"
+											/>
+										</div>
+									</div>
+								</CardBody>
+							</Card>
+						</ProductSectionLayout>
+					);
+				} }
 			</WooProductSectionItem>
 			<WooProductFieldItem
 				id="shipping/class"
-				sections={ [ { name: SHIPPING_SECTION_BASIC_ID, order: 1 } ] }
+				sections={ [
+					{ name: SHIPPING_SECTION_BASIC_ID, order: 1 },
+					{ name: VARIANT_SHIPPING_SECTION_BASIC_ID, order: 1 },
+				] }
 				pluginId={ PLUGIN_ID }
 			>
 				{ ( { product }: ProductShippingSectionPropsType ) => (
@@ -140,6 +197,7 @@ const ShippingSection = () => {
 				id="shipping/dimensions/width"
 				sections={ [
 					{ name: SHIPPING_SECTION_DIMENSIONS_ID, order: 1 },
+					{ name: VARIANT_SHIPPING_SECTION_DIMENSIONS_ID, order: 1 },
 				] }
 				pluginId={ PLUGIN_ID }
 			>
@@ -151,6 +209,7 @@ const ShippingSection = () => {
 				id="shipping/dimensions/length"
 				sections={ [
 					{ name: SHIPPING_SECTION_DIMENSIONS_ID, order: 3 },
+					{ name: VARIANT_SHIPPING_SECTION_DIMENSIONS_ID, order: 3 },
 				] }
 				pluginId={ PLUGIN_ID }
 			>
@@ -162,6 +221,7 @@ const ShippingSection = () => {
 				id="shipping/dimensions/height"
 				sections={ [
 					{ name: SHIPPING_SECTION_DIMENSIONS_ID, order: 5 },
+					{ name: VARIANT_SHIPPING_SECTION_DIMENSIONS_ID, order: 5 },
 				] }
 				pluginId={ PLUGIN_ID }
 			>
@@ -173,6 +233,7 @@ const ShippingSection = () => {
 				id="shipping/dimensions/weight"
 				sections={ [
 					{ name: SHIPPING_SECTION_DIMENSIONS_ID, order: 7 },
+					{ name: VARIANT_SHIPPING_SECTION_DIMENSIONS_ID, order: 7 },
 				] }
 				pluginId={ PLUGIN_ID }
 			>

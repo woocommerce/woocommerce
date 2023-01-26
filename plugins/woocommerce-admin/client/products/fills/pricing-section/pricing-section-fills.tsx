@@ -29,6 +29,7 @@ import {
 	PRICING_SECTION_BASIC_ID,
 	PRICING_SECTION_TAXES_ID,
 	TAB_PRICING_ID,
+	VARIANT_TAB_PRICING_ID,
 	PLUGIN_ID,
 } from '../constants';
 import { CurrencyContext } from '../../../lib/currency-context';
@@ -97,7 +98,10 @@ const PricingSection = () => {
 		<>
 			<WooProductSectionItem
 				id={ PRICING_SECTION_BASIC_ID }
-				tabs={ [ { name: TAB_PRICING_ID, order: 1 } ] }
+				tabs={ [
+					{ name: TAB_PRICING_ID, order: 1 },
+					{ name: VARIANT_TAB_PRICING_ID, order: 1 },
+				] }
 				pluginId={ PLUGIN_ID }
 			>
 				<ProductSectionLayout

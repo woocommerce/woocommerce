@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Slot, Fill } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
 
@@ -11,22 +11,28 @@ import { createElement, Fragment } from '@wordpress/element';
 import { createOrderedChildren, sortFillsByOrder } from '../utils';
 import { ProductFillLocationType } from '../woo-product-tab-item';
 
-type WooProductSectionItemProps = {
+type WooProductSectionItemProps< T > = {
 	id: string;
-	tabs: ProductFillLocationType[];
+	tabs: ProductFillLocationType< T >[];
 	pluginId: string;
+	children?: ReactNode | undefined;
 };
 
 type WooProductSectionSlotProps = {
 	tab: string;
 };
 
-export const WooProductSectionItem: React.FC< WooProductSectionItemProps > & {
-	Slot: React.FC< Slot.Props & WooProductSectionSlotProps >;
-} = ( { children, tabs } ) => {
-	return (
-		<>
-			{ tabs.map( ( { name: tabName, order: tabOrder } ) => (
+export const WooProductSectionItem = < T, >( {
+	children,
+	tabs,
+}: WooProductSectionItemProps< T > ) => (
+	<>
+		{ tabs.map(
+			( {
+				name: tabName,
+				order: tabOrder,
+				fillProps: sectionFillProps,
+			} ) => (
 				<Fill
 					name={ `woocommerce_product_section_${ tabName }` }
 					key={ tabName }
@@ -35,16 +41,19 @@ export const WooProductSectionItem: React.FC< WooProductSectionItemProps > & {
 						return createOrderedChildren< Fill.Props >(
 							children,
 							tabOrder || 20,
-							fillProps
+							{ ...fillProps, ...sectionFillProps }
 						);
 					} }
 				</Fill>
-			) ) }
-		</>
-	);
-};
+			)
+		) }
+	</>
+);
 
-WooProductSectionItem.Slot = ( { fillProps, tab } ) => (
+WooProductSectionItem.Slot = ( {
+	fillProps,
+	tab,
+}: Slot.Props & WooProductSectionSlotProps ) => (
 	<Slot
 		name={ `woocommerce_product_section_${ tab }` }
 		fillProps={ fillProps }

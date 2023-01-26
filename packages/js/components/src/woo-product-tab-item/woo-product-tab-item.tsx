@@ -10,7 +10,11 @@ import { createElement, Fragment } from '@wordpress/element';
  */
 import { createOrderedChildren } from '../utils';
 
-export type ProductFillLocationType = { name: string; order?: number };
+export type ProductFillLocationType< T = Record< string, unknown > > = {
+	name: string;
+	order?: number;
+	fillProps?: T;
+};
 
 type WooProductTabItemProps = {
 	id: string;
