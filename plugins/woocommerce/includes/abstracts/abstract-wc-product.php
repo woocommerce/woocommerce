@@ -818,18 +818,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function set_sku( $sku ) {
 		$sku = (string) $sku;
 		if ( $this->get_object_read() && ! empty( $sku ) && ! wc_product_has_unique_sku( $this->get_id(), $sku ) ) {
-			if ( ! function_exists( 'get_sample_permalink' ) ) {
-				require_once ABSPATH . 'wp-admin/includes/post.php';
-			}
-			$sku_found        = wc_get_product_id_by_sku( $sku );
-			$sample_permalink = get_sample_permalink( $this->get_id(), $this->get_name(), '' );
+			$sku_found = wc_get_product_id_by_sku( $sku );
 
 			$this->error(
 				'product_invalid_sku',
 				__( 'Invalid or duplicated SKU.', 'woocommerce' ),
 				400,
 				array(
-					'permalink_template' => $sample_permalink[0],
 					'resource_id' => $sku_found,
 					'unique_sku'  => wc_product_generate_unique_sku( $this->get_id(), $sku ),
 				)
