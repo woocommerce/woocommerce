@@ -29,7 +29,7 @@
 		"@jest/globals": "^27.5.1",
 		"@types/jest": "^27.4.1",
 		"@woocommerce/e2e-utils": "workspace:*",
-		"config": "^3.3.7"
+		"config": "3.3.7"
 	},
 	"peerDependencies": {
 		"@woocommerce/e2e-environment": "^0.2.3 || ^0.3.0",
