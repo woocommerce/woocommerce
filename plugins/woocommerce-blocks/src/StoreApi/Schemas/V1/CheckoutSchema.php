@@ -47,7 +47,7 @@ class CheckoutSchema extends AbstractSchema {
 	public function __construct( ExtendSchema $extend, SchemaController $controller ) {
 		parent::__construct( $extend, $controller );
 		$this->billing_address_schema  = $this->controller->get( BillingAddressSchema::IDENTIFIER );
-		$this->shipping_address_schema = $this->controller->get( BillingAddressSchema::IDENTIFIER );
+		$this->shipping_address_schema = $this->controller->get( ShippingAddressSchema::IDENTIFIER );
 		$this->image_attachment_schema = $this->controller->get( ImageAttachmentSchema::IDENTIFIER );
 	}
 
