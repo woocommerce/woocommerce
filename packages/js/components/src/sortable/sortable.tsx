@@ -11,7 +11,7 @@ import {
 	useState,
 	createContext,
 } from '@wordpress/element';
-import { DragEvent, DragEventHandler, KeyboardEvent } from 'react';
+import { Context, DragEvent, DragEventHandler, KeyboardEvent } from 'react';
 import { speak } from '@wordpress/a11y';
 import { throttle } from 'lodash';
 import { v4 } from 'uuid';
@@ -43,7 +43,7 @@ export type SortableProps = {
 
 const THROTTLE_TIME = 16;
 
-export const SortableContext = createContext( {} );
+export const SortableContext: Context< {} > = createContext( {} );
 
 export const Sortable = ( {
 	children,

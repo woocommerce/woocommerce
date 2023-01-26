@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { isValidElement, Fragment } from 'react';
+import { isValidElement, Fragment, ReactNode, ReactElement } from 'react';
 import { Slot, Fill } from '@wordpress/components';
 import { cloneElement, createElement } from '@wordpress/element';
 
@@ -14,11 +14,11 @@ import { cloneElement, createElement } from '@wordpress/element';
  * @return {Node} Node.
  */
 function createOrderedChildren< T = Fill.Props, S = Record< string, unknown > >(
-	children: React.ReactNode,
+	children: ReactNode,
 	order: number,
 	props: T,
 	injectProps?: S
-) {
+): ReactElement {
 	if ( typeof children === 'function' ) {
 		return cloneElement( children( props ), { order, ...injectProps } );
 	} else if ( isValidElement( children ) ) {

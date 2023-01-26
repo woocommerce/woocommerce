@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { createContext, useContext } from '@wordpress/element';
+import type { Context } from 'react';
 
 /**
  * Internal dependencies
@@ -51,7 +52,7 @@ export type FormContext< Values extends Record< string, any > > = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const FormContext = createContext< FormContext< any > >(
+export const FormContext: Context< FormContext< any > > = createContext(
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	{} as FormContext< any >
 );

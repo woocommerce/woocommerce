@@ -17,8 +17,10 @@ import { MenuItem } from './types';
  * @param {Object}     data           Data object with menu items and site information.
  * @param {MenuItem[]} data.menuItems Menu items to hydrate.
  */
-export const withNavigationHydration = ( data: { menuItems: MenuItem[] } ) =>
-	createHigherOrderComponent< Record< string, unknown > >(
+export const withNavigationHydration = < ComponentProps, >( data: {
+	menuItems: MenuItem[];
+} ) =>
+	createHigherOrderComponent< Record< string, unknown >, ComponentProps >(
 		( OriginalComponent ) => ( props ) => {
 			const dataRef = useRef( data );
 
