@@ -9,6 +9,7 @@ const {
 	getPaymentsConfig,
 	getExtensionsConfig,
 	getStylingConfig,
+	getInteractivityAPIConfig,
 } = require( './bin/webpack-configs.js' );
 
 // Only options shared between all configs should be defined here.
@@ -76,6 +77,14 @@ const StylingConfig = {
 	...getStylingConfig( { alias: getAlias() } ),
 };
 
+/**
+ * Config to generate the Interactivity API runtime.
+ */
+const InteractivityConfig = {
+	...sharedConfig,
+	...getInteractivityAPIConfig( { alias: getAlias() } ),
+};
+
 module.exports = [
 	CoreConfig,
 	MainConfig,
@@ -83,4 +92,5 @@ module.exports = [
 	ExtensionsConfig,
 	PaymentsConfig,
 	StylingConfig,
+	InteractivityConfig,
 ];

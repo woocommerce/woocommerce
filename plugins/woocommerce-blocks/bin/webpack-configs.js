@@ -781,6 +781,78 @@ const getStylingConfig = ( options = {} ) => {
 	};
 };
 
+const getInteractivityAPIConfig = ( options = {} ) => {
+	const { alias, resolvePlugins = [] } = options;
+	return {
+		entry: {
+			runtime: './assets/js/interactivity',
+		},
+		output: {
+			filename: 'wp-directives-[name].js',
+			path: path.resolve( __dirname, '../build/' ),
+		},
+		resolve: {
+			alias,
+			plugins: resolvePlugins,
+			extensions: [ '.js', '.ts', '.tsx' ],
+		},
+		plugins: [
+			...getSharedPlugins( {
+				bundleAnalyzerReportTitle: 'WP directives',
+			} ),
+			new ProgressBarPlugin(
+				getProgressBarPluginConfig( 'WP directives' )
+			),
+		],
+		optimization: {
+			runtimeChunk: {
+				name: 'vendors',
+			},
+			splitChunks: {
+				cacheGroups: {
+					vendors: {
+						test: /[\\/]node_modules[\\/]/,
+						name: 'vendors',
+						minSize: 0,
+						chunks: 'all',
+					},
+				},
+			},
+		},
+		module: {
+			rules: [
+				{
+					test: /\.(j|t)sx?$/,
+					exclude: /node_modules/,
+					use: [
+						{
+							loader: require.resolve( 'babel-loader' ),
+							options: {
+								cacheDirectory:
+									process.env.BABEL_CACHE_DIRECTORY || true,
+								babelrc: false,
+								configFile: false,
+								presets: [
+									[
+										'@babel/preset-react',
+										{
+											runtime: 'automatic',
+											importSource: 'preact',
+										},
+									],
+								],
+								plugins: [
+									'@babel/plugin-proposal-optional-chaining',
+								],
+							},
+						},
+					],
+				},
+			],
+		},
+	};
+};
+
 module.exports = {
 	getCoreConfig,
 	getFrontConfig,
@@ -788,4 +860,5 @@ module.exports = {
 	getPaymentsConfig,
 	getExtensionsConfig,
 	getStylingConfig,
+	getInteractivityAPIConfig,
 };
