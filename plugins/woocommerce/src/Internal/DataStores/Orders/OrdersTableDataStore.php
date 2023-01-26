@@ -1766,14 +1766,14 @@ FROM $order_meta_table
 
 			$order->set_id( 0 );
 
-			// If this datastore method is called while the posts table is authoritative, refrain from deleting post data.
-			if ( $order->get_data_store()->get_current_class_name() !== self::class ) {
-				return;
+			// If this datastore method is called while the posts table is authoritative, or if data synchronization is disabled,
+			// refrain from deleting post data.
+			$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+			if ( $data_synchronizer->data_sync_is_enabled() && $order->get_data_store()->get_current_class_name() === self::class ) {
+				// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
+				// Once we stop creating posts for orders, we should do the cleanup here instead.
+				wp_delete_post( $order_id );
 			}
-
-			// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
-			// Once we stop creating posts for orders, we should do the cleanup here instead.
-			wp_delete_post( $order_id );
 
 			do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		} else {
