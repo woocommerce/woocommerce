@@ -95,7 +95,7 @@ jobs:
                   UPDATE_WC: ${{ needs.get-tag.outputs.tag }}
               run: |
                   pnpm exec playwright test \
-                      --config=tests/e2e-pw/daily.playwright.config.js \
+                      --config=tests/e2e-pw/playwright.config.js \
                       update-woocommerce.spec.js
 
             - name: Generate 'Update WooCommerce' test report.
