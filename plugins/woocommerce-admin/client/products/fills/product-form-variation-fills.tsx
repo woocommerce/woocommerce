@@ -13,7 +13,15 @@ import { PartialProduct } from '@woocommerce/data';
  * Internal dependencies
  */
 import { ProductVariationDetailsSection } from '../sections/product-variation-details-section';
-import { TAB_INVENTORY_ID, TAB_SHIPPING_ID, TAB_PRICING_ID } from './constants';
+import {
+	TAB_INVENTORY_ID,
+	VARIANT_TAB_SHIPPING_ID,
+	TAB_PRICING_ID,
+	VARIANT_SHIPPING_SECTION_BASIC_ID,
+	VARIANT_SHIPPING_SECTION_DIMENSIONS_ID,
+	TAB_OPTIONS_ID,
+} from './constants';
+import { ShippingSectionFills } from './shipping-section';
 
 const tabPropData = {
 	general: {
@@ -66,18 +74,23 @@ const Tabs = () => {
 				<WooProductSectionItem.Slot tab={ TAB_INVENTORY_ID } />
 			</WooProductTabItem>
 			<WooProductTabItem
-				id="tab/shipping"
+				id={ VARIANT_TAB_SHIPPING_ID }
 				templates={ [ { name: 'tab/variation', order: 7 } ] }
 				pluginId="core"
 				tabProps={ tabPropData.shipping }
 			>
 				{ ( { product }: { product: PartialProduct } ) => (
 					<WooProductSectionItem.Slot
-						tab={ TAB_SHIPPING_ID }
+						tab={ VARIANT_TAB_SHIPPING_ID }
 						fillProps={ { product } }
 					/>
 				) }
 			</WooProductTabItem>
+			<ShippingSectionFills
+				tabId={ VARIANT_TAB_SHIPPING_ID }
+				basicSectionId={ VARIANT_SHIPPING_SECTION_BASIC_ID }
+				dimensionsSectionId={ VARIANT_SHIPPING_SECTION_DIMENSIONS_ID }
+			/>
 		</>
 	);
 };
