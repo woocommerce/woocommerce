@@ -40,7 +40,7 @@
 		"@types/qs": "^6.9.7",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"d3-time-format": "^2.3.0",
-		"eslint": "^8.12.0",
+		"eslint": "^8.32.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
 		"rimraf": "^3.0.2",
