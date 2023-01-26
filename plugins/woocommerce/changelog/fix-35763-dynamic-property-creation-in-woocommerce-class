@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Define a public `api` property in the WooCommerce class to prevent a PHP deprecation warning

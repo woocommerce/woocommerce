@@ -66,6 +66,13 @@ final class WooCommerce {
 	public $query = null;
 
 	/**
+	 * API instance
+	 *
+	 * @var WC_API
+	 */
+	public $api;
+
+	/**
 	 * Product factory instance.
 	 *
 	 * @var WC_Product_Factory

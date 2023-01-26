@@ -86,6 +86,7 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 				visibleCESModalData.props?.onCloseModal?.();
 				hideCesModal();
 			} }
+			shouldShowComments={ visibleCESModalData.props?.shouldShowComments }
 		/>
 	);
 };
