@@ -66,6 +66,13 @@ class DataSynchronizer implements BatchProcessorInterface {
 	private $error_logger;
 
 	/**
+	 * The order cache controller.
+	 *
+	 * @var OrderCacheController
+	 */
+	private $order_cache_controller;
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
@@ -88,12 +95,14 @@ class DataSynchronizer implements BatchProcessorInterface {
 		OrdersTableDataStore $data_store,
 		DatabaseUtil $database_util,
 		PostsToOrdersMigrationController $posts_to_cot_migrator,
-		LegacyProxy $legacy_proxy
+		LegacyProxy $legacy_proxy,
+		OrderCacheController $order_cache_controller
 	) {
-		$this->data_store            = $data_store;
-		$this->database_util         = $database_util;
-		$this->posts_to_cot_migrator = $posts_to_cot_migrator;
-		$this->error_logger          = $legacy_proxy->call_function( 'wc_get_logger' );
+		$this->data_store             = $data_store;
+		$this->database_util          = $database_util;
+		$this->posts_to_cot_migrator  = $posts_to_cot_migrator;
+		$this->error_logger           = $legacy_proxy->call_function( 'wc_get_logger' );
+		$this->order_cache_controller = $order_cache_controller;
 	}
 
 	/**
@@ -336,7 +345,7 @@ WHERE
 	 * @param array $batch Batch details.
 	 */
 	public function process_batch( array $batch ) : void {
-		$this->cache_controller->temporarily_disable_orders_cache_usage();
+		$this->order_cache_controller->temporarily_disable_orders_cache_usage();
 
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			foreach ( $batch as $id ) {
@@ -353,7 +362,7 @@ WHERE
 		}
 		if ( 0 === $this->get_total_pending_count() ) {
 			$this->cleanup_synchronization_state();
-			$this->cache_controller->maybe_restore_orders_cache_usage();
+			$this->order_cache_controller->maybe_restore_orders_cache_usage();
 		}
 	}
 
