@@ -105,6 +105,30 @@ class Settings {
 	}
 
 	/**
+	 * Get the product permalink template
+	 *
+	 * @return string
+	 */
+	public function get_product_permalink_template() {
+		$dummy_product_data = array(
+			'ID'                    => -1,
+			'post_type'             => 'product',
+		);
+		$dummy_product      = new \WP_Post( (object) $dummy_product_data );
+
+		// Temporarily add the post to the cache to avoid WP querying the database.
+		wp_cache_add( $dummy_product->ID, $dummy_product, 'posts' );
+	
+		if ( ! function_exists( 'get_sample_permalink' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/post.php';
+		}
+
+		$sample_permalink = get_sample_permalink( $dummy_product );
+		wp_cache_delete( $dummy_product->ID, 'posts' );
+		return $sample_permalink[0];
+	}
+
+	/**
 	 * Hooks extra neccessary data into the component settings array already set in WooCommerce core.
 	 *
 	 * @param array $settings Array of component settings.
@@ -189,14 +213,15 @@ class Settings {
 		 * @deprecated 6.7.0
 		 * @var string
 		 */
-		$settings['wcAdminAssetUrl'] = WC_ADMIN_IMAGES_FOLDER_URL;
-		$settings['wcVersion']       = WC_VERSION;
-		$settings['siteUrl']         = site_url();
-		$settings['shopUrl']         = get_permalink( wc_get_page_id( 'shop' ) );
-		$settings['homeUrl']         = home_url();
-		$settings['dateFormat']      = get_option( 'date_format' );
-		$settings['timeZone']        = wc_timezone_string();
-		$settings['plugins']         = array(
+		$settings['wcAdminAssetUrl']          = WC_ADMIN_IMAGES_FOLDER_URL;
+		$settings['wcVersion']                = WC_VERSION;
+		$settings['siteUrl']                  = site_url();
+		$settings['productPermalinkTemplate'] = $this->get_product_permalink_template();
+		$settings['shopUrl']                  = get_permalink( wc_get_page_id( 'shop' ) );
+		$settings['homeUrl']                  = home_url();
+		$settings['dateFormat']               = get_option( 'date_format' );
+		$settings['timeZone']                 = wc_timezone_string();
+		$settings['plugins']                  = array(
 			'installedPlugins' => PluginsHelper::get_installed_plugin_slugs(),
 			'activePlugins'    => Plugins::get_active_plugins(),
 		);
