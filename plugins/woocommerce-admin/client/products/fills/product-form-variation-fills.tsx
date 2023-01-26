@@ -21,9 +21,13 @@ import {
 	VARIANT_TAB_PRICING_ID,
 	VARIANT_PRICING_SECTION_BASIC_ID,
 	VARIANT_PRICING_SECTION_TAXES_ID,
+	VARIANT_TAB_INVENTORY_ID,
+	VARIANT_INVENTORY_SECTION_ID,
+	VARIANT_INVENTORY_SECTION_ADVANCED_ID,
 } from './constants';
 import { ShippingSectionFills } from './shipping-section';
 import { PricingSectionFills } from './pricing-section';
+import { InventorySectionFills } from './inventory-section';
 
 const tabPropData = {
 	general: {
@@ -73,7 +77,7 @@ const Tabs = () => {
 				pluginId="core"
 				tabProps={ tabPropData.inventory }
 			>
-				<WooProductSectionItem.Slot tab={ TAB_INVENTORY_ID } />
+				<WooProductSectionItem.Slot tab={ VARIANT_TAB_INVENTORY_ID } />
 			</WooProductTabItem>
 			<WooProductTabItem
 				id={ VARIANT_TAB_SHIPPING_ID }
@@ -114,6 +118,11 @@ registerPlugin( 'wc-admin-product-editor-form-variation-fills', {
 					tabId={ VARIANT_TAB_PRICING_ID }
 					basicSectionId={ VARIANT_PRICING_SECTION_BASIC_ID }
 					taxesSectionId={ VARIANT_PRICING_SECTION_TAXES_ID }
+				/>
+				<InventorySectionFills
+					tabId={ VARIANT_TAB_INVENTORY_ID }
+					basicSectionId={ VARIANT_INVENTORY_SECTION_ID }
+					advancedSectionId={ VARIANT_INVENTORY_SECTION_ADVANCED_ID }
 				/>
 			</>
 		);

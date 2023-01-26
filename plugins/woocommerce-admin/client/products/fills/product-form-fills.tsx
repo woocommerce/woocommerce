@@ -16,6 +16,7 @@ import { useMemo } from '@wordpress/element';
  */
 import { ShippingSectionFills } from './shipping-section';
 import { PricingSectionFills } from './pricing-section';
+import { InventorySectionFills } from './inventory-section';
 import { OptionsSection } from '../sections/options-section';
 import { ProductVariationsSection } from '../sections/product-variations-section';
 import {
@@ -28,6 +29,8 @@ import {
 	SHIPPING_SECTION_DIMENSIONS_ID,
 	PRICING_SECTION_BASIC_ID,
 	PRICING_SECTION_TAXES_ID,
+	INVENTORY_SECTION_ID,
+	INVENTORY_SECTION_ADVANCED_ID,
 	PLUGIN_ID,
 } from './constants';
 
@@ -131,6 +134,11 @@ registerPlugin( 'wc-admin-product-editor-form-fills', {
 					tabId={ TAB_PRICING_ID }
 					basicSectionId={ PRICING_SECTION_BASIC_ID }
 					taxesSectionId={ PRICING_SECTION_TAXES_ID }
+				/>
+				<InventorySectionFills
+					tabId={ TAB_INVENTORY_ID }
+					basicSectionId={ INVENTORY_SECTION_ID }
+					advancedSectionId={ INVENTORY_SECTION_ADVANCED_ID }
 				/>
 			</>
 		);
