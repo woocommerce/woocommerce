@@ -16,12 +16,14 @@ import { ProductVariationDetailsSection } from '../sections/product-variation-de
 import {
 	TAB_INVENTORY_ID,
 	VARIANT_TAB_SHIPPING_ID,
-	TAB_PRICING_ID,
 	VARIANT_SHIPPING_SECTION_BASIC_ID,
 	VARIANT_SHIPPING_SECTION_DIMENSIONS_ID,
-	TAB_OPTIONS_ID,
+	VARIANT_TAB_PRICING_ID,
+	VARIANT_PRICING_SECTION_BASIC_ID,
+	VARIANT_PRICING_SECTION_TAXES_ID,
 } from './constants';
 import { ShippingSectionFills } from './shipping-section';
+import { PricingSectionFills } from './pricing-section';
 
 const tabPropData = {
 	general: {
@@ -63,7 +65,7 @@ const Tabs = () => {
 				pluginId="core"
 				tabProps={ tabPropData.pricing }
 			>
-				<WooProductSectionItem.Slot tab={ TAB_PRICING_ID } />
+				<WooProductSectionItem.Slot tab={ VARIANT_TAB_PRICING_ID } />
 			</WooProductTabItem>
 			<WooProductTabItem
 				id="tab/inventory"
@@ -86,11 +88,6 @@ const Tabs = () => {
 					/>
 				) }
 			</WooProductTabItem>
-			<ShippingSectionFills
-				tabId={ VARIANT_TAB_SHIPPING_ID }
-				basicSectionId={ VARIANT_SHIPPING_SECTION_BASIC_ID }
-				dimensionsSectionId={ VARIANT_SHIPPING_SECTION_DIMENSIONS_ID }
-			/>
 		</>
 	);
 };
@@ -99,10 +96,26 @@ const Tabs = () => {
  * Preloading product form data, as product pages are waiting on this to be resolved.
  * The above Form component won't get rendered until the getProductForm is resolved.
  */
-registerPlugin( 'wc-admin-product-editor-form-variation-tab-fills', {
+registerPlugin( 'wc-admin-product-editor-form-variation-fills', {
 	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 	scope: 'woocommerce-product-editor',
 	render: () => {
-		return <Tabs />;
+		return (
+			<>
+				<Tabs />
+				<ShippingSectionFills
+					tabId={ VARIANT_TAB_SHIPPING_ID }
+					basicSectionId={ VARIANT_SHIPPING_SECTION_BASIC_ID }
+					dimensionsSectionId={
+						VARIANT_SHIPPING_SECTION_DIMENSIONS_ID
+					}
+				/>
+				<PricingSectionFills
+					tabId={ VARIANT_TAB_PRICING_ID }
+					basicSectionId={ VARIANT_PRICING_SECTION_BASIC_ID }
+					taxesSectionId={ VARIANT_PRICING_SECTION_TAXES_ID }
+				/>
+			</>
+		);
 	},
 } );

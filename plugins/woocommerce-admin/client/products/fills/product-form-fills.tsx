@@ -15,6 +15,7 @@ import { useMemo } from '@wordpress/element';
  * Internal dependencies
  */
 import { ShippingSectionFills } from './shipping-section';
+import { PricingSectionFills } from './pricing-section';
 import { OptionsSection } from '../sections/options-section';
 import { ProductVariationsSection } from '../sections/product-variations-section';
 import {
@@ -25,6 +26,8 @@ import {
 	TAB_OPTIONS_ID,
 	SHIPPING_SECTION_BASIC_ID,
 	SHIPPING_SECTION_DIMENSIONS_ID,
+	PRICING_SECTION_BASIC_ID,
+	PRICING_SECTION_TAXES_ID,
 	PLUGIN_ID,
 } from './constants';
 
@@ -123,6 +126,11 @@ registerPlugin( 'wc-admin-product-editor-form-fills', {
 					tabId={ TAB_SHIPPING_ID }
 					basicSectionId={ SHIPPING_SECTION_BASIC_ID }
 					dimensionsSectionId={ SHIPPING_SECTION_DIMENSIONS_ID }
+				/>
+				<PricingSectionFills
+					tabId={ TAB_PRICING_ID }
+					basicSectionId={ PRICING_SECTION_BASIC_ID }
+					taxesSectionId={ PRICING_SECTION_TAXES_ID }
 				/>
 			</>
 		);
