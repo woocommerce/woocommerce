@@ -11,3 +11,4 @@ tests/e2e/specs/backend/__fixtures__
 tests/e2e/specs/backend/__snapshots__
 
 storybook/dist
+assets/js/interactivity
