@@ -20,7 +20,10 @@ function createOrderedChildren< T = Fill.Props, S = Record< string, unknown > >(
 	injectProps?: S
 ): ReactElement {
 	if ( typeof children === 'function' ) {
-		return cloneElement( children( props ), { order, ...injectProps } );
+		return cloneElement( children( { ...props, order, ...injectProps } ), {
+			order,
+			...injectProps,
+		} );
 	} else if ( isValidElement( children ) ) {
 		return cloneElement( children, { ...props, order, ...injectProps } );
 	}
