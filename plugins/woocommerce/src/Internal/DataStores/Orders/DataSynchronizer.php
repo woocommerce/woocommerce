@@ -89,6 +89,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * @param DatabaseUtil                     $database_util The database util class to use.
 	 * @param PostsToOrdersMigrationController $posts_to_cot_migrator The posts to COT migration class to use.
 	 * @param LegacyProxy                      $legacy_proxy The legacy proxy instance to use.
+	 * @param OrderCacheController             $order_cache_controller The order cache controller instance to use.
 	 * @internal
 	 */
 	final public function init(
