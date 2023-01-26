@@ -700,7 +700,47 @@ class OrdersTableQuery {
 		// GROUP BY.
 		$groupby = $this->groupby ? 'GROUP BY ' . implode( ', ', (array) $this->groupby ) : '';
 
+		$pieces = compact( 'fields', 'join', 'where', 'groupby', 'orderby', 'limits' );
+
+		/**
+		 * Filters all query clauses at once.
+		 * Covers the fields (SELECT), JOIN, WHERE, GROUP BY, ORDER BY, and LIMIT clauses.
+		 *
+		 * @since 7.4.0
+		 *
+		 * @param string[]         $clauses {
+		 *     Associative array of the clauses for the query.
+		 *
+		 *     @type string $fields  The SELECT clause of the query.
+		 *     @type string $join    The JOIN clause of the query.
+		 *     @type string $where   The WHERE clause of the query.
+		 *     @type string $groupby The GROUP BY clause of the query.
+		 *     @type string $orderby The ORDER BY clause of the query.
+		 *     @type string $limits  The LIMIT clause of the query.
+		 * }
+		 * @param OrdersTableQuery $query   The OrdersTableQuery instance (passed by reference).
+		 */
+		$clauses = (array) apply_filters_ref_array( 'woocommerce_order_table_orders_clauses', array( $pieces, &$this ) );
+
+		$fields  = $clauses['fields'] ?? '';
+		$join    = $clauses['join'] ?? '';
+		$where   = $clauses['where'] ?? '';
+		$groupby = $clauses['groupby'] ?? '';
+		$orderby = $clauses['orderby'] ?? '';
+		$limits  = $clauses['limits'] ?? '';
+
 		$this->sql = "SELECT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
+
+		/**
+		 * Filters the completed SQL query.
+		 *
+		 * @since 7.4.0
+		 *
+		 * @param string           $sql   The complete SQL query.
+		 * @param OrdersTableQuery $query The OrdersTableQuery instance (passed by reference).
+		 */
+		$this->sql = apply_filters_ref_array( 'woocommerce_order_table_orders_request', array( $this->sql, &$this ) );
+
 		$this->build_count_query( $fields, $join, $where, $groupby );
 	}
 
