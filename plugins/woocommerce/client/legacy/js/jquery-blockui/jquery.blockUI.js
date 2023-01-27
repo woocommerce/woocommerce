@@ -10,6 +10,7 @@ function block(el, options={}) {
 	}
 
 	const $el = window.jQuery && window.jQuery(el);
+	el.datset['blockUI.isBlocked'] = true;
 	$el && $el.data('blockUI.isBlocked', true);
 
 	const position = window.getComputedStyle(el).getPropertyValue('position');
@@ -42,7 +43,10 @@ function block(el, options={}) {
 	const transitionend = ev => {
 		if (style.opacity === '0') {
 			if (position === 'static') el.style.position = position;
+
+			el.datset['blockUI.isBlocked'] = false;
 			$el && $el.data('blockUI.isBlocked', false);
+
 			blockOverlay.removeEventListener('transitionend', transitionend);
 			blockOverlay.remove();
 		}
@@ -64,10 +68,14 @@ function unblock(el) {
 
 (function($) {
 	$.fn.block = function(opts) {
-		for (const el of this) block(el, opts);
+		this.each(function() {
+			block(this, opts);
+		});
 	};
 
 	$.fn.unblock = function(opts) {
-		for (const el of this) unblock(el, opts);
+		this.each(function() {
+			unblock(this);
+		});
 	};
 })(jQuery);
