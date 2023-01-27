@@ -30,21 +30,20 @@ function CustomerEffortScoreTracksContainer( {
 	resolving,
 	clearQueue,
 } ) {
-	useEffect( () => {
-		if ( queueForPage.length ) {
-			clearQueue();
-		}
-	}, [] );
-
-	if ( resolving ) {
-		return null;
-	}
-
 	const queueForPage = queue.filter(
 		( item ) =>
 			item.pagenow === window.pagenow &&
 			item.adminpage === window.adminpage
 	);
+	useEffect( () => {
+		if ( queueForPage.length ) {
+			clearQueue();
+		}
+	}, [ queueForPage ] );
+
+	if ( resolving ) {
+		return null;
+	}
 
 	return (
 		<>
