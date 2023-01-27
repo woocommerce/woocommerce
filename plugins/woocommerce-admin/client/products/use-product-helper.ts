@@ -23,6 +23,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { AUTO_DRAFT_NAME } from './utils/get-product-title';
 import { CurrencyContext } from '../lib/currency-context';
 import { getDerivedProductType } from './utils/get-derived-product-type';
+import { getProductError } from './utils/get-product-error';
 import {
 	NUMBERS_AND_DECIMAL_SEPARATOR,
 	ONLY_ONE_DECIMAL_SEPARATOR,
@@ -117,18 +118,12 @@ export function useProductHelper() {
 					return newProduct;
 				},
 				( error ) => {
+					const productError = getProductError( error, status );
 					if ( ! skipNotice ) {
 						createNotice(
 							'error',
-							status === 'publish'
-								? __(
-										'Failed to publish product.',
-										'woocommerce'
-								  )
-								: __(
-										'Failed to create product.',
-										'woocommerce'
-								  )
+							productError.content,
+							productError.options || {}
 						);
 					}
 					setUpdating( {
