@@ -56,25 +56,18 @@ class WC_Frontend_Scripts {
 	public static function warn_deprecated_scripts() {
 		global $wp_scripts, $wp_styles;
 
-		if ( wp_script_is( 'prettyPhoto', 'enqueued' ) ) {
-			// phpcs:ignore
-			error_log( "The 'prettyPhoto' script has been deprecated and will be removed in a future version." );
-		}
+		$deprecated_scripts = array(
+			'prettyPhoto',
+			'prettyPhoto-init',
+			'jquery-cookie',
+			'woocommerce_prettyPhoto_css'
+		);
 
-		if ( wp_script_is( 'prettyPhoto-init', 'enqueued' ) ) {
-			// phpcs:ignore
-			error_log( "The 'prettyPhoto-init' script has been deprecated and will be removed in a future version." );
-		}
-
-		if ( wp_script_is( 'jquery-cookie', 'enqueued' ) ) {
-			// phpcs:ignore
-			error_log( "The 'jquery-cookie' script has been deprecated and will be removed in a future version." );
-		}
-
-		if ( wp_style_is( 'woocommerce_prettyPhoto_css', 'enqueued' ) ) {
-			// phpcs:ignore
-			error_log( "The 'woocommerce_prettyPhoto_css' style has been deprecated and will be removed in a future version." );
-		}
+		foreach ( $deprecated_scripts as $script ) {
+			if ( wp_script_is( $script, 'enqueued' ) ) {
+				wc_deprecated_script( $script, '3.3.0' );
+			}
+		}		
 	}
 
 	/**

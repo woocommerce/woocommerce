@@ -138,6 +138,26 @@ function wc_deprecated_argument( $argument, $version, $message = null ) {
 }
 
 /**
+ * Call with script handle to warn about deprecated scripts. If WP_DEBUG 
+ * is enabled an error will be thrown.
+ * 
+ * @since 7.5.0
+ * @param string $handle
+ * @param string $version
+ * 
+ */
+function wc_deprecated_script( $handle, $version, $replacement = null, $message = '' ) {
+	$error_message = "The $handle script is deprecated since version $version. $message";
+	$error_message .= $replacement ? " Use $replacement instead." : '';
+	
+	if ( wp_doing_ajax() || WC()->is_rest_api_request() ) {
+		error_log( $error_message );
+	} else if ( WP_DEBUG ) {
+		trigger_error( $error_message, E_USER_DEPRECATED );
+	}
+}
+
+/**
  * @deprecated 2.1
  */
 function woocommerce_show_messages() {
