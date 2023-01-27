@@ -17,9 +17,8 @@ export type TreeProps = React.DetailedHTMLProps<
 	level?: number;
 	items: LinkedTree[];
 	/**
-	 * It gives the possibility to control the tree item
-	 * expand/collapse on render from outside the tree.
-	 * Make sure to cache the function to improve performance.
+	 * Control the tree item expand/collapse from outside the tree.
+	 * Cache the function to improve performance.
 	 *
 	 * @example
 	 * <Tree
@@ -29,8 +28,7 @@ export type TreeProps = React.DetailedHTMLProps<
 	 * 	) }
 	 * />
 	 *
-	 * @param item The current linked tree item, useful to
-	 * traverse the entire linked tree from this item.
+	 * @param  item The tree item to expand/collapse.
 	 *
 	 * @see {@link LinkedTree}
 	 */
