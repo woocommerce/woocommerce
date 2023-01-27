@@ -62,6 +62,7 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 			resetForm(
 				{
 					...product,
+					id: updatedProduct.id,
 					slug: updatedProduct.slug,
 					permalink: updatedProduct.permalink,
 				},
