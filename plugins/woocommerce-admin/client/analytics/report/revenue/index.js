@@ -13,6 +13,7 @@ import ReportChart from '../../components/report-chart';
 import ReportSummary from '../../components/report-summary';
 import RevenueReportTable from './table';
 import ReportFilters from '../../components/report-filters';
+import { RevenueReportDateTour } from '~/guided-tours/revenue-report-date-tour';
 
 export default class RevenueReport extends Component {
 	render() {
@@ -49,6 +50,7 @@ export default class RevenueReport extends Component {
 					filters={ filters }
 					advancedFilters={ advancedFilters }
 				/>
+				<RevenueReportDateTour currentTab={ 'feedback' } />
 			</Fragment>
 		);
 	}
