@@ -16,7 +16,7 @@ import {
 
 type UseRecommendedChannels = {
 	loading: boolean;
-	data: Array< RecommendedChannel >;
+	data?: Array< RecommendedChannel >;
 };
 
 export const useRecommendedChannels = (): UseRecommendedChannels => {
@@ -33,13 +33,11 @@ export const useRecommendedChannels = (): UseRecommendedChannels => {
 		 * Recommended channels that are not in "active" state,
 		 * i.e. channels that are not installed or not activated yet.
 		 */
-		const nonActiveRecommendedChannels = differenceWith(
-			data,
-			activePlugins,
-			( a, b ) => {
+		const nonActiveRecommendedChannels =
+			data &&
+			differenceWith( data, activePlugins, ( a, b ) => {
 				return a.product === b;
-			}
-		);
+			} );
 
 		return {
 			loading: ! hasFinishedResolution( 'getRecommendedChannels' ),
