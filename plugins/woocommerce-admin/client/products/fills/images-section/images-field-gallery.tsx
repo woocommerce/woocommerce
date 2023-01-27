@@ -27,7 +27,7 @@ type Image = MediaItem & {
 
 export const ImagesGalleryField = () => {
 	const { getInputProps, setValue } = useFormContext< Product >();
-	const images = ( getInputProps( 'images' ).value as Image[] ) || [];
+	const images = ( getInputProps( 'images' )?.value as Image[] ) || [];
 	const [ isRemovingZoneVisible, setIsRemovingZoneVisible ] =
 		useState< boolean >( false );
 	const [ isRemoving, setIsRemoving ] = useState< boolean >( false );
