@@ -3,6 +3,7 @@ function block(el, options={}) {
 	const opacity = css.opacity || 0.6;
 	const overlays = el.getElementsByClassName('blockOverlay');
 	if (overlays.length) {
+		// 200ms is the fadeIn default - https://github.com/malsup/blockui/blob/2.70/jquery.blockUI.js#L199
 		overlays[0].style.transitionDuration = '200ms';
 		overlays[0].style.opacity = opacity;
 
@@ -25,6 +26,8 @@ function block(el, options={}) {
 	const blockOverlay = document.createElement('div');
 	blockOverlay.className = 'blockUI blockOverlay';
 
+	// 'background', 'cursor', and 'opacity' styles are taken from
+	// options.overlayCSS (although 'opacity' always starts at 0)
 	const style = blockOverlay.style;
 	style.zIndex = 1000;
 	style.border = 'none';
@@ -43,7 +46,7 @@ function block(el, options={}) {
 
 	blockOverlay.offsetWidth; // wait a frame
 	style.transitionProperty = 'opacity';
-	style.transitionDuration = '200ms';
+	style.transitionDuration = '200ms'; // 200ms is the fadeIn default
 	style.opacity = opacity;
 
 	const transitionend = ev => {
@@ -66,6 +69,7 @@ function block(el, options={}) {
 function unblock(el) {
 	const overlays = el.getElementsByClassName('blockOverlay');
 	if (overlays.length) {
+		// 400ms is the fadeOut default - https://github.com/malsup/blockui/blob/2.70/jquery.blockUI.js#L202
 		overlays[0].style.transitionDuration = '400ms';
 		overlays[0].style.opacity = 0;
 	}
