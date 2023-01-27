@@ -14,11 +14,6 @@
 		"inserter": false,
 		"lock": false
 	},
-	"example": {
-		"attributes": {
-			"isPreview": true
-		}
-	},
 	"attributes": {
 		"className": {
 			"type": "string",

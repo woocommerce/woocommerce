@@ -135,11 +135,6 @@ registerBlockType( 'woocommerce/product-search', {
 		align: [ 'wide', 'full' ],
 		inserter: ! isBlockVariationAvailable,
 	},
-	example: {
-		attributes: {
-			hasLabel: true,
-		},
-	},
 	attributes,
 	transforms: {
 		from: [
