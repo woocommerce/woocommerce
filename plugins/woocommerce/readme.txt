@@ -264,6 +264,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Update store-details test snapshot to reflect updated select-control [#35808](https://github.com/woocommerce/woocommerce/pull/35808)
 * Update - Update WooCommerce Blocks to 9.4.0 [#36524](https://github.com/woocommerce/woocommerce/pull/36524)
 * Update - Update WooCommerce Blocks to 9.4.1 [#36553](https://github.com/woocommerce/woocommerce/pull/36553)
+* Update - Update WooCommerce Blocks to 9.4.2 [#36624](https://github.com/woocommerce/woocommerce/pull/36624)
 * Dev - Add advanced setting option [#36380](https://github.com/woocommerce/woocommerce/pull/36380)
 * Dev - Add experimental SlotFill for task list footer [#36527](https://github.com/woocommerce/woocommerce/pull/36527)
 * Dev - Cleanup product task experiment [#35950](https://github.com/woocommerce/woocommerce/pull/35950)
