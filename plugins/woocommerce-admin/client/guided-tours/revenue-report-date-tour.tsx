@@ -12,6 +12,11 @@ import {
 import { useSelect, useDispatch } from '@wordpress/data';
 import { getAdminLink } from '@woocommerce/settings';
 
+/**
+ * Internal dependencies
+ */
+import './revenue-report-date-tour.scss';
+
 const REVENUE_REPORT_DATE_TOUR = 'woocommerce_revenue_report_date_tour_shown';
 
 export const RevenueReportDateTour: React.FC = () => {
@@ -72,6 +77,11 @@ export const RevenueReportDateTour: React.FC = () => {
 					},
 					primaryButton: {
 						text: __( 'Got it', 'woocommerce' ),
+					},
+				},
+				options: {
+					classNames: {
+						desktop: 'woocommerce-revenue-report-date-tour',
 					},
 				},
 			},
