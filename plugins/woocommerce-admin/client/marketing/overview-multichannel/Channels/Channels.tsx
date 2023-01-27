@@ -1,19 +1,29 @@
 /**
  * External dependencies
  */
-import { Fragment } from '@wordpress/element';
+import { Fragment, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Card, CardHeader, CardDivider } from '@wordpress/components';
+import {
+	Card,
+	CardHeader,
+	CardBody,
+	CardDivider,
+	Button,
+	Icon,
+} from '@wordpress/components';
+import { chevronUp, chevronDown } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
 import { RecommendedChannel } from '~/marketing/data-multichannel/types';
-import { CardHeaderTitle, CardHeaderDescription } from '~/marketing/components';
+import {
+	CardHeaderTitle,
+	CardHeaderDescription,
+	SmartPluginCardBody,
+} from '~/marketing/components';
 import { RegisteredChannel } from '~/marketing/types';
 import { RegisteredChannelCardBody } from './RegisteredChannelCardBody';
-import { RecommendedChannels } from './RecommendedChannels';
-import { RecommendedChannelsList } from './RecommendedChannelsList';
 import './Channels.scss';
 
 type ChannelsProps = {
@@ -27,6 +37,13 @@ export const Channels: React.FC< ChannelsProps > = ( {
 	recommendedChannels,
 	onInstalledAndActivated,
 } ) => {
+	/**
+	 * State to collapse / expand the recommended channels.
+	 */
+	const [ expanded, setExpanded ] = useState(
+		registeredChannels.length === 0
+	);
+
 	/*
 	 * If users have no registered channels,
 	 * we should display recommended channels without collapsible list
@@ -46,10 +63,21 @@ export const Channels: React.FC< ChannelsProps > = ( {
 						) }
 					</CardHeaderDescription>
 				</CardHeader>
-				<RecommendedChannelsList
-					recommendedChannels={ recommendedChannels }
-					onInstalledAndActivated={ onInstalledAndActivated }
-				/>
+				{ recommendedChannels.map( ( el, idx ) => {
+					return (
+						<Fragment key={ el.plugin }>
+							<SmartPluginCardBody
+								plugin={ el }
+								onInstalledAndActivated={
+									onInstalledAndActivated
+								}
+							/>
+							{ idx < recommendedChannels.length - 1 && (
+								<CardDivider />
+							) }
+						</Fragment>
+					);
+				} ) }
 			</Card>
 		);
 	}
@@ -82,10 +110,37 @@ export const Channels: React.FC< ChannelsProps > = ( {
 
 			{ /* Recommended channels section. */ }
 			{ recommendedChannels.length >= 1 && (
-				<RecommendedChannels
-					recommendedChannels={ recommendedChannels }
-					onInstalledAndActivated={ onInstalledAndActivated }
-				/>
+				<div className="woocommerce-marketing-recommended-channels">
+					<CardDivider />
+					<CardBody>
+						<Button
+							variant="link"
+							onClick={ () => setExpanded( ! expanded ) }
+						>
+							{ __( 'Add channels', 'woocommerce' ) }
+							<Icon
+								icon={ expanded ? chevronUp : chevronDown }
+								size={ 24 }
+							/>
+						</Button>
+					</CardBody>
+					{ expanded &&
+						recommendedChannels.map( ( el, idx ) => {
+							return (
+								<Fragment key={ el.plugin }>
+									<SmartPluginCardBody
+										plugin={ el }
+										onInstalledAndActivated={
+											onInstalledAndActivated
+										}
+									/>
+									{ idx < recommendedChannels.length - 1 && (
+										<CardDivider />
+									) }
+								</Fragment>
+							);
+						} ) }
+				</div>
 			) }
 		</Card>
 	);

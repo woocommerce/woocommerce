@@ -4,4 +4,11 @@
 		align-items: flex-start;
 		gap: $gap-smallest;
 	}
+
+	.components-button.is-link {
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 17px;
+		text-decoration: none;
+	}
 }
