@@ -40,35 +40,35 @@ export const DetailsSectionFills = () => (
 			/>
 		</WooProductSectionItem>
 		<WooProductFieldItem
-			id="details/name"
+			id={ `${ DETAILS_SECTION_ID }/name` }
 			sections={ [ { name: DETAILS_SECTION_ID, order: 1 } ] }
 			pluginId={ PLUGIN_ID }
 		>
 			<DetailsNameField />
 		</WooProductFieldItem>
 		<WooProductFieldItem
-			id="details/categories"
+			id={ `${ DETAILS_SECTION_ID }/categories` }
 			sections={ [ { name: DETAILS_SECTION_ID, order: 3 } ] }
 			pluginId={ PLUGIN_ID }
 		>
 			<DetailsCategoriesField />
 		</WooProductFieldItem>
 		<WooProductFieldItem
-			id="details/feature"
+			id={ `${ DETAILS_SECTION_ID }/feature` }
 			sections={ [ { name: DETAILS_SECTION_ID, order: 5 } ] }
 			pluginId={ PLUGIN_ID }
 		>
 			<DetailsFeatureField />
 		</WooProductFieldItem>
 		<WooProductFieldItem
-			id="details/summary"
+			id={ `${ DETAILS_SECTION_ID }/summary` }
 			sections={ [ { name: DETAILS_SECTION_ID, order: 7 } ] }
 			pluginId={ PLUGIN_ID }
 		>
 			<DetailsSummaryField />
 		</WooProductFieldItem>
 		<WooProductFieldItem
-			id="details/description"
+			id={ `${ DETAILS_SECTION_ID }/description` }
 			sections={ [ { name: DETAILS_SECTION_ID, order: 9 } ] }
 			pluginId={ PLUGIN_ID }
 		>
