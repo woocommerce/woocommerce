@@ -17,12 +17,11 @@ export const supports = {
 			fontSize: true,
 			__experimentalSkipSerialization: true,
 		},
-		...( typeof __experimentalGetSpacingClassesAndStyles === 'function' && {
-			spacing: {
-				margin: true,
-				__experimentalSkipSerialization: true,
-			},
-		} ),
 		__experimentalSelector: '.wc-block-components-product-rating',
+	} ),
+	...( typeof __experimentalGetSpacingClassesAndStyles === 'function' && {
+		spacing: {
+			margin: true,
+		},
 	} ),
 };
