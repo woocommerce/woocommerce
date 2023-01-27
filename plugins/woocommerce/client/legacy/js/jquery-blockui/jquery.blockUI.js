@@ -10,12 +10,12 @@ function block(el, options={}) {
 		return el;
 	}
 
+	const position = window.getComputedStyle(el).getPropertyValue('position');
+	if (position === 'static') el.style.position = 'relative';
+
 	const $el = window.jQuery && window.jQuery(el);
 	el.dataset['blockUI.isBlocked'] = true;
 	$el && $el.data('blockUI.isBlocked', true);
-
-	const position = window.getComputedStyle(el).getPropertyValue('position');
-	if (position === 'static') el.style.position = 'relative';
 
 	const blockUI = document.createElement('div');
 	blockUI.className = 'blockUI';
