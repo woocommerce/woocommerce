@@ -10,7 +10,7 @@ function block(el, options={}) {
 	}
 
 	const $el = window.jQuery && window.jQuery(el);
-	el.datset['blockUI.isBlocked'] = true;
+	el.dataset['blockUI.isBlocked'] = true;
 	$el && $el.data('blockUI.isBlocked', true);
 
 	const position = window.getComputedStyle(el).getPropertyValue('position');
@@ -50,7 +50,7 @@ function block(el, options={}) {
 		if (style.opacity === '0') {
 			if (position === 'static') el.style.position = position;
 
-			el.datset['blockUI.isBlocked'] = false;
+			el.dataset['blockUI.isBlocked'] = false;
 			$el && $el.data('blockUI.isBlocked', false);
 
 			blockOverlay.removeEventListener('transitionend', transitionend);
