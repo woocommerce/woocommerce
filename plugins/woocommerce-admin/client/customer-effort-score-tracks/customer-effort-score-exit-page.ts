@@ -14,13 +14,11 @@ import { ALLOW_TRACKING_OPTION_NAME } from './constants';
 const CUSTOMER_EFFORT_SCORE_EXIT_PAGE_KEY = 'customer-effort-score-exit-page';
 
 let allowTracking = false;
-const trackingPromise = resolveSelect( OPTIONS_STORE_NAME ).getOption(
-	ALLOW_TRACKING_OPTION_NAME
-);
-
-trackingPromise.then( ( trackingOption ) => {
-	allowTracking = trackingOption === 'yes';
-} );
+const trackingPromise = resolveSelect( OPTIONS_STORE_NAME )
+	.getOption( ALLOW_TRACKING_OPTION_NAME )
+	.then( ( trackingOption ) => {
+		allowTracking = trackingOption === 'yes';
+	} );
 /**
  * Gets the list of exited pages from Localstorage.
  */
