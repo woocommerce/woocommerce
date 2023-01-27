@@ -13,6 +13,7 @@ import {
 	WCDataSelector,
 } from '@woocommerce/data';
 import { useState } from '@wordpress/element';
+import { Controller } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -23,7 +24,7 @@ import { PRODUCT_DETAILS_SLUG } from '../constants';
 export const DetailsNameField = ( {} ) => {
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
 		useState( false );
-	const { getInputProps, values, touched, errors, setValue } =
+	const { getInputProps, values, touched, errors, setValue, control } =
 		useFormContext< Product >();
 
 	const { permalinkPrefix, permalinkSuffix } = useSelect(
@@ -52,22 +53,32 @@ export const DetailsNameField = ( {} ) => {
 	};
 	return (
 		<div>
-			<TextControl
-				label={ interpolateComponents( {
-					mixedString: __( 'Name {{required/}}', 'woocommerce' ),
-					components: {
-						required: (
-							<span className="woocommerce-product-form__optional-input">
-								{ __( '(required)', 'woocommerce' ) }
-							</span>
-						),
-					},
-				} ) }
-				name={ `${ PRODUCT_DETAILS_SLUG }-name` }
-				placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
-				{ ...getInputProps( 'name', {
-					onBlur: setSkuIfEmpty,
-				} ) }
+			<Controller
+				name="name"
+				control={ control }
+				render={ ( { field } ) => (
+					<TextControl
+						{ ...field }
+						label={ interpolateComponents( {
+							mixedString: __(
+								'Name {{required/}}',
+								'woocommerce'
+							),
+							components: {
+								required: (
+									<span className="woocommerce-product-form__optional-input">
+										{ __( '(required)', 'woocommerce' ) }
+									</span>
+								),
+							},
+						} ) }
+						placeholder={ __(
+							'e.g. 12 oz Coffee Mug',
+							'woocommerce'
+						) }
+						onBlur={ setSkuIfEmpty }
+					/>
+				) }
 			/>
 			{ values.id && ! hasNameError() && permalinkPrefix && (
 				<span className="woocommerce-product-form__secondary-text product-details-section__product-link">
