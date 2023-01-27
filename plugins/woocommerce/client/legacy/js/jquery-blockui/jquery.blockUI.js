@@ -16,6 +16,12 @@ function block(el, options={}) {
 	const position = window.getComputedStyle(el).getPropertyValue('position');
 	if (position === 'static') el.style.position = 'relative';
 
+	const blockUI = document.createElement('div');
+	blockUI.className = 'blockUI';
+	blockUI.style.display = 'none';
+
+	el.append(blockUI);
+
 	const blockOverlay = document.createElement('div');
 	blockOverlay.className = 'blockUI blockOverlay';
 
@@ -49,6 +55,7 @@ function block(el, options={}) {
 
 			blockOverlay.removeEventListener('transitionend', transitionend);
 			blockOverlay.remove();
+			blockUI.remove();
 		}
 	};
 	blockOverlay.addEventListener('transitionend', transitionend);
