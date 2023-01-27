@@ -7,13 +7,11 @@ import { createContext, createElement, useContext } from 'react';
 /**
  * Internal dependencies
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const FormContext2 = createContext(
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	{} as UseFormReturn< any, any >
 );
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function useFormContext() {
 	const formContext = useContext( FormContext2 );
 	return formContext;
