@@ -116,7 +116,7 @@ export function register(
 		...DEFAULT_SETTINGS,
 		example: {
 			...DEFAULT_EXAMPLE,
-			example,
+			...example,
 		},
 		/**
 		 * Renders and manages the block.
