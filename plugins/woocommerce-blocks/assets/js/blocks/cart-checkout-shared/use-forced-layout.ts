@@ -10,7 +10,6 @@ import {
 	BlockInstance,
 } from '@wordpress/blocks';
 import type { Block, TemplateArray } from '@wordpress/blocks';
-import { isEqual } from 'lodash';
 import { MutableRefObject } from 'react';
 
 interface LockableBlock extends Block {
@@ -116,6 +115,7 @@ export const useForcedLayout = ( {
 
 	const registry = useRegistry();
 	useEffect( () => {
+		let templateSynced = false;
 		const { replaceInnerBlocks } = dispatch( 'core/block-editor' );
 		return registry.subscribe( () => {
 			const innerBlocks = registry
@@ -125,12 +125,14 @@ export const useForcedLayout = ( {
 			// If there are NO inner blocks, sync with the given template.
 			if (
 				innerBlocks.length === 0 &&
-				currentDefaultTemplate.current.length > 0
+				currentDefaultTemplate.current.length > 0 &&
+				! templateSynced
 			) {
 				const nextBlocks = createBlocksFromInnerBlocksTemplate(
 					currentDefaultTemplate.current
 				);
-				if ( ! isEqual( nextBlocks, innerBlocks ) ) {
+				if ( nextBlocks.length !== 0 ) {
+					templateSynced = true;
 					replaceInnerBlocks( clientId, nextBlocks );
 					return;
 				}
@@ -178,6 +180,6 @@ export const useForcedLayout = ( {
 					.dispatch( 'core/block-editor' )
 					.insertBlocks( blockConfig, insertAtPosition, clientId );
 			} );
-		} );
+		}, 'core/block-editor' );
 	}, [ clientId, registry ] );
 };
