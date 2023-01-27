@@ -75,13 +75,13 @@ function unblock(el) {
 
 (function($) {
 	$.fn.block = function(opts) {
-		this.each(function() {
+		return this.each(function() {
 			block(this, opts);
 		});
 	};
 
 	$.fn.unblock = function(opts) {
-		this.each(function() {
+		return this.each(function() {
 			unblock(this);
 		});
 	};
