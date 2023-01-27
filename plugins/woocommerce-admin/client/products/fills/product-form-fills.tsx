@@ -14,9 +14,12 @@ import { useMemo } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import { DetailsSectionFills } from './details-section';
 import { ShippingSectionFills } from './shipping-section';
 import { PricingSectionFills } from './pricing-section';
 import { InventorySectionFills } from './inventory-section';
+import { AttributesSectionFills } from './attributes-section';
+import { ImagesSectionFills } from './images-section';
 import { OptionsSection } from '../sections/options-section';
 import { ProductVariationsSection } from '../sections/product-variations-section';
 import {
@@ -69,7 +72,7 @@ const Tabs = () => {
 		<>
 			<WooProductTabItem
 				id={ TAB_GENERAL_ID }
-				templates={ [ { name: 'tab/general', order: 1 } ] }
+				templates={ [ { name: TAB_GENERAL_ID, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
 				tabProps={ tabPropData.general }
 			>
@@ -77,7 +80,7 @@ const Tabs = () => {
 			</WooProductTabItem>
 			<WooProductTabItem
 				id={ TAB_PRICING_ID }
-				templates={ [ { name: 'tab/general', order: 3 } ] }
+				templates={ [ { name: TAB_GENERAL_ID, order: 3 } ] }
 				pluginId={ PLUGIN_ID }
 				tabProps={ tabPropData.pricing }
 			>
@@ -85,7 +88,7 @@ const Tabs = () => {
 			</WooProductTabItem>
 			<WooProductTabItem
 				id={ TAB_INVENTORY_ID }
-				templates={ [ { name: 'tab/general', order: 5 } ] }
+				templates={ [ { name: TAB_GENERAL_ID, order: 5 } ] }
 				pluginId={ PLUGIN_ID }
 				tabProps={ tabPropData.inventory }
 			>
@@ -93,7 +96,7 @@ const Tabs = () => {
 			</WooProductTabItem>
 			<WooProductTabItem
 				id={ TAB_SHIPPING_ID }
-				templates={ [ { name: 'tab/general', order: 7 } ] }
+				templates={ [ { name: TAB_GENERAL_ID, order: 7 } ] }
 				pluginId={ PLUGIN_ID }
 				tabProps={ tabPropData.shipping }
 			>
@@ -105,7 +108,7 @@ const Tabs = () => {
 			{ window.wcAdminFeatures[ 'product-variation-management' ] ? (
 				<WooProductTabItem
 					id={ TAB_OPTIONS_ID }
-					templates={ [ { name: 'tab/general', order: 9 } ] }
+					templates={ [ { name: TAB_GENERAL_ID, order: 9 } ] }
 					pluginId={ PLUGIN_ID }
 					tabProps={ tabPropData.options }
 				>
@@ -125,6 +128,9 @@ registerPlugin( 'wc-admin-product-editor-form-fills', {
 	render: () => (
 		<>
 			<Tabs />
+			<DetailsSectionFills />
+			<ImagesSectionFills />
+			<AttributesSectionFills />
 			<ShippingSectionFills
 				tabId={ TAB_SHIPPING_ID }
 				basicSectionId={ SHIPPING_SECTION_BASIC_ID }

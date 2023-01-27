@@ -8,7 +8,6 @@ import {
 	__experimentalProductFieldSection as ProductFieldSection,
 	Link,
 } from '@woocommerce/components';
-import { registerPlugin } from '@wordpress/plugins';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -19,7 +18,7 @@ import { IMAGES_SECTION_ID, TAB_GENERAL_ID, PLUGIN_ID } from '../constants';
 
 import './images-section.scss';
 
-const ImagesSection = () => (
+export const ImagesSectionFills = () => (
 	<>
 		<WooProductSectionItem
 			id={ IMAGES_SECTION_ID }
@@ -64,9 +63,3 @@ const ImagesSection = () => (
 		</WooProductFieldItem>
 	</>
 );
-
-registerPlugin( 'wc-admin-product-editor-images-section', {
-	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
-	scope: 'woocommerce-product-editor',
-	render: () => <ImagesSection />,
-} );

@@ -7,7 +7,6 @@ import {
 	__experimentalWooProductFieldItem as WooProductFieldItem,
 	__experimentalProductFieldSection as ProductFieldSection,
 } from '@woocommerce/components';
-import { registerPlugin } from '@wordpress/plugins';
 
 /**
  * Internal dependencies
@@ -24,7 +23,7 @@ import { DETAILS_SECTION_ID, PLUGIN_ID, TAB_GENERAL_ID } from '../constants';
 
 import './product-details-section.scss';
 
-const DetailsSection = () => (
+export const DetailsSectionFills = () => (
 	<>
 		<WooProductSectionItem
 			id={ DETAILS_SECTION_ID }
@@ -77,9 +76,3 @@ const DetailsSection = () => (
 		</WooProductFieldItem>
 	</>
 );
-
-registerPlugin( 'wc-admin-product-editor-details-section', {
-	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
-	scope: 'woocommerce-product-editor',
-	render: () => <DetailsSection />,
-} );
