@@ -18,19 +18,22 @@ import {
 	DetailsFeatureField,
 	DetailsSummaryField,
 	DetailsDescriptionField,
-	DETAILS_SECTION_ID,
 } from './index';
+
+import { DETAILS_SECTION_ID, PLUGIN_ID, TAB_GENERAL_ID } from '../constants';
+
 import './product-details-section.scss';
 
 const DetailsSection = () => (
 	<>
 		<WooProductSectionItem
 			id={ DETAILS_SECTION_ID }
-			location="tab/general"
-			pluginId="core"
+			location={ TAB_GENERAL_ID }
+			pluginId={ PLUGIN_ID }
+			order={ 1 }
 		>
 			<ProductFieldSection
-				id="general/details"
+				id={ DETAILS_SECTION_ID }
 				title={ __( 'Product details', 'woocommerce' ) }
 				description={ __(
 					'This info will be displayed on the product page, category pages, social media, and search results.',
@@ -41,7 +44,7 @@ const DetailsSection = () => (
 		<WooProductFieldItem
 			id="details/name"
 			section={ DETAILS_SECTION_ID }
-			pluginId="core"
+			pluginId={ PLUGIN_ID }
 			order={ 1 }
 		>
 			<DetailsNameField />
@@ -49,7 +52,7 @@ const DetailsSection = () => (
 		<WooProductFieldItem
 			id="details/categories"
 			section={ DETAILS_SECTION_ID }
-			pluginId="core"
+			pluginId={ PLUGIN_ID }
 			order={ 3 }
 		>
 			<DetailsCategoriesField />
@@ -57,7 +60,7 @@ const DetailsSection = () => (
 		<WooProductFieldItem
 			id="details/feature"
 			section={ DETAILS_SECTION_ID }
-			pluginId="core"
+			pluginId={ PLUGIN_ID }
 			order={ 5 }
 		>
 			<DetailsFeatureField />
@@ -65,7 +68,7 @@ const DetailsSection = () => (
 		<WooProductFieldItem
 			id="details/summary"
 			section={ DETAILS_SECTION_ID }
-			pluginId="core"
+			pluginId={ PLUGIN_ID }
 			order={ 7 }
 		>
 			<DetailsSummaryField />
@@ -73,7 +76,7 @@ const DetailsSection = () => (
 		<WooProductFieldItem
 			id="details/description"
 			section={ DETAILS_SECTION_ID }
-			pluginId="core"
+			pluginId={ PLUGIN_ID }
 			order={ 9 }
 		>
 			<DetailsDescriptionField />
@@ -84,7 +87,5 @@ const DetailsSection = () => (
 registerPlugin( 'wc-admin-product-editor-details-section', {
 	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 	scope: 'woocommerce-product-editor',
-	render: () => {
-		return <DetailsSection />;
-	},
+	render: () => <DetailsSection />,
 } );

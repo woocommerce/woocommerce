@@ -7,7 +7,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import { STORE_KEY } from '~/marketing/data/constants';
-import { Plugin } from './types';
+import { RecommendedPlugin } from '~/marketing/types';
 
 const selector = 'getRecommendedPlugins';
 const category = 'marketing';
@@ -24,7 +24,8 @@ export const useRecommendedPlugins = () => {
 	return useSelect( ( select ) => {
 		const { getRecommendedPlugins, hasFinishedResolution } =
 			select( STORE_KEY );
-		const plugins = getRecommendedPlugins< Plugin[] >( category );
+		const plugins =
+			getRecommendedPlugins< RecommendedPlugin[] >( category );
 		const isLoading = ! hasFinishedResolution( selector, [ category ] );
 
 		return {
