@@ -26,19 +26,6 @@
 * General
 */
 .woocommerce {
-
-	/**
-	* Buttons
-	*/
-	a.button,
-	button[name="add-to-cart"],
-	input[name="submit"],
-	button.single_add_to_cart_button,
-	button[type="submit"]:not(.wp-block-search__button) {
-		// Slightly increase CTA size across the board.
-		padding: 0.9rem 1.1rem;
-	}
-
 	button.button,
 	a.button {
 
