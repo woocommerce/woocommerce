@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensuring that we know if allowTracking is true before adding exit page.
