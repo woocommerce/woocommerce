@@ -113,20 +113,22 @@
 			}
 		}
 
+		.cart {
+			display: flex;
+			align-items: center;
+		}
+
 		.quantity {
 			// Adjust positioning of quantity selector and button.
 			.qty {
 				margin-right: 0.5rem;
 			}
+		}
 
-			+ .single_add_to_cart_button {
-				min-height: 51px;
-				// We need to remove top and bottom padding because we are setting a fixed
-				// height. This is to prevent the button from being cut off. !important is
-				// needed to override the Elements API styles, which also use !important.
-				padding-top: 0 !important;
-				padding-bottom: 0 !important;
-			}
+		button[name="add-to-cart"],
+		button.single_add_to_cart_button {
+			margin-top: 0;
+			margin-bottom: 0;
 		}
 
 		.related.products {
