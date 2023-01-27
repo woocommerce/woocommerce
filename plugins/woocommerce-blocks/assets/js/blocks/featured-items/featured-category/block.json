@@ -80,6 +80,7 @@
 			"default": 500
 		},
 		"linkText": {
+			"default": "Shop now",
 			"type": "string"
 		},
 		"categoryId": {
