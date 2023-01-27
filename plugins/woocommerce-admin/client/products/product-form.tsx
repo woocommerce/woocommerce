@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Form, FormRef, SlotContextProvider } from '@woocommerce/components';
+import { FormRef, SlotContextProvider, NuForm } from '@woocommerce/components';
 import { PartialProduct, Product } from '@woocommerce/data';
 import { PluginArea } from '@wordpress/plugins';
 import { Ref } from 'react';
@@ -20,7 +20,7 @@ export const ProductForm: React.FC< {
 } > = ( { product, formRef } ) => {
 	return (
 		<SlotContextProvider>
-			<Form< Partial< Product > >
+			<NuForm
 				initialValues={
 					product || {
 						backorders: 'no',
@@ -31,7 +31,6 @@ export const ProductForm: React.FC< {
 						stock_status: 'instock',
 					}
 				}
-				ref={ formRef }
 				errors={ {} }
 				validate={ validate }
 			>
@@ -40,7 +39,7 @@ export const ProductForm: React.FC< {
 				<ProductFormFooter />
 				{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
 				<PluginArea scope="woocommerce-product-editor" />
-			</Form>
+			</NuForm>
 		</SlotContextProvider>
 	);
 };
