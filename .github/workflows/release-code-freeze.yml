@@ -30,7 +30,7 @@ jobs:
             freeze: ${{ steps.check-freeze.outputs.freeze }}
         steps:
             - name: 'Install PHP'
-              uses: shivammathur/setup-php@v2
+              uses: shivammathur/setup-php@8e2ac35f639d3e794c1da1f28999385ab6fdf0fc
               with:
                   php-version: '7.4'
 
@@ -60,7 +60,8 @@ jobs:
         name: 'Maybe create next milestone and release branch'
         runs-on: ubuntu-20.04
         permissions:
-          contents: read
+            contents: write
+            issues: write
         needs: verify-code-freeze
         if: needs.verify-code-freeze.outputs.freeze == 0
         outputs:
@@ -89,8 +90,8 @@ jobs:
         name: Preps trunk for next development cycle
         runs-on: ubuntu-20.04
         permissions:
-          contents: read
-          pull-requests: write
+            contents: write
+            pull-requests: write
         needs: maybe-create-next-milestone-and-release-branch
         steps:
             - name: Checkout code
@@ -159,7 +160,7 @@ jobs:
         name: 'Trigger changelog action'
         runs-on: ubuntu-20.04
         permissions:
-          actions: write
+            actions: write
         needs: maybe-create-next-milestone-and-release-branch
         steps:
             - name: 'Trigger changelog action'

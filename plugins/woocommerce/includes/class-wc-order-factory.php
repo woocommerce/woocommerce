@@ -10,6 +10,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 /**
  * Order factory class
  */
@@ -165,16 +167,41 @@ class WC_Order_Factory {
 	 * @return int|bool false on failure
 	 */
 	public static function get_order_id( $order ) {
-		global $post;
-
-		if ( false === $order && is_a( $post, 'WP_Post' ) && 'shop_order' === get_post_type( $post ) ) {
-			return absint( $post->ID );
+		if ( false === $order ) {
+			return self::get_global_order_id();
 		} elseif ( is_numeric( $order ) ) {
 			return $order;
 		} elseif ( $order instanceof WC_Abstract_Order ) {
 			return $order->get_id();
 		} elseif ( ! empty( $order->ID ) ) {
 			return $order->ID;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Try to determine the current order ID based on available global state.
+	 *
+	 * @return false|int
+	 */
+	private static function get_global_order_id() {
+		global $post;
+		global $theorder;
+
+		// Initialize the global $theorder object if necessary.
+		if ( ! isset( $theorder ) || ! $theorder instanceof WC_Abstract_Order ) {
+			if ( ! isset( $post ) || 'shop_order' !== $post->post_type ) {
+				return false;
+			} else {
+				OrderUtil::init_theorder_object( $post );
+			}
+		}
+
+		if ( $theorder instanceof WC_Order ) {
+			return $theorder->get_id();
+		} elseif ( is_a( $post, 'WP_Post' ) && 'shop_order' === get_post_type( $post ) ) {
+			return absint( $post->ID );
 		} else {
 			return false;
 		}

@@ -107,4 +107,34 @@ describe( 'CustomerFeedbackModal', () => {
 			} );
 		}
 	);
+
+	it( 'should render even if no second question is provided', async () => {
+		render(
+			<CustomerFeedbackModal
+				recordScoreCallback={ mockRecordScoreCallback }
+				title="Testing"
+				firstQuestion="First question"
+			/>
+		);
+
+		// Wait for the modal to render.
+		await screen.findByRole( 'dialog' );
+		// Should be only one neutral emoji, since there is one question only
+		expect( screen.getAllByLabelText( 'Neutral' ).length ).toBe( 1 );
+	} );
+
+	it( 'should render default title if no title is provided', async () => {
+		render(
+			<CustomerFeedbackModal
+				recordScoreCallback={ mockRecordScoreCallback }
+				firstQuestion="First question"
+			/>
+		);
+
+		// Wait for the modal to render.
+		await screen.findByRole( 'dialog' );
+		expect(
+			screen.queryByLabelText( 'Please share your feedback' )
+		).toBeInTheDocument();
+	} );
 } );

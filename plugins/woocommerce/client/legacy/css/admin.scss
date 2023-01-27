@@ -4410,6 +4410,17 @@ img.help_tip {
 			}
 		}
 
+		td.with-tooltip {
+			> fieldset {
+				margin-top: 0;
+			}
+			span.help-tooltip {
+				position: absolute;
+				margin-left: -30px;
+				margin-top: 7px;
+			}
+		}
+
 		.iris-picker {
 			z-index: 100;
 			display: none;

@@ -2,7 +2,6 @@
 * woocommerce-blocktheme.scss
 * Block theme default styles to ensure WooCommerce looks better out of the box with block themes that are not optimised for WooCommerce specifically.
 */
-@import "common";
 @import "fonts";
 @import "variables";
 
@@ -122,6 +121,11 @@
 
 			+ .single_add_to_cart_button {
 				min-height: 51px;
+				// We need to remove top and bottom padding because we are setting a fixed
+				// height. This is to prevent the button from being cut off. !important is
+				// needed to override the Elements API styles, which also use !important.
+				padding-top: 0 !important;
+				padding-bottom: 0 !important;
 			}
 		}
 
@@ -307,8 +311,14 @@
 		#coupon_code,
 		.actions .button {
 			height: 50px;
-			padding: 0.9rem 1.1rem;
 			font-size: var(--wp--preset--font-size--small);
+			padding-left: 1.1rem;
+			padding-right: 1.1rem;
+			// We need to remove top and bottom padding because we are setting a fixed
+			// height. This is to prevent the button from being cut off. !important is
+			// needed to override the Elements API styles, which also use !important.
+			padding-top: 0 !important;
+			padding-bottom: 0 !important;
 		}
 
 		@media only screen and ( max-width: 768px ) {

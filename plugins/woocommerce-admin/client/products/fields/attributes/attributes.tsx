@@ -6,7 +6,8 @@ import { ProductAttribute } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { AttributeField } from '../attribute-field';
+import { AttributeControl } from '../attribute-control';
+import { useProductAttributes } from '~/products/hooks/use-product-attributes';
 
 type AttributesProps = {
 	value: ProductAttribute[];
@@ -19,12 +20,17 @@ export const Attributes: React.FC< AttributesProps > = ( {
 	onChange,
 	productId,
 } ) => {
+	const { attributes, handleChange } = useProductAttributes( {
+		allAttributes: value,
+		onChange,
+		productId,
+	} );
+
 	return (
-		<AttributeField
+		<AttributeControl
 			attributeType="regular"
-			value={ value }
-			onChange={ onChange }
-			productId={ productId }
+			value={ attributes }
+			onChange={ handleChange }
 		/>
 	);
 };
