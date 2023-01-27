@@ -32,4 +32,10 @@ export const supports = {
 		__experimentalSelector:
 			'.wp-block-button.wc-block-components-product-button .wc-block-components-product-button__button',
 	} ),
+	...( typeof __experimentalGetSpacingClassesAndStyles === 'function' &&
+		! isFeaturePluginBuild() && {
+			spacing: {
+				margin: true,
+			},
+		} ),
 };
