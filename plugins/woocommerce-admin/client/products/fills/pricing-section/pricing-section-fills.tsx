@@ -97,9 +97,8 @@ const PricingSection = () => {
 		<>
 			<WooProductSectionItem
 				id={ PRICING_SECTION_BASIC_ID }
-				location={ TAB_PRICING_ID }
+				tabs={ [ { name: TAB_PRICING_ID, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
-				order={ 1 }
 			>
 				<ProductSectionLayout
 					title={ __( 'Pricing', 'woocommerce' ) }
@@ -146,33 +145,29 @@ const PricingSection = () => {
 			</WooProductSectionItem>
 			<WooProductFieldItem
 				id="pricing/list"
-				section={ PRICING_SECTION_BASIC_ID }
+				sections={ [ { name: PRICING_SECTION_BASIC_ID, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
-				order={ 1 }
 			>
 				<PricingListField currencyInputProps={ currencyInputProps } />
 			</WooProductFieldItem>
 			<WooProductFieldItem
 				id="pricing/sale"
-				section={ PRICING_SECTION_BASIC_ID }
+				sections={ [ { name: PRICING_SECTION_BASIC_ID, order: 3 } ] }
 				pluginId={ PLUGIN_ID }
-				order={ 3 }
 			>
 				<PricingSaleField currencyInputProps={ currencyInputProps } />
 			</WooProductFieldItem>
 			<WooProductFieldItem
 				id="pricing/taxes/charge"
-				section={ PRICING_SECTION_TAXES_ID }
+				sections={ [ { name: PRICING_SECTION_TAXES_ID, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
-				order={ 1 }
 			>
 				<PricingTaxesChargeField />
 			</WooProductFieldItem>
 			<WooProductFieldItem
 				id="pricing/taxes/class"
-				section={ PRICING_SECTION_TAXES_ID }
+				sections={ [ { name: PRICING_SECTION_TAXES_ID, order: 3 } ] }
 				pluginId={ PLUGIN_ID }
-				order={ 3 }
 			>
 				<PricingTaxesClassField />
 			</WooProductFieldItem>
