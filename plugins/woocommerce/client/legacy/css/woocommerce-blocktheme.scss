@@ -291,23 +291,18 @@
 			}
 		}
 
+		.coupon {
+			display: flex;
+			align-items: center;
+		}
+
 		#coupon_code {
 			// Allow sufficient space for the coupon code.
 			width: auto;
 			margin-right: 0.8rem;
-		}
-
-		#coupon_code,
-		.actions .button {
 			height: 50px;
 			font-size: var(--wp--preset--font-size--small);
-			padding-left: 1.1rem;
-			padding-right: 1.1rem;
-			// We need to remove top and bottom padding because we are setting a fixed
-			// height. This is to prevent the button from being cut off. !important is
-			// needed to override the Elements API styles, which also use !important.
-			padding-top: 0 !important;
-			padding-bottom: 0 !important;
+			padding: 0 1.1rem;
 		}
 
 		@media only screen and ( max-width: 768px ) {
