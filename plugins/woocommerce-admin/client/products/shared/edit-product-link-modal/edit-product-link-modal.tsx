@@ -33,8 +33,11 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 	onSaved,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { updateProductWithStatus, isUpdatingDraft, isUpdatingPublished } =
-		useProductHelper();
+	const {
+		createOrUpdateProductWithStatus,
+		isUpdatingDraft,
+		isUpdatingPublished,
+	} = useProductHelper();
 	const [ slug, setSlug ] = useState(
 		product.slug || cleanForSlug( product.name )
 	);
@@ -46,12 +49,12 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 			product_id: product.id,
 			product_type: product.type,
 		} );
-		const updatedProduct = await updateProductWithStatus(
-			product.id,
+		const updatedProduct = await createOrUpdateProductWithStatus(
+			product.id || null,
 			{
 				slug,
 			},
-			product.status,
+			product.status || 'auto-draft',
 			true
 		);
 		if ( updatedProduct && updatedProduct.id ) {

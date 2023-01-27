@@ -243,6 +243,39 @@ export function useProductHelper() {
 	);
 
 	/**
+	 * Create or update product with status.
+	 *
+	 * @param {number}  productId  The product ID or null if not yet created.
+	 * @param {Product} product    The product data.
+	 * @param {string}  status     The product status.
+	 * @param {boolean} skipNotice Determines if the notice should be skipped (default: false).
+	 * @return {Promise<Product>} Returns a promise with the updated product.
+	 */
+	const createOrUpdateProductWithStatus = async (
+		productId: number | null,
+		product: Partial< Product >,
+		status: ProductStatus,
+		skipNotice = false
+	): Promise< Product > => {
+		if ( productId ) {
+			return updateProductWithStatus(
+				product.id,
+				product,
+				status,
+				skipNotice
+			);
+		}
+		return createProductWithStatus(
+			{
+				...product,
+				name: product.name || AUTO_DRAFT_NAME,
+			},
+			status,
+			skipNotice
+		);
+	};
+
+	/**
 	 * Creates a copy of the given product with the given status.
 	 *
 	 * @param {Product} product the product to be copied.
@@ -358,6 +391,7 @@ export function useProductHelper() {
 	);
 
 	return {
+		createOrUpdateProductWithStatus,
 		createProductWithStatus,
 		updateProductWithStatus,
 		copyProductWithStatus,
