@@ -30,9 +30,11 @@ import {
 import { ProductVariationsOrder } from './hooks/use-variations-order';
 
 function removeReadonlyProperties(
-	product: Product
-): Omit< Product, ReadOnlyProperties > {
-	productReadOnlyProperties.forEach( ( key ) => delete product[ key ] );
+	product: Partial< Product >
+): Omit< Partial< Product >, ReadOnlyProperties > {
+	productReadOnlyProperties.forEach(
+		( propertyName: keyof Product ) => delete product[ propertyName ]
+	);
 	return product;
 }
 
@@ -79,7 +81,7 @@ export function useProductHelper() {
 	 */
 	const createProductWithStatus = useCallback(
 		async (
-			product: Omit< Product, ReadOnlyProperties >,
+			product: Omit< Partial< Product >, ReadOnlyProperties >,
 			status: ProductStatus,
 			skipNotice = false
 		) => {
@@ -259,17 +261,17 @@ export function useProductHelper() {
 	): Promise< Product > => {
 		if ( productId ) {
 			return updateProductWithStatus(
-				product.id,
+				productId,
 				product,
 				status,
 				skipNotice
 			);
 		}
 		return createProductWithStatus(
-			{
+			removeReadonlyProperties( {
 				...product,
 				name: product.name || AUTO_DRAFT_NAME,
-			},
+			} ),
 			status,
 			skipNotice
 		);
