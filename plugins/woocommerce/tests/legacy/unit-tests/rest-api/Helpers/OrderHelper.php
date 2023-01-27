@@ -152,6 +152,23 @@ class OrderHelper {
 	}
 
 	/**
+	 * Enables or disables the custom orders table across WP temporarily.
+	 *
+	 * @param boolean $enabled TRUE to enable COT or FALSE to disable.
+	 * @return void
+	 */
+	public static function toggle_cot( bool $enabled ) {
+		$features_controller = wc_get_container()->get( Featurescontroller::class );
+		$features_controller->change_feature_enable( 'custom_order_tables', $enabled );
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, wc_bool_to_string( $enabled ) );
+
+		// Confirm things are really correct.
+		$wc_data_store = WC_Data_Store::load( 'order' );
+		assert( is_a( $wc_data_store->get_current_class_name(), OrdersTableDataStore::class, true ) === $enabled );
+	}
+
+	/**
 	 * Helper method to create custom tables if not present.
 	 */
 	public static function create_order_custom_table_if_not_exist() {
