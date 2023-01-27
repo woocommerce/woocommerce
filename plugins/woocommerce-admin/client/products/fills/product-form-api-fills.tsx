@@ -43,7 +43,7 @@ const Form = () => {
  * The above Form component won't get rendered until the getProductForm is resolved.
  */
 resolveSelect( EXPERIMENTAL_PRODUCT_FORM_STORE_NAME ).getProductForm();
-registerPlugin( 'wc-admin-product-editor-form-fills', {
+registerPlugin( 'wc-admin-product-editor-api-form-fills', {
 	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 	scope: 'woocommerce-product-editor',
 	render: () => {
