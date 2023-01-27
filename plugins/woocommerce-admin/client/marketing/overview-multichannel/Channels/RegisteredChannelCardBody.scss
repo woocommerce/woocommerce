@@ -18,14 +18,10 @@
 			fill: $alert-red;
 		}
 
-		&__syncing {
-			color: #008a20;
-			fill: #008a20;
-		}
-
+		&__syncing,
 		&__synced {
-			color: #008a20;
-			fill: #008a20;
+			color: $studio-green-50;
+			fill: $studio-green-50;
 		}
 	}
 
