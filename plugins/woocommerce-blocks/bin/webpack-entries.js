@@ -20,6 +20,7 @@ const blocks = {
 		customDir: 'reviews/all-reviews',
 	},
 	'attribute-filter': {},
+	breadcrumbs: {},
 	cart: {},
 	'catalog-sorting': {},
 	checkout: {},
