@@ -1,4 +1,4 @@
-export type Plugin = {
+export type InstalledPlugin = {
 	slug: string;
 	icon: string;
 	name: string;
