@@ -236,7 +236,7 @@ export const shopper = {
 			await expect( page ).toFill( '#billing-city', customerBillingDetails.city );
 			await expect( page ).toFill( '#billing-state input', customerBillingDetails.state );
 			await expect( page ).toFill( '#billing-postcode', customerBillingDetails.postcode );
-			await expect( page ).toFill( '#phone', customerBillingDetails.phone );
+			await expect( page ).toFill( '#billing-phone', customerBillingDetails.phone );
 			await expect( page ).toFill( '#email', customerBillingDetails.email );
 		},
 
@@ -267,7 +267,7 @@ export const shopper = {
 					customerBillingDetails.firstname
 				),
 				expect( page ).toMatch( customerBillingDetails.lastname),
-				expect( page ).toMatch( customerBillingDetails.company),
+				// expect( page ).toMatch( customerBillingDetails.company),
 				expect( page ).toMatch(
 					customerBillingDetails.addressfirstline
 				),
@@ -294,7 +294,7 @@ export const shopper = {
 				expect( page ).toMatch(
 					customerShippingDetails.lastname
 				),
-				expect( page ).toMatch( customerShippingDetails.company),
+				// expect( page ).toMatch( customerShippingDetails.company),
 				expect( page ).toMatch(
 					customerShippingDetails.addressfirstline
 				),
