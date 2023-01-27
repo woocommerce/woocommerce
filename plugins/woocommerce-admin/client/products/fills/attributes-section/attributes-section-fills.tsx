@@ -59,7 +59,7 @@ export const AttributesSectionFills = () => (
 			</ProductSectionLayout>
 		</WooProductSectionItem>
 		<WooProductFieldItem
-			id={ `${ ATTRIBUTES_SECTION_ID }/add` }
+			id="add"
 			sections={ [ { name: ATTRIBUTES_SECTION_ID, order: 1 } ] }
 			pluginId={ PLUGIN_ID }
 		>

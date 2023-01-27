@@ -94,14 +94,14 @@ export const InventorySectionFills: React.FC< InventorySectionFillsType > = ( {
 				</ProductSectionLayout>
 			</WooProductSectionItem>
 			<WooProductFieldItem
-				id={ `${ basicSectionId }/sku` }
+				id="sku"
 				sections={ [ { name: basicSectionId, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
 			>
 				<InventorySkuField />
 			</WooProductFieldItem>
 			<WooProductFieldItem
-				id={ `${ basicSectionId }/track-quantity` }
+				id="track-quantity"
 				sections={ [ { name: basicSectionId, order: 3 } ] }
 				pluginId={ PLUGIN_ID }
 			>
@@ -110,7 +110,7 @@ export const InventorySectionFills: React.FC< InventorySectionFillsType > = ( {
 
 			{ values.manage_stock ? (
 				<WooProductFieldItem
-					id={ `${ basicSectionId }/stock-manage` }
+					id="stock-manage"
 					sections={ [ { name: basicSectionId, order: 5 } ] }
 					pluginId={ PLUGIN_ID }
 				>
@@ -118,7 +118,7 @@ export const InventorySectionFills: React.FC< InventorySectionFillsType > = ( {
 				</WooProductFieldItem>
 			) : (
 				<WooProductFieldItem
-					id={ `${ basicSectionId }/stock-manual` }
+					id="stock-manual"
 					sections={ [ { name: basicSectionId, order: 5 } ] }
 					pluginId={ PLUGIN_ID }
 				>
@@ -128,7 +128,7 @@ export const InventorySectionFills: React.FC< InventorySectionFillsType > = ( {
 
 			{ values.manage_stock && (
 				<WooProductFieldItem
-					id={ `${ advancedSectionId }/stock-out` }
+					id="stock-out"
 					sections={ [ { name: advancedSectionId, order: 1 } ] }
 					pluginId={ PLUGIN_ID }
 				>
@@ -137,7 +137,7 @@ export const InventorySectionFills: React.FC< InventorySectionFillsType > = ( {
 			) }
 
 			<WooProductFieldItem
-				id={ `${ advancedSectionId }/stock-limit` }
+				id="stock-limit"
 				sections={ [ { name: advancedSectionId, order: 3 } ] }
 				pluginId={ PLUGIN_ID }
 			>

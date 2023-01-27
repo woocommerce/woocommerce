@@ -130,7 +130,7 @@ export const ShippingSectionFills: React.FC< ShippingSectionProps > = ( {
 				</ProductSectionLayout>
 			</WooProductSectionItem>
 			<WooProductFieldItem
-				id={ `${ basicSectionId }/class` }
+				id="class"
 				sections={ [ { name: basicSectionId, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
 			>
@@ -139,7 +139,7 @@ export const ShippingSectionFills: React.FC< ShippingSectionProps > = ( {
 				) }
 			</WooProductFieldItem>
 			<WooProductFieldItem
-				id={ `${ dimensionsSectionId }/width` }
+				id="width"
 				sections={ [ { name: dimensionsSectionId, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
 			>
@@ -148,7 +148,7 @@ export const ShippingSectionFills: React.FC< ShippingSectionProps > = ( {
 				) }
 			</WooProductFieldItem>
 			<WooProductFieldItem
-				id={ `${ dimensionsSectionId }/length` }
+				id="length"
 				sections={ [ { name: dimensionsSectionId, order: 3 } ] }
 				pluginId={ PLUGIN_ID }
 			>
@@ -157,7 +157,7 @@ export const ShippingSectionFills: React.FC< ShippingSectionProps > = ( {
 				) }
 			</WooProductFieldItem>
 			<WooProductFieldItem
-				id={ `${ dimensionsSectionId }/height` }
+				id="height"
 				sections={ [ { name: dimensionsSectionId, order: 5 } ] }
 				pluginId={ PLUGIN_ID }
 			>
@@ -166,7 +166,7 @@ export const ShippingSectionFills: React.FC< ShippingSectionProps > = ( {
 				) }
 			</WooProductFieldItem>
 			<WooProductFieldItem
-				id={ `${ dimensionsSectionId }/weight` }
+				id="weight"
 				sections={ [ { name: dimensionsSectionId, order: 7 } ] }
 				pluginId={ PLUGIN_ID }
 			>

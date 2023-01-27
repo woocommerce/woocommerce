@@ -158,28 +158,28 @@ export const PricingSectionFills: React.FC< PricingSectionFillsType > = ( {
 				</ProductSectionLayout>
 			</WooProductSectionItem>
 			<WooProductFieldItem
-				id={ `${ basicSectionId }/list` }
+				id="list"
 				sections={ [ { name: basicSectionId, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
 			>
 				<PricingListField currencyInputProps={ currencyInputProps } />
 			</WooProductFieldItem>
 			<WooProductFieldItem
-				id={ `${ basicSectionId }/sale` }
+				id="sale"
 				sections={ [ { name: basicSectionId, order: 3 } ] }
 				pluginId={ PLUGIN_ID }
 			>
 				<PricingSaleField currencyInputProps={ currencyInputProps } />
 			</WooProductFieldItem>
 			<WooProductFieldItem
-				id={ `${ taxesSectionId }/charge` }
+				id="charge"
 				sections={ [ { name: taxesSectionId, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
 			>
 				<PricingTaxesChargeField />
 			</WooProductFieldItem>
 			<WooProductFieldItem
-				id={ `${ taxesAdvancedSectionId }/class` }
+				id="class"
 				sections={ [ { name: taxesAdvancedSectionId, order: 3 } ] }
 				pluginId={ PLUGIN_ID }
 			>

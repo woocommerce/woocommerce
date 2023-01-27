@@ -55,7 +55,7 @@ export const ImagesSectionFills = () => (
 			/>
 		</WooProductSectionItem>
 		<WooProductFieldItem
-			id={ `${ IMAGES_SECTION_ID }/gallery` }
+			id="gallery"
 			sections={ [ { name: IMAGES_SECTION_ID, order: 1 } ] }
 			pluginId={ PLUGIN_ID }
 		>
