@@ -60,14 +60,14 @@ class WC_Frontend_Scripts {
 			'prettyPhoto',
 			'prettyPhoto-init',
 			'jquery-cookie',
-			'woocommerce_prettyPhoto_css'
+			'woocommerce_prettyPhoto_css',
 		);
 
 		foreach ( $deprecated_scripts as $script ) {
 			if ( wp_script_is( $script, 'enqueued' ) ) {
 				wc_deprecated_script( $script, '3.3.0' );
 			}
-		}		
+		}
 	}
 
 	/**
