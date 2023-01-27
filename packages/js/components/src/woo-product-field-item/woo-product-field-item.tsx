@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Slot, Fill } from '@wordpress/components';
 import { createElement, Children } from '@wordpress/element';
 
@@ -27,7 +27,9 @@ export const WooProductFieldItem: React.FC< WooProductFieldItemProps > & {
 } = ( { children, order = 20, section, id } ) => {
 	const { registerFill, getFillHelpers } = useSlotContext();
 
-	registerFill( id );
+	useEffect( () => {
+		registerFill( id );
+	}, [] );
 
 	return (
 		<Fill name={ `woocommerce_product_field_${ section }` }>

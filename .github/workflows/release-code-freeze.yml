@@ -30,7 +30,7 @@ jobs:
             freeze: ${{ steps.check-freeze.outputs.freeze }}
         steps:
             - name: 'Install PHP'
-              uses: shivammathur/setup-php@v2
+              uses: shivammathur/setup-php@8e2ac35f639d3e794c1da1f28999385ab6fdf0fc
               with:
                   php-version: '7.4'
 
