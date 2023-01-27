@@ -96,7 +96,7 @@ function woocommerce_blocks_is_development_version() {
 /**
  * If development version is detected and the Jetpack constant is not defined, show a notice.
  */
-if ( woocommerce_blocks_is_development_version() && ! defined( 'JETPACK_AUTOLOAD_DEV' ) ) {
+if ( woocommerce_blocks_is_development_version() && ( ! defined( 'JETPACK_AUTOLOAD_DEV' ) || true !== JETPACK_AUTOLOAD_DEV ) ) {
 	add_action(
 		'admin_notices',
 		function () {
