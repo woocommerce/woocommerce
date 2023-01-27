@@ -50,6 +50,7 @@ export interface FeaturedItemRequiredAttributes {
 	overlayGradient: string;
 	showDesc: boolean;
 	showPrice: boolean;
+	borderColor: string;
 }
 
 interface FeaturedCategoryRequiredAttributes
@@ -171,6 +172,7 @@ export const withFeaturedItem =
 				showPrice,
 				style,
 				textColor,
+				borderColor,
 			} = attributes;
 
 			const classes = classnames(
@@ -194,6 +196,11 @@ export const withFeaturedItem =
 				color: textColor
 					? `var(--wp--preset--color--${ textColor })`
 					: style?.color?.text,
+				borderColor: borderColor
+					? `var(--wp--preset--color--${ borderColor })`
+					: 'transparent',
+				borderWidth: style?.border?.width,
+				boxSizing: 'border-box',
 			};
 
 			const wrapperStyle = {
