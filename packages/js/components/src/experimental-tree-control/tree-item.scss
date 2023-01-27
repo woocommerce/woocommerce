@@ -1,5 +1,3 @@
-$control-size: clac( $gap - $gap-smaller );
-
 .experimental-woocommerce-tree-item {
 	margin: 0;
 
@@ -39,9 +37,6 @@ $control-size: clac( $gap - $gap-smaller );
 
 		.components-button {
 			padding: 0;
-			height: $control-size;
-			width: $control-size;
-			min-width: $control-size;
 		}
 	}
 }
