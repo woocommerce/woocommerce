@@ -144,7 +144,8 @@ function wc_deprecated_argument( $argument, $version, $message = null ) {
  * @since 7.5.0
  * @param string $handle
  * @param string $version
- * 
+ * @param string $replacement
+ * @param string $message
  */
 function wc_deprecated_script( $handle, $version, $replacement = null, $message = '' ) {
 	$error_message = "The $handle script is deprecated since version $version. $message";
