@@ -1767,8 +1767,7 @@ FROM $order_meta_table
 
 			$order->set_id( 0 );
 
-			// If this datastore method is called while the posts table is authoritative, or if data synchronization is disabled,
-			// refrain from deleting post data.
+			// Only delete post data if the posts table is authoritative and synchronization is enabled.
 			$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
 			if ( $data_synchronizer->data_sync_is_enabled() && $order->get_data_store()->get_current_class_name() === self::class ) {
 				// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
