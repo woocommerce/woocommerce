@@ -1,6 +1,6 @@
 function block(el, options={}) {
-	const css = options.overlayCSS || {};
-	const opacity = css.opacity || 0.6; // 0.6 is the default overlay opacity
+	const styles = options.overlayCSS || {};
+	const opacity = styles.opacity || 0.6; // 0.6 is the default overlay opacity
 
 	const overlays = el.getElementsByClassName('blockOverlay');
 	if (overlays.length) {
@@ -36,9 +36,9 @@ function block(el, options={}) {
 	style.height = '100%';
 	style.top = 0;
 	style.left = 0;
-	style.background = css.background || '#000'; // '#000' is the default overlay background
+	style.background = styles.background || '#000'; // '#000' is the default overlay background
 	style.opacity = 0;
-	style.cursor = css.cursor || 'wait'; // 'wait' is the default overlay cursor
+	style.cursor = styles.cursor || 'wait'; // 'wait' is the default overlay cursor
 	style.position = 'absolute';
 
 	el.append(lyr2);
