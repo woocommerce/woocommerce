@@ -17,6 +17,8 @@ function block(el, options={}) {
 	el.dataset['blockUI.isBlocked'] = true;
 	$el && $el.data('blockUI.isBlocked', true);
 
+	// layer1 is the iframe layer which is used to supress bleed through of underlying content
+	// it was only used for IE; now we keep layer1 as an empty div for backwards compatibility
 	const lyr1 = document.createElement('div');
 	lyr1.className = 'blockUI';
 	lyr1.style.display = 'none';
@@ -49,6 +51,7 @@ function block(el, options={}) {
 	style.opacity = opacity;
 
 	const transitionend = ev => {
+		// check if finishing a fadeOut (we don't care for a fadeIn finishing)
 		if (style.opacity === '0') {
 			if (position === 'static') el.style.position = 'static';
 
