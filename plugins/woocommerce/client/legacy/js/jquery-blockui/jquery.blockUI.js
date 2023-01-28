@@ -1,10 +1,10 @@
 function block(el, options={}) {
 	const css = options.overlayCSS || {};
-	const opacity = css.opacity || 0.6;
+	const opacity = css.opacity || 0.6; // 0.6 is the default overlay opacity
+
 	const overlays = el.getElementsByClassName('blockOverlay');
 	if (overlays.length) {
-		// 200ms is the fadeIn default - https://github.com/malsup/blockui/blob/2.70/jquery.blockUI.js#L199
-		overlays[0].style.transitionDuration = '200ms';
+		overlays[0].style.transitionDuration = '200ms'; // 200 is the default fadeIn time in millis
 		overlays[0].style.opacity = opacity;
 
 		return el;
@@ -23,11 +23,10 @@ function block(el, options={}) {
 
 	el.append(blockUI);
 
+	// blockOverlay is the overlay layer which has opacity and a wait cursor (by default)
 	const blockOverlay = document.createElement('div');
 	blockOverlay.className = 'blockUI blockOverlay';
 
-	// 'background', 'cursor', and 'opacity' styles are taken from
-	// options.overlayCSS (although 'opacity' always starts at 0)
 	const style = blockOverlay.style;
 	style.zIndex = 1000;
 	style.border = 'none';
@@ -37,21 +36,21 @@ function block(el, options={}) {
 	style.height = '100%';
 	style.top = 0;
 	style.left = 0;
-	style.background = css.background || '#000';
+	style.background = css.background || '#000'; // '#000' is the default overlay background
 	style.opacity = 0;
-	style.cursor = css.cursor || 'wait';
+	style.cursor = css.cursor || 'wait'; // 'wait' is the default overlay cursor
 	style.position = 'absolute';
 
 	el.append(blockOverlay);
 
 	blockOverlay.offsetWidth; // wait a frame
 	style.transitionProperty = 'opacity';
-	style.transitionDuration = '200ms'; // 200ms is the fadeIn default
+	style.transitionDuration = '200ms'; // 200 is the default fadeIn time in millis
 	style.opacity = opacity;
 
 	const transitionend = ev => {
 		if (style.opacity === '0') {
-			if (position === 'static') el.style.position = position;
+			if (position === 'static') el.style.position = 'static';
 
 			el.dataset['blockUI.isBlocked'] = false;
 			$el && $el.data('blockUI.isBlocked', false);
@@ -69,8 +68,7 @@ function block(el, options={}) {
 function unblock(el) {
 	const overlays = el.getElementsByClassName('blockOverlay');
 	if (overlays.length) {
-		// 400ms is the fadeOut default - https://github.com/malsup/blockui/blob/2.70/jquery.blockUI.js#L202
-		overlays[0].style.transitionDuration = '400ms';
+		overlays[0].style.transitionDuration = '400ms'; // 400 is the default fadeOut time in millis
 		overlays[0].style.opacity = 0;
 	}
 
