@@ -2,9 +2,6 @@ function block(el, options={}) {
 	const styles = options.overlayCSS || {};
 	const opacity = styles.opacity || 0.6; // 0.6 is the default overlay opacity
 
-	const full = (el === window);
-	el = full ? document.body : el;
-
 	const overlays = el.getElementsByClassName('blockOverlay');
 	if (overlays.length) {
 		overlays[0].style.transitionDuration = '200ms'; // 200ms is the default fadeIn time
@@ -13,8 +10,9 @@ function block(el, options={}) {
 		return;
 	}
 
-	const position = !full && window.getComputedStyle(el).getPropertyValue('position');
-	if (position === 'static') el.style.position = 'relative';
+	const full = (el === document.body);
+	const static = !full && (window.getComputedStyle(el).getPropertyValue('position') === 'static');
+	if (static) el.style.position = 'relative';
 
 	const $el = window.jQuery && window.jQuery(el);
 	$el && $el.data('blockUI.isBlocked', true);
@@ -56,7 +54,7 @@ function block(el, options={}) {
 	// add a fadeOut end event listener - finish unblocking and remove overlays
 	const transitionend = ev => {
 		if (style.opacity === '0') {
-			if (position === 'static') el.style.position = 'static';
+			if (static) el.style.position = 'static';
 
 			$el && $el.data('blockUI.isBlocked', false);
 			el.dataset.isBlocked = false;
@@ -70,7 +68,6 @@ function block(el, options={}) {
 }
 
 function unblock(el) {
-	el = (el === window) ? document.body : el;
 	const overlays = el.getElementsByClassName('blockOverlay');
 	if (overlays.length) {
 		overlays[0].style.transitionDuration = '400ms'; // 400ms is the default fadeOut time
@@ -80,8 +77,8 @@ function unblock(el) {
 
 (function($) {
 	// global $ methods for blocking/unblocking the entire page
-	$.blockUI   = function(opts) { block(window, opts); };
-	$.unblockUI = function(opts) { unblock(window, opts); };
+	$.blockUI   = function(opts) { block(document.body, opts); };
+	$.unblockUI = function(opts) { unblock(document.body, opts); };
 
 	// plugin method for blocking element content
 	$.fn.block = function(opts) {
