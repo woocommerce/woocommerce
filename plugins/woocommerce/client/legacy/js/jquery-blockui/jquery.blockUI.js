@@ -17,11 +17,11 @@ function block(el, options={}) {
 	el.dataset['blockUI.isBlocked'] = true;
 	$el && $el.data('blockUI.isBlocked', true);
 
-	const blockUI = document.createElement('div');
-	blockUI.className = 'blockUI';
-	blockUI.style.display = 'none';
+	const lyr1 = document.createElement('div');
+	lyr1.className = 'blockUI';
+	lyr1.style.display = 'none';
 
-	el.append(blockUI);
+	el.append(lyr1);
 
 	// blockOverlay is the overlay layer which has opacity and a wait cursor (by default)
 	const blockOverlay = document.createElement('div');
@@ -57,7 +57,7 @@ function block(el, options={}) {
 
 			blockOverlay.removeEventListener('transitionend', transitionend);
 			blockOverlay.remove();
-			blockUI.remove();
+			lyr1.remove();
 		}
 	};
 	blockOverlay.addEventListener('transitionend', transitionend);
