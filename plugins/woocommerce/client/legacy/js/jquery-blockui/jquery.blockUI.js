@@ -23,11 +23,11 @@ function block(el, options={}) {
 
 	el.append(lyr1);
 
-	// blockOverlay is the overlay layer which has opacity and a wait cursor (by default)
-	const blockOverlay = document.createElement('div');
-	blockOverlay.className = 'blockUI blockOverlay';
+	// layer2 is the overlay layer which has opacity and a wait cursor (by default)
+	const lyr2 = document.createElement('div');
+	lyr2.className = 'blockUI blockOverlay';
 
-	const style = blockOverlay.style;
+	const style = lyr2.style;
 	style.zIndex = 1000;
 	style.border = 'none';
 	style.margin = 0;
@@ -41,9 +41,9 @@ function block(el, options={}) {
 	style.cursor = css.cursor || 'wait'; // 'wait' is the default overlay cursor
 	style.position = 'absolute';
 
-	el.append(blockOverlay);
+	el.append(lyr2);
 
-	blockOverlay.offsetWidth; // wait a frame
+	lyr2.offsetWidth; // wait a frame
 	style.transitionProperty = 'opacity';
 	style.transitionDuration = '200ms'; // 200 is the default fadeIn time in millis
 	style.opacity = opacity;
@@ -55,12 +55,12 @@ function block(el, options={}) {
 			el.dataset['blockUI.isBlocked'] = false;
 			$el && $el.data('blockUI.isBlocked', false);
 
-			blockOverlay.removeEventListener('transitionend', transitionend);
-			blockOverlay.remove();
+			lyr2.removeEventListener('transitionend', transitionend);
+			lyr2.remove();
 			lyr1.remove();
 		}
 	};
-	blockOverlay.addEventListener('transitionend', transitionend);
+	lyr2.addEventListener('transitionend', transitionend);
 
 	return el;
 }
