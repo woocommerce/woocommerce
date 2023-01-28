@@ -2,6 +2,9 @@ function block(el, options={}) {
 	const styles = options.overlayCSS || {};
 	const opacity = styles.opacity || 0.6; // 0.6 is the default overlay opacity
 
+	const full = (el === window);
+	el = full ? document.body : el;
+
 	const overlays = el.getElementsByClassName('blockOverlay');
 	if (overlays.length) {
 		overlays[0].style.transitionDuration = '200ms'; // 200ms is the default fadeIn time
@@ -10,7 +13,7 @@ function block(el, options={}) {
 		return;
 	}
 
-	const position = window.getComputedStyle(el).getPropertyValue('position');
+	const position = !full && window.getComputedStyle(el).getPropertyValue('position');
 	if (position === 'static') el.style.position = 'relative';
 
 	const $el = window.jQuery && window.jQuery(el);
@@ -41,7 +44,7 @@ function block(el, options={}) {
 	style.background = styles.background || '#000'; // '#000' is the default overlay background
 	style.opacity = 0;
 	style.cursor = styles.cursor || 'wait'; // 'wait' is the default overlay cursor
-	style.position = 'absolute';
+	style.position = full ? 'fixed' : 'absolute';
 
 	el.append(lyr2);
 
@@ -67,6 +70,7 @@ function block(el, options={}) {
 }
 
 function unblock(el) {
+	el = (el === window) ? document.body : el;
 	const overlays = el.getElementsByClassName('blockOverlay');
 	if (overlays.length) {
 		overlays[0].style.transitionDuration = '400ms'; // 400ms is the default fadeOut time
@@ -75,12 +79,18 @@ function unblock(el) {
 }
 
 (function($) {
+	// global $ methods for blocking/unblocking the entire page
+	$.blockUI   = function(opts) { block(window, opts); };
+	$.unblockUI = function(opts) { unblock(window, opts); };
+
+	// plugin method for blocking element content
 	$.fn.block = function(opts) {
 		return this.each(function() {
 			block(this, opts);
 		});
 	};
 
+	// plugin method for unblocking element content
 	$.fn.unblock = function(opts) {
 		return this.each(function() {
 			unblock(this);
