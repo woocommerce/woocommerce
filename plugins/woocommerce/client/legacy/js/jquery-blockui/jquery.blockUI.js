@@ -4,8 +4,8 @@ function block(el, options={}) {
 
 	const overlays = el.getElementsByClassName('blockOverlay');
 	if (overlays.length) {
-		overlays[0].style.transitionDuration = '200ms'; // 200 is the default fadeIn time in millis
-		overlays[0].style.opacity = opacity;
+		overlays[0].style.transitionDuration = '200ms'; // 200ms is the default fadeIn time
+		overlays[0].style.opacity = opacity; // animate a fadeIn
 
 		return el;
 	}
@@ -14,8 +14,8 @@ function block(el, options={}) {
 	if (position === 'static') el.style.position = 'relative';
 
 	const $el = window.jQuery && window.jQuery(el);
-	el.dataset['blockUI.isBlocked'] = true;
 	$el && $el.data('blockUI.isBlocked', true);
+	el.dataset['blockUI.isBlocked'] = true;
 
 	// layer1 is the iframe layer which is used to supress bleed through of underlying content
 	// it was only used for IE; now we keep layer1 as an empty div for backwards compatibility
@@ -47,16 +47,17 @@ function block(el, options={}) {
 
 	lyr2.offsetWidth; // wait a frame
 	style.transitionProperty = 'opacity';
-	style.transitionDuration = '200ms'; // 200 is the default fadeIn time in millis
-	style.opacity = opacity;
+	style.transitionDuration = '200ms'; // 200ms is the default fadeIn time
+	style.opacity = opacity; // animate a fadeIn
 
+	// add a fadeOut end event listener
 	const transitionend = ev => {
 		// check if finishing a fadeOut (we don't care for a fadeIn finishing)
 		if (style.opacity === '0') {
 			if (position === 'static') el.style.position = 'static';
 
-			el.dataset['blockUI.isBlocked'] = false;
 			$el && $el.data('blockUI.isBlocked', false);
+			el.dataset['blockUI.isBlocked'] = false;
 
 			lyr2.removeEventListener('transitionend', transitionend);
 			lyr2.remove();
@@ -71,8 +72,8 @@ function block(el, options={}) {
 function unblock(el) {
 	const overlays = el.getElementsByClassName('blockOverlay');
 	if (overlays.length) {
-		overlays[0].style.transitionDuration = '400ms'; // 400 is the default fadeOut time in millis
-		overlays[0].style.opacity = 0;
+		overlays[0].style.transitionDuration = '400ms'; // 400ms is the default fadeOut time
+		overlays[0].style.opacity = 0; // animate a fadeOut
 	}
 
 	return el;
