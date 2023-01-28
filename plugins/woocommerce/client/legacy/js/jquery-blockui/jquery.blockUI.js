@@ -7,7 +7,7 @@ function block(el, options={}) {
 		overlays[0].style.transitionDuration = '200ms'; // 200ms is the default fadeIn time
 		overlays[0].style.opacity = opacity; // animate a fadeIn
 
-		return el;
+		return;
 	}
 
 	const position = window.getComputedStyle(el).getPropertyValue('position');
@@ -64,8 +64,6 @@ function block(el, options={}) {
 		}
 	};
 	lyr2.addEventListener('transitionend', transitionend);
-
-	return el;
 }
 
 function unblock(el) {
@@ -74,8 +72,6 @@ function unblock(el) {
 		overlays[0].style.transitionDuration = '400ms'; // 400ms is the default fadeOut time
 		overlays[0].style.opacity = 0; // animate a fadeOut
 	}
-
-	return el;
 }
 
 (function($) {
