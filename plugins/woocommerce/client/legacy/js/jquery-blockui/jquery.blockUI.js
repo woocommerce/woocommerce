@@ -50,9 +50,8 @@ function block(el, options={}) {
 	style.transitionDuration = '200ms'; // 200ms is the default fadeIn time
 	style.opacity = opacity; // animate a fadeIn
 
-	// add a fadeOut end event listener
+	// add a fadeOut end event listener - finish unblocking and remove overlays
 	const transitionend = ev => {
-		// check if finishing a fadeOut (we don't care for a fadeIn finishing)
 		if (style.opacity === '0') {
 			if (position === 'static') el.style.position = 'static';
 
