@@ -1,8 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { Card, CardBody } from '@wordpress/components';
 import {
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 	__experimentalProductFieldSection as ProductFieldSection,
@@ -18,9 +16,10 @@ export const Sections: React.FC< { sections: ProductFormSection[] } > = ( {
 				<WooProductSectionItem
 					key={ section.id }
 					id={ section.id }
-					location={ section.location }
+					tabs={ [
+						{ name: section.location, order: section.order },
+					] }
 					pluginId={ section.plugin_id }
-					order={ section.order }
 				>
 					<ProductFieldSection
 						id={ section.id }

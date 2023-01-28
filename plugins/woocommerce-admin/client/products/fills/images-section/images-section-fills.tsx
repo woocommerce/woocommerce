@@ -23,9 +23,8 @@ const ImagesSection = () => (
 	<>
 		<WooProductSectionItem
 			id={ IMAGES_SECTION_ID }
-			location={ TAB_GENERAL_ID }
+			tabs={ [ { name: TAB_GENERAL_ID, order: 3 } ] }
 			pluginId={ PLUGIN_ID }
-			order={ 3 }
 		>
 			<ProductFieldSection
 				id={ IMAGES_SECTION_ID }
@@ -58,9 +57,8 @@ const ImagesSection = () => (
 		</WooProductSectionItem>
 		<WooProductFieldItem
 			id="images/gallery"
-			section={ IMAGES_SECTION_ID }
+			sections={ [ { name: IMAGES_SECTION_ID, order: 1 } ] }
 			pluginId={ PLUGIN_ID }
-			order={ 1 }
 		>
 			<ImagesGalleryField />
 		</WooProductFieldItem>

@@ -57,49 +57,44 @@ const Tabs = () => {
 		<>
 			<WooProductTabItem
 				id="tab/general"
-				template="tab/general"
+				templates={ [ { name: 'tab/general', order: 1 } ] }
 				pluginId="core"
-				order={ 1 }
 				tabProps={ tabPropData.general }
 			>
-				<WooProductSectionItem.Slot location={ TAB_GENERAL_ID } />
+				<WooProductSectionItem.Slot tab={ TAB_GENERAL_ID } />
 			</WooProductTabItem>
 			<WooProductTabItem
 				id="tab/pricing"
-				template="tab/general"
+				templates={ [ { name: 'tab/general', order: 3 } ] }
 				pluginId="core"
-				order={ 3 }
 				tabProps={ tabPropData.pricing }
 			>
-				<WooProductSectionItem.Slot location={ TAB_PRICING_ID } />
+				<WooProductSectionItem.Slot tab={ TAB_PRICING_ID } />
 			</WooProductTabItem>
 			<WooProductTabItem
 				id="tab/inventory"
-				template="tab/general"
+				templates={ [ { name: 'tab/general', order: 5 } ] }
 				pluginId="core"
-				order={ 5 }
 				tabProps={ tabPropData.inventory }
 			>
-				<WooProductSectionItem.Slot location={ TAB_INVENTORY_ID } />
+				<WooProductSectionItem.Slot tab={ TAB_INVENTORY_ID } />
 			</WooProductTabItem>
 			<WooProductTabItem
 				id="tab/shipping"
-				template="tab/general"
+				templates={ [ { name: 'tab/general', order: 7 } ] }
 				pluginId="core"
-				order={ 7 }
 				tabProps={ tabPropData.shipping }
 			>
 				<WooProductSectionItem.Slot
-					location={ TAB_SHIPPING_ID }
+					tab={ TAB_SHIPPING_ID }
 					fillProps={ { product } }
 				/>
 			</WooProductTabItem>
 			{ window.wcAdminFeatures[ 'product-variation-management' ] ? (
 				<WooProductTabItem
 					id="tab/options"
-					template="tab/general"
+					templates={ [ { name: 'tab/general', order: 9 } ] }
 					pluginId="core"
-					order={ 9 }
 					tabProps={ tabPropData.options }
 				>
 					<>

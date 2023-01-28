@@ -43,41 +43,37 @@ const Tabs = () => {
 		<>
 			<WooProductTabItem
 				id="tab/general/variation"
-				template="tab/variation"
+				templates={ [ { name: 'tab/variation', order: 1 } ] }
 				pluginId="core"
-				order={ 1 }
 				tabProps={ tabPropData.general }
 			>
 				<ProductVariationDetailsSection />
 			</WooProductTabItem>
 			<WooProductTabItem
 				id="tab/pricing"
-				template="tab/variation"
+				templates={ [ { name: 'tab/variation', order: 3 } ] }
 				pluginId="core"
-				order={ 3 }
 				tabProps={ tabPropData.pricing }
 			>
-				<WooProductSectionItem.Slot location={ TAB_PRICING_ID } />
+				<WooProductSectionItem.Slot tab={ TAB_PRICING_ID } />
 			</WooProductTabItem>
 			<WooProductTabItem
 				id="tab/inventory"
-				template="tab/variation"
+				templates={ [ { name: 'tab/variation', order: 5 } ] }
 				pluginId="core"
-				order={ 5 }
 				tabProps={ tabPropData.inventory }
 			>
-				<WooProductSectionItem.Slot location={ TAB_INVENTORY_ID } />
+				<WooProductSectionItem.Slot tab={ TAB_INVENTORY_ID } />
 			</WooProductTabItem>
 			<WooProductTabItem
 				id="tab/shipping"
-				template="tab/variation"
+				templates={ [ { name: 'tab/variation', order: 7 } ] }
 				pluginId="core"
-				order={ 7 }
 				tabProps={ tabPropData.shipping }
 			>
 				{ ( { product }: { product: PartialProduct } ) => (
 					<WooProductSectionItem.Slot
-						location={ TAB_SHIPPING_ID }
+						tab={ TAB_SHIPPING_ID }
 						fillProps={ { product } }
 					/>
 				) }

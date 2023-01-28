@@ -23,10 +23,16 @@ export type ProductFormSection = BaseComponent & {
 
 export type Subsection = BaseComponent;
 
+export type Tabs = BaseComponent & {
+	name: string;
+	title: string;
+};
+
 export type ProductForm = {
 	fields: ProductFormField[];
 	sections: ProductFormSection[];
 	subsections: Subsection[];
+	tabs: Tabs[];
 };
 
 export type ProductFormState = ProductForm & {

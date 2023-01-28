@@ -9,21 +9,6 @@ namespace Automattic\WooCommerce\Internal\Admin\ProductForm;
  * Section class.
  */
 class Section extends Component {
-	/**
-	 * Section title.
-	 *
-	 * @var string
-	 */
-	protected $title;
-
-	/**
-	 * Array of required arguments.
-	 *
-	 * @var array
-	 */
-	const REQUIRED_ARGUMENTS = array(
-		'title',
-	);
 
 	/**
 	 * Constructor
@@ -40,8 +25,10 @@ class Section extends Component {
 	 */
 	public function __construct( $id, $plugin_id, $additional_args ) {
 		parent::__construct( $id, $plugin_id, $additional_args );
-
-		$missing_arguments = self::get_missing_arguments( $additional_args );
+		$this->required_arguments = array(
+			'title',
+		);
+		$missing_arguments        = self::get_missing_arguments( $additional_args );
 		if ( count( $missing_arguments ) > 0 ) {
 			throw new \Exception(
 				sprintf(
@@ -51,21 +38,5 @@ class Section extends Component {
 				)
 			);
 		}
-		$this->title = $additional_args['title'];
-	}
-
-	/**
-	 * Get missing arguments of args array.
-	 *
-	 * @param array $args section arguments.
-	 * @return array
-	 */
-	public static function get_missing_arguments( $args ) {
-		return array_filter(
-			self::REQUIRED_ARGUMENTS,
-			function( $arg_key ) use ( $args ) {
-				return null === self::get_argument_from_path( $args, $arg_key );
-			}
-		);
 	}
 }

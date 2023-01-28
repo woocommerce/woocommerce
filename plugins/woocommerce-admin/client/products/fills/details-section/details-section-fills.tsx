@@ -28,9 +28,8 @@ const DetailsSection = () => (
 	<>
 		<WooProductSectionItem
 			id={ DETAILS_SECTION_ID }
-			location={ TAB_GENERAL_ID }
+			tabs={ [ { name: TAB_GENERAL_ID, order: 1 } ] }
 			pluginId={ PLUGIN_ID }
-			order={ 1 }
 		>
 			<ProductFieldSection
 				id={ DETAILS_SECTION_ID }
@@ -43,41 +42,36 @@ const DetailsSection = () => (
 		</WooProductSectionItem>
 		<WooProductFieldItem
 			id="details/name"
-			section={ DETAILS_SECTION_ID }
+			sections={ [ { name: DETAILS_SECTION_ID, order: 1 } ] }
 			pluginId={ PLUGIN_ID }
-			order={ 1 }
 		>
 			<DetailsNameField />
 		</WooProductFieldItem>
 		<WooProductFieldItem
 			id="details/categories"
-			section={ DETAILS_SECTION_ID }
+			sections={ [ { name: DETAILS_SECTION_ID, order: 3 } ] }
 			pluginId={ PLUGIN_ID }
-			order={ 3 }
 		>
 			<DetailsCategoriesField />
 		</WooProductFieldItem>
 		<WooProductFieldItem
 			id="details/feature"
-			section={ DETAILS_SECTION_ID }
+			sections={ [ { name: DETAILS_SECTION_ID, order: 5 } ] }
 			pluginId={ PLUGIN_ID }
-			order={ 5 }
 		>
 			<DetailsFeatureField />
 		</WooProductFieldItem>
 		<WooProductFieldItem
 			id="details/summary"
-			section={ DETAILS_SECTION_ID }
+			sections={ [ { name: DETAILS_SECTION_ID, order: 7 } ] }
 			pluginId={ PLUGIN_ID }
-			order={ 7 }
 		>
 			<DetailsSummaryField />
 		</WooProductFieldItem>
 		<WooProductFieldItem
 			id="details/description"
-			section={ DETAILS_SECTION_ID }
+			sections={ [ { name: DETAILS_SECTION_ID, order: 9 } ] }
 			pluginId={ PLUGIN_ID }
-			order={ 9 }
 		>
 			<DetailsDescriptionField />
 		</WooProductFieldItem>
