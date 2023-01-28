@@ -7,6 +7,7 @@ const DEFAULT_STATE = {
 	queue: [],
 	cesModalData: undefined,
 	showCESModal: false,
+	showProductMVPFeedbackModal: false,
 };
 
 const reducer = ( state = DEFAULT_STATE, action ) => {
@@ -61,6 +62,16 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			return {
 				...state,
 				queue: [ ...state.queue, newTrack ],
+			};
+		case TYPES.SHOW_PRODUCT_MVP_FEEDBACK_MODAL:
+			return {
+				...state,
+				showProductMVPFeedbackModal: true,
+			};
+		case TYPES.HIDE_PRODUCT_MVP_FEEDBACK_MODAL:
+			return {
+				...state,
+				showProductMVPFeedbackModal: false,
 			};
 
 		default:

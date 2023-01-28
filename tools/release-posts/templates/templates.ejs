@@ -10,6 +10,9 @@
         <th>
           <strong>Template</strong>
         </th>
+        <th>
+          <strong>GitHub Link</strong>
+        </th>
       </thead>
       <tbody>
 
@@ -17,6 +20,11 @@
         <% changes.templates.forEach((change) => { %>
           <tr>
             <td><%= change.filePath %></td>
+            <td>
+              <% change.pullRequests.forEach( ( pullRequest ) => { %>
+                <a href="https://github.com/woocommerce/woocommerce/pull/<%= pullRequest %>">#<%= pullRequest %></a>
+              <% }) %>
+            </td>
           </tr>
         <% }) %>
       </tbody>

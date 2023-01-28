@@ -3,10 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 import { DropdownMenu, MenuItem } from '@wordpress/components';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { getAdminLink } from '@woocommerce/settings';
 import { moreVertical } from '@wordpress/icons';
-import { Product } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME, Product } from '@woocommerce/data';
 import { useFormContext } from '@woocommerce/components';
 
 /**
@@ -16,15 +16,40 @@ import { ClassicEditorIcon } from './images/classic-editor-icon';
 import { FeedbackIcon } from './images/feedback-icon';
 import { WooHeaderItem } from '~/header/utils';
 import { STORE_KEY as CES_STORE_KEY } from '~/customer-effort-score-tracks/data/constants';
+import { NEW_PRODUCT_MANAGEMENT } from '~/customer-effort-score-tracks/product-mvp-ces-footer';
+import { ALLOW_TRACKING_OPTION_NAME } from '~/customer-effort-score-tracks/constants';
 import './product-more-menu.scss';
 
 export const ProductMoreMenu = () => {
 	const { values } = useFormContext< Product >();
-	const { showCesModal } = useDispatch( CES_STORE_KEY );
+	const { showCesModal, showProductMVPFeedbackModal } =
+		useDispatch( CES_STORE_KEY );
+	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+
+	const { allowTracking, resolving: isLoading } = useSelect( ( select ) => {
+		const { getOption, hasFinishedResolution } =
+			select( OPTIONS_STORE_NAME );
+
+		const allowTrackingOption =
+			getOption( ALLOW_TRACKING_OPTION_NAME ) || 'no';
+
+		const resolving = ! hasFinishedResolution( 'getOption', [
+			ALLOW_TRACKING_OPTION_NAME,
+		] );
+
+		return {
+			allowTracking: allowTrackingOption === 'yes',
+			resolving,
+		};
+	} );
 
 	const classEditorUrl = values.id
 		? getAdminLink( `post.php?post=${ values.id }&action=edit` )
 		: getAdminLink( 'post-new.php?post_type=product' );
+
+	if ( isLoading ) {
+		return null;
+	}
 
 	return (
 		<WooHeaderItem>
@@ -54,7 +79,7 @@ export const ProductMoreMenu = () => {
 											'woocommerce'
 										),
 									},
-									{},
+									{ shouldShowComments: () => true },
 									{
 										type: 'snackbar',
 										icon: <span>🌟</span>,
@@ -69,11 +94,17 @@ export const ProductMoreMenu = () => {
 						</MenuItem>
 						<MenuItem
 							onClick={ () => {
-								onClose();
+								if ( allowTracking ) {
+									updateOptions( {
+										[ NEW_PRODUCT_MANAGEMENT ]: 'no',
+									} );
+									showProductMVPFeedbackModal();
+									onClose();
+								} else {
+									window.location.href = classEditorUrl;
+									onClose();
+								}
 							} }
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							// @ts-ignore The href prop exists as buttonProps.
-							href={ classEditorUrl }
 							icon={ <ClassicEditorIcon /> }
 							iconPosition="right"
 						>

@@ -118,12 +118,19 @@ class ProductForm extends \WC_REST_Data_Controller {
 			},
 			FormFactory::get_sections()
 		);
+		$tabs        = array_map(
+			function( $tab ) {
+				return $tab->get_json();
+			},
+			FormFactory::get_tabs()
+		);
 
 		return rest_ensure_response(
 			array(
 				'fields'      => $fields,
 				'subsections' => $subsections,
 				'sections'    => $sections,
+				'tabs'        => $tabs,
 			)
 		);
 	}

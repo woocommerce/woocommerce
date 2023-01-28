@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	Form,
-	FormRef,
-	__experimentalWooProductSectionItem as WooProductSectionItem,
-	SlotContextProvider,
-} from '@woocommerce/components';
+import { Form, FormRef, SlotContextProvider } from '@woocommerce/components';
 import { PartialProduct, Product } from '@woocommerce/data';
 import { PluginArea } from '@wordpress/plugins';
 import { Ref } from 'react';
@@ -16,16 +11,8 @@ import { Ref } from 'react';
  */
 import { ProductFormHeader } from './layout/product-form-header';
 import { ProductFormLayout } from './layout/product-form-layout';
-import { ProductInventorySection } from './sections/product-inventory-section';
-import { PricingSection } from './sections/pricing-section';
-import { ProductShippingSection } from './sections/product-shipping-section';
-import { ProductVariationsSection } from './sections/product-variations-section';
 import { validate } from './product-validation';
-import { AttributesSection } from './sections/attributes-section';
-import { OptionsSection } from './sections/options-section';
 import { ProductFormFooter } from './layout/product-form-footer';
-import { ProductFormTab } from './product-form-tab';
-import { TAB_GENERAL_ID } from './fills/constants';
 
 export const ProductForm: React.FC< {
 	product?: PartialProduct;
@@ -36,8 +23,9 @@ export const ProductForm: React.FC< {
 			<Form< Partial< Product > >
 				initialValues={
 					product || {
-						reviews_allowed: true,
+						backorders: 'no',
 						name: '',
+						reviews_allowed: true,
 						sku: '',
 						stock_quantity: 0,
 						stock_status: 'instock',
@@ -48,45 +36,7 @@ export const ProductForm: React.FC< {
 				validate={ validate }
 			>
 				<ProductFormHeader />
-				<ProductFormLayout>
-					<ProductFormTab name="general" title="General">
-						<WooProductSectionItem.Slot
-							location={ TAB_GENERAL_ID }
-						/>
-						<AttributesSection />
-					</ProductFormTab>
-					<ProductFormTab
-						name="pricing"
-						title="Pricing"
-						disabled={ !! product?.variations?.length }
-					>
-						<PricingSection />
-					</ProductFormTab>
-					<ProductFormTab
-						name="inventory"
-						title="Inventory"
-						disabled={ !! product?.variations?.length }
-					>
-						<ProductInventorySection />
-					</ProductFormTab>
-					<ProductFormTab
-						name="shipping"
-						title="Shipping"
-						disabled={ !! product?.variations?.length }
-					>
-						<ProductShippingSection product={ product } />
-					</ProductFormTab>
-					{ window.wcAdminFeatures[
-						'product-variation-management'
-					] ? (
-						<ProductFormTab name="options" title="Options">
-							<OptionsSection />
-							<ProductVariationsSection />
-						</ProductFormTab>
-					) : (
-						<></>
-					) }
-				</ProductFormLayout>
+				<ProductFormLayout id="general" product={ product } />
 				<ProductFormFooter />
 				{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
 				<PluginArea scope="woocommerce-product-editor" />

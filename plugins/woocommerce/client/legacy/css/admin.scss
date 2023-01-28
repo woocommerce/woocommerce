@@ -4375,11 +4375,6 @@ img.help_tip {
 			top: 20px;
 		}
 
-		td.help-tooltip {
-			white-space: nowrap;
-			width: 8px;
-		}
-
 		.select2-container {
 			vertical-align: top;
 			margin-bottom: 3px;
@@ -4412,6 +4407,17 @@ img.help_tip {
 
 			&:first-child {
 				margin-top: 0;
+			}
+		}
+
+		td.with-tooltip {
+			> fieldset {
+				margin-top: 0;
+			}
+			span.help-tooltip {
+				position: absolute;
+				margin-left: -30px;
+				margin-top: 7px;
 			}
 		}
 
