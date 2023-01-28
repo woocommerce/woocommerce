@@ -23,9 +23,8 @@ const AttributesSection = () => (
 	<>
 		<WooProductSectionItem
 			id={ ATTRIBUTES_SECTION_ID }
-			location={ TAB_GENERAL_ID }
+			tabs={ [ { name: TAB_GENERAL_ID, order: 5 } ] }
 			pluginId={ PLUGIN_ID }
-			order={ 5 }
 		>
 			<ProductSectionLayout
 				title={ __( 'Attributes', 'woocommerce' ) }
@@ -62,9 +61,8 @@ const AttributesSection = () => (
 		</WooProductSectionItem>
 		<WooProductFieldItem
 			id="attributes/add"
-			section={ ATTRIBUTES_SECTION_ID }
+			sections={ [ { name: ATTRIBUTES_SECTION_ID, order: 1 } ] }
 			pluginId={ PLUGIN_ID }
-			order={ 1 }
 		>
 			<AttributesField />
 		</WooProductFieldItem>

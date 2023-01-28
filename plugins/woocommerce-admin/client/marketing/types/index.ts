@@ -1,1 +1,2 @@
-export { Plugin } from './Plugin';
+export { InstalledPlugin } from './InstalledPlugin';
+export { RecommendedPlugin } from './RecommendedPlugin';

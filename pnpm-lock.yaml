@@ -225,6 +225,7 @@ importers:
       '@woocommerce/navigation': workspace:*
       '@wordpress/a11y': wp-5.9
       '@wordpress/api-fetch': wp-5.9
+      '@wordpress/base-styles': wp-5.9
       '@wordpress/block-editor': wp-5.9
       '@wordpress/block-library': wp-5.9
       '@wordpress/blocks': wp-5.9
@@ -298,6 +299,7 @@ importers:
       '@woocommerce/navigation': link:../navigation
       '@wordpress/a11y': 3.2.4
       '@wordpress/api-fetch': 5.2.7
+      '@wordpress/base-styles': 4.0.4
       '@wordpress/block-editor': 8.0.18_tufdcic6wklrwyy3rhbsbktylu
       '@wordpress/block-library': 6.0.29_tufdcic6wklrwyy3rhbsbktylu
       '@wordpress/blocks': 11.1.5_react@17.0.2
@@ -2363,7 +2365,7 @@ packages:
       '@automattic/viewport': 1.1.0
       '@automattic/viewport-react': 1.0.0_react@17.0.2
       '@popperjs/core': 2.11.4
-      '@wordpress/base-styles': 4.5.0
+      '@wordpress/base-styles': 4.8.0
       '@wordpress/components': 19.12.0_tufdcic6wklrwyy3rhbsbktylu
       '@wordpress/data': 6.1.5_react@17.0.2+redux@4.2.0
       '@wordpress/dom': 3.19.0
@@ -3840,7 +3842,7 @@ packages:
       '@babel/core': 7.17.8
       '@babel/helper-annotate-as-pure': 7.16.7
       '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.17.8
-      '@babel/helper-plugin-utils': 7.18.9
+      '@babel/helper-plugin-utils': 7.19.0
       '@babel/plugin-syntax-private-property-in-object': 7.14.5_@babel+core@7.17.8
     transitivePeerDependencies:
       - supports-color
@@ -13764,8 +13766,8 @@ packages:
       webpack: 4.x.x || 5.x.x
       webpack-cli: 4.x.x
     dependencies:
-      webpack: 5.70.0_webpack-cli@4.9.2
-      webpack-cli: 4.9.2_wbg6qaiqcwsayvtung7xs6mhka
+      webpack: 5.70.0_bgqcrdgdviybk52kjcpjat65sa
+      webpack-cli: 4.9.2_webpack@5.70.0
     dev: true
 
   /@webpack-cli/info/1.4.1_webpack-cli@4.9.2:
@@ -13774,7 +13776,7 @@ packages:
       webpack-cli: 4.x.x
     dependencies:
       envinfo: 7.8.1
-      webpack-cli: 4.9.2_wbg6qaiqcwsayvtung7xs6mhka
+      webpack-cli: 4.9.2_webpack@5.70.0
     dev: true
 
   /@webpack-cli/serve/1.6.1_webpack-cli@4.9.2:
@@ -13786,7 +13788,7 @@ packages:
       webpack-dev-server:
         optional: true
     dependencies:
-      webpack-cli: 4.9.2_wbg6qaiqcwsayvtung7xs6mhka
+      webpack-cli: 4.9.2_webpack@5.70.0
     dev: true
 
   /@wojtekmaj/enzyme-adapter-react-17/0.6.6_7ltvq4e2railvf5uya4ffxpe2a:
@@ -13964,10 +13966,6 @@ packages:
 
   /@wordpress/base-styles/4.0.4:
     resolution: {integrity: sha512-qXiIhWLdTHWxBWawcqigJUUMeb2jkn9ElUEUC/Cn3DK2i62jiUWXOLp6tFIaf5eQMNXsYqtp5r7n2F/OllngQA==}
-    dev: false
-
-  /@wordpress/base-styles/4.5.0:
-    resolution: {integrity: sha512-iz2bDZSDWEgBNOXx3072avn/+zsI+9akhTF2DA/wDdRX0TpS4SSs/vrfhvWfruq5PPLRjJ7ogLKHMnN9VvB9yg==}
     dev: false
 
   /@wordpress/base-styles/4.8.0:
@@ -14394,6 +14392,7 @@ packages:
       '@wordpress/deprecated': 3.19.0
       '@wordpress/dom': 3.19.0
       '@wordpress/element': 4.20.0
+      '@wordpress/escape-html': 2.22.0
       '@wordpress/hooks': 3.19.0
       '@wordpress/i18n': 4.19.0
       '@wordpress/icons': 6.1.1
@@ -15705,7 +15704,7 @@ packages:
       url-loader: 4.1.1_webpack@5.70.0
       webpack: 5.70.0_bgqcrdgdviybk52kjcpjat65sa
       webpack-bundle-analyzer: 4.6.1
-      webpack-cli: 4.9.2_webpack@5.70.0
+      webpack-cli: 4.9.2_l6uyfs2pwihmnqphljbiozjymm
       webpack-livereload-plugin: 3.0.2_webpack@5.70.0
     transitivePeerDependencies:
       - '@babel/core'
@@ -21075,11 +21074,11 @@ packages:
       eslint-import-resolver-node: 0.3.6
       eslint-module-utils: 2.7.3_lkzaig2qiyp6elizstfbgvzhie
       has: 1.0.3
-      is-core-module: 2.10.0
+      is-core-module: 2.8.0
       is-glob: 4.0.3
-      minimatch: 3.1.2
+      minimatch: 3.0.4
       object.values: 1.1.5
-      resolve: 1.22.1
+      resolve: 1.20.0
       tsconfig-paths: 3.14.0
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
@@ -21106,11 +21105,11 @@ packages:
       eslint-import-resolver-node: 0.3.6
       eslint-module-utils: 2.7.3_lkzaig2qiyp6elizstfbgvzhie
       has: 1.0.3
-      is-core-module: 2.10.0
+      is-core-module: 2.8.0
       is-glob: 4.0.3
-      minimatch: 3.1.2
+      minimatch: 3.0.4
       object.values: 1.1.5
-      resolve: 1.22.1
+      resolve: 1.20.0
       tsconfig-paths: 3.14.0
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
@@ -21168,11 +21167,11 @@ packages:
       eslint-import-resolver-node: 0.3.6
       eslint-module-utils: 2.7.3_fe5sytys3wxvt26vbywbqsq2bm
       has: 1.0.3
-      is-core-module: 2.10.0
+      is-core-module: 2.8.0
       is-glob: 4.0.3
-      minimatch: 3.1.2
+      minimatch: 3.0.4
       object.values: 1.1.5
-      resolve: 1.22.1
+      resolve: 1.20.0
       tsconfig-paths: 3.14.0
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
@@ -29134,7 +29133,6 @@ packages:
     resolution: {integrity: sha512-yJHVQEhyqPLUTgt9B83PXu6W3rx4MvvHvSUvToogpwoGDOUQ+yDrR0HRot+yOCdCO7u4hX3pWft6kWBBcqh0UA==}
     dependencies:
       brace-expansion: 1.1.11
-    dev: true
 
   /minimatch/3.1.2:
     resolution: {integrity: sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==}

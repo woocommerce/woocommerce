@@ -41,9 +41,8 @@ const InventorySection = () => {
 		<>
 			<WooProductSectionItem
 				id={ INVENTORY_SECTION_ID }
-				location={ TAB_INVENTORY_ID }
+				tabs={ [ { name: TAB_INVENTORY_ID, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
-				order={ 1 }
 			>
 				<ProductSectionLayout
 					title={ __( 'Inventory', 'woocommerce' ) }
@@ -92,17 +91,15 @@ const InventorySection = () => {
 			</WooProductSectionItem>
 			<WooProductFieldItem
 				id="inventory/sku"
-				section={ INVENTORY_SECTION_ID }
+				sections={ [ { name: INVENTORY_SECTION_ID, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
-				order={ 1 }
 			>
 				<InventorySkuField />
 			</WooProductFieldItem>
 			<WooProductFieldItem
 				id="inventory/track-quantity"
-				section={ INVENTORY_SECTION_ID }
+				sections={ [ { name: INVENTORY_SECTION_ID, order: 3 } ] }
 				pluginId={ PLUGIN_ID }
-				order={ 3 }
 			>
 				<InventoryTrackQuantityField />
 			</WooProductFieldItem>
@@ -110,18 +107,16 @@ const InventorySection = () => {
 			{ values.manage_stock ? (
 				<WooProductFieldItem
 					id="inventory/stock-manage"
-					section={ INVENTORY_SECTION_ID }
+					sections={ [ { name: INVENTORY_SECTION_ID, order: 5 } ] }
 					pluginId={ PLUGIN_ID }
-					order={ 5 }
 				>
 					<InventoryStockManageField />
 				</WooProductFieldItem>
 			) : (
 				<WooProductFieldItem
 					id="inventory/stock-manual"
-					section={ INVENTORY_SECTION_ID }
+					sections={ [ { name: INVENTORY_SECTION_ID, order: 5 } ] }
 					pluginId={ PLUGIN_ID }
-					order={ 5 }
 				>
 					<InventoryStockManualField />
 				</WooProductFieldItem>
@@ -130,9 +125,10 @@ const InventorySection = () => {
 			{ values.manage_stock && (
 				<WooProductFieldItem
 					id="inventory/advanced/stock-out"
-					section={ INVENTORY_SECTION_ADVANCED_ID }
+					sections={ [
+						{ name: INVENTORY_SECTION_ADVANCED_ID, order: 1 },
+					] }
 					pluginId={ PLUGIN_ID }
-					order={ 1 }
 				>
 					<InventoryStockOutField />
 				</WooProductFieldItem>
@@ -140,9 +136,10 @@ const InventorySection = () => {
 
 			<WooProductFieldItem
 				id="inventory/advanced/stock-limit"
-				section={ INVENTORY_SECTION_ADVANCED_ID }
+				sections={ [
+					{ name: INVENTORY_SECTION_ADVANCED_ID, order: 3 },
+				] }
 				pluginId={ PLUGIN_ID }
-				order={ 3 }
 			>
 				<InventoryStockLimitField />
 			</WooProductFieldItem>

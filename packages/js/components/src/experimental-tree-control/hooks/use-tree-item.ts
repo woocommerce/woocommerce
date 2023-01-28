@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -9,7 +10,6 @@ import { TreeItemProps } from '../types';
 
 export function useTreeItem( { item, level, ...props }: TreeItemProps ) {
 	const nextLevel = level + 1;
-	const nextHeadingPaddingLeft = ( level - 1 ) * 28 + 12;
 
 	return {
 		item,
@@ -19,8 +19,8 @@ export function useTreeItem( { item, level, ...props }: TreeItemProps ) {
 		},
 		headingProps: {
 			style: {
-				paddingLeft: nextHeadingPaddingLeft,
-			},
+				'--level': level,
+			} as React.CSSProperties,
 		},
 		treeProps: {
 			items: item.children,

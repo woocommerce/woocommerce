@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { useEffect } from 'react';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
@@ -29,18 +30,19 @@ function CustomerEffortScoreTracksContainer( {
 	resolving,
 	clearQueue,
 } ) {
-	if ( resolving ) {
-		return null;
-	}
-
 	const queueForPage = queue.filter(
 		( item ) =>
 			item.pagenow === window.pagenow &&
 			item.adminpage === window.adminpage
 	);
+	useEffect( () => {
+		if ( queueForPage.length ) {
+			clearQueue();
+		}
+	}, [ queueForPage ] );
 
-	if ( queueForPage.length ) {
-		clearQueue();
+	if ( resolving ) {
+		return null;
 	}
 
 	return (

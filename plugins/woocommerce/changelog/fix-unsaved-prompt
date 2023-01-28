@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix unsaved modal propmt to not be shown during form submission

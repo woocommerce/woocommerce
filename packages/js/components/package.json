@@ -44,6 +44,7 @@
 		"@woocommerce/navigation": "workspace:*",
 		"@wordpress/a11y": "wp-5.9",
 		"@wordpress/api-fetch": "wp-5.9",
+		"@wordpress/base-styles": "wp-5.9",
 		"@wordpress/block-editor": "wp-5.9",
 		"@wordpress/block-library": "wp-5.9",
 		"@wordpress/blocks": "wp-5.9",
@@ -164,5 +165,11 @@
 			"pnpm lint:fix",
 			"pnpm test-staged"
 		]
+	},
+	"pnpm": {
+		"overrides": {
+			"react": "^17.0.2",
+			"react-dom": "^17.0.2"
+		}
 	}
 }

@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Remove manage_stock 'parent' value before saving the variation

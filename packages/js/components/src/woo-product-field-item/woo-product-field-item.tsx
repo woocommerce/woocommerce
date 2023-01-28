@@ -1,21 +1,21 @@
 /**
  * External dependencies
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Slot, Fill } from '@wordpress/components';
-import { createElement, Children } from '@wordpress/element';
+import { createElement, Children, Fragment } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { createOrderedChildren, sortFillsByOrder } from '../utils';
 import { useSlotContext, SlotContextHelpersType } from '../slot-context';
+import { ProductFillLocationType } from '../woo-product-tab-item';
 
 type WooProductFieldItemProps = {
 	id: string;
-	section: string;
+	sections: ProductFillLocationType[];
 	pluginId: string;
-	order?: number;
 };
 
 type WooProductFieldSlotProps = {
@@ -24,28 +24,41 @@ type WooProductFieldSlotProps = {
 
 export const WooProductFieldItem: React.FC< WooProductFieldItemProps > & {
 	Slot: React.FC< Slot.Props & WooProductFieldSlotProps >;
-} = ( { children, order = 20, section, id } ) => {
+} = ( { children, sections, id } ) => {
 	const { registerFill, getFillHelpers } = useSlotContext();
 
-	registerFill( id );
+	useEffect( () => {
+		registerFill( id );
+	}, [] );
 
 	return (
-		<Fill name={ `woocommerce_product_field_${ section }` }>
-			{ ( fillProps: Fill.Props ) => {
-				return createOrderedChildren<
-					Fill.Props & SlotContextHelpersType,
-					{ _id: string }
-				>(
-					children,
-					order,
-					{
-						...fillProps,
-						...getFillHelpers(),
-					},
-					{ _id: id }
-				);
-			} }
-		</Fill>
+		<>
+			{ sections.map( ( { name: sectionName, order: sectionOrder } ) => (
+				<Fill
+					name={ `woocommerce_product_field_${ sectionName }` }
+					key={ sectionName }
+				>
+					{ ( fillProps: Fill.Props ) => {
+						return createOrderedChildren<
+							Fill.Props &
+								SlotContextHelpersType & {
+									sectionName: string;
+								},
+							{ _id: string }
+						>(
+							children,
+							sectionOrder || 20,
+							{
+								sectionName,
+								...fillProps,
+								...getFillHelpers(),
+							},
+							{ _id: id }
+						);
+					} }
+				</Fill>
+			) ) }
+		</>
 	);
 };
 
