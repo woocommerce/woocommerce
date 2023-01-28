@@ -15,7 +15,7 @@ function block(el, options={}) {
 
 	const $el = window.jQuery && window.jQuery(el);
 	$el && $el.data('blockUI.isBlocked', true);
-	el.dataset['blockUI.isBlocked'] = true;
+	el.dataset.isBlocked = true;
 
 	// layer1 is the iframe layer which is used to supress bleed through of underlying content
 	// it was only used for IE; now we keep layer1 as an empty div for backwards compatibility
@@ -57,7 +57,7 @@ function block(el, options={}) {
 			if (position === 'static') el.style.position = 'static';
 
 			$el && $el.data('blockUI.isBlocked', false);
-			el.dataset['blockUI.isBlocked'] = false;
+			el.dataset.isBlocked = false;
 
 			lyr2.removeEventListener('transitionend', transitionend);
 			lyr2.remove();
