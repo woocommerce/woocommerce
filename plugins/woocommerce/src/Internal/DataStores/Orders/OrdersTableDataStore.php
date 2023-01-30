@@ -1763,7 +1763,7 @@ FROM $order_meta_table
 
 			$this->upshift_child_orders( $order );
 			$this->delete_order_data_from_custom_order_tables( $order_id );
-			$this->delete_order_data_from_shared_tables( $order_id );
+			$this->delete_items( $order );
 
 			$order->set_id( 0 );
 
@@ -1985,28 +1985,6 @@ FROM $order_meta_table
 				array( '%d' )
 			);
 		}
-	}
-
-	/**
-	 * Deletes shared order data (created with and without custom order tables in use).
-	 *
-	 * @param int $order_id The order ID.
-	 * @return void
-	 */
-	private function delete_order_data_from_shared_tables( $order_id ) {
-		global $wpdb;
-
-		// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.MissingReplacements
-		$sql = $wpdb->prepare(
-			"DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN
-			(SELECT order_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d)",
-			$order_id
-		);
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$wpdb->query( $sql );
-
-		$wpdb->delete( "{$wpdb->prefix}woocommerce_order_items", array( 'order_id' => $order_id ) );
 	}
 
 	/**
