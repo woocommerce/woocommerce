@@ -2,8 +2,8 @@
  * External dependencies
  */
 import {
-	CartResponse,
 	Cart,
+	CartResponse,
 	ApiErrorResponse,
 	isApiErrorResponse,
 } from '@woocommerce/types';
@@ -13,7 +13,7 @@ import { camelCase, mapKeys } from 'lodash';
  * Internal dependencies
  */
 import { notifyQuantityChanges } from './notify-quantity-changes';
-import { notifyErrors, notifyCartErrors } from './notify-errors';
+import { notifyCartErrors } from './notify-errors';
 import { CartDispatchFromMap, CartSelectFromMap } from './index';
 
 /**
@@ -46,7 +46,7 @@ export const receiveCart =
 	};
 
 /**
- * A thunk used in updating the store with cart errors retrieved from a request. This also notifies the shopper of any errors that occur.
+ * A thunk used in updating the store with cart errors retrieved from a request.
  */
 export const receiveError =
 	( response: ApiErrorResponse | null = null ) =>
@@ -57,7 +57,7 @@ export const receiveError =
 			if ( response.data?.cart ) {
 				dispatch.receiveCart( response?.data?.cart );
 			}
-
-			notifyErrors( response );
 		}
 	};
+
+export type Thunks = typeof receiveCart | typeof receiveError;

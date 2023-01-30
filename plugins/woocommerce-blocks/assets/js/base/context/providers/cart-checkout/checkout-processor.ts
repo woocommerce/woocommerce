@@ -84,7 +84,8 @@ const CheckoutProcessor = () => {
 		select( CART_STORE_KEY ).getCustomerData()
 	);
 
-	const { cartNeedsPayment, cartNeedsShipping, receiveCart } = useStoreCart();
+	const { cartNeedsPayment, cartNeedsShipping, receiveCartContents } =
+		useStoreCart();
 
 	const {
 		activePaymentMethod,
@@ -275,7 +276,8 @@ const CheckoutProcessor = () => {
 						)
 						.then( ( response: CheckoutResponseError ) => {
 							if ( response.data?.cart ) {
-								receiveCart( response.data.cart );
+								// We don't want to receive the address here because it will overwrite fields.
+								receiveCartContents( response.data.cart );
 							}
 							processErrorResponse( response );
 							__internalProcessCheckoutResponse( response );
@@ -304,7 +306,7 @@ const CheckoutProcessor = () => {
 		shouldCreateAccount,
 		extensionData,
 		cartNeedsShipping,
-		receiveCart,
+		receiveCartContents,
 		__internalSetHasError,
 		__internalProcessCheckoutResponse,
 	] );

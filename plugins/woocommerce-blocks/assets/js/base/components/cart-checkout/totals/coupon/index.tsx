@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect, useRef } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import Button from '@woocommerce/base-components/button';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { withInstanceId } from '@wordpress/compose';
@@ -35,35 +35,29 @@ export interface TotalsCouponProps {
 	/**
 	 * Submit handler
 	 */
-	onSubmit?: ( couponValue: string ) => void;
+	onSubmit?: ( couponValue: string ) => Promise< boolean > | undefined;
 }
 
 export const TotalsCoupon = ( {
 	instanceId,
 	isLoading = false,
+	onSubmit,
 	displayCouponForm = false,
-	onSubmit = () => void 0,
 }: TotalsCouponProps ): JSX.Element => {
 	const [ couponValue, setCouponValue ] = useState( '' );
 	const [ isCouponFormHidden, setIsCouponFormHidden ] = useState(
 		! displayCouponForm
 	);
-	const currentIsLoading = useRef( false );
-
-	const validationErrorKey = 'coupon';
 	const textInputId = `wc-block-components-totals-coupon__input-${ instanceId }`;
-
 	const formWrapperClass = classnames(
 		'wc-block-components-totals-coupon__content',
 		{
 			'screen-reader-text': isCouponFormHidden,
 		}
 	);
-
-	const { validationError, validationErrorId } = useSelect( ( select ) => {
+	const { validationErrorId } = useSelect( ( select ) => {
 		const store = select( VALIDATION_STORE_KEY );
 		return {
-			validationError: store.getValidationError( validationErrorKey ),
 			validationErrorId: store.getValidationErrorId( textInputId ),
 		};
 	} );
@@ -77,18 +71,18 @@ export const TotalsCoupon = ( {
 		e: React.MouseEvent< HTMLButtonElement, MouseEvent >
 	) => {
 		e.preventDefault();
-		onSubmit( couponValue );
-	};
-
-	useEffect( () => {
-		if ( currentIsLoading.current !== isLoading ) {
-			if ( ! isLoading && couponValue && ! validationError ) {
-				setCouponValue( '' );
-				setIsCouponFormHidden( true );
-			}
-			currentIsLoading.current = isLoading;
+		if ( onSubmit !== undefined ) {
+			onSubmit( couponValue ).then( ( result ) => {
+				if ( result ) {
+					setCouponValue( '' );
+					setIsCouponFormHidden( true );
+				}
+			} );
+		} else {
+			setCouponValue( '' );
+			setIsCouponFormHidden( true );
 		}
-	}, [ isLoading, couponValue, validationError ] );
+	};
 
 	return (
 		<div className="wc-block-components-totals-coupon">
