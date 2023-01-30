@@ -21,8 +21,7 @@
     slider.vars = $.extend({}, $.flexslider.defaults, options);
 
     var namespace = slider.vars.namespace,
-        msGesture = window.navigator && window.navigator.msPointerEnabled && window.MSGesture,
-        touch = (( "ontouchstart" in window ) || msGesture || window.DocumentTouch && document instanceof DocumentTouch) && slider.vars.touch,
+        touch = (( "ontouchstart" in window ) || window.DocumentTouch && document instanceof DocumentTouch) && slider.vars.touch,
         // deprecating this idea, as devices are being released with both of these events
         eventType = "click touchend MSPointerUp keyup",
         watchedEvent = "",
@@ -162,7 +161,6 @@
           slider.animatingTo = Math.floor(slider.currentSlide/slider.move);
           slider.currentItem = slider.currentSlide;
           slider.slides.removeClass(namespace + "active-slide").eq(slider.currentItem).addClass(namespace + "active-slide");
-          if(!msGesture){
               slider.slides.on(eventType, function(e){
                 e.preventDefault();
                 var $slide = $(this),
@@ -182,29 +180,6 @@
                   slider.flexAnimate(target, slider.vars.pauseOnAction, false, true, true);
                 }
               });
-          }else{
-              el._slider = slider;
-              slider.slides.each(function (){
-                  var that = this;
-                  that._gesture = new MSGesture();
-                  that._gesture.target = that;
-                  that.addEventListener("MSPointerDown", function (e){
-                      e.preventDefault();
-                      if(e.currentTarget._gesture) {
-                        e.currentTarget._gesture.addPointer(e.pointerId);
-                      }
-                  }, false);
-                  that.addEventListener("MSGestureTap", function (e){
-                      e.preventDefault();
-                      var $slide = $(this),
-                          target = $slide.index();
-                      if (!$(slider.vars.asNavFor).data('flexslider').animating && !$slide.hasClass('active')) {
-                          slider.direction = (slider.currentItem < target) ? "next" : "prev";
-                          slider.flexAnimate(target, slider.vars.pauseOnAction, false, true, true);
-                      }
-                  });
-              });
-          }
         }
       },
       controlNav: {
@@ -439,7 +414,6 @@
           localY = 0,
           accDx = 0;
 
-        if(!msGesture){
             onTouchStart = function(e) {
               if (slider.animating) {
                 e.preventDefault();
@@ -510,92 +484,6 @@
             };
 
             el.addEventListener('touchstart', onTouchStart, false);
-        }else{
-            el.style.msTouchAction = "none";
-            el._gesture = new MSGesture();
-            el._gesture.target = el;
-            el.addEventListener("MSPointerDown", onMSPointerDown, false);
-            el._slider = slider;
-            el.addEventListener("MSGestureChange", onMSGestureChange, false);
-            el.addEventListener("MSGestureEnd", onMSGestureEnd, false);
-
-            function onMSPointerDown(e){
-                e.stopPropagation();
-                if (slider.animating) {
-                    e.preventDefault();
-                }else{
-                    slider.pause();
-                    el._gesture.addPointer(e.pointerId);
-                    accDx = 0;
-                    cwidth = (vertical) ? slider.h : slider. w;
-                    startT = Number(new Date());
-                    // CAROUSEL:
-
-                    offset = (carousel && reverse && slider.animatingTo === slider.last) ? 0 :
-                        (carousel && reverse) ? slider.limit - (((slider.itemW + slider.vars.itemMargin) * slider.move) * slider.animatingTo) :
-                            (carousel && slider.currentSlide === slider.last) ? slider.limit :
-                                (carousel) ? ((slider.itemW + slider.vars.itemMargin) * slider.move) * slider.currentSlide :
-                                    (reverse) ? (slider.last - slider.currentSlide + slider.cloneOffset) * cwidth : (slider.currentSlide + slider.cloneOffset) * cwidth;
-                }
-            }
-
-            function onMSGestureChange(e) {
-                e.stopPropagation();
-                var slider = e.target._slider;
-                if(!slider){
-                    return;
-                }
-                var transX = -e.translationX,
-                    transY = -e.translationY;
-
-                //Accumulate translations.
-                accDx = accDx + ((vertical) ? transY : transX);
-                dx = (slider.vars.rtl?-1:1)*accDx;
-                scrolling = (vertical) ? (Math.abs(accDx) < Math.abs(-transX)) : (Math.abs(accDx) < Math.abs(-transY));
-
-                if(e.detail === e.MSGESTURE_FLAG_INERTIA){
-                    setImmediate(function (){
-                        el._gesture.stop();
-                    });
-
-                    return;
-                }
-
-                if (!scrolling || Number(new Date()) - startT > 500) {
-                    e.preventDefault();
-                    if (!fade && slider.transitions) {
-                        if (!slider.vars.animationLoop) {
-                            dx = accDx / ((slider.currentSlide === 0 && accDx < 0 || slider.currentSlide === slider.last && accDx > 0) ? (Math.abs(accDx) / cwidth + 2) : 1);
-                        }
-                        slider.setProps(offset + dx, "setTouch");
-                    }
-                }
-            }
-
-            function onMSGestureEnd(e) {
-                e.stopPropagation();
-                var slider = e.target._slider;
-                if(!slider){
-                    return;
-                }
-                if (slider.animatingTo === slider.currentSlide && !scrolling && !(dx === null)) {
-                    var updateDx = (reverse) ? -dx : dx,
-                        target = (updateDx > 0) ? slider.getTarget('next') : slider.getTarget('prev');
-
-                    if (slider.canAdvance(target) && (Number(new Date()) - startT < 550 && Math.abs(updateDx) > 50 || Math.abs(updateDx) > cwidth/2)) {
-                        slider.flexAnimate(target, slider.vars.pauseOnAction);
-                    } else {
-                        if (!fade) { slider.flexAnimate(slider.currentSlide, slider.vars.pauseOnAction, true); }
-                    }
-                }
-
-                startX = null;
-                startY = null;
-                dx = null;
-                offset = null;
-                accDx = 0;
-            }
-        }
       },
       resize: function() {
         if (!slider.animating && slider.is(':visible')) {
