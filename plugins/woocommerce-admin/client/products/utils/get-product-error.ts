@@ -26,8 +26,18 @@ export const getProductError = (
 					{
 						label: __( 'Edit link', 'woocommerce' ),
 						onClick: () => {
-							// Navigate to general tab.
-							// Use context to open modal.
+							(
+								document.querySelector(
+									'#tab-panel-0-general'
+								) as HTMLElement
+							 )?.click();
+							setTimeout( () => {
+								(
+									document.querySelector(
+										'#wooocommerce-product-form__edit-product-link'
+									) as HTMLElement
+								 )?.click();
+							}, 0 );
 						},
 					},
 				],

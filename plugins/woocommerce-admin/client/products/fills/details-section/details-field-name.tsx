@@ -69,6 +69,7 @@ export const DetailsNameField = ( {} ) => {
 							{ permalinkSuffix }
 						</a>
 						<Button
+							id="wooocommerce-product-form__edit-product-link"
 							variant="link"
 							onClick={ () =>
 								setShowProductLinkEditModal( true )
