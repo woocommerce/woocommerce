@@ -43,7 +43,7 @@ type AttributeControlProps = {
 	onEditModalCancel?: ( attribute?: ProductAttribute ) => void;
 	onEditModalClose?: ( attribute?: ProductAttribute ) => void;
 	onEditModalOpen?: ( attribute?: ProductAttribute ) => void;
-	text?: {
+	uiStrings?: {
 		emptyStateSubtitle?: string;
 		newAttributeListItemLabel?: string;
 		newAttributeModalTitle?: string;
@@ -64,7 +64,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	onEditModalOpen = () => {},
 	onRemove = () => {},
 	onRemoveCancel = () => {},
-	text = {
+	uiStrings = {
 		newAttributeModalTitle: undefined,
 		emptyStateSubtitle: undefined,
 		newAttributeListItemLabel: undefined,
@@ -164,9 +164,9 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		return (
 			<>
 				<AttributeEmptyState
-					addNewLabel={ text.newAttributeModalTitle }
+					addNewLabel={ uiStrings.newAttributeModalTitle }
 					onNewClick={ () => openNewModal() }
-					subtitle={ text.emptyStateSubtitle }
+					subtitle={ uiStrings.emptyStateSubtitle }
 				/>
 				{ isNewModalVisible && (
 					<NewAttributeModal
@@ -176,7 +176,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						} }
 						onAdd={ handleAdd }
 						selectedAttributeIds={ [] }
-						title={ text.newAttributeModalTitle }
+						title={ uiStrings.newAttributeModalTitle }
 					/>
 				) }
 				<SelectControlMenuSlot />
@@ -231,12 +231,12 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 				) ) }
 			</Sortable>
 			<NewAttributeListItem
-				label={ text.newAttributeListItemLabel }
+				label={ uiStrings.newAttributeListItemLabel }
 				onClick={ () => openNewModal() }
 			/>
 			{ isNewModalVisible && (
 				<NewAttributeModal
-					title={ text.newAttributeModalTitle }
+					title={ uiStrings.newAttributeModalTitle }
 					onCancel={ () => {
 						closeNewModal();
 						onNewModalCancel();
@@ -254,7 +254,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						currentAttribute.name
 					) }
 					globalAttributeHelperMessage={ interpolateComponents( {
-						mixedString: text.globalAttributeHelperMessage,
+						mixedString: uiStrings.globalAttributeHelperMessage,
 						components: {
 							link: (
 								<Link

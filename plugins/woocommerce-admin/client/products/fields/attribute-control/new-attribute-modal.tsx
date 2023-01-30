@@ -83,7 +83,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	const scrollAttributeIntoView = ( index: number ) => {
 		setTimeout( () => {
 			const attributeRow = document.querySelector(
-				`.woocommerce-add-attribute-modal__table-row-${ index }`
+				`.woocommerce-new-attribute-modal__table-row-${ index }`
 			);
 			attributeRow?.scrollIntoView( { behavior: 'smooth' } );
 		}, 0 );

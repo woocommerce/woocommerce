@@ -57,7 +57,7 @@ export const Options: React.FC< OptionsProps > = ( {
 				}
 				recordEvent( 'product_add_option_button' );
 			} }
-			text={ {
+			uiStrings={ {
 				emptyStateSubtitle: __( 'No options yet', 'woocommerce' ),
 				newAttributeListItemLabel: __( 'Add option', 'woocommerce' ),
 				newAttributeModalTitle: __( 'Add options', 'woocommerce' ),
