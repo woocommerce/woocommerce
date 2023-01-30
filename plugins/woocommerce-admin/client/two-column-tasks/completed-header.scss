@@ -1,0 +1,27 @@
+$ces-feedback-height: 64px;
+
+.wooocommerce-task-card__header .wooocommerce-task-card__header-subtitle {
+	color: $gray-700;
+	margin-bottom: $gap-large;
+}
+
+.wooocommerce-task-card__finished-header-image {
+	max-width: 75%;
+}
+
+.customer-feedback-simple__container {
+	height: $ces-feedback-height;
+}
+
+.woocommerce-task-card__header-menu {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
+.wooocommerce-task-card__header-ces-feedback {
+	height: $ces-feedback-height;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}

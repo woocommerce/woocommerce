@@ -1,0 +1,4266 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SearchListControl should render a search box and list of hierarchical options 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <p
+      class="a11y-speak-intro-text"
+      hidden="hidden"
+      id="a11y-speak-intro-text"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    >
+      Notifications
+    </p>
+    <div
+      aria-atomic="true"
+      aria-live="assertive"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-assertive"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div
+      aria-atomic="true"
+      aria-live="polite"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-polite"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div>
+      <div
+        class="woocommerce-search-list"
+      >
+        <div
+          class="woocommerce-search-list__selected"
+        >
+          <div
+            class="woocommerce-search-list__selected-header"
+          >
+            <strong>
+              0 items selected
+            </strong>
+          </div>
+        </div>
+        <div
+          class="woocommerce-search-list__search"
+        >
+          <div
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+          >
+            <div
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+            >
+              <label
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                for="inspector-text-control-10"
+              >
+                Search for items
+              </label>
+              <input
+                class="components-text-control__input"
+                id="inspector-text-control-10"
+                type="search"
+                value=""
+              />
+            </div>
+          </div>
+        </div>
+        <ul
+          class="woocommerce-search-list__list"
+        >
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-1"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-1"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Apricots
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-1"
+              for="search-list-item-1-2"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-2"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-prefix"
+                >
+                  Apricots
+                </span>
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Clementine
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-1"
+              for="search-list-item-1-3"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-3"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-prefix"
+                >
+                  Apricots
+                </span>
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Elderberry
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-2"
+              for="search-list-item-1-4"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-4"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-prefix"
+                >
+                  Apricots › Elderberry
+                </span>
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Guava
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-5"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-5"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Lychee
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-6"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-6"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Mulberry
+                </span>
+              </span>
+            </label>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="woocommerce-search-list"
+    >
+      <div
+        class="woocommerce-search-list__selected"
+      >
+        <div
+          class="woocommerce-search-list__selected-header"
+        >
+          <strong>
+            0 items selected
+          </strong>
+        </div>
+      </div>
+      <div
+        class="woocommerce-search-list__search"
+      >
+        <div
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+        >
+          <div
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+          >
+            <label
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+              for="inspector-text-control-10"
+            >
+              Search for items
+            </label>
+            <input
+              class="components-text-control__input"
+              id="inspector-text-control-10"
+              type="search"
+              value=""
+            />
+          </div>
+        </div>
+      </div>
+      <ul
+        class="woocommerce-search-list__list"
+      >
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-1"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-1"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Apricots
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-1"
+            for="search-list-item-1-2"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-2"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-prefix"
+              >
+                Apricots
+              </span>
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Clementine
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-1"
+            for="search-list-item-1-3"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-3"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-prefix"
+              >
+                Apricots
+              </span>
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Elderberry
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-2"
+            for="search-list-item-1-4"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-4"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-prefix"
+              >
+                Apricots › Elderberry
+              </span>
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Guava
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-5"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-5"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Lychee
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-6"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-6"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Mulberry
+              </span>
+            </span>
+          </label>
+        </li>
+      </ul>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`SearchListControl should render a search box and list of options 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <p
+      class="a11y-speak-intro-text"
+      hidden="hidden"
+      id="a11y-speak-intro-text"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    >
+      Notifications
+    </p>
+    <div
+      aria-atomic="true"
+      aria-live="assertive"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-assertive"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div
+      aria-atomic="true"
+      aria-live="polite"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-polite"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div>
+      <div
+        class="woocommerce-search-list"
+      >
+        <div
+          class="woocommerce-search-list__selected"
+        >
+          <div
+            class="woocommerce-search-list__selected-header"
+          >
+            <strong>
+              0 items selected
+            </strong>
+          </div>
+        </div>
+        <div
+          class="woocommerce-search-list__search"
+        >
+          <div
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+          >
+            <div
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+            >
+              <label
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                for="inspector-text-control-0"
+              >
+                Search for items
+              </label>
+              <input
+                class="components-text-control__input"
+                id="inspector-text-control-0"
+                type="search"
+                value=""
+              />
+            </div>
+          </div>
+        </div>
+        <ul
+          class="woocommerce-search-list__list"
+        >
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-1"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-1"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Apricots
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-2"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-2"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Clementine
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-3"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-3"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Elderberry
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-4"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-4"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Guava
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-5"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-5"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Lychee
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-6"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-6"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Mulberry
+                </span>
+              </span>
+            </label>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="woocommerce-search-list"
+    >
+      <div
+        class="woocommerce-search-list__selected"
+      >
+        <div
+          class="woocommerce-search-list__selected-header"
+        >
+          <strong>
+            0 items selected
+          </strong>
+        </div>
+      </div>
+      <div
+        class="woocommerce-search-list__search"
+      >
+        <div
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+        >
+          <div
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+          >
+            <label
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+              for="inspector-text-control-0"
+            >
+              Search for items
+            </label>
+            <input
+              class="components-text-control__input"
+              id="inspector-text-control-0"
+              type="search"
+              value=""
+            />
+          </div>
+        </div>
+      </div>
+      <ul
+        class="woocommerce-search-list__list"
+      >
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-1"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-1"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Apricots
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-2"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-2"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Clementine
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-3"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-3"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Elderberry
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-4"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-4"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Guava
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-5"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-5"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Lychee
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-6"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-6"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Mulberry
+              </span>
+            </span>
+          </label>
+        </li>
+      </ul>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`SearchListControl should render a search box and list of options with a custom className 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <p
+      class="a11y-speak-intro-text"
+      hidden="hidden"
+      id="a11y-speak-intro-text"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    >
+      Notifications
+    </p>
+    <div
+      aria-atomic="true"
+      aria-live="assertive"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-assertive"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div
+      aria-atomic="true"
+      aria-live="polite"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-polite"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div>
+      <div
+        class="woocommerce-search-list test-search"
+      >
+        <div
+          class="woocommerce-search-list__selected"
+        >
+          <div
+            class="woocommerce-search-list__selected-header"
+          >
+            <strong>
+              0 items selected
+            </strong>
+          </div>
+        </div>
+        <div
+          class="woocommerce-search-list__search"
+        >
+          <div
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+          >
+            <div
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+            >
+              <label
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                for="inspector-text-control-1"
+              >
+                Search for items
+              </label>
+              <input
+                class="components-text-control__input"
+                id="inspector-text-control-1"
+                type="search"
+                value=""
+              />
+            </div>
+          </div>
+        </div>
+        <ul
+          class="woocommerce-search-list__list"
+        >
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-1"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-1"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Apricots
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-2"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-2"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Clementine
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-3"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-3"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Elderberry
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-4"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-4"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Guava
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-5"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-5"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Lychee
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-6"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-6"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Mulberry
+                </span>
+              </span>
+            </label>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="woocommerce-search-list test-search"
+    >
+      <div
+        class="woocommerce-search-list__selected"
+      >
+        <div
+          class="woocommerce-search-list__selected-header"
+        >
+          <strong>
+            0 items selected
+          </strong>
+        </div>
+      </div>
+      <div
+        class="woocommerce-search-list__search"
+      >
+        <div
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+        >
+          <div
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+          >
+            <label
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+              for="inspector-text-control-1"
+            >
+              Search for items
+            </label>
+            <input
+              class="components-text-control__input"
+              id="inspector-text-control-1"
+              type="search"
+              value=""
+            />
+          </div>
+        </div>
+      </div>
+      <ul
+        class="woocommerce-search-list__list"
+      >
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-1"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-1"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Apricots
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-2"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-2"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Clementine
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-3"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-3"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Elderberry
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-4"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-4"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Guava
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-5"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-5"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Lychee
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-6"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-6"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Mulberry
+              </span>
+            </span>
+          </label>
+        </li>
+      </ul>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`SearchListControl should render a search box and list of options, with a custom render callback for each item 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <p
+      class="a11y-speak-intro-text"
+      hidden="hidden"
+      id="a11y-speak-intro-text"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    >
+      Notifications
+    </p>
+    <div
+      aria-atomic="true"
+      aria-live="assertive"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-assertive"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div
+      aria-atomic="true"
+      aria-live="polite"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-polite"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div>
+      <div
+        class="woocommerce-search-list"
+      >
+        <div
+          class="woocommerce-search-list__selected"
+        >
+          <div
+            class="woocommerce-search-list__selected-header"
+          >
+            <strong>
+              0 items selected
+            </strong>
+          </div>
+        </div>
+        <div
+          class="woocommerce-search-list__search"
+        >
+          <div
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+          >
+            <div
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+            >
+              <label
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                for="inspector-text-control-9"
+              >
+                Search for items
+              </label>
+              <input
+                class="components-text-control__input"
+                id="inspector-text-control-9"
+                type="search"
+                value=""
+              />
+            </div>
+          </div>
+        </div>
+        <ul
+          class="woocommerce-search-list__list"
+        >
+          <li>
+            <div>
+              Apricots
+              !
+            </div>
+          </li>
+          <li>
+            <div>
+              Clementine
+              !
+            </div>
+          </li>
+          <li>
+            <div>
+              Elderberry
+              !
+            </div>
+          </li>
+          <li>
+            <div>
+              Guava
+              !
+            </div>
+          </li>
+          <li>
+            <div>
+              Lychee
+              !
+            </div>
+          </li>
+          <li>
+            <div>
+              Mulberry
+              !
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="woocommerce-search-list"
+    >
+      <div
+        class="woocommerce-search-list__selected"
+      >
+        <div
+          class="woocommerce-search-list__selected-header"
+        >
+          <strong>
+            0 items selected
+          </strong>
+        </div>
+      </div>
+      <div
+        class="woocommerce-search-list__search"
+      >
+        <div
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+        >
+          <div
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+          >
+            <label
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+              for="inspector-text-control-9"
+            >
+              Search for items
+            </label>
+            <input
+              class="components-text-control__input"
+              id="inspector-text-control-9"
+              type="search"
+              value=""
+            />
+          </div>
+        </div>
+      </div>
+      <ul
+        class="woocommerce-search-list__list"
+      >
+        <li>
+          <div>
+            Apricots
+            !
+          </div>
+        </li>
+        <li>
+          <div>
+            Clementine
+            !
+          </div>
+        </li>
+        <li>
+          <div>
+            Elderberry
+            !
+          </div>
+        </li>
+        <li>
+          <div>
+            Guava
+            !
+          </div>
+        </li>
+        <li>
+          <div>
+            Lychee
+            !
+          </div>
+        </li>
+        <li>
+          <div>
+            Mulberry
+            !
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`SearchListControl should render a search box and list of options, with a custom search input message 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <p
+      class="a11y-speak-intro-text"
+      hidden="hidden"
+      id="a11y-speak-intro-text"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    >
+      Notifications
+    </p>
+    <div
+      aria-atomic="true"
+      aria-live="assertive"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-assertive"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div
+      aria-atomic="true"
+      aria-live="polite"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-polite"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div>
+      <div
+        class="woocommerce-search-list"
+      >
+        <div
+          class="woocommerce-search-list__selected"
+        >
+          <div
+            class="woocommerce-search-list__selected-header"
+          >
+            <strong>
+              0 items selected
+            </strong>
+          </div>
+        </div>
+        <div
+          class="woocommerce-search-list__search"
+        >
+          <div
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+          >
+            <div
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+            >
+              <label
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                for="inspector-text-control-8"
+              >
+                Testing search label
+              </label>
+              <input
+                class="components-text-control__input"
+                id="inspector-text-control-8"
+                type="search"
+                value=""
+              />
+            </div>
+          </div>
+        </div>
+        <ul
+          class="woocommerce-search-list__list"
+        >
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-1"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-1"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Apricots
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-2"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-2"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Clementine
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-3"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-3"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Elderberry
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-4"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-4"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Guava
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-5"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-5"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Lychee
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-6"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-6"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Mulberry
+                </span>
+              </span>
+            </label>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="woocommerce-search-list"
+    >
+      <div
+        class="woocommerce-search-list__selected"
+      >
+        <div
+          class="woocommerce-search-list__selected-header"
+        >
+          <strong>
+            0 items selected
+          </strong>
+        </div>
+      </div>
+      <div
+        class="woocommerce-search-list__search"
+      >
+        <div
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+        >
+          <div
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+          >
+            <label
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+              for="inspector-text-control-8"
+            >
+              Testing search label
+            </label>
+            <input
+              class="components-text-control__input"
+              id="inspector-text-control-8"
+              type="search"
+              value=""
+            />
+          </div>
+        </div>
+      </div>
+      <ul
+        class="woocommerce-search-list__list"
+      >
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-1"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-1"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Apricots
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-2"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-2"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Clementine
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-3"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-3"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Elderberry
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-4"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-4"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Guava
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-5"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-5"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Lychee
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-6"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-6"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Mulberry
+              </span>
+            </span>
+          </label>
+        </li>
+      </ul>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`SearchListControl should render a search box and no options 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <p
+      class="a11y-speak-intro-text"
+      hidden="hidden"
+      id="a11y-speak-intro-text"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    >
+      Notifications
+    </p>
+    <div
+      aria-atomic="true"
+      aria-live="assertive"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-assertive"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div
+      aria-atomic="true"
+      aria-live="polite"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-polite"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div>
+      <div
+        class="woocommerce-search-list"
+      >
+        <div
+          class="woocommerce-search-list__selected"
+        >
+          <div
+            class="woocommerce-search-list__selected-header"
+          >
+            <strong>
+              0 items selected
+            </strong>
+          </div>
+        </div>
+        <div
+          class="woocommerce-search-list__search"
+        >
+          <div
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+          >
+            <div
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+            >
+              <label
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                for="inspector-text-control-4"
+              >
+                Search for items
+              </label>
+              <input
+                class="components-text-control__input"
+                id="inspector-text-control-4"
+                type="search"
+                value=""
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          class="woocommerce-search-list__list is-not-found"
+        >
+          <span
+            class="woocommerce-search-list__not-found-icon"
+          >
+            <svg
+              aria-hidden="true"
+              class="gridicon gridicons-notice-outline"
+              focusable="false"
+              height="24"
+              role="img"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g>
+                <path
+                  d="M12 4c4.411 0 8 3.589 8 8s-3.589 8-8 8-8-3.589-8-8 3.589-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+                />
+              </g>
+            </svg>
+          </span>
+          <span
+            class="woocommerce-search-list__not-found-text"
+          >
+            No items found.
+          </span>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="woocommerce-search-list"
+    >
+      <div
+        class="woocommerce-search-list__selected"
+      >
+        <div
+          class="woocommerce-search-list__selected-header"
+        >
+          <strong>
+            0 items selected
+          </strong>
+        </div>
+      </div>
+      <div
+        class="woocommerce-search-list__search"
+      >
+        <div
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+        >
+          <div
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+          >
+            <label
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+              for="inspector-text-control-4"
+            >
+              Search for items
+            </label>
+            <input
+              class="components-text-control__input"
+              id="inspector-text-control-4"
+              type="search"
+              value=""
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="woocommerce-search-list__list is-not-found"
+      >
+        <span
+          class="woocommerce-search-list__not-found-icon"
+        >
+          <svg
+            aria-hidden="true"
+            class="gridicon gridicons-notice-outline"
+            focusable="false"
+            height="24"
+            role="img"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g>
+              <path
+                d="M12 4c4.411 0 8 3.589 8 8s-3.589 8-8 8-8-3.589-8-8 3.589-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+              />
+            </g>
+          </svg>
+        </span>
+        <span
+          class="woocommerce-search-list__not-found-text"
+        >
+          No items found.
+        </span>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`SearchListControl should render a search box with a search term, and no matching options 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <p
+      class="a11y-speak-intro-text"
+      hidden="hidden"
+      id="a11y-speak-intro-text"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    >
+      Notifications
+    </p>
+    <div
+      aria-atomic="true"
+      aria-live="assertive"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-assertive"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div
+      aria-atomic="true"
+      aria-live="polite"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-polite"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div>
+      <div
+        class="woocommerce-search-list"
+      >
+        <div
+          class="woocommerce-search-list__selected"
+        >
+          <div
+            class="woocommerce-search-list__selected-header"
+          >
+            <strong>
+              0 items selected
+            </strong>
+          </div>
+        </div>
+        <div
+          class="woocommerce-search-list__search"
+        >
+          <div
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+          >
+            <div
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+            >
+              <label
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                for="inspector-text-control-7"
+              >
+                Search for items
+              </label>
+              <input
+                class="components-text-control__input"
+                id="inspector-text-control-7"
+                type="search"
+                value="no matches"
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          class="woocommerce-search-list__list is-not-found"
+        >
+          <span
+            class="woocommerce-search-list__not-found-icon"
+          >
+            <svg
+              aria-hidden="true"
+              class="gridicon gridicons-notice-outline"
+              focusable="false"
+              height="24"
+              role="img"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g>
+                <path
+                  d="M12 4c4.411 0 8 3.589 8 8s-3.589 8-8 8-8-3.589-8-8 3.589-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+                />
+              </g>
+            </svg>
+          </span>
+          <span
+            class="woocommerce-search-list__not-found-text"
+          >
+            No results for no matches
+          </span>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="woocommerce-search-list"
+    >
+      <div
+        class="woocommerce-search-list__selected"
+      >
+        <div
+          class="woocommerce-search-list__selected-header"
+        >
+          <strong>
+            0 items selected
+          </strong>
+        </div>
+      </div>
+      <div
+        class="woocommerce-search-list__search"
+      >
+        <div
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+        >
+          <div
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+          >
+            <label
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+              for="inspector-text-control-7"
+            >
+              Search for items
+            </label>
+            <input
+              class="components-text-control__input"
+              id="inspector-text-control-7"
+              type="search"
+              value="no matches"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="woocommerce-search-list__list is-not-found"
+      >
+        <span
+          class="woocommerce-search-list__not-found-icon"
+        >
+          <svg
+            aria-hidden="true"
+            class="gridicon gridicons-notice-outline"
+            focusable="false"
+            height="24"
+            role="img"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g>
+              <path
+                d="M12 4c4.411 0 8 3.589 8 8s-3.589 8-8 8-8-3.589-8-8 3.589-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+              />
+            </g>
+          </svg>
+        </span>
+        <span
+          class="woocommerce-search-list__not-found-text"
+        >
+          No results for no matches
+        </span>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`SearchListControl should render a search box with a search term, and only matching options 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <p
+      class="a11y-speak-intro-text"
+      hidden="hidden"
+      id="a11y-speak-intro-text"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    >
+      Notifications
+    </p>
+    <div
+      aria-atomic="true"
+      aria-live="assertive"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-assertive"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div
+      aria-atomic="true"
+      aria-live="polite"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-polite"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div>
+      <div
+        class="woocommerce-search-list"
+      >
+        <div
+          class="woocommerce-search-list__selected"
+        >
+          <div
+            class="woocommerce-search-list__selected-header"
+          >
+            <strong>
+              0 items selected
+            </strong>
+          </div>
+        </div>
+        <div
+          class="woocommerce-search-list__search"
+        >
+          <div
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+          >
+            <div
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+            >
+              <label
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                for="inspector-text-control-5"
+              >
+                Search for items
+              </label>
+              <input
+                class="components-text-control__input"
+                id="inspector-text-control-5"
+                type="search"
+                value="berry"
+              />
+            </div>
+          </div>
+        </div>
+        <ul
+          class="woocommerce-search-list__list"
+        >
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-3"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-3"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Elder
+                  <strong>
+                    berry
+                  </strong>
+                  
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-6"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-6"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Mul
+                  <strong>
+                    berry
+                  </strong>
+                  
+                </span>
+              </span>
+            </label>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="woocommerce-search-list"
+    >
+      <div
+        class="woocommerce-search-list__selected"
+      >
+        <div
+          class="woocommerce-search-list__selected-header"
+        >
+          <strong>
+            0 items selected
+          </strong>
+        </div>
+      </div>
+      <div
+        class="woocommerce-search-list__search"
+      >
+        <div
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+        >
+          <div
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+          >
+            <label
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+              for="inspector-text-control-5"
+            >
+              Search for items
+            </label>
+            <input
+              class="components-text-control__input"
+              id="inspector-text-control-5"
+              type="search"
+              value="berry"
+            />
+          </div>
+        </div>
+      </div>
+      <ul
+        class="woocommerce-search-list__list"
+      >
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-3"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-3"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Elder
+                <strong>
+                  berry
+                </strong>
+                
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-6"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-6"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Mul
+                <strong>
+                  berry
+                </strong>
+                
+              </span>
+            </span>
+          </label>
+        </li>
+      </ul>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`SearchListControl should render a search box with a search term, and only matching options, regardless of case sensitivity 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <p
+      class="a11y-speak-intro-text"
+      hidden="hidden"
+      id="a11y-speak-intro-text"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    >
+      Notifications
+    </p>
+    <div
+      aria-atomic="true"
+      aria-live="assertive"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-assertive"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div
+      aria-atomic="true"
+      aria-live="polite"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-polite"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div>
+      <div
+        class="woocommerce-search-list"
+      >
+        <div
+          class="woocommerce-search-list__selected"
+        >
+          <div
+            class="woocommerce-search-list__selected-header"
+          >
+            <strong>
+              0 items selected
+            </strong>
+          </div>
+        </div>
+        <div
+          class="woocommerce-search-list__search"
+        >
+          <div
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+          >
+            <div
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+            >
+              <label
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                for="inspector-text-control-6"
+              >
+                Search for items
+              </label>
+              <input
+                class="components-text-control__input"
+                id="inspector-text-control-6"
+                type="search"
+                value="bERry"
+              />
+            </div>
+          </div>
+        </div>
+        <ul
+          class="woocommerce-search-list__list"
+        >
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-3"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-3"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Elder
+                  <strong>
+                    bERry
+                  </strong>
+                  
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-6"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-6"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Mul
+                  <strong>
+                    bERry
+                  </strong>
+                  
+                </span>
+              </span>
+            </label>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="woocommerce-search-list"
+    >
+      <div
+        class="woocommerce-search-list__selected"
+      >
+        <div
+          class="woocommerce-search-list__selected-header"
+        >
+          <strong>
+            0 items selected
+          </strong>
+        </div>
+      </div>
+      <div
+        class="woocommerce-search-list__search"
+      >
+        <div
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+        >
+          <div
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+          >
+            <label
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+              for="inspector-text-control-6"
+            >
+              Search for items
+            </label>
+            <input
+              class="components-text-control__input"
+              id="inspector-text-control-6"
+              type="search"
+              value="bERry"
+            />
+          </div>
+        </div>
+      </div>
+      <ul
+        class="woocommerce-search-list__list"
+      >
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-3"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-3"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Elder
+                <strong>
+                  bERry
+                </strong>
+                
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-6"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-6"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Mul
+                <strong>
+                  bERry
+                </strong>
+                
+              </span>
+            </span>
+          </label>
+        </li>
+      </ul>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`SearchListControl should render a search box, a list of options, and 1 selected item 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <p
+      class="a11y-speak-intro-text"
+      hidden="hidden"
+      id="a11y-speak-intro-text"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    >
+      Notifications
+    </p>
+    <div
+      aria-atomic="true"
+      aria-live="assertive"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-assertive"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div
+      aria-atomic="true"
+      aria-live="polite"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-polite"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div>
+      <div
+        class="woocommerce-search-list"
+      >
+        <div
+          class="woocommerce-search-list__selected"
+        >
+          <div
+            class="woocommerce-search-list__selected-header"
+          >
+            <strong>
+              1 item selected
+            </strong>
+            <button
+              aria-label="Clear all selected items"
+              class="components-button is-link is-destructive"
+              type="button"
+            >
+              Clear all
+            </button>
+          </div>
+          <ul>
+            <li>
+              <span
+                class="woocommerce-tag has-remove"
+              >
+                <span
+                  class="woocommerce-tag__text"
+                  id="woocommerce-tag__label-0"
+                >
+                  <span
+                    class="screen-reader-text"
+                  >
+                    Clementine
+                  </span>
+                  <span
+                    aria-hidden="true"
+                  >
+                    Clementine
+                  </span>
+                </span>
+                <button
+                  aria-describedby="woocommerce-tag__label-0"
+                  aria-label="Remove Clementine"
+                  class="components-button woocommerce-tag__remove"
+                  type="button"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="clear-icon"
+                    focusable="false"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    width="20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"
+                    />
+                  </svg>
+                </button>
+              </span>
+            </li>
+          </ul>
+        </div>
+        <div
+          class="woocommerce-search-list__search"
+        >
+          <div
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+          >
+            <div
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+            >
+              <label
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                for="inspector-text-control-2"
+              >
+                Search for items
+              </label>
+              <input
+                class="components-text-control__input"
+                id="inspector-text-control-2"
+                type="search"
+                value=""
+              />
+            </div>
+          </div>
+        </div>
+        <ul
+          class="woocommerce-search-list__list"
+        >
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-1"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-1"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Apricots
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-2"
+            >
+              <input
+                checked=""
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-2"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Clementine
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-3"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-3"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Elderberry
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-4"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-4"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Guava
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-5"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-5"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Lychee
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-6"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-6"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Mulberry
+                </span>
+              </span>
+            </label>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="woocommerce-search-list"
+    >
+      <div
+        class="woocommerce-search-list__selected"
+      >
+        <div
+          class="woocommerce-search-list__selected-header"
+        >
+          <strong>
+            1 item selected
+          </strong>
+          <button
+            aria-label="Clear all selected items"
+            class="components-button is-link is-destructive"
+            type="button"
+          >
+            Clear all
+          </button>
+        </div>
+        <ul>
+          <li>
+            <span
+              class="woocommerce-tag has-remove"
+            >
+              <span
+                class="woocommerce-tag__text"
+                id="woocommerce-tag__label-0"
+              >
+                <span
+                  class="screen-reader-text"
+                >
+                  Clementine
+                </span>
+                <span
+                  aria-hidden="true"
+                >
+                  Clementine
+                </span>
+              </span>
+              <button
+                aria-describedby="woocommerce-tag__label-0"
+                aria-label="Remove Clementine"
+                class="components-button woocommerce-tag__remove"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="clear-icon"
+                  focusable="false"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  width="20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"
+                  />
+                </svg>
+              </button>
+            </span>
+          </li>
+        </ul>
+      </div>
+      <div
+        class="woocommerce-search-list__search"
+      >
+        <div
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+        >
+          <div
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+          >
+            <label
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+              for="inspector-text-control-2"
+            >
+              Search for items
+            </label>
+            <input
+              class="components-text-control__input"
+              id="inspector-text-control-2"
+              type="search"
+              value=""
+            />
+          </div>
+        </div>
+      </div>
+      <ul
+        class="woocommerce-search-list__list"
+      >
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-1"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-1"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Apricots
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-2"
+          >
+            <input
+              checked=""
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-2"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Clementine
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-3"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-3"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Elderberry
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-4"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-4"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Guava
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-5"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-5"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Lychee
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-6"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-6"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Mulberry
+              </span>
+            </span>
+          </label>
+        </li>
+      </ul>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`SearchListControl should render a search box, a list of options, and 2 selected item 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <p
+      class="a11y-speak-intro-text"
+      hidden="hidden"
+      id="a11y-speak-intro-text"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    >
+      Notifications
+    </p>
+    <div
+      aria-atomic="true"
+      aria-live="assertive"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-assertive"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div
+      aria-atomic="true"
+      aria-live="polite"
+      aria-relevant="additions text"
+      class="a11y-speak-region"
+      id="a11y-speak-polite"
+      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+    />
+    <div>
+      <div
+        class="woocommerce-search-list"
+      >
+        <div
+          class="woocommerce-search-list__selected"
+        >
+          <div
+            class="woocommerce-search-list__selected-header"
+          >
+            <strong>
+              2 items selected
+            </strong>
+            <button
+              aria-label="Clear all selected items"
+              class="components-button is-link is-destructive"
+              type="button"
+            >
+              Clear all
+            </button>
+          </div>
+          <ul>
+            <li>
+              <span
+                class="woocommerce-tag has-remove"
+              >
+                <span
+                  class="woocommerce-tag__text"
+                  id="woocommerce-tag__label-1"
+                >
+                  <span
+                    class="screen-reader-text"
+                  >
+                    Clementine
+                  </span>
+                  <span
+                    aria-hidden="true"
+                  >
+                    Clementine
+                  </span>
+                </span>
+                <button
+                  aria-describedby="woocommerce-tag__label-1"
+                  aria-label="Remove Clementine"
+                  class="components-button woocommerce-tag__remove"
+                  type="button"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="clear-icon"
+                    focusable="false"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    width="20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"
+                    />
+                  </svg>
+                </button>
+              </span>
+            </li>
+            <li>
+              <span
+                class="woocommerce-tag has-remove"
+              >
+                <span
+                  class="woocommerce-tag__text"
+                  id="woocommerce-tag__label-2"
+                >
+                  <span
+                    class="screen-reader-text"
+                  >
+                    Guava
+                  </span>
+                  <span
+                    aria-hidden="true"
+                  >
+                    Guava
+                  </span>
+                </span>
+                <button
+                  aria-describedby="woocommerce-tag__label-2"
+                  aria-label="Remove Guava"
+                  class="components-button woocommerce-tag__remove"
+                  type="button"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="clear-icon"
+                    focusable="false"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    width="20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"
+                    />
+                  </svg>
+                </button>
+              </span>
+            </li>
+          </ul>
+        </div>
+        <div
+          class="woocommerce-search-list__search"
+        >
+          <div
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+          >
+            <div
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+            >
+              <label
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                for="inspector-text-control-3"
+              >
+                Search for items
+              </label>
+              <input
+                class="components-text-control__input"
+                id="inspector-text-control-3"
+                type="search"
+                value=""
+              />
+            </div>
+          </div>
+        </div>
+        <ul
+          class="woocommerce-search-list__list"
+        >
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-1"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-1"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Apricots
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-2"
+            >
+              <input
+                checked=""
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-2"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Clementine
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-3"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-3"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Elderberry
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-4"
+            >
+              <input
+                checked=""
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-4"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Guava
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-5"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-5"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Lychee
+                </span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label
+              class=" woocommerce-search-list__item depth-0"
+              for="search-list-item-1-6"
+            >
+              <input
+                class="woocommerce-search-list__item-input"
+                id="search-list-item-1-6"
+                name="search-list-item-1"
+                type="checkbox"
+                value=""
+              />
+              <span
+                class="woocommerce-search-list__item-label"
+              >
+                <span
+                  class="woocommerce-search-list__item-name"
+                >
+                  Mulberry
+                </span>
+              </span>
+            </label>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="woocommerce-search-list"
+    >
+      <div
+        class="woocommerce-search-list__selected"
+      >
+        <div
+          class="woocommerce-search-list__selected-header"
+        >
+          <strong>
+            2 items selected
+          </strong>
+          <button
+            aria-label="Clear all selected items"
+            class="components-button is-link is-destructive"
+            type="button"
+          >
+            Clear all
+          </button>
+        </div>
+        <ul>
+          <li>
+            <span
+              class="woocommerce-tag has-remove"
+            >
+              <span
+                class="woocommerce-tag__text"
+                id="woocommerce-tag__label-1"
+              >
+                <span
+                  class="screen-reader-text"
+                >
+                  Clementine
+                </span>
+                <span
+                  aria-hidden="true"
+                >
+                  Clementine
+                </span>
+              </span>
+              <button
+                aria-describedby="woocommerce-tag__label-1"
+                aria-label="Remove Clementine"
+                class="components-button woocommerce-tag__remove"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="clear-icon"
+                  focusable="false"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  width="20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"
+                  />
+                </svg>
+              </button>
+            </span>
+          </li>
+          <li>
+            <span
+              class="woocommerce-tag has-remove"
+            >
+              <span
+                class="woocommerce-tag__text"
+                id="woocommerce-tag__label-2"
+              >
+                <span
+                  class="screen-reader-text"
+                >
+                  Guava
+                </span>
+                <span
+                  aria-hidden="true"
+                >
+                  Guava
+                </span>
+              </span>
+              <button
+                aria-describedby="woocommerce-tag__label-2"
+                aria-label="Remove Guava"
+                class="components-button woocommerce-tag__remove"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="clear-icon"
+                  focusable="false"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  width="20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"
+                  />
+                </svg>
+              </button>
+            </span>
+          </li>
+        </ul>
+      </div>
+      <div
+        class="woocommerce-search-list__search"
+      >
+        <div
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
+        >
+          <div
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+          >
+            <label
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+              for="inspector-text-control-3"
+            >
+              Search for items
+            </label>
+            <input
+              class="components-text-control__input"
+              id="inspector-text-control-3"
+              type="search"
+              value=""
+            />
+          </div>
+        </div>
+      </div>
+      <ul
+        class="woocommerce-search-list__list"
+      >
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-1"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-1"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Apricots
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-2"
+          >
+            <input
+              checked=""
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-2"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Clementine
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-3"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-3"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Elderberry
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-4"
+          >
+            <input
+              checked=""
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-4"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Guava
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-5"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-5"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Lychee
+              </span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label
+            class=" woocommerce-search-list__item depth-0"
+            for="search-list-item-1-6"
+          >
+            <input
+              class="woocommerce-search-list__item-input"
+              id="search-list-item-1-6"
+              name="search-list-item-1"
+              type="checkbox"
+              value=""
+            />
+            <span
+              class="woocommerce-search-list__item-label"
+            >
+              <span
+                class="woocommerce-search-list__item-name"
+              >
+                Mulberry
+              </span>
+            </span>
+          </label>
+        </li>
+      </ul>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;

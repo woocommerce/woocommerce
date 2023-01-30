@@ -1,0 +1,69 @@
+{
+	"name": "monorepo-merge",
+	"version": "0.0.0",
+	"description": "A tool for merging repositories into the WooCommerce Monorepo.",
+	"author": "Automattic",
+	"bin": {
+		"monorepo-merge": "./bin/run"
+	},
+	"homepage": "https://github.com/woocommerce/woocommerce",
+	"license": "GPLv2",
+	"main": "dist/index.js",
+	"repository": "woocommerce/woocommerce",
+	"files": [
+		"/bin",
+		"/dist",
+		"/npm-shrinkwrap.json",
+		"/oclif.manifest.json"
+	],
+	"dependencies": {
+		"@oclif/core": "^1",
+		"@oclif/plugin-help": "^5",
+		"@oclif/plugin-plugins": "^2.0.1",
+		"@octokit/graphql": "4.8.0"
+	},
+	"devDependencies": {
+		"@octokit/request-error": "^3.0.1",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"@types/node": "^16.9.4",
+		"eslint": "^8.12.0",
+		"globby": "^11",
+		"jscodeshift": "^0.13.1",
+		"oclif": "^2",
+		"shx": "^0.3.3",
+		"ts-node": "^10.2.1",
+		"tslib": "^2.3.1",
+		"typescript": "^4.8.3"
+	},
+	"oclif": {
+		"bin": "monorepo-merge",
+		"dirname": "monorepo-merge",
+		"commands": "./dist/commands",
+		"plugins": [
+			"@oclif/plugin-help",
+			"@oclif/plugin-plugins"
+		],
+		"topicSeparator": " ",
+		"topics": {
+			"merge": {
+				"description": "Merges other repositories into the monorepo."
+			},
+			"transfer-issues": {
+				"description": "Transfers issues from other repositories into the monorepo."
+			}
+		}
+	},
+	"scripts": {
+		"turbo:build": "shx rm -rf dist && tsc -b",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"lint": "eslint . --ext .ts",
+		"postpack": "shx rm -f oclif.manifest.json",
+		"posttest": "pnpm lint",
+		"prepack": "pnpm build && oclif manifest"
+	},
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "^7.13.3"
+	},
+	"types": "dist/index.d.ts"
+}

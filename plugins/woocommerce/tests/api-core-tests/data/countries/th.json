@@ -1,0 +1,326 @@
+{
+    "code": "TH",
+    "name": "Thailand",
+    "states": [
+        {
+            "code": "TH-37",
+            "name": "Amnat Charoen"
+        },
+        {
+            "code": "TH-15",
+            "name": "Ang Thong"
+        },
+        {
+            "code": "TH-14",
+            "name": "Ayutthaya"
+        },
+        {
+            "code": "TH-10",
+            "name": "Bangkok"
+        },
+        {
+            "code": "TH-38",
+            "name": "Bueng Kan"
+        },
+        {
+            "code": "TH-31",
+            "name": "Buri Ram"
+        },
+        {
+            "code": "TH-24",
+            "name": "Chachoengsao"
+        },
+        {
+            "code": "TH-18",
+            "name": "Chai Nat"
+        },
+        {
+            "code": "TH-36",
+            "name": "Chaiyaphum"
+        },
+        {
+            "code": "TH-22",
+            "name": "Chanthaburi"
+        },
+        {
+            "code": "TH-50",
+            "name": "Chiang Mai"
+        },
+        {
+            "code": "TH-57",
+            "name": "Chiang Rai"
+        },
+        {
+            "code": "TH-20",
+            "name": "Chonburi"
+        },
+        {
+            "code": "TH-86",
+            "name": "Chumphon"
+        },
+        {
+            "code": "TH-46",
+            "name": "Kalasin"
+        },
+        {
+            "code": "TH-62",
+            "name": "Kamphaeng Phet"
+        },
+        {
+            "code": "TH-71",
+            "name": "Kanchanaburi"
+        },
+        {
+            "code": "TH-40",
+            "name": "Khon Kaen"
+        },
+        {
+            "code": "TH-81",
+            "name": "Krabi"
+        },
+        {
+            "code": "TH-52",
+            "name": "Lampang"
+        },
+        {
+            "code": "TH-51",
+            "name": "Lamphun"
+        },
+        {
+            "code": "TH-42",
+            "name": "Loei"
+        },
+        {
+            "code": "TH-16",
+            "name": "Lopburi"
+        },
+        {
+            "code": "TH-58",
+            "name": "Mae Hong Son"
+        },
+        {
+            "code": "TH-44",
+            "name": "Maha Sarakham"
+        },
+        {
+            "code": "TH-49",
+            "name": "Mukdahan"
+        },
+        {
+            "code": "TH-26",
+            "name": "Nakhon Nayok"
+        },
+        {
+            "code": "TH-73",
+            "name": "Nakhon Pathom"
+        },
+        {
+            "code": "TH-48",
+            "name": "Nakhon Phanom"
+        },
+        {
+            "code": "TH-30",
+            "name": "Nakhon Ratchasima"
+        },
+        {
+            "code": "TH-60",
+            "name": "Nakhon Sawan"
+        },
+        {
+            "code": "TH-80",
+            "name": "Nakhon Si Thammarat"
+        },
+        {
+            "code": "TH-55",
+            "name": "Nan"
+        },
+        {
+            "code": "TH-96",
+            "name": "Narathiwat"
+        },
+        {
+            "code": "TH-39",
+            "name": "Nong Bua Lam Phu"
+        },
+        {
+            "code": "TH-43",
+            "name": "Nong Khai"
+        },
+        {
+            "code": "TH-12",
+            "name": "Nonthaburi"
+        },
+        {
+            "code": "TH-13",
+            "name": "Pathum Thani"
+        },
+        {
+            "code": "TH-94",
+            "name": "Pattani"
+        },
+        {
+            "code": "TH-82",
+            "name": "Phang Nga"
+        },
+        {
+            "code": "TH-93",
+            "name": "Phatthalung"
+        },
+        {
+            "code": "TH-56",
+            "name": "Phayao"
+        },
+        {
+            "code": "TH-67",
+            "name": "Phetchabun"
+        },
+        {
+            "code": "TH-76",
+            "name": "Phetchaburi"
+        },
+        {
+            "code": "TH-66",
+            "name": "Phichit"
+        },
+        {
+            "code": "TH-65",
+            "name": "Phitsanulok"
+        },
+        {
+            "code": "TH-54",
+            "name": "Phrae"
+        },
+        {
+            "code": "TH-83",
+            "name": "Phuket"
+        },
+        {
+            "code": "TH-25",
+            "name": "Prachin Buri"
+        },
+        {
+            "code": "TH-77",
+            "name": "Prachuap Khiri Khan"
+        },
+        {
+            "code": "TH-85",
+            "name": "Ranong"
+        },
+        {
+            "code": "TH-70",
+            "name": "Ratchaburi"
+        },
+        {
+            "code": "TH-21",
+            "name": "Rayong"
+        },
+        {
+            "code": "TH-45",
+            "name": "Roi Et"
+        },
+        {
+            "code": "TH-27",
+            "name": "Sa Kaeo"
+        },
+        {
+            "code": "TH-47",
+            "name": "Sakon Nakhon"
+        },
+        {
+            "code": "TH-11",
+            "name": "Samut Prakan"
+        },
+        {
+            "code": "TH-74",
+            "name": "Samut Sakhon"
+        },
+        {
+            "code": "TH-75",
+            "name": "Samut Songkhram"
+        },
+        {
+            "code": "TH-19",
+            "name": "Saraburi"
+        },
+        {
+            "code": "TH-91",
+            "name": "Satun"
+        },
+        {
+            "code": "TH-17",
+            "name": "Sing Buri"
+        },
+        {
+            "code": "TH-33",
+            "name": "Sisaket"
+        },
+        {
+            "code": "TH-90",
+            "name": "Songkhla"
+        },
+        {
+            "code": "TH-64",
+            "name": "Sukhothai"
+        },
+        {
+            "code": "TH-72",
+            "name": "Suphan Buri"
+        },
+        {
+            "code": "TH-84",
+            "name": "Surat Thani"
+        },
+        {
+            "code": "TH-32",
+            "name": "Surin"
+        },
+        {
+            "code": "TH-63",
+            "name": "Tak"
+        },
+        {
+            "code": "TH-92",
+            "name": "Trang"
+        },
+        {
+            "code": "TH-23",
+            "name": "Trat"
+        },
+        {
+            "code": "TH-34",
+            "name": "Ubon Ratchathani"
+        },
+        {
+            "code": "TH-41",
+            "name": "Udon Thani"
+        },
+        {
+            "code": "TH-61",
+            "name": "Uthai Thani"
+        },
+        {
+            "code": "TH-53",
+            "name": "Uttaradit"
+        },
+        {
+            "code": "TH-95",
+            "name": "Yala"
+        },
+        {
+            "code": "TH-35",
+            "name": "Yasothon"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/th"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

@@ -1,129 +1,66 @@
 {
-  "name": "woocommerce",
-  "title": "WooCommerce",
-  "version": "5.0.0",
-  "homepage": "https://woocommerce.com/",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/woocommerce/woocommerce.git"
-  },
-  "license": "GPL-3.0+",
-  "main": "Gruntfile.js",
-  "config": {
-    "wp_org_slug": "woocommerce"
-  },
-  "scripts": {
-    "install": "lerna bootstrap --hoist",
-    "build": "./bin/build-zip.sh",
-    "build:core": "grunt && npm run makepot",
-    "build:dev": "npm run build:core && npm run build:packages",
-    "build-watch": "grunt watch",
-    "build:packages": "lerna run build",
-    "build:zip": "npm run build && composer install && npm run build:dev",
-    "build:assets": "grunt assets",
-    "lint:js": "eslint assets/js --ext=js",
-    "docker:down": "npx wc-e2e docker:down",
-    "docker:ssh": "npx wc-e2e docker:ssh",
-    "docker:up": "npx wc-e2e docker:up",
-    "test:e2e": "npx wc-e2e test:e2e",
-    "test:e2e-debug": "npx wc-e2e test:e2e-debug",
-    "test:e2e-dev": "npx wc-e2e test:e2e-dev",
-    "test:unit": "./vendor/bin/phpunit -c ./phpunit.xml",
-    "makepot": "composer run-script makepot",
-    "packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
-    "publish-packages": "lerna publish from-package",
-    "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
-  },
-  "devDependencies": {
-    "@babel/cli": "7.12.8",
-    "@babel/core": "7.12.9",
-    "@babel/polyfill": "7.12.1",
-    "@babel/preset-env": "7.12.7",
-    "@babel/register": "7.12.1",
-    "@typescript-eslint/eslint-plugin": "3.10.1",
-    "@typescript-eslint/experimental-utils": "3.10.1",
-    "@typescript-eslint/parser": "3.10.1",
-    "@woocommerce/api": "file:tests/e2e/api",
-    "@woocommerce/e2e-core-tests": "file:tests/e2e/core-tests",
-    "@woocommerce/e2e-environment": "file:tests/e2e/env",
-    "@woocommerce/e2e-utils": "file:tests/e2e/utils",
-    "@wordpress/babel-plugin-import-jsx-pragma": "1.1.3",
-    "@wordpress/babel-preset-default": "3.0.2",
-    "@wordpress/e2e-test-utils": "^4.6.0",
-    "@wordpress/eslint-plugin": "7.3.0",
-    "autoprefixer": "9.8.6",
-    "babel-eslint": "10.1.0",
-    "chai": "4.2.0",
-    "chai-as-promised": "7.1.1",
-    "commander": "4.1.1",
-    "config": "3.3.3",
-    "cross-env": "6.0.3",
-    "deasync": "0.1.21",
-    "eslint": "6.8.0",
-    "eslint-config-wpcalypso": "5.0.0",
-    "eslint-plugin-jest": "23.20.0",
-    "github-contributors-list": "https://github.com/woocommerce/github-contributors-list/tarball/master",
-    "grunt": "1.3.0",
-    "grunt-contrib-clean": "2.0.0",
-    "grunt-contrib-concat": "1.0.1",
-    "grunt-contrib-copy": "1.0.0",
-    "grunt-contrib-cssmin": "3.0.0",
-    "grunt-contrib-uglify": "4.0.1",
-    "grunt-contrib-watch": "1.1.0",
-    "grunt-newer": "^1.3.0",
-    "grunt-phpcs": "0.4.0",
-    "grunt-postcss": "0.9.0",
-    "grunt-rtlcss": "2.0.2",
-    "grunt-sass": "3.1.0",
-    "grunt-stylelint": "0.16.0",
-    "gruntify-eslint": "5.0.0",
-    "husky": "4.3.0",
-    "istanbul": "1.0.0-alpha.2",
-    "jest": "^25.1.0",
-    "lerna": "3.22.1",
-    "lint-staged": "9.5.0",
-    "mocha": "7.2.0",
-    "node-sass": "4.14.1",
-    "prettier": "npm:wp-prettier@2.0.5",
-    "stylelint": "12.0.1",
-    "stylelint-config-wordpress": "16.0.0",
-    "typescript": "3.9.7",
-    "webpack": "4.44.2",
-    "webpack-cli": "3.3.12",
-    "wp-textdomain": "1.0.1"
-  },
-  "engines": {
-    "node": "^10.22.0",
-    "npm": "^6.14.6"
-  },
-  "husky": {
-    "hooks": {
-      "post-merge": "./bin/post-merge.sh",
-      "pre-commit": "lint-staged",
-      "pre-push": "./bin/pre-push.sh"
-    }
-  },
-  "lint-staged": {
-    "*.php": [
-      "php -d display_errors=1 -l",
-      "composer run-script phpcs-pre-commit"
-    ],
-    "*.scss": [
-      "stylelint --syntax=scss --fix",
-      "git add"
-    ],
-    "*.js": [
-      "eslint --fix",
-      "git add"
-    ],
-    "*.ts": [
-      "eslint --fix",
-      "git add"
-    ]
-  },
-  "browserslist": [
-    "> 0.1%",
-    "ie 8",
-    "ie 9"
-  ]
+	"name": "woocommerce-monorepo",
+	"title": "WooCommerce Monorepo",
+	"description": "Monorepo for the WooCommerce ecosystem",
+	"homepage": "https://woocommerce.com/",
+	"private": true,
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git"
+	},
+	"author": "Automattic",
+	"license": "GPL-3.0-or-later",
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"scripts": {
+		"build": "pnpm exec turbo run turbo:build",
+		"test": "pnpm exec turbo run turbo:test",
+		"clean": "pnpm store prune && git clean -fx **/node_modules && pnpm i",
+		"preinstall": "npx only-allow pnpm",
+		"postinstall": "pnpm git:update-hooks",
+		"git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && husky install",
+		"create-extension": "node ./tools/create-extension/index.js",
+		"cherry-pick": "node ./tools/cherry-pick/bin/run",
+		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches"
+	},
+	"devDependencies": {
+		"@babel/preset-env": "^7.16.11",
+		"@babel/runtime": "^7.17.2",
+		"@types/node": "14.14.33",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"@wordpress/data": "^6.15.0",
+		"@wordpress/eslint-plugin": "^11.1.0",
+		"@wordpress/prettier-config": "^1.1.1",
+		"babel-loader": "^8.2.3",
+		"chalk": "^4.1.2",
+		"copy-webpack-plugin": "^10.2.4",
+		"core-js": "^3.21.1",
+		"css-loader": "^6.7.0",
+		"glob": "^7.2.0",
+		"husky": "^7.0.4",
+		"jest": "^27.3.1",
+		"lint-staged": "^12.3.7",
+		"mkdirp": "^1.0.4",
+		"moment": "^2.29.1",
+		"node-stream-zip": "^1.15.0",
+		"postcss-loader": "^3.0.0",
+		"prettier": "npm:wp-prettier@^2.2.1-beta-1",
+		"regenerator-runtime": "^0.13.9",
+		"request": "^2.88.2",
+		"sass": "^1.49.9",
+		"sass-loader": "^10.2.1",
+		"syncpack": "^8.3.9",
+		"turbo": "^1.4.5",
+		"typescript": "^4.8.3",
+		"url-loader": "^1.1.2",
+		"webpack": "^5.70.0"
+	},
+	"dependencies": {
+		"@babel/core": "7.12.9",
+		"@wordpress/babel-plugin-import-jsx-pragma": "^3.1.0",
+		"@wordpress/babel-preset-default": "^6.4.1",
+		"lodash": "^4.17.21",
+		"wp-textdomain": "1.0.1"
+	}
 }

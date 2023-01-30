@@ -1,0 +1,20 @@
+name: Add Triage Label
+
+on:
+  issues:
+    types: opened
+
+permissions: {}
+
+jobs:
+  add_label:
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-ecosystem/action-add-labels@v1
+        if: github.event.issue.labels[0] == null
+        with:
+          labels: 'status: awaiting triage'

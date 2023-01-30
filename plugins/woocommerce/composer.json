@@ -1,0 +1,145 @@
+{
+	"name": "woocommerce/woocommerce",
+	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
+	"homepage": "https://woocommerce.com/",
+	"version": "7.5.0",
+	"type": "wordpress-plugin",
+	"license": "GPL-3.0-or-later",
+	"prefer-stable": true,
+	"minimum-stability": "dev",
+	"repositories": [
+		{
+			"type": "path",
+			"url": "lib"
+		}
+	],
+	"require": {
+		"php": ">=7.2",
+		"automattic/jetpack-autoloader": "2.10.1",
+		"automattic/jetpack-constants": "1.5.1",
+		"composer/installers": "^1.9",
+		"maxmind-db/reader": "^1.11",
+		"pelago/emogrifier": "^6.0",
+		"woocommerce/action-scheduler": "3.5.4",
+		"woocommerce/woocommerce-blocks": "9.4.2"
+	},
+	"require-dev": {
+		"automattic/jetpack-changelogger": "^3.3.0",
+		"bamarni/composer-bin-plugin": "^1.4",
+		"dms/phpunit-arraysubset-asserts": "^0.4.0",
+		"phpunit/phpunit": "^8.0",
+		"sebastian/comparator": "3.0.3",
+		"yoast/phpunit-polyfills": "^1.0"
+	},
+	"config": {
+		"optimize-autoloader": true,
+		"preferred-install": {
+			"woocommerce/action-scheduler": "dist",
+			"woocommerce/woocommerce-rest-api": "dist",
+			"woocommerce/woocommerce-blocks": "dist"
+		},
+		"sort-packages": true,
+		"platform": {
+			"php": "7.2"
+		},
+		"allow-plugins": {
+			"automattic/jetpack-autoloader": true,
+			"composer/installers": true,
+			"bamarni/composer-bin-plugin": true
+		}
+	},
+	"autoload": {
+		"exclude-from-classmap": [
+			"includes/legacy",
+			"includes/libraries"
+		],
+		"classmap": [
+			"includes/rest-api"
+		],
+		"psr-4": {
+			"Automattic\\WooCommerce\\": "src/",
+			"Automattic\\WooCommerce\\Vendor\\": "lib/packages/"
+		},
+		"psr-0": {
+			"Automattic\\WooCommerce\\Vendor\\": "lib/packages/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Automattic\\WooCommerce\\Tests\\": "tests/php/src/",
+			"Automattic\\WooCommerce\\Testing\\Tools\\": "tests/Tools/"
+		},
+		"classmap": [
+			"tests/legacy/unit-tests/rest-api/Helpers"
+		]
+	},
+	"scripts": {
+		"post-install-cmd": [
+			"@composer bin all install --ansi",
+			"sh ./bin/package-update.sh"
+		],
+		"post-update-cmd": [
+			"@composer bin all update --ansi",
+			"sh ./bin/package-update.sh"
+		],
+		"test": [
+			"phpunit"
+		],
+		"phpcs": [
+			"phpcs -s -p"
+		],
+		"phpcs-pre-commit": [
+			"phpcs-changed --git -s"
+		],
+		"phpcbf": [
+			"phpcbf -p"
+		],
+		"makepot-audit": [
+			"wp --allow-root i18n make-pot . --exclude=\".github,.wordpress-org,bin,sample-data,node_modules,tests\" --slug=woocommerce"
+		],
+		"makepot": [
+			"@makepot-audit --skip-audit"
+		],
+		"bin": [
+			"echo 'bin not installed'"
+		],
+		"build-lib": [
+			"sh ./bin/build-lib.sh"
+		]
+	},
+	"extra": {
+		"installer-paths": {
+			"packages/{$name}": [
+				"woocommerce/action-scheduler",
+				"woocommerce/woocommerce-blocks",
+				"woocommerce/woocommerce-admin"
+			]
+		},
+		"scripts-description": {
+			"test": "Run unit tests",
+			"phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
+			"phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier",
+			"makepot-audit": "Generate i18n/languages/woocommerce.pot file and run audit",
+			"makepot": "Generate i18n/languages/woocommerce.pot file"
+		},
+		"bamarni-bin": {
+			"target-directory": "bin/composer"
+		},
+		"changelogger": {
+			"formatter": {
+				"filename": "../../tools/changelogger/class-legacy-core-formatter.php"
+			},
+			"types": {
+				"fix": "Fixes an existing bug",
+				"add": "Adds functionality",
+				"update": "Update existing functionality",
+				"dev": "Development related task",
+				"tweak": "A minor adjustment to the codebase",
+				"performance": "Address performance issues",
+				"enhancement": "Improve existing functionality"
+			},
+			"versioning": "wordpress",
+			"changelog": "NEXT_CHANGELOG.md"
+		}
+	}
+}

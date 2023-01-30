@@ -1,0 +1,20 @@
+.woocommerce-image-upload {
+	.woocommerce-image-upload__image-preview {
+		font-size: 16px;
+		margin-right: 2em;
+
+		img {
+			max-width: 240px;
+			height: auto;
+		}
+	}
+
+	.woocommerce-image-upload__add-image {
+		margin: $gap 0;
+	}
+
+	&.has-image {
+		display: flex;
+		align-items: center;
+	}
+}

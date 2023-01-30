@@ -1,0 +1,96 @@
+{
+	"name": "woocommerce-beta-tester",
+	"description": "Setting up the local beta tester scripts.",
+	"license": "GPL-2.0",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/woocommerce/woocommerce-beta-tester.git"
+	},
+	"title": "WooCommerce Beta Tester",
+	"version": "2.2.0",
+	"homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
+	"devDependencies": {
+		"@types/react": "^17.0.2",
+		"@types/react-dom": "^18.0.6",
+		"@types/wordpress__components": "^19.10.1",
+		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"@wordpress/env": "^4.8.0",
+		"@wordpress/prettier-config": "^2.5.0",
+		"@wordpress/scripts": "^19.2.4",
+		"eslint": "5.16.0",
+		"prettier": "npm:wp-prettier@^2.6.2",
+		"ts-loader": "^9.4.1",
+		"typescript": "^4.8.3",
+		"uglify-js": "^3.5.3"
+	},
+	"dependencies": {
+		"@emotion/react": "^11.10.4",
+		"@types/prop-types": "^15.7.4",
+		"@woocommerce/components": "workspace:*",
+		"@woocommerce/data": "workspace:*",
+		"@wordpress/api-fetch": "^3.23.1",
+		"@wordpress/components": "^12.0.9",
+		"@wordpress/compose": "^3.24.4",
+		"@wordpress/data": "^4.26.7",
+		"@wordpress/data-controls": "^1.20.7",
+		"@wordpress/element": "^4.18.0",
+		"@wordpress/hooks": "^2.11.1",
+		"prop-types": "^15.8.1"
+	},
+	"peerDependencies": {
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2"
+	},
+	"assets": {
+		"js": {
+			"min": "assets/js/*.min.js",
+			"js": "assets/js/*.js"
+		}
+	},
+	"scripts": {
+		"postinstall": "composer install",
+		"changelog": "composer exec -- changelogger",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"turbo:build": "pnpm run build:admin && pnpm run uglify",
+		"build:admin": "wp-scripts build",
+		"build:zip": "./bin/build-zip.sh",
+		"build:dev": "pnpm run lint:js && pnpm run build",
+		"uglify": "rm -f $npm_package_assets_js_min && for f in $npm_package_assets_js_js; do file=${f%.js}; node_modules/.bin/uglifyjs $f -c -m > $file.min.js; done",
+		"check-engines": "wp-scripts check-engines",
+		"check-licenses": "wp-scripts check-licenses",
+		"format:js": "wp-scripts format-js",
+		"lint:css": "wp-scripts lint-style",
+		"lint:css:fix": "wp-scripts lint-style --fix",
+		"lint:js": "wp-scripts lint-js",
+		"lint:js:fix": "wp-scripts lint-js --fix",
+		"lint:md:docs": "wp-scripts lint-md-docs",
+		"lint:md:js": "wp-scripts lint-md-js",
+		"lint:pkg-json": "wp-scripts lint-pkg-json",
+		"packages-update": "wp-scripts packages-update",
+		"start": "wp-scripts start",
+		"test:e2e": "wp-scripts test-e2e",
+		"test:unit": "wp-scripts test-unit-js"
+	},
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "^7.13.3"
+	},
+	"woorelease": {
+		"svn_reauth": "true",
+		"wp_org_slug": "woocommerce-beta-tester",
+		"build_step": "pnpm run build:zip"
+	},
+	"lint-staged": {
+		"*.php": [
+			"php -d display_errors=1 -l",
+			"composer run-script phpcs-pre-commit"
+		],
+		"*.(t|j)s?(x)": [
+			"npm run lint:js:fix"
+		],
+		"*.scss": [
+			"npm run lint:css:fix"
+		]
+	}
+}

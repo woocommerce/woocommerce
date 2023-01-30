@@ -1,0 +1,27 @@
+name: Package release
+on:
+    workflow_dispatch:
+        inputs:
+            packages:
+                description: 'Enter a specific package to release, or releases separated by commas, ie @woocommerce/components,@woocommerce/number. Leaving this input blank will release all eligible packages.'
+                required: false
+                default: '-a'
+
+permissions: {}
+
+jobs:
+    release:
+        name: Run packages release script
+        runs-on: ubuntu-20.04
+        permissions:
+          contents: read
+        steps:
+            - uses: actions/checkout@v3
+            
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+
+            - name: Execute script
+              run: ./tools/package-release/bin/dev publish ${{ github.event.inputs.packages }} --branch=${{ github.ref_name }} --skip-install
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -2,22 +2,49 @@ name: Build release asset
 on: 
   release:
     types: [published]
+
+permissions: {}
+
 jobs:
   build:
     name: Build release asset
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Build
-        id: build
-        uses: woocommerce/action-build@v2
+      - uses: actions/checkout@v3
+      
+      - name: Setup WooCommerce Monorepo
+        uses: ./.github/actions/setup-woocommerce-monorepo
+        with:
+          build: false
+
+      - name: Build zip
+        working-directory: plugins/woocommerce
+        run: bash bin/build-zip.sh
+
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ${{ steps.build.outputs.zip_path }}
+          asset_path: plugins/woocommerce/woocommerce.zip
           asset_name: woocommerce.zip
           asset_content_type: application/zip
+
+
+  update-code-reference:
+    if: github.event.release.prerelease == false && github.event.release.draft == false && github.repository_owner == 'woocommerce'
+    name: Update Code Reference
+    needs: build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Invoke Code Reference build and deploy workflow
+        uses: aurelien-baudet/workflow-dispatch@v2
+        with:
+          workflow: GitHub Pages deploy
+          repo: woocommerce/code-reference
+          token: ${{ secrets.CUSTOM_GH_TOKEN }}
+          ref: refs/heads/trunk
+          inputs: '{ "version": "${{ github.event.release.tag_name }}" }'    

@@ -2,22 +2,35 @@ name: Nightly builds
 on:
   schedule:
     - cron: '0 0 * * *' # Run at 12 AM UTC.
+  workflow_dispatch:
+
+permissions: {}
+
 jobs:
   build:
+    if: github.repository_owner == 'woocommerce'
     name: Nightly builds
     strategy:
       fail-fast: false
       matrix:
-        build: [master]
-    runs-on: ubuntu-latest
+        build: [trunk]
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ matrix.build }}
-      - name: Build
-        id: build
-        uses: woocommerce/action-build@v2
+
+      - name: Setup WooCommerce Monorepo
+        uses: ./.github/actions/setup-woocommerce-monorepo
+        with:
+          build: false
+
+      - name: Build zip
+        working-directory: plugins/woocommerce
+        run: bash bin/build-zip.sh
+
       - name: Deploy nightly build
         uses: WebFreak001/deploy-nightly@v1.1.0
         env:
@@ -25,13 +38,15 @@ jobs:
         with:
           upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/25945111/assets{?name,label}
           release_id: 25945111
-          asset_path: ${{ steps.build.outputs.zip_path }}
+          asset_path: plugins/woocommerce/woocommerce.zip
           asset_name: woocommerce-${{ matrix.build }}-nightly.zip
           asset_content_type: application/zip
           max_releases: 1
   update:
     name: Update nightly tag commit ref
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: write
     steps:
       - name: Update nightly tag
         uses: richardsimko/github-tag-action@v1.0.5

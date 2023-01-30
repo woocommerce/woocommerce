@@ -1,0 +1,136 @@
+.woocommerce-add-product,
+.woocommerce-edit-product {
+	.woocommerce-product-form-actions {
+		margin-top: $gap-largest + $gap-smaller;
+	}
+	.components-checkbox-control,
+	.components-toggle-control {
+		& > * {
+			margin-bottom: 0;
+		}
+	}
+	.components-input-control {
+		&__prefix {
+			margin-left: $gap-smaller;
+		}
+		&__suffix {
+			margin-right: $gap-smaller;
+		}
+	}
+	.components-currency-control {
+		.components-input-control__prefix {
+			color: $gray-700;
+		}
+		.components-input-control__input {
+			text-align: right;
+		}
+	}
+	.components-checkbox-control {
+		&__label {
+			display: flex;
+			align-items: center;
+		}
+
+		&__input-container {
+			align-self: center;
+		}
+
+		.components-base-control__field {
+			display: flex;
+		}
+	}
+	.components-toggle-control
+	.components-base-control__field
+	.components-toggle-control__label {
+		display: flex;
+		align-items: center;
+	}
+	.woocommerce-tooltip {
+		margin-left: $gap-smaller;
+		&__button {
+			padding: 0;
+		}
+	}
+	.woocommerce-product-form {
+		&__custom-label-input {
+			display: flex;
+			flex-direction: column;
+			label {
+				display: block;
+				margin-bottom: $gap-smaller;
+			}
+		}
+		&__optional-input {
+			color: $gray-700;
+		}
+		&__secondary-text {
+			font-size: 12px;
+			color: $gray-700;
+			margin-top: $gap-smaller;
+		}
+	}
+	.has-error {
+		.components-base-control__help {
+			color: $studio-red-50;
+			margin-bottom: 0;
+		}
+	}
+
+	// This is needed because Gutenberg disables tooltip events on disabled elements.
+	// We are explicitly using this on a disabled item so this overlay prevents
+	// the tooltip from seeing the disabled property and allows mouse events to occur.
+	// See https://github.com/WordPress/gutenberg/blob/411b6eee8376e31bf9db4c15c92a80524ae38e9b/packages/components/src/tooltip/index.js#L99-L102
+	.woocommerce-product-form__tooltip-disabled-overlay {
+		position: relative;
+		display: inline-block;
+		&::after {
+			content: '';
+			display: inline-block;
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			background: transparent;
+			left: 0;
+			top: 0;
+			cursor: default;
+		}
+
+		.components-base-control {
+			margin-bottom: 0;
+		}
+	}
+	.half-width-field {
+		@include breakpoint( '<960px' ) {
+			width: 100%;
+		}
+		width: 50%;
+	}
+
+	.components-base-control__label {
+		.woocommerce-product-form__secondary-text {
+			display: block;
+			font-weight: 400;
+		}
+	}
+}
+
+.woocommerce-edit-product {
+	position: relative;
+
+	&__error {
+		background: #fff;
+		text-align: center;
+		border: 1px solid $gray-400;
+		border-radius: 2px;
+		padding: 1em 2em;
+	}
+
+	&__spinner {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: absolute;
+		width: 100%;
+		height: 100%;
+	}
+}

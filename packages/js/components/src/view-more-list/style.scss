@@ -1,0 +1,26 @@
+
+
+.woocommerce-view-more-list {
+	padding-left: 4px;
+	margin: 0 0 0 $gap-smallest;
+	vertical-align: middle;
+}
+
+.woocommerce-view-more-list__popover {
+	margin: 0;
+	padding: $gap;
+	text-align: left;
+}
+
+.woocommerce-view-more-list__popover__item {
+	display: block;
+	margin: $gap 0;
+
+	&:first-child {
+		margin-top: 0;
+	}
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}

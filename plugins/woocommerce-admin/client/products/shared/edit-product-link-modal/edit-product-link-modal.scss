@@ -1,0 +1,19 @@
+.woocommerce-product-link-edit-modal {
+	min-width: 650px;
+
+	&__buttons {
+		margin-top: $gap-larger;
+		display: flex;
+		flex-direction: row;
+		gap: 8px;
+		justify-content: flex-end;
+	}
+
+	.components-modal__header {
+		border-color: $gray-300;
+	}
+
+	.woocommerce-product-link-edit-modal__description {
+		margin: $gap-large 0;
+	}
+}

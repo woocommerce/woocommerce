@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix IdQuery selector for getItem selector in CRUD data stores

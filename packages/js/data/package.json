@@ -1,0 +1,100 @@
+{
+	"name": "@woocommerce/data",
+	"version": "4.1.0",
+	"description": "WooCommerce Admin data store and utilities",
+	"author": "Automattic",
+	"license": "GPL-3.0-or-later",
+	"keywords": [
+		"wordpress",
+		"woocommerce",
+		"data"
+	],
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "^7.13.3"
+	},
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/data/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"main": "build/index.js",
+	"module": "build-module/index.js",
+	"types": "build-types",
+	"react-native": "src/index",
+	"dependencies": {
+		"@woocommerce/date": "workspace:*",
+		"@woocommerce/navigation": "workspace:*",
+		"@wordpress/api-fetch": "^6.0.1",
+		"@wordpress/compose": "^5.1.2",
+		"@wordpress/core-data": "^4.1.2",
+		"@wordpress/data": "^6.15.0",
+		"@wordpress/data-controls": "^2.3.2",
+		"@wordpress/deprecated": "^3.3.1",
+		"@wordpress/element": "^4.1.1",
+		"@wordpress/hooks": "^3.5.0",
+		"@wordpress/i18n": "^4.3.1",
+		"@wordpress/url": "^3.4.1",
+		"dompurify": "^2.3.6",
+		"md5": "^2.3.0",
+		"qs": "^6.10.3",
+		"rememo": "^4.0.0"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"devDependencies": {
+		"@automattic/data-stores": "^2.0.1",
+		"@babel/core": "^7.17.5",
+		"@babel/runtime": "^7.17.2",
+		"@testing-library/react": "^12.1.3",
+		"@testing-library/react-hooks": "^7.0.2",
+		"@types/dompurify": "^2.3.3",
+		"@types/jest": "^27.4.1",
+		"@types/lodash": "^4.14.182",
+		"@types/md5": "^2.3.2",
+		"@types/qs": "^6.9.7",
+		"@types/react": "^17.0.2",
+		"@types/wordpress__compose": "^4.0.1",
+		"@types/wordpress__core-data": "^2.4.5",
+		"@types/wordpress__data": "^6.0.0",
+		"@types/wordpress__data-controls": "^2.2.0",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"eslint": "^8.12.0",
+		"jest": "^27.5.1",
+		"jest-cli": "^27.5.1",
+		"redux": "^4.1.0",
+		"rimraf": "^3.0.2",
+		"ts-jest": "^27.1.3",
+		"typescript": "^4.8.3"
+	},
+	"peerDependencies": {
+		"@wordpress/core-data": "^4.1.0",
+		"moment": "^2.18.1",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2"
+	},
+	"scripts": {
+		"turbo:build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
+		"turbo:test": "jest --config ./jest.config.json",
+		"prepare": "composer install",
+		"changelog": "composer exec -- changelogger",
+		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
+		"lint": "eslint src",
+		"start": "tsc --build --watch",
+		"prepack": "pnpm run clean && pnpm run build",
+		"lint:fix": "eslint src --fix",
+		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix",
+			"pnpm test-staged"
+		]
+	}
+}

@@ -1,0 +1,32 @@
+# Built CSS
+/assets/css/*
+
+# Built JS
+/assets/js/*
+/assets/client/*
+
+# Behat/CLI Tests
+tests/cli/installer
+tests/cli/composer.phar
+tests/cli/composer.lock
+tests/cli/composer.json
+tests/cli/vendor
+
+# Unit Tests
+/tests/bin/tmp
+/tests/e2e/config/local-*.json
+/tests/e2e/config/local.json
+/tests/e2e/screenshots
+/tests/e2e/plugins
+.phpunit.result.cache
+
+# Packages
+/packages/*
+!/packages/README.md
+!/packages/woocommerce-admin/woocommerce-admin.php
+
+# Language files
+i18n/languages/woocommerce.pot
+
+# Environment files
+.wp-env.override.json

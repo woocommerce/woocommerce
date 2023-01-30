@@ -1,0 +1,23 @@
+.collapsible-content-enter,
+.collapsible-content-exit-done {
+	opacity: 0;
+}
+
+.collapsible-content-enter-active {
+	opacity: 1;
+}
+
+.collapsible-content-appear,
+.collapsible-content-appear-active,
+.collapsible-content-appear-done,
+.collapsible-content-enter-done {
+	opacity: 1;
+}
+
+.collapsible-content-exit {
+	opacity: 1;
+}
+
+.collapsible-content-exit-active {
+	opacity: 0;
+}

@@ -1,0 +1,81 @@
+{
+	"$schema": "https://turborepo.org/schema.json",
+	"pipeline": {
+		"build:feature-config": {
+			"cache": false
+		},
+		"turbo:build": {
+			"dependsOn": [ "build:feature-config", "^turbo:build", "$WC_ADMIN_PHASE" ],
+			"inputs": [
+				"src/**/*.js",
+				"src/**/*.jsx",
+				"src/**/*.ts",
+				"src/**/*.tsx",
+				"src/**/*.php",
+				"includes/**/*.php"
+			],
+			"outputs": [
+				"dist/**",
+				"build/**",
+				"build-module/**",
+				"build-style/**",
+				"build-types/**"
+			],
+			"outputMode": "new-only"
+		},
+
+		"woocommerce#turbo:build": {
+			"dependsOn": [
+				"build:feature-config",
+				"^turbo:build",
+				"woocommerce/client/admin#turbo:build",
+				"woocommerce/client/legacy#turbo:build"
+			],
+			"outputs": [],
+			"inputs": [
+				"src/**/*.php",
+				"includes/**/*.php"
+			],
+			"outputMode": "new-only"
+		},
+
+		"woocommerce/client/legacy#turbo:build": {
+			"dependsOn": [ "^turbo:build" ],
+			"outputs": [
+				"../../assets/js/**",
+				"../../assets/css/**"
+			],
+			"inputs": [
+				"css/**/*.scss",
+				"css/**/*.css",
+				"js/**/*.js"
+			],
+			"outputMode": "new-only"
+		},
+
+		"woocommerce/client/admin#turbo:build": {
+			"dependsOn": [ 
+				"build:feature-config", 
+				"^turbo:build", 
+				"$WC_ADMIN_PHASE"
+			],
+			"outputs": [
+				"../woocommerce/assets/client/admin/**"
+			],
+			"inputs": [
+				"client/**/*.js",
+				"client/**/*.jsx",
+				"client/**/*.ts",
+				"client/**/*.tsx",
+				"client/**/*.scss"
+			],
+			"outputMode": "new-only"
+		},
+
+		"turbo:test": {
+			"cache": false,
+			"dependsOn": [ "turbo:build" ],
+			"outputs": []
+		}
+	}
+}

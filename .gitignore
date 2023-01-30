@@ -1,78 +1,96 @@
-# Editors
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea
+.vscode/*
 project.xml
 project.properties
-/nbproject/private/
-.buildpath
 .project
 .settings*
-.idea
-.vscode
 *.sublime-project
 *.sublime-workspace
 .sublimelinterrc
-*.swp
 
 # Grunt
-node_modules/
 none
 
 # Sass
 .sass-cache/
 
-# Compiled CSS
-/assets/css/*.css
-/assets/css/photoswipe/**/*.min.css
+# Logs
+logs/
 
-# Minified JS
-/assets/js/**/*.min.js
+# Eslint Cache
+.eslintcache
 
-# OS X metadata
-.DS_Store
+# Environment files
+wp-cli.local.yml
+yarn-error.log
+npm-debug.log
+.pnpm-debug.log
 
-# Windows junk
-Thumbs.db
+# Build files
+*.sql
+*.swp
+*.zip
 
-# Behat/CLI Tests
-tests/cli/installer
-tests/cli/composer.phar
-tests/cli/composer.lock
-tests/cli/composer.json
-tests/cli/vendor
+# Built packages
+build/
+build-module/
+build-style/
+build-types/
+dist/
+
+# Project files
+node_modules/
+vendor/
+
+# TypeScript files
+tsconfig.tsbuildinfo
+
+# Node Package Dependencies
+package-lock.json
+
+# wp-env config
+.wp-env.override.json
 
 # Unit tests
-/tmp
-/tests/bin/tmp
-/tests/e2e/config/local-*.json
-/tests/e2e/config/local.json
-/tests/e2e/config/default.json
-/tests/e2e/env/config/default.json
-/tests/e2e/docker
-/tests/e2e/env/docker/wp-cli/initialize.sh
-/tests/e2e/env/build/
-/tests/e2e/env/build-module/
-/tests/e2e/utils/build/
-/tests/e2e/utils/build-module/
-
-# Logs
-/logs
+tmp/
 
 # Composer
-/vendor/
-/bin/composer/**/vendor/
-/lib/vendor/
+vendor/
+bin/composer/**/vendor/
+lib/vendor/
 contributors.md
 contributors.html
 
-# Packages
-/packages/*
-!/packages/README.md
+# Yarn
+yarn.lock
 
-# Screenshots for e2e tests failures
-/screenshots/
+# Editors
+nbproject/private/
 
-# Language files
-i18n/languages/woocommerce.pot
+# E2E and API Test Results
+test-results
 
-# Build
-build/
-woocommerce.zip
+# Admin Feature config
+plugins/woocommerce/includes/react-admin/feature-config.php
+
+# PHP lint
+phpcs-report.xml
+
+# Allure directories
+allure-report
+allure-results
+
+# Code analyzer output and env
+changes.json
+.env
+
+# Turborepo
+.turbo
+
+# Support .gitkeep Files
+!.gitkeep

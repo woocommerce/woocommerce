@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Standardize lint scripts: add lint:fix

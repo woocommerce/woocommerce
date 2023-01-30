@@ -1,0 +1,62 @@
+{
+	"name": "@woocommerce/eslint-plugin",
+	"version": "2.2.0",
+	"description": "ESLint plugin for WooCommerce development.",
+	"author": "Automattic",
+	"license": "GPL-2.0-or-later",
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "^7.13.3"
+	},
+	"keywords": [
+		"wordpress",
+		"woocommerce",
+		"eslint",
+		"plugin"
+	],
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/eslint-plugin/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git",
+		"directory": "packages/eslint-plugin"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"files": [
+		"configs",
+		"rules",
+		"index.js"
+	],
+	"main": "index.js",
+	"dependencies": {
+		"@typescript-eslint/parser": "^5.14.0",
+		"@wordpress/eslint-plugin": "^13.3.0",
+		"eslint-plugin-react-hooks": "^4.3.0",
+		"eslint-plugin-testing-library": "^5.1.0",
+		"requireindex": "^1.2.0"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"prepare": "composer install",
+		"changelog": "composer exec -- changelogger",
+		"lint": "eslint ./rules ./configs",
+		"lint:fix": "eslint ./rules ./configs --fix"
+	},
+	"devDependencies": {
+		"@babel/core": "^7.17.5",
+		"eslint": "^8.25.0",
+		"jest": "^27.5.1",
+		"jest-cli": "^27.5.1",
+		"rimraf": "^3.0.2",
+		"ts-jest": "^27.1.3",
+		"typescript": "^4.8.3"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix"
+		]
+	}
+}

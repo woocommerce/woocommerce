@@ -1,0 +1,30 @@
+name: 'Close stale needs-feedback issues'
+on:
+  schedule:
+    - cron: '21 0 * * *'
+
+permissions: {}
+
+jobs:
+  stale:
+    if: |
+      ! contains(github.event.issue.labels.*.name, 'type: enhancement')
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/stale@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          stale-issue-message: "As a part of this repository's maintenance, this issue is being marked as stale due to inactivity. Please feel free to comment on it in case we missed something.\n\n###### After 7 days with no activity this issue will be automatically be closed."
+          close-issue-message: 'This issue was closed because it has been 14 days with no activity.'
+          days-before-issue-stale: 7
+          days-before-issue-close: 7
+          days-before-pr-close: -1
+          stale-issue-label: 'status: stale'
+          stale-pr-label: 'status: stale'
+          only-issue-labels: 'needs: author feedback'
+          close-issue-label: "status: can't reproduce"
+          ascending: true

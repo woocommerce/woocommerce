@@ -1,0 +1,185 @@
+name: Smoke test release
+on:
+    workflow_dispatch:
+        inputs:
+            release_id:
+                description: 'WooCommerce Release Id'
+                required: true
+
+permissions: {}
+
+jobs:
+    login-run:
+        name: Daily smoke test on release.
+        runs-on: ubuntu-20.04
+        permissions:
+          contents: read
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                  ref: trunk
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                build-filters: woocommerce
+
+            - name: Install Jest
+              run: npm install -g jest
+
+            - name: Run smoke test.
+              working-directory: plugins/woocommerce
+              env:
+                  SMOKE_TEST_URL: ${{ secrets.RELEASE_TEST_URL }}
+                  SMOKE_TEST_ADMIN_USER: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
+                  SMOKE_TEST_ADMIN_PASSWORD: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
+                  SMOKE_TEST_ADMIN_USER_EMAIL: ${{ secrets.RELEASE_TEST_ADMIN_USER_EMAIL }}
+                  SMOKE_TEST_CUSTOMER_USER: ${{ secrets.RELEASE_TEST_CUSTOMER_USER }}
+                  SMOKE_TEST_CUSTOMER_PASSWORD: ${{ secrets.RELEASE_TEST_CUSTOMER_PASSWORD }}
+                  WC_E2E_SCREENSHOTS: 1
+                  E2E_RETEST: 1
+                  E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
+                  E2E_SLACK_CHANNEL: 'C02DS4NE72S'
+                  TEST_RELEASE: 1
+                  UPDATE_WC: 1
+                  DEFAULT_TIMEOUT_OVERRIDE: 120000
+                  BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
+                  USER_KEY: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
+                  USER_SECRET: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
+              run: |
+                  pnpm exec wc-e2e docker:up
+                  pnpm exec wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
+                  pnpm exec wc-e2e test:e2e
+                  pnpm exec wc-api-tests test api
+    test-wp-version:
+        name: Smoke test on L-${{ matrix.wp }} WordPress version
+        runs-on: ubuntu-20.04
+        permissions:
+          contents: read
+        strategy:
+            matrix:
+                wp: ['1', '2']
+        steps:
+            - name: Create dirs.
+              run: |
+                  mkdir -p package/woocommerce
+                  mkdir -p tmp/woocommerce 
+
+            - uses: actions/checkout@v3
+              with:
+                  path: package/woocommerce
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                build-filters: woocommerce
+
+            - name: Fetch Asset ID
+              id: fetch_asset_id
+              uses: actions/github-script@v5
+              env:
+                  RELEASE_ID: ${{ github.event.inputs.release_id }}
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  REPO: ${{ github.repository }}
+              with:
+                  script: |
+                      const script = require( './package/woocommerce/.github/workflows/scripts/fetch-asset-id.js' )
+                      await script({github, context, core})
+
+            - name: Download WooCommerce release zip
+              working-directory: tmp
+              run: |
+                  curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
+
+                  unzip woocommerce.zip -d woocommerce
+                  rsync -a woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
+
+            - name: Load docker images and start containers.
+              working-directory: package/woocommerce
+              env:
+                  LATEST_WP_VERSION_MINUS: ${{ matrix.wp }}
+              run: pnpm docker:up --filter=woocommerce
+
+            - name: Run tests command.
+              working-directory: package/woocommerce/plugins/woocommerce
+              env:
+                  WC_E2E_SCREENSHOTS: 1
+                  E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
+                  E2E_SLACK_CHANNEL: ${{ secrets.RELEASE_TEST_SLACK_CHANNEL }}
+              run: pnpm exec wc-e2e test:e2e
+
+    test-plugins:
+        name: Smoke tests with ${{ matrix.plugin }} plugin installed
+        runs-on: ubuntu-20.04
+        permissions:
+          contents: read
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - plugin: 'WooCommerce Payments'
+                      repo: 'automattic/woocommerce-payments'
+                    - plugin: 'WooCommerce PayPal Payments'
+                      repo: 'woocommerce/woocommerce-paypal-payments'
+                    - plugin: 'WooCommerce Shipping & Tax'
+                      repo: 'automattic/woocommerce-services'
+                    - plugin: 'WooCommerce Subscriptions'
+                      repo: WC_SUBSCRIPTIONS_REPO
+                      private: true
+                    - plugin: 'WordPress SEO' # Yoast SEO in the UI, but the slug is wordpress-seo
+                      repo: 'Yoast/wordpress-seo'
+                    - plugin: 'Contact Form 7'
+                      repo: 'takayukister/contact-form-7'
+        steps:
+            - name: Create dirs.
+              run: |
+                  mkdir -p package/woocommerce
+                  mkdir -p tmp/woocommerce
+
+            - uses: actions/checkout@v3
+              with:
+                  path: package/woocommerce
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                build-filters: woocommerce
+
+            - name: Fetch Asset ID
+              id: fetch_asset_id
+              uses: actions/github-script@v5
+              env:
+                  RELEASE_ID: ${{ github.event.inputs.release_id }}
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  REPO: ${{ github.repository }}
+              with:
+                  script: |
+                      const script = require( './package/woocommerce/.github/workflows/scripts/fetch-asset-id.js' )
+                      await script({github, context, core})
+
+            - name: Download WooCommerce release zip
+              working-directory: tmp
+              run: |
+                  curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
+
+                  unzip woocommerce.zip -d woocommerce
+                  rsync -a woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
+
+            - name: Load docker images and start containers.
+              working-directory: package/woocommerce
+              env:
+                  LATEST_WP_VERSION_MINUS: ${{ matrix.wp }}
+              run: pnpm docker:up --filter=woocommerce
+
+            - name: Run tests command.
+              working-directory: package/woocommerce/plugins/woocommerce
+              env:
+                  WC_E2E_SCREENSHOTS: 1
+                  E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
+                  E2E_SLACK_CHANNEL: ${{ secrets.RELEASE_TEST_SLACK_CHANNEL }}
+                  PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
+                  PLUGIN_NAME: ${{ matrix.plugin }}
+                  GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
+              run: |
+                  pnpm exec wc-e2e test:e2e tests/e2e/specs/smoke-tests/upload-plugin.js
+                  pnpm exec wc-e2e test:e2e
