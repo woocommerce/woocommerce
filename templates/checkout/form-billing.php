@@ -22,9 +22,8 @@ defined( 'ABSPATH' ) || exit;
  *
  * @param checkout instance of WC_Checkout.
  */
-do_action( 'woocommerce_before_checkout_billing_html', $checkout );
-?>
-?>
+do_action( 'woocommerce_before_checkout_billing_html', $checkout ); ?>
+
 <div class="woocommerce-billing-fields">
 	<?php if ( wc_ship_to_billing_address_only() && WC()->cart->needs_shipping() ) : ?>
 
@@ -84,5 +83,4 @@ do_action( 'woocommerce_before_checkout_billing_html', $checkout );
  *
  * @param checkout instance of WC_Checkout.
  */
-do_action( 'woocommerce_after_checkout_billing_html', $checkout );
-?>
+do_action( 'woocommerce_after_checkout_billing_html', $checkout ); ?>

@@ -22,9 +22,8 @@ defined( 'ABSPATH' ) || exit;
  *
  * @param checkout instance of WC_Checkout.
  */
-do_action( 'woocommerce_before_checkout_shipping_html', $checkout );
-?>
-?>
+do_action( 'woocommerce_before_checkout_shipping_html', $checkout ); ?>
+
 <div class="woocommerce-shipping-fields">
 	<?php if ( true === WC()->cart->needs_shipping_address() ) : ?>
 
