@@ -649,8 +649,8 @@
             }
 
             // Unbind previous transitionEnd events and re-bind new transitionEnd event
-            slider.container.off("webkitTransitionEnd transitionend");
-            slider.container.on("webkitTransitionEnd transitionend", function() {
+            slider.container.off("transitionend");
+            slider.container.on("transitionend", function() {
               clearTimeout(slider.ensureAnimationEnd);
               slider.wrapup(dimension);
             });
