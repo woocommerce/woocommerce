@@ -24,13 +24,6 @@ export const getNoticeContexts = () => {
 	return Object.values( noticeContexts );
 };
 
-const hasStoreNoticesContainer = ( container: string ): boolean => {
-	const containers = select(
-		'wc/store/store-notices'
-	).getRegisteredContainers();
-	return containers.includes( container );
-};
-
 /**
  * Wrapper for @wordpress/notices createNotice.
  */
@@ -52,19 +45,6 @@ export const createNotice = (
 		...options,
 		context: noticeContext,
 	} );
-};
-
-/**
- * Creates a notice only if the Store Notice Container is visible.
- */
-export const createNoticeIfVisible = (
-	status: 'error' | 'warning' | 'info' | 'success',
-	message: string,
-	options: Partial< NoticeOptions >
-) => {
-	if ( options?.context && hasStoreNoticesContainer( options.context ) ) {
-		createNotice( status, message, options );
-	}
 };
 
 /**

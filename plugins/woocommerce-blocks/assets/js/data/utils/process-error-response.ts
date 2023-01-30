@@ -1,11 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	createNotice,
-	createNoticeIfVisible,
-	DEFAULT_ERROR_MESSAGE,
-} from '@woocommerce/base-utils';
+import { createNotice, DEFAULT_ERROR_MESSAGE } from '@woocommerce/base-utils';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
 	objectHasProp,
@@ -83,6 +79,35 @@ export const getErrorDetails = (
 };
 
 /**
+ * Gets appropriate error context from error code.
+ */
+const getErrorContextFromCode = ( code: string ): string => {
+	switch ( code ) {
+		case 'woocommerce_rest_missing_email_address':
+		case 'woocommerce_rest_invalid_email_address':
+			return noticeContexts.CONTACT_INFORMATION;
+		default:
+			return noticeContexts.CART;
+	}
+};
+
+/**
+ * Gets appropriate error context from error param name.
+ */
+const getErrorContextFromParam = ( param: string ): string | undefined => {
+	switch ( param ) {
+		case 'invalid_email':
+			return noticeContexts.CONTACT_INFORMATION;
+		case 'billing_address':
+			return noticeContexts.BILLING_ADDRESS;
+		case 'shipping_address':
+			return noticeContexts.SHIPPING_ADDRESS;
+		default:
+			return undefined;
+	}
+};
+
+/**
  * Processes the response for an invalid param error, with response code rest_invalid_param.
  */
 const processInvalidParamResponse = (
@@ -92,28 +117,13 @@ const processInvalidParamResponse = (
 	const errorDetails = getErrorDetails( response );
 
 	errorDetails.forEach( ( { code, message, id, param } ) => {
-		switch ( code ) {
-			case 'invalid_email':
-				createNotice( 'error', message, {
-					id,
-					context: context || noticeContexts.CONTACT_INFORMATION,
-				} );
-				return;
-		}
-		switch ( param ) {
-			case 'billing_address':
-				createNoticeIfVisible( 'error', message, {
-					id,
-					context: context || noticeContexts.BILLING_ADDRESS,
-				} );
-				break;
-			case 'shipping_address':
-				createNoticeIfVisible( 'error', message, {
-					id,
-					context: context || noticeContexts.SHIPPING_ADDRESS,
-				} );
-				break;
-		}
+		createNotice( 'error', message, {
+			id,
+			context:
+				context ||
+				getErrorContextFromParam( param ) ||
+				getErrorContextFromCode( code ),
+		} );
 	} );
 };
 
@@ -123,27 +133,27 @@ const processInvalidParamResponse = (
  * This is where we can handle specific error codes and display notices in specific contexts.
  */
 export const processErrorResponse = (
-	response: ApiErrorResponse,
-	context: string | undefined
+	response: ApiErrorResponse | null,
+	context?: string | undefined
 ) => {
 	if ( ! isApiErrorResponse( response ) ) {
 		return;
 	}
-	switch ( response.code ) {
-		case 'woocommerce_rest_missing_email_address':
-		case 'woocommerce_rest_invalid_email_address':
-			createNotice( 'error', response.message, {
-				id: response.code,
-				context: context || noticeContexts.CONTACT_INFORMATION,
-			} );
-			break;
-		case 'rest_invalid_param':
-			processInvalidParamResponse( response, context );
-			break;
-		default:
-			createNotice( 'error', response.message || DEFAULT_ERROR_MESSAGE, {
-				id: response.code,
-				context: context || noticeContexts.CHECKOUT,
-			} );
+
+	if ( response.code === 'rest_invalid_param' ) {
+		return processInvalidParamResponse( response, context );
 	}
+
+	let errorMessage =
+		decodeEntities( response.message ) || DEFAULT_ERROR_MESSAGE;
+
+	// Replace the generic invalid JSON message with something more user friendly.
+	if ( response.code === 'invalid_json' ) {
+		errorMessage = DEFAULT_ERROR_MESSAGE;
+	}
+
+	createNotice( 'error', errorMessage, {
+		id: response.code,
+		context: context || getErrorContextFromCode( response.code ),
+	} );
 };
