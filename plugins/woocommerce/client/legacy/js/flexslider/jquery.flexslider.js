@@ -23,7 +23,7 @@
     var namespace = slider.vars.namespace,
         touch = (( "ontouchstart" in window ) || window.DocumentTouch && document instanceof DocumentTouch) && slider.vars.touch,
         // deprecating this idea, as devices are being released with both of these events
-        eventType = "click touchend MSPointerUp keyup",
+        eventType = "click touchend keyup",
         watchedEvent = "",
         watchedEventClearTimer,
         vertical = slider.vars.direction === "vertical",
@@ -417,7 +417,7 @@
             onTouchStart = function(e) {
               if (slider.animating) {
                 e.preventDefault();
-              } else if ( ( window.navigator.msPointerEnabled ) || e.touches.length === 1 ) {
+              } else if ( e.touches.length === 1 ) {
                 slider.pause();
                 // CAROUSEL:
                 cwidth = (vertical) ? slider.h : slider. w;
