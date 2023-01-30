@@ -685,7 +685,7 @@ const AttributeFilterBlock = ( {
 			</div>
 
 			<div className="wc-block-attribute-filter__actions">
-				{ checked.length > 0 && ! isLoading && (
+				{ ( checked.length > 0 || isEditor ) && ! isLoading && (
 					<FilterResetButton
 						onClick={ () => {
 							setChecked( [] );
