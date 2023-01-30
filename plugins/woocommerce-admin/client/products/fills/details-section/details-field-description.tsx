@@ -11,10 +11,10 @@ import { BlockInstance, serialize, parse } from '@wordpress/blocks';
 import { useState } from '@wordpress/element';
 
 export const DetailsDescriptionField = () => {
-	const { setValue, values } = useFormContext< Product >();
+	const { setValue, getValues } = useFormContext< Product >();
 	const [ descriptionBlocks, setDescriptionBlocks ] = useState<
 		BlockInstance[]
-	>( parse( values.description || '' ) );
+	>( parse( getValues().description || '' ) );
 
 	return (
 		<RichTextEditor

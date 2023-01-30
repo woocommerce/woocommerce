@@ -11,9 +11,9 @@ import { BlockInstance, serialize, parse } from '@wordpress/blocks';
 import { useState } from '@wordpress/element';
 
 export const DetailsSummaryField = () => {
-	const { setValue, values } = useFormContext< Product >();
+	const { setValue, getValues } = useFormContext< Product >();
 	const [ summaryBlocks, setSummaryBlocks ] = useState< BlockInstance[] >(
-		parse( values.short_description || '' )
+		parse( getValues().short_description || '' )
 	);
 
 	return (
