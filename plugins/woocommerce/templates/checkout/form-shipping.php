@@ -18,6 +18,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Trigger action before rendering shipping fields HTML. Allow you to add custom HTML sections.
+ *
+ * @param checkout instance of WC_Checkout.
+ */
 do_action( 'woocommerce_before_checkout_shipping_html', $checkout );
 ?>
 <div class="woocommerce-shipping-fields">
@@ -71,4 +76,10 @@ do_action( 'woocommerce_before_checkout_shipping_html', $checkout );
 	<?php do_action( 'woocommerce_after_order_notes', $checkout ); ?>
 </div>
 
-<?php do_action( 'woocommerce_after_checkout_shipping_html', $checkout ); ?>
+<?php
+/**
+ * Trigger action after rendering shipping fields HTML. Allow you to add custom HTML sections.
+ *
+ * @param checkout instance of WC_Checkout.
+ */
+do_action( 'woocommerce_after_checkout_shipping_html', $checkout ); ?>

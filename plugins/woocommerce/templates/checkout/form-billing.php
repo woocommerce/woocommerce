@@ -18,6 +18,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Trigger action before rendering billing fields HTML. Allow you to add custom HTML sections.
+ *
+ * @param checkout instance of WC_Checkout.
+ */
 do_action( 'woocommerce_before_checkout_billing_html', $checkout );
 
 ?>
@@ -76,5 +81,10 @@ do_action( 'woocommerce_before_checkout_billing_html', $checkout );
 	</div>
 <?php endif;
 
+/**
+ * Trigger action after rendering billing fields HTML. Allow you to add custom HTML sections.
+ *
+ * @param checkout instance of WC_Checkout.
+ */
 do_action( 'woocommerce_after_checkout_billing_html', $checkout );
 ?>

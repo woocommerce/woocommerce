@@ -1,0 +1,6 @@
+.wc-block-components-product-name {
+	@include font-size(regular);
+	@include wrap-break-word();
+	display: block;
+	max-width: max-content;
+}
