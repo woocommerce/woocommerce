@@ -17,6 +17,12 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+/**
+ * Trigger action before rendering billing fields HTML. Allow you to add custom HTML sections.
+ *
+ * @param checkout instance of WC_Checkout.
+ */
+do_action( 'woocommerce_before_checkout_billing_html', $checkout );
 ?>
 <div class="woocommerce-billing-fields">
 	<?php if ( wc_ship_to_billing_address_only() && WC()->cart->needs_shipping() ) : ?>
@@ -71,4 +77,10 @@ defined( 'ABSPATH' ) || exit;
 
 		<?php do_action( 'woocommerce_after_checkout_registration_form', $checkout ); ?>
 	</div>
-<?php endif; ?>
+<?php endif;
+/**
+ * Trigger action after rendering billing fields HTML. Allow you to add custom HTML sections.
+ *
+ * @param checkout instance of WC_Checkout.
+ */
+do_action( 'woocommerce_after_checkout_billing_html', $checkout ); ?>
