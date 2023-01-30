@@ -10,5 +10,14 @@
 		position: absolute;
 		transform: translateY(-50%);
 		top: 50%;
+		fill: currentColor;
+	}
+}
+
+.rtl {
+	.wc-block-components-checkout-return-to-cart-button {
+		svg {
+			transform: translateY(-50%) scale(-1);
+		}
 	}
 }
