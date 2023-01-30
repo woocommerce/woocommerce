@@ -12,8 +12,9 @@ const FormContext2 = createContext(
 	{} as UseFormReturn< any, any >
 );
 
-function useFormContext() {
-	const formContext = useContext( FormContext2 );
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function useFormContext< Values extends Record< string, any > >() {
+	const formContext = useContext< UseFormReturn< Values > >( FormContext2 );
 	return formContext;
 }
 
