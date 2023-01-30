@@ -11,8 +11,7 @@
 			"background": false
 		},
 		"typography": {
-			"fontSize": true,
-			"__experimentalFontFamily": true
+			"fontSize": true
 		}
 	},
 	"attributes": {},
