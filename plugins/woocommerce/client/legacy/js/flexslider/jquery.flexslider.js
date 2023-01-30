@@ -63,18 +63,8 @@
         slider.started = false;
         slider.startTimeout = null;
         // TOUCH/USECSS:
-        slider.transitions = !slider.vars.video && !fade && slider.vars.useCSS && (function() {
-          var obj = document.createElement('div'),
-              props = ['perspectiveProperty', 'WebkitPerspective', 'MozPerspective', 'OPerspective', 'msPerspective'];
-          for (var i in props) {
-            if ( obj.style[ props[i] ] !== undefined ) {
-              slider.pfx = props[i].replace('Perspective','').toLowerCase();
-              slider.prop = "-" + slider.pfx + "-transform";
-              return true;
-            }
-          }
-          return false;
-        }());
+        slider.transitions = !slider.vars.video && !fade && slider.vars.useCSS;
+        if (slider.transitions) slider.prop = "transform";
         slider.isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
         slider.ensureAnimationEnd = '';
         // CONTROLSCONTAINER:
@@ -921,7 +911,6 @@
       if (slider.transitions) {
         target = (vertical) ? "translate3d(0," + target + ",0)" : "translate3d(" + (parseInt(target)+'px') + ",0,0)";
         dur = (dur !== undefined) ? (dur/1000) + "s" : "0s";
-        slider.container.css("-" + slider.pfx + "-transition-duration", dur);
          slider.container.css("transition-duration", dur);
       }
 
