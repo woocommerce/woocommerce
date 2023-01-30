@@ -652,7 +652,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 					$this->column_names[ 'attributes:taxonomy' . $i ] = sprintf( __( 'Attribute %d global', 'woocommerce' ), $i );
 
 					if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
-						$row[ 'attributes:name' . $i ] = wc_attribute_label( $attribute->get_name(), $product );
+						$row[ 'attributes:name' . $i ] = html_entity_decode( wc_attribute_label( $attribute->get_name(), $product ), ENT_QUOTES );
 
 						if ( $attribute->is_taxonomy() ) {
 							$terms  = $attribute->get_terms();
@@ -671,7 +671,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 						$row[ 'attributes:visible' . $i ] = $attribute->get_visible();
 					} else {
-						$row[ 'attributes:name' . $i ] = wc_attribute_label( $attribute_name, $product );
+						$row[ 'attributes:name' . $i ] = html_entity_decode( wc_attribute_label( $attribute_name, $product ), ENT_QUOTES );
 
 						if ( 0 === strpos( $attribute_name, 'pa_' ) ) {
 							$option_term = get_term_by( 'slug', $attribute, $attribute_name ); // @codingStandardsIgnoreLine.
