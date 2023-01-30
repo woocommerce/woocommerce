@@ -114,6 +114,7 @@ export const defaultCartData: StoreCart = {
 	cartHasCalculatedShipping: false,
 	paymentRequirements: EMPTY_PAYMENT_REQUIREMENTS,
 	receiveCart: () => undefined,
+	receiveCartContents: () => undefined,
 	extensions: EMPTY_EXTENSIONS,
 };
 
@@ -174,6 +175,10 @@ export const useStoreCart = (
 						typeof previewCart?.receiveCart === 'function'
 							? previewCart.receiveCart
 							: () => undefined,
+					receiveCartContents:
+						typeof previewCart?.receiveCartContents === 'function'
+							? previewCart.receiveCartContents
+							: () => undefined,
 				};
 			}
 
@@ -185,7 +190,7 @@ export const useStoreCart = (
 				! store.hasFinishedResolution( 'getCartData' );
 
 			const isLoadingRates = store.isCustomerDataUpdating();
-			const { receiveCart } = dispatch( storeKey );
+			const { receiveCart, receiveCartContents } = dispatch( storeKey );
 			const billingAddress = decodeValues( cartData.billingAddress );
 			const shippingAddress = cartData.needsShipping
 				? decodeValues( cartData.shippingAddress )
@@ -232,6 +237,7 @@ export const useStoreCart = (
 				cartHasCalculatedShipping: cartData.hasCalculatedShipping,
 				paymentRequirements: cartData.paymentRequirements,
 				receiveCart,
+				receiveCartContents,
 			};
 		},
 		[ shouldSelect ]

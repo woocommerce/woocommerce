@@ -31,11 +31,12 @@ const Template: Story< TotalsCouponProps > = ( args ) => {
 	const onSubmit = ( code: string ) => {
 		args.onSubmit?.( code );
 		setArgs( { isLoading: true } );
-
-		setTimeout(
-			() => setArgs( { isLoading: false } ),
-			INTERACTION_TIMEOUT
-		);
+		return new Promise( ( resolve ) => {
+			setTimeout( () => {
+				setArgs( { isLoading: false } );
+				resolve( true );
+			}, INTERACTION_TIMEOUT );
+		} );
 	};
 
 	return <TotalsCoupon { ...args } onSubmit={ onSubmit } />;
