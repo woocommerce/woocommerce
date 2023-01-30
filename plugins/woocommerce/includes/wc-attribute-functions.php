@@ -207,6 +207,8 @@ function wc_attribute_label( $name, $product = '' ) {
 	} else {
 		$label = $name;
 	}
+	
+	$label = html_entity_decode( $label, ENT_QUOTES );
 
 	return apply_filters( 'woocommerce_attribute_label', $label, $name, $product );
 }
