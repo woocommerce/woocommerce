@@ -134,7 +134,7 @@
           }
           // initialize animation
           //If we're visible, or we don't use PageVisibility API
-          if(!slider.vars.pauseInvisible || !methods.pauseInvisible.isHidden()) {
+          if(!slider.vars.pauseInvisible || document.visibilityState === 'visible') {
             (slider.vars.initDelay > 0) ? slider.startTimeout = setTimeout(slider.play, slider.vars.initDelay) : slider.play();
           }
         }
@@ -533,13 +533,9 @@
         return $clone;
       },
       pauseInvisible: {
-        visProp: null,
         init: function() {
-          var visProp = methods.pauseInvisible.getHiddenProp();
-          if (visProp) {
-            var evtname = visProp.replace(/[H|h]idden/,'') + 'visibilitychange';
-            document.addEventListener(evtname, function() {
-              if (methods.pauseInvisible.isHidden()) {
+            document.addEventListener('visibilitychange', function() {
+              if (document.visibilityState === 'hidden') {
                 if(slider.startTimeout) {
                   clearTimeout(slider.startTimeout); //If clock is ticking, stop timer and prevent from starting while invisible
                 } else {
@@ -558,29 +554,6 @@
                 }
               }
             });
-          }
-        },
-        isHidden: function() {
-          var prop = methods.pauseInvisible.getHiddenProp();
-          if (!prop) {
-            return false;
-          }
-          return document[prop];
-        },
-        getHiddenProp: function() {
-          var prefixes = ['webkit','moz','ms','o'];
-          // if 'hidden' is natively supported just return it
-          if ('hidden' in document) {
-            return 'hidden';
-          }
-          // otherwise loop over all the known prefixes until we find one
-          for ( var i = 0; i < prefixes.length; i++ ) {
-              if ((prefixes[i] + 'Hidden') in document) {
-                return prefixes[i] + 'Hidden';
-              }
-          }
-          // otherwise it's not supported
-          return null;
         }
       },
       setToClearWatchedEvent: function() {
