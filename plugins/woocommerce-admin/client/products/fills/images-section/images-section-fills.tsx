@@ -5,9 +5,9 @@ import { __ } from '@wordpress/i18n';
 import {
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 	__experimentalWooProductFieldItem as WooProductFieldItem,
-	__experimentalProductFieldSection as ProductFieldSection,
 	Link,
 } from '@woocommerce/components';
+import { __experimentalProductFieldSection as ProductFieldSection } from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**

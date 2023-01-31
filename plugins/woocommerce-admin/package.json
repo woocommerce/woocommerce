@@ -151,6 +151,7 @@
 		"@woocommerce/navigation": "workspace:*",
 		"@woocommerce/notices": "workspace:*",
 		"@woocommerce/number": "workspace:*",
+		"@woocommerce/product-editor": "workspace:*",
 		"@woocommerce/onboarding": "workspace:*",
 		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/babel-preset-default": "^6.5.1",
