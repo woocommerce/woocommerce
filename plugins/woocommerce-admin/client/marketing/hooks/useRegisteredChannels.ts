@@ -12,7 +12,7 @@ import { RegisteredChannel, SyncStatusType } from '~/marketing/types';
 import { STORE_KEY } from '~/marketing/data-multichannel/constants';
 import {
 	ApiFetchError,
-	Channel,
+	RegisteredChannel as APIRegisteredChannel,
 	ChannelsState,
 } from '~/marketing/data-multichannel/types';
 
@@ -34,7 +34,7 @@ const statusMap: Record< string, SyncStatusType > = {
 	synced: 'synced',
 };
 
-const convert = ( data: Channel ): RegisteredChannel => {
+const convert = ( data: APIRegisteredChannel ): RegisteredChannel => {
 	const issueType = data.errors_count >= 1 ? 'error' : 'none';
 	const issueText =
 		data.errors_count >= 1
@@ -63,15 +63,16 @@ export const useRegisteredChannels = (): UseRegisteredChannels => {
 	const { invalidateResolution } = useDispatch( STORE_KEY );
 
 	const refetch = useCallback( () => {
-		invalidateResolution( 'getChannels' );
+		invalidateResolution( 'getRegisteredChannels' );
 	}, [ invalidateResolution ] );
 
 	return useSelect( ( select ) => {
-		const { hasFinishedResolution, getChannels } = select( STORE_KEY );
-		const channels = getChannels< ChannelsState >();
+		const { hasFinishedResolution, getRegisteredChannels } =
+			select( STORE_KEY );
+		const channels = getRegisteredChannels< ChannelsState >();
 
 		return {
-			loading: ! hasFinishedResolution( 'getChannels' ),
+			loading: ! hasFinishedResolution( 'getRegisteredChannels' ),
 			data: channels.data?.map( convert ),
 			error: channels.error,
 			refetch,

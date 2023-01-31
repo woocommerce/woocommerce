@@ -6,7 +6,7 @@ export type ApiFetchError = {
 	message: string;
 };
 
-export type Channel = {
+export type RegisteredChannel = {
 	slug: string;
 	is_setup_completed: boolean;
 	settings_url: string;
@@ -18,7 +18,7 @@ export type Channel = {
 };
 
 export type ChannelsState = {
-	data?: Array< Channel >;
+	data?: Array< RegisteredChannel >;
 	error?: ApiFetchError;
 };
 
@@ -51,6 +51,6 @@ export type RecommendedChannelsState = {
 };
 
 export type State = {
-	channels: ChannelsState;
+	registeredChannels: ChannelsState;
 	recommendedChannels: RecommendedChannelsState;
 };

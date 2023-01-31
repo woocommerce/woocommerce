@@ -12,7 +12,7 @@ import { Action } from './actions';
 import { TYPES } from './action-types';
 
 const initialState = {
-	channels: {
+	registeredChannels: {
 		data: undefined,
 		error: undefined,
 	},
@@ -27,17 +27,17 @@ export const reducer: Reducer< State, Action > = (
 	action
 ) => {
 	switch ( action.type ) {
-		case TYPES.RECEIVE_CHANNELS_SUCCESS:
+		case TYPES.RECEIVE_REGISTERED_CHANNELS_SUCCESS:
 			return {
 				...state,
-				channels: {
+				registeredChannels: {
 					data: action.payload,
 				},
 			};
-		case TYPES.RECEIVE_CHANNELS_ERROR:
+		case TYPES.RECEIVE_REGISTERED_CHANNELS_ERROR:
 			return {
 				...state,
-				channels: {
+				registeredChannels: {
 					error: action.payload,
 				},
 			};

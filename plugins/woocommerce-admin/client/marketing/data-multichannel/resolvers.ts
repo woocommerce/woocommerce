@@ -7,25 +7,25 @@ import { apiFetch } from '@wordpress/data-controls';
  * Internal dependencies
  */
 import {
-	receiveChannelsSuccess,
-	receiveChannelsError,
+	receiveRegisteredChannelsSuccess,
+	receiveRegisteredChannelsError,
 	receiveRecommendedChannelsSuccess,
 	receiveRecommendedChannelsError,
 } from './actions';
-import { Channel, RecommendedChannel } from './types';
+import { RegisteredChannel, RecommendedChannel } from './types';
 import { API_NAMESPACE } from './constants';
 import { isApiFetchError } from './guards';
 
-export function* getChannels() {
+export function* getRegisteredChannels() {
 	try {
-		const data: Channel[] = yield apiFetch( {
+		const data: RegisteredChannel[] = yield apiFetch( {
 			path: `${ API_NAMESPACE }/channels`,
 		} );
 
-		yield receiveChannelsSuccess( data );
+		yield receiveRegisteredChannelsSuccess( data );
 	} catch ( error ) {
 		if ( isApiFetchError( error ) ) {
-			yield receiveChannelsError( error );
+			yield receiveRegisteredChannelsError( error );
 		}
 
 		throw error;
