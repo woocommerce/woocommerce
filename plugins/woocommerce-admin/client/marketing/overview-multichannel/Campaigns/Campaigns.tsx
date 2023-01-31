@@ -94,7 +94,6 @@ export const Campaigns = () => {
 						isNumeric: true,
 					},
 				] }
-				ids={ pagedData.map( ( el ) => el.id ) }
 				rows={ pagedData.map( ( el ) => {
 					return [
 						{
