@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add 'add_tab' method in FormFactory to allow plugins to extend the WooCommerce admin product form

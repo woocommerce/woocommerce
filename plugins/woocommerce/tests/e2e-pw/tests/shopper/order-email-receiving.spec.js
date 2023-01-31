@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { customerDetails, storeDetails } = require( '../../test-data/data' );
+const { customer, storeDetails } = require( '../../test-data/data' );
 const { api } = require( '../../utils' );
 
 let productId, orderId;
@@ -10,7 +10,6 @@ const product = {
 	price: '42.77',
 };
 
-const customerEmail = 'order-email-test@example.com';
 const storeName = 'WooCommerce Core E2E Test Suite';
 
 test.describe( 'Shopper Order Email Receiving', () => {
@@ -24,7 +23,7 @@ test.describe( 'Shopper Order Email Receiving', () => {
 	test.beforeEach( async ( { page } ) => {
 		await page.goto(
 			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
-				customerEmail
+				customer.email
 			) }`
 		);
 		// clear out the email logs before each test
@@ -54,20 +53,23 @@ test.describe( 'Shopper Order Email Receiving', () => {
 
 		await page.goto( '/checkout/' );
 
-		await page.fill( '#billing_first_name', customerDetails.us.first_name );
-		await page.fill( '#billing_last_name', customerDetails.us.last_name );
-		await page.fill( '#billing_address_1', customerDetails.us.address );
-		await page.fill( '#billing_city', customerDetails.us.city );
+		await page.fill(
+			'#billing_first_name',
+			customer.billing.us.first_name
+		);
+		await page.fill( '#billing_last_name', customer.billing.us.last_name );
+		await page.fill( '#billing_address_1', customer.billing.us.address );
+		await page.fill( '#billing_city', customer.billing.us.city );
 		await page.selectOption(
 			'#billing_country',
-			customerDetails.us.country
+			customer.billing.us.country
 		);
 
-		await page.selectOption( '#billing_state', customerDetails.us.state );
+		await page.selectOption( '#billing_state', customer.billing.us.state );
 
-		await page.fill( '#billing_postcode', customerDetails.us.zip );
-		await page.fill( '#billing_phone', customerDetails.us.phone );
-		await page.fill( '#billing_email', customerEmail );
+		await page.fill( '#billing_postcode', customer.billing.us.zip );
+		await page.fill( '#billing_phone', customer.billing.us.phone );
+		await page.fill( '#billing_email', customer.email );
 
 		await page.click( 'text=Place order' );
 
@@ -81,13 +83,13 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		// search to narrow it down to just the messages we want
 		await page.goto(
 			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
-				customerEmail
+				customer.email
 			) }`
 		);
 		await page.waitForLoadState( 'networkidle' );
 		await expect(
 			page.locator( 'td.column-receiver >> nth=0' )
-		).toContainText( customerEmail );
+		).toContainText( customer.email );
 		await expect(
 			page.locator( 'td.column-subject >> nth=1' )
 		).toContainText( `[${ storeName }]: New order #${ orderId }` );

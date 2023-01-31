@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use WC_Data_Store;
 use WC_Mock_Payment_Gateway;
 use WC_Order;
 use WC_Product;
@@ -249,8 +250,20 @@ class OrderHelper {
 	 */
 	public static function switch_data_store( $order, $data_store ) {
 		$update_data_store_func = function ( $data_store ) {
-			$this->data_store = $data_store;
+			// Each order object contains a reference to its data store, but this reference is itself
+			// held inside of an instance of WC_Data_Store, so we create that first.
+			$data_store_wrapper = WC_Data_Store::load( 'order' );
+
+			// Bind $data_store to our WC_Data_Store.
+			( function ( $data_store ) {
+				$this->current_class_name = get_class( $data_store );
+				$this->instance           = $data_store;
+			} )->call( $data_store_wrapper, $data_store );
+
+			// Finally, update the $order object with our WC_Data_Store( $data_store ) instance.
+			$this->data_store = $data_store_wrapper;
 		};
+
 		$update_data_store_func->call( $order, $data_store );
 	}
 

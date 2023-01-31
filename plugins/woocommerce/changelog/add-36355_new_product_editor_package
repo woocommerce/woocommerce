@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add @woocommerce/product-editor dependency and change dependency of ProductSectionLayout component.

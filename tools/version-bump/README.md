@@ -9,7 +9,7 @@
 Bump WooCommerce to version 7.1.0:
 
 ```
-pnpm run version --filter version-bump -- bump woocommerce -v 7.1.0
+pnpm --filter version-bump run version bump woocommerce -v 7.1.0
 ```
 
 **Arguments**:

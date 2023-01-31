@@ -9,7 +9,7 @@ import { DispatchFromMap } from '@automattic/data-stores';
 import { CrudActions, CrudSelectors } from '../crud/types';
 import { BaseQueryParams } from '../types';
 
-type ProductCategoryImage = {
+export type ProductCategoryImage = {
 	id: number;
 	date_created: string;
 	date_created_gmt: string;
@@ -20,7 +20,7 @@ type ProductCategoryImage = {
 	alt: string;
 };
 
-type ProductCategory = {
+export type ProductCategory = {
 	id: number;
 	name: string;
 	slug: string;

@@ -7,8 +7,7 @@
 	"main": "Gruntfile.js",
 	"scripts": {
 		"turbo:build": "grunt assets",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"lint": "grunt eslint stylelint --force"
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name"
 	},
 	"devDependencies": {
 		"@wordpress/stylelint-config": "19.1.0",

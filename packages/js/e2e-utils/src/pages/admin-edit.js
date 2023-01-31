@@ -4,10 +4,10 @@ export class AdminEdit {
 	/**
 	 * Publish the object being edited and verify published status
 	 *
-	 * @param  button              Publish button selector
-	 * @param  publishNotice       Publish notice selector
-	 * @param  publishVerification Expected notice on successful publish
-	 * @return {Promise<void>}
+	 * @param {string} button              Publish button selector
+	 * @param {string} publishNotice       Publish notice selector
+	 * @param {string} publishVerification Expected notice on successful publish
+	 * @return {Promise<void>} Promise resolving when the object is published
 	 */
 	async verifyPublish( button, publishNotice, publishVerification ) {
 		// Wait for auto save
@@ -24,7 +24,7 @@ export class AdminEdit {
 	/**
 	 * Get the ID of the object being edited
 	 *
-	 * @return {Promise<*>}
+	 * @return {Promise<*>} Promise resolving to the ID of the object being edited.
 	 */
 	async getId() {
 		const postId = await page.$( '#post_ID' );

@@ -1,6 +1,13 @@
+/**
+ * External dependencies
+ */
+import { AxiosRequestConfig } from 'axios';
+
+/**
+ * Internal dependencies
+ */
 import { HTTPClient } from './http-client';
 import { AxiosClient, AxiosOAuthInterceptor } from './axios';
-import { AxiosRequestConfig } from 'axios';
 import { AxiosInterceptor } from './axios/axios-interceptor';
 import { AxiosURLToQueryInterceptor } from './axios/axios-url-to-query-interceptor';
 
@@ -55,7 +62,7 @@ export class HTTPClientFactory {
 	/**
 	 * Configures the client to utilize OAuth.
 	 *
-	 * @param {string} key The OAuth consumer key to use.
+	 * @param {string} key    The OAuth consumer key to use.
 	 * @param {string} secret The OAuth consumer secret to use.
 	 * @return {HTTPClientFactory} This factory.
 	 */

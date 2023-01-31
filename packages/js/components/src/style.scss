@@ -1,6 +1,7 @@
 /**
 * External Dependencies
 */
+@import 'node_modules/@wordpress/base-styles/colors.native';
 @import '@automattic/tour-kit/dist/esm/styles.scss';
 
 /**
@@ -32,6 +33,7 @@
 @import 'pill/style.scss';
 @import 'product-image/style.scss';
 @import 'rating/style.scss';
+@import 'rich-text-editor/style.scss';
 @import 'search/style.scss';
 @import 'search-list-control/style.scss';
 @import 'section-header/style.scss';
@@ -45,11 +47,13 @@
 @import 'tag/style.scss';
 @import 'text-control/style.scss';
 @import 'text-control-with-affixes/style.scss';
+@import 'tooltip/style.scss';
 @import 'timeline/style.scss';
 @import 'view-more-list/style.scss';
 @import 'web-preview/style.scss';
 @import 'badge/style.scss';
 @import 'dynamic-form/style.scss';
-@import 'enriched-label/style.scss';
 @import 'tour-kit/style.scss';
 @import 'collapsible-content/style.scss';
+@import 'form/style.scss';
+@import 'experimental-tree-control/tree.scss';

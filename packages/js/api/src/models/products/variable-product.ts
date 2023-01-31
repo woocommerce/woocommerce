@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import {
 	AbstractProduct,
 	IProductCommon,
@@ -59,7 +62,8 @@ export type VariableProductRepositoryParams = ModelRepositoryParams<
  * @typedef ListsVariableProducts
  * @alias ListsModels.<VariableProduct>
  */
-export type ListsVariableProducts = ListsModels< VariableProductRepositoryParams >;
+export type ListsVariableProducts =
+	ListsModels< VariableProductRepositoryParams >;
 
 /**
  * An interface for creating variable products using the repository.
@@ -67,7 +71,8 @@ export type ListsVariableProducts = ListsModels< VariableProductRepositoryParams
  * @typedef CreatesVariableProducts
  * @alias CreatesModels.<VariableProduct>
  */
-export type CreatesVariableProducts = CreatesModels< VariableProductRepositoryParams >;
+export type CreatesVariableProducts =
+	CreatesModels< VariableProductRepositoryParams >;
 
 /**
  * An interface for reading variable products using the repository.
@@ -75,7 +80,8 @@ export type CreatesVariableProducts = CreatesModels< VariableProductRepositoryPa
  * @typedef ReadsVariableProducts
  * @alias ReadsModels.<VariableProduct>
  */
-export type ReadsVariableProducts = ReadsModels< VariableProductRepositoryParams >;
+export type ReadsVariableProducts =
+	ReadsModels< VariableProductRepositoryParams >;
 
 /**
  * An interface for updating variable products using the repository.
@@ -83,7 +89,8 @@ export type ReadsVariableProducts = ReadsModels< VariableProductRepositoryParams
  * @typedef UpdatesVariableProducts
  * @alias UpdatesModels.<VariableProduct>
  */
-export type UpdatesVariableProducts = UpdatesModels< VariableProductRepositoryParams >;
+export type UpdatesVariableProducts =
+	UpdatesModels< VariableProductRepositoryParams >;
 
 /**
  * An interface for deleting variable products using the repository.
@@ -91,7 +98,8 @@ export type UpdatesVariableProducts = UpdatesModels< VariableProductRepositoryPa
  * @typedef DeletesVariableProducts
  * @alias DeletesModels.<VariableProduct>
  */
-export type DeletesVariableProducts = DeletesModels< VariableProductRepositoryParams >;
+export type DeletesVariableProducts =
+	DeletesModels< VariableProductRepositoryParams >;
 
 /**
  * The base for the Variable product object.
@@ -104,7 +112,8 @@ export class VariableProduct
 		IProductInventory,
 		IProductSalesTax,
 		IProductShipping,
-		IProductUpSells {
+		IProductUpSells
+{
 	/**
 	 * @see ./abstracts/cross-sells.ts
 	 */

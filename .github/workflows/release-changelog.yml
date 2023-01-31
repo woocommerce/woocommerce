@@ -1,13 +1,13 @@
-name: "Release: Generate changelog"
+name: 'Release: Generate changelog'
 on:
-  workflow_dispatch:
-    inputs:
-      releaseBranch:
-        description: 'The name of the release branch, in the format `release/x.y`'
-        required: true
-      releaseVersion:
-        description: 'The version of the release, in the format `x.y`'
-        required: true
+    workflow_dispatch:
+        inputs:
+            releaseBranch:
+                description: 'The name of the release branch, in the format `release/x.y`'
+                required: true
+            releaseVersion:
+                description: 'The version of the release, in the format `x.y`'
+                required: true
 
 env:
     GIT_COMMITTER_NAME: 'WooCommerce Bot'
@@ -15,99 +15,105 @@ env:
     GIT_AUTHOR_NAME: 'WooCommerce Bot'
     GIT_AUTHOR_EMAIL: 'no-reply@woocommerce.com'
 
+permissions: {}
+
 jobs:
-  create-changelog-prs:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+    create-changelog-prs:
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: write
+            pull-requests: write
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
 
-      - name: Setup WooCommerce Monorepo
-        uses: ./.github/actions/setup-woocommerce-monorepo
-        with:
-          build: false
-          php-version: '7.4'
-          
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  build: false
 
-      - name: "Git fetch the release branch"
-        run: git fetch origin ${{ inputs.releaseBranch }}
-        
-      - name: "Checkout the release branch"
-        run: git checkout ${{ inputs.releaseBranch }}
-      
-      - name: "Create a new branch for the changelog update PR"
-        run: git checkout -b ${{ format( 'update/{0}-changelog', inputs.releaseVersion ) }}
+            - name: 'Git fetch the release branch'
+              run: git fetch origin ${{ inputs.releaseBranch }}
 
-      - name: "Generate the changelog file"
-        run: pnpm changelog --filter=woocommerce -- write --add-pr-num -n -vvv --use-version ${{ inputs.releaseVersion }}
-        
-      - name: "git rm deleted files"
-        run: git rm $(git ls-files --deleted)
-        
-      - name: "Commit deletion"
-        run: git commit -m "Delete changelog files from ${{ inputs.releaseVersion }} release"
-        
-      - name: "Remember the deletion commit hash"
-        id: rev-parse
-        run: echo "::set-output name=hash::$(git rev-parse HEAD)"
-        
-      - name: "Insert NEXT_CHANGELOG contents into readme.txt"
-        run: php .github/workflows/scripts/release-changelog.php
-      
-      - name: "git add readme.txt"
-        run: git add plugins/woocommerce/readme.txt
-      
-      - name: "Commit readme"
-        run: git commit -m "Update the readme files for the ${{ inputs.releaseVersion }} release"
-        
-      - name: "Push update branch to origin"
-        run: git push origin ${{ format( 'update/{0}-changelog', inputs.releaseVersion ) }}
-        
-      - name: "Stash any other undesired changes"
-        run: git stash
-        
-      - name: "Checkout trunk"
-        run: git checkout trunk
-      
-      - name: "Create a branch for the changelog files deletion"
-        run: git checkout -b ${{ format( 'delete/{0}-changelog', inputs.releaseVersion ) }}
-        
-      - name: "Cherry-pick the deletion commit"
-        run: git cherry-pick ${{ steps.rev-parse.outputs.hash }}
-        
-      - name: "Push deletion branch to origin"
-        run: git push origin ${{ format( 'delete/{0}-changelog', inputs.releaseVersion ) }}
-        
-      - name: "Create release branch PR"
-        id: release-pr
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const result = await github.rest.pulls.create( {
-              owner: "${{ github.repository_owner }}",
-              repo: "${{ github.event.repository.name }}",
-              head: "${{ format( 'update/{0}-changelog', inputs.releaseVersion ) }}",
-              base: "${{ inputs.releaseBranch }}",
-              title: "${{ format( 'Release: Prepare the changelog for {0}', inputs.releaseVersion ) }}",
-              body: "${{ format( 'This pull request was automatically generated during the code freeze to prepare the changelog for {0}', inputs.releaseVersion ) }}"
-            } );
-            
-            return result.data.number;
-            
-      - name: "Create trunk PR"
-        id: trunk-pr
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const result = await github.rest.pulls.create( {
-              owner: "${{ github.repository_owner }}",
-              repo: "${{ github.event.repository.name }}",
-              head: "${{ format( 'delete/{0}-changelog', inputs.releaseVersion ) }}",
-              base: "trunk",
-              title: "${{ format( 'Release: Remove {0} change files', inputs.releaseVersion ) }}",
-              body: "${{ format( 'This pull request was automatically generated during the code freeze to remove the changefiles from {0} that are compiled into the `{1}` branch via #{2}', inputs.releaseVersion, inputs.releaseBranch, steps.release-pr.outputs.result ) }}"
-            } );
-            
-            return result.data.number;
+            - name: 'Checkout the release branch'
+              run: git checkout ${{ inputs.releaseBranch }}
+
+            - name: 'Create a new branch for the changelog update PR'
+              run: git checkout -b ${{ format( 'update/{0}-changelog', inputs.releaseVersion ) }}
+
+            - name: 'Generate the changelog file'
+              run: pnpm --filter=woocommerce run changelog write --add-pr-num -n -vvv --use-version ${{ inputs.releaseVersion }}
+
+            - name: Checkout pnpm-lock.yaml to prevent issues
+              run: git checkout pnpm-lock.yaml
+
+            - name: 'git rm deleted files'
+              run: git rm $(git ls-files --deleted)
+
+            - name: 'Commit deletion'
+              run: git commit -m "Delete changelog files from ${{ inputs.releaseVersion }} release"
+
+            - name: 'Remember the deletion commit hash'
+              id: rev-parse
+              run: echo "hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+            - name: 'Insert NEXT_CHANGELOG contents into readme.txt'
+              run: php .github/workflows/scripts/release-changelog.php
+
+            - name: 'git add readme.txt'
+              run: git add plugins/woocommerce/readme.txt
+
+            - name: 'Commit readme'
+              run: git commit -m "Update the readme files for the ${{ inputs.releaseVersion }} release"
+
+            - name: 'Push update branch to origin'
+              run: git push origin ${{ format( 'update/{0}-changelog', inputs.releaseVersion ) }}
+
+            - name: 'Stash any other undesired changes'
+              run: git stash
+
+            - name: 'Checkout trunk'
+              run: git checkout trunk
+
+            - name: 'Create a branch for the changelog files deletion'
+              run: git checkout -b ${{ format( 'delete/{0}-changelog', inputs.releaseVersion ) }}
+
+            - name: 'Cherry-pick the deletion commit'
+              run: git cherry-pick ${{ steps.rev-parse.outputs.hash }}
+
+            - name: 'Push deletion branch to origin'
+              run: git push origin ${{ format( 'delete/{0}-changelog', inputs.releaseVersion ) }}
+
+            - name: 'Create release branch PR'
+              id: release-pr
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const result = await github.rest.pulls.create( {
+                        owner: "${{ github.repository_owner }}",
+                        repo: "${{ github.event.repository.name }}",
+                        head: "${{ format( 'update/{0}-changelog', inputs.releaseVersion ) }}",
+                        base: "${{ inputs.releaseBranch }}",
+                        title: "${{ format( 'Release: Prepare the changelog for {0}', inputs.releaseVersion ) }}",
+                        body: "${{ format( 'This pull request was automatically generated during the code freeze to prepare the changelog for {0}', inputs.releaseVersion ) }}"
+                      } );
+
+                      return result.data.number;
+
+            - name: 'Create trunk PR'
+              id: trunk-pr
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const result = await github.rest.pulls.create( {
+                        owner: "${{ github.repository_owner }}",
+                        repo: "${{ github.event.repository.name }}",
+                        head: "${{ format( 'delete/{0}-changelog', inputs.releaseVersion ) }}",
+                        base: "trunk",
+                        title: "${{ format( 'Release: Remove {0} change files', inputs.releaseVersion ) }}",
+                        body: "${{ format( 'This pull request was automatically generated during the code freeze to remove the changefiles from {0} that are compiled into the `{1}` branch via #{2}', inputs.releaseVersion, inputs.releaseBranch, steps.release-pr.outputs.result ) }}"
+                      } );
+
+                      return result.data.number;

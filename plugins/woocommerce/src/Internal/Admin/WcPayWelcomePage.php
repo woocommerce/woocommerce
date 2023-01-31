@@ -13,6 +13,39 @@ use Automattic\WooCommerce\Admin\WCAdminHelper;
 class WcPayWelcomePage {
 
 	const EXPERIMENT_NAME = 'woocommerce_payments_menu_promo_us_2022';
+	const OTHER_GATEWAYS  = [
+		'affirm',
+		'afterpay',
+		'amazon_payments_advanced_express',
+		'amazon_payments_advanced',
+		'authorize_net_cim_credit_card',
+		'authorize_net_cim_echeck',
+		'bacs',
+		'bambora_credit_card',
+		'braintree_credit_card',
+		'braintree_paypal',
+		'chase_paymentech',
+		'cybersource_credit_card',
+		'elavon_converge_credit_card',
+		'elavon_converge_echeck',
+		'gocardless',
+		'intuit_payments_credit_card',
+		'intuit_payments_echeck',
+		'kco',
+		'klarna_payments',
+		'payfast',
+		'paypal',
+		'paytrace',
+		'ppcp-gateway',
+		'psigate',
+		'sagepaymentsusaapi',
+		'square_credit_card',
+		'stripe_alipay',
+		'stripe_multibanco',
+		'stripe',
+		'trustcommerce',
+		'usa_epay_credit_card',
+	];
 
 	/**
 	 * WCPayWelcomePage constructor.
@@ -39,6 +72,11 @@ class WcPayWelcomePage {
 
 		// Must be a US based business.
 		if ( WC()->countries->get_base_country() !== 'US' ) {
+			return;
+		}
+
+		// Has another payment gateway installed.
+		if ( ! $this->is_another_payment_gateway_installed() ) {
 			return;
 		}
 
@@ -144,6 +182,23 @@ class WcPayWelcomePage {
 		);
 
 		return $abtest->get_variation( self::EXPERIMENT_NAME ) === 'treatment';
+	}
+
+	/**
+	 * Checks if there is another payment gateway installed using a static list of US gateways from WC Store.
+	 *
+	 * @return bool Whether there is another payment gateway installed.
+	 */
+	private function is_another_payment_gateway_installed() {
+		$available_gateways = wp_list_pluck( WC()->payment_gateways()->get_available_payment_gateways(), 'id' );
+
+		foreach ( $available_gateways as $gateway ) {
+			if ( in_array( $gateway, self::OTHER_GATEWAYS, true ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 }

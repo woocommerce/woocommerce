@@ -1,32 +1,12 @@
 module.exports = {
-	parser: '@typescript-eslint/parser',
-	env: {
-		'jest/globals': true,
-	},
-	ignorePatterns: [ 'dist/', 'node_modules/' ],
+	extends: [ 'plugin:@woocommerce/eslint-plugin/recommended' ],
+	plugins: [ 'jest' ],
+	root: true,
 	rules: {
-		'no-unused-vars': 'off',
-		'no-dupe-class-members': 'off',
-
-		'no-useless-constructor': 'off',
-		'@typescript-eslint/no-useless-constructor': 2,
+		// These warning rules are stop gaps for eslint issues that need to be fixed later.
+		'@typescript-eslint/no-explicit-any': 'off',
+		'@typescript-eslint/no-use-before-define': 'off',
+		'@typescript-eslint/ban-ts-comment': 'off',
+		'@typescript-eslint/no-unused-vars': 'off',
 	},
-	plugins: [ '@typescript-eslint/eslint-plugin' ],
-	extends: [ 'plugin:@wordpress/eslint-plugin/recommended-with-formatting' ],
-	overrides: [
-		{
-			files: [ '**/*.js', '**/*.ts' ],
-			settings: {
-				jsdoc: {
-					mode: 'typescript',
-				},
-			},
-		},
-		{
-			files: [ '**/*.spec.ts', '**/*.test.ts' ],
-			rules: {
-				'no-console': 'off',
-			},
-		},
-	],
 };

@@ -7,6 +7,7 @@ import {
 	UseComboboxState,
 	UseComboboxStateChangeOptions,
 	useMultipleSelection,
+	GetInputPropsOptions,
 } from 'downshift';
 import {
 	useState,
@@ -14,6 +15,7 @@ import {
 	createElement,
 	Fragment,
 } from '@wordpress/element';
+import { search } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -28,16 +30,17 @@ import { SelectedItems } from './selected-items';
 import { ComboBox } from './combo-box';
 import { Menu } from './menu';
 import { MenuItem } from './menu-item';
+import { SuffixIcon } from './suffix-icon';
 import {
 	defaultGetItemLabel,
 	defaultGetItemValue,
 	defaultGetFilteredItems,
 } from './utils';
 
-type SelectControlProps< ItemType > = {
+export type SelectControlProps< ItemType > = {
 	children?: ChildrenType< ItemType >;
 	items: ItemType[];
-	label: string;
+	label: string | JSX.Element;
 	getItemLabel?: getItemLabelType< ItemType >;
 	getItemValue?: getItemValueType< ItemType >;
 	getFilteredItems?: (
@@ -48,7 +51,10 @@ type SelectControlProps< ItemType > = {
 	) => ItemType[];
 	hasExternalTags?: boolean;
 	multiple?: boolean;
-	onInputChange?: ( value: string | undefined ) => void;
+	onInputChange?: (
+		value: string | undefined,
+		changes: Partial< Omit< UseComboboxState< ItemType >, 'inputValue' > >
+	) => void;
 	onRemove?: ( item: ItemType ) => void;
 	onSelect?: ( selected: ItemType ) => void;
 	onFocus?: ( data: { inputValue: string } ) => void;
@@ -58,6 +64,19 @@ type SelectControlProps< ItemType > = {
 	) => Partial< UseComboboxState< ItemType | null > >;
 	placeholder?: string;
 	selected: ItemType | ItemType[] | null;
+	className?: string;
+	disabled?: boolean;
+	inputProps?: GetInputPropsOptions;
+	suffix?: JSX.Element | null;
+	/**
+	 * This is a feature already implemented in downshift@7.0.0 through the
+	 * reducer. In order for us to use it this prop is added temporarily until
+	 * current downshift version get updated.
+	 *
+	 * @see https://www.downshift-js.com/use-multiple-selection#usage-with-combobox
+	 * @default false
+	 */
+	__experimentalOpenMenuOnFocus?: boolean;
 };
 
 export const selectControlStateChangeTypes = useCombobox.stateChangeTypes;
@@ -100,6 +119,11 @@ function SelectControl< ItemType = DefaultItemType >( {
 	stateReducer = ( state, actionAndChanges ) => actionAndChanges.changes,
 	placeholder,
 	selected,
+	className,
+	disabled,
+	inputProps = {},
+	suffix = <SuffixIcon icon={ search } />,
+	__experimentalOpenMenuOnFocus = false,
 }: SelectControlProps< ItemType > ) {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
@@ -148,16 +172,14 @@ function SelectControl< ItemType = DefaultItemType >( {
 		initialSelectedItem: singleSelectedItem,
 		inputValue,
 		items: filteredItems,
-		selectedItem: multiple ? null : undefined,
+		selectedItem: multiple ? null : singleSelectedItem,
 		itemToString: getItemLabel,
 		onSelectedItemChange: ( { selectedItem } ) =>
 			selectedItem && onSelect( selectedItem ),
-		onInputValueChange: ( changes ) => {
-			if ( changes.inputValue !== undefined ) {
-				setInputValue( changes.inputValue );
-				if ( changes.isOpen ) {
-					onInputChange( changes.inputValue );
-				}
+		onInputValueChange: ( { inputValue: value, ...changes } ) => {
+			if ( value !== undefined ) {
+				setInputValue( value );
+				onInputChange( value, changes );
 			}
 		},
 		stateReducer: ( state, actionAndChanges ) => {
@@ -213,13 +235,24 @@ function SelectControl< ItemType = DefaultItemType >( {
 
 	return (
 		<div
-			className={ classnames( 'woocommerce-experimental-select-control', {
-				'is-focused': isFocused,
-			} ) }
+			className={ classnames(
+				'woocommerce-experimental-select-control',
+				className,
+				{
+					'is-focused': isFocused,
+				}
+			) }
 		>
 			{ /* Downshift's getLabelProps handles the necessary label attributes. */ }
 			{ /* eslint-disable jsx-a11y/label-has-for */ }
-			<label { ...getLabelProps() }>{ label }</label>
+			{ label && (
+				<label
+					{ ...getLabelProps() }
+					className="woocommerce-experimental-select-control__label"
+				>
+					{ label }
+				</label>
+			) }
 			{ /* eslint-enable jsx-a11y/label-has-for */ }
 			<ComboBox
 				comboBoxProps={ getComboboxProps() }
@@ -231,10 +264,16 @@ function SelectControl< ItemType = DefaultItemType >( {
 					onFocus: () => {
 						setIsFocused( true );
 						onFocus( { inputValue } );
+						if ( __experimentalOpenMenuOnFocus ) {
+							openMenu();
+						}
 					},
 					onBlur: () => setIsFocused( false ),
 					placeholder,
+					disabled,
+					...inputProps,
 				} ) }
+				suffix={ suffix }
 			>
 				<>
 					{ children( {

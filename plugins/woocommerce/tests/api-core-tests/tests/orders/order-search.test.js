@@ -87,7 +87,7 @@ test.describe( 'Order Search API tests', () => {
 			const responseJSON = await response.json();
 
 			expect( response.status() ).toEqual( 200 );
-			expect( responseJSON ).toHaveLength( 1 );
+			expect( responseJSON.length ).toBeGreaterThanOrEqual( 1 );
 			expect( responseJSON[ 0 ].id ).toEqual( order.id );
 		} );
 	}

@@ -23,28 +23,6 @@ module.exports = function ( api ) {
 		ignore: [ 'packages/**/node_modules' ],
 		env: {
 			production: {},
-
-			storybook: {
-				plugins: [
-					/**
-					 * We need to set loose mode here because the storybook's default babel config enables the loose mode.
-					 * The 'loose' mode configuration must be the same for those babel plugins.
-					 *
-					 */
-					[
-						'@babel/plugin-proposal-class-properties',
-						{ loose: true },
-					],
-					[
-						'@babel/plugin-proposal-private-methods',
-						{ loose: true },
-					],
-					[
-						'@babel/plugin-proposal-private-property-in-object',
-						{ loose: true },
-					],
-				],
-			},
 		},
 	};
 };

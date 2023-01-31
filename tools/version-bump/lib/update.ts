@@ -25,7 +25,7 @@ export const updateReadmeStableTag = async (
 		const readmeContents = await readFile( filePath, 'utf8' );
 
 		const updatedReadmeContents = readmeContents.replace(
-			/Stable tag: \d.\d.\d\n/m,
+			/Stable tag: \d+\.\d+\.\d+\n/m,
 			`Stable tag: ${ nextVersion }\n`
 		);
 
@@ -50,7 +50,7 @@ export const updateReadmeChangelog = async (
 		const readmeContents = await readFile( filePath, 'utf8' );
 
 		const updatedReadmeContents = readmeContents.replace(
-			/= \d.\d.\d \d\d\d\d-XX-XX =\n/m,
+			/= \d+\.\d+\.\d+ \d\d\d\d-XX-XX =\n/m,
 			`= ${ nextVersion } ${ new Date().getFullYear() }-XX-XX =\n`
 		);
 
@@ -86,7 +86,7 @@ export const updateClassPluginFile = async (
 		const classPluginFileContents = await readFile( filePath, 'utf8' );
 
 		const updatedClassPluginFileContents = classPluginFileContents.replace(
-			/public \$version = '\d.\d.\d';\n/m,
+			/public \$version = '\d+\.\d+\.\d+';\n/m,
 			`public $version = '${ nextVersion }';\n`
 		);
 
@@ -142,7 +142,7 @@ export const updatePluginFile = async (
 		const pluginFileContents = await readFile( filePath, 'utf8' );
 
 		const updatedPluginFileContents = pluginFileContents.replace(
-			/Version: \d.\d.\d.*\n/m,
+			/Version: \d+\.\d+\.\d+.*\n/m,
 			`Version: ${ nextVersion }\n`
 		);
 		await writeFile( filePath, updatedPluginFileContents );

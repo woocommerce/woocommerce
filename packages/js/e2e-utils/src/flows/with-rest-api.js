@@ -16,9 +16,9 @@ const userEndpoint = '/wp/v2/users';
 /**
  * Utility function to delete all merchant created data store objects.
  *
- * @param  repository
- * @param  defaultObjectId
- * @param  statuses        Status of the object to check
+ * @param {unknown}       repository
+ * @param {number | null} defaultObjectId
+ * @param {Array<string>} statuses        Status of the object to check
  * @return {Promise<void>}
  */
 const deleteAllRepositoryObjects = async (
@@ -27,7 +27,7 @@ const deleteAllRepositoryObjects = async (
 	statuses = [ 'draft', 'publish', 'trash' ]
 ) => {
 	let objects;
-	const minimum = defaultObjectId == null ? 0 : 1;
+	const minimum = defaultObjectId === null ? 0 : 1;
 
 	for ( let s = 0; s < statuses.length; s++ ) {
 		const status = statuses[ s ];
@@ -35,7 +35,7 @@ const deleteAllRepositoryObjects = async (
 		while ( objects.length > minimum ) {
 			for ( let o = 0; o < objects.length; o++ ) {
 				// Skip default data store object
-				if ( objects[ o ].id == defaultObjectId ) {
+				if ( objects[ o ].id === defaultObjectId ) {
 					continue;
 				}
 				// We may be getting a cached copy of the dataset and the object has already been deleted.
@@ -52,7 +52,7 @@ const deleteAllRepositoryObjects = async (
  * Utility to flatten a tax rate.
  *
  * @param {Object} taxRate Tax rate to be flattened.
- * @return {string}
+ * @return {string} The flattened tax rate.
  */
 const flattenTaxRate = ( taxRate ) => {
 	return taxRate.rate + '/' + taxRate.class + '/' + taxRate.name;
@@ -159,7 +159,7 @@ export const withRestApi = {
 		if ( productCategories.data && productCategories.data.length ) {
 			for ( let c = 0; c < productCategories.data.length; c++ ) {
 				// The default `uncategorized` category can't be deleted
-				if ( productCategories.data[ c ].slug == 'uncategorized' ) {
+				if ( productCategories.data[ c ].slug === 'uncategorized' ) {
 					continue;
 				}
 				const response = await client.delete(
@@ -226,12 +226,12 @@ export const withRestApi = {
 	/**
 	 * Adds a shipping zone along with a shipping method using the API.
 	 *
-	 * @param           zoneName              Shipping zone name.
-	 * @param           zoneLocation          Shiping zone location. Defaults to country:US. For states use: state:US:CA.
-	 * @param           zipCode               Shipping zone zip code. Default is no zip code.
-	 * @param           zoneMethod            Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup).
-	 * @param           cost                  Shipping method cost. Default is no cost.
-	 * @param           additionalZoneMethods Array of additional zone methods to add to the shipping zone.
+	 * @param {string}  zoneName              Shipping zone name.
+	 * @param {string}  zoneLocation          Shiping zone location. Defaults to country:US. For states use: state:US:CA.
+	 * @param {string}  zipCode               Shipping zone zip code. Default is no zip code.
+	 * @param {string}  zoneMethod            Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup).
+	 * @param {string}  cost                  Shipping method cost. Default is no cost.
+	 * @param {Array}   additionalZoneMethods Array of additional zone methods to add to the shipping zone.
 	 * @param {boolean} testResponse          Test the response status code.
 	 */
 	addShippingZoneAndMethod: async (
@@ -310,6 +310,7 @@ export const withRestApi = {
 		// Add any additional zones, if provided
 		if ( additionalZoneMethods.length > 0 ) {
 			for ( let z = 0; z < additionalZoneMethods.length; z++ ) {
+				// eslint-disable-next-line no-shadow
 				const response = await client.post(
 					path + `/${ zoneId }/methods`,
 					{ method_id: additionalZoneMethods[ z ] }
@@ -331,7 +332,7 @@ export const withRestApi = {
 		if ( shippingZones.data && shippingZones.data.length ) {
 			for ( let z = 0; z < shippingZones.data.length; z++ ) {
 				// The data store doesn't support deleting the default zone.
-				if ( shippingZones.data[ z ].id == 0 ) {
+				if ( shippingZones.data[ z ].id === 0 ) {
 					continue;
 				}
 				const response = await client.delete(
@@ -367,7 +368,7 @@ export const withRestApi = {
 	/**
 	 * Delete a customer account by their email address if the user exists.
 	 *
-	 * @param  emailAddress Customer user account email address.
+	 * @param {string} emailAddress Customer user account email address.
 	 * @return {Promise<void>}
 	 */
 	deleteCustomerByEmail: async ( emailAddress ) => {
@@ -394,7 +395,7 @@ export const withRestApi = {
 	/**
 	 * Reset a settings group to default values except selects.
 	 *
-	 * @param           settingsGroup
+	 * @param {unknown} settingsGroup
 	 * @param {boolean} testResponse  Test the response status code.
 	 * @return {Promise<void>}
 	 */
@@ -411,8 +412,8 @@ export const withRestApi = {
 		for ( let s = 0; s < settings.length; s++ ) {
 			// The rest api doesn't allow selects to be set to ''.
 			if (
-				settings[ s ].type == 'select' &&
-				settings[ s ].default == ''
+				settings[ s ].type === 'select' &&
+				settings[ s ].default === ''
 			) {
 				continue;
 			}
@@ -428,7 +429,7 @@ export const withRestApi = {
 				defaultSetting
 			);
 			// Multi-selects have a default '' but return an empty [].
-			if ( testResponse && settings[ s ].type != 'multiselect' ) {
+			if ( testResponse && settings[ s ].type !== 'multiselect' ) {
 				expect( response.value ).toBe( defaultSetting.value );
 			}
 		}
@@ -467,7 +468,7 @@ export const withRestApi = {
 	/**
 	 * Create a batch of orders using the "Batch Create Order" API endpoint.
 	 *
-	 * @param           orders       Array of orders to be created
+	 * @param {Array}   orders       Array of orders to be created
 	 * @param {boolean} testResponse Test the response status code.
 	 */
 	batchCreateOrders: async ( orders, testResponse = true ) => {
@@ -482,8 +483,8 @@ export const withRestApi = {
 	/**
 	 * Add tax classes.
 	 *
-	 * @param {<Array<Object>>} taxClasses Array of tax class objects.
-	 * @return {Promise<void>}
+	 * @param {Array<Object>} taxClasses Array of tax class objects.
+	 * @return {Promise<void>} Promise resolving once tax classes have been added.
 	 */
 	addTaxClasses: async ( taxClasses ) => {
 		// Only add tax classes which don't already exist.
@@ -502,7 +503,7 @@ export const withRestApi = {
 	/**
 	 * Add tax rates.
 	 *
-	 * @param {<Array<Object>>} taxRates Array of tax rate objects.
+	 * @param {Array<Object>} taxRates Array of tax rate objects.
 	 * @return {Promise<void>}
 	 */
 	addTaxRates: async ( taxRates ) => {

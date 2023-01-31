@@ -7,7 +7,10 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -18,6 +21,8 @@ defined( 'ABSPATH' ) || exit;
  * - Synchronizing changes between the custom orders tables and the posts table whenever changes in orders happen.
  */
 class DataSynchronizer implements BatchProcessorInterface {
+
+	use AccessiblePrivateMethods;
 
 	public const ORDERS_DATA_SYNC_ENABLED_OPTION           = 'woocommerce_custom_orders_table_data_sync_enabled';
 	private const INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION = 'woocommerce_initial_orders_pending_sync_count';
@@ -52,31 +57,20 @@ class DataSynchronizer implements BatchProcessorInterface {
 	private $posts_to_cot_migrator;
 
 	/**
+	 * Logger object to be used to log events.
+	 *
+	 * @var \WC_Logger
+	 */
+	private $error_logger;
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
-		// When posts is authoritative and sync is enabled, deleting a post also deletes COT data.
-		add_action(
-			'deleted_post',
-			function( $postid, $post ) {
-				if ( 'shop_order' === $post->post_type && ! $this->custom_orders_table_is_authoritative() && $this->data_sync_is_enabled() ) {
-					$this->data_store->delete_order_data_from_custom_order_tables( $postid );
-				}
-			},
-			10,
-			2
-		);
-
-		// When posts is authoritative and sync is enabled, updating a post triggers a corresponding change in the COT table.
-		add_action(
-			'woocommerce_update_order',
-			function ( $order_id ) {
-				if ( ! $this->custom_orders_table_is_authoritative() && $this->data_sync_is_enabled() ) {
-					$this->posts_to_cot_migrator->migrate_orders( array( $order_id ) );
-				}
-			},
-			100
-		);
+		self::add_action( 'deleted_post', array( $this, 'handle_deleted_post' ), 10, 2 );
+		self::add_action( 'woocommerce_new_order', array( $this, 'handle_updated_order' ), 100 );
+		self::add_action( 'woocommerce_update_order', array( $this, 'handle_updated_order' ), 100 );
+		self::add_filter( 'woocommerce_feature_description_tip', array( $this, 'handle_feature_description_tip' ), 10, 3 );
 	}
 
 	/**
@@ -85,12 +79,14 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * @param OrdersTableDataStore             $data_store The data store to use.
 	 * @param DatabaseUtil                     $database_util The database util class to use.
 	 * @param PostsToOrdersMigrationController $posts_to_cot_migrator The posts to COT migration class to use.
-	 *@internal
+	 * @param LegacyProxy                      $legacy_proxy The legacy proxy instance to use.
+	 * @internal
 	 */
-	final public function init( OrdersTableDataStore $data_store, DatabaseUtil $database_util, PostsToOrdersMigrationController $posts_to_cot_migrator ) {
+	final public function init( OrdersTableDataStore $data_store, DatabaseUtil $database_util, PostsToOrdersMigrationController $posts_to_cot_migrator, LegacyProxy $legacy_proxy ) {
 		$this->data_store            = $data_store;
 		$this->database_util         = $database_util;
 		$this->posts_to_cot_migrator = $posts_to_cot_migrator;
+		$this->error_logger          = $legacy_proxy->call_function( 'wc_get_logger' );
 	}
 
 	/**
@@ -145,17 +141,47 @@ class DataSynchronizer implements BatchProcessorInterface {
 	}
 
 	/**
+	 * Get the total number of orders pending synchronization.
+	 *
+	 * @return int
+	 */
+	public function get_current_orders_pending_sync_count_cached() : int {
+		return $this->get_current_orders_pending_sync_count( true );
+	}
+
+	/**
 	 * Calculate how many orders need to be synchronized currently.
 	 * A database query is performed to get how many orders match one of the following:
 	 *
 	 * - Existing in the authoritative table but not in the backup table.
 	 * - Existing in both tables, but they have a different update date.
+	 *
+	 * @param bool $use_cache Whether to use the cached value instead of fetching from database.
 	 */
-	public function get_current_orders_pending_sync_count(): int {
+	public function get_current_orders_pending_sync_count( $use_cache = false ): int {
 		global $wpdb;
 
-		$orders_table                = $this->data_store::get_orders_table_name();
-		$order_post_types            = wc_get_order_types( 'cot-migration' );
+		if ( $use_cache ) {
+			$pending_count = wp_cache_get( 'woocommerce_hpos_pending_sync_count' );
+			if ( false !== $pending_count ) {
+				return (int) $pending_count;
+			}
+		}
+		$orders_table     = $this->data_store::get_orders_table_name();
+		$order_post_types = wc_get_order_types( 'cot-migration' );
+
+		if ( empty( $order_post_types ) ) {
+			$this->error_logger->debug(
+				sprintf(
+					/* translators: 1: method name. */
+					esc_html__( '%1$s was called but no order types were registered: it may have been called too early.', 'woocommerce' ),
+					__METHOD__
+				)
+			);
+
+			return 0;
+		}
+
 		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
 
 		if ( $this->custom_orders_table_is_authoritative() ) {
@@ -201,7 +227,9 @@ SELECT(
 		// phpcs:enable
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		return (int) $wpdb->get_var( $sql );
+		$pending_count = (int) $wpdb->get_var( $sql );
+		wp_cache_set( 'woocommerce_hpos_pending_sync_count', $pending_count );
+		return $pending_count;
 	}
 
 	/**
@@ -238,8 +266,10 @@ SELECT(
 		$order_post_types             = wc_get_order_types( 'cot-migration' );
 		$order_post_type_placeholders = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		switch ( $type ) {
 			case self::ID_TYPE_MISSING_IN_ORDERS_TABLE:
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $order_post_type_placeholders is prepared.
 				$sql = $wpdb->prepare(
 					"
 SELECT posts.ID FROM $wpdb->posts posts
@@ -250,6 +280,7 @@ WHERE
   AND orders.id IS NULL",
 					$order_post_types
 				);
+				// phpcs:enable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 				break;
 			case self::ID_TYPE_MISSING_IN_POSTS_TABLE:
 				$sql = "
@@ -277,6 +308,7 @@ WHERE
 			default:
 				throw new \Exception( 'Invalid $type, must be one of the ID_TYPE_... constants.' );
 		}
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		// phpcs:ignore WordPress.DB
 		return array_map( 'intval', $wpdb->get_col( $sql . " LIMIT $limit" ) );
@@ -299,7 +331,11 @@ WHERE
 	public function process_batch( array $batch ) : void {
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			foreach ( $batch as $id ) {
-				$order      = wc_get_order( $id );
+				$order = wc_get_order( $id );
+				if ( ! $order ) {
+					$this->error_logger->error( "Order $id not found during batch process, skipping." );
+					continue;
+				}
 				$data_store = $order->get_data_store();
 				$data_store->backfill_post_record( $order );
 			}
@@ -379,5 +415,97 @@ WHERE
 	 */
 	public function get_description(): string {
 		return 'Synchronizes orders between posts and custom order tables.';
+	}
+
+	/**
+	 * Handle the 'deleted_post' action.
+	 *
+	 * When posts is authoritative and sync is enabled, deleting a post also deletes COT data.
+	 *
+	 * @param int     $postid The post id.
+	 * @param WP_Post $post The deleted post.
+	 */
+	private function handle_deleted_post( $postid, $post ): void {
+		if ( 'shop_order' === $post->post_type && $this->data_sync_is_enabled() ) {
+			$this->data_store->delete_order_data_from_custom_order_tables( $postid );
+		}
+	}
+
+	/**
+	 * Handle the 'woocommerce_update_order' action.
+	 *
+	 * When posts is authoritative and sync is enabled, updating a post triggers a corresponding change in the COT table.
+	 *
+	 * @param int $order_id The order id.
+	 */
+	private function handle_updated_order( $order_id ): void {
+		if ( ! $this->custom_orders_table_is_authoritative() && $this->data_sync_is_enabled() ) {
+			$this->posts_to_cot_migrator->migrate_orders( array( $order_id ) );
+		}
+	}
+
+	/**
+	 * Handle the 'woocommerce_feature_description_tip' filter.
+	 *
+	 * When the COT feature is enabled and there are orders pending sync (in either direction),
+	 * show a "you should ync before disabling" warning under the feature in the features page.
+	 * Skip this if the UI prevents changing the feature enable status.
+	 *
+	 * @param string $desc_tip The original description tip for the feature.
+	 * @param string $feature_id The feature id.
+	 * @param bool   $ui_disabled True if the UI doesn't allow to enable or disable the feature.
+	 * @return string The new description tip for the feature.
+	 */
+	private function handle_feature_description_tip( $desc_tip, $feature_id, $ui_disabled ): string {
+		if ( 'custom_order_tables' !== $feature_id || $ui_disabled ) {
+			return $desc_tip;
+		}
+
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		$feature_is_enabled  = $features_controller->feature_is_enabled( 'custom_order_tables' );
+		if ( ! $feature_is_enabled ) {
+			return $desc_tip;
+		}
+
+		$pending_sync_count = $this->get_current_orders_pending_sync_count();
+		if ( ! $pending_sync_count ) {
+			return $desc_tip;
+		}
+
+		if ( $this->custom_orders_table_is_authoritative() ) {
+			$extra_tip = sprintf(
+				_n(
+					"⚠ There's one order pending sync from the orders table to the posts table. The feature shouldn't be disabled until this order is synchronized.",
+					"⚠ There are %1\$d orders pending sync from the orders table to the posts table. The feature shouldn't be disabled until these orders are synchronized.",
+					$pending_sync_count,
+					'woocommerce'
+				),
+				$pending_sync_count
+			);
+		} else {
+			$extra_tip = sprintf(
+				_n(
+					"⚠ There's one order pending sync from the posts table to the orders table. The feature shouldn't be disabled until this order is synchronized.",
+					"⚠ There are %1\$d orders pending sync from the posts table to the orders table. The feature shouldn't be disabled until these orders are synchronized.",
+					$pending_sync_count,
+					'woocommerce'
+				),
+				$pending_sync_count
+			);
+		}
+
+		$cot_settings_url = add_query_arg(
+			array(
+				'page'    => 'wc-settings',
+				'tab'     => 'advanced',
+				'section' => 'custom_data_stores',
+			),
+			admin_url( 'admin.php' )
+		);
+
+		/* translators: %s = URL of the custom data stores settings page */
+		$manage_cot_settings_link = sprintf( __( "<a href='%s'>Manage orders synchronization</a>", 'woocommerce' ), $cot_settings_url );
+
+		return $desc_tip ? "{$desc_tip}<br/>{$extra_tip} {$manage_cot_settings_link}" : "{$extra_tip} {$manage_cot_settings_link}";
 	}
 }

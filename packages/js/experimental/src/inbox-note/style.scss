@@ -24,9 +24,6 @@
 	}
 	&:hover {
 		background: $gray-100;
-		.woocommerce-inbox-message__actions button.woocommerce-admin-dismiss-notification {
-			visibility: visible;
-		}
 	}
 
 	&:not(.message-is-unread) {
@@ -160,9 +157,9 @@
 	button.woocommerce-admin-dismiss-notification {
 		color: $gray-700;
 		&:hover {
-			box-shadow: none !important;
+			box-shadow: inset 0 0 0 1px $gray-700;
 		}
-		visibility: hidden;
+		visibility: visible;
 	}
 
 	.components-dropdown {

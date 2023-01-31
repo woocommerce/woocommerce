@@ -15,8 +15,8 @@
 }
 
 .woocommerce-layout__primary {
-	margin: $gutter-large 0 0 $fallback-gutter-large;
-	margin: $gutter-large 0 0 $gutter-large;
+	margin: $gutter-large 0 128px $fallback-gutter-large;
+	margin: $gutter-large 0 128px $gutter-large;
 
 	@include breakpoint( '<782px' ) {
 		margin-top: 20px;

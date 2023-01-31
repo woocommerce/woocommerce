@@ -1,10 +1,19 @@
 const { devices } = require( '@playwright/test' );
-const { CI, E2E_MAX_FAILURES } = process.env;
+const {
+	ALLURE_RESULTS_DIR,
+	BASE_URL,
+	CI,
+	DEFAULT_TIMEOUT_OVERRIDE,
+	E2E_MAX_FAILURES,
+	PLAYWRIGHT_HTML_REPORT,
+} = process.env;
 
 const config = {
-	timeout: 90 * 1000,
+	timeout: DEFAULT_TIMEOUT_OVERRIDE
+		? Number( DEFAULT_TIMEOUT_OVERRIDE )
+		: 90 * 1000,
 	expect: { timeout: 20 * 1000 },
-	outputDir: './report',
+	outputDir: './test-results/report',
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
@@ -15,21 +24,32 @@ const config = {
 		[
 			'html',
 			{
-				outputFolder: 'output',
+				outputFolder:
+					PLAYWRIGHT_HTML_REPORT ??
+					'./test-results/playwright-report',
 				open: CI ? 'never' : 'always',
 			},
 		],
-		[ 'allure-playwright', { outputFolder: 'e2e/allure-results' } ],
-		[ 'json', { outputFile: 'e2e/test-results.json' } ],
+		[
+			'allure-playwright',
+			{
+				outputFolder:
+					ALLURE_RESULTS_DIR ??
+					'./tests/e2e-pw/test-results/allure-results',
+				detail: true,
+				suiteTitle: true,
+			},
+		],
+		[ 'json', { outputFile: './test-results/test-results.json' } ],
 	],
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
 	use: {
+		baseURL: BASE_URL ?? 'http://localhost:8086',
 		screenshot: 'only-on-failure',
-		video: 'on-first-retry',
+		stateDir: 'tests/e2e-pw/test-results/storage/',
 		trace: 'retain-on-failure',
+		video: 'on-first-retry',
 		viewport: { width: 1280, height: 720 },
-		baseURL: 'http://localhost:8086',
-		stateDir: 'e2e/storage/',
 	},
 	projects: [
 		{

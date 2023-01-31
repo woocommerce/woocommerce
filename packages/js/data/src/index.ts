@@ -24,6 +24,9 @@ export { EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME } from './shipping-zones';
 export { EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME } from './product-tags';
 export { EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME } from './product-categories';
 export { EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME } from './product-attribute-terms';
+export { EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME } from './product-variations';
+export { EXPERIMENTAL_PRODUCT_FORM_STORE_NAME } from './product-form';
+export { EXPERIMENTAL_TAX_CLASSES_STORE_NAME } from './tax-classes';
 export { PaymentGateway } from './payment-gateways/types';
 
 // Export hooks
@@ -73,11 +76,35 @@ export {
 // Export types
 export * from './types';
 export * from './countries/types';
+export {
+	ProductForm,
+	ProductFormField,
+	ProductFormSection,
+} from './product-form/types';
 export * from './onboarding/types';
 export * from './plugins/types';
 export * from './products/types';
+export type {
+	ProductVariation,
+	ProductVariationAttribute,
+	ProductVariationImage,
+} from './product-variations/types';
+export {
+	QueryProductAttribute,
+	ProductAttributeSelectors,
+} from './product-attributes/types';
 export * from './product-shipping-classes/types';
+export {
+	ProductAttributeTerm,
+	ProductAttributeTermsSelectors,
+} from './product-attribute-terms/types';
 export * from './orders/types';
+export {
+	ProductCategory,
+	ProductCategoryImage,
+	ProductCategorySelectors,
+} from './product-categories/types';
+export { TaxClass } from './tax-classes/types';
 
 /**
  * Internal dependencies
@@ -101,7 +128,10 @@ import type { EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME } from './product
 import type { EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME } from './shipping-zones';
 import type { EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME } from './product-tags';
 import type { EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME } from './product-categories';
+import type { EXPERIMENTAL_PRODUCT_FORM_STORE_NAME } from './product-form';
 import type { EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME } from './product-attribute-terms';
+import type { EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME } from './product-variations';
+import type { EXPERIMENTAL_TAX_CLASSES_STORE_NAME } from './tax-classes';
 
 export type WCDataStoreName =
 	| typeof REVIEWS_STORE_NAME
@@ -123,7 +153,10 @@ export type WCDataStoreName =
 	| typeof EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
 	| typeof EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME
 	| typeof EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME
-	| typeof EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME;
+	| typeof EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME
+	| typeof EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+	| typeof EXPERIMENTAL_TAX_CLASSES_STORE_NAME
+	| typeof EXPERIMENTAL_PRODUCT_FORM_STORE_NAME;
 
 /**
  * Internal dependencies
@@ -141,6 +174,9 @@ import { ShippingZonesSelectors } from './shipping-zones/types';
 import { ProductTagSelectors } from './product-tags/types';
 import { ProductCategorySelectors } from './product-categories/types';
 import { ProductAttributeTermsSelectors } from './product-attribute-terms/types';
+import { ProductVariationSelectors } from './product-variations/types';
+import { TaxClassSelectors } from './tax-classes/types';
+import { ProductFormSelectors } from './product-form/selectors';
 
 // As we add types to all the package selectors we can fill out these unknown types with real ones. See one
 // of the already typed selectors for an example of how you can do this.
@@ -180,10 +216,16 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? ProductCategorySelectors
 	: T extends typeof EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
 	? ProductAttributeTermsSelectors
+	: T extends typeof EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+	? ProductVariationSelectors
 	: T extends typeof ORDERS_STORE_NAME
 	? OrdersSelectors
 	: T extends typeof EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME
 	? ShippingZonesSelectors
+	: T extends typeof EXPERIMENTAL_TAX_CLASSES_STORE_NAME
+	? TaxClassSelectors
+	: T extends typeof EXPERIMENTAL_PRODUCT_FORM_STORE_NAME
+	? ProductFormSelectors
 	: never;
 
 export interface WCDataSelector {
@@ -196,6 +238,8 @@ export { ActionDispatchers as ProductAttributesActions } from './product-attribu
 export { ActionDispatchers as ProductTagsActions } from './product-tags/types';
 export { ActionDispatchers as ProductCategoryActions } from './product-categories/types';
 export { ActionDispatchers as ProductAttributeTermsActions } from './product-attribute-terms/types';
+export { ActionDispatchers as ProductVariationsActions } from './product-variations/types';
 export { ActionDispatchers as ProductsStoreActions } from './products/actions';
 export { ActionDispatchers as ProductShippingClassesActions } from './product-shipping-classes/types';
 export { ActionDispatchers as ShippingZonesActions } from './shipping-zones/types';
+export { ActionDispatchers as TaxClassActions } from './tax-classes/types';

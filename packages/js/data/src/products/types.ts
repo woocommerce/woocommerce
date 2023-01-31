@@ -6,6 +6,7 @@ import { Schema } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
+import { ProductCategory } from '../product-categories/types';
 import { BaseQueryParams } from '../types';
 
 export type ProductType = 'simple' | 'grouped' | 'external' | 'variable';
@@ -34,82 +35,91 @@ export type ProductAttribute = {
 	options: string[];
 };
 
+export type ProductDimensions = {
+	width: string;
+	height: string;
+	length: string;
+};
+
 export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	Schema.Post,
-	'status'
+	'status' | 'categories'
 > & {
-	id: number;
-	name: string;
-	slug: string;
-	permalink: string;
+	attributes: ProductAttribute[];
+	average_rating: string;
+	backordered: boolean;
+	backorders: 'no' | 'notify' | 'yes';
+	backorders_allowed: boolean;
+	button_text: string;
+	categories: Pick< ProductCategory, 'id' | 'name' | 'slug' >[];
 	date_created: string;
 	date_created_gmt: string;
 	date_modified: string;
 	date_modified_gmt: string;
-	type: Type;
-	status: Status;
-	featured: boolean;
-	description: string;
-	short_description: string;
-	sku: string;
-	date_on_sale_from: string | null;
 	date_on_sale_from_gmt: string | null;
-	date_on_sale_to: string | null;
 	date_on_sale_to_gmt: string | null;
-	virtual: boolean;
+	description: string;
+	dimensions: ProductDimensions;
+	download_expiry: number;
+	download_limit: number;
 	downloadable: boolean;
 	downloads: ProductDownload[];
-	download_limit: number;
-	download_expiry: number;
 	external_url: string;
-	button_text: string;
-	tax_status: 'taxable' | 'shipping' | 'none';
-	tax_class: 'standard' | 'reduced-rate' | 'zero-rate' | undefined;
+	featured: boolean;
+	id: number;
+	low_stock_amount: number;
 	manage_stock: boolean;
-	stock_quantity: number;
-	stock_status: 'instock' | 'outofstock' | 'onbackorder';
-	backorders: 'no' | 'notify' | 'yes';
+	menu_order: number;
+	name: string;
+	on_sale: boolean;
+	permalink: string;
 	price: string;
 	price_html: string;
-	regular_price: string;
-	sale_price: string;
-	on_sale: boolean;
 	purchasable: boolean;
-	total_sales: number;
-	backorders_allowed: boolean;
-	backordered: boolean;
-	shipping_required: boolean;
-	shipping_taxable: boolean;
-	shipping_class_id: number;
-	average_rating: string;
+	regular_price: string;
 	rating_count: number;
 	related_ids: number[];
+	reviews_allowed: boolean;
+	sale_price: string;
+	shipping_class: string;
+	shipping_class_id: number;
+	shipping_required: boolean;
+	shipping_taxable: boolean;
+	short_description: string;
+	slug: string;
+	sku: string;
+	status: Status;
+	stock_quantity: number;
+	stock_status: 'instock' | 'outofstock' | 'onbackorder';
+	tax_class: 'standard' | 'reduced-rate' | 'zero-rate' | undefined;
+	tax_status: 'taxable' | 'shipping' | 'none';
+	total_sales: number;
+	type: Type;
 	variations: number[];
-	attributes: ProductAttribute[];
-	dimensions: ProductDimensions;
+	virtual: boolean;
 	weight: string;
 };
 
 export const productReadOnlyProperties = [
-	'id',
-	'permalink',
+	'average_rating',
+	'backordered',
+	'backorders_allowed',
 	'date_created',
 	'date_created_gmt',
 	'date_modified',
 	'date_modified_gmt',
+	'id',
+	'on_sale',
+	'permalink',
 	'price',
 	'price_html',
-	'on_sale',
 	'purchasable',
-	'total_sales',
-	'backorders_allowed',
-	'backordered',
-	'shipping_required',
-	'shipping_taxable',
-	'shipping_class_id',
-	'average_rating',
 	'rating_count',
 	'related_ids',
+	'shipping_class_id',
+	'shipping_required',
+	'shipping_taxable',
+	'total_sales',
 	'variations',
 ] as const;
 
@@ -145,10 +155,4 @@ export type ProductQuery<
 	min_price: string;
 	max_price: string;
 	stock_status: 'instock' | 'outofstock' | 'onbackorder';
-};
-
-export type ProductDimensions = {
-	width: string;
-	height: string;
-	length: string;
 };

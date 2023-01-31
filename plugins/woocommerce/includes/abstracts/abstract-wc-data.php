@@ -614,7 +614,6 @@ abstract class WC_Data {
 
 		if ( is_array( $raw_meta_data ) ) {
 			$this->init_meta_data( $raw_meta_data );
-
 			if ( ! $cache_loaded && ! empty( $this->cache_group ) ) {
 				wp_cache_set( $cache_key, $raw_meta_data, $this->cache_group );
 			}

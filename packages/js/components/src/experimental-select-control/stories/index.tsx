@@ -1,19 +1,31 @@
 /**
  * External dependencies
  */
-import { CheckboxControl, Spinner } from '@wordpress/components';
-import React from 'react';
+import {
+	Button,
+	CheckboxControl,
+	Modal,
+	SlotFillProvider,
+	Spinner,
+} from '@wordpress/components';
+import React, { useCallback } from 'react';
 import { createElement, useState } from '@wordpress/element';
+import { tag } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
 import { SelectedType, DefaultItemType, getItemLabelType } from '../types';
 import { MenuItem } from '../menu-item';
-import { SelectControl, selectControlStateChangeTypes } from '../';
-import { Menu } from '../menu';
+import {
+	SelectControl,
+	selectControlStateChangeTypes,
+	useAsyncFilter,
+} from '../';
+import { Menu, MenuSlot } from '../menu';
+import { SuffixIcon } from '../suffix-icon';
 
-const sampleItems = [
+const sampleItems: DefaultItemType[] = [
 	{ value: 'apple', label: 'Apple' },
 	{ value: 'pear', label: 'Pear' },
 	{ value: 'orange', label: 'Orange' },
@@ -125,35 +137,121 @@ export const FuzzyMatching: React.FC = () => {
 
 export const Async: React.FC = () => {
 	const [ selectedItem, setSelectedItem ] =
-		useState< SelectedType< DefaultItemType > >( null );
+		useState< DefaultItemType | null >( null );
 	const [ fetchedItems, setFetchedItems ] = useState< DefaultItemType[] >(
 		[]
 	);
-	const [ isFetching, setIsFetching ] = useState( false );
 
-	const fetchItems = ( value: string | undefined ) => {
-		setIsFetching( true );
-		setFetchedItems( [] );
-		setTimeout( () => {
-			const results = sampleItems.sort( () => 0.5 - Math.random() );
-			setFetchedItems( results );
-			setIsFetching( false );
-		}, 1500 );
-	};
+	const filter = useCallback(
+		( value = '' ) =>
+			new Promise< DefaultItemType[] >( ( resolve ) => {
+				setTimeout( () => {
+					const filteredItems = [ ...sampleItems ]
+						.sort( ( a, b ) => a.label.localeCompare( b.label ) )
+						.filter( ( { label } ) =>
+							label.toLowerCase().includes( value.toLowerCase() )
+						);
+					resolve( filteredItems );
+				}, 1500 );
+			} ),
+		[ selectedItem ]
+	);
+
+	const { isFetching, ...selectProps } = useAsyncFilter< DefaultItemType >( {
+		filter,
+		onFilterStart() {
+			setFetchedItems( [] );
+		},
+		onFilterEnd( filteredItems ) {
+			setFetchedItems( filteredItems );
+		},
+	} );
 
 	return (
 		<>
-			<SelectControl
+			<SelectControl< DefaultItemType >
+				{ ...selectProps }
 				label="Async"
-				getFilteredItems={ ( allItems ) => {
-					return allItems;
-				} }
 				items={ fetchedItems }
-				onInputChange={ fetchItems }
 				selected={ selectedItem }
-				onSelect={ ( item ) => setSelectedItem( item ) }
-				onRemove={ () => setSelectedItem( null ) }
 				placeholder="Start typing..."
+				onSelect={ setSelectedItem }
+				onRemove={ () => setSelectedItem( null ) }
+			>
+				{ ( {
+					items,
+					isOpen,
+					highlightedIndex,
+					getItemProps,
+					getMenuProps,
+				} ) => {
+					return (
+						<Menu isOpen={ isOpen } getMenuProps={ getMenuProps }>
+							{ isFetching ? (
+								<Spinner />
+							) : (
+								items.map( ( item, index: number ) => (
+									<MenuItem
+										key={ `${ item.value }${ index }` }
+										index={ index }
+										isActive={ highlightedIndex === index }
+										item={ item }
+										getItemProps={ getItemProps }
+									>
+										{ item.label }
+									</MenuItem>
+								) )
+							) }
+						</Menu>
+					);
+				} }
+			</SelectControl>
+		</>
+	);
+};
+
+export const AsyncWithoutListeningFilterEvents: React.FC = () => {
+	const [ selectedItem, setSelectedItem ] =
+		useState< DefaultItemType | null >( null );
+	const [ fetchedItems, setFetchedItems ] = useState< DefaultItemType[] >(
+		[]
+	);
+
+	const filter = useCallback(
+		async ( value = '' ) => {
+			setFetchedItems( [] );
+			return new Promise< DefaultItemType[] >( ( resolve ) => {
+				setTimeout( () => {
+					const filteredItems = [ ...sampleItems ]
+						.sort( ( a, b ) => a.label.localeCompare( b.label ) )
+						.filter( ( { label } ) =>
+							label.toLowerCase().includes( value.toLowerCase() )
+						);
+
+					resolve( filteredItems );
+				}, 1500 );
+			} ).then( ( filteredItems ) => {
+				setFetchedItems( filteredItems );
+				return filteredItems;
+			} );
+		},
+		[ selectedItem ]
+	);
+
+	const { isFetching, ...selectProps } = useAsyncFilter< DefaultItemType >( {
+		filter,
+	} );
+
+	return (
+		<>
+			<SelectControl< DefaultItemType >
+				{ ...selectProps }
+				label="Async"
+				items={ fetchedItems }
+				selected={ selectedItem }
+				placeholder="Start typing..."
+				onSelect={ setSelectedItem }
+				onRemove={ () => setSelectedItem( null ) }
 			>
 				{ ( {
 					items,
@@ -362,6 +460,116 @@ export const CustomItemType: React.FC = () => {
 				getItemValue={ ( item ) => String( item?.itemId ) }
 			/>
 		</>
+	);
+};
+
+export const SingleWithinModalUsingBodyDropdownPlacement: React.FC = () => {
+	const [ isOpen, setOpen ] = useState( true );
+	const [ selected, setSelected ] =
+		useState< SelectedType< DefaultItemType > >();
+	const [ selectedTwo, setSelectedTwo ] =
+		useState< SelectedType< DefaultItemType > >();
+
+	return (
+		<SlotFillProvider>
+			Selected: { JSON.stringify( selected ) }
+			<Button onClick={ () => setOpen( true ) }>
+				Show Dropdown in Modal
+			</Button>
+			{ isOpen && (
+				<Modal
+					title="Dropdown Modal"
+					onRequestClose={ () => setOpen( false ) }
+				>
+					<SelectControl
+						items={ sampleItems }
+						label="Single value"
+						selected={ selected }
+						onSelect={ ( item ) => item && setSelected( item ) }
+						onRemove={ () => setSelected( null ) }
+					/>
+					<SelectControl
+						items={ sampleItems }
+						label="Single value"
+						selected={ selectedTwo }
+						onSelect={ ( item ) => item && setSelectedTwo( item ) }
+						onRemove={ () => setSelectedTwo( null ) }
+					/>
+				</Modal>
+			) }
+			<MenuSlot />
+		</SlotFillProvider>
+	);
+};
+
+export const DefaultSuffix: React.FC = () => {
+	const [ selected, setSelected ] = useState<
+		SelectedType< DefaultItemType >
+	>( sampleItems[ 1 ] );
+
+	return (
+		<SelectControl
+			items={ sampleItems }
+			label="Default suffix"
+			selected={ selected }
+			onSelect={ ( item ) => item && setSelected( item ) }
+			onRemove={ () => setSelected( null ) }
+		/>
+	);
+};
+
+export const CustomSuffixIcon: React.FC = () => {
+	const [ selected, setSelected ] = useState<
+		SelectedType< DefaultItemType >
+	>( sampleItems[ 1 ] );
+
+	return (
+		<SelectControl
+			items={ sampleItems }
+			label="Custom suffix icon"
+			selected={ selected }
+			onSelect={ ( item ) => item && setSelected( item ) }
+			onRemove={ () => setSelected( null ) }
+			suffix={ <SuffixIcon icon={ tag } /> }
+		/>
+	);
+};
+
+export const NoSuffix: React.FC = () => {
+	const [ selected, setSelected ] = useState<
+		SelectedType< DefaultItemType >
+	>( sampleItems[ 1 ] );
+
+	return (
+		<SelectControl
+			items={ sampleItems }
+			label="No suffix"
+			selected={ selected }
+			onSelect={ ( item ) => item && setSelected( item ) }
+			onRemove={ () => setSelected( null ) }
+			suffix={ null }
+		/>
+	);
+};
+
+export const CustomSuffix: React.FC = () => {
+	const [ selected, setSelected ] = useState<
+		SelectedType< DefaultItemType >
+	>( sampleItems[ 1 ] );
+
+	return (
+		<SelectControl
+			items={ sampleItems }
+			label="Custom suffix"
+			selected={ selected }
+			onSelect={ ( item ) => item && setSelected( item ) }
+			onRemove={ () => setSelected( null ) }
+			suffix={
+				<div style={ { background: 'red', height: '100%' } }>
+					Suffix!
+				</div>
+			}
+		/>
 	);
 };
 

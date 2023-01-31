@@ -1,9 +1,12 @@
 const { expect } = require( '@playwright/test' );
 
 const STORE_DETAILS_URL = 'wp-admin/admin.php?page=wc-admin&path=/setup-wizard';
-const INDUSTRY_DETAILS_URL = 'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=industry';
-const PRODUCT_TYPES_URL = 'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=product-types';
-const BUSIENSS_DETAILS_URL = 'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=business-details';
+const INDUSTRY_DETAILS_URL =
+	'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=industry';
+const PRODUCT_TYPES_URL =
+	'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=product-types';
+const BUSIENSS_DETAILS_URL =
+	'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=business-details';
 
 const onboarding = {
 	completeStoreDetailsSection: async ( page, store ) => {
@@ -46,16 +49,28 @@ const onboarding = {
 		const numCheckboxes = await page.$$(
 			'.components-checkbox-control__input'
 		);
-		expect( numCheckboxes.length === expectedIndustries ).toBeTruthy();
+		expect( numCheckboxes ).toHaveLength( expectedIndustries );
 		// Uncheck any currently checked industries
 		for ( let i = 0; i < expectedIndustries; i++ ) {
 			const currentCheck = `#inspector-checkbox-control-${ i }`;
 			await page.uncheck( currentCheck );
 		}
 
-		Object.keys( industries ).forEach( async ( industry ) => {
-			await page.click( `label >> text=${ industries[ industry ] }` );
-		} );
+		for ( let industry of Object.values( industries ) ) {
+			await page.click( `label >> text=${ industry }` );
+		}
+	},
+
+	handleSaveChangesModal: async ( page, { saveChanges } ) => {
+		// Save changes? Modal
+		await page.textContent( '.components-modal__header-heading' );
+
+		if ( saveChanges ) {
+			await page.click( 'button >> text=Save' );
+		} else {
+			await page.click( 'button >> text=Discard' );
+		}
+		await page.waitForLoadState( 'networkidle' );
 	},
 
 	completeProductTypesSection: async ( page, products ) => {
@@ -72,7 +87,7 @@ const onboarding = {
 		const numCheckboxes = await page.$$(
 			'.components-checkbox-control__input'
 		);
-		expect( numCheckboxes.length === expectedProductTypes ).toBeTruthy();
+		expect( numCheckboxes ).toHaveLength( expectedProductTypes );
 		// Uncheck any currently checked products
 		for ( let i = 0; i < expectedProductTypes; i++ ) {
 			const currentCheck = `#inspector-checkbox-control-${ i }`;

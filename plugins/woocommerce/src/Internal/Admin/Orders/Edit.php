@@ -34,6 +34,20 @@ class Edit {
 	private $order;
 
 	/**
+	 * Action name that the form is currently handling. Could be new_order or edit_order.
+	 *
+	 * @var string
+	 */
+	private $current_action;
+
+	/**
+	 * Message to be displayed to the user. Index of message from the messages array registered when declaring shop_order post type.
+	 *
+	 * @var int
+	 */
+	private $message;
+
+	/**
 	 * Hooks all meta-boxes for order edit page. This is static since this may be called by post edit form rendering.
 	 *
 	 * @param string $screen_id Screen ID.
@@ -89,6 +103,7 @@ class Edit {
 	 */
 	public function setup( \WC_Order $order ) {
 		$this->order    = $order;
+		$wc_screen_id   = wc_get_page_screen_id( 'shop-order' );
 		$current_screen = get_current_screen();
 		$current_screen->is_block_editor( false );
 		$this->screen_id = $current_screen->id;
@@ -107,8 +122,28 @@ class Edit {
 		 *
 		 * @since 3.8.0.
 		 */
-		do_action( 'add_meta_boxes', wc_get_page_screen_id( 'shop-order' ), $this->order );
+		do_action( 'add_meta_boxes', $wc_screen_id, $this->order );
+
+		/**
+		 * Provides an opportunity to inject custom meta boxes into the order editor screen. This
+		 * hook is an analog of `add_meta_boxes_<POST_TYPE>` as provided by WordPress core.
+		 *
+		 * @since 7.4.0
+		 *
+		 * @oaram WC_Order $order The order being edited.
+		 */
+		do_action( 'add_meta_boxes_' . $wc_screen_id, $this->order );
+
 		$this->enqueue_scripts();
+	}
+
+	/**
+	 * Set the current action for the form.
+	 *
+	 * @param string $action Action name.
+	 */
+	public function set_current_action( string $action ) {
+		$this->current_action = $action;
 	}
 
 	/**
@@ -151,6 +186,9 @@ class Edit {
 		 */
 		do_action( 'woocommerce_process_shop_order_meta', $this->order->get_id(), $this->order );
 
+		// Order updated message.
+		$this->message = 1;
+
 		// Refresh the order from DB.
 		$this->order = wc_get_order( $this->order->get_id() );
 		$theorder    = $this->order;
@@ -176,7 +214,32 @@ class Edit {
 	 * Render order edit page.
 	 */
 	public function display() {
-		$this->render_wrapper_start();
+		/**
+		 * This is used by the order edit page to show messages in the notice fields.
+		 * It should be similar to post_updated_messages filter, i.e.:
+		 * array(
+		 *   {order_type} => array(
+		 *      1 => 'Order updated.',
+		 *      2 => 'Custom field updated.',
+		 * ...
+		 * ).
+		 *
+		 * The index to be displayed is computed from the $_GET['message'] variable.
+		 *
+		 * @since 7.4.0.
+		 */
+		$messages = apply_filters( 'woocommerce_order_updated_messages', array() );
+
+		$message = $this->message;
+		if ( isset( $_GET['message'] ) ) {
+			$message = absint( $_GET['message'] );
+		}
+
+		if ( isset( $message ) ) {
+			$message = $messages[ $this->order->get_type() ][ $message ] ?? false;
+		}
+
+		$this->render_wrapper_start( '', $message );
 		$this->render_meta_boxes();
 		$this->render_wrapper_end();
 	}
@@ -188,18 +251,24 @@ class Edit {
 	 * @param string $message Message to display, if any.
 	 */
 	private function render_wrapper_start( $notice = '', $message = '' ) {
-		$edit_page_url = admin_url( 'admin.php?page=wc-orders&action=edit&id=' . $this->order->get_id() );
+		$post_type = get_post_type_object( $this->order->get_type() );
+
+		$edit_page_url = wc_get_container()->get( PageController::class )->get_edit_url( $this->order->get_id() );
 		$form_action   = 'edit_order';
 		$referer       = wp_get_referer();
-		$new_page_url  = wc_get_container()->get( PageController::class )->get_new_page_url();
+		$new_page_url  = wc_get_container()->get( PageController::class )->get_new_page_url( $this->order->get_type() );
 
 		?>
 		<div class="wrap">
 		<h1 class="wp-heading-inline">
-			<?php echo esc_html( 'Edit order' ); ?>
+			<?php
+			echo 'new_order' === $this->current_action ? esc_html( $post_type->labels->add_new_item ) : esc_html( $post_type->labels->edit_item );
+			?>
 		</h1>
 		<?php
-		echo ' <a href="' . esc_url( $new_page_url ) . '" class="page-title-action"> Add order </a>';
+		if ( 'edit_order' === $this->current_action ) {
+			echo ' <a href="' . esc_url( $new_page_url ) . '" class="page-title-action">' . esc_html( $post_type->labels->add_new ) . '</a>';
+		}
 		?>
 		<hr class="wp-header-end">
 

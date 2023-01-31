@@ -26,23 +26,23 @@ Here are some examples of the ways you can use Turborepo / pnpm commands:
 pnpm run -r lint && pnpm run build 
 
 # Build WooCommerce Core and all of its dependencies
-pnpm run build --filter='woocommerce'
+pnpm run --filter='woocommerce' build 
 
 # Lint the @woocommerce/components package - note the different argument order, turbo scripts
 # are not running lints at this point in time.
 pnpm run -r --filter='@woocommerce/components' lint 
 
 # Test all of the @woocommerce scoped packages
-pnpm run test --filter='@woocommerce/*'
+pnpm run --filter='@woocommerce/*' test 
 
 # Build all of the JavaScript packages
-pnpm run build --filter='./packages/js/*'
+pnpm run --filter='./packages/js/*' build 
 
 # Build everything except WooCommerce Core
-pnpm run build --filter='!woocommerce' 
+pnpm run --filter='!woocommerce' build 
 
 # Build everything that has changed since the last commit
-pnpm run build --filter='[HEAD^1]'
+pnpm run --filter='[HEAD^1]' build 
 ```
 
 ### Cache busting Turbo
@@ -53,7 +53,7 @@ e.g.
 
 ```bash
 # Force an uncached build of WooCommerce Core and all of its dependencies
-TURBO_FORCE=true pnpm run build --filter='woocommerce'
+TURBO_FORCE=true pnpm run --filter='woocommerce' build
 ```
 
 ## Other Commands

@@ -4,6 +4,7 @@ export { default as AnimationSlider } from './animation-slider';
 export { default as Chart } from './chart';
 export { default as ChartPlaceholder } from './chart/placeholder';
 export { CompareButton, CompareFilter } from './compare-filter';
+export { ConditionalWrapper as __experimentalConditionalWrapper } from './conditional-wrapper';
 export { default as Date } from './date';
 export { default as DateRangeFilterPicker } from './date-range-filter-picker';
 export { default as DateRange } from './calendar/date-range';
@@ -18,9 +19,9 @@ export { FormSection } from './form-section';
 export type { FormContext, FormRef, FormErrors } from './form';
 export { default as FilterPicker } from './filter-picker';
 export { H, Section } from './section';
-export { ImageGallery } from './image-gallery';
+export { ImageGallery, ImageGalleryItem } from './image-gallery';
 export { default as ImageUpload } from './image-upload';
-export { default as Link } from './link';
+export { Link } from './link';
 export { default as List } from './list';
 export { MediaUploader } from './media-uploader';
 export { default as MenuItem } from './ellipsis-menu/menu-item';
@@ -34,6 +35,7 @@ export { default as ProductRating } from './rating/product';
 export { default as Rating } from './rating';
 export { default as ReportFilters } from './filters';
 export { default as ReviewRating } from './rating/review';
+export { RichTextEditor as __experimentalRichTextEditor } from './rich-text-editor';
 export { default as Search } from './search';
 export { default as SearchListControl } from './search-list-control';
 export { default as SearchListItem } from './search-list-control/item';
@@ -43,8 +45,16 @@ export { default as SelectControl } from './select-control';
 export {
 	SelectControl as __experimentalSelectControl,
 	selectControlStateChangeTypes,
+	useAsyncFilter,
 } from './experimental-select-control';
-export { MenuItem as __experimentalSelectControlMenuItem } from './experimental-select-control/menu-item';
+export {
+	MenuItem as __experimentalSelectControlMenuItem,
+	MenuItemProps as __experimentalSelectControlMenuItemProps,
+} from './experimental-select-control/menu-item';
+export {
+	Menu as __experimentalSelectControlMenu,
+	MenuSlot as __experimentalSelectControlMenuSlot,
+} from './experimental-select-control/menu';
 export { default as ScrollTo } from './scroll-to';
 export { Sortable } from './sortable';
 export { ListItem } from './list-item';
@@ -66,11 +76,22 @@ export { default as Tag } from './tag';
 export { default as TextControl } from './text-control';
 export { default as TextControlWithAffixes } from './text-control-with-affixes';
 export { default as Timeline } from './timeline';
+export { Tooltip as __experimentalTooltip } from './tooltip';
 export { default as ViewMoreList } from './view-more-list';
 export { default as WebPreview } from './web-preview';
 export { Badge } from './badge';
 export { DynamicForm } from './dynamic-form';
-export { EnrichedLabel } from './enriched-label';
 export { default as TourKit } from './tour-kit';
 export * as TourKitTypes from './tour-kit/types';
 export { CollapsibleContent } from './collapsible-content';
+export { createOrderedChildren, sortFillsByOrder } from './utils';
+export { WooProductFieldItem as __experimentalWooProductFieldItem } from './woo-product-field-item';
+export { WooProductSectionItem as __experimentalWooProductSectionItem } from './woo-product-section-item';
+export { WooProductTabItem as __experimentalWooProductTabItem } from './woo-product-tab-item';
+export * from './product-fields';
+export {
+	SlotContextProvider,
+	useSlotContext,
+	SlotContextType,
+	SlotContextHelpersType,
+} from './slot-context';

@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import {
 	AddPropertyTransformation,
 	CustomTransformation,
@@ -147,7 +150,7 @@ export function createProductDataTransformer< T extends AbstractProductData >(
 /**
  * Creates a transformer for the shared properties of all products.
  *
- * @param {string} type The product type.
+ * @param {string}                      type            The product type.
  * @param {Array.<ModelTransformation>} transformations Optional transformers to add to the transformer.
  * @return {ModelTransformer} The created transformer.
  */

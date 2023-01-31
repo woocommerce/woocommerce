@@ -10,13 +10,32 @@
 			box-shadow: none;
 			&__body {
 				padding: $gap-large;
+
+				> .components-base-control,
+				> .components-dropdown,
+				> .woocommerce-rich-text-editor {
+					&:not(:first-child):not(.components-radio-control) {
+						margin-top: $gap-large - $gap-smaller;
+						margin-bottom: 0;
+					}
+				}
 			}
 		}
 
-		.components-base-control {
-			&:not(:first-child) {
-				margin-top: $gap-large - $gap-smaller;
+		.woocommerce-product-form__field:not(:first-child) {
+			margin-top: $gap-large - $gap-smaller;
+
+			> .components-base-control {
+				margin-bottom: 0;
 			}
+		}
+
+		.components-radio-control .components-v-stack {
+			gap: $gap-small;
+		}
+
+		.woocommerce-collapsible-content {
+			margin-top: $gap-large;
 		}
 	}
 

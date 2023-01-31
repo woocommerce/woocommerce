@@ -111,7 +111,7 @@ describe( 'inbox_panel_view_event', () => {
 		useSelect.mockImplementation( () => ( {
 			notes,
 			isError: false,
-			isResolvingNotes: false,
+			notesHaveResolved: true,
 			isBatchUpdating: false,
 		} ) );
 		render( <InboxPanel /> );

@@ -282,37 +282,6 @@ function wc_product_post_type_link( $permalink, $post ) {
 add_filter( 'post_type_link', 'wc_product_post_type_link', 10, 2 );
 
 /**
- * Filter to add upload tips under the product image thumbnail.
- *
- * @param  string $content The HTML markup for the admin post thumbnail.
- * @return string
- */
-function wc_product_post_thumbnail_html( $content ) {
-	$suggestion  = '<div class="image-added-detail">';
-	$suggestion .= '<p>';
-	$suggestion .= '<span class="dashicons-info-outline dashicons"></span>';
-	/* translators: 1: formatted file size */
-	$suggestion .= esc_html( sprintf( __( 'Upload JPEG files that are 1000 x 1000 pixels or larger (max. %1$s).', 'woocommerce' ), size_format( wp_max_upload_size() ) ) );
-	$suggestion .= ' <a href="https://woocommerce.com/posts/fast-high-quality-product-photos/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to prepare images?', 'woocommerce' ) . '<span class="dashicons-external dashicons"></span></a>';
-	$suggestion .= '</p>';
-	$suggestion .= '</div>';
-
-	return $content . $suggestion;
-}
-
-/**
- * Action to add the filter to add upload tips under the product image thumbnail.
- *
- * @param WP_Screen $current_screen Current WP_Screen object.
- */
-function wc_add_product_post_thumbnail_html_filter( $current_screen ) {
-	if ( 'product' === $current_screen->post_type && 'post' === $current_screen->base ) {
-		add_filter( 'admin_post_thumbnail_html', 'wc_product_post_thumbnail_html' );
-	}
-}
-add_action( 'current_screen', 'wc_add_product_post_thumbnail_html_filter' );
-
-/**
  * Get the placeholder image URL either from media, or use the fallback image.
  *
  * @param string $size Thumbnail size to use.
@@ -819,7 +788,7 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		}
 
 		$alt_text     = array_filter( $alt_text );
-		$props['alt'] = isset( $alt_text[0] ) ? $alt_text[0] : '';
+		$props['alt'] = $alt_text ? reset( $alt_text ) : '';
 
 		// Large version.
 		$full_size           = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
@@ -946,7 +915,7 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 	);
 
 	$transient     = get_transient( $transient_name );
-	$related_posts = $transient && isset( $transient[ $query_args ] ) ? $transient[ $query_args ] : false;
+	$related_posts = $transient && is_array( $transient ) && isset( $transient[ $query_args ] ) ? $transient[ $query_args ] : false;
 
 	// We want to query related posts if they are not cached, or we don't have enough.
 	if ( false === $related_posts || count( $related_posts ) < $limit ) {
@@ -962,7 +931,7 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 			$related_posts = $data_store->get_related_products( $cats_array, $tags_array, $exclude_ids, $limit + 10, $product_id );
 		}
 
-		if ( $transient ) {
+		if ( $transient && is_array( $transient ) ) {
 			$transient[ $query_args ] = $related_posts;
 		} else {
 			$transient = array( $query_args => $related_posts );

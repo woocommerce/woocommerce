@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Customers should be able to pay for orders so long as any required stock reductions have already taken place.

@@ -1,68 +1,71 @@
 name: Setup WooCommerce Monorepo
 description: Handles the installation, building, and caching of the projects within the monorepo.
+permissions: {}
 
 inputs:
-  install-filters:
-    description: The PNPM filter used to decide what projects to install. Supports multiline strings for multiple filters.
-    default: ""
-  build:
-    description: Indicates whether or not the action should build any projects.
-    default: "true"
-  build-filters:
-    description: The PNPM filter used to decide what projects to build. Supports multiline strings for multiple filters.
-    default: ""
-  php-version:
-    description: The version of PHP that the action should set up.
-    default: "7.2"
+    install-filters:
+        description: The PNPM filter used to decide what projects to install. Supports multiline strings for multiple filters.
+        default: ''
+    build:
+        description: Indicates whether or not the action should build any projects.
+        default: 'true'
+    build-filters:
+        description: The PNPM filter used to decide what projects to build. Supports multiline strings for multiple filters.
+        default: ''
+    php-version:
+        description: The version of PHP that the action should set up.
+        default: '7.4'
 
 runs:
-  using: composite
-  steps:
-    - name: Parse Action Input
-      id: parse-input
-      shell: bash
-      run: |
-        echo "::set-output name=INSTALL_FILTERS::$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.install-filters }}')"
-        echo "::set-output name=BUILD_FILTERS::$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.build-filters }}')"
+    using: composite
+    steps:
+        - name: Parse Action Input
+          id: parse-input
+          shell: bash
+          run: |
+              echo "INSTALL_FILTERS=$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.install-filters }}')" >> $GITHUB_OUTPUT
+              echo "BUILD_FILTERS=$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.build-filters }}')" >> $GITHUB_OUTPUT
 
-    - name: Setup PNPM
-      uses: pnpm/action-setup@10693b3829bf86eb2572aef5f3571dcf5ca9287d
-      with:
-        version: "^7.13.3"
+        - name: Setup PNPM
+          uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
+          with:
+              version: '^7.22.0'
 
-    - name: Setup Node
-      uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93
-      with:
-        node-version-file: .nvmrc
-        cache: pnpm
-    
-    - name: Setup PHP
-      uses: shivammathur/setup-php@e04e1d97f0c0481c6e1ba40f8a538454fe5d7709
-      with:
-        php-version: ${{ inputs.php-version }}
-        coverage: none
+        - name: Setup Node
+          uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
+          with:
+              node-version-file: .nvmrc
+              cache: pnpm
+              registry-url: 'https://registry.npmjs.org'
 
-    - name: Cache Composer Dependencies
-      uses: actions/cache@fd5de65bc895cf536527842281bea11763fefd77
-      with:
-        path: ~/.cache/composer/files
-        key: ${{ runner.os }}-php-${{ inputs.php-version }}-composer-${{ hashFiles('**/composer.lock') }}
-        restore-keys: ${{ runner.os }}-php-${{ inputs.php-version }}-composer-
+        - name: Setup PHP
+          uses: shivammathur/setup-php@8e2ac35f639d3e794c1da1f28999385ab6fdf0fc
+          with:
+              php-version: ${{ inputs.php-version }}
+              coverage: none
+              tools: phpcs, sirbrillig/phpcs-changed
 
-    - name: Install Node and PHP Dependencies
-      shell: bash
-      run: |
-        pnpm -w install turbo
-        pnpm install ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
+        - name: Cache Composer Dependencies
+          uses: actions/cache@58c146cc91c5b9e778e71775dfe9bf1442ad9a12
+          with:
+              path: ~/.cache/composer/files
+              key: ${{ runner.os }}-php-${{ inputs.php-version }}-composer-${{ hashFiles('**/composer.lock') }}
+              restore-keys: ${{ runner.os }}-php-${{ inputs.php-version }}-composer-
 
-    - name: Cache Build Output
-      uses: actions/cache@fd5de65bc895cf536527842281bea11763fefd77
-      with:
-        path: node_modules/.cache/turbo
-        key: ${{ runner.os }}-build-output-${{ hashFiles('node_modules/.cache/turbo/*-meta.json') }}
-        restore-keys: ${{ runner.os }}-build-output-
+        - name: Install Node and PHP Dependencies
+          shell: bash
+          run: |
+              pnpm -w install turbo
+              pnpm install ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
 
-    - name: Build
-      if: ${{ inputs.build == 'true' }}
-      shell: bash
-      run: pnpm -w exec turbo run turbo:build ${{ steps.parse-input.outputs.BUILD_FILTERS }}
+        - name: Cache Build Output
+          uses: actions/cache@58c146cc91c5b9e778e71775dfe9bf1442ad9a12
+          with:
+              path: node_modules/.cache/turbo
+              key: ${{ runner.os }}-build-output-${{ hashFiles('node_modules/.cache/turbo/*-meta.json') }}
+              restore-keys: ${{ runner.os }}-build-output-
+
+        - name: Build
+          if: ${{ inputs.build == 'true' }}
+          shell: bash
+          run: pnpm -w exec turbo run turbo:build ${{ steps.parse-input.outputs.BUILD_FILTERS }}

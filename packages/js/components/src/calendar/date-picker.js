@@ -116,7 +116,11 @@ class DatePicker extends Component {
 						</H>
 						<div className="woocommerce-calendar__react-dates is-core-datepicker">
 							<WpDatePicker
-								currentDate={ date }
+								currentDate={
+									date instanceof moment
+										? date.toDate()
+										: date
+								}
 								onChange={ partial(
 									this.onDateChange,
 									onToggle

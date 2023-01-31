@@ -1,12 +1,15 @@
+/**
+ * External dependencies
+ */
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 /**
  * An object containing the IDs for an interceptor currently applied to a client.
  *
  * @typedef ActiveInterceptor
- * @property {AxiosInstance} client The client the interceptor is tied to.
- * @property {number} requestInterceptorID The ID of the request interceptor callbacks.
- * @property {number} responseInterceptorID The ID of the response interceptor callbacks.
+ * @property {AxiosInstance} client                The client the interceptor is tied to.
+ * @property {number}        requestInterceptorID  The ID of the request interceptor callbacks.
+ * @property {number}        responseInterceptorID The ID of the response interceptor callbacks.
  */
 type ActiveInterceptor = {
 	client: AxiosInstance;

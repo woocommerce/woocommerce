@@ -435,7 +435,7 @@ export const testSubscriptionsInclusion = () => {
 	} );
 	describe( 'A US store will see the Subscriptions inclusion', () => {
 		const profileWizard = new OnboardingWizard( page );
-		const login = new Login( page );
+		new Login( page );
 
 		beforeAll( async () => {
 			await resetWooCommerceState();

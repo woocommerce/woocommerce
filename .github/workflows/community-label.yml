@@ -1,34 +1,46 @@
 name: Add Community Label
 
 on:
-  pull_request_target:
-    types: [opened]
-  issues:
-    types: [opened]
-  
+    pull_request_target:
+        types: [opened]
+    issues:
+        types: [opened]
 
-concurrency: 
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions: {}
 
 jobs:
-  verify:
-    name: Verify
-    runs-on: ubuntu-20.04
-    outputs:
-      issueId: ${{ steps.check.outputs.issueId }}
-      run: ${{ steps.check.outputs.run }}
-    steps:
-      - uses: actions/checkout@v3
+    verify:
+        name: Verify
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+            pull-requests: write
+            issues: write
+        steps:
+            - uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        id: check
-        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93
+            - name: Setup Node.js
+              uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
 
-      - name: Install Octokit 
-        run: npm --prefix .github/workflows/scripts install @octokit/action
+            - name: Install Octokit
+              run: npm --prefix .github/workflows/scripts install @octokit/action
 
-      - name: Check if user is a community contributor
-        run: node .github/workflows/scripts/is-community-contributor.js
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Install Actions Core
+              run: npm --prefix .github/workflows/scripts install @actions/core
+
+            - name: Check if user is a community contributor
+              id: check
+              run: node .github/workflows/scripts/is-community-contributor.js
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: 'If community PR, assign a reviewer'
+              if: github.event.pull_request && steps.check.outputs.is-community == 'yes'
+              uses: shufo/auto-assign-reviewer-by-files@f5f3db9ef06bd72ab6978996988c6462cbdaabf6
+              with:
+                  config: '.github/project-community-pr-assigner.yml'
+                  token: ${{ secrets.PR_ASSIGN_TOKEN }}

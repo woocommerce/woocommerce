@@ -1,9 +1,12 @@
+/**
+ * External dependencies
+ */
 import { AxiosRequestConfig } from 'axios';
 
 // @ts-ignore
-import buildFullPath = require( 'axios/lib/core/buildFullPath' );
+import buildFullPath = require('axios/lib/core/buildFullPath');
 // @ts-ignore
-import appendParams = require( 'axios/lib/helpers/buildURL' );
+import appendParams = require('axios/lib/helpers/buildURL');
 
 /**
  * Given an Axios request config this function generates the URL that Axios will

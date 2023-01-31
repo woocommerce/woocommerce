@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
+use Automattic\WooCommerce\Internal\Admin\Orders\COTRedirectionController;
 use Automattic\WooCommerce\Internal\Admin\Orders\Edit;
 use Automattic\WooCommerce\Internal\Admin\Orders\ListTable;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
@@ -21,6 +22,7 @@ class OrderAdminServiceProvider extends AbstractServiceProvider {
 	 * @var string[]
 	 */
 	protected $provides = array(
+		COTRedirectionController::class,
 		PageController::class,
 		Edit::class,
 		ListTable::class,
@@ -32,6 +34,7 @@ class OrderAdminServiceProvider extends AbstractServiceProvider {
 	 * @return void
 	 */
 	public function register() {
+		$this->share( COTRedirectionController::class );
 		$this->share( PageController::class );
 		$this->share( Edit::class )->addArgument( PageController::class );
 		$this->share( ListTable::class )->addArgument( PageController::class );

@@ -1,9 +1,0 @@
-{
-	"parser": "@typescript-eslint/parser",
-	"ignorePatterns": [ "dist/", "node_modules/" ],
-	"plugins": [ "@typescript-eslint/eslint-plugin" ],
-	"extends": [ "plugin:@wordpress/eslint-plugin/recommended-with-formatting" ],
-	"rules": {
-		"no-unused-vars": "off"
-	}
-}

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Utilities\PluginUtil;
 
 /**
  * Service provider for the features enabling/disabling/compatibility engine.
@@ -24,6 +25,7 @@ class FeaturesServiceProvider extends AbstractServiceProvider {
 	 * Register the classes.
 	 */
 	public function register() {
-		$this->share( FeaturesController::class )->addArgument( LegacyProxy::class );
+		$this->share( FeaturesController::class )
+			->addArguments( array( LegacyProxy::class, PluginUtil::class ) );
 	}
 }

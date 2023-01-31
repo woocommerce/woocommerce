@@ -1032,10 +1032,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 		$orders = array();
 
-		// Lets do some cache hydrations so that we don't have to fetch data from DB for every order.
-		$this->prime_raw_meta_cache_for_orders( $order_ids, $query_vars );
-		$this->prime_refund_caches_for_order( $order_ids, $query_vars );
-		$this->prime_order_item_caches_for_orders( $order_ids, $query_vars );
+		$this->prime_caches_for_orders( $order_ids, $query_vars );
 
 		foreach ( $query->posts as $post ) {
 			$order = wc_get_order( $post );
@@ -1049,6 +1046,19 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		return $orders;
+	}
+
+	/**
+	 * Helper method to prime caches for orders. Call this if you are going to be fetching orders in a loop.
+	 *
+	 * @param array $order_ids List of order IDS to prime caches for.
+	 * @param array $query_vars Original query arguments.
+	 */
+	public function prime_caches_for_orders( $order_ids, $query_vars ) {
+		// Lets do some cache hydrations so that we don't have to fetch data from DB for every order.
+		$this->prime_raw_meta_cache_for_orders( $order_ids, $query_vars );
+		$this->prime_refund_caches_for_order( $order_ids, $query_vars );
+		$this->prime_order_item_caches_for_orders( $order_ids, $query_vars );
 	}
 
 	/**

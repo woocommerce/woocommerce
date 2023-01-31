@@ -241,7 +241,7 @@ class InstalledExtensions {
 		$data         = self::get_extension_base_data( $slug );
 		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/facebook-icon.svg';
 
-		if ( $data['status'] === 'activated' && function_exists( 'facebook_for_woocommerce' ) ) {
+		if ( 'activated' === $data['status'] && function_exists( 'facebook_for_woocommerce' ) ) {
 			$integration = facebook_for_woocommerce()->get_integration();
 
 			if ( $integration->is_configured() ) {
@@ -270,7 +270,6 @@ class InstalledExtensions {
 		$data         = self::get_extension_base_data( $slug );
 		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/pinterest.svg';
 
-		// TODO: Finalise docs url.
 		$data['docsUrl'] = 'https://woocommerce.com/document/pinterest-for-woocommerce/?utm_medium=product';
 
 		if ( 'activated' === $data['status'] && class_exists( 'Pinterest_For_Woocommerce' ) ) {
@@ -503,7 +502,6 @@ class InstalledExtensions {
 		$data         = self::get_extension_base_data( $slug );
 		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/salesforce.jpg';
 
-
 		if ( 'activated' === $data['status'] && class_exists( '\Integration_With_Salesforce_Admin' ) ) {
 			if ( ! method_exists( '\Integration_With_Salesforce_Admin', 'get_connection_status' ) || \Integration_With_Salesforce_Admin::get_connection_status() ) {
 				$data['status'] = 'configured';
@@ -566,7 +564,7 @@ class InstalledExtensions {
 		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/trustpilot.png';
 
 		if ( 'activated' === $data['status'] ) {
-			$data['status'] = 'configured';
+			$data['status']      = 'configured';
 			$data['settingsUrl'] = admin_url( 'admin.php?page=woocommerce-trustpilot-settings-page' );
 			$data['docsUrl']     = 'https://woocommerce.com/document/trustpilot-reviews/';
 			$data['supportUrl']  = 'https://support.trustpilot.com/hc/en-us/requests/new';

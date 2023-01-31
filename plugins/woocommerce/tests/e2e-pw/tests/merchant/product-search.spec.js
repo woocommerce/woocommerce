@@ -2,7 +2,9 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 let productId;
-const productName = 'Unique thing that we sell';
+const productName = `Unique thing that we sell ${ new Date()
+	.getTime()
+	.toString() }`;
 const productPrice = '9.99';
 
 test.describe( 'Products > Search and View a product', () => {
@@ -54,6 +56,8 @@ test.describe( 'Products > Search and View a product', () => {
 	} );
 
 	test( "can view a product's details after search", async ( { page } ) => {
+		const productIdInURL = new RegExp( `post=${ productId }` );
+
 		await page.goto( 'wp-admin/edit.php?post_type=product' );
 
 		await page.fill( '#post-search-input', productName );
@@ -61,6 +65,7 @@ test.describe( 'Products > Search and View a product', () => {
 
 		await page.click( '.row-title' );
 
+		await expect( page ).toHaveURL( productIdInURL );
 		await expect( page.locator( '#title' ) ).toHaveValue( productName );
 		await expect( page.locator( '#_regular_price' ) ).toHaveValue(
 			productPrice

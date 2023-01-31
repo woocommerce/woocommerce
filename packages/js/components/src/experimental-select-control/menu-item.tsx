@@ -8,7 +8,7 @@ import { createElement, ReactElement } from 'react';
  */
 import { getItemPropsType } from './types';
 
-type MenuItemProps< ItemType > = {
+export type MenuItemProps< ItemType > = {
 	index: number;
 	isActive: boolean;
 	item: ItemType;

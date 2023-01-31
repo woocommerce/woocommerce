@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Add hooks that fire before an HPOS order is deleted or trashed.

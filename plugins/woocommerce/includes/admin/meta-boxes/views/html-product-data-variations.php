@@ -16,7 +16,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<div id="message" class="inline notice woocommerce-message">
 				<p><?php echo wp_kses_post( __( 'Before you can add a variation you need to add some variation attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ) ); ?></p>
+				<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 				<p><a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/document/variable-product/', 'product-variations' ) ); ?>" target="_blank"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a></p>
+				<?php /* phpcs:enable */ ?>
 			</div>
 
 		<?php else : ?>
@@ -33,11 +35,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<option value=""><?php echo esc_html( sprintf( __( 'No default %s&hellip;', 'woocommerce' ), wc_attribute_label( $attribute->get_name() ) ) ); ?></option>
 							<?php if ( $attribute->is_taxonomy() ) : ?>
 								<?php foreach ( $attribute->get_terms() as $option ) : ?>
+									<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 									<option <?php selected( $selected_value, $option->slug ); ?> value="<?php echo esc_attr( $option->slug ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option->name, $option, $attribute->get_name(), $product_object ) ); ?></option>
+									<?php /* phpcs:enable */ ?>
 								<?php endforeach; ?>
 							<?php else : ?>
 								<?php foreach ( $attribute->get_options() as $option ) : ?>
+									<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 									<option <?php selected( $selected_value, $option ); ?> value="<?php echo esc_attr( $option ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option, null, $attribute->get_name(), $product_object ) ); ?></option>
+									<?php /* phpcs:enable */ ?>
 								<?php endforeach; ?>
 							<?php endif; ?>
 						</select>
@@ -48,7 +54,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="clear"></div>
 			</div>
 
+			<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 			<?php do_action( 'woocommerce_variable_product_before_variations' ); ?>
+			<?php /* phpcs:enable */ ?>
 
 			<div class="toolbar toolbar-top">
 				<select id="field_to_edit" class="variation_actions">
@@ -87,7 +95,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<option value="variable_download_limit"><?php esc_html_e( 'Download limit', 'woocommerce' ); ?></option>
 						<option value="variable_download_expiry"><?php esc_html_e( 'Download expiry', 'woocommerce' ); ?></option>
 					</optgroup>
+					<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 					<?php do_action( 'woocommerce_variable_product_bulk_edit_actions' ); ?>
+					<?php /* phpcs:enable */ ?>
 				</select>
 				<a class="button bulk_edit do_variation_action"><?php esc_html_e( 'Go', 'woocommerce' ); ?></a>
 
@@ -104,7 +114,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<label for="current-page-selector-1" class="screen-reader-text"><?php esc_html_e( 'Select Page', 'woocommerce' ); ?></label>
 							<select class="page-selector" id="current-page-selector-1" title="<?php esc_attr_e( 'Current page', 'woocommerce' ); ?>">
 								<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
+									<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 									<option value="<?php echo $i; // WPCS: XSS ok. ?>"><?php echo $i; // WPCS: XSS ok. ?></option>
+									<?php /* phpcs:enable */ ?>
 								<?php endfor; ?>
 							</select>
 							<?php echo esc_html_x( 'of', 'number of pages', 'woocommerce' ); ?> <span class="total-pages"><?php echo esc_html( $variations_total_pages ); ?></span>
@@ -116,7 +128,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="clear"></div>
 			</div>
 
+			<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 			<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php echo wc_esc_json( wp_json_encode( wc_list_pluck( $variation_attributes, 'get_data' ) ) ); // WPCS: XSS ok. ?>" data-total="<?php echo esc_attr( $variations_count ); ?>" data-total_pages="<?php echo esc_attr( $variations_total_pages ); ?>" data-page="1" data-edited="false"></div>
+			<?php /* phpcs:enable */ ?>
 
 			<div class="toolbar">
 				<button type="button" class="button-primary save-variation-changes" disabled="disabled"><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
@@ -135,7 +149,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<label for="current-page-selector-1" class="screen-reader-text"><?php esc_html_e( 'Select Page', 'woocommerce' ); ?></label>
 							<select class="page-selector" id="current-page-selector-1" title="<?php esc_attr_e( 'Current page', 'woocommerce' ); ?>">
 								<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
+									<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 									<option value="<?php echo $i; // WPCS: XSS ok. ?>"><?php echo $i; // WPCS: XSS ok. ?></option>
+									<?php /* phpcs:enable */ ?>
 								<?php endfor; ?>
 							</select>
 							<?php echo esc_html_x( 'of', 'number of pages', 'woocommerce' ); ?> <span class="total-pages"><?php echo esc_html( $variations_total_pages ); ?></span>
@@ -150,3 +166,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php endif; ?>
 	</div>
 </div>
+<script type="text/template" id="tmpl-wc-modal-set-price-variations">
+	<div class="wc-backbone-modal">
+		<div class="wc-backbone-modal-content">
+			<div class="components-modal__content woocommerce-set-price-variations" role="document">
+				<div class="components-modal__header">
+					<h2><?php echo esc_attr( $modal_title ); ?></h2>
+				</div>
+				<div class="woocommerce-usage-modal__wrapper">
+					<div class="woocommerce-usage-modal__message">
+						<span><?php esc_html_e( 'Add price to all variations that don\'t have a price', 'woocommerce' ); ?> (<?php echo esc_attr( get_woocommerce_currency_symbol() ); ?> <?php echo esc_textarea( get_woocommerce_currency() ); ?>)</span>
+						<input type="text" class="components-text-control__input wc_input_variations_price"/>
+					</div>
+					<div class="woocommerce-usage-modal__actions">
+						<button class="modal-close components-button is-secondary"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
+						<button class="modal-close button components-button add_variations_price_button button-primary" disabled><?php esc_html_e( 'Add prices', 'woocommerce' ); ?></button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="wc-backbone-modal-backdrop modal-close"></div>
+</script>

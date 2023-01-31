@@ -1,4 +1,5 @@
 <?php
+// phpcs:ignoreFile
 /**
  * Script to automatically enforce the release code freeze.
  *
@@ -12,14 +13,24 @@ if ( getenv( 'TIME_OVERRIDE' ) ) {
 	$now = strtotime( getenv( 'TIME_OVERRIDE' ) );
 }
 
-// Code freeze comes 26 days prior to release day.
-$release_time         = strtotime( '+26 days', $now );
+/**
+ * Set an output for the GitHub action.
+ *
+ * @param string $name The name of the output.
+ * @param string $value The value of the output.
+ */
+function set_output( $name, $value ) {
+	file_put_contents( getenv( 'GITHUB_OUTPUT' ), "{$name}={$value}" . PHP_EOL, FILE_APPEND );
+}
+
+// Code freeze comes 22 days prior to release day.
+$release_time         = strtotime( '+22 days', $now );
 $release_day_of_week  = date( 'l', $release_time );
 $release_day_of_month = (int) date( 'j', $release_time );
 
-// If 26 days from now isn't the second Tuesday, then it's not code freeze day.
+// If 22 days from now isn't the second Tuesday, then it's not code freeze day.
 if ( 'Tuesday' !== $release_day_of_week || $release_day_of_month < 8 || $release_day_of_month > 14 ) {
-	echo 'Info: Today is not the Thursday of the code freeze.' . PHP_EOL;
+	echo 'Info: Today is not the Monday of the code freeze.' . PHP_EOL;
 	exit( 1 );
 }
 
@@ -41,10 +52,11 @@ $milestone_to_create      = "{$milestone_major_minor}.0";
 
 if ( getenv( 'GITHUB_OUTPUTS' ) ) {
 	echo 'Including GitHub Outputs...' . PHP_EOL;
-	echo '::set-output name=next_version::' . $milestone_major_minor . PHP_EOL;
-	echo '::set-output name=release_version::' . $branch_major_minor . PHP_EOL;
-	echo '::set-output name=branch::' . $release_branch_to_create . PHP_EOL;
-	echo '::set-output name=milestone::' . $milestone_to_create . PHP_EOL;
+	
+	set_output( 'next_version', $milestone_major_minor );
+	set_output( 'release_version', $branch_major_minor );
+	set_output( 'branch', $release_branch_to_create );
+	set_output( 'milestone', $milestone_to_create );
 }
 
 if ( getenv( 'DRY_RUN' ) ) {
@@ -56,7 +68,7 @@ if ( getenv( 'DRY_RUN' ) ) {
 
 if ( create_github_milestone( $milestone_to_create ) ) {
 	echo "Created milestone {$milestone_to_create}" . PHP_EOL;
-} else if ( '422' === $github_api_response_code ) {
+} elseif ( '422' === $github_api_response_code ) {
 	// The milestone already existed when GitHub returns a 422 status.
 	echo "Notice: Unable to create {$milestone_to_create} milestone. Maybe it already exists? Skipping..." . PHP_EOL;
 } else {
@@ -65,7 +77,7 @@ if ( create_github_milestone( $milestone_to_create ) ) {
 
 if ( create_github_branch_from_branch( 'trunk', $release_branch_to_create ) ) {
 	echo "Created branch {$release_branch_to_create}" . PHP_EOL;
-} else if ( '422' === $github_api_response_code ) {
+} elseif ( '422' === $github_api_response_code ) {
 	// The release branch already existed when GitHub returns a 422 status.
 	echo "Notice: Unable to create {$release_branch_to_create} branch. Maybe it already exists? Skipping..." . PHP_EOL;
 	exit( 1 );

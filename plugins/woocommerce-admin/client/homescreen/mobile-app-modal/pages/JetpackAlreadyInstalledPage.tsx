@@ -12,11 +12,13 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
  */
 import { ModalContentLayoutWithTitle } from '../layouts/ModalContentLayoutWithTitle';
 import { SendMagicLinkButton } from '../components';
+import { SendMagicLinkStates } from '../components/useSendMagicLink';
 
 interface JetpackAlreadyInstalledPageProps {
 	wordpressAccountEmailAddress: string | undefined;
 	isRetryingMagicLinkSend: boolean;
 	sendMagicLinkHandler: () => void;
+	sendMagicLinkStatus: SendMagicLinkStates;
 }
 
 export const JetpackAlreadyInstalledPage: React.FC<
@@ -24,6 +26,7 @@ export const JetpackAlreadyInstalledPage: React.FC<
 > = ( {
 	wordpressAccountEmailAddress,
 	sendMagicLinkHandler,
+	sendMagicLinkStatus,
 	isRetryingMagicLinkSend,
 } ) => {
 	const DISMISSED_MOBILE_APP_MODAL_OPTION =
@@ -67,7 +70,12 @@ export const JetpackAlreadyInstalledPage: React.FC<
 						) }
 					</h3>
 				</div>
-				<SendMagicLinkButton onClickHandler={ sendMagicLinkHandler } />
+				<SendMagicLinkButton
+					isFetching={
+						sendMagicLinkStatus === SendMagicLinkStates.FETCHING
+					}
+					onClickHandler={ sendMagicLinkHandler }
+				/>
 			</>
 		</ModalContentLayoutWithTitle>
 	);

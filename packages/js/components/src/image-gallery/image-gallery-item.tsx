@@ -9,9 +9,10 @@ import { createElement, Fragment } from '@wordpress/element';
  */
 import Pill from '../pill';
 import { SortableHandle, NonSortableItem } from '../sortable';
-import { ConditionalWrapper } from '../util/conditional-wrapper';
+import { ConditionalWrapper } from '../conditional-wrapper';
 
 export type ImageGalleryItemProps = {
+	id?: string;
 	alt: string;
 	isCover?: boolean;
 	src: string;
@@ -22,6 +23,7 @@ export type ImageGalleryItemProps = {
 } & React.HTMLAttributes< HTMLDivElement >;
 
 export const ImageGalleryItem: React.FC< ImageGalleryItemProps > = ( {
+	id,
 	alt,
 	isCover = false,
 	src,
@@ -49,11 +51,11 @@ export const ImageGalleryItem: React.FC< ImageGalleryItemProps > = ( {
 			{ isCover ? (
 				<>
 					<Pill>{ __( 'Cover', 'woocommerce' ) }</Pill>
-					<img alt={ alt } src={ src } />
+					<img alt={ alt } src={ src } id={ id } />
 				</>
 			) : (
 				<SortableHandle>
-					<img alt={ alt } src={ src } />
+					<img alt={ alt } src={ src } id={ id } />
 				</SortableHandle>
 			) }
 		</div>

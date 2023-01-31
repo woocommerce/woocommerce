@@ -103,7 +103,7 @@ export default class Merge extends Command {
 	/**
 	 * Validates all of the arguments to make sure they're compatible with the command.
 	 *
-	 * @param {string} source The GitHub repository we are merging.
+	 * @param {string} source      The GitHub repository we are merging.
 	 * @param {string} destination The local path we're merging into.
 	 */
 	private async validateArgs(
@@ -122,7 +122,7 @@ export default class Merge extends Command {
 		try {
 			await access( join( MONOREPO_ROOT, destination ) );
 			exists = true;
-		} catch ( err: any ) {
+		} catch ( err ) {
 			exists = false;
 		}
 
@@ -159,8 +159,8 @@ export default class Merge extends Command {
 	/**
 	 * Alters the commit history so that it appears as if it always existed within the monorepo.
 	 *
-	 * @param {string} source The GitHub repository we are merging.
-	 * @param {string} cloneDir The directory we've cloned the repository into.
+	 * @param {string} source      The GitHub repository we are merging.
+	 * @param {string} cloneDir    The directory we've cloned the repository into.
 	 * @param {string} destination The monorepo directory we want to move the files into.
 	 */
 	private async alterRepositoryHistory(
@@ -192,8 +192,8 @@ export default class Merge extends Command {
 	/**
 	 * Merges the cloned repository into the current one.
 	 *
-	 * @param {string} source The GitHub repository we are merging.
-	 * @param {string} cloneDir The directory we've cloned the repository into.
+	 * @param {string} source        The GitHub repository we are merging.
+	 * @param {string} cloneDir      The directory we've cloned the repository into.
 	 * @param {string} branchToMerge The branch we want to merge from.
 	 */
 	private async mergeRepository(

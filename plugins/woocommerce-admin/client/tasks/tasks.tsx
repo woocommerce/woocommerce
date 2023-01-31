@@ -20,15 +20,13 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { DisplayOption } from '~/activity-panel/display-options';
 import { Task } from './task';
-import { TasksPlaceholder, TasksPlaceholderProps } from './placeholder';
+import { TasksPlaceholder } from './placeholder';
 import './tasks.scss';
 import { TaskList } from './task-list';
 import { TaskList as TwoColumnTaskList } from '../two-column-tasks/task-list';
-import { SectionedTaskList } from '../two-column-tasks/sectioned-task-list';
 import TwoColumnTaskListPlaceholder from '../two-column-tasks/placeholder';
 import '../two-column-tasks/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { SectionedTaskListPlaceholder } from '~/two-column-tasks/sectioned-task-list-placeholder';
 
 export type TasksProps = {
 	query: { task?: string };

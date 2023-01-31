@@ -46,7 +46,7 @@ class ShippingLabelBanner {
 			}
 
 			if ( class_exists( Jetpack_Connection_Manager::class ) ) {
-				$jetpack_connected = ( new Jetpack_Connection_Manager() )->is_active();
+				$jetpack_connected = ( new Jetpack_Connection_Manager() )->has_connected_owner();
 			}
 
 			if ( class_exists( '\WC_Connect_Loader' ) ) {
@@ -82,6 +82,9 @@ class ShippingLabelBanner {
 	 * @param \WP_Post $post Current post object.
 	 */
 	public function add_meta_boxes( $post_type, $post ) {
+		if ( 'shop_order' !== $post_type ) {
+			return;
+		}
 		$order = wc_get_order( $post );
 		if ( $this->should_show_meta_box() ) {
 			add_meta_box(

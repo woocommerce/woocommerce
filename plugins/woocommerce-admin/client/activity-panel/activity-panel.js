@@ -9,7 +9,7 @@ import {
 	useMemo,
 	useEffect,
 } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import { Icon, help as helpIcon, external } from '@wordpress/icons';
 import { H, Section } from '@woocommerce/components';
@@ -43,8 +43,13 @@ import {
 import { getUnapprovedReviews } from '../homescreen/activity-panel/reviews/utils';
 import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-notifications-panel';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { getUrlParams } from '~/utils';
 import { useActiveSetupTasklist } from '~/tasks';
 import { LayoutContext } from '~/layout';
+import { getSegmentsFromPath } from '~/utils/url-helpers';
+import { FeedbackIcon } from '~/products/images/feedback-icon';
+import { STORE_KEY as CES_STORE_KEY } from '~/customer-effort-score-tracks/data/constants';
+import { ProductFeedbackTour } from '~/guided-tours/add-product-feedback-tour';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -201,6 +206,9 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			),
 		};
 	} );
+
+	const { showCesModal } = useDispatch( CES_STORE_KEY );
+
 	const { currentUserCan } = useUser();
 
 	const togglePanel = ( { name: tabName }, isTabOpen ) => {
@@ -236,6 +244,23 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		return query.page === 'wc-admin' && ! query.path;
 	};
 
+	const isProductScreen = () => {
+		const [ firstPathSegment ] = getSegmentsFromPath( query.path );
+		return (
+			firstPathSegment === 'add-product' || firstPathSegment === 'product'
+		);
+	};
+
+	const isAddProductPage = () => {
+		const urlParams = getUrlParams( window.location.search );
+
+		return (
+			isEmbedded &&
+			/post-new\.php$/.test( window.location.pathname ) &&
+			urlParams?.post_type === 'product'
+		);
+	};
+
 	const isPerformingSetupTask = () => {
 		return (
 			query.task &&
@@ -254,7 +279,51 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			icon: <IconFlag />,
 			unread: hasUnreadNotes || hasAbbreviatedNotifications,
 			visible:
-				( isEmbedded || ! isHomescreen() ) && ! isPerformingSetupTask(),
+				( isEmbedded || ! isHomescreen() ) &&
+				! isPerformingSetupTask() &&
+				! isProductScreen(),
+		};
+
+		const feedback = {
+			name: 'feedback',
+			title: __( 'Feedback', 'woocommerce' ),
+			icon: <FeedbackIcon />,
+			onClick: () => {
+				setCurrentTab( 'feedback' );
+				setIsPanelOpen( true );
+				showCesModal(
+					{
+						action: 'product_feedback',
+						title: __(
+							"How's your experience with the product editor?",
+							'woocommerce'
+						),
+						firstQuestion: __(
+							'The product editing screen is easy to use',
+							'woocommerce'
+						),
+						secondQuestion: __(
+							"The product editing screen's functionality meets my needs",
+							'woocommerce'
+						),
+					},
+					{
+						onRecordScore: () => {
+							setCurrentTab( '' );
+							setIsPanelOpen( false );
+						},
+						onCloseModal: () => {
+							setCurrentTab( '' );
+							setIsPanelOpen( false );
+						},
+					},
+					{
+						type: 'snackbar',
+						icon: <span>🌟</span>,
+					}
+				);
+			},
+			visible: isAddProductPage(),
 		};
 
 		const setup = {
@@ -273,7 +342,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				! requestingTaskListOptions &&
 				! setupTaskListComplete &&
 				! setupTaskListHidden &&
-				! isHomescreen(),
+				! isHomescreen() &&
+				! isProductScreen(),
 		};
 
 		const help = {
@@ -326,6 +396,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 		return [
 			activity,
+			feedback,
 			setup,
 			previewSite,
 			previewStore,
@@ -420,6 +491,9 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 						clearPanel={ () => clearPanel() }
 					/>
 				</Section>
+				{ isAddProductPage() && (
+					<ProductFeedbackTour currentTab={ currentTab } />
+				) }
 				{ showHelpHighlightTooltip ? (
 					<HighlightTooltip
 						delay={ 1000 }

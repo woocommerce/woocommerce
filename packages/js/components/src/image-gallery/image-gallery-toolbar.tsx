@@ -4,7 +4,7 @@
 import { createElement } from '@wordpress/element';
 import { Toolbar, ToolbarButton, ToolbarGroup } from '@wordpress/components';
 import { chevronRight, chevronLeft, trash } from '@wordpress/icons';
-import { MediaUpload } from '@wordpress/media-utils';
+import { MediaItem, MediaUpload } from '@wordpress/media-utils';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -20,8 +20,7 @@ export type ImageGalleryToolbarProps = {
 	removeItem: ( removeIndex: number ) => void;
 	replaceItem: (
 		replaceIndex: number,
-		newSrc: string,
-		newAlt: string
+		media: { id: number } & MediaItem
 	) => void;
 	setToolBarItem: ( key: string | null ) => void;
 	lastChild: boolean;
@@ -62,8 +61,10 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 				{ ! isCoverItem && (
 					<ToolbarGroup>
 						<ToolbarButton
-							icon={ () => <SortableHandle /> }
-							label={ __( 'Drag', 'woocommerce' ) }
+							icon={ () => (
+								<SortableHandle itemIndex={ childIndex } />
+							) }
+							label={ __( 'Drag to reorder', 'woocommerce' ) }
 						/>
 						<ToolbarButton
 							disabled={ childIndex < 2 }
@@ -84,14 +85,14 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 						<ToolbarButton
 							onClick={ () => setAsCoverImage( childIndex ) }
 							icon={ CoverImageIcon }
-							label={ __( 'Set as cover image', 'woocommerce' ) }
+							label={ __( 'Set as cover', 'woocommerce' ) }
 						/>
 					</ToolbarGroup>
 				) }
 				<ToolbarGroup className="woocommerce-image-gallery__toolbar-media">
 					<MediaUploadComponent
 						onSelect={ ( media ) =>
-							replaceItem( childIndex, media.url, media.alt )
+							replaceItem( childIndex, media as MediaItem )
 						}
 						allowedTypes={ [ 'image' ] }
 						render={ ( { open } ) => (
@@ -105,7 +106,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 					<ToolbarButton
 						onClick={ () => removeItem( childIndex ) }
 						icon={ trash }
-						label={ __( 'Delete', 'woocommerce' ) }
+						label={ __( 'Remove', 'woocommerce' ) }
 					/>
 				</ToolbarGroup>
 			</Toolbar>

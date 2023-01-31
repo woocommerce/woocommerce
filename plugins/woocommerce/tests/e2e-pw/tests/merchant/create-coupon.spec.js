@@ -25,12 +25,17 @@ test.describe( 'Add New Coupon Page', () => {
 	} );
 
 	test( 'can create new coupon', async ( { page } ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=shop_coupon' );
+		await page.goto( 'wp-admin/post-new.php?post_type=shop_coupon', {
+			waitUntil: 'networkidle',
+		} );
+
 		await page.fill( '#title', couponCode );
+
 		await page.fill( '#woocommerce-coupon-description', 'test coupon' );
 
 		await page.fill( '#coupon_amount', '100' );
 
+		await expect( page.locator( '#publish:not(.disabled)' ) ).toBeVisible();
 		await page.click( '#publish' );
 
 		await expect( page.locator( 'div.notice.notice-success' ) ).toHaveText(

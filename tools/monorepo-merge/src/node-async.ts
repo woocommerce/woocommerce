@@ -7,7 +7,7 @@ import { exec as nodeExec, ExecOptions } from 'child_process';
 /**
  * A promise wrapper for Node's `fs.access` function.
  *
- * @param {string} path The path to access.
+ * @param {string} path   The path to access.
  * @param {number} [mode] The access mode.
  */
 export async function access( path: PathLike, mode?: number ): Promise< void > {
@@ -26,7 +26,7 @@ export async function access( path: PathLike, mode?: number ): Promise< void > {
 /**
  * A promise wrapper for Node's `child_process.exec` function.
  *
- * @param {string} command The command to execute.
+ * @param {string}      command   The command to execute.
  * @param {ExecOptions} [options] The options for the command.
  */
 export async function exec(

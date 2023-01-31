@@ -89,14 +89,14 @@ test.describe( 'Cart Calculate Shipping', () => {
 			method_id: 'local_pickup',
 		} );
 		// confirm that we allow shipping to any country
-		api.put( 'settings/general/woocommerce_allowed_countries', {
+		await api.put( 'settings/general/woocommerce_allowed_countries', {
 			value: 'all',
 		} );
 	} );
 
 	test.beforeEach( async ( { page, context } ) => {
 		// Shopping cart is very sensitive to cookies, so be explicit
-		context.clearCookies();
+		await context.clearCookies();
 
 		// all tests use the first product
 		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );

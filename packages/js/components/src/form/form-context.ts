@@ -1,8 +1,17 @@
 /**
  * External dependencies
  */
-import { ChangeEvent } from 'react';
 import { createContext, useContext } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
+import {
+	CheckboxProps,
+	ConsumerInputProps,
+	InputProps,
+	SelectControlProps,
+} from './form';
 
 export type FormErrors< Values > = {
 	[ P in keyof Values ]?: FormErrors< Values[ P ] > | string;
@@ -21,20 +30,21 @@ export type FormContext< Values extends Record< string, any > > = {
 	setValue: ( name: string, value: any ) => void;
 	setValues: ( valuesToSet: Values ) => void;
 	handleSubmit: () => Promise< Values >;
+	getCheckboxControlProps< Value extends Values[ keyof Values ] >(
+		name: string,
+		inputProps?: ConsumerInputProps< Values >
+	): CheckboxProps< Values, Value >;
+	getSelectControlProps< Value extends Values[ keyof Values ] >(
+		name: string,
+		inputProps?: ConsumerInputProps< Values >
+	): SelectControlProps< Values, Value >;
 	getInputProps< Value extends Values[ keyof Values ] >(
-		name: string
-	): {
-		value: Value;
-		checked: boolean;
-		selected?: boolean;
-		onChange: ( value: ChangeEvent< HTMLInputElement > | Value ) => void;
-		onBlur: () => void;
-		className: string | undefined;
-		help: string | null | undefined;
-	};
+		name: string,
+		inputProps?: ConsumerInputProps< Values >
+	): InputProps< Values, Value >;
 	isValidForm: boolean;
 	resetForm: (
-		initialValues: Values,
+		initialValues?: Values,
 		touchedFields?: { [ P in keyof Values ]?: boolean | undefined },
 		errors?: FormErrors< Values >
 	) => void;
@@ -48,7 +58,7 @@ export const FormContext = createContext< FormContext< any > >(
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useFormContext< Values extends Record< string, any > >() {
-	const formik = useContext< FormContext< Values > >( FormContext );
+	const formContext = useContext< FormContext< Values > >( FormContext );
 
-	return formik;
+	return formContext;
 }

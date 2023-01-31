@@ -2,42 +2,46 @@
  * External dependencies
  */
 import { recordEvent } from '@woocommerce/tracks';
+import { useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
-import { Form } from '@woocommerce/components';
-import { Product } from '@woocommerce/data';
+import { Spinner } from '@wordpress/components';
+import {
+	EXPERIMENTAL_PRODUCT_FORM_STORE_NAME,
+	WCDataSelector,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
-import { ProductFormLayout } from './layout/product-form-layout';
-import { ProductFormActions } from './product-form-actions';
-import { ProductDetailsSection } from './sections/product-details-section';
-import { PricingSection } from './sections/pricing-section';
-import { ProductShippingSection } from './sections/product-shipping-section';
+import { ProductForm } from './product-form';
+import { ProductTourContainer } from './tour';
 import './product-page.scss';
-import { validate } from './product-validation';
-import { AttributesSection } from './sections/attributes-section';
+import './fills';
 
 const AddProductPage: React.FC = () => {
+	const { isLoading } = useSelect( ( select: WCDataSelector ) => {
+		const { hasFinishedResolution: hasProductFormFinishedResolution } =
+			select( EXPERIMENTAL_PRODUCT_FORM_STORE_NAME );
+		return {
+			isLoading: ! hasProductFormFinishedResolution( 'getProductForm' ),
+		};
+	} );
 	useEffect( () => {
 		recordEvent( 'view_new_product_management_experience' );
 	}, [] );
 
 	return (
 		<div className="woocommerce-add-product">
-			<Form< Partial< Product > >
-				initialValues={ {} }
-				errors={ {} }
-				validate={ validate }
-			>
-				<ProductFormLayout>
-					<ProductDetailsSection />
-					<PricingSection />
-					<ProductShippingSection />
-					<AttributesSection />
-					<ProductFormActions />
-				</ProductFormLayout>
-			</Form>
+			{ isLoading ? (
+				<div className="woocommerce-edit-product__spinner">
+					<Spinner />
+				</div>
+			) : (
+				<>
+					<ProductForm />
+					<ProductTourContainer />
+				</>
+			) }
 		</div>
 	);
 };

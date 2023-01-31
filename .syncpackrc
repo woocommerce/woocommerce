@@ -1,6 +1,6 @@
 {
 	"dev": true,
-	"filter": "^(?:react|react-dom|typescript)$",
+	"filter": "^(?:react|react-dom|typescript|@typescript-eslint|@types/react).*$",
 	"indent": "\t",
 	"overrides": true,
 	"peer": true,
@@ -9,6 +9,30 @@
 	"semverRange": "^",
 	"workspace": true,
 	"versionGroups": [
+		{
+			"dependencies": [
+				"@typescript-eslint/**"
+			],
+			"dependencyTypes": [
+				"devDependencies"
+			],
+			"pinVersion": "^5.43.0",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"dependencies": [
+				"@types/react"
+			],
+			"dependencyTypes": [
+				"devDependencies"
+			],
+			"pinVersion": "^17.0.2",
+			"packages": [
+				"**"
+			]
+		},
 		{
 			"dependencies": [
 				"react",

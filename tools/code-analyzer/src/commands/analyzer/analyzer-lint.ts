@@ -38,7 +38,7 @@ const program = new Command()
 	)
 	.option(
 		'-o, --outputStyle <outputStyle>',
-		'Output style for the results. Options: github, cli. Github output will use ::set-output to set the results as an output variable.',
+		'Output style for the results. Options: github, cli. Github output will set the results as an output variable for Github actions.',
 		'cli'
 	)
 	.option(
@@ -53,7 +53,8 @@ const program = new Command()
 			sinceVersion,
 			skipSchemaCheck,
 			source,
-			base
+			base,
+			outputStyle
 		);
 
 		if ( changes.templates.size ) {

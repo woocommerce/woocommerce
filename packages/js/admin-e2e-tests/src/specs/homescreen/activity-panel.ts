@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { afterAll, beforeAll, describe, it } from '@jest/globals';
+// TODO fix the type for this module.
+// eslint-disable-next-line
 import { createSimpleProduct, withRestApi } from '@woocommerce/e2e-utils';
 
 /**

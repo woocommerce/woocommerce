@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import {
 	AbstractProduct,
 	IProductCommon,
@@ -71,7 +74,8 @@ export type ListsSimpleProducts = ListsModels< SimpleProductRepositoryParams >;
  * @typedef CreatesSimpleProducts
  * @alias CreatesModels.<SimpleProduct>
  */
-export type CreatesSimpleProducts = CreatesModels< SimpleProductRepositoryParams >;
+export type CreatesSimpleProducts =
+	CreatesModels< SimpleProductRepositoryParams >;
 
 /**
  * An interface for reading simple products using the repository.
@@ -87,7 +91,8 @@ export type ReadsSimpleProducts = ReadsModels< SimpleProductRepositoryParams >;
  * @typedef UpdatesSimpleProducts
  * @alias UpdatesModels.<SimpleProduct>
  */
-export type UpdatesSimpleProducts = UpdatesModels< SimpleProductRepositoryParams >;
+export type UpdatesSimpleProducts =
+	UpdatesModels< SimpleProductRepositoryParams >;
 
 /**
  * An interface for deleting simple products using the repository.
@@ -95,7 +100,8 @@ export type UpdatesSimpleProducts = UpdatesModels< SimpleProductRepositoryParams
  * @typedef DeletesSimpleProducts
  * @alias DeletesModels.<SimpleProduct>
  */
-export type DeletesSimpleProducts = DeletesModels< SimpleProductRepositoryParams >;
+export type DeletesSimpleProducts =
+	DeletesModels< SimpleProductRepositoryParams >;
 
 /**
  * The base for the simple product object.
@@ -110,7 +116,8 @@ export class SimpleProduct
 		IProductPrice,
 		IProductSalesTax,
 		IProductShipping,
-		IProductUpSells {
+		IProductUpSells
+{
 	/**
 	 * @see ./abstracts/cross-sells.ts
 	 */

@@ -9,11 +9,84 @@ import {
 	ProductDimensions,
 } from '@woocommerce/data';
 import type { FormErrors } from '@woocommerce/components';
+import moment from 'moment';
+
+const validateInventory = (
+	values: Partial< Product< ProductStatus, ProductType > >,
+	errors: FormErrors< typeof values >
+) => {
+	const nextErrors = { ...errors };
+
+	if ( values.stock_quantity && values.stock_quantity < 0 ) {
+		nextErrors.stock_quantity = __(
+			'Stock quantity must be a positive number.',
+			'woocommerce'
+		);
+	}
+
+	if ( values.low_stock_amount && values.low_stock_amount < 0 ) {
+		nextErrors.low_stock_amount = __(
+			'Stock quantity must be a positive number.',
+			'woocommerce'
+		);
+	}
+
+	return nextErrors;
+};
+
+function validateScheduledSaleFields(
+	values: Partial< Product< ProductStatus, ProductType > >
+): FormErrors< typeof values > {
+	const errors: FormErrors< typeof values > = {};
+
+	const dateOnSaleFrom = moment(
+		values.date_on_sale_from_gmt,
+		moment.ISO_8601,
+		true
+	);
+	const dateOnSaleTo = moment(
+		values.date_on_sale_to_gmt,
+		moment.ISO_8601,
+		true
+	);
+
+	if ( values.date_on_sale_from_gmt && ! dateOnSaleFrom.isValid() ) {
+		errors.date_on_sale_from_gmt = __(
+			'Please enter a valid date.',
+			'woocommerce'
+		);
+	}
+
+	if ( values.date_on_sale_to_gmt && ! dateOnSaleTo.isValid() ) {
+		errors.date_on_sale_to_gmt = __(
+			'Please enter a valid date.',
+			'woocommerce'
+		);
+	}
+
+	if ( dateOnSaleFrom.isAfter( dateOnSaleTo ) ) {
+		errors.date_on_sale_from_gmt = __(
+			'The start date of the sale must be before the end date.',
+			'woocommerce'
+		);
+	}
+
+	if ( dateOnSaleTo.isBefore( dateOnSaleFrom ) ) {
+		errors.date_on_sale_to_gmt = __(
+			'The end date of the sale must be after the start date.',
+			'woocommerce'
+		);
+	}
+
+	return errors;
+}
 
 export const validate = (
 	values: Partial< Product< ProductStatus, ProductType > >
 ) => {
-	const errors: FormErrors< typeof values > = {};
+	let errors: FormErrors< typeof values > = {};
+	errors = validateInventory( values, errors );
+
 	if ( ! values.name?.length ) {
 		errors.name = __( 'This field is required.', 'woocommerce' );
 	}
@@ -50,6 +123,11 @@ export const validate = (
 			'woocommerce'
 		);
 	}
+
+	errors = {
+		...errors,
+		...validateScheduledSaleFields( values ),
+	};
 
 	if ( values.dimensions?.width && +values.dimensions.width <= 0 ) {
 		errors.dimensions = {

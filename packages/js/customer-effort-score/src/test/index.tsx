@@ -35,7 +35,9 @@ describe( 'CustomerEffortScore', () => {
 		render(
 			<CustomerEffortScore
 				recordScoreCallback={ noop }
-				label={ 'label' }
+				title={ 'title' }
+				firstQuestion="First question"
+				secondQuestion="Second question"
 				onNoticeDismissedCallback={ noop }
 				icon={ icon }
 			/>
@@ -45,7 +47,7 @@ describe( 'CustomerEffortScore', () => {
 			// Notice status.
 			expect.any( String ),
 			// Notice message.
-			'label',
+			'title',
 			// Notice options.
 			expect.objectContaining( {
 				icon,
@@ -63,7 +65,9 @@ describe( 'CustomerEffortScore', () => {
 		const { rerender } = render(
 			<CustomerEffortScore
 				recordScoreCallback={ noop }
-				label={ 'label' }
+				title={ 'title' }
+				firstQuestion="First question"
+				secondQuestion="Second question"
 			/>
 		);
 
@@ -71,7 +75,9 @@ describe( 'CustomerEffortScore', () => {
 		rerender(
 			<CustomerEffortScore
 				recordScoreCallback={ noop }
-				label={ 'label2' }
+				title={ 'title2' }
+				firstQuestion="First question"
+				secondQuestion="Second question"
 			/>
 		);
 
@@ -82,7 +88,9 @@ describe( 'CustomerEffortScore', () => {
 		render(
 			<CustomerEffortScore
 				recordScoreCallback={ noop }
-				label={ 'label' }
+				title={ 'title' }
+				firstQuestion="First question"
+				secondQuestion="Second question"
 			/>
 		);
 
@@ -121,7 +129,9 @@ describe( 'CustomerEffortScore', () => {
 		render(
 			<CustomerEffortScore
 				recordScoreCallback={ noop }
-				label={ 'label' }
+				title={ 'title' }
+				firstQuestion="First question"
+				secondQuestion="Second question"
 				onModalShownCallback={ mockOnModalShownCallback }
 			/>
 		);

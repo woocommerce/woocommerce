@@ -124,3 +124,13 @@ export function* loadInstalledPluginsAfterActivation( activatedPluginSlug ) {
 		);
 	}
 }
+
+export function* installAndActivateRecommendedPlugin(
+	recommendedPluginSlug,
+	category
+) {
+	return {
+		type: TYPES.INSTALL_AND_ACTIVATE_RECOMMENDED_PLUGIN,
+		data: { pluginSlug: recommendedPluginSlug, category },
+	};
+}

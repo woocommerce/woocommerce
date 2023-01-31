@@ -453,6 +453,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 				$variations_query = $this->get_query_statement();
 			} else {
+
+				$this->subquery->clear_sql_clause( 'select' );
+				$this->subquery->add_sql_clause( 'select', $selections );
+
+				/**
+				 * Experimental: Filter the Variations SQL query allowing extensions to add additional SQL clauses.
+				 *
+				 * @since 7.4.0
+				 * @param array $query_args Query parameters.
+				 * @param SqlQuery $subquery Variations query class.
+				 */
+				apply_filters( 'experimental_woocommerce_analytics_variations_additional_clauses', $query_args, $this->subquery );
+
 				/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 				$db_records_count = (int) $wpdb->get_var(
 					"SELECT COUNT(*) FROM (
@@ -468,8 +481,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					return $data;
 				}
 
-				$this->subquery->clear_sql_clause( 'select' );
-				$this->subquery->add_sql_clause( 'select', $selections );
 				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
 				$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 				$variations_query = $this->subquery->get_query_statement();

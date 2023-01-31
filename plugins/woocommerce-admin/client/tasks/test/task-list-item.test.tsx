@@ -7,6 +7,7 @@ import { SlotFillProvider } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { useSlot } from '@woocommerce/experimental';
 import { TaskType } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -85,6 +86,7 @@ const task: TaskType = {
 	isActioned: false,
 	eventPrefix: '',
 	level: 0,
+	recordViewEvent: false,
 };
 
 describe( 'TaskListItem', () => {
@@ -102,6 +104,37 @@ describe( 'TaskListItem', () => {
 			/>
 		);
 		expect( queryByText( task.title ) ).toBeInTheDocument();
+	} );
+
+	it( 'should not record view event on render if recordViewEvent is false', () => {
+		render(
+			<TaskListItem
+				task={ { ...task, recordViewEvent: false } }
+				isExpandable={ false }
+				isExpanded={ false }
+				setExpandedTask={ () => {} }
+			/>
+		);
+
+		expect( recordEvent ).toHaveBeenCalledTimes( 0 );
+	} );
+
+	it( 'should record view event on render if recordViewEvent is true', () => {
+		render(
+			<TaskListItem
+				task={ { ...task, recordViewEvent: true } }
+				isExpandable={ false }
+				isExpanded={ false }
+				setExpandedTask={ () => {} }
+			/>
+		);
+
+		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
+		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_item_view', {
+			context: 'root',
+			is_complete: task.isComplete,
+			task_name: task.id,
+		} );
 	} );
 
 	it( 'should call dismissTask and trigger a notice when dismissing a task', () => {

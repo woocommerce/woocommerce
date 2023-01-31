@@ -466,33 +466,31 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Given an initialized order object, update the post/postmeta records.
 	 *
-	 * @param WC_Order $order Order object.
+	 * @param WC_Abstract_Order $order Order object.
 	 *
 	 * @return bool Whether the order was updated.
 	 */
 	public function update_order_from_object( $order ) {
-		global $wpdb;
 		if ( ! $order->get_id() ) {
 			return false;
 		}
 		$this->update_order_meta_from_object( $order );
+
 		// Add hook to update post_modified date so that it's the same as order. Without this hook, WP will set the modified date to current date, and we will think that posts and orders are out of sync again.
 		add_filter( 'wp_insert_post_data', array( $this, 'update_post_modified_data' ), 10, 2 );
-		$updated = wp_update_post(
-			array(
-				'ID'                 => $order->get_id(),
-				// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- use of date is intentional.
-				'post_date'          => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
-				'post_date_gmt'      => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
-				'post_status'        => $this->get_post_status( $order ),
-				'post_parent'        => $order->get_parent_id(),
-				'post_excerpt'       => method_exists( $order, 'get_customer_note' ) ? $order->get_customer_note() : '',
-				'post_type'          => $order->get_type(),
-				// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- use of date is intentional.
-				'order_modified'     => ! is_null( $order->get_date_modified() ) ? date( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ) : '',
-				'order_modified_gmt' => ! is_null( $order->get_date_modified() ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ) : '',
-			)
+		$post_data = array(
+			'ID'                 => $order->get_id(),
+			'post_date'          => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
+			'post_date_gmt'      => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+			'post_status'        => $this->get_post_status( $order ),
+			'post_parent'        => $order->get_parent_id(),
+			'edit_date'          => true,
+			'post_excerpt'       => method_exists( $order, 'get_customer_note' ) ? $order->get_customer_note() : '',
+			'post_type'          => $order->get_type(),
+			'order_modified'     => ! is_null( $order->get_date_modified() ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getOffsetTimestamp() ) : '',
+			'order_modified_gmt' => ! is_null( $order->get_date_modified() ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ) : '',
 		);
+		$updated   = wp_update_post( $post_data );
 		remove_filter( 'wp_insert_post_data', array( $this, 'update_post_modified_data' ) );
 		return $updated;
 	}
@@ -520,7 +518,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Helper method to update order metadata from intialized order object.
 	 *
-	 * @param WC_Order $order Order object.
+	 * @param WC_Abstract_Order $order Order object.
 	 */
 	private function update_order_meta_from_object( $order ) {
 		if ( is_null( $order->get_meta() ) ) {

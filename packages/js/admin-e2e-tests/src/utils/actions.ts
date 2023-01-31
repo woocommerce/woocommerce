@@ -52,7 +52,9 @@ const verifyPublishAndTrash = async (
 	if ( button === '.order_actions li .save_order' ) {
 		await expect( page ).toMatchElement(
 			'#select2-order_status-container',
-			{ text: 'Processing' }
+			{
+				text: 'Processing',
+			}
 		);
 		await expect( page ).toMatchElement(
 			'#woocommerce-order-notes .note_content',

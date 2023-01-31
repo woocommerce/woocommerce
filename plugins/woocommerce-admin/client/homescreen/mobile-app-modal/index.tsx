@@ -21,6 +21,7 @@ import {
 	useJetpackPluginState,
 	JetpackPluginStates,
 	useSendMagicLink,
+	SendMagicLinkStates,
 } from './components';
 import {
 	EmailSentPage,
@@ -58,13 +59,19 @@ export const MobileAppModal = () => {
 	const [ isRetryingMagicLinkSend, setIsRetryingMagicLinkSend ] =
 		useState( false );
 
-	const { fetchMagicLinkApiCall } = useSendMagicLink();
+	const { requestState: magicLinkRequestStatus, fetchMagicLinkApiCall } =
+		useSendMagicLink();
 
 	const sendMagicLink = useCallback( () => {
 		fetchMagicLinkApiCall();
-		setHasSentEmail( true );
 		recordEvent( 'magic_prompt_send_signin_link_click' );
 	}, [ fetchMagicLinkApiCall ] );
+
+	useEffect( () => {
+		if ( magicLinkRequestStatus === SendMagicLinkStates.SUCCESS ) {
+			setHasSentEmail( true );
+		}
+	}, [ magicLinkRequestStatus ] );
 
 	useEffect( () => {
 		if ( hasSentEmail ) {
@@ -93,6 +100,7 @@ export const MobileAppModal = () => {
 					}
 					isRetryingMagicLinkSend={ isRetryingMagicLinkSend }
 					sendMagicLinkHandler={ sendMagicLink }
+					sendMagicLinkStatus={ magicLinkRequestStatus }
 				/>
 			);
 		} else if (
@@ -108,6 +116,7 @@ export const MobileAppModal = () => {
 						wordpressAccountEmailAddress
 					}
 					isRetryingMagicLinkSend={ isRetryingMagicLinkSend }
+					sendMagicLinkStatus={ magicLinkRequestStatus }
 					sendMagicLinkHandler={ sendMagicLink }
 				/>
 			);
@@ -119,6 +128,7 @@ export const MobileAppModal = () => {
 		jetpackConnectionData?.currentUser?.wpcomUser?.email,
 		state,
 		isRetryingMagicLinkSend,
+		magicLinkRequestStatus,
 	] );
 
 	return (

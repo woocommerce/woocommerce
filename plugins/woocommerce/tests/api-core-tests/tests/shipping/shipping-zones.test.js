@@ -121,7 +121,6 @@ test.describe( 'Shipping zones API tests', () => {
 
 		//call API to retrive the locations of the last created shipping zone
 		const response = await request.get( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}/locations`);
-		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
 		
 		//no locations exist initially
@@ -142,11 +141,6 @@ test.describe( 'Shipping zones API tests', () => {
 
 	test( 'can update a shipping region on a shipping zone', async ({request}) => {
 
-		//call API to retrive the locations of the last created shipping zone
-		const response = await request.get( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}/locations`);
-		const responseJSON = await response.json();
-		expect( response.status() ).toEqual( 200 );
-		
 		//GB and US locations exist initially
 		//update the locations of the shipping zone regions to contain an individual state
 		const putResponseStateOnly = await request.put( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}/locations`,{
@@ -166,11 +160,6 @@ test.describe( 'Shipping zones API tests', () => {
 
 	test( 'can clear/delete a shipping region on a shipping zone', async ({request}) => {
 
-		//call API to retrive the locations of the last created shipping zone
-		const response = await request.get( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}/locations`);
-		const responseJSON = await response.json();
-		expect( response.status() ).toEqual( 200 );
-		
 		//GB and US locations exist initially
 		//update the locations of the shipping zone regions to contain an individual state
 		const putResponseStateOnly = await request.put( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}/locations`,{

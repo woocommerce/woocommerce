@@ -1,5 +1,3 @@
-/** @format */
-
 module.exports = {
 	root: true,
 	env: {

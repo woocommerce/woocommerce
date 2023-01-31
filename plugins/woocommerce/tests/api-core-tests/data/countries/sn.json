@@ -1,0 +1,74 @@
+{
+    "code": "SN",
+    "name": "Senegal",
+    "states": [
+        {
+            "code": "SNDB",
+            "name": "Diourbel"
+        },
+        {
+            "code": "SNDK",
+            "name": "Dakar"
+        },
+        {
+            "code": "SNFK",
+            "name": "Fatick"
+        },
+        {
+            "code": "SNKA",
+            "name": "Kaffrine"
+        },
+        {
+            "code": "SNKD",
+            "name": "Kolda"
+        },
+        {
+            "code": "SNKE",
+            "name": "Kédougou"
+        },
+        {
+            "code": "SNKL",
+            "name": "Kaolack"
+        },
+        {
+            "code": "SNLG",
+            "name": "Louga"
+        },
+        {
+            "code": "SNMT",
+            "name": "Matam"
+        },
+        {
+            "code": "SNSE",
+            "name": "Sédhiou"
+        },
+        {
+            "code": "SNSL",
+            "name": "Saint-Louis"
+        },
+        {
+            "code": "SNTC",
+            "name": "Tambacounda"
+        },
+        {
+            "code": "SNTH",
+            "name": "Thiès"
+        },
+        {
+            "code": "SNZG",
+            "name": "Ziguinchor"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/sn"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

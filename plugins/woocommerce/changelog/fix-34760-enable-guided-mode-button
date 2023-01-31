@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix enable guided mode button not trigger when its text is translated

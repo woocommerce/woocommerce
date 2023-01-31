@@ -46,22 +46,24 @@ class FeaturesUtil {
 	 * Declare (in)compatibility with a given feature for a given plugin.
 	 *
 	 * This method MUST be executed from inside a handler for the 'before_woocommerce_init' hook and
-	 * SHOULD be executed from the main plugin file passing __FILE__ for the $plugin_file argument.
+	 * SHOULD be executed from the main plugin file passing __FILE__ or 'my-plugin/my-plugin.php' for the
+	 * $plugin_file argument.
 	 *
 	 * @param string $feature_id Unique feature id.
 	 * @param string $plugin_file The full plugin file path.
 	 * @param bool   $positive_compatibility True if the plugin declares being compatible with the feature, false if it declares being incompatible.
 	 * @return bool True on success, false on error (feature doesn't exist or not inside the required hook).
-	 * @throws \Exception A plugin attempted to declare itself as compatible and incompatible with a given feature at the same time.
 	 */
 	public static function declare_compatibility( string $feature_id, string $plugin_file, bool $positive_compatibility = true ): bool {
-		$plugin_name = StringUtil::plugin_name_from_plugin_file( $plugin_file );
+		$plugin_id = wc_get_container()->get( PluginUtil::class )->get_wp_plugin_id( $plugin_file );
 
-		if ( ! isset( get_plugins()[ $plugin_name ] ) ) {
-			throw new \Exception( "FeaturesUtil::declare_compatibility: ${plugin_name} is not a known WordPress plugin." );
+		if ( ! $plugin_id ) {
+			$logger = wc_get_logger();
+			$logger->error( "FeaturesUtil::declare_compatibility: {$plugin_file} is not a known WordPress plugin." );
+			return false;
 		}
 
-		return wc_get_container()->get( FeaturesController::class )->declare_compatibility( $feature_id, $plugin_name, $positive_compatibility );
+		return wc_get_container()->get( FeaturesController::class )->declare_compatibility( $feature_id, $plugin_id, $positive_compatibility );
 	}
 
 	/**
@@ -84,5 +86,21 @@ class FeaturesUtil {
 	 */
 	public static function get_compatible_plugins_for_feature( string $feature_id ): array {
 		return wc_get_container()->get( FeaturesController::class )->get_compatible_plugins_for_feature( $feature_id );
+	}
+
+	/**
+	 * Sets a flag indicating that it's allowed to enable features for which incompatible plugins are active
+	 * from the WooCommerce feature settings page.
+	 */
+	public static function allow_enabling_features_with_incompatible_plugins(): void {
+		wc_get_container()->get( FeaturesController::class )->allow_enabling_features_with_incompatible_plugins();
+	}
+
+	/**
+	 * Sets a flag indicating that it's allowed to activate plugins for which incompatible features are enabled
+	 * from the WordPress plugins page.
+	 */
+	public static function allow_activating_plugins_with_incompatible_features(): void {
+		wc_get_container()->get( FeaturesController::class )->allow_activating_plugins_with_incompatible_features();
 	}
 }

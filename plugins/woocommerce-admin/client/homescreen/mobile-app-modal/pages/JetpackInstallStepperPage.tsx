@@ -14,11 +14,13 @@ import {
 	useJetpackPluginState,
 	JetpackPluginStates,
 } from '../components/useJetpackPluginState';
+import { SendMagicLinkStates } from '../components';
 
 interface JetpackInstallStepperPageProps {
 	isReturningFromWordpressConnection: boolean;
 	isRetryingMagicLinkSend: boolean;
 	sendMagicLinkHandler: () => void;
+	sendMagicLinkStatus: SendMagicLinkStates;
 }
 
 export const JetpackInstallStepperPage: React.FC<
@@ -27,6 +29,7 @@ export const JetpackInstallStepperPage: React.FC<
 	isReturningFromWordpressConnection,
 	sendMagicLinkHandler,
 	isRetryingMagicLinkSend,
+	sendMagicLinkStatus,
 } ) => {
 	const { state: jetpackPluginState } = useJetpackPluginState();
 	const jetpackPluginStateRef =
@@ -67,6 +70,7 @@ export const JetpackInstallStepperPage: React.FC<
 			<JetpackInstallationStepper
 				step={ isReturningFromWordpressConnection ? 'second' : 'first' }
 				sendMagicLinkHandler={ sendMagicLinkHandler }
+				sendMagicLinkStatus={ sendMagicLinkStatus }
 			/>
 		</ModalContentLayoutWithTitle>
 	);

@@ -1,17 +1,28 @@
 <?php
 
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+
+require_once __DIR__ . '/../../../../helpers/HPOSToggleTrait.php';
 
 /**
  * Class OrdersTableDataStoreTests.
  *
- * Test or OrdersTableDataStore class.
+ * Test for OrdersTableDataStore class.
  */
 class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
+	use HPOSToggleTrait;
+
+	/**
+	 * Original timezone before this test started.
+	 * @var string
+	 */
+	private $original_time_zone;
 
 	/**
 	 * @var PostsToOrdersMigrationController
@@ -32,12 +43,13 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * Initializes system under test.
 	 */
 	public function setUp(): void {
+		$this->original_time_zone = wp_timezone_string();
+		//phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- We need to change the timezone to test the date sync fields.
+		update_option( 'timezone_string', 'Asia/Kolkata' );
 		parent::setUp();
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
-		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
-		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
-		OrderHelper::delete_order_custom_tables(); // We need this since non-temporary tables won't drop automatically.
-		OrderHelper::create_order_custom_table_if_not_exist();
+		$this->setup_cot();
+		$this->toggle_cot( false );
 		$this->sut            = wc_get_container()->get( OrdersTableDataStore::class );
 		$this->migrator       = wc_get_container()->get( PostsToOrdersMigrationController::class );
 		$this->cpt_data_store = new WC_Order_Data_Store_CPT();
@@ -47,14 +59,14 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * Destroys system under test.
 	 */
 	public function tearDown(): void {
-		// Add back removed filter.
-		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
-		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		//phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- We need to change the timezone to test the date sync fields.
+		update_option( 'timezone_string', $this->original_time_zone );
+		$this->clean_up_cot_setup();
 		parent::tearDown();
 	}
 
 	/**
-	 * Test reading from migrated post order.
+	 * @testDox Test reading from migrated post order.
 	 */
 	public function test_read_from_migrated_order() {
 		$post_order_id = OrderHelper::create_complex_wp_post_order();
@@ -80,7 +92,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test whether backfill_post_record works as expected.
+	 * @testDox Test whether backfill_post_record works as expected.
 	 */
 	public function test_backfill_post_record() {
 		$post_order_id = OrderHelper::create_complex_wp_post_order();
@@ -154,7 +166,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that modified date is backfilled correctly when syncing order.
+	 * @testDox Test that modified date is backfilled correctly when syncing order.
 	 */
 	public function test_backfill_updated_date() {
 		$order                   = $this->create_complex_cot_order();
@@ -167,21 +179,23 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests update() on the COT datastore.
+	 * @testDox Tests update() on the COT datastore.
 	 */
 	public function test_cot_datastore_update() {
-		static $props_to_update   = array(
+		static $props_to_update = array(
 			'billing_first_name' => 'John',
 			'billing_last_name'  => 'Doe',
 			'shipping_phone'     => '555-55-55',
 			'status'             => 'on-hold',
 			'cart_hash'          => 'YET-ANOTHER-CART-HASH',
 		);
+
 		static $datastore_updates = array(
 			'email_sent'          => true,
 			'order_stock_reduced' => true,
 		);
-		static $meta_to_update    = array(
+
+		static $meta_to_update = array(
 			'my_meta_key' => array( 'my', 'custom', 'meta' ),
 		);
 
@@ -278,7 +292,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests create() on the COT datastore.
+	 * @testDox Tests create() on the COT datastore.
 	 */
 	public function test_cot_datastore_create() {
 		$order    = $this->create_complex_cot_order();
@@ -313,6 +327,10 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			'billing_phone',
 			'shipping_total',
 			'total',
+			'order_stock_reduced',
+			'download_permissions_granted',
+			'recorded_sales',
+			'recorded_coupon_usage_counts',
 		);
 
 		foreach ( $props_to_compare as $prop ) {
@@ -324,7 +342,37 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Even corrupted order can be inserted as expected.
+	 * Confirm we store the order creation date in GMT.
+	 */
+	public function test_order_dates_are_gmt(): void {
+		global $wpdb;
+
+		// Switch to the COT datastore, set WordPress to use a non-UTC timezone, and create a new order.
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		update_option( 'timezone_string', 'America/Los_Angeles' );
+
+		$order = new WC_Order();
+		$this->sut->create( $order );
+		$date_created_gmt = $wpdb->get_var(
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			'SELECT date_created_gmt FROM ' . OrdersTableDataStore::get_orders_table_name() . ' WHERE id = ' . $order->get_id()
+		);
+
+		$this->assertNotEquals(
+			$date_created_gmt,
+			$order->get_date_created()->format( 'Y-m-d H:i:s' ),
+			'The creation date in the database should be in GMT, but the retrieved datetime should be in the local WP timezone.'
+		);
+
+		$this->assertEquals(
+			$date_created_gmt,
+			$order->get_date_created()->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' ),
+			'The order creation datetime, when cast to UTC/GMT, should match the same value stored in the database.'
+		);
+	}
+
+	/**
+	 * @testDox Even corrupted order can be inserted as expected.
 	 */
 	public function test_cot_data_store_update_corrupted_order() {
 		global $wpdb;
@@ -349,7 +397,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * We should be able to save multiple orders without them overwriting each other.
+	 * @testDox We should be able to save multiple orders without them overwriting each other.
 	 */
 	public function test_cot_data_store_multiple_saved_orders() {
 		$order1 = $this->create_complex_cot_order();
@@ -388,7 +436,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests creation of full vs placeholder records in the posts table when creating orders in the COT datastore.
+	 * @testDox Tests creation of full vs placeholder records in the posts table when creating orders in the COT datastore.
 	 *
 	 * @return void
 	 */
@@ -396,28 +444,18 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		global $wpdb;
 
 		// Sync enabled implies a full post should be created.
-		add_filter(
-			'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
-			function() {
-				return 'yes';
-			}
-		);
+		$this->enable_cot_sync();
 		$order = $this->create_complex_cot_order();
 		$this->assertEquals( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE ID = %d AND post_type = %s", $order->get_id(), 'shop_order' ) ) );
 
 		// Sync disabled implies a placeholder post should be created.
-		add_filter(
-			'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
-			function() {
-				return 'no';
-			}
-		);
+		$this->disable_cot_sync();
 		$order = $this->create_complex_cot_order();
 		$this->assertEquals( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE ID = %d AND post_type = %s", $order->get_id(), DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE ) ) );
 	}
 
 	/**
-	 * Tests the `delete()` method on the COT datastore -- trashing.
+	 * @testDox Tests the `delete()` method on the COT datastore -- trashing.
 	 *
 	 * @return void
 	 */
@@ -445,7 +483,39 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests the `delete()` method on the COT datastore -- full deletes.
+	 * @testdox Test the trash-untrash cycle with sync enabled.
+	 */
+	public function test_cot_datastore_untrash() {
+		global $wpdb;
+
+		$this->enable_cot_sync();
+
+		// Tests trashing of orders.
+		$order = $this->create_complex_cot_order();
+		$order->set_status( 'on-hold' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$this->sut->trash_order( $order );
+
+		//phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders
+		$orders_table = $this->sut::get_orders_table_name();
+		$this->assertEquals( 'trash', $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$orders_table} WHERE id = %d", $order_id ) ) );
+		$this->assertEquals( 'trash', $wpdb->get_var( $wpdb->prepare( "SELECT post_status FROM {$wpdb->posts} WHERE id = %d", $order_id ) ) );
+
+		$this->sut->read( $order );
+		$this->sut->untrash_order( $order );
+
+		$this->assertEquals( 'on-hold', $order->get_status() );
+		$this->assertEquals( 'wc-on-hold', get_post_status( $order_id ) );
+
+		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->sut->get_meta_table_name()} WHERE order_id = %d AND meta_key LIKE '_wp_trash_meta_%'", $order_id ) ) );
+		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key LIKE '_wp_trash_meta_%'", $order_id ) ) );
+		//phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders
+	}
+
+	/**
+	 * @testDox Tests the `delete()` method on the COT datastore -- full deletes.
 	 *
 	 * @return void
 	 */
@@ -467,7 +537,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests the `OrdersTableQuery` class on the COT datastore.
+	 * @testDox Tests the `OrdersTableQuery` class on the COT datastore.
 	 */
 	public function test_cot_query_basic() {
 		// We bypass the `query()` method as it's mainly just a thin wrapper around
@@ -536,7 +606,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests meta queries in the `OrdersTableQuery` class.
+	 * @testDox Tests meta queries in the `OrdersTableQuery` class.
 	 *
 	 * @return void
 	 */
@@ -655,7 +725,77 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests queries involving the 'customer' query var.
+	 * @testDox Tests queries involving 'orderby' and meta queries.
+	 */
+	public function test_cot_query_meta_orderby() {
+		$this->toggle_cot( true );
+
+		$order1 = new \WC_Order();
+		$order1->add_meta_data( 'color', 'red' );
+		$order1->add_meta_data( 'animal', 'lion' );
+		$order1->add_meta_data( 'numeric_meta', '1000' );
+		$order1->save();
+
+		$order2 = new \WC_Order();
+		$order2->add_meta_data( 'color', 'green' );
+		$order2->add_meta_data( 'animal', 'lion' );
+		$order2->add_meta_data( 'numeric_meta', '500' );
+		$order2->save();
+
+		$query_args = array(
+			'orderby'  => 'id',
+			'order'    => 'ASC',
+			'meta_key' => 'color', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		);
+
+		// Check that orders are in order (when no meta ordering is involved).
+		$q = new OrdersTableQuery( $query_args );
+		$this->assertEquals( $q->orders, array( $order1->get_id(), $order2->get_id() ) );
+
+		// When ordering by color $order2 should come first.
+		// Also tests that the key name is a valid synonym for the primary meta query.
+		$query_args['orderby'] = 'color';
+		$q                     = new OrdersTableQuery( $query_args );
+		$this->assertEquals( $q->orders, array( $order2->get_id(), $order1->get_id() ) );
+
+		// When ordering by 'numeric_meta' 1000 < 500 (due to alphabetical sorting by default).
+		// Also tests that 'meta_value' is a valid synonym for the primary meta query.
+		$query_args['meta_key'] = 'numeric_meta'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		$query_args['orderby']  = 'meta_value';
+		$q                      = new OrdersTableQuery( $query_args );
+		$this->assertEquals( $q->orders, array( $order1->get_id(), $order2->get_id() ) );
+
+		// Forcing numeric sorting with 'meta_value_num' reverses the order above.
+		$query_args['orderby'] = 'meta_value_num';
+		$q                     = new OrdersTableQuery( $query_args );
+		$this->assertEquals( $q->orders, array( $order2->get_id(), $order1->get_id() ) );
+
+		// Sorting by 'animal' meta is ambiguous. Test that we can order by various meta fields (and use the names in 'orderby').
+		unset( $query_args['meta_key'] );
+		$query_args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'animal_meta' => array(
+				'key' => 'animal',
+			),
+			'color_meta'  => array(
+				'key' => 'color',
+			),
+		);
+		$query_args['orderby']    = array(
+			'animal_meta' => 'ASC',
+			'color_meta'  => 'DESC',
+		);
+		$q                        = new OrdersTableQuery( $query_args );
+		$this->assertEquals( $q->orders, array( $order1->get_id(), $order2->get_id() ) );
+
+		// Order is reversed when changing the sort order for 'color_meta'.
+		$query_args['orderby']['color_meta'] = 'ASC';
+		$q                                   = new OrdersTableQuery( $query_args );
+		$this->assertEquals( $q->orders, array( $order2->get_id(), $order1->get_id() ) );
+
+	}
+
+	/**
+	 * @testDox Tests queries involving the 'customer' query var.
 	 *
 	 * @return void
 	 */
@@ -728,7 +868,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests queries involving 'date_query'.
+	 * @testDox Tests queries involving 'date_query'.
 	 *
 	 * @return void
 	 */
@@ -736,8 +876,8 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		// Hardcode a day so that we don't go over to a different month or year by adding/substracting hours and days.
 		$now    = strtotime( '2022-06-04 10:00:00' );
 		$deltas = array(
-			-DAY_IN_SECONDS,
-			-HOUR_IN_SECONDS,
+			- DAY_IN_SECONDS,
+			- HOUR_IN_SECONDS,
 			0,
 			HOUR_IN_SECONDS,
 			DAY_IN_SECONDS,
@@ -896,7 +1036,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$test_orders = array();
 		$this->assertEquals( 0, ( new OrdersTableQuery() )->found_orders, 'We initially have zero orders within our custom order tables.' );
 
-		for ( $i = 0; $i < 30; $i++ ) {
+		for ( $i = 0; $i < 30; $i ++ ) {
 			$order = new WC_Order();
 			$this->switch_data_store( $order, $this->sut );
 			$order->save();
@@ -914,7 +1054,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		$query = new OrdersTableQuery(
 			array(
-				'limit'  => -1,
+				'limit'  => - 1,
 				'offset' => 18,
 			)
 		);
@@ -936,7 +1076,49 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the `get_order_count()` method.
+	 * @testdox Test that the query counts works as expected.
+	 *
+	 * @return void
+	 */
+	public function test_cot_query_count() {
+		$this->assertEquals( 0, ( new OrdersTableQuery() )->found_orders, 'We initially have zero orders within our custom order tables.' );
+
+		for ( $i = 0; $i < 30; $i ++ ) {
+			$order = new WC_Order();
+			$this->switch_data_store( $order, $this->sut );
+			if ( 0 === $i % 2 ) {
+				$order->set_billing_address_2( 'Test' );
+			}
+			$order->save();
+		}
+
+		$query = new OrdersTableQuery( array( 'limit' => 5 ) );
+		$this->assertEquals( 30, $query->found_orders, 'Specifying limits still calculate all found orders.' );
+
+		// Count does not change based on the fields that we are fetching.
+		$query = new OrdersTableQuery(
+			array(
+				'fields' => 'ids',
+				'limit'  => 5,
+			)
+		);
+		$this->assertEquals( 30, $query->found_orders, 'Fetching specific field does not change query count.' );
+
+		$query = new OrdersTableQuery(
+			array(
+				'field_query' => array(
+					array(
+						'field' => 'billing_address_2',
+						'value' => 'Test',
+					),
+				),
+			)
+		);
+		$this->assertEquals( 15, $query->found_orders, 'Counting orders with a field query works.' );
+	}
+
+	/**
+	 * @testDox Test the `get_order_count()` method.
 	 */
 	public function test_get_order_count(): void {
 		$number_of_orders_by_status = array(
@@ -966,13 +1148,17 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test `get_unpaid_orders()`.
+	 * @testDox Test `get_unpaid_orders()`.
 	 */
 	public function test_get_unpaid_orders(): void {
+		// phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- Intentional usage since timezone is changed for this file.
 		$now = current_time( 'timestamp' );
 
 		// Create a few orders.
-		$orders_by_status = array( 'wc-completed' => 3, 'wc-pending' => 2 );
+		$orders_by_status = array(
+			'wc-completed' => 3,
+			'wc-pending'   => 2,
+		);
 		$unpaid_ids       = array();
 		foreach ( $orders_by_status as $order_status => $order_count ) {
 			foreach ( range( 1, $order_count ) as $_ ) {
@@ -989,7 +1175,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		}
 
 		// Confirm not all orders are unpaid.
-		$this->assertEquals( $orders_by_status['wc-completed'], $this->sut->get_order_count('wc-completed') );
+		$this->assertEquals( $orders_by_status['wc-completed'], $this->sut->get_order_count( 'wc-completed' ) );
 
 		// Find unpaid orders.
 		$this->assertEqualsCanonicalizing( $unpaid_ids, $this->sut->get_unpaid_orders( $now ) );
@@ -1001,7 +1187,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test `get_order_id_by_order_key()`.
+	 * @testDox Test `get_order_id_by_order_key()`.
 	 *
 	 * @return void
 	 */
@@ -1013,6 +1199,151 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $order->get_id(), $this->sut->get_order_id_by_order_key( 'an_order_key' ) );
 		$this->assertEquals( 0, $this->sut->get_order_id_by_order_key( 'other_order_key' ) );
+	}
+
+	/**
+	 * @testDox Direct write to metadata should propagate to the orders table when reading.
+	 */
+	public function test_read_with_direct_meta_write() {
+		$this->enable_cot_sync();
+		$order = $this->create_complex_cot_order();
+
+		$post_object = get_post( $order->get_id() );
+		// Make sure that COT sync is enabled, by checking that this is not placeholder post.
+		$this->assertTrue( get_post_type( $post_object->ID ) === 'shop_order' );
+
+		// simulate direct write.
+		update_post_meta( $post_object->ID, 'my_custom_meta', array( 'key' => 'value' ) );
+
+		$refreshed_order = new WC_Order();
+		$refreshed_order->set_id( $order->get_id() );
+		$this->switch_data_store( $refreshed_order, $this->sut );
+		$this->sut->read( $refreshed_order );
+
+		$this->assertEquals( array( 'key' => 'value' ), $refreshed_order->get_meta( 'my_custom_meta' ) );
+	}
+
+	/**
+	 * @testDox When there are direct writes to posts data, order should synced upon reading.
+	 */
+	public function test_read_multiple_with_direct_write() {
+		$this->enable_cot_sync();
+		$order       = $this->create_complex_cot_order();
+		$order_total = $order->get_total();
+		$order->add_meta_data( 'custom_meta_1', 'custom_value_1' );
+		$order->add_meta_data( 'custom_meta_2', 'custom_value_2' );
+		$order->add_meta_data( 'custom_meta_3', 'custom_value_3' );
+		$order->save();
+		$post_object = get_post( $order->get_id() );
+		assert( get_post_type( $post_object->ID ) === 'shop_order' );
+
+		// simulate direct write.
+		update_post_meta( $post_object->ID, '_order_total', $order_total + 100 ); // core table.
+		update_post_meta( $post_object->ID, '_billing_first_name', 'John Doe Updated' ); // address table.
+		update_post_meta( $post_object->ID, '_created_via', 'Unit tests Updated' ); // op data table.
+
+		add_post_meta( $post_object->ID, 'custom_meta_4', 'custom_value_4' ); // new meta add.
+		update_post_meta( $post_object->ID, 'custom_meta_1', 'custom_value_1_updated' ); // existing meta update.
+		delete_post_meta( $post_object->ID, 'custom_meta_2' ); // existing meta delete.
+
+		// Read a refreshed order.
+		$refreshed_order = new WC_Order();
+		$refreshed_order->set_id( $order->get_id() );
+		$this->switch_data_store( $refreshed_order, $this->sut );
+		$this->sut->read( $refreshed_order );
+		$this->assertEquals( $order_total + 100, $refreshed_order->get_total() );
+		$this->assertEquals( 'John Doe Updated', $refreshed_order->get_billing_first_name() );
+		$this->assertEquals( 'Unit tests Updated', $refreshed_order->get_created_via() );
+		$this->assertEquals( 'custom_value_4', $refreshed_order->get_meta( 'custom_meta_4' ) );
+		$this->assertEquals( 'custom_value_1_updated', $refreshed_order->get_meta( 'custom_meta_1' ) );
+		$this->assertEquals( '', $refreshed_order->get_meta( 'custom_meta_2' ) );
+	}
+
+	/**
+	 * @testDox Test that we are able to correctly detect when order and post are out of sync.
+	 */
+	public function test_is_post_different_from_order() {
+		$this->enable_cot_sync();
+		$order                         = $this->create_complex_cot_order();
+		$post_order_comparison_closure = function ( $order ) {
+			$post_order = $this->get_post_orders_for_ids( array( $order->get_id() => $order ) )[ $order->get_id() ];
+
+			return $this->is_post_different_from_order( $order, $post_order );
+		};
+		// No changes, post and order should be same.
+		$this->assertFalse( $post_order_comparison_closure->call( $this->sut, $order ) );
+
+		// Simulate direct write.
+		update_post_meta( $order->get_id(), 'my_custom_meta', array( 'key' => 'value' ) );
+
+		// Order and post are different now.
+		$this->assertTrue( $post_order_comparison_closure->call( $this->sut, $order ) );
+
+		$r_order = new WC_Order();
+		$r_order->set_id( $order->get_id() );
+		$this->switch_data_store( $r_order, $this->sut );
+		// Reading again will make a call to migrate_post_record.
+		$this->sut->read( $r_order );
+		$this->assertFalse( $post_order_comparison_closure->call( $this->sut, $r_order ) );
+		$this->assertEquals( array( 'key' => 'value' ), $r_order->get_meta( 'my_custom_meta' ) );
+	}
+
+	/**
+	 * @testDox Test that after backfilling, post order is same as cot order.
+	 */
+	public function test_post_is_same_as_order_after_backfill() {
+		$order = $this->create_complex_cot_order();
+		$order->save();
+		$this->sut->backfill_post_record( $order );
+
+		$r_order = new WC_Order();
+		$r_order->set_id( $order->get_id() );
+		$this->switch_data_store( $r_order, $this->sut );
+		$clear_sync_on_read_closure = function () {
+			self::$reading_order_ids = array();
+		};
+		$clear_sync_on_read_closure->call( $this->sut );
+		$this->sut->read( $r_order );
+
+		$post_order_comparison_closure = function () use ( $r_order ) {
+			$post_order = $this->get_cpt_order( get_post( $r_order->get_id() ) );
+
+			return $this->is_post_different_from_order( $r_order, $post_order );
+		};
+
+		$this->assertFalse( $post_order_comparison_closure->call( $this->sut ) );
+	}
+
+	/**
+	 * @testDox Meta data should be migrated from post order to cot order.
+	 *
+	 * @return void
+	 */
+	public function test_migrate_meta_data_from_post_order() {
+		$order1 = new WC_Order();
+		$order1->add_meta_data( 'common_meta_key_1', 'common_meta_value_1' );
+		$order1->add_meta_data( 'common_meta_key_2', 'common_meta_value_2' );
+		$order1->add_meta_data( 'common_meta_key_3', 'common_meta_value_3' );
+		$order1->add_meta_data( 'order1_meta_key_1', 'order1_meta_value_1' );
+		$order1->save();
+
+		$order2 = new WC_Order();
+		$order2->add_meta_data( 'common_meta_key_1', 'common_meta_value_1' );
+		$order2->add_meta_data( 'common_meta_key_2', 'common_meta_value_2_updated' );
+		$order2->add_meta_data( 'order2_meta_key_1', 'order2_meta_key_1' );
+
+		$diff_call_closure = function ( $order1, $order2 ) {
+			return $this->migrate_meta_data_from_post_order( $order1, $order2 );
+		};
+
+		$diff = $diff_call_closure->call( $this->sut, $order1, $order2 );
+		$this->assertFalse( empty( $diff ) );
+
+		$this->assertEquals( 'common_meta_value_1', $order1->get_meta( 'common_meta_key_1' ) );
+		$this->assertEquals( 'common_meta_value_2_updated', $order1->get_meta( 'common_meta_key_2' ) );
+		$this->assertEquals( '', $order1->get_meta( 'common_meta_key_3' ) );
+		$this->assertEquals( '', $order1->get_meta( 'order1_meta_key_1' ) );
+		$this->assertEquals( 'order2_meta_key_1', $order1->get_meta( 'order2_meta_key_1' ) );
 	}
 
 	/**
@@ -1044,12 +1375,13 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Ensure search works as expected.
+	 * @testDox Ensure search works as expected.
 	 */
 	public function test_cot_query_search(): void {
 		$order_1 = new WC_Order();
 		$order_1->set_billing_city( 'Fort Quality' );
 		$this->switch_data_store( $order_1, $this->sut );
+		$this->disable_cot_sync();
 		$order_1->save();
 
 		$product = new WC_Product_Simple();
@@ -1079,16 +1411,146 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		);
 
 		// Order 1's billing address references "Quality" and so does one of Order 2's order items.
-		$query = new OrdersTableQuery( array( 's' => 'Quality' ) );
+		$query        = new OrdersTableQuery( array( 's' => 'Quality' ) );
+		$orders_array = $query->orders;
+		sort( $orders_array );
 		$this->assertEquals(
 			array( $order_1->get_id(), $order_2->get_id() ),
-			$query->orders,
+			$orders_array,
 			'Search terms match against address data as well as order item names.'
 		);
 	}
 
 	/**
-	 * Ensure field_query works as expected.
+	 * @testDox Ensure sorting by `includes` param works as expected.
+	 */
+	public function test_cot_query_sort_includes() {
+		$this->disable_cot_sync();
+		$order_1 = new WC_Order();
+		$this->switch_data_store( $order_1, $this->sut );
+		$order_1->save();
+
+		$order_2 = new WC_Order();
+		$this->switch_data_store( $order_2, $this->sut );
+		$order_2->save();
+
+		$query        = new OrdersTableQuery(
+			array(
+				'orderby'  => 'include',
+				'includes' => array( $order_1->get_id(), $order_2->get_id() ),
+			)
+		);
+		$orders_array = $query->orders;
+		$this->assertEquals( array( $order_1->get_id(), $order_2->get_id() ), array( $orders_array[0], $orders_array[1] ) );
+
+		$query        = new OrdersTableQuery(
+			array(
+				'orderby'  => 'include',
+				'includes' => array( $order_2->get_id(), $order_1->get_id() ),
+			)
+		);
+		$orders_array = $query->orders;
+		$this->assertEquals( array( $order_2->get_id(), $order_1->get_id() ), array( $orders_array[0], $orders_array[1] ) );
+	}
+
+	/**
+	 * @testDox Ensure search works as expected on updated orders.
+	 */
+	public function test_cot_query_search_update() {
+		$order_1 = new WC_Order();
+		$this->switch_data_store( $order_1, $this->sut );
+		$this->disable_cot_sync();
+		$order_1->save();
+
+		$order_1->set_billing_city( 'New Cybertron' );
+		$order_1->save();
+
+		$order_2 = new WC_Order();
+		$this->switch_data_store( $order_2, $this->sut );
+		$order_2->save();
+
+		$order_2->set_billing_city( 'Gigantian City' );
+		$order_2->save();
+
+		$query = new OrdersTableQuery( array( 's' => 'Cybertron' ) );
+		$this->assertEquals(
+			array( $order_1->get_id() ),
+			$query->orders,
+			'Search terms match against updated address data.'
+		);
+	}
+
+	/**
+	 * Test methods get_total_tax_refunded and get_total_shipping_refunded.
+	 */
+	public function test_get_total_tax_refunded_and_get_total_shipping_refunded() {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate'          => '20',
+			'tax_rate_name'     => 'tax',
+			'tax_rate_order'    => '1',
+			'tax_rate_shipping' => '1',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$rate = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' );
+		$item = new WC_Order_Item_Shipping();
+		$item->set_props(
+			array(
+				'method_title' => $rate->label,
+				'method_id'    => $rate->id,
+				'total'        => wc_format_decimal( $rate->cost ),
+				'taxes'        => $rate->taxes,
+			)
+		);
+		foreach ( $rate->get_meta_data() as $key => $value ) {
+			$item->add_meta_data( $key, $value, true );
+		}
+
+		$order = new WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->save();
+		$order->add_product( WC_Helper_Product::create_simple_product(), 10 );
+		$order->add_item( $item );
+		$order->calculate_totals();
+		$order->save();
+		$this->sut->backfill_post_record( $order );
+
+		assert( $order->get_total_tax() > 0 );
+		assert( $order->get_total() > 0 );
+		$product_item_id  = current( $order->get_items() )->get_id();
+		$shipping_item_id = current( $order->get_items( 'shipping' ) )->get_id();
+		$refund           = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$product_item_id  => array(
+						'id'           => $product_item_id,
+						'qty'          => 1,
+						'refund_total' => 10,
+						'refund_tax'   => array( 1 => 2 ),
+					),
+					$shipping_item_id => array(
+						'id'           => $shipping_item_id,
+						'qty'          => 1,
+						'refund_total' => 10,
+						'refund_tax'   => array( 1 => 3 ),
+					),
+				),
+			)
+		);
+		$refund->save();
+		$this->migrator->migrate_order( $refund->get_id() );
+
+		$this->assertEquals( 5, $order->get_data_store()->get_total_tax_refunded( $order ) );
+		$this->assertEquals( 10, $order->get_data_store()->get_total_shipping_refunded( $order ) );
+	}
+
+	/**
+	 * @testdox Ensure field_query works as expected.
 	 */
 	public function test_cot_query_field_query(): void {
 		$orders_test_data = array(
@@ -1096,7 +1558,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			array( 'Max', 'Planck', 'Quanta', 'planck_1', '16.0', '1858-04-23', '1947-10-04' ),
 			array( 'Édouard', 'Roche', 'Tidal', 'roche_3', '9.99', '1820-10-17', '1883-04-27' ),
 		);
-		$order_ids       = array();
+		$order_ids        = array();
 
 		// Create some test orders.
 		foreach ( $orders_test_data as $i => $order_data ) {
@@ -1127,9 +1589,9 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			array(
 				'field' => 'order_key',
 				'value' => 'planck_1',
-			)
+			),
 		);
-		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$query       = new OrdersTableQuery( array( 'field_query' => $field_query ) );
 		$this->assertEqualsCanonicalizing( array( $order_ids[0], $order_ids[1] ), $query->orders );
 
 		// A more complex field_query.
@@ -1153,7 +1615,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 				),
 			),
 		);
-		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$query       = new OrdersTableQuery( array( 'field_query' => $field_query ) );
 		$this->assertEqualsCanonicalizing( array( $order_ids[0], $order_ids[2] ), $query->orders );
 
 		// Find orders with order_key ending in a number (i.e. all).
@@ -1161,10 +1623,10 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			array(
 				'field'   => 'order_key',
 				'value'   => '[0-9]$',
-				'compare' => 'RLIKE'
-			)
+				'compare' => 'RLIKE',
+			),
 		);
-		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$query       = new OrdersTableQuery( array( 'field_query' => $field_query ) );
 		$this->assertEqualsCanonicalizing( $order_ids, $query->orders );
 
 		// Find orders with order_key not ending in a number (i.e. none).
@@ -1172,10 +1634,10 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			array(
 				'field'   => 'order_key',
 				'value'   => '[^0-9]$',
-				'compare' => 'NOT RLIKE'
-			)
+				'compare' => 'NOT RLIKE',
+			),
 		);
-		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$query       = new OrdersTableQuery( array( 'field_query' => $field_query ) );
 		$this->assertCount( 0, $query->posts );
 
 		// Use full column name in a query.
@@ -1185,19 +1647,19 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 				'value'   => '10.0',
 				'compare' => '<=',
 				'type'    => 'NUMERIC',
-			)
+			),
 		);
-		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$query       = new OrdersTableQuery( array( 'field_query' => $field_query ) );
 		$this->assertEqualsCanonicalizing( array( $order_ids[2] ), $query->orders );
 
 		// Pass an invalid column name.
 		$field_query = array(
 			array(
-				'field'   => 'non_existing_field',
-				'value'   => 'any-value',
-			)
+				'field' => 'non_existing_field',
+				'value' => 'any-value',
+			),
 		);
-		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$query       = new OrdersTableQuery( array( 'field_query' => $field_query ) );
 		$this->assertCount( 0, $query->posts );
 
 		// Pass an apparently incorrect value to an 'IN' compare.
@@ -1206,9 +1668,9 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 				'field'   => 'wc_orders.total_amount',
 				'value'   => 5.5,
 				'compare' => 'IN',
-			)
+			),
 		);
-		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$query       = new OrdersTableQuery( array( 'field_query' => $field_query ) );
 		$this->assertCount( 0, $query->posts );
 
 		// Pass an invalid 'compare'.
@@ -1217,9 +1679,9 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 				'field'   => 'wc_orders.total_amount',
 				'value'   => 10.0,
 				'compare' => 'EXOSTS',
-			)
+			),
 		);
-		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$query       = new OrdersTableQuery( array( 'field_query' => $field_query ) );
 		$this->assertCount( 0, $query->posts );
 
 		// Pass an incomplete array for BETWEEN (treated as =).
@@ -1228,9 +1690,9 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 				'field'   => 'total',
 				'compare' => 'BETWEEN',
 				'value'   => 10.0,
-			)
+			),
 		);
-		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$query       = new OrdersTableQuery( array( 'field_query' => $field_query ) );
 		$this->assertCount( 0, $query->posts );
 
 		// Pass an incomplete array for NOT BETWEEN (treated as !=).
@@ -1239,13 +1701,13 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 				'field'   => 'total',
 				'compare' => 'NOT BETWEEN',
 				'value'   => array( 1.0 ),
-			)
+			),
 		);
-		$query = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$query       = new OrdersTableQuery( array( 'field_query' => $field_query ) );
 		$this->assertCount( 0, $query->posts );
 
-		// Test combinations of field_query with regular query args:
-		$args = array(
+		// Test combinations of field_query with regular query args.
+		$args  = array(
 			'id' => array( $order_ids[0], $order_ids[1] ),
 		);
 		$query = new OrdersTableQuery( $args );
@@ -1259,9 +1721,9 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			array(
 				'field' => 'id',
 				'value' => $order_ids[1],
-			)
+			),
 		);
-		$query = new OrdersTableQuery( $args );
+		$query               = new OrdersTableQuery( $args );
 		$this->assertEqualsCanonicalizing( array( $order_ids[1] ), $query->orders );
 
 		// ... and now none (no orders below < 5.0)
@@ -1270,13 +1732,13 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			'value'   => '5.0',
 			'compare' => '<',
 		);
-		$query = new OrdersTableQuery( $args );
+		$query                 = new OrdersTableQuery( $args );
 		$this->assertCount( 0, $query->orders );
 
-		// Now a more complex query with meta_query and date_query:
+		// Now a more complex query with meta_query and date_query.
 		$args = array(
 			'shipping_address' => 'The Universe',
-			'field_query' => array(
+			'field_query'      => array(
 				array(
 					'field'   => 'total',
 					'value'   => array( 1.0, 11.0 ),
@@ -1290,19 +1752,20 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$this->assertEqualsCanonicalizing( array( $order_ids[0], $order_ids[1] ), $query->orders );
 
 		// ... but only Planck is more than 80 years old.
+		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Intentional usage for test.
 		$args['meta_query'] = array(
-				array(
-					'key'     => 'customer_age',
-					'value'   => 80,
-					'compare' => '>='
-				)
+			array(
+				'key'     => 'customer_age',
+				'value'   => 80,
+				'compare' => '>=',
+			),
 		);
-		$query = new OrdersTableQuery( $args );
+		$query              = new OrdersTableQuery( $args );
 		$this->assertEqualsCanonicalizing( array( $order_ids[1] ), $query->orders );
 	}
 
 	/**
-	 * Test that props set by datastores can be set and get by using any of metadata, object props or from data store setters.
+	 * @testDox Test that props set by datastores can be set and get by using any of metadata, object props or from data store setters.
 	 * Ideally, this should be possible only from getters and setters for objects, but for backward compatibility, earlier ways are also supported.
 	 */
 	public function test_internal_ds_getters_and_setters() {
@@ -1391,7 +1854,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Legacy getters and setters for props migrated from data stores should be set/reset properly.
+	 * @testDox Legacy getters and setters for props migrated from data stores should be set/reset properly.
 	 */
 	public function test_legacy_getters_setters() {
 		$order_id = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_complex_wp_post_order();
@@ -1482,4 +1945,136 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * @testDox Test that created and updated dates are backfilled correctly.
+	 */
+	public function test_create_update_date_gmt() {
+		$order = new WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->set_created_via( 'checkout' );
+		$order->save();
+
+		// 10s is to account for any flakiness.
+		$this->assertTrue( 10 > absint( $order->get_date_created()->getTimestamp() - time() ), 'Order date created date is about the same as now.' );
+
+		$this->sut->backfill_post_record( $order );
+
+		$post = get_post( $order->get_id() );
+		$this->assertEquals( $order->get_date_created()->format( 'Y-m-d H:i:s' ), $post->post_date );
+		$created_date = $order->get_date_created();
+		$created_date->setTimezone( new DateTimeZone( 'GMT' ) );
+		$this->assertEquals( $created_date->format( 'Y-m-d H:i:s' ), $post->post_date_gmt );
+
+		$order->set_status( 'completed' );
+		$order->save();
+		$this->sut->backfill_post_record( $order );
+
+		// 10s is to account for any flakiness.
+		$this->assertTrue( 10 > absint( $order->get_date_modified()->getTimestamp() - time() ), 'Order date modified date is about the same as now.' );
+
+		$this->sut->backfill_post_record( $order );
+		$post = get_post( $order->get_id() );
+
+		$this->assertEquals( $order->get_date_modified()->format( 'Y-m-d H:i:s' ), $post->post_modified );
+		$modified_date = $order->get_date_modified();
+		$modified_date->setTimezone( new DateTimeZone( 'GMT' ) );
+		$this->assertEquals( $modified_date->format( 'Y-m-d H:i:s' ), $post->post_modified_gmt );
+	}
+
+	/**
+	 * @testDox Test that multiple calls to read don't try to sync again.
+	 */
+	public function test_read_multiple_dont_sync_again_for_same_order() {
+		$this->toggle_cot( true );
+		$this->enable_cot_sync();
+		$order = $this->create_complex_cot_order();
+
+		$order_id = $order->get_id();
+
+		$should_sync_callable = function( $order ) {
+			return $this->should_sync_order( $order );
+		};
+
+		$order = new WC_Order();
+		$order->set_id( $order_id );
+		$orders = array( $order_id => $order );
+		$this->assertTrue( $should_sync_callable->call( $this->sut, $order ) );
+		$this->sut->read_multiple( $orders );
+		$this->assertFalse( $should_sync_callable->call( $this->sut, $order ) );
+	}
+
+	/**
+	 * @testDox When parent order is deleted, child orders should be upshifted.
+	 */
+	public function test_child_orders_are_promoted_when_parent_is_deleted() {
+		$this->toggle_cot( true );
+		$order = new WC_Order();
+		$order->save();
+
+		$child_order = new WC_Order();
+		$child_order->set_parent_id( $order->get_id() );
+		$child_order->save();
+
+		$this->assertEquals( $order->get_id(), $child_order->get_parent_id() );
+		$this->sut->delete( $order, array( 'force_delete' => true ) );
+		$child_order = wc_get_order( $child_order->get_id() );
+
+		$this->assertEquals( 0, $child_order->get_parent_id() );
+	}
+
+	/**
+	 * @testDox Make sure get_order return false when checking an order of different order types without warning.
+	 */
+	public function test_get_order_with_id_for_different_type() {
+		$this->toggle_cot( true );
+		$this->disable_cot_sync();
+		$product = new \WC_Product();
+		$product->save();
+		$this->assertFalse( wc_get_order( $product->get_id() ) );
+	}
+
+	/**
+	 * @testDox Make sure that getting order type for non order return without warning.
+	 */
+	public function test_get_order_type_for_non_order() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->save();
+		$this->assertEquals( '', $this->sut->get_order_type( $product->get_id() ) );
+	}
+
+	/**
+	 * @testDox Test get order type working as expected.
+	 */
+	public function test_get_order_type_for_order() {
+		$order = $this->create_complex_cot_order();
+		$this->assertEquals( 'shop_order', $this->sut->get_order_type( $order->get_id() ) );
+	}
+
+	/**
+	 * @testDox Test that we are not duplicating address indexing when updating.
+	 */
+	public function test_address_index_saved_on_update() {
+		global $wpdb;
+		$this->toggle_cot( true );
+		$this->disable_cot_sync();
+		$order = new WC_Order();
+		$order->set_billing_address_1( '123 Main St' );
+		$order->save();
+
+		$this->assertTrue( false !== strpos( $order->get_meta( '_billing_address_index', true ), '123 Main St' ) );
+		$order = wc_get_order( $order->get_id() );
+		$order->set_billing_address_2( 'Apt 1' );
+		$order->save();
+
+		$order_meta_table = $this->sut::get_meta_table_name();
+		// Assert that we are not duplicating address indexes.
+		$result = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$order_meta_table} WHERE order_id = %d AND meta_key = '_billing_address_index'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$order->get_id()
+			)
+		);
+
+		$this->assertEquals( 1, $result );
+	}
 }
