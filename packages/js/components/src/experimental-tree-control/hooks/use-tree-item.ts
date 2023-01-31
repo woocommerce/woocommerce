@@ -12,14 +12,14 @@ import { useExpander } from './use-expander';
 export function useTreeItem( {
 	item,
 	level,
-	isExpanded,
+	shouldItemBeExpanded,
 	...props
 }: TreeItemProps ) {
 	const nextLevel = level + 1;
 
 	const expander = useExpander( {
 		item,
-		isExpanded,
+		shouldItemBeExpanded,
 	} );
 
 	return {
@@ -37,7 +37,7 @@ export function useTreeItem( {
 		treeProps: {
 			items: item.children,
 			level: nextLevel,
-			isItemExpanded: isExpanded,
+			shouldItemBeExpanded,
 		},
 	};
 }

@@ -11,7 +11,7 @@ export function useTree( {
 	ref,
 	items,
 	level = 1,
-	isItemExpanded,
+	shouldItemBeExpanded,
 	...props
 }: TreeProps ) {
 	return {
@@ -22,7 +22,7 @@ export function useTree( {
 		},
 		treeItemProps: {
 			level,
-			isExpanded: isItemExpanded,
+			shouldItemBeExpanded,
 		},
 	};
 }

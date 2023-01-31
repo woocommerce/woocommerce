@@ -17,22 +17,22 @@ export type TreeProps = React.DetailedHTMLProps<
 	level?: number;
 	items: LinkedTree[];
 	/**
-	 * Control the tree item expand/collapse from outside the tree.
+	 * Control the tree item expand from outside the tree.
 	 * Cache the function to improve performance.
 	 *
 	 * @example
 	 * <Tree
-	 * 	isItemExpanded={ useCallback(
+	 * 	shouldItemBeExpanded={ useCallback(
 	 * 		( item ) => checkExpanded( item, text ),
 	 * 		[ text ]
 	 * 	) }
 	 * />
 	 *
-	 * @param  item The tree item to expand/collapse.
+	 * @param  item The tree item to check if should be expanded.
 	 *
 	 * @see {@link LinkedTree}
 	 */
-	isItemExpanded?( item: LinkedTree ): boolean;
+	shouldItemBeExpanded?( item: LinkedTree ): boolean;
 };
 
 export type TreeItemProps = React.DetailedHTMLProps<
@@ -41,7 +41,7 @@ export type TreeItemProps = React.DetailedHTMLProps<
 > & {
 	level: number;
 	item: LinkedTree;
-	isExpanded?( item: LinkedTree ): boolean;
+	shouldItemBeExpanded?( item: LinkedTree ): boolean;
 };
 
 export type TreeControlProps = Omit< TreeProps, 'items' | 'level' > & {

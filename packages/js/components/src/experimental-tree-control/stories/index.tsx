@@ -36,29 +36,29 @@ export const SimpleTree: React.FC = () => {
 	);
 };
 
-function isItemExpanded( item: LinkedTree, text: string ) {
-	if ( ! text || ! item.children?.length ) return false;
+function shouldItemBeExpanded( item: LinkedTree, filter: string ) {
+	if ( ! filter || ! item.children?.length ) return false;
 	return item.children.some( ( child ) => {
-		if ( new RegExp( text, 'ig' ).test( child.data.label ) ) {
+		if ( new RegExp( filter, 'ig' ).test( child.data.label ) ) {
 			return true;
 		}
-		return isItemExpanded( child, text );
+		return shouldItemBeExpanded( child, filter );
 	} );
 }
 
-export const ExpandOnSearch: React.FC = () => {
-	const [ text, setText ] = useState( '' );
+export const ExpandOnFilter: React.FC = () => {
+	const [ filter, setFilter ] = useState( '' );
 
 	return (
 		<>
-			<TextControl value={ text } onChange={ setText } />
-			<BaseControl label="Expand on search" id="expand-on-search">
+			<TextControl value={ filter } onChange={ setFilter } />
+			<BaseControl label="Expand on filter" id="expand-on-filter">
 				<TreeControl
-					id="expand-on-search"
+					id="expand-on-filter"
 					items={ listItems }
-					isItemExpanded={ useCallback(
-						( item ) => isItemExpanded( item, text ),
-						[ text ]
+					shouldItemBeExpanded={ useCallback(
+						( item ) => shouldItemBeExpanded( item, filter ),
+						[ filter ]
 					) }
 				/>
 			</BaseControl>

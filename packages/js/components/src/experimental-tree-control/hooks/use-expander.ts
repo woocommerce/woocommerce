@@ -9,20 +9,23 @@ import { useEffect, useState } from 'react';
 import { TreeItemProps } from '../types';
 
 export function useExpander( {
-	isExpanded,
+	shouldItemBeExpanded,
 	item,
-}: Pick< TreeItemProps, 'isExpanded' | 'item' > ) {
-	const [ expanded, setExpanded ] = useState( false );
+}: Pick< TreeItemProps, 'shouldItemBeExpanded' | 'item' > ) {
+	const [ isExpanded, setExpanded ] = useState( false );
 
 	useEffect( () => {
-		if ( item.children?.length && typeof isExpanded === 'function' ) {
-			setExpanded( isExpanded( item ) );
+		if (
+			item.children?.length &&
+			typeof shouldItemBeExpanded === 'function'
+		) {
+			setExpanded( shouldItemBeExpanded( item ) );
 		}
-	}, [ item, isExpanded ] );
+	}, [ item, shouldItemBeExpanded ] );
 
 	function onToggleExpand() {
 		setExpanded( ( prev ) => ! prev );
 	}
 
-	return { expanded, onToggleExpand };
+	return { isExpanded, onToggleExpand };
 }
