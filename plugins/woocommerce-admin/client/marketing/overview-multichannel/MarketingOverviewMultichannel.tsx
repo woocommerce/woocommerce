@@ -6,19 +6,19 @@ import { useUser } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
+import '~/marketing/data';
+import '~/marketing/data-multichannel';
+import { CenteredSpinner } from '~/marketing/components';
+import {
+	useRegisteredChannels,
+	useRecommendedChannels,
+} from '~/marketing/hooks';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { Channels } from './Channels';
 import { InstalledExtensions } from './InstalledExtensions';
 import { DiscoverTools } from './DiscoverTools';
 import { LearnMarketing } from './LearnMarketing';
-import '~/marketing/data';
-import '~/marketing/data-multichannel';
-import {
-	useRegisteredChannels,
-	useRecommendedChannels,
-} from '~/marketing/hooks';
 import './MarketingOverviewMultichannel.scss';
-import { CenteredSpinner } from '../components';
 
 export const MarketingOverviewMultichannel: React.FC = () => {
 	const {
