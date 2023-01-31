@@ -3,10 +3,16 @@
  */
 import { useContext, useEffect, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { UNSAFE_NavigationContext as NavigationContext } from 'react-router-dom';
+import { parseAdminUrl } from '@woocommerce/navigation';
+import {
+	Location,
+	UNSAFE_NavigationContext as NavigationContext,
+	useLocation,
+} from 'react-router-dom';
 
 export default function usePreventLeavingPage(
 	hasUnsavedChanges: boolean,
+	shouldConfirm?: ( path: URL, fromUrl: Location ) => boolean,
 	/**
 	 * Some browsers ignore this message currently on before unload event.
 	 *
@@ -21,6 +27,7 @@ export default function usePreventLeavingPage(
 		[ message ]
 	);
 	const { navigator } = useContext( NavigationContext );
+	const fromUrl = useLocation();
 
 	// This effect prevent react router from navigate and show
 	// a confirmation message. It's a work around to beforeunload
@@ -30,6 +37,15 @@ export default function usePreventLeavingPage(
 			const push = navigator.push;
 
 			navigator.push = ( ...args: Parameters< typeof push > ) => {
+				const toUrl = parseAdminUrl( args[ 0 ] ) as URL;
+				if (
+					typeof shouldConfirm === 'function' &&
+					! shouldConfirm( toUrl, fromUrl )
+				) {
+					push( ...args );
+					return;
+				}
+
 				/* eslint-disable-next-line no-alert */
 				const result = window.confirm( confirmMessage );
 				if ( result !== false ) {

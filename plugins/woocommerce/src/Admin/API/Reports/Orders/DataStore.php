@@ -118,7 +118,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		if ( $query_args['customer_type'] ) {
 			$returning_customer = 'returning' === $query_args['customer_type'] ? 1 : 0;
-			$where_subquery[]   = "{$order_stats_lookup_table}.returning_customer = ${returning_customer}";
+			$where_subquery[]   = "{$order_stats_lookup_table}.returning_customer = {$returning_customer}";
 		}
 
 		$refund_subquery = $this->get_refund_subquery( $query_args );
@@ -256,7 +256,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->add_sql_query_params( $query_args );
 			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 			$db_records_count = (int) $wpdb->get_var(
-				"SELECT COUNT(*) FROM (
+				"SELECT COUNT( DISTINCT tt.order_id ) FROM (
 					{$this->subquery->get_query_statement()}
 				) AS tt"
 			);

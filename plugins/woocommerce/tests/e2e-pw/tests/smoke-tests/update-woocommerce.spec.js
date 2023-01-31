@@ -1,24 +1,29 @@
 const { ADMINSTATE, UPDATE_WC } = process.env;
 const { admin } = require( '../../test-data/data' );
 const { test, expect } = require( '@playwright/test' );
-const path = require( 'path' );
 const {
 	deletePlugin,
 	downloadZip,
 	deleteZip,
 } = require( '../../utils/plugin-utils' );
 
+const skipMessage = 'Skipping this test because UPDATE_WC is not "true"';
+
 let pluginZipPath;
+
+test.skip( () => {
+	const shouldSkip = UPDATE_WC !== 'true';
+
+	if ( shouldSkip ) {
+		console.log( skipMessage );
+	}
+
+	return shouldSkip;
+}, skipMessage );
 
 test.describe.serial(
 	'WooCommerce plugin can be uploaded and activated',
 	() => {
-		// Skip test if UPDATE_WC is falsy.
-		test.skip(
-			! Boolean( UPDATE_WC ),
-			`Skipping this test because UPDATE_WC is falsy: ${ UPDATE_WC }`
-		);
-
 		test.use( { storageState: ADMINSTATE } );
 
 		test.beforeAll( async () => {

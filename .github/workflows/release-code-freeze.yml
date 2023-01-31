@@ -1,7 +1,7 @@
 name: 'Release: Code freeze'
 on:
     schedule:
-        - cron: '0 16 * * 4' # Run at 1600 UTC on Thursdays.
+        - cron: '0 23 * * 1' # Run at 2300 UTC on Mondays.
     workflow_dispatch:
         inputs:
             timeOverride:
@@ -20,6 +20,8 @@ env:
     GIT_AUTHOR_NAME: 'WooCommerce Bot'
     GIT_AUTHOR_EMAIL: 'no-reply@woocommerce.com'
 
+permissions: {}
+
 jobs:
     verify-code-freeze:
         name: 'Verify that today is the day of the code freeze'
@@ -28,7 +30,7 @@ jobs:
             freeze: ${{ steps.check-freeze.outputs.freeze }}
         steps:
             - name: 'Install PHP'
-              uses: shivammathur/setup-php@v2
+              uses: shivammathur/setup-php@8e2ac35f639d3e794c1da1f28999385ab6fdf0fc
               with:
                   php-version: '7.4'
 
@@ -42,12 +44,12 @@ jobs:
                     $now = strtotime( getenv( 'TIME_OVERRIDE' ) );
                   }
 
-                  // Code freeze comes 26 days prior to release day.
-                  $release_time         = strtotime( '+26 days', $now );
+                  // Code freeze comes 22 days prior to release day.
+                  $release_time         = strtotime( '+22 days', $now );
                   $release_day_of_week  = date( 'l', $release_time );
                   $release_day_of_month = (int) date( 'j', $release_time );
 
-                  // If 26 days from now isn't the second Tuesday, then it's not code freeze day.
+                  // If 22 days from now isn't the second Tuesday, then it's not code freeze day.
                   if ( 'Tuesday' !== $release_day_of_week || $release_day_of_month < 8 || $release_day_of_month > 14 ) {
                     file_put_contents( getenv( 'GITHUB_OUTPUT' ), "freeze=1\n", FILE_APPEND );
                   } else {
@@ -57,6 +59,9 @@ jobs:
     maybe-create-next-milestone-and-release-branch:
         name: 'Maybe create next milestone and release branch'
         runs-on: ubuntu-20.04
+        permissions:
+            contents: write
+            issues: write
         needs: verify-code-freeze
         if: needs.verify-code-freeze.outputs.freeze == 0
         outputs:
@@ -84,6 +89,9 @@ jobs:
     prep-trunk:
         name: Preps trunk for next development cycle
         runs-on: ubuntu-20.04
+        permissions:
+            contents: write
+            pull-requests: write
         needs: maybe-create-next-milestone-and-release-branch
         steps:
             - name: Checkout code
@@ -151,6 +159,8 @@ jobs:
     trigger-changelog-action:
         name: 'Trigger changelog action'
         runs-on: ubuntu-20.04
+        permissions:
+            actions: write
         needs: maybe-create-next-milestone-and-release-branch
         steps:
             - name: 'Trigger changelog action'
@@ -163,7 +173,7 @@ jobs:
                         workflow_id: 'release-changelog.yml',
                         ref: 'trunk',
                         inputs: {
-                          releaseVersion: "release/${{ needs.maybe-create-next-milestone-and-release-branch.outputs.next_version }}",
-                          releaseBranch: "${{ needs.maybe-create-next-milestone-and-release-branch.outputs.next_version }}"
+                          releaseVersion: "${{ needs.maybe-create-next-milestone-and-release-branch.outputs.release_version }}",
+                          releaseBranch: "${{ needs.maybe-create-next-milestone-and-release-branch.outputs.branch }}"
                         }
                       })

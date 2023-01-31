@@ -3,11 +3,17 @@ on:
   schedule:
     - cron: '21 0 * * *'
 
+permissions: {}
+
 jobs:
   stale:
     if: |
       ! contains(github.event.issue.labels.*.name, 'type: enhancement')
     runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
       - uses: actions/stale@v3
         with:

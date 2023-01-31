@@ -867,7 +867,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'description' => __( 'Product status (post status).', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'publish',
-					'enum'        => array_merge( array_keys( get_post_statuses() ), array( 'future' ) ),
+					'enum'        => array_merge( array_keys( get_post_statuses() ), array( 'future', 'auto-draft', 'trash' ) ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'featured'              => array(
@@ -1421,6 +1421,24 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				),
 			),
 		);
+
+		$post_type_obj = get_post_type_object( $this->post_type );
+		if ( is_post_type_viewable( $post_type_obj ) && $post_type_obj->public ) {
+			$schema['properties']['permalink_template'] = array(
+				'description' => __( 'Permalink template for the product.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => array( 'edit' ),
+				'readonly'    => true,
+			);
+
+			$schema['properties']['generated_slug'] = array(
+				'description' => __( 'Slug automatically generated from the product name.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => array( 'edit' ),
+				'readonly'    => true,
+			);
+		}
+
 		return $this->add_additional_fields_schema( $schema );
 	}
 
@@ -1462,16 +1480,45 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 */
 	protected function get_product_data( $product, $context = 'view' ) {
 		$data = parent::get_product_data( ...func_get_args() );
-		// Add stock_status if needed.
+
 		if ( isset( $this->request ) ) {
 			$fields = $this->get_fields_for_response( $this->request );
-			if ( in_array( 'stock_status', $fields ) ) {
+
+			// Add stock_status if needed.
+			if ( in_array( 'stock_status', $fields, true ) ) {
 				$data['stock_status'] = $product->get_stock_status( $context );
 			}
-			if ( in_array( 'has_options', $fields ) ) {
+
+			// Add has_options if needed.
+			if ( in_array( 'has_options', $fields, true ) ) {
 				$data['has_options'] = $product->has_options( $context );
 			}
+
+			$post_type_obj = get_post_type_object( $this->post_type );
+			if ( is_post_type_viewable( $post_type_obj ) && $post_type_obj->public ) {
+				$permalink_template_requested = in_array( 'permalink_template', $fields, true );
+				$generated_slug_requested     = in_array( 'generated_slug', $fields, true );
+
+				if ( $permalink_template_requested || $generated_slug_requested ) {
+					if ( ! function_exists( 'get_sample_permalink' ) ) {
+						require_once ABSPATH . 'wp-admin/includes/post.php';
+					}
+
+					$sample_permalink = get_sample_permalink( $product->get_id(), $product->get_name(), '' );
+
+					// Add permalink_template if needed.
+					if ( $permalink_template_requested ) {
+						$data['permalink_template'] = $sample_permalink[0];
+					}
+
+					// Add generated_slug if needed.
+					if ( $generated_slug_requested ) {
+						$data['generated_slug'] = $sample_permalink[1];
+					}
+				}
+			}
 		}
+
 		return $data;
 	}
 }

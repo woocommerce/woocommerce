@@ -1,5 +1,8 @@
 name: Run code sniff on PR
-on: pull_request
+on:
+    pull_request:
+        paths-ignore:
+            - '**/changelog/**'
 defaults:
     run:
         shell: bash
@@ -8,11 +11,16 @@ concurrency:
     cancel-in-progress: true
 env:
     PHPCS: ./plugins/woocommerce/vendor/bin/phpcs # Run WooCommerce phpcs setup in phpcs-changed instead of default
+
+permissions: {}
+
 jobs:
     test:
         name: Code sniff (PHP 7.4, WP Latest)
         timeout-minutes: 15
         runs-on: ubuntu-20.04
+        permissions:
+            contents: read
         steps:
             - uses: actions/checkout@v3
               with:

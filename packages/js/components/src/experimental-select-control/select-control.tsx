@@ -7,6 +7,7 @@ import {
 	UseComboboxState,
 	UseComboboxStateChangeOptions,
 	useMultipleSelection,
+	GetInputPropsOptions,
 } from 'downshift';
 import {
 	useState,
@@ -65,6 +66,7 @@ export type SelectControlProps< ItemType > = {
 	selected: ItemType | ItemType[] | null;
 	className?: string;
 	disabled?: boolean;
+	inputProps?: GetInputPropsOptions;
 	suffix?: JSX.Element | null;
 	/**
 	 * This is a feature already implemented in downshift@7.0.0 through the
@@ -119,6 +121,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 	selected,
 	className,
 	disabled,
+	inputProps = {},
 	suffix = <SuffixIcon icon={ search } />,
 	__experimentalOpenMenuOnFocus = false,
 }: SelectControlProps< ItemType > ) {
@@ -268,6 +271,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 					onBlur: () => setIsFocused( false ),
 					placeholder,
 					disabled,
+					...inputProps,
 				} ) }
 				suffix={ suffix }
 			>

@@ -362,7 +362,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		$result = $method->invoke( $reviews );
 
 		foreach ( $expected_result as $i => $expected_message ) {
-			$this->assertContains( $expected_message, $result[ $i ] );
+			$this->assertStringContainsString( $expected_message, $result[ $i ] );
 		}
 	}
 

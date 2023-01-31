@@ -2,36 +2,47 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { recordEvent } from '@woocommerce/tracks';
-import { useEffect, useRef } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
-import { Spinner, FormRef } from '@woocommerce/components';
 import {
+	EXPERIMENTAL_PRODUCT_FORM_STORE_NAME,
+	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	PartialProduct,
 	Product,
 	PRODUCTS_STORE_NAME,
 	WCDataSelector,
 } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
+import { useEffect, useRef } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+import { Spinner, FormRef } from '@woocommerce/components';
 import { useParams } from 'react-router-dom';
 /**
  * Internal dependencies
  */
-import { ProductFormLayout } from './layout/product-form-layout';
-import './product-page.scss';
 import { ProductForm } from './product-form';
+import { ProductFormLayout } from './layout/product-form-layout';
+import { ProductVariationForm } from './product-variation-form';
+import './product-page.scss';
+import './fills';
 
 const EditProductPage: React.FC = () => {
-	const { productId } = useParams();
+	const { productId, variationId } = useParams();
+	const isProductVariation = !! variationId;
 	const previousProductRef = useRef< PartialProduct >();
 	const formRef = useRef< FormRef< Partial< Product > > >( null );
-	const { product, isLoading, isPendingAction } = useSelect(
+	const { product, isLoading, isPendingAction, productVariation } = useSelect(
 		( select: WCDataSelector ) => {
 			const {
 				getProduct,
-				hasFinishedResolution,
+				hasFinishedResolution: hasProductFinishedResolution,
 				isPending,
 				getPermalinkParts,
 			} = select( PRODUCTS_STORE_NAME );
+			const { hasFinishedResolution: hasProductFormFinishedResolution } =
+				select( EXPERIMENTAL_PRODUCT_FORM_STORE_NAME );
+			const {
+				getProductVariation,
+				hasFinishedResolution: hasProductVariationFinishedResolution,
+			} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 			if ( productId ) {
 				const retrievedProduct = getProduct(
 					parseInt( productId, 10 ),
@@ -45,13 +56,27 @@ const EditProductPage: React.FC = () => {
 						permalinkParts && retrievedProduct
 							? retrievedProduct
 							: undefined,
+					productVariation:
+						isProductVariation &&
+						getProductVariation( {
+							id: parseInt( variationId, 10 ),
+							product_id: parseInt( productId, 10 ),
+						} ),
 					isLoading:
-						! hasFinishedResolution( 'getProduct', [
+						! hasProductFinishedResolution( 'getProduct', [
 							parseInt( productId, 10 ),
 						] ) ||
-						! hasFinishedResolution( 'getPermalinkParts', [
+						! hasProductFinishedResolution( 'getPermalinkParts', [
 							parseInt( productId, 10 ),
-						] ),
+						] ) ||
+						! (
+							isProductVariation &&
+							hasProductVariationFinishedResolution(
+								'getProductVariation',
+								[ parseInt( variationId, 10 ) ]
+							)
+						) ||
+						! hasProductFormFinishedResolution( 'getProductForm' ),
 					isPendingAction:
 						isPending( 'createProduct' ) ||
 						isPending(
@@ -101,7 +126,7 @@ const EditProductPage: React.FC = () => {
 				product.status === 'trash' &&
 				! isPendingAction &&
 				! wasDeletedUsingAction && (
-					<ProductFormLayout>
+					<ProductFormLayout id="error">
 						<div className="woocommerce-edit-product__error">
 							{ __(
 								'You cannot edit this item because it is in the Trash. Please restore it and try again.',
@@ -110,7 +135,16 @@ const EditProductPage: React.FC = () => {
 						</div>
 					</ProductFormLayout>
 				) }
-			{ product &&
+			{ window.wcAdminFeatures[ 'product-variation-management' ] &&
+				productVariation &&
+				product && (
+					<ProductVariationForm
+						product={ product }
+						productVariation={ productVariation }
+					/>
+				) }
+			{ ! isProductVariation &&
+				product &&
 				( product.status !== 'trash' || wasDeletedUsingAction ) && (
 					<ProductForm formRef={ formRef } product={ product } />
 				) }

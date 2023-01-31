@@ -7,6 +7,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { waitUntilElementIsPresent } from './utils';
+import { addCustomerEffortScoreExitPageListener } from '~/customer-effort-score-tracks/customer-effort-score-exit-page';
 
 /**
  * Get the product data.
@@ -444,3 +445,51 @@ export const initProductScreenTracks = () => {
 			} );
 	} );
 };
+
+export function addExitPageListener( pageId: string ) {
+	let productChanged = false;
+	let triggeredDelete = false;
+
+	const deleteButton = document.querySelector( '#submitpost a.submitdelete' );
+
+	if ( deleteButton ) {
+		deleteButton.addEventListener( 'click', function () {
+			triggeredDelete = true;
+		} );
+	}
+
+	function checkIfSubmitButtonsDisabled() {
+		const submitButtonSelectors = [
+			'#submitpost [type="submit"]',
+			'#submitpost #post-preview',
+		];
+		let isDisabled = false;
+		for ( const sel of submitButtonSelectors ) {
+			document.querySelectorAll( sel ).forEach( ( element ) => {
+				if ( element.classList.contains( 'disabled' ) ) {
+					isDisabled = true;
+				}
+			} );
+		}
+		return isDisabled;
+	}
+	window.addEventListener( 'beforeunload', function ( event ) {
+		// Check if button disabled or triggered delete to see if user saved or deleted the product instead.
+		if ( checkIfSubmitButtonsDisabled() || triggeredDelete ) {
+			productChanged = false;
+			triggeredDelete = false;
+			return;
+		}
+		const editor = window.tinymce && window.tinymce.get( 'content' );
+
+		if ( window.wp.autosave ) {
+			productChanged = window.wp.autosave.server.postChanged();
+		} else if ( editor ) {
+			productChanged = ! editor.isHidden() && editor.isDirty();
+		}
+	} );
+
+	addCustomerEffortScoreExitPageListener( pageId, () => {
+		return productChanged;
+	} );
+}

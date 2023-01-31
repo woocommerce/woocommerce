@@ -22,11 +22,19 @@ export const scanForChanges = async (
 	skipSchemaCheck: boolean,
 	source: string,
 	base: string,
-	outputStyle: string
+	outputStyle: string,
+	clonedPath?: string
 ) => {
 	Logger.startTask( `Making temporary clone of ${ source }...` );
-	const tmpRepoPath = await cloneRepo( source );
-	Logger.endTask();
+
+	const tmpRepoPath =
+		typeof clonedPath !== 'undefined'
+			? clonedPath
+			: await cloneRepo( source );
+
+	Logger.notice(
+		`Temporary clone of ${ source } created at ${ tmpRepoPath }`
+	);
 
 	Logger.notice(
 		`Temporary clone of ${ source } created at ${ tmpRepoPath }`
@@ -36,7 +44,8 @@ export const scanForChanges = async (
 		tmpRepoPath,
 		base,
 		compareVersion,
-		Logger.error
+		Logger.error,
+		[ 'tools' ]
 	);
 
 	// Only checkout the compare version if we're in CLI mode.
@@ -49,11 +58,19 @@ export const scanForChanges = async (
 	const pluginPath = join( tmpRepoPath, 'plugins/woocommerce' );
 
 	Logger.startTask( 'Detecting hook changes...' );
-	const hookChanges = scanForHookChanges( diff, sinceVersion, tmpRepoPath );
+	const hookChanges = await scanForHookChanges(
+		diff,
+		sinceVersion,
+		tmpRepoPath
+	);
 	Logger.endTask();
 
 	Logger.startTask( 'Detecting template changes...' );
-	const templateChanges = scanForTemplateChanges( diff, sinceVersion );
+	const templateChanges = await scanForTemplateChanges(
+		diff,
+		sinceVersion,
+		tmpRepoPath
+	);
 	Logger.endTask();
 
 	Logger.startTask( 'Detecting DB changes...' );

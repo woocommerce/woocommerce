@@ -417,7 +417,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Gets order grand total. incl. taxes. Used in gateways.
+	 * Gets order grand total including taxes, shipping cost, fees, and coupon discounts. Used in gateways.
 	 *
 	 * @param  string $context View or edit context.
 	 * @return float
@@ -458,7 +458,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Gets order subtotal.
+	 * Gets order subtotal. Order subtotal is the price of all items excluding taxes, fees, shipping cost, and coupon discounts.
+	 * If sale price is set on an item, the subtotal will include this sale discount. E.g. a product with a regular
+	 * price of $100 bought at a 50% discount will represent $50 of the subtotal for the order.
 	 *
 	 * @return float
 	 */

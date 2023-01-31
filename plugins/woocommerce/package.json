@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce",
 	"title": "WooCommerce",
-	"version": "7.3.0",
+	"version": "7.5.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -108,5 +108,8 @@
 		"> 0.1%",
 		"ie 8",
 		"ie 9"
-	]
+	],
+	"dependencies": {
+		"@wordpress/browserslist-config": "^5.7.0"
+	}
 }

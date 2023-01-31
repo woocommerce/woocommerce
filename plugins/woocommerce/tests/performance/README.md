@@ -76,11 +76,11 @@ base_url | base URL of the test environment | yes `__ENV.URL`
 base_host | base host of the test environment (for use in headers) | yes `__ENV.HOST`
 admin_username | username for admin user | yes `__ENV.A_USER`
 admin_password | password for admin user | yes `__ENV.A_PW`
-admin_acc_login | set to true if site needs to use my account for admin login | yes `__ENV.A_PW`
+admin_acc_login | set to true if site needs to use my account for admin login | yes `__ENV.A_ACC_LOGIN`
 customer_username | username for customer user | yes `__ENV.C_USER`
 customer_password | password for customer user | yes `__ENV.C_PW`
 customer_user_id | user id for customer user | yes `__ENV.C_UID`
-cot_status | set to true if site is using order tables | yes `__ENV.C_PW`
+cot_status | set to true if site is using order tables | yes `__ENV.COT`
 admin_orders_base_url | url part for order urls when posts table is used | no
 cot_admin_orders_base_url | url part for order urls when orders table is used | no
 addresses_customer_billing_* | billing address details for existing customer user | no

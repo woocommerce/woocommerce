@@ -1,6 +1,13 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
+const randomNum = new Date().getTime().toString();
+const customer = {
+	username: `customer${ randomNum }`,
+	password: 'password',
+	email: `customer${ randomNum }@woocommercecoree2etestsuite.com`,
+};
+
 test.describe( 'Customer can pay for their order through My Account', () => {
 	let productId, orderId;
 
@@ -21,6 +28,10 @@ test.describe( 'Customer can pay for their order through My Account', () => {
 			.then( ( response ) => {
 				productId = response.data.id;
 			} );
+		// create customer
+		await api
+			.post( 'customers', customer )
+			.then( ( response ) => ( customer.id = response.data.id ) );
 		// create an order
 		await api
 			.post( 'orders', {
@@ -28,7 +39,7 @@ test.describe( 'Customer can pay for their order through My Account', () => {
 				billing: {
 					first_name: 'Jane',
 					last_name: 'Smith',
-					email: 'customer@woocommercecoree2etestsuite.com',
+					email: customer.email,
 				},
 				line_items: [
 					{
@@ -42,7 +53,7 @@ test.describe( 'Customer can pay for their order through My Account', () => {
 			} );
 		// once the order is created, assign it to our existing customer user
 		await api.put( `orders/${ orderId }`, {
-			customer_id: 2, // should be safe to use this ID. Saves an API call to retrieve.
+			customer_id: customer.id,
 		} );
 		// enable COD payment
 		await api.put( 'payment_gateways/cod', {
@@ -61,6 +72,7 @@ test.describe( 'Customer can pay for their order through My Account', () => {
 			force: true,
 		} );
 		await api.delete( `orders/${ orderId }`, { force: true } );
+		await api.delete( `customers/${ customer.id }`, { force: true } );
 		await api.put( 'payment_gateways/cod', {
 			enabled: false,
 		} );
@@ -71,8 +83,8 @@ test.describe( 'Customer can pay for their order through My Account', () => {
 	} ) => {
 		await page.goto( 'my-account/orders/' );
 		// sign in as the "customer" user
-		await page.fill( '#username', 'customer' );
-		await page.fill( '#password', 'password' );
+		await page.fill( '#username', customer.username );
+		await page.fill( '#password', customer.password );
 		await page.click( 'text=Log in' );
 
 		await page.click( 'a.pay' );

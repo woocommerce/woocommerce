@@ -74,14 +74,19 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 
 	return (
 		<CustomerFeedbackModal
-			title={ visibleCESModalData.label }
+			title={ visibleCESModalData.title }
 			firstQuestion={ visibleCESModalData.firstQuestion }
 			secondQuestion={ visibleCESModalData.secondQuestion }
 			recordScoreCallback={ ( ...args ) => {
 				recordScore( ...args );
 				hideCesModal();
+				visibleCESModalData.props?.onRecordScore?.();
 			} }
-			onCloseModal={ () => hideCesModal() }
+			onCloseModal={ () => {
+				visibleCESModalData.props?.onCloseModal?.();
+				hideCesModal();
+			} }
+			shouldShowComments={ visibleCESModalData.props?.shouldShowComments }
 		/>
 	);
 };

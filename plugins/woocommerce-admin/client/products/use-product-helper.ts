@@ -12,17 +12,22 @@ import {
 	PRODUCTS_STORE_NAME,
 	ReadOnlyProperties,
 	productReadOnlyProperties,
+	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	ProductVariation,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
+import { AUTO_DRAFT_NAME } from './utils/get-product-title';
 import { CurrencyContext } from '../lib/currency-context';
+import { getDerivedProductType } from './utils/get-derived-product-type';
 import {
 	NUMBERS_AND_DECIMAL_SEPARATOR,
 	ONLY_ONE_DECIMAL_SEPARATOR,
 } from './constants';
+import { ProductVariationsOrder } from './hooks/use-variations-order';
 
 function removeReadonlyProperties(
 	product: Product
@@ -51,6 +56,11 @@ export function useProductHelper() {
 	const { createProduct, updateProduct, deleteProduct } = useDispatch(
 		PRODUCTS_STORE_NAME
 	) as ProductsStoreActions;
+	const {
+		batchUpdateProductVariations,
+		invalidateResolutionForStoreSelector,
+	} = useDispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+
 	const { createNotice } = useDispatch( 'core/notices' );
 	const [ isDeleting, setIsDeleting ] = useState( false );
 	const [ updating, setUpdating ] = useState( {
@@ -62,8 +72,8 @@ export function useProductHelper() {
 	/**
 	 * Create product with status.
 	 *
-	 * @param {Product} product the product to be created.
-	 * @param {string}  status the product status.
+	 * @param {Product} product    the product to be created.
+	 * @param {string}  status     the product status.
 	 * @param {boolean} skipNotice if the notice should be skipped (default: false).
 	 * @return {Promise<Product>} Returns a promise with the created product.
 	 */
@@ -80,6 +90,7 @@ export function useProductHelper() {
 			return createProduct( {
 				...product,
 				status,
+				type: getDerivedProductType( product ),
 			} ).then(
 				( newProduct ) => {
 					if ( ! skipNotice ) {
@@ -129,12 +140,35 @@ export function useProductHelper() {
 		[ updating ]
 	);
 
+	async function updateVariationsOrder(
+		productId: number,
+		variationsOrder?: { [ page: number ]: { [ id: number ]: number } }
+	) {
+		if ( ! variationsOrder ) return undefined;
+
+		return batchUpdateProductVariations<
+			Promise< { update: ProductVariation[] } >
+		>(
+			{
+				product_id: productId,
+			},
+			{
+				update: Object.values( variationsOrder )
+					.flatMap( Object.entries )
+					.map( ( [ id, menu_order ] ) => ( {
+						id,
+						menu_order,
+					} ) ),
+			}
+		);
+	}
+
 	/**
 	 * Update product with status.
 	 *
-	 * @param {number} productId the product id to be updated.
-	 * @param {Product} product the product to be updated.
-	 * @param {string}  status the product status.
+	 * @param {number}  productId  the product id to be updated.
+	 * @param {Product} product    the product to be updated.
+	 * @param {string}  status     the product status.
 	 * @param {boolean} skipNotice if the notice should be skipped (default: false).
 	 * @return {Promise<Product>} Returns a promise with the updated product.
 	 */
@@ -152,44 +186,58 @@ export function useProductHelper() {
 			return updateProduct( productId, {
 				...product,
 				status,
-			} ).then(
-				( updatedProduct ) => {
-					if ( ! skipNotice ) {
-						const noticeContent =
-							product.status === 'draft' &&
-							updatedProduct.status === 'publish'
-								? __( 'Product published.', 'woocommerce' )
-								: __(
-										'Product successfully updated.',
-										'woocommerce'
-								  );
-						createNotice( 'success', `🎉‎ ${ noticeContent }`, {
-							actions: getNoticePreviewActions(
-								updatedProduct.status,
-								updatedProduct.permalink
-							),
+				type: getDerivedProductType( product ),
+			} )
+				.then( async ( updatedProduct ) =>
+					updateVariationsOrder(
+						updatedProduct.id,
+						( product as ProductVariationsOrder ).variationsOrder
+					)
+						.then( () =>
+							invalidateResolutionForStoreSelector(
+								'getProductVariations'
+							)
+						)
+						.then( () => updatedProduct )
+				)
+				.then(
+					( updatedProduct ) => {
+						if ( ! skipNotice ) {
+							const noticeContent =
+								product.status === 'draft' &&
+								updatedProduct.status === 'publish'
+									? __( 'Product published.', 'woocommerce' )
+									: __(
+											'Product successfully updated.',
+											'woocommerce'
+									  );
+							createNotice( 'success', `🎉‎ ${ noticeContent }`, {
+								actions: getNoticePreviewActions(
+									updatedProduct.status,
+									updatedProduct.permalink
+								),
+							} );
+						}
+						setUpdating( {
+							...updating,
+							[ status ]: false,
 						} );
+						return updatedProduct;
+					},
+					( error ) => {
+						if ( ! skipNotice ) {
+							createNotice(
+								'error',
+								__( 'Failed to update product.', 'woocommerce' )
+							);
+						}
+						setUpdating( {
+							...updating,
+							[ status ]: false,
+						} );
+						return error;
 					}
-					setUpdating( {
-						...updating,
-						[ status ]: false,
-					} );
-					return updatedProduct;
-				},
-				( error ) => {
-					if ( ! skipNotice ) {
-						createNotice(
-							'error',
-							__( 'Failed to update product.', 'woocommerce' )
-						);
-					}
-					setUpdating( {
-						...updating,
-						[ status ]: false,
-					} );
-					return error;
-				}
-			);
+				);
 		},
 		[ updating ]
 	);
@@ -198,7 +246,7 @@ export function useProductHelper() {
 	 * Creates a copy of the given product with the given status.
 	 *
 	 * @param {Product} product the product to be copied.
-	 * @param {string}  status the product status.
+	 * @param {string}  status  the product status.
 	 * @return {Promise<Product>} promise with the newly created and copied product.
 	 */
 	const copyProductWithStatus = useCallback(
@@ -206,7 +254,7 @@ export function useProductHelper() {
 			return createProductWithStatus(
 				removeReadonlyProperties( {
 					...product,
-					name: ( product.name || 'AUTO-DRAFT' ) + ' - Copy',
+					name: ( product.name || AUTO_DRAFT_NAME ) + ' - Copy',
 				} ),
 				status
 			);

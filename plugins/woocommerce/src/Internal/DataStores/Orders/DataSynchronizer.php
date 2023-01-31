@@ -426,7 +426,7 @@ WHERE
 	 * @param WP_Post $post The deleted post.
 	 */
 	private function handle_deleted_post( $postid, $post ): void {
-		if ( 'shop_order' === $post->post_type && ! $this->custom_orders_table_is_authoritative() && $this->data_sync_is_enabled() ) {
+		if ( 'shop_order' === $post->post_type && $this->data_sync_is_enabled() ) {
 			$this->data_store->delete_order_data_from_custom_order_tables( $postid );
 		}
 	}

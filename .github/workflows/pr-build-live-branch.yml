@@ -1,16 +1,22 @@
 name: Build Live Branch
 on:
     pull_request:
+        paths-ignore:
+            - '**/changelog/**'
 
 concurrency:
     # Cancel concurrent jobs on pull_request but not push, by including the run_id in the concurrency group for the latter.
     group: build-${{ github.event_name == 'push' && github.run_id || 'pr' }}-${{ github.ref }}
     cancel-in-progress: true
 
+permissions: {}
+
 jobs:
     build:
         if: github.repository_owner == 'woocommerce'
         runs-on: ubuntu-20.04
+        permissions:
+            contents: read
         steps:
             - uses: actions/checkout@v3
 

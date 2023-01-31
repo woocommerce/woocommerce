@@ -97,61 +97,6 @@ $tt2-gray: #f7f7f7;
 		margin-bottom: 1rem;
 	}
 
-	.woocommerce-message,
-	.woocommerce-error,
-	.woocommerce-info {
-		background: $tt2-gray;
-		border-top-color: var(--wp--preset--color--primary);
-		border-top-style: solid;
-		padding: 1rem 1.5rem;
-		margin-bottom: 2rem;
-		list-style: none;
-		font-size: var(--wp--preset--font-size--small);
-
-		&[role="alert"]::before {
-			color: var(--wp--preset--color--background);
-			background: var(--wp--preset--color--primary);
-			border-radius: 5rem;
-			font-size: 1rem;
-			padding-left: 3px;
-			padding-right: 3px;
-			margin-right: 1rem;
-		}
-
-		a.button {
-			margin-top: -0.5rem;
-			border: none;
-			background: #ebe9eb;
-			color: var(--wp--preset--color--black);
-			padding: 0.5rem 1rem;
-
-			&:hover,
-			&:visited {
-				color: var(--wp--preset--color--black);
-			}
-		}
-	}
-
-	.woocommerce-error[role="alert"] {
-		margin: 0;
-
-		&::before {
-			content: "X";
-			padding-right: 4px;
-			padding-left: 4px;
-		}
-
-		li {
-			display: inline-block;
-		}
-	}
-
-	.woocommerce-message {
-		&[role="alert"]::before {
-			content: "\2713";
-		}
-	}
-
 	.woocommerce-NoticeGroup-checkout {
 		ul.woocommerce-error[role="alert"] {
 			&::before {
@@ -824,7 +769,6 @@ $tt2-gray: #f7f7f7;
 
 		#coupon_code,
 		.actions .button {
-			height: auto;
 			margin-right: 0;
 		}
 
@@ -1211,5 +1155,60 @@ $tt2-gray: #f7f7f7;
 		float: right;
 		margin-right: 4rem;
 		color: inherit;
+	}
+}
+
+.woocommerce-message,
+.woocommerce-error,
+.woocommerce-info {
+	background: $tt2-gray;
+	border-top-color: var(--wp--preset--color--primary);
+	border-top-style: solid;
+	padding: 1rem 1.5rem;
+	margin-bottom: 2rem;
+	list-style: none;
+	font-size: var(--wp--preset--font-size--small);
+
+	&[role="alert"]::before {
+		color: var(--wp--preset--color--background);
+		background: var(--wp--preset--color--primary);
+		border-radius: 5rem;
+		font-size: 1rem;
+		padding-left: 3px;
+		padding-right: 3px;
+		margin-right: 1rem;
+	}
+
+	a.button {
+		margin-top: -0.5rem;
+		border: none;
+		background: #ebe9eb;
+		color: var(--wp--preset--color--black);
+		padding: 0.5rem 1rem;
+
+		&:hover,
+		&:visited {
+			color: var(--wp--preset--color--black);
+		}
+	}
+}
+
+.woocommerce-error[role="alert"] {
+	margin: 0;
+
+	&::before {
+		content: "X";
+		padding-right: 4px;
+		padding-left: 4px;
+	}
+
+	li {
+		display: inline-block;
+	}
+}
+
+.woocommerce-message {
+	&[role="alert"]::before {
+		content: "\2713";
 	}
 }

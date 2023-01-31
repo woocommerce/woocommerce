@@ -1,6 +1,4 @@
 .woocommerce-marketing-card-header-title {
-	font-size: 20px;
-	font-weight: 400;
-	line-height: 28px;
-	letter-spacing: 0;
+	@include font-size( 20 );
+	line-height: 1.4;
 }

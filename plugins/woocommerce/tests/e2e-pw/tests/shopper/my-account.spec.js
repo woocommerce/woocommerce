@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+const { customer } = require( '../../test-data/data' );
 
 const pages = [
 	[ 'Orders', 'my-account/orders' ],
@@ -18,7 +19,7 @@ test.describe( 'My account page', () => {
 		);
 		await expect(
 			page.locator( 'div.woocommerce-MyAccount-content > p >> nth=0' )
-		).toContainText( 'Jane Smith' );
+		).toContainText( `${ customer.first_name } ${ customer.last_name }` );
 
 		// assert that navigation is visible
 		await expect(

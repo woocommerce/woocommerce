@@ -28,7 +28,7 @@ export const PRODUCT_STATUS_LABELS = {
  * Get the product status for use in the header.
  *
  * @param  product Product instance.
- * @return {PRODUCT_STATUS_KEYS} Product staus key.
+ * @return {PRODUCT_STATUS_KEYS} Product status key.
  */
 export const getProductStatus = (
 	product: PartialProduct | undefined

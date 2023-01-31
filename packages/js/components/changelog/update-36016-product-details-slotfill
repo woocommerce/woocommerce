@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Adding ProductSectionLayout component and changing default order for WooProductSectionItem component.

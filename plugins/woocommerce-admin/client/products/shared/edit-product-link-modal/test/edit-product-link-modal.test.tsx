@@ -51,7 +51,7 @@ describe( 'EditProductLinkModal', () => {
 			/>
 		);
 		userEvent.type(
-			getByLabelText( 'wootesting.com/product/test' ),
+			getByLabelText( 'Product link' ),
 			'{esc}{space}update',
 			{}
 		);
@@ -76,7 +76,7 @@ describe( 'EditProductLinkModal', () => {
 			/>
 		);
 		userEvent.type(
-			getByLabelText( 'wootesting.com/product/product' ),
+			getByLabelText( 'Product link' ),
 			'{esc}{space}update',
 			{}
 		);

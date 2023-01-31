@@ -5,6 +5,8 @@
  * @package WooCommerce\Tracks
  */
 
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -33,6 +35,7 @@ class WC_Settings_Tracking {
 		add_action( 'woocommerce_settings_page_init', array( $this, 'track_settings_page_view' ) );
 		add_action( 'woocommerce_update_option', array( $this, 'add_option_to_list' ) );
 		add_action( 'woocommerce_update_options', array( $this, 'send_settings_change_event' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_settings_tracking_scripts' ) );
 	}
 
 	/**
@@ -117,5 +120,23 @@ class WC_Settings_Tracking {
 		);
 
 		WC_Tracks::record_event( 'settings_view', $properties );
+	}
+
+	/**
+	 * Adds the tracking scripts for product setting pages.
+	 *
+	 * @param string $hook Page hook.
+	 */
+	public function possibly_add_settings_tracking_scripts( $hook ) {
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
+		if (
+			! isset( $_GET['page'] ) ||
+			'wc-settings' !== wp_unslash( $_GET['page'] )
+		) {
+			return;
+		}
+		// phpcs:enable
+
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'settings-tracking', false );
 	}
 }
