@@ -39,7 +39,7 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 	const [ slug, setSlug ] = useState(
 		product.slug || cleanForSlug( product.name )
 	);
-	const { resetForm, touched, errors } = useFormContext< Product >();
+	const { resetForm } = useFormContext< Product >();
 
 	const onSave = async () => {
 		recordEvent( 'product_update_slug', {
@@ -57,15 +57,11 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 		);
 		if ( updatedProduct && updatedProduct.id ) {
 			// only reset the updated slug and permalink fields.
-			resetForm(
-				{
-					...product,
-					slug: updatedProduct.slug,
-					permalink: updatedProduct.permalink,
-				},
-				touched,
-				errors
-			);
+			resetForm( {
+				...product,
+				slug: updatedProduct.slug,
+				permalink: updatedProduct.permalink,
+			} );
 			createNotice(
 				updatedProduct.slug === cleanForSlug( slug )
 					? 'success'
