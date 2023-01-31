@@ -882,6 +882,11 @@ class WC_Countries {
 							'hidden'   => true,
 						),
 					),
+					'BG' => array(
+						'state'      => array(
+							'required' => false,
+						),
+					),
 					'BH' => array(
 						'postcode' => array(
 							'required' => false,
@@ -1116,6 +1121,7 @@ class WC_Countries {
 						),
 						'state'      => array(
 							'label' => __( 'County', 'woocommerce' ),
+							'required' => false,
 						),
 					),
 					'ID' => array(
