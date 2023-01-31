@@ -17,6 +17,7 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { EditProductLinkModal } from '../shared/edit-product-link-modal';
+import { getPermalinkParts } from '../utils/get-permalink-parts';
 import { useProductAutoSave } from '../hooks/use-product-auto-save';
 
 export const ProductLinkField = () => {
@@ -26,17 +27,24 @@ export const ProductLinkField = () => {
 	const hasNameError = Boolean( touched.name ) && Boolean( errors.name );
 	const { isAutoSaving } = useProductAutoSave( [ 'name' ] );
 
-	const { permalinkPrefix, permalinkSuffix } = useSelect(
+	const { permalinkPrefix, permalinkSuffix, isResolving } = useSelect(
 		( select: WCDataSelector ) => {
-			const { getPermalinkParts } = select( PRODUCTS_STORE_NAME );
-			if ( values.id ) {
-				const parts = getPermalinkParts( values.id );
+			if ( ! values.id ) {
 				return {
-					permalinkPrefix: parts?.prefix,
-					permalinkSuffix: parts?.suffix,
+					permalinkPrefix: null,
+					permalinkSuffix: null,
 				};
 			}
-			return {};
+
+			const { getProduct, isResolving: isProductResolving } =
+				select( PRODUCTS_STORE_NAME );
+			const product = getProduct( values.id );
+			const parts = getPermalinkParts( product.permalink_template );
+			return {
+				permalinkPrefix: parts?.prefix,
+				permalinkSuffix: parts?.suffix,
+				isResolving: isProductResolving( 'getProduct', [ values.id ] ),
+			};
 		}
 	);
 
@@ -44,7 +52,7 @@ export const ProductLinkField = () => {
 		return null;
 	}
 
-	if ( isAutoSaving ) {
+	if ( isAutoSaving || isResolving ) {
 		return <Spinner />;
 	}
 

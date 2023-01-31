@@ -73,6 +73,7 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	name: string;
 	on_sale: boolean;
 	permalink: string;
+	permalink_template: string;
 	price: string;
 	price_html: string;
 	purchasable: boolean;
