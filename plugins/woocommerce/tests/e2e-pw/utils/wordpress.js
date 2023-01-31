@@ -1,6 +1,9 @@
 const axios = require( 'axios' ).default;
 
 const getPreviousTwoVersions = async () => {
+	const latestThreeMinorVersions = [];
+	const latestThreePatchVersions = [];
+
 	const response = await axios
 		.get( 'https://api.wordpress.org/core/version-check/1.7/' )
 		.catch( ( error ) => {
@@ -10,34 +13,30 @@ const getPreviousTwoVersions = async () => {
 
 	const allVersions = response.data.offers.map( ( { version } ) => version );
 
-	// Get the three latest X.Y versions
-	const latestThree_xy = [];
 	for ( const version of allVersions ) {
-		const this_xy = version.match( /^\d+.\d+/ )[ 0 ];
+		const this_minorVersion = version.match( /^\d+.\d+/ )[ 0 ];
 
-		if ( latestThree_xy.length === 3 ) {
+		if ( latestThreeMinorVersions.length === 3 ) {
 			break;
 		}
 
-		if ( latestThree_xy.includes( this_xy ) ) {
+		if ( latestThreeMinorVersions.includes( this_minorVersion ) ) {
 			continue;
 		}
 
-		latestThree_xy.push( this_xy );
+		latestThreeMinorVersions.push( this_minorVersion );
 	}
 
-	// Get the three latest X.Y.Z versions
-	const latestThree_xyz = [];
-	for ( const xy of latestThree_xy ) {
-		const this_xyz = allVersions.find( ( version ) =>
+	for ( const xy of latestThreeMinorVersions ) {
+		const this_patchVersion = allVersions.find( ( version ) =>
 			version.startsWith( xy )
 		);
 
-		latestThree_xyz.push( this_xyz );
+		latestThreePatchVersions.push( this_patchVersion );
 	}
 
 	// Get only the previous 2 versions
-	const prev_two = latestThree_xyz.slice( -2 );
+	const prev_two = latestThreePatchVersions.slice( -2 );
 
 	const matrix = {
 		version: [
