@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
-import { pick } from 'lodash';
+import { debounce, pick } from 'lodash';
 import { Product } from '@woocommerce/data';
-import { useEffect, useState } from '@wordpress/element';
+import { useDebounce } from '@wordpress/compose';
+import { useEffect, useMemo, useState } from '@wordpress/element';
 import { useFormContext } from '@woocommerce/components';
 
 /**
@@ -13,7 +14,7 @@ import { useProductHelper } from '../use-product-helper';
 
 export const useProductAutoSave = ( dependencies: ( keyof Product )[] ) => {
 	const [ isAutoSaving, setIsAutoSaving ] = useState( false );
-	const { isValidForm, values, resetForm } = useFormContext< Product >();
+	const { isValidForm, setValue, values } = useFormContext< Product >();
 	const { createOrUpdateProductWithStatus } = useProductHelper();
 
 	const dependencyValues = dependencies.reduce(
@@ -29,18 +30,11 @@ export const useProductAutoSave = ( dependencies: ( keyof Product )[] ) => {
 			return;
 		}
 
-		resetForm( {
-			...values,
-			id: updatedProduct.id,
-		} );
-
+		setValue( 'id', updatedProduct.id );
 		setIsAutoSaving( false );
 	};
 
-	useEffect( () => {
-		if ( ! values.id || ! isValidForm ) {
-			return;
-		}
+	const saveProduct = () => {
 		setIsAutoSaving( true );
 		createOrUpdateProductWithStatus(
 			values.id || null,
@@ -48,6 +42,15 @@ export const useProductAutoSave = ( dependencies: ( keyof Product )[] ) => {
 			values.status || 'auto-draft',
 			true
 		).then( handleProductUpdated );
+	};
+
+	const debouncedSaveProduct = useDebounce( saveProduct, 250 );
+
+	useEffect( () => {
+		if ( values.id || ! isValidForm || isAutoSaving ) {
+			return;
+		}
+		debouncedSaveProduct();
 	}, dependencyValues );
 
 	return {
