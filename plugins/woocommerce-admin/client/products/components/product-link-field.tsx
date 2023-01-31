@@ -22,8 +22,7 @@ import { useProductAutoSave } from '../hooks/use-product-auto-save';
 
 export const ProductLinkField = () => {
 	const { errors, touched, values } = useFormContext< Product >();
-	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
-		useState( false );
+	const [ isModalVisible, setIsModalVisible ] = useState( false );
 	const hasNameError = Boolean( touched.name ) && Boolean( errors.name );
 	const { isAutoSaving } = useProductAutoSave( [ 'name' ] );
 
@@ -74,18 +73,18 @@ export const ProductLinkField = () => {
 				</a>
 				<Button
 					variant="link"
-					onClick={ () => setShowProductLinkEditModal( true ) }
+					onClick={ () => setIsModalVisible( true ) }
 				>
 					{ __( 'Edit', 'woocommerce' ) }
 				</Button>
 			</span>
-			{ showProductLinkEditModal && (
+			{ isModalVisible && (
 				<EditProductLinkModal
 					permalinkPrefix={ permalinkPrefix || '' }
 					permalinkSuffix={ permalinkSuffix || '' }
 					product={ values }
-					onCancel={ () => setShowProductLinkEditModal( false ) }
-					onSaved={ () => setShowProductLinkEditModal( false ) }
+					onCancel={ () => setIsModalVisible( false ) }
+					onSaved={ () => setIsModalVisible( false ) }
 				/>
 			) }
 		</>
