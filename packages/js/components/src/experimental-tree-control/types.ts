@@ -17,7 +17,7 @@ export type TreeProps = React.DetailedHTMLProps<
 	level?: number;
 	items: LinkedTree[];
 	/**
-	 * Control the tree item expand from outside the tree.
+	 * Return if the tree item passed in should be expanded.
 	 * Cache the function to improve performance.
 	 *
 	 * @example
@@ -28,7 +28,7 @@ export type TreeProps = React.DetailedHTMLProps<
 	 * 	) }
 	 * />
 	 *
-	 * @param  item The tree item to check if should be expanded.
+	 * @param  item The tree item to determine if should be expanded.
 	 *
 	 * @see {@link LinkedTree}
 	 */
