@@ -38,7 +38,7 @@ const PRODUCT_SCHEDULED_SALE_SLUG = 'product-scheduled-sale';
 export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 	currencyInputProps,
 } ) => {
-	const { getInputProps, values, setValues } = useFormContext< Product >();
+	const { getInputProps, values, setValue } = useFormContext< Product >();
 
 	const { dateFormat, timeFormat } = useSelect( ( select ) => {
 		const { getOption } = select( OPTIONS_STORE_NAME );
@@ -95,15 +95,14 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 		setShowSaleSchedule( value );
 
 		if ( value ) {
-			setValues( {
-				date_on_sale_from_gmt: moment().startOf( 'day' ).toISOString(),
-				date_on_sale_to_gmt: null,
-			} as Product );
+			setValue(
+				'date_on_sale_from_gmt',
+				moment().startOf( 'day' ).toISOString()
+			);
+			setValue( 'date_on_sale_to_gmt', null );
 		} else {
-			setValues( {
-				date_on_sale_from_gmt: null,
-				date_on_sale_to_gmt: null,
-			} as Product );
+			setValue( 'date_on_sale_from_gmt', null );
+			setValue( 'date_on_sale_to_gmt', null );
 		}
 	};
 

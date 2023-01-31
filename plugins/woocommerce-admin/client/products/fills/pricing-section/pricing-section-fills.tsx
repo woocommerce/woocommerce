@@ -51,7 +51,7 @@ export const PricingSectionFills: React.FC< PricingSectionFillsType > = ( {
 	taxesSectionId,
 	taxesAdvancedSectionId,
 } ) => {
-	const { setValues, values } = useFormContext< Product >();
+	const { values, setValue } = useFormContext< Product >();
 	const { sanitizePrice } = useProductHelper();
 
 	const context = useContext( CurrencyContext );
@@ -88,14 +88,10 @@ export const PricingSectionFills: React.FC< PricingSectionFillsType > = ( {
 			);
 			const step = Number( event.currentTarget.step || '1' );
 			if ( event.code === 'ArrowUp' ) {
-				setValues( {
-					[ name ]: String( amount + step ),
-				} as unknown as Product );
+				setValue( name, String( amount + step ) );
 			}
 			if ( event.code === 'ArrowDown' ) {
-				setValues( {
-					[ name ]: String( amount - step ),
-				} as unknown as Product );
+				setValue( name, String( amount - step ) );
 			}
 		},
 	};
