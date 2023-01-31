@@ -122,7 +122,7 @@ The contract is established through props fed to the payment method components v
 
 ### Passing a value from the client through to server side payment processing
 
-In this example, lets pass some data from the BACs payment method to the server. Registration of BACS looks like this:
+In this example, lets pass some data from the BACS payment method to the server. Registration of BACS looks like this:
 
 ```js
 const bankTransferPaymentMethod = {
