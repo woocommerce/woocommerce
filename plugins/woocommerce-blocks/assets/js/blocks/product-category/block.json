@@ -8,11 +8,6 @@
 		"align": [ "wide", "full" ],
 		"html": false
 	},
-	"example": {
-		"attributes": {
-			"isPreview": true
-		}
-	},
 	"attributes": {
 		"columns": {
 			"type": "number",
@@ -21,7 +16,7 @@
 		"rows": {
 			"type": "number",
 			"default": 3
-		}, 
+		},
 		"alignButtons": {
 			"type": "boolean",
 			"default": false
