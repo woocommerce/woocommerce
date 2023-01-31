@@ -5,6 +5,10 @@ import { isValidElement, Fragment } from 'react';
 import { Slot, Fill } from '@wordpress/components';
 import { cloneElement, createElement } from '@wordpress/element';
 
+type ChildrenProps = {
+	order: number;
+};
+
 /**
  * Ordered fill item.
  *
@@ -25,7 +29,17 @@ function createOrderedChildren< T = Fill.Props, S = Record< string, unknown > >(
 			...injectProps,
 		} );
 	} else if ( isValidElement( children ) ) {
-		return cloneElement( children, { ...props, order, ...injectProps } );
+		if ( typeof children?.type === 'function' ) {
+			return cloneElement( children, {
+				...props,
+				order,
+				...injectProps,
+			} );
+		}
+		return cloneElement( children as React.ReactElement< ChildrenProps >, {
+			order,
+			...injectProps,
+		} );
 	}
 	throw Error( 'Invalid children type' );
 }
