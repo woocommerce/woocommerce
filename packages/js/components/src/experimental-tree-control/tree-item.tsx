@@ -18,11 +18,16 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 	props: TreeItemProps,
 	ref: React.ForwardedRef< HTMLLIElement >
 ) {
-	const { item, treeItemProps, headingProps, treeProps, expander } =
-		useTreeItem( {
-			...props,
-			ref,
-		} );
+	const {
+		item,
+		treeItemProps,
+		headingProps,
+		treeProps,
+		expander: { isExpanded, onToggleExpand },
+	} = useTreeItem( {
+		...props,
+		ref,
+	} );
 
 	return (
 		<li
@@ -43,13 +48,11 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				{ Boolean( item.children?.length ) && (
 					<div className="experimental-woocommerce-tree-item__expander">
 						<Button
-							icon={
-								expander.isExpanded ? chevronUp : chevronDown
-							}
-							onClick={ expander.onToggleExpand }
+							icon={ isExpanded ? chevronUp : chevronDown }
+							onClick={ onToggleExpand }
 							className="experimental-woocommerce-tree-item__expander"
 							aria-label={
-								expander.isExpanded
+								isExpanded
 									? __( 'Collapse', 'woocommerce' )
 									: __( 'Expand', 'woocommerce' )
 							}
@@ -58,7 +61,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				) }
 			</div>
 
-			{ Boolean( item.children.length ) && expander.isExpanded && (
+			{ Boolean( item.children.length ) && isExpanded && (
 				<Tree { ...treeProps } />
 			) }
 		</li>
