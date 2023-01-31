@@ -22,7 +22,6 @@ jobs:
         runs-on: ubuntu-20.04
         permissions:
           contents: read
-        if: success() || failure()
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-report
@@ -257,7 +256,7 @@ jobs:
         runs-on: ubuntu-20.04
         permissions:
           contents: read
-        needs: [test-plugins, k6-tests]
+        needs: [e2e-tests, test-plugins, k6-tests]
         steps:
             - name: Create dirs
               run: |
@@ -313,7 +312,7 @@ jobs:
             ( success() || failure() ) &&
             ! github.event.pull_request.head.repo.fork
         runs-on: ubuntu-20.04
-        needs: [test-plugins, k6-tests]
+        needs: [e2e-tests, test-plugins, k6-tests]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             RUN_ID: ${{ github.run_id }}
