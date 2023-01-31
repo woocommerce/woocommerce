@@ -45,8 +45,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 		<div className="woocommerce-marketing-overview-multichannel">
 			{ dataRegistered &&
 				dataRecommended &&
-				( dataRegistered.length >= 1 ||
-					dataRecommended.length >= 1 ) && (
+				( dataRegistered.length || dataRecommended.length ) && (
 					<Channels
 						registeredChannels={ dataRegistered }
 						recommendedChannels={ dataRecommended }
