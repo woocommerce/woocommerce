@@ -45,11 +45,6 @@ registerBlockType( 'woocommerce/product-on-sale', {
 			default: 'date',
 		},
 	},
-	example: {
-		attributes: {
-			isPreview: true,
-		},
-	},
 	transforms: {
 		from: [
 			{

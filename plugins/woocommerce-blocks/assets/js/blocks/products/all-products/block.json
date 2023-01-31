@@ -12,11 +12,6 @@
 		"html": false,
 		"multiple": false
 	},
-	"example": {
-		"attributes": {
-			"isPreview": true
-		}
-	},
 	"attributes": {
 		"columns": {
 			"type": "number"
