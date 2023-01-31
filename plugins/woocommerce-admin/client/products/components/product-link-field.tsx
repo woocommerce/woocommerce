@@ -17,7 +17,7 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { EditProductLinkModal } from '../shared/edit-product-link-modal';
-import { getPermalinkParts } from '../utils/get-permalink-parts';
+import { getProductPermalinkParts } from '../utils/get-product-permalink-parts';
 import { useProductAutoSave } from '../hooks/use-product-auto-save';
 
 export const ProductLinkField = () => {
@@ -39,7 +39,9 @@ export const ProductLinkField = () => {
 			const { getProduct, isResolving: isProductResolving } =
 				select( PRODUCTS_STORE_NAME );
 			const product = getProduct( values.id );
-			const parts = getPermalinkParts( product.permalink_template );
+			const parts = getProductPermalinkParts(
+				product.permalink_template
+			);
 			return {
 				permalinkPrefix: parts?.prefix,
 				permalinkSuffix: parts?.suffix,

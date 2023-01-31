@@ -1,12 +1,16 @@
-/**
- * Internal dependencies
- */
-import { getAdminSetting } from '~/utils/admin-settings';
-
 export const PERMALINK_PRODUCT_REGEX = /%(?:postname|pagename)%/;
 
-export const getProductPermalinkParts = () => {
-	return getAdminSetting( 'productPermalinkTemplate' ).split(
+export const getProductPermalinkParts = ( permalink_template: string | undefined ) => {
+	if ( ! permalink_template ) {
+		return {};
+	}
+
+	const [ prefix, suffix ] = permalink_template.split(
 		PERMALINK_PRODUCT_REGEX
 	);
+
+	return {
+		prefix,
+		suffix,
+	};
 };
