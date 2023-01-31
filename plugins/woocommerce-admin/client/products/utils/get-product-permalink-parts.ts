@@ -1,6 +1,8 @@
 export const PERMALINK_PRODUCT_REGEX = /%(?:postname|pagename)%/;
 
-export const getProductPermalinkParts = ( permalink_template: string | undefined ) => {
+export const getProductPermalinkParts = (
+	permalink_template: string | undefined
+) => {
 	if ( ! permalink_template ) {
 		return {};
 	}
