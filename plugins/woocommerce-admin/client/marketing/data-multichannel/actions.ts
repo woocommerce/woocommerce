@@ -2,18 +2,20 @@
  * Internal dependencies
  */
 import { TYPES } from './action-types';
-import { ApiFetchError, Channel, RecommendedChannel } from './types';
+import { ApiFetchError, RegisteredChannel, RecommendedChannel } from './types';
 
-export const receiveChannelsSuccess = ( channels: Array< Channel > ) => {
+export const receiveRegisteredChannelsSuccess = (
+	channels: Array< RegisteredChannel >
+) => {
 	return {
-		type: TYPES.RECEIVE_CHANNELS_SUCCESS,
+		type: TYPES.RECEIVE_REGISTERED_CHANNELS_SUCCESS,
 		payload: channels,
 	};
 };
 
-export const receiveChannelsError = ( error: ApiFetchError ) => {
+export const receiveRegisteredChannelsError = ( error: ApiFetchError ) => {
 	return {
-		type: TYPES.RECEIVE_CHANNELS_ERROR,
+		type: TYPES.RECEIVE_REGISTERED_CHANNELS_ERROR,
 		payload: error,
 		error: true,
 	};
@@ -37,8 +39,8 @@ export const receiveRecommendedChannelsError = ( error: ApiFetchError ) => {
 };
 
 export type Action = ReturnType<
-	| typeof receiveChannelsSuccess
-	| typeof receiveChannelsError
+	| typeof receiveRegisteredChannelsSuccess
+	| typeof receiveRegisteredChannelsError
 	| typeof receiveRecommendedChannelsSuccess
 	| typeof receiveRecommendedChannelsError
 >;

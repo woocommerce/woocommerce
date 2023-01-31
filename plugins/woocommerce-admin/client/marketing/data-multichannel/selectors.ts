@@ -3,8 +3,8 @@
  */
 import { State } from './types';
 
-export const getChannels = ( state: State ) => {
-	return state.channels;
+export const getRegisteredChannels = ( state: State ) => {
+	return state.registeredChannels;
 };
 
 export const getRecommendedChannels = ( state: State ) => {

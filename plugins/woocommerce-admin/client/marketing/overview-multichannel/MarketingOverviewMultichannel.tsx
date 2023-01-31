@@ -47,8 +47,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 			{ dataRegistered?.length && <Campaigns /> }
 			{ dataRegistered &&
 				dataRecommended &&
-				( dataRegistered.length >= 1 ||
-					dataRecommended.length >= 1 ) && (
+				( dataRegistered.length || dataRecommended.length ) && (
 					<Channels
 						registeredChannels={ dataRegistered }
 						recommendedChannels={ dataRecommended }
