@@ -37,15 +37,9 @@ registerBlockType( blockTypeName, {
 		align: [ 'wide', 'full' ],
 		html: false,
 	},
-	example: {
-		attributes: {
-			isPreview: true,
-		},
-	},
 	attributes: {
 		...sharedAttributes,
 	},
-
 	transforms: {
 		from: [
 			{

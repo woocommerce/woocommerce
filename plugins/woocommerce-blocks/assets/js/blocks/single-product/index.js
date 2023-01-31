@@ -29,11 +29,6 @@ const settings = {
 		align: [ 'wide', 'full' ],
 		html: false,
 	},
-	example: {
-		attributes: {
-			isPreview: true,
-		},
-	},
 	attributes,
 	edit,
 	save,
