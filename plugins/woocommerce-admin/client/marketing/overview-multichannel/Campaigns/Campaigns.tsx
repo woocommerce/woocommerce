@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import {
-	Button,
 	Card,
 	CardHeader,
 	CardBody,
