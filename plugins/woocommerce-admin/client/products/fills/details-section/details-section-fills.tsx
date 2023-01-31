@@ -6,7 +6,6 @@ import {
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 	__experimentalWooProductFieldItem as WooProductFieldItem,
 } from '@woocommerce/components';
-import { registerPlugin } from '@wordpress/plugins';
 import { __experimentalProductFieldSection as ProductFieldSection } from '@woocommerce/product-editor';
 
 /**

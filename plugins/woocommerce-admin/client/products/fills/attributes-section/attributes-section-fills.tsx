@@ -8,7 +8,6 @@ import {
 	Link,
 } from '@woocommerce/components';
 import { __experimentalProductSectionLayout as ProductSectionLayout } from '@woocommerce/product-editor';
-import { registerPlugin } from '@wordpress/plugins';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
