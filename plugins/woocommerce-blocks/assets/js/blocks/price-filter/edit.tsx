@@ -100,17 +100,10 @@ export default function ( {
 							"Show 'Apply filters' button",
 							'woo-gutenberg-products-block'
 						) }
-						help={
-							showFilterButton
-								? __(
-										'Products will only update when the button is clicked.',
-										'woo-gutenberg-products-block'
-								  )
-								: __(
-										'Products will update when the slider is moved.',
-										'woo-gutenberg-products-block'
-								  )
-						}
+						help={ __(
+							'Products will update when the button is clicked.',
+							'woo-gutenberg-products-block'
+						) }
 						checked={ showFilterButton }
 						onChange={ () =>
 							setAttributes( {
