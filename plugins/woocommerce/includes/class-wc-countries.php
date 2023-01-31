@@ -883,7 +883,7 @@ class WC_Countries {
 						),
 					),
 					'BG' => array(
-						'state'      => array(
+						'state' => array(
 							'required' => false,
 						),
 					),
@@ -1120,7 +1120,7 @@ class WC_Countries {
 							'priority' => 72,
 						),
 						'state'      => array(
-							'label' => __( 'County', 'woocommerce' ),
+							'label'    => __( 'County', 'woocommerce' ),
 							'required' => false,
 						),
 					),
