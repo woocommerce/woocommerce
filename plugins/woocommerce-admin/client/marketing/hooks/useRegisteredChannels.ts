@@ -13,7 +13,7 @@ import { STORE_KEY } from '~/marketing/data-multichannel/constants';
 import {
 	ApiFetchError,
 	RegisteredChannel as APIRegisteredChannel,
-	ChannelsState,
+	RegisteredChannelsState,
 } from '~/marketing/data-multichannel/types';
 
 type UseRegisteredChannels = {
@@ -69,12 +69,12 @@ export const useRegisteredChannels = (): UseRegisteredChannels => {
 	return useSelect( ( select ) => {
 		const { hasFinishedResolution, getRegisteredChannels } =
 			select( STORE_KEY );
-		const channels = getRegisteredChannels< ChannelsState >();
+		const state = getRegisteredChannels< RegisteredChannelsState >();
 
 		return {
 			loading: ! hasFinishedResolution( 'getRegisteredChannels' ),
-			data: channels.data?.map( convert ),
-			error: channels.error,
+			data: state.data?.map( convert ),
+			error: state.error,
 			refetch,
 		};
 	} );
