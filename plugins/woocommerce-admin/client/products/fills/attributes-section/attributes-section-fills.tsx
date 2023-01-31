@@ -8,7 +8,6 @@ import {
 	__experimentalProductSectionLayout as ProductSectionLayout,
 	Link,
 } from '@woocommerce/components';
-import { registerPlugin } from '@wordpress/plugins';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -19,7 +18,7 @@ import { ATTRIBUTES_SECTION_ID, TAB_GENERAL_ID, PLUGIN_ID } from '../constants';
 
 import './attributes-section.scss';
 
-const AttributesSection = () => (
+export const AttributesSectionFills = () => (
 	<>
 		<WooProductSectionItem
 			id={ ATTRIBUTES_SECTION_ID }
@@ -60,7 +59,7 @@ const AttributesSection = () => (
 			</ProductSectionLayout>
 		</WooProductSectionItem>
 		<WooProductFieldItem
-			id="attributes/add"
+			id="add"
 			sections={ [ { name: ATTRIBUTES_SECTION_ID, order: 1 } ] }
 			pluginId={ PLUGIN_ID }
 		>
@@ -68,9 +67,3 @@ const AttributesSection = () => (
 		</WooProductFieldItem>
 	</>
 );
-
-registerPlugin( 'wc-admin-product-editor-attributes-section', {
-	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
-	scope: 'woocommerce-product-editor',
-	render: () => <AttributesSection />,
-} );
