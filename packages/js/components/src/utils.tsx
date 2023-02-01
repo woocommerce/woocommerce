@@ -10,11 +10,51 @@ type ChildrenProps = {
 };
 
 /**
+ * Returns an object with the children and props that will be used by cloneElement.
+ *
+ * @param {Node}   children    - Node children.
+ * @param {number} order       - Node order.
+ * @param {Array}  props       - Fill props.
+ * @param {Object} injectProps - Injected props.
+ * @return {Node} Node.
+ */
+function getChildrenAndProps< T = Fill.Props, S = Record< string, unknown > >(
+	children: React.ReactNode,
+	order: number,
+	props: T,
+	injectProps?: S
+) {
+	if ( typeof children === 'function' ) {
+		return {
+			children: children( { ...props, order, ...injectProps } ),
+			props: { order, ...injectProps },
+		};
+	} else if ( isValidElement( children ) ) {
+		if ( typeof children?.type === 'function' ) {
+			return {
+				children,
+				props: {
+					...props,
+					order,
+					...injectProps,
+				},
+			};
+		}
+		return {
+			children: children as React.ReactElement< ChildrenProps >,
+			props: { order },
+		};
+	}
+	throw Error( 'Invalid children type' );
+}
+
+/**
  * Ordered fill item.
  *
- * @param {Node}   children - Node children.
- * @param {number} order    - Node order.
- * @param {Array}  props    - Fill props.
+ * @param {Node}   children    - Node children.
+ * @param {number} order       - Node order.
+ * @param {Array}  props       - Fill props.
+ * @param {Object} injectProps - Injected props.
  * @return {Node} Node.
  */
 function createOrderedChildren< T = Fill.Props, S = Record< string, unknown > >(
@@ -23,25 +63,9 @@ function createOrderedChildren< T = Fill.Props, S = Record< string, unknown > >(
 	props: T,
 	injectProps?: S
 ) {
-	if ( typeof children === 'function' ) {
-		return cloneElement( children( { ...props, order, ...injectProps } ), {
-			order,
-			...injectProps,
-		} );
-	} else if ( isValidElement( children ) ) {
-		if ( typeof children?.type === 'function' ) {
-			return cloneElement( children, {
-				...props,
-				order,
-				...injectProps,
-			} );
-		}
-		return cloneElement( children as React.ReactElement< ChildrenProps >, {
-			order,
-			...injectProps,
-		} );
-	}
-	throw Error( 'Invalid children type' );
+	const { children: childrenToRender, props: propsToRender } =
+		getChildrenAndProps( children, order, props, injectProps );
+	return cloneElement( childrenToRender, propsToRender );
 }
 export { createOrderedChildren };
 
