@@ -74,20 +74,6 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	abstract protected function render_attributes( $item, $attributes );
 
 	/**
-	 * Get the supports array for this block type.
-	 *
-	 * @return string[][];
-	 * @see $this->register_block_type()
-	 */
-	protected function get_block_type_supports() {
-		return array(
-			'color' => array(
-				'__experimentalDuotone' => '.wc-block-' . $this->block_name . '__background-image',
-			),
-		);
-	}
-
-	/**
 	 * Render the featured item block.
 	 *
 	 * @param array    $attributes Block attributes.
