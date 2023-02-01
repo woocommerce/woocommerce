@@ -17,7 +17,7 @@ type ChildrenProps = {
  * @param {number} order       - Node order.
  * @param {Array}  props       - Fill props.
  * @param {Object} injectProps - Injected props.
- * @return {Node} Node.
+ * @return {Object} Object with the keys: children and props.
  */
 function getChildrenAndProps< T = Fill.Props, S = Record< string, unknown > >(
 	children: React.ReactNode,
@@ -56,7 +56,7 @@ function getChildrenAndProps< T = Fill.Props, S = Record< string, unknown > >(
  * @param {number} order       - Node order.
  * @param {Array}  props       - Fill props.
  * @param {Object} injectProps - Injected props.
- * @return {Object} Object with the keys: children and props.
+ * @return {Node} Node.
  */
 function createOrderedChildren< T = Fill.Props, S = Record< string, unknown > >(
 	children: React.ReactNode,
