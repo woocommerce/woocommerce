@@ -7,10 +7,10 @@ import { useSelect, useDispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import { STORE_KEY } from '~/marketing/data/constants';
-import { Plugin } from '~/marketing/types';
+import { InstalledPlugin } from '~/marketing/types';
 
 export type UseInstalledPlugins = {
-	installedPlugins: Plugin[];
+	installedPlugins: InstalledPlugin[];
 	activatingPlugins: string[];
 	activateInstalledPlugin: ( slug: string ) => void;
 	loadInstalledPluginsAfterActivation: ( slug: string ) => void;

@@ -24,6 +24,7 @@ export function getProductFormSuccess( productForm: ProductForm ) {
 		fields: productForm.fields,
 		sections: productForm.sections,
 		subsections: productForm.subsections,
+		tabs: productForm.tabs,
 	};
 }
 

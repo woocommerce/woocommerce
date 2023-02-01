@@ -5,3 +5,7 @@ export function getCesSurveyQueue( state ) {
 export function getVisibleCESModalData( state ) {
 	return state.showCESModal ? state.cesModalData : undefined;
 }
+
+export function isProductMVPFeedbackModalVisible( state ) {
+	return state.showProductMVPFeedbackModal;
+}

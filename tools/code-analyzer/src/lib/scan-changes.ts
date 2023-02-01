@@ -22,11 +22,19 @@ export const scanForChanges = async (
 	skipSchemaCheck: boolean,
 	source: string,
 	base: string,
-	outputStyle: string
+	outputStyle: string,
+	clonedPath?: string
 ) => {
 	Logger.startTask( `Making temporary clone of ${ source }...` );
-	const tmpRepoPath = await cloneRepo( source );
-	Logger.endTask();
+
+	const tmpRepoPath =
+		typeof clonedPath !== 'undefined'
+			? clonedPath
+			: await cloneRepo( source );
+
+	Logger.notice(
+		`Temporary clone of ${ source } created at ${ tmpRepoPath }`
+	);
 
 	Logger.notice(
 		`Temporary clone of ${ source } created at ${ tmpRepoPath }`
@@ -58,7 +66,11 @@ export const scanForChanges = async (
 	Logger.endTask();
 
 	Logger.startTask( 'Detecting template changes...' );
-	const templateChanges = scanForTemplateChanges( diff, sinceVersion );
+	const templateChanges = await scanForTemplateChanges(
+		diff,
+		sinceVersion,
+		tmpRepoPath
+	);
 	Logger.endTask();
 
 	Logger.startTask( 'Detecting DB changes...' );

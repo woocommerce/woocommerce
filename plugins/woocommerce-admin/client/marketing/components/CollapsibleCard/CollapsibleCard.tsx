@@ -17,6 +17,7 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
+import { CardHeaderTitle } from '~/marketing/components';
 import './CollapsibleCard.scss';
 
 type CollapsibleCardProps = {
@@ -48,7 +49,7 @@ const CollapsibleCard: React.FC< CollapsibleCardProps > = ( {
 			) }
 		>
 			<CardHeader onClick={ handleClick }>
-				<div>{ header }</div>
+				<CardHeaderTitle>{ header }</CardHeaderTitle>
 				<Button
 					isSmall
 					icon={ collapsed ? chevronDown : chevronUp }
