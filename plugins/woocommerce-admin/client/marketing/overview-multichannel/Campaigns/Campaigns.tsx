@@ -135,7 +135,7 @@ export const Campaigns = () => {
 			<CardFooter className="woocommerce-marketing-campaigns-card-footer">
 				<Pagination
 					showPerPagePicker={ false }
-					perPage={ 5 }
+					perPage={ perPage }
 					page={ page }
 					total={ total }
 					onPageChange={ ( newPage: number ) => {
