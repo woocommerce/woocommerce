@@ -8,7 +8,7 @@
 	<exclude-pattern>languages/woo-gutenberg-products-block.php</exclude-pattern>
 
 	<!-- Configs -->
-	<config name="minimum_supported_wp_version" value="5.8" />
+	<config name="minimum_supported_wp_version" value="5.9" />
 	<config name="testVersion" value="7.2-" />
 
 	<!-- Rules -->
@@ -59,11 +59,11 @@
 	</rule>
 
 	<rule ref="Generic.Commenting.Todo">
-    	<exclude name="Generic.Commenting.Todo.TaskFound"/>
+		<exclude name="Generic.Commenting.Todo.TaskFound"/>
 		<exclude name="Generic.Commenting.Todo.CommentFound"/>
 	</rule>
 
 	<rule ref="Generic.Arrays.DisallowShortArraySyntax.Found">
-      <exclude-pattern>src/*</exclude-pattern>
-    </rule>
+		<exclude-pattern>src/*</exclude-pattern>
+	</rule>
 </ruleset>
