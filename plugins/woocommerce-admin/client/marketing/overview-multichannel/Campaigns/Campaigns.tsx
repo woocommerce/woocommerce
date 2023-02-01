@@ -132,17 +132,19 @@ export const Campaigns = () => {
 					];
 				} ) }
 			/>
-			<CardFooter className="woocommerce-marketing-campaigns-card-footer">
-				<Pagination
-					showPerPagePicker={ false }
-					perPage={ perPage }
-					page={ page }
-					total={ total }
-					onPageChange={ ( newPage: number ) => {
-						setPage( newPage );
-					} }
-				/>
-			</CardFooter>
+			{ total > perPage && (
+				<CardFooter className="woocommerce-marketing-campaigns-card-footer">
+					<Pagination
+						showPerPagePicker={ false }
+						perPage={ perPage }
+						page={ page }
+						total={ total }
+						onPageChange={ ( newPage: number ) => {
+							setPage( newPage );
+						} }
+					/>
+				</CardFooter>
+			) }
 		</Card>
 	);
 };
