@@ -23,7 +23,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 		treeItemProps,
 		headingProps,
 		treeProps,
-		expander: { isExpanded, onToggleExpand, getLabel },
+		expander: { isExpanded, onToggleExpand },
 		getLabel,
 	} = useTreeItem( {
 		...props,
