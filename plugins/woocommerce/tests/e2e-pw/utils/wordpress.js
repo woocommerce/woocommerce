@@ -1,52 +1,52 @@
 const axios = require( 'axios' ).default;
 
 const getPreviousTwoVersions = async () => {
-	const latestThreeMinorVersions = [];
-	const latestThreePatchVersions = [];
-
 	const response = await axios
-		.get( 'https://api.wordpress.org/core/version-check/1.7/' )
+		.get( 'http://api.wordpress.org/core/stable-check/1.0/' )
 		.catch( ( error ) => {
 			console.log( error.toJSON() );
 			throw new Error( error.message );
 		} );
 
-	const allVersions = response.data.offers.map( ( { version } ) => version );
+	const body = response.data;
+	const allVersions = Object.keys( body );
+	const previousStableVersions = allVersions
+		.filter( ( version ) => body[ version ] === 'outdated' )
+		.sort()
+		.reverse();
+	const latestMinorVersion = allVersions
+		.find( ( version ) => body[ version ] === 'latest' )
+		.match( /^\d+.\d+/ )[ 0 ];
 
-	for ( const version of allVersions ) {
-		const this_minorVersion = version.match( /^\d+.\d+/ )[ 0 ];
+	const prevTwo = [];
 
-		if ( latestThreeMinorVersions.length === 3 ) {
-			break;
-		}
-
-		if ( latestThreeMinorVersions.includes( this_minorVersion ) ) {
+	for ( let thisVersion of previousStableVersions ) {
+		if ( thisVersion.startsWith( latestMinorVersion ) ) {
 			continue;
 		}
 
-		latestThreeMinorVersions.push( this_minorVersion );
+		const hasNoPatchNumber = thisVersion.split( '.' ).length === 2;
+
+		if ( hasNoPatchNumber ) {
+			thisVersion = thisVersion.concat( '.0' );
+		}
+
+		prevTwo.push( thisVersion );
+
+		if ( prevTwo.length === 2 ) {
+			break;
+		}
 	}
-
-	for ( const xy of latestThreeMinorVersions ) {
-		const this_patchVersion = allVersions.find( ( version ) =>
-			version.startsWith( xy )
-		);
-
-		latestThreePatchVersions.push( this_patchVersion );
-	}
-
-	// Get only the previous 2 versions
-	const prev_two = latestThreePatchVersions.slice( -2 );
 
 	const matrix = {
 		version: [
 			{
-				number: prev_two[ 0 ],
+				number: prevTwo[ 0 ],
 				description: 'WP Latest-1',
 				env_description: 'wp-latest-1',
 			},
 			{
-				number: prev_two[ 1 ],
+				number: prevTwo[ 1 ],
 				description: 'WP Latest-2',
 				env_description: 'wp-latest-2',
 			},
