@@ -8,7 +8,7 @@ import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	PRODUCTS_STORE_NAME,
 } from '@woocommerce/data';
-import { useFormContext } from '@woocommerce/components';
+import { useFormContext2 } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -21,7 +21,7 @@ export function useProductVariationsHelper() {
 		invalidateResolutionForStoreSelector,
 	} = useDispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 	const { createProduct, updateProduct } = useDispatch( PRODUCTS_STORE_NAME );
-	const { resetForm } = useFormContext< Product >();
+	const { reset } = useFormContext2< Product >();
 
 	const [ isGenerating, setIsGenerating ] = useState( false );
 
@@ -46,7 +46,7 @@ export function useProductVariationsHelper() {
 			return createOrUpdateProduct()
 				.then( ( createdOrUpdatedProduct ) => {
 					if ( ! product.id ) {
-						resetForm( {
+						reset( {
 							...createdOrUpdatedProduct,
 							name: product.name || '',
 						} );

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useFormContext } from '@woocommerce/components';
+import { useFormContext2 } from '@woocommerce/components';
 import type { ProductVariation } from '@woocommerce/data';
 
 const KEY_SEPARATOR = ':';
@@ -49,13 +49,15 @@ export default function useVariationsOrder( {
 	variations,
 	currentPage,
 }: UseVariationsOrderInput ): UseVariationsOrderOutput {
-	const { setValue, values } = useFormContext< ProductVariationsOrder >();
+	const { setValue, watch } = useFormContext2< ProductVariationsOrder >();
+
+	const variationsOrder = watch( 'variationsOrder' );
 
 	function onOrderChange( items: JSX.Element[] ) {
 		const minOrder = Math.min( ...items.map( getVariationOrder ) );
 
 		setValue( 'variationsOrder', {
-			...values.variationsOrder,
+			...variationsOrder,
 			[ currentPage ]: items.reduce( ( prev, item, index ) => {
 				const id = getVariationId( item );
 				return {
@@ -67,7 +69,7 @@ export default function useVariationsOrder( {
 	}
 
 	return {
-		sortedVariations: sort( variations, currentPage, values ),
+		sortedVariations: sort( variations, currentPage, { variationsOrder } ),
 		getVariationKey,
 		onOrderChange,
 	};

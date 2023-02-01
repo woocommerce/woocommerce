@@ -2,9 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Link, useFormContext } from '@woocommerce/components';
+import { Link, useFormContext2 } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { useController } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -14,10 +15,9 @@ import { ProductSectionLayout } from '../layout/product-section-layout';
 import { Options } from '../fields/options';
 
 export const OptionsSection: React.FC = () => {
-	const {
-		getInputProps,
-		values: { id: productId },
-	} = useFormContext< Product >();
+	const { watch, control } = useFormContext2< Product >();
+	const productId = watch( 'id' );
+	const { field } = useController( { control, name: 'attributes' } );
 
 	return (
 		<ProductSectionLayout
@@ -46,9 +46,9 @@ export const OptionsSection: React.FC = () => {
 			}
 		>
 			<Options
-				{ ...getInputProps( 'attributes', {
-					productId,
-				} ) }
+				productId={ productId }
+				value={ field.value }
+				onChange={ field.onChange }
 			/>
 		</ProductSectionLayout>
 	);

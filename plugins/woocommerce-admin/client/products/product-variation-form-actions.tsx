@@ -9,7 +9,7 @@ import {
 } from '@woocommerce/data';
 import { registerPlugin } from '@wordpress/plugins';
 import { useDispatch } from '@wordpress/data';
-import { useFormContext } from '@woocommerce/components';
+import { useFormContext2 } from '@woocommerce/components';
 import { useParams } from 'react-router-dom';
 import { useState } from '@wordpress/element';
 
@@ -23,8 +23,10 @@ import './product-form-actions.scss';
 
 export const ProductVariationFormActions: React.FC = () => {
 	const { productId, variationId } = useParams();
-	const { isDirty, isValidForm, values } =
-		useFormContext< ProductVariation >();
+	const { formState, watch } = useFormContext2< ProductVariation >();
+	const isDirty = formState.isDirty;
+	const isValidForm = formState.isValid;
+	const values = watch();
 	const { updateProductVariation } = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 	);

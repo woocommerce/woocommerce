@@ -14,7 +14,7 @@ import {
 	Pagination,
 	Sortable,
 	Tag,
-	useFormContext,
+	useFormContext2,
 } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { useContext, useState } from '@wordpress/element';
@@ -57,8 +57,8 @@ export const Variations: React.FC = () => {
 	const [ isUpdating, setIsUpdating ] = useState< Record< string, boolean > >(
 		{}
 	);
-	const { values } = useFormContext< Product >();
-	const productId = values.id;
+	const { watch } = useFormContext2< Product >();
+	const productId = watch( 'id' );
 	const context = useContext( CurrencyContext );
 	const { formatAmount, getCurrencyConfig } = context;
 	const { isLoading, variations, totalCount } = useSelect(

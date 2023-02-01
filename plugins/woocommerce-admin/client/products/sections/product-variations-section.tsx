@@ -3,8 +3,9 @@
  */
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
-import { Link, useFormContext } from '@woocommerce/components';
-import { Product, ProductAttribute } from '@woocommerce/data';
+import { Link, useFormContext2 } from '@woocommerce/components';
+import { Product } from '@woocommerce/data';
+import { useController } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -13,22 +14,12 @@ import { ProductSectionLayout } from '../layout/product-section-layout';
 import { Variations } from '../fields/variations';
 
 export const ProductVariationsSection: React.FC = () => {
-	const {
-		getInputProps,
-		values: { id: productId },
-	} = useFormContext< Product >();
+	const { control } = useFormContext2< Product >();
 
-	const { value: attributes }: { value: ProductAttribute[] } = getInputProps(
-		'attributes',
-		{
-			productId,
-		}
-	);
+	const { field } = useController( { control, name: 'attributes' } );
 
-	const options = attributes
-		? attributes.filter(
-				( attribute: ProductAttribute ) => attribute.variation
-		  )
+	const options = field.value
+		? field.value.filter( ( attribute ) => attribute.variation )
 		: [];
 
 	if ( options.length === 0 ) {

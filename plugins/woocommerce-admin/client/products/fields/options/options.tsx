@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Product, ProductAttribute } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { useFormContext } from '@woocommerce/components';
+import { useFormContext2 } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -24,7 +24,8 @@ export const Options: React.FC< OptionsProps > = ( {
 	onChange,
 	productId,
 } ) => {
-	const { values } = useFormContext< Product >();
+	const { watch } = useFormContext2< Product >();
+	const values = watch();
 	const { generateProductVariations } = useProductVariationsHelper();
 
 	const { attributes, handleChange } = useProductAttributes( {
