@@ -14,12 +14,6 @@ export const InventoryStockOutField = () => {
 		control,
 	} );
 
-	// These properties cause issues with the RadioControl component.
-	// A fix to form upstream would help if we can identify what type of input is used.
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	const { value, checked, ...backordersProp } = field;
-
 	return (
 		<RadioControl
 			label={ __( 'When out of stock', 'woocommerce' ) }
@@ -40,7 +34,8 @@ export const InventoryStockOutField = () => {
 					value: 'no',
 				},
 			] }
-			{ ...backordersProp }
+			onChange={ field.onChange }
+			selected={ field.value }
 		/>
 	);
 };

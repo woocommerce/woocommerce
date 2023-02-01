@@ -22,6 +22,7 @@ export const InventoryTrackQuantityField = () => {
 	const { field } = useController( {
 		name: 'manage_stock',
 		control,
+		defaultValue: false,
 	} );
 
 	const canManageStock = getAdminSetting( 'manageStock', 'yes' ) === 'yes';

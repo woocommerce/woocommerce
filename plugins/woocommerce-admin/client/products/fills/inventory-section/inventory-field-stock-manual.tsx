@@ -18,7 +18,7 @@ export const InventoryStockManualField = () => {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 
-	const { checked, value, ...inputProps } = field;
+	const { value, onChange } = field;
 
 	return (
 		<RadioControl
@@ -37,7 +37,7 @@ export const InventoryStockManualField = () => {
 					value: 'onbackorder',
 				},
 			] }
-			{ ...inputProps }
+			onChange={ onChange }
 			selected={ value }
 		/>
 	);
