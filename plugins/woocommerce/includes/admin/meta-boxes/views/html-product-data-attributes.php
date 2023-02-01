@@ -9,8 +9,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 		global $wc_product_attributes;
 		// Array of defined attribute taxonomies.
 		$attribute_taxonomies = wc_get_attribute_taxonomies();
+		// Product attributes - taxonomies and custom, ordered, with visibility and variation attributes set.
+		$product_attributes = $product_object->get_attributes( 'edit' );
 
-		if ( empty( $attribute_taxonomies ) ) :
+		if ( empty( $attribute_taxonomies ) && empty( $product_attributes ) ) :
 			?>
 			<div id="message" class="inline notice woocommerce-message">
 				<p><?php echo wp_kses_post( __( 'Add descriptive pieces of information that customers can use to search for this product on your store, such as “Material” or “Brand”.', 'woocommerce' ) ); ?></p>
@@ -50,11 +52,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 	<div class="product_attributes wc-metaboxes">
 		<?php
-		// Product attributes - taxonomies and custom, ordered, with visibility and variation attributes set.
-		$attributes = $product_object->get_attributes( 'edit' );
 		$i          = -1;
 
-		foreach ( $attributes as $attribute ) {
+		foreach ( $product_attributes as $attribute ) {
 			$i++;
 			$metabox_class = array();
 
