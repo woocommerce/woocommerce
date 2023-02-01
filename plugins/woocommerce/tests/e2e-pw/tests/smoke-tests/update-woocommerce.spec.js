@@ -93,13 +93,18 @@ test.describe.serial( 'WooCommerce update', () => {
 			await page.waitForLoadState( 'networkidle' );
 		} );
 
-		await test.step( 'Choose the option "Replace current with uploaded"', async () => {
-			await page.click( '.button-primary.update-from-upload-overwrite' );
-			await page.waitForLoadState( 'networkidle' );
-			await expect(
-				page.getByText( 'Plugin updated successfully.' )
-			).toBeVisible();
-		} );
+		await test.step(
+			'Choose the option "Replace current with uploaded"',
+			async () => {
+				await page.click(
+					'.button-primary.update-from-upload-overwrite'
+				);
+				await page.waitForLoadState( 'networkidle' );
+				await expect(
+					page.getByText( 'Plugin updated successfully.' )
+				).toBeVisible();
+			}
+		);
 
 		await test.step( 'Go to "Installed plugins" page', async () => {
 			await page.goto( 'wp-admin/plugins.php', {
