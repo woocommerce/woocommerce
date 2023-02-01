@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useFormContext, Link, useFormContext2 } from '@woocommerce/components';
+import { Link, useFormContext2 } from '@woocommerce/components';
 import {
 	Product,
 	EXPERIMENTAL_TAX_CLASSES_STORE_NAME,

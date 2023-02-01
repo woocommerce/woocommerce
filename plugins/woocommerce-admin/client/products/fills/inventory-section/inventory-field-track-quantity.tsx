@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
-	useFormContext,
 	useFormContext2,
 	__experimentalConditionalWrapper as ConditionalWrapper,
 } from '@woocommerce/components';
