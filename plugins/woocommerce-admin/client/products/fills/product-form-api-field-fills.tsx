@@ -4,14 +4,14 @@
 import {
 	__experimentalWooProductFieldItem as WooProductFieldItem,
 	renderField,
-	useFormContext,
+	useFormContext2,
 } from '@woocommerce/components';
 import { Product, ProductFormField } from '@woocommerce/data';
 
 export const Fields: React.FC< { fields: ProductFormField[] } > = ( {
 	fields,
 } ) => {
-	const { getInputProps } = useFormContext< Product >();
+	const { control } = useFormContext2< Product >();
 
 	return (
 		<>
@@ -23,10 +23,7 @@ export const Fields: React.FC< { fields: ProductFormField[] } > = ( {
 					pluginId={ field.plugin_id }
 				>
 					<>
-						{ renderField( field.type, {
-							...getInputProps( field.properties.name ),
-							...field.properties,
-						} ) }
+						{ renderField( field.type, field.properties, control ) }
 					</>
 				</WooProductFieldItem>
 			) ) }{ ' ' }
