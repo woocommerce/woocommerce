@@ -121,11 +121,11 @@ function getItemLabel( item: LinkedTree, text: string ) {
 }
 
 export const CustomItemLabelOnSearch: React.FC = () => {
-	const [ text, setText ] = useState( '' );
+	const [ filter, setFilter ] = useState( '' );
 
 	return (
 		<>
-			<TextControl value={ text } onChange={ setText } />
+			<TextControl value={ filter } onChange={ setFilter } />
 			<BaseControl
 				label="Custom item label on search"
 				id="custom-item-label-on-search"
@@ -133,11 +133,10 @@ export const CustomItemLabelOnSearch: React.FC = () => {
 				<TreeControl
 					id="custom-item-label-on-search"
 					items={ listItems }
-					getItemLabel={ ( item ) => getItemLabel( item, text ) }
-					isItemExpanded={ useCallback(
-						( item ) => isItemExpanded( item, text ),
-						[ text ]
-					) }
+					getItemLabel={ ( item ) => getItemLabel( item, filter ) }
+					shouldItemBeExpanded={ ( item ) =>
+						shouldItemBeExpanded( item, filter )
+					}
 				/>
 			</BaseControl>
 		</>
