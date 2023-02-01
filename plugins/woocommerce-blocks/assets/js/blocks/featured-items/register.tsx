@@ -25,7 +25,6 @@ interface ExtendedBlockSupports {
 			gradients: boolean;
 			link: boolean;
 			text: string;
-			__experimentalDuotone?: string;
 		};
 		spacing?: {
 			margin: boolean | CSSDirections[];
@@ -73,10 +72,6 @@ export function register(
 			color: {
 				background: metadata.supports?.color?.background,
 				text: metadata.supports?.color?.text,
-				...( isFeaturePluginBuild() && {
-					__experimentalDuotone:
-						metadata.supports?.color?.__experimentalDuotone,
-				} ),
 			},
 			spacing: {
 				padding: metadata.supports?.spacing?.padding,
