@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useEffect, useRef } from '@wordpress/element';
-import { Form, FormRef, SlotContextProvider } from '@woocommerce/components';
+import { NuForm, FormRef, SlotContextProvider } from '@woocommerce/components';
 import { PluginArea } from '@wordpress/plugins';
 import { PartialProduct, ProductVariation } from '@woocommerce/data';
 
@@ -42,11 +42,7 @@ export const ProductVariationForm: React.FC< {
 
 	return (
 		<SlotContextProvider>
-			<Form< Partial< ProductVariation > >
-				initialValues={ productVariation }
-				errors={ {} }
-				ref={ formRef }
-			>
+			<NuForm initialValues={ productVariation }>
 				<ProductVariationFormHeader />
 				<ProductFormLayout
 					key={ productVariation.id }
@@ -74,7 +70,7 @@ export const ProductVariationForm: React.FC< {
 				</div>
 				{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
 				<PluginArea scope="woocommerce-product-editor" />
-			</Form>
+			</NuForm>
 		</SlotContextProvider>
 	);
 };
