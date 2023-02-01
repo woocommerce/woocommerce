@@ -10,7 +10,8 @@ type ChildrenProps = {
 };
 
 /**
- * Returns an object with the children and props that will be used by cloneElement.
+ * Returns an object with the children and props that will be used by `cloneElement`. They will change depending on the
+ * type of children passed in.
  *
  * @param {Node}   children    - Node children.
  * @param {number} order       - Node order.
@@ -55,7 +56,7 @@ function getChildrenAndProps< T = Fill.Props, S = Record< string, unknown > >(
  * @param {number} order       - Node order.
  * @param {Array}  props       - Fill props.
  * @param {Object} injectProps - Injected props.
- * @return {Node} Node.
+ * @return {Object} Object with the keys: children and props.
  */
 function createOrderedChildren< T = Fill.Props, S = Record< string, unknown > >(
 	children: React.ReactNode,
