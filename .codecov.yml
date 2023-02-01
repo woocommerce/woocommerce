@@ -19,9 +19,9 @@ ignore:
     - '**/*.test.*'
 
 coverage:
-    precision: 2
+    precision: 1
     round: nearest
-    range: '50...100'
+    range: '50...80'
 
     status:
         project:
