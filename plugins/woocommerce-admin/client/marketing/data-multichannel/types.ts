@@ -50,7 +50,24 @@ export type RecommendedChannelsState = {
 	error?: ApiFetchError;
 };
 
+export type Campaign = {
+	id: string;
+	channel: string;
+	title: string;
+	manage_url: string;
+	cost: {
+		value: string;
+		currency: string;
+	};
+};
+
+export type CampaignsState = {
+	data?: Array< Campaign >;
+	error?: ApiFetchError;
+};
+
 export type State = {
 	registeredChannels: ChannelsState;
 	recommendedChannels: RecommendedChannelsState;
+	campaigns: CampaignsState;
 };

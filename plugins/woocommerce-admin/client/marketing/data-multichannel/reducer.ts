@@ -20,6 +20,10 @@ const initialState = {
 		data: undefined,
 		error: undefined,
 	},
+	campaigns: {
+		data: undefined,
+		error: undefined,
+	},
 };
 
 export const reducer: Reducer< State, Action > = (
@@ -55,6 +59,23 @@ export const reducer: Reducer< State, Action > = (
 					error: action.payload,
 				},
 			};
+
+		case TYPES.RECEIVE_CAMPAIGNS_SUCCESS:
+			return {
+				...state,
+				campaigns: {
+					data: action.payload,
+				},
+			};
+
+		case TYPES.RECEIVE_CAMPAIGNS_ERROR:
+			return {
+				...state,
+				campaigns: {
+					error: action.payload,
+				},
+			};
+
 		default:
 			return state;
 	}

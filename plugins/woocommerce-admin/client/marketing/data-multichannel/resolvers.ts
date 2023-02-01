@@ -11,8 +11,10 @@ import {
 	receiveRegisteredChannelsError,
 	receiveRecommendedChannelsSuccess,
 	receiveRecommendedChannelsError,
+	receiveCampaignsSuccess,
+	receiveCampaignsError,
 } from './actions';
-import { RegisteredChannel, RecommendedChannel } from './types';
+import { RegisteredChannel, RecommendedChannel, Campaign } from './types';
 import { API_NAMESPACE } from './constants';
 import { isApiFetchError } from './guards';
 
@@ -42,6 +44,22 @@ export function* getRecommendedChannels() {
 	} catch ( error ) {
 		if ( isApiFetchError( error ) ) {
 			yield receiveRecommendedChannelsError( error );
+		}
+
+		throw error;
+	}
+}
+
+export function* getCampaigns() {
+	try {
+		const data: Array< Campaign > = yield apiFetch( {
+			path: `${ API_NAMESPACE }/campaigns`,
+		} );
+
+		yield receiveCampaignsSuccess( data );
+	} catch ( error ) {
+		if ( isApiFetchError( error ) ) {
+			yield receiveCampaignsError( error );
 		}
 
 		throw error;

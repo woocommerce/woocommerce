@@ -10,3 +10,7 @@ export const getRegisteredChannels = ( state: State ) => {
 export const getRecommendedChannels = ( state: State ) => {
 	return state.recommendedChannels;
 };
+
+export const getCampaigns = ( state: State ) => {
+	return state.campaigns;
+};

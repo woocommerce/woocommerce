@@ -1,104 +1,54 @@
 /**
+ * External dependencies
+ */
+import { useSelect } from '@wordpress/data';
+
+/**
  * Internal dependencies
  */
 import { Campaign } from '~/marketing/types';
+import { STORE_KEY } from '~/marketing/data-multichannel/constants';
+import {
+	CampaignsState,
+	Campaign as APICampaign,
+	ApiFetchError,
+} from '~/marketing/data-multichannel/types';
+import { useRegisteredChannels } from '~/marketing/hooks';
 
 type UseCampaignsType = {
 	loading: boolean;
-	data: Array< Campaign >;
+	data?: Array< Campaign >;
+	error?: ApiFetchError;
 };
 
-// // TODO: testing for loading state.
-// export const useCampaigns = (): UseCampaignsType => {
-// 	return {
-// 		loading: true,
-// 		data: [],
-// 	};
-// };
-
-// TODO: testing for empty data.
-// export const useCampaigns = (): UseCampaignsType => {
-// 	return {
-// 		loading: false,
-// 		data: [],
-// 	};
-// };
-
-// TODO: testing with campaigns data.
 export const useCampaigns = (): UseCampaignsType => {
-	return {
-		loading: false,
-		data: [
-			{
-				channelSlug: 'google-listings-and-ads',
-				channelName: 'Google Listings and Ads',
-				icon: 'https://woocommerce.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/google.svg',
-				id: 'gla-campaign-01',
-				title: 'Performance Max 01',
-				description: 'New Zealand',
-				cost: '$50',
-				manageUrl: 'https://www.google.com/manage-campaign',
-			},
-			{
-				channelSlug: 'google-listings-and-ads',
-				channelName: 'Google Listings and Ads',
-				icon: 'https://woocommerce.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/google.svg',
-				id: 'gla-campaign-02',
-				title: 'Performance Max 02',
-				description: '6 countries',
-				cost: '$50',
-				manageUrl: 'https://www.google.com/manage-campaign',
-			},
-			{
-				channelSlug: 'google-listings-and-ads',
-				channelName: 'Google Listings and Ads',
-				icon: 'https://woocommerce.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/google.svg',
-				id: 'gla-campaign-03',
-				title: 'Performance Max 03',
-				description: '10 countries • 15 Sep - 31 Oct 2022',
-				cost: '$50',
-				manageUrl: 'https://www.google.com/manage-campaign',
-			},
-			{
-				channelSlug: 'google-listings-and-ads',
-				channelName: 'Google Listings and Ads',
-				icon: 'https://woocommerce.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/google.svg',
-				id: 'gla-campaign-04',
-				title: 'Performance Max 04',
-				description: 'New Zealand',
-				cost: '$50',
-				manageUrl: 'https://www.google.com/manage-campaign',
-			},
-			{
-				channelSlug: 'google-listings-and-ads',
-				channelName: 'Google Listings and Ads',
-				icon: 'https://woocommerce.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/google.svg',
-				id: 'gla-campaign-05',
-				title: 'Performance Max 05',
-				description: 'New Zealand',
-				cost: '$50',
-				manageUrl: 'https://www.google.com/manage-campaign',
-			},
-			{
-				channelSlug: 'google-listings-and-ads',
-				channelName: 'Google Listings and Ads',
-				icon: 'https://woocommerce.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/google.svg',
-				id: 'gla-campaign-06',
-				title: 'Performance Max 06',
-				description: 'New Zealand',
-				cost: '$50',
-				manageUrl: 'https://www.google.com/manage-campaign',
-			},
-			{
-				channelSlug: 'google-listings-and-ads',
-				channelName: 'Google Listings and Ads',
-				icon: 'https://woocommerce.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/google.svg',
-				id: 'gla-campaign-07',
-				title: 'Performance Max 07',
-				description: 'New Zealand',
-				cost: '$50',
-				manageUrl: 'https://www.google.com/manage-campaign',
-			},
-		],
-	};
+	const { data } = useRegisteredChannels();
+
+	return useSelect( ( select ) => {
+		const { hasFinishedResolution, getCampaigns } = select( STORE_KEY );
+		const campaignsState = getCampaigns< CampaignsState >();
+
+		const convert = ( campaign: APICampaign ): Campaign => {
+			const channel = data?.find(
+				( el ) => el.slug === campaign.channel
+			);
+
+			return {
+				id: `${ campaign.channel }|${ campaign.id }`,
+				title: campaign.title,
+				description: '',
+				cost: `${ campaign.cost.currency } ${ campaign.cost.value }`,
+				manageUrl: campaign.manage_url,
+				icon: channel?.icon || '',
+				channelName: channel?.title || '',
+				channelSlug: campaign.channel,
+			};
+		};
+
+		return {
+			loading: ! hasFinishedResolution( 'getCampaigns' ),
+			data: campaignsState.data?.map( convert ),
+			error: campaignsState.error,
+		};
+	} );
 };

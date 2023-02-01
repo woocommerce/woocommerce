@@ -41,6 +41,11 @@ export const Campaigns = () => {
 		);
 	}
 
+	// TODO: error message here.
+	if ( ! data ) {
+		return <div>error</div>;
+	}
+
 	if ( data.length === 0 ) {
 		return (
 			<Card className="woocommerce-marketing-campaigns-card">
