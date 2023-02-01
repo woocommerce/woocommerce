@@ -1,35 +1,35 @@
 # Checkout API interface <!-- omit in toc -->
 
-**Note on migration:** We are in the process of moving much of the data from contexts into data stores, so this portion of the docs may change often as we do this. We will endavour to keep it up to date while the work is carried out
+**Note on migration:** We are in the process of moving much of the data from contexts into data stores, so this portion of the docs may change often as we do this. We will try to keep it up to date while the work is carried out.
 
 ## Table of Contents <!-- omit in toc -->
 
--   [Checkout Block API overview](#checkout-block-api-overview)
-    -   [Data Stores](#data-stores)
-        -   [Checkout Data Store](#checkout-data-store)
-    -   [Contexts](#contexts)
-        -   [Notices Context](#notices-context)
-        -   [Customer Data Context](#customer-data-context)
-        -   [Billing Data Context](#billing-data-context)
-        -   [Shipping Method Data context](#shipping-method-data-context)
-        -   [Payment Method Data Context](#payment-method-data-context)
-        -   [Checkout Context](#checkout-context)
-    -   [Hooks](#hooks)
-        -   [`usePaymentMethodInterface`](#usepaymentmethodinterface)
+-   [Data Stores](#data-stores)
+    -   [Checkout Data Store](#checkout-data-store)
+        -   [Selectors](#selectors)
+        -   [Actions](#actions)
+-   [Contexts](#contexts)
+    -   [Shipping Method Data context](#shipping-method-data-context)
+    -   [Payment Method Events Context](#payment-method-events-context)
+    -   [Checkout Events Context](#checkout-events-context)
+-   [Hooks](#hooks)
+    -   [`usePaymentMethodInterface`](#usepaymentmethodinterface)
+-   [Examples](#examples)
+    -   [Passing a value from the client through to server side payment processing](#passing-a-value-from-the-client-through-to-server-side-payment-processing)
 
 This document gives an overview of some of the major architectural components/APIs for the checkout block. If you haven't already, you may also want to read about the [Checkout Flow and Events](../../extensibility/checkout-flow-and-events.md).
 
-### Data Stores
+## Data Stores
 
 We are transitioning much of what is now available in Contexts, to `@wordpress/data` stores.
 
-#### Checkout Data Store
+### Checkout Data Store
 
 This is responsible for holding all the data required for the checkout process.
 
 For more details on the checkout data store, see the [Checkout Data Store](../../../third-party-developers/extensibility/data-store/checkout.md) docs.
 
-##### Selectors
+#### Selectors
 
 For a full list of selectors see the [Checkout Data Store](
 
@@ -53,7 +53,7 @@ Data can be accessed through the following selectors:
 -   `getShouldCreateAccount()`: Returns true if the shopper has opted to create an account with their order.
 -   `getUseShippingAsBilling()`: Returns the value of the `useShippingAsBilling` flag.
 
-##### Actions
+#### Actions
 
 The following actions can be dispatched from the Checkout data store:
 
@@ -73,7 +73,7 @@ The following actions can be dispatched from the Checkout data store:
 -   `__internalSetOrderNotes( orderNotes: string )`: Set `state.orderNotes` to `orderNotes`
 -   `__internalSetExtensionData( extensionData: Record< string, Record< string, unknown > > )`: Set `state.extensionData` to `extensionData`
 
-### Contexts
+## Contexts
 
 Much of the data and api interface for components in the Checkout Block are constructed and exposed via [usage of `React.Context`](https://reactjs.org/docs/context.html). In some cases the context maintains the "tree" state within the context itself (via `useReducer`) and in others it interacts with a global `wp.data` store (for data that communicates with the server).
 
@@ -117,3 +117,92 @@ This hook is used to expose all the interfaces for the registered payment method
 _Why don't payment methods just implement this hook_?
 
 The contract is established through props fed to the payment method components via props. This allows us to avoid having to expose the hook publicly and experiment with how the props are retrieved and exposed in the future.
+
+## Examples
+
+### Passing a value from the client through to server side payment processing
+
+In this example, lets pass some data from the BACS payment method to the server. Registration of BACS looks like this:
+
+```js
+const bankTransferPaymentMethod = {
+	name: PAYMENT_METHOD_NAME,
+	label: <Label />,
+	content: <Content />,
+	edit: <Content />,
+	canMakePayment: () => true,
+	ariaLabel: label,
+	supports: {
+		features: settings?.supports ?? [],
+	},
+};
+```
+
+If we look a the `Content` component, we can see it defined as follows:
+
+```js
+const Content = () => {
+	return decodeEntities( settings.description || '' );
+};
+```
+
+Payment method components are passed, by default, everything from the [`usePaymentMethodInterface` hook](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/docs/internal-developers/block-client-apis/checkout/checkout-api.md#usepaymentmethodinterface). So we can consume this in our component like so:
+
+```js
+const Content = ( props ) => {
+	const { eventRegistration, emitResponse } = props;
+	const { onPaymentProcessing } = eventRegistration;
+	useEffect( () => {
+		const unsubscribe = onPaymentProcessing( async () => {
+			// Here we can do any processing we need, and then emit a response.
+			// For example, we might validate a custom field, or perform an AJAX request, and then emit a response indicating it is valid or not.
+			const myGatewayCustomData = '12345';
+			const customDataIsValid = !! myGatewayCustomData.length;
+
+			if ( customDataIsValid ) {
+				return {
+					type: emitResponse.responseTypes.SUCCESS,
+					meta: {
+						paymentMethodData: {
+							myGatewayCustomData,
+						},
+					},
+				};
+			}
+
+			return {
+				type: emitResponse.responseTypes.ERROR,
+				message: 'There was an error',
+			};
+		} );
+		// Unsubscribes when this component is unmounted.
+		return () => {
+			unsubscribe();
+		};
+	}, [
+		emitResponse.responseTypes.ERROR,
+		emitResponse.responseTypes.SUCCESS,
+		onPaymentProcessing,
+	] );
+	return decodeEntities( settings.description || '' );
+};
+```
+
+Now when an order is placed, if we look at the API request payload, we can see the following JSON:
+
+```json
+{
+	"shipping_address": {},
+	"billing_address": {},
+	"customer_note": "",
+	"create_account": false,
+	"payment_method": "bacs",
+	"payment_data": [
+		{
+			"key": "myGatewayCustomData",
+			"value": "12345"
+		}
+	],
+	"extensions": {}
+}
+```
