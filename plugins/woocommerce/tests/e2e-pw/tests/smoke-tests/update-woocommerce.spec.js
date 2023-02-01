@@ -177,23 +177,23 @@ test.describe.serial( 'WooCommerce update', () => {
 		} );
 
 		await test.step(
-			'Repeatedly reload the Plugins page up to 10 times until the message "WooCommerce database update complete." appears',
+			'Assert that the notice "WooCommerce database update complete." appears',
 			async () => {
-				for (
-					let reloads = 0;
-					reloads < 10 &&
-					! ( await updateCompleteMessage.isVisible() );
-					reloads++
-				) {
-					await page.goto( 'wp-admin/plugins.php', {
-						waitUntil: 'networkidle',
-					} );
+				await expect
+					.poll(
+						async () => {
+							await page.goto( 'wp-admin/plugins.php', {
+								waitUntil: 'networkidle',
+							} );
 
-					// Wait 10s before the next reload.
-					await page.waitForTimeout( 10000 );
-				}
-
-				await expect( updateCompleteMessage ).toBeVisible();
+							return await updateCompleteMessage.isVisible();
+						},
+						{
+							intervals: [ 10_000 ],
+							timeout: 120_000,
+						}
+					)
+					.toEqual( true );
 			}
 		);
 	} );
