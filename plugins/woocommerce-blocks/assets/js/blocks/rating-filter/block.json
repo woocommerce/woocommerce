@@ -8,11 +8,7 @@
 	"supports": {
 		"html": false,
 		"multiple": false,
-		"color": {
-		  "__experimentalDefaultControls": {
-			"text": true
-		  }
-		},
+		"color": true,
 		"inserter": false,
 		"lock": false
 	},
