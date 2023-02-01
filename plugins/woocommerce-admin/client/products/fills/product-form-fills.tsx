@@ -6,7 +6,7 @@ import { registerPlugin } from '@wordpress/plugins';
 import {
 	__experimentalWooProductTabItem as WooProductTabItem,
 	__experimentalWooProductSectionItem as WooProductSectionItem,
-	useFormContext,
+	useFormContext2,
 } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { useMemo } from '@wordpress/element';
@@ -39,7 +39,8 @@ import {
 } from './constants';
 
 const Tabs = () => {
-	const { values: product } = useFormContext< Product >();
+	const { watch, getValues } = useFormContext2< Product >();
+	const variations = watch( 'variations' );
 	const tabPropData = useMemo(
 		() => ( {
 			general: {
@@ -49,25 +50,26 @@ const Tabs = () => {
 			pricing: {
 				name: 'pricing',
 				title: __( 'Pricing', 'woocommerce' ),
-				disabled: !! product?.variations?.length,
+				disabled: !! variations?.length,
 			},
 			inventory: {
 				name: 'inventory',
 				title: __( 'Inventory', 'woocommerce' ),
-				disabled: !! product?.variations?.length,
+				disabled: !! variations?.length,
 			},
 			shipping: {
 				name: 'shipping',
 				title: __( 'Shipping', 'woocommerce' ),
-				disabled: !! product?.variations?.length,
+				disabled: !! variations?.length,
 			},
 			options: {
 				name: 'options',
 				title: __( 'Options', 'woocommerce' ),
 			},
 		} ),
-		[ product.variations ]
+		[ variations ]
 	);
+
 	return (
 		<>
 			<WooProductTabItem
@@ -102,7 +104,7 @@ const Tabs = () => {
 			>
 				<WooProductSectionItem.Slot
 					tab={ TAB_SHIPPING_ID }
-					fillProps={ { product } }
+					fillProps={ { product: getValues() } }
 				/>
 			</WooProductTabItem>
 			{ window.wcAdminFeatures[ 'product-variation-management' ] ? (

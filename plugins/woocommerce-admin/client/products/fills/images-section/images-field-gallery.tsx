@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
-	useFormContext,
+	useFormContext2,
 	MediaUploader,
 	ImageGallery,
 	ImageGalleryItem,
@@ -15,6 +15,7 @@ import { Product } from '@woocommerce/data';
 import { Icon, trash } from '@wordpress/icons';
 import { MediaItem } from '@wordpress/media-utils';
 import classnames from 'classnames';
+import { useController } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -26,8 +27,10 @@ type Image = MediaItem & {
 };
 
 export const ImagesGalleryField = () => {
-	const { getInputProps, setValue } = useFormContext< Product >();
-	const images = ( getInputProps( 'images' )?.value as Image[] ) || [];
+	const { setValue, control } = useFormContext2< Product >();
+	const { field } = useController< Product >( { name: 'images', control } );
+
+	const images = ( field.value as Image[] ) || [];
 	const [ isRemovingZoneVisible, setIsRemovingZoneVisible ] =
 		useState< boolean >( false );
 	const [ isRemoving, setIsRemoving ] = useState< boolean >( false );
@@ -46,12 +49,12 @@ export const ImagesGalleryField = () => {
 			);
 		} );
 		recordEvent( 'product_images_change_image_order_via_image_gallery' );
-		setValue( 'images', orderedImages );
+		setValue( 'images', orderedImages as Image[] );
 	};
 	const onFileUpload = ( files: MediaItem[] ) => {
 		if ( files[ 0 ].id ) {
 			recordEvent( 'product_images_add_via_file_upload_area' );
-			setValue( 'images', [ ...images, ...files ] );
+			setValue( 'images', [ ...images, ...files ] as Image[] );
 		}
 	};
 
@@ -174,7 +177,7 @@ export const ImagesGalleryField = () => {
 									setValue( 'images', [
 										...images,
 										...files,
-									] );
+									] as Image[] );
 								}
 							} }
 							label={

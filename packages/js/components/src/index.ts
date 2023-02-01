@@ -14,7 +14,7 @@ export { default as DropdownButton } from './dropdown-button';
 export { default as EllipsisMenu } from './ellipsis-menu';
 export { default as EmptyContent } from './empty-content';
 export { default as Flag } from './flag';
-export { Form, useFormContext, NuForm } from './form';
+export { Form, useFormContext, useFormContext2, NuForm } from './form';
 export { FormSection } from './form-section';
 export type { FormContext, FormRef, FormErrors } from './form';
 export { default as FilterPicker } from './filter-picker';

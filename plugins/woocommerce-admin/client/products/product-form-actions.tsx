@@ -11,7 +11,7 @@ import {
 } from '@wordpress/components';
 import { chevronDown, check, Icon } from '@wordpress/icons';
 import { registerPlugin } from '@wordpress/plugins';
-import { useFormContext } from '@woocommerce/components';
+import { useFormContext2 } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { navigateTo } from '@woocommerce/navigation';
@@ -45,14 +45,15 @@ export const ProductFormActions: React.FC = () => {
 
 	const { onPublish: triggerPublishCES, onSaveDraft: triggerDraftCES } =
 		useProductMVPCESFooter();
-	const { isDirty, isValidForm, values, resetForm } =
-		useFormContext< Product >();
+	const { formState, getValues, reset } = useFormContext2< Product >();
+	const isValidForm = formState.isValid;
+	const values = getValues() as Product;
 
-	usePreventLeavingPage( isDirty, preventLeavingProductForm );
+	usePreventLeavingPage( formState.isDirty, preventLeavingProductForm );
 
 	useCustomerEffortScoreExitPageTracker(
 		! values.id ? 'new_product' : 'editing_new_product',
-		isDirty
+		formState.isDirty
 	);
 
 	const { isSmallViewport } = useSelect( ( select ) => {
@@ -81,7 +82,7 @@ export const ProductFormActions: React.FC = () => {
 		if ( ! values.id ) {
 			const product = await createProductWithStatus( values, 'draft' );
 			if ( product?.id ) {
-				resetForm();
+				reset();
 				navigateTo( {
 					url: 'admin.php?page=wc-admin&path=/product/' + product.id,
 				} );
@@ -93,7 +94,7 @@ export const ProductFormActions: React.FC = () => {
 				'draft'
 			);
 			if ( product && product.id ) {
-				resetForm( product );
+				reset( product );
 			}
 		}
 		await triggerDraftCES();
@@ -107,7 +108,7 @@ export const ProductFormActions: React.FC = () => {
 		if ( ! values.id ) {
 			const product = await createProductWithStatus( values, 'publish' );
 			if ( product?.id ) {
-				resetForm();
+				reset();
 				navigateTo( {
 					url: 'admin.php?page=wc-admin&path=/product/' + product.id,
 				} );
@@ -119,7 +120,7 @@ export const ProductFormActions: React.FC = () => {
 				'publish'
 			);
 			if ( product && product.id ) {
-				resetForm( product );
+				reset( product );
 			}
 		}
 		await triggerPublishCES();
@@ -161,7 +162,7 @@ export const ProductFormActions: React.FC = () => {
 		if ( values.id ) {
 			const product = await deleteProductAndRedirect( values.id );
 			if ( product?.id ) {
-				resetForm( product );
+				reset( product );
 				navigateTo( { url: 'edit.php?post_type=product' } );
 			}
 		}
@@ -175,7 +176,7 @@ export const ProductFormActions: React.FC = () => {
 				onClick={ onSaveDraft }
 				disabled={
 					! isValidForm ||
-					( ! isDirty &&
+					( ! formState.isDirty &&
 						!! values.id &&
 						values.status !== 'publish' ) ||
 					isUpdatingDraft ||
@@ -183,11 +184,11 @@ export const ProductFormActions: React.FC = () => {
 					isDeleting
 				}
 			>
-				{ ! isDirty && values.id && values.status !== 'publish' && (
-					<Icon icon={ check } />
-				) }
+				{ ! formState.isDirty &&
+					values.id &&
+					values.status !== 'publish' && <Icon icon={ check } /> }
 				{ isUpdatingDraft ? __( 'Saving', 'woocommerce' ) : null }
-				{ ( isDirty || ! values.id ) &&
+				{ ( formState.isDirty || ! values.id ) &&
 				! isUpdatingDraft &&
 				values.status !== 'publish'
 					? __( 'Save draft', 'woocommerce' )
@@ -195,7 +196,7 @@ export const ProductFormActions: React.FC = () => {
 				{ values.status === 'publish' && ! isUpdatingDraft
 					? __( 'Switch to draft', 'woocommerce' )
 					: null }
-				{ ! isDirty &&
+				{ ! formState.isDirty &&
 				values.id &&
 				! isUpdatingDraft &&
 				values.status !== 'publish'
@@ -232,7 +233,7 @@ export const ProductFormActions: React.FC = () => {
 							isBusy={ isUpdatingPublished }
 							disabled={
 								! isValidForm ||
-								( ! isDirty && !! isPublished ) ||
+								( ! formState.isDirty && !! isPublished ) ||
 								isUpdatingDraft ||
 								isUpdatingPublished ||
 								isDeleting

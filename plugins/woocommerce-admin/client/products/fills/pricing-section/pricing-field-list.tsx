@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useFormContext, Link } from '@woocommerce/components';
+import { useFormContext2, Link } from '@woocommerce/components';
+import { useController } from 'react-hook-form';
 import { recordEvent } from '@woocommerce/tracks';
 import { useContext } from '@wordpress/element';
 import { Product, SETTINGS_STORE_NAME } from '@woocommerce/data';
@@ -29,7 +30,11 @@ type PricingListFieldProps = {
 export const PricingListField: React.FC< PricingListFieldProps > = ( {
 	currencyInputProps,
 } ) => {
-	const { getInputProps } = useFormContext< Product >();
+	const { control } = useFormContext2< Product >();
+	const { field } = useController( {
+		name: 'regular_price',
+		control,
+	} );
 	const context = useContext( CurrencyContext );
 	const { getCurrencyConfig, formatAmount } = context;
 	const currencyConfig = getCurrencyConfig();
@@ -48,11 +53,6 @@ export const PricingListField: React.FC< PricingListFieldProps > = ( {
 						?.woocommerce_calc_taxes === 'yes',
 			};
 		}
-	);
-
-	const regularPriceProps = getInputProps(
-		'regular_price',
-		currencyInputProps
 	);
 
 	const taxIncludedInPriceText = __(
@@ -91,16 +91,14 @@ export const PricingListField: React.FC< PricingListFieldProps > = ( {
 
 	return (
 		<>
-			<BaseControl
-				id="product_pricing_regular_price"
-				help={ regularPriceProps?.help ?? '' }
-			>
+			<BaseControl id="product_pricing_regular_price">
 				<InputControl
-					{ ...regularPriceProps }
+					{ ...field }
+					{ ...currencyInputProps }
 					name="regular_price"
 					label={ __( 'List price', 'woocommerce' ) }
 					value={ formatCurrencyDisplayValue(
-						String( regularPriceProps?.value ),
+						String( field?.value ),
 						currencyConfig,
 						formatAmount
 					) }

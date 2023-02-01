@@ -4,10 +4,12 @@
 import { __ } from '@wordpress/i18n';
 import {
 	useFormContext,
+	useFormContext2,
 	__experimentalConditionalWrapper as ConditionalWrapper,
 } from '@woocommerce/components';
 import { Tooltip, ToggleControl } from '@wordpress/components';
 import { Product } from '@woocommerce/data';
+import { useController } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -16,7 +18,11 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import { getCheckboxTracks } from '../../sections/utils';
 
 export const InventoryTrackQuantityField = () => {
-	const { getCheckboxControlProps } = useFormContext< Product >();
+	const { control } = useFormContext2< Product >();
+	const { field } = useController( {
+		name: 'manage_stock',
+		control,
+	} );
 
 	const canManageStock = getAdminSetting( 'manageStock', 'yes' ) === 'yes';
 
@@ -39,10 +45,8 @@ export const InventoryTrackQuantityField = () => {
 		>
 			<ToggleControl
 				label={ __( 'Track quantity for this product', 'woocommerce' ) }
-				{ ...getCheckboxControlProps(
-					'manage_stock',
-					getCheckboxTracks( 'manage_stock' )
-				) }
+				{ ...field }
+				{ ...getCheckboxTracks( 'manage_stock' ) }
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore This prop does exist, but is not typed in @wordpress/components.
 				disabled={ ! canManageStock }

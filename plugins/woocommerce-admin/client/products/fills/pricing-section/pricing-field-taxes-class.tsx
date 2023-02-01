@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useFormContext, Link } from '@woocommerce/components';
+import { useFormContext, Link, useFormContext2 } from '@woocommerce/components';
 import {
 	Product,
 	EXPERIMENTAL_TAX_CLASSES_STORE_NAME,
@@ -11,6 +11,7 @@ import {
 import { useSelect } from '@wordpress/data';
 import { RadioControl } from '@wordpress/components';
 import interpolateComponents from '@automattic/interpolate-components';
+import { useController } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -18,7 +19,11 @@ import interpolateComponents from '@automattic/interpolate-components';
 import { STANDARD_RATE_TAX_CLASS_SLUG } from '../../constants';
 
 export const PricingTaxesClassField = () => {
-	const { getInputProps } = useFormContext< Product >();
+	const { control } = useFormContext2< Product >();
+	const { field } = useController( {
+		name: 'tax_class',
+		control,
+	} );
 
 	const { isResolving: isTaxClassesResolving, taxClasses } = useSelect(
 		( select ) => {
@@ -32,13 +37,11 @@ export const PricingTaxesClassField = () => {
 		}
 	);
 
-	const taxClassProps = getInputProps( 'tax_class' );
 	// These properties cause issues with the RadioControl component.
 	// A fix to form upstream would help if we can identify what type of input is used.
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
-	delete taxClassProps.checked;
-	delete taxClassProps.value;
+	const { value, ref, ...taxClassProps } = field;
 
 	if ( isTaxClassesResolving || taxClasses.length <= 0 ) {
 		return null;

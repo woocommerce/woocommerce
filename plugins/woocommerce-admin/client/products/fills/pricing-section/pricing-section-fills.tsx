@@ -6,8 +6,8 @@ import {
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 	__experimentalWooProductFieldItem as WooProductFieldItem,
 	Link,
-	useFormContext,
 	CollapsibleContent,
+	useFormContext2,
 } from '@woocommerce/components';
 import { __experimentalProductSectionLayout as ProductSectionLayout } from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
@@ -51,7 +51,7 @@ export const PricingSectionFills: React.FC< PricingSectionFillsType > = ( {
 	taxesSectionId,
 	taxesAdvancedSectionId,
 } ) => {
-	const { values, setValue } = useFormContext< Product >();
+	const { setValue, getValues } = useFormContext2< Product >();
 	const { sanitizePrice } = useProductHelper();
 
 	const context = useContext( CurrencyContext );
@@ -84,7 +84,7 @@ export const PricingSectionFills: React.FC< PricingSectionFillsType > = ( {
 				'regular_price' | 'sale_price'
 			>;
 			const amount = Number.parseFloat(
-				sanitizePrice( values[ name ] || '0' )
+				sanitizePrice( getValues( name ) || '0' )
 			);
 			const step = Number( event.currentTarget.step || '1' );
 			if ( event.code === 'ArrowUp' ) {

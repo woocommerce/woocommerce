@@ -7,9 +7,11 @@ import {
 	Link,
 	__experimentalTooltip as Tooltip,
 	DateTimePickerControl,
+	useFormContext2,
 } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { useContext, useState, useEffect } from '@wordpress/element';
+import { useController } from 'react-hook-form';
 import { Product, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import interpolateComponents from '@automattic/interpolate-components';
@@ -38,7 +40,23 @@ const PRODUCT_SCHEDULED_SALE_SLUG = 'product-scheduled-sale';
 export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 	currencyInputProps,
 } ) => {
-	const { getInputProps, values, setValue } = useFormContext< Product >();
+	const { control, setValue, watch } = useFormContext2< Product >();
+	const [ date_on_sale_from_gmt, date_on_sale_to_gmt ] = watch( [
+		'date_on_sale_from_gmt',
+		'date_on_sale_to_gmt',
+	] );
+	const { field } = useController( {
+		name: 'sale_price',
+		control,
+	} );
+	const { field: toGmtField } = useController( {
+		name: 'date_on_sale_to_gmt',
+		control,
+	} );
+	const { field: fromGmtField } = useController( {
+		name: 'date_on_sale_from_gmt',
+		control,
+	} );
 
 	const { dateFormat, timeFormat } = useSelect( ( select ) => {
 		const { getOption } = select( OPTIONS_STORE_NAME );
@@ -64,11 +82,11 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 		}
 
 		const hasDateOnSaleFrom =
-			typeof values.date_on_sale_from_gmt === 'string' &&
-			values.date_on_sale_from_gmt.length > 0;
+			typeof date_on_sale_from_gmt === 'string' &&
+			date_on_sale_from_gmt.length > 0;
 		const hasDateOnSaleTo =
-			typeof values.date_on_sale_to_gmt === 'string' &&
-			values.date_on_sale_to_gmt.length > 0;
+			typeof date_on_sale_to_gmt === 'string' &&
+			date_on_sale_to_gmt.length > 0;
 
 		const hasSaleSchedule = hasDateOnSaleFrom || hasDateOnSaleTo;
 
@@ -76,9 +94,12 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 			setAutoToggledSaleSchedule( true );
 			setShowSaleSchedule( true );
 		}
-	}, [ userToggledSaleSchedule, autoToggledSaleSchedule, values ] );
-
-	const salePriceProps = getInputProps( 'sale_price', currencyInputProps );
+	}, [
+		userToggledSaleSchedule,
+		autoToggledSaleSchedule,
+		date_on_sale_from_gmt,
+		date_on_sale_to_gmt,
+	] );
 
 	const dateTimePickerProps = {
 		className: 'woocommerce-product__date-time-picker',
@@ -108,16 +129,13 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 
 	return (
 		<>
-			<BaseControl
-				id="product_pricing_sale_price"
-				help={ salePriceProps?.help ?? '' }
-			>
+			<BaseControl id="product_pricing_sale_price">
 				<InputControl
-					{ ...salePriceProps }
+					{ ...field }
 					name="sale_price"
 					label={ __( 'Sale price', 'woocommerce' ) }
 					value={ formatCurrencyDisplayValue(
-						String( salePriceProps?.value ),
+						String( field?.value ),
 						currencyConfig,
 						formatAmount
 					) }
@@ -181,7 +199,7 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 				onChange={ onSaleScheduleToggleChange }
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore disabled prop exists
-				disabled={ ! ( values.sale_price?.length > 0 ) }
+				disabled={ ! ( field.value?.length > 0 ) }
 			/>
 
 			{ showSaleSchedule && (
@@ -190,20 +208,18 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 						label={ __( 'From', 'woocommerce' ) }
 						placeholder={ __( 'Now', 'woocommerce' ) }
 						timeForDateOnly={ 'start-of-day' }
-						currentDate={ values.date_on_sale_from_gmt }
-						{ ...getInputProps( 'date_on_sale_from_gmt', {
-							...dateTimePickerProps,
-						} ) }
+						currentDate={ fromGmtField.value }
+						{ ...fromGmtField }
+						{ ...dateTimePickerProps }
 					/>
 
 					<DateTimePickerControl
 						label={ __( 'To', 'woocommerce' ) }
 						placeholder={ __( 'No end date', 'woocommerce' ) }
 						timeForDateOnly={ 'end-of-day' }
-						currentDate={ values.date_on_sale_to_gmt }
-						{ ...getInputProps( 'date_on_sale_to_gmt', {
-							...dateTimePickerProps,
-						} ) }
+						currentDate={ toGmtField.value }
+						{ ...toGmtField }
+						{ ...dateTimePickerProps }
 					/>
 				</>
 			) }

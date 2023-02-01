@@ -4,7 +4,7 @@
 import { CheckboxControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import {
-	useFormContext,
+	useFormContext2,
 	Link,
 	__experimentalTooltip as Tooltip,
 } from '@woocommerce/components';
@@ -21,7 +21,7 @@ import { getCheckboxTracks } from '../../sections/utils';
 import { PRODUCT_DETAILS_SLUG } from '../constants';
 
 export const DetailsFeatureField = () => {
-	const { control } = useFormContext< Product >();
+	const { control } = useFormContext2< Product >();
 
 	const checkboxTracksFn = getCheckboxTracks( 'featured' );
 

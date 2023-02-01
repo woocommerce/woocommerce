@@ -2,12 +2,13 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useFormContext, Link } from '@woocommerce/components';
+import { useFormContext2, Link } from '@woocommerce/components';
 import { TextControl } from '@wordpress/components';
 import { Product } from '@woocommerce/data';
 import interpolateComponents from '@automattic/interpolate-components';
 import { getAdminLink } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
+import { useController } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -15,7 +16,15 @@ import { recordEvent } from '@woocommerce/tracks';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 export const InventoryStockManageField = () => {
-	const { getInputProps } = useFormContext< Product >();
+	const { control } = useFormContext2< Product >();
+	const { field } = useController( {
+		name: 'stock_quantity',
+		control,
+	} );
+	const { field: lowStockCount } = useController( {
+		name: 'low_stock_amount',
+		control,
+	} );
 	const notifyLowStockAmount = getAdminSetting( 'notifyLowStockAmount', 2 );
 
 	return (
@@ -24,7 +33,7 @@ export const InventoryStockManageField = () => {
 			<TextControl
 				type="number"
 				label={ __( 'Current quantity', 'woocommerce' ) }
-				{ ...getInputProps( 'stock_quantity' ) }
+				{ ...field }
 				min={ 0 }
 			/>
 			<TextControl
@@ -35,7 +44,7 @@ export const InventoryStockManageField = () => {
 					__( '%d (store default)', 'woocommerce' ),
 					notifyLowStockAmount
 				) }
-				{ ...getInputProps( 'low_stock_amount' ) }
+				{ ...lowStockCount }
 				min={ 0 }
 			/>
 			<span className="woocommerce-product-form__secondary-text">

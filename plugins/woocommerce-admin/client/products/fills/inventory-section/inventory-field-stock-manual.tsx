@@ -2,19 +2,23 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useFormContext } from '@woocommerce/components';
+import { useFormContext2 } from '@woocommerce/components';
 import { RadioControl } from '@wordpress/components';
+import { useController } from 'react-hook-form';
 import { Product } from '@woocommerce/data';
 
 export const InventoryStockManualField = () => {
-	const { getInputProps } = useFormContext< Product >();
-	const inputProps = getInputProps( 'stock_status' );
+	const { control } = useFormContext2< Product >();
+	const { field } = useController( {
+		name: 'stock_status',
+		control,
+	} );
 	// These properties cause issues with the RadioControl component.
 	// A fix to form upstream would help if we can identify what type of input is used.
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
-	delete inputProps.checked;
-	delete inputProps.value;
+
+	const { checked, value, ...inputProps } = field;
 
 	return (
 		<RadioControl
@@ -34,6 +38,7 @@ export const InventoryStockManualField = () => {
 				},
 			] }
 			{ ...inputProps }
+			selected={ value }
 		/>
 	);
 };

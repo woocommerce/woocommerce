@@ -98,6 +98,10 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	variations: number[];
 	virtual: boolean;
 	weight: string;
+	images: Array< {
+		src: string;
+	} >;
+	sold_individually: boolean;
 };
 
 export const productReadOnlyProperties = [

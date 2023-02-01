@@ -7,7 +7,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { getAdminLink } from '@woocommerce/settings';
 import { moreVertical } from '@wordpress/icons';
 import { OPTIONS_STORE_NAME, Product } from '@woocommerce/data';
-import { useFormContext } from '@woocommerce/components';
+import { useFormContext2 } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -21,7 +21,8 @@ import { ALLOW_TRACKING_OPTION_NAME } from '~/customer-effort-score-tracks/const
 import './product-more-menu.scss';
 
 export const ProductMoreMenu = () => {
-	const { values } = useFormContext< Product >();
+	const { watch } = useFormContext2< Product >();
+	const id = watch( 'id' );
 	const { showCesModal, showProductMVPFeedbackModal } =
 		useDispatch( CES_STORE_KEY );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
@@ -43,8 +44,8 @@ export const ProductMoreMenu = () => {
 		};
 	} );
 
-	const classEditorUrl = values.id
-		? getAdminLink( `post.php?post=${ values.id }&action=edit` )
+	const classEditorUrl = id
+		? getAdminLink( `post.php?post=${ id }&action=edit` )
 		: getAdminLink( 'post-new.php?post_type=product' );
 
 	if ( isLoading ) {

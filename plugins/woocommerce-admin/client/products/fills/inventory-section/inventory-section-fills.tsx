@@ -6,7 +6,7 @@ import {
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 	__experimentalWooProductFieldItem as WooProductFieldItem,
 	Link,
-	useFormContext,
+	useFormContext2,
 	CollapsibleContent,
 } from '@woocommerce/components';
 import { __experimentalProductSectionLayout as ProductSectionLayout } from '@woocommerce/product-editor';
@@ -39,7 +39,8 @@ export const InventorySectionFills: React.FC< InventorySectionFillsType > = ( {
 	basicSectionId,
 	advancedSectionId,
 } ) => {
-	const { values } = useFormContext< Product >();
+	const { watch } = useFormContext2< Product >();
+	const manageStock = watch( 'manage_stock' );
 
 	return (
 		<>
@@ -108,7 +109,7 @@ export const InventorySectionFills: React.FC< InventorySectionFillsType > = ( {
 				<InventoryTrackQuantityField />
 			</WooProductFieldItem>
 
-			{ values.manage_stock ? (
+			{ manageStock ? (
 				<WooProductFieldItem
 					id="stock-manage"
 					sections={ [ { name: basicSectionId, order: 5 } ] }
@@ -126,7 +127,7 @@ export const InventorySectionFills: React.FC< InventorySectionFillsType > = ( {
 				</WooProductFieldItem>
 			) }
 
-			{ values.manage_stock && (
+			{ manageStock && (
 				<WooProductFieldItem
 					id="stock-out"
 					sections={ [ { name: advancedSectionId, order: 1 } ] }

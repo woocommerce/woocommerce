@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
-	useFormContext,
+	useFormContext2,
 	__experimentalRichTextEditor as RichTextEditor,
 } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
@@ -11,7 +11,7 @@ import { BlockInstance, serialize, parse } from '@wordpress/blocks';
 import { useState } from '@wordpress/element';
 
 export const DetailsDescriptionField = () => {
-	const { setValue, getValues } = useFormContext< Product >();
+	const { setValue, getValues } = useFormContext2< Product >();
 	const [ descriptionBlocks, setDescriptionBlocks ] = useState<
 		BlockInstance[]
 	>( parse( getValues().description || '' ) );

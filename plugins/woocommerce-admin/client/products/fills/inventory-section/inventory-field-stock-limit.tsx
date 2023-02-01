@@ -2,9 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useFormContext } from '@woocommerce/components';
+import { useFormContext2 } from '@woocommerce/components';
 import { CheckboxControl } from '@wordpress/components';
 import { Product } from '@woocommerce/data';
+import { useController } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -12,7 +13,13 @@ import { Product } from '@woocommerce/data';
 import { getCheckboxTracks } from '../../sections/utils';
 
 export const InventoryStockLimitField = () => {
-	const { getCheckboxControlProps } = useFormContext< Product >();
+	const { control } = useFormContext2< Product >();
+	const { field } = useController( {
+		name: 'sold_individually',
+		control,
+	} );
+
+	const { value, ...checkboxProps } = field;
 
 	return (
 		<>
@@ -22,10 +29,9 @@ export const InventoryStockLimitField = () => {
 					'Limit purchases to 1 item per order',
 					'woocommerce'
 				) }
-				{ ...getCheckboxControlProps(
-					'sold_individually',
-					getCheckboxTracks( 'sold_individually' )
-				) }
+				{ ...checkboxProps }
+				selected={ value }
+				{ ...getCheckboxTracks( 'sold_individually' ) }
 			/>
 		</>
 	);

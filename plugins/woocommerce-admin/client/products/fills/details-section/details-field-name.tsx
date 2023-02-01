@@ -5,7 +5,7 @@ import { Button, TextControl } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { cleanForSlug } from '@wordpress/url';
-import { useFormContext } from '@woocommerce/components';
+import { useFormContext2 } from '@woocommerce/components';
 import interpolateComponents from '@automattic/interpolate-components';
 import {
 	Product,
@@ -24,14 +24,21 @@ import { PRODUCT_DETAILS_SLUG } from '../constants';
 export const DetailsNameField = ( {} ) => {
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
 		useState( false );
-	const { getInputProps, values, touched, errors, setValue, control } =
-		useFormContext< Product >();
+	const { formState, setValue, control, watch, getValues } =
+		useFormContext2< Product >();
+	const [ id, name, sku, slug, permalink ] = watch( [
+		'id',
+		'name',
+		'sku',
+		'slug',
+		'permalink',
+	] );
 
 	const { permalinkPrefix, permalinkSuffix } = useSelect(
 		( select: WCDataSelector ) => {
 			const { getPermalinkParts } = select( PRODUCTS_STORE_NAME );
-			if ( values.id ) {
-				const parts = getPermalinkParts( values.id );
+			if ( id ) {
+				const parts = getPermalinkParts( id );
 				return {
 					permalinkPrefix: parts?.prefix,
 					permalinkSuffix: parts?.suffix,
@@ -42,14 +49,17 @@ export const DetailsNameField = ( {} ) => {
 	);
 
 	const hasNameError = () => {
-		return Boolean( touched.name ) && Boolean( errors.name );
+		return (
+			Boolean( formState.touchedFields.name ) &&
+			Boolean( formState.errors.name )
+		);
 	};
 
 	const setSkuIfEmpty = () => {
-		if ( values.sku || ! values.name?.length ) {
+		if ( sku || ! name?.length ) {
 			return;
 		}
-		setValue( 'sku', cleanForSlug( values.name ) );
+		setValue( 'sku', cleanForSlug( name ) );
 	};
 	return (
 		<div>
@@ -80,17 +90,13 @@ export const DetailsNameField = ( {} ) => {
 					/>
 				) }
 			/>
-			{ values.id && ! hasNameError() && permalinkPrefix && (
+			{ id && ! hasNameError() && permalinkPrefix && (
 				<span className="woocommerce-product-form__secondary-text product-details-section__product-link">
 					{ __( 'Product link', 'woocommerce' ) }
 					:&nbsp;
-					<a
-						href={ values.permalink }
-						target="_blank"
-						rel="noreferrer"
-					>
+					<a href={ permalink } target="_blank" rel="noreferrer">
 						{ permalinkPrefix }
-						{ values.slug || cleanForSlug( values.name ) }
+						{ slug || cleanForSlug( name ) }
 						{ permalinkSuffix }
 					</a>
 					<Button
@@ -105,7 +111,7 @@ export const DetailsNameField = ( {} ) => {
 				<EditProductLinkModal
 					permalinkPrefix={ permalinkPrefix || '' }
 					permalinkSuffix={ permalinkSuffix || '' }
-					product={ values }
+					product={ getValues() as Product }
 					onCancel={ () => setShowProductLinkEditModal( false ) }
 					onSaved={ () => setShowProductLinkEditModal( false ) }
 				/>

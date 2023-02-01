@@ -10,7 +10,7 @@ import {
 } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
 import { getNewPath } from '@woocommerce/navigation';
-import { useFormContext } from '@woocommerce/components';
+import { useFormContext2 } from '@woocommerce/components';
 import { useParams } from 'react-router-dom';
 import { useSelect } from '@wordpress/data';
 
@@ -28,7 +28,8 @@ import { WooHeaderPageTitle } from '~/header/utils';
 import './product-title.scss';
 
 export const ProductTitle: React.FC = () => {
-	const { values } = useFormContext< Product >();
+	const { watch } = useFormContext2< Product >();
+	const [ name, type ] = watch( [ 'name', 'type' ] );
 	const { productId, variationId } = useParams();
 	const { isLoading, persistedName, productVariation } = useSelect(
 		( select: WCDataSelector ) => {
@@ -78,11 +79,7 @@ export const ProductTitle: React.FC = () => {
 		}
 	);
 
-	const productTitle = getProductTitle(
-		values.name,
-		values.type,
-		persistedName
-	);
+	const productTitle = getProductTitle( name, type, persistedName );
 	const productVariationTitle =
 		productVariation && getProductVariationTitle( productVariation );
 
