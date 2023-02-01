@@ -118,9 +118,11 @@ export const Campaigns = () => {
 													{ el.title }
 												</a>
 											</FlexItem>
-											<FlexItem className="woocommerce-marketing-campaign-description">
-												{ el.description }
-											</FlexItem>
+											{ el.description && (
+												<FlexItem className="woocommerce-marketing-campaign-description">
+													{ el.description }
+												</FlexItem>
+											) }
 										</Flex>
 									</FlexBlock>
 								</Flex>
