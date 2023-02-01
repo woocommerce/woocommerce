@@ -287,7 +287,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Refactor AttributeField into sub-components. [#35997](https://github.com/woocommerce/woocommerce/pull/35997)
 * Tweak - Update product links when new product management experience is enabled [#36382](https://github.com/woocommerce/woocommerce/pull/36382)
 * Tweak - Updates and improves the docblocks for methods WC_Order::get_total() and WC_Order::get_subtotal(). [#34385](https://github.com/woocommerce/woocommerce/pull/34385)
-* Tweak - Update spelling of Cancelled to Canceled for US English. [#36294](https://github.com/woocommerce/woocommerce/pull/36294)
 * Tweak - Validation of Norweigan postcodes has been added. [#36277](https://github.com/woocommerce/woocommerce/pull/36277)
 * Performance - Speed up HPOS search query by using group by instead of distinct. [#35897](https://github.com/woocommerce/woocommerce/pull/35897)
 * Enhancement - Add context to countries shipping to prefix [#36254](https://github.com/woocommerce/woocommerce/pull/36254)
