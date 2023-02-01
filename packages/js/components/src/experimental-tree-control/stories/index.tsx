@@ -56,10 +56,9 @@ export const ExpandOnFilter: React.FC = () => {
 				<TreeControl
 					id="expand-on-filter"
 					items={ listItems }
-					shouldItemBeExpanded={ useCallback(
-						( item ) => shouldItemBeExpanded( item, filter ),
-						[ filter ]
-					) }
+					shouldItemBeExpanded={ ( item ) =>
+						shouldItemBeExpanded( item, filter )
+					}
 				/>
 			</BaseControl>
 		</>
