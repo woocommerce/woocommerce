@@ -7,14 +7,14 @@ import { Pill } from '@woocommerce/components';
 import { PRODUCTS_STORE_NAME, WCDataSelector } from '@woocommerce/data';
 import { useParams } from 'react-router-dom';
 import { useSelect } from '@wordpress/data';
+import {
+	getProductStatus,
+	PRODUCT_STATUS_LABELS,
+} from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
  */
-import {
-	getProductStatus,
-	PRODUCT_STATUS_LABELS,
-} from './utils/get-product-status';
 import './product-status-badge.scss';
 
 export const ProductStatusBadge: React.FC = () => {
