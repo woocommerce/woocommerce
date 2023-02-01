@@ -23,23 +23,12 @@
 		"align": [ "wide", "full" ],
 		"color": {
 			"background": false,
-			"link": true,
-			"__experimentalDefaultControls": {
-				"text": true,
-				"link": true
-			}
+			"link": true
 		},
 		"html": false,
 		"typography": {
 			"fontSize": true,
-			"lineHeight": true,
-			"__experimentalFontFamily": true,
-			"__experimentalFontStyle": true,
-			"__experimentalFontWeight": true,
-			"__experimentalTextTransform": true,
-			"__experimentalDefaultControls": {
-				"fontSize": true
-			}
+			"lineHeight": true
 		}
 	},
 	"apiVersion": 2,

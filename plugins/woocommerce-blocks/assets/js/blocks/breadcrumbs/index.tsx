@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
+import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 import { Icon, queryPagination } from '@wordpress/icons';
 
 /**
@@ -9,6 +10,22 @@ import { Icon, queryPagination } from '@wordpress/icons';
  */
 import metadata from './block.json';
 import edit from './edit';
+
+const featurePluginSupport = {
+	...metadata.supports,
+	...( isFeaturePluginBuild() && {
+		typography: {
+			...metadata.supports.typography,
+			__experimentalFontFamily: true,
+			__experimentalFontStyle: true,
+			__experimentalFontWeight: true,
+			__experimentalTextTransform: true,
+			__experimentalDefaultControls: {
+				fontSize: true,
+			},
+		},
+	} ),
+};
 
 registerBlockType( metadata, {
 	icon: {
@@ -21,6 +38,9 @@ registerBlockType( metadata, {
 	},
 	attributes: {
 		...metadata.attributes,
+	},
+	supports: {
+		...featurePluginSupport,
 	},
 	edit,
 	save() {
