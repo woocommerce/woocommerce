@@ -88,6 +88,8 @@
 .wp-block-woocommerce-mini-cart-contents {
 	box-sizing: border-box;
 	height: 100vh;
+	height: 100dvh;
+	max-height: -webkit-fill-available;
 	padding: 0;
 	justify-content: center;
 }
@@ -98,6 +100,8 @@
 .wp-block-woocommerce-empty-mini-cart-contents-block,
 .wp-block-woocommerce-filled-mini-cart-contents-block {
 	height: 100vh;
+	height: 100dvh;
+	max-height: -webkit-fill-available;
 	display: flex;
 	flex-direction: column;
 }
