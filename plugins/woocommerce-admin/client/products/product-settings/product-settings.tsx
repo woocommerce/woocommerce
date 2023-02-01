@@ -12,8 +12,9 @@ import {
 } from '@wordpress/components';
 import { closeSmall, cog } from '@wordpress/icons';
 import { Product } from '@woocommerce/data';
-import { useFormContext } from '@woocommerce/components';
+import { useFormContext2 } from '@woocommerce/components';
 import { useState } from '@wordpress/element';
+import { useController } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -23,9 +24,18 @@ import { WooHeaderItem } from '~/header/utils';
 import './product-settings.scss';
 
 export const ProductSettings = () => {
-	const { getCheckboxControlProps, getInputProps } =
-		useFormContext< Product >();
+	const { control } = useFormContext2< Product >();
 	const [ isOpen, setIsOpen ] = useState( false );
+
+	const { field: reviewsField } = useController( {
+		name: 'reviews_allowed',
+		control,
+	} );
+
+	const { field: menuField } = useController( {
+		name: 'menu_order',
+		control,
+	} );
 
 	return (
 		<WooHeaderItem>
@@ -52,15 +62,19 @@ export const ProductSettings = () => {
 						<PanelBody title={ __( 'Advanced', 'woocommerce' ) }>
 							<CheckboxControl
 								label={ __( 'Enable reviews', 'woocommerce' ) }
-								{ ...getCheckboxControlProps(
-									'reviews_allowed',
-									getCheckboxTracks( 'reviews_allowed' )
-								) }
+								onChange={ ( value ) => {
+									reviewsField.onChange( value );
+									getCheckboxTracks(
+										'reviews_allowed'
+									).onChange( value );
+								} }
+								checked={ reviewsField.value }
 							/>
 							<TextControl
 								label={ __( 'Menu order', 'woocommerce' ) }
 								type="number"
-								{ ...getInputProps( 'menu_order' ) }
+								value={ menuField.value }
+								onChange={ menuField.onChange }
 							/>
 						</PanelBody>
 					</Panel>
