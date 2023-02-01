@@ -146,7 +146,7 @@ const Content = () => {
 };
 ```
 
-Payment method components are passed, by default, everything from the `usePaymentMethodInterface` hook. So we can consume this in our component like so:
+Payment method components are passed, by default, everything from the [`usePaymentMethodInterface` hook](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/docs/internal-developers/block-client-apis/checkout/checkout-api.md#usepaymentmethodinterface). So we can consume this in our component like so:
 
 ```js
 const Content = ( props ) => {
