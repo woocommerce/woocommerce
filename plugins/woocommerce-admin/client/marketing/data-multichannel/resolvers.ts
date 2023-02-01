@@ -51,9 +51,20 @@ export function* getRecommendedChannels() {
 }
 
 export function* getCampaigns() {
+	/**
+	 * Page size.
+	 *
+	 * We set this to 100 because this is the maximum limit allowed by the API.
+	 *
+	 * We need this to support pagination in the UI.
+	 * Currently API does not return total number of rows,
+	 * so we use 100 to get "all" the rows.
+	 */
+	const perPage = 100;
+
 	try {
 		const data: Array< Campaign > = yield apiFetch( {
-			path: `${ API_NAMESPACE }/campaigns`,
+			path: `${ API_NAMESPACE }/campaigns?per_page=${ perPage }`,
 		} );
 
 		yield receiveCampaignsSuccess( data );
