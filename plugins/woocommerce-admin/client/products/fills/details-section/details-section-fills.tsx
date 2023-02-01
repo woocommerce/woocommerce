@@ -74,5 +74,12 @@ export const DetailsSectionFills = () => (
 		>
 			<DetailsDescriptionField />
 		</WooProductFieldItem>
+		<WooProductFieldItem
+			id="my-field-item"
+			sections={ [ { name: DETAILS_SECTION_ID, order: 2 } ] }
+			pluginId={ PLUGIN_ID }
+		>
+			<div className="my-class">Test field</div>
+		</WooProductFieldItem>
 	</>
 );
