@@ -11,8 +11,7 @@ import {
 import interpolateComponents from '@automattic/interpolate-components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { Controller } from 'react-hook-form';
-import _omit from 'lodash/omit';
+import { useController } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -23,56 +22,53 @@ import { PRODUCT_DETAILS_SLUG } from '../constants';
 export const DetailsFeatureField = () => {
 	const { control } = useFormContext2< Product >();
 
+	const { field } = useController( {
+		name: 'featured',
+		control,
+	} );
+
 	const checkboxTracksFn = getCheckboxTracks( 'featured' );
 
 	return (
-		<Controller
-			name="featured"
-			control={ control }
-			render={ ( { field } ) => (
-				<CheckboxControl
-					onChange={ ( value ) => {
-						field.onChange( value );
-						checkboxTracksFn.onChange( value );
-					} }
-					label={
-						<>
-							{ __( 'Feature this product', 'woocommerce' ) }
-							<Tooltip
-								text={ interpolateComponents( {
-									mixedString: __(
-										'Include this product in a featured section on your website with a widget or shortcode. {{moreLink/}}',
-										'woocommerce'
-									),
-									components: {
-										moreLink: (
-											<Link
-												href="https://woocommerce.com/document/woocommerce-shortcodes/#products"
-												target="_blank"
-												type="external"
-												onClick={ () =>
-													recordEvent(
-														'add_product_learn_more',
-														{
-															category:
-																PRODUCT_DETAILS_SLUG,
-														}
-													)
+		<CheckboxControl
+			onChange={ ( value ) => {
+				field.onChange( value );
+				checkboxTracksFn.onChange( value );
+			} }
+			checked={ field.value }
+			label={
+				<>
+					{ __( 'Feature this product', 'woocommerce' ) }
+					<Tooltip
+						text={ interpolateComponents( {
+							mixedString: __(
+								'Include this product in a featured section on your website with a widget or shortcode. {{moreLink/}}',
+								'woocommerce'
+							),
+							components: {
+								moreLink: (
+									<Link
+										href="https://woocommerce.com/document/woocommerce-shortcodes/#products"
+										target="_blank"
+										type="external"
+										onClick={ () =>
+											recordEvent(
+												'add_product_learn_more',
+												{
+													category:
+														PRODUCT_DETAILS_SLUG,
 												}
-											>
-												{ __(
-													'Learn more',
-													'woocommerce'
-												) }
-											</Link>
-										),
-									},
-								} ) }
-							/>
-						</>
-					}
-				/>
-			) }
-		></Controller>
+											)
+										}
+									>
+										{ __( 'Learn more', 'woocommerce' ) }
+									</Link>
+								),
+							},
+						} ) }
+					/>
+				</>
+			}
+		/>
 	);
 };

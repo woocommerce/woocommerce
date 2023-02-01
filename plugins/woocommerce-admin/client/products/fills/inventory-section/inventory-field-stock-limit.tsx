@@ -19,8 +19,6 @@ export const InventoryStockLimitField = () => {
 		control,
 	} );
 
-	const { value, ...checkboxProps } = field;
-
 	return (
 		<>
 			<h4>{ __( 'Restrictions', 'woocommerce' ) }</h4>
@@ -29,9 +27,11 @@ export const InventoryStockLimitField = () => {
 					'Limit purchases to 1 item per order',
 					'woocommerce'
 				) }
-				{ ...checkboxProps }
-				selected={ value }
-				{ ...getCheckboxTracks( 'sold_individually' ) }
+				onChange={ ( value ) => {
+					field.onChange( value );
+					getCheckboxTracks( 'sold_individually' ).onChange( value );
+				} }
+				checked={ field.value }
 			/>
 		</>
 	);

@@ -45,8 +45,11 @@ export const InventoryTrackQuantityField = () => {
 		>
 			<ToggleControl
 				label={ __( 'Track quantity for this product', 'woocommerce' ) }
-				{ ...field }
-				{ ...getCheckboxTracks( 'manage_stock' ) }
+				checked={ field.value }
+				onChange={ ( value ) => {
+					field.onChange( value );
+					getCheckboxTracks( 'manage_stock' ).onChange( value );
+				} }
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore This prop does exist, but is not typed in @wordpress/components.
 				disabled={ ! canManageStock }
