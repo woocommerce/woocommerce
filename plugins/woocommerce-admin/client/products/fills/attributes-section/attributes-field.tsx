@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useFormContext, useFormContext2 } from '@woocommerce/components';
+import { useFormContext2 } from '@woocommerce/components';
 import { useController } from 'react-hook-form';
 import { Product } from '@woocommerce/data';
 
@@ -17,5 +17,11 @@ export const AttributesField = () => {
 		control,
 	} );
 
-	return <Attributes { ...field } productId={ getValues( 'id' ) } />;
+	return (
+		<Attributes
+			onChange={ field.onChange }
+			value={ field.value }
+			productId={ getValues( 'id' ) }
+		/>
+	);
 };

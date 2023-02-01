@@ -3,8 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useFormContext2 } from '@woocommerce/components';
-import { Product, ProductCategory } from '@woocommerce/data';
-import { Controller, useController } from 'react-hook-form';
+import { Product } from '@woocommerce/data';
+import { useController } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -20,7 +20,8 @@ export const DetailsCategoriesField = () => {
 
 	return (
 		<CategoryField
-			{ ...field }
+			onChange={ field.onChange }
+			value={ field.value }
 			label={ __( 'Categories', 'woocommerce' ) }
 			placeholder={ __( 'Search or create category…', 'woocommerce' ) }
 		/>

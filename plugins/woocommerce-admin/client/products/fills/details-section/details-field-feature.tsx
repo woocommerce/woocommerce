@@ -31,7 +31,6 @@ export const DetailsFeatureField = () => {
 			control={ control }
 			render={ ( { field } ) => (
 				<CheckboxControl
-					{ ..._omit( field, [ 'value' ] ) }
 					onChange={ ( value ) => {
 						field.onChange( value );
 						checkboxTracksFn.onChange( value );
