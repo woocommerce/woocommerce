@@ -13,7 +13,7 @@ import {
 	FlexBlock,
 } from '@wordpress/components';
 import { Icon, megaphone } from '@wordpress/icons';
-import { Pagination, Table } from '@woocommerce/components';
+import { Pagination, Table, Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -114,9 +114,9 @@ export const Campaigns = () => {
 									<FlexBlock>
 										<Flex direction="column" gap={ 1 }>
 											<FlexItem className="woocommerce-marketing-campaign-title">
-												<a href={ el.manageUrl }>
+												<Link href={ el.manageUrl }>
 													{ el.title }
-												</a>
+												</Link>
 											</FlexItem>
 											{ el.description && (
 												<FlexItem className="woocommerce-marketing-campaign-description">
