@@ -78,7 +78,7 @@ test.describe.serial( 'WooCommerce update', () => {
 			} );
 		} );
 
-		await test.step( 'Upload the plugin zip', async () => {
+		await test.step( 'Upload the WooCommerce plugin zip', async () => {
 			await page.click( 'a.upload-view-toggle' );
 			await expect( page.locator( 'p.install-help' ) ).toBeVisible();
 			await expect( page.locator( 'p.install-help' ) ).toContainText(
@@ -93,7 +93,7 @@ test.describe.serial( 'WooCommerce update', () => {
 			await page.waitForLoadState( 'networkidle' );
 		} );
 
-		await test.step( 'Replace current with uploaded', async () => {
+		await test.step( 'Choose the option "Replace current with uploaded"', async () => {
 			await page.click( '.button-primary.update-from-upload-overwrite' );
 			await page.waitForLoadState( 'networkidle' );
 			await expect(
