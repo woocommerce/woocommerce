@@ -2,8 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useFormContext } from '@woocommerce/components';
+import { useFormContext2 } from '@woocommerce/components';
 import { PartialProduct } from '@woocommerce/data';
+import { useController } from 'react-hook-form';
 import {
 	BaseControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
@@ -22,22 +23,23 @@ export const ShippingDimensionsLengthField = ( {
 	dimensionProps,
 	setHighlightSide,
 }: ShippingDimensionsPropsType ) => {
-	const { getInputProps } = useFormContext< PartialProduct >();
+	const { control } = useFormContext2< PartialProduct >();
+	const { field } = useController( {
+		name: 'dimensions.length',
+		control,
+	} );
 	const { formatNumber } = useProductHelper();
 
-	const inputLengthProps = getInputProps(
-		'dimensions.length',
-		dimensionProps
-	);
 	return (
 		<BaseControl
 			id="product_shipping_dimensions_length"
-			className={ inputLengthProps.className }
-			help={ inputLengthProps.help }
+			// className={ inputLengthProps.className } // TODO these props were provided by the old form
+			// help={ inputLengthProps.help }
 		>
 			<InputControl
-				{ ...inputLengthProps }
-				value={ formatNumber( String( inputLengthProps.value ) ) }
+				{ ...field }
+				{ ...dimensionProps }
+				value={ formatNumber( String( field.value ) ) }
 				label={ getInterpolatedSizeLabel(
 					__( 'Length {{span}}B{{/span}}', 'woocommerce' )
 				) }

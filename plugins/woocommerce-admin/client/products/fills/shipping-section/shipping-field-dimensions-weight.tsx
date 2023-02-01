@@ -2,9 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useFormContext } from '@woocommerce/components';
+import { useFormContext2 } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME, PartialProduct } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
+import { useController } from 'react-hook-form';
 import {
 	BaseControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
@@ -18,7 +19,12 @@ import {
 import { useProductHelper } from '../../use-product-helper';
 
 export const ShippingDimensionsWeightField = () => {
-	const { getInputProps } = useFormContext< PartialProduct >();
+	const { control } = useFormContext2< PartialProduct >();
+	const { field } = useController( {
+		name: 'weight',
+		control,
+	} );
+
 	const { formatNumber, parseNumber } = useProductHelper();
 
 	const { weightUnit, hasResolvedUnits } = useSelect( ( select ) => {
@@ -36,20 +42,18 @@ export const ShippingDimensionsWeightField = () => {
 		return null;
 	}
 
-	const inputWeightProps = getInputProps( 'weight', {
-		sanitize: ( value: PartialProduct[ keyof PartialProduct ] ) =>
-			parseNumber( String( value ) ),
-	} );
-
 	return (
 		<BaseControl
 			id="product_shipping_weight"
-			className={ inputWeightProps.className }
-			help={ inputWeightProps.help }
+			// className={ inputWeightProps.className } TODO       these props were provided by the old form
+			// help={ inputWeightProps.help }
 		>
 			<InputControl
-				{ ...inputWeightProps }
-				value={ formatNumber( String( inputWeightProps.value ) ) }
+				{ ...field }
+				sanitize={ ( value: PartialProduct[ keyof PartialProduct ] ) =>
+					parseNumber( String( value ) )
+				}
+				value={ formatNumber( String( field.value ) ) }
 				label={ __( 'Weight', 'woocommerce' ) }
 				suffix={ weightUnit }
 			/>

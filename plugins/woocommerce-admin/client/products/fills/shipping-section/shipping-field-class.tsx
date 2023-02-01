@@ -4,7 +4,7 @@
 import { useState } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import { Link, useFormContext, Spinner } from '@woocommerce/components';
+import { Link, useFormContext2, Spinner } from '@woocommerce/components';
 import {
 	EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME,
 	PartialProduct,
@@ -13,6 +13,7 @@ import {
 import interpolateComponents from '@automattic/interpolate-components';
 import { recordEvent } from '@woocommerce/tracks';
 import { SelectControl } from '@wordpress/components';
+import { useController } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -79,11 +80,11 @@ function extractDefaultShippingClassFromProduct(
 export const ShippingClassField: React.FC<
 	ProductShippingSectionPropsType
 > = ( { product } ) => {
-	const { getInputProps, getSelectControlProps, setValue } =
-		useFormContext< PartialProduct >();
+	const { setValue, control } = useFormContext2< PartialProduct >();
 	const [ showShippingClassModal, setShowShippingClassModal ] =
 		useState( false );
-	const shippingClassProps = getInputProps( 'shipping_class' );
+
+	const { field } = useController( { name: 'shipping_class', control } );
 
 	const { shippingClasses, hasResolvedShippingClasses } = useSelect(
 		( select ) => {
@@ -134,9 +135,8 @@ export const ShippingClassField: React.FC<
 				<>
 					<SelectControl
 						label={ __( 'Shipping class', 'woocommerce' ) }
-						{ ...getSelectControlProps( 'shipping_class', {
-							className: 'half-width-field',
-						} ) }
+						value={ field.value }
+						className="half-width-field"
 						onChange={ ( value: string ) => {
 							if (
 								value === ADD_NEW_SHIPPING_CLASS_OPTION_VALUE
@@ -144,7 +144,7 @@ export const ShippingClassField: React.FC<
 								setShowShippingClassModal( true );
 								return;
 							}
-							shippingClassProps.onChange( value );
+							field.onChange( value );
 						} }
 						options={ [
 							...DEFAULT_SHIPPING_CLASS_OPTIONS,
