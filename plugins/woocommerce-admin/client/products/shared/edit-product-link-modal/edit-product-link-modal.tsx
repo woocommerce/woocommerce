@@ -8,8 +8,7 @@ import { useDispatch } from '@wordpress/data';
 import { cleanForSlug } from '@wordpress/url';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Product } from '@woocommerce/data';
-import { Text } from '@woocommerce/experimental';
-import { useFormContext } from '@woocommerce/components';
+import { useFormContext2 } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -39,7 +38,7 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 	const [ slug, setSlug ] = useState(
 		product.slug || cleanForSlug( product.name )
 	);
-	const { resetForm } = useFormContext< Product >();
+	const { reset } = useFormContext2< Product >();
 
 	const onSave = async () => {
 		recordEvent( 'product_update_slug', {
@@ -57,7 +56,7 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 		);
 		if ( updatedProduct && updatedProduct.id ) {
 			// only reset the updated slug and permalink fields.
-			resetForm( {
+			reset( {
 				...product,
 				slug: updatedProduct.slug,
 				permalink: updatedProduct.permalink,

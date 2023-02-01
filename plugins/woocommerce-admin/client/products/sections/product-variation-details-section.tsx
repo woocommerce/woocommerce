@@ -11,12 +11,13 @@ import {
 } from '@wordpress/components';
 import { MediaItem } from '@wordpress/media-utils';
 import {
-	useFormContext,
+	useFormContext2,
 	__experimentalRichTextEditor as RichTextEditor,
 	__experimentalTooltip as Tooltip,
 } from '@woocommerce/components';
 import { ProductVariation, ProductVariationImage } from '@woocommerce/data';
 import { useState } from '@wordpress/element';
+import { useController } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -50,14 +51,18 @@ function formatVariationImage(
 }
 
 export const ProductVariationDetailsSection: React.FC = () => {
-	const { getCheckboxControlProps, getInputProps, values, setValue } =
-		useFormContext< ProductVariation >();
+	const { setValue, watch, control } = useFormContext2< ProductVariation >();
+
+	const [ description, status ] = watch( [ 'description', 'status' ] );
+
+	const { field: imageField } = useController( {
+		name: 'image',
+		control,
+	} );
 
 	const [ descriptionBlocks, setDescriptionBlocks ] = useState<
 		BlockInstance[]
-	>( rawHandler( { HTML: values.description } ) );
-
-	const imageFieldProps = getInputProps( 'image' );
+	>( rawHandler( { HTML: description } ) );
 
 	return (
 		<ProductSectionLayout
@@ -81,19 +86,16 @@ export const ProductVariationDetailsSection: React.FC = () => {
 								/>
 							</>
 						}
-						{ ...getCheckboxControlProps(
-							'status',
-							getCheckboxTracks< ProductVariation >( 'status' )
-						) }
-						checked={ values.status === 'publish' }
-						onChange={ () =>
+						checked={ status === 'publish' }
+						onChange={ ( value ) => {
 							setValue(
 								'status',
-								values.status !== 'publish'
-									? 'publish'
-									: 'private'
-							)
-						}
+								status !== 'publish' ? 'publish' : 'private'
+							);
+							getCheckboxTracks< ProductVariation >(
+								'status'
+							).onChange( value );
+						} }
 					/>
 					<RichTextEditor
 						label={ __( 'Description', 'woocommerce' ) }
@@ -115,7 +117,7 @@ export const ProductVariationDetailsSection: React.FC = () => {
 						<SingleImageField
 							label={ __( 'Image', 'woocommerce' ) }
 							value={ formatVariationImage(
-								imageFieldProps.value as ProductVariationImage
+								imageField.value as ProductVariationImage
 							) }
 							onChange={ ( media ) =>
 								setValue(

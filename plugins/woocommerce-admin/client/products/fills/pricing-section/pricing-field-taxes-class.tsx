@@ -37,19 +37,14 @@ export const PricingTaxesClassField = () => {
 		}
 	);
 
-	// These properties cause issues with the RadioControl component.
-	// A fix to form upstream would help if we can identify what type of input is used.
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	const { value, ref, ...taxClassProps } = field;
-
 	if ( isTaxClassesResolving || taxClasses.length <= 0 ) {
 		return null;
 	}
 
 	return (
 		<RadioControl
-			{ ...taxClassProps }
+			onChange={ field.onChange }
+			selected={ field.value }
 			label={
 				<>
 					<span>{ __( 'Tax class', 'woocommerce' ) }</span>
