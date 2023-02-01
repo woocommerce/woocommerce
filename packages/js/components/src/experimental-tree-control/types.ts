@@ -18,14 +18,12 @@ export type TreeProps = React.DetailedHTMLProps<
 	items: LinkedTree[];
 	/**
 	 * Return if the tree item passed in should be expanded.
-	 * Cache the function to improve performance.
 	 *
 	 * @example
 	 * <Tree
-	 * 	shouldItemBeExpanded={ useCallback(
-	 * 		( item ) => checkExpanded( item, text ),
-	 * 		[ text ]
-	 * 	) }
+	 * 	shouldItemBeExpanded={
+	 * 		( item ) => checkExpanded( item, filter )
+	 * 	}
 	 * />
 	 *
 	 * @param  item The tree item to determine if should be expanded.
