@@ -32,13 +32,13 @@
 		margin-bottom: $gap-smallest;
 	}
 
-	.woocommerce-marketing-campaign-logo {
+	&__campaign-logo {
 		img {
 			display: block;
 		}
 	}
 
-	.woocommerce-marketing-campaign-title {
+	&__campaign-title {
 		a {
 			color: #007cba;
 			font-weight: 600;
@@ -46,11 +46,11 @@
 		}
 	}
 
-	.woocommerce-marketing-campaign-description {
+	&__campaign-description {
 		color: $gray-700;
 	}
 
-	.woocommerce-marketing-campaigns-card-footer {
+	&__footer {
 		justify-content: center;
 
 		// Remove the border-top because the table cells already has a border-bottom.

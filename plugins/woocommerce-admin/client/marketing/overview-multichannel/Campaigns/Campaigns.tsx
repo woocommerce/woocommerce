@@ -105,7 +105,7 @@ export const Campaigns = () => {
 							{
 								display: (
 									<Flex gap={ 4 }>
-										<FlexItem className="woocommerce-marketing-campaign-logo">
+										<FlexItem className="woocommerce-marketing-campaigns-card__campaign-logo">
 											<img
 												src={ el.icon }
 												alt={ el.channelName }
@@ -115,13 +115,13 @@ export const Campaigns = () => {
 										</FlexItem>
 										<FlexBlock>
 											<Flex direction="column" gap={ 1 }>
-												<FlexItem className="woocommerce-marketing-campaign-title">
+												<FlexItem className="woocommerce-marketing-campaigns-card__campaign-title">
 													<Link href={ el.manageUrl }>
 														{ el.title }
 													</Link>
 												</FlexItem>
 												{ el.description && (
-													<FlexItem className="woocommerce-marketing-campaign-description">
+													<FlexItem className="woocommerce-marketing-campaigns-card__campaign-description">
 														{ el.description }
 													</FlexItem>
 												) }
@@ -135,7 +135,7 @@ export const Campaigns = () => {
 					} ) }
 				/>
 				{ total > perPage && (
-					<CardFooter className="woocommerce-marketing-campaigns-card-footer">
+					<CardFooter className="woocommerce-marketing-campaigns-card__footer">
 						<Pagination
 							showPerPagePicker={ false }
 							perPage={ perPage }
