@@ -93,11 +93,18 @@ class Translations {
 				continue;
 			}
 
-			if ( ! isset( $chunk_data['comment']['reference'] ) ) {
+			// Support for wp-cli --make-json and Loco Translate file format.
+
+			if ( ! ( isset( $chunk_data['comment']['reference'] ) || isset( $chunk_data['source'] ) ) ) {
 				continue;
 			}
 
-			$reference_file = $chunk_data['comment']['reference'];
+			if ( isset( $chunk_data['comment'] ) ){
+				$reference_file = $chunk_data['comment']['reference'];
+			} else {
+				$reference_file = $chunk_data['source'];
+			}
+
 
 			// Only combine "app" files (not scripts registered with WP).
 			if (
@@ -112,15 +119,31 @@ class Translations {
 				$combined_translation_data = $chunk_data;
 			} else {
 				// Combine all messages from all chunk files.
-				$combined_translation_data['locale_data']['messages'] = array_merge(
-					$combined_translation_data['locale_data']['messages'],
-					$chunk_data['locale_data']['messages']
-				);
+
+				// Support for wp-cli --make-json and Loco Translate file format.
+				if ( isset( $chunk_data['locale_data']['messages'] ) ){
+					$combined_translation_data['locale_data']['messages'] = array_merge(
+						$combined_translation_data['locale_data']['messages'],
+						$chunk_data['locale_data']['messages']
+					);
+				} else {
+					$combined_translation_data['locale_data']['woocommerce'] = array_merge(
+						$combined_translation_data['locale_data']['woocommerce'],
+						$chunk_data['locale_data']['woocommerce']
+					);
+				}
+
 			}
 		}
 
 		// Remove inaccurate reference comment.
-		unset( $combined_translation_data['comment'] );
+
+		// Support for wp-cli --make-json and Loco Translate file format.
+		if ( isset( $combined_translation_data['comment'] ) ){
+			unset( $combined_translation_data['comment'] );
+		} else {
+			unset( $combined_translation_data['source'] );
+		}
 
 		return $combined_translation_data;
 	}
