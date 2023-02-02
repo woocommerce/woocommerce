@@ -411,7 +411,6 @@ const PriceSlider = ( {
 								'woo-gutenberg-products-block'
 							) }
 							allowNegative={ false }
-							isLoading={ isLoading }
 							isAllowed={ isValidMinValue( {
 								minConstraint,
 								minorUnit: currency.minorUnit,
@@ -440,7 +439,6 @@ const PriceSlider = ( {
 								'Filter products by maximum price',
 								'woo-gutenberg-products-block'
 							) }
-							isLoading={ isLoading }
 							isAllowed={ isValidMaxValue( {
 								maxConstraint,
 								minorUnit: currency.minorUnit,
