@@ -44,6 +44,7 @@ class ProductRating extends AbstractBlock {
 			'spacing'                =>
 			array(
 				'margin'                          => true,
+				'padding'                         => true,
 				'__experimentalSkipSerialization' => true,
 			),
 			'__experimentalSelector' => '.wc-block-components-product-rating',
@@ -109,7 +110,7 @@ class ProductRating extends AbstractBlock {
 
 		if ( $product ) {
 
-			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'font_size', 'margin', 'text_color' ) );
+			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
 
 			add_filter(
