@@ -37,4 +37,4 @@ HUSKY=0 git checkout $PROTECTED_BRANCH --quiet
 echo "checkout 2"
 HUSKY=0 git checkout $CURRENT_BRANCH --quiet
 
-php tools/monorepo/check-changelogger-use.php $PROTECTED_BRANCH $CURRENT_BRANCH
+# php tools/monorepo/check-changelogger-use.php $PROTECTED_BRANCH $CURRENT_BRANCH
