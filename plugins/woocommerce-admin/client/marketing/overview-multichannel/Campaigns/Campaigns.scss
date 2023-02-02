@@ -20,7 +20,7 @@
 	}
 
 	&__content-title {
-		font-size: 13px;
+		@include font-size( 13 );
 		font-weight: 600;
 		line-height: 16px;
 		color: $gray-900;
