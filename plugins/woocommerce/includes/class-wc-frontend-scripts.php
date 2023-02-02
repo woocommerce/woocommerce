@@ -54,19 +54,20 @@ class WC_Frontend_Scripts {
 	 * Log a warning for deprecated scripts/styles that will be removed.
 	 */
 	public static function warn_deprecated_scripts() {
-		global $wp_scripts, $wp_styles;
-
 		$deprecated_scripts = array(
 			'prettyPhoto',
 			'prettyPhoto-init',
-			'jquery-cookie',
-			'woocommerce_prettyPhoto_css',
+			'jquery-cookie'
 		);
 
 		foreach ( $deprecated_scripts as $script ) {
 			if ( wp_script_is( $script, 'enqueued' ) ) {
 				wc_deprecated_script( $script, '3.3.0' );
 			}
+		}
+
+		if ( wp_style_is( 'woocommerce_prettyPhoto_css', 'enqueued' ) ) {
+			wc_deprecated_script( 'woocommerce_prettyPhoto_css', '3.3.0' );
 		}
 	}
 
