@@ -353,6 +353,7 @@ const PriceFilterBlock = ( {
 					onSubmit={ () => onSubmit( minPrice, maxPrice ) }
 					isLoading={ isLoading }
 					isUpdating={ isUpdating }
+					isEditor={ isEditor }
 				/>
 			</div>
 		</>

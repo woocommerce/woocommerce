@@ -489,7 +489,7 @@ const RatingFilterBlock = ( {
 			</div>
 			{
 				<div className="wc-block-rating-filter__actions">
-					{ checked.length > 0 && ! isLoading && (
+					{ ( checked.length > 0 || isEditor ) && ! isLoading && (
 						<FilterResetButton
 							onClick={ () => {
 								setChecked( [] );
