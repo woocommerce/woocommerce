@@ -32,7 +32,9 @@ if [ $? -ne 0 ]; then
 fi
 
 # Ensure both branches are tracked or check-changelogger-use will fail. Skip husky hooks re-running
+echo "checkout 1"
 HUSKY=0 git checkout $PROTECTED_BRANCH --quiet
+echo "checkout 2"
 HUSKY=0 git checkout $CURRENT_BRANCH --quiet
 
 php tools/monorepo/check-changelogger-use.php $PROTECTED_BRANCH $CURRENT_BRANCH
