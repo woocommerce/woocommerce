@@ -31,10 +31,8 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-# Skip running husky hooks as a result of running this script.
-export HUSKY=0 
 # Ensure both branches are tracked or check-changelogger-use will fail.
 git checkout $PROTECTED_BRANCH --quiet
 git checkout $CURRENT_BRANCH --quiet
 
-# php tools/monorepo/check-changelogger-use.php $PROTECTED_BRANCH $CURRENT_BRANCH
+php tools/monorepo/check-changelogger-use.php $PROTECTED_BRANCH $CURRENT_BRANCH
