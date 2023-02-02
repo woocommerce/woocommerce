@@ -14,17 +14,31 @@ import { useController } from 'react-hook-form';
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
+import { getErrorMessageProps } from '~/products/utils/get-error-message-props';
 
 export const InventoryStockManageField = () => {
 	const { control } = useFormContext2< Product >();
-	const { field } = useController( {
+	const { field, fieldState } = useController( {
 		name: 'stock_quantity',
 		control,
+		rules: {
+			min: {
+				value: 0,
+				message: 'Stock quantity must be a positive number.',
+			},
+		},
 	} );
-	const { field: lowStockCount } = useController( {
-		name: 'low_stock_amount',
-		control,
-	} );
+	const { field: lowStockCount, fieldState: lowStockAmtFieldState } =
+		useController( {
+			name: 'low_stock_amount',
+			control,
+			rules: {
+				min: {
+					value: 0,
+					message: 'Stock quantity must be a positive number.',
+				},
+			},
+		} );
 	const notifyLowStockAmount = getAdminSetting( 'notifyLowStockAmount', 2 );
 
 	return (
@@ -34,6 +48,7 @@ export const InventoryStockManageField = () => {
 				type="number"
 				label={ __( 'Current quantity', 'woocommerce' ) }
 				{ ...field }
+				{ ...getErrorMessageProps( fieldState ) }
 				min={ 0 }
 			/>
 			<TextControl
@@ -45,6 +60,7 @@ export const InventoryStockManageField = () => {
 					notifyLowStockAmount
 				) }
 				{ ...lowStockCount }
+				{ ...getErrorMessageProps( lowStockAmtFieldState ) }
 				min={ 0 }
 			/>
 			<span className="woocommerce-product-form__secondary-text">

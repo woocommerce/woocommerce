@@ -8,6 +8,7 @@ import { createElement } from 'react';
 function NuForm( props: any ) {
 	const methods = useForm( {
 		defaultValues: props.initialValues,
+		mode: 'onBlur',
 	} );
 	return <FormProvider { ...methods }>{ props.children }</FormProvider>;
 }
