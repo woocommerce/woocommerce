@@ -3,12 +3,12 @@
  */
 import { createElement } from '@wordpress/element';
 import { Card, CardBody } from '@wordpress/components';
+import { __experimentalWooProductFieldItem as WooProductFieldItem } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
 import { ProductSectionLayout } from './product-section-layout';
-import { WooProductFieldItem } from '../woo-product-field-item';
 
 type ProductFieldSectionProps = {
 	id: string;

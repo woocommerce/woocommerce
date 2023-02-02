@@ -17,7 +17,7 @@ export type RegisteredChannel = {
 	icon: string;
 };
 
-export type ChannelsState = {
+export type RegisteredChannelsState = {
 	data?: Array< RegisteredChannel >;
 	error?: ApiFetchError;
 };
@@ -67,7 +67,7 @@ export type CampaignsState = {
 };
 
 export type State = {
-	registeredChannels: ChannelsState;
+	registeredChannels: RegisteredChannelsState;
 	recommendedChannels: RecommendedChannelsState;
 	campaigns: CampaignsState;
 };
