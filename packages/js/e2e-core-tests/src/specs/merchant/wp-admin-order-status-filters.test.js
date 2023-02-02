@@ -16,7 +16,7 @@ const orderStatus = [
 	[ 'Processing', 'wc-processing' ],
 	[ 'On hold', 'wc-on-hold' ],
 	[ 'Completed', 'wc-completed' ],
-	[ 'Canceled', 'wc-cancelled' ],
+	[ 'Cancelled', 'wc-cancelled' ],
 	[ 'Refunded', 'wc-refunded' ],
 	[ 'Failed', 'wc-failed' ],
 ];
