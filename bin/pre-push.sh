@@ -31,7 +31,7 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-# Ensure both branches are tracked or check-changelogger-use will fail.
+# Ensure both branches are tracked or check-changelogger-use will fail. Skip husky hooks re-running
 HUSKY=0 git checkout $PROTECTED_BRANCH --quiet
 HUSKY=0 git checkout $CURRENT_BRANCH --quiet
 
