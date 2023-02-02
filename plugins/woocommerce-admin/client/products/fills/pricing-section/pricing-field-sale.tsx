@@ -10,7 +10,7 @@ import {
 } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { useContext, useState, useEffect } from '@wordpress/element';
-import { useController } from 'react-hook-form';
+import { useController, useWatch } from 'react-hook-form';
 import { Product, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import interpolateComponents from '@automattic/interpolate-components';
@@ -39,11 +39,11 @@ const PRODUCT_SCHEDULED_SALE_SLUG = 'product-scheduled-sale';
 export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 	currencyInputProps,
 } ) => {
-	const { control, setValue, watch } = useFormContext2< Product >();
-	const [ date_on_sale_from_gmt, date_on_sale_to_gmt ] = watch( [
-		'date_on_sale_from_gmt',
-		'date_on_sale_to_gmt',
-	] );
+	const { control, setValue } = useFormContext2< Product >();
+	const [ date_on_sale_from_gmt, date_on_sale_to_gmt ] = useWatch( {
+		name: [ 'date_on_sale_from_gmt', 'date_on_sale_to_gmt' ],
+		control,
+	} );
 	const { field } = useController( {
 		name: 'sale_price',
 		control,
@@ -131,6 +131,7 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 			<BaseControl id="product_pricing_sale_price">
 				<InputControl
 					{ ...field }
+					{ ...currencyInputProps }
 					name="sale_price"
 					label={ __( 'Sale price', 'woocommerce' ) }
 					value={ formatCurrencyDisplayValue(

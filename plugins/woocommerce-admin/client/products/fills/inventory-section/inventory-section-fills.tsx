@@ -14,6 +14,7 @@ import { Card, CardBody } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { getAdminLink } from '@woocommerce/settings';
 import { Product } from '@woocommerce/data';
+import { useWatch } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -39,8 +40,8 @@ export const InventorySectionFills: React.FC< InventorySectionFillsType > = ( {
 	basicSectionId,
 	advancedSectionId,
 } ) => {
-	const { watch } = useFormContext2< Product >();
-	const manageStock = watch( 'manage_stock' );
+	const { control } = useFormContext2< Product >();
+	const manageStock = useWatch( { name: 'manage_stock', control } );
 
 	return (
 		<>

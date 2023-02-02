@@ -18,10 +18,10 @@ import {
 } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { useContext, useState } from '@wordpress/element';
-import { useParams } from 'react-router-dom';
 import { useSelect, useDispatch } from '@wordpress/data';
 import classnames from 'classnames';
 import truncate from 'lodash/truncate';
+import { useWatch } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -57,8 +57,8 @@ export const Variations: React.FC = () => {
 	const [ isUpdating, setIsUpdating ] = useState< Record< string, boolean > >(
 		{}
 	);
-	const { watch } = useFormContext2< Product >();
-	const productId = watch( 'id' );
+	const { control } = useFormContext2< Product >();
+	const productId = useWatch( { name: 'id', control } );
 	const context = useContext( CurrencyContext );
 	const { formatAmount, getCurrencyConfig } = context;
 	const { isLoading, variations, totalCount } = useSelect(

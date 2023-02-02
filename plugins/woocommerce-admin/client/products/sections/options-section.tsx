@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Link, useFormContext2 } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { useController } from 'react-hook-form';
+import { useController, useWatch } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -15,8 +15,8 @@ import { ProductSectionLayout } from '../layout/product-section-layout';
 import { Options } from '../fields/options';
 
 export const OptionsSection: React.FC = () => {
-	const { watch, control } = useFormContext2< Product >();
-	const productId = watch( 'id' );
+	const { control } = useFormContext2< Product >();
+	const productId = useWatch( { name: 'id', control } );
 	const { field } = useController( { control, name: 'attributes' } );
 
 	return (

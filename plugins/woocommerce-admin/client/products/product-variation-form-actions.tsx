@@ -12,6 +12,7 @@ import { useDispatch } from '@wordpress/data';
 import { useFormContext2 } from '@woocommerce/components';
 import { useParams } from 'react-router-dom';
 import { useState } from '@wordpress/element';
+import { useWatch } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -23,10 +24,18 @@ import './product-form-actions.scss';
 
 export const ProductVariationFormActions: React.FC = () => {
 	const { productId, variationId } = useParams();
-	const { formState, watch } = useFormContext2< ProductVariation >();
+	const { formState, control, getValues } =
+		useFormContext2< ProductVariation >();
 	const isDirty = formState.isDirty;
 	const isValidForm = formState.isValid;
-	const values = watch();
+
+	const [ manage_stock, permalink ] = useWatch( {
+		name: [ 'manage_stock', 'permalink' ],
+		control,
+	} );
+
+	const values = getValues();
+
 	const { updateProductVariation } = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 	);
@@ -42,9 +51,7 @@ export const ProductVariationFormActions: React.FC = () => {
 			{
 				...values,
 				manage_stock:
-					values.manage_stock === 'parent'
-						? undefined
-						: values?.manage_stock,
+					manage_stock === 'parent' ? undefined : manage_stock,
 			}
 		)
 			.then( () => {
@@ -74,8 +81,8 @@ export const ProductVariationFormActions: React.FC = () => {
 					<Button
 						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 						//@ts-ignore The `href` prop works for both Buttons and MenuItem's.
-						href={ values.permalink + '?preview=true' }
-						disabled={ ! isValidForm || ! values.permalink }
+						href={ permalink + '?preview=true' }
+						disabled={ ! isValidForm || ! permalink }
 						target="_blank"
 						className="woocommerce-product-form-actions__preview"
 					>

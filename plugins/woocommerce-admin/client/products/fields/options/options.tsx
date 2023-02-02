@@ -24,8 +24,8 @@ export const Options: React.FC< OptionsProps > = ( {
 	onChange,
 	productId,
 } ) => {
-	const { watch } = useFormContext2< Product >();
-	const values = watch();
+	const { getValues } = useFormContext2< Product >();
+	const values = getValues();
 	const { generateProductVariations } = useProductVariationsHelper();
 
 	const { attributes, handleChange } = useProductAttributes( {

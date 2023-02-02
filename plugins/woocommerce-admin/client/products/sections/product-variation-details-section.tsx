@@ -17,7 +17,7 @@ import {
 } from '@woocommerce/components';
 import { ProductVariation, ProductVariationImage } from '@woocommerce/data';
 import { useState } from '@wordpress/element';
-import { useController } from 'react-hook-form';
+import { useController, useWatch } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -51,9 +51,12 @@ function formatVariationImage(
 }
 
 export const ProductVariationDetailsSection: React.FC = () => {
-	const { setValue, watch, control } = useFormContext2< ProductVariation >();
+	const { setValue, control } = useFormContext2< ProductVariation >();
 
-	const [ description, status ] = watch( [ 'description', 'status' ] );
+	const [ description, status ] = useWatch( {
+		name: [ 'description', 'status' ],
+		control,
+	} );
 
 	const { field: imageField } = useController( {
 		name: 'image',

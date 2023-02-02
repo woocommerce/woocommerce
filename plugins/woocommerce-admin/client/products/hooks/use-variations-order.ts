@@ -3,6 +3,7 @@
  */
 import { useFormContext2 } from '@woocommerce/components';
 import type { ProductVariation } from '@woocommerce/data';
+import { useWatch } from 'react-hook-form';
 
 const KEY_SEPARATOR = ':';
 
@@ -49,9 +50,9 @@ export default function useVariationsOrder( {
 	variations,
 	currentPage,
 }: UseVariationsOrderInput ): UseVariationsOrderOutput {
-	const { setValue, watch } = useFormContext2< ProductVariationsOrder >();
+	const { setValue, control } = useFormContext2< ProductVariationsOrder >();
 
-	const variationsOrder = watch( 'variationsOrder' );
+	const variationsOrder = useWatch( { name: 'variationsOrder', control } );
 
 	function onOrderChange( items: JSX.Element[] ) {
 		const minOrder = Math.min( ...items.map( getVariationOrder ) );
