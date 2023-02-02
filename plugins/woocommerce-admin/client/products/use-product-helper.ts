@@ -31,7 +31,7 @@ import { ProductVariationsOrder } from './hooks/use-variations-order';
 
 function removeReadonlyProperties(
 	product: Partial< Product >
-): Omit< Partial< Product >, ReadOnlyProperties > {
+): Partial< Omit< Product, ReadOnlyProperties > > {
 	productReadOnlyProperties.forEach(
 		( propertyName: keyof Product ) => delete product[ propertyName ]
 	);
@@ -81,7 +81,7 @@ export function useProductHelper() {
 	 */
 	const createProductWithStatus = useCallback(
 		async (
-			product: Omit< Partial< Product >, ReadOnlyProperties >,
+			product: Partial< Omit< Product, ReadOnlyProperties > >,
 			status: ProductStatus,
 			skipNotice = false
 		) => {

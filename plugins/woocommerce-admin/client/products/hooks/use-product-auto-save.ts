@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { debounce, pick } from 'lodash';
+import { pick } from 'lodash';
 import { Product } from '@woocommerce/data';
 import { useDebounce } from '@wordpress/compose';
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { useFormContext } from '@woocommerce/components';
 
 /**
@@ -18,9 +18,9 @@ export const useProductAutoSave = ( dependencies: ( keyof Product )[] ) => {
 	const { createOrUpdateProductWithStatus } = useProductHelper();
 
 	const dependencyValues = dependencies.reduce(
-		( acc: unknown[], key: keyof Product ) => {
-			acc.push( values[ key ] );
-			return acc;
+		( dependenciesAccumulator: unknown[], key: keyof Product ) => {
+			dependenciesAccumulator.push( values[ key ] );
+			return dependenciesAccumulator;
 		},
 		[]
 	);

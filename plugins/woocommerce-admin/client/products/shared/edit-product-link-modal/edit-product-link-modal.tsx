@@ -19,8 +19,8 @@ import { useProductHelper } from '../../use-product-helper';
 
 type EditProductLinkModalProps = {
 	product: Product;
-	permalinkPrefix: string;
-	permalinkSuffix: string;
+	permalinkPrefix: string | undefined;
+	permalinkSuffix: string | undefined;
 	onCancel: () => void;
 	onSaved: () => void;
 };
@@ -90,7 +90,9 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 	};
 
 	const newProductLinkLabel =
-		permalinkPrefix + cleanForSlug( slug ) + permalinkSuffix;
+		( permalinkPrefix || '' ) +
+		cleanForSlug( slug ) +
+		( permalinkSuffix + '' );
 
 	return (
 		<Modal

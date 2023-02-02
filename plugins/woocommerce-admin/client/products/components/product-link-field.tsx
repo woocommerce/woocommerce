@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button, Spinner } from '@wordpress/components';
 import { cleanForSlug } from '@wordpress/url';
+import interpolateComponents from '@automattic/interpolate-components';
 import {
 	Product,
 	PRODUCTS_STORE_NAME,
@@ -64,24 +65,40 @@ export const ProductLinkField = () => {
 	return (
 		<>
 			<span className="woocommerce-product-form__secondary-text product-details-section__product-link">
-				{ __( 'Product link', 'woocommerce' ) }
-				:&nbsp;
-				<a href={ values.permalink } target="_blank" rel="noreferrer">
-					{ permalinkPrefix }
-					{ values.slug || cleanForSlug( values.name ) }
-					{ permalinkSuffix }
-				</a>
-				<Button
-					variant="link"
-					onClick={ () => setIsModalVisible( true ) }
-				>
-					{ __( 'Edit', 'woocommerce' ) }
-				</Button>
+				{ interpolateComponents( {
+					/* eslint-disable-next-line max-len */
+					/* translators: Sentence fragment describing a product attribute match. Example: "Color Is Not Blue" - attribute = Color, equals = Is Not, value = Blue */
+					mixedString: __(
+						'Product link {{link /}} {{editButton /}}',
+						'woocommerce'
+					),
+					components: {
+						link: (
+							<a
+								href={ values.permalink }
+								target="_blank"
+								rel="noreferrer"
+							>
+								{ permalinkPrefix }
+								{ values.slug || cleanForSlug( values.name ) }
+								{ permalinkSuffix }
+							</a>
+						),
+						editButton: (
+							<Button
+								variant="link"
+								onClick={ () => setIsModalVisible( true ) }
+							>
+								{ __( 'Edit', 'woocommerce' ) }
+							</Button>
+						),
+					},
+				} ) }
 			</span>
 			{ isModalVisible && (
 				<EditProductLinkModal
-					permalinkPrefix={ permalinkPrefix || '' }
-					permalinkSuffix={ permalinkSuffix || '' }
+					permalinkPrefix={ permalinkPrefix }
+					permalinkSuffix={ permalinkSuffix }
 					product={ values }
 					onCancel={ () => setIsModalVisible( false ) }
 					onSaved={ () => setIsModalVisible( false ) }
