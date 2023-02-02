@@ -48,7 +48,7 @@
 		"@wordpress/browserslist-config": "^4.1.1",
 		"@types/wordpress__components": "^19.10.1",
 		"css-loader": "^3.6.0",
-		"eslint": "^8.32.0",
+		"eslint": "^8.12.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
 		"postcss-loader": "^3.0.0",

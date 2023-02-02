@@ -28,7 +28,7 @@
 		"@babel/core": "7.12.9",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"chalk": "^4.1.2",
-		"eslint": "^8.32.0",
+		"eslint": "^8.12.0",
 		"glob": "^7.2.0",
 		"lodash": "^4.17.21",
 		"mkdirp": "^1.0.4"

@@ -18,7 +18,7 @@
 		"@wordpress/env": "^4.8.0",
 		"@wordpress/prettier-config": "^2.5.0",
 		"@wordpress/scripts": "^19.2.4",
-		"eslint": "^8.32.0",
+		"eslint": "5.16.0",
 		"prettier": "npm:wp-prettier@^2.6.2",
 		"ts-loader": "^9.4.1",
 		"typescript": "^4.8.3",

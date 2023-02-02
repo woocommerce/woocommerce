@@ -1,6 +1,6 @@
 {
 	"dev": true,
-	"filter": "^(?:react|react-dom|eslint|typescript|@typescript-eslint|@types/react).*$",
+	"filter": "^(?:react|react-dom|typescript|@typescript-eslint|@types/react).*$",
 	"indent": "\t",
 	"overrides": true,
 	"peer": true,
@@ -51,18 +51,6 @@
 				"**"
 			],
 			"pinVersion": "^4.8.3"
-		},
-		{
-			"dependencies": [
-				"eslint"
-			],
-			"dependencyTypes": [
-				"devDependencies"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^8.32.0"
 		}
 	]
 }
