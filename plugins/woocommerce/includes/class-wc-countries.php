@@ -1122,7 +1122,6 @@ class WC_Countries {
 						'state'      => array(
 							'label'    => __( 'County', 'woocommerce' ),
 							'required' => false,
-							'hidden'   => true,
 						),
 					),
 					'ID' => array(
