@@ -13,6 +13,7 @@ import { getNewPath } from '@woocommerce/navigation';
 import { useFormContext2 } from '@woocommerce/components';
 import { useParams } from 'react-router-dom';
 import { useSelect } from '@wordpress/data';
+import { useWatch } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -28,8 +29,8 @@ import { WooHeaderPageTitle } from '~/header/utils';
 import './product-title.scss';
 
 export const ProductTitle: React.FC = () => {
-	const { watch } = useFormContext2< Product >();
-	const [ name, type ] = watch( [ 'name', 'type' ] );
+	const { control } = useFormContext2();
+	const [ name, type ] = useWatch( { name: [ 'name', 'type' ], control } );
 	const { productId, variationId } = useParams();
 	const { isLoading, persistedName, productVariation } = useSelect(
 		( select: WCDataSelector ) => {

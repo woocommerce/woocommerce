@@ -10,6 +10,7 @@ import {
 } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { useMemo } from '@wordpress/element';
+import { useWatch } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -39,8 +40,9 @@ import {
 } from './constants';
 
 const Tabs = () => {
-	const { watch, getValues } = useFormContext2< Product >();
-	const variations = watch( 'variations' );
+	const { getValues, control } = useFormContext2< Product >();
+
+	const variations = useWatch( { name: 'variations', control } );
 	const tabPropData = useMemo(
 		() => ( {
 			general: {

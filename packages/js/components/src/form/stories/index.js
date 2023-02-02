@@ -9,7 +9,18 @@ import {
 	TextControl,
 } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-import { Form, DateTimePickerControl } from '@woocommerce/components';
+import {
+	Form,
+	DateTimePickerControl,
+	NuForm,
+	useFormContext2,
+} from '@woocommerce/components';
+import {
+	useWatch,
+	useController,
+	useForm,
+	FormProvider,
+} from 'react-hook-form';
 import moment from 'moment';
 
 const validate = ( values ) => {
@@ -31,6 +42,7 @@ const onSubmit = ( values ) => console.log( values );
 const initialValues = {
 	firstName: '',
 	lastName: '',
+	address: '',
 	select: '3',
 	date: '2014-10-24T13:02',
 	checkbox: true,
@@ -117,6 +129,62 @@ export const Basic = () => {
 				<pre>onChange values: { JSON.stringify( onChangeValues ) }</pre>
 			</div>
 		</div>
+	);
+};
+
+const NuField = ( { name, control } ) => {
+	const { field } = useController( {
+		name,
+		control,
+	} );
+	return <TextControl label={ name } { ...field } />;
+};
+
+const NuRadioField = ( { name, control } ) => {
+	const { field } = useController( {
+		name,
+		control,
+	} );
+	useWatch( { name: 'firstName' } );
+	return (
+		<RadioControl
+			label="Radio"
+			onChange={ field.onChange }
+			selected={ field.value }
+			options={ [
+				{ label: 'Option 1', value: 'one' },
+				{ label: 'Option 2', value: 'two' },
+				{ label: 'Option 3', value: 'three' },
+			] }
+		/>
+	);
+};
+
+const NuOutput = ( { watch } ) => {
+	const form = useWatch();
+
+	return (
+		<div>
+			<pre>onChange values: { JSON.stringify( form ) }</pre>
+		</div>
+	);
+};
+
+export const BasicWithNuForm = () => {
+	const methods = useForm( {
+		defaultValues: initialValues,
+	} );
+	const { control } = methods;
+	return (
+		<FormProvider { ...methods }>
+			<div>
+				<NuField name="firstName" control={ control } />
+				<NuField name="lastName" control={ control } />
+				<NuField name="address" control={ control } />
+				<NuRadioField name="radio" control={ control } />
+			</div>
+			<NuOutput />
+		</FormProvider>
 	);
 };
 

@@ -13,7 +13,7 @@ import {
 	WCDataSelector,
 } from '@woocommerce/data';
 import { useState } from '@wordpress/element';
-import { Controller } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -24,15 +24,12 @@ import { PRODUCT_DETAILS_SLUG } from '../constants';
 export const DetailsNameField = ( {} ) => {
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
 		useState( false );
-	const { formState, setValue, control, watch, getValues } =
+	const { formState, setValue, control, getValues } =
 		useFormContext2< Product >();
-	const [ id, name, sku, slug, permalink ] = watch( [
-		'id',
-		'name',
-		'sku',
-		'slug',
-		'permalink',
-	] );
+	const [ id, name, sku, slug, permalink ] = useWatch( {
+		name: [ 'id', 'name', 'sku', 'slug', 'permalink' ],
+		control,
+	} );
 
 	const { permalinkPrefix, permalinkSuffix } = useSelect(
 		( select: WCDataSelector ) => {

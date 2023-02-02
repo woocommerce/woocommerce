@@ -8,6 +8,7 @@ import { getAdminLink } from '@woocommerce/settings';
 import { moreVertical } from '@wordpress/icons';
 import { OPTIONS_STORE_NAME, Product } from '@woocommerce/data';
 import { useFormContext2 } from '@woocommerce/components';
+import { useWatch } from 'react-hook-form';
 
 /**
  * Internal dependencies
@@ -21,8 +22,8 @@ import { ALLOW_TRACKING_OPTION_NAME } from '~/customer-effort-score-tracks/const
 import './product-more-menu.scss';
 
 export const ProductMoreMenu = () => {
-	const { watch } = useFormContext2< Product >();
-	const id = watch( 'id' );
+	const { control } = useFormContext2();
+	const id = useWatch( { name: 'id', control } );
 	const { showCesModal, showProductMVPFeedbackModal } =
 		useDispatch( CES_STORE_KEY );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
