@@ -12,7 +12,7 @@ import {
 	FlexItem,
 	FlexBlock,
 } from '@wordpress/components';
-import { Icon, megaphone } from '@wordpress/icons';
+import { Icon, megaphone, cancelCircleFilled } from '@wordpress/icons';
 import { Pagination, Table, Link } from '@woocommerce/components';
 
 /**
@@ -41,9 +41,28 @@ export const Campaigns = () => {
 		);
 	}
 
-	// TODO: error message here.
 	if ( ! data ) {
-		return <div>error</div>;
+		return (
+			<Card className="woocommerce-marketing-campaigns-card">
+				<CardHeader>
+					<CardHeaderTitle>
+						{ __( 'Campaigns', 'woocommerce' ) }
+					</CardHeaderTitle>
+				</CardHeader>
+				<CardBody className="woocommerce-marketing-campaigns-card-body woocommerce-marketing-campaigns-card-body--error">
+					<Icon icon={ cancelCircleFilled } size={ 32 } />
+					<div className="woocommerce-marketing-campaigns-card-body__title">
+						{ __( 'An unexpected error occurred.', 'woocommerce' ) }
+					</div>
+					<div className="woocommerce-marketing-campaigns-card-body__description">
+						{ __(
+							'Please try again later. Check the logs if the problem persists. ',
+							'woocommerce'
+						) }
+					</div>
+				</CardBody>
+			</Card>
+		);
 	}
 
 	if ( data.length === 0 ) {
@@ -54,15 +73,15 @@ export const Campaigns = () => {
 						{ __( 'Campaigns', 'woocommerce' ) }
 					</CardHeaderTitle>
 				</CardHeader>
-				<CardBody className="woocommerce-marketing-campaigns-card-body-empty-content">
+				<CardBody className="woocommerce-marketing-campaigns-card-body woocommerce-marketing-campaigns-card-body--empty">
 					<Icon icon={ megaphone } size={ 32 } />
-					<div className="woocommerce-marketing-campaigns-card-body-empty-content-title">
+					<div className="woocommerce-marketing-campaigns-card-body__title">
 						{ __(
 							'Advertise with marketing campaigns',
 							'woocommerce'
 						) }
 					</div>
-					<div>
+					<div className="woocommerce-marketing-campaigns-card-body__description">
 						{ __(
 							'Easily create and manage marketing campaigns without leaving WooCommerce.',
 							'woocommerce'

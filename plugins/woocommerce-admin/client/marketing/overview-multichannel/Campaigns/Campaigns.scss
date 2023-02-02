@@ -1,17 +1,28 @@
 .woocommerce-marketing-campaigns-card {
-	.woocommerce-marketing-campaigns-card-body-empty-content {
+	.woocommerce-marketing-campaigns-card-body {
 		width: 50%;
 		margin: auto;
 		text-align: center;
 
 		svg {
-			fill: $studio-woocommerce-purple-50;
 			background-color: $studio-gray-0;
 			border-radius: 28px;
 			margin-bottom: $gap-smallest;
 		}
 
-		div.woocommerce-marketing-campaigns-card-body-empty-content-title {
+		&--error {
+			svg {
+				fill: $alert-red;
+			}
+		}
+
+		&--empty {
+			svg {
+				fill: $studio-woocommerce-purple-50;
+			}
+		}
+
+		&__title {
 			font-size: 13px;
 			font-weight: 600;
 			line-height: 16px;
@@ -19,7 +30,7 @@
 			margin-bottom: $gap-smallest;
 		}
 
-		div {
+		&__description {
 			color: $gray-700;
 			margin-bottom: $gap-smallest;
 		}
