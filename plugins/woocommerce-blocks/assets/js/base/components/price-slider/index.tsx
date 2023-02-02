@@ -77,6 +77,10 @@ export interface PriceSliderProps {
 	 * What step values the slider uses.
 	 */
 	step?: number;
+	/**
+	 * Wheter we're in the editor or not.
+	 */
+	isEditor?: boolean;
 }
 
 const PriceSlider = ( {
@@ -92,6 +96,7 @@ const PriceSlider = ( {
 	inlineInput = true,
 	isLoading = false,
 	isUpdating = false,
+	isEditor = false,
 	onSubmit = () => void 0,
 }: PriceSliderProps ): JSX.Element => {
 	const minRange = useRef< HTMLInputElement >( null );
@@ -473,23 +478,21 @@ const PriceSlider = ( {
 				) }
 			{
 				<div className="wc-block-components-price-slider__actions">
-					{ ! isUpdating &&
-						( minPrice !== minConstraint ||
-							maxPrice !== maxConstraint ) && (
-							<FilterResetButton
-								onClick={ () => {
-									onChange( [
-										minConstraint,
-										maxConstraint,
-									] );
-									debouncedUpdateQuery();
-								} }
-								screenReaderLabel={ __(
-									'Reset price filter',
-									'woo-gutenberg-products-block'
-								) }
-							/>
-						) }
+					{ ( isEditor ||
+						( ! isUpdating &&
+							( minPrice !== minConstraint ||
+								maxPrice !== maxConstraint ) ) ) && (
+						<FilterResetButton
+							onClick={ () => {
+								onChange( [ minConstraint, maxConstraint ] );
+								debouncedUpdateQuery();
+							} }
+							screenReaderLabel={ __(
+								'Reset price filter',
+								'woo-gutenberg-products-block'
+							) }
+						/>
+					) }
 					{ showFilterButton && (
 						<FilterSubmitButton
 							className="wc-block-price-filter__button wc-block-components-price-slider__button"
