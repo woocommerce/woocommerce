@@ -521,7 +521,7 @@ const StockStatusFilterBlock = ( {
 			</div>
 			{
 				<div className="wc-block-stock-filter__actions">
-					{ checked.length > 0 && ! isLoading && (
+					{ ( checked.length > 0 || isEditor ) && ! isLoading && (
 						<FilterResetButton
 							onClick={ () => {
 								setChecked( [] );
