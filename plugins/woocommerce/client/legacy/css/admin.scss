@@ -3216,10 +3216,6 @@ table.wp-list-table {
 		display: none;
 	}
 
-	img {
-		margin: 1px 2px;
-	}
-
 	.row-actions {
 		color: #999;
 	}
@@ -7820,43 +7816,6 @@ table.bar_chart {
 	}
 }
 
-/**
-  * Product Reviews
-  */
-.wp-list-table.product-reviews {
-
-	tbody#the-comment-list {
-		tr.review {
-			td.column-author {
-				strong {
-					display:block;
-					img{
-						margin-right:5px;
-					}
-				}
-			}
-		}
-	}
-
-	th.column-type {
-		width: 10%;
-	}
-	
-	@media screen and ( max-width: 782px ) {
-		th.column-type,
-		td.column-type,
-		th.column-author,
-		td.column-author,
-		th.column-rating,
-		td.column-rating {
-			display: none !important;
-		}
-
-		.toggle-row {
-			top: 10px;
-		}
-	}
-}
 
 #wp-content-media-buttons {
 	display: flex;
