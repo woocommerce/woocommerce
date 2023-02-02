@@ -52,7 +52,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 	<div class="product_attributes wc-metaboxes">
 		<?php
-		$i          = -1;
+		$i = -1;
 
 		foreach ( $product_attributes as $attribute ) {
 			$i++;
