@@ -490,7 +490,7 @@ const RatingFilterBlock = ( {
 						<FilterResetButton
 							onClick={ () => {
 								setChecked( [] );
-								setProductRatings( [] );
+								setProductRatingsQuery( [] );
 								onSubmit( [] );
 							} }
 							screenReaderLabel={ __(
