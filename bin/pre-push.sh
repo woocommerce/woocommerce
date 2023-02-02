@@ -32,7 +32,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Ensure both branches are tracked or check-changelogger-use will fail.
-git checkout $PROTECTED_BRANCH --quiet
-git checkout $CURRENT_BRANCH --quiet
+git checkout $PROTECTED_BRANCH --quiet --no-verify
+git checkout $CURRENT_BRANCH --quiet --no-verify
 
 php tools/monorepo/check-changelogger-use.php $PROTECTED_BRANCH $CURRENT_BRANCH
