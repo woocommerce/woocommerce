@@ -78,12 +78,21 @@ export function useProductAttributes( {
 		};
 	};
 
+	const getAugmentedAttributes = ( atts: ProductAttribute[] ) => {
+		return atts.map( ( attribute, index ) => ( {
+			...attribute,
+			variation: isVariationAttributes,
+			position: attributes.length + index,
+		} ) );
+	};
+
 	const handleChange = ( newAttributes: ProductAttribute[] ) => {
+		const augmentedAttributes = getAugmentedAttributes( newAttributes );
 		const otherAttributes = isVariationAttributes
 			? allAttributes.filter( ( attribute ) => ! attribute.variation )
 			: allAttributes.filter( ( attribute ) => !! attribute.variation );
-		setAttributes( newAttributes );
-		onChange( [ ...otherAttributes, ...newAttributes ] );
+		setAttributes( augmentedAttributes );
+		onChange( [ ...otherAttributes, ...augmentedAttributes ] );
 	};
 
 	useEffect( () => {

@@ -7,7 +7,7 @@ import { ProductAttribute, ProductAttributeTerm } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { AddAttributeModal } from '../add-attribute-modal';
+import { NewAttributeModal } from '../new-attribute-modal';
 
 let attributeOnChange: ( val: ProductAttribute ) => void;
 jest.mock( '../../attribute-input-field', () => ( {
@@ -118,14 +118,14 @@ const attributeTermList: ProductAttributeTerm[] = [
 	},
 ];
 
-describe( 'AddAttributeModal', () => {
+describe( 'NewAttributeModal', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 	} );
 
 	it( 'should render at-least one row with the attribute dropdown fields', () => {
 		const { queryAllByText } = render(
-			<AddAttributeModal
+			<NewAttributeModal
 				onCancel={ () => {} }
 				onAdd={ () => {} }
 				selectedAttributeIds={ [] }
@@ -139,7 +139,7 @@ describe( 'AddAttributeModal', () => {
 
 	it( 'should enable attribute term field once attribute is selected', () => {
 		const { queryAllByText } = render(
-			<AddAttributeModal
+			<NewAttributeModal
 				onCancel={ () => {} }
 				onAdd={ () => {} }
 				selectedAttributeIds={ [] }
@@ -155,7 +155,7 @@ describe( 'AddAttributeModal', () => {
 
 	it( 'should allow us to add multiple new rows with the attribute fields', () => {
 		const { queryAllByText, queryByRole } = render(
-			<AddAttributeModal
+			<NewAttributeModal
 				onCancel={ () => {} }
 				onAdd={ () => {} }
 				selectedAttributeIds={ [] }
@@ -175,7 +175,7 @@ describe( 'AddAttributeModal', () => {
 
 	it( 'should allow us to remove the added fields', () => {
 		const { queryAllByText, queryByRole, queryAllByLabelText } = render(
-			<AddAttributeModal
+			<NewAttributeModal
 				onCancel={ () => {} }
 				onAdd={ () => {} }
 				selectedAttributeIds={ [] }
@@ -201,7 +201,7 @@ describe( 'AddAttributeModal', () => {
 
 	it( 'should not allow us to remove all the rows', () => {
 		const { queryAllByText, queryAllByLabelText } = render(
-			<AddAttributeModal
+			<NewAttributeModal
 				onCancel={ () => {} }
 				onAdd={ () => {} }
 				selectedAttributeIds={ [] }
@@ -221,7 +221,7 @@ describe( 'AddAttributeModal', () => {
 		it( 'should not return empty attribute rows', () => {
 			const onAddMock = jest.fn();
 			const { queryAllByText, queryByLabelText, queryByRole } = render(
-				<AddAttributeModal
+				<NewAttributeModal
 					onCancel={ () => {} }
 					onAdd={ onAddMock }
 					selectedAttributeIds={ [] }
@@ -247,7 +247,7 @@ describe( 'AddAttributeModal', () => {
 		it( 'should not add attribute if no terms were selected', () => {
 			const onAddMock = jest.fn();
 			const { queryByRole } = render(
-				<AddAttributeModal
+				<NewAttributeModal
 					onCancel={ () => {} }
 					onAdd={ onAddMock }
 					selectedAttributeIds={ [] }
@@ -265,7 +265,7 @@ describe( 'AddAttributeModal', () => {
 		it( 'should add attribute with array of terms', () => {
 			const onAddMock = jest.fn();
 			const { queryByRole } = render(
-				<AddAttributeModal
+				<NewAttributeModal
 					onCancel={ () => {} }
 					onAdd={ onAddMock }
 					selectedAttributeIds={ [] }
