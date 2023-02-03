@@ -251,6 +251,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Trying experimental slot context with product editor fills. [#36333](https://github.com/woocommerce/woocommerce/pull/36333)
 * Add - Using slotfill to insert attributes section in the product editor. [#36483](https://github.com/woocommerce/woocommerce/pull/36483)
 * Add - Using slotfill to insert images section in product editor. [#36461](https://github.com/woocommerce/woocommerce/pull/36461)
+* Update - Update woocommerce-blocks to 9.4.3. [#36736](https://github.com/woocommerce/woocommerce/pull/36736)
 * Update - Adding WooProductFieldItem slot to product details section. [#36315](https://github.com/woocommerce/woocommerce/pull/36315)
 * Update - Add permalink_template and generated_slug to products REST API response. [#36497](https://github.com/woocommerce/woocommerce/pull/36497)
 * Update - Auto generate variations on option changes [#36188](https://github.com/woocommerce/woocommerce/pull/36188)
