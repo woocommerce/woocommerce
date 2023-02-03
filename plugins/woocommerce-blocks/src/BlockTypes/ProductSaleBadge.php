@@ -37,8 +37,15 @@ class ProductSaleBadge extends AbstractBlock {
 			),
 			'typography'             =>
 			array(
-				'fontSize'   => true,
-				'lineHeight' => true,
+				'fontSize'                        => true,
+				'lineHeight'                      => true,
+				'__experimentalFontFamily'        => true,
+				'__experimentalFontWeight'        => true,
+				'__experimentalFontStyle'         => true,
+				'__experimentalLetterSpacing'     => true,
+				'__experimentalTextTransform'     => true,
+				'__experimentalTextDecoration'    => true,
+				'__experimentalSkipSerialization' => true,
 			),
 			'__experimentalBorder'   =>
 			array(
@@ -48,6 +55,7 @@ class ProductSaleBadge extends AbstractBlock {
 			),
 			'spacing'                =>
 			array(
+				'margin'                          => true,
 				'padding'                         => true,
 				'__experimentalSkipSerialization' => true,
 			),
