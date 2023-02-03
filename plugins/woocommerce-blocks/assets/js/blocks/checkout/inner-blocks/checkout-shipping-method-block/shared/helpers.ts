@@ -2,6 +2,7 @@
  * External dependencies
  */
 import type { CartShippingPackageShippingRate } from '@woocommerce/type-defs/cart';
+import { hasCollectableRate } from '@woocommerce/base-utils';
 
 export interface minMaxPrices {
 	min: CartShippingPackageShippingRate | undefined;
@@ -25,7 +26,7 @@ export function getShippingPrices(
 					lowestRate: CartShippingPackageShippingRate | undefined,
 					currentRate: CartShippingPackageShippingRate
 				) => {
-					if ( currentRate.method_id === 'pickup_location' ) {
+					if ( hasCollectableRate( currentRate.method_id ) ) {
 						return lowestRate;
 					}
 					if (
@@ -44,7 +45,7 @@ export function getShippingPrices(
 					highestRate: CartShippingPackageShippingRate | undefined,
 					currentRate: CartShippingPackageShippingRate
 				) => {
-					if ( currentRate.method_id === 'pickup_location' ) {
+					if ( hasCollectableRate( currentRate.method_id ) ) {
 						return highestRate;
 					}
 					if (
@@ -83,7 +84,7 @@ export function getLocalPickupPrices(
 					lowestRate: CartShippingPackageShippingRate | undefined,
 					currentRate: CartShippingPackageShippingRate
 				) => {
-					if ( currentRate.method_id !== 'pickup_location' ) {
+					if ( hasCollectableRate( currentRate.method_id ) ) {
 						return lowestRate;
 					}
 					if (
@@ -101,7 +102,7 @@ export function getLocalPickupPrices(
 					highestRate: CartShippingPackageShippingRate | undefined,
 					currentRate: CartShippingPackageShippingRate
 				) => {
-					if ( currentRate.method_id !== 'pickup_location' ) {
+					if ( hasCollectableRate( currentRate.method_id ) ) {
 						return highestRate;
 					}
 					if (
