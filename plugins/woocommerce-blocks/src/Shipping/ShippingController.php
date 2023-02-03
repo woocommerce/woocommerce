@@ -49,6 +49,7 @@ class ShippingController {
 				true
 			);
 		}
+		$this->asset_data_registry->add( 'collectableMethodIds', array( $this, 'get_local_pickup_method_ids' ), true );
 		add_action( 'rest_api_init', [ $this, 'register_settings' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'admin_scripts' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'hydrate_client_settings' ] );
@@ -58,6 +59,32 @@ class ShippingController {
 		add_filter( 'woocommerce_shipping_packages', array( $this, 'filter_shipping_packages' ) );
 		add_filter( 'pre_update_option_woocommerce_pickup_location_settings', array( $this, 'flush_cache' ) );
 		add_filter( 'pre_update_option_pickup_location_pickup_locations', array( $this, 'flush_cache' ) );
+	}
+
+	/**
+	 * Gets a list of payment method ids that support the 'local-pickup' feature.
+	 *
+	 * @return string[] List of payment method ids that support the 'local-pickup' feature.
+	 */
+	public function get_local_pickup_method_ids() {
+		$all_methods_supporting_local_pickup = array_reduce(
+			WC()->shipping()->get_shipping_methods(),
+			function( $methods, $method ) {
+				if ( $method->supports( 'local-pickup' ) ) {
+					$methods[] = $method->id;
+				}
+				return $methods;
+			},
+			array()
+		);
+
+		// We use array_values because this will be used in JS, so we don't need the (numerical) keys.
+		return array_values(
+			// This array_unique is necessary because WC()->shipping()->get_shipping_methods() can return duplicates.
+			array_unique(
+				$all_methods_supporting_local_pickup
+			)
+		);
 	}
 
 	/**
