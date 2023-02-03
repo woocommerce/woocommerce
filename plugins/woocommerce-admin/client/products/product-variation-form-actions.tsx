@@ -11,6 +11,7 @@ import {
 import { preventLeavingProductForm } from '@woocommerce/product-editor';
 import { registerPlugin } from '@wordpress/plugins';
 import { useDispatch } from '@wordpress/data';
+import { useConfirmUnsavedChanges } from '@woocommerce/navigation';
 import { useFormContext } from '@woocommerce/components';
 import { useParams } from 'react-router-dom';
 import { useState } from '@wordpress/element';

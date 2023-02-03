@@ -23,7 +23,7 @@ import {
 } from '@woocommerce/product-editor';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { navigateTo } from '@woocommerce/navigation';
+import { navigateTo, useConfirmUnsavedChanges } from '@woocommerce/navigation';
 import { useSelect } from '@wordpress/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
