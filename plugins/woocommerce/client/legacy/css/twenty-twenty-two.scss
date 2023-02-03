@@ -328,6 +328,12 @@ $tt2-gray: #f7f7f7;
 			}
 		}
 
+		button[name="add-to-cart"],
+		button.single_add_to_cart_button {
+			margin-top: 0.5rem;
+			margin-bottom: var(--wp--style--block-gap);
+		}
+
 		ol.flex-control-thumbs {
 			padding-left: 0;
 			float: left;

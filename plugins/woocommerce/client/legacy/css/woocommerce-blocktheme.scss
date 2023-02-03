@@ -100,22 +100,26 @@
 			}
 		}
 
-		.cart {
-			display: flex;
-			align-items: center;
-		}
-
-		.quantity {
-			// Adjust positioning of quantity selector and button.
-			.qty {
-				margin-right: 0.5rem;
+		form.cart {
+			div.quantity {
+				display: inline-block;
+				float: none; // Remove float set by WC core.
+				vertical-align: middle;
+	
+				// Adjust positioning of quantity selector and button.
+				.qty {
+					margin-right: 0.5rem;
+				}
 			}
-		}
-
-		button[name="add-to-cart"],
-		button.single_add_to_cart_button {
-			margin-top: 0;
-			margin-bottom: 0;
+	
+			button[name="add-to-cart"],
+			button.single_add_to_cart_button {
+				display: inline-block;
+				float: none; // Remove float set by WC core.
+				margin-top: 0;
+				margin-bottom: 0;
+				vertical-align: middle;
+			}
 		}
 
 		.related.products {
