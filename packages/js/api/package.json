@@ -55,7 +55,7 @@
 		"@typescript-eslint/parser": "^5.43.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"axios-mock-adapter": "^1.20.0",
-		"eslint": "^8.2.0",
+		"eslint": "^8.32.0",
 		"jest": "^27",
 		"ts-jest": "^27",
 		"typescript": "^4.8.3"

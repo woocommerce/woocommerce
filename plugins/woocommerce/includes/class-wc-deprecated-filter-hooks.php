@@ -21,6 +21,7 @@ class WC_Deprecated_Filter_Hooks extends WC_Deprecated_Hooks {
 	 * @var array
 	 */
 	protected $deprecated_hooks = array(
+		'woocommerce_account_orders_columns'              => 'woocommerce_my_account_my_orders_columns',
 		'woocommerce_structured_data_order'               => 'woocommerce_email_order_schema_markup',
 		'woocommerce_add_to_cart_fragments'               => 'add_to_cart_fragments',
 		'woocommerce_add_to_cart_redirect'                => 'add_to_cart_redirect',
@@ -67,6 +68,7 @@ class WC_Deprecated_Filter_Hooks extends WC_Deprecated_Hooks {
 	 * @var array
 	 */
 	protected $deprecated_version = array(
+		'woocommerce_my_account_my_orders_columns'   => '2.6.0',
 		'woocommerce_email_order_schema_markup'      => '3.0.0',
 		'add_to_cart_fragments'                      => '3.0.0',
 		'add_to_cart_redirect'                       => '3.0.0',

@@ -5,9 +5,8 @@ import { __ } from '@wordpress/i18n';
 import {
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 	__experimentalWooProductFieldItem as WooProductFieldItem,
-	__experimentalProductFieldSection as ProductFieldSection,
 } from '@woocommerce/components';
-import { registerPlugin } from '@wordpress/plugins';
+import { __experimentalProductFieldSection as ProductFieldSection } from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
@@ -24,7 +23,7 @@ import { DETAILS_SECTION_ID, PLUGIN_ID, TAB_GENERAL_ID } from '../constants';
 
 import './product-details-section.scss';
 
-const DetailsSection = () => (
+export const DetailsSectionFills = () => (
 	<>
 		<WooProductSectionItem
 			id={ DETAILS_SECTION_ID }
@@ -41,35 +40,35 @@ const DetailsSection = () => (
 			/>
 		</WooProductSectionItem>
 		<WooProductFieldItem
-			id="details/name"
+			id="name"
 			sections={ [ { name: DETAILS_SECTION_ID, order: 1 } ] }
 			pluginId={ PLUGIN_ID }
 		>
 			<DetailsNameField />
 		</WooProductFieldItem>
 		<WooProductFieldItem
-			id="details/categories"
+			id="categories"
 			sections={ [ { name: DETAILS_SECTION_ID, order: 3 } ] }
 			pluginId={ PLUGIN_ID }
 		>
 			<DetailsCategoriesField />
 		</WooProductFieldItem>
 		<WooProductFieldItem
-			id="details/feature"
+			id="feature"
 			sections={ [ { name: DETAILS_SECTION_ID, order: 5 } ] }
 			pluginId={ PLUGIN_ID }
 		>
 			<DetailsFeatureField />
 		</WooProductFieldItem>
 		<WooProductFieldItem
-			id="details/summary"
+			id="summary"
 			sections={ [ { name: DETAILS_SECTION_ID, order: 7 } ] }
 			pluginId={ PLUGIN_ID }
 		>
 			<DetailsSummaryField />
 		</WooProductFieldItem>
 		<WooProductFieldItem
-			id="details/description"
+			id="description"
 			sections={ [ { name: DETAILS_SECTION_ID, order: 9 } ] }
 			pluginId={ PLUGIN_ID }
 		>
@@ -77,9 +76,3 @@ const DetailsSection = () => (
 		</WooProductFieldItem>
 	</>
 );
-
-registerPlugin( 'wc-admin-product-editor-details-section', {
-	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
-	scope: 'woocommerce-product-editor',
-	render: () => <DetailsSection />,
-} );
