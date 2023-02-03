@@ -20,7 +20,7 @@ import {
 /**
  * Internal dependencies
  */
-import './add-attribute-modal.scss';
+import './new-attribute-modal.scss';
 import { AttributeInputField } from '../attribute-input-field';
 import {
 	AttributeTermInputField,
@@ -29,7 +29,7 @@ import {
 import { EnhancedProductAttribute } from '~/products/hooks/use-product-attributes';
 import { getProductAttributeObject } from './utils';
 
-type AddAttributeModalProps = {
+type NewAttributeModalProps = {
 	title?: string;
 	notice?: string;
 	attributeLabel?: string;
@@ -54,7 +54,7 @@ type AttributeForm = {
 	attributes: Array< EnhancedProductAttribute | null >;
 };
 
-export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
+export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	title = __( 'Add attributes', 'woocommerce' ),
 	notice = __(
 		'By default, attributes are filterable and visible on the product page. You can change these settings for each attribute separately later.',
@@ -83,12 +83,11 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 	const scrollAttributeIntoView = ( index: number ) => {
 		setTimeout( () => {
 			const attributeRow = document.querySelector(
-				`.woocommerce-add-attribute-modal__table-row-${ index }`
+				`.woocommerce-new-attribute-modal__table-row-${ index }`
 			);
 			attributeRow?.scrollIntoView( { behavior: 'smooth' } );
 		}, 0 );
 	};
-
 	const [ showConfirmClose, setShowConfirmClose ] = useState( false );
 	const addAnother = (
 		values: AttributeForm,
@@ -148,9 +147,9 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 		setTimeout( () => {
 			const valueInputField: HTMLInputElement | null =
 				document.querySelector(
-					'.woocommerce-add-attribute-modal__table-row-' +
+					'.woocommerce-new-attribute-modal__table-row-' +
 						index +
-						' .woocommerce-add-attribute-modal__table-attribute-value-column .woocommerce-experimental-select-control__input'
+						' .woocommerce-new-attribute-modal__table-attribute-value-column .woocommerce-experimental-select-control__input'
 				);
 			if ( valueInputField ) {
 				valueInputField.focus();
@@ -198,16 +197,16 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 									onClose( values );
 								}
 							} }
-							className="woocommerce-add-attribute-modal"
+							className="woocommerce-new-attribute-modal"
 						>
 							<Notice isDismissible={ false }>
 								<p>{ notice }</p>
 							</Notice>
 
-							<div className="woocommerce-add-attribute-modal__body">
-								<table className="woocommerce-add-attribute-modal__table">
+							<div className="woocommerce-new-attribute-modal__body">
+								<table className="woocommerce-new-attribute-modal__table">
 									<thead>
-										<tr className="woocommerce-add-attribute-modal__table-header">
+										<tr className="woocommerce-new-attribute-modal__table-header">
 											<th>{ attributeLabel }</th>
 											<th>{ valueLabel }</th>
 										</tr>
@@ -217,9 +216,9 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 											( attribute, index ) => (
 												<tr
 													key={ index }
-													className={ `woocommerce-add-attribute-modal__table-row woocommerce-add-attribute-modal__table-row-${ index }` }
+													className={ `woocommerce-new-attribute-modal__table-row woocommerce-new-attribute-modal__table-row-${ index }` }
 												>
-													<td className="woocommerce-add-attribute-modal__table-attribute-column">
+													<td className="woocommerce-new-attribute-modal__table-attribute-column">
 														<AttributeInputField
 															placeholder={
 																attributePlaceholder
@@ -265,7 +264,7 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 															] }
 														/>
 													</td>
-													<td className="woocommerce-add-attribute-modal__table-attribute-value-column">
+													<td className="woocommerce-new-attribute-modal__table-attribute-value-column">
 														{ attribute === null ||
 														attribute.id !== 0 ? (
 															<AttributeTermInputField
@@ -329,7 +328,7 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 															/>
 														) }
 													</td>
-													<td className="woocommerce-add-attribute-modal__table-attribute-trash-column">
+													<td className="woocommerce-new-attribute-modal__table-attribute-trash-column">
 														<Button
 															icon={ trash }
 															disabled={
@@ -361,7 +360,7 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 							</div>
 							<div>
 								<Button
-									className="woocommerce-add-attribute-modal__add-attribute"
+									className="woocommerce-new-attribute-modal__add-attribute"
 									variant="tertiary"
 									label={ addAnotherAccessibleLabel }
 									onClick={ () => {
@@ -374,7 +373,7 @@ export const AddAttributeModal: React.FC< AddAttributeModalProps > = ( {
 									{ addAnotherLabel }
 								</Button>
 							</div>
-							<div className="woocommerce-add-attribute-modal__buttons">
+							<div className="woocommerce-new-attribute-modal__buttons">
 								<Button
 									isSecondary
 									label={ cancelLabel }
