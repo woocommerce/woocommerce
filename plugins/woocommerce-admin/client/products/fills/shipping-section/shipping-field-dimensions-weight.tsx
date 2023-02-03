@@ -17,12 +17,22 @@ import {
  * Internal dependencies
  */
 import { useProductHelper } from '../../use-product-helper';
+import { getErrorMessageProps } from '~/products/utils/get-error-message-props';
 
 export const ShippingDimensionsWeightField = () => {
 	const { control } = useFormContext2< PartialProduct >();
-	const { field } = useController( {
+	const { field, fieldState } = useController( {
 		name: 'weight',
 		control,
+		rules: {
+			min: {
+				value: 0,
+				message: __(
+					'Weight must be higher than zero.',
+					'woocommerce'
+				),
+			},
+		},
 	} );
 
 	const { formatNumber, parseNumber } = useProductHelper();
@@ -42,12 +52,10 @@ export const ShippingDimensionsWeightField = () => {
 		return null;
 	}
 
+	const errorProps = getErrorMessageProps( fieldState );
+
 	return (
-		<BaseControl
-			id="product_shipping_weight"
-			// className={ inputWeightProps.className } TODO       these props were provided by the old form
-			// help={ inputWeightProps.help }
-		>
+		<BaseControl id="product_shipping_weight" { ...errorProps }>
 			<InputControl
 				{ ...field }
 				sanitize={ ( value: PartialProduct[ keyof PartialProduct ] ) =>

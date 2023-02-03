@@ -18,6 +18,7 @@ import {
 import { useProductHelper } from '../../use-product-helper';
 import { getInterpolatedSizeLabel } from './utils';
 import { ShippingDimensionsPropsType } from './index';
+import { getErrorMessageProps } from '~/products/utils/get-error-message-props';
 
 export const ShippingDimensionsWidthField = ( {
 	dimensionProps,
@@ -26,20 +27,28 @@ export const ShippingDimensionsWidthField = ( {
 	const { control } = useFormContext2< PartialProduct >();
 	const { formatNumber } = useProductHelper();
 
-	const { field } = useController( {
+	const { field, fieldState } = useController( {
 		name: 'dimensions.width',
 		control,
+		rules: {
+			min: {
+				value: 0,
+				message: __( 'Width must be higher than zero.', 'woocommerce' ),
+			},
+		},
 	} );
 
+	const errorProps = getErrorMessageProps( fieldState );
+
 	return (
-		<BaseControl
-			id="product_shipping_dimensions_width"
-			// className={ dimensionProps.className }
-			// help={ inputWidthProps.help } TODO       these props were provided by the old form
-		>
+		<BaseControl id="product_shipping_dimensions_width" { ...errorProps }>
 			<InputControl
 				{ ...field }
 				{ ...dimensionProps }
+				onBlur={ () => {
+					dimensionProps.onBlur();
+					field.onBlur();
+				} }
 				value={ formatNumber( String( field.value ) ) }
 				label={ getInterpolatedSizeLabel(
 					__( 'Width {{span}}A{{/span}}', 'woocommerce' )
