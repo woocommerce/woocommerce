@@ -16,6 +16,15 @@ export function getAttributeKey(
 }
 
 /**
+ * Get an attribute ID that works universally across global and local attributes.
+ *
+ * @param  attribute Product attribute.
+ * @return string
+ */
+export const getAttributeId = ( attribute: ProductAttribute ) =>
+	`${ attribute.id }-${ attribute.name }`;
+
+/**
  * Updates the position of a product attribute from the new items list.
  *
  * @param { Object } items              key value pair of list items positions.
