@@ -157,6 +157,7 @@ class WC_AJAX {
 			'json_search_downloadable_products_and_variations',
 			'json_search_customers',
 			'json_search_categories',
+			'json_search_categories_tree',
 			'json_search_taxonomy_terms',
 			'json_search_product_attributes',
 			'json_search_pages',
@@ -1796,6 +1797,70 @@ class WC_AJAX {
 		}
 
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_categories', $found_categories ) );
+	}
+
+	/**
+	 * Search for categories and return json.
+	 */
+	public static function json_search_categories_tree() {
+		ob_start();
+
+		check_ajax_referer( 'search-categories', 'security' );
+
+		if ( ! current_user_can( 'edit_products' ) ) {
+			wp_die( -1 );
+		}
+
+		$search_text = isset( $_GET['term'] ) ? wc_clean( wp_unslash( $_GET['term'] ) ) : '';
+
+		if ( ! $search_text ) {
+			wp_die();
+		}
+
+		$found_categories = array();
+		$args             = array(
+			'taxonomy'   => array( 'product_cat' ),
+			'orderby'    => 'id',
+			'order'      => 'ASC',
+			'hide_empty' => false,
+			'fields'     => 'all',
+			'name__like' => $search_text,
+		);
+
+		$terms = get_terms( $args );
+
+		$terms_map = array();
+		foreach ($terms as $key => $value) {
+			$terms_map[$value->term_id] = array(
+				'term_id' => $value->term_id
+			);
+		}
+
+		if ( $terms ) {
+			foreach ( $terms as $term ) {
+				$term->formatted_name = '';
+
+				if ( $term->parent ) {
+					$ancestors = get_ancestors( $term->term_id, 'product_cat' );
+					foreach ( $ancestors as $ancestor ) {
+						if ( ! isset( $terms_map[ $ancestor ] ) ) {
+							$ancestor_term = get_term( $ancestor, 'product_cat' );
+							$terms_map[ $ancestor ] = $ancestor_term;
+						}
+						if ( ! $terms_map[ $ancestor ]->children ) {
+							$terms_map[$ancestor]->children = array();
+						}
+						$terms_map[ $ancestor ]->children[] = $term;
+					}
+				}
+
+				$found_categories[ $term->term_id ] = $term;
+			}
+		}
+		$parent_terms = array_filter( array_values( $terms_map ), function( $term ) {
+			return $term->parent === 0;
+		} );
+		wp_send_json( apply_filters( 'woocommerce_json_search_found_categories', $parent_terms ) );
 	}
 
 	/**

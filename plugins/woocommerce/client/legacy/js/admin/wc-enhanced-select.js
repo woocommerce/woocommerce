@@ -306,6 +306,69 @@ jQuery( function( $ ) {
 				});
 
 				// Ajax category search boxes
+				$( ':input.wc-category-select' ).filter( ':not(.enhanced)' ).each( function() {
+					var return_format = $( this ).data( 'return_id' ) ? 'id' : 'slug';
+
+					function formatResult(data) {
+						/*var id = 'state' + state.id;
+						var checkbox = $('<div class="checkbox"><input id="'+id+'" type="checkbox" '+(state.selected ? 'checked': '')+'><label for="'+id+'">'+state.text+'</label></div>', { id: id });
+						return checkbox;*/
+						if (data.loading){
+							return data.text;
+						}
+						var markup = "";
+						if(data.children){
+							markup = "<div class='select2-treeview'><div class='select2-treeview-triangle select2-treeview-down'></div><span>" + data.text + "</span></div>";
+						}else{
+							markup = "<div class='select2-treeview-item'><span><img style='height: 15px;width: 18px; margin-right: 5px;' src='https://select2.github.io/vendor/images/flags/" + data.element.value.toLowerCase() + ".png' class='img-flag' />" + data.text + "</span></div>";
+						}
+						return markup;
+					}
+
+					var select2_args = $.extend( {
+						templateResult: formatResult,
+						closeOnSelect:false,
+						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
+						placeholder       : $( this ).data( 'placeholder' ),
+						minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : '3',
+						escapeMarkup      : function( m ) {
+							return m;
+						},
+						width: '100%',
+						multiple: true,
+						ajax: {
+							url:         wc_enhanced_select_params.ajax_url,
+							dataType:    'json',
+							delay:       250,
+							data:        function( params ) {
+								return {
+									term:     params.term,
+									action:   'woocommerce_json_search_categories_tree',
+									security: wc_enhanced_select_params.search_categories_nonce
+								};
+							},
+							processResults: function( data ) {
+								var terms = [];
+								if ( data ) {
+									$.each( data, function( id, term ) {
+										terms.push({
+											id:   'id' === return_format ? term.term_id : term.slug,
+											text: term.name
+										});
+									});
+								}
+								return {
+									results: terms
+								};
+							},
+							cache: true
+						}
+					}, getEnhancedSelectFormatString() );
+
+					$( this ).selectWoo( select2_args ).addClass( 'enhanced' );
+				});
+
+				// Ajax category search boxes
 				$( ':input.wc-taxonomy-term-search' ).filter( ':not(.enhanced)' ).each( function() {
 					var return_format = $( this ).data( 'return_id' ) ? 'id' : 'slug';
 
