@@ -235,10 +235,9 @@ abstract class ObjectCache {
 
 		$data = $this->get_cache_engine()->get_cached_object( $id, $this->get_object_type() );
 		if ( null === $data ) {
+			$object = null;
 			if ( $get_from_datastore_callback ) {
 				$object = $get_from_datastore_callback( $id );
-			} else {
-				$object = $this->get_from_datastore( $id );
 			}
 
 			if ( null === $object ) {
@@ -296,15 +295,6 @@ abstract class ObjectCache {
 	 * @return array|null An array with validation error messages, null or an empty array if there are no errors.
 	 */
 	abstract protected function validate( $object ): ?array;
-
-	/**
-	 * Get an object from an authoritative data store.
-	 * This is used by 'get' if the object isn't cached and no custom object retrieval callback is suupplied.
-	 *
-	 * @param int|string $id The id of the object to get.
-	 * @return array|object|null The retrieved object, or null if it's not possible to retrieve an object by the given id.
-	 */
-	abstract protected function get_from_datastore( $id );
 
 	/**
 	 * Get the instance of the cache engine to use.
