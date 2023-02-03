@@ -16,6 +16,7 @@ import { useSelect } from '@wordpress/data';
 import interpolateComponents from '@automattic/interpolate-components';
 import { format as formatDate } from '@wordpress/date';
 import moment from 'moment';
+import classNames from 'classnames';
 import {
 	BaseControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
@@ -29,6 +30,7 @@ import {
 import { CurrencyInputProps } from './pricing-section-fills';
 import { formatCurrencyDisplayValue } from '../../sections/utils';
 import { CurrencyContext } from '../../../lib/currency-context';
+import { getErrorMessageProps } from '~/products/utils/get-error-message-props';
 
 type PricingListFieldProps = {
 	currencyInputProps: CurrencyInputProps;
@@ -40,21 +42,85 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 	currencyInputProps,
 } ) => {
 	const { control, setValue } = useFormContext2< Product >();
-	const [ date_on_sale_from_gmt, date_on_sale_to_gmt ] = useWatch( {
-		name: [ 'date_on_sale_from_gmt', 'date_on_sale_to_gmt' ],
-		control,
-	} );
-	const { field } = useController( {
+	const { field, fieldState } = useController( {
 		name: 'sale_price',
 		control,
+		rules: {
+			pattern: {
+				value: /^[0-9.,]+$/,
+				message: __(
+					'Please enter a price with one monetary decimal point without thousand separators and currency symbols.',
+					'woocommerce'
+				),
+			},
+			validate: ( sale_price, { regular_price } ) => {
+				if (
+					sale_price &&
+					( ! regular_price ||
+						parseFloat( sale_price ) >=
+							parseFloat( regular_price ) )
+				) {
+					return __(
+						'Sale price cannot be equal to or higher than list price.',
+						'woocommerce'
+					);
+				}
+			},
+		},
 	} );
-	const { field: toGmtField } = useController( {
+	const { field: fromGmtField, fieldState: fromGmtFieldState } =
+		useController( {
+			name: 'date_on_sale_from_gmt',
+			control,
+			rules: {
+				validate: ( fromGmt, { date_on_sale_to_gmt } ) => {
+					const dateOnSaleFrom = moment(
+						fromGmt,
+						moment.ISO_8601,
+						true
+					);
+					if ( fromGmt && ! dateOnSaleFrom.isValid() ) {
+						return __(
+							'Please enter a valid date.',
+							'woocommerce'
+						);
+					}
+					const dateOnSaleTo = moment(
+						date_on_sale_to_gmt,
+						moment.ISO_8601,
+						true
+					);
+					if ( dateOnSaleFrom.isAfter( dateOnSaleTo ) ) {
+						return __(
+							'The start date of the sale must be before the end date.',
+							'woocommerce'
+						);
+					}
+				},
+			},
+		} );
+	const { field: toGmtField, fieldState: toGmtFieldState } = useController( {
 		name: 'date_on_sale_to_gmt',
 		control,
-	} );
-	const { field: fromGmtField } = useController( {
-		name: 'date_on_sale_from_gmt',
-		control,
+		rules: {
+			validate: ( toGmt, { date_on_sale_from_gmt } ) => {
+				const dateOnSaleTo = moment( toGmt, moment.ISO_8601, true );
+				if ( toGmt && ! dateOnSaleTo.isValid() ) {
+					return __( 'Please enter a valid date.', 'woocommerce' );
+				}
+				const dateOnSaleFrom = moment(
+					date_on_sale_from_gmt,
+					moment.ISO_8601,
+					true
+				);
+				if ( dateOnSaleTo.isBefore( dateOnSaleFrom ) ) {
+					return __(
+						'The end date of the sale must be after the start date.',
+						'woocommerce'
+					);
+				}
+			},
+		},
 	} );
 
 	const { dateFormat, timeFormat } = useSelect( ( select ) => {
@@ -81,11 +147,10 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 		}
 
 		const hasDateOnSaleFrom =
-			typeof date_on_sale_from_gmt === 'string' &&
-			date_on_sale_from_gmt.length > 0;
+			typeof fromGmtField.value === 'string' &&
+			fromGmtField.value.length > 0;
 		const hasDateOnSaleTo =
-			typeof date_on_sale_to_gmt === 'string' &&
-			date_on_sale_to_gmt.length > 0;
+			typeof toGmtField.value === 'string' && toGmtField.value.length > 0;
 
 		const hasSaleSchedule = hasDateOnSaleFrom || hasDateOnSaleTo;
 
@@ -96,8 +161,8 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 	}, [
 		userToggledSaleSchedule,
 		autoToggledSaleSchedule,
-		date_on_sale_from_gmt,
-		date_on_sale_to_gmt,
+		fromGmtField.value,
+		toGmtField.value,
 	] );
 
 	const dateTimePickerProps = {
@@ -126,12 +191,23 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 		}
 	};
 
+	const errorMessageProps = getErrorMessageProps( fieldState );
+	const toGmtErrorMessageProps = getErrorMessageProps( toGmtFieldState );
+	const fromGmtMessageProps = getErrorMessageProps( fromGmtFieldState );
+
 	return (
 		<>
-			<BaseControl id="product_pricing_sale_price">
+			<BaseControl
+				id="product_pricing_sale_price"
+				help={ errorMessageProps.help ?? '' }
+			>
 				<InputControl
-					{ ...field }
 					{ ...currencyInputProps }
+					{ ...field }
+					className={ classNames(
+						errorMessageProps.className,
+						currencyInputProps.className
+					) }
 					name="sale_price"
 					label={ __( 'Sale price', 'woocommerce' ) }
 					value={ formatCurrencyDisplayValue(
@@ -211,6 +287,11 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 						currentDate={ fromGmtField.value }
 						{ ...fromGmtField }
 						{ ...dateTimePickerProps }
+						className={ classNames(
+							fromGmtMessageProps.className,
+							dateTimePickerProps.className
+						) }
+						help={ fromGmtMessageProps.help ?? '' }
 					/>
 
 					<DateTimePickerControl
@@ -220,6 +301,11 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 						currentDate={ toGmtField.value }
 						{ ...toGmtField }
 						{ ...dateTimePickerProps }
+						className={ classNames(
+							toGmtErrorMessageProps.className,
+							dateTimePickerProps.className
+						) }
+						help={ toGmtErrorMessageProps.help ?? '' }
 					/>
 				</>
 			) }
