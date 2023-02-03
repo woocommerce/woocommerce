@@ -171,9 +171,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</span>
 				</label>
 				<label class="change-input">
-					<input type="text" name="_length" class="text length" placeholder="<?php printf( esc_attr__( 'Length (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
-					<input type="text" name="_width" class="text width" placeholder="<?php printf( esc_attr__( 'Width (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
-					<input type="text" name="_height" class="text height" placeholder="<?php printf( esc_attr__( 'Height (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
+					<?php
+					$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', 'cm' ) );
+					?>
+					<input
+						type="text"
+						name="_length"
+						class="text length"
+						<?php /* translators: %s is dimension unit label */ ?>
+						placeholder="<?php printf( esc_attr__( 'Length (%s)', 'woocommerce' ), $dimension_unit_label ); ?>"
+						value=""
+					>
+					<input
+						type="text"
+						name="_width"
+						class="text width"
+						<?php /* translators: %s is dimension unit label */ ?>
+						placeholder="<?php printf( esc_attr__( 'Width (%s)', 'woocommerce' ), $dimension_unit_label ); ?>"
+						value=""
+					>
+					<input
+						type="text"
+						name="_height"
+						class="text height"
+						<?php /* translators: %s is dimension unit label */ ?>
+						placeholder="<?php printf( esc_attr__( 'Height (%s)', 'woocommerce' ), $dimension_unit_label ); ?>"
+						value=""
+					>
 				</label>
 			</div>
 		<?php endif; ?>

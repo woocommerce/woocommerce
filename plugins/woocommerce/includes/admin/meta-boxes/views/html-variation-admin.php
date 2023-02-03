@@ -312,9 +312,9 @@ defined( 'ABSPATH' ) || exit;
 						<label for="product_length">
 							<?php
 							printf(
-								/* translators: %s: dimension unit */
+								/* translators: %s dimension unit */
 								esc_html__( 'Dimensions (L&times;W&times;H) (%s)', 'woocommerce' ),
-								esc_html( get_option( 'woocommerce_dimension_unit' ) )
+								esc_html( I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit' ) ) )
 							);
 							?>
 						</label>
