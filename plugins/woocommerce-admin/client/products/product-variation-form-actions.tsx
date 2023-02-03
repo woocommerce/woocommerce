@@ -14,11 +14,11 @@ import { useDispatch } from '@wordpress/data';
 import { useFormContext } from '@woocommerce/components';
 import { useParams } from 'react-router-dom';
 import { useState } from '@wordpress/element';
+import { usePreventLeavingPage } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
-import usePreventLeavingPage from '~/hooks/usePreventLeavingPage';
 import './product-form-actions.scss';
 
 export const ProductVariationFormActions: React.FC = () => {

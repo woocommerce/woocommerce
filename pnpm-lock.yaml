@@ -1181,6 +1181,7 @@ importers:
       '@types/jest': ^27.4.1
       '@types/qs': ^6.9.7
       '@woocommerce/eslint-plugin': workspace:*
+<<<<<<< HEAD
       '@wordpress/api-fetch': wp-6.0
       '@wordpress/components': wp-6.0
       '@wordpress/compose': wp-6.0
@@ -1188,6 +1189,16 @@ importers:
       '@wordpress/hooks': wp-6.0
       '@wordpress/notices': wp-6.0
       '@wordpress/url': wp-6.0
+=======
+      '@wordpress/api-fetch': ^6.0.1
+      '@wordpress/components': ^19.5.0
+      '@wordpress/compose': ^5.1.2
+      '@wordpress/element': ^4.1.1
+      '@wordpress/hooks': ^3.5.0
+      '@wordpress/i18n': ^4.26.0
+      '@wordpress/notices': ^3.3.2
+      '@wordpress/url': ^3.4.1
+>>>>>>> c6cfa0596e (Move usePreventLeavingPage to navigation package)
       eslint: ^8.32.0
       history: ^5.3.0
       jest: ^27.5.1
@@ -1199,6 +1210,7 @@ importers:
       ts-jest: ^27.1.3
       typescript: ^4.8.3
     dependencies:
+<<<<<<< HEAD
       '@wordpress/api-fetch': 6.3.1
       '@wordpress/components': 19.8.5_rysvg2ttzfworbkpz2ftlx73d4
       '@wordpress/compose': 5.4.1_react@17.0.2
@@ -1206,6 +1218,16 @@ importers:
       '@wordpress/hooks': 3.6.1
       '@wordpress/notices': 3.6.1_react@17.0.2
       '@wordpress/url': 3.7.1
+=======
+      '@wordpress/api-fetch': 6.1.1
+      '@wordpress/components': 19.6.1_rysvg2ttzfworbkpz2ftlx73d4
+      '@wordpress/compose': 5.2.1_react@17.0.2
+      '@wordpress/element': 4.8.0
+      '@wordpress/hooks': 3.5.0
+      '@wordpress/i18n': 4.26.0
+      '@wordpress/notices': 3.4.1_react@17.0.2
+      '@wordpress/url': 3.5.1
+>>>>>>> c6cfa0596e (Move usePreventLeavingPage to navigation package)
       history: 5.3.0
       lodash: 4.17.21
       qs: 6.10.3
@@ -15029,16 +15051,35 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.19.0
+<<<<<<< HEAD
       '@wordpress/dom-ready': 3.28.0
       '@wordpress/i18n': 4.28.0
+=======
+      '@wordpress/dom-ready': 3.19.0
+      '@wordpress/i18n': 4.26.0
+>>>>>>> c6cfa0596e (Move usePreventLeavingPage to navigation package)
 
   /@wordpress/a11y/3.6.1:
     resolution: {integrity: sha512-mOQtwpY5hUt4vMLyshZPPV1x9MBRF2FimUjIImfYJb1x8o6jY4npikzWplAfWYQUJJjWfw/1NmfqD7vUOh9+ww==}
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.19.0
+<<<<<<< HEAD
       '@wordpress/dom-ready': 3.28.0
       '@wordpress/i18n': 4.28.0
+=======
+      '@wordpress/dom-ready': 3.10.0
+      '@wordpress/i18n': 4.26.0
+    dev: false
+
+  /@wordpress/a11y/3.5.0:
+    resolution: {integrity: sha512-pJyDexol4yFfUNs6BAW1IKftdxZBsxvNRpzmYcwXiFA+1jSnMJFehp0nu47skdzxiHS6CKyLqBks17J+a/GqGA==}
+    engines: {node: '>=12'}
+    dependencies:
+      '@babel/runtime': 7.19.0
+      '@wordpress/dom-ready': 3.10.0
+      '@wordpress/i18n': 4.26.0
+>>>>>>> c6cfa0596e (Move usePreventLeavingPage to navigation package)
     dev: false
 
   /@wordpress/api-fetch/3.23.1_react-native@0.70.0:
@@ -15074,9 +15115,16 @@ packages:
     resolution: {integrity: sha512-VDs4E3nghISq1Qd+44cdJiB/K6tXWX67zMspzpwsSMa+F7PQaBHbHXimja4XTe5DVV/ZBzwZOdQaJj7qHaO+KQ==}
     engines: {node: '>=12'}
     dependencies:
+<<<<<<< HEAD
       '@babel/runtime': 7.19.0
       '@wordpress/i18n': 4.28.0
       '@wordpress/url': 3.29.0
+=======
+      '@babel/runtime': 7.17.7
+      '@wordpress/i18n': 4.26.0
+      '@wordpress/url': 3.5.1
+    dev: false
+>>>>>>> c6cfa0596e (Move usePreventLeavingPage to navigation package)
 
   /@wordpress/api-fetch/6.3.1:
     resolution: {integrity: sha512-jfa5c+sffADJCz36oYr5xY5IihNUJPg0II+rZ6SyJfHQyA3NuUJfRk63hS2GF2vaD8Zgp2p5s7uD1h9ZMi+5iA==}
@@ -15718,6 +15766,75 @@ packages:
       - react-with-direction
     dev: false
 
+<<<<<<< HEAD
+=======
+  /@wordpress/components/19.8.5_ivjkhzvx5dt6opkkf6frl2zoam:
+    resolution: {integrity: sha512-36d8fSk/nWfNv2nEZrC2gLx1rN9rGWFt425yXoH6JiakDvdXacN/04xcxZGBRkS+JDz6v22uyPMEol9TzwXOLg==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      react: ^17.0.0
+      react-dom: ^17.0.0
+    dependencies:
+      '@babel/runtime': 7.19.0
+      '@emotion/cache': 11.10.5
+      '@emotion/css': 11.7.1_@babel+core@7.17.8
+      '@emotion/react': 11.10.5_mcptgafjogap2nfvnfqvfwh6uu
+      '@emotion/serialize': 1.1.1
+      '@emotion/styled': 11.8.1_c2qm47vaialpqni522adyu6za4
+      '@emotion/utils': 1.0.0
+      '@use-gesture/react': 10.2.10_react@17.0.2
+      '@wordpress/a11y': 3.28.0
+      '@wordpress/compose': 5.17.0_react@17.0.2
+      '@wordpress/date': 4.28.0
+      '@wordpress/deprecated': 3.28.0
+      '@wordpress/dom': 3.28.0
+      '@wordpress/element': 4.20.0
+<<<<<<< HEAD
+      '@wordpress/escape-html': 2.28.0
+      '@wordpress/hooks': 3.28.0
+      '@wordpress/i18n': 4.28.0
+      '@wordpress/icons': 8.4.0
+      '@wordpress/is-shallow-equal': 4.28.0
+      '@wordpress/keycodes': 3.28.0
+      '@wordpress/primitives': 3.26.0
+      '@wordpress/rich-text': 5.17.0_react@17.0.2
+      '@wordpress/warning': 2.28.0
+=======
+      '@wordpress/escape-html': 2.4.1
+      '@wordpress/hooks': 3.5.0
+      '@wordpress/i18n': 4.26.0
+      '@wordpress/icons': 8.0.1
+      '@wordpress/is-shallow-equal': 4.4.1
+      '@wordpress/keycodes': 3.4.1
+      '@wordpress/primitives': 3.2.1
+      '@wordpress/rich-text': 5.2.1_react@17.0.2
+      '@wordpress/warning': 2.4.1
+>>>>>>> c6cfa0596e (Move usePreventLeavingPage to navigation package)
+      classnames: 2.3.1
+      colord: 2.9.2
+      dom-scroll-into-view: 1.2.1
+      downshift: 6.1.12_react@17.0.2
+      framer-motion: 6.2.8_sfoxds7t5ydpegc3knd667wn6m
+      gradient-parser: 0.1.5
+      highlight-words-core: 1.2.2
+      lodash: 4.17.21
+      memize: 1.1.0
+      moment: 2.29.4
+      re-resizable: 6.9.5_sfoxds7t5ydpegc3knd667wn6m
+      react: 17.0.2
+      react-colorful: 5.5.1_sfoxds7t5ydpegc3knd667wn6m
+      react-dates: 17.2.0_mbqv3i57zshgl3mhyvv367ttdu
+      react-dom: 17.0.2_react@17.0.2
+      react-resize-aware: 3.1.1_react@17.0.2
+      reakit: 1.3.11_sfoxds7t5ydpegc3knd667wn6m
+      uuid: 8.3.2
+    transitivePeerDependencies:
+      - '@babel/core'
+      - '@types/react'
+      - react-with-direction
+    dev: false
+
+>>>>>>> 89eae6e840 (Move usePreventLeavingPage to navigation package)
   /@wordpress/components/19.8.5_rysvg2ttzfworbkpz2ftlx73d4:
     resolution: {integrity: sha512-36d8fSk/nWfNv2nEZrC2gLx1rN9rGWFt425yXoH6JiakDvdXacN/04xcxZGBRkS+JDz6v22uyPMEol9TzwXOLg==}
     engines: {node: '>=12'}
@@ -16149,8 +16266,13 @@ packages:
       react: ^17.0.0
     dependencies:
       '@babel/runtime': 7.19.0
+<<<<<<< HEAD
       '@wordpress/compose': 5.17.0_react@17.0.2
       '@wordpress/deprecated': 3.28.0
+=======
+      '@wordpress/compose': 5.14.0_react@17.0.2
+      '@wordpress/deprecated': 3.16.0
+>>>>>>> c6cfa0596e (Move usePreventLeavingPage to navigation package)
       '@wordpress/element': 4.20.0
       '@wordpress/is-shallow-equal': 4.28.0
       '@wordpress/priority-queue': 2.28.0
@@ -16246,8 +16368,13 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.19.0
+<<<<<<< HEAD
       moment: 2.29.4
       moment-timezone: 0.5.41
+=======
+      moment: 2.29.1
+      moment-timezone: 0.5.34
+>>>>>>> c6cfa0596e (Move usePreventLeavingPage to navigation package)
     dev: false
 
   /@wordpress/dependency-extraction-webpack-plugin/2.9.0_webpack@4.46.0:
@@ -16281,20 +16408,45 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.19.0
+<<<<<<< HEAD
       '@wordpress/hooks': 3.28.0
+=======
+      '@wordpress/hooks': 3.26.0
+>>>>>>> c6cfa0596e (Move usePreventLeavingPage to navigation package)
 
   /@wordpress/deprecated/3.6.1:
     resolution: {integrity: sha512-ilOkjXejcnJMxnq1gTVkBnDPP9W+XjlEe1TIfaMKcCwKsfsNy6bgURxWl1qIM2dPjH+5KK65bPjW0XELTMJy4w==}
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.19.0
+<<<<<<< HEAD
       '@wordpress/hooks': 3.28.0
+=======
+      '@wordpress/hooks': 3.26.0
+
+  /@wordpress/deprecated/3.2.3:
+    resolution: {integrity: sha512-YoJos/hW216PIlxbtNyb24kPR3TUFTSsfeVT23SxudW4jhmwM12vkl3KY1RDbhD/qi89OE4k+8xsBo5cM3lCSw==}
+    engines: {node: '>=12'}
+    dependencies:
+      '@babel/runtime': 7.17.7
+      '@wordpress/hooks': 3.2.2
+>>>>>>> c6cfa0596e (Move usePreventLeavingPage to navigation package)
     dev: false
 
   /@wordpress/dom-ready/3.28.0:
     resolution: {integrity: sha512-PFFAnuPUouV0uSDZN6G/B8yksybtxzS/6H53OZJEA3h3EsNCicKRMGSowkumvLwXA23HV0K2Kht6JuS+bDECzA==}
     engines: {node: '>=12'}
     dependencies:
+<<<<<<< HEAD
+=======
+      '@babel/runtime': 7.19.0
+      '@wordpress/hooks': 3.26.0
+    dev: false
+
+  /@wordpress/dom-ready/2.13.2:
+    resolution: {integrity: sha512-COH7n2uZfBq4FtluSbl37N3nCEcdMXzV42ETCWKUcumiP1Zd3qnkfQKcsxTaHWY8aVt/358RvJ7ghWe3xAd+fg==}
+    dependencies:
+>>>>>>> c6cfa0596e (Move usePreventLeavingPage to navigation package)
       '@babel/runtime': 7.19.0
 
   /@wordpress/dom-ready/3.6.1:
@@ -16322,6 +16474,16 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.19.0
+<<<<<<< HEAD
+=======
+      '@wordpress/deprecated': 3.19.0
+
+  /@wordpress/dom/3.4.1:
+    resolution: {integrity: sha512-fySHKew0GEIXC4HsIlHyszivV9qAQZcD+oHWn3N0MjaUYKvBRfh6jeBOQwbeBGR/32U+TX8Bqa/qAmDb8bMsyA==}
+    engines: {node: '>=12'}
+    dependencies:
+      '@babel/runtime': 7.19.0
+>>>>>>> c6cfa0596e (Move usePreventLeavingPage to navigation package)
       lodash: 4.17.21
     dev: false
 
@@ -16714,8 +16876,19 @@ packages:
       '@babel/runtime': 7.19.0
     dev: false
 
+<<<<<<< HEAD
   /@wordpress/html-entities/3.28.0:
     resolution: {integrity: sha512-UAaU6au8UTrSkowkV33pE/EvdPov2mA9W51vh6t88KsJPzt4171EzIchGnQuzt04HuZLdLyWy2A+7JCOSbfhBA==}
+=======
+  /@wordpress/hooks/3.26.0:
+    resolution: {integrity: sha512-NYFnKttKLdkr7OZMqqRgsuQy1LMHjK7tkrGO9NWgrGkvwsaWEIn0hI65za9/TJnUccEBMwl9knsiGA4Fwe7dAA==}
+    engines: {node: '>=12'}
+    dependencies:
+      '@babel/runtime': 7.19.0
+
+  /@wordpress/hooks/3.4.1:
+    resolution: {integrity: sha512-+RODEvxNsx3KW5nvk4KbnYMNFYvWA4Fduf784Ht7PJoL2L3z63Wm2blRh7a21hDEFHGPgWkne0f3Fgr/dqalHA==}
+>>>>>>> c6cfa0596e (Move usePreventLeavingPage to navigation package)
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.19.0
@@ -16746,6 +16919,18 @@ packages:
     dependencies:
       '@babel/runtime': 7.19.0
       '@wordpress/hooks': 3.28.0
+      gettext-parser: 1.4.0
+      memize: 1.1.0
+      sprintf-js: 1.1.2
+      tannin: 1.2.0
+
+  /@wordpress/i18n/4.26.0:
+    resolution: {integrity: sha512-W94aIByO+3YraI7fJbk+3STnz3e0hhrtBPPjKK1XvT4+3RZiKPaVN2Y8mvCCknbaAILCT+CixUBJOgq6m6bwjQ==}
+    engines: {node: '>=12'}
+    hasBin: true
+    dependencies:
+      '@babel/runtime': 7.19.0
+      '@wordpress/hooks': 3.26.0
       gettext-parser: 1.4.0
       memize: 1.1.0
       sprintf-js: 1.1.2
@@ -17034,15 +17219,24 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.19.0
+<<<<<<< HEAD
       '@wordpress/i18n': 4.28.0
+=======
+      '@wordpress/i18n': 4.26.0
+>>>>>>> c6cfa0596e (Move usePreventLeavingPage to navigation package)
       change-case: 4.1.2
 
   /@wordpress/keycodes/3.4.1:
     resolution: {integrity: sha512-z/pIY0JtLVCxMClKZFnSbhumDbTDf69F4vHYLESNRdAJktqPRRzKsSeg69tJKI+00QzVakKWAvoyyyjopmxoCQ==}
     engines: {node: '>=12'}
     dependencies:
+<<<<<<< HEAD
       '@babel/runtime': 7.17.7
       '@wordpress/i18n': 4.28.0
+=======
+      '@babel/runtime': 7.19.0
+      '@wordpress/i18n': 4.26.0
+>>>>>>> c6cfa0596e (Move usePreventLeavingPage to navigation package)
       lodash: 4.17.21
     dev: false
 
@@ -17255,7 +17449,11 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.19.0
+<<<<<<< HEAD
       '@wordpress/element': 5.5.0
+=======
+      '@wordpress/element': 4.20.0
+>>>>>>> c6cfa0596e (Move usePreventLeavingPage to navigation package)
       classnames: 2.3.1
 
   /@wordpress/primitives/3.4.1:
@@ -17385,9 +17583,15 @@ packages:
       '@wordpress/compose': 5.17.0_react@17.0.2
       '@wordpress/data': 6.15.0_react@17.0.2
       '@wordpress/element': 4.20.0
+<<<<<<< HEAD
       '@wordpress/escape-html': 2.28.0
       '@wordpress/i18n': 4.28.0
       '@wordpress/keycodes': 3.28.0
+=======
+      '@wordpress/escape-html': 2.22.0
+      '@wordpress/i18n': 4.26.0
+      '@wordpress/keycodes': 3.19.0
+>>>>>>> c6cfa0596e (Move usePreventLeavingPage to navigation package)
       lodash: 4.17.21
       memize: 1.1.0
       react: 17.0.2

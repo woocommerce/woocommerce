@@ -3,14 +3,18 @@
  */
 import { useContext, useEffect, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { parseAdminUrl } from '@woocommerce/navigation';
 import {
 	Location,
 	UNSAFE_NavigationContext as NavigationContext,
 	useLocation,
 } from 'react-router-dom';
 
-export default function usePreventLeavingPage(
+/**
+ * Internal dependencies
+ */
+import { parseAdminUrl } from '../';
+
+export const usePreventLeavingPage = (
 	hasUnsavedChanges: boolean,
 	shouldConfirm?: ( path: URL, fromUrl: Location ) => boolean,
 	/**
@@ -19,7 +23,7 @@ export default function usePreventLeavingPage(
 	 * @see https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event#compatibility_notes
 	 */
 	message?: string
-) {
+) => {
 	const confirmMessage = useMemo(
 		() =>
 			message ??
@@ -79,4 +83,4 @@ export default function usePreventLeavingPage(
 			};
 		}
 	}, [ hasUnsavedChanges, confirmMessage ] );
-}
+};

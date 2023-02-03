@@ -28,6 +28,9 @@ export { getHistory };
 // Export all filter utilities
 export * from './filters';
 
+// Export all hooks
+export { usePreventLeavingPage } from './hooks/usePreventLeavingPage';
+
 const TIME_EXCLUDED_SCREENS_FILTER = 'woocommerce_admin_time_excluded_screens';
 
 /**
