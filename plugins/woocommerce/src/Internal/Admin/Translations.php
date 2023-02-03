@@ -99,12 +99,11 @@ class Translations {
 				continue;
 			}
 
-			if ( isset( $chunk_data['comment'] ) ){
+			if ( isset( $chunk_data['comment'] ) ) {
 				$reference_file = $chunk_data['comment']['reference'];
 			} else {
 				$reference_file = $chunk_data['source'];
 			}
-
 
 			// Only combine "app" files (not scripts registered with WP).
 			if (
@@ -121,7 +120,7 @@ class Translations {
 				// Combine all messages from all chunk files.
 
 				// Support for wp-cli --make-json and Loco Translate file format.
-				if ( isset( $chunk_data['locale_data']['messages'] ) ){
+				if ( isset( $chunk_data['locale_data']['messages'] ) ) {
 					$combined_translation_data['locale_data']['messages'] = array_merge(
 						$combined_translation_data['locale_data']['messages'],
 						$chunk_data['locale_data']['messages']
@@ -132,14 +131,13 @@ class Translations {
 						$chunk_data['locale_data']['woocommerce']
 					);
 				}
-
 			}
 		}
 
 		// Remove inaccurate reference comment.
 
 		// Support for wp-cli --make-json and Loco Translate file format.
-		if ( isset( $combined_translation_data['comment'] ) ){
+		if ( isset( $combined_translation_data['comment'] ) ) {
 			unset( $combined_translation_data['comment'] );
 		} else {
 			unset( $combined_translation_data['source'] );
