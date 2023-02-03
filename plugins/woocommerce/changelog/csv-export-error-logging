@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Additional error logging within the CSV Exporter framework.

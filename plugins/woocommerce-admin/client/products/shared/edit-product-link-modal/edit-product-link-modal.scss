@@ -8,4 +8,12 @@
 		gap: 8px;
 		justify-content: flex-end;
 	}
+
+	.components-modal__header {
+		border-color: $gray-300;
+	}
+
+	.woocommerce-product-link-edit-modal__description {
+		margin: $gap-large 0;
+	}
 }

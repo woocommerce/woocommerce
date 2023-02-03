@@ -29,6 +29,10 @@ type CustomerEffortScoreProps = {
 	onModalShownCallback?: () => void;
 	onModalDismissedCallback?: () => void;
 	icon?: React.ReactElement | null;
+	shouldShowComments?: (
+		firstQuestionScore: number,
+		secondQuestionScore: number
+	) => boolean;
 };
 
 /**
@@ -48,6 +52,7 @@ type CustomerEffortScoreProps = {
  * @param {Function} props.onNoticeDismissedCallback Function to call when the notice is dismissed.
  * @param {Function} props.onModalShownCallback      Function to call when the modal is shown.
  * @param {Function} props.onModalDismissedCallback  Function to call when modal is dismissed.
+ * @param {Function} props.shouldShowComments        Callback to determine if comments section should be shown.
  * @param {Object}   props.icon                      Icon (React component) to be shown on the notice.
  */
 const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
@@ -62,6 +67,10 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 	onModalShownCallback = noop,
 	onModalDismissedCallback = noop,
 	icon,
+	shouldShowComments = ( firstQuestionScore, secondQuestionScore ) =>
+		[ firstQuestionScore, secondQuestionScore ].some(
+			( score ) => score === 1 || score === 2
+		),
 } ) => {
 	const [ shouldCreateNotice, setShouldCreateNotice ] = useState( true );
 	const [ visible, setVisible ] = useState( false );
@@ -108,6 +117,7 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 			secondQuestion={ secondQuestion }
 			recordScoreCallback={ recordScoreCallback }
 			onCloseModal={ onModalDismissedCallback }
+			shouldShowComments={ shouldShowComments }
 		/>
 	);
 };
@@ -145,6 +155,10 @@ CustomerEffortScore.propTypes = {
 	 * The second survey question.
 	 */
 	secondQuestion: PropTypes.string,
+	/**
+	 * A function to determine whether or not the comments field shown be shown.
+	 */
+	shouldShowComments: PropTypes.func,
 };
 
 export { CustomerEffortScore };

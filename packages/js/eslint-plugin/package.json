@@ -47,7 +47,7 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
-		"eslint": "^8.25.0",
+		"eslint": "^8.32.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
 		"rimraf": "^3.0.2",
