@@ -149,11 +149,19 @@ const reducer = ( state = defaultState, action: CheckoutAction ) => {
 		case types.SET_EXTENSION_DATA:
 			if (
 				action.extensionData !== undefined &&
-				state.extensionData !== action.extensionData
+				action.namespace !== undefined
 			) {
 				newState = {
 					...state,
-					extensionData: action.extensionData,
+					extensionData: {
+						...state.extensionData,
+						[ action.namespace ]: action.replace
+							? action.extensionData
+							: {
+									...state.extensionData[ action.namespace ],
+									...action.extensionData,
+							  },
+					},
 				};
 			}
 			break;
