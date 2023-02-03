@@ -3,6 +3,8 @@
  * Admin View: Bulk Edit Products
  */
 
+use Automattic\WooCommerce\Utilities\I18nUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -131,7 +133,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</span>
 				</label>
 				<label class="change-input">
-					<input type="text" name="_weight" class="text weight" placeholder="<?php printf( esc_attr__( '%1$s (%2$s)', 'woocommerce' ), wc_format_localized_decimal( 0 ), get_option( 'woocommerce_weight_unit' ) ); ?>" value="">
+					<?php
+					$placeholder = sprintf(
+						/* translators: 1. Weight number; 2. Weight unit; E.g. 2 kg */
+						__( '%1$s (%2$s)', 'woocommerce' ),
+						wc_format_localized_decimal( 0 ),
+						I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) )
+					);
+					?>
+					<input
+						type="text"
+						name="_weight"
+						class="text weight"
+						placeholder="<?php echo esc_attr( $placeholder ); ?>"
+						value=""
+					>
 				</label>
 			</div>
 		<?php endif; ?>

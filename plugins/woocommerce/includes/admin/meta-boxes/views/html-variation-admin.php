@@ -9,6 +9,8 @@
  * @var array $variation_data array of variation data @deprecated 4.4.0.
  */
 
+use Automattic\WooCommerce\Utilities\I18nUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 ?>
@@ -279,9 +281,9 @@ defined( 'ABSPATH' ) || exit;
 
 				if ( wc_product_weight_enabled() ) {
 					$label = sprintf(
-						/* translators: %s: weight unit */
+						/* translators: %s: Weight unit */
 						__( 'Weight (%s)', 'woocommerce' ),
-						esc_html( get_option( 'woocommerce_weight_unit' ) )
+						I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) )
 					);
 
 					woocommerce_wp_text_input(

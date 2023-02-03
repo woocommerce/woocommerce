@@ -1,4 +1,6 @@
 <?php
+use Automattic\WooCommerce\Utilities\I18nUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -11,7 +13,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 				array(
 					'id'          => '_weight',
 					'value'       => $product_object->get_weight( 'edit' ),
-					'label'       => __( 'Weight', 'woocommerce' ) . ' (' . get_option( 'woocommerce_weight_unit' ) . ')',
+					'label'       => sprintf(
+						/* translators: %s: Weight unit */
+						__( 'Weight (%s)', 'woocommerce' ),
+						I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) )
+					),
 					'placeholder' => wc_format_localized_decimal( 0 ),
 					'desc_tip'    => true,
 					'description' => __( 'Weight in decimal form', 'woocommerce' ),
