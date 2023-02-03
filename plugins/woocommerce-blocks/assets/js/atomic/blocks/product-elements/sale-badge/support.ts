@@ -16,7 +16,14 @@ export const supports = {
 		},
 		typography: {
 			fontSize: true,
+			lineHeight: true,
+			__experimentalFontFamily: true,
+			__experimentalFontWeight: true,
+			__experimentalFontStyle: true,
 			__experimentalSkipSerialization: true,
+			__experimentalLetterSpacing: true,
+			__experimentalTextTransform: true,
+			__experimentalTextDecoration: true,
 		},
 		__experimentalBorder: {
 			color: true,
@@ -26,10 +33,16 @@ export const supports = {
 		},
 		...( typeof __experimentalGetSpacingClassesAndStyles === 'function' && {
 			spacing: {
+				margin: true,
 				padding: true,
-				__experimentalSkipSerialization: true,
 			},
 		} ),
 		__experimentalSelector: '.wc-block-components-product-sale-badge',
 	} ),
+	...( typeof __experimentalGetSpacingClassesAndStyles === 'function' &&
+		! isFeaturePluginBuild() && {
+			spacing: {
+				margin: true,
+			},
+		} ),
 };

@@ -53,7 +53,8 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					[ `${ parentClassName }__product-onsale` ]: parentClassName,
 				},
 				colorProps.className,
-				borderProps.className
+				borderProps.className,
+				typographyProps.className
 			) }
 			style={ {
 				...colorProps.style,
