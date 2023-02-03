@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useContext, useEffect, useMemo } from '@wordpress/element';
+import { useEffect, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	Location,
@@ -12,6 +12,7 @@ import {
 /**
  * Internal dependencies
  */
+import { getHistory } from '../history';
 import { parseAdminUrl } from '../';
 
 export const useConfirmUnsavedChanges = (
@@ -30,17 +31,17 @@ export const useConfirmUnsavedChanges = (
 			__( 'Changes you made may not be saved.', 'woocommerce' ),
 		[ message ]
 	);
-	const { navigator } = useContext( NavigationContext );
-	const fromUrl = useLocation();
+	const history = getHistory();
 
 	// This effect prevent react router from navigate and show
 	// a confirmation message. It's a work around to beforeunload
 	// because react router does not triggers that event.
 	useEffect( () => {
 		if ( hasUnsavedChanges ) {
-			const push = navigator.push;
+			const push = history.push;
 
-			navigator.push = ( ...args: Parameters< typeof push > ) => {
+			history.push = ( ...args: Parameters< typeof push > ) => {
+				const fromUrl = history.location;
 				const toUrl = parseAdminUrl( args[ 0 ] ) as URL;
 				if (
 					typeof shouldConfirm === 'function' &&
@@ -58,10 +59,10 @@ export const useConfirmUnsavedChanges = (
 			};
 
 			return () => {
-				navigator.push = push;
+				history.push = push;
 			};
 		}
-	}, [ navigator, hasUnsavedChanges, confirmMessage ] );
+	}, [ history, hasUnsavedChanges, confirmMessage ] );
 
 	// This effect listen to the native beforeunload event to show
 	// a confirmation message
