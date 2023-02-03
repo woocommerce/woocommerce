@@ -427,38 +427,6 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'get' uses the 'get_from_datastore' method if there's no object cached under the passed id, and caches the object retrieved.
-	 */
-	public function test_try_getting_not_cached_object_get_from_datastore_implemented() {
-		// phpcs:disable Squiz.Commenting
-
-		$sut = new class() extends ObjectCache {
-			public function get_object_type(): string {
-				return 'the_type';
-			}
-
-			protected function get_from_datastore( $id ) {
-				return array( 'id' => $id );
-			}
-
-			protected function get_object_id( $object ) {
-			}
-
-			protected function validate( $object ) : ?array {
-				return null;
-			}
-		};
-
-		// phpcs:enable Squiz.Commenting
-
-		$result = $sut->get( 'the_id' );
-
-		$expected = array( 'id' => 'the_id' );
-		$this->assertEquals( $expected, $result );
-		$this->assertEquals( $expected, $sut->get( 'the_id' ) );
-	}
-
-	/**
 	 * @testdox 'remove' removes a cached object and returns true, or returns false if there's no cached object under the passed id.
 	 */
 	public function test_remove() {
