@@ -7,184 +7,106 @@ namespace Automattic\WooCommerce\Blocks\Utils;
 class StyleAttributesUtils {
 
 	/**
-	 * Get class and style for font-size from attributes.
+	 * If color value is in preset format, convert it to a CSS var. Else return same value
+	 * For example:
+	 * "var:preset|color|pale-pink" -> "var(--wp--preset--color--pale-pink)"
+	 * "#98b66e" -> "#98b66e"
+	 *
+	 * @param string $color_value value to be processed.
+	 *
+	 * @return (string)
+	 */
+	public static function get_color_value( $color_value ) {
+		if ( is_string( $color_value ) && str_contains( $color_value, 'var:preset|color|' ) ) {
+			$color_value = str_replace( 'var:preset|color|', '', $color_value );
+			return sprintf( 'var(--wp--preset--color--%s)', $color_value );
+		}
+
+		return $color_value;
+	}
+
+	/**
+	 * Get CSS value for color preset.
+	 *
+	 * @param string $preset_name Preset name.
+	 *
+	 * @return string CSS value for color preset.
+	 */
+	public static function get_preset_value( $preset_name ) {
+		return "var(--wp--preset--color--$preset_name)";
+	}
+
+	/**
+	 * If spacing value is in preset format, convert it to a CSS var. Else return same value
+	 * For example:
+	 * "var:preset|spacing|50" -> "var(--wp--preset--spacing--50)"
+	 * "50px" -> "50px"
+	 *
+	 * @param string $spacing_value value to be processed.
+	 *
+	 * @return (string)
+	 */
+	public static function get_spacing_value( $spacing_value ) {
+		// Used following code as reference: https://github.com/WordPress/gutenberg/blob/cff6d70d6ff5a26e212958623dc3130569f95685/lib/block-supports/layout.php/#L219-L225.
+		if ( is_string( $spacing_value ) && str_contains( $spacing_value, 'var:preset|spacing|' ) ) {
+			$spacing_value = str_replace( 'var:preset|spacing|', '', $spacing_value );
+			return sprintf( 'var(--wp--preset--spacing--%s)', $spacing_value );
+		}
+
+		return $spacing_value;
+	}
+
+	/**
+	 * Get class and style for align from attributes.
 	 *
 	 * @param array $attributes Block attributes.
 	 *
 	 * @return (array | null)
 	 */
-	public static function get_font_size_class_and_style( $attributes ) {
+	public static function get_align_class_and_style( $attributes ) {
 
-		$font_size = $attributes['fontSize'] ?? '';
+		$align_attribute = $attributes['align'] ?? null;
 
-		$custom_font_size = $attributes['style']['typography']['fontSize'] ?? '';
-
-		if ( ! $font_size && '' === $custom_font_size ) {
+		if ( ! $align_attribute ) {
 			return null;
 		}
 
-		if ( $font_size ) {
+		if ( 'wide' === $align_attribute ) {
 			return array(
-				'class' => sprintf( 'has-font-size has-%s-font-size', $font_size ),
-				'style' => null,
-			);
-		} elseif ( '' !== $custom_font_size ) {
-			return array(
-				'class' => null,
-				'style' => sprintf( 'font-size: %s;', $custom_font_size ),
-			);
-		}
-		return null;
-	}
-
-	/**
-	 * Get class and style for font-weight from attributes.
-	 *
-	 * @param array $attributes Block attributes.
-	 *
-	 * @return (array | null)
-	 */
-	public static function get_font_weight_class_and_style( $attributes ) {
-
-		$custom_font_weight = $attributes['style']['typography']['fontWeight'] ?? '';
-
-		if ( '' !== $custom_font_weight ) {
-			return array(
-				'class' => null,
-				'style' => sprintf( 'font-weight: %s;', $custom_font_weight ),
-			);
-		}
-		return null;
-	}
-
-	/**
-	 * Get class and style for font-style from attributes.
-	 *
-	 * @param array $attributes Block attributes.
-	 *
-	 * @return (array | null)
-	 */
-	public static function get_font_style_class_and_style( $attributes ) {
-
-		$custom_font_style = $attributes['style']['typography']['fontStyle'] ?? '';
-
-		if ( '' !== $custom_font_style ) {
-			return array(
-				'class' => null,
-				'style' => sprintf( 'font-style: %s;', $custom_font_style ),
-			);
-		}
-		return null;
-	}
-
-	/**
-	 * Get class and style for font-family from attributes.
-	 *
-	 * @param array $attributes Block attributes.
-	 *
-	 * @return (array | null)
-	 */
-	public static function get_font_family_class_and_style( $attributes ) {
-
-		$font_family = $attributes['fontFamily'] ?? '';
-
-		if ( $font_family ) {
-			return array(
-				'class' => sprintf( 'has-%s-font-family', $font_family ),
+				'class' => 'alignwide',
 				'style' => null,
 			);
 		}
-		return null;
-	}
 
-	/**
-	 * Get class and style for text-color from attributes.
-	 *
-	 * @param array $attributes Block attributes.
-	 *
-	 * @return (array | null)
-	 */
-	public static function get_text_color_class_and_style( $attributes ) {
-
-		$text_color = $attributes['textColor'] ?? '';
-
-		$custom_text_color = $attributes['style']['color']['text'] ?? '';
-
-		if ( ! $text_color && ! $custom_text_color ) {
-			return null;
-		}
-
-		if ( $text_color ) {
+		if ( 'full' === $align_attribute ) {
 			return array(
-				'class' => sprintf( 'has-text-color has-%s-color', $text_color ),
+				'class' => 'alignfull',
 				'style' => null,
-				'value' => self::get_preset_value( $text_color ),
-			);
-		} elseif ( $custom_text_color ) {
-			return array(
-				'class' => null,
-				'style' => sprintf( 'color: %s;', $custom_text_color ),
-				'value' => $custom_text_color,
 			);
 		}
+
+		if ( 'left' === $align_attribute ) {
+			return array(
+				'class' => 'alignleft',
+				'style' => null,
+			);
+		}
+
+		if ( 'right' === $align_attribute ) {
+			return array(
+				'class' => 'alignright',
+				'style' => null,
+			);
+		}
+
+		if ( 'center' === $align_attribute ) {
+			return array(
+				'class' => 'aligncenter',
+				'style' => null,
+			);
+		}
+
 		return null;
-	}
-
-	/**
-	 * Get class and style for link-color from attributes.
-	 *
-	 * @param array $attributes Block attributes.
-	 *
-	 * @return (array | null)
-	 */
-	public static function get_link_color_class_and_style( $attributes ) {
-
-		if ( ! isset( $attributes['style']['elements']['link']['color']['text'] ) ) {
-			return null;
-		}
-
-		$link_color = $attributes['style']['elements']['link']['color']['text'];
-
-		// If the link color is selected from the theme color picker, the value of $link_color is var:preset|color|slug.
-		// If the link color is selected from the core color picker, the value of $link_color is an hex value.
-		// When the link color is a string var:preset|color|slug we parsed it for get the slug, otherwise we use the hex value.
-		$index_named_link_color = strrpos( $link_color, '|' );
-
-		if ( ! empty( $index_named_link_color ) ) {
-			$parsed_named_link_color = substr( $link_color, $index_named_link_color + 1 );
-			return array(
-				'class' => null,
-				'style' => sprintf( 'color: %s;', self::get_preset_value( $parsed_named_link_color ) ),
-				'value' => self::get_preset_value( $parsed_named_link_color ),
-			);
-		} else {
-			return array(
-				'class' => null,
-				'style' => sprintf( 'color: %s;', $link_color ),
-				'value' => $link_color,
-			);
-		}
-	}
-
-	/**
-	 * Get class and style for line height from attributes.
-	 *
-	 * @param array $attributes Block attributes.
-	 *
-	 * @return (array | null)
-	 */
-	public static function get_line_height_class_and_style( $attributes ) {
-
-		$line_height = $attributes['style']['typography']['lineHeight'] ?? '';
-
-		if ( ! $line_height ) {
-			return null;
-		}
-
-		return array(
-			'class' => null,
-			'style' => sprintf( 'line-height: %s;', $line_height ),
-		);
 	}
 
 	/**
@@ -347,56 +269,251 @@ class StyleAttributesUtils {
 	}
 
 	/**
-	 * Get class and style for align from attributes.
+	 * Get space-separated classes from block attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @param array $properties Properties to get classes from.
+	 *
+	 * @return string Space-separated classes.
+	 */
+	public static function get_classes_by_attributes( $attributes, $properties = array() ) {
+		$classes_and_styles = self::get_classes_and_styles_by_attributes( $attributes, $properties );
+
+		return $classes_and_styles['classes'];
+	}
+
+	/**
+	 * Get class and style for font-family from attributes.
 	 *
 	 * @param array $attributes Block attributes.
 	 *
 	 * @return (array | null)
 	 */
-	public static function get_align_class_and_style( $attributes ) {
+	public static function get_font_family_class_and_style( $attributes ) {
 
-		$align_attribute = $attributes['align'] ?? null;
+		$font_family = $attributes['fontFamily'] ?? '';
 
-		if ( ! $align_attribute ) {
+		if ( $font_family ) {
+			return array(
+				'class' => sprintf( 'has-%s-font-family', $font_family ),
+				'style' => null,
+			);
+		}
+		return null;
+	}
+
+	/**
+	 * Get class and style for font-size from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return (array | null)
+	 */
+	public static function get_font_size_class_and_style( $attributes ) {
+
+		$font_size = $attributes['fontSize'] ?? '';
+
+		$custom_font_size = $attributes['style']['typography']['fontSize'] ?? '';
+
+		if ( ! $font_size && '' === $custom_font_size ) {
 			return null;
 		}
 
-		if ( 'wide' === $align_attribute ) {
+		if ( $font_size ) {
 			return array(
-				'class' => 'alignwide',
+				'class' => sprintf( 'has-font-size has-%s-font-size', $font_size ),
 				'style' => null,
 			);
-		}
-
-		if ( 'full' === $align_attribute ) {
+		} elseif ( '' !== $custom_font_size ) {
 			return array(
-				'class' => 'alignfull',
-				'style' => null,
+				'class' => null,
+				'style' => sprintf( 'font-size: %s;', $custom_font_size ),
 			);
 		}
-
-		if ( 'left' === $align_attribute ) {
-			return array(
-				'class' => 'alignleft',
-				'style' => null,
-			);
-		}
-
-		if ( 'right' === $align_attribute ) {
-			return array(
-				'class' => 'alignright',
-				'style' => null,
-			);
-		}
-
-		if ( 'center' === $align_attribute ) {
-			return array(
-				'class' => 'aligncenter',
-				'style' => null,
-			);
-		}
-
 		return null;
+	}
+
+	/**
+	 * Get class and style for font-style from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return (array | null)
+	 */
+	public static function get_font_style_class_and_style( $attributes ) {
+
+		$custom_font_style = $attributes['style']['typography']['fontStyle'] ?? '';
+
+		if ( '' !== $custom_font_style ) {
+			return array(
+				'class' => null,
+				'style' => sprintf( 'font-style: %s;', $custom_font_style ),
+			);
+		}
+		return null;
+	}
+
+	/**
+	 * Get class and style for font-weight from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return (array | null)
+	 */
+	public static function get_font_weight_class_and_style( $attributes ) {
+
+		$custom_font_weight = $attributes['style']['typography']['fontWeight'] ?? '';
+
+		if ( '' !== $custom_font_weight ) {
+			return array(
+				'class' => null,
+				'style' => sprintf( 'font-weight: %s;', $custom_font_weight ),
+			);
+		}
+		return null;
+	}
+
+	/**
+	 * Get class and style for letter-spacing from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return (array | null)
+	 */
+	public static function get_letter_spacing_class_and_style( $attributes ) {
+
+		$custom_letter_spacing = $attributes['style']['typography']['letterSpacing'] ?? '';
+
+		if ( '' !== $custom_letter_spacing ) {
+			return array(
+				'class' => null,
+				'style' => sprintf( 'letter-spacing: %s;', $custom_letter_spacing ),
+			);
+		}
+		return null;
+	}
+
+	/**
+	 * Get class and style for line height from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return (array | null)
+	 */
+	public static function get_line_height_class_and_style( $attributes ) {
+
+		$line_height = $attributes['style']['typography']['lineHeight'] ?? '';
+
+		if ( ! $line_height ) {
+			return null;
+		}
+
+		return array(
+			'class' => null,
+			'style' => sprintf( 'line-height: %s;', $line_height ),
+		);
+	}
+
+	/**
+	 * Get class and style for link-color from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return (array | null)
+	 */
+	public static function get_link_color_class_and_style( $attributes ) {
+
+		if ( ! isset( $attributes['style']['elements']['link']['color']['text'] ) ) {
+			return null;
+		}
+
+		$link_color = $attributes['style']['elements']['link']['color']['text'];
+
+		// If the link color is selected from the theme color picker, the value of $link_color is var:preset|color|slug.
+		// If the link color is selected from the core color picker, the value of $link_color is an hex value.
+		// When the link color is a string var:preset|color|slug we parsed it for get the slug, otherwise we use the hex value.
+		$index_named_link_color = strrpos( $link_color, '|' );
+
+		if ( ! empty( $index_named_link_color ) ) {
+			$parsed_named_link_color = substr( $link_color, $index_named_link_color + 1 );
+			return array(
+				'class' => null,
+				'style' => sprintf( 'color: %s;', self::get_preset_value( $parsed_named_link_color ) ),
+				'value' => self::get_preset_value( $parsed_named_link_color ),
+			);
+		} else {
+			return array(
+				'class' => null,
+				'style' => sprintf( 'color: %s;', $link_color ),
+				'value' => $link_color,
+			);
+		}
+	}
+
+	/**
+	 * Get class and style for margin from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return (array | null)
+	 */
+	public static function get_margin_class_and_style( $attributes ) {
+		$margin = $attributes['style']['spacing']['margin'] ?? null;
+
+		if ( ! $margin ) {
+			return null;
+		}
+
+		$spacing_values_css = '';
+
+		foreach ( $margin as $margin_side => $margin_value ) {
+			$spacing_values_css .= 'margin-' . $margin_side . ':' . self::get_spacing_value( $margin_value ) . ';';
+		}
+
+		return array(
+			'class' => null,
+			'style' => $spacing_values_css,
+		);
+	}
+
+	/**
+	 * Get class and style for padding from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return (array | null)
+	 */
+	public static function get_padding_class_and_style( $attributes ) {
+		$padding = $attributes['style']['spacing']['padding'] ?? null;
+
+		if ( ! $padding ) {
+			return null;
+		}
+
+		$spacing_values_css = '';
+
+		foreach ( $padding as $padding_side => $padding_value ) {
+			$spacing_values_css .= 'padding-' . $padding_side . ':' . self::get_spacing_value( $padding_value ) . ';';
+		}
+
+		return array(
+			'class' => null,
+			'style' => $spacing_values_css,
+		);
+	}
+
+	/**
+	 * Get space-separated style rules from block attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @param array $properties Properties to get styles from.
+	 *
+	 * @return string Space-separated style rules.
+	 */
+	public static function get_styles_by_attributes( $attributes, $properties = array() ) {
+		$classes_and_styles = self::get_classes_and_styles_by_attributes( $attributes, $properties );
+
+		return $classes_and_styles['styles'];
 	}
 
 	/**
@@ -439,75 +556,76 @@ class StyleAttributesUtils {
 	}
 
 	/**
-	 * If spacing value is in preset format, convert it to a CSS var. Else return same value
-	 * For example:
-	 * "var:preset|spacing|50" -> "var(--wp--preset--spacing--50)"
-	 * "50px" -> "50px"
-	 *
-	 * @param string $spacing_value value to be processed.
-	 *
-	 * @return (string)
-	 */
-	public static function get_spacing_value( $spacing_value ) {
-		// Used following code as reference: https://github.com/WordPress/gutenberg/blob/cff6d70d6ff5a26e212958623dc3130569f95685/lib/block-supports/layout.php/#L219-L225.
-		if ( is_string( $spacing_value ) && str_contains( $spacing_value, 'var:preset|spacing|' ) ) {
-			$spacing_value = str_replace( 'var:preset|spacing|', '', $spacing_value );
-			return sprintf( 'var(--wp--preset--spacing--%s)', $spacing_value );
-		}
-
-		return $spacing_value;
-	}
-
-	/**
-	 * Get class and style for padding from attributes.
+	 * Get class and style for text-color from attributes.
 	 *
 	 * @param array $attributes Block attributes.
 	 *
 	 * @return (array | null)
 	 */
-	public static function get_padding_class_and_style( $attributes ) {
-		$padding = $attributes['style']['spacing']['padding'] ?? null;
+	public static function get_text_color_class_and_style( $attributes ) {
 
-		if ( ! $padding ) {
+		$text_color = $attributes['textColor'] ?? '';
+
+		$custom_text_color = $attributes['style']['color']['text'] ?? '';
+
+		if ( ! $text_color && ! $custom_text_color ) {
 			return null;
 		}
 
-		$spacing_values_css = '';
-
-		foreach ( $padding as $padding_side => $padding_value ) {
-			$spacing_values_css .= 'padding-' . $padding_side . ':' . self::get_spacing_value( $padding_value ) . ';';
+		if ( $text_color ) {
+			return array(
+				'class' => sprintf( 'has-text-color has-%s-color', $text_color ),
+				'style' => null,
+				'value' => self::get_preset_value( $text_color ),
+			);
+		} elseif ( $custom_text_color ) {
+			return array(
+				'class' => null,
+				'style' => sprintf( 'color: %s;', $custom_text_color ),
+				'value' => $custom_text_color,
+			);
 		}
-
-		return array(
-			'class' => null,
-			'style' => $spacing_values_css,
-		);
+		return null;
 	}
 
 	/**
-	 * Get class and style for margin from attributes.
+	 * Get class and style for text-decoration from attributes.
 	 *
 	 * @param array $attributes Block attributes.
 	 *
 	 * @return (array | null)
 	 */
-	public static function get_margin_class_and_style( $attributes ) {
-		$margin = $attributes['style']['spacing']['margin'] ?? null;
+	public static function get_text_decoration_class_and_style( $attributes ) {
 
-		if ( ! $margin ) {
-			return null;
+		$custom_text_decoration = $attributes['style']['typography']['textDecoration'] ?? '';
+
+		if ( '' !== $custom_text_decoration ) {
+			return array(
+				'class' => null,
+				'style' => sprintf( 'text-decoration: %s;', $custom_text_decoration ),
+			);
 		}
+		return null;
+	}
 
-		$spacing_values_css = '';
+	/**
+	 * Get class and style for text-transform from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return (array | null)
+	 */
+	public static function get_text_transform_class_and_style( $attributes ) {
 
-		foreach ( $margin as $margin_side => $margin_value ) {
-			$spacing_values_css .= 'margin-' . $margin_side . ':' . self::get_spacing_value( $margin_value ) . ';';
+		$custom_text_transform = $attributes['style']['typography']['textTransform'] ?? '';
+
+		if ( '' !== $custom_text_transform ) {
+			return array(
+				'class' => null,
+				'style' => sprintf( 'text-transform: %s;', $custom_text_transform ),
+			);
 		}
-
-		return array(
-			'class' => null,
-			'style' => $spacing_values_css,
-		);
+		return null;
 	}
 
 	/**
@@ -520,19 +638,22 @@ class StyleAttributesUtils {
 	 */
 	public static function get_classes_and_styles_by_attributes( $attributes, $properties = array() ) {
 		$classes_and_styles = array(
-			'line_height'      => self::get_line_height_class_and_style( $attributes ),
-			'text_color'       => self::get_text_color_class_and_style( $attributes ),
-			'font_size'        => self::get_font_size_class_and_style( $attributes ),
-			'font_family'      => self::get_font_family_class_and_style( $attributes ),
-			'font_weight'      => self::get_font_weight_class_and_style( $attributes ),
-			'font_style'       => self::get_font_style_class_and_style( $attributes ),
-			'link_color'       => self::get_link_color_class_and_style( $attributes ),
 			'background_color' => self::get_background_color_class_and_style( $attributes ),
 			'border_color'     => self::get_border_color_class_and_style( $attributes ),
 			'border_radius'    => self::get_border_radius_class_and_style( $attributes ),
 			'border_width'     => self::get_border_width_class_and_style( $attributes ),
-			'padding'          => self::get_padding_class_and_style( $attributes ),
+			'font_family'      => self::get_font_family_class_and_style( $attributes ),
+			'font_size'        => self::get_font_size_class_and_style( $attributes ),
+			'font_style'       => self::get_font_style_class_and_style( $attributes ),
+			'font_weight'      => self::get_font_weight_class_and_style( $attributes ),
+			'letter_spacing'   => self::get_letter_spacing_class_and_style( $attributes ),
+			'line_height'      => self::get_line_height_class_and_style( $attributes ),
+			'link_color'       => self::get_link_color_class_and_style( $attributes ),
 			'margin'           => self::get_margin_class_and_style( $attributes ),
+			'padding'          => self::get_padding_class_and_style( $attributes ),
+			'text_color'       => self::get_text_color_class_and_style( $attributes ),
+			'text_decoration'  => self::get_text_decoration_class_and_style( $attributes ),
+			'text_transform'   => self::get_text_transform_class_and_style( $attributes ),
 		);
 
 		if ( ! empty( $properties ) ) {
@@ -566,63 +687,5 @@ class StyleAttributesUtils {
 			'classes' => implode( ' ', $classes ),
 			'styles'  => implode( ' ', $styles ),
 		);
-	}
-
-	/**
-	 * Get space-separated classes from block attributes.
-	 *
-	 * @param array $attributes Block attributes.
-	 * @param array $properties Properties to get classes from.
-	 *
-	 * @return string Space-separated classes.
-	 */
-	public static function get_classes_by_attributes( $attributes, $properties = array() ) {
-		$classes_and_styles = self::get_classes_and_styles_by_attributes( $attributes, $properties );
-
-		return $classes_and_styles['classes'];
-	}
-
-	/**
-	 * Get space-separated style rules from block attributes.
-	 *
-	 * @param array $attributes Block attributes.
-	 * @param array $properties Properties to get styles from.
-	 *
-	 * @return string Space-separated style rules.
-	 */
-	public static function get_styles_by_attributes( $attributes, $properties = array() ) {
-		$classes_and_styles = self::get_classes_and_styles_by_attributes( $attributes, $properties );
-
-		return $classes_and_styles['styles'];
-	}
-
-	/**
-	 * Get CSS value for color preset.
-	 *
-	 * @param string $preset_name Preset name.
-	 *
-	 * @return string CSS value for color preset.
-	 */
-	public static function get_preset_value( $preset_name ) {
-		return "var(--wp--preset--color--$preset_name)";
-	}
-
-	/**
-	 * If color value is in preset format, convert it to a CSS var. Else return same value
-	 * For example:
-	 * "var:preset|color|pale-pink" -> "var(--wp--preset--color--pale-pink)"
-	 * "#98b66e" -> "#98b66e"
-	 *
-	 * @param string $color_value value to be processed.
-	 *
-	 * @return (string)
-	 */
-	public static function get_color_value( $color_value ) {
-		if ( is_string( $color_value ) && str_contains( $color_value, 'var:preset|color|' ) ) {
-			$color_value = str_replace( 'var:preset|color|', '', $color_value );
-			return sprintf( 'var(--wp--preset--color--%s)', $color_value );
-		}
-
-		return $color_value;
 	}
 }
