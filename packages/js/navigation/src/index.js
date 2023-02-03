@@ -29,7 +29,7 @@ export { getHistory };
 export * from './filters';
 
 // Export all hooks
-export { usePreventLeavingPage } from './hooks/usePreventLeavingPage';
+export { useConfirmUnsavedChanges } from './hooks/use-confirm-unsaved-changes';
 
 const TIME_EXCLUDED_SCREENS_FILTER = 'woocommerce_admin_time_excluded_screens';
 

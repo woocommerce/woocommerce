@@ -14,7 +14,7 @@ import {
  */
 import { parseAdminUrl } from '../';
 
-export const usePreventLeavingPage = (
+export const useConfirmUnsavedChanges = (
 	hasUnsavedChanges: boolean,
 	shouldConfirm?: ( path: URL, fromUrl: Location ) => boolean,
 	/**

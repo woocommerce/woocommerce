@@ -12,7 +12,7 @@ import {
 import { chevronDown, check, Icon } from '@wordpress/icons';
 import { registerPlugin } from '@wordpress/plugins';
 import {
-	usePreventLeavingPage,
+	useConfirmUnsavedChanges,
 	WooHeaderItem,
 } from '@woocommerce/admin-layout';
 import { useFormContext } from '@woocommerce/components';
@@ -54,7 +54,7 @@ export const ProductFormActions: React.FC = () => {
 	const { isDirty, isValidForm, values, resetForm } =
 		useFormContext< Product >();
 
-	usePreventLeavingPage( isDirty, preventLeavingProductForm );
+	useConfirmUnsavedChanges( isDirty, preventLeavingProductForm );
 
 	useCustomerEffortScoreExitPageTracker(
 		! values.id ? 'new_product' : 'editing_new_product',
