@@ -24,7 +24,10 @@ export const InventoryStockManageField = () => {
 		rules: {
 			min: {
 				value: 0,
-				message: 'Stock quantity must be a positive number.',
+				message: __(
+					'Stock quantity must be a positive number.',
+					'woocommerce'
+				),
 			},
 		},
 	} );
@@ -35,7 +38,10 @@ export const InventoryStockManageField = () => {
 			rules: {
 				min: {
 					value: 0,
-					message: 'Stock quantity must be a positive number.',
+					message: __(
+						'Stock quantity must be a positive number.',
+						'woocommerce'
+					),
 				},
 			},
 		} );

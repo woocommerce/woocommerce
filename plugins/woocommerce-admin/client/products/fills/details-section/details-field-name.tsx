@@ -13,13 +13,13 @@ import {
 	WCDataSelector,
 } from '@woocommerce/data';
 import { useState } from '@wordpress/element';
-import { Controller, useWatch } from 'react-hook-form';
+import { useWatch, useController } from 'react-hook-form';
 
 /**
  * Internal dependencies
  */
 import { EditProductLinkModal } from '../../shared/edit-product-link-modal';
-import { PRODUCT_DETAILS_SLUG } from '../constants';
+import { getErrorMessageProps } from '~/products/utils/get-error-message-props';
 
 export const DetailsNameField = ( {} ) => {
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
@@ -29,6 +29,24 @@ export const DetailsNameField = ( {} ) => {
 	const [ id, name, sku, slug, permalink ] = useWatch( {
 		name: [ 'id', 'name', 'sku', 'slug', 'permalink' ],
 		control,
+	} );
+
+	const { field, fieldState } = useController( {
+		name: 'name',
+		control,
+		rules: {
+			required: {
+				value: true,
+				message: __( 'This field is required.', 'woocommerce' ),
+			},
+			maxLength: {
+				value: 120,
+				message: __(
+					'Please enter a product name shorter than 120 characters.',
+					'woocommerce'
+				),
+			},
+		},
 	} );
 
 	const { permalinkPrefix, permalinkSuffix } = useSelect(
@@ -60,33 +78,26 @@ export const DetailsNameField = ( {} ) => {
 	};
 	return (
 		<div>
-			<Controller
-				name="name"
-				control={ control }
-				render={ ( { field } ) => (
-					<TextControl
-						{ ...field }
-						label={ interpolateComponents( {
-							mixedString: __(
-								'Name {{required/}}',
-								'woocommerce'
-							),
-							components: {
-								required: (
-									<span className="woocommerce-product-form__optional-input">
-										{ __( '(required)', 'woocommerce' ) }
-									</span>
-								),
-							},
-						} ) }
-						placeholder={ __(
-							'e.g. 12 oz Coffee Mug',
-							'woocommerce'
-						) }
-						onBlur={ setSkuIfEmpty }
-					/>
-				) }
+			<TextControl
+				{ ...field }
+				{ ...getErrorMessageProps( fieldState ) }
+				label={ interpolateComponents( {
+					mixedString: __( 'Name {{required/}}', 'woocommerce' ),
+					components: {
+						required: (
+							<span className="woocommerce-product-form__optional-input">
+								{ __( '(required)', 'woocommerce' ) }
+							</span>
+						),
+					},
+				} ) }
+				placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
+				onBlur={ () => {
+					field.onBlur();
+					setSkuIfEmpty();
+				} }
 			/>
+
 			{ id && ! hasNameError() && permalinkPrefix && (
 				<span className="woocommerce-product-form__secondary-text product-details-section__product-link">
 					{ __( 'Product link', 'woocommerce' ) }
