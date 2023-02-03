@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 
 const CatalogSorting = () => {
 	return (
-		<select>
+		<select className="orderby">
 			<option>
 				{ __( 'Default sorting', 'woo-gutenberg-products-block' ) }
 			</option>
