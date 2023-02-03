@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Move hook to confirm unsaved form changes to navigation package
