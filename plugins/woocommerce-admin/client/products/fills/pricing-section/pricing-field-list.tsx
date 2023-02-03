@@ -9,6 +9,7 @@ import { useContext } from '@wordpress/element';
 import { Product, SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import interpolateComponents from '@automattic/interpolate-components';
+import classNames from 'classnames';
 import {
 	BaseControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
@@ -22,6 +23,7 @@ import { CurrencyInputProps } from './pricing-section-fills';
 import { formatCurrencyDisplayValue } from '../../sections/utils';
 import { CurrencyContext } from '../../../lib/currency-context';
 import { ADMIN_URL } from '~/utils/admin-settings';
+import { getErrorMessageProps } from '~/products/utils/get-error-message-props';
 
 type PricingListFieldProps = {
 	currencyInputProps: CurrencyInputProps;
@@ -31,9 +33,18 @@ export const PricingListField: React.FC< PricingListFieldProps > = ( {
 	currencyInputProps,
 } ) => {
 	const { control } = useFormContext2< Product >();
-	const { field } = useController( {
+	const { field, fieldState } = useController( {
 		name: 'regular_price',
 		control,
+		rules: {
+			pattern: {
+				value: /^[0-9.,]+$/,
+				message: __(
+					'Please enter a price with one monetary decimal point without thousand separators and currency symbols.',
+					'woocommerce'
+				),
+			},
+		},
 	} );
 	const context = useContext( CurrencyContext );
 	const { getCurrencyConfig, formatAmount } = context;
@@ -89,12 +100,22 @@ export const PricingListField: React.FC< PricingListFieldProps > = ( {
 		},
 	} );
 
+	const errorMessageProps = getErrorMessageProps( fieldState );
+
 	return (
 		<>
-			<BaseControl id="product_pricing_regular_price">
+			<BaseControl
+				id="product_pricing_regular_price"
+				help={ errorMessageProps.help ?? '' }
+			>
 				<InputControl
 					{ ...field }
 					{ ...currencyInputProps }
+					{ ...errorMessageProps }
+					className={ classNames(
+						currencyInputProps.className,
+						errorMessageProps.className
+					) }
 					name="regular_price"
 					label={ __( 'List price', 'woocommerce' ) }
 					value={ formatCurrencyDisplayValue(
