@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { Children, isValidElement, createElement } from '@wordpress/element';
-
-/**
- * Internal dependencies
- */
-import { FormSection } from '../form-section';
+import { FormSection } from '@woocommerce/components';
 
 type ProductSectionLayoutProps = {
 	title: string;

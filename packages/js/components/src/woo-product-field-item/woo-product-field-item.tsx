@@ -22,41 +22,68 @@ type WooProductFieldSlotProps = {
 	section: string;
 };
 
-export const WooProductFieldItem: React.FC< WooProductFieldItemProps > & {
-	Slot: React.FC< Slot.Props & WooProductFieldSlotProps >;
-} = ( { children, sections, id } ) => {
+type WooProductFieldFillProps = {
+	fieldName: string;
+	sectionName: string;
+	order: number;
+	children?: React.ReactNode;
+};
+
+const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
+	fieldName,
+	sectionName,
+	order,
+	children,
+} ) => {
 	const { registerFill, getFillHelpers } = useSlotContext();
 
+	const fieldId = `product_field/${ sectionName }/${ fieldName }`;
+
 	useEffect( () => {
-		registerFill( id );
+		registerFill( fieldId );
 	}, [] );
 
 	return (
+		<Fill
+			name={ `woocommerce_product_field_${ sectionName }` }
+			key={ fieldId }
+		>
+			{ ( fillProps: Fill.Props ) =>
+				createOrderedChildren<
+					Fill.Props &
+						SlotContextHelpersType & {
+							sectionName: string;
+						},
+					{ _id: string }
+				>(
+					children,
+					order,
+					{
+						sectionName,
+						...fillProps,
+						...getFillHelpers(),
+					},
+					{ _id: fieldId }
+				)
+			}
+		</Fill>
+	);
+};
+
+export const WooProductFieldItem: React.FC< WooProductFieldItemProps > & {
+	Slot: React.FC< Slot.Props & WooProductFieldSlotProps >;
+} = ( { children, sections, id } ) => {
+	return (
 		<>
-			{ sections.map( ( { name: sectionName, order: sectionOrder } ) => (
-				<Fill
-					name={ `woocommerce_product_field_${ sectionName }` }
+			{ sections.map( ( { name: sectionName, order = 20 } ) => (
+				<WooProductFieldFill
+					fieldName={ id }
+					sectionName={ sectionName }
+					order={ order }
 					key={ sectionName }
 				>
-					{ ( fillProps: Fill.Props ) => {
-						return createOrderedChildren<
-							Fill.Props &
-								SlotContextHelpersType & {
-									sectionName: string;
-								},
-							{ _id: string }
-						>(
-							children,
-							sectionOrder || 20,
-							{
-								sectionName,
-								...fillProps,
-								...getFillHelpers(),
-							},
-							{ _id: id }
-						);
-					} }
-				</Fill>
+					{ children }
+				</WooProductFieldFill>
 			) ) }
 		</>
 	);

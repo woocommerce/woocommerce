@@ -1170,6 +1170,20 @@ class WC_Countries {
 							'label' => __( 'State', 'woocommerce' ),
 						),
 					),
+					'IR' => array(
+						'state'     => array(
+							'priority' => 50,
+						),
+						'city'      => array(
+							'priority' => 60,
+						),
+						'address_1' => array(
+							'priority' => 70,
+						),
+						'address_2' => array(
+							'priority' => 80,
+						),
+					),
 					'IT' => array(
 						'postcode' => array(
 							'priority' => 65,
