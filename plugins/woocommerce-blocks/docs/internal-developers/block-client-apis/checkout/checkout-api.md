@@ -71,7 +71,7 @@ The following actions can be dispatched from the Checkout data store:
 -   `__internalSetUseShippingAsBilling( useShippingAsBilling: boolean )`: Set `state.useShippingAsBilling` to `useShippingAsBilling`
 -   `__internalSetShouldCreateAccount( shouldCreateAccount: boolean )`: Set `state.shouldCreateAccount` to `shouldCreateAccount`
 -   `__internalSetOrderNotes( orderNotes: string )`: Set `state.orderNotes` to `orderNotes`
--   `__internalSetExtensionData( extensionData: Record< string, Record< string, unknown > > )`: Set `state.extensionData` to `extensionData`
+-   `__internalSetExtensionData( namespace: string, extensionData: Record< string, unknown > )`: Set `state.extensionData` to `extensionData`
 
 ## Contexts
 

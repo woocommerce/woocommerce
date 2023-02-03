@@ -215,21 +215,81 @@ describe.only( 'Checkout Store Reducer', () => {
 		).toEqual( expectedState );
 	} );
 
-	it( 'should handle SET_EXTENSION_DATA', () => {
-		const mockExtensionData = {
-			testExtension: { key: 'test', value: 'test2' },
-		};
-		const expectedState = {
-			...defaultState,
-			status: STATUS.IDLE,
-			extensionData: mockExtensionData,
-		};
-
-		expect(
-			reducer(
+	describe( 'should handle SET_EXTENSION_DATA', () => {
+		it( 'should set data under a namespace', () => {
+			const mockExtensionData = {
+				extensionNamespace: {
+					testKey: 'test-value',
+					testKey2: 'test-value-2',
+				},
+			};
+			const expectedState = {
+				...defaultState,
+				status: STATUS.IDLE,
+				extensionData: mockExtensionData,
+			};
+			expect(
+				reducer(
+					defaultState,
+					actions.__internalSetExtensionData(
+						'extensionNamespace',
+						mockExtensionData.extensionNamespace
+					)
+				)
+			).toEqual( expectedState );
+		} );
+		it( 'should append data under a namespace', () => {
+			const mockExtensionData = {
+				extensionNamespace: {
+					testKey: 'test-value',
+					testKey2: 'test-value-2',
+				},
+			};
+			const expectedState = {
+				...defaultState,
+				status: STATUS.IDLE,
+				extensionData: mockExtensionData,
+			};
+			const firstState = reducer(
 				defaultState,
-				actions.__internalSetExtensionData( mockExtensionData )
-			)
-		).toEqual( expectedState );
+				actions.__internalSetExtensionData( 'extensionNamespace', {
+					testKey: 'test-value',
+				} )
+			);
+			const secondState = reducer(
+				firstState,
+				actions.__internalSetExtensionData( 'extensionNamespace', {
+					testKey2: 'test-value-2',
+				} )
+			);
+			expect( secondState ).toEqual( expectedState );
+		} );
+		it( 'support replacing data under a namespace', () => {
+			const mockExtensionData = {
+				extensionNamespace: {
+					testKey: 'test-value',
+				},
+			};
+			const expectedState = {
+				...defaultState,
+				status: STATUS.IDLE,
+				extensionData: mockExtensionData,
+			};
+			const firstState = reducer(
+				defaultState,
+				actions.__internalSetExtensionData( 'extensionNamespace', {
+					testKeyOld: 'test-value',
+				} )
+			);
+			const secondState = reducer(
+				firstState,
+				actions.__internalSetExtensionData(
+					'extensionNamespace',
+					{ testKey: 'test-value' },
+					true
+				)
+			);
+			expect( secondState ).toEqual( expectedState );
+		} );
 	} );
 } );
