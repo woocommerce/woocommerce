@@ -1,0 +1,5 @@
+Significance: patch
+Type: update
+Comment: Mark purchase tests skipped temporarily due to a change in the endpoint behavior
+
+
