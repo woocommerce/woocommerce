@@ -31,6 +31,7 @@ function getChildrenAndProps< T = Fill.Props, S = Record< string, unknown > >(
 			props: { order, ...injectProps },
 		};
 	} else if ( isValidElement( children ) ) {
+		// This checks whether 'children' is a react element or a standard HTML element.
 		if ( typeof children?.type === 'function' ) {
 			return {
 				children,
