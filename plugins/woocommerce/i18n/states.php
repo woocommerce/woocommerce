@@ -2083,7 +2083,6 @@ return array(
 		'VE-Z' => __( 'Amazonas', 'woocommerce' ),
 	),
 	'VN' => array(),
-	'XK' => array(),
 	'YT' => array(),
 	'ZA' => array( // South African states.
 		'EC'  => __( 'Eastern Cape', 'woocommerce' ),
@@ -2108,4 +2107,5 @@ return array(
 		'ZM-09' => __( 'Lusaka', 'woocommerce' ),
 		'ZM-10' => __( 'Muchinga', 'woocommerce' ),
 	),
+	'XK' => array(),
 );

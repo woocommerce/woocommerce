@@ -260,8 +260,8 @@ return array(
 	'WF' => __( 'Wallis and Futuna', 'woocommerce' ),
 	'EH' => __( 'Western Sahara', 'woocommerce' ),
 	'WS' => __( 'Samoa', 'woocommerce' ),
-	'XK' => __( 'Kosovo', 'woocommerce' ),
 	'YE' => __( 'Yemen', 'woocommerce' ),
 	'ZM' => __( 'Zambia', 'woocommerce' ),
 	'ZW' => __( 'Zimbabwe', 'woocommerce' ),
+	'XK' => __( 'Kosovo', 'woocommerce' ),
 );
