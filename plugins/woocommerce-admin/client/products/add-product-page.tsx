@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * External dependencies
  */
@@ -47,3 +48,44 @@ const AddProductPage: React.FC = () => {
 };
 
 export default AddProductPage;
+
+
+
+import { useFormContext, useSlotContext, __experimentalWooProductFieldItem as WooProductFieldItem, TextControl } from "@woocommerce/components";
+import { registerPlugin } from "@wordpress/plugins";
+
+export const MakeAFill = () => {
+	const sc = useSlotContext();
+	const { setValues, values } = useFormContext();
+	console.log("maf");
+	const fills = sc.getFillHelpers().getFills();
+	console.log("fills", fills);
+	console.log("values", values);
+
+	// return null;
+	return (
+		<WooProductFieldItem id="make-a-thingo" sections={ [{ name: "tab/general/details" }] } order={2} pluginId="test-plugin" >
+			{() => {
+				return (
+					<TextControl
+						label="Name"
+						name={`product-mvp-name`}
+						placeholder="e.g. 12 oz Coffee Mug"
+						value="Test Name"
+						onChange={() => console.debug('Changed!')}
+					/>
+				);
+			}}
+		</WooProductFieldItem>
+	);
+}
+
+registerPlugin('wc-admin-product-editor-api-form-fills-experimental-meetup-thingos', {
+	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
+	scope: 'woocommerce-product-editor',
+	render: () => {
+		return <MakeAFill />;
+	},
+});
+
+console.log("loaded emt")
