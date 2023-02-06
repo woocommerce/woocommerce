@@ -8,7 +8,7 @@ import {
 } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { BlockInstance, serialize, parse } from '@wordpress/blocks';
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 
 export const DetailsDescriptionField = () => {
 	const { setValue, values } = useFormContext< Product >();
@@ -16,6 +16,11 @@ export const DetailsDescriptionField = () => {
 		BlockInstance[]
 	>( parse( values.description || '' ) );
 
+	useEffect( () => {
+		console.log("desc", values?.description);
+		setDescriptionBlocks( parse( values.description || '' ) );
+	}, [ values?.description ] );
+	
 	return (
 		<RichTextEditor
 			label={ __( 'Description', 'woocommerce' ) }
