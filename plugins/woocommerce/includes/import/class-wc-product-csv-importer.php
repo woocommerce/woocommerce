@@ -95,7 +95,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$row = version_compare( PHP_VERSION, '5.3', '>=' ) ? fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ) : fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'] ); // @codingStandardsIgnoreLine
 
 				if ( false !== $row ) {
-					$row = array_map("utf8_encode", $row);
+					$row = array_map('utf8_encode', $row);
 					$this->raw_data[]                                 = $row;
 					$this->file_positions[ count( $this->raw_data ) ] = ftell( $handle );
 
