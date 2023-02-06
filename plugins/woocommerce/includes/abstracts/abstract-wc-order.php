@@ -370,40 +370,40 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Get discount_total.
 	 *
 	 * @param  string $context View or edit context.
-	 * @return string
+	 * @return float
 	 */
 	public function get_discount_total( $context = 'view' ) {
-		return $this->get_prop( 'discount_total', $context );
+		return floatval( $this->get_prop( 'discount_total', $context ) );
 	}
 
 	/**
 	 * Get discount_tax.
 	 *
 	 * @param  string $context View or edit context.
-	 * @return string
+	 * @return float
 	 */
 	public function get_discount_tax( $context = 'view' ) {
-		return $this->get_prop( 'discount_tax', $context );
+		return floatval( $this->get_prop( 'discount_tax', $context ) );
 	}
 
 	/**
 	 * Get shipping_total.
 	 *
 	 * @param  string $context View or edit context.
-	 * @return string
+	 * @return float
 	 */
 	public function get_shipping_total( $context = 'view' ) {
-		return $this->get_prop( 'shipping_total', $context );
+		return floatval( $this->get_prop( 'shipping_total', $context ) );
 	}
 
 	/**
 	 * Get shipping_tax.
 	 *
 	 * @param  string $context View or edit context.
-	 * @return string
+	 * @return float
 	 */
 	public function get_shipping_tax( $context = 'view' ) {
-		return $this->get_prop( 'shipping_tax', $context );
+		return floatval( $this->get_prop( 'shipping_tax', $context ) );
 	}
 
 	/**
