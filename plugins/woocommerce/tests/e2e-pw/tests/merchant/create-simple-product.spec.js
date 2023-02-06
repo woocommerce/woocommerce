@@ -71,9 +71,11 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 			await page.waitForLoadState( 'networkidle' );
 		}
 
-		await expect( page.locator( 'div.notice-success > p' ) ).toContainText(
-			'Product published.'
-		);
+		await expect(
+			page
+				.locator( 'div.notice-success > p' )
+				.filter( { hasText: 'Product published.' } )
+		).toBeVisible();
 
 		// Save product ID
 		virtualProductId = page.url().match( /(?<=post=)\d+/ );
@@ -127,9 +129,11 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 			await page.waitForLoadState( 'networkidle' );
 		}
 
-		await expect( page.locator( 'div.notice-success > p' ) ).toContainText(
-			'Product published.'
-		);
+		await expect(
+			page
+				.locator( 'div.notice-success > p' )
+				.filter( { hasText: 'Product published.' } )
+		).toBeVisible();
 
 		// Save product ID
 		nonVirtualProductId = page.url().match( /(?<=post=)\d+/ );
