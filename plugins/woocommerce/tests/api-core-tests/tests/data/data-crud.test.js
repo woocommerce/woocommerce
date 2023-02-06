@@ -2063,6 +2063,18 @@ test.describe('Data API tests', () => {
 							"thousand_sep": ".",
 							"weight_unit": "kg",
 							"states": []
+						},
+						{
+							"code": "XK",
+							"name": "Euro",
+							"currency_code": "EUR",
+							"currency_pos": "right_space",
+							"decimal_sep": ",",
+							"dimension_unit": "cm",
+							"num_decimals": 2,
+							"thousand_sep": " ",
+							"weight_unit": "kg",
+							"states": []
 						}
 					],
 				})
