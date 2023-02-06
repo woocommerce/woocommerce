@@ -405,7 +405,7 @@ test.describe('Products API tests: CRUD', () => {
 		test('can retrieve all product categories', async ({
 			request
 		}) => {
-			// call API to retrieve all product tags
+			// call API to retrieve all product categories
 			const response = await request.get('/wp-json/wc/v3/products/categories');
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
@@ -417,7 +417,7 @@ test.describe('Products API tests: CRUD', () => {
 		test('can update a product category', async ({
 			request
 		}) => {
-			// call API to retrieve all product tags
+			// call API to retrieve all product categories
 			const response = await request.put(`wp-json/wc/v3/products/categories/${productCategoryId}`, {
 				data: {
 					description: 'Games played on a video games console or computer.'
@@ -611,7 +611,7 @@ test.describe('Products API tests: CRUD', () => {
 		test('can retrieve all product reviews', async ({
 			request
 		}) => {
-			// call API to retrieve all product tags
+			// call API to retrieve all product reviews
 			const response = await request.get('/wp-json/wc/v3/products/reviews');
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
@@ -622,7 +622,7 @@ test.describe('Products API tests: CRUD', () => {
 		test('can update a product review', async ({
 			request
 		}) => {
-			// call API to retrieve all product tags
+			// call API to retrieve all product reviews
 			const response = await request.put(`wp-json/wc/v3/products/reviews/${productReviewId}`, {
 				data: {
 					rating: 1
@@ -644,7 +644,7 @@ test.describe('Products API tests: CRUD', () => {
 		test('can permanently delete a product review', async ({
 			request
 		}) => {
-			// Delete the product category.
+			// Delete the product review.
 			const response = await request.delete(
 				`wp-json/wc/v3/products/reviews/${productReviewId}`, {
 					data: {
@@ -801,7 +801,7 @@ test.describe('Products API tests: CRUD', () => {
 		test('can retrieve all product shipping classes', async ({
 			request
 		}) => {
-			// call API to retrieve all product tags
+			// call API to retrieve all product shipping classes
 			const response = await request.get('/wp-json/wc/v3/products/shipping_classes');
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
@@ -812,7 +812,7 @@ test.describe('Products API tests: CRUD', () => {
 		test('can update a product shipping class', async ({
 			request
 		}) => {
-			// call API to retrieve all product tags
+			// call API to retrieve a product shipping class
 			const response = await request.put(`wp-json/wc/v3/products/shipping_classes/${productShippingClassId}`, {
 				data: {
 					description: 'This is a description for the Priority shipping class.'
@@ -959,7 +959,7 @@ test.describe('Products API tests: CRUD', () => {
 		test('can update a product tag', async ({
 			request
 		}) => {
-			// call API to retrieve all product tags
+			// call API to update a product tag
 			const response = await request.put(`wp-json/wc/v3/products/tags/${productTagId}`, {
 				data: {
 					description: 'Genuine leather.'
@@ -1098,25 +1098,183 @@ test.describe('Products API tests: CRUD', () => {
 		});
 	});
 
-	test('can add a variable product', async ({
-		request
-	}) => {
-		const response = await request.post('wp-json/wc/v3/products', {
-			data: variableProduct,
+	test.describe('Product variation tests: CRUD', () => {
+		let variableProductId;
+		let productVariationId;
+
+		test('can add a variable product', async ({
+			request
+		}) => {
+			const response = await request.post('wp-json/wc/v3/products', {
+				data: variableProduct,
+			});
+			const responseJSON = await response.json();
+			variableProductId = responseJSON.id;
+			expect(response.status()).toEqual(201);
+			expect(typeof variableProductId).toEqual('number');
+			expect(responseJSON).toMatchObject(variableProduct);
+			expect(responseJSON.status).toEqual('publish');
 		});
-		const responseJSON = await response.json();
-		const variableProductId = responseJSON.id;
 
-		expect(response.status()).toEqual(201);
-		expect(typeof variableProductId).toEqual('number');
-		expect(responseJSON).toMatchObject(variableProduct);
-		expect(responseJSON.status).toEqual('publish');
+		test('can add a product variation', async ({
+			request
+		}) => {
+			const response = await request.post(`wp-json/wc/v3/products/${variableProductId}/variations`, {
+				data: {
+					"regular_price": "29.00",
+					"attributes": [{
+						"name": "Colour",
+						"option": "Green"
+					}]
+				},
+			});
+			const responseJSON = await response.json();
+			productVariationId = responseJSON.id;
+			expect(response.status()).toEqual(201);
+			expect(typeof productVariationId).toEqual('number');
+			expect(responseJSON.regular_price).toEqual("29.00");
+		});
 
-		// Cleanup: Delete the variable product
-		await request.delete(`wp-json/wc/v3/products/${ variableProductId }`, {
-			data: {
-				force: true,
-			},
+		test('can retrieve a product variation', async ({
+			request
+		}) => {
+			const response = await request.get(`wp-json/wc/v3/products/${variableProductId}/variations/${productVariationId}`);
+			const responseJSON = await response.json();
+			expect(response.status()).toEqual(200);
+			expect(responseJSON.id).toEqual(productVariationId);
+			expect(responseJSON.regular_price).toEqual('29.00');
+		});
+
+		test('can retrieve all product variations', async ({
+			request
+		}) => {
+			// call API to retrieve all product variations
+			const response = await request.get(`wp-json/wc/v3/products/${variableProductId}/variations`);
+			const responseJSON = await response.json();
+			expect(response.status()).toEqual(200);
+			expect(Array.isArray(responseJSON)).toBe(true);
+			expect(responseJSON.length).toBeGreaterThan(0);
+		});
+
+		test('can update a product variation', async ({
+			request
+		}) => {
+			// call API to update the product variation
+			const response = await request.put(`wp-json/wc/v3/products/${variableProductId}/variations/${productVariationId}`, {
+				data: {
+					"regular_price": "30.00",
+				}
+			});
+			const responseJSON = await response.json();
+			expect(response.status()).toEqual(200);
+			expect(responseJSON.id).toEqual(productVariationId);
+			expect(responseJSON.regular_price).toEqual('30.00');
+		});
+
+		test('can permanently delete a product variation', async ({
+			request
+		}) => {
+			// Delete the product variation.
+			const response = await request.delete(
+				`wp-json/wc/v3/products/${variableProductId}/variations/${productVariationId}`, {
+					data: {
+						force: true,
+					},
+				}
+			);
+			expect(response.status()).toEqual(200);
+
+			// Verify that the product variation can no longer be retrieved.
+			const getDeletedProductVariationResponse = await request.get(
+				`wp-json/wc/v3/products/${variableProductId}/variations/${productVariationId}`
+			);
+			expect(getDeletedProductVariationResponse.status()).toEqual(404);
+		});
+
+		test('can batch update product variations', async ({
+			request
+		}) => {
+			// Batch create 2 product variations
+			const response = await request.post(
+				`wp-json/wc/v3/products/${variableProductId}/variations/batch`, {
+					data: {
+						create: [{
+								"regular_price": "30.00",
+								"attributes": [{
+									"name": "Colour",
+									"option": "Green"
+								}]
+							},
+							{
+								"regular_price": "35.00",
+								"attributes": [{
+									"name": "Colour",
+									"option": "Red"
+								}]
+							}
+						]
+					}
+				}
+			);
+			const responseJSON = await response.json();
+			expect(response.status()).toEqual(200);
+			const variation1Id = responseJSON.create[0].id;
+			const variation2Id = responseJSON.create[1].id;
+			expect(typeof variation1Id).toEqual('number');
+			expect(typeof variation2Id).toEqual('number');
+			expect(responseJSON.create[0].price).toEqual('30.00');
+			expect(responseJSON.create[1].price).toEqual('35.00');
+
+			// Batch create a new variation, update a variation and delete another.
+			const responseBatchUpdate = await request.post(
+				`wp-json/wc/v3/products/${variableProductId}/variations/batch`, {
+					data: {
+						create: [{
+							"regular_price": "25.99",
+							"attributes": [{
+								"name": "Colour",
+								"option": "Blue"
+							}]
+						}],
+						update: [{
+							id: variation2Id,
+							"regular_price": "35.99",
+						}],
+						delete: [
+							variation1Id
+						]
+					}
+				}
+			);
+
+			expect(response.status()).toEqual(200);
+			const responseBatchUpdateJSON = await responseBatchUpdate.json();
+			const variation3Id = responseBatchUpdateJSON.create[0].id;
+			const responseUpdatedVariation = await request.get(`wp-json/wc/v3/products/${variableProductId}/variations/${variation2Id}`);
+			const responseUpdatedVariationJSON = await responseUpdatedVariation.json();
+			expect(responseUpdatedVariationJSON.regular_price).toEqual('35.99');
+
+			// Verify that the deleted product variation can no longer be retrieved.
+			const getDeletedProductVariationResponse = await request.get(
+				`wp-json/wc/v3/products/${variableProductId}/variations/${variation1Id}`
+			);
+			expect(getDeletedProductVariationResponse.status()).toEqual(404);
+
+			// Batch delete the created product variations
+			await request.post(
+				`wp-json/wc/v3/products/${variableProductId}/variations/batch`, {
+					data: {
+						delete: [variation2Id, variation3Id]
+					}
+				}
+			);
+
+			// Cleanup: Delete the variable product
+			await request.delete(`wp-json/wc/v3/products/${ variableProductId }`, {
+				data: {
+					force: true,
+				},
+			});
 		});
 	});
 

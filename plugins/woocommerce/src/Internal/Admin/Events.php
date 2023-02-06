@@ -11,22 +11,17 @@ use \Automattic\WooCommerce\Admin\Features\Features;
 use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\DataSourcePoller;
 use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
 use \Automattic\WooCommerce\Internal\Admin\Notes\AddFirstProduct;
-use \Automattic\WooCommerce\Internal\Admin\Notes\AddingAndManangingProducts;
 use \Automattic\WooCommerce\Internal\Admin\Notes\ChoosingTheme;
 use \Automattic\WooCommerce\Internal\Admin\Notes\CouponPageMoved;
 use \Automattic\WooCommerce\Internal\Admin\Notes\CustomizeStoreWithBlocks;
 use \Automattic\WooCommerce\Internal\Admin\Notes\CustomizingProductCatalog;
 use \Automattic\WooCommerce\Internal\Admin\Notes\EditProductsOnTheMove;
 use \Automattic\WooCommerce\Internal\Admin\Notes\EUVATNumber;
-use \Automattic\WooCommerce\Internal\Admin\Notes\FirstDownlaodableProduct;
 use \Automattic\WooCommerce\Internal\Admin\Notes\FirstProduct;
-use \Automattic\WooCommerce\Internal\Admin\Notes\InsightFirstProductAndPayment;
-use \Automattic\WooCommerce\Internal\Admin\Notes\InsightFirstSale;
 use \Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
 use \Automattic\WooCommerce\Internal\Admin\Notes\LaunchChecklist;
 use \Automattic\WooCommerce\Internal\Admin\Notes\MagentoMigration;
 use \Automattic\WooCommerce\Internal\Admin\Notes\ManageOrdersOnTheGo;
-use \Automattic\WooCommerce\Internal\Admin\Notes\ManageStoreActivityFromHomeScreen;
 use \Automattic\WooCommerce\Internal\Admin\Notes\MarketingJetpack;
 use \Automattic\WooCommerce\Internal\Admin\Notes\MerchantEmailNotifications;
 use \Automattic\WooCommerce\Internal\Admin\Notes\MigrateFromShopify;
@@ -35,6 +30,7 @@ use \Automattic\WooCommerce\Internal\Admin\Notes\NewSalesRecord;
 use \Automattic\WooCommerce\Internal\Admin\Notes\OnboardingPayments;
 use \Automattic\WooCommerce\Internal\Admin\Notes\OnlineClothingStore;
 use \Automattic\WooCommerce\Internal\Admin\Notes\OrderMilestones;
+use \Automattic\WooCommerce\Internal\Admin\Notes\PaymentsMoreInfoNeeded;
 use \Automattic\WooCommerce\Internal\Admin\Notes\PaymentsRemindMeLater;
 use \Automattic\WooCommerce\Internal\Admin\Notes\PerformanceOnMobile;
 use \Automattic\WooCommerce\Internal\Admin\Notes\PersonalizeStore;
@@ -43,8 +39,6 @@ use \Automattic\WooCommerce\Internal\Admin\Notes\SellingOnlineCourses;
 use \Automattic\WooCommerce\Internal\Admin\Notes\TestCheckout;
 use \Automattic\WooCommerce\Internal\Admin\Notes\TrackingOptIn;
 use \Automattic\WooCommerce\Internal\Admin\Notes\UnsecuredReportFiles;
-use \Automattic\WooCommerce\Internal\Admin\Notes\UpdateStoreDetails;
-use \Automattic\WooCommerce\Internal\Admin\Notes\WelcomeToWooCommerceForStoreUsers;
 use \Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
 use \Automattic\WooCommerce\Internal\Admin\Notes\WooCommerceSubscriptions;
 use \Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
@@ -76,16 +70,12 @@ class Events {
 	 */
 	private static $note_classes_to_added_or_updated = array(
 		AddFirstProduct::class,
-		AddingAndManangingProducts::class,
 		ChoosingTheme::class,
 		CustomizeStoreWithBlocks::class,
 		CustomizingProductCatalog::class,
 		EditProductsOnTheMove::class,
 		EUVATNumber::class,
-		FirstDownlaodableProduct::class,
 		FirstProduct::class,
-		InsightFirstProductAndPayment::class,
-		InsightFirstSale::class,
 		LaunchChecklist::class,
 		MagentoMigration::class,
 		ManageOrdersOnTheGo::class,
@@ -95,13 +85,13 @@ class Events {
 		NewSalesRecord::class,
 		OnboardingPayments::class,
 		OnlineClothingStore::class,
+		PaymentsMoreInfoNeeded::class,
 		PaymentsRemindMeLater::class,
 		PerformanceOnMobile::class,
 		PersonalizeStore::class,
 		RealTimeOrderAlerts::class,
 		TestCheckout::class,
 		TrackingOptIn::class,
-		UpdateStoreDetails::class,
 		WooCommercePayments::class,
 		WooCommerceSubscriptions::class,
 	);
@@ -114,11 +104,9 @@ class Events {
 	private static $other_note_classes = array(
 		CouponPageMoved::class,
 		InstallJPAndWCSPlugins::class,
-		ManageStoreActivityFromHomeScreen::class,
 		OrderMilestones::class,
 		SellingOnlineCourses::class,
 		UnsecuredReportFiles::class,
-		WelcomeToWooCommerceForStoreUsers::class,
 		WooSubscriptionsNotes::class,
 	);
 
@@ -129,7 +117,7 @@ class Events {
 	 * @return object Instance.
 	 */
 	final public static function instance() {
-		if ( static::$instance === null ) {
+		if ( null === static::$instance ) {
 			static::$instance = new static();
 		}
 		return static::$instance;
@@ -214,6 +202,7 @@ class Events {
 	 */
 	protected function possibly_delete_notes() {
 		PaymentsRemindMeLater::delete_if_not_applicable();
+		PaymentsMoreInfoNeeded::delete_if_not_applicable();
 	}
 
 	/**

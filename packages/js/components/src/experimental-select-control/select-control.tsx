@@ -7,6 +7,7 @@ import {
 	UseComboboxState,
 	UseComboboxStateChangeOptions,
 	useMultipleSelection,
+	GetInputPropsOptions,
 } from 'downshift';
 import {
 	useState,
@@ -14,6 +15,7 @@ import {
 	createElement,
 	Fragment,
 } from '@wordpress/element';
+import { search } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -28,16 +30,17 @@ import { SelectedItems } from './selected-items';
 import { ComboBox } from './combo-box';
 import { Menu } from './menu';
 import { MenuItem } from './menu-item';
+import { SuffixIcon } from './suffix-icon';
 import {
 	defaultGetItemLabel,
 	defaultGetItemValue,
 	defaultGetFilteredItems,
 } from './utils';
 
-type SelectControlProps< ItemType > = {
+export type SelectControlProps< ItemType > = {
 	children?: ChildrenType< ItemType >;
 	items: ItemType[];
-	label: string;
+	label: string | JSX.Element;
 	getItemLabel?: getItemLabelType< ItemType >;
 	getItemValue?: getItemValueType< ItemType >;
 	getFilteredItems?: (
@@ -63,6 +66,17 @@ type SelectControlProps< ItemType > = {
 	selected: ItemType | ItemType[] | null;
 	className?: string;
 	disabled?: boolean;
+	inputProps?: GetInputPropsOptions;
+	suffix?: JSX.Element | null;
+	/**
+	 * This is a feature already implemented in downshift@7.0.0 through the
+	 * reducer. In order for us to use it this prop is added temporarily until
+	 * current downshift version get updated.
+	 *
+	 * @see https://www.downshift-js.com/use-multiple-selection#usage-with-combobox
+	 * @default false
+	 */
+	__experimentalOpenMenuOnFocus?: boolean;
 };
 
 export const selectControlStateChangeTypes = useCombobox.stateChangeTypes;
@@ -107,6 +121,9 @@ function SelectControl< ItemType = DefaultItemType >( {
 	selected,
 	className,
 	disabled,
+	inputProps = {},
+	suffix = <SuffixIcon icon={ search } />,
+	__experimentalOpenMenuOnFocus = false,
 }: SelectControlProps< ItemType > ) {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
@@ -247,11 +264,16 @@ function SelectControl< ItemType = DefaultItemType >( {
 					onFocus: () => {
 						setIsFocused( true );
 						onFocus( { inputValue } );
+						if ( __experimentalOpenMenuOnFocus ) {
+							openMenu();
+						}
 					},
 					onBlur: () => setIsFocused( false ),
 					placeholder,
 					disabled,
+					...inputProps,
 				} ) }
+				suffix={ suffix }
 			>
 				<>
 					{ children( {

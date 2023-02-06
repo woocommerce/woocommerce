@@ -41,6 +41,7 @@ class WC_Admin_Post_Types {
 
 		// Admin notices.
 		add_filter( 'post_updated_messages', array( $this, 'post_updated_messages' ) );
+		add_filter( 'woocommerce_order_updated_messages', array( $this, 'order_updated_messages' ) );
 		add_filter( 'bulk_post_updated_messages', array( $this, 'bulk_post_updated_messages' ), 10, 2 );
 
 		// Disable Auto Save.
@@ -124,14 +125,14 @@ class WC_Admin_Post_Types {
 
 		$messages['product'] = array(
 			0  => '', // Unused. Messages start at index 1.
-			/* translators: %s: Product view URL. */
-			1  => sprintf( __( 'Product updated. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post->ID ) ) ),
+			/* translators: %1$s: Product link opening tag. %2$s: Product link closing tag.*/
+			1  => sprintf( __( 'Product updated. %1$sView Product%2$s', 'woocommerce' ), '<a id="woocommerce-product-updated-message-view-product__link" href="' . esc_url( get_permalink( $post->ID ) ) . '">', '</a>' ),
 			2  => __( 'Custom field updated.', 'woocommerce' ),
 			3  => __( 'Custom field deleted.', 'woocommerce' ),
 			4  => __( 'Product updated.', 'woocommerce' ),
 			5  => __( 'Revision restored.', 'woocommerce' ),
-			/* translators: %s: product url */
-			6  => sprintf( __( 'Product published. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post->ID ) ) ),
+			/* translators: %1$s: Product link opening tag. %2$s: Product link closing tag.*/
+			6  => sprintf( __( 'Product published. %1$sView Product%2$s', 'woocommerce' ), '<a id="woocommerce-product-updated-message-view-product__link" href="' . esc_url( get_permalink( $post->ID ) ) . '">', '</a>' ),
 			7  => __( 'Product saved.', 'woocommerce' ),
 			/* translators: %s: product url */
 			8  => sprintf( __( 'Product submitted. <a target="_blank" href="%s">Preview product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),
@@ -145,24 +146,7 @@ class WC_Admin_Post_Types {
 			10 => sprintf( __( 'Product draft updated. <a target="_blank" href="%s">Preview product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),
 		);
 
-		$messages['shop_order'] = array(
-			0  => '', // Unused. Messages start at index 1.
-			1  => __( 'Order updated.', 'woocommerce' ),
-			2  => __( 'Custom field updated.', 'woocommerce' ),
-			3  => __( 'Custom field deleted.', 'woocommerce' ),
-			4  => __( 'Order updated.', 'woocommerce' ),
-			5  => __( 'Revision restored.', 'woocommerce' ),
-			6  => __( 'Order updated.', 'woocommerce' ),
-			7  => __( 'Order saved.', 'woocommerce' ),
-			8  => __( 'Order submitted.', 'woocommerce' ),
-			9  => sprintf(
-				/* translators: %s: date */
-				__( 'Order scheduled for: %s.', 'woocommerce' ),
-				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) . '</strong>'
-			),
-			10 => __( 'Order draft updated.', 'woocommerce' ),
-			11 => __( 'Order updated and sent.', 'woocommerce' ),
-		);
+		$messages = $this->order_updated_messages( $messages );
 
 		$messages['shop_coupon'] = array(
 			0  => '', // Unused. Messages start at index 1.
@@ -180,6 +164,46 @@ class WC_Admin_Post_Types {
 				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) . '</strong>'
 			),
 			10 => __( 'Coupon draft updated.', 'woocommerce' ),
+		);
+
+		return $messages;
+	}
+
+	/**
+	 * Add messages when an order is updated.
+	 *
+	 * @param array $messages Array of messages.
+	 *
+	 * @return array
+	 */
+	public function order_updated_messages( array $messages ) {
+		global $post, $theorder;
+
+		if ( ! isset( $theorder ) || ! $theorder instanceof WC_Abstract_Order ) {
+			if ( ! isset( $post ) || 'shop_order' !== $post->post_type ) {
+				return $messages;
+			} else {
+				\Automattic\WooCommerce\Utilities\OrderUtil::init_theorder_object( $post );
+			}
+		}
+
+		$messages['shop_order'] = array(
+			0  => '', // Unused. Messages start at index 1.
+			1  => __( 'Order updated.', 'woocommerce' ),
+			2  => __( 'Custom field updated.', 'woocommerce' ),
+			3  => __( 'Custom field deleted.', 'woocommerce' ),
+			4  => __( 'Order updated.', 'woocommerce' ),
+			5  => __( 'Revision restored.', 'woocommerce' ),
+			6  => __( 'Order updated.', 'woocommerce' ),
+			7  => __( 'Order saved.', 'woocommerce' ),
+			8  => __( 'Order submitted.', 'woocommerce' ),
+			9  => sprintf(
+			/* translators: %s: date */
+				__( 'Order scheduled for: %s.', 'woocommerce' ),
+				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $theorder->get_date_created() ) ) . '</strong>'
+			),
+			10 => __( 'Order draft updated.', 'woocommerce' ),
+			11 => __( 'Order updated and sent.', 'woocommerce' ),
 		);
 
 		return $messages;

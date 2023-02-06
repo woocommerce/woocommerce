@@ -12,6 +12,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use \Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use \Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Admin\API\Reports\Customers\DataStore.
@@ -64,7 +65,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'id'               => "{$table_name}.customer_id as id",
 			'user_id'          => 'user_id',
 			'username'         => 'username',
-			'name'             => "CONCAT_WS( ' ', first_name, last_name ) as name", // @todo What does this mean for RTL?
+			'name'             => "CONCAT_WS( ' ', first_name, last_name ) as name", // @xxx: What does this mean for RTL?
 			'email'            => 'email',
 			'country'          => 'country',
 			'city'             => 'city',
@@ -122,7 +123,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public static function sync_order_customer( $post_id ) {
 		global $wpdb;
 
-		if ( 'shop_order' !== get_post_type( $post_id ) && 'shop_order_refund' !== get_post_type( $post_id ) ) {
+		if ( ! OrderUtil::is_order( $post_id, array( 'shop_order', 'shop_order_refund' ) ) ) {
 			return -1;
 		}
 

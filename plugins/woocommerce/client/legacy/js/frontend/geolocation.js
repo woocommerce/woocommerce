@@ -127,7 +127,17 @@ jQuery( function( $ ) {
 	// Get the current geo hash. If it doesn't exist, or if it doesn't match the current
 	// page URL, perform a geolocation request.
 	if ( ! get_geo_hash() || needs_refresh() ) {
-		$.ajax( $geolocate_customer );
+		window.fetch( $geolocate_customer.url, {
+			method: $geolocate_customer.type,
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }
+		} )
+		.then( response => {
+			if ( !response.ok ) {
+				throw new Error( response.statusText );
+			}
+			return response.json();
+		} )
+		.then( $geolocate_customer.success );
 	}
 
 	// Page updates.

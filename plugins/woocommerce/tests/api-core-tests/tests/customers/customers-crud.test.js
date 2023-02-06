@@ -5,6 +5,10 @@ const {
 const {
 	customer
 } = require('../../data');
+const {
+	USER_KEY,
+} = process.env;
+const userKey = USER_KEY ?? 'admin';
 
 /**
  * Tests for the WooCommerce Customers API.
@@ -15,12 +19,72 @@ const {
  */
 test.describe('Customers API tests: CRUD', () => {
 	let customerId;
+	let subscriberUserId;
+	let subscriberUserCreatedDuringTests = false;
+
+	test.beforeAll(async ({
+		request
+	}) => {
+		// Call the API to return all users and determine if a 
+		// subscriber user has been created
+		const customersResponse = await request.get('/wp-json/wc/v3/customers', {
+			params: {
+				role: 'all'
+			}
+		});
+		const customersResponseJSON = await customersResponse.json();
+
+		for (const element of customersResponseJSON) {
+			if (element.role === 'subscriber') {
+				subscriberUserId = element.id;
+				break;
+			}
+		}
+
+		// If a subscriber user has not been created then create one
+		if (!subscriberUserId) {
+			const userResponse = await request.post('/wp-json/wp/v2/users', {
+				data: {
+					username: "customer",
+					email: "customer@woocommercecoretestsuite.com",
+					first_name: "Jane",
+					last_name: "Smith",
+					roles: ["subscriber"],
+					password: "password",
+					name: "Jane",
+				}
+			});
+			const userResponseJSON = await userResponse.json();
+			// set subscriber user id to newly created user
+			subscriberUserId = userResponseJSON.id;
+			subscriberUserCreatedDuringTests = true;
+		}
+
+		// Verify the subscriber user has been created
+		const response = await request.get(`/wp-json/wc/v3/customers/${subscriberUserId}`);
+		const responseJSON = await response.json();
+		expect(response.status()).toEqual(200);
+		expect(responseJSON.role).toEqual('subscriber');
+	});
+
+	test.afterAll(async ({
+		request
+	}) => {
+		// delete subscriber user if one was created during the execution of these tests
+		if (subscriberUserCreatedDuringTests) {
+			await request.delete(`/wp-json/wc/v3/customers/${subscriberUserId}`, {
+				data: {
+					force: true
+				}
+			});
+		}
+	});
 
 	test.describe('Retrieve after env setup', () => {
 		/** when the environment is created,
 		 * (https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw#woocommerce-playwright-end-to-end-tests),
-		 * we have an admin user and  a subscriber user that can both be 
-         * accessed through their ids
+		 * we have an admin user and a subscriber user that can both be 
+		 * accessed through their ids
 		 * admin user will have id 1 and subscriber user will have id 2
 		 * neither of these are returned as part of the get all customers call
 		 * unless the role 'all' is passed as a search param 
@@ -35,14 +99,16 @@ test.describe('Customers API tests: CRUD', () => {
 			expect(response.status()).toEqual(200);
 			expect(responseJSON.is_paying_customer).toEqual(false);
 			expect(responseJSON.role).toEqual('administrator');
-			expect(responseJSON.username).toEqual('admin');
+			// this test was updated to allow for local test setup and other test sites.
+			expect(responseJSON.username).toEqual(userKey);
 		});
 
 		test('can retrieve subscriber user', async ({
 			request
 		}) => {
-			// call API to retrieve the previously saved customer
-			const response = await request.get('/wp-json/wc/v3/customers/2');
+			// if environment was created with subscriber user
+			// call API to retrieve the customer with id 2
+			const response = await request.get(`/wp-json/wc/v3/customers/${subscriberUserId}`);
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
 			expect(responseJSON.is_paying_customer).toEqual(false);
@@ -67,7 +133,7 @@ test.describe('Customers API tests: CRUD', () => {
 			const response = await request.get('/wp-json/wc/v3/customers');
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
-			expect(Array.isArray(responseJSON));
+			expect(Array.isArray(responseJSON)).toBe(true);
 			expect(responseJSON.length).toEqual(0);
 		});
 
@@ -85,8 +151,8 @@ test.describe('Customers API tests: CRUD', () => {
 			});
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
-			expect(Array.isArray(responseJSON));
-			expect(responseJSON.length).toBeGreaterThanOrEqual(2);
+			expect(Array.isArray(responseJSON)).toBe(true);
+			expect(responseJSON.length).toBeGreaterThanOrEqual(1);
 		});
 	});
 
@@ -132,7 +198,7 @@ test.describe('Customers API tests: CRUD', () => {
 			const response = await request.get('/wp-json/wc/v3/customers');
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
-			expect(Array.isArray(responseJSON));
+			expect(Array.isArray(responseJSON)).toBe(true);
 			expect(responseJSON.length).toBeGreaterThan(0);
 		});
 	});
@@ -143,10 +209,10 @@ test.describe('Customers API tests: CRUD', () => {
 			request,
 		}) => {
 			/**
-             * update customer names (regular, billing and shipping) to admin
-             * (these were initialised blank when the environment is created,
-             * (https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw#woocommerce-playwright-end-to-end-tests
-             */ 
+			 * update customer names (regular, billing and shipping) to admin
+			 * (these were initialised blank when the environment is created,
+			 * (https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw#woocommerce-playwright-end-to-end-tests
+			 */
 			const response = await request.put(
 				`/wp-json/wc/v3/customers/1`, {
 					data: {
@@ -185,7 +251,7 @@ test.describe('Customers API tests: CRUD', () => {
 			// update customer names (billing and shipping) to Jane
 			// (these were initialised blank, only regular first_name was populated)
 			const response = await request.put(
-				`/wp-json/wc/v3/customers/2`, {
+				`/wp-json/wc/v3/customers/${subscriberUserId}`, {
 					data: {
 						billing: {
 							first_name: 'Jane'
@@ -207,7 +273,7 @@ test.describe('Customers API tests: CRUD', () => {
 			request
 		}) => {
 			// call API to retrieve the subscriber customer we updated above
-			const response = await request.get('/wp-json/wc/v3/customers/2');
+			const response = await request.get(`/wp-json/wc/v3/customers/${subscriberUserId}`);
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
 			expect(responseJSON.first_name).toEqual('Jane');

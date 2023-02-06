@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure changes made via the `woocommerce_order_list_table_prepare_items_query_args` are observed.

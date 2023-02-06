@@ -22,6 +22,7 @@ export interface WooStep extends Step {
 			text?: string;
 			/** Disable the button or not. Default to False */
 			isDisabled?: boolean;
+			isHidden?: boolean;
 		};
 	};
 	/** Auto apply the focus state for the element. Default to null */

@@ -1,0 +1,114 @@
+{
+    "code": "AR",
+    "name": "Argentina",
+    "states": [
+        {
+            "code": "C",
+            "name": "Ciudad Autónoma de Buenos Aires"
+        },
+        {
+            "code": "B",
+            "name": "Buenos Aires"
+        },
+        {
+            "code": "K",
+            "name": "Catamarca"
+        },
+        {
+            "code": "H",
+            "name": "Chaco"
+        },
+        {
+            "code": "U",
+            "name": "Chubut"
+        },
+        {
+            "code": "X",
+            "name": "Córdoba"
+        },
+        {
+            "code": "W",
+            "name": "Corrientes"
+        },
+        {
+            "code": "E",
+            "name": "Entre Ríos"
+        },
+        {
+            "code": "P",
+            "name": "Formosa"
+        },
+        {
+            "code": "Y",
+            "name": "Jujuy"
+        },
+        {
+            "code": "L",
+            "name": "La Pampa"
+        },
+        {
+            "code": "F",
+            "name": "La Rioja"
+        },
+        {
+            "code": "M",
+            "name": "Mendoza"
+        },
+        {
+            "code": "N",
+            "name": "Misiones"
+        },
+        {
+            "code": "Q",
+            "name": "Neuquén"
+        },
+        {
+            "code": "R",
+            "name": "Río Negro"
+        },
+        {
+            "code": "A",
+            "name": "Salta"
+        },
+        {
+            "code": "J",
+            "name": "San Juan"
+        },
+        {
+            "code": "D",
+            "name": "San Luis"
+        },
+        {
+            "code": "Z",
+            "name": "Santa Cruz"
+        },
+        {
+            "code": "S",
+            "name": "Santa Fe"
+        },
+        {
+            "code": "G",
+            "name": "Santiago del Estero"
+        },
+        {
+            "code": "V",
+            "name": "Tierra del Fuego"
+        },
+        {
+            "code": "T",
+            "name": "Tucumán"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/ar"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

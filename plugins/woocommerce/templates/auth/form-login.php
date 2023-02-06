@@ -12,7 +12,7 @@
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Auth
- * @version 3.4.0
+ * @version 7.0.1
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -46,7 +46,7 @@ do_action( 'woocommerce_auth_page_header' ); ?>
 	</p>
 	<p class="wc-auth-actions">
 		<?php wp_nonce_field( 'woocommerce-login', 'woocommerce-login-nonce' ); ?>
-		<button type="submit" class="button button-large button-primary wc-auth-login-button" name="login" value="<?php esc_attr_e( 'Login', 'woocommerce' ); ?>"><?php esc_html_e( 'Login', 'woocommerce' ); ?></button>
+		<button type="submit" class="button button-large button-primary wc-auth-login-button<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>" name="login" value="<?php esc_attr_e( 'Login', 'woocommerce' ); ?>"><?php esc_html_e( 'Login', 'woocommerce' ); ?></button>
 		<input type="hidden" name="redirect" value="<?php echo esc_url( $redirect_url ); ?>" />
 	</p>
 </form>

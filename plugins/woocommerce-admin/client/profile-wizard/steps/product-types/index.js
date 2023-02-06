@@ -77,7 +77,9 @@ export class ProductTypes extends Component {
 			);
 			this.setState(
 				{
-					selected: profileItems.product_types || defaultProductTypes,
+					selected: Array.isArray( profileItems.product_types )
+						? [ ...profileItems.product_types ]
+						: defaultProductTypes,
 				},
 				() => {
 					this.props.trackStepValueChanges(

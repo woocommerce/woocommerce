@@ -9,11 +9,14 @@
 use Automattic\WooCommerce\Internal\Admin\Schedulers\CustomersScheduler;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 
 /**
  * Class WC_Admin_Tests_API_Init
  */
 class WC_Admin_Tests_API_Init extends WC_REST_Unit_Test_Case {
+	use ArraySubsetAsserts;
+
 	/**
 	 * Set up.
 	 */

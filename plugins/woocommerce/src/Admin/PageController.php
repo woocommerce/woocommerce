@@ -125,7 +125,7 @@ class PageController {
 		}
 
 		$current_query = wp_parse_url( $current_url, PHP_URL_QUERY );
-		parse_str( $current_query, $current_pieces );
+		parse_str( (string) $current_query, $current_pieces );
 		$current_path  = empty( $current_pieces['page'] ) ? '' : $current_pieces['page'];
 		$current_path .= empty( $current_pieces['path'] ) ? '' : '&path=' . $current_pieces['path'];
 

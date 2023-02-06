@@ -36,6 +36,7 @@ const wcAdminPackages = [
 	'data',
 	'tracks',
 	'onboarding',
+	'product-editor',
 ];
 // wpAdminScripts are loaded on wp-admin pages outside the context of WooCommerce Admin
 // See ./client/wp-admin-scripts/README.md for more details
@@ -56,6 +57,10 @@ const wpAdminScripts = [
 	'category-tracking',
 	'tags-tracking',
 	'product-tour',
+	'wc-addons-tour',
+	'settings-tracking',
+	'order-tracking',
+	'product-import-tracking',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
@@ -123,6 +128,7 @@ const webpackConfig = {
 							],
 							[ '@babel/preset-typescript' ],
 						],
+						plugins: [ '@babel/plugin-proposal-class-properties' ],
 					},
 				},
 			},

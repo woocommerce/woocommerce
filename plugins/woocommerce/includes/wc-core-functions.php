@@ -673,7 +673,7 @@ function get_woocommerce_currency_symbols() {
 			'ARS' => '&#36;',
 			'AUD' => '&#36;',
 			'AWG' => 'Afl.',
-			'AZN' => 'AZN',
+			'AZN' => '&#8380;',
 			'BAM' => 'KM',
 			'BBD' => '&#36;',
 			'BDT' => '&#2547;&nbsp;',
@@ -752,7 +752,7 @@ function get_woocommerce_currency_symbols() {
 			'LKR' => '&#xdbb;&#xdd4;',
 			'LRD' => '&#36;',
 			'LSL' => 'L',
-			'LYD' => '&#x644;.&#x62f;',
+			'LYD' => '&#x62f;.&#x644;',
 			'MAD' => '&#x62f;.&#x645;.',
 			'MDL' => 'MDL',
 			'MGA' => 'Ar',
@@ -1701,8 +1701,11 @@ function wc_get_shipping_method_count( $include_legacy = false, $enabled_only = 
 		return absint( $transient_value['value'] );
 	}
 
-	$where_clause = $enabled_only ? 'WHERE is_enabled=1' : '';
-	$method_count = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods ${where_clause}" ) );
+	if ( $enabled_only ) {
+		$method_count = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE is_enabled=1" ) );
+	} else {
+		$method_count = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" ) );
+	}
 
 	if ( $include_legacy ) {
 		// Count activated methods that don't support shipping zones.
@@ -2397,6 +2400,7 @@ function wc_is_active_theme( $theme ) {
 function wc_is_wp_default_theme_active() {
 	return wc_is_active_theme(
 		array(
+			'twentytwentythree',
 			'twentytwentytwo',
 			'twentytwentyone',
 			'twentytwenty',

@@ -62,9 +62,6 @@ class Tax extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		if ( count( $this->task_list->get_sections() ) > 0 && ! $this->is_complete() ) {
-			return __( 'Get taxes out of your mind', 'woocommerce' );
-		}
 		if ( $this->get_parent_option( 'use_completed_title' ) === true ) {
 			if ( $this->is_complete() ) {
 				return __( 'You added tax rates', 'woocommerce' );
@@ -80,9 +77,6 @@ class Tax extends Task {
 	 * @return string
 	 */
 	public function get_content() {
-		if ( count( $this->task_list->get_sections() ) > 0 ) {
-			return __( 'Have sales tax calculated automatically, or add the rates manually.', 'woocommerce' );
-		}
 		return self::can_use_automated_taxes()
 			? __(
 				'Good news! WooCommerce Services and Jetpack can automate your sales tax calculations for you.',

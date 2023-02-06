@@ -46,8 +46,8 @@ test.describe( 'Edit order', () => {
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
 
 		// make sure we're on the order details page
-		await expect( page.locator( 'h1.components-text' ) ).toContainText(
-			'Edit Order'
+		await expect( page.locator( 'h1.wp-heading-inline' ) ).toContainText(
+			/Edit [oO]rder/
 		);
 	} );
 
@@ -95,7 +95,39 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 		email: 'john.doe@example.com',
 	};
 
-	let orderId, productId, product2Id, noProductOrderId;
+	let orderId,
+		productId,
+		product2Id,
+		noProductOrderId,
+		initialGrantAccessAfterPaymentSetting;
+
+	/**
+	 * Enable the "Grant access to downloadable products after payment" setting in WooCommerce > Settings > Products > Downloadable products.
+	 */
+	const enableGrantAccessAfterPaymentSetting = async ( api ) => {
+		const endpoint =
+			'settings/products/woocommerce_downloads_grant_access_after_payment';
+
+		// Get current value
+		const response = await api.get( endpoint );
+		initialGrantAccessAfterPaymentSetting = response.data.value;
+
+		// Enable
+		if ( initialGrantAccessAfterPaymentSetting !== 'yes' ) {
+			await api.put( endpoint, {
+				value: 'yes',
+			} );
+		}
+	};
+
+	const revertGrantAccessAfterPaymentSetting = async ( api ) => {
+		const endpoint =
+			'settings/products/woocommerce_downloads_grant_access_after_payment';
+
+		await api.put( endpoint, {
+			value: initialGrantAccessAfterPaymentSetting,
+		} );
+	};
 
 	test.beforeEach( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -113,13 +145,17 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 					{
 						id: uuid.v4(),
 						name: 'Single',
-						file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
+						file:
+							'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
 					},
 				],
 			} )
 			.then( ( response ) => {
 				productId = response.data.id;
 			} );
+
+		await enableGrantAccessAfterPaymentSetting( api );
+
 		await api
 			.post( 'products', {
 				name: product2Name,
@@ -129,7 +165,8 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 					{
 						id: uuid.v4(),
 						name: 'Single',
-						file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
+						file:
+							'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
 					},
 				],
 			} )
@@ -171,6 +208,7 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 		await api.delete( `products/${ product2Id }`, { force: true } );
 		await api.delete( `orders/${ orderId }`, { force: true } );
 		await api.delete( `orders/${ noProductOrderId }`, { force: true } );
+		await revertGrantAccessAfterPaymentSetting( api );
 	} );
 
 	// these tests aren't completely independent.  Needs some refactoring.
@@ -229,18 +267,19 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 		// verify new downloadable product permission details
 		await expect(
 			page.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong >> nth=1'
+				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong',
+				{ hasText: product2Name }
 			)
-		).toContainText( product2Name );
+		).toBeVisible();
 
 		await expect(
 			page.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short >> nth=1'
+				'#woocommerce-order-downloads input[name^="downloads_remaining"] >> nth=-1'
 			)
 		).toHaveAttribute( 'placeholder', 'Unlimited' );
 		await expect(
 			page.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short >> nth=1'
+				'#woocommerce-order-downloads input[name^="access_expires"] >> nth=-1'
 			)
 		).toHaveAttribute( 'placeholder', 'Never' );
 	} );

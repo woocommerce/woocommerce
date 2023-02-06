@@ -15,18 +15,18 @@ import {
 	ProductIcon,
 	PluginCardBody,
 } from '~/marketing/components';
-import { Plugin } from './types';
-import { usePlugins } from './usePlugins';
+import { InstalledPlugin } from '~/marketing/types';
+import { useInstalledPlugins } from '~/marketing/hooks';
 
 export const InstalledExtensions = () => {
 	const { installedPlugins, activatingPlugins, activateInstalledPlugin } =
-		usePlugins();
+		useInstalledPlugins();
 
 	if ( installedPlugins.length === 0 ) {
 		return null;
 	}
 
-	const getButton = ( plugin: Plugin ) => {
+	const getButton = ( plugin: InstalledPlugin ) => {
 		if ( plugin.status === 'installed' ) {
 			return (
 				<Button

@@ -12,7 +12,7 @@
  *
  * @see https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 3.6.0
+ * @version 7.0.1
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -43,7 +43,7 @@ do_action( 'woocommerce_before_edit_account_address_form' ); ?>
 			<?php do_action( "woocommerce_after_edit_address_form_{$load_address}" ); ?>
 
 			<p>
-				<button type="submit" class="button" name="save_address" value="<?php esc_attr_e( 'Save address', 'woocommerce' ); ?>"><?php esc_html_e( 'Save address', 'woocommerce' ); ?></button>
+				<button type="submit" class="button<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>" name="save_address" value="<?php esc_attr_e( 'Save address', 'woocommerce' ); ?>"><?php esc_html_e( 'Save address', 'woocommerce' ); ?></button>
 				<?php wp_nonce_field( 'woocommerce-edit_address', 'woocommerce-edit-address-nonce' ); ?>
 				<input type="hidden" name="action" value="edit_address" />
 			</p>

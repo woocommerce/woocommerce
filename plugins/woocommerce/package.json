@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce",
 	"title": "WooCommerce",
-	"version": "7.1.0",
+	"version": "7.5.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -33,7 +33,7 @@
 		"env:test": "pnpm run env:dev && ./tests/e2e-pw/bin/test-env-setup.sh",
 		"test:e2e-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js",
 		"test:api-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js",
-		"env:test:cot": "pnpm run env:dev && ./tests/e2e-pw/bin/test-env-setup.sh --cot",
+		"env:test:cot": "pnpm run env:dev && ENABLE_HPOS=1 ./tests/e2e-pw/bin/test-env-setup.sh",
 		"env:performance-init": "./tests/performance/bin/init-sample-products.sh",
 		"env:down": "pnpm wp-env stop",
 		"env:destroy": "pnpm wp-env destroy",
@@ -50,10 +50,10 @@
 		"@babel/core": "7.12.9",
 		"@babel/preset-env": "7.12.7",
 		"@babel/register": "7.12.1",
-		"@playwright/test": "^1.27.1",
-		"@typescript-eslint/eslint-plugin": "3.10.1",
-		"@typescript-eslint/experimental-utils": "3.10.1",
-		"@typescript-eslint/parser": "3.10.1",
+		"@playwright/test": "^1.28.0",
+		"@typescript-eslint/eslint-plugin": "^5.43.0",
+		"@typescript-eslint/experimental-utils": "^5.43.0",
+		"@typescript-eslint/parser": "^5.43.0",
 		"@woocommerce/admin-e2e-tests": "workspace:*",
 		"@woocommerce/api": "workspace:*",
 		"@woocommerce/api-core-tests": "workspace:*",
@@ -77,7 +77,7 @@
 		"cross-env": "6.0.3",
 		"deasync": "0.1.26",
 		"dotenv": "^10.0.0",
-		"eslint": "^8.12.0",
+		"eslint": "^8.32.0",
 		"eslint-config-wpcalypso": "5.0.0",
 		"eslint-plugin-jest": "23.20.0",
 		"istanbul": "1.0.0-alpha.2",
@@ -108,5 +108,8 @@
 		"> 0.1%",
 		"ie 8",
 		"ie 9"
-	]
+	],
+	"dependencies": {
+		"@wordpress/browserslist-config": "^5.7.0"
+	}
 }

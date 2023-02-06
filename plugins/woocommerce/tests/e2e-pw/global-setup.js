@@ -1,28 +1,7 @@
 const { chromium, expect } = require( '@playwright/test' );
+const { admin, customer } = require( './test-data/data' );
 const fs = require( 'fs' );
-const {
-	ADMIN_USER,
-	ADMIN_PASSWORD,
-	CUSTOMER_USER,
-	CUSTOMER_PASSWORD,
-} = process.env;
-const adminUsername = ADMIN_USER ?? 'admin';
-const adminPassword = ADMIN_PASSWORD ?? 'password';
-const customerUsername = CUSTOMER_USER ?? 'customer';
-const customerPassword = CUSTOMER_PASSWORD ?? 'password';
-
-const setupPermalinks = async ( adminPage, baseURL ) => {
-	console.log( 'Trying to setup permalinks!' );
-	await adminPage.goto( baseURL + '/wp-admin/options-permalink.php' );
-	await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
-		'Permalink Settings'
-	);
-	await adminPage.click( '#custom_selection' );
-	await adminPage.fill( '#permalink_structure', '/%postname%/' );
-	await adminPage.click( '#submit' );
-
-	console.log( 'Permalinks Set!' );
-}
+const { site } = require( './utils' );
 
 module.exports = async ( config ) => {
 	const { stateDir, baseURL, userAgent } = config.projects[ 0 ].use;
@@ -77,8 +56,8 @@ module.exports = async ( config ) => {
 		try {
 			console.log( 'Trying to log-in as admin...' );
 			await adminPage.goto( `/wp-admin` );
-			await adminPage.fill( 'input[name="log"]', adminUsername );
-			await adminPage.fill( 'input[name="pwd"]', adminPassword );
+			await adminPage.fill( 'input[name="log"]', admin.username );
+			await adminPage.fill( 'input[name="pwd"]', admin.password );
 			await adminPage.click( 'text=Log In' );
 			await adminPage.waitForLoadState( 'networkidle' );
 
@@ -142,38 +121,14 @@ module.exports = async ( config ) => {
 		process.exit( 1 );
 	}
 
-	// Ensure that permalinks are correctly setup since we can't set it up using wp-env when not using the default WP version.
-	// More info here: https://github.com/WordPress/gutenberg/issues/28201
-	let permalinkConfigured = false;
-	const permalinkRetries = 5;
-	for ( let i = 0; i < permalinkRetries; i++ ) {
-		try {
-			await setupPermalinks( adminPage, baseURL );
-			permalinkConfigured = true;
-			break;
-		} catch ( e ) {
-			console.log(
-				`Setting permalink failed, Retrying... ${ i }/${ permalinkRetries }`
-			);
-			console.log( e );
-		}
-	}
-
-	if ( ! permalinkConfigured ) {
-		console.error(
-			'Cannot proceed e2e test, as we could not setup permalinks. Please check if the test site has been setup correctly.'
-		);
-		process.exit( 1 );
-	}
-
 	// Sign in as customer user and save state
 	const customerRetries = 5;
 	for ( let i = 0; i < customerRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as customer...' );
 			await customerPage.goto( `/wp-admin` );
-			await customerPage.fill( 'input[name="log"]', customerUsername );
-			await customerPage.fill( 'input[name="pwd"]', customerPassword );
+			await customerPage.fill( 'input[name="log"]', customer.username );
+			await customerPage.fill( 'input[name="pwd"]', customer.password );
 			await customerPage.click( 'text=Log In' );
 
 			await customerPage.goto( `/my-account` );
@@ -212,4 +167,11 @@ module.exports = async ( config ) => {
 	await adminContext.close();
 	await customerContext.close();
 	await browser.close();
+
+	if ( process.env.RESET_SITE === 'true' ) {
+		await site.reset(
+			process.env.CONSUMER_KEY,
+			process.env.CONSUMER_SECRET
+		);
+	}
 };

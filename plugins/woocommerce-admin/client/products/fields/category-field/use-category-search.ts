@@ -171,7 +171,7 @@ export const useCategorySearch = () => {
 			};
 		}
 	);
-	const [ isSearching, setIsSearching ] = useState( false );
+	const [ isSearching, setIsSearching ] = useState( true );
 	const [ categoriesAndNewItem, setCategoriesAndNewItem ] = useState<
 		[
 			ProductCategory[],
@@ -207,12 +207,12 @@ export const useCategorySearch = () => {
 	}, [ initialCategories ] );
 
 	const searchCategories = useCallback(
-		async ( search: string ): Promise< CategoryTreeItem[] > => {
-			lastSearchValue.current = search;
+		async ( search?: string ): Promise< CategoryTreeItem[] > => {
+			lastSearchValue.current = search || '';
 			if ( ! isAsync && initialCategories.length > 0 ) {
 				return getCategoriesTreeWithMissingParents(
 					[ ...initialCategories ],
-					search
+					search || ''
 				).then( ( categoryData ) => {
 					setCategoriesAndNewItem( categoryData );
 					return categoryData[ 1 ];

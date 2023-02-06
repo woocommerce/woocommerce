@@ -1,0 +1,114 @@
+{
+    "code": "EC",
+    "name": "Ecuador",
+    "states": [
+        {
+            "code": "EC-A",
+            "name": "Azuay"
+        },
+        {
+            "code": "EC-B",
+            "name": "Bolívar"
+        },
+        {
+            "code": "EC-F",
+            "name": "Cañar"
+        },
+        {
+            "code": "EC-C",
+            "name": "Carchi"
+        },
+        {
+            "code": "EC-H",
+            "name": "Chimborazo"
+        },
+        {
+            "code": "EC-X",
+            "name": "Cotopaxi"
+        },
+        {
+            "code": "EC-O",
+            "name": "El Oro"
+        },
+        {
+            "code": "EC-E",
+            "name": "Esmeraldas"
+        },
+        {
+            "code": "EC-W",
+            "name": "Galápagos"
+        },
+        {
+            "code": "EC-G",
+            "name": "Guayas"
+        },
+        {
+            "code": "EC-I",
+            "name": "Imbabura"
+        },
+        {
+            "code": "EC-L",
+            "name": "Loja"
+        },
+        {
+            "code": "EC-R",
+            "name": "Los Ríos"
+        },
+        {
+            "code": "EC-M",
+            "name": "Manabí"
+        },
+        {
+            "code": "EC-S",
+            "name": "Morona-Santiago"
+        },
+        {
+            "code": "EC-N",
+            "name": "Napo"
+        },
+        {
+            "code": "EC-D",
+            "name": "Orellana"
+        },
+        {
+            "code": "EC-Y",
+            "name": "Pastaza"
+        },
+        {
+            "code": "EC-P",
+            "name": "Pichincha"
+        },
+        {
+            "code": "EC-SE",
+            "name": "Santa Elena"
+        },
+        {
+            "code": "EC-SD",
+            "name": "Santo Domingo de los Tsáchilas"
+        },
+        {
+            "code": "EC-U",
+            "name": "Sucumbíos"
+        },
+        {
+            "code": "EC-T",
+            "name": "Tungurahua"
+        },
+        {
+            "code": "EC-Z",
+            "name": "Zamora-Chinchipe"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/ec"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

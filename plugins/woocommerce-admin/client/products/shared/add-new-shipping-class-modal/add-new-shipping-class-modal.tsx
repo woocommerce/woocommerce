@@ -39,36 +39,25 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 		<div className="woocommerce-add-new-shipping-class-modal__wrapper">
 			<TextControl
 				{ ...getInputProps( 'name' ) }
-				label={ __( 'Name', 'woocommerce' ) }
 				placeholder={ __( 'e.g. Fragile products', 'woocommerce' ) }
+				label={ interpolateComponents( {
+					mixedString: __( 'Name {{required/}}', 'woocommerce' ),
+					components: {
+						required: (
+							<span className="woocommerce-add-new-shipping-class-modal__optional-input">
+								{ __( '(required)', 'woocommerce' ) }
+							</span>
+						),
+					},
+				} ) }
 			/>
 			<TextControl
 				{ ...getInputProps( 'slug' ) }
-				label={ interpolateComponents( {
-					mixedString: __(
-						'Slug {{span}}(optional){{/span}}',
-						'woocommerce'
-					),
-					components: {
-						span: (
-							<span className="woocommerce-add-new-shipping-class-modal__optional-input" />
-						),
-					},
-				} ) }
+				label={ __( 'Slug', 'woocommerce' ) }
 			/>
 			<TextControl
 				{ ...getInputProps( 'description' ) }
-				label={ interpolateComponents( {
-					mixedString: __(
-						'Description {{span}}(optional){{/span}}',
-						'woocommerce'
-					),
-					components: {
-						span: (
-							<span className="woocommerce-add-new-shipping-class-modal__optional-input" />
-						),
-					},
-				} ) }
+				label={ __( 'Description', 'woocommerce' ) }
 				help={
 					errors?.description ??
 					__(

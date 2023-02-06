@@ -17,6 +17,14 @@
 			margin-right: $gap-smaller;
 		}
 	}
+	.components-currency-control {
+		.components-input-control__prefix {
+			color: $gray-700;
+		}
+		.components-input-control__input {
+			text-align: right;
+		}
+	}
 	.components-checkbox-control {
 		&__label {
 			display: flex;
@@ -31,8 +39,17 @@
 			display: flex;
 		}
 	}
+	.components-toggle-control
+	.components-base-control__field
+	.components-toggle-control__label {
+		display: flex;
+		align-items: center;
+	}
 	.woocommerce-tooltip {
 		margin-left: $gap-smaller;
+		&__button {
+			padding: 0;
+		}
 	}
 	.woocommerce-product-form {
 		&__custom-label-input {
@@ -82,6 +99,19 @@
 			margin-bottom: 0;
 		}
 	}
+	.half-width-field {
+		@include breakpoint( '<960px' ) {
+			width: 100%;
+		}
+		width: 50%;
+	}
+
+	.components-base-control__label {
+		.woocommerce-product-form__secondary-text {
+			display: block;
+			font-weight: 400;
+		}
+	}
 }
 
 .woocommerce-edit-product {
@@ -104,4 +134,3 @@
 		height: 100%;
 	}
 }
-

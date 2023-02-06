@@ -10,6 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper;
 /**
  * System status controller class.
  *
@@ -1235,13 +1236,6 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$product_visibility_terms[ $term->slug ] = strtolower( $term->name );
 		}
 
-		// Check if WooCommerce.com account is connected.
-		$woo_com_connected = 'no';
-		$helper_options    = get_option( 'woocommerce_helper_data', array() );
-		if ( array_key_exists( 'auth', $helper_options ) && ! empty( $helper_options['auth'] ) ) {
-			$woo_com_connected = 'yes';
-		}
-
 		// Return array of useful settings for debugging.
 		return array(
 			'api_enabled'               => 'yes' === get_option( 'woocommerce_api_enabled' ),
@@ -1255,7 +1249,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'geolocation_enabled'       => in_array( get_option( 'woocommerce_default_customer_address' ), array( 'geolocation_ajax', 'geolocation' ), true ),
 			'taxonomies'                => $term_response,
 			'product_visibility_terms'  => $product_visibility_terms,
-			'woocommerce_com_connected' => $woo_com_connected,
+			'woocommerce_com_connected' => ConnectionHelper::is_connected() ? 'yes' : 'no',
 		);
 	}
 

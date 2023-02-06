@@ -61,7 +61,7 @@ test.describe( 'Cart applying coupons', () => {
 
 	test.beforeEach( async ( { page, context } ) => {
 		// Shopping cart is very sensitive to cookies, so be explicit
-		context.clearCookies();
+		await context.clearCookies();
 
 		// all tests use the first product
 		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );

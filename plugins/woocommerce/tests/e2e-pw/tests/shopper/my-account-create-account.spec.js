@@ -5,6 +5,8 @@ const customerEmailAddress = 'john.doe.test@example.com';
 
 test.describe( 'Shopper My Account Create Account', () => {
 	test.beforeAll( async ( { baseURL } ) => {
+		let customerId;
+
 		const api = new wcApi( {
 			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
@@ -17,6 +19,25 @@ test.describe( 'Shopper My Account Create Account', () => {
 				value: 'yes',
 			}
 		);
+
+		// make sure the test customer does not exist
+		await api
+			.get( `customers?email=${ customerEmailAddress }` )
+			.then( ( response ) => {
+				const testCustomer = response.data.find(
+					( customer ) => customer.email === customerEmailAddress
+				);
+
+				if ( testCustomer ) {
+					customerId = testCustomer.id;
+				}
+			} );
+		if ( customerId ) {
+			console.log(
+				`Customer with email ${ customerEmailAddress } already exists. Deleting it before continuing with the test.`
+			);
+			await api.delete( `customers/${ customerId }`, { force: true } );
+		}
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {

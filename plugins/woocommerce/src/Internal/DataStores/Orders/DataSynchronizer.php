@@ -68,6 +68,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 */
 	public function __construct() {
 		self::add_action( 'deleted_post', array( $this, 'handle_deleted_post' ), 10, 2 );
+		self::add_action( 'woocommerce_new_order', array( $this, 'handle_updated_order' ), 100 );
 		self::add_action( 'woocommerce_update_order', array( $this, 'handle_updated_order' ), 100 );
 		self::add_filter( 'woocommerce_feature_description_tip', array( $this, 'handle_feature_description_tip' ), 10, 3 );
 	}
@@ -166,8 +167,21 @@ class DataSynchronizer implements BatchProcessorInterface {
 				return (int) $pending_count;
 			}
 		}
-		$orders_table                = $this->data_store::get_orders_table_name();
-		$order_post_types            = wc_get_order_types( 'cot-migration' );
+		$orders_table     = $this->data_store::get_orders_table_name();
+		$order_post_types = wc_get_order_types( 'cot-migration' );
+
+		if ( empty( $order_post_types ) ) {
+			$this->error_logger->debug(
+				sprintf(
+					/* translators: 1: method name. */
+					esc_html__( '%1$s was called but no order types were registered: it may have been called too early.', 'woocommerce' ),
+					__METHOD__
+				)
+			);
+
+			return 0;
+		}
+
 		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
 
 		if ( $this->custom_orders_table_is_authoritative() ) {
@@ -255,7 +269,9 @@ SELECT(
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		switch ( $type ) {
 			case self::ID_TYPE_MISSING_IN_ORDERS_TABLE:
-				$sql = $wpdb->prepare("
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $order_post_type_placeholders is prepared.
+				$sql = $wpdb->prepare(
+					"
 SELECT posts.ID FROM $wpdb->posts posts
 LEFT JOIN $orders_table orders ON posts.ID = orders.id
 WHERE
@@ -264,6 +280,7 @@ WHERE
   AND orders.id IS NULL",
 					$order_post_types
 				);
+				// phpcs:enable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 				break;
 			case self::ID_TYPE_MISSING_IN_POSTS_TABLE:
 				$sql = "
@@ -409,7 +426,7 @@ WHERE
 	 * @param WP_Post $post The deleted post.
 	 */
 	private function handle_deleted_post( $postid, $post ): void {
-		if ( 'shop_order' === $post->post_type && ! $this->custom_orders_table_is_authoritative() && $this->data_sync_is_enabled() ) {
+		if ( 'shop_order' === $post->post_type && $this->data_sync_is_enabled() ) {
 			$this->data_store->delete_order_data_from_custom_order_tables( $postid );
 		}
 	}
@@ -469,7 +486,7 @@ WHERE
 			$extra_tip = sprintf(
 				_n(
 					"⚠ There's one order pending sync from the posts table to the orders table. The feature shouldn't be disabled until this order is synchronized.",
-					"⚠ There are %%1\$d orders pending sync from the posts table to the orders table. The feature shouldn't be disabled until these orders are synchronized.",
+					"⚠ There are %1\$d orders pending sync from the posts table to the orders table. The feature shouldn't be disabled until these orders are synchronized.",
 					$pending_sync_count,
 					'woocommerce'
 				),

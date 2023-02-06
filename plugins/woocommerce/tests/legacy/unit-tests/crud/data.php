@@ -86,7 +86,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$result      = $object->set_props( $data_to_set );
 		$this->assertTrue( is_wp_error( $result ) );
 		$this->assertEquals( 'I am also a fish', $object->get_content() );
-		$this->assertNotEquals( 'thisisinvalid', $object->get_bool_value() );
+		$this->assertNotSame( 'thisisinvalid', $object->get_bool_value() );
 	}
 
 	/**
