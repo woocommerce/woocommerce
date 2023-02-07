@@ -24,6 +24,14 @@
 	.wc-blocks-incompatible-extensions-notice__element {
 		display: flex;
 		align-items: center;
+		position: relative;
+
+		&::before {
+			content: "•";
+			position: absolute;
+			left: -13px;
+			font-size: 1.2rem;
+		}
 	}
 }
 
