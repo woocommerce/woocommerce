@@ -85,7 +85,7 @@ jQuery( function( $ ) {
 	 */
 	var remove_duplicate_notices = function( notices ) {
 		var seen = [];
-		var new_notices = notices;
+		var new_notices = [...notices];
 
 		notices.each( function( index ) {
 			var text = $( this ).text();
