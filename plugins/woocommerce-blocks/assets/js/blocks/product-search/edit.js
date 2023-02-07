@@ -86,6 +86,7 @@ const Edit = ( {
 							onChange={ ( value ) =>
 								setAttributes( { label: value } )
 							}
+							style={ { backgroundColor: 'transparent' } }
 						/>
 					</>
 				) }
