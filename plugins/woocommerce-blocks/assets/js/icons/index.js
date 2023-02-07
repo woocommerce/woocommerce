@@ -13,7 +13,7 @@ export { default as woo } from './library/woo';
 export { default as miniCart } from './library/mini-cart';
 export { default as miniCartAlt } from './library/mini-cart-alt';
 export { default as stacks } from './library/stacks';
-export { default as alert } from './library/alert';
+export { default as Alert } from './library/alert';
 export { default as customerAccount } from './library/customer-account';
 export { default as customerAccountStyle } from './library/customer-account-style';
 export { default as customerAccountStyleAlt } from './library/customer-account-style-alt';
