@@ -37,6 +37,7 @@ export const Edit = ( {
 					onChange={ ( value ) =>
 						setAttributes( { content: value } )
 					}
+					style={ { backgroundColor: 'transparent' } }
 				/>
 			</Title>
 		</div>

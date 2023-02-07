@@ -17,9 +17,9 @@ export const Edit = (): JSX.Element => {
 					'You may be interested in…',
 					'woo-gutenberg-products-block'
 				),
-				level: 3,
+				level: 2,
+				fontSize: 'large',
 			},
-			,
 			[],
 		],
 		[ 'woocommerce/cart-cross-sells-products-block', {}, [] ],

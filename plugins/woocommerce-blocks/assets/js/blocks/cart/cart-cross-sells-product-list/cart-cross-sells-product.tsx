@@ -49,7 +49,7 @@ const CartCrossSellsProduct = ( {
 						/>
 						<ProductName
 							align={ '' }
-							headingLevel={ 2 }
+							headingLevel={ 3 }
 							showProductLink={ true }
 						/>
 						<ProductRating />

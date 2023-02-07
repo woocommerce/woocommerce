@@ -32,6 +32,7 @@ const BlockTitle = ( {
 				className="wc-block-editor-components-title"
 				value={ heading }
 				onChange={ onChange }
+				style={ { backgroundColor: 'transparent' } }
 			/>
 		</TagName>
 	);
