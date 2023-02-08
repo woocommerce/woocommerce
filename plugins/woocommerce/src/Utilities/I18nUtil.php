@@ -5,8 +5,13 @@
 
 namespace Automattic\WooCommerce\Utilities;
 
+/**
+ * A class of utilities for dealing with internationalization.
+ */
 final class I18nUtil {
 	/**
+	 * A cache for the i18n units data.
+	 *
 	 * @var array $units
 	 */
 	private static $units;
@@ -14,7 +19,7 @@ final class I18nUtil {
 	/**
 	 * Get the translated label for a weight unit of measure.
 	 *
-	 * @param string $weight_unit
+	 * @param string $weight_unit The abbreviated weight unit in English, e.g. kg.
 	 *
 	 * @return string
 	 */
@@ -35,7 +40,7 @@ final class I18nUtil {
 	/**
 	 * Get the translated label for a dimensions unit of measure.
 	 *
-	 * @param string $dimensions_unit
+	 * @param string $dimensions_unit The abbreviated dimension unit in English, e.g. cm.
 	 *
 	 * @return string
 	 */

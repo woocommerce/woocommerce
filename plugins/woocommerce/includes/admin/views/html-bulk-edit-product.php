@@ -179,7 +179,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						name="_length"
 						class="text length"
 						<?php /* translators: %s is dimension unit label */ ?>
-						placeholder="<?php printf( esc_attr__( 'Length (%s)', 'woocommerce' ), $dimension_unit_label ); ?>"
+						placeholder="<?php printf( esc_attr__( 'Length (%s)', 'woocommerce' ), esc_html( $dimension_unit_label ) ); ?>"
 						value=""
 					>
 					<input
@@ -187,7 +187,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						name="_width"
 						class="text width"
 						<?php /* translators: %s is dimension unit label */ ?>
-						placeholder="<?php printf( esc_attr__( 'Width (%s)', 'woocommerce' ), $dimension_unit_label ); ?>"
+						placeholder="<?php printf( esc_attr__( 'Width (%s)', 'woocommerce' ), esc_html( $dimension_unit_label ) ); ?>"
 						value=""
 					>
 					<input
@@ -195,7 +195,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						name="_height"
 						class="text height"
 						<?php /* translators: %s is dimension unit label */ ?>
-						placeholder="<?php printf( esc_attr__( 'Height (%s)', 'woocommerce' ), $dimension_unit_label ); ?>"
+						placeholder="<?php printf( esc_attr__( 'Height (%s)', 'woocommerce' ), esc_html( $dimension_unit_label ) ); ?>"
 						value=""
 					>
 				</label>

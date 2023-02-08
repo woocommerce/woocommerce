@@ -1307,7 +1307,7 @@ function wc_format_weight( $weight ) {
 		$weight_label = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit' ) );
 
 		$weight_string = sprintf(
-			// translators: 1. A formatted number; 2. A label for a weight unit of measure. E.g. 2.72 kg
+			// translators: 1. A formatted number; 2. A label for a weight unit of measure. E.g. 2.72 kg.
 			_x( '%1$s %2$s', 'formatted weight', 'woocommerce' ),
 			$weight_string,
 			$weight_label
@@ -1333,7 +1333,7 @@ function wc_format_dimensions( $dimensions ) {
 		$dimension_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit' ) );
 
 		$dimension_string = sprintf(
-			// translators: 1. A formatted number; 2. A label for a dimensions unit of measure. E.g. 3.14 cm
+			// translators: 1. A formatted number; 2. A label for a dimensions unit of measure. E.g. 3.14 cm.
 			_x( '%1$s %2$s', 'formatted dimensions', 'woocommerce' ),
 			$dimension_string,
 			$dimension_label
