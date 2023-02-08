@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/customer-effort-score",
-	"version": "2.2.0",
+	"version": "2.3.0",
 	"description": "WooCommerce utility to measure user effort.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
