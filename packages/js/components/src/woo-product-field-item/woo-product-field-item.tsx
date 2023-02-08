@@ -72,6 +72,7 @@ const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 
 export const WooProductFieldItem: React.FC< WooProductFieldItemProps > & {
 	Slot: React.FC< Slot.Props & WooProductFieldSlotProps >;
+	docUrl?: string;
 } = ( { children, sections, id } ) => {
 	return (
 		<>
@@ -103,16 +104,22 @@ WooProductFieldItem.Slot = ( { fillProps, section } ) => {
 					return null;
 				}
 
-				return Children.map(
-					sortFillsByOrder( filterRegisteredFills( fills ) )?.props
-						.children,
-					( child ) => (
-						<div className="woocommerce-product-form__field">
-							{ child }
-						</div>
-					)
+				return (
+					<div className="woocommerce-slot-wrapper">
+						{ Children.map(
+							sortFillsByOrder( filterRegisteredFills( fills ) )
+								?.props.children,
+							( child ) => (
+								<div className="woocommerce-product-form__field">
+									{ child }
+								</div>
+							)
+						) }
+					</div>
 				);
 			} }
 		</Slot>
 	);
 };
+
+WooProductFieldItem.docUrl = 'https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/components/src/woo-product-field-item/README.md';

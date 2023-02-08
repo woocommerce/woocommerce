@@ -7,6 +7,7 @@ module.exports = {
 		...defaultConfig.entry,
 		// Separate entry point for the live-branches page.
 		'live-branches': './src/live-branches/index.tsx',
+		'slot-fill-viewer': './src/slot-fill-viewer/index.tsx',
 	},
 	module: {
 		...defaultConfig.module,

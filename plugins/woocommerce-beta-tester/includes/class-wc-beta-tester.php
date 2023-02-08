@@ -73,6 +73,15 @@ class WC_Beta_Tester {
 	}
 
 	/**
+	 * Get the plugin directory.
+	 *
+	 * @return string
+	 */
+	public function plugin_dir() {
+		return dirname( WC_BETA_TESTER_FILE );
+	}
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {

@@ -1,0 +1,19 @@
+.woocommerce-slot-fill-viewer-fill__wrapper {
+    border: 1px dashed red;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+}
+.woocommerce-slot-fill-viewer-fill__label {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background: #ccc;
+    padding: 4px 8px;
+}
+
+.woocommerce-slot-wrapper {
+    position: relative;
+}
