@@ -76,6 +76,8 @@ function unblock(el) {
 }
 
 (function($) {
+	if (!$) return; // bail out if Vanilla JS is being used instead of jQuery
+
 	// global $ methods for blocking/unblocking the entire page
 	$.blockUI   = function(opts) { block(document.body, opts); };
 	$.unblockUI = function(opts) { unblock(document.body, opts); };
@@ -93,4 +95,4 @@ function unblock(el) {
 			unblock(this);
 		});
 	};
-})(jQuery);
+})(window.jQuery);
