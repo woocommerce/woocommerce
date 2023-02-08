@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add location argument to wc_get_price_to_display
