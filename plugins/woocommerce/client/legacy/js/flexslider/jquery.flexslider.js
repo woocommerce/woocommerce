@@ -121,7 +121,7 @@
         if (slider.vars.pausePlay) { methods.pausePlay.setup(); }
 
         //PAUSE WHEN INVISIBLE
-        if (slider.vars.slideshow && slider.vars.pauseInvisible) { methods.pauseInvisible.init(); }
+        if (slider.vars.slideshow && slider.vars.pauseInvisible) { methods.pauseInvisible(); }
 
         // SLIDSESHOW
         if (slider.vars.slideshow) {
@@ -532,8 +532,7 @@
         });
         return $clone;
       },
-      pauseInvisible: {
-        init: function() {
+      pauseInvisible: function() {
             document.addEventListener('visibilitychange', function() {
               if (document.visibilityState === 'hidden') {
                 if(slider.startTimeout) {
@@ -554,7 +553,6 @@
                 }
               }
             });
-        }
       },
       setToClearWatchedEvent: function() {
         clearTimeout(watchedEventClearTimer);
