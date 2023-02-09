@@ -8,7 +8,6 @@ import { sanitizeHTML } from '@woocommerce/utils';
 import { useDispatch } from '@wordpress/data';
 import { usePrevious } from '@woocommerce/base-hooks';
 import { decodeEntities } from '@wordpress/html-entities';
-import { STORE_NOTICES_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -17,19 +16,14 @@ import { getClassNameFromStatus } from './utils';
 import type { StoreNotice } from './types';
 
 const StoreNotices = ( {
-	context,
 	className,
 	notices,
 }: {
-	context: string | string[];
 	className: string;
 	notices: StoreNotice[];
 } ): JSX.Element => {
 	const ref = useRef< HTMLDivElement >( null );
 	const { removeNotice } = useDispatch( 'core/notices' );
-	const { registerContainer, unregisterContainer } = useDispatch(
-		STORE_NOTICES_STORE_KEY
-	);
 	const noticeIds = notices.map( ( notice ) => notice.id );
 	const previousNoticeIds = usePrevious( noticeIds );
 
@@ -64,14 +58,6 @@ const StoreNotices = ( {
 			} );
 		}
 	}, [ noticeIds, previousNoticeIds, ref ] );
-	// Register the container context with the parent.
-	useEffect( () => {
-		const contexts = Array.isArray( context ) ? context : [ context ];
-		contexts.map( ( _context ) => registerContainer( _context ) );
-		return () => {
-			contexts.map( ( _context ) => unregisterContainer( _context ) );
-		};
-	}, [ context, registerContainer, unregisterContainer ] );
 
 	// Group notices by whether or not they are dismissible. Dismissible notices can be grouped.
 	const dismissibleNotices = notices.filter(
