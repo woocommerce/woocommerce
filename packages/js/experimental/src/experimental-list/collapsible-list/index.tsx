@@ -32,6 +32,7 @@ type CollapsibleListProps = {
 	show?: number;
 	onCollapse?: () => void;
 	onExpand?: () => void;
+	direction?: 'top' | 'bottom';
 } & ListProps;
 
 const defaultStyle = {
@@ -126,6 +127,7 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 	show = 0,
 	onCollapse,
 	onExpand,
+	direction = 'top',
 	...listProps
 } ): JSX.Element => {
 	const [ isCollapsed, setCollapsed ] = useState( collapsed );
@@ -225,9 +227,33 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 		'woocommerce-experimental-list-wrapper': ! isCollapsed,
 	} );
 
+	const hiddenChildren =
+		displayedChildren.hidden.length > 0 ? (
+			<ExperimentalListItem
+				key="collapse-item"
+				className="list-item-collapse"
+				onClick={ clickHandler }
+				animation="none"
+				disableGutters
+			>
+				<p>
+					{ isCollapsed
+						? footerLabels.expand
+						: footerLabels.collapse }
+				</p>
+
+				<Icon
+					className="list-item-collapse__icon"
+					size={ 30 }
+					icon={ isCollapsed ? chevronDown : chevronUp }
+				/>
+			</ExperimentalListItem>
+		) : null;
+
 	return (
 		<ExperimentalList { ...listProps } className={ listClasses }>
 			{ [
+				direction === 'bottom' && hiddenChildren,
 				...displayedChildren.shown,
 				<Transition
 					key="remaining-children"
@@ -288,27 +314,7 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 						);
 					} }
 				</Transition>,
-				displayedChildren.hidden.length > 0 ? (
-					<ExperimentalListItem
-						key="collapse-item"
-						className="list-item-collapse"
-						onClick={ clickHandler }
-						animation="none"
-						disableGutters
-					>
-						<p>
-							{ isCollapsed
-								? footerLabels.expand
-								: footerLabels.collapse }
-						</p>
-
-						<Icon
-							className="list-item-collapse__icon"
-							size={ 30 }
-							icon={ isCollapsed ? chevronDown : chevronUp }
-						/>
-					</ExperimentalListItem>
-				) : null,
+				direction === 'top' && hiddenChildren,
 			] }
 		</ExperimentalList>
 	);
