@@ -137,4 +137,79 @@ describe( 'StoreNoticesContainer', () => {
 			)
 		);
 	} );
+
+	it( 'Shows notices from several contexts', async () => {
+		dispatch( noticesStore ).createErrorNotice( 'Custom shipping error', {
+			id: 'custom-subcontext-test-error',
+			context: 'wc/checkout/shipping-address',
+		} );
+		dispatch( noticesStore ).createErrorNotice( 'Custom billing error', {
+			id: 'custom-subcontext-test-error',
+			context: 'wc/checkout/billing-address',
+		} );
+		render(
+			<StoreNoticesContainer
+				context={ [
+					'wc/checkout/billing-address',
+					'wc/checkout/shipping-address',
+				] }
+			/>
+		);
+		// This should match against 4 elements; A written and spoken message for each error.
+		expect( screen.getAllByText( /Custom shipping error/i ) ).toHaveLength(
+			2
+		);
+		expect( screen.getAllByText( /Custom billing error/i ) ).toHaveLength(
+			2
+		);
+		// Clean up notices.
+		await act( () =>
+			dispatch( noticesStore ).removeNotice(
+				'custom-subcontext-test-error',
+				'wc/checkout/shipping-address'
+			)
+		);
+		await act( () =>
+			dispatch( noticesStore ).removeNotice(
+				'custom-subcontext-test-error',
+				'wc/checkout/billing-address'
+			)
+		);
+	} );
+
+	it( 'Combine same notices from several contexts', async () => {
+		dispatch( noticesStore ).createErrorNotice( 'Custom generic error', {
+			id: 'custom-subcontext-test-error',
+			context: 'wc/checkout/shipping-address',
+		} );
+		dispatch( noticesStore ).createErrorNotice( 'Custom generic error', {
+			id: 'custom-subcontext-test-error',
+			context: 'wc/checkout/billing-address',
+		} );
+		render(
+			<StoreNoticesContainer
+				context={ [
+					'wc/checkout/billing-address',
+					'wc/checkout/shipping-address',
+				] }
+			/>
+		);
+		// This should match against 2 elements; A written and spoken message.
+		expect( screen.getAllByText( /Custom generic error/i ) ).toHaveLength(
+			2
+		);
+		// Clean up notices.
+		await act( () =>
+			dispatch( noticesStore ).removeNotice(
+				'custom-subcontext-test-error',
+				'wc/checkout/shipping-address'
+			)
+		);
+		await act( () =>
+			dispatch( noticesStore ).removeNotice(
+				'custom-subcontext-test-error',
+				'wc/checkout/billing-address'
+			)
+		);
+	} );
 } );
