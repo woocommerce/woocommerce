@@ -3,11 +3,7 @@
  */
 import { debounce, pick } from 'lodash';
 import { select, dispatch } from '@wordpress/data';
-import {
-	pluckAddress,
-	pluckEmail,
-	removeAllNotices,
-} from '@woocommerce/base-utils';
+import { pluckEmail, removeAllNotices } from '@woocommerce/base-utils';
 import {
 	CartBillingAddress,
 	CartShippingAddress,
@@ -27,13 +23,31 @@ type CustomerData = {
 	shippingAddress: CartShippingAddress;
 };
 
+type BillingOrShippingAddress = CartBillingAddress | CartShippingAddress;
+
 /**
  * Checks if a cart response contains an email property.
  */
 const isBillingAddress = (
-	address: CartBillingAddress | CartShippingAddress
+	address: BillingOrShippingAddress
 ): address is CartBillingAddress => {
 	return 'email' in address;
+};
+
+export const trimAddress = ( address: BillingOrShippingAddress ) => {
+	const trimmedAddress = {
+		...address,
+	};
+	Object.keys( address ).forEach( ( key ) => {
+		trimmedAddress[ key as keyof BillingOrShippingAddress ] =
+			address[ key as keyof BillingOrShippingAddress ].trim();
+	} );
+
+	trimmedAddress.postcode = trimmedAddress.postcode
+		? trimmedAddress.postcode.replace( ' ', '' ).toUpperCase()
+		: '';
+
+	return trimmedAddress;
 };
 
 /**
@@ -57,8 +71,8 @@ const isAddressDirty = < T extends CartBillingAddress | CartShippingAddress >(
 	return (
 		!! address.country &&
 		! isShallowEqual(
-			pluckAddress( previousAddress ),
-			pluckAddress( address )
+			trimAddress( previousAddress ),
+			trimAddress( address )
 		)
 	);
 };
