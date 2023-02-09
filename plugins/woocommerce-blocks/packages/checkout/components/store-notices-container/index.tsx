@@ -1,13 +1,14 @@
 /**
  * External dependencies
  */
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	PAYMENT_STORE_KEY,
 	STORE_NOTICES_STORE_KEY,
 } from '@woocommerce/block-data';
 import { getNoticeContexts } from '@woocommerce/base-utils';
 import type { Notice } from '@wordpress/notices';
+import { useMemo, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -26,9 +27,12 @@ const formatNotices = ( notices: Notice[], context: string ): StoreNotice[] => {
 
 const StoreNoticesContainer = ( {
 	className = '',
-	context,
+	context = '',
 	additionalNotices = [],
 }: StoreNoticesContainerProps ): JSX.Element | null => {
+	const { registerContainer, unregisterContainer } = useDispatch(
+		STORE_NOTICES_STORE_KEY
+	);
 	const { suppressNotices, registeredContainers } = useSelect(
 		( select ) => ( {
 			suppressNotices:
@@ -38,7 +42,10 @@ const StoreNoticesContainer = ( {
 			).getRegisteredContainers(),
 		} )
 	);
-	const contexts = Array.isArray( context ) ? context : [ context ];
+	const contexts = useMemo< string[] >(
+		() => ( Array.isArray( context ) ? context : [ context ] ),
+		[ context ]
+	);
 	// Find sub-contexts that have not been registered. We will show notices from those contexts here too.
 	const allContexts = getNoticeContexts();
 	const unregisteredSubContexts = allContexts.filter(
@@ -65,6 +72,15 @@ const StoreNoticesContainer = ( {
 			),
 		].filter( Boolean ) as StoreNotice[];
 	} );
+
+	// Register the container context with the parent.
+	useEffect( () => {
+		contexts.map( ( _context ) => registerContainer( _context ) );
+		return () => {
+			contexts.map( ( _context ) => unregisterContainer( _context ) );
+		};
+	}, [ contexts, registerContainer, unregisterContainer ] );
+
 	if ( suppressNotices || ! notices.length ) {
 		return null;
 	}
@@ -73,7 +89,6 @@ const StoreNoticesContainer = ( {
 		<>
 			<StoreNotices
 				className={ className }
-				context={ contexts }
 				notices={ notices.filter(
 					( notice ) => notice.type === 'default'
 				) }
