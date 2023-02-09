@@ -38,13 +38,14 @@ const StoreNoticesContainer = ( {
 			).getRegisteredContainers(),
 		} )
 	);
-
+	const contexts = Array.isArray( context ) ? context : [ context ];
 	// Find sub-contexts that have not been registered. We will show notices from those contexts here too.
 	const allContexts = getNoticeContexts();
 	const unregisteredSubContexts = allContexts.filter(
 		( subContext: string ) =>
-			subContext.includes( context + '/' ) &&
-			! registeredContainers.includes( subContext )
+			contexts.some( ( _context: string ) =>
+				subContext.includes( _context + '/' )
+			) && ! registeredContainers.includes( subContext )
 	);
 
 	// Get notices from the current context and any sub-contexts and append the name of the context to the notice
@@ -56,13 +57,14 @@ const StoreNoticesContainer = ( {
 			...unregisteredSubContexts.flatMap( ( subContext: string ) =>
 				formatNotices( getNotices( subContext ), subContext )
 			),
-			...formatNotices(
-				getNotices( context ).concat( additionalNotices ),
-				context
+			...contexts.flatMap( ( subContext: string ) =>
+				formatNotices(
+					getNotices( subContext ).concat( additionalNotices ),
+					subContext
+				)
 			),
 		].filter( Boolean ) as StoreNotice[];
 	} );
-
 	if ( suppressNotices || ! notices.length ) {
 		return null;
 	}
@@ -71,7 +73,7 @@ const StoreNoticesContainer = ( {
 		<>
 			<StoreNotices
 				className={ className }
-				context={ context }
+				context={ contexts }
 				notices={ notices.filter(
 					( notice ) => notice.type === 'default'
 				) }

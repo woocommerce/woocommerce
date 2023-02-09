@@ -30,10 +30,9 @@ const ShippingCalculator = ( {
 	addressFields = [ 'country', 'state', 'city', 'postcode' ],
 }: ShippingCalculatorProps ): JSX.Element => {
 	const { shippingAddress } = useCustomerData();
-	const noticeContext = 'wc/cart/shipping-calculator';
 	return (
 		<div className="wc-block-components-shipping-calculator">
-			<StoreNoticesContainer context={ noticeContext } />
+			<StoreNoticesContainer context={ 'wc/cart/shipping-calculator' } />
 			<ShippingCalculatorAddress
 				address={ shippingAddress }
 				addressFields={ addressFields }
