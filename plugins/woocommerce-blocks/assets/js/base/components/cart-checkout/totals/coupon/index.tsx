@@ -92,15 +92,12 @@ export const TotalsCoupon = ( {
 					href="#wc-block-components-totals-coupon__form"
 					className="wc-block-components-totals-coupon-link"
 					aria-label={ __(
-						'Apply a coupon code',
+						'Add a coupon',
 						'woo-gutenberg-products-block'
 					) }
 					onClick={ handleCouponAnchorClick }
 				>
-					{ __(
-						'Apply a coupon code',
-						'woo-gutenberg-products-block'
-					) }
+					{ __( 'Add a coupon', 'woo-gutenberg-products-block' ) }
 				</a>
 			) }
 			<LoadingMask
