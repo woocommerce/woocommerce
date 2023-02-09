@@ -105,24 +105,27 @@ describe( 'StoreNoticesContainer', () => {
 
 	it( 'Shows notices from unregistered sub-contexts', async () => {
 		dispatch( noticesStore ).createErrorNotice(
-			'Custom sub-context error',
+			'Custom first sub-context error',
 			{
 				id: 'custom-subcontext-test-error',
 				context: 'wc/checkout/shipping-address',
 			}
 		);
 		dispatch( noticesStore ).createErrorNotice(
-			'Custom sub-context error',
+			'Custom second sub-context error',
 			{
 				id: 'custom-subcontext-test-error',
 				context: 'wc/checkout/billing-address',
 			}
 		);
 		render( <StoreNoticesContainer context="wc/checkout" /> );
-		// This should match against 3 elements; 2 error messages, and the spoken message where they are combined into one element.
+		// This should match against 2 messages, one for each sub-context.
 		expect(
-			screen.getAllByText( /Custom sub-context error/i )
-		).toHaveLength( 3 );
+			screen.getAllByText( /Custom first sub-context error/i )
+		).toHaveLength( 2 );
+		expect(
+			screen.getAllByText( /Custom second sub-context error/i )
+		).toHaveLength( 2 );
 		// Clean up notices.
 		await act( () =>
 			dispatch( noticesStore ).removeNotice(
