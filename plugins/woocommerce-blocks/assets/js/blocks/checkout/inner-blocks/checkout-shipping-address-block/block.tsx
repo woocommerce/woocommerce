@@ -97,13 +97,14 @@ const Block = ( {
 	] ) as Record< keyof AddressFields, Partial< AddressField > >;
 
 	const AddressFormWrapperComponent = isEditor ? Noninteractive : Fragment;
+	const noticeContext = useShippingAsBilling
+		? [ noticeContexts.SHIPPING_ADDRESS, noticeContexts.BILLING_ADDRESS ]
+		: [ noticeContexts.SHIPPING_ADDRESS ];
 
 	return (
 		<>
 			<AddressFormWrapperComponent>
-				<StoreNoticesContainer
-					context={ noticeContexts.SHIPPING_ADDRESS }
-				/>
+				<StoreNoticesContainer context={ noticeContext } />
 				<AddressForm
 					id="shipping"
 					type="shipping"

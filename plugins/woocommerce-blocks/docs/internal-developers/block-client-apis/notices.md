@@ -5,7 +5,6 @@
 -   [Notices in WooCommerce Blocks](#notices-in-woocommerce-blocks)
     -   [`StoreNoticesContainer`](#storenoticescontainer)
 -   [Snackbar notices in WooCommerce Blocks](#snackbar-notices-in-woocommerce-blocks)
-    -   [`SnackbarNoticesContainer`](#snackbarnoticescontainer)
 
 ## Notices in WooCommerce Blocks
 
@@ -19,11 +18,32 @@ The below example will show all notices with type `default` that are in the `wc/
 
 On the Cart Block, a `StoreNoticesContainer` is already rendered with the `wc/cart` context, and on the Checkout Block, a `StoreNoticesContainer` is already rendered with the `wc/checkout` context. To display errors from other contexts, you can use the `StoreNoticesContainer` component with context passed as a prop.
 
+`StoreNoticesContainer` also support passing an array of context strings to it, this allows you to capture several contexts at once, while filtering out similar notices.
+
+#### Single context
+
 ```jsx
 import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
 
 const PaymentErrors = () => {
 	return <StoreNoticesContainer context="wc/payment" />;
+};
+```
+
+#### Multiple contexts
+
+```jsx
+import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
+
+const AddressForm = () => {
+	return (
+		<StoreNoticesContainer
+			context={ [
+				'wc/checkout/shipping-address',
+				'wc/checkout/billing-address',
+			] }
+		/>
+	);
 };
 ```
 
@@ -52,18 +72,4 @@ dispatch( 'core/notices' ).createNotice(
 	},
 	'snackbar-notice-id'
 );
-```
-
-### `SnackbarNoticesContainer`
-
-To display snackbar notices, use the `SnackbarNoticesContainer` component. This component is rendered with the Cart and Checkout blocks, so there is no need to add another. The context it displays notices for is `default`. If, for some reason you do need to show snackbar messages for a different context, you can render this component again and pass the context as a prop to the component.
-
-```jsx
-import { SnackbarNoticesContainer } from '@woocommerce/base-components/snackbar-notices-container';
-
-const AlternativeSnackbarNotices = () => {
-	return (
-		<SnackbarNoticesContainer context="wc/alternative-snackbar-notices" />
-	);
-};
 ```
