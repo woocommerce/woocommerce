@@ -32,7 +32,7 @@ type CollapsibleListProps = {
 	show?: number;
 	onCollapse?: () => void;
 	onExpand?: () => void;
-	direction?: 'top' | 'bottom';
+	direction?: 'up' | 'down';
 } & ListProps;
 
 const defaultStyle = {
@@ -127,7 +127,7 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 	show = 0,
 	onCollapse,
 	onExpand,
-	direction = 'top',
+	direction = 'up',
 	...listProps
 } ): JSX.Element => {
 	const [ isCollapsed, setCollapsed ] = useState( collapsed );
@@ -253,7 +253,7 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 	return (
 		<ExperimentalList { ...listProps } className={ listClasses }>
 			{ [
-				direction === 'bottom' && hiddenChildren,
+				direction === 'down' && hiddenChildren,
 				...displayedChildren.shown,
 				<Transition
 					key="remaining-children"
@@ -314,7 +314,7 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 						);
 					} }
 				</Transition>,
-				direction === 'top' && hiddenChildren,
+				direction === 'up' && hiddenChildren,
 			] }
 		</ExperimentalList>
 	);

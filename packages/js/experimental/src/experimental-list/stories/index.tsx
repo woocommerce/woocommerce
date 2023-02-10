@@ -20,7 +20,7 @@ export default {
 		direction: {
 			control: {
 				type: 'select',
-				options: [ 'top', 'bottom' ],
+				options: [ 'up', 'down' ],
 			},
 		},
 	},
