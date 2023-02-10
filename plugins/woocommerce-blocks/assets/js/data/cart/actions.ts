@@ -22,7 +22,7 @@ import {
 import { ACTION_TYPES as types } from './action-types';
 import { apiFetchWithHeaders } from '../shared-controls';
 import { ReturnOrGeneratorYieldUnion } from '../mapped-types';
-import { CartDispatchFromMap, CartResolveSelectFromMap } from './index';
+import { CartDispatchFromMap, CartSelectFromMap } from './index';
 
 // Thunks are functions that can be dispatched, similar to actions creators
 export * from './thunks';
@@ -183,7 +183,7 @@ export const shippingRatesBeingSelected = ( isResolving: boolean ) =>
  */
 export const applyExtensionCartUpdate =
 	( args: ExtensionCartUpdateArgs ) =>
-	async ( { dispatch } ) => {
+	async ( { dispatch }: { dispatch: CartDispatchFromMap } ) => {
 		try {
 			const { response } = await apiFetchWithHeaders( {
 				path: '/wc/store/v1/cart/extensions',
@@ -214,7 +214,7 @@ export const applyExtensionCartUpdate =
  */
 export const applyCoupon =
 	( couponCode: string ) =>
-	async ( { dispatch } ) => {
+	async ( { dispatch }: { dispatch: CartDispatchFromMap } ) => {
 		dispatch.receiveApplyingCoupon( couponCode );
 		try {
 			const { response } = await apiFetchWithHeaders( {
@@ -253,7 +253,7 @@ export const applyCoupon =
  */
 export const removeCoupon =
 	( couponCode: string ) =>
-	async ( { dispatch } ) => {
+	async ( { dispatch }: { dispatch: CartDispatchFromMap } ) => {
 		dispatch.receiveRemovingCoupon( couponCode );
 
 		try {
@@ -296,7 +296,7 @@ export const removeCoupon =
  */
 export const addItemToCart =
 	( productId: number, quantity = 1 ) =>
-	async ( { dispatch } ) => {
+	async ( { dispatch }: { dispatch: CartDispatchFromMap } ) => {
 		try {
 			triggerAddingToCartEvent();
 			const { response } = await apiFetchWithHeaders( {
@@ -378,12 +378,12 @@ export const changeCartItemQuantity =
 	) =>
 	async ( {
 		dispatch,
-		resolveSelect,
+		select,
 	}: {
 		dispatch: CartDispatchFromMap;
-		resolveSelect: CartResolveSelectFromMap;
+		select: CartSelectFromMap;
 	} ) => {
-		const cartItem = await resolveSelect.getCartItem( cartItemKey );
+		const cartItem = select.getCartItem( cartItemKey );
 		if ( cartItem?.quantity === quantity ) {
 			return;
 		}
