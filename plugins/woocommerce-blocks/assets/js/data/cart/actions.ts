@@ -25,7 +25,6 @@ import { ACTION_TYPES as types } from './action-types';
 import { apiFetchWithHeaders } from '../shared-controls';
 import { ReturnOrGeneratorYieldUnion } from '../mapped-types';
 import { CartDispatchFromMap, CartSelectFromMap } from './index';
-import type { Thunks } from './thunks';
 
 // Thunks are functions that can be dispatched, similar to actions creators
 // @todo Many of the functions that return promises in this file need to be moved to thunks.ts.
@@ -216,6 +215,7 @@ export const applyExtensionCartUpdate =
 export const applyCoupon =
 	( couponCode: string ) =>
 	async ( { dispatch }: { dispatch: CartDispatchFromMap } ) => {
+		dispatch.receiveApplyingCoupon( couponCode );
 		try {
 			dispatch.receiveApplyingCoupon( couponCode );
 			const { response } = await apiFetchWithHeaders( {
@@ -246,6 +246,8 @@ export const applyCoupon =
 export const removeCoupon =
 	( couponCode: string ) =>
 	async ( { dispatch }: { dispatch: CartDispatchFromMap } ) => {
+		dispatch.receiveRemovingCoupon( couponCode );
+
 		try {
 			dispatch.receiveRemovingCoupon( couponCode );
 			const { response } = await apiFetchWithHeaders( {
