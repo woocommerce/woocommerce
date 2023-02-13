@@ -101,6 +101,10 @@ const ValidatedTextInput = ( {
 			inputObject.value = inputObject.value.trim();
 			inputObject.setCustomValidity( '' );
 
+			if ( previousValue === inputObject.value ) {
+				return;
+			}
+
 			const inputIsValid = customValidation
 				? inputObject.checkValidity() && customValidation( inputObject )
 				: inputObject.checkValidity();
@@ -120,6 +124,7 @@ const ValidatedTextInput = ( {
 			} );
 		},
 		[
+			previousValue,
 			clearValidationError,
 			customValidation,
 			errorIdString,
