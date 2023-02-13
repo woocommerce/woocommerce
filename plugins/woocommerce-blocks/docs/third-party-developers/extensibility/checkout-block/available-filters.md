@@ -110,11 +110,11 @@ For this example, let's suppose we are building an extension that lets customers
 const replaceTotalWithDeposit = () => 'Deposit due today';
 ```
 
-2. Now we need to register this filter function, and have it executed when the `totalLabel` filter is applied. We can access the `__experimentalRegisterCheckoutFilters` function on the `window.wc.blocksCheckout` object. As long as your extension's script is enqueued _after_ WooCommerce Blocks' scripts (i.e. by registering `wc-blocks-checkout` as a dependency), then this will be available.
+2. Now we need to register this filter function, and have it executed when the `totalLabel` filter is applied. We can access the `registerCheckoutFilters` function on the `window.wc.blocksCheckout` object. As long as your extension's script is enqueued _after_ WooCommerce Blocks' scripts (i.e. by registering `wc-blocks-checkout` as a dependency), then this will be available.
 
 ```ts
-const { __experimentalRegisterCheckoutFilters } = window.wc.blocksCheckout;
-__experimentalRegisterCheckoutFilters( 'my-hypothetical-deposit-plugin', {
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+registerCheckoutFilters( 'my-hypothetical-deposit-plugin', {
 	totalLabel: replaceTotalWithDeposit,
 } );
 ```
@@ -140,11 +140,11 @@ const appendTextToPriceInCart = ( value, extensions, args ) => {
 };
 ```
 
-2. Now we must register it. Refer to the first example for information about `__experimentalRegisterCheckoutFilters`.
+2. Now we must register it. Refer to the first example for information about `registerCheckoutFilters`.
 
 ```ts
-const { __experimentalRegisterCheckoutFilters } = window.wc.blocksCheckout;
-__experimentalRegisterCheckoutFilters( 'my-hypothetical-price-plugin', {
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+registerCheckoutFilters( 'my-hypothetical-price-plugin', {
 	subtotalPriceFormat: appendTextToPriceInCart,
 } );
 ```
@@ -175,9 +175,9 @@ const filterCoupons = ( coupons ) => {
 We'd register our filter like this:
 
 ```ts
-import { __experimentalRegisterCheckoutFilters } from '@woocommerce/blocks-checkout';
+import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 
-__experimentalRegisterCheckoutFilters( 'automatic-coupon-extension', {
+registerCheckoutFilters( 'automatic-coupon-extension', {
 	coupons: filterCoupons,
 } );
 ```
@@ -193,9 +193,9 @@ If you want to prevent a coupon apply notice from appearing, you can use the `sh
 The same can be done with the `showRemoveCouponNotice` filter to prevent a notice when a coupon is removed from the cart.
 
 ```ts
-import { __experimentalRegisterCheckoutFilters } from '@woocommerce/blocks-checkout';
+import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 
-__experimentalRegisterCheckoutFilters( 'example-extension', {
+registerCheckoutFilters( 'example-extension', {
 	showApplyCouponNotice: ( value, extensions, { couponCode } ) => {
 		// Prevent a couponCode called '10off' from creating a notice.
 		return couponCode === '10off' ? false : value;
@@ -215,9 +215,9 @@ An important caveat to note is this does _not_ prevent the item from being remov
 removing it in the Mini Cart, or traditional shortcode cart.
 
 ```ts
-import { __experimentalRegisterCheckoutFilters } from '@woocommerce/blocks-checkout';
+import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 
-__experimentalRegisterCheckoutFilters( 'example-extension', {
+registerCheckoutFilters( 'example-extension', {
 	showRemoveItemLink: ( value, extensions, { cartItem } ) => {
 		// Prevent items with ID 1 being removed from the cart.
 		return cartItem.id !== 1;
@@ -235,11 +235,11 @@ Let's assume a merchant want to change the label of the Place Order button _Plac
 const label = () => `Pay now`;
 ```
 
-2. Now we have to register this filter function, and have it executed when the `placeOrderButtonLabel` filter is applied. We can access the `__experimentalRegisterCheckoutFilters` function on the `window.wc.blocksCheckout` object. As long as your extension's script is enqueued _after_ WooCommerce Blocks' scripts (i.e. by registering `wc-blocks-checkout` as a dependency), then this will be available.
+2. Now we have to register this filter function, and have it executed when the `placeOrderButtonLabel` filter is applied. We can access the `registerCheckoutFilters` function on the `window.wc.blocksCheckout` object. As long as your extension's script is enqueued _after_ WooCommerce Blocks' scripts (i.e. by registering `wc-blocks-checkout` as a dependency), then this will be available.
 
 ```ts
-const { __experimentalRegisterCheckoutFilters } = window.wc.blocksCheckout;
-__experimentalRegisterCheckoutFilters( 'custom-place-order-button-label', {
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+registerCheckoutFilters( 'custom-place-order-button-label', {
 	placeOrderButtonLabel: label,
 } );
 ```

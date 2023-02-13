@@ -33,10 +33,11 @@ let checkoutFilters: Record<
 > = {};
 
 const cachedValues: Record< string, T > = {};
+
 /**
  * Register filters for a specific extension.
  */
-export const __experimentalRegisterCheckoutFilters = (
+export const registerCheckoutFilters = (
 	namespace: string,
 	filters: Record< string, CheckoutFilterFunction >
 ): void => {
@@ -57,6 +58,24 @@ export const __experimentalRegisterCheckoutFilters = (
 		...checkoutFilters,
 		[ namespace ]: filters,
 	};
+};
+
+/**
+ * Backward compatibility for __experimentalRegisterCheckoutFilters, this has been graduated to stable now.
+ * Remove after July 2023.
+ */
+export const __experimentalRegisterCheckoutFilters = (
+	namespace: string,
+	filters: Record< string, CheckoutFilterFunction >
+) => {
+	deprecated( '__experimentalRegisterCheckoutFilters', {
+		alternative: 'registerCheckoutFilters',
+		plugin: 'WooCommerce Blocks',
+		link: '',
+		since: '6.0.0',
+		hint: '__experimentalRegisterCheckoutFilters has graduated to stable and this experimental function will be removed.',
+	} );
+	registerCheckoutFilters( namespace, filters );
 };
 
 /**
@@ -179,7 +198,7 @@ const shouldReRunFilters = < T >(
 /**
  * Apply a filter.
  */
-export const __experimentalApplyCheckoutFilter = < T >( {
+export const applyCheckoutFilter = < T >( {
 	filterName,
 	defaultValue,
 	extensions = null,
@@ -233,4 +252,42 @@ export const __experimentalApplyCheckoutFilter = < T >( {
 	} );
 	cachedValues[ filterName ] = value;
 	return value;
+};
+
+/**
+ * Backward compatibility for __experimentalApplyCheckoutFilter, this has been graduated to stable now.
+ * Remove after July 2023.
+ */
+export const __experimentalApplyCheckoutFilter = < T >( {
+	filterName,
+	defaultValue,
+	extensions = null,
+	arg = null,
+	validation = returnTrue,
+}: {
+	/** Name of the filter to apply. */
+	filterName: string;
+	/** Default value to filter. */
+	defaultValue: T;
+	/** Values extend to REST API response. */
+	extensions?: Record< string, unknown > | null;
+	/** Object containing arguments for the filter function. */
+	arg?: CheckoutFilterArguments;
+	/** Function that needs to return true when the filtered value is passed in order for the filter to be applied. */
+	validation?: ( value: T ) => true | Error;
+} ): T => {
+	deprecated( '__experimentalApplyCheckoutFilter', {
+		alternative: 'applyCheckoutFilter',
+		plugin: 'WooCommerce Blocks',
+		link: '',
+		since: '6.0.0',
+		hint: '__experimentalApplyCheckoutFilter has graduated to stable and this experimental function will be removed.',
+	} );
+	return applyCheckoutFilter( {
+		filterName,
+		defaultValue,
+		extensions,
+		arg,
+		validation,
+	} );
 };

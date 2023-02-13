@@ -6,7 +6,7 @@ import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { default as fetchMock } from 'jest-fetch-mock';
-import { __experimentalRegisterCheckoutFilters } from '@woocommerce/blocks-checkout';
+import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
@@ -240,7 +240,7 @@ describe( 'Testing cart', () => {
 			items: [ previewCart.items[ 0 ] ],
 		};
 
-		__experimentalRegisterCheckoutFilters( 'woo-blocks-test-extension', {
+		registerCheckoutFilters( 'woo-blocks-test-extension', {
 			showRemoveItemLink: ( value, extensions, { cartItem } ) => {
 				return cartItem.id !== cart.items[ 0 ].id;
 			},

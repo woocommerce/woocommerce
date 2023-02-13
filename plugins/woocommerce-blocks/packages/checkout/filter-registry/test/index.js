@@ -5,10 +5,7 @@ import { renderHook } from '@testing-library/react-hooks';
 /**
  * Internal dependencies
  */
-import {
-	__experimentalRegisterCheckoutFilters,
-	__experimentalApplyCheckoutFilter,
-} from '../';
+import { registerCheckoutFilters, applyCheckoutFilter } from '../';
 
 describe( 'Checkout registry', () => {
 	const filterName = 'loremIpsum';
@@ -16,7 +13,7 @@ describe( 'Checkout registry', () => {
 	test( 'should return default value if there are no filters', () => {
 		const value = 'Hello World';
 		const { result: newValue } = renderHook( () =>
-			__experimentalApplyCheckoutFilter( {
+			applyCheckoutFilter( {
 				filterName,
 				defaultValue: value,
 			} )
@@ -26,12 +23,12 @@ describe( 'Checkout registry', () => {
 
 	test( 'should return filtered value when a filter is registered', () => {
 		const value = 'Hello World';
-		__experimentalRegisterCheckoutFilters( filterName, {
+		registerCheckoutFilters( filterName, {
 			[ filterName ]: ( val, extensions, args ) =>
 				val.toUpperCase() + args.punctuationSign,
 		} );
 		const { result: newValue } = renderHook( () =>
-			__experimentalApplyCheckoutFilter( {
+			applyCheckoutFilter( {
 				filterName,
 				defaultValue: value,
 				arg: {
@@ -45,11 +42,11 @@ describe( 'Checkout registry', () => {
 
 	test( 'should not return filtered value if validation failed', () => {
 		const value = 'Hello World';
-		__experimentalRegisterCheckoutFilters( filterName, {
+		registerCheckoutFilters( filterName, {
 			[ filterName ]: ( val ) => val.toUpperCase(),
 		} );
 		const { result: newValue } = renderHook( () =>
-			__experimentalApplyCheckoutFilter( {
+			applyCheckoutFilter( {
 				filterName,
 				defaultValue: value,
 				validation: ( val ) => ! val.includes( 'HELLO' ),
@@ -69,13 +66,13 @@ describe( 'Checkout registry', () => {
 		// We use this new filter name here to avoid return the cached value for the filter
 		const filterNameThatThrows = 'throw';
 		const value = 'Hello World';
-		__experimentalRegisterCheckoutFilters( filterNameThatThrows, {
+		registerCheckoutFilters( filterNameThatThrows, {
 			[ filterNameThatThrows ]: () => {
 				throw error;
 			},
 		} );
 		const { result: newValue } = renderHook( () =>
-			__experimentalApplyCheckoutFilter( {
+			applyCheckoutFilter( {
 				filterName: filterNameThatThrows,
 				defaultValue: value,
 			} )

@@ -86,7 +86,6 @@ We also have individual features or code blocks behind a feature flag, this is a
 
 -   `__experimentalDeRegisterPaymentMethod` function used to deregister a payment method, only used in tests ([experimental function](https://github.com/woocommerce/woocommerce-blocks/blob/f27456dd00fa0b21b29a935943defb18351edf48/assets/js/blocks-registry/payment-methods/registry.ts#L110-L114)).
 -   `__experimentalDeRegisterExpressPaymentMethod` function used to deregister an express payment method, only used in tests ([experimental function](https://github.com/woocommerce/woocommerce-blocks/blob/f27456dd00fa0b21b29a935943defb18351edf48/assets/js/blocks-registry/payment-methods/registry.ts#L116-L120)).
--   `__experimentalRegisterCheckoutFilters` and `__experimentalApplyCheckoutFilter` methods included with `@woocommerce/blocks-checkout` package. They allow registering and applying a filter to certain parts of the Cart and Checkout blocks ([experimental method 1](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/3e59ec9842464f783f6e087947e717fa0b0a7b1b/packages/checkout/registry/index.js#L2) | [experimental method 2](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/3e59ec9842464f783f6e087947e717fa0b0a7b1b/packages/checkout/registry/index.js#L17)).
 
 ### Slots
 
