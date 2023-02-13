@@ -15,7 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 		if ( empty( $attribute_taxonomies ) && empty( $product_attributes ) ) :
 			?>
 			<div id="message" class="inline notice woocommerce-message">
-				<p><?php echo esc_html_e( __( 'Add descriptive pieces of information that customers can use to search for this product on your store, such as “Material” or “Brand”.', 'woocommerce' ) ); ?></p>
+				<p>
+					<?php
+					esc_html_e(
+						'Add descriptive pieces of information that customers can use to search for this product on your store, such as “Material” or “Brand”.',
+						'woocommerce'
+					);
+					?>
+				</p>
 			</div>
 		<?php endif; ?>
 		<span class="expand-close">
