@@ -10,10 +10,7 @@ import {
 	getCurrencyFromPriceResponse,
 	formatPrice,
 } from '@woocommerce/price-format';
-import {
-	__experimentalApplyCheckoutFilter,
-	mustContain,
-} from '@woocommerce/blocks-checkout';
+import { applyCheckoutFilter, mustContain } from '@woocommerce/blocks-checkout';
 import Dinero from 'dinero.js';
 import { getSetting } from '@woocommerce/settings';
 import { useMemo } from '@wordpress/element';
@@ -52,7 +49,7 @@ const OrderSummaryItem = ( { cartItem }: OrderSummaryProps ): JSX.Element => {
 		extensions,
 	} = cartItem;
 
-	// Prepare props to pass to the __experimentalApplyCheckoutFilter filter.
+	// Prepare props to pass to the applyCheckoutFilter filter.
 	// We need to pluck out receiveCart.
 	// eslint-disable-next-line no-unused-vars
 	const { receiveCart, ...cart } = useStoreCart();
@@ -68,7 +65,7 @@ const OrderSummaryItem = ( { cartItem }: OrderSummaryProps ): JSX.Element => {
 
 	const priceCurrency = getCurrencyFromPriceResponse( prices );
 
-	const name = __experimentalApplyCheckoutFilter( {
+	const name = applyCheckoutFilter( {
 		filterName: 'itemName',
 		defaultValue: initialName,
 		extensions,
@@ -101,7 +98,7 @@ const OrderSummaryItem = ( { cartItem }: OrderSummaryProps ): JSX.Element => {
 		amount: lineSubtotal,
 		precision: totalsCurrency.minorUnit,
 	} ).getAmount();
-	const subtotalPriceFormat = __experimentalApplyCheckoutFilter( {
+	const subtotalPriceFormat = applyCheckoutFilter( {
 		filterName: 'subtotalPriceFormat',
 		defaultValue: '<price/>',
 		extensions,
@@ -110,7 +107,7 @@ const OrderSummaryItem = ( { cartItem }: OrderSummaryProps ): JSX.Element => {
 	} );
 
 	// Allow extensions to filter how the price is displayed. Ie: prepending or appending some values.
-	const productPriceFormat = __experimentalApplyCheckoutFilter( {
+	const productPriceFormat = applyCheckoutFilter( {
 		filterName: 'cartItemPrice',
 		defaultValue: '<price/>',
 		extensions,
@@ -118,7 +115,7 @@ const OrderSummaryItem = ( { cartItem }: OrderSummaryProps ): JSX.Element => {
 		validation: productPriceValidation,
 	} );
 
-	const cartItemClassNameFilter = __experimentalApplyCheckoutFilter( {
+	const cartItemClassNameFilter = applyCheckoutFilter( {
 		filterName: 'cartItemClass',
 		defaultValue: '',
 		extensions,

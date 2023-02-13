@@ -11,7 +11,7 @@ import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
 import { noticeContexts } from '@woocommerce/base-context';
 import {
 	StoreNoticesContainer,
-	__experimentalApplyCheckoutFilter,
+	applyCheckoutFilter,
 } from '@woocommerce/blocks-checkout';
 
 /**
@@ -32,7 +32,7 @@ const Block = ( {
 	placeOrderButtonLabel: string;
 } ): JSX.Element => {
 	const { paymentMethodButtonLabel } = useCheckoutSubmit();
-	const label = __experimentalApplyCheckoutFilter( {
+	const label = applyCheckoutFilter( {
 		filterName: 'placeOrderButtonLabel',
 		defaultValue:
 			paymentMethodButtonLabel ||
