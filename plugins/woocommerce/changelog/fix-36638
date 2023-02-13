@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix WordPress unit tests libraries being installed in a symlinked folder structure
