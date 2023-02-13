@@ -226,6 +226,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 			'postcode'   => $customer->get_billing_postcode(),
 			'country'    => $customer->get_billing_country(),
 			'phone'      => $customer->get_billing_phone(),
+			'email'      => $customer->get_billing_email(),
 		];
 	}
 
