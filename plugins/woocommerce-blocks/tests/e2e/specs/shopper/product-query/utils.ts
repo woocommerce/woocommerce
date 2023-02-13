@@ -32,17 +32,16 @@ export const addProductQueryBlock = async () => {
 	await page.waitForNetworkIdle();
 };
 
-const enableInheritQueryFromTemplateSetting = async () => {
+export const toggleInheritQueryFromTemplateSetting = async () => {
 	const [ button ] = await page.$x(
 		block.selectors.editor.inheritQueryFromTemplateSetting
 	);
 	await button.click();
 };
 
-export const configurateProductQueryBlock = async () => {
+export const configureProductQueryBlock = async () => {
 	await ensureSidebarOpened();
 	await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
-	await enableInheritQueryFromTemplateSetting();
 };
 
 export const getProductsNameFromClassicTemplate = async () => {
