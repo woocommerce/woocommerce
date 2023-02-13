@@ -71,6 +71,13 @@ class WC_Product_CSV_Importer_Controller {
 	protected $update_existing = false;
 
 	/**
+	 * The character encoding to use to interpret the input file, or empty string for autodetect.
+	 *
+	 * @var string
+	 */
+	protected $character_encoding = 'UTF-8';
+
+	/**
 	 * Get importer instance.
 	 *
 	 * @param  string $file File to import.
@@ -139,11 +146,12 @@ class WC_Product_CSV_Importer_Controller {
 		$this->steps = apply_filters( 'woocommerce_product_csv_importer_steps', $default_steps );
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$this->step            = isset( $_REQUEST['step'] ) ? sanitize_key( $_REQUEST['step'] ) : current( array_keys( $this->steps ) );
-		$this->file            = isset( $_REQUEST['file'] ) ? wc_clean( wp_unslash( $_REQUEST['file'] ) ) : '';
-		$this->update_existing = isset( $_REQUEST['update_existing'] ) ? (bool) $_REQUEST['update_existing'] : false;
-		$this->delimiter       = ! empty( $_REQUEST['delimiter'] ) ? wc_clean( wp_unslash( $_REQUEST['delimiter'] ) ) : ',';
-		$this->map_preferences = isset( $_REQUEST['map_preferences'] ) ? (bool) $_REQUEST['map_preferences'] : false;
+		$this->step               = isset( $_REQUEST['step'] ) ? sanitize_key( $_REQUEST['step'] ) : current( array_keys( $this->steps ) );
+		$this->file               = isset( $_REQUEST['file'] ) ? wc_clean( wp_unslash( $_REQUEST['file'] ) ) : '';
+		$this->update_existing    = isset( $_REQUEST['update_existing'] ) ? (bool) $_REQUEST['update_existing'] : false;
+		$this->delimiter          = ! empty( $_REQUEST['delimiter'] ) ? wc_clean( wp_unslash( $_REQUEST['delimiter'] ) ) : ',';
+		$this->map_preferences    = isset( $_REQUEST['map_preferences'] ) ? (bool) $_REQUEST['map_preferences'] : false;
+		$this->character_encoding = isset( $_REQUEST['character_encoding'] ) ? wc_clean( wp_unslash( $_REQUEST['character_encoding'] ) ) : 'UTF-8';
 		// phpcs:enable
 
 		// Import mappings for CSV data.
@@ -180,12 +188,13 @@ class WC_Product_CSV_Importer_Controller {
 		}
 
 		$params = array(
-			'step'            => $keys[ $step_index + 1 ],
-			'file'            => str_replace( DIRECTORY_SEPARATOR, '/', $this->file ),
-			'delimiter'       => $this->delimiter,
-			'update_existing' => $this->update_existing,
-			'map_preferences' => $this->map_preferences,
-			'_wpnonce'        => wp_create_nonce( 'woocommerce-csv-importer' ), // wp_nonce_url() escapes & to &amp; breaking redirects.
+			'step'               => $keys[ $step_index + 1 ],
+			'file'               => str_replace( DIRECTORY_SEPARATOR, '/', $this->file ),
+			'delimiter'          => $this->delimiter,
+			'update_existing'    => $this->update_existing,
+			'map_preferences'    => $this->map_preferences,
+			'character_encoding' => $this->character_encoding,
+			'_wpnonce'           => wp_create_nonce( 'woocommerce-csv-importer' ), // wp_nonce_url() escapes & to &amp; breaking redirects.
 		);
 
 		return add_query_arg( $params );
@@ -365,8 +374,9 @@ class WC_Product_CSV_Importer_Controller {
 	protected function mapping_form() {
 		check_admin_referer( 'woocommerce-csv-importer' );
 		$args = array(
-			'lines'     => 1,
-			'delimiter' => $this->delimiter,
+			'lines'              => 1,
+			'delimiter'          => $this->delimiter,
+			'character_encoding' => $this->character_encoding,
 		);
 
 		$importer     = self::get_importer( $this->file, $args );
@@ -428,14 +438,15 @@ class WC_Product_CSV_Importer_Controller {
 			'wc-product-import',
 			'wc_product_import_params',
 			array(
-				'import_nonce'    => wp_create_nonce( 'wc-product-import' ),
-				'mapping'         => array(
+				'import_nonce'       => wp_create_nonce( 'wc-product-import' ),
+				'mapping'            => array(
 					'from' => $mapping_from,
 					'to'   => $mapping_to,
 				),
-				'file'            => $this->file,
-				'update_existing' => $this->update_existing,
-				'delimiter'       => $this->delimiter,
+				'file'               => $this->file,
+				'update_existing'    => $this->update_existing,
+				'delimiter'          => $this->delimiter,
+				'character_encoding' => $this->character_encoding,
 			)
 		);
 		wp_enqueue_script( 'wc-product-import' );
