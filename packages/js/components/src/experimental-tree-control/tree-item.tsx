@@ -1,7 +1,9 @@
 /**
  * External dependencies
  */
+import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { chevronDown, chevronUp } from '@wordpress/icons';
 import classNames from 'classnames';
 import { createElement, forwardRef } from 'react';
 
@@ -16,7 +18,13 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 	props: TreeItemProps,
 	ref: React.ForwardedRef< HTMLLIElement >
 ) {
-	const { item, treeItemProps, headingProps, treeProps } = useTreeItem( {
+	const {
+		item,
+		treeItemProps,
+		headingProps,
+		treeProps,
+		expander: { isExpanded, onToggleExpand },
+	} = useTreeItem( {
 		...props,
 		ref,
 	} );
@@ -36,9 +44,26 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				<div className="experimental-woocommerce-tree-item__label">
 					<span>{ item.data.label }</span>
 				</div>
+
+				{ Boolean( item.children?.length ) && (
+					<div className="experimental-woocommerce-tree-item__expander">
+						<Button
+							icon={ isExpanded ? chevronUp : chevronDown }
+							onClick={ onToggleExpand }
+							className="experimental-woocommerce-tree-item__expander"
+							aria-label={
+								isExpanded
+									? __( 'Collapse', 'woocommerce' )
+									: __( 'Expand', 'woocommerce' )
+							}
+						/>
+					</div>
+				) }
 			</div>
 
-			{ Boolean( item.children.length ) && <Tree { ...treeProps } /> }
+			{ Boolean( item.children.length ) && isExpanded && (
+				<Tree { ...treeProps } />
+			) }
 		</li>
 	);
 } );

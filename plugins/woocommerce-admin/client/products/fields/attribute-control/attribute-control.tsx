@@ -9,7 +9,6 @@ import {
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
 	Link,
 } from '@woocommerce/components';
-import { recordEvent } from '@woocommerce/tracks';
 import interpolateComponents from '@automattic/interpolate-components';
 import { getAdminLink } from '@woocommerce/settings';
 
@@ -17,47 +16,68 @@ import { getAdminLink } from '@woocommerce/settings';
  * Internal dependencies
  */
 import './attribute-field.scss';
-import { AddAttributeModal } from './add-attribute-modal';
 import { EditAttributeModal } from './edit-attribute-modal';
 import { EnhancedProductAttribute } from '~/products/hooks/use-product-attributes';
 import {
+	getAttributeId,
 	getAttributeKey,
 	reorderSortableProductAttributePositions,
 } from './utils';
 import { AttributeEmptyState } from '../attribute-empty-state';
 import {
-	AddAttributeListItem,
 	AttributeListItem,
+	NewAttributeListItem,
 } from '../attribute-list-item';
+import { NewAttributeModal } from './new-attribute-modal';
 
 type AttributeControlProps = {
 	value: ProductAttribute[];
+	onAdd?: ( attribute: EnhancedProductAttribute[] ) => void;
 	onChange: ( value: ProductAttribute[] ) => void;
-	// TODO: should we support an 'any' option to show all attributes?
-	attributeType?: 'regular' | 'for-variations';
+	onEdit?: ( attribute: ProductAttribute ) => void;
+	onRemove?: ( attribute: ProductAttribute ) => void;
+	onRemoveCancel?: ( attribute: ProductAttribute ) => void;
+	onNewModalCancel?: () => void;
+	onNewModalClose?: () => void;
+	onNewModalOpen?: () => void;
+	onEditModalCancel?: ( attribute?: ProductAttribute ) => void;
+	onEditModalClose?: ( attribute?: ProductAttribute ) => void;
+	onEditModalOpen?: ( attribute?: ProductAttribute ) => void;
+	uiStrings?: {
+		emptyStateSubtitle?: string;
+		newAttributeListItemLabel?: string;
+		newAttributeModalTitle?: string;
+		globalAttributeHelperMessage: string;
+	};
 };
 
 export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	value,
-	attributeType = 'regular',
+	onAdd = () => {},
 	onChange,
+	onEdit = () => {},
+	onNewModalCancel = () => {},
+	onNewModalClose = () => {},
+	onNewModalOpen = () => {},
+	onEditModalCancel = () => {},
+	onEditModalClose = () => {},
+	onEditModalOpen = () => {},
+	onRemove = () => {},
+	onRemoveCancel = () => {},
+	uiStrings = {
+		newAttributeModalTitle: undefined,
+		emptyStateSubtitle: undefined,
+		newAttributeListItemLabel: undefined,
+		globalAttributeHelperMessage: __(
+			`You can change the attribute's name in {{link}}Attributes{{/link}}.`,
+			'woocommerce'
+		),
+	},
 } ) => {
-	const [ showAddAttributeModal, setShowAddAttributeModal ] =
-		useState( false );
-	const [ editingAttributeId, setEditingAttributeId ] = useState<
+	const [ isNewModalVisible, setIsNewModalVisible ] = useState( false );
+	const [ currentAttributeId, setCurrentAttributeId ] = useState<
 		null | string
 	>( null );
-
-	const isOnlyForVariations = attributeType === 'for-variations';
-
-	const newAttributeProps = { variation: isOnlyForVariations };
-
-	const CANCEL_BUTTON_EVENT_NAME = isOnlyForVariations
-		? 'product_add_options_modal_cancel_button_click'
-		: 'product_add_attributes_modal_cancel_button_click';
-
-	const fetchAttributeId = ( attribute: { id: number; name: string } ) =>
-		`${ attribute.id }-${ attribute.name }`;
 
 	const handleChange = ( newAttributes: EnhancedProductAttribute[] ) => {
 		onChange(
@@ -74,79 +94,89 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		);
 	};
 
-	const onRemove = ( attribute: ProductAttribute ) => {
+	const handleRemove = ( attribute: ProductAttribute ) => {
 		// eslint-disable-next-line no-alert
 		if ( window.confirm( __( 'Remove this attribute?', 'woocommerce' ) ) ) {
-			recordEvent(
-				'product_remove_attribute_confirmation_confirm_click'
-			);
 			handleChange(
 				value.filter(
 					( attr ) =>
-						fetchAttributeId( attr ) !==
-						fetchAttributeId( attribute )
+						getAttributeId( attr ) !== getAttributeId( attribute )
 				)
 			);
-		} else {
-			recordEvent( 'product_remove_attribute_confirmation_cancel_click' );
+			onRemove( attribute );
+			return;
 		}
+		onRemoveCancel( attribute );
 	};
 
-	const onAddNewAttributes = (
-		newAttributes: EnhancedProductAttribute[]
-	) => {
+	const openNewModal = () => {
+		setIsNewModalVisible( true );
+		onNewModalOpen();
+	};
+
+	const closeNewModal = () => {
+		setIsNewModalVisible( false );
+		onNewModalClose();
+	};
+
+	const openEditModal = ( attribute: ProductAttribute ) => {
+		setCurrentAttributeId( getAttributeId( attribute ) );
+		onEditModalOpen( attribute );
+	};
+
+	const closeEditModal = ( attribute: ProductAttribute ) => {
+		setCurrentAttributeId( null );
+		onEditModalClose( attribute );
+	};
+
+	const handleAdd = ( newAttributes: EnhancedProductAttribute[] ) => {
 		handleChange( [
-			...( value || [] ),
-			...newAttributes
-				.filter(
-					( newAttr ) =>
-						! ( value || [] ).find( ( attr ) =>
-							newAttr.id === 0
-								? newAttr.name === attr.name // check name if custom attribute = id === 0.
-								: attr.id === newAttr.id
-						)
-				)
-				.map( ( newAttr, index ) => {
-					return {
-						...newAttributeProps,
-						...newAttr,
-						position: ( value || [] ).length + index,
-					};
-				} ),
+			...value,
+			...newAttributes.filter(
+				( newAttr ) =>
+					! value.find(
+						( attr ) =>
+							getAttributeId( newAttr ) === getAttributeId( attr )
+					)
+			),
 		] );
-		recordEvent( 'product_add_attributes_modal_add_button_click' );
-		setShowAddAttributeModal( false );
+		onAdd( newAttributes );
+		closeNewModal();
+	};
+
+	const handleEdit = ( updatedAttribute: ProductAttribute ) => {
+		const updatedAttributes = value.map( ( attr ) => {
+			if (
+				getAttributeId( attr ) === getAttributeId( updatedAttribute )
+			) {
+				return updatedAttribute;
+			}
+
+			return attr;
+		} );
+
+		onEdit( updatedAttribute );
+		handleChange( updatedAttributes );
+		closeEditModal( updatedAttribute );
 	};
 
 	if ( ! value.length ) {
 		return (
 			<>
 				<AttributeEmptyState
-					addNewLabel={
-						isOnlyForVariations
-							? __( 'Add options', 'woocommerce' )
-							: undefined
-					}
-					onNewClick={ () => {
-						recordEvent(
-							'product_add_first_attribute_button_click'
-						);
-						setShowAddAttributeModal( true );
-					} }
-					subtitle={
-						isOnlyForVariations
-							? __( 'No options yet', 'woocommerce' )
-							: undefined
-					}
+					addNewLabel={ uiStrings.newAttributeModalTitle }
+					onNewClick={ () => openNewModal() }
+					subtitle={ uiStrings.emptyStateSubtitle }
 				/>
-				{ showAddAttributeModal && (
-					<AddAttributeModal
+				{ isNewModalVisible && (
+					<NewAttributeModal
 						onCancel={ () => {
-							recordEvent( CANCEL_BUTTON_EVENT_NAME );
-							setShowAddAttributeModal( false );
+							closeNewModal();
+							onNewModalCancel();
 						} }
-						onAdd={ onAddNewAttributes }
+						onAdd={ handleAdd }
 						selectedAttributeIds={ [] }
+						title={ uiStrings.newAttributeModalTitle }
 					/>
 				) }
 				<SelectControlMenuSlot />
@@ -167,19 +197,9 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		{} as Record< number | string, ProductAttribute >
 	);
 
-	const editingAttribute = value.find(
-		( attr ) => fetchAttributeId( attr ) === editingAttributeId
+	const currentAttribute = value.find(
+		( attr ) => getAttributeId( attr ) === currentAttributeId
 	) as EnhancedProductAttribute;
-
-	const editAttributeCopy = isOnlyForVariations
-		? __(
-				`You can change the option's name in {{link}}Attributes{{/link}}.`,
-				'woocommerce'
-		  )
-		: __(
-				`You can change the attribute's name in {{link}}Attributes{{/link}}.`,
-				'woocommerce'
-		  );
 
 	return (
 		<div className="woocommerce-attribute-field">
@@ -204,54 +224,37 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 				{ sortedAttributes.map( ( attr ) => (
 					<AttributeListItem
 						attribute={ attr }
-						key={ fetchAttributeId( attr ) }
-						onEditClick={ () =>
-							setEditingAttributeId( fetchAttributeId( attr ) )
-						}
-						onRemoveClick={ () => onRemove( attr ) }
+						key={ getAttributeId( attr ) }
+						onEditClick={ () => openEditModal( attr ) }
+						onRemoveClick={ () => handleRemove( attr ) }
 					/>
 				) ) }
 			</Sortable>
-			<AddAttributeListItem
-				label={
-					isOnlyForVariations
-						? __( 'Add option', 'woocommerce' )
-						: undefined
-				}
-				onAddClick={ () => {
-					recordEvent(
-						isOnlyForVariations
-							? 'product_add_option_button'
-							: 'product_add_attribute_button'
-					);
-					setShowAddAttributeModal( true );
-				} }
+			<NewAttributeListItem
+				label={ uiStrings.newAttributeListItemLabel }
+				onClick={ () => openNewModal() }
 			/>
-			{ showAddAttributeModal && (
-				<AddAttributeModal
-					title={
-						isOnlyForVariations
-							? __( 'Add options', 'woocommerce' )
-							: undefined
-					}
+			{ isNewModalVisible && (
+				<NewAttributeModal
+					title={ uiStrings.newAttributeModalTitle }
 					onCancel={ () => {
-						recordEvent( CANCEL_BUTTON_EVENT_NAME );
-						setShowAddAttributeModal( false );
+						closeNewModal();
+						onNewModalCancel();
 					} }
-					onAdd={ onAddNewAttributes }
+					onAdd={ handleAdd }
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
 				/>
 			) }
 			<SelectControlMenuSlot />
-			{ editingAttribute && (
+			{ currentAttribute && (
 				<EditAttributeModal
 					title={ sprintf(
 						/* translators: %s is the attribute name */
 						__( 'Edit %s', 'woocommerce' ),
-						editingAttribute.name
+						currentAttribute.name
 					) }
 					globalAttributeHelperMessage={ interpolateComponents( {
-						mixedString: editAttributeCopy,
+						mixedString: uiStrings.globalAttributeHelperMessage,
 						components: {
 							link: (
 								<Link
@@ -266,26 +269,14 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 							),
 						},
 					} ) }
-					onCancel={ () => setEditingAttributeId( null ) }
-					onEdit={ ( changedAttribute ) => {
-						const newAttributesSet = [ ...value ];
-						const changedAttributeIndex: number =
-							newAttributesSet.findIndex( ( attr ) =>
-								attr.id !== 0
-									? attr.id === changedAttribute.id
-									: attr.name === changedAttribute.name
-							);
-
-						newAttributesSet.splice(
-							changedAttributeIndex,
-							1,
-							changedAttribute
-						);
-
-						handleChange( newAttributesSet );
-						setEditingAttributeId( null );
+					onCancel={ () => {
+						closeEditModal( currentAttribute );
+						onEditModalCancel( currentAttribute );
 					} }
-					attribute={ editingAttribute }
+					onEdit={ ( updatedAttribute ) => {
+						handleEdit( updatedAttribute );
+					} }
+					attribute={ currentAttribute }
 				/>
 			) }
 		</div>

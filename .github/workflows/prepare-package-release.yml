@@ -14,8 +14,8 @@ jobs:
         name: Run prepare script
         runs-on: ubuntu-20.04
         permissions:
-          contents: read
-          pull-requests: write
+            contents: write
+            pull-requests: write
         steps:
             - uses: actions/checkout@v3
 

@@ -1,0 +1,15 @@
+.woocommerce-marketing-issue-status {
+	display: flex;
+	align-items: center;
+	gap: $gap-smallest;
+
+	&__error {
+		color: $alert-red;
+		fill: $alert-red;
+	}
+
+	&__warning {
+		color: $alert-yellow;
+		fill: $alert-yellow;
+	}
+}
