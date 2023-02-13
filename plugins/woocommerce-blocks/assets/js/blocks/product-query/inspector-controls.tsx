@@ -208,13 +208,6 @@ const ProductQueryControls = ( props: ProductQueryBlock ) => {
 					) }
 				</ToolsPanel>
 			</InspectorControls>
-			{
-				// Hacky temporary solution to display the feedback prompt
-				// at the bottom of the inspector controls
-			 }
-			<InspectorControls __experimentalGroup="color">
-				<ProductQueryFeedbackPrompt />
-			</InspectorControls>
 		</>
 	);
 };
@@ -226,6 +219,9 @@ export const withProductQueryControls =
 			<>
 				<ProductQueryControls { ...props } />
 				<BlockEdit { ...props } />
+				<InspectorControls>
+					<ProductQueryFeedbackPrompt />
+				</InspectorControls>
 			</>
 		) : (
 			<BlockEdit { ...props } />
