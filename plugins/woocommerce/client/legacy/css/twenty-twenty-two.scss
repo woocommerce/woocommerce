@@ -120,7 +120,6 @@ $tt2-gray: #f7f7f7;
 		background-color: var(--wp--preset--color--primary);
 		color: #fff;
 		border: 1px solid var(--wp--preset--color--black);
-		padding: 1rem 2rem;
 		margin-top: 1rem;
 		text-decoration: none;
 		font-size: medium;
@@ -186,7 +185,6 @@ $tt2-gray: #f7f7f7;
 	button.single_add_to_cart_button,
 	a.checkout-button {
 		font-size: 18px;
-		padding: 1.5rem 3.5rem;
 	}
 
 	// Moved from blockthemes.css to make sure TT2 won't be changed.
@@ -330,8 +328,9 @@ $tt2-gray: #f7f7f7;
 			}
 		}
 
-		button[name="add-to-cart"],
-		button.single_add_to_cart_button {
+		form.cart button[name="add-to-cart"],
+		form.cart button.single_add_to_cart_button {
+			display: block;
 			margin-top: 0.5rem;
 			margin-bottom: var(--wp--style--block-gap);
 		}
