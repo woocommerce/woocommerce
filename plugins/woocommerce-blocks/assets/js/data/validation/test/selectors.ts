@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { FieldValidationStatus } from '@woocommerce/types';
+
+/**
  * Internal dependencies
  */
 import {
@@ -6,7 +11,6 @@ import {
 	getValidationError,
 	hasValidationErrors,
 } from '../selectors';
-import { FieldValidationStatus } from '../../types';
 
 describe( 'Validation selectors', () => {
 	it( 'Gets the validation error', () => {

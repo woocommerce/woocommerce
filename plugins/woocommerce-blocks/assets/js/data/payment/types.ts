@@ -5,7 +5,11 @@ import {
 	PlainPaymentMethods,
 	PlainExpressPaymentMethods,
 } from '@woocommerce/types';
-import type { EmptyObjectType, ObjectType } from '@woocommerce/types';
+import type {
+	EmptyObjectType,
+	ObjectType,
+	FieldValidationStatus,
+} from '@woocommerce/types';
 import { DataRegistry } from '@wordpress/data';
 
 /**
@@ -14,7 +18,6 @@ import { DataRegistry } from '@wordpress/data';
 import type { EventObserversType } from '../../base/context/event-emit';
 import type { DispatchFromMap } from '../mapped-types';
 import * as actions from './actions';
-import { FieldValidationStatus } from '../types';
 
 export interface CustomerPaymentMethodConfiguration {
 	gateway: string;

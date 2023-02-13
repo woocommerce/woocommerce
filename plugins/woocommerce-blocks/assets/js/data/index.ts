@@ -15,5 +15,4 @@ export { VALIDATION_STORE_KEY } from './validation';
 export { QUERY_STATE_STORE_KEY } from './query-state';
 export { STORE_NOTICES_STORE_KEY } from './store-notices';
 export * from './constants';
-export * from './types';
 export * from './utils';

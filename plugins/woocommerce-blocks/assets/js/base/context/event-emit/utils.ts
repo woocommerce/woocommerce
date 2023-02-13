@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { isObject } from '@woocommerce/types';
+import { FieldValidationStatus, isObject } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -42,6 +42,16 @@ export interface ResponseType extends Record< string, unknown > {
 	retry?: boolean;
 }
 
+/**
+ * Observers of checkout/cart events can return a response object to indicate success/error/failure. They may also
+ * optionally pass metadata.
+ */
+export interface ObserverResponse {
+	type: responseTypes;
+	meta?: Record< string, unknown > | undefined;
+	validationErrors?: Record< string, FieldValidationStatus > | undefined;
+}
+
 const isResponseOf = (
 	response: unknown,
 	type: string
@@ -51,19 +61,27 @@ const isResponseOf = (
 
 export const isSuccessResponse = (
 	response: unknown
-): response is ResponseType => {
+): response is ObserverFailResponse => {
 	return isResponseOf( response, responseTypes.SUCCESS );
 };
-
+interface ObserverSuccessResponse extends ObserverResponse {
+	type: responseTypes.SUCCESS;
+}
 export const isErrorResponse = (
 	response: unknown
-): response is ResponseType => {
+): response is ObserverSuccessResponse => {
 	return isResponseOf( response, responseTypes.ERROR );
 };
+interface ObserverErrorResponse extends ObserverResponse {
+	type: responseTypes.ERROR;
+}
 
+interface ObserverFailResponse extends ObserverResponse {
+	type: responseTypes.FAIL;
+}
 export const isFailResponse = (
 	response: unknown
-): response is ResponseType => {
+): response is ObserverErrorResponse => {
 	return isResponseOf( response, responseTypes.FAIL );
 };
 

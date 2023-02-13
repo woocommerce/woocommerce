@@ -17,3 +17,4 @@ export * from './utils';
 export * from './taxes';
 export * from './attributes';
 export * from './stock-status';
+export * from './validation';
