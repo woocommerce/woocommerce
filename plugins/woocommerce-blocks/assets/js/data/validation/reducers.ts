@@ -4,14 +4,13 @@
 import type { Reducer } from 'redux';
 import { pickBy } from 'lodash';
 import isShallowEqual from '@wordpress/is-shallow-equal';
-import { isString } from '@woocommerce/types';
+import { isString, FieldValidationStatus } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import { ValidationAction } from './actions';
 import { ACTION_TYPES as types } from './action-types';
-import { FieldValidationStatus } from '../types';
 
 const reducer: Reducer< Record< string, FieldValidationStatus > > = (
 	state: Record< string, FieldValidationStatus > = {},

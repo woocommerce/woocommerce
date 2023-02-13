@@ -22,10 +22,8 @@ import {
 	ShippingAddress,
 } from '@woocommerce/settings';
 import { useSelect, useDispatch } from '@wordpress/data';
-import {
-	VALIDATION_STORE_KEY,
-	FieldValidationStatus,
-} from '@woocommerce/block-data';
+import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
+import { FieldValidationStatus } from '@woocommerce/types';
 
 /**
  * Internal dependencies
