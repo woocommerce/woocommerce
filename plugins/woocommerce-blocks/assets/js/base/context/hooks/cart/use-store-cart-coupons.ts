@@ -6,7 +6,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { CART_STORE_KEY, VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { decodeEntities } from '@wordpress/html-entities';
 import type { StoreCartCoupon } from '@woocommerce/types';
-import { __experimentalApplyCheckoutFilter } from '@woocommerce/blocks-checkout';
+import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
@@ -46,7 +46,7 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 		return applyCoupon( couponCode )
 			.then( () => {
 				if (
-					__experimentalApplyCheckoutFilter( {
+					applyCheckoutFilter( {
 						filterName: 'showApplyCouponNotice',
 						defaultValue: true,
 						arg: { couponCode, context },
@@ -86,7 +86,7 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 		return removeCoupon( couponCode )
 			.then( () => {
 				if (
-					__experimentalApplyCheckoutFilter( {
+					applyCheckoutFilter( {
 						filterName: 'showRemoveCouponNotice',
 						defaultValue: true,
 						arg: { couponCode, context },

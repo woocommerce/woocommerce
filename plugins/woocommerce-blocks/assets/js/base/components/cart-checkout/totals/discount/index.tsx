@@ -4,10 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { RemovableChip } from '@woocommerce/base-components/chip';
-import {
-	__experimentalApplyCheckoutFilter,
-	TotalsItem,
-} from '@woocommerce/blocks-checkout';
+import { applyCheckoutFilter, TotalsItem } from '@woocommerce/blocks-checkout';
 import { getSetting } from '@woocommerce/settings';
 import {
 	CartResponseCouponItemWithLabel,
@@ -64,7 +61,7 @@ const TotalsDiscount = ( {
 		? discountValue + discountTaxValue
 		: discountValue;
 
-	const filteredCartCoupons = __experimentalApplyCheckoutFilter( {
+	const filteredCartCoupons = applyCheckoutFilter( {
 		arg: filteredCartCouponsFilterArg,
 		filterName: 'coupons',
 		defaultValue: cartCoupons,
