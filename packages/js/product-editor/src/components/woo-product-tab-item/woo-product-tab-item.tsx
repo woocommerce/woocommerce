@@ -4,12 +4,11 @@
 import React, { ReactElement, ReactNode } from 'react';
 import { Slot, Fill, TabPanel } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
-import deprecated from '@wordpress/deprecated';
 
 /**
  * Internal dependencies
  */
-import { createOrderedChildren } from '../utils';
+import { createOrderedChildren } from '../../utils';
 
 export type ProductFillLocationType = { name: string; order?: number };
 
@@ -36,12 +35,6 @@ export const WooProductTabItem: React.FC< WooProductTabItemProps > & {
 		Omit< Slot.Props, 'children' > & WooProductFieldSlotProps
 	>;
 } = ( { children, tabProps, templates } ) => {
-	deprecated( `__experimentalWooProductTabItem`, {
-		version: '13.0.0',
-		plugin: '@woocommerce/components',
-		hint: 'Moved to @woocommerce/product-editor package: import { __experimentalWooProductTabItem } from @woocommerce/product-editor',
-	} );
-
 	if ( ! templates ) {
 		// eslint-disable-next-line no-console
 		console.warn( 'WooProductTabItem fill is missing templates property.' );
