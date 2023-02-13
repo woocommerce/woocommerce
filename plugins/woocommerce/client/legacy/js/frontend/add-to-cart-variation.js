@@ -665,7 +665,7 @@
 		var $form             = this,
 			$product          = $form.closest( '.product' ),
 			$product_gallery  = $product.find( '.images' ),
-			$gallery_nav      = $product.find( '.flex-control-nav' ),
+			$gallery_nav      = $product_gallery.find( '.flex-control-nav' ),
 			$gallery_img      = $gallery_nav.find( 'li:eq(0) img' ),
 			$product_img_wrap = $product_gallery
 				.find( '.woocommerce-product-gallery__image, .woocommerce-product-gallery__image--placeholder' )
@@ -728,7 +728,7 @@
 		var $form             = this,
 			$product          = $form.closest( '.product' ),
 			$product_gallery  = $product.find( '.images' ),
-			$gallery_nav      = $product.find( '.flex-control-nav' ),
+			$gallery_nav      = $product_gallery.find( '.flex-control-nav' ),
 			$gallery_img      = $gallery_nav.find( 'li:eq(0) img' ),
 			$product_img_wrap = $product_gallery
 				.find( '.woocommerce-product-gallery__image, .woocommerce-product-gallery__image--placeholder' )
