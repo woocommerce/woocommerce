@@ -38044,7 +38044,7 @@ packages:
       serialize-javascript: 6.0.0
       source-map: 0.6.1
       terser: 5.10.0_acorn@8.8.1
-      webpack: 5.70.0_webpack-cli@3.3.12
+      webpack: 5.70.0
     transitivePeerDependencies:
       - acorn
 
