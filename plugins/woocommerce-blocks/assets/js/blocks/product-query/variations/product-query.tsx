@@ -1,11 +1,16 @@
 /**
  * External dependencies
  */
-import { registerBlockVariation } from '@wordpress/blocks';
+import {
+	registerBlockVariation,
+	unregisterBlockVariation,
+} from '@wordpress/blocks';
 import { Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { stacks } from '@woocommerce/icons';
 import { isWpVersion } from '@woocommerce/settings';
+import { select, subscribe } from '@wordpress/data';
+import { QueryBlockAttributes } from '@woocommerce/blocks/product-query/types';
 
 /**
  * Internal dependencies
@@ -19,7 +24,15 @@ import {
 
 const VARIATION_NAME = 'woocommerce/product-query';
 
-if ( isWpVersion( '6.1', '>=' ) ) {
+const ARCHIVE_PRODUCT_TEMPLATES = [
+	'woocommerce/woocommerce//archive-product',
+	'woocommerce/woocommerce//taxonomy-product_cat',
+	'woocommerce/woocommerce//taxonomy-product_tag',
+	'woocommerce/woocommerce//taxonomy-product_attribute',
+	'woocommerce/woocommerce//product-search-results',
+];
+
+const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
 	registerBlockVariation( QUERY_LOOP_ID, {
 		description: __(
 			'A block that displays a selection of products in your store.',
@@ -37,7 +50,7 @@ if ( isWpVersion( '6.1', '>=' ) ) {
 			/>
 		),
 		attributes: {
-			...QUERY_DEFAULT_ATTRIBUTES,
+			...attributes,
 			namespace: VARIATION_NAME,
 		},
 		// Gutenberg doesn't support this type yet, discussion here:
@@ -48,4 +61,37 @@ if ( isWpVersion( '6.1', '>=' ) ) {
 		innerBlocks: INNER_BLOCKS_TEMPLATE,
 		scope: [ 'inserter' ],
 	} );
+};
+
+if ( isWpVersion( '6.1', '>=' ) ) {
+	const store = select( 'core/edit-site' );
+
+	if ( store ) {
+		let currentTemplateId: string | undefined;
+
+		subscribe( () => {
+			const previousTemplateId = currentTemplateId;
+
+			currentTemplateId = store?.getEditedPostId();
+
+			if ( previousTemplateId === currentTemplateId ) {
+				return;
+			}
+
+			const queryAttributes = {
+				...QUERY_DEFAULT_ATTRIBUTES,
+				query: {
+					...QUERY_DEFAULT_ATTRIBUTES.query,
+					inherit:
+						ARCHIVE_PRODUCT_TEMPLATES.includes( currentTemplateId ),
+				},
+			};
+
+			unregisterBlockVariation( QUERY_LOOP_ID, VARIATION_NAME );
+
+			registerProductsBlock( queryAttributes );
+		} );
+	} else {
+		registerProductsBlock( QUERY_DEFAULT_ATTRIBUTES );
+	}
 }
