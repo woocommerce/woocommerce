@@ -31,4 +31,12 @@
 			display: block;
 		}
 	}
+	&__expander {
+		display: flex;
+		align-items: center;
+
+		.components-button {
+			padding: 0;
+		}
+	}
 }

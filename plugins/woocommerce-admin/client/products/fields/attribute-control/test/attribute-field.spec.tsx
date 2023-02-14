@@ -144,7 +144,6 @@ describe( 'AttributeControl', () => {
 				<AttributeControl
 					value={ [ ...attributeList ] }
 					onChange={ () => {} }
-					attributeType="for-variations"
 				/>
 			);
 		} );

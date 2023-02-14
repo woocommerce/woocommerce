@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Move clearQueue call to inside an useEffect since it was updating a component while rendering another component
+
+

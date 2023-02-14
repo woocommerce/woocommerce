@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { apiFetch, select } from '@wordpress/data-controls';
-import { controls } from '@wordpress/data';
+import { apiFetch } from '@wordpress/data-controls';
 
 /**
  * Internal dependencies
@@ -15,10 +14,6 @@ import {
 } from './actions';
 import { WC_ADMIN_NAMESPACE } from '../constants';
 import { ProductFormField, ProductForm } from './types';
-import { STORE_NAME } from './constants';
-
-const resolveSelect =
-	controls && controls.resolveSelect ? controls.resolveSelect : select;
 
 export function* getFields() {
 	try {
@@ -32,10 +27,6 @@ export function* getFields() {
 	} catch ( error ) {
 		return getFieldsError( error );
 	}
-}
-
-export function* getCountry() {
-	yield resolveSelect( STORE_NAME, 'getProductForm' );
 }
 
 export function* getProductForm() {

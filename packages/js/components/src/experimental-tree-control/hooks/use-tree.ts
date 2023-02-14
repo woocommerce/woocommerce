@@ -7,7 +7,13 @@
  */
 import { TreeProps } from '../types';
 
-export function useTree( { ref, items, level = 1, ...props }: TreeProps ) {
+export function useTree( {
+	ref,
+	items,
+	level = 1,
+	shouldItemBeExpanded,
+	...props
+}: TreeProps ) {
 	return {
 		level,
 		items,
@@ -16,6 +22,7 @@ export function useTree( { ref, items, level = 1, ...props }: TreeProps ) {
 		},
 		treeItemProps: {
 			level,
+			shouldItemBeExpanded,
 		},
 	};
 }

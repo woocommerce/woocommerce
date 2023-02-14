@@ -10,16 +10,16 @@ import { createElement, Fragment } from '@wordpress/element';
  */
 import { createOrderedChildren } from '../utils';
 
+export type ProductFillLocationType = { name: string; order?: number };
+
 type WooProductTabItemProps = {
 	id: string;
 	pluginId: string;
-	template?: string;
-	order?: number;
 	tabProps:
 		| TabPanel.Tab
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		| ( ( fillProps: Record< string, any > | undefined ) => TabPanel.Tab );
-	templates?: Array< { name: string; order?: number } >;
+	templates?: Array< ProductFillLocationType >;
 };
 
 type WooProductFieldSlotProps = {
@@ -34,15 +34,12 @@ export const WooProductTabItem: React.FC< WooProductTabItemProps > & {
 	Slot: React.VFC<
 		Omit< Slot.Props, 'children' > & WooProductFieldSlotProps
 	>;
-} = ( { children, order, template, tabProps, templates } ) => {
-	if ( ! template && ! templates ) {
+} = ( { children, tabProps, templates } ) => {
+	if ( ! templates ) {
 		// eslint-disable-next-line no-console
-		console.warn(
-			'WooProductTabItem fill is missing template or templates property.'
-		);
+		console.warn( 'WooProductTabItem fill is missing templates property.' );
 		return null;
 	}
-	templates = templates || [ { name: template as string, order } ];
 	return (
 		<>
 			{ templates.map( ( templateData ) => (
@@ -77,7 +74,8 @@ WooProductTabItem.Slot = ( { fillProps, template, children } ) => (
 		{ ( fills ) => {
 			const tabData = fills.reduce(
 				( { childrenMap, tabs }, fill ) => {
-					const props: WooProductTabItemProps = fill[ 0 ].props;
+					const props: WooProductTabItemProps & { order: number } =
+						fill[ 0 ].props;
 					if ( props && props.tabProps ) {
 						childrenMap[ props.tabProps.name ] = fill[ 0 ];
 						const tabProps =

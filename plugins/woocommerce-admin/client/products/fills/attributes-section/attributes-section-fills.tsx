@@ -5,10 +5,9 @@ import { __ } from '@wordpress/i18n';
 import {
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 	__experimentalWooProductFieldItem as WooProductFieldItem,
-	__experimentalProductSectionLayout as ProductSectionLayout,
 	Link,
 } from '@woocommerce/components';
-import { registerPlugin } from '@wordpress/plugins';
+import { __experimentalProductSectionLayout as ProductSectionLayout } from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -19,13 +18,12 @@ import { ATTRIBUTES_SECTION_ID, TAB_GENERAL_ID, PLUGIN_ID } from '../constants';
 
 import './attributes-section.scss';
 
-const AttributesSection = () => (
+export const AttributesSectionFills = () => (
 	<>
 		<WooProductSectionItem
 			id={ ATTRIBUTES_SECTION_ID }
-			location={ TAB_GENERAL_ID }
+			tabs={ [ { name: TAB_GENERAL_ID, order: 5 } ] }
 			pluginId={ PLUGIN_ID }
-			order={ 5 }
 		>
 			<ProductSectionLayout
 				title={ __( 'Attributes', 'woocommerce' ) }
@@ -61,18 +59,11 @@ const AttributesSection = () => (
 			</ProductSectionLayout>
 		</WooProductSectionItem>
 		<WooProductFieldItem
-			id="attributes/add"
-			section={ ATTRIBUTES_SECTION_ID }
+			id="add"
+			sections={ [ { name: ATTRIBUTES_SECTION_ID, order: 1 } ] }
 			pluginId={ PLUGIN_ID }
-			order={ 1 }
 		>
 			<AttributesField />
 		</WooProductFieldItem>
 	</>
 );
-
-registerPlugin( 'wc-admin-product-editor-attributes-section', {
-	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
-	scope: 'woocommerce-product-editor',
-	render: () => <AttributesSection />,
-} );
