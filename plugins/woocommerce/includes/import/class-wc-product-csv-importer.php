@@ -6,6 +6,8 @@
  * @version 3.1.0
  */
 
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -90,7 +92,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		if ( false !== $handle ) {
 			$this->raw_keys = array_map( 'trim', fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ) ); // @codingStandardsIgnoreLine
 
-			if ( $this->params['character_encoding'] ) {
+			if ( ArrayUtil::is_truthy( $this->params, 'character_encoding' ) ) {
 				$this->raw_keys = array_map( array( $this, 'adjust_character_encoding' ), $this->raw_keys );
 			}
 
@@ -110,7 +112,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$row = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ); // @codingStandardsIgnoreLine
 
 				if ( false !== $row ) {
-					if ( $this->params['character_encoding'] ) {
+					if ( ArrayUtil::is_truthy( $this->params, 'character_encoding' ) ) {
 						$row = array_map( array( $this, 'adjust_character_encoding' ), $row );
 					}
 
