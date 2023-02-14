@@ -17,6 +17,7 @@ import '../data';
 
 const MarketingOverview = () => {
 	const { currentUserCan } = useUser();
+
 	const shouldShowExtensions =
 		getAdminSetting( 'allowMarketplaceSuggestions', false ) &&
 		currentUserCan( 'install_plugins' );
