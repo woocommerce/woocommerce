@@ -26,7 +26,6 @@ describe.only( 'Checkout Store Reducer', () => {
 		const expectedState = {
 			...defaultState,
 			redirectUrl: 'https://example.com',
-			status: STATUS.IDLE,
 		};
 
 		expect(
@@ -97,12 +96,15 @@ describe.only( 'Checkout Store Reducer', () => {
 	} );
 
 	it( 'should handle SET_HAS_ERROR when status is anything else', () => {
-		const initialState = { ...defaultState, status: STATUS.PRISTINE };
+		const initialState = {
+			...defaultState,
+			status: STATUS.AFTER_PROCESSING,
+		};
 
 		const expectedState = {
 			...defaultState,
 			hasError: false,
-			status: STATUS.IDLE,
+			status: STATUS.AFTER_PROCESSING,
 		};
 
 		expect(
@@ -135,7 +137,6 @@ describe.only( 'Checkout Store Reducer', () => {
 	it( 'should handle INCREMENT_CALCULATING', () => {
 		const expectedState = {
 			...defaultState,
-			status: STATUS.IDLE,
 			calculatingCount: 1,
 		};
 
@@ -152,7 +153,6 @@ describe.only( 'Checkout Store Reducer', () => {
 
 		const expectedState = {
 			...defaultState,
-			status: STATUS.IDLE,
 			calculatingCount: 0,
 		};
 
@@ -164,7 +164,6 @@ describe.only( 'Checkout Store Reducer', () => {
 	it( 'should handle SET_CUSTOMER_ID', () => {
 		const expectedState = {
 			...defaultState,
-			status: STATUS.IDLE,
 			customerId: 1,
 		};
 
@@ -176,7 +175,6 @@ describe.only( 'Checkout Store Reducer', () => {
 	it( 'should handle SET_USE_SHIPPING_AS_BILLING', () => {
 		const expectedState = {
 			...defaultState,
-			status: STATUS.IDLE,
 			useShippingAsBilling: false,
 		};
 
@@ -191,7 +189,6 @@ describe.only( 'Checkout Store Reducer', () => {
 	it( 'should handle SET_SHOULD_CREATE_ACCOUNT', () => {
 		const expectedState = {
 			...defaultState,
-			status: STATUS.IDLE,
 			shouldCreateAccount: true,
 		};
 
@@ -206,7 +203,6 @@ describe.only( 'Checkout Store Reducer', () => {
 	it( 'should handle SET_ORDER_NOTES', () => {
 		const expectedState = {
 			...defaultState,
-			status: STATUS.IDLE,
 			orderNotes: 'test',
 		};
 
@@ -225,7 +221,6 @@ describe.only( 'Checkout Store Reducer', () => {
 			};
 			const expectedState = {
 				...defaultState,
-				status: STATUS.IDLE,
 				extensionData: mockExtensionData,
 			};
 			expect(
@@ -247,7 +242,6 @@ describe.only( 'Checkout Store Reducer', () => {
 			};
 			const expectedState = {
 				...defaultState,
-				status: STATUS.IDLE,
 				extensionData: mockExtensionData,
 			};
 			const firstState = reducer(
@@ -272,7 +266,6 @@ describe.only( 'Checkout Store Reducer', () => {
 			};
 			const expectedState = {
 				...defaultState,
-				status: STATUS.IDLE,
 				extensionData: mockExtensionData,
 			};
 			const firstState = reducer(

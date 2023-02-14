@@ -166,14 +166,6 @@ const reducer = ( state = defaultState, action: CheckoutAction ) => {
 			}
 			break;
 	}
-
-	if (
-		newState !== state &&
-		action.type !== types.SET_PRISTINE &&
-		newState?.status === STATUS.PRISTINE
-	) {
-		newState.status = STATUS.IDLE;
-	}
 	return newState;
 };
 
