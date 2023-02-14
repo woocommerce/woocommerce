@@ -134,3 +134,26 @@
 		height: 100%;
 	}
 }
+
+// @todo These are temporary styles and need to be moved into respective folders
+.woocommerce-layout__header {
+	display: none;
+}
+
+.woocommerce-layout__main {
+	.interface-interface-skeleton {
+		top: 0;
+		background-color: $white;
+	}
+	
+	.interface-interface-skeleton__sidebar {
+		width: 280px;
+	}
+}
+
+.woocommerce-product-header {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    padding: 0 $gap;
+}
