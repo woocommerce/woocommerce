@@ -292,7 +292,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			$order = wc_get_order( absint( $arg ) );
 
 			// Ignore standard drafts for orders.
-			if ( in_array( $order->get_status(), array( 'draft', 'auto-draft', 'new' ) ) ) {
+			if ( in_array( $order->get_status(), array( 'draft', 'auto-draft', 'new' ), true ) ) {
 				return false;
 			}
 		}
