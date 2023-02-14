@@ -18,7 +18,7 @@
 		"@automattic/puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
 		"@wordpress/deprecated": "^3.2.3",
 		"@wordpress/e2e-test-utils": "wp-5.8",
-		"config": "3.3.3",
+		"config": "3.3.7",
 		"fishery": "^1.2.0"
 	},
 	"devDependencies": {
