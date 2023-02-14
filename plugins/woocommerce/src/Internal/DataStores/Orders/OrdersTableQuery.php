@@ -202,13 +202,13 @@ class OrdersTableQuery {
 	private function maybe_remap_args(): void {
 		$mapping = array(
 			// WP_Query legacy.
-			'post_date'           => 'date_created_gmt',
+			'post_date'           => 'date_created',
 			'post_date_gmt'       => 'date_created_gmt',
-			'post_modified'       => 'date_modified_gmt',
+			'post_modified'       => 'date_modified',
 			'post_modified_gmt'   => 'date_updated_gmt',
 			'post_status'         => 'status',
-			'_date_completed'     => 'date_completed_gmt',
-			'_date_paid'          => 'date_paid_gmt',
+			'_date_completed'     => 'date_completed',
+			'_date_paid'          => 'date_paid',
 			'paged'               => 'page',
 			'post_parent'         => 'parent_order_id',
 			'post_parent__in'     => 'parent_order_id',
@@ -231,12 +231,8 @@ class OrdersTableQuery {
 
 			// Translate from WC_Order_Query to table structure.
 			'version'             => 'woocommerce_version',
-			'date_created'        => 'date_created_gmt',
-			'date_modified'       => 'date_updated_gmt',
+			'date_modified'       => 'date_updated',
 			'date_modified_gmt'   => 'date_updated_gmt',
-			'date_completed'      => 'date_completed_gmt',
-			'date_completed_gmt'  => 'date_completed_gmt',
-			'date_paid'           => 'date_paid_gmt',
 			'discount_total'      => 'discount_total_amount',
 			'discount_tax'        => 'discount_tax_amount',
 			'shipping_total'      => 'shipping_total_amount',
@@ -282,10 +278,11 @@ class OrdersTableQuery {
 	 * Generates a `WP_Date_Query` compatible query from a given date.
 	 * YYYY-MM-DD queries have 'day' precision for backwards compatibility.
 	 *
-	 * @param mixed $date The date. Can be a {@see \WC_DateTime}, a timestamp or a string.
+	 * @param mixed  $date The date. Can be a {@see \WC_DateTime}, a timestamp or a string.
+	 * @param string $timezone The timezone to use for the date.
 	 * @return array An array with keys 'year', 'month', 'day' and possibly 'hour', 'minute' and 'second'.
 	 */
-	private function date_to_date_query_arg( $date ): array {
+	private function date_to_date_query_arg( $date, $timezone ): array {
 		$result    = array(
 			'year'  => '',
 			'month' => '',
@@ -294,7 +291,7 @@ class OrdersTableQuery {
 		$precision = 'second';
 
 		if ( is_numeric( $date ) ) {
-			$date = new \WC_DateTime( "@{$date}", new \DateTimeZone( 'UTC' ) );
+			$date = new \WC_DateTime( "@{$date}", new \DateTimeZone( $timezone ) );
 		} elseif ( ! is_a( $date, 'WC_DateTime' ) ) {
 			// YYYY-MM-DD queries have 'day' precision for backwards compat.
 			$date      = wc_string_to_datetime( $date );
@@ -321,30 +318,33 @@ class OrdersTableQuery {
 	 * @throws \Exception When date args are invalid.
 	 */
 	private function process_date_args(): void {
-		$valid_operators = array( '>', '>=', '=', '<=', '<', '...' );
-		$date_queries    = array();
-		$gmt_date_keys   = array(
-			'date_created_gmt',
-			'date_updated_gmt',
-			'date_paid_gmt',
-			'date_completed_gmt',
+		$valid_operators        = array( '>', '>=', '=', '<=', '<', '...' );
+		$date_queries           = array();
+		$local_to_gmt_date_keys = array(
+			'date_created'   => 'date_created_gmt',
+			'date_updated'   => 'date_updated_gmt',
+			'date_paid'      => 'date_paid_gmt',
+			'date_completed' => 'date_completed_gmt',
 		);
+		$gmt_date_keys          = array_values( $local_to_gmt_date_keys );
+		$local_date_keys        = array_keys( $local_to_gmt_date_keys );
 
-		foreach ( array_filter( $gmt_date_keys, array( $this, 'arg_isset' ) ) as $date_key ) {
+		foreach ( array_filter( array_merge( $gmt_date_keys, $local_date_keys ), array( $this, 'arg_isset' ) ) as $date_key ) {
 			$date_value = $this->args[ $date_key ];
 			$operator   = '=';
 			$dates      = array();
+			$timezone = in_array( $date_key, $gmt_date_keys, true ) ? '+0000' : wc_timezone_string();
 
 			if ( is_string( $date_value ) && preg_match( self::REGEX_SHORTHAND_DATES, $date_value, $matches ) ) {
 				$operator = in_array( $matches[2], $valid_operators, true ) ? $matches[2] : '';
 
 				if ( ! empty( $matches[1] ) ) {
-					$dates[] = $this->date_to_date_query_arg( $matches[1] );
+					$dates[] = $this->date_to_date_query_arg( $matches[1], $timezone );
 				}
 
-				$dates[] = $this->date_to_date_query_arg( $matches[3] );
+				$dates[] = $this->date_to_date_query_arg( $matches[3], $timezone );
 			} else {
-				$dates[] = $this->date_to_date_query_arg( $date_value );
+				$dates[] = $this->date_to_date_query_arg( $date_value, $timezone );
 			}
 
 			if ( empty( $dates ) || ! $operator || ( '...' === $operator && count( $dates ) < 2 ) ) {
@@ -361,6 +361,7 @@ class OrdersTableQuery {
 				$operator_to_keys[] = 'before';
 			}
 
+			$date_key = in_array( $date_key, $local_date_keys, true ) ? $local_to_gmt_date_keys[ $date_key ] : $date_key;
 			$date_queries[] = array_merge(
 				array(
 					'column'    => $date_key,
