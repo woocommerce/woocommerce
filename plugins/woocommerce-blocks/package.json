@@ -126,7 +126,7 @@
 		"@types/wordpress__blocks": "11.0.7",
 		"@types/wordpress__components": "^23.0.0",
 		"@types/wordpress__core-data": "^2.4.5",
-		"@types/wordpress__data": "^6.0.1",
+		"@types/wordpress__data": "^6.0.2",
 		"@types/wordpress__data-controls": "2.2.0",
 		"@types/wordpress__editor": "^11.0.0",
 		"@types/wordpress__notices": "^3.5.0",
