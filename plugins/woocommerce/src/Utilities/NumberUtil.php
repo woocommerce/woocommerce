@@ -40,8 +40,8 @@ final class NumberUtil {
 	 *
 	 * @return float|false The value rounded down to the next integer value (as a float), or false if non-numeric.
 	 */
-	public static function floor( $num ) : float {
-		if ( ! is_int( $num ) && ! is_float( $num ) ) {
+	public static function floor( $num ) {
+		if ( ! is_int( $num ) && ! is_float( $num ) && true !== $num ) {
 			if ( is_numeric( $num ) ) {
 				$num = floatval( $num );
 			} else {
