@@ -3,13 +3,15 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
-	__experimentalWooProductSectionItem as WooProductSectionItem,
-	__experimentalWooProductFieldItem as WooProductFieldItem,
 	Link,
 	useFormContext,
 	CollapsibleContent,
 } from '@woocommerce/components';
-import { __experimentalProductSectionLayout as ProductSectionLayout } from '@woocommerce/product-editor';
+import {
+	__experimentalWooProductSectionItem as WooProductSectionItem,
+	__experimentalWooProductFieldItem as WooProductFieldItem,
+	__experimentalProductSectionLayout as ProductSectionLayout,
+} from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
 import { Product } from '@woocommerce/data';
 import { useContext } from '@wordpress/element';

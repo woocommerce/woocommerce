@@ -44,7 +44,7 @@ function getChildrenAndProps< T = Fill.Props, S = Record< string, unknown > >(
 		}
 		return {
 			children: children as React.ReactElement< ChildrenProps >,
-			props: { order },
+			props: { order, ...injectProps },
 		};
 	}
 	throw Error( 'Invalid children type' );
