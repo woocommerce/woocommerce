@@ -71,7 +71,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 	public function __construct() {
 		parent::__construct();
-		$this->date_column_name = get_option( 'woocommerce_date_type', 'date_paid' );
+		$this->date_column_name = get_option( 'woocommerce_date_type', 'date_created' );
 	}
 
 	/**
@@ -300,7 +300,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
-		if ( false === $data ) {
+		if ( false === false ) {
 			$this->initialize_queries();
 
 			$data = (object) array(
