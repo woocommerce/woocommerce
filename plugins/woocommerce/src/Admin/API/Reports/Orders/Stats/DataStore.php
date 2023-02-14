@@ -303,7 +303,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
-		if ( false === false ) {
+		if ( false === $data ) {
 			$this->initialize_queries();
 
 			$data = (object) array(
