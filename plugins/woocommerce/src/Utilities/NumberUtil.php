@@ -31,4 +31,23 @@ final class NumberUtil {
 		}
 		return round( $val, $precision, $mode );
 	}
+
+	/**
+	 * Works the same as the built-in `floor` function, but handles invalid inputs so as not
+	 * to throw an error in PHP 8+.
+	 *
+	 * @param mixed $num The value to round down.
+	 *
+	 * @return float|false The value rounded down to the next integer value (as a float), or false if non-numeric.
+	 */
+	public static function floor( $num ) : float {
+		if ( ! is_int( $num ) && ! is_float( $num ) ) {
+			if ( is_numeric( $num ) ) {
+				$num = floatval( $num );
+			} else {
+				return false;
+			}
+		}
+		return floor( $num );
+	}
 }
