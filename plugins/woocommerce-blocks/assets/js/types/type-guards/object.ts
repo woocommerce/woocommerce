@@ -21,3 +21,9 @@ export function objectHasProp< P extends PropertyKey >(
 	// The `in` operator throws a `TypeError` for non-object values.
 	return isObject( target ) && property in target;
 }
+
+export const isEmptyObject = < T extends { [ key: string ]: unknown } >(
+	object: T
+) => {
+	return Object.keys( object ).length === 0;
+};
