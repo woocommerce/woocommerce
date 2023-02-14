@@ -88,7 +88,6 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Add a reset button for the Filter blocks. ([8366](https://github.com/woocommerce/woocommerce-blocks/pull/8366))
 - Update the incompatible gateways notice design. ([8365](https://github.com/woocommerce/woocommerce-blocks/pull/8365))
 - Product Rating: Add support for the Padding setting. ([8347](https://github.com/woocommerce/woocommerce-blocks/pull/8347))
-- Graduate `__experimentalApplyCheckoutFilter` and `__experimentalRegisterCheckoutFilters` to stable. ([8346](https://github.com/woocommerce/woocommerce-blocks/pull/8346))
 - Update apply button description to be more clear for filter blocks. ([8339](https://github.com/woocommerce/woocommerce-blocks/pull/8339))
 - Allow third party shipping methods to declare compatibility with WC Blocks local pickup. ([8256](https://github.com/woocommerce/woocommerce-blocks/pull/8256))
 
