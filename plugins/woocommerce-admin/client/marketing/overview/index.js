@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useUser, withOptionsHydration } from '@woocommerce/data';
+import { useSlot } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies
