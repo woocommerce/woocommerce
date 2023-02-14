@@ -10,7 +10,7 @@ import ShipStationImage from '../images/shipstation.svg';
 import TimerImage from '../images/timer.svg';
 import StarImage from '../images/star.svg';
 import DiscountImage from '../images/discount.svg';
-import './wcs-banner.scss';
+import './plugin-banner.scss';
 
 export const ShipStationBanner = () => {
 	return (
