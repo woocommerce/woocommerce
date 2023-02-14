@@ -140,7 +140,7 @@ export const config = applyFilters( SETTINGS_FILTER, {
 			},
 		],
 		helpText: __(
-			'Database date field considered for reports',
+			'Database date field considered for Revenue and Orders reports',
 			'woocommerce'
 		),
 		defaultValue: 'date_created',
