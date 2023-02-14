@@ -28,6 +28,7 @@
 		"access": "public"
 	},
 	"dependencies": {
+		"@automattic/interpolate-components": "^1.2.0",
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/data": "workspace:^4.1.0",
 		"@wordpress/block-editor": "^9.8.0",

@@ -1291,6 +1291,7 @@ importers:
 
   packages/js/product-editor:
     specifiers:
+      '@automattic/interpolate-components': ^1.2.0
       '@types/wordpress__block-editor': ^7.0.0
       '@types/wordpress__blocks': ^11.0.7
       '@types/wordpress__components': ^19.10.1
@@ -1323,6 +1324,7 @@ importers:
       webpack: ^5.70.0
       webpack-cli: ^3.3.12
     dependencies:
+      '@automattic/interpolate-components': 1.2.1_react@17.0.2
       '@woocommerce/components': link:../components
       '@woocommerce/data': link:../data
       '@wordpress/block-editor': 9.8.0_s6htitehnjl4cfb77y2wxeg7ge

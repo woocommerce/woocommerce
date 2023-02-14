@@ -19,6 +19,9 @@ import { FullscreenMode, InterfaceSkeleton } from '@wordpress/interface';
 import { Header } from '../header';
 import { Sidebar } from '../sidebar';
 import { BlockEditor } from '../block-editor';
+import { initBlocks } from './init-blocks';
+
+initBlocks();
 
 type EditorProps = {
 	product: Product;

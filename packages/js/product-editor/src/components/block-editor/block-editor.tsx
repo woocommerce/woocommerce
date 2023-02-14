@@ -123,7 +123,7 @@ export function BlockEditor( { settings: _settings }: BlockEditorProps ) {
 					<BlockTools>
 						<WritingFlow>
 							<ObserveTyping>
-								<BlockList className="getdavesbe-block-editor__block-list" />
+								<BlockList className="woocommerce-product-block-editor__block-list" />
 							</ObserveTyping>
 						</WritingFlow>
 					</BlockTools>
