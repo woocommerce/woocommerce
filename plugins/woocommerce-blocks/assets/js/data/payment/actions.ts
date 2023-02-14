@@ -17,28 +17,24 @@ import { setDefaultPaymentMethod } from './utils/set-default-payment-method';
 // `Thunks are functions that can be dispatched, similar to actions creators
 export * from './thunks';
 
-export const __internalSetPaymentPristine = () => ( {
-	type: ACTION_TYPES.SET_PAYMENT_PRISTINE,
+export const __internalSetPaymentIdle = () => ( {
+	type: ACTION_TYPES.SET_PAYMENT_IDLE,
 } );
 
-export const __internalSetPaymentStarted = () => ( {
-	type: ACTION_TYPES.SET_PAYMENT_STARTED,
+export const __internalSetExpressPaymentStarted = () => ( {
+	type: ACTION_TYPES.SET_EXPRESS_PAYMENT_STARTED,
 } );
 
 export const __internalSetPaymentProcessing = () => ( {
 	type: ACTION_TYPES.SET_PAYMENT_PROCESSING,
 } );
 
-export const __internalSetPaymentFailed = () => ( {
-	type: ACTION_TYPES.SET_PAYMENT_FAILED,
-} );
-
 export const __internalSetPaymentError = () => ( {
 	type: ACTION_TYPES.SET_PAYMENT_ERROR,
 } );
 
-export const __internalSetPaymentSuccess = () => ( {
-	type: ACTION_TYPES.SET_PAYMENT_SUCCESS,
+export const __internalSetPaymentReady = () => ( {
+	type: ACTION_TYPES.SET_PAYMENT_READY,
 } );
 
 /**

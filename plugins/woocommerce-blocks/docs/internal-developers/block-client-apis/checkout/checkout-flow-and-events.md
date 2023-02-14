@@ -109,14 +109,13 @@ import { select } from '@wordpress/data';
 import { PAYMENT_STORE_KEY } from '@woocommerce/blocks-data';
 
 const MyComponent = ( props ) => {
-	const isPaymentPristine = select( PAYMENT_STORE_KEY ).isPaymentPristine();
-	const isPaymentStarted = select( PAYMENT_STORE_KEY ).isPaymentStarted();
+	const isPaymentIdle = select( PAYMENT_STORE_KEY ).isPaymentIdle();
+	const isExpressPaymentStarted =
+		select( PAYMENT_STORE_KEY ).isExpressPaymentStarted();
 	const isPaymentProcessing =
 		select( PAYMENT_STORE_KEY ).isPaymentProcessing();
-	const isPaymentSuccess = select( PAYMENT_STORE_KEY ).isPaymentSuccess();
-	const isPaymentFailed = select( PAYMENT_STORE_KEY ).isPaymentFailed();
+	const isPaymentReady = select( PAYMENT_STORE_KEY ).isPaymentReady();
 	const hasPaymentError = select( PAYMENT_STORE_KEY ).hasPaymentError();
-	const hasPaymentFinished = select( PAYMENT_STORE_KEY ).hasPaymentFinished();
 
 	// do something with the boolean values
 };
@@ -126,11 +125,10 @@ The status here will help inform the current state of _client side_ processing f
 
 The possible _internal_ statuses that may be set are:
 
--   `PRISTINE`: This is the status when checkout is initialized and there are payment methods that are not doing anything. This status is also set whenever the checkout status is changed to `IDLE`.
--   `STARTED`: **Express Payment Methods Only** - This status is used when an express payment method has been triggered by the user clicking it's button. This flow happens before processing, usually in a modal window.
+-   `IDLE`: This is the status when checkout is initialized and there are payment methods that are not doing anything. This status is also set whenever the checkout status is changed to `IDLE`.
+-   `EXPRESS_STARTED`: **Express Payment Methods Only** - This status is used when an express payment method has been triggered by the user clicking it's button. This flow happens before processing, usually in a modal window.
 -   `PROCESSING`: This status is set when the checkout status is `PROCESSING`, checkout `hasError` is false, checkout is not calculating, and the current payment status is not `FINISHED`. When this status is set, it will trigger the payment processing event emitter.
--   `SUCCESS`: This status is set after all the observers hooked into the payment processing event have completed successfully. The `CheckoutProcessor` component uses this along with the checkout `PROCESSING` status to signal things are ready to send the order to the server with data for processing.
--   `FAILED`: This status is set after an observer hooked into the payment processing event returns a fail response. This in turn will end up causing the checkout `hasError` flag to be set to true.
+-   `READY`: This status is set after all the observers hooked into the payment processing event have completed successfully. The `CheckoutProcessor` component uses this along with the checkout `PROCESSING` status to signal things are ready to send the order to the server with data for processing and to take payment
 -   `ERROR`: This status is set after an observer hooked into the payment processing event returns an error response. This in turn will end up causing the checkout `hasError` flag to be set to true.
 
 ### Emitting Events

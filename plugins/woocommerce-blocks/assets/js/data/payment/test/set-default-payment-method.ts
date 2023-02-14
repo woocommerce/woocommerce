@@ -126,11 +126,10 @@ describe( 'setDefaultPaymentMethod', () => {
 						__internalSetActivePaymentMethod:
 							setActivePaymentMethodMock,
 						__internalSetPaymentError: () => void 0,
-						__internalSetPaymentFailed: () => void 0,
-						__internalSetPaymentSuccess: () => void 0,
-						__internalSetPaymentPristine: () => void 0,
-						__internalSetPaymentStarted: () => void 0,
+						__internalSetPaymentIdle: () => void 0,
+						__internalSetExpressPaymentStarted: () => void 0,
 						__internalSetPaymentProcessing: () => void 0,
+						__internalSetPaymentReady: () => void 0,
 					};
 				}
 				return originalStore;

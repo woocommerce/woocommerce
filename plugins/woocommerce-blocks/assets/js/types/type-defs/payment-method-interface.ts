@@ -166,6 +166,7 @@ export type PaymentMethodInterface = {
 	// Various payment status helpers.
 	paymentStatus: {
 		isPristine: boolean;
+		isIdle: boolean;
 		isStarted: boolean;
 		isProcessing: boolean;
 		isFinished: boolean;

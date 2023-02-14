@@ -32,7 +32,7 @@ export interface PaymentState {
 }
 
 export const defaultPaymentState: PaymentState = {
-	status: PAYMENT_STATUS.PRISTINE,
+	status: PAYMENT_STATUS.IDLE,
 	activePaymentMethod: '',
 	activeSavedToken: '',
 	availablePaymentMethods: {},

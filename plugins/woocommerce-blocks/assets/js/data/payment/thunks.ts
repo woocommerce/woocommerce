@@ -67,9 +67,11 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 				shippingAddress: ShippingAddress | undefined;
 			observerResponses.forEach( ( response ) => {
 				if ( isSuccessResponse( response ) ) {
-					// the last observer response always "wins" for success.
+					// The last observer response always "wins" for success.
 					successResponse = response;
 				}
+
+				// We consider both failed and error responses as an error.
 				if (
 					isErrorResponse( response ) ||
 					isFailResponse( response )
@@ -125,27 +127,24 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 			const { setBillingAddress, setShippingAddress } =
 				registry.dispatch( CART_STORE_KEY );
 
-			if (
-				isObserverResponse( successResponse ) &&
-				successResponse &&
-				! errorResponse
-			) {
+			// Observer returned success, we sync the payment method data and billing address.
+			if ( isObserverResponse( successResponse ) && ! errorResponse ) {
 				const { paymentMethodData } = successResponse?.meta || {};
-				if ( billingAddress && isBillingAddress( billingAddress ) ) {
+
+				if ( isBillingAddress( billingAddress ) ) {
 					setBillingAddress( billingAddress );
 				}
-				if (
-					typeof shippingAddress !== 'undefined' &&
-					isShippingAddress( shippingAddress )
-				) {
+				if ( isShippingAddress( shippingAddress ) ) {
 					setShippingAddress( shippingAddress );
 				}
-				const paymentDataToSet = isObject( paymentMethodData )
-					? paymentMethodData
-					: {};
-				dispatch.__internalSetPaymentMethodData( paymentDataToSet );
-				dispatch.__internalSetPaymentSuccess();
+
+				dispatch.__internalSetPaymentMethodData(
+					isObject( paymentMethodData ) ? paymentMethodData : {}
+				);
+				dispatch.__internalSetPaymentReady();
 			} else if ( isFailResponse( errorResponse ) ) {
+				const { paymentMethodData } = errorResponse?.meta || {};
+
 				if (
 					objectHasProp( errorResponse, 'message' ) &&
 					isString( errorResponse.message ) &&
@@ -166,16 +165,14 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 					} );
 				}
 
-				const { paymentMethodData } = errorResponse?.meta || {};
-				if ( billingAddress && isBillingAddress( billingAddress ) ) {
+				if ( isBillingAddress( billingAddress ) ) {
 					setBillingAddress( billingAddress );
 				}
-				dispatch.__internalSetPaymentFailed();
 
-				const paymentDataToSet = isObject( paymentMethodData )
-					? paymentMethodData
-					: {};
-				dispatch.__internalSetPaymentMethodData( paymentDataToSet );
+				dispatch.__internalSetPaymentMethodData(
+					isObject( paymentMethodData ) ? paymentMethodData : {}
+				);
+				dispatch.__internalSetPaymentError();
 			} else if ( isErrorResponse( errorResponse ) ) {
 				if (
 					objectHasProp( errorResponse, 'message' ) &&
@@ -207,9 +204,8 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 					setValidationErrors( errorResponse.validationErrors );
 				}
 			} else {
-				// otherwise there are no payment methods doing anything so
-				// just consider success
-				dispatch.__internalSetPaymentSuccess();
+				// Otherwise there are no payment methods doing anything so just assume payment method is ready.
+				dispatch.__internalSetPaymentReady();
 			}
 		} );
 	};
