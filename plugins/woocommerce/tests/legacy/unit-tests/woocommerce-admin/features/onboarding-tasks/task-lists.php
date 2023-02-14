@@ -30,22 +30,25 @@ class WC_Tests_OnboardingTasks_TaskLists extends WC_Unit_Test_Case {
 	 */
 	public function test_default_tasklists_can_be_add_by_onboarding_filter() {
 		// Filter the default task lists.
-		add_filter( 'woocommerce_admin_experimental_onboarding_tasklists', function(
+		add_filter(
+			'woocommerce_admin_experimental_onboarding_tasklists',
+			function(
 			$task_lists
-		) {
-			$this->assertIsArray( $task_lists );
+			) {
+				$this->assertIsArray( $task_lists );
 
-			// Add a new task list.
-			$task_lists[ 'test' ] = new TaskList(
-				array(
-					'id'       => 'test',
-					'title'    => 'Test',
-					'tasks'    => array(),
-					'isHidden' => false,
-				)
-			);
-			return $task_lists;
-		} );
+				// Add a new task list.
+				$task_lists['test'] = new TaskList(
+					array(
+						'id'       => 'test',
+						'title'    => 'Test',
+						'tasks'    => array(),
+						'isHidden' => false,
+					)
+				);
+				return $task_lists;
+			}
+		);
 
 		// Initialize the default task lists.
 		TaskLists::init_default_lists();
