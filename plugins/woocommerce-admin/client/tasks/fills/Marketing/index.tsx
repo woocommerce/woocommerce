@@ -26,8 +26,8 @@ import { PluginList, PluginListProps } from './PluginList';
 import { PluginProps } from './Plugin';
 import { getPluginSlug } from '../../../utils';
 
-const ALLOWED_PLUGIN_LISTS = [ 'task-list/reach', 'task-list/grow' ];
-const PLUGIN_LIST_DISPLAY_ORDER = [ 'task-list/grow', 'task-list/reach' ];
+// We display the list of plugins ordered by this list.
+const ALLOWED_PLUGIN_LISTS = [ 'task-list/grow', 'task-list/reach' ];
 
 export const transformExtensionToPlugin = (
 	extension: Extension,
@@ -60,8 +60,8 @@ export const getMarketingExtensionLists = (
 	freeExtensions
 		.sort( ( a: ExtensionList, b: ExtensionList ) => {
 			return (
-				PLUGIN_LIST_DISPLAY_ORDER.indexOf( a.key ) -
-				PLUGIN_LIST_DISPLAY_ORDER.indexOf( b.key )
+				ALLOWED_PLUGIN_LISTS.indexOf( a.key ) -
+				ALLOWED_PLUGIN_LISTS.indexOf( b.key )
 			);
 		} )
 		.forEach( ( list ) => {
