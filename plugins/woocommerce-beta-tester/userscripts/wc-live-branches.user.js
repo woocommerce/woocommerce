@@ -142,6 +142,10 @@
 						${ getOptionsList(
 							[
 								{
+									label: 'WooCommerce Smooth Generator',
+									name: 'wc-smooth-generator',
+								},
+								{
 									label: 'Jetpack',
 									name: 'nojetpack',
 									invert: true,
