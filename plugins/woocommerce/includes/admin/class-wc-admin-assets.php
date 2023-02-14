@@ -29,26 +29,26 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		}
 
-	/**
-	 * Log a warning for deprecated scripts/styles that will be removed.
-	 */
-	public function warn_deprecated_scripts() {
-		$deprecated_scripts = array(
-			'prettyPhoto',
-			'prettyPhoto-init',
-			'jquery-cookie'
-		);
+		/**
+		 * Log a warning for deprecated scripts/styles that will be removed.
+		 */
+		public function warn_deprecated_scripts() {
+			$deprecated_scripts = array(
+				'prettyPhoto',
+				'prettyPhoto-init',
+				'jquery-cookie',
+			);
 
-		foreach ( $deprecated_scripts as $script ) {
-			if ( wp_script_is( $script, 'enqueued' ) ) {
-				wc_deprecated_script( $script, '3.3.0' );
+			foreach ( $deprecated_scripts as $script ) {
+				if ( wp_script_is( $script, 'enqueued' ) ) {
+					wc_deprecated_script( $script, '3.3.0' );
+				}
+			}
+
+			if ( wp_style_is( 'woocommerce_prettyPhoto_css', 'enqueued' ) ) {
+				wc_deprecated_script( 'woocommerce_prettyPhoto_css', '3.3.0' );
 			}
 		}
-
-		if ( wp_style_is( 'woocommerce_prettyPhoto_css', 'enqueued' ) ) {
-			wc_deprecated_script( 'woocommerce_prettyPhoto_css', '3.3.0' );
-		}
-	}
 
 		/**
 		 * Enqueue styles.

@@ -57,7 +57,7 @@ class WC_Frontend_Scripts {
 		$deprecated_scripts = array(
 			'prettyPhoto',
 			'prettyPhoto-init',
-			'jquery-cookie'
+			'jquery-cookie',
 		);
 
 		foreach ( $deprecated_scripts as $script ) {
