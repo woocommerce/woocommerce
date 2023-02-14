@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import './wcs-banner.scss';
+import './plugin-banner.scss';
 
 type Feature = {
 	icon: string;
