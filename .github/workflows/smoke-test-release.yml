@@ -33,7 +33,7 @@ jobs:
               run: gh release view "${{ github.event.inputs.tag }}" --repo=woocommerce/woocommerce
 
             - name: Get tag
-              uses: actions/github-script@v5
+              uses: actions/github-script@v6
               id: tag
               with:
                   result-encoding: string
