@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Directly fetch order prop from DB for compatibility with CPT store.

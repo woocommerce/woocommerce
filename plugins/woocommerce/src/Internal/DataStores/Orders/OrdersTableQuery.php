@@ -164,6 +164,12 @@ class OrdersTableQuery {
 	 */
 	private $date_query = null;
 
+	/**
+	 * Instance of the OrdersTableDataStore class.
+	 *
+	 * @var OrdersTableDataStore
+	 */
+	private $order_datastore = null;
 
 	/**
 	 * Sets up and runs the query after processing arguments.
@@ -171,19 +177,11 @@ class OrdersTableQuery {
 	 * @param array $args Array of query vars.
 	 */
 	public function __construct( $args = array() ) {
-		global $wpdb;
+		// Note that ideally we would inject this dependency via constructor, but that's not possible since this class needs to be backward compatible with WC_Order_Query class.
+		$this->order_datastore = wc_get_container()->get( OrdersTableDataStore::class );
 
-		$datastore = wc_get_container()->get( OrdersTableDataStore::class );
-
-		// TODO: maybe OrdersTableDataStore::get_all_table_names() could return these keys/indices instead.
-		$this->tables   = array(
-			'orders'           => $datastore::get_orders_table_name(),
-			'addresses'        => $datastore::get_addresses_table_name(),
-			'operational_data' => $datastore::get_operational_data_table_name(),
-			'meta'             => $datastore::get_meta_table_name(),
-			'items'            => $wpdb->prefix . 'woocommerce_order_items',
-		);
-		$this->mappings = $datastore->get_all_order_column_mappings();
+		$this->tables   = $this->order_datastore::get_all_table_names_with_id();
+		$this->mappings = $this->order_datastore->get_all_order_column_mappings();
 
 		$this->args = $args;
 
@@ -333,7 +331,7 @@ class OrdersTableQuery {
 			$date_value = $this->args[ $date_key ];
 			$operator   = '=';
 			$dates      = array();
-			$timezone = in_array( $date_key, $gmt_date_keys, true ) ? '+0000' : wc_timezone_string();
+			$timezone   = in_array( $date_key, $gmt_date_keys, true ) ? '+0000' : wc_timezone_string();
 
 			if ( is_string( $date_value ) && preg_match( self::REGEX_SHORTHAND_DATES, $date_value, $matches ) ) {
 				$operator = in_array( $matches[2], $valid_operators, true ) ? $matches[2] : '';
@@ -361,7 +359,7 @@ class OrdersTableQuery {
 				$operator_to_keys[] = 'before';
 			}
 
-			$date_key = in_array( $date_key, $local_date_keys, true ) ? $local_to_gmt_date_keys[ $date_key ] : $date_key;
+			$date_key       = in_array( $date_key, $local_date_keys, true ) ? $local_to_gmt_date_keys[ $date_key ] : $date_key;
 			$date_queries[] = array_merge(
 				array(
 					'column'    => $date_key,
