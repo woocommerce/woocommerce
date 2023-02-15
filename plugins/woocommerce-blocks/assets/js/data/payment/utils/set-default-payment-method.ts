@@ -60,7 +60,7 @@ export const setDefaultPaymentMethod = async (
 		return;
 	}
 
-	dispatch( PAYMENT_STORE_KEY ).__internalSetPaymentPristine();
+	dispatch( PAYMENT_STORE_KEY ).__internalSetPaymentIdle();
 
 	dispatch( PAYMENT_STORE_KEY ).__internalSetActivePaymentMethod(
 		paymentMethodKeys[ 0 ]
