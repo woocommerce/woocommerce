@@ -208,7 +208,7 @@ export class Shipping extends Component {
 			task,
 			updateAndPersistSettingsForGroup,
 		} = this.props;
-		const pluginsToActivate = this.getPluginsToActivate();
+		const pluginsToActivate = this.getPluginsToActivate(); // TODO: change this to hasPluginsToPromote
 		const requiresJetpackConnection =
 			! isJetpackConnected && countryCode === 'US';
 
@@ -279,7 +279,7 @@ export class Shipping extends Component {
 				label: __( 'Enable shipping label printing', 'woocommerce' ),
 				description: pluginsToActivate.includes(
 					'woocommerce-shipstation-integration'
-				)
+				) // TODO: change this to each plugins description
 					? interpolateComponents( {
 							mixedString: __(
 								'We recommend using ShipStation to save time at the post office by printing your shipping ' +
@@ -327,6 +327,8 @@ export class Shipping extends Component {
 				),
 				visible: pluginsToActivate.length,
 			},
+
+			// Only needed for WooCommerce Shipping
 			{
 				key: 'connect',
 				label: __( 'Connect your store', 'woocommerce' ),
@@ -347,6 +349,7 @@ export class Shipping extends Component {
 				),
 				visible: requiresJetpackConnection,
 			},
+
 		];
 
 		// Override the step fields for the smart shipping defaults.
