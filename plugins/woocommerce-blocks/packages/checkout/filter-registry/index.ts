@@ -71,8 +71,8 @@ export const __experimentalRegisterCheckoutFilters = (
 	deprecated( '__experimentalRegisterCheckoutFilters', {
 		alternative: 'registerCheckoutFilters',
 		plugin: 'WooCommerce Blocks',
-		link: '',
-		since: '6.0.0',
+		link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8346',
+		since: '9.6.0',
 		hint: '__experimentalRegisterCheckoutFilters has graduated to stable and this experimental function will be removed.',
 	} );
 	registerCheckoutFilters( namespace, filters );
@@ -279,8 +279,8 @@ export const __experimentalApplyCheckoutFilter = < T >( {
 	deprecated( '__experimentalApplyCheckoutFilter', {
 		alternative: 'applyCheckoutFilter',
 		plugin: 'WooCommerce Blocks',
-		link: '',
-		since: '6.0.0',
+		link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8346',
+		since: '9.6.0',
 		hint: '__experimentalApplyCheckoutFilter has graduated to stable and this experimental function will be removed.',
 	} );
 	return applyCheckoutFilter( {
