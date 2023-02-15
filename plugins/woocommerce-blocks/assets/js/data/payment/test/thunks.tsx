@@ -191,7 +191,7 @@ describe( 'wc/store/payment thunks', () => {
 			} );
 
 			const setPaymentErrorMock = jest.fn();
-			const setPaymentSuccessMock = jest.fn();
+			const setPaymentReadyMock = jest.fn();
 			const registryMock = {
 				dispatch: jest
 					.fn()
@@ -211,14 +211,14 @@ describe( 'wc/store/payment thunks', () => {
 				dispatch: {
 					...wpDataFunctions.dispatch( PAYMENT_STORE_KEY ),
 					__internalSetPaymentError: setPaymentErrorMock,
-					__internalSetPaymentSuccess: setPaymentSuccessMock,
+					__internalSetPaymentReady: setPaymentReadyMock,
 				},
 			} );
 
 			// The observer throwing will cause this.
 			//expect( console ).toHaveErroredWith( new Error( 'test error' ) );
 			expect( setPaymentErrorMock ).toHaveBeenCalled();
-			expect( setPaymentSuccessMock ).not.toHaveBeenCalled();
+			expect( setPaymentReadyMock ).not.toHaveBeenCalled();
 		} );
 	} );
 } );

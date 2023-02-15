@@ -60,13 +60,46 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 			return {
 				// The paymentStatus is exposed to third parties via the payment method interface so the API must not be changed
 				paymentStatus: {
-					isPristine: store.isPaymentPristine(),
-					isStarted: store.isPaymentStarted(),
+					get isPristine() {
+						deprecated( 'isPristine', {
+							since: '9.6.0',
+							alternative: 'isIdle',
+							plugin: 'WooCommerce Blocks',
+							link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
+						} );
+						return store.isPaymentIdle();
+					}, // isPristine is the same as isIdle
+					isIdle: store.isPaymentIdle(),
+					isStarted: store.isExpressPaymentStarted(),
 					isProcessing: store.isPaymentProcessing(),
-					isFinished: store.isPaymentFinished(),
+					get isFinished() {
+						deprecated( 'isFinished', {
+							since: '9.6.0',
+							plugin: 'WooCommerce Blocks',
+							link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
+						} );
+						return (
+							store.hasPaymentError() || store.isPaymentReady()
+						);
+					},
 					hasError: store.hasPaymentError(),
-					hasFailed: store.isPaymentFailed(),
-					isSuccessful: store.isPaymentSuccess(),
+					get hasFailed() {
+						deprecated( 'hasFailed', {
+							since: '9.6.0',
+							plugin: 'WooCommerce Blocks',
+							link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
+						} );
+						return store.hasPaymentError();
+					},
+					get isSuccessful() {
+						deprecated( 'isSuccessful', {
+							since: '9.6.0',
+							plugin: 'WooCommerce Blocks',
+							link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
+						} );
+						return store.isPaymentReady();
+					},
+					isReady: store.isPaymentReady(),
 					isDoingExpressPayment: store.isExpressPaymentMethodActive(),
 				},
 				activePaymentMethod: store.getActivePaymentMethod(),

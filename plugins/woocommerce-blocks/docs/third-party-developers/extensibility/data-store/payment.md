@@ -27,28 +27,62 @@ with. We do not encourage extensions to dispatch actions onto this data store ye
 
 ## Selectors
 
-### isPaymentPristine
+### (@deprecated) isPaymentPristine
 
-Queries if the status is `pristine`
+_**This selector is deprecated and will be removed in a future release. Please use isPaymentIdle instead**_
 
 #### _Returns_
 
-`boolean`: True if the payment status is `pristine`, false otherwise.
+`boolean`: True if the payment status is `idle`, false otherwise.
 
 #### _Example_
 
 ```js
 const store = select( 'wc/store/payment' );
-const isPaymentPristine = store.isPaymentPristine();
+const isPaymentIdle = store.isPaymentIdle();
 ```
 
-### isPaymentStarted
+### isPaymentIdle
+
+Queries if the status is `idle`
+
+#### _Returns_
+
+`boolean`: True if the payment status is `idle`, false otherwise.
+
+#### _Example_
+
+```js
+const store = select( 'wc/store/payment' );
+const isPaymentIdle = store.isPaymentIdle();
+```
+
+### (@deprecated) isPaymentStarted
 
 Queries if the status is `started`.
+
+_**This selector is deprecated and will be removed in a future release. Please use isExpressPaymentStarted instead**_
 
 #### _Returns_
 
 `boolean`: True if the payment status is `started`, false otherwise.
+
+#### _Example_
+
+```js
+const store = select( 'wc/store/payment' );
+const isPaymentStarted = store.isPaymentStarted();
+```
+
+### isExpressPaymentStarted
+
+Queries if an express payment method has been clicked.
+
+_**This selector is deprecated and will be removed in a future release. Please use isExpressPaymentStarted instead**_
+
+#### _Returns_
+
+`boolean`: True if the button for an express payment method has been clicked, false otherwise.
 
 #### _Example_
 
@@ -72,9 +106,11 @@ const store = select( 'wc/store/payment' );
 const isPaymentProcessing = store.isPaymentProcessing();
 ```
 
-### isPaymentSuccess
+### (@deprecated) isPaymentSuccess
 
 Queries if the status is `success`.
+
+_**This selector is deprecated and will be removed in a future release. Please use isPaymentReady instead**_
 
 #### _Returns_
 
@@ -87,9 +123,26 @@ const store = select( 'wc/store/payment' );
 const isPaymentSuccess = store.isPaymentSuccess();
 ```
 
-### isPaymentFailed
+### isPaymentReady
+
+Queries if the status is `ready`.
+
+#### _Returns_
+
+`boolean`: True if the payment status is `ready`, false otherwise.
+
+#### _Example_
+
+```js
+const store = select( 'wc/store/payment' );
+const isPaymentReady = store.isPaymentReady();
+```
+
+### (@deprecated) isPaymentFailed
 
 Queries if the status is `failed`.
+
+_**This selector is deprecated and will be removed in a future release. Please use hasPaymentError instead**_
 
 #### _Returns_
 
@@ -117,24 +170,10 @@ const store = select( 'wc/store/payment' );
 const hasPaymentError = store.hasPaymentError();
 ```
 
-### isPaymentFinished
-
-Checks wether the payment has finished processing. This includes failed payments, payments with errors or successful payments.
-
-#### _Returns_
-
-`boolean`: True if the payment status is `success`, `failed` or `error`, false otherwise.
-
-#### _Example_
-
-```js
-const store = select( 'wc/store/payment' );
-const isPaymentFinished = store.isPaymentFinished();
-```
-
-### getCurrentStatus (deprecated)
+### (@deprecated) getCurrentStatus
 
 Returns an object with booleans representing the payment status.
+
 _**This selector is deprecated and will be removed in a future release. Please use the selectors above**_
 
 #### _Returns_
