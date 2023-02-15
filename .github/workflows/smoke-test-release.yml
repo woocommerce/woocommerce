@@ -44,15 +44,16 @@ jobs:
             - name: Verify woocommerce.zip asset
               env:
                   GITHUB_TOKEN: ${{ github.token }}
+                  RELEASE_TAG: ${{ steps.tag.outputs.result }}
               run: |
-                  gh release download ${{ steps.tag.outputs.result }} --repo woocommerce/woocommerce
+                  gh release download $RELEASE_TAG --repo woocommerce/woocommerce
                   if [[ -f "woocommerce.zip" ]]
                     then
-                      echo "${{ github.event.inputs.tag }} has a valid woocommerce.zip asset."
+                      echo "$RELEASE_TAG has a valid woocommerce.zip asset."
                       exit 0
                   fi
 
-                  echo "${{ github.event.inputs.tag }} does not have a valid woocommerce.zip asset."
+                  echo "$RELEASE_TAG does not have a valid woocommerce.zip asset."
                   exit 1
 
             - name: Get 'created-at' of WooCommerce zip
@@ -393,7 +394,7 @@ jobs:
             - name: Download release zip
               env:
                   GITHUB_TOKEN: ${{ github.token }}
-              run: gh release download ${{ github.event.inputs.tag }} --dir tmp
+              run: gh release download ${{ needs.get-wp-versions.outputs.tag }} --dir tmp
 
             - name: Replace `plugins/woocommerce` with unzipped woocommerce release build
               run: unzip -d plugins -o tmp/woocommerce.zip
@@ -567,7 +568,7 @@ jobs:
             - name: Download release zip
               env:
                   GITHUB_TOKEN: ${{ github.token }}
-              run: gh release download ${{ github.event.inputs.tag }} --dir tmp
+              run: gh release download ${{ needs.get-tag.outputs.tag }} --dir tmp
 
             - name: Replace `plugins/woocommerce` with unzipped woocommerce release build
               run: unzip -d plugins -o tmp/woocommerce.zip
