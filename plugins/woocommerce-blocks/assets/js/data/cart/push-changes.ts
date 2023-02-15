@@ -34,25 +34,28 @@ const isBillingAddress = (
 	return 'email' in address;
 };
 
-export const trimAddress = ( address: BillingOrShippingAddress ) => {
-	const trimmedAddress = {
-		...address,
-	};
-	Object.keys( address ).forEach( ( key ) => {
-		trimmedAddress[ key as keyof BillingOrShippingAddress ] =
-			address[ key as keyof BillingOrShippingAddress ].trim();
-	} );
-
-	trimmedAddress.postcode = trimmedAddress.postcode
-		? trimmedAddress.postcode.replace( ' ', '' ).toUpperCase()
-		: '';
-
+/**
+ * Trims and normalizes address data for comparison.
+ */
+export const normalizeAddress = ( address: BillingOrShippingAddress ) => {
+	const trimmedAddress = Object.entries( address ).reduce(
+		( acc, [ key, value ] ) => {
+			if ( key === 'postcode' ) {
+				acc[ key as keyof BillingOrShippingAddress ] = value
+					.replace( ' ', '' )
+					.toUpperCase();
+			} else {
+				acc[ key as keyof BillingOrShippingAddress ] = value.trim();
+			}
+			return acc;
+		},
+		{} as BillingOrShippingAddress
+	);
 	return trimmedAddress;
 };
 
 /**
- * Does a shallow compare of important address data to determine if the cart needs updating on the server. This takes
- * the current and previous address into account, as well as the billing email field.
+ * Does a shallow compare of all address data to determine if the cart needs updating on the server.
  */
 const isAddressDirty = < T extends CartBillingAddress | CartShippingAddress >(
 	// An object containing all previous address information
@@ -68,13 +71,12 @@ const isAddressDirty = < T extends CartBillingAddress | CartShippingAddress >(
 		return true;
 	}
 
-	return (
-		!! address.country &&
-		! isShallowEqual(
-			trimAddress( previousAddress ),
-			trimAddress( address )
-		)
+	const addressMatches = isShallowEqual(
+		normalizeAddress( previousAddress ),
+		normalizeAddress( address )
 	);
+
+	return ! addressMatches;
 };
 
 type BaseAddressKey = keyof CartBillingAddress | keyof CartShippingAddress;
@@ -238,4 +240,8 @@ export const pushChanges = (): void => {
 	) {
 		updateCustomerData();
 	}
+};
+
+export const flushChanges = (): void => {
+	updateCustomerData.flush();
 };

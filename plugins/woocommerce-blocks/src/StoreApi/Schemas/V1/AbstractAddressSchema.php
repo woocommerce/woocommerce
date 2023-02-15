@@ -167,15 +167,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		$errors  = new \WP_Error();
 		$address = $this->sanitize_callback( $address, $request, $param );
 
-		if ( empty( $address['country'] ) ) {
-			$errors->add(
-				'missing_country',
-				__( 'Country is required', 'woo-gutenberg-products-block' )
-			);
-			return $errors;
-		}
-
-		if ( ! in_array( $address['country'], array_keys( wc()->countries->get_countries() ), true ) ) {
+		if ( ! empty( $address['country'] ) && ! in_array( $address['country'], array_keys( wc()->countries->get_countries() ), true ) ) {
 			$errors->add(
 				'invalid_country',
 				sprintf(
