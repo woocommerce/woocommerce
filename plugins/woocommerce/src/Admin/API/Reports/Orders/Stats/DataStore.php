@@ -563,6 +563,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$data['parent_id'] = $parent_order->get_id();
 				$data['status']    = self::normalize_order_status( $parent_order->get_status() );
 			}
+			/**
+			 * Set date_completed and date_paid the same as date_created to avoid problems
+			 * when they are being used to sort the data, as refunds don't have them filled
+			*/
+			$data['date_completed'] = $data['date_created'];
+			$data['date_paid']      = $data['date_created'];
 		}
 
 		// Update or add the information to the DB.
