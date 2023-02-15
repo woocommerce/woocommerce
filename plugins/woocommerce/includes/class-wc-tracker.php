@@ -794,10 +794,10 @@ class WC_Tracker {
 	 * Get tracker data for a pickup location method.
 	 *
 	 * @return array Associative array of tracker data with keys:
-	 * - page_contains_block
-	 * - block_attributes
+	 * - pickup_location_enabled
+	 * - pickup_locations_count
 	 */
-	public static function get_pickup_location_data( $block_name, $woo_page_name ) {
+	public static function get_pickup_location_data() {
 		$pickup_location_enabled = false;
 		$pickup_locations_count  = count( get_option( 'pickup_location_pickup_locations', [] ) );
 
