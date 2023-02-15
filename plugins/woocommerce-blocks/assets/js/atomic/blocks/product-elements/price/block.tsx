@@ -83,6 +83,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 			align={ textAlign }
 			className={ wrapperClassName }
 			regularPriceStyle={ style }
+			priceStyle={ style }
 			priceClassName={ priceClassName }
 			currency={ currency }
 			price={ prices.price }
