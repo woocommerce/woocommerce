@@ -1786,7 +1786,7 @@ class WC_Helper {
 		$current_timestamp           = time();
 		set_transient( $current_timestamp_cache_key, $current_timestamp );
 		$cached_timestamp = get_transient( '_wc_helper_api_cache_test' );
-		// To avoid a potential race condition where the transient is updated with a new timestamp
+		// To avoid a potential race condition where the transient is updated with a new timestamp.
 		if ( $current_timestamp <= (int) $cached_timestamp ) {
 			return true;
 		}
