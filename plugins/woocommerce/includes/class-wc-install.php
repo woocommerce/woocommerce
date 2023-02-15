@@ -225,8 +225,8 @@ class WC_Install {
 			'wc_update_722_adjust_new_zealand_states',
 			'wc_update_722_adjust_ukraine_states',
 		),
-		'7.4.0' => array(
-			'wc_update_740_add_columns_to_order_stats_table',
+		'7.5.0' => array(
+			'wc_update_750_add_columns_to_order_stats_table',
 		),
 	);
 
