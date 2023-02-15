@@ -270,7 +270,7 @@ class WC_Helper_Updater {
 		$raw_response = wp_remote_post(
 			'https://translate.wordpress.com/api/translations-updates/woocommerce',
 			array(
-				'body'    => json_encode( $request_body ),
+				'body'    => wp_json_encode( $request_body ),
 				'headers' => array( 'Content-Type: application/json' ),
 				'timeout' => $timeout,
 			)
