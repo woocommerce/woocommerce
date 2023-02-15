@@ -13,16 +13,16 @@ defined( 'ABSPATH' ) || exit;
 
 return array(
 	'weight'     => array(
-		'kg'  => _x( 'kg', 'weight unit kilograms', 'woocommerce' ),
-		'g'   => _x( 'g', 'weight unit grams', 'woocommerce' ),
-		'lbs' => _x( 'lbs', 'weight unit pounds', 'woocommerce' ),
-		'oz'  => _x( 'oz', 'weight unit ounces', 'woocommerce' ),
+		'kg'  => __( 'kg', 'woocommerce' ),
+		'g'   => __( 'g', 'woocommerce' ),
+		'lbs' => __( 'lbs', 'woocommerce' ),
+		'oz'  => __( 'oz', 'woocommerce' ),
 	),
 	'dimensions' => array(
-		'm'  => _x( 'm', 'dimensions unit meters', 'woocommerce' ),
-		'cm' => _x( 'cm', 'dimensions unit centimeters', 'woocommerce' ),
-		'mm' => _x( 'mm', 'dimensions unit millimeters', 'woocommerce' ),
-		'in' => _x( 'in', 'dimensions unit inches', 'woocommerce' ),
-		'yd' => _x( 'yd', 'dimensions unit yards', 'woocommerce' ),
+		'm'  => __( 'm', 'woocommerce' ),
+		'cm' => __( 'cm', 'woocommerce' ),
+		'mm' => __( 'mm', 'woocommerce' ),
+		'in' => __( 'in', 'woocommerce' ),
+		'yd' => __( 'yd', 'woocommerce' ),
 	),
 );
