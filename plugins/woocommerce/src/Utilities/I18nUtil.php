@@ -19,6 +19,9 @@ final class I18nUtil {
 	/**
 	 * Get the translated label for a weight unit of measure.
 	 *
+	 * This will return the original input string if it isn't found in the units array. This way a custom unit of
+	 * measure can be used even if its' not getting translated.
+	 *
 	 * @param string $weight_unit The abbreviated weight unit in English, e.g. kg.
 	 *
 	 * @return string
@@ -28,7 +31,7 @@ final class I18nUtil {
 			self::$units = include WC()->plugin_path() . '/i18n/units.php';
 		}
 
-		$label = '';
+		$label = $weight_unit;
 
 		if ( ! empty( self::$units['weight'][ $weight_unit ] ) ) {
 			$label = self::$units['weight'][ $weight_unit ];
@@ -40,6 +43,9 @@ final class I18nUtil {
 	/**
 	 * Get the translated label for a dimensions unit of measure.
 	 *
+	 * This will return the original input string if it isn't found in the units array. This way a custom unit of
+	 * measure can be used even if its' not getting translated.
+	 *
 	 * @param string $dimensions_unit The abbreviated dimension unit in English, e.g. cm.
 	 *
 	 * @return string
@@ -49,7 +55,7 @@ final class I18nUtil {
 			self::$units = include WC()->plugin_path() . '/i18n/units.php';
 		}
 
-		$label = '';
+		$label = $dimensions_unit;
 
 		if ( ! empty( self::$units['dimensions'][ $dimensions_unit ] ) ) {
 			$label = self::$units['dimensions'][ $dimensions_unit ];
