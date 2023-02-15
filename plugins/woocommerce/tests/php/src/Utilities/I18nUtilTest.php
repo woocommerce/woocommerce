@@ -28,7 +28,7 @@ class I18nUtilTest extends \WC_Unit_Test_Case {
 	 * Do before each test in this class.
 	 *
 	 * @return void
-	 * @throws \ReflectionException
+	 * @throws \ReflectionException If the units property does not exist on the class.
 	 */
 	public function set_up() {
 		parent::set_up();
@@ -55,7 +55,7 @@ class I18nUtilTest extends \WC_Unit_Test_Case {
 	/**
 	 * Simulate a string getting translated.
 	 *
-	 * @param string $translated
+	 * @param string $translated The "translated" string before we modify it.
 	 *
 	 * @return string
 	 */
