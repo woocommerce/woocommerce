@@ -3,6 +3,7 @@
  */
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -13,7 +14,7 @@ import ReportChart from '../../components/report-chart';
 import ReportSummary from '../../components/report-summary';
 import RevenueReportTable from './table';
 import ReportFilters from '../../components/report-filters';
-import { RevenueReportDateTour } from '~/guided-tours/revenue-report-date-tour';
+import { ReportDateTour } from '~/guided-tours/report-date-tour';
 
 export default class RevenueReport extends Component {
 	render() {
@@ -50,7 +51,13 @@ export default class RevenueReport extends Component {
 					filters={ filters }
 					advancedFilters={ advancedFilters }
 				/>
-				<RevenueReportDateTour currentTab={ 'feedback' } />
+				<ReportDateTour
+					optionName="woocommerce_revenue_report_date_tour_shown"
+					headingText={ __(
+						'Revenue is now reported from paid orders ✅',
+						'woocommerce'
+					) }
+				/>
 			</Fragment>
 		);
 	}

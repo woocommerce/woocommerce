@@ -15,11 +15,12 @@ import { getAdminLink } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
-import './revenue-report-date-tour.scss';
+import './report-date-tour.scss';
 
-const REVENUE_REPORT_DATE_TOUR = 'woocommerce_revenue_report_date_tour_shown';
-
-export const RevenueReportDateTour: React.FC = () => {
+export const ReportDateTour: React.FC< {
+	optionName: string;
+	headingText: string;
+} > = ( { optionName, headingText } ) => {
 	const [ isDismissed, setIsDismissed ] = useState( false );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
@@ -28,10 +29,8 @@ export const RevenueReportDateTour: React.FC = () => {
 			select( OPTIONS_STORE_NAME );
 
 		return {
-			hasShownTour: getOption( REVENUE_REPORT_DATE_TOUR ) === 'yes',
-			isResolving: ! hasFinishedResolution( 'getOption', [
-				REVENUE_REPORT_DATE_TOUR,
-			] ),
+			hasShownTour: getOption( optionName ) === 'yes',
+			isResolving: ! hasFinishedResolution( 'getOption', [ optionName ] ),
 		};
 	} );
 
@@ -52,10 +51,7 @@ export const RevenueReportDateTour: React.FC = () => {
 				},
 				meta: {
 					name: 'product-feedback-',
-					heading: __(
-						'Revenue is now reported from paid orders ✅',
-						'woocommerce'
-					),
+					heading: headingText,
 					descriptions: {
 						desktop: createInterpolateElement(
 							__(
@@ -88,7 +84,7 @@ export const RevenueReportDateTour: React.FC = () => {
 		],
 		closeHandler: () => {
 			updateOptions( {
-				[ REVENUE_REPORT_DATE_TOUR ]: 'yes',
+				[ optionName ]: 'yes',
 			} );
 			setIsDismissed( true );
 		},
