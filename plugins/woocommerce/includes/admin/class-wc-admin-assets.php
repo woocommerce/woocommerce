@@ -106,11 +106,11 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		 * Enqueue scripts.
 		 */
 		public function admin_scripts() {
-			global $wp_query, $post, $theorder, $admin_page_hooks;
+			global $wp_query, $post, $theorder;
 
 			$screen       = get_current_screen();
 			$screen_id    = $screen ? $screen->id : '';
-			$wc_screen_id = $admin_page_hooks['woocommerce'];
+			$wc_screen_id = 'woocommerce';
 			$suffix       = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 			$version      = Constants::get_constant( 'WC_VERSION' );
 
