@@ -1,0 +1,46 @@
+.wp-block-woocommerce-product-details {
+	ul.tabs {
+		list-style: none;
+		padding: 0 0 0 1em;
+		margin: 0 0 1.618em;
+		overflow: hidden;
+		position: relative;
+		border-bottom: 1px solid $gray-200;
+
+		li {
+			border: 1px solid $gray-200;
+			background-color: $white;
+			display: inline-block;
+			position: relative;
+			z-index: 0;
+			border-radius: 4px 4px 0 0;
+			margin: 0;
+			padding: 0.5em 1em;
+			opacity: 0.5;
+
+			a {
+				display: inline-block;
+				font-weight: 700;
+				color: $black;
+				text-decoration: none;
+
+				&:hover {
+					text-decoration: none;
+					color: color.adjust($black, $lightness: 10%);
+				}
+			}
+
+			&.active {
+				background: $gray-100;
+				z-index: 2;
+				border-bottom-color: $gray-200;
+				opacity: 1;
+
+				a {
+					color: inherit;
+					text-shadow: inherit;
+				}
+			}
+		}
+	}
+}
