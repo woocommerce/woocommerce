@@ -28,6 +28,13 @@ class ProductImageGallery extends AbstractBlock {
 		return [ 'query', 'queryId', 'postId' ];
 	}
 
+	/**
+	 * It isn't necessary register block assets because it is a server side block.
+	 */
+	protected function register_block_type_assets() {
+		return null;
+	}
+
 
 	/**
 	 * Include and render the block.
