@@ -2567,16 +2567,16 @@ function wc_update_750_add_columns_to_order_stats_table() {
 	global $wpdb;
 
 	$wpdb->query(
-		"UPDATE wp_wc_order_stats AS order_stats
-		INNER JOIN wp_postmeta AS postmeta
+		"UPDATE {$wpdb->prefix}wc_order_stats AS order_stats
+		INNER JOIN {$wpdb->postmeta} AS postmeta
 			ON postmeta.post_id = order_stats.order_id
 			and postmeta.meta_key = '_date_paid'
 		SET order_stats.date_paid = IFNULL(FROM_UNIXTIME(postmeta.meta_value), '0000-00-00 00:00:00');"
 	);
 
 	$wpdb->query(
-		"UPDATE wp_wc_order_stats AS order_stats
-		INNER JOIN wp_postmeta AS postmeta
+		"UPDATE {$wpdb->prefix}wc_order_stats AS order_stats
+		INNER JOIN {$wpdb->postmeta} AS postmeta
 			ON postmeta.post_id = order_stats.order_id
 			and postmeta.meta_key = '_date_completed'
 		SET order_stats.date_completed = IFNULL(FROM_UNIXTIME(postmeta.meta_value), '0000-00-00 00:00:00');"
