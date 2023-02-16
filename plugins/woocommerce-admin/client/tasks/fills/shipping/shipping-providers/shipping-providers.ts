@@ -12,9 +12,15 @@ import {
 
 // Order is respected, left to right in the UI
 const shippingProviders = {
+	AU: {
+		shipping_providers: [ 'ShipStation' ] as const,
+	},
 	MX: {
 		// using name instead of directly referencing the component because we want to send this over the API in the near future
 		shipping_providers: [ 'Skydropx' ] as const,
+	},
+	CA: {
+		shipping_providers: [ 'ShipStation' ] as const,
 	},
 	CO: {
 		shipping_providers: [ 'Skydropx' ] as const,
@@ -61,6 +67,9 @@ const shippingProviders = {
 	GB: {
 		shipping_providers: [ 'Sendcloud', 'ShipStation' ] as const,
 	},
+	US: {
+		shipping_providers: [ 'WooCommerceShipping' ] as const,
+	},
 };
 
 const providers = {
@@ -101,10 +110,13 @@ const providers = {
 
 /**
  * Gets the components for the shipping providers for a given country
- * @param countryCode One of the countries above
- * @returns Either a single partner component or an array containing two partner components
+ *
+ * @param  countryCode One of the countries above
+ * @return Either a single partner component or an array containing two partner components
  */
-export const getShippingProviders = ( countryCode: keyof typeof shippingProviders ) => {
+export const getShippingProviders = (
+	countryCode: keyof typeof shippingProviders
+) => {
 	const countryProviders =
 		shippingProviders[ countryCode ]?.shipping_providers;
 
@@ -113,9 +125,9 @@ export const getShippingProviders = ( countryCode: keyof typeof shippingProvider
 	}
 
 	return countryProviders.length === 1
-		? providers[ countryProviders[ 0 ] ][ 'single-partner-layout' ]
+		? [ providers[ countryProviders[ 0 ] ] ]
 		: [
-				providers[ countryProviders[ 0 ] ][ 'dual-partner-layout' ],
-				providers[ countryProviders[ 1 ] ][ 'dual-partner-layout' ],
+				providers[ countryProviders[ 0 ] ],
+				providers[ countryProviders[ 1 ] ],
 		  ];
 };
