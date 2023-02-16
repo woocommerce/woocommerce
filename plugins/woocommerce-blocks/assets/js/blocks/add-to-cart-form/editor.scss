@@ -1,0 +1,27 @@
+.wc-block-add-to-cart-form {
+	display: flex;
+	flex-direction: row;
+}
+
+.wc-block-add-to-cart-form__notice {
+	margin: 10px 0;
+	color: $black;
+	max-width: 60%;
+}
+input.wc-block-add-to-cart-form__quantity {
+	width: 35px;
+	float: left;
+	padding: 10px 6px 10px 12px;
+	margin-right: 10px;
+	height: 15px;
+}
+
+input[type="number"]::-webkit-inner-spin-button {
+	opacity: 1;
+}
+
+.wc-block-add-to-cart-form__button {
+	float: left;
+	padding: 20px 30px;
+	border-radius: 0;
+}
