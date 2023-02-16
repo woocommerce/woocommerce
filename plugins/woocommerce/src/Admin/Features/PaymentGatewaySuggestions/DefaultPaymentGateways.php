@@ -33,8 +33,8 @@ class DefaultPaymentGateways {
 		'klarna_payments'                                 => 6,
 		// Klarna Checkout.
 		'kco'                                             => 6,
-		'eway'                                            => 6,
 		'paystack'                                        => 6,
+		'eway'                                            => 7,
 		'amazon_payments_advanced'                        => 7,
 		'affirm'                                          => 8,
 		'afterpay'                                        => 9,
