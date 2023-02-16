@@ -86,24 +86,29 @@ const providers = {
 	Sendcloud: {
 		name: 'Sendcloud' as const,
 		slug: 'sendcloud-shipping', // https://wordpress.org/plugins/sendcloud-shipping/
+		url: 'https://woocommerce.com/products/sendcloud/',
 		'single-partner-layout': SendcloudSinglePartner,
 		'dual-partner-layout': SendcloudDualPartner,
 	},
 	Packlink: {
 		name: 'Packlink' as const,
 		slug: 'packlink-pro-shipping', // https://wordpress.org/plugins/packlink-pro-shipping/
+		url: 'https://woocommerce.com/products/packlink-pro/',
 		'single-partner-layout': PacklinkSinglePartner,
 		'dual-partner-layout': PacklinkDualPartner,
 	},
 	ShipStation: {
 		name: 'ShipStation' as const,
 		slug: 'woocommerce-shipstation-integration', // https://wordpress.org/plugins/woocommerce-shipstation-integration/
+		url: 'https://woocommerce.com/products/shipstation-integration/',
 		'single-partner-layout': ShipStationSinglePartner,
 		'dual-partner-layout': ShipStationDualPartner,
 	},
 	WooCommerceShipping: {
 		name: 'WooCommerce Shipping' as const,
 		slug: 'woocommerce-services', // https://wordpress.org/plugins/woocommerce-services/
+		url: 'https://woocommerce.com/products/shipping',
+		dependencies: 'jetpack',
 		'single-partner-layout': WooCommerceShippingSinglePartner,
 	},
 } as const;

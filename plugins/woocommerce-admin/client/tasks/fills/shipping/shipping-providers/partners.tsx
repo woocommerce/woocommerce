@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-
 /**
  * Internal dependencies
  */
@@ -57,7 +56,11 @@ export const SendcloudSinglePartner = () => {
 /**
  * Narrow Column Layout for Sendcloud
  */
-export const SendcloudDualPartner = () => {
+export const SendcloudDualPartner = ( {
+	children,
+}: {
+	children: React.ReactNode;
+} ) => {
 	const features = [
 		{
 			icon: CheckIcon,
@@ -87,9 +90,10 @@ export const SendcloudDualPartner = () => {
 		<PluginBanner
 			layout="dual"
 			features={ features }
+			description={ __( 'All-in-one shipping tool:', 'woocommerce' ) }
 			logo={ { image: SendCloudColumnImage } }
 		>
-			<div>test</div>
+			{ children }
 		</PluginBanner>
 	);
 };
@@ -109,7 +113,11 @@ export const PacklinkSinglePartner = () => {
 /**
  * Narrow Column Layout for Packlink
  */
-export const PacklinkDualPartner = () => {
+export const PacklinkDualPartner = ( {
+	children,
+}: {
+	children: React.ReactNode;
+} ) => {
 	const features = [
 		{
 			icon: CheckIcon,
@@ -146,7 +154,13 @@ export const PacklinkDualPartner = () => {
 			layout="dual"
 			features={ features }
 			logo={ { image: PacklinkColumnImage } }
-		/>
+			description={ __(
+				'Optimize your full shipping process:',
+				'woocommerce'
+			) }
+		>
+			{ children }
+		</PluginBanner>
 	);
 };
 
@@ -165,7 +179,11 @@ export const ShipStationSinglePartner = () => {
 /**
  * Narrow Column Layout for ShipStation
  */
-export const ShipStationDualPartner = () => {
+export const ShipStationDualPartner = ( {
+	children,
+}: {
+	children: React.ReactNode;
+} ) => {
 	const features = [
 		{
 			icon: CheckIcon,
@@ -199,14 +217,16 @@ export const ShipStationDualPartner = () => {
 			layout="dual"
 			features={ features }
 			logo={ { image: ShipStationColumnImage } }
-		/>
+			description={ __(
+				'Powerful yet easy-to-use solution:',
+				'woocommerce'
+			) }
+		>
+			{ children }
+		</PluginBanner>
 	);
 };
 
-/**
- * Banner layout for WooCommerce Shipping
- * TODO: might not need to implement: see slack
- */
 export const WooCommerceShippingSinglePartner = () => {
 	return <WCSBanner />;
 };

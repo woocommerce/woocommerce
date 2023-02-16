@@ -306,7 +306,7 @@ export class Shipping extends Component {
 				label: __( 'Enable shipping label printing', 'woocommerce' ),
 				description: pluginsToActivate.includes(
 					'woocommerce-shipstation-integration'
-				) // TODO: change this to each plugins description
+				)
 					? interpolateComponents( {
 							mixedString: __(
 								'We recommend using ShipStation to save time at the post office by printing your shipping ' +
@@ -447,9 +447,69 @@ export class Shipping extends Component {
 								<div className="woocommerce-task-shipping-recommendation_plugins-install-container">
 									{ pluginsToPromote.map(
 										( pluginToPromote ) => {
+											const pluginsForPartner = [
+												pluginToPromote?.slug,
+												pluginToPromote?.dependencies,
+											].filter(
+												( element ) =>
+													element !== undefined
+											); // remove undefineds
+											// TODO: if pluginsForPartner is empty then we show a CTA with the URL instead
 											return pluginToPromote[
 												'dual-partner-layout'
-											]();
+											]( {
+												children: (
+													<div className="woocommerce-task-shipping-recommendations_plugins-buttons">
+														<Plugins
+															onComplete={ (
+																response
+															) => {
+																createNoticesFromResponse(
+																	response
+																);
+																recordEvent(
+																	'tasklist_shipping_label_printing',
+																	{
+																		install: true,
+																		plugins_to_activate:
+																			pluginsForPartner,
+																	}
+																);
+																this.completeStep();
+															} }
+															onError={ (
+																errors,
+																response
+															) =>
+																createNoticesFromResponse(
+																	response
+																)
+															}
+															installText={ __(
+																'Install and enable',
+																'woocommerce'
+															) }
+															learnMore={
+																pluginToPromote.url
+															}
+															onLearnMore={ () => {
+																recordEvent(
+																	'tasklist_shipping_label_printing_learn_more',
+																	{
+																		plugin: pluginToPromote.slug,
+																	}
+																);
+															} }
+															pluginSlugs={
+																pluginsForPartner
+															}
+															installButtonVariant={
+																'secondary'
+															}
+														/>
+													</div>
+												),
+											} );
 										}
 									) }
 								</div>
@@ -478,6 +538,7 @@ export class Shipping extends Component {
 								<Button
 									isTertiary
 									onClick={ onShippingPluginInstalltionSkip }
+									className="woocommerce-task-shipping-recommendations_skip-button"
 								>
 									{ __( 'No Thanks', 'woocommerce' ) }
 								</Button>

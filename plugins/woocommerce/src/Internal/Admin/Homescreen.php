@@ -126,7 +126,7 @@ class Homescreen {
 		if (
 			( 'US' === $country_code && $is_jetpack_installed )
 			||
-			( ! in_array( $country_code, array( 'US', 'CA', 'AU', 'GB' ), true ) )
+			( ! in_array( $country_code, array( 'US', 'CA', 'AU', 'GB', 'ES' , 'IT' , 'DE' , 'FR' ), true ) ) // TODO: should make a constant that is shared with Shipping.php
 			||
 			( 'US' === $country_code && false === $is_jetpack_installed && false === $is_wcs_installed )
 		) {
