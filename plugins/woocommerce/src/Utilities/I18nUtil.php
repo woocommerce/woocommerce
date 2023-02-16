@@ -20,7 +20,7 @@ final class I18nUtil {
 	 * Get the translated label for a weight unit of measure.
 	 *
 	 * This will return the original input string if it isn't found in the units array. This way a custom unit of
-	 * measure can be used even if its' not getting translated.
+	 * measure can be used even if it's not getting translated.
 	 *
 	 * @param string $weight_unit The abbreviated weight unit in English, e.g. kg.
 	 *
