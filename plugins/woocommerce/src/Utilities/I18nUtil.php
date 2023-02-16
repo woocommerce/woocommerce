@@ -44,7 +44,7 @@ final class I18nUtil {
 	 * Get the translated label for a dimensions unit of measure.
 	 *
 	 * This will return the original input string if it isn't found in the units array. This way a custom unit of
-	 * measure can be used even if its' not getting translated.
+	 * measure can be used even if it's not getting translated.
 	 *
 	 * @param string $dimensions_unit The abbreviated dimension unit in English, e.g. cm.
 	 *
