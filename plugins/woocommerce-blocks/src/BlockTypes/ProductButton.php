@@ -89,26 +89,53 @@ class ProductButton extends AbstractBlock {
 			$html_element                  = ( ! $product->has_options() && $product->is_purchasable() && $product->is_in_stock() && ! $cart_redirect_after_add ) ? 'button' : 'a';
 			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'border_radius', 'font_size', 'font_weight', 'margin', 'padding', 'text_color' ) );
 			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
+			$html_classes                  = implode(
+				' ',
+				array_filter(
+					array(
+						'wp-block-button__link',
+						'wc-block-components-product-button__button',
+						$product->is_purchasable() && ! $product->has_options() ? 'ajax_add_to_cart add_to_cart_button' : '',
+						'product_type_' . $product->get_type(),
+						$styles_and_classes['classes'],
+					)
+				)
+			);
+
+			$args = apply_filters(
+				'woocommerce_loop_add_to_cart_args',
+				array(
+					'class'      => $html_classes,
+					'attributes' => array(
+						'data-product_id'  => $product->get_id(),
+						'data-product_sku' => $product->get_sku(),
+						'aria-label'       => $product->add_to_cart_description(),
+						'rel'              => 'nofollow',
+					),
+				),
+				$product
+			);
+
+			if ( isset( $args['attributes']['aria-label'] ) ) {
+				$args['attributes']['aria-label'] = wp_strip_all_tags( $args['attributes']['aria-label'] );
+			}
 
 			return apply_filters(
 				'woocommerce_loop_add_to_cart_link',
 				sprintf(
 					'<div class="wp-block-button wc-block-components-product-button wc-block-grid__product-add-to-cart %1$s">
-					<%2$s href="%3$s" rel="nofollow" data-product_id="%4$s" data-product_sku="%5$s" class="wp-block-button__link %6$s wc-block-components-product-button__button product_type_%7$s %8$s" style="%9$s">%10$s</%11$s>
+					<%2$s href="%3$s" class="%4$s" style="%5$s" %6$s>%7$s</%2$s>
 				</div>',
 					esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
 					$html_element,
 					esc_url( $product->add_to_cart_url() ),
-					esc_attr( $product->get_id() ),
-					esc_attr( $product->get_sku() ),
-					$product->is_purchasable() && ! $product->has_options() ? 'ajax_add_to_cart add_to_cart_button' : '',
-					esc_attr( $product->get_type() ),
-					esc_attr( $styles_and_classes['classes'] ),
+					isset( $args['class'] ) ? esc_attr( $args['class'] ) : '',
 					esc_attr( $styles_and_classes['styles'] ),
-					esc_html( $product->add_to_cart_text() ),
-					$html_element
+					isset( $args['attributes'] ) ? wc_implode_html_attributes( $args['attributes'] ) : '',
+					esc_html( $product->add_to_cart_text() )
 				),
-				$product
+				$product,
+				$args
 			);
 		}
 	}
