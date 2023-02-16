@@ -18,8 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array
  */
 function wc_get_screen_ids() {
+	global $admin_page_hooks;
 
-	$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
+	$wc_screen_id = $admin_page_hooks['woocommerce'];
 	$screen_ids   = array(
 		'toplevel_page_' . $wc_screen_id,
 		$wc_screen_id . '_page_wc-orders',
