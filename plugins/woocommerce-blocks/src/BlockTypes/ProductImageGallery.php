@@ -29,14 +29,6 @@ class ProductImageGallery extends AbstractBlock {
 	}
 
 	/**
-	 * It isn't necessary register block assets because it is a server side block.
-	 */
-	protected function register_block_type_assets() {
-		return null;
-	}
-
-
-	/**
 	 * Include and render the block.
 	 *
 	 * @param array    $attributes Block attributes. Default empty array.
