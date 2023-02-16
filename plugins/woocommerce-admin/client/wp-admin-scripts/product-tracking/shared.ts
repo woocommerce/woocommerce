@@ -418,10 +418,69 @@ export const initProductScreenTracks = () => {
 				'.woocommerce_attribute'
 			).length;
 			if ( newAttributesCount > attributesCount ) {
+				const global_attributes = [
+					...document.querySelectorAll( '.pa_glbattr' ),
+				].map( ( globalAttr ) => {
+					const terms =
+						(
+							globalAttr.querySelector(
+								'.attribute_values'
+							) as HTMLSelectElement
+						 ).selectedOptions?.length ?? 0;
+
+					return {
+						visibleOnTheProductPage: (
+							globalAttr.querySelector(
+								'[name="attribute_visibility[1]"'
+							) as HTMLInputElement
+						 )?.checked
+							? 'yes'
+							: 'no',
+						usedForVariations: (
+							globalAttr.querySelector(
+								'[name="attribute_variation[1]"'
+							) as HTMLInputElement
+						 )?.checked
+							? 'yes'
+							: 'no',
+						terms,
+					};
+				} );
+				const local_attributes = [
+					...document.querySelectorAll(
+						'.woocommerce_attribute:not(.pa_glbattr)'
+					),
+				].map( ( attr ) => {
+					const terms =
+						(
+							attr.querySelector(
+								"[name='attribute_values[0]']"
+							) as HTMLTextAreaElement
+						 )?.value.split( '|' ).length ?? 0;
+					return {
+						visibleOnTheProductPage: (
+							attr.querySelector(
+								'[name="attribute_visibility[1]"'
+							) as HTMLInputElement
+						 )?.checked
+							? 'yes'
+							: 'no',
+						usedForVariations: (
+							attr.querySelector(
+								'[name="attribute_variation[1]"'
+							) as HTMLInputElement
+						 )?.checked
+							? 'yes'
+							: 'no',
+						terms,
+					};
+				} );
 				recordEvent( 'product_attributes_add', {
 					page: 'product',
 					enable_archive: '',
 					default_sort_order: '',
+					global_attributes,
+					local_attributes,
 				} );
 			}
 		} );
