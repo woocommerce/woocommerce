@@ -1,0 +1,21 @@
+.product-add-category {
+	&__tree-control {
+		margin-top: 8px;
+
+		.woocommerce-tree-select-control {
+
+			.components-base-control,
+			.woocommerce-tree-select-control__tree {
+				padding: 0 5px;
+			}
+
+			.components-checkbox-control__label {
+				min-height: 32px;
+			}
+		}
+	}
+}
+
+.categorydiv #product_cat-all {
+	overflow: visible;
+}

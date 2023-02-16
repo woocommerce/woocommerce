@@ -305,29 +305,39 @@ jQuery( function( $ ) {
 					$( this ).selectWoo( select2_args ).addClass( 'enhanced' );
 				});
 
+				function markMatch(text, term) {
+					var startString = '<span class="boldwrap">';
+					var endString = text.replace(startString, '');
+					var match = endString.toUpperCase().indexOf((term || '').toUpperCase());
+
+					if (match < 0) {
+						return text;
+					}
+					var elementToReplace = endString.substr(match, term.length);
+
+					var $match = '<strong>' + endString.substring(match, match + term.length) + '</strong>';
+
+					return startString + endString.replace(elementToReplace, $match);
+				}
 				// Ajax category search boxes
 				$( ':input.wc-category-select' ).filter( ':not(.enhanced)' ).each( function() {
 					var return_format = $( this ).data( 'return_id' ) ? 'id' : 'slug';
+					var query;
 
 					function formatResult(data) {
-						/*var id = 'state' + state.id;
-						var checkbox = $('<div class="checkbox"><input id="'+id+'" type="checkbox" '+(state.selected ? 'checked': '')+'><label for="'+id+'">'+state.text+'</label></div>', { id: id });
-						return checkbox;*/
 						if (data.loading){
 							return data.text;
 						}
 						var markup = "";
-						if(data.children){
-							markup = "<div class='select2-treeview'><div class='select2-treeview-triangle select2-treeview-down'></div><span>" + data.text + "</span></div>";
-						}else{
-							markup = "<div class='select2-treeview-item'><span><img style='height: 15px;width: 18px; margin-right: 5px;' src='https://select2.github.io/vendor/images/flags/" + data.element.value.toLowerCase() + ".png' class='img-flag' />" + data.text + "</span></div>";
-						}
+						var term = query.term || '';
+						var id = 'state' + data.term_id;
+						markup = $('<div class="checkbox"><input id="'+id+'" type="checkbox" '+(data.selected ? 'checked': '')+'><label for="'+id+'">'+markMatch( data.text, term ) +'</label></div>', { id: id });
 						return markup;
 					}
 
 					var select2_args = $.extend( {
 						templateResult: formatResult,
-						closeOnSelect:false,
+						closeOnSelect     : false,
 						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
 						placeholder       : $( this ).data( 'placeholder' ),
 						minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : '3',
@@ -341,9 +351,11 @@ jQuery( function( $ ) {
 							dataType:    'json',
 							delay:       250,
 							data:        function( params ) {
+								query = params;
 								return {
 									term:     params.term,
-									action:   'woocommerce_json_search_categories_tree',
+									hide_empty: false,
+									action:   'woocommerce_json_search_categories',
 									security: wc_enhanced_select_params.search_categories_nonce
 								};
 							},
@@ -353,7 +365,7 @@ jQuery( function( $ ) {
 									$.each( data, function( id, term ) {
 										terms.push({
 											id:   'id' === return_format ? term.term_id : term.slug,
-											text: term.name
+											text: term.formatted_name
 										});
 									});
 								}

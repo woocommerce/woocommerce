@@ -34,9 +34,9 @@ class WC_Meta_Box_Product_Categories {
 		$parsed_args = wp_parse_args( $args, $defaults );
 		$tax_name    = esc_attr( $parsed_args['taxonomy'] );
 		$taxonomy    = get_taxonomy( $parsed_args['taxonomy'] );
+		$selected_categories = wp_get_object_terms( $post->ID, 'product_cat' );
 		?>
 		<div id="taxonomy-<?php echo $tax_name; ?>" class="categorydiv">
-			<div>Test</div>
 			<ul id="<?php echo $tax_name; ?>-tabs" class="category-tabs">
 				<li class="tabs"><a href="#<?php echo $tax_name; ?>-all"><?php echo $taxonomy->labels->all_items; ?></a></li>
 				<li class="hide-if-no-js"><a href="#<?php echo $tax_name; ?>-pop"><?php echo esc_html( $taxonomy->labels->most_used ); ?></a></li>
@@ -53,27 +53,31 @@ class WC_Meta_Box_Product_Categories {
 				$current_category_slug = isset( $_GET['product_cat'] ) ? wc_clean( wp_unslash( $_GET['product_cat'] ) ) : false; // WPCS: input var ok, CSRF ok.
 				$current_category      = $current_category_slug ? get_term_by( 'slug', $current_category_slug, 'product_cat' ) : false;
 				?>
-				<select class="wc-category-select" name="product_cat" data-placeholder="<?php esc_attr_e( 'Add category', 'woocommerce' ); ?>" data-allow_clear="true" multiple="multiple">
+				<div class="wc-select-tree-control"></div>
+				<!--<select class="wc-category-select" name="link_category" data-placeholder="<?php esc_attr_e( 'Add category', 'woocommerce' ); ?>" data-allow_clear="true" multiple="multiple">
 					<?php if ( $current_category_slug && $current_category ) : ?>
 						<option value="<?php echo esc_attr( $current_category_slug ); ?>" selected="selected"><?php echo esc_html( htmlspecialchars( wp_kses_post( $current_category->name ) ) ); ?></option>
 					<?php endif; ?>
-				</select>
-				<ul class="tagchecklist" role="list"></ul>
-				<?php
-				$name = ( 'category' === $tax_name ) ? 'post_category' : 'tax_input[' . $tax_name . ']';
-				// Allows for an empty term set to be sent. 0 is an invalid term ID and will be ignored by empty() checks.
-				echo "<input type='hidden' name='{$name}[]' value='0' />";
-				?>
-				<ul id="<?php echo $tax_name; ?>checklist" data-wp-lists="list:<?php echo $tax_name; ?>" class="categorychecklist form-no-clear">
+				</select> -->
+				<ul id="categorychecklist" data-wp-lists="list:category" class="categorychecklist form-no-clear">
 					<?php
-					wp_terms_checklist(
-						$post->ID,
-						array(
-							'taxonomy'     => $tax_name,
-							'popular_cats' => $popular_ids,
-						)
-					);
-					?>
+					foreach ( (array) $selected_categories as $term ) {
+						$id      = "$term->term_id";
+						$checked = 'checked="checked"';
+						?>
+
+						<li id="link-category-<?php echo $id; ?>">
+							<label for="in-link-category-<?php echo $id; ?>" class="selectit">
+								<input id="in-link-category-<?php echo $id; ?>" type="checkbox" <?php echo $checked; ?> value="<?php echo (int) $term->term_id; ?>" name="link_category[]" />
+								<?php
+								/** This filter is documented in wp-includes/category-template.php */
+								echo esc_html( apply_filters( 'the_category', $term->name, '', '' ) );
+								?>
+							</label>
+						</li>
+
+						<?php
+					} ?>
 				</ul>
 			</div>
 			<?php if ( current_user_can( $taxonomy->cap->edit_terms ) ) : ?>
