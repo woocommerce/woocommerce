@@ -47,7 +47,11 @@ const AccountSettingsLink = () => {
 		}
 	);
 
-	return <div className="account-link">{ linkText }</div>;
+	return (
+		<div className="wc-block-editor-customer-account__link">
+			{ linkText }
+		</div>
+	);
 };
 
 export const BlockSettings = ( {
