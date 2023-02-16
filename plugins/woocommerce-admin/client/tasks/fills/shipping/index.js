@@ -1,14 +1,14 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { Component } from '@wordpress/element';
-import { Card, CardBody } from '@wordpress/components';
+import { Button, Card, CardBody } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { difference, filter } from 'lodash';
 import interpolateComponents from '@automattic/interpolate-components';
-import { withDispatch, withSelect } from '@wordpress/data';
+import { plugins, withDispatch, withSelect } from '@wordpress/data';
 import { Link, Stepper, Plugins } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
@@ -30,8 +30,7 @@ import Connect from '../../../dashboard/components/connect';
 import { getCountryCode } from '../../../dashboard/utils';
 import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
-import { WCSBanner } from '../experimental-shipping-recommendation/components/wcs-banner';
-import { ShipStationBanner } from '../experimental-shipping-recommendation/components/shipstation-banner';
+import { getShippingProviders } from './shipping-providers/shipping-providers';
 import { createNoticesFromResponse } from '../../../lib/notices';
 import './shipping.scss';
 
@@ -183,19 +182,6 @@ export class Shipping extends Component {
 		}
 	}
 
-	getPluginsToActivate() {
-		const { countryCode } = this.props;
-
-		const plugins = [];
-		if ( [ 'GB', 'CA', 'AU' ].includes( countryCode ) ) {
-			plugins.push( 'woocommerce-shipstation-integration' );
-		} else if ( countryCode === 'US' ) {
-			plugins.push( 'woocommerce-services' );
-			plugins.push( 'jetpack' );
-		}
-		return difference( plugins, this.activePlugins );
-	}
-
 	getSteps() {
 		const {
 			countryCode,
@@ -208,7 +194,48 @@ export class Shipping extends Component {
 			task,
 			updateAndPersistSettingsForGroup,
 		} = this.props;
-		const pluginsToActivate = this.getPluginsToActivate(); // TODO: change this to hasPluginsToPromote
+		const pluginsToPromote = getShippingProviders( this.props.countryCode );
+		const pluginsToActivate = pluginsToPromote.map( ( pluginToPromote ) => {
+			return pluginToPromote.slug;
+		} );
+
+		// Add jetpack to the list if the list includes woocommerce-services
+		if ( pluginsToActivate.includes( 'woocommerce-services' ) ) {
+			pluginsToActivate.push( 'jetpack' );
+		}
+
+		const onShippingPluginInstalltionSkip = () => {
+			recordEvent( 'tasklist_shipping_label_printing', {
+				install: false,
+				plugins_to_activate: pluginsToActivate,
+			} );
+			getHistory().push( getNewPath( {}, '/', {} ) );
+			onComplete();
+		};
+
+		const getSinglePluginDescription = ( name, slug ) => {
+			return interpolateComponents( {
+				mixedString: sprintf(
+					/* translators: %s = plugin name */
+					__(
+						'Save time and money by printing your shipping labels right from your computer with %1$s. Try %2$s for free. {{link}}Learn more{{/link}}',
+						'woocommerce'
+					),
+					name,
+					name
+				),
+				components: {
+					link: (
+						<Link
+							href={ 'https://wordpress.org/plugins/' + slug }
+							target="_blank"
+							type="external"
+						/>
+					),
+				},
+			} );
+		};
+
 		const requiresJetpackConnection =
 			! isJetpackConnected && countryCode === 'US';
 
@@ -349,7 +376,6 @@ export class Shipping extends Component {
 				),
 				visible: requiresJetpackConnection,
 			},
-
 		];
 
 		// Override the step fields for the smart shipping defaults.
@@ -400,71 +426,63 @@ export class Shipping extends Component {
 						'Enable shipping label printing and discounted rates',
 						'woocommerce'
 					),
-					description: pluginsToActivate.includes(
-						'woocommerce-shipstation-integration'
-					)
-						? interpolateComponents( {
-								mixedString: __(
-									'We recommend using ShipStation to save time at the post office by printing your shipping ' +
-										'labels at home. Try ShipStation free for 30 days. {{link}}Learn more{{/link}}.',
+					description:
+						pluginsToPromote.length === 1
+							? getSinglePluginDescription(
+									pluginsToPromote[ 0 ].name,
+									pluginsToPromote[ 0 ].slug
+							  )
+							: __(
+									'Save time and money by printing your shipping labels right from your computer with one of these shipping solutions.',
 									'woocommerce'
-								),
-								components: {
-									link: (
-										<Link
-											href="https://woocommerce.com/products/shipstation-integration?utm_medium=product"
-											target="_blank"
-											type="external"
-										/>
-									),
-								},
-						  } )
-						: __(
-								'Save time and fulfill your orders with WooCommerce Shipping. You can manage it at any time in WooCommerce Shipping Settings.',
-								'woocommerce'
-						  ),
+							  ),
 
 					content: (
 						<>
-							{ pluginsToActivate.includes(
-								'woocommerce-services'
-							) ? (
-								<WCSBanner />
+							{ pluginsToPromote.length === 1 ? (
+								pluginsToPromote[ 0 ][
+									'single-partner-layout'
+								]()
 							) : (
-								<ShipStationBanner />
+								<div className="woocommerce-task-shipping-recommendation_plugins-install-container">
+									{ pluginsToPromote.map(
+										( pluginToPromote ) => {
+											return pluginToPromote[
+												'dual-partner-layout'
+											]();
+										}
+									) }
+								</div>
 							) }
-							<Plugins
-								onComplete={ ( plugins, response ) => {
-									createNoticesFromResponse( response );
-									recordEvent(
-										'tasklist_shipping_label_printing',
-										{
-											install: true,
-											plugins_to_activate:
-												pluginsToActivate,
-										}
-									);
-									this.completeStep();
-								} }
-								onError={ ( errors, response ) =>
-									createNoticesFromResponse( response )
-								}
-								onSkip={ () => {
-									recordEvent(
-										'tasklist_shipping_label_printing',
-										{
-											install: false,
-											plugins_to_activate:
-												pluginsToActivate,
-										}
-									);
-									getHistory().push(
-										getNewPath( {}, '/', {} )
-									);
-									onComplete();
-								} }
-								pluginSlugs={ pluginsToActivate }
-							/>
+							{ pluginsToPromote.length === 1 ? (
+								<Plugins
+									onComplete={ ( plugins, response ) => {
+										createNoticesFromResponse( response );
+										recordEvent(
+											'tasklist_shipping_label_printing',
+											{
+												install: true,
+												plugins_to_activate:
+													pluginsToActivate,
+											}
+										);
+										this.completeStep();
+									} }
+									onError={ ( errors, response ) =>
+										createNoticesFromResponse( response )
+									}
+									onSkip={ onShippingPluginInstalltionSkip }
+									pluginSlugs={ pluginsToActivate }
+								/>
+							) : (
+								<Button
+									isTertiary
+									onClick={ onShippingPluginInstalltionSkip }
+								>
+									{ __( 'No Thanks', 'woocommerce' ) }
+								</Button>
+							) }
+
 							{ ! isJetpackConnected &&
 								pluginsToActivate.includes(
 									'woocommerce-services'
