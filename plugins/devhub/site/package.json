@@ -1,0 +1,36 @@
+{
+  "name": "dev-hub",
+  "version": "1.0.0",
+  "private": true,
+  "description": "dev-hub",
+  "author": "Sam Seay",
+  "keywords": [
+    "gatsby"
+  ],
+  "scripts": {
+    "develop": "gatsby develop",
+    "start": "gatsby develop",
+    "build": "gatsby build",
+    "serve": "gatsby serve",
+    "clean": "gatsby clean",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@mdx-js/react": "^2.3.0",
+    "babel-plugin-styled-components": "^2.0.7",
+    "gatsby": "^5.6.0",
+    "gatsby-plugin-manifest": "^5.6.0",
+    "gatsby-plugin-mdx": "^5.6.0",
+    "gatsby-plugin-styled-components": "^6.6.0",
+    "gatsby-source-filesystem": "^5.6.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "styled-components": "^5.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.18",
+    "@types/react": "^18.0.27",
+    "@types/react-dom": "^18.0.10",
+    "typescript": "^4.9.5"
+  }
+}

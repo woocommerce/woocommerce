@@ -13,6 +13,10 @@ project.properties
 *.sublime-workspace
 .sublimelinterrc
 
+# Gatsby files
+.cache/
+public/
+
 # Grunt
 none
 
