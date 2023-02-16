@@ -52,7 +52,9 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 
 		// add 3 attributes
 		for ( let i = 0; i < 3; i++ ) {
-			await page.click( 'button.add_attribute' );
+			if ( i > 0 ) {
+				await page.click( 'button.add_attribute' );
+			}
 			await page.fill(
 				`input[name="attribute_names[${ i }]"]`,
 				`attr #${ i + 1 }`
@@ -61,7 +63,6 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 				`textarea[name="attribute_values[${ i }]"]`,
 				'val1 | val2'
 			);
-			await page.click( `input[name="attribute_variation[${ i }]"]` );
 		}
 		await page.click( 'text=Save attributes' );
 
@@ -199,7 +200,9 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 		await page.click( 'a[href="#product_attributes"]' );
 		// add 3 attributes
 		for ( let i = 0; i < 3; i++ ) {
-			await page.click( 'button.add_attribute' );
+			if ( i > 0 ) {
+				await page.click( 'button.add_attribute' );
+			}
 			await page.fill(
 				`input[name="attribute_names[${ i }]"]`,
 				`attr #${ i + 1 }`
@@ -208,7 +211,6 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 				`textarea[name="attribute_values[${ i }]"]`,
 				'val1 | val2'
 			);
-			await page.click( `input[name="attribute_variation[${ i }]"]` );
 			await page.click( 'text=Save attributes' );
 			await expect(
 				page
