@@ -6,6 +6,10 @@
 	justify-content: space-around;
 	margin-bottom: $gap-large;
 
+	&.dual {
+		width: 285px;
+	}
+
 	.plugins-install__plugin-banner-image {
 		display: flex;
 
@@ -29,4 +33,11 @@
 	.plugins-install__list-icon {
 		margin-right: $gap-small;
 	}
+}
+
+.woocommerce-task-shipping-recommendation_plugins-install-container {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 10px;
 }
