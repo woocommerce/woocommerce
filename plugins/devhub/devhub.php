@@ -36,7 +36,6 @@ function create_gatsby_page() {
 
 register_activation_hook(__FILE__, 'create_gatsby_page');
 
-
 function gatsby_template( $original_template ) {
 	global $post;
 
@@ -48,18 +47,3 @@ function gatsby_template( $original_template ) {
 }
 
 add_filter( 'template_include', 'gatsby_template' );
-
-function enqueue_gatsby_assets() {
-  $gatsby_assets_dir = dirname(__FILE__) . '/site/public'; // Replace with actual path to Gatsby public directory
-  $gatsby_js_files = glob( $gatsby_assets_dir . '/*.js' );
-  
-  foreach ( $gatsby_js_files as $js_file ) {
-    $js_file_url = str_replace( $gatsby_assets_dir, get_site_url(), $js_file );    
-    $js_file_handle = 'gatsby-' . basename( $js_file, '.js' );
-    wp_register_script( $js_file_handle, $js_file_url, array(), null, true );
-    wp_enqueue_script( basename( $js_file ), $js_file_url, array(), null, true );
-  }
-}
-
-add_action( 'wp_enqueue_scripts', 'enqueue_gatsby_assets' );
-
