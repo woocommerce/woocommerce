@@ -4,6 +4,7 @@ on: [pull_request]
 
 jobs:
   generate-zip-file:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-zip') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
