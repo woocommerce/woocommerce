@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Comment: Fix inconsistencies on Analytics > Orders table when using date_paid or date_completed

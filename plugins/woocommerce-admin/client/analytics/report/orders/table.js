@@ -116,7 +116,7 @@ class OrdersReportTable extends Component {
 		return map( tableData, ( row ) => {
 			const {
 				currency,
-				date_created: dateCreated,
+				date,
 				net_total: netTotal,
 				num_items_sold: numItemsSold,
 				order_id: orderId,
@@ -150,12 +150,9 @@ class OrdersReportTable extends Component {
 			return [
 				{
 					display: (
-						<Date
-							date={ dateCreated }
-							visibleFormat={ dateFormat }
-						/>
+						<Date date={ date } visibleFormat={ dateFormat } />
 					),
-					value: dateCreated,
+					value: date,
 				},
 				{
 					display: (
