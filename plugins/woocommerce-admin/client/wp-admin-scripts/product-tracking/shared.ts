@@ -432,7 +432,7 @@ export const initProductScreenTracks = () => {
 					return {
 						name: (
 							attr.querySelector(
-								'[name^="attribute_names"'
+								'[name^="attribute_names"]'
 							) as HTMLInputElement
 						 )?.value,
 						terms,

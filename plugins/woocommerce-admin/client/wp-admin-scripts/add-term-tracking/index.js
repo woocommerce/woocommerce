@@ -34,8 +34,12 @@ function addActionButtonListeners() {
 addActionButtonListeners();
 
 addNewTag?.addEventListener( 'click', function () {
+	const name = document.querySelector( '#tag-name' );
+	const slug = document.querySelector( '#tag-slug' );
 	recordEvent( 'product_attributes_add_term', {
 		page: 'tags',
+		name: name?.value,
+		slug: slug?.value,
 	} );
 	setTimeout( () => {
 		addActionButtonListeners();
