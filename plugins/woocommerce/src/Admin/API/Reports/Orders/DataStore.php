@@ -75,9 +75,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->report_columns = array(
 			'order_id'         => "DISTINCT {$table_name}.order_id",
 			'parent_id'        => "{$table_name}.parent_id",
-			/**
-			 * add 'date' field based on date type setting
-			 */
+			// Add 'date' field based on date type setting.
 			'date'             => "{$table_name}.{$this->date_column_name} AS date",
 			'date_created'     => "{$table_name}.date_created",
 			'date_created_gmt' => "{$table_name}.date_created_gmt",
