@@ -338,7 +338,7 @@ class WC_Helper_Updater {
 			}
 		}
 
-		if ( false === WC_Helper::verify_site_cache_status() ) {
+		if ( false === wc_is_transient_functional() ) {
 			WC_Helper::log( 'Could not perform update-check due to dysfunctional site cache. This could be due to a misconfigured object cache or database not having enough space.' );
 			return array();
 		}

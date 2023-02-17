@@ -1270,7 +1270,7 @@ class WC_Helper {
 			return $data;
 		}
 
-		if ( false === self::verify_site_cache_status() ) {
+		if ( false === wc_is_transient_functional() ) {
 			self::log( 'Could not fetch subscription data due to dysfunctional site cache. This could be due to a misconfigured object cache or database not having enough space.' );
 			return array();
 		}
@@ -1774,24 +1774,6 @@ class WC_Helper {
 
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
-	}
-
-	/**
-	 * Verify if the cache is working properly.
-	 *
-	 * @return bool
-	 */
-	public static function verify_site_cache_status(): bool {
-		$current_timestamp_cache_key = '_wc_helper_api_cache_test';
-		$current_timestamp           = time();
-		set_transient( $current_timestamp_cache_key, $current_timestamp );
-		$cached_timestamp = get_transient( '_wc_helper_api_cache_test' );
-		// To avoid a potential race condition where the transient is updated with a new timestamp.
-		if ( $current_timestamp <= (int) $cached_timestamp ) {
-			return true;
-		}
-
-		return false;
 	}
 }
 
