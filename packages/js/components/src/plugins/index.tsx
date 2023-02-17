@@ -9,7 +9,7 @@ import {
 	useState,
 	useEffect,
 } from '@wordpress/element';
-import { SyntheticEvent } from 'react';
+import { SyntheticEvent, useCallback } from 'react';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { PLUGINS_STORE_NAME, InstallPluginsResponse } from '@woocommerce/data';
 
@@ -64,51 +64,58 @@ export const Plugins = ( {
 		};
 	} );
 
-	const handleErrors = (
-		errors: unknown,
-		response: InstallPluginsResponse
-	) => {
-		setHasErrors( true );
+	const handleErrors = useCallback(
+		( errors: unknown, response: InstallPluginsResponse ) => {
+			setHasErrors( true );
 
-		onError( errors, response );
-	};
+			onError( errors, response );
+		},
+		[ onError ]
+	);
 
-	const handleSuccess = (
-		plugins: string[],
-		response: InstallPluginsResponse
-	) => {
-		onComplete( plugins, response );
-	};
+	const handleSuccess = useCallback(
+		( plugins: string[], response: InstallPluginsResponse ) => {
+			onComplete( plugins, response );
+		},
+		[ onComplete ]
+	);
 
-	const installAndActivate = async (
-		event?: SyntheticEvent< HTMLAnchorElement >
-	) => {
-		if ( event ) {
-			event.preventDefault();
-		}
+	const installAndActivate = useCallback(
+		async ( event?: SyntheticEvent< HTMLAnchorElement > ) => {
+			if ( event ) {
+				event.preventDefault();
+			}
 
-		// Avoid double activating.
-		if ( isRequesting ) {
-			return false;
-		}
+			// Avoid double activating.
+			if ( isRequesting ) {
+				return false;
+			}
 
-		installAndActivatePlugins( pluginSlugs )
-			.then( ( response ) => {
-				handleSuccess( response.data.activated, response );
-			} )
-			.catch( ( response ) => {
-				handleErrors( response.errors, response );
-			} );
-	};
+			installAndActivatePlugins( pluginSlugs )
+				.then( ( response ) => {
+					handleSuccess( response.data.activated, response );
+				} )
+				.catch( ( response ) => {
+					setHasBeenClicked( false );
+					handleErrors( response.errors, response );
+				} );
+		},
+		[
+			handleErrors,
+			handleSuccess,
+			installAndActivatePlugins,
+			isRequesting,
+			pluginSlugs,
+		]
+	);
 
 	useEffect( () => {
 		if ( autoInstall ) {
 			installAndActivate();
 		}
-	}, [] );
+	}, [ autoInstall, installAndActivate ] );
 
 	if ( hasErrors ) {
-		setHasBeenClicked( false );
 		return (
 			<>
 				<Button

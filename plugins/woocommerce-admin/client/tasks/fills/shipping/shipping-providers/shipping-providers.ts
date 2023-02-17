@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import {
 	EnviaSinglePartner,
 	SkydropxSinglePartner,
@@ -80,27 +83,28 @@ const providers = {
 	},
 	Skydropx: {
 		name: 'Skydropx' as const,
-		url: 'https://woocommerce.com/products/skydropx/', // no plugin yet so we link to the product page
+		slug: 'skydropx-cotizador-y-envios',
+		url: 'https://wordpress.org/plugins/skydropx-cotizador-y-envios/',
 		'single-partner-layout': SkydropxSinglePartner,
 	},
 	Sendcloud: {
 		name: 'Sendcloud' as const,
 		slug: 'sendcloud-shipping', // https://wordpress.org/plugins/sendcloud-shipping/
-		url: 'https://woocommerce.com/products/sendcloud/',
+		url: 'https://wordpress.org/plugins/sendcloud-shipping/',
 		'single-partner-layout': SendcloudSinglePartner,
 		'dual-partner-layout': SendcloudDualPartner,
 	},
 	Packlink: {
 		name: 'Packlink' as const,
 		slug: 'packlink-pro-shipping', // https://wordpress.org/plugins/packlink-pro-shipping/
-		url: 'https://woocommerce.com/products/packlink-pro/',
+		url: 'https://wordpress.org/plugins/packlink-pro-shipping/',
 		'single-partner-layout': PacklinkSinglePartner,
 		'dual-partner-layout': PacklinkDualPartner,
 	},
 	ShipStation: {
 		name: 'ShipStation' as const,
 		slug: 'woocommerce-shipstation-integration', // https://wordpress.org/plugins/woocommerce-shipstation-integration/
-		url: 'https://woocommerce.com/products/shipstation-integration/',
+		url: 'https://wordpress.org/plugins/woocommerce-shipstation-integration/',
 		'single-partner-layout': ShipStationSinglePartner,
 		'dual-partner-layout': ShipStationDualPartner,
 	},

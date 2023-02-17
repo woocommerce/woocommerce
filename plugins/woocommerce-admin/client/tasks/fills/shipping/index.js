@@ -22,6 +22,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { Text } from '@woocommerce/experimental';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -213,7 +214,7 @@ export class Shipping extends Component {
 			onComplete();
 		};
 
-		const getSinglePluginDescription = ( name, slug ) => {
+		const getSinglePluginDescription = ( name, url ) => {
 			return interpolateComponents( {
 				mixedString: sprintf(
 					/* translators: %s = plugin name */
@@ -225,13 +226,7 @@ export class Shipping extends Component {
 					name
 				),
 				components: {
-					link: (
-						<Link
-							href={ 'https://wordpress.org/plugins/' + slug }
-							target="_blank"
-							type="external"
-						/>
-					),
+					link: <Link href={ url } target="_blank" type="external" />,
 				},
 			} );
 		};
@@ -330,7 +325,7 @@ export class Shipping extends Component {
 					  ),
 				content: (
 					<Plugins
-						onComplete={ ( plugins, response ) => {
+						onComplete={ ( _plugins, response ) => {
 							createNoticesFromResponse( response );
 							recordEvent( 'tasklist_shipping_label_printing', {
 								install: true,
@@ -430,7 +425,7 @@ export class Shipping extends Component {
 						pluginsToPromote.length === 1
 							? getSinglePluginDescription(
 									pluginsToPromote[ 0 ].name,
-									pluginsToPromote[ 0 ].slug
+									pluginsToPromote[ 0 ].url
 							  )
 							: __(
 									'Save time and money by printing your shipping labels right from your computer with one of these shipping solutions.',
@@ -514,9 +509,22 @@ export class Shipping extends Component {
 									) }
 								</div>
 							) }
-							{ pluginsToPromote.length === 1 ? (
+							{ pluginsToPromote.length === 1 &&
+								pluginsToPromote[ 0 ].slug === undefined && ( // if it doesn't have a slug we just show a download button
+									<a
+										href={ pluginsToPromote[ 0 ].url }
+										target="_blank"
+										rel="noreferrer"
+									>
+										<Button variant="primary">
+											{ __( 'Download', 'woocommerce' ) }
+										</Button>
+									</a>
+								) }
+							{ pluginsToPromote.length === 1 &&
+							pluginsToPromote[ 0 ].slug ? (
 								<Plugins
-									onComplete={ ( plugins, response ) => {
+									onComplete={ ( _plugins, response ) => {
 										createNoticesFromResponse( response );
 										recordEvent(
 											'tasklist_shipping_label_printing',
@@ -533,12 +541,21 @@ export class Shipping extends Component {
 									}
 									onSkip={ onShippingPluginInstalltionSkip }
 									pluginSlugs={ pluginsToActivate }
+									installText={ __(
+										'Install and enable',
+										'woocommerce'
+									) }
 								/>
 							) : (
 								<Button
 									isTertiary
 									onClick={ onShippingPluginInstalltionSkip }
-									className="woocommerce-task-shipping-recommendations_skip-button"
+									className={ classNames(
+										'woocommerce-task-shipping-recommendations_skip-button',
+										pluginsToPromote.length === 2
+											? 'dual'
+											: ''
+									) }
 								>
 									{ __( 'No Thanks', 'woocommerce' ) }
 								</Button>

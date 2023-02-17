@@ -120,7 +120,7 @@ class Shipping extends Task {
 				return true;
 			}
 
-			return in_array( $store_country, array( 'AU', 'CA', 'GB' , 'ES' , 'IT' , 'DE' , 'FR' ), true ); // TODO: should make a constant that is shared with Homescreen.php
+			return in_array( $store_country, array( 'US', 'CA', 'AU', 'GB', 'ES' , 'IT' , 'DE' , 'FR' , 'MX' , 'CO' , 'CL' , 'AR' , 'PE' , 'BR' , 'UY' , 'GT' , 'NL' , 'AT' , 'BE' ), true ); // TODO: should make a constant that is shared with Homescreen.php
 		}
 
 		return self::has_physical_products();
