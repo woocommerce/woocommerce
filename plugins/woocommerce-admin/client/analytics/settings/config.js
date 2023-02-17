@@ -143,6 +143,6 @@ export const config = applyFilters( SETTINGS_FILTER, {
 			'Database date field considered for Revenue and Orders reports',
 			'woocommerce'
 		),
-		defaultValue: 'date_created',
+		defaultValue: 'date_paid',
 	},
 } );
