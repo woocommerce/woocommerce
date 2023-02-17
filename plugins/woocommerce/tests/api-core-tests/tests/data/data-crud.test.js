@@ -1903,7 +1903,7 @@ test.describe('Data API tests', () => {
 							"currency_pos": "left_space",
 							"decimal_sep": ",",
 							"dimension_unit": "cm",
-							"num_decimals": 0,
+							"num_decimals": 2,
 							"thousand_sep": " ",
 							"weight_unit": "kg",
 							"states": []
@@ -1999,7 +1999,7 @@ test.describe('Data API tests', () => {
 							"currency_pos": "left_space",
 							"decimal_sep": ",",
 							"dimension_unit": "cm",
-							"num_decimals": 0,
+							"num_decimals": 2,
 							"thousand_sep": " ",
 							"weight_unit": "kg",
 							"states": []
@@ -3542,7 +3542,7 @@ test.describe('Data API tests', () => {
 						"currency_pos": "left_space",
 						"decimal_sep": ",",
 						"dimension_unit": "cm",
-						"num_decimals": 0,
+						"num_decimals": 2,
 						"thousand_sep": " ",
 						"weight_unit": "kg",
 						"states": []
@@ -3638,7 +3638,7 @@ test.describe('Data API tests', () => {
 						"currency_pos": "left_space",
 						"decimal_sep": ",",
 						"dimension_unit": "cm",
-						"num_decimals": 0,
+						"num_decimals": 2,
 						"thousand_sep": " ",
 						"weight_unit": "kg",
 						"states": []
