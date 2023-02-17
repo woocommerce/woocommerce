@@ -458,8 +458,20 @@ class CartItemSchema extends ProductSchema {
 		 * @param array $cart_item Cart item array.
 		 * @return array
 		 */
-		$item_data = apply_filters( 'woocommerce_get_item_data', array(), $cart_item );
-		return array_map( [ $this, 'format_item_data_element' ], $item_data );
+		$item_data       = apply_filters( 'woocommerce_get_item_data', array(), $cart_item );
+		$clean_item_data = [];
+		foreach ( $item_data as $data ) {
+			// We will check each piece of data in the item data element to ensure it is scalar. Extensions could add arrays
+			// to this, which would cause a fatal in wp_strip_all_tags. If it is not scalar, we will return an empty array,
+			// which will be filtered out in get_item_data (after this function has run).
+			foreach ( $data as $data_value ) {
+				if ( ! is_scalar( $data_value ) ) {
+					continue 2;
+				}
+			}
+			$clean_item_data[] = $this->format_item_data_element( $data );
+		}
+		return $clean_item_data;
 	}
 
 	/**
