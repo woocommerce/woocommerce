@@ -123,6 +123,11 @@ class Api {
 	 * an error in the admin.
 	 */
 	public function verify_payment_methods_dependencies() {
+		// Check that the wc-blocks script is registered before continuing. Some extensions may cause this function to run
+		// before the payment method scripts' dependencies are registered.
+		if ( ! wp_script_is( 'wc-blocks', 'registered' ) ) {
+			return;
+		}
 		$wp_scripts             = wp_scripts();
 		$payment_method_scripts = $this->payment_method_registry->get_all_active_payment_method_script_dependencies();
 
