@@ -40,6 +40,9 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 		onCheckoutAfterProcessingWithSuccess,
 		onCheckoutAfterProcessingWithError,
 		onSubmit,
+		onCheckoutSuccess,
+		onCheckoutFail,
+		onCheckoutValidation,
 	} = useCheckoutEventsContext();
 
 	const { isCalculating, isComplete, isIdle, isProcessing, customerId } =
@@ -111,7 +114,7 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 	const { __internalSetExpressPaymentError } =
 		useDispatch( PAYMENT_STORE_KEY );
 
-	const { onPaymentProcessing } = usePaymentEventsContext();
+	const { onPaymentProcessing, onPaymentSetup } = usePaymentEventsContext();
 	const {
 		shippingErrorStatus,
 		shippingErrorTypes,
@@ -210,7 +213,11 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 			onCheckoutAfterProcessingWithSuccess,
 			onCheckoutBeforeProcessing,
 			onCheckoutValidationBeforeProcessing,
+			onCheckoutSuccess,
+			onCheckoutFail,
+			onCheckoutValidation,
 			onPaymentProcessing,
+			onPaymentSetup,
 			onShippingRateFail,
 			onShippingRateSelectFail,
 			onShippingRateSelectSuccess,
