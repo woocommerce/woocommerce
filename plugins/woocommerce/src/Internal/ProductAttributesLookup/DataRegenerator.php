@@ -104,7 +104,7 @@ class DataRegenerator {
 		$this->data_store->unset_regeneration_in_progress_flag();
 
 		if ( $this->data_store->check_lookup_table_exists() ) {
-			$wpdb->query( "TRUNCATE TABLE {$this->lookup_table_name}" );
+			$wpdb->query( "TRUNCATE TABLE {$this->lookup_table_name}" ); // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 	}
 
