@@ -126,14 +126,13 @@ export const openWidgetEditor = async () => {
 };
 
 export const closeModalIfExists = async () => {
-	if (
-		await page.evaluate( () => {
-			return !! document.querySelector( '.components-modal__header' );
-		} )
-	) {
-		await page.click(
-			'.components-modal__header [aria-label="Close dialog"]'
-		);
+	// The modal close button can have different aria-labels, depending on the version of Gutenberg/WP.
+	// Newer versions (WP >=6.2) use `Close`, while older versions (WP <6.1) use `Close dialog`.
+	const closeButton = await page.$(
+		'.components-modal__header [aria-label="Close"], .components-modal__header [aria-label="Close dialog"]'
+	);
+	if ( closeButton ) {
+		await closeButton.click();
 	}
 };
 
