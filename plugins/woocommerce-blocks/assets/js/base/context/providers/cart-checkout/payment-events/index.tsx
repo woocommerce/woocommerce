@@ -7,6 +7,7 @@ import {
 	useReducer,
 	useRef,
 	useEffect,
+	useMemo,
 } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
@@ -14,6 +15,7 @@ import {
 	PAYMENT_STORE_KEY,
 	VALIDATION_STORE_KEY,
 } from '@woocommerce/block-data';
+import deprecated from '@wordpress/deprecated';
 
 /**
  * Internal dependencies
@@ -24,10 +26,12 @@ import { emitterCallback } from '../../../event-emit';
 type PaymentEventsContextType = {
 	// Event registration callback for registering observers for the payment processing event.
 	onPaymentProcessing: ReturnType< typeof emitterCallback >;
+	onPaymentSetup: ReturnType< typeof emitterCallback >;
 };
 
 const PaymentEventsContext = createContext< PaymentEventsContextType >( {
 	onPaymentProcessing: () => () => () => void null,
+	onPaymentSetup: () => () => () => void null,
 } );
 
 export const usePaymentEventsContext = () => {
@@ -65,7 +69,7 @@ export const PaymentEventsProvider = ( {
 		const store = select( PAYMENT_STORE_KEY );
 
 		return {
-			// The PROCESSING status represents befor the checkout runs the observers
+			// The PROCESSING status represents before the checkout runs the observers
 			// registered for the payment_setup event.
 			isPaymentProcessing: store.isPaymentProcessing(),
 			// the READY status represents when the observers have finished processing and payment data
@@ -76,7 +80,7 @@ export const PaymentEventsProvider = ( {
 
 	const { setValidationErrors } = useDispatch( VALIDATION_STORE_KEY );
 	const [ observers, observerDispatch ] = useReducer( emitReducer, {} );
-	const { onPaymentProcessing } = useEventEmitters( observerDispatch );
+	const { onPaymentSetup } = useEventEmitters( observerDispatch );
 	const currentObservers = useRef( observers );
 
 	// ensure observers are always current.
@@ -131,8 +135,22 @@ export const PaymentEventsProvider = ( {
 		}
 	}, [ checkoutHasError, isPaymentReady, __internalSetPaymentIdle ] );
 
+	/**
+	 * @deprecated use onPaymentSetup instead
+	 */
+	const onPaymentProcessing = useMemo( () => {
+		return function ( ...args: Parameters< typeof onPaymentSetup > ) {
+			deprecated( 'onPaymentProcessing', {
+				alternative: 'onPaymentSetup',
+				plugin: 'WooCommerce Blocks',
+			} );
+			return onPaymentSetup( ...args );
+		};
+	}, [ onPaymentSetup ] );
+
 	const paymentContextData = {
 		onPaymentProcessing,
+		onPaymentSetup,
 	};
 
 	return (

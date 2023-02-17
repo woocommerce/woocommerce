@@ -55,11 +55,11 @@ export const handleErrorResponse = ( {
 };
 
 /**
- * This functions runs after the CHECKOUT_AFTER_PROCESSING_WITH_ERROR event has been triggered and
+ * This functions runs after the CHECKOUT_FAIL event has been triggered and
  * all observers have been processed. It sets any Error Notices and the status of the Checkout
  * based on the observer responses
  */
-export const runCheckoutAfterProcessingWithErrorObservers = ( {
+export const runCheckoutFailObservers = ( {
 	observerResponses,
 	notices,
 	dispatch,
@@ -115,11 +115,11 @@ export const runCheckoutAfterProcessingWithErrorObservers = ( {
 };
 
 /**
- * This functions runs after the CHECKOUT_AFTER_PROCESSING_WITH_SUCCESS event has been triggered and
+ * This functions runs after the CHECKOUT_SUCCESS event has been triggered and
  * all observers have been processed. It sets any Error Notices and the status of the Checkout
  * based on the observer responses
  */
-export const runCheckoutAfterProcessingWithSuccessObservers = ( {
+export const runCheckoutSuccessObservers = ( {
 	observerResponses,
 	dispatch,
 	createErrorNotice,
@@ -159,7 +159,7 @@ export const runCheckoutAfterProcessingWithSuccessObservers = ( {
 			dispatch.__internalSetComplete( errorResponse );
 		} else {
 			// this will set an error which will end up
-			// triggering the onCheckoutAfterProcessingWithError emitter.
+			// triggering the onCheckoutFail emitter.
 			// and then setting checkout to IDLE state.
 			dispatch.__internalSetHasError( true );
 		}

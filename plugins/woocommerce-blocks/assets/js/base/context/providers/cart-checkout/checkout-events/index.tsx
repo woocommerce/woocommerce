@@ -35,22 +35,31 @@ import { useEditorContext } from '../../editor-context';
 type CheckoutEventsContextType = {
 	// Submits the checkout and begins processing.
 	onSubmit: () => void;
-	// Used to register a callback that will fire after checkout has been processed and there are no errors.
+	// Deprecated in favour of onCheckoutSuccess.
 	onCheckoutAfterProcessingWithSuccess: ReturnType< typeof emitterCallback >;
-	// Used to register a callback that will fire when the checkout has been processed and has an error.
+	// Deprecated in favour of onCheckoutFail.
 	onCheckoutAfterProcessingWithError: ReturnType< typeof emitterCallback >;
 	// Deprecated in favour of onCheckoutValidationBeforeProcessing.
 	onCheckoutBeforeProcessing: ReturnType< typeof emitterCallback >;
-	// Used to register a callback that will fire when the checkout has been submitted before being sent off to the server.
+	// Deprecated in favour of onCheckoutValidation.
 	onCheckoutValidationBeforeProcessing: ReturnType< typeof emitterCallback >;
+	// Used to register a callback that will fire if the api call to /checkout is successful
+	onCheckoutSuccess: ReturnType< typeof emitterCallback >;
+	// Used to register a callback that will fire if the api call to /checkout fails
+	onCheckoutFail: ReturnType< typeof emitterCallback >;
+	// Used to register a callback that will fire when the checkout performs validation on the form
+	onCheckoutValidation: ReturnType< typeof emitterCallback >;
 };
 
 const CheckoutEventsContext = createContext< CheckoutEventsContextType >( {
 	onSubmit: () => void null,
-	onCheckoutAfterProcessingWithSuccess: () => () => void null,
-	onCheckoutAfterProcessingWithError: () => () => void null,
+	onCheckoutAfterProcessingWithSuccess: () => () => void null, // deprecated for onCheckoutSuccess
+	onCheckoutAfterProcessingWithError: () => () => void null, // deprecated for onCheckoutFail
 	onCheckoutBeforeProcessing: () => () => void null, // deprecated for onCheckoutValidationBeforeProcessing
-	onCheckoutValidationBeforeProcessing: () => () => void null,
+	onCheckoutValidationBeforeProcessing: () => () => void null, // deprecated for onCheckoutValidation
+	onCheckoutSuccess: () => () => void null,
+	onCheckoutFail: () => () => void null,
+	onCheckoutValidation: () => () => void null,
 } );
 
 export const useCheckoutEventsContext = () => {
@@ -159,11 +168,8 @@ export const CheckoutEventsProvider = ( {
 
 	const [ observers, observerDispatch ] = useReducer( emitReducer, {} );
 	const currentObservers = useRef( observers );
-	const {
-		onCheckoutAfterProcessingWithSuccess,
-		onCheckoutAfterProcessingWithError,
-		onCheckoutValidationBeforeProcessing,
-	} = useEventEmitters( observerDispatch );
+	const { onCheckoutValidation, onCheckoutSuccess, onCheckoutFail } =
+		useEventEmitters( observerDispatch );
 
 	// set observers on ref so it's always current.
 	useEffect( () => {
@@ -171,7 +177,7 @@ export const CheckoutEventsProvider = ( {
 	}, [ observers ] );
 
 	/**
-	 * @deprecated use onCheckoutValidationBeforeProcessing instead
+	 * @deprecated use onCheckoutValidation instead
 	 *
 	 * To prevent the deprecation message being shown at render time
 	 * we need an extra function between useMemo and event emitters
@@ -180,16 +186,59 @@ export const CheckoutEventsProvider = ( {
 	 * See: https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4039/commits/a502d1be8828848270993264c64220731b0ae181
 	 */
 	const onCheckoutBeforeProcessing = useMemo( () => {
-		return function (
-			...args: Parameters< typeof onCheckoutValidationBeforeProcessing >
-		) {
+		return function ( ...args: Parameters< typeof onCheckoutValidation > ) {
 			deprecated( 'onCheckoutBeforeProcessing', {
-				alternative: 'onCheckoutValidationBeforeProcessing',
+				alternative: 'onCheckoutValidation',
 				plugin: 'WooCommerce Blocks',
 			} );
-			return onCheckoutValidationBeforeProcessing( ...args );
+			return onCheckoutValidation( ...args );
 		};
-	}, [ onCheckoutValidationBeforeProcessing ] );
+	}, [ onCheckoutValidation ] );
+
+	/**
+	 * @deprecated use onCheckoutValidation instead
+	 */
+	const onCheckoutValidationBeforeProcessing = useMemo( () => {
+		return function ( ...args: Parameters< typeof onCheckoutValidation > ) {
+			deprecated( 'onCheckoutValidationBeforeProcessing', {
+				since: '9.7.0',
+				alternative: 'onCheckoutValidation',
+				plugin: 'WooCommerce Blocks',
+				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8381',
+			} );
+			return onCheckoutValidation( ...args );
+		};
+	}, [ onCheckoutValidation ] );
+
+	/**
+	 * @deprecated use onCheckoutSuccess instead
+	 */
+	const onCheckoutAfterProcessingWithSuccess = useMemo( () => {
+		return function ( ...args: Parameters< typeof onCheckoutSuccess > ) {
+			deprecated( 'onCheckoutAfterProcessingWithSuccess', {
+				since: '9.7.0',
+				alternative: 'onCheckoutSuccess',
+				plugin: 'WooCommerce Blocks',
+				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8381',
+			} );
+			return onCheckoutSuccess( ...args );
+		};
+	}, [ onCheckoutSuccess ] );
+
+	/**
+	 * @deprecated use onCheckoutFail instead
+	 */
+	const onCheckoutAfterProcessingWithError = useMemo( () => {
+		return function ( ...args: Parameters< typeof onCheckoutFail > ) {
+			deprecated( 'onCheckoutAfterProcessingWithError', {
+				since: '9.7.0',
+				alternative: 'onCheckoutFail',
+				plugin: 'WooCommerce Blocks',
+				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8381',
+			} );
+			return onCheckoutFail( ...args );
+		};
+	}, [ onCheckoutFail ] );
 
 	// Emit CHECKOUT_VALIDATE event and set the error state based on the response of
 	// the registered callbacks
@@ -209,7 +258,7 @@ export const CheckoutEventsProvider = ( {
 	const previousStatus = usePrevious( checkoutStatus );
 	const previousHasError = usePrevious( checkoutHasError );
 
-	// Emit CHECKOUT_AFTER_PROCESSING_WITH_SUCCESS and CHECKOUT_AFTER_PROCESSING_WITH_ERROR events
+	// Emit CHECKOUT_SUCCESS and CHECKOUT_FAIL events
 	// and set checkout errors according to the callback responses
 	useEffect( () => {
 		if (
@@ -258,6 +307,9 @@ export const CheckoutEventsProvider = ( {
 		onCheckoutValidationBeforeProcessing,
 		onCheckoutAfterProcessingWithSuccess,
 		onCheckoutAfterProcessingWithError,
+		onCheckoutSuccess,
+		onCheckoutFail,
+		onCheckoutValidation,
 	};
 	return (
 		<CheckoutEventsContext.Provider value={ checkoutEventHandlers }>

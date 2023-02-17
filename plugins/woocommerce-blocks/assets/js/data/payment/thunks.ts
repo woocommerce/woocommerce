@@ -58,7 +58,7 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 		removeNotice( 'wc-payment-error', noticeContexts.PAYMENTS );
 		return emitEventWithAbort(
 			currentObserver,
-			EMIT_TYPES.PAYMENT_PROCESSING,
+			EMIT_TYPES.PAYMENT_SETUP,
 			{}
 		).then( ( observerResponses ) => {
 			let successResponse: ObserverResponse | undefined,

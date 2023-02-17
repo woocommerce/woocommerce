@@ -47,7 +47,7 @@ import { useStoreCart } from '../../hooks/cart/use-store-cart';
  * Subscribes to checkout context and triggers processing via the API.
  */
 const CheckoutProcessor = () => {
-	const { onCheckoutValidationBeforeProcessing } = useCheckoutEventsContext();
+	const { onCheckoutValidation } = useCheckoutEventsContext();
 
 	const {
 		hasError: checkoutHasError,
@@ -188,10 +188,7 @@ const CheckoutProcessor = () => {
 	useEffect( () => {
 		let unsubscribeProcessing: () => void;
 		if ( ! isExpressPaymentMethodActive ) {
-			unsubscribeProcessing = onCheckoutValidationBeforeProcessing(
-				checkValidation,
-				0
-			);
+			unsubscribeProcessing = onCheckoutValidation( checkValidation, 0 );
 		}
 		return () => {
 			if (
@@ -202,7 +199,7 @@ const CheckoutProcessor = () => {
 			}
 		};
 	}, [
-		onCheckoutValidationBeforeProcessing,
+		onCheckoutValidation,
 		checkValidation,
 		isExpressPaymentMethodActive,
 	] );
