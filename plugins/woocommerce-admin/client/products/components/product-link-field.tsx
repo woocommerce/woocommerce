@@ -66,8 +66,6 @@ export const ProductLinkField = () => {
 		<>
 			<span className="woocommerce-product-form__secondary-text product-details-section__product-link">
 				{ interpolateComponents( {
-					/* eslint-disable-next-line max-len */
-					/* translators: Sentence fragment describing a product attribute match. Example: "Color Is Not Blue" - attribute = Color, equals = Is Not, value = Blue */
 					mixedString: __(
 						'Product link {{link /}} {{editButton /}}',
 						'woocommerce'
