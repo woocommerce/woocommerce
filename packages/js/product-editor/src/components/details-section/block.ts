@@ -15,5 +15,12 @@ export default {
 			type: 'string',
 		},
 	},
-	supports: {},
+	supports: {
+		align: false,
+		html: false,
+		multiple: false,
+		reusable: false,
+		inserter: false,
+		lock: false,
+	},
 };

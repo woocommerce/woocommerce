@@ -15,6 +15,12 @@ export default {
 			type: 'string',
 		},
 	},
-	supports: {},
-	style: 'wp-paragraph',
+	supports: {
+		align: false,
+		html: false,
+		multiple: false,
+		reusable: false,
+		inserter: false,
+		lock: false,
+	},
 };
