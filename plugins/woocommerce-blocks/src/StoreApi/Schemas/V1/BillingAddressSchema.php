@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\StoreApi\Utilities\ValidationUtils;
 
 /**
  * BillingAddressSchema class.
@@ -89,11 +90,12 @@ class BillingAddressSchema extends AbstractAddressSchema {
 	 * @return stdClass
 	 */
 	public function get_item_response( $address ) {
+		$validation_util = new ValidationUtils();
 		if ( ( $address instanceof \WC_Customer || $address instanceof \WC_Order ) ) {
 			$billing_country = $address->get_billing_country();
 			$billing_state   = $address->get_billing_state();
 
-			if ( ! $this->validate_state( $billing_state, $billing_country ) ) {
+			if ( ! $validation_util->validate_state( $billing_state, $billing_country ) ) {
 				$billing_state = '';
 			}
 

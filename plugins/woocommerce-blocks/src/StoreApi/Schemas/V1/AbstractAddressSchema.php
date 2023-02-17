@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\StoreApi\Utilities\ValidationUtils;
+
 /**
  * AddressSchema class.
  *
@@ -87,6 +89,8 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function sanitize_callback( $address, $request, $param ) {
+		$validation_util = new ValidationUtils();
+
 		$address               = array_merge( array_fill_keys( array_keys( $this->get_properties() ), '' ), (array) $address );
 		$address['country']    = wc_strtoupper( wc_clean( wp_unslash( $address['country'] ) ) );
 		$address['first_name'] = wc_clean( wp_unslash( $address['first_name'] ) );
@@ -95,62 +99,10 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		$address['address_1']  = wc_clean( wp_unslash( $address['address_1'] ) );
 		$address['address_2']  = wc_clean( wp_unslash( $address['address_2'] ) );
 		$address['city']       = wc_clean( wp_unslash( $address['city'] ) );
-		$address['state']      = $this->format_state( wc_clean( wp_unslash( $address['state'] ) ), $address['country'] );
+		$address['state']      = $validation_util->format_state( wc_clean( wp_unslash( $address['state'] ) ), $address['country'] );
 		$address['postcode']   = $address['postcode'] ? wc_format_postcode( wc_clean( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
 		$address['phone']      = wc_clean( wp_unslash( $address['phone'] ) );
 		return $address;
-	}
-
-	/**
-	 * Get list of states for a country.
-	 *
-	 * @param string $country Country code.
-	 * @return array Array of state names indexed by state keys.
-	 */
-	protected function get_states_for_country( $country ) {
-		return $country ? array_filter( (array) \wc()->countries->get_states( $country ) ) : [];
-	}
-
-	/**
-	 * Validate provided state against a countries list of defined states.
-	 *
-	 * If there are no defined states for a country, any given state is valid.
-	 *
-	 * @param string $state State name or code (sanitized).
-	 * @param string $country Country code.
-	 * @return boolean Valid or not valid.
-	 */
-	protected function validate_state( $state, $country ) {
-		$states = $this->get_states_for_country( $country );
-
-		if ( count( $states ) && ! in_array( \wc_strtoupper( $state ), array_map( '\wc_strtoupper', array_keys( $states ) ), true ) ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Format a state based on the country. If country has defined states, will return a valid upper case state code.
-	 *
-	 * @param string $state State name or code (sanitized).
-	 * @param string $country Country code.
-	 * @return string
-	 */
-	protected function format_state( $state, $country ) {
-		$states = $this->get_states_for_country( $country );
-
-		if ( count( $states ) ) {
-			$state        = \wc_strtoupper( $state );
-			$state_values = array_map( 'wc_strtoupper', array_flip( array_map( '\wc_strtoupper', $states ) ) );
-
-			if ( isset( $state_values[ $state ] ) ) {
-				// Convert to state code if a state name was provided.
-				return $state_values[ $state ];
-			}
-		}
-
-		return $state;
 	}
 
 	/**
@@ -164,8 +116,9 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 	 * @return true|\WP_Error
 	 */
 	public function validate_callback( $address, $request, $param ) {
-		$errors  = new \WP_Error();
-		$address = $this->sanitize_callback( $address, $request, $param );
+		$errors          = new \WP_Error();
+		$address         = $this->sanitize_callback( $address, $request, $param );
+		$validation_util = new ValidationUtils();
 
 		if ( ! empty( $address['country'] ) && ! in_array( $address['country'], array_keys( wc()->countries->get_countries() ), true ) ) {
 			$errors->add(
@@ -179,14 +132,14 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			return $errors;
 		}
 
-		if ( ! empty( $address['state'] ) && ! $this->validate_state( $address['state'], $address['country'] ) ) {
+		if ( ! empty( $address['state'] ) && ! $validation_util->validate_state( $address['state'], $address['country'] ) ) {
 			$errors->add(
 				'invalid_state',
 				sprintf(
 					/* translators: %1$s given state, %2$s valid states */
 					__( 'The provided state (%1$s) is not valid. Must be one of: %2$s', 'woo-gutenberg-products-block' ),
 					esc_html( $address['state'] ),
-					implode( ', ', array_keys( $this->get_states_for_country( $address['country'] ) ) )
+					implode( ', ', array_keys( $validation_util->get_states_for_country( $address['country'] ) ) )
 				)
 			);
 		}
