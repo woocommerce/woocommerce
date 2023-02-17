@@ -15,7 +15,7 @@ import {
 } from '../../../event-emit';
 
 const EMIT_TYPES = {
-	PAYMENT_PROCESSING: 'payment_processing',
+	PAYMENT_SETUP: 'payment_setup',
 };
 
 type EventEmittersType = Record< string, ReturnType< typeof emitterCallback > >;
@@ -36,8 +36,8 @@ const useEventEmitters = (
 ): EventEmittersType => {
 	const eventEmitters = useMemo(
 		() => ( {
-			onPaymentProcessing: emitterCallback(
-				EMIT_TYPES.PAYMENT_PROCESSING,
+			onPaymentSetup: emitterCallback(
+				EMIT_TYPES.PAYMENT_SETUP,
 				observerDispatch
 			),
 		} ),

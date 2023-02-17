@@ -110,31 +110,30 @@ export const usePaymentProcessing = (
 
 In the location linked in point 3, add the following:
 
-#### `onCheckoutValidationBeforeProcessing`
+#### `onCheckoutValidation`
 
 ```js
-const unsubscribeValidationBeforeProcessing =
-	eventRegistration.onCheckoutValidationBeforeProcessing( ( a ) => {
-		console.log( 'onCheckoutValidationBeforeProcessing', a );
-	} );
+const unsubscribeValidation = eventRegistration.onCheckoutValidation( ( a ) => {
+	console.log( 'onCheckoutValidation', a );
+} );
 ```
 
-#### `onCheckoutAfterProcessingWithError`
+#### `onCheckoutFail`
 
 ```js
-const unsubscribeOnCheckoutAfterProcessingWithError =
-	eventRegistration.onCheckoutAfterProcessingWithError( ( a ) => {
-		console.log( 'onCheckoutAfterProcessingWithError', a );
-	} );
+const unsubscribeOnCheckoutFail = eventRegistration.onCheckoutFail( ( a ) => {
+	console.log( 'onCheckoutFail', a );
+} );
 ```
 
-#### `onCheckoutAfterProcessingWithSuccess`
+#### `onCheckoutSuccess`
 
 ```js
-const unsubscribeOnCheckoutAfterProcessingWithSuccess =
-	eventRegistration.onCheckoutAfterProcessingWithSuccess( ( a ) => {
-		console.log( 'onCheckoutAfterProcessingWithSuccess', a );
-	} );
+const unsubscribeOnCheckoutSuccess = eventRegistration.onCheckoutSuccess(
+	( a ) => {
+		console.log( 'onCheckoutSuccess', a );
+	}
+);
 ```
 
 #### `onCheckoutBeforeProcessing` (deprecated)
@@ -150,10 +149,10 @@ const unsubscribeOnCheckoutBeforeProcessing =
 Then, in the returned function, [https://github.com/woocommerce/woocommerce-gateway-stripe/blob/8ffd22aff3b06eda02a1ae2fd8368b71450b36a9/client/blocks/credit-card/use-payment-processing.js#L147-L149](https://github.com/woocommerce/woocommerce-gateway-stripe/blob/8ffd22aff3b06eda02a1ae2fd8368b71450b36a9/client/blocks/credit-card/use-payment-processing.js#L147-L149) below, add:
 
 ```js
+unsubscribeOnCheckoutValidation();
+unsubscribeOnCheckoutSuccess();
+unsubscribeOnCheckoutFail();
 unsubscribeOnCheckoutBeforeProcessing();
-unsubscribeOnCheckoutAfterProcessingWithSuccess();
-unsubscribeOnCheckoutAfterProcessingWithError();
-unsubscribeValidationBeforeProcessing();
 ```
 
 After these changes have been made, your file should look like this: [https://gist.github.com/opr/1f71e72ea8bee0a58d33f6f0412af51f](https://gist.github.com/opr/1f71e72ea8bee0a58d33f6f0412af51f)
@@ -170,19 +169,19 @@ After these changes have been made, your file should look like this: [https://gi
 
 -   Check out using a valid card. You should see a message telling you `onCheckoutBeforeProcessing` is deprecated then when you check out you should see, in the same order, the following logs:
 
-    -   `onCheckoutValidationBeforeProcessing` `{}`
+    -   `onCheckoutValidation` `{}`
     -   `onCheckoutBeforeProcessing` `{}`
-    -   `onCheckoutAfterProcessingWithSuccess` `{redirectUrl, orderId, customerId, orderNotes, paymentResult }
+    -   `onCheckoutSuccess` `{redirectUrl, orderId, customerId, orderNotes, paymentResult }
 
 -   Check out using an invalid card, you should only see:
 
-    -   `onCheckoutValidationBeforeProcessing` `{}`
+    -   `onCheckoutValidation` `{}`
     -   `onCheckoutBeforeProcessing` `{}`
 
 -   Reload the checkout page and then go to [https://github.com/woocommerce/woocommerce-blocks/blob/029b379138906872dec3ed920fcb23d24404a3f2/src/StoreApi/Schemas/V1/CheckoutSchema.php#L26-L25](https://github.com/woocommerce/woocommerce-blocks/blob/029b379138906872dec3ed920fcb23d24404a3f2/src/StoreApi/Schemas/V1/CheckoutSchema.php#L26-L25) and introduce a syntax error. Try to check out using a valid card, then an invalid card you should see:
-    -   `onCheckoutValidationBeforeProcessing` `{}`
+    -   `onCheckoutValidation` `{}`
     -   `onCheckoutBeforeProcessing` `{}`
-    -   `onCheckoutAfterProcessingWithError` `{redirectUrl, orderId, customerId, orderNotes, paymentResult }`
+    -   `onCheckoutFail` `{redirectUrl, orderId, customerId, orderNotes, paymentResult }`
 
 ## WordPress.com
 

@@ -87,16 +87,24 @@ export interface EmitResponseProps {
 }
 
 export interface EventRegistrationProps {
-	// Used to subscribe callbacks firing when checkout has completed processing with an error.
+	// Deprecated in favour of onCheckoutFail.
 	onCheckoutAfterProcessingWithError: ReturnType< typeof emitterCallback >;
-	// Used to subscribe callbacks firing when checkout has completed processing successfully.
+	// Deprecated in favour of onCheckoutSuccess.
 	onCheckoutAfterProcessingWithSuccess: ReturnType< typeof emitterCallback >;
 	// Used to subscribe callbacks firing before checkout begins processing.
 	onCheckoutBeforeProcessing: ReturnType< typeof emitterCallback >;
-	// Used to subscribe callbacks firing when validation of the submitted checkout data happens, before it's sent off to the server.
+	// Used to register a callback that will fire if the api call to /checkout is successful
+	onCheckoutSuccess: ReturnType< typeof emitterCallback >;
+	// Used to register a callback that will fire if the api call to /checkout fails
+	onCheckoutFail: ReturnType< typeof emitterCallback >;
+	// Used to register a callback that will fire when the checkout performs validation on the form
+	onCheckoutValidation: ReturnType< typeof emitterCallback >;
+	// Deprecated in favour of onCheckoutValidation.
 	onCheckoutValidationBeforeProcessing: ReturnType< typeof emitterCallback >;
-	// Event registration callback for registering observers for the payment processing event.
+	// Deprecated in favour of onPaymentSetup
 	onPaymentProcessing: ReturnType< typeof emitterCallback >;
+	// Event registration callback for registering observers for the payment setup event.
+	onPaymentSetup: ReturnType< typeof emitterCallback >;
 	// Used to subscribe callbacks that will fire when retrieving shipping rates failed.
 	onShippingRateFail: ReturnType< typeof emitterCallback >;
 	// Used to subscribe callbacks that will fire after selecting a shipping rate unsuccessfully.

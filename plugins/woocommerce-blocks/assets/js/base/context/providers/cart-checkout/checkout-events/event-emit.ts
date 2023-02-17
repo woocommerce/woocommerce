@@ -17,12 +17,9 @@ import {
 // These events are emitted when the Checkout status is BEFORE_PROCESSING and AFTER_PROCESSING
 // to enable third parties to hook into the checkout process
 const EVENTS = {
-	CHECKOUT_VALIDATION_BEFORE_PROCESSING:
-		'checkout_validation_before_processing',
-	CHECKOUT_AFTER_PROCESSING_WITH_SUCCESS:
-		'checkout_after_processing_with_success',
-	CHECKOUT_AFTER_PROCESSING_WITH_ERROR:
-		'checkout_after_processing_with_error',
+	CHECKOUT_SUCCESS: 'checkout_success',
+	CHECKOUT_FAIL: 'checkout_fail',
+	CHECKOUT_VALIDATION: 'checkout_validation',
 };
 
 type EventEmittersType = Record< string, ReturnType< typeof emitterCallback > >;
@@ -43,16 +40,16 @@ const useEventEmitters = (
 ): EventEmittersType => {
 	const eventEmitters = useMemo(
 		() => ( {
-			onCheckoutAfterProcessingWithSuccess: emitterCallback(
-				EVENTS.CHECKOUT_AFTER_PROCESSING_WITH_SUCCESS,
+			onCheckoutSuccess: emitterCallback(
+				EVENTS.CHECKOUT_SUCCESS,
 				observerDispatch
 			),
-			onCheckoutAfterProcessingWithError: emitterCallback(
-				EVENTS.CHECKOUT_AFTER_PROCESSING_WITH_ERROR,
+			onCheckoutFail: emitterCallback(
+				EVENTS.CHECKOUT_FAIL,
 				observerDispatch
 			),
-			onCheckoutValidationBeforeProcessing: emitterCallback(
-				EVENTS.CHECKOUT_VALIDATION_BEFORE_PROCESSING,
+			onCheckoutValidation: emitterCallback(
+				EVENTS.CHECKOUT_VALIDATION,
 				observerDispatch
 			),
 		} ),
