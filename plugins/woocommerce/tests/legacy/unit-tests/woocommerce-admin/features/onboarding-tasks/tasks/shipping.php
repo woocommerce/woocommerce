@@ -153,6 +153,21 @@ class WC_Admin_Tests_OnboardingTasks_Task_Shipping extends WC_Unit_Test_Case {
 			array( 'AU' ),
 			array( 'CA' ),
 			array( 'GB' ),
+			array( 'ES' ), 
+			array( 'IT' ), 
+			array( 'DE' ), 
+			array( 'FR' ), 
+			array( 'MX' ), 
+			array( 'CO' ), 
+			array( 'CL' ), 
+			array( 'AR' ), 
+			array( 'PE' ), 
+			array( 'BR' ), 
+			array( 'UY' ), 
+			array( 'GT' ), 
+			array( 'NL' ), 
+			array( 'AT' ), 
+			array( 'BE' )
 		);
 	}
 }
