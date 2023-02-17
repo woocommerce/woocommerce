@@ -54,21 +54,16 @@ class WC_Meta_Box_Product_Categories {
 				$current_category      = $current_category_slug ? get_term_by( 'slug', $current_category_slug, 'product_cat' ) : false;
 				?>
 				<div class="wc-select-tree-control"></div>
-				<!--<select class="wc-category-select" name="link_category" data-placeholder="<?php esc_attr_e( 'Add category', 'woocommerce' ); ?>" data-allow_clear="true" multiple="multiple">
-					<?php if ( $current_category_slug && $current_category ) : ?>
-						<option value="<?php echo esc_attr( $current_category_slug ); ?>" selected="selected"><?php echo esc_html( htmlspecialchars( wp_kses_post( $current_category->name ) ) ); ?></option>
-					<?php endif; ?>
-				</select> -->
-				<ul id="categorychecklist" data-wp-lists="list:category" class="categorychecklist form-no-clear">
+				<ul id="<?php echo $tax_name; ?>checklist" data-wp-lists="list:<?php echo $tax_name; ?>" class="categorychecklist form-no-clear">
 					<?php
 					foreach ( (array) $selected_categories as $term ) {
 						$id      = "$term->term_id";
 						$checked = 'checked="checked"';
 						?>
 
-						<li id="link-category-<?php echo $id; ?>">
-							<label for="in-link-category-<?php echo $id; ?>" class="selectit">
-								<input id="in-link-category-<?php echo $id; ?>" type="checkbox" <?php echo $checked; ?> value="<?php echo (int) $term->term_id; ?>" name="link_category[]" />
+						<li id="product_cat-<?php echo $id; ?>">
+							<label for="in-<?php echo $tax_name; ?>-<?php echo $id; ?>" class="selectit">
+								<input id="in-<?php echo $tax_name; ?>-<?php echo $id; ?>" type="checkbox" <?php echo $checked; ?> value="<?php echo (int) $term->term_id; ?>" name="link_category[]" />
 								<?php
 								/** This filter is documented in wp-includes/category-template.php */
 								echo esc_html( apply_filters( 'the_category', $term->name, '', '' ) );
