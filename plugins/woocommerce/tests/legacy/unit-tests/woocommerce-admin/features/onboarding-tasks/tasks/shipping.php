@@ -148,7 +148,7 @@ class WC_Admin_Tests_OnboardingTasks_Task_Shipping extends WC_Unit_Test_Case {
 	 * Data provider for test_can_view_return_true_for_eligible_countries.
 	 *
 	 */
-	public function data_provider_can_view_eligible_countries() { // TODO: probably need to update this too
+	public function data_provider_can_view_eligible_countries() {
 		return array(
 			array( 'AU' ),
 			array( 'CA' ),
