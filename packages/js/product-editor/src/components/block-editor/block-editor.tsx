@@ -10,6 +10,7 @@ import {
 	useState,
 	useMemo,
 } from '@wordpress/element';
+import { Product } from '@woocommerce/data';
 import { useSelect, useDispatch, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import {
@@ -30,15 +31,19 @@ import {
 /**
  * Internal dependencies
  */
+import { parseProductToBlocks } from '../../utils/parse-product-to-blocks';
 import { Sidebar } from '../sidebar';
 
 type BlockEditorProps = {
+	product: Partial< Product >;
 	settings: Partial< EditorSettings & EditorBlockListSettings > | undefined;
 };
 
-export function BlockEditor( { settings: _settings }: BlockEditorProps ) {
-	const [ blocks, updateBlocks ] = useState< BlockInstance[] >( [] );
-	const { createInfoNotice } = useDispatch( 'core/notices' );
+export function BlockEditor( {
+	product,
+	settings: _settings,
+}: BlockEditorProps ) {
+	const [ blocks, updateBlocks ] = useState< BlockInstance[] >();
 
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
 		const _canUserCreateMedia = select( 'core' ).canUser(
@@ -84,25 +89,11 @@ export function BlockEditor( { settings: _settings }: BlockEditorProps ) {
 	}
 
 	useEffect( () => {
-		const storedBlocks = window.localStorage.getItem(
-			'productEditorBlocks'
-		);
-
-		if ( storedBlocks?.length ) {
-			handleUpdateBlocks( parse( storedBlocks ) );
-			createInfoNotice( 'Blocks loaded', {
-				type: 'snackbar',
-				isDismissible: true,
-			} );
-		}
-	}, [] );
+		handleUpdateBlocks( parseProductToBlocks( product ) );
+	}, [ product ] );
 
 	function handlePersistBlocks( newBlocks: BlockInstance[] ) {
 		updateBlocks( newBlocks );
-		window.localStorage.setItem(
-			'productEditorBlocks',
-			serialize( newBlocks )
-		);
 	}
 
 	return (

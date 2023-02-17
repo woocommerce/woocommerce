@@ -34,14 +34,17 @@ export function Editor( { product, settings }: EditorProps ) {
 			<StrictMode>
 				<ShortcutProvider>
 					<FullscreenMode isActive={ false } />
-					{/* @ts-ignore */}
+					{ /* @ts-ignore */ }
 					<SlotFillProvider>
 						<InterfaceSkeleton
 							header={ <Header title={ product.name } /> }
 							sidebar={ <Sidebar /> }
 							content={
 								<>
-									<BlockEditor settings={ settings } />
+									<BlockEditor
+										settings={ settings }
+										product={ product }
+									/>
 								</>
 							}
 						/>

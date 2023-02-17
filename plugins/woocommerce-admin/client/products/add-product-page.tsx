@@ -11,6 +11,7 @@ import './product-page.scss';
 
 const dummyProduct = {
 	name: 'Example product',
+	short_description: 'Short product description content',
 } as Product;
 
 const AddProductPage: React.FC = () => {
