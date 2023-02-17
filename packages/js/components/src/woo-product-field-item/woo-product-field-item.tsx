@@ -30,6 +30,8 @@ type WooProductFieldFillProps = {
 	children?: React.ReactNode;
 };
 
+const DEFAULT_FIELD_ORDER = 20;
+
 const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 	fieldName,
 	sectionName,
@@ -82,16 +84,18 @@ export const WooProductFieldItem: React.FC< WooProductFieldItemProps > & {
 } = ( { children, sections, id } ) => {
 	return (
 		<>
-			{ sections.map( ( { name: sectionName, order = 20 } ) => (
-				<WooProductFieldFill
-					fieldName={ id }
-					sectionName={ sectionName }
-					order={ order }
-					key={ sectionName }
-				>
-					{ children }
-				</WooProductFieldFill>
-			) ) }
+			{ sections.map(
+				( { name: sectionName, order = DEFAULT_FIELD_ORDER } ) => (
+					<WooProductFieldFill
+						fieldName={ id }
+						sectionName={ sectionName }
+						order={ order }
+						key={ sectionName }
+					>
+						{ children }
+					</WooProductFieldFill>
+				)
+			) }
 		</>
 	);
 };
