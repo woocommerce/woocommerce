@@ -32,25 +32,6 @@ class Controller extends \WC_REST_Reports_Controller {
 	protected $rest_base = 'reports';
 
 	/**
-	 * Register the routes for reports.
-	 */
-	public function register_routes() {
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base,
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_items' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-					'args'                => $this->get_collection_params(),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
-	}
-
-	/**
 	 * Check whether a given request has permission to read reports.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
