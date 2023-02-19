@@ -1,4 +1,4 @@
-name: Run tests against trunk on PR merge
+name: Run tests on PR merge to trunk
 on:
     push:
         branch:
@@ -19,15 +19,12 @@ jobs:
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
+            ARTIFACT_NAME: e2e-trunk-commit-${{ github.sha }}-run-${{ github.run_number }}
         steps:
             - uses: actions/checkout@v3
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
-
-            - name: Get current date
-              id: date
-              run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
@@ -39,22 +36,23 @@ jobs:
             - name: Run E2E tests
               uses: ./.github/actions/tests/run-e2e
               with:
-                  report-name: e2e-trunk-merge-commit-${{ github.sha }}-run-${{ github.run_number }}
+                  report-name: ${{ env.ARTIFACT_NAME }}
 
-            - name: Upload Allure artifacts to bucket
+            - name: Upload Allure files to bucket
               if: contains(fromJSON('["success", "failure"]'), steps.e2e.conclusion)
-              uses: .github/actions/tests/upload-artifact-to-bucket
+              uses: .github/actions/tests/upload-allure-files-to-bucket
               with:
-                  destination: trunk-merge/commit-${{ github.sha }}/run-${{ github.run_number }}/e2e
+                  artifact-name: ${{ env.ARTIFACT_NAME }}
 
-            - name: Publish E2E Allure report
+            - name: Publish Allure report
               if: contains(fromJSON('["success", "failure"]'), steps.e2e.conclusion)
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-                  ENV_DESCRIPTION: wp-latest
               run: |
                   gh workflow run publish-test-reports-trunk-merge.yml \
-                  -f artifact_url="${{ inputs.report-url }}" \
+                  -f run_id=${{ github.run_id }} \
+                  -f artifact=${{ env.ARTIFACT_NAME }} \
+                  -f sha=${{ github.sha }} \
                   -f test_type="e2e" \
                   --repo woocommerce/woocommerce-test-reports
 

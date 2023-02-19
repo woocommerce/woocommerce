@@ -3,7 +3,7 @@ description: Upload Allure files to bucket.
 permissions: {}
 
 inputs:
-    destination:
+    artifact-name:
         description: Directory under the "artifacts" S3 folder to which the Allure files would be uploaded.
         required: true
 
@@ -21,12 +21,12 @@ runs:
           run: |
               echo "Uploading files from $ALLURE_RESULTS_DIR..."
               aws s3 sync ${{ env.ALLURE_RESULTS_DIR }} \
-                  ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ inputs.destination }}/allure-results \
+                  ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ inputs.artifact-name }}/allure-results \
                   --quiet
               echo "Done"
 
               echo "Uploading files from $ALLURE_REPORT_DIR..."
               aws s3 sync ${{ env.ALLURE_REPORT_DIR }} \
-                  ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ inputs.destination }}/allure-report \
+                  ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ inputs.artifact-name }}/allure-report \
                   --quiet
               echo "Done"
