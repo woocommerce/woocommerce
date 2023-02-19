@@ -1,0 +1,32 @@
+name: Upload Allure files to bucket
+description: Upload Allure files to bucket.
+permissions: {}
+
+inputs:
+    destination:
+        description: Directory under the "artifacts" S3 folder to which the Allure files would be uploaded.
+        required: true
+
+runs:
+    using: composite
+    steps:
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v1
+          with:
+              aws-region: ${{ secrets.REPORTS_AWS_REGION }}
+              aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+              aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+
+        - name: Upload 'allure-results' and 'allure-report' folders to bucket
+          run: |
+              echo "Uploading files from $ALLURE_RESULTS_DIR..."
+              aws s3 sync ${{ env.ALLURE_RESULTS_DIR }} \
+                  ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ inputs.destination }}/allure-results \
+                  --quiet
+              echo "Done"
+
+              echo "Uploading files from $ALLURE_REPORT_DIR..."
+              aws s3 sync ${{ env.ALLURE_REPORT_DIR }} \
+                  ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ inputs.destination }}/allure-report \
+                  --quiet
+              echo "Done"

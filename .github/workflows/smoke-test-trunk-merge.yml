@@ -2,16 +2,16 @@ name: Run tests against trunk on PR merge
 on:
     push:
         branch:
-            - 'trunk'
+            - 'e2e/on-trunk-merge-0'
 
 concurrency:
-    group: e2e-trunk-merge-${{ github.sha }}
+    group: trunk-merge-${{ github.sha }}
     cancel-in-progress: true
 
 permissions: {}
 
 jobs:
-    e2e-tests-run:
+    e2e:
         name: Runs E2E tests.
         runs-on: ubuntu-20.04
         permissions:
@@ -25,6 +25,10 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
 
+            - name: Get current date
+              id: date
+              run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
               env:
@@ -32,43 +36,27 @@ jobs:
                   WP_ENV_PHP_VERSION: 7.4
               run: pnpm run env:test
 
-            - name: Download and install Chromium browser.
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium
-
-            - name: Run Playwright E2E tests.
-              timeout-minutes: 60
-              id: run_playwright_e2e_tests
-              env:
-                  USE_WP_ENV: 1
-                  E2E_MAX_FAILURES: 15
-                  FORCE_COLOR: 1
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js basic.spec.js
-
-            - name: Generate Playwright E2E Test report.
-              id: generate_e2e_report
-              if: |
-                  always() &&
-                  (
-                    steps.run_playwright_e2e_tests.conclusion != 'cancelled' ||
-                    steps.run_playwright_e2e_tests.conclusion != 'skipped' 
-                  )
-              working-directory: plugins/woocommerce
-              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
-
-            - name: Archive Playwright E2E test report
-              if: |
-                  always() &&
-                  steps.generate_e2e_report.conclusion == 'success'
-              uses: actions/upload-artifact@v3
+            - name: Run E2E tests
+              uses: ./.github/actions/tests/run-e2e
               with:
-                  name: e2e-test-report---pr-${{ github.event.number }}
-                  path: |
-                      ${{ env.ALLURE_RESULTS_DIR }}
-                      ${{ env.ALLURE_REPORT_DIR }}
-                  if-no-files-found: ignore
-                  retention-days: 5
+                  report-name: e2e-trunk-merge-commit-${{ github.sha }}-run-${{ github.run_number }}
+
+            - name: Upload Allure artifacts to bucket
+              if: contains(fromJSON('["success", "failure"]'), steps.e2e.conclusion)
+              uses: .github/actions/tests/upload-artifact-to-bucket
+              with:
+                  destination: trunk-merge/commit-${{ github.sha }}/run-${{ github.run_number }}/e2e
+
+            - name: Publish E2E Allure report
+              if: contains(fromJSON('["success", "failure"]'), steps.e2e.conclusion)
+              env:
+                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+                  ENV_DESCRIPTION: wp-latest
+              run: |
+                  gh workflow run publish-test-reports-trunk-merge.yml \
+                  -f artifact_url="${{ inputs.report-url }}" \
+                  -f test_type="e2e" \
+                  --repo woocommerce/woocommerce-test-reports
 
     api-tests-run:
         name: Runs API tests.
@@ -148,59 +136,3 @@ jobs:
             - name: Run k6 tests
               run: |
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-pr-requests.js
-
-    test-summary:
-        name: Post test results
-        if: |
-            always() && 
-            ! github.event.pull_request.head.repo.fork &&
-            (
-              contains( needs.*.result, 'success' ) ||
-              contains( needs.*.result, 'failure' )
-            )
-        runs-on: ubuntu-20.04
-        needs: [api-tests-run, e2e-tests-run]
-        permissions:
-            contents: read
-            issues: write
-            pull-requests: write
-        env:
-            E2E_GRAND_TOTAL: ${{needs.e2e-tests-run.outputs.E2E_GRAND_TOTAL}}
-        steps:
-            - name: Create dirs
-              run: |
-                  mkdir -p repo
-                  mkdir -p artifacts/api 
-                  mkdir -p artifacts/e2e
-                  mkdir -p output
-
-            - name: Checkout code
-              uses: actions/checkout@v3
-              with:
-                  path: repo
-
-            - name: Download API test report artifact
-              uses: actions/download-artifact@v3
-              with:
-                  name: api-test-report---pr-${{ github.event.number }}
-                  path: artifacts/api
-
-            - name: Download Playwright E2E test report artifact
-              uses: actions/download-artifact@v3
-              with:
-                  name: e2e-test-report---pr-${{ github.event.number }}
-                  path: artifacts/e2e
-
-            - name: Prepare test summary
-              id: prepare-test-summary
-              uses: actions/github-script@v6
-              env:
-                  API_SUMMARY_PATH: ${{ github.workspace }}/artifacts/api/allure-report/widgets/summary.json
-                  E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/widgets/summary.json
-                  PR_NUMBER: ${{ github.event.number }}
-                  SHA: ${{ github.event.pull_request.head.sha }}
-              with:
-                  result-encoding: string
-                  script: |
-                      const script = require( './repo/.github/workflows/scripts/prepare-test-summary.js' )
-                      return await script( { core } )
