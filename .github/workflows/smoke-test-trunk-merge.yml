@@ -34,18 +34,17 @@ jobs:
               run: pnpm run env:test
 
             - name: Run E2E tests
+              id: e2e-action
               uses: ./.github/actions/tests/run-e2e
               with:
                   report-name: ${{ env.ARTIFACT_NAME }}
 
             - name: Upload Allure files to bucket
-              if: contains(fromJSON('["success", "failure"]'), steps.e2e.conclusion)
               uses: .github/actions/tests/upload-allure-files-to-bucket
               with:
                   artifact-name: ${{ env.ARTIFACT_NAME }}
 
             - name: Publish Allure report
-              if: contains(fromJSON('["success", "failure"]'), steps.e2e.conclusion)
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
               run: |
