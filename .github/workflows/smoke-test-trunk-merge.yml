@@ -38,7 +38,7 @@ jobs:
             - name: Upload Allure files to bucket
               uses: .github/actions/tests/upload-allure-files-to-bucket
               with:
-                  artifact-name: ${{ env.ARTIFACT_NAME }}
+                  destination-dir: ${{ env.ARTIFACT_NAME }}
 
             - name: Publish Allure report
               env:
