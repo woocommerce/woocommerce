@@ -13,6 +13,7 @@ runs:
         - name: Run API tests.
           id: api
           working-directory: plugins/woocommerce
+          shell: bash
           env:
               BASE_URL: http://localhost:8086
               USER_KEY: admin
