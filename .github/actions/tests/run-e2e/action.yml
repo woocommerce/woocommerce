@@ -26,14 +26,13 @@ runs:
           run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js basic.spec.js
 
         - name: Generate E2E Test report.
-          id: e2e-report
-          if: contains(fromJSON('["success", "failure"]'), steps.e2e.conclusion)
+          if: success() || ( failure() && steps.e2e.conclusion == 'failure' )
           working-directory: plugins/woocommerce
           shell: bash
           run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
         - name: Archive E2E test report
-          if: contains(fromJSON('["success", "failure"]'), steps.e2e.conclusion)
+          if: success() || ( failure() && steps.e2e.conclusion == 'failure' )
           uses: actions/upload-artifact@v3
           with:
               name: ${{ inputs.report-name }}
