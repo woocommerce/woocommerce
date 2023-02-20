@@ -647,8 +647,10 @@ class FeaturesController {
 		}
 
 		if ('new_product_management' === $feature_id) {
-			    $disabled = true;
-				$desc_tip = __('⚠ This feature will be available soon. Stay tuned!', 'woocommerce');
+			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
+				$disabled = true;
+			}
+			$desc_tip = __('⚠ This feature will be available soon. Stay tuned!', 'woocommerce');
 		}
 
 		if ( ! $this->is_legacy_feature( $feature_id ) && ! $disabled && $this->verify_did_woocommerce_init() ) {
