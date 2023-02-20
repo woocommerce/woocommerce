@@ -16,7 +16,6 @@ runs:
           run: pnpm exec playwright install chromium
 
         - name: Run E2E tests.
-          timeout-minutes: 60
           id: e2e
           env:
               E2E_MAX_FAILURES: 15

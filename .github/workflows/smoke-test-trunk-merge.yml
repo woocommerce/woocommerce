@@ -30,6 +30,7 @@ jobs:
               uses: ./.github/actions/tests/setup-e2e-local-environment
 
             - name: Run E2E tests
+              timeout-minutes: 60
               id: e2e-action
               uses: ./.github/actions/tests/run-e2e
               with:
