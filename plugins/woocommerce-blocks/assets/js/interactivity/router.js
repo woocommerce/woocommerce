@@ -1,13 +1,7 @@
-/**
- * External dependencies
- */
 import { hydrate, render } from 'preact';
-
-/**
- * Internal dependencies
- */
 import { toVdom, hydratedIslands } from './vdom';
 import { createRootFragment } from './utils';
+import { cstMetaTagItemprop, directivePrefix } from './constants';
 
 // The root to render the vdom (document.body).
 let rootFragment;
@@ -26,7 +20,7 @@ const cleanUrl = ( url ) => {
 // Helper to check if a page has client-side transitions activated.
 export const hasClientSideTransitions = ( dom ) =>
 	dom
-		.querySelector( "meta[itemprop='wp-client-side-transitions']" )
+		.querySelector( `meta[itemprop='${ cstMetaTagItemprop }']` )
 		?.getAttribute( 'content' ) === 'active';
 
 // Fetch styles of a new page.
@@ -120,12 +114,17 @@ export const init = async () => {
 			Promise.resolve( { body, head } )
 		);
 	} else {
-		document.querySelectorAll( '[wp-island]' ).forEach( ( node ) => {
-			if ( ! hydratedIslands.has( node ) ) {
-				const fragment = createRootFragment( node.parentNode, node );
-				const vdom = toVdom( node );
-				hydrate( vdom, fragment );
-			}
-		} );
+		document
+			.querySelectorAll( `[${ directivePrefix }island]` )
+			.forEach( ( node ) => {
+				if ( ! hydratedIslands.has( node ) ) {
+					const fragment = createRootFragment(
+						node.parentNode,
+						node
+					);
+					const vdom = toVdom( node );
+					hydrate( vdom, fragment );
+				}
+			} );
 	}
 };

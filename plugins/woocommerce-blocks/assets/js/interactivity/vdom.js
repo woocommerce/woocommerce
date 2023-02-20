@@ -1,7 +1,9 @@
-/**
- * External dependencies
- */
 import { h } from 'preact';
+import { directivePrefix as p } from './constants';
+
+const ignoreAttr = `${ p }ignore`;
+const islandAttr = `${ p }island`;
+const directiveParser = new RegExp( `${ p }([^:]+):?(.*)$` );
 
 export const hydratedIslands = new WeakSet();
 
@@ -9,8 +11,8 @@ export const hydratedIslands = new WeakSet();
 export function toVdom( node ) {
 	const props = {};
 	const { attributes, childNodes } = node;
-	const wpDirectives = {};
-	let hasWpDirectives = false;
+	const directives = {};
+	let hasDirectives = false;
 	let ignore = false;
 	let island = false;
 
@@ -22,20 +24,20 @@ export function toVdom( node ) {
 
 	for ( let i = 0; i < attributes.length; i++ ) {
 		const n = attributes[ i ].name;
-		if ( n[ 0 ] === 'w' && n[ 1 ] === 'p' && n[ 2 ] === '-' && n[ 3 ] ) {
-			if ( n === 'wp-ignore' ) {
+		if ( n[ p.length ] && n.slice( 0, p.length ) === p ) {
+			if ( n === ignoreAttr ) {
 				ignore = true;
-			} else if ( n === 'wp-island' ) {
+			} else if ( n === islandAttr ) {
 				island = true;
 			} else {
-				hasWpDirectives = true;
+				hasDirectives = true;
 				let val = attributes[ i ].value;
 				try {
 					val = JSON.parse( val );
 				} catch ( e ) {}
-				const [ , prefix, suffix ] = /wp-([^:]+):?(.*)$/.exec( n );
-				wpDirectives[ prefix ] = wpDirectives[ prefix ] || {};
-				wpDirectives[ prefix ][ suffix || 'default' ] = val;
+				const [ , prefix, suffix ] = directiveParser.exec( n );
+				directives[ prefix ] = directives[ prefix ] || {};
+				directives[ prefix ][ suffix || 'default' ] = val;
 			}
 		} else if ( n === 'ref' ) {
 			continue;
@@ -50,7 +52,7 @@ export function toVdom( node ) {
 		} );
 	if ( island ) hydratedIslands.add( node );
 
-	if ( hasWpDirectives ) props.wp = wpDirectives;
+	if ( hasDirectives ) props.directives = directives;
 
 	const children = [];
 	for ( let i = 0; i < childNodes.length; i++ ) {
