@@ -19,11 +19,7 @@ import { merchant } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
  */
-import {
-	openWidgetEditor,
-	closeModalIfExists,
-	openWidgetsEditorBlockInserter,
-} from '../../utils.js';
+import { openWidgetEditor, closeModalIfExists } from '../../utils.js';
 
 const block = {
 	name: 'Cart',
@@ -142,7 +138,6 @@ describe( `${ block.name } Block`, () => {
 			await merchant.login();
 			await openWidgetEditor();
 			await closeModalIfExists();
-			await openWidgetsEditorBlockInserter();
 			await searchForBlock( block.name );
 			await page.waitForXPath(
 				`//button//span[text()='${ block.name }']`
