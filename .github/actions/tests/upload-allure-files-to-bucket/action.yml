@@ -18,6 +18,7 @@ runs:
               aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
 
         - name: Upload 'allure-results' and 'allure-report' folders to bucket
+          shell: bash
           run: |
               echo "Uploading files from $ALLURE_RESULTS_DIR..."
               aws s3 sync ${{ env.ALLURE_RESULTS_DIR }} \

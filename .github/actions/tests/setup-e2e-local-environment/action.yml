@@ -18,4 +18,5 @@ runs:
           env:
               ENABLE_HPOS: ${{ inputs.enable-hpos }}
               WP_ENV_PHP_VERSION: ${{ inputs.wp-env-php-version }}
+          shell: bash
           run: pnpm run env:test
