@@ -57,7 +57,9 @@ export const Tooltip: React.FC< TooltipProps > = ( {
 						className="woocommerce-tooltip__text"
 						onFocusOutside={ ( event: FocusEvent ) => {
 							if (
-								event.relatedTarget?.classList.contains(
+								(
+									event.relatedTarget as Element
+								 )?.classList.contains(
 									'woocommerce-tooltip__button'
 								)
 							) {

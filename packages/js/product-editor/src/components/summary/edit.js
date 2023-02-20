@@ -12,7 +12,7 @@ export function Edit( { attributes } ) {
 		<div { ...blockProps }>
 			<h4>{ __( 'Summary', 'woocommerce' ) }</h4>
 			<InnerBlocks
-				allowedBlocks={ 'core/paragraph' }
+				allowedBlocks={ [ 'core/paragraph' ] }
 				template={ [ [ 'core/paragraph', attributes ] ] }
 				templateLock="all"
 			/>

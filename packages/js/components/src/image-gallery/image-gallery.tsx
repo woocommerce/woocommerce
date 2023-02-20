@@ -7,7 +7,7 @@ import {
 	useState,
 	useEffect,
 } from '@wordpress/element';
-import { DragEventHandler } from 'react';
+import { DragEventHandler, isValidElement } from 'react';
 import classnames from 'classnames';
 import { MediaItem, MediaUpload } from '@wordpress/media-utils';
 
@@ -65,7 +65,11 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 		setOrderedChildren(
 			( Array.isArray( children ) ? children : [ children ] ).map(
 				( child, index ) =>
-					cloneElement( child, { key: child.key || String( index ) } )
+					cloneElement( child as ImageGalleryChild, {
+						key:
+							( child as ImageGalleryChild ).key ||
+							String( index ),
+					} )
 			)
 		);
 	}, [ children ] );
@@ -121,7 +125,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 								if (
 									isDragging ||
 									event.currentTarget.contains(
-										event.relatedTarget
+										event.relatedTarget as Node
 									) ||
 									( event.relatedTarget &&
 										(

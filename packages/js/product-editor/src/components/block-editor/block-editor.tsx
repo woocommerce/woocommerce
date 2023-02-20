@@ -85,6 +85,7 @@ export function BlockEditor( {
 	 * @param  _blocks
 	 */
 	function handleUpdateBlocks( _blocks: BlockInstance[] ) {
+		console.log( 'handleUpdateBlocks', _blocks );
 		updateBlocks( _blocks );
 	}
 
