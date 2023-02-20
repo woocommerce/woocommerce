@@ -7,12 +7,14 @@ namespace Automattic\WooCommerce\Internal\Features;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\Navigation\Init;
 use Automattic\WooCommerce\Admin\Features\NewProductManagementExperience;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\PluginUtil;
+
 
 defined( 'ABSPATH' ) || exit;
 
@@ -116,6 +118,7 @@ class FeaturesController {
 		$this->legacy_feature_ids = array( 'analytics', 'new_navigation', 'new_product_management' );
 
 		$this->init_features( $features );
+
 
 		self::add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
 		self::add_filter( 'added_option', array( $this, 'process_added_option' ), 999, 3 );
@@ -643,8 +646,9 @@ class FeaturesController {
 			}
 		}
 
-		if ( 'new_product_management' === $feature_id ) {
-			$desc_tip = __( '⚠ This feature is currently in development and only available for simple products. No extension support yet.', 'woocommerce' );
+		if ('new_product_management' === $feature_id) {
+			    $disabled = true;
+				$desc_tip = __('⚠ This feature will be available soon. Stay tuned!', 'woocommerce');
 		}
 
 		if ( ! $this->is_legacy_feature( $feature_id ) && ! $disabled && $this->verify_did_woocommerce_init() ) {
