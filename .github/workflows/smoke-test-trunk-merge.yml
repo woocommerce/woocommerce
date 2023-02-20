@@ -64,7 +64,7 @@ jobs:
               if: failure() && steps.e2e-action.conclusion == 'failure'
               uses: slackapi/slack-github-action@v1.23.0
               with:
-                  channel-id: ${{ secrets.E2E_SLACK_CHANNEL }}
+                  channel-id: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
                   slack-message: |
                       :warning-8c: E2E tests failed on trunk
                       :hash: Commit: https://github.com/woocommerce/woocommerce/commit/${{ github.sha }}
