@@ -12,7 +12,7 @@ permissions: {}
 
 jobs:
     e2e:
-        name: Runs E2E tests.
+        name: Run E2E tests with HPOS disabled.
         runs-on: ubuntu-20.04
         permissions:
             contents: read
