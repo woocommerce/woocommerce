@@ -20,9 +20,6 @@ jobs:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
             ARTIFACT_NAME: e2e-trunk-commit-${{ github.sha }}-run-${{ github.run_number }}
-        strategy:
-            matrix:
-                enable-hpos: [0, 1]
         steps:
             - uses: actions/checkout@v3
 
@@ -33,9 +30,6 @@ jobs:
 
             - name: Setup E2E local environment
               uses: ./.github/actions/tests/setup-e2e-local-environment
-              env:
-                  ENABLE_HPOS: ${{ matrix.enable-hpos }}
-                  WP_ENV_PHP_VERSION: 7.4
 
             - name: Run E2E tests
               timeout-minutes: 60
