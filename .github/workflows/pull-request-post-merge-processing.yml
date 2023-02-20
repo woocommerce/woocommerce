@@ -5,6 +5,7 @@ on:
         paths:
             - 'packages/**'
             - 'plugins/woocommerce/**'
+            - 'plugins/woocommerce-admin/**'
 
 permissions: {}
 
