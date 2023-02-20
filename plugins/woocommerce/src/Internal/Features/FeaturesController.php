@@ -15,7 +15,6 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -118,7 +117,6 @@ class FeaturesController {
 		$this->legacy_feature_ids = array( 'analytics', 'new_navigation', 'new_product_management' );
 
 		$this->init_features( $features );
-
 
 		self::add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
 		self::add_filter( 'added_option', array( $this, 'process_added_option' ), 999, 3 );
