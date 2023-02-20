@@ -6,6 +6,14 @@ inputs:
     destination-dir:
         description: Directory under the "artifacts" S3 folder to which the Allure files would be uploaded.
         required: true
+    aws-region:
+        required: true
+    aws-access-key-id:
+        required: true
+    aws-secret-access-key:
+        required: true
+    s3-bucket:
+        required: true
 
 runs:
     using: composite
@@ -13,21 +21,21 @@ runs:
         - name: Configure AWS credentials
           uses: aws-actions/configure-aws-credentials@v1
           with:
-              aws-region: ${{ secrets.REPORTS_AWS_REGION }}
-              aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
-              aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+              aws-region: ${{ inputs.aws-region }}
+              aws-access-key-id: ${{ inputs.aws-access-key-id }}
+              aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
 
         - name: Upload 'allure-results' and 'allure-report' folders to bucket
           shell: bash
           run: |
               echo "Uploading files from $ALLURE_RESULTS_DIR..."
               aws s3 sync ${{ env.ALLURE_RESULTS_DIR }} \
-                  ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ inputs.destination-dir }}/allure-results \
+                  ${{ inputs.s3-bucket }}/artifacts/${{ github.run_id }}/${{ inputs.destination-dir }}/allure-results \
                   --quiet
               echo "Done"
 
               echo "Uploading files from $ALLURE_REPORT_DIR..."
               aws s3 sync ${{ env.ALLURE_REPORT_DIR }} \
-                  ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ inputs.destination-dir }}/allure-report \
+                  ${{ inputs.s3-bucket }}/artifacts/${{ github.run_id }}/${{ inputs.destination-dir }}/allure-report \
                   --quiet
               echo "Done"
