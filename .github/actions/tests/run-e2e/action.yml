@@ -12,6 +12,7 @@ runs:
     steps:
         - name: Download and install Chromium browser.
           working-directory: plugins/woocommerce
+          shell: bash
           run: pnpm exec playwright install chromium
 
         - name: Run E2E tests.
