@@ -31,7 +31,6 @@ jobs:
 
             - name: Run E2E tests
               timeout-minutes: 60
-              id: e2e-action
               uses: ./.github/actions/tests/run-e2e
               with:
                   report-name: ${{ env.ARTIFACT_NAME }}
