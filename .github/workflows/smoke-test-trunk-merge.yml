@@ -34,6 +34,8 @@ jobs:
             - name: Run API tests
               id: api-action
               uses: ./.github/actions/tests/run-api-tests
+              with:
+                  report-name: ${{ env.ARTIFACT_NAME }}
 
             - name: Upload Allure files to bucket
               if: success() || ( failure() && steps.api-action.conclusion == 'failure' )
