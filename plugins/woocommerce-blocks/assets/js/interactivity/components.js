@@ -1,30 +1,26 @@
-/**
- * External dependencies
- */
 import { useMemo, useContext } from 'preact/hooks';
 import { deepSignal } from 'deepsignal';
-
-/**
- * Internal dependencies
- */
 import { component } from './hooks';
 
 export default () => {
-	const WpContext = ( { children, data, context: { Provider } } ) => {
+	// <wp-context>
+	const Context = ( { children, data, context: { Provider } } ) => {
 		const signals = useMemo(
 			() => deepSignal( JSON.parse( data ) ),
 			[ data ]
 		);
 		return <Provider value={ signals }>{ children }</Provider>;
 	};
-	component( 'wp-context', WpContext );
+	component( 'context', Context );
 
-	const WpShow = ( { children, when, evaluate, context } ) => {
+	// <wp-show>
+	const Show = ( { children, when, evaluate, context } ) => {
 		const contextValue = useContext( context );
 		if ( evaluate( when, { context: contextValue } ) ) {
 			return children;
+		} else {
+			return <template>{ children }</template>;
 		}
-		return <template>{ children }</template>;
 	};
-	component( 'wp-show', WpShow );
+	component( 'show', Show );
 };
