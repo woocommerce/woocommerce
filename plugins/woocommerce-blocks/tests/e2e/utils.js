@@ -79,6 +79,7 @@ const SELECTORS = {
  * @param {string} searchTerm The text to search the inserter for.
  */
 export async function searchForBlock( searchTerm ) {
+	await openGlobalBlockInserter();
 	await page.waitForSelector( SELECTORS.inserter.search );
 	await page.focus( SELECTORS.inserter.search );
 	await pressKeyWithModifier( 'primary', 'a' );
@@ -92,7 +93,6 @@ export async function searchForBlock( searchTerm ) {
  * @param {string} searchTerm The text to search the inserter for.
  */
 export async function insertBlockDontWaitForInsertClose( searchTerm ) {
-	await openGlobalBlockInserter();
 	await searchForBlock( searchTerm );
 	await page.waitForXPath( `//button//span[text()='${ searchTerm }']` );
 	const insertButton = (
@@ -134,15 +134,6 @@ export const closeModalIfExists = async () => {
 	if ( closeButton ) {
 		await closeButton.click();
 	}
-};
-
-export const openWidgetsEditorBlockInserter = async () => {
-	await page.waitForSelector(
-		'.edit-widgets-header [aria-label="Add block"],.edit-widgets-header [aria-label="Toggle block inserter"]'
-	);
-	await page.click(
-		'.edit-widgets-header [aria-label="Add block"],.edit-widgets-header [aria-label="Toggle block inserter"]'
-	);
 };
 
 export const isBlockInsertedInWidgetsArea = async ( blockName ) => {

@@ -13,7 +13,6 @@ import {
 	insertBlockDontWaitForInsertClose,
 	openWidgetEditor,
 	closeModalIfExists,
-	openWidgetsEditorBlockInserter,
 } from '../../utils.js';
 
 const block = {
@@ -44,7 +43,6 @@ describe( `${ block.name } Block`, () => {
 			await merchant.login();
 			await openWidgetEditor();
 			await closeModalIfExists();
-			await openWidgetsEditorBlockInserter();
 			await searchForBlock( block.name );
 			const allProductsButton = await page.$x(
 				`//button//span[text()='${ block.name }']`
