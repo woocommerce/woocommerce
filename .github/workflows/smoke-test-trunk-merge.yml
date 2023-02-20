@@ -11,8 +11,68 @@ concurrency:
 permissions: {}
 
 jobs:
+    api:
+        name: Run API tests
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        env:
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-results
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-report
+            ARTIFACT_NAME: api-trunk-commit-${{ github.sha }}-run-${{ github.run_number }}
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  build-filters: woocommerce
+
+            - name: Setup E2E local environment
+              uses: ./.github/actions/tests/setup-e2e-local-environment
+
+            - name: Run API tests
+              id: api-action
+              uses: ./.github/actions/tests/run-api-tests
+
+            - name: Upload Allure files to bucket
+              if: success() || ( failure() && steps.api-action.conclusion == 'failure' )
+              uses: ./.github/actions/tests/upload-allure-files-to-bucket
+              with:
+                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
+                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+                  destination-dir: ${{ env.ARTIFACT_NAME }}
+                  s3-bucket: ${{ secrets.REPORTS_BUCKET }}
+
+            - name: Publish Allure report
+              if: success() || ( failure() && steps.api-action.conclusion == 'failure' )
+              env:
+                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+              run: |
+                  gh workflow run publish-test-reports-trunk-merge.yml \
+                  -f run_id=${{ github.run_id }} \
+                  -f artifact=${{ env.ARTIFACT_NAME }} \
+                  -f sha=${{ github.sha }} \
+                  -f test_type="api" \
+                  --repo woocommerce/woocommerce-test-reports
+
+            - name: Send Slack alert on test failure
+              if: failure() && steps.api-action.conclusion == 'failure'
+              uses: slackapi/slack-github-action@v1.23.0
+              with:
+                  channel-id: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
+                  slack-message: |
+                      :warning-8c: API tests failed on trunk
+                      :hash: Commit: https://github.com/woocommerce/woocommerce/commit/${{ github.sha }}
+                      :github: GitHub workflow run: https://github.com/woocommerce/woocommerce/actions/runs/${{ github.run_id }}
+                      :playwright: Test report: https://a8c-woo-test-reports.s3.amazonaws.com/public/trunk-merge/${{ github.sha }}/api/index.html
+              env:
+                  SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
+
     e2e:
-        name: Run E2E tests.
+        name: Run E2E tests
+        needs: [api]
         runs-on: ubuntu-20.04
         permissions:
             contents: read
@@ -34,7 +94,7 @@ jobs:
             - name: Run E2E tests
               id: e2e-action
               timeout-minutes: 60
-              uses: ./.github/actions/tests/run-e2e
+              uses: ./.github/actions/tests/run-e2e-tests
               with:
                   report-name: ${{ env.ARTIFACT_NAME }}
 
@@ -69,6 +129,6 @@ jobs:
                       :warning-8c: E2E tests failed on trunk
                       :hash: Commit: https://github.com/woocommerce/woocommerce/commit/${{ github.sha }}
                       :github: GitHub workflow run: https://github.com/woocommerce/woocommerce/actions/runs/${{ github.run_id }}
-                      :playwright: E2E report: https://a8c-woo-test-reports.s3.amazonaws.com/public/trunk-merge/${{ github.sha }}/e2e/index.html
+                      :playwright: Test report: https://a8c-woo-test-reports.s3.amazonaws.com/public/trunk-merge/${{ github.sha }}/e2e/index.html
               env:
                   SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
