@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce\Internal\Features;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\Navigation\Init;
 use Automattic\WooCommerce\Admin\Features\NewProductManagementExperience;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
@@ -645,9 +644,8 @@ class FeaturesController {
 		}
 
 		if ('new_product_management' === $feature_id) {
-			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
-				$disabled = true;
-			}
+			$disabled = true;
+
 			$desc_tip = __('⚠ This feature will be available soon. Stay tuned!', 'woocommerce');
 		}
 

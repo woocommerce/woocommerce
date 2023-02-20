@@ -29,7 +29,6 @@ class Features {
 		'multichannel-marketing'            => array( 'default' => 'no' ),
 		'navigation'                        => array( 'default' => 'no' ),
 		'settings'                          => array( 'default' => 'no' ),
-		//'new-product-management-experience' => array( 'default' => 'no' ),
 		'analytics'                         => array( 'default' => 'yes' ),
 		'remote-inbox-notifications'        => array( 'default' => 'yes' ),
 	);
@@ -78,7 +77,7 @@ class Features {
 		return apply_filters( 'woocommerce_admin_features', array() );
 	}
 
-	/**new-product-management-experience
+	/**
 	 * Gets the optional feature options as an associative array that can be toggled on or off.
 	 *
 	 * @return array

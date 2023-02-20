@@ -2563,8 +2563,7 @@ function wc_update_722_adjust_ukraine_states() {
  * Add new columns date_paid and date_completed to wp_wc_order_stats table in order to provide the option
  * of using the dates in the reports
  */
-function wc_update_750_add_columns_to_order_stats_table()
-{
+function wc_update_750_add_columns_to_order_stats_table() {
 	global $wpdb;
 
 	$wpdb->query(
@@ -2582,6 +2581,7 @@ function wc_update_750_add_columns_to_order_stats_table()
 			and postmeta.meta_key = '_date_completed'
 		SET order_stats.date_completed = IFNULL(FROM_UNIXTIME(postmeta.meta_value), '0000-00-00 00:00:00');"
 	);
+
 }
 
 /**
