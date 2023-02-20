@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { ReactElement } from 'react';
 import type { BlockEditProps } from '@wordpress/blocks';
 
 export interface BlockAttributes {
@@ -27,3 +28,6 @@ export interface DisplayOption {
 	textLabel: string;
 	formattedValue: string;
 }
+
+export type Notices = 'noAttributes' | 'noProducts';
+export type GetNotice = ( type: Notices ) => ReactElement | null;

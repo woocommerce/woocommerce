@@ -23,6 +23,7 @@ import {
 	ToggleControl,
 	Button,
 	ToolbarGroup,
+	Notice,
 	withSpokenMessages,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControl as ToggleGroupControl,
@@ -35,10 +36,30 @@ import {
  */
 import Block from './block';
 import './editor.scss';
-import type { EditProps } from './types';
+import type { EditProps, GetNotice } from './types';
 import { UpgradeNotice } from '../filter-wrapper/upgrade';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
+
+const noticeContent = {
+	noAttributes: __(
+		'Please select an attribute to use this filter!',
+		'woo-gutenberg-products-block'
+	),
+	noProducts: __(
+		'There are no products with the selected attributes.',
+		'woo-gutenberg-products-block'
+	),
+};
+
+const getNotice: GetNotice = ( type ) => {
+	const content = noticeContent[ type ];
+	return content ? (
+		<Notice status="warning" isDismissible={ false }>
+			<p>{ content }</p>
+		</Notice>
+	) : null;
+};
 
 const Edit = ( {
 	attributes,
@@ -416,7 +437,11 @@ const Edit = ( {
 						/>
 					) }
 					<Disabled>
-						<Block attributes={ attributes } isEditor={ true } />
+						<Block
+							attributes={ attributes }
+							isEditor={ true }
+							getNotice={ getNotice }
+						/>
 					</Disabled>
 				</div>
 			) }
