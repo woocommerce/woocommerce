@@ -28,6 +28,8 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  build-filters: woocommerce
 
             - name: Setup E2E local environment
               uses: ./.github/actions/tests/setup-e2e-local-environment
