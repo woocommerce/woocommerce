@@ -1,27 +1,21 @@
-/**
- * External dependencies
- */
 import { h, options, createContext } from 'preact';
 import { useRef } from 'preact/hooks';
-
-/**
- * Internal dependencies
- */
 import { store } from './wpx';
+import { componentPrefix } from './constants';
 
 // Main context.
 const context = createContext( {} );
 
 // WordPress Directives.
-const directives = {};
+const directiveMap = {};
 export const directive = ( name, cb ) => {
-	directives[ name ] = cb;
+	directiveMap[ name ] = cb;
 };
 
 // WordPress Components.
-const components = {};
+const componentMap = {};
 export const component = ( name, Comp ) => {
-	components[ name ] = Comp;
+	componentMap[ name ] = Comp;
 };
 
 // Resolve the path to some property of the wpx object.
@@ -46,15 +40,15 @@ const getEvaluate =
 	};
 
 // Directive wrapper.
-const WpDirective = ( { type, wp, props: originalProps } ) => {
+const Directive = ( { type, directives, props: originalProps } ) => {
 	const ref = useRef( null );
 	const element = h( type, { ...originalProps, ref, _wrapped: true } );
 	const props = { ...originalProps, children: element };
 	const evaluate = getEvaluate( { ref: ref.current } );
-	const directiveArgs = { directives: wp, props, element, context, evaluate };
+	const directiveArgs = { directives, props, element, context, evaluate };
 
-	for ( const d in wp ) {
-		const wrapper = directives[ d ]?.( directiveArgs );
+	for ( const d in directives ) {
+		const wrapper = directiveMap[ d ]?.( directiveArgs );
 		if ( wrapper !== undefined ) props.children = wrapper;
 	}
 
@@ -65,20 +59,23 @@ const WpDirective = ( { type, wp, props: originalProps } ) => {
 const old = options.vnode;
 options.vnode = ( vnode ) => {
 	const type = vnode.type;
-	const wp = vnode.props.wp;
+	const { directives } = vnode.props;
 
-	if ( typeof type === 'string' && type.startsWith( 'wp-' ) ) {
+	if (
+		typeof type === 'string' &&
+		type.slice( 0, componentPrefix.length ) === componentPrefix
+	) {
 		vnode.props.children = h(
-			components[ type ],
+			componentMap[ type.slice( componentPrefix.length ) ],
 			{ ...vnode.props, context, evaluate: getEvaluate() },
 			vnode.props.children
 		);
-	} else if ( wp ) {
+	} else if ( directives ) {
 		const props = vnode.props;
-		delete props.wp;
+		delete props.directives;
 		if ( ! props._wrapped ) {
-			vnode.props = { type: vnode.type, wp, props };
-			vnode.type = WpDirective;
+			vnode.props = { type: vnode.type, directives, props };
+			vnode.type = Directive;
 		} else {
 			delete props._wrapped;
 		}

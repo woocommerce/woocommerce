@@ -1,6 +1,3 @@
-/**
- * External dependencies
- */
 import { deepSignal } from 'deepsignal';
 
 const isObject = ( item ) =>
