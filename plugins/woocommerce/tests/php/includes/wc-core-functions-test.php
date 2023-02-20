@@ -54,7 +54,7 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 	 *           [6, 8]
 	 *           [7, 9]
 	 *
-	 * @param int $decimals Value returned by wc_get_price_decimals()
+	 * @param int $decimals Value returned by wc_get_price_decimals().
 	 * @param int $expected Expected value returned by the function.
 	 */
 	public function test_wc_get_rounding_precision( $decimals, $expected ) {
@@ -83,10 +83,10 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 	 *           [2, null, false, 0]
 	 *           [2, null, true, 0]
 	 *
-	 * @param $decimals Value returned by wc_get_price_decimals()
-	 * @param $value Value to pass to the function.
-	 * @param $round Whether to round the result or not.
-	 * @param $expected Expected value returned by the function.
+	 * @param int   $decimals Value returned by wc_get_price_decimals().
+	 * @param mixed $value Value to pass to the function.
+	 * @param bool  $round Whether to round the result or not.
+	 * @param float $expected Expected value returned by the function.
 	 */
 	public function test_wc_add_number_precision( $decimals, $value, $round, $expected ) {
 		add_filter(
@@ -107,9 +107,9 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 	 *           [5, 123.4567, 0.001234567]
 	 *           [2, null, 0]
 	 *
-	 * @param $decimals Value returned by wc_get_price_decimals()
-	 * @param $value Value to pass to the function.
-	 * @param $expected Expected value returned by the function.
+	 * @param int   $decimals Value returned by wc_get_price_decimals().
+	 * @param mixed $value Value to pass to the function.
+	 * @param float $expected Expected value returned by the function.
 	 */
 	public function test_wc_remove_number_precision( $decimals, $value, $expected ) {
 		add_filter(
