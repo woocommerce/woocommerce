@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment, StrictMode } from '@wordpress/element';
+import { createElement, StrictMode } from '@wordpress/element';
 import {
 	EditorSettings,
 	EditorBlockListSettings,
@@ -30,26 +30,19 @@ type EditorProps = {
 
 export function Editor( { product, settings }: EditorProps ) {
 	return (
-		<>
-			<StrictMode>
-				<ShortcutProvider>
-					<FullscreenMode isActive={ false } />
-					{/* @ts-ignore */}
-					<SlotFillProvider>
-						<InterfaceSkeleton
-							header={ <Header title={ product.name } /> }
-							sidebar={ <Sidebar /> }
-							content={
-								<>
-									<BlockEditor settings={ settings } />
-								</>
-							}
-						/>
-
-						<Popover.Slot />
-					</SlotFillProvider>
-				</ShortcutProvider>
-			</StrictMode>
-		</>
+		<StrictMode>
+			<ShortcutProvider>
+				<FullscreenMode isActive={ false } />
+				{ /* @ts-ignore */ }
+				<SlotFillProvider>
+					<InterfaceSkeleton
+						header={ <Header title={ product.name } /> }
+						sidebar={ <Sidebar /> }
+						content={ <BlockEditor settings={ settings } /> }
+					/>
+					<Popover.Slot />
+				</SlotFillProvider>
+			</ShortcutProvider>
+		</StrictMode>
 	);
 }

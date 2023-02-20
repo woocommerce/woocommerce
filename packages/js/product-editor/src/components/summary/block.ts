@@ -7,14 +7,8 @@ export default {
 	description: 'The product summary.',
 	keywords: [ 'products', 'summary' ],
 	textdomain: 'default',
-	attributes: {
-		content: {
-			type: 'string',
-		},
-		placeholder: {
-			type: 'string',
-		},
-	},
+	attributes: {},
+	ancestor: [ 'woocommerce/product-form' ],
 	supports: {},
 	style: 'wp-paragraph',
 };

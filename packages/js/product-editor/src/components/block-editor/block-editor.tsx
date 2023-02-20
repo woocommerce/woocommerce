@@ -80,6 +80,7 @@ export function BlockEditor( { settings: _settings }: BlockEditorProps ) {
 	 * @param  _blocks
 	 */
 	function handleUpdateBlocks( _blocks: BlockInstance[] ) {
+		console.log( 'handleUpdateBlocks', _blocks );
 		updateBlocks( _blocks );
 	}
 

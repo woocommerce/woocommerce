@@ -9,8 +9,7 @@ const { name } = metadata;
 
 export { metadata, name };
 
-export const settings: any = {
-	example: {},
+export const settings = {
 	edit: Edit,
 };
 
