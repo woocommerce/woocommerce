@@ -59,3 +59,16 @@ jobs:
                   -f sha=${{ github.sha }} \
                   -f test_type="e2e" \
                   --repo woocommerce/woocommerce-test-reports
+
+            - name: Send Slack alert on test failure
+              if: failure() && steps.e2e-action.conclusion == 'failure'
+              uses: slackapi/slack-github-action@v1.23.0
+              with:
+                  channel-id: ${{ secrets.E2E_SLACK_CHANNEL }}
+                  slack-message: |
+                      :warning-8c: E2E tests failed on trunk
+                      :hash: Commit: https://github.com/woocommerce/woocommerce/commit/${{ github.sha }}
+                      :github: GitHub workflow run: https://github.com/woocommerce/woocommerce/actions/runs/${{ github.run_id }}
+                      :playwright: E2E report: https://a8c-woo-test-reports.s3.amazonaws.com/public/trunk-merge/${{ github.sha }}/e2e/index.html
+              env:
+                  SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
