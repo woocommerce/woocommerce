@@ -26,8 +26,8 @@ type PluginsProps = {
 	onAbort?: () => void;
 	abortText?: string;
 	installText?: string;
-	installButtonVariant?: 'primary' | 'secondary' | 'tertiary' | 'link';
-	learnMore?: string;
+	installButtonVariant?: Button.BaseProps[ 'variant' ];
+	learnMoreLink?: string;
 	learnMoreText?: string;
 	onLearnMore?: () => void;
 };
@@ -43,7 +43,7 @@ export const Plugins = ( {
 	skipText = __( 'No thanks', 'woocommerce' ),
 	abortText = __( 'Abort', 'woocommerce' ),
 	installButtonVariant = 'primary',
-	learnMore,
+	learnMoreLink,
 	learnMoreText = __( 'Learn more', 'woocommerce' ),
 	onLearnMore,
 }: PluginsProps ) => {
@@ -170,8 +170,8 @@ export const Plugins = ( {
 					{ skipText }
 				</Button>
 			) }
-			{ learnMore && (
-				<a href={ learnMore } target="_blank" rel="noreferrer">
+			{ learnMoreLink && (
+				<a href={ learnMoreLink } target="_blank" rel="noreferrer">
 					<Button isTertiary onClick={ onLearnMore }>
 						{ learnMoreText }
 					</Button>

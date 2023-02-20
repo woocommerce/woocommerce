@@ -341,6 +341,7 @@ export class Shipping extends Component {
 								install: false,
 								plugins_to_activate: pluginsToActivate,
 							} );
+							invalidateResolutionForStoreSelector();
 							getHistory().push( getNewPath( {}, '/', {} ) );
 							onComplete();
 						} }
@@ -449,7 +450,6 @@ export class Shipping extends Component {
 												( element ) =>
 													element !== undefined
 											); // remove undefineds
-											// TODO: if pluginsForPartner is empty then we show a CTA with the URL instead
 											return pluginToPromote[
 												'dual-partner-layout'
 											]( {
@@ -470,6 +470,7 @@ export class Shipping extends Component {
 																			pluginsForPartner,
 																	}
 																);
+																invalidateResolutionForStoreSelector();
 																this.completeStep();
 															} }
 															onError={ (
@@ -484,7 +485,7 @@ export class Shipping extends Component {
 																'Install and enable',
 																'woocommerce'
 															) }
-															learnMore={
+															learnMoreLink={
 																pluginToPromote.url
 															}
 															onLearnMore={ () => {
@@ -534,6 +535,7 @@ export class Shipping extends Component {
 													pluginsToActivate,
 											}
 										);
+										invalidateResolutionForStoreSelector();
 										this.completeStep();
 									} }
 									onError={ ( errors, response ) =>
