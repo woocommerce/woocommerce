@@ -11,7 +11,6 @@ import {
  * Internal dependencies
  */
 import {
-	openWidgetsEditorBlockInserter,
 	closeModalIfExists,
 	openWidgetEditor,
 	searchForBlock,
@@ -39,7 +38,6 @@ if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 3 ) {
 
 const addBlockToWidgetsArea = async () => {
 	await closeModalIfExists();
-	await openWidgetsEditorBlockInserter();
 	await searchForBlock( block.name );
 	await page.waitForXPath( block.selectors.insertButton );
 	const miniCartButton = await page.$x( block.selectors.insertButton );
