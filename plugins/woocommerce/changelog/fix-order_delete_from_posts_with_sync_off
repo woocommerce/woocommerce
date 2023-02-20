@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Don't delete order from posts table when deleted from orders table if the later is authoritative and sync is off
