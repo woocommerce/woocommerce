@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a unit test for woocommerce_admin_experimental_onboarding_tasklists filter
