@@ -10,13 +10,12 @@ inputs:
         description: WP_ENV_PHP_VERSION
         default: 7.4
 
-env:
-    ENABLE_HPOS: ${{ inputs.enable-hpos }}
-    WP_ENV_PHP_VERSION: ${{ inputs.wp-env-php-version }}
-
 runs:
     using: composite
     steps:
         - name: Load docker images and start containers.
           working-directory: plugins/woocommerce
+          env:
+              ENABLE_HPOS: ${{ inputs.enable-hpos }}
+              WP_ENV_PHP_VERSION: ${{ inputs.wp-env-php-version }}
           run: pnpm run env:test
