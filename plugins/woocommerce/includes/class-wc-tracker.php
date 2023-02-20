@@ -799,13 +799,13 @@ class WC_Tracker {
 	 */
 	public static function get_pickup_location_data() {
 		$pickup_location_enabled = false;
-		$pickup_locations_count  = count( get_option( 'pickup_location_pickup_locations', [] ) );
+		$pickup_locations_count  = count( get_option( 'pickup_location_pickup_locations', array() ) );
 
-		// Get the available shipping methods
+		// Get the available shipping methods.
 		$shipping_methods = WC()->shipping()->get_shipping_methods();
 
-		// Check if the desired shipping method is enabled
-		if ( isset( $shipping_methods['pickup_location'] ) && $shipping_methods['pickup_location']->is_enabled()) {
+		// Check if the desired shipping method is enabled.
+		if ( isset( $shipping_methods['pickup_location'] ) && $shipping_methods['pickup_location']->is_enabled() ) {
 			$pickup_location_enabled = true;
 		}
 
@@ -843,7 +843,7 @@ class WC_Tracker {
 			'cart_block_attributes'                     => $cart_block_data['block_attributes'],
 			'checkout_page_contains_checkout_block'     => $checkout_block_data['page_contains_block'],
 			'checkout_block_attributes'                 => $checkout_block_data['block_attributes'],
-			'pickup_location'						    => $pickup_location_data,
+			'pickup_location'                           => $pickup_location_data,
 		);
 	}
 
