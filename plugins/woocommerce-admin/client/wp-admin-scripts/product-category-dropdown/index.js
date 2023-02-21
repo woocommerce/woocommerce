@@ -6,14 +6,20 @@ import { render } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { CategoryDropdownContainer } from './container';
+import { CategoryMetabox } from './category-metabox';
+import { getSelectedCategoryData } from './category-handlers';
 import './style.scss';
 
 const navigationOptOutRoot = document.createElement( 'div' );
 navigationOptOutRoot.setAttribute( 'id', 'navigation-opt-out-root' );
 
-const container = document.querySelector( '.wc-select-tree-control' );
+const metaboxContainer = document.querySelector(
+	'#taxonomy-product_cat-metabox'
+);
+const initialSelected = getSelectedCategoryData(
+	metaboxContainer.parentElement
+);
 render(
-	<CategoryDropdownContainer />,
-	container.appendChild( navigationOptOutRoot )
+	<CategoryMetabox initialSelected={ initialSelected } />,
+	metaboxContainer
 );

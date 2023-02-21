@@ -1873,11 +1873,12 @@ class WC_AJAX {
 		$limit       = isset( $_GET['limit'] ) ? absint( wp_unslash( $_GET['limit'] ) ) : null;
 		$taxonomy    = isset( $_GET['taxonomy'] ) ? wc_clean( wp_unslash( $_GET['taxonomy'] ) ) : '';
 		$orderby     = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : 'name';
+		$order       = isset( $_GET['order'] ) ? wc_clean( wp_unslash( $_GET['order'] ) ) : 'ASC';
 
 		$args = array(
 			'taxonomy'        => $taxonomy,
 			'orderby'         => $orderby,
-			'order'           => 'ASC',
+			'order'           => $order,
 			'hide_empty'      => false,
 			'fields'          => 'all',
 			'number'          => $limit,

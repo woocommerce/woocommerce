@@ -1,25 +1,27 @@
 export const CATEGORY_TERM_NAME = 'product_cat';
 
 export function getCategoryDataFromElement( element ) {
-	if ( element && element.dataset && element.dataset.termId ) {
+	if ( element && element.dataset && element.dataset.name ) {
 		return {
-			term_id: parseInt( element.dataset.termId, 10 ),
+			term_id: parseInt( element.value, 10 ),
 			name: element.dataset.name,
 		};
 	}
 	return null;
 }
 
-export function getSelectedCategoryData() {
-	const categoryContainer = document.querySelector( '#product_catchecklist' );
-	const selectedCategories = Array.from(
-		categoryContainer.querySelectorAll( 'li' )
-	).map( ( ele ) => {
-		const id = getCategoryDataFromElement( ele );
-		return id;
-	} );
-	categoryContainer.remove();
-	return selectedCategories;
+export function getSelectedCategoryData( container ) {
+	if ( container ) {
+		const selectedCategories = Array.from(
+			container.querySelectorAll( ':scope > input[type=hidden]' )
+		).map( ( ele ) => {
+			const id = getCategoryDataFromElement( ele );
+			ele.remove();
+			return id;
+		} );
+		return selectedCategories;
+	}
+	return [];
 }
 
 export function syncWithMostUsed( selectedIds ) {
