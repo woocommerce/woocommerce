@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 
 /**
@@ -9,14 +10,19 @@ import { useState } from '@wordpress/element';
 import { CATEGORY_TERM_NAME } from './category-handlers';
 import { AllCategoryList } from './all-category-list';
 import { CategoryTerm, PopularCategoryList } from './popular-category-list';
+import { CategoryAddNew } from './category-add-new';
 
-const initialHash = window.location.hash.substr( 1 );
+let initialTab = '';
+if ( window.getUserSetting ) {
+	initialTab = window.getUserSetting( CATEGORY_TERM_NAME + '_tab' ) || '';
+}
+
 export const CategoryMetabox: React.FC< {
 	initialSelected: CategoryTerm[];
 } > = ( { initialSelected } ) => {
 	const [ selected, setSelected ] = useState( initialSelected );
 	const [ activeTab, setActiveTab ] = useState(
-		initialHash === CATEGORY_TERM_NAME + '-pop' ? 'pop' : 'all'
+		initialTab === 'pop' ? 'pop' : 'all'
 	);
 	return (
 		<div id={ 'taxonomy-' + CATEGORY_TERM_NAME } className="categorydiv">
@@ -24,7 +30,15 @@ export const CategoryMetabox: React.FC< {
 				<li className={ activeTab === 'all' ? 'tabs' : '' }>
 					<a
 						href={ '#' + CATEGORY_TERM_NAME + '-all' }
-						onClick={ () => setActiveTab( 'all' ) }
+						onClick={ ( event ) => {
+							event.preventDefault();
+							setActiveTab( 'all' );
+							if ( window.deleteUserSetting ) {
+								window.deleteUserSetting(
+									CATEGORY_TERM_NAME + '_tab'
+								);
+							}
+						} }
 					>
 						All items
 					</a>
@@ -32,15 +46,24 @@ export const CategoryMetabox: React.FC< {
 				<li className={ activeTab === 'pop' ? 'tabs' : '' }>
 					<a
 						href={ '#' + CATEGORY_TERM_NAME + '-pop' }
-						onClick={ () => setActiveTab( 'pop' ) }
+						onClick={ ( event ) => {
+							event.preventDefault();
+							setActiveTab( 'pop' );
+							if ( window.setUserSetting ) {
+								window.setUserSetting(
+									CATEGORY_TERM_NAME + '_tab',
+									'pop'
+								);
+							}
+						} }
 					>
 						Most used
 					</a>
 				</li>
 			</ul>
 			<div
-				id={ CATEGORY_TERM_NAME + '-pop' }
 				className="tabs-panel"
+				id={ CATEGORY_TERM_NAME + '-pop' }
 				style={ activeTab !== 'pop' ? { display: 'none' } : {} }
 			>
 				<ul
@@ -54,8 +77,8 @@ export const CategoryMetabox: React.FC< {
 				</ul>
 			</div>
 			<div
-				id={ CATEGORY_TERM_NAME + '-all' }
 				className="tabs-panel"
+				id={ CATEGORY_TERM_NAME + '-all' }
 				style={ activeTab !== 'all' ? { display: 'none' } : {} }
 			>
 				<AllCategoryList
@@ -71,6 +94,7 @@ export const CategoryMetabox: React.FC< {
 					name={ 'tax_input[' + CATEGORY_TERM_NAME + '][]' }
 				/>
 			) ) }
+			<CategoryAddNew selected={ selected } onChange={ setSelected } />
 		</div>
 	);
 };

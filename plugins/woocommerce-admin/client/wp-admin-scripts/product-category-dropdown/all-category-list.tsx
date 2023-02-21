@@ -11,7 +11,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { CATEGORY_TERM_NAME, syncWithMostUsed } from './category-handlers';
+import { CATEGORY_TERM_NAME } from './category-handlers';
 import { CategoryTerm } from './popular-category-list';
 
 type CategoryTreeItem = CategoryTerm & {
@@ -81,11 +81,10 @@ export const AllCategoryList: React.FC< {
 					value={ selected.map( ( cat ) => cat.term_id.toString() ) }
 					onChange={ ( sel: number[] ) => {
 						onChange( sel.map( ( id ) => categoryLibrary[ id ] ) );
-						syncWithMostUsed( sel );
 					} }
 					selectAllLabel={ false }
 					onInputChange={ setFilter }
-					placeholder="Add category"
+					placeholder={ __( 'Add category', 'woocommerce' ) }
 					includeParent={ true }
 				/>
 			</div>
@@ -103,11 +102,6 @@ export const AllCategoryList: React.FC< {
 									( sel ) => sel.term_id !== cat.term_id
 								);
 								onChange( newSelectedItems );
-								syncWithMostUsed(
-									newSelectedItems.map(
-										( sel ) => sel.term_id
-									)
-								);
 							} }
 						>
 							<span
