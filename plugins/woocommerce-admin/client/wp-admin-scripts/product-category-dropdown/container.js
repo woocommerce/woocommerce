@@ -93,6 +93,7 @@ export const CategoryDropdownContainer = () => {
 		<>
 			<div className="product-add-category__tree-control">
 				<TreeSelectControl
+					alwaysShowPlaceholder={ true }
 					options={ treeItems }
 					value={ selected.map( ( cat ) => cat.term_id ) }
 					onChange={ ( sel ) => {

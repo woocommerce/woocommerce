@@ -11,13 +11,15 @@ export function getCategoryDataFromElement( element ) {
 }
 
 export function getSelectedCategoryData() {
-	return Array.from(
-		document.querySelectorAll( '#product_catchecklist li' )
+	const categoryContainer = document.querySelector( '#product_catchecklist' );
+	const selectedCategories = Array.from(
+		categoryContainer.querySelectorAll( 'li' )
 	).map( ( ele ) => {
 		const id = getCategoryDataFromElement( ele );
-		ele.remove();
 		return id;
 	} );
+	categoryContainer.remove();
+	return selectedCategories;
 }
 
 export function syncWithMostUsed( selectedIds ) {
