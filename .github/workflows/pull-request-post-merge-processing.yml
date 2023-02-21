@@ -2,6 +2,10 @@ name: 'Pull request post-merge processing'
 on:
     pull_request_target:
         types: [closed]
+        paths:
+            - 'packages/**'
+            - 'plugins/woocommerce/**'
+            - 'plugins/woocommerce-admin/**'
 
 permissions: {}
 
