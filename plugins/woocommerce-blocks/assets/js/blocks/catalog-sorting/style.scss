@@ -5,7 +5,12 @@
 
 	select.orderby {
 		font-size: inherit;
-		color: inherit;
+	}
+
+	&.has-text-color {
+		select.orderby {
+			color: inherit;
+		}
 	}
 
 	.woocommerce-ordering {
