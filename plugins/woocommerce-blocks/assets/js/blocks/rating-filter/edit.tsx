@@ -7,6 +7,7 @@ import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
 import {
 	Disabled,
+	Notice,
 	PanelBody,
 	ToggleControl,
 	withSpokenMessages,
@@ -22,6 +23,17 @@ import {
 import Block from './block';
 import { Attributes } from './types';
 import './editor.scss';
+
+const noRatingsNotice = (
+	<Notice status="warning" isDismissible={ false }>
+		<p>
+			{ __(
+				"Your store doesn't have any products with ratings yet. This filter option will display when a product receives a review.",
+				'woo-gutenberg-products-block'
+			) }
+		</p>
+	</Notice>
+);
 
 const Edit = ( {
 	attributes,
@@ -143,7 +155,11 @@ const Edit = ( {
 			{
 				<div { ...blockProps }>
 					<Disabled>
-						<Block attributes={ attributes } isEditor={ true } />
+						<Block
+							attributes={ attributes }
+							isEditor={ true }
+							noRatingsNotice={ noRatingsNotice }
+						/>
 					</Disabled>
 				</div>
 			}
