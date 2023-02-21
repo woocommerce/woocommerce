@@ -94,6 +94,13 @@ export const CategoryMetabox: React.FC< {
 					name={ 'tax_input[' + CATEGORY_TERM_NAME + '][]' }
 				/>
 			) ) }
+			{ selected.length === 0 && (
+				<input
+					type="hidden"
+					value=""
+					name={ 'tax_input[' + CATEGORY_TERM_NAME + '][]' }
+				/>
+			) }
 			<CategoryAddNew selected={ selected } onChange={ setSelected } />
 		</div>
 	);
