@@ -3,8 +3,10 @@ import type { GatsbyConfig } from 'gatsby';
 const config: GatsbyConfig = {
 	siteMetadata: {
 		title: `Dev Hub`,
-		siteUrl: `https://www.yourdomain.tld`,
+		siteUrl: `http://localhost:1234/docs`,
 	},
+
+	pathPrefix: '/docs',
 
 	assetPrefix: '/wp-content/plugins/devhub/site/public',
 	// More easily incorporate content into your pages through automatic TypeScript type generation and better GraphQL IntelliSense.
