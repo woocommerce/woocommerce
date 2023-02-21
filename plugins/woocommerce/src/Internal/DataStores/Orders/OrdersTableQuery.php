@@ -873,6 +873,9 @@ class OrdersTableQuery {
 				$ids[] = absint( $value );
 			} elseif ( is_string( $value ) && is_email( $value ) ) {
 				$emails[] = sanitize_email( $value );
+			} else {
+				// Invalid query.
+				$pieces[] = '1=0';
 			}
 		}
 
