@@ -575,6 +575,9 @@ ul.wc-tabs {
 		}
 
 		&.active {
+			// Style active tab in theme colors.
+			background: var(--wp--preset--color--background, $contentbg);
+			border-bottom-color: var(--wp--preset--color--background, $contentbg);
 			box-shadow: 0 1px var(--wp--preset--color--background);
 		}
 
@@ -582,13 +585,6 @@ ul.wc-tabs {
 			text-decoration: none;
 		}
 	}
-}
-
-// Moved from blocktheme.scss to retain full styling.
-ul.tabs li.active {
-	// Style active tab in theme colors.
-	background: var(--wp--preset--color--background, $contentbg);
-	border-bottom-color: var(--wp--preset--color--background, $contentbg);
 }
 
 .woocommerce-Tabs-panel {
