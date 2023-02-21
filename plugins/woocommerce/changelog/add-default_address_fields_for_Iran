@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Add IR and fields priorities to list of get_country_locale() method to follow conventional way of addressing in Iran.

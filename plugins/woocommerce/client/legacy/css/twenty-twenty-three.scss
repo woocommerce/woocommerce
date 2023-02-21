@@ -315,10 +315,6 @@
 					font-size: 1em;
 				}
 			}
-
-			.quantity {
-				display: inline-block;
-			}
 		}
 
 		table.variations tr {
@@ -334,12 +330,6 @@
 
 		.single_variation_wrap {
 			margin-top: var(--wp--style--block-gap);
-		}
-
-		button[name="add-to-cart"],
-		button.single_add_to_cart_button {
-			margin-top: 0.5rem;
-			margin-bottom: var(--wp--style--block-gap);
 		}
 
 		ol.flex-control-thumbs {

@@ -95,3 +95,9 @@ export {
 	SlotContextType,
 	SlotContextHelpersType,
 } from './slot-context';
+
+// Exports below can be removed once the @woocommerce/product-editor package is released.
+export {
+	ProductSectionLayout as __experimentalProductSectionLayout,
+	ProductFieldSection as __experimentalProductFieldSection,
+} from './product-section-layout';
