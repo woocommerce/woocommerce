@@ -13,7 +13,7 @@ jobs:
             - uses: actions/setup-node@v3
               with:
                   node-version-file: '.nvmrc'
-            - uses: preactjs/compressed-size-action@v2
+            - uses: preactjs/compressed-size-action@265b0667736973f2d83b1a35fdc5440d6cb3322e
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   pattern: '{build/**/*.js,build/**/*.css}'
