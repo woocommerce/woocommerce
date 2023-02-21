@@ -115,9 +115,13 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$add_mock_order_type = function( $order_types ) use ( $mock_datastores ) {
 			return array( 'shop_order', 'order-fake-type' );
 		};
+		$return_mock_order_data_store = function ( $stores ) use ( $mock_datastores ) {
+			return $mock_datastores['order'];
+		};
 
 		add_filter( 'woocommerce_data_stores', $add_mock_datastores );
 		add_filter( 'wc_order_types', $add_mock_order_type );
+		add_filter( 'woocommerce_order_data_store', $return_mock_order_data_store, 1000, 2 );
 
 		// Check counts for specific order types.
 		$this->assertEquals( 2, wc_orders_count( 'on-hold', 'shop_order' ) );
@@ -131,6 +135,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_data_stores', $add_mock_datastores );
 		remove_filter( 'wc_order_types', $add_mock_order_type );
+		remove_filter( 'woocommerce_order_data_store', $return_mock_order_data_store, 1000 );
 
 		// Confirm that everything's back to normal.
 		wp_cache_flush();
@@ -190,7 +195,8 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		// Assert the return when $the_order args is false.
 		$this->assertFalse( wc_get_order( false ) );
 
-		$post = get_post( $order->get_id() );
+		$post     = get_post( $order->get_id() );
+		$theorder = $order;
 		$this->assertInstanceOf(
 			'WC_Order',
 			wc_get_order(),
