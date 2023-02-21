@@ -134,7 +134,7 @@ class OnboardingThemes {
 				}
 			}
 
-			$active_theme     = get_option( 'stylesheet' );
+			$active_theme = get_option( 'stylesheet' );
 
 			/**
 			 * The active theme may no be set if active_theme is not compatible with current version of WordPress.
@@ -148,7 +148,6 @@ class OnboardingThemes {
 
 				$themes = array( $active_theme => $themes[ $active_theme ] ) + $themes;
 			}
-
 
 			set_transient( self::THEMES_TRANSIENT, $themes, DAY_IN_SECONDS );
 		}
