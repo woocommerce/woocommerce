@@ -1,4 +1,7 @@
 <?php
+
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 /**
  * Test meta for https://github.com/woocommerce/woocommerce/issues/13533.
  *
@@ -106,11 +109,14 @@ class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $order->get_meta_data() );
 		$this->assertTrue( in_array( 'random', wp_list_pluck( $order->get_meta_data(), 'key' ) ) );
 
-		// The new $order should have 3 items of meta since it's freshly loaded.
-		$this->assertCount( 3, $new_order->get_meta_data() );
+		$expected_count = OrderUtil::custom_orders_table_usage_is_enabled() ? 2 : 3;
+		// The new $order should have 3 items (or 2 in case of HPOS since direct post updates are not read) of meta since it's freshly loaded.
+		$this->assertCount( $expected_count, $new_order->get_meta_data() );
 		$this->assertTrue( in_array( 'random', wp_list_pluck( $new_order->get_meta_data(), 'key' ) ) );
 		$this->assertTrue( in_array( 'random_other', wp_list_pluck( $new_order->get_meta_data(), 'key' ) ) );
-		$this->assertTrue( in_array( 'random_other_pre_crud', wp_list_pluck( $new_order->get_meta_data(), 'key' ) ) );
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->assertTrue( in_array( 'random_other_pre_crud', wp_list_pluck( $new_order->get_meta_data(), 'key' ) ) );
+		}
 	}
 
 	/**
