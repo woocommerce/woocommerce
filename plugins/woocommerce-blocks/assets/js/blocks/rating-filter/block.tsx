@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { type ReactElement } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
 import { Icon, chevronDown } from '@wordpress/icons';
@@ -12,7 +13,6 @@ import {
 	useShallowEqual,
 	useBorderProps,
 } from '@woocommerce/base-hooks';
-import { Notice } from 'wordpress-components';
 import {
 	useQueryStateByKey,
 	useQueryStateByContext,
@@ -65,17 +65,15 @@ const translations = {
 
 /**
  * Component displaying a rating filter.
- *
- * @param {Object}  props            Incoming props for the component.
- * @param {Object}  props.attributes Incoming block attributes.
- * @param {boolean} props.isEditor   Whether the component is being rendered in the editor.
  */
 const RatingFilterBlock = ( {
 	attributes: blockAttributes,
 	isEditor,
+	noRatingsNotice = null,
 }: {
-	isEditor: boolean;
 	attributes: Attributes;
+	isEditor: boolean;
+	noRatingsNotice?: ReactElement | null;
 } ) => {
 	const setWrapperVisibility = useSetWraperVisibility();
 
@@ -335,16 +333,7 @@ const RatingFilterBlock = ( {
 
 	return (
 		<>
-			{ displayNoProductRatingsNotice && (
-				<Notice status="warning" isDismissible={ false }>
-					<p>
-						{ __(
-							"Your store doesn't have any products with ratings yet. This filter option will display when a product receives a review.",
-							'woo-gutenberg-products-block'
-						) }
-					</p>
-				</Notice>
-			) }
+			{ displayNoProductRatingsNotice && noRatingsNotice }
 			<div
 				className={ classnames(
 					'wc-block-rating-filter',
