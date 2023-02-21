@@ -14,7 +14,7 @@ export const blockAttributes: BlockAttributes = {
 	},
 	textAlign: {
 		type: 'string',
-		default: '',
+		default: 'center',
 	},
 };
 

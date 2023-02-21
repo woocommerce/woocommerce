@@ -59,14 +59,12 @@ const PriceEdit = ( {
 	return (
 		<>
 			<BlockControls>
-				{ isDescendentOfQueryLoop && (
-					<AlignmentToolbar
-						value={ attributes.textAlign }
-						onChange={ ( textAlign: AllowedAlignments ) => {
-							setAttributes( { textAlign } );
-						} }
-					/>
-				) }
+				<AlignmentToolbar
+					value={ attributes.textAlign }
+					onChange={ ( textAlign: AllowedAlignments ) => {
+						setAttributes( { textAlign } );
+					} }
+				/>
 			</BlockControls>
 			<div { ...blockProps }>
 				<Block { ...blockAttrs } />
