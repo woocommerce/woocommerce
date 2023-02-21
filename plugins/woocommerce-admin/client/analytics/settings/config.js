@@ -118,4 +118,31 @@ export const config = applyFilters( SETTINGS_FILTER, {
 		),
 		defaultValue: DEFAULT_DATE_RANGE,
 	},
+	woocommerce_date_type: {
+		name: 'woocommerce_date_type',
+		label: __( 'Date type:', 'woocommerce' ),
+		inputType: 'select',
+		options: [
+			{
+				label: __( 'Date created', 'woocommerce' ),
+				value: 'date_created',
+				key: 'date_created',
+			},
+			{
+				label: __( 'Date paid', 'woocommerce' ),
+				value: 'date_paid',
+				key: 'date_paid',
+			},
+			{
+				label: __( 'Date completed', 'woocommerce' ),
+				value: 'date_completed',
+				key: 'date_completed',
+			},
+		],
+		helpText: __(
+			'Database date field considered for Revenue and Orders reports',
+			'woocommerce'
+		),
+		defaultValue: 'date_created',
+	},
 } );

@@ -26,12 +26,11 @@ class Features {
 	 * @var array
 	 */
 	protected static $optional_features = array(
-		'multichannel-marketing'            => array( 'default' => 'no' ),
-		'navigation'                        => array( 'default' => 'no' ),
-		'settings'                          => array( 'default' => 'no' ),
-		'new-product-management-experience' => array( 'default' => 'no' ),
-		'analytics'                         => array( 'default' => 'yes' ),
-		'remote-inbox-notifications'        => array( 'default' => 'yes' ),
+		'multichannel-marketing'     => array( 'default' => 'no' ),
+		'navigation'                 => array( 'default' => 'no' ),
+		'settings'                   => array( 'default' => 'no' ),
+		'analytics'                  => array( 'default' => 'yes' ),
+		'remote-inbox-notifications' => array( 'default' => 'yes' ),
 	);
 
 	/**
