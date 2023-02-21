@@ -33,7 +33,6 @@ class WC_Meta_Box_Product_Categories {
 		}
 		$parsed_args = wp_parse_args( $args, $defaults );
 		$tax_name    = esc_attr( $parsed_args['taxonomy'] );
-		$taxonomy    = get_taxonomy( $parsed_args['taxonomy'] );
 		$selected_categories = wp_get_object_terms( $post->ID, 'product_cat' );
 		?>
 		<div id="taxonomy-<?php echo $tax_name; ?>-metabox"></div>
@@ -44,11 +43,6 @@ class WC_Meta_Box_Product_Categories {
 				name="tax_input[<?php echo $tax_name; ?>][]"
 				data-name="<?php echo $term->name; ?>"
 			/>
-		<?php } ?>
-		<div id="taxonomy-<?php echo $tax_name; ?>" class="categorydiv">
-			<?php if ( current_user_can( $taxonomy->cap->edit_terms ) ) : ?>
-			<?php endif; ?>
-		</div>
-		<?php
+		<?php }
 	}
 }
