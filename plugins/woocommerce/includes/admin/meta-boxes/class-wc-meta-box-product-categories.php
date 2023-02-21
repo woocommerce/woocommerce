@@ -54,21 +54,34 @@ class WC_Meta_Box_Product_Categories {
 				$current_category      = $current_category_slug ? get_term_by( 'slug', $current_category_slug, 'product_cat' ) : false;
 				?>
 				<div class="wc-select-tree-control"></div>
-				<ul id="<?php echo $tax_name; ?>checklist" data-wp-lists="list:<?php echo $tax_name; ?>" class="categorychecklist form-no-clear">
+				<ul id="<?php echo $tax_name; ?>checklist" data-wp-lists="list:<?php echo $tax_name; ?>" class="categorychecklist form-no-clear tagchecklist">
 					<?php
+					if ( 'category' === $taxonomy ) {
+						$name = 'post_category';
+					} else {
+						$name = 'tax_input[' . $tax_name . ']';
+					}
 					foreach ( (array) $selected_categories as $term ) {
 						$id      = "$term->term_id";
 						$checked = 'checked="checked"';
+						$class = in_array( $term->term_id, $popular_ids, true ) ? ' class="popular-category"' : '';
 						?>
 
-						<li id="product_cat-<?php echo $id; ?>">
-							<label for="in-<?php echo $tax_name; ?>-<?php echo $id; ?>" class="selectit">
-								<input id="in-<?php echo $tax_name; ?>-<?php echo $id; ?>" type="checkbox" <?php echo $checked; ?> value="<?php echo (int) $term->term_id; ?>" name="link_category[]" />
-								<?php
-								/** This filter is documented in wp-includes/category-template.php */
-								echo esc_html( apply_filters( 'the_category', $term->name, '', '' ) );
-								?>
-							</label>
+						<li id="product_cat-<?php echo $id; ?>" <?php echo $class; ?> data-term-id="<?php echo $id; ?>" data-name="<?php echo $term->name; ?>">
+							<button type="button" id="product_cat-check-<?php echo $id; ?>" class="ntdelbutton">
+								<span class="remove-tag-icon" aria-hidden="true"></span>
+								<span class="screen-reader-text">Remove term: <?php
+									/** This filter is documented in wp-includes/category-template.php */
+									echo esc_html( apply_filters( 'the_category', $term->name, '', '' ) );
+									?></span>
+							</button>
+							<?php
+							/** This filter is documented in wp-includes/category-template.php */
+							echo esc_html( apply_filters( 'the_category', $term->name, '', '' ) );
+							?>
+							<!--<label for="in-<?php echo $tax_name; ?>-<?php echo $id; ?>" class="selectit">
+								<input id="in-<?php echo $tax_name; ?>-<?php echo $id; ?>" type="checkbox" <?php echo $checked; ?> value="<?php echo (int) $term->term_id; ?>" name="<?php echo $name; ?>[]" />
+							</label>-->
 						</li>
 
 						<?php
@@ -135,21 +148,5 @@ class WC_Meta_Box_Product_Categories {
 			<?php endif; ?>
 		</div>
 		<?php
-	}
-
-	/**
-	 * Save meta box data.
-	 *
-	 * @param int     $post_id
-	 * @param WP_Post $post
-	 */
-	public static function save( $post_id, $post ) {
-		$product_type   = empty( $_POST['product-type'] ) ? WC_Product_Factory::get_product_type( $post_id ) : sanitize_title( stripslashes( $_POST['product-type'] ) );
-		$classname      = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : 'simple' );
-		$product        = new $classname( $post_id );
-		$attachment_ids = isset( $_POST['product_image_gallery'] ) ? array_filter( explode( ',', wc_clean( $_POST['product_image_gallery'] ) ) ) : array();
-
-		$product->set_gallery_image_ids( $attachment_ids );
-		$product->save();
 	}
 }

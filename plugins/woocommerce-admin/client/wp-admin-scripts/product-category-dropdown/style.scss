@@ -12,10 +12,18 @@
 			.components-checkbox-control__label {
 				min-height: 32px;
 			}
+
+			&__tags {
+				display: none;
+			}
 		}
 	}
 }
 
 .categorydiv #product_cat-all {
 	overflow: visible;
+
+	.categorychecklist>li {
+		margin-right: 25px;
+	}
 }

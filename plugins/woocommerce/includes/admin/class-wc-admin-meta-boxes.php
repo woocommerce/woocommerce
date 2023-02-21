@@ -52,6 +52,9 @@ class WC_Admin_Meta_Boxes {
 		// Save Product Meta Boxes.
 		add_action( 'woocommerce_process_product_meta', 'WC_Meta_Box_Product_Data::save', 10, 2 );
 		add_action( 'woocommerce_process_product_meta', 'WC_Meta_Box_Product_Images::save', 20, 2 );
+		add_action( 'woocommerce_process_product_meta', function( $post_id, $post ) {
+			error_log( print_r( $_POST, true ) );
+		}, 20, 2 );
 
 		// Save Coupon Meta Boxes.
 		add_action( 'woocommerce_process_shop_coupon_meta', 'WC_Meta_Box_Coupon_Data::save', 10, 2 );
