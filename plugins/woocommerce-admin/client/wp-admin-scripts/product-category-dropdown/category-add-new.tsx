@@ -108,10 +108,7 @@ export const CategoryAddNew: React.FC< {
 				{ __( '+ Add new category', 'woocommerce' ) }
 			</a>
 			{ showAddNew && (
-				<p
-					id="product_cat-add"
-					className="category-add wp-hidden-child"
-				>
+				<p id="product_cat-add" className="category-add">
 					<label
 						className="screen-reader-text"
 						htmlFor="newproduct_cat"

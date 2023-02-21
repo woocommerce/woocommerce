@@ -386,7 +386,6 @@ const TreeSelectControl = ( {
 	};
 
 	/**
->>>>>>> f08237f7d0 (Display selected items and sync with most used tab)
 	 * Handles a change of a child element.
 	 *
 	 * @param {boolean}     checked Indicates if the item should be checked
