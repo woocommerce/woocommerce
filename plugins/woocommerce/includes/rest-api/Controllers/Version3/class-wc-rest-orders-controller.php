@@ -253,10 +253,11 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		if ( ! empty( $item_data['meta_data'] ) ) {
 			$item_data['meta_data'] = array_filter(
 				$item_data['meta_data'],
-				function( $meta ) use ( $cpt_hidden_keys ) {
+				function ( $meta ) use ( $cpt_hidden_keys ) {
 					return ! in_array( $meta->key, $cpt_hidden_keys, true );
 				}
 			);
+			$item_data['meta_data'] = array_values( $item_data['meta_data'] );
 		}
 
 		return $item_data;
