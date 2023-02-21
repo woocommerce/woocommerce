@@ -227,6 +227,7 @@ class WC_Install {
 		),
 		'7.5.0' => array(
 			'wc_update_750_add_columns_to_order_stats_table',
+			'wc_update_750_disable_new_product_management_experience',
 		),
 	);
 
