@@ -544,11 +544,11 @@ $tt2-gray: #f7f7f7;
 	}
 }
 
-
-
+// Description/Additional info/Reviews tabs.
 .woocommerce-tabs {
 	padding-top: var(--wp--style--block-gap);
 }
+
 ul.wc-tabs {
 	padding: 0;
 	border-bottom-style: solid;
@@ -583,12 +583,14 @@ ul.wc-tabs {
 		}
 	}
 }
+
 // Moved from blocktheme.scss to retain full styling.
 ul.tabs li.active {
 	// Style active tab in theme colors.
 	background: var(--wp--preset--color--background, $contentbg);
 	border-bottom-color: var(--wp--preset--color--background, $contentbg);
 }
+
 .woocommerce-Tabs-panel {
 	padding-top: var(--wp--style--block-gap);
 	font-size: var(--wp--preset--font-size--small);
