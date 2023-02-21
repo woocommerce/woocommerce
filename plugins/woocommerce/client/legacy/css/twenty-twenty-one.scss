@@ -127,11 +127,13 @@ a.button {
 }
 
 .site-main {
+
 	.woocommerce-breadcrumb {
 		margin-bottom: var(--global--spacing-vertical);
 		font-size: 0.88889em;
 		font-family: $headings;
 	}
+
 	.woocommerce-products-header {
 		margin-top: var(--global--spacing-vertical);
 	}
@@ -2887,6 +2889,8 @@ a.reset_variations {
 
 	.woocommerce-cart-form {
 
+		text-align: center;
+
 		.shop_table_responsive {
 			margin-top: var(--global--spacing-vertical);
 			margin-bottom: var(--global--spacing-vertical);
@@ -2895,8 +2899,9 @@ a.reset_variations {
 				border: none;
 			}
 
-			#coupon_code {
+			input#coupon_code.input-text {
 				min-width: 9rem;
+				width: auto !important;
 			}
 		}
 
@@ -2919,6 +2924,11 @@ a.reset_variations {
 			.attachment-woocommerce_thumbnail {
 				height: auto !important;
 			}
+		}
+
+		input.qty {
+			width: 6em;
+			text-align: center;
 		}
 	}
 

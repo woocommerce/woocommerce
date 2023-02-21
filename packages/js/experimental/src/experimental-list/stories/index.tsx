@@ -16,6 +16,14 @@ export default {
 	title: 'WooCommerce Admin/experimental/List',
 	component: List,
 	decorators: [ ( storyFn, context ) => withConsole()( storyFn )( context ) ],
+	argTypes: {
+		direction: {
+			control: {
+				type: 'select',
+				options: [ 'up', 'down' ],
+			},
+		},
+	},
 } as Meta;
 
 const Template: Story< ListProps > = ( args ) => (
@@ -40,9 +48,10 @@ export const Primary = Template.bind( { onClick: () => {} } );
 Primary.args = {
 	listType: 'ul',
 	animation: 'slide-right',
+	direction: 'top',
 };
 
-export const CollapsibleListExample: Story = () => {
+export const CollapsibleListExample: Story = ( args ) => {
 	return (
 		<CollapsibleList
 			collapseLabel="Show less"
@@ -56,6 +65,8 @@ export const CollapsibleListExample: Story = () => {
 				// eslint-disable-next-line no-console
 				console.log( 'expanded' );
 			} }
+			direction="top"
+			{ ...args }
 		>
 			<ListItem onClick={ () => {} }>
 				<div>Any markup can go here.</div>
