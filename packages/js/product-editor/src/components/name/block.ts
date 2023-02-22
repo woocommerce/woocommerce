@@ -12,6 +12,7 @@ export default {
 			type: 'string',
 		},
 	},
+	usesContext: [ 'productId' ],
 	supports: {
 		align: false,
 		html: false,

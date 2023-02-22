@@ -25,6 +25,7 @@ export function parseProductToBlocks( product: Partial< Product > ) {
 					'This info will be displayed on the product page, category pages, social media, and search results.',
 					'woocommerce'
 				),
+				productId: product.id,
 			},
 			[
 				createBlock( nameBlock.name, {

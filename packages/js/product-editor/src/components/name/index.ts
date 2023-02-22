@@ -14,4 +14,5 @@ export const settings = {
 	edit: Edit,
 };
 
+// @ts-ignore Context schema is incorrect.
 export const init = () => initBlock( { name, metadata, settings } );

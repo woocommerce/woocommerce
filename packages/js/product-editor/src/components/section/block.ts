@@ -14,6 +14,9 @@ export default {
 		title: {
 			type: 'string',
 		},
+		productId: {
+			type: 'number',
+		},
 	},
 	supports: {
 		align: false,
@@ -22,5 +25,9 @@ export default {
 		reusable: false,
 		inserter: false,
 		lock: false,
+	},
+	// @todo This could be moved into a parent block if we create one.
+	providesContext: {
+		productId: 'productId',
 	},
 };
