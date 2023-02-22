@@ -44,6 +44,7 @@ export function Editor( { product, settings }: EditorProps ) {
 										product?.name ||
 										__( 'Add new product', 'woocommerce' )
 									}
+									product={ product }
 								/>
 							}
 							sidebar={ <Sidebar /> }
