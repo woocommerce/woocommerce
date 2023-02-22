@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { CliUx, Command, Flags } from '@oclif/core';
+import { CliUx, Command, Flags, ux } from '@oclif/core';
 import { readFileSync, writeFileSync } from 'fs';
 
 /**
@@ -88,6 +88,10 @@ export default class PackagePrepare extends Command {
 				if ( hasValidChangelogs( name ) ) {
 					validateChangelogEntries( name );
 					const nextVersion = getNextVersion( name );
+					if ( ! nextVersion ) {
+						console.log( ux );
+						// const input = await ux.prompt( 'What is your name?' );
+					}
 					writeChangelog( name );
 					if ( nextVersion ) {
 						this.bumpPackageVersion( name, nextVersion );
