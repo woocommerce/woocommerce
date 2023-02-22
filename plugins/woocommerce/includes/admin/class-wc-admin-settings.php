@@ -488,6 +488,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							$visibility_class[] = 'show_options_if_checked';
 						}
 
+						$must_disable = ArrayUtil::get_value_or_default( $value, 'disabled', false );
+
 						if ( ! isset( $value['checkboxgroup'] ) || 'start' === $value['checkboxgroup'] ) {
 							$has_tooltip             = isset( $value['tooltip'] ) && '' !== $value['tooltip'];
 							$tooltip_container_class = $has_tooltip ? 'with-tooltip' : '';
@@ -515,6 +517,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						?>
 							<label for="<?php echo esc_attr( $value['id'] ); ?>">
 								<input
+									<?php echo $must_disable ? 'disabled' : ''; ?>
 									name="<?php echo esc_attr( $value['field_name'] ); ?>"
 									id="<?php echo esc_attr( $value['id'] ); ?>"
 									type="checkbox"
