@@ -132,7 +132,10 @@ export const sparseCheckoutRepo = async (
  * @return {Response<string>} - the simple-git response.
  */
 export const checkoutRef = ( pathToRepo: string, ref: string ) => {
-	const git = simpleGit( { baseDir: pathToRepo } );
+	const git = simpleGit( {
+		baseDir: pathToRepo,
+		config: [ 'core.hooksPath=/dev/null' ],
+	} );
 	return git.checkout( ref );
 };
 
@@ -252,7 +255,10 @@ export const getPullRequestNumberFromHash = async (
 	hash: string
 ) => {
 	try {
-		const git = await simpleGit( { baseDir } );
+		const git = await simpleGit( {
+			baseDir,
+			config: [ 'core.hooksPath=/dev/null' ],
+		} );
 		const formerHead = await git.revparse( 'HEAD' );
 		await git.checkout( hash );
 		const cmdOutput = await git.raw( [
@@ -294,7 +300,10 @@ export const generateDiff = async (
 	excludePaths: string[] = []
 ) => {
 	try {
-		const git = simpleGit( { baseDir: tmpRepoPath } );
+		const git = simpleGit( {
+			baseDir: tmpRepoPath,
+			config: [ 'core.hooksPath=/dev/null' ],
+		} );
 
 		const validBranches = [ hashA, hashB ].filter(
 			( hash ) => ! refIsHash( hash )

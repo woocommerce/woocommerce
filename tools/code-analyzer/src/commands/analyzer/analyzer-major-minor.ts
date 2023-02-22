@@ -21,7 +21,10 @@ const getPluginData = async (
 	pathToMainFile: string,
 	hashOrBranch: string
 ): Promise< string | void > => {
-	const git = simpleGit( { baseDir: tmpRepoPath } );
+	const git = simpleGit( {
+		baseDir: tmpRepoPath,
+		config: [ 'core.hooksPath=/dev/null' ],
+	} );
 	await git.checkout( [ hashOrBranch ] );
 
 	const mainFile = join( tmpRepoPath, pathToMainFile );

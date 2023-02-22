@@ -20,6 +20,14 @@ use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 	/**
+	 * Dynamically sets the date column name based on configuration
+	 */
+	public function __construct() {
+		$this->date_column_name = get_option( 'woocommerce_date_type', 'date_created' );
+		parent::__construct();
+	}
+
+	/**
 	 * Table used to get the data.
 	 *
 	 * @var string
@@ -67,6 +75,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->report_columns = array(
 			'order_id'         => "DISTINCT {$table_name}.order_id",
 			'parent_id'        => "{$table_name}.parent_id",
+			// Add 'date' field based on date type setting.
+			'date'             => "{$table_name}.{$this->date_column_name} AS date",
 			'date_created'     => "{$table_name}.date_created",
 			'date_created_gmt' => "{$table_name}.date_created_gmt",
 			'status'           => "REPLACE({$table_name}.status, 'wc-', '') as status",
@@ -207,14 +217,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public function get_data( $query_args ) {
 		global $wpdb;
 
-		$table_name = self::get_db_table_name();
-
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults   = array(
 			'per_page'          => get_option( 'posts_per_page' ),
 			'page'              => 1,
 			'order'             => 'DESC',
-			'orderby'           => 'date_created',
+			'orderby'           => $this->date_column_name,
 			'before'            => TimeInterval::default_before(),
 			'after'             => TimeInterval::default_after(),
 			'fields'            => '*',
@@ -317,7 +325,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function normalize_order_by( $order_by ) {
 		if ( 'date' === $order_by ) {
-			return 'date_created';
+			return $this->date_column_name;
 		}
 
 		return $order_by;

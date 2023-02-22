@@ -121,24 +121,29 @@ export const isPending = (
 	return false;
 };
 
-export const getPermalinkParts = ( state: ProductState, productId: number ) => {
-	const product = state.data[ productId ];
+export const getPermalinkParts = createSelector(
+	( state: ProductState, productId: number ) => {
+		const product = state.data[ productId ];
 
-	if ( product && product.permalink_template ) {
-		const postName = product.slug || product.generated_slug;
+		if ( product && product.permalink_template ) {
+			const postName = product.slug || product.generated_slug;
 
-		const [ prefix, suffix ] = product.permalink_template.split(
-			PERMALINK_PRODUCT_REGEX
-		);
+			const [ prefix, suffix ] = product.permalink_template.split(
+				PERMALINK_PRODUCT_REGEX
+			);
 
-		return {
-			prefix,
-			postName,
-			suffix,
-		};
+			return {
+				prefix,
+				postName,
+				suffix,
+			};
+		}
+		return null;
+	},
+	( state, productId ) => {
+		return [ state.data[ productId ] ];
 	}
-	return null;
-};
+);
 
 export type ProductsSelectors = {
 	getCreateProductError: WPDataSelector< typeof getCreateProductError >;

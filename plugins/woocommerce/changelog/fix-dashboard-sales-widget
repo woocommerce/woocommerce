@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Do not display low/out-of-stock information in the dashboard status widget when stock management is disabled.

@@ -351,6 +351,27 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Get date_modified.
+	 *
+	 * @param  string $context View or edit context.
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
+	 */
+	public function get_date_paid( $context = 'view' ) {
+		return $this->get_prop( 'date_paid', $context );
+	}
+
+	/**
+	 * Get date_modified.
+	 *
+	 * @param  string $context View or edit context.
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
+	 */
+	public function get_date_completed( $context = 'view' ) {
+		return $this->get_prop( 'date_completed', $context );
+	}
+
+
+	/**
 	 * Return the order statuses without wc- internal prefix.
 	 *
 	 * @param  string $context View or edit context.
