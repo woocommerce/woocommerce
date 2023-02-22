@@ -34,7 +34,7 @@ trait DateFilteringForCrudControllers {
 	 * @param bool   $filter_by_gmt Whether the dates to filter by are GMT or not.
 	 * @param bool   $expected_to_be_returned True if the created item is expected to be included in the response, false otherwise.
 	 */
-	public function test_filter_by_creation_or_modification_date_sign1( $param_name, $filter_by_gmt, $expected_to_be_returned ) {
+	public function test_filter_by_creation_or_modification_date( $param_name, $filter_by_gmt, $expected_to_be_returned ) {
 		global $wpdb;
 
 		$timezone_string_option = get_option( 'timezone_string' );

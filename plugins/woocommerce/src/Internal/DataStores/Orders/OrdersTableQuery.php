@@ -202,7 +202,7 @@ class OrdersTableQuery {
 			// WP_Query legacy.
 			'post_date'           => 'date_created',
 			'post_date_gmt'       => 'date_created_gmt',
-			'post_modified'       => 'date_modified',
+			'post_modified'       => 'date_updated',
 			'post_modified_gmt'   => 'date_updated_gmt',
 			'post_status'         => 'status',
 			'_date_completed'     => 'date_completed',
