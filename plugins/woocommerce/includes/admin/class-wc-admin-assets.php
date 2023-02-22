@@ -195,16 +195,26 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			// WooCommerce admin pages.
 			if ( in_array( $screen_id, wc_get_screen_ids() ) ) {
+				$rtl = is_rtl() ? '-rtl' : '';
 				wp_enqueue_script( 'iris' );
 				wp_enqueue_script( 'woocommerce_admin' );
 				wp_enqueue_script( 'wc-enhanced-select' );
 				wp_enqueue_style(
-					'wc-admin-product-category-dropdown',
+					'wc-admin-product-category-metabox',
 					WCAdminAssets::get_url( "product-category-dropdown/style{$rtl}", 'css' ),
 					array( 'wp-components' ),
 					WCAdminAssets::get_file_version( 'css' )
 				);
-				WCAdminAssets::register_script( 'wp-admin-scripts', 'product-category-dropdown', true );
+				WCAdminAssets::register_script( 'wp-admin-scripts', 'product-category-metabox', true );
+				wp_localize_script(
+					'wc-admin-product-category-metabox',
+					'wc_product_category_metabox_params',
+					array(
+						'search_categories_nonce'         => wp_create_nonce( 'search-categories' ),
+						'search_taxonomy_terms_nonce'     => wp_create_nonce( 'search-taxonomy-terms' ),
+					)
+				);
+				wp_enqueue_script( 'product-category-metabox' );
 				wp_enqueue_script( 'jquery-ui-sortable' );
 				wp_enqueue_script( 'jquery-ui-autocomplete' );
 

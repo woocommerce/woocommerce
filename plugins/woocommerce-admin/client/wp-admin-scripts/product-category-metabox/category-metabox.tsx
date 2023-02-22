@@ -40,7 +40,7 @@ export const CategoryMetabox: React.FC< {
 							}
 						} }
 					>
-						All items
+						{ __( 'All items', 'woocommerce' ) }
 					</a>
 				</li>
 				<li className={ activeTab === 'pop' ? 'tabs' : '' }>
@@ -57,7 +57,7 @@ export const CategoryMetabox: React.FC< {
 							}
 						} }
 					>
-						Most used
+						{ __( 'Most used', 'woocommerce' ) }
 					</a>
 				</li>
 			</ul>

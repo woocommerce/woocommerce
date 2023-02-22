@@ -10,9 +10,6 @@ import { CategoryMetabox } from './category-metabox';
 import { getSelectedCategoryData } from './category-handlers';
 import './style.scss';
 
-const navigationOptOutRoot = document.createElement( 'div' );
-navigationOptOutRoot.setAttribute( 'id', 'navigation-opt-out-root' );
-
 const metaboxContainer = document.querySelector(
 	'#taxonomy-product_cat-metabox'
 );

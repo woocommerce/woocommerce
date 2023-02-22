@@ -1840,6 +1840,7 @@ class WC_AJAX {
 					$ancestors = get_ancestors( $term->term_id, 'product_cat' );
 					$current_child = $term;
 					foreach ( $ancestors as $ancestor ) {
+						$ancestor_term = null;
 						if ( ! isset( $terms_map[ $ancestor ] ) ) {
 							$ancestor_term = get_term( $ancestor, 'product_cat' );
 							$terms_map[ $ancestor ] = $ancestor_term;

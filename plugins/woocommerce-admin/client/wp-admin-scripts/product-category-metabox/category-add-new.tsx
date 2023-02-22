@@ -18,7 +18,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { CATEGORY_TERM_NAME } from './category-handlers';
 import { CategoryTerm } from './popular-category-list';
 
-declare const wc_enhanced_select_params: {
+declare const wc_product_category_metabox_params: {
 	search_categories_nonce: string;
 };
 
@@ -75,7 +75,7 @@ export const CategoryAddNew: React.FC< {
 						action: 'woocommerce_json_search_categories',
 						// eslint-disable-next-line no-undef, camelcase
 						security:
-							wc_enhanced_select_params.search_categories_nonce,
+							wc_product_category_metabox_params.search_categories_nonce,
 					}
 				),
 				method: 'GET',
@@ -138,7 +138,7 @@ export const CategoryAddNew: React.FC< {
 						label={ __( 'Parent category:', 'woocommerce' ) }
 						items={ fetchedItems }
 						selected={ categoryParent || null }
-						placeholder="Start typing..."
+						placeholder={ __( 'Find category', 'woocommerce' ) }
 						onSelect={ setCategoryParent }
 						getItemLabel={ ( item ) => item?.name || '' }
 						getItemValue={ ( item ) => String( item?.term_id ) }
@@ -148,7 +148,7 @@ export const CategoryAddNew: React.FC< {
 						type="button"
 						id="product_cat-add-submit"
 						className="button category-add-submit"
-						value="Add new category"
+						value={ __( 'Add new category', 'woocommerce' ) }
 						disabled={ ! newCategoryName.length }
 						onClick={ onCreate }
 					/>

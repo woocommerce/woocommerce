@@ -11,9 +11,8 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { CATEGORY_TERM_NAME } from './category-handlers';
-import { SelectiveExtensionsBundle } from '~/profile-wizard/steps/business-details/flows/selective-bundle/selective-extensions-bundle';
 
-declare const wc_enhanced_select_params: {
+declare const wc_product_category_metabox_params: {
 	search_taxonomy_terms_nonce: string;
 };
 
@@ -40,7 +39,8 @@ export const PopularCategoryList: React.FC< {
 				orderby: 'count',
 				order: 'DESC',
 				// eslint-disable-next-line no-undef, camelcase
-				security: wc_enhanced_select_params.search_taxonomy_terms_nonce,
+				security:
+					wc_product_category_metabox_params.search_taxonomy_terms_nonce,
 			} ),
 			method: 'GET',
 		} ).then( ( res ) => {

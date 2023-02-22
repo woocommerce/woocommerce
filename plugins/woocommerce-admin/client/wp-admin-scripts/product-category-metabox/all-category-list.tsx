@@ -14,6 +14,10 @@ import apiFetch from '@wordpress/api-fetch';
 import { CATEGORY_TERM_NAME } from './category-handlers';
 import { CategoryTerm } from './popular-category-list';
 
+declare const wc_product_category_metabox_params: {
+	search_categories_nonce: string;
+};
+
 type CategoryTreeItem = CategoryTerm & {
 	children?: CategoryTreeItem[];
 };
@@ -43,9 +47,6 @@ function convertTreeToLabelValue(
 	}
 	return newTree;
 }
-declare const wc_enhanced_select_params: {
-	search_categories_nonce: string;
-};
 
 export const AllCategoryList: React.FC< {
 	selected: CategoryTerm[];
@@ -62,7 +63,8 @@ export const AllCategoryList: React.FC< {
 				term: filter,
 				action: 'woocommerce_json_search_categories_tree',
 				// eslint-disable-next-line no-undef, camelcase
-				security: wc_enhanced_select_params.search_categories_nonce,
+				security:
+					wc_product_category_metabox_params.search_categories_nonce,
 			} ),
 			method: 'GET',
 		} ).then( ( res ) => {
