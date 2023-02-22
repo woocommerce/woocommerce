@@ -18,7 +18,7 @@ Closes # .
 
 ### How to test the changes in this Pull Request:
 
-<!-- Otherwise, please include detailed instructions on how these changes can be tested. Please, make sure to review and follow the guide for writing high-quality testing instructions below. -->
+<!-- Please include detailed instructions on how these changes can be tested, make sure to review and follow the guide for writing high-quality testing instructions below. -->
 
 - [ ] Have you followed the [Writing high-quality testing instructions guide](https://github.com/woocommerce/woocommerce/wiki/Writing-high-quality-testing-instructions)?
 
