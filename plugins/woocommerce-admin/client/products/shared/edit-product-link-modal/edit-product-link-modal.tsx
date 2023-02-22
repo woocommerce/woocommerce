@@ -6,6 +6,7 @@ import { Button, Modal, TextControl } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { cleanForSlug } from '@wordpress/url';
+import interpolateComponents from '@automattic/interpolate-components';
 import { Product } from '@woocommerce/data';
 import { Text } from '@woocommerce/experimental';
 import { useFormContext } from '@woocommerce/components';
@@ -95,18 +96,25 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 			className="woocommerce-product-link-edit-modal"
 		>
 			<div className="woocommerce-product-link-edit-modal__wrapper">
+				<p className="woocommerce-product-link-edit-modal__description">
+					{ __(
+						"Create a unique link for this product. Use simple, descriptive words and numbers. We'll replace spaces with hyphens (-).",
+						'woocommerce'
+					) }
+				</p>
 				<TextControl
-					label={ newProductLinkLabel }
+					label={ __( 'Product link', 'woocommerce' ) }
 					name="slug"
 					value={ slug }
 					onChange={ setSlug }
+					hideLabelFromVision
+					help={ interpolateComponents( {
+						mixedString: __( 'Preview: {{link/}}', 'woocommerce' ),
+						components: {
+							link: <strong>{ newProductLinkLabel }</strong>,
+						},
+					} ) }
 				/>
-				<Text size={ 12 }>
-					{ __(
-						"Use simple, descriptive words and numbers. We'll replace spaces with hyphens (-).",
-						'woocommerce'
-					) }
-				</Text>
 				<div className="woocommerce-product-link-edit-modal__buttons">
 					<Button isSecondary onClick={ () => onCancel() }>
 						{ __( 'Cancel', 'woocommerce' ) }

@@ -882,6 +882,11 @@ class WC_Countries {
 							'hidden'   => true,
 						),
 					),
+					'BG' => array(
+						'state' => array(
+							'required' => false,
+						),
+					),
 					'BH' => array(
 						'postcode' => array(
 							'required' => false,
@@ -1115,7 +1120,8 @@ class WC_Countries {
 							'priority' => 72,
 						),
 						'state'      => array(
-							'label' => __( 'County', 'woocommerce' ),
+							'label'    => __( 'County', 'woocommerce' ),
+							'required' => false,
 						),
 					),
 					'ID' => array(
@@ -1162,6 +1168,20 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'label' => __( 'State', 'woocommerce' ),
+						),
+					),
+					'IR' => array(
+						'state'     => array(
+							'priority' => 50,
+						),
+						'city'      => array(
+							'priority' => 60,
+						),
+						'address_1' => array(
+							'priority' => 70,
+						),
+						'address_2' => array(
+							'priority' => 80,
 						),
 					),
 					'IT' => array(

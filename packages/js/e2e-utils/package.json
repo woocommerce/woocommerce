@@ -18,7 +18,7 @@
 		"@automattic/puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
 		"@wordpress/deprecated": "^3.2.3",
 		"@wordpress/e2e-test-utils": "wp-5.8",
-		"config": "3.3.3",
+		"config": "3.3.7",
 		"fishery": "^1.2.0"
 	},
 	"devDependencies": {
@@ -37,7 +37,7 @@
 		"@wordpress/babel-plugin-import-jsx-pragma": "1.1.3",
 		"@wordpress/babel-preset-default": "3.0.2",
 		"@wordpress/browserslist-config": "^4.1.0",
-		"eslint": "^8.1.0",
+		"eslint": "^8.32.0",
 		"eslint-plugin-jest": "23.20.0"
 	},
 	"peerDependencies": {

@@ -6,7 +6,7 @@
 		flex-grow: 1;
 		gap: $gap-smaller;
 		min-height: $gap-largest;
-		padding: 0 $gap-small;
+		padding: 0 $gap-small 0 calc( ( var( --level ) - 1 ) * ( $gap + $gap-small ) + $gap-small );
 		border-radius: 2px;
 
 		&:hover,
@@ -17,7 +17,7 @@
 
 		&:hover,
 		&:focus-within {
-			background-color: $gray-0;
+			background-color: $gray-100;
 		}
 	}
 	&__label {
@@ -29,6 +29,14 @@
 
 		> span {
 			display: block;
+		}
+	}
+	&__expander {
+		display: flex;
+		align-items: center;
+
+		.components-button {
+			padding: 0;
 		}
 	}
 }

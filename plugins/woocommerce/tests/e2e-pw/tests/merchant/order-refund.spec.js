@@ -233,11 +233,9 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 
 		// Update the order
 		await page.click( 'button.save_order' );
-		await expect(
-			page
-				.locator( 'div.notice-success > p' )
-				.filter( { hasText: 'Order updated.' } )
-		).toBeVisible();
+		await expect( page.locator( 'div.updated.notice-success' ) ).toContainText(
+			'Order updated.'
+		);
 
 		// Verify that inventory wasn't modified.
 		expect(

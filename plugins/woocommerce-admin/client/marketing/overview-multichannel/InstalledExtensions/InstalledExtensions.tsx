@@ -15,7 +15,7 @@ import {
 	ProductIcon,
 	PluginCardBody,
 } from '~/marketing/components';
-import { Plugin } from '~/marketing/types';
+import { InstalledPlugin } from '~/marketing/types';
 import { useInstalledPlugins } from '~/marketing/hooks';
 
 export const InstalledExtensions = () => {
@@ -26,7 +26,7 @@ export const InstalledExtensions = () => {
 		return null;
 	}
 
-	const getButton = ( plugin: Plugin ) => {
+	const getButton = ( plugin: InstalledPlugin ) => {
 		if ( plugin.status === 'installed' ) {
 			return (
 				<Button

@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update TaskLists::add_task() to reflect changes in TaskList::add_task()
