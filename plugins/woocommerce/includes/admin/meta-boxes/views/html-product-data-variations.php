@@ -14,13 +14,41 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<?php if ( ! count( $variation_attributes ) ) : ?>
 
-			<div id="message" class="inline notice woocommerce-message">
-				<p><?php echo wp_kses_post( __( 'Before you can add a variation you need to add some variation attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ) ); ?></p>
-				<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
-				<p><a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/document/variable-product/', 'product-variations' ) ); ?>" target="_blank"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a></p>
-				<?php /* phpcs:enable */ ?>
+		<div id="message" class="inline notice woocommerce-message">
+			<p><?php echo __( 'Offer customers multiple product options, like size and color.... todo', 'woocommerce' ); ?></p>
+		</div>
+		<div class="wc-metabox">
+			<div class="woocommerce_attribute_data wc-metabox-content">
+				<table cellpadding="0" cellspacing="0">
+					<tbody>
+						<tr>
+							<td class="attribute_name">
+								<label><?php esc_html_e( 'Name', 'woocommerce' ); ?>:</label>
+								<input type="text" class="attribute_name" name="attribute_names[0]" placeholder="<?php esc_attr_e( 'e.g. Fabric or Brand', 'woocommerce' ); ?>" />
+								<input type="hidden" name="attribute_position[0]" class="attribute_position" />
+							</td>
+							<td rowspan="3">
+								<label><?php esc_html_e( 'Value(s)', 'woocommerce' ); ?>:</label>
+								<textarea name="attribute_values[0]" cols="5" rows="5" placeholder="<?php printf( esc_attr__( 'Enter some text, or some attributes by "%s" separating values.', 'woocommerce' ), WC_DELIMITER ); ?>"></textarea>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<label><input type="checkbox" class="checkbox" name="attribute_visibility[0]" value="1" /> <?php esc_html_e( 'Visible on the product page', 'woocommerce' ); ?></label>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<div class="enable_variation show_if_variable">
+									<label><input type="checkbox" class="checkbox" name="attribute_variation[0]" value="1" checked /> <?php esc_html_e( 'Used for variations', 'woocommerce' ); ?></label>
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<button type="button" class="button button-primary"><?php esc_html_e( 'Save variations', 'woocommerce' ); ?></button>
 			</div>
-
+		</div>
 		<?php else : ?>
 
 			<div class="toolbar toolbar-variations-defaults">
