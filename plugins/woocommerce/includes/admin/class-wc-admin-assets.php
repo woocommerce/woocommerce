@@ -110,7 +110,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			$screen       = get_current_screen();
 			$screen_id    = $screen ? $screen->id : '';
-			$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
+			$wc_screen_id = 'woocommerce';
 			$suffix       = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 			$version      = Constants::get_constant( 'WC_VERSION' );
 

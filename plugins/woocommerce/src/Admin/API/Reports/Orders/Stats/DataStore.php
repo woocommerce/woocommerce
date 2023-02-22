@@ -70,6 +70,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected $context = 'orders_stats';
 
 	/**
+	 * Dynamically sets the date column name based on configuration
+	 */
+	public function __construct() {
+		$this->date_column_name = get_option( 'woocommerce_date_type', 'date_created' );
+		parent::__construct();
+	}
+
+	/**
 	 * Assign report columns once full table name has been assigned.
 	 */
 	protected function assign_report_columns() {
@@ -517,6 +525,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				'order_id'           => $order->get_id(),
 				'parent_id'          => $order->get_parent_id(),
 				'date_created'       => $order->get_date_created()->date( 'Y-m-d H:i:s' ),
+				'date_paid'          => $order->get_date_paid() ? $order->get_date_paid()->date( 'Y-m-d H:i:s' ) : null,
+				'date_completed'     => $order->get_date_completed() ? $order->get_date_completed()->date( 'Y-m-d H:i:s' ) : null,
 				'date_created_gmt'   => gmdate( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() ),
 				'num_items_sold'     => self::get_num_items_sold( $order ),
 				'total_sales'        => $order->get_total(),
@@ -535,6 +545,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'%d',
 			'%s',
 			'%s',
+			'%s',
+			'%s',
 			'%d',
 			'%f',
 			'%f',
@@ -551,6 +563,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$data['parent_id'] = $parent_order->get_id();
 				$data['status']    = self::normalize_order_status( $parent_order->get_status() );
 			}
+			/**
+			 * Set date_completed and date_paid the same as date_created to avoid problems
+			 * when they are being used to sort the data, as refunds don't have them filled
+			*/
+			$data['date_completed'] = $data['date_created'];
+			$data['date_paid']      = $data['date_created'];
 		}
 
 		// Update or add the information to the DB.
