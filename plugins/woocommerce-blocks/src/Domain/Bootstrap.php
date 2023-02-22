@@ -22,7 +22,6 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\PayPal;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Blocks\Registry\Container;
 use Automattic\WooCommerce\Blocks\Templates\ClassicTemplatesCompatibility;
-use Automattic\WooCommerce\Blocks\Templates\BlockTemplatesCompatibility;
 use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\StoreApi\RoutesController;
@@ -128,7 +127,6 @@ class Bootstrap {
 		$this->container->get( ProductSearchResultsTemplate::class );
 		$this->container->get( ProductAttributeTemplate::class );
 		$this->container->get( ClassicTemplatesCompatibility::class );
-		$this->container->get( BlockTemplatesCompatibility::class );
 		$this->container->get( BlockPatterns::class );
 		$this->container->get( PaymentsApi::class );
 		$this->container->get( ShippingController::class )->init();
@@ -272,12 +270,6 @@ class Bootstrap {
 			function ( Container $container ) {
 				$asset_data_registry = $container->get( AssetDataRegistry::class );
 				return new ClassicTemplatesCompatibility( $asset_data_registry );
-			}
-		);
-		$this->container->register(
-			BlockTemplatesCompatibility::class,
-			function () {
-				return new BlockTemplatesCompatibility();
 			}
 		);
 		$this->container->register(
