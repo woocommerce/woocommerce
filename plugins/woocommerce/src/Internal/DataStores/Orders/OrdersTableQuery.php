@@ -349,7 +349,7 @@ class OrdersTableQuery {
 				// Convert any local dates to GMT.
 				if ( isset( $local_to_gmt_date_keys[ $query['column'] ] ) ) {
 					$this->args['date_query'][ $index ]['column'] = $local_to_gmt_date_keys[ $query['column'] ];
-					$op                                           = $query['after'] ? 'after' : 'before';
+					$op                                           = isset( $query['after'] ) ? 'after' : 'before';
 					$date_value_local                             = $query[ $op ];
 					$date_value_gmt                               = wc_string_to_timestamp( get_gmt_from_date( wc_string_to_datetime( $date_value_local ) ) );
 					$this->args['date_query'][ $index ][ $op ]    = $this->date_to_date_query_arg( $date_value_gmt, 'UTC' );
