@@ -19,6 +19,7 @@ export function Edit( { context: { productId } } ) {
 			),
 		[ productId ]
 	);
+
 	const { editEntityRecord } = useDispatch( 'core' );
 	const handleChange = ( title ) =>
 		editEntityRecord( 'postType', 'product', productId, { title } );
