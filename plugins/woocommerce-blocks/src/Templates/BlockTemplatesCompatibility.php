@@ -244,6 +244,14 @@ class BlockTemplatesCompatibility {
 					'wc_no_products_found' => 10,
 				),
 			),
+			'woocommerce_archive_description'         => array(
+				'block_name' => 'core/term-description',
+				'position'   => 'before',
+				'hooked'     => array(
+					'woocommerce_taxonomy_archive_description' => 10,
+					'woocommerce_product_archive_description'  => 10,
+				),
+			),
 		);
 	}
 
