@@ -105,7 +105,7 @@ class FeaturesController {
 				'description'     => __( 'Enable the high performance order storage feature.', 'woocommerce' ),
 				'is_experimental' => true,
 			),
-			'cart_checkout_blocks' => array(
+			'cart_checkout_blocks'   => array(
 				'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
 				'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
 				'is_experimental' => false,
