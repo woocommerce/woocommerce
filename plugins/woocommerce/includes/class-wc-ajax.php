@@ -1793,7 +1793,7 @@ class WC_AJAX {
 					}
 				}
 
-				$term->parents						= $ancestors;
+				$term->parents                      = $ancestors;
 				$term->formatted_name              .= $term->name . ' (' . $term->count . ')';
 				$found_categories[ $term->term_id ] = $term;
 			}
@@ -1817,7 +1817,7 @@ class WC_AJAX {
 		$search_text = isset( $_GET['term'] ) ? wc_clean( wp_unslash( $_GET['term'] ) ) : '';
 		$number      = isset( $_GET['number'] ) ? absint( wp_unslash( $_GET['number'] ) ) : 50;
 
-		$args             = array(
+		$args = array(
 			'taxonomy'   => array( 'product_cat' ),
 			'orderby'    => 'id',
 			'order'      => 'ASC',
@@ -1834,33 +1834,41 @@ class WC_AJAX {
 		if ( $terms ) {
 			foreach ( $terms as $term ) {
 				$terms_map[ $term->term_id ] = $term;
-				$term->formatted_name = '';
+				$term->formatted_name        = '';
 
 				if ( $term->parent ) {
-					$ancestors = get_ancestors( $term->term_id, 'product_cat' );
+					$ancestors     = get_ancestors( $term->term_id, 'product_cat' );
 					$current_child = $term;
 					foreach ( $ancestors as $ancestor ) {
 						if ( ! isset( $terms_map[ $ancestor ] ) ) {
-							$ancestor_term = get_term( $ancestor, 'product_cat' );
+							$ancestor_term          = get_term( $ancestor, 'product_cat' );
 							$terms_map[ $ancestor ] = $ancestor_term;
 						}
 						if ( ! $terms_map[ $ancestor ]->children ) {
-							$terms_map[$ancestor]->children = array();
+							$terms_map[ $ancestor ]->children = array();
 						}
-						$item_exists = count( array_filter( $terms_map[ $ancestor ]->children, function( $term ) use ( $current_child ) {
-							return $term->term_id === $current_child->term_id;
-						} ) ) === 1;
+						$item_exists = count(
+							array_filter(
+								$terms_map[ $ancestor ]->children,
+								function( $term ) use ( $current_child ) {
+									return $term->term_id === $current_child->term_id;
+								}
+							)
+						) === 1;
 						if ( ! $item_exists ) {
-							$terms_map[$ancestor]->children[] = $current_child;
+							$terms_map[ $ancestor ]->children[] = $current_child;
 						}
 						$current_child = $terms_map[ $ancestor ];
 					}
 				}
 			}
 		}
-		$parent_terms = array_filter( array_values( $terms_map ), function( $term ) {
-			return $term->parent === 0;
-		} );
+		$parent_terms = array_filter(
+			array_values( $terms_map ),
+			function( $term ) {
+				return $term->parent === 0;
+			}
+		);
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_categories', $parent_terms ) );
 	}
 

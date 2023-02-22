@@ -123,7 +123,7 @@ class WC_Post_Types {
 						'with_front'   => false,
 						'hierarchical' => true,
 					),
-					'meta_box_cb' => 'WC_Meta_Box_Product_Categories::output'
+					'meta_box_cb'           => 'WC_Meta_Box_Product_Categories::output',
 				)
 			)
 		);

@@ -210,8 +210,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'wc-admin-product-category-metabox',
 					'wc_product_category_metabox_params',
 					array(
-						'search_categories_nonce'         => wp_create_nonce( 'search-categories' ),
-						'search_taxonomy_terms_nonce'     => wp_create_nonce( 'search-taxonomy-terms' ),
+						'search_categories_nonce'     => wp_create_nonce( 'search-categories' ),
+						'search_taxonomy_terms_nonce' => wp_create_nonce( 'search-taxonomy-terms' ),
 					)
 				);
 				wp_enqueue_script( 'product-category-metabox' );
