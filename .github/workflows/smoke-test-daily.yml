@@ -8,7 +8,6 @@ env:
     API_ARTIFACT: api-daily--run-${{ github.run_number }}
     E2E_ARTIFACT: e2e-daily--run-${{ github.run_number }}
     FORCE_COLOR: 1
-    BRANCH_NAME: ${{ github.ref_name }}
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,14 +20,19 @@ jobs:
         name: API tests on nightly build
         runs-on: ubuntu-20.04
         permissions:
-          contents: read
+            contents: read
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-report
+            BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
+            ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
+            ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
+            ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
+            CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
+            CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
+            DEFAULT_TIMEOUT_OVERRIDE: 120000
         steps:
             - uses: actions/checkout@v3
-              with:
-                  ref: ${{ env.BRANCH_NAME }}
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -49,10 +53,8 @@ jobs:
             - name: Run API tests.
               working-directory: plugins/woocommerce
               env:
-                  BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
                   USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
                   USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
-                  DEFAULT_TIMEOUT_OVERRIDE: 120000
               run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js hello.test.js
 
             - name: Generate API Test report.
@@ -70,12 +72,12 @@ jobs:
                       ${{ env.ALLURE_REPORT_DIR }}
                   if-no-files-found: ignore
                   retention-days: 5
-                  
+
     e2e-tests:
         name: E2E tests on nightly build
         runs-on: ubuntu-20.04
         permissions:
-          contents: read
+            contents: read
         needs: [api-tests]
         env:
             ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
@@ -90,8 +92,6 @@ jobs:
 
         steps:
             - uses: actions/checkout@v3
-              with:
-                  ref: ${{ env.BRANCH_NAME }}
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -131,13 +131,11 @@ jobs:
         name: k6 tests on nightly build
         runs-on: ubuntu-20.04
         permissions:
-          contents: read
+            contents: read
         needs: [api-tests]
         if: success() || failure()
         steps:
             - uses: actions/checkout@v3
-              with:
-                  ref: ${{ env.BRANCH_NAME }}
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -183,7 +181,7 @@ jobs:
         name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed
         runs-on: ubuntu-20.04
         permissions:
-          contents: read
+            contents: read
         needs: [api-tests]
         env:
             USE_WP_ENV: 1
@@ -208,8 +206,6 @@ jobs:
                       repo: 'takayukister/contact-form-7'
         steps:
             - uses: actions/checkout@v3
-              with:
-                  ref: ${{ env.BRANCH_NAME }}
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -259,7 +255,7 @@ jobs:
             ! github.event.pull_request.head.repo.fork
         runs-on: ubuntu-20.04
         permissions:
-          contents: read
+            contents: read
         needs: [e2e-tests, test-plugins, k6-tests]
         steps:
             - name: Create dirs
@@ -273,7 +269,6 @@ jobs:
               uses: actions/checkout@v3
               with:
                   path: repo
-                  ref: ${{ env.BRANCH_NAME }}
 
             - name: Download API test report artifact
               uses: actions/download-artifact@v3
