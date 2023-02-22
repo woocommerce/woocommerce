@@ -65,7 +65,14 @@ const program = new Command()
 				Logger.notice
 			);
 		} else {
+			Logger.notice( '\n\n## TEMPLATE CHANGES' );
+			Logger.notice(
+				'---------------------------------------------------'
+			);
 			Logger.notice( 'No template changes found.' );
+			Logger.notice(
+				'---------------------------------------------------'
+			);
 		}
 
 		if ( changes.hooks.size ) {
@@ -76,7 +83,14 @@ const program = new Command()
 				Logger.notice
 			);
 		} else {
+			Logger.notice( '\n\n## HOOK CHANGES' );
+			Logger.notice(
+				'---------------------------------------------------'
+			);
 			Logger.notice( 'No hook changes found.' );
+			Logger.notice(
+				'---------------------------------------------------'
+			);
 		}
 
 		if ( changes.schema.filter( ( s ) => ! s.areEqual ).length ) {
@@ -87,13 +101,27 @@ const program = new Command()
 				Logger.notice
 			);
 		} else {
+			Logger.notice( '\n\n## SCHEMA CHANGES' );
+			Logger.notice(
+				'---------------------------------------------------'
+			);
 			Logger.notice( 'No schema changes found.' );
+			Logger.notice(
+				'---------------------------------------------------'
+			);
 		}
 
 		if ( changes.db ) {
 			printDatabaseUpdates( changes.db, outputStyle, Logger.notice );
 		} else {
-			Logger.notice( 'No database changes found.' );
+			Logger.notice( '\n\n## DB CHANGES' );
+			Logger.notice(
+				'---------------------------------------------------'
+			);
+			Logger.notice( 'No db changes found.' );
+			Logger.notice(
+				'---------------------------------------------------'
+			);
 		}
 	} );
 
