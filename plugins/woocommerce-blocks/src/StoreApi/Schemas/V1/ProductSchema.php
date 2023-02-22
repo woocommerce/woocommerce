@@ -494,7 +494,7 @@ class ProductSchema extends AbstractSchema {
 	protected function get_images( \WC_Product $product ) {
 		$attachment_ids = array_merge( [ $product->get_image_id() ], $product->get_gallery_image_ids() );
 
-		return array_filter( array_map( [ $this->image_attachment_schema, 'get_item_response' ], $attachment_ids ) );
+		return array_values( array_filter( array_map( [ $this->image_attachment_schema, 'get_item_response' ], $attachment_ids ) ) );
 	}
 
 	/**
