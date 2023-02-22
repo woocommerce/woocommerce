@@ -1,0 +1,33 @@
+name: Remind reviewers to also review the testing instructions.
+on:
+  pull_request:
+    types: [review_requested]
+
+permissions: {}
+
+jobs:
+  add-testing-instructions-review-comment:
+    runs-on: ubuntu-20.04
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Get the username of requested reviewers
+        id: get_reviewer_username
+        run: |
+          # Retrieves the username of all reviewers and stores them in a comma-separated list
+          reviewers=$(echo '${{ toJson(github.event.pull_request.requested_reviewers[*].login) }}' | jq -r 'map("@\(.)") | join(", ")')
+          echo "REVIEWERS=$reviewers" >> $GITHUB_ENV
+      - name: Remind reviewers to review the testing instructions
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Hi ${{ env.REVIEWERS }},\n\n\
+              Apart from reviewing the code changes, please make sure to review the testing instructions as well.\n\n\
+              You can follow this guide to find out what good testing instructions should look like:\n\
+              https://github.com/woocommerce/woocommerce/wiki/Writing-high-quality-testing-instructions'
+            })
