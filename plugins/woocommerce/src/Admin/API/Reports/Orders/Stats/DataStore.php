@@ -73,8 +73,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Dynamically sets the date column name based on configuration
 	 */
 	public function __construct() {
-		parent::__construct();
 		$this->date_column_name = get_option( 'woocommerce_date_type', 'date_paid' );
+		parent::__construct();
 	}
 
 	/**
