@@ -80,6 +80,12 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 9.6.2 - 2023-02-22 =
+
+#### Bug Fixes
+
+- Disable compatibility layer ([8507](https://github.com/woocommerce/woocommerce-blocks/pull/8507))
+
 = 9.6.1 - 2023-02-17 =
 
 #### Bug Fixes
