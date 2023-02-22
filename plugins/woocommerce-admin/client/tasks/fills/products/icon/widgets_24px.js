@@ -24,7 +24,7 @@ const Widget = () => {
 				/>
 			</mask>
 			<g mask="url(#mask0_1133_132667)">
-				<rect x="0.5" width="24" height="24" fill="#007CBA" />
+				<rect x="0.5" width="24" height="24" />
 			</g>
 		</svg>
 	);

@@ -6,6 +6,8 @@
  * @version 2.4.0
  */
 
+use Automattic\WooCommerce\Utilities\I18nUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -112,10 +114,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'default'  => 'kg',
 					'type'     => 'select',
 					'options'  => array(
-						'kg'  => __( 'kg', 'woocommerce' ),
-						'g'   => __( 'g', 'woocommerce' ),
-						'lbs' => __( 'lbs', 'woocommerce' ),
-						'oz'  => __( 'oz', 'woocommerce' ),
+						'kg'  => I18nUtil::get_weight_unit_label( 'kg' ),
+						'g'   => I18nUtil::get_weight_unit_label( 'g' ),
+						'lbs' => I18nUtil::get_weight_unit_label( 'lbs' ),
+						'oz'  => I18nUtil::get_weight_unit_label( 'oz' ),
 					),
 					'desc_tip' => true,
 				),
@@ -129,11 +131,11 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'default'  => 'cm',
 					'type'     => 'select',
 					'options'  => array(
-						'm'  => __( 'm', 'woocommerce' ),
-						'cm' => __( 'cm', 'woocommerce' ),
-						'mm' => __( 'mm', 'woocommerce' ),
-						'in' => __( 'in', 'woocommerce' ),
-						'yd' => __( 'yd', 'woocommerce' ),
+						'm'  => I18nUtil::get_dimensions_unit_label( 'm' ),
+						'cm' => I18nUtil::get_dimensions_unit_label( 'cm' ),
+						'mm' => I18nUtil::get_dimensions_unit_label( 'mm' ),
+						'in' => I18nUtil::get_dimensions_unit_label( 'in' ),
+						'yd' => I18nUtil::get_dimensions_unit_label( 'yd' ),
 					),
 					'desc_tip' => true,
 				),

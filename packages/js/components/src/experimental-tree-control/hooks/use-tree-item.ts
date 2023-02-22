@@ -1,30 +1,43 @@
 /**
  * External dependencies
  */
+import React from 'react';
 
 /**
  * Internal dependencies
  */
 import { TreeItemProps } from '../types';
+import { useExpander } from './use-expander';
 
-export function useTreeItem( { item, level, ...props }: TreeItemProps ) {
+export function useTreeItem( {
+	item,
+	level,
+	shouldItemBeExpanded,
+	...props
+}: TreeItemProps ) {
 	const nextLevel = level + 1;
-	const nextHeadingPaddingLeft = ( level - 1 ) * 28 + 12;
+
+	const expander = useExpander( {
+		item,
+		shouldItemBeExpanded,
+	} );
 
 	return {
 		item,
 		level: nextLevel,
+		expander,
 		treeItemProps: {
 			...props,
 		},
 		headingProps: {
 			style: {
-				paddingLeft: nextHeadingPaddingLeft,
-			},
+				'--level': level,
+			} as React.CSSProperties,
 		},
 		treeProps: {
 			items: item.children,
 			level: nextLevel,
+			shouldItemBeExpanded,
 		},
 	};
 }
