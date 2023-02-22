@@ -103,7 +103,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		$id        = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
-		$order     = wc_get_order( $id );
+		$order     = new WC_Order( $id );
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
 
