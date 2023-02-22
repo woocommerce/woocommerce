@@ -1,8 +1,10 @@
 name: Nightly builds
+
 on:
   schedule:
     - cron: '0 0 * * *' # Run at 12 AM UTC.
   workflow_dispatch:
+
 jobs:
   build:
     name: Nightly builds
@@ -16,6 +18,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ matrix.build }}
+
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
 
       - name: Install Node Dependencies
         run: npm ci --no-optional
