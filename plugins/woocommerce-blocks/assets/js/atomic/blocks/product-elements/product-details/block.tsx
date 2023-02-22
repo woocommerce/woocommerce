@@ -84,7 +84,7 @@ export const SingleProductDetails = () => {
 
 	return (
 		<div { ...blockProps }>
-			<ul className="tabs" role="tablist">
+			<ul className="wc-tabs tabs" role="tablist">
 				{ tabsTitle }
 			</ul>
 			{ tabsContent }
