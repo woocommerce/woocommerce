@@ -6,7 +6,14 @@
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"supports": {
-		"multiple": false
+		"multiple": false,
+		"align": [ "wide", "full" ]
+	},
+	"attributes": {
+		"align": {
+			"type": "string",
+			"default": "wide"
+		}
 	},
 	"textdomain": "woo-gutenberg-products-block",
 	"apiVersion": 2,

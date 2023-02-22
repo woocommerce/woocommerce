@@ -36,6 +36,10 @@ class StoreNotices extends AbstractBlock {
 
 		$classname = isset( $attributes['className'] ) ? $attributes['className'] : '';
 
+		if ( isset( $attributes['align'] ) ) {
+			$classname .= " align{$attributes['align']}";
+		}
+
 		return sprintf(
 			'<div class="woocommerce wc-block-store-notices %1$s">%2$s</div>',
 			esc_attr( $classname ),
