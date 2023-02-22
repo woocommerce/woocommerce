@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { createElement, Fragment, StrictMode } from '@wordpress/element';
 import {
 	EditorSettings,
@@ -24,7 +25,7 @@ import { initBlocks } from './init-blocks';
 initBlocks();
 
 type EditorProps = {
-	product: Product;
+	product?: Product;
 	settings: Partial< EditorSettings & EditorBlockListSettings > | undefined;
 };
 
@@ -37,7 +38,14 @@ export function Editor( { product, settings }: EditorProps ) {
 					{ /* @ts-ignore */ }
 					<SlotFillProvider>
 						<InterfaceSkeleton
-							header={ <Header title={ product.name } /> }
+							header={
+								<Header
+									title={
+										product?.name ||
+										__( 'Add new product', 'woocommerce' )
+									}
+								/>
+							}
 							sidebar={ <Sidebar /> }
 							content={
 								<>

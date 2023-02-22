@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import '@wordpress/editor';
 import '@wordpress/format-library';
 import { BlockInstance, serialize, parse } from '@wordpress/blocks';
 import {
 	createElement,
 	useEffect,
+	useLayoutEffect,
 	useState,
 	useMemo,
 } from '@wordpress/element';
@@ -27,6 +27,8 @@ import {
 	WritingFlow,
 	ObserveTyping,
 } from '@wordpress/block-editor';
+// @ts-ignore
+import { store as editorStore } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -35,7 +37,7 @@ import { parseProductToBlocks } from '../../utils/parse-product-to-blocks';
 import { Sidebar } from '../sidebar';
 
 type BlockEditorProps = {
-	product: Partial< Product >;
+	product?: Partial< Product >;
 	settings: Partial< EditorSettings & EditorBlockListSettings > | undefined;
 };
 
@@ -44,7 +46,7 @@ export function BlockEditor( {
 	settings: _settings,
 }: BlockEditorProps ) {
 	const [ blocks, updateBlocks ] = useState< BlockInstance[] >();
-
+	const { setupEditor } = useDispatch( editorStore );
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
 		const _canUserCreateMedia = select( 'core' ).canUser(
 			'create',
@@ -89,8 +91,21 @@ export function BlockEditor( {
 	}
 
 	useEffect( () => {
+		if ( ! product ) {
+			return;
+		}
 		handleUpdateBlocks( parseProductToBlocks( product ) );
 	}, [ product ] );
+
+	useLayoutEffect( () => {
+		if ( ! product ) {
+			return;
+		}
+		// @todo Look into using templates here.
+		// @ts-ignore
+		const template = _settings?.template;
+		setupEditor( product, {}, template );
+	}, [ product?.id ] );
 
 	function handlePersistBlocks( newBlocks: BlockInstance[] ) {
 		updateBlocks( newBlocks );
