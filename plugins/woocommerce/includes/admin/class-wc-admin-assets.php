@@ -201,7 +201,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'wc-enhanced-select' );
 				wp_enqueue_style(
 					'wc-admin-product-category-metabox',
-					WCAdminAssets::get_url( "product-category-dropdown/style{$rtl}", 'css' ),
+					WCAdminAssets::get_url( "product-category-metabox/style{$rtl}", 'css' ),
 					array( 'wp-components' ),
 					WCAdminAssets::get_file_version( 'css' )
 				);

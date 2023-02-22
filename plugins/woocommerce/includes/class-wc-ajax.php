@@ -1840,7 +1840,6 @@ class WC_AJAX {
 					$ancestors = get_ancestors( $term->term_id, 'product_cat' );
 					$current_child = $term;
 					foreach ( $ancestors as $ancestor ) {
-						$ancestor_term = null;
 						if ( ! isset( $terms_map[ $ancestor ] ) ) {
 							$ancestor_term = get_term( $ancestor, 'product_cat' );
 							$terms_map[ $ancestor ] = $ancestor_term;
@@ -1848,8 +1847,13 @@ class WC_AJAX {
 						if ( ! $terms_map[ $ancestor ]->children ) {
 							$terms_map[$ancestor]->children = array();
 						}
-						$terms_map[ $ancestor ]->children[] = $current_child;
-						$current_child = $ancestor_term;
+						$item_exists = count( array_filter( $terms_map[ $ancestor ]->children, function( $term ) use ( $current_child ) {
+							return $term->term_id === $current_child->term_id;
+						} ) ) === 1;
+						if ( ! $item_exists ) {
+							$terms_map[$ancestor]->children[] = $current_child;
+						}
+						$current_child = $terms_map[ $ancestor ];
 					}
 				}
 			}
