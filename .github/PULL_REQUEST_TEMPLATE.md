@@ -14,10 +14,6 @@
 
 Closes # .
 
-<!-- The next section is mandatory. If your PR doesn't require testing, please indicate that you are purposefully omitting instructions. -->
-
-- [ ] This PR is a very minor change/addition and does not require testing instructions (if checked you can ignore/remove the next section).
-
 <!-- Begin testing instructions -->
 
 ### How to test the changes in this Pull Request:
@@ -37,6 +33,7 @@ Closes # .
 -   [ ] Have you added an explanation of what your changes do and why you'd like us to include them?
 -   [ ] Have you written new tests for your changes, as applicable?
 -   [ ] Have you created a changelog file for each project being changed, ie `pnpm --filter=<project> changelog add`?
+-   [ ] Have you included testing instructions?
 
 <!-- Mark completed items with an [x] -->
 
