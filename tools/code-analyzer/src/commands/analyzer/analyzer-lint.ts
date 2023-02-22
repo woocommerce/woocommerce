@@ -64,6 +64,8 @@ const program = new Command()
 				'TEMPLATES',
 				Logger.notice
 			);
+		} else {
+			Logger.notice( 'No template changes found.' );
 		}
 
 		if ( changes.hooks.size ) {
@@ -73,6 +75,8 @@ const program = new Command()
 				'HOOKS',
 				Logger.notice
 			);
+		} else {
+			Logger.notice( 'No hook changes found.' );
 		}
 
 		if ( changes.schema.filter( ( s ) => ! s.areEqual ).length ) {
@@ -82,10 +86,14 @@ const program = new Command()
 				outputStyle,
 				Logger.notice
 			);
+		} else {
+			Logger.notice( 'No schema changes found.' );
 		}
 
 		if ( changes.db ) {
 			printDatabaseUpdates( changes.db, outputStyle, Logger.notice );
+		} else {
+			Logger.notice( 'No database changes found.' );
 		}
 	} );
 
