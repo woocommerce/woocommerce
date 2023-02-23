@@ -49,6 +49,45 @@ jQuery( function ( $ ) {
 					'.wc_input_variations_price',
 					this.maybe_enable_button_to_add_price_to_variations
 				);
+
+			$( '.save-variations' ).on( 'click', function () {
+				const original_data = $(
+					'.woocommerce_variation_new_attribute_data'
+				).find( 'input, select, textarea' );
+
+				const data = {
+					post_id: woocommerce_admin_meta_boxes.post_id,
+					product_type: $( '#product-type' ).val(),
+					data: original_data.serialize(),
+					action: 'woocommerce_save_attributes_nathan',
+					security:
+						woocommerce_admin_meta_boxes.save_attributes_nathan_nonce,
+				};
+
+				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function (
+					response
+				) {
+					if ( response.error ) {
+						// Error.
+						window.alert( response.error );
+					} else if ( response ) {
+						var wrapper = $( '#variable_product_options' ).find(
+							'.woocommerce_variations'
+						);
+						wrapper
+							.empty()
+							.append( response );
+
+						$( '#woocommerce-product-data' ).trigger(
+							'woocommerce_variations_loaded'
+						);
+					}
+				} );
+
+				// save attributes
+				// link variations
+				console.log( 'save variations clicked' );
+			} );
 		},
 
 		/**

@@ -18,14 +18,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<p><?php echo __( 'Offer customers multiple product options, like size and color.... todo', 'woocommerce' ); ?></p>
 		</div>
 		<div class="wc-metabox">
-			<div class="woocommerce_attribute_data wc-metabox-content">
+			<div class="woocommerce_variation_new_attribute_data wc-metabox-content">
 				<table cellpadding="0" cellspacing="0">
 					<tbody>
 						<tr>
 							<td class="attribute_name">
 								<label><?php esc_html_e( 'Name', 'woocommerce' ); ?>:</label>
 								<input type="text" class="attribute_name" name="attribute_names[0]" placeholder="<?php esc_attr_e( 'e.g. Fabric or Brand', 'woocommerce' ); ?>" />
-								<input type="hidden" name="attribute_position[0]" class="attribute_position" />
+								<input type="hidden" name="attribute_position[0]" class="attribute_position" value="0" />
 							</td>
 							<td rowspan="3">
 								<label><?php esc_html_e( 'Value(s)', 'woocommerce' ); ?>:</label>
@@ -46,7 +46,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</tr>
 					</tbody>
 				</table>
-				<button type="button" class="button button-primary"><?php esc_html_e( 'Save variations', 'woocommerce' ); ?></button>
+				<div class="toolbar">
+					<button type="button" class="button button-primary save-variations"><?php esc_html_e( 'Save variations', 'woocommerce' ); ?></button>
+				</div>
 			</div>
 		</div>
 		<?php else : ?>

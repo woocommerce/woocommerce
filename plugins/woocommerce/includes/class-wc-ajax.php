@@ -131,6 +131,7 @@ class WC_AJAX {
 			'add_new_attribute',
 			'remove_variations',
 			'save_attributes',
+			'save_attributes_nathan',
 			'add_variation',
 			'link_all_variations',
 			'revoke_access_to_download',
@@ -711,6 +712,69 @@ class WC_AJAX {
 
 		// wp_send_json_success must be outside the try block not to break phpunit tests.
 		wp_send_json_success( $response );
+	}
+
+	public static function save_attributes_nathan() {
+		check_ajax_referer( 'save-attributes-nathan', 'security' );
+
+		if ( ! current_user_can( 'edit_products' ) || ! isset( $_POST['data'], $_POST['post_id'] ) ) {
+			wp_die( -1 );
+		}
+
+		$response = array();
+
+		try {
+			parse_str( wp_unslash( $_POST['data'] ), $data ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+			$attributes   = WC_Meta_Box_Product_Data::prepare_attributes( $data );
+			$product_id   = absint( wp_unslash( $_POST['post_id'] ) );
+			$product_type = ! empty( $_POST['product_type'] ) ? wc_clean( wp_unslash( $_POST['product_type'] ) ) : 'simple';
+			$classname    = WC_Product_Factory::get_product_classname( $product_id, $product_type );
+			$product      = new $classname( $product_id );
+
+			$product->set_attributes( $attributes );
+			$product->save();
+
+			$data_store = $product->get_data_store();
+
+			if ( ! is_callable( array( $data_store, 'create_all_product_variations' ) ) ) {
+				wp_die();
+			}
+
+			$data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ) );
+
+			$data_store->sort_all_product_variations( $product->get_id() );
+
+			$product_object   = wc_get_product_object( 'variable', $product_id ); // Forces type to variable in case product is unsaved.
+			$variations       = wc_get_products(
+				array(
+					'status'  => array( 'private', 'publish' ),
+					'type'    => 'variation',
+					'parent'  => $product_id,
+					'orderby' => array(
+						'menu_order' => 'ASC',
+						'ID'         => 'DESC',
+					),
+					'return'  => 'objects',
+				)
+			);
+
+			if ( $variations ) {
+				wc_render_invalid_variation_notice( $product_object );
+
+
+				foreach ( $variations as $variation_object ) {
+					$variation_id   = $variation_object->get_id();
+					$variation      = get_post( $variation_id );
+					$variation_data = array_merge( get_post_custom( $variation_id ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compatibility.
+					include __DIR__ . '/admin/meta-boxes/views/html-variation-admin.php';
+					$loop++;
+				}
+			}
+
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
+		}
 	}
 
 	/**
