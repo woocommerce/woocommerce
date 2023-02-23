@@ -50,4 +50,5 @@ runs:
               SLACK_BOT_TOKEN: ${{ inputs.slack-bot-token }}
           with:
               channel-id: ${{ inputs.channel-id }}
-              slack-message: ${{ steps.compose-slack-message.outputs.slack-message }}
+              slack-message: |
+                  ${{ steps.compose-slack-message.outputs.slack-message }}
