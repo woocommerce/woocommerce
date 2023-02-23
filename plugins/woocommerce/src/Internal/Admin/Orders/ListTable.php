@@ -325,7 +325,7 @@ class ListTable extends WP_List_Table {
 		 *
 		 * @since 7.3.0
 		 */
-		$order_query_args = apply_filters( 'woocommerce_' . $this->order_type . '_list_table_prepare_items_query_args', $this->order_query_args );
+		$order_query_args = apply_filters( 'woocommerce_' . $this->order_type . '_list_table_prepare_items_query_args', $order_query_args );
 
 		// We must ensure the 'paginate' argument is set.
 		$order_query_args['paginate'] = true;

@@ -60,4 +60,5 @@ export const pluginNames = {
 		'woocommerce'
 	),
 	'tiktok-for-business:alt': __( 'TikTok for WooCommerce', 'woocommerce' ),
+	codistoconnect: __( 'Omnichannel for WooCommerce', 'woocommerce' ),
 };

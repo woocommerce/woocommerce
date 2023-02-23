@@ -1,6 +1,6 @@
 {
 	"dev": true,
-	"filter": "^(?:react|react-dom|typescript|@typescript-eslint|@types/react).*$",
+	"filter": "^(?:config|react|react-dom|eslint|typescript|@typescript-eslint|@types/react).*$",
 	"indent": "\t",
 	"overrides": true,
 	"peer": true,
@@ -35,6 +35,15 @@
 		},
 		{
 			"dependencies": [
+				"config"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "3.3.7"
+		},
+		{
+			"dependencies": [
 				"react",
 				"react-dom"
 			],
@@ -51,6 +60,18 @@
 				"**"
 			],
 			"pinVersion": "^4.8.3"
+		},
+		{
+			"dependencies": [
+				"eslint"
+			],
+			"dependencyTypes": [
+				"devDependencies"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^8.32.0"
 		}
 	]
 }

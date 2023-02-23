@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Set child orders to be children of current order parent before deleting for consistency.

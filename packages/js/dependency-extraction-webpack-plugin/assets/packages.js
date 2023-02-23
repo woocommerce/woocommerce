@@ -14,6 +14,7 @@ module.exports = [
 	'@woocommerce/navigation',
 	'@woocommerce/notices',
 	'@woocommerce/number',
+	'@woocommerce/product-editor',
 	'@woocommerce/tracks',
 	// wc-blocks packages
 	'@woocommerce/blocks-checkout',

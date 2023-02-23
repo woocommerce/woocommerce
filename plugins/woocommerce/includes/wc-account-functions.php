@@ -190,7 +190,13 @@ function wc_get_account_endpoint_url( $endpoint ) {
  * @return array
  */
 function wc_get_account_orders_columns() {
-	$columns = apply_filters(
+	/**
+	 * Filters the array of My Account > Orders columns.
+	 *
+	 * @since 2.6.0
+	 * @param array $columns Array of column labels keyed by column IDs.
+	 */
+	return apply_filters(
 		'woocommerce_account_orders_columns',
 		array(
 			'order-number'  => __( 'Order', 'woocommerce' ),
@@ -200,9 +206,6 @@ function wc_get_account_orders_columns() {
 			'order-actions' => __( 'Actions', 'woocommerce' ),
 		)
 	);
-
-	// Deprecated filter since 2.6.0.
-	return apply_filters( 'woocommerce_my_account_my_orders_columns', $columns );
 }
 
 /**
