@@ -1766,7 +1766,7 @@ class WC_AJAX {
 		}
 
 		$hide_empty       = isset( $_GET['hide_empty'] ) ? wc_clean( wp_unslash( $_GET['hide_empty'] ) ) : true;
-		$hide_empty       = $hide_empty === 'false' ? false : true;
+		$hide_empty       = 'false' === $hide_empty ? false : true;
 		$found_categories = array();
 		$args             = array(
 			'taxonomy'   => array( 'product_cat' ),
@@ -1866,7 +1866,7 @@ class WC_AJAX {
 		$parent_terms = array_filter(
 			array_values( $terms_map ),
 			function( $term ) {
-				return $term->parent === 0;
+				return 0 === $term->parent;
 			}
 		);
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_categories', $parent_terms ) );

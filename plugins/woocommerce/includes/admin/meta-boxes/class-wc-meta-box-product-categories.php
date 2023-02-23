@@ -4,14 +4,12 @@
  *
  * Display the product images meta box.
  *
- * @author      WooThemes
- * @category    Admin
  * @package     WooCommerce\Admin\Meta Boxes
- * @version     2.1.0
+ * @version     7.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
@@ -22,7 +20,19 @@ class WC_Meta_Box_Product_Categories {
 	/**
 	 * Output the metabox.
 	 *
-	 * @param WP_Post $post
+	 * @param WP_Post $post Current post object.
+	 * @param array   $box {
+	 *     Categories meta box arguments.
+	 *
+	 *     @type string   $id       Meta box 'id' attribute.
+	 *     @type string   $title    Meta box title.
+	 *     @type callable $callback Meta box display callback.
+	 *     @type array    $args {
+	 *         Extra meta box arguments.
+	 *
+	 *         @type string $taxonomy Taxonomy. Default 'category'.
+	 *     }
+	 * }
 	 */
 	public static function output( $post, $box ) {
 		$defaults = array( 'taxonomy' => 'category' );
@@ -32,18 +42,18 @@ class WC_Meta_Box_Product_Categories {
 			$args = $box['args'];
 		}
 		$parsed_args         = wp_parse_args( $args, $defaults );
-		$tax_name            = esc_attr( $parsed_args['taxonomy'] );
+		$tax_name            = $parsed_args['taxonomy'];
 		$selected_categories = wp_get_object_terms( $post->ID, 'product_cat' );
 		?>
-		<div id="taxonomy-<?php echo $tax_name; ?>-metabox"></div>
-		<? foreach ( (array) $selected_categories as $term ) { ?>
+		<div id="taxonomy-<?php echo esc_attr( $tax_name ); ?>-metabox"></div>
+		<?php foreach ( (array) $selected_categories as $term ) { ?>
 			<input
 				type="hidden"
-				value="<?php echo $term->term_id; ?>"
-				name="tax_input[<?php echo $tax_name; ?>][]"
-				data-name="<?php echo $term->name; ?>"
+				value="<?php echo esc_attr( $term->term_id ); ?>"
+				name="tax_input[<?php echo esc_attr( $tax_name ); ?>][]"
+				data-name="<?php echo esc_attr( $term->name ); ?>"
 			/>
-		<?php
+			<?php
+		}
 	}
-}
 }
