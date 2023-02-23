@@ -30,19 +30,19 @@ runs:
               PR_NUMBER: ${{ github.event.pull_request.number }}
               PR_TITLE: ${{ github.event.pull_request.title }}
               SHA: ${{ github.event.pull_request.merge_commit_sha }}
-              SLACK_MESSAGE: |
-                  :warning-8c: ${{ inputs.test-type }} tests failed after PR <https://github.com/woocommerce/woocommerce/pull/${{ env.PR_NUMBER }}|#${{ env.PR_NUMBER }}> was merged.
-
-                  :pr: Pull request: ${{ env.PR_TITLE }} <https://github.com/woocommerce/woocommerce/pull/${{ env.PR_NUMBER }}|#${{ env.PR_NUMBER }}>
-                  :hash: Trunk merge commit: <https://github.com/woocommerce/woocommerce/commit/${{ env.SHA }}|${{ env.SHA }}>
-                  :github: GitHub run log: <https://github.com/woocommerce/woocommerce/actions/runs/${{ github.run_id }}|Run ID ${{ github.run_id }}>
           run: |
+              mkdir -p tmp
+              echo ":warning-8c: ${{ inputs.test-type }} tests failed on ${{ github.event.pull_request.base.ref }} after merging PR <https://github.com/woocommerce/woocommerce/pull/${{ env.PR_NUMBER }}|#${{ env.PR_NUMBER }}>." > tmp/slack-message.tmp
+              echo "" >> tmp/slack-message.tmp
+              echo ":pr: Pull request: ${{ env.PR_TITLE }} <https://github.com/woocommerce/woocommerce/pull/${{ env.PR_NUMBER }}|#${{ env.PR_NUMBER }}>" >> tmp/slack-message.tmp
+              echo ":hash: Trunk merge commit: <https://github.com/woocommerce/woocommerce/commit/${{ env.SHA }}|${{ env.SHA }}>" >> tmp/slack-message.tmp
+              echo ":github: GitHub run log: <https://github.com/woocommerce/woocommerce/actions/runs/${{ github.run_id }}|Run ID ${{ github.run_id }}>" >> tmp/slack-message.tmp
+
               if [ ${{ inputs.test-type }} != "k6" ]; then
-                mkdir -p tmp
-                echo "$SLACK_MESSAGE" > tmp/slack-message.tmp
-                echo ":playwright: Test report: <https://a8c-woo-test-reports.s3.amazonaws.com/public/pr-merge/${{ env.PR_NUMBER }}/${{ steps.lowcase-test-type.outputs.test-type-lowcase }}/index.html|${{ inputs.test-type }} test report on merged PR #${{ env.PR_NUMBER }}>" >> tmp/slack-message.tmp
-                echo "slack-message=$(cat tmp/slack-message.tmp)" >> $GITHUB_OUTPUT
+                  echo ":playwright: Test report: <https://a8c-woo-test-reports.s3.amazonaws.com/public/pr-merge/${{ env.PR_NUMBER }}/${{ steps.lowcase-test-type.outputs.test-type-lowcase }}/index.html|${{ inputs.test-type }} test report on merged PR #${{ env.PR_NUMBER }}>" >> tmp/slack-message.tmp
               fi
+
+              echo "slack-message=$(cat tmp/slack-message.tmp)" >> $GITHUB_OUTPUT
 
         - name: Send Slack alert on test failure
           uses: slackapi/slack-github-action@v1.23.0
