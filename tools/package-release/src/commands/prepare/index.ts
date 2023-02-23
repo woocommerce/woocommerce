@@ -49,6 +49,10 @@ export default class PackagePrepare extends Command {
 			default: false,
 			description: 'Perform prepare function on all packages.',
 		} ),
+		initialRelease: Flags.boolean( {
+			default: false,
+			description: "Create a package's first release to NPM",
+		} ),
 	};
 
 	/**
@@ -68,11 +72,17 @@ export default class PackagePrepare extends Command {
 
 		const packages = args.packages.split( ',' );
 
+		if ( flags.initialRelease && packages.length > 1 ) {
+			this.error(
+				'Please release only a single package when making an initial release'
+			);
+		}
+
 		packages.forEach( ( name: string ) =>
 			validatePackage( name, ( e: string ): void => this.error( e ) )
 		);
 
-		await this.preparePackages( packages );
+		await this.preparePackages( packages, flags.initialRelease );
 	}
 
 	/**
@@ -80,7 +90,10 @@ export default class PackagePrepare extends Command {
 	 *
 	 * @param {Array<string>} packages Packages to prepare.
 	 */
-	private async preparePackages( packages: Array< string > ) {
+	private async preparePackages(
+		packages: Array< string >,
+		initialRelease?: Boolean
+	) {
 		packages.forEach( async ( name ) => {
 			CliUx.ux.action.start( `Preparing ${ name }` );
 
@@ -92,11 +105,7 @@ export default class PackagePrepare extends Command {
 						writeChangelog( name );
 						this.bumpPackageVersion( name, nextVersion );
 					} else {
-						const isInitialDeployment = await CliUx.ux.confirm(
-							`The changelog for package ${ name } does not contain a version number. \n\nAre you attempting to make an intial deployment of ${ name }? (yes/no)`
-						);
-
-						if ( isInitialDeployment ) {
+						if ( initialRelease ) {
 							nextVersion = '1.0.0';
 						} else {
 							throw new Error(
