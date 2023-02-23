@@ -101,7 +101,7 @@ export default class PackagePrepare extends Command {
 							);
 						}
 					}
-					writeChangelog( name );
+					writeChangelog( name, nextVersion );
 					if ( nextVersion ) {
 						this.bumpPackageVersion( name, nextVersion );
 					}
