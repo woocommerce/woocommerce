@@ -58,7 +58,7 @@ jQuery( function ( $ ) {
 	} );
 
 	$( function () {
-		if ( ! woocommerce_admin_meta_boxes.has_attributes ) {
+		if ( ! woocommerce_admin_meta_boxes.has_local_attributes ) {
 			$( 'button.add_attribute' ).trigger( 'click' );
 		}
 	} );
@@ -1044,7 +1044,6 @@ jQuery( function ( $ ) {
 			delay: 200,
 			keepAlive: true,
 		} );
-
 
 	// add a tooltip to the right of the product image meta box "Set product image" and "Add product gallery images"
 	const setProductImageLink = $( '#set-post-thumbnail' );
