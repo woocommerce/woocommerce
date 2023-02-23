@@ -4,12 +4,8 @@
 import { __ } from '@wordpress/i18n';
 import { useFormContext } from '@woocommerce/components';
 import { CheckboxControl } from '@wordpress/components';
+import { getCheckboxTracks } from '@woocommerce/product-editor';
 import { Product } from '@woocommerce/data';
-
-/**
- * Internal dependencies
- */
-import { getCheckboxTracks } from '../../sections/utils';
 
 export const InventoryStockLimitField = () => {
 	const { getCheckboxControlProps } = useFormContext< Product >();
