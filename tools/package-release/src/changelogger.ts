@@ -25,9 +25,6 @@ export const getNextVersion = ( name: string ) => {
 		} ).trim();
 	} catch ( e ) {
 		if ( e instanceof Error ) {
-			// // eslint-disable-next-line no-console
-			// console.log( e );
-			// throw e;
 			return null;
 		}
 	}

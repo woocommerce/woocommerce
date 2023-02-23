@@ -20,7 +20,6 @@
 		"@oclif/core": "^1",
 		"@oclif/plugin-help": "^5",
 		"@oclif/plugin-plugins": "^2.0.1",
-		"@types/inquirer": "^9.0.3",
 		"@types/semver": "^7.3.10",
 		"semver": "^7.3.2"
 	},
