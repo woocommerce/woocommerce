@@ -19,36 +19,61 @@ type UseCampaignsType = {
 	loading: boolean;
 	data?: Array< Campaign >;
 	error?: ApiFetchError;
+	meta?: {
+		total?: number;
+	};
 };
 
-export const useCampaigns = (): UseCampaignsType => {
-	const { data } = useRegisteredChannels();
+export const useCampaigns = (
+	page: number,
+	perPage: number
+): UseCampaignsType => {
+	const { data: channels } = useRegisteredChannels();
 
-	return useSelect( ( select ) => {
-		const { hasFinishedResolution, getCampaigns } = select( STORE_KEY );
-		const campaignsState = getCampaigns< CampaignsState >();
-
-		const convert = ( campaign: APICampaign ): Campaign => {
-			const channel = data?.find(
-				( el ) => el.slug === campaign.channel
+	return useSelect(
+		( select ) => {
+			const { hasFinishedResolution, getCampaigns } = select( STORE_KEY );
+			const campaignsState = getCampaigns< CampaignsState >(
+				page,
+				perPage
 			);
 
-			return {
-				id: `${ campaign.channel }|${ campaign.id }`,
-				title: campaign.title,
-				description: '',
-				cost: `${ campaign.cost.currency } ${ campaign.cost.value }`,
-				manageUrl: campaign.manage_url,
-				icon: channel?.icon || '',
-				channelName: channel?.title || '',
-				channelSlug: campaign.channel,
-			};
-		};
+			const convert = ( campaign: APICampaign ): Campaign => {
+				const channel = channels?.find(
+					( el ) => el.slug === campaign.channel
+				);
 
-		return {
-			loading: ! hasFinishedResolution( 'getCampaigns' ),
-			data: campaignsState.data?.map( convert ),
-			error: campaignsState.error,
-		};
-	} );
+				return {
+					id: `${ campaign.channel }|${ campaign.id }`,
+					title: campaign.title,
+					description: '',
+					cost: `${ campaign.cost.currency } ${ campaign.cost.value }`,
+					manageUrl: campaign.manage_url,
+					icon: channel?.icon || '',
+					channelName: channel?.title || '',
+					channelSlug: campaign.channel,
+				};
+			};
+
+			const error =
+				campaignsState.pages && campaignsState.pages[ page ]?.error;
+
+			const data =
+				campaignsState.pages &&
+				campaignsState.pages[ page ]?.data?.map( convert );
+
+			return {
+				loading: ! hasFinishedResolution( 'getCampaigns', [
+					page,
+					perPage,
+				] ),
+				data,
+				error,
+				meta: {
+					total: campaignsState.total,
+				},
+			};
+		},
+		[ page, perPage ]
+	);
 };

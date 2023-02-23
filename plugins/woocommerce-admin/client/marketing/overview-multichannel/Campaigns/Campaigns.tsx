@@ -22,9 +22,11 @@ import { CardHeaderTitle, CenteredSpinner } from '~/marketing/components';
 import { useCampaigns } from './useCampaigns';
 import './Campaigns.scss';
 
+const perPage = 5;
+
 export const Campaigns = () => {
 	const [ page, setPage ] = useState( 1 );
-	const { loading, data } = useCampaigns();
+	const { loading, data, meta } = useCampaigns( page, perPage );
 
 	const getContent = () => {
 		if ( loading ) {
@@ -80,10 +82,7 @@ export const Campaigns = () => {
 			);
 		}
 
-		const perPage = 5;
-		const total = data.length;
-		const start = ( page - 1 ) * perPage;
-		const pagedData = data.slice( start, start + perPage );
+		const total = meta?.total as number;
 
 		return (
 			<>
@@ -100,7 +99,7 @@ export const Campaigns = () => {
 							isNumeric: true,
 						},
 					] }
-					rows={ pagedData.map( ( el ) => {
+					rows={ data.map( ( el ) => {
 						return [
 							{
 								display: (
