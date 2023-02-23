@@ -103,7 +103,6 @@ export default class PackagePrepare extends Command {
 					let nextVersion = getNextVersion( name );
 					if ( nextVersion ) {
 						writeChangelog( name );
-						this.bumpPackageVersion( name, nextVersion );
 					} else {
 						if ( initialRelease ) {
 							nextVersion = '1.0.0';
@@ -115,6 +114,8 @@ export default class PackagePrepare extends Command {
 
 						writeChangelog( name, nextVersion );
 					}
+
+					this.bumpPackageVersion( name, nextVersion );
 
 					CliUx.ux.action.stop();
 				} else {
