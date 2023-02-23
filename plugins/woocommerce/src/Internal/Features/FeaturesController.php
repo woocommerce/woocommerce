@@ -94,21 +94,25 @@ class FeaturesController {
 				'description'        => __( 'Enables WooCommerce Analytics', 'woocommerce' ),
 				'is_experimental'    => false,
 				'enabled_by_default' => true,
+				'disable_ui'         => false,
 			),
 			'new_navigation'      => array(
 				'name'            => __( 'Navigation', 'woocommerce' ),
 				'description'     => __( 'Adds the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
 				'is_experimental' => false,
+				'disable_ui'      => false,
 			),
 			'custom_order_tables' => array(
 				'name'            => __( 'High-Performance order storage (COT)', 'woocommerce' ),
 				'description'     => __( 'Enable the high performance order storage feature.', 'woocommerce' ),
 				'is_experimental' => true,
+				'disable_ui'      => false,
 			),
 			'cart_checkout_blocks'   => array(
 				'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
 				'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
 				'is_experimental' => false,
+				'disable_ui'      => true,
 			),
 		);
 
@@ -540,7 +544,13 @@ class FeaturesController {
 				return $features[ $feature_id ]['is_experimental'];
 			}
 		);
-		$mature_feature_ids       = array_diff( $feature_ids, $experimental_feature_ids, array( 'cart_checkout_blocks' ) );
+		$disabled_ui_feature_ids = array_filter(
+			$feature_ids,
+			function( $feature_id ) use ( $features ) {
+				return $features[ $feature_id ]['disable_ui'];
+			}
+		); 
+		$mature_feature_ids       = array_diff( $feature_ids, $experimental_feature_ids, $disabled_ui_feature_ids );
 		$feature_ids              = array_merge( $mature_feature_ids, array( 'mature_features_end' ), $experimental_feature_ids );
 
 		foreach ( $feature_ids as $id ) {
