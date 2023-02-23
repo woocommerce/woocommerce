@@ -109,7 +109,7 @@ export default class PackagePrepare extends Command {
 							nextVersion = '1.0.0';
 						} else {
 							throw new Error(
-								`Error reading version number for ${ name }. Check that a Changelog file exists and has a version number. If making an initial release, pass the --initial-release flag.`
+								`Error reading version number for ${ name }. Check that a Changelog file exists and has a version number. If making an initial release, pass the --initialRelease flag.`
 							);
 						}
 
