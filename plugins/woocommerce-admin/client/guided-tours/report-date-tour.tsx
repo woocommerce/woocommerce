@@ -17,6 +17,8 @@ import { getAdminLink } from '@woocommerce/settings';
  */
 import './report-date-tour.scss';
 
+const DATE_TYPE_OPTION = 'woocommerce_date_type';
+
 export const ReportDateTour: React.FC< {
 	optionName: string;
 	headingText: string;
@@ -24,17 +26,21 @@ export const ReportDateTour: React.FC< {
 	const [ isDismissed, setIsDismissed ] = useState( false );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
-	const { hasShownTour, isResolving } = useSelect( ( select ) => {
+	const { shouldShowTour, isResolving } = useSelect( ( select ) => {
 		const { getOption, hasFinishedResolution } =
 			select( OPTIONS_STORE_NAME );
-
 		return {
-			hasShownTour: getOption( optionName ) === 'yes',
-			isResolving: ! hasFinishedResolution( 'getOption', [ optionName ] ),
+			shouldShowTour:
+				getOption( optionName ) !== 'yes' &&
+				getOption( DATE_TYPE_OPTION ) === false,
+			isResolving: ! (
+				hasFinishedResolution( 'getOption', [ optionName ] ) &&
+				hasFinishedResolution( 'getOption', [ DATE_TYPE_OPTION ] )
+			),
 		};
 	} );
 
-	if ( isDismissed || hasShownTour || isResolving ) {
+	if ( isDismissed || ! shouldShowTour || isResolving ) {
 		return null;
 	}
 
