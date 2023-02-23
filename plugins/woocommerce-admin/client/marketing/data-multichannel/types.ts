@@ -61,9 +61,16 @@ export type Campaign = {
 	};
 };
 
-export type CampaignsState = {
+export type CampaignsPage = {
 	data?: Array< Campaign >;
 	error?: ApiFetchError;
+};
+
+export type CampaignsState = {
+	error?: ApiFetchError;
+	perPage?: number;
+	pages?: Record< number, CampaignsPage >;
+	total?: number;
 };
 
 export type State = {

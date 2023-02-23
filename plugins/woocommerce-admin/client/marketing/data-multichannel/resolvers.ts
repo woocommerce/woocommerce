@@ -14,9 +14,26 @@ import {
 	receiveCampaignsSuccess,
 	receiveCampaignsError,
 } from './actions';
+import { fetchWithHeaders } from './controls';
 import { RegisteredChannel, RecommendedChannel, Campaign } from './types';
 import { API_NAMESPACE } from './constants';
 import { isApiFetchError } from './guards';
+
+const getIntHeaderValues = (
+	response: {
+		headers: Map< string, string >;
+		data: unknown;
+	},
+	keys: string[]
+) => {
+	return keys.map( ( key ) => {
+		const value = response.headers.get( key );
+		if ( value === undefined ) {
+			throw new Error( `'${ key }' header is missing.` );
+		}
+		return parseInt( value, 10 );
+	} );
+};
 
 export function* getRegisteredChannels() {
 	try {
@@ -50,25 +67,29 @@ export function* getRecommendedChannels() {
 	}
 }
 
-export function* getCampaigns() {
-	/**
-	 * Page size.
-	 *
-	 * We set this to 100 because this is the maximum limit allowed by the API.
-	 *
-	 * We need this to support pagination in the UI.
-	 * Currently API does not return total number of rows,
-	 * so we use 100 to get "all" the rows.
-	 */
-	const perPage = 100;
-
+export function* getCampaigns( page: number, perPage: number ) {
 	try {
-		const data: Array< Campaign > = yield apiFetch( {
-			path: `${ API_NAMESPACE }/campaigns?per_page=${ perPage }`,
+		const resp: {
+			headers: Map< string, string >;
+			data: Array< Campaign >;
+		} = yield fetchWithHeaders( {
+			path: `${ API_NAMESPACE }/campaigns?page=${ page }&per_page=${ perPage }`,
+			parse: false,
 		} );
 
-		yield receiveCampaignsSuccess( data );
+		const [ total ] = getIntHeaderValues( resp, [ 'x-wp-total' ] );
+
+		yield receiveCampaignsSuccess( {
+			payload: resp.data,
+			error: false,
+			meta: {
+				page,
+				perPage,
+				total,
+			},
+		} );
 	} catch ( error ) {
+		// TODO: error is an HTTPResponse that hasn't been parsed.
 		if ( isApiFetchError( error ) ) {
 			yield receiveCampaignsError( error );
 		}

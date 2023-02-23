@@ -21,8 +21,9 @@ const initialState = {
 		error: undefined,
 	},
 	campaigns: {
-		data: undefined,
-		error: undefined,
+		perPage: undefined,
+		pages: undefined,
+		total: undefined,
 	},
 };
 
@@ -64,7 +65,14 @@ export const reducer: Reducer< State, Action > = (
 			return {
 				...state,
 				campaigns: {
-					data: action.payload,
+					perPage: action.meta.perPage,
+					pages: {
+						...state.campaigns.pages,
+						[ action.meta.page ]: {
+							data: action.payload,
+						},
+					},
+					total: action.meta.total,
 				},
 			};
 

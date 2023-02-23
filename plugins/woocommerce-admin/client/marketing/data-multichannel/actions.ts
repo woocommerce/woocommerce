@@ -43,10 +43,18 @@ export const receiveRecommendedChannelsError = ( error: ApiFetchError ) => {
 	};
 };
 
-export const receiveCampaignsSuccess = ( campaigns: Array< Campaign > ) => {
+export const receiveCampaignsSuccess = ( action: {
+	payload: Array< Campaign >;
+	error: boolean;
+	meta: {
+		page: number;
+		perPage: number;
+		total: number;
+	};
+} ) => {
 	return {
 		type: TYPES.RECEIVE_CAMPAIGNS_SUCCESS,
-		payload: campaigns,
+		...action,
 	};
 };
 
