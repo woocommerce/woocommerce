@@ -187,7 +187,7 @@ While this is true for many cases (often you don't need to create a different st
 
 ### Can I create stories with mixed components?
 
-Yes, and it'd be awesome to see how our components interact with each other, especially in the context of blocks. At the time of writing, we have no such stories, however, here is a link to the official docs if you want to give a go at implementing this: <https://storybook.js.org/docs/react/workflows/stories-for-multiple-components>
+Yes, and it'd be awesome to see how our components interact with each other, especially in the context of blocks. At the time of writing, we have no such stories, however, here is a link to the official docs if you want to give a go at implementing this: <https://storybook.js.org/docs/react/writing-stories/stories-for-multiple-components>
 
 ## Tips
 
