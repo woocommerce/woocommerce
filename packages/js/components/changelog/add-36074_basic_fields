@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add 6 basic fields to the product fields registry for use in extensibility within the new Product MVP.

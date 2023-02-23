@@ -263,6 +263,7 @@ class WCAdminAssets {
 			'wc-store-data',
 			'wc-currency',
 			'wc-navigation',
+			'wc-product-editor',
 		);
 
 		$scripts_map = array(
@@ -312,6 +313,14 @@ class WCAdminAssets {
 		wp_style_add_data( 'wc-components', 'rtl', 'replace' );
 
 		wp_register_style(
+			'wc-product-editor',
+			self::get_url( 'product-editor/style', 'css' ),
+			array(),
+			$css_file_version
+		);
+		wp_style_add_data( 'wc-product-editor', 'rtl', 'replace' );
+
+		wp_register_style(
 			'wc-customer-effort-score',
 			self::get_url( 'customer-effort-score/style', 'css' ),
 			array(),
@@ -339,7 +348,7 @@ class WCAdminAssets {
 		wp_register_style(
 			WC_ADMIN_APP,
 			self::get_url( 'app/style', 'css' ),
-			array( 'wc-components', 'wc-customer-effort-score', 'wp-components', 'wc-experimental' ),
+			array( 'wc-components', 'wc-customer-effort-score', 'wc-product-editor', 'wp-components', 'wc-experimental' ),
 			$css_file_version
 		);
 		wp_style_add_data( WC_ADMIN_APP, 'rtl', 'replace' );
@@ -370,6 +379,7 @@ class WCAdminAssets {
 				'wc-date',
 				'wc-components',
 				'wc-tracks',
+				'wc-product-editor',
 			];
 			foreach ( $handles_for_injection as $handle ) {
 				$script = wp_scripts()->query( $handle, 'registered' );

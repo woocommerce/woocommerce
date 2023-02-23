@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add exit prompt logic to get feedback if users leave product pages without saving when tracking is enabled.

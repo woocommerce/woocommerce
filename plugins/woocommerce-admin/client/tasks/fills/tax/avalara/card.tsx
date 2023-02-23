@@ -42,10 +42,7 @@ export const Card: React.FC< TaxChildProps > = ( { task } ) => {
 					'woocommerce'
 				),
 			] }
-			terms={ __(
-				'30-day free trial. No credit card needed.',
-				'woocommerce'
-			) }
+			terms={ '' }
 			actionText={
 				avalaraActivated
 					? __( 'Continue setup', 'woocommerce' )

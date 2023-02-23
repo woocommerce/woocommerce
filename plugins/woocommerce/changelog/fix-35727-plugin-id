@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Improves efficiency of code responsible for determining plugin IDs (during feature compatibility checks).

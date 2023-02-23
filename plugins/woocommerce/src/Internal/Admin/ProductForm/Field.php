@@ -9,24 +9,6 @@ namespace Automattic\WooCommerce\Internal\Admin\ProductForm;
  * Field class.
  */
 class Field extends Component {
-	/**
-	 * Field type.
-	 *
-	 * @var string
-	 */
-	public $type;
-
-	/**
-	 * Array of required arguments.
-	 *
-	 * @var array
-	 */
-	const REQUIRED_ARGUMENTS = array(
-		'type',
-		'section',
-		'properties.name',
-		'properties.label',
-	);
 
 	/**
 	 * Constructor
@@ -44,6 +26,12 @@ class Field extends Component {
 	 */
 	public function __construct( $id, $plugin_id, $additional_args ) {
 		parent::__construct( $id, $plugin_id, $additional_args );
+		$this->required_arguments = array(
+			'type',
+			'section',
+			'properties.name',
+			'properties.label',
+		);
 
 		$missing_arguments = self::get_missing_arguments( $additional_args );
 		if ( count( $missing_arguments ) > 0 ) {
@@ -55,23 +43,5 @@ class Field extends Component {
 				)
 			);
 		}
-		$this->type = $additional_args['type'];
-	}
-
-	/**
-	 * Get missing arguments of args array.
-	 *
-	 * @param array $args field arguments.
-	 * @return array
-	 */
-	public static function get_missing_arguments( $args ) {
-		return array_values(
-			array_filter(
-				self::REQUIRED_ARGUMENTS,
-				function( $arg_key ) use ( $args ) {
-					return null === self::get_argument_from_path( $args, $arg_key );
-				}
-			)
-		);
 	}
 }

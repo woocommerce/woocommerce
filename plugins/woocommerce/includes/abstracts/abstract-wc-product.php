@@ -820,7 +820,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		if ( $this->get_object_read() && ! empty( $sku ) && ! wc_product_has_unique_sku( $this->get_id(), $sku ) ) {
 			$sku_found = wc_get_product_id_by_sku( $sku );
 
-			$this->error( 'product_invalid_sku', __( 'Invalid or duplicated SKU.', 'woocommerce' ), 400, array( 'resource_id' => $sku_found ) );
+			$this->error(
+				'product_invalid_sku',
+				__( 'Invalid or duplicated SKU.', 'woocommerce' ),
+				400,
+				array(
+					'resource_id' => $sku_found,
+					'unique_sku'  => wc_product_generate_unique_sku( $this->get_id(), $sku ),
+				)
+			);
 		}
 		$this->set_prop( 'sku', $sku );
 	}

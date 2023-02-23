@@ -19,21 +19,23 @@ async function isProductMVPCESHidden(): Promise< boolean > {
 export const useProductMVPCESFooter = () => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
+	const showCesFooter = ( actionName = 'show' ) => {
+		updateOptions( {
+			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: actionName,
+		} );
+	};
+
 	const onSaveDraft = async () => {
 		if ( ( await isProductMVPCESHidden() ) === false ) {
-			updateOptions( {
-				[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: 'new_product',
-			} );
+			showCesFooter( 'new_product' );
 		}
 	};
 
 	const onPublish = async () => {
 		if ( ( await isProductMVPCESHidden() ) === false ) {
-			updateOptions( {
-				[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: 'new_product',
-			} );
+			showCesFooter( 'new_product' );
 		}
 	};
 
-	return { onSaveDraft, onPublish };
+	return { onSaveDraft, onPublish, showCesFooter };
 };

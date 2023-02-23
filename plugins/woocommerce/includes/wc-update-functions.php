@@ -19,7 +19,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
-use Automattic\WooCommerce\Internal\Admin\Marketing;
+use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
@@ -2470,7 +2470,7 @@ function wc_update_700_remove_download_log_fk() {
  * Remove the transient data for recommended marketing extensions.
  */
 function wc_update_700_remove_recommended_marketing_plugins_transient() {
-	delete_transient( Marketing::RECOMMENDED_PLUGINS_TRANSIENT );
+	delete_transient( MarketingSpecs::RECOMMENDED_PLUGINS_TRANSIENT );
 }
 
 /**
@@ -2557,4 +2557,40 @@ function wc_update_722_adjust_new_zealand_states() {
  */
 function wc_update_722_adjust_ukraine_states() {
 	return wc_update_721_adjust_ukraine_states();
+}
+
+/**
+ * Add new columns date_paid and date_completed to wp_wc_order_stats table in order to provide the option
+ * of using the dates in the reports
+ */
+function wc_update_750_add_columns_to_order_stats_table() {
+	global $wpdb;
+
+	$wpdb->query(
+		"UPDATE {$wpdb->prefix}wc_order_stats AS order_stats
+		INNER JOIN {$wpdb->postmeta} AS postmeta
+			ON postmeta.post_id = order_stats.order_id
+			and postmeta.meta_key = '_date_paid'
+		SET order_stats.date_paid = IFNULL(FROM_UNIXTIME(postmeta.meta_value), '0000-00-00 00:00:00');"
+	);
+
+	$wpdb->query(
+		"UPDATE {$wpdb->prefix}wc_order_stats AS order_stats
+		INNER JOIN {$wpdb->postmeta} AS postmeta
+			ON postmeta.post_id = order_stats.order_id
+			and postmeta.meta_key = '_date_completed'
+		SET order_stats.date_completed = IFNULL(FROM_UNIXTIME(postmeta.meta_value), '0000-00-00 00:00:00');"
+	);
+
+}
+
+/**
+ * Disable the experimental product management experience.
+ *
+ * @return void
+ */
+function wc_update_750_disable_new_product_management_experience() {
+	if ( 'yes' === get_option( 'woocommerce_new_product_management_enabled' ) ) {
+		update_option( 'woocommerce_new_product_management_enabled', 'no' );
+	}
 }

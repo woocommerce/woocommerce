@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix REST API order refunds enpoint when HPOS is active, and make v2 orders endpoint compatible with HPOS

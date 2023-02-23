@@ -230,13 +230,6 @@ class Edit {
 		 */
 		$messages = apply_filters( 'woocommerce_order_updated_messages', array() );
 
-		/**
-		 * Backward compatibility for displaying messages using the post fields.
-		 *
-		 * @since 7.4.0. (Although available earlier by the posts based screen).
-		 */
-		$messages = apply_filters( 'post_updated_messages', $messages );
-
 		$message = $this->message;
 		if ( isset( $_GET['message'] ) ) {
 			$message = absint( $_GET['message'] );
