@@ -36,6 +36,11 @@ const settings = {
 		html: false,
 		multiple: false,
 	},
+	example: {
+		attributes: {
+			isPreview: true,
+		},
+	},
 	attributes: blockAttributes,
 	edit: Edit,
 	save: Save,

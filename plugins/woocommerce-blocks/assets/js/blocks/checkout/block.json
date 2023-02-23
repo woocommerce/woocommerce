@@ -10,6 +10,11 @@
 		"html": false,
 		"multiple": false
 	},
+	"example": {
+		"attributes": {
+			"isPreview": true
+		}
+	},
 	"attributes": {
 		"isPreview": {
 			"type": "boolean",
