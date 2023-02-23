@@ -32,9 +32,9 @@ runs:
               SHA: ${{ github.event.pull_request.merge_commit_sha }}
           run: |
               mkdir -p tmp
-              echo ":warning-8c: ${{ inputs.test-type }} tests failed on ${{ github.event.pull_request.base.ref }} after merging PR #${{ env.PR_NUMBER }}." > tmp/slack-message.tmp
+              echo ":warning-8c: ${{ inputs.test-type }} tests failed on ${{ github.event.pull_request.base.ref }} after merging PR #${{ env.PR_NUMBER }}" > tmp/slack-message.tmp
               echo "" >> tmp/slack-message.tmp
-              echo ">${{ env.PR_TITLE }}" >> tmp/slack-message.tmp
+              echo "**_${{ env.PR_TITLE }}_**" >> tmp/slack-message.tmp
               echo "" >> tmp/slack-message.tmp
               echo ":pr-merged: Pull request: https://github.com/woocommerce/woocommerce/pull/${{ env.PR_NUMBER }}" >> tmp/slack-message.tmp
               echo ":alphabet-yellow-hash: Merge commit: https://github.com/woocommerce/woocommerce/commit/${{ env.SHA }}" >> tmp/slack-message.tmp
