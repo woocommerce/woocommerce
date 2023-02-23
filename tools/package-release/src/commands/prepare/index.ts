@@ -88,7 +88,10 @@ export default class PackagePrepare extends Command {
 				if ( hasValidChangelogs( name ) ) {
 					validateChangelogEntries( name );
 					let nextVersion = getNextVersion( name );
-					if ( ! nextVersion ) {
+					if ( nextVersion ) {
+						writeChangelog( name );
+						this.bumpPackageVersion( name, nextVersion );
+					} else {
 						const isInitialDeployment = await CliUx.ux.confirm(
 							`The changelog for package ${ name } does not contain a version number. \n\nAre you attempting to make an intial deployment of ${ name }? (yes/no)`
 						);
@@ -100,11 +103,10 @@ export default class PackagePrepare extends Command {
 								`Error reading version number for ${ name }. Check that a Changelog file exists and has a version number. `
 							);
 						}
+
+						writeChangelog( name, nextVersion );
 					}
-					writeChangelog( name, nextVersion );
-					if ( nextVersion ) {
-						this.bumpPackageVersion( name, nextVersion );
-					}
+
 					CliUx.ux.action.stop();
 				} else {
 					CliUx.ux.action.stop(

@@ -60,7 +60,7 @@ export const validateChangelogEntries = ( name: string ) => {
  *
  * @param {string} name Package name.
  */
-export const writeChangelog = ( name: string, nextVersion: string ) => {
+export const writeChangelog = ( name: string, nextVersion?: string ) => {
 	try {
 		const cwd = getFilepathFromPackageName( name );
 		execSync(
