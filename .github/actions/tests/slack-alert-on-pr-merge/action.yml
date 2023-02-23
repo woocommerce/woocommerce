@@ -34,14 +34,14 @@ runs:
               mkdir -p tmp
               echo ":warning-8c: ${{ inputs.test-type }} tests failed on ${{ github.event.pull_request.base.ref }} after merging PR #${{ env.PR_NUMBER }}." > tmp/slack-message.tmp
               echo "" >> tmp/slack-message.tmp
-              echo "> ${{ env.PR_TITLE }}" >> tmp/slack-message.tmp
+              echo ">${{ env.PR_TITLE }}" >> tmp/slack-message.tmp
               echo "" >> tmp/slack-message.tmp
               echo ":pr-merged: Pull request: https://github.com/woocommerce/woocommerce/pull/${{ env.PR_NUMBER }}" >> tmp/slack-message.tmp
               echo ":alphabet-yellow-hash: Merge commit: https://github.com/woocommerce/woocommerce/commit/${{ env.SHA }}" >> tmp/slack-message.tmp
               echo ":github: GitHub run log: https://github.com/woocommerce/woocommerce/actions/runs/${{ github.run_id }}" >> tmp/slack-message.tmp
 
               if [ ${{ inputs.test-type }} != "k6" ]; then
-                  echo ":playwright: Test report: https://a8c-woo-test-reports.s3.amazonaws.com/public/pr-merge/${{ env.PR_NUMBER }}/${{ steps.lowcase-test-type.outputs.test-type-lowcase }}/index.html" >> tmp/slack-message.tmp
+                  echo ":playwright: Test report: https://woocommerce.github.io/woocommerce-test-reports/pr-merge/${{ env.PR_NUMBER }}/${{ steps.lowcase-test-type.outputs.test-type-lowcase }}/index.html" >> tmp/slack-message.tmp
               fi
 
               echo "slack-message=$(cat tmp/slack-message.tmp)" >> $GITHUB_OUTPUT
