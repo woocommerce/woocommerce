@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Change the default date used on Revenue and Orders report to 'date_paid' and create spotlight on both reports

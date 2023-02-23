@@ -6,7 +6,7 @@ import { ProductVariation } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { PRODUCT_VARIATION_TITLE_LIMIT } from '../constants';
+import { PRODUCT_VARIATION_TITLE_LIMIT } from './constants';
 
 /**
  * Get the product variation title for use in the header.
