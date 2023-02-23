@@ -65,7 +65,7 @@ export const writeChangelog = ( name: string, nextVersion: string ) => {
 		const cwd = getFilepathFromPackageName( name );
 		execSync(
 			`./vendor/bin/changelogger write --add-pr-num ${
-				nextVersion ? '--use-version' + nextVersion : ''
+				nextVersion ? '--use-version ' + nextVersion : ''
 			}`,
 			{
 				cwd,
