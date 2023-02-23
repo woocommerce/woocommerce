@@ -1,27 +1,41 @@
 name: Run tests on PR merge to trunk
 on:
-    push:
-        branch:
-            - 'e2e/on-trunk-merge-0'
-
+    pull_request:
+        types:
+            - closed
 concurrency:
-    group: trunk-merge-${{ github.sha }}
+    group: ${{ github.event.pull_request.merge_commit_sha }}
     cancel-in-progress: true
-
 permissions: {}
 
 jobs:
+    verify_merge:
+        name: Verify merge
+        runs-on: ubuntu-20.04
+        # mytodo Use trunk before merge
+        # if: (github.event.pull_request.merged == true) && (github.event.pull_request.base.ref == 'trunk')
+        if: github.event.pull_request.merged == true
+        permissions:
+            contents: read
+        steps:
+            - name: Confirm if PR is merged to trunk
+              run: echo "PR ${{ github.event.pull_request.number }} was merged to ${{ github.event.pull_request.base.ref }}."
+
     api:
         name: Run API tests
+        needs: [verify_merge]
         runs-on: ubuntu-20.04
         permissions:
             contents: read
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-report
-            ARTIFACT_NAME: api-trunk-commit-${{ github.sha }}-run-${{ github.run_number }}
+            ARTIFACT_NAME: api-pr-merge-${{ github.event.pull_request.number }}-run-${{ github.run_number }}
         steps:
-            - uses: actions/checkout@v3
+            - name: Checkout merge commit on trunk
+              uses: actions/checkout@v3
+              with:
+                  ref: ${{ github.event.pull_request.merge_commit_sha }}
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -32,13 +46,13 @@ jobs:
               uses: ./.github/actions/tests/setup-e2e-local-environment
 
             - name: Run API tests
-              id: api-action
+              id: run-api-composite-action
               uses: ./.github/actions/tests/run-api-tests
               with:
                   report-name: ${{ env.ARTIFACT_NAME }}
 
             - name: Upload Allure files to bucket
-              if: success() || ( failure() && steps.api-action.conclusion == 'failure' )
+              if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
               with:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
@@ -48,29 +62,24 @@ jobs:
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish Allure report
-              if: success() || ( failure() && steps.api-action.conclusion == 'failure' )
+              if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
               run: |
                   gh workflow run publish-test-reports-trunk-merge.yml \
                   -f run_id=${{ github.run_id }} \
                   -f artifact=${{ env.ARTIFACT_NAME }} \
-                  -f sha=${{ github.sha }} \
+                  -f pr_number=${{ github.event.pull_request.number }} \
                   -f test_type="api" \
                   --repo woocommerce/woocommerce-test-reports
 
             - name: Send Slack alert on test failure
-              if: failure() && steps.api-action.conclusion == 'failure'
-              uses: slackapi/slack-github-action@v1.23.0
+              if: failure() && steps.run-api-composite-action.conclusion == 'failure'
+              uses: ./.github/actions/tests/slack-alert-on-pr-merge
               with:
+                  slack-bot-token: ${{ secrets.E2E_SLACK_TOKEN }}
                   channel-id: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
-                  slack-message: |
-                      :warning-8c: API tests failed on trunk
-                      :hash: Commit: https://github.com/woocommerce/woocommerce/commit/${{ github.sha }}
-                      :github: GitHub workflow run: https://github.com/woocommerce/woocommerce/actions/runs/${{ github.run_id }}
-                      :playwright: Test report: https://a8c-woo-test-reports.s3.amazonaws.com/public/trunk-merge/${{ github.sha }}/api/index.html
-              env:
-                  SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
+                  test-type: API
 
     e2e:
         name: Run E2E tests
@@ -84,6 +93,8 @@ jobs:
             ARTIFACT_NAME: e2e-trunk-commit-${{ github.sha }}-run-${{ github.run_number }}
         steps:
             - uses: actions/checkout@v3
+              with:
+                  ref: ${{ github.event.pull_request.merge_commit_sha }}
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -94,14 +105,14 @@ jobs:
               uses: ./.github/actions/tests/setup-e2e-local-environment
 
             - name: Run E2E tests
-              id: e2e-action
+              id: run-e2e-composite-action
               timeout-minutes: 60
               uses: ./.github/actions/tests/run-e2e-tests
               with:
                   report-name: ${{ env.ARTIFACT_NAME }}
 
             - name: Upload Allure files to bucket
-              if: success() || ( failure() && steps.e2e-action.conclusion == 'failure' )
+              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
               with:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
@@ -111,26 +122,22 @@ jobs:
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish Allure report
-              if: success() || ( failure() && steps.e2e-action.conclusion == 'failure' )
+              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
               run: |
                   gh workflow run publish-test-reports-trunk-merge.yml \
-                  -f run_id=${{ github.run_id }} \
-                  -f artifact=${{ env.ARTIFACT_NAME }} \
-                  -f sha=${{ github.sha }} \
-                  -f test_type="e2e" \
-                  --repo woocommerce/woocommerce-test-reports
+                      -f run_id=${{ github.run_id }} \
+                      -f artifact=${{ env.ARTIFACT_NAME }} \
+                      -f pr_number=${{ github.event.pull_request.number }} \
+                      -f test_type="e2e" \
+                      --repo woocommerce/woocommerce-test-reports
 
             - name: Send Slack alert on test failure
-              if: failure() && steps.e2e-action.conclusion == 'failure'
-              uses: slackapi/slack-github-action@v1.23.0
+              if: failure() && steps.run-api-composite-action.conclusion == 'failure'
+              uses: ./.github/actions/tests/slack-alert-on-pr-merge
               with:
+                  slack-bot-token: ${{ secrets.E2E_SLACK_TOKEN }}
                   channel-id: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
-                  slack-message: |
-                      :warning-8c: E2E tests failed on trunk
-                      :hash: Commit: https://github.com/woocommerce/woocommerce/commit/${{ github.sha }}
-                      :github: GitHub workflow run: https://github.com/woocommerce/woocommerce/actions/runs/${{ github.run_id }}
-                      :playwright: Test report: https://a8c-woo-test-reports.s3.amazonaws.com/public/trunk-merge/${{ github.sha }}/e2e/index.html
-              env:
-                  SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
+                  test-type: E2E
+# mytodo add k6 tests

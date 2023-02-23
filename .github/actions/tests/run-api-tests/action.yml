@@ -11,7 +11,7 @@ runs:
     using: composite
     steps:
         - name: Run API tests.
-          id: api
+          id: run-api-tests
           working-directory: plugins/woocommerce
           shell: bash
           env:
@@ -20,19 +20,18 @@ runs:
               USER_SECRET: password
           run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js
 
-        - name: Generate E2E Test report.
-          if: success() || ( failure() && steps.api.conclusion == 'failure' )
+        - name: Generate Test report.
+          if: success() || ( failure() && steps.run-api-tests.conclusion == 'failure' )
           working-directory: plugins/woocommerce
           shell: bash
           run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
-        - name: Archive E2E test report
-          if: success() || ( failure() && steps.api.conclusion == 'failure' )
+        - name: Archive test report
+          if: success() || ( failure() && steps.run-api-tests.conclusion == 'failure' )
           uses: actions/upload-artifact@v3
           with:
               name: ${{ inputs.report-name }}
               path: |
                   ${{ env.ALLURE_RESULTS_DIR }}
                   ${{ env.ALLURE_REPORT_DIR }}
-              if-no-files-found: ignore
               retention-days: 5
