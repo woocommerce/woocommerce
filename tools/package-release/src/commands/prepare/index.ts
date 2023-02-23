@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { CliUx, Command, Flags, ux } from '@oclif/core';
+import { CliUx, Command, Flags } from '@oclif/core';
 import { readFileSync, writeFileSync } from 'fs';
 
 /**
@@ -62,7 +62,7 @@ export default class PackagePrepare extends Command {
 		}
 
 		if ( flags.all ) {
-			this.preparePackages( getAllPackges() );
+			await this.preparePackages( getAllPackges() );
 			return;
 		}
 
@@ -72,7 +72,7 @@ export default class PackagePrepare extends Command {
 			validatePackage( name, ( e: string ): void => this.error( e ) )
 		);
 
-		this.preparePackages( packages );
+		await this.preparePackages( packages );
 	}
 
 	/**
@@ -80,17 +80,26 @@ export default class PackagePrepare extends Command {
 	 *
 	 * @param {Array<string>} packages Packages to prepare.
 	 */
-	private preparePackages( packages: Array< string > ) {
-		packages.forEach( ( name ) => {
+	private async preparePackages( packages: Array< string > ) {
+		packages.forEach( async ( name ) => {
 			CliUx.ux.action.start( `Preparing ${ name }` );
 
 			try {
 				if ( hasValidChangelogs( name ) ) {
 					validateChangelogEntries( name );
-					const nextVersion = getNextVersion( name );
+					let nextVersion = getNextVersion( name );
 					if ( ! nextVersion ) {
-						console.log( ux );
-						// const input = await ux.prompt( 'What is your name?' );
+						const isInitialDeployment = await CliUx.ux.confirm(
+							`The changelog for package ${ name } does not contain a version number. \n\nAre you attempting to make an intial deployment of ${ name }? (yes/no)`
+						);
+
+						if ( isInitialDeployment ) {
+							nextVersion = '1.0.0';
+						} else {
+							throw new Error(
+								`Error reading version number for ${ name }. Check that a Changelog file exists and has a version number. `
+							);
+						}
 					}
 					writeChangelog( name );
 					if ( nextVersion ) {
