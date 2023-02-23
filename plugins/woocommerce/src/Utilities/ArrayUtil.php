@@ -86,7 +86,7 @@ class ArrayUtil {
 	 * @return mixed|null The value for the key, or the default value passed.
 	 */
 	public static function get_value_or_default( array $array, string $key, $default = null ) {
-		return isset( $array[ $key ] ) ? $array[ $key ] : $default;
+		return $array[$key] ?? $default;
 	}
 
 	/**

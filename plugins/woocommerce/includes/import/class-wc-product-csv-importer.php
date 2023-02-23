@@ -822,15 +822,20 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		// Status is mapped from a special published field.
 		if ( isset( $data['published'] ) ) {
+			$published = $data['published'];
+			if ( is_float( $published ) ) {
+				$published = (int) $published;
+			}
+
 			$statuses       = array(
 				-1 => 'draft',
 				0  => 'private',
 				1  => 'publish',
 			);
-			$data['status'] = isset( $statuses[ $data['published'] ] ) ? $statuses[ $data['published'] ] : 'draft';
+			$data['status'] = $statuses[ $published ] ?? 'draft';
 
 			// Fix draft status of variations.
-			if ( isset( $data['type'] ) && 'variation' === $data['type'] && -1 === $data['published'] ) {
+			if ( 'variation' === ( $data['type'] ?? null ) && -1 === $published ) {
 				$data['status'] = 'publish';
 			}
 
