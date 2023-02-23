@@ -33,7 +33,7 @@ test.describe(
 			} );
 		} );
 
-		test( 'failing test for testing', async ( { page } ) => {
+		test( 'failing e2e test', async ( { page } ) => {
 			test.fail();
 		} );
 	}
