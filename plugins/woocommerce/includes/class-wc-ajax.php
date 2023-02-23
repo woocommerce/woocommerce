@@ -721,8 +721,6 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
-		$response = array();
-
 		try {
 			parse_str( wp_unslash( $_POST['data'] ), $data ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
@@ -745,32 +743,9 @@ class WC_AJAX {
 
 			$data_store->sort_all_product_variations( $product->get_id() );
 
-			$product_object   = wc_get_product_object( 'variable', $product_id ); // Forces type to variable in case product is unsaved.
-			$variations       = wc_get_products(
-				array(
-					'status'  => array( 'private', 'publish' ),
-					'type'    => 'variation',
-					'parent'  => $product_id,
-					'orderby' => array(
-						'menu_order' => 'ASC',
-						'ID'         => 'DESC',
-					),
-					'return'  => 'objects',
-				)
-			);
+			WC_Meta_Box_Product_Data::output_variations2($product, get_post( $product->get_id() ) );
+			wp_die();
 
-			if ( $variations ) {
-				wc_render_invalid_variation_notice( $product_object );
-
-
-				foreach ( $variations as $variation_object ) {
-					$variation_id   = $variation_object->get_id();
-					$variation      = get_post( $variation_id );
-					$variation_data = array_merge( get_post_custom( $variation_id ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compatibility.
-					include __DIR__ . '/admin/meta-boxes/views/html-variation-admin.php';
-					$loop++;
-				}
-			}
 
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );

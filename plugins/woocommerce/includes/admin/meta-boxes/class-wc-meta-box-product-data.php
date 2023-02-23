@@ -173,7 +173,16 @@ class WC_Meta_Box_Product_Data {
 	 * Show options for the variable product type.
 	 */
 	public static function output_variations() {
-		global $post, $wpdb, $product_object;
+		global $post, $product_object;
+
+		self::output_variations2( $product_object, $post );
+	}
+
+	/**
+	 * Show options for the variable product type.
+	 */
+	public static function output_variations2( $product_object, $post ) {
+		global $wpdb;
 
 		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		$variation_attributes   = array_filter( $product_object->get_attributes(), array( __CLASS__, 'filter_variation_attributes' ) );

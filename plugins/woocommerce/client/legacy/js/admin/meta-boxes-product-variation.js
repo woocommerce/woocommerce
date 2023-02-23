@@ -71,22 +71,15 @@ jQuery( function ( $ ) {
 						// Error.
 						window.alert( response.error );
 					} else if ( response ) {
-						var wrapper = $( '#variable_product_options' ).find(
-							'.woocommerce_variations'
-						);
+						var wrapper = $( '#variable_product_options' );
 						wrapper
-							.empty()
-							.append( response );
+							.replaceWith( response );
 
 						$( '#woocommerce-product-data' ).trigger(
 							'woocommerce_variations_loaded'
 						);
 					}
 				} );
-
-				// save attributes
-				// link variations
-				console.log( 'save variations clicked' );
 			} );
 		},
 
