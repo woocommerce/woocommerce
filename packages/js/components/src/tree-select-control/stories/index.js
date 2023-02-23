@@ -88,6 +88,12 @@ Base.args = {
 	options: treeSelectControlOptions,
 	maxVisibleTags: 3,
 	selectAllLabel: 'All countries',
+	includeParent: false,
+	alwaysShowPlaceholder: false,
+};
+
+Base.argTypes = {
+	onInputChange: { action: 'onInputChange' },
 };
 
 export default {
