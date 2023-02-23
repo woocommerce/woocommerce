@@ -15,8 +15,8 @@ export default {
 	supports: {
 		align: false,
 		html: false,
-		multiple: false,
-		reusable: false,
+		// multiple: false,
+		// reusable: false,
 		inserter: false,
 		lock: false,
 	},

@@ -43,7 +43,7 @@ export function BlockEditor( {
 	product,
 	settings: _settings,
 }: BlockEditorProps ) {
-	const [ blocks, updateBlocks ] = useState< BlockInstance[] >();
+	const [ blocks, updateBlocks ] = useState< BlockInstance[] >( [] );
 
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
 		const _canUserCreateMedia = select( 'core' ).canUser(
@@ -90,7 +90,20 @@ export function BlockEditor( {
 	}
 
 	useEffect( () => {
-		handleUpdateBlocks( parseProductToBlocks( product ) );
+		function UpdateBlocks() {
+			console.time( 'parseProductToBlocks' );
+			const newBlocks = parseProductToBlocks( product );
+			console.timeEnd( 'parseProductToBlocks' );
+
+			handleUpdateBlocks( newBlocks );
+		}
+		Object.defineProperty( UpdateBlocks, 'name', {
+			value: 'UpdateBlocks',
+			writable: false,
+		} );
+
+		const id = setTimeout( UpdateBlocks, 2000 );
+		return () => clearTimeout( id );
 	}, [ product ] );
 
 	function handlePersistBlocks( newBlocks: BlockInstance[] ) {

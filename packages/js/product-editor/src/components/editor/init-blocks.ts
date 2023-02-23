@@ -7,6 +7,7 @@ import { init as initName } from '../name';
 import { init as initSummary } from '../summary';
 import { init as initSubmit } from '../submit';
 import { init as initProductForm } from '../product-form';
+import { init as initEmpty } from '../empty';
 
 export const initBlocks = () => {
 	initProductForm();
@@ -15,4 +16,10 @@ export const initBlocks = () => {
 	initSection();
 	initSummary();
 	initSubmit();
+	initEmpty();
 };
+
+Object.defineProperty( initBlocks, 'name', {
+	value: 'initBlocks',
+	writable: false,
+} );
