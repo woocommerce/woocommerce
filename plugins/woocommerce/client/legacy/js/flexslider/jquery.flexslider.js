@@ -775,8 +775,6 @@
 
       slider.args[slider.prop] = target;
       if (slider.transitions || dur === undefined) { slider.container.css(slider.args); }
-
-      slider.container.css('transform',target);
     };
 
     slider.setup = function(type) {
