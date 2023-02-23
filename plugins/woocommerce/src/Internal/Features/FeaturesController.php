@@ -554,12 +554,12 @@ class FeaturesController {
 				return $features[ $feature_id ]['is_experimental'];
 			}
 		);
-		$disabled_ui_feature_ids = array_filter(
+		$disabled_ui_feature_ids  = array_filter(
 			$feature_ids,
 			function( $feature_id ) use ( $features ) {
 				return $features[ $feature_id ]['disable_ui'];
 			}
-		); 
+		);
 		$mature_feature_ids       = array_diff( $feature_ids, $experimental_feature_ids, $disabled_ui_feature_ids );
 		$feature_ids              = array_merge( $mature_feature_ids, array( 'mature_features_end' ), $experimental_feature_ids );
 
