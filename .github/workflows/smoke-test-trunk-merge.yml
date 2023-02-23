@@ -89,7 +89,7 @@ jobs:
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
-            ARTIFACT_NAME: e2e-trunk-commit-${{ github.sha }}-run-${{ github.run_number }}
+            ARTIFACT_NAME: e2e-pr-merge-${{ github.event.pull_request.number }}-run-${{ github.run_number }}
         steps:
             - uses: actions/checkout@v3
               with:
