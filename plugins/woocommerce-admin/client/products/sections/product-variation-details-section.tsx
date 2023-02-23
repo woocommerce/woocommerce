@@ -9,6 +9,7 @@ import {
 	CardBody,
 	BaseControl,
 } from '@wordpress/components';
+import { getCheckboxTracks } from '@woocommerce/product-editor';
 import { MediaItem } from '@wordpress/media-utils';
 import {
 	useFormContext,
@@ -21,7 +22,6 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { getCheckboxTracks } from './utils';
 import { ProductSectionLayout } from '../layout/product-section-layout';
 import { SingleImageField } from '../fields/single-image-field';
 

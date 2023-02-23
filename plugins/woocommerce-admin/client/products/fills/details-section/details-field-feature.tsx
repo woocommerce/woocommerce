@@ -8,6 +8,7 @@ import {
 	Link,
 	__experimentalTooltip as Tooltip,
 } from '@woocommerce/components';
+import { getCheckboxTracks } from '@woocommerce/product-editor';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -15,7 +16,6 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { getCheckboxTracks } from '../../sections/utils';
 import { PRODUCT_DETAILS_SLUG } from '../constants';
 
 export const DetailsFeatureField = () => {

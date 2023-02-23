@@ -9,6 +9,10 @@ import {
 	ProductVariation,
 } from '@woocommerce/data';
 import {
+	getProductStockStatus,
+	getProductStockStatusClass,
+} from '@woocommerce/product-editor';
+import {
 	Link,
 	ListItem,
 	Pagination,
@@ -31,10 +35,6 @@ import useVariationsOrder from '~/products/hooks/use-variations-order';
 import HiddenIcon from '~/products/images/hidden-icon';
 import VisibleIcon from '~/products/images/visible-icon';
 import { CurrencyContext } from '../../../lib/currency-context';
-import {
-	getProductStockStatus,
-	getProductStockStatusClass,
-} from '../../utils/get-product-stock-status';
 import './variations.scss';
 
 /**
