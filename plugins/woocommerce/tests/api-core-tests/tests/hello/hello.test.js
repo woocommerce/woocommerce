@@ -16,8 +16,4 @@ test.describe( 'Test API connectivity', () => {
 		const result = await request.get( '/wp-json/wc/v3/system_status' );
 		expect( result.status() ).toEqual( 200 );
 	} );
-
-	test( 'failing api test', async ( { page } ) => {
-		test.fail();
-	} );
 } );
