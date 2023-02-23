@@ -2028,7 +2028,6 @@ importers:
       '@oclif/core': ^1
       '@oclif/plugin-help': ^5
       '@oclif/plugin-plugins': ^2.0.1
-      '@types/inquirer': ^9.0.3
       '@types/node': ^16.9.4
       '@types/semver': ^7.3.10
       '@woocommerce/eslint-plugin': workspace:*
@@ -2043,7 +2042,6 @@ importers:
       '@oclif/core': 1.16.1
       '@oclif/plugin-help': 5.1.12
       '@oclif/plugin-plugins': 2.1.0
-      '@types/inquirer': 9.0.3
       '@types/semver': 7.3.12
       semver: 7.3.5
     devDependencies:
@@ -2208,7 +2206,7 @@ packages:
     resolution: {integrity: sha512-hoyByceqwKirw7w3Z7gnIIZC3Wx3J484Y3L/cMpXFbr7d9ZQj2mODrirNzcJa+SM3UlpWXYvKV4RlRpFXlWgXg==}
     engines: {node: '>=6.0.0'}
     dependencies:
-      '@jridgewell/trace-mapping': 0.3.16
+      '@jridgewell/trace-mapping': 0.3.17
 
   /@automattic/calypso-color-schemes/2.1.1:
     resolution: {integrity: sha512-X5gmQEDJVtw8N9NARgZGM/pmalfapV8ZyRzEn2o0sCLmTAXGYg6A28ucLCQdBIn1l9t2rghBDFkY71vyqjyyFQ==}
@@ -7207,9 +7205,14 @@ packages:
 >>>>>>> 03756046fb (add changelog files and readme update)
 =======
       '@babel/helper-module-imports': 7.16.0
+<<<<<<< HEAD
       '@babel/helper-plugin-utils': 7.14.5
       babel-plugin-polyfill-corejs2: 0.3.0_@babel+core@7.17.8
 >>>>>>> 32f51f446a (manage deps)
+=======
+      '@babel/helper-plugin-utils': 7.20.2
+      babel-plugin-polyfill-corejs2: 0.3.3_@babel+core@7.17.8
+>>>>>>> 684f739694 (lockfile)
       babel-plugin-polyfill-corejs3: 0.4.0_@babel+core@7.17.8
       babel-plugin-polyfill-regenerator: 0.3.0_@babel+core@7.17.8
       semver: 6.3.0
@@ -10947,7 +10950,7 @@ packages:
       '@storybook/core-events': 6.4.19
       '@storybook/csf': 0.0.2--canary.87bc651.0
       '@storybook/theming': 6.4.19_sfoxds7t5ydpegc3knd667wn6m
-      core-js: 3.28.0
+      core-js: 3.21.1
       fast-deep-equal: 3.1.3
       global: 4.4.0
       lodash: 4.17.21
@@ -10956,7 +10959,7 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-inspector: 5.1.1_react@17.0.2
-      regenerator-runtime: 0.13.11
+      regenerator-runtime: 0.13.9
       telejson: 5.3.3
       ts-dedent: 2.2.0
       util-deprecate: 1.0.2
@@ -13025,11 +13028,11 @@ packages:
     resolution: {integrity: sha512-gf/zRhGoAVsFwSyV2tc+jeJfZQkxF6QsaZgbUSe24/IUvGFCT/PS/jZq1qy7dECAwrTOfykgu8juyBtj6WhWyw==}
     dependencies:
       '@babel/core': 7.17.8
-      '@babel/generator': 7.19.3
-      '@babel/parser': 7.19.3
+      '@babel/generator': 7.21.1
+      '@babel/parser': 7.21.1
       '@babel/plugin-transform-react-jsx': 7.19.0_@babel+core@7.17.8
       '@babel/preset-env': 7.20.2_@babel+core@7.17.8
-      '@babel/traverse': 7.19.3
+      '@babel/traverse': 7.21.0
       '@babel/types': 7.21.0
       '@mdx-js/mdx': 1.6.22
       '@storybook/csf': 0.0.2--canary.87bc651.0
@@ -14311,13 +14314,6 @@ packages:
   /@types/http-cache-semantics/4.0.1:
     resolution: {integrity: sha512-SZs7ekbP8CN0txVG2xVRH6EgKmEm31BOxA07vkFaETzZz1xh+cbt8BcI0slpymvwhx5dlFnQG2rTlPVQn+iRPQ==}
 
-  /@types/inquirer/9.0.3:
-    resolution: {integrity: sha512-CzNkWqQftcmk2jaCWdBTf9Sm7xSw4rkI1zpU/Udw3HX5//adEZUIm9STtoRP1qgWj0CWQtJ9UTvqmO2NNjhMJw==}
-    dependencies:
-      '@types/through': 0.0.30
-      rxjs: 7.8.0
-    dev: false
-
   /@types/is-function/1.0.1:
     resolution: {integrity: sha512-A79HEEiwXTFtfY+Bcbo58M2GRYzCr9itHWzbzHVFNEYCcoU/MMGwYYf721gBrnhpj1s6RGVVha/IgNFnR0Iw/Q==}
     dev: true
@@ -14634,12 +14630,6 @@ packages:
     resolution: {integrity: sha512-oKZe+Mf4ioWlMuzVBaXQ9WDnEm1+umLx0InILg+yvZVBBDmzV5KfZyLrCvadtWcx8+916jLmHafcmqqffl+iIw==}
     dependencies:
       '@types/jest': 27.4.1
-
-  /@types/through/0.0.30:
-    resolution: {integrity: sha512-FvnCJljyxhPM3gkRgWmxmDZyAQSiBQQWLI0A0VFL0K7W1oRUrPJSqNO0NvTnLkBcotdlp3lKvaT0JrnyRDkzOg==}
-    dependencies:
-      '@types/node': 18.11.18
-    dev: false
 
   /@types/tinycolor2/1.4.3:
     resolution: {integrity: sha512-Kf1w9NE5HEgGxCRyIcRXR/ZYtDv0V8FVPtYHwLxl0O+maGX0erE77pQlD0gpP+/KByMZ87mOA79SjifhSB3PjQ==}
@@ -37480,6 +37470,7 @@ packages:
     resolution: {integrity: sha512-F2+gxDshqmIub1KdvZkaEfGDwLNpPvk9Fs6LD/MyQxNgMds/WH9OdDDXOmxUZpME+iSK3rQCctkL0DYyytUqMg==}
     dependencies:
       tslib: 2.3.1
+    dev: true
 
   /safe-buffer/5.1.1:
     resolution: {integrity: sha512-kKvNJn6Mm93gAczWVJg7wH+wGYWNrDHdWvpUmHyEsgCtIwwo3bqPtV4tR5tuPaUhTOo/kvhVwd8XwwOllGYkbg==}
