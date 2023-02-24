@@ -11,6 +11,7 @@ export function useTree( {
 	ref,
 	items,
 	level = 1,
+	getItemLabel,
 	shouldItemBeExpanded,
 	...props
 }: TreeProps ) {
@@ -22,6 +23,7 @@ export function useTree( {
 		},
 		treeItemProps: {
 			level,
+			getLabel: getItemLabel,
 			shouldItemBeExpanded,
 		},
 	};
