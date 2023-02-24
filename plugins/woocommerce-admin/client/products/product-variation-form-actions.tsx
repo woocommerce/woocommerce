@@ -7,6 +7,7 @@ import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	ProductVariation,
 } from '@woocommerce/data';
+import { preventLeavingProductForm } from '@woocommerce/product-editor';
 import { registerPlugin } from '@wordpress/plugins';
 import { useDispatch } from '@wordpress/data';
 import { useFormContext } from '@woocommerce/components';
@@ -16,7 +17,6 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { preventLeavingProductForm } from './utils/prevent-leaving-product-form';
 import usePreventLeavingPage from '~/hooks/usePreventLeavingPage';
 import { WooHeaderItem } from '~/header/utils';
 import './product-form-actions.scss';

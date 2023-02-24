@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 import { TabPanel, Tooltip } from '@wordpress/components';
 import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
-import { __experimentalWooProductTabItem as WooProductTabItem } from '@woocommerce/components';
+import { __experimentalWooProductTabItem as WooProductTabItem } from '@woocommerce/product-editor';
 import { PartialProduct } from '@woocommerce/data';
 import classnames from 'classnames';
 

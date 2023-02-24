@@ -57,6 +57,12 @@ jQuery( function ( $ ) {
 		} );
 	} );
 
+	$( function () {
+		if ( ! woocommerce_admin_meta_boxes.has_attributes ) {
+			$( 'button.add_attribute' ).trigger( 'click' );
+		}
+	} );
+
 	// Catalog Visibility.
 	$( '#catalog-visibility' )
 		.find( '.edit-catalog-visibility' )
