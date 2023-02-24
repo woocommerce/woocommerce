@@ -6,8 +6,8 @@ import { registerPlugin } from '@wordpress/plugins';
 import {
 	__experimentalWooProductTabItem as WooProductTabItem,
 	__experimentalWooProductSectionItem as WooProductSectionItem,
-	useFormContext,
-} from '@woocommerce/components';
+} from '@woocommerce/product-editor';
+import { useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { useMemo } from '@wordpress/element';
 
