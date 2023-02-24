@@ -13,27 +13,47 @@ import {
 	FlexBlock,
 } from '@wordpress/components';
 import { Icon, megaphone, cancelCircleFilled } from '@wordpress/icons';
-import { Pagination, Table, Link } from '@woocommerce/components';
+import {
+	Pagination,
+	Table,
+	TablePlaceholder,
+	Link,
+} from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
-import { CardHeaderTitle, CenteredSpinner } from '~/marketing/components';
+import { CardHeaderTitle } from '~/marketing/components';
 import { useCampaigns } from './useCampaigns';
 import './Campaigns.scss';
+
+const tableCaption = __( 'Campaigns', 'woocommerce' );
+const tableHeaders = [
+	{
+		key: 'campaign',
+		label: __( 'Campaign', 'woocommerce' ),
+	},
+	{
+		key: 'cost',
+		label: __( 'Cost', 'woocommerce' ),
+		isNumeric: true,
+	},
+];
 
 const perPage = 5;
 
 export const Campaigns = () => {
 	const [ page, setPage ] = useState( 1 );
 	const { loading, data, meta } = useCampaigns( page, perPage );
+	const total = meta?.total;
 
 	const getContent = () => {
 		if ( loading ) {
 			return (
-				<CardBody>
-					<CenteredSpinner />
-				</CardBody>
+				<TablePlaceholder
+					caption={ tableCaption }
+					headers={ tableHeaders }
+				/>
 			);
 		}
 
@@ -82,71 +102,44 @@ export const Campaigns = () => {
 			);
 		}
 
-		const total = meta?.total as number;
-
 		return (
-			<>
-				<Table
-					caption={ __( 'Campaigns', 'woocommerce' ) }
-					headers={ [
+			<Table
+				caption={ tableCaption }
+				headers={ tableHeaders }
+				rows={ data.map( ( el ) => {
+					return [
 						{
-							key: 'campaign',
-							label: __( 'Campaign', 'woocommerce' ),
-						},
-						{
-							key: 'cost',
-							label: __( 'Cost', 'woocommerce' ),
-							isNumeric: true,
-						},
-					] }
-					rows={ data.map( ( el ) => {
-						return [
-							{
-								display: (
-									<Flex gap={ 4 }>
-										<FlexItem className="woocommerce-marketing-campaigns-card__campaign-logo">
-											<img
-												src={ el.icon }
-												alt={ el.channelName }
-												width="16"
-												height="16"
-											/>
-										</FlexItem>
-										<FlexBlock>
-											<Flex direction="column" gap={ 1 }>
-												<FlexItem className="woocommerce-marketing-campaigns-card__campaign-title">
-													<Link href={ el.manageUrl }>
-														{ el.title }
-													</Link>
+							display: (
+								<Flex gap={ 4 }>
+									<FlexItem className="woocommerce-marketing-campaigns-card__campaign-logo">
+										<img
+											src={ el.icon }
+											alt={ el.channelName }
+											width="16"
+											height="16"
+										/>
+									</FlexItem>
+									<FlexBlock>
+										<Flex direction="column" gap={ 1 }>
+											<FlexItem className="woocommerce-marketing-campaigns-card__campaign-title">
+												<Link href={ el.manageUrl }>
+													{ el.title }
+												</Link>
+											</FlexItem>
+											{ el.description && (
+												<FlexItem className="woocommerce-marketing-campaigns-card__campaign-description">
+													{ el.description }
 												</FlexItem>
-												{ el.description && (
-													<FlexItem className="woocommerce-marketing-campaigns-card__campaign-description">
-														{ el.description }
-													</FlexItem>
-												) }
-											</Flex>
-										</FlexBlock>
-									</Flex>
-								),
-							},
-							{ display: el.cost },
-						];
-					} ) }
-				/>
-				{ total > perPage && (
-					<CardFooter className="woocommerce-marketing-campaigns-card__footer">
-						<Pagination
-							showPerPagePicker={ false }
-							perPage={ perPage }
-							page={ page }
-							total={ total }
-							onPageChange={ ( newPage: number ) => {
-								setPage( newPage );
-							} }
-						/>
-					</CardFooter>
-				) }
-			</>
+											) }
+										</Flex>
+									</FlexBlock>
+								</Flex>
+							),
+						},
+						{ display: el.cost },
+					];
+				} ) }
+			/>
 		);
 	};
 
@@ -158,6 +151,19 @@ export const Campaigns = () => {
 				</CardHeaderTitle>
 			</CardHeader>
 			{ getContent() }
+			{ total && total > perPage && (
+				<CardFooter className="woocommerce-marketing-campaigns-card__footer">
+					<Pagination
+						showPerPagePicker={ false }
+						perPage={ perPage }
+						page={ page }
+						total={ total }
+						onPageChange={ ( newPage: number ) => {
+							setPage( newPage );
+						} }
+					/>
+				</CardFooter>
+			) }
 		</Card>
 	);
 };
