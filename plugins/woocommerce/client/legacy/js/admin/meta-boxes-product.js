@@ -499,6 +499,14 @@ jQuery( function ( $ ) {
 		}
 		$( this ).val( null );
 		$( this ).trigger( 'change' );
+		if (
+			$( 'button.save_attributes' ).hasClass( 'hidden' ) &&
+			$( 'div.add-attribute-container' ).hasClass( 'hidden' )
+		) {
+			$( 'div.add-attribute-container' ).removeClass( 'hidden' );
+			$( 'div.add-global-attribute-container' ).addClass( 'hidden' );
+			$( 'button.save_attributes' ).removeClass( 'hidden' );
+		}
 
 		return false;
 	} );
@@ -522,6 +530,14 @@ jQuery( function ( $ ) {
 	$( 'button.add_custom_attribute' ).on( 'click', function () {
 		add_attribute( this, '' );
 
+		if (
+			$( 'button.save_attributes' ).hasClass( 'hidden' ) &&
+			$( 'div.add-attribute-container' ).hasClass( 'hidden' )
+		) {
+			$( 'div.add-attribute-container' ).removeClass( 'hidden' );
+			$( 'div.add-global-attribute-container' ).addClass( 'hidden' );
+			$( 'button.save_attributes' ).removeClass( 'hidden' );
+		}
 		return false;
 	} );
 
@@ -571,7 +587,6 @@ jQuery( function ( $ ) {
 								term.term_id +
 								'"]'
 						);
-						console.log( currentItem );
 						if ( currentItem && currentItem.length > 0 ) {
 							currentItem.prop( 'selected', 'selected' );
 						} else {
