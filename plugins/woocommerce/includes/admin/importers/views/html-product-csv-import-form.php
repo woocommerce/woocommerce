@@ -84,7 +84,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<option value="" selected><?php esc_html_e( 'Autodetect', 'woocommerce' ); ?></option>
 							<?php
 							$encodings = mb_list_encodings();
-							sort( $encodings, SORT_STRING );
+							sort( $encodings, SORT_NATURAL );
 							foreach ( $encodings as $encoding ) {
 								echo '<option>' . esc_html( $encoding ) . '</option>';
 							}
