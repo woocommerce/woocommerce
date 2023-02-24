@@ -14,6 +14,7 @@ import { Product, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import interpolateComponents from '@automattic/interpolate-components';
 import { format as formatDate } from '@wordpress/date';
+import { formatCurrencyDisplayValue } from '@woocommerce/product-editor';
 import moment from 'moment';
 import {
 	BaseControl,
@@ -26,7 +27,6 @@ import {
  * Internal dependencies
  */
 import { CurrencyInputProps } from './pricing-section-fills';
-import { formatCurrencyDisplayValue } from '../../sections/utils';
 import { CurrencyContext } from '../../../lib/currency-context';
 
 type PricingListFieldProps = {
