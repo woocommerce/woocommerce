@@ -53,6 +53,7 @@ export const Campaigns = () => {
 				<TablePlaceholder
 					caption={ tableCaption }
 					headers={ tableHeaders }
+					numberOfRows={ perPage }
 				/>
 			);
 		}
