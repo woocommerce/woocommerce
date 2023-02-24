@@ -1021,6 +1021,11 @@
 		padding: 32px 0px;
 		gap: 24px;
 		height: 360px;
+		@media screen and ( max-width: 782px ) {
+			button {
+				vertical-align: top;
+			}
+		}
 		p {
 			width: 90%;
 			max-width: 544px;
