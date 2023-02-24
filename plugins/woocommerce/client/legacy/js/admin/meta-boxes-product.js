@@ -797,6 +797,9 @@ jQuery( function ( $ ) {
 						$( '#variable_product_options' ).trigger( 'reload' );
 					}
 				);
+
+				$( document.body ).trigger( 'woocommerce_attributes_saved' );
+
 			}
 		} );
 	} );
