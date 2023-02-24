@@ -2,11 +2,12 @@
  * External dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
+import { Dispatch, SetStateAction } from 'react';
 
 export const useLocalStorageState = < T >(
 	key: string,
 	initialValue: T
-): [ T, ( arg0: T ) => void ] => {
+): [ T, Dispatch< SetStateAction< T > > ] => {
 	const [ state, setState ] = useState< T >( () => {
 		const valueInLocalStorage = window.localStorage.getItem( key );
 		if ( valueInLocalStorage ) {

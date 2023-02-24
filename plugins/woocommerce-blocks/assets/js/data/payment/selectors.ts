@@ -111,13 +111,24 @@ export const getPaymentMethodData = ( state: PaymentState ) => {
 };
 
 export const getIncompatiblePaymentMethods = ( state: PaymentState ) => {
+	const {
+		availablePaymentMethods,
+		availableExpressPaymentMethods,
+		paymentMethodsInitialized,
+		expressPaymentMethodsInitialized,
+	} = state;
+
+	if ( ! paymentMethodsInitialized || ! expressPaymentMethodsInitialized ) {
+		return {};
+	}
+
 	return Object.fromEntries(
 		Object.entries( globalPaymentMethods ).filter( ( [ k ] ) => {
 			return ! (
 				k in
 				{
-					...state.availablePaymentMethods,
-					...state.availableExpressPaymentMethods,
+					...availablePaymentMethods,
+					...availableExpressPaymentMethods,
 				}
 			);
 		} )
