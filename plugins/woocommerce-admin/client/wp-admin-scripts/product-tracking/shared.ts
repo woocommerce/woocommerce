@@ -418,10 +418,31 @@ export const initProductScreenTracks = () => {
 				'.woocommerce_attribute'
 			).length;
 			if ( newAttributesCount > attributesCount ) {
+				const local_attributes = [
+					...document.querySelectorAll(
+						'.woocommerce_attribute:not(.pa_glbattr)'
+					),
+				].map( ( attr ) => {
+					const terms =
+						(
+							attr.querySelector(
+								"[name^='attribute_values']"
+							) as HTMLTextAreaElement
+						 )?.value.split( '|' ).length ?? 0;
+					return {
+						name: (
+							attr.querySelector(
+								'[name^="attribute_names"]'
+							) as HTMLInputElement
+						 )?.value,
+						terms,
+					};
+				} );
 				recordEvent( 'product_attributes_add', {
 					page: 'product',
 					enable_archive: '',
 					default_sort_order: '',
+					local_attributes,
 				} );
 			}
 		} );

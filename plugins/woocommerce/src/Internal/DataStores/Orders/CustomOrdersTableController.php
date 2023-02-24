@@ -5,9 +5,12 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -82,6 +85,20 @@ class CustomOrdersTableController {
 	private $features_controller;
 
 	/**
+	 * The orders cache object to use.
+	 *
+	 * @var OrderCache
+	 */
+	private $order_cache;
+
+	/**
+	 * The orders cache controller object to use.
+	 *
+	 * @var OrderCacheController
+	 */
+	private $order_cache_controller;
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
@@ -114,18 +131,24 @@ class CustomOrdersTableController {
 	 * @param OrdersTableRefundDataStore $refund_data_store The refund data store to use.
 	 * @param BatchProcessingController  $batch_processing_controller The batch processing controller to use.
 	 * @param FeaturesController         $features_controller The features controller instance to use.
+	 * @param OrderCache                 $order_cache The order cache engine to use.
+	 * @param OrderCacheController       $order_cache_controller The order cache controller to use.
 	 */
 	final public function init(
 		OrdersTableDataStore $data_store,
 		DataSynchronizer $data_synchronizer,
 		OrdersTableRefundDataStore $refund_data_store,
 		BatchProcessingController $batch_processing_controller,
-		FeaturesController $features_controller ) {
+		FeaturesController $features_controller,
+		OrderCache $order_cache,
+		OrderCacheController $order_cache_controller ) {
 		$this->data_store                  = $data_store;
 		$this->data_synchronizer           = $data_synchronizer;
 		$this->batch_processing_controller = $batch_processing_controller;
 		$this->refund_data_store           = $refund_data_store;
 		$this->features_controller         = $features_controller;
+		$this->order_cache                 = $order_cache;
+		$this->order_cache_controller      = $order_cache_controller;
 	}
 
 	/**
@@ -462,12 +485,19 @@ class CustomOrdersTableController {
 	 * @throws \Exception Attempt to change the authoritative orders table while orders sync is pending.
 	 */
 	private function process_pre_update_option( $value, $option, $old_value ) {
+		if ( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION === $option && $value !== $old_value ) {
+			$this->order_cache->flush();
+			return $value;
+		}
+
 		if ( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION !== $option || $value === $old_value || false === $old_value ) {
 			return $value;
 		}
 
+		$this->order_cache->flush();
+
 		/**
-		 * Commenting out for better testability.
+		 * Re-enable the following code once the COT to posts table sync is implemented (it's currently commented out to ease testing).
 		$sync_is_pending = 0 !== $this->data_synchronizer->get_current_orders_pending_sync_count();
 		if ( $sync_is_pending ) {
 			throw new \Exception( "The authoritative table for orders storage can't be changed while there are orders out of sync" );
@@ -575,4 +605,6 @@ class CustomOrdersTableController {
 			)
 		);
 	}
+
+
 }

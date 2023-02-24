@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { Link } from '@woocommerce/components';
 import {
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 	__experimentalWooProductFieldItem as WooProductFieldItem,
-	Link,
-} from '@woocommerce/components';
-import { __experimentalProductFieldSection as ProductFieldSection } from '@woocommerce/product-editor';
+	__experimentalProductFieldSection as ProductFieldSection,
+} from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**

@@ -5,6 +5,8 @@
  * @package WooCommerce\Admin\Importers
  */
 
+use Automattic\WooCommerce\Utilities\I18nUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -493,8 +495,8 @@ class WC_Product_CSV_Importer_Controller {
 	 * @return array
 	 */
 	protected function auto_map_columns( $raw_headers, $num_indexes = true ) {
-		$weight_unit    = get_option( 'woocommerce_weight_unit' );
-		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
+		$weight_unit_label    = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) );
+		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', 'cm' ) );
 
 		/*
 		 * @hooked wc_importer_generic_mappings - 10
@@ -524,13 +526,13 @@ class WC_Product_CSV_Importer_Controller {
 					__( 'Low stock amount', 'woocommerce' ) => 'low_stock_amount',
 					__( 'Sold individually?', 'woocommerce' ) => 'sold_individually',
 					/* translators: %s: Weight unit */
-					sprintf( __( 'Weight (%s)', 'woocommerce' ), $weight_unit ) => 'weight',
+					sprintf( __( 'Weight (%s)', 'woocommerce' ), $weight_unit_label ) => 'weight',
 					/* translators: %s: Length unit */
-					sprintf( __( 'Length (%s)', 'woocommerce' ), $dimension_unit ) => 'length',
+					sprintf( __( 'Length (%s)', 'woocommerce' ), $dimension_unit_label ) => 'length',
 					/* translators: %s: Width unit */
-					sprintf( __( 'Width (%s)', 'woocommerce' ), $dimension_unit ) => 'width',
+					sprintf( __( 'Width (%s)', 'woocommerce' ), $dimension_unit_label ) => 'width',
 					/* translators: %s: Height unit */
-					sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit ) => 'height',
+					sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit_label ) => 'height',
 					__( 'Allow customer reviews?', 'woocommerce' ) => 'reviews_allowed',
 					__( 'Purchase note', 'woocommerce' )  => 'purchase_note',
 					__( 'Sale price', 'woocommerce' )     => 'sale_price',
@@ -666,9 +668,9 @@ class WC_Product_CSV_Importer_Controller {
 		$meta = str_replace( 'meta:', '', $item );
 
 		// Available options.
-		$weight_unit    = get_option( 'woocommerce_weight_unit' );
-		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
-		$options        = array(
+		$weight_unit_label    = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) );
+		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', 'cm' ) );
+		$options              = array(
 			'id'                 => __( 'ID', 'woocommerce' ),
 			'type'               => __( 'Type', 'woocommerce' ),
 			'sku'                => __( 'SKU', 'woocommerce' ),
@@ -695,16 +697,16 @@ class WC_Product_CSV_Importer_Controller {
 			'low_stock_amount'   => __( 'Low stock amount', 'woocommerce' ),
 			'sold_individually'  => __( 'Sold individually?', 'woocommerce' ),
 			/* translators: %s: weight unit */
-			'weight'             => sprintf( __( 'Weight (%s)', 'woocommerce' ), $weight_unit ),
+			'weight'             => sprintf( __( 'Weight (%s)', 'woocommerce' ), $weight_unit_label ),
 			'dimensions'         => array(
 				'name'    => __( 'Dimensions', 'woocommerce' ),
 				'options' => array(
 					/* translators: %s: dimension unit */
-					'length' => sprintf( __( 'Length (%s)', 'woocommerce' ), $dimension_unit ),
+					'length' => sprintf( __( 'Length (%s)', 'woocommerce' ), $dimension_unit_label ),
 					/* translators: %s: dimension unit */
-					'width'  => sprintf( __( 'Width (%s)', 'woocommerce' ), $dimension_unit ),
+					'width'  => sprintf( __( 'Width (%s)', 'woocommerce' ), $dimension_unit_label ),
 					/* translators: %s: dimension unit */
-					'height' => sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit ),
+					'height' => sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit_label ),
 				),
 			),
 			'category_ids'       => __( 'Categories', 'woocommerce' ),

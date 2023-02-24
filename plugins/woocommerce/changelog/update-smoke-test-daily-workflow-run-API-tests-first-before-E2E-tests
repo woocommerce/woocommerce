@@ -1,5 +1,0 @@
-Significance: patch
-Type: update
-Comment: Update smoke test daily workflow to run api tests before e2e tests
-
-

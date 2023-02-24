@@ -94,6 +94,7 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 					'customer_type'    => 'new',
 					'date_created'     => $data->data[0]['date_created'], // Not under test.
 					'date_created_gmt' => $data->data[0]['date_created_gmt'], // Not under test.
+					'date'             => $data->data[0]['date'], // Not under test.
 					'extended_info'    => array(
 						'products' => array(
 							array(

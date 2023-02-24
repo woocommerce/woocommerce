@@ -57,6 +57,12 @@ jQuery( function ( $ ) {
 		} );
 	} );
 
+	$( function () {
+		if ( ! woocommerce_admin_meta_boxes.has_attributes ) {
+			$( 'button.add_attribute' ).trigger( 'click' );
+		}
+	} );
+
 	// Catalog Visibility.
 	$( '#catalog-visibility' )
 		.find( '.edit-catalog-visibility' )
@@ -791,6 +797,9 @@ jQuery( function ( $ ) {
 						$( '#variable_product_options' ).trigger( 'reload' );
 					}
 				);
+
+				$( document.body ).trigger( 'woocommerce_attributes_saved' );
+
 			}
 		} );
 	} );
