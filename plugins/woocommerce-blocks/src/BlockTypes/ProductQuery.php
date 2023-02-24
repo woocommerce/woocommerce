@@ -81,7 +81,7 @@ class ProductQuery extends AbstractBlock {
 	 * @param array $parsed_block The block being rendered.
 	 * @return boolean
 	 */
-	private function is_woocommerce_variation( $parsed_block ) {
+	public static function is_woocommerce_variation( $parsed_block ) {
 		return isset( $parsed_block['attrs']['namespace'] )
 		&& substr( $parsed_block['attrs']['namespace'], 0, 11 ) === 'woocommerce';
 	}
@@ -99,7 +99,7 @@ class ProductQuery extends AbstractBlock {
 
 		$this->parsed_block = $parsed_block;
 
-		if ( $this->is_woocommerce_variation( $parsed_block ) ) {
+		if ( self::is_woocommerce_variation( $parsed_block ) ) {
 			// Set this so that our product filters can detect if it's a PHP template.
 			$this->asset_data_registry->add( 'has_filterable_products', true, true );
 			$this->asset_data_registry->add( 'is_rendering_php_template', true, true );

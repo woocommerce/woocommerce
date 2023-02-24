@@ -14,6 +14,7 @@ import { CORE_NAME as PRODUCT_TEMPLATE_ID } from './variations/elements/product-
 import './inspector-controls';
 import './style.scss';
 import './variations/product-query';
+import './variations/related-products';
 
 const EXTENDED_CORE_ELEMENTS = [
 	PRODUCT_SUMMARY_ID,
