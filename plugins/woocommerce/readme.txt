@@ -217,6 +217,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Remove attribute type logic from attribute component [#36563](https://github.com/woocommerce/woocommerce/pull/36563)
 * Dev - Update eslint to 8.32.0 across the monorepo. [#36700](https://github.com/woocommerce/woocommerce/pull/36700)
 * Dev - Update pnpm command to run e2e tests for consistency. Also update docs with new command. [#35287](https://github.com/woocommerce/woocommerce/pull/35287)
+* Tweak - Add tracking for local pickup method in Checkout [#36847](https://github.com/woocommerce/woocommerce/pull/36847)
 * Tweak - Add IR and fields priorities to list of get_country_locale() method to follow conventional way of addressing in Iran. [#36491](https://github.com/woocommerce/woocommerce/pull/36491)
 * Tweak - Add missing deprecation notice for filter hook woocommerce_my_account_my_orders_columns. [#36356](https://github.com/woocommerce/woocommerce/pull/36356)
 * Tweak - Adjust default sizes for the quantity and coupon input fields within the cart page. [#29122](https://github.com/woocommerce/woocommerce/pull/29122)
