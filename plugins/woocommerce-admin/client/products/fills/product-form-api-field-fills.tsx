@@ -1,11 +1,8 @@
 /**
  * External dependencies
  */
-import {
-	__experimentalWooProductFieldItem as WooProductFieldItem,
-	renderField,
-	useFormContext,
-} from '@woocommerce/components';
+import { renderField, useFormContext } from '@woocommerce/components';
+import { __experimentalWooProductFieldItem as WooProductFieldItem } from '@woocommerce/product-editor';
 import { Product, ProductFormField } from '@woocommerce/data';
 
 export const Fields: React.FC< { fields: ProductFormField[] } > = ( {

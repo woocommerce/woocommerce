@@ -20,7 +20,7 @@ This is the fill component. You must provide the `id` prop to identify your sect
 
 | Prop        | Type   | Description                                                                                                    |
 | ----------- | ------ | -------------------------------------------------------------------------------------------------------------- |
-| `id`        | String | A unique string to identify your fill. Used for configuiration management.                                     |
+| `id`        | String | A unique string to identify your fill. Used for configuration management.                                      |
 | `templates` | Array  | Array of name and order of which template slots it should be rendered in                                       |
 | `pluginId`  | String | A unique plugin ID to identify the plugin/extension that this fill is associated with.                         |
 | `tabProps`  | Object | An object containing tab props: name, title, className, disabled (see TabPanel.Tab from @wordpress/components) |
