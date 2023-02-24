@@ -56,6 +56,12 @@ export function* getRecommendedChannels() {
 	}
 }
 
+const getTotalFromResponse = ( response: Response ) => {
+	return (
+		parseInt( response.headers.get( 'x-wp-total' ) || '0', 10 ) || undefined
+	);
+};
+
 export function* getCampaigns( page: number, perPage: number ) {
 	try {
 		const response: Response = yield apiFetch( {
@@ -63,10 +69,7 @@ export function* getCampaigns( page: number, perPage: number ) {
 			parse: false,
 		} );
 
-		const total = parseInt(
-			response.headers.get( 'x-wp-total' ) || '0',
-			10
-		);
+		const total = getTotalFromResponse( response );
 		const payload: Campaign[] = yield awaitResponseJson( response );
 
 		yield receiveCampaignsSuccess( {
@@ -80,10 +83,7 @@ export function* getCampaigns( page: number, perPage: number ) {
 		} );
 	} catch ( error ) {
 		if ( error instanceof Response ) {
-			const total =
-				parseInt( error.headers.get( 'x-wp-total' ) || '0', 10 ) ||
-				undefined;
-
+			const total = getTotalFromResponse( error );
 			const payload: ApiFetchError = yield awaitResponseJson( error );
 
 			yield receiveCampaignsError( {
