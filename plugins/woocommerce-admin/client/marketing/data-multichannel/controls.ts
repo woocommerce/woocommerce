@@ -14,6 +14,15 @@ export const fetchWithHeaders = (
 	};
 };
 
+export const awaitResponseJson = (
+	response: Response
+): AnyAction & { response: Response } => {
+	return {
+		type: 'AWAIT_RESPONSE_JSON',
+		response,
+	};
+};
+
 const controls = {
 	...dataControls,
 	FETCH_WITH_HEADERS( action: AnyAction ) {
@@ -35,6 +44,9 @@ const controls = {
 					throw data;
 				} );
 			} );
+	},
+	AWAIT_RESPONSE_JSON( action: AnyAction ) {
+		return action.response.json();
 	},
 };
 

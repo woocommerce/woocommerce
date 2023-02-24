@@ -14,26 +14,15 @@ import {
 	receiveCampaignsSuccess,
 	receiveCampaignsError,
 } from './actions';
-import { fetchWithHeaders } from './controls';
-import { RegisteredChannel, RecommendedChannel, Campaign } from './types';
+import { awaitResponseJson } from './controls';
+import {
+	RegisteredChannel,
+	RecommendedChannel,
+	Campaign,
+	ApiFetchError,
+} from './types';
 import { API_NAMESPACE } from './constants';
 import { isApiFetchError } from './guards';
-
-const getIntHeaderValues = (
-	response: {
-		headers: Map< string, string >;
-		data: unknown;
-	},
-	keys: string[]
-) => {
-	return keys.map( ( key ) => {
-		const value = response.headers.get( key );
-		if ( value === undefined ) {
-			throw new Error( `'${ key }' header is missing.` );
-		}
-		return parseInt( value, 10 );
-	} );
-};
 
 export function* getRegisteredChannels() {
 	try {
@@ -69,18 +58,19 @@ export function* getRecommendedChannels() {
 
 export function* getCampaigns( page: number, perPage: number ) {
 	try {
-		const resp: {
-			headers: Map< string, string >;
-			data: Array< Campaign >;
-		} = yield fetchWithHeaders( {
+		const response: Response = yield apiFetch( {
 			path: `${ API_NAMESPACE }/campaigns?page=${ page }&per_page=${ perPage }`,
 			parse: false,
 		} );
 
-		const [ total ] = getIntHeaderValues( resp, [ 'x-wp-total' ] );
+		const total = parseInt(
+			response.headers.get( 'x-wp-total' ) || '0',
+			10
+		);
+		const payload: Campaign[] = yield awaitResponseJson( response );
 
 		yield receiveCampaignsSuccess( {
-			payload: resp.data,
+			payload,
 			error: false,
 			meta: {
 				page,
@@ -89,9 +79,22 @@ export function* getCampaigns( page: number, perPage: number ) {
 			},
 		} );
 	} catch ( error ) {
-		// TODO: error is an HTTPResponse that hasn't been parsed.
-		if ( isApiFetchError( error ) ) {
-			yield receiveCampaignsError( error );
+		if ( error instanceof Response ) {
+			const total =
+				parseInt( error.headers.get( 'x-wp-total' ) || '0', 10 ) ||
+				undefined;
+
+			const payload: ApiFetchError = yield awaitResponseJson( error );
+
+			yield receiveCampaignsError( {
+				payload,
+				error: true,
+				meta: {
+					page,
+					perPage,
+					total,
+				},
+			} );
 		}
 
 		throw error;

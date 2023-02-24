@@ -80,7 +80,14 @@ export const reducer: Reducer< State, Action > = (
 			return {
 				...state,
 				campaigns: {
-					error: action.payload,
+					perPage: action.meta.perPage,
+					pages: {
+						...state.campaigns.pages,
+						[ action.meta.page ]: {
+							error: action.payload,
+						},
+					},
+					total: action.meta.total,
 				},
 			};
 
