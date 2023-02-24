@@ -525,29 +525,9 @@ class StyleAttributesUtils {
 	 */
 	public static function get_text_align_class_and_style( $attributes ) {
 
-		$text_align_attribute = $attributes['textAlign'] ?? null;
-
-		if ( ! $text_align_attribute ) {
-			return null;
-		}
-
-		if ( 'left' === $text_align_attribute ) {
+		if ( isset( $attributes['textAlign'] ) ) {
 			return array(
-				'class' => 'has-text-align-left',
-				'style' => null,
-			);
-		}
-
-		if ( 'center' === $text_align_attribute ) {
-			return array(
-				'class' => 'has-text-align-center',
-				'style' => null,
-			);
-		}
-
-		if ( 'right' === $text_align_attribute ) {
-			return array(
-				'class' => 'has-text-align-right',
+				'class' => 'has-text-align-' . $attributes['textAlign'],
 				'style' => null,
 			);
 		}
