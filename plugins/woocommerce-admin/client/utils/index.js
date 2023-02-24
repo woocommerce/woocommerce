@@ -74,6 +74,7 @@ const timeFrames = [
 	{ name: '>60s' },
 ];
 
+/* eslint-disable jsdoc/require-returns-check */
 /**
  * Returns time frame for a given time in milliseconds.
  *

@@ -245,6 +245,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 		>
 			{ /* Downshift's getLabelProps handles the necessary label attributes. */ }
 			{ /* eslint-disable jsx-a11y/label-has-for */ }
+			{ /* eslint-disable jsx-a11y/label-has-associated-control */ }
 			{ label && (
 				<label
 					{ ...getLabelProps() }
@@ -254,6 +255,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 				</label>
 			) }
 			{ /* eslint-enable jsx-a11y/label-has-for */ }
+			{ /* eslint-enable jsx-a11y/label-has-associated-control */ }
 			<ComboBox
 				comboBoxProps={ getComboboxProps() }
 				inputProps={ getInputProps( {
