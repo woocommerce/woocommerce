@@ -271,7 +271,7 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
 
 		// Validate required POST fields.
-		if ( $creating && StringUtil::is_null_or_whitespace( $request['code'] ?? null ) ) {
+		if ( $creating && StringUtil::is_blank( $request['code'] ?? null ) ) {
 			return new WP_Error( 'woocommerce_rest_empty_coupon_code', sprintf( __( 'The coupon code cannot be empty.', 'woocommerce' ), 'code' ), array( 'status' => 400 ) );
 		}
 

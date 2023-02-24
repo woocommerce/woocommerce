@@ -947,7 +947,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		if ( 'create' === $action ) {
 			$coupon_code = ArrayUtil::get_value_or_default( $posted, 'code' );
-			if ( StringUtil::is_null_or_whitespace( $coupon_code ) ) {
+			if ( StringUtil::is_blank( $coupon_code ) ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
 			}
 		}

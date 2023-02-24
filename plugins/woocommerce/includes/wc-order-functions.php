@@ -927,7 +927,7 @@ function wc_update_coupon_usage_counts( $order_id ) {
 
 	if ( count( $order->get_coupon_codes() ) > 0 ) {
 		foreach ( $order->get_coupon_codes() as $code ) {
-			if ( StringUtil::is_null_or_whitespace( $code ) ) {
+			if ( StringUtil::is_blank( $code ) ) {
 				continue;
 			}
 
@@ -947,6 +947,7 @@ function wc_update_coupon_usage_counts( $order_id ) {
 					break;
 			}
 		}
+		
 		$order->get_data_store()->release_held_coupons( $order, true );
 	}
 }

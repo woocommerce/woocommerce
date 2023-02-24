@@ -737,15 +737,14 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_coupon_lines( $posted, $action ) {
-		$item = new WC_Order_Item_Coupon( ! empty( $posted['id'] ) ? $posted['id'] : '' );
-
 		if ( 'create' === $action ) {
 			$coupon_code = ArrayUtil::get_value_or_default( $posted, 'code' );
-			if ( StringUtil::is_null_or_whitespace( $coupon_code ) ) {
+			if ( StringUtil::is_blank( $coupon_code ) ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
 			}
 		}
 
+		$item = new WC_Order_Item_Coupon( ! empty( $posted['id'] ) ? $posted['id'] : '' );
 		$this->maybe_set_item_props( $item, array( 'code', 'discount' ), $posted );
 
 		return $item;
