@@ -14,12 +14,12 @@ import {
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
 import { CurrencyInputProps } from './pricing-section-fills';
-import { CurrencyContext } from '../../../lib/currency-context';
 import { ADMIN_URL } from '~/utils/admin-settings';
 
 type PricingListFieldProps = {
