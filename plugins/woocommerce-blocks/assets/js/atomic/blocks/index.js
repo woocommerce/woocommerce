@@ -13,6 +13,7 @@ import './product-elements/category-list';
 import './product-elements/tag-list';
 import './product-elements/stock-indicator';
 import './product-elements/add-to-cart';
+import './product-elements/add-to-cart-form';
 import './product-elements/product-image-gallery';
 import './product-elements/product-details';
 import './product-elements/related-products';
