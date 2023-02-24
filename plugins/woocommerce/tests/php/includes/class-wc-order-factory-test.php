@@ -6,6 +6,35 @@
 class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * Store COT state at the start of the test so we can restore it later.
+	 *
+	 * @var bool
+	 */
+	private $cot_state;
+
+	/**
+	 * Disable COT before the test.
+	 *
+	 * @return void
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->cot_state = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot( false );
+	}
+
+	/**
+	 * Restore COT state after the test.
+	 *=
+	 * @return void
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		wp_cache_flush();
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot( $this->cot_state );
+	}
+
+	/**
 	 * @testDox get_orders should be able to return multiple orders of different types.
 	 */
 	public function test_get_orders_with_multiple_order_type() {
