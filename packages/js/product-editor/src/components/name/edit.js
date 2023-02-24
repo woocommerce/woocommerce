@@ -6,23 +6,11 @@ import { createElement } from '@wordpress/element';
 import interpolateComponents from '@automattic/interpolate-components';
 import { TextControl } from '@woocommerce/components';
 import { useBlockProps } from '@wordpress/block-editor';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useEntityProp } from '@wordpress/core-data';
 
-export function Edit( { context: { productId } } ) {
+export function Edit() {
 	const blockProps = useBlockProps();
-	const product = useSelect(
-		( select ) =>
-			select( 'core' ).getEditedEntityRecord(
-				'postType',
-				'product',
-				productId
-			),
-		[ productId ]
-	);
-
-	const { editEntityRecord } = useDispatch( 'core' );
-	const handleChange = ( title ) =>
-		editEntityRecord( 'postType', 'product', productId, { title } );
+	const [ title, setTitle ] = useEntityProp( 'postType', 'product', 'title' );
 
 	return (
 		<div { ...blockProps }>
@@ -39,8 +27,8 @@ export function Edit( { context: { productId } } ) {
 				} ) }
 				name={ 'woocommerce-product-name' }
 				placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
-				onChange={ handleChange }
-				value={ product.title.raw }
+				onChange={ setTitle }
+				value={ title }
 				// { ...getInputProps( 'name', {
 				// 	onBlur: setSkuIfEmpty,
 				// } ) }

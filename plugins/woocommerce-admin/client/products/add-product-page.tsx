@@ -3,6 +3,7 @@
  */
 import { Editor } from '@woocommerce/product-editor';
 import { Product } from '@woocommerce/data';
+import { Spinner } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 
@@ -27,6 +28,10 @@ const AddProductPage: React.FC = () => {
 				setProduct( autoDraftProduct );
 			} );
 	}, [] );
+
+	if ( ! product ) {
+		return <Spinner />;
+	}
 
 	return <Editor product={ product } settings={ {} } />;
 };

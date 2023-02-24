@@ -7,6 +7,7 @@ import {
 	EditorSettings,
 	EditorBlockListSettings,
 } from '@wordpress/block-editor';
+import { EntityProvider } from '@wordpress/core-data';
 import { Popover, SlotFillProvider } from '@wordpress/components';
 import { Product } from '@woocommerce/data';
 // @ts-ignore
@@ -25,7 +26,7 @@ import { initBlocks } from './init-blocks';
 initBlocks();
 
 type EditorProps = {
-	product?: Product;
+	product: Product;
 	settings: Partial< EditorSettings & EditorBlockListSettings > | undefined;
 };
 
@@ -34,32 +35,41 @@ export function Editor( { product, settings }: EditorProps ) {
 		<>
 			<StrictMode>
 				<ShortcutProvider>
-					<FullscreenMode isActive={ false } />
-					{ /* @ts-ignore */ }
-					<SlotFillProvider>
-						<InterfaceSkeleton
-							header={
-								<Header
-									title={
-										product?.name ||
-										__( 'Add new product', 'woocommerce' )
-									}
-									product={ product }
-								/>
-							}
-							sidebar={ <Sidebar /> }
-							content={
-								<>
-									<BlockEditor
-										settings={ settings }
+					<EntityProvider
+						kind="postType"
+						type="product"
+						id={ product.id }
+					>
+						<FullscreenMode isActive={ false } />
+						{ /* @ts-ignore */ }
+						<SlotFillProvider>
+							<InterfaceSkeleton
+								header={
+									<Header
+										title={
+											product.name ||
+											__(
+												'Add new product',
+												'woocommerce'
+											)
+										}
 										product={ product }
 									/>
-								</>
-							}
-						/>
+								}
+								sidebar={ <Sidebar /> }
+								content={
+									<>
+										<BlockEditor
+											settings={ settings }
+											product={ product }
+										/>
+									</>
+								}
+							/>
 
-						<Popover.Slot />
-					</SlotFillProvider>
+							<Popover.Slot />
+						</SlotFillProvider>
+					</EntityProvider>
 				</ShortcutProvider>
 			</StrictMode>
 		</>
