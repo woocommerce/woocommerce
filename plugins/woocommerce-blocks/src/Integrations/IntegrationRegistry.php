@@ -43,6 +43,8 @@ class IntegrationRegistry {
 		 * used as the primary hook for integrations to include their scripts, styles, and other code extending the
 		 * blocks.
 		 *
+		 * @since 4.6.0
+		 *
 		 * @param IntegrationRegistry $this Instance of the IntegrationRegistry class which exposes the IntegrationRegistry::register() method.
 		 */
 		do_action( 'woocommerce_blocks_' . $this->registry_identifier . '_registration', $this );

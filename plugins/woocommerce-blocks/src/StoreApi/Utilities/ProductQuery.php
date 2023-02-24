@@ -466,6 +466,8 @@ class ProductQuery {
 			 * with out of base locations. e.g. If a product costs 10 including tax, all users will pay 10
 			 * regardless of location and taxes.
 			 *
+			 * @since 2.6.0
+			 *
 			 * @internal Matches filter name in WooCommerce core.
 			 *
 			 * @param boolean $adjust_non_base_location_prices True by default.

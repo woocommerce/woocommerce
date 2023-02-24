@@ -200,6 +200,13 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @return int
 	 */
 	protected function get_cart_token_expiration() {
+		/**
+		 * Filters the session expiration.
+		 *
+		 * @since 8.7.0
+		 *
+		 * @param int $expiration Expiration in seconds.
+		 */
 		return time() + intval( apply_filters( 'wc_session_expiration', DAY_IN_SECONDS * 2 ) );
 	}
 
@@ -240,6 +247,8 @@ abstract class AbstractCartRoute extends AbstractRoute {
 			/**
 			 * Fires when the order is synced with cart data from a cart route.
 			 *
+			 * @since 7.2.0
+			 *
 			 * @param \WC_Order $draft_order Order object.
 			 * @param \WC_Customer $customer Customer object.
 			 * @param \WP_REST_Request $request Full details about the request.
@@ -275,6 +284,8 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		 * Filters the Store API nonce check.
 		 *
 		 * This can be used to disable the nonce check when testing API endpoints via a REST API client.
+		 *
+		 * @since 4.5.0
 		 *
 		 * @param boolean $disable_nonce_check If true, nonce checks will be disabled.
 		 *

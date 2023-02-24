@@ -136,3 +136,13 @@ The `checkPaymentMethodsCanPay()` [function](https://github.com/woocommerce/wooc
 -   [Here](https://github.com/woocommerce/woocommerce-blocks/blob/4af2c0916a936369be8a4f0044683b90b3af4f0d/assets/js/data/cart/index.ts#L46-L57), once the cart loads, we want to be able to display express payment methods, so we need to validate them first.
 -   [Here](https://github.com/woocommerce/woocommerce-blocks/blob/4af2c0916a936369be8a4f0044683b90b3af4f0d/assets/js/data/cart/index.ts#L42-L43), once the cart changes, we may want to enable/disable certain payment methods
 -   [Here](https://github.com/woocommerce/woocommerce-blocks/blob/4af2c0916a936369be8a4f0044683b90b3af4f0d/assets/js/data/checkout/index.ts#L44-L49), once the checkout loads, we want to verify all registered payment methods
+<!-- FEEDBACK -->
+
+---
+
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
+
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/how-checkout-processes-an-order.md)
+
+<!-- /FEEDBACK -->
+

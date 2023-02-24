@@ -229,6 +229,8 @@ class AssetDataRegistry {
 		 * Automattic\WooCommerce\Blocks\Package::container()->get( Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class )->add( $key, $value )
 		 * ```
 		 *
+		 * @since 5.0.0
+		 *
 		 * @deprecated
 		 * @param array $data Settings data.
 		 * @return array

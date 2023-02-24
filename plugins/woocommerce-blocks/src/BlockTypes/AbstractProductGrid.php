@@ -348,6 +348,8 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		 * @param boolean $is_cacheable The list of script dependencies.
 		 * @param array $query_args Query args for the products query passed to BlocksWpQuery.
 		 * @return array True to enable cache, false to disable cache.
+		 *
+		 * @since 2.5.0
 		 */
 		$is_cacheable      = (bool) apply_filters( 'woocommerce_blocks_product_grid_is_cacheable', true, $this->query_args );
 		$transient_version = \WC_Cache_Helper::get_transient_version( 'product_query' );
@@ -504,6 +506,8 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		 * @param array $data Product data passed to the template.
 		 * @param \WC_Product $product Product object.
 		 * @return string Updated product grid item HTML.
+		 *
+		 * @since 2.2.0
 		 */
 		return apply_filters(
 			'woocommerce_blocks_product_grid_item_html',

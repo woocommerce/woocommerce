@@ -197,3 +197,4 @@ This file is inspired by the great work of @JustinyAhin and @gziolo in <https://
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/contributing/folder-structure.md)
 
 <!-- /FEEDBACK -->
+

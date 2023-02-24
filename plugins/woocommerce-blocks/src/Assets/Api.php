@@ -150,6 +150,8 @@ class Api {
 		/**
 		 * Filters the list of script dependencies.
 		 *
+		 * @since 3.0.0
+		 *
 		 * @param array $dependencies The list of script dependencies.
 		 * @param string $handle The script's handle.
 		 * @return array

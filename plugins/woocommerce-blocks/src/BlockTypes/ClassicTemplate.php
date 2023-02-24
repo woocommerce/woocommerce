@@ -106,6 +106,8 @@ class ClassicTemplate extends AbstractDynamicBlock {
 		 * @see woocommerce_output_content_wrapper() Outputs opening DIV for the content (priority 10)
 		 * @see woocommerce_breadcrumb() Outputs breadcrumb trail to the current product (priority 20)
 		 * @see WC_Structured_Data::generate_website_data() Outputs schema markup (priority 30)
+		 *
+		 * @since 6.3.0
 		 */
 		do_action( 'woocommerce_before_main_content' );
 
@@ -122,6 +124,8 @@ class ClassicTemplate extends AbstractDynamicBlock {
 		 * Called after rendering the main content for a product.
 		 *
 		 * @see woocommerce_output_content_wrapper_end() Outputs closing DIV for the content (priority 10)
+		 *
+		 * @since 6.3.0
 		 */
 		do_action( 'woocommerce_after_main_content' );
 
@@ -146,21 +150,37 @@ class ClassicTemplate extends AbstractDynamicBlock {
 		 * @see woocommerce_output_content_wrapper() Outputs opening DIV for the content (priority 10)
 		 * @see woocommerce_breadcrumb() Outputs breadcrumb trail to the current product (priority 20)
 		 * @see WC_Structured_Data::generate_website_data() Outputs schema markup (priority 30)
+		 *
+		 * @since 6.3.0
 		 */
 		do_action( 'woocommerce_before_main_content' );
 
 		?>
 		<header class="woocommerce-products-header">
-			<?php if ( apply_filters( 'woocommerce_show_page_title', true ) ) : ?>
-				<h1 class="woocommerce-products-header__title page-title"><?php woocommerce_page_title(); ?></h1>
-			<?php endif; ?>
-
 			<?php
+			/**
+			 * Hook: woocommerce_show_page_title
+			 *
+			 * Allows controlling the display of the page title.
+			 *
+			 * @since 6.3.0
+			 */
+			if ( apply_filters( 'woocommerce_show_page_title', true ) ) {
+				?>
+				<h1 class="woocommerce-products-header__title page-title">
+					<?php
+						woocommerce_page_title();
+					?>
+				</h1>
+				<?php
+			}
 			/**
 			 * Hook: woocommerce_archive_description.
 			 *
 			 * @see woocommerce_taxonomy_archive_description() Renders the taxonomy archive description (priority 10)
 			 * @see woocommerce_product_archive_description() Renders the product archive description (priority 10)
+			 *
+			 * @since 6.3.0
 			 */
 			do_action( 'woocommerce_archive_description' );
 			?>
@@ -174,6 +194,8 @@ class ClassicTemplate extends AbstractDynamicBlock {
 			 * @see woocommerce_output_all_notices() Render error notices (priority 10)
 			 * @see woocommerce_result_count() Show number of results found (priority 20)
 			 * @see woocommerce_catalog_ordering() Show form to control sort order (priority 30)
+			 *
+			 * @since 6.3.0
 			 */
 			do_action( 'woocommerce_before_shop_loop' );
 
@@ -185,6 +207,8 @@ class ClassicTemplate extends AbstractDynamicBlock {
 
 					/**
 					 * Hook: woocommerce_shop_loop.
+					 *
+					 * @since 6.3.0
 					 */
 					do_action( 'woocommerce_shop_loop' );
 
@@ -198,6 +222,8 @@ class ClassicTemplate extends AbstractDynamicBlock {
 			 * Hook: woocommerce_after_shop_loop.
 			 *
 			 * @see woocommerce_pagination() Renders pagination (priority 10)
+			 *
+			 * @since 6.3.0
 			 */
 			do_action( 'woocommerce_after_shop_loop' );
 		} else {
@@ -205,6 +231,8 @@ class ClassicTemplate extends AbstractDynamicBlock {
 			 * Hook: woocommerce_no_products_found.
 			 *
 			 * @see wc_no_products_found() Default no products found content (priority 10)
+			 *
+			 * @since 6.3.0
 			 */
 			do_action( 'woocommerce_no_products_found' );
 		}
@@ -215,6 +243,8 @@ class ClassicTemplate extends AbstractDynamicBlock {
 		 * Called after rendering the main content for a product.
 		 *
 		 * @see woocommerce_output_content_wrapper_end() Outputs closing DIV for the content (priority 10)
+		 *
+		 * @since 6.3.0
 		 */
 		do_action( 'woocommerce_after_main_content' );
 

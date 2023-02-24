@@ -32,6 +32,8 @@ class AddToCartForm extends AbstractBlock {
 			global $product;
 			/**
 			 * Trigger the single product add to cart action for each product type.
+			 *
+			 * @since 9.7.0
 			 */
 			do_action( 'woocommerce_' . $product->get_type() . '_add_to_cart' );
 		}

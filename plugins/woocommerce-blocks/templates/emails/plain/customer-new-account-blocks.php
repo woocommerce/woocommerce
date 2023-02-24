@@ -35,4 +35,11 @@ if ( $additional_content ) {
 	echo "\n\n----------------------------------------\n\n";
 }
 
+/**
+ * Filters the email footer text.
+ *
+ * @since 3.7.0
+ *
+ * @param string $footer_text Footer text. Default empty.
+ */
 echo wp_kses_post( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ) );

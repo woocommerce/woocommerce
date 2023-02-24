@@ -101,6 +101,8 @@ class CartAddItem extends AbstractCartRoute {
 		 * may be ignored. CartController::add_to_cart (and core) do already have a filter hook called
 		 * woocommerce_add_cart_item, but this does not have access to the original Store API request like this hook does.
 		 *
+		 * @since 8.8.0
+		 *
 		 * @param array $customer_data An array of customer (user) data.
 		 * @return array
 		 */

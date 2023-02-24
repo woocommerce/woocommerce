@@ -218,6 +218,8 @@ class Checkout extends AbstractCartRoute {
 		 * - To keep the interface focused (only pass $order, not passing request data).
 		 * - This also explicitly indicates these orders are from checkout block/StoreAPI.
 		 *
+		 * @since 7.2.0
+		 *
 		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
 		 * @example See docs/examples/checkout-order-processed.md
 
@@ -346,6 +348,8 @@ class Checkout extends AbstractCartRoute {
 		 * - To keep the interface focused (only pass $order, not passing request data).
 		 * - This also explicitly indicates these orders are from checkout block/StoreAPI.
 		 *
+		 * @since 7.2.0
+		 *
 		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3686
 		 *
 		 * @param \WC_Order $order Order object.
@@ -414,6 +418,8 @@ class Checkout extends AbstractCartRoute {
 		/**
 		 * Fires when the Checkout Block/Store API updates a customer from the API request data.
 		 *
+		 * @since 8.2.0
+		 *
 		 * @param \WC_Customer $customer Customer object.
 		 * @param \WP_REST_Request $request Full details about the request.
 		 */
@@ -458,6 +464,8 @@ class Checkout extends AbstractCartRoute {
 		 *
 		 * This hook gives extensions the chance to update orders based on the data in the request. This can be used in
 		 * conjunction with the ExtendSchema class to post custom data and then process it.
+		 *
+		 * @since 7.2.0
 		 *
 		 * @param \WC_Order $order Order object.
 		 * @param \WP_REST_Request $request Full details about the request.
@@ -711,6 +719,8 @@ class Checkout extends AbstractCartRoute {
 		 *
 		 * This could be used to add extra validation logic and append errors to the array.
 		 *
+		 * @since 7.2.0
+		 *
 		 * @internal Matches filter name in WooCommerce core.
 		 *
 		 * @param string $username Customer username.
@@ -724,6 +734,8 @@ class Checkout extends AbstractCartRoute {
 		 *
 		 * This hook filters registration errors. This can be used to manipulate the array of errors before
 		 * they are displayed.
+		 *
+		 * @since 7.2.0
 		 *
 		 * @internal Matches filter name in WooCommerce core.
 		 *
@@ -743,6 +755,8 @@ class Checkout extends AbstractCartRoute {
 		 *
 		 * This hook filters customer data. It allows user data to be changed, for example, username, password, email,
 		 * first name, last name, and role.
+		 *
+		 * @since 7.2.0
 		 *
 		 * @param array $customer_data An array of customer (user) data.
 		 * @return array
@@ -773,6 +787,8 @@ class Checkout extends AbstractCartRoute {
 		 * Fires after a customer account has been registered.
 		 *
 		 * This hook fires after customer accounts are created and passes the customer data.
+		 *
+		 * @since 7.2.0
 		 *
 		 * @internal Matches filter name in WooCommerce core.
 		 *

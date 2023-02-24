@@ -101,7 +101,11 @@ class ProductButton extends AbstractBlock {
 					)
 				)
 			);
-
+			/**
+			 * Allow filtering of the add to cart button arguments.
+			 *
+			 * @since 9.7.0
+			 */
 			$args = apply_filters(
 				'woocommerce_loop_add_to_cart_args',
 				array(
@@ -120,6 +124,13 @@ class ProductButton extends AbstractBlock {
 				$args['attributes']['aria-label'] = wp_strip_all_tags( $args['attributes']['aria-label'] );
 			}
 
+			/**
+			 * Filters the add to cart button class.
+			 *
+			 * @since 8.7.0
+			 *
+			 * @param string $class The class.
+			 */
 			return apply_filters(
 				'woocommerce_loop_add_to_cart_link',
 				sprintf(

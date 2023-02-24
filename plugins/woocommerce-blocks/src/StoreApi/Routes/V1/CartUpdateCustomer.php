@@ -197,6 +197,8 @@ class CartUpdateCustomer extends AbstractCartRoute {
 		/**
 		 * Fires when the Checkout Block/Store API updates a customer from the API request data.
 		 *
+		 * @since 7.2.0
+		 *
 		 * @param \WC_Customer $customer Customer object.
 		 * @param \WP_REST_Request $request Full details about the request.
 		 */
