@@ -223,10 +223,11 @@ export function* installPlugins( plugins: Partial< PluginNames >[] ) {
 			throw results.errors.errors;
 		}
 
-		yield setIsRequesting( 'installPlugins', false );
 		return results;
 	} catch ( error ) {
 		yield handlePluginAPIError( 'install', plugins, error );
+	} finally {
+		yield setIsRequesting( 'installPlugins', false );
 	}
 }
 
@@ -248,11 +249,11 @@ export function* activatePlugins( plugins: Partial< PluginNames >[] ) {
 			throw results.errors.errors;
 		}
 
-		yield setIsRequesting( 'activatePlugins', false );
-
 		return results;
 	} catch ( error ) {
 		yield handlePluginAPIError( 'activate', plugins, error );
+	} finally {
+		yield setIsRequesting( 'activatePlugins', false );
 	}
 }
 

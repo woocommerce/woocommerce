@@ -6,6 +6,7 @@ import {
 	useFormContext,
 	__experimentalConditionalWrapper as ConditionalWrapper,
 } from '@woocommerce/components';
+import { getCheckboxTracks } from '@woocommerce/product-editor';
 import { Tooltip, ToggleControl } from '@wordpress/components';
 import { Product } from '@woocommerce/data';
 
@@ -13,7 +14,6 @@ import { Product } from '@woocommerce/data';
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
-import { getCheckboxTracks } from '../../sections/utils';
 
 export const InventoryTrackQuantityField = () => {
 	const { getCheckboxControlProps } = useFormContext< Product >();

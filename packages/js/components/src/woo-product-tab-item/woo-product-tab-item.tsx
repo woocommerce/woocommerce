@@ -4,6 +4,7 @@
 import React, { ReactElement, ReactNode } from 'react';
 import { Slot, Fill, TabPanel } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
+import deprecated from '@wordpress/deprecated';
 
 /**
  * Internal dependencies
@@ -30,11 +31,19 @@ type WooProductFieldSlotProps = {
 	) => ReactElement | null;
 };
 
+const DEFAULT_TAB_ORDER = 20;
+
 export const WooProductTabItem: React.FC< WooProductTabItemProps > & {
 	Slot: React.VFC<
 		Omit< Slot.Props, 'children' > & WooProductFieldSlotProps
 	>;
 } = ( { children, tabProps, templates } ) => {
+	deprecated( `__experimentalWooProductTabItem`, {
+		version: '13.0.0',
+		plugin: '@woocommerce/components',
+		hint: 'Moved to @woocommerce/product-editor package: import { __experimentalWooProductTabItem } from @woocommerce/product-editor',
+	} );
+
 	if ( ! templates ) {
 		// eslint-disable-next-line no-console
 		console.warn( 'WooProductTabItem fill is missing templates property.' );
@@ -50,12 +59,12 @@ export const WooProductTabItem: React.FC< WooProductTabItemProps > & {
 					{ ( fillProps: Fill.Props ) => {
 						return createOrderedChildren< Fill.Props >(
 							children,
-							templateData.order || 20,
+							templateData.order || DEFAULT_TAB_ORDER,
 							{},
 							{
 								tabProps,
 								templateName: templateData.name,
-								order: templateData.order || 20,
+								order: templateData.order || DEFAULT_TAB_ORDER,
 								...fillProps,
 							}
 						);
@@ -84,7 +93,7 @@ WooProductTabItem.Slot = ( { fillProps, template, children } ) => (
 								: props.tabProps;
 						tabs.push( {
 							...tabProps,
-							order: props.order ?? 20,
+							order: props.order ?? DEFAULT_TAB_ORDER,
 						} );
 					}
 					return {
