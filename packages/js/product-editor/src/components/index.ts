@@ -6,3 +6,4 @@ export { WooProductFieldItem as __experimentalWooProductFieldItem } from './woo-
 export { WooProductSectionItem as __experimentalWooProductSectionItem } from './woo-product-section-item';
 export { WooProductTabItem as __experimentalWooProductTabItem } from './woo-product-tab-item';
 export { DetailsNameField as __experimentalDetailsNameField } from './field-details-name';
+export { DetailsFeatureField as __experimentalDetailsFeatureField } from './field-details-feature';

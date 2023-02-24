@@ -7,6 +7,7 @@ import {
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 	__experimentalWooProductFieldItem as WooProductFieldItem,
 	__experimentalDetailsNameField as DetailsNameField,
+	__experimentalDetailsFeatureField as DetailsFeatureField,
 } from '@woocommerce/product-editor';
 
 /**
@@ -14,7 +15,6 @@ import {
  */
 import {
 	DetailsCategoriesField,
-	DetailsFeatureField,
 	DetailsSummaryField,
 	DetailsDescriptionField,
 } from './index';
