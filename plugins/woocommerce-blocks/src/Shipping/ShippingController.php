@@ -283,6 +283,10 @@ class ShippingController {
 	 * @return array
 	 */
 	public function filter_taxable_address( $address ) {
+
+		if ( null === WC()->session ) {
+			return $address;
+		}
 		// We only need to select from the first package, since pickup_location only supports a single package.
 		$chosen_method          = current( WC()->session->get( 'chosen_shipping_methods', array() ) ) ?? '';
 		$chosen_method_id       = explode( ':', $chosen_method )[0];
