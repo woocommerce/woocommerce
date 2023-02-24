@@ -1,4 +1,4 @@
-$control-size: clac( $gap - $gap-smaller );
+$control-size: $gap-large;
 
 .experimental-woocommerce-tree-item {
 	margin: 0;
@@ -62,6 +62,7 @@ $control-size: clac( $gap - $gap-smaller );
 		svg.components-checkbox-control__checked,
 		svg.components-checkbox-control__indeterminate,
 		.components-checkbox-control__input[type='checkbox'] {
+			position: absolute;
 			border-color: $gray-700;
 			width: $control-size;
 			height: $control-size;

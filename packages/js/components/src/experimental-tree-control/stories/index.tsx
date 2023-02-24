@@ -10,6 +10,7 @@ import React, { createElement, useCallback, useState } from 'react';
  */
 import { TreeControl } from '../tree-control';
 import { Item, LinkedTree } from '../types';
+import '../tree.scss';
 
 const listItems: Item[] = [
 	{ value: '1', label: 'Technology' },
@@ -119,107 +120,6 @@ function getItemLabel( item: LinkedTree, text: string ) {
 		</span>
 	);
 }
-
-export const CustomItemLabelOnSearch: React.FC = () => {
-	const [ filter, setFilter ] = useState( '' );
-
-	return (
-		<>
-			<TextControl value={ filter } onChange={ setFilter } />
-			<BaseControl
-				label="Custom item label on search"
-				id="custom-item-label-on-search"
-			>
-				<TreeControl
-					id="custom-item-label-on-search"
-					items={ listItems }
-					getItemLabel={ ( item ) => getItemLabel( item, filter ) }
-					shouldItemBeExpanded={ ( item ) =>
-						shouldItemBeExpanded( item, filter )
-					}
-				/>
-			</BaseControl>
-		</>
-	);
-};
-
-export const CustomItemLabel: React.FC = () => {
-	function renderCustomItemLabel( item: LinkedTree ) {
-		return (
-			<div style={ { display: 'flex', gap: 8 } }>
-				<div
-					style={ {
-						width: 36,
-						height: 36,
-						backgroundColor: '#ccc',
-						borderRadius: 2,
-					} }
-				/>
-				<div
-					style={ {
-						display: 'flex',
-						flexDirection: 'column',
-					} }
-				>
-					<strong>{ item.data.label }</strong>
-					<small>Some item description</small>
-				</div>
-			</div>
-		);
-	}
-
-	return (
-		<BaseControl label="Custom item label" id="custom-item-label">
-			<TreeControl
-				id="custom-item-label"
-				items={ listItems }
-				getItemLabel={ renderCustomItemLabel }
-			/>
-		</BaseControl>
-	);
-};
-
-function getItemLabel( item: LinkedTree, text: string ) {
-	return (
-		<span>
-			{ text
-				? interpolate( {
-						mixedString: item.data.label.replace(
-							new RegExp( text, 'ig' ),
-							( group ) => `{{bold}}${ group }{{/bold}}`
-						),
-						components: {
-							bold: <b />,
-						},
-				  } )
-				: item.data.label }
-		</span>
-	);
-}
-
-export const CustomItemLabelOnSearch: React.FC = () => {
-	const [ text, setText ] = useState( '' );
-
-	return (
-		<>
-			<TextControl value={ text } onChange={ setText } />
-			<BaseControl
-				label="Custom item label on search"
-				id="custom-item-label-on-search"
-			>
-				<TreeControl
-					id="custom-item-label-on-search"
-					items={ listItems }
-					getItemLabel={ ( item ) => getItemLabel( item, text ) }
-					isItemExpanded={ useCallback(
-						( item ) => isItemExpanded( item, text ),
-						[ text ]
-					) }
-				/>
-			</BaseControl>
-		</>
-	);
-};
 
 export const SelectionSingle: React.FC = () => {
 	const [ selected, setSelected ] = useState( listItems[ 1 ] );
