@@ -49,7 +49,7 @@ export const receiveCampaignsSuccess = ( success: {
 	meta: {
 		page: number;
 		perPage: number;
-		total: number;
+		total?: number;
 	};
 } ) => {
 	return {
