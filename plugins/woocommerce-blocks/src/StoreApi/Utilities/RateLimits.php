@@ -219,6 +219,8 @@ class RateLimits extends WC_Rate_Limiter {
 			 *
 			 * @param array $rate_limit_options Array of option values.
 			 * @return array
+			 *
+			 * @since 8.9.0
 			 */
 			apply_filters(
 				'woocommerce_store_api_rate_limit_options',

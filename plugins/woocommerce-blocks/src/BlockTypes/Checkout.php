@@ -62,11 +62,15 @@ class Checkout extends AbstractBlock {
 	protected function enqueue_assets( array $attributes ) {
 		/**
 		 * Fires before checkout block scripts are enqueued.
+		 *
+		 * @since 4.6.0
 		 */
 		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_before' );
 		parent::enqueue_assets( $attributes );
 		/**
 		 * Fires after checkout block scripts are enqueued.
+		 *
+		 * @since 4.6.0
 		 */
 		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_after' );
 	}
@@ -338,6 +342,8 @@ class Checkout extends AbstractBlock {
 
 		/**
 		 * Fires after checkout block data is registered.
+		 *
+		 * @since 2.6.0
 		 */
 		do_action( 'woocommerce_blocks_checkout_enqueue_data' );
 	}

@@ -90,6 +90,8 @@ class CartSelectShippingRate extends AbstractCartRoute {
 		 * This allows extensions to perform addition actions after a shipping method has been chosen, but before the
 		 * cart totals are recalculated.
 		 *
+		 * @since 9.0.0
+		 *
 		 * @param string|null $package_id The sanitized ID of the package being updated. Null if all packages are being updated.
 		 * @param string $rate_id The sanitized chosen rate ID for the package.
 		 * @param \WP_REST_Request $request Full details about the request.
