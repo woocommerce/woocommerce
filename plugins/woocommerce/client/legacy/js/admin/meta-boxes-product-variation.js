@@ -51,6 +51,15 @@ jQuery( function ( $ ) {
 				);
 
 			$( '.save-variations' ).on( 'click', function () {
+
+				$( '#variable_product_options' ).block( {
+					message: null,
+					overlayCSS: {
+						background: '#fff',
+						opacity: 0.6,
+					},
+				} );
+
 				const original_data = $(
 					'.woocommerce_variation_new_attribute_data'
 				).find( 'input, select, textarea' );
@@ -70,6 +79,7 @@ jQuery( function ( $ ) {
 					if ( response.error ) {
 						// Error.
 						window.alert( response.error );
+						$( '#variable_product_options' ).unblock();
 					} else if ( response ) {
 						// Reload variations and attributes panel.
 						var this_page = window.location.toString();
@@ -81,6 +91,7 @@ jQuery( function ( $ ) {
 						);
 
 						$.get( this_page, function ( response ) {
+							$( '#variable_product_options' ).unblock();
 							$( '#variable_product_options_inner' ).replaceWith(
 								$( response ).find(
 									'#variable_product_options_inner'
