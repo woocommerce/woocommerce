@@ -59,8 +59,7 @@ describe( 'Shopper → Checkout → Account', () => {
 		} );
 		//Create random email to place an order.
 		const testEmail = `test${ Math.random() * 10 }@example.com`;
-		await shopper.block.fillInCheckoutWithTestData();
-		await expect( page ).toFill( `#email`, testEmail );
+		await shopper.block.fillInCheckoutWithTestData( { email: testEmail } );
 		await shopper.block.placeOrder();
 		await expect( page ).toMatch( 'Order received' );
 		await merchant.login();
