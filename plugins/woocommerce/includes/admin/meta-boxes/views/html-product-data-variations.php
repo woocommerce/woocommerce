@@ -21,34 +21,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 		<div class="wc-metabox">
 			<div class="woocommerce_variation_new_attribute_data wc-metabox-content">
-				<table cellpadding="0" cellspacing="0">
-					<tbody>
-						<tr>
-							<td class="attribute_name">
-								<label><?php esc_html_e( 'Name', 'woocommerce' ); ?>:</label>
-								<input type="text" class="attribute_name" name="attribute_names[0]" placeholder="<?php esc_attr_e( 'f.e. size or color', 'woocommerce' ); ?>" />
-								<input type="hidden" name="attribute_position[0]" class="attribute_position" value="0" />
-							</td>
-							<td rowspan="3">
-								<label><?php esc_html_e( 'Value(s)', 'woocommerce' ); ?>:</label>
-								<textarea name="attribute_values[0]" cols="5" rows="5" placeholder="<?php printf( esc_attr__( 'Enter options for customers to choose from, f.e. “Blue” or “Large”. Use “%s” to separate different options.', 'woocommerce' ), WC_DELIMITER ); ?>"></textarea>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<label><input type="checkbox" class="checkbox" name="attribute_visibility[0]" value="1" /> <?php esc_html_e( 'Visible on the product page', 'woocommerce' ); ?></label>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<div class="enable_variation show_if_variable">
-									<label><input type="checkbox" class="checkbox" name="attribute_variation[0]" checked disabled /> <?php esc_html_e( 'Used for variations', 'woocommerce' ); ?></label>
-									<input type="hidden" name="attribute_variation[0]" value="1" />
-								</div>
-							</td>
-						</tr>
-					</tbody>
-				</table>
+			<?php
+				$i                    = 0;
+				$is_variations_screen = true;
+				$attribute            = new WC_Product_Attribute();
+				$attribute->set_variation( true );
+				require __DIR__ . '/html-product-attribute-inner.php';
+			?>
 				<div class="toolbar">
 					<button type="button" class="button button-primary save-variations"><?php esc_html_e( 'Save variations', 'woocommerce' ); ?></button>
 				</div>
