@@ -3,48 +3,36 @@
  */
 import { _n } from '@wordpress/i18n';
 import { Notice, ExternalLink } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
-import {
-	useState,
-	createInterpolateElement,
-	useEffect,
-} from '@wordpress/element';
+import { createInterpolateElement, useEffect } from '@wordpress/element';
 import { Alert } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import { STORE_KEY as PAYMENT_STORE_KEY } from '../../data/payment/constants';
+import { useIncompatiblePaymentGatewaysNotice } from './use-incompatible-payment-gateways-notice';
 import './editor.scss';
 
 interface PaymentGatewaysNoticeProps {
 	toggleDismissedStatus: ( status: boolean ) => void;
+	block: 'woocommerce/cart' | 'woocommerce/checkout';
 }
 
 export function IncompatiblePaymentGatewaysNotice( {
 	toggleDismissedStatus,
+	block,
 }: PaymentGatewaysNoticeProps ) {
-	// Everything below works the same for Cart/Checkout
-	const { incompatiblePaymentMethods } = useSelect( ( select ) => {
-		const { getIncompatiblePaymentMethods } = select( PAYMENT_STORE_KEY );
-		return {
-			incompatiblePaymentMethods: getIncompatiblePaymentMethods(),
-		};
-	}, [] );
-	const [ settingStatus, setStatus ] = useState( 'pristine' );
-
-	const numberOfIncompatiblePaymentMethods = Object.keys(
-		incompatiblePaymentMethods
-	).length;
-	const isNoticeDismissed =
-		numberOfIncompatiblePaymentMethods === 0 ||
-		settingStatus === 'dismissed';
+	const [
+		isVisible,
+		dismissNotice,
+		incompatiblePaymentMethods,
+		numberOfIncompatiblePaymentMethods,
+	] = useIncompatiblePaymentGatewaysNotice( block );
 
 	useEffect( () => {
-		toggleDismissedStatus( isNoticeDismissed );
-	}, [ isNoticeDismissed, toggleDismissedStatus ] );
+		toggleDismissedStatus( ! isVisible );
+	}, [ isVisible, toggleDismissedStatus ] );
 
-	if ( isNoticeDismissed ) {
+	if ( ! isVisible ) {
 		return null;
 	}
 
@@ -68,7 +56,7 @@ export function IncompatiblePaymentGatewaysNotice( {
 		<Notice
 			className="wc-blocks-incompatible-extensions-notice"
 			status={ 'warning' }
-			onRemove={ () => setStatus( 'dismissed' ) }
+			onRemove={ dismissNotice }
 			spokenMessage={ noticeContent }
 		>
 			<div className="wc-blocks-incompatible-extensions-notice__content">
