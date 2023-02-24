@@ -223,11 +223,10 @@ class WC_AJAX {
 	 * AJAX apply coupon on checkout page.
 	 */
 	public static function apply_coupon() {
-
 		check_ajax_referer( 'apply-coupon', 'security' );
 
 		$coupon_code = ArrayUtil::get_value_or_default( $_POST, 'coupon_code' );
-		if ( ! StringUtil::is_null_or_whitespace( $coupon_code ) ) {
+		if ( ! StringUtil::is_blank( $coupon_code ) ) {
 			WC()->cart->add_discount( wc_format_coupon_code( wp_unslash( $coupon_code ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		} else {
 			wc_add_notice( WC_Coupon::get_generic_coupon_error( WC_Coupon::E_WC_COUPON_PLEASE_ENTER ), 'error' );
@@ -245,7 +244,7 @@ class WC_AJAX {
 
 		$coupon = isset( $_POST['coupon'] ) ? wc_format_coupon_code( wp_unslash( $_POST['coupon'] ) ) : false; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-		if ( StringUtil::is_null_or_whitespace( $coupon ) ) {
+		if ( StringUtil::is_blank( $coupon ) ) {
 			wc_add_notice( __( 'Sorry there was a problem removing this coupon.', 'woocommerce' ), 'error' );
 		} else {
 			WC()->cart->remove_coupon( $coupon );
@@ -1203,7 +1202,7 @@ class WC_AJAX {
 			}
 
 			$coupon = ArrayUtil::get_value_or_default( $_POST, 'coupon' );
-			if ( StringUtil::is_null_or_whitespace( $coupon ) ) {
+			if ( StringUtil::is_blank( $coupon ) ) {
 				throw new Exception( __( 'Invalid coupon', 'woocommerce' ) );
 			}
 

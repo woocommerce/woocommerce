@@ -61,7 +61,7 @@ class CouponsController {
 		}
 
 		$coupon = ArrayUtil::get_value_or_default( $post_variables, 'coupon' );
-		if ( StringUtil::is_null_or_whitespace( $coupon ) ) {
+		if ( StringUtil::is_blank( $coupon ) ) {
 			throw new Exception( __( 'Invalid coupon', 'woocommerce' ) );
 		}
 
