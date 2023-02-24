@@ -11,12 +11,12 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 	 * @see https://github.com/woocommerce/woocommerce/issues/28759
 	 * @dataProvider provide_customers_with_different_addresses
 	 *
-	 * @param Closure     $customer_closure        The customer object being tested.
-	 * @param bool        $states_should_match    If the billing and shipping states should match.
-	 * @param bool        $countries_should_match If the billing and shipping countries should match.
+	 * @param Closure $customer_closure The customer object being tested.
+	 * @param bool    $states_should_match If the billing and shipping states should match.
+	 * @param bool    $countries_should_match If the billing and shipping countries should match.
 	 */
 	public function test_setting_default_address_fields( Closure $customer_closure, bool $states_should_match, bool $countries_should_match ) {
-		$customer = $customer_closure();
+		$customer     = $customer_closure();
 		$session_data = new WC_Customer_Data_Store_Session();
 		$session_data->read( $customer );
 
