@@ -6,13 +6,13 @@ import {
 	__experimentalProductFieldSection as ProductFieldSection,
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 	__experimentalWooProductFieldItem as WooProductFieldItem,
+	__experimentalDetailsNameField as DetailsNameField,
 } from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
  */
 import {
-	DetailsNameField,
 	DetailsCategoriesField,
 	DetailsFeatureField,
 	DetailsSummaryField,

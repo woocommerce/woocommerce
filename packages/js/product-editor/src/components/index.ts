@@ -5,3 +5,4 @@ export {
 export { WooProductFieldItem as __experimentalWooProductFieldItem } from './woo-product-field-item';
 export { WooProductSectionItem as __experimentalWooProductSectionItem } from './woo-product-section-item';
 export { WooProductTabItem as __experimentalWooProductTabItem } from './woo-product-tab-item';
+export { DetailsNameField as __experimentalDetailsNameField } from './field-details-name';

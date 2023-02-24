@@ -1295,6 +1295,7 @@ importers:
 
   packages/js/product-editor:
     specifiers:
+      '@automattic/interpolate-components': ^1.2.0
       '@types/react': ^17.0.2
       '@types/wordpress__components': ^19.10.1
       '@types/wordpress__data': ^6.0.0
@@ -1307,8 +1308,10 @@ importers:
       '@woocommerce/tracks': workspace:^1.3.0
       '@wordpress/browserslist-config': ^4.1.1
       '@wordpress/components': ^19.5.0
+      '@wordpress/data': ^6.15.0
       '@wordpress/element': ^4.1.1
       '@wordpress/i18n': ^4.26.0
+      '@wordpress/url': ^3.4.1
       concurrently: ^7.0.0
       css-loader: ^3.6.0
       eslint: ^8.32.0
@@ -1325,14 +1328,17 @@ importers:
       webpack: ^5.70.0
       webpack-cli: ^3.3.12
     dependencies:
+      '@automattic/interpolate-components': 1.2.1_pxzommwrsowkd4kgag6q3sluym
       '@woocommerce/components': link:../components
       '@woocommerce/currency': link:../currency
       '@woocommerce/data': link:../data
       '@woocommerce/number': link:../number
       '@woocommerce/tracks': link:../tracks
       '@wordpress/components': 19.12.0_tufdcic6wklrwyy3rhbsbktylu
+      '@wordpress/data': 6.15.0_react@17.0.2
       '@wordpress/element': 4.20.0
       '@wordpress/i18n': 4.26.0
+      '@wordpress/url': 3.20.0
       react-router-dom: 6.3.0_sfoxds7t5ydpegc3knd667wn6m
     devDependencies:
       '@types/react': 17.0.50
@@ -15912,7 +15918,7 @@ packages:
       '@wordpress/element': 4.20.0
       '@wordpress/is-shallow-equal': 4.19.0
       '@wordpress/priority-queue': 2.19.0
-      '@wordpress/redux-routine': 4.4.1_redux@4.2.0
+      '@wordpress/redux-routine': 4.19.0_redux@4.2.0
       equivalent-key-map: 0.2.2
       is-promise: 4.0.0
       lodash: 4.17.21
@@ -17016,19 +17022,6 @@ packages:
       is-promise: 4.0.0
       redux: 4.2.0
       rungen: 0.3.2
-
-  /@wordpress/redux-routine/4.4.1_redux@4.2.0:
-    resolution: {integrity: sha512-AqSEWN0PNxp00g1da+laL2rr0SP0AAfGpoqfzd55wIjWMQnHEf2pDsLvo6gQ9jyauuY5Wn2GUsYmGjQ+WjSf4w==}
-    engines: {node: '>=12'}
-    peerDependencies:
-      redux: '>=4'
-    dependencies:
-      '@babel/runtime': 7.19.0
-      is-promise: 4.0.0
-      lodash: 4.17.21
-      redux: 4.2.0
-      rungen: 0.3.2
-    dev: false
 
   /@wordpress/reusable-blocks/3.17.0_vcke6catv4iqpjdw24uwvlzyyi:
     resolution: {integrity: sha512-7ZfhtpWGvtT7xWqY/mCwC93zFHTVPQf8SZRjy2jAhcl7RNY6KZpW82rMRKNROEKJ4cYbTOMMf7WL2ulYi6cNFw==}

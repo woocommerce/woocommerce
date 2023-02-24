@@ -28,6 +28,7 @@
 		"access": "public"
 	},
 	"dependencies": {
+		"@automattic/interpolate-components": "^1.2.0",
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/currency": "workspace:*",
 		"@woocommerce/data": "workspace:^4.1.0",
@@ -36,6 +37,7 @@
 		"@wordpress/components": "^19.5.0",
 		"@wordpress/element": "^4.1.1",
 		"@wordpress/i18n": "^4.26.0",
+		"@wordpress/url": "^3.4.1",
 		"react-router-dom": "^6.3.0"
 	},
 	"devDependencies": {
@@ -75,6 +77,8 @@
 	},
 	"peerDependencies": {
 		"@types/react": "^17.0.2",
-		"react": "^17.0.2"
+		"@wordpress/data": "^6.15.0",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2"
 	}
 }
