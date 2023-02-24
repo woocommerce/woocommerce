@@ -5,3 +5,5 @@ declare module 'gridicons/dist/*' {
 	} >;
 	export default value;
 }
+
+declare module '@woocommerce/components';

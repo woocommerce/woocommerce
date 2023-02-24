@@ -62,5 +62,9 @@
 		"@wordpress/babel-preset-default": "^6.4.1",
 		"lodash": "^4.17.21",
 		"wp-textdomain": "1.0.1"
+	},
+	"resolutions": {
+		"@types/react": "17.0.2",
+		"@types/react-dom": "17.0.2"
 	}
 }

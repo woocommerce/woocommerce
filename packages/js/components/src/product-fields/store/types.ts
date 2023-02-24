@@ -1,11 +1,11 @@
 /**
  * External dependencies
  */
-import { ComponentType, HTMLInputTypeAttribute } from 'react';
+import { ComponentType } from 'react';
 
 export type ProductFieldDefinition = {
 	name: string;
-	type?: HTMLInputTypeAttribute;
+	type?: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	render?: ComponentType;
 };

@@ -123,7 +123,7 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	function hasFocusLeftInputAndDropdownContent(
 		event: React.FocusEvent< HTMLInputElement >
 	): boolean {
-		return ! event.relatedTarget?.closest(
+		return ! ( event.relatedTarget as HTMLElement )?.closest(
 			'.components-dropdown__content'
 		);
 	}
