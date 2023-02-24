@@ -1,10 +1,10 @@
-name: Run tests on PR merge to trunk
+name: Run tests against trunk after PR merge
 on:
     pull_request:
         types:
             - closed
 concurrency:
-    group: ${{ github.workflow }}-${{ github.event.pull_request.merge_commit_sha }}
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
     cancel-in-progress: true
 permissions: {}
 
