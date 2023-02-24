@@ -56,6 +56,7 @@ describe( 'Merchant → Checkout → Can adjust T&S and Privacy Policy options',
 		await expect( page ).toMatch(
 			'By proceeding with your purchase you agree to our Terms and Conditions and Privacy Policy'
 		);
+		await shopper.block.fillInCheckoutWithTestData();
 		await shopper.block.placeOrder();
 		await expect( page ).toMatch( 'Order received' );
 	} );
