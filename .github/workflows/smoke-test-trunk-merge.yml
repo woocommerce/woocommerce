@@ -4,7 +4,7 @@ on:
         types:
             - closed
 concurrency:
-    group: ${{ github.event.pull_request.merge_commit_sha }}
+    group: ${{ github.workflow }}-${{ github.event.pull_request.merge_commit_sha }}
     cancel-in-progress: true
 permissions: {}
 
