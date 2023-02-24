@@ -13,7 +13,9 @@ module.exports = {
 					'warn',
 					{ ignore: [ '@woocommerce/components' ] },
 				],
+				'prettier/prettier': 'error',
 			},
 		},
 	],
+	plugins: [ 'prettier' ],
 };

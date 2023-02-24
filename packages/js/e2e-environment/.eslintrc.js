@@ -9,5 +9,8 @@ module.exports = {
 		context: true,
 		jestPuppeteer: true,
 	},
-	plugins: [ 'jest' ],
+	plugins: [ 'jest', 'prettier' ],
+	rules: {
+		'prettier/prettier': 'error',
+	},
 };

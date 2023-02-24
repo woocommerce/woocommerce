@@ -4,4 +4,8 @@ module.exports = {
 		'plugin:@woocommerce/eslint-plugin/recommended',
 	],
 	root: true,
+	plugins: [ 'prettier' ],
+	rules: {
+		'prettier/prettier': 'error',
+	},
 };

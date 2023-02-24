@@ -5,9 +5,11 @@
 		"browser": true,
 		"node": true
 	},
+	"plugins": [ "prettier" ],
 	"rules": {
 		"camelcase": 0,
 		"react/react-in-jsx-scope": "off",
-		"no-alert": "off"
+		"no-alert": "off",
+		"prettier/prettier": "error"
 	}
 }

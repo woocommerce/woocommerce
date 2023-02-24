@@ -11,8 +11,9 @@ module.exports = {
 
 		'no-useless-constructor': 'off',
 		'@typescript-eslint/no-useless-constructor': 2,
+		'prettier/prettier': 'error',
 	},
-	plugins: [ '@typescript-eslint/eslint-plugin', 'jest' ],
+	plugins: [ '@typescript-eslint/eslint-plugin', 'jest', 'prettier' ],
 	extends: [ 'plugin:@wordpress/eslint-plugin/recommended-with-formatting' ],
 	overrides: [
 		{
