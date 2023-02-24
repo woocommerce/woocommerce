@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Make WC_Order::get_tax_location public

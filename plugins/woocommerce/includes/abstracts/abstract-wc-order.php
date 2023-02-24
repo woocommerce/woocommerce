@@ -1619,7 +1619,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param array $args array Override the location.
 	 * @return array
 	 */
-	protected function get_tax_location( $args = array() ) {
+	public function get_tax_location( $args = array() ) {
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
 
 		if ( 'shipping' === $tax_based_on && ! $this->get_shipping_country() ) {
