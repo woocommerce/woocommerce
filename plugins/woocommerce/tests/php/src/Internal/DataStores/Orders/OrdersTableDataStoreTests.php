@@ -1855,7 +1855,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * @testDox Legacy getters and setters for props migrated from data stores should be set/reset properly.
 	 */
 	public function test_legacy_getters_setters() {
-		$order_id = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_complex_wp_post_order();
+		$order_id = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_complex_data_store_order( $this->sut );
 		$order    = wc_get_order( $order_id );
 		$this->switch_data_store( $order, $this->sut );
 		$bool_props = array(
