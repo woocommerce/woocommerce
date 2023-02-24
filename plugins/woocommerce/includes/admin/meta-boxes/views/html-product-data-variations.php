@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<div id="message" class="inline notice woocommerce-message">
 			<p>
-				<?php echo esc_html_e( __( 'Offer customers multiple product options, like size and color. Start by creating a new custom attribute and enter available values (they’ll be shown as selectable product options).', 'woocommerce' ) ); ?> <a target="_blank" href="https://woocommerce.com/document/variable-product/#add-variations"><?php esc_html_e( 'Learn more about creating variations', 'woocommerce' ); ?></a>
+				<?php echo esc_html_e( 'Offer customers multiple product options, like size and color. Start by creating a new custom attribute and enter available values (they’ll be shown as selectable product options).', 'woocommerce' ); ?> <a target="_blank" href="https://woocommerce.com/document/variable-product/#add-variations"><?php esc_html_e( 'Learn more about creating variations', 'woocommerce' ); ?></a>
 			</p>
 		</div>
 		<div class="wc-metabox">

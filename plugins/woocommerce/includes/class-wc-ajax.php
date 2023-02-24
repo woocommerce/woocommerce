@@ -714,6 +714,9 @@ class WC_AJAX {
 		wp_send_json_success( $response );
 	}
 
+	/**
+	 * Save attributes and variations via ajax.
+	 */
 	public static function add_attributes_and_variations() {
 		check_ajax_referer( 'add-attributes-and-variations', 'security' );
 
@@ -741,7 +744,6 @@ class WC_AJAX {
 			$data_store->sort_all_product_variations( $product->get_id() );
 			wp_send_json_success();
 			wp_die();
-
 
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );

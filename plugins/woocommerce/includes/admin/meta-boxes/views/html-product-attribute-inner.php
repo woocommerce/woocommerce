@@ -1,4 +1,10 @@
 <?php
+/**
+ * Product attribute table for reuse.
+ *
+ * @package WooCommerce\Admin
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
