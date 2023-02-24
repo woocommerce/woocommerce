@@ -10,7 +10,13 @@
  */
 
 defined( 'ABSPATH' ) || exit;
-
+/**
+ * Fires to output the email header.
+ *
+ * @hooked WC_Emails::email_header()
+ *
+ * @since 3.7.0
+ */
 do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
 <?php /* translators: %s: Customer username */ ?>
@@ -28,5 +34,11 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 if ( $additional_content ) {
 	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );
 }
-
+/**
+ * Fires to output the email footer.
+ *
+ * @hooked WC_Emails::email_footer()
+ *
+ * @since 3.7.0
+ */
 do_action( 'woocommerce_email_footer', $email );

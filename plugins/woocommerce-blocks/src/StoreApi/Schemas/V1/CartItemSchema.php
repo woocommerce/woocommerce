@@ -419,6 +419,8 @@ class CartItemSchema extends ProductSchema {
 				 *
 				 * Filters the variation option name for custom option slugs.
 				 *
+				 * @since 2.5.0
+				 *
 				 * @internal Matches filter name in WooCommerce core.
 				 *
 				 * @param string $value The name to display.
@@ -451,6 +453,8 @@ class CartItemSchema extends ProductSchema {
 		 * Filters cart item data.
 		 *
 		 * Filters the variation option name for custom option slugs.
+		 *
+		 * @since 4.3.0
 		 *
 		 * @internal Matches filter name in WooCommerce core.
 		 *

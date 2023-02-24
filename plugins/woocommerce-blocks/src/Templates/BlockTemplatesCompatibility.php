@@ -300,6 +300,8 @@ class BlockTemplatesCompatibility {
 		 * - priority is the priority of the hooked function.
 		 *
 		 * @param array $data Additional hooked data. Default to empty
+		 *
+		 * @since 9.5.0
 		 */
 		$additional_hook_data = apply_filters( 'woocommerce_blocks_hook_compatibility_additional_data', array() );
 
@@ -327,6 +329,11 @@ class BlockTemplatesCompatibility {
 		ob_start();
 		foreach ( $hooks as $hook => $data ) {
 			if ( $data['position'] === $position ) {
+				/**
+				 * Action to render the content of a hook.
+				 *
+				 * @since 9.5.0
+				 */
 				do_action( $hook );
 			}
 		}

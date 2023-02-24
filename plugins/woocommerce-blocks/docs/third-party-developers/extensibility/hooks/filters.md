@@ -17,19 +17,23 @@
  - [woocommerce_add_to_cart_sold_individually_quantity](#woocommerce_add_to_cart_sold_individually_quantity)
  - [woocommerce_add_to_cart_validation](#-woocommerce_add_to_cart_validation)
  - [woocommerce_adjust_non_base_location_prices](#woocommerce_adjust_non_base_location_prices)
+ - [woocommerce_apply_base_tax_for_local_pickup](#woocommerce_apply_base_tax_for_local_pickup)
  - [woocommerce_apply_individual_use_coupon](#woocommerce_apply_individual_use_coupon)
  - [woocommerce_apply_with_individual_use_coupon](#woocommerce_apply_with_individual_use_coupon)
+ - [woocommerce_blocks_hook_compatibility_additional_data](#woocommerce_blocks_hook_compatibility_additional_data)
  - [woocommerce_blocks_product_grid_is_cacheable](#woocommerce_blocks_product_grid_is_cacheable)
  - [woocommerce_blocks_product_grid_item_html](#woocommerce_blocks_product_grid_item_html)
  - [woocommerce_blocks_register_script_dependencies](#woocommerce_blocks_register_script_dependencies)
  - [woocommerce_cart_contents_changed](#woocommerce_cart_contents_changed)
  - [woocommerce_ga_disable_tracking](#woocommerce_ga_disable_tracking)
  - [woocommerce_get_item_data](#woocommerce_get_item_data)
+ - [woocommerce_loop_add_to_cart_args](#woocommerce_loop_add_to_cart_args)
  - [woocommerce_loop_add_to_cart_link](#woocommerce_loop_add_to_cart_link)
  - [woocommerce_new_customer_data](#woocommerce_new_customer_data)
  - [woocommerce_registration_errors](#woocommerce_registration_errors)
  - [woocommerce_shared_settings](#-woocommerce_shared_settings)
  - [woocommerce_shipping_package_name](#woocommerce_shipping_package_name)
+ - [woocommerce_shipping_{$this->id}_is_available](#woocommerce_shipping_-this--id-_is_available)
  - [woocommerce_show_page_title](#woocommerce_show_page_title)
  - [woocommerce_store_api_add_to_cart_data](#woocommerce_store_api_add_to_cart_data)
  - [woocommerce_store_api_disable_nonce_check](#woocommerce_store_api_disable_nonce_check)
@@ -141,11 +145,17 @@ add_filter( '__experimental_woocommerce_blocks_payment_gateway_features_list', '
 ## deprecated_function_trigger_error
 
 
-
+Filters whether to trigger an error for deprecated functions. (Same as WP core)
 
 ```php
-apply_filters( 'deprecated_function_trigger_error' )
+apply_filters( 'deprecated_function_trigger_error', bool $trigger )
 ```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $trigger | bool | Whether to trigger the error for deprecated functions. Default true. |
 
 ### Source
 
@@ -157,11 +167,17 @@ apply_filters( 'deprecated_function_trigger_error' )
 ## wc_session_expiration
 
 
-
+Filters the session expiration.
 
 ```php
-apply_filters( 'wc_session_expiration' )
+apply_filters( 'wc_session_expiration', int $expiration )
 ```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $expiration | int | Expiration in seconds. |
 
 ### Source
 
@@ -340,6 +356,22 @@ apply_filters( 'woocommerce_adjust_non_base_location_prices', boolean $adjust_no
 
 ---
 
+## woocommerce_apply_base_tax_for_local_pickup
+
+
+
+
+```php
+apply_filters( 'woocommerce_apply_base_tax_for_local_pickup' )
+```
+
+### Source
+
+
+ - [Shipping/ShippingController.php](../../../../src/Shipping/ShippingController.php)
+
+---
+
 ## woocommerce_apply_individual_use_coupon
 
 
@@ -402,6 +434,32 @@ apply_filters( 'woocommerce_apply_with_individual_use_coupon', boolean $apply_wi
 
 
  - [StoreApi/Utilities/CartController.php](../../../../src/StoreApi/Utilities/CartController.php)
+
+---
+
+## woocommerce_blocks_hook_compatibility_additional_data
+
+
+When extensions implement their equivalent blocks of the template hook functions, they can use this filter to register their old hooked data here, so in the blockified template, the old hooked functions can be removed in favor of the new blocks while keeping the old hooked functions working in classic templates.
+
+```php
+apply_filters( 'woocommerce_blocks_hook_compatibility_additional_data', array $data )
+```
+
+### Description
+
+<p>Accepts an array of hooked data. The array should be in the following format: [ [ hook =&gt; <hook-name>, function =&gt; <function-name>, priority =&gt; <priority>, ], ... ] Where:</p> <ul> <li>hook-name is the name of the hook that have the functions hooked to.</li> <li>function-name is the hooked function name.</li> <li>priority is the priority of the hooked function.</li> </ul>
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $data | array | Additional hooked data. Default to empty |
+
+### Source
+
+
+ - [Templates/BlockTemplatesCompatibility.php](../../../../src/Templates/BlockTemplatesCompatibility.php)
 
 ---
 
@@ -580,14 +638,36 @@ apply_filters( 'woocommerce_get_item_data', array $item_data, array $cart_item )
 
 ---
 
+## woocommerce_loop_add_to_cart_args
+
+
+Allow filtering of the add to cart button arguments.
+
+```php
+apply_filters( 'woocommerce_loop_add_to_cart_args' )
+```
+
+### Source
+
+
+ - [BlockTypes/ProductButton.php](../../../../src/BlockTypes/ProductButton.php)
+
+---
+
 ## woocommerce_loop_add_to_cart_link
 
 
-
+Filters the add to cart button class.
 
 ```php
-apply_filters( 'woocommerce_loop_add_to_cart_link' )
+apply_filters( 'woocommerce_loop_add_to_cart_link', string $class )
 ```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $class | string | The class. |
 
 ### Source
 
@@ -729,19 +809,34 @@ apply_filters( 'woocommerce_shipping_package_name', string $shipping_package_nam
 
 ---
 
+## woocommerce_shipping_{$this->id}_is_available
+
+
+
+
+```php
+apply_filters( 'woocommerce_shipping_{$this->id}_is_available' )
+```
+
+### Source
+
+
+ - [Shipping/PickupLocation.php](../../../../src/Shipping/PickupLocation.php)
+
+---
+
 ## woocommerce_show_page_title
 
 
-We need to load the scripts here because when using block templates wp_head() gets run after the block template. As a result we are trying to enqueue required scripts before we have even registered them.
+Hook: woocommerce_show_page_title
 
 ```php
 apply_filters( 'woocommerce_show_page_title' )
 ```
 
-### See
+### Description
 
-
- - https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/5328#issuecomment-989013447
+<p>Allows controlling the display of the page title.</p>
 
 ### Source
 

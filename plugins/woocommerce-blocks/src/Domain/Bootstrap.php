@@ -80,6 +80,8 @@ class Bootstrap {
 			 * To ensure blocks are initialized, you must use the `woocommerce_blocks_loaded`
 			 * hook instead of the `plugins_loaded` hook. This is because the functions
 			 * hooked into plugins_loaded on the same priority load in an inconsistent and unpredictable manner.
+			 *
+			 * @since 2.5.0
 			 */
 			do_action( 'woocommerce_blocks_loaded' );
 		}
@@ -386,7 +388,11 @@ class Bootstrap {
 			$function,
 			$version
 		);
-
+		/**
+		 * Fires when a deprecated function is called.
+		 *
+		 * @since 7.3.0
+		 */
 		do_action( 'deprecated_function_run', $function, $replacement, $version );
 
 		$log_error = false;
@@ -401,7 +407,13 @@ class Bootstrap {
 			$log_error = true;
 		}
 
-		// Apply same filter as WP core.
+		/**
+		 * Filters whether to trigger an error for deprecated functions. (Same as WP core)
+		 *
+		 * @since 7.3.0
+		 *
+		 * @param bool $trigger Whether to trigger the error for deprecated functions. Default true.
+		 */
 		if ( ! apply_filters( 'deprecated_function_trigger_error', true ) ) {
 			$log_error = true;
 		}
