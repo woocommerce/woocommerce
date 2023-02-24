@@ -573,7 +573,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	public function get_download_permissions_granted( $order ) {
 		$order_id = is_int( $order ) ? $order : $order->get_id();
-		return $this->get_field_value( $order_id, 'download_permission_granted', self::get_operational_data_table_name() );
+		return wc_string_to_bool( $this->get_field_value( $order_id, 'download_permission_granted', self::get_operational_data_table_name() ) );
 	}
 
 	/**
@@ -599,7 +599,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	public function get_recorded_sales( $order ) {
 		$order_id = is_int( $order ) ? $order : $order->get_id();
-		return $this->get_field_value( $order_id, 'recorded_sales', self::get_operational_data_table_name() );
+		return wc_string_to_bool( $this->get_field_value( $order_id, 'recorded_sales', self::get_operational_data_table_name() ) );
 	}
 
 	/**
@@ -625,7 +625,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	public function get_recorded_coupon_usage_counts( $order ) {
 		$order_id = is_int( $order ) ? $order : $order->get_id();
-		return $this->get_field_value( $order_id, 'coupon_usages_are_counted', self::get_operational_data_table_name() );
+		return wc_string_to_bool( $this->get_field_value( $order_id, 'coupon_usages_are_counted', self::get_operational_data_table_name() ) );
 	}
 
 	/**
@@ -651,7 +651,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	public function get_email_sent( $order ) {
 		$order_id = is_int( $order ) ? $order : $order->get_id();
-		return $this->get_field_value( $order_id, 'new_order_email_sent', self::get_operational_data_table_name() );
+		return wc_string_to_bool( $this->get_field_value( $order_id, 'new_order_email_sent', self::get_operational_data_table_name() ) );
 	}
 
 	/**
@@ -702,7 +702,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	public function get_stock_reduced( $order ) {
 		$order_id = is_int( $order ) ? $order : $order->get_id();
-		return $this->get_field_value( $order_id, 'order_stock_reduced', self::get_operational_data_table_name() );
+		return wc_string_to_bool( $this->get_field_value( $order_id, 'order_stock_reduced', self::get_operational_data_table_name() ) );
 	}
 
 	/**
