@@ -131,7 +131,7 @@ class WC_AJAX {
 			'add_new_attribute',
 			'remove_variations',
 			'save_attributes',
-			'save_attributes_nathan',
+			'add_attributes_and_variations',
 			'add_variation',
 			'link_all_variations',
 			'revoke_access_to_download',
@@ -714,8 +714,8 @@ class WC_AJAX {
 		wp_send_json_success( $response );
 	}
 
-	public static function save_attributes_nathan() {
-		check_ajax_referer( 'save-attributes-nathan', 'security' );
+	public static function add_attributes_and_variations() {
+		check_ajax_referer( 'add-attributes-and-variations', 'security' );
 
 		if ( ! current_user_can( 'edit_products' ) || ! isset( $_POST['data'], $_POST['post_id'] ) ) {
 			wp_die( -1 );
@@ -729,10 +729,8 @@ class WC_AJAX {
 			$product_type = ! empty( $_POST['product_type'] ) ? wc_clean( wp_unslash( $_POST['product_type'] ) ) : 'simple';
 			$classname    = WC_Product_Factory::get_product_classname( $product_id, $product_type );
 			$product      = new $classname( $product_id );
-
 			$product->set_attributes( $attributes );
 			$product->save();
-
 			$data_store = $product->get_data_store();
 
 			if ( ! is_callable( array( $data_store, 'create_all_product_variations' ) ) ) {
@@ -740,10 +738,8 @@ class WC_AJAX {
 			}
 
 			$data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ) );
-
 			$data_store->sort_all_product_variations( $product->get_id() );
-
-			WC_Meta_Box_Product_Data::output_variations2($product, get_post( $product->get_id() ) );
+			wp_send_json_success();
 			wp_die();
 
 

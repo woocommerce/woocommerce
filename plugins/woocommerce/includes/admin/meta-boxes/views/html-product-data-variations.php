@@ -15,7 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php if ( ! count( $variation_attributes ) ) : ?>
 
 		<div id="message" class="inline notice woocommerce-message">
-			<p><?php echo __( 'Offer customers multiple product options, like size and color.... todo', 'woocommerce' ); ?></p>
+			<p>
+				<?php echo esc_html_e( __( 'Offer customers multiple product options, like size and color. Start by creating a new custom attribute and enter available values (they’ll be shown as selectable product options).', 'woocommerce' ) ); ?> <a target="_blank" href="https://woocommerce.com/document/variable-product/#add-variations"><?php esc_html_e( 'Learn more about creating variations', 'woocommerce' ); ?></a>
+			</p>
 		</div>
 		<div class="wc-metabox">
 			<div class="woocommerce_variation_new_attribute_data wc-metabox-content">
@@ -40,7 +42,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<tr>
 							<td>
 								<div class="enable_variation show_if_variable">
-									<label><input type="checkbox" class="checkbox" name="attribute_variation[0]" value="1" checked /> <?php esc_html_e( 'Used for variations', 'woocommerce' ); ?></label>
+									<label><input type="checkbox" class="checkbox" name="attribute_variation[0]" checked disabled /> <?php esc_html_e( 'Used for variations', 'woocommerce' ); ?></label>
+									<input type="hidden" name="attribute_variation[0]" value="1" />
 								</div>
 							</td>
 						</tr>
