@@ -14,7 +14,7 @@ permissions: {}
 
 jobs:
   test:
-    name: PHP ${{ matrix.php }} WP ${{ matrix.wp }}
+    name: PHP ${{ matrix.php }} WP ${{ matrix.wp }} ${{ matrix.hpos && 'HPOS' || '' }}
     timeout-minutes: 30
     runs-on: ubuntu-20.04
     permissions:
@@ -34,7 +34,7 @@ jobs:
             php: 7.4
           - wp: '5.9'
             php: 7.4
-          - wp: nightly
+          - wp: '6.1'
             php: '7.4'
             hpos: true
     services:
