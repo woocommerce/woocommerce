@@ -21,7 +21,7 @@
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
-	"main": "build/index.js",
+	"main": "build/index.ts",
 	"module": "build-module/index.js",
 	"types": "build-types",
 	"react-native": "src/index",
@@ -29,6 +29,7 @@
 		"@woocommerce/number": "workspace:*",
 		"@wordpress/deprecated": "^2.12.3",
 		"@wordpress/element": "^4.1.1",
+		"@wordpress/hooks": "^3.5.0",
 		"@wordpress/html-entities": "^3.3.1",
 		"@wordpress/i18n": "^3.20.0"
 	},
