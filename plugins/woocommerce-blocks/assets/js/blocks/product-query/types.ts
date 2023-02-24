@@ -112,4 +112,5 @@ export interface ProductQueryContext {
 export enum QueryVariation {
 	/** The main, fully customizable, Product Query block */
 	PRODUCT_QUERY = 'woocommerce/product-query',
+	RELATED_PRODUCTS = 'woocommerce/related-products',
 }
