@@ -17,13 +17,26 @@ $product_attributes              = $product_object->get_attributes( 'edit' );
 $has_local_attributes            = empty( $attribute_taxonomies );
 $has_global_attributes           = empty( $product_attributes );
 $is_add_glboal_attribute_visible = ! $has_local_attributes && $has_global_attributes;
+$icon_url                        = WC_ADMIN_IMAGES_FOLDER_URL . '/icons/global-attributes-icon.svg';
+// $icon_url                        = WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/mercadopago.png';
 ?>
 <div id="product_attributes" class="panel wc-metaboxes-wrapper hidden<?php echo $has_global_attributes ? ' show_global_attributes_form' : ''; ?>">
 	<div class="toolbar toolbar-top">
 		<div class="add-global-attribute-container<?php echo $is_add_glboal_attribute_visible ? '' : ' hidden'; ?>">
-			<button type="button" class="button add_custom_attribute"><?php esc_html_e( 'Create new attribute', 'woocommerce' ); ?></button>
-			<select class="wc-attribute-search" data-placeholder="<?php esc_attr_e( 'Add existing attribute', 'woocommerce' ); ?>" data-minimum-input-length="0">
-			</select>
+			<img src="<?php echo esc_url( $icon_url ); ?>" />
+			<p>
+				<?php
+				esc_html_e(
+					'Add descriptive pieces of information that customers can use to search for this product on your store, such as “Material” or “Brand”.',
+					'woocommerce'
+				);
+				?>
+			</p>
+			<div>
+				<button type="button" class="button add_custom_attribute"><?php esc_html_e( 'Create new attribute', 'woocommerce' ); ?></button>
+				<select class="wc-attribute-search" data-placeholder="<?php esc_attr_e( 'Add existing attribute', 'woocommerce' ); ?>" data-minimum-input-length="0">
+				</select>
+			</div>
 		</div>
 			<div class="add-attribute-container<?php echo $is_add_glboal_attribute_visible ? ' hidden' : ' '; ?>">
 				<?php

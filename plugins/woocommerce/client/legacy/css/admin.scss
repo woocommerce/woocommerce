@@ -1012,6 +1012,26 @@
 }
 
 #product_attributes {
+	.add-global-attribute-container {
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		padding: 32px 0px;
+		gap: 24px;
+		height: 360px;
+		p {
+			width: 90%;
+			max-width: 544px;
+			font-size: 14px;
+			line-height: 18px;
+			text-align: center;
+		}
+		&.hidden {
+			display: none;
+		}
+	}
 	.toolbar-top {
 		.button,
 		.select2-container {
