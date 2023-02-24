@@ -26,12 +26,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<tr>
 							<td class="attribute_name">
 								<label><?php esc_html_e( 'Name', 'woocommerce' ); ?>:</label>
-								<input type="text" class="attribute_name" name="attribute_names[0]" placeholder="<?php esc_attr_e( 'e.g. Fabric or Brand', 'woocommerce' ); ?>" />
+								<input type="text" class="attribute_name" name="attribute_names[0]" placeholder="<?php esc_attr_e( 'f.e. size or color', 'woocommerce' ); ?>" />
 								<input type="hidden" name="attribute_position[0]" class="attribute_position" value="0" />
 							</td>
 							<td rowspan="3">
 								<label><?php esc_html_e( 'Value(s)', 'woocommerce' ); ?>:</label>
-								<textarea name="attribute_values[0]" cols="5" rows="5" placeholder="<?php printf( esc_attr__( 'Enter some text, or some attributes by "%s" separating values.', 'woocommerce' ), WC_DELIMITER ); ?>"></textarea>
+								<textarea name="attribute_values[0]" cols="5" rows="5" placeholder="<?php printf( esc_attr__( 'Enter options for customers to choose from, f.e. “Blue” or “Large”. Use “%s” to separate different options.', 'woocommerce' ), WC_DELIMITER ); ?>"></textarea>
 							</td>
 						</tr>
 						<tr>
