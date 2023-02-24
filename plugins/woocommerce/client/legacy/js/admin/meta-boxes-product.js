@@ -434,6 +434,12 @@ jQuery( function ( $ ) {
 		selectedAttributes
 	);
 
+	function toggle_add_global_attribute_layout() {
+		$( 'div.add-attribute-container' ).toggle();
+		$( 'div.add-global-attribute-container' ).toggle();
+		$( 'button.save_attributes' ).toggle();
+	}
+
 	function add_attribute( element, attribute ) {
 		var size = $( '.product_attributes .woocommerce_attribute' ).length;
 		var $wrapper = $( element ).closest( '#product_attributes' );
@@ -499,13 +505,8 @@ jQuery( function ( $ ) {
 		}
 		$( this ).val( null );
 		$( this ).trigger( 'change' );
-		if (
-			$( 'button.save_attributes' ).hasClass( 'hidden' ) &&
-			$( 'div.add-attribute-container' ).hasClass( 'hidden' )
-		) {
-			$( 'div.add-attribute-container' ).removeClass( 'hidden' );
-			$( 'div.add-global-attribute-container' ).addClass( 'hidden' );
-			$( 'button.save_attributes' ).removeClass( 'hidden' );
+		if ( $( 'div.add-attribute-container' ).hasClass( 'hidden' ) ) {
+			toggle_add_global_attribute_layout();
 		}
 
 		return false;
@@ -530,13 +531,8 @@ jQuery( function ( $ ) {
 	$( 'button.add_custom_attribute' ).on( 'click', function () {
 		add_attribute( this, '' );
 
-		if (
-			$( 'button.save_attributes' ).hasClass( 'hidden' ) &&
-			$( 'div.add-attribute-container' ).hasClass( 'hidden' )
-		) {
-			$( 'div.add-attribute-container' ).removeClass( 'hidden' );
-			$( 'div.add-global-attribute-container' ).addClass( 'hidden' );
-			$( 'button.save_attributes' ).removeClass( 'hidden' );
+		if ( $( 'div.add-attribute-container' ).hasClass( 'hidden' ) ) {
+			toggle_add_global_attribute_layout();
 		}
 		return false;
 	} );
@@ -648,6 +644,10 @@ jQuery( function ( $ ) {
 				$parent.find( 'select, input[type=text]' ).val( '' );
 				$parent.hide();
 				attribute_row_indexes();
+			}
+
+			if ( ! $( '.woocommerce_attribute_data' ).is( ':visible' ) ) {
+				toggle_add_global_attribute_layout();
 			}
 		}
 		return false;
