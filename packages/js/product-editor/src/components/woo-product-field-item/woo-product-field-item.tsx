@@ -1,16 +1,23 @@
 /**
  * External dependencies
  */
-import React, { useEffect } from 'react';
+import { ReactNode } from 'react';
 import { Slot, Fill } from '@wordpress/components';
-import { createElement, Children, Fragment } from '@wordpress/element';
-import deprecated from '@wordpress/deprecated';
+import {
+	createElement,
+	Children,
+	Fragment,
+	useEffect,
+} from '@wordpress/element';
+import {
+	useSlotContext,
+	SlotContextHelpersType,
+} from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
-import { createOrderedChildren, sortFillsByOrder } from '../utils';
-import { useSlotContext, SlotContextHelpersType } from '../slot-context';
+import { createOrderedChildren, sortFillsByOrder } from '../../utils';
 import { ProductFillLocationType } from '../woo-product-tab-item';
 
 type WooProductFieldItemProps = {
@@ -27,7 +34,7 @@ type WooProductFieldFillProps = {
 	fieldName: string;
 	sectionName: string;
 	order: number;
-	children?: React.ReactNode;
+	children?: ReactNode;
 };
 
 const DEFAULT_FIELD_ORDER = 20;
@@ -41,12 +48,6 @@ const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 	const { registerFill, getFillHelpers } = useSlotContext();
 
 	const fieldId = `product_field/${ sectionName }/${ fieldName }`;
-
-	deprecated( `__experimentalWooProductFieldItem`, {
-		version: '13.0.0',
-		plugin: '@woocommerce/components',
-		hint: 'Moved to @woocommerce/product-editor package: import { __experimentalWooProductFieldItem } from @woocommerce/product-editor',
-	} );
 
 	useEffect( () => {
 		registerFill( fieldId );

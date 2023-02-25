@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import interpolate from '@automattic/interpolate-components';
 import { BaseControl, TextControl } from '@wordpress/components';
 import React, { createElement, useCallback, useState } from 'react';
 
@@ -56,6 +57,83 @@ export const ExpandOnFilter: React.FC = () => {
 				<TreeControl
 					id="expand-on-filter"
 					items={ listItems }
+					shouldItemBeExpanded={ ( item ) =>
+						shouldItemBeExpanded( item, filter )
+					}
+				/>
+			</BaseControl>
+		</>
+	);
+};
+
+export const CustomItemLabel: React.FC = () => {
+	function renderCustomItemLabel( item: LinkedTree ) {
+		return (
+			<div style={ { display: 'flex', gap: 8 } }>
+				<div
+					style={ {
+						width: 36,
+						height: 36,
+						backgroundColor: '#ccc',
+						borderRadius: 2,
+					} }
+				/>
+				<div
+					style={ {
+						display: 'flex',
+						flexDirection: 'column',
+					} }
+				>
+					<strong>{ item.data.label }</strong>
+					<small>Some item description</small>
+				</div>
+			</div>
+		);
+	}
+
+	return (
+		<BaseControl label="Custom item label" id="custom-item-label">
+			<TreeControl
+				id="custom-item-label"
+				items={ listItems }
+				getItemLabel={ renderCustomItemLabel }
+			/>
+		</BaseControl>
+	);
+};
+
+function getItemLabel( item: LinkedTree, text: string ) {
+	return (
+		<span>
+			{ text
+				? interpolate( {
+						mixedString: item.data.label.replace(
+							new RegExp( text, 'ig' ),
+							( group ) => `{{bold}}${ group }{{/bold}}`
+						),
+						components: {
+							bold: <b />,
+						},
+				  } )
+				: item.data.label }
+		</span>
+	);
+}
+
+export const CustomItemLabelOnSearch: React.FC = () => {
+	const [ filter, setFilter ] = useState( '' );
+
+	return (
+		<>
+			<TextControl value={ filter } onChange={ setFilter } />
+			<BaseControl
+				label="Custom item label on search"
+				id="custom-item-label-on-search"
+			>
+				<TreeControl
+					id="custom-item-label-on-search"
+					items={ listItems }
+					getItemLabel={ ( item ) => getItemLabel( item, filter ) }
 					shouldItemBeExpanded={ ( item ) =>
 						shouldItemBeExpanded( item, filter )
 					}
