@@ -17,7 +17,7 @@ module.exports = () => {
 		type: 'section',
 		text: {
 			type: 'mrkdwn',
-			text: `${ TEST_TYPE.toUpperCase() } tests failed on \`${ GITHUB_BASE_REF }\` after merging PR <https://github.com/woocommerce/woocommerce/pull/${ PR_NUMBER }|#${ PR_NUMBER }>`,
+			text: `${ TEST_TYPE } tests failed on \`${ GITHUB_BASE_REF }\` after merging PR <https://github.com/woocommerce/woocommerce/pull/${ PR_NUMBER }|#${ PR_NUMBER }>`,
 		},
 	};
 	const prTitleBlock = {
@@ -97,8 +97,8 @@ module.exports = () => {
 	};
 
 	// Assemble blocks
-	blocks.push( introBlock );
 	blocks.push( dividerBlock );
+	blocks.push( introBlock );
 	blocks.push( prTitleBlock );
 	blocks.push( prButtonBlock );
 	blocks.push( mergeCommitBlock );
@@ -107,6 +107,8 @@ module.exports = () => {
 	if ( [ 'e2e', 'api' ].includes( TEST_TYPE.toLowerCase() ) ) {
 		blocks.push( reportBlock );
 	}
+
+	blocks.push( dividerBlock );
 
 	return { blocks };
 };
