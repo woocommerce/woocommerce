@@ -76,9 +76,9 @@ jobs:
               if: failure() && steps.run-api-composite-action.conclusion == 'failure'
               uses: ./.github/actions/tests/slack-alert-on-pr-merge
               with:
-                  slack_bot_token: ${{ secrets.E2E_SLACK_TOKEN }}
-                  channel_id: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
-                  test_type: API
+                  slack-bot-token: ${{ secrets.E2E_SLACK_TOKEN }}
+                  channel-id: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
+                  test-type: API
 
     e2e:
         name: Run E2E tests
@@ -136,9 +136,9 @@ jobs:
               if: failure() && steps.run-e2e-composite-action.conclusion == 'failure'
               uses: ./.github/actions/tests/slack-alert-on-pr-merge
               with:
-                  slack_bot_token: ${{ secrets.E2E_SLACK_TOKEN }}
-                  channel_id: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
-                  test_type: E2E
+                  slack-bot-token: ${{ secrets.E2E_SLACK_TOKEN }}
+                  channel-id: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
+                  test-type: E2E
 
     k6:
         name: Runs k6 Performance tests
@@ -170,6 +170,6 @@ jobs:
               if: failure() && steps.run-k6-tests.conclusion == 'failure'
               uses: ./.github/actions/tests/slack-alert-on-pr-merge
               with:
-                  slack_bot_token: ${{ secrets.E2E_SLACK_TOKEN }}
-                  channel_id: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
-                  test_type: k6
+                  slack-bot-token: ${{ secrets.E2E_SLACK_TOKEN }}
+                  channel-id: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
+                  test-type: k6
