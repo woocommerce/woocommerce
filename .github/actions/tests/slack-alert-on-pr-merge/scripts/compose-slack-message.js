@@ -1,11 +1,11 @@
-module.exports = ( { github, inputs } ) => {
+module.exports = ( { github, core } ) => {
 	// Get variables from 'github' and 'inputs' objects
 	const baseRef = github.base_ref;
 	const prNumber = github.event.pull_request.number;
 	const prTitle = github.event.pull_request.title;
 	const runId = github.run_id;
 	const sha = github.event.pull_request.merge_commit_sha;
-	const testType = inputs.test_type;
+	const testType = core.getInput( 'test-type' );
 
 	// Slack message blocks
 	const blocks = [];

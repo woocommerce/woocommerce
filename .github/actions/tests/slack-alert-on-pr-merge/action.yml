@@ -3,11 +3,11 @@ description: Send a Slack alert when automated tests failed on trunk after PR me
 permissions: {}
 
 inputs:
-    slack_bot_token:
+    slack-bot-token:
         required: true
-    channel_id:
+    channel-id:
         required: true
-    test_type:
+    test-type:
         required: true
         type: choice
         options:
@@ -24,13 +24,13 @@ runs:
           with:
               script: |
                   const script = require('./.github/actions/tests/slack-alert-on-pr-merge/scripts/compose-slack-message.js')
-                  const slackMessage = script({github, inputs})
+                  const slackMessage = script({github, core})
                   core.setOutput('slack-message', slackMessage)
 
         - name: Send Slack alert
           uses: slackapi/slack-github-action@v1.23.0
           env:
-              SLACK_BOT_TOKEN: ${{ inputs.slack_bot_token }}
+              SLACK_BOT_TOKEN: ${{ inputs.slack-bot-token }}
           with:
-              channel_id: ${{ inputs.channel_id }}
+              channel-id: ${{ inputs.channel-id }}
               payload: ${{ steps.compose-slack-message.outputs.slack-message }}
