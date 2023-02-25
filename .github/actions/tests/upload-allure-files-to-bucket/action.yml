@@ -28,7 +28,7 @@ runs:
               aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
 
         - name: Upload 'allure-results' folder
-          if: inputs.include-allure-results == 'true'
+          if: inputs.include-allure-results == true
           shell: bash
           run: |
               echo "Uploading allure-results folder..."
