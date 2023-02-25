@@ -97,8 +97,8 @@ module.exports = () => {
 	};
 
 	// Assemble blocks
-	blocks.push( introBlock );
 	blocks.push( dividerBlock );
+	blocks.push( introBlock );
 	blocks.push( prTitleBlock );
 	blocks.push( prButtonBlock );
 	blocks.push( mergeCommitBlock );
@@ -107,6 +107,8 @@ module.exports = () => {
 	if ( [ 'e2e', 'api' ].includes( TEST_TYPE.toLowerCase() ) ) {
 		blocks.push( reportBlock );
 	}
+
+	blocks.push( dividerBlock );
 
 	return { blocks };
 };
