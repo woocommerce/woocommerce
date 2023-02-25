@@ -125,6 +125,7 @@ jobs:
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
                   destination-dir: ${{ env.ARTIFACT_NAME }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
+                  include-allure-results: false
 
             - name: Publish Allure report
               if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
