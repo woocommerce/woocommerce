@@ -90,7 +90,7 @@ module.exports = () => {
 					emoji: true,
 				},
 				value: 'view_report',
-				url: `https://woocommerce.github.io/woocommerce-test-reports/pr-merge/${ PR_NUMBER }/${ TEST_TYPE.toLowerCase() }/index.html`,
+				url: `https://woocommerce.github.io/woocommerce-test-reports/pr-merge/${ PR_NUMBER }/${ TEST_TYPE.toLowerCase() }`,
 				action_id: 'view-report',
 			},
 		],
