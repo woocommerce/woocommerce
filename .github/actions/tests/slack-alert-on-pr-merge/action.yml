@@ -3,11 +3,11 @@ description: Send a Slack alert when automated tests failed on trunk after PR me
 permissions: {}
 
 inputs:
-    slack-bot-token:
+    slack_bot_token:
         required: true
-    channel-id:
+    channel_id:
         required: true
-    test-type:
+    test_type:
         required: true
         type: choice
         options:
@@ -18,26 +18,19 @@ inputs:
 runs:
     using: composite
     steps:
-        - name: Lowercase test type
-          id: lowcase-test-type
-          shell: bash
-          run: echo "test-type-lowcase=$(echo ${{ inputs.test-type }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+        - name: Compose Slack message
+          id: compose-slack-message
+          uses: actions/github-script@v6
+          with:
+              script: |
+                  const script = require('./.github/actions/tests/slack-alert-on-pr-merge/scripts/compose-slack-message.js')
+                  const slackMessage = script({github, inputs})
+                  core.setOutput('slack-message', slackMessage)
 
-        - name: Send Slack alert on test failure
+        - name: Send Slack alert
           uses: slackapi/slack-github-action@v1.23.0
           env:
-              SLACK_BOT_TOKEN: ${{ inputs.slack-bot-token }}
-              PR_NUMBER: ${{ github.event.pull_request.number }}
-              PR_TITLE: ${{ github.event.pull_request.title }}
-              SHA: ${{ github.event.pull_request.merge_commit_sha }}
+              SLACK_BOT_TOKEN: ${{ inputs.slack_bot_token }}
           with:
-              channel-id: ${{ inputs.channel-id }}
-              slack-message: |
-                  :warning-8c: ${{ inputs.test-type }} tests failed on ${{ github.event.pull_request.base.ref }} after merging PR #${{ env.PR_NUMBER }}
-
-                  >${{ env.PR_TITLE }}
-
-                  :pr-merged: Pull request: <https://github.com/woocommerce/woocommerce/pull/${{ env.PR_NUMBER }}|${{ env.PR_NUMBER }}>
-                  :alphabet-yellow-hash: Merge commit: <https://github.com/woocommerce/woocommerce/commit/${{ env.SHA }}|${{ env.SHA }}>
-                  :github: GitHub run log: https://github.com/woocommerce/woocommerce/actions/runs/${{ github.run_id }}
-                  :playwright: Test report: https://woocommerce.github.io/woocommerce-test-reports/pr-merge/${{ env.PR_NUMBER }}/${{ steps.lowcase-test-type.outputs.test-type-lowcase }}/index.html
+              channel_id: ${{ inputs.channel_id }}
+              payload: ${{ steps.compose-slack-message.outputs.slack-message }}
