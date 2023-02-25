@@ -1,11 +1,12 @@
-module.exports = ( { github, core } ) => {
-	// Get variables from 'github' and 'inputs' objects
-	const baseRef = github.base_ref;
-	const prNumber = github.event.pull_request.number;
-	const prTitle = github.event.pull_request.title;
-	const runId = github.run_id;
-	const sha = github.event.pull_request.merge_commit_sha;
-	const testType = core.getInput( 'test-type' );
+module.exports = () => {
+	const {
+		GITHUB_BASE_REF,
+		GITHUB_RUN_ID,
+		PR_NUMBER,
+		PR_TITLE,
+		SHA,
+		TEST_TYPE,
+	} = process.env;
 
 	// Slack message blocks
 	const blocks = [];
@@ -16,14 +17,14 @@ module.exports = ( { github, core } ) => {
 		type: 'section',
 		text: {
 			type: 'mrkdwn',
-			text: `${ testType.toUpperCase() } tests failed on \`${ baseRef }\` after merging PR <https://github.com/woocommerce/woocommerce/pull/${ prNumber }|#${ prNumber }>`,
+			text: `${ TEST_TYPE.toUpperCase() } tests failed on \`${ GITHUB_BASE_REF }\` after merging PR <https://github.com/woocommerce/woocommerce/pull/${ PR_NUMBER }|#${ PR_NUMBER }>`,
 		},
 	};
 	const prTitleBlock = {
 		type: 'header',
 		text: {
 			type: 'plain_text',
-			text: prTitle,
+			text: PR_TITLE,
 			emoji: true,
 		},
 	};
@@ -38,7 +39,7 @@ module.exports = ( { github, core } ) => {
 					emoji: true,
 				},
 				value: 'view_pr',
-				url: `https://github.com/woocommerce/woocommerce/pull/${ prNumber }`,
+				url: `https://github.com/woocommerce/woocommerce/pull/${ PR_NUMBER }`,
 				action_id: 'view-pr',
 			},
 		],
@@ -50,14 +51,14 @@ module.exports = ( { github, core } ) => {
 				type: 'button',
 				text: {
 					type: 'plain_text',
-					text: `View merge commit ${ sha.substring(
+					text: `View merge commit ${ SHA.substring(
 						0,
 						7
 					) } :alphabet-yellow-hash:`,
 					emoji: true,
 				},
 				value: 'view_commit',
-				url: `https://github.com/woocommerce/woocommerce/commit/${ sha }`,
+				url: `https://github.com/woocommerce/woocommerce/commit/${ SHA }`,
 				action_id: 'view-commit',
 			},
 		],
@@ -73,7 +74,7 @@ module.exports = ( { github, core } ) => {
 					emoji: true,
 				},
 				value: 'view_github',
-				url: `https://github.com/woocommerce/woocommerce/actions/runs/${ runId }`,
+				url: `https://github.com/woocommerce/woocommerce/actions/runs/${ GITHUB_RUN_ID }`,
 				action_id: 'view-github',
 			},
 		],
@@ -89,7 +90,7 @@ module.exports = ( { github, core } ) => {
 					emoji: true,
 				},
 				value: 'view_report',
-				url: `https://woocommerce.github.io/woocommerce-test-reports/pr-merge/${ prNumber }/${ testType.toLowerCase() }/index.html`,
+				url: `https://woocommerce.github.io/woocommerce-test-reports/pr-merge/${ PR_NUMBER }/${ TEST_TYPE.toLowerCase() }/index.html`,
 				action_id: 'view-report',
 			},
 		],
@@ -103,7 +104,7 @@ module.exports = ( { github, core } ) => {
 	blocks.push( mergeCommitBlock );
 	blocks.push( githubBlock );
 
-	if ( [ 'e2e', 'api' ].includes( testType.toLowerCase() ) ) {
+	if ( [ 'e2e', 'api' ].includes( TEST_TYPE.toLowerCase() ) ) {
 		blocks.push( reportBlock );
 	}
 
