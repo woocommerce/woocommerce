@@ -17,7 +17,7 @@ module.exports = () => {
 		type: 'section',
 		text: {
 			type: 'mrkdwn',
-			text: `${ TEST_TYPE.toUpperCase() } tests failed on \`${ GITHUB_BASE_REF }\` after merging PR <https://github.com/woocommerce/woocommerce/pull/${ PR_NUMBER }|#${ PR_NUMBER }>`,
+			text: `${ TEST_TYPE } tests failed on \`${ GITHUB_BASE_REF }\` after merging PR <https://github.com/woocommerce/woocommerce/pull/${ PR_NUMBER }|#${ PR_NUMBER }>`,
 		},
 	};
 	const prTitleBlock = {
