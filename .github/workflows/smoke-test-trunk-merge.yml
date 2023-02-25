@@ -167,7 +167,7 @@ jobs:
 
             - name: Run k6 performance tests
               id: run-k6-composite-action
-              uses: './.github/actions/tests/run-k6-tests/action.yml'
+              uses: './.github/actions/tests/run-k6-tests'
 
             - name: Send Slack alert on test failure
               if: failure() && steps.run-k6-tests.conclusion == 'failure'
