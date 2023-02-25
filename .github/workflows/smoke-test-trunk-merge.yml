@@ -41,8 +41,10 @@ jobs:
               with:
                   build-filters: woocommerce
 
-            - name: Setup E2E local environment
-              uses: ./.github/actions/tests/setup-e2e-local-environment
+            - name: Setup local test environment
+              uses: ./.github/actions/tests/setup-local-test-environment
+              with:
+                  test-type: api
 
             - name: Run API tests
               id: run-api-composite-action
@@ -100,8 +102,10 @@ jobs:
               with:
                   build-filters: woocommerce
 
-            - name: Setup E2E local environment
-              uses: ./.github/actions/tests/setup-e2e-local-environment
+            - name: Setup local test environment
+              uses: ./.github/actions/tests/setup-local-test-environment
+              with:
+                  test-type: e2e
 
             - name: Run E2E tests
               id: run-e2e-composite-action
@@ -156,22 +160,14 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
 
-            - name: Load docker images and start containers.
-              working-directory: plugins/woocommerce
-              env:
-                  ENABLE_HPOS: 0
-              run: |
-                  pnpm env:dev --filter=woocommerce
-                  pnpm env:performance-init --filter=woocommerce
+            - name: Setup local test environment
+              uses: ./.github/actions/tests/setup-local-test-environment
+              with:
+                  test-type: k6
 
-            - name: Install k6
-              run: |
-                  curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
-
-            - name: Run k6 tests
-              id: run-k6-tests
-              run: |
-                  ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-pr-requests.js
+            - name: Run k6 performance tests
+              id: run-k6-composite-action
+              uses: './.github/actions/tests/run-k6-tests/action.yml'
 
             - name: Send Slack alert on test failure
               if: failure() && steps.run-k6-tests.conclusion == 'failure'
