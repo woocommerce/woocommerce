@@ -21,10 +21,15 @@ runs:
         - name: Compose Slack message
           id: compose-slack-message
           uses: actions/github-script@v6
+          env:
+              PR_NUMBER: ${{ github.event.pull_request.number }}
+              PR_TITLE: ${{ github.event.pull_request.title }}
+              SHA: ${{ github.event.pull_request.merge_commit_sha }}
+              TEST_TYPE: ${{ inputs.test-type }}
           with:
               script: |
                   const script = require('./.github/actions/tests/slack-alert-on-pr-merge/scripts/compose-slack-message.js')
-                  const slackMessage = script({github, core})
+                  const slackMessage = script()
                   core.setOutput('slack-message', slackMessage)
 
         - name: Send Slack alert
