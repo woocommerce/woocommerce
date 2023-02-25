@@ -156,8 +156,13 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
 
-            - name: Setup E2E local environment
-              uses: ./.github/actions/tests/setup-e2e-local-environment
+            - name: Load docker images and start containers.
+              working-directory: plugins/woocommerce
+              env:
+                  ENABLE_HPOS: 0
+              run: |
+                  pnpm env:dev --filter=woocommerce
+                  pnpm env:performance-init --filter=woocommerce
 
             - name: Install k6
               run: |
