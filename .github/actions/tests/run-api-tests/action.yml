@@ -34,4 +34,4 @@ runs:
               path: |
                   ${{ env.ALLURE_RESULTS_DIR }}
                   ${{ env.ALLURE_REPORT_DIR }}
-              retention-days: 5
+              retention-days: 20

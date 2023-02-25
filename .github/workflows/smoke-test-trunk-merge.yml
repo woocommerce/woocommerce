@@ -107,6 +107,8 @@ jobs:
               id: run-e2e-composite-action
               timeout-minutes: 60
               uses: ./.github/actions/tests/run-e2e-tests
+              env:
+                  E2E_MAX_FAILURES: 15
               with:
                   report-name: ${{ env.ARTIFACT_NAME }}
 

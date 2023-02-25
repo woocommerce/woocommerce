@@ -18,7 +18,6 @@ runs:
         - name: Run E2E tests.
           id: run-e2e-tests
           env:
-              E2E_MAX_FAILURES: 15
               FORCE_COLOR: 1
               USE_WP_ENV: 1
           working-directory: plugins/woocommerce
@@ -39,5 +38,4 @@ runs:
               path: |
                   ${{ env.ALLURE_RESULTS_DIR }}
                   ${{ env.ALLURE_REPORT_DIR }}
-              if-no-files-found: ignore
-              retention-days: 5
+              retention-days: 20
