@@ -32,7 +32,7 @@ This is the fill component. You must provide the `id` prop to identify your sect
 
 | Prop       | Type   | Description                                                                                        |
 | ---------- | ------ | -------------------------------------------------------------------------------------------------- |
-| `id`       | String | A unique string to identify your fill. Used for configuiration management.                         |
+| `id`       | String | A unique string to identify your fill. Used for configuration management.                          |
 | `tabs`     | Array  | Contains an array of name and order of which slots it should be rendered in.                       |
 | `pluginId` | String | A unique plugin ID to identify the plugin/extension that this fill is associated with.             |
 | `order`    | Number | (optional) This number will dictate the order that the sections rendered by a Slot will be appear. |

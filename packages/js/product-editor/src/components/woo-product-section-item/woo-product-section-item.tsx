@@ -4,12 +4,11 @@
 import React from 'react';
 import { Slot, Fill } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
-import deprecated from '@wordpress/deprecated';
 
 /**
  * Internal dependencies
  */
-import { createOrderedChildren, sortFillsByOrder } from '../utils';
+import { createOrderedChildren, sortFillsByOrder } from '../../utils';
 import { ProductFillLocationType } from '../woo-product-tab-item';
 
 type WooProductSectionItemProps = {
@@ -27,12 +26,6 @@ const DEFAULT_SECTION_ORDER = 20;
 export const WooProductSectionItem: React.FC< WooProductSectionItemProps > & {
 	Slot: React.FC< Slot.Props & WooProductSectionSlotProps >;
 } = ( { children, tabs } ) => {
-	deprecated( `__experimentalWooProductSectionItem`, {
-		version: '13.0.0',
-		plugin: '@woocommerce/components',
-		hint: 'Moved to @woocommerce/product-editor package: import { __experimentalWooProductSectionItem } from @woocommerce/product-editor',
-	} );
-
 	return (
 		<>
 			{ tabs.map( ( { name: tabName, order: sectionOrder } ) => (
