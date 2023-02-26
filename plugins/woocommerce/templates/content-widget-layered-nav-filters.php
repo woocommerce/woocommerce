@@ -23,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
 <ul>
 	<?php foreach ( $filters as $filter ) : ?>
 		<li class="<?php echo esc_attr( $filter['class'] ); ?>">
-			<a rel="nofollow" aria-label="<?php esc_attr_e( 'Remove filter', 'woocommerce' ); ?>" href="<?php echo esc_url( $filter['link'] ); ?>"><?php echo $filter['label']; // WPCS: XSS ok. ?></a>
+			<a rel="nofollow" aria-label="<?php esc_attr_e( 'Remove filter', 'woocommerce' ); ?>" href="<?php echo esc_url( $filter['link'] ); ?>"><?php echo $filter['label']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
 		</li>
 	<?php endforeach; ?>
 </ul>
