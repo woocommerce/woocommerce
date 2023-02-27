@@ -1566,10 +1566,10 @@ class WC_Cart extends WC_Legacy_Cart {
 				return false;
 			}
 			$country_fields = WC()->countries->get_address_fields( $country, 'shipping_' );
-			if ( isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'] && ! $this->get_customer()->get_shipping_state() ) {
+			if ( apply_filters( 'woocommerce_shipping_calculator_enable_state', true ) && isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'] && ! $this->get_customer()->get_shipping_state() ) {
 				return false;
 			}
-			if ( isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'] && ! $this->get_customer()->get_shipping_postcode() ) {
+			if ( apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true ) && isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'] && ! $this->get_customer()->get_shipping_postcode() ) {
 				return false;
 			}
 		}
