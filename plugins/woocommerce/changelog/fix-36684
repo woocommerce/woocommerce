@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add HPOS compat for wc-user-functions.php.
