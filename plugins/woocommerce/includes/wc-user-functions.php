@@ -740,13 +740,13 @@ function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
 		$wpdb->update(
 			$wpdb->postmeta,
 			array(
-				'meta_value' => 0,
+				'meta_value' => 0, //phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			),
 			array(
-				'meta_key'   => '_customer_user',
-				'meta_value' => $user_id,
+				'meta_key'   => '_customer_user', //phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value' => $user_id, //phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			)
-		); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+		);
 	}
 }
 
