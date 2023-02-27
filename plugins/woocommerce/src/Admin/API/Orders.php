@@ -67,7 +67,8 @@ class Orders extends \WC_REST_Orders_Controller {
 
 	/**
 	 * Helper method to allow searching by partial order number.
-	 * @param int   $number Partial order number match
+	 *
+	 * @param int   $number Partial order number match.
 	 * @param array $args List of arguments for the request.
 	 *
 	 * @return array Modified args with partial order search included.
@@ -79,6 +80,7 @@ class Orders extends \WC_REST_Orders_Controller {
 		$limit          = intval( $args['posts_per_page'] );
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$order_table_name = OrdersTableDataStore::get_orders_table_name();
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $orders_table_name is hardcoded.
 			$order_ids = $wpdb->get_col(
 				$wpdb->prepare(
 					"SELECT id
@@ -90,6 +92,7 @@ class Orders extends \WC_REST_Orders_Controller {
 					$limit
 				)
 			);
+			// phpcs:enable
 		} else {
 			$order_ids = $wpdb->get_col(
 				$wpdb->prepare(
