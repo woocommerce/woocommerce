@@ -8,6 +8,46 @@
 
   var focused = true;
 
+  // When wishing to use jQuery transitions, we replicate them with CSS3's transition-timing-function instead
+  // Default options provided by jQuery are "swing" and "linear"; jQuery easing plugin methods: https://easings.net/
+  // We do NOT support easeInElastic, easeOutElastic, easeInOutElastic, easeInBounce, easeOutBounce, and easeInOutBounce
+  var easings = {
+    swing: 'cubic-bezier(.02, .01, .47, 1)', // https://stackoverflow.com/a/9245729
+    linear: 'linear',
+
+    easeInQuad:     'cubic-bezier(0.11, 0, 0.5, 0)',  // https://easings.net/#easeInQuad
+    easeOutQuad:    'cubic-bezier(0.5, 1, 0.89, 1)',  // https://easings.net/#easeOutQuad
+    easeInOutQuad:  'cubic-bezier(0.45, 0, 0.55, 1)', // https://easings.net/#easeInOutQuad
+
+    easeInCubic:    'cubic-bezier(0.32, 0, 0.67, 0)', // https://easings.net/#easeInCubic
+    easeOutCubic:   'cubic-bezier(0.33, 1, 0.68, 1)', // https://easings.net/#easeOutCubic
+    easeInOutCubic: 'cubic-bezier(0.65, 0, 0.35, 1)', // https://easings.net/#easeInOutCubic
+
+    easeInQuart:    'cubic-bezier(0.5, 0, 0.75, 0)',  // https://easings.net/#easeInQuart
+    easeOutQuart:   'cubic-bezier(0.25, 1, 0.5, 1)',  // https://easings.net/#easeOutQuart
+    easeInOutQuart: 'cubic-bezier(0.76, 0, 0.24, 1)', // https://easings.net/#easeInOutQuart
+
+    easeInQuint:    'cubic-bezier(0.64, 0, 0.78, 0)', // https://easings.net/#easeInQuint
+    easeOutQuint:   'cubic-bezier(0.22, 1, 0.36, 1)', // https://easings.net/#easeOutQuint
+    easeInOutQuint: 'cubic-bezier(0.83, 0, 0.17, 1)', // https://easings.net/#easeInOutQuint
+
+    easeInSine:     'cubic-bezier(0.12, 0, 0.39, 0)', // https://easings.net/#easeInSine
+    easeOutSine:    'cubic-bezier(0.61, 1, 0.88, 1)', // https://easings.net/#easeOutSine
+    easeInOutSine:  'cubic-bezier(0.37, 0, 0.63, 1)', // https://easings.net/#easeInOutSine
+
+    easeInExpo:     'cubic-bezier(0.7, 0, 0.84, 0)',  // https://easings.net/#easeInExpo
+    easeOutExpo:    'cubic-bezier(0.16, 1, 0.3, 1)',  // https://easings.net/#easeOutExpo
+    easeInOutExpo:  'cubic-bezier(0.87, 0, 0.13, 1)', // https://easings.net/#easeInOutExpo
+
+    easeInCirc:     'cubic-bezier(0.55, 0, 1, 0.45)', // https://easings.net/#easeInCirc
+    easeOutCirc:    'cubic-bezier(0, 0.55, 0.45, 1)', // https://easings.net/#easeOutCirc
+    easeInOutCirc:  'cubic-bezier(0.85, 0, 0.15, 1)', // https://easings.net/#easeInOutCirc
+
+    easeInBack:     'cubic-bezier(0.36, 0, 0.66, -0.56)', // https://easings.net/#easeInBack
+    easeOutBack:    'cubic-bezier(0.34, 1.56, 0.64, 1)',  // https://easings.net/#easeOutBack
+    easeInOutBack:  'cubic-bezier(0.68, -0.6, 0.32, 1.6)' // https://easings.net/#easeInOutBack
+  };
+
   //FlexSlider: Object Instance
   $.flexslider = function(el, options) {
     var slider = $(el);
@@ -26,6 +66,7 @@
         eventType = "click touchend keyup",
         watchedEvent = "",
         watchedEventClearTimer,
+        easing = easings[slider.vars.easing],
         vertical = slider.vars.direction === "vertical",
         reverse = slider.vars.reverse,
         carousel = (slider.vars.itemWidth > 0),
@@ -62,8 +103,8 @@
         slider.started = false;
         slider.startTimeout = null;
         // TOUCH/USECSS:
-        slider.transitions = !slider.vars.video && !fade && slider.vars.useCSS;
-        if (slider.transitions) slider.prop = "transform";
+        slider.transform = !slider.vars.video && !fade && slider.vars.useCSS;
+        if (slider.transform) slider.prop = "transform";
         slider.isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
         slider.ensureAnimationEnd = '';
         // CONTROLSCONTAINER:
@@ -452,7 +493,7 @@
 
               if ( ! scrolling || Number( new Date() ) - startT > fxms ) {
                 e.preventDefault();
-                if (!fade && slider.transitions) {
+                if (!fade && slider.transform) {
                   if (!slider.vars.animationLoop) {
                     dx = dx/((slider.currentSlide === 0 && dx < 0 || slider.currentSlide === slider.last && dx > 0) ? (Math.abs(dx)/cwidth+2) : 1);
                   }
@@ -640,11 +681,12 @@
             slideString = (reverse) ? ((slider.count - 1) - target + slider.cloneOffset) * dimension : (target + slider.cloneOffset) * dimension;
           }
           slider.setProps(slideString, "", slider.vars.animationSpeed);
-          if (slider.transitions) {
+          if (slider.transform) {
             if (!slider.vars.animationLoop || !slider.atEnd) {
               slider.animating = false;
               slider.currentSlide = slider.animatingTo;
             }
+          }
 
             // Unbind previous transitionEnd events and re-bind new transitionEnd event
             slider.container.off("transitionend");
@@ -658,12 +700,6 @@
             slider.ensureAnimationEnd = setTimeout(function() {
               slider.wrapup(dimension);
             }, slider.vars.animationSpeed + 100);
-
-          } else {
-            slider.container.animate(slider.args, slider.vars.animationSpeed, slider.vars.easing, function(){
-              slider.wrapup(dimension);
-            });
-          }
         } else { // FADE:
           if (!touch) {
             slider.slides.eq(slider.currentSlide).css({"zIndex": 1}).animate({"opacity": 0}, slider.vars.animationSpeed, slider.vars.easing);
@@ -767,16 +803,17 @@
             return (posCalc * ((slider.vars.rtl)?1:-1)) + "px";
           }());
 
-      if (slider.transitions) {
+      if (slider.transform) {
         target = (vertical) ? "translate3d(0," + target + ",0)" : "translate3d(" + (parseInt(target)+'px') + ",0,0)";
+      } else {
+        // When wishing to use jQuery transitions, we replicate them with CSS3's transition-timing-function instead
+        slider.container.css("transition-timing-function", easing);
+      }
         dur = (dur !== undefined) ? (dur/1000) + "s" : "0s";
          slider.container.css("transition-duration", dur);
-      }
 
       slider.args[slider.prop] = target;
-      if (slider.transitions || dur === undefined) { slider.container.css(slider.args); }
-
-      slider.container.css('transform',target);
+      slider.container.css(slider.args);
     };
 
     slider.setup = function(type) {
@@ -996,7 +1033,7 @@
     namespace: "flex-",             //{NEW} String: Prefix string attached to the class of every element generated by the plugin
     selector: ".slides > li",       //{NEW} Selector: Must match a simple pattern. '{container} > {slide}' -- Ignore pattern at your own peril
     animation: "fade",              //String: Select your animation type, "fade" or "slide"
-    easing: "swing",                //{NEW} String: Determines the easing method used in jQuery transitions. jQuery easing plugin is supported!
+    easing: "swing",                //{NEW} String: Determines the easing method used in jQuery transitions. Most jQuery easing plugin methods are supported!
     direction: "horizontal",        //String: Select the sliding direction, "horizontal" or "vertical"
     reverse: false,                 //{NEW} Boolean: Reverse the animation direction
     animationLoop: true,            //Boolean: Should the animation loop? If false, directionNav will received "disable" classes at either end
