@@ -720,7 +720,6 @@ class WC_AJAX {
 		try {
 			parse_str( wp_unslash( $_POST['data'] ), $data ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-
 			$product = self::create_product_with_attributes( $data );
 			self::create_all_product_variations( $product );
 
@@ -733,8 +732,11 @@ class WC_AJAX {
 	}
 	/**
 	 * Create product with attributes from POST data.
+	 * @param  array $data Attribute data.
+	 * @return mixed Product class.
 	 */
 	private static function create_product_with_attributes( $data ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		$attributes   = WC_Meta_Box_Product_Data::prepare_attributes( $data );
 		$product_id   = absint( wp_unslash( $_POST['post_id'] ) );
 		$product_type = ! empty( $_POST['product_type'] ) ? wc_clean( wp_unslash( $_POST['product_type'] ) ) : 'simple';
@@ -746,6 +748,8 @@ class WC_AJAX {
 	}
 	/**
 	 * Create all product variations from existing attributes.
+	 * @param mixed $product Product class.
+	 * @returns int Number of variations created.
 	 */
 	private static function create_all_product_variations( $product ) {
 		$data_store = $product->get_data_store();
@@ -802,7 +806,7 @@ class WC_AJAX {
 			wp_die();
 		}
 
-		$product    = wc_get_product( $post_id );
+		$product        = wc_get_product( $post_id );
 		$number_created = self::create_all_product_variations( $product );
 
 		echo esc_html( $number_created );
