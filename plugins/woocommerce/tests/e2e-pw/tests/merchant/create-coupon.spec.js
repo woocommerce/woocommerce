@@ -38,8 +38,10 @@ test.describe( 'Add New Coupon Page', () => {
 		await expect( page.locator( '#publish:not(.disabled)' ) ).toBeVisible();
 		await page.click( '#publish' );
 
-		await expect( page.locator( 'div.notice.notice-success' ) ).toHaveText(
-			'Coupon updated.Dismiss this notice.'
-		);
+		await expect(
+			page
+				.locator( 'div.notice-success > p' )
+				.filter( { hasText: 'Coupon updated.' } )
+		).toBeVisible();
 	} );
 } );
