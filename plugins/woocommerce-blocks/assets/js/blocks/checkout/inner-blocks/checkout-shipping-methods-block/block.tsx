@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { type ReactElement } from 'react';
 import { __ } from '@wordpress/i18n';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import { ShippingRatesControl } from '@woocommerce/base-components/cart-checkout';
@@ -24,7 +25,6 @@ import type {
 /**
  * Internal dependencies
  */
-import NoShippingPlaceholder from './no-shipping-placeholder';
 import './style.scss';
 
 /**
@@ -52,7 +52,7 @@ const renderShippingRatesControlOption = (
 	};
 };
 
-const Block = (): JSX.Element | null => {
+const Block = ( { noShippingPlaceholder = null } ): ReactElement | null => {
 	const { isEditor } = useEditorContext();
 
 	const {
@@ -105,7 +105,7 @@ const Block = (): JSX.Element | null => {
 				context={ noticeContexts.SHIPPING_METHODS }
 			/>
 			{ isEditor && ! shippingRatesPackageCount ? (
-				<NoShippingPlaceholder />
+				noShippingPlaceholder
 			) : (
 				<ShippingRatesControl
 					noResultsMessage={
