@@ -339,7 +339,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			return $meta_data;
 		}
 		$cpt_hidden_keys = ( new \WC_Order_Data_Store_CPT() )->get_internal_meta_keys();
-		$meta_data = array_filter(
+		$meta_data       = array_filter(
 			$meta_data,
 			function ( $meta ) use ( $cpt_hidden_keys ) {
 				return ! in_array( $meta->key, $cpt_hidden_keys, true );

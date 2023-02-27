@@ -40,7 +40,7 @@ trait DateFilteringForCrudControllers {
 		$timezone_string_option = get_option( 'timezone_string' );
 		update_option( 'timezone_string', 'Africa/Blantyre', true ); // +02:00
 		wp_set_current_user( $this->user );
-		$item = $this->get_item_for_date_filtering_tests();
+		$item    = $this->get_item_for_date_filtering_tests();
 		$item_id = $item->get_id();
 
 		if ( $item instanceof WC_Abstract_Order && OrderUtil::custom_orders_table_usage_is_enabled() ) {

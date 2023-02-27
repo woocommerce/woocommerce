@@ -342,17 +342,17 @@ class OrdersTableQuery {
 		// Process already passed date queries args.
 		if ( $this->arg_isset( 'date_query' ) && is_array( $this->args['date_query'] ) ) {
 			foreach ( $this->args['date_query'] as $index => $query ) {
-				if ( ! isset( $query['column' ] ) || ! in_array( $query['column'], $valid_date_keys, true ) ) {
+				if ( ! isset( $query['column'] ) || ! in_array( $query['column'], $valid_date_keys, true ) ) {
 					unset( $this->args['date_query'][ $index ] );
 					continue;
 				}
 				// Convert any local dates to GMT.
 				if ( isset( $local_to_gmt_date_keys[ $query['column'] ] ) ) {
 					$this->args['date_query'][ $index ]['column'] = $local_to_gmt_date_keys[ $query['column'] ];
-					$op                                           = isset( $query['after'] ) ? 'after' : 'before';
-					$date_value_local                             = $query[ $op ];
-					$date_value_gmt                               = wc_string_to_timestamp( get_gmt_from_date( wc_string_to_datetime( $date_value_local ) ) );
-					$this->args['date_query'][ $index ][ $op ]    = $this->date_to_date_query_arg( $date_value_gmt, 'UTC' );
+					$op                                        = isset( $query['after'] ) ? 'after' : 'before';
+					$date_value_local                          = $query[ $op ];
+					$date_value_gmt                            = wc_string_to_timestamp( get_gmt_from_date( wc_string_to_datetime( $date_value_local ) ) );
+					$this->args['date_query'][ $index ][ $op ] = $this->date_to_date_query_arg( $date_value_gmt, 'UTC' );
 				}
 			}
 		}
