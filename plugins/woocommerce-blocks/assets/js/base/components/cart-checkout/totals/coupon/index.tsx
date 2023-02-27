@@ -86,7 +86,7 @@ export const TotalsCoupon = ( {
 
 	return (
 		<div className="wc-block-components-totals-coupon">
-			{ isCouponFormHidden && (
+			{ isCouponFormHidden ? (
 				<a
 					role="button"
 					href="#wc-block-components-totals-coupon__form"
@@ -99,52 +99,56 @@ export const TotalsCoupon = ( {
 				>
 					{ __( 'Add a coupon', 'woo-gutenberg-products-block' ) }
 				</a>
-			) }
-			<LoadingMask
-				screenReaderLabel={ __(
-					'Applying coupon…',
-					'woo-gutenberg-products-block'
-				) }
-				isLoading={ isLoading }
-				showSpinner={ false }
-			>
-				<div className={ formWrapperClass }>
-					<form
-						className="wc-block-components-totals-coupon__form"
-						id="wc-block-components-totals-coupon__form"
-					>
-						<ValidatedTextInput
-							id={ textInputId }
-							errorId="coupon"
-							className="wc-block-components-totals-coupon__input"
-							label={ __(
-								'Enter code',
-								'woo-gutenberg-products-block'
-							) }
-							value={ couponValue }
-							ariaDescribedBy={ validationErrorId }
-							onChange={ ( newCouponValue ) => {
-								setCouponValue( newCouponValue );
-							} }
-							focusOnMount={ true }
-							showError={ false }
-						/>
-						<Button
-							className="wc-block-components-totals-coupon__button"
-							disabled={ isLoading || ! couponValue }
-							showSpinner={ isLoading }
-							onClick={ handleCouponSubmit }
-							type="submit"
+			) : (
+				<LoadingMask
+					screenReaderLabel={ __(
+						'Applying coupon…',
+						'woo-gutenberg-products-block'
+					) }
+					isLoading={ isLoading }
+					showSpinner={ false }
+				>
+					<div className={ formWrapperClass }>
+						<form
+							className="wc-block-components-totals-coupon__form"
+							id="wc-block-components-totals-coupon__form"
 						>
-							{ __( 'Apply', 'woo-gutenberg-products-block' ) }
-						</Button>
-					</form>
-					<ValidationInputError
-						propertyName="coupon"
-						elementId={ textInputId }
-					/>
-				</div>
-			</LoadingMask>
+							<ValidatedTextInput
+								id={ textInputId }
+								errorId="coupon"
+								className="wc-block-components-totals-coupon__input"
+								label={ __(
+									'Enter code',
+									'woo-gutenberg-products-block'
+								) }
+								value={ couponValue }
+								ariaDescribedBy={ validationErrorId }
+								onChange={ ( newCouponValue ) => {
+									setCouponValue( newCouponValue );
+								} }
+								focusOnMount={ true }
+								showError={ false }
+							/>
+							<Button
+								className="wc-block-components-totals-coupon__button"
+								disabled={ isLoading || ! couponValue }
+								showSpinner={ isLoading }
+								onClick={ handleCouponSubmit }
+								type="submit"
+							>
+								{ __(
+									'Apply',
+									'woo-gutenberg-products-block'
+								) }
+							</Button>
+						</form>
+						<ValidationInputError
+							propertyName="coupon"
+							elementId={ textInputId }
+						/>
+					</div>
+				</LoadingMask>
+			) }
 		</div>
 	);
 };
