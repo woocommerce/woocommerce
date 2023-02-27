@@ -51,6 +51,17 @@ jQuery( function ( $ ) {
 				);
 
 			$( '.save-variations' ).on( 'click', function () {
+				const newAttributeData = $(
+					'.woocommerce_variation_new_attribute_data'
+				);
+				const attributeName = newAttributeData.find( 'input[name^="attribute_names"]' ).val();
+				const attributeValue = newAttributeData
+					.find( 'textarea[name^="attribute_values"]' )
+					.val();
+
+				if ( ! attributeName || ! attributeValue ) {
+					return;
+				}
 
 				$( '#variable_product_options' ).block( {
 					message: null,
@@ -60,9 +71,9 @@ jQuery( function ( $ ) {
 					},
 				} );
 
-				const original_data = $(
-					'.woocommerce_variation_new_attribute_data'
-				).find( 'input, select, textarea' );
+				const original_data = newAttributeData.find(
+					'input, select, textarea'
+				);
 
 				const data = {
 					post_id: woocommerce_admin_meta_boxes.post_id,
@@ -82,15 +93,15 @@ jQuery( function ( $ ) {
 						$( '#variable_product_options' ).unblock();
 					} else if ( response ) {
 						// Reload variations and attributes panel.
-						var this_page = window.location.toString();
-						this_page = this_page.replace(
+						const thisPageUrl = window.location.toString();
+						thisPageUrl = thisPageUrl.replace(
 							'post-new.php?',
 							'post.php?post=' +
 								woocommerce_admin_meta_boxes.post_id +
 								'&action=edit&'
 						);
 
-						$.get( this_page, function ( response ) {
+						$.get( thisPageUrl, function ( response ) {
 							$( '#variable_product_options' ).unblock();
 							$( '#variable_product_options_inner' ).replaceWith(
 								$( response ).find(
@@ -100,8 +111,12 @@ jQuery( function ( $ ) {
 							$( '#variable_product_options' ).trigger(
 								'reload'
 							);
-							$( '#product_attributes > .product_attributes' ).replaceWith(
-								$( response ).find( '#product_attributes > .product_attributes' )
+							$(
+								'#product_attributes > .product_attributes'
+							).replaceWith(
+								$( response ).find(
+									'#product_attributes > .product_attributes'
+								)
 							);
 						} );
 					}
