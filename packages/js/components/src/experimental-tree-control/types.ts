@@ -17,6 +17,20 @@ export type TreeProps = React.DetailedHTMLProps<
 	level?: number;
 	items: LinkedTree[];
 	/**
+	 * It gives a way to render a different Element as the
+	 * tree item label.
+	 *
+	 * @example
+	 * <Tree
+	 * 	getItemLabel={ ( item ) => <span>${ item.data.label }</span> }
+	 * />
+	 *
+	 * @param  item The current rendering tree item
+	 *
+	 * @see {@link LinkedTree}
+	 */
+	getItemLabel?( item: LinkedTree ): JSX.Element;
+	/**
 	 * Return if the tree item passed in should be expanded.
 	 *
 	 * @example
@@ -39,6 +53,7 @@ export type TreeItemProps = React.DetailedHTMLProps<
 > & {
 	level: number;
 	item: LinkedTree;
+	getLabel?( item: LinkedTree ): JSX.Element;
 	shouldItemBeExpanded?( item: LinkedTree ): boolean;
 };
 

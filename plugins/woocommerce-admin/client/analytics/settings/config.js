@@ -124,6 +124,11 @@ export const config = applyFilters( SETTINGS_FILTER, {
 		inputType: 'select',
 		options: [
 			{
+				label: __( 'Select a date type', 'woocommerce' ),
+				value: '',
+				disabled: true,
+			},
+			{
 				label: __( 'Date created', 'woocommerce' ),
 				value: 'date_created',
 				key: 'date_created',
@@ -143,6 +148,5 @@ export const config = applyFilters( SETTINGS_FILTER, {
 			'Database date field considered for Revenue and Orders reports',
 			'woocommerce'
 		),
-		defaultValue: 'date_created',
 	},
 } );
