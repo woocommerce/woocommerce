@@ -71,7 +71,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				/**
 				 * Hook to display custom attribute terms.
 				 *
-				 * @since @since 3.4.0
+				 * @since 3.4.0
 				 * @param array|null $attribute_taxonomy Attribute taxonomy object.
 				 * @param number $i Attribute index.
 				 * @param WC_Product_Attribute $attribute Attribute object.
