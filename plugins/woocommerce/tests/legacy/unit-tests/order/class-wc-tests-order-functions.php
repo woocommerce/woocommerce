@@ -109,10 +109,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 				->will( $this->returnValueMap( $test_counts[ $order_type ] ) );
 		}
 
-		$add_mock_datastores = function( $stores ) use ( $mock_datastores ) {
+		$add_mock_datastores          = function ( $stores ) use ( $mock_datastores ) {
 			return array_merge( $stores, $mock_datastores );
 		};
-		$add_mock_order_type = function( $order_types ) use ( $mock_datastores ) {
+		$add_mock_order_type          = function ( $order_types ) use ( $mock_datastores ) {
 			return array( 'shop_order', 'order-fake-type' );
 		};
 		$return_mock_order_data_store = function ( $stores ) use ( $mock_datastores ) {

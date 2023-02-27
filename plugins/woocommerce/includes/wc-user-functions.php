@@ -716,11 +716,11 @@ function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
 
 	if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 		$order_table_ds = wc_get_container()->get( OrdersTableDataStore::class );
-		$order_table = $order_table_ds::get_orders_table_name();
+		$order_table    = $order_table_ds::get_orders_table_name();
 		$wpdb->update(
 			$order_table,
 			array(
-				'customer_id' => 0,
+				'customer_id'      => 0,
 				'date_updated_gmt' => current_time( 'mysql', true ),
 			),
 			array(
@@ -740,13 +740,13 @@ function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
 		$wpdb->update(
 			$wpdb->postmeta,
 			array(
-				'meta_value' => 0,
+				'meta_value' => 0, //phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			),
 			array(
-				'meta_key'   => '_customer_user',
-				'meta_value' => $user_id,
+				'meta_key'   => '_customer_user', //phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value' => $user_id, //phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			)
-		); // WPCS: slow query ok.
+		);
 	}
 }
 

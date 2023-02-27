@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\CRUD
  */
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 /**
  * Meta
  *
@@ -882,9 +884,9 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 
 		// Save + create.
-		$save_id = $object->save();
-		$post    = get_post( $save_id );
-		$expected_post_type = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ? 'shop_order_placehold' : 'shop_order';
+		$save_id            = $object->save();
+		$post               = get_post( $save_id );
+		$expected_post_type = OrderUtil::custom_orders_table_usage_is_enabled() ? 'shop_order_placehold' : 'shop_order';
 		$this->assertEquals( $expected_post_type, $post->post_type );
 
 		// Update.
