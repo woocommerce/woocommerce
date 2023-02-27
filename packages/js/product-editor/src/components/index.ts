@@ -11,3 +11,4 @@ export {
 	DetailsCategoriesField as __experimentalDetailsCategoriesField,
 	CategoryField as __experimental__experimentalDetailsCategoryField,
 } from './field-details-categories';
+export { DetailsSummaryField as __experimentalDetailsSummaryField } from './field-details-summary';

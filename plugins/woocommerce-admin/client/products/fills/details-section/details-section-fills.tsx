@@ -9,12 +9,13 @@ import {
 	__experimentalDetailsNameField as DetailsNameField,
 	__experimentalDetailsFeatureField as DetailsFeatureField,
 	__experimentalDetailsCategoriesField as DetailsCategoriesField,
+	__experimentalDetailsSummaryField as DetailsSummaryField,
 } from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
  */
-import { DetailsSummaryField, DetailsDescriptionField } from './index';
+import { DetailsDescriptionField } from './index';
 
 import { DETAILS_SECTION_ID, PLUGIN_ID, TAB_GENERAL_ID } from '../constants';
 
