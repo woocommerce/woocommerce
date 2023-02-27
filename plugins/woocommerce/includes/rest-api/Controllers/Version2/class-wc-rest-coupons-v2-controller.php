@@ -8,7 +8,6 @@
  * @since   2.6.0
  */
 
-use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;

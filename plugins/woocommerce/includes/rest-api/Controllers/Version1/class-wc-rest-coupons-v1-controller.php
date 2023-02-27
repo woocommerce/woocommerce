@@ -10,7 +10,6 @@
  * @since    3.0.0
  */
 
-use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
