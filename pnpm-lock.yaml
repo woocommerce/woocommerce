@@ -1310,13 +1310,17 @@ importers:
       '@wordpress/components': ^19.5.0
       '@wordpress/data': ^6.15.0
       '@wordpress/element': ^4.1.1
+      '@wordpress/html-entities': ^3.3.1
       '@wordpress/i18n': ^4.26.0
+      '@wordpress/icons': ^8.1.0
       '@wordpress/url': ^3.4.1
+      classnames: ^2.3.1
       concurrently: ^7.0.0
       css-loader: ^3.6.0
       eslint: ^8.32.0
       jest: ^27.5.1
       jest-cli: ^27.5.1
+      lodash: ^4.17.21
       postcss-loader: ^3.0.0
       react: ^17.0.2
       react-dom: ^17.0.2
@@ -1337,8 +1341,12 @@ importers:
       '@wordpress/components': 19.12.0_tufdcic6wklrwyy3rhbsbktylu
       '@wordpress/data': 6.15.0_react@17.0.2
       '@wordpress/element': 4.20.0
+      '@wordpress/html-entities': 3.19.0
       '@wordpress/i18n': 4.26.0
+      '@wordpress/icons': 8.1.0
       '@wordpress/url': 3.20.0
+      classnames: 2.3.1
+      lodash: 4.17.21
       react-router-dom: 6.3.0_sfoxds7t5ydpegc3knd667wn6m
     devDependencies:
       '@types/react': 17.0.50
@@ -4174,7 +4182,7 @@ packages:
       '@babel/core': 7.12.9
       '@babel/helper-annotate-as-pure': 7.16.7
       '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.12.9
-      '@babel/helper-plugin-utils': 7.18.9
+      '@babel/helper-plugin-utils': 7.19.0
       '@babel/plugin-syntax-private-property-in-object': 7.14.5_@babel+core@7.12.9
     transitivePeerDependencies:
       - supports-color
@@ -4189,7 +4197,7 @@ packages:
       '@babel/core': 7.16.12
       '@babel/helper-annotate-as-pure': 7.16.7
       '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.16.12
-      '@babel/helper-plugin-utils': 7.18.9
+      '@babel/helper-plugin-utils': 7.19.0
       '@babel/plugin-syntax-private-property-in-object': 7.14.5_@babel+core@7.16.12
     transitivePeerDependencies:
       - supports-color
@@ -15333,7 +15341,7 @@ packages:
       '@wordpress/escape-html': 2.4.1
       '@wordpress/hooks': 3.26.0
       '@wordpress/i18n': 4.4.1
-      '@wordpress/icons': 8.0.1
+      '@wordpress/icons': 8.1.0
       '@wordpress/is-shallow-equal': 4.4.1
       '@wordpress/keycodes': 3.4.1
       '@wordpress/primitives': 3.2.1
@@ -15441,7 +15449,7 @@ packages:
       '@wordpress/escape-html': 2.4.1
       '@wordpress/hooks': 3.26.0
       '@wordpress/i18n': 4.4.1
-      '@wordpress/icons': 8.0.1
+      '@wordpress/icons': 8.1.0
       '@wordpress/is-shallow-equal': 4.4.1
       '@wordpress/keycodes': 3.4.1
       '@wordpress/primitives': 3.2.1
@@ -16560,9 +16568,9 @@ packages:
     resolution: {integrity: sha512-fNq0Mnzzf03uxIwKqQeU/G48wElyypwkhcBZWYQRpmwLZrOR231dxUeK9mzPOSGlYbgM+YKK+k3lzysGmrJU0A==}
     engines: {node: '>=12'}
     dependencies:
-      '@babel/runtime': 7.17.7
+      '@babel/runtime': 7.19.0
       '@wordpress/element': 4.20.0
-      '@wordpress/primitives': 3.3.0
+      '@wordpress/primitives': 3.17.0
     dev: false
 
   /@wordpress/icons/8.4.0:
@@ -16940,15 +16948,6 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.17.7
-      '@wordpress/element': 4.20.0
-      classnames: 2.3.1
-    dev: false
-
-  /@wordpress/primitives/3.3.0:
-    resolution: {integrity: sha512-iwlFGSaI2RnQF0SxsWJ3KaM0LPdUosI5mb9879JXOh/vAFVObrQdyk5Fv+++vGUzDfxRnxAH68UpJi7nOzcRRA==}
-    engines: {node: '>=12'}
-    dependencies:
-      '@babel/runtime': 7.19.0
       '@wordpress/element': 4.20.0
       classnames: 2.3.1
     dev: false

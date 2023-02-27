@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useMemo, useState } from '@wordpress/element';
+import { useMemo, useState, createElement, Fragment } from '@wordpress/element';
 import {
 	selectControlStateChangeTypes,
 	Spinner,
@@ -15,7 +15,6 @@ import { debounce } from 'lodash';
 /**
  * Internal dependencies
  */
-import './category-field.scss';
 import { CategoryFieldItem, CategoryTreeItem } from './category-field-item';
 import { useCategorySearch } from './use-category-search';
 import { CreateCategoryModal } from './create-category-modal';

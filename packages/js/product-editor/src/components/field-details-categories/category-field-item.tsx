@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { CheckboxControl, Icon } from '@wordpress/components';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useState, createElement } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { chevronDown, chevronUp } from '@wordpress/icons';
 import { ProductCategory } from '@woocommerce/data';

@@ -8,16 +8,13 @@ import {
 	__experimentalWooProductFieldItem as WooProductFieldItem,
 	__experimentalDetailsNameField as DetailsNameField,
 	__experimentalDetailsFeatureField as DetailsFeatureField,
+	__experimentalDetailsCategoriesField as DetailsCategoriesField,
 } from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
  */
-import {
-	DetailsCategoriesField,
-	DetailsSummaryField,
-	DetailsDescriptionField,
-} from './index';
+import { DetailsSummaryField, DetailsDescriptionField } from './index';
 
 import { DETAILS_SECTION_ID, PLUGIN_ID, TAB_GENERAL_ID } from '../constants';
 
