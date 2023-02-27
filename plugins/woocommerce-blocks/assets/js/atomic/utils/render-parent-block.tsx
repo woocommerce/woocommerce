@@ -137,7 +137,7 @@ const renderInnerBlocks = ( {
 	children,
 	// Current depth of the children. Used to ensure keys are unique.
 	depth = 1,
-}: renderInnerBlocksProps ): ( JSX.Element | null )[] | null => {
+}: renderInnerBlocksProps ): ( string | JSX.Element | null )[] | null => {
 	if ( ! children || children.length === 0 ) {
 		return null;
 	}
@@ -147,11 +147,10 @@ const renderInnerBlocks = ( {
 		 * convert the HTMLElement to a React component.
 		 */
 		const { blockName = '', ...componentProps } = {
-			key: `${ block }_${ depth }_${ index }`,
 			...( node instanceof HTMLElement ? node.dataset : {} ),
 			className: node instanceof Element ? node?.className : '',
 		};
-
+		const componentKey = `${ block }_${ depth }_${ index }`;
 		const InnerBlockComponent = getBlockComponentFromMap(
 			blockName,
 			blockMap
@@ -190,13 +189,20 @@ const renderInnerBlocks = ( {
 				  } )
 				: undefined;
 
+			// We pass props here rather than componentProps to avoid the data attributes being renamed.
 			return renderedChildren
 				? cloneElement(
 						parsedElement,
-						componentProps,
+						{
+							key: componentKey,
+							...( parsedElement?.props || {} ),
+						},
 						renderedChildren
 				  )
-				: cloneElement( parsedElement, componentProps );
+				: cloneElement( parsedElement, {
+						key: componentKey,
+						...( parsedElement?.props || {} ),
+				  } );
 		}
 
 		// This will wrap inner blocks with the provided wrapper. If no wrapper is provided, we default to Fragment.
@@ -215,7 +221,10 @@ const renderInnerBlocks = ( {
 					showErrorBlock={ CURRENT_USER_IS_ADMIN as boolean }
 				>
 					<InnerBlockComponentWrapper>
-						<InnerBlockComponent { ...componentProps }>
+						<InnerBlockComponent
+							key={ componentKey }
+							{ ...componentProps }
+						>
 							{
 								/**
 								 * Within this Inner Block Component we also need to recursively render it's children. This
