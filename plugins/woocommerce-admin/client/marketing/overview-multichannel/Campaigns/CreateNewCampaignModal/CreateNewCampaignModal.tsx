@@ -2,9 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { Fragment, useState } from '@wordpress/element';
 import {
 	Button,
+	CardDivider,
 	Modal,
 	Icon,
 	Flex,
@@ -17,8 +18,8 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import { RecommendedChannelsList } from '~/marketing/components';
 import { useRecommendedChannels } from '~/marketing/hooks';
+import { SmartPluginCardBody } from '~/marketing/components';
 import { useNewCampaignTypes } from './useNewCampaignTypes';
 import './CreateNewCampaignModal.scss';
 
@@ -115,7 +116,7 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 					} ) }
 				</div>
 			</div>
-			{ recommendedChannels.length > 0 && (
+			{ recommendedChannels?.length && (
 				<div className="woocommerce-marketing-add-channels">
 					<Flex direction="column">
 						<FlexItem>
@@ -135,9 +136,22 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 						</FlexItem>
 						{ ! collapsed && (
 							<FlexItem>
-								<RecommendedChannelsList
-									recommendedChannels={ recommendedChannels }
-								/>
+								{ recommendedChannels.map( ( el, idx ) => {
+									return (
+										<Fragment key={ el.plugin }>
+											<SmartPluginCardBody
+												plugin={ el }
+												onInstalledAndActivated={
+													// TODO: check what to do here.
+													() => {}
+												}
+											/>
+											{ idx !==
+												recommendedChannels.length -
+													1 && <CardDivider /> }
+										</Fragment>
+									);
+								} ) }
 							</FlexItem>
 						) }
 					</Flex>
