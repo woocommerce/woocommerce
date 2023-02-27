@@ -317,9 +317,9 @@ class Checkout extends AbstractBlock {
 		}
 
 		if ( $is_block_editor && ! $this->asset_data_registry->exists( 'globalPaymentMethods' ) ) {
-			$payment_methods           = WC()->payment_gateways->payment_gateways();
+			$payment_gateways          = $this->get_enabled_payment_gateways();
 			$formatted_payment_methods = array_reduce(
-				$payment_methods,
+				$payment_gateways,
 				function( $acc, $method ) {
 					if ( 'yes' === $method->enabled ) {
 						$acc[] = [
@@ -346,6 +346,21 @@ class Checkout extends AbstractBlock {
 		 * @since 2.6.0
 		 */
 		do_action( 'woocommerce_blocks_checkout_enqueue_data' );
+	}
+
+	/**
+	 * Get payment methods that are enabled in settings.
+	 *
+	 * @return array
+	 */
+	protected function get_enabled_payment_gateways() {
+		$payment_gateways = WC()->payment_gateways->payment_gateways();
+		return array_filter(
+			$payment_gateways,
+			function( $payment_gateway ) {
+				return 'yes' === $payment_gateway->enabled;
+			}
+		);
 	}
 
 	/**
@@ -388,9 +403,23 @@ class Checkout extends AbstractBlock {
 			return;
 		}
 		add_filter( 'woocommerce_payment_methods_list_item', [ $this, 'include_token_id_with_payment_methods' ], 10, 2 );
+
+		$payment_gateways = $this->get_enabled_payment_gateways();
+		$payment_methods  = wc_get_customer_saved_methods_list( get_current_user_id() );
+
+		// Filter out payment methods that are not enabled.
+		foreach ( $payment_methods as $payment_method_group => $saved_payment_methods ) {
+			$payment_methods[ $payment_method_group ] = array_filter(
+				$saved_payment_methods,
+				function( $saved_payment_method ) use ( $payment_gateways ) {
+					return in_array( $saved_payment_method['method']['gateway'], array_keys( $payment_gateways ), true );
+				}
+			);
+		}
+
 		$this->asset_data_registry->add(
 			'customerPaymentMethods',
-			wc_get_customer_saved_methods_list( get_current_user_id() )
+			$payment_methods
 		);
 		remove_filter( 'woocommerce_payment_methods_list_item', [ $this, 'include_token_id_with_payment_methods' ], 10, 2 );
 	}
