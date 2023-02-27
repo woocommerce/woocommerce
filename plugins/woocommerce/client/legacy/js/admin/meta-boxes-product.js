@@ -57,6 +57,10 @@ jQuery( function ( $ ) {
 		} );
 	} );
 
+	$( document.body ).on( 'woocommerce_attributes_saved', function () {
+		$( '#product_attributes_actions' ).removeClass( 'hidden' );
+	} );
+
 	$( function () {
 		if ( ! woocommerce_admin_meta_boxes.has_attributes ) {
 			$( 'button.add_attribute' ).trigger( 'click' );
@@ -467,11 +471,18 @@ jQuery( function ( $ ) {
 
 			attribute_row_indexes();
 
-			$attributes
+			const lastAttribute = $attributes
 				.find( '.woocommerce_attribute' )
-				.last()
-				.find( 'h3' )
-				.trigger( 'click' );
+				.last();
+
+			lastAttribute.find( 'h3' ).trigger( 'click' );
+
+			if ( $attributes.length === 1 ) {
+				// if there is only one attribute, show the actions that were hidden when user finishes typing attribute value to avoid a roundtrip
+				lastAttribute.find( '[name^="attribute_values"]' ).on( 'blur', function () {
+					$( '#product_attributes_actions' ).removeClass( 'hidden' );
+				} );
+			}
 
 			$wrapper.unblock();
 
@@ -799,7 +810,6 @@ jQuery( function ( $ ) {
 				);
 
 				$( document.body ).trigger( 'woocommerce_attributes_saved' );
-
 			}
 		} );
 	} );
@@ -1047,7 +1057,6 @@ jQuery( function ( $ ) {
 			delay: 200,
 			keepAlive: true,
 		} );
-
 
 	// add a tooltip to the right of the product image meta box "Set product image" and "Add product gallery images"
 	const setProductImageLink = $( '#set-post-thumbnail' );

@@ -12,7 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 		// Product attributes - taxonomies and custom, ordered, with visibility and variation attributes set.
 		$product_attributes = $product_object->get_attributes( 'edit' );
 
-		if ( empty( $attribute_taxonomies ) && empty( $product_attributes ) ) :
+		$is_empty = empty( $attribute_taxonomies ) && empty( $product_attributes );
+
+		if ( $is_empty ) :
 			?>
 			<div id="message" class="inline notice woocommerce-message">
 				<p>
@@ -25,10 +27,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</p>
 			</div>
 		<?php endif; ?>
-		<span class="expand-close">
-			<a href="#" class="expand_all"><?php esc_html_e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php esc_html_e( 'Close', 'woocommerce' ); ?></a>
-		</span>
-
+		<div id="product_attributes_actions" class="<?php echo $is_empty ? 'hidden' : ''; ?>">
+			<span class="expand-close">
+				<a href="#" class="expand_all"><?php esc_html_e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php esc_html_e( 'Close', 'woocommerce' ); ?></a>
+			</span>
 		<?php
 		/**
 		 * Filter for the attribute taxonomy filter dropdown threshold.
@@ -56,6 +58,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<select class="wc-attribute-search attribute_taxonomy" id="attribute_taxonomy" name="attribute_taxonomy" data-placeholder="<?php esc_attr_e( 'Add existing attribute', 'woocommerce' ); ?>" data-minimum-input-length="0">
 			</select>
 		<?php endif; ?>
+		</div>
 	</div>
 	<div class="product_attributes wc-metaboxes">
 		<?php
