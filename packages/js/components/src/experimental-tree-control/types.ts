@@ -23,7 +23,7 @@ type BaseTreeProps = {
 	 */
 	multiple?: boolean;
 	/**
-	 * When `multipe` is true and a child item is selected, all its
+	 * When `multiple` is true and a child item is selected, all its
 	 * ancestors and its descendants are also selected. If it's false
 	 * only the clicked item is selected.
 	 *
@@ -31,7 +31,7 @@ type BaseTreeProps = {
 	 */
 	onSelect?( value: Item | Item[] ): void;
 	/**
-	 * When `multipe` is true and a child item is unselected, all its
+	 * When `multiple` is true and a child item is unselected, all its
 	 * ancestors (if no sibblings are selected) and its descendants
 	 * are also unselected. If it's false only the clicked item is
 	 * unselected.
