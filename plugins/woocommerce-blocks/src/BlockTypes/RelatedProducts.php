@@ -39,6 +39,14 @@ class RelatedProducts extends AbstractBlock {
 	}
 
 	/**
+	 * It isn't necessary register block assets because it is a server side block.
+	 */
+	protected function register_block_type_assets() {
+		return null;
+	}
+
+
+	/**
 	 * Update the query for the product query block.
 	 *
 	 * @param string|null $pre_render   The pre-rendered content. Default null.
