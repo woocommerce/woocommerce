@@ -58,7 +58,7 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 					) }
 				</div>
 				<div>
-					{ newCampaignTypes.map( ( el ) => {
+					{ newCampaignTypes?.map( ( el ) => {
 						return (
 							<Flex
 								key={ el.id }

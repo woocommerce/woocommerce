@@ -1,38 +1,46 @@
 /**
+ * External dependencies
+ */
+import { useSelect } from '@wordpress/data';
+
+/**
  * Internal dependencies
  */
+import { STORE_KEY } from '~/marketing/data-multichannel/constants';
+import {
+	CampaignTypesState,
+	CampaignType as APICampaignType,
+	ApiFetchError,
+} from '~/marketing/data-multichannel/types';
 import { CampaignType } from '~/marketing/types/CampaignType';
 
 type UseNewCampaignTypes = {
 	loading: boolean;
-	data: Array< CampaignType >;
+	data?: Array< CampaignType >;
+	error?: ApiFetchError;
 };
 
 export const useNewCampaignTypes = (): UseNewCampaignTypes => {
-	return {
-		loading: false,
-		data: [
-			{
-				id: 'google-ads',
-				icon: 'https://woocommerce.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/google.svg',
-				name: 'Google',
-				description:
-					'Boost your product listings with a campaign that is automatically optimized to meet your goals',
-				createUrl:
-					'https://wc1.test/wp-admin/admin.php?page=wc-admin&path=%2Fgoogle%2Fsetup-ads',
-				channelSlug: 'google-listings-and-ads',
-				channelName: 'Google Listings and Ads',
-			},
-			{
-				id: 'pinterest-ads',
-				icon: 'https://woocommerce.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/pinterest.svg',
-				name: 'Pinterest',
-				description:
-					'Create single or multi image ads that promote a product relevant to people’s interests (Opens in Pinterest Ads Manager)',
-				createUrl: 'https://pinterest.com/create-campaign',
-				channelSlug: 'pinterest-for-woocommerce',
-				channelName: 'Pinterest for WooCommerce',
-			},
-		],
+	const convert = ( campaignType: APICampaignType ): CampaignType => {
+		return {
+			id: campaignType.id,
+			icon: campaignType.icon_url,
+			name: campaignType.name,
+			description: campaignType.description,
+			createUrl: campaignType.create_url,
+			channelName: campaignType.channel.name,
+			channelSlug: campaignType.channel.slug,
+		};
 	};
+
+	return useSelect( ( select ) => {
+		const { hasFinishedResolution, getCampaignTypes } = select( STORE_KEY );
+		const campaignTypesState = getCampaignTypes< CampaignTypesState >();
+
+		return {
+			loading: ! hasFinishedResolution( 'getCampaignTypes' ),
+			data: campaignTypesState.data?.map( convert ),
+			error: campaignTypesState.error,
+		};
+	} );
 };
