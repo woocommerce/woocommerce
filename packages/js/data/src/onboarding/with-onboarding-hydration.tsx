@@ -12,12 +12,15 @@ import { STORE_NAME } from './constants';
 import { ProfileItems } from './types';
 import { OnboardingSelector } from './';
 
-export const withOnboardingHydration = ( data: {
+export const withOnboardingHydration = < ComponentProps, >( data: {
 	profileItems: ProfileItems;
 } ) => {
 	let hydratedProfileItems = false;
 
-	return createHigherOrderComponent< Record< string, unknown > >(
+	return createHigherOrderComponent<
+		Record< string, unknown >,
+		ComponentProps
+	>(
 		( OriginalComponent ) => ( props ) => {
 			const onboardingRef = useRef( data );
 

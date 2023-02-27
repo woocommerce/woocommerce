@@ -11,8 +11,11 @@ import { createElement, useRef } from '@wordpress/element';
 import { STORE_NAME } from './constants';
 import { Settings } from './types';
 
-export const withSettingsHydration = ( group: string, settings: Settings ) =>
-	createHigherOrderComponent< Record< string, unknown > >(
+export const withSettingsHydration = < ComponentProps, >(
+	group: string,
+	settings: Settings
+) =>
+	createHigherOrderComponent< Record< string, unknown >, ComponentProps >(
 		( OriginalComponent ) => ( props ) => {
 			const settingsRef = useRef( settings );
 

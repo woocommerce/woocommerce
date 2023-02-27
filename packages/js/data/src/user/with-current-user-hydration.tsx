@@ -16,8 +16,10 @@ import { WCUser } from './types';
  *
  * @param {Object} currentUser Current user object in the same format as the WP REST API returns.
  */
-export const withCurrentUserHydration = ( currentUser: WCUser ) =>
-	createHigherOrderComponent< Record< string, unknown > >(
+export const withCurrentUserHydration = < ComponentProps, >(
+	currentUser: WCUser
+) =>
+	createHigherOrderComponent< Record< string, unknown >, ComponentProps >(
 		( OriginalComponent ) => ( props ) => {
 			const userRef = useRef( currentUser );
 

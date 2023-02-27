@@ -21,8 +21,10 @@ type PluginHydrationData = {
 	activePlugins: string[];
 	jetpackStatus?: { isActive: boolean };
 };
-export const withPluginsHydration = ( data: PluginHydrationData ) =>
-	createHigherOrderComponent< Record< string, unknown > >(
+export const withPluginsHydration = < ComponentProps, >(
+	data: PluginHydrationData
+) =>
+	createHigherOrderComponent< Record< string, unknown >, ComponentProps >(
 		( OriginalComponent ) => ( props ) => {
 			const dataRef = useRef( data );
 
