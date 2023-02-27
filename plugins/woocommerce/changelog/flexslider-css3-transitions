@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+FlexSlider always uses CSS3 transitions for "slide" animations.
