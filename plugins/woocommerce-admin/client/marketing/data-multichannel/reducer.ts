@@ -25,6 +25,10 @@ const initialState = {
 		pages: undefined,
 		total: undefined,
 	},
+	campaignTypes: {
+		data: undefined,
+		error: undefined,
+	},
 };
 
 export const reducer: Reducer< State, Action > = (
@@ -88,6 +92,22 @@ export const reducer: Reducer< State, Action > = (
 						},
 					},
 					total: action.meta.total,
+				},
+			};
+
+		case TYPES.RECEIVE_CAMPAIGN_TYPES_SUCCESS:
+			return {
+				...state,
+				campaignTypes: {
+					data: action.payload,
+				},
+			};
+
+		case TYPES.RECEIVE_CAMPAIGN_TYPES_ERROR:
+			return {
+				...state,
+				campaignTypes: {
+					error: action.payload,
 				},
 			};
 

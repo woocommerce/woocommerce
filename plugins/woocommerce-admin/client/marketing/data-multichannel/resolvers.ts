@@ -13,12 +13,15 @@ import {
 	receiveRecommendedChannelsError,
 	receiveCampaignsSuccess,
 	receiveCampaignsError,
+	receiveCampaignTypesSuccess,
+	receiveCampaignTypesError,
 } from './actions';
 import { awaitResponseJson } from './controls';
 import {
 	RegisteredChannel,
 	RecommendedChannel,
 	Campaign,
+	CampaignType,
 	ApiFetchError,
 } from './types';
 import { API_NAMESPACE } from './constants';
@@ -95,6 +98,22 @@ export function* getCampaigns( page: number, perPage: number ) {
 					total,
 				},
 			} );
+		}
+
+		throw error;
+	}
+}
+
+export function* getCampaignTypes() {
+	try {
+		const data: CampaignType[] = yield apiFetch( {
+			path: `${ API_NAMESPACE }/campaign-types`,
+		} );
+
+		yield receiveCampaignTypesSuccess( data );
+	} catch ( error ) {
+		if ( isApiFetchError( error ) ) {
+			yield receiveCampaignTypesError( error );
 		}
 
 		throw error;

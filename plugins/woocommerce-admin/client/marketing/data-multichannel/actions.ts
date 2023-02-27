@@ -7,6 +7,7 @@ import {
 	RegisteredChannel,
 	RecommendedChannel,
 	Campaign,
+	CampaignType,
 } from './types';
 
 export const receiveRegisteredChannelsSuccess = (
@@ -73,6 +74,24 @@ export const receiveCampaignsError = ( error: {
 	};
 };
 
+export const receiveCampaignTypesSuccess = (
+	campaignTypes: Array< CampaignType >
+) => {
+	return {
+		type: TYPES.RECEIVE_CAMPAIGN_TYPES_SUCCESS,
+		payload: campaignTypes,
+		error: false,
+	};
+};
+
+export const receiveCampaignTypesError = ( error: ApiFetchError ) => {
+	return {
+		type: TYPES.RECEIVE_CAMPAIGN_TYPES_ERROR,
+		payload: error,
+		error: true,
+	};
+};
+
 export type Action = ReturnType<
 	| typeof receiveRegisteredChannelsSuccess
 	| typeof receiveRegisteredChannelsError
@@ -80,4 +99,6 @@ export type Action = ReturnType<
 	| typeof receiveRecommendedChannelsError
 	| typeof receiveCampaignsSuccess
 	| typeof receiveCampaignsError
+	| typeof receiveCampaignTypesSuccess
+	| typeof receiveCampaignTypesError
 >;
