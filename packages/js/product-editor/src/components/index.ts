@@ -12,3 +12,4 @@ export {
 	CategoryField as __experimental__experimentalDetailsCategoryField,
 } from './field-details-categories';
 export { DetailsSummaryField as __experimentalDetailsSummaryField } from './field-details-summary';
+export { DetailsDescriptionField as __experimentalDetailsDescriptionField } from './field-details-description';
