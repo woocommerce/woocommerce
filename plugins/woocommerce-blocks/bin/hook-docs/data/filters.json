@@ -735,6 +735,58 @@
             "args": 1
         },
         {
+            "name": "woocommerce_disable_compatibility_layer",
+            "file": "Templates/BlockTemplatesCompatibility.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters to disable the compatibility layer for the blockified templates.",
+                "long_description": "This hooks allows to disable the compatibility layer for the blockified.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "TBD",
+                        "description": "TBD"
+                    },
+                    {
+                        "name": "param",
+                        "content": "",
+                        "types": [
+                            "\\Automattic\\WooCommerce\\Blocks\\Templates\\boolean."
+                        ],
+                        "variable": ""
+                    }
+                ],
+                "long_description_html": "<p>This hooks allows to disable the compatibility layer for the blockified.</p>"
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_disable_compatibility_layer",
+            "file": "Templates/BlockTemplatesCompatibility.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters to disable the compatibility layer for the blockified templates.",
+                "long_description": "This hooks allows to disable the compatibility layer for the blockified.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "TBD",
+                        "description": "TBD"
+                    },
+                    {
+                        "name": "param",
+                        "content": "",
+                        "types": [
+                            "\\Automattic\\WooCommerce\\Blocks\\Templates\\boolean."
+                        ],
+                        "variable": ""
+                    }
+                ],
+                "long_description_html": "<p>This hooks allows to disable the compatibility layer for the blockified.</p>"
+            },
+            "args": 1
+        },
+        {
             "name": "woocommerce_ga_disable_tracking",
             "file": "Domain/Services/GoogleAnalytics.php",
             "type": "filter",
