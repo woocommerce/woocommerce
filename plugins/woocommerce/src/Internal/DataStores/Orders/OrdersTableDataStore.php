@@ -573,7 +573,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	public function get_download_permissions_granted( $order ) {
 		$order_id = is_int( $order ) ? $order : $order->get_id();
-		return $this->get_field_value( $order_id, 'download_permission_granted', self::get_operational_data_table_name() );
+		$order    = wc_get_order( $order_id );
+		return $order->get_download_permissions_granted();
 	}
 
 	/**
@@ -599,7 +600,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	public function get_recorded_sales( $order ) {
 		$order_id = is_int( $order ) ? $order : $order->get_id();
-		return $this->get_field_value( $order_id, 'recorded_sales', self::get_operational_data_table_name() );
+		$order    = wc_get_order( $order_id );
+		return $order->get_recorded_sales();
 	}
 
 	/**
@@ -625,7 +627,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	public function get_recorded_coupon_usage_counts( $order ) {
 		$order_id = is_int( $order ) ? $order : $order->get_id();
-		return $this->get_field_value( $order_id, 'coupon_usages_are_counted', self::get_operational_data_table_name() );
+		$order    = wc_get_order( $order_id );
+		return $order->get_recorded_coupon_usage_counts();
 	}
 
 	/**
@@ -651,7 +654,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	public function get_email_sent( $order ) {
 		$order_id = is_int( $order ) ? $order : $order->get_id();
-		return $this->get_field_value( $order_id, 'new_order_email_sent', self::get_operational_data_table_name() );
+		$order    = wc_get_order( $order_id );
+		return $order->get_new_order_email_sent();
 	}
 
 	/**
@@ -702,7 +706,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	public function get_stock_reduced( $order ) {
 		$order_id = is_int( $order ) ? $order : $order->get_id();
-		return $this->get_field_value( $order_id, 'order_stock_reduced', self::get_operational_data_table_name() );
+		$order    = wc_get_order( $order_id );
+		return $order->get_order_stock_reduced();
 	}
 
 	/**
@@ -897,31 +902,6 @@ WHERE
 			)
 		);
 		// phpcs:enable
-	}
-
-	/**
-	 * Returns field value for an order directly from the database, skipping the value stored in order prop.
-	 * Useful when you are not sure if the order prop is manipulated by a callee function without having to refresh the order.
-	 *
-	 * @param int    $order_id Order ID.
-	 * @param string $column_name Name of the column to fetch value from.
-	 * @param string $table_name Name of the table to fetch value from.
-	 *
-	 * @return string|null Field value or null if not found.
-	 */
-	public function get_field_value( $order_id, $column_name, $table_name ) {
-		global $wpdb;
-		$where_clause = ' WHERE 1=1 ';
-		if ( self::get_addresses_table_name() === $table_name ) {
-			$address_type  = explode( '_', $column_name )[0];
-			$column_name   = str_replace( $address_type . '_', '', $column_name );
-			$where_clause .= $wpdb->prepare( ' AND type = %s', $address_type );
-		}
-		$select_clause = 'SELECT `' . esc_sql( $column_name ) . '` FROM `' . esc_sql( $table_name ) . '` ';
-		$where_clause .= $wpdb->prepare( ' AND order_id = %d', $order_id );
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Both select_clause and where_clause are escaped.
-		return $wpdb->get_var( "$select_clause $where_clause LIMIT 1" );
 	}
 
 	/**
