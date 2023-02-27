@@ -71,7 +71,6 @@ export function* request< Query extends BaseQueryParams, DataType >(
 			path: url,
 			method: 'GET',
 		} );
-
 	if ( isUnboundedRequest && ! ( 'data' in response ) ) {
 		return { items: response, totalCount: response.length };
 	}

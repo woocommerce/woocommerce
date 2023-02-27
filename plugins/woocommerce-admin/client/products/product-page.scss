@@ -105,6 +105,13 @@
 		}
 		width: 50%;
 	}
+
+	.components-base-control__label {
+		.woocommerce-product-form__secondary-text {
+			display: block;
+			font-weight: 400;
+		}
+	}
 }
 
 .woocommerce-edit-product {

@@ -32,7 +32,7 @@ test.describe( 'Cart > Redirect to cart from shop', () => {
 
 	test.beforeEach( async ( { context } ) => {
 		// Shopping cart is very sensitive to cookies, so be explicit
-		context.clearCookies();
+		await context.clearCookies();
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {

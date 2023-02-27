@@ -8,6 +8,7 @@
  * @version 2.1.0
  */
 
+use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -105,10 +106,10 @@ function wc_get_filename_from_url( $file_url ) {
  *
  * @param int|float $dimension    Dimension.
  * @param string    $to_unit      Unit to convert to.
- *                                Options: 'in', 'm', 'cm', 'm'.
+ *                                Options: 'in', 'mm', 'cm', 'm'.
  * @param string    $from_unit    Unit to convert from.
  *                                Defaults to ''.
- *                                Options: 'in', 'm', 'cm', 'm'.
+ *                                Options: 'in', 'mm', 'cm', 'm'.
  * @return float
  */
 function wc_get_dimension( $dimension, $to_unit, $from_unit = '' ) {
@@ -1303,7 +1304,14 @@ function wc_format_weight( $weight ) {
 	$weight_string = wc_format_localized_decimal( $weight );
 
 	if ( ! empty( $weight_string ) ) {
-		$weight_string .= ' ' . get_option( 'woocommerce_weight_unit' );
+		$weight_label = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit' ) );
+
+		$weight_string = sprintf(
+			// translators: 1. A formatted number; 2. A label for a weight unit of measure. E.g. 2.72 kg.
+			_x( '%1$s %2$s', 'formatted weight', 'woocommerce' ),
+			$weight_string,
+			$weight_label
+		);
 	} else {
 		$weight_string = __( 'N/A', 'woocommerce' );
 	}
@@ -1322,7 +1330,14 @@ function wc_format_dimensions( $dimensions ) {
 	$dimension_string = implode( ' &times; ', array_filter( array_map( 'wc_format_localized_decimal', $dimensions ) ) );
 
 	if ( ! empty( $dimension_string ) ) {
-		$dimension_string .= ' ' . get_option( 'woocommerce_dimension_unit' );
+		$dimension_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit' ) );
+
+		$dimension_string = sprintf(
+			// translators: 1. A formatted number; 2. A label for a dimensions unit of measure. E.g. 3.14 cm.
+			_x( '%1$s %2$s', 'formatted dimensions', 'woocommerce' ),
+			$dimension_string,
+			$dimension_label
+		);
 	} else {
 		$dimension_string = __( 'N/A', 'woocommerce' );
 	}

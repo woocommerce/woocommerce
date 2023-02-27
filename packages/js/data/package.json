@@ -63,7 +63,7 @@
 		"@types/wordpress__data": "^6.0.0",
 		"@types/wordpress__data-controls": "^2.2.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^8.12.0",
+		"eslint": "^8.32.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
 		"redux": "^4.1.0",
@@ -86,7 +86,7 @@
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
 		"lint": "eslint src",
-		"start": "tsc --build --watch",
+		"start": "tsc --build --watch ./tsconfig.json ./tsconfig-cjs.json",
 		"prepack": "pnpm run clean && pnpm run build",
 		"lint:fix": "eslint src --fix",
 		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"

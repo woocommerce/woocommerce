@@ -66,7 +66,6 @@ const completer: AutoCompleter = {
 		const match = computeSuggestionMatch( product.name, query );
 		return (
 			<Fragment>
-				{ /* @ts-expect-error TODO: migrate ProductImage component to TS. */ }
 				<ProductImage
 					key="thumbnail"
 					className="woocommerce-search__result-thumbnail"

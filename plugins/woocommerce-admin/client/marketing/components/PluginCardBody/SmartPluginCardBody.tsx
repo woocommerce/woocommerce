@@ -16,6 +16,7 @@ import { PluginCardBody } from '~/marketing/components';
 import { RecommendedPlugin } from '~/marketing/types';
 import { getInAppPurchaseUrl } from '~/lib/in-app-purchase';
 import { createNoticesFromResponse } from '~/lib/notices';
+import { useIsPluginInstalledNotActivated } from './useIsPluginInstalledNotActivated';
 import './PluginCardBody.scss';
 
 type SmartPluginCardBodyProps = {
@@ -38,6 +39,8 @@ export const SmartPluginCardBody = ( {
 		null
 	);
 	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
+	const { isPluginInstalledNotActivated } =
+		useIsPluginInstalledNotActivated();
 
 	/**
 	 * Install and activate a plugin.
@@ -70,6 +73,19 @@ export const SmartPluginCardBody = ( {
 
 	const renderButton = () => {
 		const buttonDisabled = !! currentPlugin;
+
+		if ( isPluginInstalledNotActivated( plugin.product ) ) {
+			return (
+				<Button
+					variant="secondary"
+					isBusy={ currentPlugin === plugin.product }
+					disabled={ buttonDisabled }
+					onClick={ installAndActivate }
+				>
+					{ __( 'Activate', 'woocommerce' ) }
+				</Button>
+			);
+		}
 
 		if ( plugin.direct_install ) {
 			return (

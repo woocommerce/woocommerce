@@ -167,16 +167,16 @@
 
 		if ( attributes.count && attributes.count === attributes.chosenCount ) {
 			if ( form.useAjax ) {
-				if ( form.xhr ) {
-					form.xhr.abort();
+				if ( form.controller ) {
+					form.controller.abort();
 				}
 				form.$form.block( { message: null, overlayCSS: { background: '#fff', opacity: 0.6 } } );
 				currentAttributes.product_id  = parseInt( form.$form.data( 'product_id' ), 10 );
 				currentAttributes.custom_data = form.$form.data( 'custom_data' );
-				form.xhr                      = $.ajax( {
+				const options                 = {
 					url: wc_add_to_cart_variation_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_variation' ),
 					type: 'POST',
-					data: currentAttributes,
+					data: $.param( currentAttributes ),
 					success: function( variation ) {
 						if ( variation ) {
 							form.$form.trigger( 'found_variation', [ variation ] );
@@ -199,7 +199,25 @@
 					complete: function() {
 						form.$form.unblock();
 					}
-				} );
+				};
+
+				const controller = new AbortController();
+				form.controller = controller;
+
+				window.fetch( options.url, {
+					method: options.type,
+					headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+					body: options.data,
+					signal: controller.signal
+				} )
+					.then( response => {
+						if ( !response.ok ) {
+							throw new Error( response.statusText );
+						}
+						return response.json();
+					})
+					.then( options.success )
+					.finally( () => options.complete() );
 			} else {
 				form.$form.trigger( 'update_variation_values' );
 
@@ -245,7 +263,8 @@
 			$dimensions    = form.$product.find(
 				'.product_dimensions, .woocommerce-product-attributes-item--dimensions .woocommerce-product-attributes-item__value'
 			),
-			$qty           = form.$singleVariationWrap.find( '.quantity' ),
+			$qty_input     = form.$singleVariationWrap.find( '.quantity input.qty[name="quantity"]' ),
+			$qty           = $qty_input.closest( '.quantity' ),
 			purchasable    = true,
 			variation_id   = '',
 			template       = false,
@@ -290,12 +309,11 @@
 
 		// Hide or show qty input
 		if ( variation.is_sold_individually === 'yes' ) {
-			$qty.find( 'input.qty' ).val( '1' ).attr( 'min', '1' ).attr( 'max', '' ).trigger( 'change' );
+			$qty_input.val( '1' ).attr( 'min', '1' ).attr( 'max', '' ).trigger( 'change' );
 			$qty.hide();
 		} else {
 
-			var $qty_input = $qty.find( 'input.qty' ),
-				qty_val    = parseFloat( $qty_input.val() );
+			var qty_val    = parseFloat( $qty_input.val() );
 
 			if ( isNaN( qty_val ) ) {
 				qty_val = variation.min_qty;

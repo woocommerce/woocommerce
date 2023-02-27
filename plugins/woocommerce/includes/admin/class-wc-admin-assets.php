@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -109,7 +110,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			$screen       = get_current_screen();
 			$screen_id    = $screen ? $screen->id : '';
-			$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
+			$wc_screen_id = 'woocommerce';
 			$suffix       = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 			$version      = Constants::get_constant( 'WC_VERSION' );
 
@@ -214,6 +215,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'gateway_toggle' => wp_create_nonce( 'woocommerce-toggle-payment-gateway-enabled' ),
 					),
 					'urls'                              => array(
+						'add_product'     => Features::is_enabled( 'new-product-management-experience' ) ? esc_url_raw( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) ) : null,
 						'import_products' => current_user_can( 'import' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) : null,
 						'export_products' => current_user_can( 'export' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ) : null,
 					),
@@ -337,6 +339,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				$remove_item_notice     = __( 'Are you sure you want to remove the selected items?', 'woocommerce' );
 				$remove_fee_notice      = __( 'Are you sure you want to remove the selected fees?', 'woocommerce' );
 				$remove_shipping_notice = __( 'Are you sure you want to remove the selected shipping?', 'woocommerce' );
+				$product                = wc_get_product( $post_id );
 
 				// Eventually this will become wc_data_or_post object as we implement more custom tables.
 				$order_or_post_object = $post;
@@ -401,6 +404,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'rounding_precision'                 => wc_get_rounding_precision(),
 					'tax_rounding_mode'                  => wc_get_tax_rounding_mode(),
 					'product_types'                      => array_unique( array_merge( array( 'simple', 'grouped', 'variable', 'external' ), array_keys( wc_get_product_types() ) ) ),
+					'has_attributes'                     => ! empty( wc_get_attribute_taxonomies() ) || ! empty( $product ? $product->get_attributes( 'edit' ) : array() ),
 					'i18n_download_permission_fail'      => __( 'Could not grant access - the user may already have permission for this file or billing email is not set. Ensure the billing email is set, and the order has been saved.', 'woocommerce' ),
 					'i18n_permission_revoke'             => __( 'Are you sure you want to revoke access to this download?', 'woocommerce' ),
 					'i18n_tax_rate_already_exists'       => __( 'You cannot add the same tax rate twice!', 'woocommerce' ),
@@ -540,8 +544,16 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		 * @return bool Whether the current screen is an order edit screen.
 		 */
 		private function is_order_meta_box_screen( $screen_id ) {
-			return in_array( str_replace( 'edit-', '', $screen_id ), wc_get_order_types( 'order-meta-boxes' ), true ) ||
-						wc_get_page_screen_id( 'shop-order' ) === $screen_id;
+			$screen_id = str_replace( 'edit-', '', $screen_id );
+
+			$types_with_metaboxes_screen_ids = array_filter(
+				array_map(
+					'wc_get_page_screen_id',
+					wc_get_order_types( 'order-meta-boxes' )
+				)
+			);
+
+			return in_array( $screen_id, $types_with_metaboxes_screen_ids, true );
 		}
 
 	}

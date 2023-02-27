@@ -41,6 +41,7 @@ class Features {
 	protected static $beta_features = array(
 		'multichannel-marketing',
 		'navigation',
+		'new-product-management-experience',
 		'settings',
 	);
 

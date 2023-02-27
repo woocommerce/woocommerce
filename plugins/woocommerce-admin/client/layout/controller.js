@@ -29,7 +29,6 @@ const EditProductPage = lazy( () =>
 		/* webpackChunkName: "edit-product-page" */ '../products/edit-product-page'
 	)
 );
-
 const AddProductPage = lazy( () =>
 	import(
 		/* webpackChunkName: "add-product-page" */ '../products/add-product-page'
@@ -46,7 +45,6 @@ const AnalyticsSettings = lazy( () =>
 const Dashboard = lazy( () =>
 	import( /* webpackChunkName: "dashboard" */ '../dashboard' )
 );
-
 const Homescreen = lazy( () =>
 	import( /* webpackChunkName: "homescreen" */ '../homescreen' )
 );
@@ -66,7 +64,6 @@ const ProfileWizard = lazy( () =>
 const SettingsGroup = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ '../settings' )
 );
-
 const WCPaymentsWelcomePage = lazy( () =>
 	import(
 		/* webpackChunkName: "wcpay-payment-welcome-page" */ '../payments-welcome'
@@ -201,6 +198,22 @@ export const getPages = () => {
 			},
 			wpOpenMenu: 'menu-posts-product',
 			capability: 'manage_woocommerce',
+		} );
+	}
+
+	if ( window.wcAdminFeatures[ 'product-variation-management' ] ) {
+		pages.push( {
+			container: EditProductPage,
+			path: '/product/:productId/variation/:variationId',
+			breadcrumbs: [
+				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
+				__( 'Edit Product Variation', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-edit-product',
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'edit_products',
 		} );
 	}
 

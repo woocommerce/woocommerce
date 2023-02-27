@@ -5,6 +5,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <div id="product_attributes" class="panel wc-metaboxes-wrapper hidden">
 	<div class="toolbar toolbar-top">
+		<?php
+		global $wc_product_attributes;
+		// Array of defined attribute taxonomies.
+		$attribute_taxonomies = wc_get_attribute_taxonomies();
+		// Product attributes - taxonomies and custom, ordered, with visibility and variation attributes set.
+		$product_attributes = $product_object->get_attributes( 'edit' );
+
+		if ( empty( $attribute_taxonomies ) && empty( $product_attributes ) ) :
+			?>
+			<div id="message" class="inline notice woocommerce-message">
+				<p>
+					<?php
+					esc_html_e(
+						'Add descriptive pieces of information that customers can use to search for this product on your store, such as “Material” or “Brand”.',
+						'woocommerce'
+					);
+					?>
+				</p>
+			</div>
+		<?php endif; ?>
 		<span class="expand-close">
 			<a href="#" class="expand_all"><?php esc_html_e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php esc_html_e( 'Close', 'woocommerce' ); ?></a>
 		</span>
@@ -16,15 +36,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		 * @since 7.0.0
 		 * @param number $threshold The threshold for showing the simple dropdown.
 		 */
-		if ( count( wc_get_attribute_taxonomies() ) <= apply_filters( 'woocommerce_attribute_taxonomy_filter_threshold', 20 ) ) :
+		if ( count( $attribute_taxonomies ) <= apply_filters( 'woocommerce_attribute_taxonomy_filter_threshold', 20 ) ) :
 			?>
 			<select name="attribute_taxonomy" class="attribute_taxonomy">
 				<option value=""><?php esc_html_e( 'Custom product attribute', 'woocommerce' ); ?></option>
 				<?php
-				global $wc_product_attributes;
-				// Array of defined attribute taxonomies.
-				$attribute_taxonomies = wc_get_attribute_taxonomies();
-
 				if ( ! empty( $attribute_taxonomies ) ) {
 					foreach ( $attribute_taxonomies as $attr_taxonomy ) {
 						$attribute_taxonomy_name = wc_attribute_taxonomy_name( $attr_taxonomy->attribute_name );
@@ -43,11 +59,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 	<div class="product_attributes wc-metaboxes">
 		<?php
-		// Product attributes - taxonomies and custom, ordered, with visibility and variation attributes set.
-		$attributes = $product_object->get_attributes( 'edit' );
-		$i          = -1;
+		$i = -1;
 
-		foreach ( $attributes as $attribute ) {
+		foreach ( $product_attributes as $attribute ) {
 			$i++;
 			$metabox_class = array();
 

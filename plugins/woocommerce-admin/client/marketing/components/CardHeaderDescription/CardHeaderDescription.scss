@@ -1,6 +1,4 @@
 .woocommerce-marketing-card-header-description {
-	font-size: 14px;
-	font-weight: 400;
-	line-height: 18px;
+	@include font-size( 14 );
 	color: $gray-700;
 }

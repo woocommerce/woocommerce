@@ -13,44 +13,90 @@ import {
 	FlexItem,
 	FlexBlock,
 } from '@wordpress/components';
-import { Icon, megaphone } from '@wordpress/icons';
-import { Pagination, Table } from '@woocommerce/components';
+import { Icon, megaphone, cancelCircleFilled } from '@wordpress/icons';
+import {
+	Pagination,
+	Table,
+	TablePlaceholder,
+	Link,
+} from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
-import { CenteredSpinner, CardHeaderTitle } from '~/marketing/components';
+import { CardHeaderTitle } from '~/marketing/components';
 import { useCampaigns } from './useCampaigns';
 import { CreateNewCampaignModal } from './CreateNewCampaignModal';
 import './Campaigns.scss';
 
-const PER_PAGE = 5;
+const tableCaption = __( 'Campaigns', 'woocommerce' );
+const tableHeaders = [
+	{
+		key: 'campaign',
+		label: __( 'Campaign', 'woocommerce' ),
+	},
+	{
+		key: 'cost',
+		label: __( 'Cost', 'woocommerce' ),
+		isNumeric: true,
+	},
+];
+
+const perPage = 5;
 
 export const Campaigns = () => {
 	const [ page, setPage ] = useState( 1 );
 	const [ open, setOpen ] = useState( false );
-	const { loading, data } = useCampaigns();
+	const { loading, data, meta } = useCampaigns( page, perPage );
+	const total = meta?.total;
 
-	const renderBody = () => {
+	const getContent = () => {
 		if ( loading ) {
 			return (
-				<CardBody>
-					<CenteredSpinner />
+				<TablePlaceholder
+					caption={ tableCaption }
+					headers={ tableHeaders }
+					numberOfRows={ perPage }
+				/>
+			);
+		}
+
+		if ( ! data ) {
+			return (
+				<CardBody className="woocommerce-marketing-campaigns-card__content">
+					<Icon
+						className="woocommerce-marketing-campaigns-card__content-icon woocommerce-marketing-campaigns-card__content-icon--error"
+						icon={ cancelCircleFilled }
+						size={ 32 }
+					/>
+					<div className="woocommerce-marketing-campaigns-card__content-title">
+						{ __( 'An unexpected error occurred.', 'woocommerce' ) }
+					</div>
+					<div className="woocommerce-marketing-campaigns-card-body__content-description">
+						{ __(
+							'Please try again later. Check the logs if the problem persists. ',
+							'woocommerce'
+						) }
+					</div>
 				</CardBody>
 			);
 		}
 
 		if ( data.length === 0 ) {
 			return (
-				<CardBody className="woocommerce-marketing-campaigns-card-body-empty-content">
-					<Icon icon={ megaphone } size={ 32 } />
-					<div className="woocommerce-marketing-campaigns-card-body-empty-content-title">
+				<CardBody className="woocommerce-marketing-campaigns-card__content">
+					<Icon
+						className="woocommerce-marketing-campaigns-card__content-icon woocommerce-marketing-campaigns-card__content-icon--empty"
+						icon={ megaphone }
+						size={ 32 }
+					/>
+					<div className="woocommerce-marketing-campaigns-card__content-title">
 						{ __(
 							'Advertise with marketing campaigns',
 							'woocommerce'
 						) }
 					</div>
-					<div>
+					<div className="woocommerce-marketing-campaigns-card__content-description">
 						{ __(
 							'Easily create and manage marketing campaigns without leaving WooCommerce.',
 							'woocommerce'
@@ -60,32 +106,16 @@ export const Campaigns = () => {
 			);
 		}
 
-		const start = ( page - 1 ) * PER_PAGE;
-		const pagedData = data.slice( start, start + PER_PAGE );
-
 		return (
 			<Table
-				// this is `classNames`, instead of the correct `className`, due to misnaming in the Table component.
-				classNames="woocommerce-marketing-campaigns-table"
-				caption={ __( 'Campaigns', 'woocommerce' ) }
-				headers={ [
-					{
-						key: 'campaign',
-						label: __( 'Campaign', 'woocommerce' ),
-					},
-					{
-						key: 'cost',
-						label: __( 'Cost', 'woocommerce' ),
-						isNumeric: true,
-					},
-				] }
-				ids={ pagedData.map( ( el ) => el.id ) }
-				rows={ pagedData.map( ( el ) => {
+				caption={ tableCaption }
+				headers={ tableHeaders }
+				rows={ data.map( ( el ) => {
 					return [
 						{
 							display: (
 								<Flex gap={ 4 }>
-									<FlexItem className="woocommerce-marketing-campaign-logo">
+									<FlexItem className="woocommerce-marketing-campaigns-card__campaign-logo">
 										<img
 											src={ el.icon }
 											alt={ el.channelName }
@@ -95,14 +125,16 @@ export const Campaigns = () => {
 									</FlexItem>
 									<FlexBlock>
 										<Flex direction="column" gap={ 1 }>
-											<FlexItem className="woocommerce-marketing-campaign-title">
-												<a href={ el.manageUrl }>
+											<FlexItem className="woocommerce-marketing-campaigns-card__campaign-title">
+												<Link href={ el.manageUrl }>
 													{ el.title }
-												</a>
+												</Link>
 											</FlexItem>
-											<FlexItem className="woocommerce-marketing-campaign-description">
-												{ el.description }
-											</FlexItem>
+											{ el.description && (
+												<FlexItem className="woocommerce-marketing-campaigns-card__campaign-description">
+													{ el.description }
+												</FlexItem>
+											) }
 										</Flex>
 									</FlexBlock>
 								</Flex>
@@ -112,26 +144,6 @@ export const Campaigns = () => {
 					];
 				} ) }
 			/>
-		);
-	};
-
-	const renderFooter = () => {
-		if ( loading || data.length === 0 ) {
-			return null;
-		}
-
-		return (
-			<CardFooter className="woocommerce-marketing-campaigns-card-footer">
-				<Pagination
-					showPerPagePicker={ false }
-					perPage={ PER_PAGE }
-					page={ page }
-					total={ data.length }
-					onPageChange={ ( newPage: number ) => {
-						setPage( newPage );
-					} }
-				/>
-			</CardFooter>
 		);
 	};
 
@@ -150,8 +162,20 @@ export const Campaigns = () => {
 					/>
 				) }
 			</CardHeader>
-			{ renderBody() }
-			{ renderFooter() }
+			{ getContent() }
+			{ total && total > perPage && (
+				<CardFooter className="woocommerce-marketing-campaigns-card__footer">
+					<Pagination
+						showPerPagePicker={ false }
+						perPage={ perPage }
+						page={ page }
+						total={ total }
+						onPageChange={ ( newPage: number ) => {
+							setPage( newPage );
+						} }
+					/>
+				</CardFooter>
+			) }
 		</Card>
 	);
 };

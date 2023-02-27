@@ -1,0 +1,97 @@
+/**
+ * External dependencies
+ */
+
+import type { Reducer } from 'redux';
+
+/**
+ * Internal dependencies
+ */
+import { State } from './types';
+import { Action } from './actions';
+import { TYPES } from './action-types';
+
+const initialState = {
+	registeredChannels: {
+		data: undefined,
+		error: undefined,
+	},
+	recommendedChannels: {
+		data: undefined,
+		error: undefined,
+	},
+	campaigns: {
+		perPage: undefined,
+		pages: undefined,
+		total: undefined,
+	},
+};
+
+export const reducer: Reducer< State, Action > = (
+	state = initialState,
+	action
+) => {
+	switch ( action.type ) {
+		case TYPES.RECEIVE_REGISTERED_CHANNELS_SUCCESS:
+			return {
+				...state,
+				registeredChannels: {
+					data: action.payload,
+				},
+			};
+		case TYPES.RECEIVE_REGISTERED_CHANNELS_ERROR:
+			return {
+				...state,
+				registeredChannels: {
+					error: action.payload,
+				},
+			};
+		case TYPES.RECEIVE_RECOMMENDED_CHANNELS_SUCCESS:
+			return {
+				...state,
+				recommendedChannels: {
+					data: action.payload,
+				},
+			};
+		case TYPES.RECEIVE_RECOMMENDED_CHANNELS_ERROR:
+			return {
+				...state,
+				recommendedChannels: {
+					error: action.payload,
+				},
+			};
+
+		case TYPES.RECEIVE_CAMPAIGNS_SUCCESS:
+			return {
+				...state,
+				campaigns: {
+					perPage: action.meta.perPage,
+					pages: {
+						...state.campaigns.pages,
+						[ action.meta.page ]: {
+							data: action.payload,
+						},
+					},
+					total: action.meta.total,
+				},
+			};
+
+		case TYPES.RECEIVE_CAMPAIGNS_ERROR:
+			return {
+				...state,
+				campaigns: {
+					perPage: action.meta.perPage,
+					pages: {
+						...state.campaigns.pages,
+						[ action.meta.page ]: {
+							error: action.payload,
+						},
+					},
+					total: action.meta.total,
+				},
+			};
+
+		default:
+			return state;
+	}
+};

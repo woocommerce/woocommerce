@@ -506,7 +506,7 @@ class WC_Helper {
 	public static function admin_enqueue_scripts() {
 		$screen       = get_current_screen();
 		$screen_id    = $screen ? $screen->id : '';
-		$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
+		$wc_screen_id = 'woocommerce';
 
 		if ( $wc_screen_id . '_page_wc-addons' === $screen_id && isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
 			wp_enqueue_style( 'woocommerce-helper', WC()->plugin_url() . '/assets/css/helper.css', array(), Constants::get_constant( 'WC_VERSION' ) );
@@ -661,7 +661,7 @@ class WC_Helper {
 	 * @param object $screen WP screen object.
 	 */
 	public static function current_screen( $screen ) {
-		$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
+		$wc_screen_id = 'woocommerce';
 
 		if ( $wc_screen_id . '_page_wc-addons' !== $screen->id ) {
 			return;
@@ -1280,6 +1280,8 @@ class WC_Helper {
 			$source = 'inbox-notes';
 		elseif ( stripos( $request_uri, 'admin-ajax.php' ) ) :
 			$source = 'heartbeat-api';
+		elseif ( defined( 'WP_CLI' ) && WP_CLI ) :
+			$source = 'wc-cli';
 		endif;
 
 		// Obtain the connected user info.
@@ -1287,7 +1289,7 @@ class WC_Helper {
 			'subscriptions',
 			array(
 				'authenticated' => true,
-				'query_string'  => esc_url( '?source=' . $source ),
+				'query_string'  => '' !== $source ? esc_url( '?source=' . $source ) : '',
 			)
 		);
 

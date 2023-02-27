@@ -3,6 +3,9 @@ on:
   schedule:
     - cron: '0 0 * * *' # Run at 12 AM UTC.
   workflow_dispatch:
+
+permissions: {}
+
 jobs:
   build:
     if: github.repository_owner == 'woocommerce'
@@ -12,6 +15,8 @@ jobs:
       matrix:
         build: [trunk]
     runs-on: ubuntu-20.04
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
         with:
@@ -40,6 +45,8 @@ jobs:
   update:
     name: Update nightly tag commit ref
     runs-on: ubuntu-20.04
+    permissions:
+      contents: write
     steps:
       - name: Update nightly tag
         uses: richardsimko/github-tag-action@v1.0.5

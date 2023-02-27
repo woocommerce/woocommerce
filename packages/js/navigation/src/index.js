@@ -314,7 +314,7 @@ export const isWCAdmin = ( url = window.location.href ) => {
  * Returns a parsed object for an absolute or relative admin URL.
  *
  * @param {*} url - the url to test.
- * @return {Object} - the URL object of the given url.
+ * @return {URL} - the URL object of the given url.
  */
 export const parseAdminUrl = ( url ) => {
 	if ( url.startsWith( 'http' ) ) {

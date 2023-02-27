@@ -12,7 +12,10 @@
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 7.2.0
+ * @version 7.4.0
+ *
+ * @var bool   $readonly If the input should be set to readonly mode.
+ * @var string $type     The input type attribute.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -20,13 +23,6 @@ defined( 'ABSPATH' ) || exit;
 /* translators: %s: Quantity. */
 $label = ! empty( $args['product_name'] ) ? sprintf( esc_html__( '%s quantity', 'woocommerce' ), wp_strip_all_tags( $args['product_name'] ) ) : esc_html__( 'Quantity', 'woocommerce' );
 
-// In some cases we wish to display the quantity but not allow for it to be changed.
-if ( $max_value && $min_value === $max_value ) {
-	$is_readonly = true;
-	$input_value = $min_value;
-} else {
-	$is_readonly = false;
-}
 ?>
 <div class="quantity">
 	<?php
@@ -39,8 +35,8 @@ if ( $max_value && $min_value === $max_value ) {
 	?>
 	<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php echo esc_attr( $label ); ?></label>
 	<input
-		type="<?php echo $is_readonly ? 'text' : 'number'; ?>"
-		<?php wp_readonly( $is_readonly ); ?>
+		type="<?php echo esc_attr( $type ); ?>"
+		<?php echo $readonly ? 'readonly="readonly"' : ''; ?>
 		id="<?php echo esc_attr( $input_id ); ?>"
 		class="<?php echo esc_attr( join( ' ', (array) $classes ) ); ?>"
 		name="<?php echo esc_attr( $input_name ); ?>"
@@ -49,7 +45,7 @@ if ( $max_value && $min_value === $max_value ) {
 		size="4"
 		min="<?php echo esc_attr( $min_value ); ?>"
 		max="<?php echo esc_attr( 0 < $max_value ? $max_value : '' ); ?>"
-		<?php if ( ! $is_readonly ): ?>
+		<?php if ( ! $readonly ) : ?>
 			step="<?php echo esc_attr( $step ); ?>"
 			placeholder="<?php echo esc_attr( $placeholder ); ?>"
 			inputmode="<?php echo esc_attr( $inputmode ); ?>"

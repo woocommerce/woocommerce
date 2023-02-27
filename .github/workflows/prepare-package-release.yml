@@ -6,10 +6,16 @@ on:
                 description: 'Enter a specific package to release, or packages separated by commas, ie @woocommerce/components,@woocommerce/number. Leaving this input to the default "-a" will prepare to release all eligible packages.'
                 required: false
                 default: '-a'
+
+permissions: {}
+
 jobs:
     prepare:
         name: Run prepare script
         runs-on: ubuntu-20.04
+        permissions:
+            contents: write
+            pull-requests: write
         steps:
             - uses: actions/checkout@v3
 

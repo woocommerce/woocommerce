@@ -26,19 +26,6 @@
 * General
 */
 .woocommerce {
-
-	/**
-	* Buttons
-	*/
-	a.button,
-	button[name="add-to-cart"],
-	input[name="submit"],
-	button.single_add_to_cart_button,
-	button[type="submit"]:not(.wp-block-search__button) {
-		// Slightly increase CTA size across the board.
-		padding: 0.9rem 1.1rem;
-	}
-
 	button.button,
 	a.button {
 
@@ -113,14 +100,25 @@
 			}
 		}
 
-		.quantity {
-			// Adjust positioning of quantity selector and button.
-			.qty {
-				margin-right: 0.5rem;
+		form.cart {
+			div.quantity {
+				display: inline-block;
+				float: none; // Remove float set by WC core.
+				vertical-align: middle;
+	
+				// Adjust positioning of quantity selector and button.
+				.qty {
+					margin-right: 0.5rem;
+				}
 			}
-
-			+ .single_add_to_cart_button {
-				min-height: 51px;
+	
+			button[name="add-to-cart"],
+			button.single_add_to_cart_button {
+				display: inline-block;
+				float: none; // Remove float set by WC core.
+				margin-top: 0;
+				margin-bottom: 0;
+				vertical-align: middle;
 			}
 		}
 
@@ -297,17 +295,18 @@
 			}
 		}
 
+		.coupon {
+			display: flex;
+			align-items: center;
+		}
+
 		#coupon_code {
 			// Allow sufficient space for the coupon code.
 			width: auto;
 			margin-right: 0.8rem;
-		}
-
-		#coupon_code,
-		.actions .button {
 			height: 50px;
-			padding: 0.9rem 1.1rem;
 			font-size: var(--wp--preset--font-size--small);
+			padding: 0 1.1rem;
 		}
 
 		@media only screen and ( max-width: 768px ) {

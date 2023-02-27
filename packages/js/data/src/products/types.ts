@@ -66,12 +66,15 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	downloads: ProductDownload[];
 	external_url: string;
 	featured: boolean;
+	generated_slug: string;
 	id: number;
 	low_stock_amount: number;
 	manage_stock: boolean;
+	menu_order: number;
 	name: string;
 	on_sale: boolean;
 	permalink: string;
+	permalink_template: string;
 	price: string;
 	price_html: string;
 	purchasable: boolean;
@@ -107,9 +110,11 @@ export const productReadOnlyProperties = [
 	'date_created_gmt',
 	'date_modified',
 	'date_modified_gmt',
+	'generated_slug',
 	'id',
 	'on_sale',
 	'permalink',
+	'permalink_template',
 	'price',
 	'price_html',
 	'purchasable',
