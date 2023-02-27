@@ -2705,32 +2705,6 @@ packages:
       semver: 6.3.0
     dev: true
 
-  /@babel/helper-compilation-targets/7.17.7_@babel+core@7.12.9:
-    resolution: {integrity: sha512-UFzlz2jjd8kroj0hmCFV5zr+tQPi1dpC2cRsDV/3IEW8bJfCPrPpmcSN6ZS8RqIq4LXcmpipCQFPddyFA5Yc7w==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0
-    dependencies:
-      '@babel/compat-data': 7.19.3
-      '@babel/core': 7.12.9
-      '@babel/helper-validator-option': 7.18.6
-      browserslist: 4.19.3
-      semver: 6.3.0
-    dev: true
-
-  /@babel/helper-compilation-targets/7.17.7_@babel+core@7.16.12:
-    resolution: {integrity: sha512-UFzlz2jjd8kroj0hmCFV5zr+tQPi1dpC2cRsDV/3IEW8bJfCPrPpmcSN6ZS8RqIq4LXcmpipCQFPddyFA5Yc7w==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0
-    dependencies:
-      '@babel/compat-data': 7.19.3
-      '@babel/core': 7.16.12
-      '@babel/helper-validator-option': 7.18.6
-      browserslist: 4.19.3
-      semver: 6.3.0
-    dev: false
-
   /@babel/helper-compilation-targets/7.17.7_@babel+core@7.17.8:
     resolution: {integrity: sha512-UFzlz2jjd8kroj0hmCFV5zr+tQPi1dpC2cRsDV/3IEW8bJfCPrPpmcSN6ZS8RqIq4LXcmpipCQFPddyFA5Yc7w==}
     engines: {node: '>=6.9.0'}
@@ -6393,9 +6367,9 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.16.12
-      '@babel/helper-module-imports': 7.16.0
-      '@babel/helper-plugin-utils': 7.14.5
-      babel-plugin-polyfill-corejs2: 0.3.0_@babel+core@7.16.12
+      '@babel/helper-module-imports': 7.18.6
+      '@babel/helper-plugin-utils': 7.19.0
+      babel-plugin-polyfill-corejs2: 0.3.3_@babel+core@7.16.12
       babel-plugin-polyfill-corejs3: 0.4.0_@babel+core@7.16.12
       babel-plugin-polyfill-regenerator: 0.3.0_@babel+core@7.16.12
       semver: 6.3.0
@@ -6410,9 +6384,9 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.17.8
-      '@babel/helper-module-imports': 7.16.0
-      '@babel/helper-plugin-utils': 7.14.5
-      babel-plugin-polyfill-corejs2: 0.3.0_@babel+core@7.17.8
+      '@babel/helper-module-imports': 7.18.6
+      '@babel/helper-plugin-utils': 7.19.0
+      babel-plugin-polyfill-corejs2: 0.3.3_@babel+core@7.17.8
       babel-plugin-polyfill-corejs3: 0.4.0_@babel+core@7.17.8
       babel-plugin-polyfill-regenerator: 0.3.0_@babel+core@7.17.8
       semver: 6.3.0
@@ -6921,7 +6895,7 @@ packages:
     dependencies:
       '@babel/compat-data': 7.17.7
       '@babel/core': 7.12.9
-      '@babel/helper-compilation-targets': 7.17.7_@babel+core@7.12.9
+      '@babel/helper-compilation-targets': 7.19.3_@babel+core@7.12.9
       '@babel/helper-plugin-utils': 7.18.9
       '@babel/helper-validator-option': 7.16.7
       '@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression': 7.16.7_@babel+core@7.12.9
@@ -6988,7 +6962,7 @@ packages:
       '@babel/plugin-transform-unicode-escapes': 7.16.7_@babel+core@7.12.9
       '@babel/plugin-transform-unicode-regex': 7.16.7_@babel+core@7.12.9
       '@babel/preset-modules': 0.1.5_@babel+core@7.12.9
-      '@babel/types': 7.17.0
+      '@babel/types': 7.19.3
       babel-plugin-polyfill-corejs2: 0.3.0_@babel+core@7.12.9
       babel-plugin-polyfill-corejs3: 0.5.2_@babel+core@7.12.9
       babel-plugin-polyfill-regenerator: 0.3.0_@babel+core@7.12.9
@@ -7006,7 +6980,7 @@ packages:
     dependencies:
       '@babel/compat-data': 7.17.7
       '@babel/core': 7.16.12
-      '@babel/helper-compilation-targets': 7.17.7_@babel+core@7.16.12
+      '@babel/helper-compilation-targets': 7.19.3_@babel+core@7.16.12
       '@babel/helper-plugin-utils': 7.18.9
       '@babel/helper-validator-option': 7.16.7
       '@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression': 7.16.7_@babel+core@7.16.12
@@ -7073,7 +7047,7 @@ packages:
       '@babel/plugin-transform-unicode-escapes': 7.16.7_@babel+core@7.16.12
       '@babel/plugin-transform-unicode-regex': 7.16.7_@babel+core@7.16.12
       '@babel/preset-modules': 0.1.5_@babel+core@7.16.12
-      '@babel/types': 7.17.0
+      '@babel/types': 7.19.3
       babel-plugin-polyfill-corejs2: 0.3.0_@babel+core@7.16.12
       babel-plugin-polyfill-corejs3: 0.5.2_@babel+core@7.16.12
       babel-plugin-polyfill-regenerator: 0.3.0_@babel+core@7.16.12
@@ -14511,7 +14485,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.19.0
       '@wordpress/dom-ready': 3.10.0
-      '@wordpress/i18n': 4.19.0
+      '@wordpress/i18n': 4.26.0
     dev: false
 
   /@wordpress/a11y/3.5.0:
@@ -14546,7 +14520,7 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.19.0
-      '@wordpress/i18n': 4.19.0
+      '@wordpress/i18n': 4.26.0
       '@wordpress/url': 3.20.0
     dev: true
 
@@ -14796,7 +14770,7 @@ packages:
       '@wordpress/deprecated': 3.19.0
       '@wordpress/dom': 3.19.0
       '@wordpress/element': 4.20.0
-      '@wordpress/hooks': 3.19.0
+      '@wordpress/hooks': 3.26.0
       '@wordpress/html-entities': 3.19.0
       '@wordpress/i18n': 4.26.0
       '@wordpress/icons': 9.10.0
@@ -14995,9 +14969,9 @@ packages:
       '@wordpress/deprecated': 3.19.0
       '@wordpress/dom': 3.19.0
       '@wordpress/element': 4.20.0
-      '@wordpress/hooks': 3.19.0
+      '@wordpress/hooks': 3.26.0
       '@wordpress/html-entities': 3.19.0
-      '@wordpress/i18n': 4.19.0
+      '@wordpress/i18n': 4.26.0
       '@wordpress/is-shallow-equal': 4.19.0
       '@wordpress/shortcode': 3.19.0
       colord: 2.9.2
@@ -15326,7 +15300,7 @@ packages:
       '@wordpress/dom': 3.19.0
       '@wordpress/element': 4.20.0
       '@wordpress/escape-html': 2.22.0
-      '@wordpress/hooks': 3.19.0
+      '@wordpress/hooks': 3.26.0
       '@wordpress/i18n': 4.26.0
       '@wordpress/icons': 9.10.0
       '@wordpress/is-shallow-equal': 4.19.0
@@ -15380,7 +15354,7 @@ packages:
       '@wordpress/dom': 3.19.0
       '@wordpress/element': 4.20.0
       '@wordpress/escape-html': 2.22.0
-      '@wordpress/hooks': 3.19.0
+      '@wordpress/hooks': 3.26.0
       '@wordpress/i18n': 4.26.0
       '@wordpress/icons': 9.10.0
       '@wordpress/is-shallow-equal': 4.19.0
@@ -15762,14 +15736,14 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.19.0
-      '@wordpress/hooks': 3.19.0
+      '@wordpress/hooks': 3.26.0
 
   /@wordpress/deprecated/3.19.0:
     resolution: {integrity: sha512-0YdT5emjDd7RPwQ0SMlUqqwxlxRDvF3hDsFJkUmMU5CtMVbWh+vnaGSmFEYJB7LyGc7ZkN0/BOvD2THl8bNnoA==}
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.19.0
-      '@wordpress/hooks': 3.19.0
+      '@wordpress/hooks': 3.26.0
 
   /@wordpress/deprecated/3.2.3:
     resolution: {integrity: sha512-YoJos/hW216PIlxbtNyb24kPR3TUFTSsfeVT23SxudW4jhmwM12vkl3KY1RDbhD/qi89OE4k+8xsBo5cM3lCSw==}
@@ -16205,7 +16179,7 @@ packages:
     hasBin: true
     dependencies:
       '@babel/runtime': 7.19.0
-      '@wordpress/hooks': 3.19.0
+      '@wordpress/hooks': 3.26.0
       gettext-parser: 1.4.0
       lodash: 4.17.21
       memize: 1.1.0
@@ -16219,7 +16193,7 @@ packages:
     hasBin: true
     dependencies:
       '@babel/runtime': 7.19.0
-      '@wordpress/hooks': 3.19.0
+      '@wordpress/hooks': 3.26.0
       gettext-parser: 1.4.0
       lodash: 4.17.21
       memize: 1.1.0
@@ -16233,7 +16207,7 @@ packages:
     hasBin: true
     dependencies:
       '@babel/runtime': 7.19.0
-      '@wordpress/hooks': 3.19.0
+      '@wordpress/hooks': 3.26.0
       gettext-parser: 1.4.0
       memize: 1.1.0
       sprintf-js: 1.1.2
@@ -16724,7 +16698,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.19.0
       '@wordpress/element': 4.20.0
-      '@wordpress/i18n': 4.19.0
+      '@wordpress/i18n': 4.26.0
       utility-types: 3.10.0
     dev: false
 
@@ -16853,7 +16827,7 @@ packages:
       '@wordpress/data': 6.15.0_react@17.0.2
       '@wordpress/element': 4.20.0
       '@wordpress/escape-html': 2.22.0
-      '@wordpress/i18n': 4.19.0
+      '@wordpress/i18n': 4.26.0
       '@wordpress/keycodes': 3.19.0
       lodash: 4.17.21
       memize: 1.1.0
@@ -18497,6 +18471,19 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /babel-plugin-polyfill-corejs2/0.3.3_@babel+core@7.16.12:
+    resolution: {integrity: sha512-8hOdmFYFSZhqg2C/JgLUQ+t52o5nirNwaWM2B9LWteozwIvM14VSwdsCAUET10qT+kmySAlseadmfeeSWFCy+Q==}
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    dependencies:
+      '@babel/compat-data': 7.19.3
+      '@babel/core': 7.16.12
+      '@babel/helper-define-polyfill-provider': 0.3.3_@babel+core@7.16.12
+      semver: 6.3.0
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
 
   /babel-plugin-polyfill-corejs2/0.3.3_@babel+core@7.17.8:
     resolution: {integrity: sha512-8hOdmFYFSZhqg2C/JgLUQ+t52o5nirNwaWM2B9LWteozwIvM14VSwdsCAUET10qT+kmySAlseadmfeeSWFCy+Q==}
