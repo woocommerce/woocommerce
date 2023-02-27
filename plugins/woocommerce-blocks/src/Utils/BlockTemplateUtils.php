@@ -122,44 +122,6 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Remove block from parsed template content.
-	 *
-	 * @param string $template_content serialized wp_template content.
-	 * @param string $block_name       Block to be removed.
-	 *
-	 * @return string Updated wp_template content.
-	 */
-	private static function remove_block_from_template( $template_content, $block_name ) {
-		$new_content     = '';
-		$template_blocks = parse_blocks( $template_content );
-
-		self::recursive_remove_block( $template_blocks, $block_name );
-
-		foreach ( $template_blocks as &$block ) {
-			$new_content .= serialize_block( $block );
-		}
-
-		return $new_content;
-	}
-
-	/**
-	 * Remove block recursively from block list.
-	 *
-	 * @param array  $blocks      Parsed blocks array.
-	 * @param string $block_name Block to be removed.
-	 * @return void
-	 */
-	private static function recursive_remove_block( &$blocks, $block_name ) {
-		foreach ( $blocks as $index => &$block ) {
-			if ( $block_name === $block['blockName'] ) {
-				unset( $blocks[ $index ] );
-			} elseif ( ! empty( $block['innerBlocks'] ) ) {
-				self::recursive_remove_block( $block['innerBlocks'], $block_name );
-			}
-		}
-	}
-
-	/**
 	 * Build a unified template object based a post Object.
 	 * Important: This method is an almost identical duplicate from wp-includes/block-template-utils.php as it was not intended for public use. It has been modified to build templates from plugins rather than themes.
 	 *
@@ -239,7 +201,7 @@ class BlockTemplateUtils {
 		// Remove the term description block from the archive-product template
 		// as the Product Catalog/Shop page doesn't have a description.
 		if ( 'archive-product' === $template_file->slug ) {
-			$template->content = self::remove_block_from_template( $template->content, 'core/term-description' );
+			$template->content = str_replace( '<!-- wp:term-description /-->', '', $template->content );
 		}
 		// Plugin was agreed as a valid source value despite existing inline docs at the time of creating: https://github.com/WordPress/gutenberg/issues/36597#issuecomment-976232909.
 		$template->source         = $template_file->source ? $template_file->source : 'plugin';
