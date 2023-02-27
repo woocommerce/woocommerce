@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Directly fetch order prop from DB for compatibility with CPT store.
+Fetch order first to refresh cache before returning prop.
