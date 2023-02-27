@@ -627,7 +627,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	public function get_recorded_coupon_usage_counts( $order ) {
 		$order_id = is_int( $order ) ? $order : $order->get_id();
-		$order = wc_get_order( $order_id );
+		$order    = wc_get_order( $order_id );
 		return $order->get_recorded_coupon_usage_counts();
 	}
 
