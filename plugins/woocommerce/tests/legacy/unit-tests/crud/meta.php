@@ -115,7 +115,7 @@ class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
 		$this->assertTrue( in_array( 'random', wp_list_pluck( $new_order->get_meta_data(), 'key' ) ) );
 		$this->assertTrue( in_array( 'random_other', wp_list_pluck( $new_order->get_meta_data(), 'key' ) ) );
 		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$this->assertTrue( in_array( 'random_other_pre_crud', wp_list_pluck( $new_order->get_meta_data(), 'key' ) ) );
+			$this->assertTrue( in_array( 'random_other_pre_crud', wp_list_pluck( $new_order->get_meta_data(), 'key' ), true ) );
 		}
 	}
 
