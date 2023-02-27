@@ -50,7 +50,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^17.0.2"
+			"pinVersion": "^18.0.2"
 		},
 		{
 			"dependencies": [

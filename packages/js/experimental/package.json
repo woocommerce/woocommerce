@@ -59,7 +59,7 @@
 		"@types/jest": "^27.4.1",
 		"@types/react-transition-group": "^4.4.4",
 		"@types/testing-library__jest-dom": "^5.14.3",
-		"@types/wordpress__components": "^19.10.1",
+		"@types/wordpress__components": "^23.0.1",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
 		"@wordpress/browserslist-config": "^4.1.1",
@@ -77,8 +77,8 @@
 		"webpack-cli": "^3.3.12"
 	},
 	"peerDependencies": {
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2"
+		"react": "^18.0.2",
+		"react-dom": "^18.0.2"
 	},
 	"scripts": {
 		"turbo:build": "pnpm run build:js && pnpm run build:css",
