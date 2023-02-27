@@ -88,6 +88,7 @@ $border-radius: 5px;
 
 	.wc-block-components-express-payment__event-buttons {
 		> li {
+			box-sizing: border-box;
 			display: inline-block;
 			width: 50%;
 		}
