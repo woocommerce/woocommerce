@@ -21,7 +21,7 @@
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
-	"main": "build/index.ts",
+	"main": "build/index.js",
 	"module": "build-module/index.js",
 	"types": "build-types",
 	"react-native": "src/index",
