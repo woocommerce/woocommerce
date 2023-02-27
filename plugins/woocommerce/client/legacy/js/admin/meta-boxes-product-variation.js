@@ -93,7 +93,7 @@ jQuery( function ( $ ) {
 						$( '#variable_product_options' ).unblock();
 					} else if ( response ) {
 						// Reload variations and attributes panel.
-						const thisPageUrl = window.location.toString();
+						var thisPageUrl = window.location.toString();
 						thisPageUrl = thisPageUrl.replace(
 							'post-new.php?',
 							'post.php?post=' +
