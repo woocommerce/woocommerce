@@ -25,7 +25,7 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * Restore COT state after the test.
-	 *=
+	 *
 	 * @return void
 	 */
 	public function tearDown(): void {

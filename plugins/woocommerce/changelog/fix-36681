@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Skipping unit test for legacy widgets when in HPOS context.
+
+

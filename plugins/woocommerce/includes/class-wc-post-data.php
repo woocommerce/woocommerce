@@ -53,6 +53,7 @@ class WC_Post_Data {
 		add_action( 'delete_post', array( __CLASS__, 'delete_post' ) );
 		add_action( 'wp_trash_post', array( __CLASS__, 'trash_post' ) );
 		add_action( 'untrashed_post', array( __CLASS__, 'untrash_post' ) );
+		add_action( 'before_delete_post', array( __CLASS__, 'before_delete_order' ) );
 		add_action( 'woocommerce_before_delete_order', array( __CLASS__, 'before_delete_order' ) );
 
 		// Meta cache flushing.
