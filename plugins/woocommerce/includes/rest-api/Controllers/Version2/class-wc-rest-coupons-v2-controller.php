@@ -235,8 +235,9 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 	protected function prepare_objects_query( $request ) {
 		$args = parent::prepare_objects_query( $request );
 
-		if ( ! empty( $request['code'] ) ) {
-			$id               = wc_get_coupon_id_by_code( $request['code'] );
+		$coupon_code = $request['code'] ?? null;
+		if ( ! StringUtil::is_null_or_whitespace( $coupon_code ) ) {
+			$id               = wc_get_coupon_id_by_code( $coupon_code );
 			$args['post__in'] = array( $id );
 		}
 

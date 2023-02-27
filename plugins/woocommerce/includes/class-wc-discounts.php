@@ -257,7 +257,7 @@ class WC_Discounts {
 		}
 
 		$coupon_code = $coupon->get_code();
-		if ( StringUtil::is_null_or_whitespace( $this->discounts[ $coupon_code ] ) ) {
+		if ( StringUtil::is_null_or_whitespace( $this->discounts[ $coupon_code ] ?? null ) ) {
 			$this->discounts[ $coupon_code ] = array_fill_keys( array_keys( $this->items ), 0 );
 		}
 

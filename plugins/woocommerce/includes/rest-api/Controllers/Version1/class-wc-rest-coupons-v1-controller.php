@@ -133,8 +133,9 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 	 * @return array
 	 */
 	public function query_args( $args, $request ) {
-		if ( ! empty( $request['code'] ) ) {
-			$id = wc_get_coupon_id_by_code( $request['code'] );
+		$coupon_code = $request['code'] ?? null;
+		if ( ! StringUtil::is_null_or_whitespace( $coupon_code ) ) {
+			$id               = wc_get_coupon_id_by_code( $coupon_code );
 			$args['post__in'] = array( $id );
 		}
 
