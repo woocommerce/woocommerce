@@ -16,12 +16,12 @@ $attribute_taxonomies = wc_get_attribute_taxonomies();
 $product_attributes              = $product_object->get_attributes( 'edit' );
 $has_local_attributes            = empty( $attribute_taxonomies );
 $has_global_attributes           = empty( $product_attributes );
-$is_add_glboal_attribute_visible = ! $has_local_attributes && $has_global_attributes;
+$is_add_global_attribute_visible = ! $has_local_attributes && $has_global_attributes;
 $icon_url                        = WC_ADMIN_IMAGES_FOLDER_URL . '/icons/global-attributes-icon.svg';
 ?>
 <div id="product_attributes" class="panel wc-metaboxes-wrapper hidden">
 	<div class="toolbar toolbar-top">
-		<div class="add-global-attribute-container<?php echo $is_add_glboal_attribute_visible ? '' : ' hidden'; ?>">
+		<div class="add-global-attribute-container<?php echo $is_add_global_attribute_visible ? '' : ' hidden'; ?>">
 			<img src="<?php echo esc_url( $icon_url ); ?>" />
 			<p>
 				<?php
@@ -37,7 +37,7 @@ $icon_url                        = WC_ADMIN_IMAGES_FOLDER_URL . '/icons/global-a
 				</select>
 			</div>
 		</div>
-			<div class="add-attribute-container<?php echo $is_add_glboal_attribute_visible ? ' hidden' : ' '; ?>">
+			<div class="add-attribute-container<?php echo $is_add_global_attribute_visible ? ' hidden' : ' '; ?>">
 				<?php
 				if ( $has_local_attributes && $has_global_attributes ) :
 					?>
