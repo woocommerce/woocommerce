@@ -696,4 +696,14 @@ class BlockTemplateUtils {
 	public static function template_has_title( $template ) {
 		return ! empty( $template->title ) && $template->title !== $template->slug;
 	}
+
+	/**
+	 * Returns whether the passed `$template` has the legacy template block.
+	 *
+	 * @param object $template The template object.
+	 * @return boolean
+	 */
+	public static function template_has_legacy_template_block( $template ) {
+		return has_block( 'woocommerce/legacy-template', $template->content );
+	}
 }

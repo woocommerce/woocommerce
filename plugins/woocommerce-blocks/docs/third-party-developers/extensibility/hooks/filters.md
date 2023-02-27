@@ -25,6 +25,7 @@
  - [woocommerce_blocks_product_grid_item_html](#woocommerce_blocks_product_grid_item_html)
  - [woocommerce_blocks_register_script_dependencies](#woocommerce_blocks_register_script_dependencies)
  - [woocommerce_cart_contents_changed](#woocommerce_cart_contents_changed)
+ - [woocommerce_disable_compatibility_layer](#woocommerce_disable_compatibility_layer)
  - [woocommerce_ga_disable_tracking](#woocommerce_ga_disable_tracking)
  - [woocommerce_get_item_data](#woocommerce_get_item_data)
  - [woocommerce_loop_add_to_cart_args](#woocommerce_loop_add_to_cart_args)
@@ -575,6 +576,33 @@ apply_filters( 'woocommerce_cart_contents_changed', array $cart_contents )
 
 
  - [StoreApi/Utilities/CartController.php](../../../../src/StoreApi/Utilities/CartController.php)
+
+---
+
+## woocommerce_disable_compatibility_layer
+
+
+Filters to disable the compatibility layer for the blockified templates.
+
+```php
+apply_filters( 'woocommerce_disable_compatibility_layer', \Automattic\WooCommerce\Blocks\Templates\boolean. $argument0 )
+```
+
+### Description
+
+<p>This hooks allows to disable the compatibility layer for the blockified.</p>
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| 1 | \Automattic\WooCommerce\Blocks\Templates\boolean. |  |
+
+### Source
+
+
+ - [Templates/BlockTemplatesCompatibility.php](../../../../src/Templates/BlockTemplatesCompatibility.php)
+ - [Templates/BlockTemplatesCompatibility.php](../../../../src/Templates/BlockTemplatesCompatibility.php)
 
 ---
 
