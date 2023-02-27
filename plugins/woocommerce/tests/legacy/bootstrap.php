@@ -89,7 +89,9 @@ class WC_Unit_Tests_Bootstrap {
 		// re-initialize dependency injection, this needs to be the last operation after everything else is in place.
 		$this->initialize_dependency_injection();
 
-		$this->initialize_hpos();
+		if ( getenv( 'HPOS' ) ) {
+			$this->initialize_hpos();
+		}
 
 		error_reporting(error_reporting() & ~E_DEPRECATED);
 	}
@@ -142,6 +144,11 @@ class WC_Unit_Tests_Bootstrap {
 		CodeHacker::enable();
 	}
 
+	/**
+	 * Initialize HPOS if tests need to run in HPOS context.
+	 *
+	 * @return void
+	 */
 	private function initialize_hpos() {
 		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::delete_order_custom_tables();
 		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order_custom_table_if_not_exist();
