@@ -293,7 +293,6 @@ class Settings {
 			'option_key'  => 'woocommerce_date_type',
 			'label'       => __( 'Date Type', 'woocommerce' ),
 			'description' => __( 'Database date field considered for Revenue and Orders reports', 'woocommerce' ),
-			'default'     => 'date_created',
 			'type'        => 'select',
 			'options'     => array(
 				'date_created'   => 'date_created',

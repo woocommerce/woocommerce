@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Updates automated release testing workflow to use Playwright
