@@ -22,7 +22,7 @@ import {
 	QUERY_LOOP_ID,
 } from '../constants';
 
-const VARIATION_NAME = 'woocommerce/product-query';
+export const VARIATION_NAME = 'woocommerce/product-query';
 
 const ARCHIVE_PRODUCT_TEMPLATES = [
 	'woocommerce/woocommerce//archive-product',
