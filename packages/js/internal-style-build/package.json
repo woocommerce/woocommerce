@@ -23,11 +23,11 @@
 	"main": "index.js",
 	"dependencies": {
 		"@automattic/color-studio": "^2.5.0",
-		"@wordpress/base-styles": "^4.3.0",
-		"@wordpress/postcss-plugins-preset": "^1.6.0",
+		"@wordpress/base-styles": "wp-5.9",
+		"@wordpress/postcss-plugins-preset": "wp-5.9",
 		"css-loader": "^3.6.0",
 		"mini-css-extract-plugin": "^2.6.0",
-		"postcss-loader": "^3.0.0",
+		"postcss-loader": "^7.0.0",
 		"sass-loader": "^10.2.1",
 		"webpack-remove-empty-scripts": "^0.7.3",
 		"webpack-rtl-plugin": "^2.0.0"

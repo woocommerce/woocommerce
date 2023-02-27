@@ -32,8 +32,8 @@
 	"dependencies": {
 		"@automattic/explat-client": "^0.0.3",
 		"@automattic/explat-client-react-helpers": "^0.0.4",
-		"@wordpress/api-fetch": "^6.0.1",
-		"@wordpress/hooks": "^3.5.0",
+		"@wordpress/api-fetch": "wp-5.9",
+		"@wordpress/hooks": "wp-5.9",
 		"cookie": "^0.4.2",
 		"qs": "^6.10.3"
 	},

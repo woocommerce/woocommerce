@@ -1,6 +1,6 @@
 {
 	"dev": true,
-	"filter": "^(?:config|react|react-dom|eslint|typescript|@typescript-eslint|@types/react).*$",
+	"filter": "^(?:config|react|react-dom|eslint|typescript|@typescript-eslint|@types/react|@wordpress).*$",
 	"indent": "\t",
 	"overrides": true,
 	"peer": true,
@@ -72,6 +72,15 @@
 				"**"
 			],
 			"pinVersion": "^8.32.0"
+		},
+		{
+			"dependencies": [
+				"@wordpress/**"
+			],
+			"packages": [
+				"@woocommerce/*"
+			],
+			"pinVersion": "wp-5.9"
 		}
 	]
 }
