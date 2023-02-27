@@ -63,6 +63,9 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 				`textarea[name="attribute_values[${ i }]"]`,
 				'val1 | val2'
 			);
+			await page
+				.locator( `textarea[name="attribute_values[${ i }]"]` )
+				.blur();
 		}
 		await page.click( 'text=Save attributes' );
 
