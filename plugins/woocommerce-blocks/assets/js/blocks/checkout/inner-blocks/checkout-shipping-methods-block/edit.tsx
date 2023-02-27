@@ -19,6 +19,7 @@ import {
 	AdditionalFields,
 	AdditionalFieldsContent,
 } from '../../form-step';
+import NoShippingPlaceholder from './no-shipping-placeholder';
 import Block from './block';
 import './editor.scss';
 
@@ -128,7 +129,7 @@ export const Edit = ( {
 				) }
 			</InspectorControls>
 			<Noninteractive>
-				<Block />
+				<Block noShippingPlaceholder={ <NoShippingPlaceholder /> } />
 			</Noninteractive>
 			<AdditionalFields block={ innerBlockAreas.SHIPPING_METHODS } />
 		</FormStepBlock>
