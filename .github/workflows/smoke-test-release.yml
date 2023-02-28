@@ -29,7 +29,7 @@ jobs:
             - name: Validate tag
               if: ${{ github.event_name == 'workflow_dispatch' }}
               env:
-                  GH_TOKEN: ${{ github.token }}
+                  GH_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
               run: gh release view "${{ github.event.inputs.tag }}" --repo=woocommerce/woocommerce
 
             - name: Get tag
@@ -43,7 +43,7 @@ jobs:
 
             - name: Verify woocommerce.zip asset
               env:
-                  GITHUB_TOKEN: ${{ github.token }}
+                  GH_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
                   RELEASE_TAG: ${{ steps.tag.outputs.result }}
               run: |
                   gh release download $RELEASE_TAG --repo woocommerce/woocommerce
@@ -59,7 +59,7 @@ jobs:
             - name: Get 'created-at' of WooCommerce zip
               id: created-at
               env:
-                  GH_TOKEN: ${{ github.token }}
+                  GH_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
               run: echo "created=$(gh release view ${{ steps.tag.outputs.result }} --json assets --jq .assets[0].createdAt --repo woocommerce/woocommerce)" >> $GITHUB_OUTPUT
 
     e2e-update-wc:
