@@ -51,11 +51,11 @@ jQuery( function ( $ ) {
 				);
 
 			$( '.save-variations' ).on( 'click', function () {
-				const new_attribute_data = $(
+				var new_attribute_data = $(
 					'.woocommerce_variation_new_attribute_data'
 				);
-				const attribute_name = new_attribute_data.find( 'input[name^="attribute_names"]' ).val();
-				const attribute_value = new_attribute_data
+				var attribute_name = new_attribute_data.find( 'input[name^="attribute_names"]' ).val();
+				var attribute_value = new_attribute_data
 					.find( 'textarea[name^="attribute_values"]' )
 					.val();
 
@@ -71,11 +71,11 @@ jQuery( function ( $ ) {
 					},
 				} );
 
-				const original_data = new_attribute_data.find(
+				var original_data = new_attribute_data.find(
 					'input, select, textarea'
 				);
 
-				const data = {
+				var data = {
 					post_id: woocommerce_admin_meta_boxes.post_id,
 					product_type: $( '#product-type' ).val(),
 					data: original_data.serialize(),
