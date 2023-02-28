@@ -209,7 +209,12 @@ const TreeSelectControl = ( {
 						return [];
 					}
 					return this.children.flatMap( ( option ) => {
-						return option.hasChildren ? option.leaves : option;
+						if ( option.hasChildren ) {
+							return includeParent && option.value !== ROOT_VALUE
+								? [ option, ...option.leaves ]
+								: option.leaves;
+						}
+						return option;
 					} );
 				},
 			},
@@ -222,7 +227,10 @@ const TreeSelectControl = ( {
 				 * @return {boolean} True if checked, false otherwise.
 				 */
 				get() {
-					if ( this.hasChildren && ! includeParent ) {
+					if ( includeParent && this.value !== ROOT_VALUE ) {
+						return cache.selectedValues.includes( this.value );
+					}
+					if ( this.hasChildren ) {
 						return this.leaves.every( ( opt ) => opt.checked );
 					}
 					return cache.selectedValues.includes( this.value );
@@ -413,10 +421,12 @@ const TreeSelectControl = ( {
 		if (
 			includeParent &&
 			parent &&
+			parent.value !== ROOT_VALUE &&
 			parent.children &&
 			parent.children.every( ( child ) =>
 				newValue.includes( child.value )
-			)
+			) &&
+			! newValue.includes( parent.value )
 		) {
 			newValue.push( parent.value );
 		}
@@ -434,7 +444,7 @@ const TreeSelectControl = ( {
 		const changedValues = option.leaves
 			.filter( ( opt ) => opt.checked !== checked )
 			.map( ( opt ) => opt.value );
-		if ( includeParent ) {
+		if ( includeParent && option.value !== ROOT_VALUE ) {
 			changedValues.push( option.value );
 		}
 		if ( checked ) {
