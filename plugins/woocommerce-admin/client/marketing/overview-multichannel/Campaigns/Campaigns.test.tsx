@@ -14,6 +14,22 @@ jest.mock( './useCampaigns', () => ( {
 	useCampaigns: jest.fn(),
 } ) );
 
+/**
+ * Create a test campaign data object.
+ */
+const createTestCampaign = ( programId: string ) => {
+	return {
+		id: `google-listings-and-ads|${ programId }`,
+		title: `Campaign ${ programId }`,
+		description: '',
+		cost: `USD 30`,
+		manageUrl: `https://wc1.test/wp-admin/admin.php?page=wc-admin&path=/google/dashboard&subpath=/campaigns/edit&programId=${ programId }`,
+		icon: 'https://woocommerce.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
+		channelName: 'Google Listings and Ads',
+		channelSlug: 'google-listings-and-ads',
+	};
+};
+
 describe( 'Campaigns component', () => {
 	it( 'renders a TablePlaceholder when loading is in progress', () => {
 		( useCampaigns as jest.Mock ).mockReturnValue( {
@@ -67,19 +83,7 @@ describe( 'Campaigns component', () => {
 		( useCampaigns as jest.Mock ).mockReturnValue( {
 			loading: false,
 			error: undefined,
-			data: [
-				{
-					id: `google-listings-and-ads|111`,
-					title: 'Campaign 111',
-					description: '',
-					cost: `USD 111`,
-					manageUrl:
-						'https://wc1.test/wp-admin/admin.php?page=wc-admin&path=/google/dashboard&subpath=/campaigns/edit&programId=111',
-					icon: 'https://woocommerce.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
-					channelName: 'Google Listings and Ads',
-					channelSlug: 'google-listings-and-ads',
-				},
-			],
+			data: [ createTestCampaign( '1' ) ],
 			meta: {
 				total: 1,
 			},
@@ -87,9 +91,8 @@ describe( 'Campaigns component', () => {
 
 		const { container } = render( <Campaigns /> );
 
-		expect( screen.getByText( 'Campaign 111' ) ).toBeInTheDocument();
-
-		expect( screen.getByText( 'USD 111' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Campaign 1' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'USD 30' ) ).toBeInTheDocument();
 
 		const pagination = container.querySelector( '.woocommerce-pagination' );
 		expect( pagination ).not.toBeInTheDocument();
@@ -100,72 +103,12 @@ describe( 'Campaigns component', () => {
 			loading: false,
 			error: undefined,
 			data: [
-				{
-					id: `google-listings-and-ads|111`,
-					title: 'Campaign 111',
-					description: '',
-					cost: `USD 111`,
-					manageUrl:
-						'https://wc1.test/wp-admin/admin.php?page=wc-admin&path=/google/dashboard&subpath=/campaigns/edit&programId=111',
-					icon: 'https://woocommerce.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
-					channelName: 'Google Listings and Ads',
-					channelSlug: 'google-listings-and-ads',
-				},
-				{
-					id: `google-listings-and-ads|222`,
-					title: 'Campaign 222',
-					description: '',
-					cost: `USD 222`,
-					manageUrl:
-						'https://wc1.test/wp-admin/admin.php?page=wc-admin&path=/google/dashboard&subpath=/campaigns/edit&programId=222',
-					icon: 'https://woocommerce.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
-					channelName: 'Google Listings and Ads',
-					channelSlug: 'google-listings-and-ads',
-				},
-				{
-					id: `google-listings-and-ads|333`,
-					title: 'Campaign 333',
-					description: '',
-					cost: `USD 333`,
-					manageUrl:
-						'https://wc1.test/wp-admin/admin.php?page=wc-admin&path=/google/dashboard&subpath=/campaigns/edit&programId=333',
-					icon: 'https://woocommerce.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
-					channelName: 'Google Listings and Ads',
-					channelSlug: 'google-listings-and-ads',
-				},
-				{
-					id: `google-listings-and-ads|444`,
-					title: 'Campaign 444',
-					description: '',
-					cost: `USD 444`,
-					manageUrl:
-						'https://wc1.test/wp-admin/admin.php?page=wc-admin&path=/google/dashboard&subpath=/campaigns/edit&programId=444',
-					icon: 'https://woocommerce.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
-					channelName: 'Google Listings and Ads',
-					channelSlug: 'google-listings-and-ads',
-				},
-				{
-					id: `google-listings-and-ads|555`,
-					title: 'Campaign 555',
-					description: '',
-					cost: `USD 555`,
-					manageUrl:
-						'https://wc1.test/wp-admin/admin.php?page=wc-admin&path=/google/dashboard&subpath=/campaigns/edit&programId=555',
-					icon: 'https://woocommerce.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
-					channelName: 'Google Listings and Ads',
-					channelSlug: 'google-listings-and-ads',
-				},
-				{
-					id: `google-listings-and-ads|666`,
-					title: 'Campaign 666',
-					description: '',
-					cost: `USD 666`,
-					manageUrl:
-						'https://wc1.test/wp-admin/admin.php?page=wc-admin&path=/google/dashboard&subpath=/campaigns/edit&programId=666',
-					icon: 'https://woocommerce.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
-					channelName: 'Google Listings and Ads',
-					channelSlug: 'google-listings-and-ads',
-				},
+				createTestCampaign( '1' ),
+				createTestCampaign( '2' ),
+				createTestCampaign( '3' ),
+				createTestCampaign( '4' ),
+				createTestCampaign( '5' ),
+				createTestCampaign( '6' ),
 			],
 			meta: {
 				total: 6,
@@ -175,8 +118,7 @@ describe( 'Campaigns component', () => {
 		render( <Campaigns /> );
 
 		// Campaign info.
-		expect( screen.getByText( 'Campaign 111' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'USD 111' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Campaign 1' ) ).toBeInTheDocument();
 
 		// Pagination.
 		expect( screen.getByText( 'Page 1 of 2' ) ).toBeInTheDocument();
@@ -187,7 +129,6 @@ describe( 'Campaigns component', () => {
 		);
 
 		// Campaign info in the second page.
-		expect( screen.getByText( 'Campaign 666' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'USD 666' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Campaign 6' ) ).toBeInTheDocument();
 	} );
 } );
