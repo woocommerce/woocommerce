@@ -547,12 +547,16 @@
         },
         {
             "name": "woocommerce_blocks_hook_compatibility_additional_data",
-            "file": "Templates/BlockTemplatesCompatibility.php",
+            "file": "Templates/AbstractTemplateCompatibility.php",
             "type": "filter",
             "doc": {
                 "description": "When extensions implement their equivalent blocks of the template hook functions, they can use this filter to register their old hooked data here, so in the blockified template, the old hooked functions can be removed in favor of the new blocks while keeping the old hooked functions working in classic templates.",
                 "long_description": "Accepts an array of hooked data. The array should be in the following format: [   [     hook => <hook-name>,     function => <function-name>,     priority => <priority>,  ],  ... ] Where: - hook-name is the name of the hook that have the functions hooked to. - function-name is the hooked function name. - priority is the priority of the hooked function.",
                 "tags": [
+                    {
+                        "name": "since",
+                        "content": "9.5.0"
+                    },
                     {
                         "name": "param",
                         "content": "Additional hooked data. Default to empty",
@@ -560,10 +564,6 @@
                             "array"
                         ],
                         "variable": "$data"
-                    },
-                    {
-                        "name": "since",
-                        "content": "9.5.0"
                     }
                 ],
                 "long_description_html": "<p>Accepts an array of hooked data. The array should be in the following format: [ [ hook =&gt; <hook-name>, function =&gt; <function-name>, priority =&gt; <priority>, ], ... ] Where:</p> <ul> <li>hook-name is the name of the hook that have the functions hooked to.</li> <li>function-name is the hooked function name.</li> <li>priority is the priority of the hooked function.</li> </ul>"
@@ -736,11 +736,11 @@
         },
         {
             "name": "woocommerce_disable_compatibility_layer",
-            "file": "Templates/BlockTemplatesCompatibility.php",
+            "file": "Templates/AbstractTemplateCompatibility.php",
             "type": "filter",
             "doc": {
-                "description": "Filters to disable the compatibility layer for the blockified templates.",
-                "long_description": "This hooks allows to disable the compatibility layer for the blockified.",
+                "description": "Filter to disable the compatibility layer for the blockified templates.",
+                "long_description": "This hook allows to disable the compatibility layer for the blockified.",
                 "tags": [
                     {
                         "name": "since",
@@ -756,17 +756,17 @@
                         "variable": ""
                     }
                 ],
-                "long_description_html": "<p>This hooks allows to disable the compatibility layer for the blockified.</p>"
+                "long_description_html": "<p>This hook allows to disable the compatibility layer for the blockified.</p>"
             },
             "args": 1
         },
         {
             "name": "woocommerce_disable_compatibility_layer",
-            "file": "Templates/BlockTemplatesCompatibility.php",
+            "file": "Templates/AbstractTemplateCompatibility.php",
             "type": "filter",
             "doc": {
-                "description": "Filters to disable the compatibility layer for the blockified templates.",
-                "long_description": "This hooks allows to disable the compatibility layer for the blockified.",
+                "description": "Filter to disable the compatibility layer for the blockified templates.",
+                "long_description": "This hook allows to disable the compatibility layer for the blockified templates.",
                 "tags": [
                     {
                         "name": "since",
@@ -782,7 +782,7 @@
                         "variable": ""
                     }
                 ],
-                "long_description_html": "<p>This hooks allows to disable the compatibility layer for the blockified.</p>"
+                "long_description_html": "<p>This hook allows to disable the compatibility layer for the blockified templates.</p>"
             },
             "args": 1
         },

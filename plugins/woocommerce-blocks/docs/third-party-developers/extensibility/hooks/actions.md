@@ -883,7 +883,7 @@ do_action( '{$hook}' )
 ### Source
 
 
- - [Templates/BlockTemplatesCompatibility.php](../../../../src/Templates/BlockTemplatesCompatibility.php)
+ - [Templates/AbstractTemplateCompatibility.php](../../../../src/Templates/AbstractTemplateCompatibility.php)
 
 ---
 <!-- FEEDBACK -->
