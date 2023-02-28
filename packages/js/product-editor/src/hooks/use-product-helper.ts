@@ -155,8 +155,10 @@ export function useProductHelper() {
 			},
 			{
 				update: Object.values( variationsOrder )
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-ignore
 					.flatMap( Object.entries )
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-ignore
 					.map( ( [ id, menu_order ] ) => ( {
 						id,
@@ -310,6 +312,7 @@ export function useProductHelper() {
 				'g'
 			);
 			const decimalRegex = new RegExp(
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore
 				ONLY_ONE_DECIMAL_SEPARATOR.replaceAll( '%s', decimalSeparator ),
 				'g'
