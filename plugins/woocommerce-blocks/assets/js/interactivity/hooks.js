@@ -1,6 +1,6 @@
 import { h, options, createContext } from 'preact';
 import { useRef } from 'preact/hooks';
-import { store } from './wpx';
+import { rawStore as store } from './store';
 import { componentPrefix } from './constants';
 
 // Main context.
@@ -18,7 +18,7 @@ export const component = ( name, Comp ) => {
 	componentMap[ name ] = Comp;
 };
 
-// Resolve the path to some property of the wpx object.
+// Resolve the path to some property of the store object.
 const resolve = ( path, context ) => {
 	let current = { ...store, context };
 	path.split( '.' ).forEach( ( p ) => ( current = current[ p ] ) );
