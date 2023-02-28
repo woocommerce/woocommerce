@@ -51,15 +51,15 @@ jQuery( function ( $ ) {
 				);
 
 			$( '.save-variations' ).on( 'click', function () {
-				const newAttributeData = $(
+				const new_attribute_data = $(
 					'.woocommerce_variation_new_attribute_data'
 				);
-				const attributeName = newAttributeData.find( 'input[name^="attribute_names"]' ).val();
-				const attributeValue = newAttributeData
+				const attribute_name = new_attribute_data.find( 'input[name^="attribute_names"]' ).val();
+				const attribute_value = new_attribute_data
 					.find( 'textarea[name^="attribute_values"]' )
 					.val();
 
-				if ( ! attributeName || ! attributeValue ) {
+				if ( ! attribute_name || ! attribute_value ) {
 					return;
 				}
 
@@ -71,7 +71,7 @@ jQuery( function ( $ ) {
 					},
 				} );
 
-				const original_data = newAttributeData.find(
+				const original_data = new_attribute_data.find(
 					'input, select, textarea'
 				);
 
@@ -93,15 +93,15 @@ jQuery( function ( $ ) {
 						$( '#variable_product_options' ).unblock();
 					} else if ( response ) {
 						// Reload variations and attributes panel.
-						var thisPageUrl = window.location.toString();
-						thisPageUrl = thisPageUrl.replace(
+						var this_page_url = window.location.toString();
+						this_page_url = this_page_url.replace(
 							'post-new.php?',
 							'post.php?post=' +
 								woocommerce_admin_meta_boxes.post_id +
 								'&action=edit&'
 						);
 
-						$.get( thisPageUrl, function ( response ) {
+						$.get( this_page_url, function ( response ) {
 							$( '#variable_product_options' ).unblock();
 							$( '#variable_product_options_inner' ).replaceWith(
 								$( response ).find(
