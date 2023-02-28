@@ -70,6 +70,12 @@ module.exports = {
 	},
 	overrides: [
 		{
+			files: [ '*.js', '*.jsx' ],
+			rules: {
+				'@typescript-eslint/no-var-requires': 'off',
+			},
+		},
+		{
 			files: [ '*.ts', '*.tsx' ],
 			rules: {
 				// Making use of typescript no-shadow instead.
