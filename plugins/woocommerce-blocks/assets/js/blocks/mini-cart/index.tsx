@@ -45,6 +45,7 @@ const settings: BlockConfiguration = {
 	example: {
 		attributes: {
 			isPreview: true,
+			className: 'wc-block-mini-cart--preview',
 		},
 	},
 	attributes: {
