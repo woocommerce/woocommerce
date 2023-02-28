@@ -4,6 +4,7 @@
 import React, { useEffect } from 'react';
 import { Slot, Fill } from '@wordpress/components';
 import { createElement, Children, Fragment } from '@wordpress/element';
+import deprecated from '@wordpress/deprecated';
 
 /**
  * Internal dependencies
@@ -29,6 +30,8 @@ type WooProductFieldFillProps = {
 	children?: React.ReactNode;
 };
 
+const DEFAULT_FIELD_ORDER = 20;
+
 const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 	fieldName,
 	sectionName,
@@ -38,6 +41,12 @@ const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 	const { registerFill, getFillHelpers } = useSlotContext();
 
 	const fieldId = `product_field/${ sectionName }/${ fieldName }`;
+
+	deprecated( `__experimentalWooProductFieldItem`, {
+		version: '13.0.0',
+		plugin: '@woocommerce/components',
+		hint: 'Moved to @woocommerce/product-editor package: import { __experimentalWooProductFieldItem } from @woocommerce/product-editor',
+	} );
 
 	useEffect( () => {
 		registerFill( fieldId );
@@ -75,16 +84,18 @@ export const WooProductFieldItem: React.FC< WooProductFieldItemProps > & {
 } = ( { children, sections, id } ) => {
 	return (
 		<>
-			{ sections.map( ( { name: sectionName, order = 20 } ) => (
-				<WooProductFieldFill
-					fieldName={ id }
-					sectionName={ sectionName }
-					order={ order }
-					key={ sectionName }
-				>
-					{ children }
-				</WooProductFieldFill>
-			) ) }
+			{ sections.map(
+				( { name: sectionName, order = DEFAULT_FIELD_ORDER } ) => (
+					<WooProductFieldFill
+						fieldName={ id }
+						sectionName={ sectionName }
+						order={ order }
+						key={ sectionName }
+					>
+						{ children }
+					</WooProductFieldFill>
+				)
+			) }
 		</>
 	);
 };

@@ -8,13 +8,13 @@ import { Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from '@woocommerce/number';
 import { getAdminLink } from '@woocommerce/settings';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
 import ReportTable from '../../components/report-table';
 import { isLowStock } from './utils';
-import { CurrencyContext } from '../../../lib/currency-context';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 const stockStatuses = getAdminSetting( 'stockStatuses', {} );

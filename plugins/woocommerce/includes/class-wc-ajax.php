@@ -10,8 +10,10 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -224,8 +226,9 @@ class WC_AJAX {
 
 		check_ajax_referer( 'apply-coupon', 'security' );
 
-		if ( ! empty( $_POST['coupon_code'] ) ) {
-			WC()->cart->add_discount( wc_format_coupon_code( wp_unslash( $_POST['coupon_code'] ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$coupon_code = ArrayUtil::get_value_or_default( $_POST, 'coupon_code' );
+		if ( ! StringUtil::is_null_or_whitespace( $coupon_code ) ) {
+			WC()->cart->add_discount( wc_format_coupon_code( wp_unslash( $coupon_code ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		} else {
 			wc_add_notice( WC_Coupon::get_generic_coupon_error( WC_Coupon::E_WC_COUPON_PLEASE_ENTER ), 'error' );
 		}
@@ -242,7 +245,7 @@ class WC_AJAX {
 
 		$coupon = isset( $_POST['coupon'] ) ? wc_format_coupon_code( wp_unslash( $_POST['coupon'] ) ) : false; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-		if ( empty( $coupon ) ) {
+		if ( StringUtil::is_null_or_whitespace( $coupon ) ) {
 			wc_add_notice( __( 'Sorry there was a problem removing this coupon.', 'woocommerce' ), 'error' );
 		} else {
 			WC()->cart->remove_coupon( $coupon );
@@ -1199,11 +1202,12 @@ class WC_AJAX {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
 			}
 
-			if ( empty( $_POST['coupon'] ) ) {
+			$coupon = ArrayUtil::get_value_or_default( $_POST, 'coupon' );
+			if ( StringUtil::is_null_or_whitespace( $coupon ) ) {
 				throw new Exception( __( 'Invalid coupon', 'woocommerce' ) );
 			}
 
-			$order->remove_coupon( wc_format_coupon_code( wp_unslash( $_POST['coupon'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$order->remove_coupon( wc_format_coupon_code( wp_unslash( $coupon ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$order->calculate_taxes( $calculate_tax_args );
 			$order->calculate_totals( false );
 

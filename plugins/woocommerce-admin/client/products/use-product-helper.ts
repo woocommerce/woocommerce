@@ -2,6 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import {
+	AUTO_DRAFT_NAME,
+	getDerivedProductType,
+} from '@woocommerce/product-editor';
 import { useDispatch } from '@wordpress/data';
 import { useCallback, useContext, useState } from '@wordpress/element';
 import * as WooNumber from '@woocommerce/number';
@@ -16,13 +20,11 @@ import {
 	ProductVariation,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
-import { AUTO_DRAFT_NAME } from './utils/get-product-title';
-import { CurrencyContext } from '../lib/currency-context';
-import { getDerivedProductType } from './utils/get-derived-product-type';
 import {
 	NUMBERS_AND_DECIMAL_SEPARATOR,
 	ONLY_ONE_DECIMAL_SEPARATOR,

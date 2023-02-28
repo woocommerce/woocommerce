@@ -3216,10 +3216,6 @@ table.wp-list-table {
 		display: none;
 	}
 
-	img {
-		margin: 1px 2px;
-	}
-
 	.row-actions {
 		color: #999;
 	}
@@ -7824,6 +7820,11 @@ table.bar_chart {
   * Product Reviews
   */
 .wp-list-table.product-reviews {
+
+	.column-author {
+		width: 20%;
+	}
+
 	th.column-type {
 		width: 10%;
 	}
