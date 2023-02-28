@@ -103,24 +103,6 @@ export const CustomItemLabel: React.FC = () => {
 	);
 };
 
-function getItemLabel( item: LinkedTree, text: string ) {
-	return (
-		<span>
-			{ text
-				? interpolate( {
-						mixedString: item.data.label.replace(
-							new RegExp( text, 'ig' ),
-							( group ) => `{{bold}}${ group }{{/bold}}`
-						),
-						components: {
-							bold: <b />,
-						},
-				  } )
-				: item.data.label }
-		</span>
-	);
-}
-
 export const SelectionSingle: React.FC = () => {
 	const [ selected, setSelected ] = useState( listItems[ 1 ] );
 
