@@ -12,20 +12,20 @@ export function useHighlighter( {
 	item,
 	multiple,
 	checkedStatus,
-	isHighlighted,
-}: Pick< TreeItemProps, 'item' | 'multiple' | 'isHighlighted' > & {
+	shouldItemBeHighlighted,
+}: Pick< TreeItemProps, 'item' | 'multiple' | 'shouldItemBeHighlighted' > & {
 	checkedStatus: CheckedStatus;
 } ) {
-	const highlighted = useMemo( () => {
-		if ( typeof isHighlighted === 'function' ) {
+	const isHighlighted = useMemo( () => {
+		if ( typeof shouldItemBeHighlighted === 'function' ) {
 			if ( multiple || item.children.length === 0 ) {
-				return isHighlighted( item );
+				return shouldItemBeHighlighted( item );
 			}
 		}
 		if ( ! multiple ) {
 			return checkedStatus === 'checked';
 		}
-	}, [ item, multiple, checkedStatus, isHighlighted ] );
+	}, [ item, multiple, checkedStatus, shouldItemBeHighlighted ] );
 
-	return { highlighted, isHighlighted };
+	return { isHighlighted };
 }

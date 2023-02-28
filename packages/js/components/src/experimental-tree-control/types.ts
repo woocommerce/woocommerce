@@ -39,6 +39,21 @@ type BaseTreeProps = {
 	 * @param value The unselection
 	 */
 	onRemove?( value: Item | Item[] ): void;
+	/**
+	 * It gives a way to determine whether the current rendering
+	 * item is highlighted or not from outside the tree.
+	 *
+	 * @example
+	 * <Tree
+	 * 	shouldItemBeHighlighted={ isFirstChild }
+	 * />
+	 *
+	 * @param item The current linked tree item, useful to
+	 * traverse the entire linked tree from this item.
+	 *
+	 * @see {@link LinkedTree}
+	 */
+	shouldItemBeHighlighted?( item: LinkedTree ): boolean;
 };
 
 export type TreeProps = BaseTreeProps &
@@ -79,21 +94,6 @@ export type TreeProps = BaseTreeProps &
 		 * @see {@link LinkedTree}
 		 */
 		shouldItemBeExpanded?( item: LinkedTree ): boolean;
-		/**
-		 * It gives a way to determine whether the current rendering
-		 * item is highlighted or not from outside the tree.
-		 *
-		 * @example
-		 * <Tree
-		 * 	isItemHighlighted={ isFirstChild }
-		 * />
-		 *
-		 * @param item The current linked tree item, useful to
-		 * traverse the entire linked tree from this item.
-		 *
-		 * @see {@link LinkedTree}
-		 */
-		isItemHighlighted?( item: LinkedTree ): boolean;
 	};
 
 export type TreeItemProps = BaseTreeProps &
@@ -109,7 +109,6 @@ export type TreeItemProps = BaseTreeProps &
 		index: number;
 		getLabel?( item: LinkedTree ): JSX.Element;
 		shouldItemBeExpanded?( item: LinkedTree ): boolean;
-		isHighlighted?( item: LinkedTree ): boolean;
 	};
 
 export type TreeControlProps = Omit< TreeProps, 'items' | 'level' > & {

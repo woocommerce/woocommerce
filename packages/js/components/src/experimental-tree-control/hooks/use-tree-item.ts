@@ -19,7 +19,7 @@ export function useTreeItem( {
 	index,
 	getLabel,
 	shouldItemBeExpanded,
-	isHighlighted,
+	shouldItemBeHighlighted,
 	onSelect,
 	onRemove,
 	...props
@@ -45,7 +45,7 @@ export function useTreeItem( {
 		item,
 		checkedStatus: selection.checkedStatus,
 		multiple,
-		isHighlighted,
+		shouldItemBeHighlighted,
 	} );
 
 	return {
@@ -70,7 +70,7 @@ export function useTreeItem( {
 			selected: selection.selected,
 			getItemLabel: getLabel,
 			shouldItemBeExpanded,
-			isItemHighlighted: highlighter.isHighlighted,
+			shouldItemBeHighlighted,
 			onSelect: selection.onSelectChildren,
 			onRemove: selection.onRemoveChildren,
 		},

@@ -241,11 +241,11 @@ export const HighlightFirstMatchingItem: React.FC = () => {
 					id="highlight-first-matching-item"
 					items={ listItems }
 					getItemLabel={ ( item ) => getItemLabel( item, text ) }
-					isItemExpanded={ useCallback(
-						( item ) => isItemExpanded( item, text ),
+					shouldItemBeExpanded={ useCallback(
+						( item ) => shouldItemBeExpanded( item, text ),
 						[ text ]
 					) }
-					isItemHighlighted={ ( item ) =>
+					shouldItemBeHighlighted={ ( item ) =>
 						getFirstMatchingItem( item, text, memo.current )
 					}
 				/>
