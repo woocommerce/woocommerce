@@ -506,7 +506,10 @@ jQuery( function ( $ ) {
 		}
 		$( this ).val( null );
 		$( this ).trigger( 'change' );
-		if ( $( 'div.add-attribute-container' ).hasClass( 'hidden' ) ) {
+		if (
+			$( 'div.add-attribute-container' ).hasClass( 'hidden' ) &&
+			! $( 'div.add-global-attribute-container' ).hasClass( 'hidden' )
+		) {
 			toggle_add_global_attribute_layout();
 		}
 
@@ -532,7 +535,10 @@ jQuery( function ( $ ) {
 	$( 'button.add_custom_attribute' ).on( 'click', function () {
 		add_attribute( this, '' );
 
-		if ( $( 'div.add-attribute-container' ).hasClass( 'hidden' ) ) {
+		if (
+			$( 'div.add-attribute-container' ).hasClass( 'hidden' ) &&
+			! $( 'div.add-global-attribute-container' ).hasClass( 'hidden' )
+		) {
 			toggle_add_global_attribute_layout();
 		}
 		return false;
@@ -647,7 +653,10 @@ jQuery( function ( $ ) {
 				attribute_row_indexes();
 			}
 
-			if ( ! $( '.woocommerce_attribute_data' ).is( ':visible' ) ) {
+			if (
+				! $( '.woocommerce_attribute_data' ).is( ':visible' ) &&
+				! $( 'div.add-global-attribute-container' ).hasClass( 'hidden' )
+			) {
 				toggle_add_global_attribute_layout();
 			}
 		}
