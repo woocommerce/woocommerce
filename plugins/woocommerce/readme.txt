@@ -192,6 +192,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Add unique sku option to error data when setting product sku [#36612](https://github.com/woocommerce/woocommerce/pull/36612)
 * Add - Add WC-specific criteria to the Site Health test for persistent object caches [#35202](https://github.com/woocommerce/woocommerce/pull/35202)
 * Add - Enable new experience when new user selects "Physical product". [#36406](https://github.com/woocommerce/woocommerce/pull/36406)
+* Update - Update WooCommerce Blocks to 9.6.3 [#36992](https://github.com/woocommerce/woocommerce/pull/36992)
 * Update - Update WooCommerce Blocks to 9.6.2 [#36919](https://github.com/woocommerce/woocommerce/pull/36919)
 * Update - Add date_paid and date_completed date sorting options for Revenue and Order reports [#36492](https://github.com/woocommerce/woocommerce/pull/36492)
 * Update - Add default value for backorders [#36607](https://github.com/woocommerce/woocommerce/pull/36607)
