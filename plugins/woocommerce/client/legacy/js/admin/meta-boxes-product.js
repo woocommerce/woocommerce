@@ -438,6 +438,7 @@ jQuery( function ( $ ) {
 		$( 'div.add-attribute-container' ).toggle();
 		$( 'div.add-global-attribute-container' ).toggle();
 		$( 'button.save_attributes' ).toggle();
+		$( '#product_attributes > .toolbar' ).toggle();
 	}
 
 	function add_attribute( element, attribute ) {
