@@ -66,4 +66,7 @@
 	<rule ref="Generic.Arrays.DisallowShortArraySyntax.Found">
 		<exclude-pattern>src/*</exclude-pattern>
 	</rule>
+
+	<!-- Exclude Interactivity API-->
+	<exclude-pattern>./src/Interactivity/*</exclude-pattern>
 </ruleset>
