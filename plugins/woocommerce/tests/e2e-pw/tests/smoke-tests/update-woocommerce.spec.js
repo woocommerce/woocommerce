@@ -1,6 +1,6 @@
 const axios = require( 'axios' ).default;
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { ADMINSTATE, UPDATE_WC } = process.env;
+const { ADMINSTATE, GITHUB_TOKEN, UPDATE_WC } = process.env;
 const { downloadZip, deleteZip } = require( '../../utils/plugin-utils' );
 const { test, expect } = require( '@playwright/test' );
 
@@ -20,34 +20,53 @@ const skipTestIfUndefined = () => {
 	}, skipMessage );
 };
 
+/**
+ * Get download URL of WooCommerce ZIP by sending a `GET` request to `List releases` GitHub API endpoint in the WooCommerce repository.
+ * 
+ * If `GITHUB_TOKEN` is defined, use it as `Authorization` header.
+ *
+ * @returns Download URL of the WooCommerce ZIP
+ * @throws Error if 'List releases' request was unsuccessful, no release with the given tag was found, or when a WooCommerce ZIP asset was not found.
+ */
 const getWCDownloadURL = async () => {
-	let woocommerceZipAsset;
+	const requestConfig = {
+		method: 'get',
+		url: 'https://api.github.com/repos/woocommerce/woocommerce/releases',
+		headers: {
+			Accept: 'application/vnd.github+json',
+			Authorization: GITHUB_TOKEN
+				? `Bearer ${ GITHUB_TOKEN }`
+				: undefined,
+		},
+	};
 
-	const response = await axios
-		.get(
-			`https://api.github.com/repos/woocommerce/woocommerce/releases/tags/${ UPDATE_WC }`
-		)
-		.catch( ( error ) => {
-			console.log( error.toJSON() );
-			return error.response;
-		} );
+	const response = await axios( requestConfig ).catch( ( error ) => {
+		if ( error.response ) {
+			console.log( error.response.data );
+		}
 
-	if (
-		response.status === 200 &&
-		response.data.assets &&
-		response.data.assets.length > 0 &&
-		( woocommerceZipAsset = response.data.assets.find(
-			( { browser_download_url } ) =>
-				browser_download_url.match(
-					/woocommerce(-trunk-nightly)?\.zip$/
-				)
-		) )
-	) {
-		return woocommerceZipAsset.browser_download_url;
-	} else {
-		const error = `You're attempting to get the download URL of a WooCommerce release zip with tag "${ UPDATE_WC }". But "${ UPDATE_WC }" is an invalid WooCommerce release tag, or a tag without a WooCommerce release zip asset like "7.2.0-rc.2".`;
-		throw new Error( error );
+		throw new Error( error.message );
+	} );
+
+	const releaseWithTagName = response.data.find(
+		( { tag_name } ) => tag_name === UPDATE_WC
+	);
+
+	if ( ! releaseWithTagName ) {
+		throw new Error( `No release with tag_name="${ UPDATE_WC }" found.` );
 	}
+
+	const wcZipAsset = releaseWithTagName.assets.find( ( { name } ) =>
+		name.match( /^woocommerce(-trunk-nightly)?\.zip$/ )
+	);
+
+	if ( wcZipAsset ) {
+		return wcZipAsset.browser_download_url;
+	}
+
+	throw new Error(
+		`WooCommerce release with tag "${ UPDATE_WC }" found, but does not have a WooCommerce ZIP asset.`
+	);
 };
 
 skipTestIfUndefined();
@@ -58,7 +77,13 @@ test.describe.serial( 'WooCommerce update', () => {
 	test.beforeAll( async () => {
 		await test.step( 'Download WooCommerce zip from GitHub', async () => {
 			const url = await getWCDownloadURL();
-			woocommerceZipPath = await downloadZip( { url } );
+			const params = { url };
+
+			if ( GITHUB_TOKEN ) {
+				params.authorizationToken = GITHUB_TOKEN;
+			}
+
+			woocommerceZipPath = await downloadZip( params );
 		} );
 	} );
 
