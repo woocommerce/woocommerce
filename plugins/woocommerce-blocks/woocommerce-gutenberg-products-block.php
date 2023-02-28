@@ -287,24 +287,6 @@ function woocommerce_blocks_plugin_outdated_notice() {
 
 add_action( 'admin_notices', 'woocommerce_blocks_plugin_outdated_notice' );
 
-/**
- * Register the Interactivity API scripts. These files are enqueued when a block
- * defines `woo-directives-runtime` as a dependency.
- */
-function woo_directives_register_scripts() {
-	wp_register_script(
-		'woo-directives-vendors',
-		plugins_url( 'build/woo-directives-vendors.js', __FILE__ ),
-		array(),
-		'1.0.0',
-		true
-	);
-	wp_register_script(
-		'woo-directives-runtime',
-		plugins_url( 'build/woo-directives-runtime.js', __FILE__ ),
-		array( 'woo-directives-vendors' ),
-		'1.0.0',
-		true
-	);
-}
-add_action( 'init', 'woo_directives_register_scripts' );
+// Include the Interactivity API.
+require_once __DIR__ . '/src/Interactivity/woo-directives.php';
+
