@@ -32,6 +32,8 @@ export const scanForChanges = async (
 			? clonedPath
 			: await cloneRepo( source );
 
+	Logger.endTask();
+
 	Logger.notice(
 		`Temporary clone of ${ source } created at ${ tmpRepoPath }`
 	);

@@ -16,6 +16,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { Product } from '@woocommerce/data';
 import { useContext } from '@wordpress/element';
 import { Card, CardBody } from '@wordpress/components';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -28,7 +29,6 @@ import {
 } from './index';
 import { useProductHelper } from '../../use-product-helper';
 import { PLUGIN_ID } from '../constants';
-import { CurrencyContext } from '../../../lib/currency-context';
 
 import './pricing-section.scss';
 

@@ -7,8 +7,7 @@ import { get, find, isArray } from 'lodash';
 import interpolateComponents from '@automattic/interpolate-components';
 import classnames from 'classnames';
 import { sprintf, __, _x } from '@wordpress/i18n';
-
-import CurrencyFactory from '@woocommerce/currency';
+import { CurrencyFactory } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
