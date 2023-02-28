@@ -50,37 +50,6 @@ function getBuildPath( file, buildFolder ) {
 }
 
 /**
- * Given a list of scss and js filepaths, divide them into sets them and rebuild.
- *
- * @param {Array} files list of files to rebuild
- */
-function buildFiles( files ) {
-	// Reduce files into a unique sets of javaScript files and scss packages.
-	const buildPaths = files.reduce(
-		( accumulator, filePath ) => {
-			if ( isJsFile( filePath ) ) {
-				accumulator.jsFiles.add( filePath );
-			}
-			return accumulator;
-		},
-		{ jsFiles: new Set() }
-	);
-
-	buildPaths.jsFiles.forEach( buildJsFile );
-}
-
-/**
- * Build a javaScript file for the required environments (node and ES5)
- *
- * @param {string}  file   File path to build
- * @param {boolean} silent Show logs
- */
-function buildJsFile( file, silent ) {
-	buildJsFileFor( file, silent, 'main' );
-	buildJsFileFor( file, silent, 'module' );
-}
-
-/**
  * Build a file for a specific environment
  *
  * @param {string}  file        File path to build
@@ -114,6 +83,37 @@ function buildJsFileFor( file, silent, environment ) {
 				'\n'
 		);
 	}
+}
+
+/**
+ * Build a javaScript file for the required environments (node and ES5)
+ *
+ * @param {string}  file   File path to build
+ * @param {boolean} silent Show logs
+ */
+function buildJsFile( file, silent ) {
+	buildJsFileFor( file, silent, 'main' );
+	buildJsFileFor( file, silent, 'module' );
+}
+
+/**
+ * Given a list of scss and js filepaths, divide them into sets them and rebuild.
+ *
+ * @param {Array} files list of files to rebuild
+ */
+function buildFiles( files ) {
+	// Reduce files into a unique sets of javaScript files and scss packages.
+	const buildPaths = files.reduce(
+		( accumulator, filePath ) => {
+			if ( isJsFile( filePath ) ) {
+				accumulator.jsFiles.add( filePath );
+			}
+			return accumulator;
+		},
+		{ jsFiles: new Set() }
+	);
+
+	buildPaths.jsFiles.forEach( buildJsFile );
 }
 
 /**

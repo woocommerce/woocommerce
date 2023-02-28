@@ -22,7 +22,6 @@ import {
 } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { useContext, useState } from '@wordpress/element';
-import { useParams } from 'react-router-dom';
 import { useSelect, useDispatch } from '@wordpress/data';
 import classnames from 'classnames';
 import truncate from 'lodash/truncate';
