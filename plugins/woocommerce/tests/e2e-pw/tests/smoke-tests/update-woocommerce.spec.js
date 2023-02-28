@@ -21,12 +21,23 @@ const skipTestIfUndefined = () => {
 };
 
 /**
- * Get download URL of WooCommerce ZIP by sending a `GET` request to `List releases` GitHub API endpoint in the WooCommerce repository.
- * 
+ *
+ * Get download URL of a WooCommerce ZIP asset by sending a `GET` request to `List releases` GitHub API endpoint in the WooCommerce repository.
+ *
  * If `GITHUB_TOKEN` is defined, use it as `Authorization` header.
  *
- * @returns Download URL of the WooCommerce ZIP
- * @throws Error if 'List releases' request was unsuccessful, no release with the given tag was found, or when a WooCommerce ZIP asset was not found.
+ * @returns Download URL of the WooCommerce ZIP. This URL depends on whether `GITHUB_TOKEN` was specified or not.
+ *
+ * If `GITHUB_TOKEN` was defined, this function assumes that you're trying to access all releases, including drafts (as draft releases don't show up in the response of an unauthenticated GET `List releases` request ).
+ * In this case, the returned value will be the `asset.url`.
+ *
+ * Otherwise, the returned value will be the `asset.browser_download_url`.
+ *
+ * @throws Error if:
+ * - 'List releases' request was unsuccessful, or
+ * - no release with the given tag was found, or
+ * - when a WooCommerce ZIP asset was not found.
+ *
  */
 const getWCDownloadURL = async () => {
 	const requestConfig = {
@@ -34,11 +45,12 @@ const getWCDownloadURL = async () => {
 		url: 'https://api.github.com/repos/woocommerce/woocommerce/releases',
 		headers: {
 			Accept: 'application/vnd.github+json',
-			Authorization: GITHUB_TOKEN
-				? `Bearer ${ GITHUB_TOKEN }`
-				: undefined,
 		},
 	};
+
+	if ( GITHUB_TOKEN ) {
+		requestConfig.headers.Authorization = `Bearer ${ GITHUB_TOKEN }`;
+	}
 
 	const response = await axios( requestConfig ).catch( ( error ) => {
 		if ( error.response ) {
@@ -53,7 +65,9 @@ const getWCDownloadURL = async () => {
 	);
 
 	if ( ! releaseWithTagName ) {
-		throw new Error( `No release with tag_name="${ UPDATE_WC }" found.` );
+		throw new Error(
+			`No release with tag_name="${ UPDATE_WC }" found. If "${ UPDATE_WC }" is a draft release, make sure to specify a GITHUB_TOKEN environment variable.`
+		);
 	}
 
 	const wcZipAsset = releaseWithTagName.assets.find( ( { name } ) =>
@@ -61,7 +75,7 @@ const getWCDownloadURL = async () => {
 	);
 
 	if ( wcZipAsset ) {
-		return wcZipAsset.browser_download_url;
+		return GITHUB_TOKEN ? wcZipAsset.url : wcZipAsset.browser_download_url;
 	}
 
 	throw new Error(
