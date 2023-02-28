@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 
 /**
  * Checkout class.
@@ -277,7 +278,7 @@ class Checkout extends AbstractBlock {
 			$formatted_shipping_methods = array_reduce(
 				$shipping_methods,
 				function( $acc, $method ) {
-					if ( 'pickup_location' === $method->id ) {
+					if ( in_array( $method->id, LocalPickupUtils::get_local_pickup_method_ids(), true ) ) {
 						return $acc;
 					}
 					if ( $method->supports( 'settings' ) ) {
