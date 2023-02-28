@@ -1,5 +1,35 @@
 == Changelog ==
 
+= 7.4.1 2023-03-01 =
+
+**WooCommerce**
+
+* Update - Update WooCommerce Blocks to 9.4.4. [#36982](https://github.com/woocommerce/woocommerce/pull/36982)
+
+
+= 7.4.0 2023-02-18 =
+
+**WooCommerce**
+
+* Fix - Add support for sorting by includes param. [#36215](https://github.com/woocommerce/woocommerce/pull/36215)
+* Fix - Allow product tab navigation without prompting for unsaved changes [#36235](https://github.com/woocommerce/woocommerce/pull/36235)
+* Fix - Convert HTML to blocks in product variation description [#36241](https://github.com/woocommerce/woocommerce/pull/36241)
+* Fix - Decode HTML entities in CategoryBreadcrumbs. [#36321](https://github.com/woocommerce/woocommerce/pull/36321)
+* Fix - Decode HTML entities in CategoryFieldItem. [#36367](https://github.com/woocommerce/woocommerce/pull/36367)
+* Fix - Ensure order emails are responsive in most email clients, including when the current language is RTL. [#36310](https://github.com/woocommerce/woocommerce/pull/36310)
+* Fix - Ensures product variation sort order is correctly persisted. [#36343](https://github.com/woocommerce/woocommerce/pull/36343)
+* Fix - Ensure wc_get_order() works without arguments when HPOS is enabled. [#36496](https://github.com/woocommerce/woocommerce/pull/36496)
+* Fix - Fix "Save changes?" modal saves the options after selecting the 'Discard' option [#36160](https://github.com/woocommerce/woocommerce/pull/36160)
+* Fix - Fix attributes/options lists corrupt render #36236 [#36236](https://github.com/woocommerce/woocommerce/pull/36236)
+* Fix - Fix bug when filtering for customer_id=0. [#36216](https://github.com/woocommerce/woocommerce/pull/36216)
+* Fix - Fix deprecated usage of ${var} in strings [#36439](https://github.com/woocommerce/woocommerce/pull/36439)
+* Fix - Fix edit attribute modal terms list [#36186](https://github.com/woocommerce/woocommerce/pull/36186)
+* Fix - Fixes editing of child product reviews. [#35888](https://github.com/woocommerce/woocommerce/pull/35888)
+* Fix - Fix for product filters when 'shop' page is the front page. [#36224](https://github.com/woocommerce/woocommerce/pull/36224)
+* Fix - Fix issue where attribute term dropdown was not adhering to sort order setting. [#36047](https://github.com/woocommerce/woocommerce/pull/36047)
+* Fix - Fix navigation between variations and tab selection [#36239](https://github.com/woocommerce/woocommerce/pull/36239)
+
+
 = 7.4.0 2023-02-14 =
 
 **WooCommerce**
