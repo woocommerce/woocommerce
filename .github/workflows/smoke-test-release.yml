@@ -93,6 +93,7 @@ jobs:
                   CUSTOMER_PASSWORD: ${{ secrets.RELEASE_TEST_CUSTOMER_PASSWORD }}
                   CUSTOMER_USER: ${{ secrets.RELEASE_TEST_CUSTOMER_USER }}
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
+                  GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
                   UPDATE_WC: ${{ needs.get-tag.outputs.tag }}
               run: |
                   pnpm exec playwright test \
