@@ -4192,7 +4192,7 @@ packages:
       '@babel/core': 7.12.9
       '@babel/helper-annotate-as-pure': 7.16.7
       '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.12.9
-      '@babel/helper-plugin-utils': 7.19.0
+      '@babel/helper-plugin-utils': 7.18.9
       '@babel/plugin-syntax-private-property-in-object': 7.14.5_@babel+core@7.12.9
     transitivePeerDependencies:
       - supports-color
@@ -4207,7 +4207,7 @@ packages:
       '@babel/core': 7.16.12
       '@babel/helper-annotate-as-pure': 7.16.7
       '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.16.12
-      '@babel/helper-plugin-utils': 7.19.0
+      '@babel/helper-plugin-utils': 7.18.9
       '@babel/plugin-syntax-private-property-in-object': 7.14.5_@babel+core@7.16.12
     transitivePeerDependencies:
       - supports-color
@@ -22840,9 +22840,9 @@ packages:
       has: 1.0.3
       is-core-module: 2.10.0
       is-glob: 4.0.3
-      minimatch: 3.0.4
+      minimatch: 3.1.2
       object.values: 1.1.5
-      resolve: 1.20.0
+      resolve: 1.22.1
       tsconfig-paths: 3.14.0
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
@@ -22902,9 +22902,9 @@ packages:
       has: 1.0.3
       is-core-module: 2.10.0
       is-glob: 4.0.3
-      minimatch: 3.0.4
+      minimatch: 3.1.2
       object.values: 1.1.5
-      resolve: 1.20.0
+      resolve: 1.22.1
       tsconfig-paths: 3.14.0
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
@@ -31397,6 +31397,7 @@ packages:
     resolution: {integrity: sha512-yJHVQEhyqPLUTgt9B83PXu6W3rx4MvvHvSUvToogpwoGDOUQ+yDrR0HRot+yOCdCO7u4hX3pWft6kWBBcqh0UA==}
     dependencies:
       brace-expansion: 1.1.11
+    dev: true
 
   /minimatch/3.1.2:
     resolution: {integrity: sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==}

@@ -10,7 +10,11 @@ import interpolateComponents from '@automattic/interpolate-components';
 import { Product } from '@woocommerce/data';
 import { useFormContext } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
-import { __experimentalUseProductHelper as useProductHelper } from '@woocommerce/product-editor';
+
+/**
+ * Internal dependencies
+ */
+import { useProductHelper } from '../../hooks/use-product-helper';
 
 type EditProductLinkModalProps = {
 	product: Product;
