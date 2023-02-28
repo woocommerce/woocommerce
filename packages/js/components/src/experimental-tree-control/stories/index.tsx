@@ -3,7 +3,7 @@
  */
 import interpolate from '@automattic/interpolate-components';
 import { BaseControl, TextControl } from '@wordpress/components';
-import React, { createElement, useCallback, useState } from 'react';
+import React, { createElement, useState } from 'react';
 
 /**
  * Internal dependencies

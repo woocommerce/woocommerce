@@ -3,6 +3,7 @@ module.exports = {
 		'plugin:react-hooks/recommended',
 		require.resolve( './custom.js' ),
 		'plugin:@wordpress/eslint-plugin/recommended',
+		'plugin:@typescript-eslint/recommended',
 	],
 	parser: '@typescript-eslint/parser',
 	globals: {
@@ -10,7 +11,7 @@ module.exports = {
 		'jest/globals': true,
 		jest: true,
 	},
-	plugins: [ '@wordpress' ],
+	plugins: [ '@wordpress', '@typescript-eslint' ],
 	rules: {
 		radix: 'error',
 		yoda: [ 'error', 'never' ],
@@ -22,6 +23,15 @@ module.exports = {
 				allowedTextDomain: 'woocommerce',
 			},
 		],
+		'@typescript-eslint/no-explicit-any': 'error',
+		'@typescript-eslint/no-use-before-define': [ 'error' ],
+		'@typescript-eslint/no-shadow': [ 'error' ],
+		'@typescript-eslint/no-empty-function': 'off',
+		camelcase: 'off',
+		'no-use-before-define': 'off',
+		'jsdoc/require-param': 'off',
+		// Making use of typescript no-shadow instead, fixes issues with enum.
+		'no-shadow': 'off',
 		'@wordpress/valid-sprintf': 'warn',
 		'@wordpress/no-unsafe-wp-apis': 'warn',
 		'@wordpress/no-global-active-element': 'warn',
@@ -61,16 +71,8 @@ module.exports = {
 	overrides: [
 		{
 			files: [ '*.ts', '*.tsx' ],
-			extends: [ 'plugin:@typescript-eslint/recommended' ],
 			rules: {
-				'@typescript-eslint/no-explicit-any': 'error',
-				'@typescript-eslint/no-use-before-define': [ 'error' ],
-				'@typescript-eslint/no-shadow': [ 'error' ],
-				'@typescript-eslint/no-empty-function': 'off',
-				camelcase: 'off',
-				'no-use-before-define': 'off',
-				'jsdoc/require-param': 'off',
-				// Making use of typescript no-shadow instead, fixes issues with enum.
+				// Making use of typescript no-shadow instead.
 				'no-shadow': 'off',
 			},
 		},
