@@ -1053,7 +1053,7 @@
         },
         {
             "name": "{$hook}",
-            "file": "Templates/BlockTemplatesCompatibility.php",
+            "file": "Templates/AbstractTemplateCompatibility.php",
             "type": "action",
             "doc": {
                 "description": "Action to render the content of a hook.",
