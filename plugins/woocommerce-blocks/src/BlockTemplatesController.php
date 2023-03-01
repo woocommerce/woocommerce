@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Blocks\Domain\Package;
+use Automattic\WooCommerce\Blocks\Templates\BlockTemplatesCompatibility;
 use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
