@@ -13,6 +13,7 @@ import {
 	useStoreEvents,
 } from '@woocommerce/base-context/hooks';
 import { sanitizeHTML } from '@woocommerce/utils';
+import { debounce } from 'lodash';
 
 /**
  * Internal dependencies
@@ -90,14 +91,17 @@ export const ShippingRatesControlPackage = ( {
 			) }
 		</>
 	);
-	const onSelectRate = useCallback(
-		( newShippingRateId: string ) => {
-			selectShippingRate( newShippingRateId, packageId );
-			dispatchCheckoutEvent( 'set-selected-shipping-rate', {
-				shippingRateId: newShippingRateId,
-			} );
-		},
-		[ dispatchCheckoutEvent, packageId, selectShippingRate ]
+	const onSelectRate = debounce(
+		useCallback(
+			( newShippingRateId: string ) => {
+				selectShippingRate( newShippingRateId, packageId );
+				dispatchCheckoutEvent( 'set-selected-shipping-rate', {
+					shippingRateId: newShippingRateId,
+				} );
+			},
+			[ dispatchCheckoutEvent, packageId, selectShippingRate ]
+		),
+		1000
 	);
 	const packageRatesProps = {
 		className,
