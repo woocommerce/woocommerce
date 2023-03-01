@@ -39,6 +39,21 @@ type BaseTreeProps = {
 	 * @param value The unselection
 	 */
 	onRemove?( value: Item | Item[] ): void;
+	/**
+	 * It provides a way to determine whether the current rendering
+	 * item is highlighted or not from outside the tree.
+	 *
+	 * @example
+	 * <Tree
+	 * 	shouldItemBeHighlighted={ isFirstChild }
+	 * />
+	 *
+	 * @param item The current linked tree item, useful to
+	 * traverse the entire linked tree from this item.
+	 *
+	 * @see {@link LinkedTree}
+	 */
+	shouldItemBeHighlighted?( item: LinkedTree ): boolean;
 };
 
 export type TreeProps = BaseTreeProps &
