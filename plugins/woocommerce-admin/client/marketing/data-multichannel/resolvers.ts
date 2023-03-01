@@ -57,9 +57,13 @@ export function* getRecommendedChannels() {
 }
 
 const getTotalFromResponse = ( response: Response ) => {
-	return (
-		parseInt( response.headers.get( 'x-wp-total' ) || '0', 10 ) || undefined
-	);
+	const total = response.headers.get( 'x-wp-total' );
+
+	if ( total === null ) {
+		return undefined;
+	}
+
+	return parseInt( total, 10 );
 };
 
 export function* getCampaigns( page: number, perPage: number ) {
