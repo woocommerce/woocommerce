@@ -201,13 +201,20 @@ class MiniCart extends AbstractBlock {
 			current_user_can( 'edit_theme_options' ) &&
 			wc_current_theme_is_fse_theme()
 		) {
-			$theme_slug      = BlockTemplateUtils::theme_has_template_part( 'mini-cart' ) ? wp_get_theme()->get_stylesheet() : BlockTemplateUtils::PLUGIN_SLUG;
-			$site_editor_uri = admin_url( 'site-editor.php' );
+			$theme_slug = BlockTemplateUtils::theme_has_template_part( 'mini-cart' ) ? wp_get_theme()->get_stylesheet() : BlockTemplateUtils::PLUGIN_SLUG;
 
 			if ( version_compare( get_bloginfo( 'version' ), '5.9', '<' ) ) {
 				$site_editor_uri = add_query_arg(
 					array( 'page' => 'gutenberg-edit-site' ),
 					admin_url( 'themes.php' )
+				);
+			} else {
+				$site_editor_uri = add_query_arg(
+					array(
+						'canvas' => 'edit',
+						'path'   => '/template-parts/single',
+					),
+					admin_url( 'site-editor.php' )
 				);
 			}
 
