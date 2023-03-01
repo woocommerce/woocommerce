@@ -29,7 +29,7 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
-use Automattic\WooCommerce\Blocks\Templates\BlockTemplatesCompatibility;
+use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
 
 /**
  * Takes care of bootstrapping the plugin.
@@ -131,7 +131,7 @@ class Bootstrap {
 		$this->container->get( ProductSearchResultsTemplate::class );
 		$this->container->get( ProductAttributeTemplate::class );
 		$this->container->get( ClassicTemplatesCompatibility::class );
-		$this->container->get( BlockTemplatesCompatibility::class )->init();
+		$this->container->get( ArchiveProductTemplatesCompatibility::class )->init();
 		$this->container->get( SingleProductTemplateCompatibility::class )->init();
 		$this->container->get( BlockPatterns::class );
 		$this->container->get( PaymentsApi::class );
@@ -279,9 +279,9 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
-			BlockTemplatesCompatibility::class,
+			ArchiveProductTemplatesCompatibility::class,
 			function () {
-				return new BlockTemplatesCompatibility();
+				return new ArchiveProductTemplatesCompatibility();
 			}
 		);
 

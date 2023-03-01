@@ -2,13 +2,13 @@
 namespace Automattic\WooCommerce\Blocks\Templates;
 
 /**
- * BlockTemplatesCompatibility class.
+ * ArchiveProductTemplatesCompatibility class.
  *
- * To bridge the gap on compatibility with PHP hooks and blockified templates.
+ * To bridge the gap on compatibility with PHP hooks and Product Archive blockified templates.
  *
  * @internal
  */
-class BlockTemplatesCompatibility extends AbstractTemplateCompatibility {
+class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility {
 
 	/**
 	 * The custom ID of the loop item block as the replacement of the core/null block.
