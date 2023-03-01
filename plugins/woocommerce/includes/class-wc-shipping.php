@@ -226,7 +226,7 @@ class WC_Shipping {
 	/**
 	 * Get an array of shipping classes.
 	 *
-	 * @return array
+	 * @return WP_Term[]|int[]|string[]|string|mixed
 	 */
 	public function get_shipping_classes() {
 		if ( empty( $this->shipping_classes ) ) {
