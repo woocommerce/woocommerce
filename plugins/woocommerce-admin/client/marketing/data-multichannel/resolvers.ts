@@ -56,6 +56,11 @@ export function* getRecommendedChannels() {
 	}
 }
 
+/**
+ * Get total number of records from the HTTP response header "x-wp-total".
+ *
+ * If the header is not present, then the function will return `undefined`.
+ */
 const getTotalFromResponse = ( response: Response ) => {
 	const total = response.headers.get( 'x-wp-total' );
 
