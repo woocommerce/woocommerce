@@ -5,8 +5,6 @@
  * @package WooCommerce\Tests\Admin
  */
 
-use Automattic\WooCommerce\Utilities\OrderUtil;
-
 /**
  * Tests for the WC_Admin_Report class.
  */
@@ -39,9 +37,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 	 * Test: get_status_widget
 	 */
 	public function test_status_widget() {
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$this->markTestSkipped( 'We don\'t support legacy reports in HPOS.' );
-		}
+		$this->skip_if_hpos_enabled( 'We don\'t support legacy reports on HPOS' );
 		wp_set_current_user( $this->user );
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( 'completed' );
@@ -63,9 +59,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 	 * Test: get_status_widget with woo admin disabled.
 	 */
 	public function test_status_widget_with_woo_admin_disabled() {
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$this->markTestSkipped( 'We don\'t support legacy reports in HPOS.' );
-		}
+		$this->skip_if_hpos_enabled( 'We don\'t support legacy reports on HPOS' );
 		wp_set_current_user( $this->user );
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( 'completed' );
