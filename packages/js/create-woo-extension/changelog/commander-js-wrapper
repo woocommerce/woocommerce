@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Add a Commander-based wrapper to make this a proper CLI tool and simplify calling it.

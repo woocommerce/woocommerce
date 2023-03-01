@@ -1,8 +1,11 @@
 {
 	"name": "@woocommerce/create-woo-extension",
-	"version": "1.0.2",
-	"description": "A template to be used with `@wordpress/create-block` to create a WooCommerce extension.",
+	"version": "1.0.3",
+	"description": "A CLI tool for developing WooCommerce extensions.",
 	"main": "index.js",
+	"bin": {
+		"create-woo-extension": "./index.js"
+	  },
 	"engines": {
 		"node": "^16.13.1",
 		"pnpm": "^7.13.3"
@@ -15,11 +18,36 @@
 		"type": "git",
 		"url": "git+https://github.com/woocommerce/woocommerce.git"
 	},
-	"keywords": [],
-	"author": "",
+	"keywords": ["woocommerce", "cli", "wordpress"],
+	"author": "Automattic",
 	"license": "GPL-3.0+",
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
-	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/create-woo-extensionv#readme"
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/create-woo-extension#readme",
+	"require-dev": {
+		"automattic/jetpack-changelogger": "3.3.0"
+	},
+	"dependencies": {
+		"@wordpress/create-block": "^4.11.0",
+		"commander": "^10.0.0",
+		"slug": "^8.2.2"
+	},
+	"extra": {
+		"changelogger": {
+			"formatter": {
+				"filename": "../../../tools/changelogger/class-package-formatter.php"
+			},
+			"types": {
+				"fix": "Fixes an existing bug",
+				"add": "Adds functionality",
+				"update": "Update existing functionality",
+				"dev": "Development related task",
+				"tweak": "A minor adjustment to the codebase",
+				"performance": "Address performance issues",
+				"enhancement": "Improve existing functionality"
+			},
+			"changelog": "CHANGELOG.md"
+		}
+	}
 }

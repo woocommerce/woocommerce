@@ -1,7 +1,7 @@
 {
-	"name": "woocommerce/extend-cart-checkout-block",
-	"description": "A template to be used with `@wordpress/create-block` to create a WooCommerce extension.",
-	"type": "library",
+	"name": "woocommerce/create-woo-extension",
+	"description": "A CLI tool for developing WooCommerce extensions.",
+	"type": "project",
 	"license": "GPL-3.0-or-later",
 	"minimum-stability": "dev",
 	"require-dev": {
