@@ -21,6 +21,20 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	protected $fee_cost = '';
 
 	/**
+	 * Shipping method cost.
+	 *
+	 * @var string
+	 */
+	public $cost;
+
+	/**
+	 * Shipping method type.
+	 *
+	 * @var string
+	 */
+	public $type;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param int $instance_id Shipping method instance ID.
