@@ -67,7 +67,6 @@ export type CampaignsPage = {
 };
 
 export type CampaignsState = {
-	error?: ApiFetchError;
 	perPage?: number;
 	pages?: Record< number, CampaignsPage >;
 	total?: number;
