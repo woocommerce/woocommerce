@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Address undeclared proprty use (PHP 8.2 deprecation notices).
