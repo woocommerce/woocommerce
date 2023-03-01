@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import interpolate from '@automattic/interpolate-components';
 import { BaseControl, TextControl } from '@wordpress/components';
 import React, { createElement, useState } from 'react';
 
