@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import interpolate from '@automattic/interpolate-components';
 import { BaseControl, TextControl } from '@wordpress/components';
 import React, { createElement, useCallback, useState } from 'react';
 
@@ -9,6 +10,7 @@ import React, { createElement, useCallback, useState } from 'react';
  */
 import { TreeControl } from '../tree-control';
 import { Item, LinkedTree } from '../types';
+import '../tree.scss';
 
 const listItems: Item[] = [
 	{ value: '1', label: 'Technology' },
@@ -61,6 +63,122 @@ export const ExpandOnFilter: React.FC = () => {
 					}
 				/>
 			</BaseControl>
+		</>
+	);
+};
+
+export const CustomItemLabel: React.FC = () => {
+	function renderCustomItemLabel( item: LinkedTree ) {
+		return (
+			<div style={ { display: 'flex', gap: 8 } }>
+				<div
+					style={ {
+						width: 36,
+						height: 36,
+						backgroundColor: '#ccc',
+						borderRadius: 2,
+					} }
+				/>
+				<div
+					style={ {
+						display: 'flex',
+						flexDirection: 'column',
+					} }
+				>
+					<strong>{ item.data.label }</strong>
+					<small>Some item description</small>
+				</div>
+			</div>
+		);
+	}
+
+	return (
+		<BaseControl label="Custom item label" id="custom-item-label">
+			<TreeControl
+				id="custom-item-label"
+				items={ listItems }
+				getItemLabel={ renderCustomItemLabel }
+			/>
+		</BaseControl>
+	);
+};
+
+function getItemLabel( item: LinkedTree, text: string ) {
+	return (
+		<span>
+			{ text
+				? interpolate( {
+						mixedString: item.data.label.replace(
+							new RegExp( text, 'ig' ),
+							( group ) => `{{bold}}${ group }{{/bold}}`
+						),
+						components: {
+							bold: <b />,
+						},
+				  } )
+				: item.data.label }
+		</span>
+	);
+}
+
+export const SelectionSingle: React.FC = () => {
+	const [ selected, setSelected ] = useState( listItems[ 1 ] );
+
+	return (
+		<>
+			<BaseControl label="Single selection" id="single-selection">
+				<TreeControl
+					id="single-selection"
+					items={ listItems }
+					selected={ selected }
+					onSelect={ ( value: Item ) => setSelected( value ) }
+				/>
+			</BaseControl>
+
+			<pre>{ JSON.stringify( selected, null, 2 ) }</pre>
+		</>
+	);
+};
+
+export const SelectionMultiple: React.FC = () => {
+	const [ selected, setSelected ] = useState( [
+		listItems[ 0 ],
+		listItems[ 1 ],
+	] );
+
+	function handleSelect( values: Item[] ) {
+		setSelected( ( items ) => {
+			const newItems = values.filter(
+				( { value } ) =>
+					! items.some( ( item ) => item.value === value )
+			);
+			return [ ...items, ...newItems ];
+		} );
+	}
+
+	function handleRemove( values: Item[] ) {
+		setSelected( ( items ) =>
+			items.filter(
+				( item ) =>
+					! values.some( ( { value } ) => item.value === value )
+			)
+		);
+	}
+
+	return (
+		<>
+			<BaseControl label="Multiple selection" id="multiple-selection">
+				<TreeControl
+					id="multiple-selection"
+					items={ listItems }
+					multiple
+					selected={ selected }
+					onSelect={ handleSelect }
+					onRemove={ handleRemove }
+				/>
+			</BaseControl>
+
+			<pre>{ JSON.stringify( selected, null, 2 ) }</pre>
 		</>
 	);
 };

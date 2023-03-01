@@ -14,11 +14,11 @@ import {
 	isoDateFormat,
 } from '@woocommerce/date';
 import { recordEvent } from '@woocommerce/tracks';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
-import { CurrencyContext } from '../../../lib/currency-context';
 import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
 import { LOCALE } from '~/utils/admin-settings';
 

@@ -11,7 +11,12 @@ export function useTree( {
 	ref,
 	items,
 	level = 1,
+	multiple,
+	selected,
+	getItemLabel,
 	shouldItemBeExpanded,
+	onSelect,
+	onRemove,
 	...props
 }: TreeProps ) {
 	return {
@@ -22,7 +27,12 @@ export function useTree( {
 		},
 		treeItemProps: {
 			level,
+			multiple,
+			selected,
+			getLabel: getItemLabel,
 			shouldItemBeExpanded,
+			onSelect,
+			onRemove,
 		},
 	};
 }
