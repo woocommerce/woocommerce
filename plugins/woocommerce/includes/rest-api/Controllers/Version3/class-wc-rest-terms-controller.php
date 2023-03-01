@@ -39,6 +39,20 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	protected $taxonomies_by_id = array();
 
 	/**
+	 * Total number of terms received after running get_terms_for_product().
+	 *
+	 * @var int
+	 */
+	protected $total_terms = 0;
+
+	/**
+	 * Column to sort terms by.
+	 *
+	 * @var string
+	 */
+	protected $sort_column;
+
+	/**
 	 * Register the routes for terms.
 	 */
 	public function register_routes() {
