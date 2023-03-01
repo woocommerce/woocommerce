@@ -95,7 +95,6 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Enable users to migrate to blockified Product Archive templates. ([8248](https://github.com/woocommerce/woocommerce-blocks/pull/8248))
 - Add Product Image Gallery block. ([8235](https://github.com/woocommerce/woocommerce-blocks/pull/8235))
 - Add Single Product Details block that displays the product description, information, and reviews. ([8225](https://github.com/woocommerce/woocommerce-blocks/pull/8225))
-- Validate postcodes client-site instead of server-side. ([7945](https://github.com/woocommerce/woocommerce-blocks/pull/7945))
 
 #### Bug Fixes
 
