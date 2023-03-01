@@ -25,6 +25,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 		treeProps,
 		expander: { isExpanded, onToggleExpand },
 		selection,
+		highlighter: { isHighlighted },
 		getLabel,
 	} = useTreeItem( {
 		...props,
@@ -39,8 +40,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				'experimental-woocommerce-tree-item',
 				{
 					'experimental-woocommerce-tree-item--highlighted':
-						! selection.multiple &&
-						selection.checkedStatus === 'checked',
+						isHighlighted,
 				}
 			) }
 		>

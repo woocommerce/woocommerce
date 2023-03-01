@@ -124,8 +124,6 @@ class OnboardingThemes {
 			}
 
 			$installed_themes = wp_get_themes();
-			$active_theme     = get_option( 'stylesheet' );
-
 			foreach ( $installed_themes as $slug => $theme ) {
 				$theme_data = self::get_theme_data( $theme );
 				if ( isset( $themes[ $slug ] ) ) {
@@ -136,12 +134,20 @@ class OnboardingThemes {
 				}
 			}
 
-			// Add the WooCommerce support tag for default themes that don't explicitly declare support.
-			if ( function_exists( 'wc_is_wp_default_theme_active' ) && wc_is_wp_default_theme_active() ) {
-				$themes[ $active_theme ]['has_woocommerce_support'] = true;
-			}
+			$active_theme = get_option( 'stylesheet' );
 
-			$themes = array( $active_theme => $themes[ $active_theme ] ) + $themes;
+			/**
+			 * The active theme may no be set if active_theme is not compatible with current version of WordPress.
+			 * In this case, we should not add active theme to onboarding themes.
+			 */
+			if ( isset( $themes[ $active_theme ] ) ) {
+				// Add the WooCommerce support tag for default themes that don't explicitly declare support.
+				if ( function_exists( 'wc_is_wp_default_theme_active' ) && wc_is_wp_default_theme_active() ) {
+					$themes[ $active_theme ]['has_woocommerce_support'] = true;
+				}
+
+				$themes = array( $active_theme => $themes[ $active_theme ] ) + $themes;
+			}
 
 			set_transient( self::THEMES_TRANSIENT, $themes, DAY_IN_SECONDS );
 		}
