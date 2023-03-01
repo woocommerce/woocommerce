@@ -226,7 +226,7 @@ class WC_REST_Payment_Gateways_V2_Controller extends WC_REST_Controller {
 	 * Get a gateway based on the current request object.
 	 *
 	 * @param WP_REST_Request $request Request data.
-	 * @return WP_REST_Response|null
+	 * @return WC_Payment_Gateway|null
 	 */
 	public function get_gateway( $request ) {
 		$gateway          = null;
