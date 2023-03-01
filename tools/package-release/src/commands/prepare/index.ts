@@ -92,7 +92,7 @@ export default class PackagePrepare extends Command {
 	 */
 	private async preparePackages(
 		packages: Array< string >,
-		initialRelease?: Boolean
+		initialRelease?: boolean
 	) {
 		packages.forEach( async ( name ) => {
 			CliUx.ux.action.start( `Preparing ${ name }` );

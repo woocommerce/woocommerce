@@ -10,7 +10,6 @@ import {
 } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import apiFetch from '@wordpress/api-fetch';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -22,9 +21,7 @@ import strings from './strings';
  * Provides a modal requesting customer feedback.
  *
  */
-function ExitSurveyModal( {
-	setExitSurveyModalOpen,
-}: {
+function ExitSurveyModal( {}: {
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	setExitSurveyModalOpen: Function;
 } ): JSX.Element | null {

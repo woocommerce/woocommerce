@@ -169,7 +169,7 @@ describe( 'SelectControl', () => {
 
 	it( 'changes the options on search', async () => {
 		const queriedOptions = [];
-		// eslint-disable-next-line no-shadow
+		// eslint-disable-next-line @typescript-eslint/no-shadow
 		const queryOptions = ( options, searchedQuery ) => {
 			if ( searchedQuery === 'test' ) {
 				queriedOptions.push( {

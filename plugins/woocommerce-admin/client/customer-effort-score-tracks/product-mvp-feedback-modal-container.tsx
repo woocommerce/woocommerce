@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { ProductMVPFeedbackModal } from '@woocommerce/customer-effort-score';
 import { recordEvent } from '@woocommerce/tracks';
