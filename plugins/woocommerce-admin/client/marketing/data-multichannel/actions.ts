@@ -65,6 +65,9 @@ type CampaignsFailResponse = {
 
 type CampaignsResponse = CampaignsSuccessResponse | CampaignsFailResponse;
 
+/**
+ * Create a "RECEIVE_CAMPAIGNS" action object.
+ */
 export const receiveCampaigns = ( response: CampaignsResponse ) => {
 	return {
 		type: TYPES.RECEIVE_CAMPAIGNS,
