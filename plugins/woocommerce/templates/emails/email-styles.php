@@ -237,17 +237,55 @@ img {
  * Gmail clients and can help us achieve better consistency there.
  */
 @media screen and (max-width: 600px) {
+	* {
+		font-size: 8px !important;
+	}
+
+	body {
+		padding: 0 !important;
+	}
+
+	#template_container {
+		margin: 0 !important;
+	}
+
+	h1 {
+		font-size: 18px !important;
+		margin: 14px 0 !important;
+	}
+
+	h2, h3, h2 a, h3 a {
+		font-size: 12px !important;
+		margin: 12px 0 !important;
+	}
+
 	#header_wrapper {
-		padding: 27px 36px !important;
-		font-size: 24px;
+		padding: 18px 27px !important;
+	}
+
+	#header_wrapper h1 {
+		margin: 0 !important;
 	}
 
 	#body_content table > tbody > tr > td {
-		padding: 10px !important;
+		padding: 14px 25px !important;
+	}
+
+	#body_content table table.td th,
+	#body_content table table.td td {
+		padding: 4px 7px !important;
+	}
+
+	#body_content table#addresses > tbody > tr > td {
+		padding: 0 !important;
 	}
 
 	#body_content_inner {
 		font-size: 10px !important;
+	}
+
+	#body_content_inner > div {
+		margin-bottom: 10px !important;
 	}
 }
 <?php
