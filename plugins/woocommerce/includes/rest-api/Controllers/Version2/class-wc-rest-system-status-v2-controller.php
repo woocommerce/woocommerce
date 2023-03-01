@@ -34,6 +34,14 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	protected $rest_base = 'system_status';
 
 	/**
+	 * Available updates for plugins.
+	 *
+	 * @var array
+	 */
+	public $available_updates;
+
+
+	/**
 	 * Register cache cleaner
 	 *
 	 * Handles all the cache cleaning for this endpoint. We need to register
