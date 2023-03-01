@@ -15,14 +15,6 @@ use WP_Block_Editor_Context;
  * Loads assets related to the product block editor.
  */
 class Init {
-
-	const FEATURE_ID = 'product-block-editor';
-
-	/**
-	 * Option name used to toggle this feature.
-	 */
-	const TOGGLE_OPTION_NAME = 'woocommerce_' . self::FEATURE_ID . '_enabled';
-
 	/**
 	 * The context name used to identify the editor.
 	 */
@@ -32,11 +24,11 @@ class Init {
 	 * Constructor
 	 */
 	public function __construct() {
-		if ( ! Features::is_enabled( 'new-product-management-experience' ) && Features::is_enabled( self::FEATURE_ID ) ) {
-			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
-			add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
-		}
-		if ( Features::is_enabled( self::FEATURE_ID ) ) {
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
+			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
+				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+				add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
+			}
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 			add_filter( 'woocommerce_register_post_type_product', array( $this, 'add_product_template' ) );
 			$block_registry = new BlockRegistry();
