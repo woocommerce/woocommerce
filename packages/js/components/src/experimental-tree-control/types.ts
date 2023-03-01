@@ -40,7 +40,7 @@ type BaseTreeProps = {
 	 */
 	onRemove?( value: Item | Item[] ): void;
 	/**
-	 * It gives a way to determine whether the current rendering
+	 * It provides a way to determine whether the current rendering
 	 * item is highlighted or not from outside the tree.
 	 *
 	 * @example
