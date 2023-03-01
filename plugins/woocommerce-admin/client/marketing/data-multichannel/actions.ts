@@ -43,33 +43,32 @@ export const receiveRecommendedChannelsError = ( error: ApiFetchError ) => {
 	};
 };
 
-export const receiveCampaignsSuccess = ( success: {
+type CampaignsSuccessResponse = {
 	payload: Array< Campaign >;
-	error: boolean;
+	error: false;
 	meta: {
 		page: number;
 		perPage: number;
 		total?: number;
-	};
-} ) => {
-	return {
-		type: TYPES.RECEIVE_CAMPAIGNS_SUCCESS,
-		...success,
 	};
 };
 
-export const receiveCampaignsError = ( error: {
+type CampaignsFailResponse = {
 	payload: ApiFetchError;
-	error: boolean;
+	error: true;
 	meta: {
 		page: number;
 		perPage: number;
 		total?: number;
 	};
-} ) => {
+};
+
+type CampaignsResponse = CampaignsSuccessResponse | CampaignsFailResponse;
+
+export const receiveCampaigns = ( response: CampaignsResponse ) => {
 	return {
-		type: TYPES.RECEIVE_CAMPAIGNS_ERROR,
-		...error,
+		type: TYPES.RECEIVE_CAMPAIGNS,
+		...response,
 	};
 };
 
@@ -78,6 +77,5 @@ export type Action = ReturnType<
 	| typeof receiveRegisteredChannelsError
 	| typeof receiveRecommendedChannelsSuccess
 	| typeof receiveRecommendedChannelsError
-	| typeof receiveCampaignsSuccess
-	| typeof receiveCampaignsError
+	| typeof receiveCampaigns
 >;

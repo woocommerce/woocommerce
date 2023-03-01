@@ -11,8 +11,7 @@ import {
 	receiveRegisteredChannelsError,
 	receiveRecommendedChannelsSuccess,
 	receiveRecommendedChannelsError,
-	receiveCampaignsSuccess,
-	receiveCampaignsError,
+	receiveCampaigns,
 } from './actions';
 import { awaitResponseJson } from './controls';
 import {
@@ -81,7 +80,7 @@ export function* getCampaigns( page: number, perPage: number ) {
 		const total = getTotalFromResponse( response );
 		const payload: Campaign[] = yield awaitResponseJson( response );
 
-		yield receiveCampaignsSuccess( {
+		yield receiveCampaigns( {
 			payload,
 			error: false,
 			meta: {
@@ -95,7 +94,7 @@ export function* getCampaigns( page: number, perPage: number ) {
 			const total = getTotalFromResponse( error );
 			const payload: ApiFetchError = yield awaitResponseJson( error );
 
-			yield receiveCampaignsError( {
+			yield receiveCampaigns( {
 				payload,
 				error: true,
 				meta: {
