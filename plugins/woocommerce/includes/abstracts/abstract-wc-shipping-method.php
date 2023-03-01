@@ -135,6 +135,13 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	public $countries = array();
 
 	/**
+	 * Shipping method order.
+	 *
+	 * @var int
+	 */
+	public $method_order;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param int $instance_id Instance ID.
