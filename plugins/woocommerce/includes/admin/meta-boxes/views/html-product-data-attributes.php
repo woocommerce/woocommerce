@@ -102,11 +102,11 @@ $icon_url                        = WC_ADMIN_IMAGES_FOLDER_URL . '/icons/global-a
 		}
 		?>
 	</div>
-	<div class="toolbar<?php echo $is_add_global_attribute_visible ? ' hidden' : ''; ?>">
+	<div class="toolbar toolbar-buttons<?php echo $is_add_global_attribute_visible ? ' hidden' : ''; ?>">
 		<span class="expand-close">
 			<a href="#" class="expand_all"><?php esc_html_e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php esc_html_e( 'Close', 'woocommerce' ); ?></a>
 		</span>
-		<button type="button" class="button save_attributes button-primary <?php echo ! $has_local_attributes && $has_global_attributes ? 'hidden' : ''; ?>"><?php esc_html_e( 'Save attributes', 'woocommerce' ); ?></button>
+		<button type="button" class="button save_attributes button-primary"><?php esc_html_e( 'Save attributes', 'woocommerce' ); ?></button>
 	</div>
 	<?php do_action( 'woocommerce_product_options_attributes' ); ?>
 </div>
