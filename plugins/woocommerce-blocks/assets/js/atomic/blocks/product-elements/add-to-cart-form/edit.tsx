@@ -14,7 +14,7 @@ export interface Attributes {
 
 const Edit = () => {
 	const blockProps = useBlockProps( {
-		className: 'woocommerce wc-block-add-to-cart-form',
+		className: 'wc-block-add-to-cart-form',
 	} );
 
 	return (

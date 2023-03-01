@@ -3,24 +3,27 @@
 	flex-direction: row;
 }
 
-.wc-block-add-to-cart-form__notice {
+.wc-block-add-to-cart-form__notice.components-notice {
 	margin: 10px 0;
 	color: $black;
 	max-width: 60%;
 }
-input.wc-block-add-to-cart-form__quantity {
-	width: 35px;
+
+input.wc-block-add-to-cart-form__quantity[type="number"] {
+	max-width: 50px;
+	min-height: 23px;
 	float: left;
-	padding: 10px 6px 10px 12px;
+	padding: 6px 6px 6px 12px;
 	margin-right: 10px;
-	height: 15px;
+	font-size: 13px;
+	height: inherit;
 }
 
 input[type="number"]::-webkit-inner-spin-button {
 	opacity: 1;
 }
 
-.wc-block-add-to-cart-form__button {
+button.components-button.wc-block-add-to-cart-form__button {
 	float: left;
 	padding: 20px 30px;
 	border-radius: 0;
