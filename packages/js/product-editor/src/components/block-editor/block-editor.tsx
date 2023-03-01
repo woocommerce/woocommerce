@@ -26,7 +26,6 @@ import {
 /**
  * Internal dependencies
  */
-// import { parseProductToBlocks } from '../../utils/parse-product-to-blocks';
 import { Sidebar } from '../sidebar';
 
 type BlockEditorProps = {
