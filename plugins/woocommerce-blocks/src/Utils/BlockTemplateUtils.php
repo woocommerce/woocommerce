@@ -635,11 +635,18 @@ class BlockTemplateUtils {
 
 	/**
 	 * Returns whether the blockified templates should be used or not.
-	 * If the option is not stored on the db, we need to check if the current theme is a block one or not.
+	 * First, we need to make sure WordPress version is higher than 6.1 (lowest that supports Products block).
+	 * Then, if the option is not stored on the db, we need to check if the current theme is a block one or not.
 	 *
 	 * @return boolean
 	 */
 	public static function should_use_blockified_product_grid_templates() {
+		$minimum_wp_version = '6.1';
+
+		if ( version_compare( $GLOBALS['wp_version'], $minimum_wp_version, '<' ) ) {
+			return false;
+		}
+
 		$use_blockified_templates = get_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE );
 
 		if ( false === $use_blockified_templates ) {
