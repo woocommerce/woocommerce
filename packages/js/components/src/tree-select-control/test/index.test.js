@@ -71,6 +71,25 @@ describe( 'TreeSelectControl Component', () => {
 		expect( onChange ).toHaveBeenCalledWith( [ 'ES', 'AS' ] );
 	} );
 
+	it( 'Should include parent in onChange value when includeParent is truthy', () => {
+		const onChange = jest.fn().mockName( 'onChange' );
+
+		const { queryByLabelText, queryByRole } = render(
+			<TreeSelectControl
+				options={ options }
+				value={ [] }
+				onChange={ onChange }
+				includeParent={ true }
+			/>
+		);
+
+		const control = queryByRole( 'combobox' );
+		fireEvent.click( control );
+		const checkbox = queryByLabelText( 'Europe' );
+		fireEvent.click( checkbox );
+		expect( onChange ).toHaveBeenCalledWith( [ 'ES', 'FR', 'IT', 'EU' ] );
+	} );
+
 	it( 'Renders the label', () => {
 		const { queryByLabelText } = render(
 			<TreeSelectControl options={ options } label="Select" />
@@ -147,5 +166,26 @@ describe( 'TreeSelectControl Component', () => {
 		expect( queryByLabelText( 'Spain' ) ).toBeTruthy(); // match pain
 		expect( queryByLabelText( 'France' ) ).toBeFalsy(); // doesn't match pain
 		expect( queryByLabelText( 'Asia' ) ).toBeFalsy(); // doesn't match pain
+	} );
+
+	it( 'should call onInputChange when input field changed', () => {
+		const onInputChangeMock = jest.fn();
+		const { queryByRole } = render(
+			<TreeSelectControl
+				options={ options }
+				onInputChange={ onInputChangeMock }
+			/>
+		);
+
+		const control = queryByRole( 'combobox' );
+		fireEvent.click( control );
+		fireEvent.change( control, { target: { value: 'Asi' } } );
+		expect( onInputChangeMock ).toHaveBeenCalledWith( 'Asi' );
+
+		fireEvent.change( control, { target: { value: 'As' } } );
+		expect( onInputChangeMock ).toHaveBeenCalledWith( 'As' );
+
+		fireEvent.change( control, { target: { value: 'pain' } } );
+		expect( onInputChangeMock ).toHaveBeenCalledWith( 'pain' );
 	} );
 } );
