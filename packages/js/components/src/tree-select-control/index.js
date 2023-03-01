@@ -422,7 +422,9 @@ const TreeSelectControl = ( {
 		const changedValues = option.leaves
 			.filter( ( opt ) => opt.checked !== checked )
 			.map( ( opt ) => opt.value );
-
+		if ( includeParent && option.value !== ROOT_VALUE ) {
+			changedValues.push( option.value );
+		}
 		if ( checked ) {
 			if ( ! option.expanded ) {
 				handleToggleExpanded( option );
@@ -435,6 +437,14 @@ const TreeSelectControl = ( {
 		onChange( newValue );
 	};
 
+	/**
+	 * Handles a change on the Tree options. Could be a click on a parent option
+	 * or a child option
+	 *
+	 * @param {boolean}     checked Indicates if the item should be checked
+	 * @param {InnerOption} option  The option to change
+	 * @param {InnerOption} parent  The options parent (could be null)
+	 */
 	const handleOptionsChange = ( checked, option, parent ) => {
 		if ( option.hasChildren ) {
 			handleParentChange( checked, option );
