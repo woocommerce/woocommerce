@@ -123,6 +123,13 @@ class DataStore extends SqlQuery {
 	protected $debug_cache_data = array();
 
 	/**
+	 * SQL columns to select in the db query.
+	 *
+	 * @var array
+	 */
+	protected $report_columns = array();
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
