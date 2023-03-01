@@ -2,7 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\Templates;
 
 /**
- * BlockTemplatesCompatibility class.
+ * AbstractTemplateCompatibility class.
  *
  * To bridge the gap on compatibility with PHP hooks and blockified templates.
  *
