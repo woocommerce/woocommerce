@@ -8,10 +8,12 @@ import { registerBlockType } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { Edit, Save } from './edit';
-import metadata from './block.json';
 import attributes from './attributes';
 
-registerBlockType( metadata, {
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore -- TypeScript expects some required properties which we already
+// registered in PHP.
+registerBlockType( 'woocommerce/mini-cart-shopping-button-block', {
 	icon: {
 		src: (
 			<Icon
