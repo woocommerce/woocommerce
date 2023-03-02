@@ -21,5 +21,8 @@
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
-	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/create-woo-extensionv#readme"
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/create-woo-extensionv#readme",
+	"dependencies": {
+		"node-fetch": "^3.3.0"
+	}
 }
