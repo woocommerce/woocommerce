@@ -46,6 +46,7 @@
 		"@wordpress/i18n": "^4.26.0",
 		"@wordpress/icons": "^8.1.0",
 		"@wordpress/interface": "^5.3.0",
+		"@wordpress/keyboard-shortcuts": "^3.17.0",
 		"@wordpress/media-utils": "^4.6.0",
 		"@wordpress/url": "^3.4.1",
 		"classnames": "^2.3.1",

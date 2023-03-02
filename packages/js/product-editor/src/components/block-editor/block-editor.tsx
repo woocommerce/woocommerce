@@ -9,12 +9,14 @@ import { Product } from '@woocommerce/data';
 import { useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import {
-	// @ts-ignore
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore No types for this exist yet.
 	BlockBreadcrumb,
 	BlockEditorKeyboardShortcuts,
 	BlockEditorProvider,
 	BlockList,
-	// @ts-ignore
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore No types for this exist yet.
 	BlockTools,
 	BlockInspector,
 	EditorSettings,
@@ -37,7 +39,10 @@ export function BlockEditor( { settings: _settings }: BlockEditorProps ) {
 	const [ blocks, updateBlocks ] = useState< BlockInstance[] >();
 
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
-		const { canUser } = select( 'core' ) as Record< string, Function >;
+		const { canUser } = select( 'core' ) as Record<
+			string,
+			( ...args: string[] ) => boolean
+		>;
 		const _canUserCreateMedia = canUser( 'create', 'media' );
 		return _canUserCreateMedia || _canUserCreateMedia !== false;
 	}, [] );
@@ -54,7 +59,8 @@ export function BlockEditor( { settings: _settings }: BlockEditorProps ) {
 			}: {
 				onError: ( message: string ) => void;
 			} ) {
-				// @ts-ignore
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore No types for this exist yet.
 				uploadMedia( {
 					wpAllowedMimeTypes:
 						_settings?.allowedMimeTypes || undefined,
@@ -94,7 +100,8 @@ export function BlockEditor( { settings: _settings }: BlockEditorProps ) {
 					<BlockInspector />
 				</Sidebar.InspectorFill>
 				<div className="editor-styles-wrapper">
-					{ /* @ts-ignore */ }
+					{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+					{ /* @ts-ignore No types for this exist yet. */ }
 					<BlockEditorKeyboardShortcuts.Register />
 					<BlockTools>
 						<WritingFlow>

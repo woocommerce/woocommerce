@@ -1,16 +1,20 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment, StrictMode } from '@wordpress/element';
+import { createElement, StrictMode } from '@wordpress/element';
 import {
 	EditorSettings,
 	EditorBlockListSettings,
 } from '@wordpress/block-editor';
 import { Popover, SlotFillProvider } from '@wordpress/components';
 import { Product } from '@woocommerce/data';
-// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
 import { ShortcutProvider } from '@wordpress/keyboard-shortcuts';
-// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
 import { FullscreenMode, InterfaceSkeleton } from '@wordpress/interface';
 
 /**
@@ -33,7 +37,6 @@ export function Editor( { product, settings }: EditorProps ) {
 		<StrictMode>
 			<ShortcutProvider>
 				<FullscreenMode isActive={ false } />
-				{ /* @ts-ignore */ }
 				<SlotFillProvider>
 					<InterfaceSkeleton
 						header={ <Header title={ product.name } /> }

@@ -20,7 +20,6 @@ export function Sidebar() {
 			) }
 			tabIndex={ -1 }
 		>
-			{ /* @ts-ignore */ }
 			<Panel header={ __( 'Inspector', 'woocommerce' ) }>
 				<InspectorSlot bubblesVirtually />
 			</Panel>
