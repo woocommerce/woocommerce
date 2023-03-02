@@ -37,10 +37,8 @@ export function BlockEditor( { settings: _settings }: BlockEditorProps ) {
 	const [ blocks, updateBlocks ] = useState< BlockInstance[] >();
 
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
-		const _canUserCreateMedia = select( 'core' ).canUser(
-			'create',
-			'media'
-		);
+		const { canUser } = select( 'core' ) as Record< string, Function >;
+		const _canUserCreateMedia = canUser( 'create', 'media' );
 		return _canUserCreateMedia || _canUserCreateMedia !== false;
 	}, [] );
 
