@@ -96,10 +96,8 @@ jQuery( function ( $ ) {
 		'keyup',
 		'input, textarea',
 		function () {
-			if ( $( '.product_attributes' ).is( ':visible' ) ) {
-				$tab = $( '.product_attributes' );
-				$save_button = $( 'button.save_attributes' );
-			}
+			var $tab = $( '.product_attributes' );
+			var $save_button = $( 'button.save_attributes' );
 			if (
 				$( '.woocommerce_variation_new_attribute_data' ).is(
 					':visible'
@@ -107,9 +105,6 @@ jQuery( function ( $ ) {
 			) {
 				$tab = $( '.woocommerce_variation_new_attribute_data' );
 				$save_button = $( 'button.create-variations' );
-			}
-			if ( ! $tab ) {
-				return;
 			}
 
 			var attributes_and_variations_data = $tab.find(
