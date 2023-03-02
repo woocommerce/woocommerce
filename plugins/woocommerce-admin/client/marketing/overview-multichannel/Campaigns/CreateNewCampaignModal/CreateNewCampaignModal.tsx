@@ -36,8 +36,7 @@ type CreateCampaignModalProps = Omit< Modal.Props, 'title' | 'children' >;
 export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 	const { className, ...restProps } = props;
 	const [ collapsed, setCollapsed ] = useState( true );
-	// TOOD: handle loading state.
-	const { loading, data: newCampaignTypes } = useNewCampaignTypes();
+	const { data: newCampaignTypes } = useNewCampaignTypes();
 	const { data: recommendedChannels } = useRecommendedChannels();
 
 	return (

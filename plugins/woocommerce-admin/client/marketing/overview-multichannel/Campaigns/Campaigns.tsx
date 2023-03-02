@@ -25,6 +25,7 @@ import {
  * Internal dependencies
  */
 import { CardHeaderTitle } from '~/marketing/components';
+import { useNewCampaignTypes } from '~/marketing/hooks';
 import { useCampaigns } from './useCampaigns';
 import { CreateNewCampaignModal } from './CreateNewCampaignModal';
 import './Campaigns.scss';
@@ -52,15 +53,24 @@ const perPage = 5;
  * If there are no campaigns, there will be no table but an info message instead.
  *
  * If there is an error, there will be no table but an error message instead.
+ *
+ * The new campaign types data will also be loaded,
+ * so that when users click on the "Create new campaign" button in the card header,
+ * there will be no loading necessary in the modal.
  */
 export const Campaigns = () => {
 	const [ page, setPage ] = useState( 1 );
 	const [ open, setOpen ] = useState( false );
-	const { loading, data, meta } = useCampaigns( page, perPage );
+	const {
+		loading: loadingCampaigns,
+		data,
+		meta,
+	} = useCampaigns( page, perPage );
+	const { loading: loadingNewCampaignTypes } = useNewCampaignTypes();
 	const total = meta?.total;
 
 	const getContent = () => {
-		if ( loading ) {
+		if ( loadingNewCampaignTypes || loadingCampaigns ) {
 			return (
 				<TablePlaceholder
 					caption={ tableCaption }
