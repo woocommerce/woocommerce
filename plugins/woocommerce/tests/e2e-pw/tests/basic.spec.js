@@ -32,5 +32,17 @@ test.describe(
 				await expect( title ).toHaveText( 'My account' );
 			} );
 		} );
+
+		test( 'should intentionally fail #1', async () => {
+			test.fail();
+		} );
+
+		test( 'should intentionally fail #2', async () => {
+			test.fail();
+		} );
+
+		test( 'should intentionally fail #3', async () => {
+			test.fail();
+		} );
 	}
 );
