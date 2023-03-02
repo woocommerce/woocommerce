@@ -42,8 +42,8 @@
 	"scripts": {
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
-		"lint": "eslint ./rules ./configs",
-		"lint:fix": "eslint ./rules ./configs --fix"
+		"lint": "eslint ./rules ./configs -c lint-config/.eslintrc.js",
+		"lint:fix": "eslint ./rules ./configs -c lint-config/.eslintrc.js --fix"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
