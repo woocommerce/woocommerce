@@ -46,7 +46,6 @@ use Automattic\WooCommerce\Internal\Admin\Schedulers\MailchimpScheduler;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\PaymentGatewaySuggestionsDataSourcePoller;
 use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\RemoteFreeExtensionsDataSourcePoller;
-use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\WCPayPromotionDataSourcePoller;
 
 /**
  * Events Class.
@@ -146,7 +145,7 @@ class Events {
 		$this->possibly_add_notes();
 		$this->possibly_delete_notes();
 		$this->possibly_update_notes();
-		$this->refresh_data_source_poller_transients();
+		$this->possibly_refresh_data_source_pollers();
 
 		if ( $this->is_remote_inbox_notifications_enabled() ) {
 			DataSourcePoller::get_instance()->read_specs_from_data_sources();
@@ -255,9 +254,15 @@ class Events {
 		return true;
 	}
 
-	protected function refresh_data_source_poller_transients(){
-		PaymentGatewaySuggestionsDataSourcePoller::get_instance()->read_specs_from_data_sources();
-		WCPayPromotionDataSourcePoller::get_instance()->read_specs_from_data_sources();
-		RemoteFreeExtensionsDataSourcePoller::get_instance()->read_specs_from_data_sources();
+	protected function possibly_refresh_data_source_pollers(){
+		$completed_tasks = get_option( 'woocommerce_task_list_tracked_completed_tasks' );
+
+		if ( ! in_array( 'payments', $completed_tasks ) ) {
+			PaymentGatewaySuggestionsDataSourcePoller::get_instance()->read_specs_from_data_sources();
+		}
+
+		if ( ! in_array( 'store_details', $completed_tasks ) ) {
+			RemoteFreeExtensionsDataSourcePoller::get_instance()->read_specs_from_data_sources();
+		}
 	}
 }
