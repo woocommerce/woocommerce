@@ -18,7 +18,7 @@ runs:
               BASE_URL: http://localhost:8086
               USER_KEY: admin
               USER_SECRET: password
-          run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js hello
+          run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js
 
         - name: Generate Test report.
           if: success() || ( failure() && steps.run-api-tests.conclusion == 'failure' )
