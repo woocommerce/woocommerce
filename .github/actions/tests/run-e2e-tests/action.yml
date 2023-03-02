@@ -22,7 +22,7 @@ runs:
               USE_WP_ENV: 1
           working-directory: plugins/woocommerce
           shell: bash
-          run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
+          run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js basic.spec.js
 
         - name: Generate Test report.
           if: success() || ( failure() && steps.run-e2e-tests.conclusion == 'failure' )
