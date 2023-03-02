@@ -9,21 +9,12 @@ concurrency:
 permissions: {}
 
 jobs:
-    verify_merge:
-        name: Verify merge
-        runs-on: ubuntu-20.04
-        # mytodo Replace with trunk before review
-        if: (github.event.pull_request.merged == true) && (github.event.pull_request.base.ref == 'e2e/on-trunk-merge-0')
-        permissions:
-            contents: read
-        steps:
-            - name: Confirm if PR is merged to ${{ github.event.pull_request.base.ref }}
-              run: echo "PR ${{ github.event.pull_request.number }} was merged to ${{ github.event.pull_request.base.ref }}."
-
     api:
         name: Run API tests
         needs: [verify_merge]
         runs-on: ubuntu-20.04
+        # mytodo change base.ref to trunk
+        if: (github.event.pull_request.merged == true) && (github.event.pull_request.base.ref == 'e2e/on-trunk-merge-0')
         permissions:
             contents: read
         env:
