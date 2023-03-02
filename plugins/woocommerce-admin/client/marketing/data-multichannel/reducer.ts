@@ -84,20 +84,16 @@ export const reducer: Reducer< State, Action > = (
 				},
 			};
 
-		case TYPES.RECEIVE_CAMPAIGN_TYPES_SUCCESS:
+		case TYPES.RECEIVE_CAMPAIGN_TYPES:
 			return {
 				...state,
-				campaignTypes: {
-					data: action.payload,
-				},
-			};
-
-		case TYPES.RECEIVE_CAMPAIGN_TYPES_ERROR:
-			return {
-				...state,
-				campaignTypes: {
-					error: action.payload,
-				},
+				campaignTypes: action.error
+					? {
+							error: action.payload,
+					  }
+					: {
+							data: action.payload,
+					  },
 			};
 
 		default:

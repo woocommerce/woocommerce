@@ -12,8 +12,7 @@ import {
 	receiveRecommendedChannelsSuccess,
 	receiveRecommendedChannelsError,
 	receiveCampaigns,
-	receiveCampaignTypesSuccess,
-	receiveCampaignTypesError,
+	receiveCampaignTypes,
 } from './actions';
 import { awaitResponseJson } from './controls';
 import {
@@ -124,10 +123,16 @@ export function* getCampaignTypes() {
 			path: `${ API_NAMESPACE }/campaign-types`,
 		} );
 
-		yield receiveCampaignTypesSuccess( data );
+		yield receiveCampaignTypes( {
+			payload: data,
+			error: false,
+		} );
 	} catch ( error ) {
 		if ( isApiFetchError( error ) ) {
-			yield receiveCampaignTypesError( error );
+			yield receiveCampaignTypes( {
+				payload: error,
+				error: true,
+			} );
 		}
 
 		throw error;

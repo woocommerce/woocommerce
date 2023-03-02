@@ -76,21 +76,20 @@ export const receiveCampaigns = ( response: CampaignsResponse ) => {
 	};
 };
 
-export const receiveCampaignTypesSuccess = (
-	campaignTypes: Array< CampaignType >
+export const receiveCampaignTypes = (
+	response:
+		| {
+				payload: Array< CampaignType >;
+				error: false;
+		  }
+		| {
+				payload: ApiFetchError;
+				error: true;
+		  }
 ) => {
 	return {
-		type: TYPES.RECEIVE_CAMPAIGN_TYPES_SUCCESS,
-		payload: campaignTypes,
-		error: false,
-	};
-};
-
-export const receiveCampaignTypesError = ( error: ApiFetchError ) => {
-	return {
-		type: TYPES.RECEIVE_CAMPAIGN_TYPES_ERROR,
-		payload: error,
-		error: true,
+		type: TYPES.RECEIVE_CAMPAIGN_TYPES,
+		...response,
 	};
 };
 
@@ -100,6 +99,5 @@ export type Action = ReturnType<
 	| typeof receiveRecommendedChannelsSuccess
 	| typeof receiveRecommendedChannelsError
 	| typeof receiveCampaigns
-	| typeof receiveCampaignTypesSuccess
-	| typeof receiveCampaignTypesError
+	| typeof receiveCampaignTypes
 >;
