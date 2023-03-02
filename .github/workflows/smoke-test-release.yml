@@ -1,14 +1,14 @@
 name: Smoke test release ${{ github.event.release.tag_name || inputs.tag }}
 on:
     release:
-        types: [published]
+        types: [released, prereleased]
     workflow_dispatch:
         inputs:
             tag:
                 description: 'WooCommerce Release Tag'
                 required: true
 concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
+    group: ${{ github.workflow }}-${{ github.event.release.tag_name || inputs.tag }}
     cancel-in-progress: true
 permissions: {}
 env:
