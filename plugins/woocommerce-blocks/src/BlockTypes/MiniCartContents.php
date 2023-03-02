@@ -1,10 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Assets;
-use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
-use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
@@ -140,4 +136,25 @@ class MiniCartContents extends AbstractBlock {
 			$parsed_style
 		);
 	}
+
+	/**
+	 * Get list of Mini Cart block & its inner-block types.
+	 *
+	 * @return array;
+	 */
+	public static function get_mini_cart_block_types() {
+		$block_types = [];
+
+		$block_types[] = 'MiniCartContents';
+		$block_types[] = 'EmptyMiniCartContentsBlock';
+		$block_types[] = 'FilledMiniCartContentsBlock';
+		$block_types[] = 'MiniCartFooterBlock';
+		$block_types[] = 'MiniCartItemsBlock';
+		$block_types[] = 'MiniCartProductsTableBlock';
+		$block_types[] = 'MiniCartShoppingButtonBlock';
+		$block_types[] = 'MiniCartTitleBlock';
+
+		return $block_types;
+	}
+
 }
