@@ -123,16 +123,10 @@ export function* getCampaignTypes() {
 			path: `${ API_NAMESPACE }/campaign-types`,
 		} );
 
-		yield receiveCampaignTypes( {
-			payload: data,
-			error: false,
-		} );
+		yield receiveCampaignTypes( data );
 	} catch ( error ) {
 		if ( isApiFetchError( error ) ) {
-			yield receiveCampaignTypes( {
-				payload: error,
-				error: true,
-			} );
+			yield receiveCampaignTypes( error );
 		}
 
 		throw error;

@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import { TYPES } from './action-types';
+import { isApiFetchError } from './guards';
 import {
 	ApiFetchError,
 	RegisteredChannel,
@@ -77,19 +78,20 @@ export const receiveCampaigns = ( response: CampaignsResponse ) => {
 };
 
 export const receiveCampaignTypes = (
-	response:
-		| {
-				payload: Array< CampaignType >;
-				error: false;
-		  }
-		| {
-				payload: ApiFetchError;
-				error: true;
-		  }
+	data: Array< CampaignType > | ApiFetchError
 ) => {
+	if ( isApiFetchError( data ) ) {
+		return {
+			type: TYPES.RECEIVE_CAMPAIGN_TYPES,
+			payload: data,
+			error: true as const,
+		};
+	}
+
 	return {
 		type: TYPES.RECEIVE_CAMPAIGN_TYPES,
-		...response,
+		payload: data,
+		error: false as const,
 	};
 };
 
