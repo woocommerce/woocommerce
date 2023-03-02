@@ -96,7 +96,7 @@ class COTMigrationUtil {
 			}
 			return $data->get_meta( $key, $single );
 		} else {
-			return get_post_meta( $post->ID, $key, $single );
+			return isset( $post->ID ) ? get_post_meta( $post->ID, $key, $single ) : false;
 		}
 	}
 
