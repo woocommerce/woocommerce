@@ -1,6 +1,6 @@
 {
 	"dev": true,
-	"filter": "^(?:config|react|react-dom|eslint|typescript|@typescript-eslint|@types/react).*$",
+	"filter": "^(?:config|react|react-dom|eslint|typescript|@typescript-eslint|@types/react|@wordpress|postcss).*$",
 	"indent": "\t",
 	"overrides": true,
 	"peer": true,
@@ -72,6 +72,46 @@
 				"**"
 			],
 			"pinVersion": "^8.32.0"
+		},
+		{
+			"dependencies": [
+				"@wordpress/block-editor",
+				"@wordpress/block-library"
+			],
+			"packages": [
+				"**"
+			],
+			"isIgnored": true
+		},
+		{
+			"dependencies": [
+				"@wordpress/**"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "wp-6.0"
+		},
+		{
+			"dependencies": [
+				"postcss-loader"
+			],
+			"dependencyTypes": [
+				"devDependencies"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^4.3.0"
+		},
+		{
+			"dependencies": [
+				"postcss"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^8.4.7"
 		}
 	]
 }
