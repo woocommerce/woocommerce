@@ -46,7 +46,7 @@ jobs:
                   GH_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
                   RELEASE_TAG: ${{ steps.get-tag.outputs.tag }}
               run: |
-                  gh release download $RELEASE_TAG --repo woocommerce/woocommerce
+                  gh release download $RELEASE_TAG --repo woocommerce/woocommerce --archive zip
                   if [[ -f "woocommerce.zip" ]]
                     then
                       echo "$RELEASE_TAG has a valid woocommerce.zip asset."
