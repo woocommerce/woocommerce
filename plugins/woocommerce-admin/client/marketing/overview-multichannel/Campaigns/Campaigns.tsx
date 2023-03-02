@@ -44,6 +44,15 @@ const tableHeaders = [
 
 const perPage = 5;
 
+/**
+ * Card displaying campaigns in a table.
+ *
+ * Pagination will be rendered in the card footer if the total number of campaigns is more than one page.
+ *
+ * If there are no campaigns, there will be no table but an info message instead.
+ *
+ * If there is an error, there will be no table but an error message instead.
+ */
 export const Campaigns = () => {
 	const [ page, setPage ] = useState( 1 );
 	const [ open, setOpen ] = useState( false );

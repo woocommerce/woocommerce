@@ -11,8 +11,7 @@ import {
 	receiveRegisteredChannelsError,
 	receiveRecommendedChannelsSuccess,
 	receiveRecommendedChannelsError,
-	receiveCampaignsSuccess,
-	receiveCampaignsError,
+	receiveCampaigns,
 	receiveCampaignTypesSuccess,
 	receiveCampaignTypesError,
 } from './actions';
@@ -59,12 +58,27 @@ export function* getRecommendedChannels() {
 	}
 }
 
+/**
+ * Get total number of records from the HTTP response header "x-wp-total".
+ *
+ * If the header is not present, then the function will return `undefined`.
+ */
 const getTotalFromResponse = ( response: Response ) => {
-	return (
-		parseInt( response.headers.get( 'x-wp-total' ) || '0', 10 ) || undefined
-	);
+	const total = response.headers.get( 'x-wp-total' );
+
+	if ( total === null ) {
+		return undefined;
+	}
+
+	return parseInt( total, 10 );
 };
 
+/**
+ * Get campaigns from API backend.
+ *
+ * @param  page    Page number. First page is `1`.
+ * @param  perPage Page size, i.e. number of records in one page.
+ */
 export function* getCampaigns( page: number, perPage: number ) {
 	try {
 		const response: Response = yield apiFetch( {
@@ -75,7 +89,7 @@ export function* getCampaigns( page: number, perPage: number ) {
 		const total = getTotalFromResponse( response );
 		const payload: Campaign[] = yield awaitResponseJson( response );
 
-		yield receiveCampaignsSuccess( {
+		yield receiveCampaigns( {
 			payload,
 			error: false,
 			meta: {
@@ -89,7 +103,7 @@ export function* getCampaigns( page: number, perPage: number ) {
 			const total = getTotalFromResponse( error );
 			const payload: ApiFetchError = yield awaitResponseJson( error );
 
-			yield receiveCampaignsError( {
+			yield receiveCampaigns( {
 				payload,
 				error: true,
 				meta: {

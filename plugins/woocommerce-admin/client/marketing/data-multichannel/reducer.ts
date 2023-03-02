@@ -65,31 +65,20 @@ export const reducer: Reducer< State, Action > = (
 				},
 			};
 
-		case TYPES.RECEIVE_CAMPAIGNS_SUCCESS:
+		case TYPES.RECEIVE_CAMPAIGNS:
 			return {
 				...state,
 				campaigns: {
 					perPage: action.meta.perPage,
 					pages: {
 						...state.campaigns.pages,
-						[ action.meta.page ]: {
-							data: action.payload,
-						},
-					},
-					total: action.meta.total,
-				},
-			};
-
-		case TYPES.RECEIVE_CAMPAIGNS_ERROR:
-			return {
-				...state,
-				campaigns: {
-					perPage: action.meta.perPage,
-					pages: {
-						...state.campaigns.pages,
-						[ action.meta.page ]: {
-							error: action.payload,
-						},
+						[ action.meta.page ]: action.error
+							? {
+									error: action.payload,
+							  }
+							: {
+									data: action.payload,
+							  },
 					},
 					total: action.meta.total,
 				},
