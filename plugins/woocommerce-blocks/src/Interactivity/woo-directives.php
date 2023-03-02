@@ -1,6 +1,4 @@
 <?php
-require_once __DIR__ . '/directives/wp-html.php';
-
 require_once __DIR__ . '/directives/class-woo-directive-context.php';
 require_once __DIR__ . '/directives/class-woo-directive-store.php';
 require_once __DIR__ . '/directives/woo-process-directives.php';
