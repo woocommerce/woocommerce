@@ -160,7 +160,7 @@ jobs:
               uses: './.github/actions/tests/run-k6-tests'
 
             - name: Send Slack alert on test failure
-              if: failure() && steps.run-k6-tests.conclusion == 'failure'
+              if: failure() && steps.run-k6-composite-action.conclusion == 'failure'
               uses: ./.github/actions/tests/slack-alert-on-pr-merge
               with:
                   slack-bot-token: ${{ secrets.E2E_SLACK_TOKEN }}
