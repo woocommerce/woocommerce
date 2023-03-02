@@ -747,8 +747,32 @@ jQuery( function ( $ ) {
 		}
 	);
 
+	function is_attributes_and_variations_data_valid(
+		attributes_and_variations_data
+	) {
+		var valid = true;
+		attributes_and_variations_data.each( function () {
+			if ( ! $( this ).val() ) {
+				valid = false;
+			}
+		} );
+		return valid;
+	}
+
 	// Save attributes and update variations.
 	$( '.save_attributes' ).on( 'click', function () {
+		var attributes_and_variations_data = $( '.product_attributes' ).find(
+			'input, select, textarea'
+		);
+
+		if (
+			! is_attributes_and_variations_data_valid(
+				attributes_and_variations_data
+			)
+		) {
+			return;
+		}
+
 		$( '.product_attributes' ).block( {
 			message: null,
 			overlayCSS: {
@@ -756,13 +780,11 @@ jQuery( function ( $ ) {
 				opacity: 0.6,
 			},
 		} );
-		var original_data = $( '.product_attributes' ).find(
-			'input, select, textarea'
-		);
+
 		var data = {
 			post_id: woocommerce_admin_meta_boxes.post_id,
 			product_type: $( '#product-type' ).val(),
-			data: original_data.serialize(),
+			data: attributes_and_variations_data.serialize(),
 			action: 'woocommerce_save_attributes',
 			security: woocommerce_admin_meta_boxes.save_attributes_nonce,
 		};
