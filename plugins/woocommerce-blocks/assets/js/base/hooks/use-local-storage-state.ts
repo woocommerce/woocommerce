@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
-import { Dispatch, SetStateAction } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 
 export const useLocalStorageState = < T >(
 	key: string,

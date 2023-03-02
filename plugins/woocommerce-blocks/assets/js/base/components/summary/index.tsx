@@ -3,7 +3,7 @@
  */
 import { RawHTML, useMemo } from '@wordpress/element';
 import { WordCountType } from '@woocommerce/block-settings';
-import { CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 
 /**
  * Internal dependencies

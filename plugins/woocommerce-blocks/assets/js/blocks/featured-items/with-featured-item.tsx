@@ -9,15 +9,10 @@ import { __experimentalGetSpacingClassesAndStyles as getSpacingClassesAndStyles 
 import { Icon, Placeholder, Spinner } from '@wordpress/components';
 import classnames from 'classnames';
 import { isEmpty } from 'lodash';
-import {
-	ComponentType,
-	Dispatch,
-	SetStateAction,
-	useCallback,
-	useState,
-} from 'react';
+import { useCallback, useState } from '@wordpress/element';
 import { WP_REST_API_Category } from 'wp-types';
 import { useBorderProps } from '@woocommerce/base-hooks';
+import type { ComponentType, Dispatch, SetStateAction } from 'react';
 
 /**
  * Internal dependencies

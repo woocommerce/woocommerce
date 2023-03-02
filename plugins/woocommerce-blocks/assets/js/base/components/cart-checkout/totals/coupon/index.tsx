@@ -13,6 +13,7 @@ import {
 import { useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import classnames from 'classnames';
+import type { MouseEvent } from 'react';
 
 /**
  * Internal dependencies
@@ -62,13 +63,13 @@ export const TotalsCoupon = ( {
 		};
 	} );
 	const handleCouponAnchorClick = (
-		e: React.MouseEvent< HTMLAnchorElement, MouseEvent >
+		e: MouseEvent< HTMLAnchorElement, MouseEvent >
 	) => {
 		e.preventDefault();
 		setIsCouponFormHidden( false );
 	};
 	const handleCouponSubmit = (
-		e: React.MouseEvent< HTMLButtonElement, MouseEvent >
+		e: MouseEvent< HTMLButtonElement, MouseEvent >
 	) => {
 		e.preventDefault();
 		if ( onSubmit !== undefined ) {

@@ -2,11 +2,11 @@
 /**
  * External dependencies
  */
-import type { ReactElement } from 'react';
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { EditorProvider } from '@woocommerce/base-context';
 import type { TemplateArray } from '@wordpress/blocks';
 import { useEffect } from '@wordpress/element';
+import type { ReactElement } from 'react';
 
 /**
  * Internal dependencies

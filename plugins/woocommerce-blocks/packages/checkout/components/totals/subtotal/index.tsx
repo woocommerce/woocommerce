@@ -2,9 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { getSetting } from '@woocommerce/settings';
 import type { Currency } from '@woocommerce/price-format';
 import type { ReactElement } from 'react';
-import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies

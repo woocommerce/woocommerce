@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { ElementType } from 'react';
+import type { ElementType } from 'react';
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
 import { useSelect } from '@wordpress/data';

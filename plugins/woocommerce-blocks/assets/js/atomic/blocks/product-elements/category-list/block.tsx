@@ -10,7 +10,7 @@ import {
 import { useColorProps, useTypographyProps } from '@woocommerce/base-hooks';
 import { isEmpty } from 'lodash';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
-import { HTMLAttributes } from 'react';
+import type { HTMLAttributes } from 'react';
 
 /**
  * Internal dependencies

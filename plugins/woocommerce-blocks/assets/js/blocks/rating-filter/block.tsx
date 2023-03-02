@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { type ReactElement } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
 import { Icon, chevronDown } from '@wordpress/icons';
@@ -30,6 +29,7 @@ import { addQueryArgs, removeQueryArgs } from '@wordpress/url';
 import { changeUrl } from '@woocommerce/utils';
 import classnames from 'classnames';
 import { difference } from 'lodash';
+import type { ReactElement } from 'react';
 
 /**
  * Internal dependencies

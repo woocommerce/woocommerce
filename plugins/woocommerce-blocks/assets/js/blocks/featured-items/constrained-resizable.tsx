@@ -2,7 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { useState } from 'react';
+import { useState } from '@wordpress/element';
 import { ResizableBox } from '@wordpress/components';
 
 /**

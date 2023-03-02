@@ -1,19 +1,14 @@
 /**
  * External dependencies
  */
-import {
-	useRef,
-	useEffect,
-	useState,
-	useCallback,
-	InputHTMLAttributes,
-} from 'react';
+import { useRef, useEffect, useState, useCallback } from '@wordpress/element';
 import classnames from 'classnames';
 import { withInstanceId } from '@wordpress/compose';
 import { isObject } from '@woocommerce/types';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { usePrevious } from '@woocommerce/base-hooks';
+import type { InputHTMLAttributes } from 'react';
 
 /**
  * Internal dependencies

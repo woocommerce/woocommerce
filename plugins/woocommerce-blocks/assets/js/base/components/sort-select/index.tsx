@@ -4,7 +4,7 @@
 import classNames from 'classnames';
 import Label from '@woocommerce/base-components/label';
 import { withInstanceId } from '@wordpress/compose';
-import { ChangeEventHandler } from 'react';
+import type { ChangeEventHandler } from 'react';
 
 /**
  * Internal dependencies

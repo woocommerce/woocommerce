@@ -2,9 +2,9 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
-import type { ReactNode, ReactElement } from 'react';
 import classNames from 'classnames';
 import { Icon, chevronUp, chevronDown } from '@wordpress/icons';
+import type { ReactNode, ReactElement } from 'react';
 
 /**
  * Internal dependencies

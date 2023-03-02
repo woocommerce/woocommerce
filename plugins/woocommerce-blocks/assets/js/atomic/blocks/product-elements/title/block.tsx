@@ -2,7 +2,6 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { HTMLAttributes } from 'react';
 import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
@@ -16,6 +15,7 @@ import {
 	useTypographyProps,
 	useColorProps,
 } from '@woocommerce/base-hooks';
+import type { HTMLAttributes } from 'react';
 
 /**
  * Internal dependencies

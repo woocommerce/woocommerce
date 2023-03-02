@@ -3,7 +3,7 @@
  */
 import { decodeEntities } from '@wordpress/html-entities';
 import classnames from 'classnames';
-import { AnchorHTMLAttributes, HTMLAttributes } from 'react';
+import type { AnchorHTMLAttributes, HTMLAttributes } from 'react';
 
 /**
  * Internal dependencies

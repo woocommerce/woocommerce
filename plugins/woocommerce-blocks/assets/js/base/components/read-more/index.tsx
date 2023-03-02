@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import React, { createRef, Component } from 'react';
+import { createRef, Component } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import type { MouseEvent, RefObject, ReactNode } from 'react';
 
 /**
  * Internal dependencies
@@ -13,7 +14,7 @@ export interface ReadMoreProps {
 	/**
 	 * The entire content to clamp
 	 */
-	children: React.ReactNode;
+	children: ReactNode;
 	/**
 	 * Class names for the wrapped component
 	 */
@@ -56,7 +57,7 @@ interface ReadMoreState {
 	/**
 	 * Content is passed in via children.
 	 */
-	content: React.ReactNode;
+	content: ReactNode;
 	/**
 	 * Summary content generated from content HTML.
 	 */
@@ -79,8 +80,8 @@ export const defaultProps = {
 class ReadMore extends Component< ReadMoreProps, ReadMoreState > {
 	static defaultProps = defaultProps;
 
-	private reviewSummary: React.RefObject< HTMLDivElement >;
-	private reviewContent: React.RefObject< HTMLDivElement >;
+	private reviewSummary: RefObject< HTMLDivElement >;
+	private reviewContent: RefObject< HTMLDivElement >;
 
 	constructor( props: ReadMoreProps ) {
 		super( props );
@@ -192,7 +193,7 @@ class ReadMore extends Component< ReadMoreProps, ReadMoreState > {
 	/**
 	 * Handles the click event for the read more/less button.
 	 */
-	onClick( e: React.MouseEvent< HTMLAnchorElement, MouseEvent > ): void {
+	onClick( e: MouseEvent< HTMLAnchorElement, MouseEvent > ): void {
 		e.preventDefault();
 
 		const { isExpanded } = this.state;

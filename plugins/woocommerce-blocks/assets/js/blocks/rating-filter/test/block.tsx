@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React from 'react';
+import React from '@wordpress/element';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import * as hooks from '@woocommerce/base-context/hooks';
 import userEvent from '@testing-library/user-event';

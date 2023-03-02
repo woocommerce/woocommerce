@@ -3,7 +3,6 @@
 /**
  * External dependencies
  */
-import { ComponentType } from 'react';
 import { WP_REST_API_Category } from 'wp-types';
 import { __ } from '@wordpress/i18n';
 import {
@@ -22,6 +21,7 @@ import {
 	ExternalLink,
 } from '@wordpress/components';
 import { LooselyMustHave, ProductResponseItem } from '@woocommerce/types';
+import type { ComponentType } from 'react';
 
 /**
  * Internal dependencies

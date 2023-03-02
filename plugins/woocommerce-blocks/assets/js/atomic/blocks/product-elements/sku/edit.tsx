@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import type { BlockEditProps } from '@wordpress/blocks';
 import EditProductLink from '@woocommerce/editor-components/edit-product-link';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
-import { useEffect } from 'react';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies

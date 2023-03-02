@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { ReactElement } from 'react';
 import { CartResponseShippingRate } from '@woocommerce/type-defs/cart-response';
+import type { ReactElement } from 'react';
 
 /**
  * Internal dependencies

@@ -3,13 +3,13 @@
 /**
  * External dependencies
  */
-import { ComponentType, Dispatch, SetStateAction } from 'react';
 import { WP_REST_API_Category } from 'wp-types';
 import { ProductResponseItem } from '@woocommerce/types';
 import {
 	__experimentalImageEditingProvider as ImageEditingProvider,
 	__experimentalImageEditor as GutenbergImageEditor,
 } from '@wordpress/block-editor';
+import type { ComponentType, Dispatch, SetStateAction } from 'react';
 
 /**
  * Internal dependencies

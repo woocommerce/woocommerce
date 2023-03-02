@@ -70,6 +70,19 @@ module.exports = {
 				allowedTextDomain: [ 'woo-gutenberg-products-block' ],
 			},
 		],
+		'@typescript-eslint/no-restricted-imports': [
+			'error',
+			{
+				paths: [
+					{
+						name: 'react',
+						message:
+							'Please use React API through `@wordpress/element` instead.',
+						allowTypeImports: true,
+					},
+				],
+			},
+		],
 		camelcase: [
 			'error',
 			{

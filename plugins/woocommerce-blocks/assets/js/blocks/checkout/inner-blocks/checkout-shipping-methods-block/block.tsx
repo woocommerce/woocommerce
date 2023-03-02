@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { type ReactElement } from 'react';
 import { __ } from '@wordpress/i18n';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import { ShippingRatesControl } from '@woocommerce/base-components/cart-checkout';
@@ -21,6 +20,7 @@ import type {
 	PackageRateOption,
 	CartShippingPackageShippingRate,
 } from '@woocommerce/types';
+import type { ReactElement } from 'react';
 
 /**
  * Internal dependencies
