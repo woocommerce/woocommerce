@@ -39,7 +39,7 @@ jobs:
               run: |
                   echo "Triggered event: ${{ github.event_name }}"
                   echo "Tag from event: $RELEASE_TAG"
-                  echo "tag=$RELEASE_TAG" >> GITHUB_OUTPUT
+                  echo "tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
 
             - name: Verify woocommerce.zip asset
               env:
