@@ -18,7 +18,11 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import { useRecommendedChannels, useNewCampaignTypes } from '~/marketing/hooks';
+import {
+	useRecommendedChannels,
+	useNewCampaignTypes,
+	useRegisteredChannels,
+} from '~/marketing/hooks';
 import { SmartPluginCardBody } from '~/marketing/components';
 import './CreateNewCampaignModal.scss';
 
@@ -38,6 +42,7 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 	const [ collapsed, setCollapsed ] = useState( true );
 	const { data: newCampaignTypes } = useNewCampaignTypes();
 	const { data: recommendedChannels } = useRecommendedChannels();
+	const { refetch } = useRegisteredChannels();
 
 	return (
 		<Modal
@@ -140,8 +145,7 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 											<SmartPluginCardBody
 												plugin={ el }
 												onInstalledAndActivated={
-													// TODO: check what to do here.
-													() => {}
+													refetch
 												}
 											/>
 											{ idx !==
