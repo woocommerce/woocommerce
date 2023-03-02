@@ -18,6 +18,7 @@ test.describe( 'Test API connectivity', () => {
 	} );
 
 	test( '(dummy) failing test', async () => {
+		console.log( 'Change 1.' );
 		test.fail();
 	} );
 } );
