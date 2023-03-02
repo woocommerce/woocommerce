@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useStoreCart } from '@woocommerce/base-context/hooks';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies

@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import SortSelect from '@woocommerce/base-components/sort-select';
-import { ChangeEventHandler } from 'react';
+import type { ChangeEventHandler } from 'react';
 
 /**
  * Internal dependencies

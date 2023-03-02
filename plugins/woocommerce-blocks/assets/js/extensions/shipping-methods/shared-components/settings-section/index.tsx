@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React from 'react';
+import React from '@wordpress/element';
 import styled from '@emotion/styled';
 
 const StyledSectionWrapper = styled.div`

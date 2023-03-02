@@ -8,7 +8,7 @@ import { Placeholder, Icon, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
 import ProductControl from '@woocommerce/editor-components/product-control';
-import { ComponentType } from 'react';
+import type { ComponentType } from 'react';
 
 /**
  * Internal dependencies

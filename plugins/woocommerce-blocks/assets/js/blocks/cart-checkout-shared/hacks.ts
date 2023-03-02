@@ -19,10 +19,11 @@ import {
 import { isTextField } from '@wordpress/dom';
 import { subscribe, select as _select } from '@wordpress/data';
 import { useEffect, useRef } from '@wordpress/element';
-import { MutableRefObject } from 'react';
 import { BACKSPACE, DELETE } from '@wordpress/keycodes';
 import { hasFilter } from '@wordpress/hooks';
 import { getBlockType } from '@wordpress/blocks';
+import type { MutableRefObject } from 'react';
+
 /**
  * Toggle class on body.
  *

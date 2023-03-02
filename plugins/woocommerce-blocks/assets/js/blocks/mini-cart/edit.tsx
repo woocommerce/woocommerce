@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import type { ReactElement } from 'react';
 import { formatPrice } from '@woocommerce/price-format';
 import {
 	PanelBody,
@@ -14,6 +13,7 @@ import {
 import { getSetting } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
+import type { ReactElement } from 'react';
 
 /**
  * Internal dependencies

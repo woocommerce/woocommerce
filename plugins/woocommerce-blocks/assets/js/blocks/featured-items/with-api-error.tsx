@@ -5,7 +5,7 @@ import ErrorPlaceholder, {
 	ErrorObject,
 } from '@woocommerce/editor-components/error-placeholder';
 import type { Block } from '@wordpress/blocks';
-import { ComponentType } from 'react';
+import type { ComponentType } from 'react';
 
 /**
  * Internal dependencies

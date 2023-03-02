@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { forwardRef, InputHTMLAttributes } from 'react';
 import classnames from 'classnames';
-import { useState } from '@wordpress/element';
+import { forwardRef, useState } from '@wordpress/element';
+import type { InputHTMLAttributes } from 'react';
 
 /**
  * Internal dependencies

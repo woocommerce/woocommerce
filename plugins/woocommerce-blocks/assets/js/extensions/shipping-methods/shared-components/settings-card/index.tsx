@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { Card, CardBody } from '@wordpress/components';
-import type { ReactNode } from 'react';
 import styled from '@emotion/styled';
+import type { ReactNode } from 'react';
 
 const StyledCard = styled( Card )`
 	border-radius: 3px;

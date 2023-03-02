@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React from 'react';
+import React from '@wordpress/element';
 import { render, screen, within, waitFor } from '@testing-library/react';
 import { default as fetchMock } from 'jest-fetch-mock';
 import userEvent from '@testing-library/user-event';
