@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { useMemo, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
 import {
 	selectControlStateChangeTypes,
 	Spinner,

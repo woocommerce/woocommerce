@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import {
 	__experimentalProductFieldSection as ProductFieldSection,
 	__experimentalWooProductSectionItem as WooProductSectionItem,

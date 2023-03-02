@@ -3,14 +3,15 @@
  */
 import { createContext } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
-import CurrencyFactory from '@woocommerce/currency';
+import { getSetting } from '@woocommerce/settings';
+
 /**
  * Internal dependencies
  */
-import { CURRENCY } from '~/utils/admin-settings';
+import { CurrencyFactory } from './index';
 
+const CURRENCY = getSetting( 'currency' );
 const appCurrency = CurrencyFactory( CURRENCY );
-
 export const getFilteredCurrencyInstance = ( query ) => {
 	const config = appCurrency.getCurrencyConfig();
 	/**

@@ -20,6 +20,7 @@ import { BACKSPACE } from './constants';
  * @param {string}   props.instanceId       Id of the component
  * @param {string}   props.placeholder      Placeholder of the search input
  * @param {boolean}  props.isExpanded       True if the tree is expanded
+ * @param {boolean}  props.alwaysShowPlaceholder  Will always show placeholder (default: false)
  * @param {boolean}  props.disabled         True if the component is disabled
  * @param {number}   props.maxVisibleTags   The maximum number of tags to show. Undefined, 0 or less than 0 evaluates to "Show All".
  * @param {string}   props.value            The current input value
@@ -43,11 +44,14 @@ const Control = forwardRef(
 			onTagsChange = () => {},
 			onInputChange = () => {},
 			onControlClick = noop,
+			alwaysShowPlaceholder = false,
 		},
 		ref
 	) => {
 		const hasTags = tags.length > 0;
-		const showPlaceholder = ! hasTags && ! isExpanded;
+		const showPlaceholder = alwaysShowPlaceholder
+			? true
+			: ! hasTags && ! isExpanded;
 
 		/**
 		 * Handles keydown event

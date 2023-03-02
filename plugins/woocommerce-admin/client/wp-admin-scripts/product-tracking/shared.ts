@@ -135,7 +135,7 @@ const getProductData = () => {
 /**
  * Get the publish date as a string.
  *
- * @param  prefix Prefix for date element selectors.
+ * @param prefix Prefix for date element selectors.
  * @return string
  */
 const getPublishDate = ( prefix = '' ) => {
@@ -186,8 +186,8 @@ const getPublishingWidgetData = () => {
 /**
  * Prefix all object keys with a string.
  *
- * @param  obj    Object to create keys from.
- * @param  prefix Prefix used before all keys.
+ * @param obj    Object to create keys from.
+ * @param prefix Prefix used before all keys.
  * @return object
  */
 const prefixObjectKeys = (
@@ -306,7 +306,7 @@ export const initProductScreenTracks = () => {
 
 	// Product tags
 
-	function deleteTagEventListener( event: Event ) {
+	function deleteTagEventListener(/* event: Event */) {
 		recordEvent( 'product_tags_delete', {
 			page: 'product',
 			tag_list_size:
@@ -330,7 +330,7 @@ export const initProductScreenTracks = () => {
 
 	document
 		.querySelector( '.tagadd' )
-		?.addEventListener( 'click', ( event ) => {
+		?.addEventListener( 'click', (/* event: Event */) => {
 			const tagInput = document.querySelector< HTMLInputElement >(
 				'#new-tag-product_tag'
 			);
@@ -494,7 +494,7 @@ export function addExitPageListener( pageId: string ) {
 		}
 		return isDisabled;
 	}
-	window.addEventListener( 'beforeunload', function ( event ) {
+	window.addEventListener( 'beforeunload', function (/* event */) {
 		// Check if button disabled or triggered delete to see if user saved or deleted the product instead.
 		if ( checkIfSubmitButtonsDisabled() || triggeredDelete ) {
 			productChanged = false;
