@@ -7,8 +7,9 @@ import { formatPrice } from '@woocommerce/price-format';
 import {
 	PanelBody,
 	ExternalLink,
-	SelectControl,
 	ToggleControl,
+	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+	__experimentalToggleGroupControl as ToggleGroupControl,
 } from '@wordpress/components';
 import { getSetting } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
@@ -52,7 +53,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 						'woo-gutenberg-products-block'
 					) }
 				>
-					<SelectControl
+					<ToggleGroupControl
 						label={ __(
 							'Add-to-Cart behaviour',
 							'woo-gutenberg-products-block'
@@ -65,23 +66,22 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 							'Select what happens when a customer adds a product to the cart.',
 							'woo-gutenberg-products-block'
 						) }
-						options={ [
-							{
-								value: 'none',
-								label: __(
-									'Do nothing',
-									'woo-gutenberg-products-block'
-								),
-							},
-							{
-								value: 'open_drawer',
-								label: __(
-									'Open cart drawer',
-									'woo-gutenberg-products-block'
-								),
-							},
-						] }
-					/>
+					>
+						<ToggleGroupControlOption
+							value="none"
+							label={ __(
+								'Do nothing',
+								'woo-gutenberg-products-block'
+							) }
+						/>
+						<ToggleGroupControlOption
+							value="open_drawer"
+							label={ __(
+								'Open cart drawer',
+								'woo-gutenberg-products-block'
+							) }
+						/>
+					</ToggleGroupControl>
 					<ToggleControl
 						label={ __(
 							'Hide Cart Price',
