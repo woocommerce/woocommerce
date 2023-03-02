@@ -7,14 +7,13 @@ import { map } from 'lodash';
 import { Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from '@woocommerce/number';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
 import { getTaxCode } from './utils';
 import ReportTable from '../../components/report-table';
-import { CurrencyContext } from '../../../lib/currency-context';
-
 class TaxesReportTable extends Component {
 	constructor() {
 		super();

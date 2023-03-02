@@ -112,7 +112,7 @@ describe( 'transformExtensionToPlugin', () => {
 
 describe( 'getMarketingExtensionLists', () => {
 	test( 'should only return the allowed lists', () => {
-		const [ installed, lists ] = getMarketingExtensionLists(
+		const [ , lists ] = getMarketingExtensionLists(
 			extensionLists,
 			[],
 			[]
@@ -135,7 +135,7 @@ describe( 'getMarketingExtensionLists', () => {
 	} );
 
 	test( 'should not include installed plugins in the extensions list', () => {
-		const [ installed, lists ] = getMarketingExtensionLists(
+		const [ , lists ] = getMarketingExtensionLists(
 			extensionLists,
 			[],
 			[ 'grow-plugin' ]
@@ -145,7 +145,7 @@ describe( 'getMarketingExtensionLists', () => {
 	} );
 
 	test( 'should only include allowed list plugins in the installed list', () => {
-		const [ installed, lists ] = getMarketingExtensionLists(
+		const [ installed ] = getMarketingExtensionLists(
 			extensionLists,
 			[],
 			[ 'basic-plugin' ]
