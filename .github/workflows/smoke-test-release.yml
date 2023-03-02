@@ -30,12 +30,12 @@ jobs:
               if: ${{ github.event_name == 'workflow_dispatch' }}
               env:
                   GH_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
-              run: gh release view "${{ github.event.inputs.tag }}" --repo=woocommerce/woocommerce
+              run: gh release view "${{ inputs.tag }}" --repo=woocommerce/woocommerce
 
             - name: Get tag from triggered event
               id: get-tag
               env:
-                  RELEASE_TAG: ${{ github.event.release.tag_name || github.event.inputs.tag }}
+                  RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
               run: |
                   echo "Triggered event: ${{ github.event_name }}"
                   echo "Tag from event: $RELEASE_TAG"
