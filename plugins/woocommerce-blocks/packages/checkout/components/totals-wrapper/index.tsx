@@ -2,7 +2,8 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { Children, ReactNode } from 'react';
+import { Children } from '@wordpress/element';
+import type { ReactNode } from 'react';
 
 /**
  * Internal dependencies

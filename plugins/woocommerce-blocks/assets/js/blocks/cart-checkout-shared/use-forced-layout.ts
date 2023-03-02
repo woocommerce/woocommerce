@@ -10,7 +10,7 @@ import {
 	BlockInstance,
 } from '@wordpress/blocks';
 import type { Block, TemplateArray } from '@wordpress/blocks';
-import { MutableRefObject } from 'react';
+import type { MutableRefObject } from 'react';
 
 interface LockableBlock extends Block {
 	attributes: {

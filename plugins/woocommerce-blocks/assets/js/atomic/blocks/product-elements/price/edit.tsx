@@ -6,7 +6,7 @@ import {
 	BlockControls,
 	useBlockProps,
 } from '@wordpress/block-editor';
-import { useEffect } from 'react';
+import { useEffect } from '@wordpress/element';
 import type { BlockAlignment } from '@wordpress/blocks';
 
 /**

@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { FunctionComponent } from 'react';
 import { useBlockProps } from '@wordpress/block-editor';
+import type { FunctionComponent } from 'react';
 
 export function Edit< T >( Block: FunctionComponent< T > ) {
 	return function WithBlock( props: T ): JSX.Element {

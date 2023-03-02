@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { LazyExoticComponent } from 'react';
+import type { LazyExoticComponent } from '@wordpress/element';
 import type { BlockConfiguration } from '@wordpress/blocks';
 import type { RegisteredBlockComponent } from '@woocommerce/types';
 

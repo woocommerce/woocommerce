@@ -4,7 +4,7 @@
  * External dependencies
  */
 import { DebouncedFunc, throttle, ThrottleSettings } from 'lodash';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from '@wordpress/element';
 
 /**
  * Throttles a function inside a React functional component

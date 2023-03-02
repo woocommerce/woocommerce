@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect } from '@wordpress/element';
 
 interface Validation< T > {
 	( value: T, previousValue: T | undefined ): boolean;
