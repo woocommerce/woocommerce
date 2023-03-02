@@ -1,0 +1,56 @@
+# Duplicate workflow that returns success for this check when there is no relevant file change. See https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/troubleshooting-required-status-checks#handling-skipped-but-required-checks
+
+name: Status Check Bypass for Changelog Only Changes
+on:
+    pull_request:
+        paths:
+            - '!**'
+            - '**/changelog/**'
+    
+jobs:
+    bypass-lint:
+        runs-on: ubuntu-latest
+        name: "Lint and Test JS"
+        steps:
+                - run: 'echo "No build required"'
+    bypass-7-4-latest:
+        runs-on: ubuntu-latest
+        name: "PHP 7.4 WP latest"
+        steps:
+                - run: 'echo "No build required"'
+    bypass-8-0-latest:
+        runs-on: ubuntu-latest
+        name: "PHP 8.0 WP latest"
+        steps:
+                - run: 'echo "No build required"'
+    bypass-api-tests:
+        runs-on: ubuntu-latest
+        name: "Runs API tests."
+        steps:
+                - run: 'echo "No build required"'
+    bypass-k6:
+        runs-on: ubuntu-latest
+        name: "Runs k6 Performance tests"
+        steps:
+                - run: 'echo "No build required"'
+    bypass-sniff:
+        runs-on: ubuntu-latest
+        name: "Code sniff (PHP 7.4, WP Latest)"
+        steps:
+                - run: 'echo "No build required"'
+    bypass-changelogger-use:
+        runs-on: ubuntu-latest
+        name: "Changelogger use"
+        steps:
+                - run: 'echo "No build required"'
+    bypass-e2e:
+        runs-on: ubuntu-latest
+        name: "Runs E2E tests."
+        steps:
+                - run: 'echo "No build required"'
+    bypass-pr-highlight:
+        runs-on: ubuntu-latest
+        name: "Check pull request changes to highlight"
+        steps:
+                - run: 'echo "No build required"'
+                
