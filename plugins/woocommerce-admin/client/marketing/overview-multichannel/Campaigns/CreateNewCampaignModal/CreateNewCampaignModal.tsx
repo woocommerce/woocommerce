@@ -18,9 +18,8 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import { useRecommendedChannels } from '~/marketing/hooks';
+import { useRecommendedChannels, useNewCampaignTypes } from '~/marketing/hooks';
 import { SmartPluginCardBody } from '~/marketing/components';
-import { useNewCampaignTypes } from './useNewCampaignTypes';
 import './CreateNewCampaignModal.scss';
 
 const isExternalURL = ( url: string ) =>
