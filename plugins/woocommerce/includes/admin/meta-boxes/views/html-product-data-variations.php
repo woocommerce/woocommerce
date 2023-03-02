@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				require __DIR__ . '/html-product-attribute-inner.php';
 			?>
 				<div class="toolbar">
-					<button type="button" class="button button-primary create-variations"><?php esc_html_e( 'Create variations', 'woocommerce' ); ?></button>
+					<button type="button" class="button button-primary create-variations" disabled="disabled"><?php esc_html_e( 'Create variations', 'woocommerce' ); ?></button>
 				</div>
 			</div>
 		</div>
