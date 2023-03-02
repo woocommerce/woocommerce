@@ -8,10 +8,19 @@ import userEvent from '@testing-library/user-event';
  * Internal dependencies
  */
 import { useCampaigns } from './useCampaigns';
+import { useNewCampaignTypes } from '~/marketing/hooks';
 import { Campaigns } from './Campaigns';
 
 jest.mock( './useCampaigns', () => ( {
 	useCampaigns: jest.fn(),
+} ) );
+
+jest.mock( '~/marketing/hooks', () => ( {
+	useNewCampaignTypes: jest.fn(),
+} ) );
+
+jest.mock( './CreateNewCampaignModal', () => ( {
+	CreateNewCampaignModal: () => <div>Create a new campaign</div>,
 } ) );
 
 /**
@@ -38,6 +47,9 @@ describe( 'Campaigns component', () => {
 			data: undefined,
 			meta: undefined,
 		} );
+		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+			loading: true,
+		} );
 
 		const { container } = render( <Campaigns /> );
 		const tablePlaceholder = container.querySelector(
@@ -53,6 +65,9 @@ describe( 'Campaigns component', () => {
 			error: {},
 			data: undefined,
 			meta: undefined,
+		} );
+		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+			loading: false,
 		} );
 
 		render( <Campaigns /> );
@@ -71,6 +86,9 @@ describe( 'Campaigns component', () => {
 				total: 0,
 			},
 		} );
+		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+			loading: false,
+		} );
 
 		render( <Campaigns /> );
 
@@ -87,6 +105,9 @@ describe( 'Campaigns component', () => {
 			meta: {
 				total: 1,
 			},
+		} );
+		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+			loading: false,
 		} );
 
 		const { container } = render( <Campaigns /> );
@@ -114,6 +135,9 @@ describe( 'Campaigns component', () => {
 				total: 6,
 			},
 		} );
+		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+			loading: false,
+		} );
 
 		render( <Campaigns /> );
 
@@ -130,5 +154,31 @@ describe( 'Campaigns component', () => {
 
 		// Campaign info in the second page.
 		expect( screen.getByText( 'Campaign 6' ) ).toBeInTheDocument();
+	} );
+
+	it( 'renders a "Create new campaign" button in the card header, and upon clicking, displays the "Create a new campaign" modal', async () => {
+		( useCampaigns as jest.Mock ).mockReturnValue( {
+			loading: false,
+			error: undefined,
+			data: [ createTestCampaign( '1' ) ],
+			meta: {
+				total: 1,
+			},
+		} );
+		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+			loading: false,
+		} );
+
+		render( <Campaigns /> );
+
+		expect( screen.getByText( 'Create new campaign' ) ).toBeInTheDocument();
+
+		await userEvent.click(
+			screen.getByRole( 'button', { name: 'Create new campaign' } )
+		);
+
+		expect(
+			screen.getByText( 'Create a new campaign' )
+		).toBeInTheDocument();
 	} );
 } );
