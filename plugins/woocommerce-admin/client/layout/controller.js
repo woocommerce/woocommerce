@@ -204,7 +204,7 @@ export const getPages = () => {
 		} );
 
 		pages.push( {
-			container: EditProductPage,
+			container: ProductPage,
 			path: '/product/:productId',
 			breadcrumbs: [
 				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
@@ -212,6 +212,20 @@ export const getPages = () => {
 			],
 			navArgs: {
 				id: 'woocommerce-edit-product',
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'manage_woocommerce',
+		} );
+
+		pages.push( {
+			container: EditProductPage,
+			path: '/product-old/:productId',
+			breadcrumbs: [
+				[ '/edit-product-old', __( 'Product', 'woocommerce' ) ],
+				__( 'Edit Product (Old)', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-edit-product-old',
 			},
 			wpOpenMenu: 'menu-posts-product',
 			capability: 'manage_woocommerce',
