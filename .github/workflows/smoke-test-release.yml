@@ -42,12 +42,13 @@ jobs:
                   echo "tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
 
             - name: Verify woocommerce.zip asset
+              uses: uses: actions/github-script@v6
               env:
                   GH_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
                   RELEASE_TAG: ${{ steps.get-tag.outputs.tag }}
               run: |
-                  gh release download $RELEASE_TAG --repo woocommerce/woocommerce --archive zip
-                  if [[ -f "woocommerce.zip" ]]
+                  ASSET_NAMES=$(gh release view $RELEASE_TAG --repo woocommerce/woocommerce --json assets --jq ".assets[].name")
+                  if [[ $ASSET_NAMES == *"woocommerce.zip"* ]]
                     then
                       echo "$RELEASE_TAG has a valid woocommerce.zip asset."
                       exit 0
