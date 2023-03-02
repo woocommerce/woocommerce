@@ -11,7 +11,6 @@ permissions: {}
 jobs:
     api:
         name: Run API tests
-        needs: [verify_merge]
         runs-on: ubuntu-20.04
         # mytodo change base.ref to trunk
         if: (github.event.pull_request.merged == true) && (github.event.pull_request.base.ref == 'e2e/on-trunk-merge-0')
