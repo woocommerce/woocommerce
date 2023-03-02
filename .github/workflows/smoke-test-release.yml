@@ -1,4 +1,4 @@
-name: Smoke test release ${{ github.event.release.tag_name || inputs.tag }}
+name: Smoke test release
 on:
     release:
         types: [released, prereleased]
