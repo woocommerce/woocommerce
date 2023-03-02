@@ -23,7 +23,7 @@ jobs:
             contents: read
         runs-on: ubuntu-20.04
         outputs:
-            tag: ${{ steps.tag.outputs.result }}
+            tag: ${{ steps.get-tag.outputs.tag }}
             created: ${{ steps.created-at.outputs.created }}
         steps:
             - name: Validate tag
@@ -32,19 +32,19 @@ jobs:
                   GH_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
               run: gh release view "${{ github.event.inputs.tag }}" --repo=woocommerce/woocommerce
 
-            - name: Get tag
-              uses: actions/github-script@v6
-              id: tag
-              with:
-                  result-encoding: string
-                  script: |
-                      console.log( "${{ github.event_name }}" );
-                      return "${{ github.event.release.tag_name }}" || "${{ github.event.inputs.tag }}"
+            - name: Get tag from triggered event
+              id: get-tag
+              env:
+                  RELEASE_TAG: ${{ github.event.release.tag_name || github.event.inputs.tag }}
+              run: |
+                  echo "Triggered event: ${{ github.event_name }}"
+                  echo "Tag from event: $RELEASE_TAG"
+                  echo "tag=$RELEASE_TAG" >> GITHUB_OUTPUT
 
             - name: Verify woocommerce.zip asset
               env:
                   GH_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
-                  RELEASE_TAG: ${{ steps.tag.outputs.result }}
+                  RELEASE_TAG: ${{ steps.get-tag.outputs.tag }}
               run: |
                   gh release download $RELEASE_TAG --repo woocommerce/woocommerce
                   if [[ -f "woocommerce.zip" ]]
@@ -60,7 +60,7 @@ jobs:
               id: created-at
               env:
                   GH_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
-              run: echo "created=$(gh release view ${{ steps.tag.outputs.result }} --json assets --jq .assets[0].createdAt --repo woocommerce/woocommerce)" >> $GITHUB_OUTPUT
+              run: echo "created=$(gh release view ${{ steps.get-tag.outputs.tag }} --json assets --jq .assets[0].createdAt --repo woocommerce/woocommerce)" >> $GITHUB_OUTPUT
 
     e2e-update-wc:
         name: Test WooCommerce update
