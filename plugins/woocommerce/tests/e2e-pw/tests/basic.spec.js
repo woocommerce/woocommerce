@@ -32,9 +32,5 @@ test.describe(
 				await expect( title ).toHaveText( 'My account' );
 			} );
 		} );
-
-		test( 'E2E failing test', async () => {
-			test.fail();
-		} );
 	}
 );
