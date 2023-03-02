@@ -42,7 +42,6 @@ jobs:
                   echo "tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
 
             - name: Verify woocommerce.zip asset
-              uses: uses: actions/github-script@v6
               env:
                   GH_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
                   RELEASE_TAG: ${{ steps.get-tag.outputs.tag }}
