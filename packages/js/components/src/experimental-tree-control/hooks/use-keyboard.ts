@@ -48,6 +48,11 @@ function getAllHeadings(
 	);
 }
 
+const step = {
+	ArrowDown: 1,
+	ArrowUp: -1,
+};
+
 function getNextFocusableElement(
 	currentHeading: HTMLDivElement,
 	code: 'ArrowDown' | 'ArrowUp'
@@ -67,10 +72,6 @@ function getNextFocusableElement(
 		return null;
 	}
 
-	const step = {
-		ArrowDown: 1,
-		ArrowUp: -1,
-	};
 	const heading = headingsNodeList.item(
 		currentHeadingIndex + ( step[ code ] ?? 0 )
 	);
