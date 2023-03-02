@@ -1,8 +1,6 @@
 /**
  * External dependencies
  */
-import '@wordpress/editor';
-import '@wordpress/format-library';
 import { BlockInstance } from '@wordpress/blocks';
 import { createElement, useState, useMemo } from '@wordpress/element';
 import { Product } from '@woocommerce/data';
