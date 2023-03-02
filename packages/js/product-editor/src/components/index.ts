@@ -9,7 +9,7 @@ export { DetailsNameField as __experimentalDetailsNameField } from './field-deta
 export { DetailsFeatureField as __experimentalDetailsFeatureField } from './field-details-feature';
 export {
 	DetailsCategoriesField as __experimentalDetailsCategoriesField,
-	CategoryField as __experimental__experimentalDetailsCategoryField,
+	CategoryField as __experimentalDetailsCategoryField,
 } from './field-details-categories';
 export { DetailsSummaryField as __experimentalDetailsSummaryField } from './field-details-summary';
 export { DetailsDescriptionField as __experimentalDetailsDescriptionField } from './field-details-description';
