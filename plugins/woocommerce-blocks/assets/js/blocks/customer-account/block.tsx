@@ -17,9 +17,11 @@ import { Attributes, DisplayStyle, IconStyle } from './types';
 const AccountIcon = ( {
 	iconStyle,
 	displayStyle,
+	iconClass,
 }: {
 	iconStyle: IconStyle;
 	displayStyle: DisplayStyle;
+	iconClass: string;
 } ) => {
 	const icon =
 		iconStyle === IconStyle.ALT
@@ -27,7 +29,7 @@ const AccountIcon = ( {
 			: customerAccountStyle;
 
 	return displayStyle === DisplayStyle.TEXT_ONLY ? null : (
-		<Icon className="icon" icon={ icon } size={ 18 } />
+		<Icon className={ iconClass } icon={ icon } size={ 18 } />
 	);
 };
 
@@ -52,7 +54,7 @@ export const CustomerAccountBlock = ( {
 }: {
 	attributes: Attributes;
 } ): JSX.Element => {
-	const { displayStyle, iconStyle } = attributes;
+	const { displayStyle, iconStyle, iconClass } = attributes;
 
 	return (
 		<a
@@ -64,6 +66,7 @@ export const CustomerAccountBlock = ( {
 			<AccountIcon
 				iconStyle={ iconStyle }
 				displayStyle={ displayStyle }
+				iconClass={ iconClass }
 			/>
 			<Label displayStyle={ displayStyle } />
 		</a>
