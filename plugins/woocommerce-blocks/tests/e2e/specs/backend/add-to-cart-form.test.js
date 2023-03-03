@@ -14,9 +14,9 @@ import { searchForBlock } from '@wordpress/e2e-test-utils/build/inserter';
 import {
 	filterCurrentBlocks,
 	insertBlockDontWaitForInsertClose,
-	goToSiteEditor,
 	useTheme,
 	waitForCanvas,
+	goToTemplateEditor,
 } from '../../utils.js';
 
 const block = {
@@ -40,7 +40,9 @@ describe( `${ block.name } Block`, () => {
 		useTheme( 'emptytheme' );
 
 		beforeEach( async () => {
-			await goToSiteEditor();
+			await goToTemplateEditor( {
+				postId: 'woocommerce/woocommerce//single-product',
+			} );
 			await waitForCanvas();
 		} );
 
