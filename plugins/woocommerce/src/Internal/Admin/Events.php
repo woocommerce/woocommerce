@@ -254,14 +254,19 @@ class Events {
 		return true;
 	}
 
-	protected function possibly_refresh_data_source_pollers(){
+	/**
+	 *   Refresh transient for the following DataSourcePollers on wc_admin_daily cron job.
+	 *   - PaymentGatewaySuggestionsDataSourcePoller
+	 *   - RemoteFreeExtensionsDataSourcePoller
+	 */
+	protected function possibly_refresh_data_source_pollers() {
 		$completed_tasks = get_option( 'woocommerce_task_list_tracked_completed_tasks' );
 
-		if ( ! in_array( 'payments', $completed_tasks ) ) {
+		if ( ! in_array( 'payments', $completed_tasks, true ) ) {
 			PaymentGatewaySuggestionsDataSourcePoller::get_instance()->read_specs_from_data_sources();
 		}
 
-		if ( ! in_array( 'store_details', $completed_tasks ) ) {
+		if ( ! in_array( 'store_details', $completed_tasks, true ) ) {
 			RemoteFreeExtensionsDataSourcePoller::get_instance()->read_specs_from_data_sources();
 		}
 	}
