@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { SHOP_URL } from '@woocommerce/block-settings';
+import Button from '@woocommerce/base-components/button';
 import classNames from 'classnames';
 
 /**
@@ -23,15 +24,16 @@ const Block = ( {
 	}
 
 	return (
-		<div
-			className={ classNames(
-				className,
-				'wc-block-mini-cart__shopping-button'
-			) }
-		>
-			<a href={ SHOP_URL }>
+		<div className="wp-block-button has-text-align-center">
+			<Button
+				className={ classNames(
+					className,
+					'wc-block-mini-cart__shopping-button'
+				) }
+				href={ SHOP_URL }
+			>
 				{ startShoppingButtonLabel || defaultStartShoppingButtonLabel }
-			</a>
+			</Button>
 		</div>
 	);
 };

@@ -191,7 +191,7 @@ describe( 'Shopper → Mini Cart', () => {
 			);
 
 			const shopLink = await page.$eval(
-				'.wc-block-mini-cart__shopping-button a',
+				'a.wc-block-mini-cart__shopping-button',
 				( el ) => el.href
 			);
 
