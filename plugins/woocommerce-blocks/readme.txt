@@ -80,6 +80,12 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 9.7.1 - 2023-03-03 =
+
+#### Bug Fixes
+
+- Fix: Show up to three Express Payments buttons next to each other. ([8601](https://github.com/woocommerce/woocommerce-blocks/pull/8601))
+
 = 9.7.0 - 2023-02-28 =
 
 #### Enhancements
