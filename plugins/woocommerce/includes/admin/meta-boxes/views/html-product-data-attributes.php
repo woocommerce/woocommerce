@@ -106,7 +106,7 @@ $icon_url                        = WC_ADMIN_IMAGES_FOLDER_URL . '/icons/global-a
 		<span class="expand-close">
 			<a href="#" class="expand_all"><?php esc_html_e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php esc_html_e( 'Close', 'woocommerce' ); ?></a>
 		</span>
-		<button type="button" class="button save_attributes button-primary" disabled="disabled" title="<?php echo esc_html_e( 'Make sure you enter the name and values for each attribute.', 'woocommerce' ); ?>">><?php esc_html_e( 'Save attributes', 'woocommerce' ); ?></button>
+		<button type="button" class="button save_attributes button-primary" disabled="disabled" title="<?php echo esc_html_e( 'Make sure you enter the name and values for each attribute.', 'woocommerce' ); ?>"><?php esc_html_e( 'Save attributes', 'woocommerce' ); ?></button>
 	</div>
 	<?php do_action( 'woocommerce_product_options_attributes' ); ?>
 </div>
