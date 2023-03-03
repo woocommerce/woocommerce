@@ -46,8 +46,8 @@ class WC_API_Coupons extends WC_API_Resource {
 		# GET/PUT/DELETE /coupons/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_coupon' ),    WC_API_Server::READABLE ),
-			array( array( $this, 'edit_coupon' ),   WC_API_SERVER::EDITABLE | WC_API_SERVER::ACCEPT_DATA ),
-			array( array( $this, 'delete_coupon' ), WC_API_SERVER::DELETABLE ),
+			array( array( $this, 'edit_coupon' ),   WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'delete_coupon' ), WC_API_Server::DELETABLE ),
 		);
 
 		# GET /coupons/code/<code>, note that coupon codes can contain spaces, dashes and underscores
