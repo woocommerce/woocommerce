@@ -62,7 +62,7 @@ export type CountryInfo = {
  * @param {CurrencyConfig} currencySetting
  * @return {Object} currency object
  */
-const CurrencyFactory = function ( currencySetting?: CurrencyConfig ) {
+const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 	let currency: Currency;
 
 	function stripTags( str: string ) {
@@ -272,7 +272,7 @@ const CurrencyFactory = function ( currencySetting?: CurrencyConfig ) {
 	};
 };
 
-export default CurrencyFactory;
+export const CurrencyFactory = CurrencyFactoryBase;
 
 /**
  * Returns currency data by country/region. Contains code, symbol, position, thousands separator, decimal separator, and precision.

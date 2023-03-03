@@ -8,7 +8,6 @@ import { useDispatch } from '@wordpress/data';
 import { cleanForSlug } from '@wordpress/url';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Product } from '@woocommerce/data';
-import { Text } from '@woocommerce/experimental';
 import { useFormContext } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 

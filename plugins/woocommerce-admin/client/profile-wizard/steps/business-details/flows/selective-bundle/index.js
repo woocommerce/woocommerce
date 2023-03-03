@@ -25,11 +25,11 @@ import {
 import { getSetting } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
 import classnames from 'classnames';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
-import { CurrencyContext } from '~/lib/currency-context';
 import { createNoticesFromResponse } from '~/lib/notices';
 import { platformOptions } from '../../data/platform-options';
 import { employeeOptions } from '../../data/employee-options';

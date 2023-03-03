@@ -8,12 +8,12 @@ import { Date, Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from '@woocommerce/number';
 import { defaultTableDateFormat } from '@woocommerce/date';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
 import ReportTable from '../../components/report-table';
-import { CurrencyContext } from '../../../lib/currency-context';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 class CouponsReportTable extends Component {

@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Moving currencyContext to relevant package, and updating all references.

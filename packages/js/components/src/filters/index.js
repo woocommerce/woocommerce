@@ -7,7 +7,7 @@ import { find } from 'lodash';
 import PropTypes from 'prop-types';
 import { updateQueryString } from '@woocommerce/navigation';
 import { getDateParamsFromQuery, getCurrentDates } from '@woocommerce/date';
-import CurrencyFactory from '@woocommerce/currency';
+import { CurrencyFactory } from '@woocommerce/currency';
 
 /**
  * Internal dependencies

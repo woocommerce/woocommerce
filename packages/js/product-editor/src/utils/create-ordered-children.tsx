@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { isValidElement, Fragment } from 'react';
-import { Slot, Fill } from '@wordpress/components';
+import { isValidElement } from 'react';
+import { Fill } from '@wordpress/components';
 import { cloneElement, createElement } from '@wordpress/element';
 
 type ChildrenProps = {
