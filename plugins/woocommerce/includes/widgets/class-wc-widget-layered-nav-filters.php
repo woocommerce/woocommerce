@@ -55,8 +55,14 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 			$this->widget_start( $args, $instance );
 
 			echo '<ul>';
-			
-			do_action( 'woocommerce_widget_layered_nav_filters_start' );
+
+			/**
+			 * Allow 3rd party developers to add their own filters to start the Layered Navigation Filters Widget.
+			 *
+			 * @param array $args     Arguments.
+			 * @param array $instance Widget instance.
+			 */
+			do_action( 'woocommerce_widget_layered_nav_filters_start', $args, $instance );
 
 			// Attributes.
 			if ( ! empty( $_chosen_attributes ) ) {
@@ -106,8 +112,14 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 					echo '<li class="chosen"><a rel="nofollow" aria-label="' . esc_attr__( 'Remove filter', 'woocommerce' ) . '" href="' . esc_url( $link ) . '">' . sprintf( esc_html__( 'Rated %s out of 5', 'woocommerce' ), esc_html( $rating ) ) . '</a></li>';
 				}
 			}
-			
-			do_action( 'woocommerce_widget_layered_nav_filters_end' );
+
+			/**
+			 * Allow 3rd party developers to add their own filters to end the Layered Navigation Filters Widget.
+			 *
+			 * @param array $args     Arguments.
+			 * @param array $instance Widget instance.
+			 */
+			do_action( 'woocommerce_widget_layered_nav_filters_end', $args, $instance );
 
 			echo '</ul>';
 
