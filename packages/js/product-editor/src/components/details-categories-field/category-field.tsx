@@ -197,24 +197,10 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 											?.parentID === 0 || item.id === -99
 							  )
 							: [];
-					const notCreatedItem = items.find(
-						( item ) => item.id === -99
-					);
 					return (
 						<Menu
 							isOpen={ isOpen }
 							getMenuProps={ getMenuProps }
-							fixedPositionElement={
-								notCreatedItem ? (
-									<CategoryFieldAddNewItem
-										key={ `${ notCreatedItem.id }` }
-										item={ notCreatedItem }
-										highlightedIndex={ highlightedIndex }
-										items={ items }
-										getItemProps={ getItemProps }
-									/>
-								) : null
-							}
 							className="woocommerce-category-field-dropdown__menu"
 						>
 							<>
@@ -226,7 +212,17 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 									</li>
 								) : (
 									rootItems.map( ( item ) => {
-										return item.id === -99 ? null : (
+										return item.id === -99 ? (
+											<CategoryFieldAddNewItem
+												key={ `${ item.id }` }
+												item={ item }
+												highlightedIndex={
+													highlightedIndex
+												}
+												items={ items }
+												getItemProps={ getItemProps }
+											/>
+										) : (
 											<CategoryFieldItem
 												key={ `${ item.id }` }
 												item={
