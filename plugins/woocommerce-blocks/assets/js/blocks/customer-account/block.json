@@ -23,6 +23,10 @@
 		"iconStyle": {
 			"type": "string",
 			"default": "default"
+		},
+		"iconClass": {
+			"type": "string",
+			"default": "icon"
 		}
 	},
 	"textdomain": "woo-gutenberg-products-block",

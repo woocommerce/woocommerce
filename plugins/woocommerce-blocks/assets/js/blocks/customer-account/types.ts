@@ -2,6 +2,7 @@ export interface Attributes {
 	className?: string;
 	displayStyle: DisplayStyle;
 	iconStyle: IconStyle;
+	iconClass: string;
 }
 
 export enum DisplayStyle {

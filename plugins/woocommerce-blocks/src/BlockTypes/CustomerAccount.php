@@ -67,7 +67,7 @@ class CustomerAccount extends AbstractBlock {
 		}
 
 		if ( self::DISPLAY_ALT === $attributes['iconStyle'] ) {
-			return '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="18" height="18">
+			return '<svg class="' . $attributes['iconClass'] . '" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="18" height="18">
 				<path
 					d="M9 0C4.03579 0 0 4.03579 0 9C0 13.9642 4.03579 18 9 18C13.9642 18 18 13.9642 18 9C18 4.03579 13.9642 0 9
 					 	0ZM9 4.32C10.5347 4.32 11.7664 5.57056 11.7664 7.08638C11.7664 8.62109 10.5158 9.85277 9 9.85277C7.4653
@@ -79,7 +79,7 @@ class CustomerAccount extends AbstractBlock {
 			</svg>';
 		}
 
-		return '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+		return '<svg class="' . $attributes['iconClass'] . '" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
 			<path
 				d="M8.00009 8.34785C10.3096 8.34785 12.1819 6.47909 12.1819 4.17393C12.1819 1.86876 10.3096 0 8.00009 0C5.69055
 				 	0 3.81824 1.86876 3.81824 4.17393C3.81824 6.47909 5.69055 8.34785 8.00009 8.34785ZM0.333496 15.6522C0.333496
