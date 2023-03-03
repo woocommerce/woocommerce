@@ -28,6 +28,19 @@ class WC_Countries {
 	public $address_formats = array();
 
 	/**
+	 * Cache of geographical regions.
+	 *
+	 * Only to be used by the get_* and load_* methods, as other methods may expect the regions to be
+	 * loaded on demand.
+	 *
+	 * This was added to stop creating properties being created dynamically, as it's throwing deprecations in PHP 8.2
+	 * and might get removed in PHP 9.
+	 *
+	 * @var array
+	 */
+	private $geo_cache = array();
+
+	/**
 	 * Auto-load in-accessible properties on demand.
 	 *
 	 * @param  mixed $key Key.
@@ -38,6 +51,8 @@ class WC_Countries {
 			return $this->get_countries();
 		} elseif ( 'states' === $key ) {
 			return $this->get_states();
+		} elseif ( 'continents' === $key ) {
+			return $this->get_continents();
 		}
 	}
 
@@ -47,14 +62,14 @@ class WC_Countries {
 	 * @return array
 	 */
 	public function get_countries() {
-		if ( empty( $this->countries ) ) {
-			$this->countries = apply_filters( 'woocommerce_countries', include WC()->plugin_path() . '/i18n/countries.php' );
+		if ( empty( $this->geo_cache['countries'] ) ) {
+			$this->geo_cache['countries'] = apply_filters( 'woocommerce_countries', include WC()->plugin_path() . '/i18n/countries.php' );
 			if ( apply_filters( 'woocommerce_sort_countries', true ) ) {
-				wc_asort_by_locale( $this->countries );
+				wc_asort_by_locale( $this->geo_cache['countries'] );
 			}
 		}
 
-		return $this->countries;
+		return $this->geo_cache['countries'];
 	}
 
 	/**
@@ -74,11 +89,11 @@ class WC_Countries {
 	 * @return array
 	 */
 	public function get_continents() {
-		if ( empty( $this->continents ) ) {
-			$this->continents = apply_filters( 'woocommerce_continents', include WC()->plugin_path() . '/i18n/continents.php' );
+		if ( empty( $this->geo_cache['continents'] ) ) {
+			$this->geo_cache['continents'] = apply_filters( 'woocommerce_continents', include WC()->plugin_path() . '/i18n/continents.php' );
 		}
 
-		return $this->continents;
+		return $this->geo_cache['continents'];
 	}
 
 	/**
@@ -155,7 +170,7 @@ class WC_Countries {
 		global $states;
 
 		$states       = include WC()->plugin_path() . '/i18n/states.php';
-		$this->states = apply_filters( 'woocommerce_states', $states );
+		$this->geo_cache['states'] = apply_filters( 'woocommerce_states', $states );
 	}
 
 	/**
@@ -165,14 +180,14 @@ class WC_Countries {
 	 * @return false|array of states
 	 */
 	public function get_states( $cc = null ) {
-		if ( ! isset( $this->states ) ) {
-			$this->states = apply_filters( 'woocommerce_states', include WC()->plugin_path() . '/i18n/states.php' );
+		if ( ! isset( $this->geo_cache['states'] ) ) {
+			$this->geo_cache['states'] = apply_filters( 'woocommerce_states', include WC()->plugin_path() . '/i18n/states.php' );
 		}
 
 		if ( ! is_null( $cc ) ) {
-			return isset( $this->states[ $cc ] ) ? $this->states[ $cc ] : false;
+			return isset( $this->geo_cache['states'][ $cc ] ) ? $this->geo_cache['states'][ $cc ] : false;
 		} else {
-			return $this->states;
+			return $this->geo_cache['states'];
 		}
 	}
 
