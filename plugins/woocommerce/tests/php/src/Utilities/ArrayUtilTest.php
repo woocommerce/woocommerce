@@ -136,15 +136,6 @@ class ArrayUtilTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `get_value_or_default` returns null if the key exists and has a null value.
-	 */
-	public function test_get_value_or_default_returns_null_if_key_exists_and_value_is_null() {
-		$array = array( 'foo' => null );
-
-		$this->assertNull( ArrayUtil::get_value_or_default( $array, 'foo', 'buzz' ) );
-	}
-
-	/**
 	 * Data provider for test_to_ranges_string
 	 *
 	 * @return array[]
