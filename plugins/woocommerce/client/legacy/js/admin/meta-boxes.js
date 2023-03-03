@@ -111,7 +111,7 @@ jQuery( function ( $ ) {
 				'input, select, textarea'
 			);
 			if (
-				! is_attributes_and_variations_data_valid(
+				is_attribute_or_variation_empty(
 					attributes_and_variations_data
 				)
 			) {
@@ -123,13 +123,11 @@ jQuery( function ( $ ) {
 			$save_button.removeAttr( 'disabled' );
 		}
 	);
-	function is_attributes_and_variations_data_valid(
-		attributes_and_variations_data
-	) {
-		var valid = true;
+	function is_attribute_or_variation_empty( attributes_and_variations_data ) {
+		var valid = false;
 		attributes_and_variations_data.each( function () {
 			if ( ! $( this ).val() ) {
-				valid = false;
+				valid = true;
 			}
 		} );
 		return valid;
