@@ -9,13 +9,19 @@
 			text-decoration: underline !important;
 		}
 
-		.icon + .label {
+		.icon + .label,
+		.wc-block-customer-account__account-icon + .label {
 			margin-left: $gap-smaller;
 		}
 
 		.icon {
 			height: em(16px);
 			width: em(16px);
+		}
+
+		.wc-block-customer-account__account-icon {
+			height: em(23px);
+			width: em(23px);
 		}
 	}
 }
