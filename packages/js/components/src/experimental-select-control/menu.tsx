@@ -22,6 +22,7 @@ type MenuProps = {
 	getMenuProps: getMenuPropsType;
 	isOpen: boolean;
 	className?: string;
+	fixedPositionElement?: JSX.Element | null;
 };
 
 export const Menu = ( {
@@ -29,6 +30,7 @@ export const Menu = ( {
 	getMenuProps,
 	isOpen,
 	className,
+	fixedPositionElement,
 }: MenuProps ) => {
 	const [ boundingRect, setBoundingRect ] = useState< DOMRect >();
 	const selectControlMenuRef = useRef< HTMLDivElement >( null );
@@ -79,6 +81,7 @@ export const Menu = ( {
 					>
 						{ isOpen && children }
 					</ul>
+					{ fixedPositionElement ?? null }
 				</Popover>
 			</div>
 		</div>
