@@ -117,10 +117,15 @@ jQuery( function ( $ ) {
 			) {
 				if ( ! $save_button.is( ':disabled' ) ) {
 					$save_button.attr( 'disabled', 'disabled' );
+					$save_button.attr(
+						'title',
+						woocommerce_admin_meta_boxes.i18n_save_attribute_variation_tip
+					);
 				}
 				return;
 			}
 			$save_button.removeAttr( 'disabled' );
+			$save_button.removeAttr( 'title' );
 		}
 	);
 	function is_attribute_or_variation_empty( attributes_and_variations_data ) {
