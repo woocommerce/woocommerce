@@ -61,6 +61,8 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 			 *
 			 * @param array $args     Arguments.
 			 * @param array $instance Widget instance.
+			 *
+			 * @since 7.6.0
 			 */
 			do_action( 'woocommerce_widget_layered_nav_filters_start', $args, $instance );
 
@@ -118,6 +120,8 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 			 *
 			 * @param array $args     Arguments.
 			 * @param array $instance Widget instance.
+			 *
+			 * @since 7.6.0
 			 */
 			do_action( 'woocommerce_widget_layered_nav_filters_end', $args, $instance );
 
