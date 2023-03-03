@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { BlockInstance } from '@wordpress/blocks';
-import { createElement, useState, useMemo } from '@wordpress/element';
+import {
+	createElement,
+	useState,
+	useMemo,
+	useEffect,
+} from '@wordpress/element';
 import { Product } from '@woocommerce/data';
 import { useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
@@ -26,6 +31,7 @@ import {
 /**
  * Internal dependencies
  */
+import { parseProductToBlocks } from '../../utils/parse-product-to-blocks';
 import { Sidebar } from '../sidebar';
 
 type BlockEditorProps = {
@@ -33,7 +39,10 @@ type BlockEditorProps = {
 	settings: Partial< EditorSettings & EditorBlockListSettings > | undefined;
 };
 
-export function BlockEditor( { settings: _settings }: BlockEditorProps ) {
+export function BlockEditor( {
+	settings: _settings,
+	product,
+}: BlockEditorProps ) {
 	const [ blocks, updateBlocks ] = useState< BlockInstance[] >();
 
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
@@ -79,6 +88,10 @@ export function BlockEditor( { settings: _settings }: BlockEditorProps ) {
 	function handleUpdateBlocks( _blocks: BlockInstance[] ) {
 		updateBlocks( _blocks );
 	}
+
+	useEffect( () => {
+		handleUpdateBlocks( parseProductToBlocks( product ) );
+	}, [ product ] );
 
 	function handlePersistBlocks( newBlocks: BlockInstance[] ) {
 		updateBlocks( newBlocks );

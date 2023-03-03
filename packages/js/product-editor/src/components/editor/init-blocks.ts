@@ -1,5 +1,8 @@
 /**
  * Internal dependencies
  */
+import { init as initName } from '../name';
 
-export const initBlocks = () => {};
+export const initBlocks = () => {
+	initName();
+};
