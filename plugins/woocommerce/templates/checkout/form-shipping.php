@@ -21,6 +21,8 @@ defined( 'ABSPATH' ) || exit;
  * Trigger action before rendering shipping fields HTML. Allow you to add custom HTML sections.
  *
  * @param checkout instance of WC_Checkout.
+ *
+ * @since 7.6.0
  */
 do_action( 'woocommerce_before_checkout_shipping_html', $checkout );
 ?>
@@ -79,5 +81,7 @@ do_action( 'woocommerce_before_checkout_shipping_html', $checkout );
  * Trigger action after rendering shipping fields HTML. Allow you to add custom HTML sections.
  *
  * @param checkout instance of WC_Checkout.
+ *
+ * @since 7.6.0
  */
 do_action( 'woocommerce_after_checkout_shipping_html', $checkout ); ?>

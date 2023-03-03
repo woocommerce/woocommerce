@@ -12,7 +12,7 @@
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 3.6.0
+ * @version 7.6.0
  * @global WC_Checkout $checkout
  */
 
@@ -21,6 +21,8 @@ defined( 'ABSPATH' ) || exit;
  * Trigger action before rendering billing fields HTML. Allow you to add custom HTML sections.
  *
  * @param checkout instance of WC_Checkout.
+ *
+ * @since 7.6.0
  */
 do_action( 'woocommerce_before_checkout_billing_html', $checkout );
 ?>
@@ -82,5 +84,7 @@ do_action( 'woocommerce_before_checkout_billing_html', $checkout );
  * Trigger action after rendering billing fields HTML. Allow you to add custom HTML sections.
  *
  * @param checkout instance of WC_Checkout.
+ *
+ * @since 7.6.0
  */
 do_action( 'woocommerce_after_checkout_billing_html', $checkout ); ?>
