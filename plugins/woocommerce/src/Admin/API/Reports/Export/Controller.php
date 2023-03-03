@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Export;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\ReportExporter;
+use Automattic\WooCommerce\Admin\ReportExporter;
 
 /**
  * Reports Export controller.

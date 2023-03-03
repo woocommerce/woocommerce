@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\API
  */
 
-use \Automattic\WooCommerce\Admin\API\OnboardingTasks;
+use Automattic\WooCommerce\Admin\API\OnboardingTasks;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 
