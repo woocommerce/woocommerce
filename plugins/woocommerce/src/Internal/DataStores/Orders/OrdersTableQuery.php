@@ -164,6 +164,12 @@ class OrdersTableQuery {
 	 */
 	private $date_query = null;
 
+	/**
+	 * Order IDs returned from query.
+	 *
+	 * @var int[]
+	 */
+	public array $orders;
 
 	/**
 	 * Sets up and runs the query after processing arguments.
