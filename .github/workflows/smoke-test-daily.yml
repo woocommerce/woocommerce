@@ -155,7 +155,7 @@ jobs:
                   ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
                   CUSTOMER_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
                   CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
-                  UPDATE_WC: true
+                  UPDATE_WC: nightly
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
               run: |
                   pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-woocommerce.spec.js
