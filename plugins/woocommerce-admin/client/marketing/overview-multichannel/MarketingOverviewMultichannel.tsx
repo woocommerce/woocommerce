@@ -14,6 +14,7 @@ import {
 	useRecommendedChannels,
 } from '~/marketing/hooks';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { Campaigns } from './Campaigns';
 import { Channels } from './Channels';
 import { InstalledExtensions } from './InstalledExtensions';
 import { DiscoverTools } from './DiscoverTools';
@@ -43,6 +44,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 
 	return (
 		<div className="woocommerce-marketing-overview-multichannel">
+			{ dataRegistered?.length && <Campaigns /> }
 			{ dataRegistered &&
 				dataRecommended &&
 				( dataRegistered.length || dataRecommended.length ) && (
